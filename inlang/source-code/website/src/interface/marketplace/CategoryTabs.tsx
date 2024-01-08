@@ -34,8 +34,10 @@ const CategoryTabs = () => {
 		]
 	}
 	return (
-		<nav class="max-w-7xl mx-auto flex gap-2 overflow-x-scroll hide-scrollbar items-center">
-			<p class="text-sm pr-4 font-regular text-surface-500">{m.footer_category_title() + ":"}</p>
+		<nav class="max-w-7xl mx-auto flex gap-2 overflow-x-scroll hide-scrollbar items-center px-4 md:px-0 h-16 sm:h-auto bg-surface-50 sm:bg-background border-t sm:border-t-0 border-surface-200">
+			<p class="hidden sm:block text-sm pr-4 font-regular text-surface-500">
+				{m.footer_category_title() + ":"}
+			</p>
 			<For each={getCategories()}>
 				{(link) => (
 					<div
@@ -43,7 +45,7 @@ const CategoryTabs = () => {
 							(currentPageContext.urlParsed.pathname.includes(link.href)
 								? "border-hover-primary "
 								: "border-background ") +
-							" border-b-[2px] py-[4px] text-sm bg-transparent group content-box"
+							" sm:border-b-[2px] py-[4px] text-sm bg-transparent group content-box"
 						}
 					>
 						<Link
@@ -54,9 +56,9 @@ const CategoryTabs = () => {
 							<div
 								class={
 									(currentPageContext.urlParsed.pathname.includes(link.href)
-										? "text-primary "
-										: "text-surface-600 hover:bg-surface-100 ") +
-									" px-2 py-[6px] rounded-md transition-colors font-medium cursor-pointer w-max"
+										? " bg-hover-primary text-background sm:text-primary sm:bg-background"
+										: " text-surface-700 sm:text-surface-600 bg-surface-200 sm:bg-background sm:hover:bg-surface-100 ") +
+									" px-3 sm:px-2 py-[6px] rounded-md transition-colors font-medium cursor-pointer w-max"
 								}
 							>
 								{link.name}

@@ -8,7 +8,7 @@ import "./InlangInstall"
 import { createNodeishMemoryFs, openRepository } from "@lix-js/client"
 import { listProjects } from "@inlang/sdk"
 import { publicEnv } from "@inlang/env-variables"
-import { browserAuth, getUser } from "@lix-js/client/src/browser-auth.ts"
+import { browserAuth, getUser } from "@lix-js/server"
 import { tryCatch } from "@inlang/result"
 import { registry } from "@inlang/marketplace-registry"
 import type { MarketplaceManifest } from "../../../versioned-interfaces/marketplace-manifest/dist/interface.js"
@@ -24,8 +24,12 @@ export class InlangManage extends TwLitElement {
 	@property({ type: String })
 	repoURL: string = ""
 
+	@property({ type: String })
+	branches: string[] | undefined = undefined
+
 	@property({ type: Object })
-	projects: Record<string, string>[] | undefined | "no-access" | "load" | "error" = "load"
+	projects: Record<string, string>[] | undefined | "no-access" | "not-found" | "load" | "error" =
+		"load"
 
 	@property({ type: Object })
 	modules: ManifestWithVersion[] | undefined | "empty"
@@ -36,6 +40,9 @@ export class InlangManage extends TwLitElement {
 	@query("#repo-input")
 	repoInput: HTMLInputElement | undefined
 
+	@query("branch-dropdown")
+	branchDropdown: NodeListOf<Element> | undefined
+
 	@query("project-dropdown")
 	projectDropdown: NodeListOf<Element> | undefined
 
@@ -44,6 +51,7 @@ export class InlangManage extends TwLitElement {
 			`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${this.url.repo}`,
 			{
 				nodeishFs: createNodeishMemoryFs(),
+				branch: this.url.branch ? this.url.branch : undefined,
 			}
 		)
 
@@ -52,6 +60,7 @@ export class InlangManage extends TwLitElement {
 			return
 		}
 
+		this.branches = await repo.getBranches()
 		this.projects = await listProjects(repo.nodeishFs, "/")
 
 		if (this.url.project) {
@@ -67,8 +76,13 @@ export class InlangManage extends TwLitElement {
 			})
 
 			if (result.error) {
-				this.projects = "no-access"
-				return
+				if (result.error.toString().includes("ENOENT")) {
+					this.projects = "not-found"
+					return
+				} else {
+					this.projects = "no-access"
+					return
+				}
 			}
 
 			const inlangProject = JSON.parse(result.data)
@@ -140,7 +154,10 @@ export class InlangManage extends TwLitElement {
 		/* Initialize Telemetry via Posthog */
 		if (publicEnv.PUBLIC_POSTHOG_TOKEN) {
 			posthog.init(publicEnv.PUBLIC_POSTHOG_TOKEN ?? "placeholder", {
-				api_host: "https://eu.posthog.com",
+				api_host:
+					process.env.NODE_ENV === "production"
+						? "https://eu.posthog.com"
+						: "http://localhost:4005",
 			})
 		} else if (publicEnv.PUBLIC_POSTHOG_TOKEN === undefined) {
 			return console.warn("Posthog token is not set. Telemetry will not be initialized.")
@@ -174,6 +191,17 @@ export class InlangManage extends TwLitElement {
 		}
 	}
 
+	handleBranchesDropdown() {
+		this.projectDropdown = this.shadowRoot?.querySelectorAll(".branch-dropdown")
+		if (this.branchDropdown)
+			// @ts-ignore
+			for (const dropdown of this.branchDropdown) {
+				dropdown.addEventListener("click", () => {
+					dropdown.classList.toggle("active")
+				})
+			}
+	}
+
 	handleProjectDropdown() {
 		this.projectDropdown = this.shadowRoot?.querySelectorAll(".project-dropdown")
 		if (this.projectDropdown)
@@ -189,32 +217,125 @@ export class InlangManage extends TwLitElement {
 		return html` <main
 			class="w-full min-h-screen flex flex-col bg-slate-50"
 			@click=${() => {
+				this.shadowRoot?.querySelector("#branch")?.classList.add("hidden")
 				this.shadowRoot?.querySelector("#account")?.classList.add("hidden")
 				this.shadowRoot?.querySelector("#projects")?.classList.add("hidden")
 			}}
 		>
-			<header class="bg-white border-b border-slate-200 py-3.5 px-4 sticky top-0">
+			<header class="bg-white border-b border-slate-200 py-3.5 px-4 sticky top-0 z-50">
 				<div class="max-w-7xl mx-auto flex flex-row justify-between relative sm:static">
 					<div class="flex items-center">
 						<a
-							href="/"
+							href="https://inlang.com"
+							target="_blank"
 							class="flex items-center w-fit pointer-events-auto transition-opacity hover:opacity-75"
 						>
 							<inlang-logo size="2rem"></inlang-logo>
 						</a>
 						<p class="self-center text-left font-regular text-slate-400 pl-4 pr-1">/</p>
 						<a
-							href=${`/?${
-								(this.url.repo ? `&repo=${this.url.repo}` : "") +
-								(this.url.project ? `&project=${this.url.project}` : "")
-							}
-		`}
+							href="/"
 							class="self-center pl-2 text-left font-medium text-slate-900 truncate hover:text-slate-800"
 							>Manage</a
 						>
-						${this.url.project
-							? html`<div class="flex items-center flex-shrink-0">
-									<p class="self-center text-left font-regular text-slate-400 pl-2 pr-1">/</p>
+					</div>
+					<div class="flex items-center gap-4 flex-shrink-0">
+						${this.user && this.user !== "load"
+							? html`<div>
+									<!-- Dropdown for account settings -->
+									<div
+										class="relative"
+										x-data="{ open: false }"
+										@click=${(e: Event) => {
+											e.stopPropagation()
+										}}
+									>
+										<button
+											@click=${() => {
+												this.shadowRoot?.querySelector("#branch")?.classList.add("hidden")
+												this.shadowRoot?.querySelector("#projects")?.classList.add("hidden")
+												this.shadowRoot?.querySelector("#account")?.classList.toggle("hidden")
+											}}
+											class="flex items-center gap-1 group"
+										>
+											<img
+												class="h-6 w-6 rounded-full transition-opacity group-hover:opacity-70"
+												src=${this.user.avatarUrl}
+											/>
+											<svg
+												viewBox="0 0 24 24"
+												width="1.2em"
+												height="1.2em"
+												class="text-slate-400 group-hover:text-slate-300 transition-colors"
+											>
+												<path
+													fill="currentColor"
+													d="M12 14.95q-.2 0-.375-.062t-.325-.213l-4.6-4.6q-.275-.275-.275-.7t.275-.7q.275-.275.7-.275t.7.275l3.9 3.9l3.9-3.9q.275-.275.7-.275t.7.275q.275.275.275.7t-.275.7l-4.6 4.6q-.15.15-.325.213T12 14.95Z"
+												></path>
+											</svg>
+										</button>
+										<div
+											@click=${(e: { stopPropagation: () => void }) => {
+												e.stopPropagation()
+											}}
+											id="account"
+											class="hidden absolute top-10 right-0 w-48 bg-white border border-slate-200 rounded-md shadow-lg z-20 py-0.5"
+										>
+											<div
+												@click=${async () => {
+													await browserAuth.addPermissions()
+													window.location.reload()
+												}}
+												class="block cursor-pointer px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+											>
+												Edit Permissions
+											</div>
+											<div
+												@click=${async () => {
+													await browserAuth.logout()
+													window.location.reload()
+												}}
+												class="block cursor-pointer px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+											>
+												Logout
+											</div>
+										</div>
+									</div>
+							  </div>`
+							: ""}
+					</div>
+				</div>
+			</header>
+
+			${this.url.repo && this.url.project
+				? html`<div class="w-full max-w-7xl mx-auto flex items-center py-5 px-4 xl:px-0">
+						<div class="flex items-center font-medium text-lg">
+							<svg class="w-4 h-4 mr-2" viewBox="0 0 16 16">
+								<path
+									fill="currentColor"
+									fill-rule="evenodd"
+									d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 1 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7a.75.75 0 0 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 0 1 1-1h8zM5 12.25v3.25a.25.25 0 0 0 .4.2l1.45-1.087a.25.25 0 0 1 .3 0L8.6 15.7a.25.25 0 0 0 .4-.2v-3.25a.25.25 0 0 0-.25-.25h-3.5a.25.25 0 0 0-.25.25z"
+								/>
+							</svg>
+							<a
+								target="_blank"
+								href=${`https://github.com/${this.url.repo.split("/")[1]}`}
+								class="self-center text-slate-900 truncate hover:text-[#098DAC] transition-colors duration-75"
+							>
+								${this.url.repo ? this.url.repo.split("/")[1] : ""}
+							</a>
+							<p class="mx-1.5">/</p>
+							<a
+								target="_blank"
+								href=${`
+								https://github.com/${this.url.repo.split("/")[1]}/${this.url.repo.split("/")[2]}`}
+								class="self-center text-slate-900 truncate hover:text-[#098DAC] transition-colors duration-75"
+							>
+								${this.url.repo ? this.url.repo.split("/")[2] : ""}
+							</a>
+						</div>
+						${this.url.repo && this.branches
+							? html`<div class="flex items-center flex-shrink-0 mx-2">
 									<!-- Dropdown for all projects -->
 									<div
 										class="relative"
@@ -225,6 +346,87 @@ export class InlangManage extends TwLitElement {
 									>
 										<button
 											@click=${() => {
+												this.shadowRoot?.querySelector("#branch")?.classList.toggle("hidden")
+												this.shadowRoot?.querySelector("#account")?.classList.add("hidden")
+												this.shadowRoot?.querySelector("#projects")?.classList.add("hidden")
+											}}
+										>
+											<div
+												@click=${() => {
+													this.handleProjectDropdown()
+												}}
+												class="self-center flex items-center gap-2 text-left font-medium text-slate-900 bg-white border border-slate-200 hover:bg-slate-100 hover:border-slate-300 rounded-[4px] cursor-pointer pl-2 pr-1.5 py-1.5 text-xs"
+											>
+												<svg class="w-4 h-4">
+													<path
+														fill="currentColor"
+														fill-rule="evenodd"
+														d="M11.75 2.5a.75.75 0 1 0 0 1.5a.75.75 0 0 0 0-1.5zm-2.25.75a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25zM4.25 12a.75.75 0 1 0 0 1.5a.75.75 0 0 0 0-1.5zM3.5 3.25a.75.75 0 1 1 1.5 0a.75.75 0 0 1-1.5 0z"
+													></path>
+												</svg>
+												${this.url.branch ? this.url.branch : "main"}
+												${
+													// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+													this.branches!.length > 1
+														? html`<doc-icon
+																class="inline-block translate-y-0.5"
+																size="1em"
+																icon="mdi:unfold-more-horizontal"
+														  ></doc-icon> `
+														: ""
+												}
+											</div>
+										</button>
+										<div
+											@click=${(e: { stopPropagation: () => void }) => {
+												e.stopPropagation()
+											}}
+											id="branch"
+											class="hidden absolute max-h-96 overflow-y-scroll top-10 left-0 w-auto bg-white border border-slate-200 rounded-md shadow-lg py-0.5 z-40"
+										>
+											${typeof this.branches === "object"
+												? this.branches?.map(
+														(branch) =>
+															html`<a
+																href=${`/${this.url.path !== "" ? this.url.path : ""}
+																?repo=${this.url.repo}&branch=${branch}&project=${this.url.project}${
+																	this.url.module ? `&module=${this.url.module}` : ""
+																}`}
+																class="flex items-center gap-1 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+															>
+																${this.url.branch === branch ||
+																(!this.url.branch && branch === "main")
+																	? html`<doc-icon
+																			class="inline-block mr-1 translate-y-0.5"
+																			size="1.2em"
+																			icon="mdi:check"
+																	  ></doc-icon>`
+																	: html`<doc-icon
+																			class="inline-block mr-1 translate-y-0.5 text-transparent"
+																			size="1.2em"
+																			icon="mdi:check"
+																	  ></doc-icon>`}
+																<p class="truncate">${branch}</p>
+															</a>`
+												  )
+												: ""}
+										</div>
+									</div>
+							  </div>`
+							: ""}
+						${this.url.project && this.projects && this.branches
+							? html`<div class="flex items-center flex-shrink-0">
+									<!-- Dropdown for all projects -->
+									<div
+										class="relative"
+										x-data="{ open: false }"
+										@click=${(e: Event) => {
+											e.stopPropagation()
+										}}
+									>
+										<button
+											@click=${() => {
+												this.shadowRoot?.querySelector("#branch")?.classList.add("hidden")
 												this.shadowRoot?.querySelector("#account")?.classList.add("hidden")
 												this.shadowRoot?.querySelector("#projects")?.classList.toggle("hidden")
 											}}
@@ -233,15 +435,21 @@ export class InlangManage extends TwLitElement {
 												@click=${() => {
 													this.handleProjectDropdown()
 												}}
-												class="self-center relative text-left font-medium text-slate-900 hover:bg-slate-100 rounded-md cursor-pointer px-2 py-1.5"
+												class="self-center flex items-center gap-2 text-left font-medium text-slate-900 bg-white border border-slate-200 hover:bg-slate-100 hover:border-slate-300 rounded-[4px] cursor-pointer pl-2 pr-1.5 py-1.5 text-xs"
 											>
+												<svg viewBox="0 0 24 24" width="1.2em" height="1.2em" class="w-4 h-4">
+													<path
+														fill="currentColor"
+														d="M8 18h8v-2H8v2Zm0-4h8v-2H8v2Zm-2 8q-.825 0-1.413-.588T4 20V4q0-.825.588-1.413T6 2h8l6 6v12q0 .825-.588 1.413T18 22H6Zm7-13V4H6v16h12V9h-5ZM6 4v5v-5v16V4Z"
+													></path>
+												</svg>
 												${this.url.project.split("/").at(-1)}
 												${
 													// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 													this.projects!.length > 1
 														? html`<doc-icon
-																class="inline-block translate-y-1"
-																size="1.2em"
+																class="inline-block translate-y-0.5"
+																size="1em"
 																icon="mdi:unfold-more-horizontal"
 														  ></doc-icon> `
 														: ""
@@ -253,7 +461,7 @@ export class InlangManage extends TwLitElement {
 												e.stopPropagation()
 											}}
 											id="projects"
-											class="hidden absolute top-12 left-0 w-auto bg-white border border-slate-200 rounded-md shadow-lg py-0.5 z-40"
+											class="hidden absolute max-h-96 overflow-y-scroll top-10 left-0 w-auto bg-white border border-slate-200 rounded-md shadow-lg py-0.5 z-40"
 										>
 											${typeof this.projects === "object"
 												? this.projects?.map(
@@ -285,65 +493,12 @@ export class InlangManage extends TwLitElement {
 									</div>
 							  </div>`
 							: ""}
-					</div>
-					<div class="flex items-center gap-4 flex-shrink-0">
-						${this.user && this.user !== "load"
-							? html`<div>
-									<!-- Dropdown for account settings -->
-									<div
-										class="relative"
-										x-data="{ open: false }"
-										@click=${(e: Event) => {
-											e.stopPropagation()
-										}}
-									>
-										<button
-											@click=${() => {
-												this.shadowRoot?.querySelector("#projects")?.classList.add("hidden")
-												this.shadowRoot?.querySelector("#account")?.classList.toggle("hidden")
-											}}
-										>
-											<img
-												class="h-8 w-8 rounded-full transition-opacity hover:opacity-70"
-												src=${this.user.avatarUrl}
-											/>
-										</button>
-										<div
-											@click=${(e: { stopPropagation: () => void }) => {
-												e.stopPropagation()
-											}}
-											id="account"
-											class="hidden absolute top-12 right-0 w-48 bg-white border border-slate-200 rounded-md shadow-lg z-20 py-0.5"
-										>
-											<div
-												@click=${async () => {
-													await browserAuth.addPermissions()
-													window.location.reload()
-												}}
-												class="block cursor-pointer px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900"
-											>
-												Edit Permissions
-											</div>
-											<div
-												@click=${async () => {
-													await browserAuth.logout()
-													window.location.reload()
-												}}
-												class="block cursor-pointer px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900"
-											>
-												Logout
-											</div>
-										</div>
-									</div>
-							  </div>`
-							: ""}
-					</div>
-				</div>
-			</header>
+				  </div>`
+				: ""}
 			${this.url.path === ""
 				? html`<div
 						class=${"w-full max-w-7xl h-full flex-grow mx-auto flex justify-center px-4 pb-24" +
-						(!this.modules ? " items-center" : " py-16 xl:px-0")}
+						(!this.modules ? " items-center" : " py-8 xl:px-0")}
 				  >
 						${!this.url.repo
 							? html`<div class="max-w-lg w-full flex flex-col items-center gap-4">
@@ -359,7 +514,7 @@ export class InlangManage extends TwLitElement {
 											!this.isValidUrl() && this.repoURL.length > 0
 												? " border-red-500 mb-8"
 												: " focus-within:border-[#098DAC] border-slate-200"
-										}	
+										}
 					`}
 									>
 										<input
@@ -404,7 +559,7 @@ export class InlangManage extends TwLitElement {
 											: ""}
 									</div>
 							  </div>`
-							: this.projects === "load"
+							: this.projects === "load" && typeof this.user === "undefined"
 							? html`<div class="flex flex-col gap-0.5 mt-4">
 									<div class="mx-auto">
 										<div class="h-12 w-12 animate-spin mb-4">
@@ -456,6 +611,19 @@ export class InlangManage extends TwLitElement {
 												size="1.2em"
 												icon="mdi:arrow-top-right"
 											></doc-icon>
+										</a>
+									</div>
+							  </div>`
+							: this.projects === "not-found"
+							? html`<div class="flex flex-col gap-0.5 mt-4">
+									<div
+										class="py-4 px-8 w-full rounded-md bg-red-100 text-red-500 flex flex-col items-center justify-center"
+									>
+										<p class="mb-4 font-medium">The project could not be found.</p>
+										<a
+											href=${`/?repo=${this.url.repo}`}
+											class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
+											>Select a different project
 										</a>
 									</div>
 							  </div>`

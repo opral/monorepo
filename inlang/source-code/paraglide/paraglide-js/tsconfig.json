@@ -8,6 +8,7 @@
 		"sourceMap": false,
 		"checkJs": true,
 		"emitDeclarationOnly": true,
-		"declarationMap": false
+		"declarationMap": false,
+		"skipLibCheck": true
 	}
 }

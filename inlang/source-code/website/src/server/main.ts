@@ -44,5 +44,5 @@ if (isProduction) {
 app.set("base", "/")
 app.use("/", router)
 
-const port = 4002
+const port = 4001
 app.listen(port, () => console.info(`Server listening at http://localhost:${port}`))

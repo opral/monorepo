@@ -1,126 +1,53 @@
-import { handleNavigate, setSearchInput } from "#src/interface/components/SearchBar.jsx"
 import Link from "#src/renderer/Link.jsx"
-import { createSignal } from "solid-js"
 import * as m from "#src/paraglide/messages.js"
+import { Button } from "../components/Button.jsx"
 
 const HeroSearch = () => {
-	const [input, setInput] = createSignal("")
-
 	return (
-		<div class="flex flex-col gap-2 items-center pb-8 md:pb-0">
-			<h1 class="text-4xl max-w-[1000px] md:text-6xl text-surface-900 text-center font-bold leading-snug tracking-tight mt-8 md:mt-16 ">
-				<span class="pr-3 text-6xl">🎄</span>
-				{m.home_inlang_title()}
-				<span class="pl-3 text-6xl">🎄</span>
-			</h1>
-			<p class="text-lg max-w-[740px] text-center text-surface-500 pt-4">
-				{m.home_inlang_description()}
-			</p>
+		<div class="relative flex flex-col items-center lg:items-start">
+			<div class="items-center lg:items-start relative z-30 flex flex-col w-1/2gap-2 pb-6 mt-4 md:mt-8">
+				<div class="pt-4 group">
+					<Link
+						href="https://www.youtube.com/live/pTgIx-ucMsY?feature=shared&t=3825"
+						target="_blanc"
+					>
+						<Button class="w-fit" type="text">
+							<Play />
+							<p>{m.home_inlang_secondary_link()}</p>
+						</Button>
+					</Link>
+				</div>
+				<h1 class="text-4xl max-w-[650px] md:text-5xl text-surface-900 text-center lg:text-start font-bold tracking-tight mt-6">
+					{m.home_inlang_title()}
+				</h1>
+				<p class="text-center lg:text-start text-lg max-w-[450px] text-surface-500 pt-5">
+					{m.home_inlang_description()}
+				</p>
 
-			<form
-				class="relative w-full md:w-[600px] flex items-center group mt-8 md:mt-12"
-				onSubmit={(event) => {
-					event.preventDefault()
-					setSearchInput(input())
-					handleNavigate()
-				}}
-			>
-				<div
-					class={
-						"pl-6 pr-2 gap-2 relative z-10 flex items-center w-full border border-surface-200 bg-background rounded-lg transition-all focus-within:border-primary"
-					}
-				>
-					<input
-						class={
-							"pl-0 active:outline-0 focus:outline-0 focus:ring-0 border-0 h-14 grow placeholder:text-surface-700 placeholder:font-normal placeholder:text-base text-surface-800"
-						}
-						placeholder={m.home_inlang_search_placeholder()}
-						onInput={(event) => {
-							// @ts-ignore
-							setInput(event.target.value)
-						}}
-						onPaste={(event) => {
-							// @ts-ignore
-							setInput(event.target.value)
-						}}
-						//on:sl-change={() => (isValidUrl() ? navigateToEditor : undefined)}
-					/>
-					<button
-						onClick={(event) => {
-							event.preventDefault()
-							setSearchInput(input())
-							handleNavigate()
-						}}
-						class="bg-surface-800 text-background hover:bg-on-background flex justify-center items-center h-10 relative rounded-md px-4 border-surface-200 transition-all duration-100 text-sm font-medium"
+				<div class="mt-8">
+					<Button
+						class="w-fit"
+						type="secondary"
+						href="/g/7777asdy/guide-nilsjacobsen-ecosystemCompatible"
 					>
-						{m.home_inlang_search_button()}
-					</button>
+						{m.home_inlang_button()}
+					</Button>
 				</div>
-				<div
-					style={{
-						background: "linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
-						transition: "all .3s ease-in-out",
-					}}
-					class="absolute bg-on-background top-0 left-0 w-full h-full opacity-10 blur-3xl group-hover:opacity-50 group-focus-within:opacity-50"
-				/>
-				<div
-					style={{
-						background: "linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
-						transition: "all .3s ease-in-out",
-					}}
-					class="absolute bg-on-background top-0 left-0 w-full h-full opacity-5 blur-xl group-hover:opacity-15 group-focus-within:opacity-15"
-				/>
-				<div
-					style={{
-						background: "linear-gradient(91.55deg, #51cbe0 2.95%, #5f98f3 52.23%, #bba0f8 99.17%)",
-						transition: "all .3s ease-in-out",
-					}}
-					class="absolute bg-on-background top-0 left-0 w-full h-full opacity-10 blur-sm group-hover:opacity-25 group-focus-within:opacity-25"
-				/>
-			</form>
-			<div class="pt-4 group">
-				<Link href="https://www.youtube.com/live/pTgIx-ucMsY?feature=shared&t=3825" target="_blanc">
-					<div class="flex gap-4 items-center text-surface-500 group-hover:text-active-primary">
-						<Play />
-						<p>{m.home_inlang_secondary_link()}</p>
-					</div>
-				</Link>
 			</div>
-			{/* <div class="w-full xl:w-3/4 flex flex-col gap-8 px-6 md:px-4 pb-14 md:pb-4 pt-8 md:pt-20">
-				<div class="flex gap-4 justify-center md:gap-12 items-center w-full xl:justify-center text-surface-400 flex-wrap">
-					<Link class="transition-opacity hover:opacity-80" href="https://cal.com/" target="_blank">
-						<Calcom />
-					</Link>
-					<Link
-						class="transition-opacity hover:opacity-80"
-						href="https://appflowy.io/"
-						target="_blank"
-					>
-						<AppFlowy />
-					</Link>
-					<Link
-						class="transition-opacity hover:opacity-80"
-						href="https://meet.jit.si/"
-						target="_blank"
-					>
-						<Jitsi />
-					</Link>
-					<Link
-						class="transition-opacity hover:opacity-80"
-						href="https://listmonk.app/"
-						target="_blank"
-					>
-						<Listmonk />
-					</Link>
-					<Link
-						class="transition-opacity hover:opacity-80"
-						href="https://open-assistant.io/"
-						target="_blank"
-					>
-						<OpenAssistant />
-					</Link>
-				</div>
-			</div> */}
+			<div class="hidden mb-4 lg:block relative lg:absolute z-10 lg:top-[50%] lg:-translate-y-[40%] lg:right-0 w-full lg:w-[600px] xl:w-[900px] flex-1 md:mt-0 mt-12 overflow-hidden">
+				<div class="lg:block absolute inset-0 bg-gradient-to-r from-surface-50 from-20% via-surface-50/0 via-40% hidden" />
+				<div class="lg:block absolute inset-0 bg-gradient-to-r from-surface-50/0 from-80% to-surface-50 hidden" />
+				<img
+					class="w-full lg:min-w-[900px] xl:min-w-[1000px] h-full object-contain object-right"
+					src="/images/lix-transparent.webp"
+					alt="lix header image"
+				/>
+			</div>
+			<img
+				class="lg:hidden w-full my-8 mb-16 max-w-[500px]"
+				src="/images/lixProcess.png"
+				alt="lix header image"
+			/>
 		</div>
 	)
 }
