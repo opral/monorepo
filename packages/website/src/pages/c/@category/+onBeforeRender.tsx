@@ -18,13 +18,13 @@ export default async function onBeforeRender(pageContext: any) {
 			case "libraries":
 				return "library"
 			default:
-				return category
+				return undefined
 		}
 	})()
 
 	const results = await search({
 		term: category,
-		category: category === "lix" ? undefined : categoryValue,
+		category: categoryValue,
 	})
 
 	let items = JSON.parse(results.data as string).map((item: any) => {
