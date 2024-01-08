@@ -44,6 +44,10 @@
 				{
 					"id": "messageView",
 					"name": "Messages"
+				},
+				{
+					"id": "errorView",
+					"name": "Errors"
 				}
 			]
 		},
@@ -68,6 +72,11 @@
 				"command": "inlang.openSettingsFile",
 				"title": "Open settings file",
 				"icon": "$(go-to-file)"
+			},
+			{
+				"command": "inlang.copyError",
+				"title": "Copy Error",
+				"icon": "$(copy)"
 			}
 		],
 		"menus": {
@@ -80,6 +89,11 @@
 				{
 					"when": "view == projectView && viewItem == projectNode",
 					"command": "inlang.openSettingsFile",
+					"group": "inline"
+				},
+				{
+					"when": "view == errorView && viewItem == errorNode",
+					"command": "inlang.copyError",
 					"group": "inline"
 				}
 			]

@@ -10,6 +10,7 @@ import { projectView } from "./utilities/project/project.js"
 import { state } from "./state.js"
 import { messagePreview } from "./decorations/messagePreview.js"
 import { ExtractMessage } from "./actions/extractMessage.js"
+import { errorView } from "./utilities/errors/errors.js"
 
 // Entry Point
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
@@ -37,6 +38,7 @@ async function main(args: {
 	}
 
 	await projectView({ ...args, workspaceFolder })
+	await errorView({ ...args })
 
 	setupFileSystemWatcher(workspaceFolder, args)
 	registerExtensionComponents(workspaceFolder, args)
