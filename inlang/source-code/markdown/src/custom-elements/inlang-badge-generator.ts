@@ -35,6 +35,7 @@ export class InlangBadgeGenerator extends LitElement {
 			align-items: center;
 			justify-content: flex-end;
 			position: relative;
+			margin-bottom: 0.5rem;
 		}
 		.options > input {
 			position: absolute;
@@ -49,7 +50,8 @@ export class InlangBadgeGenerator extends LitElement {
 			text-indent: 16px;
 			font-size: 1rem;
 		}
-		.options > input:focus {
+		.options > input:focus,
+		.optional > input:focus {
 			outline: 3px solid rgba(5, 182, 211, 0.1);
 			border: 1px solid #05b6d3;
 		}
@@ -97,19 +99,40 @@ export class InlangBadgeGenerator extends LitElement {
 			padding-top: 0.5rem;
 			font-size: 0.75rem;
 			color: #ff4d4f;
-			margin-top: 0.5rem;
 			font-weight: 400;
+		}
+		.optional {
+			height: 32px;
+			display: flex;
+			gap: 0.5rem;
+			align-items: center;
+			justify-content: flex-start;
+			position: relative;
+		}
+		.optional > input {
+			position: relative;
+			height: 100%;
+			width: 100%;
+			border: 1px solid #ecedee;
+			border-radius: 0.5rem;
+			transition: all 0.2s ease-in-out;
+			outline-color: rgba(5, 182, 211, 0.1);
+			text-indent: 16px;
+			font-size: 0.8rem;
 		}
 	`
 
 	@property() badgeURL: string = ""
+	@property() projectPath: string = ""
 	@property() loading: boolean = false
-	@property() error: boolean = false
+	@property() error: string | undefined = undefined
 
 	@query("input", true) _input!: HTMLInputElement
+	@query("#projectInput", true) _projectInput!: HTMLInputElement
 
 	private _generateBadge() {
 		const value = this._input.value
+		const project = this._projectInput.value
 
 		if (!value.includes("github") || value.length < 20) return
 
@@ -119,7 +142,9 @@ export class InlangBadgeGenerator extends LitElement {
 		const path = url.pathname.split("/")
 		const { owner, repo } = { owner: path[1], repo: path[2] }
 
-		this.badgeURL = `https://inlang.com/badge?url=github.com/${owner}/${repo}`
+		this.badgeURL =
+			`https://badge.inlang.com/?url=github.com/${owner}/${repo}` +
+			(project ? `&project=${project}` : "")
 
 		const img = new Image()
 		img.src = this.badgeURL
@@ -133,10 +158,17 @@ export class InlangBadgeGenerator extends LitElement {
 		const value = this._input.value
 
 		if ((!value.includes("github") && value !== "") || (value.length < 20 && value !== "")) {
-			this.error = true
+			this.error = "Please enter a valid GitHub repository link"
+			return
+		} else if (
+			// first character of project path must be a slash
+			this._projectInput.value.length > 0 &&
+			this._projectInput.value[0] !== "/"
+		) {
+			this.error = "Please enter a valid project path"
 			return
 		} else if (this.error) {
-			this.error = false
+			this.error = undefined
 		}
 	}
 
@@ -151,10 +183,14 @@ export class InlangBadgeGenerator extends LitElement {
 				Successfully copied!`
 			this.markdownCopied = true
 			navigator.clipboard.writeText(
-				`[![inlang status badge](${this.badgeURL})](https://fink.inlang.com/${this.badgeURL.replace(
-					"https://inlang.com/badge?url=",
-					""
-				)}?ref=badge)`
+				`[![inlang status badge](${this.badgeURL})](https://fink.inlang.com/${this.badgeURL
+					.replace("https://badge.inlang.com/badge?url=", "")
+					.replace(
+						this._projectInput.value
+							? `&project=${this._projectInput.value}`
+							: "&project=/project.inlang",
+						""
+					)}?ref=badge)`
 			)
 
 			setTimeout(() => {
@@ -196,23 +232,46 @@ export class InlangBadgeGenerator extends LitElement {
 						${this.loading ? "disabled" : ""}
 						@change=${() => this.checkForError()}
 						@keydown=${(e: KeyboardEvent) => {
-							if (e.key === "Enter") {
+							if (e.key === "Enter" && this._input.value !== "" && !this.error) {
+								this.checkForError()
 								this._generateBadge()
 							}
 						}}
 						type="text"
+						required
 						placeholder="Link to your repository"
 						style=${this.error
 							? "border: 1px solid #ff4d4f; color: #ff4d4f; outline-color: rgba(255, 77, 79, 0.1);"
 							: ""}
 					/>
-					<sl-button @click=${this._generateBadge} variant="primary" size="small"
+					<sl-button
+						@click=${() => {
+							if (this._input.value !== "" && !this.error) this._generateBadge()
+						}}
+						variant="primary"
+						size="small"
 						>Generate</sl-button
 					>
 				</div>
-				${this.error
-					? html`<div class="error-message">Please enter a valid GitHub repository link</div>`
-					: ""}
+				<div class="optional">
+					<input
+						id="projectInput"
+						${this.loading ? "disabled" : ""}
+						@change=${() => this.checkForError()}
+						@keydown=${(e: KeyboardEvent) => {
+							if (e.key === "Enter" && this._input.value !== "" && !this.error) {
+								this.checkForError()
+								this._generateBadge()
+							}
+						}}
+						type="text"
+						placeholder="Optional: Path to your project, e.g. /lang/project.inlang"
+						style=${this.error
+							? "border: 1px solid #ff4d4f; color: #ff4d4f; outline-color: rgba(255, 77, 79, 0.1);"
+							: ""}
+					/>
+				</div>
+				${this.error ? html`<div class="error-message">${this.error}</div>` : ""}
 			</div>
 			${this.badgeURL === ""
 				? ""

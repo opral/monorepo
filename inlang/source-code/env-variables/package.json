@@ -2,7 +2,7 @@
 	"name": "@inlang/env-variables",
 	"type": "module",
 	"private": true,
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"exports": {
 		".": "./dist/index.js",
 		"./dist/runtime/publicEnv.js": "./dist/runtime/publicEnv.js"

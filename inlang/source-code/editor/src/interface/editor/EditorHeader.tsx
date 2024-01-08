@@ -1,11 +1,25 @@
-import { Show } from "solid-js"
+import { For, Show } from "solid-js"
 import UserDropdown from "./UserDropdown.jsx"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
+import { Button } from "../components/Button.jsx"
 
 function EditorHeader() {
-	// const getLinks = () => {
-	// 	return []
-	// }
+	const getLinks = () => {
+		return [
+			{
+				href: "https://inlang.com/m/tdozzpar",
+				name: "What is Fink?",
+			},
+			{
+				href: "https://inlang.com/g/6ddyhpoi",
+				name: "How to translate?",
+			},
+			{
+				href: "https://inlang.com/c/lint-rules",
+				name: "Find Lint Rules",
+			},
+		]
+	}
 
 	const [localStorage] = useLocalStorage()
 	const user = () => {
@@ -53,7 +67,7 @@ function EditorHeader() {
 							{/* <p class="self-center text-left font-regular text-surface-400 pl-3 pr-1">/</p> */}
 							<div class="w-full content-center">
 								<div class="hidden md:flex justify-end items-center gap-8">
-									{/* <For each={getLinks()}>
+									<For each={getLinks()}>
 										{(link) => (
 											<>
 												<Button type="text" href={link.href}>
@@ -61,7 +75,7 @@ function EditorHeader() {
 												</Button>
 											</>
 										)}
-									</For> */}
+									</For>
 									<Show when={user()?.isLoggedIn}>
 										<UserDropdown />
 									</Show>

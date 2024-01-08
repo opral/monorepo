@@ -87,12 +87,7 @@ const MarketplaceHeader = () => {
 						<LanguagePicker />
 					</div>
 				</div>
-				<Show
-					when={
-						!currentPageContext.urlParsed.pathname.includes("/g/") &&
-						!currentPageContext.urlParsed.pathname.includes("/install")
-					}
-				>
+				<Show when={!currentPageContext.urlParsed.pathname.includes("/install")}>
 					<CategoryTabs />
 				</Show>
 			</header>

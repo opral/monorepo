@@ -124,12 +124,13 @@ export default function Page(props: PageProps) {
 											>
 												<img
 													class="w-16 h-16 rounded-md m-0 object-cover object-center"
+													alt={displayName()}
 													src={props.manifest.icon}
 												/>
 											</Show>
 											<div class="mb-0">
 												<div class="flex gap-3 flex-col">
-													<div class="flex gap-4 items-center">
+													<div class="flex flex-col lg:flex-row gap-4 lg:items-center">
 														<h1 class="text-3xl font-bold">{displayName()}</h1>
 														<Show
 															when={props.manifest.keywords
@@ -226,6 +227,9 @@ export default function Page(props: PageProps) {
 										>
 											<div class="pt-12">
 												<img
+													alt={
+														props.manifest.gallery && props.manifest.gallery[0]!.split("/").at(-1)
+													}
 													src={props.manifest.gallery && props.manifest.gallery[0]}
 													class="max-w-sm mx-auto rounded-lg border border-surface-100 shadow-md shadow-on-background/[0.02]"
 												/>
@@ -351,6 +355,7 @@ export default function Page(props: PageProps) {
 														}
 													>
 														<img
+															alt={props.manifest.publisherName}
 															class="w-6 h-6 rounded-full m-0"
 															src={props.manifest.publisherIcon}
 														/>
@@ -438,12 +443,6 @@ export default function Page(props: PageProps) {
 }
 
 export function Recommends(props: { recommends: MarketplaceManifest[] }) {
-	const [show, setShow] = createSignal<boolean>(false)
-
-	onMount(() => {
-		setShow(true)
-	})
-
 	return (
 		<>
 			<Show
@@ -453,24 +452,10 @@ export function Recommends(props: { recommends: MarketplaceManifest[] }) {
 				<h3 class="font-semibold mb-4">Recommended to use with:</h3>
 			</Show>
 			<div class="flex items-center gap-4 md:flex-row flex-col">
-				<Show
-					when={show()}
-					fallback={
-						<div class="h-auto w-full col-span-4 flex items-center justify-center py-16 relative">
-							<div class="mx-auto">
-								<div class="h-12 w-12 animate-spin mb-4">
-									<div class="h-full w-full bg-surface-50 border-primary border-4 rounded-full" />
-									<div class="h-1/2 w-1/2 absolute top-0 left-0 z-5 bg-surface-50" />
-								</div>
-							</div>
-						</div>
-					}
-				>
-					<For each={props.recommends}>
-						{/* @ts-ignore */}
-						{(item) => <Card item={item} displayName={item.displayName.en} />}
-					</For>
-				</Show>
+				<For each={props.recommends}>
+					{/* @ts-ignore */}
+					{(item) => <Card item={item} displayName={item.displayName.en} />}
+				</For>
 			</div>
 		</>
 	)

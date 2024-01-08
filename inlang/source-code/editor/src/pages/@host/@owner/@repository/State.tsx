@@ -17,7 +17,8 @@ import type { LocalStorageSchema } from "#src/services/local-storage/index.js"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
-import { openRepository, createNodeishMemoryFs, type Repository, browserAuth } from "@lix-js/client"
+import { openRepository, createNodeishMemoryFs, type Repository } from "@lix-js/client"
+import { browserAuth } from "@lix-js/server"
 import { publicEnv } from "@inlang/env-variables"
 import {
 	LanguageTag,
@@ -27,7 +28,7 @@ import {
 	listProjects,
 	type InlangProjectWithSolidAdapter,
 } from "@inlang/sdk"
-import { telemetryBrowser } from "@inlang/telemetry"
+import { posthog as telemetryBrowser } from "posthog-js"
 import type { Result } from "@inlang/result"
 
 type EditorStateSchema = {
@@ -93,7 +94,7 @@ type EditorStateSchema = {
 	/**
 	 * List of projects in the repository.
 	 */
-	projectList: Resource<{ projectPath: string; }[]>
+	projectList: Resource<{ projectPath: string }[]>
 
 	doesInlangConfigExist: () => boolean
 
@@ -109,7 +110,6 @@ type EditorStateSchema = {
 
 	setActiveProject: Setter<string | undefined>
 	activeProject: Accessor<string | undefined>
-
 
 	/**
 	 * FilterLanguages show or hide the different messages.
