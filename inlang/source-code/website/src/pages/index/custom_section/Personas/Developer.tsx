@@ -12,23 +12,6 @@ import {
 } from "#src/interface/custom-icons/subcategoryIcon.jsx"
 import * as m from "#src/paraglide/messages.js"
 
-const cards = [
-	{
-		title: m.home_personas_developer_cards_cli_title(),
-		description: m.home_personas_developer_cards_cli_description(),
-		href: "/m/2qj2w8pu",
-		logo: "/images/cli-logo-landingpage.png",
-		cover: "/images/cli-cover-landingpage.png",
-	},
-	{
-		title: m.home_personas_developer_cards_ide_title(),
-		description: m.home_personas_developer_cards_ide_description(),
-		href: "/m/r7kp499g",
-		logo: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/ide-extension/assets/icon-vscode-marketplace.png",
-		cover: "/images/ide-extension-cover-landingpage.png",
-	},
-]
-
 const logoStyling = "w-8 h-8 opacity-80 group-hover:opacity-100 transition-all"
 
 const stacks = [
@@ -83,6 +66,23 @@ const stacks = [
 ]
 
 const DeveloperSlide = () => {
+	const cards = [
+		{
+			title: m.home_personas_developer_cards_cli_title(),
+			description: m.home_personas_developer_cards_cli_description(),
+			href: "/m/2qj2w8pu",
+			logo: "/images/cli-logo-landingpage.png",
+			cover: "/images/cli-cover-landingpage.png",
+		},
+		{
+			title: m.home_personas_developer_cards_ide_title(),
+			description: m.home_personas_developer_cards_ide_description(),
+			href: "/m/r7kp499g",
+			logo: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/ide-extension/assets/icon-vscode-marketplace.png",
+			cover: "/images/ide-extension-cover-landingpage.png",
+		},
+	]
+
 	return (
 		<div class="flex flex-col gap-6 md:gap-4 py-6 h-full">
 			<div class="px-6 md:px-8">
