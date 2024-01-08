@@ -1,0 +1,23 @@
+{
+  "name": "example",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "_dev": "paraglide-js compile --project ./project.inlang && astro dev",
+    "start": "paraglide-js compile --project ./project.inlang && astro dev",
+    "build": "paraglide-js compile --project ./project.inlang && astro check && astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.3.4",
+    "@astrojs/mdx": "^2.0.3",
+    "@astrojs/rss": "^4.0.1",
+    "@astrojs/sitemap": "^3.0.4",
+    "astro": "^4.0.8",
+    "typescript": "^5.3.3"
+  },
+  "devDependencies": {
+    "@inlang/paraglide-js": "workspace:*"
+  }
+}
