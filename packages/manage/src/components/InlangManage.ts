@@ -8,7 +8,7 @@ import "./InlangInstall"
 import { createNodeishMemoryFs, openRepository } from "@lix-js/client"
 import { listProjects } from "@inlang/sdk"
 import { publicEnv } from "@inlang/env-variables"
-import { browserAuth, getUser } from "@lix-js/client/src/browser-auth.ts"
+import { browserAuth, getUser } from "@lix-js/server"
 import { tryCatch } from "@inlang/result"
 import { registry } from "@inlang/marketplace-registry"
 import type { MarketplaceManifest } from "../../../versioned-interfaces/marketplace-manifest/dist/interface.js"
@@ -154,7 +154,8 @@ export class InlangManage extends TwLitElement {
 		/* Initialize Telemetry via Posthog */
 		if (publicEnv.PUBLIC_POSTHOG_TOKEN) {
 			posthog.init(publicEnv.PUBLIC_POSTHOG_TOKEN ?? "placeholder", {
-				api_host: "https://eu.posthog.com",
+				api_host:
+					process.env.NODE_ENV === "production" ? "https://tm.inlang.com" : "http://localhost:4005",
 			})
 		} else if (publicEnv.PUBLIC_POSTHOG_TOKEN === undefined) {
 			return console.warn("Posthog token is not set. Telemetry will not be initialized.")
@@ -511,7 +512,7 @@ export class InlangManage extends TwLitElement {
 											!this.isValidUrl() && this.repoURL.length > 0
 												? " border-red-500 mb-8"
 												: " focus-within:border-[#098DAC] border-slate-200"
-										}	
+										}
 					`}
 									>
 										<input

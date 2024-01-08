@@ -14,7 +14,7 @@ import {
 } from "#src/services/auth/index.js"
 import { posthog as telemetryBrowser } from "posthog-js"
 import { TourHintWrapper, type TourStepId } from "./Notification/TourHintWrapper.jsx"
-import { browserAuth } from "@lix-js/client"
+import { browserAuth } from "@lix-js/server"
 
 export const Gitfloat = () => {
 	const {

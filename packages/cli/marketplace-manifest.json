@@ -8,10 +8,10 @@
 		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/cli-gallery/cli-gallery-image-3.jpg"
 	],
 	"displayName": {
-		"en": "CLI"
+		"en": "CLI - Translation Automation"
 	},
 	"description": {
-		"en": "Command line interface for inlang projects. Many commands and the possibility to do automation."
+		"en": "Command line interface for inlang projects. Many commands and the possibility to do translation automation."
 	},
 	"readme": {
 		"en": "./inlang/source-code/cli/README.md"
