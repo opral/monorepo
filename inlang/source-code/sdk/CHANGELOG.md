@@ -1,5 +1,30 @@
 # @inlang/sdk
 
+## 0.22.0
+
+### Minor Changes
+
+- cd29edb11: bumbing fixed env var dependecy issue affected packages
+
+### Patch Changes
+
+- Updated dependencies [cd29edb11]
+  - @lix-js/client@0.5.0
+
+## 0.21.0
+
+### Minor Changes
+
+- e20364a46: release fixed dependency chain in preparation for paraglide 1.0
+
+### Patch Changes
+
+- Updated dependencies [e20364a46]
+  - @lix-js/client@0.4.0
+  - @lix-js/fs@0.5.0
+  - @inlang/plugin@2.4.1
+  - @inlang/module@1.2.1
+
 ## 0.20.0
 
 ### Minor Changes

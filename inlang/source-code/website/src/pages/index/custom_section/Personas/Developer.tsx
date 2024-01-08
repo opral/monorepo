@@ -1,6 +1,7 @@
 import { For } from "solid-js"
 import Link from "#src/renderer/Link.jsx"
 import {
+	IconAstro,
 	IconFlutter,
 	IconJavascript,
 	IconNextjs,
@@ -27,55 +28,63 @@ const cards = [
 	},
 ]
 
+const logoStyling = "w-8 h-8 opacity-80 group-hover:opacity-100 transition-all"
+
 const stacks = [
 	{
 		name: "Svelte",
 		param: "svelte",
-		icon: <IconSvelte class="w-8 h-8" />,
+		icon: <IconSvelte class={logoStyling} />,
 		link: "/c/svelte",
 	},
 	{
 		name: "Next.js",
 		param: "nextjs",
-		icon: <IconNextjs class="w-8 h-8" />,
+		icon: <IconNextjs class={"w-[28px] h-[28px] " + logoStyling} />,
 		link: "/c/nextjs",
 	},
 	{
 		name: "Solid",
 		param: "solid",
-		icon: <IconSolid class="w-8 h-8" />,
+		icon: <IconSolid class={logoStyling} />,
 		link: "/c/solid",
+	},
+	{
+		name: "Astro",
+		param: "astro",
+		icon: <IconAstro class={logoStyling} />,
+		link: "/c/astro",
 	},
 	{
 		name: "React",
 		param: "react",
-		icon: <IconReact class="w-8 h-8" />,
+		icon: <IconReact class={"w-[34px] h-[34px] " + logoStyling} />,
 		link: "/c/react",
 	},
 	{
 		name: "Vue",
 		param: "vue",
-		icon: <IconVue class="w-8 h-8" />,
+		icon: <IconVue class={logoStyling} />,
 		link: "/c/vue",
 	},
 	{
 		name: "Javascript",
 		param: "javascript",
-		icon: <IconJavascript class="w-8 h-8" />,
+		icon: <IconJavascript class={logoStyling} />,
 		link: "/c/javascript",
 	},
 	{
 		name: "Flutter",
 		param: "flutter",
-		icon: <IconFlutter class="w-8 h-8" />,
+		icon: <IconFlutter class={logoStyling} />,
 		link: "/c/flutter",
 	},
 ]
 
 const DeveloperSlide = () => {
 	return (
-		<div class="flex flex-col gap-4 px-8 py-6 h-full">
-			<div>
+		<div class="flex flex-col gap-6 md:gap-4 py-6 h-full">
+			<div class="px-6 md:px-8">
 				<div class="flex items-center justify-between">
 					<h3 class="font-medium text-surface-600">Apps for Developer</h3>
 					<Link class="flex items-center gap-2 text-surface-500 group" href="/c/apps">
@@ -85,7 +94,7 @@ const DeveloperSlide = () => {
 						</div>
 					</Link>
 				</div>
-				<div class="grid grid-cols-2 h-[244px] gap-4 mt-4">
+				<div class="grid md:grid-cols-2 h-[430px] sm:h-[530px] md:h-[244px] gap-4 mt-4">
 					<For each={cards}>
 						{(card) => (
 							<Link
@@ -111,17 +120,17 @@ const DeveloperSlide = () => {
 					</For>
 				</div>
 			</div>
-			<div>
+			<div class="pl-6 md:pl-8 md:pr-8">
 				<h3 class="font-medium text-surface-600">Stack-based Tooling</h3>
-				<div class="flex gap-4 mt-4">
+				<div class="flex gap-[10px] md:gap-4 mt-4 overflow-x-scroll hide-scrollbar">
 					<For each={stacks}>
 						{(stack) => (
-							<Link href={stack.link} class="flex-1">
-								<div class="w-full flex flex-col items-center gap-2">
+							<Link href={stack.link} class="flex-1 min-w-[64px]">
+								<div class="group w-full flex flex-col items-center gap-2">
 									<div class="flex w-full justify-center items-center border border-surface-200 hover:border-surface-300 bg-gradient-to-b from-surface-50 hover:from-surface-100 rounded-lg h-[60px] overflow-hidden">
 										{stack.icon}
 									</div>
-									<p class="text-center text-sm">{stack.name}</p>
+									<p class="text-center text-sm text-surface-500 font-medium">{stack.name}</p>
 								</div>
 							</Link>
 						)}

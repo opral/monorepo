@@ -13,6 +13,7 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"devDependencies": {
+		"@lix-js/server": "workspace:*",
 		"@inlang/detect-json-formatting": "workspace:*",
 		"@inlang/env-variables": "workspace:*",
 		"@inlang/markdown": "workspace:*",

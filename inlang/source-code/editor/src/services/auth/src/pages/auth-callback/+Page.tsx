@@ -1,7 +1,7 @@
 import { createEffect, createResource, Match, Switch } from "solid-js"
 import MaterialSymbolsCheckCircleRounded from "~icons/material-symbols/check-circle-rounded"
 import MaterialSymbolsArrowBackRounded from "~icons/material-symbols/arrow-back-rounded"
-import { browserAuth } from "@lix-js/client"
+import { browserAuth } from "@lix-js/server"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 
 /**

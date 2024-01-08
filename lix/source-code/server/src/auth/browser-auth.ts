@@ -1,5 +1,15 @@
 import { publicEnv } from "@inlang/env-variables/dist/runtime/publicEnv.js"
-import type { LixAuthModule } from "./api.js"
+
+export type LixAuthModule = {
+	login: () => Promise<any>
+	logout: () => Promise<any>
+	getUser: () => Promise<{
+		username: string
+		email: string
+		avatarUrl?: string
+	}>
+	addPermissions: () => Promise<any>
+}
 
 const gitHubProxyUrl = publicEnv.PUBLIC_GIT_PROXY_BASE_URL + "/github-proxy/"
 const githubAppClientId = publicEnv.PUBLIC_LIX_GITHUB_APP_CLIENT_ID
