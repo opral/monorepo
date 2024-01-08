@@ -1,0 +1,77 @@
+import * as vscode from "vscode"
+import { state } from "../../state.js"
+import { CONFIGURATION } from "../../configuration.js"
+
+export interface ErrorNode {
+	label: string
+	tooltip: string
+	description?: string
+	error: Error | undefined
+}
+export function createErrorNode(error: Error | undefined): ErrorNode {
+	if (error) {
+		return {
+			label: error.name,
+			tooltip: error.message,
+			description: error.message,
+			error: error,
+		}
+	} else {
+		return {
+			label: "No errors found",
+			tooltip: "All good!",
+			error: undefined,
+		}
+	}
+}
+
+export async function createErrorNodes(): Promise<ErrorNode[]> {
+	const errors = state().project.errors() as Error[]
+	if (errors.length === 0) {
+		// If no errors, return a single node indicating this
+		return [createErrorNode(undefined)]
+	}
+	return errors.map(createErrorNode)
+}
+
+export function getTreeItem(element: ErrorNode): vscode.TreeItem {
+	const treeItem = new vscode.TreeItem(
+		element.label,
+		element.error ? vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.None
+	)
+	treeItem.tooltip = element.tooltip
+	treeItem.description = element.description
+	treeItem.iconPath = element.error
+		? new vscode.ThemeIcon("error", new vscode.ThemeColor("errorForeground"))
+		: new vscode.ThemeIcon("check", new vscode.ThemeColor("statusBar.foreground"))
+
+	if (element.error) {
+		treeItem.contextValue = "errorNode"
+		treeItem.command = {
+			command: "inlang.copyError",
+			title: "Copy Error",
+			arguments: [element],
+		}
+	}
+
+	return treeItem
+}
+
+export function createErrorTreeDataProvider(): vscode.TreeDataProvider<ErrorNode> {
+	return {
+		getTreeItem,
+		getChildren: async () => await createErrorNodes(),
+		onDidChangeTreeData: CONFIGURATION.EVENTS.ON_DID_ERROR_TREE_VIEW_CHANGE.event,
+	}
+}
+
+export const errorView = async (args: { context: vscode.ExtensionContext }) => {
+	const errorDataProvider = createErrorTreeDataProvider()
+
+	// This line is optional, used only if you want to perform initial data loading or similar actions
+	await errorDataProvider.getChildren()
+
+	args.context.subscriptions.push(
+		vscode.window.registerTreeDataProvider("errorView", errorDataProvider)
+	)
+}

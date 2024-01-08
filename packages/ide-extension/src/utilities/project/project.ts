@@ -1,4 +1,3 @@
-// src/treeDataProvider.ts
 import * as vscode from "vscode"
 import { loadProject } from "@inlang/sdk"
 import { findInlangProjectRecursively } from "./findInlangProjectRecusively.js"
@@ -23,7 +22,7 @@ export interface ProjectNode {
 let selectedProject: string | undefined = undefined // Store the currently selected project path
 let projectNodes: ProjectNode[] = [] // Store the project nodes
 
-function createProjectNode(args: {
+export function createProjectNode(args: {
 	label: string
 	path: string
 	isSelected: boolean
@@ -69,7 +68,7 @@ export async function createProjectNodes(
 	return projectNodes
 }
 
-function getTreeItem(element: ProjectNode, nodeishFs: NodeishFilesystem): vscode.TreeItem {
+export function getTreeItem(element: ProjectNode, nodeishFs: NodeishFilesystem): vscode.TreeItem {
 	return {
 		label: element.label,
 		iconPath: element.isSelected
@@ -133,10 +132,9 @@ export async function handleTreeSelection(
 
 		setState({ project: inlangProject })
 
-		console.log("Loaded project:", inlangProject)
-
 		// Refresh the entire tree to reflect selection changes
 		CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.fire(undefined)
+		CONFIGURATION.EVENTS.ON_DID_ERROR_TREE_VIEW_CHANGE.fire(undefined)
 	} catch (error) {
 		vscode.window.showErrorMessage(`Failed to load project "${selectedProject}": ${error}`)
 	}
