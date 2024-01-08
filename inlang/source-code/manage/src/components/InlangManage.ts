@@ -155,9 +155,7 @@ export class InlangManage extends TwLitElement {
 		if (publicEnv.PUBLIC_POSTHOG_TOKEN) {
 			posthog.init(publicEnv.PUBLIC_POSTHOG_TOKEN ?? "placeholder", {
 				api_host:
-					process.env.NODE_ENV === "production"
-						? "https://eu.posthog.com"
-						: "http://localhost:4005",
+					process.env.NODE_ENV === "production" ? "https://tm.inlang.com" : "http://localhost:4005",
 			})
 		} else if (publicEnv.PUBLIC_POSTHOG_TOKEN === undefined) {
 			return console.warn("Posthog token is not set. Telemetry will not be initialized.")
