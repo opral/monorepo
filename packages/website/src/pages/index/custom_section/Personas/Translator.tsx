@@ -4,24 +4,26 @@ import Link from "#src/renderer/Link.jsx"
 import { Button } from "../../components/Button.jsx"
 import * as m from "#src/paraglide/messages.js"
 
-const cards = [
-	{
-		title: "Fink - Translation Editor",
-		description: "Translation right from the browser.",
-		href: "/m/tdozzpar",
-		logo: "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/editor/assets/new-fink-logo.png",
-		cover: "/images/fink-cover-landingpage.png",
-	},
-	{
-		title: "Translation status badge",
-		description: "Show missing messages in a markdown file.",
-		href: "/m/zu942ln6",
-		logo: "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/badge/assets/images/badge-icon.jpg",
-		cover: "/images/badge-cover-landingpage.png",
-	},
-]
+
 
 const TranslatorSlide = () => {
+	const cards = [
+		{
+			title: m.home_personas_translator_cards_fink_title(),
+			description: m.home_personas_translator_cards_fink_description(),
+			href: "/m/tdozzpar",
+			logo: "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/editor/assets/new-fink-logo.png",
+			cover: "/images/fink-cover-landingpage.png",
+		},
+		{
+			title: m.home_personas_translator_cards_badge_title(),
+			description: m.home_personas_translator_cards_badge_description(),
+			href: "/m/zu942ln6",
+			logo: "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/badge/assets/images/badge-icon.jpg",
+			cover: "/images/badge-cover-landingpage.png",
+		},
+	]
+
 	return (
 		<div class="flex flex-col gap-4 px-6 md:px-8 py-6 h-full">
 			<div>
@@ -63,7 +65,7 @@ const TranslatorSlide = () => {
 			<div>
 				<h3 class="font-medium text-surface-600">{m.home_personas_translator_guide_title()}</h3>
 				<div class="flex flex-col md:flex-row gap-8 md:justify-between md:items-center p-6 md:p-4 border border-surface-200 mt-4 rounded-xl bg-gradient-to-b from-surface-50">
-					<div class="flex flex-col md:flex-row md:items-center gap-4">
+					<div class="flex-1 flex flex-col md:flex-row md:items-center gap-4">
 						<p class="font-semibold text-primary bg-primary/20 px-4 py-1.5 rounded-lg w-fit">
 							{m.home_personas_translator_guide_type()}
 						</p>
@@ -76,9 +78,9 @@ const TranslatorSlide = () => {
 						chevron
 						type="secondary"
 						href="/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink"
-						class="w-full"
+						class="flex-1"
 					>
-						Read Guide
+						{m.home_personas_translator_guide_button()}
 					</Button>
 				</div>
 			</div>
