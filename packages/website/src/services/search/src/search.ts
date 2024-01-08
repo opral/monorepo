@@ -13,7 +13,7 @@ const client = algolia(privateEnv.ALGOLIA_APPLICATION, privateEnv.ALGOLIA_ADMIN)
 const index = client.initIndex("registry")
 
 index.setSettings({
-	searchableAttributes: ["displayName.en", "description", "keywords"],
+	searchableAttributes: ["displayName", "description", "keywords"],
 })
 
 export async function search(args: {
@@ -24,7 +24,10 @@ export async function search(args: {
 		const hits = []
 		for (const product of registry) {
 			if (product.id.split(".")[0] === args.category) {
-				hits.push(product)
+				hits.push({
+					objectID: product.uniqueID,
+					...product,
+				})
 			}
 		}
 		return { data: JSON.stringify(hits) }
