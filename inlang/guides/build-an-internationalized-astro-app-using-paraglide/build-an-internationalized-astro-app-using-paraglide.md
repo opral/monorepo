@@ -136,7 +136,7 @@ The challenge is in calling `setLanguageTag` at the right time. We need to do it
 Fortunately this isn't hard.
 
 ### Adding Middleware
-To set the language on the Server we can use Astro's [Middleware](https://docs.astro.build/core-concepts/middleware). Middleware is a function that runs on the server before the page is rendered. We can use it to set the language tag.
+To set the language on the Server we can use Astro's [Middleware](https://docs.astro.build/en/guides/middleware/#_top). Middleware is a function that runs on the server before the page is rendered. We can use it to set the language tag.
 
 
 At `src/middleware.ts`, add the following:
