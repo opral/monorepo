@@ -1,7 +1,7 @@
 import type { SetStoreFunction } from "solid-js/store"
 import type { LocalStorageSchema } from "../../../services/local-storage/index.js"
 import { telemetryBrowser } from "@inlang/telemetry"
-import { browserAuth } from "@lix-js/client"
+import { browserAuth } from "@lix-js/server"
 
 /**
  * This function is called when the user clicks the "Sign Out" button.

@@ -127,6 +127,15 @@ export default function Page(props: {
 					coverCard: <GenericHeader />,
 				}
 			}
+			case "astro": {
+				return {
+					title: m.marketplace_header_generic_title(),
+					description: m.marketplace_header_generic_description(),
+					icon: "https://astro.build/favicon.svg",
+					coverCard: <GenericHeader />,
+				}
+			}
+
 			default:
 				return {
 					title:

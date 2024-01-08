@@ -17,7 +17,8 @@ import type { LocalStorageSchema } from "#src/services/local-storage/index.js"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
-import { openRepository, createNodeishMemoryFs, type Repository, browserAuth } from "@lix-js/client"
+import { openRepository, createNodeishMemoryFs, type Repository } from "@lix-js/client"
+import { browserAuth } from "@lix-js/server"
 import { publicEnv } from "@inlang/env-variables"
 import {
 	LanguageTag,
@@ -27,7 +28,7 @@ import {
 	listProjects,
 	type InlangProjectWithSolidAdapter,
 } from "@inlang/sdk"
-import { telemetryBrowser } from "@inlang/telemetry"
+import { posthog as telemetryBrowser } from "posthog-js"
 import type { Result } from "@inlang/result"
 
 type EditorStateSchema = {

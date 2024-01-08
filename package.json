@@ -5,7 +5,7 @@
 	"scripts": {
 		"dev": "pnpm exec nx run-many --nx-bail --target=dev --parallel 1000 --output-style stream",
 		"dev:ide": "pnpm exec nx run-many --target=dev --parallel=10 --nx-bail --verbose --projects=vs-code-extension --output-style=stream",
-		"production": "pnpm exec nx run-many --nx-bail --target=production --parallel 1000 --exclude @lix-js/server --exclude @inlang/badge --exclude @inlang/manage --exclude @inlang/editor --output-style=stream",
+		"production": "pnpm exec nx run-many --nx-bail --target=production --parallel 1000 --exclude @lix-js/server --exclude @inlang/badge --exclude @inlang/manage --exclude @inlang/editor --exclude @inlang/telemetry-proxy --output-style=stream",
 		"build": "pnpm exec nx run-many --nx-bail --target=build --parallel",
 		"dev:lix": "pnpm --stream --parallel --filter @lix-js/* --filter @inlang/server --filter @inlang/editor --filter @inlang/website dev",
 		"---- TEST ----------------------------------------------------------": "",
@@ -23,13 +23,18 @@
 		"clean": "pnpm recursive run clean && rm -rf ./.env ./node_modules",
 		"----- CI ---- used to test the codebase on every commit": "",
 		"ci": "pnpm install && pnpm check-all",
-		"check-all": "pnpm format && pnpm lint && pnpm build && pnpm test",
+		"check-all": "pnpm audit --audit-level=high && pnpm format && pnpm lint && pnpm build && pnpm test",
 		"ci:publish": "pnpm --filter !vs-code-extension publish -r",
 		"ci:version": "pnpm exec changeset version"
 	},
 	"engines": {
 		"npm": ">=8.0.0",
 		"node": ">=18.0.0"
+	},
+	"pnpm": {
+		"overrides": {
+			"http-cache-semantics": "4.1.1"
+		}
 	},
 	"devDependencies": {
 		"@inlang/cli": "workspace:*",
