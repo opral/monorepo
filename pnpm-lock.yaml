@@ -143,6 +143,9 @@ importers:
       '@inlang/telemetry':
         specifier: workspace:*
         version: link:../telemetry
+      '@lix-js/client':
+        specifier: workspace:*
+        version: link:../../../lix/source-code/client
       '@lix-js/fs':
         specifier: workspace:*
         version: link:../../../lix/source-code/fs
@@ -1100,6 +1103,9 @@ importers:
       '@inlang/telemetry':
         specifier: workspace:*
         version: link:../../telemetry
+      '@lix-js/client':
+        specifier: workspace:*
+        version: link:../../../../lix/source-code/client
       '@lix-js/fs':
         specifier: workspace:*
         version: link:../../../../lix/source-code/fs
