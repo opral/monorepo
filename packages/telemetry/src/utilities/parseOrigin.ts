@@ -34,7 +34,7 @@ function transformRemote(remote: string) {
 
 		// Remove ghp_ or ghs_ key if present in the host
 		const hostRegex = /(ghp_|ghs_)[\w]+@/
-		
+
 		host = host.replace(hostRegex, "")
 
 		return `${host}/${repo}.git`

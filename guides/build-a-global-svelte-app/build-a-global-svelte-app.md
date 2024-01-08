@@ -26,7 +26,7 @@ In the root of your project, run:
 npx @inlang/paraglide-js@latest init
 ```
 
-The CLI might ask you some questions depending on your environment. Answer them thuroughly & follow the instructions.
+The CLI might ask you some questions depending on your environment. Answer them thoroughly & follow the instructions.
 
 ```cmd
 npx @inlang/paraglide-js@latest init
@@ -77,7 +77,7 @@ export default defineConfig({
 })
 ```
 
-With the Vite-Plugin added, you can also remove the `paraglide-js compile` from your package.json, if you added those. The plugin will take care of that.
+With the Vite-Plugin added, you can also remove the `paraglide-js compile` from your package.json. The plugin will take care of that.
 
 ### Definining an Alias
 
@@ -120,7 +120,7 @@ Neat right?
 
 By default, paraglide uses the [inlang-message-format Plugin](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat) for storing messages.
 
-The default path for translation files are `./messages/{lang}.json`. You can change this option in `project.inlang.json`. The Files just contain a Key-Value pair of the message ID and the message itself.
+The default path for translation files are `./messages/{lang}.json`. You can change this option in `./project.inlang/settings.json`. The Files just contain a Key-Value pair of the message ID and the message itself.
 
 ```json
 // messages/en.json
@@ -202,11 +202,11 @@ routes
         └── +page.svelte
 ```
 
-Right now [[lang]] will match any string, not just languages. We can make sure that it only matches valid [language tags](/m/8y8sxj09/library-inlang-languageTag) by adding [matcher](https://kit.svelte.dev/docs/advanced-routing#matching). Add a `lang` matcher in `./src/params/lang.ts`.
+Right now [[lang]] will match any string, not just languages. We can make sure that it only matches valid [language tags](/m/8y8sxj09/library-inlang-languageTag) by adding a [matcher](https://kit.svelte.dev/docs/advanced-routing#matching). Add a `lang` matcher in `./src/params/lang.ts`.
 
 ```ts
 // ./src/params/lang.ts
-import { availableLanguageTags, AvailableLanguageTag } from "$paraglide/runtime"
+import { availableLanguageTags, type AvailableLanguageTag } from "$paraglide/runtime"
 
 export const match = (param: any): param is AvailableLanguageTag => {
 	return availableLanguageTags.includes(param)
@@ -222,16 +222,18 @@ routes
     └── +page.svelte
 ```
 
+Also, make sure to add any languages you use to the `"languageTags"` array in `./project.inlang/settings.json`.
+
 ### Using the Language Parameter
 
 Armed with this route-parameter, the routing logic should already work, except for the language change. We need to communicate to Paraglide which language is currently active & re-render the page when it changes.
 
-In your root layout, add some code that reactively sets the language tag based on the route parameter & rerenders if it changes.
+In your [root layout](https://kit.svelte.dev/docs/routing#layout), add some code that reactively sets the language tag based on the route parameter & rerenders if it changes.
 
 ```svelte
 <script lang="ts">
   import { page } from "$app/stores";
-  import { setLanguageTag, sourceLanguageTag type AvailableLanguageTag } from "$paraglide/runtime";
+  import { setLanguageTag, sourceLanguageTag, type AvailableLanguageTag } from "$paraglide/runtime";
 
   //Use the default language if no language is given
   $: lang = $page.params.lang as AvailableLanguageTag ?? sourceLanguageTag;
@@ -239,7 +241,7 @@ In your root layout, add some code that reactively sets the language tag based o
 </script>
 
 {#key lang}
-  <slot/>
+  <slot></slot>
 {/key}
 ```
 
@@ -250,7 +252,7 @@ You can navigate between languages by adding a language parameter to your links.
 
 ### Adding a language switcher
 
-Language switchers are challenging, because they require us to translate the path we're currently on.
+Language switchers are challenging, because they require us to translate the page we're currently on.
 Because there are so many different ways to implement i18n routing, we can't provide a one-size-fits-all solution. Regardless, you will probably need to define a `route` function that takes in a path (in any language), and returns the path in the specified language.
 
 ```ts
@@ -280,13 +282,13 @@ export function route(path: string, lang: AvailableLanguageTag) {
 function withoutLanguageTag(path: string) {
 	const [_, maybeLang, ...rest] = path.split("/")
 	if (availableLanguageTags.includes(maybeLang as AvailableLanguageTag)) {
-		return rest.join("/")
+		return `/${rest.join('/')}`
 	}
 	return path
 }
 ```
 
-We can now get the link to the current page in a different language by calling `route` with our current path.
+We can now get the link to the current page in a different language by calling `route` with our current path. Using this link, a basic language switcher component looks like:
 
 ```svelte
 <script lang="ts">
@@ -326,7 +328,7 @@ Let's implement these things in our app.
 
 ### Setting the `lang` attribute
 
-We need to set the `lang` attribute in two places. The Server, so that it will be correct on the first render, and the client, so that it stays correct when navigating between pages. Let's start with the server.
+We need to set the `lang` attribute in two places. The Server, so that it will be correct on the first render, and the client, so that it stays correct when navigating between pages. Let's start with the server using [Sveltekit Hooks](https://kit.svelte.dev/docs/hooks).
 
 We can set the `lang` attribute in `hooks.server.ts` by modifying the returned HTML. We can make this easier by making sure that the `lang` attribute has an easy-to-find placeholder. In `./src/app.html` add a placeholder for the `lang` attribute.
 
@@ -339,6 +341,8 @@ Then in `hooks.server.ts`, replace the placeholder with the correct language.
 
 ```ts
 // ./src/hooks.server.ts
+import { sourceLanguageTag } from "$paraglide/runtime";
+
 export async function handle({ event, resolve }) {
 	const lang = event.params.lang ?? sourceLanguageTag
 
@@ -360,14 +364,15 @@ On the client, we can set the `lang` attribute using JS. In your root layout, ad
 ```svelte
 <script lang="ts">
   import { page } from "$app/stores";
-  import { setLanguageTag, sourceLanguageTag type AvailableLanguageTag } from "$paraglide/runtime";
+  import { setLanguageTag, sourceLanguageTag, type AvailableLanguageTag } from "$paraglide/runtime";
+  import { browser } from "$app/environment";
 
   //Use the default language if no language is given
   $: lang = $page.params.lang as AvailableLanguageTag ?? sourceLanguageTag;
   $: setLanguageTag(lang);
 
   //Set the lang attribute on the html tag
-  $: document.documentElement.lang = lang;
+  $: if(browser) document.documentElement.lang = lang;
 </script>
 ```
 
@@ -381,7 +386,7 @@ What we want is to generate a `<link rel="alternate" hreflang="..." href="...">`
 
 Fortunately, we already did most of the work for this when building the language switcher. We can reuse the `route` function to generate the correct `href` attribute.
 
-Let's create a new `I18NHeader` component that generates the `<link>` tags.
+Let's create a new `I18NHeader` component that generates the `<link>` tags. This component can be imported into your root layout to apply for all pages.
 
 ```svelte
 <!-- ./src/lib/I18NHeader.svelte -->

@@ -17,5 +17,5 @@ Inlang project architecture is more flexible with the use of plugins. This means
 Go to https://inlang.com/c/plugins and click install. 
 
 ### Links
--> Look for plugins at [inlang.com](https://inlang.com/c/application)
+-> Look for plugins at [inlang.com](https://inlang.com/c/apps)
 -> Do you want to write a plugin? [Guide](https://inlang.com/documentation/plugin)

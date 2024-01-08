@@ -3,7 +3,7 @@ import { html } from "lit"
 import { openRepository, createNodeishMemoryFs } from "@lix-js/client"
 import { customElement, property } from "lit/decorators.js"
 import { TwLitElement } from "../common/TwLitElement.js"
-import { browserAuth, getUser } from "@lix-js/client/src/browser-auth.ts"
+import { browserAuth, getUser } from "@lix-js/server"
 import { registry } from "@inlang/marketplace-registry"
 import { ProjectSettings, loadProject, listProjects } from "@inlang/sdk"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
@@ -23,7 +23,7 @@ export class InlangInstall extends TwLitElement {
 		| "noauth"
 		| "norepo"
 		| "noproject"
-		| "no-optin"
+		| "nooptin"
 		| "install"
 		| "error"
 		| "success"
@@ -165,6 +165,7 @@ export class InlangInstall extends TwLitElement {
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			projectPath: this.url.project!,
 			nodeishFs: repo.nodeishFs,
+			repo,
 		})
 
 		if (inlangProject.errors().length > 0) {
@@ -205,6 +206,7 @@ export class InlangInstall extends TwLitElement {
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			projectPath: this.url.project!,
 			nodeishFs: repo.nodeishFs,
+			repo,
 		})
 
 		this.loadingProgress = 100
@@ -214,7 +216,7 @@ export class InlangInstall extends TwLitElement {
 			this.step = "error"
 			// @ts-ignore
 			this.error = inlangProjectAfter.errors()
-		} else this.step = "success"
+		} else window.location.href = `/?repo=${this.url.repo}&project=${this.url.project}&install=true`
 	}
 
 	/* This function checks if all necessary data is given to install into a project */
@@ -262,7 +264,7 @@ export class InlangInstall extends TwLitElement {
 			this.step = "noproject"
 			this.loading = false
 		} else if (!this.optin) {
-			this.step = "no-optin"
+			this.step = "nooptin"
 			this.loading = false
 		} else {
 			this.step = "install"
@@ -460,7 +462,7 @@ export class InlangInstall extends TwLitElement {
 								!this.isValidUrl() && this.repoURL.length > 0
 									? " border-red-500 mb-8"
 									: " focus-within:border-[#098DAC] border-slate-200"
-							}	
+							}
 `}
 						>
 							<input
@@ -539,13 +541,13 @@ export class InlangInstall extends TwLitElement {
 							</div>
 						</div>
 				  </div>`
-				: this.step === "no-optin"
+				: this.step === "nooptin"
 				? html`<div class="flex flex-col gap-2">
 						<h1 class="font-bold text-4xl text-slate-900 mb-2 text-center">We need your consent</h1>
 						<p class="text-slate-600 w-full md:w-[400px] leading-relaxed text-center mx-auto mb-4">
 							Please confirm that you want to install the following module:
 						</p>
-						<div class="mx-auto max-w-lg mb-8">
+						<div class="mx-auto w-full max-w-lg mb-8">
 							<div
 								class="p-6 w-full bg-white border border-slate-200 rounded-xl flex flex-col justify-between gap-2"
 							>
@@ -607,7 +609,7 @@ export class InlangInstall extends TwLitElement {
 				? html`<div class="flex flex-col gap-2">
 						<h1 class="font-bold text-4xl text-slate-900 mb-2 text-center">Installing module</h1>
 						<p class="text-slate-600 w-full md:w-[400px] leading-relaxed text-center mx-auto mb-4">
-							Modules are getting installed into your repository...
+							Modules are getting installed into your project...
 						</p>
 						<div class="flex items-start gap-2 w-full h-2 bg-slate-200 rounded-full mb-12">
 							<div
@@ -752,33 +754,33 @@ export class InlangInstall extends TwLitElement {
 			</div>
 	  </div>`
 							: ""} `
-				: this.step === "success"
-				? html`<div class="flex flex-col gap-2 max-w-lg">
-						<h1 class="font-bold text-4xl text-slate-900 mb-4 text-center">
-							Succesfully installed
-						</h1>
-						<p class="text-slate-600 w-full md:w-[400px] leading-relaxed text-center">
-							Your module was succesfully installed into your project: ${this.url.project}
-						</p>
-						<div class="flex gap-4">
-							<a
-								class="bg-slate-800 px-6 w-full text-white text-center py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"
-								href=${`/?repo=${
-									this.url.repo + (this.url.project ? `&project=${this.url.project}` : "")
-								}`}
-							>
-								To inlang Manage
-							</a>
-							<a
-								class="bg-slate-200 truncate px-6 w-full text-slate-900 text-center py-2 rounded-md font-medium hover:bg-slate-300 transition-colors"
-								href=${`https://inlang.com/editor/${this.url.repo}`}
-								target="_blank"
-							>
-								Go to Fink - Editor
-							</a>
-						</div>
-				  </div>`
-				: this.step === "abort"
+				: // : this.step === "success"
+				// ? html`<div class="flex flex-col gap-2 max-w-lg">
+				// 		<h1 class="font-bold text-4xl text-slate-900 mb-4 text-center">
+				// 			Succesfully installed
+				// 		</h1>
+				// 		<p class="text-slate-600 w-full md:w-[400px] leading-relaxed text-center mb-8">
+				// 			Your module was succesfully installed into your project: ${this.url.project}
+				// 		</p>
+				// 		<div class="flex gap-4">
+				// 			<a
+				// 				class="bg-slate-800 px-6 w-full text-white text-center py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"
+				// 				href=${`/?repo=${
+				// 					this.url.repo + (this.url.project ? `&project=${this.url.project}` : "")
+				// 				}`}
+				// 			>
+				// 				To inlang Manage
+				// 			</a>
+				// 			<a
+				// 				class="bg-slate-200 truncate px-6 w-full text-slate-900 text-center py-2 rounded-md font-medium hover:bg-slate-300 transition-colors"
+				// 				href=${`https://inlang.com/editor/${this.url.repo}`}
+				// 				target="_blank"
+				// 			>
+				// 				Go to Fink - Editor
+				// 			</a>
+				// 		</div>
+				//   </div>`
+				this.step === "abort"
 				? html`<div class="flex flex-col gap-2">
 						<h1 class="font-bold text-4xl text-slate-900 mb-2 text-center">Installation aborted</h1>
 						<p class="text-slate-600 w-full md:w-[400px] leading-relaxed text-center mx-auto mb-8">

@@ -16,6 +16,7 @@
 		"node": ">=18.0.0"
 	},
 	"dependencies": {
+		"@lix-js/server": "workspace:*",
 		"@isomorphic-git/cors-proxy": "^2.7.1",
 		"@lix-js/client": "workspace:*",
 		"@lix-js/fs": "workspace:*",
@@ -29,7 +30,6 @@
 		"@solid-primitives/scroll": "2.0.20",
 		"@solidjs/meta": "0.28.2",
 		"@types/flat": "^5.0.2",
-		"cheerio": "1.0.0-rc.12",
 		"clipboard-copy": "^4.0.1",
 		"compression": "^1.7.4",
 		"cookie-session": "^2.0.0",
@@ -38,7 +38,7 @@
 		"flat": "^5.0.2",
 		"isomorphic-git": "1.24.5",
 		"jose": "^4.11.1",
-		"octokit": "^2.0.14",
+		"octokit": "3.1.2",
 		"prosemirror-history": "^1.3.0",
 		"shiki": "^0.11.1",
 		"sirv": "^2.0.2",
@@ -91,5 +91,6 @@
 	"peerDependencies": {
 		"express": "^4.18.2"
 	},
-	"license": "Apache-2.0"
+	"license": "Apache-2.0",
+	"version": null
 }

@@ -2,7 +2,7 @@ import { createContext, type JSXElement, onCleanup, onMount, useContext } from "
 import { createStore, reconcile, type SetStoreFunction } from "solid-js/store"
 import { defaultLocalStorage, type LocalStorageSchema } from "./schema.js"
 import { telemetryBrowser } from "@inlang/telemetry"
-import { browserAuth } from "@lix-js/client"
+import { browserAuth } from "@lix-js/server"
 import { onSignOut } from "#src/services/auth/index.js"
 
 const LocalStorageContext = createContext()
