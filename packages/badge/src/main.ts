@@ -41,9 +41,9 @@ if (isProduction) {
 	app.use(Sentry.Handlers.tracingHandler())
 }
 
-app.set("base", "/badge")
+app.set("base", "/")
 app.use(router)
 
-const port = process.env.PORT ?? 4003
+const port = process.env.PORT ?? 4002
 app.listen(port)
 console.info(`Server running at http://localhost:${port}/`)

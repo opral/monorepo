@@ -41,8 +41,8 @@ if (isProduction) {
 	app.use(Sentry.Handlers.tracingHandler())
 }
 
-app.set("base", "/editor")
-app.use("/editor", router)
+app.set("base", "/")
+app.use("/", router)
 
-const port = 4001
+const port = process.env.PORT ?? 4003
 app.listen(port, () => console.info(`Server listening at http://localhost:${port}`))

@@ -12,9 +12,9 @@ import {
 	ForkPermissionDialog,
 	PushPermissionDialog,
 } from "#src/services/auth/index.js"
-import { telemetryBrowser } from "@inlang/telemetry"
+import { posthog as telemetryBrowser } from "posthog-js"
 import { TourHintWrapper, type TourStepId } from "./Notification/TourHintWrapper.jsx"
-import { browserAuth } from "@lix-js/client"
+import { browserAuth } from "@lix-js/server"
 
 export const Gitfloat = () => {
 	const {
@@ -94,7 +94,7 @@ export const Gitfloat = () => {
 
 			setTimeout(() => {
 				// @ts-expect-error - type mismatch fix after refactoring
-				navigate(`/editor/github.com/${response.data.full_name}`)
+				navigate(`/github.com/${response.data.full_name}`)
 			}, 1000)
 			return
 		} else if (response?.status === 403) {

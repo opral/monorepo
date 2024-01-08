@@ -1,5 +1,37 @@
 # @inlang/paraglide-js-adapter-unplugin
 
+## 1.2.0
+
+### Minor Changes
+
+- cd29edb11: bumbing fixed env var dependecy issue affected packages
+
+### Patch Changes
+
+- Updated dependencies [cd29edb11]
+  - @inlang/sdk@0.22.0
+  - @inlang/paraglide-js@1.1.0
+
+## 1.1.0
+
+### Minor Changes
+
+- e20364a46: release fixed dependency chain in preparation for paraglide 1.0
+
+### Patch Changes
+
+- Updated dependencies [e20364a46]
+  - @inlang/sdk@0.21.0
+  - @inlang/paraglide-js@1.0.0
+
+## 1.0.4
+
+### Patch Changes
+
+- Updated dependencies [bc5803235]
+  - @inlang/sdk@0.20.0
+  - @inlang/paraglide-js@1.0.0
+
 ## 1.0.3
 
 ### Patch Changes

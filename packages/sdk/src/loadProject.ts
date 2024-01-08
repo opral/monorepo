@@ -550,6 +550,14 @@ export const loadProject = async (args: {
 							cause: err,
 						})
 					}
+					const abortController = new AbortController()
+					if (
+						newMessages.length !== 0 &&
+						JSON.stringify(newMessages) !== JSON.stringify(messages()) &&
+						nodeishFs.watch("/", { signal: abortController.signal }) !== undefined
+					) {
+						setMessages(newMessages)
+					}
 				},
 				{ atBegin: false }
 			)
