@@ -1,0 +1,1 @@
+The search was previously a RPC call to the backend, but now it is a local search. This is faster and makes the website more independent as other apps don't have to search something. `inlang.com` is the place to search the ecosystem.
