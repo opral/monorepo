@@ -38,6 +38,11 @@ type EditorStateSchema = {
 	repo: () => Repository | undefined
 
 	/**
+	 * Refetch the repository.
+	 */
+	refetchRepo: () => void
+
+	/**
 	 * The current branch.
 	 */
 	currentBranch: Resource<string | undefined>
@@ -227,7 +232,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			setSearchParams({ key: "branch", value: branch })
 		}
 	})
-	const [repo] = createResource(
+	const [repo, { refetch: refetchRepo }] = createResource(
 		() => {
 			return { routeParams: routeParams(), user: localStorage.user, branch: activeBranch() }
 		},
@@ -370,7 +375,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	})
 
-	const [githubRepositoryInformation, { refetch }] = createResource(
+	const [githubRepositoryInformation, { refetch: refetchRepoInfo }] = createResource(
 		() => {
 			if (
 				localStorage?.user === undefined ||
@@ -392,7 +397,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	)
 
 	createEffect(() => {
-		if (localStorage?.user?.isLoggedIn) refetch()
+		if (localStorage?.user?.isLoggedIn) refetchRepoInfo()
 	})
 
 	const [currentBranch] = createResource(
@@ -457,6 +462,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			value={
 				{
 					repo: repo,
+					refetchRepo,
 					currentBranch,
 					branchNames,
 					githubRepositoryInformation,
