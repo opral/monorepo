@@ -1,6 +1,5 @@
 import { Arrow } from "./Developer.jsx"
 import Link from "#src/renderer/Link.jsx"
-import { Button } from "../../components/Button.jsx"
 
 const DesignrSlide = () => {
 	return (
@@ -15,7 +14,10 @@ const DesignrSlide = () => {
 				</Link>
 			</div>
 
-			<div class="flex-1 bg-gradient-to-b from-surface-200 rounded-xl p-[1px] transition-all mt-4">
+			<Link
+				href="/m/gkrpgoir"
+				class="flex-1 bg-gradient-to-b from-surface-200 rounded-xl p-[1px] transition-all mt-4"
+			>
 				<div class="grid md:grid-cols-12 rounded-[11px] bg-gradient-to-b from-surface-50 to-background h-full">
 					<div class="hidden col-span-5 pt-16 pl-8 pb-5 md:flex flex-col justify-between">
 						<div>
@@ -27,9 +29,9 @@ const DesignrSlide = () => {
 								translation workflow, this plugin is for you!
 							</p>
 						</div>
-						<Button chevron type="secondary" href="/m/gkrpgoir">
+						<div class="text-sm font-medium h-10 px-4 bg-surface-200 hover:bg-surface-300 flex justify-center items-center w-fit rounded">
 							Read more
-						</Button>
+						</div>
 					</div>
 					<div class="col-span-12 md:col-span-7 relative">
 						<div class="md:absolute w-full top-0 left-0 pointer-events-none">
@@ -53,7 +55,7 @@ const DesignrSlide = () => {
 						</div>
 					</div>
 				</div>
-			</div>
+			</Link>
 		</div>
 	)
 }

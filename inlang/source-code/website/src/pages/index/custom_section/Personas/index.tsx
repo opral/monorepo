@@ -33,7 +33,7 @@ const Personas = () => {
 				<br />
 				One Ecosystem.
 			</h2>
-			<div class="flex justify-center gap-2 mt-8">
+			<div class="w-full flex justify-center gap-2 mt-8 flex-wrap">
 				<For each={slideMap}>
 					{(slideItem) => (
 						<button
