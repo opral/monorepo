@@ -443,12 +443,6 @@ export default function Page(props: PageProps) {
 }
 
 export function Recommends(props: { recommends: MarketplaceManifest[] }) {
-	const [show, setShow] = createSignal<boolean>(false)
-
-	onMount(() => {
-		setShow(true)
-	})
-
 	return (
 		<>
 			<Show
@@ -458,24 +452,10 @@ export function Recommends(props: { recommends: MarketplaceManifest[] }) {
 				<h3 class="font-semibold mb-4">Recommended to use with:</h3>
 			</Show>
 			<div class="flex items-center gap-4 md:flex-row flex-col">
-				<Show
-					when={show()}
-					fallback={
-						<div class="h-auto w-full col-span-4 flex items-center justify-center py-16 relative">
-							<div class="mx-auto">
-								<div class="h-12 w-12 animate-spin mb-4">
-									<div class="h-full w-full bg-surface-50 border-primary border-4 rounded-full" />
-									<div class="h-1/2 w-1/2 absolute top-0 left-0 z-5 bg-surface-50" />
-								</div>
-							</div>
-						</div>
-					}
-				>
-					<For each={props.recommends}>
-						{/* @ts-ignore */}
-						{(item) => <Card item={item} displayName={item.displayName.en} />}
-					</For>
-				</Show>
+				<For each={props.recommends}>
+					{/* @ts-ignore */}
+					{(item) => <Card item={item} displayName={item.displayName.en} />}
+				</For>
 			</div>
 		</>
 	)
