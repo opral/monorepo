@@ -17,7 +17,7 @@ router.get(
 			const { url, project } = req.query
 			if (!url) {
 				res.send(
-					"No url provided, please provide a url like this: https://inlang.com/badge?url=github.com/inlang/example"
+					"No url provided, please provide a url like this: https://inlang.com/badge?url=github.com/opral/example"
 				)
 				return
 			}
