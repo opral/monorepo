@@ -13,7 +13,7 @@ const client = algolia(privateEnv.ALGOLIA_APPLICATION, privateEnv.ALGOLIA_ADMIN)
 const index = client.initIndex("registry")
 
 index.setSettings({
-	searchableAttributes: ["displayName", "description", "keywords"],
+	searchableAttributes: ["displayName.en", "description", "keywords"],
 })
 
 export async function search(args: {
