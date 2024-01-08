@@ -2,6 +2,7 @@
   "name": "example",
   "type": "module",
   "version": "0.0.1",
+  "private": "true",
   "scripts": {
     "_dev": "paraglide-js compile --project ./project.inlang && astro dev",
     "start": "paraglide-js compile --project ./project.inlang && astro dev",
