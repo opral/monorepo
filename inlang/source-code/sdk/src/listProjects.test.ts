@@ -2,6 +2,7 @@ import { assert, describe, it } from "vitest"
 import { listProjects } from "./listProjects.js"
 import { createNodeishMemoryFs } from "@lix-js/fs"
 import type { ProjectSettings } from "@inlang/project-settings"
+import { mockRepo, ciTestRepo } from "@lix-js/client"
 
 const settings: ProjectSettings = {
 	sourceLanguageTag: "en",
@@ -52,6 +53,14 @@ describe("listProjects", () => {
 
 		await listProjects(fs, "/user").then((projects) => {
 			assert(projects.length === 0)
+		})
+	})
+
+	it("should not crash on broken symlinks as cal.com has", async () => {
+		const repo = await mockRepo({ fromSnapshot: ciTestRepo })
+
+		await listProjects(repo.fs, "/").then((projects) => {
+			assert(projects.length === 1)
 		})
 	})
 
