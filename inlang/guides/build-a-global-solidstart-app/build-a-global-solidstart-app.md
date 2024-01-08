@@ -120,7 +120,7 @@ You can add languages by adding them in the settings file `project.inlang/settin
 ```json
 {
     "sourceLanguageTag": "en",
-    "availableLanguageTags": ["en", "de", "ar"]
+    "languageTags": ["en", "de", "ar"]
 }
 ```
 
