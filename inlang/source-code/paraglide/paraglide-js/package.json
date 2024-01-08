@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/paraglide-js",
 	"type": "module",
-	"version": "1.0.0-prerelease.19",
+	"version": "1.1.0",
 	"license": "Apache-2.0",
 	"publishConfig": {
 		"access": "public"
@@ -39,9 +39,8 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/detect-json-formatting": "1.0.0",
-		"@inlang/sdk": "workspace:*",
-		"@lix-js/fs": "workspace:*",
+		"@inlang/language-tag": "workspace:*",
+		"@inlang/detect-json-formatting": "workspace:*",
 		"commander": "11.1.0",
 		"consola": "3.2.3",
 		"dedent": "1.5.1",
@@ -52,11 +51,13 @@
 	"devDependencies": {
 		"@inlang/env-variables": "workspace:*",
 		"@inlang/telemetry": "workspace:*",
+		"@inlang/sdk": "workspace:*",
 		"@rollup/plugin-terser": "0.4.3",
 		"@rollup/plugin-virtual": "3.0.1",
 		"@ts-morph/bootstrap": "0.20.0",
 		"@types/minimist": "1.2.3",
 		"@vitest/coverage-v8": "0.34.3",
+		"@lix-js/fs": "workspace:*",
 		"cross-env": "^7.0.3",
 		"esbuild": "^0.19.7",
 		"memfs": "4.6.0",

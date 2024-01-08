@@ -1,5 +1,4 @@
 {
-	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "plugin.inlang.i18next",
 	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/i18next/assets/icon.png",
 	"displayName": {
@@ -24,9 +23,9 @@
 		"messages",
 		"plugin"
 	],
+	"recommends": ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g", "m/gerre34r"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0",
 	"module": "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@latest/dist/index.js"
 }
-  

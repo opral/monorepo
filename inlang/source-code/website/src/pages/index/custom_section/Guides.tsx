@@ -10,6 +10,7 @@ const Guides = () => {
 		"guide.niklasbuchfink.whatIsInlang",
 		"guide.nilsjacobsen.whatArePlugins",
 		"guide.lorissigrist.useParaglideJsWithNextjsAppRouter",
+		"guide.floriankiem.localizationStartegy",
 	]
 	return (
 		<div class="w-full flex gap-4 my-28 flex-col-reverse md:flex-row">
@@ -40,7 +41,11 @@ const Guides = () => {
 									href={`/g/${manifest.uniqueID}/${manifest.id.replaceAll(".", "-")}`}
 									class="gap-4 py-6 flex group hover:cursor-pointer"
 								>
-									<img class="w-7 h-7 object-cover object-center rounded-lg" src={manifest.icon} />
+									<img
+										class="w-7 h-7 object-cover object-center rounded-lg"
+										src={manifest.icon}
+										alt={displayName()}
+									/>
 									<div class="flex flex-col gap-1 flex-1">
 										<h3 class="m-0 mb-2 text-surface-800 leading-none no-underline font-semibold">
 											{displayName()}

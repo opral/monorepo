@@ -36,5 +36,7 @@
 	},
 	"[typescript]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	}
+	},
+	"cSpell.words": ["inlang"],
+	"testing.automaticallyOpenPeekView": "never"
 }

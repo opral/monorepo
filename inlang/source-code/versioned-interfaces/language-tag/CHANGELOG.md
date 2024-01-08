@@ -1,5 +1,11 @@
 # @inlang/language-tag
 
+## 1.3.0
+
+### Minor Changes
+
+feat: Add `lookup` function for resolving language tag fallbacks
+
 ## 1.2.0
 
 ### Minor Changes

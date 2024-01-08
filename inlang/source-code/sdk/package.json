@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/sdk",
 	"type": "module",
-	"version": "0.19.0",
+	"version": "0.22.0",
 	"license": "Apache-2.0",
 	"publishConfig": {
 		"access": "public"
@@ -37,15 +37,15 @@
 		"@inlang/project-settings": "workspace:*",
 		"@inlang/result": "workspace:*",
 		"@inlang/translatable": "workspace:*",
-		"@lix-js/fs": "workspace:*",
 		"@sinclair/typebox": "^0.31.17",
 		"dedent": "1.5.1",
 		"deepmerge-ts": "^5.1.0",
 		"solid-js": "1.6.12",
-		"throttle-debounce": "^5.0.0"
+		"throttle-debounce": "^5.0.0",
+		"@lix-js/fs": "workspace:*",
+		"@lix-js/client": "workspace:*"
 	},
 	"devDependencies": {
-		"@lix-js/fs": "workspace:*",
 		"@types/throttle-debounce": "5.0.0",
 		"@vitest/coverage-v8": "^0.33.0",
 		"jsdom": "22.1.0",

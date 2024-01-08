@@ -170,12 +170,7 @@ export function makeHttpClient({ verbose, description, onReq, onRes }) {
 		}
 
 		if (verbose) {
-			console.warn(
-				`${description} git req:`,
-				origUrl,
-				"\n",
-				body ? new TextDecoder().decode(body) : ""
-			)
+			console.warn(`${description} git req:`, origUrl)
 		}
 
 		const statusCode = res.status
