@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 2.4.0
+
+### Minor Changes
+
+- 112e9c1c3: interim fix: bumb machine translate timeout to 8s (https://github.com/opral/monorepo/issues/1968)
+
 ## 2.3.0
 
 ### Minor Changes
