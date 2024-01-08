@@ -10,18 +10,19 @@ import {
 	IconSvelte,
 	IconVue,
 } from "#src/interface/custom-icons/subcategoryIcon.jsx"
+import * as m from "#src/paraglide/messages.js"
 
 const cards = [
 	{
-		title: "CLI - Automate Translations",
-		description: "Command line interface for inlang projects.",
+		title: m.home_personas_developer_cards_cli_title(),
+		description: m.home_personas_developer_cards_cli_description(),
 		href: "/m/2qj2w8pu",
 		logo: "/images/cli-logo-landingpage.png",
 		cover: "/images/cli-cover-landingpage.png",
 	},
 	{
-		title: "IDE Extension for i18n",
-		description: "Supercharge i18n within VS Code.",
+		title: m.home_personas_developer_cards_ide_title(),
+		description: m.home_personas_developer_cards_ide_description(),
 		href: "/m/r7kp499g",
 		logo: "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/ide-extension/assets/icon-vscode-marketplace.png",
 		cover: "/images/ide-extension-cover-landingpage.png",
@@ -86,9 +87,9 @@ const DeveloperSlide = () => {
 		<div class="flex flex-col gap-6 md:gap-4 py-6 h-full">
 			<div class="px-6 md:px-8">
 				<div class="flex items-center justify-between">
-					<h3 class="font-medium text-surface-600">Apps for Developer</h3>
+					<h3 class="font-medium text-surface-600">{m.home_personas_developer_apps_title()}</h3>
 					<Link class="flex items-center gap-2 text-surface-500 group" href="/c/apps">
-						<p class="group-hover:text-surface-600">More Apps</p>
+						<p class="group-hover:text-surface-600">{m.home_personas_developer_more_apps()}</p>
 						<div class="w-8 h-8 border border-surface-300 rounded-full flex justify-center items-center group-hover:bg-surface-100 transition-all text-surface-500 group-hover:text-surface-900">
 							<Arrow />
 						</div>
@@ -121,7 +122,7 @@ const DeveloperSlide = () => {
 				</div>
 			</div>
 			<div class="pl-6 md:pl-8 md:pr-8">
-				<h3 class="font-medium text-surface-600">Stack-based Tooling</h3>
+				<h3 class="font-medium text-surface-600">{m.home_personas_developer_stack_title()}</h3>
 				<div class="flex gap-[10px] md:gap-4 mt-4 overflow-x-scroll hide-scrollbar">
 					<For each={stacks}>
 						{(stack) => (

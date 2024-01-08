@@ -2,6 +2,7 @@ import { createSignal, For, Switch, type Setter, Match } from "solid-js"
 import DeveloperSlide from "./Developer.jsx"
 import TranslatorSlide from "./Translator.jsx"
 import DesignrSlide from "./Designer.jsx"
+import * as m from "#src/paraglide/messages.js"
 
 type slideOptions = "developer" | "translator" | "designer"
 
@@ -10,17 +11,17 @@ const [slide, setSlide] = createSignal<slideOptions>("developer")
 const slideMap: Array<{ id: slideOptions; title: string; function: Setter<slideOptions> }> = [
 	{
 		id: "developer",
-		title: "🛠️ Developer",
+		title: m.home_personas_developer_title(),
 		function: () => setSlide("developer"),
 	},
 	{
 		id: "translator",
-		title: "✈️ Translator",
+		title: m.home_personas_translator_title(),
 		function: () => setSlide("translator"),
 	},
 	{
 		id: "designer",
-		title: "🎨 Designer",
+		title: m.home_personas_designer_title(),
 		function: () => setSlide("designer"),
 	},
 ]
@@ -29,9 +30,7 @@ const Personas = () => {
 	return (
 		<div class="pt-12 md:pt-20">
 			<h2 class="font-bold text-2xl md:text-4xl text-surface-900 text-center">
-				Different Users. Different Tools.
-				<br />
-				One Ecosystem.
+				{m.home_personas_title()}
 			</h2>
 			<div class="w-full flex justify-center gap-2 mt-8 flex-wrap">
 				<For each={slideMap}>
