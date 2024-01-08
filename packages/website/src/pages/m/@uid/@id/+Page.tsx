@@ -130,7 +130,7 @@ export default function Page(props: PageProps) {
 											</Show>
 											<div class="mb-0">
 												<div class="flex gap-3 flex-col">
-													<div class="flex gap-4 items-center">
+													<div class="flex flex-col lg:flex-row gap-4 lg:items-center">
 														<h1 class="text-3xl font-bold">{displayName()}</h1>
 														<Show
 															when={props.manifest.keywords
