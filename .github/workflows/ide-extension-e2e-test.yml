@@ -35,6 +35,7 @@ jobs:
       - name: Build
         run: doppler run -- pnpm build
         env:
+          NODE_OPTIONS: "-max-old-space-size=2000000"
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
       - name: Run e2e tests on Linux
