@@ -6,7 +6,7 @@ Fink enables translators to edit translations in a visual editor and submit them
 <br />
 <br />
 
-Used by 
+Used by
 
 <doc-proof organisations="osmosis, appflowy, remnote"></doc-proof>
 
@@ -43,5 +43,5 @@ If your repository can't be accessed anonymously, you can login via GitHub. The 
 This is how the editor could look like for your project:
 
 <doc-links>
-    <doc-link title="Open inlang example" icon="icon-park-outline:editor" href="/editor/github.com/inlang/example" description="inlang example repository in the editor"></doc-link>
+    <doc-link title="Open inlang example" icon="icon-park-outline:editor" href="/editor/github.com/opral/example" description="inlang example repository in the editor"></doc-link>
 </doc-links>
