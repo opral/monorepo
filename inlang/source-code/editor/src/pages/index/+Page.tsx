@@ -42,7 +42,7 @@ export default function Page() {
 							Open the Fink Message Editor
 						</h2>
 						<p class="text-xl text-surface-600 w-full md:w-[400px] text-center leading-relaxed">
-							The i18n editor,requires a{" "}
+							The i18n editor, requires a{" "}
 							<span class="text-base font-mono py-[5px] px-2 bg-surface-100 rounded-lg text-surface-600">
 								project.inlang
 							</span>{" "}
