@@ -42,11 +42,11 @@ export default function Page() {
 							Open the Fink Message Editor
 						</h2>
 						<p class="text-xl text-surface-600 w-full md:w-[400px] text-center leading-relaxed">
-							To access the i18n editor, please create the{" "}
+							The i18n editor, requires a{" "}
 							<span class="text-base font-mono py-[5px] px-2 bg-surface-100 rounded-lg text-surface-600">
 								project.inlang
 							</span>{" "}
-							file in your repository.
+							folder in your repository.
 						</p>
 					</div>
 					{/* using a column to ease responsive design (mobile would be tricky othersie) */}
@@ -124,7 +124,7 @@ export default function Page() {
 					</form>
 
 					<div class="pt-3">
-						<Button type="text" href="/c/guide">
+						<Button type="text" href="https://inlang.com/g/6ddyhpoi">
 							Learn how to get started
 						</Button>
 					</div>

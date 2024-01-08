@@ -13,10 +13,10 @@ export default async function onBeforeRender(pageContext: PageContext) {
 		(item: any) => item.uniqueID === pageContext.routeParams.uid
 	) as MarketplaceManifest & { uniqueID: string }
 
-	if (!item || item.id.split(".")[0] !== "guide") throw redirect("/g/404")
+	if (!item || item.id.split(".")[0] !== "guide") throw redirect("/not-found")
 
 	if (item.id.replaceAll(".", "-").toLowerCase() !== pageContext.routeParams.id?.toLowerCase()) {
-		throw redirect(`/g/${item.uniqueID}/${item.id.replaceAll(".", "-").toLowerCase()}`)
+		throw redirect(`/g/${item.uniqueID}/${item.id.replaceAll(".", "-").toLowerCase()}`, 301)
 	}
 
 	const readme = () => {

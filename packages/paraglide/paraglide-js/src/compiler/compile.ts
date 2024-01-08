@@ -21,7 +21,9 @@ export const compile = (args: {
 	messages: Readonly<Message[]>
 	settings: ProjectSettings
 }): Record<string, string> => {
-	const compiledMessages = args.messages.map(compileMessage)
+	const compiledMessages = args.messages.map((message) =>
+		compileMessage(message, args.settings.languageTags, args.settings.sourceLanguageTag)
+	)
 
 	telemetry.capture({
 		event: "PARAGLIDE-JS compile executed",
@@ -31,22 +33,9 @@ export const compile = (args: {
 
 	for (const compiledMessage of compiledMessages) {
 		for (const languageTag of Object.keys(compiledMessage)) {
-			if (languageTag === "index") {
-				continue
-			} else if (resources[languageTag] === undefined) {
-				resources[languageTag] = ""
-			}
+			if (languageTag === "index") continue
+			if (!resources[languageTag]) resources[languageTag] = ""
 			resources[languageTag] += "\n\n" + compiledMessage[languageTag]
-		}
-	}
-
-	if (args.settings.languageTags.length < Object.keys(resources).length) {
-		for (const languageTag of Object.keys(resources)) {
-			if (args.settings.languageTags.includes(languageTag) === false) {
-				throw new Error(
-					`The language tag "${languageTag}" is not included in the project's language tags but contained in of your messages. Please add the language tag to your project's language tags or delete the messages with the language tag "${languageTag}" to avoid unexpected type errors.`
-				)
-			}
 		}
 	}
 
@@ -56,10 +45,6 @@ export const compile = (args: {
 		// boilerplate files
 		".prettierignore": ignoreDirectory,
 		".gitignore": ignoreDirectory,
-		// resources
-		// (messages/en.js)
-		// (messages/de.js)
-		// (etc...)
 		...Object.fromEntries(
 			Object.entries(resources).map(([languageTag, content]) => [
 				`messages/${languageTag}.js`,

@@ -5,7 +5,7 @@ import type { PageProps } from "./+Page.jsx"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import fs from "node:fs/promises"
 import { redirect } from "vike/abort"
-import cheerio from "cheerio"
+import { generateTableOfContents } from "@inlang/markdown"
 
 const repositoryRoot = import.meta.url.slice(0, import.meta.url.lastIndexOf("inlang/source-code"))
 
@@ -32,10 +32,10 @@ export default async function onBeforeRender(pageContext: PageContext) {
 		(item: any) => item.uniqueID === pageContext.routeParams.uid
 	) as MarketplaceManifest & { uniqueID: string }
 
-	if (!item || item.id.split(".")[0] === "guide") throw redirect("/m/404")
+	if (!item || item.id.split(".")[0] === "guide") throw redirect("/not-found", 301)
 
 	if (item.id.replaceAll(".", "-").toLowerCase() !== pageContext.routeParams.id?.toLowerCase()) {
-		throw redirect(`/m/${item.uniqueID}/${item.id.replaceAll(".", "-").toLowerCase()}`)
+		throw redirect(`/m/${item.uniqueID}/${item.id.replaceAll(".", "-").toLowerCase()}`, 301)
 	}
 
 	const readme = () => {
@@ -86,34 +86,4 @@ export default async function onBeforeRender(pageContext: PageContext) {
 			} as PageProps,
 		},
 	}
-}
-
-const generateTableOfContents = async (markdown: any) => {
-	const table = {}
-
-	if (
-		markdown &&
-		markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g) &&
-		markdown.match(/<h[1].*?>(.*?)<\/h[1]>/g)
-	) {
-		const headings = markdown.match(/<h[1-3].*?>(.*?)<\/h[1-3]>/g)
-
-		for (const heading of headings) {
-			const $ = cheerio.load(heading)
-			const text = $("h1, h2, h3").text()
-
-			if (text) {
-				if ($("h1").length > 0) {
-					// @ts-ignore
-					table[text.replace(/(<([^>]+)>)/gi, "").replace("#", "")] = []
-				} else if (Object.keys(table).length > 0) {
-					const lastH1Key = Object.keys(table).pop()
-					// @ts-ignore
-					table[lastH1Key].push(text.replace(/(<([^>]+)>)/gi, "").replace("#", ""))
-				}
-			}
-		}
-	}
-
-	return table
 }
