@@ -25,6 +25,56 @@
                     "value": "Manage"
                 }
             ]
+        },
+        {
+            "languageTag": "fr",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Gérer"
+                }
+            ]
+        },
+        {
+            "languageTag": "it",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Maneggio"
+                }
+            ]
+        },
+        {
+            "languageTag": "pt-BR",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Gerenciar"
+                }
+            ]
+        },
+        {
+            "languageTag": "sk",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Spravovať"
+                }
+            ]
+        },
+        {
+            "languageTag": "zh",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "管理"
+                }
+            ]
         }
     ]
 }

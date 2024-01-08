@@ -1,9 +1,9 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_resources_manage",
-        "library.inlang.paraglideJs": "footer_resources_manage"
+        "plugin.inlang.messageFormat": "marketplace_header_generic_title",
+        "library.inlang.paraglideJs": "marketplace_header_generic_title"
     },
-    "id": "alone_carp_roam_abroad",
+    "id": "home_hawk_grand_polite",
     "selectors": [],
     "variants": [
         {
@@ -12,7 +12,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Verwalten"
+                    "value": "Dein Stack"
                 }
             ]
         },
@@ -22,7 +22,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Manage"
+                    "value": "Your stack"
                 }
             ]
         },
@@ -32,7 +32,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Gérer"
+                    "value": "Votre pile"
                 }
             ]
         },
@@ -42,7 +42,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Maneggio"
+                    "value": "La tua pila"
                 }
             ]
         },
@@ -52,7 +52,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Gerenciar"
+                    "value": "Sua pilha"
                 }
             ]
         },
@@ -62,7 +62,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Spravovať"
+                    "value": "Váš zásobník"
                 }
             ]
         },
@@ -72,7 +72,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "管理"
+                    "value": "你的堆栈"
                 }
             ]
         }

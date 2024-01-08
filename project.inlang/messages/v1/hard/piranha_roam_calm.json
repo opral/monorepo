@@ -12,7 +12,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Ein Ökosystem, um global zu gehen. Kombiniere die Produkte um in neue Märkte einzutreten und neue Kunden zu gewinnen."
+                    "value": "Kombiniere die Produkte um in neue Märkte einzutreten und neue Kunden zu gewinnen."
                 }
             ]
         },
@@ -22,7 +22,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Beyond an i18n library, inlang is your ecosystem to go global. Plug inlang's products together for market expansion and a broader customer reach."
+                    "value": "Plug inlang's products together for market expansion and a broader customer reach."
                 }
             ]
         },
@@ -32,7 +32,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Au-delà d'une bibliothèque i18n, inlang est votre écosystème pour vous mondialiser. Regroupez les produits d'Inlang pour une expansion du marché et une clientèle plus large."
+                    "value": "Regroupez les produits d'Inlang pour une expansion du marché et une clientèle plus large."
                 }
             ]
         },
@@ -42,7 +42,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Oltre ad essere una libreria di internazionalizzazione, inlang è il tuo ecosistema per diventare globale. Collega i prodotti di inlang insieme per avere una espansione nel mercato e raggiungere più clienti."
+                    "value": "Collega i prodotti di inlang insieme per avere una espansione nel mercato e raggiungere più clienti."
                 }
             ]
         },
@@ -52,7 +52,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Mais do que apenas uma biblioteca de i18n. inlang é o seu ecossistema para a globalização. Conecte os produtos inlang para expandir o seu mercado e atingir mais consumidores."
+                    "value": "Conecte os produtos inlang para expandir o seu mercado e atingir mais consumidores."
                 }
             ]
         },
@@ -62,7 +62,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Okrem knižnice i18n je váš ekosystém inlang globálny. Zapojte produkty inlang dohromady pre rozšírenie trhu a širší dosah zákazníkov."
+                    "value": "Zapojte produkty inlang dohromady pre rozšírenie trhu a širší dosah zákazníkov."
                 }
             ]
         },
@@ -72,7 +72,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "除了 i18n 库之外，inlang 还是您走向全球的生态系统。将 inlang 的产品整合在一起以扩展市场并扩大客户范围。"
+                    "value": "将 inlang 的产品整合在一起以扩展市场并扩大客户范围。"
                 }
             ]
         }

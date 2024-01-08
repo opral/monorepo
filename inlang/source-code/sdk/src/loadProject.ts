@@ -19,7 +19,6 @@ import {
 } from "./errors.js"
 import { createRoot, createSignal, createEffect } from "./reactivity/solid.js"
 import { createMessagesQuery } from "./createMessagesQuery.js"
-import { debounce } from "throttle-debounce"
 import { createMessageLintReportsQuery } from "./createMessageLintReportsQuery.js"
 import { ProjectSettings, Message, type NodeishFilesystemSubset } from "./versionedInterfaces.js"
 import { tryCatch, type Result } from "@inlang/result"
@@ -398,6 +397,7 @@ export const loadProject = async (args: {
 		const messagesQuery = createMessagesQuery(() => messages() || [])
 
 		const trackedMessages: Map<string, () => void> = new Map()
+		let initialSetup = true
 		// -- subscribe to all messages and write to files on signal -------------
 		createEffect(() => {
 			const _resolvedModules = resolvedModules()
@@ -421,7 +421,12 @@ export const loadProject = async (args: {
 							if (!message) {
 								return
 							}
-							if (trackedMessages?.has(messageId)) {
+							if (!trackedMessages?.has(messageId)) {
+								// initial effect execution - add dispose function
+								trackedMessages?.set(messageId, dispose)
+							}
+
+							if (!initialSetup) {
 								const persistMessage = async (
 									fs: NodeishFilesystemSubset,
 									path: string,
@@ -461,8 +466,6 @@ export const loadProject = async (args: {
 										setMessageSaveErrors(messageLoadErrors)
 									})
 							} else {
-								// initial effect execution - add dispose function
-								trackedMessages?.set(messageId, dispose)
 							}
 						})
 					})
@@ -484,6 +487,8 @@ export const loadProject = async (args: {
 				trackedMessages.get(deletedMessage[0])?.()
 				trackedMessages.delete(deletedMessage[0])
 			}
+
+			initialSetup = false
 		})
 
 		// TODO #1844 CLEARIFY this was used to create a watcher on all files that the fs reads - shall we import on every change as well?
@@ -804,15 +809,18 @@ async function loadMessages(
 
 			let currentOffset = 0
 			let messsageId: string | undefined
-			do {
+			idConflictResolverLoop: do {
 				messsageId = humanIdHash(importedMessage.id, currentOffset)
-				const path = /* messageFolderPath + "/" +*/ getPathFromMessageId(messsageId)
+				const path =
+					/* TODO #1844 check how to check for existance here - we could also use the query instead messageFolderPath + "/" +*/ getPathFromMessageId(
+						messsageId
+					)
 				try {
 					await fs.stat(path)
 				} catch (e) {
 					if ((e as any).code === "ENOENT") {
 						// keep the message id!
-						continue
+						continue idConflictResolverLoop
 					}
 					throw e
 				}

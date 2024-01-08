@@ -12,7 +12,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Verwende Plugins und Adapter, um Produkte einfach an deine spezifischen Anforderungen anzupassen, egal wo und egal wie sie funktionieren sollen."
+                    "value": "Wenn du das Ökosystem erkunden möchtest, stehen dir Guides zur Verfügung, damit du schnell durchstarten kannst."
                 }
             ]
         },
@@ -22,7 +22,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Use plugins and adapters to easily make products work for your specific needs, no matter where you want them to work."
+                    "value": "If you're looking to explore the ecosystem, we have guides available to help you. Be sure to check them out!"
                 }
             ]
         },
@@ -32,7 +32,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Utilisez des plugins et des adaptateurs pour adapter facilement les produits à vos besoins spécifiques, quel que soit l'endroit où vous souhaitez qu'ils fonctionnent."
+                    "value": "Si vous souhaitez explorer l'écosystème, nous avons des guides disponibles pour vous aider. Assurez-vous de les consulter !"
                 }
             ]
         },
@@ -42,7 +42,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Utilizza plug-in e adattatori per far sì che i prodotti funzionino facilmente per le tue esigenze specifiche, indipendentemente da dove desideri che funzionino."
+                    "value": "Se stai cercando di esplorare l'ecosistema, abbiamo delle guide disponibili per aiutarti. Assicurati di controllarli!"
                 }
             ]
         },
@@ -52,7 +52,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Use plug-ins e adaptadores para fazer com que os produtos funcionem facilmente para suas necessidades específicas, não importa onde você queira que eles funcionem."
+                    "value": "Se você deseja explorar o ecossistema, temos guias disponíveis para ajudá-lo. Não deixe de conferir!"
                 }
             ]
         },
@@ -62,7 +62,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Použite pluginy a adaptéry na jednoduché prispôsobenie produktov vašim špecifickým potrebám bez ohľadu na to, kde chcete, aby fungovali."
+                    "value": "Ak chcete preskúmať ekosystém, máme k dispozícii sprievodcov, ktorí vám pomôžu. Určite si ich pozrite!"
                 }
             ]
         },
@@ -72,7 +72,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "使用插件和适配器可以轻松地使产品满足您的特定需求，无论您希望它们在哪里工作。"
+                    "value": "如果您想探索生态系统，我们可以提供帮助您的指南。一定要检查一下！"
                 }
             ]
         }

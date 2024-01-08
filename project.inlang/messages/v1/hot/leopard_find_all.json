@@ -1,9 +1,9 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_resources_manage",
-        "library.inlang.paraglideJs": "footer_resources_manage"
+        "plugin.inlang.messageFormat": "marketplace_header_solid_title",
+        "library.inlang.paraglideJs": "marketplace_header_solid_title"
     },
-    "id": "alone_carp_roam_abroad",
+    "id": "hot_leopard_find_all",
     "selectors": [],
     "variants": [
         {
@@ -12,7 +12,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Verwalten"
+                    "value": "Solid - i18n Werkzeuge"
                 }
             ]
         },
@@ -22,7 +22,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Manage"
+                    "value": "Solid - i18n Tooling"
                 }
             ]
         },
@@ -32,7 +32,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Gérer"
+                    "value": "Solide - Outillage i18n"
                 }
             ]
         },
@@ -42,7 +42,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Maneggio"
+                    "value": "Solido: utensili i18n"
                 }
             ]
         },
@@ -52,7 +52,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Gerenciar"
+                    "value": "Sólido - Ferramentas i18n"
                 }
             ]
         },
@@ -62,7 +62,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Spravovať"
+                    "value": "Solid - i18n Tooling"
                 }
             ]
         },
@@ -72,7 +72,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "管理"
+                    "value": "Solid - i18n 工具"
                 }
             ]
         }

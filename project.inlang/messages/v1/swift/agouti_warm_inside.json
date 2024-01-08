@@ -1,9 +1,9 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_resources_manage",
-        "library.inlang.paraglideJs": "footer_resources_manage"
+        "plugin.inlang.messageFormat": "marketplace_header_generic_description",
+        "library.inlang.paraglideJs": "marketplace_header_generic_description"
     },
-    "id": "alone_carp_roam_abroad",
+    "id": "swift_agouti_warm_inside",
     "selectors": [],
     "variants": [
         {
@@ -12,7 +12,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Verwalten"
+                    "value": "Empfohlene Werkzeuge für Internationalisierung"
                 }
             ]
         },
@@ -22,7 +22,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Manage"
+                    "value": "Recommended internationalization tooling for your stack."
                 }
             ]
         },
@@ -32,7 +32,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Gérer"
+                    "value": "Outils d'internationalisation recommandés pour votre pile."
                 }
             ]
         },
@@ -42,7 +42,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Maneggio"
+                    "value": "Strumenti di internazionalizzazione consigliati per il tuo stack."
                 }
             ]
         },
@@ -52,7 +52,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Gerenciar"
+                    "value": "Ferramentas de internacionalização recomendadas para sua pilha."
                 }
             ]
         },
@@ -62,7 +62,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Spravovať"
+                    "value": "Odporúčané nástroje na internacionalizáciu pre váš zásobník."
                 }
             ]
         },
@@ -72,7 +72,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "管理"
+                    "value": "为您的堆栈推荐的国际化工具。"
                 }
             ]
         }

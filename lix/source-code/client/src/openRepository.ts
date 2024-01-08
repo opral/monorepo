@@ -351,7 +351,7 @@ export async function openRepository(
 					intercept: delayedAction,
 				}),
 				dir,
-				ref: args.branch,
+				// ref:  cmdArgs.branch ? 'refs/heads/' + args.branch : undefined,
 				author: cmdArgs.author,
 				message: cmdArgs.message,
 			}

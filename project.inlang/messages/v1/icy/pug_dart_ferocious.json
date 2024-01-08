@@ -1,9 +1,9 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_resources_manage",
-        "library.inlang.paraglideJs": "footer_resources_manage"
+        "plugin.inlang.messageFormat": "marketplace_header_nextjs_title",
+        "library.inlang.paraglideJs": "marketplace_header_nextjs_title"
     },
-    "id": "alone_carp_roam_abroad",
+    "id": "icy_pug_dart_ferocious",
     "selectors": [],
     "variants": [
         {
@@ -12,7 +12,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Verwalten"
+                    "value": "Next.js - i18n Werkzeuge"
                 }
             ]
         },
@@ -22,7 +22,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Manage"
+                    "value": "Next.js - i18n Tooling"
                 }
             ]
         },
@@ -32,7 +32,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Gérer"
+                    "value": "Next.js - Outillage i18n"
                 }
             ]
         },
@@ -42,7 +42,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Maneggio"
+                    "value": "Next.js - Strumenti i18n"
                 }
             ]
         },
@@ -52,7 +52,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Gerenciar"
+                    "value": "Next.js - Ferramentas i18n"
                 }
             ]
         },
@@ -62,7 +62,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "Spravovať"
+                    "value": "Next.js – i18n Tooling"
                 }
             ]
         },
@@ -72,7 +72,7 @@
             "pattern": [
                 {
                     "type": "Text",
-                    "value": "管理"
+                    "value": "Next.js - i18n 工具"
                 }
             ]
         }
