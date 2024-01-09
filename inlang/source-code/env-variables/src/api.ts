@@ -24,6 +24,7 @@ export const publicEnvVariablesSchema = z.object({
 	PUBLIC_ALLOWED_AUTH_URLS: z
 		.string()
 		.describe("List of allowed base urls eg https://inlang.com,https://manage.inlang.com"),
+	PUBLIC_HCAPTCHA_SITEKEY: z.string().describe("The sitekey to https://www.hcaptcha.com/"),
 })
 export const privateEnvVariablesSchema = z.object({
 	LIX_GITHUB_APP_CLIENT_SECRET: z.string(),
