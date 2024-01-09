@@ -8,6 +8,8 @@ describe("parse lix uris", () => {
 		const parseResult = parseLixUri("https://github.com/inlang/monorepo")
 
 		expect(parseResult).toStrictEqual({
+			password: "",
+			username: "",
 			protocol: "https:",
 			lixHost: "",
 			namespace: "",
@@ -21,6 +23,8 @@ describe("parse lix uris", () => {
 		const parseResult = parseLixUri("https://lix.inlang.com/git/github.com/inlang/monorepo")
 
 		expect(parseResult).toStrictEqual({
+			password: "",
+			username: "",
 			protocol: "https:",
 			lixHost: "lix.inlang.com",
 			namespace: "git",
@@ -34,6 +38,8 @@ describe("parse lix uris", () => {
 		const parseResult = parseLixUri("http://localhost:3001/git/github.com/inlang/monorepo")
 
 		expect(parseResult).toStrictEqual({
+			password: "",
+			username: "",
 			protocol: "http:",
 			lixHost: "localhost:3001",
 			namespace: "git",
