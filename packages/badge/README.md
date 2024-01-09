@@ -1,4 +1,4 @@
-![inlang translation status badge](https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/badge/assets/images/badge-header.png)
+![inlang translation status badge](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/badge/assets/images/badge-header.png)
 
 # Generate badges for your i18n status
 
