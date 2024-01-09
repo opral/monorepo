@@ -122,8 +122,8 @@ export default function Page(props: {
 			}
 			case "astro": {
 				return {
-					title: m.marketplace_header_generic_title(),
-					description: m.marketplace_header_generic_description(),
+					title: m.marketplace_header_astro_title(),
+					description: m.marketplace_header_astro_description(),
 					icon: "https://astro.build/favicon.svg",
 					withGuides: true,
 					coverCard: <GenericHeader />,
