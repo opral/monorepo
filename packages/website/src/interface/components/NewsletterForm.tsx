@@ -79,7 +79,7 @@ export function NewsletterForm() {
 			showToast({
 				title: "Error",
 				variant: "danger",
-				message: "Please complete the captcha",
+				message: m.newsletter_error_captcha(),
 			})
 			return
 		}

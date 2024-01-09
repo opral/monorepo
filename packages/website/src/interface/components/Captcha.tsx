@@ -4,6 +4,7 @@ import { publicEnv } from "@inlang/env-variables"
 
 import HCaptcha from "solid-hcaptcha"
 import { Show } from "solid-js"
+import * as m from "../../paraglide/messages.js"
 
 export default function Captcha(props: {
 	captchaResponse: () => HCaptchaExecuteResponse | null
@@ -21,7 +22,7 @@ export default function Captcha(props: {
 	}
 
 	return (
-		<div>
+		<div class={props.captchaResponse() ? "pointer-events-none opacity-50 cursor-default" : ""}>
 			<Show when={typeof window !== "undefined"}>
 				<HCaptcha
 					sitekey={publicEnv.PUBLIC_HCAPTCHA_SITEKEY}
@@ -32,12 +33,9 @@ export default function Captcha(props: {
 			<Button
 				function={submitCaptcha}
 				type="text"
-				class={
-					"text-md" +
-					(props.captchaResponse() ? "pointer-events-none opacity-50 cursor-default" : "")
-				}
+				class={"text-md" + (props.captchaResponse() ? "pointer-events-none opacity-50" : "")}
 			>
-				{props.captchaResponse() ? "Captcha submitted" : "Submit Captcha"}
+				{props.captchaResponse() ? m.newsletter_captcha_submitted() : m.newsletter_captcha_submit()}
 			</Button>
 		</div>
 	)
