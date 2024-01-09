@@ -27,6 +27,7 @@ const {
 	addRemote,
 	fetch: gitFetch,
 	commit: isoCommit,
+	findRoot,
 } = isoGit
 
 const verbose = false
@@ -45,6 +46,18 @@ const whitelistedExperimentalRepos = [
 	"niklasbuchfink/appflowy",
 ]
 
+export async function findRepoRoot(args: {
+	nodeishFs: NodeishFilesystem
+	path: string
+}): Promise<string | undefined> {
+	const gitroot = await findRoot({
+		fs: args.nodeishFs,
+		filepath: args.path,
+	}).catch(() => undefined)
+
+	return gitroot ? "file://" + gitroot : undefined
+}
+
 export async function openRepository(
 	url: string,
 	args: {
@@ -56,6 +69,7 @@ export async function openRepository(
 ): Promise<Repository> {
 	const rawFs = args.nodeishFs
 
+	// fixme: propper error handling with error return values and no signal dependency
 	const [errors, setErrors] = createSignal<Error[]>([])
 
 	// the url format for lix urls is
@@ -65,7 +79,24 @@ export async function openRepository(
 	// the url format for direct github urls without a lix server is https://github.com/inlang/examplX (only per domain-enabled git hosters will be supported, currently just gitub)
 	// the url for opening a local repo allready in the fs provider is file://path/to/repo (not implemented yet)
 
-	const { protocol, lixHost, repoHost, owner, repoName } = parseLixUri(url)
+	if (url.startsWith("file:")) {
+		const remotes = await listRemotes({
+			fs: args.nodeishFs,
+			dir: url.replace("file://", ""),
+		}).catch(() => [])
+		const origin = remotes.find(({ remote }) => remote === "origin")?.url || ""
+
+		if (origin.startsWith("git@github.com:")) {
+			url = origin.replace("git@github.com:", "https://github.com/")
+		} else {
+			url = origin
+		}
+	}
+
+	const { protocol, lixHost, repoHost, owner, repoName, username, password } = parseLixUri(url)
+	if (username || password) {
+		console.error("username and password are not supported yet")
+	}
 
 	const gitProxyUrl = lixHost ? `${protocol}//${lixHost}/git-proxy/` : ""
 	const gitHubProxyUrl = lixHost ? `${protocol}//${lixHost}/github-proxy/` : ""
@@ -519,45 +550,33 @@ export async function openRepository(
 					return { error: newError }
 				})
 
+			const repoId = await hash(`${protocol}__${lixHost}__${repoHost}__${owner}__${repoName}`)
+
 			if ("error" in res) {
-				return { error: res.error }
-			}
-
-			const {
-				data: {
-					id: githubId,
-					name,
-					private: isPrivate,
-					fork: isFork,
-					parent,
-					owner: ownerMetaData,
-					permissions,
-				},
-			} = res
-
-			const id = await hash(`${githubId}`)
-
-			return {
-				id,
-				name,
-				isPrivate,
-				isFork,
-				permissions: {
-					admin: permissions?.admin || false,
-					push: permissions?.push || false,
-					pull: permissions?.pull || false,
-				},
-				owner: {
-					name: ownerMetaData.name || undefined,
-					email: ownerMetaData.email || undefined,
-					login: ownerMetaData.login,
-				},
-				parent: parent
-					? {
-							url: transformRemote(parent.git_url),
-							fullName: parent.full_name,
-					  }
-					: undefined,
+				return { error: res.error, id: repoId }
+			} else {
+				return {
+					id: repoId,
+					name: res.data.name,
+					isPrivate: res.data.private,
+					isFork: res.data.fork,
+					permissions: {
+						admin: res.data.permissions?.admin || false,
+						push: res.data.permissions?.push || false,
+						pull: res.data.permissions?.pull || false,
+					},
+					owner: {
+						name: res.data.owner.name || undefined,
+						email: res.data.owner.email || undefined,
+						login: res.data.owner.login,
+					},
+					parent: res.data.parent
+						? {
+								url: transformRemote(res.data.parent.git_url),
+								fullName: res.data.parent.full_name,
+						  }
+						: undefined,
+				}
 			}
 		},
 	}
