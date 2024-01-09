@@ -1,5 +1,5 @@
 import * as vscode from "vscode"
-import { msg } from "./utilities/messages/message.js"
+import { msg } from "./utilities/messages/msg.js"
 import { getGitOrigin } from "./services/telemetry/index.js"
 import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview.js"
 import { recommendation } from "./utilities/settings/recommendation.js"
@@ -11,6 +11,7 @@ import { state } from "./state.js"
 import { messagePreview } from "./decorations/messagePreview.js"
 import { ExtractMessage } from "./actions/extractMessage.js"
 import { errorView } from "./utilities/errors/errors.js"
+import { messageView } from "./utilities/messages/messages.js"
 
 // Entry Point
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
@@ -38,6 +39,7 @@ async function main(args: {
 	}
 
 	await projectView({ ...args, workspaceFolder })
+	await messageView({ ...args })
 	await errorView({ ...args })
 
 	setupFileSystemWatcher(workspaceFolder, args)

@@ -39,15 +39,18 @@
 			"inlang": [
 				{
 					"id": "projectView",
-					"name": "Projects"
+					"name": "Projects",
+					"type": "tree"
 				},
 				{
 					"id": "messageView",
-					"name": "Messages"
+					"name": "Messages",
+					"type": "webview"
 				},
 				{
 					"id": "errorView",
-					"name": "Errors"
+					"name": "Errors",
+					"type": "tree"
 				}
 			]
 		},
