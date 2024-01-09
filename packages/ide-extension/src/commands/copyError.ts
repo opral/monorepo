@@ -1,6 +1,6 @@
 import * as vscode from "vscode"
 import type { ErrorNode } from "../utilities/errors/errors.js"
-import { msg } from "../utilities/messages/message.js"
+import { msg } from "../utilities/messages/msg.js"
 
 export const copyErrorCommand = {
 	command: "inlang.copyError",

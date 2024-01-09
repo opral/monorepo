@@ -1,5 +1,5 @@
 import { state } from "../state.js"
-import { msg } from "../utilities/messages/message.js"
+import { msg } from "../utilities/messages/msg.js"
 import { commands, window } from "vscode"
 import type { LanguageTag, Message } from "@inlang/sdk"
 import { getPatternFromString, getStringFromPattern } from "../utilities/messages/query.js"
