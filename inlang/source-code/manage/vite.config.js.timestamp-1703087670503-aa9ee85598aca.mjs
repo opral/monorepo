@@ -1,6 +1,6 @@
 // vite.config.js
-import { defineConfig } from "file:///Users/floriank/inlang/monorepo/node_modules/.pnpm/vite@4.5.0_@types+node@20.10.4/node_modules/vite/dist/node/index.js";
-import { nodePolyfills } from "file:///Users/floriank/inlang/monorepo/node_modules/.pnpm/vite-plugin-node-polyfills@0.16.0_vite@4.5.0/node_modules/vite-plugin-node-polyfills/dist/index.js";
+import { defineConfig } from "file:///Users/floriank/opral/monorepo/node_modules/.pnpm/vite@4.5.0_@types+node@20.10.4/node_modules/vite/dist/node/index.js"
+import { nodePolyfills } from "file:///Users/floriank/opral/monorepo/node_modules/.pnpm/vite-plugin-node-polyfills@0.16.0_vite@4.5.0/node_modules/vite-plugin-node-polyfills/dist/index.js"
 var isProduction = process.env.NODE_ENV === "production";
 var vite_config_default = defineConfig({
   server: {

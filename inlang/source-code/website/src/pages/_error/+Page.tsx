@@ -39,7 +39,7 @@ export default function Page(pageContext: PageContextRenderer) {
 							</div>
 							<Link
 								class="self-end pt-5"
-								href="https://github.com/inlang/monorepo/issues/new/choose"
+								href="https://github.com/opral/monorepo/issues/new/choose"
 								target="_blank"
 							>
 								<sl-button prop:variant="text">

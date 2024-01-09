@@ -1,5 +1,5 @@
-<a href="https://github.com/inlang/monorepo/discussions/1793"><img width="200px" height="auto" alt="Upvote on Github" src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/globelens/assets/GlobeLens-cta.svg" /></a>
-<a href="https://github.com/inlang/monorepo/discussions/1793"><img width="160px" height="auto" alt="Upvote on Github" src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/globelens/assets/GlobeLens-soon.svg" />
+<a href="https://github.com/opral/monorepo/discussions/1793"><img width="200px" height="auto" alt="Upvote on Github" src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/globelens/assets/GlobeLens-cta.svg" /></a>
+<a href="https://github.com/opral/monorepo/discussions/1793"><img width="160px" height="auto" alt="Upvote on Github" src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/globelens/assets/GlobeLens-soon.svg" />
 </a>
 
 ![Cover](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/globelens/assets/GlobeLens-coverV02.png)
@@ -29,7 +29,7 @@ Hey, did you know that having a killer **🌎 global strategy** can really help 
 ## Evaluation phase
 
 This tool is in an evaluation phase. If you have any feedback or interest, please let us know.
-https://github.com/inlang/monorepo/discussions/1793
+https://github.com/opral/monorepo/discussions/1793
 
 [<img src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/globelens/assets/GlobeLens-VideoImg.png" width="100%" />](https://www.loom.com/share/b718df15d9174ba8b9c0aeae1cdb5502?sid=d5ef3002-e154-41f9-8504-a6c11ba9cdf0)
 

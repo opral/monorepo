@@ -5,7 +5,7 @@ import { parseLixUri } from "./helpers.js"
 
 describe("parse lix uris", () => {
 	it("parses github uris correctly", () => {
-		const parseResult = parseLixUri("https://github.com/inlang/monorepo")
+		const parseResult = parseLixUri("https://github.com/opral/monorepo")
 
 		expect(parseResult).toStrictEqual({
 			protocol: "https:",
@@ -18,7 +18,7 @@ describe("parse lix uris", () => {
 	})
 
 	it("parses lix uris correctly", () => {
-		const parseResult = parseLixUri("https://lix.inlang.com/git/github.com/inlang/monorepo")
+		const parseResult = parseLixUri("https://lix.inlang.com/git/github.com/opral/monorepo")
 
 		expect(parseResult).toStrictEqual({
 			protocol: "https:",
@@ -31,7 +31,7 @@ describe("parse lix uris", () => {
 	})
 
 	it("parses lix localhost uris correctly", () => {
-		const parseResult = parseLixUri("http://localhost:3001/git/github.com/inlang/monorepo")
+		const parseResult = parseLixUri("http://localhost:3001/git/github.com/opral/monorepo")
 
 		expect(parseResult).toStrictEqual({
 			protocol: "http:",
@@ -44,7 +44,7 @@ describe("parse lix uris", () => {
 	})
 
 	it("throws on missing protocol in uri", () => {
-		expect(() => parseLixUri("lix.inlang.com/git/github.com/inlang/monorepo")).toThrowError()
+		expect(() => parseLixUri("lix.inlang.com/git/github.com/opral/monorepo")).toThrowError()
 	})
 
 	it("throws on missing repo name in lix server uri", () => {

@@ -2,7 +2,7 @@
 
 # Automate (i18n) localization tasks with the CLI
 
-[@inlang/cli](https://github.com/inlang/monorepo/tree/main/inlang/source-code/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infrastructure. It can be used to automate localization tasks, such as machine translation, linting, and more.
+[@inlang/cli](https://github.com/opral/monorepo/tree/main/inlang/source-code/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infrastructure. It can be used to automate localization tasks, such as machine translation, linting, and more.
 
 Get started with the CLI by using the following npx command:
 
@@ -159,7 +159,7 @@ This will launch an interactive prompt that will guide you through the process o
 
 ## `lint`
 
-The lint command lints the translation with the configured lint rules, for example, with the [@inlang/plugin-standard-lint-rules](https://github.com/inlang/monorepo/tree/main/inlang/source-code/message-lint-rules).
+The lint command lints the translation with the configured lint rules, for example, with the [@inlang/plugin-standard-lint-rules](https://github.com/opral/monorepo/tree/main/inlang/source-code/message-lint-rules).
 
 ```sh
 npx @inlang/cli lint
@@ -173,9 +173,9 @@ The translate command has the following options:
 - `--project <path>`: Specifies the path to the project root. The default project root is the current working directory.
 - `--languageTags <tags>`: Specifies the [language tags](/m/8y8sxj09/library-inlang-languageTag) to lint. Defaults to all. Should be a comma-separated list of language tags specified in the inlang project, e.g. `en,de,fr`.
 
-`lint` will read through all resources and find potential errors and warnings in the translation strings, for example, with the [@inlang/plugin-standard-lint-rules](https://github.com/inlang/monorepo/tree/main/inlang/source-code/message-lint-rules), it searches for **missing messages**, **missing references** and **identical patterns/duplicates**.
+`lint` will read through all resources and find potential errors and warnings in the translation strings, for example, with the [@inlang/plugin-standard-lint-rules](https://github.com/opral/monorepo/tree/main/inlang/source-code/message-lint-rules), it searches for **missing messages**, **missing references** and **identical patterns/duplicates**.
 
-However, it's totally up to you how you configure your lints. _You can build your own plugin with your customized set of lints_ with the [@inlang/plugin-standard-lint-rules](https://github.com/inlang/monorepo/tree/main/inlang/source-code/message-lint-rules) as a starter template.
+However, it's totally up to you how you configure your lints. _You can build your own plugin with your customized set of lints_ with the [@inlang/plugin-standard-lint-rules](https://github.com/opral/monorepo/tree/main/inlang/source-code/message-lint-rules) as a starter template.
 
 ## `open`
 
