@@ -93,7 +93,10 @@ export async function openRepository(
 		}
 	}
 
-	const { protocol, lixHost, repoHost, owner, repoName } = parseLixUri(url)
+	const { protocol, lixHost, repoHost, owner, repoName, username, password } = parseLixUri(url)
+	if (username || password) {
+		console.error("username and password are not supported yet")
+	}
 
 	const gitProxyUrl = lixHost ? `${protocol}//${lixHost}/git-proxy/` : ""
 	const gitHubProxyUrl = lixHost ? `${protocol}//${lixHost}/github-proxy/` : ""
@@ -547,45 +550,33 @@ export async function openRepository(
 					return { error: newError }
 				})
 
+			const repoId = await hash(`${protocol}__${lixHost}__${repoHost}__${owner}__${repoName}`)
+
 			if ("error" in res) {
-				return { error: res.error }
-			}
-
-			const {
-				data: {
-					id: githubId,
-					name,
-					private: isPrivate,
-					fork: isFork,
-					parent,
-					owner: ownerMetaData,
-					permissions,
-				},
-			} = res
-
-			const id = await hash(`${githubId}`)
-
-			return {
-				id,
-				name,
-				isPrivate,
-				isFork,
-				permissions: {
-					admin: permissions?.admin || false,
-					push: permissions?.push || false,
-					pull: permissions?.pull || false,
-				},
-				owner: {
-					name: ownerMetaData.name || undefined,
-					email: ownerMetaData.email || undefined,
-					login: ownerMetaData.login,
-				},
-				parent: parent
-					? {
-							url: transformRemote(parent.git_url),
-							fullName: parent.full_name,
-					  }
-					: undefined,
+				return { error: res.error, id: repoId }
+			} else {
+				return {
+					id: repoId,
+					name: res.data.name,
+					isPrivate: res.data.private,
+					isFork: res.data.fork,
+					permissions: {
+						admin: res.data.permissions?.admin || false,
+						push: res.data.permissions?.push || false,
+						pull: res.data.permissions?.pull || false,
+					},
+					owner: {
+						name: res.data.owner.name || undefined,
+						email: res.data.owner.email || undefined,
+						login: res.data.owner.login,
+					},
+					parent: res.data.parent
+						? {
+								url: transformRemote(res.data.parent.git_url),
+								fullName: res.data.parent.full_name,
+						  }
+						: undefined,
+				}
 			}
 		},
 	}
