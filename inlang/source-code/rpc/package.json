@@ -22,7 +22,6 @@
 		"@inlang/result": "workspace:*",
 		"@inlang/sdk": "workspace:*",
 		"@types/cors": "^2.8.17",
-		"algoliasearch": "4.20.0",
 		"body-parser": "^1.20.2",
 		"cors": "^2.8.5",
 		"ts-dedent": "^2.2.0",

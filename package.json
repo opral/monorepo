@@ -33,7 +33,8 @@
 	},
 	"pnpm": {
 		"overrides": {
-			"http-cache-semantics": "4.1.1"
+			"http-cache-semantics": "4.1.1",
+			"follow-redirects": "1.15.4"
 		}
 	},
 	"devDependencies": {

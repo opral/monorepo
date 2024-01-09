@@ -11,7 +11,7 @@ services:
     region: frankfurt
     plan: standard
     buildCommand: pnpm install && pnpm run build
-    startCommand: pnpm --filter !@inlang/telemetry-proxy run production
+    startCommand: pnpm run production
     autoDeploy: true
     envVars:
       - fromGroup: production
