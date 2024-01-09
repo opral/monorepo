@@ -164,7 +164,9 @@ describe("initialization", () => {
 	})
 
 	it("should generate projectId on missing projectid", async () => {
-		const ciTestRepo: Snapshot = JSON.parse(readFileSync("../mocks/", { encoding: "utf-8" }))
+		const ciTestRepo: Snapshot = JSON.parse(
+			readFileSync("./mocks/ci-test-repo.json", { encoding: "utf-8" })
+		)
 		const repo = await mockRepo({ fromSnapshot: ciTestRepo })
 
 		const existing = await repo.nodeishFs
@@ -201,7 +203,9 @@ describe("initialization", () => {
 	})
 
 	it("should reuse projectId on existing projectid", async () => {
-		const ciTestRepo: Snapshot = JSON.parse(readFileSync("../mocks/", { encoding: "utf-8" }))
+		const ciTestRepo: Snapshot = JSON.parse(
+			readFileSync("./mocks/ci-test-repo.json", { encoding: "utf-8" })
+		)
 		const repo = await mockRepo({ fromSnapshot: ciTestRepo })
 
 		repo.nodeishFs.writeFile("/project.inlang/project_id", "testId")

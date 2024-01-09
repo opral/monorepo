@@ -7,7 +7,9 @@ import { type Snapshot } from "@lix-js/fs"
 import { readFileSync } from "node:fs"
 
 describe("generateProjectId", async () => {
-	const ciTestRepo: Snapshot = JSON.parse(readFileSync("../mocks/", { encoding: "utf-8" }))
+	const ciTestRepo: Snapshot = JSON.parse(
+		readFileSync("./mocks/ci-test-repo.json", { encoding: "utf-8" })
+	)
 	const repo = await mockRepo({ fromSnapshot: ciTestRepo as Snapshot })
 
 	it("should generate a project id", async () => {
