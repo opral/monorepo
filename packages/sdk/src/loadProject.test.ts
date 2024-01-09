@@ -196,7 +196,7 @@ describe("initialization", () => {
 				return { error }
 			})
 
-		expect(newId).toBe("7cd6c2b7cf12febf99496408917123fdfe158b6bc442914f5fb42aa74346bd50")
+		expect(newId).toBe("c030e1c6a9c8f3bc9afef01a40567d6c5b79165b1cc782c207d784565b9c88ce")
 
 		expect(result.error).toBeUndefined()
 		expect(result.data).toBeDefined()
