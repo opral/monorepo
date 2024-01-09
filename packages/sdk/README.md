@@ -7,7 +7,7 @@ Developer-first localization infrastructure that is built on git. Your git repos
     <h4 align="center">
         <!-- <a href="https://inlang.com/documentation" target="_blank">Get Started</a>
         ·  -->
-        <a href="https://github.com/inlang/monorepo/discussions" target="_blank">Discussions</a> · <a href="https://twitter.com/inlangHQ" target="_blank">Twitter</a>
+        <a href="https://github.com/opral/monorepo/discussions" target="_blank">Discussions</a> · <a href="https://twitter.com/inlangHQ" target="_blank">Twitter</a>
     </h4>
 </div>
 

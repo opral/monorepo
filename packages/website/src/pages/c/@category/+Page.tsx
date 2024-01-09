@@ -91,7 +91,7 @@ export default function Page(props: {
 				return {
 					title: m.marketplace_header_lix_title(),
 					description: m.marketplace_header_lix_short_description(),
-					buttonLink: "https://github.com/inlang/monorepo/tree/main/lix",
+					buttonLink: "https://github.com/opral/monorepo/tree/main/lix",
 					buttonText: m.marketplace_header_lix_button_text(),
 					coverCard: <LixHeader />,
 				}

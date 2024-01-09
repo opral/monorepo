@@ -29,4 +29,4 @@ For every use case, there is an app, a plugin, a lint rule, or a custom solution
 
 Inlang apps are built on lix. Lix is a git-compatible version control backend for applications. Using lix provides inlang with CI/CD for globalization and collaboration between developers, translators, and designers on one common source of truth: your repository and your data.
 
-<doc-figure src="https://github.com/inlang/monorepo/assets/58360188/917cc987-669d-4203-a2ed-8184087fd070" alt="lix-based globalization infrastructure" caption="Lix repositories act as building blocks for tools, applications like the editor, and automation via CI/CD."></doc-figure>
+<doc-figure src="https://github.com/opral/monorepo/assets/58360188/917cc987-669d-4203-a2ed-8184087fd070" alt="lix-based globalization infrastructure" caption="Lix repositories act as building blocks for tools, applications like the editor, and automation via CI/CD."></doc-figure>

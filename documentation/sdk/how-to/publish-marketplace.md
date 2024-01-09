@@ -155,7 +155,7 @@ Please note that you need to include a key of a 8 character long random string. 
 
 If you are publishing an app, plugin or lint rule, you can add your product to the "m" category.
 
-Add the raw link of your manifest to [this file](https://github.com/inlang/monorepo/blob/main/inlang/source-code/marketplace-registry/registry.json). You can fork the repository to do so.
+Add the raw link of your manifest to [this file](https://github.com/opral/monorepo/blob/main/inlang/source-code/marketplace-registry/registry.json). You can fork the repository to do so.
 
 ### 3. Create a pull request and wait for approval
 

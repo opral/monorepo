@@ -12,7 +12,7 @@ Before setting up the adapter in your own project, you can take a look at the [e
 
 ### 1. Initialize paraglide-js
 
-If you haven't already, initialize paraglide-js in your project. To do so, follow the [getting started guide](https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js#getting-started) to get familiar with the basic paraglide concepts.
+If you haven't already, initialize paraglide-js in your project. To do so, follow the [getting started guide](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js#getting-started) to get familiar with the basic paraglide concepts.
 
 Then come back here to learn how the adapter helps you to integrate paraglide-js into your SolidStart project.
 

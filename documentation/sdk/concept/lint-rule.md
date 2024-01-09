@@ -16,7 +16,7 @@ A message lint rule validates a message. For example, the [missing translation l
 
 ### More soon...
 
-We will support more types of lint rules in the future. If you have an idea for a new lint type, please share it with us on [GitHub](https://github.com/inlang/monorepo/discussions).
+We will support more types of lint rules in the future. If you have an idea for a new lint type, please share it with us on [GitHub](https://github.com/opral/monorepo/discussions).
 
 ## Develop your own lint rule
 

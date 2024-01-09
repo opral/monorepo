@@ -12,9 +12,9 @@
 	"author": "inlang <hello@inlang.com> (https://inlang.com/)",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/inlang/monorepo.git#inlang/source-code/paraglide/paraglide-js-adapter-unplugin"
+		"url": "https://github.com/opral/monorepo.git#inlang/source-code/paraglide/paraglide-js-adapter-unplugin"
 	},
-	"homepage": "https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-unplugin#README",
+	"homepage": "https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-unplugin#README",
 	"keywords": [
 		"paraglide",
 		"javascript i18n",

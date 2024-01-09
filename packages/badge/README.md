@@ -26,7 +26,7 @@ If you don't have an inlang project yet, [read this guide](/g/49fn9ggo/guide-nik
 Go to your repository (where you already have set up inlang) and copy the URL. It should look something like this:
 
 ```text
-https://github.com/inlang/monorepo
+https://github.com/opral/monorepo
 ```
 
 Then, you can paste it into the input field of the badge generator above.
@@ -45,4 +45,4 @@ This is how the badge could look like in your README, it is from the official in
 
 <br />
 
-![inlang status badge](https://inlang.com/badge?url=github.com/inlang/monorepo)
+![inlang status badge](https://inlang.com/badge?url=github.com/opral/monorepo)

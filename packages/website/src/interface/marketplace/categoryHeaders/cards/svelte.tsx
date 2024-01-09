@@ -71,7 +71,7 @@ const SvelteHeader = () => {
 						</div>
 					</Link>
 					<a
-						href="https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-vite"
+						href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-vite"
 						target="_blanc"
 						class="w-full bg-background rounded-xl border border-surface-300 relative group hover:border-surface-400 transition-all cursor-pointer"
 					>

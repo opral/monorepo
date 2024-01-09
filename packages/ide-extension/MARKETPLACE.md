@@ -11,7 +11,7 @@
 
 Supercharge i18n within VS Code with powerful tools designed to streamline the translation process. Visualize, edit, and lint translated strings effortlessly using Inline Decorations & Hover Support. Extract new strings with a simple click, making localization tasks more intuitive and efficient.
 
-[Inlang](https://inlang.com) is a powerful [open-source](https://github.com/inlang/monorepo/tree/main/inlang/source-code/ide-extension) extension for [Visual Studio Code](https://code.visualstudio.com/)
+[Inlang](https://inlang.com) is a powerful [open-source](https://github.com/opral/monorepo/tree/main/inlang/source-code/ide-extension) extension for [Visual Studio Code](https://code.visualstudio.com/)
 
 ## Getting started
 
@@ -98,7 +98,7 @@ Just _highlight/select_ the text you want and hit `cmd .` or `ctrl +` (Quick Fix
 
 Hover over the message to see the tooltip with the translation.
 
-If something isn't working as expected, please join our [Discord](https://discord.gg/gdMPPWy57R) or [create an issue](https://github.com/inlang/monorepo/issues/new/choose). We are happy to help!
+If something isn't working as expected, please join our [Discord](https://discord.gg/gdMPPWy57R) or [create an issue](https://github.com/opral/monorepo/issues/new/choose). We are happy to help!
 
 ## Configuration
 
@@ -115,4 +115,4 @@ You can fully customize this behavior.
 
 ## Support: Join our Discord!
 
-If something isn't working as expected or you have a feature suggestion, please join our [Discord](https://discord.gg/DEHKgmx2) or [create an issue](<[https](https://github.com/inlang/monorepo/issues/new/choose)>). We are happy to help!
+If something isn't working as expected or you have a feature suggestion, please join our [Discord](https://discord.gg/DEHKgmx2) or [create an issue](<[https](https://github.com/opral/monorepo/issues/new/choose)>). We are happy to help!
