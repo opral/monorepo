@@ -43,6 +43,10 @@ type EditorStateSchema = {
 	refetchRepo: () => void
 
 	/**
+	 * Fork status of the repository.
+	 */
+	forkStatus: () => { ahead: number, behind: number }
+	/**
 	 * The current branch.
 	 */
 	currentBranch: Resource<string | undefined>
@@ -273,6 +277,25 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		setLixErrors(errors)
 	})
 
+	const [forkStatus] = createResource(
+		() => {
+			if (repo()) {
+				return repo()
+			} else {
+				return false
+			}
+		},
+		async (args) => {
+			const value = await args.forkStatus()
+			if ("error" in value) {
+				return { ahead: 0, behind: 0 }
+			} else {
+				return value
+			}
+		},
+		{ initialValue: { ahead: 0, behind: 0 } }
+	)
+
 	const [projectList] = createResource(
 		() => {
 			return { repo: repo() }
@@ -463,6 +486,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				{
 					repo: repo,
 					refetchRepo,
+					forkStatus,
 					currentBranch,
 					branchNames,
 					githubRepositoryInformation,

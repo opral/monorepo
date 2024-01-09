@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For, type JSXElement, on, onMount, Show, createResource } from "solid-js"
+import { createEffect, createSignal, For, type JSXElement, on, onMount, Show } from "solid-js"
 import { useEditorState } from "./State.jsx"
 import { SearchInput } from "./components/SearchInput.jsx"
 import { Gitfloat } from "./components/Gitfloat.jsx"
@@ -26,6 +26,7 @@ export function Layout(props: { children: JSXElement }) {
 	const {
 		repo,
 		refetchRepo,
+		forkStatus,
 		project,
 		lixErrors,
 		setTextSearch,
@@ -47,29 +48,8 @@ export function Layout(props: { children: JSXElement }) {
 	const [forkStatusModalOpen, setForkStatusModalOpen] = createSignal(false)
 	const [openedGitHub, setOpenedGitHub] = createSignal(false)
 
-	const [forkStatus] = createResource(
-		() => {
-			if (repo()) {
-				return repo()
-			} else {
-				return false
-			}
-		},
-		async (args) => {
-			const value = await args.forkStatus()
-			if ("error" in value) {
-				return { ahead: 0, behind: 0 }
-			} else {
-				return value
-			}
-		},
-		{ initialValue: { ahead: 0, behind: 0 } }
-	)
-
 	createEffect(() => {
-		console.log("forkStatus")
-		const _forkStatus = forkStatus()
-		if (_forkStatus && _forkStatus?.behind > 0) {
+		if (forkStatus() && forkStatus()?.behind > 0) {
 			setForkStatusModalOpen(true)
 		}
 	})
