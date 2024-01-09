@@ -49,20 +49,30 @@ export function Layout(props: { children: JSXElement }) {
 
 	const [forkStatus] = createResource(
 		() => {
-			return { repo: repo() }
+			if (repo()) {
+				return repo()
+			} else {
+				return false
+			}
 		},
 		async (args) => {
-			if (args.repo) {
-				return await args.repo?.forkStatus()
+			const value = await args.forkStatus()
+			if ("error" in value) {
+				return { ahead: 0, behind: 0 }
+			} else {
+				return value
 			}
-		}
+		},
+		{ initialValue: { ahead: 0, behind: 0 } }
 	)
 
-	createEffect(on(forkStatus, () => {
-		if (forkStatus() && !forkStatus()?.error && forkStatus()?.behind > 0) {
+	createEffect(() => {
+		console.log("forkStatus")
+		const _forkStatus = forkStatus()
+		if (_forkStatus && _forkStatus?.behind > 0) {
 			setForkStatusModalOpen(true)
 		}
-	}))
+	})
 
 	const [addLanguageModalOpen, setAddLanguageModalOpen] = createSignal(false)
 	const [addLanguageText, setAddLanguageText] = createSignal("")
@@ -372,21 +382,21 @@ export function Layout(props: { children: JSXElement }) {
 				on:sl-after-hide={() => setForkStatusModalOpen(false)}
 			>
 				{/* Can't merge upstream */}
-				<Show when={forkStatus() && forkStatus()?.ahead > 0 && forkStatus()?.behind > 0 }>
+				<Show when={forkStatus() && forkStatus().ahead > 0 && forkStatus().behind > 0}>
 					<p class="text-sm pb-4 -mt-4 pr-8">
 						Your fork is out of sync with the upstream repository. Please resolve the conflicts before 
 						applying your changes.
 					</p>
 				</Show>
 				{/* Pull from upstream */}
-				<Show when={forkStatus() && forkStatus()?.ahead === 0 && forkStatus()?.behind > 0 }>
+				<Show when={forkStatus() && forkStatus().ahead === 0 && forkStatus().behind > 0}>
 					<p class="text-sm pb-4 -mt-4 pr-8">
 						Your fork is out of sync. Please pull the latest changes from the upstream repository before 
 						applying your changes.
 					</p>
 				</Show>
 				<div class="flex flex-end gap-4 pt-6">
-					<Show when={forkStatus() && forkStatus()?.ahead === 0 && forkStatus()?.behind > 0 }>
+					<Show when={forkStatus() && forkStatus().ahead === 0 && forkStatus().behind > 0}>
 						<sl-button
 							class="w-full"
 							prop:size={"small"}
