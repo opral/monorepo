@@ -14,7 +14,7 @@ describe("generateProjectId", async () => {
 
 	it("should generate a project id", async () => {
 		const projectId = await generateProjectId(repo, "mocked_project_path")
-		expect(projectId).toBe("0c83325bf9068eb01091c522d4b8e3765aff42e36fc781c041b44439bbe3e734")
+		expect(projectId).toBe("800010644a18ea62e761d63073d3750d7cff660cab9a8ab51a426f3741e2e2d4")
 	})
 
 	it("should return undefined if repoMeta contains error", async () => {

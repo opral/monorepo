@@ -17,18 +17,5 @@ export async function mockRepo({ fromSnapshot }: { fromSnapshot?: Snapshot } = {
 		nodeishFs,
 	})
 
-	// temporarily all test repos get same test metadata, this can be removed when repo ids are implemented
-	repo.getMeta = async () => {
-		return {
-			id: "34c48e4ba4c128582466b8dc1330feac0733880b35f467f4161e259070d24a31",
-			name: "ci-test-repo",
-			isPrivate: false,
-			isFork: true,
-			permissions: { admin: false, push: false, pull: false },
-			owner: { name: undefined, email: undefined, login: "inlang" },
-			parent: { url: "github.com/inlang/example.git", fullName: "inlang/example" },
-		}
-	}
-
 	return repo
 }
