@@ -125,6 +125,7 @@ export default function Page(props: {
 					title: m.marketplace_header_generic_title(),
 					description: m.marketplace_header_generic_description(),
 					icon: "https://astro.build/favicon.svg",
+					withGuides: true,
 					coverCard: <GenericHeader />,
 				}
 			}
