@@ -42,7 +42,7 @@ npx @inlang/paraglide-js@latest init
 
 ### 2. Select an adapter (if required)
 
-Having an adapter is only required if you want to use paraglide-js with a framework. If you don't use a framework, you can skip this step.
+Having an adapter is recommended but not required if you want to use paraglide-js with a framework. If you don't use a framework, you can skip this step.
 
 <doc-links>
     <doc-link title="Adapter for Svelte" icon="simple-icons:svelte" href="https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-svelte/example" description="Go to GitHub example"></doc-link>
