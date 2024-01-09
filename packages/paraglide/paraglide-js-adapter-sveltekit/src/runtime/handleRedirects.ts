@@ -1,4 +1,3 @@
-import getLanguage from "$paraglide-adapter-sveltekit:get-language"
 import type { Handle } from "@sveltejs/kit"
 import { getLanguageFromURL } from "./getLanguageFromUrl.js"
 import { sourceLanguageTag } from "$paraglide-adapter-sveltekit:runtime"
@@ -25,8 +24,6 @@ export const handleRedirects: () => Handle =
 
 		const language = getLanguageFromURL(event.url) ?? sourceLanguageTag
 		const newLocation = translatePath(location, language)
-
-		console.log("newLocation", newLocation)
 
 		response.headers.set("location", newLocation)
 		return response

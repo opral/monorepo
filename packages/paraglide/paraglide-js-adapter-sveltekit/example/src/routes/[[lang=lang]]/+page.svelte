@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 	import { goto } from "$app/navigation"
 	import { availableLanguageTags, languageTag, setLanguageTag } from "$paraglide/runtime.js"
 	import * as m from "$paraglide/messages.js"
