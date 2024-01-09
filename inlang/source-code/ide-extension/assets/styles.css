@@ -1,0 +1,58 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe WUI", "Ubuntu", sans-serif;
+    color: var(--vscode-editor-foreground);
+    background-color: var(--vscode-editor-background);
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.collapsible {
+    background-color: inherit;
+    color: var(--vscode-editor-foreground);
+    cursor: pointer;
+    padding: 10px;
+    border: none;
+    text-align: left;
+    outline: none;
+    width: 100%;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    gap: 5px;
+}
+
+.content {
+    padding: 0 18px;
+    display: none;
+}
+
+.highlighted-section {
+    background-color: rgba(147, 112, 219, 0.5);
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+#searchInput {
+    width: calc(100% - 20px);
+    margin: 10px;
+    padding: 4px 6px;
+    box-sizing: border-box;
+    background-color: var(--vscode-input-background);
+    border: 1px solid var(--vscode-input-border);
+    color: var(--vscode-input-foreground);
+}
+
+#searchInput:focus {
+    outline: none;
+    border: 1px solid var(--vscode-inputOption-activeBorder);
+}
+
+/* #searchInput:active {
+    border: 1px solid var(--vscode-inputOption-activeBorder);
+    background-color: var(--vscode-inputOption-activeBackground);
+} */
+
+#searchInput::placeholder {
+    color: var(--vscode-input-placeholderForeground);
+}

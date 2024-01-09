@@ -589,6 +589,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: 0.34.6
         version: 0.34.6(vitest@0.34.6)
+      '@vscode/codicons':
+        specifier: ^0.0.35
+        version: 0.0.35
       https-proxy-agent:
         specifier: 7.0.2
         version: 7.0.2
@@ -8930,6 +8933,10 @@ packages:
     dependencies:
       '@volar/language-core': 1.10.10
       path-browserify: 1.0.1
+    dev: false
+
+  /@vscode/codicons@0.0.35:
+    resolution: {integrity: sha512-7iiKdA5wHVYSbO7/Mm0hiHD3i4h+9hKUe1O4hISAe/nHhagMwb2ZbFC8jU6d7Cw+JNT2dWXN2j+WHbkhT5/l2w==}
     dev: false
 
   /@vscode/emmet-helper@2.9.2:
