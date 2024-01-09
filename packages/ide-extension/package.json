@@ -141,12 +141,13 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/result": "workspace:*",
-		"@inlang/telemetry": "workspace:*",
 		"@inlang/create-project": "workspace:*",
+		"@inlang/result": "workspace:*",
 		"@inlang/sdk": "workspace:*",
+		"@inlang/telemetry": "workspace:*",
 		"@lix-js/fs": "workspace:*",
 		"@vitest/coverage-v8": "0.34.6",
+		"@vscode/codicons": "^0.0.35",
 		"https-proxy-agent": "7.0.2",
 		"require-from-string": "^2.0.2",
 		"throttle-debounce": "^5.0.0",
