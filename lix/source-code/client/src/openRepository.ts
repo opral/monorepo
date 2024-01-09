@@ -550,7 +550,8 @@ export async function openRepository(
 					return { error: newError }
 				})
 
-			const repoId = await hash(`${protocol}__${lixHost}__${repoHost}__${owner}__${repoName}`)
+
+			const repoId = await hash(`${lixHost}__${repoHost}__${owner}__${repoName}`)
 
 			if ("error" in res) {
 				return { error: res.error, id: repoId }
