@@ -3,6 +3,7 @@ import { showToast } from "./Toast.jsx"
 import { rpc } from "@inlang/rpc"
 import * as m from "../../paraglide/messages.js"
 import Captcha from "./Captcha.jsx"
+import validator from "validator"
 
 export function NewsletterForm() {
 	const [email, setEmail] = createSignal("")
@@ -49,11 +50,9 @@ export function NewsletterForm() {
 		if (loading()) return
 
 		function checkEmail(email: any) {
-			const re = /\S+@\S+\.\S+/
-
 			if (email.trim() === "") {
 				return "empty"
-			} else if (!re.test(email)) {
+			} else if (!validator.default.isEmail(email)) {
 				return "invalid"
 			} else {
 				return "valid"

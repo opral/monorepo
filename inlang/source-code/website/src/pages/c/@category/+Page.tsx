@@ -1,4 +1,4 @@
-import { For, Show, createSignal, onMount, type JSX, Switch, Match } from "solid-js"
+import { For, Show, createSignal, type JSX, Switch, Match } from "solid-js"
 import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
@@ -37,13 +37,6 @@ export default function Page(props: {
 	slider?: boolean
 	items: Awaited<ReturnType<any>>
 }) {
-	onMount(() => {
-		const urlParams = new URLSearchParams(window.location.search)
-		if (urlParams.get("search") !== "" && urlParams.get("search") !== undefined) {
-			setSearchValue(urlParams.get("search")?.replace(/%20/g, " ") || "")
-		}
-	})
-
 	type HeaderContentType = {
 		title: string
 		description: string
