@@ -24,7 +24,7 @@ const data: CardType[] = [
 		description: "Globalize your application and get a process that suits your needs.",
 		soon: false,
 		button: "Start your Global App",
-		link: "/application",
+		link: "/apps",
 		img: <App />,
 		left: true,
 		color: "#06B6D4",

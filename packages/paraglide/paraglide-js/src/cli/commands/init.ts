@@ -10,7 +10,8 @@ import childProcess from "node:child_process"
 import { version } from "../state.js"
 import { telemetry } from "../../services/telemetry/implementation.js"
 import { Logger } from "../../services/logger/index.js"
-
+// TODO add a project UUID to the tele.groups internal #196
+// import { gitOrigin } from "../../services/telemetry/implementation.js"
 const DEFAULT_PROJECT_PATH = "./project.inlang"
 
 export const initCommand = new Command()
@@ -22,7 +23,14 @@ export const initCommand = new Command()
 		logger.box("Welcome to inlang Paraglide-JS 🪂")
 
 		telemetry.capture({ event: "PARAGLIDE-JS init started" })
-
+		// TODO add a project UUID to the tele.groups internal #196
+		// telemetry.groupIdentify({
+		// 	groupType: "repository",
+		// 	groupKey: gitOrigin,
+		// 	properties: {
+		// 		name: gitOrigin,
+		// 	},
+		// })
 		await checkIfUncommittedChanges(logger)
 		await checkIfPackageJsonExists(logger)
 		const projectPath = await initializeInlangProject(logger)
@@ -188,6 +196,7 @@ export const newProjectTemplate: ProjectSettings = {
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-identical-pattern@latest/dist/index.js",
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js",
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-without-source@latest/dist/index.js",
+		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-valid-js-identifier@latest/dist/index.js",
 		// default to the message format plugin because it supports all features
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@latest/dist/index.js",
 		// the m function matcher should be installed by default in case the ide extension is adopted

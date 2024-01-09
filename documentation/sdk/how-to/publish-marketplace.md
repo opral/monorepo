@@ -5,15 +5,15 @@ Publishing your own plugin or lint rule to the [marketplace](/) is straightforwa
 ## Pre-requisites
 
 - [jsdelivr URL](https://www.jsdelivr.com/github) (other CDN's are not supported)
-- A developed [app](/documentation/build-app), [plugin](/documentation/plugin/guide), or [lint rule](/documentation/build-lint-rule)
+- A developed [app](/documentation/build-app), [plugin](/documentation/plugin/guide), or [lint rule](/documentation/lint-rule)
 
 ## Step-by-step
 
 ### 1. Add the information to your marketplace manifest
 Adding the marketplace information is necessary for the marketplace to display your item correctly. You can use these category-specific templates:
-- [Manifest template for apps](/documentation/build-app#4.-configure-your-app)
-- [Manifest template for lint rules](/documentation/build-lint-rule#3.-configure-your-lint-rule)
-- [Manifest template for plugins](/documentation/plugin/guide#3.-configure-your-plugin)
+- [Manifest template for apps](/documentation/build-app#4-configure-your-app)
+- [Manifest template for lint rules](/documentation/lint-rule/guide#3-configure-your-lint-rule)
+- [Manifest template for plugins](/documentation/plugin/guide#3-configure-your-plugin)
 
 #### Official JSON schema
 
@@ -27,7 +27,7 @@ You can ensure that your manifest is valid by loading the following schema.
 | Parameter        | Convention                                               |
 |----------------------|---------------------------------------------------------------|
 | `id`                 | The unique identifier should always be written in camelCase like this: `camelCase.camelCase.camelCase`                         |
-| `displayName`                 | Please follow the [Apple Style Guide](https://support.apple.com/de-de/guide/applestyleguide/apsgb744e4a3/web) and write the first letter of a new word in the title always in uppercase, e.g. `Language Tag`. **Rule of thumb:** The first letter of the first word always has to be uppercase, except your displayName is a name written in lowercase letters everywhere else like `npm` for example.                       |
+| `displayName`                 | Please follow the [Apple Style Guide](https://support.apple.com/de-de/guide/applestyleguide/apsgb744e4a3/web) and write the first letter of a new word in the title always in uppercase, e.g. [Language Tag](/m/8y8sxj09/library-inlang-languageTag). **Rule of thumb:** The first letter of the first word always has to be uppercase, except your displayName is a name written in lowercase letters everywhere else like `npm` for example.                       |
 | `description`                 | Please make sure to describe your item as simple as possible. It is best practice to write 100 to 200 characters.                         |
 `readme`                 | The readme acts as documentation for your item and is written in markdown. Feel free to use github flavored markdown, additionally you use inlang's custom web components (doc-elements).                      |
 `keywords`                 | Keywords are always written in lowercase e.g. `i18n`, `adoptable` …                          |

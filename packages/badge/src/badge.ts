@@ -18,20 +18,20 @@ const cache = await caching("memory", {
 	maxSize: 1000 * 1000 * 1000 * 0.25, // 250 MB
 })
 
-export const badge = async (url: string) => {
-	const fromCache = (await cache.get(url)) as string | undefined
+export const badge = async (urlQuery: string, projectQuery?: string) => {
+	const fromCache = (await cache.get(urlQuery)) as string | undefined
 
 	if (fromCache) {
 		return fromCache
 	}
 
 	// initialize a lix repo instance on each request to prevent cross request pollution
-	const repo = await openRepository(`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${url}`, {
+	const repo = await openRepository(`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${urlQuery}`, {
 		nodeishFs: createNodeishMemoryFs(),
 	})
 
 	const project = await loadProject({
-		projectPath: "/project.inlang",
+		projectPath: projectQuery ?? "/project.inlang",
 		nodeishFs: repo.nodeishFs,
 		_capture(id, props) {
 			telemetryNode.capture({
@@ -40,6 +40,7 @@ export const badge = async (url: string) => {
 				distinctId: "unknown",
 			})
 		},
+		repo,
 	})
 
 	// access all messages via inlang instance query
@@ -113,20 +114,13 @@ export const badge = async (url: string) => {
 		}
 	)
 
-	await cache.set(url, image)
-	const gitOrigin = await repo.getOrigin()
+	await cache.set(urlQuery, image)
 
-	telemetryNode.capture({
-		event: "BADGE created",
-		groups: { repository: gitOrigin },
-		distinctId: "unknown",
-	})
-	telemetryNode.groupIdentify({
-		groupType: "repository",
-		groupKey: gitOrigin,
-		properties: {
-			name: gitOrigin,
-		},
-	})
+	// TODO: additional badge telemetry event?
+	// telemetryNode.capture({
+	// 	event: "BADGE created",
+	// 	groups: { repository: gitOrigin },
+	// 	distinctId: "unknown",
+	// })
 	return image
 }

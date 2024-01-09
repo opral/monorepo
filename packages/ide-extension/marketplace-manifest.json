@@ -17,8 +17,20 @@
 	"readme": {
 		"en": "./inlang/source-code/ide-extension/MARKETPLACE.md"
 	},
-	"keywords": ["apps", "website", "developer", "vscode", "ide", "extension", "lix"],
+	"keywords": [
+		"apps",
+		"website",
+		"developer",
+		"vscode",
+		"ide",
+		"extension",
+		"lix",
+		"svelte",
+		"nextjs",
+		"inlang"
+	],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
-	"license": "Apache-2.0"
+	"license": "Apache-2.0",
+	"pricing": "Free"
 }

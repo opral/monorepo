@@ -27,6 +27,8 @@ import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
 import { isAbsolutePath } from "./isAbsolutePath.js"
 import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
 import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
+import type { Repository } from "@lix-js/client"
+import { generateProjectId } from "./generateProjectId.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -42,6 +44,7 @@ const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
  */
 export const loadProject = async (args: {
 	projectPath: string
+	repo?: Repository
 	nodeishFs: NodeishFilesystem
 	_import?: ImportFunction
 	_capture?: (id: string, props: Record<string, unknown>) => void
@@ -70,6 +73,7 @@ export const loadProject = async (args: {
 	}
 
 	// -- load project ------------------------------------------------------
+	let idError: Error | undefined
 	return await createRoot(async () => {
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
 		const nodeishFs = createNodeishFsWithAbsolutePaths({
@@ -77,16 +81,43 @@ export const loadProject = async (args: {
 			nodeishFs: args.nodeishFs,
 		})
 
+		let projectId: string | undefined
+
+		try {
+			projectId = await nodeishFs.readFile(projectPath + "/project_id", {
+				encoding: "utf-8",
+			})
+		} catch (error) {
+			// @ts-ignore
+			if (error.code === "ENOENT") {
+				if (args.repo) {
+					projectId = await generateProjectId(args.repo, projectPath)
+					if (projectId) {
+						await nodeishFs.writeFile(projectPath + "/project_id", projectId)
+					}
+				}
+			} else {
+				idError = error as Error
+			}
+		}
+
 		// -- settings ------------------------------------------------------------
 
 		const [settings, _setSettings] = createSignal<ProjectSettings>()
 		createEffect(() => {
+			// TODO:
+			// if (projectId) {
+			// 	telemetryBrowser.group("project", projectId, {
+			// 		name: projectId,
+			// 	})
+			// }
+
 			loadSettings({ settingsFilePath: projectPath + "/settings.json", nodeishFs })
 				.then((settings) => {
 					setSettings(settings)
 					// rename settings to get a convenient access to the data in Posthog
 					const project_settings = settings
-					args._capture?.("SDK used settings", { project_settings })
+					args._capture?.("SDK used settings", { project_settings, group: projectId })
 				})
 				.catch((err) => {
 					markInitAsFailed(err)
@@ -208,6 +239,7 @@ export const loadProject = async (args: {
 		// -- app ---------------------------------------------------------------
 
 		const initializeError: Error | undefined = await initialized.catch((error) => error)
+
 		const abortController = new AbortController()
 		const hasWatcher = nodeishFs.watch("/", { signal: abortController.signal }) !== undefined
 
@@ -225,14 +257,24 @@ export const loadProject = async (args: {
 				500,
 				async (newMessages) => {
 					try {
-						await resolvedModules()?.resolvedPluginApi.saveMessages({
-							settings: settingsValue,
-							messages: newMessages,
-						})
+						if (JSON.stringify(newMessages) !== JSON.stringify(messages())) {
+							await resolvedModules()?.resolvedPluginApi.saveMessages({
+								settings: settingsValue,
+								messages: newMessages,
+							})
+						}
 					} catch (err) {
 						throw new PluginSaveMessagesError({
 							cause: err,
 						})
+					}
+					const abortController = new AbortController()
+					if (
+						newMessages.length !== 0 &&
+						JSON.stringify(newMessages) !== JSON.stringify(messages()) &&
+						nodeishFs.watch("/", { signal: abortController.signal }) !== undefined
+					) {
+						setMessages(newMessages)
 					}
 				},
 				{ atBegin: false }
@@ -250,6 +292,7 @@ export const loadProject = async (args: {
 			},
 			errors: createSubscribable(() => [
 				...(initializeError ? [initializeError] : []),
+				...(idError ? [idError] : []),
 				...(resolvedModules() ? resolvedModules()!.errors : []),
 				// have a query error exposed
 				//...(lintErrors() ?? []),

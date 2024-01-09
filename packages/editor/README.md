@@ -6,7 +6,7 @@ Fink enables translators to edit translations in a visual editor and submit them
 <br />
 <br />
 
-Used by 
+Used by
 
 <doc-proof organisations="osmosis, appflowy, remnote"></doc-proof>
 
@@ -30,25 +30,9 @@ Used by
 <br />
 <br />
 
-# Usage
+# Tutorial
 
-### Translate missing messages
-
-After your project is loaded, you can see your messages. Additionally, if your project file includes lint rules, you might encounter warnings for specific keys.
-
-### Push and commit your changes
-
-To save what you've translated, you can use the so called GitFloat menu on the bottom of the page. If you've made changes, you are able to push and commit them. This will automatically create an addition to the git history inside of your repository, which is useful for seeing who has changed what and working on a single source of truth.
-
-### How to filter messages
-
-**Filter after language**
-
-You can filter messages shown based on the language selected. You can find the filter on the top right corner of the editor.
-
-**Handle lint rules**
-
-Lint rules are a great way to ensure the quality of your translations, therefore you can select the lints you want to use in the editor. You can find it on the top left corner of the editor (filter options).
+[![Fink Guide Ad](https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/editor-guide-image.jpg) Read in-depth guide](https://inlang.com/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink)
 
 # Login via GitHub
 
@@ -59,5 +43,5 @@ If your repository can't be accessed anonymously, you can login via GitHub. The 
 This is how the editor could look like for your project:
 
 <doc-links>
-    <doc-link title="Open inlang example" icon="icon-park-outline:editor" href="/editor/github.com/inlang/example" description="inlang example repository in the editor"></doc-link>
+    <doc-link title="Open inlang example" icon="icon-park-outline:editor" href="/editor/github.com/opral/example" description="inlang example repository in the editor"></doc-link>
 </doc-links>

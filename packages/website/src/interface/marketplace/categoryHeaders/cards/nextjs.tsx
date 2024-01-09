@@ -15,7 +15,10 @@ const NextjsHeader = () => {
 						A small collection of tooling to get you going to build your global next app.
 					</p>
 					<div class="pt-6 flex gap-4">
-						<Button type="secondary" href="/g/2fg8ng94/guide-nilsjacobsen-buildAGlobalSvelteApp">
+						<Button
+							type="secondary"
+							href="/g/wxcebbig/guide-lorissigrist-useParaglideJsWithNextjsAppRouter"
+						>
 							{m.marketplace_application_header_svelte_button()}
 						</Button>
 					</div>
@@ -31,7 +34,7 @@ const NextjsHeader = () => {
 							alt="ParaglideJS"
 						/>
 					</div>
-					<h3 class="font-medium text-lg px-8 pb-1 z-20">Paraglide JS - 18n library</h3>
+					<h3 class="font-medium text-lg px-8 pb-1 z-20">Paraglide JS - i18n library</h3>
 					<p class="text-surface-500 px-8 pb-6 text-sm pr-20 z-20">
 						A i18n library without async resources. Build for the Next community.
 					</p>
