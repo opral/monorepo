@@ -19,7 +19,10 @@ import {
 import { createNodeishMemoryFs, normalizePath } from "@lix-js/fs"
 import { createMessage } from "./test-utilities/createMessage.js"
 import { tryCatch } from "@inlang/result"
-import { mockRepo, ciTestRepo } from "@lix-js/client"
+import { mockRepo } from "@lix-js/client"
+import { type Snapshot } from "@lix-js/fs"
+// eslint-disable-next-line no-restricted-imports -- test
+import { readFileSync } from "node:fs"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -161,6 +164,7 @@ describe("initialization", () => {
 	})
 
 	it("should generate projectId on missing projectid", async () => {
+		const ciTestRepo: Snapshot = JSON.parse(readFileSync("../mocks/", { encoding: "utf-8" }))
 		const repo = await mockRepo({ fromSnapshot: ciTestRepo })
 
 		const existing = await repo.nodeishFs
@@ -197,6 +201,7 @@ describe("initialization", () => {
 	})
 
 	it("should reuse projectId on existing projectid", async () => {
+		const ciTestRepo: Snapshot = JSON.parse(readFileSync("../mocks/", { encoding: "utf-8" }))
 		const repo = await mockRepo({ fromSnapshot: ciTestRepo })
 
 		repo.nodeishFs.writeFile("/project.inlang/project_id", "testId")
