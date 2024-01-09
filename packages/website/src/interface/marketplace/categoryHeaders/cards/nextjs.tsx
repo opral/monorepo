@@ -15,7 +15,10 @@ const NextjsHeader = () => {
 						A small collection of tooling to get you going to build your global next app.
 					</p>
 					<div class="pt-6 flex gap-4">
-						<Button type="secondary" href="/g/2fg8ng94/guide-nilsjacobsen-buildAGlobalSvelteApp">
+						<Button
+							type="secondary"
+							href="/g/wxcebbig/guide-lorissigrist-useParaglideJsWithNextjsAppRouter"
+						>
 							{m.marketplace_application_header_svelte_button()}
 						</Button>
 					</div>

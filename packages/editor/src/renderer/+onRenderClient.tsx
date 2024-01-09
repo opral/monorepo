@@ -9,8 +9,8 @@ import { MetaProvider } from "@solidjs/meta"
 import { posthog } from "posthog-js"
 import { publicEnv } from "@inlang/env-variables"
 
-posthog.init(publicEnv.PUBLIC_POSTHOG_TOKEN ?? "placeholder", {
-	api_host: import.meta.env.PROD ? "https://telemetry.inlang.com" : "http://localhost:4005",
+posthog.init(publicEnv.PUBLIC_POSTHOG_TOKEN ?? "", {
+	api_host: import.meta.env.PROD ? "https://tm.inlang.com" : "http://localhost:4005",
 	capture_performance: false,
 })
 
