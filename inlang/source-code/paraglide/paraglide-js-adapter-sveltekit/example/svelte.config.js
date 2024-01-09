@@ -1,7 +1,6 @@
 import adapter from "@sveltejs/adapter-static"
-import { vitePreprocess } from "@sveltejs/kit/vite"
+import { vitePreprocess } from "@sveltejs/vite-plugin-svelte"
 import { mdsvex } from "mdsvex"
-
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -16,13 +15,6 @@ const config = {
 
 		alias: {
 			$paraglide: "./src/paraglide/",
-		},
-
-		// Need for crawling to work until
-		// https://github.com/sveltejs/kit/issues/11133
-		// is fixed (PR open)
-		prerender: {
-			entries: ["/"],
 		},
 	},
 
