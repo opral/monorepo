@@ -6,7 +6,7 @@
 		"_dev": "paraglide-js compile --project ./project.inlang --watch",
 		"build": "paraglide-js compile --project ./project.inlang && tsc",
 		"pretest": "paraglide-js compile --project ./project.inlang",
-		"test": "vitest run"
+		"test": "pnpm build && vitest run"
 	},
 	"dependencies": {
 		"@inlang/paraglide-js": "workspace:*"
