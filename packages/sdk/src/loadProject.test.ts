@@ -183,7 +183,6 @@ describe("initialization", () => {
 		const result = await tryCatch(() =>
 			loadProject({
 				projectPath: "/project.inlang",
-				nodeishFs: repo.nodeishFs,
 				repo,
 				_import,
 			})
@@ -214,7 +213,6 @@ describe("initialization", () => {
 		const result = await tryCatch(() =>
 			loadProject({
 				projectPath: "/project.inlang",
-				nodeishFs: repo.nodeishFs,
 				repo,
 				_import,
 			})

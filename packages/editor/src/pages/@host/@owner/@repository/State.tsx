@@ -312,7 +312,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			if (lixErrors.length === 0 && newRepo) {
 				const project = solidAdapter(
 					await loadProject({
-						nodeishFs: newRepo.nodeishFs,
 						repo: newRepo,
 						projectPath: activeProject!,
 						_capture(id, props) {
