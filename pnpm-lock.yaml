@@ -2385,14 +2385,14 @@ importers:
         specifier: ^0.15.0
         version: 0.15.3
       vike:
-        specifier: 0.4.149
-        version: 0.4.149(vite@4.5.0)
+        specifier: 0.4.156
+        version: 0.4.156(vite@4.5.0)
       vite:
         specifier: 4.5.0
         version: 4.5.0(@types/node@20.5.9)
       vite-plugin-solid:
-        specifier: 2.7.0
-        version: 2.7.0(solid-js@1.7.11)(vite@4.5.0)
+        specifier: 2.8.0
+        version: 2.8.0(solid-js@1.7.11)(vite@4.5.0)
       vitest:
         specifier: 0.34.3
         version: 0.34.3
@@ -4109,7 +4109,7 @@ packages:
     dependencies:
       '@babel/core': 7.23.5
       '@babel/helper-plugin-utils': 7.22.5
-      '@babel/helper-validator-option': 7.22.15
+      '@babel/helper-validator-option': 7.23.5
       '@babel/plugin-syntax-jsx': 7.23.3(@babel/core@7.23.5)
       '@babel/plugin-transform-modules-commonjs': 7.23.3(@babel/core@7.23.5)
       '@babel/plugin-transform-typescript': 7.23.4(@babel/core@7.23.5)
@@ -4202,6 +4202,12 @@ packages:
 
   /@brillout/vite-plugin-import-build@0.2.22:
     resolution: {integrity: sha512-n5sv0HdCB5WC2QJSnTN6iS/F+sJsF0AmtsCCaQ+5+dRjgsoGGsa3auinJV8tuEog5WsX+3MF8RIwn3A/u0e04w==}
+    dependencies:
+      '@brillout/import': 0.2.3
+    dev: true
+
+  /@brillout/vite-plugin-server-entry@0.4.3:
+    resolution: {integrity: sha512-JDWFZOsSJfDo9511r7OJDeNON7x5mwIGNZCi1DQWaVuYK2cs9J/eD3Jwypg4M1ex9iAb/WvI+aSAEfsVGmNeMQ==}
     dependencies:
       '@brillout/import': 0.2.3
     dev: true
@@ -9924,6 +9930,19 @@ packages:
       html-entities: 2.3.3
       validate-html-nesting: 1.2.2
 
+  /babel-plugin-jsx-dom-expressions@0.37.13(@babel/core@7.23.5):
+    resolution: {integrity: sha512-oAEMMIgU0h1DmHn4ZDaBBFc08nsVJciLq9pF7g0ZdpeIDKfY4zXjXr8+/oBjKhXG8nyomhnTodPjeG+/ZXcWXQ==}
+    peerDependencies:
+      '@babel/core': ^7.20.12
+    dependencies:
+      '@babel/core': 7.23.5
+      '@babel/helper-module-imports': 7.18.6
+      '@babel/plugin-syntax-jsx': 7.23.3(@babel/core@7.23.5)
+      '@babel/types': 7.23.5
+      html-entities: 2.3.3
+      validate-html-nesting: 1.2.2
+    dev: true
+
   /babel-plugin-polyfill-corejs2@0.4.6(@babel/core@7.23.5):
     resolution: {integrity: sha512-jhHiWVZIlnPbEUKSSNb9YoWcQGdlTLq7z1GHL4AjFxaoOUMuuEVJ+Y4pAaQUGOGk93YsVCKPbqbfw3m0SM6H8Q==}
     peerDependencies:
@@ -9972,6 +9991,15 @@ packages:
     dependencies:
       '@babel/core': 7.23.5
       babel-plugin-jsx-dom-expressions: 0.36.18(@babel/core@7.23.5)
+
+  /babel-preset-solid@1.8.9(@babel/core@7.23.5):
+    resolution: {integrity: sha512-1awR1QCoryXtAdnjsrx/eVBTYz+tpHUDOdBXqG9oVV7S0ojf2MV/woR0+8BG+LMXVzIr60oKYzCZ9UZGafxmpg==}
+    peerDependencies:
+      '@babel/core': ^7.0.0
+    dependencies:
+      '@babel/core': 7.23.5
+      babel-plugin-jsx-dom-expressions: 0.37.13(@babel/core@7.23.5)
+    dev: true
 
   /bail@2.0.2:
     resolution: {integrity: sha512-0xO6mYd7JB2YesxDKplafRpsiOzPt9V02ddPCLbY1xYGPOX24NTyN50qnUxgCPcSoYMhKpAuBTjQoRZCAkUDRw==}
@@ -21763,6 +21791,32 @@ packages:
       vite: 4.5.0(@types/node@20.5.9)
     dev: true
 
+  /vike@0.4.156(vite@4.5.0):
+    resolution: {integrity: sha512-CaeG+clu+oLDKSv4B+6aOYoWNUb/URF6dK3/AeC9NJD0XvsfW8at1yQO5hA3M1SVWpe7c/tUGw1uYVgceT4JMw==}
+    engines: {node: '>=16.0.0'}
+    hasBin: true
+    peerDependencies:
+      react-streaming: '>=0.3.5'
+      vite: '>=3.1.0'
+    peerDependenciesMeta:
+      react-streaming:
+        optional: true
+    dependencies:
+      '@brillout/import': 0.2.3
+      '@brillout/json-serializer': 0.5.8
+      '@brillout/picocolors': 1.0.10
+      '@brillout/require-shim': 0.1.2
+      '@brillout/vite-plugin-server-entry': 0.4.3
+      acorn: 8.11.2
+      cac: 6.7.14
+      es-module-lexer: 1.4.1
+      esbuild: 0.19.8
+      fast-glob: 3.3.2
+      sirv: 2.0.3
+      source-map-support: 0.5.21
+      vite: 4.5.0(@types/node@20.5.9)
+    dev: true
+
   /vite-node@0.33.0(@types/node@20.10.4):
     resolution: {integrity: sha512-19FpHYbwWWxDr73ruNahC+vtEdza52kA90Qb3La98yZ0xULqV8A5JLNPUff0f5zID4984tW7l3DH2przTJUZSw==}
     engines: {node: '>=v14.18.0'}
@@ -21958,6 +22012,25 @@ packages:
       vitefu: 0.2.5(vite@4.4.9)
     transitivePeerDependencies:
       - supports-color
+
+  /vite-plugin-solid@2.8.0(solid-js@1.7.11)(vite@4.5.0):
+    resolution: {integrity: sha512-n5FAm7ZmTl94VWUoiJCgG7bouF2NlC9CA1wY/qbVnkFbYDWk++bFWyNoU48aLJ+lMtzNeYzJypJXOHzFKxL9xA==}
+    peerDependencies:
+      solid-js: ^1.7.2
+      vite: ^3.0.0 || ^4.0.0 || ^5.0.0
+    dependencies:
+      '@babel/core': 7.23.5
+      '@babel/preset-typescript': 7.23.3(@babel/core@7.23.5)
+      '@types/babel__core': 7.20.4
+      babel-preset-solid: 1.8.9(@babel/core@7.23.5)
+      merge-anything: 5.1.7
+      solid-js: 1.7.11
+      solid-refresh: 0.5.3(solid-js@1.7.11)
+      vite: 4.5.0(@types/node@20.5.9)
+      vitefu: 0.2.5(vite@4.5.0)
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
 
   /vite-plugin-watch@0.2.0:
     resolution: {integrity: sha512-MBlqIuL8OW6YBgsDuIq39/2HPOjz9E1na595k3EoFQVFJiL3IfnKGKrqNe6OYj+LIA67opun13YvgterMWSqgA==}
