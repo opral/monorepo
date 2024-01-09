@@ -6,7 +6,7 @@
  */
 export const repositories: Repositories = [
 	{
-		owner: "inlang",
+		owner: "opral",
 		repository: "example",
 		description: "Example repository that showcases inlang.",
 	},

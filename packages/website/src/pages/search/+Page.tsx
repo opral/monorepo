@@ -38,7 +38,8 @@ export default function Page(props: {
 		<>
 			<Title>
 				{m.marketplace_search_seo_title()}
-				{currentPageContext.urlParsed.search.q !== ""
+				{currentPageContext.urlParsed.search.q !== "" &&
+				currentPageContext.urlParsed.search.q !== undefined
 					? ` ${
 							currentPageContext.urlParsed.search.q
 					  } ${m.marketplace_search_seo_global_products()}`
