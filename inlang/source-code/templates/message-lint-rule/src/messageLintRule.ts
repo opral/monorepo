@@ -1,4 +1,4 @@
-import { MessageLintRule } from "@inlang/sdk"
+import type { MessageLintRule } from "@inlang/sdk"
 import { id, displayName, description } from "../marketplace-manifest.json"
 
 export const messageLintRule: MessageLintRule = {

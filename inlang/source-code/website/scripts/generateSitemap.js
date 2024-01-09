@@ -42,35 +42,37 @@ async function generateSitemap() {
 		if (route.dynamic && route.path === "/m") {
 			for (const item of registry) {
 				if (!item.id.startsWith("guide.")) {
-					for (const locale of locales) {
-						content = `${content}${formatPage(
-							siteURL +
-								locale +
-								route.path +
-								"/" +
-								item.uniqueID +
-								"/" +
-								item.id.replaceAll(".", "-"),
-							publishDate
-						)}`
-					}
+					// TODO: Include locales again when markdown editor is ready
+					// for (const locale of locales) {
+					content = `${content}${formatPage(
+						siteURL +
+							// locale +
+							route.path +
+							"/" +
+							item.uniqueID +
+							"/" +
+							item.id.replaceAll(".", "-"),
+						publishDate
+					)}`
+					// }
 				}
 			}
 		} else if (route.dynamic && route.path === "/g") {
 			for (const item of registry) {
 				if (item.id.startsWith("guide.")) {
-					for (const locale of locales) {
-						content = `${content}${formatPage(
-							siteURL +
-								locale +
-								route.path +
-								"/" +
-								item.uniqueID +
-								"/" +
-								item.id.replaceAll(".", "-"),
-							publishDate
-						)}`
-					}
+					// TODO: Include locales again when markdown editor is ready
+					// for (const locale of locales) {
+					content = `${content}${formatPage(
+						siteURL +
+							// locale +
+							route.path +
+							"/" +
+							item.uniqueID +
+							"/" +
+							item.id.replaceAll(".", "-"),
+						publishDate
+					)}`
+					// }
 				}
 			}
 		} else if (route.dynamic && route.path === "/c") {
@@ -91,14 +93,20 @@ async function generateSitemap() {
 				new URL("./inlang" + route.path + "/plugin/tableOfContents.json", repositoryRoot),
 				"utf-8"
 			)
+			const lintRuleTableOfContents = await fs.readFile(
+				new URL("./inlang" + route.path + "/lint-rule/tableOfContents.json", repositoryRoot),
+				"utf-8"
+			)
 
 			if (
 				Array.isArray(JSON.parse(sdkTableOfContents)) &&
-				Array.isArray(JSON.parse(pluginTableOfContents))
+				Array.isArray(JSON.parse(pluginTableOfContents)) &&
+				Array.isArray(JSON.parse(lintRuleTableOfContents))
 			) {
 				const tableOfContents = [
 					...JSON.parse(sdkTableOfContents),
 					...JSON.parse(pluginTableOfContents),
+					...JSON.parse(lintRuleTableOfContents),
 				]
 				for (const item of tableOfContents) {
 					for (const locale of locales) {
@@ -152,6 +160,13 @@ async function generateSitemap() {
 							}
 					}
 				}
+			}
+		} else if (route.path === "/newsletter"){
+			for (const locale of locales) {
+				content = `${content}${formatPage(
+					siteURL + locale + route.path,
+					publishDate
+				)}`
 			}
 		}
 	}

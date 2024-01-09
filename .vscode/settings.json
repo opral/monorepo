@@ -6,10 +6,8 @@
 	"eslint.format.enable": true,
 	// ---------------------------------
 	"editor.codeActionsOnSave": {
-		"source.fixAll": false,
-		// only fix eslint issues on save (no typescript issues)
-		// see https://github.com/microsoft/vscode/issues/109530
-		"source.fixAll.eslint": true
+		"source.fixAll": "never",
+		"source.fixAll.eslint": "explicit"
 	},
 	"gitlens.showWelcomeOnInstall": false,
 	"gitlens.showWhatsNewAfterUpgrades": false,
@@ -38,5 +36,13 @@
 	},
 	"[typescript]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	}
+	},
+	"cSpell.words": ["inlang"],
+	"[astro]": {
+		"editor.defaultFormatter": "astro-build.astro-vscode"
+	},
+	"[svg]": {
+		"editor.defaultFormatter": "jock.svg"
+	},
+	"testing.automaticallyOpenPeekView": "never"
 }

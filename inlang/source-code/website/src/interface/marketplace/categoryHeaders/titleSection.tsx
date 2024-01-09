@@ -10,13 +10,13 @@ interface TitleSectionProps {
 }
 const TitleSection = (props: TitleSectionProps) => {
 	return (
-		<div class="flex justify-between md:items-end border-b border-surface-200 pb-4 mb-8 pt-6 mt-4 gap-6">
+		<div class="flex justify-between items-center border-b border-surface-200 pb-4 mb-8 pt-6 mt-4 gap-6 flex-wrap">
 			<Show when={props.icon}>
 				<div class="flex md:justify-center items-stretch">
 					<img class="w-10 md:w-14 h-10 md:h-14" src={props.icon} alt={props.title} />
 				</div>
 			</Show>
-			<div class="flex-1">
+			<div class="flex-1 min-w-[70%]">
 				<h1 class="text-2xl font-semibold  text-surface-900 max-w-[400px] leading-snug tracking-tight">
 					{props.title}
 				</h1>

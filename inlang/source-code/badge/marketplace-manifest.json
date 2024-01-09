@@ -15,8 +15,19 @@
 	"readme": {
 		"en": "./inlang/source-code/badge/README.md"
 	},
-	"keywords": ["apps", "badge", "markdown", "translation", "status", "lix"],
+	"keywords": [
+		"apps",
+		"badge",
+		"markdown",
+		"translation",
+		"status",
+		"lix",
+		"svelte",
+		"nextjs",
+		"inlang"
+	],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
-	"license": "Apache-2.0"
+	"license": "Apache-2.0",
+	"pricing": "Free"
 }

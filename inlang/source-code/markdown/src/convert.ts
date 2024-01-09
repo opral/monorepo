@@ -73,8 +73,8 @@ export async function convert(markdown: string): Promise<string> {
 			a: "text-primary doc-font-medium hover:text-hover-primary doc-no-underline doc-inline-block",
 			code: "doc-px-1 doc-py-0.5 doc-bg-surface-100 doc-rounded-lg bg-surface-200 doc-my-6 doc-text-sm doc-font-mono text-surface-900",
 			pre: "doc-relative",
-			ul: "doc-list-disc doc-list-inside doc-space-y-3",
-			ol: "doc-list-decimal doc-list-inside doc-space-y-3",
+			ul: "doc-list-disc doc-list-inside doc-space-y-3 pl-6",
+			ol: "doc-list-decimal doc-list-inside doc-space-y-3 pl-6",
 			li: "doc-list-outside",
 			table:
 				"doc-table-auto doc-w-full doc-my-6 doc-rounded-xl doc-text-left doc-max-w-[100%] doc-overflow-x-scroll",
@@ -164,7 +164,6 @@ export async function convert(markdown: string): Promise<string> {
 						},
 					]),
 						(node.properties.target = "_blank")
-					node.properties.href = node.properties.href + "?ref=inlang.com"
 				} else if (
 					node.tagName === "a" &&
 					node.properties.href &&

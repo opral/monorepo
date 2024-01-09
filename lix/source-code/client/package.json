@@ -1,13 +1,16 @@
 {
 	"name": "@lix-js/client",
-	"version": "0.2.0",
+	"version": "0.5.0",
 	"type": "module",
 	"publishConfig": {
 		"access": "public"
 	},
 	"exports": {
-		".": "./dist/index.js"
+		".": "./dist/index.js",
+		"./src/*.ts": "./src/*.ts",
+		"./src/browser-auth.ts": "./src/browser-auth.ts"
 	},
+	"types": "./dist/index.d.ts",
 	"files": [
 		"./dist",
 		"./src"
@@ -23,16 +26,15 @@
 	},
 	"dependencies": {
 		"@lix-js/fs": "workspace:*",
-		"@octokit/types": "11.1.0",
+		"@octokit/types": "12.4.0 ",
 		"isomorphic-git": "1.24.5",
-		"octokit": "3.1.0",
-		"solid-js": "1.7.11",
-		"@inlang/env-variables": "workspace:*"
+		"octokit": "3.1.2",
+		"solid-js": "1.7.11"
 	},
 	"license": "Apache-2.0",
 	"devDependencies": {
-		"@vitest/coverage-v8": "0.34.3",
+		"@vitest/coverage-v8": "1.1.1",
 		"typescript": "5.2.2",
-		"vitest": "0.34.3"
+		"vitest": "1.1.1"
 	}
 }

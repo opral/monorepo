@@ -3,6 +3,7 @@ import { Message, ProjectSettings, loadProject, type InlangProject } from "@inla
 import path from "node:path"
 import fs from "node:fs/promises"
 import { compile, writeOutput, Logger } from "@inlang/paraglide-js/internal"
+import crypto from "node:crypto"
 
 const PLUGIN_NAME = "unplugin-paraglide"
 
@@ -24,7 +25,12 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 	//Keep track of how many times we've compiled
 	let numCompiles = 0
 
+	let previousMessagesHash: string | undefined = undefined
+
 	async function triggerCompile(messages: readonly Message[], settings: ProjectSettings) {
+		const currentMessagesHash = hashMessages(messages, settings)
+		if (currentMessagesHash === previousMessagesHash) return
+
 		if (messages.length === 0) {
 			logger.warn(`No messages found - Skipping compilation into ${options.outdir}`)
 			return
@@ -34,6 +40,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		const output = compile({ messages, settings })
 		await writeOutput(outputDirectory, output, fs)
 		numCompiles++
+		previousMessagesHash = currentMessagesHash
 	}
 
 	function logMessageChange() {
@@ -88,3 +95,10 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		},
 	}
 })
+
+function hashMessages(messages: readonly Message[], settings: ProjectSettings): string {
+	const hash = crypto.createHash("sha256")
+	hash.update(JSON.stringify(messages))
+	hash.update(JSON.stringify(settings))
+	return hash.digest("hex")
+}

@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/plugin-m-function-matcher",
-	"version": "0.6.1",
+	"version": "0.6.4",
 	"type": "module",
 	"exports": {
 		".": "./dist/index.js"
@@ -11,6 +11,12 @@
 	"publishConfig": {
 		"access": "public"
 	},
+	"recommends": [
+		"m/tdozzpa",
+		"m/2qj2w8pu",
+		"m/r7kp499g",
+		"m/gerre34r"
+	],
 	"scripts": {
 		"postinstall": "patch-package --error-on-fail",
 		"dev": "inlang module build --entry ./src/index.ts --outdir ./dist --watch",

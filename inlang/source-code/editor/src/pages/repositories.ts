@@ -6,7 +6,7 @@
  */
 export const repositories: Repositories = [
 	{
-		owner: "inlang",
+		owner: "opral",
 		repository: "example",
 		description: "Example repository that showcases inlang.",
 	},
@@ -16,15 +16,15 @@ export const repositories: Repositories = [
 		description: "Scheduling infrastructure for absolutely everyone.",
 	},
 	{
-		owner: "LAION-AI",
-		repository: "Open-Assistant",
+		owner: "hiddify",
+		repository: "hiddify-next",
 		description:
-			"OpenAssistant is a chat-based assistant that understands tasks, can interact with third-party systems, and retrieve information dynamically to do so.",
+			"Multi-platform auto-proxy client, supporting Sing-box, X-ray, TUIC, Hysteria, Reality, Trojan, SSH etc. ",
 	},
 	{
-		owner: "jitsi",
-		repository: "jitsi-meet",
-		description: "Jitsi Meet - Secure, Simple and Scalable Video Conferences.",
+		owner: "StanGirard",
+		repository: "quivr",
+		description: "Your GenAI Second Brain 🧠",
 	},
 	{
 		owner: "AppFlowy-IO",
@@ -43,9 +43,20 @@ export const repositories: Repositories = [
 		description: "Web interface for Osmosis Zone",
 	},
 	{
+		owner: "LAION-AI",
+		repository: "Open-Assistant",
+		description:
+			"OpenAssistant is a chat-based assistant that understands tasks, can interact with third-party systems, and retrieve information dynamically to do so.",
+	},
+	{
 		owner: "jazzband",
 		repository: "djangorestframework-simplejwt",
 		description: "A JSON Web Token authentication plugin for the Django REST Framework.",
+	},
+	{
+		owner: "flornkm",
+		repository: "florians-site",
+		description: "Personal Website of Florian Kiem.",
 	},
 	{
 		owner: "hecker",

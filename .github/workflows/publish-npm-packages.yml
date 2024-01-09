@@ -4,12 +4,17 @@ on:
   # manually triggering the workflow if desired
   workflow_dispatch:
 
-  push:
-    branches:
-      - main
+  # trigger this workflow when the CI workflow is completed
+  workflow_run:
+    workflows: ["Continuous Integration"]
+    branches: [main]
+    types: 
+      - completed
 
 jobs:
   publish-npm-packages:
+    # check that the CI workflow was actually successful
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     environment: npm
     steps:
@@ -31,10 +36,6 @@ jobs:
         uses: dopplerhq/cli-action@v2
 
       - run: doppler run -- pnpm build
-        env:
-          DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
-
-      - run: doppler run -- pnpm test
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 

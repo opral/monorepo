@@ -9,6 +9,7 @@
 		"asvuch18": "./inlang/source-code/message-lint-rules/identicalPattern/marketplace-manifest.json",
 		"10l6oyv1": "./inlang/source-code/message-lint-rules/messageWithoutSource/marketplace-manifest.json",
 		"4cxm3eqi": "./inlang/source-code/message-lint-rules/missingTranslation/marketplace-manifest.json",
+		"teldgniy": "./inlang/source-code/message-lint-rules/validJsIdentifier/marketplace-manifest.json",
 		"gkerinvo": "./inlang/source-code/message-lint-rules/snakeCaseId/marketplace-manifest.json",
 		"ewkole66": "./inlang/source-code/message-lint-rules/camelCaseId/marketplace-manifest.json",
 		"3i8bor92": "./inlang/source-code/plugins/i18next/marketplace-manifest.json",
@@ -17,6 +18,7 @@
 		"8y8sxj09": "./inlang/source-code/versioned-interfaces/language-tag/marketplace-manifest.json",
 		"ezdlll4o": "./inlang/source-code/versioned-interfaces/translatable/marketplace-manifest.json",
 		"gerre34r": "./inlang/source-code/paraglide/paraglide-js/marketplace-manifest.json",
+		"n860p17j": "./inlang/source-code/paraglide/paraglide-js-adapter-solidstart/marketplace-manifest.json",
 		"632iow21": "./inlang/source-code/plugins/m-function-matcher/marketplace-manifest.json",
 		"698iow33": "./inlang/source-code/plugins/t-function-matcher/marketplace-manifest.json",
 		"hheug211": "./inlang/external-projects/next-intl/marketplace-manifest.json",
@@ -26,7 +28,8 @@
 		"0023fsjj": "./inlang/external-projects/i18n-ally/marketplace-manifest.json",
 		"1153khjh": "./inlang/external-projects/tolgee/marketplace-manifest.json",
 		"kkfjusgu": "./inlang/external-projects/svelte-i18n/marketplace-manifest.json",
-		"92fst3wd": "./inlang/source-code/globelens/marketplace-manifest.json"
+		"92fst3wd": "./inlang/source-code/globelens/marketplace-manifest.json",
+		"193hsyds": "./inlang/source-code/plugins/next-intl/marketplace-manifest.json"
 	},
 	"g": {
 		"94ng94n4": "./inlang/guides/how-to-inlang-app/marketplace-manifest.json",
@@ -37,6 +40,10 @@
 		"6ddyhpoi": "./inlang/guides/contribute-translations-with-fink/marketplace-manifest.json",
 		"uxohikde": "./inlang/guides/use-paraglide-with-nextjs-pages-router/marketplace-manifest.json",
 		"wxcebbig": "./inlang/guides/use-paraglide-with-nextjs-app-router/marketplace-manifest.json",
-		"38fnf03n": "./inlang/guides/localization-strategy/marketplace-manifest.json"
+		"38fnf03n": "./inlang/guides/localization-strategy/marketplace-manifest.json",
+		"lubhdyua": "./inlang/guides/build-a-global-solidstart-app/marketplace-manifest.json",
+		"7777asdy": "./inlang/guides/ecosystem-compatible/marketplace-manifest.json",
+		"hhfueysj": "./inlang/guides/next-intl-with-ide-extension/marketplace-manifest.json",
+		"utqgkmzp": "./inlang/guides/build-an-internationalized-astro-app-using-paraglide/marketplace-manifest.json"
 	}
 }

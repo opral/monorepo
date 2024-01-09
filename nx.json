@@ -1,12 +1,20 @@
 {
 	"$schema": "./node_modules/nx/schemas/nx-schema.json",
 	"namedInputs": {
-		"default": [
-			"{projectRoot}/**/*"
-		],
-		"doppler": [
+		"default": ["{projectRoot}/**/*"],
+		"publicEnv": [
 			{
 				"runtime": "env | grep ^PUBLIC_"
+			}
+		],
+		"nodeVersion": [
+			{
+				"runtime": "node --version"
+			}
+		],
+		"platform": [
+			{
+				"runtime": " node -e 'console.log(process.platform)'"
 			}
 		]
 	},
@@ -15,11 +23,7 @@
 			"dependsOn": [
 				"^build"
 			],
-			"inputs": [
-				"default",
-				"^default",
-				"doppler"
-			],
+			"inputs": ["default", "^default", "publicEnv", "nodeVersion", "platform"],
 			"cache": true
 		},
 		"dev": {
@@ -28,9 +32,7 @@
 			]
 		},
 		"test": {
-			"dependsOn": [
-				"^build"
-			],
+			"dependsOn": ["^build", "publicEnv", "nodeVersion", "platform"],
 			"cache": true
 		},
 		"lint": {

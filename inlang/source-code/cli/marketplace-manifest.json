@@ -1,6 +1,6 @@
 {
 	"id": "app.inlang.cli",
-	"icon": "https://raw.githubusercontent.com/inlang/monorepo/e318fc5289b08664b9df54a74f7850d84be6e87b/inlang/source-code/cli/assets/cli-icon.png",
+	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/cli/assets/cli-icon.png",
 	"gallery": [
 		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/cli-marketplace-cover.jpg",
 		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/cli-gallery/cli-gallery-image-1.jpg",
@@ -8,15 +8,28 @@
 		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/cli-gallery/cli-gallery-image-3.jpg"
 	],
 	"displayName": {
-		"en": "CLI"
+		"en": "CLI - Translation Automation"
 	},
 	"description": {
-		"en": "Command line interface for inlang projects. Many commands and the possibility to do automation."
+		"en": "Command line interface for inlang projects. Many commands and the possibility to do translation automation."
 	},
 	"readme": {
 		"en": "./inlang/source-code/cli/README.md"
 	},
-	"keywords": ["cli", "commands", "application", "website", "developer", "ai", "ci/cd", "lix"],
+	"keywords": [
+		"cli",
+		"commands",
+		"application",
+		"website",
+		"developer",
+		"ai",
+		"ci/cd",
+		"lix",
+		"svelte",
+		"nextjs",
+		"inlang"
+	],
+	"pricing": "free",
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0"

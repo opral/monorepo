@@ -46,7 +46,7 @@ Having an adapter is only required if you want to use paraglide-js with a framew
 
 <doc-links>
     <doc-link title="Adapter for Svelte" icon="simple-icons:svelte" href="https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-svelte/example" description="Go to GitHub example"></doc-link>
-    <doc-link title="Adapter for SolidJS" icon="tabler:brand-solidjs" href="https://discord.com/channels/897438559458430986/1163823207128776795" description="View progress"></doc-link>
+    <doc-link title="Adapter for SolidJS" icon="tabler:brand-solidjs" href="https://inlang.com/m/n860p17j/library-inlang-paraglideJsAdapterSolidStart" description="Go to Adapter"></doc-link>
     <doc-link title="Adapter for NextJS" icon="tabler:brand-nextjs" href="https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next" description="Go to GitHub example"></doc-link>
     <doc-link title="Adapter for Vite" icon="tabler:brand-vite" href="https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-vite" description="Go to GitHub"></doc-link>
 </doc-links>
@@ -126,7 +126,7 @@ Paraglide JS provides five exports in `./paraglide/runtime.js`:
 
 ## Setting the language
 
-You can set the current language tag by calling `setLanguageTag()`. Any subsequent calls to either `languageTag()` or a message function will return the new language tag.
+You can set the current [language tag](/m/8y8sxj09/library-inlang-languageTag) by calling `setLanguageTag()`. Any subsequent calls to either `languageTag()` or a message function will return the new language tag.
 
 ```js
 import { setLanguageTag } from "./paraglide/runtime"
@@ -139,11 +139,11 @@ setLanguageTag("en")
 m.hello() // Hello world!
 ```
 
-The language tag is global, so you need to be careful with it on the server to make sure multiple requests don't interfere with each other. That's why we recommend using an adapter for your framework. Adapters integrate with the framework's lifecycle and ensure that the language tag is managed correctly.
+The [language tag](/m/8y8sxj09/library-inlang-languageTag) is global, so you need to be careful with it on the server to make sure multiple requests don't interfere with each other. That's why we recommend using an adapter for your framework. Adapters integrate with the framework's lifecycle and ensure that the language tag is managed correctly.
 
 ## Reacting to a language change
 
-You can react to a language change by calling `onSetLanguageTag()`. This function is called whenever the language tag changes.
+You can react to a language change by calling `onSetLanguageTag()`. This function is called whenever the [language tag](/m/8y8sxj09/library-inlang-languageTag) changes.
 
 ```js
 import { setLanguageTag, onSetLanguageTag } from "./paraglide/runtime"
@@ -207,7 +207,7 @@ Inlang Paraglide-JS consists of four main parts:
 | ------------ | -------------------------------------------------------------------------- |
 | **Compiler** | Compiles messages into tree-shakable message functions                     |
 | **Messages** | The compiled tree-shakable message functions                               |
-| **Runtime**  | A runtime that resolves the language tag of the current user               |
+| **Runtime**  | A runtime that resolves the [language tag](/m/8y8sxj09/library-inlang-languageTag) of the current user               |
 | **Adapter**  | (if required) An adapter that adjusts the runtime for different frameworks |
 
 ## Compiler
@@ -300,7 +300,7 @@ View the source of `./paraglide/runtime.js` to find the latest runtime API and d
 
 Paraglide-JS can be adapted to any framework or environment by calling `setLanguageTag()` and `onSetLanguageTag()`.
 
-1.  `setLanguageTag()` can be used to set a getter function for the language tag. The getter function can be used to resolve server-side language tags or to resolve the language tag from a global state management library like Redux or Vuex.
+1.  `setLanguageTag()` can be used to set a getter function for the [language tag](/m/8y8sxj09/library-inlang-languageTag). The getter function can be used to resolve server-side language tags or to resolve the language tag from a global state management library like Redux or Vuex.
 2.  `onSetLanguageTag()` can be used to trigger side-effects such as updating the UI, or requesting the site in the new language from the server.
 
 # Writing an Adapter
@@ -309,7 +309,7 @@ The following example adapts Paraglide-JS to a fictitious metaframework like Nex
 
 The goal is to provide a high-level understanding of how to adapt Paraglide-JS to a framework. Besides this example, we recommend viewing the source-code of available adapters. In general, only two functions need to be called to adapt Paraglide-JS to a framework:
 
-1. `setLanguageTag()`: to set the language tag
+1. `setLanguageTag()`: to set the [language tag](/m/8y8sxj09/library-inlang-languageTag)
 2. `onSetLanguageTag()`: to trigger a side-effect when the language changes
 
 ```tsx

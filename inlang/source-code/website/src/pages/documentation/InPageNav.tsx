@@ -1,5 +1,5 @@
 import { currentPageContext } from "#src/renderer/state.js"
-import { For, createEffect, createSignal, onMount } from "solid-js"
+import { For, createEffect, createSignal, onMount, Show } from "solid-js"
 
 interface InPageNavProps {
 	markdown: Awaited<ReturnType<any>>
@@ -127,48 +127,50 @@ const InPageNav = (props: InPageNavProps) => {
 	return (
 		<div>
 			<ul role="list" class="w-full space-y-3">
-				<For each={Object.keys(tableOfContents())}>
-					{(sectionTitle) => (
-						<li>
-							<a
-								onClick={(e: any) => {
-									e.preventDefault()
-									scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()), "smooth")
-									setHighlightedAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
-								}}
-								class={
-									(isSelected(replaceChars(sectionTitle.toString().toLowerCase()))
-										? "text-primary font-semibold "
-										: "text-surface-900 hover:text-on-background ") +
-									"tracking-wide cursor-pointer text-sm block w-full font-normal mb-2"
-								}
-							>
-								{sectionTitle.replace("#", "")}
-							</a>
-							<For each={tableOfContents()[sectionTitle]}>
-								{(heading) => (
-									<li>
-										<a
-											onClick={(e: any) => {
-												e.preventDefault()
-												scrollToAnchor(replaceChars(heading.toString().toLowerCase()), "smooth")
-												setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
-											}}
-											class={
-												"text-sm cursor-pointer tracking-widem block w-full border-l pl-3 py-1 hover:border-l-info/80 " +
-												(highlightedAnchor() === replaceChars(heading.toString().toLowerCase())
-													? "font-medium text-on-background border-l-on-background "
-													: "text-info/80 hover:text-on-background font-normal border-l-info/20 ")
-											}
-										>
-											{heading.replace("#", "")}
-										</a>
-									</li>
-								)}
-							</For>
-						</li>
-					)}
-				</For>
+				<Show when={Object.values(tableOfContents()).some((array) => array.length > 0)}>
+					<For each={Object.keys(tableOfContents())}>
+						{(sectionTitle) => (
+							<li>
+								<a
+									onClick={(e: any) => {
+										e.preventDefault()
+										scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()), "smooth")
+										setHighlightedAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
+									}}
+									class={
+										(isSelected(replaceChars(sectionTitle.toString().toLowerCase()))
+											? "text-primary font-semibold "
+											: "text-surface-900 hover:text-on-background ") +
+										"tracking-wide cursor-pointer text-sm block w-full font-normal mb-2"
+									}
+								>
+									{sectionTitle.replace("#", "")}
+								</a>
+								<For each={tableOfContents()[sectionTitle]}>
+									{(heading) => (
+										<li>
+											<a
+												onClick={(e: any) => {
+													e.preventDefault()
+													scrollToAnchor(replaceChars(heading.toString().toLowerCase()), "smooth")
+													setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
+												}}
+												class={
+													"text-sm cursor-pointer tracking-widem block w-full border-l pl-3 py-1 hover:border-l-info/80 " +
+													(highlightedAnchor() === replaceChars(heading.toString().toLowerCase())
+														? "font-medium text-on-background border-l-on-background "
+														: "text-info/80 hover:text-on-background font-normal border-l-info/20 ")
+												}
+											>
+												{heading.replace("#", "")}
+											</a>
+										</li>
+									)}
+								</For>
+							</li>
+						)}
+					</For>
+				</Show>
 			</ul>
 		</div>
 	)

@@ -3,13 +3,15 @@ import { createInlangConfigFile } from "./createInlangConfigFile.js"
 import { loadProject, type InlangProject } from "@inlang/sdk"
 import * as vscode from "vscode"
 import { determineClosestPath } from "./determineClosestPath.js"
-import { isInWorkspaceRecommendation } from "./recommendation.js"
+// TODO add a project UUID to the tele.groups internal #196
+// import { isInWorkspaceRecommendation } from "./recommendation.js"
 import { telemetry } from "../services/telemetry/implementation.js"
 import { createFileSystemMapper } from "./createFileSystemMapper.js"
 import { _import } from "./import/_import.js"
 import type { TelemetryEvents } from "../services/telemetry/events.js"
 import { tryCatch } from "@inlang/result"
 import fs from "node:fs/promises"
+import { normalizePath } from "@lix-js/fs"
 
 // Helper Functions
 export function getActiveTextEditor(): vscode.TextEditor | undefined {
@@ -35,7 +37,7 @@ export async function initProject(args: {
 	// Load project
 	const activeTextEditor = getActiveTextEditor()
 	if (!activeTextEditor) {
-		return { project: undefined, error: new Error("No active test editor found – aborting.") }
+		return { project: undefined, error: new Error("No active text editor found – aborting.") }
 	}
 
 	const closestProjectFilePath = determineClosestPath({
@@ -43,25 +45,26 @@ export async function initProject(args: {
 		to: activeTextEditor.document.uri.path,
 	})
 	const closestProjectFilePathUri = vscode.Uri.parse(closestProjectFilePath)
-
-	if (args.gitOrigin) {
-		telemetry.groupIdentify({
-			groupType: "repository",
-			groupKey: args.gitOrigin,
-			properties: {
-				name: args.gitOrigin,
-				isInWorkspaceRecommendation: await isInWorkspaceRecommendation({
-					workspaceFolder: args.workspaceFolder,
-				}),
-			},
-		})
-	}
+	const closestProjectFilePathUriNormalized = normalizePath(closestProjectFilePathUri.fsPath)
+	// TODO add a project UUID to the tele.groups internal #196
+	// 	if (args.gitOrigin) {
+	// 		telemetry.groupIdentify({
+	// 			groupType: "repository",
+	// 			groupKey: args.gitOrigin,
+	// 			properties: {
+	// 				name: args.gitOrigin,
+	// 				isInWorkspaceRecommendation: await isInWorkspaceRecommendation({
+	// 					workspaceFolder: args.workspaceFolder,
+	// 				}),
+	// 			},
+	// 		})
+	// 	}
 
 	// REMOVE THIS HARDCODED ASSUMPTION FOR MULTI PROJECT SUPPORT
 	// Has been implemented for https://github.com/inlang/monorepo/pull/1762
 	if (
-		(closestProjectFilePathUri.fsPath.endsWith(".inlang/settings.json") === false ||
-			closestProjectFilePathUri.fsPath.endsWith("project.inlang.json") === false) === false
+		(closestProjectFilePathUriNormalized.endsWith(".inlang/settings.json") === false ||
+			closestProjectFilePathUriNormalized.endsWith("project.inlang.json") === false) === false
 	) {
 		throw new Error("INTERNAL BUG 29j3d. Please report this to the inlang team.")
 	}
@@ -69,11 +72,11 @@ export async function initProject(args: {
 	const { data: project, error } = await tryCatch(() =>
 		loadProject({
 			// SEE THROW ABOVE: remove the /settings.json from the path
-			projectPath: closestProjectFilePathUri.fsPath.includes(".inlang/settings.json")
+			projectPath: closestProjectFilePathUriNormalized.includes(".inlang/settings.json")
 				? // */lucky-elephant.inlang/settings.json -> */lucky-elephant.inlang
-				  closestProjectFilePathUri.fsPath.replace("/settings.json", "")
+				  closestProjectFilePathUriNormalized.replace("/settings.json", "")
 				: // */project.inlang.json -> */project.inlang
-				  closestProjectFilePathUri.fsPath.replace(".json", ""),
+				  closestProjectFilePathUriNormalized.replace(".json", ""),
 			nodeishFs: createFileSystemMapper(args.workspaceFolder.uri.fsPath, fs),
 			_import: _import(args.workspaceFolder.uri.fsPath),
 			_capture(id, props) {

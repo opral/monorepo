@@ -1,6 +1,6 @@
 {
 	"name": "@lix-js/fs",
-	"version": "0.4.0",
+	"version": "0.5.0",
 	"type": "module",
 	"publishConfig": {
 		"access": "public"
@@ -8,6 +8,7 @@
 	"exports": {
 		".": "./dist/index.js"
 	},
+	"types": "./dist/*.d.ts",
 	"files": [
 		"./dist",
 		"./src"
@@ -15,19 +16,16 @@
 	"scripts": {
 		"build": "tsc --build",
 		"dev": "tsc --watch",
-		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"test": "vitest run --passWithNoTests --coverage",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
 	},
-	"dependencies": {
-		"js-base64": "^3.7.5"
-	},
 	"license": "Apache-2.0",
 	"devDependencies": {
 		"@types/node": "20.8.10",
-		"tsd": "^0.28.1",
 		"@vitest/coverage-v8": "0.34.3",
+		"tsd": "^0.28.1",
 		"typescript": "5.2.2",
 		"vitest": "0.34.3"
 	}

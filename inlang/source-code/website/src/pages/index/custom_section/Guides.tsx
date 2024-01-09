@@ -8,8 +8,9 @@ const Guides = () => {
 	const getGuides = () => [
 		"guide.nilsjacobsen.buildAGlobalSvelteApp",
 		"guide.niklasbuchfink.whatIsInlang",
-		"guide.niklasbuchfink.howToSetupInlang",
-		"guide.nilsjacobsen.useParaglideJsInMonorepos",
+		"guide.nilsjacobsen.whatArePlugins",
+		"guide.lorissigrist.useParaglideJsWithNextjsAppRouter",
+		"guide.floriankiem.localizationStartegy",
 	]
 	return (
 		<div class="w-full flex gap-4 my-28 flex-col-reverse md:flex-row">
@@ -19,7 +20,7 @@ const Guides = () => {
 						{m.home_guides_title()}
 					</h2>
 					<p class="text-surface-500 lg:pr-16 pb-2">{m.home_guides_description()}</p>
-					<Button href="/search?q=guides" type="secondary">
+					<Button href="/c/guides" type="secondary">
 						{m.home_guides_button_text()}
 					</Button>
 				</div>
@@ -40,7 +41,11 @@ const Guides = () => {
 									href={`/g/${manifest.uniqueID}/${manifest.id.replaceAll(".", "-")}`}
 									class="gap-4 py-6 flex group hover:cursor-pointer"
 								>
-									<img class="w-7 h-7 object-cover object-center rounded-lg" src={manifest.icon} />
+									<img
+										class="w-7 h-7 object-cover object-center rounded-lg"
+										src={manifest.icon}
+										alt={displayName()}
+									/>
 									<div class="flex flex-col gap-1 flex-1">
 										<h3 class="m-0 mb-2 text-surface-800 leading-none no-underline font-semibold">
 											{displayName()}
