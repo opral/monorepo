@@ -1,4 +1,4 @@
-![inlang CLI header image](https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/cli/assets/cli-header.jpg)
+![inlang CLI header image](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/cli/assets/cli-header.jpg)
 
 # Automate (i18n) localization tasks with the CLI
 
@@ -15,9 +15,9 @@ See all available commands [here](#commands).
 # Core features
 
 <doc-features>
-  <doc-feature text-color="#fff" color="#000" title="Automation" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/cli/assets/automation.jpg"></doc-feature>
-  <doc-feature text-color="#fff" color="#000" title="Machine Translation" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/cli/assets/machine-translation.jpg"></doc-feature>
-  <doc-feature text-color="#fff" color="#000" title="Validation" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/cli/assets/lint.jpg"></doc-feature>
+  <doc-feature text-color="#fff" color="#000" title="Automation" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/cli/assets/automation.jpg"></doc-feature>
+  <doc-feature text-color="#fff" color="#000" title="Machine Translation" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/cli/assets/machine-translation.jpg"></doc-feature>
+  <doc-feature text-color="#fff" color="#000" title="Validation" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/cli/assets/lint.jpg"></doc-feature>
 </doc-features>
 
 <br />
@@ -43,7 +43,7 @@ The CLI allows you to machine translate your resources. This is useful if you wa
 
 The CLI allows you to validate your inlang project. This is useful if you want to make sure that your configuration file is valid before you commit it to your repository.
 
-![Example of a dev doing translation automation](https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/cli/assets/why.jpg)
+![Example of a dev doing translation automation](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/cli/assets/why.jpg)
 
 # Installation
 

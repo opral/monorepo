@@ -44,11 +44,11 @@ Attributes:
 - `caption` (required): Caption shown below the image.
 
 ```md
-<doc-figure src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg" alt="inlang ecosystem" caption="The inlang ecosystem"></doc-figure>
+<doc-figure src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg" alt="inlang ecosystem" caption="The inlang ecosystem"></doc-figure>
 ```
 
 ##### Preview
-<doc-figure src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg" alt="inlang ecosystem" caption="The inlang ecosystem"></doc-figure>
+<doc-figure src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg" alt="inlang ecosystem" caption="The inlang ecosystem"></doc-figure>
 
 ---
 
@@ -94,11 +94,11 @@ Attributes:
 - `looping` (optional): True if you want the slider to loop.
 
 ```md
-<doc-slider items="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg, https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg, https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg"></doc-slider>
+<doc-slider items="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg, https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg, https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg"></doc-slider>
 ```
 
 ##### Preview
-<doc-slider items="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg, https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg, https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg"></doc-slider>
+<doc-slider items="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg, https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg, https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg"></doc-slider>
 
 ---
 
@@ -145,7 +145,7 @@ It is completely up to you how you want to style your product pages. This is jus
 
 We are using an engaging header image with up to three key features of the product. If it is important to the product, we introduce a `Getting started` section beforehand. 
 
-![How we style product pages at inlang](https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/styleguide-mockup.svg)
+![How we style product pages at inlang](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/styleguide-mockup.svg)
 
 Of course styling product pages can change from time to time. If you have any questions regarding this, please reach out to us on [Discord](https://discord.com/invite/gdMPPWy57R).
 

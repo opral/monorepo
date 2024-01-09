@@ -7,7 +7,7 @@
 		"en": "This guide gives you an introduction on how to build your own inlang app."
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/how-to-inlang-app/how-to-inlang-app.md"
+		"en": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/how-to-inlang-app/how-to-inlang-app.md"
 	},
 	"keywords": ["app", "build", "applicaton", "website"],
 	"publisherName": "Felix Häberle",

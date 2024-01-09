@@ -58,9 +58,9 @@ export async function defineConfig(env) {
 	const jsonPlugin = await env.$import(
 		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1/dist/index.js",
 	)
-	const sdk = await env.$import("https://cdn.jsdelivr.net/gh/inlang/inlang1/dist/sdk-js/index.js")
+	const sdk = await env.$import("https://cdn.jsdelivr.net/gh/opral/inlang1/dist/sdk-js/index.js")
 	const ideExtension = await env.$import(
-		"https://cdn.jsdelivr.net/gh/inlang/inlang1/dist/sdk-js/index.js",
+		"https://cdn.jsdelivr.net/gh/opral/inlang1/dist/sdk-js/index.js",
 	)
 
 	return {
@@ -96,7 +96,7 @@ export async function defineConfig(env) {
 		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1/dist/index.js",
 	)
 	const { withSdk } = await env.$import(
-		"https://cdn.jsdelivr.net/gh/inlang/inlang1/dist/sdk-js/index.js",
+		"https://cdn.jsdelivr.net/gh/opral/inlang1/dist/sdk-js/index.js",
 	)
 
 	return
@@ -133,7 +133,7 @@ export async function setup({ defineConfig, env }) {
 	const pluginJson = await env.$import(
 		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1/dist/index.js",
 	)
-	const sdk = await env.$import("https://cdn.jsdelivr.net/gh/inlang/inlang@1/dist/sdk-js/index.js")
+	const sdk = await env.$import("https://cdn.jsdelivr.net/gh/opral/inlang@1/dist/sdk-js/index.js")
 
 	return defineConfig({
 		sourceLanguageTag: "en",
@@ -174,10 +174,10 @@ export async function defineConfig(env) {
 	const pluginJson = await env.$import(
 		"https://cdn.jsdelivr.net/gh/samuelstroschein/inlang-plugin-json@1/dist/index.js",
 	)
-	const sdk = await env.$import("https://cdn.jsdelivr.net/gh/inlang/inlang@1/dist/sdk-js/index.js")
+	const sdk = await env.$import("https://cdn.jsdelivr.net/gh/opral/inlang@1/dist/sdk-js/index.js")
 
 	const standardLintRules = await env.$import(
-		"https://cdn.jsdelivr.net/gh/inlang/inlang@1/dist/sdk-js/index.js",
+		"https://cdn.jsdelivr.net/gh/opral/inlang@1/dist/sdk-js/index.js",
 	)
 
 	return {
