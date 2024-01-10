@@ -28,6 +28,9 @@ export const CONFIGURATION = {
 		//
 		PROJECT: "project.inlang/settings.json",
 	},
+	STRINGS: {
+		MISSING_TRANSLATION_MESSAGE: "[missing]",
+	},
 } as const
 
 export const INTERPOLATE = {
