@@ -15,7 +15,6 @@ const routes = [
 	{ path: "/m", dynamic: true },
 	{ path: "/newsletter", dynamic: false },
 	{ path: "/search", dynamic: false },
-	// { path: "/editor", dynamic: false },
 ]
 
 // Hardcoded categories for the marketplace
