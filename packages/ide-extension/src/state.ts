@@ -8,6 +8,7 @@ type State = {
 	 * Inlang project
 	 */
 	project: InlangProject
+	selectedProjectPath: string
 }
 
 let _state: State

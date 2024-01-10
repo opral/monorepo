@@ -10,6 +10,7 @@ import fs from "node:fs/promises"
 import { telemetry } from "../../services/telemetry/implementation.js"
 import type { TelemetryEvents } from "../../services/telemetry/events.js"
 import { createInlangConfigFile } from "../settings/createInlangConfigFile.js"
+import path from "node:path"
 
 export interface ProjectNode {
 	label: string
@@ -61,14 +62,18 @@ export async function createProjectNodes(
 	if (!selectedProject && closestProject) {
 		const closestNode = projectNodes.find((node) => node.path === closestProject)
 		if (closestNode) {
-			await handleTreeSelection(closestNode, nodeishFs)
+			await handleTreeSelection(closestNode, nodeishFs, workspaceFolder)
 		}
 	}
 
 	return projectNodes
 }
 
-export function getTreeItem(element: ProjectNode, nodeishFs: NodeishFilesystem): vscode.TreeItem {
+export function getTreeItem(
+	element: ProjectNode,
+	nodeishFs: NodeishFilesystem,
+	workspaceFolder: vscode.WorkspaceFolder
+): vscode.TreeItem {
 	return {
 		label: element.label,
 		iconPath: element.isSelected
@@ -78,7 +83,7 @@ export function getTreeItem(element: ProjectNode, nodeishFs: NodeishFilesystem):
 		command: {
 			command: "inlang.openProject", // This is a custom command you will define
 			title: "Open File",
-			arguments: [element, nodeishFs], // Pass the file path as an argument
+			arguments: [element, nodeishFs, workspaceFolder], // Pass the file path as an argument
 		},
 	}
 }
@@ -86,7 +91,7 @@ export function getTreeItem(element: ProjectNode, nodeishFs: NodeishFilesystem):
 export async function handleTreeSelection(
 	selectedNode: ProjectNode,
 	nodeishFs: NodeishFilesystem,
-	workspaceFolder?: vscode.WorkspaceFolder
+	workspaceFolder: vscode.WorkspaceFolder
 ): Promise<void> {
 	const possibleInlangProjectPaths = [
 		...(await vscode.workspace.findFiles("*.inlang/settings.json")),
@@ -130,7 +135,12 @@ export async function handleTreeSelection(
 			},
 		})
 
-		setState({ project: inlangProject })
+		// Here we get the relative path
+		const relativeProjectPath = selectedProject
+			? "/" + path.relative(workspaceFolder?.uri.fsPath, selectedProject) // adding leading slash
+			: ""
+
+		setState({ project: inlangProject, selectedProjectPath: relativeProjectPath })
 
 		// Refresh the entire tree to reflect selection changes
 		CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.fire(undefined)
@@ -141,12 +151,12 @@ export async function handleTreeSelection(
 }
 
 export async function createTreeDataProvider(
-	workingDirectory: vscode.WorkspaceFolder,
+	workspaceFolder: vscode.WorkspaceFolder,
 	nodeishFs: NodeishFilesystem
 ): Promise<vscode.TreeDataProvider<ProjectNode>> {
 	return {
-		getTreeItem: (element: ProjectNode) => getTreeItem(element, nodeishFs),
-		getChildren: async () => await createProjectNodes(workingDirectory, nodeishFs),
+		getTreeItem: (element: ProjectNode) => getTreeItem(element, nodeishFs, workspaceFolder),
+		getChildren: async () => await createProjectNodes(workspaceFolder, nodeishFs),
 		onDidChangeTreeData: CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.event,
 	}
 }

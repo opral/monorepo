@@ -98,7 +98,7 @@ function createMessageHtml(args: { message: Message; isHighlighted: boolean }): 
 	return `
         <div class="tree-item">
             <button class="collapsible">
-                <span class="codicon codicon-note"></span><span>${args.message.id}<span>
+                <span><strong>#</strong></span><span>${args.message.id}<span>
             </button>
             <div class="content" style="display: none;">
                 ${translationsTableHtml}
@@ -125,7 +125,7 @@ function getTranslationsTableHtml(message: Message): string {
 
 		// Replace these commands with appropriate actions for your webview
 		const editCommand = `editMessage('${message.id}', '${languageTag}')`
-		const openCommand = `openMessage('${message.id}', '${languageTag}')`
+		const openCommand = `openInEditor('${message.id}', '${state().selectedProjectPath}')`
 
 		return `
             <div class="section">
@@ -239,11 +239,11 @@ function getHtml(args: {
 					});
 				}
 			
-				function openMessage(messageId, languageTag) {
+				function openInEditor(messageId, selectedProjectPath) {
 					vscode.postMessage({
 						command: 'executeCommand',
-						commandName: 'inlang.openMessage',
-						commandArgs: { messageId, languageTag },
+						commandName: 'inlang.openInEditor',
+						commandArgs: { messageId, selectedProjectPath },
 					});
 				}
             </script>
