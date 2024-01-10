@@ -58,7 +58,11 @@ export function toSnapshot(fs: NodeishFilesystem) {
 	}
 }
 
-export function fromSnapshot(fs: NodeishFilesystem, snapshot: { fsMap: any; fsStats: any }) {
+export function fromSnapshot(
+	fs: NodeishFilesystem,
+	snapshot: { fsMap: any; fsStats: any },
+	{ pathPrefix = "" } = {}
+) {
 	fs._state.lastIno = 1
 	fs._state.fsMap = new Map(
 		// @ts-ignore FIXME: no idea what ts wants me to do here the error message is ridiculous
@@ -67,10 +71,10 @@ export function fromSnapshot(fs: NodeishFilesystem, snapshot: { fsMap: any; fsSt
 				// requires node buffers, but no web standard method exists
 				const data = Buffer.from(content, "base64")
 				// new TextEncoder().encode(decodeURIComponent(escape(atob(content)))) Buffer.from()
-				return [path, data]
+				return [pathPrefix + path, data]
 			}
 
-			return [path, new Set(content as string[])]
+			return [pathPrefix + path, new Set(content as string[])]
 		})
 	)
 	fs._state.fsStats = new Map(
@@ -88,7 +92,7 @@ export function fromSnapshot(fs: NodeishFilesystem, snapshot: { fsMap: any; fsSt
 				isSymbolicLink: () => serializedStat._kind === 2,
 			} as NodeishStats
 
-			return [path, statsObj]
+			return [pathPrefix + path, statsObj]
 		})
 	)
 }

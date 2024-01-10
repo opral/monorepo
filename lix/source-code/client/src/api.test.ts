@@ -58,6 +58,31 @@ describe("main workflow", () => {
 		expect(status).toBe("unmodified")
 	})
 
+	it("supports non root repos", async () => {
+		const fs = createNodeishMemoryFs()
+
+		const snapshot = JSON.parse(readFileSync("./mocks/ci-test-repo.json", { encoding: "utf-8" }))
+		fromSnapshot(fs, snapshot, { pathPrefix: "/test/toast/" })
+
+		const repoUrl = await findRepoRoot({
+			nodeishFs: fs,
+			path: "/test/toast/src/routes/todo", // should find repo root from any path in the repo
+		})
+
+		expect(repoUrl).toBe("file:///test/toast")
+
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test fails if repoUrl is null
+		const repository: Awaited<ReturnType<typeof openRepository>> = await openRepository(repoUrl!, {
+			nodeishFs: fs,
+			branch: "test-symlink",
+		})
+
+		// test random repo action to make sure opening worked
+		const status = await repository.status({ filepath: "README.md" })
+
+		expect(status).toBe("unmodified")
+	})
+
 	it("usees the lix custom commit for the whitelistesd ci test repo", () => {
 		expect(repository._enableExperimentalFeatures).toBe(true)
 	})
