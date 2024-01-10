@@ -5,7 +5,7 @@ import { ArrowLinkIcon } from "./icons/TinyIcons.jsx"
 
 const NavbarOtherPageIndicator = (props: { slug: string }) => {
 	return (
-		<div class="text-surface-700 opacity-30">
+		<div class="text-surface-700 opacity-30 w-4 h-4">
 			<Show
 				when={
 					getDocsBaseUrl(currentPageContext.urlParsed.pathname) !==

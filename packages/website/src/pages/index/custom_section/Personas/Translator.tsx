@@ -4,8 +4,6 @@ import Link from "#src/renderer/Link.jsx"
 import { Button } from "../../components/Button.jsx"
 import * as m from "#src/paraglide/messages.js"
 
-
-
 const TranslatorSlide = () => {
 	const cards = [
 		{
