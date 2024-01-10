@@ -12,7 +12,7 @@ describe("parse lix uris", () => {
 			lixHost: "",
 			namespace: "",
 			repoHost: "github.com",
-			owner: "inlang",
+			owner: "opral",
 			repoName: "monorepo",
 		})
 	})
@@ -25,7 +25,7 @@ describe("parse lix uris", () => {
 			lixHost: "lix.inlang.com",
 			namespace: "git",
 			repoHost: "github.com",
-			owner: "inlang",
+			owner: "opral",
 			repoName: "monorepo",
 		})
 	})
@@ -38,7 +38,7 @@ describe("parse lix uris", () => {
 			lixHost: "localhost:3001",
 			namespace: "git",
 			repoHost: "github.com",
-			owner: "inlang",
+			owner: "opral",
 			repoName: "monorepo",
 		})
 	})
