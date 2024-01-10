@@ -7,7 +7,7 @@ import {
 } from "$paraglide-adapter-next-internal/runtime.js"
 import { headers } from "next/headers"
 import { ClientLanguageProvider } from "./ClientLanguageProvider"
-import { LangaugeSpy } from "./LanguageSpy"
+import { LanguageSpy } from "./LanguageSpy"
 import { LANGUAGE_HEADER } from "../constants"
 
 export default function LanguageProvider(props: { children: React.ReactNode }): React.ReactElement {
@@ -25,7 +25,7 @@ export default function LanguageProvider(props: { children: React.ReactNode }): 
 			{/* Pass the language tag to the client */}
 			<ClientLanguageProvider language={languageTag()} />
 			{/* Refresh when the language changes */}
-			<LangaugeSpy />
+			<LanguageSpy />
 			<React.Fragment key={languageTag()}>{props.children}</React.Fragment>
 		</>
 	)

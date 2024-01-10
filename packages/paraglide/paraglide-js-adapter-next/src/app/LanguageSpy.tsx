@@ -11,7 +11,7 @@ import { prefixStrategy } from "./navigation/prefixStrategy"
 const { getLocaleFromPath } = prefixStrategy(availableLanguageTags, sourceLanguageTag)
 
 //Keep track of the language in the pathname, and reload the page when it changes
-export function LangaugeSpy() {
+export function LanguageSpy() {
 	const router = useRouter()
 	const pathname = usePathname()
 
