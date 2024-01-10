@@ -564,8 +564,9 @@ export async function openRepository(
 				await gitFetch({
 					singleBranch: true,
 					dir,
-					ref: args.branch,
+					depth: 2147483647, // the magic number for all commits
 					http: makeHttpClient({ verbose, description: "getFirstCommitHash" }),
+					corsProxy: gitProxyUrl,
 					fs: getFirstCommitFs,
 				})
 			}
@@ -574,7 +575,7 @@ export async function openRepository(
 			for (;;) {
 				const commits: Awaited<ReturnType<typeof log>> | { error: any } = await log({
 					fs: getFirstCommitFs,
-					depth: 50,
+					depth: 550,
 					dir,
 					ref: firstCommitHash,
 				}).catch((error) => {
