@@ -6,7 +6,11 @@ export const openProjectCommand = {
 	command: "inlang.openProject",
 	title: "Inlang: Open project",
 	register: vscode.commands.registerCommand,
-	callback: async (node: ProjectNode, nodeishFs: NodeishFilesystem) => {
-		await handleTreeSelection(node, nodeishFs)
+	callback: async (
+		node: ProjectNode,
+		nodeishFs: NodeishFilesystem,
+		workspaceFolder: vscode.WorkspaceFolder
+	) => {
+		await handleTreeSelection(node, nodeishFs, workspaceFolder)
 	},
 }
