@@ -152,10 +152,6 @@ export function Layout(props: { children: JSXElement }) {
 		}
 	}
 
-	createEffect(() => {
-		console.log(!localStorage?.user?.isLoggedIn)
-	})
-
 	return (
 		<EditorLayout>
 			<div class="w-full flex flex-col grow bg-surface-50">
