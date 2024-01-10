@@ -116,6 +116,13 @@ async function writeImage(outputDirectory, item) {
 		ctx.fillText(line, 64, 210 + i * 64)
 	}
 
+	ctx.fillStyle = "#0891b2"
+
+	ctx.font = "medium 32px Inter"
+	ctx.fontWeight = "medium"
+
+	ctx.fillText(`/documentation${item.slug}`, 64, 630 - 64)
+
 	// Set the inlang logo as base64 encoded image
 	const logo = new Image()
 
