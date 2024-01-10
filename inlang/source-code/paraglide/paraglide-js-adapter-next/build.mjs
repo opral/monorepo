@@ -18,7 +18,6 @@ const app_build = await rollup({
 	plugins: [typescript({ tsconfig: "./tsconfig.json" }), cjs(), resolve(), preserveDirectives()],
 	input: {
 		index: "src/index.tsx",
-		"pages/entry": "src/pages/index.tsx",
 		"app/navigation/index": "src/app/navigation/index.tsx",
 		"app/middleware": "src/app/middleware.tsx",
 	},
