@@ -4,6 +4,7 @@ import { rpc } from "@inlang/rpc"
 import * as m from "../../paraglide/messages.js"
 import Captcha from "./Captcha.jsx"
 import validator from "validator"
+import { Icon } from "./Icon.jsx"
 
 export function NewsletterForm() {
 	const [email, setEmail] = createSignal("")
@@ -95,7 +96,7 @@ export function NewsletterForm() {
 					(loading() ? "opacity-70 cursor-not-allowed" : "")
 				}
 			>
-				<div class="flex flex-col gap-1 w-full">
+				<div class="flex flex-col gap-1 w-full relative">
 					<input
 						class={
 							"p-0 xl:w-[302px] w-full text-sm h-10 rounded-[4px] transition-colors focus:outline-primary/50 focus:-outline-offset-0 focus:ring-0 focus:border-primary px-4 border border-surface-300 " +
@@ -117,6 +118,9 @@ export function NewsletterForm() {
 							}
 						}}
 					/>
+					<Show when={captchaResponse()}>
+						<Icon name="success" class="absolute right-3 top-2.5" />
+					</Show>
 				</div>
 				<Show
 					when={!captchaResponse()}
