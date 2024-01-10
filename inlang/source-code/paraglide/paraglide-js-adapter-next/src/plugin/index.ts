@@ -46,7 +46,7 @@ export function withParaglide(config: Config): NextConfig {
 		})
 	}
 
-	const nextConfig: NextConfig = config
+	const nextConfig: NextConfig = { ...config }
 	delete nextConfig.paraglide
 
 	return nextConfig
