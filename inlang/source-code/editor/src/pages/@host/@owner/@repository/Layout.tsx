@@ -367,6 +367,7 @@ export function Layout(props: { children: JSXElement }) {
 						Your fork is out of sync with the upstream repository. Please resolve the conflicts before 
 						applying your changes.
 					</p>
+					<img src="/images/resolve-in-github.webp" alt="Sync Fork GitHub UI" class="w-full" />
 				</Show>
 				{/* Pull from upstream */}
 				<Show when={forkStatus() && forkStatus().ahead === 0 && forkStatus().behind > 0}>
