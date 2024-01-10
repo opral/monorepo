@@ -14,13 +14,30 @@ const dependencies = Object.keys(packageJson.dependencies || {})
 
 console.log(`Building ${packageJson.name} v${packageJson.version}...`)
 
-const build = await rollup({
+const app_build = await rollup({
 	plugins: [typescript({ tsconfig: "./tsconfig.json" }), cjs(), resolve(), preserveDirectives()],
 	input: {
 		index: "src/index.tsx",
-		"pages/index": "src/pages/index.tsx",
+		"pages/entry": "src/pages/index.tsx",
 		"app/navigation/index": "src/app/navigation/index.tsx",
 		"app/middleware": "src/app/middleware.tsx",
+	},
+	external: [
+		/node_modules/,
+		"$paraglide-adapter-next-internal/runtime.js",
+		"path",
+		"url",
+		"fs/promises",
+		"@inlang/sdk",
+		...peerDependencies,
+		...dependencies,
+	],
+})
+
+const pages_build = await rollup({
+	plugins: [typescript({ tsconfig: "./tsconfig.json" }), cjs(), resolve(), preserveDirectives()],
+	input: {
+		"pages/entry": "src/pages/index.tsx",
 	},
 	external: [
 		/node_modules/,
@@ -52,14 +69,21 @@ const pluginBuild = await rollup({
 })
 
 await pluginBuild.write({
-	preserveModules: true,
+	preserveModules: false,
 	format: "cjs",
 	entryFileNames: "[name].cjs",
 	dir: "dist",
 })
 
-await build.write({
+await app_build.write({
 	preserveModules: true,
+	format: "es",
+	entryFileNames: "[name].js",
+	dir: "dist",
+})
+
+await pages_build.write({
+	preserveModules: false,
 	format: "es",
 	entryFileNames: "[name].js",
 	dir: "dist",
