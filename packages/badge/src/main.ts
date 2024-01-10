@@ -41,7 +41,7 @@ if (isProduction) {
 	app.use(Sentry.Handlers.tracingHandler())
 }
 
-app.set("base", "/badge")
+app.set("base", "/")
 app.use(router)
 
 const port = process.env.PORT ?? 4002

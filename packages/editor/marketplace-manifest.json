@@ -1,6 +1,6 @@
 {
 	"id": "app.inlang.editor",
-	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/editor/assets/christmasFink.png",
+	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/editor/assets/new-fink-logo.png",
 	"gallery": [
 		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/editor-marketplace-cover.jpg",
 		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/editor-gallery/editor-gallery-image-1.jpg",
@@ -9,18 +9,19 @@
 		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/editor-gallery/editor-gallery-image-4.jpg"
 	],
 	"displayName": {
-		"en": "Fink – Message editor"
+		"en": "Fink – Localization Editor"
 	},
 	"description": {
-		"en": "The Fink message editor enables you to work with globalized codebases in your browser, without having to touch code but still being able to have a git-based workflow."
+		"en": "Your translation workflow with no-code setup and repository-based operation — the ideal i18n solution for translators."
 	},
 	"readme": {
 		"en": "./inlang/source-code/editor/README.md"
 	},
 	"keywords": ["editor", "web", "apps", "website", "translator", "lix", "fink", "inlang"],
+	"recommends": ["m/gerre34r", "m/reootnfj", "m/4cxm3eqi", "g/6ddyhpoi"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
-	"website": "https://inlang.com/editor",
+	"website": "https://fink.inlang.com/",
 	"license": "Apache-2.0",
 	"pricing": "Free Beta"
 }

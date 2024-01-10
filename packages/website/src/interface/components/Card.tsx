@@ -39,6 +39,10 @@ export default function Card(props: { item: any; displayName: string }) {
 					<Match when={app && props.item.gallery}>
 						<img
 							src={props.item.icon}
+							alt={
+								// @ts-ignore
+								props.displayName.en
+							}
 							class="mx-4 mt-4 w-10 h-10 aspect-1 rounded object-cover object-center"
 						/>
 						<div class="flex flex-1 flex-col items-start px-4">
@@ -92,6 +96,10 @@ export default function Card(props: { item: any; displayName: string }) {
 					<Match when={!app && showCover && props.item.gallery}>
 						<img
 							class="w-full h-36 object-cover object-top rounded-xl"
+							alt={
+								// @ts-ignore
+								props.displayName.en
+							}
 							src={props.item.gallery && props.item.gallery[0]}
 						/>
 						<div class="flex flex-shrink-0 flex-row flex-wrap justify-between items-start mb-2 px-4">
@@ -113,6 +121,10 @@ export default function Card(props: { item: any; displayName: string }) {
 										}
 									>
 										<img
+											alt={
+												// @ts-ignore
+												props.displayName.en
+											}
 											class="w-10 h-10 rounded-lg m-0 object-cover object-center"
 											src={props.item.icon}
 										/>
@@ -141,6 +153,10 @@ export default function Card(props: { item: any; displayName: string }) {
 							<Show when={props.item.publisherIcon}>
 								<div class="flex gap-2">
 									<img
+										alt={
+											// @ts-ignore
+											props.item.publisherName.en
+										}
 										class="w-5 h-5 rounded-full object-cover object-center"
 										src={props.item.publisherIcon}
 									/>

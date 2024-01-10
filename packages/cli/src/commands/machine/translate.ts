@@ -131,8 +131,8 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 		}
 
 		// https://github.com/inlang/monorepo/issues/1846
-		// 4000 is sometimes not working. no idea why.
-		await new Promise((resolve) => setTimeout(resolve, 4001))
+		// https://github.com/opral/monorepo/issues/1968
+		await new Promise((resolve) => setTimeout(resolve, 8002))
 		// Log the message counts
 		log.success("Machine translate complete.")
 	} catch (error) {
