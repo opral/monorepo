@@ -9,45 +9,29 @@ import * as m from "../../paraglide/messages.js";
 
 <HTML>
 	<head>
-		<BaseHead title={m.title()} description={"asd"} />
+		<BaseHead title={m.site_title()} description={m.site_description()} />
+		<link rel="alternate" hreflang="en" href="/" />
+		<link rel="alternate" hreflang="de" href="/de/" />
 	</head>
 	<body>
-		<Header title={m.title()} />
-        <Counter />
-        <Counter />
-        <Counter />
-        <Counter />
+		<Header title={m.site_title()} />
 		<main>
-			<h1>{m.title()}</h1>
+			<h1>🧑‍🚀 Hallo Astronaut</h1>
 			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This
-				template serves as a lightweight, minimally-styled starting point for anyone looking to
-				build a personal website, blog, or portfolio with Astro.
+				Dieses Beispiel soll Ihnen helfen, Paraglide in Ihre Multi-Language
+				Astro-App zu integrieren. Paraglide ist eine großartige Ergänzung für die interaktiven Inseln
+				in Ihrer App, wie Formulare, App-Shells oder dieser Zähler:
 			</p>
+			<Counter />
 			<p>
-				This template comes with a few integrations already configured in your
-				<code>astro.config.mjs</code> file. You can customize your setup with
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like
-				Tailwind, React, or Vue to your project.
+				Weil Paraglide sehr gut treeshaket, versendet jede Insel nur die Nachricht, die sie tatsächlich verwendet.
+				Dies bedeutet, dass Sie Paraglide in Ihrer App verwenden können, ohne sich um die Größe Ihres JS-Bundles zu kümmern.
+				Es kann nur 100 Bytes gross werden!
 			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>Edit this page in <code>src/pages/index.astro</code></li>
-				<li>Edit the site header items in <code>src/components/Header.astro</code></li>
-				<li>Add your name to the footer in <code>src/components/Footer.astro</code></li>
-				<li>Check out the included blog posts in <code>src/pages/blog/</code></li>
-				<li>Customize the blog post page layout in <code>src/layouts/BlogPost.astro</code></li>
-			</ul>
+
 			<p>
-				Have fun! If you get stuck, remember to <a href="https://docs.astro.build/"
-					>read the docs
-				</a> or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out <a
-					href="https://github.com/Charca/astro-blog-template"
-					>astro-blog-template
-				</a> by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
+				Schauen Sie sich dieses Beispiel also gerne an und sehen Sie, wie Paraglide Ihnen helfen kann,
+				oder lesen Sie <a href="https://inlang.com/g/utqgkmzp/guide-lorissigrist-buildAGlobalAstroApp">die geschriebene Anleitung auf der Paraglide-Website.</a>
 			</p>
 		</main>
 		<Footer />
