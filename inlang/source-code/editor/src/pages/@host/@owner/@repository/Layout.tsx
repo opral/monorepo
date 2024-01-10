@@ -12,6 +12,7 @@ import type { LanguageTag } from "@inlang/sdk"
 import { sortLanguageTags } from "./helper/sortLanguageTags.js"
 import EditorLayout from "#src/interface/editor/EditorLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
+import { setSignInModalOpen } from "#src/services/auth/src/components/SignInDialog.jsx"
 
 interface Filter {
 	name: string
@@ -151,6 +152,10 @@ export function Layout(props: { children: JSXElement }) {
 		}
 	}
 
+	createEffect(() => {
+		console.log(!localStorage?.user?.isLoggedIn)
+	})
+
 	return (
 		<EditorLayout>
 			<div class="w-full flex flex-col grow bg-surface-50">
@@ -274,8 +279,20 @@ export function Layout(props: { children: JSXElement }) {
 						/>
 						<sl-button
 							prop:size={"small"}
-							onClick={() => setAddLanguageModalOpen(true)}
-							prop:disabled={!userIsCollaborator()}
+							onClick={() => {
+								if (localStorage?.user?.isLoggedIn === false) {
+									setSignInModalOpen(true)
+								} else if (userIsCollaborator() === false) {
+									showToast({
+										variant: "warning",
+										title: "Not a collaborator",
+										message:
+											"Fork this repository to make changes.",
+									})
+								} else {
+									setAddLanguageModalOpen(true)
+								}
+							}}
 						>
 							Add language tag
 						</sl-button>
