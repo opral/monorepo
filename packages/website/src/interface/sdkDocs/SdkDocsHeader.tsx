@@ -24,13 +24,13 @@ const SdkDocsHeader = () => {
 						<p class={"self-center pl-2 text-left font-medium text-surface-900"}>Documentation</p>
 					</div>
 					<div class="flex gap-8">
-						<Button type="text" href="https://github.com/inlang/monorepo">
+						<Button type="text" href="https://github.com/opral/monorepo">
 							Github
 						</Button>
 						<Button type="text" href="https://discord.com/invite/gdMPPWy57R">
 							Community
 						</Button>
-						<Button type="secondary" href="https://github.com/inlang/monorepo/discussions">
+						<Button type="secondary" href="https://github.com/opral/monorepo/discussions">
 							Feedback
 						</Button>
 					</div>

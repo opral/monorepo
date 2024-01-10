@@ -230,7 +230,7 @@ function RepositoryDoesNotExistOrNotAuthorizedCard(args: { code: number; user: a
 
 				<Link
 					class="self-end pt-5"
-					href="https://github.com/inlang/monorepo/discussions/categories/help-questions-answers"
+					href="https://github.com/opral/monorepo/discussions/categories/help-questions-answers"
 					target="_blank"
 				>
 					<sl-button prop:variant="text">

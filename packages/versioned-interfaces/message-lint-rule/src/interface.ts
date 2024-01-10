@@ -62,7 +62,7 @@ export const MessageLintRule = Type.Object({
 	/**
 	 * Tyepbox is must be used to validate the Json Schema.
 	 * Github discussion to upvote a plain Json Schema validator and read the benefits of Typebox
-	 * https://github.com/inlang/monorepo/discussions/1503
+	 * https://github.com/opral/monorepo/discussions/1503
 	 */
 	settingsSchema: Type.Optional(Type.Object({}, { additionalProperties: true })),
 })

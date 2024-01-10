@@ -43,7 +43,7 @@ export default function Page(props: PageProps) {
 	createEffect(() => {
 		if (currentPageContext) {
 			setEditLink(
-				"https://github.com/inlang/monorepo/edit/main/inlang" +
+				"https://github.com/opral/monorepo/edit/main/inlang" +
 					getDocsBaseUrl(currentPageContext.urlParsed.pathname) +
 					"/" +
 					findPageBySlug(
