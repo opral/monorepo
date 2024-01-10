@@ -3,23 +3,9 @@
     "version": "0.0.1",
     "private": true,
     "scripts": {
-        "build": "node ./build.js",
+        "build": "node ./build.mjs",
         "test": "vitest run --passWithNoTests"
     },
-    "keywords": [
-        "inlang",
-        "i18n",
-        "localization",
-        "translation",
-        "internationalization",
-        "next.js",
-        "next",
-        "react"
-    ],
-    "main": "dist/index.cjs",
-    "module": "dist/index.mjs",
-    "types": "dist/index.d.ts",
-    "type": "module",
     "exports": {
         ".": {
             "import": "./dist/index.js",
@@ -34,7 +20,7 @@
             "types": "./dist/app/navigation/index.d.ts"
         },
         "./pages": {
-            "import": "./dist/pages/index.js",
+            "import": "./dist/pages/entry.js",
             "types": "./dist/pages/index.d.ts"
         },
         "./plugin": {
@@ -42,6 +28,16 @@
             "types": "./dist/plugin/index.d.ts"
         }
     },
+    "keywords": [
+        "inlang",
+        "i18n",
+        "localization",
+        "translation",
+        "internationalization",
+        "next.js",
+        "next",
+        "react"
+    ],
     "files": [
         "dist"
     ],
