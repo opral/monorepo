@@ -96,7 +96,7 @@ function TheActualPage() {
 					/>
 				</Match>
 
-				<Match when={!repo() || !projectList()}>
+				<Match when={!repo() || !projectList() || project.loading}>
 					<div class="flex flex-col grow justify-center items-center min-w-full min-h-[calc(100vh_-_324px)] gap-2">
 						{/* sl-spinner need a own div otherwise the spinner has a bug. The wheel is rendered on the outer div  */}
 						<div>
