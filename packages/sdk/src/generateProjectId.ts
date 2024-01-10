@@ -8,7 +8,7 @@ export async function generateProjectId(repo: Repository, projectPath: string) {
 	const firstCommitHash = await repo.getFirstCommitHash()
 	const originHash = await repo.getOrigin({ safeHashOnly: true })
 
-	if (repoId) {
+	if (firstCommitHash) {
 		return hash(`${firstCommitHash + projectPath + originHash}`)
 	}
 	return undefined
