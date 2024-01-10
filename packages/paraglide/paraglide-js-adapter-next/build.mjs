@@ -33,6 +33,23 @@ const app_build = await rollup({
 	],
 })
 
+const pages_build = await rollup({
+	plugins: [typescript({ tsconfig: "./tsconfig.json" }), cjs(), resolve(), preserveDirectives()],
+	input: {
+		"pages/entry": "src/pages/index.tsx",
+	},
+	external: [
+		/node_modules/,
+		"$paraglide-adapter-next-internal/runtime.js",
+		"path",
+		"url",
+		"fs/promises",
+		"@inlang/sdk",
+		...peerDependencies,
+		...dependencies,
+	],
+})
+
 const pluginBuild = await rollup({
 	plugins: [typescript({ tsconfig: "./tsconfig.json" }), cjs(), resolve(), preserveDirectives()],
 	input: {
@@ -64,4 +81,9 @@ await app_build.write({
 	dir: "dist",
 })
 
-
+await pages_build.write({
+	preserveModules: false,
+	format: "es",
+	entryFileNames: "[name].js",
+	dir: "dist",
+})

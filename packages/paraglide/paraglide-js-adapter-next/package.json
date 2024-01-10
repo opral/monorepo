@@ -22,6 +22,10 @@
         "./plugin": {
             "require": "./dist/plugin/index.cjs",
             "types": "./dist/plugin/index.d.ts"
+        },
+        "./pages": {
+            "import": "./dist/pages/entry.js",
+            "types": "./dist/pages/index.d.ts"
         }
     },
     "keywords": [
