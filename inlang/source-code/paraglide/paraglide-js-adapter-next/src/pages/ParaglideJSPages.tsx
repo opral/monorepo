@@ -4,6 +4,7 @@ import {
 	sourceLanguageTag,
 } from "$paraglide-adapter-next-internal/runtime.js"
 import React from "react"
+import Header from "./Header"
 
 export default function ParaglideJS(props: {
 	language?: string
@@ -21,5 +22,10 @@ export default function ParaglideJS(props: {
 		setLanguageTag(sourceLanguageTag)
 	}
 
-	return <>{props.children}</>
+	return (
+		<>
+			<Header />
+			{props.children}
+		</>
+	)
 }
