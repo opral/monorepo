@@ -15,17 +15,6 @@ export class LixError extends Error {
 	response?: { status?: number }
 }
 
-export type LixAuthModule = {
-	login: () => Promise<any>
-	logout: () => Promise<any>
-	getUser: () => Promise<{
-		username: string
-		email: string
-		avatarUrl?: string
-	}>
-	addPermissions: () => Promise<any>
-}
-
 export type Repository = {
 	// we dont want to add isogit to types but its required for teting comparison and debugging
 	[x: string]: any

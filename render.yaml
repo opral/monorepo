@@ -10,12 +10,16 @@ services:
     runtime: node
     region: frankfurt
     plan: standard
-    branch: main
     buildCommand: pnpm install && pnpm run build
     startCommand: pnpm run production
     autoDeploy: true
     envVars:
       - fromGroup: production
+    buildFilter:
+      paths:
+        - inlang/source-code/website/**
+        - inlang/source-code/markdown/**
+        - inlang/source-code/marketplace-registry/**
     domains:
       - inlang.com
 
@@ -37,7 +41,7 @@ services:
       - git.inlang.com
 
   - name: badge-service
-    type: pserv
+    type: web
     runtime: node
     region: frankfurt
     plan: standard
@@ -50,13 +54,14 @@ services:
     buildFilter:
       paths:
         - inlang/source-code/badge/**
+    domains:
+      - badge.inlang.com
 
   - name: fink-editor
     type: web
     runtime: node
     region: frankfurt
     plan: standard
-    branch: main
     pullRequestPreviewsEnabled: false
     buildCommand: pnpm install && pnpm run build
     startCommand: pnpm --filter @inlang/editor production
@@ -74,7 +79,6 @@ services:
     runtime: node
     region: frankfurt
     plan: standard
-    branch: main
     pullRequestPreviewsEnabled: false
     buildCommand: pnpm install && pnpm run build
     startCommand: pnpm --filter @inlang/manage production
@@ -86,3 +90,14 @@ services:
         - inlang/source-code/manage/**
     domains:
       - manage.inlang.com
+
+  - name: opral-website
+    type: web
+    runtime: static
+    autoDeploy: true
+    staticPublishPath: ./opral/source-code/website
+    buildFilter:
+      paths:
+        - opral/source-code/website/**
+    domains:
+      - opral.com

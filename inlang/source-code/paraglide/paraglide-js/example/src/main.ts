@@ -15,3 +15,5 @@ console.log(m.currentLanguageTag({ languageTag: languageTag() }))
 console.log(m.greeting({ name: "Samuel", count: 5 }))
 
 console.log(en_US.greeting({ name: "Samuel", count: 5 }))
+
+console.log(m.missing_in_german())

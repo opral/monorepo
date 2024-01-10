@@ -20,6 +20,7 @@ export default defineConfig({
 			// other parts of the source code use server side node dependencies with protocol node:* imports.
 			// to not break server side node imports, don't polyfill node:* imports.
 			protocolImports: false,
+			exclude: ["util", "zlib"],
 		}),
 		solid({ ssr: true }),
 		// the metaframework https://vike.dev/

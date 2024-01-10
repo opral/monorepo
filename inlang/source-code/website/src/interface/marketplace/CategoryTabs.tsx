@@ -34,7 +34,7 @@ const CategoryTabs = () => {
 		]
 	}
 	return (
-		<nav class="max-w-7xl mx-auto flex gap-2 overflow-x-scroll hide-scrollbar items-center px-4 h-16 sm:h-auto bg-surface-50 sm:bg-background border-t sm:border-t-0 border-surface-200">
+		<nav class="max-w-7xl mx-auto flex gap-2 overflow-x-scroll hide-scrollbar items-center px-4 md:px-0 h-16 sm:h-auto bg-surface-50 sm:bg-background border-t sm:border-t-0 border-surface-200">
 			<p class="hidden sm:block text-sm pr-4 font-regular text-surface-500">
 				{m.footer_category_title() + ":"}
 			</p>
