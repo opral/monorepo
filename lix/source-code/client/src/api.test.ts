@@ -62,7 +62,7 @@ describe("main workflow", () => {
 		const fs = createNodeishMemoryFs()
 
 		const snapshot = JSON.parse(readFileSync("./mocks/ci-test-repo.json", { encoding: "utf-8" }))
-		fromSnapshot(fs, snapshot, { pathPrefix: "/test/toast/" })
+		fromSnapshot(fs, snapshot, { pathPrefix: "/test/toast" })
 
 		const repoUrl = await findRepoRoot({
 			nodeishFs: fs,

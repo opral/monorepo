@@ -41,7 +41,7 @@ export type Repository = {
 	getCurrentBranch: () => Promise<string | undefined>
 	getBranches: () => Promise<string[] | undefined>
 	errors: Subscribable<LixError[]>
-	getId: () => Promise<string | undefined>
+	getFirstCommitHash: () => Promise<string | undefined>
 	getMeta: () => Promise<
 		| {
 				name: string

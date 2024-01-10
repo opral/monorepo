@@ -63,6 +63,8 @@ export function fromSnapshot(
 	snapshot: { fsMap: any; fsStats: any },
 	{ pathPrefix = "" } = {}
 ) {
+	// TODO: windows withothout repo will hang tests. fix this with windows vm¯
+
 	fs._state.lastIno = 1
 	fs._state.fsMap = new Map(
 		// @ts-ignore FIXME: no idea what ts wants me to do here the error message is ridiculous
@@ -77,6 +79,7 @@ export function fromSnapshot(
 			return [pathPrefix + path, new Set(content as string[])]
 		})
 	)
+
 	fs._state.fsStats = new Map(
 		Object.entries(snapshot.fsStats).map(([path, rawStat]) => {
 			const serializedStat = rawStat as Omit<
@@ -95,6 +98,18 @@ export function fromSnapshot(
 			return [pathPrefix + path, statsObj]
 		})
 	)
+
+	if (pathPrefix) {
+		const prefixParts = pathPrefix.split("/")
+		const rootStat = fs._state.fsStats.get(pathPrefix + "/")
+
+		for (let i = 1; i < prefixParts.length; i++) {
+			const path = prefixParts.slice(0, i).join("/") + "/"
+
+			fs._state.fsMap.set(path, new Set([prefixParts[i]]))
+			fs._state.fsStats.set(path, rootStat)
+		}
+	}
 }
 
 export function createNodeishMemoryFs(): NodeishFilesystem {

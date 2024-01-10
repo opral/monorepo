@@ -5,11 +5,11 @@ export async function generateProjectId(repo: Repository, projectPath: string) {
 	if (!repo || !projectPath) {
 		return undefined
 	}
-	const repoId = await repo.getId()
+	const firstCommitHash = await repo.getFirstCommitHash()
 	const originHash = await repo.getOrigin({ safeHashOnly: true })
 
 	if (repoId) {
-		return hash(`${repoId + projectPath + originHash}`)
+		return hash(`${firstCommitHash + projectPath + originHash}`)
 	}
 	return undefined
 }

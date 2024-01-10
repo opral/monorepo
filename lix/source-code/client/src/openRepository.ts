@@ -80,7 +80,7 @@ export async function openRepository(
 	// the url for opening a local repo allready in the fs provider is file://path/to/repo (not implemented yet)
 
 	// TODO: check for same origin
-	let doClone = false
+	let doLixClone = false
 
 	// the directory we use for all git operations as repo root, if we are interested in a repo subdirectory we have to append this
 	// TODO: add more tests for non root dir command
@@ -104,7 +104,7 @@ export async function openRepository(
 		// Simple check for existing git repos
 		const maybeGitDir = await rawFs.lstat(".git").catch((error) => ({ error }))
 		if ("error" in maybeGitDir) {
-			doClone = true
+			doLixClone = true
 		}
 	}
 
@@ -150,7 +150,7 @@ export async function openRepository(
 
 	let pending: Promise<void | { error: Error }> | undefined
 
-	if (doClone) {
+	if (doLixClone) {
 		pending = clone({
 			fs: withLazyFetching({ nodeishFs: rawFs, verbose, description: "clone" }),
 			http: makeHttpClient({
@@ -171,7 +171,7 @@ export async function openRepository(
 			ref: args.branch,
 
 			// TODO: use only first and last commit in lazy clone? (we need first commit for repo id)
-			// depth: 1,
+			depth: 1,
 			noTags: true,
 		})
 			.then(() => {
@@ -552,16 +552,28 @@ export async function openRepository(
 			},
 		}),
 
-		async getId() {
+		async getFirstCommitHash() {
+			const getFirstCommitFs = withLazyFetching({
+				nodeishFs: rawFs,
+				verbose,
+				description: "getFirstCommitHash",
+				intercept: delayedAction,
+			})
+
+			if (doLixClone) {
+				await gitFetch({
+					singleBranch: true,
+					dir,
+					ref: args.branch,
+					http: makeHttpClient({ verbose, description: "getFirstCommitHash" }),
+					fs: getFirstCommitFs,
+				})
+			}
+
 			let firstCommitHash: string | undefined = "HEAD"
 			for (;;) {
 				const commits: Awaited<ReturnType<typeof log>> | { error: any } = await log({
-					fs: withLazyFetching({
-						nodeishFs: rawFs,
-						verbose,
-						description: "getRepoId",
-						intercept: delayedAction,
-					}),
+					fs: getFirstCommitFs,
 					depth: 50,
 					dir,
 					ref: firstCommitHash,
@@ -584,9 +596,7 @@ export async function openRepository(
 				}
 			}
 
-			const repoId = firstCommitHash && (await hash(firstCommitHash))
-
-			return repoId
+			return firstCommitHash
 		},
 
 		/**
