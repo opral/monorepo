@@ -29,6 +29,7 @@ export const Gitfloat = () => {
 		setLastPullTime,
 		tourStep,
 		project,
+		projectList,
 		lixErrors,
 	} = useEditorState()
 	const [localStorage] = useLocalStorage()
@@ -45,7 +46,7 @@ export const Gitfloat = () => {
 			typeof repoInfo === "undefined" ||
 			"error" in repoInfo ||
 			userIsCollaborator.loading ||
-			!project() ||
+			!projectList() ||
 			isForking()
 		) {
 			return "loading"

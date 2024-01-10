@@ -36,7 +36,8 @@ export default function Page() {
  * is required to use the useEditorState hook.
  */
 function TheActualPage() {
-	const { project, routeParams, doesInlangConfigExist, tourStep, lixErrors } = useEditorState()
+	const { repo, project, projectList, routeParams, doesInlangConfigExist, tourStep, lixErrors } =
+		useEditorState()
 	const [localStorage, setLocalStorage] = useLocalStorage()
 
 	onMount(() => {
@@ -95,7 +96,7 @@ function TheActualPage() {
 					/>
 				</Match>
 
-				<Match when={project() === undefined}>
+				<Match when={!repo() || !projectList()}>
 					<div class="flex flex-col grow justify-center items-center min-w-full min-h-[calc(100vh_-_338px)] gap-2">
 						{/* sl-spinner need a own div otherwise the spinner has a bug. The wheel is rendered on the outer div  */}
 						<div>
@@ -137,7 +138,7 @@ function TheActualPage() {
 					/>
 				</Match>
 				<Match when={!doesInlangConfigExist()}>
-					<NoInlangConfigFoundCard />
+					<NoInlangProjectFoundCard />
 				</Match>
 				<Match
 					when={
@@ -183,18 +184,20 @@ function TheActualPage() {
 	)
 }
 
-function NoInlangConfigFoundCard() {
+function NoInlangProjectFoundCard() {
 	return (
 		<div class="min-h-[calc(100vh_-_338px)] flex grow items-center justify-center">
 			<div class="border border-outline p-8 rounded flex flex-col max-w-lg">
 				<MaterialSymbolsUnknownDocumentOutlineRounded class="w-10 h-10 self-center" />
 				<h1 class="font-semibold pt-5">Inlang has not been set up for this repository yet.</h1>
-				<p class="pt-1.5 pb-8">
-					Please refer to the documentation and write the config file manually.
-				</p>
-				<Link class="self-center" href="/documentation" target="_blank">
+				<p class="pt-1.5 pb-8">Please refer to product page and setup a inlang project.</p>
+				<Link
+					class="self-center"
+					href="https://inlang.com/m/tdozzpar/app-inlang-editor#lets-get-started"
+					target="_blank"
+				>
 					<sl-button prop:variant="text">
-						Take me to the documentation
+						Take me to setup guide
 						{/* @ts-ignore */}
 						<MaterialSymbolsArrowOutwardRounded slot="suffix" />
 					</sl-button>
