@@ -58,6 +58,35 @@ If you now run `npm run build`, you should see the paraglide compiler running al
 }
 ```
 
+## Using the Paraglide Vite Plugin (optional)
+
+Currently the compiler only runs when the `build` or `dev` script is run. This means that if you change a message, you need to restart the dev server. This is not ideal. To avoid this, you can install `@inlang/paraglide-js-adapter-vite`:
+
+```bash
+npm i -D @inlang/paraglide-js-adapter-vite
+```
+
+Then add it to your `astro.config.mjs`:
+
+```js
+import { paraglide } from "@inlang/paraglide-js-adapter-vite"
+import { defineConfig } from "astro/config"
+
+export default defineConfig({
+    ...,
+	vite: {
+		plugins: [
+			paraglide({
+				project: "./project.inlang",
+				outdir: "./src/paraglide",
+			}),
+		],
+	},
+})
+```
+
+Now the compiler will re-run whenever you change a message, causing your browser to update automatically. You can now remove the `paraglide` command from your `dev` and `build` scripts.
+
 ## Adding Languages
 
 You can add languages by adding them in the settings file `project.inlang/settings.json`. All languages that you intend to use must be listed here.
