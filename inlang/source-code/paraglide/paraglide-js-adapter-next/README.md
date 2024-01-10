@@ -26,7 +26,7 @@ Depending on which router you are using your setup will be different. Make sure 
 
 The Pages router already comes with i18n support out of the box. You can read more about it [here](https://nextjs.org/docs/advanced-features/i18n-routing). Thanks to this, Paraglide doesn't need to provide it's own routing, all it needs to do is react to the language state.
 
-So let's set up basic i18n routing in NextJS. First, in your `next.config.js` file, add an `i18n` object:
+To set up basic i18n routing in NextJS add an `i18n` object to your `next.config.js` file. In it you should specify the locales you want to support and the default locale. Make sure these match the ones in your `project.inlang/settings.json` file.
 
 ```js
 module.exports = {
@@ -37,15 +37,17 @@ module.exports = {
 }
 ```
 
+This will have the effect that NextJS will automatically prefix all routes with the locale. For example, the route `/about` will become `/en/about` for the English locale and `/de/about` for the German locale. The only language that won't be prefixed is the default locale.
 
-To do this, wrap your `_app.js` file with the `ParaglideJS` component for the Pages router:
+Now all that's left is to tell paraglide which language to use. To do that, wrap your `_app.js` file with the `ParaglideJS` component, pass it the current language and the paraglide runtime module.
 
 ```jsx
-import { ParaglideJS } from "@inlang/paraglide-js-adapter-next"
+import { ParaglideJS } from "@inlang/paraglide-js-adapter-next/pages"
+import * as runtime from "@/paraglide/runtime.js"
 
 export default function App({ Component, pageProps, router }: AppProps) {
 	return (
-		<ParaglideJS language={router.locale}>
+		<ParaglideJS runtime={runtime} language={router.locale}>
 			<Component {...pageProps} />
 		</ParaglideJS>
 	)
@@ -65,3 +67,9 @@ export default function Home() {
     )
 }
 ```
+
+## With NextJS App Router
+
+The App router is the new recommended router for NextJS. It is more flexible, but less opinionated than the Pages router, so it requires a bit more setup.
+
+TODO
