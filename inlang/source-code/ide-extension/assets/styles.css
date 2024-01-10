@@ -1,17 +1,18 @@
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe WUI", "Ubuntu", sans-serif;
-    color: var(--vscode-editor-foreground);
-    background-color: var(--vscode-editor-background);
+    color: var(--vscode-sideBar-foreground);
+    background-color: var(--vscode-sideBar-background);
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
 .collapsible {
-    background-color: inherit;
-    color: var(--vscode-editor-foreground);
+    color: var(--vscode-sideBar-foreground);
+    background-color: var(--vscode-sideBar-background);
+    font-size: 13px;
     cursor: pointer;
-    padding: 10px;
+    padding: 5px 10px;
     border: none;
     text-align: left;
     outline: none;
@@ -22,15 +23,79 @@ body {
     gap: 5px;
 }
 
+.collapsible:hover {
+    background-color: var(--vscode-list-hoverBackground);
+}
+
 .content {
-    padding: 0 18px;
     display: none;
 }
 
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table .section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4px 10px;
+    border-top: 1px solid var(--vscode-sideBar-border);
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.table .section:last-child {
+    border-bottom: 1px solid var(--vscode-sideBar-border);
+}
+
+.table .section .languageTag {
+    margin-right: 15px;
+}
+
+.table .section .message {
+    margin-right: auto;
+}
+
+.table .section .actionButtons {
+    align-self: flex-end;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.table .section .actionButtons button {
+    all: unset;
+}
+
 .highlighted-section {
-    background-color: rgba(147, 112, 219, 0.5);
-    border-radius: 4px;
-    margin-bottom: 20px;
+    margin-bottom: 5px;
+}
+
+main {
+    margin-bottom: 5px;
+}
+
+.banner {
+    display: flex;
+    align-items: center;
+    background-color: var(--vscode-sideBar-background);
+    text-transform: uppercase;
+    font-size: 11px;
+    font-weight: bold; 
+    padding: 4px 10px;
+}
+
+.active-dot {
+    display: inline-block;
+    height: 8px;
+    width: 8px;
+    background-color: green;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
 }
 
 #searchInput {
@@ -47,11 +112,6 @@ body {
     outline: none;
     border: 1px solid var(--vscode-inputOption-activeBorder);
 }
-
-/* #searchInput:active {
-    border: 1px solid var(--vscode-inputOption-activeBorder);
-    background-color: var(--vscode-inputOption-activeBackground);
-} */
 
 #searchInput::placeholder {
     color: var(--vscode-input-placeholderForeground);

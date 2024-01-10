@@ -1,60 +1,145 @@
 import * as vscode from "vscode"
 import { state } from "../../state.js"
 import type { Message } from "@inlang/sdk"
+import { CONFIGURATION } from "../../configuration.js"
+import { getStringFromPattern } from "./query.js"
 
 export function createMessageWebviewProvider(args: { context: vscode.ExtensionContext }) {
+	let messages = state().project.query.messages.getAll()
+	let activeFileContent: string | undefined
+	let debounceTimer: NodeJS.Timeout | undefined
+
 	return {
 		resolveWebviewView(webviewView: vscode.WebviewView) {
 			webviewView.webview.options = {
 				enableScripts: true,
 			}
 
-			const messages = state().project.query.messages.getAll()
-			const activeEditor = vscode.window.activeTextEditor
-			let fileContent = ""
+			webviewView.webview.onDidReceiveMessage(
+				(message) => {
+					if (message.command === "executeCommand") {
+						const commandName = message.commandName
+						const commandArgs = message.commandArgs
+						vscode.commands.executeCommand(commandName, commandArgs)
+					}
+				},
+				undefined,
+				args.context.subscriptions
+			)
 
-			if (activeEditor) {
-				const document = activeEditor.document
-				fileContent = document.getText()
+			const updateMessages = () => {
+				messages = state().project.query.messages.getAll()
+				updateWebviewContent()
 			}
 
-			const highlightedMessages = messages.filter((message) => fileContent.includes(message.id))
-			const highlightedMessagesHtml =
-				highlightedMessages.length > 0
-					? `<div class="highlighted-section">${highlightedMessages
-							.map((message) => createMessageHtml({ message, isHighlighted: true }))
-							.join("")}</div>`
-					: ""
+			const debounceUpdate = () => {
+				const activeEditor = vscode.window.activeTextEditor
+				const fileContent = activeEditor ? activeEditor.document.getText() : ""
+				if (debounceTimer) {
+					clearTimeout(debounceTimer)
+				}
+				debounceTimer = setTimeout(() => {
+					if (activeFileContent !== fileContent) {
+						activeFileContent = fileContent
+						updateWebviewContent()
+					}
+				}, 300)
+			}
 
-			const messageListHtml = messages
-				.map((message) => createMessageHtml({ message, isHighlighted: false }))
-				.join("")
+			const updateWebviewContent = () => {
+				const activeEditor = vscode.window.activeTextEditor
+				const fileContent = activeEditor ? activeEditor.document.getText() : ""
 
-			webviewView.webview.html = getHtml({
-				highlightedContent: highlightedMessagesHtml,
-				mainContent: messageListHtml,
-				context: args.context,
-				webview: webviewView.webview,
-			})
+				const highlightedMessages = messages.filter((message) => fileContent.includes(message.id))
+				const highlightedMessagesHtml =
+					highlightedMessages.length > 0
+						? `<div class="highlighted-section">
+                        <div class="banner"><span class="active-dot"></span><span>Current file<span></div>
+                        ${highlightedMessages
+													.map((message) => createMessageHtml({ message, isHighlighted: true }))
+													.join("")}
+                    </div>`
+						: ""
+
+				const allMessagesBanner = '<div class="banner">All Messages</div>'
+				const messageListHtml = `<main>${allMessagesBanner}${messages
+					.map((message) => createMessageHtml({ message, isHighlighted: false }))
+					.join("")}</main>`
+
+				webviewView.webview.html = getHtml({
+					highlightedContent: highlightedMessagesHtml,
+					mainContent: messageListHtml,
+					context: args.context,
+					webview: webviewView.webview,
+				})
+			}
+
+			updateWebviewContent() // Initial update
+
+			args.context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(debounceUpdate))
+			args.context.subscriptions.push(
+				vscode.workspace.onDidChangeTextDocument((event) => {
+					if (
+						vscode.window.activeTextEditor &&
+						event.document === vscode.window.activeTextEditor.document
+					) {
+						debounceUpdate()
+					}
+				})
+			)
+			args.context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(updateMessages))
 		},
 	}
 }
 
 function createMessageHtml(args: { message: Message; isHighlighted: boolean }): string {
-	const highlightedStyle = args.isHighlighted
-		? 'style="background-color: rgba(147, 112, 219, 0.1);"'
-		: ""
+	const translationsTableHtml = getTranslationsTableHtml(args.message)
+
 	return `
-        <div class="tree-item" ${highlightedStyle}>
+        <div class="tree-item">
             <button class="collapsible">
                 <span class="codicon codicon-note"></span><span>${args.message.id}<span>
             </button>
             <div class="content" style="display: none;">
-                <p>Source language tag: ${"en"}</p>
-                <button class="copy-btn" data-message-id="${args.message.id}">Copy ID</button>
+                ${translationsTableHtml}
             </div>
         </div>
     `
+}
+
+function getTranslationsTableHtml(message: Message): string {
+	const configuredLanguageTags = state().project.settings()?.languageTags || []
+	const contextTableRows = configuredLanguageTags.map((languageTag) => {
+		// ... similar logic to contextTooltip for generating rows ...
+		const variant = message.variants.find((v) => v.languageTag === languageTag)
+
+		let m = CONFIGURATION.STRINGS.MISSING_TRANSLATION_MESSAGE as string
+
+		if (variant) {
+			m = getStringFromPattern({
+				pattern: variant.pattern,
+				languageTag: variant.languageTag,
+				messageId: message.id,
+			})
+		}
+
+		// Replace these commands with appropriate actions for your webview
+		const editCommand = `editMessage('${message.id}', '${languageTag}')`
+		const openCommand = `openMessage('${message.id}', '${languageTag}')`
+
+		return `
+            <div class="section">
+                <span class="languageTag"><strong>${languageTag}</strong></span>
+                <span class="message">${m}</span>
+				<span class="actionButtons">
+					<button onclick="${editCommand}"><span class="codicon codicon-edit"></span></button>
+					<button onclick="${openCommand}"><span class="codicon codicon-link-external"></span></button>
+				</span>
+            </div>
+        `
+	})
+
+	return `<div class="table">${contextTableRows.join("")}</div>`
 }
 
 function getHtml(args: {
@@ -89,49 +174,78 @@ function getHtml(args: {
             <link href="${codiconsUri}" rel="stylesheet" />
         </head>
         <body>
-            <input type="text" id="searchInput" placeholder="Search messages...">
+            <input type="text" id="searchInput" placeholder="Search">
             ${args.highlightedContent}
             ${args.mainContent}
             <script>
-                // JavaScript for collapsible sections
-                document.addEventListener('DOMContentLoaded', () => {
-                    // collapsible items
-                    const collapsibles = document.querySelectorAll('.collapsible');
-                    collapsibles.forEach(collapsible => {
-                        collapsible.addEventListener('click', function() {
-                            this.classList.toggle('active');
-                            const content = this.nextElementSibling;
-                            if (content.style.display === 'block') {
-                                content.style.display = 'none';
-                            } else {
-                                content.style.display = 'block';
-                            }
-                        });
-                    });
-                    
-                    // copy button
-                    document.querySelectorAll('.copy-btn').forEach(button => {
-                        button.addEventListener('click', function() {
-                            const messageId = this.getAttribute('data-message-id');
-                            navigator.clipboard.writeText(messageId);
-                            // Show a notification or an alert
-                        });
-                    });
+				let collapsibles = [];
+				let copyButtons = [];
+				const vscode = acquireVsCodeApi();
+			
+				document.addEventListener('DOMContentLoaded', () => {
+					collapsibles = document.querySelectorAll('.collapsible');
+					copyButtons = document.querySelectorAll('.copy-btn');
+					initializeSearchFunctionality();
+					initializeCollapsibleItems();
+					initializeCopyButtons();
+				});
+			
+				function initializeCollapsibleItems() {
+					collapsibles.forEach(collapsible => {
+						collapsible.addEventListener('click', function() {
+							this.classList.toggle('active');
+							const content = this.nextElementSibling;
+							content.style.display = content.style.display === 'block' ? 'none' : 'block';
+						});
+					});
+				}
+			
+				function initializeCopyButtons() {
+					copyButtons.forEach(button => {
+						button.addEventListener('click', function() {
+							const messageId = this.getAttribute('data-message-id');
+							navigator.clipboard.writeText(messageId);
+						});
+					});
+				}
 
-                    // search functionality
+                function initializeSearchFunctionality() {
                     const searchInput = document.getElementById('searchInput');
+                    const storedSearchValue = localStorage.getItem('inlang.searchValue') || '';
+                    searchInput.value = storedSearchValue;
+
+                    // Apply filter based on stored value on load
+                    filterItems(storedSearchValue.toLowerCase());
+
                     searchInput.addEventListener('input', () => {
                         const searchTerm = searchInput.value.toLowerCase();
-                        document.querySelectorAll('.tree-item').forEach(item => {
-                            const messageId = item.querySelector('.collapsible').textContent.toLowerCase();
-                            if (messageId.includes(searchTerm)) {
-                                item.style.display = '';
-                            } else {
-                                item.style.display = 'none';
-                            }
-                        });
+                        localStorage.setItem('inlang.searchValue', searchTerm);
+                        filterItems(searchTerm);
                     });
-                });
+                }
+
+                function filterItems(searchTerm) {
+                    document.querySelectorAll('.tree-item').forEach(item => {
+                        const messageId = item.querySelector('.collapsible').textContent.toLowerCase();
+                        item.style.display = messageId.includes(searchTerm) ? '' : 'none';
+                    });
+                }
+
+				function editMessage(messageId, languageTag) {
+					vscode.postMessage({
+						command: 'executeCommand',
+						commandName: 'inlang.editMessage',
+						commandArgs: { messageId, languageTag },
+					});
+				}
+			
+				function openMessage(messageId, languageTag) {
+					vscode.postMessage({
+						command: 'executeCommand',
+						commandName: 'inlang.openMessage',
+						commandArgs: { messageId, languageTag },
+					});
+				}
             </script>
         </body>
         </html>
