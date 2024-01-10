@@ -1,4 +1,3 @@
-import { Button } from "#src/pages/index/components/Button.jsx"
 import type { HCaptchaFunctions, HCaptchaExecuteResponse } from "solid-hcaptcha"
 import { publicEnv } from "@inlang/env-variables"
 
