@@ -30,18 +30,27 @@ Used by
 <br />
 <br />
 
-# Tutorial
+# Let's get started
 
-[![Fink Guide Ad](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/editor-guide-image.jpg) Read in-depth guide](https://inlang.com/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink)
+- Add a `project.inlang` folder to your repository
+- Create a `settings.json` file to that new dir `project.inlang/settings.json`
+- Install a plugin that reads and writes your messages from the [inlang marketplace](https://inlang.com/c/plugins)
+- Install lint rules to find errors in your translations from the [inlang marketplace](https://inlang.com/c/lint-rules)
 
-# Login via GitHub
+Look at the [example repository](https://github.com/opral/example) and it's [settings.json](https://github.com/opral/example/blob/main/project.inlang/settings.json) for a working example.
 
-If your repository can't be accessed anonymously, you can login via GitHub. The editor will ask you to login if it can't access your repository.
-
-# Example
+## Example
 
 This is how the editor could look like for your project:
 
 <doc-links>
     <doc-link title="Open inlang example" icon="icon-park-outline:editor" href="/editor/github.com/opral/example" description="inlang example repository in the editor"></doc-link>
 </doc-links>
+
+# How to contribute translations
+
+[![Fink Guide Ad](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/editor-guide-image.jpg) Read in-depth guide](https://inlang.com/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink)
+
+# Login via GitHub
+
+If your repository can't be accessed anonymously, you can login via GitHub. The editor will ask you to login if it can't access your repository.
