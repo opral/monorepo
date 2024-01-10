@@ -1,8 +1,8 @@
 import { paraglideMiddleware } from "@inlang/paraglide-js-adapter-next/middleware"
-import { availableLanguageTags } from "@/paraglide/runtime"
 
 export const middleware = paraglideMiddleware
 
 export const config = {
-	matcher: ["/", `/(${availableLanguageTags.join("|")})/:path*`],
+	//Must be hardcoded string
+	matcher: ["/", `/(de|en|de-CH)/:path*`],
 }

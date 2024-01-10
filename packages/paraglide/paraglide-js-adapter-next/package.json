@@ -19,10 +19,6 @@
             "import": "./dist/app/navigation/index.js",
             "types": "./dist/app/navigation/index.d.ts"
         },
-        "./pages": {
-            "import": "./dist/pages/entry.js",
-            "types": "./dist/pages/index.d.ts"
-        },
         "./plugin": {
             "require": "./dist/plugin/index.cjs",
             "types": "./dist/plugin/index.d.ts"
