@@ -22,7 +22,11 @@ export default function Captcha(props: {
 	}
 
 	return (
-		<div class={props.captchaResponse() ? "pointer-events-none opacity-50 cursor-default" : ""}>
+		<div
+			class={
+				"w-full " + (props.captchaResponse() ? "pointer-events-none opacity-50 cursor-default" : "")
+			}
+		>
 			<Show when={typeof window !== "undefined"}>
 				<HCaptcha
 					sitekey={publicEnv.PUBLIC_HCAPTCHA_SITEKEY}
@@ -30,13 +34,15 @@ export default function Captcha(props: {
 					size="invisible"
 				/>
 			</Show>
-			<Button
-				function={submitCaptcha}
-				type="text"
-				class={"text-md" + (props.captchaResponse() ? "pointer-events-none opacity-50" : "")}
+			<button
+				onClick={submitCaptcha}
+				class={
+					"h-10 truncate text-sm text-background px-4 bg-surface-800 hover:bg-surface-900 max-xl:w-full rounded-[4px] font-medium transition-all duration-200 " +
+					(props.captchaResponse() ? "pointer-events-none opacity-50" : "")
+				}
 			>
 				{props.captchaResponse() ? m.newsletter_captcha_submitted() : m.newsletter_captcha_submit()}
-			</Button>
+			</button>
 		</div>
 	)
 }

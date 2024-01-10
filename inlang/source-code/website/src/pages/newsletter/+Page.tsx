@@ -38,7 +38,7 @@ export default function Page() {
 							<div class="flex flex-col w-full h-full justify-end items-center px-8">
 								<div class="h-full w-[2px] bg-gradient-to-t from-surface-100 to-hover-primary relative z-0">
 									<div class="w-full flex justify-center h-full z-3">
-										<div class="text-hover-primary bg-[#FFF] z-10 flex justify-center items-center text-center mx-auto p-8 rounded-2xl bg-white border-2 border-hover-primary absolute max-w-[90vw] -top-8">
+										<div class="text-hover-primary bg-[#FFF] z-10 flex justify-center items-center text-center xl:w-auto w-[312px] mx-auto p-8 rounded-2xl bg-white border-2 border-hover-primary absolute max-w-[90vw] -top-8">
 											<NewsletterForm />
 										</div>
 									</div>
