@@ -27,7 +27,7 @@ export default function Page(props: PageProps) {
 	const [markdownHeadings, setMarkdownHeadings] = createSignal<Array<string>>([])
 
 	const ogPath = () => {
-		const lastWordIndex = props.slug.lastIndexOf("/")
+		const lastWordIndex = props.slug.lastIndexOf("/") ?? 0
 
 		const slug = props.slug.includes("/") ? props.slug.slice(0, lastWordIndex) : props.slug
 
