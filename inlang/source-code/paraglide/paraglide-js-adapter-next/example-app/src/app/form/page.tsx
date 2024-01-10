@@ -4,7 +4,7 @@ import { languageTag } from "@/paraglide/runtime"
 export default function About() {
 	async function log(formData: FormData) {
 		"use server"
-		console.log(formData, languageTag())
+		console.info(formData, languageTag())
 	}
 
 	return (
