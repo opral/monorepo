@@ -27,20 +27,24 @@ export default function Page(props: PageProps) {
 	const [markdownHeadings, setMarkdownHeadings] = createSignal<Array<string>>([])
 
 	const ogPath = () => {
-		const lastWordIndex = props.slug.lastIndexOf("/") ?? 0
+		if (props.slug) {
+			const lastWordIndex = props.slug.lastIndexOf("/")
 
-		const slug = props.slug.includes("/") ? props.slug.slice(0, lastWordIndex) : props.slug
+			const slug = props.slug.includes("/") ? props.slug.slice(0, lastWordIndex) : props.slug
 
-		return slug === ""
-			? "/opengraph/inlang-documentation-image.jpg"
-			: `/opengraph/generated/${slug}/${findPageBySlug(
-					currentPageContext.urlParsed.pathname
-						.replace("/" + languageTag(), "")
-						.replace("/documentation/", "")
-			  )
-					?.title.toLowerCase()
-					.replaceAll(" ", "_")
-					.replaceAll("?", "")}.jpg`
+			return slug === ""
+				? "/opengraph/inlang-documentation-image.jpg"
+				: `/opengraph/generated/${slug}/${findPageBySlug(
+						currentPageContext.urlParsed.pathname
+							.replace("/" + languageTag(), "")
+							.replace("/documentation/", "")
+				  )
+						?.title.toLowerCase()
+						.replaceAll(" ", "_")
+						.replaceAll("?", "")}.jpg`
+		} else {
+			return "/opengraph/inlang-documentation-image.jpg"
+		}
 	}
 
 	createEffect(() => {
@@ -306,12 +310,18 @@ function NavbarCommon(props: {
 }
 
 function findPageBySlug(slug: string) {
-	for (const [, pageArray] of Object.entries(getTableOfContents())) {
-		for (const page of pageArray) {
-			if (page.slug === slug || page.slug === slug.replace("/documentation", "")) {
-				return page
-			}
+	const tableOfContents = getTableOfContents()
+
+	for (const [, pageArray] of Object.entries(tableOfContents)) {
+		const foundPage = pageArray.find(
+			(page) => page.slug === slug || page.slug === slug.replace("/documentation", "")
+		)
+
+		if (foundPage) {
+			return foundPage
 		}
 	}
+
 	return undefined
 }
+  
