@@ -1,16 +1,16 @@
 "use client"
-import {
-	setLanguageTag,
-	isAvailableLanguageTag,
-	sourceLanguageTag,
-} from "$paraglide-adapter-next-internal/runtime.js"
 import React from "react"
 import Header from "./Header"
+import { availableLanguageTags } from "$paraglide-adapter-next-internal/runtime.js"
 
 export default function ParaglideJS(props: {
+	runtime: typeof import("$paraglide-adapter-next-internal/runtime.js")
 	language?: string
 	children: React.ReactNode
 }): React.ReactNode {
+	const { isAvailableLanguageTag, setLanguageTag, sourceLanguageTag, availableLanguageTags } =
+		props.runtime
+
 	if (isAvailableLanguageTag(props.language as string)) {
 		setLanguageTag(props.language as string)
 	} else {
@@ -20,12 +20,13 @@ export default function ParaglideJS(props: {
 				`[paraglide]: "${props.language}" is not one of the available language tags. Falling back to "${sourceLanguageTag}"`
 			)
 		}
+
 		setLanguageTag(sourceLanguageTag)
 	}
 
 	return (
 		<>
-			<Header />
+			<Header availableLanguageTags={availableLanguageTags} sourceLanguageTag={sourceLanguageTag} />
 			{props.children}
 		</>
 	)

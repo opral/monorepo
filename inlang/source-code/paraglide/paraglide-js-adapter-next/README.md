@@ -41,8 +41,7 @@ module.exports = {
 To do this, wrap your `_app.js` file with the `ParaglideJS` component for the Pages router:
 
 ```jsx
-import { ParaglideJS } from "@inlang/paraglide-js-adapter-next/pages"
-
+import { ParaglideJS } from "@inlang/paraglide-js-adapter-next"
 
 export default function App({ Component, pageProps, router }: AppProps) {
 	return (
