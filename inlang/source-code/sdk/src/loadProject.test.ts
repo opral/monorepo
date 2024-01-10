@@ -165,7 +165,7 @@ describe("initialization", () => {
 
 	it("should generate projectId on missing projectid", async () => {
 		const ciTestRepo: Snapshot = JSON.parse(
-			readFileSync("./mocks/ci-test-repo.json", { encoding: "utf-8" })
+			readFileSync("./mocks/ci-test-repo-no-shallow.json", { encoding: "utf-8" })
 		)
 		const repo = await mockRepo({ fromSnapshot: ciTestRepo })
 
@@ -196,7 +196,7 @@ describe("initialization", () => {
 				return { error }
 			})
 
-		expect(newId).toBe("7e722a1fad6e3a70628a1872ef33cf4c7a33f61eea88907956836f93d9cefd33")
+		expect(newId).toBe("e8c61726bc2f437ec6a260abb632b3c59195059b60031e648b5afbafa7f3d79a")
 
 		expect(result.error).toBeUndefined()
 		expect(result.data).toBeDefined()
@@ -204,7 +204,7 @@ describe("initialization", () => {
 
 	it("should reuse projectId on existing projectid", async () => {
 		const ciTestRepo: Snapshot = JSON.parse(
-			readFileSync("./mocks/ci-test-repo.json", { encoding: "utf-8" })
+			readFileSync("./mocks/ci-test-repo-no-shallow.json", { encoding: "utf-8" })
 		)
 		const repo = await mockRepo({ fromSnapshot: ciTestRepo })
 

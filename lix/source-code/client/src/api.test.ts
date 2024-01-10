@@ -130,6 +130,18 @@ describe("main workflow", () => {
 		expect(gitOrigin).toBe("github.com/inlang/ci-test-repo.git")
 	})
 
+  it("finds initial commit of repo", async () => {
+		const fs = createNodeishMemoryFs()
+
+		const snapshot = JSON.parse(
+			readFileSync("./mocks/ci-test-repo-no-shallow.json", { encoding: "utf-8" })
+		)
+		fromSnapshot(fs, snapshot)
+
+		const firstHash = await repository.getFirstCommitHash()
+		expect(firstHash).toBe("244e3ce8c3335530ac0cd07e669b964bceb3b787")
+	})
+
 	it("exposes current branch", async () => {
 		const branch = await repository.getCurrentBranch()
 		expect(branch).toBe("main")

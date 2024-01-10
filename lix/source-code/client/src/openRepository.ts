@@ -72,6 +72,8 @@ export async function openRepository(
 	// fixme: propper error handling with error return values and no signal dependency
 	const [errors, setErrors] = createSignal<Error[]>([])
 
+	// TODO: use propper shallow .git format and checks
+
 	// the url format for lix urls is
 	// https://lix.inlang.com/git/github.com/opral/monorepo
 	// proto:// lixServer / namespace / repoHost / owner / repoName
@@ -561,14 +563,18 @@ export async function openRepository(
 			})
 
 			if (doLixClone) {
-				await gitFetch({
-					singleBranch: true,
-					dir,
-					depth: 2147483647, // the magic number for all commits
-					http: makeHttpClient({ verbose, description: "getFirstCommitHash" }),
-					corsProxy: gitProxyUrl,
-					fs: getFirstCommitFs,
-				})
+				try {
+					await gitFetch({
+						singleBranch: true,
+						dir,
+						depth: 2147483647, // the magic number for all commits
+						http: makeHttpClient({ verbose, description: "getFirstCommitHash" }),
+						corsProxy: gitProxyUrl,
+						fs: getFirstCommitFs,
+					})
+				} catch {
+					return undefined
+				}
 			}
 
 			let firstCommitHash: string | undefined = "HEAD"

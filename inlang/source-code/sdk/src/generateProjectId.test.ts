@@ -8,13 +8,13 @@ import { readFileSync } from "node:fs"
 
 describe("generateProjectId", async () => {
 	const ciTestRepo: Snapshot = JSON.parse(
-		readFileSync("./mocks/ci-test-repo.json", { encoding: "utf-8" })
+		readFileSync("./mocks/ci-test-repo-no-shallow.json", { encoding: "utf-8" })
 	)
 	const repo = await mockRepo({ fromSnapshot: ciTestRepo as Snapshot })
 
 	it("should generate a project id", async () => {
 		const projectId = await generateProjectId(repo, "mocked_project_path")
-		expect(projectId).toBe("1e1f379d047dc95b577566532478ae89b32d7b545724bc470b4a1677c158910b")
+		expect(projectId).toBe("959bcf0a30e678c9b90a3c76d1a281d085eab55f289c5439b6b10849baa1920c")
 	})
 
 	it("should return undefined if repoMeta contains error", async () => {
