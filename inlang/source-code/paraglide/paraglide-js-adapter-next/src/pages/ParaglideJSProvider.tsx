@@ -13,7 +13,7 @@ export interface Paraglide<T extends string> {
 
 export default function ParaglideJS<T extends string>(props: {
 	runtime: Paraglide<T>
-	language?: T
+	language?: string //this intentionally isn't T because Next's types arent as strict as ours
 	children: React.ReactNode
 }): React.ReactNode {
 	const { isAvailableLanguageTag, setLanguageTag, sourceLanguageTag, availableLanguageTags } =
