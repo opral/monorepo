@@ -36,7 +36,7 @@ const verbose = false
 const whitelistedExperimentalRepos = [
 	"inlang/example",
 	"inlang/ci-test-repo",
-	"inlang/monorepo",
+	"opral/monorepo",
 	"inlang/example-test",
 
 	"janfjohannes/inlang-example",
@@ -59,7 +59,7 @@ export async function openRepository(
 	const [errors, setErrors] = createSignal<Error[]>([])
 
 	// the url format for lix urls is
-	// https://lix.inlang.com/git/github.com/inlang/monorepo
+	// https://lix.inlang.com/git/github.com/opral/monorepo
 	// proto:// lixServer / namespace / repoHost / owner / repoName
 	// namespace is ignored until switching from git.inlang.com to lix.inlang.com and can eveolve in future to be used for repoType, api type or feature group
 	// the url format for direct github urls without a lix server is https://github.com/inlang/examplX (only per domain-enabled git hosters will be supported, currently just gitub)

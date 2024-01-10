@@ -260,7 +260,7 @@
 
 ### Patch Changes
 
-- 66519584: Fixes https://github.com/inlang/monorepo/issues/927
+- 66519584: Fixes https://github.com/opral/monorepo/issues/927
 
 ## 0.7.4
 
@@ -307,7 +307,7 @@
 
 ### Patch Changes
 
-- 04f5ac93: The ide extension config has been moved back into @inlang/core. For more information, read https://github.com/inlang/monorepo/issues/856.
+- 04f5ac93: The ide extension config has been moved back into @inlang/core. For more information, read https://github.com/opral/monorepo/issues/856.
 - Updated dependencies [04f5ac93]
   - @inlang/core@0.9.0
 

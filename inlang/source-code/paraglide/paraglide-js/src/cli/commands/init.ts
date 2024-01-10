@@ -45,7 +45,7 @@ export const initCommand = new Command()
 
 		telemetry.capture({ event: "PARAGLIDE-JS init finished" })
 		logger.box(
-			"inlang Paraglide-JS has been set up sucessfully.\n\n1. Run your install command (npm i, yarn install, etc)\n2. Run the build script (npm run build, or similar.)\n3. Done :) Happy paragliding 🪂\n\n For questions and feedback, visit https://github.com/inlang/monorepo/discussions.\n"
+			"inlang Paraglide-JS has been set up sucessfully.\n\n1. Run your install command (npm i, yarn install, etc)\n2. Run the build script (npm run build, or similar.)\n3. Done :) Happy paragliding 🪂\n\n For questions and feedback, visit https://github.com/opral/monorepo/discussions.\n"
 		)
 	})
 
@@ -173,7 +173,7 @@ export const createNewProjectFlow = async (logger: Logger) => {
 	})
 	if (project.errors().length > 0) {
 		logger.warn(
-			"Failed to create a new inlang project.\n\nThis is likely an internal bug. Please file an issue at https://github.com/inlang/monorepo."
+			"Failed to create a new inlang project.\n\nThis is likely an internal bug. Please file an issue at https://github.com/opral/monorepo."
 		)
 		for (const error of project.errors()) {
 			logger.error(error)
@@ -204,7 +204,7 @@ export const newProjectTemplate: ProjectSettings = {
 	],
 	"plugin.inlang.messageFormat": {
 		// using .inlang/paraglide-js as directory to avoid future conflicts when an official .inlang
-		// directory is introduced, see https://github.com/inlang/monorepo/discussions/1418
+		// directory is introduced, see https://github.com/opral/monorepo/discussions/1418
 		pathPattern: "./messages/{languageTag}.json",
 	},
 }

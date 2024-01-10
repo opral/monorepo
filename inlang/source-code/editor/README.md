@@ -1,4 +1,4 @@
-![editor banner image](https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/editor/assets/editor-header.png)
+![editor banner image](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/editor/assets/editor-header.png)
 
 # Edit translations with version control in a visual editor.
 
@@ -12,9 +12,9 @@ Used by
 
 # Why use Fink?
 <doc-features>
-  <doc-feature text-color="#0F172A" color="#E1EFF7" title="Edit messages visually" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/editor/assets/editor01.png"></doc-feature>
-  <doc-feature text-color="#0F172A" color="#E1EFF7" title="Collaborate using version control" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/editor/assets/editor02.png"></doc-feature>
-  <doc-feature text-color="#0F172A" color="#E1EFF7" title="Ensure quality with lint rules" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/editor/assets/editor03.png"></doc-feature>
+  <doc-feature text-color="#0F172A" color="#E1EFF7" title="Edit messages visually" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/editor01.png"></doc-feature>
+  <doc-feature text-color="#0F172A" color="#E1EFF7" title="Collaborate using version control" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/editor02.png"></doc-feature>
+  <doc-feature text-color="#0F172A" color="#E1EFF7" title="Ensure quality with lint rules" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/editor03.png"></doc-feature>
 </doc-features>
 
 <br />
@@ -32,7 +32,7 @@ Used by
 
 # Tutorial
 
-[![Fink Guide Ad](https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/editor-guide-image.jpg) Read in-depth guide](https://inlang.com/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink)
+[![Fink Guide Ad](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/editor-guide-image.jpg) Read in-depth guide](https://inlang.com/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink)
 
 # Login via GitHub
 
