@@ -79,7 +79,16 @@ export async function openRepository(
 	// the url format for direct github urls without a lix server is https://github.com/inlang/examplX (only per domain-enabled git hosters will be supported, currently just gitub)
 	// the url for opening a local repo allready in the fs provider is file://path/to/repo (not implemented yet)
 
+	// TODO: check for same origin
+	let doClone = false
+
+	// the directory we use for all git operations as repo root, if we are interested in a repo subdirectory we have to append this
+	// TODO: add more tests for non root dir command
+	let dir = "/"
+
 	if (url.startsWith("file:")) {
+		dir = url.replace("file://", "")
+
 		const remotes = await listRemotes({
 			fs: args.nodeishFs,
 			dir: url.replace("file://", ""),
@@ -90,6 +99,12 @@ export async function openRepository(
 			url = origin.replace("git@github.com:", "https://github.com/")
 		} else {
 			url = origin
+		}
+	} else {
+		// Simple check for existing git repos
+		const maybeGitDir = await rawFs.lstat(".git").catch((error) => ({ error }))
+		if ("error" in maybeGitDir) {
+			doClone = true
 		}
 	}
 
@@ -133,14 +148,9 @@ export async function openRepository(
 
 	// Bail commit/ push on errors that are relevant or unknown
 
-	// the directory we use for all git operations
-	const dir = "/"
-
 	let pending: Promise<void | { error: Error }> | undefined
-	// Simpel check for existing git repos
-	// TODO: check for same origin
-	const maybeGitDir = await rawFs.lstat("/.git").catch((error) => ({ error }))
-	if ("error" in maybeGitDir) {
+
+	if (doClone) {
 		pending = clone({
 			fs: withLazyFetching({ nodeishFs: rawFs, verbose, description: "clone" }),
 			http: makeHttpClient({
@@ -159,7 +169,9 @@ export async function openRepository(
 			singleBranch: true,
 			noCheckout: true,
 			ref: args.branch,
-			depth: 1,
+
+			// TODO: use only first and last commit in lazy clone? (we need first commit for repo id)
+			// depth: 1,
 			noTags: true,
 		})
 			.then(() => {
@@ -468,7 +480,13 @@ export async function openRepository(
 		 *
 		 * The function ensures that the same orgin is always returned for the same repository.
 		 */
-		async getOrigin(): Promise<string> {
+		async getOrigin({ safeHashOnly = false } = {}): Promise<string> {
+			if (safeHashOnly) {
+				const safeOriginHash = await hash(`${lixHost}__${repoHost}__${owner}__${repoName}`)
+				return safeOriginHash
+			}
+
+			// TODO: this flow is obsolete and can be unified with the initialization of the repo
 			const repo = await this
 			const remotes: Array<{ remote: string; url: string }> | undefined = await repo.listRemotes()
 
@@ -486,7 +504,7 @@ export async function openRepository(
 		},
 
 		async getCurrentBranch() {
-			// TODO: make stateless
+			// TODO: make stateless?
 			return (
 				(await currentBranch({
 					fs: withLazyFetching({
@@ -534,6 +552,43 @@ export async function openRepository(
 			},
 		}),
 
+		async getId() {
+			let firstCommitHash: string | undefined = "HEAD"
+			for (;;) {
+				const commits: Awaited<ReturnType<typeof log>> | { error: any } = await log({
+					fs: withLazyFetching({
+						nodeishFs: rawFs,
+						verbose,
+						description: "getRepoId",
+						intercept: delayedAction,
+					}),
+					depth: 50,
+					dir,
+					ref: firstCommitHash,
+				}).catch((error) => {
+					return { error }
+				})
+
+				if ("error" in commits) {
+					firstCommitHash = undefined
+					break
+				}
+
+				const lastHashInPage: undefined | string = commits.at(-1)?.oid
+				if (lastHashInPage) {
+					firstCommitHash = lastHashInPage
+				}
+
+				if (commits.length < 50) {
+					break
+				}
+			}
+
+			const repoId = firstCommitHash && (await hash(firstCommitHash))
+
+			return repoId
+		},
+
 		/**
 		 * Additional information about a repository provided by GitHub.
 		 */
@@ -550,14 +605,10 @@ export async function openRepository(
 					return { error: newError }
 				})
 
-
-			const repoId = await hash(`${lixHost}__${repoHost}__${owner}__${repoName}`)
-
 			if ("error" in res) {
-				return { error: res.error, id: repoId }
+				return { error: res.error }
 			} else {
 				return {
-					id: repoId,
 					name: res.data.name,
 					isPrivate: res.data.private,
 					isFork: res.data.fork,

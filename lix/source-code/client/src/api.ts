@@ -37,13 +37,13 @@ export type Repository = {
 	>
 	createFork: () => Promise<Endpoints["POST /repos/{owner}/{repo}/forks"]["response"]>
 	forkStatus: () => Promise<{ ahead: number; behind: number } | { error: string }>
-	getOrigin: () => Promise<string>
+	getOrigin: (arg?: { safeHashOnly?: boolean }) => Promise<string>
 	getCurrentBranch: () => Promise<string | undefined>
 	getBranches: () => Promise<string[] | undefined>
 	errors: Subscribable<LixError[]>
+	getId: () => Promise<string | undefined>
 	getMeta: () => Promise<
 		| {
-				id: string
 				name: string
 				isPrivate: boolean
 				isFork: boolean
