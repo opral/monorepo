@@ -9,6 +9,11 @@ type ParaglideConfig = {
 	outdir: string
 }
 
+type Config = NextConfig & {
+	paraglide: ParaglideConfig
+	paths?: Record<string, Record<string, string>>
+}
+
 /**
  * Add this to your next.config.js to enable Paraglide.
  * It will register any aliases required by the Adapter,
@@ -16,19 +21,16 @@ type ParaglideConfig = {
  *
  * @returns
  */
-export function withParaglide(
-	paraglideConfig: ParaglideConfig,
-	nextConfig: NextConfig
-): NextConfig {
-	addAlias(nextConfig, {
-		"$paraglide-adapter-next-internal/runtime.js": paraglideConfig.outdir + "/runtime.js",
+export function withParaglide(config: Config): NextConfig {
+	addAlias(config, {
+		"$paraglide-adapter-next-internal/runtime.js": config.paraglide.outdir + "/runtime.js",
 	})
 
-	const router = nextConfig.i18n ? "pages" : "app"
+	const router = config.i18n ? "pages" : "app"
 	if (router === "app") {
-		addRewrites(nextConfig, async () => {
+		addRewrites(config, async () => {
 			const { loadProject } = await import("@inlang/sdk")
-			const projectPath = resolve(process.cwd(), paraglideConfig.project)
+			const projectPath = resolve(process.cwd(), config.paraglide.project)
 			const project = await loadProject({
 				projectPath,
 				nodeishFs: fs,
@@ -43,6 +45,9 @@ export function withParaglide(
 			]
 		})
 	}
+
+	const nextConfig: NextConfig = config
+	delete nextConfig.paraglide
 
 	return nextConfig
 }
