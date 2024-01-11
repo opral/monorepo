@@ -363,3 +363,10 @@ Of course we are open to and value criticism as well. If you have any feedback, 
 <doc-comment text="[...] the switch between the sdk-js and paraglide has been pretty great! " author="albbus" icon="mdi:discord"></doc-comment>
 <doc-comment text="Thanks for all the great work @Samuel Stroschein" author="Willem" icon="mdi:discord"></doc-comment>
 </doc-comments>
+
+# Talks
+
+- [Svelte Summit Spring 2023](https://www.youtube.com/watch?v=Y6IbPfMU1xM)
+- [Svelte Summit Fall 2023](https://www.youtube.com/watch?v=-YES3CCAG90)
+- Web Zurich December 2023
+- [Svelte London January 2024](https://www.youtube.com/watch?v=eswNQiq4T2w&t=646s)
