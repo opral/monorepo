@@ -1,4 +1,4 @@
-import { For, Show, createSignal, onMount, type JSX, Switch, Match } from "solid-js"
+import { For, Show, createSignal, type JSX, Switch, Match } from "solid-js"
 import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
@@ -37,13 +37,6 @@ export default function Page(props: {
 	slider?: boolean
 	items: Awaited<ReturnType<any>>
 }) {
-	onMount(() => {
-		const urlParams = new URLSearchParams(window.location.search)
-		if (urlParams.get("search") !== "" && urlParams.get("search") !== undefined) {
-			setSearchValue(urlParams.get("search")?.replace(/%20/g, " ") || "")
-		}
-	})
-
 	type HeaderContentType = {
 		title: string
 		description: string
@@ -98,7 +91,7 @@ export default function Page(props: {
 				return {
 					title: m.marketplace_header_lix_title(),
 					description: m.marketplace_header_lix_short_description(),
-					buttonLink: "https://github.com/inlang/monorepo/tree/main/lix",
+					buttonLink: "https://github.com/opral/monorepo/tree/main/lix",
 					buttonText: m.marketplace_header_lix_button_text(),
 					coverCard: <LixHeader />,
 				}
@@ -123,15 +116,16 @@ export default function Page(props: {
 				return {
 					title: m.marketplace_header_solid_title(),
 					description: m.marketplace_header_solid_description(),
-					icon: "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-solidstart/assets/icon.png",
+					icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-solidstart/assets/icon.png",
 					coverCard: <GenericHeader />,
 				}
 			}
 			case "astro": {
 				return {
-					title: m.marketplace_header_generic_title(),
-					description: m.marketplace_header_generic_description(),
+					title: m.marketplace_header_astro_title(),
+					description: m.marketplace_header_astro_description(),
 					icon: "https://astro.build/favicon.svg",
+					withGuides: true,
 					coverCard: <GenericHeader />,
 				}
 			}
@@ -179,12 +173,12 @@ export default function Page(props: {
 			/>
 			<Meta
 				name="og:image"
-				content="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/website/public/opengraph/inlang-social-image.jpg"
+				content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/website/public/opengraph/inlang-social-image.jpg"
 			/>
 			<Meta name="twitter:card" content="summary_large_image" />
 			<Meta
 				name="twitter:image"
-				content="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/website/public/opengraph/inlang-social-image.jpg"
+				content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/website/public/opengraph/inlang-social-image.jpg"
 			/>
 			<Meta
 				name="twitter:image:alt"
