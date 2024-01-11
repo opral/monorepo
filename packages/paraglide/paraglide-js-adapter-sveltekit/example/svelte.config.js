@@ -15,6 +15,7 @@ const config = {
 
 		alias: {
 			$paraglide: "./src/paraglide/",
+			$lib: "./src/lib/",
 		},
 		paths: {
 			base: "/base",

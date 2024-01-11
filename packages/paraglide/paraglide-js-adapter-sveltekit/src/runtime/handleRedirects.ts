@@ -1,5 +1,4 @@
 import type { Handle } from "@sveltejs/kit"
-import { getLanguageFromURL } from "./getLanguageFromUrl.js"
 import { sourceLanguageTag } from "$paraglide-adapter-sveltekit:runtime"
 import translatePath from "$paraglide-adapter-sveltekit:translate-path"
 
