@@ -6,7 +6,7 @@ There are many ways users interact with inlang. This documentation gives you inf
 
 ### 1. Open repository
 
-Open a repository locally or with [lix](https://github.com/inlang/monorepo/blob/main/lix/design-principles.md). Using lix enables you to use git-based features directly in the browser.
+Open a repository locally or with [lix](https://github.com/opral/monorepo/blob/main/lix/design-principles.md). Using lix enables you to use git-based features directly in the browser.
 
 ### 2. Open project
 

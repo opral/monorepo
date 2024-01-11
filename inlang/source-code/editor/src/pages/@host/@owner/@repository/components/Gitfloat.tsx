@@ -15,6 +15,7 @@ import {
 import { posthog as telemetryBrowser } from "posthog-js"
 import { TourHintWrapper, type TourStepId } from "./Notification/TourHintWrapper.jsx"
 import { browserAuth } from "@lix-js/server"
+import { setSignInModalOpen, signInModalOpen } from "#src/services/auth/src/components/SignInDialog.jsx"
 
 export const Gitfloat = () => {
 	const {
@@ -29,6 +30,7 @@ export const Gitfloat = () => {
 		setLastPullTime,
 		tourStep,
 		project,
+		projectList,
 		lixErrors,
 	} = useEditorState()
 	const [localStorage] = useLocalStorage()
@@ -45,7 +47,7 @@ export const Gitfloat = () => {
 			typeof repoInfo === "undefined" ||
 			"error" in repoInfo ||
 			userIsCollaborator.loading ||
-			!project() ||
+			!projectList() ||
 			isForking()
 		) {
 			return "loading"
@@ -67,9 +69,11 @@ export const Gitfloat = () => {
 	let forkPermissionDialog: SlDialog | undefined
 	let pushPermissionDialog: SlDialog | undefined
 
-	function onSignIn() {
-		signInDialog?.show()
-	}
+	createEffect(() => {
+		if (signInModalOpen()) {
+			signInDialog?.show()
+		}
+	})
 
 	async function handleFork() {
 		if (!localStorage.user?.isLoggedIn) {
@@ -199,7 +203,7 @@ export const Gitfloat = () => {
 			icon: () => {
 				return <IconGithub />
 			},
-			onClick: onSignIn,
+			onClick: () => setSignInModalOpen(true),
 			tourStepId: "github-login",
 		},
 		loading: {
@@ -337,6 +341,7 @@ export const Gitfloat = () => {
 					// hide the sign in dialog to increase UX when switching back to this window
 					browserAuth.login()
 					signInDialog?.hide()
+					setSignInModalOpen(false)
 				}}
 			/>
 			<ForkPermissionDialog

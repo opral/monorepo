@@ -1,6 +1,6 @@
 {
 	"id": "guide.lorissigrist.useParaglideJsWithNextjsPagesRouter",
-	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/use-paraglide-with-nextjs-pages-router/pages-router-logo.png",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/use-paraglide-with-nextjs-pages-router/pages-router-logo.png",
 	"displayName": {
 		"en": "Use ParaglideJS with the NextJS Pages Router"
 	},

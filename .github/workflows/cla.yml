@@ -27,7 +27,7 @@ jobs:
           PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         with:
           path-to-signatures: 'cla-signatures.json'
-          path-to-document: 'https://github.com/inlang/monorepo/blob/main/cla.md' # e.g. a CLA or a DCO document
+          path-to-document: 'https://github.com/opral/monorepo/blob/main/cla.md' # e.g. a CLA or a DCO document
           # branch should not be protected
           branch: 'main'
           allowlist: bot*

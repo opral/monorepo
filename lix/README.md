@@ -21,9 +21,9 @@ If you are interested, check out the [design principles](./design-principles.md)
 
 ## Community & Support
 
-**[🚩 Issues](https://github.com/inlang/monorepo/issues)** - Bugs end errors you encounter using inlang.
+**[🚩 Issues](https://github.com/opral/monorepo/issues)** - Bugs end errors you encounter using inlang.
 
-**[💬 Discussions](https://github.com/inlang/monorepo/discussions)** - Get help, ask questions, request features, and discuss inlang.
+**[💬 Discussions](https://github.com/opral/monorepo/discussions)** - Get help, ask questions, request features, and discuss inlang.
 
 **[🗣️ Discord](https://discord.gg/gdMPPWy57R)** - Hanging out with the community.
 
