@@ -49,10 +49,11 @@
 		"posthog-node": "3.1.3"
 	},
 	"devDependencies": {
+		"@lix-js/client": "workspace:*",
 		"@inlang/env-variables": "workspace:*",
 		"@inlang/telemetry": "workspace:*",
-		"@inlang/sdk": "workspace:*",
 		"@rollup/plugin-terser": "0.4.3",
+		"@inlang/sdk": "workspace:*",
 		"@rollup/plugin-virtual": "3.0.1",
 		"@ts-morph/bootstrap": "0.20.0",
 		"@types/minimist": "1.2.3",
