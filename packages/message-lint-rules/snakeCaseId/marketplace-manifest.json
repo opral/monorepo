@@ -1,9 +1,9 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "messageLintRule.inlang.snakeCaseId",
-	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/snakeCaseId/assets/icon.png",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/message-lint-rules/snakeCaseId/assets/icon.png",
 	"gallery": [
-		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/snake_case_id-cover.jpg"
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/snake_case_id-cover.jpg"
 	],
 	"displayName": {
 		"en": "Snake case id"
@@ -12,7 +12,7 @@
 		"en": "Checks for messages to have a snake case formatted message id (e.g. 'my_message_id')."
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/snakeCaseId/README.md"
+		"en": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/message-lint-rules/snakeCaseId/README.md"
 	},
 	"keywords": ["message", "lint rule", "id", "format", "snake", "case", "website"],
 	"publisherName": "inlang",

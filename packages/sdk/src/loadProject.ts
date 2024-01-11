@@ -218,7 +218,7 @@ export const loadProject = async (args: {
 						module:
 							resolvedModules()?.meta.find((m) => m.id.includes(rule.id))?.module ??
 							"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
-						// default to warning, see https://github.com/inlang/monorepo/issues/1254
+						// default to warning, see https://github.com/opral/monorepo/issues/1254
 						level: settingsValue["messageLintRuleLevels"]?.[rule.id] ?? "warning",
 					} satisfies InstalledMessageLintRule)
 			) satisfies Array<InstalledMessageLintRule>

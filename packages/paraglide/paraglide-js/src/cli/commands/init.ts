@@ -187,7 +187,7 @@ export const createNewProjectFlow = async (logger: Logger) => {
 	})
 	if (project.errors().length > 0) {
 		logger.warn(
-			"Failed to create a new inlang project.\n\nThis is likely an internal bug. Please file an issue at https://github.com/inlang/monorepo."
+			"Failed to create a new inlang project.\n\nThis is likely an internal bug. Please file an issue at https://github.com/opral/monorepo."
 		)
 		for (const error of project.errors()) {
 			logger.error(error)
@@ -218,7 +218,7 @@ export const newProjectTemplate: ProjectSettings = {
 	],
 	"plugin.inlang.messageFormat": {
 		// using .inlang/paraglide-js as directory to avoid future conflicts when an official .inlang
-		// directory is introduced, see https://github.com/inlang/monorepo/discussions/1418
+		// directory is introduced, see https://github.com/opral/monorepo/discussions/1418
 		pathPattern: "./messages/{languageTag}.json",
 	},
 }
