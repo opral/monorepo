@@ -1,10 +1,14 @@
-body {
+/* messages webview */
+
+html, body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe WUI", "Ubuntu", sans-serif;
     color: var(--vscode-sideBar-foreground);
     background-color: var(--vscode-sideBar-background);
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    user-select: text;
+    -webkit-user-select: text;
 }
 
 .collapsible {
@@ -51,22 +55,29 @@ body {
 }
 
 .table .section .languageTag {
-    margin-right: 15px;
+    align-self: flex-start;
+    padding-block-start: 1px;
+    margin-inline-end: 8px;
+    margin-inline-start: 12px;
+    
 }
 
 .table .section .message {
-    margin-right: auto;
+    align-self: flex-start;
+    padding-block-start: 1px;
+    margin-inline-end: auto;
 }
 
 .table .section .actionButtons {
-    align-self: flex-end;
+    align-self: flex-start;
+    padding-block-start: 1px;
     display: flex;
     gap: 5px;
     align-items: center;
     justify-content: flex-end;
 }
 
-.table .section .actionButtons button {
+.table button {
     all: unset;
 }
 
@@ -86,6 +97,16 @@ main {
     font-size: 11px;
     font-weight: bold; 
     padding: 4px 10px;
+}
+
+.no-messages {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    font-size: 13px;
+    margin: 5px 10px;
+    color: var(--vscode-sideBar-foreground);
 }
 
 .active-dot {

@@ -62,9 +62,12 @@ export function createMessageWebviewProvider(args: { context: vscode.ExtensionCo
 						: ""
 
 				const allMessagesBanner = '<div class="banner">All Messages</div>'
-				const messageListHtml = `<main>${allMessagesBanner}${messages
-					.map((message) => createMessageHtml({ message, isHighlighted: false }))
-					.join("")}</main>`
+				const messageListHtml =
+					messages.length > 0
+						? `<main>${allMessagesBanner}${messages
+								.map((message) => createMessageHtml({ message, isHighlighted: false }))
+								.join("")}</main>`
+						: `<main>${allMessagesBanner + createNoMessagesFoundHtml(true)}</main>`
 
 				webviewView.webview.html = getHtml({
 					highlightedContent: highlightedMessagesHtml,
@@ -88,6 +91,27 @@ export function createMessageWebviewProvider(args: { context: vscode.ExtensionCo
 				})
 			)
 			args.context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(updateMessages))
+
+			// if message was extracted, update webview
+			args.context.subscriptions.push(
+				CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.event(() => {
+					updateMessages()
+				})
+			)
+
+			// if message was edited, update webview
+			args.context.subscriptions.push(
+				CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.event(() => {
+					updateMessages()
+				})
+			)
+
+			// when project view changes, update webview
+			args.context.subscriptions.push(
+				CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.event(() => {
+					updateMessages()
+				})
+			)
 		},
 	}
 }
@@ -97,7 +121,7 @@ function createMessageHtml(args: { message: Message; isHighlighted: boolean }): 
 
 	return `
         <div class="tree-item">
-            <button class="collapsible">
+			<button class="collapsible" data-message-id="${args.message.id}">
                 <span><strong>#</strong></span><span>${args.message.id}<span>
             </button>
             <div class="content" style="display: none;">
@@ -105,6 +129,15 @@ function createMessageHtml(args: { message: Message; isHighlighted: boolean }): 
             </div>
         </div>
     `
+}
+
+function createNoMessagesFoundHtml(isEmpty: boolean): string {
+	if (!isEmpty) {
+		return ""
+	}
+	return `<div class="no-messages">
+                <span>No messages found. Extract text to create a message by selecting a text and using the "Extract message" quick action / command.</span>
+            </div>`
 }
 
 function getTranslationsTableHtml(message: Message): string {
@@ -130,10 +163,10 @@ function getTranslationsTableHtml(message: Message): string {
 		return `
             <div class="section">
                 <span class="languageTag"><strong>${languageTag}</strong></span>
-                <span class="message">${m}</span>
+                <span class="message"><button onclick="${editCommand}">${m}</button></span>
 				<span class="actionButtons">
-					<button onclick="${editCommand}"><span class="codicon codicon-edit"></span></button>
-					<button onclick="${openCommand}"><span class="codicon codicon-link-external"></span></button>
+					<button title="Edit" onclick="${editCommand}"><span class="codicon codicon-edit"></span></button>
+					<button title="Open in Fink" onclick="${openCommand}"><span class="codicon codicon-link-external"></span></button>
 				</span>
             </div>
         `
@@ -192,14 +225,31 @@ function getHtml(args: {
 			
 				function initializeCollapsibleItems() {
 					collapsibles.forEach(collapsible => {
+						const messageId = collapsible.getAttribute('data-message-id');
+						const isHighlighted = collapsible.closest('.highlighted-section') !== null;
+						const sectionPrefix = isHighlighted ? 'highlighted' : 'all';
+						const storageKey = 'inlang.collapsibleState.' + sectionPrefix + '.' + messageId;
+				
+						const storedState = localStorage.getItem(storageKey);
+						const content = collapsible.nextElementSibling;
+						if (storedState) {
+							const isActive = storedState === 'true';
+							collapsible.classList.toggle('active', isActive);
+							content.style.display = isActive ? 'block' : 'none';
+						} else {
+							// Ensure default state is correctly set
+							content.style.display = 'none';
+						}
+				
 						collapsible.addEventListener('click', function() {
 							this.classList.toggle('active');
-							const content = this.nextElementSibling;
-							content.style.display = content.style.display === 'block' ? 'none' : 'block';
+							const isExpanded = content.style.display === 'block';
+							content.style.display = isExpanded ? 'none' : 'block';
+							localStorage.setItem(storageKey, !isExpanded);
 						});
 					});
 				}
-			
+				
 				function initializeCopyButtons() {
 					copyButtons.forEach(button => {
 						button.addEventListener('click', function() {
