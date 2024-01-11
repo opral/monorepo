@@ -263,6 +263,20 @@ describe("e2e", async () => {
 		runtime.setLanguageTag("en-US")
 		expect(m.missingInGerman()).toBe("A simple message.")
 	})
+
+	test("throws an error if languageTag() returns a non-languageTag value", async () => {
+		const { m, runtime } = await import(
+			`data:application/javascript;base64,${Buffer.from(
+				compiledBundle.output[0].code,
+				"utf8"
+			).toString("base64")}`
+		)
+
+		expect(() => {
+			runtime.setLanguageTag("dsklfgj")
+			runtime.languageTag()
+		}).toThrow()
+	})
 })
 
 describe("tree-shaking", () => {
