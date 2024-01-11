@@ -10,6 +10,8 @@ import childProcess from "node:child_process"
 import { version } from "../state.js"
 import { telemetry } from "../../services/telemetry/implementation.js"
 import { Logger } from "../../services/logger/index.js"
+import dedent from "dedent"
+
 // TODO add a project UUID to the tele.groups internal #196
 // import { gitOrigin } from "../../services/telemetry/implementation.js"
 const DEFAULT_PROJECT_PATH = "./project.inlang"
@@ -44,8 +46,20 @@ export const initCommand = new Command()
 		await maybeAddVsCodeExtension({ projectPath }, logger)
 
 		telemetry.capture({ event: "PARAGLIDE-JS init finished" })
+
+		const absoluteSettingsPath = resolve(projectPath, "settings.json")
+		const relativeSettingsFilePath = absoluteSettingsPath.replace(process.cwd(), ".")
+
 		logger.box(
-			"inlang Paraglide-JS has been set up sucessfully.\n\n1. Run your install command (npm i, yarn install, etc)\n2. Run the build script (npm run build, or similar.)\n3. Done :) Happy paragliding 🪂\n\n For questions and feedback, visit https://github.com/opral/monorepo/discussions.\n"
+			dedent`inlang Paraglide-JS has been set up sucessfully.
+			
+			1. Run your install command (npm i, yarn install, etc)
+			2. Register all your languages in ${relativeSettingsFilePath}
+			3. Run the build script (npm run build, or similar.)
+			4. Done :) Happy paragliding 🪂
+			
+			For questions and feedback, visit https://github.com/inlang/monorepo/discussions.
+			`
 		)
 	})
 
