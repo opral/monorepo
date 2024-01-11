@@ -16,6 +16,9 @@ const config = {
 		alias: {
 			$paraglide: "./src/paraglide/",
 		},
+		paths: {
+			base: "/base",
+		},
 	},
 
 	extensions: [".svelte", ".svx"],

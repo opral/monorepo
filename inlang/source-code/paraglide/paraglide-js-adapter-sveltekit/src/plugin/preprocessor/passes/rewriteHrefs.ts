@@ -2,8 +2,10 @@ import { PARAGLIDE_CONTEXT_KEY } from "../../../constants.js"
 import type { PreprocessingPass } from "../index.js"
 import { getElementsFromAst } from "../utils/ast.js"
 import { attrubuteValuesToJSValue } from "../utils/attributes-to-values.js"
-import { identifier as i } from "../utils/identifier.js"
+import { identifier } from "../utils/identifier.js"
 import dedent from "dedent"
+
+const i = identifier("rewriteHrefs")
 
 export const RewriteHrefs: PreprocessingPass = {
 	condition: ({ content }) => {
@@ -49,17 +51,26 @@ export const RewriteHrefs: PreprocessingPass = {
 
 		return {
 			scriptAdditions: {
-				before: [`import { getContext as ${i("getContext")} } from 'svelte';`],
+				before: [
+					dedent`
+					import { getContext as ${i("getContext")} } from 'svelte';
+					import { getHrefBetween as ${i(
+						"getHrefBetween"
+					)} } from "@inlang/paraglide-js-adapter-sveltekit/internal"
+					import { page as ${i("page")}} from "$app/stores"
+					`,
+				],
 
 				after: [
 					dedent`
 						const ${i("context")} = ${i("getContext")}('${PARAGLIDE_CONTEXT_KEY}');
 
-						// If there is a context, use it to translate the hrefs, 
-						// otherwise just return the hrefs as they are
-						const ${i("translateHref")} = ${i("context")} 
-							? (href, hreflang) => ${i("context")}.translatePath(href, hreflang ?? ${i("context")}.languageTag())
-							: (href, hreflang) => href;
+						function ${i("translateHref")}(href, hreflang) {
+							const from = new URL($${i("page")}.url);
+							const to = new URL(href, from);
+
+							return ${i("getHrefBetween")}(from, to);
+						}
 					`,
 				],
 			},
