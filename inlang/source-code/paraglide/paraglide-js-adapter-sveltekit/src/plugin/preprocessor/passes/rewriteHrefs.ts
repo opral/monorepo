@@ -51,25 +51,15 @@ export const RewriteHrefs: PreprocessingPass = {
 
 		return {
 			scriptAdditions: {
-				before: [
-					dedent`
-					import { getContext as ${i("getContext")} } from 'svelte';
-					import { getHrefBetween as ${i(
-						"getHrefBetween"
-					)} } from "@inlang/paraglide-js-adapter-sveltekit/internal"
-					import { page as ${i("page")}} from "$app/stores"
-					`,
-				],
+				before: [`import { getContext as ${i("getContext")} } from 'svelte';`],
 
 				after: [
 					dedent`
 						const ${i("context")} = ${i("getContext")}('${PARAGLIDE_CONTEXT_KEY}');
 
 						function ${i("translateHref")}(href, hreflang) {
-							const from = new URL($${i("page")}.url);
-							const to = new URL(href, from);
-
-							return ${i("getHrefBetween")}(from, to);
+							if(!${i("context")}) return href;
+							return ${i("context")}.translateHref(href, hreflang);
 						}
 					`,
 				],

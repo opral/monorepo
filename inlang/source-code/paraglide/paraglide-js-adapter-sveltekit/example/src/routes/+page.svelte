@@ -7,17 +7,17 @@
 <p>{m.greeting({ name: "Samuel", count: 5 })}</p>
 <p>{m.currentLanguageTag({ languageTag: languageTag() })}</p>
 
-<a href="/about">{m.about()}</a>
-<a href="/some-subpage">Subpage with redirect</a>
+<a href="/base/about">{m.about()}</a>
+<a href="/base/some-subpage">Subpage with redirect</a>
 
-<button on:click={() => goto("/about")}> Programmatic About</button>
+<button on:click={() => goto("/base/about")}> Programmatic About</button>
 
 <br/>
 
 
 <!-- Navigation with languageTag -->
 {#each availableLanguageTags as lang}
-	<a href="/" hreflang={lang}>
+	<a href="/base/" hreflang={lang}>
 		{m.change_language_to({ languageTag: lang })}
 	</a>
 	<br />
@@ -36,9 +36,9 @@
 <br/>
 
 <!-- This path is excluded from being transalted in `vite.config.js` -->
-<a href="/not-translated">Not Translated</a>
+<a href="/base/not-translated">Not Translated</a>
 
-<form action="/">
+<form action="/base/">
 	<input type="text" name="test" />
 	<button formaction="/test">submit</button>
 </form>

@@ -41,10 +41,6 @@
         "./plugin": {
             "import": "./dist/plugin/index.js",
             "types": "./dist/plugin/index.d.ts"
-        },
-        "./internal": {
-            "import": "./dist/internal/index.js",
-            "types": "./dist/internal/index.d.ts"
         }
     }
 }

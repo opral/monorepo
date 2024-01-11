@@ -4,4 +4,4 @@
 
 # {m.about()}
 
-[{m.home()}](/)
+[{m.home()}](/base/)
