@@ -32,7 +32,7 @@
 	 */
 	export let languageTag = undefined
 
-	/** @type {import("./translate-paths/path-translations.js").PathTranslations}*/
+	/** @type {import("./translate-paths/path-translations.js").PathTranslations<string>}*/
 	export let paths  = {};
 
 	$: lang = languageTag ?? runtime.sourceLanguageTag

@@ -2,7 +2,10 @@ import { base } from "$app/paths"
 import * as Path from "../utils/path.js"
 import type { PathTranslations } from "./path-translations.js"
 
-export function getCanonicalPath(pathWithBase: string, translations: PathTranslations): string {
+export function getCanonicalPath(
+	pathWithBase: string,
+	translations: PathTranslations<string>
+): string {
 	const pathWithLanguage = pathWithBase.slice(base.length)
 	const { lang, path } = parsePathWithLanguage(pathWithLanguage)
 
