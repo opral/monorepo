@@ -138,7 +138,7 @@ export async function openRepository(
 	})
 
 	// TODO: support for url scheme to use local repo already in the fs
-	const gitUrl = repoName ? `https://${repoHost}/${owner}/${repoName}` : undefined
+	const gitUrl = repoName ? `https://${repoHost}/${owner}/${repoName}` : ""
 
 	const enableExperimentalFeatures = whitelistedExperimentalRepos.includes(
 		`${owner}/${repoName}`.toLocaleLowerCase()
