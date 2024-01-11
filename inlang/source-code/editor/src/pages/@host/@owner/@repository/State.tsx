@@ -275,7 +275,10 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		async (args) => {
 			if (args.repo?.nodeishFs === undefined) return []
 			const projects = await listProjects(args.repo?.nodeishFs, "/")
-			if (projects.length === 1) {
+
+			if (searchParams().project) {
+				setActiveProject(searchParams().project)
+			} else if (projects.length === 1) {
 				setActiveProject(projects[0]?.projectPath)
 			} else if (
 				projects.length > 1 &&
