@@ -1,5 +1,5 @@
 export { default as ParaglideJS } from "./ParaglideJS.svelte"
 export { injectLangAttribute } from "./injectLangAttribute.js"
-export { getLanguageFromURL } from "./getLanguageFromUrl.js"
 export { handleRedirects } from "./handleRedirects.js"
-export { getCanonicalPath } from "./translate-paths/translate.js"
+export { getCanonicalPath } from "./translate-paths/get-canonical-path.js"
+export { reroute } from "./reroute.js"

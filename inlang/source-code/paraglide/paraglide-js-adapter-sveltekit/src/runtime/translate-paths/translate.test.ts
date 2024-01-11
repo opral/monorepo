@@ -1,42 +1,19 @@
-import { afterAll, afterEach, describe, expect, it, test, vi } from "vitest"
-import { getCanonicalPath } from "./translate"
+import { describe, it, expect } from "vitest"
+import { getTranslatedPath } from "./translate"
 
-vi.mock("$app/paths", () => {
-	return { base: "/base/" }
-})
-
-describe("getCanonicalPath", () => {
-	it("removes the language ", () => {
-		const canonical = getCanonicalPath("/base/de", {})
-		expect(canonical).toBe("/base")
+describe("getTranslatedPath", () => {
+	it("returns the path if no translations are given", () => {
+		const translatedPath = getTranslatedPath("/foo", "en", {})
+		expect(translatedPath).toBe("/foo")
 	})
 
-	it("keeps paths", () => {
-		const canonical = getCanonicalPath("/base/de/about", {})
-		expect(canonical).toBe("/base/about")
-	})
-
-	it("applies translations according to the language paths", () => {
-		const canonical = getCanonicalPath("/base/de/ueber-uns", {
-			"/about": {
-				en: "/about",
-				de: "/ueber-uns",
-				fr: "/a-propos",
+	it("returns the translated path (no params)", () => {
+		const translatedPath = getTranslatedPath("/foo", "en", {
+			"/foo": {
+				en: "/bar",
+				de: "/baz",
 			},
 		})
-		expect(canonical).toBe("/base/about")
-	})
-
-	it("applies translations according to the language paths", () => {
-		const canonical = getCanonicalPath("/base/fr/a-propos", {
-			"/about": {
-				en: "/about",
-				de: "/ueber-uns",
-				fr: "/a-propos",
-			},
-		})
-		expect(canonical).toBe("/base/about")
+		expect(translatedPath).toBe("/bar")
 	})
 })
-
-vi.resetAllMocks()
