@@ -63,7 +63,15 @@ export function transformRemote(remote: string) {
 }
 
 export function parseLixUri(uriText: string) {
-	const { protocol, host, pathname, username, password } = new URL(uriText)
+	// let url
+	// try {
+	const url = new URL(uriText)
+	// } catch (error) {
+	// 	console.error(error, uriText) use only for debugging could leak secrets into logs
+	// 	throw error
+	// }
+
+	const { protocol, host, pathname, username, password } = url
 
 	const pathParts = pathname.split("/")
 

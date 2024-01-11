@@ -10,7 +10,7 @@ services:
     runtime: node
     region: frankfurt
     plan: standard
-    buildCommand: pnpm install && pnpm run build
+    buildCommand: pnpm install && pnpm run build --projects=@inlang/website
     startCommand: pnpm run production
     autoDeploy: true
     envVars:
@@ -46,7 +46,7 @@ services:
     region: frankfurt
     plan: standard
     branch: main
-    buildCommand: pnpm install && pnpm run build
+    buildCommand: pnpm install && pnpm run build --projects=@inlang/badge
     startCommand: pnpm --filter @inlang/badge run production
     autoDeploy: true
     envVars:
@@ -63,7 +63,7 @@ services:
     region: frankfurt
     plan: standard
     pullRequestPreviewsEnabled: false
-    buildCommand: pnpm install && pnpm run build
+    buildCommand: pnpm install && pnpm run build --projects=@inlang/editor
     startCommand: pnpm --filter @inlang/editor production
     autoDeploy: true
     envVars:
