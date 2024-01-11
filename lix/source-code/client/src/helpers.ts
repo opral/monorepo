@@ -63,13 +63,24 @@ export function transformRemote(remote: string) {
 }
 
 export function parseLixUri(uriText: string) {
-	// let url
-	// try {
-	const url = new URL(uriText)
-	// } catch (error) {
-	// 	console.error(error, uriText) use only for debugging could leak secrets into logs
-	// 	throw error
-	// }
+	let url
+	try {
+		url = new URL(uriText)
+	} catch (error) {
+		// console.error(error, uriText) use only for debugging could leak secrets into logs
+		return {
+			error,
+
+			username: "",
+			password: "",
+			protocol: "",
+			lixHost: "",
+			namespace: "",
+			repoHost: "",
+			owner: "",
+			repoName: "",
+		}
+	}
 
 	const { protocol, host, pathname, username, password } = url
 

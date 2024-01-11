@@ -63,7 +63,7 @@ services:
     region: frankfurt
     plan: standard
     pullRequestPreviewsEnabled: false
-    buildCommand: pnpm install && pnpm run build --projects=@inlang/editor
+    buildCommand: pnpm install && pnpm run build # TODO: --projects=@inlang/editor
     startCommand: pnpm --filter @inlang/editor production
     autoDeploy: true
     envVars:
