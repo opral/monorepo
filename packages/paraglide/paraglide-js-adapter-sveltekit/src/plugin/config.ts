@@ -1,24 +1,8 @@
 import type { paraglide as vitePluginParaglide } from "@inlang/paraglide-js-adapter-vite"
-import {
-	type RoutingStrategyUserConfig,
-	type RoutingStrategyConfig,
-	resolveRoutingStrategyConfig,
-} from "./routing/config.js"
 
 type VitePluginUserConfig = Parameters<typeof vitePluginParaglide>[0]
 
 export interface UserConfig extends VitePluginUserConfig {
-	/**
-	 * The routing strategy to use.
-	 * The avaliable strategies are:
-	 * - domain
-	 * - prefix
-	 * - searchParam
-	 *
-	 * @default { name: "prefix", prefixDefault: false }
-	 */
-	routingStrategy?: RoutingStrategyUserConfig
-
 	/**
 	 * The preprocessor rewrites any links in your markup
 	 * and translates them according to the routing strategy.
@@ -28,18 +12,6 @@ export interface UserConfig extends VitePluginUserConfig {
 	 * @default false
 	 */
 	disablePreprocessor?: boolean
-
-	/**
-	 * An array of regexes for paths that should not be translated.
-	 * @default []
-	 *
-	 * @example
-	 * ```ts
-	 * //Don't translate any paths starting with /not-translated or /api
-	 * exclude: [new RegExp("^/not-translated"), new RegExp("^/api")]
-	 * ```
-	 */
-	exclude?: RegExp[]
 }
 
 /**
@@ -47,9 +19,7 @@ export interface UserConfig extends VitePluginUserConfig {
  * Any values not provided by the user are filled in with defaults.
  */
 export interface Config extends VitePluginUserConfig {
-	routingStrategy: RoutingStrategyConfig
 	disablePreprocessor: boolean
-	exclude: RegExp[]
 }
 
 /**
@@ -65,9 +35,7 @@ export function resolveConfig(userConfig: UserConfig): Config {
 		outdir: userConfig.outdir,
 		silent: userConfig.silent,
 
-		routingStrategy: resolveRoutingStrategyConfig(userConfig.routingStrategy),
 		disablePreprocessor: userConfig.disablePreprocessor ?? false,
-		exclude: userConfig.exclude ?? [],
 	}
 
 	return fullConfig
