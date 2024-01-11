@@ -27,7 +27,7 @@ const Lix = () => {
 						<div class="flex md:items-center items-start gap-8">
 							<Button
 								type="textPrimaryOnDark"
-								href="https://github.com/inlang/monorepo/tree/main/lix"
+								href="https://github.com/opral/monorepo/tree/main/lix"
 								chevron
 							>
 								Learn more about Lix

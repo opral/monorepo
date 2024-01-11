@@ -101,6 +101,7 @@ export default async function onBeforeRender(pageContext: any) {
 	return {
 		pageContext: {
 			pageProps: {
+				slug,
 				markdown: renderedMarkdown[slug],
 			},
 		},

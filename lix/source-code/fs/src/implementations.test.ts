@@ -35,7 +35,7 @@ const runFsTestSuite = async (
 	fs: NodeishFilesystem,
 	isNodeFs = false
 ) => {
-	// testing characters is important. see bug https://github.com/inlang/monorepo/issues/785
+	// testing characters is important. see bug https://github.com/opral/monorepo/issues/785
 	const textInFirstFile = `
 	  Testing a variety of characters.
 

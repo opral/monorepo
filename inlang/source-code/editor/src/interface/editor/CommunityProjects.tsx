@@ -43,7 +43,7 @@ export function CommunityProjects() {
 					</p>
 				</div>
 				<Link
-					href="https://github.com/inlang/monorepo/blob/main/inlang/source-code/editor/src/pages/repositories.ts"
+					href="https://github.com/opral/monorepo/blob/main/inlang/source-code/editor/src/pages/repositories.ts"
 					target="_blank"
 					class="w-full md:w-auto"
 				>

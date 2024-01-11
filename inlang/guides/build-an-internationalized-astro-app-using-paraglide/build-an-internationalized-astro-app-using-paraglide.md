@@ -278,6 +278,6 @@ import * as m from "../paraglide/messages"
 We encourage you to run `npm run build` and inspect the output. You will see that only the message `m.count` is shipped to the client. Any other messages are not included in the bundle.
 
 ## What's Next?
-There is a full Astro example project using Paraglide [on our GitHub](https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-astro/example).
+There is a full Astro example project using Paraglide [on our GitHub](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-astro/example).
 
-If you have any suggestions for this guide, please reach out to us on [Discord](https://discord.gg/gdMPPWy57R), or open an issue on [GitHub](https://www.github.com/inlang/monorepo/issues). If you have trouble following, don't hesitate to ask for help. We are happy to help getting you set up.
+If you have any suggestions for this guide, please reach out to us on [Discord](https://discord.gg/gdMPPWy57R), or open an issue on [GitHub](https://www.github.com/opral/monorepo/issues). If you have trouble following, don't hesitate to ask for help. We are happy to help getting you set up.

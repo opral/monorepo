@@ -43,7 +43,7 @@ npx @inlang/paraglide-js@latest init
  │  2. Run the build script (npm run build, or similar.)                                │
  │  3. Done :) Happy paragliding 🪂                                                     │
  │                                                                                      │
- │   For questions and feedback, visit https://github.com/inlang/monorepo/discussions.  │
+ │   For questions and feedback, visit https://github.com/opral/monorepo/discussions.  │
  │                                                                                      │
  │                                                                                      │
  ╰──────────────────────────────────────────────────────────────────────────────────────╯
@@ -409,8 +409,8 @@ Let's create a new `I18NHeader` component that generates the `<link>` tags. This
 
 You are now ready to use Paraglide!
 
-If you have any questions, feel free to ask them in our [Discord](https://discord.gg/gdMPPWy57R) or open a discussion on [GitHub](https://github.com/inlang/monorepo/discussions).
+If you have any questions, feel free to ask them in our [Discord](https://discord.gg/gdMPPWy57R) or open a discussion on [GitHub](https://github.com/opral/monorepo/discussions).
 
-You can view this example project on [GitHub](https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/example)
+You can view this example project on [GitHub](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/example)
 
 This guide is based on `paraglide-js 1.0.0-prerelease.12`, `plugin-message-format 2.0.0`, `m-function-matcher 0.5.0.` and `paraglide-js-adapter-vite 1.0.0-prerelease.2`.
