@@ -1,12 +1,10 @@
 <!--
 	@component
 	Automatically detect and manage the language of your page.
-
 	It also adds `<link rel="alternate">` tags to the head of your page
 -->
-<script lang="ts">
+<script>
 	import translatePath from "$paraglide-adapter-sveltekit:translate-path"
-	import getLanguage from "$paraglide-adapter-sveltekit:get-language"
 	import { page } from "$app/stores"
 	import { browser } from "$app/environment"
 
@@ -22,7 +20,7 @@
 	 * 
 	 * @type {import("./runtime.js").Paraglide<any>}
 	 */
-	export let runtime;
+	export let runtime; 
 
 	/** 
 	 * Override the language detection with a specific language tag.
@@ -30,7 +28,7 @@
 	 */
 	export let languageTag = undefined
 
-	$: lang = languageTag ?? getLanguage($page.url) ?? runtime.sourceLanguageTag
+	$: lang = languageTag ?? runtime.sourceLanguageTag
 	$: runtime.setLanguageTag(lang)
 	$: if(browser) document.documentElement.lang = lang
 </script>
