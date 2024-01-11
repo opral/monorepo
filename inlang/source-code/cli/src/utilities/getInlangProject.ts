@@ -48,7 +48,6 @@ export async function getInlangProject(args: { projectPath: string }): Promise<I
 		})
 	}
 
-
 	if (project.errors().length > 0) {
 		for (const error of project.errors()) {
 			console.error(error)

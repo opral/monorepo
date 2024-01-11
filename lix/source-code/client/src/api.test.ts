@@ -130,7 +130,7 @@ describe("main workflow", () => {
 		expect(gitOrigin).toBe("github.com/inlang/ci-test-repo.git")
 	})
 
-  it("finds initial commit of repo", async () => {
+	it("finds initial commit of repo", async () => {
 		const fs = createNodeishMemoryFs()
 
 		const snapshot = JSON.parse(
