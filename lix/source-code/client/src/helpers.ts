@@ -98,9 +98,20 @@ export function parseLixUri(uriText: string) {
 		repoName = pathParts[2] || ""
 
 		if (!repoHost || !owner || !repoName) {
-			throw new Error(
-				`Invalid url format for '${uriText}' for direct cloning repository from github, please use the format of https://github.com/opral/monorepo.`
-			)
+      return {
+				error: new Error(
+					`Invalid url format for '${uriText}' for direct cloning repository from github, please use the format of https://github.com/opral/monorepo.`
+				),
+
+				username,
+				password,
+				protocol,
+				lixHost,
+				namespace,
+				repoHost,
+				owner,
+				repoName,
+			}
 		}
 	} else {
 		lixHost = host
@@ -110,9 +121,19 @@ export function parseLixUri(uriText: string) {
 		repoName = pathParts[4] || ""
 
 		if (!namespace || !host || !owner || !repoName) {
-			throw new Error(
-				`Invalid url format for '${uriText}' for cloning repository, please use the format of https://lix.inlang.com/git/github.com/opral/monorepo.`
-			)
+      return {
+				error: new Error(
+					`Invalid url format for '${uriText}' for cloning repository, please use the format of https://lix.inlang.com/git/github.com/opral/monorepo.`
+				),
+				username,
+				password,
+				protocol,
+				lixHost,
+				namespace,
+				repoHost,
+				owner,
+				repoName,
+			}
 		}
 	}
 
