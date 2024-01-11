@@ -1,4 +1,3 @@
-import { isAvailableLanguageTag, sourceLanguageTag } from "$paraglide/runtime"
 import { getCanonicalPath } from "@inlang/paraglide-js-adapter-sveltekit"
 
 const translations = {
@@ -7,6 +6,21 @@ const translations = {
 		de: "/ueber-uns",
 		fr: "/a-propos",
 	},
+	"/admin": {
+		en: "/admin",
+		de: "/admin",
+		fr: "/admin",
+	},
+	"/admin/users": {
+		en: "/admin/users",
+		de: "/admin/benutzer",
+		fr: "/admin/utilisateurs",
+	},
+	"/admin/users/[id]": {
+		en: "/admin/users/[id]",
+		de: "/admin/benutzer/[id]",
+		fr: "/admin/utilisateurs/[id]",
+	},
 	"/some-subpage": {
 		en: "/some-subpage",
 		de: "/irgendeine-unterseite",
@@ -14,27 +28,7 @@ const translations = {
 	},
 }
 
-/** @param {string} path */
-function getLanguageFromPath(path) {
-	const maybeLang = path.split("/").filter(Boolean).at(0)
-	if (isAvailableLanguageTag(maybeLang)) {
-		return maybeLang
-	}
-	return sourceLanguageTag
-}
-
-/** @param {string} path */
-function getPahtWihtoutLanguage(path) {
-	const maybeLang = path.split("/").filter(Boolean).at(0)
-	if (isAvailableLanguageTag(maybeLang)) {
-		return path.replace(`/${maybeLang}`, "")
-	}
-	return path
-}
-
 /** @type {import("@sveltejs/kit").Reroute} */
 export const reroute = ({ url }) => {
-	const lang = getLanguageFromPath(url.pathname)
-	const pathname = getPahtWihtoutLanguage(url.pathname)
-	return getCanonicalPath(pathname, lang, translations)
+	return getCanonicalPath(url.pathname, translations)
 }

@@ -1,8 +1,9 @@
-<script lang="ts">
-	import { ParaglideJS } from "@inlang/paraglide-js-adapter-sveltekit"
+<script>
 	import * as runtime from "$paraglide/runtime.js";
+	import { ParaglideJS } from "@inlang/paraglide-js-adapter-sveltekit"
+	export let data;
 </script>
 
-<ParaglideJS {runtime}>
+<ParaglideJS {runtime} languageTag={data.lang}>
 	<slot />
 </ParaglideJS>

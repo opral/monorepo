@@ -32,7 +32,7 @@ export type PreprocessingPass = {
 	}
 }
 
-const PASSES: PreprocessingPass[] = [RewriteHrefs /* RewriteActions, RewriteFormActions*/]
+const PASSES: PreprocessingPass[] = [RewriteHrefs, RewriteActions, RewriteFormActions]
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function preprocess(_config: PreprocessorConfig): PreprocessorGroup {

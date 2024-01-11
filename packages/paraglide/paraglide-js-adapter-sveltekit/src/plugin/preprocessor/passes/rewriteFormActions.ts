@@ -2,8 +2,10 @@ import { PARAGLIDE_CONTEXT_KEY } from "../../../constants.js"
 import type { PreprocessingPass } from "../index.js"
 import { getElementsFromAst } from "../utils/ast.js"
 import { attrubuteValuesToJSValue } from "../utils/attributes-to-values.js"
-import { identifier as i } from "../utils/identifier.js"
+import { identifier } from "../utils/identifier.js"
 import dedent from "dedent"
+
+const i = identifier("rewriteFormActions")
 
 export const RewriteFormActions: PreprocessingPass = {
 	condition: ({ content }) => {
@@ -51,7 +53,12 @@ export const RewriteFormActions: PreprocessingPass = {
 
 		return {
 			scriptAdditions: {
-				before: [`import { getContext as ${i("getContext")} } from 'svelte';`],
+				before: [
+					dedent`
+					import { getContext as ${i("getContext")} } from 'svelte';
+					import { getHrefBetween } from "@inlang/paraglide-js-adapter-sveltekit/internal"
+					`,
+				],
 
 				after: [
 					dedent`

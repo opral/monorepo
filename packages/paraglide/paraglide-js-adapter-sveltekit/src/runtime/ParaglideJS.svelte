@@ -4,9 +4,10 @@
 	It also adds `<link rel="alternate">` tags to the head of your page
 -->
 <script>
-	import translatePath from "$paraglide-adapter-sveltekit:translate-path"
 	import { page } from "$app/stores"
 	import { browser } from "$app/environment"
+	import { setContext } from "svelte"
+	import { PARAGLIDE_CONTEXT_KEY } from "../constants.js"
 
 	/** 
 	 * The Paraglide runtime from the Paraglide compiler output.
@@ -31,6 +32,9 @@
 	$: lang = languageTag ?? runtime.sourceLanguageTag
 	$: runtime.setLanguageTag(lang)
 	$: if(browser) document.documentElement.lang = lang
+
+
+		const translatePath = x => x;
 </script>
 
 <svelte:head>
