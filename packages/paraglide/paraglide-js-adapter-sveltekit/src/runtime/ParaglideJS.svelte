@@ -1,116 +1,44 @@
-<script>
+<!--
+	@component
+	Automatically detect and manage the language of your page.
+
+	It also adds `<link rel="alternate">` tags to the head of your page
+-->
+<script lang="ts">
 	import translatePath from "$paraglide-adapter-sveltekit:translate-path"
 	import getLanguage from "$paraglide-adapter-sveltekit:get-language"
-	import {
-		setLanguageTag,
-		availableLanguageTags,
-		sourceLanguageTag,
-		onSetLanguageTag,
-	} from "$paraglide-adapter-sveltekit:runtime"
 	import { page } from "$app/stores"
-	import { beforeNavigate, goto } from "$app/navigation"
 	import { browser } from "$app/environment"
-	import { setContext } from "svelte"
-	import { PARAGLIDE_CONTEXT_KEY } from "../constants.js"
 
-	/** @type { string | undefined } */
-	export let languageTag = undefined
-
-	/**
-	 * By default, ParaglideJS will intercept and rewrite any `goto` calls with their translated counterparts.
-	 * If you wish to disable this behaviour, set `rewriteGoto` to `false`.
+	/** 
+	 * The Paraglide runtime from the Paraglide compiler output.
+	 * Import it and pass it to this component.
 	 * 
 	 * @example
 	 * ```ts
-	 * goto("/about") 
-	 * // becomes goto("/en/about") if the current language is "en"
+	 * import * as runtime from "../paraglide/runtime.js"
+	 * <ParaglideJS {runtime} />
 	 * ```
+	 * 
+	 * @type {import("./runtime.js").Paraglide<any>}
 	 */
-	export let rewriteGoto = true;
-	$: lang = languageTag ?? getLanguage($page.url) ?? sourceLanguageTag
-	$: setLanguageTag(lang)
+	export let runtime;
 
-	/**
-	 * Normalize a path, so that it never ends with a slash.
-	 * This makes comparing paths easier.
-	 *
-	 * @param {string} path
-	 * @returns {string}
+	/** 
+	 * Override the language detection with a specific language tag.
+	 * @type { string | undefined } 
 	 */
-	function normalizePath(path) {
-		if (path.endsWith("/")) {
-			return path.slice(0, -1)
-		}
-		return path
-	}
+	export let languageTag = undefined
 
-	// This is a dirty dirty hack to differentiate between regular goto's
-	// and goto's that are triggered by the language changing
-	let isLanguageChange = false
-
-	onSetLanguageTag((lang) => {
-		//Don't do anything if we're server-side rendering
-		if (browser) {
-			//check if the path would be different in the new language & navigate if so
-			const newPath = translatePath($page.url.pathname, lang)
-			if (normalizePath(newPath) !== normalizePath($page.url.pathname)) {
-				//Disable the beforeNavigate handler, so that it won't re-translate the path
-				isLanguageChange = true
-				goto(newPath)
-			}
-
-			//Update the html lang attribute
-			document.documentElement.lang = lang
-		}
-	})
-
-	beforeNavigate((event) => {
-		//If `goto` to internal route
-		if (event.type === "goto") {
-			if(rewriteGoto === false) return;
-			//If the user is intentionally navigating to a different language, we don't want to rewrite the path
-			const skipHandling = isLanguageChange === true
-			isLanguageChange = false
-			if (skipHandling) return
-
-			if (event.to && event.to.route.id) {
-				const existingLanguage = getLanguage(event.to.url)
-
-				if (existingLanguage) {
-					//If the language is already in the path, we don't need to do anything
-					return
-				}
-
-				/*
-				If there isn't an existing language, check if translating the path would change it
-				only navigate if it would
-
-				This avoids an infinite loop of navigation where this beforeNavigate gets triggered again & again
-				*/
-
-				const translatedPath = translatePath(event.to.url.pathname, lang)
-				if (normalizePath(translatedPath) === normalizePath(event.to.url.pathname)) {
-					return
-				}
-
-				event.cancel()
-				goto(translatedPath)
-			}
-		}
-	})
-
-
-	setContext(PARAGLIDE_CONTEXT_KEY, {
-		translatePath,
-		getLanguage,
-		languageTag: () => lang,
-	})
+	$: lang = languageTag ?? getLanguage($page.url) ?? runtime.sourceLanguageTag
+	$: runtime.setLanguageTag(lang)
+	$: if(browser) document.documentElement.lang = lang
 </script>
 
 <svelte:head>
 	<!-- If there is more than one language, add alternate links -->
-	{#if availableLanguageTags.length >= 1}
-		{#each availableLanguageTags as lang}
+	{#if runtime.availableLanguageTags.length >= 1}
+		{#each runtime.availableLanguageTags as lang}
 			<link rel="alternate" hreflang={lang} href={translatePath($page.url.pathname, lang)} />
 		{/each}
 	{/if}
