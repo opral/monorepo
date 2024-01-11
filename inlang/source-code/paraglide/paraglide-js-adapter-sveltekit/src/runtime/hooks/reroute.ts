@@ -1,7 +1,7 @@
+import * as Path from "../utils/path.js"
+import { getCanonicalPath } from "../translate-paths/get-canonical-path.js"
 import type { Reroute } from "@sveltejs/kit"
-import type { PathTranslations } from "./translate-paths/path-translations.js"
-import * as Path from "./utils/path.js"
-import { getCanonicalPath } from "./index.js"
+import type { PathTranslations } from "../translate-paths/path-translations.js"
 
 const DATA_SUFFIX = "/__data.json"
 
