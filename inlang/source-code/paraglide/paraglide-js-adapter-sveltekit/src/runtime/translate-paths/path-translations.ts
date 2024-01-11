@@ -19,8 +19,6 @@
  * }
  * ```
  */
-export type PathTranslations = {
-	[canonicalPath: string]: {
-		[languageTag: string]: string
-	}
+export type PathTranslations<T extends string> = {
+	[canonicalPath: string]: Record<T, string>
 }
