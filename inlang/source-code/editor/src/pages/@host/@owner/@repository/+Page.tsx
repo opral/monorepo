@@ -193,7 +193,7 @@ function NoInlangProjectFoundCard() {
 				<p class="pt-1.5 pb-8">Please refer to product page and setup a inlang project.</p>
 				<Link
 					class="self-center"
-					href="https://inlang.com/m/tdozzpar/app-inlang-editor#lets-get-started"
+					href="https://inlang.com/m/tdozzpar/app-inlang-editor"
 					target="_blank"
 				>
 					<sl-button prop:variant="text">
