@@ -2,8 +2,8 @@ import path from "node:path"
 
 export async function closestInlangProject(args: {
 	workingDirectory: string
-	projects: string[]
-}): Promise<string | undefined> {
+	projects: { projectPath: string }[]
+}): Promise<{ projectPath: string } | undefined> {
 	if (args.workingDirectory === "" || args.projects.length === 0) {
 		return undefined // No working directory specified or no projects
 	}
@@ -23,7 +23,7 @@ export async function closestInlangProject(args: {
 	let minDistance = Infinity
 
 	for (const project of args.projects) {
-		const distance = calculateDistance(args.workingDirectory, project)
+		const distance = calculateDistance(args.workingDirectory, project.projectPath)
 		if (distance < minDistance) {
 			minDistance = distance
 			closestProject = project

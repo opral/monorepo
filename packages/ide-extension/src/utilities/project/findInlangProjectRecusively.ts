@@ -8,26 +8,30 @@ export async function findInlangProjectRecursively(args: {
 	const targetSuffix = ".inlang"
 	const foundFolders: string[] = []
 
-	async function searchForFolders(currentPath: string) {
+	async function searchForFolders(currentPath: string): Promise<void> {
 		try {
 			const items = await args.nodeishFs.readdir(currentPath)
-			for (const item of items) {
-                if (item === "node_modules") continue
-                
+			const searchPromises = items.map(async (item) => {
+				if (item === "node_modules") return
+
 				const itemPath = path.join(currentPath, item)
 				const stat = await args.nodeishFs.stat(itemPath)
 
-				if (stat.isDirectory() && item.endsWith(targetSuffix)) {
-					foundFolders.push(itemPath)
-				}
-
-				// Continue searching recursively
 				if (stat.isDirectory()) {
+					if (item.endsWith(targetSuffix)) {
+						foundFolders.push(itemPath)
+						// No need to search subdirectories
+						return
+					}
+
+					// Continue searching recursively
 					await searchForFolders(itemPath)
 				}
-			}
+			})
+
+			// Wait for all searches to complete
+			await Promise.all(searchPromises)
 		} catch (error) {
-			// Handle any errors here
 			console.error(`Error while processing ${currentPath}: ${error}`)
 		}
 	}

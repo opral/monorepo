@@ -1,6 +1,5 @@
 import * as vscode from "vscode"
-import { loadProject } from "@inlang/sdk"
-import { findInlangProjectRecursively } from "./findInlangProjectRecusively.js"
+import { listProjects, loadProject } from "@inlang/sdk"
 import { closestInlangProject } from "./closestInlangProject.js"
 import { type NodeishFilesystem } from "@lix-js/fs"
 import { setState } from "../../state.js"
@@ -20,8 +19,10 @@ export interface ProjectNode {
 	collapsibleState: vscode.TreeItemCollapsibleState
 }
 
-let selectedProject: string | undefined = undefined // Store the currently selected project path
-let projectNodes: ProjectNode[] = [] // Store the project nodes
+let projectsList: Awaited<ReturnType<typeof listProjects>>
+let closestProjectNode: Awaited<ReturnType<typeof closestInlangProject>>
+let selectedProject: string | undefined = undefined
+let projectNodes: ProjectNode[] = []
 
 export function createProjectNode(args: {
 	label: string
@@ -37,30 +38,31 @@ export async function createProjectNodes(
 	workspaceFolder: vscode.WorkspaceFolder,
 	nodeishFs: NodeishFilesystem
 ): Promise<ProjectNode[]> {
-	const projects = await findInlangProjectRecursively({
-		rootPath: workspaceFolder.uri.fsPath,
-		nodeishFs,
-	})
+	if (!projectsList) {
+		projectsList = await listProjects(nodeishFs, workspaceFolder.uri.fsPath)
+	}
 
-	const closestProject = await closestInlangProject({
-		workingDirectory: workspaceFolder.uri.fsPath,
-		projects,
-	})
+	if (!closestProjectNode) {
+		closestProjectNode = await closestInlangProject({
+			workingDirectory: workspaceFolder.uri.fsPath,
+			projects: projectsList,
+		})
+	}
 
-	projectNodes = projects.map((project) => {
-		const projectName = project.split("/").pop() ?? ""
+	projectNodes = projectsList.map((project) => {
+		const projectName = project.projectPath.split("/").slice(-2).join("/")
 		return createProjectNode({
 			label: projectName,
-			path: project,
-			isSelected: project === selectedProject,
-			isClosest: project === closestProject,
+			path: project.projectPath,
+			isSelected: project.projectPath === selectedProject,
+			isClosest: project === closestProjectNode,
 			collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
 		})
 	})
 
 	// Handle initial selection
-	if (!selectedProject && closestProject) {
-		const closestNode = projectNodes.find((node) => node.path === closestProject)
+	if (!selectedProject && closestProjectNode) {
+		const closestNode = projectNodes.find((node) => node.path === closestProjectNode?.projectPath)
 		if (closestNode) {
 			await handleTreeSelection(closestNode, nodeishFs, workspaceFolder)
 		}
@@ -76,6 +78,7 @@ export function getTreeItem(
 ): vscode.TreeItem {
 	return {
 		label: element.label,
+		tooltip: element.path,
 		iconPath: element.isSelected
 			? new vscode.ThemeIcon("pass-filled", new vscode.ThemeColor("statusBar.foreground"))
 			: new vscode.ThemeIcon("circle-large-outline", new vscode.ThemeColor("statusBar.foreground")),
@@ -93,14 +96,8 @@ export async function handleTreeSelection(
 	nodeishFs: NodeishFilesystem,
 	workspaceFolder: vscode.WorkspaceFolder
 ): Promise<void> {
-	const possibleInlangProjectPaths = [
-		...(await vscode.workspace.findFiles("*.inlang/settings.json")),
-		// remove after migration
-		...(await vscode.workspace.findFiles("project.inlang.json")),
-	]
-
 	// if no settings file is found
-	if (workspaceFolder && possibleInlangProjectPaths.length === 0) {
+	if (workspaceFolder && projectNodes.length === 0) {
 		// Try to auto config
 		await createInlangConfigFile({ workspaceFolder })
 	}
