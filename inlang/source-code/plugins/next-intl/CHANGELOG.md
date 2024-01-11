@@ -1,5 +1,11 @@
 # @inlang/plugin-next-intl
 
+## 1.2.0
+
+### Minor Changes
+
+- 7b9f920df: Improved parser to match also `getTranslations`
+
 ## 1.1.3
 
 ### Patch Changes
