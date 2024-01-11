@@ -265,7 +265,7 @@ describe("e2e", async () => {
 	})
 
 	test("throws an error if languageTag() returns a non-languageTag value", async () => {
-		const { m, runtime } = await import(
+		const { runtime } = await import(
 			`data:application/javascript;base64,${Buffer.from(
 				compiledBundle.output[0].code,
 				"utf8"
