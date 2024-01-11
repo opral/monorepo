@@ -27,8 +27,8 @@ import { normalizePath } from "@lix-js/fs"
 import { isAbsolutePath } from "./isAbsolutePath.js"
 import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
 import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
+import { maybeCreateProjectId } from "./generateProjectId.js"
 import type { Repository } from "@lix-js/client"
-import { generateProjectId } from "./generateProjectId.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -69,16 +69,13 @@ export async function loadProject(args: any): Promise<InlangProject> {
 
 	let fs: Repository["nodeishFs"]
 	if (args.nodeishFs) {
+		// TODO: deprecate
 		fs = args.nodeishFs
 	} else if (args.repo) {
 		fs = args.repo.nodeishFs
 	} else {
 		throw new LoadProjectInvalidArgument(`Repo missing from arguments.`, { argument: "repo" })
 	}
-
-	// -- migrate if outdated ------------------------------------------------
-
-	await maybeMigrateToDirectory({ nodeishFs: fs, projectPath })
 
 	// -- validation --------------------------------------------------------
 	// the only place where throwing is acceptable because the project
@@ -97,35 +94,27 @@ export async function loadProject(args: any): Promise<InlangProject> {
 		)
 	}
 
-	// -- load project ------------------------------------------------------
+	// -- migrate if outdated ------------------------------------------------
+	const nodeishFs = createNodeishFsWithAbsolutePaths({
+		projectPath,
+		nodeishFs: fs,
+	})
+
+	await maybeMigrateToDirectory({ nodeishFs: fs, projectPath })
+	const { error: projectIdError, projectId } = await maybeCreateProjectId({
+		nodeishFs,
+		projectPath,
+		repo: args.repo,
+	})
+
 	let idError: Error | undefined
+	if (projectIdError) {
+		idError = projectIdError as Error
+	}
+
+	// -- load project ------------------------------------------------------
 	return await createRoot(async () => {
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
-		const nodeishFs = createNodeishFsWithAbsolutePaths({
-			projectPath,
-			nodeishFs: fs,
-		})
-
-		let projectId: string | undefined
-
-		try {
-			projectId = await nodeishFs.readFile(projectPath + "/project_id", {
-				encoding: "utf-8",
-			})
-		} catch (error) {
-			// @ts-ignore
-			if (error.code === "ENOENT") {
-				if (args.repo) {
-					projectId = await generateProjectId(args.repo, projectPath)
-					if (projectId) {
-						await nodeishFs.writeFile(projectPath + "/project_id", projectId)
-					}
-				}
-			} else {
-				idError = error as Error
-			}
-		}
-
 		// -- settings ------------------------------------------------------------
 
 		const [settings, _setSettings] = createSignal<ProjectSettings>()
