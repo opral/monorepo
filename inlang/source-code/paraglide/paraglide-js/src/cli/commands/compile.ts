@@ -6,6 +6,7 @@ import { Command } from "commander"
 import { telemetry } from "../../services/telemetry/implementation.js"
 import { writeOutput } from "../../services/file-handling/write-output.js"
 import { Logger } from "../../services/logger/index.js"
+import { openRepository, findRepoRoot } from "@lix-js/client"
 // TODO add a project UUID to the tele.groups internal #196
 // import { gitOrigin } from "../../services/telemetry/implementation.js"
 
@@ -33,20 +34,48 @@ export const compileCommand = new Command()
 		// 		name: gitOrigin,
 		// 	},
 		// })
-		const project = exitIfErrors(
-			await loadProject({
-				projectPath: path,
+
+		const repoRoot = await findRepoRoot({ nodeishFs: fs, path })
+
+		let project: Awaited<ReturnType<typeof loadProject>>
+		if (!repoRoot) {
+			logger.warn(`Could not find repository root for path ${path}`)
+			// We still support projects without git repo for now.
+
+			project = exitIfErrors(
+				await loadProject({
+					projectPath: path,
+					nodeishFs: fs,
+					_capture(id, props) {
+						telemetry.capture({
+							// @ts-ignore the event types
+							event: id,
+							properties: props,
+						})
+					},
+				}),
+				logger
+			)
+		} else {
+			const repo = await openRepository(repoRoot, {
 				nodeishFs: fs,
-				_capture(id, props) {
-					telemetry.capture({
-						// @ts-ignore the event types
-						event: id,
-						properties: props,
-					})
-				},
-			}),
-			logger
-		)
+			})
+
+			project = exitIfErrors(
+				await loadProject({
+					projectPath: path,
+					repo,
+					_capture(id, props) {
+						telemetry.capture({
+							// @ts-ignore the event types
+							event: id,
+							properties: props,
+						})
+					},
+				}),
+				logger
+			)
+		}
 
 		async function execute() {
 			const output = compile({

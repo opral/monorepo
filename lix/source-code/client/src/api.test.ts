@@ -1,5 +1,7 @@
 import { describe, it, expect, vi } from "vitest"
-import { openRepository, createNodeishMemoryFs } from "./index.ts"
+import { openRepository, findRepoRoot } from "./index.ts"
+import { createNodeishMemoryFs, fromSnapshot } from "@lix-js/fs"
+import { readFileSync } from "node:fs"
 
 // - loading multiple repositories is possible
 // - loading a local repository is possible: const localRepository = await load("/bar.git", { fs: nodeFs })
@@ -29,6 +31,56 @@ describe("main workflow", () => {
 		repository = await openRepository("https://github.com/inlang/ci-test-repo", {
 			nodeishFs: createNodeishMemoryFs(),
 		})
+	})
+
+	it("supports local repos", async () => {
+		const fs = createNodeishMemoryFs()
+
+		const snapshot = JSON.parse(readFileSync("./mocks/ci-test-repo.json", { encoding: "utf-8" }))
+		fromSnapshot(fs, snapshot)
+
+		const repoUrl = await findRepoRoot({
+			nodeishFs: fs,
+			path: "/src/routes/todo", // should find repo root from any path in the repo
+		})
+
+		expect(repoUrl).toBe("file:///")
+
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test fails if repoUrl is null
+		const repository: Awaited<ReturnType<typeof openRepository>> = await openRepository(repoUrl!, {
+			nodeishFs: fs,
+			branch: "test-symlink",
+		})
+
+		// test random repo action to make sure opening worked
+		const status = await repository.status({ filepath: "README.md" })
+
+		expect(status).toBe("unmodified")
+	})
+
+	it("supports non root repos", async () => {
+		const fs = createNodeishMemoryFs()
+
+		const snapshot = JSON.parse(readFileSync("./mocks/ci-test-repo.json", { encoding: "utf-8" }))
+		fromSnapshot(fs, snapshot, { pathPrefix: "/test/toast" })
+
+		const repoUrl = await findRepoRoot({
+			nodeishFs: fs,
+			path: "/test/toast/src/routes/todo", // should find repo root from any path in the repo
+		})
+
+		expect(repoUrl).toBe("file:///test/toast")
+
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test fails if repoUrl is null
+		const repository: Awaited<ReturnType<typeof openRepository>> = await openRepository(repoUrl!, {
+			nodeishFs: fs,
+			branch: "test-symlink",
+		})
+
+		// test random repo action to make sure opening worked
+		const status = await repository.status({ filepath: "README.md" })
+
+		expect(status).toBe("unmodified")
 	})
 
 	it("usees the lix custom commit for the whitelistesd ci test repo", () => {
@@ -76,6 +128,18 @@ describe("main workflow", () => {
 	it("exposes proper origin", async () => {
 		const gitOrigin = await repository.getOrigin()
 		expect(gitOrigin).toBe("github.com/inlang/ci-test-repo.git")
+	})
+
+  it("finds initial commit of repo", async () => {
+		const fs = createNodeishMemoryFs()
+
+		const snapshot = JSON.parse(
+			readFileSync("./mocks/ci-test-repo-no-shallow.json", { encoding: "utf-8" })
+		)
+		fromSnapshot(fs, snapshot)
+
+		const firstHash = await repository.getFirstCommitHash()
+		expect(firstHash).toBe("244e3ce8c3335530ac0cd07e669b964bceb3b787")
 	})
 
 	it("exposes current branch", async () => {
