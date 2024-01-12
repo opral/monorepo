@@ -19,7 +19,7 @@ export const createReroute = (
 			const {
 				lang,
 				path: translatedPath,
-				isDataRequest,
+				dataSuffix,
 			} = getPathInfo(url.pathname, {
 				base,
 				availableLanguageTags: runtime.availableLanguageTags,
@@ -31,7 +31,7 @@ export const createReroute = (
 			const serializedPath = serializeRoute({
 				path: canonicalPath,
 				base,
-				isDataRequest,
+				dataSuffix,
 				includeLanguage: false,
 			})
 

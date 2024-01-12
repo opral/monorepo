@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest"
 import { getPathInfo } from "./get-path-info"
+import { DATA_SUFFIX } from "../constants"
 
 describe("parsePath", () => {
 	it("correctly identifies the segments (with base path)", () => {
@@ -76,20 +77,31 @@ describe("parsePath", () => {
 	})
 
 	it("identifies data-requests as data requests", () => {
-		const { isDataRequest } = getPathInfo("/foo/bar/__data.json", {
+		const { dataSuffix } = getPathInfo("/foo/bar/__data.json", {
 			base: "/",
 			availableLanguageTags: ["en"],
 			defaultLanguageTag: "en",
 		})
-		expect(isDataRequest).toBe(true)
+		expect(dataSuffix).toBe("__data.json")
+	})
+
+	it("identifies data-requests as html data requests", () => {
+		const { dataSuffix, path } = getPathInfo("/foo/bar/.html__data.json", {
+			base: "/",
+			availableLanguageTags: ["en"],
+			defaultLanguageTag: "en",
+		})
+		expect(dataSuffix).toBe(".html__data.json")
+		expect(path).toBe("/foo/bar")
 	})
 
 	it("doesn't identify non-data-requests as data requests", () => {
-		const { isDataRequest } = getPathInfo("/foo/bar", {
+		const { dataSuffix, path } = getPathInfo("/foo/bar", {
 			base: "/",
 			availableLanguageTags: ["en"],
 			defaultLanguageTag: "en",
 		})
-		expect(isDataRequest).toBe(false)
+		expect(dataSuffix).toBeUndefined()
+		expect(path).toBe("/foo/bar")
 	})
 })
