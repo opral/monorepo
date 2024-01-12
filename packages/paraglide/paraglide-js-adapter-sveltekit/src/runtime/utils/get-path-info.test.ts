@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { parsePath } from "./parse-path"
+import { getPathInfo } from "./get-path-info"
 
 describe("parsePath", () => {
 	it("correctly identifies the segments (with base path)", () => {
@@ -7,7 +7,7 @@ describe("parsePath", () => {
 			lang,
 			base,
 			path: canonicalPath,
-		} = parsePath("/base/de/foo/bar", {
+		} = getPathInfo("/base/de/foo/bar", {
 			base: "/base",
 			availableLanguageTags: ["en", "de"],
 			defaultLanguageTag: "en",
@@ -23,7 +23,7 @@ describe("parsePath", () => {
 			lang,
 			base,
 			path: canonicalPath,
-		} = parsePath("/de/foo/bar", {
+		} = getPathInfo("/de/foo/bar", {
 			base: "/",
 			availableLanguageTags: ["en", "de"],
 			defaultLanguageTag: "en",
@@ -39,7 +39,7 @@ describe("parsePath", () => {
 			lang,
 			base,
 			path: canonicalPath,
-		} = parsePath("/", {
+		} = getPathInfo("/", {
 			base: "/",
 			availableLanguageTags: ["en", "de"],
 			defaultLanguageTag: "en",
@@ -55,7 +55,7 @@ describe("parsePath", () => {
 			lang,
 			base,
 			path: canonicalPath,
-		} = parsePath("/base", {
+		} = getPathInfo("/base", {
 			base: "/base",
 			availableLanguageTags: ["en", "de"],
 			defaultLanguageTag: "en",
@@ -67,7 +67,7 @@ describe("parsePath", () => {
 	})
 
 	it("falls backt to the default language if no language segment is present", () => {
-		const { lang } = parsePath("/base/path", {
+		const { lang } = getPathInfo("/base/path", {
 			base: "/base",
 			availableLanguageTags: ["de", "en", "fr"],
 			defaultLanguageTag: "en",
@@ -76,7 +76,7 @@ describe("parsePath", () => {
 	})
 
 	it("identifies data-requests as data requests", () => {
-		const { isDataRequest } = parsePath("/foo/bar/__data.json", {
+		const { isDataRequest } = getPathInfo("/foo/bar/__data.json", {
 			base: "/",
 			availableLanguageTags: ["en"],
 			defaultLanguageTag: "en",
@@ -85,7 +85,7 @@ describe("parsePath", () => {
 	})
 
 	it("doesn't identify non-data-requests as data requests", () => {
-		const { isDataRequest } = parsePath("/foo/bar", {
+		const { isDataRequest } = getPathInfo("/foo/bar", {
 			base: "/",
 			availableLanguageTags: ["en"],
 			defaultLanguageTag: "en",

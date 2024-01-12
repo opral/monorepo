@@ -1,4 +1,4 @@
-import { parsePath } from "../utils/parse-path.js"
+import { getPathInfo } from "../utils/get-path-info.js"
 import { base } from "$app/paths"
 import { serializeRoute } from "../utils/serialize-path.js"
 import { getCanonicalPath } from "../path-translations/getCanonicalPath.js"
@@ -20,7 +20,7 @@ export const reroute = (
 				lang,
 				path: translatedPath,
 				isDataRequest,
-			} = parsePath(url.pathname, {
+			} = getPathInfo(url.pathname, {
 				base,
 				availableLanguageTags: runtime.availableLanguageTags,
 				defaultLanguageTag: runtime.sourceLanguageTag,
