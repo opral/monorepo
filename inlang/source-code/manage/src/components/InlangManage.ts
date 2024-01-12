@@ -317,6 +317,8 @@ export class InlangManage extends TwLitElement {
 	}
 
 	async addLanguageTag() {
+		if (this.newLanguageTag === "") return
+
 		this.newLanguageTagLoading = true
 
 		const repo = await openRepository(
