@@ -47,10 +47,7 @@
 		return fullPath;
 	}
 
-	setContext(PARAGLIDE_CONTEXT_KEY, {
-		runtime: i18n,
-		translateHref
-	})
+	setContext(PARAGLIDE_CONTEXT_KEY, { translateHref })
 </script>
 
 <svelte:head>
