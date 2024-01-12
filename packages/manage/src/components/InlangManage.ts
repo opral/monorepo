@@ -63,6 +63,21 @@ export class InlangManage extends TwLitElement {
 		this.branches = await repo.getBranches()
 		this.projects = await listProjects(repo.nodeishFs, "/")
 
+		if (!this.url.project && this.url.path === "") {
+			for (const project of this.projects) {
+				if (project.projectPath === "/project.inlang") {
+					this.url.project = project.projectPath
+					window.history.pushState(
+						{},
+						"",
+						`?repo=${this.url.repo}${this.url.branch ? `&branch=${this.url.branch}` : ""}&project=${
+							this.url.project
+						}`
+					)
+				}
+			}
+		}
+
 		if (this.url.project) {
 			const result = await tryCatch(async () => {
 				const inlangProjectString = (await repo.nodeishFs.readFile(
