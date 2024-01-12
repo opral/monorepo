@@ -12,6 +12,7 @@
 	import * as Path from "./utils/path.js"
 	import { isExternal } from "./utils/external.js"
 	import { getTranslatedPath } from "./translate-paths/translate.js"
+	import { parsePath } from "./utils/parse-path.js"
 
 	/** 
 	 * The Paraglide runtime from the Paraglide compiler output.
@@ -40,29 +41,6 @@
 	$: runtime.setLanguageTag(lang)
 	$: if(browser) document.documentElement.lang = lang
 
-	/**
-	 * 
-	 * @param {string} pathWithBase
-	 * @returns {{ lang: string; path: string }}
-	 */
-	function parsePathWithLanguage(pathWithBase) {
-		const pathWithLanguage = pathWithBase.slice(base.length)
-		const [lang, ...parts] = pathWithLanguage.split("/").filter(Boolean)
-
-		const path = Path.normalize(parts.join("/"))
-
-		return lang
-			? {
-					lang,
-					path,
-			}
-			: {
-					lang: "",
-					path: "/",
-			}
-	}
-
-
 	/** 
 	 * @param {string} href
 	 * @param {string | undefined} hreflang
@@ -75,7 +53,13 @@
 		if(isExternal(original_to, from, base)) 
 			return href;
 
-		const lang = hreflang ?? parsePathWithLanguage(from.pathname).lang;
+		const { lang: fromLang } = parsePath(from.pathname, { 
+			base, 
+			availableLanguageTags: runtime.availableLanguageTags,
+			defaultLanguageTag: runtime.sourceLanguageTag
+		})
+
+		const lang = hreflang ?? fromLang;
 		const canonicalPath = original_to.pathname.slice(base.length);
 
 		const translatedPath = getTranslatedPath(canonicalPath, lang, paths);
