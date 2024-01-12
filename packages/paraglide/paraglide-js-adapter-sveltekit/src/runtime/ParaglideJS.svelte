@@ -11,9 +11,9 @@
 	import { base } from "$app/paths"
 	import * as Path from "./utils/path.js"
 	import { isExternal } from "./utils/external.js"
-	import { getTranslatedPath } from "./translate-paths/translate.js"
+	import { getTranslatedPath } from "./translate-paths/getTranslatedPath.js"
 	import { parsePath } from "./utils/parse-path.js"
-	import { resolveTranslatedPath } from "./translate-paths/resolve-translated-path.js"
+	import { getCanonicalPath } from "./translate-paths/getCanonicalPath.js"
 
 	/** 
 	 * The Paraglide runtime from the Paraglide compiler output.
@@ -81,7 +81,7 @@
 		defaultLanguageTag: runtime.sourceLanguageTag
 	});
 
-	$: canonicalPath = resolveTranslatedPath(currentUrl.canonicalPath, currentUrl.lang, paths)
+	$: canonicalPath = getCanonicalPath(currentUrl.path, currentUrl.lang, paths)
 </script>
 
 <svelte:head>

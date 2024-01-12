@@ -10,7 +10,7 @@ type ParseOptions = {
 type ParseResult = {
 	base: string
 	lang: string
-	canonicalPath: string
+	path: string
 	isDataRequest: boolean
 }
 
@@ -34,14 +34,13 @@ export function parsePath(path: string, options: ParseOptions): ParseResult {
 	const [maybeLang, ...rest] = pathWithoutBase.split("/").filter(Boolean)
 
 	if (!maybeLang) {
-		return { base, lang: defaultLanguageTag, canonicalPath: "/", isDataRequest }
+		return { base, lang: defaultLanguageTag, path: "/", isDataRequest }
 	}
 
-	const canonicalPath = availableLanguageTags.includes(maybeLang as any)
+	const lang = availableLanguageTags.includes(maybeLang as any) ? maybeLang : defaultLanguageTag
+	const pathSegment = availableLanguageTags.includes(maybeLang as any)
 		? Path.normalize(rest.join("/"))
 		: Path.normalize(pathWithoutBase)
 
-	const lang = availableLanguageTags.includes(maybeLang as any) ? maybeLang : defaultLanguageTag
-
-	return { base, lang, canonicalPath, isDataRequest }
+	return { base, lang, path: pathSegment, isDataRequest }
 }

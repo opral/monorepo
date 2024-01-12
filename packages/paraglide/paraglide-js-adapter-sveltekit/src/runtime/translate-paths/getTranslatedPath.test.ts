@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { getTranslatedPath } from "./translate"
+import { getTranslatedPath } from "./getTranslatedPath"
 
 describe("getTranslatedPath", () => {
 	it("returns the path if no translations are given", () => {
