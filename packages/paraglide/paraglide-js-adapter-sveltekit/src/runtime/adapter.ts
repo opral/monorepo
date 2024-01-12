@@ -1,8 +1,11 @@
 import { createHandle, type HandleOptions } from "./hooks/handle.js"
 import { createReroute } from "./hooks/reroute.js"
-import { getTranslatedPath } from "./path-translations/getTranslatedPath.js"
 import type { PathTranslations } from "./path-translations/types.js"
 import type { Paraglide } from "./runtime.js"
+
+export type I18nOptions<T extends string> = {
+	pathnames: PathTranslations<T>
+}
 
 export function createI18n<T extends string>(
 	runtime: Paraglide<T>,
@@ -11,10 +14,6 @@ export function createI18n<T extends string>(
 	return {
 		...runtime,
 		translations,
-		getTranslatedPath: (canonicalPath: string, lang: string) => {
-			return getTranslatedPath(canonicalPath, lang, translations)
-		},
-		getCanonicalPath: (translatedPath: string, lang: string) => {},
 
 		/**
 		 * Returns a `reroute` hook that applies the path translations to the paths
