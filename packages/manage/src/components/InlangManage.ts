@@ -13,6 +13,7 @@ import { tryCatch } from "@inlang/result"
 import { registry } from "@inlang/marketplace-registry"
 import type { MarketplaceManifest } from "../../../versioned-interfaces/marketplace-manifest/dist/interface.js"
 import { posthog } from "posthog-js"
+import { detectJsonFormatting } from "@inlang/detect-json-formatting"
 
 type ManifestWithVersion = MarketplaceManifest & { version: string }
 
@@ -32,7 +33,13 @@ export class InlangManage extends TwLitElement {
 		"load"
 
 	@property({ type: String })
-	languageTags: Record<string, string>[] | undefined = undefined
+	languageTags:
+		| {
+				name: string
+				sourceLanguageTag: boolean
+				loading?: boolean
+		  }[]
+		| undefined = undefined
 
 	@property({ type: Object })
 	modules: ManifestWithVersion[] | undefined | "empty"
@@ -235,6 +242,65 @@ export class InlangManage extends TwLitElement {
 					dropdown.classList.toggle("active")
 				})
 			}
+	}
+
+	async removeLanguageTag(languageTag: string) {
+		if (this.languageTags) {
+			this.languageTags.map((tag) => {
+				if (tag.name === languageTag) {
+					tag.loading = true
+				}
+			})
+
+			const repo = await openRepository(
+				`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${this.url.repo}`,
+				{
+					nodeishFs: createNodeishMemoryFs(),
+					branch: this.url.branch ? this.url.branch : undefined,
+				}
+			)
+
+			const inlangProjectString = (await repo.nodeishFs.readFile(
+				`.${this.url.project}/settings.json`,
+				{
+					encoding: "utf-8",
+				}
+			)) as string
+
+			const formatting = detectJsonFormatting(inlangProjectString)
+
+			const inlangProject = JSON.parse(inlangProjectString)
+
+			const languageTags = inlangProject.languageTags.filter((tag: string) => tag !== languageTag)
+
+			inlangProject.languageTags = languageTags
+
+			const generatedProject = formatting(inlangProject)
+
+			await repo.nodeishFs.writeFile(`.${this.url.project}/settings.json`, generatedProject)
+
+			await repo.add({
+				filepath: `${this.url.project?.slice(1)}/settings.json`,
+			})
+
+			await repo.commit({
+				message: "inlang/manage: remove languageTag",
+				author: {
+					name: this.user.username,
+					email: this.user.email,
+				},
+			})
+
+			await repo.push()
+
+			this.languageTags = this.languageTags.filter((tag) => tag.name !== languageTag)
+
+			this.languageTags.map((tag) => {
+				if (tag.name === languageTag) {
+					tag.loading = false
+				}
+			})
+		}
 	}
 
 	override render(): TemplateResult {
@@ -754,18 +820,47 @@ export class InlangManage extends TwLitElement {
 							<h2 class="text-lg font-semibold my-4">Language Tags</h2>
 								${
 									this.languageTags && this.languageTags.length > 0
-										? html`<div class="flex flex-wrap gap-4">
+										? html`<div class="flex flex-wrap gap-2">
 												${
 													// @ts-ignore
-													this.languageTags.map(
-														(tag: Record<string, string>) =>
-															html`<div
-																class="p-6 w-full bg-white border border-slate-200 rounded-xl flex flex-col justify-between gap-2"
-															>
-																${tag.name}
-															</div>`
-													)
+													this.languageTags.map((tag: Record<string, string | boolean>) => {
+														return html`<div
+															class=${"pl-3 py-1 bg-white border border-slate-200 rounded-xl flex items-center justify-between gap-2 " +
+															(tag.loading ? "opacity-25 pointer-events-none" : "")}
+														>
+															<p class="font-medium">${tag.name}</p>
+															${tag.sourceLanguageTag
+																? html`<p class="text-sm text-slate-500 mr-3">(Source)</p>`
+																: tag.loading
+																? html`<div class="mr-3 w-6 h-6 relative">
+																		<div
+																			class="h-6 w-6 bg-slate-50 border-4 border-slate-200 rounded-full animate-spin"
+																		></div>
+																		<div
+																			class="h-1/2 w-1/2 absolute top-0 left-0 z-5 bg-slate-50"
+																		></div>
+																  </div>`
+																: html`<button
+																		@click=${async () => {
+																			if (typeof tag.name === "string")
+																				await this.removeLanguageTag(tag.name)
+																		}}
+																		class="text-red-500 text-sm w-6 h-6 mr-1 flex items-center justify-center font-medium transition-colors hover:text-red-400 hover:bg-red-50 rounded-md"
+																  >
+																		<doc-icon
+																			class="inline-block translate-y-0.5"
+																			size="1em"
+																			icon="mdi:delete"
+																		></doc-icon>
+																  </button>`}
+														</div>`
+													})
 												}
+												<div
+													class="px-3 py-1 bg-white border border-slate-200 rounded-xl flex items-center justify-between gap-2"
+												>
+													<p class="font-medium">Add new</p>
+												</div>
 										  </div>`
 										: html`<div
 												class="py-16 border border-dashed border-slate-300 px-8 w-full rounded-md bg-slate-100 text-slate-500 flex flex-col items-center justify-center"
