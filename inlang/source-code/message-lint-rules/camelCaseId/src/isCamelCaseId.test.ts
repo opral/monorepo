@@ -7,6 +7,8 @@ describe("isCamelCaseId", () => {
 		expect(isCamelCaseId("myVariable")).toBe(true)
 		expect(isCamelCaseId("anotherVariable")).toBe(true)
 		expect(isCamelCaseId("mixedCaseIdentifier")).toBe(true)
+		expect(isCamelCaseId("a11yCamelCase")).toBe(true)
+		expect(isCamelCaseId("contactBudget10k")).toBe(true)
 	})
 
 	// Test case: invalid camelCase identifiers
@@ -15,6 +17,10 @@ describe("isCamelCaseId", () => {
 		expect(isCamelCaseId("123Variable")).toBe(false) // starts with a number
 		expect(isCamelCaseId("special-Variable")).toBe(false) // contains special character
 		expect(isCamelCaseId("snake_case")).toBe(false) // not camelCase
+		expect(isCamelCaseId("PascalCase")).toBe(false) // not camelCase
+		expect(isCamelCaseId("kebab-case")).toBe(false) // not camelCase
+		expect(isCamelCaseId("homeCTASubtitle")).toBe(false) // contains multiple uppercase letters
+		expect(isCamelCaseId("homeSubtitleCTA")).toBe(false) // contains multiple uppercase letters
 	})
 
 	// Test case: edge cases
