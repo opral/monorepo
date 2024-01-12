@@ -245,62 +245,66 @@ export class InlangManage extends TwLitElement {
 	}
 
 	async removeLanguageTag(languageTag: string) {
-		if (this.languageTags) {
-			this.languageTags.map((tag) => {
-				if (tag.name === languageTag) {
-					tag.loading = true
+		this.languageTags = this.languageTags?.map((tag) => {
+			if (tag.name === languageTag) {
+				return {
+					...tag,
+					loading: true,
 				}
-			})
+			} else {
+				return tag
+			}
+		})
 
-			const repo = await openRepository(
-				`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${this.url.repo}`,
-				{
-					nodeishFs: createNodeishMemoryFs(),
-					branch: this.url.branch ? this.url.branch : undefined,
-				}
-			)
+		const repo = await openRepository(
+			`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${this.url.repo}`,
+			{
+				nodeishFs: createNodeishMemoryFs(),
+				branch: this.url.branch ? this.url.branch : undefined,
+			}
+		)
 
-			const inlangProjectString = (await repo.nodeishFs.readFile(
-				`.${this.url.project}/settings.json`,
-				{
-					encoding: "utf-8",
-				}
-			)) as string
+		const inlangProjectString = (await repo.nodeishFs.readFile(
+			`.${this.url.project}/settings.json`,
+			{
+				encoding: "utf-8",
+			}
+		)) as string
 
-			const formatting = detectJsonFormatting(inlangProjectString)
+		const formatting = detectJsonFormatting(inlangProjectString)
 
-			const inlangProject = JSON.parse(inlangProjectString)
+		const inlangProject = JSON.parse(inlangProjectString)
 
-			const languageTags = inlangProject.languageTags.filter((tag: string) => tag !== languageTag)
+		const languageTags = inlangProject.languageTags.filter((tag: string) => tag !== languageTag)
 
-			inlangProject.languageTags = languageTags
+		inlangProject.languageTags = languageTags
 
-			const generatedProject = formatting(inlangProject)
+		const generatedProject = formatting(inlangProject)
 
-			await repo.nodeishFs.writeFile(`.${this.url.project}/settings.json`, generatedProject)
+		await repo.nodeishFs.writeFile(`.${this.url.project}/settings.json`, generatedProject)
 
-			await repo.add({
-				filepath: `${this.url.project?.slice(1)}/settings.json`,
-			})
+		await repo.add({
+			filepath: `${this.url.project?.slice(1)}/settings.json`,
+		})
 
-			await repo.commit({
-				message: "inlang/manage: remove languageTag",
-				author: {
-					name: this.user.username,
-					email: this.user.email,
-				},
-			})
+		await repo.commit({
+			message: "inlang/manage: remove languageTag",
+			author: {
+				name: this.user.username,
+				email: this.user.email,
+			},
+		})
 
-			await repo.push()
+		const result = await repo.push()
 
-			this.languageTags = this.languageTags.filter((tag) => tag.name !== languageTag)
+		// @ts-ignore
+		if (result.error) console.error(result.error)
 
-			this.languageTags.map((tag) => {
-				if (tag.name === languageTag) {
-					tag.loading = false
-				}
-			})
-		}
+		this.languageTags = this.languageTags?.filter((tag) => tag.name !== languageTag)
+
+		posthog.capture("removed languageTag", {
+			languageTag,
+		})
 	}
 
 	override render(): TemplateResult {
@@ -832,12 +836,12 @@ export class InlangManage extends TwLitElement {
 															${tag.sourceLanguageTag
 																? html`<p class="text-sm text-slate-500 mr-3">(Source)</p>`
 																: tag.loading
-																? html`<div class="mr-3 w-6 h-6 relative">
+																? html`<div class="mr-3 w-5 h-5 relative animate-spin">
 																		<div
-																			class="h-6 w-6 bg-slate-50 border-4 border-slate-200 rounded-full animate-spin"
+																			class="h-5 w-5 border-2 border-[#098DAC] rounded-full"
 																		></div>
 																		<div
-																			class="h-1/2 w-1/2 absolute top-0 left-0 z-5 bg-slate-50"
+																			class="h-1/2 w-1/2 absolute top-0 left-0 z-5 bg-white"
 																		></div>
 																  </div>`
 																: html`<button
