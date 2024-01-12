@@ -115,7 +115,7 @@ describe("main workflow", () => {
 		expect(statusPost).toBe("unmodified")
 	})
 
-  it("can commit open repos without origin or git config (the case eg. on render.com or other deoployment scenarios)", async () => {
+	it("can commit open repos without origin or git config (the case eg. on render.com or other deoployment scenarios)", async () => {
 		const fs = createNodeishMemoryFs()
 
 		const snapshot = JSON.parse(readFileSync("./mocks/ci-test-repo.json", { encoding: "utf-8" }))

@@ -1,4 +1,4 @@
-import { assert, describe, it } from "vitest"
+import { assert, describe, it, expect } from "vitest"
 import { listProjects } from "./listProjects.js"
 import { createNodeishMemoryFs, type Snapshot } from "@lix-js/fs"
 import type { ProjectSettings } from "@inlang/project-settings"
@@ -63,6 +63,11 @@ describe("listProjects", () => {
 			readFileSync("./mocks/ci-test-repo-no-shallow.json", { encoding: "utf-8" })
 		)
 		const repo = await mockRepo({ fromSnapshot: ciTestRepo })
+		repo.checkout({ branch: "test-symlink" })
+
+		const link = await repo.nodeishFs.readlink("test-symlink-not-existing-target")
+
+		expect(link).toBe("/test-symlink-not-existing-target//.././no-exist")
 
 		await listProjects(repo.nodeishFs, "/").then((projects) => {
 			assert(projects.length === 1)

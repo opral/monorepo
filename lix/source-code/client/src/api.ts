@@ -19,6 +19,7 @@ export type Repository = {
 	// we dont want to add isogit to types but its required for teting comparison and debugging
 	[x: string]: any
 	nodeishFs: NodeishFilesystem
+	checkout: (args: { branch: string }) => Promise<void>
 	commit: (args: {
 		author: Author
 		message: string
