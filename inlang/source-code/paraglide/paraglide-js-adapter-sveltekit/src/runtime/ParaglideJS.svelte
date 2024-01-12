@@ -15,6 +15,7 @@
 	import { translatePath } from "./path-translations/translatePath.js"
 	import type { I18n } from "./adapter.js"
 
+	//The base path may be relative during SSR. To make sure it is absolute, we need to resolve it against the current page URL.
 	const absoluteBase = new URL(maybe_relative_base, new URL($page.url)).pathname
 
 	/** 
