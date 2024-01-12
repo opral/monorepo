@@ -1,8 +1,10 @@
 import { assert, describe, it } from "vitest"
 import { listProjects } from "./listProjects.js"
-import { createNodeishMemoryFs } from "@lix-js/fs"
+import { createNodeishMemoryFs, type Snapshot } from "@lix-js/fs"
 import type { ProjectSettings } from "@inlang/project-settings"
-import { mockRepo, ciTestRepo } from "@lix-js/client"
+import { mockRepo } from "@lix-js/client"
+// eslint-disable-next-line no-restricted-imports -- test
+import { readFileSync } from "node:fs"
 
 const settings: ProjectSettings = {
 	sourceLanguageTag: "en",
@@ -57,9 +59,12 @@ describe("listProjects", () => {
 	})
 
 	it("should not crash on broken symlinks as cal.com has", async () => {
+		const ciTestRepo: Snapshot = JSON.parse(
+			readFileSync("./mocks/ci-test-repo-no-shallow.json", { encoding: "utf-8" })
+		)
 		const repo = await mockRepo({ fromSnapshot: ciTestRepo })
 
-		await listProjects(repo.fs, "/").then((projects) => {
+		await listProjects(repo.nodeishFs, "/").then((projects) => {
 			assert(projects.length === 1)
 		})
 	})
