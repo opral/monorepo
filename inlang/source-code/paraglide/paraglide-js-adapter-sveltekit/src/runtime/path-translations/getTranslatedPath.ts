@@ -1,4 +1,4 @@
-import type { PathTranslations } from "./path-translations.js"
+import type { PathTranslations } from "./types.js"
 
 export function getTranslatedPath(
 	canonicalPath: string,

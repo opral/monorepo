@@ -1,9 +1,9 @@
 import { parsePath } from "../utils/parse-path.js"
 import { base } from "$app/paths"
 import { serializeRoute } from "../utils/serialize-path.js"
-import { getCanonicalPath } from "../translate-paths/getCanonicalPath.js"
+import { getCanonicalPath } from "../path-translations/getCanonicalPath.js"
 import type { Reroute } from "@sveltejs/kit"
-import type { PathTranslations } from "../translate-paths/path-translations.js"
+import type { PathTranslations } from "../path-translations/types.js"
 import type { Paraglide } from "../runtime.js"
 
 /**

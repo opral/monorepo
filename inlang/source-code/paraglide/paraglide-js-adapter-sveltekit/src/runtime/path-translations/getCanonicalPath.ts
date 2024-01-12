@@ -1,0 +1,26 @@
+import { matches } from "./matching/match.js"
+import { resolvePath } from "./matching/resolvePath.js"
+import type { PathTranslations } from "./types.js"
+
+/**
+ * Resolves the canonical path from a translated path
+ * @param translatedPath The translated path WITHOUT the language or base
+ */
+export function getCanonicalPath(
+	translatedPath: string,
+	lang: string,
+	translations: PathTranslations<string>
+): string {
+	for (const [canonicalPathDefinition, translationsForPath] of Object.entries(translations)) {
+		if (!(lang in translationsForPath)) continue
+		const translatedPathDefinition = translationsForPath[lang]
+		if (!translatedPathDefinition) continue
+
+		const matchResult = matches(translatedPath, translatedPathDefinition)
+		if (matchResult.matches === false) continue
+
+		return resolvePath(canonicalPathDefinition, matchResult.params)
+	}
+
+	return translatedPath
+}
