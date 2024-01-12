@@ -2,11 +2,17 @@
 	import { page } from "$app/stores"
 	import { availableLanguageTags } from "$paraglide/runtime"
     import * as m from "$paraglide/messages.js"
+
+    const totalUsers = 10;
+
+    const next = (Number($page.params.id) + 1) % totalUsers;
+    const prev = (Number($page.params.id) - 1 + totalUsers) % totalUsers;
 </script>
 
 <h1>User {$page.params.id}</h1>
 
-<a data-sveltekit-keepfocus href="/base/users/{Number($page.params.id) + 1}">Next User</a>
+<a data-sveltekit-keepfocus href="/base/users/{prev}">Previous User</a>
+<a data-sveltekit-keepfocus href="/base/users/{next}">Next User</a>
 
 {#each availableLanguageTags as lang}
     <a href="/base/users/{Number($page.params.id)}" hreflang={lang}>
