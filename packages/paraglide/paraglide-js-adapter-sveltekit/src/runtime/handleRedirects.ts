@@ -1,17 +1,16 @@
+import { getTranslatedPath } from "./translate-paths/translate.js"
+import { isExternal } from "./utils/external.js"
+import { parsePath } from "./utils/parse-path.js"
+import { base } from "$app/paths"
 import type { Handle } from "@sveltejs/kit"
 import type { Paraglide } from "./runtime.js"
 import type { PathTranslations } from "./translate-paths/path-translations.js"
-import { getTranslatedPath } from "./translate-paths/translate.js"
-import { isExternal } from "./utils/external.js"
-import { base } from "$app/paths"
 
 /**
  * This is a SvelteKit Server hook that rewrites redirects to internal pages to use the correct language.s
- * @param param0
- * @returns
  */
 export const handleRedirects: (
-	runtime: Paraglide<string>,
+	runtime: Paraglide<any>,
 	translations: PathTranslations<string>
 ) => Handle =
 	(runtime, translations) =>
@@ -26,12 +25,20 @@ export const handleRedirects: (
 		const from = new URL(event.url)
 		const to = new URL(location, from)
 
+		console.log("redirect", from.href, to.href)
+
 		if (isExternal(to, from, base)) return response
 
-		//TODO Determin based on the URL
-		const lang = runtime.sourceLanguageTag
+		const { lang } = parsePath(from.pathname, {
+			base,
+			availableLanguageTags: runtime.availableLanguageTags,
+			defaultLanguageTag: runtime.sourceLanguageTag,
+		})
 
 		const translatedPath = getTranslatedPath(to.pathname, lang, translations)
+
+		console.log("translatedPath", translatedPath)
+
 		response.headers.set("location", translatedPath)
 		return response
 	}
