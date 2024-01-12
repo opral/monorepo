@@ -4,5 +4,8 @@
 	"greeting": "Welcome {name}! You have {count} messages.",
 	"change_language_to": "Change language to {languageTag}",
 	"about": "About",
-	"home": "Home"
+	"home": "Home",
+	"users": "Users",
+	"next_user": "Next user",
+	"previous_user": "Previous user"
 }

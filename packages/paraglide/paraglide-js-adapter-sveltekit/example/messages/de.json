@@ -4,5 +4,8 @@
 	"greeting": "Hallo {name}! Du hast {count} Nachrichten.",
 	"change_language_to": "Sprache ändern zu {languageTag}",
 	"about": "Über uns",
-	"home": "Startseite"
+	"home": "Startseite",
+	"users": "Benutzer",
+	"next_user": "Nächster Benutzer",
+	"previous_user": "Vorheriger Benutzer"
 }
