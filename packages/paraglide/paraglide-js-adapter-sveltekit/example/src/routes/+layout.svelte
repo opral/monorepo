@@ -1,10 +1,9 @@
 <script>
-	import * as runtime from "$paraglide/runtime.js";
 	import { ParaglideJS } from "@inlang/paraglide-js-adapter-sveltekit"
-	import { pathTranslations } from "$lib/i18n"
+	import { i18n } from "$lib/i18n.js"
 	export let data;
 </script>
 
-<ParaglideJS {runtime} languageTag={data.lang} paths={pathTranslations}>
+<ParaglideJS {i18n} languageTag={data.lang}>
 	<slot />
 </ParaglideJS>

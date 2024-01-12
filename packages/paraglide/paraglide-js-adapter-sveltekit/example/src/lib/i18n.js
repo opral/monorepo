@@ -1,4 +1,7 @@
-export const pathTranslations = {
+import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
+import * as runtime from "$paraglide/runtime.js"
+
+export const i18n = createI18n(runtime, {
 	"/about": {
 		en: "/about",
 		de: "/ueber-uns",
@@ -19,4 +22,4 @@ export const pathTranslations = {
 		de: "/irgendeine-unterseite",
 		fr: "/quelque-sous-page",
 	},
-}
+})

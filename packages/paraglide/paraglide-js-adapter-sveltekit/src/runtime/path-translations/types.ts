@@ -20,5 +20,5 @@
  * ```
  */
 export type PathTranslations<T extends string> = {
-	[canonicalPath: string]: Record<T, string>
+	[canonicalPath: `/${string}`]: Record<T, `/${string}`>
 }
