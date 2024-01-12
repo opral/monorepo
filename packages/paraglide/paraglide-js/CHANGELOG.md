@@ -1,5 +1,12 @@
 # @inlang/paraglide-js
 
+## 1.1.1
+
+### Patch Changes
+
+- 7ea9753fb: Improve onboarding message
+- 4277232db: fix: better formatting of messageID fallbacks
+
 ## 1.1.0
 
 ### Minor Changes

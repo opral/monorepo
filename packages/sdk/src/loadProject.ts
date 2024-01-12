@@ -23,12 +23,12 @@ import { ProjectSettings, Message, type NodeishFilesystemSubset } from "./versio
 import { tryCatch, type Result } from "@inlang/result"
 import { migrateIfOutdated } from "@inlang/project-settings/migration"
 import { createNodeishFsWithAbsolutePaths } from "./createNodeishFsWithAbsolutePaths.js"
-import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
+import { normalizePath } from "@lix-js/fs"
 import { isAbsolutePath } from "./isAbsolutePath.js"
 import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
 import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
+import { maybeCreateProjectId } from "./generateProjectId.js"
 import type { Repository } from "@lix-js/client"
-import { generateProjectId } from "./generateProjectId.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -36,24 +36,46 @@ const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
  * Creates an inlang instance.
  *
  * @param projectPath - Absolute path to the inlang settings file.
- * @param nodeishFs - Filesystem that implements the NodeishFilesystemSubset interface.
+ * @param @deprecated nodeishFs - Filesystem that implements the NodeishFilesystemSubset interface.
  * @param _import - Use `_import` to pass a custom import function for testing,
  *   and supporting legacy resolvedModules such as CJS.
  * @param _capture - Use `_capture` to capture events for analytics.
  *
  */
-export const loadProject = async (args: {
+export async function loadProject(args: {
 	projectPath: string
-	repo?: Repository
-	nodeishFs: NodeishFilesystem
+	nodeishFs: Repository["nodeishFs"]
 	_import?: ImportFunction
 	_capture?: (id: string, props: Record<string, unknown>) => void
-}): Promise<InlangProject> => {
+}): Promise<InlangProject>
+
+/**
+ * @param projectPath - Absolute path to the inlang settings file.
+ * @param repo - An instance of a lix repo as returned by `openRepository`.
+ * @param _import - Use `_import` to pass a custom import function for testing,
+ *   and supporting legacy resolvedModules such as CJS.
+ * @param _capture - Use `_capture` to capture events for analytics.
+ *
+ */
+export async function loadProject(args: {
+	projectPath: string
+	repo: Repository
+	_import?: ImportFunction
+	_capture?: (id: string, props: Record<string, unknown>) => void
+}): Promise<InlangProject>
+
+export async function loadProject(args: any): Promise<InlangProject> {
 	const projectPath = normalizePath(args.projectPath)
 
-	// -- migrate if outdated ------------------------------------------------
-
-	await maybeMigrateToDirectory({ nodeishFs: args.nodeishFs, projectPath })
+	let fs: Repository["nodeishFs"]
+	if (args.nodeishFs) {
+		// TODO: deprecate
+		fs = args.nodeishFs
+	} else if (args.repo) {
+		fs = args.repo.nodeishFs
+	} else {
+		throw new LoadProjectInvalidArgument(`Repo missing from arguments.`, { argument: "repo" })
+	}
 
 	// -- validation --------------------------------------------------------
 	// the only place where throwing is acceptable because the project
@@ -72,35 +94,27 @@ export const loadProject = async (args: {
 		)
 	}
 
-	// -- load project ------------------------------------------------------
+	// -- migrate if outdated ------------------------------------------------
+	const nodeishFs = createNodeishFsWithAbsolutePaths({
+		projectPath,
+		nodeishFs: fs,
+	})
+
+	await maybeMigrateToDirectory({ nodeishFs: fs, projectPath })
+	const { error: projectIdError, projectId } = await maybeCreateProjectId({
+		nodeishFs,
+		projectPath,
+		repo: args.repo,
+	})
+
 	let idError: Error | undefined
+	if (projectIdError) {
+		idError = projectIdError as Error
+	}
+
+	// -- load project ------------------------------------------------------
 	return await createRoot(async () => {
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
-		const nodeishFs = createNodeishFsWithAbsolutePaths({
-			projectPath,
-			nodeishFs: args.nodeishFs,
-		})
-
-		let projectId: string | undefined
-
-		try {
-			projectId = await nodeishFs.readFile(projectPath + "/project_id", {
-				encoding: "utf-8",
-			})
-		} catch (error) {
-			// @ts-ignore
-			if (error.code === "ENOENT") {
-				if (args.repo) {
-					projectId = await generateProjectId(args.repo, projectPath)
-					if (projectId) {
-						await nodeishFs.writeFile(projectPath + "/project_id", projectId)
-					}
-				}
-			} else {
-				idError = error as Error
-			}
-		}
-
 		// -- settings ------------------------------------------------------------
 
 		const [settings, _setSettings] = createSignal<ProjectSettings>()

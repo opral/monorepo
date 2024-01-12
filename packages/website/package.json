@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "vite",
-		"build": "node ./scripts/generateSitemap.js && node ./scripts/generateOG.js && npx @inlang/cli machine translate -f --project ../../../project.inlang --targetLanguageTags fr,it,pt-BR,sk,zh && vite build",
+		"build": "node ./scripts/generateSitemap.js && npx @inlang/cli machine translate -f --project ../../../project.inlang --targetLanguageTags fr,it,pt-BR,sk,zh && vite build",
 		"production": "NODE_ENV=production tsx ./src/server/main.ts ",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "paraglide-js compile --project ../../../project.inlang && npx @inlang/cli lint --project ../../../project.inlang --languageTags de,en && tsc --noEmit ",
@@ -31,7 +31,6 @@
 		"@solidjs/meta": "0.28.2",
 		"@types/flat": "^5.0.2",
 		"algoliasearch": "4.20.0",
-		"canvas": "^2.11.2",
 		"clipboard-copy": "^4.0.1",
 		"compression": "^1.7.4",
 		"cookie-session": "^2.0.0",
@@ -42,6 +41,7 @@
 		"jose": "^4.11.1",
 		"octokit": "3.1.2",
 		"prosemirror-history": "^1.3.0",
+		"pureimage": "^0.4.13",
 		"shiki": "^0.11.1",
 		"sirv": "^2.0.2",
 		"solid-hcaptcha": "^0.4.0",
@@ -88,7 +88,7 @@
 		"tailwindcss": "^3.3.0",
 		"typescript": "5.2.2",
 		"unplugin-icons": "^0.15.0",
-		"vike": "0.4.149",
+		"vike": "0.4.156",
 		"vite": "4.5.0",
 		"vite-plugin-solid": "2.7.0",
 		"vitest": "0.34.3"

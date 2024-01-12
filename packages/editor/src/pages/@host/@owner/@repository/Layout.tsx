@@ -282,8 +282,7 @@ export function Layout(props: { children: JSXElement }) {
 									showToast({
 										variant: "warning",
 										title: "Not a collaborator",
-										message:
-											"Fork this repository to make changes.",
+										message: "Fork this repository to make changes.",
 									})
 								} else {
 									setAddLanguageModalOpen(true)
