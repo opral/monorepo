@@ -1,4 +1,4 @@
-import { parsePath } from "../utils/parse-path.js"
+import { getPathInfo } from "../utils/get-path-info.js"
 import { serializeRoute } from "../utils/serialize-path.js"
 import { getCanonicalPath } from "./getCanonicalPath.js"
 import { getTranslatedPath } from "./getTranslatedPath.js"
@@ -17,7 +17,7 @@ export function translatePath(
 		path: targetedPathSource,
 		lang,
 		isDataRequest,
-	} = parsePath(path, {
+	} = getPathInfo(path, {
 		base: opts.base,
 		availableLanguageTags: opts.availableLanguageTags,
 		defaultLanguageTag: opts.defaultLanguageTag,

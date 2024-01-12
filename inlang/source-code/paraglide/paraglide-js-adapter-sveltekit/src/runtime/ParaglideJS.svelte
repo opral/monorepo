@@ -12,7 +12,7 @@
 	import { base } from "$app/paths"
 	import { isExternal } from "./utils/external.js"
 	import { getTranslatedPath } from "./path-translations/getTranslatedPath.js"
-	import { parsePath } from "./utils/parse-path.js"
+	import { getPathInfo } from "./utils/get-path-info.js"
 	import { translatePath } from "./path-translations/translatePath.js"
 
 	/** 
@@ -54,7 +54,7 @@
 		if(isExternal(original_to, from, base)) 
 			return href;
 
-		const { lang: fromLang } = parsePath(from.pathname, { 
+		const { lang: fromLang } = getPathInfo(from.pathname, { 
 			base, 
 			availableLanguageTags: runtime.availableLanguageTags,
 			defaultLanguageTag: runtime.sourceLanguageTag

@@ -19,7 +19,7 @@ type ParseResult = {
  * @param path
  * @param base
  */
-export function parsePath(path: string, options: ParseOptions): ParseResult {
+export function getPathInfo(path: string, options: ParseOptions): ParseResult {
 	path = Path.normalize(path)
 	const base = Path.normalize(options.base)
 	const { availableLanguageTags, defaultLanguageTag } = options

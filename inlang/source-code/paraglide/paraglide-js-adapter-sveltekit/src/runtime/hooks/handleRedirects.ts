@@ -1,6 +1,6 @@
 import { getTranslatedPath } from "../path-translations/getTranslatedPath.js"
 import { isExternal } from "../utils/external.js"
-import { parsePath } from "../utils/parse-path.js"
+import { getPathInfo } from "../utils/get-path-info.js"
 import { base } from "$app/paths"
 import type { Handle } from "@sveltejs/kit"
 import type { Paraglide } from "../runtime.js"
@@ -27,7 +27,7 @@ export const handleRedirects: (
 
 		if (isExternal(to, from, base)) return response
 
-		const { lang } = parsePath(from.pathname, {
+		const { lang } = getPathInfo(from.pathname, {
 			base,
 			availableLanguageTags: runtime.availableLanguageTags,
 			defaultLanguageTag: runtime.sourceLanguageTag,
