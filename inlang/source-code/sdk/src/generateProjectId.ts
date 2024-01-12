@@ -7,9 +7,9 @@ export async function maybeCreateProjectId({
 	projectPath,
 	repo,
 }: {
-	nodeishFs: any
+	nodeishFs?: any
 	projectPath: string
-	repo: Repository
+	repo?: Repository
 }) {
 	let projectId: string | undefined
 	const fs = nodeishFs as NodeishFilesystem
