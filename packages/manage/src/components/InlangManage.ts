@@ -500,7 +500,7 @@ export class InlangManage extends TwLitElement {
 						</div>
 						${this.url.repo && this.branches
 							? html`<div class="flex items-center flex-shrink-0 mx-2">
-									<!-- Dropdown for all projects -->
+									<!-- Dropdown for all branches -->
 									<div
 										class="relative"
 										x-data="{ open: false }"
@@ -519,7 +519,7 @@ export class InlangManage extends TwLitElement {
 												@click=${() => {
 													this.handleProjectDropdown()
 												}}
-												class="self-center flex items-center gap-2 text-left font-medium text-slate-900 bg-white border border-slate-200 hover:bg-slate-100 hover:border-slate-300 rounded-[4px] cursor-pointer pl-2 pr-1.5 py-1.5 text-xs"
+												class="self-center flex items-center gap-2 text-left font-medium text-slate-900 bg-white border border-slate-200 hover:bg-slate-100 hover:border-slate-300 rounded-[4px] cursor-pointer px-2 py-1.5 text-xs"
 											>
 												<svg class="w-4 h-4">
 													<path
@@ -599,7 +599,7 @@ export class InlangManage extends TwLitElement {
 												@click=${() => {
 													this.handleProjectDropdown()
 												}}
-												class="self-center flex items-center gap-2 text-left font-medium text-slate-900 bg-white border border-slate-200 hover:bg-slate-100 hover:border-slate-300 rounded-[4px] cursor-pointer pl-2 pr-1.5 py-1.5 text-xs"
+												class="self-center flex items-center gap-2 text-left font-medium text-slate-900 bg-white border border-slate-200 hover:bg-slate-100 hover:border-slate-300 rounded-[4px] cursor-pointer px-2 py-1.5 text-xs"
 											>
 												<svg viewBox="0 0 24 24" width="1.2em" height="1.2em" class="w-4 h-4">
 													<path
