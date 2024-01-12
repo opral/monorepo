@@ -965,7 +965,7 @@ export class InlangManage extends TwLitElement {
 																await this.addLanguageTag()
 															}
 														}}
-														class="px-3 py-1 bg-white border w-44 pr-8 text-sm truncate border-slate-200 rounded-xl flex items-center justify-between gap-2"
+														class="px-3 py-1 focus:outline-0 focus:ring-0 focus-within:border-[#098DAC] bg-white border w-44 pr-8 text-sm truncate border-slate-200 rounded-xl flex items-center justify-between gap-2"
 														placeholder="Add languageTag"
 													/>
 													${this.newLanguageTagLoading
