@@ -1,4 +1,4 @@
-import { PARAGLIDE_CONTEXT_KEY } from "../../../constants.js"
+import { PARAGLIDE_CONTEXT_KEY } from "../../../runtime/constants.js"
 import type { PreprocessingPass } from "../index.js"
 import { getElementsFromAst } from "../utils/ast.js"
 import { attrubuteValuesToJSValue } from "../utils/attributes-to-values.js"
