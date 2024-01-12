@@ -84,7 +84,7 @@ export async function openRepository(
 	// TODO: check for same origin
 	let doLixClone = false
 
-  let branchName = args.branch
+	let branchName = args.branch
 
 	// the directory we use for all git operations as repo root, if we are interested in a repo subdirectory we have to append this
 	// TODO: add more tests for non root dir command
