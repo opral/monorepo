@@ -54,17 +54,12 @@
 		if(isExternal(original_to, from, base)) 
 			return href;
 
-		const { lang: fromLang } = getPathInfo(from.pathname, { 
-			base, 
-			availableLanguageTags: runtime.availableLanguageTags,
-			defaultLanguageTag: runtime.sourceLanguageTag
-		})
 
-		const lang = hreflang ?? fromLang;
+		const language = hreflang ?? lang;
 		const canonicalPath = original_to.pathname.slice(base.length);
 
-		const translatedPath = getTranslatedPath(canonicalPath, lang, paths);
-		const fullPath = Path.resolve(base, lang, translatedPath);
+		const translatedPath = getTranslatedPath(canonicalPath, language, paths);
+		const fullPath = Path.resolve(base, language, translatedPath);
 
 		return fullPath;
 	}
