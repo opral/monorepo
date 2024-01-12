@@ -1,21 +1,42 @@
-import * as Path from "../utils/path.js"
 import { getCanonicalPath } from "../translate-paths/get-canonical-path.js"
+import { parsePath } from "../utils/parse-path.js"
+import { base } from "$app/paths"
+import { serializePath } from "../utils/serialize-path.js"
 import type { Reroute } from "@sveltejs/kit"
 import type { PathTranslations } from "../translate-paths/path-translations.js"
-
-const DATA_SUFFIX = "/__data.json"
-
+import type { Paraglide } from "../runtime.js"
 /**
  * Returns a reroute function that applies the given translations to the paths
  * @param translations
  */
-export const reroute = (translations: PathTranslations<string>): Reroute => {
+export const reroute = (
+	runtime: Paraglide<any>,
+	translations: PathTranslations<string>
+): Reroute => {
 	return ({ url }) => {
-		const isDataRequest = url.pathname.endsWith(DATA_SUFFIX)
+		try {
+			const { lang, canonicalPath, isDataRequest } = parsePath(url.pathname, {
+				base,
+				availableLanguageTags: runtime.availableLanguageTags,
+				defaultLanguageTag: runtime.sourceLanguageTag,
+			})
 
-		const path = isDataRequest ? url.pathname.slice(0, -DATA_SUFFIX.length) : url.pathname
-		const resolvedPath = getCanonicalPath(path, translations)
+			const resolvedPath = getCanonicalPath(canonicalPath, lang, translations)
 
-		return isDataRequest ? Path.resolve(resolvedPath, DATA_SUFFIX) : resolvedPath
+			const serializedPath = serializePath({
+				path: resolvedPath,
+				lang,
+				base,
+				defaultLanguageTag: runtime.sourceLanguageTag,
+				isDataRequest,
+			})
+
+			console.log("reroute", url.pathname, serializedPath)
+
+			return serializedPath
+		} catch (e) {
+			console.error(e)
+			return url.pathname
+		}
 	}
 }
