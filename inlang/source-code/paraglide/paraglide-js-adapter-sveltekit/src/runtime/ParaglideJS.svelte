@@ -3,7 +3,7 @@
 	Automatically detect and manage the language of your page.
 	It also adds `<link rel="alternate">` tags to the head of your page
 -->
-<script>
+<script lang="ts" generics="T extends string">
 	import * as Path from "./utils/path.js"
 	import { page } from "$app/stores"
 	import { browser } from "$app/environment"
@@ -13,42 +13,22 @@
 	import { isExternal } from "./utils/external.js"
 	import { getTranslatedPath } from "./path-translations/getTranslatedPath.js"
 	import { translatePath } from "./path-translations/translatePath.js"
+	import type { I18n } from "./adapter.js"
 
 	const absoluteBase = new URL(maybe_relative_base, new URL($page.url)).pathname
 
 	/** 
-	 * The Paraglide runtime from the Paraglide compiler output.
-	 * Import it and pass it to this component.
-	 * 
-	 * @example
-	 * ```ts
-	 * import * as runtime from "../paraglide/runtime.js"
-	 * <ParaglideJS {runtime} />
-	 * ```
-	 * 
-	 * @type {import("./runtime.js").Paraglide<any>}
-	 */
-	export let runtime; 
-
-	/** 
 	 * Override the language detection with a specific language tag.
-	 * @type { string | undefined } 
 	 */
-	export let languageTag = undefined
+	export let languageTag : T | undefined = undefined
+	export let i18n : I18n<T>;
 
-	/** @type {import("./path-translations/types.js").PathTranslations<string>}*/
-	export let paths  = {};
 
-	$: lang = languageTag ?? runtime.sourceLanguageTag
-	$: runtime.setLanguageTag(lang)
+	$: lang = languageTag ?? i18n.sourceLanguageTag
+	$: i18n.setLanguageTag(lang)
 	$: if(browser) document.documentElement.lang = lang
 
-	/** 
-	 * @param {string} href
-	 * @param {string | undefined} hreflang
-	 * @returns {string}
-	 */
-	function translateHref(href, hreflang) {
+	function translateHref(href: string, hreflang : string | undefined) : string {
 		const from = new URL($page.url)
 		const original_to = new URL(href, new URL(from))
 		
@@ -60,31 +40,31 @@
 		const language = hreflang ?? lang;
 		const canonicalPath = original_to.pathname.slice(absoluteBase.length);
 
-		const translatedPath = getTranslatedPath(canonicalPath, language, paths);
+		const translatedPath = getTranslatedPath(canonicalPath, language, i18n.translations);
 		const fullPath = Path.resolve(absoluteBase, language, translatedPath);
 
 		return fullPath;
 	}
 
 	setContext(PARAGLIDE_CONTEXT_KEY, {
-		runtime,
+		runtime: i18n,
 		translateHref
 	})
 </script>
 
 <svelte:head>
 	<!-- If there is more than one language, add alternate links -->
-	{#if runtime.availableLanguageTags.length >= 1}
-		{#each runtime.availableLanguageTags as lang}
+	{#if i18n.availableLanguageTags.length >= 1}
+		{#each i18n.availableLanguageTags as lang}
 			<link rel="alternate" hreflang={lang} href={
 			translatePath(
 				$page.url.pathname, 
 				lang, 
-				paths, 
+				i18n.translations,
 				{ 
 					base: absoluteBase, 
-					availableLanguageTags: runtime.availableLanguageTags, 
-					defaultLanguageTag: runtime.sourceLanguageTag
+					availableLanguageTags: i18n.availableLanguageTags, 
+					defaultLanguageTag: i18n.sourceLanguageTag
 				}
 			)} />
 		{/each}

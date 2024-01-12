@@ -27,3 +27,10 @@
     <br />
 {/each}
 
+
+
+
+<br />
+<br />
+
+<a href="/base/">{m.home()}</a>

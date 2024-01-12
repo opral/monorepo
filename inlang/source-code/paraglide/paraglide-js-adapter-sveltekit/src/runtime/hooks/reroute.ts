@@ -10,7 +10,7 @@ import type { Paraglide } from "../runtime.js"
  * Returns a reroute function that applies the given translations to the paths
  * @param translations
  */
-export const reroute = (
+export const createReroute = (
 	runtime: Paraglide<any>,
 	translations: PathTranslations<string>
 ): Reroute => {
