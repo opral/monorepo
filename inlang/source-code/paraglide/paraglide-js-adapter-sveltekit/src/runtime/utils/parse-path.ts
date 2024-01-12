@@ -1,4 +1,4 @@
-import { DATA_SUFFIX } from "../../constants.js"
+import { DATA_SUFFIX } from "../constants.js"
 import * as Path from "./path.js"
 
 type ParseOptions = {

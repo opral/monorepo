@@ -7,12 +7,13 @@
 	import { page } from "$app/stores"
 	import { browser } from "$app/environment"
 	import { setContext } from "svelte"
-	import { PARAGLIDE_CONTEXT_KEY } from "../constants.js"
+	import { PARAGLIDE_CONTEXT_KEY } from "./constants.js"
 	import { base } from "$app/paths"
 	import * as Path from "./utils/path.js"
 	import { isExternal } from "./utils/external.js"
 	import { getTranslatedPath } from "./translate-paths/translate.js"
 	import { parsePath } from "./utils/parse-path.js"
+	import { resolveTranslatedPath } from "./translate-paths/resolve-translated-path.js"
 
 	/** 
 	 * The Paraglide runtime from the Paraglide compiler output.
@@ -72,13 +73,22 @@
 		runtime,
 		translateHref
 	})
+
+
+	$: currentUrl = parsePath($page.url.pathname, { 
+		base, 
+		availableLanguageTags: runtime.availableLanguageTags,
+		defaultLanguageTag: runtime.sourceLanguageTag
+	});
+
+	$: canonicalPath = resolveTranslatedPath(currentUrl.canonicalPath, currentUrl.lang, paths)
 </script>
 
 <svelte:head>
 	<!-- If there is more than one language, add alternate links -->
 	{#if runtime.availableLanguageTags.length >= 1}
 		{#each runtime.availableLanguageTags as lang}
-			<link rel="alternate" hreflang={lang} href={translateHref($page.url.pathname, lang)} />
+			<link rel="alternate" hreflang={lang} href={translateHref(Path.resolve(base, canonicalPath), lang)} />
 		{/each}
 	{/if}
 </svelte:head>

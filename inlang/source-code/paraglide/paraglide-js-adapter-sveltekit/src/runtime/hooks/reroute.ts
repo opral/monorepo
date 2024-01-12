@@ -1,10 +1,10 @@
-import { getCanonicalPath } from "../translate-paths/get-canonical-path.js"
 import { parsePath } from "../utils/parse-path.js"
 import { base } from "$app/paths"
-import { serializePath } from "../utils/serialize-path.js"
+import { serializeRoute } from "../utils/serialize-path.js"
 import type { Reroute } from "@sveltejs/kit"
 import type { PathTranslations } from "../translate-paths/path-translations.js"
 import type { Paraglide } from "../runtime.js"
+import { resolveTranslatedPath } from "../translate-paths/resolve-translated-path.js"
 /**
  * Returns a reroute function that applies the given translations to the paths
  * @param translations
@@ -21,17 +21,13 @@ export const reroute = (
 				defaultLanguageTag: runtime.sourceLanguageTag,
 			})
 
-			const resolvedPath = getCanonicalPath(canonicalPath, lang, translations)
+			const resolvedPath = resolveTranslatedPath(canonicalPath, lang, translations)
 
-			const serializedPath = serializePath({
+			const serializedPath = serializeRoute({
 				path: resolvedPath,
-				lang,
 				base,
-				defaultLanguageTag: runtime.sourceLanguageTag,
 				isDataRequest,
 			})
-
-			console.log("reroute", url.pathname, serializedPath)
 
 			return serializedPath
 		} catch (e) {
