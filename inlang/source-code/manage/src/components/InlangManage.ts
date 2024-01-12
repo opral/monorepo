@@ -853,7 +853,7 @@ export class InlangManage extends TwLitElement {
 							  </div>`
 							: this.modules
 							? html`<div class="h-full w-full">
-					<div class="mb-16 flex items-start justify-between flex-col-reverse md:flex-row gap-10 md:gap-4">
+					<div class="mb-12 flex items-start justify-between flex-col-reverse md:flex-row gap-10 md:gap-4">
 					<div>
 							${
 								this.url.install === "true"
@@ -999,6 +999,7 @@ export class InlangManage extends TwLitElement {
 								}
 								</div>
 								</div>
+								</div>
 							<div class="mb-12">
 							<h2 class="text-lg font-semibold my-4">Plugins</h2>
 								${
@@ -1081,7 +1082,6 @@ export class InlangManage extends TwLitElement {
 												</a>
 										  </div>`
 								}
-								</div>
 								</div>
 								<div>
 							<h2 class="text-lg font-semibold my-4">Lint Rules</h2>
