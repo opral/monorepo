@@ -4,5 +4,8 @@
 	"home": "Accueil",
 	"currentLanguageTag": "La langue actuelle est \"{languageTag}\"",
 	"greeting": "Bienvenue à {name}! Vous avez {count} messages.",
-	"change_language_to": "Changer la langue en {languageTag}"
+	"change_language_to": "Changer la langue en {languageTag}",
+	"users": "Utilisateurs",
+	"next_user": "Prochain utilisateur",
+	"previous_user": "Utilisateur précédent"
 }

@@ -5,17 +5,23 @@
 
     const totalUsers = 10;
 
-    const next = (Number($page.params.id) + 1) % totalUsers;
-    const prev = (Number($page.params.id) - 1 + totalUsers) % totalUsers;
+    $: num_users = Number.parseInt($page.params.id);
+
+    $: next = (num_users + 1) % totalUsers;
+    $: prev = (num_users - 1 + totalUsers) % totalUsers;
 </script>
 
-<h1>User {$page.params.id}</h1>
+<h1>{m.users()} {num_users}</h1>
 
-<a data-sveltekit-keepfocus href="/base/users/{prev}">Previous User</a>
-<a data-sveltekit-keepfocus href="/base/users/{next}">Next User</a>
+<a data-sveltekit-keepfocus href="/base/users/{prev}">{m.previous_user()}</a>
+<br />
+<a data-sveltekit-keepfocus href="/base/users/{next}">{m.next_user()}</a>
 
+
+<br />
+<br />
 {#each availableLanguageTags as lang}
-    <a href="/base/users/{Number($page.params.id)}" hreflang={lang}>
+    <a href="/base/users/{num_users}" hreflang={lang}>
     {m.change_language_to({ languageTag: lang })}
     </a>
     <br />
