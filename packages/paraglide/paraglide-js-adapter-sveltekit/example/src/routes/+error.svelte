@@ -1,11 +1,12 @@
 <script>
+	import { base } from "$app/paths"
 	import { page } from "$app/stores"
+	import { i18n } from "$lib/i18n"
     import * as m from "$paraglide/messages.js"
-    import * as runtime from "$paraglide/runtime.js"
     import { ParaglideJS } from "@inlang/paraglide-js-adapter-sveltekit"
 </script>
 
-<ParaglideJS {runtime} languageTag="en">
+<ParaglideJS {i18n} languageTag="en">
     <h1>{$page.error?.message}</h1>
-    <a href="/">{m.home()}</a>
+    <a href="{base}/">{m.home()}</a>
 </ParaglideJS>
