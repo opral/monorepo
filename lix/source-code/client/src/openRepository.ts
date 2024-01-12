@@ -84,6 +84,8 @@ export async function openRepository(
 	// TODO: check for same origin
 	let doLixClone = false
 
+  let branchName = args.branch
+
 	// the directory we use for all git operations as repo root, if we are interested in a repo subdirectory we have to append this
 	// TODO: add more tests for non root dir command
 	let dir = "/"
@@ -160,7 +162,7 @@ export async function openRepository(
 				description: "clone",
 
 				onReq: ({ url, body }: { url: string; body: any }) => {
-					return optimizedRefsReq({ url, body, addRef: args.branch })
+					return optimizedRefsReq({ url, body, addRef: branchName })
 				},
 
 				onRes: optimizedRefsRes,
@@ -170,7 +172,7 @@ export async function openRepository(
 			url: gitUrl,
 			singleBranch: true,
 			noCheckout: true,
-			ref: args.branch,
+			ref: branchName,
 
 			// TODO: use only first and last commit in lazy clone? (we need first commit for repo id)
 			depth: 1,
@@ -184,7 +186,7 @@ export async function openRepository(
 						description: "checkout",
 					}),
 					dir,
-					ref: args.branch,
+					ref: branchName,
 					// filepaths: ["resources/en.json", "resources/de.json", "project.inlang.json"],
 				})
 			})
@@ -242,6 +244,20 @@ export async function openRepository(
 			}
 		},
 
+		async checkout({ branch }: { branch: string }) {
+			branchName = branch
+
+			await checkout({
+				fs: withLazyFetching({
+					nodeishFs: rawFs,
+					verbose,
+					description: "checkout",
+				}),
+				dir,
+				ref: branchName,
+			})
+		},
+
 		status(cmdArgs) {
 			return status({
 				fs: withLazyFetching({
@@ -285,7 +301,7 @@ export async function openRepository(
 					depth: 1,
 					singleBranch: true,
 					dir,
-					ref: args.branch,
+					ref: branchName,
 					remote: "upstream",
 					http: makeHttpClient({ verbose, description: "forkStatus" }),
 					fs: forkFs,

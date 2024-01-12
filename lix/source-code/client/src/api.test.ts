@@ -115,6 +115,33 @@ describe("main workflow", () => {
 		expect(statusPost).toBe("unmodified")
 	})
 
+	it("can commit open repos without origin or git config (the case eg. on render.com or other deoployment scenarios)", async () => {
+		const fs = createNodeishMemoryFs()
+
+		const snapshot = JSON.parse(readFileSync("./mocks/ci-test-repo.json", { encoding: "utf-8" }))
+		fromSnapshot(fs, snapshot)
+
+		await fs.rm("/.git/config")
+
+		const repoUrl = await findRepoRoot({
+			nodeishFs: fs,
+			path: "/src/routes/todo", // should find repo root from any path in the repo
+		})
+
+		expect(repoUrl).toBe("file:///")
+
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test fails if repoUrl is null
+		const repository: Awaited<ReturnType<typeof openRepository>> = await openRepository(repoUrl!, {
+			nodeishFs: fs,
+			branch: "test-symlink",
+		})
+
+		// test random repo action to make sure opening worked
+		const status = await repository.status({ filepath: "README.md" })
+
+		expect(status).toBe("unmodified")
+	})
+
 	it("uses standard commit logic for non whitelisted repos", async () => {
 		const nonWhitelistedRepo = await openRepository(
 			"https://github.com/janfjohannes/unicode-bug-issues-1404",
