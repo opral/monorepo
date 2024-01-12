@@ -4,6 +4,16 @@ export const pathTranslations = {
 		de: "/ueber-uns",
 		fr: "/a-propos",
 	},
+	"/users": {
+		en: "/users",
+		de: "/benutzer",
+		fr: "/utilisateurs",
+	},
+	"/users/[id]": {
+		en: "/users/[id]",
+		de: "/benutzer/[id]",
+		fr: "/utilisateurs/[id]",
+	},
 	"/admin": {
 		en: "/admin",
 		de: "/admin",

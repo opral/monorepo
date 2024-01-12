@@ -7,19 +7,15 @@ export function getTranslatedPath(
 	lang: string,
 	translations: PathTranslations<string>
 ) {
-	const pathTranslationsDefinition = Object.keys(translations).find((path) => {
-		return matches(canonicalPath, path).matches
-	})
+	const match = matches(canonicalPath, Object.keys(translations))
 
-	if (!pathTranslationsDefinition) return canonicalPath
-	const translationsForPath = translations[pathTranslationsDefinition]
+	if (!match) return canonicalPath
+
+	const translationsForPath = translations[match.id]
 	if (!translationsForPath) return canonicalPath
 
 	const translatedPath = translationsForPath[lang]
 	if (!translatedPath) return canonicalPath
 
-	const parseResult = matches(canonicalPath, pathTranslationsDefinition)
-	if (!parseResult.matches) return canonicalPath
-
-	return resolvePath(translatedPath, parseResult.params)
+	return resolvePath(translatedPath, match.params)
 }

@@ -10,6 +10,8 @@
 <a href="/base/about">{m.about()}</a>
 <a href="/base/some-subpage">Subpage with redirect</a>
 
+<a href="/base/users/1">Users</a>
+
 <button on:click={() => goto("/base/about")}> Programmatic About</button>
 
 <br/>

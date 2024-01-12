@@ -32,7 +32,7 @@ export function parsePathDefinition(definition: string): PathDefinitionPart[] {
 	return parts
 }
 
-type PathDefinitionPart =
+export type PathDefinitionPart =
 	| {
 			type: "param"
 			name: string
