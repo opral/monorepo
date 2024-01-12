@@ -19,9 +19,9 @@ describe("closestInlangProject", async () => {
 	await nodeishFs.writeFile("/root/path/file2.txt", "")
 
 	const projects = [
-		"/root/path/folder2/project.inlang",
-		"/root/path/folder1.inlang",
-		"/root/path/folder2.inlang",
+		{ projectPath: "/root/path/folder1.inlang" },
+		{ projectPath: "/root/path/folder2.inlang" },
+		{ projectPath: "/root/path/folder2/project.inlang" },
 	]
 
 	it("should find the closest inlang project", async () => {
@@ -30,7 +30,7 @@ describe("closestInlangProject", async () => {
 			projects,
 		})
 
-		expect(result).toEqual("/root/path/folder1.inlang")
+		expect(result).toEqual({ projectPath: "/root/path/folder1.inlang" })
 	})
 
 	it("should return undefined if no inlang project is found", async () => {

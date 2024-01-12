@@ -29,6 +29,12 @@ vi.mock("vscode", () => ({
 // Mocking other dependencies
 vi.mock("@inlang/sdk", () => ({
 	loadProject: vi.fn(),
+	listProjects: vi
+		.fn()
+		.mockResolvedValue([
+			{ projectPath: "/workspace/project1.inlang" },
+			{ projectPath: "/workspace/project2.inlang" },
+		]),
 }))
 vi.mock("../../services/telemetry/implementation", () => ({
 	telemetry: {

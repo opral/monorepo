@@ -1,8 +1,7 @@
 import { Uri, commands, env } from "vscode"
 import { getGitOrigin, telemetry } from "../services/telemetry/implementation.js"
 import type { Message } from "@inlang/sdk"
-
-const EDITOR_BASE_PATH = "https://inlang.com/editor/"
+import { CONFIGURATION } from "../configuration.js"
 
 export const openInEditorCommand = {
 	command: "inlang.openInEditor",
@@ -12,10 +11,10 @@ export const openInEditorCommand = {
 		// TODO: Probably the origin should be configurable via the config.
 		const origin = (await getGitOrigin())?.replaceAll(".git", "")
 		const uri = args.messageId
-			? `${EDITOR_BASE_PATH}${origin}?project=${encodeURIComponent(
+			? `${CONFIGURATION.STRINGS.EDITOR_BASE_PATH}${origin}?project=${encodeURIComponent(
 					args.selectedProjectPath
 			  )}&id=${encodeURIComponent(args.messageId)}`
-			: `${EDITOR_BASE_PATH}${origin}`
+			: `${CONFIGURATION.STRINGS.EDITOR_BASE_PATH}${origin}`
 
 		env.openExternal(Uri.parse(uri))
 
