@@ -178,3 +178,29 @@ it("should add the defined namespaces by useTranslations hook", async () => {
 	expect(matches).toHaveLength(1)
 	expect(matches[0]?.messageId).toBe("login.test.button.a")
 })
+
+it("should add the defined namespace by getTranslations hook", async () => {
+	const sourceCode = `
+		const { t } = await getTranslations("login");
+		<p>{t("a")}</p>
+	`
+	const settings: PluginSettings = {
+		pathPattern: "./{language}.json",
+	}
+	const matches = parse(sourceCode, settings)
+	expect(matches).toHaveLength(1)
+	expect(matches[0]?.messageId).toBe("login.a")
+})
+
+it("should add the defined namespaces by getTranslations hook", async () => {
+	const sourceCode = `
+		const { t } = await getTranslations("login.test");
+		<p>{t("button.a")}</p>
+	`
+	const settings: PluginSettings = {
+		pathPattern: "./{language}.json",
+	}
+	const matches = parse(sourceCode, settings)
+	expect(matches).toHaveLength(1)
+	expect(matches[0]?.messageId).toBe("login.test.button.a")
+})

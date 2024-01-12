@@ -15,7 +15,10 @@ import {
 import { posthog as telemetryBrowser } from "posthog-js"
 import { TourHintWrapper, type TourStepId } from "./Notification/TourHintWrapper.jsx"
 import { browserAuth } from "@lix-js/server"
-import { setSignInModalOpen, signInModalOpen } from "#src/services/auth/src/components/SignInDialog.jsx"
+import {
+	setSignInModalOpen,
+	signInModalOpen,
+} from "#src/services/auth/src/components/SignInDialog.jsx"
 
 export const Gitfloat = () => {
 	const {

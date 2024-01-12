@@ -157,7 +157,7 @@ const createNamespaceParser = (pattern: string) => {
 		FunctionCall: function (r) {
 			return Parsimmon.seqMap(
 				Parsimmon.regex(/[^a-zA-Z0-9]/), // no preceding letters or numbers
-				Parsimmon.regex(/\buseTranslations?\b/), // starts with useTranslation
+				Parsimmon.regex(/\b(?:use|get)Translations\b/), // starts with useTranslation or getTranslations
 				Parsimmon.string(pattern), // then an opening parenthesis
 				Parsimmon.index, // start position of the message id
 				r.stringLiteral!, // message id

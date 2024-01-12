@@ -20,6 +20,9 @@ import { createNodeishMemoryFs, normalizePath } from "@lix-js/fs"
 import { createMessage } from "./test-utilities/createMessage.js"
 import { tryCatch } from "@inlang/result"
 import { mockRepo } from "@lix-js/client"
+import { type Snapshot } from "@lix-js/fs"
+// eslint-disable-next-line no-restricted-imports -- test
+import { readFileSync } from "node:fs"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -161,7 +164,10 @@ describe("initialization", () => {
 	})
 
 	it("should generate projectId on missing projectid", async () => {
-		const repo = await mockRepo()
+		const ciTestRepo: Snapshot = JSON.parse(
+			readFileSync("./mocks/ci-test-repo-no-shallow.json", { encoding: "utf-8" })
+		)
+		const repo = await mockRepo({ fromSnapshot: ciTestRepo })
 
 		const existing = await repo.nodeishFs
 			.readFile("/project.inlang/project_id", {
@@ -177,7 +183,6 @@ describe("initialization", () => {
 		const result = await tryCatch(() =>
 			loadProject({
 				projectPath: "/project.inlang",
-				nodeishFs: repo.nodeishFs,
 				repo,
 				_import,
 			})
@@ -191,21 +196,23 @@ describe("initialization", () => {
 				return { error }
 			})
 
-		expect(newId).toBe("7cd6c2b7cf12febf99496408917123fdfe158b6bc442914f5fb42aa74346bd50")
+		expect(newId).toBe("e8c61726bc2f437ec6a260abb632b3c59195059b60031e648b5afbafa7f3d79a")
 
 		expect(result.error).toBeUndefined()
 		expect(result.data).toBeDefined()
 	})
 
 	it("should reuse projectId on existing projectid", async () => {
-		const repo = await mockRepo()
+		const ciTestRepo: Snapshot = JSON.parse(
+			readFileSync("./mocks/ci-test-repo-no-shallow.json", { encoding: "utf-8" })
+		)
+		const repo = await mockRepo({ fromSnapshot: ciTestRepo })
 
 		repo.nodeishFs.writeFile("/project.inlang/project_id", "testId")
 
 		const result = await tryCatch(() =>
 			loadProject({
 				projectPath: "/project.inlang",
-				nodeishFs: repo.nodeishFs,
 				repo,
 				_import,
 			})
