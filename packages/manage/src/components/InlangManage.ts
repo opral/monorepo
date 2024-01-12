@@ -53,6 +53,9 @@ export class InlangManage extends TwLitElement {
 	@property({ type: Boolean })
 	newLanguageTagLoading: boolean = false
 
+	@property()
+	confirmPopup: undefined | "removeLanguageTag" | "addLanguageTag" = undefined
+
 	@query("#language-tag-input")
 	languageTagInput: HTMLInputElement | undefined
 
@@ -254,6 +257,8 @@ export class InlangManage extends TwLitElement {
 	}
 
 	async removeLanguageTag(languageTag: string) {
+		if (typeof this.user === "undefined") return
+
 		this.languageTags = this.languageTags?.map((tag) => {
 			if (tag.name === languageTag) {
 				return {
@@ -318,6 +323,8 @@ export class InlangManage extends TwLitElement {
 
 	async addLanguageTag() {
 		if (this.newLanguageTag === "") return
+
+		if (typeof this.user === "undefined") return
 
 		this.newLanguageTagLoading = true
 
@@ -468,13 +475,26 @@ export class InlangManage extends TwLitElement {
 										</div>
 									</div>
 							  </div>`
+							: typeof this.user === "undefined"
+							? html`<button
+									@click=${async () => {
+										await browserAuth.login()
+										window.location.reload()
+									}}
+									target="_blank"
+									class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
+							  >
+									Login
+							  </button>`
 							: ""}
 					</div>
 				</div>
 			</header>
 
 			${this.url.repo && this.url.project
-				? html`<div class="w-full max-w-7xl mx-auto flex items-center py-5 px-4 xl:px-0">
+				? html`<div
+						class="w-full max-w-7xl mx-auto flex items-center py-5 px-4 xl:px-0 overflow-x-scroll"
+				  >
 						<div class="flex items-center font-medium text-lg">
 							<svg class="w-4 h-4 mr-2" viewBox="0 0 16 16">
 								<path
@@ -664,7 +684,7 @@ export class InlangManage extends TwLitElement {
 			${this.url.path === ""
 				? html`<div
 						class=${"w-full max-w-7xl h-full flex-grow mx-auto flex justify-center px-4 pb-24" +
-						(!this.modules ? " items-center" : " py-8 xl:px-0")}
+						(!this.modules ? " items-center" : " md:py-8 xl:px-0")}
 				  >
 						${!this.url.repo
 							? html`<div class="max-w-lg w-full flex flex-col items-center gap-4">
@@ -855,18 +875,18 @@ export class InlangManage extends TwLitElement {
 							  </div>`
 							: this.modules
 							? html`<div class="h-full w-full">
-					<div class="mb-12 flex items-start justify-between flex-col-reverse md:flex-row gap-10 md:gap-4">
-					<div>
+					<div class="md:mb-12 flex items-start justify-between flex-col-reverse md:flex-row md:gap-4">
+					<div class="md:mb-0 mb-6">
 							${
 								this.url.install === "true"
-									? html`<h1 class="font-bold text-4xl text-slate-900 mb-4">
+									? html`<h1 class="font-bold md:text-4xl text-slate-900 mb-4 text-xl">
 											Module successfully installed
 									  </h1>`
 									: this.url.uninstall === "true"
-									? html`<h1 class="font-bold text-4xl text-slate-900 mb-4">
+									? html`<h1 class="font-bold md:text-4xl text-slate-900 mb-4 text-xl">
 											Module successfully uninstalled
 									  </h1>`
-									: html`<h1 class="font-bold text-4xl text-slate-900 mb-4">
+									: html`<h1 class="font-bold md:text-4xl text-slate-900 mb-4 text-xl">
 											Manage your inlang project
 									  </h1>`
 							}
@@ -883,7 +903,7 @@ export class InlangManage extends TwLitElement {
 								Go to Fink - Editor
 							</a>
 							<button
-							class="bg-slate-800 text-white text-center px-4 py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"
+							class="bg-slate-800 text-white text-center md:block hidden px-4 py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"
 							@click=${() => {
 								window.location.href = `https://inlang.com/?repo=${this.url.repo}&project=${this.url.project}`
 							}}
@@ -915,35 +935,121 @@ export class InlangManage extends TwLitElement {
 													// @ts-ignore
 													this.languageTags.map((tag: Record<string, string | boolean>) => {
 														return html`<div
-															class=${"pl-3 py-1 bg-white border border-slate-200 rounded-xl flex items-center justify-between gap-2 " +
-															(tag.loading ? "opacity-25 pointer-events-none" : "")}
-														>
-															<p class="font-medium">${tag.name}</p>
-															${tag.sourceLanguageTag
-																? html`<p class="text-sm text-slate-500 mr-3">(Source)</p>`
-																: tag.loading
-																? html`<div class="mr-3 w-5 h-5 relative animate-spin">
-																		<div
-																			class="h-5 w-5 border-2 border-[#098DAC] rounded-full"
-																		></div>
-																		<div
-																			class="h-1/2 w-1/2 absolute top-0 left-0 z-5 bg-white"
-																		></div>
-																  </div>`
-																: html`<button
-																		@click=${async () => {
-																			if (typeof tag.name === "string")
-																				await this.removeLanguageTag(tag.name)
-																		}}
-																		class="text-red-500 text-sm w-6 h-6 mr-1 flex items-center justify-center font-medium transition-colors hover:text-red-400 hover:bg-red-50 rounded-md"
+																class=${"pl-3 py-1 bg-white border border-slate-200 rounded-xl flex items-center justify-between gap-2 " +
+																(tag.loading ? "opacity-25 pointer-events-none" : "")}
+															>
+																<p class="font-medium">${tag.name}</p>
+																${tag.sourceLanguageTag
+																	? html`<p class="text-sm text-slate-500 mr-3">(Source)</p>`
+																	: tag.loading
+																	? html`<div class="mr-3 w-5 h-5 relative animate-spin">
+																			<div
+																				class="h-5 w-5 border-2 border-[#098DAC] rounded-full"
+																			></div>
+																			<div
+																				class="h-1/2 w-1/2 absolute top-0 left-0 z-5 bg-white"
+																			></div>
+																	  </div>`
+																	: html`<button
+																			@click=${async () => {
+																				if (typeof tag.name === "string")
+																					this.confirmPopup = "removeLanguageTag"
+																			}}
+																			class=${"text-red-500 text-sm w-6 h-6 mr-1 flex items-center justify-center font-medium transition-colors hover:text-red-400 hover:bg-red-50 rounded-md " +
+																			(typeof this.user === "undefined"
+																				? "cursor-not-allowed"
+																				: "")}
+																	  >
+																			<doc-icon
+																				class="inline-block translate-y-0.5"
+																				size="1em"
+																				icon="mdi:delete"
+																			></doc-icon>
+																	  </button>`}
+															</div>
+															<!-- Popup to confirm -->
+															${this.confirmPopup === "removeLanguageTag"
+																? html`<div
+																		class="fixed z-50 inset-0 overflow-y-auto"
+																		aria-labelledby="modal-title"
+																		role="dialog"
+																		aria-modal="true"
 																  >
-																		<doc-icon
-																			class="inline-block translate-y-0.5"
-																			size="1em"
-																			icon="mdi:delete"
-																		></doc-icon>
-																  </button>`}
-														</div>`
+																		<div class="flex items-center justify-center min-h-screen">
+																			<div
+																				class="fixed inset-0 bg-black bg-opacity-25 transition-opacity"
+																				aria-hidden="true"
+																			></div>
+																			<div
+																				class="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all max-w-lg w-full mx-4"
+																				role="document"
+																			>
+																				<div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+																					<div class="sm:flex sm:items-start">
+																						<div
+																							class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10"
+																						>
+																							<svg
+																								class="h-6 w-6 text-red-600"
+																								xmlns="http://www.w3.org/2000/svg"
+																								fill="none"
+																								viewBox="0 0 24 24"
+																								stroke="currentColor"
+																								aria-hidden="true"
+																							>
+																								<path
+																									stroke-linecap="round"
+																									stroke-linejoin="round"
+																									stroke-width="2"
+																									d="M6 18L18 6M6 6l12 12"
+																								/>
+																							</svg>
+																						</div>
+																						<div
+																							class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left"
+																						>
+																							<h3
+																								class="text-lg leading-6 font-medium text-gray-900"
+																								id="modal-title"
+																							>
+																								Remove languageTag
+																							</h3>
+																							<div class="mt-2">
+																								<p class="text-sm text-gray-500">
+																									Are you sure you want to remove this languageTag?
+																								</p>
+																							</div>
+																						</div>
+																					</div>
+																				</div>
+																				<div
+																					class="bg-gray-50 px-4 py-3 sm:px-6 flex-col flex sm:flex-row-reverse gap-2"
+																				>
+																					<button
+																						@click=${async () => {
+																							this.confirmPopup = undefined
+																							if (typeof tag.name === "string")
+																								await this.removeLanguageTag(tag.name)
+																						}}
+																						type="button"
+																						class="text-white truncate text-center px-4 py-2 rounded-md font-medium transition-colors bg-red-500 hover:bg-red-400"
+																					>
+																						Remove
+																					</button>
+																					<button
+																						@click=${() => {
+																							this.confirmPopup = undefined
+																						}}
+																						type="button"
+																						class="bg-slate-200 text-slate-900 hover:bg-slate-300 truncate text-center px-4 py-2 rounded-md font-medium transition-colors"
+																					>
+																						Cancel
+																					</button>
+																				</div>
+																			</div>
+																		</div>
+																  </div>`
+																: ""} `
 													})
 												}
 												<div
@@ -977,7 +1083,8 @@ export class InlangManage extends TwLitElement {
 														  </div>`
 														: html`<button
 																@click=${async () => await this.addLanguageTag()}
-																class="text-slate-600 absolute right-0.5 top-1/2 -translate-y-1/2 text-sm w-6 h-6 mr-1 flex items-center justify-center font-medium transition-colors hover:text-slate-500 hover:bg-slate-50 rounded-md"
+																class=${"text-slate-600 absolute right-0.5 top-1/2 -translate-y-1/2 text-sm w-6 h-6 mr-1 flex items-center justify-center font-medium transition-colors hover:text-slate-500 hover:bg-slate-50 rounded-md " +
+																(typeof this.user === "undefined" ? "cursor-not-allowed" : "")}
 														  >
 																<doc-icon
 																	class="inline-block translate-y-0.5"
@@ -1157,7 +1264,7 @@ export class InlangManage extends TwLitElement {
 												}
 										  </div>`
 										: html`<div
-												class="py-16 border border-dashed border-slate-300 px-8 w-full rounded-md bg-slate-100 text-slate-500 flex flex-col items-center justify-center"
+												class="py-16 border border-dashed border-slate-300 px-8 w-full rounded-lg bg-slate-100 text-slate-500 flex flex-col items-center justify-center"
 										  >
 												<p class="mb-4 font-medium">You don't have any rules installed.</p>
 												<a
