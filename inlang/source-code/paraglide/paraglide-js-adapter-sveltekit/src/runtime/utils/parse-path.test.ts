@@ -3,7 +3,11 @@ import { parsePath } from "./parse-path"
 
 describe("parsePath", () => {
 	it("correctly identifies the segments (with base path)", () => {
-		const { lang, base, canonicalPath } = parsePath("/base/de/foo/bar", {
+		const {
+			lang,
+			base,
+			path: canonicalPath,
+		} = parsePath("/base/de/foo/bar", {
 			base: "/base",
 			availableLanguageTags: ["en", "de"],
 			defaultLanguageTag: "en",
@@ -15,7 +19,11 @@ describe("parsePath", () => {
 	})
 
 	it("correctly identifies the segments (without base path)", () => {
-		const { lang, base, canonicalPath } = parsePath("/de/foo/bar", {
+		const {
+			lang,
+			base,
+			path: canonicalPath,
+		} = parsePath("/de/foo/bar", {
 			base: "/",
 			availableLanguageTags: ["en", "de"],
 			defaultLanguageTag: "en",
@@ -27,7 +35,11 @@ describe("parsePath", () => {
 	})
 
 	it("deals with empty inputs", () => {
-		const { lang, base, canonicalPath } = parsePath("/", {
+		const {
+			lang,
+			base,
+			path: canonicalPath,
+		} = parsePath("/", {
 			base: "/",
 			availableLanguageTags: ["en", "de"],
 			defaultLanguageTag: "en",
@@ -39,7 +51,11 @@ describe("parsePath", () => {
 	})
 
 	it("deals with an input that is just the base inputs", () => {
-		const { lang, base, canonicalPath } = parsePath("/base", {
+		const {
+			lang,
+			base,
+			path: canonicalPath,
+		} = parsePath("/base", {
 			base: "/base",
 			availableLanguageTags: ["en", "de"],
 			defaultLanguageTag: "en",

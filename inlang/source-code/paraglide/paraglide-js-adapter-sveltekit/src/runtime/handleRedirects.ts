@@ -1,4 +1,4 @@
-import { getTranslatedPath } from "./translate-paths/translate.js"
+import { getTranslatedPath } from "./translate-paths/getTranslatedPath.js"
 import { isExternal } from "./utils/external.js"
 import { parsePath } from "./utils/parse-path.js"
 import { base } from "$app/paths"
@@ -25,8 +25,6 @@ export const handleRedirects: (
 		const from = new URL(event.url)
 		const to = new URL(location, from)
 
-		console.log("redirect", from.href, to.href)
-
 		if (isExternal(to, from, base)) return response
 
 		const { lang } = parsePath(from.pathname, {
@@ -36,8 +34,6 @@ export const handleRedirects: (
 		})
 
 		const translatedPath = getTranslatedPath(to.pathname, lang, translations)
-
-		console.log("translatedPath", translatedPath)
 
 		response.headers.set("location", translatedPath)
 		return response
