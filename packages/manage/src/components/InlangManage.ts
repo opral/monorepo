@@ -746,7 +746,7 @@ export class InlangManage extends TwLitElement {
 											: ""}
 									</div>
 							  </div>`
-							: this.projects === "load" && typeof this.user === "undefined"
+							: this.projects === "load"
 							? html`<div class="flex flex-col gap-0.5 mt-4">
 									<div class="mx-auto">
 										<div class="h-12 w-12 animate-spin mb-4">
@@ -836,7 +836,36 @@ export class InlangManage extends TwLitElement {
 										</a>
 									</div>
 							  </div>`
-							: !this.url.project
+							: this.projects !== "load" &&
+							  this.projects !== "no-access" &&
+							  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+							  this.projects!.length === 0
+							? html`<div class="flex flex-col gap-0.5 mt-4">
+									<div
+										class="py-4 px-8 w-full rounded-md bg-red-100 text-red-500 flex flex-col items-center justify-center"
+									>
+										<p class="mb-2 font-medium text-center">No projects found.</p>
+										<p class="mb-8 text-center">
+											Creating a new project in the browser is not supported yet.
+										</p>
+										<a
+											href="https://inlang.com/c/guides"
+											target="_blank"
+											class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
+											>Follow a setup guide
+											<doc-icon
+												class="inline-block ml-1 translate-y-0.5"
+												size="1.2em"
+												icon="mdi:arrow-top-right"
+											></doc-icon>
+										</a>
+									</div>
+							  </div>`
+							: !this.url.project &&
+							  this.projects !== "load" &&
+							  this.projects !== "no-access" &&
+							  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+							  this.projects!.length > 0
 							? html`<div class="flex flex-col w-full max-w-lg items-center">
 									<h1 class="font-bold text-4xl text-slate-900 mb-4 text-center">
 										Select your project
