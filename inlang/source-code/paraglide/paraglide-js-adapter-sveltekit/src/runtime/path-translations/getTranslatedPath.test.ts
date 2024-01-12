@@ -16,4 +16,14 @@ describe("getTranslatedPath", () => {
 		})
 		expect(translatedPath).toBe("/bar")
 	})
+
+	it("returns the translated path (with params)", () => {
+		const translatedPath = getTranslatedPath("/foo/123/asd", "en", {
+			"/foo/[id]/asd": {
+				en: "/bar/[id]/cvb",
+				de: "/baz/[id]/cvb",
+			},
+		})
+		expect(translatedPath).toBe("/bar/123/cvb")
+	})
 })
