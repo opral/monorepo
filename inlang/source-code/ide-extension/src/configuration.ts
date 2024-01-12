@@ -30,6 +30,7 @@ export const CONFIGURATION = {
 	},
 	STRINGS: {
 		MISSING_TRANSLATION_MESSAGE: "[missing]",
+		EDITOR_BASE_PATH: "https://fink.inlang.com/",
 	},
 } as const
 

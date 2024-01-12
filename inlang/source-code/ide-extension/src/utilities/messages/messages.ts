@@ -116,7 +116,7 @@ export function createMessageWebviewProvider(args: { context: vscode.ExtensionCo
 	}
 }
 
-function createMessageHtml(args: { message: Message; isHighlighted: boolean }): string {
+export function createMessageHtml(args: { message: Message; isHighlighted: boolean }): string {
 	const translationsTableHtml = getTranslationsTableHtml(args.message)
 
 	return `
@@ -131,7 +131,7 @@ function createMessageHtml(args: { message: Message; isHighlighted: boolean }): 
     `
 }
 
-function createNoMessagesFoundHtml(isEmpty: boolean): string {
+export function createNoMessagesFoundHtml(isEmpty: boolean): string {
 	if (!isEmpty) {
 		return ""
 	}
@@ -140,7 +140,7 @@ function createNoMessagesFoundHtml(isEmpty: boolean): string {
             </div>`
 }
 
-function getTranslationsTableHtml(message: Message): string {
+export function getTranslationsTableHtml(message: Message): string {
 	const configuredLanguageTags = state().project.settings()?.languageTags || []
 	const contextTableRows = configuredLanguageTags.map((languageTag) => {
 		// ... similar logic to contextTooltip for generating rows ...
@@ -175,7 +175,7 @@ function getTranslationsTableHtml(message: Message): string {
 	return `<div class="table">${contextTableRows.join("")}</div>`
 }
 
-function getHtml(args: {
+export function getHtml(args: {
 	highlightedContent: string
 	mainContent: string
 	context: vscode.ExtensionContext
