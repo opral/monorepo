@@ -27,7 +27,7 @@ import { normalizePath } from "@lix-js/fs"
 import { isAbsolutePath } from "./isAbsolutePath.js"
 import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
 import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
-import { maybeCreateProjectId } from "./generateProjectId.js"
+import { maybeCreateFirstProjectId } from "./migrations/maybeCreateFirstProjectId.js"
 import type { Repository } from "@lix-js/client"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
@@ -64,18 +64,14 @@ export async function loadProject(args: {
 	_capture?: (id: string, props: Record<string, unknown>) => void
 }): Promise<InlangProject>
 
-export async function loadProject(args: any): Promise<InlangProject> {
+export async function loadProject(args: {
+	projectPath: string
+	repo?: Repository
+	_import?: ImportFunction
+	_capture?: (id: string, props: Record<string, unknown>) => void
+	nodeishFs?: Repository["nodeishFs"]
+}): Promise<InlangProject> {
 	const projectPath = normalizePath(args.projectPath)
-
-	let fs: Repository["nodeishFs"]
-	if (args.nodeishFs) {
-		// TODO: deprecate
-		fs = args.nodeishFs
-	} else if (args.repo) {
-		fs = args.repo.nodeishFs
-	} else {
-		throw new LoadProjectInvalidArgument(`Repo missing from arguments.`, { argument: "repo" })
-	}
 
 	// -- validation --------------------------------------------------------
 	// the only place where throwing is acceptable because the project
@@ -94,23 +90,25 @@ export async function loadProject(args: any): Promise<InlangProject> {
 		)
 	}
 
-	// -- migrate if outdated ------------------------------------------------
+	let fs: Repository["nodeishFs"]
+	if (args.nodeishFs) {
+		// TODO: deprecate
+		fs = args.nodeishFs
+	} else if (args.repo) {
+		fs = args.repo.nodeishFs
+	} else {
+		throw new LoadProjectInvalidArgument(`Repo missing from arguments.`, { argument: "repo" })
+	}
+
 	const nodeishFs = createNodeishFsWithAbsolutePaths({
 		projectPath,
 		nodeishFs: fs,
 	})
 
-	await maybeMigrateToDirectory({ nodeishFs: fs, projectPath })
-	const { error: projectIdError, projectId } = await maybeCreateProjectId({
-		nodeishFs,
-		projectPath,
-		repo: args.repo,
-	})
+	// -- migratations ------------------------------------------------
 
-	let idError: Error | undefined
-	if (projectIdError) {
-		idError = projectIdError as Error
-	}
+	await maybeMigrateToDirectory({ nodeishFs: fs, projectPath })
+	await maybeCreateFirstProjectId({ projectPath, repo: args.repo })
 
 	// -- load project ------------------------------------------------------
 	return await createRoot(async () => {
@@ -131,7 +129,7 @@ export async function loadProject(args: any): Promise<InlangProject> {
 					setSettings(settings)
 					// rename settings to get a convenient access to the data in Posthog
 					const project_settings = settings
-					args._capture?.("SDK used settings", { project_settings, group: projectId })
+					args._capture?.("SDK used settings", { project_settings })
 				})
 				.catch((err) => {
 					markInitAsFailed(err)
@@ -306,7 +304,6 @@ export async function loadProject(args: any): Promise<InlangProject> {
 			},
 			errors: createSubscribable(() => [
 				...(initializeError ? [initializeError] : []),
-				...(idError ? [idError] : []),
 				...(resolvedModules() ? resolvedModules()!.errors : []),
 				// have a query error exposed
 				//...(lintErrors() ?? []),
