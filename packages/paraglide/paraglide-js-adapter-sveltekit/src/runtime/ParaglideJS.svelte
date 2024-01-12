@@ -4,17 +4,16 @@
 	It also adds `<link rel="alternate">` tags to the head of your page
 -->
 <script>
+	import * as Path from "./utils/path.js"
 	import { page } from "$app/stores"
 	import { browser } from "$app/environment"
 	import { setContext } from "svelte"
 	import { PARAGLIDE_CONTEXT_KEY } from "./constants.js"
 	import { base } from "$app/paths"
-	import * as Path from "./utils/path.js"
 	import { isExternal } from "./utils/external.js"
-	import { getTranslatedPath } from "./translate-paths/getTranslatedPath.js"
+	import { getTranslatedPath } from "./path-translations/getTranslatedPath.js"
 	import { parsePath } from "./utils/parse-path.js"
-	import { getCanonicalPath } from "./translate-paths/getCanonicalPath.js"
-	import { translatePath } from "./translate-paths/translatePath.js"
+	import { translatePath } from "./path-translations/translatePath.js"
 
 	/** 
 	 * The Paraglide runtime from the Paraglide compiler output.
@@ -36,7 +35,7 @@
 	 */
 	export let languageTag = undefined
 
-	/** @type {import("./translate-paths/path-translations.js").PathTranslations<string>}*/
+	/** @type {import("./path-translations/types.js").PathTranslations<string>}*/
 	export let paths  = {};
 
 	$: lang = languageTag ?? runtime.sourceLanguageTag

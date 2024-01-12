@@ -2,7 +2,7 @@ import { parsePath } from "../utils/parse-path.js"
 import { serializeRoute } from "../utils/serialize-path.js"
 import { getCanonicalPath } from "./getCanonicalPath.js"
 import { getTranslatedPath } from "./getTranslatedPath.js"
-import type { PathTranslations } from "./path-translations.js"
+import type { PathTranslations } from "./types.js"
 
 /**
  * Utility function to translate a path in one language to another language

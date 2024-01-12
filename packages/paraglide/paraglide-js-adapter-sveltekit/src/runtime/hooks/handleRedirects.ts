@@ -1,10 +1,10 @@
-import { getTranslatedPath } from "./translate-paths/getTranslatedPath.js"
-import { isExternal } from "./utils/external.js"
-import { parsePath } from "./utils/parse-path.js"
+import { getTranslatedPath } from "../path-translations/getTranslatedPath.js"
+import { isExternal } from "../utils/external.js"
+import { parsePath } from "../utils/parse-path.js"
 import { base } from "$app/paths"
 import type { Handle } from "@sveltejs/kit"
-import type { Paraglide } from "./runtime.js"
-import type { PathTranslations } from "./translate-paths/path-translations.js"
+import type { Paraglide } from "../runtime.js"
+import type { PathTranslations } from "../path-translations/types.js"
 
 /**
  * This is a SvelteKit Server hook that rewrites redirects to internal pages to use the correct language.s
