@@ -6,7 +6,7 @@ describe("serializePath", () => {
 		const path = serializeRoute({
 			path: "/foo/bar",
 			base: "/base",
-			isDataRequest: false,
+			dataSuffix: undefined,
 			includeLanguage: false,
 		})
 
@@ -17,7 +17,7 @@ describe("serializePath", () => {
 		const path = serializeRoute({
 			path: "/foo/bar",
 			base: "/",
-			isDataRequest: false,
+			dataSuffix: undefined,
 			includeLanguage: false,
 		})
 
@@ -28,7 +28,7 @@ describe("serializePath", () => {
 		const path = serializeRoute({
 			path: "/foo/bar",
 			base: "/",
-			isDataRequest: true,
+			dataSuffix: "__data.json",
 			includeLanguage: false,
 		})
 
@@ -39,7 +39,7 @@ describe("serializePath", () => {
 		const path = serializeRoute({
 			path: "/foo/bar",
 			base: "/base",
-			isDataRequest: true,
+			dataSuffix: "__data.json",
 			includeLanguage: false,
 		})
 

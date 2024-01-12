@@ -1,4 +1,4 @@
-import { DATA_SUFFIX } from "../constants.js"
+import { DATA_SUFFIX, HTML_DATA_SUFFIX } from "../constants.js"
 import * as Path from "./path.js"
 
 type ParseOptions = {
@@ -11,7 +11,7 @@ type ParseResult = {
 	base: string
 	lang: string
 	path: string
-	isDataRequest: boolean
+	dataSuffix: string | undefined
 }
 
 /**
@@ -26,15 +26,20 @@ export function getPathInfo(path: string, options: ParseOptions): ParseResult {
 
 	let pathWithoutBase = path.replace(base, "/")
 
-	const isDataRequest = pathWithoutBase.endsWith(DATA_SUFFIX)
-	if (isDataRequest) {
-		pathWithoutBase = pathWithoutBase.replace(DATA_SUFFIX, "")
+	const dataSuffix = pathWithoutBase.endsWith(HTML_DATA_SUFFIX)
+		? HTML_DATA_SUFFIX
+		: pathWithoutBase.endsWith(DATA_SUFFIX)
+		? DATA_SUFFIX
+		: undefined
+
+	if (dataSuffix) {
+		pathWithoutBase = pathWithoutBase.replace(dataSuffix, "")
 	}
 
 	const [maybeLang, ...rest] = pathWithoutBase.split("/").filter(Boolean)
 
 	if (!maybeLang) {
-		return { base, lang: defaultLanguageTag, path: "/", isDataRequest }
+		return { base, lang: defaultLanguageTag, path: "/", dataSuffix }
 	}
 
 	const lang = availableLanguageTags.includes(maybeLang as any) ? maybeLang : defaultLanguageTag
@@ -42,5 +47,5 @@ export function getPathInfo(path: string, options: ParseOptions): ParseResult {
 		? Path.normalize(rest.join("/"))
 		: Path.normalize(pathWithoutBase)
 
-	return { base, lang, path: pathSegment, isDataRequest }
+	return { base, lang, path: pathSegment, dataSuffix }
 }

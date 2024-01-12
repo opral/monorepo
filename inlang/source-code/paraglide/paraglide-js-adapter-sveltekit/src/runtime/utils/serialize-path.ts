@@ -15,14 +15,14 @@ export function serializeRoute(opts: SerializePathOptions): string {
 
 	parts.push(opts.path)
 
-	if (opts.isDataRequest) parts.push(DATA_SUFFIX)
+	if (opts.dataSuffix) parts.push(DATA_SUFFIX)
 	return Path.resolve(...parts)
 }
 
 type SerializePathOptions = {
 	path: string
 	base: string
-	isDataRequest: boolean
+	dataSuffix: string | undefined
 } & (
 	| { includeLanguage: false }
 	| {
