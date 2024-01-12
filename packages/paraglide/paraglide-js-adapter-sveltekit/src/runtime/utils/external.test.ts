@@ -25,4 +25,12 @@ describe("isExternal", () => {
 
 		expect(isExternal(url, currentUrl, base)).toBe(false)
 	})
+
+	it("can deal with a relative base", () => {
+		const url = new URL("https://example.com/foo")
+		const currentUrl = new URL("https://example.com")
+		const base = "."
+
+		expect(isExternal(url, currentUrl, base)).toBe(false)
+	})
 })
