@@ -3,17 +3,17 @@ import { matches } from "./match"
 
 describe("match", () => {
 	it("matches a static path", () => {
-		const match = matches("/foo", "/foo")
+		const match = matches("/foo", ["/foo"])
 		expect(match).toEqual({
-			matches: true,
+			id: "/foo",
 			params: {},
 		})
 	})
 
 	it("matches a path with a param", () => {
-		const match = matches("/bar/123", "/bar/[id]")
+		const match = matches("/bar/123", ["/bar/[id]"])
 		expect(match).toEqual({
-			matches: true,
+			id: "/bar/[id]",
 			params: {
 				id: "123",
 			},
@@ -21,13 +21,26 @@ describe("match", () => {
 	})
 
 	it("matches a path with multiple params", () => {
-		const match = matches("/foo/bar/baz", "/foo/[id]/[slug]")
+		const match = matches("/foo/bar/baz", ["/foo/[id]/[slug]"])
 		expect(match).toEqual({
-			matches: true,
+			id: "/foo/[id]/[slug]",
 			params: {
 				id: "bar",
 				slug: "baz",
 			},
 		})
+	})
+
+	it("prefers paths with no params", () => {
+		const match = matches("/foo/bar/baz", ["/foo/[id]/[slug]", "/foo/bar/baz"])
+		expect(match).toEqual({
+			id: "/foo/bar/baz",
+			params: {},
+		})
+	})
+
+	it("doesn't match on partial matches", () => {
+		const match = matches("/", ["/admin"])
+		expect(match).toBeUndefined()
 	})
 })

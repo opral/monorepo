@@ -13,13 +13,14 @@ export function getCanonicalPath(
 ): string {
 	for (const [canonicalPathDefinition, translationsForPath] of Object.entries(translations)) {
 		if (!(lang in translationsForPath)) continue
+
 		const translatedPathDefinition = translationsForPath[lang]
 		if (!translatedPathDefinition) continue
 
-		const matchResult = matches(translatedPath, translatedPathDefinition)
-		if (matchResult.matches === false) continue
+		const match = matches(translatedPath, [translatedPathDefinition])
+		if (!match) continue
 
-		return resolvePath(canonicalPathDefinition, matchResult.params)
+		return resolvePath(canonicalPathDefinition, match.params)
 	}
 
 	return translatedPath

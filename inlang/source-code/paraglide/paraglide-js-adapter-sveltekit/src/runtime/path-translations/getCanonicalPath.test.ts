@@ -2,6 +2,21 @@ import { describe, it, expect } from "vitest"
 import { getCanonicalPath } from "./getCanonicalPath"
 
 describe("getCanonicalPath", () => {
+	it("leaves the path unchanged if no translations are given", () => {
+		const translatedPath = getCanonicalPath("/foo", "en", {})
+		expect(translatedPath).toBe("/foo")
+	})
+
+	it("leaves the path unchanged if no translations match", () => {
+		const translatedPath = getCanonicalPath("/", "en", {
+			"/about": {
+				en: "/about",
+				de: "/uber-uns",
+			},
+		})
+		expect(translatedPath).toBe("/")
+	})
+
 	it("returns the translatedPath if no translations are given", () => {
 		const translatedPath = getCanonicalPath("/foo", "en", {})
 		expect(translatedPath).toBe("/foo")
@@ -13,6 +28,10 @@ describe("getCanonicalPath", () => {
 				en: "/bar",
 				de: "/baz",
 			},
+			"/bar": {
+				en: "/foo",
+				de: "/baz",
+			},
 		})
 		expect(canonicalPath).toBe("/foo")
 	})
@@ -22,6 +41,11 @@ describe("getCanonicalPath", () => {
 			"/foo/[id]": {
 				en: "/bar/[id]",
 				de: "/baz/[id]",
+			},
+
+			"/foo/[id]/[slug]": {
+				en: "/bar/[id]/[slug]",
+				de: "/baz/[id]/[slug]",
 			},
 		})
 		expect(canonicalPath).toBe("/foo/123")
