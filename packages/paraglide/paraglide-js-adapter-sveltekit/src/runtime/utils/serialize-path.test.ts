@@ -7,6 +7,7 @@ describe("serializePath", () => {
 			path: "/foo/bar",
 			base: "/base",
 			isDataRequest: false,
+			includeLanguage: false,
 		})
 
 		expect(path).toBe("/base/foo/bar")
@@ -17,6 +18,7 @@ describe("serializePath", () => {
 			path: "/foo/bar",
 			base: "/",
 			isDataRequest: false,
+			includeLanguage: false,
 		})
 
 		expect(path).toBe("/foo/bar")
@@ -27,6 +29,7 @@ describe("serializePath", () => {
 			path: "/foo/bar",
 			base: "/",
 			isDataRequest: true,
+			includeLanguage: false,
 		})
 
 		expect(path).toBe("/foo/bar/__data.json")
@@ -37,6 +40,7 @@ describe("serializePath", () => {
 			path: "/foo/bar",
 			base: "/base",
 			isDataRequest: true,
+			includeLanguage: false,
 		})
 
 		expect(path).toBe("/base/foo/bar/__data.json")

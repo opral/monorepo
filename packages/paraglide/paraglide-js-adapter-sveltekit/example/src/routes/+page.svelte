@@ -15,14 +15,6 @@
 <br/>
 
 
-<!-- Navigation with languageTag -->
-{#each availableLanguageTags as lang}
-	<a href="/base/" hreflang={lang}>
-		{m.change_language_to({ languageTag: lang })}
-	</a>
-	<br />
-{/each}
-
 <!-- Programmatic Navigation with goto -->
 <select on:change={(e)=>{
 	// @ts-ignore

@@ -14,6 +14,7 @@
 	import { getTranslatedPath } from "./translate-paths/getTranslatedPath.js"
 	import { parsePath } from "./utils/parse-path.js"
 	import { getCanonicalPath } from "./translate-paths/getCanonicalPath.js"
+	import { translatePath } from "./translate-paths/translatePath.js"
 
 	/** 
 	 * The Paraglide runtime from the Paraglide compiler output.
@@ -74,21 +75,23 @@
 		translateHref
 	})
 
-
-	$: currentUrl = parsePath($page.url.pathname, { 
-		base, 
-		availableLanguageTags: runtime.availableLanguageTags,
-		defaultLanguageTag: runtime.sourceLanguageTag
-	});
-
-	$: canonicalPath = getCanonicalPath(currentUrl.path, currentUrl.lang, paths)
 </script>
 
 <svelte:head>
 	<!-- If there is more than one language, add alternate links -->
 	{#if runtime.availableLanguageTags.length >= 1}
 		{#each runtime.availableLanguageTags as lang}
-			<link rel="alternate" hreflang={lang} href={translateHref(Path.resolve(base, canonicalPath), lang)} />
+			<link rel="alternate" hreflang={lang} href={
+			translatePath(
+				$page.url.pathname, 
+				lang, 
+				paths, 
+				{ 
+					base, 
+					availableLanguageTags: runtime.availableLanguageTags, 
+					defaultLanguageTag: runtime.sourceLanguageTag
+				}
+			)} />
 		{/each}
 	{/if}
 </svelte:head>

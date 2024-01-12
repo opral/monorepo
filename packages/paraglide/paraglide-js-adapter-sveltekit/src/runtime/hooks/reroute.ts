@@ -32,6 +32,7 @@ export const reroute = (
 				path: canonicalPath,
 				base,
 				isDataRequest,
+				includeLanguage: false,
 			})
 
 			return serializedPath
