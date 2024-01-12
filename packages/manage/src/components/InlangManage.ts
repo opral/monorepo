@@ -47,6 +47,18 @@ export class InlangManage extends TwLitElement {
 	@property({ type: Object })
 	user: Record<string, any> | undefined | "load" = "load"
 
+	@property({ type: String })
+	newLanguageTag: {
+		name: string
+		loading?: boolean
+	} = {
+		name: "",
+		loading: false,
+	}
+
+	@query("#language-tag-input")
+	languageTagInput: HTMLInputElement | undefined
+
 	@query("#repo-input")
 	repoInput: HTMLInputElement | undefined
 
@@ -288,7 +300,7 @@ export class InlangManage extends TwLitElement {
 		})
 
 		await repo.commit({
-			message: "inlang/manage: remove languageTag",
+			message: "inlang/manage: remove languageTag " + languageTag,
 			author: {
 				name: this.user.username,
 				email: this.user.email,
@@ -305,6 +317,69 @@ export class InlangManage extends TwLitElement {
 		posthog.capture("removed languageTag", {
 			languageTag,
 		})
+	}
+
+	async addLanguageTag() {
+		this.newLanguageTag.loading = true
+
+		const repo = await openRepository(
+			`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${this.url.repo}`,
+			{
+				nodeishFs: createNodeishMemoryFs(),
+				branch: this.url.branch ? this.url.branch : undefined,
+			}
+		)
+
+		const inlangProjectString = (await repo.nodeishFs.readFile(
+			`.${this.url.project}/settings.json`,
+			{
+				encoding: "utf-8",
+			}
+		)) as string
+
+		const formatting = detectJsonFormatting(inlangProjectString)
+
+		const inlangProject = JSON.parse(inlangProjectString)
+
+		const languageTags = inlangProject.languageTags
+
+		languageTags.push(this.newLanguageTag.name)
+
+		inlangProject.languageTags = languageTags
+
+		const generatedProject = formatting(inlangProject)
+
+		await repo.nodeishFs.writeFile(`.${this.url.project}/settings.json`, generatedProject)
+
+		await repo.add({
+			filepath: `${this.url.project?.slice(1)}/settings.json`,
+		})
+
+		await repo.commit({
+			message: "inlang/manage: add languageTag " + this.newLanguageTag.name,
+			author: {
+				name: this.user.username,
+				email: this.user.email,
+			},
+		})
+
+		const result = await repo.push()
+
+		// @ts-ignore
+		if (result.error) console.error(result.error)
+
+		this.languageTags = [
+			...this.languageTags!,
+			{
+				name: this.newLanguageTag.name,
+				sourceLanguageTag: false,
+			},
+		]
+
+		this.newLanguageTag = {
+			name: "",
+			loading: false,
+		}
 	}
 
 	override render(): TemplateResult {
@@ -799,7 +874,7 @@ export class InlangManage extends TwLitElement {
 									  </h1>`
 							}
 							<p class="text-slate-600 w-full md:w-[400px] leading-relaxed">
-								Here is a list of all modules installed in your project.
+								Manage your project settings here.
 							</p>
 							</div>
 							<div class="flex items-center gap-2">
@@ -861,9 +936,37 @@ export class InlangManage extends TwLitElement {
 													})
 												}
 												<div
-													class="px-3 py-1 bg-white border border-slate-200 rounded-xl flex items-center justify-between gap-2"
+													class=${"relative flex " +
+													(this.newLanguageTag.loading ? "opacity-25 pointer-events-none" : "")}
 												>
-													<p class="font-medium">Add new</p>
+													<input
+														id="language-tag-input"
+														.value=${this.newLanguageTag.name}
+														@input=${(e: InputEvent) => {
+															this.newLanguageTag.name = (e.target as HTMLInputElement).value
+														}}
+														@keydown=${async (e: KeyboardEvent) => {
+															if (e.key === "Enter") await this.addLanguageTag()
+														}}
+														class="px-3 py-1 bg-white border w-40 pr-6 text-sm truncate border-slate-200 rounded-xl flex items-center justify-between gap-2"
+														placeholder="Add languageTag"
+													/>
+													${this.newLanguageTag.loading
+														? html`<div class="mr-3 w-5 h-5 relative animate-spin">
+																<div class="h-5 w-5 border-2 border-[#098DAC] rounded-full"></div>
+																<div class="h-1/2 w-1/2 absolute top-0 left-0 z-5 bg-white"></div>
+														  </div>`
+														: html`<button
+																@click=${async () => await this.addLanguageTag()}
+																class="text-slate-600 absolute right-0.5 top-1/2 -translate-y-1/2 text-sm w-6 h-6 mr-1 flex items-center justify-center font-medium transition-colors hover:text-slate-500 hover:bg-slate-50 rounded-md"
+														  >
+																<doc-icon
+																	class="inline-block translate-y-0.5"
+																	size="1em"
+																	icon="mdi:plus"
+																></doc-icon>
+														  </button>`}
+													${this.newLanguageTag.loading ? "True" : "False"}
 												</div>
 										  </div>`
 										: html`<div
