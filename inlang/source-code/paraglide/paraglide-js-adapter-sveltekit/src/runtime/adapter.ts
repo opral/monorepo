@@ -11,6 +11,9 @@ export function createI18n<T extends string>(
 	runtime: Paraglide<T>,
 	translations: PathTranslations<T>
 ) {
+	// We don't want the translations to be mutable
+	Object.freeze(translations)
+
 	return {
 		...runtime,
 		translations,
