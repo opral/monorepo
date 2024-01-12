@@ -1,6 +1,6 @@
 <script>
 	import { goto } from "$app/navigation"
-	import { availableLanguageTags, languageTag, setLanguageTag } from "$paraglide/runtime.js"
+	import { availableLanguageTags, languageTag } from "$paraglide/runtime.js"
 	import * as m from "$paraglide/messages.js"
 </script>
 
@@ -23,17 +23,6 @@
     <br />
 {/each}
 
-
-
-<!-- Programmatic Navigation with goto -->
-<select on:change={(e)=>{
-	// @ts-ignore
-	setLanguageTag(e.target.value)
-}}>
-	{#each availableLanguageTags as lang}
-		<option value={lang} selected={lang === languageTag()}>{lang}</option>
-	{/each}
-</select>
 
 <br/>
 

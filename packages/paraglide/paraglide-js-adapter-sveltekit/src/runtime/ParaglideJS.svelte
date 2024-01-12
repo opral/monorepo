@@ -12,7 +12,6 @@
 	import { base } from "$app/paths"
 	import { isExternal } from "./utils/external.js"
 	import { getTranslatedPath } from "./path-translations/getTranslatedPath.js"
-	import { getPathInfo } from "./utils/get-path-info.js"
 	import { translatePath } from "./path-translations/translatePath.js"
 
 	/** 
@@ -51,10 +50,11 @@
 		const from = new URL($page.url)
 		const original_to = new URL(href, new URL(from))
 		
-		if(isExternal(original_to, from, base)) 
+		
+		if(isExternal(original_to, from, base)) {
 			return href;
-
-
+		}
+			
 		const language = hreflang ?? lang;
 		const canonicalPath = original_to.pathname.slice(base.length);
 
@@ -68,7 +68,6 @@
 		runtime,
 		translateHref
 	})
-
 </script>
 
 <svelte:head>
