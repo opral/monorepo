@@ -31,6 +31,9 @@ export class InlangManage extends TwLitElement {
 	projects: Record<string, string>[] | undefined | "no-access" | "not-found" | "load" | "error" =
 		"load"
 
+	@property({ type: String })
+	languageTags: Record<string, string>[] | undefined = undefined
+
 	@property({ type: Object })
 	modules: ManifestWithVersion[] | undefined | "empty"
 
@@ -146,6 +149,14 @@ export class InlangManage extends TwLitElement {
 
 			this.modules = tempModules
 			if (!this.modules) this.modules = "empty"
+
+			// Read the languageTags
+			this.languageTags = inlangProject.languageTags.map((languageTag: string) => {
+				return {
+					name: languageTag,
+					sourceLanguageTag: languageTag === inlangProject.sourceLanguageTag,
+				}
+			})
 		}
 	}
 
@@ -739,6 +750,36 @@ export class InlangManage extends TwLitElement {
 						</button>
 						</div>
 							</div>
+							<div class="mb-12">
+							<h2 class="text-lg font-semibold my-4">Language Tags</h2>
+								${
+									this.languageTags && this.languageTags.length > 0
+										? html`<div class="flex flex-wrap gap-4">
+												${
+													// @ts-ignore
+													this.languageTags.map(
+														(tag: Record<string, string>) =>
+															html`<div
+																class="p-6 w-full bg-white border border-slate-200 rounded-xl flex flex-col justify-between gap-2"
+															>
+																${tag.name}
+															</div>`
+													)
+												}
+										  </div>`
+										: html`<div
+												class="py-16 border border-dashed border-slate-300 px-8 w-full rounded-md bg-slate-100 text-slate-500 flex flex-col items-center justify-center"
+										  >
+												<p class="mb-4 font-medium">You don't have any languageTags</p>
+												<a
+													href="https://inlang.com/c/lint-rules"
+													target="_blank"
+													class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
+													>Add basic languageTag "en"
+												</a>
+										  </div>`
+								}
+								</div>
 							<div class="mb-12">
 							<h2 class="text-lg font-semibold my-4">Plugins</h2>
 								${
