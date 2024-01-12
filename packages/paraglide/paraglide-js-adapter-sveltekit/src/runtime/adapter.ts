@@ -4,13 +4,29 @@ import type { PathTranslations } from "./path-translations/types.js"
 import type { Paraglide } from "./runtime.js"
 
 export type I18nOptions<T extends string> = {
-	pathnames: PathTranslations<T>
+	/**
+	 * The default locale to use if no locale is specified.
+	 * By default the sourceLanguageTag from the Paraglide runtime is used.
+	 *
+	 * @default runtime.sourceLanguageTag
+	 */
+	defaultLocale?: T
+
+	/**
+	 * Translations for pathnames.
+	 */
+	pathnames?: PathTranslations<T>
+
+	/**
+	 * Whether to prefix the language tag to the path even if it's the default language.
+	 * @default "always"
+	 */
+	prefixDefaultLanguage?: "always" | "never"
 }
 
-export function createI18n<T extends string>(
-	runtime: Paraglide<T>,
-	translations: PathTranslations<T>
-) {
+export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18nOptions<T>) {
+	const translations = options.pathnames ?? {}
+
 	// We don't want the translations to be mutable
 	Object.freeze(translations)
 
