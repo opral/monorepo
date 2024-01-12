@@ -33,6 +33,21 @@ import type { Repository } from "@lix-js/client"
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
 /**
+ * @param projectPath - Absolute path to the inlang settings file.
+ * @param repo - An instance of a lix repo as returned by `openRepository`.
+ * @param _import - Use `_import` to pass a custom import function for testing,
+ *   and supporting legacy resolvedModules such as CJS.
+ * @param _capture - Use `_capture` to capture events for analytics.
+ *
+ */
+export async function loadProject(args: {
+	projectPath: string
+	repo: Repository
+	_import?: ImportFunction
+	_capture?: (id: string, props: Record<string, unknown>) => void
+}): Promise<InlangProject>
+
+/**
  * Creates an inlang instance.
  *
  * @param projectPath - Absolute path to the inlang settings file.
@@ -49,28 +64,20 @@ export async function loadProject(args: {
 	_capture?: (id: string, props: Record<string, unknown>) => void
 }): Promise<InlangProject>
 
-/**
- * @param projectPath - Absolute path to the inlang settings file.
- * @param repo - An instance of a lix repo as returned by `openRepository`.
- * @param _import - Use `_import` to pass a custom import function for testing,
- *   and supporting legacy resolvedModules such as CJS.
- * @param _capture - Use `_capture` to capture events for analytics.
- *
- */
 export async function loadProject(args: {
 	projectPath: string
-	repo: Repository
+	repo?: Repository
+	nodeishFs?: Repository["nodeishFs"]
 	_import?: ImportFunction
 	_capture?: (id: string, props: Record<string, unknown>) => void
-}): Promise<InlangProject>
-
-export async function loadProject(args: any): Promise<InlangProject> {
+}): Promise<InlangProject> {
 	const projectPath = normalizePath(args.projectPath)
 
 	let fs: Repository["nodeishFs"]
 	if (args.nodeishFs) {
 		// TODO: deprecate
 		fs = args.nodeishFs
+		console.warn("The nodeishFs argument is deprecated. Please use the repo argument instead.")
 	} else if (args.repo) {
 		fs = args.repo.nodeishFs
 	} else {
@@ -95,12 +102,13 @@ export async function loadProject(args: any): Promise<InlangProject> {
 	}
 
 	// -- migrate if outdated ------------------------------------------------
+	await maybeMigrateToDirectory({ nodeishFs: fs, projectPath })
+
+	// we narrow the fs down to a NodeishFilesystemSubset because we only need the subset from here
 	const nodeishFs = createNodeishFsWithAbsolutePaths({
 		projectPath,
 		nodeishFs: fs,
 	})
-
-	await maybeMigrateToDirectory({ nodeishFs: fs, projectPath })
 	const { error: projectIdError, projectId } = await maybeCreateProjectId({
 		nodeishFs,
 		projectPath,
