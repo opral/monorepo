@@ -9,10 +9,12 @@
 	import { browser } from "$app/environment"
 	import { setContext } from "svelte"
 	import { PARAGLIDE_CONTEXT_KEY } from "./constants.js"
-	import { base } from "$app/paths"
+	import { base as maybe_relative_base } from "$app/paths"
 	import { isExternal } from "./utils/external.js"
 	import { getTranslatedPath } from "./path-translations/getTranslatedPath.js"
 	import { translatePath } from "./path-translations/translatePath.js"
+
+	const absoluteBase = new URL(maybe_relative_base, new URL($page.url)).pathname
 
 	/** 
 	 * The Paraglide runtime from the Paraglide compiler output.
@@ -51,15 +53,15 @@
 		const original_to = new URL(href, new URL(from))
 		
 		
-		if(isExternal(original_to, from, base)) {
+		if(isExternal(original_to, from, absoluteBase)) {
 			return href;
 		}
 			
 		const language = hreflang ?? lang;
-		const canonicalPath = original_to.pathname.slice(base.length);
+		const canonicalPath = original_to.pathname.slice(absoluteBase.length);
 
 		const translatedPath = getTranslatedPath(canonicalPath, language, paths);
-		const fullPath = Path.resolve(base, language, translatedPath);
+		const fullPath = Path.resolve(absoluteBase, language, translatedPath);
 
 		return fullPath;
 	}
@@ -80,7 +82,7 @@
 				lang, 
 				paths, 
 				{ 
-					base, 
+					base: absoluteBase, 
 					availableLanguageTags: runtime.availableLanguageTags, 
 					defaultLanguageTag: runtime.sourceLanguageTag
 				}
