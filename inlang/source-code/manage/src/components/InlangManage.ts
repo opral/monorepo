@@ -1043,7 +1043,7 @@ ${
 								${
 									this.languageTags && this.languageTags.length > 0
 										? html`<div
-												class="flex flex-wrap gap-2 border border-slate-200 rounded-2xl bg-slate-100 p-1"
+												class="flex flex-wrap gap-1 border border-slate-200 rounded-2xl bg-slate-100 p-1"
 										  >
 												${
 													// @ts-ignore
