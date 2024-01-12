@@ -48,13 +48,10 @@ export class InlangManage extends TwLitElement {
 	user: Record<string, any> | undefined | "load" = "load"
 
 	@property({ type: String })
-	newLanguageTag: {
-		name: string
-		loading?: boolean
-	} = {
-		name: "",
-		loading: false,
-	}
+	newLanguageTag: string = ""
+
+	@property({ type: Boolean })
+	newLanguageTagLoading: boolean = false
 
 	@query("#language-tag-input")
 	languageTagInput: HTMLInputElement | undefined
@@ -320,7 +317,7 @@ export class InlangManage extends TwLitElement {
 	}
 
 	async addLanguageTag() {
-		this.newLanguageTag.loading = true
+		this.newLanguageTagLoading = true
 
 		const repo = await openRepository(
 			`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${this.url.repo}`,
@@ -343,7 +340,7 @@ export class InlangManage extends TwLitElement {
 
 		const languageTags = inlangProject.languageTags
 
-		languageTags.push(this.newLanguageTag.name)
+		languageTags.push(this.newLanguageTag)
 
 		inlangProject.languageTags = languageTags
 
@@ -356,7 +353,7 @@ export class InlangManage extends TwLitElement {
 		})
 
 		await repo.commit({
-			message: "inlang/manage: add languageTag " + this.newLanguageTag.name,
+			message: "inlang/manage: add languageTag " + this.newLanguageTag,
 			author: {
 				name: this.user.username,
 				email: this.user.email,
@@ -371,15 +368,13 @@ export class InlangManage extends TwLitElement {
 		this.languageTags = [
 			...this.languageTags!,
 			{
-				name: this.newLanguageTag.name,
+				name: this.newLanguageTag,
 				sourceLanguageTag: false,
 			},
 		]
 
-		this.newLanguageTag = {
-			name: "",
-			loading: false,
-		}
+		this.newLanguageTag = ""
+		this.newLanguageTagLoading = false
 	}
 
 	override render(): TemplateResult {
@@ -897,6 +892,20 @@ export class InlangManage extends TwLitElement {
 							</div>
 							<div class="mb-12">
 							<h2 class="text-lg font-semibold my-4">Language Tags</h2>
+							<div class=${
+								this.languageTags?.some((tag) => tag.loading === true) ||
+								this.newLanguageTagLoading === true
+									? "cursor-wait"
+									: "w-full"
+							}
+							>
+							<div class=${
+								this.languageTags?.some((tag) => tag.loading === true) ||
+								this.newLanguageTagLoading === true
+									? "pointer-events-none"
+									: "w-full"
+							}
+							>
 								${
 									this.languageTags && this.languageTags.length > 0
 										? html`<div class="flex flex-wrap gap-2">
@@ -937,22 +946,30 @@ export class InlangManage extends TwLitElement {
 												}
 												<div
 													class=${"relative flex " +
-													(this.newLanguageTag.loading ? "opacity-25 pointer-events-none" : "")}
+													(this.newLanguageTagLoading ? "opacity-25 pointer-events-none" : "")}
 												>
 													<input
 														id="language-tag-input"
-														.value=${this.newLanguageTag.name}
+														.value=${this.newLanguageTag}
 														@input=${(e: InputEvent) => {
-															this.newLanguageTag.name = (e.target as HTMLInputElement).value
+															if (!this.newLanguageTagLoading)
+																this.newLanguageTag = (e.target as HTMLInputElement).value
 														}}
 														@keydown=${async (e: KeyboardEvent) => {
-															if (e.key === "Enter") await this.addLanguageTag()
+															if (e.key === "Enter" && !this.newLanguageTagLoading) {
+																;(
+																	this.shadowRoot?.querySelector(
+																		"#language-tag-input"
+																	) as HTMLInputElement
+																).blur()
+																await this.addLanguageTag()
+															}
 														}}
-														class="px-3 py-1 bg-white border w-40 pr-6 text-sm truncate border-slate-200 rounded-xl flex items-center justify-between gap-2"
+														class="px-3 py-1 bg-white border w-44 pr-8 text-sm truncate border-slate-200 rounded-xl flex items-center justify-between gap-2"
 														placeholder="Add languageTag"
 													/>
-													${this.newLanguageTag.loading
-														? html`<div class="mr-3 w-5 h-5 relative animate-spin">
+													${this.newLanguageTagLoading
+														? html`<div class="mr-3 w-5 h-5 absolute animate-spin right-0 top-1.5">
 																<div class="h-5 w-5 border-2 border-[#098DAC] rounded-full"></div>
 																<div class="h-1/2 w-1/2 absolute top-0 left-0 z-5 bg-white"></div>
 														  </div>`
@@ -966,7 +983,6 @@ export class InlangManage extends TwLitElement {
 																	icon="mdi:plus"
 																></doc-icon>
 														  </button>`}
-													${this.newLanguageTag.loading ? "True" : "False"}
 												</div>
 										  </div>`
 										: html`<div
@@ -981,6 +997,7 @@ export class InlangManage extends TwLitElement {
 												</a>
 										  </div>`
 								}
+								</div>
 								</div>
 							<div class="mb-12">
 							<h2 class="text-lg font-semibold my-4">Plugins</h2>
@@ -1064,6 +1081,7 @@ export class InlangManage extends TwLitElement {
 												</a>
 										  </div>`
 								}
+								</div>
 								</div>
 								<div>
 							<h2 class="text-lg font-semibold my-4">Lint Rules</h2>
