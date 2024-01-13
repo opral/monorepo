@@ -29,6 +29,7 @@ import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
 import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
 import { maybeCreateFirstProjectId } from "./migrations/maybeCreateFirstProjectId.js"
 import type { Repository } from "@lix-js/client"
+import { capture } from "./telemetry/capture.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -111,7 +112,15 @@ export async function loadProject(args: {
 	await maybeCreateFirstProjectId({ projectPath, repo: args.repo })
 
 	// -- load project ------------------------------------------------------
+
 	return await createRoot(async () => {
+		// TODO remove tryCatch after https://github.com/opral/monorepo/issues/2013
+		// - a repo will always be present
+		// - if a repo is present, the project id will always be present
+		const { data: projectId } = await tryCatch(() =>
+			fs.readFile(args.projectPath + "/project_id", { encoding: "utf-8" })
+		)
+
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
 		// -- settings ------------------------------------------------------------
 
@@ -125,12 +134,7 @@ export async function loadProject(args: {
 			// }
 
 			loadSettings({ settingsFilePath: projectPath + "/settings.json", nodeishFs })
-				.then((settings) => {
-					setSettings(settings)
-					// rename settings to get a convenient access to the data in Posthog
-					const project_settings = settings
-					args._capture?.("SDK used settings", { project_settings })
-				})
+				.then((settings) => setSettings(settings))
 				.catch((err) => {
 					markInitAsFailed(err)
 				})
@@ -297,7 +301,31 @@ export async function loadProject(args: {
 			debouncedSave(messagesQuery.getAll())
 		})
 
+		/**
+		 * Utility to escape reactive tracking and avoid multiple calls to
+		 * the capture event.
+		 *
+		 * Should be addressed with https://github.com/opral/monorepo/issues/1772
+		 */
+		let projectLoadedCapturedAlready = false
+
+		if (projectId && projectLoadedCapturedAlready === false) {
+			projectLoadedCapturedAlready = true
+			// TODO ensure that capture is "awaited" without blocking the the app from starting
+			// - equirement for https://github.com/opral/monorepo/issues/1772
+			capture("SDK loaded project", {
+				projectId,
+				properties: {
+					settings: settings(),
+					installedPluginIds: installedPlugins().map((p) => p.id),
+					installedMessageLintRuleIds: installedMessageLintRules().map((r) => r.id),
+					numberOfMessages: messagesQuery.includedMessageIds().length,
+				},
+			})
+		}
+
 		return {
+			id: projectId,
 			installed: {
 				plugins: createSubscribable(() => installedPlugins()),
 				messageLintRules: createSubscribable(() => installedMessageLintRules()),
@@ -305,8 +333,6 @@ export async function loadProject(args: {
 			errors: createSubscribable(() => [
 				...(initializeError ? [initializeError] : []),
 				...(resolvedModules() ? resolvedModules()!.errors : []),
-				// have a query error exposed
-				//...(lintErrors() ?? []),
 			]),
 			settings: createSubscribable(() => settings() as ProjectSettings),
 			setSettings,
