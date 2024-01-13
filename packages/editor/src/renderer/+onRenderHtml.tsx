@@ -16,15 +16,15 @@ export default async function onRenderHtml(pageContext: PageContextRenderer): Pr
 	const metaInfo = {
 		title:
 			pageContext.urlParsed.pathname === "/"
-				? "Fink - i18n Message Editor"
+				? "Fink Project Launcher for Translators"
 				: pageContext.urlParsed.pathname.split("/")[2] +
 				  " / " +
 				  pageContext.urlParsed.pathname.split("/")[3] +
-				  " | Fink - i18n Message Editor",
+				  " | Fink Project Launcher for Translators",
 		description:
 			pageContext.urlParsed.pathname === "/"
-				? "Fink is an i18n message editor for managing translations of your application."
-				: `Fink is an i18n message editor for managing translations of your application. Edit ${
+				? "Fink is an localization editor for managing translations of your application."
+				: `Fink is an localization editor for managing translations of your application. Edit ${
 						pageContext.urlParsed.pathname.split("/")[2]
 				  } / ${pageContext.urlParsed.pathname.split("/")[3]} translations here.`,
 	}

@@ -1,9 +1,9 @@
-import { rpc } from "@inlang/rpc"
+import { search } from "#src/services/search/index.js"
 
 export default async function onBeforeRender(pageContext: any) {
 	const { q } = pageContext.urlParsed.search
 
-	const results = await rpc.search({ term: q })
+	const results = await search({ term: q })
 
 	let items = JSON.parse(results.data as string).map((item: any) => {
 		item.uniqueID = item.objectID

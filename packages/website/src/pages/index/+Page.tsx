@@ -1,8 +1,6 @@
 import { Link, Meta, Title } from "@solidjs/meta"
 import HeroSearch from "./custom_section/HeroSearch.jsx"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
-import { Show } from "solid-js"
-import Gridview from "#src/interface/marketplace/Gridview.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
 import Guides from "./custom_section/Guides.jsx"
 import Features from "./custom_section/Features.jsx"
@@ -13,8 +11,6 @@ import { i18nRouting } from "#src/renderer/+onBeforeRoute.js"
 import Personas from "./custom_section/Personas/index.jsx"
 
 export default function Page() {
-	const search = currentPageContext.urlParsed.search["search"]
-
 	return (
 		<>
 			<Title>{m.inlang_global_title()}</Title>
@@ -44,22 +40,11 @@ export default function Page() {
 				rel="canonical"
 			/>
 			<MarketplaceLayout>
-				<Show
-					when={search}
-					fallback={
-						<>
-							<HeroSearch />
-							<Features />
-							<Personas />
-							<Guides />
-							<ParaglideHeader />
-						</>
-					}
-				>
-					<div class="pt-10">
-						<Gridview />
-					</div>
-				</Show>
+				<HeroSearch />
+				<Features />
+				<Personas />
+				<Guides />
+				<ParaglideHeader />
 			</MarketplaceLayout>
 		</>
 	)
