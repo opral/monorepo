@@ -32,7 +32,7 @@ import {
 	getMessageIdFromPath,
 	getPathFromMessageId,
 	parseMessage,
-	encodeMessage as stringifyMessage,
+	stringifyMessage as stringifyMessage,
 } from "./storage/helper.js"
 
 import { humanIdHash } from "./storage/human-id/human-readable-id.js"
@@ -412,9 +412,10 @@ export const loadProject = async (args: {
 				(plugin) => plugin.saveMessages !== undefined
 			)
 
+			// TODO #1844 add reasoning behind salting of project id
 			for (const messageId of currentMessageIds) {
 				if (!trackedMessages!.has(messageId!)) {
-					// to avoid to drop the effect after creation we need to create a new disposable root
+					// TODO #1844 INFORM to avoid to drop the effect after creation we need to create a new disposable root
 					createRoot((dispose) => {
 						createEffect(() => {
 							const message = messagesQuery.get({ where: { id: messageId } })!
@@ -456,7 +457,7 @@ export const loadProject = async (args: {
 										setMessageLoadErrors(_messageSaveErrors)
 									})
 									.catch((error) => {
-										// TODO #1844 test if errors get propagated
+										// TODO #1844 FINK - test if errors get propagated
 										// in case saving didn't work (problem during serialization or saving to file) - add to message error array in project
 										messageSaveErrors()[messageId] = new SaveMessageError({
 											path: messageFilePath,
@@ -465,7 +466,6 @@ export const loadProject = async (args: {
 										})
 										setMessageSaveErrors(messageLoadErrors)
 									})
-							} else {
 							}
 						})
 					})
@@ -491,22 +491,25 @@ export const loadProject = async (args: {
 			initialSetup = false
 		})
 
-		// TODO #1844 CLEARIFY this was used to create a watcher on all files that the fs reads - shall we import on every change as well?
-		// TODO #1844 synchronize imports with debouncedSave - wait for the import until the import took place and vice versa - synchronize import/export
-		// we need to do this since importers currently don't check the target state. if the importer works on two files en/de and a message is saved for both languages
-		// this would lead to a change in one language first – for example en – but the improter would load en and de. de is still in the old state and would override changes
-		const fsWithWatcher = createNodeishFsWithWatcher({
-			nodeishFs: nodeishFs,
-			updateMessages: () => {
-				// TODO #1844 this is where the messages are loaded (all) when the message file changed
-				// TODO #1844 do we still need to reload all messages when plugins change - guess not
-				// loadAndSetMessages(nodeishFs)
-			},
-		})
-
 		// run import
 		const _resolvedModules = resolvedModules()
 		const _settings = settings()
+
+		const fsWithWatcher = createNodeishFsWithWatcher({
+			nodeishFs: nodeishFs,
+			updateMessages: () => {
+				// TODO #1844 CLEARIFY the current solution does not watch on deletion or creation of a file (if one adds de.json in case of the json plugin we wont recognize this until restart)
+				if (_resolvedModules?.resolvedPluginApi.loadMessages && _settings) {
+					// get plugin finding the plugin that provides loadMessages function
+					const loadMessagePlugin = _resolvedModules.plugins.find(
+						(plugin) => plugin.loadMessages !== undefined
+					)
+
+					// TODO #1844 FINK check error handling for plugin load methods (triggered by file change)
+					loadMessages(fsWithWatcher, messagesQuery, settings()!, loadMessagePlugin)
+				}
+			},
+		})
 		// initial project setup finished - import all messages using legacy load Messages method
 		if (_resolvedModules?.resolvedPluginApi.loadMessages && _settings) {
 			// get plugin finding the plugin that provides loadMessages function
@@ -514,6 +517,7 @@ export const loadProject = async (args: {
 				(plugin) => plugin.loadMessages !== undefined
 			)
 
+			// TODO #1844 FINK check error handling for plugin load methods (initial load)
 			await loadMessages(fsWithWatcher, messagesQuery, _settings, loadMessagePlugin)
 		}
 
@@ -525,11 +529,12 @@ export const loadProject = async (args: {
 			hasWatcher
 		)
 
-		// TODO #1844 i doubt this is needed
-		/* const debouncedSave = skipFirst(
+		// TODO #1844 INFORM this is no longer needed
+		const debouncedSave = skipFirst(
 			debounce(
 				500,
 				async (newMessages) => {
+					// entered maximum every 500ms - doesn't mean its finished by that time
 					try {
 						const loadMessagePlugin = _resolvedModules.plugins.find(
 							(plugin) => plugin.loadMessages !== undefined
@@ -546,6 +551,7 @@ export const loadProject = async (args: {
 							messagesToExport.push(fixedExportMessage)
 						}
 
+						// this will execute on the next tick - processing of the maschine translations that returned within the tick will kick in
 						await resolvedModules()?.resolvedPluginApi.saveMessages({
 							settings: settingsValue,
 							messages: messagesToExport,
@@ -566,7 +572,7 @@ export const loadProject = async (args: {
 				},
 				{ atBegin: false }
 			)
-		)*/
+		)
 
 		return {
 			installed: {
@@ -721,6 +727,13 @@ export function createSubscribable<T>(signal: () => T): Subscribable<T> {
 	})
 }
 
+// --- serialization of loading / saving messages.
+// 1. A plugin saveMessage call can not be called simultaniously to avoid side effects - its an async function not controlled by us
+// 2. loading and saving must not run in "parallel".
+// - json plugin exports into separate file per language.
+// - saving a message in two different languages would lead to a write in de.json first
+// - This will leads to a load of the messages and since en.json has not been saved yet the english variant in the message would get overritten with the old state again
+
 let isSaving: boolean
 let currentSaveMessages: Promise<void> | undefined
 let sheduledSaveMessages:
@@ -747,10 +760,12 @@ let sheduledLoadMessages:
  */
 async function loadMessages(
 	fs: NodeishFilesystemSubset,
-	messagesQuery: any,
+	messagesQuery: InlangProject["query"]["messages"],
 	settingsValue: ProjectSettings,
-	loadPlugin: any
+	loadPlugin: any // TODO #1844 CLEARIFY what type should we use for this?
 ) {
+	// TODO #1844 CLEARIFY the current approach introuces a sync between both systems - we dont delete messages that we don't see int he plugins produced messages array anymore
+
 	// let the current save process finish first
 	if (currentSaveMessages) {
 		await currentSaveMessages
@@ -770,7 +785,7 @@ async function loadMessages(
 
 	const loadPluginId = loadPlugin!.id
 
-	const importedMessages = await makeTrulyAsync(
+	const loadedMessages = await makeTrulyAsync(
 		loadPlugin.loadMessages({
 			// @ts-ignore
 			settings: settingsValue,
@@ -778,62 +793,52 @@ async function loadMessages(
 		})
 	)
 
-	for (const importedMessage of importedMessages) {
+	for (const loadedMessage of loadedMessages) {
 		const currentMessages = messagesQuery
 			.getAll()
 			// TODO #1585 here we match using the id to support legacy load message plugins - after we introduced import / export methods we will use importedMessage.alias
-			.filter((message: any) => message.alias[loadPluginId] === importedMessage.id)
+			.filter((message: any) => message.alias[loadPluginId] === loadedMessage.id)
 
 		if (currentMessages.length > 1) {
 			// TODO #1844 CLEARIFY how to handle the case that we find a dublicated alias during import? - change Error correspondingly
 			throw new Error("more than one message with the same alias found ")
 		} else if (currentMessages.length === 1) {
 			// update message in place - leave message id and alias untouched
-			importedMessage.alias = {} as any
+			loadedMessage.alias = {} as any
 			// TODO #1585 we have to map the id of the importedMessage to the alias and fill the id property with the id of the existing message - change when import mesage provides importedMessage.alias
-			importedMessage.alias[loadPluginId] = importedMessage.id
-			importedMessage.alias["library.inlang.paraglideJs"] = importedMessage.id
-			importedMessage.id = currentMessages[0]!.id
-			const importedEnecoded = stringifyMessage(importedMessage)
+			loadedMessage.alias[loadPluginId] = loadedMessage.id
+			loadedMessage.alias["library.inlang.paraglideJs"] = loadedMessage.id
+			loadedMessage.id = currentMessages[0]!.id
+
+			// TODO #1844 INFORM stringifyMessage encodes messages independent from key order!
+			const importedEnecoded = stringifyMessage(loadedMessage)
 			const currentMessageEncoded = stringifyMessage(currentMessages[0]!)
 			if (importedEnecoded === currentMessageEncoded) {
 				continue
 			}
-			messagesQuery.update({ where: { id: importedMessage.id }, data: importedMessage })
+			messagesQuery.update({ where: { id: loadedMessage.id }, data: loadedMessage })
 		} else {
 			// message with the given alias does not exist so far
-			importedMessage.alias = {} as any
+			loadedMessage.alias = {} as any
 			// TODO #1585 we have to map the id of the importedMessage to the alias - change when import mesage provides importedMessage.alias
-			importedMessage.alias[loadPluginId] = importedMessage.id
-			importedMessage.alias["library.inlang.paraglideJs"] = importedMessage.id
+			loadedMessage.alias[loadPluginId] = loadedMessage.id
+			loadedMessage.alias["library.inlang.paraglideJs"] = loadedMessage.id
 
 			let currentOffset = 0
 			let messsageId: string | undefined
-			idConflictResolverLoop: do {
-				messsageId = humanIdHash(importedMessage.id, currentOffset)
-				const path =
-					/* TODO #1844 check how to check for existance here - we could also use the query instead messageFolderPath + "/" +*/ getPathFromMessageId(
-						messsageId
-					)
-				try {
-					await fs.stat(path)
-				} catch (e) {
-					if ((e as any).code === "ENOENT") {
-						// keep the message id!
-						continue idConflictResolverLoop
-					}
-					throw e
+			do {
+				messsageId = humanIdHash(loadedMessage.id, currentOffset)
+				if (messagesQuery.get({ where: { id: messsageId } })) {
+					currentOffset += 1
+					messsageId = undefined
 				}
-
-				currentOffset += 1
-				messsageId = undefined
 			} while (messsageId === undefined)
 
 			// create a humanId based on a hash of the alias
-			importedMessage.id = messsageId
+			loadedMessage.id = messsageId
 
-			// TODO #1844 CLEARIFY - we don't block fs here - we could have a situation where a file with the same message id is created in the meantime
-			messagesQuery.create({ data: importedMessage })
+			// add the message - this will trigger an async file creation in the backgound!
+			messagesQuery.create({ data: loadedMessage })
 		}
 	}
 
@@ -860,9 +865,9 @@ async function loadMessages(
 
 async function saveMessages(
 	fs: NodeishFilesystemSubset,
-	messagesQuery: any,
+	messagesQuery: InlangProject["query"]["messages"],
 	settingsValue: ProjectSettings,
-	savePlugin: any
+	savePlugin: any // TODO #1844 CLEARIFY what type should we use for this?
 ) {
 	// queue next save if we have a save ongoing
 	if (isSaving) {
@@ -891,6 +896,7 @@ async function saveMessages(
 				messagesToExport.push(fixedExportMessage)
 			}
 
+			// TODO #1844 SPLIT (separate ticket) make sure save messages produces the same output again and again
 			await savePlugin.saveMessages({
 				settings: settingsValue,
 				messages: messagesToExport,

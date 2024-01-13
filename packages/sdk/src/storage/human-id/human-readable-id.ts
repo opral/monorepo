@@ -1,4 +1,6 @@
 import murmurhash3 from "murmurhash3js" // we use murmur for best distribution https://medium.com/miro-engineering/choosing-a-hash-function-to-solve-a-data-sharding-problem-c656259e2b54
+
+// TODO #1844 update word list 
 import { adjectives, animals, adverbs, verbs } from "./words.js"
 
 export function randomHumanId() {
