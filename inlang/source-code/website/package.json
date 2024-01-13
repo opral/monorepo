@@ -16,10 +16,10 @@
 		"node": ">=18.0.0"
 	},
 	"dependencies": {
-		"@lix-js/server": "workspace:*",
 		"@isomorphic-git/cors-proxy": "^2.7.1",
 		"@lix-js/client": "workspace:*",
 		"@lix-js/fs": "workspace:*",
+		"@lix-js/server": "workspace:*",
 		"@sentry/browser": "^7.27.0",
 		"@sentry/node": "^7.47.0",
 		"@sentry/tracing": "^7.47.0",
@@ -30,6 +30,7 @@
 		"@solid-primitives/scroll": "2.0.20",
 		"@solidjs/meta": "0.28.2",
 		"@types/flat": "^5.0.2",
+		"algoliasearch": "4.20.0",
 		"clipboard-copy": "^4.0.1",
 		"compression": "^1.7.4",
 		"cookie-session": "^2.0.0",

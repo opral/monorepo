@@ -5,11 +5,11 @@ _write `hello@inlang.com` to apply_
 Become the lead for [the SDK](https://inlang.com/documentation) that powers the [inlang ecosystem](https://inlang.com/c/apps). Apply if you are interested in:
 
 
+- pushing JS on the client to its limits (!)
 - [local first software](https://www.inkandswitch.com/local-first/)
 - reactive systems/reactive programming
-- dev tools
-- i18n infrastructure
-- multithreading
+- distributed software
+- example issues https://github.com/opral/monorepo/issues/1772, https://github.com/opral/monorepo/issues/1844. 
 
 **More info**
 
