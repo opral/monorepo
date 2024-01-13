@@ -141,7 +141,7 @@ export async function openRepository(
 					}),
 					dir,
 					ref: args.branch,
-					// TODO #1844 force: true
+					force: true,
 					// filepaths: ["resources/en.json", "resources/de.json", "project.inlang.json"],
 				})
 			})

@@ -26,7 +26,7 @@ export function parseMessage(messagePath: string, messageRaw: string) {
 	return JSON.parse(messageRaw)
 }
 
-export function encodeMessage(message: Message) {
+export function stringifyMessage(message: Message) {
 	// create a new object do specify key output order
 	const messageWithSortedKeys: any = {}
 	for (const key of Object.keys(message).sort()) {
