@@ -33,7 +33,6 @@ export const listProjects = async (
 			} catch {
 				continue
 			}
-
 		}
 	}
 

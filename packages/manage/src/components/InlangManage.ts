@@ -1042,7 +1042,9 @@ ${
 							>
 								${
 									this.languageTags && this.languageTags.length > 0
-										? html`<div class="flex flex-wrap gap-2">
+										? html`<div
+												class="flex flex-wrap gap-1 border border-slate-200 rounded-2xl bg-slate-100 p-1"
+										  >
 												${
 													// @ts-ignore
 													this.languageTags.map((tag: Record<string, string | boolean>) => {
@@ -1073,13 +1075,13 @@ ${
 																				this.confirmPopup = "removeLanguageTag"
 																			}
 																		}}
-																		class=${"text-red-500 text-sm w-6 h-6 mr-1 flex items-center justify-center font-medium transition-colors hover:text-red-400 hover:bg-red-50 rounded-md " +
+																		class=${"text-slate-500 text-sm w-6 h-6 mr-1 flex items-center justify-center font-medium transition-colors hover:text-slate-600 hover:bg-slate-50 rounded-md " +
 																		(typeof this.user === "undefined" ? "cursor-not-allowed" : "")}
 																  >
 																		<doc-icon
 																			class="inline-block translate-y-0.5"
-																			size="1em"
-																			icon="mdi:delete"
+																			size="1.2em"
+																			icon="mdi:close"
 																		></doc-icon>
 																  </button>`}
 														</div>`
@@ -1106,7 +1108,7 @@ ${
 																await this.addLanguageTag()
 															}
 														}}
-														class="px-3 py-1 focus:outline-0 focus:ring-0 focus-within:border-[#098DAC] bg-white border w-44 pr-8 text-sm truncate border-slate-200 rounded-xl flex items-center justify-between gap-2"
+														class="px-3 py-1 focus:outline-0 focus:ring-0 focus-within:border-[#098DAC] bg-white border w-44 pr-6 truncate border-slate-200 rounded-xl flex items-center justify-between gap-2"
 														placeholder="Add languageTag"
 													/>
 													${this.newLanguageTagLoading
@@ -1116,12 +1118,12 @@ ${
 														  </div>`
 														: html`<button
 																@click=${async () => await this.addLanguageTag()}
-																class=${"text-slate-600 absolute right-0.5 top-1/2 -translate-y-1/2 text-sm w-6 h-6 mr-1 flex items-center justify-center font-medium transition-colors hover:text-slate-500 hover:bg-slate-50 rounded-md " +
+																class=${"text-slate-500 absolute right-0.5 top-1/2 -translate-y-1/2 text-sm w-6 h-6 mr-1 flex items-center justify-center font-medium transition-colors hover:text-slate-600 hover:bg-slate-50 rounded-md " +
 																(typeof this.user === "undefined" ? "cursor-not-allowed" : "")}
 														  >
 																<doc-icon
 																	class="inline-block translate-y-0.5"
-																	size="1em"
+																	size="1.2em"
 																	icon="mdi:plus"
 																></doc-icon>
 														  </button>`}
