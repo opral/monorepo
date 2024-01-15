@@ -4,6 +4,8 @@
 	It also adds `<link rel="alternate">` tags to the head of your page
 -->
 <script lang="ts" generics="T extends string">
+	import { serializeRoute } from "./utils/serialize-path.js"
+
 	import * as Path from "./utils/path.js"
 	import { page } from "$app/stores"
 	import { browser } from "$app/environment"
@@ -42,9 +44,14 @@
 		const canonicalPath = original_to.pathname.slice(absoluteBase.length);
 
 		const translatedPath = getTranslatedPath(canonicalPath, language, i18n.translations);
-		const fullPath = Path.resolve(absoluteBase, language, translatedPath);
-
-		return fullPath;
+		return serializeRoute({
+			base: absoluteBase,
+			lang: language,
+			path: translatedPath,
+			dataSuffix: undefined,
+			includeLanguage: true,
+			defaultLanguageTag: i18n.sourceLanguageTag
+		});
 	}
 
 	setContext(PARAGLIDE_CONTEXT_KEY, { translateHref })

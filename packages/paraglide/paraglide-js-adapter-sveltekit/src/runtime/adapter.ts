@@ -45,7 +45,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18
 		 * on the `html` element
 		 */
 		/* @__SIDE_EFFECT_FREE__ */
-		handle: (options: HandleOptions) => createHandle(options),
+		handle: (options: HandleOptions) => createHandle(runtime, options),
 	}
 }
 
