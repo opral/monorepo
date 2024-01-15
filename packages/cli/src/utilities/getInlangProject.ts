@@ -3,6 +3,7 @@ import { loadProject, type InlangProject } from "@inlang/sdk"
 import { telemetry } from "../services/telemetry/implementation.js"
 import { resolve } from "node:path"
 import { openRepository, findRepoRoot } from "@lix-js/client"
+import { id } from "../../marketplace-manifest.json"
 
 /**
  * Gets the inlang project and exists if the project contains errors.
@@ -22,6 +23,7 @@ export async function getInlangProject(args: { projectPath: string }): Promise<I
 		project = await loadProject({
 			projectPath,
 			nodeishFs: fs,
+			appId: id,
 			_capture(id, props) {
 				telemetry.capture({
 					// @ts-ignore the event types
@@ -38,6 +40,7 @@ export async function getInlangProject(args: { projectPath: string }): Promise<I
 		project = await loadProject({
 			projectPath,
 			repo,
+			appId: id,
 			_capture(id, props) {
 				telemetry.capture({
 					// @ts-ignore the event types

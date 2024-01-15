@@ -46,6 +46,16 @@ const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 export async function loadProject(args: {
 	projectPath: string
 	nodeishFs: Repository["nodeishFs"]
+	/**
+	 * The app id is used to identify the app that is using the SDK.
+	 *
+	 * We use the app id to group events in telemetry to answer questions
+	 * like "Which apps causes these errors?" or "Which apps are used more than others?".
+	 *
+	 * @example
+	 * 	appId: "app.inlang.badge"
+	 */
+	appId?: string
 	_import?: ImportFunction
 	_capture?: (id: string, props: Record<string, unknown>) => void
 }): Promise<InlangProject>
@@ -61,6 +71,7 @@ export async function loadProject(args: {
 export async function loadProject(args: {
 	projectPath: string
 	repo: Repository
+	appId?: string
 	_import?: ImportFunction
 	_capture?: (id: string, props: Record<string, unknown>) => void
 }): Promise<InlangProject>
@@ -68,6 +79,7 @@ export async function loadProject(args: {
 export async function loadProject(args: {
 	projectPath: string
 	repo?: Repository
+	appId?: string
 	_import?: ImportFunction
 	_capture?: (id: string, props: Record<string, unknown>) => void
 	nodeishFs?: Repository["nodeishFs"]
@@ -312,10 +324,10 @@ export async function loadProject(args: {
 		if (projectId && projectLoadedCapturedAlready === false) {
 			projectLoadedCapturedAlready = true
 			// TODO ensure that capture is "awaited" without blocking the the app from starting
-			// - equirement for https://github.com/opral/monorepo/issues/1772
-			capture("SDK loaded project", {
+			await capture("SDK loaded project", {
 				projectId,
 				properties: {
+					appId: args.appId,
 					settings: settings(),
 					installedPluginIds: installedPlugins().map((p) => p.id),
 					installedMessageLintRuleIds: installedMessageLintRules().map((r) => r.id),
@@ -325,7 +337,6 @@ export async function loadProject(args: {
 		}
 
 		return {
-			id: projectId,
 			installed: {
 				plugins: createSubscribable(() => installedPlugins()),
 				messageLintRules: createSubscribable(() => installedMessageLintRules()),
