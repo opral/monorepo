@@ -1,8 +1,10 @@
-import { createSignal } from "solid-js"
+import { Show, createSignal } from "solid-js"
 import { showToast } from "./Toast.jsx"
 import { rpc } from "@inlang/rpc"
 import * as m from "../../paraglide/messages.js"
 import Captcha from "./Captcha.jsx"
+import validator from "validator"
+import { Icon } from "./Icon.jsx"
 
 export function NewsletterForm() {
 	const [email, setEmail] = createSignal("")
@@ -49,11 +51,9 @@ export function NewsletterForm() {
 		if (loading()) return
 
 		function checkEmail(email: any) {
-			const re = /\S+@\S+\.\S+/
-
 			if (email.trim() === "") {
 				return "empty"
-			} else if (!re.test(email)) {
+			} else if (!validator.default.isEmail(email)) {
 				return "invalid"
 			} else {
 				return "valid"
@@ -92,14 +92,14 @@ export function NewsletterForm() {
 			<p class="text-surface-800 text-sm font-semibold mb-3">{m.newsletter_title()}</p>
 			<div
 				class={
-					"flex items-start justify-stretch gap-3 w-full md:flex-row flex-col transition-opacity duration-150 " +
+					"flex items-start justify gap-3 w-full xl:flex-row flex-col transition-opacity duration-150 " +
 					(loading() ? "opacity-70 cursor-not-allowed" : "")
 				}
 			>
-				<div class="flex flex-col gap-1 w-full">
+				<div class="flex flex-col gap-1 w-full relative">
 					<input
 						class={
-							"p-0 md:w-[302px] w-full text-sm h-10 rounded-[4px] transition-colors focus:outline-primary/50 focus:-outline-offset-0 focus:ring-0 focus:border-primary px-4 border border-surface-300 " +
+							"p-0 xl:w-[302px] w-full text-sm h-10 rounded-[4px] transition-colors focus:outline-primary/50 focus:-outline-offset-0 focus:ring-0 focus:border-primary px-4 border border-surface-300 " +
 							(loading() ? "pointer-events-none" : "")
 						}
 						placeholder={m.newsletter_placeholder()}
@@ -118,17 +118,26 @@ export function NewsletterForm() {
 							}
 						}}
 					/>
-					<Captcha captchaResponse={captchaResponse} setCaptchaResponse={setCaptchaResponse} />
+					<Show when={captchaResponse()}>
+						<Icon name="success" class="absolute right-3 top-2.5" />
+					</Show>
 				</div>
-				<button
-					class={
-						"h-10 text-sm text-background px-4 bg-surface-800 hover:bg-surface-900 max-md:w-full rounded-[4px] font-medium transition-all duration-200 " +
-						(loading() ? "pointer-events-none" : "")
+				<Show
+					when={!captchaResponse()}
+					fallback={
+						<button
+							class={
+								"h-10 text-sm text-background px-4 bg-surface-800 hover:bg-surface-900 max-xl:w-full rounded-[4px] font-medium transition-all duration-200 " +
+								(loading() ? "pointer-events-none" : "")
+							}
+							onClick={handleSubscribe}
+						>
+							{m.newsletter_button()}
+						</button>
 					}
-					onClick={handleSubscribe}
 				>
-					{m.newsletter_button()}
-				</button>
+					<Captcha captchaResponse={captchaResponse} setCaptchaResponse={setCaptchaResponse} />
+				</Show>
 			</div>
 		</div>
 	)

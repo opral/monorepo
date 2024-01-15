@@ -22,7 +22,7 @@ The editor inlang offers, Fink, supports variables out of the box. You can use t
 
 Test your localized app rigorously on a variety of devices, operating systems, and screen sizes to identify and address any layout or functionality issues that may arise due to language-specific content. Embrace responsive design principles to deliver a consistent user experience across diverse platforms.
 
-In the GitHub Repo of inlang there is the initiative to implement an i18n checker, so you don't have to make a checklist yourself [i18n Checker GitHub Issue](https://github.com/inlang/monorepo/issues/1730#issuecomment-1825809689).
+In the GitHub Repo of inlang there is the initiative to implement an i18n checker, so you don't have to make a checklist yourself [i18n Checker GitHub Issue](https://github.com/opral/monorepo/issues/1730#issuecomment-1825809689).
 
 ### Mistake 4: Disregarding User Feedback and Iterative Improvement
 
@@ -35,6 +35,6 @@ If you're using a product which is built on top of inlang, you can use the [Tran
 
 inlang is an ecosystem for finding globalization products and services. Imagine inlang.com like a marketplace where you can find everything you need to make your app or website global, instead of being limited to a single service or product.
 
-[Homepage](/) | [Documentation](/documentation) | [GitHub](https://github.com/inlang/monorepo)
+[Homepage](/) | [Documentation](/documentation) | [GitHub](https://github.com/opral/monorepo)
 
 <br />

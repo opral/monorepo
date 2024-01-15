@@ -2,12 +2,12 @@ import { For, Show, createSignal, onMount } from "solid-js"
 import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
-// import Highlight from "#src/interface/components/Highlight.jsx"
 import Card, { CardBuildOwn, NoResultsCard } from "#src/interface/components/Card.jsx"
 import { Link, Meta, Title } from "@solidjs/meta"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import * as m from "#src/paraglide/messages.js"
 import { i18nRouting } from "#src/renderer/+onBeforeRoute.js"
+import validator from "validator"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
@@ -18,6 +18,10 @@ export type SubCategory = SubCategoryApplication
 export const [searchValue, setSearchValue] = createSignal<string>("")
 const selectedCategory = () => {
 	return currentPageContext.urlParsed.pathname.replace("/", "")
+}
+
+const sanitize = (input: string): string => {
+	return validator.default.escape(input)
 }
 
 export default function Page(props: {
@@ -34,18 +38,22 @@ export default function Page(props: {
 		}
 	})
 
+	const title = () => {
+		if (
+			currentPageContext.urlParsed.search.q !== "" &&
+			currentPageContext.urlParsed.search.q !== undefined
+		) {
+			return `${m.marketplace_search_seo_title()} ${sanitize(
+				currentPageContext.urlParsed.search.q
+			)} ${m.marketplace_search_seo_global_products()}`
+		} else {
+			return m.marketplace_search_seo_title()
+		}
+	}
+
 	return (
 		<>
-			<Title>
-				{m.marketplace_search_seo_title()}
-				{currentPageContext.urlParsed.search.q !== "" &&
-				currentPageContext.urlParsed.search.q !== undefined
-					? ` ${
-							currentPageContext.urlParsed.search.q
-					  } ${m.marketplace_search_seo_global_products()}`
-					: ""}{" "}
-				| inlang
-			</Title>
+			<Title>{title()}| inlang</Title>
 			<Meta name="description" content="Search globalization products." />
 			<Meta name="og:image" content="/opengraph/inlang-search-image.jpg" />
 			<Link

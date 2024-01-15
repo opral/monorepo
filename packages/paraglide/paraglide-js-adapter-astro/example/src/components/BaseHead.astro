@@ -2,6 +2,7 @@
 // Import the global.css file here so that it is included on
 // all pages through the use of the <BaseHead /> component.
 import '../styles/global.css';
+import { availableLanguageTags, isAvailableLanguageTag, sourceLanguageTag } from '../paraglide/runtime.js';
 
 interface Props {
 	title: string;
@@ -12,6 +13,19 @@ interface Props {
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
 const { title, description, image = '/blog-placeholder-1.jpg' } = Astro.props;
+
+function translatePath(path: string, lang: string) {
+	const withoutPrefix = removeLanguagePrefix(path);
+	if(lang === sourceLanguageTag) {
+		return withoutPrefix;
+	}
+	return `/${lang}${withoutPrefix}`;
+}
+
+function removeLanguagePrefix(path: string) {
+	const [maybeLanguage, ...rest] = path.split('/').filter(Boolean);
+	return isAvailableLanguageTag(maybeLanguage) ? rest.join('/') : path;
+}
 ---
 
 <!-- Global Metadata -->
@@ -45,3 +59,8 @@ const { title, description, image = '/blog-placeholder-1.jpg' } = Astro.props;
 <meta property="twitter:title" content={title} />
 <meta property="twitter:description" content={description} />
 <meta property="twitter:image" content={new URL(image, Astro.url)} />
+
+<!-- Alternate Language Versions -->
+{availableLanguageTags.map(lang => (
+	<link rel="alternate" hreflang={lang} href={translatePath(Astro.url.pathname, lang)} />
+))}

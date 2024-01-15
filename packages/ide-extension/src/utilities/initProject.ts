@@ -61,7 +61,7 @@ export async function initProject(args: {
 	// 	}
 
 	// REMOVE THIS HARDCODED ASSUMPTION FOR MULTI PROJECT SUPPORT
-	// Has been implemented for https://github.com/inlang/monorepo/pull/1762
+	// Has been implemented for https://github.com/opral/monorepo/pull/1762
 	if (
 		(closestProjectFilePathUriNormalized.endsWith(".inlang/settings.json") === false ||
 			closestProjectFilePathUriNormalized.endsWith("project.inlang.json") === false) === false

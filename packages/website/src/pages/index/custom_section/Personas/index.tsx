@@ -28,8 +28,11 @@ const Personas = () => {
 	]
 
 	return (
-		<div class="pt-12 md:pt-20">
-			<h2 class="font-bold text-2xl md:text-4xl text-surface-900 text-center">
+		<div class="pt-12 md:pt-20 flex flex-col items-center">
+			<p class="bg-background px-4 py-1.5 rounded-full text-sm font-medium w-fit border shadow border-surface-300">
+				Collaboration
+			</p>
+			<h2 class="font-bold text-2xl md:text-4xl text-surface-900 text-center mt-4">
 				{m.home_personas_title()}
 			</h2>
 			<div class="w-full flex justify-center gap-2 mt-8 flex-wrap">
@@ -50,21 +53,21 @@ const Personas = () => {
 			</div>
 			<Switch>
 				<Match when={slide() === "developer"}>
-					<div class="grid grid-cols-12 h-[700px] sm:h-[800px] md:h-[496px] mt-8">
+					<div class="grid grid-cols-12 h-[700px] sm:h-[800px] md:h-[496px] mt-8 w-full">
 						<div class="col-span-12 lg:col-span-10 lg:col-start-2 bg-background h-full rounded-2xl border border-surface-200">
 							<DeveloperSlide />
 						</div>
 					</div>
 				</Match>
 				<Match when={slide() === "translator"}>
-					<div class="grid grid-cols-12 h-[830px] md:h-[496px] mt-8">
+					<div class="grid grid-cols-12 h-[830px] md:h-[496px] mt-8 w-full">
 						<div class="col-span-12 lg:col-span-10 lg:col-start-2 bg-background h-full rounded-2xl border border-surface-200">
 							<TranslatorSlide />
 						</div>
 					</div>
 				</Match>
 				<Match when={slide() === "designer"}>
-					<div class="grid grid-cols-12 sm:h-[480px] md:h-[496px] mt-8">
+					<div class="grid grid-cols-12 sm:h-[480px] md:h-[496px] mt-8 w-full">
 						<div class="col-span-12 lg:col-span-10 lg:col-start-2 bg-background h-full rounded-2xl border border-surface-200">
 							<DesignrSlide />
 						</div>
