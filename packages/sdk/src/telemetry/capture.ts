@@ -25,12 +25,12 @@ export const capture = async (
 		await fetch("https://eu.posthog.com/capture/", {
 			method: "POST",
 			body: JSON.stringify({
-        // TODO env variable injection
+				// TODO env variable injection
 				api_key: "<KEY>",
 				event,
 				distinct_id: "unknown",
 				properties: {
-					$group: { project: args.projectId },
+					$groups: { project: args.projectId },
 					...args.properties,
 				},
 			}),
