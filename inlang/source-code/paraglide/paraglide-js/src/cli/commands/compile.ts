@@ -3,10 +3,10 @@ import { compile } from "../../compiler/compile.js"
 import fs from "node:fs/promises"
 import { resolve } from "node:path"
 import { Command } from "commander"
-import { telemetry } from "../../services/telemetry/implementation.js"
 import { writeOutput } from "../../services/file-handling/write-output.js"
 import { Logger } from "../../services/logger/index.js"
 import { openRepository, findRepoRoot } from "@lix-js/client"
+
 // TODO add a project UUID to the tele.groups internal #196
 // import { gitOrigin } from "../../services/telemetry/implementation.js"
 
@@ -46,13 +46,7 @@ export const compileCommand = new Command()
 				await loadProject({
 					projectPath: path,
 					nodeishFs: fs,
-					_capture(id, props) {
-						telemetry.capture({
-							// @ts-ignore the event types
-							event: id,
-							properties: props,
-						})
-					},
+					appId: "library.inlang.paraglideJs",
 				}),
 				logger
 			)
@@ -65,13 +59,7 @@ export const compileCommand = new Command()
 				await loadProject({
 					projectPath: path,
 					repo,
-					_capture(id, props) {
-						telemetry.capture({
-							// @ts-ignore the event types
-							event: id,
-							properties: props,
-						})
-					},
+					appId: "library.inlang.paraglideJs",
 				}),
 				logger
 			)
