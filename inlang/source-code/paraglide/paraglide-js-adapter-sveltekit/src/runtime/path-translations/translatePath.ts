@@ -10,13 +10,13 @@ import type { PathTranslations } from "./types.js"
 export function translatePath(
 	path: string,
 	targetLanguage: string,
-	translations: PathTranslations<string>,
+	translations: PathTranslations,
 	opts: { base: string; availableLanguageTags: readonly string[]; defaultLanguageTag: string }
 ): string {
 	const {
 		path: targetedPathSource,
 		lang,
-		isDataRequest,
+		dataSuffix,
 	} = getPathInfo(path, {
 		base: opts.base,
 		availableLanguageTags: opts.availableLanguageTags,
@@ -29,7 +29,7 @@ export function translatePath(
 	return serializeRoute({
 		path: translatedPathTarget,
 		base: opts.base,
-		isDataRequest,
+		dataSuffix,
 		includeLanguage: true,
 		lang: targetLanguage,
 		defaultLanguageTag: opts.defaultLanguageTag,
