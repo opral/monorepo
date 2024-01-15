@@ -40,7 +40,6 @@ const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
  * @param @deprecated nodeishFs - Filesystem that implements the NodeishFilesystemSubset interface.
  * @param _import - Use `_import` to pass a custom import function for testing,
  *   and supporting legacy resolvedModules such as CJS.
- * @param _capture - Use `_capture` to capture events for analytics.
  *
  */
 export async function loadProject(args: {
@@ -57,7 +56,6 @@ export async function loadProject(args: {
 	 */
 	appId?: string
 	_import?: ImportFunction
-	_capture?: (id: string, props: Record<string, unknown>) => void
 }): Promise<InlangProject>
 
 /**
@@ -65,7 +63,6 @@ export async function loadProject(args: {
  * @param repo - An instance of a lix repo as returned by `openRepository`.
  * @param _import - Use `_import` to pass a custom import function for testing,
  *   and supporting legacy resolvedModules such as CJS.
- * @param _capture - Use `_capture` to capture events for analytics.
  *
  */
 export async function loadProject(args: {
@@ -73,7 +70,6 @@ export async function loadProject(args: {
 	repo: Repository
 	appId?: string
 	_import?: ImportFunction
-	_capture?: (id: string, props: Record<string, unknown>) => void
 }): Promise<InlangProject>
 
 export async function loadProject(args: {
@@ -81,7 +77,6 @@ export async function loadProject(args: {
 	repo?: Repository
 	appId?: string
 	_import?: ImportFunction
-	_capture?: (id: string, props: Record<string, unknown>) => void
 	nodeishFs?: Repository["nodeishFs"]
 }): Promise<InlangProject> {
 	const projectPath = normalizePath(args.projectPath)
