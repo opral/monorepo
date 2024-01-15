@@ -1,20 +1,8 @@
-import { base } from "$app/paths"
-import { isAvailableLanguageTag, sourceLanguageTag } from "$paraglide/runtime.js"
+import { i18n } from "$lib/i18n.js"
 
 export const prerender = true
 
-/**
- * @param {string} pathWithBase
- */
-function getLanguageFromPath(pathWithBase) {
-	const pathWithLanguage = pathWithBase.slice(base.length)
-	const [lang, ...parts] = pathWithLanguage.split("/").filter(Boolean)
-
-	if (isAvailableLanguageTag(lang)) return lang
-	return sourceLanguageTag
-}
-
 export function load({ url }) {
-	const lang = getLanguageFromPath(url.pathname)
+	const lang = i18n.getLanguageFromUrl(url)
 	return { lang }
 }
