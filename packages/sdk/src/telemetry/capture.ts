@@ -1,3 +1,5 @@
+import { ENV_VARIABLES } from "../env-variables/index.js"
+
 /**
  * List of telemetry events for typesafety.
  *
@@ -21,13 +23,18 @@ export const capture = async (
 		properties: Record<string, any>
 	}
 ) => {
+	// do not send events if the token is not set
+	// (assuming this eases testing)
+	if (ENV_VARIABLES.PUBLIC_POSTHOG_TOKEN === undefined) {
+		return
+	}
 	try {
 		await fetch("https://eu.posthog.com/capture/", {
 			method: "POST",
 			body: JSON.stringify({
-				// TODO env variable injection
-				api_key: "<KEY>",
+				api_key: ENV_VARIABLES.PUBLIC_POSTHOG_TOKEN,
 				event,
+				// id is "unknown" because no user information is available
 				distinct_id: "unknown",
 				properties: {
 					$groups: { project: args.projectId },
