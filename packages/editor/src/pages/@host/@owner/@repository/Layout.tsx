@@ -1,4 +1,13 @@
-import { createEffect, createSignal, For, type JSXElement, type Setter, on, onMount, Show } from "solid-js"
+import {
+	createEffect,
+	createSignal,
+	For,
+	type JSXElement,
+	type Setter,
+	on,
+	onMount,
+	Show,
+} from "solid-js"
 import { useEditorState } from "./State.jsx"
 import { SearchInput } from "./components/SearchInput.jsx"
 import { Gitfloat } from "./components/Gitfloat.jsx"
@@ -56,10 +65,12 @@ export function Layout(props: { children: JSXElement }) {
 		{
 			name: "Language",
 			icon: <IconTranslate class="w-5 h-5" />,
-			component: <LanguageFilter
-				clearFunction={removeFilter("Language")}
-				setAddLanguageModalOpen={setAddLanguageModalOpen}
-			/>,
+			component: (
+				<LanguageFilter
+					clearFunction={removeFilter("Language")}
+					setAddLanguageModalOpen={setAddLanguageModalOpen}
+				/>
+			),
 		},
 	])
 
@@ -469,8 +480,9 @@ function ProjectMenu() {
 	)
 }
 
-function LanguageFilter(props: { clearFunction: any, setAddLanguageModalOpen: Setter<boolean> }) {
-	const { project, setFilteredLanguageTags, filteredLanguageTags, userIsCollaborator } = useEditorState()
+function LanguageFilter(props: { clearFunction: any; setAddLanguageModalOpen: Setter<boolean> }) {
+	const { project, setFilteredLanguageTags, filteredLanguageTags, userIsCollaborator } =
+		useEditorState()
 	const [localStorage] = useLocalStorage()
 
 	onMount(() => {
