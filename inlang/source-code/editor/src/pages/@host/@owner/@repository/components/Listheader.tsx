@@ -161,25 +161,29 @@ export const ListHeader = () => {
 						</Show>
 					)}
 				</For>
-					<TourHintWrapper
-						currentId="missing-lint-rules"
-						position="bottom-right"
-						offset={{ x: 0, y: 40 }}
-						isVisible={tourStep() === "missing-lint-rules"}
+				<TourHintWrapper
+					currentId="missing-lint-rules"
+					position="bottom-right"
+					offset={{ x: 0, y: 40 }}
+					isVisible={tourStep() === "missing-lint-rules"}
+				>
+					<sl-tooltip
+						prop:content={
+							"Install lint rules from the marketplace. They will help you write better translations."
+						}
+						prop:placement="bottom"
+						prop:trigger="hover"
+						style={{ "--show-delay": "1s" }}
 					>
-						<sl-tooltip
-							prop:content={
-								"Install lint rules from the marketplace. They will help you write better translations."
+						<sl-button
+							prop:size="small"
+							prop:href={
+								import.meta.env.PROD
+									? "https://inlang.com/c/lint-rules"
+									: "http://localhost:3000/c/lint-rules"
 							}
-							prop:placement="bottom"
-							prop:trigger="hover"
-							style={{ "--show-delay": "1s" }}
+							prop:target="_blank"
 						>
-							<sl-button
-								prop:size="small"
-								prop:href={import.meta.env.PROD ? "https://inlang.com/c/lint-rules" : "http://localhost:3000/c/lint-rules"}
-								prop:target="_blank"
-							>
 							<Show when={project()?.installed.messageLintRules().length === 0}>
 								Install lint rules
 							</Show>
@@ -187,8 +191,8 @@ export const ListHeader = () => {
 								{/* @ts-ignore */}
 								<IconAdd slot="prefix" class="w-5 h-5 -mx-1" />
 							</Show>
-							</sl-button>
-						</sl-tooltip>
+						</sl-button>
+					</sl-tooltip>
 				</TourHintWrapper>
 			</div>
 		</div>
