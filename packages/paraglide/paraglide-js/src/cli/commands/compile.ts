@@ -42,10 +42,14 @@ export const compileCommand = new Command()
 			logger.warn(`Could not find repository root for path ${path}`)
 			// We still support projects without git repo for now.
 
+			const repo = await openRepository("file://", {
+				nodeishFs: fs,
+			})
+
 			project = exitIfErrors(
 				await loadProject({
 					projectPath: path,
-					nodeishFs: fs,
+					repo,
 					_capture(id, props) {
 						telemetry.capture({
 							// @ts-ignore the event types

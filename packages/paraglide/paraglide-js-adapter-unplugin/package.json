@@ -49,6 +49,7 @@
 	"dependencies": {
 		"@inlang/paraglide-js": "workspace:*",
 		"@inlang/sdk": "workspace:*",
+		"@lix-js/client": "workspace:*",
 		"unplugin": "1.5.1"
 	},
 	"devDependencies": {
