@@ -16,4 +16,9 @@ describe("resolvePath", () => {
 		const resolvedPath = resolvePath("/foo/[id]/[slug]", { id: "bar", slug: "baz" })
 		expect(resolvedPath).toBe("/foo/bar/baz")
 	})
+
+	it("resolves a path with a param that's not it's own segment", () => {
+		const resolvedPath = resolvePath("/foo/bar-[id]", { id: "123" })
+		expect(resolvedPath).toBe("/foo/bar-123")
+	})
 })
