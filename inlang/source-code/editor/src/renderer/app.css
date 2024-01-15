@@ -298,3 +298,7 @@ sl-details::part(content) {
 	height: calc(100vh - 124px);
 	padding-bottom: 8rem;
 }
+
+sl-button::part(caret) {
+	width: 1rem;
+}
