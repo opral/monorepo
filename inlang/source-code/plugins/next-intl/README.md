@@ -1,6 +1,6 @@
 # What does the next-intl plugin do?
 
-Next-intl determines how its users store their messages and access them on the frontend. To ensure compatibility with the inlang ecosystem and other inlang apps, a plugin is required to provide the necessary information to these apps.
+`next-intl` is agnostic but recommends the json format. It also determines how messages are accessed on the frontend. To ensure compatibility with the inlang ecosystem and other inlang apps, a plugin is required to provide the necessary information to these apps.
 
 ## Manual Installation
 
@@ -35,11 +35,13 @@ You can add this settings also in the `settings.json`:
 
 ```json
 {
+	"sourceLanguageTag": "en",
+	"languageTags": ["en", "de"], // add languageTags if needed
 	"modules": [
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-next-intl@1/dist/index.js",
   	],
 	"plugin.inlang.nextIntl": {
-    	// settings
+    		// settings
   	}
 }
 ```
@@ -54,12 +56,12 @@ To use the plugin, you need to provide a path to the directory where your langua
 
 ## `variableReferencePattern`
 
-Defines the pattern for variable references. The default is how i18next suggests the usage of placeholders.
+Defines the pattern for variable references. For the default of `next-intl`, you can add this to your plugin settings.
 
-default:
+Example:
 
 ```json
-"variableReferencePattern": ["{{", "}}"]
+"variableReferencePattern": ["{", "}"]
 ```
 
 ## `sourceLanguageFilePath`
