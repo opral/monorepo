@@ -157,13 +157,17 @@ export function Layout(props: { children: JSXElement }) {
 
 	const settingsLink = () => {
 		if (currentBranch() && activeProject()) {
-			return `https://manage.inlang.com/?repo=${`github.com/${routeParams().owner}/${
-				routeParams().repository
-			}`}&branch=${currentBranch()}&project=${activeProject()}`
+			return (
+				(import.meta.env.PROD ? `https://manage.inlang.com/` : `http://localhost:4004/`) +
+				`?repo=${`github.com/${routeParams().owner}/${
+					routeParams().repository
+				}`}&branch=${currentBranch()}&project=${activeProject()}`
+			)
 		} else {
-			return `https://manage.inlang.com/?repo=${`github.com/${routeParams().owner}/${
-				routeParams().repository
-			}`}`
+			return (
+				(import.meta.env.PROD ? `https://manage.inlang.com/` : `http://localhost:4004/`) +
+				`?repo=${`github.com/${routeParams().owner}/${routeParams().repository}`}`
+			)
 		}
 	}
 
@@ -309,7 +313,11 @@ export function Layout(props: { children: JSXElement }) {
 					<p class="text-xs leading-5 text-danger max-sm:hidden pt-1 pb-0.5">
 						Please enter a valid{" "}
 						<a
-							href="https://inlang.com/documentation/concept/language-tag"
+							href={
+								import.meta.env.PROD
+									? "https://inlang.com/documentation/concept/language-tag"
+									: "http://localhost:3000/documentation/concept/language-tag"
+							}
 							target="_blank"
 							class="underline"
 						>
