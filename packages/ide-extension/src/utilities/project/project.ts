@@ -1,7 +1,7 @@
 import * as vscode from "vscode"
 import { listProjects, loadProject } from "@inlang/sdk"
 import { closestInlangProject } from "./closestInlangProject.js"
-import { type NodeishFilesystem } from "@lix-js/fs"
+import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
 import { setState } from "../../state.js"
 import { CONFIGURATION } from "../../configuration.js"
 import { createFileSystemMapper } from "../fs/createFileSystemMapper.js"
@@ -38,13 +38,14 @@ export async function createProjectNodes(
 	workspaceFolder: vscode.WorkspaceFolder,
 	nodeishFs: NodeishFilesystem
 ): Promise<ProjectNode[]> {
+	const workspaceFolderFsPath = normalizePath(workspaceFolder.uri.fsPath)
 	if (!projectsList) {
-		projectsList = await listProjects(nodeishFs, workspaceFolder.uri.fsPath)
+		projectsList = await listProjects(nodeishFs, workspaceFolderFsPath)
 	}
 
 	if (!closestProjectNode) {
 		closestProjectNode = await closestInlangProject({
-			workingDirectory: workspaceFolder.uri.fsPath,
+			workingDirectory: workspaceFolderFsPath,
 			projects: projectsList,
 		})
 	}
@@ -134,7 +135,7 @@ export async function handleTreeSelection(
 
 		// Here we get the relative path
 		const relativeProjectPath = selectedProject
-			? "/" + path.relative(workspaceFolder?.uri.fsPath, selectedProject) // adding leading slash
+			? "/" + path.relative(normalizePath(workspaceFolder?.uri.fsPath), selectedProject) // adding leading slash
 			: ""
 
 		setState({ project: inlangProject, selectedProjectPath: relativeProjectPath })
