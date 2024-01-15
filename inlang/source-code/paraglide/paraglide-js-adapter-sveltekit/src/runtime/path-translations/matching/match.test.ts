@@ -43,4 +43,14 @@ describe("match", () => {
 		const match = matches("/", ["/admin"])
 		expect(match).toBeUndefined()
 	})
+
+	it("matches a path with a param that's not it's own segment", () => {
+		const match = matches("/foo/bar-123", ["/foo/bar-[id]"])
+		expect(match).toEqual({
+			id: "/foo/bar-[id]",
+			params: {
+				id: "123",
+			},
+		})
+	})
 })
