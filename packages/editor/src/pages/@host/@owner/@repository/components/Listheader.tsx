@@ -3,8 +3,8 @@ import { For, Show, createMemo } from "solid-js"
 import { showFilteredMessage } from "./../helper/showFilteredMessage.js"
 import { TourHintWrapper } from "./Notification/TourHintWrapper.jsx"
 import IconArrowLeft from "~icons/material-symbols/arrow-back-rounded"
+import IconAdd from "~icons/material-symbols/add"
 import { type InstalledMessageLintRule, type MessageLintRule } from "@inlang/sdk"
-import { navigate } from "vike/client/router"
 
 export const messageCount = (ids: string[]) => {
 	const { project } = useEditorState()
@@ -161,7 +161,6 @@ export const ListHeader = () => {
 						</Show>
 					)}
 				</For>
-				<Show when={project()?.installed.messageLintRules().length === 0}>
 					<TourHintWrapper
 						currentId="missing-lint-rules"
 						position="bottom-right"
@@ -178,14 +177,19 @@ export const ListHeader = () => {
 						>
 							<sl-button
 								prop:size="small"
-								// @ts-ignore
-								onClick={() => navigate("/c/lint-rules")}
+								prop:href={import.meta.env.PROD ? "https://inlang.com/c/lint-rules" : "http://localhost:3000/c/lint-rules"}
+								prop:target="_blank"
 							>
+							<Show when={project()?.installed.messageLintRules().length === 0}>
 								Install lint rules
+							</Show>
+							<Show when={project()?.installed.messageLintRules().length !== 0}>
+								{/* @ts-ignore */}
+								<IconAdd slot="prefix" class="w-4 h-4 -mx-0.5" />
+							</Show>
 							</sl-button>
 						</sl-tooltip>
-					</TourHintWrapper>
-				</Show>
+				</TourHintWrapper>
 			</div>
 		</div>
 	)
