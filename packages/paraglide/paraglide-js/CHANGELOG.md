@@ -1,5 +1,11 @@
 # @inlang/paraglide-js
 
+## 1.2.0
+
+### Minor Changes
+
+- 0f0e8496d: Throw runtime error if `languageTag()` returns a non-language tag value
+
 ## 1.1.1
 
 ### Patch Changes

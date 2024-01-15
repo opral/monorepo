@@ -194,6 +194,14 @@ export class InlangManage extends TwLitElement {
 			.regex(/github/)
 			.safeParse(this.repoURL).success
 
+	isValidLanguageTag = () =>
+		z
+			.string()
+			.regex(
+				/^((?<grandfathered>(en-GB-oed|i-ami|i-bnn|i-default|i-enochian|i-hak|i-klingon|i-lux|i-mingo|i-navajo|i-pwn|i-tao|i-tay|i-tsu|sgn-BE-FR|sgn-BE-NL|sgn-CH-DE)|(art-lojban|cel-gaulish|no-bok|no-nyn|zh-guoyu|zh-hakka|zh-min|zh-min-nan|zh-xiang))|((?<language>([A-Za-z]{2,3}(-(?<extlang>[A-Za-z]{3}(-[A-Za-z]{3}){0,2}))?))(-(?<script>[A-Za-z]{4}))?(-(?<region>[A-Za-z]{2}|[0-9]{3}))?(-(?<variant>[A-Za-z0-9]{5,8}|[0-9][A-Za-z0-9]{3}))*))$/
+			)
+			.safeParse(this.newLanguageTag).success
+
 	override async connectedCallback() {
 		super.connectedCallback()
 
@@ -317,7 +325,7 @@ export class InlangManage extends TwLitElement {
 
 		this.languageTags = this.languageTags?.filter((tag) => tag.name !== languageTag)
 
-		posthog.capture("removed languageTag", {
+		posthog.capture("MANAGE removed languageTag", {
 			languageTag,
 		})
 	}
@@ -494,7 +502,7 @@ export class InlangManage extends TwLitElement {
 
 			${this.url.repo && this.url.project
 				? html`<div
-						class="w-full max-w-7xl mx-auto flex items-center py-5 px-4 xl:px-0 overflow-x-scroll"
+						class="w-full max-w-7xl mx-auto flex md:items-center gap-2 py-5 px-4 xl:px-0 md:flex-row flex-col"
 				  >
 						<div class="flex items-center font-medium text-lg">
 							<svg class="w-4 h-4 mr-2" viewBox="0 0 16 16">
@@ -521,165 +529,167 @@ export class InlangManage extends TwLitElement {
 								${this.url.repo ? this.url.repo.split("/")[2] : ""}
 							</a>
 						</div>
-						${this.url.repo && this.branches
-							? html`<div class="flex items-center flex-shrink-0 mx-2">
-									<!-- Dropdown for all branches -->
-									<div
-										class="relative"
-										x-data="{ open: false }"
-										@click=${(e: Event) => {
-											e.stopPropagation()
-										}}
-									>
-										<button
-											@click=${() => {
-												this.shadowRoot?.querySelector("#branch")?.classList.toggle("hidden")
-												this.shadowRoot?.querySelector("#account")?.classList.add("hidden")
-												this.shadowRoot?.querySelector("#projects")?.classList.add("hidden")
-											}}
-										>
-											<div
-												@click=${() => {
-													this.handleProjectDropdown()
-												}}
-												class="self-center flex items-center gap-2 text-left font-medium text-slate-900 bg-white border border-slate-200 hover:bg-slate-100 hover:border-slate-300 rounded-[4px] cursor-pointer px-2 py-1.5 text-xs"
-											>
-												<svg class="w-4 h-4">
-													<path
-														fill="currentColor"
-														fill-rule="evenodd"
-														d="M11.75 2.5a.75.75 0 1 0 0 1.5a.75.75 0 0 0 0-1.5zm-2.25.75a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25zM4.25 12a.75.75 0 1 0 0 1.5a.75.75 0 0 0 0-1.5zM3.5 3.25a.75.75 0 1 1 1.5 0a.75.75 0 0 1-1.5 0z"
-													></path>
-												</svg>
-												${this.url.branch ? this.url.branch : "main"}
-												${
-													// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-													this.branches!.length > 1
-														? html`<doc-icon
-																class="inline-block translate-y-0.5"
-																size="1em"
-																icon="mdi:unfold-more-horizontal"
-														  ></doc-icon> `
-														: ""
-												}
-											</div>
-										</button>
+						<div class="flex gap-2">
+							${this.url.repo && this.branches
+								? html`<div class="flex items-center flex-shrink-0 md:ml-2">
+										<!-- Dropdown for all branches -->
 										<div
-											@click=${(e: { stopPropagation: () => void }) => {
+											class="relative"
+											x-data="{ open: false }"
+											@click=${(e: Event) => {
 												e.stopPropagation()
 											}}
-											id="branch"
-											class="hidden absolute max-h-96 overflow-y-scroll top-10 left-0 w-auto bg-white border border-slate-200 rounded-md shadow-lg py-0.5 z-40"
 										>
-											${typeof this.branches === "object"
-												? this.branches?.map(
-														(branch) =>
-															html`<a
-																href=${`/${this.url.path !== "" ? this.url.path : ""}
+											<button
+												@click=${() => {
+													this.shadowRoot?.querySelector("#branch")?.classList.toggle("hidden")
+													this.shadowRoot?.querySelector("#account")?.classList.add("hidden")
+													this.shadowRoot?.querySelector("#projects")?.classList.add("hidden")
+												}}
+											>
+												<div
+													@click=${() => {
+														this.handleProjectDropdown()
+													}}
+													class="self-center flex items-center gap-2 text-left font-medium text-slate-900 bg-white border border-slate-200 hover:bg-slate-100 hover:border-slate-300 rounded-[4px] cursor-pointer px-2 py-1.5 text-xs"
+												>
+													<svg class="w-4 h-4">
+														<path
+															fill="currentColor"
+															fill-rule="evenodd"
+															d="M11.75 2.5a.75.75 0 1 0 0 1.5a.75.75 0 0 0 0-1.5zm-2.25.75a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25zM4.25 12a.75.75 0 1 0 0 1.5a.75.75 0 0 0 0-1.5zM3.5 3.25a.75.75 0 1 1 1.5 0a.75.75 0 0 1-1.5 0z"
+														></path>
+													</svg>
+													${this.url.branch ? this.url.branch : "main"}
+													${
+														// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+														this.branches!.length > 1
+															? html`<doc-icon
+																	class="inline-block translate-y-0.5"
+																	size="1em"
+																	icon="mdi:unfold-more-horizontal"
+															  ></doc-icon> `
+															: ""
+													}
+												</div>
+											</button>
+											<div
+												@click=${(e: { stopPropagation: () => void }) => {
+													e.stopPropagation()
+												}}
+												id="branch"
+												class="hidden absolute max-h-96 overflow-y-scroll top-10 left-0 w-auto bg-white border border-slate-200 rounded-md shadow-lg py-0.5 z-40"
+											>
+												${typeof this.branches === "object"
+													? this.branches?.map(
+															(branch) =>
+																html`<a
+																	href=${`/${this.url.path !== "" ? this.url.path : ""}
 																?repo=${this.url.repo}&branch=${branch}&project=${this.url.project}${
-																	this.url.module ? `&module=${this.url.module}` : ""
-																}`}
-																class="flex items-center gap-1 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900"
-															>
-																${this.url.branch === branch ||
-																(!this.url.branch && branch === "main")
-																	? html`<doc-icon
-																			class="inline-block mr-1 translate-y-0.5"
-																			size="1.2em"
-																			icon="mdi:check"
-																	  ></doc-icon>`
-																	: html`<doc-icon
-																			class="inline-block mr-1 translate-y-0.5 text-transparent"
-																			size="1.2em"
-																			icon="mdi:check"
-																	  ></doc-icon>`}
-																<p class="truncate">${branch}</p>
-															</a>`
-												  )
-												: ""}
-										</div>
-									</div>
-							  </div>`
-							: ""}
-						${this.url.project && this.projects && this.branches
-							? html`<div class="flex items-center flex-shrink-0">
-									<!-- Dropdown for all projects -->
-									<div
-										class="relative"
-										x-data="{ open: false }"
-										@click=${(e: Event) => {
-											e.stopPropagation()
-										}}
-									>
-										<button
-											@click=${() => {
-												this.shadowRoot?.querySelector("#branch")?.classList.add("hidden")
-												this.shadowRoot?.querySelector("#account")?.classList.add("hidden")
-												this.shadowRoot?.querySelector("#projects")?.classList.toggle("hidden")
-											}}
-										>
-											<div
-												@click=${() => {
-													this.handleProjectDropdown()
-												}}
-												class="self-center flex items-center gap-2 text-left font-medium text-slate-900 bg-white border border-slate-200 hover:bg-slate-100 hover:border-slate-300 rounded-[4px] cursor-pointer px-2 py-1.5 text-xs"
-											>
-												<svg viewBox="0 0 24 24" width="1.2em" height="1.2em" class="w-4 h-4">
-													<path
-														fill="currentColor"
-														d="M8 18h8v-2H8v2Zm0-4h8v-2H8v2Zm-2 8q-.825 0-1.413-.588T4 20V4q0-.825.588-1.413T6 2h8l6 6v12q0 .825-.588 1.413T18 22H6Zm7-13V4H6v16h12V9h-5ZM6 4v5v-5v16V4Z"
-													></path>
-												</svg>
-												${this.url.project.split("/").at(-1)}
-												${
-													// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-													this.projects!.length > 1
-														? html`<doc-icon
-																class="inline-block translate-y-0.5"
-																size="1em"
-																icon="mdi:unfold-more-horizontal"
-														  ></doc-icon> `
-														: ""
-												}
+																		this.url.module ? `&module=${this.url.module}` : ""
+																	}`}
+																	class="flex items-center gap-1 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+																>
+																	${this.url.branch === branch ||
+																	(!this.url.branch && branch === "main")
+																		? html`<doc-icon
+																				class="inline-block mr-1 translate-y-0.5"
+																				size="1.2em"
+																				icon="mdi:check"
+																		  ></doc-icon>`
+																		: html`<doc-icon
+																				class="inline-block mr-1 translate-y-0.5 text-transparent"
+																				size="1.2em"
+																				icon="mdi:check"
+																		  ></doc-icon>`}
+																	<p class="truncate">${branch}</p>
+																</a>`
+													  )
+													: ""}
 											</div>
-										</button>
+										</div>
+								  </div>`
+								: ""}
+							${this.url.project && this.projects && this.branches
+								? html`<div class="flex items-center flex-shrink-0">
+										<!-- Dropdown for all projects -->
 										<div
-											@click=${(e: { stopPropagation: () => void }) => {
+											class="relative"
+											x-data="{ open: false }"
+											@click=${(e: Event) => {
 												e.stopPropagation()
 											}}
-											id="projects"
-											class="hidden absolute max-h-96 overflow-y-scroll top-10 left-0 w-auto bg-white border border-slate-200 rounded-md shadow-lg py-0.5 z-40"
 										>
-											${typeof this.projects === "object"
-												? this.projects?.map(
-														(project) =>
-															html`<a
-																href=${`/?repo=${this.url.repo}&project=${project.projectPath}`}
-																class="flex items-center gap-1 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900"
-															>
-																${this.url.project === project.projectPath
-																	? html`<doc-icon
-																			class="inline-block mr-1 translate-y-0.5"
-																			size="1.2em"
-																			icon="mdi:check"
-																	  ></doc-icon>`
-																	: html`<doc-icon
-																			class="inline-block mr-1 translate-y-0.5 text-transparent"
-																			size="1.2em"
-																			icon="mdi:check"
-																	  ></doc-icon>`}
-																<p class="truncate">
-																	${project.projectPath?.split("/").at(-2)}/${project.projectPath
-																		?.split("/")
-																		.at(-1)}
-																</p>
-															</a>`
-												  )
-												: ""}
+											<button
+												@click=${() => {
+													this.shadowRoot?.querySelector("#branch")?.classList.add("hidden")
+													this.shadowRoot?.querySelector("#account")?.classList.add("hidden")
+													this.shadowRoot?.querySelector("#projects")?.classList.toggle("hidden")
+												}}
+											>
+												<div
+													@click=${() => {
+														this.handleProjectDropdown()
+													}}
+													class="self-center flex items-center gap-2 text-left font-medium text-slate-900 bg-white border border-slate-200 hover:bg-slate-100 hover:border-slate-300 rounded-[4px] cursor-pointer px-2 py-1.5 text-xs"
+												>
+													<svg viewBox="0 0 24 24" width="1.2em" height="1.2em" class="w-4 h-4">
+														<path
+															fill="currentColor"
+															d="M8 18h8v-2H8v2Zm0-4h8v-2H8v2Zm-2 8q-.825 0-1.413-.588T4 20V4q0-.825.588-1.413T6 2h8l6 6v12q0 .825-.588 1.413T18 22H6Zm7-13V4H6v16h12V9h-5ZM6 4v5v-5v16V4Z"
+														></path>
+													</svg>
+													${this.url.project.split("/").at(-1)}
+													${
+														// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+														this.projects!.length > 1
+															? html`<doc-icon
+																	class="inline-block translate-y-0.5"
+																	size="1em"
+																	icon="mdi:unfold-more-horizontal"
+															  ></doc-icon> `
+															: ""
+													}
+												</div>
+											</button>
+											<div
+												@click=${(e: { stopPropagation: () => void }) => {
+													e.stopPropagation()
+												}}
+												id="projects"
+												class="hidden absolute max-h-96 overflow-y-scroll top-10 left-0 w-auto bg-white border border-slate-200 rounded-md shadow-lg py-0.5 z-40"
+											>
+												${typeof this.projects === "object"
+													? this.projects?.map(
+															(project) =>
+																html`<a
+																	href=${`/?repo=${this.url.repo}&project=${project.projectPath}`}
+																	class="flex items-center gap-1 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+																>
+																	${this.url.project === project.projectPath
+																		? html`<doc-icon
+																				class="inline-block mr-1 translate-y-0.5"
+																				size="1.2em"
+																				icon="mdi:check"
+																		  ></doc-icon>`
+																		: html`<doc-icon
+																				class="inline-block mr-1 translate-y-0.5 text-transparent"
+																				size="1.2em"
+																				icon="mdi:check"
+																		  ></doc-icon>`}
+																	<p class="truncate">
+																		${project.projectPath?.split("/").at(-2)}/${project.projectPath
+																			?.split("/")
+																			.at(-1)}
+																	</p>
+																</a>`
+													  )
+													: ""}
+											</div>
 										</div>
-									</div>
-							  </div>`
-							: ""}
+								  </div>`
+								: ""}
+						</div>
 				  </div>`
 				: ""}
 			${this.url.path === ""
@@ -906,17 +916,17 @@ export class InlangManage extends TwLitElement {
 							: this.modules
 							? html`<div class="h-full w-full">
 					<div class="md:mb-12 flex items-start justify-between flex-col-reverse md:flex-row md:gap-4">
-					<div class="md:mb-0 mb-6">
+					<div class="md:my-0 my-6">
 							${
 								this.url.install === "true"
-									? html`<h1 class="font-bold md:text-4xl text-slate-900 mb-4 text-xl">
+									? html`<h1 class="font-bold md:text-4xl text-slate-900 md:mb-4 text-xl mb-2">
 											Module successfully installed
 									  </h1>`
 									: this.url.uninstall === "true"
-									? html`<h1 class="font-bold md:text-4xl text-slate-900 mb-4 text-xl">
+									? html`<h1 class="font-bold md:text-4xl text-slate-900 md:mb-4 text-xl mb-2">
 											Module successfully uninstalled
 									  </h1>`
-									: html`<h1 class="font-bold md:text-4xl text-slate-900 mb-4 text-xl">
+									: html`<h1 class="font-bold md:text-4xl text-slate-900 md:mb-4 text-xl mb-2">
 											Manage your inlang project
 									  </h1>`
 							}
@@ -1099,7 +1109,11 @@ ${
 																this.newLanguageTag = (e.target as HTMLInputElement).value
 														}}
 														@keydown=${async (e: KeyboardEvent) => {
-															if (e.key === "Enter" && !this.newLanguageTagLoading) {
+															if (
+																e.key === "Enter" &&
+																!this.newLanguageTagLoading &&
+																this.isValidLanguageTag()
+															) {
 																;(
 																	this.shadowRoot?.querySelector(
 																		"#language-tag-input"
@@ -1108,7 +1122,10 @@ ${
 																await this.addLanguageTag()
 															}
 														}}
-														class="px-3 py-1 focus:outline-0 focus:ring-0 focus-within:border-[#098DAC] bg-white border w-44 pr-6 truncate border-slate-200 rounded-xl flex items-center justify-between gap-2"
+														class=${"px-3 py-1 focus:outline-0 focus:ring-0 bg-white border w-44 pr-6 truncate border-slate-200 rounded-xl flex items-center justify-between gap-2 " +
+														(this.newLanguageTag.length > 0 && !this.isValidLanguageTag()
+															? "focus-within:border-red-500"
+															: "focus-within:border-[#098DAC]")}
 														placeholder="Add languageTag"
 													/>
 													${this.newLanguageTagLoading
@@ -1116,6 +1133,8 @@ ${
 																<div class="h-5 w-5 border-2 border-[#098DAC] rounded-full"></div>
 																<div class="h-1/2 w-1/2 absolute top-0 left-0 z-5 bg-white"></div>
 														  </div>`
+														: !this.isValidLanguageTag()
+														? ""
 														: html`<button
 																@click=${async () => await this.addLanguageTag()}
 																class=${"text-slate-500 absolute right-0.5 top-1/2 -translate-y-1/2 text-sm w-6 h-6 mr-1 flex items-center justify-center font-medium transition-colors hover:text-slate-600 hover:bg-slate-50 rounded-md " +
@@ -1189,7 +1208,7 @@ ${
 																		</a>
 																		<a
 																			@click=${() => {
-																				posthog.capture("Uninstall module", {
+																				posthog.capture("MANAGE Uninstall module", {
 																					$set: {
 																						name:
 																							typeof this.user === "object"
@@ -1273,7 +1292,7 @@ ${
 																		</a>
 																		<a
 																			@click=${() => {
-																				posthog.capture("Uninstall module", {
+																				posthog.capture("MANAGE Uninstall module", {
 																					$set: {
 																						name:
 																							typeof this.user === "object"
