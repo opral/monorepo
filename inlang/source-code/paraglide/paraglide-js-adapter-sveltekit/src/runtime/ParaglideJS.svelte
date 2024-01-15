@@ -26,8 +26,10 @@
 	export let languageTag : T | undefined = undefined
 	export let i18n : I18n<T>;
 
+	$: autodetectedLanguage = i18n.getLanguageFromUrl($page.url)
 
-	$: lang = languageTag ?? i18n.sourceLanguageTag
+
+	$: lang = languageTag ?? autodetectedLanguage
 	$: i18n.setLanguageTag(lang)
 	$: if(browser) document.documentElement.lang = lang
 
