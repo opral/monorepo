@@ -8,7 +8,7 @@
 		"en": "A plugin to make next-intl ecosystem compatible with inlang"
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/plugins/next-intl/README.md"
+		"en": "./inlang/source-code/plugins/next-intl/README.md"
 	},
 	"keywords": [
 		"next-intl",

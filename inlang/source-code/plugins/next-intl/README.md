@@ -10,6 +10,8 @@ Add this to the modules in your `project.inlang/settings.json`
 
 ```json
 {
+	"sourceLanguageTag": "en",
+	"languageTags": ["en", "de"], // add languageTags if needed
 	"modules": [
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-next-intl@1/dist/index.js",
   	],
