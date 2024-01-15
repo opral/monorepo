@@ -130,7 +130,7 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 			log()
 		}
 
-		// https://github.com/inlang/monorepo/issues/1846
+		// https://github.com/opral/monorepo/issues/1846
 		// https://github.com/opral/monorepo/issues/1968
 		await new Promise((resolve) => setTimeout(resolve, 8002))
 		// Log the message counts

@@ -32,7 +32,7 @@ export const badge = async (urlQuery: string, projectQuery?: string) => {
 
 	const project = await loadProject({
 		projectPath: projectQuery ?? "/project.inlang",
-		nodeishFs: repo.nodeishFs,
+		repo,
 		_capture(id, props) {
 			telemetryNode.capture({
 				event: id,
@@ -40,7 +40,6 @@ export const badge = async (urlQuery: string, projectQuery?: string) => {
 				distinctId: "unknown",
 			})
 		},
-		repo,
 	})
 
 	// access all messages via inlang instance query

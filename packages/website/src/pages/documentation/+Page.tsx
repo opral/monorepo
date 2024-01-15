@@ -17,6 +17,7 @@ import NavbarIcon from "./NavbarIcon.jsx"
 import NavbarOtherPageIndicator from "./NavBarOtherPageIndicator.jsx"
 
 export type PageProps = {
+	slug: string
 	markdown: Awaited<ReturnType<any>>
 }
 
@@ -24,6 +25,27 @@ export default function Page(props: PageProps) {
 	let mobileDetailMenu: SlDetails | undefined
 	const [editLink, setEditLink] = createSignal<string | undefined>("")
 	const [markdownHeadings, setMarkdownHeadings] = createSignal<Array<string>>([])
+
+	const ogPath = () => {
+		if (props.slug) {
+			const lastWordIndex = props.slug.lastIndexOf("/")
+
+			const slug = props.slug.includes("/") ? props.slug.slice(0, lastWordIndex) : props.slug
+
+			return slug === ""
+				? "/opengraph/inlang-documentation-image.jpg"
+				: `/opengraph/generated/${slug}/${findPageBySlug(
+						currentPageContext.urlParsed.pathname
+							.replace("/" + languageTag(), "")
+							.replace("/documentation/", "")
+				  )
+						?.title.toLowerCase()
+						.replaceAll(" ", "_")
+						.replaceAll("?", "")}.jpg`
+		} else {
+			return "/opengraph/inlang-documentation-image.jpg"
+		}
+	}
 
 	createEffect(() => {
 		setMarkdownHeadings(
@@ -43,7 +65,7 @@ export default function Page(props: PageProps) {
 	createEffect(() => {
 		if (currentPageContext) {
 			setEditLink(
-				"https://github.com/inlang/monorepo/edit/main/inlang" +
+				"https://github.com/opral/monorepo/edit/main/inlang" +
 					getDocsBaseUrl(currentPageContext.urlParsed.pathname) +
 					"/" +
 					findPageBySlug(
@@ -77,9 +99,9 @@ export default function Page(props: PageProps) {
 					)?.description
 				}`}
 			/>
-			<Meta name="og:image" content="/opengraph/inlang-documentation-image.jpg" />
+			<Meta name="og:image" content={ogPath()} />
 			<Meta name="twitter:card" content="summary_large_image" />
-			<Meta name="twitter:image" content="/opengraph/inlang-documentation-image.jpg" />
+			<Meta name="twitter:image" content={ogPath()} />
 			<Meta
 				name="twitter:image:alt"
 				content="inlang's ecosystem helps organizations to go global."
@@ -288,12 +310,17 @@ function NavbarCommon(props: {
 }
 
 function findPageBySlug(slug: string) {
-	for (const [, pageArray] of Object.entries(getTableOfContents())) {
-		for (const page of pageArray) {
-			if (page.slug === slug || page.slug === slug.replace("/documentation", "")) {
-				return page
-			}
+	const tableOfContents = getTableOfContents()
+
+	for (const [, pageArray] of Object.entries(tableOfContents)) {
+		const foundPage = pageArray.find(
+			(page) => page.slug === slug || page.slug === slug.replace("/documentation", "")
+		)
+
+		if (foundPage) {
+			return foundPage
 		}
 	}
+
 	return undefined
 }

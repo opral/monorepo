@@ -17,14 +17,21 @@ export const listProjects = async (
 		const files = await nodeishFs.readdir(path)
 		for (const file of files) {
 			const filePath = `${path}/${file}`
-			const stats = await nodeishFs.stat(filePath)
-			if (stats.isDirectory()) {
-				if (file === "node_modules") continue
-				if (file.endsWith(".inlang")) {
-					projects.push({ projectPath: filePath })
-				} else {
-					await searchDir(filePath, depth + 1)
+			try {
+				const stats = await nodeishFs.stat(filePath)
+				if (stats.isDirectory()) {
+					if (file === "node_modules") {
+						continue
+					}
+
+					if (file.endsWith(".inlang")) {
+						projects.push({ projectPath: filePath })
+					} else {
+						await searchDir(filePath, depth + 1)
+					}
 				}
+			} catch {
+				continue
 			}
 		}
 	}
