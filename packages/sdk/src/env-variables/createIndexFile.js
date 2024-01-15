@@ -16,10 +16,13 @@ import path from "node:path"
 const dirname = path.dirname(url.fileURLToPath(import.meta.url))
 
 await fs.writeFile(
-	dirname + "/index.js",
+	dirname + "/index.ts",
 	`
 export const ENV_VARIABLES = {
   PUBLIC_POSTHOG_TOKEN: "${process.env.PUBLIC_POSTHOG_TOKEN}",
 }
 `
 )
+
+// eslint-disable-next-line no-console
+console.log("✅ Created env variable index file.")
