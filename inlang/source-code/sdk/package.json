@@ -17,8 +17,9 @@
 		"./src"
 	],
 	"scripts": {
-		"build": "tsc --build",
-		"dev": "tsc --watch",
+		"build": "npm run prepare-env-variables && tsc --build",
+		"dev": "npm run prepare-env-variables && tsc --watch",
+		"prepare-env-variables": "node ./src/env-variables/createIndexFile.js",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
