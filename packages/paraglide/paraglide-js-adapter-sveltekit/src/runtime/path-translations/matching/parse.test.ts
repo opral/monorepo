@@ -1,18 +1,14 @@
 import { describe, it, expect } from "vitest"
 import { parsePathDefinition } from "./parse"
 
-describe("parsePathDefinition", () => {
+describe.only("parsePathDefinition", () => {
 	it("parses a static path", () => {
 		const parsed = parsePathDefinition("/foo/bar")
 
 		expect(parsed).toEqual([
 			{
 				type: "static",
-				value: "foo",
-			},
-			{
-				type: "static",
-				value: "bar",
+				value: "/foo/bar",
 			},
 		])
 	})
@@ -23,71 +19,47 @@ describe("parsePathDefinition", () => {
 		expect(parsed).toEqual([
 			{
 				type: "static",
-				value: "foo",
+				value: "/foo/",
 			},
 			{
 				type: "param",
 				name: "id",
-				optional: false,
-				catchAll: false,
-			},
-		])
-	})
-
-	it("parses an optional param", () => {
-		const parsed = parsePathDefinition("/foo/[[id]]")
-		expect(parsed).toEqual([
-			{
-				type: "static",
-				value: "foo",
-			},
-			{
-				type: "param",
-				name: "id",
-				optional: true,
-				catchAll: false,
-			},
-		])
-	})
-
-	it("parses a catchall param", () => {
-		const parsed = parsePathDefinition("/foo/[...slug]")
-		expect(parsed).toEqual([
-			{
-				type: "static",
-				value: "foo",
-			},
-			{
-				type: "param",
-				name: "slug",
-				optional: false,
-				catchAll: true,
 			},
 		])
 	})
 
 	it("parses multiple params", () => {
-		const parsed = parsePathDefinition("/foo/[id]/bar/[...slug]")
+		const parsed = parsePathDefinition("/foo/[id]/bar/[slug]")
 		expect(parsed).toEqual([
 			{
 				type: "static",
-				value: "foo",
+				value: "/foo/",
 			},
 			{
 				type: "param",
 				name: "id",
-				optional: false,
-				catchAll: false,
 			},
 			{
 				type: "static",
-				value: "bar",
+				value: "/bar/",
 			},
 			{
 				type: "param",
 				name: "slug",
-				optional: false,
-				catchAll: true,
+			},
+		])
+	})
+
+	it("parses a param that's not it's own segment", () => {
+		const parsed = parsePathDefinition("/foo/bar-[id]")
+		expect(parsed).toEqual([
+			{
+				type: "static",
+				value: "/foo/bar-",
+			},
+			{
+				type: "param",
+				name: "id",
 			},
 		])
 	})
