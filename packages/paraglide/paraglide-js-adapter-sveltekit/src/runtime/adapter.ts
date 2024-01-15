@@ -1,5 +1,6 @@
 import { createHandle, type HandleOptions } from "./hooks/handle.js"
 import { createReroute } from "./hooks/reroute.js"
+import { base } from "$app/paths"
 import type { PathTranslations } from "./path-translations/types.js"
 import type { Paraglide } from "./runtime.js"
 
@@ -46,6 +47,14 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18
 		 */
 		/* @__SIDE_EFFECT_FREE__ */
 		handle: (options: HandleOptions) => createHandle(runtime, options),
+
+		getLanguageFromUrl(url: URL) {
+			const pathWithLanguage = url.pathname.slice(base.length)
+			const [lang, ...parts] = pathWithLanguage.split("/").filter(Boolean)
+
+			if (runtime.isAvailableLanguageTag(lang)) return lang
+			return runtime.sourceLanguageTag
+		},
 	}
 }
 
