@@ -17,7 +17,7 @@ const Lix = () => {
 				</div>
 				<Button
 					type="textPrimary"
-					href="https://github.com/inlang/monorepo/tree/main/lix"
+					href="https://github.com/opral/monorepo/tree/main/lix"
 					class="-mb-[10px]"
 				>
 					{m.home_lix_button()}

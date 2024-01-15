@@ -12,6 +12,8 @@ import IconGithub from "~icons/cib/github"
  * 		signInDialog?.show();
  * 	}
  */
+export const [signInModalOpen, setSignInModalOpen] = createSignal(false)
+
 export function SignInDialog(props: {
 	/** forwarding the ref */
 	ref: SlDialog
@@ -19,14 +21,13 @@ export function SignInDialog(props: {
 }) {
 	// web component slots load eagarly. applying manual conditional rendering
 	// combats flickering on initial render
-	const [isShown, setIsShown] = createSignal(false)
 	return (
 		<sl-dialog
 			ref={props.ref}
-			on:sl-show={() => setIsShown(true)}
-			on:sl-after-hide={() => setIsShown(false)}
+			on:sl-show={() => setSignInModalOpen(true)}
+			on:sl-after-hide={() => setSignInModalOpen(false)}
 		>
-			<Show when={isShown()}>
+			<Show when={signInModalOpen()}>
 				<h3 slot="label">Sign in</h3>
 				<p>To conduct changes, you must sign in with a GitHub account.</p>
 				<sl-button
