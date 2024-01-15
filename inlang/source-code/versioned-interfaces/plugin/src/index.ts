@@ -4,7 +4,7 @@ export { Plugin, type NodeishFilesystemSubset } from "./interface.js"
 /**
  * -------- RE-EXPORTS --------
  *
- * See https://github.com/inlang/monorepo/issues/1184.
+ * See https://github.com/opral/monorepo/issues/1184.
  */
 
 export * from "@inlang/message"
