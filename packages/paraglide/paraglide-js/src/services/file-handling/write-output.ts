@@ -1,4 +1,4 @@
-import type nodeFsPromises from "node:fs/promises"
+import type nodeFsPromises from "fs/promises"
 import path from "node:path"
 import crypto from "node:crypto"
 

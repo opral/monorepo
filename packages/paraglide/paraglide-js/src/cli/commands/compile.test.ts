@@ -1,7 +1,7 @@
 import { vi, test, expect, beforeEach } from "vitest"
 import memfs from "memfs"
-import mockedFs from "node:fs/promises"
-import fs from "node:fs"
+import mockedFs from "fs/promises"
+import nodeFsSync from "node:fs"
 import { compileCommand } from "./compile.js"
 import type { ProjectSettings } from "@inlang/sdk"
 import { createMessage, createNodeishMemoryFs } from "@inlang/sdk/test-utilities"
@@ -44,7 +44,7 @@ test("it should exit if the project has errors", async () => {
 
 test("it should compile into the default outdir", async () => {
 	const _fs = mockFs({
-		"/plugin.js": fs.readFileSync(
+		"/plugin.js": nodeFsSync.readFileSync(
 			// using the inlang-message-format plugin
 			resolve(__dirname, "../../../../../plugins/inlang-message-format/dist/index.js"),
 			{ encoding: "utf-8" }
@@ -77,7 +77,7 @@ test("it should compile a project into the provided outdir", async () => {
 	const outdirs = ["/paraglide-js", "./paraglide-js", "/src/paraglide-js", "./src/paraglide-js"]
 
 	const _fs = mockFs({
-		"/plugin.js": fs.readFileSync(
+		"/plugin.js": nodeFsSync.readFileSync(
 			// using the inlang-message-format plugin
 			resolve(__dirname, "../../../../../plugins/inlang-message-format/dist/index.js"),
 			{ encoding: "utf-8" }
