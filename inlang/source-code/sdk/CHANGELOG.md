@@ -41,7 +41,7 @@
 
 ### Minor Changes
 
-- 9212cc19d: fix: https://github.com/inlang/monorepo/issues/1647
+- 9212cc19d: fix: https://github.com/opral/monorepo/issues/1647
 
 ## 0.17.0
 
@@ -111,7 +111,7 @@
 
 ### Minor Changes
 
-- 936cfa401: fix [[#1456](https://github.com/inlang/monorepo/issues/1456)]: resolving modules from relative paths sometimes lead to incorrect file paths and subsequent import failures
+- 936cfa401: fix [[#1456](https://github.com/opral/monorepo/issues/1456)]: resolving modules from relative paths sometimes lead to incorrect file paths and subsequent import failures
 
 ## 0.11.0
 

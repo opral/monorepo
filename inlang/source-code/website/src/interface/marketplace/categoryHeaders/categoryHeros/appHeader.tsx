@@ -18,7 +18,7 @@ const AppHeader = () => {
 	// 			"The Fink message editor enables you to work with globalized codebases in your browser...",
 	// 		pricing: "Free Beta",
 	// 		image:
-	// 			"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/editor/assets/fink-logo.webp",
+	// 			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/fink-logo.webp",
 	// 		cover: "/images/fink-cover.png",
 	// 	},
 	// 	{
@@ -28,7 +28,7 @@ const AppHeader = () => {
 	// 			"Supercharge i18n within VS Code — Visualize, edit & lint translated strings at a glance.",
 	// 		pricing: "Free",
 	// 		image:
-	// 			"https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/ide-extension/assets/icon-vscode-marketplace.png",
+	// 			"https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/ide-extension/assets/icon-vscode-marketplace.png",
 	// 		cover: "/images/ide-cover.png",
 	// 	},
 	// 	{

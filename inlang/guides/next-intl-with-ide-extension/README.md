@@ -1,5 +1,5 @@
 
-![image](https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/next-intl-with-ide-extension/assets/next-intl-guide.png)
+![image](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/next-intl-with-ide-extension/assets/next-intl-guide.png)
 
 ## What is this about?
 

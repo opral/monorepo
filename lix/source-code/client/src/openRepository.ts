@@ -27,6 +27,7 @@ const {
 	addRemote,
 	fetch: gitFetch,
 	commit: isoCommit,
+	findRoot,
 } = isoGit
 
 const verbose = false
@@ -36,7 +37,7 @@ const verbose = false
 const whitelistedExperimentalRepos = [
 	"inlang/example",
 	"inlang/ci-test-repo",
-	"inlang/monorepo",
+	"opral/monorepo",
 	"inlang/example-test",
 
 	"janfjohannes/inlang-example",
@@ -44,6 +45,18 @@ const whitelistedExperimentalRepos = [
 
 	"niklasbuchfink/appflowy",
 ]
+
+export async function findRepoRoot(args: {
+	nodeishFs: NodeishFilesystem
+	path: string
+}): Promise<string | undefined> {
+	const gitroot = await findRoot({
+		fs: args.nodeishFs,
+		filepath: args.path,
+	}).catch(() => undefined)
+
+	return gitroot ? "file://" + gitroot : undefined
+}
 
 export async function openRepository(
 	url: string,
@@ -56,16 +69,53 @@ export async function openRepository(
 ): Promise<Repository> {
 	const rawFs = args.nodeishFs
 
+	// fixme: propper error handling with error return values and no signal dependency
 	const [errors, setErrors] = createSignal<Error[]>([])
 
+	// TODO: use propper shallow .git format and checks
+
 	// the url format for lix urls is
-	// https://lix.inlang.com/git/github.com/inlang/monorepo
+	// https://lix.inlang.com/git/github.com/opral/monorepo
 	// proto:// lixServer / namespace / repoHost / owner / repoName
 	// namespace is ignored until switching from git.inlang.com to lix.inlang.com and can eveolve in future to be used for repoType, api type or feature group
 	// the url format for direct github urls without a lix server is https://github.com/inlang/examplX (only per domain-enabled git hosters will be supported, currently just gitub)
 	// the url for opening a local repo allready in the fs provider is file://path/to/repo (not implemented yet)
 
-	const { protocol, lixHost, repoHost, owner, repoName } = parseLixUri(url)
+	// TODO: check for same origin
+	let doLixClone = false
+
+	let branchName = args.branch
+
+	// the directory we use for all git operations as repo root, if we are interested in a repo subdirectory we have to append this
+	// TODO: add more tests for non root dir command
+	let dir = "/"
+
+	if (url.startsWith("file:")) {
+		dir = url.replace("file://", "")
+
+		const remotes = await listRemotes({
+			fs: args.nodeishFs,
+			dir: url.replace("file://", ""),
+		}).catch(() => [])
+		const origin = remotes.find(({ remote }) => remote === "origin")?.url || ""
+
+		if (origin.startsWith("git@github.com:")) {
+			url = origin.replace("git@github.com:", "https://github.com/")
+		} else {
+			url = origin
+		}
+	} else {
+		// Simple check for existing git repos
+		const maybeGitDir = await rawFs.lstat(".git").catch((error) => ({ error }))
+		if ("error" in maybeGitDir) {
+			doLixClone = true
+		}
+	}
+
+	const { protocol, lixHost, repoHost, owner, repoName, username, password } = parseLixUri(url)
+	if (username || password) {
+		console.error("username and password are not supported yet")
+	}
 
 	const gitProxyUrl = lixHost ? `${protocol}//${lixHost}/git-proxy/` : ""
 	const gitHubProxyUrl = lixHost ? `${protocol}//${lixHost}/github-proxy/` : ""
@@ -90,7 +140,7 @@ export async function openRepository(
 	})
 
 	// TODO: support for url scheme to use local repo already in the fs
-	const gitUrl = `https://${repoHost}/${owner}/${repoName}`
+	const gitUrl = repoName ? `https://${repoHost}/${owner}/${repoName}` : ""
 
 	const enableExperimentalFeatures = whitelistedExperimentalRepos.includes(
 		`${owner}/${repoName}`.toLocaleLowerCase()
@@ -102,14 +152,9 @@ export async function openRepository(
 
 	// Bail commit/ push on errors that are relevant or unknown
 
-	// the directory we use for all git operations
-	const dir = "/"
-
 	let pending: Promise<void | { error: Error }> | undefined
-	// Simpel check for existing git repos
-	// TODO: check for same origin
-	const maybeGitDir = await rawFs.lstat("/.git").catch((error) => ({ error }))
-	if ("error" in maybeGitDir) {
+
+	if (doLixClone) {
 		pending = clone({
 			fs: withLazyFetching({ nodeishFs: rawFs, verbose, description: "clone" }),
 			http: makeHttpClient({
@@ -117,7 +162,7 @@ export async function openRepository(
 				description: "clone",
 
 				onReq: ({ url, body }: { url: string; body: any }) => {
-					return optimizedRefsReq({ url, body, addRef: args.branch })
+					return optimizedRefsReq({ url, body, addRef: branchName })
 				},
 
 				onRes: optimizedRefsRes,
@@ -127,7 +172,9 @@ export async function openRepository(
 			url: gitUrl,
 			singleBranch: true,
 			noCheckout: true,
-			ref: args.branch,
+			ref: branchName,
+
+			// TODO: use only first and last commit in lazy clone? (we need first commit for repo id)
 			depth: 1,
 			noTags: true,
 		})
@@ -139,7 +186,7 @@ export async function openRepository(
 						description: "checkout",
 					}),
 					dir,
-					ref: args.branch,
+					ref: branchName,
 					// filepaths: ["resources/en.json", "resources/de.json", "project.inlang.json"],
 				})
 			})
@@ -197,6 +244,20 @@ export async function openRepository(
 			}
 		},
 
+		async checkout({ branch }: { branch: string }) {
+			branchName = branch
+
+			await checkout({
+				fs: withLazyFetching({
+					nodeishFs: rawFs,
+					verbose,
+					description: "checkout",
+				}),
+				dir,
+				ref: branchName,
+			})
+		},
+
 		status(cmdArgs) {
 			return status({
 				fs: withLazyFetching({
@@ -240,7 +301,7 @@ export async function openRepository(
 					depth: 1,
 					singleBranch: true,
 					dir,
-					ref: args.branch,
+					ref: branchName,
 					remote: "upstream",
 					http: makeHttpClient({ verbose, description: "forkStatus" }),
 					fs: forkFs,
@@ -437,7 +498,13 @@ export async function openRepository(
 		 *
 		 * The function ensures that the same orgin is always returned for the same repository.
 		 */
-		async getOrigin(): Promise<string> {
+		async getOrigin({ safeHashOnly = false } = {}): Promise<string> {
+			if (safeHashOnly) {
+				const safeOriginHash = await hash(`${lixHost}__${repoHost}__${owner}__${repoName}`)
+				return safeOriginHash
+			}
+
+			// TODO: this flow is obsolete and can be unified with the initialization of the repo
 			const repo = await this
 			const remotes: Array<{ remote: string; url: string }> | undefined = await repo.listRemotes()
 
@@ -455,7 +522,7 @@ export async function openRepository(
 		},
 
 		async getCurrentBranch() {
-			// TODO: make stateless
+			// TODO: make stateless?
 			return (
 				(await currentBranch({
 					fs: withLazyFetching({
@@ -503,6 +570,58 @@ export async function openRepository(
 			},
 		}),
 
+		async getFirstCommitHash() {
+			const getFirstCommitFs = withLazyFetching({
+				nodeishFs: rawFs,
+				verbose,
+				description: "getFirstCommitHash",
+				intercept: delayedAction,
+			})
+
+			if (doLixClone) {
+				try {
+					await gitFetch({
+						singleBranch: true,
+						dir,
+						depth: 2147483647, // the magic number for all commits
+						http: makeHttpClient({ verbose, description: "getFirstCommitHash" }),
+						corsProxy: gitProxyUrl,
+						fs: getFirstCommitFs,
+					})
+				} catch {
+					return undefined
+				}
+			}
+
+			let firstCommitHash: string | undefined = "HEAD"
+			for (;;) {
+				const commits: Awaited<ReturnType<typeof log>> | { error: any } = await log({
+					fs: getFirstCommitFs,
+					depth: 550,
+					dir,
+					ref: firstCommitHash,
+				}).catch((error) => {
+					return { error }
+				})
+
+				if ("error" in commits) {
+					firstCommitHash = undefined
+					break
+				}
+
+				const lastHashInPage: undefined | string = commits.at(-1)?.oid
+				if (lastHashInPage) {
+					firstCommitHash = lastHashInPage
+				}
+
+				if (commits.length < 50) {
+					break
+				}
+			}
+
+			return firstCommitHash
+		},
+
 		/**
 		 * Additional information about a repository provided by GitHub.
 		 */
@@ -521,43 +640,28 @@ export async function openRepository(
 
 			if ("error" in res) {
 				return { error: res.error }
-			}
-
-			const {
-				data: {
-					id: githubId,
-					name,
-					private: isPrivate,
-					fork: isFork,
-					parent,
-					owner: ownerMetaData,
-					permissions,
-				},
-			} = res
-
-			const id = await hash(`${githubId}`)
-
-			return {
-				id,
-				name,
-				isPrivate,
-				isFork,
-				permissions: {
-					admin: permissions?.admin || false,
-					push: permissions?.push || false,
-					pull: permissions?.pull || false,
-				},
-				owner: {
-					name: ownerMetaData.name || undefined,
-					email: ownerMetaData.email || undefined,
-					login: ownerMetaData.login,
-				},
-				parent: parent
-					? {
-							url: transformRemote(parent.git_url),
-							fullName: parent.full_name,
-					  }
-					: undefined,
+			} else {
+				return {
+					name: res.data.name,
+					isPrivate: res.data.private,
+					isFork: res.data.fork,
+					permissions: {
+						admin: res.data.permissions?.admin || false,
+						push: res.data.permissions?.push || false,
+						pull: res.data.permissions?.pull || false,
+					},
+					owner: {
+						name: res.data.owner.name || undefined,
+						email: res.data.owner.email || undefined,
+						login: res.data.owner.login,
+					},
+					parent: res.data.parent
+						? {
+								url: transformRemote(res.data.parent.git_url),
+								fullName: res.data.parent.full_name,
+						  }
+						: undefined,
+				}
 			}
 		},
 	}
