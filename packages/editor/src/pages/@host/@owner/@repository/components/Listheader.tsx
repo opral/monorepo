@@ -185,7 +185,7 @@ export const ListHeader = () => {
 							</Show>
 							<Show when={project()?.installed.messageLintRules().length !== 0}>
 								{/* @ts-ignore */}
-								<IconAdd slot="prefix" class="w-4 h-4 -mx-0.5" />
+								<IconAdd slot="prefix" class="w-5 h-5 -mx-1" />
 							</Show>
 							</sl-button>
 						</sl-tooltip>
