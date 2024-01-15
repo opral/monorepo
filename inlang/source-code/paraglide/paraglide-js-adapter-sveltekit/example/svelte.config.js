@@ -17,6 +17,9 @@ const config = {
 			$paraglide: "./src/paraglide/",
 			$lib: "./src/lib/",
 		},
+		paths: {
+			base: "/base",
+		},
 	},
 
 	extensions: [".svelte", ".svx"],
