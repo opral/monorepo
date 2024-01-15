@@ -1,5 +1,6 @@
 import { createUnplugin } from "unplugin"
 import { Message, ProjectSettings, loadProject, type InlangProject } from "@inlang/sdk"
+import { openRepository } from "@lix-js/client"
 import path from "node:path"
 import fs from "node:fs/promises"
 import { compile, writeOutput, Logger } from "@inlang/paraglide-js/internal"
@@ -59,9 +60,14 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 	let project: InlangProject | undefined = undefined
 	async function getProject(): Promise<InlangProject> {
 		if (project) return project
+
+		const repo = await openRepository("file://", {
+			nodeishFs: fs,
+		})
+
 		project = await loadProject({
 			projectPath: path.resolve(process.cwd(), options.project),
-			nodeishFs: fs,
+			repo,
 		})
 		return project
 	}

@@ -11,6 +11,7 @@ import { version } from "../state.js"
 import { telemetry } from "../../services/telemetry/implementation.js"
 import { Logger } from "../../services/logger/index.js"
 import dedent from "dedent"
+import { openRepository } from "@lix-js/client"
 
 // TODO add a project UUID to the tele.groups internal #196
 // import { gitOrigin } from "../../services/telemetry/implementation.js"
@@ -84,10 +85,13 @@ export const maybeAddVsCodeExtension = async (args: { projectPath: string }, log
 		return
 	}
 
+	const repo = await openRepository("file://", {
+		nodeishFs: fs,
+	})
+
 	const project = await loadProject({
 		projectPath: resolve(process.cwd(), args.projectPath),
-		//@ts-ignore
-		nodeishFs: fs,
+		repo,
 	})
 
 	const settings = project.settings()
@@ -159,11 +163,16 @@ export const existingProjectFlow = async (
 	if (selection === "newProject") {
 		return createNewProjectFlow(logger)
 	}
-	const project = await loadProject({
-		projectPath: resolve(process.cwd(), args.existingProjectPath),
-		//@ts-ignore
+
+	const repo = await openRepository("file://", {
 		nodeishFs: fs,
 	})
+
+	const project = await loadProject({
+		projectPath: resolve(process.cwd(), args.existingProjectPath),
+		repo,
+	})
+
 	if (project.errors().length > 0) {
 		logger.error("The project contains errors: ")
 		for (const error of project.errors()) {
@@ -180,11 +189,16 @@ export const createNewProjectFlow = async (logger: Logger) => {
 		DEFAULT_PROJECT_PATH + "/settings.json",
 		JSON.stringify(newProjectTemplate, undefined, 2)
 	)
-	const project = await loadProject({
-		projectPath: resolve(process.cwd(), DEFAULT_PROJECT_PATH),
-		//@ts-ignore
+
+	const repo = await openRepository("file://", {
 		nodeishFs: fs,
 	})
+
+	const project = await loadProject({
+		projectPath: resolve(process.cwd(), DEFAULT_PROJECT_PATH),
+		repo,
+	})
+
 	if (project.errors().length > 0) {
 		logger.warn(
 			"Failed to create a new inlang project.\n\nThis is likely an internal bug. Please file an issue at https://github.com/opral/monorepo."

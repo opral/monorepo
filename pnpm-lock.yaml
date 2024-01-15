@@ -1376,6 +1376,9 @@ importers:
       '@inlang/sdk':
         specifier: workspace:*
         version: link:../../sdk
+      '@lix-js/client':
+        specifier: workspace:*
+        version: link:../../../../lix/source-code/client
       unplugin:
         specifier: 1.5.1
         version: 1.5.1
