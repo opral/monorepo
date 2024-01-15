@@ -194,6 +194,14 @@ export class InlangManage extends TwLitElement {
 			.regex(/github/)
 			.safeParse(this.repoURL).success
 
+	isValidLanguageTag = () =>
+		z
+			.string()
+			.regex(
+				/^((?<grandfathered>(en-GB-oed|i-ami|i-bnn|i-default|i-enochian|i-hak|i-klingon|i-lux|i-mingo|i-navajo|i-pwn|i-tao|i-tay|i-tsu|sgn-BE-FR|sgn-BE-NL|sgn-CH-DE)|(art-lojban|cel-gaulish|no-bok|no-nyn|zh-guoyu|zh-hakka|zh-min|zh-min-nan|zh-xiang))|((?<language>([A-Za-z]{2,3}(-(?<extlang>[A-Za-z]{3}(-[A-Za-z]{3}){0,2}))?))(-(?<script>[A-Za-z]{4}))?(-(?<region>[A-Za-z]{2}|[0-9]{3}))?(-(?<variant>[A-Za-z0-9]{5,8}|[0-9][A-Za-z0-9]{3}))*))$/
+			)
+			.safeParse(this.newLanguageTag).success
+
 	override async connectedCallback() {
 		super.connectedCallback()
 
@@ -1101,7 +1109,11 @@ ${
 																this.newLanguageTag = (e.target as HTMLInputElement).value
 														}}
 														@keydown=${async (e: KeyboardEvent) => {
-															if (e.key === "Enter" && !this.newLanguageTagLoading) {
+															if (
+																e.key === "Enter" &&
+																!this.newLanguageTagLoading &&
+																this.isValidLanguageTag()
+															) {
 																;(
 																	this.shadowRoot?.querySelector(
 																		"#language-tag-input"
@@ -1110,7 +1122,10 @@ ${
 																await this.addLanguageTag()
 															}
 														}}
-														class="px-3 py-1 focus:outline-0 focus:ring-0 focus-within:border-[#098DAC] bg-white border w-44 pr-6 truncate border-slate-200 rounded-xl flex items-center justify-between gap-2"
+														class=${"px-3 py-1 focus:outline-0 focus:ring-0 bg-white border w-44 pr-6 truncate border-slate-200 rounded-xl flex items-center justify-between gap-2 " +
+														(this.newLanguageTag.length > 0 && !this.isValidLanguageTag()
+															? "focus-within:border-red-500"
+															: "focus-within:border-[#098DAC]")}
 														placeholder="Add languageTag"
 													/>
 													${this.newLanguageTagLoading
@@ -1118,6 +1133,8 @@ ${
 																<div class="h-5 w-5 border-2 border-[#098DAC] rounded-full"></div>
 																<div class="h-1/2 w-1/2 absolute top-0 left-0 z-5 bg-white"></div>
 														  </div>`
+														: !this.isValidLanguageTag()
+														? ""
 														: html`<button
 																@click=${async () => await this.addLanguageTag()}
 																class=${"text-slate-500 absolute right-0.5 top-1/2 -translate-y-1/2 text-sm w-6 h-6 mr-1 flex items-center justify-center font-medium transition-colors hover:text-slate-600 hover:bg-slate-50 rounded-md " +
