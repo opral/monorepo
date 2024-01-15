@@ -317,7 +317,7 @@ export class InlangManage extends TwLitElement {
 
 		this.languageTags = this.languageTags?.filter((tag) => tag.name !== languageTag)
 
-		posthog.capture("removed languageTag", {
+		posthog.capture("MANAGE removed languageTag", {
 			languageTag,
 		})
 	}
@@ -1191,7 +1191,7 @@ ${
 																		</a>
 																		<a
 																			@click=${() => {
-																				posthog.capture("Uninstall module", {
+																				posthog.capture("MANAGE Uninstall module", {
 																					$set: {
 																						name:
 																							typeof this.user === "object"
@@ -1275,7 +1275,7 @@ ${
 																		</a>
 																		<a
 																			@click=${() => {
-																				posthog.capture("Uninstall module", {
+																				posthog.capture("MANAGE Uninstall module", {
 																					$set: {
 																						name:
 																							typeof this.user === "object"
