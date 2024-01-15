@@ -74,6 +74,9 @@ export const setSearchParams = ({ key, value }: SearchParamsType) => {
 			searchParamsObj.lang = []
 			searchParamsObj.lang = [...value]
 			break
+		case "project":
+			searchParamsObj.project = value
+			break
 	}
 
 	//put search params in new url

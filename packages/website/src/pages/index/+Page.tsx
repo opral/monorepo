@@ -9,6 +9,7 @@ import * as m from "#src/paraglide/messages.js"
 import { renderLocales } from "#src/renderer/renderLocales.js"
 import { i18nRouting } from "#src/renderer/+onBeforeRoute.js"
 import Personas from "./custom_section/Personas/index.jsx"
+import ExtendSection from "./custom_section/Extend/index.jsx"
 
 export default function Page() {
 	return (
@@ -43,6 +44,8 @@ export default function Page() {
 				<HeroSearch />
 				<Features />
 				<Personas />
+				<ExtendSection />
+				{/* <EcosystemComponents /> */}
 				<Guides />
 				<ParaglideHeader />
 			</MarketplaceLayout>

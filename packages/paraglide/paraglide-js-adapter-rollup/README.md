@@ -78,4 +78,4 @@ Happy Hacking.
 
 ## Example
 
-You can find an example project [here](https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-rollup/example)
+You can find an example project [here](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-rollup/example)

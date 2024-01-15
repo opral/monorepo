@@ -4,7 +4,6 @@ import { showToast } from "../components/Toast.jsx"
 import { posthog as telemetryBrowser } from "posthog-js"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import IconSignOut from "~icons/material-symbols/logout-rounded"
-import IconExpand from "~icons/material-symbols/expand-more-rounded"
 
 /**
  * Dropdown with user information and actions.
@@ -41,10 +40,7 @@ function UserDropdown() {
 				{(user) => (
 					<sl-dropdown>
 						<div slot="trigger" class="flex items-center cursor-pointer">
-							<img src={user().avatarUrl} alt="user avatar" class="w-6 h-6 rounded-full" />
-							<div class="w-5 h-5 opacity-50">
-								<IconExpand />
-							</div>
+							<img src={user().avatarUrl} alt="user avatar" class="w-8 h-8 rounded-full" />
 						</div>
 						<sl-menu>
 							<div class="px-7 py-2 bg-surface-1 text-on-surface">

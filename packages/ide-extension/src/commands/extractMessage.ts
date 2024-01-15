@@ -73,7 +73,7 @@ export const extractMessageCommand = {
 			// TODO #152
 			return env.openExternal(
 				Uri.parse(
-					"https://github.com/inlang/monorepo/tree/main/inlang/source-code/ide-extension#3%EF%B8%8F%E2%83%A3-configuration"
+					"https://github.com/opral/monorepo/tree/main/inlang/source-code/ide-extension#3%EF%B8%8F%E2%83%A3-configuration"
 				)
 			)
 		}

@@ -14,7 +14,7 @@ Paraglide avoids this in a few ways. First, it's runtime is tiny, usually less t
 
 Finally, Paraglide is fully typesafe. This means you get autocompletion on which messages are available, and on which arguments they take.
 
-## Setup
+## Setup
 
 This guide assumes that you already have an Astro project set up, with some basic i18n routing.
 If you don't, you can follow the [official Astro Quickstart](https://docs.astro.build/en/install/auto/).
@@ -164,7 +164,7 @@ The challenge is in calling `setLanguageTag` at the right time. We need to do it
 
 Fortunately this isn't hard.
 
-### Adding Middleware
+### Adding Middleware
 To set the language on the Server we can use Astro's [Middleware](https://docs.astro.build/en/guides/middleware/#_top). Middleware is a function that runs on the server before the page is rendered. We can use it to set the language tag.
 
 
@@ -278,6 +278,6 @@ import * as m from "../paraglide/messages"
 We encourage you to run `npm run build` and inspect the output. You will see that only the message `m.count` is shipped to the client. Any other messages are not included in the bundle.
 
 ## What's Next?
-There is a full Astro example project using Paraglide [on our GitHub](https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-astro/example).
+There is a full Astro example project using Paraglide [on our GitHub](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-astro/example).
 
-If you have any suggestions for this guide, please reach out to us on [Discord](https://discord.gg/gdMPPWy57R), or open an issue on [GitHub](https://www.github.com/inlang/monorepo/issues). If you have trouble following, don't hesitate to ask for help. We are happy to help getting you set up.
+If you have any suggestions for this guide, please reach out to us on [Discord](https://discord.gg/gdMPPWy57R), or open an issue on [GitHub](https://www.github.com/opral/monorepo/issues). If you have trouble following, don't hesitate to ask for help. We are happy to help getting you set up.

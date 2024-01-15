@@ -1,6 +1,6 @@
 {
 	"id": "guide.nilsjacobsen.ecosystemCompatible",
-	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/ecosystem-compatible/assets/compatible-badge.png",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/ecosystem-compatible/assets/compatible-badge.png",
 	"displayName": {
 		"en": "inlang ecosystem compatible"
 	},

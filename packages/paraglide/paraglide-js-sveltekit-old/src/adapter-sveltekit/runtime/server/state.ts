@@ -40,7 +40,7 @@ export const initState = async () => {
 
 // ------------------------------------------------------------------------------------------------
 
-// TODO: fix resources if needed with fallback logic https://github.com/inlang/monorepo/discussions/1267
+// TODO: fix resources if needed with fallback logic https://github.com/opral/monorepo/discussions/1267
 export const loadMessages = (languageTag: LanguageTag) =>
 	state?.messages.map((message) => ({
 		...message,

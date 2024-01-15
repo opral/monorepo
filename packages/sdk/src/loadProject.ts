@@ -23,12 +23,12 @@ import { ProjectSettings, Message, type NodeishFilesystemSubset } from "./versio
 import { tryCatch, type Result } from "@inlang/result"
 import { migrateIfOutdated } from "@inlang/project-settings/migration"
 import { createNodeishFsWithAbsolutePaths } from "./createNodeishFsWithAbsolutePaths.js"
-import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
+import { normalizePath } from "@lix-js/fs"
 import { isAbsolutePath } from "./isAbsolutePath.js"
 import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
 import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
+import { maybeCreateFirstProjectId } from "./migrations/maybeCreateFirstProjectId.js"
 import type { Repository } from "@lix-js/client"
-import { generateProjectId } from "./generateProjectId.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -36,24 +36,42 @@ const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
  * Creates an inlang instance.
  *
  * @param projectPath - Absolute path to the inlang settings file.
- * @param nodeishFs - Filesystem that implements the NodeishFilesystemSubset interface.
+ * @param @deprecated nodeishFs - Filesystem that implements the NodeishFilesystemSubset interface.
  * @param _import - Use `_import` to pass a custom import function for testing,
  *   and supporting legacy resolvedModules such as CJS.
  * @param _capture - Use `_capture` to capture events for analytics.
  *
  */
-export const loadProject = async (args: {
+export async function loadProject(args: {
 	projectPath: string
-	repo?: Repository
-	nodeishFs: NodeishFilesystem
+	nodeishFs: Repository["nodeishFs"]
 	_import?: ImportFunction
 	_capture?: (id: string, props: Record<string, unknown>) => void
-}): Promise<InlangProject> => {
+}): Promise<InlangProject>
+
+/**
+ * @param projectPath - Absolute path to the inlang settings file.
+ * @param repo - An instance of a lix repo as returned by `openRepository`.
+ * @param _import - Use `_import` to pass a custom import function for testing,
+ *   and supporting legacy resolvedModules such as CJS.
+ * @param _capture - Use `_capture` to capture events for analytics.
+ *
+ */
+export async function loadProject(args: {
+	projectPath: string
+	repo: Repository
+	_import?: ImportFunction
+	_capture?: (id: string, props: Record<string, unknown>) => void
+}): Promise<InlangProject>
+
+export async function loadProject(args: {
+	projectPath: string
+	repo?: Repository
+	_import?: ImportFunction
+	_capture?: (id: string, props: Record<string, unknown>) => void
+	nodeishFs?: Repository["nodeishFs"]
+}): Promise<InlangProject> {
 	const projectPath = normalizePath(args.projectPath)
-
-	// -- migrate if outdated ------------------------------------------------
-
-	await maybeMigrateToDirectory({ nodeishFs: args.nodeishFs, projectPath })
 
 	// -- validation --------------------------------------------------------
 	// the only place where throwing is acceptable because the project
@@ -72,35 +90,29 @@ export const loadProject = async (args: {
 		)
 	}
 
+	let fs: Repository["nodeishFs"]
+	if (args.nodeishFs) {
+		// TODO: deprecate
+		fs = args.nodeishFs
+	} else if (args.repo) {
+		fs = args.repo.nodeishFs
+	} else {
+		throw new LoadProjectInvalidArgument(`Repo missing from arguments.`, { argument: "repo" })
+	}
+
+	const nodeishFs = createNodeishFsWithAbsolutePaths({
+		projectPath,
+		nodeishFs: fs,
+	})
+
+	// -- migratations ------------------------------------------------
+
+	await maybeMigrateToDirectory({ nodeishFs: fs, projectPath })
+	await maybeCreateFirstProjectId({ projectPath, repo: args.repo })
+
 	// -- load project ------------------------------------------------------
-	let idError: Error | undefined
 	return await createRoot(async () => {
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
-		const nodeishFs = createNodeishFsWithAbsolutePaths({
-			projectPath,
-			nodeishFs: args.nodeishFs,
-		})
-
-		let projectId: string | undefined
-
-		try {
-			projectId = await nodeishFs.readFile(projectPath + "/project_id", {
-				encoding: "utf-8",
-			})
-		} catch (error) {
-			// @ts-ignore
-			if (error.code === "ENOENT") {
-				if (args.repo) {
-					projectId = await generateProjectId(args.repo, projectPath)
-					if (projectId) {
-						await nodeishFs.writeFile(projectPath + "/project_id", projectId)
-					}
-				}
-			} else {
-				idError = error as Error
-			}
-		}
-
 		// -- settings ------------------------------------------------------------
 
 		const [settings, _setSettings] = createSignal<ProjectSettings>()
@@ -117,7 +129,7 @@ export const loadProject = async (args: {
 					setSettings(settings)
 					// rename settings to get a convenient access to the data in Posthog
 					const project_settings = settings
-					args._capture?.("SDK used settings", { project_settings, group: projectId })
+					args._capture?.("SDK used settings", { project_settings })
 				})
 				.catch((err) => {
 					markInitAsFailed(err)
@@ -218,7 +230,7 @@ export const loadProject = async (args: {
 						module:
 							resolvedModules()?.meta.find((m) => m.id.includes(rule.id))?.module ??
 							"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
-						// default to warning, see https://github.com/inlang/monorepo/issues/1254
+						// default to warning, see https://github.com/opral/monorepo/issues/1254
 						level: settingsValue["messageLintRuleLevels"]?.[rule.id] ?? "warning",
 					} satisfies InstalledMessageLintRule)
 			) satisfies Array<InstalledMessageLintRule>
@@ -292,7 +304,6 @@ export const loadProject = async (args: {
 			},
 			errors: createSubscribable(() => [
 				...(initializeError ? [initializeError] : []),
-				...(idError ? [idError] : []),
 				...(resolvedModules() ? resolvedModules()!.errors : []),
 				// have a query error exposed
 				//...(lintErrors() ?? []),
