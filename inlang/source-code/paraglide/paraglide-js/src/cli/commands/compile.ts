@@ -1,6 +1,6 @@
 import { loadProject, type InlangProject } from "@inlang/sdk"
 import { compile } from "../../compiler/compile.js"
-import fs from "node:fs/promises"
+import nodeFsPromises from "node:fs/promises"
 import { resolve } from "node:path"
 import { Command } from "commander"
 import { telemetry } from "../../services/telemetry/implementation.js"
@@ -35,7 +35,7 @@ export const compileCommand = new Command()
 		// 	},
 		// })
 
-		const repoRoot = await findRepoRoot({ nodeishFs: fs, path })
+		const repoRoot = await findRepoRoot({ nodeishFs: nodeFsPromises, path })
 
 		let project: Awaited<ReturnType<typeof loadProject>>
 		if (!repoRoot) {
@@ -43,7 +43,7 @@ export const compileCommand = new Command()
 			// We still support projects without git repo for now.
 
 			const repo = await openRepository("file://", {
-				nodeishFs: fs,
+				nodeishFs: nodeFsPromises,
 			})
 
 			project = exitIfErrors(
@@ -62,7 +62,7 @@ export const compileCommand = new Command()
 			)
 		} else {
 			const repo = await openRepository(repoRoot, {
-				nodeishFs: fs,
+				nodeishFs: nodeFsPromises,
 			})
 
 			project = exitIfErrors(
@@ -87,7 +87,7 @@ export const compileCommand = new Command()
 				settings: project.settings(),
 			})
 
-			await writeOutput(outputDirectory, output, fs)
+			await writeOutput(outputDirectory, output, nodeFsPromises)
 		}
 
 		await execute()
