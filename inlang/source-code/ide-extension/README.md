@@ -1,5 +1,7 @@
+
+
 <div>
-	<h1>inlang – Supercharge i18n in VS Code</h1>
+	<h1>inlang – Supercharge i18n in VS Code</h1>	
 	<p>
 		<br>
 		<a href='https://inlang.com/c/apps' target="_blank">🕹️ Apps</a>
@@ -21,7 +23,106 @@
 
 ✅ Extract new strings with a simple click, making localization tasks more intuitive and efficient.
 
-## Getting started
+<br>
+<br>
+
+<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-extension-cover.png"/>
+
+<br>
+
+## Manage Translations directly from your Code
+
+See translations and edit them directly in your code. No more back-and-forth looking into the translation files themselves.
+
+<br>
+
+<div>
+	<div class="flex-container">
+		<div class="flex-item">
+			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-inline.png"/>
+		</div>
+		<div class="flex-item">
+			<p class="bold">🔎 Inline Annotaions</p>
+			<p>See translations directly in your code. No more back-and-forth looking into the translation files themselves.</p>
+		</div>
+	</div>
+</div>
+
+<br>
+
+<div>
+	<div class="flex-container">
+		<div class="flex-item">
+			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-extract.png"/>
+		</div>
+		<div class="flex-item">
+			<p class="bold">✂️ Extract Messages (translations)</p>
+			<p>Extract new strings with a simple click, making localization tasks more intuitive and efficient. Visualize, edit, and lint translated strings effortlessly using Inline Decorations & Hover Support.</p>
+		</div>
+	</div>
+</div>
+
+<br>
+
+<div>
+	<div class="flex-container">
+		<div class="flex-item">
+			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-lint.png"/>
+		</div>
+		<div class="flex-item">
+			<p class="bold">❌ Message Linting</p>
+			<p>Get notified about missing translations and other issues directly in your IDE.</p>
+		</div>
+	</div>
+</div>
+
+<br>
+
+## Inlang Tab - Transparent, Fast, Always Up-to-Date
+
+<div>
+	<div class="flex-container">
+		<div class="flex-item">
+			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-monorepo.png"/>
+		</div>
+		<div class="flex-item">
+			<p class="bold">📦 Monorepo support</p>
+			<p>You can have multible projects in your repository. The inlang tab makes it easy to switch from one to another.</p>
+		</div>
+	</div>
+</div>
+
+<br>
+
+<div>
+	<div class="flex-container">
+		<div class="flex-item">
+			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-update.png"/>
+		</div>
+		<div class="flex-item">
+			<p class="bold">🔁 Update Translations</p>
+			<p>Translations from the resource files are automatically updated when you change the source text.</p>
+		</div>
+	</div>
+</div>
+
+<br>
+
+<div>
+	<div class="flex-container">
+		<div class="flex-item">
+			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-errors.png"/>
+		</div>
+		<div class="flex-item">
+			<p class="bold">⚠ Transparent Errors</p>
+			<p>In the tab menu you can see project errors if the setup is broken.</p>
+		</div>
+	</div>
+</div>
+
+<br>
+
+## Manual setup
 
 ### 1. Create a `project.inlang/settings.json` in the **root** of your project
 
@@ -59,46 +160,29 @@ If you want to add lint rules to your experience, you can add them from: https:/
 - VS Code version 1.84.0 or higher.
 - Node.js version v18 or higher.
 
-## Features
-
-### Context Tooltips
-
-See translations and edit them directly in your code. No more back-and-forth looking into the translation files themselves.
-
-<img width="500" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/assets/ide-extension/tooltip.gif"/>
-
-### ✂️ Extract Messages (translations)
-
-Extract Messages (translations) via the `Inlang: Extract Message` code action.
-
-<img width="500" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/assets/ide-extension/extract.gif"/>
-
-### Message Linting
-
-Get notified about missing translations and other issues directly in your IDE.
-
-<img width="500" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/assets/ide-extension/lint.gif"/>
-
-### 🔎 Inline Annotations
-
-See translations directly in your code. No more back-and-forth looking into the translation files themselves.
-
-<img width="500" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/assets/ide-extension/inline.gif"/>
-
-### 🔁 Update Translations
-
-Translations from the resource files are automatically updated when you change the source text.
-
-<img width="500" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/assets/ide-extension/update.gif"/>
-
-## Usage
-
-Just _highlight/select_ the text you want and hit `cmd .` or `ctrl +` (Quick Fix / Yellow Bulb) to open the **translate dialog** to provide a id for it.
-
-Hover over the message to see the tooltip with the translation.
-
-If something isn't working as expected, please join our [Discord](https://discord.gg/gdMPPWy57R) or [create an issue](https://github.com/opral/monorepo/issues/new/choose). We are happy to help!
-
 ## Support: Join our Discord!
 
 If something isn't working as expected or you have a feature suggestion, please join our [Discord](https://discord.gg/DEHKgmx2) or [create an issue](<[https](https://github.com/opral/monorepo/issues/new/choose)>). We are happy to help!
+
+
+<style>
+.flex-container {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	align-items: center;
+}
+.flex-item {
+	width: 100%;
+}
+@media (min-width: 600px) {
+	.flex-item {
+		width: calc(50% - 16px); /* Two columns with a small gap between them */
+		margin-bottom: 0;
+	}
+}
+.flex-item .bold {
+	font-weight: bold;
+	font-size: 20px;
+}
+</style>
