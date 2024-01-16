@@ -2,7 +2,7 @@ import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
 import * as runtime from "$paraglide/runtime.js"
 
 export const i18n = createI18n(runtime, {
-	exclude: (url) => url.pathname.startsWith("/base/not-translated"),
+	exclude: (path) => path.startsWith("/base/not-translated"),
 	pathnames: {
 		"/about": {
 			en: "/about",

@@ -1,8 +1,8 @@
 <script>
 	import { page } from "$app/stores"
+    import { base } from "$app/paths"
 	import { availableLanguageTags } from "$paraglide/runtime"
     import * as m from "$paraglide/messages.js"
-	import { base } from "$app/paths"
 
     const totalUsers = 10;
 
