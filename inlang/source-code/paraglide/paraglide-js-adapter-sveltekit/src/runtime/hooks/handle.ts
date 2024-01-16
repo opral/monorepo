@@ -23,7 +23,7 @@ export type HandleOptions = {
 
 export const createHandle = <T extends string>(
 	{ runtime, defaultLanguageTag }: I18nConfig<T>,
-	options: HandleOptions
+	options: HandleOptions,
 ): Handle => {
 	return ({ resolve, event }) => {
 		const { lang } = getPathInfo(event.url.pathname, {
