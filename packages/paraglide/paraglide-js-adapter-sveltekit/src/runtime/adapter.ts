@@ -1,6 +1,8 @@
 import { createHandle, type HandleOptions } from "./hooks/handle.js"
 import { createReroute } from "./hooks/reroute.js"
 import { base } from "$app/paths"
+import { page } from "$app/stores"
+import { get } from "svelte/store"
 import type { PathTranslations } from "./path-translations/types.js"
 import type { Paraglide } from "./runtime.js"
 
@@ -49,7 +51,8 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18
 		handle: (options: HandleOptions) => createHandle(runtime, options),
 
 		getLanguageFromUrl(url: URL) {
-			const pathWithLanguage = url.pathname.slice(base.length)
+			const absoluteBase = new URL(base, get(page).url).pathname
+			const pathWithLanguage = url.pathname.slice(absoluteBase.length)
 			const [lang, ...parts] = pathWithLanguage.split("/").filter(Boolean)
 
 			if (runtime.isAvailableLanguageTag(lang)) return lang
