@@ -1,6 +1,6 @@
 import { vi, test, expect, beforeEach } from "vitest"
 import memfs from "memfs"
-import mockedFs from "fs/promises"
+import mockedFs from "node:fs/promises"
 import nodeFsSync from "node:fs"
 import { compileCommand } from "./compile.js"
 import type { ProjectSettings } from "@inlang/sdk"

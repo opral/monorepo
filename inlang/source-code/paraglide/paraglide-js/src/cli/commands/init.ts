@@ -147,7 +147,15 @@ export const maybeAddVsCodeExtension = async (args: { projectPath: string }, ctx
 export const addParaglideJsToDevDependencies = async (ctx: Context) => {
 	const file = await ctx.repo.nodeishFs.readFile("./package.json", { encoding: "utf-8" })
 	const stringify = detectJsonFormatting(file)
-	const pkg = JSON.parse(file)
+	let pkg: any = {}
+	try {
+		pkg = JSON.parse(file)
+	} catch {
+		ctx.logger.error(
+			`Your ./package.json does not contain valid JSON. Please fix it and try again.`
+		)
+		process.exit(1)
+	}
 	if (pkg.devDependencies === undefined) {
 		pkg.devDependencies = {}
 	}
@@ -495,7 +503,7 @@ export async function fileExists(filePath: string, nodeishFs: NodeishFilesystem)
  */
 function execAsync(command: string) {
 	return new Promise<string>((resolve, reject) => {
-		childProcess.exec(command, (error, stdout, stderr) => {
+		childProcess.exec(command, (error, stdout) => {
 			if (error) {
 				reject(error)
 			} else {
