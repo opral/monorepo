@@ -1,4 +1,4 @@
-// workaround for https://github.com/inlang/monorepo/issues/1091
+// workaround for https://github.com/opral/monorepo/issues/1091
 import { get } from "svelte/store"
 import type { RelativeUrl } from "../../../../index.js"
 import type { SvelteKitClientRuntime } from "../index.js"
@@ -15,7 +15,7 @@ import { setContext } from "svelte"
 
 type RuntimeContext<
 	LanguageTag extends LanguageTagBase = LanguageTagBase,
-	InlangFunction extends Runtime.InlangFunction = Runtime.InlangFunction,
+	InlangFunction extends Runtime.InlangFunction = Runtime.InlangFunction
 > = {
 	sourceLanguageTag: LanguageTag
 	languageTags: LanguageTag[]
@@ -81,7 +81,7 @@ export const addRuntimeToContext = (runtime: SvelteKitClientRuntime) => {
 const route = (href: RelativeUrl) => {
 	if (import.meta.env.DEV) {
 		console.info(
-			`Calling the function 'route' is unnecessary with this project configuration, because it only returns the input.`,
+			`Calling the function 'route' is unnecessary with this project configuration, because it only returns the input.`
 		)
 	}
 

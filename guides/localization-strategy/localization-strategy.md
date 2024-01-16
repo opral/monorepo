@@ -8,7 +8,7 @@ If you've never heard of localization strategy before, don't worry, we'll explai
 
 A localization strategy is a company’s overall plan and approach to adapting its content, offerings, and messaging in new countries. This means addressing the differences in language, culture, customer behavior, and social norms. Big players that have already done that with massive success is [Netflix](https://netflix.com), [WWF](https://www.worldwildlife.org) or [Airbnb](https://airbnb.com). By coming up with a localization strategy, you’ll be able to shine a new light on your services in various markets based on data derived from extensive research. You’ll be able to present a more personalized marketing experience to consumers in those areas, showcasing your product or service in a way that this new audience can connect with.
 
-<doc-figure src="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/localization-strategy/assets/strategy.jpg" alt="inlang ecosystem" caption="Localization strategy within the inlang ecosystem"></doc-figure>
+<doc-figure src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/localization-strategy/assets/strategy.jpg" alt="inlang ecosystem" caption="Localization strategy within the inlang ecosystem"></doc-figure>
 
 In this example, a SaaS tool is making use of inlang's products to localize their website and achieve a successful localization strategy.
 The [IDE Extension](/m/r7kp499g/app-inlang-ideExtension) enables translating the content of the web application. Therefore, the developer can connect a wide range of libraries. The most common one in inlang's ecosystem is [Paraglide JS](/m/gerre34r/library-inlang-paraglideJs), which runs with every popular framework. 

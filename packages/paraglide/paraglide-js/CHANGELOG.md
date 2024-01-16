@@ -1,5 +1,18 @@
 # @inlang/paraglide-js
 
+## 1.2.0
+
+### Minor Changes
+
+- 0f0e8496d: Throw runtime error if `languageTag()` returns a non-language tag value
+
+## 1.1.1
+
+### Patch Changes
+
+- 7ea9753fb: Improve onboarding message
+- 4277232db: fix: better formatting of messageID fallbacks
+
 ## 1.1.0
 
 ### Minor Changes
@@ -124,7 +137,7 @@ de.hello()
 
 ## 1.0.0-prerelease.7
 
-FIX: type error https://github.com/inlang/monorepo/pull/1610#issuecomment-1801768825
+FIX: type error https://github.com/opral/monorepo/pull/1610#issuecomment-1801768825
 
 ```diff
 export const currentLanguageTag = (params) => {
@@ -139,7 +152,7 @@ export const currentLanguageTag = (params) => {
 
 ## 1.0.0-prerelease.6
 
-BREAKING: Paraglide JS now compiles into source code, see https://github.com/inlang/monorepo/issues/1607.
+BREAKING: Paraglide JS now compiles into source code, see https://github.com/opral/monorepo/issues/1607.
 
 What you need to change:
 
@@ -163,7 +176,7 @@ add: `paraglide-js init` command which simplifies the setup process
 
 ## 1.0.0-prerelease.3
 
-fix: https://github.com/inlang/monorepo/issues/1478
+fix: https://github.com/opral/monorepo/issues/1478
 
 ## 1.0.0-prerelease.1
 

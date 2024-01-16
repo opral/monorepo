@@ -1,4 +1,4 @@
-<!-- ![Paraglide JS header image](https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/paraglide-js-header.png) -->
+<!-- ![Paraglide JS header image](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/paraglide-js-header.png) -->
 
 [<img src="https://cdn.loom.com/sessions/thumbnails/a8365ec4fa2c4f6bbbf4370cf22dd7f6-with-play.gif" width="100%" /> Watch the pre-release demo of Paraglide JS](https://www.youtube.com/watch?v=-YES3CCAG90)
 
@@ -17,14 +17,14 @@ npx @inlang/paraglide-js@latest init
 # Features
 
 <doc-features>
-  <doc-feature title="No unused translations" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/unused-translations.png"></doc-feature>
-  <doc-feature title="Reduced payload" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/reduced-payload.png"></doc-feature>
-  <doc-feature title="Typesafety" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/typesafe.png"></doc-feature>
+  <doc-feature title="No unused translations" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/unused-translations.png"></doc-feature>
+  <doc-feature title="Reduced payload" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/reduced-payload.png"></doc-feature>
+  <doc-feature title="Typesafety" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/typesafe.png"></doc-feature>
 </doc-features>
 
 ### Treeshaking
 
-<doc-figure src="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/tree-shaking.jpg" alt="An illustration explaining the benefits of treeshaking in software" caption="How Paraglide JS treeshaking works">
+<doc-figure src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/tree-shaking.jpg" alt="An illustration explaining the benefits of treeshaking in software" caption="How Paraglide JS treeshaking works">
 </doc-figure>
 
 Treeshaking gives us superpowers. With it, each page of your app only loads the messages that it actually uses. Incremental loading like this would usually take hours of manual tweaking to get right. With Paraglide-JS you get it for free. Say goodbye to huge bundles.
@@ -42,13 +42,13 @@ npx @inlang/paraglide-js@latest init
 
 ### 2. Select an adapter (if required)
 
-Having an adapter is only required if you want to use paraglide-js with a framework. If you don't use a framework, you can skip this step.
+Having an adapter is recommended but not required if you want to use paraglide-js with a framework. If you don't use a framework, you can skip this step.
 
 <doc-links>
-    <doc-link title="Adapter for Svelte" icon="simple-icons:svelte" href="https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-svelte/example" description="Go to GitHub example"></doc-link>
+    <doc-link title="Adapter for Svelte" icon="simple-icons:svelte" href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-svelte/example" description="Go to GitHub example"></doc-link>
     <doc-link title="Adapter for SolidJS" icon="tabler:brand-solidjs" href="https://inlang.com/m/n860p17j/library-inlang-paraglideJsAdapterSolidStart" description="Go to Adapter"></doc-link>
-    <doc-link title="Adapter for NextJS" icon="tabler:brand-nextjs" href="https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next" description="Go to GitHub example"></doc-link>
-    <doc-link title="Adapter for Vite" icon="tabler:brand-vite" href="https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-vite" description="Go to GitHub"></doc-link>
+    <doc-link title="Adapter for NextJS" icon="tabler:brand-nextjs" href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next" description="Go to GitHub example"></doc-link>
+    <doc-link title="Adapter for Vite" icon="tabler:brand-vite" href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-vite" description="Go to GitHub"></doc-link>
 </doc-links>
 
 #### Alternatively, [you can write your own adapter](#writing-an-adapter)
@@ -179,9 +179,9 @@ const msg = m.hello({ name: "Samuel" }, { languageTag: "de" }) // Hallo Samuel!
 We provide a few bundler plugins to make it easier to use paraglide-js with a bundler. If you
 are using one of these bundlers, we recommed using the corresponding plugin.
 
-- [Rollup](https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-rollup)
-- [Webpack](https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-webpack)
-- [Vite](https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-vite)
+- [Rollup](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-rollup)
+- [Webpack](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-webpack)
+- [Vite](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-vite)
 
 These plugins make sure to rerun the `compile` script whenever you build your project. That way you don't need to modify your build script in `package.json`. If you are using a bundler with a dev-server, like Vite, the plugins also make sure to rerun the `compile` script whenever your messages change.
 
@@ -199,7 +199,7 @@ Inlang Paraglide JS leverages a compiler to emit vanilla JavaScript functions.
 
 The emitted functions are often referred to as "message functions". By emitting message functions, inlang Paraglide JS eliminates a class of edge cases while also being simpler, faster, and more reliable than other i18n libraries. The compiled runtime contains less than 50 LOC (lines of code) and is less than 1kb gzipped.
 
-![paraglide JS architecture](https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/architecture.svg)
+![paraglide JS architecture](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/architecture.svg)
 
 Inlang Paraglide-JS consists of four main parts:
 
@@ -355,7 +355,7 @@ render((page) => (
 # Community
 
 We are grateful for all the support we get from the community. Here are just a few of the comments we've received over the last few weeks.
-Of course we are open to and value criticism as well. If you have any feedback, please let us know directly on [GitHub](https://github.com/inlang/monorepo/discussions/1464)
+Of course we are open to and value criticism as well. If you have any feedback, please let us know directly on [GitHub](https://github.com/opral/monorepo/discussions/1464)
 
 <doc-comments>
 <doc-comment text="The lib is great guys!" author="ktarmyshov" icon="mdi:github"></doc-comment>
@@ -363,3 +363,10 @@ Of course we are open to and value criticism as well. If you have any feedback, 
 <doc-comment text="[...] the switch between the sdk-js and paraglide has been pretty great! " author="albbus" icon="mdi:discord"></doc-comment>
 <doc-comment text="Thanks for all the great work @Samuel Stroschein" author="Willem" icon="mdi:discord"></doc-comment>
 </doc-comments>
+
+# Talks
+
+- [Svelte Summit Spring 2023](https://www.youtube.com/watch?v=Y6IbPfMU1xM)
+- [Svelte Summit Fall 2023](https://www.youtube.com/watch?v=-YES3CCAG90)
+- Web Zurich December 2023
+- [Svelte London January 2024](https://www.youtube.com/watch?v=eswNQiq4T2w&t=646s)

@@ -55,6 +55,7 @@
 		"@inlang/sdk": "workspace:*",
 		"@inlang/telemetry": "workspace:*",
 		"@lix-js/fs": "workspace:*",
+		"@lix-js/client": "workspace:*",
 		"@sentry/node": "^7.64.0",
 		"@sinclair/typebox": "^0.31.17",
 		"@types/cli-progress": "^3.11.5",
