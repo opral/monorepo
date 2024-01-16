@@ -11,7 +11,7 @@ import { Logger } from "../../services/logger/index.js"
 import dedent from "dedent"
 import { findRepoRoot, openRepository, type Repository } from "@lix-js/client"
 import type { NodeishFilesystem } from "@lix-js/fs"
-import nodeFsPromises from "fs/promises"
+import nodeFsPromises from "node:fs/promises"
 
 // TODO add a project UUID to the tele.groups internal #196
 // import { gitOrigin } from "../../services/telemetry/implementation.js"
@@ -474,7 +474,7 @@ const prompt: typeof consola.prompt = async (message, options) => {
 
 export async function fileExists(filePath: string, nodeishFs: NodeishFilesystem) {
 	try {
-		await nodeishFs.access(filePath)
+		await nodeishFs.stat(filePath)
 		return true
 	} catch (error) {
 		//@ts-ignore
