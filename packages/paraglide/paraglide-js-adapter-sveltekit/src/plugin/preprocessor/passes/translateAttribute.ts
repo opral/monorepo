@@ -8,7 +8,7 @@ import dedent from "dedent"
 export function createTranslateAttributePass(
 	element_name: string,
 	attribute_name: string,
-	lang_attribute_name?: string
+	lang_attribute_name?: string,
 ): PreprocessingPass {
 	return {
 		condition: ({ content }) => {
@@ -29,7 +29,7 @@ export function createTranslateAttributePass(
 				if (!attribute) continue
 
 				const optOutAttribute = link.attributes.find(
-					(attribute) => attribute.name === "data-no-translate"
+					(attribute) => attribute.name === "data-no-translate",
 				)
 				if (optOutAttribute) continue
 
@@ -46,7 +46,7 @@ export function createTranslateAttributePass(
 
 				//Replace the href attribute with the new href attribute
 				const newAttributeString = `${attribute_name}={${i(
-					"translateHref"
+					"translateHref",
 				)}(${attributeAsTemplateString}, ${langAttributeValue})}`
 				code.overwrite(attribute.start, attribute.end, newAttributeString)
 

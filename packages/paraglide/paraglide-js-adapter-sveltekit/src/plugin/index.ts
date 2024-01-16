@@ -20,7 +20,7 @@ export function paraglide(userConfig: UserConfig): any {
  */
 function registerPreprocessor(
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	_config: Config
+	_config: Config,
 ): Plugin {
 	const preprocessConfig: PreprocessorConfig = {}
 	return {

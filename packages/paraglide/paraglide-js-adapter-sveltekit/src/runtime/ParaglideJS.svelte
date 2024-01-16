@@ -17,25 +17,25 @@
 	import { translatePath } from "./path-translations/translatePath.js"
 	import type { I18n } from "./adapter.js"
 
-	// The base path may be relative during SSR. 
+	// The base path may be relative during SSR.
 	// To make sure it is absolute, we need to resolve it against the current page URL.
 	const absoluteBase = normalize(new URL(maybe_relative_base, new URL($page.url)).pathname)
 
-	/** 
+	/**
 	 * Override the language detection with a specific language tag.
 	 */
-	export let languageTag : T | undefined = undefined
-	
+	export let languageTag: T | undefined = undefined
+
 	/**
 	 * The i18n instance to use.
 	 * You can create one with `createI18n()` from `@inlang/paraglide-js-adapter-sveltekit`.
 	 */
-	export let i18n : I18n<T>;
+	export let i18n: I18n<T>
 
-	/**	
-	* If true, no alternate links will be added to the head.
+	/**
+	 * If true, no alternate links will be added to the head.
 	 */
-	export let noAlternateLinks = false;
+	export let noAlternateLinks = false
 
 	/**
 	 * The language tag that was autodetected from the URL.
@@ -44,23 +44,23 @@
 
 	$: lang = languageTag ?? autodetectedLanguage
 	$: i18n.config.runtime.setLanguageTag(lang)
-	$: if(browser) document.documentElement.lang = lang
+	$: if (browser) document.documentElement.lang = lang
 
-	function translateHref(href: string, hreflang : string | undefined) : string {
+	function translateHref(href: string, hreflang: string | undefined): string {
 		const from = new URL($page.url)
 		const original_to = new URL(href, new URL(from))
-		
-		if(isExternal(original_to, from, absoluteBase)) {
-			return href;
+
+		if (isExternal(original_to, from, absoluteBase)) {
+			return href
 		}
 
-		if(i18n.config.exclude(original_to.pathname)) {
-			return href;
+		if (i18n.config.exclude(original_to.pathname)) {
+			return href
 		}
-			
-		const language = hreflang ?? lang;
-		const canonicalPath = normalize(original_to.pathname.slice(absoluteBase.length));
-		const translatedPath = getTranslatedPath(canonicalPath, language, i18n.config.translations);
+
+		const language = hreflang ?? lang
+		const canonicalPath = normalize(original_to.pathname.slice(absoluteBase.length))
+		const translatedPath = getTranslatedPath(canonicalPath, language, i18n.config.translations)
 
 		return serializeRoute({
 			base: absoluteBase,
@@ -70,7 +70,7 @@
 			includeLanguage: true,
 			defaultLanguageTag: i18n.config.defaultLanguageTag,
 			prefixDefaultLanguage: i18n.config.prefixDefaultLanguage,
-		});
+		})
 	}
 
 	setContext(PARAGLIDE_CONTEXT_KEY, { translateHref })
@@ -81,18 +81,16 @@
 		<!-- If there is more than one language, add alternate links -->
 		{#if i18n.config.runtime.availableLanguageTags.length >= 1}
 			{#each i18n.config.runtime.availableLanguageTags as lang}
-				<link rel="alternate" hreflang={lang} href={
-				translatePath(
-					$page.url.pathname, 
-					lang, 
-					i18n.config.translations,
-					{ 
-						base: absoluteBase, 
-						availableLanguageTags: i18n.config.runtime.availableLanguageTags, 
+				<link
+					rel="alternate"
+					hreflang={lang}
+					href={translatePath($page.url.pathname, lang, i18n.config.translations, {
+						base: absoluteBase,
+						availableLanguageTags: i18n.config.runtime.availableLanguageTags,
 						defaultLanguageTag: i18n.config.defaultLanguageTag,
 						prefixDefaultLanguage: i18n.config.prefixDefaultLanguage,
-					}
-				)} />
+					})}
+				/>
 			{/each}
 		{/if}
 	{/if}

@@ -54,7 +54,6 @@ describe("match", () => {
 		})
 	})
 
-
 	it("prefers matches with fewer params", () => {
 		const match = matches("/foo/bar/baz", ["/foo/[id]/baz", "/foo/[id]/[slug]"])
 		expect(match).toEqual({

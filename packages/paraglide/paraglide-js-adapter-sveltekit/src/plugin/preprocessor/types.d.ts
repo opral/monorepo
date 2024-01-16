@@ -44,4 +44,3 @@ export type AttributeValue =
 				end: number
 			}
 	  }
-	
