@@ -1,12 +1,13 @@
 import { vi, test, expect, beforeEach } from "vitest"
 import memfs from "memfs"
-import mockedFs from "node:fs/promises"
-import fs from "node:fs"
+import nodeFsPromises from "node:fs/promises"
+import { type NodeishFilesystem, createNodeishMemoryFs } from "@lix-js/fs"
+import { createMessage } from "@inlang/sdk/test-utilities"
 import { compileCommand } from "./compile.js"
 import type { ProjectSettings } from "@inlang/sdk"
-import { createMessage, createNodeishMemoryFs } from "@inlang/sdk/test-utilities"
 import { resolve } from "node:path"
 import { Logger } from "../../services/logger/index.js"
+import { fileExists } from "./init.js"
 
 beforeEach(() => {
 	vi.resetAllMocks()
@@ -43,12 +44,15 @@ test("it should exit if the project has errors", async () => {
 })
 
 test("it should compile into the default outdir", async () => {
-	const _fs = mockFs({
-		"/plugin.js": fs.readFileSync(
-			// using the inlang-message-format plugin
-			resolve(__dirname, "../../../../../plugins/inlang-message-format/dist/index.js"),
-			{ encoding: "utf-8" }
-		),
+	const realFs: NodeishFilesystem = await vi.importActual("node:fs/promises")
+
+	const pluginCode = await realFs.readFile(
+		resolve(__dirname, "../../../../../plugins/inlang-message-format/dist/index.js"),
+		{ encoding: "utf-8" }
+	)
+
+	const fs = mockFs({
+		"/plugin.js": pluginCode,
 		"/project.inlang/settings.json": JSON.stringify({
 			sourceLanguageTag: "en",
 			languageTags: ["de", "en"],
@@ -70,18 +74,20 @@ test("it should compile into the default outdir", async () => {
 
 	// I have no idea why, but the { from: "user" } is required for the test to pass
 	await compileCommand.parseAsync(["--project", "./project.inlang"], { from: "user" })
-	expect(_fs.existsSync("./src/paraglide/messages.js")).toBe(true)
+	expect(await fileExists("./src/paraglide/messages.js", fs)).toBe(true)
 })
 
 test("it should compile a project into the provided outdir", async () => {
 	const outdirs = ["/paraglide-js", "./paraglide-js", "/src/paraglide-js", "./src/paraglide-js"]
 
-	const _fs = mockFs({
-		"/plugin.js": fs.readFileSync(
-			// using the inlang-message-format plugin
-			resolve(__dirname, "../../../../../plugins/inlang-message-format/dist/index.js"),
-			{ encoding: "utf-8" }
-		),
+	const realFs: NodeishFilesystem = await vi.importActual("node:fs/promises")
+	const pluginCode = await realFs.readFile(
+		resolve(__dirname, "../../../../../plugins/inlang-message-format/dist/index.js"),
+		{ encoding: "utf-8" }
+	)
+
+	const fs = mockFs({
+		"/plugin.js": pluginCode,
 		"/project.inlang/settings.json": JSON.stringify({
 			sourceLanguageTag: "en",
 			languageTags: ["de", "en"],
@@ -106,24 +112,24 @@ test("it should compile a project into the provided outdir", async () => {
 		await compileCommand.parseAsync(["--project", "./project.inlang", "--outdir", outdir], {
 			from: "user",
 		})
-		expect(_fs.existsSync(`${outdir}/messages.js`)).toBe(true)
+		expect(await fileExists(`${outdir}/messages.js`, fs)).toBe(true)
 	}
 })
 
 const mockFs = (files: memfs.DirectoryJSON) => {
 	const _memfs = memfs.createFsFromVolume(memfs.Volume.fromJSON(files))
 	const lixFs = createNodeishMemoryFs()
-	for (const prop in mockedFs) {
+	for (const prop in nodeFsPromises) {
 		// @ts-ignore - memfs has the same interface as node:fs/promises
-		if (typeof mockedFs[prop] !== "function") continue
+		if (typeof nodeFsPromises[prop] !== "function") continue
 		// @ts-ignore - memfs dies not have a watch interface - quick fix should be updated
-		if (mockedFs[prop].name === "watch") {
+		if (nodeFsPromises[prop].name === "watch") {
 			// @ts-ignore - memfs has the same interface as node:fs/promises
-			vi.spyOn(mockedFs, prop).mockImplementation(lixFs[prop])
+			vi.spyOn(nodeFsPromises, prop).mockImplementation(lixFs[prop])
 		} else {
 			// @ts-ignore - memfs has the same interface as node:fs/promises
-			vi.spyOn(mockedFs, prop).mockImplementation(_memfs.promises[prop])
+			vi.spyOn(nodeFsPromises, prop).mockImplementation(_memfs.promises[prop])
 		}
 	}
-	return _memfs
+	return nodeFsPromises
 }
