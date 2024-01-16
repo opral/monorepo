@@ -7,11 +7,15 @@ import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
 import { handleError, telemetryCapture } from "./utilities/utils.js"
 import { CONFIGURATION } from "./configuration.js"
 import { projectView } from "./utilities/project/project.js"
-import { state } from "./state.js"
+import { setState, state } from "./state.js"
 import { messagePreview } from "./decorations/messagePreview.js"
 import { ExtractMessage } from "./actions/extractMessage.js"
 import { errorView } from "./utilities/errors/errors.js"
 import { messageView } from "./utilities/messages/messages.js"
+import { listProjects } from "@inlang/sdk"
+import { createFileSystemMapper } from "./utilities/fs/createFileSystemMapper.js"
+import fs from "node:fs/promises"
+import { normalizePath } from "@lix-js/fs"
 
 // Entry Point
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
@@ -31,6 +35,7 @@ async function main(args: {
 	context: vscode.ExtensionContext
 	gitOrigin: string | undefined
 }): Promise<void> {
+	vscode.commands.executeCommand("setContext", "inlang:hasProjectInWorkspace", false)
 	const workspaceFolder = vscode.workspace.workspaceFolders?.[0]
 
 	if (!workspaceFolder) {
@@ -38,7 +43,21 @@ async function main(args: {
 		return
 	}
 
-	await projectView({ ...args, workspaceFolder })
+	const nodeishFs = createFileSystemMapper(normalizePath(workspaceFolder.uri.fsPath), fs)
+
+	try {
+		const projectsList = await listProjects(nodeishFs, normalizePath(workspaceFolder.uri.fsPath))
+		setState({ ...state(), projectsInWorkspace: projectsList })
+	} catch (error) {
+		handleError(error)
+		return
+	}
+
+	if (state().projectsInWorkspace.length > 0) {
+		vscode.commands.executeCommand("setContext", "inlang:hasProjectInWorkspace", true)
+	}
+
+	await projectView({ ...args, workspaceFolder, nodeishFs })
 	await messageView({ ...args })
 	await errorView({ ...args })
 
@@ -66,9 +85,12 @@ function registerExtensionComponents(
 		...Object.values(CONFIGURATION.COMMANDS).map((c) => c.register(c.command, c.callback as any))
 	)
 
+	const additionalSelectors =
+		state().project?.customApi()["app.inlang.ideExtension"]?.documentSelectors || []
+
 	const documentSelectors: vscode.DocumentSelector = [
 		{ language: "javascript", pattern: `!${CONFIGURATION.FILES.PROJECT}` },
-		...(state().project.customApi()["app.inlang.ideExtension"]?.documentSelectors || []),
+		...(state().project ? additionalSelectors : []),
 	]
 
 	args.context.subscriptions.push(
@@ -84,7 +106,7 @@ function registerExtensionComponents(
 }
 
 function handleInlangErrors() {
-	const inlangErrors = state().project.errors()
+	const inlangErrors = state().project?.errors() || []
 	if (inlangErrors.length > 0) {
 		console.error("Inlang VSCode Extension errors:", inlangErrors)
 	}

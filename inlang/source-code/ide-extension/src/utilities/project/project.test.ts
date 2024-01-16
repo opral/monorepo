@@ -53,6 +53,14 @@ vi.mock("../../configuration", () => ({
 		},
 	},
 }))
+vi.mock("../../state", () => ({
+	state: vi.fn(() => ({
+		projectsInWorkspace: [
+			{ projectPath: "/workspace/project1.inlang" },
+			{ projectPath: "/workspace/project2.inlang" },
+		],
+	})),
+}))
 
 // Mocking state module
 const mockSelectedProject: string | undefined = undefined
@@ -80,8 +88,9 @@ describe("project view", () => {
 		const mockContext = { subscriptions: [] } as unknown as vscode.ExtensionContext
 		const workspaceFolder = { uri: { fsPath: "/workspace" } } as vscode.WorkspaceFolder
 		const gitOrigin = "git@github.com:user/repo.git"
+		const nodeishFs = {} as NodeishFilesystem // Mock as needed
 
-		await projectView({ context: mockContext, gitOrigin, workspaceFolder })
+		await projectView({ context: mockContext, gitOrigin, workspaceFolder, nodeishFs })
 		expect(mockContext.subscriptions.length).toBeGreaterThan(0)
 	})
 })

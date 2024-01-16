@@ -3,7 +3,7 @@ import { state } from "../state.js"
 import * as vscode from "vscode"
 
 export const propertiesMissingPreview = () => {
-	const ideExtension = state().project.customApi()["app.inlang.ideExtension"]
+	const ideExtension = state().project?.customApi()["app.inlang.ideExtension"]
 
 	const activeTextEditor = getActiveTextEditor()
 	if (!activeTextEditor) {

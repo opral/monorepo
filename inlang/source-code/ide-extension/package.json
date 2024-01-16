@@ -38,16 +38,25 @@
 		"views": {
 			"inlang": [
 				{
+					"when": "!inlang:hasProjectInWorkspace",
+					"id": "gettingStartedView",
+					"name": "Getting Started",
+					"type": "webview"
+				},
+				{
+					"when": "inlang:hasProjectInWorkspace",
 					"id": "projectView",
 					"name": "Projects",
 					"type": "tree"
 				},
 				{
+					"when": "inlang:hasProjectInWorkspace",
 					"id": "messageView",
 					"name": "Messages",
 					"type": "webview"
 				},
 				{
+					"when": "inlang:hasProjectInWorkspace",
 					"id": "errorView",
 					"name": "Errors",
 					"type": "tree"
@@ -85,12 +94,12 @@
 		"menus": {
 			"view/item/context": [
 				{
-					"when": "view == projectView && viewItem == projectNode",
+					"when": "view == projectView && viewItem == projectViewNode",
 					"command": "inlang.openProject",
 					"group": "navigation"
 				},
 				{
-					"when": "view == projectView && viewItem == projectNode",
+					"when": "view == projectView && viewItem == projectViewNode",
 					"command": "inlang.openSettingsFile",
 					"group": "inline"
 				},

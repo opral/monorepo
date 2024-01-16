@@ -4,7 +4,7 @@ import { editMessageCommand } from "./commands/editMessage.js"
 import { EventEmitter } from "vscode"
 import { openProjectCommand } from "./commands/openProject.js"
 import { openSettingsFileCommand } from "./commands/openSettingsFile.js"
-import { type ProjectNode } from "./utilities/project/project.js"
+import { type ProjectViewNode } from "./utilities/project/project.js"
 import type { ErrorNode } from "./utilities/errors/errors.js"
 import { copyErrorCommand } from "./commands/copyError.js"
 
@@ -12,7 +12,7 @@ export const CONFIGURATION = {
 	EVENTS: {
 		ON_DID_EDIT_MESSAGE: new EventEmitter<void>(),
 		ON_DID_EXTRACT_MESSAGE: new EventEmitter<void>(),
-		ON_DID_PROJECT_TREE_VIEW_CHANGE: new EventEmitter<ProjectNode | undefined>(),
+		ON_DID_PROJECT_TREE_VIEW_CHANGE: new EventEmitter<ProjectViewNode | undefined>(),
 		ON_DID_ERROR_TREE_VIEW_CHANGE: new EventEmitter<ErrorNode | undefined>(),
 	},
 	COMMANDS: {
