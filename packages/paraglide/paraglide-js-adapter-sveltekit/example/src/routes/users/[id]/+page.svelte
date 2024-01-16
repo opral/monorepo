@@ -18,6 +18,10 @@
 <br />
 <a data-sveltekit-keepfocus href="{base}/users/{next}">{m.next_user()}</a>
 
+<br />
+<br />
+
+<a href="{base}/users/{$page.params.id}/edit">{m.edit()}</a>
 
 <br />
 <br />
