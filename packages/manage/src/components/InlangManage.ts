@@ -6,7 +6,7 @@ import { z } from "zod"
 import "./InlangUninstall"
 import "./InlangInstall"
 import { createNodeishMemoryFs, openRepository } from "@lix-js/client"
-import { listProjects } from "@inlang/sdk"
+import { listProjects, isValidLanguageTag } from "@inlang/sdk"
 import { publicEnv } from "@inlang/env-variables"
 import { browserAuth, getUser } from "@lix-js/server"
 import { tryCatch } from "@inlang/result"
@@ -19,6 +19,9 @@ type ManifestWithVersion = MarketplaceManifest & { version: string }
 
 @customElement("inlang-manage")
 export class InlangManage extends TwLitElement {
+	@property({ type: Boolean })
+	isProduction: boolean = !window.location.origin.includes("localhost")
+
 	@property({ type: Object })
 	url: Record<string, string | undefined> = {}
 
@@ -193,14 +196,6 @@ export class InlangManage extends TwLitElement {
 			.url()
 			.regex(/github/)
 			.safeParse(this.repoURL).success
-
-	isValidLanguageTag = () =>
-		z
-			.string()
-			.regex(
-				/^((?<grandfathered>(en-GB-oed|i-ami|i-bnn|i-default|i-enochian|i-hak|i-klingon|i-lux|i-mingo|i-navajo|i-pwn|i-tao|i-tay|i-tsu|sgn-BE-FR|sgn-BE-NL|sgn-CH-DE)|(art-lojban|cel-gaulish|no-bok|no-nyn|zh-guoyu|zh-hakka|zh-min|zh-min-nan|zh-xiang))|((?<language>([A-Za-z]{2,3}(-(?<extlang>[A-Za-z]{3}(-[A-Za-z]{3}){0,2}))?))(-(?<script>[A-Za-z]{4}))?(-(?<region>[A-Za-z]{2}|[0-9]{3}))?(-(?<variant>[A-Za-z0-9]{5,8}|[0-9][A-Za-z0-9]{3}))*))$/
-			)
-			.safeParse(this.newLanguageTag).success
 
 	override async connectedCallback() {
 		super.connectedCallback()
@@ -408,7 +403,7 @@ export class InlangManage extends TwLitElement {
 				<div class="max-w-7xl mx-auto flex flex-row justify-between relative sm:static">
 					<div class="flex items-center">
 						<a
-							href="https://inlang.com"
+							href=${this.isProduction ? `https://inlang.com` : "http://localhost:3000"}
 							target="_blank"
 							class="flex items-center w-fit pointer-events-auto transition-opacity hover:opacity-75"
 						>
@@ -859,7 +854,8 @@ export class InlangManage extends TwLitElement {
 											Creating a new project in the browser is not supported yet.
 										</p>
 										<a
-											href="https://inlang.com/c/guides"
+											href=${(this.isProduction ? `https://inlang.com` : "http://localhost:3000") +
+											"/c/guides"}
 											target="_blank"
 											class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
 											>Follow a setup guide
@@ -937,7 +933,10 @@ export class InlangManage extends TwLitElement {
 							<div class="flex items-center gap-2">
 							<a
 								class="bg-slate-200 text-slate-900 md:block hidden hover:bg-slate-300 truncate text-center px-4 py-2 rounded-md font-medium transition-colors"
-								href=${`https://inlang.com/editor/${this.url.repo}`}
+								href=${
+									(this.isProduction ? `https://fink.inlang.com` : "http://localhost:400") +
+									`/${this.url.repo}`
+								}
 								target="_blank"
 							>
 								Go to Fink - Editor
@@ -945,7 +944,9 @@ export class InlangManage extends TwLitElement {
 							<button
 							class="bg-slate-800 text-white text-center md:block hidden px-4 py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"
 							@click=${() => {
-								window.location.href = `https://inlang.com/?repo=${this.url.repo}&project=${this.url.project}`
+								window.location.href =
+									(this.isProduction ? `https://inlang.com` : "http://localhost:3000") +
+									`/?repo=${this.url.repo}&project=${this.url.project}`
 							}}
 						>
 							Install a module
@@ -1112,7 +1113,7 @@ ${
 															if (
 																e.key === "Enter" &&
 																!this.newLanguageTagLoading &&
-																this.isValidLanguageTag()
+																isValidLanguageTag(this.newLanguageTag)
 															) {
 																;(
 																	this.shadowRoot?.querySelector(
@@ -1123,7 +1124,8 @@ ${
 															}
 														}}
 														class=${"px-3 py-1 focus:outline-0 focus:ring-0 bg-white border w-44 pr-6 truncate border-slate-200 rounded-xl flex items-center justify-between gap-2 " +
-														(this.newLanguageTag.length > 0 && !this.isValidLanguageTag()
+														(this.newLanguageTag.length > 0 &&
+														!isValidLanguageTag(this.newLanguageTag)
 															? "focus-within:border-red-500"
 															: "focus-within:border-[#098DAC]")}
 														placeholder="Add languageTag"
@@ -1133,7 +1135,7 @@ ${
 																<div class="h-5 w-5 border-2 border-[#098DAC] rounded-full"></div>
 																<div class="h-1/2 w-1/2 absolute top-0 left-0 z-5 bg-white"></div>
 														  </div>`
-														: !this.isValidLanguageTag()
+														: !isValidLanguageTag(this.newLanguageTag)
 														? ""
 														: html`<button
 																@click=${async () => await this.addLanguageTag()}
@@ -1153,7 +1155,9 @@ ${
 										  >
 												<p class="mb-4 font-medium">You don't have any languageTags</p>
 												<a
-													href="https://inlang.com/c/lint-rules"
+													href=${(this.isProduction
+														? `https://inlang.com`
+														: "http://localhost:3000") + "/c/lint-rules"}
 													target="_blank"
 													class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
 													>Add basic languageTag "en"
@@ -1193,7 +1197,10 @@ ${
 																	>
 																		<a
 																			target="_blank"
-																			href=${`https://inlang.com/m/${
+																			href=${(this.isProduction
+																				? `https://inlang.com`
+																				: "http://localhost:3000") +
+																			`/m/${
 																				// @ts-ignore
 																				module.uniqueID
 																			}`}
@@ -1238,7 +1245,9 @@ ${
 										  >
 												<p class="mb-4 font-medium">You don't have any plugins installed.</p>
 												<a
-													href="https://inlang.com/c/plugins"
+													href=${(this.isProduction
+														? `https://inlang.com`
+														: "http://localhost:3000") + "/c/plugins"}
 													target="_blank"
 													class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
 													>Install a plugin
@@ -1277,7 +1286,10 @@ ${
 																	>
 																		<a
 																			target="_blank"
-																			href=${`https://inlang.com/m/${
+																			href=${(this.isProduction
+																				? `https://inlang.com`
+																				: "http://localhost:3000") +
+																			`/m/${
 																				// @ts-ignore
 																				module.uniqueID
 																			}`}
@@ -1322,7 +1334,9 @@ ${
 										  >
 												<p class="mb-4 font-medium">You don't have any rules installed.</p>
 												<a
-													href="https://inlang.com/c/lint-rules"
+													href=${(this.isProduction
+														? `https://inlang.com`
+														: "http://localhost:3000") + "/c/lint-rules"}
 													target="_blank"
 													class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
 													>Install a lint rule
