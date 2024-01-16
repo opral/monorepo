@@ -1,5 +1,11 @@
 # @inlang/message-lint-rule-snake-case-id
 
+## 1.1.1
+
+### Patch Changes
+
+- @inlang/message-lint-rule@1.4.1
+
 ## 1.1.0
 
 ### Minor Changes
