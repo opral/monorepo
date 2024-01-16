@@ -8,6 +8,7 @@ import type { Paraglide } from "./runtime.js"
 import { getTranslatedPath } from "./path-translations/getTranslatedPath.js"
 import { serializeRoute } from "./utils/serialize-path.js"
 import { translatePath } from "./path-translations/translatePath.js"
+import { normalize } from "./utils/path.js"
 
 export type I18nUserConfig<T extends string> = {
 	/**
@@ -41,7 +42,7 @@ export type I18nUserConfig<T extends string> = {
 
 	/**
 	 * Whether to prefix the language tag to the path even if it's the default language.
-	 * @default "always"
+	 * @default "never"
 	 */
 	prefixDefaultLanguage?: "always" | "never"
 }
@@ -103,7 +104,8 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18
 		 * @returns
 		 */
 		getLanguageFromUrl(url: URL): T {
-			const absoluteBase = new URL(base, get(page).url).pathname
+			const absoluteBase = normalize(new URL(base, get(page).url).pathname)
+
 			const pathWithLanguage = url.pathname.slice(absoluteBase.length)
 			const [lang, ...parts] = pathWithLanguage.split("/").filter(Boolean)
 
@@ -125,7 +127,8 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18
 		 * ```
 		 */
 		resolveRoute(path: string, lang: T) {
-			const absoluteBase = new URL(base, get(page).url).pathname
+			const absoluteBase = normalize(new URL(base, get(page).url).pathname)
+
 			if (options.exclude?.(path)) return path
 
 			const canonicalPath = path.slice(absoluteBase.length)
@@ -159,7 +162,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18
 		 * ```
 		 */
 		translatePath(translatedPath: string, targetLanguage: T) {
-			const absoluteBase = new URL(base, get(page).url).pathname
+			const absoluteBase = normalize(new URL(base, get(page).url).pathname)
 
 			return translatePath(translatedPath, targetLanguage, translations, {
 				base: absoluteBase,

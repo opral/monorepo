@@ -35,8 +35,6 @@ export const createReroute = <T extends string>({
 				includeLanguage: false,
 			})
 
-			console.log("rerouting", url.pathname, "to", serializedPath, "canonical", canonicalPath)
-
 			return serializedPath
 		} catch (e) {
 			console.error(e)

@@ -4,6 +4,8 @@
 	It also adds `<link rel="alternate">` tags to the head of your page
 -->
 <script lang="ts" generics="T extends string">
+	import { normalize } from "./utils/path.js"
+
 	import { serializeRoute } from "./utils/serialize-path.js"
 	import { page } from "$app/stores"
 	import { browser } from "$app/environment"
@@ -17,7 +19,7 @@
 
 	// The base path may be relative during SSR. 
 	// To make sure it is absolute, we need to resolve it against the current page URL.
-	const absoluteBase = new URL(maybe_relative_base, new URL($page.url)).pathname
+	const absoluteBase = normalize(new URL(maybe_relative_base, new URL($page.url)).pathname)
 
 	/** 
 	 * Override the language detection with a specific language tag.
@@ -57,9 +59,9 @@
 		}
 			
 		const language = hreflang ?? lang;
-		const canonicalPath = original_to.pathname.slice(absoluteBase.length);
-
+		const canonicalPath = normalize(original_to.pathname.slice(absoluteBase.length));
 		const translatedPath = getTranslatedPath(canonicalPath, language, i18n.config.translations);
+
 		return serializeRoute({
 			base: absoluteBase,
 			lang: language,
