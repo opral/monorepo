@@ -97,13 +97,16 @@ export const initializeInlangProject = async (ctx: Context) => {
 }
 
 export const maybeAddVsCodeExtension = async (args: { projectPath: string }, ctx: Context) => {
-	const response = await prompt(`Are you using VSCode?`, {
-		type: "confirm",
-		initial: true,
-	})
-	if (response === false) {
-		return
+	const isCertainlyVsCode = process?.env?.TERM_PROGRAM === "vscode"
+
+	let response = isCertainlyVsCode
+	if (!isCertainlyVsCode) {
+		response = await prompt(`Are you using VSCode?`, {
+			type: "confirm",
+			initial: true,
+		})
 	}
+	if (response === false) return
 
 	const project = await loadProject({
 		projectPath: resolve(process.cwd(), args.projectPath),

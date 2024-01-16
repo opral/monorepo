@@ -18,7 +18,7 @@ import IconSettings from "~icons/material-symbols/settings-outline"
 import IconDescription from "~icons/material-symbols/description-outline"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 import { showToast } from "#src/interface/components/Toast.jsx"
-import type { LanguageTag } from "@inlang/sdk"
+import { isValidLanguageTag, type LanguageTag } from "@inlang/sdk"
 import { sortLanguageTags } from "./helper/sortLanguageTags.js"
 import EditorLayout from "#src/interface/editor/EditorLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
@@ -53,13 +53,6 @@ export function Layout(props: { children: JSXElement }) {
 
 	const [addLanguageModalOpen, setAddLanguageModalOpen] = createSignal(false)
 	const [addLanguageText, setAddLanguageText] = createSignal("")
-
-	// check if the type matches the LanguageTag type
-	const isValidLanguageTag = (): boolean => {
-		const languageTagRegex =
-			/^((?<grandfathered>(en-GB-oed|i-ami|i-bnn|i-default|i-enochian|i-hak|i-klingon|i-lux|i-mingo|i-navajo|i-pwn|i-tao|i-tay|i-tsu|sgn-BE-FR|sgn-BE-NL|sgn-CH-DE)|(art-lojban|cel-gaulish|no-bok|no-nyn|zh-guoyu|zh-hakka|zh-min|zh-min-nan|zh-xiang))|((?<language>([A-Za-z]{2,3}(-(?<extlang>[A-Za-z]{3}(-[A-Za-z]{3}){0,2}))?))(-(?<script>[A-Za-z]{4}))?(-(?<region>[A-Za-z]{2}|[0-9]{3}))?(-(?<variant>[A-Za-z0-9]{5,8}|[0-9][A-Za-z0-9]{3}))*))$/
-		return languageTagRegex.test(addLanguageText())
-	}
 
 	const [filterOptions, setFilterOptions] = createSignal<Filter[]>([
 		{
@@ -299,7 +292,7 @@ export function Layout(props: { children: JSXElement }) {
 					prop:placeholder={"Add a language tag"}
 					prop:helpText={
 						!(
-							(!isValidLanguageTag() && addLanguageText().length > 0) ||
+							(!isValidLanguageTag(addLanguageText()) && addLanguageText().length > 0) ||
 							project()?.settings().languageTags.includes(addLanguageText())
 						)
 							? "Unique tags for languages (e.g. -> en, de, fr)"
@@ -309,7 +302,7 @@ export function Layout(props: { children: JSXElement }) {
 					onPaste={(e) => setAddLanguageText(e.currentTarget.value)}
 					onInput={(e) => setAddLanguageText(e.currentTarget.value)}
 				/>
-				<Show when={!isValidLanguageTag() && addLanguageText().length > 0}>
+				<Show when={!isValidLanguageTag(addLanguageText()) && addLanguageText().length > 0}>
 					<p class="text-xs leading-5 text-danger max-sm:hidden pt-1 pb-0.5">
 						Please enter a valid{" "}
 						<a
@@ -336,7 +329,8 @@ export function Layout(props: { children: JSXElement }) {
 					prop:size={"small"}
 					prop:variant={"primary"}
 					prop:disabled={
-						!isValidLanguageTag() || project()?.settings().languageTags.includes(addLanguageText())
+						!isValidLanguageTag(addLanguageText()) ||
+						project()?.settings().languageTags.includes(addLanguageText())
 					}
 					onClick={() => {
 						addLanguageTag(addLanguageText())
