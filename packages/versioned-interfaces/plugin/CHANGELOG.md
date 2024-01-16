@@ -1,5 +1,15 @@
 # @inlang/plugin
 
+## 2.4.2
+
+### Patch Changes
+
+- Updated dependencies [74ac11c47]
+  - @inlang/language-tag@1.4.0
+  - @inlang/message@2.0.1
+  - @inlang/project-settings@2.2.1
+  - @inlang/translatable@1.2.1
+
 ## 2.4.1
 
 ### Patch Changes
