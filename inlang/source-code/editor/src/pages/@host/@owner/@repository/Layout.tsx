@@ -36,7 +36,6 @@ interface Filter {
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
 	const {
-		repo,
 		refetchRepo,
 		forkStatus,
 		project,
@@ -60,7 +59,7 @@ export function Layout(props: { children: JSXElement }) {
 	const [openedGitHub, setOpenedGitHub] = createSignal(false)
 
 	createEffect(() => {
-		if (forkStatus() && forkStatus()?.behind > 0) {
+		if (forkStatus() && forkStatus()?.ahead > 0 && forkStatus()?.behind > 0) {
 			setForkStatusModalOpen(true)
 		}
 	})
@@ -359,40 +358,12 @@ export function Layout(props: { children: JSXElement }) {
 				prop:open={forkStatusModalOpen()}
 				on:sl-after-hide={() => setForkStatusModalOpen(false)}
 			>
-				{/* Can't merge upstream */}
-				<Show when={forkStatus() && forkStatus().ahead > 0 && forkStatus().behind > 0}>
-					<p class="text-sm pb-4 -mt-4 pr-8">
-						Your fork is out of sync with the upstream repository. Please resolve the conflicts before 
-						applying your changes.
-					</p>
-					<img src="/images/resolve-in-github.webp" alt="Sync Fork GitHub UI" class="w-full" />
-				</Show>
-				{/* Pull from upstream */}
-				<Show when={forkStatus() && forkStatus().ahead === 0 && forkStatus().behind > 0}>
-					<p class="text-sm pb-4 -mt-4 pr-8">
-						Your fork is out of sync. Please pull the latest changes from the upstream repository before 
-						applying your changes.
-					</p>
-				</Show>
+				<p class="text-sm pb-4 -mt-4 pr-8">
+					Your fork is out of sync with the upstream repository. Please resolve the conflicts before
+					applying your changes.
+				</p>
+				<img src="/images/resolve-in-github.webp" alt="Sync Fork GitHub UI" class="w-full" />
 				<div class="flex flex-end gap-4 pt-6">
-					<Show when={forkStatus() && forkStatus().ahead === 0 && forkStatus().behind > 0}>
-						<sl-button
-							class="w-full"
-							prop:size={"small"}
-							prop:variant={"primary"}
-							onClick={async () => {
-								await repo()?.mergeUpstream()
-								refetchRepo()
-								setForkStatusModalOpen(false)
-							}}
-						>
-							<div slot="prefix">
-								<IconSync />
-							</div>
-							Update fork
-						</sl-button>
-					</Show>
-					<Show when={forkStatus() && forkStatus()?.ahead > 0 && forkStatus()?.behind > 0 }>
 						<sl-button
 							class="w-full"
 							prop:size={"small"}
@@ -404,15 +375,13 @@ export function Layout(props: { children: JSXElement }) {
 								<IconGithub />
 							</div>
 							Open GitHub
-						</sl-button>
-					</Show>
+					</sl-button>
 					<Show when={openedGitHub()}>
 						<sl-button
 							class="w-full"
 							prop:size={"small"}
 							prop:variant={"primary"}
-							onClick={async () => {
-								await repo()?.mergeUpstream()
+							onClick={() => {
 								refetchRepo()
 								setForkStatusModalOpen(false)
 								setOpenedGitHub(false)
