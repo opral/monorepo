@@ -1,5 +1,12 @@
 # @inlang/paraglide-js-adapter-vite
 
+## 1.2.3
+
+### Patch Changes
+
+- Updated dependencies [74dc1f8c6]
+  - @inlang/paraglide-js-adapter-unplugin@1.2.3
+
 ## 1.2.2
 
 ### Patch Changes

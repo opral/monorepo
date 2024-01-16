@@ -1,5 +1,11 @@
 # @inlang/manage
 
+## 0.4.0
+
+### Minor Changes
+
+- 74ac11c47: Add isValidLanguageTag function
+
 ## 0.3.0
 
 ### Minor Changes
