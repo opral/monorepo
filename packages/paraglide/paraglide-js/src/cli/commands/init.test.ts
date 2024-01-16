@@ -16,7 +16,7 @@ import {
 } from "./init.js"
 import consola from "consola"
 import { describe } from "node:test"
-import nodeFsPromises from "fs/promises"
+import nodeFsPromises from "node:fs/promises"
 import childProcess from "node:child_process"
 import memfs from "memfs"
 import type { ProjectSettings } from "@inlang/sdk"
