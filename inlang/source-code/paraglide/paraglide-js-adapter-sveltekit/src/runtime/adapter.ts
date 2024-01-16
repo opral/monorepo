@@ -172,6 +172,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18
 				base: absoluteBase,
 				defaultLanguageTag,
 				availableLanguageTags: runtime.availableLanguageTags,
+				prefixDefaultLanguage: config.prefixDefaultLanguage,
 			})
 		},
 	}
