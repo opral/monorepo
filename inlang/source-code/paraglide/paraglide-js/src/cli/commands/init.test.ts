@@ -50,6 +50,7 @@ beforeEach(() => {
 	// set the current working directory to some mock value to prevent
 	// the tests from failing when running in a different environment
 	process.cwd = () => "/"
+	process.env.TERM_PROGRAM = "not-vscode"
 })
 
 // @eslint-ignore unicorn/no-null
@@ -415,6 +416,27 @@ describe("maybeAddVsCodeExtension()", () => {
 		])
 		await maybeAddVsCodeExtension({ projectPath: "/project.inlang" }, { logger, repo })
 		expect(await fileExists("/.vscode/extensions.json", fs)).toBe(true)
+	})
+
+	test("it should skip asking about vscode if the command is being run inside the vscode terminal", async () => {
+		process.env.TERM_PROGRAM = "vscode"
+		mockFiles({
+			"/project.inlang/settings.json": JSON.stringify(newProjectTemplate),
+		})
+		await maybeAddVsCodeExtension({ projectPath: "/project.inlang" }, logger)
+		expect(consola.prompt).not.toHaveBeenCalled()
+		const extensions = await fs.readFile("/.vscode/extensions.json", {
+			encoding: "utf-8",
+		})
+		expect(extensions).toBe(
+			JSON.stringify(
+				{
+					recommendations: ["inlang.vs-code-extension"],
+				},
+				undefined,
+				2
+			)
+		)
 	})
 })
 
