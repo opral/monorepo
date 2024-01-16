@@ -107,7 +107,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18
 			const absoluteBase = normalize(new URL(base, get(page).url).pathname)
 
 			const pathWithLanguage = url.pathname.slice(absoluteBase.length)
-			const [lang, ...parts] = pathWithLanguage.split("/").filter(Boolean)
+			const lang = pathWithLanguage.split("/").filter(Boolean).at(0)
 
 			if (runtime.isAvailableLanguageTag(lang)) return lang
 			return defaultLanguageTag

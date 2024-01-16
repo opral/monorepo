@@ -1,6 +1,5 @@
 import type { Handle } from "@sveltejs/kit"
 import { getPathInfo } from "../utils/get-path-info.js"
-import type { Paraglide } from "../runtime.js"
 import { base } from "$app/paths"
 import type { I18nConfig } from "../adapter.js"
 

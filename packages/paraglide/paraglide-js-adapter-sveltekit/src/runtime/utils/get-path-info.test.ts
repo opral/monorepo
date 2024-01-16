@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest"
 import { getPathInfo } from "./get-path-info"
-import { DATA_SUFFIX } from "../constants"
 
 describe("parsePath", () => {
 	it("correctly identifies the segments (with base path)", () => {
