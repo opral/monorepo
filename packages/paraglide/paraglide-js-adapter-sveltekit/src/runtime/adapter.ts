@@ -9,7 +9,7 @@ import { getTranslatedPath } from "./path-translations/getTranslatedPath.js"
 import { serializeRoute } from "./utils/serialize-path.js"
 import { translatePath } from "./path-translations/translatePath.js"
 
-export type I18nOptions<T extends string> = {
+export type I18nUserConfig<T extends string> = {
 	/**
 	 * The default languageTag to use if no locale is specified.
 	 * By default the sourceLanguageTag from the Paraglide runtime is used.
@@ -46,11 +46,28 @@ export type I18nOptions<T extends string> = {
 	prefixDefaultLanguage?: "always" | "never"
 }
 
-export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18nOptions<T>) {
+/**
+ * The _resolved_ configuration for the i18n instance.
+ */
+export type I18nConfig<T extends string> = {
+	runtime: Paraglide<T>
+	translations: PathTranslations<T>
+	exclude: (path: string) => boolean
+	defaultLanguageTag: T
+}
+
+export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18nUserConfig<T>) {
 	const translations = options.pathnames ?? {}
 
 	const exclude = options.exclude ?? (() => false)
 	const defaultLanguageTag = options.defaultLanguageTag ?? runtime.sourceLanguageTag
+
+	const config: I18nConfig<T> = {
+		runtime,
+		translations,
+		exclude,
+		defaultLanguageTag,
+	}
 
 	// We don't want the translations to be mutable
 	Object.freeze(translations)
@@ -59,23 +76,26 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18
 		/**
 		 * The configuration that was used to create this i18n instance.
 		 */
-		config: {
-			runtime,
-			translations,
-			exclude,
-			defaultLanguageTag,
-		},
+		config,
 
 		/**
-		 * Returns a `reroute` hook that applies the path translations to the paths
+		 * Returns a `reroute` hook that applies the path translations to the paths.
+		 * Register it in your `src/hooks.js` file to enable path translations.
+		 *
+		 * @example
+		 * ```ts
+		 * // src/hooks.js
+		 * import { i18n } from "$lib/i18n.js"
+		 * export const reroute = i18n.reroute()
+		 * ```
 		 */
-		reroute: () => createReroute(runtime, translations),
+		reroute: () => createReroute(config),
 
 		/**
 		 * Returns a `handle` hook that set's the correct `lang` attribute
 		 * on the `html` element
 		 */
-		handle: (options: HandleOptions) => createHandle(runtime, options),
+		handle: (options: HandleOptions) => createHandle(config, options),
 
 		/**
 		 * Takes in a URL and returns the language that should be used for it.

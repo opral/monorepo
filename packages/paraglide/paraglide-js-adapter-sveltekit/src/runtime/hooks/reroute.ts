@@ -3,17 +3,17 @@ import { base } from "$app/paths"
 import { serializeRoute } from "../utils/serialize-path.js"
 import { getCanonicalPath } from "../path-translations/getCanonicalPath.js"
 import type { Reroute } from "@sveltejs/kit"
-import type { PathTranslations } from "../path-translations/types.js"
-import type { Paraglide } from "../runtime.js"
+import type { I18nConfig } from "../adapter.js"
 
 /**
  * Returns a reroute function that applies the given translations to the paths
  * @param translations
  */
-export const createReroute = (
-	runtime: Paraglide<any>,
-	translations: PathTranslations<string>
-): Reroute => {
+export const createReroute = <T extends string>({
+	defaultLanguageTag,
+	runtime,
+	translations,
+}: I18nConfig<T>): Reroute => {
 	return ({ url }) => {
 		try {
 			const {
@@ -23,7 +23,7 @@ export const createReroute = (
 			} = getPathInfo(url.pathname, {
 				base,
 				availableLanguageTags: runtime.availableLanguageTags,
-				defaultLanguageTag: runtime.sourceLanguageTag,
+				defaultLanguageTag,
 			})
 
 			const canonicalPath = getCanonicalPath(translatedPath, lang, translations)
@@ -34,6 +34,8 @@ export const createReroute = (
 				dataSuffix,
 				includeLanguage: false,
 			})
+
+			console.log("rerouting", url.pathname, "to", serializedPath, "canonical", canonicalPath)
 
 			return serializedPath
 		} catch (e) {

@@ -3,6 +3,7 @@ import * as runtime from "$paraglide/runtime.js"
 
 export const i18n = createI18n(runtime, {
 	exclude: (path) => path.startsWith("/base/not-translated"),
+	defaultLanguageTag: "fr",
 	pathnames: {
 		"/about": {
 			en: "/about",
