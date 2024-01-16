@@ -21,7 +21,7 @@ const repo = await openRepository(repoRoot, {
 })
 ```
 
-Or, to open a GitHub repo from a browser:
+Or, use createNodeishMemoryFs to open a GitHub repo from a browser:
 
 ```typescript
 import { createNodeishMemoryFs } from "@lix-js/fs"
