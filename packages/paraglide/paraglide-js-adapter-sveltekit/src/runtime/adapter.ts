@@ -83,6 +83,23 @@ export type I18nConfig<T extends string> = {
 	prefixDefaultLanguage: "always" | "never"
 }
 
+
+/**
+ * Creates an i18n instance that manages your internationalization.
+ * 
+ * @param runtime The Paraglide runtime. 
+ * @param options The options for the i18n instance.
+ * @returns An i18n instance.
+ * 
+ * @example
+ * ```ts
+ * // src/lib/i18n.js
+ * import * as runtime from "../paraglide/runtime.js"
+ * import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
+ * 
+ * export const i18n = createI18n(runtime, { ...options })
+ * ```
+ */
 export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18nUserConfig<T>) {
 	const translations = options.pathnames ?? {}
 
