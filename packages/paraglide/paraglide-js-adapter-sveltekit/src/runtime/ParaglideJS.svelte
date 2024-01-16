@@ -53,6 +53,13 @@
 		if(isExternal(original_to, from, absoluteBase)) {
 			return href;
 		}
+
+		if(i18n.exclude(new URL(original_to))) {
+			console.log("Excluding", original_to.href, "from translation")
+			return href;
+		}
+
+		console.log("Not excluding", original_to.href, "from translation")
 			
 		const language = hreflang ?? lang;
 		const canonicalPath = original_to.pathname.slice(absoluteBase.length);
@@ -72,7 +79,7 @@
 </script>
 
 <svelte:head>
-	{#if !noAlternateLinks}
+	{#if !noAlternateLinks && !i18n.exclude($page.url)}
 		<!-- If there is more than one language, add alternate links -->
 		{#if i18n.availableLanguageTags.length >= 1}
 			{#each i18n.availableLanguageTags as lang}

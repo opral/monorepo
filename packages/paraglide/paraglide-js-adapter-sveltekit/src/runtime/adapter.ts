@@ -21,6 +21,21 @@ export type I18nOptions<T extends string> = {
 	pathnames?: PathTranslations<T>
 
 	/**
+	 * A predicate that determines whether a URL should be excluded from translation.
+	 * If it returns `true`, the URL will not be translated.
+	 *
+	 * @default () => false
+	 * @param url The URL to check
+	 * @returns True if the URL should be excluded from translation
+	 *
+	 * @example
+	 * ```ts
+	 * exclude: (url) => url.pathname.startsWith("/api")
+	 * ```
+	 */
+	exclude?: (url: URL) => boolean
+
+	/**
 	 * Whether to prefix the language tag to the path even if it's the default language.
 	 * @default "always"
 	 */
@@ -36,18 +51,17 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18
 	return {
 		...runtime,
 		translations,
+		exclude: options.exclude ?? (() => false),
 
 		/**
 		 * Returns a `reroute` hook that applies the path translations to the paths
 		 */
-		/* @__SIDE_EFFECT_FREE__ */
 		reroute: () => createReroute(runtime, translations),
 
 		/**
 		 * Returns a `handle` hook that set's the correct `lang` attribute
 		 * on the `html` element
 		 */
-		/* @__SIDE_EFFECT_FREE__ */
 		handle: (options: HandleOptions) => createHandle(runtime, options),
 
 		getLanguageFromUrl(url: URL) {
