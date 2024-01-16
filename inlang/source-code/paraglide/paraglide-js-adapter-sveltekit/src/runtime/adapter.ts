@@ -8,7 +8,6 @@ import type { Paraglide } from "./runtime.js"
 import { getTranslatedPath } from "./path-translations/getTranslatedPath.js"
 import { serializeRoute } from "./utils/serialize-path.js"
 import { translatePath } from "./path-translations/translatePath.js"
-import { normalize } from "./utils/path.js"
 
 export type I18nUserConfig<T extends string> = {
 	/**
