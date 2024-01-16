@@ -11,7 +11,11 @@
 export type NodeishFilesystem = {
 	// we need to expose internal state _State to the snapshotter without adding it to code completions
 	[x: string]: any
-	writeFile(path: string, data: string | Uint8Array, options?: { mode: number }): Promise<void>
+	writeFile(
+		path: string,
+		data: string | Uint8Array,
+		options?: { mode?: number; encoding?: "utf-8" }
+	): Promise<void>
 	readFile(path: string): Promise<Uint8Array>
 	readFile(path: string, options: { encoding: "utf-8" | "binary" }): Promise<string>
 	readdir(path: string): Promise<string[]>
