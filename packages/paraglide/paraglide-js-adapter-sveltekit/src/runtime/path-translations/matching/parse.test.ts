@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest"
 import { parsePathDefinition } from "./parse"
 
-describe.only("parsePathDefinition", () => {
+describe("parsePathDefinition", () => {
 	it("parses a static path", () => {
 		const parsed = parsePathDefinition("/foo/bar")
 

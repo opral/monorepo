@@ -200,10 +200,11 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18
 
 function normalizeBase(base: string) {
 	if (base == "") return base
+
+	//The base may be a relative path during SSR component initialization.
+	//If that's the case, we need to make it absolute.
 	if (!base.startsWith("/")) {
-		//The base may be a relative path during SSR component initialization.
-		//If that's the case, we need to make it absolute.
-		const absoluteBase = normalize(new URL(base, get(page).url).pathname)
+		const absoluteBase = new URL(base, get(page).url).pathname
 		return absoluteBase
 	}
 	return base
