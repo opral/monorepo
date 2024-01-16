@@ -11,12 +11,12 @@ import { translatePath } from "./path-translations/translatePath.js"
 
 export type I18nOptions<T extends string> = {
 	/**
-	 * The default locale to use if no locale is specified.
+	 * The default languageTag to use if no locale is specified.
 	 * By default the sourceLanguageTag from the Paraglide runtime is used.
 	 *
 	 * @default runtime.sourceLanguageTag
 	 */
-	defaultLocale?: T
+	defaultLanguageTag?: T
 
 	/**
 	 * Translations for pathnames.
@@ -50,6 +50,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18
 	const translations = options.pathnames ?? {}
 
 	const exclude = options.exclude ?? (() => false)
+	const defaultLanguageTag = options.defaultLanguageTag ?? runtime.sourceLanguageTag
 
 	// We don't want the translations to be mutable
 	Object.freeze(translations)
@@ -62,6 +63,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18
 			runtime,
 			translations,
 			exclude,
+			defaultLanguageTag,
 		},
 
 		/**
@@ -86,7 +88,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18
 			const [lang, ...parts] = pathWithLanguage.split("/").filter(Boolean)
 
 			if (runtime.isAvailableLanguageTag(lang)) return lang
-			return runtime.sourceLanguageTag
+			return defaultLanguageTag
 		},
 
 		/**
@@ -113,7 +115,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18
 				path: translatedPath,
 				lang,
 				base,
-				defaultLanguageTag: runtime.sourceLanguageTag,
+				defaultLanguageTag,
 				includeLanguage: true,
 				dataSuffix: undefined,
 			})
@@ -141,8 +143,8 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18
 
 			return translatePath(translatedPath, targetLanguage, translations, {
 				base: absoluteBase,
+				defaultLanguageTag,
 				availableLanguageTags: runtime.availableLanguageTags,
-				defaultLanguageTag: runtime.sourceLanguageTag,
 			})
 		},
 	}
