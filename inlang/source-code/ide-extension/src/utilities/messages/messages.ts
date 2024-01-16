@@ -5,7 +5,7 @@ import { CONFIGURATION } from "../../configuration.js"
 import { getStringFromPattern } from "./query.js"
 
 export function createMessageWebviewProvider(args: { context: vscode.ExtensionContext }) {
-	let messages = state().project?.query.messages.getAll() || []
+	let messages = state().project.query.messages.getAll() || []
 	let activeFileContent: string | undefined
 	let debounceTimer: NodeJS.Timeout | undefined
 
@@ -28,7 +28,7 @@ export function createMessageWebviewProvider(args: { context: vscode.ExtensionCo
 			)
 
 			const updateMessages = () => {
-				messages = state().project?.query.messages.getAll() || []
+				messages = state().project.query.messages.getAll() || []
 				updateWebviewContent()
 			}
 
@@ -46,11 +46,25 @@ export function createMessageWebviewProvider(args: { context: vscode.ExtensionCo
 				}, 300)
 			}
 
-			const updateWebviewContent = () => {
+			const updateWebviewContent = async () => {
 				const activeEditor = vscode.window.activeTextEditor
 				const fileContent = activeEditor ? activeEditor.document.getText() : ""
+				const ideExtensionConfig = state().project.customApi()?.["app.inlang.ideExtension"]
+				const messageReferenceMatchers = ideExtensionConfig?.messageReferenceMatchers
 
-				const highlightedMessages = messages.filter((message) => fileContent.includes(message.id))
+				const matchedMessages = (
+					await Promise.all(
+						(messageReferenceMatchers ?? []).map(async (matcher) => {
+							return matcher({ documentText: fileContent })
+						})
+					)
+				).flat()
+
+				const highlightedMessages = matchedMessages
+					.map((message) => {
+						return state().project.query.messages.get({ where: { id: message.messageId } })
+					})
+					.filter((message): message is Message => message !== undefined)
 				const highlightedMessagesHtml =
 					highlightedMessages.length > 0
 						? `<div class="highlighted-section">
@@ -141,7 +155,7 @@ export function createNoMessagesFoundHtml(isEmpty: boolean): string {
 }
 
 export function getTranslationsTableHtml(message: Message): string {
-	const configuredLanguageTags = state().project?.settings()?.languageTags || []
+	const configuredLanguageTags = state().project.settings()?.languageTags || []
 	const contextTableRows = configuredLanguageTags.map((languageTag) => {
 		// ... similar logic to contextTooltip for generating rows ...
 		const variant = message.variants.find((v) => v.languageTag === languageTag)
@@ -274,12 +288,19 @@ export function getHtml(args: {
                     });
                 }
 
-                function filterItems(searchTerm) {
-                    document.querySelectorAll('.tree-item').forEach(item => {
-                        const messageId = item.querySelector('.collapsible').textContent.toLowerCase();
-                        item.style.display = messageId.includes(searchTerm) ? '' : 'none';
-                    });
-                }
+				function filterItems(searchTerm) {
+					document.querySelectorAll('.tree-item').forEach(item => {
+						const messageId = item.querySelector('.collapsible').textContent.toLowerCase();
+						const messageButtons = item.querySelectorAll('.message button');
+						let translationsText = '';
+						messageButtons.forEach(button => {
+							translationsText += button.textContent.toLowerCase() + ' ';
+						});
+				
+						const itemVisible = messageId.includes(searchTerm) || translationsText.includes(searchTerm);
+						item.style.display = itemVisible ? '' : 'none';
+					});
+				}
 
 				function editMessage(messageId, languageTag) {
 					vscode.postMessage({

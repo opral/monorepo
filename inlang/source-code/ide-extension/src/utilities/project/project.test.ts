@@ -77,10 +77,9 @@ describe("project view", () => {
 	// TODO: test other functions from project.ts
 
 	it("createTreeDataProvider returns a TreeDataProvider", async () => {
-		const workspaceFolder = { uri: { fsPath: "/workspace" } } as vscode.WorkspaceFolder
 		const nodeishFs = {} as NodeishFilesystem // Mock as needed
 
-		const provider = createTreeDataProvider(workspaceFolder, nodeishFs)
+		const provider = createTreeDataProvider(nodeishFs)
 		expect(provider).toBeDefined()
 	})
 
