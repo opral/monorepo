@@ -33,7 +33,7 @@
 <br/>
 
 <!-- This path is excluded from being transalted in `vite.config.js` -->
-<a href="/base/not-translated" data-no-translate>Not Translated</a>
+<a href="/base/not-translated">Not Translated</a>
 
 <form action="{base}/">
 	<input type="text" name="test" />
