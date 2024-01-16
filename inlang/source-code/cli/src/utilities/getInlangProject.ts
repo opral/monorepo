@@ -1,8 +1,8 @@
 import fs from "node:fs/promises"
 import { loadProject, type InlangProject } from "@inlang/sdk"
-import { telemetry } from "../services/telemetry/implementation.js"
 import { resolve } from "node:path"
 import { openRepository, findRepoRoot } from "@lix-js/client"
+import { id } from "../../marketplace-manifest.json"
 
 /**
  * Gets the inlang project and exists if the project contains errors.
@@ -22,13 +22,7 @@ export async function getInlangProject(args: { projectPath: string }): Promise<I
 		project = await loadProject({
 			projectPath,
 			nodeishFs: fs,
-			_capture(id, props) {
-				telemetry.capture({
-					// @ts-ignore the event types
-					event: id,
-					properties: props,
-				})
-			},
+			appId: id,
 		})
 	} else {
 		const repo = await openRepository(repoRoot, {
@@ -38,13 +32,7 @@ export async function getInlangProject(args: { projectPath: string }): Promise<I
 		project = await loadProject({
 			projectPath,
 			repo,
-			_capture(id, props) {
-				telemetry.capture({
-					// @ts-ignore the event types
-					event: id,
-					properties: props,
-				})
-			},
+			appId: id,
 		})
 	}
 
