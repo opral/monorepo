@@ -7,8 +7,7 @@ import { telemetry } from "../../services/telemetry/implementation.js"
 import { writeOutput } from "../../services/file-handling/write-output.js"
 import { Logger } from "../../services/logger/index.js"
 import { openRepository, findRepoRoot } from "@lix-js/client"
-// TODO add a project UUID to the tele.groups internal #196
-// import { gitOrigin } from "../../services/telemetry/implementation.js"
+import type { NodeishFilesystem } from "@lix-js/fs"
 
 export const compileCommand = new Command()
 	.name("compile")
@@ -51,18 +50,8 @@ export const compileCommand = new Command()
 			logger
 		)
 
-		async function execute() {
-			const output = compile({
-				messages: project.query.messages.getAll(),
-				settings: project.settings(),
-			})
+		await executeCompilation(project, outputDirectory, repo.nodeishFs)
 
-			await writeOutput(outputDirectory, output, nodeFsPromises)
-		}
-
-		await execute()
-
-		// await Promise that never resolves to keep the process alive
 		if (options.watch) {
 			process.on("SIGINT", () => {
 				//start with a new line, since the ^C is on the current line
@@ -77,7 +66,7 @@ export const compileCommand = new Command()
 				if (numChanges === 1) return //don't recompile on the first run
 
 				logger.info("Messages changed. Recompiling...")
-				await execute()
+				await executeCompilation(project, outputDirectory, repo.nodeishFs)
 			})
 
 			/* eslint-disable no-constant-condition */
@@ -89,6 +78,22 @@ export const compileCommand = new Command()
 
 		logger.info("Sucessfully compiled the project.")
 	})
+
+/**
+ * Reads the messages from the project and compiles them into the output directory.
+ */
+async function executeCompilation(
+	project: InlangProject,
+	outputDirectory: string,
+	fs: NodeishFilesystem
+) {
+	const output = compile({
+		messages: project.query.messages.getAll(),
+		settings: project.settings(),
+	})
+
+	await writeOutput(outputDirectory, output, fs)
+}
 
 /**
  * Utility function to exit when the project has errors.
