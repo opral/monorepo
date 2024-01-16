@@ -133,9 +133,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18
 		 * @returns
 		 */
 		getLanguageFromUrl(url: URL): T {
-			const absoluteBase = normalize(new URL(base, get(page).url).pathname)
-
-			const pathWithLanguage = url.pathname.slice(absoluteBase.length)
+			const pathWithLanguage = url.pathname.slice(normalizeBase(base).length)
 			const lang = pathWithLanguage.split("/").filter(Boolean).at(0)
 
 			if (runtime.isAvailableLanguageTag(lang)) return lang
@@ -156,17 +154,15 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18
 		 * ```
 		 */
 		resolveRoute(path: string, lang: T) {
-			const absoluteBase = normalize(new URL(base, get(page).url).pathname)
-
 			if (options.exclude?.(path)) return path
 
-			const canonicalPath = path.slice(absoluteBase.length)
+			const canonicalPath = path.slice(normalizeBase(base).length)
 			const translatedPath = getTranslatedPath(canonicalPath, lang, translations)
 
 			return serializeRoute({
 				path: translatedPath,
 				lang,
-				base,
+				base: normalizeBase(base),
 				dataSuffix: undefined,
 				includeLanguage: true,
 				defaultLanguageTag,
@@ -192,16 +188,25 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18
 		 * ```
 		 */
 		translatePath(translatedPath: string, targetLanguage: T) {
-			const absoluteBase = normalize(new URL(base, get(page).url).pathname)
-
 			return translatePath(translatedPath, targetLanguage, translations, {
-				base: absoluteBase,
+				base: normalizeBase(base),
 				defaultLanguageTag,
 				availableLanguageTags: runtime.availableLanguageTags,
 				prefixDefaultLanguage: config.prefixDefaultLanguage,
 			})
 		},
 	}
+}
+
+function normalizeBase(base: string) {
+	if (base == "") return base
+	if (!base.startsWith("/")) {
+		//The base may be a relative path during SSR component initialization.
+		//If that's the case, we need to make it absolute.
+		const absoluteBase = normalize(new URL(base, get(page).url).pathname)
+		return absoluteBase
+	}
+	return base
 }
 
 export type I18n<T extends string> = ReturnType<typeof createI18n<T>>
