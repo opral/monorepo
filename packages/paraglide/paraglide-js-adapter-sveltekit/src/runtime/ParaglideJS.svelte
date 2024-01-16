@@ -66,7 +66,7 @@
 			path: translatedPath,
 			dataSuffix: undefined,
 			includeLanguage: true,
-			defaultLanguageTag: i18n.config.runtime.sourceLanguageTag
+			defaultLanguageTag: i18n.config.defaultLanguageTag
 		});
 	}
 
@@ -86,7 +86,7 @@
 					{ 
 						base: absoluteBase, 
 						availableLanguageTags: i18n.config.runtime.availableLanguageTags, 
-						defaultLanguageTag: i18n.config.runtime.sourceLanguageTag
+						defaultLanguageTag: i18n.config.defaultLanguageTag
 					}
 				)} />
 			{/each}
