@@ -458,9 +458,9 @@ describe("checkIfUncommittedChanges()", () => {
 		const fs = mockFiles({})
 		const repo = await openRepository("file://", { nodeishFs: fs })
 
-		//TODO execSync is not mocked correctly
-		vi.spyOn(childProcess, "exec").mockImplementation(async (command, callback) => {
-			callback("Command failed: git status")
+		vi.spyOn(childProcess, "exec").mockImplementation((command, callback): any => {
+			const cb = callback as (error: Error | null, stdout: Buffer, stderr: Buffer) => void
+			cb(new Error("Command failed: git status"), Buffer.from(""), Buffer.from(""))
 		})
 
 		expect(checkIfUncommittedChanges({ logger, repo })).resolves.toBeUndefined()
@@ -470,8 +470,9 @@ describe("checkIfUncommittedChanges()", () => {
 		const fs = mockFiles({})
 		const repo = await openRepository("file://", { nodeishFs: fs })
 
-		vi.spyOn(childProcess, "exec").mockImplementation(async (command, callback) => {
-			callback(null, Buffer.from(""))
+		vi.spyOn(childProcess, "exec").mockImplementation((command, callback): any => {
+			const cb = callback as (error: Error | null, stdout: Buffer, stderr: Buffer) => void
+			cb(null, Buffer.from(""), Buffer.from(""))
 		})
 
 		expect(checkIfUncommittedChanges({ logger, repo })).resolves.toBeUndefined()
@@ -481,8 +482,9 @@ describe("checkIfUncommittedChanges()", () => {
 		const fs = mockFiles({})
 		const repo = await openRepository("file://", { nodeishFs: fs })
 
-		vi.spyOn(childProcess, "exec").mockImplementation((...args) => {
-			callback(null, Buffer.from("M package.json"))
+		vi.spyOn(childProcess, "exec").mockImplementation((command, callback): any => {
+			const cb = callback as (error: Error | null, stdout: Buffer, stderr: Buffer) => void
+			cb(null, Buffer.from("M package.json"), Buffer.from(""))
 		})
 
 		const processExit = vi.spyOn(process, "exit").mockImplementation(() => undefined as never)
@@ -501,8 +503,9 @@ describe("checkIfUncommittedChanges()", () => {
 		const fs = mockFiles({})
 		const repo = await openRepository("file://", { nodeishFs: fs })
 
-		vi.spyOn(childProcess, "exec").mockImplementation((command, callback) => {
-			callback(null, Buffer.from("M package.json"))
+		vi.spyOn(childProcess, "exec").mockImplementation((command, callback): any => {
+			const cb = callback as (error: Error | null, stdout: Buffer, stderr: Buffer) => void
+			cb(null, Buffer.from("M package.json"), Buffer.from(""))
 		})
 
 		const processExit = vi.spyOn(process, "exit").mockImplementation(() => undefined as never)
@@ -520,6 +523,11 @@ describe("checkIfUncommittedChanges()", () => {
 	test("it should not prompt the user if no uncommitted changes exist", async () => {
 		const fs = mockFiles({})
 		const repo = await openRepository("file://", { nodeishFs: fs })
+
+		vi.spyOn(childProcess, "exec").mockImplementation((command, callback): any => {
+			const cb = callback as (error: Error | null, stdout: Buffer, stderr: Buffer) => void
+			cb(null, Buffer.from(""), Buffer.from(""))
+		})
 
 		await checkIfUncommittedChanges({ logger, repo })
 		expect(consola.prompt).not.toHaveBeenCalled()
