@@ -7,5 +7,6 @@
 	"change_language_to": "Changer la langue en {languageTag}",
 	"users": "Utilisateurs",
 	"next_user": "Prochain utilisateur",
-	"previous_user": "Utilisateur précédent"
+	"previous_user": "Utilisateur précédent",
+	"edit": "Modifier"
 }
