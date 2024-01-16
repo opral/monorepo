@@ -1991,7 +1991,7 @@ importers:
   inlang/source-code/templates/message-lint-rule:
     dependencies:
       '@inlang/sdk':
-        specifier: ^0.22.0
+        specifier: ^0.23.0
         version: link:../../sdk
     devDependencies:
       '@inlang/cli':
