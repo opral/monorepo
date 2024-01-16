@@ -20,7 +20,29 @@ export type I18nUserConfig<T extends string> = {
 	defaultLanguageTag?: T
 
 	/**
-	 * Translations for pathnames.
+	 * The translations for pathnames.
+	 * They should **not** include the base path or the language tag.
+	 *
+	 * You can include parameters in the pathnames by using square brackets.
+	 * If you are using a parameter, you must include it in all translations.
+	 *
+	 * @example
+	 * ```ts
+	 * pathnames: {
+	 *   "/about": {
+	 *     de: "/ueber-uns",
+	 *     en: "/about",
+	 *     fr: "/a-propos",
+	 *   },
+	 *   "/users/[slug]": {
+	 *      en: "/users/[slug]",
+	 *      // parameters don't have to be their own segment
+	 *      de: "/benutzer/[slug]",
+	 *      // parameters don't have to be in the same position
+	 *      fr: "/[slug]/utilisateurs",
+	 *    },
+	 * }
+	 * ```
 	 */
 	pathnames?: PathTranslations<T>
 
@@ -42,6 +64,10 @@ export type I18nUserConfig<T extends string> = {
 
 	/**
 	 * Whether to prefix the language tag to the path even if it's the default language.
+	 *
+	 * - If set to `"always"`, the language tag will always be included in the path. (eg `/base/en/about`)
+	 * - If set to `"never"`, the default language will not have a language tag in the path. (eg `/base/about`)
+	 *
 	 * @default "never"
 	 */
 	prefixDefaultLanguage?: "always" | "never"
