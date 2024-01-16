@@ -39,11 +39,9 @@
 	 * The language tag that was autodetected from the URL.
 	 */
 	$: autodetectedLanguage = i18n.getLanguageFromUrl($page.url)
-	$: console.log("Autodetected language:", autodetectedLanguage, $page.url.href)
-
 
 	$: lang = languageTag ?? autodetectedLanguage
-	$: i18n.setLanguageTag(lang)
+	$: i18n.config.runtime.setLanguageTag(lang)
 	$: if(browser) document.documentElement.lang = lang
 
 	function translateHref(href: string, hreflang : string | undefined) : string {
@@ -54,24 +52,21 @@
 			return href;
 		}
 
-		if(i18n.exclude(new URL(original_to))) {
-			console.log("Excluding", original_to.href, "from translation")
+		if(i18n.config.exclude(original_to.pathname)) {
 			return href;
 		}
-
-		console.log("Not excluding", original_to.href, "from translation")
 			
 		const language = hreflang ?? lang;
 		const canonicalPath = original_to.pathname.slice(absoluteBase.length);
 
-		const translatedPath = getTranslatedPath(canonicalPath, language, i18n.translations);
+		const translatedPath = getTranslatedPath(canonicalPath, language, i18n.config.translations);
 		return serializeRoute({
 			base: absoluteBase,
 			lang: language,
 			path: translatedPath,
 			dataSuffix: undefined,
 			includeLanguage: true,
-			defaultLanguageTag: i18n.sourceLanguageTag
+			defaultLanguageTag: i18n.config.runtime.sourceLanguageTag
 		});
 	}
 
@@ -79,19 +74,19 @@
 </script>
 
 <svelte:head>
-	{#if !noAlternateLinks && !i18n.exclude($page.url)}
+	{#if !noAlternateLinks && !i18n.config.exclude($page.url.pathname)}
 		<!-- If there is more than one language, add alternate links -->
-		{#if i18n.availableLanguageTags.length >= 1}
-			{#each i18n.availableLanguageTags as lang}
+		{#if i18n.config.runtime.availableLanguageTags.length >= 1}
+			{#each i18n.config.runtime.availableLanguageTags as lang}
 				<link rel="alternate" hreflang={lang} href={
 				translatePath(
 					$page.url.pathname, 
 					lang, 
-					i18n.translations,
+					i18n.config.translations,
 					{ 
 						base: absoluteBase, 
-						availableLanguageTags: i18n.availableLanguageTags, 
-						defaultLanguageTag: i18n.sourceLanguageTag
+						availableLanguageTags: i18n.config.runtime.availableLanguageTags, 
+						defaultLanguageTag: i18n.config.runtime.sourceLanguageTag
 					}
 				)} />
 			{/each}
