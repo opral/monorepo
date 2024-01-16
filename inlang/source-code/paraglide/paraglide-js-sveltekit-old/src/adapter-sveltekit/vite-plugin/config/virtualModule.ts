@@ -14,7 +14,7 @@ import { shouldContentBePrerendered } from "./utils/shouldContentBePrerendered.j
 import { getSettings } from "./utils/getSettings.js"
 import { doesPathExist } from "./utils/utils.js"
 import { getNodeishFs } from "./utils/getNodeishFs.js"
-import { openRepository } from "@lix-js/client"
+import { openRepository, findRepoRoot } from "@lix-js/client"
 
 type VersionString = `${number}.${number}.${number}${string}`
 
@@ -58,7 +58,9 @@ export const initVirtualModule = async (): Promise<VirtualModule> => {
 
 	// eslint-disable-next-line no-async-promise-executor
 	return (VirtualModule = new Promise<VirtualModule>(async (resolve, reject) => {
-		const repo = await openRepository("file://", {
+		const repoRoot = await findRepoRoot({ nodeishFs, path: PATH_TO_CWD })
+
+		const repo = await openRepository(repoRoot || process.cwd(), {
 			nodeishFs,
 		})
 		const inlang = await loadProject({ repo, projectPath: PATH_TO_INLANG_CONFIG })
