@@ -68,7 +68,8 @@
 			path: translatedPath,
 			dataSuffix: undefined,
 			includeLanguage: true,
-			defaultLanguageTag: i18n.config.defaultLanguageTag
+			defaultLanguageTag: i18n.config.defaultLanguageTag,
+			prefixDefaultLanguage: i18n.config.prefixDefaultLanguage,
 		});
 	}
 
@@ -88,7 +89,8 @@
 					{ 
 						base: absoluteBase, 
 						availableLanguageTags: i18n.config.runtime.availableLanguageTags, 
-						defaultLanguageTag: i18n.config.defaultLanguageTag
+						defaultLanguageTag: i18n.config.defaultLanguageTag,
+						prefixDefaultLanguage: i18n.config.prefixDefaultLanguage,
 					}
 				)} />
 			{/each}

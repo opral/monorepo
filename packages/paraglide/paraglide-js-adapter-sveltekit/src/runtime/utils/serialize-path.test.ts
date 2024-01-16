@@ -45,4 +45,46 @@ describe("serializePath", () => {
 
 		expect(path).toBe("/base/foo/bar/__data.json")
 	})
+
+	it("correctly omits the language if it's the default language", () => {
+		const path = serializeRoute({
+			path: "/foo/bar",
+			base: "/base",
+			dataSuffix: undefined,
+			includeLanguage: true,
+			lang: "en",
+			defaultLanguageTag: "en",
+			prefixDefaultLanguage: "never",
+		})
+
+		expect(path).toBe("/base/foo/bar")
+	})
+
+	it("correctly includes the language if it's not the default language", () => {
+		const path = serializeRoute({
+			path: "/foo/bar",
+			base: "/base",
+			dataSuffix: undefined,
+			includeLanguage: true,
+			lang: "en",
+			defaultLanguageTag: "fr",
+			prefixDefaultLanguage: "never",
+		})
+
+		expect(path).toBe("/base/en/foo/bar")
+	})
+
+	it("correctly includes the language if it's the default language and prefixDefaultLanguage is set to 'always'", () => {
+		const path = serializeRoute({
+			path: "/foo/bar",
+			base: "/base",
+			dataSuffix: undefined,
+			includeLanguage: true,
+			lang: "en",
+			defaultLanguageTag: "en",
+			prefixDefaultLanguage: "always",
+		})
+
+		expect(path).toBe("/base/en/foo/bar")
+	})
 })
