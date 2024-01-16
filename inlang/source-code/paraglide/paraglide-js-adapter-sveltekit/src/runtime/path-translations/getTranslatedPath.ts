@@ -1,4 +1,3 @@
-import { serializeRoute } from "../utils/serialize-path.js"
 import { matches } from "./matching/match.js"
 import { resolvePath } from "./matching/resolvePath.js"
 import type { PathTranslations } from "./types.js"
