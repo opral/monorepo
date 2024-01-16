@@ -7,8 +7,8 @@ type State = {
 	/**
 	 * Inlang project
 	 */
-	project: InlangProject | undefined
-	selectedProjectPath: string | undefined
+	project: InlangProject
+	selectedProjectPath: string
 	projectsInWorkspace: Awaited<ReturnType<typeof listProjects>>
 }
 

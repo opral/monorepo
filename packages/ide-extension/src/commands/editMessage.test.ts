@@ -76,7 +76,7 @@ describe("editMessageCommand", () => {
 		await editMessageCommand.callback({ messageId: mockMessageId, languageTag: mockLanguageTag })
 
 		expect(window.showInputBox).toHaveBeenCalled()
-		expect(state().project?.query.messages.upsert).toHaveBeenCalledWith({
+		expect(state().project.query.messages.upsert).toHaveBeenCalledWith({
 			where: { id: mockMessageId },
 			data: mockMessage,
 		})
@@ -137,6 +137,6 @@ describe("editMessageCommand", () => {
 		await editMessageCommand.callback({ messageId: mockMessageId, languageTag: mockLanguageTag })
 
 		expect(window.showInputBox).toHaveBeenCalled()
-		expect(state().project?.query.messages.upsert).not.toHaveBeenCalled()
+		expect(state().project.query.messages.upsert).not.toHaveBeenCalled()
 	})
 })
