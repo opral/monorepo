@@ -12,7 +12,7 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 			return
 		}
 
-		const ideExtension = state().project?.customApi()["app.inlang.ideExtension"]
+		const ideExtension = state().project.customApi()["app.inlang.ideExtension"]
 
 		if (!ideExtension) {
 			return
@@ -26,7 +26,7 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 			const diagnosticsIndex: Record<string, Record<string, vscode.Diagnostic[]>> = {}
 
 			for (const message of messages) {
-				state().project?.query.messageLintReports.get.subscribe(
+				state().project.query.messageLintReports.get.subscribe(
 					{
 						where: {
 							messageId: message.messageId,
