@@ -1,17 +1,17 @@
 import * as vscode from "vscode"
-import { listProjects, loadProject } from "@inlang/sdk"
+import { loadProject } from "@inlang/sdk"
 import { closestInlangProject } from "./closestInlangProject.js"
 import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
-import { setState } from "../../state.js"
+import { setState, state } from "../../state.js"
 import { CONFIGURATION } from "../../configuration.js"
-import { createFileSystemMapper } from "../fs/createFileSystemMapper.js"
-import fs from "node:fs/promises"
+
 import { telemetry } from "../../services/telemetry/implementation.js"
 import type { TelemetryEvents } from "../../services/telemetry/events.js"
-import { createInlangConfigFile } from "../settings/createInlangConfigFile.js"
 import path from "node:path"
 
-export interface ProjectNode {
+let projectViewNodes: ProjectViewNode[] = []
+
+export interface ProjectViewNode {
 	label: string
 	path: string
 	isSelected: boolean
@@ -19,61 +19,54 @@ export interface ProjectNode {
 	collapsibleState: vscode.TreeItemCollapsibleState
 }
 
-let projectsList: Awaited<ReturnType<typeof listProjects>>
-let closestProjectNode: Awaited<ReturnType<typeof closestInlangProject>>
-let selectedProject: string | undefined = undefined
-let projectNodes: ProjectNode[] = []
-
-export function createProjectNode(args: {
-	label: string
-	path: string
-	isSelected: boolean
-	isClosest: boolean
-	collapsibleState: vscode.TreeItemCollapsibleState
-}): ProjectNode {
-	return { ...args }
-}
-
-export async function createProjectNodes(
+export async function createProjectViewNodes(
 	workspaceFolder: vscode.WorkspaceFolder,
 	nodeishFs: NodeishFilesystem
-): Promise<ProjectNode[]> {
+): Promise<ProjectViewNode[]> {
+	let closestProjectToWorkspace: Awaited<ReturnType<typeof closestInlangProject>>
+	const selectedProject = state().selectedProjectPath
 	const workspaceFolderFsPath = normalizePath(workspaceFolder.uri.fsPath)
-	if (!projectsList) {
-		projectsList = await listProjects(nodeishFs, workspaceFolderFsPath)
+	const projectList = state().projectsInWorkspace
+
+	if (!projectList || projectList.length === 0) {
+		return []
 	}
 
-	if (!closestProjectNode) {
-		closestProjectNode = await closestInlangProject({
+	if (!closestProjectToWorkspace) {
+		closestProjectToWorkspace = await closestInlangProject({
 			workingDirectory: workspaceFolderFsPath,
-			projects: projectsList,
+			projects: projectList,
 		})
 	}
 
-	projectNodes = projectsList.map((project) => {
-		const projectName = project.projectPath.split("/").slice(-2).join("/")
-		return createProjectNode({
+	projectViewNodes = projectList.map((project) => {
+		const projectName = normalizePath(project.projectPath).split("/").slice(-2).join("/")
+		const projectPathRelative = project.projectPath.replace(workspaceFolderFsPath, "")
+
+		return {
 			label: projectName,
 			path: project.projectPath,
-			isSelected: project.projectPath === selectedProject,
-			isClosest: project === closestProjectNode,
+			isSelected: projectPathRelative === selectedProject,
+			isClosest: project === closestProjectToWorkspace,
 			collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
-		})
+		} as ProjectViewNode
 	})
 
 	// Handle initial selection
-	if (!selectedProject && closestProjectNode) {
-		const closestNode = projectNodes.find((node) => node.path === closestProjectNode?.projectPath)
+	if (!selectedProject && closestProjectToWorkspace) {
+		const closestNode = projectViewNodes.find(
+			(node) => node.path === closestProjectToWorkspace?.projectPath
+		)
 		if (closestNode) {
 			await handleTreeSelection(closestNode, nodeishFs, workspaceFolder)
 		}
 	}
 
-	return projectNodes
+	return projectViewNodes
 }
 
 export function getTreeItem(
-	element: ProjectNode,
+	element: ProjectViewNode,
 	nodeishFs: NodeishFilesystem,
 	workspaceFolder: vscode.WorkspaceFolder
 ): vscode.TreeItem {
@@ -83,36 +76,28 @@ export function getTreeItem(
 		iconPath: element.isSelected
 			? new vscode.ThemeIcon("pass-filled", new vscode.ThemeColor("statusBar.foreground"))
 			: new vscode.ThemeIcon("circle-large-outline", new vscode.ThemeColor("statusBar.foreground")),
-		contextValue: "projectNode",
+		contextValue: "projectViewNode",
 		command: {
-			command: "inlang.openProject", // This is a custom command you will define
+			command: "inlang.openProject",
 			title: "Open File",
-			arguments: [element, nodeishFs, workspaceFolder], // Pass the file path as an argument
+			arguments: [element, nodeishFs, workspaceFolder],
 		},
 	}
 }
 
 export async function handleTreeSelection(
-	selectedNode: ProjectNode,
+	selectedNode: ProjectViewNode,
 	nodeishFs: NodeishFilesystem,
 	workspaceFolder: vscode.WorkspaceFolder
 ): Promise<void> {
-	// if no settings file is found
-	if (workspaceFolder && projectNodes.length === 0) {
-		// Try to auto config
-		await createInlangConfigFile({ workspaceFolder })
-	}
+	const selectedProject = selectedNode.path
 
-	// update isSelected
-	projectNodes = projectNodes.map((node) => {
-		return {
-			...node,
-			isSelected: node.path === selectedNode.path,
-		}
-	})
+	projectViewNodes = projectViewNodes.map((node) => ({
+		...node,
+		isSelected: node.path === selectedNode.path,
+	}))
 
-	// update selectedProject
-	selectedProject = projectNodes.find((node) => node.isSelected)?.path
+	const newSelectedProject = projectViewNodes.find((node) => node.isSelected)?.path
 
 	try {
 		const inlangProject = await loadProject({
@@ -133,12 +118,16 @@ export async function handleTreeSelection(
 			},
 		})
 
-		// Here we get the relative path
-		const relativeProjectPath = selectedProject
+		// Get the relative path
+		const relativeProjectPath = newSelectedProject
 			? "/" + path.relative(normalizePath(workspaceFolder?.uri.fsPath), selectedProject) // adding leading slash
 			: ""
 
-		setState({ project: inlangProject, selectedProjectPath: relativeProjectPath })
+		setState({
+			...state(),
+			project: inlangProject,
+			selectedProjectPath: relativeProjectPath,
+		})
 
 		// Refresh the entire tree to reflect selection changes
 		CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.fire(undefined)
@@ -151,25 +140,118 @@ export async function handleTreeSelection(
 export async function createTreeDataProvider(
 	workspaceFolder: vscode.WorkspaceFolder,
 	nodeishFs: NodeishFilesystem
-): Promise<vscode.TreeDataProvider<ProjectNode>> {
+): Promise<vscode.TreeDataProvider<ProjectViewNode>> {
 	return {
-		getTreeItem: (element: ProjectNode) => getTreeItem(element, nodeishFs, workspaceFolder),
-		getChildren: async () => await createProjectNodes(workspaceFolder, nodeishFs),
+		getTreeItem: (element: ProjectViewNode) => getTreeItem(element, nodeishFs, workspaceFolder),
+		getChildren: async () => await createProjectViewNodes(workspaceFolder, nodeishFs),
 		onDidChangeTreeData: CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.event,
 	}
+}
+
+function createNoProjectsFoundViewProvider(): vscode.WebviewViewProvider {
+	return {
+		resolveWebviewView(webviewView: vscode.WebviewView) {
+			webviewView.webview.options = {
+				enableScripts: false,
+			}
+			webviewView.webview.html = getNoProjectsFoundHtml()
+		},
+	}
+}
+
+function getNoProjectsFoundHtml(): string {
+	return `<!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>No Projects Found</title>
+			<style>
+				body{
+					margin: 0;
+					padding: 0;
+					box-sizing: border-box;
+				}
+				main {
+					margin: 5px 10px;
+				}
+				h1 {
+					font-size: 12px;
+					text-weight: bold;
+				}
+				span {
+					display: block;
+					font-size: 12px;
+					line-height: 1.2;
+					margin-bottom: 10px;
+				}
+				button {
+					color: var(--vscode-button-foreground);
+					background-color: var(--vscode-button-background);
+					border: none;
+					padding: 5px 10px;
+					width: 100%;
+					text-align: center;
+					text-decoration: none;
+					display: inline-block;
+					font-size: 12px;
+					font-weight: bold;
+					margin: 4px 2px;
+					transition-duration: 0.4s;
+					cursor: pointer;
+					border-radius: 2px;
+					margin-bottom: 10px;
+				}
+				
+				button:hover {
+					background-color: var(--vscode-button-hoverBackground);
+				}
+
+				ol, ul {
+					margin-top: 5px;
+				}
+
+				li {
+					font-size: 12px;
+					margin-bottom: 5px;
+				}
+			</style>
+        </head>
+        <body>
+			<main>
+				<h1>No project found</h1>
+				<span>Please create a project or make sure to have the correct workspace open.</span>
+				<a href="https://manage.inlang.com"><button>Create Project</button></a>
+				<span style="text-align: center;">Or, see <a href="https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension">documentation</a></span>
+			</main>
+        </body>
+        </html>`
 }
 
 export const projectView = async (args: {
 	context: vscode.ExtensionContext
 	gitOrigin: string | undefined
 	workspaceFolder: vscode.WorkspaceFolder
+	nodeishFs: NodeishFilesystem
 }) => {
-	const nodeishFs = createFileSystemMapper(args.workspaceFolder.uri.fsPath, fs)
-	const treeDataProvider = await createTreeDataProvider(args.workspaceFolder || "", nodeishFs)
+	const projectList = state().projectsInWorkspace
 
-	await treeDataProvider.getChildren()
+	if (projectList && projectList.length === 0) {
+		vscode.window.registerWebviewViewProvider(
+			"gettingStartedView",
+			createNoProjectsFoundViewProvider()
+		)
+	} else {
+		const treeDataProvider = await createTreeDataProvider(
+			args.workspaceFolder || "",
+			args.nodeishFs
+		)
 
-	args.context.subscriptions.push(
-		vscode.window.registerTreeDataProvider("projectView", treeDataProvider)
-	)
+		args.context.subscriptions.push(
+			vscode.window.registerTreeDataProvider("projectView", treeDataProvider)
+		)
+	}
+
+	return
 }

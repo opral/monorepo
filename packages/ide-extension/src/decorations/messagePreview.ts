@@ -28,8 +28,8 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 		}
 
 		// Get the reference language
-		const sourceLanguageTag = state().project.settings()?.sourceLanguageTag
-		const ideExtensionConfig = state().project.customApi()?.["app.inlang.ideExtension"]
+		const sourceLanguageTag = state().project?.settings()?.sourceLanguageTag
+		const ideExtensionConfig = state().project?.customApi()?.["app.inlang.ideExtension"]
 
 		const messageReferenceMatchers = ideExtensionConfig?.messageReferenceMatchers
 
@@ -45,7 +45,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 				documentText: activeTextEditor.document.getText(),
 			})
 			return messages.map((message) => {
-				const _message = state().project.query.messages.get({
+				const _message = state().project?.query.messages.get({
 					where: { id: message.messageId },
 				})
 

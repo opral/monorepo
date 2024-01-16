@@ -5,7 +5,7 @@ import { CONFIGURATION } from "../../configuration.js"
 import { getStringFromPattern } from "./query.js"
 
 export function createMessageWebviewProvider(args: { context: vscode.ExtensionContext }) {
-	let messages = state().project.query.messages.getAll()
+	let messages = state().project?.query.messages.getAll() || []
 	let activeFileContent: string | undefined
 	let debounceTimer: NodeJS.Timeout | undefined
 
@@ -28,7 +28,7 @@ export function createMessageWebviewProvider(args: { context: vscode.ExtensionCo
 			)
 
 			const updateMessages = () => {
-				messages = state().project.query.messages.getAll()
+				messages = state().project?.query.messages.getAll() || []
 				updateWebviewContent()
 			}
 
@@ -141,7 +141,7 @@ export function createNoMessagesFoundHtml(isEmpty: boolean): string {
 }
 
 export function getTranslationsTableHtml(message: Message): string {
-	const configuredLanguageTags = state().project.settings()?.languageTags || []
+	const configuredLanguageTags = state().project?.settings()?.languageTags || []
 	const contextTableRows = configuredLanguageTags.map((languageTag) => {
 		// ... similar logic to contextTooltip for generating rows ...
 		const variant = message.variants.find((v) => v.languageTag === languageTag)
@@ -307,4 +307,5 @@ export async function messageView(args: { context: vscode.ExtensionContext }) {
 	args.context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider("messageView", provider)
 	)
+	return
 }

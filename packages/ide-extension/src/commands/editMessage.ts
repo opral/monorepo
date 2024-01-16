@@ -17,7 +17,7 @@ export const editMessageCommand = {
 		languageTag: LanguageTag
 	}) {
 		// Get the message from the state
-		const message = state().project.query.messages.get({ where: { id: messageId } })
+		const message = state().project?.query.messages.get({ where: { id: messageId } })
 		if (!message) {
 			return msg(`Message with id ${messageId} not found.`)
 		}
@@ -55,7 +55,7 @@ export const editMessageCommand = {
 		variant.pattern = getPatternFromString({ string: newValue })
 
 		// Upsert the updated message
-		state().project.query.messages.upsert({
+		state().project?.query.messages.upsert({
 			where: { id: messageId },
 			data: message,
 		})

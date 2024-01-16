@@ -29,7 +29,7 @@ export function contextTooltip(
 		ReturnType<CustomApiInlangIdeExtension["messageReferenceMatchers"][number]>
 	>[number]
 ) {
-	const message = state().project.query.messages.get({
+	const message = state().project?.query.messages.get({
 		where: { id: referenceMessage.messageId },
 	})
 
@@ -38,7 +38,7 @@ export function contextTooltip(
 	}
 
 	// Get the configured language tags
-	const configuredLanguageTags = state().project.settings()?.languageTags || []
+	const configuredLanguageTags = state().project?.settings()?.languageTags || []
 
 	// Generate rows for each configured language tag
 	const contextTableRows: ContextTableRow[] = configuredLanguageTags.map((languageTag) => {

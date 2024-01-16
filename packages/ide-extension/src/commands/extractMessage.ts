@@ -14,8 +14,8 @@ export const extractMessageCommand = {
 	title: "Inlang: Extract Message",
 	register: commands.registerTextEditorCommand,
 	callback: async function (textEditor: TextEditor) {
-		const ideExtension = state().project.customApi()["app.inlang.ideExtension"]
-		const sourceLanguageTag = state().project.settings().sourceLanguageTag
+		const ideExtension = state().project?.customApi()["app.inlang.ideExtension"]
+		const sourceLanguageTag = state().project?.settings().sourceLanguageTag
 
 		// guards
 		if (!ideExtension) {
@@ -91,7 +91,7 @@ export const extractMessageCommand = {
 			selectors: [],
 			variants: [
 				{
-					languageTag: state().project.settings()?.sourceLanguageTag as string,
+					languageTag: state().project?.settings()?.sourceLanguageTag as string,
 					match: [],
 					pattern: [
 						{
@@ -104,7 +104,7 @@ export const extractMessageCommand = {
 		}
 
 		// create message
-		const success = state().project.query.messages.create({
+		const success = state().project?.query.messages.create({
 			data: message,
 		})
 

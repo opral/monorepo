@@ -8,7 +8,7 @@ export interface ErrorNode {
 	description?: string
 	error: Error | undefined
 }
-export function createErrorNode(error: Error | undefined): ErrorNode {
+export function createErrorNode(error: Error | 0 | undefined): ErrorNode {
 	if (error) {
 		return {
 			label: error.name,
@@ -16,20 +16,32 @@ export function createErrorNode(error: Error | undefined): ErrorNode {
 			description: error.message,
 			error: error,
 		}
-	} else {
+	} else if (error === 0) {
 		return {
 			label: "No errors found",
 			tooltip: "All good!",
 			error: undefined,
 		}
+	} else {
+		return {
+			label: "No project found in workspace",
+			tooltip:
+				"No project found in workspace. Please open a project to see errors. To create a new project, visit https://manage.inlang.com",
+			error: new Error(
+				"No project found in workspace. Please open a project to see errors. To create a new project, visit https://manage.inlang.com"
+			),
+		}
 	}
 }
 
 export async function createErrorNodes(): Promise<ErrorNode[]> {
-	const errors = state().project.errors() as Error[]
-	if (errors.length === 0) {
-		// If no errors, return a single node indicating this
+	const errors = state().project?.errors() as Error[]
+	if (state().project === undefined) {
+		// no project
 		return [createErrorNode(undefined)]
+	} else if (errors.length === 0) {
+		// no errors
+		return [createErrorNode(0)]
 	}
 	return errors.map(createErrorNode)
 }
@@ -68,10 +80,9 @@ export function createErrorTreeDataProvider(): vscode.TreeDataProvider<ErrorNode
 export const errorView = async (args: { context: vscode.ExtensionContext }) => {
 	const errorDataProvider = createErrorTreeDataProvider()
 
-	// This line is optional, used only if you want to perform initial data loading or similar actions
-	await errorDataProvider.getChildren()
-
 	args.context.subscriptions.push(
 		vscode.window.registerTreeDataProvider("errorView", errorDataProvider)
 	)
+
+	return
 }

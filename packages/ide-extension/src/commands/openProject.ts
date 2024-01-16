@@ -1,5 +1,5 @@
 import * as vscode from "vscode"
-import { handleTreeSelection, type ProjectNode } from "../utilities/project/project.js"
+import { handleTreeSelection, type ProjectViewNode } from "../utilities/project/project.js"
 import type { NodeishFilesystem } from "@lix-js/fs"
 
 export const openProjectCommand = {
@@ -7,7 +7,7 @@ export const openProjectCommand = {
 	title: "Inlang: Open project",
 	register: vscode.commands.registerCommand,
 	callback: async (
-		node: ProjectNode,
+		node: ProjectViewNode,
 		nodeishFs: NodeishFilesystem,
 		workspaceFolder: vscode.WorkspaceFolder
 	) => {
