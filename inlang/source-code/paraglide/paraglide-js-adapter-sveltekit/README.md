@@ -1,19 +1,15 @@
 # Paraglide Adapter SvelteKit
 
-> Not to be confused with SvelteKit's adapters.
+> Not to be confused with SvelteKit's adapters. This is a framework integration for Paraglide.
 
 Everything you need to internationalize your SvelteKit app with Paraglide.
 
 **Features**
 
-- Automatically set & manage the language for Paraglide
-- Supports multiple i18n routing strategies
-  - Url Prefix
-  - Domain based
-  - Search Param
-- Automatically rewrite existing links to reflect your routing strategy
-- Adds alternate language links to your pages, again based on your routing strategy
-- Sets the `html` lang attribute for SEO
+- 🪂 Automatically set & manage the language for Paraglide
+- 💬 Translated paths
+- 🪄 Automatically translate existing links
+- ⚙️ SEO friendly out of the box
 
 ## Quickstart
 
