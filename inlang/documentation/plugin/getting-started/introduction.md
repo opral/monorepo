@@ -3,7 +3,7 @@
 
 <br/>
 
-![pluginCover](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/plugin/assets/plugin-cover.png)
+![pluginCover](https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/documentation/plugin/assets/plugin-cover.png)
 
 An inlang plugin is a small program that can be added to the inlang project to provide apps or the SDK with logic and information. By using plugins, developers can extend their apps without having to build everything from scratch.
 
@@ -19,7 +19,7 @@ Inlang project architecture is more flexible with the use of plugins. This means
 
 For example, plugin A defines that [messages](/documentation/concept/message) should be stored in a database, while plugin B defines that messages should be stored in a file. An [inlang app](/documentation/concept/app) that uses plugin A will store messages in a database, while an inlang app that uses plugin B will store messages in a file.
 
-![inlang plugin](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/plugin.jpg)
+![inlang plugin](https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/documentation/sdk/assets/plugin.jpg)
 
 <br/>
 

@@ -30,7 +30,7 @@ export default async function onRenderHtml(pageContext: PageContextRenderer): Pr
 	}
 
 	return escapeInject`<!DOCTYPE html>
-    <html lang="en" class="min-h-screen min-w-screen overflow-x-hidden">
+    <html lang="en" class="min-h-screen min-w-screen">
       <head>
 	  		<title>${dangerouslySkipEscape(metaInfo.title)}</title>
 			<meta name="description" content="${dangerouslySkipEscape(metaInfo.description)}" />

@@ -64,11 +64,26 @@ export function transformRemote(remote: string) {
 }
 
 export function parseLixUri(uriText: string) {
-	const { protocol, host, pathname } = new URL(uriText)
+	let url
+	try {
+		url = new URL(uriText)
+	} catch (error) {
+		// console.error(error, uriText) use only for debugging could leak secrets into logs
+		return {
+			error,
 
-	if (protocol === "file:") {
-		throw new Error(`Local repos are not supported yet`)
+			username: "",
+			password: "",
+			protocol: "",
+			lixHost: "",
+			namespace: "",
+			repoHost: "",
+			owner: "",
+			repoName: "",
+		}
 	}
+
+	const { protocol, host, pathname, username, password } = url
 
 	const pathParts = pathname.split("/")
 
@@ -84,9 +99,20 @@ export function parseLixUri(uriText: string) {
 		repoName = pathParts[2] || ""
 
 		if (!repoHost || !owner || !repoName) {
-			throw new Error(
-				`Invalid url format for '${uriText}' for direct cloning repository from github, please use the format of https://github.com/inlang/monorepo.`
-			)
+			return {
+				error: new Error(
+					`Invalid url format for '${uriText}' for direct cloning repository from github, please use the format of https://github.com/opral/monorepo.`
+				),
+
+				username,
+				password,
+				protocol,
+				lixHost,
+				namespace,
+				repoHost,
+				owner,
+				repoName,
+			}
 		}
 	} else {
 		lixHost = host
@@ -96,13 +122,25 @@ export function parseLixUri(uriText: string) {
 		repoName = pathParts[4] || ""
 
 		if (!namespace || !host || !owner || !repoName) {
-			throw new Error(
-				`Invalid url format for '${uriText}' for cloning repository, please use the format of https://lix.inlang.com/git/github.com/inlang/monorepo.`
-			)
+			return {
+				error: new Error(
+					`Invalid url format for '${uriText}' for cloning repository, please use the format of https://lix.inlang.com/git/github.com/opral/monorepo.`
+				),
+				username,
+				password,
+				protocol,
+				lixHost,
+				namespace,
+				repoHost,
+				owner,
+				repoName,
+			}
 		}
 	}
 
 	return {
+		username,
+		password,
 		protocol,
 		lixHost,
 		namespace,

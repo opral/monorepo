@@ -1,6 +1,12 @@
 export const AppIcon = () => {
 	return (
-		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			width="100%"
+			height="100%"
+			fill="none"
+			viewBox="0 0 16 16"
+		>
 			<rect
 				width="11"
 				height="11"
@@ -16,7 +22,13 @@ export const AppIcon = () => {
 
 export const ProjectIcon = () => {
 	return (
-		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			width="100%"
+			height="100%"
+			fill="none"
+			viewBox="0 0 16 16"
+		>
 			<path
 				stroke="currentColor"
 				stroke-width="1.3"
@@ -29,7 +41,13 @@ export const ProjectIcon = () => {
 
 export const MessageIcon = () => {
 	return (
-		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			width="100%"
+			height="100%"
+			fill="none"
+			viewBox="0 0 16 16"
+		>
 			<path
 				fill="currentColor"
 				fill-rule="evenodd"
@@ -42,7 +60,13 @@ export const MessageIcon = () => {
 
 export const LibraryIcon = () => {
 	return (
-		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			width="100%"
+			height="100%"
+			fill="none"
+			viewBox="0 0 16 16"
+		>
 			<path
 				stroke="currentColor"
 				stroke-width="1.3"
@@ -55,7 +79,13 @@ export const LibraryIcon = () => {
 
 export const LanguageTagIcon = () => {
 	return (
-		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			width="100%"
+			height="100%"
+			fill="none"
+			viewBox="0 0 16 16"
+		>
 			<path
 				fill="currentColor"
 				fill-rule="evenodd"
@@ -68,7 +98,13 @@ export const LanguageTagIcon = () => {
 
 export const PluginIcon = () => {
 	return (
-		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			width="100%"
+			height="100%"
+			fill="none"
+			viewBox="0 0 16 16"
+		>
 			<path
 				stroke="currentColor"
 				stroke-linejoin="round"
@@ -81,7 +117,13 @@ export const PluginIcon = () => {
 
 export const LintRuleIcon = () => {
 	return (
-		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			width="100%"
+			height="100%"
+			fill="none"
+			viewBox="0 0 16 16"
+		>
 			<path
 				fill="currentColor"
 				d="M2.746 10H1.219l2.78-7.898h1.767L8.55 10H7.023l-2.11-6.278h-.061L2.746 10zm.05-3.097h4.165v1.15H2.796v-1.15zm8.437 3.217c-.375 0-.713-.067-1.014-.201a1.655 1.655 0 01-.71-.602c-.172-.264-.258-.59-.258-.98 0-.333.062-.61.185-.828.123-.219.292-.394.505-.525.214-.13.454-.23.721-.297.27-.07.55-.12.837-.15.347-.036.629-.068.845-.097.216-.03.373-.077.47-.138.1-.065.15-.164.15-.297V5.98c0-.29-.085-.515-.258-.674-.172-.16-.42-.24-.744-.24-.342 0-.613.075-.814.224a1.11 1.11 0 00-.4.529l-1.304-.186c.103-.36.272-.66.509-.902.236-.244.526-.427.868-.548A3.32 3.32 0 0111.954 4c.286 0 .57.034.853.1.282.067.54.178.775.332.234.152.421.359.563.621.144.262.216.59.216.983V10h-1.342v-.814h-.046a1.705 1.705 0 01-.36.463 1.726 1.726 0 01-.574.343 2.317 2.317 0 01-.806.128zm.363-1.026c.28 0 .523-.056.729-.166.205-.113.363-.262.474-.447a1.14 1.14 0 00.17-.606v-.698a.657.657 0 01-.224.1c-.103.031-.219.058-.347.081-.129.023-.256.044-.382.062l-.328.046a2.437 2.437 0 00-.559.14.928.928 0 00-.39.269.66.66 0 00-.142.44c0 .257.094.45.281.582.188.131.427.197.718.197z"
@@ -100,7 +142,13 @@ export const LintRuleIcon = () => {
 
 export const ArrowLinkIcon = () => {
 	return (
-		<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 16 16">
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			width="100%"
+			height="100%"
+			fill="none"
+			viewBox="0 0 16 16"
+		>
 			<path
 				fill="currentColor"
 				d="M15.716 8.433l-5.759 5.784a.96.96 0 01-1.64-.683c0-.256.1-.501.28-.683l4.12-4.136H.96A.958.958 0 010 7.751a.966.966 0 01.96-.964h11.758L8.599 2.648A.968.968 0 019.28 1c.255 0 .5.102.68.283l5.76 5.784a.963.963 0 01.207 1.053.965.965 0 01-.21.313z"

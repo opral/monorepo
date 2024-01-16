@@ -2,6 +2,7 @@ import { Uri, commands, env } from "vscode"
 import { getGitOrigin, telemetry } from "../services/telemetry/implementation.js"
 import type { Message } from "@inlang/sdk"
 
+// TODO #1844 CLEARIFY Felix - shouldn this point to the fink domain?
 const EDITOR_BASE_PATH = "https://inlang.com/editor/"
 
 export const openInEditorCommand = {

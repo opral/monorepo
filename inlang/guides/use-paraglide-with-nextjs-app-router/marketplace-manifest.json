@@ -1,6 +1,6 @@
 {
 	"id": "guide.lorissigrist.useParaglideJsWithNextjsAppRouter",
-	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/use-paraglide-with-nextjs-app-router/app-router-logo.png",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/use-paraglide-with-nextjs-app-router/app-router-logo.png",
 	"displayName": {
 		"en": "Use ParaglideJS with the NextJS App Router"
 	},

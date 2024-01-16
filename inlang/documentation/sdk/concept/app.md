@@ -2,7 +2,7 @@
 
 An inlang app provides a user interface for a project. A wide variety of apps for many different use-cases exists. Go to the [marketplace](/) to find apps that fit your needs.
 
-![inlang app concept](https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/documentation/sdk/assets/app.jpg)
+![inlang app concept](https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/documentation/sdk/assets/app.jpg)
 
 ## Develop your own app
 
