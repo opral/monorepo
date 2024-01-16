@@ -25,6 +25,8 @@ export type I18nUserConfig<T extends string> = {
 	 * You can include parameters in the pathnames by using square brackets.
 	 * If you are using a parameter, you must include it in all translations.
 	 *
+	 * If you are using translated pathnames, make sure you have the `i18n.reroute()` hook registered in your `src/hooks.js` file.
+	 *
 	 * @example
 	 * ```ts
 	 * pathnames: {
@@ -35,8 +37,8 @@ export type I18nUserConfig<T extends string> = {
 	 *   },
 	 *   "/users/[slug]": {
 	 *      en: "/users/[slug]",
-	 *      // parameters don't have to be their own segment
-	 *      de: "/benutzer/[slug]",
+	 *      // parameters don't have to be their own path-segment
+	 *      de: "/benutzer-[slug]",
 	 *      // parameters don't have to be in the same position
 	 *      fr: "/[slug]/utilisateurs",
 	 *    },
