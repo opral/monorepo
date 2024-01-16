@@ -64,16 +64,15 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 
 		const repoRoot = await findRepoRoot({ nodeishFs: fs, path: projectPath })
 
-		const repo = repoRoot
-			? await openRepository(repoRoot, {
-					nodeishFs: fs,
-			  })
-			: await openRepository("file://", { nodeishFs: fs })
+		const repo = await openRepository(repoRoot || process.cwd(), {
+			nodeishFs: fs,
+		})
 
 		project = await loadProject({
 			projectPath: path.resolve(process.cwd(), options.project),
 			repo,
 		})
+
 		return project
 	}
 
