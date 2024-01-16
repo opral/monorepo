@@ -39,6 +39,7 @@
 	 * The language tag that was autodetected from the URL.
 	 */
 	$: autodetectedLanguage = i18n.getLanguageFromUrl($page.url)
+	$: console.log("Autodetected language:", autodetectedLanguage, $page.url.href)
 
 
 	$: lang = languageTag ?? autodetectedLanguage
