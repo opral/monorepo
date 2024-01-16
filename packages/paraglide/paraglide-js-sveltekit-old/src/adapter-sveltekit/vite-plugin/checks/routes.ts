@@ -10,13 +10,13 @@ import type { NodeishFilesystem } from "@lix-js/fs"
 
 export const assertRoutesFolderPathExists = async (
 	nodeishFs: NodeishFilesystem,
-	config: VirtualModule,
+	config: VirtualModule
 ) => {
 	if (!(await doesPathExist(nodeishFs, config.options.rootRoutesFolder))) {
 		throw new InlangException(dedent`
 
 			Could not find the folder '${config.options.rootRoutesFolder.replace(config.cwdFolderPath, "")}'.
-			It is needed in order to circumvent a current limitation of SvelteKit. See https://github.com/inlang/monorepo/issues/647.
+			It is needed in order to circumvent a current limitation of SvelteKit. See https://github.com/opral/monorepo/issues/647.
 			Please create the folder and move all existing route files into it.
 
 		`)
@@ -27,13 +27,13 @@ export const assertRoutesFolderPathExists = async (
 
 export const assertNecessaryFilesArePresent = async (
 	nodeishFs: NodeishFilesystem,
-	config: VirtualModule,
+	config: VirtualModule
 ) => {
 	const preferredFileEnding = config.svelteKit.usesTypeScript ? "ts" : "js"
 
 	const getPathForFileType = (
 		fileType: FileType,
-		fileEnding: "ts" | "js" = preferredFileEnding,
+		fileEnding: "ts" | "js" = preferredFileEnding
 	) => {
 		switch (fileType) {
 			case "hooks.server.js":
@@ -43,7 +43,7 @@ export const assertNecessaryFilesArePresent = async (
 					config.svelteKit.files.routes,
 					"inlang",
 					"[languageTag].json",
-					`+server.${fileEnding}`,
+					`+server.${fileEnding}`
 				)
 			case "+layout.server.js":
 				return path.resolve(config.svelteKit.files.routes, `+layout.server.${fileEnding}`)
@@ -68,7 +68,7 @@ export const assertNecessaryFilesArePresent = async (
 			: [getPathForFileType(fileType, "js"), getPathForFileType(fileType, "ts")]
 
 		return (await Promise.all(files.map((file) => doesPathExist(nodeishFs, file)))).some(
-			(result) => result,
+			(result) => result
 		)
 	}
 
@@ -98,20 +98,20 @@ export const assertNecessaryFilesArePresent = async (
 					// TODO: improve robustness by using something like `vite-plugin-restart` that recreates those file if they were deleted
 					const message = dedent`
 						This file was created by inlang.
-						It is needed in order to circumvent a current limitation of SvelteKit. See https://github.com/inlang/monorepo/issues/647
+						It is needed in order to circumvent a current limitation of SvelteKit. See https://github.com/opral/monorepo/issues/647
 						You can remove this comment and modify the file as you like. We just need to make sure it exists.
 						Please do not delete it (inlang will recreate it if needed).
 					`
 
 					await writeFile(
 						path,
-						path.endsWith(".svelte") ? `<!-- ${message} -->` : `/* ${message} */`,
+						path.endsWith(".svelte") ? `<!-- ${message} -->` : `/* ${message} */`
 					)
 					console.info(`[INLANG] Created file (${path.replace(config.cwdFolderPath, "")}).`)
 
 					resolve(true)
-				}),
-		),
+				})
+		)
 	)
 
 	// TODO: remove not needed files if config changes

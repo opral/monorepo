@@ -2,7 +2,7 @@
 
 A globalized project involves numerous personas, each using its own set of tools. From developers working with code to designers focusing on user interfaces and translators dealing with language nuances, the diversity in tooling creates a disjointed workflow.
 
-<doc-image src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/guides/ecosystem-compatible/assets/compatible-problem.png" alt="problem"></doc-image>
+<doc-image src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/guides/ecosystem-compatible/assets/compatible-problem.png" alt="problem"></doc-image>
 
 ### 1. Implementation Overhead
 Connecting these disparate tools often requires elaborate pipelines, leading to implementation overhead. This complexity increases with the number of personas involved, making the development and maintenance of the i18n process challenging.
@@ -17,7 +17,7 @@ The traditional view of i18n as a one-time task rather than a continuous process
 
 The inlang ecosystem compatibility offers a solution by providing a unified way for different users with diverse tools to collaborate on a single project. This eliminates the need for complicated integration processes and ensures that all parties collaborate effectively.
 
-<doc-image src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/guides/ecosystem-compatible/assets/compatible-solution.png" alt="problem"></doc-image>
+<doc-image src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/guides/ecosystem-compatible/assets/compatible-solution.png" alt="problem"></doc-image>
 
 ### Centralized Source of Truth
 Inlang-compatible apps and libraries operate seamlessly with a centralized source of truth stored in a project. This allows for efficient collaboration and eliminates the need for additional continuous integration (CI) pipelines and syncing processes.

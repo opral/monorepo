@@ -35,7 +35,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 
 		if (sourceLanguageTag === undefined || messageReferenceMatchers === undefined) {
 			// don't show an error message. See issue:
-			// https://github.com/inlang/monorepo/issues/927
+			// https://github.com/opral/monorepo/issues/927
 			return
 		}
 
@@ -46,6 +46,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 			})
 			return messages.map((message) => {
 				const _message = state().project.query.messages.get({
+					// TODO #1844 CLEARIFY FELIX ALIAS: how should this behave with the aliase we will introduce?
 					where: { id: message.messageId },
 				})
 

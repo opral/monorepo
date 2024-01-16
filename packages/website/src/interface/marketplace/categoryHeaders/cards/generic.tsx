@@ -30,7 +30,7 @@ const GenericHeader = () => {
 					<div class="px-7 pb-4 z-20">
 						<img
 							class="w-20 pt-20"
-							src="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/paraglideNoBg.png"
+							src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/paraglideNoBg.png"
 							alt="ParaglideJS"
 						/>
 					</div>
@@ -71,7 +71,7 @@ const GenericHeader = () => {
 						</div>
 					</a>
 					<a
-						href="https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide"
+						href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide"
 						target="_blanc"
 						class="w-full bg-background rounded-xl border border-surface-300 relative group hover:border-surface-400 transition-all cursor-pointer"
 					>

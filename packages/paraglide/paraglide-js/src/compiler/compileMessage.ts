@@ -164,7 +164,9 @@ function reexportMessage(messageId: string, fromLanguageTag: string) {
 
 function messageIdFallback(messageId: string, languageTag: string) {
 	return `/**
-	* Failed to resolve message ${messageId} for languageTag "${languageTag}". 
-	*/
-	export const ${messageId} = () => "${escapeForDoubleQuoteString(messageId)}"`
+* Failed to resolve message ${messageId} for languageTag "${languageTag}". 
+* @returns {string}
+*/
+/* @__NO_SIDE_EFFECTS__ */
+export const ${messageId} = () => "${escapeForDoubleQuoteString(messageId)}"`
 }

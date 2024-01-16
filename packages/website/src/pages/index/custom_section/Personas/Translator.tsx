@@ -4,22 +4,20 @@ import Link from "#src/renderer/Link.jsx"
 import { Button } from "../../components/Button.jsx"
 import * as m from "#src/paraglide/messages.js"
 
-
-
 const TranslatorSlide = () => {
 	const cards = [
 		{
 			title: m.home_personas_translator_cards_fink_title(),
 			description: m.home_personas_translator_cards_fink_description(),
 			href: "/m/tdozzpar",
-			logo: "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/editor/assets/new-fink-logo.png",
+			logo: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/new-fink-logo.png",
 			cover: "/images/fink-cover-landingpage.png",
 		},
 		{
 			title: m.home_personas_translator_cards_badge_title(),
 			description: m.home_personas_translator_cards_badge_description(),
 			href: "/m/zu942ln6",
-			logo: "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/badge/assets/images/badge-icon.jpg",
+			logo: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/badge/assets/images/badge-icon.jpg",
 			cover: "/images/badge-cover-landingpage.png",
 		},
 	]

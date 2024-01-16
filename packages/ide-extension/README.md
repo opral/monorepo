@@ -65,31 +65,31 @@ If you want to add lint rules to your experience, you can add them from: https:/
 
 See translations and edit them directly in your code. No more back-and-forth looking into the translation files themselves.
 
-<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/tooltip.gif"/>
+<img width="500" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/assets/ide-extension/tooltip.gif"/>
 
 ### ✂️ Extract Messages (translations)
 
 Extract Messages (translations) via the `Inlang: Extract Message` code action.
 
-<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/extract.gif"/>
+<img width="500" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/assets/ide-extension/extract.gif"/>
 
 ### Message Linting
 
 Get notified about missing translations and other issues directly in your IDE.
 
-<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/lint.gif"/>
+<img width="500" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/assets/ide-extension/lint.gif"/>
 
 ### 🔎 Inline Annotations
 
 See translations directly in your code. No more back-and-forth looking into the translation files themselves.
 
-<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/inline.gif"/>
+<img width="500" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/assets/ide-extension/inline.gif"/>
 
 ### 🔁 Update Translations
 
 Translations from the resource files are automatically updated when you change the source text.
 
-<img width="500" src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/assets/ide-extension/update.gif"/>
+<img width="500" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/assets/ide-extension/update.gif"/>
 
 ## Usage
 
@@ -97,8 +97,8 @@ Just _highlight/select_ the text you want and hit `cmd .` or `ctrl +` (Quick Fix
 
 Hover over the message to see the tooltip with the translation.
 
-If something isn't working as expected, please join our [Discord](https://discord.gg/gdMPPWy57R) or [create an issue](https://github.com/inlang/monorepo/issues/new/choose). We are happy to help!
+If something isn't working as expected, please join our [Discord](https://discord.gg/gdMPPWy57R) or [create an issue](https://github.com/opral/monorepo/issues/new/choose). We are happy to help!
 
 ## Support: Join our Discord!
 
-If something isn't working as expected or you have a feature suggestion, please join our [Discord](https://discord.gg/DEHKgmx2) or [create an issue](<[https](https://github.com/inlang/monorepo/issues/new/choose)>). We are happy to help!
+If something isn't working as expected or you have a feature suggestion, please join our [Discord](https://discord.gg/DEHKgmx2) or [create an issue](<[https](https://github.com/opral/monorepo/issues/new/choose)>). We are happy to help!

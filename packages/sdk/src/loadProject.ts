@@ -38,8 +38,9 @@ import {
 import { humanIdHash } from "./storage/human-id/human-readable-id.js"
 
 import type { Repository } from "@lix-js/client"
-import { generateProjectId } from "./generateProjectId.js"
 import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
+
+import { maybeCreateFirstProjectId } from "./migrations/maybeCreateFirstProjectId.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -47,24 +48,42 @@ const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
  * Creates an inlang instance.
  *
  * @param projectPath - Absolute path to the inlang settings file.
- * @param nodeishFs - Filesystem that implements the NodeishFilesystemSubset interface.
+ * @param @deprecated nodeishFs - Filesystem that implements the NodeishFilesystemSubset interface.
  * @param _import - Use `_import` to pass a custom import function for testing,
  *   and supporting legacy resolvedModules such as CJS.
  * @param _capture - Use `_capture` to capture events for analytics.
  *
  */
-export const loadProject = async (args: {
+export async function loadProject(args: {
 	projectPath: string
-	repo?: Repository
-	nodeishFs: NodeishFilesystem
+	nodeishFs: Repository["nodeishFs"]
 	_import?: ImportFunction
 	_capture?: (id: string, props: Record<string, unknown>) => void
-}): Promise<InlangProject> => {
+}): Promise<InlangProject>
+
+/**
+ * @param projectPath - Absolute path to the inlang settings file.
+ * @param repo - An instance of a lix repo as returned by `openRepository`.
+ * @param _import - Use `_import` to pass a custom import function for testing,
+ *   and supporting legacy resolvedModules such as CJS.
+ * @param _capture - Use `_capture` to capture events for analytics.
+ *
+ */
+export async function loadProject(args: {
+	projectPath: string
+	repo: Repository
+	_import?: ImportFunction
+	_capture?: (id: string, props: Record<string, unknown>) => void
+}): Promise<InlangProject>
+
+export async function loadProject(args: {
+	projectPath: string
+	repo?: Repository
+	_import?: ImportFunction
+	_capture?: (id: string, props: Record<string, unknown>) => void
+	nodeishFs?: Repository["nodeishFs"]
+}): Promise<InlangProject> {
 	const projectPath = normalizePath(args.projectPath)
-
-	// -- migrate if outdated ------------------------------------------------
-
-	await maybeMigrateToDirectory({ nodeishFs: args.nodeishFs, projectPath })
 
 	// -- validation --------------------------------------------------------
 	// the only place where throwing is acceptable because the project
@@ -83,35 +102,29 @@ export const loadProject = async (args: {
 		)
 	}
 
+	let fs: Repository["nodeishFs"]
+	if (args.nodeishFs) {
+		// TODO: deprecate
+		fs = args.nodeishFs
+	} else if (args.repo) {
+		fs = args.repo.nodeishFs
+	} else {
+		throw new LoadProjectInvalidArgument(`Repo missing from arguments.`, { argument: "repo" })
+	}
+
+	const nodeishFs = createNodeishFsWithAbsolutePaths({
+		projectPath,
+		nodeishFs: fs,
+	})
+
+	// -- migratations ------------------------------------------------
+
+	await maybeMigrateToDirectory({ nodeishFs: fs, projectPath })
+	await maybeCreateFirstProjectId({ projectPath, repo: args.repo })
+
 	// -- load project ------------------------------------------------------
-	let idError: Error | undefined
 	return await createRoot(async () => {
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
-		const nodeishFs = createNodeishFsWithAbsolutePaths({
-			projectPath,
-			nodeishFs: args.nodeishFs,
-		})
-
-		let projectId: string | undefined
-
-		try {
-			projectId = await nodeishFs.readFile(projectPath + "/project_id", {
-				encoding: "utf-8",
-			})
-		} catch (error) {
-			// @ts-ignore
-			if (error.code === "ENOENT") {
-				if (args.repo) {
-					projectId = await generateProjectId(args.repo, projectPath)
-					if (projectId) {
-						await nodeishFs.writeFile(projectPath + "/project_id", projectId)
-					}
-				}
-			} else {
-				idError = error as Error
-			}
-		}
-
 		// -- settings ------------------------------------------------------------
 
 		const [settings, _setSettings] = createSignal<ProjectSettings>()
@@ -128,7 +141,7 @@ export const loadProject = async (args: {
 					setSettings(settings)
 					// rename settings to get a convenient access to the data in Posthog
 					const project_settings = settings
-					args._capture?.("SDK used settings", { project_settings, group: projectId })
+					args._capture?.("SDK used settings", { project_settings })
 				})
 				.catch((err) => {
 					markInitAsFailed(err)
@@ -221,19 +234,19 @@ export const loadProject = async (args: {
 						let filePaths: string[] = []
 						const paths = await fileSystem.readdir(rootPath + pathToRead)
 						for (const path of paths) {
-							// TODO #1844 FILESYSTEM - what is inlangs best practice to handle other file systems atm?
+							// TODO #1844 CLEARIFY Felix FILESYSTEM - what is inlangs best practice to handle other file systems atm?
 							const stat = await fileSystem.stat(rootPath + pathToRead + "/" + path)
 
 							if (stat.isDirectory()) {
 								const subfolderPaths = await readFilesFromFolderRecursive(
 									fileSystem,
 									rootPath,
-									// TODO #1844 FILESYSTEM - what is inlangs best practice to handle other file systems atm?
+									// TODO #1844 CLEARIFY Felix FILESYSTEM - what is inlangs best practice to handle other file systems atm?
 									pathToRead + "/" + path
 								)
 								filePaths = filePaths.concat(subfolderPaths)
 							} else {
-								// TODO #1844 FILESYSTEM - what is inlangs best practice to handle other file systems atm?
+								// TODO #1844 CLEARIFY Felix FILESYSTEM - what is inlangs best practice to handle other file systems atm?
 								filePaths.push(pathToRead + "/" + path)
 							}
 						}
@@ -261,7 +274,7 @@ export const loadProject = async (args: {
 
 							loadedMessages.push(message)
 						} catch (e) {
-							// TODO #1844 FINK - test errors being propagated - fink doesnt show errors other than lints at the moment...
+							// TODO #1844 FINK - test errors being propagated - fink doesnt show errors other than lints at the moment... -> move to new issue
 							// if reading of a single message fails we propagate the error to the project errors
 							messageLoadErrors()[messageId] = new LoadMessageError({
 								path: messageFilePath,
@@ -337,7 +350,7 @@ export const loadProject = async (args: {
 
 										messagesQuery.upsert({ where: { id: messageId }, data: message })
 									} catch (e) {
-										// TODO #1844 FINK - test errors being propagated - fink doesnt show errors other than lints at the moment...
+										// TODO #1844 FINK - test errors being propagated - fink doesnt show errors other than lints at the moment... -> move to new issue
 										messageLoadErrors()[messageId] = new LoadMessageError({
 											path: messageFolderPath + "/" + event.filename,
 											messageId,
@@ -369,7 +382,7 @@ export const loadProject = async (args: {
 						module:
 							resolvedModules()?.meta.find((m) => m.id.includes(rule.id))?.module ??
 							"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
-						// default to warning, see https://github.com/inlang/monorepo/issues/1254
+						// default to warning, see https://github.com/opral/monorepo/issues/1254
 						level: settingsValue["messageLintRuleLevels"]?.[rule.id] ?? "warning",
 					} satisfies InstalledMessageLintRule)
 			) satisfies Array<InstalledMessageLintRule>
@@ -412,10 +425,10 @@ export const loadProject = async (args: {
 				(plugin) => plugin.saveMessages !== undefined
 			)
 
-			// TODO #1844 add reasoning behind salting of project id
+			// TODO #1844 add reasoning behind salting of project id -> move to new issue
 			for (const messageId of currentMessageIds) {
 				if (!trackedMessages!.has(messageId!)) {
-					// TODO #1844 INFORM to avoid to drop the effect after creation we need to create a new disposable root
+					// we create a new root to be able to cleanup an effect for a message the got deleted
 					createRoot((dispose) => {
 						createEffect(() => {
 							const message = messagesQuery.get({ where: { id: messageId } })!
@@ -446,6 +459,7 @@ export const loadProject = async (args: {
 
 									await fs.writeFile(path, stringifyMessage(message))
 
+									// TODO #1844 we don't wait for the file to be persisted - investigate could this become a problem when we batch update messages
 									saveMessages(fs, messagesQuery, settings()!, saveMessagesPlugin)
 									// debouncedSave(messagesQuery.getAll())
 								}
@@ -457,7 +471,7 @@ export const loadProject = async (args: {
 										setMessageLoadErrors(_messageSaveErrors)
 									})
 									.catch((error) => {
-										// TODO #1844 FINK - test if errors get propagated
+										// TODO #1844 FINK - test if errors get propagated -> move to new issue
 										// in case saving didn't work (problem during serialization or saving to file) - add to message error array in project
 										messageSaveErrors()[messageId] = new SaveMessageError({
 											path: messageFilePath,
@@ -476,8 +490,8 @@ export const loadProject = async (args: {
 				const messageFilePath = messageFolderPath + "/" + getPathFromMessageId(deletedMessage[0])
 				try {
 					nodeishFs.rm(messageFilePath)
+					// TODO #1844 we don't wait for the file to be persisted - investigate could this become a problem when we batch update messages
 					saveMessages(nodeishFs, messagesQuery, settings()!, saveMessagesPlugin)
-					// debouncedSave(messagesQuery.getAll())
 				} catch (e) {
 					if ((e as any).code !== "ENOENT") {
 						throw e
@@ -498,14 +512,14 @@ export const loadProject = async (args: {
 		const fsWithWatcher = createNodeishFsWithWatcher({
 			nodeishFs: nodeishFs,
 			updateMessages: () => {
-				// TODO #1844 CLEARIFY the current solution does not watch on deletion or creation of a file (if one adds de.json in case of the json plugin we wont recognize this until restart)
+				// NOTE the current solution does not watch on deletion or creation of a file (if one adds de.json in case of the json plugin we wont recognize this until restart)
 				if (_resolvedModules?.resolvedPluginApi.loadMessages && _settings) {
 					// get plugin finding the plugin that provides loadMessages function
 					const loadMessagePlugin = _resolvedModules.plugins.find(
 						(plugin) => plugin.loadMessages !== undefined
 					)
 
-					// TODO #1844 FINK check error handling for plugin load methods (triggered by file change)
+					// TODO #1844 FINK check error handling for plugin load methods (triggered by file change) -> move to separate ticket
 					loadMessages(fsWithWatcher, messagesQuery, settings()!, loadMessagePlugin)
 				}
 			},
@@ -517,7 +531,7 @@ export const loadProject = async (args: {
 				(plugin) => plugin.loadMessages !== undefined
 			)
 
-			// TODO #1844 FINK check error handling for plugin load methods (initial load)
+			// TODO #1844 FINK check error handling for plugin load methods (initial load) -> move to separate ticket
 			await loadMessages(fsWithWatcher, messagesQuery, _settings, loadMessagePlugin)
 		}
 
@@ -530,49 +544,49 @@ export const loadProject = async (args: {
 		)
 
 		// TODO #1844 INFORM this is no longer needed
-		const debouncedSave = skipFirst(
-			debounce(
-				500,
-				async (newMessages) => {
-					// entered maximum every 500ms - doesn't mean its finished by that time
-					try {
-						const loadMessagePlugin = _resolvedModules.plugins.find(
-							(plugin) => plugin.loadMessages !== undefined
-						)
-						const loadPluginId = loadMessagePlugin!.id
+		// 	const debouncedSave = skipFirst(
+		// 		debounce(
+		// 			500,
+		// 			async (newMessages) => {
+		// 				// entered maximum every 500ms - doesn't mean its finished by that time
+		// 				try {
+		// 					const loadMessagePlugin = _resolvedModules.plugins.find(
+		// 						(plugin) => plugin.loadMessages !== undefined
+		// 					)
+		// 					const loadPluginId = loadMessagePlugin!.id
 
-						const messagesToExport: Message[] = []
-						for (const message of newMessages) {
-							const fixedExportMessage = { ...message }
-							// TODO #1585 here we match using the id to support legacy load message plugins - after we introduced import / export methods we will use importedMessage.alias
-							fixedExportMessage.id =
-								fixedExportMessage.alias[loadPluginId] ?? fixedExportMessage.id
+		// 					const messagesToExport: Message[] = []
+		// 					for (const message of newMessages) {
+		// 						const fixedExportMessage = { ...message }
+		// 						// TODO #1585 here we match using the id to support legacy load message plugins - after we introduced import / export methods we will use importedMessage.alias
+		// 						fixedExportMessage.id =
+		// 							fixedExportMessage.alias[loadPluginId] ?? fixedExportMessage.id
 
-							messagesToExport.push(fixedExportMessage)
-						}
+		// 						messagesToExport.push(fixedExportMessage)
+		// 					}
 
-						// this will execute on the next tick - processing of the maschine translations that returned within the tick will kick in
-						await resolvedModules()?.resolvedPluginApi.saveMessages({
-							settings: settingsValue,
-							messages: messagesToExport,
-						})
-					} catch (err) {
-						throw new PluginSaveMessagesError({
-							cause: err,
-						})
-					}
-					const abortController = new AbortController()
-					if (
-						newMessages.length !== 0 &&
-						JSON.stringify(newMessages) !== JSON.stringify(messages()) &&
-						nodeishFs.watch("/", { signal: abortController.signal }) !== undefined
-					) {
-						setMessages(newMessages)
-					}
-				},
-				{ atBegin: false }
-			)
-		)
+		// 					// this will execute on the next tick - processing of the maschine translations that returned within the tick will kick in
+		// 					await resolvedModules()?.resolvedPluginApi.saveMessages({
+		// 						settings: settingsValue,
+		// 						messages: messagesToExport,
+		// 					})
+		// 				} catch (err) {
+		// 					throw new PluginSaveMessagesError({
+		// 						cause: err,
+		// 					})
+		// 				}
+		// 				const abortController = new AbortController()
+		// 				if (
+		// 					newMessages.length !== 0 &&
+		// 					JSON.stringify(newMessages) !== JSON.stringify(messages()) &&
+		// 					nodeishFs.watch("/", { signal: abortController.signal }) !== undefined
+		// 				) {
+		// 					setMessages(newMessages)
+		// 				}
+		// 			},
+		// 			{ atBegin: false }
+		// 		)
+		// 	)
 
 		return {
 			installed: {
@@ -581,7 +595,6 @@ export const loadProject = async (args: {
 			},
 			errors: createSubscribable(() => [
 				...(initializeError ? [initializeError] : []),
-				...(idError ? [idError] : []),
 				...(resolvedModules() ? resolvedModules()!.errors : []),
 				...Object.values(messageLoadErrors()),
 				...Object.values(messageSaveErrors()),
@@ -762,9 +775,9 @@ async function loadMessages(
 	fs: NodeishFilesystemSubset,
 	messagesQuery: InlangProject["query"]["messages"],
 	settingsValue: ProjectSettings,
-	loadPlugin: any // TODO #1844 CLEARIFY what type should we use for this?
+	loadPlugin: Plugin["loadMessages"]
 ) {
-	// TODO #1844 CLEARIFY the current approach introuces a sync between both systems - we dont delete messages that we don't see int he plugins produced messages array anymore
+	// the current approach introuces a sync between both systems - the legacy load / save messages plugins and the new format - we dont delete messages that we don't see int he plugins produced messages array anymore
 
 	// let the current save process finish first
 	if (currentSaveMessages) {
@@ -787,7 +800,6 @@ async function loadMessages(
 
 	const loadedMessages = await makeTrulyAsync(
 		loadPlugin.loadMessages({
-			// @ts-ignore
 			settings: settingsValue,
 			nodeishFs: fs,
 		})
@@ -800,7 +812,8 @@ async function loadMessages(
 			.filter((message: any) => message.alias[loadPluginId] === loadedMessage.id)
 
 		if (currentMessages.length > 1) {
-			// TODO #1844 CLEARIFY how to handle the case that we find a dublicated alias during import? - change Error correspondingly
+			// NOTE: if we happen to find two messages witht the sam alias we throw for now
+			// - this could be the case if one edits the aliase manualy
 			throw new Error("more than one message with the same alias found ")
 		} else if (currentMessages.length === 1) {
 			// update message in place - leave message id and alias untouched
@@ -867,7 +880,7 @@ async function saveMessages(
 	fs: NodeishFilesystemSubset,
 	messagesQuery: InlangProject["query"]["messages"],
 	settingsValue: ProjectSettings,
-	savePlugin: any // TODO #1844 CLEARIFY what type should we use for this?
+	savePlugin: Plugin["saveMessages"]
 ) {
 	// queue next save if we have a save ongoing
 	if (isSaving) {

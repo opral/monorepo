@@ -133,13 +133,28 @@ export let languageTag = () => sourceLanguageTag
  */
 export const setLanguageTag = (tag) => {
 	if (typeof tag === "function") {
-		languageTag = tag
+		languageTag = enforceLanguageTag(tag)
 	} else {
-		languageTag = () => tag
+		languageTag = enforceLanguageTag(() => tag)
 	}
 	// call the callback function if it has been defined
 	if (_onSetLanguageTag !== undefined) {
 		_onSetLanguageTag(languageTag())
+	}
+}
+
+/**
+ * Wraps an untrusted function and enforces that it returns a language tag.
+ * @param {() => AvailableLanguageTag} unsafeLanguageTag
+ * @returns {() => AvailableLanguageTag}
+ */
+function enforceLanguageTag(unsafeLanguageTag) {
+	return () => {
+		const tag = unsafeLanguageTag()
+		if(!isAvailableLanguageTag(tag)) {
+			throw new Error(\`languageTag() didn't return a valid language tag. Check your setLanguageTag call\`)
+		}
+		return tag
 	}
 }
 
