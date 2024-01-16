@@ -9,7 +9,7 @@ export function Feedback() {
 		setSubmittedFeedback(true)
 	}
 
-	//* Only two emojis because of https://github.com/inlang/monorepo/pull/910#issuecomment-1584832926
+	//* Only two emojis because of https://github.com/opral/monorepo/pull/910#issuecomment-1584832926
 	const feedbackEmojis: [string, string] = ["👍", "👎"]
 
 	const [submittedFeedback, setSubmittedFeedback] = createSignal<boolean>(false)

@@ -36,7 +36,8 @@ export default function Page() {
  * is required to use the useEditorState hook.
  */
 function TheActualPage() {
-	const { project, routeParams, doesInlangConfigExist, tourStep, lixErrors } = useEditorState()
+	const { repo, project, projectList, routeParams, doesInlangConfigExist, tourStep, lixErrors } =
+		useEditorState()
 	const [localStorage, setLocalStorage] = useLocalStorage()
 
 	onMount(() => {
@@ -95,8 +96,8 @@ function TheActualPage() {
 					/>
 				</Match>
 
-				<Match when={project() === undefined}>
-					<div class="flex flex-col grow justify-center items-center min-w-full min-h-[calc(100vh_-_338px)] gap-2">
+				<Match when={!repo() || !projectList() || project.loading}>
+					<div class="flex flex-col grow justify-center items-center min-w-full min-h-[calc(100vh_-_324px)] gap-2">
 						{/* sl-spinner need a own div otherwise the spinner has a bug. The wheel is rendered on the outer div  */}
 						<div>
 							{/* use font-size to change the spinner size    */}
@@ -137,7 +138,7 @@ function TheActualPage() {
 					/>
 				</Match>
 				<Match when={!doesInlangConfigExist()}>
-					<NoInlangConfigFoundCard />
+					<NoInlangProjectFoundCard />
 				</Match>
 				<Match
 					when={
@@ -162,7 +163,7 @@ function TheActualPage() {
 						</Show>
 
 						<div
-							class="flex flex-col h-[calc(100vh_-_288px)] grow justify-center items-center min-w-full gap-2"
+							class="flex flex-col h-[calc(100vh_-_324px)] grow justify-center items-center min-w-full gap-2"
 							classList={{
 								["hidden"]:
 									messageCount(project()?.query.messages.includedMessageIds() || []) !== 0,
@@ -183,18 +184,24 @@ function TheActualPage() {
 	)
 }
 
-function NoInlangConfigFoundCard() {
+function NoInlangProjectFoundCard() {
 	return (
-		<div class="min-h-[calc(100vh_-_338px)] flex grow items-center justify-center">
+		<div class="min-h-[calc(100vh_-_324px)] flex grow items-center justify-center">
 			<div class="border border-outline p-8 rounded flex flex-col max-w-lg">
 				<MaterialSymbolsUnknownDocumentOutlineRounded class="w-10 h-10 self-center" />
 				<h1 class="font-semibold pt-5">Inlang has not been set up for this repository yet.</h1>
-				<p class="pt-1.5 pb-8">
-					Please refer to the documentation and write the config file manually.
-				</p>
-				<Link class="self-center" href="/documentation" target="_blank">
+				<p class="pt-1.5 pb-8">Please refer to product page and setup a inlang project.</p>
+				<Link
+					class="self-center"
+					href={
+						import.meta.env.PROD
+							? "https://inlang.com/m/tdozzpar/app-inlang-editor"
+							: "http://localhost:3000/m/tdozzpar/app-inlang-editor"
+					}
+					target="_blank"
+				>
 					<sl-button prop:variant="text">
-						Take me to the documentation
+						Take me to setup guide
 						{/* @ts-ignore */}
 						<MaterialSymbolsArrowOutwardRounded slot="suffix" />
 					</sl-button>
@@ -206,7 +213,7 @@ function NoInlangConfigFoundCard() {
 
 function RepositoryDoesNotExistOrNotAuthorizedCard(args: { code: number; user: any }) {
 	return (
-		<div class="min-h-[calc(100vh_-_338px)] flex grow items-center justify-center">
+		<div class="min-h-[calc(100vh_-_324px)] flex grow items-center justify-center">
 			<div class="border border-outline p-12 rounded-xl flex flex-col max-w-lg">
 				<h2 class="font-semibold pt-12">Cannot access the repository</h2>
 
@@ -230,7 +237,7 @@ function RepositoryDoesNotExistOrNotAuthorizedCard(args: { code: number; user: a
 
 				<Link
 					class="self-end pt-5"
-					href="https://github.com/inlang/monorepo/discussions/categories/help-questions-answers"
+					href="https://github.com/opral/monorepo/discussions/categories/help-questions-answers"
 					target="_blank"
 				>
 					<sl-button prop:variant="text">

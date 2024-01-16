@@ -187,7 +187,7 @@
 
 ### Patch Changes
 
-- 6326e01e: fix: placeholder matching https://github.com/inlang/monorepo/issues/955
+- 6326e01e: fix: placeholder matching https://github.com/opral/monorepo/issues/955
 
 ## 2.2.1
 

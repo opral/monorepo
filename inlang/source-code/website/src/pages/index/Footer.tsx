@@ -18,7 +18,7 @@ const Footer = () => {
 		},
 		{
 			name: "GitHub",
-			href: "https://github.com/inlang/monorepo",
+			href: "https://github.com/opral/monorepo",
 			Icon: IconGithub,
 			screenreader: "GitHub Repository",
 		},
@@ -46,7 +46,7 @@ const Footer = () => {
 			},
 			{
 				name: m.footer_resources_inlang_manage(),
-				href: "https://manage.inlang.com",
+				href: import.meta.env.PROD ? "https://manage.inlang.com" : "http://localhost:4004",
 			},
 		]
 	}
@@ -59,11 +59,11 @@ const Footer = () => {
 			},
 			{
 				name: m.footer_contact_join(),
-				href: "https://github.com/inlang/monorepo/tree/main/careers",
+				href: "https://github.com/opral/monorepo/tree/main/careers",
 			},
 			{
 				name: m.footer_contact_feedback(),
-				href: "https://github.com/inlang/monorepo/discussions/categories/feedback",
+				href: "https://github.com/opral/monorepo/discussions/categories/feedback",
 			},
 			{ name: m.footer_contact_blog(), href: "/blog" },
 			{

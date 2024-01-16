@@ -1,6 +1,6 @@
 {
 	"id": "guide.lorissigrist.buildAGlobalSolidStartApp",
-	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/build-a-global-solidstart-app/icon.png",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/build-a-global-solidstart-app/icon.png",
 	"displayName": {
 		"en": "Build a Global SolidStart App"
 	},
@@ -25,11 +25,7 @@
 		"ide",
 		"guide"
 	],
-	"recommends": [
-		"g/3go4f04m",
-		"g/00162hsd",
-		"g/38fnf03n"
-	],
+	"recommends": ["g/3go4f04m", "g/00162hsd", "g/38fnf03n"],
 	"publisherName": "LorisSigrist",
 	"publisherIcon": "https://avatars.githubusercontent.com/u/43482866?v=4",
 	"license": "Apache-2.0"

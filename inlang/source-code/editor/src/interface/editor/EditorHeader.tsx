@@ -7,15 +7,21 @@ function EditorHeader() {
 	const getLinks = () => {
 		return [
 			{
-				href: "https://inlang.com/m/tdozzpar",
+				href: import.meta.env.PROD
+					? "https://inlang.com/m/tdozzpar"
+					: "http://localhost:3000/m/tdozzpar",
 				name: "What is Fink?",
 			},
 			{
-				href: "https://inlang.com/g/6ddyhpoi",
+				href: import.meta.env.PROD
+					? "https://inlang.com/g/6ddyhpoi"
+					: "http://localhost:3000/g/6ddyhpoi",
 				name: "How to translate?",
 			},
 			{
-				href: "https://inlang.com/c/lint-rules",
+				href: import.meta.env.PROD
+					? "https://inlang.com/c/lint-rules"
+					: "http://localhost:3000/c/lint-rules",
 				name: "Find Lint Rules",
 			},
 		]
@@ -27,15 +33,14 @@ function EditorHeader() {
 		return localStorage.user
 	}
 
-	// const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(false)
 	return (
 		<>
-			<header class="sticky top-0 z-[1000] w-full bg-transparent bg-background py-3.5 px-4 border-b border-surface-200">
+			<header class="sticky top-0 left-0 right-0 z-[100] w-full bg-transparent bg-background py-3.5 px-4 border-b border-surface-200">
 				<div class="w-full h-full relative z-10 bg-background max-w-7xl mx-auto flex flex-row justify-between sm:static">
 					<nav class="max-w-[1248px] w-full mx-auto -mt-[0.8px] -mb-[1.5px]">
 						<div class="flex items-center">
 							<a
-								href="https://inlang.com"
+								href={import.meta.env.PROD ? "https://inlang.com" : "http://localhost:3000"}
 								target="_blank"
 								class="flex items-center w-fit pointer-events-auto transition-opacity hover:opacity-75"
 							>

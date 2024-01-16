@@ -7,7 +7,7 @@
 		"dev:ide": "pnpm exec nx run-many --target=dev --parallel=10 --nx-bail --verbose --projects=vs-code-extension --output-style=stream",
 		"production": "pnpm exec nx run-many --nx-bail --target=production --parallel 1000 --exclude @lix-js/server --exclude @inlang/badge --exclude @inlang/manage --exclude @inlang/editor --exclude @inlang/telemetry-proxy --output-style=stream",
 		"build": "pnpm exec nx run-many --nx-bail --target=build --parallel",
-		"dev:lix": "pnpm --stream --parallel --filter @lix-js/* --filter @inlang/server --filter @inlang/editor --filter @inlang/website dev",
+		"dev:lix": "pnpm --stream --parallel --filter @lix-js/* --filter @inlang/server --filter @inlang/editor --filter @inlang/manage --filter @inlang/website dev",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "pnpm exec nx run-many --target=test --parallel",
 		"---- LINT ----------------------------------------------------------": "",
@@ -33,7 +33,8 @@
 	},
 	"pnpm": {
 		"overrides": {
-			"http-cache-semantics": "4.1.1"
+			"http-cache-semantics": "4.1.1",
+			"follow-redirects": "1.15.4"
 		}
 	},
 	"devDependencies": {
@@ -44,7 +45,7 @@
 		"eslint": "^8.32.0",
 		"eslint-config-prettier": "^8.6.0",
 		"eslint-plugin-unicorn": "^45.0.2",
-		"nx": "17.1.3",
+		"nx": "17.2.8",
 		"nx-cloud": "16.5.2",
 		"prettier": "2.8.3",
 		"typescript": "5.2.2",

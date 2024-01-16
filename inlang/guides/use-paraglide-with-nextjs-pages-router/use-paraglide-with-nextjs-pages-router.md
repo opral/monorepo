@@ -26,13 +26,13 @@ This will have done a few things:
 - Added the paraglide compiler to your `package.json` build scripts
 
 
-It's recommended to also modify your `dev` command to include the `paraglide compile` command. This will cause the compiler to re-run whenever your messages change.
+It's recommended to also modify your `dev` command to include the `paraglide-js compile` command. This will cause the compiler to re-run whenever your messages change.
 
 ```json
 // package.json
 {
 	"scripts": {
-		"dev": "next dev & paraglide compile --project ./project.inlang --watch"
+		"dev": "next dev & paraglide-js compile --project ./project.inlang --watch"
 	}
 }
 ```
@@ -294,8 +294,8 @@ If you now inspect the `head` of your page, you should see the correct `link` ta
 
 That's it! You should now have a fully functional multilingual NextJS app using ParaglideJS. Wasn't that hard was it?
 
-You can check out the full source code of this example [here](https://github.com/inlang/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next/example-pages).
+You can check out the full source code of this example [here](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next/example-pages).
 
-If you want to learn more about ParaglideJS, check out the [ParaglideJS Documentation](https://inlang.com/m/gerre34r/library-inlang-paraglideJs). If you need help or have some ideas, feel free to reach out to us on [Discord](https://discord.gg/gdMPPWy57R) or open a Discussion on [GitHub](https://github.com/inlang/monorepo/discussions).
+If you want to learn more about ParaglideJS, check out the [ParaglideJS Documentation](https://inlang.com/m/gerre34r/library-inlang-paraglideJs). If you need help or have some ideas, feel free to reach out to us on [Discord](https://discord.gg/gdMPPWy57R) or open a Discussion on [GitHub](https://github.com/opral/monorepo/discussions).
 
 Happy Coding!

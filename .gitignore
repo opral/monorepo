@@ -16,6 +16,8 @@ examples/sveltekit/package-lock.json
 **/test-results/
 **/playwright-report/
 **/playwright/.cache/
+
+# SEO
 sitemap.xml
 
 # Created by https://www.toptal.com/developers/gitignore/api/windows,macos,linux,node,visualstudiocode,intellij

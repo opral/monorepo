@@ -8,18 +8,18 @@
 
 # Editing translations
 For each text element of the project, you'll find a text box in the editor like this:
-<img src="https://github.com/inlang/monorepo/blob/main/inlang/guides/contribute-translations-with-fink/box.png?raw=true" alt="box" width="700"/>
+<img src="https://github.com/opral/monorepo/blob/main/inlang/guides/contribute-translations-with-fink/box.png?raw=true" alt="box" width="700"/>
 
 You can click into the text field and edit the translation.
-<img src="https://github.com/inlang/monorepo/blob/main/inlang/guides/contribute-translations-with-fink/edit.png?raw=true" alt="edit" width="700"/>
+<img src="https://github.com/opral/monorepo/blob/main/inlang/guides/contribute-translations-with-fink/edit.png?raw=true" alt="edit" width="700"/>
 
 Occasionally you'll encounter these blue placeholders, which RemNote will fill with text, numbers, or entire UI components when it displays the text. You can’t edit the placeholders, but you can change their position to whatever your language's grammar requires.
-<img src="https://github.com/inlang/monorepo/blob/main/inlang/guides/contribute-translations-with-fink/placeholder.png?raw=true" alt="placeholder" width="700"/>
+<img src="https://github.com/opral/monorepo/blob/main/inlang/guides/contribute-translations-with-fink/placeholder.png?raw=true" alt="placeholder" width="700"/>
 
 The placeholder label will give you a clue about what it's being used for. In the above example, the placeholder will receive a `count` number  – that is, it will say something like “3 Tags” in English when displayed.
 
 To help speed up the creation of a rough initial translation, you can use the Machine translate button, which appear whenever a text is empty:
-![machine translate](https://github.com/inlang/monorepo/blob/main/inlang/guides/contribute-translations-with-fink/translation.png?raw=true)
+![machine translate](https://github.com/opral/monorepo/blob/main/inlang/guides/contribute-translations-with-fink/translation.png?raw=true)
 
 Obviously, machine translation will not be perfect and will still require manual editing, especially because the translator is lacking any context about where in the UI these texts are used and what they refer to – but it’s often a useful way to get started, as large chunks of the result will often be reasonably accurate.
  
