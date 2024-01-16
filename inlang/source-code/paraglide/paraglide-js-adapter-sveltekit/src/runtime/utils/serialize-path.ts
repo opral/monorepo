@@ -9,8 +9,11 @@ export function serializeRoute(opts: SerializePathOptions): string {
 
 	parts.push(opts.base)
 
-	if (opts.includeLanguage && opts.lang !== opts.defaultLanguageTag) {
-		parts.push(opts.lang)
+	if (opts.includeLanguage) {
+		const isDefaultLanguage = opts.lang === opts.defaultLanguageTag
+		if (!isDefaultLanguage || opts.prefixDefaultLanguage === "always") {
+			parts.push(opts.lang)
+		}
 	}
 
 	parts.push(opts.path)
@@ -29,5 +32,6 @@ type SerializePathOptions = {
 			includeLanguage: true
 			lang: string
 			defaultLanguageTag: string
+			prefixDefaultLanguage: "always" | "never"
 	  }
 )

@@ -55,6 +55,7 @@ export type I18nConfig<T extends string> = {
 	translations: PathTranslations<T>
 	exclude: (path: string) => boolean
 	defaultLanguageTag: T
+	prefixDefaultLanguage: "always" | "never"
 }
 
 export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18nUserConfig<T>) {
@@ -68,10 +69,12 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18
 		translations,
 		exclude,
 		defaultLanguageTag,
+		prefixDefaultLanguage: options.prefixDefaultLanguage ?? "never",
 	}
 
 	// We don't want the translations to be mutable
 	Object.freeze(translations)
+	Object.freeze(config)
 
 	return {
 		/**
@@ -138,9 +141,10 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18
 				path: translatedPath,
 				lang,
 				base,
-				defaultLanguageTag,
-				includeLanguage: true,
 				dataSuffix: undefined,
+				includeLanguage: true,
+				defaultLanguageTag,
+				prefixDefaultLanguage: config.prefixDefaultLanguage,
 			})
 		},
 
