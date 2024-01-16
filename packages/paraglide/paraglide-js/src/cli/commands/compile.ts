@@ -26,60 +26,30 @@ export const compileCommand = new Command()
 		const outputDirectory = resolve(process.cwd(), options.outdir)
 
 		logger.info(`Compiling inlang project at "${options.project}".`)
-		// TODO add a project UUID to the tele.groups internal #196
-		// telemetry.groupIdentify({
-		// 	groupType: "repository",
-		// 	groupKey: gitOrigin,
-		// 	properties: {
-		// 		name: gitOrigin,
-		// 	},
-		// })
 
 		const repoRoot = await findRepoRoot({ nodeishFs: nodeFsPromises, path })
+		const repo = await openRepository(repoRoot || process.cwd(), {
+			nodeishFs: nodeFsPromises,
+		})
 
-		let project: Awaited<ReturnType<typeof loadProject>>
 		if (!repoRoot) {
 			logger.warn(`Could not find repository root for path ${path}`)
-			// We still support projects without git repo for now.
-
-			const repo = await openRepository("file://", {
-				nodeishFs: nodeFsPromises,
-			})
-
-			project = exitIfErrors(
-				await loadProject({
-					projectPath: path,
-					repo,
-					_capture(id, props) {
-						telemetry.capture({
-							// @ts-ignore the event types
-							event: id,
-							properties: props,
-						})
-					},
-				}),
-				logger
-			)
-		} else {
-			const repo = await openRepository(repoRoot, {
-				nodeishFs: nodeFsPromises,
-			})
-
-			project = exitIfErrors(
-				await loadProject({
-					projectPath: path,
-					repo,
-					_capture(id, props) {
-						telemetry.capture({
-							// @ts-ignore the event types
-							event: id,
-							properties: props,
-						})
-					},
-				}),
-				logger
-			)
 		}
+
+		const project = exitIfErrors(
+			await loadProject({
+				projectPath: path,
+				repo,
+				_capture(id, props) {
+					telemetry.capture({
+						// @ts-ignore the event types
+						event: id,
+						properties: props,
+					})
+				},
+			}),
+			logger
+		)
 
 		async function execute() {
 			const output = compile({
