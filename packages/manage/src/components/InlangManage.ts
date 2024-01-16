@@ -19,6 +19,9 @@ type ManifestWithVersion = MarketplaceManifest & { version: string }
 
 @customElement("inlang-manage")
 export class InlangManage extends TwLitElement {
+	@property({ type: Boolean })
+	isProduction: boolean = !window.location.origin.includes("localhost")
+
 	@property({ type: Object })
 	url: Record<string, string | undefined> = {}
 
@@ -400,7 +403,7 @@ export class InlangManage extends TwLitElement {
 				<div class="max-w-7xl mx-auto flex flex-row justify-between relative sm:static">
 					<div class="flex items-center">
 						<a
-							href="https://inlang.com"
+							href=${this.isProduction ? `https://inlang.com` : "http://localhost:3000"}
 							target="_blank"
 							class="flex items-center w-fit pointer-events-auto transition-opacity hover:opacity-75"
 						>
@@ -851,7 +854,8 @@ export class InlangManage extends TwLitElement {
 											Creating a new project in the browser is not supported yet.
 										</p>
 										<a
-											href="https://inlang.com/c/guides"
+											href=${(this.isProduction ? `https://inlang.com` : "http://localhost:3000") +
+											"/c/guides"}
 											target="_blank"
 											class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
 											>Follow a setup guide
@@ -929,7 +933,10 @@ export class InlangManage extends TwLitElement {
 							<div class="flex items-center gap-2">
 							<a
 								class="bg-slate-200 text-slate-900 md:block hidden hover:bg-slate-300 truncate text-center px-4 py-2 rounded-md font-medium transition-colors"
-								href=${`https://inlang.com/editor/${this.url.repo}`}
+								href=${
+									(this.isProduction ? `https://fink.inlang.com` : "http://localhost:400") +
+									`/${this.url.repo}`
+								}
 								target="_blank"
 							>
 								Go to Fink - Editor
@@ -937,7 +944,9 @@ export class InlangManage extends TwLitElement {
 							<button
 							class="bg-slate-800 text-white text-center md:block hidden px-4 py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"
 							@click=${() => {
-								window.location.href = `https://inlang.com/?repo=${this.url.repo}&project=${this.url.project}`
+								window.location.href =
+									(this.isProduction ? `https://inlang.com` : "http://localhost:3000") +
+									`/?repo=${this.url.repo}&project=${this.url.project}`
 							}}
 						>
 							Install a module
@@ -1146,7 +1155,9 @@ ${
 										  >
 												<p class="mb-4 font-medium">You don't have any languageTags</p>
 												<a
-													href="https://inlang.com/c/lint-rules"
+													href=${(this.isProduction
+														? `https://inlang.com`
+														: "http://localhost:3000") + "/c/lint-rules"}
 													target="_blank"
 													class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
 													>Add basic languageTag "en"
@@ -1186,7 +1197,10 @@ ${
 																	>
 																		<a
 																			target="_blank"
-																			href=${`https://inlang.com/m/${
+																			href=${(this.isProduction
+																				? `https://inlang.com`
+																				: "http://localhost:3000") +
+																			`/m/${
 																				// @ts-ignore
 																				module.uniqueID
 																			}`}
@@ -1231,7 +1245,9 @@ ${
 										  >
 												<p class="mb-4 font-medium">You don't have any plugins installed.</p>
 												<a
-													href="https://inlang.com/c/plugins"
+													href=${(this.isProduction
+														? `https://inlang.com`
+														: "http://localhost:3000") + "/c/plugins"}
 													target="_blank"
 													class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
 													>Install a plugin
@@ -1270,7 +1286,10 @@ ${
 																	>
 																		<a
 																			target="_blank"
-																			href=${`https://inlang.com/m/${
+																			href=${(this.isProduction
+																				? `https://inlang.com`
+																				: "http://localhost:3000") +
+																			`/m/${
 																				// @ts-ignore
 																				module.uniqueID
 																			}`}
@@ -1315,7 +1334,9 @@ ${
 										  >
 												<p class="mb-4 font-medium">You don't have any rules installed.</p>
 												<a
-													href="https://inlang.com/c/lint-rules"
+													href=${(this.isProduction
+														? `https://inlang.com`
+														: "http://localhost:3000") + "/c/lint-rules"}
 													target="_blank"
 													class="bg-white text-slate-600 border flex justify-center items-center h-9 relative rounded-md px-2 border-slate-200 transition-all duration-100 text-sm font-medium hover:bg-slate-100"
 													>Install a lint rule
