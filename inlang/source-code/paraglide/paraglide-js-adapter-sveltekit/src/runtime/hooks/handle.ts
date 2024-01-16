@@ -2,6 +2,7 @@ import type { Handle } from "@sveltejs/kit"
 import { getPathInfo } from "../utils/get-path-info.js"
 import type { Paraglide } from "../runtime.js"
 import { base } from "$app/paths"
+import type { I18nConfig } from "../adapter.js"
 
 export type HandleOptions = {
 	/**
@@ -21,11 +22,14 @@ export type HandleOptions = {
 	langPlaceholder: string
 }
 
-export const createHandle = (runtime: Paraglide<any>, options: HandleOptions): Handle => {
+export const createHandle = <T extends string>(
+	{ runtime, defaultLanguageTag }: I18nConfig<T>,
+	options: HandleOptions
+): Handle => {
 	return ({ resolve, event }) => {
 		const { lang } = getPathInfo(event.url.pathname, {
 			availableLanguageTags: runtime.availableLanguageTags,
-			defaultLanguageTag: runtime.sourceLanguageTag,
+			defaultLanguageTag,
 			base,
 		})
 
