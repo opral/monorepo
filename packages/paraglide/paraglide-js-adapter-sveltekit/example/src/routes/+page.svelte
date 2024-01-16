@@ -37,5 +37,5 @@
 
 <form action="{base}/">
 	<input type="text" name="test" />
-	<button formaction="{base}/test">submit</button>
+	<button formaction="{base}/">submit</button>
 </form>

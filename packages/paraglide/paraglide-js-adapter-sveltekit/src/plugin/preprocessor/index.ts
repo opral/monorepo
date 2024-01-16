@@ -1,9 +1,7 @@
 import { parse, type PreprocessorGroup } from "svelte/compiler"
 import MagicString from "magic-string"
-import { RewriteHrefs } from "./passes/rewriteHrefs.js"
-import { RewriteActions } from "./passes/rewriteActions.js"
-import { RewriteFormActions } from "./passes/rewriteFormActions.js"
 import type { Ast } from "./types.js"
+import { createTranslateAttributePass } from "./passes/translateAttribute.js"
 
 export type PreprocessorConfig = Record<string, never>
 
@@ -32,7 +30,11 @@ export type PreprocessingPass = {
 	}
 }
 
-const PASSES: PreprocessingPass[] = [RewriteHrefs, RewriteActions, RewriteFormActions]
+const PASSES: PreprocessingPass[] = [
+	createTranslateAttributePass("a", "href", "hreflang"),
+	createTranslateAttributePass("button", "formaction"),
+	createTranslateAttributePass("form", "action"),
+]
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function preprocess(_config: PreprocessorConfig): PreprocessorGroup {
@@ -78,8 +80,6 @@ export function preprocess(_config: PreprocessorConfig): PreprocessorGroup {
 
 			//Inject any imports that were added by the passes
 			modifyScriptTag(ast, code, { before: scriptAdditonsStart, after: scriptAdditonsEnd })
-
-			console.log(code.toString())
 
 			//Generate the code and map
 			const map = code.generateMap({ hires: true })
