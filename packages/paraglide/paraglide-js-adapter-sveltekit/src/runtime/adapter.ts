@@ -22,11 +22,12 @@ export type I18nOptions<T extends string> = {
 
 	/**
 	 * A predicate that determines whether a URL should be excluded from translation.
-	 * If it returns `true`, the URL will not be translated.
+	 * If it returns `true`, any links to it will not be translated,
+	 * and no alternate links will be added while on it.
 	 *
 	 * @default () => false
 	 * @param url The URL to check
-	 * @returns True if the URL should be excluded from translation
+	 * @returns `true` if the URL should be excluded from translation
 	 *
 	 * @example
 	 * ```ts

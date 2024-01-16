@@ -4,6 +4,20 @@ import type { Paraglide } from "../runtime.js"
 import { base } from "$app/paths"
 
 export type HandleOptions = {
+	/**
+	 * Which placeholder to find and replace with the language tag.
+	 * Use this placeholder as the lang atrribute in your `src/app.html` file.
+	 *
+	 * @example
+	 * ```html
+	 * <!-- src/app.html -->
+	 * <html lang="%lang%">
+	 * ```
+	 * ```ts
+	 * { langPlaceholder: "%lang%" }
+	 * ```
+	 *
+	 */
 	langPlaceholder: string
 }
 
