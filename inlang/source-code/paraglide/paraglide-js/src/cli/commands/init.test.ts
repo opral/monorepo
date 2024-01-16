@@ -420,10 +420,12 @@ describe("maybeAddVsCodeExtension()", () => {
 
 	test("it should skip asking about vscode if the command is being run inside the vscode terminal", async () => {
 		process.env.TERM_PROGRAM = "vscode"
-		mockFiles({
+		const fs = mockFiles({
 			"/project.inlang/settings.json": JSON.stringify(newProjectTemplate),
 		})
-		await maybeAddVsCodeExtension({ projectPath: "/project.inlang" }, logger)
+		const repo = await openRepository("file://", { nodeishFs: fs })
+
+		await maybeAddVsCodeExtension({ projectPath: "/project.inlang" }, { logger, repo })
 		expect(consola.prompt).not.toHaveBeenCalled()
 		const extensions = await fs.readFile("/.vscode/extensions.json", {
 			encoding: "utf-8",
