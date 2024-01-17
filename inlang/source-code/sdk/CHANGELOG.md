@@ -1,5 +1,19 @@
 # @inlang/sdk
 
+## 0.24.0
+
+### Minor Changes
+
+- c38faebce: release fixed project id and catchup missed releases for cli and lix
+
+### Patch Changes
+
+- Updated dependencies [c38faebce]
+  - @lix-js/client@0.6.0
+  - @lix-js/fs@0.6.0
+  - @inlang/plugin@2.4.3
+  - @inlang/module@1.2.3
+
 ## 0.23.0
 
 ### Minor Changes

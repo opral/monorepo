@@ -4,6 +4,7 @@ import { defaultLocalStorage, type LocalStorageSchema } from "./schema.js"
 import { telemetryBrowser } from "@inlang/telemetry"
 import { browserAuth } from "@lix-js/server"
 import { onSignOut } from "#src/services/auth/index.js"
+import { publicEnv } from "@inlang/env-variables"
 
 const LocalStorageContext = createContext()
 
@@ -26,6 +27,8 @@ export function getLocalStorage(): LocalStorageSchema | undefined {
 	}
 	return undefined
 }
+
+const allowedOrigins = publicEnv.PUBLIC_ALLOWED_AUTH_URLS.split(",")
 
 /**
  * Store that provides access to the local storage.
@@ -51,6 +54,17 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 		setOriginStore(...args)
 		// write to local storage
 		localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(store))
+
+		const referrer = document.referrer && new URL(document.referrer).origin
+		if (window.opener && allowedOrigins.includes(referrer)) {
+			window.opener.postMessage(
+				{
+					key: LOCAL_STORAGE_KEY,
+					newValue: JSON.stringify(store),
+				},
+				referrer
+			)
+		}
 	}
 
 	// read from local storage on mount
@@ -93,19 +107,25 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 
 		if (typeof window !== "undefined") {
 			// listen for changes in other windows
-			window.addEventListener("storage", onStorageSetByOtherWindow)
+			window.addEventListener("message", onPostMessage, false)
 		}
 	})
 
 	onCleanup(() => {
 		// remove listener
 		if (typeof window !== "undefined") {
-			window.removeEventListener("storage", onStorageSetByOtherWindow)
+			window.removeEventListener("message", onPostMessage)
 		}
 	})
 
+	/** changed in another window should be reflected. thus listen for changes */
+	const onPostMessage = (e: { origin: string; data: { key: string; newValue: string } }) => {
+		if (allowedOrigins.includes(e.origin)) {
+			onStorageSetByOtherWindow(e.data)
+		}
+	}
 	/** changed in another window should be reflected. thus listen for changes  */
-	const onStorageSetByOtherWindow = (event: StorageEvent) => {
+	const onStorageSetByOtherWindow = (event: Pick<StorageEvent, "key" | "newValue">) => {
 		// if (event.key !== LOCAL_STORAGE_KEY) {
 		//   return console.warn(
 		//     `unknown localStorage key "${event.key}" was changed by another tab.`
