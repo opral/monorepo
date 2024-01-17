@@ -101,18 +101,18 @@ export type I18nConfig<T extends string> = {
  * export const i18n = createI18n(runtime, { ...options })
  * ```
  */
-export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18nUserConfig<T>) {
-	const translations = options.pathnames ?? {}
+export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I18nUserConfig<T>) {
+	const translations = options?.pathnames ?? {}
 
-	const exclude = options.exclude ?? (() => false)
-	const defaultLanguageTag = options.defaultLanguageTag ?? runtime.sourceLanguageTag
+	const exclude = options?.exclude ?? (() => false)
+	const defaultLanguageTag = options?.defaultLanguageTag ?? runtime.sourceLanguageTag
 
 	const config: I18nConfig<T> = {
 		runtime,
 		translations,
 		exclude,
 		defaultLanguageTag,
-		prefixDefaultLanguage: options.prefixDefaultLanguage ?? "never",
+		prefixDefaultLanguage: options?.prefixDefaultLanguage ?? "never",
 	}
 
 	// We don't want the translations to be mutable
@@ -171,7 +171,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options: I18
 		 * ```
 		 */
 		resolveRoute(path: string, lang: T) {
-			if (options.exclude?.(path)) return path
+			if (config.exclude(path)) return path
 
 			const canonicalPath = path.slice(normalizeBase(base).length)
 			const translatedPath = getTranslatedPath(canonicalPath, lang, translations)
