@@ -78,7 +78,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 
 <br>
 
-## Inlang Tab - Transparent, Fast, Always Up-to-Date
+## Inlang Tab - Transparent & Fast
 
 <div>
 	<div class="flex-container">
