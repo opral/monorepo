@@ -4,10 +4,12 @@ import { defaultLocalStorage, type LocalStorageSchema } from "./schema.js"
 import { posthog as telemetryBrowser } from "posthog-js"
 import { browserAuth } from "@lix-js/server"
 import { onSignOut } from "#src/services/auth/index.js"
+import { publicEnv } from "@inlang/env-variables"
 
 const LocalStorageContext = createContext()
 
 const LOCAL_STORAGE_KEY = "inlang-local-storage"
+const allowedOrigins = publicEnv.PUBLIC_ALLOWED_AUTH_URLS.split(",")
 
 // FIXME: remove user object from localstorage
 
@@ -51,6 +53,16 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 		setOriginStore(...args)
 		// write to local storage
 		localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(store))
+
+		if (allowedOrigins.includes(document.referrer)) {
+			window.opener.postMessage(
+				{
+					key: LOCAL_STORAGE_KEY,
+					newValue: JSON.stringify(store),
+				},
+				document.referrer
+			)
+		}
 	}
 
 	// read from local storage on mount
@@ -94,19 +106,24 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 
 		if (typeof window !== "undefined") {
 			// listen for changes in other windows
-			window.addEventListener("storage", onStorageSetByOtherWindow)
+			window.addEventListener("message", onPostMessage, false)
 		}
 	})
 
 	onCleanup(() => {
 		// remove listener
 		if (typeof window !== "undefined") {
-			window.removeEventListener("storage", onStorageSetByOtherWindow)
+			window.removeEventListener("message", onPostMessage)
 		}
 	})
 
-	/** changed in another window should be reflected. thus listen for changes  */
-	const onStorageSetByOtherWindow = (event: StorageEvent) => {
+	/** changed in another window should be reflected. thus listen for changes */
+	const onPostMessage = (e: { origin: string; data: { key: string; newValue: string } }) => {
+		if (allowedOrigins.includes(e.origin)) {
+			onStorageSetByOtherWindow(e.data)
+		}
+	}
+	const onStorageSetByOtherWindow = (event: Pick<StorageEvent, "key" | "newValue">) => {
 		// if (event.key !== LOCAL_STORAGE_KEY) {
 		//   return console.warn(
 		//     `unknown localStorage key "${event.key}" was changed by another tab.`
