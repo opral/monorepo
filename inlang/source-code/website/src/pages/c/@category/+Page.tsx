@@ -257,7 +257,7 @@ export default function Page(props: {
 									<AppHeader />
 								</Match>
 							</Switch>
-							<div class="mb-8 grid xl:grid-cols-4 md:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
+							<div class="mb-8 grid xl:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
 								<Gallery
 									items={props.items}
 									guides={selectedCategory().includes("c/guides")}
