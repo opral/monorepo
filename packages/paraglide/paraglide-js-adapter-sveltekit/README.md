@@ -7,9 +7,10 @@ Everything you need to internationalize your SvelteKit app with Paraglide.
 **Features**
 
 - 🪂 Automatically set & manage the language for Paraglide
-- 💬 Translated paths
+- 💨 A breeze to set up
 - 🪄 Automatically translate existing links
-- ⚙️ SEO friendly out of the box
+- 💬 Translated paths
+- 🤖 SEO friendly out of the box
 
 ## Quickstart
 
