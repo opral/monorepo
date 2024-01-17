@@ -129,12 +129,13 @@ ${args.availableLanguageTags
 	}[options.languageTag ?? languageTag()](${hasParams ? "params" : ""})
 }
 ${
-	args.message.alias[inlanAliasKey] &&
-	`
+	args.message.alias["default"] &&
+	args.message.id !== args.message.alias["default"] &&
+	` 
 /**
  * This message is an alias of ${args.message.id}
  */
-export const ${args.message.alias[inlanAliasKey]} = ${args.message.id};
+export const ${args.message.alias["default"]} = ${args.message.id};
 `
 }
 `
