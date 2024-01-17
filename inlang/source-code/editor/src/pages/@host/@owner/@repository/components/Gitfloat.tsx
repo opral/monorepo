@@ -98,6 +98,8 @@ export const Gitfloat = () => {
 				title: "The Fork has been created.",
 				message: `Don't forget to open a pull request`,
 			})
+			// reset localChanges counter, as changes are not transferred to the fork
+			setLocalChanges(0)
 
 			setTimeout(() => {
 				// @ts-expect-error - type mismatch fix after refactoring
