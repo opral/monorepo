@@ -46,7 +46,7 @@ describe("openInEditorCommand", () => {
 
 		expect(env.openExternal).toHaveBeenCalledWith(
 			Uri.parse(
-				`${CONFIGURATION.STRINGS.EDITOR_BASE_PATH}${mockOrigin}?project=${encodeURIComponent(
+				`${CONFIGURATION.STRINGS.EDITOR_BASE_URL}${mockOrigin}?project=${encodeURIComponent(
 					mockArgs.selectedProjectPath
 				)}&id=${encodeURIComponent(mockArgs.messageId)}`
 			)
@@ -60,7 +60,7 @@ describe("openInEditorCommand", () => {
 		await openInEditorCommand.callback(mockArgs)
 
 		expect(env.openExternal).toHaveBeenCalledWith(
-			Uri.parse(`${CONFIGURATION.STRINGS.EDITOR_BASE_PATH}`)
+			Uri.parse(`${CONFIGURATION.STRINGS.EDITOR_BASE_URL}`)
 		)
 	})
 })

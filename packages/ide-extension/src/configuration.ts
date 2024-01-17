@@ -30,7 +30,10 @@ export const CONFIGURATION = {
 	},
 	STRINGS: {
 		MISSING_TRANSLATION_MESSAGE: "[missing]",
-		EDITOR_BASE_PATH: "https://fink.inlang.com/",
+		EDITOR_BASE_URL: "https://fink.inlang.com/",
+		GETTING_STARTED_URL:
+			"https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension",
+		DOCS_URL: "https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension",
 		APP_ID: "app.inlang.ideExtension",
 	},
 } as const
