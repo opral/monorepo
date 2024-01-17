@@ -95,7 +95,7 @@ export default function Card(props: { item: any; displayName: string }) {
 					</Match>
 					<Match when={!app && showCover && props.item.gallery}>
 						<img
-							class="w-full h-36 object-cover object-top rounded-xl"
+							class="w-full h-36 object-cover object-center rounded-xl"
 							alt={
 								// @ts-ignore
 								props.displayName.en
