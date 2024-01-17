@@ -122,9 +122,15 @@ See translations and edit them directly in your code. No more back-and-forth loo
 
 <br>
 
-## Manual setup
+## Quick start
 
-### 1. Create a `project.inlang/settings.json` in the **root** of your project
+<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-start.png"/>
+
+Just install the extension and click on `Getting Started` in the `Inlang Tab`. 
+
+### Manual setup
+
+#### 1. Create a `project.inlang/settings.json` in the **root** of your project
 
 You can use the following template when using json files as translation files, if not, please look for other [supported resource file types](https://inlang.com/):
 
@@ -143,7 +149,7 @@ You can use the following template when using json files as translation files, i
 }
 ```
 
-### 2. Decide on a **syntax matcher**
+#### 2. Decide on a **syntax matcher**
 
 You should continue with **installing a syntax matcher**. There are multiple syntax matcher available like:
 
@@ -151,7 +157,7 @@ You should continue with **installing a syntax matcher**. There are multiple syn
 - t function matcher: https://inlang.com/m/698iow33/plugin-inlang-tFunctionMatcher
 - *if you are using the i18next module, everything is already built-in*
 
-### 3. ✨ Recommended
+#### 3. ✨ Recommended
 
 If you want to add lint rules to your experience, you can add them from: https://inlang.com/c/lint-rules
 
