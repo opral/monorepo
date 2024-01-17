@@ -15,21 +15,11 @@ export class LixError extends Error {
 	response?: { status?: number }
 }
 
-export type LixAuthModule = {
-	login: () => Promise<any>
-	logout: () => Promise<any>
-	getUser: () => Promise<{
-		username: string
-		email: string
-		avatarUrl?: string
-	}>
-	addPermissions: () => Promise<any>
-}
-
 export type Repository = {
 	// we dont want to add isogit to types but its required for teting comparison and debugging
 	[x: string]: any
 	nodeishFs: NodeishFilesystem
+	checkout: (args: { branch: string }) => Promise<void>
 	commit: (args: {
 		author: Author
 		message: string
@@ -48,10 +38,11 @@ export type Repository = {
 	>
 	createFork: () => Promise<Endpoints["POST /repos/{owner}/{repo}/forks"]["response"]>
 	forkStatus: () => Promise<{ ahead: number; behind: number } | { error: string }>
-	getOrigin: () => Promise<string>
+	getOrigin: (arg?: { safeHashOnly?: boolean }) => Promise<string>
 	getCurrentBranch: () => Promise<string | undefined>
 	getBranches: () => Promise<string[] | undefined>
 	errors: Subscribable<LixError[]>
+	getFirstCommitHash: () => Promise<string | undefined>
 	getMeta: () => Promise<
 		| {
 				name: string

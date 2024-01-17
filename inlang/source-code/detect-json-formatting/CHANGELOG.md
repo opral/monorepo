@@ -4,7 +4,7 @@
 
 ### Major Changes
 
-- 127014069: BREAKING: The API changed from `detectJsonFormatting().serialize` to `const serialize = detectJsonFormatting(file)` as part of https://github.com/inlang/monorepo/pull/1422.
+- 127014069: BREAKING: The API changed from `detectJsonFormatting().serialize` to `const serialize = detectJsonFormatting(file)` as part of https://github.com/opral/monorepo/pull/1422.
 
 ## 0.3.0
 

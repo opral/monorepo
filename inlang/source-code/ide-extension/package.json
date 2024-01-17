@@ -7,10 +7,10 @@
 	"publisher": "inlang",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/inlang/monorepo.git"
+		"url": "https://github.com/opral/monorepo.git"
 	},
 	"icon": "assets/icon-vscode-marketplace.png",
-	"version": "1.23.0",
+	"version": "1.25.3",
 	"engines": {
 		"vscode": "^1.84.2"
 	},

@@ -1,5 +1,33 @@
 # @inlang/plugin-json
 
+## 5.1.5
+
+### Patch Changes
+
+- Updated dependencies [b920761e6]
+  - @inlang/sdk@0.23.0
+
+## 5.1.4
+
+### Patch Changes
+
+- Updated dependencies [cd29edb11]
+  - @inlang/sdk@0.22.0
+
+## 5.1.3
+
+### Patch Changes
+
+- Updated dependencies [e20364a46]
+  - @inlang/sdk@0.21.0
+
+## 5.1.2
+
+### Patch Changes
+
+- Updated dependencies [bc5803235]
+  - @inlang/sdk@0.20.0
+
 ## 5.1.1
 
 ### Patch Changes
@@ -173,7 +201,7 @@
 
 ### Patch Changes
 
-- 6326e01e: fix: placeholder matching https://github.com/inlang/monorepo/issues/955
+- 6326e01e: fix: placeholder matching https://github.com/opral/monorepo/issues/955
 
 ## 3.0.4
 

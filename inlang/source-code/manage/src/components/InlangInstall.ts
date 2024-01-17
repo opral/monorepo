@@ -3,7 +3,7 @@ import { html } from "lit"
 import { openRepository, createNodeishMemoryFs } from "@lix-js/client"
 import { customElement, property } from "lit/decorators.js"
 import { TwLitElement } from "../common/TwLitElement.js"
-import { browserAuth, getUser } from "@lix-js/client/src/browser-auth.ts"
+import { browserAuth, getUser } from "@lix-js/server"
 import { registry } from "@inlang/marketplace-registry"
 import { ProjectSettings, loadProject, listProjects } from "@inlang/sdk"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
@@ -13,6 +13,9 @@ import { z } from "zod"
 
 @customElement("inlang-install")
 export class InlangInstall extends TwLitElement {
+	@property({ type: Boolean })
+	isProduction: boolean = !window.location.origin.includes("localhost")
+
 	@property({ type: Boolean })
 	manual: boolean = false
 
@@ -164,7 +167,7 @@ export class InlangInstall extends TwLitElement {
 		const inlangProject = await loadProject({
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			projectPath: this.url.project!,
-			nodeishFs: repo.nodeishFs,
+			repo,
 		})
 
 		if (inlangProject.errors().length > 0) {
@@ -204,7 +207,7 @@ export class InlangInstall extends TwLitElement {
 		const inlangProjectAfter = await loadProject({
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			projectPath: this.url.project!,
-			nodeishFs: repo.nodeishFs,
+			repo,
 		})
 
 		this.loadingProgress = 100
@@ -308,7 +311,7 @@ export class InlangInstall extends TwLitElement {
 						</p>
 						<a
 							class="bg-slate-800 px-4 text-white text-center py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"
-							href=${`https://inlang.com/?` +
+							href=${(this.isProduction ? `https://inlang.com/?` : "http://localhost:3000/?") +
 							(this.url.repo ? `repo=${this.url.repo}` : "") +
 							(this.url.project ? `&project=${this.url.project}` : "")}
 						>
@@ -436,7 +439,10 @@ export class InlangInstall extends TwLitElement {
 					</div>
 				</div>
 				<a
-					href="https://inlang.com/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang"
+					href=${
+						(this.isProduction ? `https://inlang.com` : "http://localhost:3000") +
+						"/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang"
+					}
 					target="_blank"
 					class="text-[#098DAC] font-medium transition-colors hover:text-[#06b6d4]"									"
 				>
@@ -460,7 +466,7 @@ export class InlangInstall extends TwLitElement {
 								!this.isValidUrl() && this.repoURL.length > 0
 									? " border-red-500 mb-8"
 									: " focus-within:border-[#098DAC] border-slate-200"
-							}	
+							}
 `}
 						>
 							<input
@@ -566,7 +572,8 @@ export class InlangInstall extends TwLitElement {
 									</p>
 									<a
 										target="_blank"
-										href=${`https://inlang.com/m/${
+										href=${(this.isProduction ? `https://inlang.com` : "http://localhost:3000") +
+										`/m/${
 											// @ts-ignore
 											registry.find((x) => x.id === this.url.module)?.uniqueID
 										}`}
@@ -742,7 +749,10 @@ export class InlangInstall extends TwLitElement {
 					</div>
 				</div>
 				<a
-					href="https://inlang.com/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang"
+				href=${
+					(this.isProduction ? `https://inlang.com` : "http://localhost:3000") +
+					"/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang"
+				}
 					target="_blank"
 					class="text-[#098DAC] font-medium transition-colors hover:text-[#06b6d4]"									"
 				>

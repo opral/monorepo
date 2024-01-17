@@ -17,17 +17,20 @@ import type { LocalStorageSchema } from "#src/services/local-storage/index.js"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
-import { openRepository, createNodeishMemoryFs, type Repository, browserAuth } from "@lix-js/client"
+import { openRepository, createNodeishMemoryFs, type Repository } from "@lix-js/client"
+import { browserAuth } from "@lix-js/server"
 import { publicEnv } from "@inlang/env-variables"
 import {
 	LanguageTag,
 	MessageLintRule,
 	loadProject,
 	solidAdapter,
+	listProjects,
 	type InlangProjectWithSolidAdapter,
 } from "@inlang/sdk"
-import { telemetryBrowser } from "@inlang/telemetry"
+import { posthog as telemetryBrowser } from "posthog-js"
 import type { Result } from "@inlang/result"
+import { id } from "../../../../../marketplace-manifest.json"
 
 type EditorStateSchema = {
 	/**
@@ -89,6 +92,11 @@ type EditorStateSchema = {
 	 */
 	project: Resource<InlangProjectWithSolidAdapter | undefined>
 
+	/**
+	 * List of projects in the repository.
+	 */
+	projectList: Resource<{ projectPath: string }[]>
+
 	doesInlangConfigExist: () => boolean
 
 	sourceLanguageTag: () => LanguageTag | undefined
@@ -100,6 +108,9 @@ type EditorStateSchema = {
 
 	setActiveBranch: Setter<string | undefined>
 	activeBranch: Accessor<string | undefined>
+
+	setActiveProject: Setter<string | undefined>
+	activeProject: Accessor<string | undefined>
 
 	/**
 	 * FilterLanguages show or hide the different messages.
@@ -232,6 +243,12 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 							branch,
 						}
 					)
+
+					if (newRepo.errors().length > 0) {
+						setLixErrors(newRepo.errors())
+						return
+					}
+
 					// @ts-expect-error
 					newRepo.nodeishFs.watch = () => undefined
 					setLastPullTime(new Date())
@@ -252,31 +269,60 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		setLixErrors(errors)
 	})
 
+	const [projectList] = createResource(
+		() => {
+			return { repo: repo() }
+		},
+		async (args) => {
+			if (args.repo?.nodeishFs === undefined) return []
+			const projects = await listProjects(args.repo?.nodeishFs, "/")
+
+			if (searchParams().project) {
+				setActiveProject(searchParams().project)
+			} else if (projects.length === 1) {
+				setActiveProject(projects[0]?.projectPath)
+			} else if (
+				projects.length > 1 &&
+				projects.some((project) => project.projectPath === "/project.inlang")
+			) {
+				setActiveProject("/project.inlang")
+			} else {
+				setActiveProject(projects[0]?.projectPath)
+			}
+			return projects
+		}
+	)
+
+	const [activeProject, setActiveProject] = createSignal<string | undefined>(
+		params.get("project") || undefined
+	)
+
+	createEffect(() => {
+		const projectPath = activeProject()
+		if (projectPath) {
+			setSearchParams({ key: "project", value: projectPath })
+		}
+	})
+
 	// open the inlang project and store it in a resource
 	const [project, { mutate: setProject }] = createResource(
 		() => {
-			if (repo() === undefined || lixErrors().length > 0) {
+			if (repo() === undefined || lixErrors().length > 0 || activeProject() === undefined) {
 				return false
 			}
-			return { newRepo: repo(), lixErrors: lixErrors() }
+			return { newRepo: repo(), lixErrors: lixErrors(), activeProject: activeProject() }
 		},
-		async ({ newRepo, lixErrors }) => {
+		async ({ newRepo, lixErrors, activeProject }) => {
 			if (lixErrors.length === 0 && newRepo) {
 				const project = solidAdapter(
 					await loadProject({
-						nodeishFs: newRepo.nodeishFs,
-						projectPath: "/project.inlang",
-						_capture(id, props) {
-							telemetryBrowser.capture(id, props)
-						},
+						repo: newRepo,
+						projectPath: activeProject!,
+						appId: id,
 					}),
 					{ from }
 				)
-				// TODO add a project UUID to the tele.groups internal #196
-				// const gitOrigin = parseOrigin({ remotes: await newRepo.listRemotes() })
-				// telemetryBrowser.group("repository", gitOrigin, {
-				// 	name: gitOrigin,
-				// })
+
 				telemetryBrowser.capture("EDITOR cloned repository", {
 					userPermission: userIsCollaborator() ? "iscollaborator" : "isNotCollaborator",
 				})
@@ -424,6 +470,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					fsChange,
 					setFsChange,
 					project,
+					projectList,
 					doesInlangConfigExist,
 					sourceLanguageTag,
 					languageTags,
@@ -435,6 +482,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					setFilteredMessageLintRules,
 					setActiveBranch,
 					activeBranch,
+					setActiveProject,
+					activeProject,
 					localChanges,
 					setLocalChanges,
 					userIsCollaborator,
@@ -482,9 +531,11 @@ export async function pushChanges(args: {
 	if (typeof args.user === "undefined" || args.user?.isLoggedIn === false) {
 		return { error: new PushException("User not logged in") }
 	}
+
 	// stage all changes
 	const status = await args.repo.statusMatrix({
 		filter: (f: any) =>
+			f.endsWith("project_id") ||
 			f.endsWith(".json") ||
 			f.endsWith(".po") ||
 			f.endsWith(".yaml") ||
@@ -492,6 +543,7 @@ export async function pushChanges(args: {
 			f.endsWith(".js") ||
 			f.endsWith(".ts"),
 	})
+
 	const filesWithUncommittedChanges = status.filter(
 		(row: any) =>
 			// files with unstaged and uncommitted changes
@@ -499,6 +551,7 @@ export async function pushChanges(args: {
 			// added files
 			(row[2] === 2 && row[3] === 0)
 	)
+
 	if (filesWithUncommittedChanges.length > 0) {
 		// add all changes
 		for (const file of filesWithUncommittedChanges) {

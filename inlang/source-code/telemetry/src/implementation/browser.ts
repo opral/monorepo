@@ -1,6 +1,5 @@
 import { posthog } from "posthog-js"
 import { publicEnv } from "@inlang/env-variables"
-import { ROUTE_PATH } from "./shared.js"
 
 /**
  * The telemetry service.
@@ -35,7 +34,8 @@ function initWrapper(
 	return posthog.init(
 		publicEnv.PUBLIC_POSTHOG_TOKEN,
 		{
-			api_host: ROUTE_PATH,
+			api_host:
+				process.env.NODE_ENV === "production" ? "https://tm.inlang.com" : "http://localhost:4005",
 			capture_performance: false,
 			...config,
 		},

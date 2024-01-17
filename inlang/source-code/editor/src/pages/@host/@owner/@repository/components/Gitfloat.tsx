@@ -12,9 +12,13 @@ import {
 	ForkPermissionDialog,
 	PushPermissionDialog,
 } from "#src/services/auth/index.js"
-import { telemetryBrowser } from "@inlang/telemetry"
+import { posthog as telemetryBrowser } from "posthog-js"
 import { TourHintWrapper, type TourStepId } from "./Notification/TourHintWrapper.jsx"
-import { browserAuth } from "@lix-js/client"
+import { browserAuth } from "@lix-js/server"
+import {
+	setSignInModalOpen,
+	signInModalOpen,
+} from "#src/services/auth/src/components/SignInDialog.jsx"
 
 export const Gitfloat = () => {
 	const {
@@ -29,6 +33,7 @@ export const Gitfloat = () => {
 		setLastPullTime,
 		tourStep,
 		project,
+		projectList,
 		lixErrors,
 	} = useEditorState()
 	const [localStorage] = useLocalStorage()
@@ -45,7 +50,7 @@ export const Gitfloat = () => {
 			typeof repoInfo === "undefined" ||
 			"error" in repoInfo ||
 			userIsCollaborator.loading ||
-			!project() ||
+			!projectList() ||
 			isForking()
 		) {
 			return "loading"
@@ -67,9 +72,11 @@ export const Gitfloat = () => {
 	let forkPermissionDialog: SlDialog | undefined
 	let pushPermissionDialog: SlDialog | undefined
 
-	function onSignIn() {
-		signInDialog?.show()
-	}
+	createEffect(() => {
+		if (signInModalOpen()) {
+			signInDialog?.show()
+		}
+	})
 
 	async function handleFork() {
 		if (!localStorage.user?.isLoggedIn) {
@@ -91,10 +98,12 @@ export const Gitfloat = () => {
 				title: "The Fork has been created.",
 				message: `Don't forget to open a pull request`,
 			})
+			// reset localChanges counter, as changes are not transferred to the fork
+			setLocalChanges(0)
 
 			setTimeout(() => {
 				// @ts-expect-error - type mismatch fix after refactoring
-				navigate(`/editor/github.com/${response.data.full_name}`)
+				navigate(`/github.com/${response.data.full_name}`)
 			}, 1000)
 			return
 		} else if (response?.status === 403) {
@@ -199,7 +208,7 @@ export const Gitfloat = () => {
 			icon: () => {
 				return <IconGithub />
 			},
-			onClick: onSignIn,
+			onClick: () => setSignInModalOpen(true),
 			tourStepId: "github-login",
 		},
 		loading: {
@@ -337,6 +346,7 @@ export const Gitfloat = () => {
 					// hide the sign in dialog to increase UX when switching back to this window
 					browserAuth.login()
 					signInDialog?.hide()
+					setSignInModalOpen(false)
 				}}
 			/>
 			<ForkPermissionDialog

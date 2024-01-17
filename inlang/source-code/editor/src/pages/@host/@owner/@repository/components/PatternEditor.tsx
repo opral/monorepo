@@ -6,7 +6,7 @@ import type { SlDialog } from "@shoelace-style/shoelace"
 import { showToast } from "#src/interface/components/Toast.jsx"
 import MaterialSymbolsTranslateRounded from "~icons/material-symbols/translate-rounded"
 import { type Notification, NotificationHint } from "./Notification/NotificationHint.jsx"
-import { telemetryBrowser } from "@inlang/telemetry"
+import { posthog as telemetryBrowser } from "posthog-js"
 import { getTextValue, setTipTapMessage } from "../helper/parse.js"
 import { getEditorConfig } from "../helper/editorSetup.js"
 import { FloatingMenu } from "./FloatingMenu.jsx"
@@ -318,14 +318,14 @@ export function PatternEditor(props: {
 			}
 		})
 
-		if (hasChanges() && localStorage.user === undefined) {
+		if (hasChanges() && !localStorage.user?.isLoggedIn) {
 			notifications.push({
 				notificationTitle: "Access:",
 				notificationDescription: "Sign in to commit changes.",
 				notificationType: "warning",
 			})
 		}
-		if (hasChanges() && userIsCollaborator() === false) {
+		if (hasChanges() && localStorage.user?.isLoggedIn && !userIsCollaborator()) {
 			notifications.push({
 				notificationTitle: "Fork:",
 				notificationDescription: "Fork the project to commit changes.",

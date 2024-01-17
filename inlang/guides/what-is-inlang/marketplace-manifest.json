@@ -1,6 +1,6 @@
 {
 	"id": "guide.niklasbuchfink.whatIsInlang",
-	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/what-is-inlang/question-mark-logo.webp",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/what-is-inlang/question-mark-logo.webp",
 	"displayName": {
 		"en": "What is inlang?"
 	},
@@ -8,7 +8,7 @@
 		"en": "Understand general concept of inlang ecosystem and its benefits."
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/what-is-inlang/what-is-inlang.md"
+		"en": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/what-is-inlang/what-is-inlang.md"
 	},
 	"keywords": [
 		"application",
@@ -21,6 +21,7 @@
 		"localization",
 		"guide"
 	],
+	"recommends": ["g/00162hsd", "g/6ddyhpoi", "g/38fnf03n"],
 	"publisherName": "Niklas Buchfink",
 	"publisherIcon": "https://avatars.githubusercontent.com/u/59048346?v=4",
 	"license": "Apache-2.0"

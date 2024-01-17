@@ -1,6 +1,6 @@
 {
 	"id": "guide.floriankiem.i18nMistakes",
-	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/i18n-mistakes/assets/computer-icon.jpg",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/i18n-mistakes/assets/computer-icon.jpg",
 	"displayName": {
 		"en": "Localization Mistakes and How to Avoid Them when Internationalizing (i18n) your App"
 	},
@@ -22,6 +22,7 @@
 		"internationalization",
 		"guide"
 	],
+	"recommends": ["g/38fnf03n", "m/3i8bor92", "g/3go4f04m", "g/6ddyhpoi"],
 	"publisherName": "Florian Kiem",
 	"publisherIcon": "https://avatars.githubusercontent.com/u/92092993?v=4",
 	"license": "Apache-2.0"

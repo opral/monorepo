@@ -1,8 +1,8 @@
 {
 	"id": "app.inlang.globelens",
-	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/globelens/assets/GlobeLens-logo.png",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/globelens/assets/GlobeLens-logo.png",
 	"gallery": [
-		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/globelens/assets/GlobeLens-01.png"
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/globelens/assets/GlobeLens-01.png"
 	],
 	"displayName": {
 		"en": "GlobeLens – i18n SEO Analysis"
@@ -14,6 +14,7 @@
 		"en": "./inlang/source-code/globelens/README.md"
 	},
 	"keywords": ["analysis", "i18n", "apps", "seo", "test", "url", "keyword"],
+	"pricing": "FREE BETA",
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0"

@@ -1,8 +1,8 @@
-![inlang CLI header image](https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/cli/assets/cli-header.png)
+![inlang CLI header image](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/cli/assets/cli-header.jpg)
 
 # Automate (i18n) localization tasks with the CLI
 
-[@inlang/cli](https://github.com/inlang/monorepo/tree/main/inlang/source-code/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infrastructure. It can be used to automate localization tasks, such as machine translation, linting, and more.
+[@inlang/cli](https://github.com/opral/monorepo/tree/main/inlang/source-code/cli) is a command line interface (CLI) tool that allows you to interact with the Inlang infrastructure. It can be used to automate localization tasks, such as machine translation, linting, and more.
 
 Get started with the CLI by using the following npx command:
 
@@ -10,12 +10,14 @@ Get started with the CLI by using the following npx command:
 npx @inlang/cli [command]
 ```
 
+See all available commands [here](#commands).
+
 # Core features
 
 <doc-features>
-  <doc-feature text-color="#fff" color="#22272D" title="Automation" icon="mdi:file-auto"></doc-feature>
-  <doc-feature text-color="#fff" color="#22272D" title="Machine Translation" icon="streamline:ai-prompt-spark-solid"></doc-feature>
-  <doc-feature text-color="#fff" color="#22272D" title="Validation" icon="solar:bill-check-bold"></doc-feature>
+  <doc-feature text-color="#fff" color="#000" title="Automation" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/cli/assets/automation.jpg"></doc-feature>
+  <doc-feature text-color="#fff" color="#000" title="Machine Translation" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/cli/assets/machine-translation.jpg"></doc-feature>
+  <doc-feature text-color="#fff" color="#000" title="Validation" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/cli/assets/lint.jpg"></doc-feature>
 </doc-features>
 
 <br />
@@ -35,26 +37,28 @@ You can use the CLI to automate localization tasks, such as machine translation,
 
 #### Machine Translation
 
-The CLI allows you to machine translate your resources. This is useful if you want to get a first draft of your translations and then have them reviewed by a human translator.
+The CLI allows you to machine translate your resources. This is useful if you want to get a first draft of your translations and then have them reviewed by a human translator. Via machine translation, you're able to do translation automation e.g. in your CI/CD pipeline.
 
 #### Validation
 
 The CLI allows you to validate your inlang project. This is useful if you want to make sure that your configuration file is valid before you commit it to your repository.
 
+![Example of a dev doing translation automation](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/cli/assets/why.jpg)
+
 # Installation
 
 ## Install with package manager
 
-You can install the @inlang/cli with this command:
+You can install the [@inlang/cli](https://www.npmjs.com/package/@inlang/cli) with this command:
 
 ```sh
-npm install @inlang/cli
+npm install -D @inlang/cli
 ```
 
 or
 
 ```sh
-yarn add @inlang/cli
+yarn add --dev @inlang/cli
 ```
 
 best
@@ -78,7 +82,7 @@ If one of the commands can't be found, you are probably using an outdated versio
 | **Validate**     | `npx @inlang/cli validate [options]`                  | Validate if the project is working correctly.                          |
 | **Lint**        | `npx @inlang/cli lint [options]`                     | Lint translations using configured rules. Options include `--no-fail`, `--project`, and `--languageTags`.      |
 | **Machine**     | `npx @inlang/cli machine translate [options]`        | Automate translation processes. Options include `-f, --force`, `--project <path>`, `--sourceLanguageTag <source>` and `--targetLanguageTags <targets...>`                          |
-| **Open**        | `npx @inlang/cli open editor`                     | Open parts of the Inlang infrastructure in your default browser, including the editor.                        |
+| **Open**        | `npx @inlang/cli open editor`                     | Open parts of the Inlang infrastructure in your default browser, including the [editor](https://inlang.com/m/tdozzpar/app-inlang-editor).                        |
 | **Module**      | `npx @inlang/cli module [command]`                   | Interact with Inlang modules, including initialization and building. Commands:  `init [options]`   Initialize a new inlang module codebase,   `build [options]`  build an inlang module. Options include `--type`, `--entry`, and `--outdir`. |
 
 ---
@@ -155,7 +159,7 @@ This will launch an interactive prompt that will guide you through the process o
 
 ## `lint`
 
-The lint command lints the translation with the configured lint rules, for example, with the [@inlang/plugin-standard-lint-rules](https://github.com/inlang/monorepo/tree/main/inlang/source-code/message-lint-rules).
+The lint command lints the translation with the configured lint rules, for example, with the [@inlang/plugin-standard-lint-rules](https://github.com/opral/monorepo/tree/main/inlang/source-code/message-lint-rules).
 
 ```sh
 npx @inlang/cli lint
@@ -169,9 +173,9 @@ The translate command has the following options:
 - `--project <path>`: Specifies the path to the project root. The default project root is the current working directory.
 - `--languageTags <tags>`: Specifies the [language tags](/m/8y8sxj09/library-inlang-languageTag) to lint. Defaults to all. Should be a comma-separated list of language tags specified in the inlang project, e.g. `en,de,fr`.
 
-`lint` will read through all resources and find potential errors and warnings in the translation strings, for example, with the [@inlang/plugin-standard-lint-rules](https://github.com/inlang/monorepo/tree/main/inlang/source-code/message-lint-rules), it searches for **missing messages**, **missing references** and **identical patterns/duplicates**.
+`lint` will read through all resources and find potential errors and warnings in the translation strings, for example, with the [@inlang/plugin-standard-lint-rules](https://github.com/opral/monorepo/tree/main/inlang/source-code/message-lint-rules), it searches for **missing messages**, **missing references** and **identical patterns/duplicates**.
 
-However, it's totally up to you how you configure your lints. _You can build your own plugin with your customized set of lints_ with the [@inlang/plugin-standard-lint-rules](https://github.com/inlang/monorepo/tree/main/inlang/source-code/message-lint-rules) as a starter template.
+However, it's totally up to you how you configure your lints. _You can build your own plugin with your customized set of lints_ with the [@inlang/plugin-standard-lint-rules](https://github.com/opral/monorepo/tree/main/inlang/source-code/message-lint-rules) as a starter template.
 
 ## `open`
 

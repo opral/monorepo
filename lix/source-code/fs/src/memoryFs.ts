@@ -4,6 +4,24 @@ import { normalPath, getBasename, getDirname } from "./utilities/helpers.js"
 
 type Inode = Uint8Array | Set<string>
 
+export type Snapshot = {
+	fsMap: {
+		[key: string]: string[] | string
+	}
+	fsStats: {
+		[key: string]: {
+			ctimeMs: number
+			mtimeMs: number
+			dev: number
+			mode: number
+			uid: number
+			gid: number
+			size: number
+			_kind: number
+		}
+	}
+}
+
 export function toSnapshot(fs: NodeishFilesystem) {
 	return {
 		fsMap: Object.fromEntries(
@@ -40,7 +58,13 @@ export function toSnapshot(fs: NodeishFilesystem) {
 	}
 }
 
-export function fromSnapshot(fs: NodeishFilesystem, snapshot: { fsMap: any; fsStats: any }) {
+export function fromSnapshot(
+	fs: NodeishFilesystem,
+	snapshot: { fsMap: any; fsStats: any },
+	{ pathPrefix = "" } = {}
+) {
+	// TODO: windows withothout repo will hang tests. fix this with windows vm¯
+
 	fs._state.lastIno = 1
 	fs._state.fsMap = new Map(
 		// @ts-ignore FIXME: no idea what ts wants me to do here the error message is ridiculous
@@ -49,12 +73,13 @@ export function fromSnapshot(fs: NodeishFilesystem, snapshot: { fsMap: any; fsSt
 				// requires node buffers, but no web standard method exists
 				const data = Buffer.from(content, "base64")
 				// new TextEncoder().encode(decodeURIComponent(escape(atob(content)))) Buffer.from()
-				return [path, data]
+				return [pathPrefix + path, data]
 			}
 
-			return [path, new Set(content as string[])]
+			return [pathPrefix + path, new Set(content as string[])]
 		})
 	)
+
 	fs._state.fsStats = new Map(
 		Object.entries(snapshot.fsStats).map(([path, rawStat]) => {
 			const serializedStat = rawStat as Omit<
@@ -70,9 +95,21 @@ export function fromSnapshot(fs: NodeishFilesystem, snapshot: { fsMap: any; fsSt
 				isSymbolicLink: () => serializedStat._kind === 2,
 			} as NodeishStats
 
-			return [path, statsObj]
+			return [pathPrefix + path, statsObj]
 		})
 	)
+
+	if (pathPrefix) {
+		const prefixParts = pathPrefix.split("/")
+		const rootStat = fs._state.fsStats.get(pathPrefix + "/")
+
+		for (let i = 1; i < prefixParts.length; i++) {
+			const path = prefixParts.slice(0, i).join("/") + "/"
+
+			fs._state.fsMap.set(path, new Set([prefixParts[i]]))
+			fs._state.fsStats.set(path, rootStat)
+		}
+	}
 }
 
 export function createNodeishMemoryFs(): NodeishFilesystem {
@@ -179,9 +216,15 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			const baseName = getBasename(path)
 			const parentDir: Inode | undefined = state.fsMap.get(dirName)
 
-			if (typeof parentDir === "string") throw new FilesystemError("ENOTDIR", path, "mkdir")
+			if (typeof parentDir === "string") {
+				throw new FilesystemError("ENOTDIR", path, "mkdir")
+			}
 
 			if (parentDir && parentDir instanceof Set) {
+				if (state.fsMap.has(path)) {
+					throw new FilesystemError("EEXIST", path, "mkdir")
+				}
+
 				parentDir.add(baseName)
 				newStatEntry(path, state.fsStats, 1, 0o755)
 				state.fsMap.set(path, new Set())

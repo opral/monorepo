@@ -23,10 +23,13 @@ import { ProjectSettings, Message, type NodeishFilesystemSubset } from "./versio
 import { tryCatch, type Result } from "@inlang/result"
 import { migrateIfOutdated } from "@inlang/project-settings/migration"
 import { createNodeishFsWithAbsolutePaths } from "./createNodeishFsWithAbsolutePaths.js"
-import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
+import { normalizePath } from "@lix-js/fs"
 import { isAbsolutePath } from "./isAbsolutePath.js"
 import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
 import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
+import { maybeCreateFirstProjectId } from "./migrations/maybeCreateFirstProjectId.js"
+import type { Repository } from "@lix-js/client"
+import { capture } from "./telemetry/capture.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -34,23 +37,49 @@ const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
  * Creates an inlang instance.
  *
  * @param projectPath - Absolute path to the inlang settings file.
- * @param nodeishFs - Filesystem that implements the NodeishFilesystemSubset interface.
+ * @param @deprecated nodeishFs - Filesystem that implements the NodeishFilesystemSubset interface.
  * @param _import - Use `_import` to pass a custom import function for testing,
  *   and supporting legacy resolvedModules such as CJS.
- * @param _capture - Use `_capture` to capture events for analytics.
  *
  */
-export const loadProject = async (args: {
+export async function loadProject(args: {
 	projectPath: string
-	nodeishFs: NodeishFilesystem
+	nodeishFs: Repository["nodeishFs"]
+	/**
+	 * The app id is used to identify the app that is using the SDK.
+	 *
+	 * We use the app id to group events in telemetry to answer questions
+	 * like "Which apps causes these errors?" or "Which apps are used more than others?".
+	 *
+	 * @example
+	 * 	appId: "app.inlang.badge"
+	 */
+	appId?: string
 	_import?: ImportFunction
-	_capture?: (id: string, props: Record<string, unknown>) => void
-}): Promise<InlangProject> => {
+}): Promise<InlangProject>
+
+/**
+ * @param projectPath - Absolute path to the inlang settings file.
+ * @param repo - An instance of a lix repo as returned by `openRepository`.
+ * @param _import - Use `_import` to pass a custom import function for testing,
+ *   and supporting legacy resolvedModules such as CJS.
+ *
+ */
+export async function loadProject(args: {
+	projectPath: string
+	repo: Repository
+	appId?: string
+	_import?: ImportFunction
+}): Promise<InlangProject>
+
+export async function loadProject(args: {
+	projectPath: string
+	repo?: Repository
+	appId?: string
+	_import?: ImportFunction
+	nodeishFs?: Repository["nodeishFs"]
+}): Promise<InlangProject> {
 	const projectPath = normalizePath(args.projectPath)
-
-	// -- migrate if outdated ------------------------------------------------
-
-	await maybeMigrateToDirectory({ nodeishFs: args.nodeishFs, projectPath })
 
 	// -- validation --------------------------------------------------------
 	// the only place where throwing is acceptable because the project
@@ -69,25 +98,50 @@ export const loadProject = async (args: {
 		)
 	}
 
-	// -- load project ------------------------------------------------------
-	return await createRoot(async () => {
-		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
-		const nodeishFs = createNodeishFsWithAbsolutePaths({
-			projectPath,
-			nodeishFs: args.nodeishFs,
-		})
+	let fs: Repository["nodeishFs"]
+	if (args.nodeishFs) {
+		// TODO: deprecate
+		fs = args.nodeishFs
+	} else if (args.repo) {
+		fs = args.repo.nodeishFs
+	} else {
+		throw new LoadProjectInvalidArgument(`Repo missing from arguments.`, { argument: "repo" })
+	}
 
+	const nodeishFs = createNodeishFsWithAbsolutePaths({
+		projectPath,
+		nodeishFs: fs,
+	})
+
+	// -- migratations ------------------------------------------------
+
+	await maybeMigrateToDirectory({ nodeishFs: fs, projectPath })
+	await maybeCreateFirstProjectId({ projectPath, repo: args.repo })
+
+	// -- load project ------------------------------------------------------
+
+	return await createRoot(async () => {
+		// TODO remove tryCatch after https://github.com/opral/monorepo/issues/2013
+		// - a repo will always be present
+		// - if a repo is present, the project id will always be present
+		const { data: projectId } = await tryCatch(() =>
+			fs.readFile(args.projectPath + "/project_id", { encoding: "utf-8" })
+		)
+
+		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
 		// -- settings ------------------------------------------------------------
 
 		const [settings, _setSettings] = createSignal<ProjectSettings>()
 		createEffect(() => {
+			// TODO:
+			// if (projectId) {
+			// 	telemetryBrowser.group("project", projectId, {
+			// 		name: projectId,
+			// 	})
+			// }
+
 			loadSettings({ settingsFilePath: projectPath + "/settings.json", nodeishFs })
-				.then((settings) => {
-					setSettings(settings)
-					// rename settings to get a convenient access to the data in Posthog
-					const project_settings = settings
-					args._capture?.("SDK used settings", { project_settings })
-				})
+				.then((settings) => setSettings(settings))
 				.catch((err) => {
 					markInitAsFailed(err)
 				})
@@ -187,7 +241,7 @@ export const loadProject = async (args: {
 						module:
 							resolvedModules()?.meta.find((m) => m.id.includes(rule.id))?.module ??
 							"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
-						// default to warning, see https://github.com/inlang/monorepo/issues/1254
+						// default to warning, see https://github.com/opral/monorepo/issues/1254
 						level: settingsValue["messageLintRuleLevels"]?.[rule.id] ?? "warning",
 					} satisfies InstalledMessageLintRule)
 			) satisfies Array<InstalledMessageLintRule>
@@ -208,6 +262,7 @@ export const loadProject = async (args: {
 		// -- app ---------------------------------------------------------------
 
 		const initializeError: Error | undefined = await initialized.catch((error) => error)
+
 		const abortController = new AbortController()
 		const hasWatcher = nodeishFs.watch("/", { signal: abortController.signal }) !== undefined
 
@@ -225,14 +280,24 @@ export const loadProject = async (args: {
 				500,
 				async (newMessages) => {
 					try {
-						await resolvedModules()?.resolvedPluginApi.saveMessages({
-							settings: settingsValue,
-							messages: newMessages,
-						})
+						if (JSON.stringify(newMessages) !== JSON.stringify(messages())) {
+							await resolvedModules()?.resolvedPluginApi.saveMessages({
+								settings: settingsValue,
+								messages: newMessages,
+							})
+						}
 					} catch (err) {
 						throw new PluginSaveMessagesError({
 							cause: err,
 						})
+					}
+					const abortController = new AbortController()
+					if (
+						newMessages.length !== 0 &&
+						JSON.stringify(newMessages) !== JSON.stringify(messages()) &&
+						nodeishFs.watch("/", { signal: abortController.signal }) !== undefined
+					) {
+						setMessages(newMessages)
 					}
 				},
 				{ atBegin: false }
@@ -243,6 +308,29 @@ export const loadProject = async (args: {
 			debouncedSave(messagesQuery.getAll())
 		})
 
+		/**
+		 * Utility to escape reactive tracking and avoid multiple calls to
+		 * the capture event.
+		 *
+		 * Should be addressed with https://github.com/opral/monorepo/issues/1772
+		 */
+		let projectLoadedCapturedAlready = false
+
+		if (projectId && projectLoadedCapturedAlready === false) {
+			projectLoadedCapturedAlready = true
+			// TODO ensure that capture is "awaited" without blocking the the app from starting
+			await capture("SDK loaded project", {
+				projectId,
+				properties: {
+					appId: args.appId,
+					settings: settings(),
+					installedPluginIds: installedPlugins().map((p) => p.id),
+					installedMessageLintRuleIds: installedMessageLintRules().map((r) => r.id),
+					numberOfMessages: messagesQuery.includedMessageIds().length,
+				},
+			})
+		}
+
 		return {
 			installed: {
 				plugins: createSubscribable(() => installedPlugins()),
@@ -251,8 +339,6 @@ export const loadProject = async (args: {
 			errors: createSubscribable(() => [
 				...(initializeError ? [initializeError] : []),
 				...(resolvedModules() ? resolvedModules()!.errors : []),
-				// have a query error exposed
-				//...(lintErrors() ?? []),
 			]),
 			settings: createSubscribable(() => settings() as ProjectSettings),
 			setSettings,

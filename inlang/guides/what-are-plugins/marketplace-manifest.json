@@ -1,6 +1,6 @@
 {
 	"id": "guide.nilsjacobsen.whatArePlugins",
-	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/what-are-plugins/electric-plug-logo.webp",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/what-are-plugins/electric-plug-logo.webp",
 	"displayName": {
 		"en": "What are Plugins?"
 	},
@@ -8,9 +8,10 @@
 		"en": "Discover the benefits of using plugins: freedom and low-cost adoption."
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/what-are-plugins/what-are-plugins.md"
+		"en": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/what-are-plugins/what-are-plugins.md"
 	},
 	"keywords": ["application", "website", "inlang", "getting-started", "guide", "plugins", "plugin"],
+	"recommends": ["g/2fg8ng94", "g/00162hsd", "g/wxcebbig", "g/uxohikde"],
 	"publisherName": "Nils Jacobsen",
 	"publisherIcon": "https://avatars.githubusercontent.com/u/58360188?s=96&v=4",
 	"license": "Apache-2.0"

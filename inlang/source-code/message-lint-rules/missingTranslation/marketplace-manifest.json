@@ -1,9 +1,9 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "messageLintRule.inlang.missingTranslation",
-	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/missingTranslation/assets/icon.png",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/message-lint-rules/missingTranslation/assets/icon.png",
 	"gallery": [
-		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/missing_translation-marketplace-cover.jpg"
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/missing_translation-marketplace-cover.jpg"
 	],
 	"displayName": {
 		"en": "Missing translation"
@@ -12,7 +12,7 @@
 		"en": "Checks for missing variants for a specific languageTag.  If a variant exists for the sourceLanguageTag but is missing for a listed languageTag, it is likely that the message has not been translated for this languageTag yet."
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/message-lint-rules/missingTranslation/README.md"
+		"en": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/message-lint-rules/missingTranslation/README.md"
 	},
 	"keywords": ["message", "lint rule", "missing", "website"],
 	"publisherName": "inlang",
