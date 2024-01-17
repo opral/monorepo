@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_grid_need_help",
-        "library.inlang.paraglideJs": "marketplace_grid_need_help"
+        "default": "marketplace_grid_need_help"
     },
     "id": "hour_duck_excel_clever",
     "selectors": [],

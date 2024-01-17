@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_contact_blog",
-        "library.inlang.paraglideJs": "footer_contact_blog"
+        "default": "footer_contact_blog"
     },
     "id": "red_bat_fly_blissful",
     "selectors": [],

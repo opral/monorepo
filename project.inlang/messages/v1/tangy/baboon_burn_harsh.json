@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "newsletter_error_alreadySubscribed",
-        "library.inlang.paraglideJs": "newsletter_error_alreadySubscribed"
+        "default": "newsletter_error_alreadySubscribed"
     },
     "id": "tangy_baboon_burn_harsh",
     "selectors": [],

@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "home_featured_title",
-        "library.inlang.paraglideJs": "home_featured_title"
+        "default": "home_featured_title"
     },
     "id": "only_lemming_swim_dai",
     "selectors": [],

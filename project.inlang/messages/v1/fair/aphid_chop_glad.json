@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_categories_lintrules",
-        "library.inlang.paraglideJs": "footer_categories_lintrules"
+        "default": "footer_categories_lintrules"
     },
     "id": "fair_aphid_chop_glad",
     "selectors": [],

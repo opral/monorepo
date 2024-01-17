@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_category_markdown",
-        "library.inlang.paraglideJs": "marketplace_header_category_markdown"
+        "default": "marketplace_header_category_markdown"
     },
     "id": "tiny_moth_dine_either",
     "selectors": [],

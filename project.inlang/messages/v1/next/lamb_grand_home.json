@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_lix_button",
-        "library.inlang.paraglideJs": "marketplace_header_lix_button"
+        "default": "marketplace_header_lix_button"
     },
     "id": "next_lamb_grand_home",
     "selectors": [],

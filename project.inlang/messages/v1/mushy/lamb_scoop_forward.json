@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "home_stack_title",
-        "library.inlang.paraglideJs": "home_stack_title"
+        "default": "home_stack_title"
     },
     "id": "mushy_lamb_scoop_forward",
     "selectors": [],

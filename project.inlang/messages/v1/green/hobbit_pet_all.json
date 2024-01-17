@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_plugins_description",
-        "library.inlang.paraglideJs": "marketplace_header_plugins_description"
+        "default": "marketplace_header_plugins_description"
     },
     "id": "green_hobbit_pet_all",
     "selectors": [],

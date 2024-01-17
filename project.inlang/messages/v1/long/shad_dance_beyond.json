@@ -1,0 +1,79 @@
+{
+    "alias": {
+        "default": "marketplace_search_seo_global_products"
+    },
+    "id": "long_shad_dance_beyond",
+    "selectors": [],
+    "variants": [
+        {
+            "languageTag": "de",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Globalisierungsprodukte"
+                }
+            ]
+        },
+        {
+            "languageTag": "en",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Globalization Products"
+                }
+            ]
+        },
+        {
+            "languageTag": "fr",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Produits de mondialisation"
+                }
+            ]
+        },
+        {
+            "languageTag": "it",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Prodotti della globalizzazione"
+                }
+            ]
+        },
+        {
+            "languageTag": "pt-BR",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Produtos de Globalização"
+                }
+            ]
+        },
+        {
+            "languageTag": "sk",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Produkty globalizácie"
+                }
+            ]
+        },
+        {
+            "languageTag": "zh",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "全球化产品"
+                }
+            ]
+        }
+    ]
+}

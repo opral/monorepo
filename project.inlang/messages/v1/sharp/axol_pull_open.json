@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "home_lix_button",
-        "library.inlang.paraglideJs": "home_lix_button"
+        "default": "home_lix_button"
     },
     "id": "sharp_axol_pull_open",
     "selectors": [],

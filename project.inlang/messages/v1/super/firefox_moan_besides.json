@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_contact_getInTouch",
-        "library.inlang.paraglideJs": "footer_contact_getInTouch"
+        "default": "footer_contact_getInTouch"
     },
     "id": "super_firefox_moan_besides",
     "selectors": [],

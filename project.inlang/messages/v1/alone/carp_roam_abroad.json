@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_resources_manage",
-        "library.inlang.paraglideJs": "footer_resources_manage"
+        "default": "footer_resources_manage"
     },
     "id": "alone_carp_roam_abroad",
     "selectors": [],

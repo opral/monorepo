@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_grid_build_your_own_description",
-        "library.inlang.paraglideJs": "marketplace_grid_build_your_own_description"
+        "default": "marketplace_grid_build_your_own_description"
     },
     "id": "petty_fly_quest_clear",
     "selectors": [],

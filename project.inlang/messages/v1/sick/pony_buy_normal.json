@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_plugin_toast_title",
-        "library.inlang.paraglideJs": "marketplace_header_plugin_toast_title"
+        "default": "marketplace_header_plugin_toast_title"
     },
     "id": "sick_pony_buy_normal",
     "selectors": [],

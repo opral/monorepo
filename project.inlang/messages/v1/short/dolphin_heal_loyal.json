@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_lix_description",
-        "library.inlang.paraglideJs": "marketplace_header_lix_description"
+        "default": "marketplace_header_lix_description"
     },
     "id": "short_dolphin_heal_loyal",
     "selectors": [],

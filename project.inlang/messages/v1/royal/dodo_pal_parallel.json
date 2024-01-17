@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_documentation_contribute",
-        "library.inlang.paraglideJs": "footer_documentation_contribute"
+        "default": "footer_documentation_contribute"
     },
     "id": "royal_dodo_pal_parallel",
     "selectors": [],

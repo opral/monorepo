@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_libraries_description",
-        "library.inlang.paraglideJs": "marketplace_header_libraries_description"
+        "default": "marketplace_header_libraries_description"
     },
     "id": "flat_jackdaw_sing_keen",
     "selectors": [],

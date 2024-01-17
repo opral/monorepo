@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "newsletter_error_generic",
-        "library.inlang.paraglideJs": "newsletter_error_generic"
+        "default": "newsletter_error_generic"
     },
     "id": "stout_sloth_light_dainty",
     "selectors": [],

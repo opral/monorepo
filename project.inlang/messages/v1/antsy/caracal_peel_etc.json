@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_search_placeholder",
-        "library.inlang.paraglideJs": "marketplace_header_search_placeholder"
+        "default": "marketplace_header_search_placeholder"
     },
     "id": "antsy_caracal_peel_etc",
     "selectors": [],

@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_lix_short_description",
-        "library.inlang.paraglideJs": "marketplace_header_lix_short_description"
+        "default": "marketplace_header_lix_short_description"
     },
     "id": "petty_peacock_peel_across",
     "selectors": [],

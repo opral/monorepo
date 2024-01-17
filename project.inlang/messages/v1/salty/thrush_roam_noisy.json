@@ -1,0 +1,29 @@
+{
+    "alias": {
+        "default": "newsletter_captcha_submit"
+    },
+    "id": "salty_thrush_roam_noisy",
+    "selectors": [],
+    "variants": [
+        {
+            "languageTag": "de",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Captcha bestätigen"
+                }
+            ]
+        },
+        {
+            "languageTag": "en",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Submit Captcha"
+                }
+            ]
+        }
+    ]
+}

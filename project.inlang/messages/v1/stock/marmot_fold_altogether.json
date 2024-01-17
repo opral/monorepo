@@ -1,0 +1,79 @@
+{
+    "alias": {
+        "default": "home_personas_developer_cards_ide_description"
+    },
+    "id": "stock_marmot_fold_altogether",
+    "selectors": [],
+    "variants": [
+        {
+            "languageTag": "de",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Booste i18n innerhalb VS Code"
+                }
+            ]
+        },
+        {
+            "languageTag": "en",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Supercharge i18n within VS Code."
+                }
+            ]
+        },
+        {
+            "languageTag": "fr",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Superchargez l'i18n dans VS Code."
+                }
+            ]
+        },
+        {
+            "languageTag": "it",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Potenzia i18n con VS Code."
+                }
+            ]
+        },
+        {
+            "languageTag": "pt-BR",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Sobrecarregue o i18n no VS Code."
+                }
+            ]
+        },
+        {
+            "languageTag": "sk",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Supercharge i18n v rámci VS Code."
+                }
+            ]
+        },
+        {
+            "languageTag": "zh",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "在 VS Code 中增强 i18n。"
+                }
+            ]
+        }
+    ]
+}

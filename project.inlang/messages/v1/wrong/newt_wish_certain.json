@@ -1,0 +1,29 @@
+{
+    "alias": {
+        "default": "newsletter_captcha_submitted"
+    },
+    "id": "wrong_newt_wish_certain",
+    "selectors": [],
+    "variants": [
+        {
+            "languageTag": "de",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Captcha bestätigt"
+                }
+            ]
+        },
+        {
+            "languageTag": "en",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Captcha submitted"
+                }
+            ]
+        }
+    ]
+}

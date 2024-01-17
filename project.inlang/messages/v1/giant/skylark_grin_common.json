@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_resources_github",
-        "library.inlang.paraglideJs": "footer_resources_github"
+        "default": "footer_resources_github"
     },
     "id": "giant_skylark_grin_common",
     "selectors": [],

@@ -1,0 +1,29 @@
+{
+    "alias": {
+        "default": "marketplace_header_astro_title"
+    },
+    "id": "tame_beaver_grow_just",
+    "selectors": [],
+    "variants": [
+        {
+            "languageTag": "de",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Astro - i18n Werkzeuge"
+                }
+            ]
+        },
+        {
+            "languageTag": "en",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Astro - i18n Tooling"
+                }
+            ]
+        }
+    ]
+}

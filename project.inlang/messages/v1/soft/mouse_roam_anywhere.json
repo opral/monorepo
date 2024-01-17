@@ -1,0 +1,79 @@
+{
+    "alias": {
+        "default": "home_personas_translator_guide_tagline"
+    },
+    "id": "soft_mouse_roam_anywhere",
+    "selectors": [],
+    "variants": [
+        {
+            "languageTag": "de",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Wie kann ich Übersetzungen machen?"
+                }
+            ]
+        },
+        {
+            "languageTag": "en",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "How to contribute Translations"
+                }
+            ]
+        },
+        {
+            "languageTag": "fr",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Comment contribuer Traductions"
+                }
+            ]
+        },
+        {
+            "languageTag": "it",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Come contribuire alle traduzioni"
+                }
+            ]
+        },
+        {
+            "languageTag": "pt-BR",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Como contribuir com traduções"
+                }
+            ]
+        },
+        {
+            "languageTag": "sk",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Ako prispieť prekladmi"
+                }
+            ]
+        },
+        {
+            "languageTag": "zh",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "如何贡献翻译"
+                }
+            ]
+        }
+    ]
+}

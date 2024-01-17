@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_resources_roadmap",
-        "library.inlang.paraglideJs": "footer_resources_roadmap"
+        "default": "footer_resources_roadmap"
     },
     "id": "plane_insect_build_anxious",
     "selectors": [],

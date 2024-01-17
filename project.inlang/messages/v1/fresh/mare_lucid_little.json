@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_category_lint",
-        "library.inlang.paraglideJs": "footer_category_lint"
+        "default": "footer_category_lint"
     },
     "id": "fresh_mare_lucid_little",
     "selectors": [],

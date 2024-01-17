@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "newsletter_title",
-        "library.inlang.paraglideJs": "newsletter_title"
+        "default": "newsletter_title"
     },
     "id": "broad_wren_crisp_enthusiastical",
     "selectors": [],

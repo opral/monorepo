@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_grid_subscribe_title",
-        "library.inlang.paraglideJs": "marketplace_grid_subscribe_title"
+        "default": "marketplace_grid_subscribe_title"
     },
     "id": "front_sloth_adapt_irritab",
     "selectors": [],

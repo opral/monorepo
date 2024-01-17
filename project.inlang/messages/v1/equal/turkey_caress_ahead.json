@@ -1,0 +1,79 @@
+{
+    "alias": {
+        "default": "home_personas_translator_cards_fink_description"
+    },
+    "id": "equal_turkey_caress_ahead",
+    "selectors": [],
+    "variants": [
+        {
+            "languageTag": "de",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Übersetzungen direkt aus deinem Browser."
+                }
+            ]
+        },
+        {
+            "languageTag": "en",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Translation right from the browser."
+                }
+            ]
+        },
+        {
+            "languageTag": "fr",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Traduction directement depuis le navigateur."
+                }
+            ]
+        },
+        {
+            "languageTag": "it",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Traduzione direttamente dal browser."
+                }
+            ]
+        },
+        {
+            "languageTag": "pt-BR",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Tradução diretamente do navegador."
+                }
+            ]
+        },
+        {
+            "languageTag": "sk",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Preklad priamo z prehliadača."
+                }
+            ]
+        },
+        {
+            "languageTag": "zh",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "直接从浏览器翻译。"
+                }
+            ]
+        }
+    ]
+}

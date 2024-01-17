@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_lintRules_title",
-        "library.inlang.paraglideJs": "marketplace_header_lintRules_title"
+        "default": "marketplace_header_lintRules_title"
     },
     "id": "novel_meerkat_kick_frank",
     "selectors": [],

@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_inlang_tagline",
-        "library.inlang.paraglideJs": "footer_inlang_tagline"
+        "default": "footer_inlang_tagline"
     },
     "id": "upper_midge_wild_harsh",
     "selectors": [],

@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_contact_title",
-        "library.inlang.paraglideJs": "footer_contact_title"
+        "default": "footer_contact_title"
     },
     "id": "still_flea_boost_alike",
     "selectors": [],

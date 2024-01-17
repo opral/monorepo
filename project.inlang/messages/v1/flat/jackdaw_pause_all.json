@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_category_lint",
-        "library.inlang.paraglideJs": "marketplace_header_category_lint"
+        "default": "marketplace_header_category_lint"
     },
     "id": "flat_jackdaw_pause_all",
     "selectors": [],

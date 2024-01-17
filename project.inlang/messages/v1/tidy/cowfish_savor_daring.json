@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_apps_title",
-        "library.inlang.paraglideJs": "marketplace_header_apps_title"
+        "default": "marketplace_header_apps_title"
     },
     "id": "tidy_cowfish_savor_daring",
     "selectors": [],

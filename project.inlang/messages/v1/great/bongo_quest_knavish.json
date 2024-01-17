@@ -1,0 +1,79 @@
+{
+    "alias": {
+        "default": "home_personas_translator_guide_description"
+    },
+    "id": "great_bongo_quest_knavish",
+    "selectors": [],
+    "variants": [
+        {
+            "languageTag": "de",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Einsteigerguide für Übersetzungen."
+                }
+            ]
+        },
+        {
+            "languageTag": "en",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "A Beginner guide that helps translators."
+                }
+            ]
+        },
+        {
+            "languageTag": "fr",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Un guide pour débutants qui aide les traducteurs."
+                }
+            ]
+        },
+        {
+            "languageTag": "it",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Una guida per principianti che aiuta i traduttori."
+                }
+            ]
+        },
+        {
+            "languageTag": "pt-BR",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Um guia para iniciantes que ajuda tradutores."
+                }
+            ]
+        },
+        {
+            "languageTag": "sk",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Príručka pre začiatočníkov, ktorá pomáha prekladateľom."
+                }
+            ]
+        },
+        {
+            "languageTag": "zh",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "帮助翻译人员的初学者指南。"
+                }
+            ]
+        }
+    ]
+}

@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_grid_subscribe_description_first_part",
-        "library.inlang.paraglideJs": "marketplace_grid_subscribe_description_first_part"
+        "default": "marketplace_grid_subscribe_description_first_part"
     },
     "id": "mad_wombat_dare_aloud",
     "selectors": [],

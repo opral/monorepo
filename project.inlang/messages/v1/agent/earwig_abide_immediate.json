@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_grid_subscribe_could_not_subscribe",
-        "library.inlang.paraglideJs": "marketplace_grid_subscribe_could_not_subscribe"
+        "default": "marketplace_grid_subscribe_could_not_subscribe"
     },
     "id": "agent_earwig_abide_immediate",
     "selectors": [],

@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_application_header_generic_button",
-        "library.inlang.paraglideJs": "marketplace_application_header_generic_button"
+        "default": "marketplace_application_header_generic_button"
     },
     "id": "poor_bullock_spur_diligent",
     "selectors": [],

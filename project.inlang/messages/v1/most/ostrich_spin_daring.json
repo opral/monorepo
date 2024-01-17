@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_libraries_title",
-        "library.inlang.paraglideJs": "marketplace_header_libraries_title"
+        "default": "marketplace_header_libraries_title"
     },
     "id": "most_ostrich_spin_daring",
     "selectors": [],

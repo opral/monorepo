@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "home_popular_products_title",
-        "library.inlang.paraglideJs": "home_popular_products_title"
+        "default": "home_popular_products_title"
     },
     "id": "each_shrike_zap_however",
     "selectors": [],

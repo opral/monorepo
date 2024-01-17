@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_application_header_generic_description",
-        "library.inlang.paraglideJs": "marketplace_application_header_generic_description"
+        "default": "marketplace_application_header_generic_description"
     },
     "id": "tough_caribou_clip_occasional",
     "selectors": [],

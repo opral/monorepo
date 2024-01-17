@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_resources_title",
-        "library.inlang.paraglideJs": "footer_resources_title"
+        "default": "footer_resources_title"
     },
     "id": "soft_bongo_tear_curious",
     "selectors": [],

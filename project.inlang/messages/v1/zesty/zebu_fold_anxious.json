@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_paraglide_button_secondary_text",
-        "library.inlang.paraglideJs": "marketplace_header_paraglide_button_secondary_text"
+        "default": "marketplace_header_paraglide_button_secondary_text"
     },
     "id": "zesty_zebu_fold_anxious",
     "selectors": [],

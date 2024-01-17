@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_plugins_title",
-        "library.inlang.paraglideJs": "marketplace_header_plugins_title"
+        "default": "marketplace_header_plugins_title"
     },
     "id": "quiet_insect_buddy_broad",
     "selectors": [],

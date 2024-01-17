@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_category_application",
-        "library.inlang.paraglideJs": "footer_category_application"
+        "default": "footer_category_application"
     },
     "id": "agent_skylark_talk_overnight",
     "selectors": [],

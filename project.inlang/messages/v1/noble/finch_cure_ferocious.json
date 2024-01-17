@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "home_inlang_search_placeholder",
-        "library.inlang.paraglideJs": "home_inlang_search_placeholder"
+        "default": "home_inlang_search_placeholder"
     },
     "id": "noble_finch_cure_ferocious",
     "selectors": [],

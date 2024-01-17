@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "newsletter_error_emptyEmail",
-        "library.inlang.paraglideJs": "newsletter_error_emptyEmail"
+        "default": "newsletter_error_emptyEmail"
     },
     "id": "aqua_caribou_care_however",
     "selectors": [],

@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_grid_subscribe_description_last_part",
-        "library.inlang.paraglideJs": "marketplace_grid_subscribe_description_last_part"
+        "default": "marketplace_grid_subscribe_description_last_part"
     },
     "id": "dead_leopard_savor_obedient",
     "selectors": [],

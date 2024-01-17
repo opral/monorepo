@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_resources_marketplace",
-        "library.inlang.paraglideJs": "footer_resources_marketplace"
+        "default": "footer_resources_marketplace"
     },
     "id": "ill_maned_enjoy_around",
     "selectors": [],

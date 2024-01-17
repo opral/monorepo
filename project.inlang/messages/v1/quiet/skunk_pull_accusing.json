@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_categories_libraries",
-        "library.inlang.paraglideJs": "footer_categories_libraries"
+        "default": "footer_categories_libraries"
     },
     "id": "quiet_skunk_pull_accusing",
     "selectors": [],

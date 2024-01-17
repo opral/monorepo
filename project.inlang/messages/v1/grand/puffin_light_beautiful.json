@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_guides_title",
-        "library.inlang.paraglideJs": "marketplace_header_guides_title"
+        "default": "marketplace_header_guides_title"
     },
     "id": "grand_puffin_light_beautiful",
     "selectors": [],

@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "newsletter_subscribe_description",
-        "library.inlang.paraglideJs": "newsletter_subscribe_description"
+        "default": "newsletter_subscribe_description"
     },
     "id": "zesty_skua_liven_forward",
     "selectors": [],

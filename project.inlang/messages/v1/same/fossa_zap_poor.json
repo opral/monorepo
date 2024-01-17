@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_resources_discord",
-        "library.inlang.paraglideJs": "footer_resources_discord"
+        "default": "footer_resources_discord"
     },
     "id": "same_fossa_zap_poor",
     "selectors": [],

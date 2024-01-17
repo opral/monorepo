@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_documentation_title",
-        "library.inlang.paraglideJs": "footer_documentation_title"
+        "default": "footer_documentation_title"
     },
     "id": "wide_newt_blend_easi",
     "selectors": [],

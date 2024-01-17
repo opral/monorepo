@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_application_header_svelte_description",
-        "library.inlang.paraglideJs": "marketplace_application_header_svelte_description"
+        "default": "marketplace_application_header_svelte_description"
     },
     "id": "vexed_jay_clasp_intense",
     "selectors": [],

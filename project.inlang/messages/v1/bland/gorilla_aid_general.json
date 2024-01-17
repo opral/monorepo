@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "home_inlang_secondary_link",
-        "library.inlang.paraglideJs": "home_inlang_secondary_link"
+        "default": "home_inlang_secondary_link"
     },
     "id": "bland_gorilla_aid_general",
     "selectors": [],

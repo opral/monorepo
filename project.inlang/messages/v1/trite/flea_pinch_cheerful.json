@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_resources_twitter",
-        "library.inlang.paraglideJs": "footer_resources_twitter"
+        "default": "footer_resources_twitter"
     },
     "id": "trite_flea_pinch_cheerful",
     "selectors": [],

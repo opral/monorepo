@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_paraglide_title",
-        "library.inlang.paraglideJs": "marketplace_header_paraglide_title"
+        "default": "marketplace_header_paraglide_title"
     },
     "id": "awful_salmon_lend_high",
     "selectors": [],

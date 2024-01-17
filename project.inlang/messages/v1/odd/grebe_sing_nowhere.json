@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_categories_plugins",
-        "library.inlang.paraglideJs": "footer_categories_plugins"
+        "default": "footer_categories_plugins"
     },
     "id": "odd_grebe_sing_nowhere",
     "selectors": [],

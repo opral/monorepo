@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "newsletter_error_invalidEmail",
-        "library.inlang.paraglideJs": "newsletter_error_invalidEmail"
+        "default": "newsletter_error_invalidEmail"
     },
     "id": "main_falcon_lucid_everywhere",
     "selectors": [],

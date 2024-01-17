@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_resources_documentation",
-        "library.inlang.paraglideJs": "footer_resources_documentation"
+        "default": "footer_resources_documentation"
     },
     "id": "light_jaguar_dust_careless",
     "selectors": [],

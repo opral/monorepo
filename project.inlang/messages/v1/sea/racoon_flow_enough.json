@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_application_header_generic_title",
-        "library.inlang.paraglideJs": "marketplace_application_header_generic_title"
+        "default": "marketplace_application_header_generic_title"
     },
     "id": "sea_racoon_flow_enough",
     "selectors": [],

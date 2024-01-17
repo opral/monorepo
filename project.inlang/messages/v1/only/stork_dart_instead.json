@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "home_inlang_search_button",
-        "library.inlang.paraglideJs": "home_inlang_search_button"
+        "default": "home_inlang_search_button"
     },
     "id": "only_stork_dart_instead",
     "selectors": [],

@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_grid_subscribe_unvalid_email",
-        "library.inlang.paraglideJs": "marketplace_grid_subscribe_unvalid_email"
+        "default": "marketplace_grid_subscribe_unvalid_email"
     },
     "id": "red_car_scold_back",
     "selectors": [],

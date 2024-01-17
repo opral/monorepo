@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_grid_title_guides",
-        "library.inlang.paraglideJs": "marketplace_grid_title_guides"
+        "default": "marketplace_grid_title_guides"
     },
     "id": "much_whale_grand_beyond",
     "selectors": [],

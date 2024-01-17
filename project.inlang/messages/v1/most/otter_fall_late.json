@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_svelte_description",
-        "library.inlang.paraglideJs": "marketplace_header_svelte_description"
+        "default": "marketplace_header_svelte_description"
     },
     "id": "most_otter_fall_late",
     "selectors": [],

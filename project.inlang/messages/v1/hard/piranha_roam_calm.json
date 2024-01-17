@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "home_inlang_description",
-        "library.inlang.paraglideJs": "home_inlang_description"
+        "default": "home_inlang_description"
     },
     "id": "hard_piranha_roam_calm",
     "selectors": [],

@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_categories_lix",
-        "library.inlang.paraglideJs": "footer_categories_lix"
+        "default": "footer_categories_lix"
     },
     "id": "deft_cat_dare_proper",
     "selectors": [],

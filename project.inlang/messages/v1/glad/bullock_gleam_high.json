@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_lintRules_description",
-        "library.inlang.paraglideJs": "marketplace_header_lintRules_description"
+        "default": "marketplace_header_lintRules_description"
     },
     "id": "glad_bullock_gleam_high",
     "selectors": [],

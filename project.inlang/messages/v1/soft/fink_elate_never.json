@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "inlang_global_title",
-        "library.inlang.paraglideJs": "inlang_global_title"
+        "default": "inlang_global_title"
     },
     "id": "soft_fink_elate_never",
     "selectors": [],

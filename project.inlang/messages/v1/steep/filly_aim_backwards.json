@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_documentation_gettingStarted",
-        "library.inlang.paraglideJs": "footer_documentation_gettingStarted"
+        "default": "footer_documentation_gettingStarted"
     },
     "id": "steep_filly_aim_backwards",
     "selectors": [],

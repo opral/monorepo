@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_build_on_inlang_button",
-        "library.inlang.paraglideJs": "marketplace_header_build_on_inlang_button"
+        "default": "marketplace_header_build_on_inlang_button"
     },
     "id": "lofty_lemming_bubble_common",
     "selectors": [],

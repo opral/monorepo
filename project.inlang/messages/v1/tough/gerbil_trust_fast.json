@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "home_guides_description",
-        "library.inlang.paraglideJs": "home_guides_description"
+        "default": "home_guides_description"
     },
     "id": "tough_gerbil_trust_fast",
     "selectors": [],

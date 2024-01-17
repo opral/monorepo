@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_grid_subscribe_placeholder",
-        "library.inlang.paraglideJs": "marketplace_grid_subscribe_placeholder"
+        "default": "marketplace_grid_subscribe_placeholder"
     },
     "id": "proof_turkey_unzip_frequent",
     "selectors": [],

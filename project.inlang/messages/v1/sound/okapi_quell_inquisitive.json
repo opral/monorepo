@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_lintRule_toast_title",
-        "library.inlang.paraglideJs": "marketplace_header_lintRule_toast_title"
+        "default": "marketplace_header_lintRule_toast_title"
     },
     "id": "sound_okapi_quell_inquisitive",
     "selectors": [],

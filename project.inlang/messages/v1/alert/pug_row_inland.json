@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_grid_subscribe_no_email",
-        "library.inlang.paraglideJs": "marketplace_grid_subscribe_no_email"
+        "default": "marketplace_grid_subscribe_no_email"
     },
     "id": "alert_pug_row_inland",
     "selectors": [],

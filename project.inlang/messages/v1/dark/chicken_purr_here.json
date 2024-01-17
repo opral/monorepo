@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "inlang_twitter_title",
-        "library.inlang.paraglideJs": "inlang_twitter_title"
+        "default": "inlang_twitter_title"
     },
     "id": "dark_chicken_purr_here",
     "selectors": [],

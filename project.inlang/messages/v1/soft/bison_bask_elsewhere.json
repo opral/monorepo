@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "newsletter_subscribe_title",
-        "library.inlang.paraglideJs": "newsletter_subscribe_title"
+        "default": "newsletter_subscribe_title"
     },
     "id": "soft_bison_bask_elsewhere",
     "selectors": [],

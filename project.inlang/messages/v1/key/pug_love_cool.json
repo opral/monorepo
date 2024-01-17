@@ -1,0 +1,79 @@
+{
+    "alias": {
+        "default": "home_personas_designer_cards_parrot_description"
+    },
+    "id": "key_pug_love_cool",
+    "selectors": [],
+    "variants": [
+        {
+            "languageTag": "de",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Parrot vereinfacht den Übersetzungsprozess direkt aus Figma heraus."
+                }
+            ]
+        },
+        {
+            "languageTag": "en",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Parrot simplifies the translation management process right within Figma."
+                }
+            ]
+        },
+        {
+            "languageTag": "fr",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Parrot simplifie le processus de gestion des traductions directement au sein de Figma."
+                }
+            ]
+        },
+        {
+            "languageTag": "it",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Parrot semplifica il processo di gestione delle traduzioni direttamente all'interno di Figma."
+                }
+            ]
+        },
+        {
+            "languageTag": "pt-BR",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "O Parrot simplifica o processo de gerenciamento de tradução diretamente no Figma."
+                }
+            ]
+        },
+        {
+            "languageTag": "sk",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Parrot zjednodušuje proces správy prekladov priamo vo Figme."
+                }
+            ]
+        },
+        {
+            "languageTag": "zh",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Parrot 简化了 Figma 内的翻译管理流程。"
+                }
+            ]
+        }
+    ]
+}

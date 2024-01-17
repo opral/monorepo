@@ -30,6 +30,7 @@ import {
 } from "@inlang/sdk"
 import { posthog as telemetryBrowser } from "posthog-js"
 import type { Result } from "@inlang/result"
+import { id } from "../../../../../marketplace-manifest.json"
 
 type EditorStateSchema = {
 	/**
@@ -317,9 +318,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					await loadProject({
 						repo: newRepo,
 						projectPath: activeProject!,
-						_capture(id, props) {
-							telemetryBrowser.capture(id, props)
-						},
+						appId: id,
 					}),
 					{ from }
 				)

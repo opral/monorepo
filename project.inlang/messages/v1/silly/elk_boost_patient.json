@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "home_guides_button_text",
-        "library.inlang.paraglideJs": "home_guides_button_text"
+        "default": "home_guides_button_text"
     },
     "id": "silly_elk_boost_patient",
     "selectors": [],

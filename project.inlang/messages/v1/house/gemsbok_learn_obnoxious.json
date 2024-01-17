@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_lix_title",
-        "library.inlang.paraglideJs": "marketplace_header_lix_title"
+        "default": "marketplace_header_lix_title"
     },
     "id": "house_gemsbok_learn_obnoxious",
     "selectors": [],

@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_card_lix_tooltip",
-        "library.inlang.paraglideJs": "marketplace_card_lix_tooltip"
+        "default": "marketplace_card_lix_tooltip"
     },
     "id": "game_hawk_jest_jealous",
     "selectors": [],

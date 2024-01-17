@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_plugin_toast_button_text",
-        "library.inlang.paraglideJs": "marketplace_header_plugin_toast_button_text"
+        "default": "marketplace_header_plugin_toast_button_text"
     },
     "id": "deft_nymph_type_never",
     "selectors": [],

@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "inlang_global_description",
-        "library.inlang.paraglideJs": "inlang_global_description"
+        "default": "inlang_global_description"
     },
     "id": "born_elk_bloom_queasi",
     "selectors": [],

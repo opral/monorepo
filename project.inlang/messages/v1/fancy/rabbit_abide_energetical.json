@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_categories_apps",
-        "library.inlang.paraglideJs": "footer_categories_apps"
+        "default": "footer_categories_apps"
     },
     "id": "fancy_rabbit_abide_energetical",
     "selectors": [],

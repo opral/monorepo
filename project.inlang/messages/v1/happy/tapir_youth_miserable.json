@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_contact_join",
-        "library.inlang.paraglideJs": "footer_contact_join"
+        "default": "footer_contact_join"
     },
     "id": "happy_tapir_youth_miserable",
     "selectors": [],

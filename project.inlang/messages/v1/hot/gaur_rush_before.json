@@ -1,0 +1,79 @@
+{
+    "alias": {
+        "default": "home_personas_designer_main_description"
+    },
+    "id": "hot_gaur_rush_before",
+    "selectors": [],
+    "variants": [
+        {
+            "languageTag": "de",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Wenn du dich mit mehrsprachigen Designprojekten befasst und deinen Übersetzungsworkflow optimieren möchtest, ist dieses Plugin genau das Richtige für Dich!"
+                }
+            ]
+        },
+        {
+            "languageTag": "en",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "If you deal with multilingual design projects and want to streamline your\n\t\t\t\t\t\t\t\ttranslation workflow, this plugin is for you!"
+                }
+            ]
+        },
+        {
+            "languageTag": "fr",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Si vous traitez des projets de conception multilingues et souhaitez rationaliser votre flux de traduction, ce plugin est fait pour vous !"
+                }
+            ]
+        },
+        {
+            "languageTag": "it",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Se ti occupi di progetti di design multilingue e desideri semplificare il flusso di lavoro di traduzione, questo plugin fa al caso tuo!"
+                }
+            ]
+        },
+        {
+            "languageTag": "pt-BR",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Se você lida com projetos de design multilíngue e deseja agilizar seu fluxo de trabalho de tradução, este plugin é para você!"
+                }
+            ]
+        },
+        {
+            "languageTag": "sk",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "Ak sa zaoberáte viacjazyčnými dizajnérskymi projektmi a chcete zefektívniť pracovný postup prekladu, tento doplnok je pre vás!"
+                }
+            ]
+        },
+        {
+            "languageTag": "zh",
+            "match": [],
+            "pattern": [
+                {
+                    "type": "Text",
+                    "value": "如果您处理多语言设计项目并希望简化翻译工作流程，那么这个插件非常适合您！"
+                }
+            ]
+        }
+    ]
+}

@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_grid_subscribe_secondary_button",
-        "library.inlang.paraglideJs": "marketplace_grid_subscribe_secondary_button"
+        "default": "marketplace_grid_subscribe_secondary_button"
     },
     "id": "full_caiman_light_happi",
     "selectors": [],

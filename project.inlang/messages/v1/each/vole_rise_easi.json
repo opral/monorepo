@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "home_inlang_search_popular",
-        "library.inlang.paraglideJs": "home_inlang_search_popular"
+        "default": "home_inlang_search_popular"
     },
     "id": "each_vole_rise_easi",
     "selectors": [],

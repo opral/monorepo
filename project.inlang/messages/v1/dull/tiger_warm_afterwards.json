@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "newsletter_unsubscribed_description",
-        "library.inlang.paraglideJs": "newsletter_unsubscribed_description"
+        "default": "newsletter_unsubscribed_description"
     },
     "id": "dull_tiger_warm_afterwards",
     "selectors": [],

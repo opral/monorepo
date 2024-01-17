@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_contact_feedback",
-        "library.inlang.paraglideJs": "footer_contact_feedback"
+        "default": "footer_contact_feedback"
     },
     "id": "basic_shad_dial_full",
     "selectors": [],

@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_privacy_policy",
-        "library.inlang.paraglideJs": "footer_privacy_policy"
+        "default": "footer_privacy_policy"
     },
     "id": "all_bee_grow_jealous",
     "selectors": [],

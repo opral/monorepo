@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_grid_build_your_own_title",
-        "library.inlang.paraglideJs": "marketplace_grid_build_your_own_title"
+        "default": "marketplace_grid_build_your_own_title"
     },
     "id": "loud_lizard_crave_foolish",
     "selectors": [],

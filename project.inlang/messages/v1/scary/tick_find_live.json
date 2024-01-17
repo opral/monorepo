@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_category_markdown",
-        "library.inlang.paraglideJs": "footer_category_markdown"
+        "default": "footer_category_markdown"
     },
     "id": "scary_tick_find_live",
     "selectors": [],

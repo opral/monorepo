@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_grid_subscribe_button",
-        "library.inlang.paraglideJs": "marketplace_grid_subscribe_button"
+        "default": "marketplace_grid_subscribe_button"
     },
     "id": "best_halibut_slap_dead",
     "selectors": [],

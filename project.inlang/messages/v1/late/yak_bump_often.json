@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "home_guides_item_button_text",
-        "library.inlang.paraglideJs": "home_guides_item_button_text"
+        "default": "home_guides_item_button_text"
     },
     "id": "late_yak_bump_often",
     "selectors": [],

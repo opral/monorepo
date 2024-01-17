@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_lix_title_explanation",
-        "library.inlang.paraglideJs": "marketplace_header_lix_title_explanation"
+        "default": "marketplace_header_lix_title_explanation"
     },
     "id": "free_caracal_hug_lucky",
     "selectors": [],

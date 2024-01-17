@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_grid_subscribe_error",
-        "library.inlang.paraglideJs": "marketplace_grid_subscribe_error"
+        "default": "marketplace_grid_subscribe_error"
     },
     "id": "any_bike_kick_open",
     "selectors": [],

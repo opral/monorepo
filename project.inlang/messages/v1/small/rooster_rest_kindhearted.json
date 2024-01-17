@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "newsletter_success",
-        "library.inlang.paraglideJs": "newsletter_success"
+        "default": "newsletter_success"
     },
     "id": "small_rooster_rest_kindhearted",
     "selectors": [],

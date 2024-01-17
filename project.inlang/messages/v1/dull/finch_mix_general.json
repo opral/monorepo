@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "home_guides_title",
-        "library.inlang.paraglideJs": "home_guides_title"
+        "default": "home_guides_title"
     },
     "id": "dull_finch_mix_general",
     "selectors": [],

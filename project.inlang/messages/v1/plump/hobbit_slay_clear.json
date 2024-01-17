@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_resources_guides",
-        "library.inlang.paraglideJs": "footer_resources_guides"
+        "default": "footer_resources_guides"
     },
     "id": "plump_hobbit_slay_clear",
     "selectors": [],

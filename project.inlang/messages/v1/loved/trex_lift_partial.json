@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "home_lix_title",
-        "library.inlang.paraglideJs": "home_lix_title"
+        "default": "home_lix_title"
     },
     "id": "loved_trex_lift_partial",
     "selectors": [],

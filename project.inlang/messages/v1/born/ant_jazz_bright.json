@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_category_website",
-        "library.inlang.paraglideJs": "marketplace_header_category_website"
+        "default": "marketplace_header_category_website"
     },
     "id": "born_ant_jazz_bright",
     "selectors": [],

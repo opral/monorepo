@@ -3,7 +3,6 @@ import { openRepository, createNodeishMemoryFs } from "@lix-js/client"
 import { publicEnv } from "@inlang/env-variables"
 import { markup } from "./helper/markup.js"
 import { readFileSync } from "node:fs"
-import { telemetryNode } from "@inlang/telemetry"
 import { removeCommas } from "./helper/removeCommas.js"
 import { calculateSummary } from "./helper/calculateSummary.js"
 import { caching } from "cache-manager"
@@ -33,13 +32,7 @@ export const badge = async (urlQuery: string, projectQuery?: string) => {
 	const project = await loadProject({
 		projectPath: projectQuery ?? "/project.inlang",
 		repo,
-		_capture(id, props) {
-			telemetryNode.capture({
-				event: id,
-				properties: props,
-				distinctId: "unknown",
-			})
-		},
+		appId: "app.inlang.badge",
 	})
 
 	// access all messages via inlang instance query

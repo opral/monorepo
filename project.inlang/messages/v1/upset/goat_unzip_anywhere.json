@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "home_inlang_button",
-        "library.inlang.paraglideJs": "home_inlang_button"
+        "default": "home_inlang_button"
     },
     "id": "upset_goat_unzip_anywhere",
     "selectors": [],

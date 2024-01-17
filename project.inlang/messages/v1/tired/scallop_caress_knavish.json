@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_category_title",
-        "library.inlang.paraglideJs": "footer_category_title"
+        "default": "footer_category_title"
     },
     "id": "tired_scallop_caress_knavish",
     "selectors": [],

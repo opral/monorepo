@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_application_header_svelte_title",
-        "library.inlang.paraglideJs": "marketplace_application_header_svelte_title"
+        "default": "marketplace_application_header_svelte_title"
     },
     "id": "born_caracal_favor_quizzical",
     "selectors": [],

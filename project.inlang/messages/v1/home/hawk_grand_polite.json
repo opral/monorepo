@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_generic_title",
-        "library.inlang.paraglideJs": "marketplace_header_generic_title"
+        "default": "marketplace_header_generic_title"
     },
     "id": "home_hawk_grand_polite",
     "selectors": [],

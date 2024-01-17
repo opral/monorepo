@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "home_lix_description",
-        "library.inlang.paraglideJs": "home_lix_description"
+        "default": "home_lix_description"
     },
     "id": "proof_lemming_magic_once",
     "selectors": [],

@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_grid_title_generic",
-        "library.inlang.paraglideJs": "marketplace_grid_title_generic"
+        "default": "marketplace_grid_title_generic"
     },
     "id": "close_shell_grow_downstairs",
     "selectors": [],

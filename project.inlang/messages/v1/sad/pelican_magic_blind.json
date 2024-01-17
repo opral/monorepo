@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_grid_subscribe_success",
-        "library.inlang.paraglideJs": "marketplace_grid_subscribe_success"
+        "default": "marketplace_grid_subscribe_success"
     },
     "id": "sad_pelican_magic_blind",
     "selectors": [],

@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_paraglide_description",
-        "library.inlang.paraglideJs": "marketplace_header_paraglide_description"
+        "default": "marketplace_header_paraglide_description"
     },
     "id": "broad_gemsbok_cut_immediate",
     "selectors": [],

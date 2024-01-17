@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_solid_title",
-        "library.inlang.paraglideJs": "marketplace_header_solid_title"
+        "default": "marketplace_header_solid_title"
     },
     "id": "hot_leopard_find_all",
     "selectors": [],

@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "newsletter_button",
-        "library.inlang.paraglideJs": "newsletter_button"
+        "default": "newsletter_button"
     },
     "id": "wrong_grizzly_lend_proper",
     "selectors": [],

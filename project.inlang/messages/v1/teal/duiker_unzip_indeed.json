@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "newsletter_unsubscribed_title",
-        "library.inlang.paraglideJs": "newsletter_unsubscribed_title"
+        "default": "newsletter_unsubscribed_title"
     },
     "id": "teal_duiker_unzip_indeed",
     "selectors": [],

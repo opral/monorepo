@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_category_website",
-        "library.inlang.paraglideJs": "footer_category_website"
+        "default": "footer_category_website"
     },
     "id": "proud_ant_drop_noisy",
     "selectors": [],

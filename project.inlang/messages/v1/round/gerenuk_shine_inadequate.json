@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_category_missing_something",
-        "library.inlang.paraglideJs": "marketplace_header_category_missing_something"
+        "default": "marketplace_header_category_missing_something"
     },
     "id": "round_gerenuk_shine_inadequate",
     "selectors": [],

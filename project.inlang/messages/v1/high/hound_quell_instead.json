@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_application_header_generic_tag",
-        "library.inlang.paraglideJs": "marketplace_application_header_generic_tag"
+        "default": "marketplace_application_header_generic_tag"
     },
     "id": "high_hound_quell_instead",
     "selectors": [],

@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "home_inlang_title",
-        "library.inlang.paraglideJs": "home_inlang_title"
+        "default": "home_inlang_title"
     },
     "id": "thin_pelican_jolt_natural",
     "selectors": [],

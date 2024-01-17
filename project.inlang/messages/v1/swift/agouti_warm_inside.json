@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "marketplace_header_generic_description",
-        "library.inlang.paraglideJs": "marketplace_header_generic_description"
+        "default": "marketplace_header_generic_description"
     },
     "id": "swift_agouti_warm_inside",
     "selectors": [],

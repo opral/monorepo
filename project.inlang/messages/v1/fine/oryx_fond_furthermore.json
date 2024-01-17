@@ -1,7 +1,6 @@
 {
     "alias": {
-        "plugin.inlang.messageFormat": "footer_documentation_whyInlang",
-        "library.inlang.paraglideJs": "footer_documentation_whyInlang"
+        "default": "footer_documentation_whyInlang"
     },
     "id": "fine_oryx_fond_furthermore",
     "selectors": [],
