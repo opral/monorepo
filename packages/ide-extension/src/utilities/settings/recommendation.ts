@@ -1,8 +1,8 @@
-import { getSetting, updateSetting } from "./settings/index.js"
+import { getSetting, updateSetting } from "../settings/index.js"
 import * as vscode from "vscode"
 import * as path from "node:path"
 import * as fs from "node:fs"
-import { getGitOrigin, telemetry } from "../services/telemetry/implementation.js"
+import { getGitOrigin, telemetry } from "../../services/telemetry/implementation.js"
 import { parse, stringify, type CommentJSONValue } from "comment-json"
 
 /**

@@ -1,7 +1,7 @@
 import type { CustomApiInlangIdeExtension, LanguageTag } from "@inlang/sdk"
 import { MarkdownString, Uri } from "vscode"
 import { state } from "../state.js"
-import { getStringFromPattern } from "../utilities/query.js"
+import { getStringFromPattern } from "../utilities/messages/query.js"
 import { INTERPOLATE } from "../configuration.js"
 
 const MISSING_TRANSLATION_MESSAGE = "[missing]"
