@@ -8,13 +8,13 @@ We'll cover initializing a project from a repo, creating and updating messages, 
 
 All Inlang projects live in a repo, so first we use the lix client to open the repo.
 
-We can use node:fs for repos which are already in the filesytem e.g. in the current working directory:
+We can use node:fs for repos which are already in the filesytem. E.g. This example uses the lix client to find the repo root starting from the current working directory, and then opens the repo there.
 
 ```typescript
 import fs from "node:fs/promises"
-import { openRepository } from "@lix-js/client"
+import { openRepository, findRepoRoot } from "@lix-js/client"
 
-const repoRoot = process.cwd()
+const repoRoot = await findRepoRoot({ nodeishFs: fs, process.cwd() })
 
 const repo = await openRepository(repoRoot, {
     nodeishFs: fs,
