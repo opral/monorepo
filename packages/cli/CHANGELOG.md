@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 2.5.0
+
+### Minor Changes
+
+- c38faebce: release fixed project id and catchup missed releases for cli and lix
+
 ## 2.4.0
 
 ### Minor Changes
