@@ -1,15 +1,23 @@
 import * as vscode from "vscode"
-import { state } from "./state.js"
-import { messagePreview } from "./decorations/messagePreview.js"
-import { ExtractMessage } from "./actions/extractMessage.js"
-import { msg } from "./utilities/message.js"
+import { msg } from "./utilities/messages/msg.js"
 import { getGitOrigin } from "./services/telemetry/index.js"
 import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview.js"
-import { recommendation } from "./utilities/recommendation.js"
+import { recommendation } from "./utilities/settings/recommendation.js"
 import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
-import { initProject } from "./utilities/initProject.js"
 import { handleError, telemetryCapture } from "./utilities/utils.js"
 import { CONFIGURATION } from "./configuration.js"
+import { projectView } from "./utilities/project/project.js"
+import { setState, state } from "./state.js"
+import { messagePreview } from "./decorations/messagePreview.js"
+import { ExtractMessage } from "./actions/extractMessage.js"
+import { errorView } from "./utilities/errors/errors.js"
+import { messageView } from "./utilities/messages/messages.js"
+import { listProjects } from "@inlang/sdk"
+import { createFileSystemMapper } from "./utilities/fs/createFileSystemMapper.js"
+import fs from "node:fs/promises"
+import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
+import { gettingStartedView } from "./utilities/getting-started/gettingStarted.js"
+import { closestInlangProject } from "./utilities/project/closestInlangProject.js"
 
 // TODO #1844 CLEARIFY Felix  - why is this important now? The lifecycle of the information flow is crutial now that we deal with so many files and watch on so many files
 
@@ -19,9 +27,25 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		const gitOrigin = await getGitOrigin()
 		telemetryCapture("IDE-EXTENSION activated")
 
-		// Start the IDE extension
-		await main({ context, gitOrigin }) 
+		vscode.commands.executeCommand("setContext", "inlang:hasProjectInWorkspace", false)
+		const workspaceFolder = vscode.workspace.workspaceFolders?.[0]
+
+		if (!workspaceFolder) {
+			console.warn("No workspace folder found.")
+			return
+		}
+
+		const nodeishFs = createFileSystemMapper(normalizePath(workspaceFolder.uri.fsPath), fs)
+
+		try {
+			const projectsList = await listProjects(nodeishFs, normalizePath(workspaceFolder.uri.fsPath))
+			setState({ ...state(), projectsInWorkspace: projectsList })
+		} catch (error) {
+			handleError(error)
+			return
+		}
 		// TODO #1844 CLEARIFY Felix the main function may not completed the initialization when we arrived here if the project got migrated
+		await main({ context, gitOrigin, workspaceFolder, nodeishFs })
 		msg("inlang's extension activated", "info")
 	} catch (error) {
 		handleError(error)
@@ -32,75 +56,99 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 async function main(args: {
 	context: vscode.ExtensionContext
 	gitOrigin: string | undefined
+	workspaceFolder: vscode.WorkspaceFolder
+	nodeishFs: NodeishFilesystem
 }): Promise<void> {
-	const workspaceFolder = vscode.workspace.workspaceFolders?.[0]
+	if (state().projectsInWorkspace.length > 0) {
+		vscode.commands.executeCommand("setContext", "inlang:hasProjectInWorkspace", true)
 
-	if (!workspaceFolder) {
-		console.warn("No workspace folder found.")
-		return
+		// find the closest project to the workspace
+		const closestProjectToWorkspace = await closestInlangProject({
+			workingDirectory: normalizePath(args.workspaceFolder.uri.fsPath),
+			projects: state().projectsInWorkspace,
+		})
+
+		setState({
+			...state(),
+			selectedProjectPath:
+				closestProjectToWorkspace?.projectPath || state().projectsInWorkspace[0]?.projectPath || "",
+		})
+
+		await projectView({ ...args })
+		await messageView({ ...args })
+		await errorView({ ...args })
+
+		registerExtensionComponents(args)
+		// TODO: Replace by reactive settings API?
+		setupFileSystemWatcher(args)
+		handleInlangErrors()
+	} else {
+		await gettingStartedView()
 	}
+}
 
-	// initate project
-	const { project, error } = await initProject({ workspaceFolder, gitOrigin: args.gitOrigin })
-
-	// if project is undefined but the files exists, the project got migrated / newly created and we need to restart the extension
-	if (!project && (await vscode.workspace.findFiles(CONFIGURATION.FILES.PROJECT)).length !== 0) {
-		// TODO #1844 CLEARIFY Felix we don't await the main function here
-		main(args)
-		return
-	}
-
-	if (error) {
-		handleError(error)
-		return
-	}
-
-	// Watch for changes in the config file
+function setupFileSystemWatcher(args: {
+	context: vscode.ExtensionContext
+	workspaceFolder: vscode.WorkspaceFolder
+	nodeishFs: NodeishFilesystem
+	gitOrigin: string | undefined
+}) {
 	const watcher = vscode.workspace.createFileSystemWatcher(
-		new vscode.RelativePattern(workspaceFolder, CONFIGURATION.FILES.PROJECT)
+		new vscode.RelativePattern(
+			args.workspaceFolder,
+			// TODO #1844 CLEARIFY Felix we don't await the main function here (CHECK does this still trigger main()?)
+			state().selectedProjectPath || CONFIGURATION.FILES.PROJECT
+		)
 	)
-	// Listen for changes in the config file
-	watcher.onDidChange(() => {
-		main(args)
+
+	watcher.onDidChange(async () => {
+		// reload project
+		await main({
+			context: args.context,
+			gitOrigin: args.gitOrigin,
+			workspaceFolder: args.workspaceFolder,
+			nodeishFs: args.nodeishFs,
+		})
 	})
+}
 
-	// TODO #1844 CLEARIFY Felix the following code (registration of code actions, commands, message preview...) runs twice when the settings file changes? (reason: wathcer on the project config)
-
-	// Register commands and other extension functionality
+function registerExtensionComponents(args: {
+	context: vscode.ExtensionContext
+	workspaceFolder: vscode.WorkspaceFolder
+}) {
 	args.context.subscriptions.push(
 		...Object.values(CONFIGURATION.COMMANDS).map((c) => c.register(c.command, c.callback as any))
 	)
 
+	const additionalSelectors =
+		state().project.customApi()["app.inlang.ideExtension"]?.documentSelectors || []
+
 	const documentSelectors: vscode.DocumentSelector = [
 		{ language: "javascript", pattern: `!${CONFIGURATION.FILES.PROJECT}` },
-		...(state().project.customApi()["app.inlang.ideExtension"]?.documentSelectors || []),
+		...(state().project ? additionalSelectors : []),
 	]
 
-	// Register source actions
-	args.context.subscriptions.push( // TODO #1844 CLEARIFY Felix shouldn't the state object be registered for later disposal here as well?
+	args.context.subscriptions.push(
+		// TODO #1844 CLEARIFY Felix shouldn't the state object be registered for later disposal here as well?
 		vscode.languages.registerCodeActionsProvider(documentSelectors, new ExtractMessage(), {
 			providedCodeActionKinds: ExtractMessage.providedCodeActionKinds,
 		})
 	)
 
-	// Register decorations
 	messagePreview(args)
-
-	// Properties missing decoration in project.inlang
 	propertiesMissingPreview()
-
-	// Add inlang extension to recommended extensions
-	recommendation({ workspaceFolder })
-
-	// Linter diagnostics
+	recommendation(args)
 	linterDiagnostics(args)
+}
 
-	// Log inlang errors
-	const inlangErrors = state().project.errors()
+function handleInlangErrors() {
+	const inlangErrors = state().project.errors() || []
 	if (inlangErrors.length > 0) {
 		console.error("Inlang VSCode Extension errors:", inlangErrors)
 	}
 }
 
-// Deactivate function (if needed)
-// export function deactivate() {}
+// Helper Functions
+export function getActiveTextEditor(): vscode.TextEditor | undefined {
+	return vscode.window.activeTextEditor
+}
