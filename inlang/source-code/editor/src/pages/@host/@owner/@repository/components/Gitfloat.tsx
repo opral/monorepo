@@ -27,6 +27,8 @@ export const Gitfloat = () => {
 		repo,
 		refetchRepo,
 		forkStatus,
+		refetchForkStatus,
+		mutateForkStatus,
 		userIsCollaborator,
 		githubRepositoryInformation,
 		currentBranch,
@@ -268,7 +270,7 @@ export const Gitfloat = () => {
 	})
 
 	createEffect(() => {
-		if (forkStatus().behind > 0) {
+		if (forkStatus().behind > 0 && (tourStep() !== "github-login" || tourStep() !== "fork-repository")) {
 			const gitfloat = document.querySelector(".syncfork")
 			gitfloat?.classList.remove("hidden")
 			gitfloat?.classList.add("animate-slideInFromBehind", "-z-10")
@@ -326,8 +328,11 @@ export const Gitfloat = () => {
 									await repo()?.mergeUpstream()
 									refetchRepo()
 									setIsMerging(false)
+									setTimeout(() => {
+										mutateForkStatus({ ...forkStatus(), behind: 0 })
+										refetchForkStatus()
+									}, 400)
 								}}
-								// loading as long as the merge is not done
 								prop:loading={isMerging()}
 								class="ml-auto on-inverted"
 							>

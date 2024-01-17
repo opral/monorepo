@@ -36,19 +36,24 @@ type EditorStateSchema = {
 	 * Returns a repository object
 	 */
 	repo: () => Repository | undefined
-
 	/**
 	 * Refetch the repository.
 	 */
 	refetchRepo: () => void
-
 	/**
 	 * Fork status of the repository.
 	 */
+
 	forkStatus: () => { ahead: number, behind: number }
+	/**
+	 * Refetch the fork status.
+	 */
+	refetchForkStatus: () => void
 	/**
 	 * The current branch.
 	 */
+	mutateForkStatus: (args: { ahead: number, behind: number }) => void
+
 	currentBranch: Resource<string | undefined>
 	/**
 	 * The branch names of current repo.
@@ -57,6 +62,7 @@ type EditorStateSchema = {
 	/**
 	 * Additional information about a repository provided by GitHub.
 	 */
+
 	githubRepositoryInformation: Resource<Awaited<ReturnType<Repository["getMeta"]>> | undefined>
 	/**
 	 * Route parameters like `/github.com/inlang/website`.
@@ -277,7 +283,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		setLixErrors(errors)
 	})
 
-	const [forkStatus] = createResource(
+	const [forkStatus, { refetch: refetchForkStatus, mutate: mutateForkStatus }] = createResource(
 		() => {
 			if (repo()) {
 				return repo()
@@ -489,6 +495,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					repo: repo,
 					refetchRepo,
 					forkStatus,
+					mutateForkStatus,
+					refetchForkStatus,
 					currentBranch,
 					branchNames,
 					githubRepositoryInformation,
