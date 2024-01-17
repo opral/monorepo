@@ -119,6 +119,7 @@ test.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 				modules: ["./plugin.js"],
 			} satisfies ProjectSettings)
 		)
+		const repo = await openRepository("file://", { nodeishFs: fs })
 
 		const _mockPlugin: Plugin = {
 			id: "plugin.inlang.json",
@@ -136,7 +137,7 @@ test.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 
 		const project = await loadProject({
 			projectPath: "/user/project.inlang",
-			nodeishFs: fs,
+			repo,
 			_import,
 		})
 
