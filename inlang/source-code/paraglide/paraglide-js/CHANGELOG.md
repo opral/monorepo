@@ -1,5 +1,14 @@
 # @inlang/paraglide-js
 
+## 1.2.1
+
+### Patch Changes
+
+- 74dc1f8c6: Update dependencies
+- 4ae6295d0: Detect when `paraglide-js init` is being run inside the VsCode terminal and skip the VsCode question if so
+- Updated dependencies [74ac11c47]
+  - @inlang/language-tag@1.4.0
+
 ## 1.2.0
 
 ### Minor Changes
