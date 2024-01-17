@@ -18,6 +18,7 @@ import SvelteHeader from "#src/interface/marketplace/categoryHeaders/cards/svelt
 import NextjsHeader from "#src/interface/marketplace/categoryHeaders/cards/nextjs.jsx"
 import GenericHeader from "#src/interface/marketplace/categoryHeaders/cards/generic.jsx"
 import AppHeader from "#src/interface/marketplace/categoryHeaders/categoryHeros/appHeader.jsx"
+import AstroHeader from "#src/interface/marketplace/categoryHeaders/cards/astro.jsx"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
@@ -111,7 +112,6 @@ export default function Page(props: {
 					withGuides: true,
 					coverCard: <NextjsHeader />,
 				}
-
 			case "solid": {
 				return {
 					title: m.marketplace_header_solid_title(),
@@ -126,7 +126,7 @@ export default function Page(props: {
 					description: m.marketplace_header_astro_description(),
 					icon: "https://astro.build/favicon.svg",
 					withGuides: true,
-					coverCard: <GenericHeader />,
+					coverCard: <AstroHeader />,
 				}
 			}
 
