@@ -315,7 +315,7 @@ export const Gitfloat = () => {
 						lixErrors().length === 0
 					}
 				>
-					<Show when={forkStatus() && forkStatus().ahead === 0 && forkStatus().behind > 0}>
+					<Show when={forkStatus() && forkStatus().ahead === 0 && forkStatus().behind > 0 && userIsCollaborator()}>
 						<div class="syncfork w-full relative flex justify-start items-center gap-1.5 rounded-t-lg bg-[#293344] p-1.5 text-xs font-medium text-on-inverted-surface after:content-[''] after:absolute after:w-full after:h-8 after:translate-y-6 after:-m-1.5 after:bg-[#293344] after:-z-10">
 							<div class="text-warning-on-inverted-container px-1.5 py-[5px]">
 								<WarningIcon />
