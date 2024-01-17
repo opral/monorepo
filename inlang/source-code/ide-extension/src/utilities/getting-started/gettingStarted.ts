@@ -1,6 +1,7 @@
 import * as vscode from "vscode"
+import { CONFIGURATION } from "../../configuration.js"
 
-function createNoProjectsFoundViewProvider(): vscode.WebviewViewProvider {
+export function createNoProjectsFoundViewProvider(): vscode.WebviewViewProvider {
 	return {
 		resolveWebviewView(webviewView: vscode.WebviewView) {
 			webviewView.webview.options = {
@@ -11,7 +12,7 @@ function createNoProjectsFoundViewProvider(): vscode.WebviewViewProvider {
 	}
 }
 
-function getNoProjectsFoundHtml(): string {
+export function getNoProjectsFoundHtml(): string {
 	return `<!DOCTYPE html>
         <html lang="en">
         <head>
@@ -74,8 +75,8 @@ function getNoProjectsFoundHtml(): string {
 			<main>
 				<h1>No project found</h1>
 				<span>Please create a project or make sure to have the correct workspace open.</span>
-				<a href="https://manage.inlang.com"><button>Create Project</button></a>
-				<span style="text-align: center;">Or, see <a href="https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension">documentation</a></span>
+				<a href="${CONFIGURATION.STRINGS.GETTING_STARTED_URL}"><button>Create Project</button></a>
+				<span style="text-align: center;">Or, see <a href="${CONFIGURATION.STRINGS.DOCS_URL}">documentation</a></span>
 			</main>
         </body>
         </html>`
