@@ -55,13 +55,14 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 		// write to local storage
 		localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(store))
 
-		if (allowedOrigins.includes(document.referrer)) {
+		const referrer = new URL(document.referrer).origin
+		if (window.opener && allowedOrigins.includes(referrer)) {
 			window.opener.postMessage(
 				{
 					key: LOCAL_STORAGE_KEY,
 					newValue: JSON.stringify(store),
 				},
-				document.referrer
+				referrer
 			)
 		}
 	}
