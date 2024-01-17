@@ -8,10 +8,10 @@ import { determineClosestPath } from "./determineClosestPath.js"
 import { telemetry } from "../services/telemetry/implementation.js"
 import { createFileSystemMapper } from "./createFileSystemMapper.js"
 import { _import } from "./import/_import.js"
-import type { TelemetryEvents } from "../services/telemetry/events.js"
 import { tryCatch } from "@inlang/result"
 import fs from "node:fs/promises"
 import { normalizePath } from "@lix-js/fs"
+import { id } from "../../marketplace-manifest.json"
 
 // Helper Functions
 export function getActiveTextEditor(): vscode.TextEditor | undefined {
@@ -79,12 +79,7 @@ export async function initProject(args: {
 				  closestProjectFilePathUriNormalized.replace(".json", ""),
 			nodeishFs: createFileSystemMapper(args.workspaceFolder.uri.fsPath, fs),
 			_import: _import(args.workspaceFolder.uri.fsPath),
-			_capture(id, props) {
-				telemetry.capture({
-					event: id as TelemetryEvents,
-					properties: props,
-				})
-			},
+			appId: id,
 		})
 	)
 	telemetry.capture({

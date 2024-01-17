@@ -46,7 +46,7 @@ const Footer = () => {
 			},
 			{
 				name: m.footer_resources_inlang_manage(),
-				href: "https://manage.inlang.com",
+				href: import.meta.env.PROD ? "https://manage.inlang.com" : "http://localhost:4004",
 			},
 		]
 	}
