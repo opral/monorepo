@@ -216,7 +216,8 @@ export async function loadProject(args: {
 			[messageId: string]: Error
 		}>({})
 
-		const messageFolderPath = projectPath + "/messages" + "/v1"
+		const messageBaseFolderFolderPath = projectPath + "/messages"
+		const messageFolderPath = messageBaseFolderFolderPath + "/v1"
 
 		createEffect(() => {
 			// wait for first effect excution until modules are resolved
@@ -229,6 +230,14 @@ export async function loadProject(args: {
 
 				try {
 					// make sure the message folder exists within the .inlang folder
+					try {
+						await fs.mkdir(messageBaseFolderFolderPath, { recursive: true })
+					} catch (e) {
+						if ((e as any).code !== "EEXIST") {
+							throw e
+						}
+					}
+
 					try {
 						await fs.mkdir(messageFolderPath, { recursive: true })
 					} catch (e) {
