@@ -3,7 +3,7 @@ import { html } from "lit"
 import { openRepository, createNodeishMemoryFs } from "@lix-js/client"
 import { customElement, property } from "lit/decorators.js"
 import { TwLitElement } from "../common/TwLitElement.js"
-import { browserAuth, getUser } from "@lix-js/client/src/browser-auth.ts"
+import { browserAuth, getUser } from "@lix-js/server"
 import { registry } from "@inlang/marketplace-registry"
 import { ProjectSettings } from "@inlang/sdk"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
@@ -12,6 +12,9 @@ import { publicEnv } from "@inlang/env-variables"
 
 @customElement("inlang-uninstall")
 export class InlangInstall extends TwLitElement {
+	@property({ type: Boolean })
+	isProduction: boolean = !window.location.origin.includes("localhost")
+
 	@property({ type: String })
 	step: "" | "nooptin" | "noauth" | "uninstall" | "error" | "success" | "abort" = ""
 
@@ -212,7 +215,8 @@ export class InlangInstall extends TwLitElement {
 									</p>
 									<a
 										target="_blank"
-										href=${`https://inlang.com/m/${
+										href=${(this.isProduction ? `https://inlang.com` : "http://localhost:3000") +
+										`/m/${
 											// @ts-ignore
 											registry.find((x) => x.id === this.url.module)?.uniqueID
 										}`}

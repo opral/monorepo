@@ -14,6 +14,7 @@
 		"en": "./inlang/external-projects/next-international/README.md"
 	},
 	"keywords": ["libraries", "nextjs", "next", "javascript", "developer", "i18n"],
+	"recommends": ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g"],
 	"publisherName": "QuiiBz",
 	"publisherIcon": "https://avatars.githubusercontent.com/u/43268759?v=4",
 	"website": "https://next-international.vercel.app",

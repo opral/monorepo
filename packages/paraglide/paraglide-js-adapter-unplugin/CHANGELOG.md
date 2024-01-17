@@ -1,5 +1,75 @@
 # @inlang/paraglide-js-adapter-unplugin
 
+## 1.2.4
+
+### Patch Changes
+
+- 9cd76dca8: fix broken dependency
+
+## 1.2.3
+
+### Patch Changes
+
+- 74dc1f8c6: Update dependencies
+- Updated dependencies [74dc1f8c6]
+- Updated dependencies [4ae6295d0]
+- Updated dependencies [b920761e6]
+  - @inlang/paraglide-js@1.2.1
+  - @inlang/sdk@0.23.0
+
+## 1.2.2
+
+### Patch Changes
+
+- Updated dependencies [0f0e8496d]
+  - @inlang/paraglide-js@1.2.0
+
+## 1.2.1
+
+### Patch Changes
+
+- Updated dependencies [7ea9753fb]
+- Updated dependencies [4277232db]
+  - @inlang/paraglide-js@1.1.1
+
+## 1.2.0
+
+### Minor Changes
+
+- cd29edb11: bumbing fixed env var dependecy issue affected packages
+
+### Patch Changes
+
+- Updated dependencies [cd29edb11]
+  - @inlang/sdk@0.22.0
+  - @inlang/paraglide-js@1.1.0
+
+## 1.1.0
+
+### Minor Changes
+
+- e20364a46: release fixed dependency chain in preparation for paraglide 1.0
+
+### Patch Changes
+
+- Updated dependencies [e20364a46]
+  - @inlang/sdk@0.21.0
+  - @inlang/paraglide-js@1.0.0
+
+## 1.0.4
+
+### Patch Changes
+
+- Updated dependencies [bc5803235]
+  - @inlang/sdk@0.20.0
+  - @inlang/paraglide-js@1.0.0
+
+## 1.0.3
+
+### Patch Changes
+
+- 784e227ba: fix: check if messages have actually changed before recompiling
+
 ## 1.0.2
 
 ### Patch Changes

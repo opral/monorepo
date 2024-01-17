@@ -1,5 +1,53 @@
 # @inlang/sdk
 
+## 0.23.0
+
+### Minor Changes
+
+- b920761e6: refactor: remove `_capture` in favor of `appDir` for product insights
+
+### Patch Changes
+
+- Updated dependencies [74ac11c47]
+  - @inlang/language-tag@1.4.0
+  - @inlang/message@2.0.1
+  - @inlang/message-lint-rule@1.4.1
+  - @inlang/plugin@2.4.2
+  - @inlang/project-settings@2.2.1
+  - @inlang/translatable@1.2.1
+  - @inlang/module@1.2.2
+
+## 0.22.0
+
+### Minor Changes
+
+- cd29edb11: bumbing fixed env var dependecy issue affected packages
+
+### Patch Changes
+
+- Updated dependencies [cd29edb11]
+  - @lix-js/client@0.5.0
+
+## 0.21.0
+
+### Minor Changes
+
+- e20364a46: release fixed dependency chain in preparation for paraglide 1.0
+
+### Patch Changes
+
+- Updated dependencies [e20364a46]
+  - @lix-js/client@0.4.0
+  - @lix-js/fs@0.5.0
+  - @inlang/plugin@2.4.1
+  - @inlang/module@1.2.1
+
+## 0.20.0
+
+### Minor Changes
+
+- bc5803235: hotfix reactivity bug in ide extension
+
 ## 0.19.0
 
 ### Minor Changes
@@ -10,7 +58,7 @@
 
 ### Minor Changes
 
-- 9212cc19d: fix: https://github.com/inlang/monorepo/issues/1647
+- 9212cc19d: fix: https://github.com/opral/monorepo/issues/1647
 
 ## 0.17.0
 
@@ -80,7 +128,7 @@
 
 ### Minor Changes
 
-- 936cfa401: fix [[#1456](https://github.com/inlang/monorepo/issues/1456)]: resolving modules from relative paths sometimes lead to incorrect file paths and subsequent import failures
+- 936cfa401: fix [[#1456](https://github.com/opral/monorepo/issues/1456)]: resolving modules from relative paths sometimes lead to incorrect file paths and subsequent import failures
 
 ## 0.11.0
 

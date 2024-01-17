@@ -1,0 +1,33 @@
+{
+	"id": "library.inlang.paraglideJsAdapterSolidStart",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-solidstart/assets/icon.png",
+	"displayName": {
+		"en": "Paraglide JS Adapter Solid"
+	},
+	"description": {
+		"en": "A SolidStart integration for ParaglideJS, providing you with everything you need to take your solid app global."
+	},
+	"readme": {
+		"en": "./inlang/source-code/paraglide/paraglide-js-adapter-solidstart/README.md"
+	},
+	"keywords": [
+		"paraglide js",
+		"libraries",
+		"website",
+		"developer",
+		"paraglide",
+		"i18n",
+		"library",
+		"localization",
+		"sdk",
+		"sdk-js",
+		"solid",
+		"solid-start",
+		"javascript",
+		"typescript"
+	],
+	"recommends": ["m/reootnfj", "m/632iow21", "m/r7kp499g", "m/teldgniy"],
+	"publisherName": "inlang",
+	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"license": "Apache-2.0"
+}

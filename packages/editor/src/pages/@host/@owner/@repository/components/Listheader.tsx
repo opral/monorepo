@@ -3,8 +3,8 @@ import { For, Show, createMemo } from "solid-js"
 import { showFilteredMessage } from "./../helper/showFilteredMessage.js"
 import { TourHintWrapper } from "./Notification/TourHintWrapper.jsx"
 import IconArrowLeft from "~icons/material-symbols/arrow-back-rounded"
+import IconAdd from "~icons/material-symbols/add"
 import { type InstalledMessageLintRule, type MessageLintRule } from "@inlang/sdk"
-import { navigate } from "vike/client/router"
 
 export const messageCount = (ids: string[]) => {
 	const { project } = useEditorState()
@@ -161,31 +161,39 @@ export const ListHeader = () => {
 						</Show>
 					)}
 				</For>
-				<Show when={project()?.installed.messageLintRules().length === 0}>
-					<TourHintWrapper
-						currentId="missing-lint-rules"
-						position="bottom-right"
-						offset={{ x: 0, y: 40 }}
-						isVisible={tourStep() === "missing-lint-rules"}
+				<TourHintWrapper
+					currentId="missing-lint-rules"
+					position="bottom-right"
+					offset={{ x: 0, y: 40 }}
+					isVisible={tourStep() === "missing-lint-rules"}
+				>
+					<sl-tooltip
+						prop:content={
+							"Install lint rules from the marketplace. They will help you write better translations."
+						}
+						prop:placement="bottom"
+						prop:trigger="hover"
+						style={{ "--show-delay": "1s" }}
 					>
-						<sl-tooltip
-							prop:content={
-								"Install lint rules from the marketplace. They will help you write better translations."
+						<sl-button
+							prop:size="small"
+							prop:href={
+								import.meta.env.PROD
+									? "https://inlang.com/c/lint-rules"
+									: "http://localhost:3000/c/lint-rules"
 							}
-							prop:placement="bottom"
-							prop:trigger="hover"
-							style={{ "--show-delay": "1s" }}
+							prop:target="_blank"
 						>
-							<sl-button
-								prop:size="small"
-								// @ts-ignore
-								onClick={() => navigate("/c/lint-rules")}
-							>
+							<Show when={project()?.installed.messageLintRules().length === 0}>
 								Install lint rules
-							</sl-button>
-						</sl-tooltip>
-					</TourHintWrapper>
-				</Show>
+							</Show>
+							<Show when={project()?.installed.messageLintRules().length !== 0}>
+								{/* @ts-ignore */}
+								<IconAdd slot="prefix" class="w-5 h-5 -mx-1" />
+							</Show>
+						</sl-button>
+					</sl-tooltip>
+				</TourHintWrapper>
 			</div>
 		</div>
 	)

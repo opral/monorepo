@@ -1,6 +1,6 @@
-import { createEffect } from "solid-js"
-import { createSignal } from "solid-js"
+import { createEffect, createSignal } from "solid-js"
 import { useEditorState } from "../State.jsx"
+import IconSearch from "~icons/material-symbols/search"
 
 interface SearchInputProps {
 	placeholder: string
@@ -23,13 +23,12 @@ export const SearchInput = (props: SearchInputProps) => {
 					"border-radius": "4px",
 				}}
 				prop:placeholder={props.placeholder}
-				prop:filled={true}
 				prop:size={"small"}
 				prop:value={textValue()}
 				onInput={(e) => setTextValue(e.currentTarget.value)}
 			>
 				<div slot={"suffix"}>
-					<SearchIcon />
+					<IconSearch class="w-5 h-5 -mr-1 text-outline-variant" />
 				</div>
 			</sl-input>
 		</div>

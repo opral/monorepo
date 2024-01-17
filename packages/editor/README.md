@@ -1,4 +1,4 @@
-![editor banner image](https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/editor/assets/editor-header.png)
+![editor banner image](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/editor/assets/editor-header.png)
 
 # Edit translations with version control in a visual editor.
 
@@ -6,15 +6,15 @@ Fink enables translators to edit translations in a visual editor and submit them
 <br />
 <br />
 
-Used by 
+Used by
 
 <doc-proof organisations="osmosis, appflowy, remnote"></doc-proof>
 
 # Why use Fink?
 <doc-features>
-  <doc-feature text-color="#0F172A" color="#E1EFF7" title="Edit messages visually" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/editor/assets/editor01.png"></doc-feature>
-  <doc-feature text-color="#0F172A" color="#E1EFF7" title="Collaborate using version control" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/editor/assets/editor02.png"></doc-feature>
-  <doc-feature text-color="#0F172A" color="#E1EFF7" title="Ensure quality with lint rules" image="https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/editor/assets/editor03.png"></doc-feature>
+  <doc-feature text-color="#0F172A" color="#E1EFF7" title="Edit messages visually" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/editor01.png"></doc-feature>
+  <doc-feature text-color="#0F172A" color="#E1EFF7" title="Collaborate using version control" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/editor02.png"></doc-feature>
+  <doc-feature text-color="#0F172A" color="#E1EFF7" title="Ensure quality with lint rules" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/editor03.png"></doc-feature>
 </doc-features>
 
 <br />
@@ -30,34 +30,27 @@ Used by
 <br />
 <br />
 
-# Usage
+# Let's get started
 
-### Translate missing messages
+- Add a `project.inlang` folder to your repository
+- Create a `settings.json` file to that new dir `project.inlang/settings.json`
+- Install a plugin that reads and writes your messages from the [inlang marketplace](https://inlang.com/c/plugins)
+- Install lint rules to find errors in your translations from the [inlang marketplace](https://inlang.com/c/lint-rules)
 
-After your project is loaded, you can see your messages. Additionally, if your project file includes lint rules, you might encounter warnings for specific keys.
+Look at the [example repository](https://github.com/opral/example) and it's [settings.json](https://github.com/opral/example/blob/main/project.inlang/settings.json) for a working example.
 
-### Push and commit your changes
-
-To save what you've translated, you can use the so called GitFloat menu on the bottom of the page. If you've made changes, you are able to push and commit them. This will automatically create an addition to the git history inside of your repository, which is useful for seeing who has changed what and working on a single source of truth.
-
-### How to filter messages
-
-**Filter after language**
-
-You can filter messages shown based on the language selected. You can find the filter on the top right corner of the editor.
-
-**Handle lint rules**
-
-Lint rules are a great way to ensure the quality of your translations, therefore you can select the lints you want to use in the editor. You can find it on the top left corner of the editor (filter options).
-
-# Login via GitHub
-
-If your repository can't be accessed anonymously, you can login via GitHub. The editor will ask you to login if it can't access your repository.
-
-# Example
+## Example
 
 This is how the editor could look like for your project:
 
 <doc-links>
-    <doc-link title="Open inlang example" icon="icon-park-outline:editor" href="/editor/github.com/inlang/example" description="inlang example repository in the editor"></doc-link>
+    <doc-link title="Open inlang example" icon="icon-park-outline:editor" href="/editor/github.com/opral/example" description="inlang example repository in the editor"></doc-link>
 </doc-links>
+
+# How to contribute translations
+
+[![Fink Guide Ad](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/editor-guide-image.jpg) Read in-depth guide](https://inlang.com/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink)
+
+# Login via GitHub
+
+If your repository can't be accessed anonymously, you can login via GitHub. The editor will ask you to login if it can't access your repository.

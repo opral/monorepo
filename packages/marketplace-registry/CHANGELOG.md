@@ -1,5 +1,18 @@
 # @inlang/marketplace-registry
 
+## 1.5.2
+
+### Patch Changes
+
+- @inlang/marketplace-manifest@1.3.1
+
+## 1.5.1
+
+### Patch Changes
+
+- Updated dependencies [e20364a46]
+  - @inlang/env-variables@0.2.0
+
 ## 1.5.0
 
 ### Minor Changes

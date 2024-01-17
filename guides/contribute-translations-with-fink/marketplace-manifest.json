@@ -1,6 +1,6 @@
 {
 	"id": "guide.nilsjacobsen.contributeTranslationsWithFink",
-	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/guides/contribute-translations-with-fink/bird-contribute.png?raw=true",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/contribute-translations-with-fink/bird-contribute.png?raw=true",
 	"displayName": {
 		"en": "Contribute Translations with Fink"
 	},
@@ -22,6 +22,7 @@
 		"internationalization",
 		"guide"
 	],
+	"recommends": ["g/2fg8ng94", "g/00162hsd", "g/wxcebbig", "g/uxohikde"],
 	"publisherName": "Nils Jacobsen",
 	"publisherIcon": "https://avatars.githubusercontent.com/u/58360188?s=96&v=4",
 	"license": "Apache-2.0"

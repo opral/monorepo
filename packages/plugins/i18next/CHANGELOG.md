@@ -1,5 +1,33 @@
 # @inlang/plugin-i18next
 
+## 4.13.4
+
+### Patch Changes
+
+- Updated dependencies [b920761e6]
+  - @inlang/sdk@0.23.0
+
+## 4.13.3
+
+### Patch Changes
+
+- Updated dependencies [cd29edb11]
+  - @inlang/sdk@0.22.0
+
+## 4.13.2
+
+### Patch Changes
+
+- Updated dependencies [e20364a46]
+  - @inlang/sdk@0.21.0
+
+## 4.13.1
+
+### Patch Changes
+
+- Updated dependencies [bc5803235]
+  - @inlang/sdk@0.20.0
+
 ## 4.13.0
 
 ### Minor Changes
@@ -166,7 +194,7 @@
 
 ### Patch Changes
 
-- 6326e01e: fix: placeholder matching https://github.com/inlang/monorepo/issues/955
+- 6326e01e: fix: placeholder matching https://github.com/opral/monorepo/issues/955
 
 ## 2.2.1
 

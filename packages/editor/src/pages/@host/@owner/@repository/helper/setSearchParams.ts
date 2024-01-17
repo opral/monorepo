@@ -6,6 +6,7 @@ type SearchParams = {
 	lint?: `${string}.${string}`[]
 	lang?: string[]
 	branch?: string
+	project?: string
 }
 
 type SearchType = {
@@ -15,6 +16,11 @@ type SearchType = {
 
 type BranchType = {
 	key: "branch"
+	value: string
+}
+
+type ProjectType = {
+	key: "project"
 	value: string
 }
 
@@ -33,7 +39,7 @@ type LangType = {
 	value: string[]
 }
 
-type SearchParamsType = SearchType | LintType | LangType | idType | BranchType
+type SearchParamsType = SearchType | LintType | LangType | idType | BranchType | ProjectType
 
 export const setSearchParams = ({ key, value }: SearchParamsType) => {
 	//get url from window
@@ -44,6 +50,7 @@ export const setSearchParams = ({ key, value }: SearchParamsType) => {
 		search: currentUrl.searchParams.get("search") || "",
 		id: currentUrl.searchParams.get("id") || "",
 		branch: currentUrl.searchParams.get("branch") || "",
+		project: currentUrl.searchParams.get("project") || "",
 		lint: currentUrl.searchParams.getAll("lint") as `${string}.${string}`[],
 		lang: currentUrl.searchParams.getAll("lang"),
 	}
@@ -66,6 +73,9 @@ export const setSearchParams = ({ key, value }: SearchParamsType) => {
 		case "lang":
 			searchParamsObj.lang = []
 			searchParamsObj.lang = [...value]
+			break
+		case "project":
+			searchParamsObj.project = value
 			break
 	}
 

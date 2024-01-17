@@ -1,7 +1,6 @@
 {
-	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "plugin.inlang.mFunctionMatcher",
-	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/m-function-matcher/assets/m.png",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/plugins/m-function-matcher/assets/m.png",
 	"displayName": {
 		"en": "m-function-matcher"
 	},
@@ -9,9 +8,10 @@
 		"en": "Enables the inlang VSCode extension to work with paraglide"
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/inlang/monorepo@main/inlang/source-code/plugins/m-function-matcher/README.md"
+		"en": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/plugins/m-function-matcher/README.md"
 	},
 	"keywords": ["website", "vscode", "react", "nextjs", "sveltekit", "svelte", "vue", "plugin"],
+	"recommends": ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g", "m/gerre34r"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0",

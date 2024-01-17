@@ -1,5 +1,52 @@
 # inlang-vs-code-extension
 
+## 1.25.3
+
+### Patch Changes
+
+- Updated dependencies [b920761e6]
+  - @inlang/sdk@0.23.0
+  - @inlang/create-project@1.1.5
+  - @inlang/telemetry@0.3.4
+
+## 1.25.2
+
+### Patch Changes
+
+- Updated dependencies [cd29edb11]
+  - @inlang/sdk@0.22.0
+  - @inlang/create-project@1.1.4
+  - @inlang/telemetry@0.3.3
+
+## 1.25.1
+
+### Patch Changes
+
+- Updated dependencies [e20364a46]
+  - @inlang/sdk@0.21.0
+  - @lix-js/fs@0.5.0
+  - @inlang/create-project@1.1.3
+  - @inlang/telemetry@0.3.2
+
+## 1.25.0
+
+### Minor Changes
+
+- bc5803235: hotfix reactivity bug in ide extension
+
+### Patch Changes
+
+- Updated dependencies [bc5803235]
+  - @inlang/sdk@0.20.0
+  - @inlang/create-project@1.1.2
+  - @inlang/telemetry@0.3.1
+
+## 1.24.0
+
+### Minor Changes
+
+- 013a0923b: fix windows close project selection bug
+
 ## 1.23.0
 
 ### Minor Changes
@@ -222,7 +269,7 @@
 
 ### Patch Changes
 
-- 66519584: Fixes https://github.com/inlang/monorepo/issues/927
+- 66519584: Fixes https://github.com/opral/monorepo/issues/927
 
 ## 0.7.4
 
@@ -269,7 +316,7 @@
 
 ### Patch Changes
 
-- 04f5ac93: The ide extension config has been moved back into @inlang/core. For more information, read https://github.com/inlang/monorepo/issues/856.
+- 04f5ac93: The ide extension config has been moved back into @inlang/core. For more information, read https://github.com/opral/monorepo/issues/856.
 - Updated dependencies [04f5ac93]
   - @inlang/core@0.9.0
 

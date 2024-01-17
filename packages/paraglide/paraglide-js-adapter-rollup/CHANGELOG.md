@@ -1,5 +1,59 @@
 # @inlang/paraglide-js-adapter-rollup
 
+## 1.0.10
+
+### Patch Changes
+
+- Updated dependencies [9cd76dca8]
+  - @inlang/paraglide-js-adapter-unplugin@1.2.4
+
+## 1.0.9
+
+### Patch Changes
+
+- Updated dependencies [74dc1f8c6]
+  - @inlang/paraglide-js-adapter-unplugin@1.2.3
+
+## 1.0.8
+
+### Patch Changes
+
+- @inlang/paraglide-js-adapter-unplugin@1.2.2
+
+## 1.0.7
+
+### Patch Changes
+
+- @inlang/paraglide-js-adapter-unplugin@1.2.1
+
+## 1.0.6
+
+### Patch Changes
+
+- Updated dependencies [cd29edb11]
+  - @inlang/paraglide-js-adapter-unplugin@1.2.0
+
+## 1.0.5
+
+### Patch Changes
+
+- Updated dependencies [e20364a46]
+  - @inlang/paraglide-js-adapter-unplugin@1.1.0
+
+## 1.0.4
+
+### Patch Changes
+
+- @inlang/paraglide-js-adapter-unplugin@1.0.4
+
+## 1.0.3
+
+### Patch Changes
+
+- 784e227ba: fix: check if messages have actually changed before recompiling
+- Updated dependencies [784e227ba]
+  - @inlang/paraglide-js-adapter-unplugin@1.0.3
+
 ## 1.0.2
 
 ### Patch Changes

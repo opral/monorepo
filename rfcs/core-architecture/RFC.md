@@ -5,7 +5,7 @@ href: /blog/rfc-core-architecture
 description: This RFC describes the architecture of inlang.
 ---
 
-### 💡 Discuss the RFC [here](https://github.com/inlang/monorepo/pull/127).
+### 💡 Discuss the RFC [here](https://github.com/opral/monorepo/pull/127).
 
 # RFC 001: Core Architecture
 
@@ -240,7 +240,7 @@ import Translated from 'i18n-library';
 Develop a CLI and VSCode extension to extract and validate resources and messages.
 
 {% Figure
-    src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/rfcs/core-architecture/assets/001-ide-extension.gif"
+    src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/rfcs/core-architecture/assets/001-ide-extension.gif"
 
     alt="Localization IDE extension"
     
@@ -251,7 +251,7 @@ Develop a CLI and VSCode extension to extract and validate resources and message
 
 {% Figure
 
-    src="https://cdn.jsdelivr.net/gh/inlang/monorepo/inlang/rfcs/core-architecture/assets/001-editor.png"
+    src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/rfcs/core-architecture/assets/001-editor.png"
 
     alt="Proof of concept translation editor CAT"
 

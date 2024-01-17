@@ -2,6 +2,7 @@ import memfs from "memfs"
 import nodeFsPromises from "node:fs/promises"
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { createNodeishMemoryFs } from "@inlang/sdk/test-utilities"
+import type { NodeishFilesystem } from "@lix-js/fs"
 
 beforeEach(() => {
 	vi.resetModules()
@@ -13,7 +14,7 @@ describe("write output", () => {
 		const fs = mockFs({})
 
 		await writeOutput("/output", { "test.txt": "test" }, fs)
-		expect(await fs.readFile("/output/test.txt", "utf-8")).toBe("test")
+		expect(await fs.readFile("/output/test.txt", { encoding: "utf-8" })).toBe("test")
 	})
 
 	it("should clear & overwrite output that's already there", async () => {
@@ -25,8 +26,10 @@ describe("write output", () => {
 
 		await writeOutput("/output", { "test.txt": "new" }, fs)
 
-		expect(await fs.readFile("/output/test.txt", "utf-8")).toBe("new")
-		await expect(async () => await fs.readFile("/output/other.txt", "utf-8")).rejects.toBeDefined()
+		expect(await fs.readFile("/output/test.txt", { encoding: "utf-8" })).toBe("new")
+		await expect(
+			async () => await fs.readFile("/output/other.txt", { encoding: "utf-8" })
+		).rejects.toBeDefined()
 	})
 
 	it("should create any missing directories", async () => {
@@ -41,8 +44,8 @@ describe("write output", () => {
 			},
 			fs
 		)
-		expect(await fs.readFile("/output/messages/de/test.txt", "utf-8")).toBe("de")
-		expect(await fs.readFile("/output/messages/en/test.txt", "utf-8")).toBe("en")
+		expect(await fs.readFile("/output/messages/de/test.txt", { encoding: "utf-8" })).toBe("de")
+		expect(await fs.readFile("/output/messages/en/test.txt", { encoding: "utf-8" })).toBe("en")
 	})
 
 	it("should only write once if the output hasn't changed", async () => {
@@ -54,7 +57,7 @@ describe("write output", () => {
 
 		await writeOutput("/output", { "test.txt": "test" }, fs)
 		await writeOutput("/output", { "test.txt": "test" }, fs)
-		expect(await fs.readFile("/output/test.txt", "utf-8")).toBe("test")
+		expect(await fs.readFile("/output/test.txt", { encoding: "utf-8" })).toBe("test")
 		expect(fs.writeFile).toHaveBeenCalledTimes(1)
 	})
 
@@ -67,12 +70,12 @@ describe("write output", () => {
 
 		await writeOutput("/output", { "test.txt": "test" }, fs)
 		await writeOutput("/output", { "test.txt": "test2" }, fs)
-		expect(await fs.readFile("/output/test.txt", "utf-8")).toBe("test2")
+		expect(await fs.readFile("/output/test.txt", { encoding: "utf-8" })).toBe("test2")
 		expect(fs.writeFile).toHaveBeenCalledTimes(2)
 	})
 })
 
-const mockFs = (files: memfs.DirectoryJSON): typeof nodeFsPromises => {
+const mockFs = (files: memfs.DirectoryJSON) => {
 	const _memfs = memfs.createFsFromVolume(memfs.Volume.fromJSON(files))
 	const lixFs = createNodeishMemoryFs()
 	for (const prop in nodeFsPromises) {
@@ -81,11 +84,11 @@ const mockFs = (files: memfs.DirectoryJSON): typeof nodeFsPromises => {
 		// @ts-ignore - memfs dies not have a watch interface - quick fix should be updated
 		if (nodeFsPromises[prop].name === "watch") {
 			// @ts-ignore - memfs has the same interface as node:fs/promises
-			vi.spyOn(nodeFsPromises, prop).mockImplementation(lixFs[prop])
+			vi.spyOn(_memfs.promises, prop).mockImplementation(lixFs[prop])
 		} else {
 			// @ts-ignore - memfs has the same interface as node:fs/promises
-			vi.spyOn(nodeFsPromises, prop).mockImplementation(_memfs.promises[prop])
+			vi.spyOn(_memfs.promises, prop)
 		}
 	}
-	return _memfs.promises as any
+	return _memfs.promises as NodeishFilesystem
 }

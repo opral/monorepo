@@ -1,10 +1,10 @@
 {
 	"id": "app.inlang.badge",
-	"icon": "https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/source-code/badge/assets/images/badge-icon.jpg",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/badge/assets/images/badge-icon.jpg",
 	"gallery": [
-		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/badge-marketplace-cover.jpg",
-		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/badge-gallery/badge-gallery-image-1.jpg",
-		"https://cdn.jsdelivr.net/gh/inlang/monorepo@latest/inlang/assets/marketplace/badge-gallery/badge-gallery-image-2.jpg"
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/badge-marketplace-cover.jpg",
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/badge-gallery/badge-gallery-image-1.jpg",
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/badge-gallery/badge-gallery-image-2.jpg"
 	],
 	"displayName": {
 		"en": "Translation status badge"
@@ -15,8 +15,20 @@
 	"readme": {
 		"en": "./inlang/source-code/badge/README.md"
 	},
-	"keywords": ["apps", "badge", "markdown", "translation", "status", "lix", "svelte", "nextjs"],
+	"keywords": [
+		"apps",
+		"badge",
+		"markdown",
+		"translation",
+		"status",
+		"lix",
+		"svelte",
+		"nextjs",
+		"astro",
+		"inlang"
+	],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
-	"license": "Apache-2.0"
+	"license": "Apache-2.0",
+	"pricing": "Free"
 }
