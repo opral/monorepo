@@ -16,6 +16,7 @@ describe("createFileSystemMapper", () => {
 			mkdir: vi.fn(),
 			stat: vi.fn(),
 			watch: vi.fn(),
+			lstat: vi.fn(),
 		}
 	})
 
@@ -85,6 +86,17 @@ describe("createFileSystemMapper", () => {
 		expect(mockFs.watch).toHaveBeenCalledWith(
 			testPath.startsWith(normalizedBase) ? testPath : _path.resolve(normalizedBase, testPath),
 			{}
+		)
+	})
+
+	it("should map lstat correctly", async () => {
+		const fs = createFileSystemMapper(normalizedBase, mockFs)
+		const testPath = "/test/path"
+
+		await fs.lstat(testPath)
+
+		expect(mockFs.lstat).toHaveBeenCalledWith(
+			testPath.startsWith(normalizedBase) ? testPath : _path.resolve(normalizedBase, testPath)
 		)
 	})
 })

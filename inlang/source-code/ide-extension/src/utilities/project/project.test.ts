@@ -79,7 +79,7 @@ describe("project view", () => {
 	it("createTreeDataProvider returns a TreeDataProvider", async () => {
 		const nodeishFs = {} as NodeishFilesystem // Mock as needed
 
-		const provider = createTreeDataProvider(nodeishFs)
+		const provider = createTreeDataProvider({ nodeishFs })
 		expect(provider).toBeDefined()
 	})
 

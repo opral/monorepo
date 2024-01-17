@@ -60,5 +60,10 @@ export function createFileSystemMapper(base: string, fs: NodeishFilesystem): Nod
 				options
 			)
 		},
+		lstat: async (path: Parameters<NodeishFilesystem["lstat"]>[0]) => {
+			return fs.lstat(
+				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path))
+			)
+		},
 	}
 }
