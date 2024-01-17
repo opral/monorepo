@@ -19,7 +19,7 @@ export const withLazyFetching = ({
 	return new Proxy(nodeishFs, {
 		get(getTarget: typeof nodeishFs, prop, receiver) {
 			// eslint-disable-next-line no-prototype-builtins
-			if (((getTarget as any).__proto__ as any).hasOwnProperty(prop)) {
+			if (getTarget[prop as keyof typeof nodeishFs]) {
 				return new Proxy(getTarget[prop as keyof typeof getTarget], {
 					apply(callTarget, thisArg, argumentsList) {
 						if (verbose) {
