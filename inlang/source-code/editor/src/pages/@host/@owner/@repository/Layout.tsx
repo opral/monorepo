@@ -38,6 +38,7 @@ export function Layout(props: { children: JSXElement }) {
 	const {
 		refetchRepo,
 		forkStatus,
+		userIsCollaborator,
 		project,
 		lixErrors,
 		setTextSearch,
@@ -59,7 +60,7 @@ export function Layout(props: { children: JSXElement }) {
 	const [openedGitHub, setOpenedGitHub] = createSignal(false)
 
 	createEffect(() => {
-		if (forkStatus() && forkStatus()?.ahead > 0 && forkStatus()?.behind > 0) {
+		if (forkStatus() && forkStatus()?.ahead > 0 && forkStatus()?.behind > 0 && userIsCollaborator()) {
 			setForkStatusModalOpen(true)
 		}
 	})
