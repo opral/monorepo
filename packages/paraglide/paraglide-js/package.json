@@ -7,6 +7,11 @@
 		"access": "public"
 	},
 	"author": "inlang <hello@inlang.com> (https://inlang.com/)",
+	"homepage": "https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/opral/monorepo.git"
+	},
 	"keywords": [
 		"paraglide",
 		"javascript i18n",
@@ -21,14 +26,19 @@
 		"vue",
 		"angular",
 		"nextjs",
-		"next i18n"
+		"next i18n",
+		"astro",
+		"astro i18n",
+		"solid",
+		"solidstart"
 	],
 	"bin": {
 		"paraglide-js": "./bin/run.js"
 	},
 	"files": [
 		"./dist",
-		"./bin"
+		"./bin",
+		"./default"
 	],
 	"scripts": {
 		"dev": "node ./build.js",
@@ -69,6 +79,10 @@
 		"vitest": "0.34.3"
 	},
 	"exports": {
+		".": {
+			"import": "./default/index.js",
+			"types": "./default/index.d.ts"
+		},
 		"./internal": {
 			"import": "./dist/index.js",
 			"types": "./dist/index.d.ts"
