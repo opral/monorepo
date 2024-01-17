@@ -1,5 +1,11 @@
 # @inlang/language-tag
 
+## 1.4.0
+
+### Minor Changes
+
+- 74ac11c47: Add isValidLanguageTag function
+
 ## 1.3.0
 
 ### Minor Changes

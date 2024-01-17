@@ -1,5 +1,12 @@
 # @inlang/translatable
 
+## 1.2.1
+
+### Patch Changes
+
+- Updated dependencies [74ac11c47]
+  - @inlang/language-tag@1.4.0
+
 ## 1.2.0
 
 ### Minor Changes

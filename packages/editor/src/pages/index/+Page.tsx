@@ -124,7 +124,14 @@ export default function Page() {
 					</form>
 
 					<div class="pt-3">
-						<Button type="text" href="https://inlang.com/g/6ddyhpoi">
+						<Button
+							type="text"
+							href={
+								import.meta.env.PROD
+									? "https://inlang.com/g/6ddyhpoi"
+									: "http://localhost:3000/g/6ddyhpoi"
+							}
+						>
 							Learn how to get started
 						</Button>
 					</div>
