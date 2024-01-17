@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/paraglide-js-adapter-unplugin",
-	"version": "1.2.3",
+	"version": "1.2.4",
 	"description": "Unplugin adapter for Paraglide.js",
 	"license": "Apache-2.0",
 	"type": "module",
@@ -39,8 +39,8 @@
 		"./dist"
 	],
 	"scripts": {
-		"build": "tsc --build",
-		"dev": "tsc --watch",
+		"build": "cross-env NODE_ENV=production node ./build.js && tsc",
+		"dev": "node ./build.js",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules",
@@ -49,11 +49,13 @@
 	"dependencies": {
 		"@inlang/paraglide-js": "workspace:*",
 		"@inlang/sdk": "workspace:*",
-		"@lix-js/client": "workspace:*",
 		"unplugin": "1.5.1"
 	},
 	"devDependencies": {
+		"@lix-js/client": "workspace:*",
 		"@types/node": "20.9.3",
+		"cross-env": "^7.0.3",
+		"esbuild": "^0.19.11",
 		"typescript": "5.2.2",
 		"vite": "4.5.0",
 		"vitest": "0.34.3"
