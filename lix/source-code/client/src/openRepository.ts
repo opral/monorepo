@@ -12,6 +12,8 @@ import { commit as lixCommit } from "./git/commit.js"
 import isoGit from "isomorphic-git"
 import { hash } from "./hash.js"
 
+// TODO: LSTAT is not properly in the memory fs!
+
 const {
 	clone,
 	listRemotes,
