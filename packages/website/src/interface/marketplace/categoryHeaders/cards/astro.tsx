@@ -76,7 +76,7 @@ const AstroHeader = () => {
 						</div>
 					</Link>
 					<a
-						href="/g/utqgkmzp"
+						href="https://stackblitz.com/~/github.com/LorisSigrist/paraglide-astro-example"
 						target="_blanc"
 						class="w-full bg-background rounded-xl border border-surface-300 relative group hover:border-surface-400 transition-all cursor-pointer"
 					>
