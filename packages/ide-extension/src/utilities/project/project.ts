@@ -5,7 +5,8 @@ import { setState, state } from "../../state.js"
 import { CONFIGURATION } from "../../configuration.js"
 
 import { telemetry } from "../../services/telemetry/implementation.js"
-import type { TelemetryEvents } from "../../services/telemetry/events.js"
+import { openRepository } from "@lix-js/client"
+import { findRepoRoot } from "@lix-js/client"
 
 let projectViewNodes: ProjectViewNode[] = []
 
@@ -38,48 +39,53 @@ export function createProjectViewNodes(): ProjectViewNode[] {
 	return projectViewNodes
 }
 
-export function getTreeItem(
-	element: ProjectViewNode,
+export function getTreeItem(args: {
+	element: ProjectViewNode
 	nodeishFs: NodeishFilesystem
-): vscode.TreeItem {
+}): vscode.TreeItem {
 	return {
-		label: element.label,
-		tooltip: element.path,
-		iconPath: element.isSelected
+		label: args.element.label,
+		tooltip: args.element.path,
+		iconPath: args.element.isSelected
 			? new vscode.ThemeIcon("pass-filled", new vscode.ThemeColor("statusBar.foreground"))
 			: new vscode.ThemeIcon("circle-large-outline", new vscode.ThemeColor("statusBar.foreground")),
 		contextValue: "projectViewNode",
 		command: {
 			command: "inlang.openProject",
 			title: "Open File",
-			arguments: [element, nodeishFs],
+			arguments: [args.element, args.nodeishFs],
 		},
 	}
 }
 
-export async function handleTreeSelection(
-	selectedNode: ProjectViewNode,
+export async function handleTreeSelection(args: {
+	selectedNode: ProjectViewNode
 	nodeishFs: NodeishFilesystem
-): Promise<void> {
-	const selectedProject = selectedNode.path
+}): Promise<void> {
+	const selectedProject = normalizePath(args.selectedNode.path)
 
 	projectViewNodes = projectViewNodes.map((node) => ({
 		...node,
-		isSelected: node.path === selectedNode.path,
+		isSelected: node.path === args.selectedNode.path,
 	}))
 
 	const newSelectedProject = projectViewNodes.find((node) => node.isSelected)?.path as string
 
+	const repo = await openRepository(
+		(await findRepoRoot({
+			nodeishFs: args.nodeishFs,
+			path: newSelectedProject,
+		})) || "",
+		{
+			nodeishFs: args.nodeishFs,
+		}
+	)
+
 	try {
 		const inlangProject = await loadProject({
-			projectPath: selectedProject ?? "",
-			nodeishFs,
-			_capture(id, props) {
-				telemetry.capture({
-					event: id as TelemetryEvents,
-					properties: props,
-				})
-			},
+			projectPath: newSelectedProject,
+			appId: CONFIGURATION.STRINGS.APP_ID,
+			repo,
 		})
 
 		telemetry.capture({
@@ -106,11 +112,11 @@ export async function handleTreeSelection(
 	}
 }
 
-export function createTreeDataProvider(
+export function createTreeDataProvider(args: {
 	nodeishFs: NodeishFilesystem
-): vscode.TreeDataProvider<ProjectViewNode> {
+}): vscode.TreeDataProvider<ProjectViewNode> {
 	return {
-		getTreeItem: (element: ProjectViewNode) => getTreeItem(element, nodeishFs),
+		getTreeItem: (element: ProjectViewNode) => getTreeItem({ element, nodeishFs: args.nodeishFs }),
 		getChildren: async () => createProjectViewNodes(),
 		onDidChangeTreeData: CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.event,
 	}
@@ -122,7 +128,7 @@ export const projectView = async (args: {
 	workspaceFolder: vscode.WorkspaceFolder
 	nodeishFs: NodeishFilesystem
 }) => {
-	const treeDataProvider = await createTreeDataProvider(args.nodeishFs)
+	const treeDataProvider = await createTreeDataProvider({ nodeishFs: args.nodeishFs })
 
 	// inital call to createProjectViewNodes() to set the selected project
 	treeDataProvider.getChildren()
@@ -136,7 +142,7 @@ export const projectView = async (args: {
 	if (selectedProjectPath) {
 		const selectedNode = projectViewNodes.find((node) => node.path === selectedProjectPath)
 		if (selectedNode) {
-			await handleTreeSelection(selectedNode, args.nodeishFs)
+			await handleTreeSelection({ selectedNode, nodeishFs: args.nodeishFs })
 		}
 	}
 }
