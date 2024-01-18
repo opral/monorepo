@@ -216,7 +216,8 @@ export async function loadProject(args: {
 			[messageId: string]: Error
 		}>({})
 
-		const messageFolderPath = projectPath + "/messages" + "/v1"
+		const messageBaseFolderFolderPath = projectPath + "/messages"
+		const messageFolderPath = messageBaseFolderFolderPath + "/v1"
 
 		createEffect(() => {
 			// wait for first effect excution until modules are resolved
@@ -229,6 +230,14 @@ export async function loadProject(args: {
 
 				try {
 					// make sure the message folder exists within the .inlang folder
+					try {
+						await fs.mkdir(messageBaseFolderFolderPath, { recursive: true })
+					} catch (e) {
+						if ((e as any).code !== "EEXIST") {
+							throw e
+						}
+					}
+
 					try {
 						await fs.mkdir(messageFolderPath, { recursive: true })
 					} catch (e) {
@@ -264,39 +273,43 @@ export async function loadProject(args: {
 						}
 						return filePaths
 					}
-
+					const startTime = new Date()
 					const messageFilePaths = await readFilesFromFolderRecursive(fs, messageFolderPath, "")
+					const parallelMessageLoad = []
 					for (const messageFilePath of messageFilePaths) {
 						const messageId = getMessageIdFromPath(messageFilePath)
 						if (!messageId) {
 							// ignore files not matching the expected id file path
 							continue
 						}
-						try {
-							const messageRaw = await fs.readFile(`${messageFolderPath}${messageFilePath}`, {
-								encoding: "utf-8",
-							})
+						parallelMessageLoad.push(async () => {
+							try {
+								const messageRaw = await fs.readFile(`${messageFolderPath}${messageFilePath}`, {
+									encoding: "utf-8",
+								})
 
-							const message = parseMessage(messageFilePath, messageRaw) as Message
+								const message = parseMessage(messageFilePath, messageRaw) as Message
 
-							// if we end up here - message parsing was successfull remove entry in erros map if it exists
-							const _messageLoadErrors = { ...messageLoadErrors() }
-							delete _messageLoadErrors[messageId]
-							setMessageLoadErrors(messageLoadErrors)
+								// if we end up here - message parsing was successfull remove entry in erros map if it exists
+								const _messageLoadErrors = { ...messageLoadErrors() }
+								delete _messageLoadErrors[messageId]
+								setMessageLoadErrors(messageLoadErrors)
 
-							loadedMessages.push(message)
-						} catch (e) {
-							// TODO #1844 FINK - test errors being propagated - fink doesnt show errors other than lints at the moment... -> move to new issue
-							// if reading of a single message fails we propagate the error to the project errors
-							messageLoadErrors()[messageId] = new LoadMessageError({
-								path: messageFilePath,
-								messageId,
-								cause: e,
-							})
-							setMessageLoadErrors(messageLoadErrors)
-						}
+								loadedMessages.push(message)
+							} catch (e) {
+								// TODO #1844 FINK - test errors being propagated - fink doesnt show errors other than lints at the moment... -> move to new issue
+								// if reading of a single message fails we propagate the error to the project errors
+								messageLoadErrors()[messageId] = new LoadMessageError({
+									path: messageFilePath,
+									messageId,
+									cause: e,
+								})
+								setMessageLoadErrors(messageLoadErrors)
+							}
+						})
 					}
 
+					await Promise.all(parallelMessageLoad)
 					setMessages(loadedMessages)
 
 					markInitAsComplete()
