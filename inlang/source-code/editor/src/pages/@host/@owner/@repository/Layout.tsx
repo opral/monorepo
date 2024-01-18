@@ -167,7 +167,7 @@ export function Layout(props: { children: JSXElement }) {
 	return (
 		<EditorLayout>
 			<div class="w-full flex flex-col grow bg-surface-50">
-				<div class="w-full flex items-end justify-between">
+				<div class="w-full flex items-end justify-between z-20">
 					<div class="flex flex-wrap gap-2 items-center pt-5">
 						<Breadcrumbs />
 						<BranchMenu />
@@ -184,7 +184,7 @@ export function Layout(props: { children: JSXElement }) {
 						Settings
 					</sl-button>
 				</div>
-				<div class="flex flex-wrap justify-between gap-2 py-5 sticky top-12 md:top-16 z-30 bg-surface-50">
+				<div class="flex flex-wrap justify-between gap-2 py-5 sticky top-12 md:top-16 z-10 bg-surface-50">
 					<div class="flex flex-wrap z-20 gap-2 items-center">
 						<Show when={project()}>
 							<For each={filterOptions()}>
@@ -536,9 +536,9 @@ function LanguageFilter(props: { clearFunction: any; setAddLanguageModalOpen: Se
 						<button
 							class="link link-primary opacity-75"
 							onClick={() => {
-								if (localStorage?.user?.isLoggedIn === false) {
+								if (!localStorage?.user?.isLoggedIn) {
 									setSignInModalOpen(true)
-								} else if (userIsCollaborator() === false) {
+								} else if (!userIsCollaborator()) {
 									showToast({
 										variant: "warning",
 										title: "Not a collaborator",
