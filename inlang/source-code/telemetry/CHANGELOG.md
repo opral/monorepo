@@ -1,5 +1,13 @@
 # @inlang/telemetry
 
+## 0.3.7
+
+### Patch Changes
+
+- Updated dependencies [87bed968b]
+- Updated dependencies [23ca73060]
+  - @inlang/sdk@0.25.0
+
 ## 0.3.6
 
 ### Patch Changes
