@@ -1,5 +1,11 @@
 # @inlang/create-project
 
+## 1.1.7
+
+### Patch Changes
+
+- @inlang/sdk@0.24.1
+
 ## 1.1.6
 
 ### Patch Changes
