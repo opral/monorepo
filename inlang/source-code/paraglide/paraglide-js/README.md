@@ -337,9 +337,8 @@ render((page) => (
 We are grateful for all the support we get from the community. Here are just a few of the comments we've received over the last few weeks.
 Of course we are open to and value criticism as well. If you have any feedback, please let us know directly on [GitHub](https://github.com/opral/monorepo/discussions/1464)
 
-<doc-comment text="Just tried Paraglide JS from @inlangHQ. This is how i18n should be done! Totally new level of DX for both implementation and managing translations! Superb support for SvelteKit as well ⭐" author="Patrik Engborg" icon="mdi:twitter" data-source="https://twitter.com/patrikengborg/status/1747260930873053674"></doc-comment>
-</doc-comments>
 <doc-comments>
+<doc-comment text="Just tried Paraglide JS from @inlangHQ. This is how i18n should be done! Totally new level of DX for both implementation and managing translations! Superb support for SvelteKit as well ⭐" author="Patrik Engborg" icon="mdi:twitter" data-source="https://twitter.com/patrikengborg/status/1747260930873053674"></doc-comment>
 <doc-comment text="The lib is great guys!" author="ktarmyshov" icon="mdi:github"></doc-comment>
 <doc-comment text="Thank you for that huge work you have done and still doing!" author="ZerdoX-x" icon="mdi:github"></doc-comment>
 <doc-comment text="[...] the switch between the sdk-js and paraglide has been pretty great! " author="albbus" icon="mdi:discord"></doc-comment>
@@ -350,8 +349,9 @@ Of course we are open to and value criticism as well. If you have any feedback, 
 
 Of course, we're not done yet! We plan on adding the following features to Paraglide JS in the upcoming weeks:
 
-- [ ] Pluralization
-- [ ] Formatting of numbers and dates
+- [ ] Pluralization ([Join the Discussion](https://github.com/opral/monorepo/discussions/2025))
+- [ ] Formatting of numbers and dates ([Join the Discussion](https://github.com/opral/monorepo/discussions/992))
+- [ ] Markup Placeholders ([Join the Discussion](https://github.com/opral/monorepo/discussions/913))
 
 # Talks
 
