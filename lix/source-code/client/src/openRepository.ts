@@ -335,7 +335,7 @@ export async function openRepository(
 			})
 
 			if (currentUpstreamCommit === currentOriginCommit) {
-				return { ahead: 0, behind: 0 }
+				return { ahead: 0, behind: 0, conflicts: false }
 			}
 
 			const res: Promise<

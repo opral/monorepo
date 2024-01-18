@@ -15,6 +15,7 @@ export class LixError extends Error {
 	response?: { status?: number }
 }
 
+// TODO: return type of openRepository instead of seperate type defs
 export type Repository = {
 	// we dont want to add isogit to types but its required for teting comparison and debugging
 	[x: string]: any
