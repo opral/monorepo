@@ -27,7 +27,6 @@ export const Gitfloat = () => {
 		repo,
 		refetchRepo,
 		forkStatus,
-		refetchForkStatus,
 		mutateForkStatus,
 		userIsCollaborator,
 		githubRepositoryInformation,
