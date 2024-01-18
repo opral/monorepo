@@ -30,6 +30,7 @@ import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
 import { maybeCreateFirstProjectId } from "./migrations/maybeCreateFirstProjectId.js"
 import type { Repository } from "@lix-js/client"
 import { capture } from "./telemetry/capture.js"
+import { identifyProject } from "./telemetry/groupIdentify.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -319,6 +320,14 @@ export async function loadProject(args: {
 		if (projectId && projectLoadedCapturedAlready === false) {
 			projectLoadedCapturedAlready = true
 			// TODO ensure that capture is "awaited" without blocking the the app from starting
+			await identifyProject({
+				projectId,
+				properties: {
+					// using the id for now as a name but can be changed in the future
+					// we need at least one property to make a project visible in the dashboard
+					name: projectId,
+				},
+			})
 			await capture("SDK loaded project", {
 				projectId,
 				properties: {
