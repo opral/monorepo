@@ -2,22 +2,53 @@
 
 Inlang is a versatile globalization ecosystem that empowers developers to seamlessly integrate language translation capabilities into their applications. This comprehensive guide will walk you through the process of building a general Inlang app with the `@inlang/sdk`. 
 
-We'll cover initializing a project, creating and updating messages, and working with lint rules.
+We'll cover initializing a project from a repo, creating and updating messages, and working with lint rules.
 
-## 1. Initialize the project
+## 1. Open Repository
 
-The first step is to initialize your project using the Inlang SDK. The `loadProject()` function in initializes an Inlang `object` with various functions.
+All Inlang projects live in a repo, so first we use the lix client to open the repo.
+
+We can use node:fs for repos which are already in the filesytem. E.g. This example uses the lix client to find the repo root starting from the current working directory, and then opens the repo there.
 
 ```typescript
-import { loadProject } from '@inlang/sdk';
+import fs from "node:fs/promises"
+import { openRepository, findRepoRoot } from "@lix-js/client"
 
-const inlang = loadProject({
-    projectPath: "user/project.inlang"
-    nodeishFs // NodeishFs is a wrapper around the Node.js fs module
-});
+const repoRoot = await findRepoRoot({ nodeishFs: fs, process.cwd() })
+
+const repo = await openRepository(repoRoot, {
+    nodeishFs: fs,
+})
 ```
 
-This sets the foundation for your Inlang powered application.
+Or, use createNodeishMemoryFs to open a GitHub repo from a browser:
+
+```typescript
+import { createNodeishMemoryFs } from "@lix-js/fs"
+import { openRepository } from "@lix-js/client"
+
+const repoURL = "https://github.com/inlang/ci-test-repo"
+
+const repo = await openRepository(repoURL, {
+    nodeishFs: createNodeishMemoryFs(),
+})
+```
+
+## 2. Load Project
+The next step is to initialize a project from the repo, using the Inlang SDK. This sets the foundation for your Inlang powered application.
+
+Since there may be multiple projects in a repo, a projectPath needs to be specified. The default projectPath is `/project.inlang`.
+
+```typescript
+import { loadProject } from "@inlang/sdk";
+
+const projectPath = "/project.inlang";
+
+const inlang = loadProject({
+    projectPath,
+    repo,
+});
+```
 
 ## 2. Create and update Messages
 

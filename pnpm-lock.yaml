@@ -2018,6 +2018,9 @@ importers:
       '@inlang/sdk':
         specifier: workspace:*
         version: link:../../sdk
+      '@lix-js/client':
+        specifier: workspace:*
+        version: link:../../../../lix/source-code/client
       typescript:
         specifier: ^5.2.2
         version: 5.2.2

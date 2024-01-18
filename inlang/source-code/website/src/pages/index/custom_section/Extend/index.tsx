@@ -11,8 +11,8 @@ const ExtendSection = () => {
 				Extend your Apps
 			</h2>
 			<p class="text-center text-lg max-w-[500px] text-surface-500 pt-5">
-				Enhance your app experience with plugins and lint rules, seamlessly adapting to your project
-				needs.
+				Enhance the experience in your globalization apps with plugins and lint rules, seamlessly
+				adapting to your project needs.
 			</p>
 			<div class="flex flex-col gap-10 mt-10 w-full">
 				<PluginSection />
