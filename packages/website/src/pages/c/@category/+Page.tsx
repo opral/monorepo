@@ -1,4 +1,4 @@
-import { For, Show, createSignal, type JSX, Switch, Match } from "solid-js"
+import { For, Show, createSignal, type JSX } from "solid-js"
 import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
