@@ -60,7 +60,7 @@ export function Layout(props: { children: JSXElement }) {
 	const [openedGitHub, setOpenedGitHub] = createSignal(false)
 
 	createEffect(() => {
-		if (forkStatus() && forkStatus()?.ahead > 0 && forkStatus()?.behind > 0 && userIsCollaborator()) {
+		if (forkStatus() && forkStatus()?.behind > 0 && forkStatus().conflicts && userIsCollaborator()) {
 			setForkStatusModalOpen(true)
 		}
 	})

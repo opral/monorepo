@@ -45,7 +45,7 @@ type EditorStateSchema = {
 	 * Fork status of the repository.
 	 */
 
-	forkStatus: () => { ahead: number, behind: number }
+	forkStatus: () => { ahead: number, behind: number, conflicts: boolean }
 	/**
 	 * Refetch the fork status.
 	 */
@@ -53,7 +53,7 @@ type EditorStateSchema = {
 	/**
 	 * The current branch.
 	 */
-	mutateForkStatus: (args: { ahead: number, behind: number }) => void
+	mutateForkStatus: (args: { ahead: number, behind: number, conflicts: boolean }) => void
 
 	currentBranch: Resource<string | undefined>
 	/**
@@ -295,12 +295,12 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		async (args) => {
 			const value = await args.forkStatus()
 			if ("error" in value) {
-				return { ahead: 0, behind: 0 }
+				return { ahead: 0, behind: 0, conflicts: false }
 			} else {
 				return value
 			}
 		},
-		{ initialValue: { ahead: 0, behind: 0 } }
+		{ initialValue: { ahead: 0, behind: 0, conflicts: false } }
 	)
 
 	const [projectList] = createResource(
