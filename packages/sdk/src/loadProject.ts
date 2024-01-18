@@ -341,6 +341,7 @@ export async function loadProject(args: {
 		}
 
 		return {
+			id: projectId,
 			installed: {
 				plugins: createSubscribable(() => installedPlugins()),
 				messageLintRules: createSubscribable(() => installedMessageLintRules()),
