@@ -99,7 +99,7 @@ export async function initProject(args: {
 	telemetry.capture({
 		event: "IDE-EXTENSION loaded project",
 		properties: {
-			errors: project?.errors(),
+			errors: project.errors(),
 		},
 	})
 
