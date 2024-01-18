@@ -65,11 +65,3 @@ telemetry.capture({
 		version,
 	},
 })
-// TODO add a project UUID to the tele.groups internal #196
-// telemetry.groupIdentify({
-// 	groupType: "repository",
-// 	groupKey: gitOrigin,
-// 	properties: {
-// 		name: gitOrigin,
-// 	},
-// })
