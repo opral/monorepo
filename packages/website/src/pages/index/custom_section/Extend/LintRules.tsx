@@ -3,6 +3,7 @@ import { registry } from "@inlang/marketplace-registry"
 import { For } from "solid-js"
 import { Arrow } from "../Personas/Developer.jsx"
 import { Button } from "../../components/Button.jsx"
+
 const LintRulesSection = () => {
 	const getLintRules = {
 		"messageLintRule.inlang.missingTranslation":
@@ -44,7 +45,13 @@ const LintRulesSection = () => {
 												/>
 												<div class="flex justify-between items-center gap-1">
 													<div class="flex items-center gap-2">
-														<WarningIcon />
+														<div class="w-8 h-8 relative group hover:bg-[#FFEDCA] rounded-lg text-[#FAAB11]">
+															<WarningIcon />
+															<div class="absolute hidden group-hover:block transition-all bg-surface-700 rounded-lg w-24 py-2 -translate-x-8 bottom-9 text-background text-center">
+																Warning
+															</div>
+														</div>
+
 														<div class="flex-1 font-bold text-surface-600">{lintRule}</div>
 													</div>
 													<div class="w-8 h-8 border border-surface-300 rounded-full flex justify-center items-center group-hover:bg-surface-100 transition-all text-surface-500 group-hover:text-surface-900">
@@ -71,7 +78,12 @@ const LintRulesSection = () => {
 											/>
 											<div class="flex justify-between items-center gap-1">
 												<div class="flex items-center gap-2">
-													<WarningIcon />
+													<div class="w-8 h-8 relative group hover:bg-[#FFEDED] rounded-lg text-[#FF4F4F]">
+														<WarningIcon />
+														<div class="absolute hidden group-hover:block transition-all bg-surface-700 rounded-lg w-20 py-2 -translate-x-6 bottom-9 text-background text-center">
+															Error
+														</div>
+													</div>
 													<div class="flex-1 font-bold text-surface-600">{displayName()}</div>
 												</div>
 												<div class="w-8 h-8 border border-surface-300 rounded-full flex justify-center items-center group-hover:bg-surface-100 transition-all text-surface-500 group-hover:text-surface-900">
@@ -128,7 +140,7 @@ function WarningIcon() {
 	return (
 		<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 32 32">
 			<path
-				fill="#FF4F4F"
+				fill="currentColor"
 				d="M14.662 19.997h2.667v2.667h-2.667v-2.667zm0-10.666h2.667v8h-2.667v-8zm1.333-6.667c-7.373 0-13.333 6-13.333 13.333A13.333 13.333 0 1015.995 2.664zm0 24a10.667 10.667 0 110-21.333 10.667 10.667 0 010 21.333z"
 			/>
 		</svg>

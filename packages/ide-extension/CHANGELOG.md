@@ -1,5 +1,24 @@
 # inlang-vs-code-extension
 
+## 1.25.4
+
+### Patch Changes
+
+- Updated dependencies [c38faebce]
+  - @inlang/sdk@0.24.0
+  - @lix-js/fs@0.6.0
+  - @inlang/create-project@1.1.6
+  - @inlang/telemetry@0.3.5
+
+## 1.25.3
+
+### Patch Changes
+
+- Updated dependencies [b920761e6]
+  - @inlang/sdk@0.23.0
+  - @inlang/create-project@1.1.5
+  - @inlang/telemetry@0.3.4
+
 ## 1.25.2
 
 ### Patch Changes

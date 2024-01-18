@@ -1,5 +1,24 @@
 # @inlang/create-project
 
+## 1.1.6
+
+### Patch Changes
+
+- Updated dependencies [c38faebce]
+  - @inlang/sdk@0.24.0
+  - @lix-js/fs@0.6.0
+  - @inlang/plugin@2.4.3
+
+## 1.1.5
+
+### Patch Changes
+
+- Updated dependencies [b920761e6]
+  - @inlang/sdk@0.23.0
+  - @inlang/plugin@2.4.2
+  - @inlang/project-settings@2.2.1
+  - @inlang/marketplace-registry@1.5.2
+
 ## 1.1.4
 
 ### Patch Changes

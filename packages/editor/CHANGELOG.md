@@ -4,6 +4,21 @@
 
 ### Patch Changes
 
+- Updated dependencies [c38faebce]
+  - @lix-js/client@0.6.0
+  - @lix-js/fs@0.6.0
+  - @lix-js/server@null
+
+## null
+
+### Patch Changes
+
+- @lix-js/server@null
+
+## null
+
+### Patch Changes
+
 - Updated dependencies [cd29edb11]
   - @lix-js/client@0.5.0
   - @lix-js/server@null

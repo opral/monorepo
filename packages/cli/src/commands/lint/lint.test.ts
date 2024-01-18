@@ -9,6 +9,7 @@ import {
 	type InlangModule,
 } from "@inlang/sdk"
 import { createNodeishMemoryFs } from "@lix-js/fs"
+import { openRepository } from "@lix-js/client"
 
 const exampleMessages: Message[] = [
 	{
@@ -68,6 +69,7 @@ async function setupProject(enabledLintRule?: MessageLintRule) {
 			messageLintRuleLevels: {},
 		} satisfies ProjectSettings)
 	)
+	const repo = await openRepository("file://", { nodeishFs: fs })
 
 	const _mockPlugin: Plugin = {
 		id: "plugin.inlang.json",
@@ -88,7 +90,7 @@ async function setupProject(enabledLintRule?: MessageLintRule) {
 
 	return await loadProject({
 		projectPath: "/user/project.inlang",
-		nodeishFs: fs,
+		repo,
 		_import,
 	})
 }
