@@ -19,10 +19,12 @@ import {
 import { createNodeishMemoryFs, normalizePath } from "@lix-js/fs"
 import { createMessage } from "./test-utilities/createMessage.js"
 import { tryCatch } from "@inlang/result"
-import { mockRepo } from "@lix-js/client"
+import { mockRepo, openRepository } from "@lix-js/client"
 import { type Snapshot } from "@lix-js/fs"
 // eslint-disable-next-line no-restricted-imports -- test
 import { readFileSync } from "node:fs"
+// eslint-disable-next-line no-restricted-imports -- test
+import { resolve } from "node:path"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -107,6 +109,16 @@ const _import: ImportFunction = async (name) =>
 		default: name === "plugin.js" ? mockPlugin : mockMessageLintRule,
 	} satisfies InlangModule)
 
+async function openCiTestRepo() {
+	return await mockRepo({
+		fromSnapshot: JSON.parse(
+			readFileSync(resolve(__dirname, "../mocks/ci-test-repo-no-shallow.json"), {
+				encoding: "utf-8",
+			})
+		) as Snapshot,
+	})
+}
+
 // ------------------------------------------------------------------------------------------------
 
 /**
@@ -117,10 +129,11 @@ const _import: ImportFunction = async (name) =>
  */
 it("should throw if a project (path) does not have a name", async () => {
 	const fs = createNodeishMemoryFs()
+	const repo = await openRepository("file://", { nodeishFs: fs })
 	const project = await tryCatch(() =>
 		loadProject({
 			projectPath: "/source-code/.inlang",
-			nodeishFs: fs,
+			repo,
 			_import,
 		})
 	)
@@ -129,6 +142,7 @@ it("should throw if a project (path) does not have a name", async () => {
 
 it("should throw if a project path does not end with .inlang", async () => {
 	const fs = createNodeishMemoryFs()
+	const repo = await openRepository("file://", { nodeishFs: fs })
 
 	const invalidPaths = [
 		"/source-code/frontend.inlang/settings",
@@ -140,7 +154,7 @@ it("should throw if a project path does not end with .inlang", async () => {
 		const project = await tryCatch(() =>
 			loadProject({
 				projectPath: invalidPath,
-				nodeishFs: fs,
+				repo,
 				_import,
 			})
 		)
@@ -151,11 +165,12 @@ it("should throw if a project path does not end with .inlang", async () => {
 describe("initialization", () => {
 	it("should throw if projectPath is not an absolute path", async () => {
 		const fs = createNodeishMemoryFs()
+		const repo = await openRepository("file://", { nodeishFs: fs })
 
 		const result = await tryCatch(() =>
 			loadProject({
 				projectPath: "relative/path",
-				nodeishFs: fs,
+				repo,
 				_import,
 			})
 		)
@@ -164,10 +179,7 @@ describe("initialization", () => {
 	})
 
 	it("should generate projectId on missing projectid", async () => {
-		const ciTestRepo: Snapshot = JSON.parse(
-			readFileSync("./mocks/ci-test-repo-no-shallow.json", { encoding: "utf-8" })
-		)
-		const repo = await mockRepo({ fromSnapshot: ciTestRepo })
+		const repo = await openCiTestRepo()
 
 		const existing = await repo.nodeishFs
 			.readFile("/project.inlang/project_id", {
@@ -203,10 +215,7 @@ describe("initialization", () => {
 	})
 
 	it("should reuse projectId on existing projectid", async () => {
-		const ciTestRepo: Snapshot = JSON.parse(
-			readFileSync("./mocks/ci-test-repo-no-shallow.json", { encoding: "utf-8" })
-		)
-		const repo = await mockRepo({ fromSnapshot: ciTestRepo })
+		const repo = await openCiTestRepo()
 
 		repo.nodeishFs.writeFile("/project.inlang/project_id", "testId")
 
@@ -236,11 +245,12 @@ describe("initialization", () => {
 		const fs = createNodeishMemoryFs()
 		fs.mkdir("C:\\Users\\user\\project.inlang", { recursive: true })
 		fs.writeFile("C:\\Users\\user\\project.inlang\\settings.json", JSON.stringify(settings))
+		const repo = await openRepository("file://", { nodeishFs: fs })
 
 		const result = await tryCatch(() =>
 			loadProject({
 				projectPath: "C:\\Users\\user\\project.inlang",
-				nodeishFs: fs,
+				repo,
 				_import,
 			})
 		)
@@ -253,10 +263,11 @@ describe("initialization", () => {
 		it("should return an error if settings file is not found", async () => {
 			const fs = createNodeishMemoryFs()
 			fs.mkdir("/user/project", { recursive: true })
+			const repo = await openRepository("file://", { nodeishFs: fs })
 
 			const project = await loadProject({
 				projectPath: "/user/non-existend-project.inlang",
-				nodeishFs: fs,
+				repo,
 				_import,
 			})
 
@@ -267,10 +278,11 @@ describe("initialization", () => {
 			const fs = await createNodeishMemoryFs()
 			await fs.mkdir("/user/project.inlang", { recursive: true })
 			await fs.writeFile("/user/project.inlang/settings.json", "invalid json")
+			const repo = await openRepository("file://", { nodeishFs: fs })
 
 			const project = await loadProject({
 				projectPath: "/user/project.inlang",
-				nodeishFs: fs,
+				repo,
 				_import,
 			})
 
@@ -281,10 +293,11 @@ describe("initialization", () => {
 			const fs = await createNodeishMemoryFs()
 			await fs.mkdir("/user/project.inlang", { recursive: true })
 			await fs.writeFile("/user/project.inlang/settings.json", JSON.stringify({}))
+			const repo = await openRepository("file://", { nodeishFs: fs })
 
 			const project = await loadProject({
 				projectPath: "/user/project.inlang",
-				nodeishFs: fs,
+				repo,
 				_import,
 			})
 
@@ -295,9 +308,10 @@ describe("initialization", () => {
 			const fs = await createNodeishMemoryFs()
 			await fs.mkdir("/user/project.inlang", { recursive: true })
 			await fs.writeFile("/user/project.inlang/settings.json", JSON.stringify(settings))
+			const repo = await openRepository("file://", { nodeishFs: fs })
 			const project = await loadProject({
 				projectPath: "/user/project.inlang",
-				nodeishFs: fs,
+				repo,
 				_import,
 			})
 
@@ -309,10 +323,11 @@ describe("initialization", () => {
 			const settingsWithDeifferentFormatting = JSON.stringify(settings, undefined, 4)
 			await fs.mkdir("/user/project.inlang", { recursive: true })
 			await fs.writeFile("/user/project.inlang/settings.json", settingsWithDeifferentFormatting)
+			const repo = await openRepository("file://", { nodeishFs: fs })
 
 			const project = await loadProject({
 				projectPath: "/user/project.inlang",
-				nodeishFs: fs,
+				repo,
 				_import,
 			})
 
@@ -342,10 +357,11 @@ describe("initialization", () => {
 			const fs = createNodeishMemoryFs()
 			await fs.mkdir("/user/project.inlang", { recursive: true })
 			await fs.writeFile("/user/project.inlang/settings.json", JSON.stringify(settings))
+			const repo = await openRepository("file://", { nodeishFs: fs })
 
 			const project = await loadProject({
 				projectPath: "/user/project.inlang",
-				nodeishFs: fs,
+				repo,
 				_import: $badImport,
 			})
 
@@ -375,9 +391,10 @@ describe("functionality", () => {
 			const fs = await createNodeishMemoryFs()
 			await fs.mkdir("/user/project.inlang", { recursive: true })
 			await fs.writeFile("/user/project.inlang/settings.json", JSON.stringify(settings))
+			const repo = await openRepository("file://", { nodeishFs: fs })
 			const project = await loadProject({
 				projectPath: "/user/project.inlang",
-				nodeishFs: fs,
+				repo,
 				_import,
 			})
 
@@ -388,9 +405,10 @@ describe("functionality", () => {
 			const fs = await createNodeishMemoryFs()
 			await fs.mkdir("/user/project.inlang", { recursive: true })
 			await fs.writeFile("/user/project.inlang/settings.json", JSON.stringify(settings))
+			const repo = await openRepository("file://", { nodeishFs: fs })
 			const project = await loadProject({
 				projectPath: "/user/project.inlang",
-				nodeishFs: fs,
+				repo,
 				_import,
 			})
 
@@ -414,9 +432,10 @@ describe("functionality", () => {
 			const fs = await createNodeishMemoryFs()
 			await fs.mkdir("/user/project.inlang", { recursive: true })
 			await fs.writeFile("/user/project.inlang/settings.json", JSON.stringify(settings))
+			const repo = await openRepository("file://", { nodeishFs: fs })
 			const project = await loadProject({
 				projectPath: "/user/project.inlang",
-				nodeishFs: fs,
+				repo,
 				_import,
 			})
 
@@ -436,10 +455,11 @@ describe("functionality", () => {
 			}
 
 			await fs.writeFile("/user/project.inlang/settings.json", JSON.stringify(settings))
+			const repo = await openRepository("file://", { nodeishFs: fs })
 
 			const project = await loadProject({
 				projectPath: "/user/project.inlang",
-				nodeishFs: fs,
+				repo,
 				_import,
 			})
 
@@ -451,9 +471,10 @@ describe("functionality", () => {
 			const fs = await createNodeishMemoryFs()
 			await fs.mkdir("/user/project.inlang", { recursive: true })
 			await fs.writeFile("/user/project.inlang/settings.json", JSON.stringify(settings))
+			const repo = await openRepository("file://", { nodeishFs: fs })
 			const project = await loadProject({
 				projectPath: "/user/project.inlang",
-				nodeishFs: fs,
+				repo,
 				_import,
 			})
 
@@ -483,9 +504,10 @@ describe("functionality", () => {
 			}
 			await fs.mkdir("/user/project.inlang", { recursive: true })
 			await fs.writeFile("/user/project.inlang/settings.json", JSON.stringify(settings))
+			const repo = await openRepository("file://", { nodeishFs: fs })
 			const project = await loadProject({
 				projectPath: "/user/project.inlang",
-				nodeishFs: fs,
+				repo,
 				_import,
 			})
 
@@ -516,10 +538,11 @@ describe("functionality", () => {
 
 			await fs.mkdir("/user/project.inlang", { recursive: true })
 			await fs.writeFile("/user/project.inlang/settings.json", JSON.stringify(settings))
+			const repo = await openRepository("file://", { nodeishFs: fs })
 
 			const project = await loadProject({
 				projectPath: "/user/project.inlang",
-				nodeishFs: fs,
+				repo,
 				_import,
 			})
 
@@ -558,6 +581,7 @@ describe("functionality", () => {
 					modules: ["plugin.js", "lintRule.js"],
 				} satisfies ProjectSettings)
 			)
+			const repo = await openRepository("file://", { nodeishFs: fs })
 
 			const _import: ImportFunction = async (name) => {
 				return {
@@ -566,7 +590,7 @@ describe("functionality", () => {
 			}
 			const project = await loadProject({
 				projectPath: "/user/project.inlang",
-				nodeishFs: fs,
+				repo,
 				_import,
 			})
 
@@ -609,6 +633,7 @@ describe("functionality", () => {
 					modules: ["plugin.js", "lintRule.js"],
 				} satisfies ProjectSettings)
 			)
+			const repo = await openRepository("file://", { nodeishFs: fs })
 			const _import: ImportFunction = async (name) => {
 				return {
 					default: name === "plugin.js" ? _mockPlugin : _mockLintRule,
@@ -617,7 +642,7 @@ describe("functionality", () => {
 
 			const project = await loadProject({
 				projectPath: "/user/project.inlang",
-				nodeishFs: fs,
+				repo,
 				_import,
 			})
 
@@ -634,9 +659,10 @@ describe("functionality", () => {
 			const fs = await createNodeishMemoryFs()
 			await fs.mkdir("/user/project.inlang", { recursive: true })
 			await fs.writeFile("/user/project.inlang/settings.json", JSON.stringify(settings))
+			const repo = await openRepository("file://", { nodeishFs: fs })
 			const project = await loadProject({
 				projectPath: "/user/project.inlang",
-				nodeishFs: fs,
+				repo,
 				_import,
 			})
 			project.errors.subscribe((errors) => {
@@ -650,9 +676,10 @@ describe("functionality", () => {
 			const fs = await createNodeishMemoryFs()
 			await fs.mkdir("/user/project.inlang", { recursive: true })
 			await fs.writeFile("/user/project.inlang/settings.json", JSON.stringify(settings))
+			const repo = await openRepository("file://", { nodeishFs: fs })
 			const project = await loadProject({
 				projectPath: "/user/project.inlang",
-				nodeishFs: fs,
+				repo,
 				_import,
 			})
 
@@ -667,9 +694,10 @@ describe("functionality", () => {
 			const fs = await createNodeishMemoryFs()
 			await fs.mkdir("/user/project.inlang", { recursive: true })
 			await fs.writeFile("/user/project.inlang/settings.json", JSON.stringify(settings))
+			const repo = await openRepository("file://", { nodeishFs: fs })
 			const project = await loadProject({
 				projectPath: "/user/project.inlang",
-				nodeishFs: fs,
+				repo,
 				_import,
 			})
 
@@ -694,6 +722,7 @@ describe("functionality", () => {
 			await fs.writeFile("/user/project.inlang/settings.json", JSON.stringify(settings))
 
 			await fs.mkdir("./resources")
+			const repo = await openRepository("file://", { nodeishFs: fs })
 
 			const mockSaveFn = vi.fn()
 
@@ -714,7 +743,7 @@ describe("functionality", () => {
 
 			const project = await loadProject({
 				projectPath: "/user/project.inlang",
-				nodeishFs: fs,
+				repo,
 				_import,
 			})
 
@@ -869,6 +898,7 @@ describe("functionality", () => {
 
 			await fs.mkdir("./project.inlang", { recursive: true })
 			await fs.writeFile("./project.inlang/settings.json", JSON.stringify(settings))
+			const repo = await openRepository("file://", { nodeishFs: fs })
 
 			const mockSaveFn = vi.fn()
 
@@ -893,7 +923,7 @@ describe("functionality", () => {
 
 			const project = await loadProject({
 				projectPath: "/project.inlang",
-				nodeishFs: fs,
+				repo,
 				_import,
 			})
 
@@ -911,9 +941,10 @@ describe("functionality", () => {
 			const fs = await createNodeishMemoryFs()
 			await fs.mkdir("/user/project", { recursive: true })
 			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
+			const repo = await openRepository("file://", { nodeishFs: fs })
 			const project = await loadProject({
 				projectPath: "/user/project/project.inlang.json",
-				nodeishFs: fs,
+				repo,
 				_import,
 			})
 			// TODO: test with real lint rules
@@ -933,9 +964,10 @@ describe("functionality", () => {
 			const fs = createNodeishMemoryFs()
 			await fs.mkdir("/user/project.inlang", { recursive: true })
 			await fs.writeFile("/user/project.inlang/settings.json", JSON.stringify(settings))
+			const repo = await openRepository("file://", { nodeishFs: fs })
 			const project = await loadProject({
 				projectPath: "/user/project.inlang",
-				nodeishFs: fs,
+				repo,
 				_import: async () => ({
 					default: mockMessageLintRule,
 				}),
@@ -998,11 +1030,12 @@ describe("functionality", () => {
 
 			await fs.mkdir("./project.inlang", { recursive: true })
 			await fs.writeFile("./project.inlang/settings.json", JSON.stringify(settings))
+			const repo = await openRepository("file://", { nodeishFs: fs })
 
 			// establish watcher
 			const project = await loadProject({
 				projectPath: normalizePath("/project.inlang"),
-				nodeishFs: fs,
+				repo,
 				_import: async () => ({
 					default: mockMessageFormatPlugin,
 				}),
