@@ -273,7 +273,7 @@ export async function loadProject(args: {
 						}
 						return filePaths
 					}
-					const startTime = new Date()
+
 					const messageFilePaths = await readFilesFromFolderRecursive(fs, messageFolderPath, "")
 					const parallelMessageLoad = []
 					for (const messageFilePath of messageFilePaths) {
@@ -310,9 +310,7 @@ export async function loadProject(args: {
 					}
 
 					await Promise.all(parallelMessageLoad)
-					const endTime = new Date()
-					const timeElapsed = endTime - startTime
-					debugger
+
 					setMessages(loadedMessages)
 
 					markInitAsComplete()
