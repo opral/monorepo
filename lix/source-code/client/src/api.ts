@@ -38,7 +38,7 @@ export type Repository = {
 	>
 	createFork: () => Promise<Endpoints["POST /repos/{owner}/{repo}/forks"]["response"]>
 	forkStatus: () => Promise<
-		{ ahead: number; behind: number; conflict: boolean } | { error: string }
+		{ ahead: number; behind: number; conflicts: boolean } | { error: string }
 	>
 	getOrigin: (arg?: { safeHashOnly?: boolean }) => Promise<string>
 	getCurrentBranch: () => Promise<string | undefined>
