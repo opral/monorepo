@@ -50,6 +50,7 @@ export const createNodeishFsWithWatcher = (args: {
 		// @ts-expect-error
 		readFile: (path: string, options: { encoding: "utf-8" | "binary" }) =>
 			readFileAndExtractPath(path, options),
+		rm: args.nodeishFs.rm,
 		readdir: args.nodeishFs.readdir,
 		mkdir: args.nodeishFs.mkdir,
 		writeFile: args.nodeishFs.writeFile,
