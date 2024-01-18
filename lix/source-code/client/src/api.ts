@@ -37,7 +37,9 @@ export type Repository = {
 		Endpoints["POST /repos/{owner}/{repo}/merge-upstream"]["response"]["data"] | { error: any }
 	>
 	createFork: () => Promise<Endpoints["POST /repos/{owner}/{repo}/forks"]["response"]>
-	forkStatus: () => Promise<{ ahead: number; behind: number } | { error: string }>
+	forkStatus: () => Promise<
+		{ ahead: number; behind: number; conflict: boolean } | { error: string }
+	>
 	getOrigin: (arg?: { safeHashOnly?: boolean }) => Promise<string>
 	getCurrentBranch: () => Promise<string | undefined>
 	getBranches: () => Promise<string[] | undefined>
