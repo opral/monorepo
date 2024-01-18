@@ -1,5 +1,11 @@
 # @inlang/paraglide-js-adapter-webpack
 
+## 1.0.12
+
+### Patch Changes
+
+- @inlang/paraglide-js-adapter-unplugin@1.2.6
+
 ## 1.0.11
 
 ### Patch Changes
