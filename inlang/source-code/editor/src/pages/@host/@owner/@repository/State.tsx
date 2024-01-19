@@ -37,10 +37,24 @@ type EditorStateSchema = {
 	 * Returns a repository object
 	 */
 	repo: () => Repository | undefined
+	/**
+	 * Refetch the repository.
+	 */
+	refetchRepo: () => void
+	/**
+	 * Fork status of the repository.
+	 */
 
+	forkStatus: () => { ahead: number, behind: number, conflicts: boolean }
+	/**
+	 * Refetch the fork status.
+	 */
+	refetchForkStatus: () => void
 	/**
 	 * The current branch.
 	 */
+	mutateForkStatus: (args: { ahead: number, behind: number, conflicts: boolean }) => void
+
 	currentBranch: Resource<string | undefined>
 	/**
 	 * The branch names of current repo.
@@ -49,6 +63,7 @@ type EditorStateSchema = {
 	/**
 	 * Additional information about a repository provided by GitHub.
 	 */
+
 	githubRepositoryInformation: Resource<Awaited<ReturnType<Repository["getMeta"]>> | undefined>
 	/**
 	 * Route parameters like `/github.com/inlang/website`.
@@ -228,7 +243,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			setSearchParams({ key: "branch", value: branch })
 		}
 	})
-	const [repo] = createResource(
+	const [repo, { refetch: refetchRepo }] = createResource(
 		() => {
 			return { routeParams: routeParams(), user: localStorage.user, branch: activeBranch() }
 		},
@@ -268,6 +283,25 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	repo()?.errors.subscribe((errors) => {
 		setLixErrors(errors)
 	})
+
+	const [forkStatus, { refetch: refetchForkStatus, mutate: mutateForkStatus }] = createResource(
+		() => {
+			if (repo()) {
+				return repo()
+			} else {
+				return false
+			}
+		},
+		async (args) => {
+			const value = await args.forkStatus()
+			if ("error" in value) {
+				return { ahead: 0, behind: 0, conflicts: false }
+			} else {
+				return value
+			}
+		},
+		{ initialValue: { ahead: 0, behind: 0, conflicts: false } }
+	)
 
 	const [projectList] = createResource(
 		() => {
@@ -373,7 +407,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	})
 
-	const [githubRepositoryInformation, { refetch }] = createResource(
+	const [githubRepositoryInformation, { refetch: refetchRepoInfo }] = createResource(
 		() => {
 			if (
 				localStorage?.user === undefined ||
@@ -395,7 +429,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	)
 
 	createEffect(() => {
-		if (localStorage?.user?.isLoggedIn) refetch()
+		if (localStorage?.user?.isLoggedIn) refetchRepoInfo()
 	})
 
 	const [currentBranch] = createResource(
@@ -460,6 +494,10 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			value={
 				{
 					repo: repo,
+					refetchRepo,
+					forkStatus,
+					mutateForkStatus,
+					refetchForkStatus,
 					currentBranch,
 					branchNames,
 					githubRepositoryInformation,

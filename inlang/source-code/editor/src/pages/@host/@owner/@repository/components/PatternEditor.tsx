@@ -349,7 +349,7 @@ export function PatternEditor(props: {
 			timer = setTimeout(() => {
 				showToast({
 					variant: "info",
-					title: "Inlang saves automatically but make shure to push your changes.",
+					title: "Inlang saves automatically, but make sure you push your changes.",
 				})
 			}, 500)
 		}
