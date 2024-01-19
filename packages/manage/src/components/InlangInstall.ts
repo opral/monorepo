@@ -439,14 +439,11 @@ export class InlangInstall extends TwLitElement {
 					</div>
 				</div>
 				<a
-					href=${
-						(this.isProduction ? `https://inlang.com` : "http://localhost:3000") +
-						"/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang"
-					}
+					href=${(this.isProduction ? `https://inlang.com` : "http://localhost:3000") + "/c/apps"}
 					target="_blank"
 					class="text-[#098DAC] font-medium transition-colors hover:text-[#06b6d4]"									"
 				>
-					You don't have project file? Read how to get started
+					Visit product pages to learn how to get started.
 					<doc-icon class="inline-block ml-1 translate-y-0.5" size="1.2em" icon="mdi:arrow-top-right"></doc-icon>
 				</a>
 			</div>
@@ -749,14 +746,11 @@ export class InlangInstall extends TwLitElement {
 					</div>
 				</div>
 				<a
-				href=${
-					(this.isProduction ? `https://inlang.com` : "http://localhost:3000") +
-					"/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang"
-				}
+				href=${(this.isProduction ? `https://inlang.com` : "http://localhost:3000") + "/c/apps"}
 					target="_blank"
 					class="text-[#098DAC] font-medium transition-colors hover:text-[#06b6d4]"									"
 				>
-					You don't have project file? Read how to get started
+					Go to the product pages to learn how to get started.
 					<doc-icon class="inline-block ml-1 translate-y-0.5" size="1.2em" icon="mdi:arrow-top-right"></doc-icon>
 				</a>
 			</div>

@@ -76,13 +76,6 @@ const Hero = () => {
 						<h1 class="text-base text-surface-900 font-semibold leading-snug">Old Title</h1>
 						<p class="text-sm text-surface-500">{m.home_inlang_description()}</p>
 					</div>
-					<Button
-						type="textPrimary"
-						href="/g/3go4f04m/guide-niklasbuchfink-whatIsInlang"
-						class="-mb-[10px]"
-					>
-						{m.home_inlang_button()}
-					</Button>
 				</div>
 			</div>
 		</div>

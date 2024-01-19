@@ -7,7 +7,6 @@ import Link from "#src/renderer/Link.jsx"
 const Guides = () => {
 	const getGuides = () => [
 		"guide.nilsjacobsen.buildAGlobalSvelteApp",
-		"guide.niklasbuchfink.whatIsInlang",
 		"guide.nilsjacobsen.whatArePlugins",
 		"guide.lorissigrist.useParaglideJsWithNextjsAppRouter",
 		"guide.floriankiem.localizationStartegy",
