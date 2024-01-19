@@ -8,7 +8,6 @@ export function telemetryCapture(event: TelemetryEvents, properties?: Record<str
 	telemetry.capture({
 		event,
 		properties: {
-			test: "test",
 			vscode_version: vscode.version,
 			version,
 			...properties,

@@ -57,8 +57,6 @@ async function main(args: {
 	nodeishFs: NodeishFilesystem
 }): Promise<void> {
 	if (state().projectsInWorkspace.length > 0) {
-		vscode.commands.executeCommand("setContext", "inlang:hasProjectInWorkspace", true)
-
 		// find the closest project to the workspace
 		const closestProjectToWorkspace = await closestInlangProject({
 			workingDirectory: normalizePath(args.workspaceFolder.uri.fsPath),
@@ -70,6 +68,8 @@ async function main(args: {
 			selectedProjectPath:
 				closestProjectToWorkspace?.projectPath || state().projectsInWorkspace[0]?.projectPath || "",
 		})
+
+		vscode.commands.executeCommand("setContext", "inlang:hasProjectInWorkspace", true)
 
 		await projectView({ ...args })
 		await messageView({ ...args })
