@@ -150,7 +150,6 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/create-project": "workspace:*",
 		"@inlang/result": "workspace:*",
 		"@inlang/sdk": "workspace:*",
 		"@inlang/telemetry": "workspace:*",
