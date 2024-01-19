@@ -3,7 +3,7 @@
 	import { availableLanguageTags, languageTag } from "$paraglide/runtime.js"
 	import * as m from "$paraglide/messages.js"
 	import { base } from "$app/paths"
-	import { i18n } from "$lib/i18n"
+	import { routing } from "$lib/i18n"
 </script>
 
 <p>{m.greeting({ name: "Samuel", count: 5 })}</p>
@@ -19,7 +19,7 @@
 
 <br/>
 <br/>
-<button on:click={() => goto(i18n.resolveRoute(base + "/about", languageTag()))}> Programmatic About</button>
+<button on:click={() => goto(routing.resolveRoute(base + "/about", languageTag()))}> Programmatic About</button>
 
 <br/>
 
@@ -34,7 +34,7 @@
 <br/>
 
 <!-- This path is excluded from being transalted in `vite.config.js` -->
-<a href="/base/not-translated">Not Translated</a>
+<a href="{base}/not-translated">Not Translated</a>
 
 <form action="{base}/">
 	<input type="text" name="test" />

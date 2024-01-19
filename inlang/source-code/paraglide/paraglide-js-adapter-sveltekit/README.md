@@ -45,53 +45,61 @@ export default defineConfig({
 })
 ```
 
-The vite plugin does a few things:
+This replaces the need for calling `paraglide-js compile` in your build script. It will automatically compiler and recompile your translations when you run `npm run dev` or `npm run build`.
 
-1. It automatically runs the Paraglide Compiler when your messages change, eliminating the need to call the paraglide CLI in your build script
-2. It adds the Link Preprocessor
+### 2. Initialize i18n routing
 
-
-### 2. Initialise the Adapter
-
-Create a file called `src/lib/i18n.js` and add the following code:
+Create a file somewhere, for example `src/lib/i18n.js` and add the following code:
 
 ```js
-import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
-import * as runtime from "../paraglide/runtime.js"
+import { i18nRouting } from "@inlang/paraglide-js-adapter-sveltekit"
+import * as runtime from "$paraglide/runtime.js"
 
-export const i18n = createI18n(runtime);
+export const routing = i18nRouting(runtime);
 ```
 
-This `i18n` instance is the heart of the adapter. It will provide you with all the methods you need to internationalize your app.
+This `routing` instance is the heart of the adapter. It will provide you with all the routing functionality you need.
 
-### 3. Add the Adapter Component
+### 3. Set up the Language Provider
 
-To provide the language to your app, add the `ParaglideJS` component to your layout and pass it the `i18n` instance.
+To provide the language to your app, add the `ParaglideJS` component to your layout and pass it the `routing` instance.
 
 ```svelte
 <!-- src/routes/+layout.svelte -->
 <script>
     import { ParaglideJS } from '@inlang/paraglide-js-adapter-sveltekit'
-	import { i18n } from '$lib/i18n.js'
+	import { routing } from '$lib/i18n.js'
 </script>
 
-<ParaglideJS {i18n}>
+<ParaglideJS {routing}>
     <slot />
 </ParaglideJS>
 ```
 
-The adapter makes sure that the language is set before your app is rendered. It will also add the alternate language links to your pages, making sure that search engines can find all your pages.
+This will do a few things for you:
+1. Automatically set the language for Paraglide
+2. Automatically add `rel="alternate"` links to your page head
+3. Automatically translate any `<a href>` attributes on your page. You don't need to change them
 
-### 4. Add the Hooks
+### 4. Add the Reroute hook
 
 Finally, let's add the `reroute` hook that makes it all possible. In your `src/hooks.js` file, use the `i18n` instance to add the `reroute` hook:
 
 ```js
-import { i18n } from '$lib/i18n.js'
-export const reroute = i18n.reroute()
+import { routing } from '$lib/routing.js'
+export const reroute = routing.reroute()
 ```
 
-## Translated Paths
+## 5. Go try it out!
+
+
+
+
+## Advanced Routing
+
+### Excluding certain routes
+
+### Translated Paths
 
 With the Paraglide SvelteKit Adapter, you can have different paths for each language. For example, you can have:
 - `/en/about` for English
