@@ -47,7 +47,6 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"devDependencies": {
-		"@inlang/create-project": "workspace:*",
 		"@inlang/env-variables": "workspace:*",
 		"@inlang/language-tag": "workspace:*",
 		"@inlang/result": "workspace:*",

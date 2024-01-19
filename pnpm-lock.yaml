@@ -119,9 +119,6 @@ importers:
         specifier: 11.1.1
         version: 11.1.1
     devDependencies:
-      '@inlang/create-project':
-        specifier: workspace:*
-        version: link:../create-project
       '@inlang/env-variables':
         specifier: workspace:*
         version: link:../env-variables
@@ -206,46 +203,6 @@ importers:
       vitest:
         specifier: 0.34.3
         version: 0.34.3
-
-  inlang/source-code/create-project:
-    dependencies:
-      '@inlang/env-variables':
-        specifier: workspace:*
-        version: link:../env-variables
-      '@inlang/marketplace-registry':
-        specifier: workspace:*
-        version: link:../marketplace-registry
-      '@inlang/plugin':
-        specifier: workspace:*
-        version: link:../versioned-interfaces/plugin
-      '@inlang/project-settings':
-        specifier: workspace:*
-        version: link:../versioned-interfaces/project-settings
-      '@inlang/result':
-        specifier: workspace:*
-        version: link:../result
-      '@inlang/sdk':
-        specifier: workspace:*
-        version: link:../sdk
-      '@lix-js/fs':
-        specifier: workspace:*
-        version: link:../../../lix/source-code/fs
-      '@sinclair/typebox':
-        specifier: 0.31.28
-        version: 0.31.28
-      terser:
-        specifier: 5.19.4
-        version: 5.19.4
-    devDependencies:
-      '@vitest/coverage-v8':
-        specifier: 0.34.3
-        version: 0.34.3(vitest@0.34.6)
-      typescript:
-        specifier: 5.2.2
-        version: 5.2.2
-      vitest:
-        specifier: ^0.34.1
-        version: 0.34.6(terser@5.19.4)
 
   inlang/source-code/design-system:
     dependencies:
@@ -571,9 +528,6 @@ importers:
 
   inlang/source-code/ide-extension:
     dependencies:
-      '@inlang/create-project':
-        specifier: workspace:*
-        version: link:../create-project
       '@inlang/result':
         specifier: workspace:*
         version: link:../result
@@ -783,7 +737,7 @@ importers:
         version: 5.3.2
       vite:
         specifier: 4.5.0
-        version: 4.5.0(@types/node@20.10.4)(terser@5.19.4)
+        version: 4.5.0(@types/node@20.10.4)
 
   inlang/source-code/markdown:
     dependencies:
@@ -1342,7 +1296,7 @@ importers:
         version: 4.0.5
       vite:
         specifier: 4.5.0
-        version: 4.5.0(@types/node@20.10.4)(terser@5.19.4)
+        version: 4.5.0(@types/node@20.9.3)
 
   inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/example:
     devDependencies:
@@ -1375,7 +1329,7 @@ importers:
         version: 5.2.2
       vite:
         specifier: 4.5.0
-        version: 4.5.0(@types/node@20.10.4)(terser@5.19.4)
+        version: 4.5.0(@types/node@20.9.3)
 
   inlang/source-code/paraglide/paraglide-js-adapter-unplugin:
     dependencies:
@@ -1440,7 +1394,7 @@ importers:
         version: 4.9.5
       vite:
         specifier: 4.5.0
-        version: 4.5.0(@types/node@20.10.4)(terser@5.19.4)
+        version: 4.5.0(@types/node@20.9.3)
 
   inlang/source-code/paraglide/paraglide-js-adapter-vite/tests/build:
     devDependencies:
@@ -1455,7 +1409,7 @@ importers:
         version: 4.9.5
       vite:
         specifier: ^4.2.0
-        version: 4.4.9(@types/node@20.10.4)(terser@5.19.4)
+        version: 4.4.9(@types/node@20.9.3)
 
   inlang/source-code/paraglide/paraglide-js-adapter-webpack:
     dependencies:
@@ -7492,7 +7446,7 @@ packages:
       svelte: 4.0.5
       tiny-glob: 0.2.9
       undici: 5.26.5
-      vite: 4.5.0(@types/node@20.10.4)(terser@5.19.4)
+      vite: 4.5.0(@types/node@20.9.3)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -7508,7 +7462,7 @@ packages:
       '@sveltejs/vite-plugin-svelte': 2.4.2(svelte@4.0.5)(vite@4.5.0)
       debug: 4.3.4(supports-color@8.1.1)
       svelte: 4.0.5
-      vite: 4.5.0(@types/node@20.10.4)(terser@5.19.4)
+      vite: 4.5.0(@types/node@20.9.3)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -7524,7 +7478,7 @@ packages:
       '@sveltejs/vite-plugin-svelte': 2.5.3(svelte@4.0.5)(vite@4.5.0)
       debug: 4.3.4(supports-color@8.1.1)
       svelte: 4.0.5
-      vite: 4.5.0(@types/node@20.10.4)(terser@5.19.4)
+      vite: 4.5.0(@types/node@20.9.3)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -7543,7 +7497,7 @@ packages:
       magic-string: 0.30.5
       svelte: 4.0.5
       svelte-hmr: 0.15.3(svelte@4.0.5)
-      vite: 4.5.0(@types/node@20.10.4)(terser@5.19.4)
+      vite: 4.5.0(@types/node@20.9.3)
       vitefu: 0.2.5(vite@4.5.0)
     transitivePeerDependencies:
       - supports-color
@@ -7563,7 +7517,7 @@ packages:
       magic-string: 0.30.5
       svelte: 4.0.5
       svelte-hmr: 0.15.3(svelte@4.0.5)
-      vite: 4.5.0(@types/node@20.10.4)(terser@5.19.4)
+      vite: 4.5.0(@types/node@20.9.3)
       vitefu: 0.2.5(vite@4.5.0)
     transitivePeerDependencies:
       - supports-color
@@ -8886,7 +8840,7 @@ packages:
       std-env: 3.5.0
       test-exclude: 6.0.0
       v8-to-istanbul: 9.1.3
-      vitest: 0.34.6(terser@5.19.4)
+      vitest: 0.34.6(webdriverio@8.26.1)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -21977,7 +21931,7 @@ packages:
       mlly: 1.4.2
       pathe: 1.1.1
       picocolors: 1.0.0
-      vite: 4.5.0(@types/node@20.10.4)(terser@5.19.4)
+      vite: 4.5.0(@types/node@20.10.4)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -22019,7 +21973,7 @@ packages:
       mlly: 1.4.2
       pathe: 1.1.1
       picocolors: 1.0.0
-      vite: 4.5.0(@types/node@20.10.4)(terser@5.19.4)
+      vite: 4.5.0(@types/node@20.10.4)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -22031,7 +21985,7 @@ packages:
       - terser
     dev: true
 
-  /vite-node@0.34.6(@types/node@20.10.4)(terser@5.19.4):
+  /vite-node@0.34.6(@types/node@20.10.4):
     resolution: {integrity: sha512-nlBMJ9x6n7/Amaz6F3zJ97EBwR2FkzhBRxF5e+jE6LA3yi6Wtc2lyTij1OnDMIr34v5g/tVQtsVAzhT0jc5ygA==}
     engines: {node: '>=v14.18.0'}
     dependencies:
@@ -22040,7 +21994,7 @@ packages:
       mlly: 1.4.2
       pathe: 1.1.1
       picocolors: 1.0.0
-      vite: 4.5.0(@types/node@20.10.4)(terser@5.19.4)
+      vite: 4.5.0(@types/node@20.10.4)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -22103,7 +22057,7 @@ packages:
       buffer-polyfill: /buffer@6.0.3
       node-stdlib-browser: 1.2.0
       process: 0.11.10
-      vite: 4.5.0(@types/node@20.10.4)(terser@5.19.4)
+      vite: 4.5.0(@types/node@20.10.4)
     transitivePeerDependencies:
       - rollup
     dev: false
@@ -22166,7 +22120,7 @@ packages:
       minimatch: 5.1.6
     dev: true
 
-  /vite@4.4.9(@types/node@20.10.4)(terser@5.19.4):
+  /vite@4.4.9(@types/node@20.10.4):
     resolution: {integrity: sha512-2mbUn2LlUmNASWwSCNSJ/EG2HuSRTnVNaydp6vMCm5VIqJsjMfbIWtbH2kDuwUVW5mMUKKZvGPX/rqeqVvv1XA==}
     engines: {node: ^14.18.0 || >=16.0.0}
     hasBin: true
@@ -22198,7 +22152,6 @@ packages:
       esbuild: 0.18.20
       postcss: 8.4.31
       rollup: 3.29.1
-      terser: 5.19.4
     optionalDependencies:
       fsevents: 2.3.3
 
@@ -22273,7 +22226,7 @@ packages:
     optionalDependencies:
       fsevents: 2.3.3
 
-  /vite@4.5.0(@types/node@20.10.4)(terser@5.19.4):
+  /vite@4.5.0(@types/node@20.10.4):
     resolution: {integrity: sha512-ulr8rNLA6rkyFAlVWw2q5YJ91v098AFQ2R0PRFwPzREXOUJQPtFUG0t+/ZikhaOCDqFoDhN6/v8Sq0o4araFAw==}
     engines: {node: ^14.18.0 || >=16.0.0}
     hasBin: true
@@ -22305,7 +22258,6 @@ packages:
       esbuild: 0.18.20
       postcss: 8.4.31
       rollup: 3.29.1
-      terser: 5.19.4
     optionalDependencies:
       fsevents: 2.3.3
 
@@ -22536,7 +22488,7 @@ packages:
       strip-literal: 1.3.0
       tinybench: 2.5.1
       tinypool: 0.6.0
-      vite: 4.5.0(@types/node@20.10.4)(terser@5.19.4)
+      vite: 4.5.0(@types/node@20.10.4)
       vite-node: 0.33.0(@types/node@20.10.4)
       why-is-node-running: 2.2.2
     transitivePeerDependencies:
@@ -22666,73 +22618,8 @@ packages:
       strip-literal: 1.3.0
       tinybench: 2.5.1
       tinypool: 0.7.0
-      vite: 4.5.0(@types/node@20.10.4)(terser@5.19.4)
+      vite: 4.5.0(@types/node@20.10.4)
       vite-node: 0.34.4(@types/node@20.10.4)
-      why-is-node-running: 2.2.2
-    transitivePeerDependencies:
-      - less
-      - lightningcss
-      - sass
-      - stylus
-      - sugarss
-      - supports-color
-      - terser
-    dev: true
-
-  /vitest@0.34.6(terser@5.19.4):
-    resolution: {integrity: sha512-+5CALsOvbNKnS+ZHMXtuUC7nL8/7F1F2DnHGjSsszX8zCjWSSviphCb/NuS9Nzf4Q03KyyDRBAXhF/8lffME4Q==}
-    engines: {node: '>=v14.18.0'}
-    hasBin: true
-    peerDependencies:
-      '@edge-runtime/vm': '*'
-      '@vitest/browser': '*'
-      '@vitest/ui': '*'
-      happy-dom: '*'
-      jsdom: '*'
-      playwright: '*'
-      safaridriver: '*'
-      webdriverio: '*'
-    peerDependenciesMeta:
-      '@edge-runtime/vm':
-        optional: true
-      '@vitest/browser':
-        optional: true
-      '@vitest/ui':
-        optional: true
-      happy-dom:
-        optional: true
-      jsdom:
-        optional: true
-      playwright:
-        optional: true
-      safaridriver:
-        optional: true
-      webdriverio:
-        optional: true
-    dependencies:
-      '@types/chai': 4.3.10
-      '@types/chai-subset': 1.3.5
-      '@types/node': 20.10.4
-      '@vitest/expect': 0.34.6
-      '@vitest/runner': 0.34.6
-      '@vitest/snapshot': 0.34.6
-      '@vitest/spy': 0.34.6
-      '@vitest/utils': 0.34.6
-      acorn: 8.11.2
-      acorn-walk: 8.3.0
-      cac: 6.7.14
-      chai: 4.3.10
-      debug: 4.3.4(supports-color@8.1.1)
-      local-pkg: 0.4.3
-      magic-string: 0.30.5
-      pathe: 1.1.1
-      picocolors: 1.0.0
-      std-env: 3.5.0
-      strip-literal: 1.3.0
-      tinybench: 2.5.1
-      tinypool: 0.7.0
-      vite: 4.4.9(@types/node@20.10.4)(terser@5.19.4)
-      vite-node: 0.34.6(@types/node@20.10.4)(terser@5.19.4)
       why-is-node-running: 2.2.2
     transitivePeerDependencies:
       - less
@@ -22796,8 +22683,8 @@ packages:
       strip-literal: 1.3.0
       tinybench: 2.5.1
       tinypool: 0.7.0
-      vite: 4.4.9(@types/node@20.10.4)(terser@5.19.4)
-      vite-node: 0.34.6(@types/node@20.10.4)(terser@5.19.4)
+      vite: 4.4.9(@types/node@20.10.4)
+      vite-node: 0.34.6(@types/node@20.10.4)
       webdriverio: 8.26.1(typescript@5.3.2)
       why-is-node-running: 2.2.2
     transitivePeerDependencies:
