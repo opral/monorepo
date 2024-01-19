@@ -363,11 +363,11 @@ export function Layout(props: { children: JSXElement }) {
 					Your fork is out of sync with the upstream repository. Please resolve the conflicts before
 					applying your changes.
 				</p>
-				<img src="/images/resolve-in-github.webp" alt="Sync Fork GitHub UI" class="w-full" />
-				<div class="flex flex-end gap-4 pt-6">
+				<img src="/images/resolve-in-github.webp" alt="Sync Fork GitHub UI" class="w-4/5 mx-auto mt-2" />
+				<div class="flex flex-col gap-4 pt-6">
 						<sl-button
 							class="w-full"
-							prop:size={"small"}
+						prop:variant={openedGitHub() ? "default" : "primary"}
 							prop:href={`https://github.com/${routeParams().owner}/${routeParams().repository}`}
 							prop:target="_blank"
 							onClick={() => setOpenedGitHub(true)}
@@ -380,7 +380,6 @@ export function Layout(props: { children: JSXElement }) {
 					<Show when={openedGitHub()}>
 						<sl-button
 							class="w-full"
-							prop:size={"small"}
 							prop:variant={"primary"}
 							onClick={() => {
 								refetchRepo()
