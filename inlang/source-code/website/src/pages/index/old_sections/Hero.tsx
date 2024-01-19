@@ -2,7 +2,6 @@ import { For, Show } from "solid-js"
 import { registry } from "@inlang/marketplace-registry"
 import { Chip } from "#src/interface/components/Chip.jsx"
 import { colorForTypeOf, typeOfIdToTitle } from "#src/pages/m/utilities.js"
-import { Button } from "../components/Button.jsx"
 import Link from "#src/renderer/Link.jsx"
 import * as m from "#src/paraglide/messages.js"
 
