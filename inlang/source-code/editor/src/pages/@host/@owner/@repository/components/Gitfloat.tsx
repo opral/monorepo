@@ -40,7 +40,7 @@ export const Gitfloat = () => {
 		tourStep,
 		project,
 		projectList,
-		lixErrors
+		lixErrors,
 	} = useEditorState()
 	const [localStorage] = useLocalStorage()
 
@@ -272,7 +272,10 @@ export const Gitfloat = () => {
 	})
 
 	createEffect(() => {
-		if (forkStatus().behind > 0 && (tourStep() !== "github-login" || tourStep() !== "fork-repository")) {
+		if (
+			forkStatus().behind > 0 &&
+			(tourStep() !== "github-login" || tourStep() !== "fork-repository")
+		) {
 			const gitfloat = document.querySelector(".syncfork")
 			gitfloat?.classList.remove("hidden")
 			gitfloat?.classList.add("animate-slideInFromBehind", "-z-10")
@@ -289,7 +292,7 @@ export const Gitfloat = () => {
 		}
 	})
 
-	// // trigger refetch of repo when user is logged in and 
+	// // trigger refetch of repo when user is logged in and
 	// createEffect(() => {
 	// 	if (lixErrors().some((err) => err.message.includes("401")) && localStorage?.user?.isLoggedIn && repo()) {
 	// 		refetchRepo()
@@ -324,7 +327,14 @@ export const Gitfloat = () => {
 						lixErrors().length === 0
 					}
 				>
-					<Show when={forkStatus() && forkStatus().behind > 0 && !forkStatus().conflicts && userIsCollaborator()}>
+					<Show
+						when={
+							forkStatus() &&
+							forkStatus().behind > 0 &&
+							!forkStatus().conflicts &&
+							userIsCollaborator()
+						}
+					>
 						<div class="syncfork w-full relative flex justify-start items-center gap-1.5 rounded-t-lg bg-[#293344] p-1.5 text-xs font-medium text-on-inverted-surface after:content-[''] after:absolute after:w-full after:h-8 after:translate-y-6 after:-m-1.5 after:bg-[#293344] after:-z-10">
 							<div class="text-warning-on-inverted-container px-1.5 py-[5px]">
 								<WarningIcon />
@@ -347,9 +357,7 @@ export const Gitfloat = () => {
 							>
 								{/* @ts-ignore */}
 								<IconArrowDownward slot="prefix" class="w-6 h-6 -mx-1 opacity-90" />
-								<span class="opacity-90">
-									{forkStatus().behind}
-								</span>
+								<span class="opacity-90">{forkStatus().behind}</span>
 							</sl-button>
 						</div>
 					</Show>
