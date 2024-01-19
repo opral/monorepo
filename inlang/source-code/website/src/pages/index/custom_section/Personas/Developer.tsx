@@ -123,26 +123,32 @@ const DeveloperSlide = () => {
 			</div>
 			<div class="pl-6 md:pl-8 md:pr-8">
 				<h3 class="font-medium text-surface-600">{m.home_personas_developer_stack_title()}</h3>
-				<div class="flex gap-[10px] md:gap-4 mt-4 overflow-x-scroll hide-scrollbar">
-					<For each={stacks}>
-						{(stack) => (
-							<Link href={stack.link} class="flex-1 min-w-[64px]">
-								<div class="group w-full flex flex-col items-center gap-2">
-									<div class="flex w-full justify-center items-center border border-surface-200 hover:border-surface-300 bg-gradient-to-b from-surface-50 hover:from-surface-100 rounded-lg h-[60px] overflow-hidden">
-										{stack.icon}
-									</div>
-									<p class="text-center text-sm text-surface-500 font-medium">{stack.name}</p>
-								</div>
-							</Link>
-						)}
-					</For>
-				</div>
+				<StackList />
 			</div>
 		</div>
 	)
 }
 
 export default DeveloperSlide
+
+export function StackList() {
+	return (
+		<div class="flex gap-[10px] md:gap-4 mt-4 overflow-x-scroll hide-scrollbar">
+			<For each={stacks}>
+				{(stack) => (
+					<Link href={stack.link} class="flex-1 min-w-[64px]">
+						<div class="group w-full flex flex-col items-center gap-2">
+							<div class="flex w-full justify-center items-center border border-surface-200 hover:border-surface-300 bg-gradient-to-b from-surface-50 hover:from-surface-100 rounded-lg h-[60px] overflow-hidden">
+								{stack.icon}
+							</div>
+							<p class="text-center text-sm text-surface-500 font-medium">{stack.name}</p>
+						</div>
+					</Link>
+				)}
+			</For>
+		</div>
+	)
+}
 
 export function Arrow() {
 	return (

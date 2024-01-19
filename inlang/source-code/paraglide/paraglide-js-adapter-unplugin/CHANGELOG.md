@@ -1,5 +1,33 @@
 # @inlang/paraglide-js-adapter-unplugin
 
+## 1.3.0
+
+### Minor Changes
+
+- d199e539d: chore: add missing `appId` parameter to `loadProject`
+
+### Patch Changes
+
+- Updated dependencies [87bed968b]
+- Updated dependencies [23ca73060]
+  - @inlang/sdk@0.25.0
+  - @inlang/paraglide-js@1.2.1
+
+## 1.2.6
+
+### Patch Changes
+
+- @inlang/paraglide-js@1.2.1
+- @inlang/sdk@0.24.1
+
+## 1.2.5
+
+### Patch Changes
+
+- Updated dependencies [c38faebce]
+  - @inlang/sdk@0.24.0
+  - @inlang/paraglide-js@1.2.1
+
 ## 1.2.4
 
 ### Patch Changes

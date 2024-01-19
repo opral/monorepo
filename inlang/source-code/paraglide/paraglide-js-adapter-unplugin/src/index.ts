@@ -69,6 +69,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		})
 
 		project = await loadProject({
+			appId: "library.inlang.paraglideJs",
 			projectPath: path.resolve(process.cwd(), options.project),
 			repo,
 		})

@@ -1,5 +1,33 @@
 # @inlang/sdk
 
+## 0.25.0
+
+### Minor Changes
+
+- 87bed968b: add: `project.id` API
+- 23ca73060: add project identify
+
+## 0.24.1
+
+### Patch Changes
+
+- Updated dependencies [23ce3f0ea]
+  - @lix-js/client@0.7.0
+
+## 0.24.0
+
+### Minor Changes
+
+- c38faebce: release fixed project id and catchup missed releases for cli and lix
+
+### Patch Changes
+
+- Updated dependencies [c38faebce]
+  - @lix-js/client@0.6.0
+  - @lix-js/fs@0.6.0
+  - @inlang/plugin@2.4.3
+  - @inlang/module@1.2.3
+
 ## 0.23.0
 
 ### Minor Changes
