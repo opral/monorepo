@@ -1,7 +1,7 @@
-import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
+import { i18nRouting } from "@inlang/paraglide-js-adapter-sveltekit"
 import * as runtime from "$paraglide/runtime.js"
 
-export const i18n = createI18n(runtime, {
+export const routing = i18nRouting(runtime, {
 	pathnames: {
 		"/about": {
 			en: "/about",

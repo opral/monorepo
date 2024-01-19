@@ -101,7 +101,7 @@ export type I18nConfig<T extends string> = {
  * export const i18n = createI18n(runtime, { ...options })
  * ```
  */
-export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I18nUserConfig<T>) {
+export function i18nRouting<T extends string>(runtime: Paraglide<T>, options?: I18nUserConfig<T>) {
 	const translations = options?.pathnames ?? {}
 
 	const exclude = options?.exclude ?? (() => false)
@@ -227,4 +227,4 @@ function normalizeBase(base: string) {
 	return base
 }
 
-export type I18n<T extends string> = ReturnType<typeof createI18n<T>>
+export type I18n<T extends string> = ReturnType<typeof i18nRouting<T>>

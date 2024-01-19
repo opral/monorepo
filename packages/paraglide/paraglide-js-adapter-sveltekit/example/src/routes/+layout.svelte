@@ -1,8 +1,8 @@
 <script>
 	import { ParaglideJS } from "@inlang/paraglide-js-adapter-sveltekit"
-	import { i18n } from "$lib/i18n.js"
+	import { routing } from "$lib/i18n.js"
 </script>
 
-<ParaglideJS {i18n}>
+<ParaglideJS {routing}>
 	<slot />
 </ParaglideJS>
