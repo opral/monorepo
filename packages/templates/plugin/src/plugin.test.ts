@@ -1,12 +1,12 @@
 import { it, expect } from "vitest"
 import { ProjectSettings, loadProject } from "@inlang/sdk"
-import { createNodeishMemoryFs } from "@inlang/sdk/test-utilities"
 import { id as pluginId } from "../marketplace-manifest.json"
-import { openRepository } from "@lix-js/client"
+import { mockRepo } from "@lix-js/client"
 
 it("should return fake messages to illustrate how a plugin works", async () => {
-	// creating a virtual filesystem to store the project file
-	const fs = createNodeishMemoryFs()
+	// creating a virtual filesystem in a mock repo to store the project file
+	const repo = await mockRepo()
+	const fs = repo.nodeishFs
 
 	// creating a project file
 	const settings = {
@@ -18,9 +18,6 @@ it("should return fake messages to illustrate how a plugin works", async () => {
 	// writing the project file to the virtual filesystem
 	await fs.mkdir("/project.inlang", { recursive: true })
 	await fs.writeFile("/project.inlang/settings.json", JSON.stringify(settings))
-
-	// opening the repository
-	const repo = await openRepository("file://", { nodeishFs: fs })
 
 	// opening the project file and loading the plugin
 	const project = await loadProject({

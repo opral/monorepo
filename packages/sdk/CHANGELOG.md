@@ -1,5 +1,12 @@
 # @inlang/sdk
 
+## 0.25.0
+
+### Minor Changes
+
+- 87bed968b: add: `project.id` API
+- 23ca73060: add project identify
+
 ## 0.24.1
 
 ### Patch Changes
