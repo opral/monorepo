@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { window } from "vscode"
 import { extractMessageCommand } from "./extractMessage.js"
-import { state } from "../state.js"
+import { state } from "../utilities/state.js"
 import { msg } from "../utilities/messages/msg.js"
 import { CONFIGURATION } from "../configuration.js"
 
@@ -22,7 +22,7 @@ vi.mock("vscode", () => ({
 	},
 }))
 
-vi.mock("../state.js", () => ({
+vi.mock("../utilities/state.js", () => ({
 	state: vi.fn(),
 }))
 

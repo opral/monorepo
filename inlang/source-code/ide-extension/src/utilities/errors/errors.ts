@@ -1,5 +1,5 @@
 import * as vscode from "vscode"
-import { state } from "../../state.js"
+import { state } from "../state.js"
 import { CONFIGURATION } from "../../configuration.js"
 
 export interface ErrorNode {

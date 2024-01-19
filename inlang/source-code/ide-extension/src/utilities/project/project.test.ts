@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import * as vscode from "vscode"
 import { loadProject } from "@inlang/sdk"
-import { setState, state } from "../../state.js"
+import { setState, state } from "../state.js"
 import { CONFIGURATION } from "../../configuration.js"
 import { telemetry } from "../../services/telemetry/implementation.js"
 import { openRepository, findRepoRoot } from "@lix-js/client"
@@ -40,7 +40,7 @@ vi.mock("@lix-js/fs", () => ({
 	normalizePath: vi.fn((path: string) => path),
 }))
 
-vi.mock("../../state.js", () => ({
+vi.mock("../state.js", () => ({
 	setState: vi.fn(),
 	state: vi.fn(() => ({
 		projectsInWorkspace: [

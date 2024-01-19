@@ -1,5 +1,5 @@
 import * as vscode from "vscode"
-import { state } from "../state.js"
+import { state } from "../utilities/state.js"
 import { contextTooltip } from "./contextTooltip.js"
 import { getStringFromPattern } from "../utilities/messages/query.js"
 import { CONFIGURATION } from "../configuration.js"

@@ -1,6 +1,6 @@
 import type { CustomApiInlangIdeExtension, LanguageTag } from "@inlang/sdk"
 import { MarkdownString, Uri } from "vscode"
-import { state } from "../state.js"
+import { state } from "../utilities/state.js"
 import { getStringFromPattern } from "../utilities/messages/query.js"
 import { INTERPOLATE } from "../configuration.js"
 import { escapeHtml } from "../utilities/utils.js"

@@ -1,5 +1,5 @@
 import * as vscode from "vscode"
-import { state } from "../state.js"
+import { state } from "../utilities/state.js"
 import type { MessageLintReport } from "@inlang/sdk"
 import { getActiveTextEditor } from "../main.js"
 

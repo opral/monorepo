@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import * as vscode from "vscode"
-import { state } from "../../state.js"
+import { state } from "../state.js"
 import type { Message } from "@inlang/sdk"
 import {
 	createMessageHtml,
@@ -29,7 +29,7 @@ vi.mock("vscode", () => ({
 	},
 }))
 
-vi.mock("../../state.js", () => ({
+vi.mock("../state.js", () => ({
 	state: vi.fn(),
 }))
 

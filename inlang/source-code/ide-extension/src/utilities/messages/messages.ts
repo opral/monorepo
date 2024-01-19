@@ -1,5 +1,5 @@
 import * as vscode from "vscode"
-import { state } from "../../state.js"
+import { state } from "../state.js"
 import type { Message } from "@inlang/sdk"
 import { CONFIGURATION } from "../../configuration.js"
 import { getStringFromPattern } from "./query.js"
