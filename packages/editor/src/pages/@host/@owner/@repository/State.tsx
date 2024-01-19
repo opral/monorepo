@@ -45,7 +45,7 @@ type EditorStateSchema = {
 	 * Fork status of the repository.
 	 */
 
-	forkStatus: () => { ahead: number, behind: number, conflicts: boolean }
+	forkStatus: () => { ahead: number; behind: number; conflicts: boolean }
 	/**
 	 * Refetch the fork status.
 	 */
@@ -53,7 +53,7 @@ type EditorStateSchema = {
 	/**
 	 * The current branch.
 	 */
-	mutateForkStatus: (args: { ahead: number, behind: number, conflicts: boolean }) => void
+	mutateForkStatus: (args: { ahead: number; behind: number; conflicts: boolean }) => void
 
 	currentBranch: Resource<string | undefined>
 	/**

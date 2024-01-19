@@ -13,7 +13,7 @@ const AppHeader = () => {
 	// const data: Array<DataItem> = [
 	// 	{
 	// 		title: "Fink – Message editor",
-	// 		link: "/m/tdozzpar/app-inlang-editor",
+	// 		link: "/m/tdozzpar/app-inlang-finkLocalizationEditor",
 	// 		description:
 	// 			"The Fink message editor enables you to work with globalized codebases in your browser...",
 	// 		pricing: "Free Beta",
