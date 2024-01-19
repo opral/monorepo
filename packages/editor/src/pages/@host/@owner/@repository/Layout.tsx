@@ -167,7 +167,7 @@ export function Layout(props: { children: JSXElement }) {
 	return (
 		<EditorLayout>
 			<div class="w-full flex flex-col grow bg-surface-50">
-				<div class="w-full flex items-end justify-between">
+				<div class="w-full flex items-end justify-between z-20">
 					<div class="flex flex-wrap gap-2 items-center pt-5">
 						<Breadcrumbs />
 						<BranchMenu />
@@ -184,7 +184,7 @@ export function Layout(props: { children: JSXElement }) {
 						Settings
 					</sl-button>
 				</div>
-				<div class="flex flex-wrap justify-between gap-2 py-5 sticky top-12 md:top-16 z-30 bg-surface-50">
+				<div class="flex flex-wrap justify-between gap-2 py-5 sticky top-12 md:top-16 z-10 bg-surface-50">
 					<div class="flex flex-wrap z-20 gap-2 items-center">
 						<Show when={project()}>
 							<For each={filterOptions()}>
@@ -356,21 +356,21 @@ function Breadcrumbs() {
 					d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 1 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7a.75.75 0 0 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 0 1 1-1h8zM5 12.25v3.25a.25.25 0 0 0 .4.2l1.45-1.087a.25.25 0 0 1 .3 0L8.6 15.7a.25.25 0 0 0 .4-.2v-3.25a.25.25 0 0 0-.25-.25h-3.5a.25.25 0 0 0-.25.25z"
 				/>
 			</svg>
-			<Link
+			<a
 				href={`https://github.com/${routeParams().owner}`}
 				target="_blank"
 				class="link hover:text-primary break-all"
 			>
 				<h3>{routeParams().owner}</h3>
-			</Link>
+			</a>
 			<h3>/</h3>
-			<Link
+			<a
 				href={`https://github.com/${routeParams().owner}/${routeParams().repository}`}
 				target="_blank"
 				class="link hover:text-primary break-all"
 			>
 				<h3>{routeParams().repository}</h3>
-			</Link>
+			</a>
 		</div>
 	)
 }
@@ -536,9 +536,9 @@ function LanguageFilter(props: { clearFunction: any; setAddLanguageModalOpen: Se
 						<button
 							class="link link-primary opacity-75"
 							onClick={() => {
-								if (localStorage?.user?.isLoggedIn === false) {
+								if (!localStorage?.user?.isLoggedIn) {
 									setSignInModalOpen(true)
-								} else if (userIsCollaborator() === false) {
+								} else if (!userIsCollaborator()) {
 									showToast({
 										variant: "warning",
 										title: "Not a collaborator",

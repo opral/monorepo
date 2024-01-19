@@ -1,4 +1,4 @@
-import { For, Show, createSignal, type JSX, Switch, Match } from "solid-js"
+import { For, Show, createSignal, type JSX } from "solid-js"
 import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
@@ -19,6 +19,7 @@ import NextjsHeader from "#src/interface/marketplace/categoryHeaders/cards/nextj
 import GenericHeader from "#src/interface/marketplace/categoryHeaders/cards/generic.jsx"
 import AppHeader from "#src/interface/marketplace/categoryHeaders/categoryHeros/appHeader.jsx"
 import AstroHeader from "#src/interface/marketplace/categoryHeaders/cards/astro.jsx"
+import Stacks from "#src/interface/marketplace/categoryHeaders/toast/stacks.jsx"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
@@ -56,6 +57,7 @@ export default function Page(props: {
 					description: m.marketplace_header_apps_description(),
 					buttonLink: "/documentation/build-app",
 					buttonText: m.marketplace_header_apps_button_text(),
+					coverCard: <AppHeader />,
 				}
 			case "libraries":
 				return {
@@ -232,7 +234,19 @@ export default function Page(props: {
 						buttonText={getCategoryContent()!.buttonText}
 						icon={getCategoryContent()!.icon}
 					/>
-					<Show when={getCategoryContent()?.coverCard}>{getCategoryContent()?.coverCard}</Show>
+					<Show when={getCategoryContent()?.coverCard}>
+						{getCategoryContent()?.coverCard}
+						<Show
+							when={
+								currentPageContext.routeParams.category === "libraries" ||
+								currentPageContext.routeParams.category === "apps"
+							}
+						>
+							<h2 class="pb-4 border-t-surface-200 text-xl font-medium tracking-tight text-surface-900">
+								{`All ${currentPageContext.routeParams.category}`}
+							</h2>
+						</Show>
+					</Show>
 				</Show>
 				<div class="pb-16 md:pb-20 min-h-screen relative">
 					<SectionLayout showLines={false} type="white">
@@ -252,11 +266,6 @@ export default function Page(props: {
 									</div>
 								</Show>
 							</Show>
-							<Switch>
-								<Match when={selectedCategory().includes("c/apps")}>
-									<AppHeader />
-								</Match>
-							</Switch>
 							<div class="mb-8 grid xl:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
 								<Gallery
 									items={props.items}
@@ -269,6 +278,14 @@ export default function Page(props: {
 								<div class="mb-8 grid xl:grid-cols-4 md:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
 									<Gallery items={props.items} guides={true} />
 								</div>{" "}
+							</Show>
+							<Show
+								when={
+									selectedCategory().includes("c/libraries") ||
+									selectedCategory().includes("c/plugins")
+								}
+							>
+								<Stacks />
 							</Show>
 						</div>
 						<Show when={!props.category && !props.slider && !props.minimal}>

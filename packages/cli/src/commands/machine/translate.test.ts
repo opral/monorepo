@@ -3,7 +3,7 @@ import { translateCommandAction } from "./translate.js"
 import { Message, ProjectSettings, loadProject, Plugin, type InlangModule } from "@inlang/sdk"
 import { createMessage } from "@inlang/sdk/test-utilities"
 import { privateEnv } from "@inlang/env-variables"
-import { createNodeishMemoryFs } from "@lix-js/fs"
+import { mockRepo } from "@lix-js/client"
 
 test.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 	"should tanslate the missing languages",
@@ -18,7 +18,8 @@ test.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 			}),
 		]
 
-		const fs = createNodeishMemoryFs()
+		const repo = await mockRepo()
+		const fs = repo.nodeishFs
 
 		await fs.mkdir("/user/project.inlang", { recursive: true })
 		await fs.writeFile(
@@ -46,7 +47,7 @@ test.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 
 		const project = await loadProject({
 			projectPath: "/user/project.inlang",
-			nodeishFs: fs,
+			repo,
 			_import,
 		})
 
@@ -106,7 +107,8 @@ test.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 			},
 		]
 
-		const fs = createNodeishMemoryFs()
+		const repo = await mockRepo()
+		const fs = repo.nodeishFs
 
 		await fs.mkdir("/user/project.inlang", { recursive: true })
 		await fs.writeFile(
@@ -134,7 +136,7 @@ test.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 
 		const project = await loadProject({
 			projectPath: "/user/project.inlang",
-			nodeishFs: fs,
+			repo,
 			_import,
 		})
 
