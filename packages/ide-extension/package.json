@@ -82,7 +82,6 @@
 	"dependencies": {
 		"@inlang/result": "workspace:*",
 		"@inlang/telemetry": "workspace:*",
-		"@inlang/create-project": "workspace:*",
 		"@inlang/sdk": "workspace:*",
 		"@lix-js/client": "workspace:*",
 		"@lix-js/fs": "workspace:*",

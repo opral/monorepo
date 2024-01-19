@@ -1,5 +1,4 @@
 import { setState } from "../state.js"
-import { createInlangConfigFile } from "./createInlangConfigFile.js"
 import { loadProject, type InlangProject } from "@inlang/sdk"
 import * as vscode from "vscode"
 import { determineClosestPath } from "./determineClosestPath.js"
@@ -31,8 +30,7 @@ export async function initProject(args: {
 
 	// if no settings file is found
 	if (possibleInlangProjectPaths.length === 0) {
-		// Try to auto config
-		await createInlangConfigFile({ workspaceFolder: args.workspaceFolder })
+		return { project: undefined, error: new Error("No inlang project found – aborting.") }
 	}
 
 	// Load project
