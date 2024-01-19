@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 2.6.0
+
+### Minor Changes
+
+- 488f2e33e: chore: add project group identify
+
 ## 2.5.0
 
 ### Minor Changes

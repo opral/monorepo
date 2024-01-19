@@ -1,5 +1,19 @@
 # @inlang/plugin-m-function-matcher
 
+## 0.6.8
+
+### Patch Changes
+
+- Updated dependencies [87bed968b]
+- Updated dependencies [23ca73060]
+  - @inlang/sdk@0.25.0
+
+## 0.6.7
+
+### Patch Changes
+
+- @inlang/sdk@0.24.1
+
 ## 0.6.6
 
 ### Patch Changes

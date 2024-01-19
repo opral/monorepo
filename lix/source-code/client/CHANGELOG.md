@@ -1,5 +1,11 @@
 # @lix-js/client
 
+## 0.7.0
+
+### Minor Changes
+
+- 23ce3f0ea: support conflict detection in fork status api
+
 ## 0.6.0
 
 ### Minor Changes
