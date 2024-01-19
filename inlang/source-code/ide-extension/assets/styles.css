@@ -2,7 +2,7 @@
 
 html, body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe WUI", "Ubuntu", sans-serif;
-    color: var(--vscode-sideBar-foreground);
+    color: var(--vscode-foreground);
     background-color: var(--vscode-sideBar-background);
     margin: 0;
     padding: 0;
@@ -12,7 +12,7 @@ html, body {
 }
 
 .collapsible {
-    color: var(--vscode-sideBar-foreground);
+    color: var(--vscode-foreground);
     background-color: var(--vscode-sideBar-background);
     font-size: 13px;
     cursor: pointer;
@@ -99,6 +99,7 @@ main {
     padding: 4px 10px;
 }
 
+.loading,
 .no-messages {
     display: flex;
     justify-content: center;
@@ -130,8 +131,7 @@ main {
 }
 
 #searchInput:focus {
-    outline: none;
-    border: 1px solid var(--vscode-inputOption-activeBorder);
+    outline-color: var(--vscode-focusBorder);
 }
 
 #searchInput::placeholder {

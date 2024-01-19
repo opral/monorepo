@@ -3,6 +3,7 @@ import { MarkdownString, Uri } from "vscode"
 import { state } from "../state.js"
 import { getStringFromPattern } from "../utilities/messages/query.js"
 import { INTERPOLATE } from "../configuration.js"
+import { escapeHtml } from "../utilities/utils.js"
 
 const MISSING_TRANSLATION_MESSAGE = "[missing]"
 
@@ -18,7 +19,9 @@ function renderTranslationRow(row: ContextTableRow) {
 	const openInEditorLink = row.openInEditorCommand
 		? `<a href="${row.openInEditorCommand}">$(link-external)</a>`
 		: ""
-	const messageListing = `<td><strong>${row.language}&nbsp;</strong></td><td>${row.message}</td>`
+	const messageListing = `<td><strong>${escapeHtml(
+		row.language
+	)}&nbsp;</strong></td><td>${escapeHtml(row.message)}</td>`
 	const editCommandCell = editCommandLink ? `<td>&nbsp;&nbsp;${editCommandLink}</td>` : ""
 	const openInEditorCell = openInEditorLink ? `<td>&nbsp;${openInEditorLink}</td>` : ""
 	return `<tr>${messageListing}${editCommandCell}${openInEditorCell}</tr>`

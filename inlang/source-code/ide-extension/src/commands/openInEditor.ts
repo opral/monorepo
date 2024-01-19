@@ -1,7 +1,8 @@
 import { Uri, commands, env } from "vscode"
-import { getGitOrigin, telemetry } from "../services/telemetry/implementation.js"
+import { telemetry } from "../services/telemetry/implementation.js"
 import type { Message } from "@inlang/sdk"
 import { CONFIGURATION } from "../configuration.js"
+import { getGitOrigin } from "../utilities/settings/getGitOrigin.js"
 
 export const openInEditorCommand = {
 	command: "inlang.openInEditor",

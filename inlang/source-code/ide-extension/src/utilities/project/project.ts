@@ -19,14 +19,16 @@ export interface ProjectViewNode {
 
 export function createProjectViewNodes(): ProjectViewNode[] {
 	const projectsInWorkspace = state().projectsInWorkspace
+
 	if (!projectsInWorkspace) {
-		// Handle the case where projectsInWorkspace is undefined or null
 		console.error("state().projectsInWorkspace is undefined")
 		return []
 	}
 
-	projectViewNodes = state().projectsInWorkspace.map((project) => {
-		const projectName = normalizePath(project.projectPath).split("/").slice(-2).join("/")
+	projectViewNodes = projectsInWorkspace.map((project) => {
+		// Ensure projectPath is a string
+		const projectPath = typeof project.projectPath === "string" ? project.projectPath : ""
+		const projectName = projectPath.split("/").slice(-2).join("/")
 
 		return {
 			label: projectName,
@@ -88,6 +90,13 @@ export async function handleTreeSelection(args: {
 			repo,
 		})
 
+		if (inlangProject.id) {
+			telemetry.groupIdentify({
+				groupType: "project",
+				groupKey: inlangProject.id,
+			})
+		}
+
 		telemetry.capture({
 			event: "IDE-EXTENSION loaded project",
 			properties: {
@@ -124,7 +133,6 @@ export function createTreeDataProvider(args: {
 
 export const projectView = async (args: {
 	context: vscode.ExtensionContext
-	gitOrigin: string | undefined
 	workspaceFolder: vscode.WorkspaceFolder
 	nodeishFs: NodeishFilesystem
 }) => {
