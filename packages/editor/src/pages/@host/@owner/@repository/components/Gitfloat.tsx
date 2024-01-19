@@ -28,6 +28,7 @@ export const Gitfloat = () => {
 		refetchRepo,
 		forkStatus,
 		mutateForkStatus,
+		refetchForkStatus,
 		userIsCollaborator,
 		githubRepositoryInformation,
 		currentBranch,
@@ -39,7 +40,7 @@ export const Gitfloat = () => {
 		tourStep,
 		project,
 		projectList,
-		lixErrors,
+		lixErrors
 	} = useEditorState()
 	const [localStorage] = useLocalStorage()
 
@@ -288,6 +289,13 @@ export const Gitfloat = () => {
 		}
 	})
 
+	// // trigger refetch of repo when user is logged in and 
+	// createEffect(() => {
+	// 	if (lixErrors().some((err) => err.message.includes("401")) && localStorage?.user?.isLoggedIn && repo()) {
+	// 		refetchRepo()
+	// 	}
+	// })
+
 	// wait until fork fetch is done
 	createEffect(
 		on(userIsCollaborator, () => {
@@ -331,6 +339,7 @@ export const Gitfloat = () => {
 									setIsMerging(false)
 									setTimeout(() => {
 										mutateForkStatus({ ...forkStatus(), behind: 0, conflicts: false })
+										refetchForkStatus()
 									}, 400)
 								}}
 								prop:loading={isMerging()}
