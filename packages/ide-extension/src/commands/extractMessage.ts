@@ -1,4 +1,4 @@
-import { state } from "../state.js"
+import { state } from "../utilities/state.js"
 import { msg } from "../utilities/messages/msg.js"
 import { commands, type TextEditor, window, env, Uri } from "vscode"
 import { telemetry } from "../services/telemetry/index.js"

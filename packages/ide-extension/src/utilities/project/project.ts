@@ -1,12 +1,11 @@
 import * as vscode from "vscode"
 import { loadProject } from "@inlang/sdk"
 import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
-import { setState, state } from "../../state.js"
 import { CONFIGURATION } from "../../configuration.js"
-
 import { telemetry } from "../../services/telemetry/implementation.js"
 import { openRepository } from "@lix-js/client"
 import { findRepoRoot } from "@lix-js/client"
+import { setState, state } from "../state.js"
 
 let projectViewNodes: ProjectViewNode[] = []
 
