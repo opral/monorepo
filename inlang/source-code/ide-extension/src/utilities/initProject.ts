@@ -82,18 +82,26 @@ export async function initProject(args: {
 			appId: id,
 		})
 	)
-	telemetry.capture({
-		event: "IDE-EXTENSION loaded project",
-		properties: {
-			errors: project?.errors(),
-		},
-	})
 
 	if (error) {
 		console.error(error)
 		// No error message because that gets handled in createInlang
 		return { project: undefined, error }
 	}
+
+	if (project.id) {
+		telemetry.groupIdentify({
+			groupType: "project",
+			groupKey: project.id,
+		})
+	}
+
+	telemetry.capture({
+		event: "IDE-EXTENSION loaded project",
+		properties: {
+			errors: project.errors(),
+		},
+	})
 
 	setState({
 		project,
