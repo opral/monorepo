@@ -8,6 +8,7 @@ export function telemetryCapture(event: TelemetryEvents, properties?: Record<str
 	telemetry.capture({
 		event,
 		properties: {
+			test: "test",
 			vscode_version: vscode.version,
 			version,
 			...properties,
@@ -17,4 +18,13 @@ export function telemetryCapture(event: TelemetryEvents, properties?: Record<str
 
 export function handleError(error: any) {
 	console.error(error)
+}
+
+export function escapeHtml(unsafe: string): string {
+	return unsafe
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#039;")
 }
