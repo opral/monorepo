@@ -84,6 +84,7 @@
 		"@inlang/telemetry": "workspace:*",
 		"@inlang/create-project": "workspace:*",
 		"@inlang/sdk": "workspace:*",
+		"@lix-js/client": "workspace:*",
 		"@lix-js/fs": "workspace:*",
 		"@vitest/coverage-v8": "0.34.6",
 		"https-proxy-agent": "7.0.2",

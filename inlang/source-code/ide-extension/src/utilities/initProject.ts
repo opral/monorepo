@@ -12,6 +12,7 @@ import { tryCatch } from "@inlang/result"
 import fs from "node:fs/promises"
 import { normalizePath } from "@lix-js/fs"
 import { id } from "../../marketplace-manifest.json"
+import { openRepository, findRepoRoot } from "@lix-js/client"
 
 // Helper Functions
 export function getActiveTextEditor(): vscode.TextEditor | undefined {
@@ -69,16 +70,22 @@ export async function initProject(args: {
 		throw new Error("INTERNAL BUG 29j3d. Please report this to the inlang team.")
 	}
 
+	const workspacePath = args.workspaceFolder.uri.fsPath
+	const nodeishFs = createFileSystemMapper(workspacePath, fs)
+	const projectPath = closestProjectFilePathUriNormalized.includes(".inlang/settings.json")
+		? // */lucky-elephant.inlang/settings.json -> */lucky-elephant.inlang
+		  closestProjectFilePathUriNormalized.replace("/settings.json", "")
+		: // */project.inlang.json -> */project.inlang
+		  closestProjectFilePathUriNormalized.replace(".json", "")
+
+	const repoRoot = await findRepoRoot({ nodeishFs, path: projectPath })
+	const repo = await openRepository(repoRoot || workspacePath, { nodeishFs })
+
 	const { data: project, error } = await tryCatch(() =>
 		loadProject({
-			// SEE THROW ABOVE: remove the /settings.json from the path
-			projectPath: closestProjectFilePathUriNormalized.includes(".inlang/settings.json")
-				? // */lucky-elephant.inlang/settings.json -> */lucky-elephant.inlang
-				  closestProjectFilePathUriNormalized.replace("/settings.json", "")
-				: // */project.inlang.json -> */project.inlang
-				  closestProjectFilePathUriNormalized.replace(".json", ""),
-			nodeishFs: createFileSystemMapper(args.workspaceFolder.uri.fsPath, fs),
-			_import: _import(args.workspaceFolder.uri.fsPath),
+			projectPath,
+			repo,
+			_import: _import(workspacePath),
 			appId: id,
 		})
 	)
