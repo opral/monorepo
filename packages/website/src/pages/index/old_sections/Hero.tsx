@@ -7,7 +7,7 @@ import * as m from "#src/paraglide/messages.js"
 
 const featuredArray = [
 	"library.inlang.paraglideJs",
-	"app.inlang.editor",
+	"app.inlang.finkLocalizationEditor",
 	"app.inlang.cli",
 	"app.inlang.ideExtension",
 	"plugin.inlang.i18next",

@@ -5,7 +5,7 @@ import { For, Match, Show, Switch } from "solid-js"
 
 const AppHeader = () => {
 	const getProducts = () => [
-		"app.inlang.editor",
+		"app.inlang.finkLocalizationEditor",
 		"app.inlang.ideExtension",
 		"app.parrot.figmaPlugin",
 	]
@@ -71,7 +71,7 @@ const AppHeader = () => {
 							>
 								<div class="w-full h-[200px] overflow-hidden">
 									<Switch>
-										<Match when={manifest.id === "app.inlang.editor"}>
+										<Match when={manifest.id === "app.inlang.finkLocalizationEditor"}>
 											<img
 												class="group-hover:scale-105 h-full w-full bg-surface-400 object-cover transition-all duration-500"
 												src={"/images/fink-cover.png"}
