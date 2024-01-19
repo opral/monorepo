@@ -7,13 +7,12 @@ import Link from "#src/renderer/Link.jsx"
 const Guides = () => {
 	const getGuides = () => [
 		"guide.nilsjacobsen.buildAGlobalSvelteApp",
-		"guide.niklasbuchfink.whatIsInlang",
 		"guide.nilsjacobsen.whatArePlugins",
 		"guide.lorissigrist.useParaglideJsWithNextjsAppRouter",
 		"guide.floriankiem.localizationStartegy",
 	]
 	return (
-		<div class="w-full flex gap-4 my-28 flex-col-reverse md:flex-row">
+		<div class="w-full flex gap-4 mt-28 mb-4 flex-col-reverse md:flex-row">
 			<div class="w-full flex flex-col md:flex-row gap-12">
 				<div class="w-full md:w-1/3 flex flex-col gap-4">
 					<h2 class="text-surface-900 font-semibold text-2xl leading-snug tracking-tight">
