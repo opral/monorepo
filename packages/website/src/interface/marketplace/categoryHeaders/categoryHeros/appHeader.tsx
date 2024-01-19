@@ -141,9 +141,6 @@ const AppHeader = () => {
 					}}
 				</For>
 			</div>
-			<h2 class="pb-4 border-t-surface-200 text-xl font-medium tracking-tight text-surface-900">
-				All Apps
-			</h2>
 		</>
 	)
 }

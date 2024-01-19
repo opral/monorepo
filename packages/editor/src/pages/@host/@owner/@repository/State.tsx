@@ -322,7 +322,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					}),
 					{ from }
 				)
-
+				if (project.id) {
+					telemetryBrowser.group("project", project.id)
+				}
 				telemetryBrowser.capture("EDITOR cloned repository", {
 					userPermission: userIsCollaborator() ? "iscollaborator" : "isNotCollaborator",
 				})
