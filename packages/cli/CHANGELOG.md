@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 2.7.0
+
+### Minor Changes
+
+- 676c0f905: remove deprecated loadProject({nodeishFs})
+
 ## 2.6.0
 
 ### Minor Changes
