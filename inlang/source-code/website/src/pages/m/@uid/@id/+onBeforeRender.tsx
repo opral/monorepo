@@ -58,8 +58,8 @@ export default async function onBeforeRender(pageContext: PageContext) {
 			: fs.readFile(new URL(path, repositoryRoot)).then((res) => res.toString())
 
 	const readmeMarkdown = await convert(await text(readme()))
-	const changelogPath = await changelog()
 
+	const changelogPath = await changelog()
 	const changelogMarkdown = changelogPath ? await convert(await text(changelogPath)) : undefined
 
 	const recommends = item.recommends

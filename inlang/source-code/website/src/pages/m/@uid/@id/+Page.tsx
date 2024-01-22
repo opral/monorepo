@@ -244,9 +244,7 @@ export default function Page(props: PageProps) {
 										<Show when={props.tab}>
 											<div class="flex items-center gap-6 mt-6 w-full border-b border-surface-2">
 												<a
-													href=""
-													onClick={(e) => {
-														e.preventDefault()
+													onClick={() => {
 														typeof window !== "undefined" &&
 															window.location.replace(`${currentPageContext.urlParsed.pathname}`)
 													}}
@@ -270,7 +268,6 @@ export default function Page(props: PageProps) {
 													</div>
 												</a>
 												<a
-													href="?view=changelog"
 													onClick={(e) => {
 														e.preventDefault()
 														typeof window !== "undefined" &&
