@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 2.9.0
+
+### Minor Changes
+
+- 0bf93e5e6: refactor: telemetry for how commands are used
+
 ## 2.8.0
 
 ### Minor Changes
