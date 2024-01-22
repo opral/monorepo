@@ -1,4 +1,4 @@
-# Paraglide Adapter SvelteKit
+# Paraglide Adapter SvelteKit
 
 > Not to be confused with SvelteKit's adapters. This is a framework integration for Paraglide.
 
