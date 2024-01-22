@@ -43,7 +43,7 @@ export default function Page(props: PageProps) {
 						.replaceAll(" ", "_")
 						.replaceAll("?", "")}.jpg`
 		} else {
-			return "/opengraph/inlang-documentation-image.jpg"
+			return "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/website/public/opengraph/inlang-documentation-image.jpg"
 		}
 	}
 

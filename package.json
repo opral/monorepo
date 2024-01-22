@@ -34,7 +34,10 @@
 	"pnpm": {
 		"overrides": {
 			"http-cache-semantics": "4.1.1",
-			"follow-redirects": "1.15.4"
+			"follow-redirects": "1.15.4",
+			"vitest": "0.34.6",
+			"@vitest/coverage-v8": "0.34.6",
+			"vite": "4.5.2"
 		}
 	},
 	"devDependencies": {
@@ -49,6 +52,6 @@
 		"nx-cloud": "16.5.2",
 		"prettier": "2.8.3",
 		"typescript": "5.2.2",
-		"vitest": "^0.34.6"
+		"vitest": "0.34.6"
 	}
 }
