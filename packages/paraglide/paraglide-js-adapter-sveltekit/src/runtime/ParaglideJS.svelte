@@ -4,6 +4,10 @@
 	It also adds `<link rel="alternate">` tags to the head of your page
 -->
 <script lang="ts" generics="T extends string">
+	import { getPathInfo } from "./utils/get-path-info.js"
+
+	import { getHrefBetween } from "./utils/diff-urls.js"
+
 	import { normalize } from "./utils/path.js"
 
 	import { serializeRoute } from "./utils/serialize-path.js"
@@ -59,10 +63,16 @@
 		}
 
 		const language = hreflang ?? lang
-		const canonicalPath = normalize(original_to.pathname.slice(absoluteBase.length))
+
+		const { path: canonicalPath } = getPathInfo(original_to.pathname, {
+			base: absoluteBase,
+			availableLanguageTags: i18n.config.runtime.availableLanguageTags,
+			defaultLanguageTag: i18n.config.defaultLanguageTag,
+		})
+
 		const translatedPath = getTranslatedPath(canonicalPath, language, i18n.config.translations)
 
-		return serializeRoute({
+		const newPathname = serializeRoute({
 			base: absoluteBase,
 			lang: language,
 			path: translatedPath,
@@ -70,7 +80,12 @@
 			includeLanguage: true,
 			defaultLanguageTag: i18n.config.defaultLanguageTag,
 			prefixDefaultLanguage: i18n.config.prefixDefaultLanguage,
-		})
+		})	
+
+		const to = new URL(original_to)
+		to.pathname = newPathname;
+
+		return getHrefBetween(from, to)
 	}
 
 	setContext(PARAGLIDE_CONTEXT_KEY, { translateHref })
