@@ -2,9 +2,12 @@
 
 This plugin provides the integration of `t-functions` into the inlang VSCode extension. It allows you to extract messages from your code, view them inline in the text editor and get lints for your messages.
 
-Match example:
+Match examples:
 ```ts
 t('name')
+```
+```ts
+t('start-page:title')
 ```
 
 ### Usage
