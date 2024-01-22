@@ -10,7 +10,7 @@
 		"url": "https://github.com/opral/monorepo.git"
 	},
 	"icon": "assets/icon-vscode-marketplace.png",
-	"version": "1.26.0",
+	"version": "1.28.0",
 	"engines": {
 		"vscode": "^1.84.2"
 	},
@@ -26,6 +26,43 @@
 	],
 	"main": "./dist/main.cjs",
 	"contributes": {
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "inlang",
+					"title": "Inlang",
+					"icon": "assets/logo-negative.svg"
+				}
+			]
+		},
+		"views": {
+			"inlang": [
+				{
+					"when": "!inlang:hasProjectInWorkspace",
+					"id": "gettingStartedView",
+					"name": "Getting Started",
+					"type": "webview"
+				},
+				{
+					"when": "inlang:hasProjectInWorkspace",
+					"id": "projectView",
+					"name": "Projects",
+					"type": "tree"
+				},
+				{
+					"when": "inlang:hasProjectInWorkspace",
+					"id": "messageView",
+					"name": "Messages",
+					"type": "webview"
+				},
+				{
+					"when": "inlang:hasProjectInWorkspace",
+					"id": "errorView",
+					"name": "Errors",
+					"type": "tree"
+				}
+			]
+		},
 		"commands": [
 			{
 				"command": "inlang.editMessage",
@@ -38,8 +75,41 @@
 			{
 				"command": "inlang.openInEditor",
 				"title": "Inlang: Open in Editor"
+			},
+			{
+				"command": "inlang.openProject",
+				"title": "Open project"
+			},
+			{
+				"command": "inlang.openSettingsFile",
+				"title": "Open settings file",
+				"icon": "$(go-to-file)"
+			},
+			{
+				"command": "inlang.copyError",
+				"title": "Copy Error",
+				"icon": "$(copy)"
 			}
 		],
+		"menus": {
+			"view/item/context": [
+				{
+					"when": "view == projectView && viewItem == projectViewNode",
+					"command": "inlang.openProject",
+					"group": "navigation"
+				},
+				{
+					"when": "view == projectView && viewItem == projectViewNode",
+					"command": "inlang.openSettingsFile",
+					"group": "inline"
+				},
+				{
+					"when": "view == errorView && viewItem == errorNode",
+					"command": "inlang.copyError",
+					"group": "inline"
+				}
+			]
+		},
 		"configuration": {
 			"properties": {
 				"inlang.userId": {
@@ -81,11 +151,12 @@
 	},
 	"dependencies": {
 		"@inlang/result": "workspace:*",
-		"@inlang/telemetry": "workspace:*",
-		"@inlang/create-project": "workspace:*",
 		"@inlang/sdk": "workspace:*",
+		"@inlang/telemetry": "workspace:*",
 		"@lix-js/fs": "workspace:*",
+		"@lix-js/client": "workspace:*",
 		"@vitest/coverage-v8": "0.34.6",
+		"@vscode/codicons": "^0.0.35",
 		"https-proxy-agent": "7.0.2",
 		"require-from-string": "^2.0.2",
 		"throttle-debounce": "^5.0.0",
@@ -121,8 +192,6 @@
 		"wdio-vscode-service": "^5.2.2"
 	},
 	"activationEvents": [
-		"workspaceContains:**/project.inlang/*",
-		"workspaceContains:**/inlang.config.js",
 		"onStartupFinished"
 	],
 	"license": "Apache-2.0"

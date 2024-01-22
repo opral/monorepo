@@ -1,0 +1,139 @@
+/* messages webview */
+
+html, body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe WUI", "Ubuntu", sans-serif;
+    color: var(--vscode-foreground);
+    background-color: var(--vscode-sideBar-background);
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: text;
+    -webkit-user-select: text;
+}
+
+.collapsible {
+    color: var(--vscode-foreground);
+    background-color: var(--vscode-sideBar-background);
+    font-size: 13px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border: none;
+    text-align: left;
+    outline: none;
+    width: 100%;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    gap: 5px;
+}
+
+.collapsible:hover {
+    background-color: var(--vscode-list-hoverBackground);
+}
+
+.content {
+    display: none;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table .section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4px 10px;
+    border-top: 1px solid var(--vscode-sideBar-border);
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.table .section:last-child {
+    border-bottom: 1px solid var(--vscode-sideBar-border);
+}
+
+.table .section .languageTag {
+    align-self: flex-start;
+    padding-block-start: 1px;
+    margin-inline-end: 8px;
+    margin-inline-start: 12px;
+    
+}
+
+.table .section .message {
+    align-self: flex-start;
+    padding-block-start: 1px;
+    margin-inline-end: auto;
+}
+
+.table .section .actionButtons {
+    align-self: flex-start;
+    padding-block-start: 1px;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.table button {
+    all: unset;
+}
+
+.highlighted-section {
+    margin-bottom: 5px;
+}
+
+main {
+    margin-bottom: 5px;
+}
+
+.banner {
+    display: flex;
+    align-items: center;
+    background-color: var(--vscode-sideBar-background);
+    text-transform: uppercase;
+    font-size: 11px;
+    font-weight: bold; 
+    padding: 4px 10px;
+}
+
+.loading,
+.no-messages {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    font-size: 13px;
+    margin: 5px 10px;
+    color: var(--vscode-sideBar-foreground);
+}
+
+.active-dot {
+    display: inline-block;
+    height: 8px;
+    width: 8px;
+    background-color: green;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+#searchInput {
+    width: calc(100% - 20px);
+    margin: 10px;
+    padding: 4px 6px;
+    box-sizing: border-box;
+    background-color: var(--vscode-input-background);
+    border: 1px solid var(--vscode-input-border);
+    color: var(--vscode-input-foreground);
+}
+
+#searchInput:focus {
+    outline-color: var(--vscode-focusBorder);
+}
+
+#searchInput::placeholder {
+    color: var(--vscode-input-placeholderForeground);
+}

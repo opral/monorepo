@@ -1,5 +1,27 @@
 # inlang-vs-code-extension
 
+## 1.28.0
+
+### Minor Changes
+
+- f2b4e23e5: add inlang tab
+
+### Patch Changes
+
+- 870143a22: update import with workspaceFolder
+
+## 1.27.0
+
+### Minor Changes
+
+- 676c0f905: remove deprecated loadProject({nodeishFs})
+
+### Patch Changes
+
+- Updated dependencies [676c0f905]
+  - @inlang/sdk@0.26.0
+  - @inlang/telemetry@0.3.8
+
 ## 1.26.0
 
 ### Minor Changes

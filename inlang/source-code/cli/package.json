@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/cli",
-	"version": "2.6.0",
+	"version": "2.8.0",
 	"private": false,
 	"publishConfig": {
 		"access": "public"
@@ -40,7 +40,6 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"devDependencies": {
-		"@inlang/create-project": "workspace:*",
 		"@inlang/language-tag": "workspace:*",
 		"@inlang/result": "workspace:*",
 		"@inlang/rpc": "workspace:*",
