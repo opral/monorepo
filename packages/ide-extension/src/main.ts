@@ -71,14 +71,16 @@ async function main(args: {
 
 		vscode.commands.executeCommand("setContext", "inlang:hasProjectInWorkspace", true)
 
-		await projectView({ ...args })
-		await messageView({ ...args })
-		await errorView({ ...args })
+		await projectView(args)
+		await messageView(args)
+		await errorView(args)
 
 		registerExtensionComponents(args)
 		// TODO: Replace by reactive settings API?
 		setupFileSystemWatcher(args)
 		handleInlangErrors()
+
+		return
 	} else {
 		await gettingStartedView()
 	}
