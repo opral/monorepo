@@ -19,7 +19,7 @@
 
 <br/>
 <br/>
-<button on:click={() => goto(i18n.resolveRoute(base + "/about"))}> Programmatic About</button>
+<button on:click={() => goto(i18n.route(base + "/about"))}> Programmatic About</button>
 
 <br/>
 
