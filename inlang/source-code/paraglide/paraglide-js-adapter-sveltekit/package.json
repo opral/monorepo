@@ -1,6 +1,6 @@
 {
     "name": "@inlang/paraglide-js-adapter-sveltekit",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "type": "module",
     "main": "./dist/runtime/index.js",
     "types": "./dist/runtime/index.d.ts",
@@ -26,6 +26,7 @@
     },
     "devDependencies": {
         "@sveltejs/package": "^2.2.3",
+        "@sveltejs/vite-plugin-svelte": "^3.0.1",
         "prettier-plugin-svelte": "^3.1.2",
         "typescript": "^5.3.2",
         "vite": "^5.0.4",
