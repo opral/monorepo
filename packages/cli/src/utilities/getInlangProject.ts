@@ -3,7 +3,11 @@ import { loadProject, type InlangProject } from "@inlang/sdk"
 import { resolve } from "node:path"
 import { openRepository, findRepoRoot } from "@lix-js/client"
 import { id } from "../../marketplace-manifest.json"
-import { telemetry } from "../services/telemetry/index.js"
+
+/**
+ * Used for telemetry.
+ */
+export let lastUsedProject: InlangProject | undefined
 
 /**
  * Gets the inlang project and exits if the project contains errors.
@@ -36,11 +40,6 @@ export async function getInlangProject(args: { projectPath: string }): Promise<I
 		}
 		process.exit(1)
 	}
-	if (project.id) {
-		telemetry.groupIdentify({
-			groupType: "project",
-			groupKey: project.id,
-		})
-	}
+	lastUsedProject = project
 	return project
 }

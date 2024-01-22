@@ -31,13 +31,6 @@
 		"/bin",
 		"/dist"
 	],
-	"exports": {
-		"./src/utlilities/fs": "./src/utilities/fs/index.ts",
-		"./src/utlilities/format": "./src/utilities/format.ts",
-		"./src/utilities/getLanguageFolderPath": "./src/utilities/getLanguageFolderPath.ts",
-		"./src/utilities/getSupportedLibrary": "./src/utilities/getSupportedLibrary.ts",
-		"./src/utilities/getConfigContent": "./src/utilities/getConfigContent.ts"
-	},
 	"scripts": {
 		"dev": "node ./build.js",
 		"build": "cross-env NODE_ENV=production node ./build.js",
@@ -47,7 +40,6 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"devDependencies": {
-		"@inlang/env-variables": "workspace:*",
 		"@inlang/language-tag": "workspace:*",
 		"@inlang/result": "workspace:*",
 		"@inlang/rpc": "workspace:*",
@@ -71,7 +63,6 @@
 		"esbuild": "^0.19.2",
 		"isomorphic-git": "1.24.5",
 		"node-fetch": "^3.3.2",
-		"posthog-node": "^3.1.2",
 		"prompts": "^2.4.2",
 		"typescript": "5.2.2",
 		"vitest": "0.34.3"
