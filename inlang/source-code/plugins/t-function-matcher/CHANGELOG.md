@@ -1,5 +1,11 @@
 # @inlang/plugin-t-function-matcher
 
+## 0.5.0
+
+### Minor Changes
+
+- 871972019: update README
+
 ## 0.4.9
 
 ### Patch Changes

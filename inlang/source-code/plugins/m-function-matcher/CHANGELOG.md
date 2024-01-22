@@ -1,5 +1,11 @@
 # @inlang/plugin-m-function-matcher
 
+## 0.7.0
+
+### Minor Changes
+
+- 871972019: update README
+
 ## 0.6.9
 
 ### Patch Changes
