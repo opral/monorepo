@@ -204,6 +204,7 @@ import { goto } from '$app/navigation'
 import { languageTag } from '../paraglide/runtime.js'
 
 goto(i18n.resolveRoute("/about"))
+redirect(i18n.resolveRoute("/about", "en"))
 ```
 
 Fortunately you don't need to do this often. Most of the time, you can use the `a` tag and the adapter will translate it for you.

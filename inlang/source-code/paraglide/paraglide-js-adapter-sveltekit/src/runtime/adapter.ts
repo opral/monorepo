@@ -48,20 +48,20 @@ export type I18nUserConfig<T extends string> = {
 	pathnames?: PathTranslations<T>
 
 	/**
-	 * A predicate that determines whether a page should be excluded from translation.
-	 * If it returns `true`, any links to it will not be translated,
-	 * and no alternate links will be added while on it.
+	 * A list of paths to exclude from translation. You can use strings or regular expressions.
 	 *
-	 * @default () => false
-	 * @param path The path to check (eg /base/api)
-	 * @returns `true` if the path should be excluded from translation
+	 * Any path that matches one of the strings or regular expressions will not be translated,
+	 * meaning that it won't get the language tag in the path, any links to it won't be translated,
+	 * and no alternate links will be generated for it.
+	 *
+	 * @default []
 	 *
 	 * @example
 	 * ```ts
-	 * exclude: (path) => path.startsWith("/base/api")
+	 * exclude: ["/base/admin", /^\/base\/admin\/.* /]
 	 * ```
 	 */
-	exclude?: (path: string) => boolean
+	exclude: (string | RegExp)[]
 
 	/**
 	 * Whether to prefix the language tag to the path even if it's the default language.
@@ -104,13 +104,19 @@ export type I18nConfig<T extends string> = {
 export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I18nUserConfig<T>) {
 	const translations = options?.pathnames ?? {}
 
-	const exclude = options?.exclude ?? (() => false)
+	const exclude = options?.exclude ?? []
+	const stringExcludes = exclude.filter((e) => typeof e === "string") as string[]
+	const regexExcludes = exclude.filter((e) => e instanceof RegExp) as RegExp[]
 	const defaultLanguageTag = options?.defaultLanguageTag ?? runtime.sourceLanguageTag
 
 	const config: I18nConfig<T> = {
 		runtime,
 		translations,
-		exclude,
+		exclude: (path) => {
+			if (stringExcludes.some((e) => path.startsWith(e))) return true
+			if (regexExcludes.some((e) => e.test(path))) return true
+			return false
+		},
 		defaultLanguageTag,
 		prefixDefaultLanguage: options?.prefixDefaultLanguage ?? "never",
 	}

@@ -29,5 +29,5 @@ export const i18n = createI18n(runtime, {
 			fr: "/quelque-sous-page",
 		},
 	},
-	exclude: (path) => path.startsWith("/base/not-translated"),
+	exclude: ["/base/not-translated"],
 })
