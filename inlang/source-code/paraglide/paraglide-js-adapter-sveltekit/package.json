@@ -5,6 +5,9 @@
     "type": "module",
     "main": "./dist/runtime/index.js",
     "types": "./dist/runtime/index.d.ts",
+    "publishConfig": {
+        "access": "public"
+    },
     "scripts": {
         "test": "vitest run --passWithNoTests --dir src",
         "build": "svelte-package -i src -o dist",
