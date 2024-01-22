@@ -1995,7 +1995,7 @@ importers:
         version: link:../../sdk
     devDependencies:
       '@inlang/cli':
-        specifier: ^2.8.0
+        specifier: ^2.9.0
         version: link:../../cli
       typescript:
         specifier: ^5.2.2
