@@ -261,8 +261,42 @@ import { goto } from '$app/navigation'
 
 redirect(i18n.route("/about", "en"))
 
-//Omitting the language default to the current language
+//Omitting the language defaults to the current language
 goto(i18n.route("/about"))
 ```
 
 Fortunately you don't need to do this often. Most of the time the an `a` tag is enough.
+
+### Language Switchers
+
+Language switchers are tricky, because we need to get the translated version of the current URL path. This is tricky because the path in the URL is already translated. We need to somehow get the untranslated version of the path, so that we can translate it again.
+
+Fortunately, the `i18n` instance can help us with that. It exposes a `getCanonicalPath` method that takes the current path and return the untranslated version of it.
+
+```ts
+// $page.url.pathname = "/base/de/uber-uns"
+const canonicalPath = i18n.getCanonicalPath($page.url.pathname)
+// canonicalPath = "/base/about"
+```
+
+We can use this to create a language switcher that links to the current page in a different language.
+1. Get the untranslated version of the current path
+2. Automatically translate it into all available languages with the `<a>` tag using the `hreflang` attribute
+
+```svelte
+<script>
+	import { availableLanguageTags } from "../paraglide/runtime.js"
+	import { i18n } from '$lib/i18n.js'
+	import { page } from '$app/stores'
+</script>
+
+{#each availableLanguageTags as lang}
+	<a 
+		href={i18n.getCanonicalPath($page.url.pathname)}
+		hreflang={lang}
+		aria-current={lang === languageTag() ? "page" : undefined}
+	>
+		{lang}
+	</a>
+{/each}
+```

@@ -2,6 +2,8 @@
     import * as m from "$paraglide/messages.js"
     import { availableLanguageTags } from "$paraglide/runtime.js"
     import { base } from "$app/paths"
+    import { i18n } from "$lib/i18n.js"
+    import {page} from "$app/stores"
 </script>
 
 # {m.about()}
@@ -9,7 +11,7 @@
 [{m.home()}]({base}/)
 
 {#each availableLanguageTags as lang}
-    <a href="{base}/about" hreflang={lang}>
+    <a href={i18n.getCanonicalPath($page.url.pathname)} hreflang={lang}>
     {m.change_language_to({ languageTag: lang })}
     </a>
     <br />

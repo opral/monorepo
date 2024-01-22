@@ -4,6 +4,7 @@
 	import * as m from "$paraglide/messages.js"
 	import { base } from "$app/paths"
 	import { i18n } from "$lib/i18n"
+	import { page } from "$app/stores"
 </script>
 
 <p>{m.greeting({ name: "Samuel", count: 5 })}</p>
@@ -24,7 +25,7 @@
 <br/>
 
 {#each availableLanguageTags as lang}
-    <a href="{base}/" hreflang={lang}>
+    <a href={i18n.getCanonicalPath($page.url.pathname)} hreflang={lang}>
     {m.change_language_to({ languageTag: lang })}
     </a>
     <br />

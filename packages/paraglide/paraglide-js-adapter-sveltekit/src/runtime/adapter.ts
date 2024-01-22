@@ -8,6 +8,8 @@ import type { Paraglide } from "./runtime.js"
 import { getTranslatedPath } from "./path-translations/getTranslatedPath.js"
 import { serializeRoute } from "./utils/serialize-path.js"
 import { translatePath } from "./path-translations/translatePath.js"
+import { getCanonicalPath } from "./path-translations/getCanonicalPath.js"
+import { getPathInfo } from "./utils/get-path-info.js"
 
 export type I18nUserConfig<T extends string> = {
 	/**
@@ -196,29 +198,30 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		},
 
 		/**
-		 * Takes in a path in one language and returns it's translated version in another language.
-		 * This is useful for use in `alternate` links.
+		 * Takes in a path in one language and returns it's canonical version.
+		 * Basicall the oposite of `i18n.route()`.
+		 * This is useful for use in language switchers.
 		 *
-		 * @param translatedPath The path to translate (eg _/base/de/ueber-uns_)
-		 * @param targetLanguage The language to translate to (eg _en_)
-		 * @returns The translated path (eg _/base/en/about_)
+		 * @param targetedPathSource The path to translate (eg _/base/de/ueber-uns_)
+		 * @returns The canonical version path (eg _/base/about_)
 		 *
 		 * @example
 		 * ```ts
-		 * <link
-		 *   rel="alternate"
-		 *   href={i18n.translatePath($page.url.pathname, languageTag(), "en")}
+		 * <a
+		 *   href={i18n.getCanonicalPath($page.url.pathname)}
 		 *   hreflang="en"
 		 * >
 		 * ```
 		 */
-		translatePath(translatedPath: string, targetLanguage: T) {
-			return translatePath(translatedPath, targetLanguage, translations, {
+		getCanonicalPath(translatedPath: string) {
+			const { path, lang } = getPathInfo(translatedPath, {
 				base: normalizeBase(base),
-				defaultLanguageTag,
-				availableLanguageTags: runtime.availableLanguageTags,
-				prefixDefaultLanguage: config.prefixDefaultLanguage,
+				availableLanguageTags: config.runtime.availableLanguageTags,
+				defaultLanguageTag: config.defaultLanguageTag,
 			})
+
+			const canonicalPath = getCanonicalPath(path, lang, translations)
+			return normalizeBase(base) + canonicalPath
 		},
 	}
 }

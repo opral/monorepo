@@ -1,6 +1,6 @@
 {
     "name": "@inlang/paraglide-js-adapter-sveltekit",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "private": true,
     "type": "module",
     "main": "./dist/runtime/index.js",
@@ -35,6 +35,7 @@
     "exports": {
         ".": {
             "import": "./dist/runtime/index.js",
+            "svelte": "./dist/runtime/index.js",
             "types": "./dist/runtime/index.d.ts"
         },
         "./vite": {
