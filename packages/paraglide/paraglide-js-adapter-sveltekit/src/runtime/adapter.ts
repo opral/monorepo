@@ -198,7 +198,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 
 		/**
 		 * Takes in a path in one language and returns it's canonical version.
-		 * Basicall the oposite of `i18n.route()`.
+		 * Basically the oposite of `i18n.route()`.
 		 * This is useful for use in language switchers.
 		 *
 		 * @param targetedPathSource The path to translate (eg _/base/de/ueber-uns_)
