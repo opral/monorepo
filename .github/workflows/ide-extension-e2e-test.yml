@@ -45,10 +45,6 @@ jobs:
         with:
           run: pnpm --filter vs-code-extension run test:e2e
 
-      - name: Run e2e tests on MacOS
-        if: startsWith(matrix.os, 'macos')
-        run: pnpm --filter vs-code-extension run test:e2e
-
       - name: Run e2e tests on Windows
         if: startsWith(matrix.os, 'windows')
         shell: bash
