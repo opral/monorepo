@@ -70,7 +70,7 @@
 		"@rollup/plugin-virtual": "3.0.1",
 		"@ts-morph/bootstrap": "0.20.0",
 		"@types/minimist": "1.2.3",
-		"@types/node": "^20.11.2",
+		"@types/node": "^20.11.4",
 		"@vitest/coverage-v8": "0.34.3",
 		"cross-env": "^7.0.3",
 		"esbuild": "^0.19.7",
