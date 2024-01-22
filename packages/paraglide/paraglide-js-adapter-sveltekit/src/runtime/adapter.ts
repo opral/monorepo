@@ -101,7 +101,7 @@ export type I18nConfig<T extends string> = {
  * export const i18n = createI18n(runtime, { ...options })
  * ```
  */
-export function i18nRouting<T extends string>(runtime: Paraglide<T>, options?: I18nUserConfig<T>) {
+export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I18nUserConfig<T>) {
 	const translations = options?.pathnames ?? {}
 
 	const exclude = options?.exclude ?? (() => false)
@@ -162,7 +162,7 @@ export function i18nRouting<T extends string>(runtime: Paraglide<T>, options?: I
 		 * This is useful for use in `goto` statements and `redirect` calls.
 		 *
 		 * @param canonicalPath The path to translate (eg _/base/about_)
-		 * @param lang The language to translate to
+		 * @param lang The language to translate to - Defaults to the current language
 		 * @returns The translated path (eg _/base/de/ueber-uns_)
 		 *
 		 * @example
@@ -170,8 +170,10 @@ export function i18nRouting<T extends string>(runtime: Paraglide<T>, options?: I
 		 * redirect(i18n.resolveRoute("/base/about", "de"))
 		 * ```
 		 */
-		resolveRoute(path: string, lang: T) {
+		resolveRoute(path: string, lang: T | undefined = undefined) {
 			if (config.exclude(path)) return path
+
+			lang = lang ?? runtime.languageTag()
 
 			const canonicalPath = path.slice(normalizeBase(base).length)
 			const translatedPath = getTranslatedPath(canonicalPath, lang, translations)
@@ -227,4 +229,4 @@ function normalizeBase(base: string) {
 	return base
 }
 
-export type I18n<T extends string> = ReturnType<typeof i18nRouting<T>>
+export type I18n<T extends string> = ReturnType<typeof createI18n<T>>
