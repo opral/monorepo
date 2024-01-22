@@ -176,7 +176,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		 * redirect(i18n.resolveRoute("/base/about", "de"))
 		 * ```
 		 */
-		resolveRoute(path: string, lang: T | undefined = undefined) {
+		route(path: string, lang: T | undefined = undefined) {
 			if (config.exclude(path)) return path
 
 			lang = lang ?? runtime.languageTag()
