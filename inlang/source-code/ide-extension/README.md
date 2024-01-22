@@ -168,7 +168,7 @@ If you want to add lint rules to your experience, you can add them from: https:/
 
 #### Troubleshooting
 
-If you are having trouble with the **loading icon** not disappearing, this is a known issue & we are working wit VSCode to fix it. In the meantime, you can right click the Inlang icon to hide it:
+If you are having trouble with the **loading icon** not disappearing, this is a known issue & we are working with VSCode to fix it. In the meantime, you can right click the Inlang icon to hide it:
 
 <img width="25%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/hide-badge.png"/>
 
@@ -182,7 +182,7 @@ If something isn't working as expected or you have a feature suggestion, please 
 .flex-container {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 16px;
+	padding: 0 16px;
 	align-items: center;
 }
 .flex-item {
