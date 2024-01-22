@@ -1,10 +1,10 @@
 import * as vscode from "vscode"
-import { state } from "../state.js"
+import { state } from "../utilities/state.js"
 import { contextTooltip } from "./contextTooltip.js"
-import { getStringFromPattern } from "../utilities/query.js"
-import { getActiveTextEditor } from "../utilities/initProject.js"
+import { getStringFromPattern } from "../utilities/messages/query.js"
 import { CONFIGURATION } from "../configuration.js"
-import { resolveEscapedCharacters } from "../utilities/resolveEscapedCharacters.js"
+import { resolveEscapedCharacters } from "../utilities/messages/resolveEscapedCharacters.js"
+import { getActiveTextEditor } from "../main.js"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
