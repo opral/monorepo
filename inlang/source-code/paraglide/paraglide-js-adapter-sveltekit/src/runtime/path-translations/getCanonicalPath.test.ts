@@ -50,4 +50,19 @@ describe("getCanonicalPath", () => {
 		})
 		expect(canonicalPath).toBe("/foo/123")
 	})
+
+	it("returns the canonical path in case of a match with params", () => {
+		const canonicalPath = getCanonicalPath("/bar/123", "en", {
+			"/foo/[id]": {
+				en: "/bar/[id]",
+				de: "/baz/[id]",
+			},
+
+			"/foo/[id]/[slug]": {
+				en: "/bar/[id]/[slug]",
+				de: "/baz/[id]/[slug]",
+			},
+		})
+		expect(canonicalPath).toBe("/foo/123")
+	})
 })
