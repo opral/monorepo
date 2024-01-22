@@ -51,21 +51,12 @@ export const cli = new Command()
 			properties: {
 				name: name.join(" "),
 				args: command.args.join(" "),
+				node_version: process.versions.node,
+				platform: process.platform,
+				version,
 			},
 		})
 		// https://github.com/tj/commander.js/issues/1745
 		process.exit(0)
 	})
 
-// --------------- TELEMETRY ---------------
-
-// not using await to not block the CLI
-
-await capture({
-	event: "CLI started",
-	properties: {
-		node_version: process.versions.node,
-		platform: process.platform,
-		version,
-	},
-})
