@@ -1,24 +1,49 @@
 import * as vscode from "vscode"
-import { state } from "./state.js"
-import { messagePreview } from "./decorations/messagePreview.js"
-import { ExtractMessage } from "./actions/extractMessage.js"
-import { msg } from "./utilities/message.js"
-import { getGitOrigin } from "./services/telemetry/index.js"
+import { msg } from "./utilities/messages/msg.js"
 import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview.js"
-import { recommendation } from "./utilities/recommendation.js"
+import { isInWorkspaceRecommendation, recommendation } from "./utilities/settings/recommendation.js"
 import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
-import { initProject } from "./utilities/initProject.js"
 import { handleError, telemetryCapture } from "./utilities/utils.js"
 import { CONFIGURATION } from "./configuration.js"
+import { projectView } from "./utilities/project/project.js"
+import { setState, state } from "./utilities/state.js"
+import { messagePreview } from "./decorations/messagePreview.js"
+import { ExtractMessage } from "./actions/extractMessage.js"
+import { errorView } from "./utilities/errors/errors.js"
+import { messageView } from "./utilities/messages/messages.js"
+import { listProjects } from "@inlang/sdk"
+import { createFileSystemMapper } from "./utilities/fs/createFileSystemMapper.js"
+import fs from "node:fs/promises"
+import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
+import { gettingStartedView } from "./utilities/getting-started/gettingStarted.js"
+import { closestInlangProject } from "./utilities/project/closestInlangProject.js"
 
 // Entry Point
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
-		const gitOrigin = await getGitOrigin()
-		telemetryCapture("IDE-EXTENSION activated")
+		vscode.commands.executeCommand("setContext", "inlang:hasProjectInWorkspace", false)
+		const workspaceFolder = vscode.workspace.workspaceFolders?.[0]
 
-		// Start the IDE extension
-		await main({ context, gitOrigin })
+		if (!workspaceFolder) {
+			console.warn("No workspace folder found.")
+			return
+		}
+
+		telemetryCapture("IDE-EXTENSION activated", {
+			isInWorkspaceRecommendation: await isInWorkspaceRecommendation({ workspaceFolder }),
+		})
+
+		const nodeishFs = createFileSystemMapper(normalizePath(workspaceFolder.uri.fsPath), fs)
+
+		try {
+			const projectsList = await listProjects(nodeishFs, normalizePath(workspaceFolder.uri.fsPath))
+			setState({ ...state(), projectsInWorkspace: projectsList })
+		} catch (error) {
+			handleError(error)
+			return
+		}
+
+		await main({ context, workspaceFolder, nodeishFs })
 		msg("inlang's extension activated", "info")
 	} catch (error) {
 		handleError(error)
@@ -28,73 +53,99 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 // Main Function
 async function main(args: {
 	context: vscode.ExtensionContext
-	gitOrigin: string | undefined
+	workspaceFolder: vscode.WorkspaceFolder
+	nodeishFs: NodeishFilesystem
 }): Promise<void> {
-	const workspaceFolder = vscode.workspace.workspaceFolders?.[0]
+	if (state().projectsInWorkspace.length > 0) {
+		// find the closest project to the workspace
+		const closestProjectToWorkspace = await closestInlangProject({
+			workingDirectory: normalizePath(args.workspaceFolder.uri.fsPath),
+			projects: state().projectsInWorkspace,
+		})
 
-	if (!workspaceFolder) {
-		console.warn("No workspace folder found.")
+		setState({
+			...state(),
+			selectedProjectPath:
+				closestProjectToWorkspace?.projectPath || state().projectsInWorkspace[0]?.projectPath || "",
+		})
+
+		vscode.commands.executeCommand("setContext", "inlang:hasProjectInWorkspace", true)
+
+		await projectView(args)
+		await messageView(args)
+		await errorView(args)
+
+		registerExtensionComponents(args)
+		// TODO: Replace by reactive settings API?
+		setupFileSystemWatcher(args)
+		handleInlangErrors()
+
 		return
+	} else {
+		await gettingStartedView()
 	}
+}
 
-	// initate project
-	const { project, error } = await initProject({ workspaceFolder, gitOrigin: args.gitOrigin })
-
-	// if project is undefined but the files exists, the project got migrated / newly created and we need to restart the extension
-	if (!project && (await vscode.workspace.findFiles(CONFIGURATION.FILES.PROJECT)).length !== 0) {
-		main(args)
-		return
-	}
-
-	if (error) {
-		handleError(error)
-		return
-	}
-
-	// Watch for changes in the config file
+function setupFileSystemWatcher(args: {
+	context: vscode.ExtensionContext
+	workspaceFolder: vscode.WorkspaceFolder
+	nodeishFs: NodeishFilesystem
+}) {
 	const watcher = vscode.workspace.createFileSystemWatcher(
-		new vscode.RelativePattern(workspaceFolder, CONFIGURATION.FILES.PROJECT)
+		new vscode.RelativePattern(
+			args.workspaceFolder,
+			state().selectedProjectPath || CONFIGURATION.FILES.PROJECT
+		)
 	)
-	// Listen for changes in the config file
-	watcher.onDidChange(() => {
-		main(args)
-	})
 
-	// Register commands and other extension functionality
+	watcher.onDidChange(async () => {
+		// reload project
+		await main({
+			context: args.context,
+			workspaceFolder: args.workspaceFolder,
+			nodeishFs: args.nodeishFs,
+		})
+	})
+}
+
+function registerExtensionComponents(args: {
+	context: vscode.ExtensionContext
+	workspaceFolder: vscode.WorkspaceFolder
+}) {
 	args.context.subscriptions.push(
 		...Object.values(CONFIGURATION.COMMANDS).map((c) => c.register(c.command, c.callback as any))
 	)
 
+	const additionalSelectors =
+		state().project.customApi()["app.inlang.ideExtension"]?.documentSelectors || []
+
 	const documentSelectors: vscode.DocumentSelector = [
 		{ language: "javascript", pattern: `!${CONFIGURATION.FILES.PROJECT}` },
-		...(state().project.customApi()["app.inlang.ideExtension"]?.documentSelectors || []),
+		...(state().project ? additionalSelectors : []),
 	]
 
-	// Register source actions
 	args.context.subscriptions.push(
 		vscode.languages.registerCodeActionsProvider(documentSelectors, new ExtractMessage(), {
 			providedCodeActionKinds: ExtractMessage.providedCodeActionKinds,
 		})
 	)
 
-	// Register decorations
 	messagePreview(args)
-
-	// Properties missing decoration in project.inlang
 	propertiesMissingPreview()
-
-	// Add inlang extension to recommended extensions
-	recommendation({ workspaceFolder })
-
-	// Linter diagnostics
+	recommendation(args)
 	linterDiagnostics(args)
+}
 
-	// Log inlang errors
-	const inlangErrors = state().project.errors()
+function handleInlangErrors() {
+	const inlangErrors = state().project.errors() || []
 	if (inlangErrors.length > 0) {
 		console.error("Inlang VSCode Extension errors:", inlangErrors)
 	}
 }
 
-// Deactivate function (if needed)
-// export function deactivate() {}
+// Helper Functions
+export function getActiveTextEditor(): vscode.TextEditor | undefined {
+	return vscode.window.activeTextEditor
+}
+
+
