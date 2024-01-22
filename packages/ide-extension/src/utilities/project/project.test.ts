@@ -162,7 +162,16 @@ describe("getTreeItem", () => {
 			isSelected: true,
 			collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
 		}
-		const treeItem = getTreeItem({ element: node, nodeishFs: {} as NodeishFilesystem })
+		const workspaceFolder = {
+			uri: {
+				fsPath: "/path/to/workspace",
+			},
+		} as vscode.WorkspaceFolder
+		const treeItem = getTreeItem({
+			element: node,
+			nodeishFs: {} as NodeishFilesystem,
+			workspaceFolder,
+		})
 		expect(treeItem.label).toBe("TestProject")
 		expect(treeItem.tooltip).toBe("/path/to/testproject")
 		expect(treeItem.iconPath).toBeInstanceOf(vscode.ThemeIcon)
@@ -178,6 +187,11 @@ describe("handleTreeSelection", () => {
 			collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
 		}
 		const nodeishFs = {} as NodeishFilesystem
+		const workspaceFolder = {
+			uri: {
+				fsPath: "/path/to/workspace",
+			},
+		} as vscode.WorkspaceFolder
 
 		// @ts-expect-error
 		openRepository.mockResolvedValue({})
@@ -186,7 +200,7 @@ describe("handleTreeSelection", () => {
 		// @ts-expect-error
 		loadProject.mockResolvedValue({ errors: () => [] })
 
-		await handleTreeSelection({ selectedNode, nodeishFs })
+		await handleTreeSelection({ selectedNode, nodeishFs, workspaceFolder })
 
 		expect(setState).toBeCalled()
 		expect(telemetry.capture).toBeCalled()
@@ -201,6 +215,11 @@ describe("handleTreeSelection", () => {
 			collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
 		}
 		const nodeishFs = {} as NodeishFilesystem
+		const workspaceFolder = {
+			uri: {
+				fsPath: "/path/to/workspace",
+			},
+		} as vscode.WorkspaceFolder
 
 		// @ts-expect-error
 		openRepository.mockResolvedValue({})
@@ -209,7 +228,7 @@ describe("handleTreeSelection", () => {
 		// @ts-expect-error
 		loadProject.mockRejectedValue(new Error("Loading failed"))
 
-		await handleTreeSelection({ selectedNode, nodeishFs })
+		await handleTreeSelection({ selectedNode, nodeishFs, workspaceFolder })
 
 		expect(vscode.window.showErrorMessage).toBeCalledWith(
 			expect.stringContaining("Failed to load project")
@@ -224,11 +243,16 @@ describe("handleTreeSelection", () => {
 			collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
 		}
 		const nodeishFs = {} as NodeishFilesystem
+		const workspaceFolder = {
+			uri: {
+				fsPath: "/path/to/workspace",
+			},
+		} as vscode.WorkspaceFolder
 
 		// @ts-expect-error
 		loadProject.mockRejectedValue(new Error("Loading failed"))
 
-		await handleTreeSelection({ selectedNode, nodeishFs })
+		await handleTreeSelection({ selectedNode, nodeishFs, workspaceFolder })
 
 		// Update the expected error message according to the actual implementation
 		expect(vscode.window.showErrorMessage).toBeCalledWith(
@@ -240,7 +264,12 @@ describe("handleTreeSelection", () => {
 describe("createTreeDataProvider", () => {
 	it("should create a TreeDataProvider", () => {
 		const nodeishFs = {} as NodeishFilesystem
-		const treeDataProvider = createTreeDataProvider({ nodeishFs })
+		const workspaceFolder = {
+			uri: {
+				fsPath: "/path/to/workspace",
+			},
+		} as vscode.WorkspaceFolder
+		const treeDataProvider = createTreeDataProvider({ nodeishFs, workspaceFolder })
 		expect(treeDataProvider).toBeDefined()
 		expect(treeDataProvider.getTreeItem).toBeInstanceOf(Function)
 		expect(treeDataProvider.getChildren).toBeInstanceOf(Function)
@@ -254,7 +283,9 @@ describe("projectView", () => {
 			subscriptions: [],
 		} as vscode.ExtensionContext
 		const workspaceFolder = {
-			uri: vscode.Uri.parse("file:///path/to/workspace"),
+			uri: {
+				fsPath: "/path/to/workspace",
+			},
 		} as vscode.WorkspaceFolder
 		const nodeishFs = {} as NodeishFilesystem
 
