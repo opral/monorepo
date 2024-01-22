@@ -32,7 +32,7 @@ npm i -D @inlang/paraglide-js-adapter-sveltekit
 Then add the adapter to your `vite.config.js` file:
 
 ```js
-import { paraglide } from "@inlang/paraglide-js-adapter-sveltekit/plugin"
+import { paraglide } from "@inlang/paraglide-js-adapter-sveltekit/vite"
 
 export default defineConfig({
 	plugins: [
@@ -52,13 +52,13 @@ This replaces the need for calling `paraglide-js compile` in your build script. 
 Create a file somewhere, for example `src/lib/i18n.js` and add the following code:
 
 ```js
-import { i18nRouting } from "@inlang/paraglide-js-adapter-sveltekit"
+import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
 import * as runtime from "$paraglide/runtime.js"
 
-export const routing = i18nRouting(runtime);
+export const i18n = createI18n(runtime);
 ```
 
-This `routing` instance is the heart of the adapter. It will provide you with all the routing functionality you need.
+This `i18n` instance is the heart of the adapter. It will provide you with all the functionality you need. `createI18n` is your one-stop-shop for configuring the adapter.
 
 ### 3. Set up the Language Provider
 
@@ -68,10 +68,10 @@ To provide the language to your app, add the `ParaglideJS` component to your lay
 <!-- src/routes/+layout.svelte -->
 <script>
     import { ParaglideJS } from '@inlang/paraglide-js-adapter-sveltekit'
-	import { routing } from '$lib/i18n.js'
+	import { i18n } from '$lib/i18n.js'
 </script>
 
-<ParaglideJS {routing}>
+<ParaglideJS {i18n}>
     <slot />
 </ParaglideJS>
 ```
@@ -86,18 +86,35 @@ This will do a few things for you:
 Finally, let's add the `reroute` hook that makes it all possible. In your `src/hooks.js` file, use the `i18n` instance to add the `reroute` hook:
 
 ```js
-import { routing } from '$lib/routing.js'
-export const reroute = routing.reroute()
+import { i18n } from '$lib/routing.js'
+export const reroute = i18n.reroute()
 ```
 
 ## 5. Go try it out!
 
-
-
+TODO
 
 ## Advanced Routing
 
 ### Excluding certain routes
+
+If you have routes that you don't want to translate, you can exclude them by passing them to the `exclude` option:
+
+```js
+import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
+import * as runtime from "../paraglide/runtime.js"
+
+export const i18n = createI18n(runtime, {
+	exclude: ["/admin", "/login", /^\/user\/\d+$/],
+})
+```
+
+Excluded routes will:
+- Not have any `rel="alternate"` links added to them
+- Not have their Paths translated
+- Not have links pointing to them translated
+
+Links to non-excluded routes from excluded routes will still be translated.
 
 ### Translated Paths
 
@@ -106,7 +123,7 @@ With the Paraglide SvelteKit Adapter, you can have different paths for each lang
 - `/de/uber-uns` for German
 - `/fr/a-propos` for French
 
-Setting this up is easy. In your `src/lib/i18n.js` add the translated paths to the `pathnames` option:
+Setting this up is easy with the `pathnames` option:
 
 ```js
 import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
@@ -186,7 +203,7 @@ import { i18n } from '$lib/i18n.js'
 import { goto } from '$app/navigation'
 import { languageTag } from '../paraglide/runtime.js'
 
-goto(i18n.resolveRoute("/about", languageTag()))
+goto(i18n.resolveRoute("/about"))
 ```
 
 Fortunately you don't need to do this often. Most of the time, you can use the `a` tag and the adapter will translate it for you.

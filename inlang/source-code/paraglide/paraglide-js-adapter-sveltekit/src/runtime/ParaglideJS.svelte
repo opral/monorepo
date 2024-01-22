@@ -30,7 +30,7 @@
 	 * The routing instance to use.
 	 * You can create one with `createI18n()` from `@inlang/paraglide-js-adapter-sveltekit`.
 	 */
-	export let routing: I18n<T>
+	export let i18n: I18n<T>
 
 	/**
 	 * If true, no alternate links will be added to the head.
@@ -40,10 +40,10 @@
 	/**
 	 * The language tag that was autodetected from the URL.
 	 */
-	$: autodetectedLanguage = routing.getLanguageFromUrl($page.url)
+	$: autodetectedLanguage = i18n.getLanguageFromUrl($page.url)
 
 	$: lang = languageTag ?? autodetectedLanguage
-	$: routing.config.runtime.setLanguageTag(lang)
+	$: i18n.config.runtime.setLanguageTag(lang)
 	$: if (browser) document.documentElement.lang = lang
 
 	function translateHref(href: string, hreflang: string | undefined): string {
@@ -54,13 +54,13 @@
 			return href
 		}
 
-		if (routing.config.exclude(original_to.pathname)) {
+		if (i18n.config.exclude(original_to.pathname)) {
 			return href
 		}
 
 		const language = hreflang ?? lang
 		const canonicalPath = normalize(original_to.pathname.slice(absoluteBase.length))
-		const translatedPath = getTranslatedPath(canonicalPath, language, routing.config.translations)
+		const translatedPath = getTranslatedPath(canonicalPath, language, i18n.config.translations)
 
 		return serializeRoute({
 			base: absoluteBase,
@@ -68,8 +68,8 @@
 			path: translatedPath,
 			dataSuffix: undefined,
 			includeLanguage: true,
-			defaultLanguageTag: routing.config.defaultLanguageTag,
-			prefixDefaultLanguage: routing.config.prefixDefaultLanguage,
+			defaultLanguageTag: i18n.config.defaultLanguageTag,
+			prefixDefaultLanguage: i18n.config.prefixDefaultLanguage,
 		})
 	}
 
@@ -77,18 +77,18 @@
 </script>
 
 <svelte:head>
-	{#if !noAlternateLinks && !routing.config.exclude($page.url.pathname)}
+	{#if !noAlternateLinks && !i18n.config.exclude($page.url.pathname)}
 		<!-- If there is more than one language, add alternate links -->
-		{#if routing.config.runtime.availableLanguageTags.length >= 1}
-			{#each routing.config.runtime.availableLanguageTags as lang}
+		{#if i18n.config.runtime.availableLanguageTags.length >= 1}
+			{#each i18n.config.runtime.availableLanguageTags as lang}
 				<link
 					rel="alternate"
 					hreflang={lang}
-					href={translatePath($page.url.pathname, lang, routing.config.translations, {
+					href={translatePath($page.url.pathname, lang, i18n.config.translations, {
 						base: absoluteBase,
-						availableLanguageTags: routing.config.runtime.availableLanguageTags,
-						defaultLanguageTag: routing.config.defaultLanguageTag,
-						prefixDefaultLanguage: routing.config.prefixDefaultLanguage,
+						availableLanguageTags: i18n.config.runtime.availableLanguageTags,
+						defaultLanguageTag: i18n.config.defaultLanguageTag,
+						prefixDefaultLanguage: i18n.config.prefixDefaultLanguage,
 					})}
 				/>
 			{/each}
