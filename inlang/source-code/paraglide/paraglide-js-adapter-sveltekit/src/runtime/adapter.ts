@@ -7,7 +7,6 @@ import type { PathTranslations } from "./path-translations/types.js"
 import type { Paraglide } from "./runtime.js"
 import { getTranslatedPath } from "./path-translations/getTranslatedPath.js"
 import { serializeRoute } from "./utils/serialize-path.js"
-import { translatePath } from "./path-translations/translatePath.js"
 import { getCanonicalPath } from "./path-translations/getCanonicalPath.js"
 import { getPathInfo } from "./utils/get-path-info.js"
 
