@@ -26,6 +26,15 @@ export function createProjectViewNodes(): ProjectViewNode[] {
 
 	projectViewNodes = projectsInWorkspace.map((project) => {
 		// Ensure projectPath is a string
+		if (!project.projectPath) {
+			return {
+				label: "",
+				path: "",
+				isSelected: false,
+				collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+			} as ProjectViewNode
+		}
+
 		const projectPath = typeof project.projectPath === "string" ? project.projectPath : ""
 		const projectName = projectPath.split("/").slice(-2).join("/")
 
@@ -116,6 +125,8 @@ export async function handleTreeSelection(args: {
 		CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.fire(undefined)
 		CONFIGURATION.EVENTS.ON_DID_ERROR_TREE_VIEW_CHANGE.fire(undefined)
 	} catch (error) {
+		//console.log(error, selectedProject)
+
 		vscode.window.showErrorMessage(`Failed to load project "${selectedProject}": ${error}`)
 	}
 }
@@ -125,7 +136,7 @@ export function createTreeDataProvider(args: {
 }): vscode.TreeDataProvider<ProjectViewNode> {
 	return {
 		getTreeItem: (element: ProjectViewNode) => getTreeItem({ element, nodeishFs: args.nodeishFs }),
-		getChildren: async () => createProjectViewNodes(),
+		getChildren: () => createProjectViewNodes(),
 		onDidChangeTreeData: CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.event,
 	}
 }
@@ -135,9 +146,8 @@ export const projectView = async (args: {
 	workspaceFolder: vscode.WorkspaceFolder
 	nodeishFs: NodeishFilesystem
 }) => {
-	const treeDataProvider = await createTreeDataProvider({ nodeishFs: args.nodeishFs })
+	const treeDataProvider = createTreeDataProvider({ nodeishFs: args.nodeishFs })
 
-	// inital call to createProjectViewNodes() to set the selected project
 	treeDataProvider.getChildren()
 
 	args.context.subscriptions.push(
