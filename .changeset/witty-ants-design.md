@@ -1,7 +1,7 @@
 ---
 "@inlang/sdk": minor
-"vs-code-extension": patch
-"@inlang/cli": patch
+"vs-code-extension": minor
+"@inlang/cli": minor
 ---
 
 remove deprecated loadProject({nodeishFs})
