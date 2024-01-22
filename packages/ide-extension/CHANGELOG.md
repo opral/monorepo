@@ -1,5 +1,15 @@
 # inlang-vs-code-extension
 
+## 1.28.0
+
+### Minor Changes
+
+- f2b4e23e5: add inlang tab
+
+### Patch Changes
+
+- 870143a22: update import with workspaceFolder
+
 ## 1.27.0
 
 ### Minor Changes
