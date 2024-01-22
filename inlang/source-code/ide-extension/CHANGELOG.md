@@ -1,5 +1,17 @@
 # inlang-vs-code-extension
 
+## 1.27.0
+
+### Minor Changes
+
+- 676c0f905: remove deprecated loadProject({nodeishFs})
+
+### Patch Changes
+
+- Updated dependencies [676c0f905]
+  - @inlang/sdk@0.26.0
+  - @inlang/telemetry@0.3.8
+
 ## 1.26.0
 
 ### Minor Changes
