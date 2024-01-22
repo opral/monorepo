@@ -17,9 +17,15 @@ export default function Page() {
 		<>
 			<Title>{m.inlang_global_title()}</Title>
 			<Meta name="description" content={m.inlang_global_description()} />
-			<Meta name="og:image" content="/opengraph/inlang-social-image.jpg" />
+			<Meta
+				name="og:image"
+				content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/website/public/opengraph/inlang-social-image.jpg"
+			/>
 			<Meta name="twitter:card" content="summary_large_image" />
-			<Meta name="twitter:image" content="/opengraph/inlang-social-image.jpg" />
+			<Meta
+				name="twitter:image"
+				content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/website/public/opengraph/inlang-social-image.jpg"
+			/>
 			<Meta name="twitter:image:alt" content={m.inlang_twitter_title()} />
 			<Meta name="twitter:title" content={m.inlang_global_title()} />
 			<Meta name="twitter:description" content={m.inlang_global_description()} />
