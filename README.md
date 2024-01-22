@@ -48,7 +48,7 @@
 
 - use [inlang Paraglide.js](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) to have a fully translated, typesafe & fast app in minutes
 - use the [inlang VSCode extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) to translate your app right in the editor
-- use the [inlang Fink](https://inlang.com/m/tdozzpar/app-inlang-editor) to translate your app in the browser & invite collaborators to help you
+- use the [inlang Fink](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor) to translate your app in the browser & invite collaborators to help you
 - use the [inlang CLI](https://inlang.com/m/2qj2w8pu/app-inlang-cli) to lint your messsages with lint rules or machine translate them & have quality control in CI/CD
 - *build your own app / plugin / lint rule* with the [inlang SDK](https://inlang.com/documentation)
 - ...

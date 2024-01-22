@@ -11,8 +11,10 @@ import {
 import { useEditorState } from "./State.jsx"
 import { SearchInput } from "./components/SearchInput.jsx"
 import { Gitfloat } from "./components/Gitfloat.jsx"
+import IconGithub from "~icons/cib/github"
 import IconAdd from "~icons/material-symbols/add"
 import IconClose from "~icons/material-symbols/close"
+import IconSync from "~icons/material-symbols/sync-outline"
 import IconTranslate from "~icons/material-symbols/translate"
 import IconSettings from "~icons/material-symbols/settings-outline"
 import IconDescription from "~icons/material-symbols/description-outline"
@@ -34,6 +36,9 @@ interface Filter {
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
 	const {
+		refetchRepo,
+		forkStatus,
+		userIsCollaborator,
 		project,
 		lixErrors,
 		setTextSearch,
@@ -50,6 +55,20 @@ export function Layout(props: { children: JSXElement }) {
 	const removeFilter = (filterName: string) => {
 		setSelectedFilters(selectedFilters().filter((filter: Filter) => filter.name !== filterName))
 	}
+
+	const [forkStatusModalOpen, setForkStatusModalOpen] = createSignal(false)
+	const [openedGitHub, setOpenedGitHub] = createSignal(false)
+
+	createEffect(() => {
+		if (
+			forkStatus() &&
+			forkStatus()?.behind > 0 &&
+			forkStatus().conflicts &&
+			userIsCollaborator()
+		) {
+			setForkStatusModalOpen(true)
+		}
+	})
 
 	const [addLanguageModalOpen, setAddLanguageModalOpen] = createSignal(false)
 	const [addLanguageText, setAddLanguageText] = createSignal("")
@@ -339,6 +358,51 @@ export function Layout(props: { children: JSXElement }) {
 				>
 					Add language
 				</sl-button>
+			</sl-dialog>
+			<sl-dialog
+				prop:label="Fork out of sync"
+				prop:open={forkStatusModalOpen()}
+				on:sl-after-hide={() => setForkStatusModalOpen(false)}
+			>
+				<p class="text-sm pb-4 -mt-4 pr-8">
+					Your fork is out of sync with the upstream repository. Please resolve the conflicts before
+					applying your changes.
+				</p>
+				<img
+					src="/images/resolve-in-github.webp"
+					alt="Sync Fork GitHub UI"
+					class="w-4/5 mx-auto mt-2"
+				/>
+				<div class="flex flex-col gap-4 pt-6">
+					<sl-button
+						class="w-full"
+						prop:variant={openedGitHub() ? "default" : "primary"}
+						prop:href={`https://github.com/${routeParams().owner}/${routeParams().repository}`}
+						prop:target="_blank"
+						onClick={() => setOpenedGitHub(true)}
+					>
+						<div slot="prefix">
+							<IconGithub />
+						</div>
+						Open GitHub
+					</sl-button>
+					<Show when={openedGitHub()}>
+						<sl-button
+							class="w-full"
+							prop:variant={"primary"}
+							onClick={() => {
+								refetchRepo()
+								setForkStatusModalOpen(false)
+								setOpenedGitHub(false)
+							}}
+						>
+							<div slot="prefix">
+								<IconSync />
+							</div>
+							Reload repo
+						</sl-button>
+					</Show>
+				</div>
 			</sl-dialog>
 			<Gitfloat />
 		</EditorLayout>

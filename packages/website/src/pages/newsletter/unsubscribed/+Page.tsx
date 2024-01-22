@@ -17,7 +17,10 @@ export default function Page() {
 				name="description"
 				content="inlang's ecosystem makes adapting your application to different markets easy."
 			/>
-			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
+			<Meta
+				name="og:image"
+				content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/website/public/opengraph/inlang-social-image.jpg"
+			/>
 			<Meta name="robots" content="noindex" />
 			<MetaLink
 				href={`https://inlang.com${i18nRouting(currentPageContext.urlParsed.pathname).url}`}
