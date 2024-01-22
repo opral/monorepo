@@ -166,7 +166,14 @@ If you want to add lint rules to your experience, you can add them from: https:/
 - VS Code version 1.84.0 or higher.
 - Node.js version v18 or higher.
 
-## Support: Join our Discord!
+#### Troubleshooting
+
+If you are having trouble with the **loading icon** not disappearing, this is a known issue & we are working wit VSCode to fix it. In the meantime, you can right click the Inlang icon to hide it:
+
+<img width="25%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/hide-badge.png"/>
+
+
+## Support: Join our Discord / Open an issue on GitHub!
 
 If something isn't working as expected or you have a feature suggestion, please join our [Discord](https://discord.gg/DEHKgmx2) or [create an issue](<[https](https://github.com/opral/monorepo/issues/new/choose)>). We are happy to help!
 
