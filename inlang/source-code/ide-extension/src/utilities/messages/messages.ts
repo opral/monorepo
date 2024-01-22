@@ -221,13 +221,10 @@ export function getHtml(args: {
 		vscode.Uri.joinPath(args.context.extensionUri, "assets", "styles.css")
 	)
 	const codiconsUri = args.webview.asWebviewUri(
-		vscode.Uri.joinPath(
-			args.context.extensionUri,
-			"node_modules",
-			"@vscode/codicons",
-			"dist",
-			"codicon.css"
-		)
+		vscode.Uri.joinPath(args.context.extensionUri, "assets", "codicon.css")
+	)
+	const codiconsTtfUri = args.webview.asWebviewUri(
+		vscode.Uri.joinPath(args.context.extensionUri, "assets", "codicon.ttf")
 	)
 
 	return `
@@ -241,6 +238,7 @@ export function getHtml(args: {
             <title>Inlang Message View</title>
             <link href="${styleUri}" rel="stylesheet" />
             <link href="${codiconsUri}" rel="stylesheet" />
+			<link href="${codiconsTtfUri}" rel="stylesheet" />
         </head>
         <body>
             <input type="text" id="searchInput" placeholder="Search">
