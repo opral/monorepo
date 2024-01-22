@@ -31,13 +31,6 @@
 		"/bin",
 		"/dist"
 	],
-	"exports": {
-		"./src/utlilities/fs": "./src/utilities/fs/index.ts",
-		"./src/utlilities/format": "./src/utilities/format.ts",
-		"./src/utilities/getLanguageFolderPath": "./src/utilities/getLanguageFolderPath.ts",
-		"./src/utilities/getSupportedLibrary": "./src/utilities/getSupportedLibrary.ts",
-		"./src/utilities/getConfigContent": "./src/utilities/getConfigContent.ts"
-	},
 	"scripts": {
 		"dev": "node ./build.js",
 		"build": "cross-env NODE_ENV=production node ./build.js",
