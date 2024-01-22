@@ -1,10 +1,10 @@
-import { state } from "../state.js"
-import { msg } from "../utilities/message.js"
+import { state } from "../utilities/state.js"
+import { msg } from "../utilities/messages/msg.js"
 import { commands, type TextEditor, window, env, Uri } from "vscode"
 import { telemetry } from "../services/telemetry/index.js"
 import type { Message } from "@inlang/sdk"
 import { CONFIGURATION } from "../configuration.js"
-import { isQuoted, stripQuotes } from "../utilities/isQuoted.js"
+import { isQuoted, stripQuotes } from "../utilities/messages/isQuoted.js"
 
 /**
  * Helps the user to extract messages from the active text editor.
@@ -15,6 +15,7 @@ export const extractMessageCommand = {
 	register: commands.registerTextEditorCommand,
 	callback: async function (textEditor: TextEditor) {
 		const ideExtension = state().project.customApi()["app.inlang.ideExtension"]
+		const sourceLanguageTag = state().project.settings().sourceLanguageTag
 
 		// guards
 		if (!ideExtension) {
@@ -31,7 +32,7 @@ export const extractMessageCommand = {
 				"notification"
 			)
 		}
-		if (state().project.settings()?.sourceLanguageTag === undefined) {
+		if (sourceLanguageTag === undefined) {
 			return msg(
 				"The `sourceLanguageTag` is not defined in the project but required to extract a message.",
 				"warn",

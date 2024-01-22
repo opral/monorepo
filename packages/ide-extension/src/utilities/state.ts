@@ -1,4 +1,4 @@
-import type { InlangProject } from "@inlang/sdk"
+import type { InlangProject, listProjects } from "@inlang/sdk"
 
 /**
  * The state of the vscode extension.
@@ -8,6 +8,8 @@ type State = {
 	 * Inlang project
 	 */
 	project: InlangProject
+	selectedProjectPath: string
+	projectsInWorkspace: Awaited<ReturnType<typeof listProjects>>
 }
 
 let _state: State
