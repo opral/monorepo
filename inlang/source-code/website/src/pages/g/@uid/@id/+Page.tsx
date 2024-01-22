@@ -65,13 +65,19 @@ export default function Page(props: PageProps) {
 			{props.manifest && props.manifest.gallery ? (
 				<Meta name="og:image" content={props.manifest.gallery[0]} />
 			) : (
-				<Meta name="og:image" content="/images/opengraph/inlang-social-image.jpg" />
+				<Meta
+					name="og:image"
+					content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/website/public/opengraph/inlang-social-image.jpg"
+				/>
 			)}
 			<Meta name="twitter:card" content="summary_large_image" />
 			{props.manifest && props.manifest.gallery ? (
 				<Meta name="twitter:image" content={props.manifest.gallery[0]} />
 			) : (
-				<Meta name="twitter:image" content="/images/inlang-social-image.jpg" />
+				<Meta
+					name="twitter:image"
+					content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/website/public/opengraph/inlang-social-image.jpg"
+				/>
 			)}
 			<Meta
 				name="twitter:image:alt"
