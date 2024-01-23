@@ -6,7 +6,7 @@ Attention: This package is in pre-release. It is not yet ready for production us
 
 ## Example project
 
-Before setting up the adapter in your own project, you can take a look at the [example project](./example) to see how it works.
+Before setting up the adapter in your own project, you can take a look at the [example project](https://github.com/thetarnav/paraglide-solidstart-hackernews) to see how it works.
 
 ## Getting started
 
@@ -39,21 +39,46 @@ import { createI18n } from "@inlang/paraglide-js-adapter-solidstart"
 const { LanguageTagProvider, languageTag, setLanguageTag } = createI18n(paraglide)
 ```
 
-Take a look at (./example/src/i18n/index.tsx) to see how the adapter is used in a example project. With an addition to some convenience functions.
+Take a look at [example/src/i18n/index.tsx](https://github.com/thetarnav/paraglide-solidstart-hackernews/blob/main/src/i18n/index.tsx) to see how the adapter is used in a example project. With an addition to some convenience functions.
 
 ### 4. Provide language tag to your app, and Solid Router.
 
 ```tsx
-// root.tsx
+// entry-server.tsx
 
-import { Component, ErrorBoundary, Suspense } from "solid-js"
-import { Body, FileRoutes, Head, Html, Routes, Scripts } from "solid-start"
-import { LanguageTagProvider, useLocationLanguageTag } from "./i18n.ts"
-import { sourceLanguageTag, availableLanguageTags } from "./paraglide/runtime.js"
+import { createHandler, StartServer } from "@solidjs/start/server"
+import { useLocationLanguageTag } from "./i18n.js"
 
-const Root: Component = () => {
+export default createHandler(() => {
+	const language_tag = useLocationLanguageTag() ?? i18n.sourceLanguageTag
+
+	return (
+		<StartServer
+			document={(props) => (
+				<html lang={language_tag}>
+					<head>
+						{props.assets}
+					</head>
+					<body>
+						<div id="app">{props.children}</div>
+						{props.scripts}
+					</body>
+				</html>
+			)}
+		/>
+	)
+})
+
+// app.tsx
+
+import { Router } from "@solidjs/router"
+import { FileRoutes } from "@solidjs/start"
+import { Suspense } from "solid-js"
+import { LanguageTagProvider, useLocationLanguageTag, sourceLanguageTag } from "./i18n.js"
+
+export default function App() {
 	// get language tag from URL, or use source language tag as fallback
-	const url_language_tag = useLocationLanguageTag(availableLanguageTags)
+	const url_language_tag = useLocationLanguageTag()
 	const language_tag = url_language_tag ?? sourceLanguageTag
 
 	// 1. provide language tag to your app
@@ -61,27 +86,23 @@ const Root: Component = () => {
 	// 3. make sure the routing doesn't treat the language tag as part of the path
 
 	return (
-		<LanguageTagProvider value={language_tag}>
-			<Html lang={language_tag}>
-				<Head />
-				<Body>
-					<ErrorBoundary>
-						<Suspense>
-							<Routes base={url_language_tag}>
-								<FileRoutes />
-							</Routes>
-						</Suspense>
-					</ErrorBoundary>
-					<Scripts />
-				</Body>
-			</Html>
-		</LanguageTagProvider>
+		<main>
+			<Router
+				base={url_language_tag}
+				root={(props) => (
+					<LanguageTagProvider value={language_tag}>
+						<Suspense>{props.children}</Suspense>
+					</LanguageTagProvider>
+				)}
+			>
+				<FileRoutes />
+			</Router>
+		</main>
 	)
 }
-export default Root
 ```
 
-Take a look at (./example/src/root.tsx) to see how it is used in a example project.
+Take a look at [example/src/app.tsx](https://github.com/thetarnav/paraglide-solidstart-hackernews/blob/main/src/app.tsx) to see how it is used in a example project.
 
 ### 5. Use message functions
 
@@ -105,12 +126,44 @@ const language_tag = languageTag() // in component body
 ```
 
 ### 6. Switch language
+
 You can switch languages by calling the `setLanguageTag` function provided by the adapter. This will navigate to the translated variant of the current route.
 
-If you want to navigate to a different route in a specific language, you can use the `translateHref` function provided by the adapter to generate the correct href. 
+```tsx
+<select onChange={(e) => setLanguageTag(e.target.value)}>
+	{availableLanguageTags.map((tag) => (
+		<option value={tag} selected={tag === languageTag()}>
+			{tag}
+		</option>
+	))}
+</select>
+```
+
+If you want to navigate to a different route in a specific language, you can use the `translateHref` function provided by the adapter to generate the correct href.
 
 ```tsx
 <A href={translateHref("/about", "en")}>{m.about()}</A>
 ```
 
 > ⚠️ Don't use the `translateHref` function on links that point to external websites. It will break the link.
+
+### 7. Alternate links
+
+If you want to provide alternate links to the same page in different languages.
+
+```tsx
+const language_tag = languageTag()
+
+<head>
+	{availableLanguageTags
+		.filter((tag) => tag !== language_tag)
+		.map((tag) => (
+			<link
+				rel="alternate"
+				href={translateHref("/", tag)}
+				hreflang={tag}
+			/>
+		))
+	}
+</head>
+```

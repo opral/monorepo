@@ -18,12 +18,15 @@ export function normalizePathname(pathname: string): string {
  * @param all_language_tags All available language tags. (From paraglide, e.g. "en", "de")
  * @returns The language tag from the URL, or `undefined` if no language tag was found.
  */
-export function languageTagInPathname<T extends string>(
+export function languageTagFromPathname<T extends string>(
 	pathname: string,
 	all_language_tags: readonly T[]
 ): T | undefined {
 	for (const tag of all_language_tags) {
-		if (pathname.startsWith(`/${tag}/`)) {
+		if (
+			pathname.startsWith(tag, 1) &&
+			(pathname.length === tag.length + 1 || pathname[tag.length + 1] === "/")
+		) {
 			return tag
 		}
 	}
@@ -46,33 +49,32 @@ export function languageTagInPathname<T extends string>(
 export function translateHref<T extends string>(
 	pathname: string,
 	page_language_tag: T,
-	available_language_tags: readonly T[],
-	source_language_tag: T
+	available_language_tags: readonly T[]
 ): string {
 	const to_normal_pathname = normalizePathname(pathname)
-	const to_language_tag = languageTagInPathname(to_normal_pathname, available_language_tags)
+	const to_language_tag = languageTagFromPathname(to_normal_pathname, available_language_tags)
 
-	if (to_language_tag === source_language_tag) {
-		return pathname
-	} else if (to_language_tag) {
-		return to_normal_pathname.replace(to_language_tag, page_language_tag)
-	} else {
-		return "/" + page_language_tag + pathname
-	}
+	return to_language_tag
+		? to_normal_pathname.replace(to_language_tag, page_language_tag)
+		: "/" + page_language_tag + to_normal_pathname
 }
 
 /**
- * Get the language tag from the URL, using `router.useLocation()`. (needs to be used under `router.Router` context)
+ * Returns the current pathname. From request on server, from window on client.
  *
- * @param all_language_tags All available language tags. (From paraglide, e.g. "en", "de")
- * @returns The language tag from the URL, or `undefined` if no language tag was found.
+ * Use with {@link languageTagFromPathname} to get the language tag from the URL.
+ *
+ * @example
+ * ```ts
+ * const pathname = useLocationPathname()
+ * const language_tag = languageTagFromPathname(pathname, all_language_tags)
+ * ```
  */
-export function useLocationLanguageTag<T extends string>(
-	all_language_tags: readonly T[]
-): T | undefined {
-	const location = router.useLocation()
-	const normalized_pathname = normalizePathname(location.pathname)
-	return languageTagInPathname(normalized_pathname, all_language_tags)
+export function useLocationPathname(): string {
+	return solid_web.isServer
+		? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		  new URL(solid_web.getRequestEvent()!.request.url).pathname
+		: window.location.pathname
 }
 
 /**
@@ -139,18 +141,21 @@ export function createI18n<T extends string>(paraglide: Paraglide<T>): I18n<T> {
 			const navigate = router.useNavigate()
 
 			/*
-            Keep the language tag in the URL
-            */
+			Keep the language tag in the URL
+			*/
 			router.useBeforeLeave((e) => {
 				if (typeof e.to !== "string") return
 
 				const from_pathname = normalizePathname(e.from.pathname)
-				const from_language_tag = languageTagInPathname(
+				const from_language_tag = languageTagFromPathname(
 					from_pathname,
 					paraglide.availableLanguageTags
 				)
 				const to_pathname = normalizePathname(e.to)
-				const to_language_tag = languageTagInPathname(to_pathname, paraglide.availableLanguageTags)
+				const to_language_tag = languageTagFromPathname(
+					to_pathname,
+					paraglide.availableLanguageTags
+				)
 
 				//  /en/foo → /en/bar  |  /foo → /bar
 				if (to_language_tag === from_language_tag) return
