@@ -2,7 +2,7 @@ import * as vscode from "vscode"
 import { msg } from "./utilities/messages/msg.js"
 import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview.js"
 import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
-import { handleError, telemetryCapture } from "./utilities/utils.js"
+import { handleError } from "./utilities/utils.js"
 import { CONFIGURATION } from "./configuration.js"
 import { projectView } from "./utilities/project/project.js"
 import { setState, state } from "./utilities/state.js"
@@ -16,10 +16,9 @@ import fs from "node:fs/promises"
 import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
 import { gettingStartedView } from "./utilities/getting-started/gettingStarted.js"
 import { closestInlangProject } from "./utilities/project/closestInlangProject.js"
-import {
-	isInWorkspaceRecommendation,
-	recommendationBannerView,
-} from "./utilities/recommendation/recommendation.js"
+import { recommendationBannerView } from "./utilities/recommendation/recommendation.js"
+import { telemetry } from "./services/telemetry/implementation.js"
+import { version } from "../package.json"
 
 // Entry Point
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
@@ -33,8 +32,13 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			return
 		}
 
-		telemetryCapture("IDE-EXTENSION activated", {
-			isInWorkspaceRecommendation: await isInWorkspaceRecommendation({ workspaceFolder }),
+		telemetry.capture({
+			event: "IDE-EXTENSION activated",
+			properties: {
+				vscode_version: vscode.version,
+				version,
+				platform: process.platform,
+			},
 		})
 
 		const nodeishFs = createFileSystemMapper(normalizePath(workspaceFolder.uri.fsPath), fs)

@@ -138,8 +138,8 @@ export function getRecommendationBannerHtml(args: { webview: vscode.Webview }): 
 					margin-bottom: 10px;
 				}
 				button {
-					color: var(--vscode-button-secondaryForeground);
-					background-color: var(--vscode-button-secondaryBackground);
+					color: var(--vscode-button-foreground);
+					background-color: var(--vscode-button-background);
 					border: none;
 					padding: 6px 10px;
 					width: 100%;
@@ -182,9 +182,10 @@ export function getRecommendationBannerHtml(args: { webview: vscode.Webview }): 
         </head>
         <body>
             <main>
-                <span>Add the extension to be recommended for other users of your current workspace.</span>
+                <!--<span>Add the extension to be recommended for other users of your current workspace.</span>-->
+
                 <button id="addRecommendation">Add to workspace recommendation</button>
-                <a id="rejectRecommendation" class="link"><span style="text-align: center;">Reject</a></span></a>
+                <!--<a id="rejectRecommendation" class="link"><span style="text-align: center;">Reject</a></span></a>-->
             </main>
             <script>
 			console.log("test")
