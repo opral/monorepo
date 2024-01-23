@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.28.1
+
+### Patch Changes
+
+- 9a55e9390: update codicon location
+
 ## 1.28.0
 
 ### Minor Changes
