@@ -1,12 +1,10 @@
-![image](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/translation-review-system/assets/lix-guide-review.png)
+![image](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/translation-review-system/assets/lix-guide-reviewV2.png)
 
 ## Translation Review System - Ensure project-wide quality
 
-As your i18n project grows, ensuring the quality of translations becomes crucial. To achieve this, you can establish a review system.
+As your i18n project grows, ensuring the quality of translations becomes crucial. To achieve this, you can establish a review system. The aim of this system is to meet specific standards for translations.
 
-The aim of this system is to meet specific standards for translations.
-
-### Change Control enables your review system?
+## Change Control enables your review system?
 
 1. You have complete control over the quality of translations and what gets merged or not.
 2. You can set up mechanisms to automatically assign people responsible for maintaining a specific language.
