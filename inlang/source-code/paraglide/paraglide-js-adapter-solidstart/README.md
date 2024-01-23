@@ -6,7 +6,7 @@ Attention: This package is in pre-release. It is not yet ready for production us
 
 ## Example project
 
-Before setting up the adapter in your own project, you can take a look at the [example project](./example) to see how it works.
+Before setting up the adapter in your own project, you can take a look at the [example project](https://github.com/thetarnav/paraglide-solidstart-hackernews) to see how it works.
 
 ## Getting started
 
