@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.28.2
+
+### Patch Changes
+
+- 365fd5610: update readme & recommendation view
+
 ## 1.28.1
 
 ### Patch Changes
