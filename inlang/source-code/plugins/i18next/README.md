@@ -103,6 +103,10 @@ The [dist](./dist/) directory is used to distribute the plugin directly via CDN 
 
 Read the [jsDelivr documentation](https://www.jsdelivr.com/?docs=gh) on importing from GitHub.
 
+## Pricing 
+
+<doc-dev-tool-pricing></doc-dev-tool-pricing>
+
 ---
 
 _Is something unclear or do you have questions? Reach out to us in our [Discord channel](https://discord.gg/9vUg7Rr) or open a [Discussion](https://github.com/opral/monorepo/discussions) or an [Issue](https://github.com/opral/monorepo/issues) on [Github](https://github.com/opral/monorepo)._

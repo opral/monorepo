@@ -43,3 +43,7 @@ The path pattern is used to find the files that contain the messages.
   "hello": "Hello {name}!"
 }
 ```
+
+## Pricing 
+
+<doc-dev-tool-pricing></doc-dev-tool-pricing>
