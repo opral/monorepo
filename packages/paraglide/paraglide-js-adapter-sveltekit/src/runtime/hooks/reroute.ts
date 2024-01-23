@@ -4,6 +4,7 @@ import { serializeRoute } from "../utils/serialize-path.js"
 import { getCanonicalPath } from "../path-translations/getCanonicalPath.js"
 import type { Reroute } from "@sveltejs/kit"
 import type { I18nConfig } from "../adapter.js"
+import { dev } from "$app/environment"
 
 /**
  * Returns a reroute function that applies the given translations to the paths
@@ -37,7 +38,9 @@ export const createReroute = <T extends string>({
 
 			return serializedPath
 		} catch (e) {
-			console.error(e)
+			if (dev) {
+				console.error("[@inlang/paraglide-js-adapter-sveltekit] Error thrown during reroute", e)
+			}
 			return url.pathname
 		}
 	}
