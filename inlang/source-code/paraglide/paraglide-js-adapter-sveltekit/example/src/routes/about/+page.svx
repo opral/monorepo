@@ -11,7 +11,7 @@
 [{m.home()}]({base}/)
 
 {#each availableLanguageTags as lang}
-    <a href={i18n.getCanonicalPath($page.url.pathname)} hreflang={lang}>
+    <a href={i18n.route($page.url.pathname)} hreflang={lang}>
     {m.change_language_to({ languageTag: lang })}
     </a>
     <br />
