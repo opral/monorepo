@@ -38,7 +38,7 @@
 		"views": {
 			"inlang": [
 				{
-					"when": "inlang:showRecommendationBanner",
+					"when": "inlang:showRecommendationBanner && inlang:hasProjectInWorkspace",
 					"id": "recommendationBanner",
 					"name": "Recommendation",
 					"type": "webview",
