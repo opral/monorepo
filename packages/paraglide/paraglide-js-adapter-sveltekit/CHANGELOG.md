@@ -1,5 +1,11 @@
 # @inlang/paraglide-js-adapter-sveltekit
 
+## 0.2.2
+
+### Patch Changes
+
+- 6ac6e3be9: fix: make `exclude` option optional
+
 ## 0.2.1
 
 ### Patch Changes
