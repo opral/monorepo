@@ -506,9 +506,8 @@ function ProjectMenu() {
 	return (
 		<sl-tooltip
 			prop:content="Select inlang project"
-			prop:placement="top"
+			prop:placement="bottom"
 			prop:trigger="hover"
-			prop:hoist={true}
 			class="small"
 			style={{ "--show-delay": "1s" }}
 		>

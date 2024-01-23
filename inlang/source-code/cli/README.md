@@ -159,7 +159,7 @@ This will launch an interactive prompt that will guide you through the process o
 
 ## `lint`
 
-The lint command lints the translation with the configured lint rules, for example, with the [@inlang/plugin-standard-lint-rules](https://github.com/opral/monorepo/tree/main/inlang/source-code/message-lint-rules).
+The lint command lints the translation with the configured [lint rules](https://inlang.com/c/lint-rules), for example, with the [@inlang/plugin-standard-lint-rules](https://github.com/opral/monorepo/tree/main/inlang/source-code/message-lint-rules).
 
 ```sh
 npx @inlang/cli lint
@@ -229,3 +229,7 @@ npx @inlang/cli module build --entry ./path/to/index.ts --outdir ./path/to/dist
 `--watch`: An optional flag that, when provided, enables a watch mode to monitor for changes and automatically rebuild the module when changes are detected.
 
 See how there is also a `--watch` flag, which enables a watch mode to monitor for changes and automatically rebuild the module when changes are detected. This command runs with `esbuild` under the hood. -->
+
+## Pricing 
+
+<doc-dev-tool-pricing></doc-dev-tool-pricing>

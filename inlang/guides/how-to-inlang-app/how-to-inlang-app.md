@@ -74,11 +74,11 @@ These functions internally handle the loading and saving of messages according t
 
 ## 3. Working with Lint Rules
 
-Lint rules are crucial for maintaining code quality and consistency. In your Inlang app, you can leverage lint rules to ensure that your localization messages adhere to specific standards. For example, let's explore working with the [`snakeCaseId`](https://inlang.com/m/messageLintRule.inlang.snakeCaseId) lint rule.
+[Lint rules](/c/lint-rules) are crucial for maintaining code quality and consistency. In your Inlang app, you can leverage lint rules to ensure that your localization messages adhere to specific standards. For example, let's explore working with the [`snakeCaseId`](https://inlang.com/m/messageLintRule.inlang.snakeCaseId) lint rule.
 
 This lint rule checks whether your message id's are in a snale case format or not.
 
-To access lint reports based on the configured lint rule on a specific `message`, you can subscribe on `inlang.query.messageLintReports.get.subscribe()` – we introduced a subscription pattern here because of the nature of lint rules which can frequently update, like with every update of the `message`.
+To access lint reports based on the configured lint rule on a specific `message`, you can subscribe on `inlang.query.messageLintReports.get.subscribe()` – we introduced a subscription pattern here because of the nature of [lint rules](/c/lint-rules) which can frequently update, like with every update of the `message`.
 
 To get the lint reports:
 

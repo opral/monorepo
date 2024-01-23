@@ -19,7 +19,8 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@solidjs/router": "^0.9",
+		"@solidjs/router": "^0.10",
+		"@solidjs/start": "^0.4",
 		"solid-js": "^1.8"
 	},
 	"devDependencies": {
