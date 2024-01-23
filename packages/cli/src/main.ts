@@ -59,4 +59,3 @@ export const cli = new Command()
 		// https://github.com/tj/commander.js/issues/1745
 		process.exit(0)
 	})
-
