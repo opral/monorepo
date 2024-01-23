@@ -10,15 +10,22 @@ import { renderLocales } from "#src/renderer/renderLocales.js"
 import { i18nRouting } from "#src/renderer/+onBeforeRoute.js"
 import Personas from "./custom_section/Personas/index.jsx"
 import ExtendSection from "./custom_section/Extend/index.jsx"
+import LixSection from "./custom_section/Lix/index.jsx"
 
 export default function Page() {
 	return (
 		<>
 			<Title>{m.inlang_global_title()}</Title>
 			<Meta name="description" content={m.inlang_global_description()} />
-			<Meta name="og:image" content="/opengraph/inlang-social-image.jpg" />
+			<Meta
+				name="og:image"
+				content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/website/public/opengraph/inlang-social-image.jpg"
+			/>
 			<Meta name="twitter:card" content="summary_large_image" />
-			<Meta name="twitter:image" content="/opengraph/inlang-social-image.jpg" />
+			<Meta
+				name="twitter:image"
+				content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/website/public/opengraph/inlang-social-image.jpg"
+			/>
 			<Meta name="twitter:image:alt" content={m.inlang_twitter_title()} />
 			<Meta name="twitter:title" content={m.inlang_global_title()} />
 			<Meta name="twitter:description" content={m.inlang_global_description()} />
@@ -47,6 +54,7 @@ export default function Page() {
 				<ExtendSection />
 				{/* <EcosystemComponents /> */}
 				<Guides />
+				<LixSection />
 				<ParaglideHeader />
 			</MarketplaceLayout>
 		</>

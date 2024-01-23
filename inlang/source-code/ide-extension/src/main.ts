@@ -1,13 +1,12 @@
 import * as vscode from "vscode"
 import { msg } from "./utilities/messages/msg.js"
-import { getGitOrigin } from "./services/telemetry/index.js"
 import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview.js"
-import { recommendation } from "./utilities/settings/recommendation.js"
+import { isInWorkspaceRecommendation, recommendation } from "./utilities/settings/recommendation.js"
 import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
 import { handleError, telemetryCapture } from "./utilities/utils.js"
 import { CONFIGURATION } from "./configuration.js"
 import { projectView } from "./utilities/project/project.js"
-import { setState, state } from "./state.js"
+import { setState, state } from "./utilities/state.js"
 import { messagePreview } from "./decorations/messagePreview.js"
 import { ExtractMessage } from "./actions/extractMessage.js"
 import { errorView } from "./utilities/errors/errors.js"
@@ -24,9 +23,6 @@ import { closestInlangProject } from "./utilities/project/closestInlangProject.j
 // Entry Point
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
-		const gitOrigin = await getGitOrigin()
-		telemetryCapture("IDE-EXTENSION activated")
-
 		vscode.commands.executeCommand("setContext", "inlang:hasProjectInWorkspace", false)
 		const workspaceFolder = vscode.workspace.workspaceFolders?.[0]
 
@@ -34,6 +30,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			console.warn("No workspace folder found.")
 			return
 		}
+
+		telemetryCapture("IDE-EXTENSION activated", {
+			isInWorkspaceRecommendation: await isInWorkspaceRecommendation({ workspaceFolder }),
+		})
 
 		const nodeishFs = createFileSystemMapper(normalizePath(workspaceFolder.uri.fsPath), fs)
 
@@ -44,8 +44,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			handleError(error)
 			return
 		}
-		// TODO #1844 CLEARIFY Felix the main function may not completed the initialization when we arrived here if the project got migrated
-		await main({ context, gitOrigin, workspaceFolder, nodeishFs })
+
+		await main({ context, workspaceFolder, nodeishFs })
 		msg("inlang's extension activated", "info")
 	} catch (error) {
 		handleError(error)
@@ -55,13 +55,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 // Main Function
 async function main(args: {
 	context: vscode.ExtensionContext
-	gitOrigin: string | undefined
 	workspaceFolder: vscode.WorkspaceFolder
 	nodeishFs: NodeishFilesystem
 }): Promise<void> {
 	if (state().projectsInWorkspace.length > 0) {
-		vscode.commands.executeCommand("setContext", "inlang:hasProjectInWorkspace", true)
-
 		// find the closest project to the workspace
 		const closestProjectToWorkspace = await closestInlangProject({
 			workingDirectory: normalizePath(args.workspaceFolder.uri.fsPath),
@@ -74,14 +71,18 @@ async function main(args: {
 				closestProjectToWorkspace?.projectPath || state().projectsInWorkspace[0]?.projectPath || "",
 		})
 
-		await projectView({ ...args })
-		await messageView({ ...args })
-		await errorView({ ...args })
+		vscode.commands.executeCommand("setContext", "inlang:hasProjectInWorkspace", true)
+
+		await projectView(args)
+		await messageView(args)
+		await errorView(args)
 
 		registerExtensionComponents(args)
 		// TODO: Replace by reactive settings API?
 		setupFileSystemWatcher(args)
 		handleInlangErrors()
+
+		return
 	} else {
 		await gettingStartedView()
 	}
@@ -91,7 +92,6 @@ function setupFileSystemWatcher(args: {
 	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
 	nodeishFs: NodeishFilesystem
-	gitOrigin: string | undefined
 }) {
 	const watcher = vscode.workspace.createFileSystemWatcher(
 		new vscode.RelativePattern(
@@ -105,7 +105,6 @@ function setupFileSystemWatcher(args: {
 		// reload project
 		await main({
 			context: args.context,
-			gitOrigin: args.gitOrigin,
 			workspaceFolder: args.workspaceFolder,
 			nodeishFs: args.nodeishFs,
 		})

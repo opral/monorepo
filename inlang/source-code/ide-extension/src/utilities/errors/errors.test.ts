@@ -7,7 +7,7 @@ import {
 	createErrorTreeDataProvider,
 	errorView,
 } from "./errors.js"
-import { state } from "../../state.js"
+import { state } from "../state.js"
 
 interface MockState {
 	project: {
@@ -37,7 +37,7 @@ vi.mock("vscode", () => ({
 }))
 
 // Mock the state module
-vi.mock("../../state.js", () => ({
+vi.mock("../state.js", () => ({
 	state: vi.fn(() => ({
 		project: {
 			errors: vi.fn(() => [new Error("Test Error 1"), new Error("Test Error 2")]),

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { commands, window } from "vscode"
-import { state } from "../state.js"
+import { state } from "../utilities/state.js"
 import { msg } from "../utilities/messages/msg.js"
 import { CONFIGURATION } from "../configuration.js"
 import type { Message } from "@inlang/sdk"
@@ -15,7 +15,7 @@ vi.mock("vscode", () => ({
 	},
 }))
 
-vi.mock("../state.js", () => ({
+vi.mock("../utilities/state.js", () => ({
 	state: vi.fn(),
 }))
 

@@ -38,6 +38,25 @@ export type PageProps = {
 
 const pagesToHideSlider = ["badge", "editor", "ide", "cli", "paraglide"]
 
+const scrollToAnchor = (anchor: string, behavior?: ScrollBehavior) => {
+	const element = document.getElementById(anchor)
+	if (element && window) {
+		window.scrollTo({
+			top: element.offsetTop - 128,
+			behavior: behavior ?? "instant",
+		})
+	}
+	window.history.pushState(
+		{},
+		"",
+		`${currentPageContext.urlParsed.pathname}${
+			currentPageContext.urlParsed.search.view
+				? `?view=${currentPageContext.urlParsed.search.view}`
+				: ""
+		}#${anchor}`
+	)
+}
+
 export default function Page(props: PageProps) {
 	const [readmore, setReadmore] = createSignal<boolean>(false)
 
@@ -79,13 +98,19 @@ export default function Page(props: PageProps) {
 			{props.manifest && props.manifest.gallery ? (
 				<Meta name="og:image" content={props.manifest.gallery[0]} />
 			) : (
-				<Meta name="og:image" content="/images/inlang-social-image.jpg" />
+				<Meta
+					name="og:image"
+					content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/website/public/opengraph/inlang-social-image.jpg"
+				/>
 			)}
 			<Meta name="twitter:card" content="summary_large_image" />
 			{props.manifest && props.manifest.gallery ? (
 				<Meta name="twitter:image" content={props.manifest.gallery[0]} />
 			) : (
-				<Meta name="twitter:image" content="/images/inlang-social-image.jpg" />
+				<Meta
+					name="twitter:image"
+					content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/website/public/opengraph/inlang-social-image.jpg"
+				/>
 			)}
 			<Meta
 				name="twitter:image:alt"
@@ -238,9 +263,7 @@ export default function Page(props: PageProps) {
 										<Show when={props.tab}>
 											<div class="flex items-center gap-6 mt-6 w-full border-b border-surface-2">
 												<a
-													href=""
-													onClick={(e) => {
-														e.preventDefault()
+													onClick={() => {
 														typeof window !== "undefined" &&
 															window.location.replace(`${currentPageContext.urlParsed.pathname}`)
 													}}
@@ -264,7 +287,6 @@ export default function Page(props: PageProps) {
 													</div>
 												</a>
 												<a
-													href="?view=changelog"
 													onClick={(e) => {
 														e.preventDefault()
 														typeof window !== "undefined" &&
@@ -377,7 +399,10 @@ export default function Page(props: PageProps) {
 													props.manifest.pricing
 												}
 											>
-												<div>
+												<div
+													class="cursor-pointer"
+													onClick={() => scrollToAnchor("pricing", "smooth")}
+												>
 													<h3 class="text-surface-400 text-sm mb-2">Pricing</h3>
 													<p class="text-surface-600 font-medium">
 														{
@@ -464,25 +489,6 @@ export function Recommends(props: { recommends: MarketplaceManifest[] }) {
 function Markdown(props: { markdown: string }) {
 	// eslint-disable-next-line solid/no-innerhtml
 	return <article class="w-full" innerHTML={props.markdown} />
-}
-
-const scrollToAnchor = (anchor: string, behavior?: ScrollBehavior) => {
-	const element = document.getElementById(anchor)
-	if (element && window) {
-		window.scrollTo({
-			top: element.offsetTop - 128,
-			behavior: behavior ?? "instant",
-		})
-	}
-	window.history.pushState(
-		{},
-		"",
-		`${currentPageContext.urlParsed.pathname}${
-			currentPageContext.urlParsed.search.view
-				? `?view=${currentPageContext.urlParsed.search.view}`
-				: ""
-		}#${anchor}`
-	)
 }
 
 function NavbarCommon(props: {

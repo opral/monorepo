@@ -195,8 +195,8 @@ function NoInlangProjectFoundCard() {
 					class="self-center"
 					href={
 						import.meta.env.PROD
-							? "https://inlang.com/m/tdozzpar/app-inlang-editor"
-							: "http://localhost:3000/m/tdozzpar/app-inlang-editor"
+							? "https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor"
+							: "http://localhost:3000/m/tdozzpar/app-inlang-finkLocalizationEditor"
 					}
 					target="_blank"
 				>

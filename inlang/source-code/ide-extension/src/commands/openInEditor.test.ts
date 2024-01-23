@@ -1,10 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { Uri, commands, env } from "vscode"
-import { getGitOrigin } from "../services/telemetry/implementation.js"
-import { openInEditorCommand } from "./openInEditor.js" // Adjust the import path
+import { Uri, env } from "vscode"
+import { openInEditorCommand } from "./openInEditor.js"
 import { CONFIGURATION } from "../configuration.js"
+import { getGitOrigin } from "../utilities/settings/getGitOrigin.js"
 
 vi.mock("vscode", () => ({
+	workspace: {
+		getConfiguration: vi.fn().mockReturnValue({
+			get: vi.fn().mockReturnValue("test"),
+		}),
+		workspaceFolders: [],
+	},
 	commands: {
 		registerCommand: vi.fn(),
 	},
@@ -17,36 +23,27 @@ vi.mock("vscode", () => ({
 	EventEmitter: vi.fn(),
 }))
 
-vi.mock("../services/telemetry/implementation.js", () => ({
+vi.mock("../utilities/settings/getGitOrigin.js", () => ({
 	getGitOrigin: vi.fn(),
-	telemetry: {
-		capture: vi.fn(),
-	},
 }))
 
 describe("openInEditorCommand", () => {
 	beforeEach(() => {
 		vi.clearAllMocks()
-	})
 
-	it("should register the command correctly", () => {
-		openInEditorCommand.register(openInEditorCommand.command, openInEditorCommand.callback)
-		expect(commands.registerCommand).toHaveBeenCalledWith(
-			openInEditorCommand.command,
-			expect.any(Function)
-		)
+		vi.mocked(getGitOrigin).mockResolvedValue("https://github.com/user/repo")
 	})
 
 	it("should open the editor with message id in URL", async () => {
 		const mockArgs = { messageId: "testMessageId", selectedProjectPath: "/test/path" }
-		const mockOrigin = "https://github.com/user/repo"
-		vi.mocked(getGitOrigin).mockResolvedValue(mockOrigin)
 
 		await openInEditorCommand.callback(mockArgs)
 
 		expect(env.openExternal).toHaveBeenCalledWith(
 			Uri.parse(
-				`${CONFIGURATION.STRINGS.EDITOR_BASE_URL}${mockOrigin}?project=${encodeURIComponent(
+				`${
+					CONFIGURATION.STRINGS.EDITOR_BASE_URL
+				}https://github.com/user/repo?project=${encodeURIComponent(
 					mockArgs.selectedProjectPath
 				)}&id=${encodeURIComponent(mockArgs.messageId)}`
 			)

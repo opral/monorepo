@@ -17,7 +17,7 @@ Used by:
 - inlang project in your repository
 - public repository
 
-If you don't have an inlang project yet, [read this guide](/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang) to get started.
+If you don't have an inlang project yet, [read fink's Getting Started](/m/tdozzpar/app-inlang-finklocalizationeditor#lets-get-started).
 
 # Getting started
 

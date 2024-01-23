@@ -101,3 +101,7 @@ If you want to add lint rules to your experience, you can add them from: https:/
 ## Support: Join our Discord!
 
 If something isn't working as expected or you have a feature suggestion, please join our [Discord](https://discord.gg/DEHKgmx2) or [create an issue](<[https](https://github.com/opral/monorepo/issues/new/choose)>). We are happy to help!
+
+## Pricing 
+
+<doc-dev-tool-pricing></doc-dev-tool-pricing>

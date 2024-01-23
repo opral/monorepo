@@ -1,12 +1,12 @@
 import * as vscode from "vscode"
 import { loadProject } from "@inlang/sdk"
 import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
-import { setState, state } from "../../state.js"
 import { CONFIGURATION } from "../../configuration.js"
-
 import { telemetry } from "../../services/telemetry/implementation.js"
 import { openRepository } from "@lix-js/client"
 import { findRepoRoot } from "@lix-js/client"
+import { setState, state } from "../state.js"
+import { _import } from "../import/_import.js"
 
 let projectViewNodes: ProjectViewNode[] = []
 
@@ -19,14 +19,25 @@ export interface ProjectViewNode {
 
 export function createProjectViewNodes(): ProjectViewNode[] {
 	const projectsInWorkspace = state().projectsInWorkspace
+
 	if (!projectsInWorkspace) {
-		// Handle the case where projectsInWorkspace is undefined or null
 		console.error("state().projectsInWorkspace is undefined")
 		return []
 	}
 
-	projectViewNodes = state().projectsInWorkspace.map((project) => {
-		const projectName = normalizePath(project.projectPath).split("/").slice(-2).join("/")
+	projectViewNodes = projectsInWorkspace.map((project) => {
+		// Ensure projectPath is a string
+		if (!project.projectPath) {
+			return {
+				label: "",
+				path: "",
+				isSelected: false,
+				collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+			} as ProjectViewNode
+		}
+
+		const projectPath = typeof project.projectPath === "string" ? project.projectPath : ""
+		const projectName = projectPath.split("/").slice(-2).join("/")
 
 		return {
 			label: projectName,
@@ -42,6 +53,7 @@ export function createProjectViewNodes(): ProjectViewNode[] {
 export function getTreeItem(args: {
 	element: ProjectViewNode
 	nodeishFs: NodeishFilesystem
+	workspaceFolder: vscode.WorkspaceFolder
 }): vscode.TreeItem {
 	return {
 		label: args.element.label,
@@ -53,7 +65,7 @@ export function getTreeItem(args: {
 		command: {
 			command: "inlang.openProject",
 			title: "Open File",
-			arguments: [args.element, args.nodeishFs],
+			arguments: [args.element, args.nodeishFs, args.workspaceFolder],
 		},
 	}
 }
@@ -61,6 +73,7 @@ export function getTreeItem(args: {
 export async function handleTreeSelection(args: {
 	selectedNode: ProjectViewNode
 	nodeishFs: NodeishFilesystem
+	workspaceFolder: vscode.WorkspaceFolder
 }): Promise<void> {
 	const selectedProject = normalizePath(args.selectedNode.path)
 
@@ -86,7 +99,15 @@ export async function handleTreeSelection(args: {
 			projectPath: newSelectedProject,
 			appId: CONFIGURATION.STRINGS.APP_ID,
 			repo,
+			_import: _import(normalizePath(args.workspaceFolder.uri.fsPath)),
 		})
+
+		if (inlangProject.id) {
+			telemetry.groupIdentify({
+				groupType: "project",
+				groupKey: inlangProject.id,
+			})
+		}
 
 		telemetry.capture({
 			event: "IDE-EXTENSION loaded project",
@@ -108,29 +129,34 @@ export async function handleTreeSelection(args: {
 		CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.fire(undefined)
 		CONFIGURATION.EVENTS.ON_DID_ERROR_TREE_VIEW_CHANGE.fire(undefined)
 	} catch (error) {
+		//console.log(error, selectedProject)
+
 		vscode.window.showErrorMessage(`Failed to load project "${selectedProject}": ${error}`)
 	}
 }
 
 export function createTreeDataProvider(args: {
 	nodeishFs: NodeishFilesystem
+	workspaceFolder: vscode.WorkspaceFolder
 }): vscode.TreeDataProvider<ProjectViewNode> {
 	return {
-		getTreeItem: (element: ProjectViewNode) => getTreeItem({ element, nodeishFs: args.nodeishFs }),
-		getChildren: async () => createProjectViewNodes(),
+		getTreeItem: (element: ProjectViewNode) =>
+			getTreeItem({ element, nodeishFs: args.nodeishFs, workspaceFolder: args.workspaceFolder }),
+		getChildren: () => createProjectViewNodes(),
 		onDidChangeTreeData: CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.event,
 	}
 }
 
 export const projectView = async (args: {
 	context: vscode.ExtensionContext
-	gitOrigin: string | undefined
 	workspaceFolder: vscode.WorkspaceFolder
 	nodeishFs: NodeishFilesystem
 }) => {
-	const treeDataProvider = await createTreeDataProvider({ nodeishFs: args.nodeishFs })
+	const treeDataProvider = createTreeDataProvider({
+		nodeishFs: args.nodeishFs,
+		workspaceFolder: args.workspaceFolder,
+	})
 
-	// inital call to createProjectViewNodes() to set the selected project
 	treeDataProvider.getChildren()
 
 	args.context.subscriptions.push(
@@ -142,7 +168,11 @@ export const projectView = async (args: {
 	if (selectedProjectPath) {
 		const selectedNode = projectViewNodes.find((node) => node.path === selectedProjectPath)
 		if (selectedNode) {
-			await handleTreeSelection({ selectedNode, nodeishFs: args.nodeishFs })
+			await handleTreeSelection({
+				selectedNode,
+				nodeishFs: args.nodeishFs,
+				workspaceFolder: args.workspaceFolder,
+			})
 		}
 	}
 }

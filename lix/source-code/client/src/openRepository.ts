@@ -31,6 +31,7 @@ const {
 	fetch: gitFetch,
 	commit: isoCommit,
 	findRoot,
+	merge,
 } = isoGit
 
 const verbose = false
@@ -283,14 +284,25 @@ export async function openRepository(
 			}
 
 			if (!isFork) {
-				return { error: "could not get fork origin or repo not a fork" }
+				return { error: "could not get fork upstream or repo not a fork" }
 			}
+
 			const forkFs = withLazyFetching({
 				nodeishFs: rawFs,
 				verbose,
 				description: "forkStatus",
 				intercept: delayedAction,
 			})
+
+			const useBranchName = await isoGit.currentBranch({
+				fs: forkFs,
+				dir,
+				fullname: false,
+			})
+
+			if (!useBranchName) {
+				return { error: "could not get fork status for detached head" }
+			}
 
 			await addRemote({
 				dir,
@@ -304,7 +316,7 @@ export async function openRepository(
 					depth: 1,
 					singleBranch: true,
 					dir,
-					ref: branchName,
+					ref: useBranchName,
 					remote: "upstream",
 					http: makeHttpClient({ verbose, description: "forkStatus" }),
 					fs: forkFs,
@@ -313,30 +325,20 @@ export async function openRepository(
 				return { error: err }
 			}
 
-			const branch = await isoGit.currentBranch({
-				fs: forkFs,
-				dir,
-				fullname: false,
-			})
-
-			if (typeof branch !== "string") {
-				return { error: "could not get current branch" }
-			}
-
 			const currentUpstreamCommit = await isoGit.resolveRef({
 				fs: forkFs,
 				dir: "/",
-				ref: "upstream/" + branch,
+				ref: "upstream/" + useBranchName,
 			})
 
 			const currentOriginCommit = await isoGit.resolveRef({
 				fs: forkFs,
 				dir: "/",
-				ref: branch,
+				ref: useBranchName,
 			})
 
 			if (currentUpstreamCommit === currentOriginCommit) {
-				return { ahead: 0, behind: 0 }
+				return { ahead: 0, behind: 0, conflicts: false }
 			}
 
 			const res: Promise<
@@ -362,7 +364,44 @@ export async function openRepository(
 				return { error: compare.error || "could not diff repos on github" }
 			}
 
-			return { ahead: compare.data.ahead_by, behind: compare.data.behind_by }
+			await gitFetch({
+				depth: compare.data.behind_by + 1,
+				remote: "upstream",
+
+				singleBranch: true,
+				dir,
+				ref: useBranchName,
+				http: makeHttpClient({ verbose, description: "forkStatus" }),
+				fs: forkFs,
+			})
+
+			await gitFetch({
+				depth: compare.data.ahead_by + 1,
+
+				singleBranch: true,
+				ref: useBranchName,
+				dir,
+				http: makeHttpClient({ verbose, description: "forkStatus" }),
+				corsProxy: gitProxyUrl,
+				fs: forkFs,
+			})
+
+			let conflicts = false
+			try {
+				await merge({
+					fs: forkFs,
+					author: { name: "lix" },
+					dir,
+					ours: useBranchName,
+					dryRun: true,
+					theirs: "upstream/" + useBranchName,
+					noUpdateBranch: true,
+					abortOnConflict: true,
+				})
+			} catch (err) {
+				conflicts = true
+			}
+			return { ahead: compare.data.ahead_by, behind: compare.data.behind_by, conflicts }
 		},
 
 		statusMatrix(cmdArgs) {
@@ -516,6 +555,7 @@ export async function openRepository(
 		 */
 		async getOrigin({ safeHashOnly = false } = {}): Promise<string> {
 			if (safeHashOnly) {
+				// FIXME: handle forks and upstream!
 				const safeOriginHash = await hash(`${lixHost}__${repoHost}__${owner}__${repoName}`)
 				return safeOriginHash
 			}
