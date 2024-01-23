@@ -3,6 +3,7 @@ import { registry } from "@inlang/marketplace-registry"
 import { For } from "solid-js"
 import { Arrow } from "../Personas/Developer.jsx"
 import { Button } from "../../components/Button.jsx"
+import * as m from "#src/paraglide/messages.js"
 
 const LintRulesSection = () => {
 	const getLintRules = {
@@ -14,10 +15,7 @@ const LintRulesSection = () => {
 		"Custom Brand Rule": "/images/lint-rule-covers/lint-rule-cover-brand.png",
 	}
 
-	const getCheckList = () => [
-		"Bring quality to your translations",
-		"Fix errors with resolver functions",
-	]
+	const getCheckList = () => [m.home_extend_lint_list_quality(), m.home_extend_lint_list_resolve()]
 
 	return (
 		<div class="lg:grid grid-cols-12 w-full">
@@ -48,7 +46,7 @@ const LintRulesSection = () => {
 														<div class="w-8 h-8 relative group hover:bg-[#FFEDCA] rounded-lg text-[#FAAB11]">
 															<WarningIcon />
 															<div class="absolute hidden group-hover:block transition-all bg-surface-700 rounded-lg w-24 py-2 -translate-x-8 bottom-9 text-background text-center">
-																Warning
+																{m.home_extend_lint_warning()}
 															</div>
 														</div>
 
@@ -81,7 +79,7 @@ const LintRulesSection = () => {
 													<div class="w-8 h-8 relative group hover:bg-[#FFEDED] rounded-lg text-[#FF4F4F]">
 														<WarningIcon />
 														<div class="absolute hidden group-hover:block transition-all bg-surface-700 rounded-lg w-20 py-2 -translate-x-6 bottom-9 text-background text-center">
-															Error
+															{m.home_extend_lint_error()}
 														</div>
 													</div>
 													<div class="flex-1 font-bold text-surface-600">{displayName()}</div>
@@ -98,10 +96,8 @@ const LintRulesSection = () => {
 					</div>
 					<div class="col-span-12 md:col-span-4 row-start-1 md:row-auto flex flex-col justify-between py-4 lg:pr-8 pb-10 sm:pb-0">
 						<div class="md:mt-6 flex flex-col gap-3 pb-8">
-							<h3 class="font-semibold text-surface-900 text-2xl">Lint Rules</h3>
-							<p class="text-surface-500 mt-2">
-								Validate content of an inlang project right from the App you are using.
-							</p>
+							<h3 class="font-semibold text-surface-900 text-2xl">{m.home_extend_lint_title()}</h3>
+							<p class="text-surface-500 mt-2">{m.home_extend_lint_description()}</p>
 							<div class="mt-4">
 								<For each={getCheckList()}>
 									{(item) => (
@@ -114,7 +110,7 @@ const LintRulesSection = () => {
 							</div>
 						</div>
 						<Button type="secondaryOnGray" href="/c/plugins" chevron>
-							Browse Lint Rules
+							{m.home_extend_lint_button()}
 						</Button>
 					</div>
 				</div>
