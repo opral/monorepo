@@ -102,7 +102,7 @@ export default function App() {
 }
 ```
 
-Take a look at [example/src/app.tsx](https://github.com/inlang/monorepo/blob/main/inlang/source-code/paraglide/paraglide-js-adapter-solidstart/example/src/app.tsx) to see how it is used in a example project.
+Take a look at [example/src/app.tsx](https://github.com/thetarnav/paraglide-solidstart-hackernews/blob/main/src/app.tsx) to see how it is used in a example project.
 
 ### 5. Use message functions
 
