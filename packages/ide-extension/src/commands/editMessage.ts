@@ -1,4 +1,4 @@
-import { state } from "../state.js"
+import { state } from "../utilities/state.js"
 import { msg } from "../utilities/messages/msg.js"
 import { commands, window } from "vscode"
 import type { LanguageTag, Message } from "@inlang/sdk"

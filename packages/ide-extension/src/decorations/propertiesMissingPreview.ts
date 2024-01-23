@@ -1,5 +1,5 @@
 import { getActiveTextEditor } from "../main.js"
-import { state } from "../state.js"
+import { state } from "../utilities/state.js"
 import * as vscode from "vscode"
 
 export const propertiesMissingPreview = () => {

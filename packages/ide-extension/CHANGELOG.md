@@ -1,5 +1,55 @@
 # inlang-vs-code-extension
 
+## 1.28.1
+
+### Patch Changes
+
+- 9a55e9390: update codicon location
+
+## 1.28.0
+
+### Minor Changes
+
+- f2b4e23e5: add inlang tab
+
+### Patch Changes
+
+- 870143a22: update import with workspaceFolder
+
+## 1.27.0
+
+### Minor Changes
+
+- 676c0f905: remove deprecated loadProject({nodeishFs})
+
+### Patch Changes
+
+- Updated dependencies [676c0f905]
+  - @inlang/sdk@0.26.0
+  - @inlang/telemetry@0.3.8
+
+## 1.26.0
+
+### Minor Changes
+
+- 2f55a1a0d: chore: add project group identify
+
+### Patch Changes
+
+- Updated dependencies [87bed968b]
+- Updated dependencies [23ca73060]
+  - @inlang/sdk@0.25.0
+  - @inlang/create-project@1.1.8
+  - @inlang/telemetry@0.3.7
+
+## 1.25.5
+
+### Patch Changes
+
+- @inlang/sdk@0.24.1
+- @inlang/create-project@1.1.7
+- @inlang/telemetry@0.3.6
+
 ## 1.25.4
 
 ### Patch Changes

@@ -28,7 +28,7 @@ Using external tooling often requires establishing additional CI pipelines and s
 ## Example: Classic i18n Stack vs. Inlang Ecosystem
 
 ### Classic i18n Stack
-Global projects traditionally require a combination of i18n libraries, translation editors, and IDE extensions. In the inlang ecosystem, using tools like Paraglide JS, Fink, and Inlang’s IDE extension streamlines the process with a single project configuration. This unified approach eliminates the need for additional plugins and syncing jobs, providing a seamless development experience.
+Global projects traditionally require a combination of i18n libraries, translation editors, and IDE extensions. In the inlang ecosystem, using tools like [Paraglide JS](https://inlang.com/m/gerre34r), [Fink](https://inlang.com/m/tdozzpar), and Inlang’s [IDE extension](https://inlang.com/m/r7kp499g) streamlines the process with a single project configuration. This unified approach eliminates the need for additional plugins and syncing jobs, providing a seamless development experience.
 
 ### External Tooling Challenges
 When relying on external tools, the development process becomes more challenging. Additional plugins and syncing jobs are necessary, leading to increased maintenance and initial development costs. The lack of inherent semantic understanding of the repository and files further complicates the integration.

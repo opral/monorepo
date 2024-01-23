@@ -1,11 +1,13 @@
 import * as vscode from "vscode"
-import { state } from "../../state.js"
+import { state } from "../state.js"
 import type { Message } from "@inlang/sdk"
 import { CONFIGURATION } from "../../configuration.js"
 import { getStringFromPattern } from "./query.js"
+import { escapeHtml } from "../utils.js"
 
 export function createMessageWebviewProvider(args: { context: vscode.ExtensionContext }) {
-	let messages = state().project.query.messages.getAll() || []
+	let messages: Message[] | undefined
+	let isLoading = true
 	let activeFileContent: string | undefined
 	let debounceTimer: NodeJS.Timeout | undefined
 
@@ -27,8 +29,18 @@ export function createMessageWebviewProvider(args: { context: vscode.ExtensionCo
 				args.context.subscriptions
 			)
 
-			const updateMessages = () => {
-				messages = state().project.query.messages.getAll() || []
+			const updateMessages = async () => {
+				// Check if project is loaded
+				if (!state().project) {
+					isLoading = true
+					updateWebviewContent()
+					return
+				}
+
+				// Load messages
+				const fetchedMessages = state().project.query.messages.getAll()
+				messages = fetchedMessages ? [...fetchedMessages] : []
+				isLoading = false
 				updateWebviewContent()
 			}
 
@@ -45,53 +57,6 @@ export function createMessageWebviewProvider(args: { context: vscode.ExtensionCo
 					}
 				}, 300)
 			}
-
-			const updateWebviewContent = async () => {
-				const activeEditor = vscode.window.activeTextEditor
-				const fileContent = activeEditor ? activeEditor.document.getText() : ""
-				const ideExtensionConfig = state().project.customApi()?.["app.inlang.ideExtension"]
-				const messageReferenceMatchers = ideExtensionConfig?.messageReferenceMatchers
-
-				const matchedMessages = (
-					await Promise.all(
-						(messageReferenceMatchers ?? []).map(async (matcher) => {
-							return matcher({ documentText: fileContent })
-						})
-					)
-				).flat()
-
-				const highlightedMessages = matchedMessages
-					.map((message) => {
-						return state().project.query.messages.get({ where: { id: message.messageId } })
-					})
-					.filter((message): message is Message => message !== undefined)
-				const highlightedMessagesHtml =
-					highlightedMessages.length > 0
-						? `<div class="highlighted-section">
-                        <div class="banner"><span class="active-dot"></span><span>Current file<span></div>
-                        ${highlightedMessages
-													.map((message) => createMessageHtml({ message, isHighlighted: true }))
-													.join("")}
-                    </div>`
-						: ""
-
-				const allMessagesBanner = '<div class="banner">All Messages</div>'
-				const messageListHtml =
-					messages.length > 0
-						? `<main>${allMessagesBanner}${messages
-								.map((message) => createMessageHtml({ message, isHighlighted: false }))
-								.join("")}</main>`
-						: `<main>${allMessagesBanner + createNoMessagesFoundHtml(true)}</main>`
-
-				webviewView.webview.html = getHtml({
-					highlightedContent: highlightedMessagesHtml,
-					mainContent: messageListHtml,
-					context: args.context,
-					webview: webviewView.webview,
-				})
-			}
-
-			updateWebviewContent() // Initial update
 
 			args.context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(debounceUpdate))
 			args.context.subscriptions.push(
@@ -126,6 +91,58 @@ export function createMessageWebviewProvider(args: { context: vscode.ExtensionCo
 					updateMessages()
 				})
 			)
+
+			const updateWebviewContent = async () => {
+				const activeEditor = vscode.window.activeTextEditor
+				const fileContent = activeEditor ? activeEditor.document.getText() : ""
+				const ideExtensionConfig = state().project.customApi()?.["app.inlang.ideExtension"]
+				const messageReferenceMatchers = ideExtensionConfig?.messageReferenceMatchers
+
+				const matchedMessages = (
+					await Promise.all(
+						(messageReferenceMatchers ?? []).map(async (matcher) => {
+							return matcher({ documentText: fileContent })
+						})
+					)
+				).flat()
+
+				const highlightedMessages = matchedMessages
+					.map((message) => {
+						return state().project.query.messages.get({ where: { id: message.messageId } })
+					})
+					.filter((message): message is Message => message !== undefined)
+				const highlightedMessagesHtml =
+					highlightedMessages.length > 0
+						? `<div class="highlighted-section">
+                        <div class="banner"><span class="active-dot"></span><span>Current file<span></div>
+                        ${highlightedMessages
+													.map((message) => createMessageHtml({ message, isHighlighted: true }))
+													.join("")}
+                    </div>`
+						: ""
+
+				const allMessagesBanner = '<div class="banner">All Messages</div>'
+				let mainContentHtml = ""
+				if (isLoading) {
+					mainContentHtml = createMessagesLoadingHtml()
+				} else if (messages && messages.length > 0) {
+					mainContentHtml = `${highlightedMessagesHtml}<main>${allMessagesBanner}${messages
+						.map((message) => createMessageHtml({ message, isHighlighted: false }))
+						.join("")}</main>`
+				} else {
+					mainContentHtml = `${highlightedMessagesHtml}<main>${
+						allMessagesBanner + createNoMessagesFoundHtml()
+					}</main>`
+				}
+
+				webviewView.webview.html = getHtml({
+					mainContent: mainContentHtml,
+					context: args.context,
+					webview: webviewView.webview,
+				})
+			}
+
+			updateMessages() // Initial update
 		},
 	}
 }
@@ -145,13 +162,17 @@ export function createMessageHtml(args: { message: Message; isHighlighted: boole
     `
 }
 
-export function createNoMessagesFoundHtml(isEmpty: boolean): string {
-	if (!isEmpty) {
-		return ""
-	}
+export function createNoMessagesFoundHtml(): string {
 	return `<div class="no-messages">
                 <span>No messages found. Extract text to create a message by selecting a text and using the "Extract message" quick action / command.</span>
             </div>`
+}
+
+// function for createMessagesLoadingHtml
+export function createMessagesLoadingHtml(): string {
+	return `<div class="loading">
+				<span>Loading messages...</span>
+			</div>`
 }
 
 export function getTranslationsTableHtml(message: Message): string {
@@ -171,13 +192,15 @@ export function getTranslationsTableHtml(message: Message): string {
 		}
 
 		// Replace these commands with appropriate actions for your webview
-		const editCommand = `editMessage('${message.id}', '${languageTag}')`
+		const editCommand = `editMessage('${message.id}', '${escapeHtml(languageTag)}')`
 		const openCommand = `openInEditor('${message.id}', '${state().selectedProjectPath}')`
 
 		return `
             <div class="section">
-                <span class="languageTag"><strong>${languageTag}</strong></span>
-                <span class="message"><button onclick="${editCommand}">${m}</button></span>
+                <span class="languageTag"><strong>${escapeHtml(languageTag)}</strong></span>
+                <span class="message"><button onclick="${editCommand}">${escapeHtml(
+			m
+		)}</button></span>
 				<span class="actionButtons">
 					<button title="Edit" onclick="${editCommand}"><span class="codicon codicon-edit"></span></button>
 					<button title="Open in Fink" onclick="${openCommand}"><span class="codicon codicon-link-external"></span></button>
@@ -190,7 +213,6 @@ export function getTranslationsTableHtml(message: Message): string {
 }
 
 export function getHtml(args: {
-	highlightedContent: string
 	mainContent: string
 	context: vscode.ExtensionContext
 	webview: vscode.Webview
@@ -199,13 +221,10 @@ export function getHtml(args: {
 		vscode.Uri.joinPath(args.context.extensionUri, "assets", "styles.css")
 	)
 	const codiconsUri = args.webview.asWebviewUri(
-		vscode.Uri.joinPath(
-			args.context.extensionUri,
-			"node_modules",
-			"@vscode/codicons",
-			"dist",
-			"codicon.css"
-		)
+		vscode.Uri.joinPath(args.context.extensionUri, "assets", "codicon.css")
+	)
+	const codiconsTtfUri = args.webview.asWebviewUri(
+		vscode.Uri.joinPath(args.context.extensionUri, "assets", "codicon.ttf")
 	)
 
 	return `
@@ -219,10 +238,10 @@ export function getHtml(args: {
             <title>Inlang Message View</title>
             <link href="${styleUri}" rel="stylesheet" />
             <link href="${codiconsUri}" rel="stylesheet" />
+			<link href="${codiconsTtfUri}" rel="stylesheet" />
         </head>
         <body>
             <input type="text" id="searchInput" placeholder="Search">
-            ${args.highlightedContent}
             ${args.mainContent}
             <script>
 				let collapsibles = [];
@@ -325,8 +344,8 @@ export function getHtml(args: {
 
 export async function messageView(args: { context: vscode.ExtensionContext }) {
 	const provider = createMessageWebviewProvider({ ...args })
+
 	args.context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider("messageView", provider)
 	)
-	return
 }

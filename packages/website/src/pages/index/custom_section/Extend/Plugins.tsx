@@ -3,6 +3,8 @@ import { registry } from "@inlang/marketplace-registry"
 import { For, Show } from "solid-js"
 import { Arrow } from "../Personas/Developer.jsx"
 import { Button } from "../../components/Button.jsx"
+import * as m from "#src/paraglide/messages.js"
+
 const PluginSection = () => {
 	const getPlugins = () => [
 		"plugin.inlang.messageFormat",
@@ -11,7 +13,10 @@ const PluginSection = () => {
 		"plugin.inlang.json",
 	]
 
-	const getCheckList = () => ["Integrate in ever project", "Customize app behaviour"]
+	const getCheckList = () => [
+		m.home_extend_plugins_list_integrate(),
+		m.home_extend_plugins_list_customize(),
+	]
 
 	return (
 		<div class="lg:grid grid-cols-12 w-full">
@@ -19,10 +24,10 @@ const PluginSection = () => {
 				<div class="md:grid grid-cols-12 gap-8 lg:gap-0">
 					<div class="col-span-4 flex flex-col justify-between py-4 lg:pl-4 pb-10 md:pb-0">
 						<div class="md:mt-6 flex flex-col gap-3 pb-8">
-							<h3 class="font-semibold text-surface-900 text-2xl">Plugins</h3>
-							<p class="text-surface-500 mt-2">
-								Change or extend app behavior with custom plugins.
-							</p>
+							<h3 class="font-semibold text-surface-900 text-2xl">
+								{m.home_extend_plugins_title()}
+							</h3>
+							<p class="text-surface-500 mt-2">{m.home_extend_plugins_description()}</p>
 							<div class="mt-4">
 								<For each={getCheckList()}>
 									{(item) => (
@@ -35,7 +40,7 @@ const PluginSection = () => {
 							</div>
 						</div>
 						<Button type="secondaryOnGray" href="/c/plugins" chevron>
-							Browse Plugins
+							{m.home_extend_plugins_button()}
 						</Button>
 					</div>
 					<div class="col-span-8">

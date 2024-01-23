@@ -30,7 +30,7 @@ const Personas = () => {
 	return (
 		<div class="pt-12 md:pt-20 flex flex-col items-center">
 			<p class="bg-background px-4 py-1.5 rounded-full text-sm font-medium w-fit border shadow border-surface-300">
-				Collaboration
+				{m.home_personas_tag()}
 			</p>
 			<h2 class="font-bold text-2xl md:text-4xl text-surface-900 text-center mt-4">
 				{m.home_personas_title()}

@@ -1,5 +1,25 @@
 # @inlang/sdk
 
+## 0.26.0
+
+### Minor Changes
+
+- 676c0f905: remove deprecated loadProject({nodeishFs})
+
+## 0.25.0
+
+### Minor Changes
+
+- 87bed968b: add: `project.id` API
+- 23ca73060: add project identify
+
+## 0.24.1
+
+### Patch Changes
+
+- Updated dependencies [23ce3f0ea]
+  - @lix-js/client@0.7.0
+
 ## 0.24.0
 
 ### Minor Changes

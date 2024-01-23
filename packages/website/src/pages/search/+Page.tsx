@@ -55,7 +55,10 @@ export default function Page(props: {
 		<>
 			<Title>{title()}| inlang</Title>
 			<Meta name="description" content="Search globalization products." />
-			<Meta name="og:image" content="/opengraph/inlang-search-image.jpg" />
+			<Meta
+				name="og:image"
+				content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/website/public/opengraph/inlang-social-image.jpg"
+			/>
 			<Link
 				href={`https://inlang.com${i18nRouting(currentPageContext.urlParsed.pathname).url}`}
 				rel="canonical"

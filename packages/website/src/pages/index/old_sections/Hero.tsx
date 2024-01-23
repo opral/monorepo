@@ -2,13 +2,12 @@ import { For, Show } from "solid-js"
 import { registry } from "@inlang/marketplace-registry"
 import { Chip } from "#src/interface/components/Chip.jsx"
 import { colorForTypeOf, typeOfIdToTitle } from "#src/pages/m/utilities.js"
-import { Button } from "../components/Button.jsx"
 import Link from "#src/renderer/Link.jsx"
 import * as m from "#src/paraglide/messages.js"
 
 const featuredArray = [
 	"library.inlang.paraglideJs",
-	"app.inlang.editor",
+	"app.inlang.finkLocalizationEditor",
 	"app.inlang.cli",
 	"app.inlang.ideExtension",
 	"plugin.inlang.i18next",
@@ -76,13 +75,6 @@ const Hero = () => {
 						<h1 class="text-base text-surface-900 font-semibold leading-snug">Old Title</h1>
 						<p class="text-sm text-surface-500">{m.home_inlang_description()}</p>
 					</div>
-					<Button
-						type="textPrimary"
-						href="/g/3go4f04m/guide-niklasbuchfink-whatIsInlang"
-						class="-mb-[10px]"
-					>
-						{m.home_inlang_button()}
-					</Button>
 				</div>
 			</div>
 		</div>

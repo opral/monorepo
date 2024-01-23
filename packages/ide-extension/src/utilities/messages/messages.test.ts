@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import * as vscode from "vscode"
-import { state } from "../../state.js"
+import { state } from "../state.js"
 import type { Message } from "@inlang/sdk"
 import {
 	createMessageHtml,
@@ -29,7 +29,7 @@ vi.mock("vscode", () => ({
 	},
 }))
 
-vi.mock("../../state.js", () => ({
+vi.mock("../state.js", () => ({
 	state: vi.fn(),
 }))
 
@@ -103,11 +103,10 @@ describe("Message Webview Provider Tests", () => {
 	})
 
 	it("should return correct HTML when no messages are found", () => {
-		let html = createNoMessagesFoundHtml(true)
-		expect(html).toContain("No messages found.")
-
-		html = createNoMessagesFoundHtml(false)
-		expect(html).toBe("")
+		const html = createNoMessagesFoundHtml()
+		expect(html).toContain(
+			`No messages found. Extract text to create a message by selecting a text and using the "Extract message" quick action / command.`
+		)
 	})
 
 	it("should create a translations table for a message", () => {
@@ -125,12 +124,10 @@ describe("Message Webview Provider Tests", () => {
 			cspSource: "mockCspSource",
 		}
 		const html = getHtml({
-			highlightedContent: "Highlighted Content",
 			mainContent: "Main Content",
 			context,
 			webview: mockWebview as unknown as vscode.Webview,
 		})
-		expect(html).toContain("Highlighted Content")
 		expect(html).toContain("Main Content")
 	})
 

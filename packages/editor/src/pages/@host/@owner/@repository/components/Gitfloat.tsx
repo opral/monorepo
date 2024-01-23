@@ -19,9 +19,16 @@ import {
 	setSignInModalOpen,
 	signInModalOpen,
 } from "#src/services/auth/src/components/SignInDialog.jsx"
+import { WarningIcon } from "./Notification/NotificationHint.jsx"
+import IconArrowDownward from "~icons/material-symbols/arrow-downward-alt"
 
 export const Gitfloat = () => {
 	const {
+		repo,
+		refetchRepo,
+		forkStatus,
+		mutateForkStatus,
+		refetchForkStatus,
 		userIsCollaborator,
 		githubRepositoryInformation,
 		currentBranch,
@@ -29,7 +36,6 @@ export const Gitfloat = () => {
 		setLocalChanges,
 		setFsChange,
 		routeParams,
-		repo,
 		setLastPullTime,
 		tourStep,
 		project,
@@ -66,6 +72,7 @@ export const Gitfloat = () => {
 
 	const [isLoading, setIsLoading] = createSignal(false)
 	const [isForking, setIsForking] = createSignal(false)
+	const [isMerging, setIsMerging] = createSignal(false)
 	const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
 
 	let signInDialog: SlDialog | undefined
@@ -249,6 +256,7 @@ export const Gitfloat = () => {
 		},
 	}
 
+	// animations
 	onMount(() => {
 		const gitfloat = document.querySelector(".gitfloat")
 		gitfloat?.classList.add("animate-slideIn")
@@ -262,6 +270,34 @@ export const Gitfloat = () => {
 			setTimeout(() => gitfloat?.classList.remove("animate-jump"), 1000)
 		}
 	})
+
+	createEffect(() => {
+		if (
+			forkStatus().behind > 0 &&
+			(tourStep() !== "github-login" || tourStep() !== "fork-repository")
+		) {
+			const gitfloat = document.querySelector(".syncfork")
+			gitfloat?.classList.remove("hidden")
+			gitfloat?.classList.add("animate-slideInFromBehind", "-z-10")
+			setTimeout(() => gitfloat?.classList.remove("animate-slideInFromBehind", "-z-10"), 400)
+		}
+	})
+
+	createEffect(() => {
+		if (!isMerging()) {
+			const gitfloat = document.querySelector(".syncfork")
+			gitfloat?.classList.add("animate-slideOutFromBehind", "-z-10")
+			setTimeout(() => gitfloat?.classList.remove("animate-slideOutFromBehind", "-z-10"), 400)
+			setTimeout(() => gitfloat?.classList.add("hidden"), 400)
+		}
+	})
+
+	// // trigger refetch of repo when user is logged in and
+	// createEffect(() => {
+	// 	if (lixErrors().some((err) => err.message.includes("401")) && localStorage?.user?.isLoggedIn && repo()) {
+	// 		refetchRepo()
+	// 	}
+	// })
 
 	// wait until fork fetch is done
 	createEffect(
@@ -291,7 +327,41 @@ export const Gitfloat = () => {
 						lixErrors().length === 0
 					}
 				>
-					<div class="w-full flex justify-start items-center rounded-lg bg-inverted-surface shadow-xl ">
+					<Show
+						when={
+							forkStatus() &&
+							forkStatus().behind > 0 &&
+							!forkStatus().conflicts &&
+							userIsCollaborator()
+						}
+					>
+						<div class="syncfork w-full relative flex justify-start items-center gap-1.5 rounded-t-lg bg-[#293344] p-1.5 text-xs font-medium text-on-inverted-surface after:content-[''] after:absolute after:w-full after:h-8 after:translate-y-6 after:-m-1.5 after:bg-[#293344] after:-z-10">
+							<div class="text-warning-on-inverted-container px-1.5 py-[5px]">
+								<WarningIcon />
+							</div>
+							Get new project changes
+							<sl-button
+								prop:size="small"
+								onClick={async () => {
+									setIsMerging(true)
+									await repo()?.mergeUpstream()
+									refetchRepo()
+									setIsMerging(false)
+									setTimeout(() => {
+										mutateForkStatus({ ...forkStatus(), behind: 0, conflicts: false })
+										refetchForkStatus()
+									}, 400)
+								}}
+								prop:loading={isMerging()}
+								class="ml-auto on-inverted"
+							>
+								{/* @ts-ignore */}
+								<IconArrowDownward slot="prefix" class="w-6 h-6 -mx-1 opacity-90" />
+								<span class="opacity-90">{forkStatus().behind}</span>
+							</sl-button>
+						</div>
+					</Show>
+					<div class="w-full flex justify-start items-center rounded-lg bg-inverted-surface shadow-xl z-20">
 						<Show when={loggedInUser(localStorage.user)}>
 							{(user) => (
 								<div class="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2 p-1.5 rounded-tl-lg rounded-bl-lg border-t-0 border-r border-b-0 border-l-0 border-background/10">
