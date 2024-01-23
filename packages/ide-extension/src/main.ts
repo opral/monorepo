@@ -1,9 +1,8 @@
 import * as vscode from "vscode"
 import { msg } from "./utilities/messages/msg.js"
 import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview.js"
-import { isInWorkspaceRecommendation, recommendation } from "./utilities/settings/recommendation.js"
 import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
-import { handleError, telemetryCapture } from "./utilities/utils.js"
+import { handleError } from "./utilities/utils.js"
 import { CONFIGURATION } from "./configuration.js"
 import { projectView } from "./utilities/project/project.js"
 import { setState, state } from "./utilities/state.js"
@@ -17,11 +16,15 @@ import fs from "node:fs/promises"
 import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
 import { gettingStartedView } from "./utilities/getting-started/gettingStarted.js"
 import { closestInlangProject } from "./utilities/project/closestInlangProject.js"
+import { recommendationBannerView } from "./utilities/recommendation/recommendation.js"
+import { telemetry } from "./services/telemetry/implementation.js"
+import { version } from "../package.json"
 
 // Entry Point
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
 		vscode.commands.executeCommand("setContext", "inlang:hasProjectInWorkspace", false)
+		vscode.commands.executeCommand("setContext", "inlang:showRecommendationBanner", false)
 		const workspaceFolder = vscode.workspace.workspaceFolders?.[0]
 
 		if (!workspaceFolder) {
@@ -29,8 +32,13 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 			return
 		}
 
-		telemetryCapture("IDE-EXTENSION activated", {
-			isInWorkspaceRecommendation: await isInWorkspaceRecommendation({ workspaceFolder }),
+		telemetry.capture({
+			event: "IDE-EXTENSION activated",
+			properties: {
+				vscode_version: vscode.version,
+				version,
+				platform: process.platform,
+			},
 		})
 
 		const nodeishFs = createFileSystemMapper(normalizePath(workspaceFolder.uri.fsPath), fs)
@@ -71,6 +79,7 @@ async function main(args: {
 
 		vscode.commands.executeCommand("setContext", "inlang:hasProjectInWorkspace", true)
 
+		await recommendationBannerView(args)
 		await projectView(args)
 		await messageView(args)
 		await errorView(args)
@@ -132,7 +141,6 @@ function registerExtensionComponents(args: {
 
 	messagePreview(args)
 	propertiesMissingPreview()
-	recommendation(args)
 	linterDiagnostics(args)
 }
 

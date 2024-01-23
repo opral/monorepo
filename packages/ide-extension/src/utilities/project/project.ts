@@ -7,6 +7,7 @@ import { openRepository } from "@lix-js/client"
 import { findRepoRoot } from "@lix-js/client"
 import { setState, state } from "../state.js"
 import { _import } from "../import/_import.js"
+import { isInWorkspaceRecommendation } from "../recommendation/recommendation.js"
 
 let projectViewNodes: ProjectViewNode[] = []
 
@@ -113,6 +114,9 @@ export async function handleTreeSelection(args: {
 			event: "IDE-EXTENSION loaded project",
 			properties: {
 				errors: inlangProject?.errors(),
+				isInWorkspaceRecommendation: await isInWorkspaceRecommendation({
+					workspaceFolder: args.workspaceFolder,
+				}),
 			},
 		})
 
