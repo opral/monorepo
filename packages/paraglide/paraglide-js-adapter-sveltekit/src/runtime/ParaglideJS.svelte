@@ -20,7 +20,7 @@
 
 	// The base path may be relative during SSR.
 	// To make sure it is absolute, we need to resolve it against the current page URL.
-	const absoluteBase = normaliseBase(maybe_relative_base, new URL($page.url)) || "/";
+	const absoluteBase = normaliseBase(maybe_relative_base, new URL($page.url)) || "/"
 
 	/**
 	 * Override the language detection with a specific language tag.
@@ -76,10 +76,10 @@
 			includeLanguage: true,
 			defaultLanguageTag: i18n.config.defaultLanguageTag,
 			prefixDefaultLanguage: i18n.config.prefixDefaultLanguage,
-		})	
+		})
 
 		const to = new URL(original_to)
-		to.pathname = newPathname;
+		to.pathname = newPathname
 
 		return getHrefBetween(from, to)
 	}

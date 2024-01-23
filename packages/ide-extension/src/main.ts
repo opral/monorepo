@@ -147,5 +147,3 @@ function handleInlangErrors() {
 export function getActiveTextEditor(): vscode.TextEditor | undefined {
 	return vscode.window.activeTextEditor
 }
-
-
