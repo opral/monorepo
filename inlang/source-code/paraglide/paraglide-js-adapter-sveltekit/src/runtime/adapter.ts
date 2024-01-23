@@ -232,6 +232,11 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 }
 
 function normaliseBase(base: string) {
+	if (base === "") return ""
+	if (base.startsWith("/")) return base
+
+	// this should only be reachable during component initialization
+	// We can detect this, because base is only ever a relative path during component initialization
 	return canonicalNormaliseBase(base, new URL(get(page).url))
 }
 
