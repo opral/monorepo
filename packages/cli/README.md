@@ -229,3 +229,7 @@ npx @inlang/cli module build --entry ./path/to/index.ts --outdir ./path/to/dist
 `--watch`: An optional flag that, when provided, enables a watch mode to monitor for changes and automatically rebuild the module when changes are detected.
 
 See how there is also a `--watch` flag, which enables a watch mode to monitor for changes and automatically rebuild the module when changes are detected. This command runs with `esbuild` under the hood. -->
+
+## Pricing 
+
+<doc-dev-tool-pricing></doc-dev-tool-pricing>

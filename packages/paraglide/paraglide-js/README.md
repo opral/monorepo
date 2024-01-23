@@ -359,3 +359,7 @@ Of course, we're not done yet! We plan on adding the following features to Parag
 - [Svelte Summit Fall 2023](https://www.youtube.com/watch?v=-YES3CCAG90)
 - Web Zurich December 2023
 - [Svelte London January 2024](https://www.youtube.com/watch?v=eswNQiq4T2w&t=646s)
+
+## Pricing 
+
+<doc-dev-tool-pricing></doc-dev-tool-pricing>
