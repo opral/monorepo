@@ -6,6 +6,8 @@
 		"moduleResolution": "Node",
 		"lib": ["ESNext", "DOM"],
 		"types": [],
+		"jsxImportSource": "solid-js",
+		"jsx": "preserve",
 		"outDir": "dist",
 		"rootDir": "src"
 	}
