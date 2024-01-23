@@ -18,7 +18,7 @@ const Guides = () => {
 			<div class="w-full grid grid-cols-12">
 				<div class="col-span-12 md:col-span-4 flex flex-col items-center md:items-start">
 					<p class="bg-background px-4 py-1.5 rounded-full text-sm font-medium w-fit border shadow border-surface-300">
-						Learn about inlang
+						{m.home_guides_tag()}
 					</p>
 					<h2 class="font-bold text-2xl md:text-4xl text-surface-900 mt-5">
 						{m.home_guides_title()}

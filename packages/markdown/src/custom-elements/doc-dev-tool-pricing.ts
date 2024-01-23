@@ -11,11 +11,10 @@ export class DocDevToolPricing extends LitElement {
 			border: 1px solid #e2e8f0;
 		}
 		.doc-h2 {
-            doc-text-2xl doc-pb-3 doc-mb-1 doc-mt-10
 		}
 		.doc-p {
-            color: #475569; 
-            line-height: 1.6rem;
+			color: #475569;
+			line-height: 1.6rem;
 		}
 	`
 

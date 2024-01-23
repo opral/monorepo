@@ -1,5 +1,6 @@
 import { Show, type JSXElement } from "solid-js"
 import LixCard from "./Card.jsx"
+import * as m from "#src/paraglide/messages.js"
 
 const LixSection = () => {
 	const data: Array<{
@@ -10,34 +11,34 @@ const LixSection = () => {
 		link: string
 	}> = [
 		{
-			title: "Review",
-			description: "Include who is needed inside a flexible review workflow.",
+			title: m.home_lix_review_title(),
+			description: m.home_lix_review_description(),
 			icon: <IconCheck />,
 			imagePath: "/images/lix-review-cover.png",
 			link: "/g/oostafhs",
 		},
 		{
-			title: "Automation",
-			description: "Out of the box automations can transform in highly customizable processes.",
+			title: m.home_lix_automation_title(),
+			description: m.home_lix_automation_description(),
 			icon: <IconAutomation />,
 			imagePath: "/images/lix-automation-cover.png",
 			link: "https://github.com/opral/monorepo/tree/main/lix",
 		},
 		{
-			title: "Traceability",
-			description: "Know why a decision was made and how things evolved.",
+			title: m.home_lix_traceability_title(),
+			description: m.home_lix_traceability_description(),
 			icon: <IconTracebility />,
 			link: "https://github.com/opral/monorepo/tree/main/lix",
 		},
 		{
-			title: "Recovery",
-			description: "Always go back before things went wrong.",
+			title: m.home_lix_recovery_title(),
+			description: m.home_lix_recovery_description(),
 			icon: <IconRecovery />,
 			link: "https://github.com/opral/monorepo/tree/main/lix",
 		},
 		{
-			title: "Collaboration",
-			description: "Everyone in the team can work seamlessly together on the same data.",
+			title: m.home_lix_collaboration_title(),
+			description: m.home_lix_collaboration_description(),
 			icon: <IconChat />,
 			link: "/g/7777asdy",
 		},
@@ -46,16 +47,12 @@ const LixSection = () => {
 	return (
 		<div class="pt-12 md:pt-20 flex flex-col items-center pb-20">
 			<p class="bg-background px-4 py-1.5 rounded-full text-sm font-medium w-fit border shadow border-surface-300">
-				Ecosystem powered by
+				{m.home_lix_tag()}
 			</p>
 			<h2 class="font-bold text-2xl md:text-4xl text-surface-900 text-center mt-5">
-				Lix Change Control
+				{m.home_lix_title()}
 			</h2>
-			<p class="text-center text-lg max-w-[600px] text-surface-500 pt-5">
-				Get complete control over modifications in your inlang project with the built-in Lix Change
-				Control. This will help you take charge of changes and ensure a stress-free project
-				shipping.
-			</p>
+			<p class="text-center text-lg max-w-[600px] text-surface-500 pt-5">{m.home_lix_desc()}</p>
 			<div class="grid grid-cols-12 w-full">
 				<div class="col-span-12 lg:col-span-10 lg:col-start-2 mt-10 grid grid-cols-6 gap-4">
 					<Show when={data[0]}>
