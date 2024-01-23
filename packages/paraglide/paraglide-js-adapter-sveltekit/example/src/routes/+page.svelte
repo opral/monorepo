@@ -20,12 +20,12 @@
 
 <br/>
 <br/>
-<button on:click={() => goto(i18n.route(base + "/about"))}> Programmatic About</button>
+<button on:click={() => goto(i18n.resolveRoute(base + "/about"))}> Programmatic About</button>
 
 <br/>
 
 {#each availableLanguageTags as lang}
-    <a href={i18n.getCanonicalPath($page.url.pathname)} hreflang={lang}>
+    <a href={i18n.route($page.url.pathname)} hreflang={lang}>
     {m.change_language_to({ languageTag: lang })}
     </a>
     <br />

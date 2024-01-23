@@ -3,13 +3,13 @@ import { createReroute } from "./hooks/reroute.js"
 import { base } from "$app/paths"
 import { page } from "$app/stores"
 import { get } from "svelte/store"
-import type { PathTranslations } from "./path-translations/types.js"
-import type { Paraglide } from "./runtime.js"
 import { getTranslatedPath } from "./path-translations/getTranslatedPath.js"
 import { serializeRoute } from "./utils/serialize-path.js"
 import { getCanonicalPath } from "./path-translations/getCanonicalPath.js"
 import { getPathInfo } from "./utils/get-path-info.js"
 import { normaliseBase as canonicalNormaliseBase } from "./utils/normaliseBase.js"
+import type { PathTranslations } from "./path-translations/types.js"
+import type { Paraglide } from "./runtime.js"
 
 export type I18nUserConfig<T extends string> = {
 	/**
@@ -154,6 +154,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 
 		/**
 		 * Takes in a URL and returns the language that should be used for it.
+		 *
 		 * @param url
 		 * @returns
 		 */
@@ -169,6 +170,8 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		 * Takes in a route and returns a translated version of it.
 		 * This is useful for use in `goto` statements and `redirect` calls.
 		 *
+		 * The oposite of `i18n.route()`.
+		 *
 		 * @param canonicalPath The path to translate (eg _/base/about_)
 		 * @param lang The language to translate to - Defaults to the current language
 		 * @returns The translated path (eg _/base/de/ueber-uns_)
@@ -178,7 +181,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		 * redirect(i18n.resolveRoute("/base/about", "de"))
 		 * ```
 		 */
-		route(path: string, lang: T | undefined = undefined) {
+		resolveRoute(path: string, lang: T | undefined = undefined) {
 			if (config.exclude(path)) return path
 
 			lang = lang ?? runtime.languageTag()
@@ -199,8 +202,10 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 
 		/**
 		 * Takes in a path in one language and returns it's canonical version.
-		 * Basically the oposite of `i18n.route()`.
-		 * This is useful for use in language switchers.
+		 * The oposite of `i18n.resolveRoute()`.
+		 * This is useful for use in:
+		 * - Language Switchers
+		 * - Navigation
 		 *
 		 * @param targetedPathSource The path to translate (eg _/base/de/ueber-uns_)
 		 * @returns The canonical version path (eg _/base/about_)
@@ -208,12 +213,12 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		 * @example
 		 * ```ts
 		 * <a
-		 *   href={i18n.getCanonicalPath($page.url.pathname)}
+		 *   href={i18n.route($page.url.pathname)}
 		 *   hreflang="en"
 		 * >
 		 * ```
 		 */
-		getCanonicalPath(translatedPath: string) {
+		route(translatedPath: string) {
 			const { path, lang } = getPathInfo(translatedPath, {
 				base: normaliseBase(base),
 				availableLanguageTags: config.runtime.availableLanguageTags,
