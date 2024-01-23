@@ -12,7 +12,7 @@ Before you begin developing a lint rule, make sure you have the following pre-re
 
 ### 1. Initialize a new lint rule module
 
-You need to initialize a new lint rule module using the inlang CLI to get started. Open your terminal and run the following command:
+You need to initialize a new lint rule module using the inlang [CLI](/m/2qj2w8pu) to get started. Open your terminal and run the following command:
 
 ```bash
 npx @inlang/cli@latest module init --type lintRule

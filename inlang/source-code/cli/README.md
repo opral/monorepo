@@ -159,7 +159,7 @@ This will launch an interactive prompt that will guide you through the process o
 
 ## `lint`
 
-The lint command lints the translation with the configured lint rules, for example, with the [@inlang/plugin-standard-lint-rules](https://github.com/opral/monorepo/tree/main/inlang/source-code/message-lint-rules).
+The lint command lints the translation with the configured [lint rules](https://inlang.com/c/lint-rules), for example, with the [@inlang/plugin-standard-lint-rules](https://github.com/opral/monorepo/tree/main/inlang/source-code/message-lint-rules).
 
 ```sh
 npx @inlang/cli lint
