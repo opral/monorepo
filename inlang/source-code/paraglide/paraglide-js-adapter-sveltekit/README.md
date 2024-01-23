@@ -312,3 +312,8 @@ This is also usefull for detecting which navigation item is currently active.
 	<a href="/about">{m.about()}</a>
 </li>
 ```
+
+
+## Playground
+
+Play around with it on [StackBlitz](https://stackblitz.com/~/github.com/lorissigrist/paraglide-sveltekit-example)

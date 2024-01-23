@@ -188,7 +188,7 @@ These plugins make sure to rerun the `compile` script whenever you build your pr
 You can find many examples for how to use paraglide on codesandbox, or in [our GitHub repository](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide).
 
 <doc-links>
-    <doc-link title="Svelte + Paraglide JS" icon="lucide:codesandbox" href="https://dub.sh/paraglide-playground-svelte" description="Play around with Svelte and Paraglide JS"></doc-link>
+    <doc-link title="Svelte + Paraglide JS" icon="lucide:codesandbox" href="https://stackblitz.com/~/github.com/LorisSigrist/paraglide-sveltekit-example" description="Play around with Svelte and Paraglide JS"></doc-link>
     <doc-link title="Astro + Paraglide JS" icon="lucide:codesandbox" href="https://stackblitz.com/~/github.com/LorisSigrist/paraglide-astro-example" description="Play around with Astro and Paraglide JS"></doc-link>
 </doc-links>
 
