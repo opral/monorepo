@@ -64,7 +64,7 @@ export type I18nUserConfig<T extends string> = {
 	 * exclude: ["/base/admin", /^\/base\/admin\/.* /]
 	 * ```
 	 */
-	exclude: (string | RegExp)[]
+	exclude?: (string | RegExp)[]
 
 	/**
 	 * Whether to prefix the language tag to the path even if it's the default language.
