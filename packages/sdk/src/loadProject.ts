@@ -35,35 +35,11 @@ import { identifyProject } from "./telemetry/groupIdentify.js"
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
 /**
- * Creates an inlang instance.
- *
- * @param projectPath - Absolute path to the inlang settings file.
- * @param @deprecated nodeishFs - Filesystem that implements the NodeishFilesystemSubset interface.
- * @param _import - Use `_import` to pass a custom import function for testing,
- *   and supporting legacy resolvedModules such as CJS.
- *
- */
-export async function loadProject(args: {
-	projectPath: string
-	nodeishFs: Repository["nodeishFs"]
-	/**
-	 * The app id is used to identify the app that is using the SDK.
-	 *
-	 * We use the app id to group events in telemetry to answer questions
-	 * like "Which apps causes these errors?" or "Which apps are used more than others?".
-	 *
-	 * @example
-	 * 	appId: "app.inlang.badge"
-	 */
-	appId?: string
-	_import?: ImportFunction
-}): Promise<InlangProject>
-
-/**
  * @param projectPath - Absolute path to the inlang settings file.
  * @param repo - An instance of a lix repo as returned by `openRepository`.
  * @param _import - Use `_import` to pass a custom import function for testing,
  *   and supporting legacy resolvedModules such as CJS.
+ * @param appId - The app id to use for telemetry e.g "app.inlang.badge"
  *
  */
 export async function loadProject(args: {
@@ -71,14 +47,6 @@ export async function loadProject(args: {
 	repo: Repository
 	appId?: string
 	_import?: ImportFunction
-}): Promise<InlangProject>
-
-export async function loadProject(args: {
-	projectPath: string
-	repo?: Repository
-	appId?: string
-	_import?: ImportFunction
-	nodeishFs?: Repository["nodeishFs"]
 }): Promise<InlangProject> {
 	const projectPath = normalizePath(args.projectPath)
 
@@ -99,15 +67,7 @@ export async function loadProject(args: {
 		)
 	}
 
-	let fs: Repository["nodeishFs"]
-	if (args.nodeishFs) {
-		// TODO: deprecate
-		fs = args.nodeishFs
-	} else if (args.repo) {
-		fs = args.repo.nodeishFs
-	} else {
-		throw new LoadProjectInvalidArgument(`Repo missing from arguments.`, { argument: "repo" })
-	}
+	const fs = args.repo.nodeishFs
 
 	const nodeishFs = createNodeishFsWithAbsolutePaths({
 		projectPath,

@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 0.26.0
+
+### Minor Changes
+
+- 676c0f905: remove deprecated loadProject({nodeishFs})
+
 ## 0.25.0
 
 ### Minor Changes
