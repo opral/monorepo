@@ -1,5 +1,29 @@
 # @inlang/cli
 
+## 2.10.0
+
+### Minor Changes
+
+- 773ec8516: refactor: consolidate telemetry event
+
+## 2.9.0
+
+### Minor Changes
+
+- 0bf93e5e6: refactor: telemetry for how commands are used
+
+## 2.8.0
+
+### Minor Changes
+
+- 871972019: remove create-project in fsvor of manage.inlang.com
+
+## 2.7.0
+
+### Minor Changes
+
+- 676c0f905: remove deprecated loadProject({nodeishFs})
+
 ## 2.6.0
 
 ### Minor Changes
