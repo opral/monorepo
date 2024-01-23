@@ -38,28 +38,39 @@
 		"views": {
 			"inlang": [
 				{
+					"when": "inlang:showRecommendationBanner && inlang:hasProjectInWorkspace",
+					"id": "recommendationBanner",
+					"name": "Recommendation",
+					"type": "webview",
+					"group": "inlang@1"
+				},
+				{
 					"when": "!inlang:hasProjectInWorkspace",
 					"id": "gettingStartedView",
 					"name": "Getting Started",
-					"type": "webview"
+					"type": "webview",
+					"group": "inlang@2"
 				},
 				{
 					"when": "inlang:hasProjectInWorkspace",
 					"id": "projectView",
 					"name": "Projects",
-					"type": "tree"
+					"type": "tree",
+					"group": "inlang@3"
 				},
 				{
 					"when": "inlang:hasProjectInWorkspace",
 					"id": "messageView",
 					"name": "Messages",
-					"type": "webview"
+					"type": "webview",
+					"group": "inlang@4"
 				},
 				{
 					"when": "inlang:hasProjectInWorkspace",
 					"id": "errorView",
 					"name": "Errors",
-					"type": "tree"
+					"type": "tree",
+					"group": "inlang@5"
 				}
 			]
 		},
