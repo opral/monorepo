@@ -1,5 +1,11 @@
 # @inlang/paraglide-js-adapter-sveltekit
 
+## 0.2.1
+
+### Patch Changes
+
+- 117c684d0: fix base resolution issue in `route`
+
 ## 0.2.0
 
 ### Minor Changes
