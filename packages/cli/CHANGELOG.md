@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 2.10.0
+
+### Minor Changes
+
+- 773ec8516: refactor: consolidate telemetry event
+
 ## 2.9.0
 
 ### Minor Changes
