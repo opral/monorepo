@@ -1,5 +1,44 @@
 # @inlang/rpc
 
+## 0.2.9
+
+### Patch Changes
+
+- Updated dependencies [676c0f905]
+  - @inlang/sdk@0.26.0
+
+## 0.2.8
+
+### Patch Changes
+
+- Updated dependencies [87bed968b]
+- Updated dependencies [23ca73060]
+  - @inlang/sdk@0.25.0
+
+## 0.2.7
+
+### Patch Changes
+
+- @inlang/sdk@0.24.1
+
+## 0.2.6
+
+### Patch Changes
+
+- Updated dependencies [c38faebce]
+  - @inlang/sdk@0.24.0
+
+## 0.2.5
+
+### Patch Changes
+
+- Updated dependencies [b920761e6]
+- Updated dependencies [74ac11c47]
+  - @inlang/sdk@0.23.0
+  - @inlang/language-tag@1.4.0
+  - @inlang/message@2.0.1
+  - @inlang/marketplace-registry@1.5.2
+
 ## 0.2.4
 
 ### Patch Changes

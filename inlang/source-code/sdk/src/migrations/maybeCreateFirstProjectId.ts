@@ -1,6 +1,12 @@
 import type { Repository } from "@lix-js/client"
 import { hash } from "@lix-js/client"
 
+/**
+ * Creates a project id if it does not exist yet.
+ *
+ * - this is a migration to ensure that all projects have a project id
+ * - new projects are created with a project id (in the future)
+ */
 export async function maybeCreateFirstProjectId(args: {
 	projectPath: string
 	repo?: Repository
@@ -29,10 +35,9 @@ export async function generateProjectId(args: { repo?: Repository; projectPath: 
 		return undefined
 	}
 	const firstCommitHash = await args.repo.getFirstCommitHash()
-	const originHash = await args.repo.getOrigin({ safeHashOnly: true })
 
 	if (firstCommitHash) {
-		return hash(`${firstCommitHash + args.projectPath + originHash}`)
+		return hash(`${firstCommitHash + args.projectPath}`)
 	}
 	return undefined
 }

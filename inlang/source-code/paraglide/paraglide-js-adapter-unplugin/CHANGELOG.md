@@ -1,5 +1,65 @@
 # @inlang/paraglide-js-adapter-unplugin
 
+## 1.3.1
+
+### Patch Changes
+
+- Updated dependencies [676c0f905]
+  - @inlang/sdk@0.26.0
+  - @inlang/paraglide-js@1.2.1
+
+## 1.3.0
+
+### Minor Changes
+
+- d199e539d: chore: add missing `appId` parameter to `loadProject`
+
+### Patch Changes
+
+- Updated dependencies [87bed968b]
+- Updated dependencies [23ca73060]
+  - @inlang/sdk@0.25.0
+  - @inlang/paraglide-js@1.2.1
+
+## 1.2.6
+
+### Patch Changes
+
+- @inlang/paraglide-js@1.2.1
+- @inlang/sdk@0.24.1
+
+## 1.2.5
+
+### Patch Changes
+
+- Updated dependencies [c38faebce]
+  - @inlang/sdk@0.24.0
+  - @inlang/paraglide-js@1.2.1
+
+## 1.2.4
+
+### Patch Changes
+
+- 9cd76dca8: fix broken dependency
+
+## 1.2.3
+
+### Patch Changes
+
+- 74dc1f8c6: Update dependencies
+- Updated dependencies [74dc1f8c6]
+- Updated dependencies [4ae6295d0]
+- Updated dependencies [b920761e6]
+  - @inlang/paraglide-js@1.2.1
+  - @inlang/sdk@0.23.0
+
+## 1.2.2
+
+### Patch Changes
+
+- Updated dependencies [0f0e8496d]
+  - @inlang/paraglide-js@1.2.0
+
 ## 1.2.1
 
 ### Patch Changes

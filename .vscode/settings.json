@@ -44,5 +44,6 @@
 	"[svg]": {
 		"editor.defaultFormatter": "jock.svg"
 	},
-	"testing.automaticallyOpenPeekView": "never"
+	"testing.automaticallyOpenPeekView": "never",
+	"git.mergeEditor": true
 }

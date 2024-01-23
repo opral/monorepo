@@ -1,5 +1,56 @@
 # @inlang/sdk
 
+## 0.26.0
+
+### Minor Changes
+
+- 676c0f905: remove deprecated loadProject({nodeishFs})
+
+## 0.25.0
+
+### Minor Changes
+
+- 87bed968b: add: `project.id` API
+- 23ca73060: add project identify
+
+## 0.24.1
+
+### Patch Changes
+
+- Updated dependencies [23ce3f0ea]
+  - @lix-js/client@0.7.0
+
+## 0.24.0
+
+### Minor Changes
+
+- c38faebce: release fixed project id and catchup missed releases for cli and lix
+
+### Patch Changes
+
+- Updated dependencies [c38faebce]
+  - @lix-js/client@0.6.0
+  - @lix-js/fs@0.6.0
+  - @inlang/plugin@2.4.3
+  - @inlang/module@1.2.3
+
+## 0.23.0
+
+### Minor Changes
+
+- b920761e6: refactor: remove `_capture` in favor of `appDir` for product insights
+
+### Patch Changes
+
+- Updated dependencies [74ac11c47]
+  - @inlang/language-tag@1.4.0
+  - @inlang/message@2.0.1
+  - @inlang/message-lint-rule@1.4.1
+  - @inlang/plugin@2.4.2
+  - @inlang/project-settings@2.2.1
+  - @inlang/translatable@1.2.1
+  - @inlang/module@1.2.2
+
 ## 0.22.0
 
 ### Minor Changes

@@ -4,6 +4,58 @@
 
 ### Patch Changes
 
+- @inlang/badge@0.5.8
+- @inlang/plugin-message-format@2.0.0
+- @inlang/rpc@0.2.9
+- @inlang/telemetry@0.3.8
+- @inlang/website@null
+
+## null
+
+### Patch Changes
+
+- @inlang/badge@0.5.7
+- @inlang/plugin-message-format@2.0.0
+- @inlang/rpc@0.2.8
+- @inlang/telemetry@0.3.7
+- @inlang/website@null
+
+## null
+
+### Patch Changes
+
+- @inlang/badge@0.5.6
+- @inlang/website@null
+- @inlang/plugin-message-format@2.0.0
+- @inlang/rpc@0.2.7
+- @inlang/telemetry@0.3.6
+
+## null
+
+### Patch Changes
+
+- @inlang/badge@0.5.5
+- @inlang/plugin-message-format@2.0.0
+- @inlang/rpc@0.2.6
+- @inlang/telemetry@0.3.5
+- @inlang/website@null
+
+## null
+
+### Patch Changes
+
+- @inlang/website@null
+- @inlang/badge@0.5.4
+- @inlang/plugin-message-format@2.0.0
+- @inlang/rpc@0.2.5
+- @inlang/telemetry@0.3.4
+- @inlang/project-settings@2.2.1
+- @inlang/marketplace-manifest@1.3.1
+
+## null
+
+### Patch Changes
+
 - @inlang/badge@0.5.3
 - @inlang/plugin-message-format@2.0.0
 - @inlang/rpc@0.2.4

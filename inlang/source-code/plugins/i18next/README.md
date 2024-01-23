@@ -1,6 +1,6 @@
 # What does this plugin do?
 
-This plugin works with i18next to read and write messages. It also determines how translation functions and namespaces are parsed and handled by the IDE extension.
+This plugin works with [i18next](https://inlang.com/m/kl95463j) to read and write messages. It also determines how translation functions and namespaces are parsed and handled by the IDE extension.
 
 # Settings
 
@@ -39,7 +39,7 @@ To use our plugin, you need to provide a path to the directory where your langua
 
 ## `variableReferencePattern`
 
-Defines the pattern for variable references. The default is how i18next suggests the usage of placeholders.
+Defines the pattern for variable references. The default is how [i18next](https://inlang.com/m/kl95463j) suggests the usage of placeholders.
 
 default:
 
@@ -102,6 +102,10 @@ Run `npm run build` to generate a build.
 The [dist](./dist/) directory is used to distribute the plugin directly via CDN like [jsDelivr](https://www.jsdelivr.com/). Using a CDN works because the inlang config uses dynamic imports to import plugins.
 
 Read the [jsDelivr documentation](https://www.jsdelivr.com/?docs=gh) on importing from GitHub.
+
+## Pricing 
+
+<doc-dev-tool-pricing></doc-dev-tool-pricing>
 
 ---
 

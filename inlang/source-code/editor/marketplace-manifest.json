@@ -1,5 +1,5 @@
 {
-	"id": "app.inlang.editor",
+	"id": "app.inlang.finkLocalizationEditor",
 	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/new-fink-logo.png",
 	"gallery": [
 		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/editor-marketplace-cover.jpg",
@@ -17,7 +17,18 @@
 	"readme": {
 		"en": "./inlang/source-code/editor/README.md"
 	},
-	"keywords": ["editor", "web", "apps", "website", "translator", "lix", "fink", "inlang"],
+	"keywords": [
+		"editor",
+		"web",
+		"apps",
+		"website",
+		"translator",
+		"lix",
+		"fink",
+		"inlang",
+		"astro",
+		"nextjs"
+	],
 	"recommends": ["m/gerre34r", "m/reootnfj", "m/4cxm3eqi", "g/6ddyhpoi"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
