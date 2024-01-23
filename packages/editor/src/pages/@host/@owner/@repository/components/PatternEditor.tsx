@@ -318,14 +318,14 @@ export function PatternEditor(props: {
 			}
 		})
 
-		if (hasChanges() && localStorage.user === undefined) {
+		if (hasChanges() && !localStorage.user?.isLoggedIn) {
 			notifications.push({
 				notificationTitle: "Access:",
 				notificationDescription: "Sign in to commit changes.",
 				notificationType: "warning",
 			})
 		}
-		if (hasChanges() && userIsCollaborator() === false) {
+		if (hasChanges() && localStorage.user?.isLoggedIn && !userIsCollaborator()) {
 			notifications.push({
 				notificationTitle: "Fork:",
 				notificationDescription: "Fork the project to commit changes.",
@@ -349,7 +349,7 @@ export function PatternEditor(props: {
 			timer = setTimeout(() => {
 				showToast({
 					variant: "info",
-					title: "Inlang saves automatically but make shure to push your changes.",
+					title: "Inlang saves automatically, but make sure you push your changes.",
 				})
 			}, 500)
 		}

@@ -1,5 +1,11 @@
 # @inlang/message-lint-rule-without-source
 
+## 1.4.1
+
+### Patch Changes
+
+- @inlang/message-lint-rule@1.4.1
+
 ## 1.4.0
 
 ### Minor Changes

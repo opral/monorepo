@@ -1,18 +1,31 @@
-import { createEffect, createSignal, For, type JSXElement, on, onMount, Show } from "solid-js"
+import {
+	createEffect,
+	createSignal,
+	For,
+	type JSXElement,
+	type Setter,
+	on,
+	onMount,
+	Show,
+} from "solid-js"
 import { useEditorState } from "./State.jsx"
 import { SearchInput } from "./components/SearchInput.jsx"
 import { Gitfloat } from "./components/Gitfloat.jsx"
+import IconGithub from "~icons/cib/github"
 import IconAdd from "~icons/material-symbols/add"
 import IconClose from "~icons/material-symbols/close"
+import IconSync from "~icons/material-symbols/sync-outline"
 import IconTranslate from "~icons/material-symbols/translate"
+import IconSettings from "~icons/material-symbols/settings-outline"
 import IconDescription from "~icons/material-symbols/description-outline"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 import { showToast } from "#src/interface/components/Toast.jsx"
-import type { LanguageTag } from "@inlang/sdk"
+import { isValidLanguageTag, type LanguageTag } from "@inlang/sdk"
 import { sortLanguageTags } from "./helper/sortLanguageTags.js"
 import EditorLayout from "#src/interface/editor/EditorLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
 import { setSignInModalOpen } from "#src/services/auth/src/components/SignInDialog.jsx"
+import { useLocalStorage } from "#src/services/local-storage/src/LocalStorageProvider.jsx"
 
 interface Filter {
 	name: string
@@ -23,6 +36,9 @@ interface Filter {
 // command-f this repo to find where the layout is called
 export function Layout(props: { children: JSXElement }) {
 	const {
+		refetchRepo,
+		forkStatus,
+		userIsCollaborator,
 		project,
 		lixErrors,
 		setTextSearch,
@@ -30,7 +46,6 @@ export function Layout(props: { children: JSXElement }) {
 		setFilteredMessageLintRules,
 		filteredLanguageTags,
 		setFilteredLanguageTags,
-		userIsCollaborator,
 		languageTags,
 		currentBranch,
 		activeProject,
@@ -41,21 +56,33 @@ export function Layout(props: { children: JSXElement }) {
 		setSelectedFilters(selectedFilters().filter((filter: Filter) => filter.name !== filterName))
 	}
 
+	const [forkStatusModalOpen, setForkStatusModalOpen] = createSignal(false)
+	const [openedGitHub, setOpenedGitHub] = createSignal(false)
+
+	createEffect(() => {
+		if (
+			forkStatus() &&
+			forkStatus()?.behind > 0 &&
+			forkStatus().conflicts &&
+			userIsCollaborator()
+		) {
+			setForkStatusModalOpen(true)
+		}
+	})
+
 	const [addLanguageModalOpen, setAddLanguageModalOpen] = createSignal(false)
 	const [addLanguageText, setAddLanguageText] = createSignal("")
-
-	// check if the type matches the LanguageTag type
-	const isValidLanguageTag = (): boolean => {
-		const languageTagRegex =
-			/^((?<grandfathered>(en-GB-oed|i-ami|i-bnn|i-default|i-enochian|i-hak|i-klingon|i-lux|i-mingo|i-navajo|i-pwn|i-tao|i-tay|i-tsu|sgn-BE-FR|sgn-BE-NL|sgn-CH-DE)|(art-lojban|cel-gaulish|no-bok|no-nyn|zh-guoyu|zh-hakka|zh-min|zh-min-nan|zh-xiang))|((?<language>([A-Za-z]{2,3}(-(?<extlang>[A-Za-z]{3}(-[A-Za-z]{3}){0,2}))?))(-(?<script>[A-Za-z]{4}))?(-(?<region>[A-Za-z]{2}|[0-9]{3}))?(-(?<variant>[A-Za-z0-9]{5,8}|[0-9][A-Za-z0-9]{3}))*))$/
-		return languageTagRegex.test(addLanguageText())
-	}
 
 	const [filterOptions, setFilterOptions] = createSignal<Filter[]>([
 		{
 			name: "Language",
 			icon: <IconTranslate class="w-5 h-5" />,
-			component: <LanguageFilter clearFunction={removeFilter("Language")} />,
+			component: (
+				<LanguageFilter
+					clearFunction={removeFilter("Language")}
+					setAddLanguageModalOpen={setAddLanguageModalOpen}
+				/>
+			),
 		},
 	])
 
@@ -142,20 +169,24 @@ export function Layout(props: { children: JSXElement }) {
 
 	const settingsLink = () => {
 		if (currentBranch() && activeProject()) {
-			return `https://manage.inlang.com/?repo=${`github.com/${routeParams().owner}/${
-				routeParams().repository
-			}`}&branch=${currentBranch()}&project=${activeProject()}`
+			return (
+				(import.meta.env.PROD ? `https://manage.inlang.com/` : `http://localhost:4004/`) +
+				`?repo=${`github.com/${routeParams().owner}/${
+					routeParams().repository
+				}`}&branch=${currentBranch()}&project=${activeProject()}`
+			)
 		} else {
-			return `https://manage.inlang.com/?repo=${`github.com/${routeParams().owner}/${
-				routeParams().repository
-			}`}`
+			return (
+				(import.meta.env.PROD ? `https://manage.inlang.com/` : `http://localhost:4004/`) +
+				`?repo=${`github.com/${routeParams().owner}/${routeParams().repository}`}`
+			)
 		}
 	}
 
 	return (
 		<EditorLayout>
 			<div class="w-full flex flex-col grow bg-surface-50">
-				<div class="w-full flex items-end justify-between">
+				<div class="w-full flex items-end justify-between z-20">
 					<div class="flex flex-wrap gap-2 items-center pt-5">
 						<Breadcrumbs />
 						<BranchMenu />
@@ -167,25 +198,12 @@ export function Layout(props: { children: JSXElement }) {
 						prop:href={settingsLink()}
 						prop:target="_blank"
 					>
-						<div slot="prefix">
-							<svg
-								width="16"
-								height="16"
-								class="w-4 h-4"
-								viewBox="0 0 16 16"
-								fill="none"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									d="M7.99977 5.33301C8.70701 5.33301 9.38529 5.61396 9.88538 6.11406C10.3855 6.61415 10.6664 7.29243 10.6664 7.99967C10.6664 8.70692 10.3855 9.3852 9.88538 9.88529C9.38529 10.3854 8.70701 10.6663 7.99977 10.6663C7.29252 10.6663 6.61424 10.3854 6.11415 9.88529C5.61405 9.3852 5.3331 8.70692 5.3331 7.99967C5.3331 7.29243 5.61405 6.61415 6.11415 6.11406C6.61424 5.61396 7.29252 5.33301 7.99977 5.33301ZM7.99977 6.66634C7.64614 6.66634 7.30701 6.80682 7.05696 7.05687C6.80691 7.30691 6.66643 7.64605 6.66643 7.99967C6.66643 8.3533 6.80691 8.69243 7.05696 8.94248C7.30701 9.19253 7.64614 9.33301 7.99977 9.33301C8.35339 9.33301 8.69253 9.19253 8.94257 8.94248C9.19262 8.69243 9.3331 8.3533 9.3331 7.99967C9.3331 7.64605 9.19262 7.30691 8.94257 7.05687C8.69253 6.80682 8.35339 6.66634 7.99977 6.66634ZM6.66643 14.6663C6.49977 14.6663 6.35977 14.5463 6.3331 14.3863L6.08643 12.6197C5.66643 12.453 5.30643 12.2263 4.95977 11.9597L3.29977 12.633C3.1531 12.6863 2.9731 12.633 2.8931 12.4863L1.55977 10.1797C1.51896 10.111 1.50458 10.0298 1.5193 9.95125C1.53403 9.87273 1.57685 9.80225 1.63977 9.75301L3.04643 8.64634L2.99977 7.99967L3.04643 7.33301L1.63977 6.24634C1.57685 6.1971 1.53403 6.12662 1.5193 6.04809C1.50458 5.96957 1.51896 5.88837 1.55977 5.81967L2.8931 3.51301C2.9731 3.36634 3.1531 3.30634 3.29977 3.36634L4.95977 4.03301C5.30643 3.77301 5.66643 3.54634 6.08643 3.37967L6.3331 1.61301C6.35977 1.45301 6.49977 1.33301 6.66643 1.33301H9.3331C9.49977 1.33301 9.63977 1.45301 9.66643 1.61301L9.9131 3.37967C10.3331 3.54634 10.6931 3.77301 11.0398 4.03301L12.6998 3.36634C12.8464 3.30634 13.0264 3.36634 13.1064 3.51301L14.4398 5.81967C14.5264 5.96634 14.4864 6.14634 14.3598 6.24634L12.9531 7.33301L12.9998 7.99967L12.9531 8.66634L14.3598 9.75301C14.4864 9.85301 14.5264 10.033 14.4398 10.1797L13.1064 12.4863C13.0264 12.633 12.8464 12.693 12.6998 12.633L11.0398 11.9663C10.6931 12.2263 10.3331 12.453 9.9131 12.6197L9.66643 14.3863C9.63977 14.5463 9.49977 14.6663 9.3331 14.6663H6.66643ZM7.49977 2.66634L7.2531 4.40634C6.4531 4.57301 5.74643 4.99967 5.2331 5.59301L3.62643 4.89967L3.12643 5.76634L4.5331 6.79967C4.26643 7.57745 4.26643 8.4219 4.5331 9.19967L3.11977 10.2397L3.61977 11.1063L5.23977 10.413C5.7531 10.9997 6.4531 11.4263 7.24643 11.5863L7.4931 13.333H8.50643L8.7531 11.593C9.54643 11.4263 10.2464 10.9997 10.7598 10.413L12.3798 11.1063L12.8798 10.2397L11.4664 9.20634C11.7331 8.42634 11.7331 7.57967 11.4664 6.79967L12.8731 5.76634L12.3731 4.89967L10.7664 5.59301C10.2426 4.98656 9.53199 4.57146 8.74643 4.41301L8.49977 2.66634H7.49977Z"
-									fill="currentColor"
-								/>
-							</svg>
-						</div>
+						{/* @ts-ignore */}
+						<IconSettings slot="prefix" class="w-5 h-5 -ml-0.5" />
 						Settings
 					</sl-button>
 				</div>
-				<div class="flex flex-wrap justify-between gap-2 py-5 sticky top-12 md:top-16 z-30 bg-surface-50">
+				<div class="flex flex-wrap justify-between gap-2 py-5 sticky top-12 md:top-16 z-10 bg-surface-50">
 					<div class="flex flex-wrap z-20 gap-2 items-center">
 						<Show when={project()}>
 							<For each={filterOptions()}>
@@ -224,7 +242,7 @@ export function Layout(props: { children: JSXElement }) {
 								<sl-dropdown prop:distance={8}>
 									<sl-button prop:size="small" slot="trigger">
 										<button slot="prefix">
-											<IconAdd class="w-4 h-4" />
+											<IconAdd class="w-5 h-5 -mx-0.5" />
 										</button>
 										Filter
 									</sl-button>
@@ -273,24 +291,6 @@ export function Layout(props: { children: JSXElement }) {
 							placeholder="Search ..."
 							handleChange={(text: string) => setTextSearch(text)}
 						/>
-						<sl-button
-							prop:size={"small"}
-							onClick={() => {
-								if (localStorage?.user?.isLoggedIn === false) {
-									setSignInModalOpen(true)
-								} else if (userIsCollaborator() === false) {
-									showToast({
-										variant: "warning",
-										title: "Not a collaborator",
-										message: "Fork this repository to make changes.",
-									})
-								} else {
-									setAddLanguageModalOpen(true)
-								}
-							}}
-						>
-							Add language tag
-						</sl-button>
 					</div>
 				</div>
 				{props.children}
@@ -311,7 +311,7 @@ export function Layout(props: { children: JSXElement }) {
 					prop:placeholder={"Add a language tag"}
 					prop:helpText={
 						!(
-							(!isValidLanguageTag() && addLanguageText().length > 0) ||
+							(!isValidLanguageTag(addLanguageText()) && addLanguageText().length > 0) ||
 							project()?.settings().languageTags.includes(addLanguageText())
 						)
 							? "Unique tags for languages (e.g. -> en, de, fr)"
@@ -321,11 +321,15 @@ export function Layout(props: { children: JSXElement }) {
 					onPaste={(e) => setAddLanguageText(e.currentTarget.value)}
 					onInput={(e) => setAddLanguageText(e.currentTarget.value)}
 				/>
-				<Show when={!isValidLanguageTag() && addLanguageText().length > 0}>
+				<Show when={!isValidLanguageTag(addLanguageText()) && addLanguageText().length > 0}>
 					<p class="text-xs leading-5 text-danger max-sm:hidden pt-1 pb-0.5">
 						Please enter a valid{" "}
 						<a
-							href="https://inlang.com/documentation/concept/language-tag"
+							href={
+								import.meta.env.PROD
+									? "https://inlang.com/documentation/concept/language-tag"
+									: "http://localhost:3000/documentation/concept/language-tag"
+							}
 							target="_blank"
 							class="underline"
 						>
@@ -344,7 +348,8 @@ export function Layout(props: { children: JSXElement }) {
 					prop:size={"small"}
 					prop:variant={"primary"}
 					prop:disabled={
-						!isValidLanguageTag() || project()?.settings().languageTags.includes(addLanguageText())
+						!isValidLanguageTag(addLanguageText()) ||
+						project()?.settings().languageTags.includes(addLanguageText())
 					}
 					onClick={() => {
 						addLanguageTag(addLanguageText())
@@ -353,6 +358,51 @@ export function Layout(props: { children: JSXElement }) {
 				>
 					Add language
 				</sl-button>
+			</sl-dialog>
+			<sl-dialog
+				prop:label="Fork out of sync"
+				prop:open={forkStatusModalOpen()}
+				on:sl-after-hide={() => setForkStatusModalOpen(false)}
+			>
+				<p class="text-sm pb-4 -mt-4 pr-8">
+					Your fork is out of sync with the upstream repository. Please resolve the conflicts before
+					applying your changes.
+				</p>
+				<img
+					src="/images/resolve-in-github.webp"
+					alt="Sync Fork GitHub UI"
+					class="w-4/5 mx-auto mt-2"
+				/>
+				<div class="flex flex-col gap-4 pt-6">
+					<sl-button
+						class="w-full"
+						prop:variant={openedGitHub() ? "default" : "primary"}
+						prop:href={`https://github.com/${routeParams().owner}/${routeParams().repository}`}
+						prop:target="_blank"
+						onClick={() => setOpenedGitHub(true)}
+					>
+						<div slot="prefix">
+							<IconGithub />
+						</div>
+						Open GitHub
+					</sl-button>
+					<Show when={openedGitHub()}>
+						<sl-button
+							class="w-full"
+							prop:variant={"primary"}
+							onClick={() => {
+								refetchRepo()
+								setForkStatusModalOpen(false)
+								setOpenedGitHub(false)
+							}}
+						>
+							<div slot="prefix">
+								<IconSync />
+							</div>
+							Reload repo
+						</sl-button>
+					</Show>
+				</div>
 			</sl-dialog>
 			<Gitfloat />
 		</EditorLayout>
@@ -370,21 +420,21 @@ function Breadcrumbs() {
 					d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 1 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7a.75.75 0 0 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 0 1 1-1h8zM5 12.25v3.25a.25.25 0 0 0 .4.2l1.45-1.087a.25.25 0 0 1 .3 0L8.6 15.7a.25.25 0 0 0 .4-.2v-3.25a.25.25 0 0 0-.25-.25h-3.5a.25.25 0 0 0-.25.25z"
 				/>
 			</svg>
-			<Link
+			<a
 				href={`https://github.com/${routeParams().owner}`}
 				target="_blank"
 				class="link hover:text-primary break-all"
 			>
 				<h3>{routeParams().owner}</h3>
-			</Link>
+			</a>
 			<h3>/</h3>
-			<Link
+			<a
 				href={`https://github.com/${routeParams().owner}/${routeParams().repository}`}
 				target="_blank"
 				class="link hover:text-primary break-all"
 			>
 				<h3>{routeParams().repository}</h3>
-			</Link>
+			</a>
 		</div>
 	)
 }
@@ -397,9 +447,8 @@ function BranchMenu() {
 	return (
 		<sl-tooltip
 			prop:content="Select branch"
-			prop:placement="top"
+			prop:placement="bottom"
 			prop:trigger="hover"
-			prop:hoist={true}
 			class="small"
 			style={{ "--show-delay": "1s" }}
 		>
@@ -497,8 +546,10 @@ function ProjectMenu() {
 	)
 }
 
-function LanguageFilter(props: { clearFunction: any }) {
-	const { project, setFilteredLanguageTags, filteredLanguageTags } = useEditorState()
+function LanguageFilter(props: { clearFunction: any; setAddLanguageModalOpen: Setter<boolean> }) {
+	const { project, setFilteredLanguageTags, filteredLanguageTags, userIsCollaborator } =
+		useEditorState()
+	const [localStorage] = useLocalStorage()
 
 	onMount(() => {
 		if (filteredLanguageTags().length === 0 || filteredLanguageTags() === undefined) {
@@ -533,12 +584,38 @@ function LanguageFilter(props: { clearFunction: any }) {
 						is
 					</p>
 				</div>
-				<button slot="clear-icon" class="p-0.5">
-					<IconClose class="w-4 h-4" />
+				<button slot="clear-icon">
+					<IconClose width={20} height={20} />
 				</button>
 
 				<div class="flex px-3 gap-2 text-sm font-medium">
 					<span class="text-left text-outline-variant grow">Select</span>
+					<sl-tooltip
+						prop:content="Add language"
+						prop:placement="bottom"
+						prop:trigger="hover"
+						class="small"
+						style={{ "--show-delay": "1s" }}
+					>
+						<button
+							class="link link-primary opacity-75"
+							onClick={() => {
+								if (!localStorage?.user?.isLoggedIn) {
+									setSignInModalOpen(true)
+								} else if (!userIsCollaborator()) {
+									showToast({
+										variant: "warning",
+										title: "Not a collaborator",
+										message: "Fork this repository to make changes.",
+									})
+								} else {
+									props.setAddLanguageModalOpen(true)
+								}
+							}}
+						>
+							<IconAdd class="w-5 h-5" />
+						</button>
+					</sl-tooltip>
 					<Link
 						class="cursor-pointer link link-primary opacity-75"
 						onClick={() => setFilteredLanguageTags(() => project()?.settings()?.languageTags || [])}

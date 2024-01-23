@@ -38,7 +38,9 @@ const __dirname = pathPolyfill123.dirname(__filename)
 	define: {
 		// eslint-disable-next-line no-undef
 		ENV_DEFINED_IN_BUILD_STEP: JSON.stringify({
-			isProduction: isProduction,
+			IS_PRODUCTION: isProduction,
+			// eslint-disable-next-line no-undef
+			PUBLIC_POSTHOG_TOKEN: process.env.PUBLIC_POSTHOG_TOKEN,
 		}),
 	},
 	external: ["esbuild-wasm"],

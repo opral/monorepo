@@ -15,7 +15,7 @@ The [IDE Extension](/m/r7kp499g/app-inlang-ideExtension) enables translating the
 
 The [CLI for automation](/m/2qj2w8pu/app-inlang-cli) enables the developer to automate the translation process, e.g. with [Machine Translation](https://en.wikipedia.org/wiki/Machine_translation). The CLI can be used in a CI/CD pipeline to automatically translate the content of the web application.
 
-To make sure that the translation is correct, the [Fink - Message Editor](/m/tdozzpar/app-inlang-editor) can be used to send the translation to a professional translator. The translator can then use it to translate the content on one single source of truth. The translation is then automatically pushed to the web application.
+To make sure that the translation is correct, the [Fink - Message Editor](/m/tdozzpar/app-inlang-finkLocalizationEditor) can be used to send the translation to a professional translator. The translator can then use it to translate the content on one single source of truth. The translation is then automatically pushed to the web application.
 
 Furthermore, and of course in a later stage, it is recommended to watch audits and analytics to see how the localization strategy is performing. This can be done with [GlobeLens](/m/92fst3wd/app-inlang-globelens). Furthermore, at this stage it is not only important that translations are correct, but also that they are optimized for the target market and do not contain any cultural faux pas or other mistakes that could damage the brand image or end in a lawsuit. Herefore, inlang LocalSuits (which is not yet released and just a placeholder) can be used to arrange a legal review of the global content.
 
@@ -36,7 +36,7 @@ The chief benefit of a well-planned localization strategy is that it’ll help y
 
 1. Learn about the local audience through market research (e.g. [GlobeLens](/m/92fst3wd/app-inlang-globelens))
 2. Hire local experts to understand the market opportunity
-3. Maximize translation and localization (e.g. [Fink - Message Editor](/m/tdozzpar/app-inlang-editor))
+3. Maximize translation and localization (e.g. [Fink - Message Editor](/m/tdozzpar/app-inlang-finkLocalizationEditor))
 4. Translate your media 
 5. Optimize your website for multilingual SEO (e.g. [Paraglide JS](/m/gerre34r/library-inlang-paraglideJs))
 6. Understand the competition 
@@ -64,7 +64,7 @@ The basic concept of localization is the adaptation of a product or content to a
 
 ## Conclusion
 
-In conclusion, a successful localization strategy is essential for businesses looking to expand into new markets. By understanding and adapting to the culture of each target market, and going beyond merely [translating](/m/tdozzpar/app-inlang-editor) words, businesses can resonate with their new audiences and achieve long-lasting growth. Remember, the aim of a localization strategy is the creation of a product where no customer feels excluded or unable to fully access it owing to language issues or cultural norms.
+In conclusion, a successful localization strategy is essential for businesses looking to expand into new markets. By understanding and adapting to the culture of each target market, and going beyond merely [translating](/m/tdozzpar/app-inlang-finkLocalizationEditor) words, businesses can resonate with their new audiences and achieve long-lasting growth. Remember, the aim of a localization strategy is the creation of a product where no customer feels excluded or unable to fully access it owing to language issues or cultural norms.
 
 Searching for a localization solution? [Go to inlang.com](/) and find what you need.
 

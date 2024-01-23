@@ -82,7 +82,7 @@ If one of the commands can't be found, you are probably using an outdated versio
 | **Validate**     | `npx @inlang/cli validate [options]`                  | Validate if the project is working correctly.                          |
 | **Lint**        | `npx @inlang/cli lint [options]`                     | Lint translations using configured rules. Options include `--no-fail`, `--project`, and `--languageTags`.      |
 | **Machine**     | `npx @inlang/cli machine translate [options]`        | Automate translation processes. Options include `-f, --force`, `--project <path>`, `--sourceLanguageTag <source>` and `--targetLanguageTags <targets...>`                          |
-| **Open**        | `npx @inlang/cli open editor`                     | Open parts of the Inlang infrastructure in your default browser, including the [editor](https://inlang.com/m/tdozzpar/app-inlang-editor).                        |
+| **Open**        | `npx @inlang/cli open editor`                     | Open parts of the Inlang infrastructure in your default browser, including the [editor](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor).                        |
 | **Module**      | `npx @inlang/cli module [command]`                   | Interact with Inlang modules, including initialization and building. Commands:  `init [options]`   Initialize a new inlang module codebase,   `build [options]`  build an inlang module. Options include `--type`, `--entry`, and `--outdir`. |
 
 ---
@@ -159,7 +159,7 @@ This will launch an interactive prompt that will guide you through the process o
 
 ## `lint`
 
-The lint command lints the translation with the configured lint rules, for example, with the [@inlang/plugin-standard-lint-rules](https://github.com/opral/monorepo/tree/main/inlang/source-code/message-lint-rules).
+The lint command lints the translation with the configured [lint rules](https://inlang.com/c/lint-rules), for example, with the [@inlang/plugin-standard-lint-rules](https://github.com/opral/monorepo/tree/main/inlang/source-code/message-lint-rules).
 
 ```sh
 npx @inlang/cli lint
@@ -229,3 +229,7 @@ npx @inlang/cli module build --entry ./path/to/index.ts --outdir ./path/to/dist
 `--watch`: An optional flag that, when provided, enables a watch mode to monitor for changes and automatically rebuild the module when changes are detected.
 
 See how there is also a `--watch` flag, which enables a watch mode to monitor for changes and automatically rebuild the module when changes are detected. This command runs with `esbuild` under the hood. -->
+
+## Pricing 
+
+<doc-dev-tool-pricing></doc-dev-tool-pricing>

@@ -1,8 +1,8 @@
-import { state } from "../state.js"
-import { msg } from "../utilities/message.js"
+import { state } from "../utilities/state.js"
+import { msg } from "../utilities/messages/msg.js"
 import { commands, window } from "vscode"
 import type { LanguageTag, Message } from "@inlang/sdk"
-import { getPatternFromString, getStringFromPattern } from "../utilities/query.js"
+import { getPatternFromString, getStringFromPattern } from "../utilities/messages/query.js"
 import { CONFIGURATION } from "../configuration.js"
 
 export const editMessageCommand = {

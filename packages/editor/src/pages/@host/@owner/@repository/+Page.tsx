@@ -193,7 +193,11 @@ function NoInlangProjectFoundCard() {
 				<p class="pt-1.5 pb-8">Please refer to product page and setup a inlang project.</p>
 				<Link
 					class="self-center"
-					href="https://inlang.com/m/tdozzpar/app-inlang-editor"
+					href={
+						import.meta.env.PROD
+							? "https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor"
+							: "http://localhost:3000/m/tdozzpar/app-inlang-finkLocalizationEditor"
+					}
 					target="_blank"
 				>
 					<sl-button prop:variant="text">

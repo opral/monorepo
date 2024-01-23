@@ -15,6 +15,7 @@ export const publicEnvVariablesSchema = z.object({
 		.regex(/^(?!.*\/$).+$/, "Must not end with a slash")
 		.describe(`Must be a url including protocol`),
 	PUBLIC_WEBSITE_SENTRY_DSN: z.string().optional().describe("DSN for Sentry (in the browser)"),
+	PUBLIC_FINK_SENTRY_DSN: z.string().optional().describe("DSN for Sentry (in the fink)"),
 	PUBLIC_POSTHOG_TOKEN: z.string().optional(),
 	PUBLIC_SERVER_BASE_URL: z
 		.string()

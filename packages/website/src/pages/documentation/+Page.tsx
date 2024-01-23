@@ -43,7 +43,7 @@ export default function Page(props: PageProps) {
 						.replaceAll(" ", "_")
 						.replaceAll("?", "")}.jpg`
 		} else {
-			return "/opengraph/inlang-documentation-image.jpg"
+			return "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/website/public/opengraph/inlang-documentation-image.jpg"
 		}
 	}
 
@@ -235,6 +235,10 @@ function NavbarCommon(props: {
 			.replaceAll(")", "")
 			.replaceAll("?", "")
 			.replaceAll(".", "")
+			.replaceAll("@", "")
+			.replaceAll(/([\uE000-\uF8FF]|\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDDFF])/g, "")
+			.replaceAll("✂", "")
+			.replaceAll(":", "")
 	}
 
 	const scrollToAnchor = (anchor: string, behavior?: ScrollBehavior) => {

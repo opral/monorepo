@@ -1,42 +1,51 @@
 import { exec } from "node:child_process"
 import { Command } from "commander"
-import { parseOrigin } from "@inlang/telemetry"
 import { log } from "../../utilities/log.js"
-import { getGitRemotes } from "../../utilities/getGitRemotes.js"
+import fs from "node:fs/promises"
+import { findRoot, listRemotes } from "isomorphic-git"
+import { parseOrigin } from "@inlang/telemetry"
 import type { NodeishFilesystem } from "@lix-js/fs"
 
 export const editor = new Command()
 	.command("editor")
 	.description("Open the Inlang editor for the current repository.")
 	.action(async () => {
-		await editorCommandAction({ exec, logger: log })
+		await editorCommandAction({ exec, nodeishFs: fs, path: process.cwd(), logger: log })
 	})
 
 export async function editorCommandAction(args: {
 	exec: any
-	nodeishFs?: NodeishFilesystem
-	filepath?: string
+	nodeishFs: NodeishFilesystem
+	path: string
 	logger: any
 }) {
-	const gitOrigin = parseOrigin({
-		remotes: await getGitRemotes({ nodeishFs: args.nodeishFs, filepath: args.filepath }),
-	})
-	if (!gitOrigin) {
-		args.logger.error("Failed to get the git origin.")
+	let repoRoot: string | undefined
+	try {
+		repoRoot = await findRoot({ fs: args.nodeishFs, filepath: args.path })
+	} catch (error) {
+		args.logger.error("Failed to find repository root.")
 		return
 	}
 
-	// Print out the remote URL
-	args.logger.info(`Origin URL: ${gitOrigin}`)
+	const remotes = await listRemotes({
+		fs: args.nodeishFs,
+		dir: repoRoot,
+	})
 
-	const githubUrl = parseGithubUrl(gitOrigin)
+	const origin = parseOrigin({ remotes })
+
+	// const origin = parse
+	// Print out the remote URL
+	args.logger.info(`Origin URL: ${origin}`)
+
+	const githubUrl = parseGithubUrl(origin)
 
 	if (!githubUrl) {
 		args.logger.error("Failed to parse the GitHub URL from the remote URL.")
 		return
 	}
 
-	const inlangEditorUrl = `https://inlang.com/editor/${githubUrl}`
+	const inlangEditorUrl = `https://fink.inlang.com/${githubUrl}`
 
 	let command
 	let commandArgs
