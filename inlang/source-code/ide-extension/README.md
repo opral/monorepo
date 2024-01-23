@@ -182,7 +182,6 @@ If something isn't working as expected or you have a feature suggestion, please 
 .flex-container {
 	display: flex;
 	flex-wrap: wrap;
-	padding: 0 16px;
 	align-items: center;
 }
 .flex-item {
@@ -192,6 +191,7 @@ If something isn't working as expected or you have a feature suggestion, please 
 	.flex-item {
 		width: calc(50% - 16px); /* Two columns with a small gap between them */
 		margin-bottom: 0;
+		padding: 0 8px;
 	}
 }
 .flex-item .bold {
