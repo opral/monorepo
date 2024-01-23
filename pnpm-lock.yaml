@@ -50,7 +50,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/badge:
     dependencies:
@@ -111,7 +111,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/cli:
     dependencies:
@@ -199,7 +199,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/design-system:
     dependencies:
@@ -218,7 +218,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/detect-json-formatting:
     dependencies:
@@ -234,7 +234,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/editor:
     dependencies:
@@ -490,7 +490,7 @@ importers:
         version: 0.2.0
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/env-variables:
     dependencies:
@@ -518,7 +518,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
       zod:
         specifier: ^3.22.2
         version: 3.22.4
@@ -652,7 +652,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/manage:
     dependencies:
@@ -795,7 +795,7 @@ importers:
         version: 5.3.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/marketplace-registry:
     dependencies:
@@ -845,7 +845,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/message-lint-rules/emptyPattern:
     dependencies:
@@ -873,7 +873,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/message-lint-rules/identicalPattern:
     dependencies:
@@ -904,7 +904,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/message-lint-rules/messageWithoutSource:
     dependencies:
@@ -932,7 +932,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/message-lint-rules/missingTranslation:
     dependencies:
@@ -960,7 +960,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/message-lint-rules/snakeCaseId:
     dependencies:
@@ -988,7 +988,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/message-lint-rules/validJsIdentifier:
     dependencies:
@@ -1016,7 +1016,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/paraglide/paraglide-js:
     dependencies:
@@ -1098,7 +1098,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/paraglide/paraglide-js-adapter-astro/example:
     dependencies:
@@ -1198,7 +1198,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/paraglide/paraglide-js-adapter-rollup/example:
     devDependencies:
@@ -1238,7 +1238,7 @@ importers:
         version: 5.3.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/paraglide/paraglide-js-adapter-solidstart/example:
     dependencies:
@@ -1327,7 +1327,7 @@ importers:
         version: 4.5.2(@types/node@20.9.3)
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/example:
     devDependencies:
@@ -1394,7 +1394,7 @@ importers:
         version: 4.5.2(@types/node@20.9.3)
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/paraglide/paraglide-js-adapter-vite:
     dependencies:
@@ -1410,7 +1410,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/paraglide/paraglide-js-adapter-vite/example:
     devDependencies:
@@ -1456,7 +1456,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/paraglide/paraglide-js-adapter-webpack/example:
     devDependencies:
@@ -1487,7 +1487,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/plugins/i18next:
     dependencies:
@@ -1539,7 +1539,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/plugins/inlang-message-format:
     devDependencies:
@@ -1563,7 +1563,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/plugins/json:
     dependencies:
@@ -1606,7 +1606,7 @@ importers:
         version: 5.1.3
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/plugins/m-function-matcher:
     dependencies:
@@ -1643,7 +1643,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/plugins/next-intl:
     dependencies:
@@ -1695,7 +1695,7 @@ importers:
         version: 5.3.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/plugins/t-function-matcher:
     dependencies:
@@ -1732,7 +1732,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/result:
     devDependencies:
@@ -1747,7 +1747,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/rpc:
     dependencies:
@@ -1802,7 +1802,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/sdk:
     dependencies:
@@ -1964,7 +1964,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/telemetry-proxy:
     dependencies:
@@ -1992,14 +1992,14 @@ importers:
         version: link:../../sdk
     devDependencies:
       '@inlang/cli':
-        specifier: ^2.9.0
+        specifier: ^2.10.0
         version: link:../../cli
       typescript:
         specifier: ^5.2.2
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/templates/plugin:
     devDependencies:
@@ -2017,7 +2017,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/versioned-interfaces/language-tag:
     dependencies:
@@ -2033,7 +2033,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/versioned-interfaces/marketplace-manifest:
     dependencies:
@@ -2052,7 +2052,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/versioned-interfaces/message:
     dependencies:
@@ -2165,7 +2165,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/versioned-interfaces/translatable:
     dependencies:
@@ -2184,7 +2184,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/website:
     dependencies:
@@ -2413,7 +2413,7 @@ importers:
         version: 2.7.0(solid-js@1.7.11)(vite@4.5.2)
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   lix/source-code/client:
     dependencies:
@@ -2441,7 +2441,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   lix/source-code/fs:
     devDependencies:
@@ -2459,7 +2459,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   lix/source-code/server:
     dependencies:
@@ -2514,7 +2514,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: 0.34.6
-        version: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
 packages:
 
@@ -7821,7 +7821,6 @@ packages:
   /@tootallnate/once@2.0.0:
     resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}
     engines: {node: '>= 10'}
-    dev: true
 
   /@tootallnate/quickjs-emscripten@0.23.0:
     resolution: {integrity: sha512-C5Mc6rdnsaJDjO3UpGW/CQTHtCKaYlScZTly4JIu97Jxo/odCiH0ITnDXSJPTOrEKk/ycSZ0AOgTmkDtkOsvIA==}
@@ -8188,6 +8187,7 @@ packages:
     resolution: {integrity: sha512-cZShBaVa+UO1LjWWBPmWRR4+/eY/JR/UIEcDlVsw3okjWEu+rB7/mH6X3B/L+qJVHDLjk9QW/y2upp9wp1yDXA==}
     dependencies:
       undici-types: 5.26.5
+    dev: false
 
   /@types/node@20.11.5:
     resolution: {integrity: sha512-g557vgQjUUfN76MZAN/dt1z3dzcUsimuysco0KeluHgrPdJXkP/XdAURgyO2W9fZWHRtRBiVKzKn8vyOAwlG+w==}
@@ -8755,7 +8755,7 @@ packages:
       std-env: 3.5.0
       test-exclude: 6.0.0
       v8-to-istanbul: 9.2.0
-      vitest: 0.34.6
+      vitest: 0.34.6(jsdom@22.1.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -9263,7 +9263,6 @@ packages:
 
   /abab@2.0.6:
     resolution: {integrity: sha512-j2afSsaIENvHZN2B8GOpF566vZ5WVk5opAiMTvWgaQT8DkbOqsTfvNAvHoRGU2zzP8cPoqys+xHTRDWW8L+/BA==}
-    dev: true
 
   /abort-controller@3.0.0:
     resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
@@ -11038,7 +11037,6 @@ packages:
     engines: {node: '>=14'}
     dependencies:
       rrweb-cssom: 0.6.0
-    dev: true
 
   /csstype@3.1.2:
     resolution: {integrity: sha512-I7K1Uu0MBPzaFKg4nI5Q7Vs2t+3gWWW648spaF+Rg7pI9ds18Ugn+lvg4SHczUdKlHI5LWBXyqfS8+DufyBsgQ==}
@@ -11093,7 +11091,6 @@ packages:
       abab: 2.0.6
       whatwg-mimetype: 3.0.0
       whatwg-url: 12.0.1
-    dev: true
 
   /date-fns@2.30.0:
     resolution: {integrity: sha512-fnULvOpxnC5/Vg3NCiWelDsLiUc9bRwAPs/+LfTLNvetFCtCTN+yQz15C/fs4AwX1R9K5GLtLfn8QW+dWisaAw==}
@@ -11170,7 +11167,6 @@ packages:
 
   /decimal.js@10.4.3:
     resolution: {integrity: sha512-VBBaLc1MgL5XpzgIP7ny5Z6Nx3UrRkIViUkPUdtl9aya5amy3De1gsUUSB1g3+3sExYNjCAsAznmukyxCb1GRA==}
-    dev: true
 
   /decode-named-character-reference@1.0.2:
     resolution: {integrity: sha512-O8x12RzrUF8xyVcY0KJowWsmaJxQbmy0/EtnNtHRpsOcT7dFk5W598coHqBVpmWo1oQQfsCqfCmkZN5DJrZVdg==}
@@ -11520,7 +11516,6 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       webidl-conversions: 7.0.0
-    dev: true
 
   /domhandler@5.0.3:
     resolution: {integrity: sha512-cgwlv/1iFQiFnU96XXgROh8xTeetsnJiDsTc7TYCLFd9+/WNkIqPTxiM/8pSd8VIrhXGTf1Ny1q1hquVqDJB5w==}
@@ -14016,7 +14011,6 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       whatwg-encoding: 2.0.0
-    dev: true
 
   /html-entities@2.3.3:
     resolution: {integrity: sha512-DV5Ln36z34NNTDgnz0EWGBLZENelNAtkiFA4kyNOG2tDI6Mz1uSWiq1wAKdyjnJwyDiDO7Fa2SO1CTxPXL8VxA==}
@@ -14089,7 +14083,6 @@ packages:
       debug: 4.3.4(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
-    dev: true
 
   /http-proxy-agent@7.0.0:
     resolution: {integrity: sha512-+ZT+iBxVUQ1asugqnD6oWoRiS25AkjNfG085dKJGtGxkdwLQrMKU5wJr2bOOFAXzKcTuqq+7fZlTMgG3SRfIYQ==}
@@ -14216,7 +14209,6 @@ packages:
     engines: {node: '>=0.10.0'}
     dependencies:
       safer-buffer: 2.1.2
-    dev: true
 
   /ieee754@1.2.1:
     resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
@@ -14583,7 +14575,6 @@ packages:
 
   /is-potential-custom-element-name@1.0.1:
     resolution: {integrity: sha512-bCYeRA2rVibKZd+s2625gGnGF/t7DSqDs4dP7CrLA1m7jKWz6pps0LpYLJN8Q64HtmPKJ1hrN3nzPNKFEKOUiQ==}
-    dev: true
 
   /is-reference@1.2.1:
     resolution: {integrity: sha512-U82MsXXiFIrjCK4otLT+o2NA2Cd2g5MLoOVXUZjIOhLurrRxpEXzI8O0KZHr3IjLvlAH1kTPYSuqer5T9ZVBKQ==}
@@ -14962,7 +14953,6 @@ packages:
       - bufferutil
       - supports-color
       - utf-8-validate
-    dev: true
 
   /jsesc@0.5.0:
     resolution: {integrity: sha512-uZz5UnB7u4T9LvwmFqXii7pZSouaRPorGs5who1Ip7VO0wxanFvBL7GkM6dTHlgX+jhBApRetaWpnDabOeTcnA==}
@@ -17163,7 +17153,6 @@ packages:
 
   /nwsapi@2.2.7:
     resolution: {integrity: sha512-ub5E4+FBPKwAZx0UwIQOjYWGHTEq5sPqHQNRN8Z9e4A7u3Tj1weLJsL59yH9vmvqEtBHaOmT6cYQKIZOxp35FQ==}
-    dev: true
 
   /nx-cloud@16.5.2:
     resolution: {integrity: sha512-1t1Ii9gojl8r/8hFGaZ/ZyYR0Cb0hzvXLCsaFuvg+EJEFdvua3P4cfNya/0bdRrm+7Eb/ITUOskbvYq4TSlyGg==}
@@ -18419,7 +18408,6 @@ packages:
 
   /psl@1.9.0:
     resolution: {integrity: sha512-E/ZsdU4HLs/68gYzgGTkMicWTLPdAftJLfJFlLUAAKZGkStNU72sZjT66SnMDVOfOWY/YAoiD7Jxa9iHvngcag==}
-    dev: true
 
   /public-encrypt@4.0.3:
     resolution: {integrity: sha512-zVpa8oKZSz5bTMTFClc1fQOnyyEzpl5ozpi1B5YcvBrdohMjH2rfsBtyXcuNuwjsDIXmBYlF2N5FlJYhR29t8Q==}
@@ -18443,7 +18431,6 @@ packages:
   /punycode@2.3.1:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
     engines: {node: '>=6'}
-    dev: true
 
   /puppeteer-core@20.9.0(typescript@5.3.2):
     resolution: {integrity: sha512-H9fYZQzMTRrkboEfPmf7m3CLDN6JvbxXA3qTtS+dFt27tR+CsFHzPsT6pzp6lYL6bJbAPaR0HaPO6uSi+F94Pg==}
@@ -18513,7 +18500,6 @@ packages:
 
   /querystringify@2.2.0:
     resolution: {integrity: sha512-FIqgj2EUvTa7R50u0rGsyTftzjYmv/a3hO345bZNrqabNqjtgiDMgmo4mkUjd+nzU5oF3dClKqFIPUKybUyqoQ==}
-    dev: true
 
   /queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
@@ -19211,7 +19197,6 @@ packages:
 
   /rrweb-cssom@0.6.0:
     resolution: {integrity: sha512-APM0Gt1KoXBz0iIkkdB/kfvGOwC4UuJFeG/c+yV7wSc7q96cG/kJ0HiYCnzivD9SB53cLV1MlHFNfOuPaadYSw==}
-    dev: true
 
   /run-applescript@5.0.0:
     resolution: {integrity: sha512-XcT5rBksx1QdIhlFOCtgZkB99ZEouFZ1E2Kc2LHqNW13U3/74YGdkQRmThTwxy4QIyookibDKYZOPqX//6BlAg==}
@@ -19329,7 +19314,6 @@ packages:
     engines: {node: '>=v12.22.7'}
     dependencies:
       xmlchars: 2.2.0
-    dev: true
 
   /scheduler@0.23.0:
     resolution: {integrity: sha512-CtuThmgHNg7zIZWAXi3AsyIzA3n4xx7aNyjwC2VJldO2LMVDhFK+63xGqq6CsJH4rTAt6/M+N4GhZiDYPx9eUw==}
@@ -20435,7 +20419,6 @@ packages:
 
   /symbol-tree@3.2.4:
     resolution: {integrity: sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==}
-    dev: true
 
   /synckit@0.8.6:
     resolution: {integrity: sha512-laHF2savN6sMeHCjLRkheIU4wo3Zg9Ln5YOjOo7sZ5dVQW8yF5pPE5SIw1dsPhq3TRp1jisKRCdPhfs/1WMqDA==}
@@ -20773,7 +20756,6 @@ packages:
       punycode: 2.3.1
       universalify: 0.2.0
       url-parse: 1.5.10
-    dev: true
 
   /tr46@0.0.3:
     resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
@@ -20783,7 +20765,6 @@ packages:
     engines: {node: '>=14'}
     dependencies:
       punycode: 2.3.1
-    dev: true
 
   /traverse@0.3.9:
     resolution: {integrity: sha512-iawgk0hLP3SxGKDfnDJf8wTz4p2qImnyihM5Hh/sGvQ3K37dPi/w8sRhdNIxYA1TwFwc5mDhIJq+O0RsvXBKdQ==}
@@ -21442,7 +21423,6 @@ packages:
   /universalify@0.2.0:
     resolution: {integrity: sha512-CJ1QgKmNg3CwvAv/kOFmtnEN05f0D/cn9QntgNOQlQF9dgvVTHj3t+8JPdjqawCHk7V/KA+fbUqzZ9XWhcqPUg==}
     engines: {node: '>= 4.0.0'}
-    dev: true
 
   /universalify@2.0.1:
     resolution: {integrity: sha512-gptHNQghINnc/vTGIk0SOFGFNXw7JVrlRUtConJRlvaw6DuX0wO5Jeko9sWrMBhh+PsYAZ7oXAiOnf/UKogyiw==}
@@ -21538,7 +21518,6 @@ packages:
     dependencies:
       querystringify: 2.2.0
       requires-port: 1.0.0
-    dev: true
 
   /url-to-options@1.0.1:
     resolution: {integrity: sha512-0kQLIzG4fdk/G5NONku64rSH/x32NOA39LVQqlK8Le6lvTF6GGRJpqaQFGgU+CLwySIqBSMdwYM0sYcW9f6P4A==}
@@ -21729,6 +21708,7 @@ packages:
       - sugarss
       - supports-color
       - terser
+    dev: false
 
   /vite-node@0.34.6(@types/node@20.11.5):
     resolution: {integrity: sha512-nlBMJ9x6n7/Amaz6F3zJ97EBwR2FkzhBRxF5e+jE6LA3yi6Wtc2lyTij1OnDMIr34v5g/tVQtsVAzhT0jc5ygA==}
@@ -21915,6 +21895,7 @@ packages:
       rollup: 3.29.1
     optionalDependencies:
       fsevents: 2.3.3
+    dev: false
 
   /vite@4.5.2(@types/node@20.11.5):
     resolution: {integrity: sha512-tBCZBNSBbHQkaGyhGCDUGqeo2ph8Fstyp6FMSvTtsXeZSPpSMGlviAOav2hxVTqFcx8Hj/twtWKsMJXNY0xI8w==}
@@ -22031,7 +22012,7 @@ packages:
     dependencies:
       vite: 4.5.2(@types/node@20.5.9)
 
-  /vitest@0.34.6:
+  /vitest@0.34.6(jsdom@22.1.0):
     resolution: {integrity: sha512-+5CALsOvbNKnS+ZHMXtuUC7nL8/7F1F2DnHGjSsszX8zCjWSSviphCb/NuS9Nzf4Q03KyyDRBAXhF/8lffME4Q==}
     engines: {node: '>=v14.18.0'}
     hasBin: true
@@ -22075,6 +22056,7 @@ packages:
       cac: 6.7.14
       chai: 4.3.10
       debug: 4.3.4(supports-color@8.1.1)
+      jsdom: 22.1.0
       local-pkg: 0.4.3
       magic-string: 0.30.5
       pathe: 1.1.1
@@ -22094,72 +22076,6 @@ packages:
       - sugarss
       - supports-color
       - terser
-
-  /vitest@0.34.6(jsdom@22.1.0):
-    resolution: {integrity: sha512-+5CALsOvbNKnS+ZHMXtuUC7nL8/7F1F2DnHGjSsszX8zCjWSSviphCb/NuS9Nzf4Q03KyyDRBAXhF/8lffME4Q==}
-    engines: {node: '>=v14.18.0'}
-    hasBin: true
-    peerDependencies:
-      '@edge-runtime/vm': '*'
-      '@vitest/browser': '*'
-      '@vitest/ui': '*'
-      happy-dom: '*'
-      jsdom: '*'
-      playwright: '*'
-      safaridriver: '*'
-      webdriverio: '*'
-    peerDependenciesMeta:
-      '@edge-runtime/vm':
-        optional: true
-      '@vitest/browser':
-        optional: true
-      '@vitest/ui':
-        optional: true
-      happy-dom:
-        optional: true
-      jsdom:
-        optional: true
-      playwright:
-        optional: true
-      safaridriver:
-        optional: true
-      webdriverio:
-        optional: true
-    dependencies:
-      '@types/chai': 4.3.11
-      '@types/chai-subset': 1.3.5
-      '@types/node': 20.11.2
-      '@vitest/expect': 0.34.6
-      '@vitest/runner': 0.34.6
-      '@vitest/snapshot': 0.34.6
-      '@vitest/spy': 0.34.6
-      '@vitest/utils': 0.34.6
-      acorn: 8.11.2
-      acorn-walk: 8.3.2
-      cac: 6.7.14
-      chai: 4.3.10
-      debug: 4.3.4(supports-color@8.1.1)
-      jsdom: 22.1.0
-      local-pkg: 0.4.3
-      magic-string: 0.30.5
-      pathe: 1.1.1
-      picocolors: 1.0.0
-      std-env: 3.5.0
-      strip-literal: 1.3.0
-      tinybench: 2.5.1
-      tinypool: 0.7.0
-      vite: 4.5.2(@types/node@20.11.2)
-      vite-node: 0.34.6(@types/node@20.11.2)
-      why-is-node-running: 2.2.2
-    transitivePeerDependencies:
-      - less
-      - lightningcss
-      - sass
-      - stylus
-      - sugarss
-      - supports-color
-      - terser
-    dev: true
 
   /vitest@0.34.6(webdriverio@8.26.1):
     resolution: {integrity: sha512-+5CALsOvbNKnS+ZHMXtuUC7nL8/7F1F2DnHGjSsszX8zCjWSSviphCb/NuS9Nzf4Q03KyyDRBAXhF/8lffME4Q==}
@@ -22386,7 +22302,6 @@ packages:
     engines: {node: '>=14'}
     dependencies:
       xml-name-validator: 4.0.0
-    dev: true
 
   /wait-on@6.0.1(debug@4.3.4):
     resolution: {integrity: sha512-zht+KASY3usTY5u2LgaNqn/Cd8MukxLGjdcZxT2ns5QzDmTFc4XoWBgC+C/na+sMRZTuVygQoMYwdcVjHnYIVw==}
@@ -22558,7 +22473,6 @@ packages:
   /webidl-conversions@7.0.0:
     resolution: {integrity: sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==}
     engines: {node: '>=12'}
-    dev: true
 
   /webpack-cli@5.1.4(webpack@5.89.0):
     resolution: {integrity: sha512-pIDJHIEI9LR0yxHXQ+Qh95k2EvXpWzZ5l+d+jIo+RdSm9MiHfzazIxwwni/p7+x4eJZuvG1AJwgC4TNQ7NRgsg==}
@@ -22655,12 +22569,10 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       iconv-lite: 0.6.3
-    dev: true
 
   /whatwg-mimetype@3.0.0:
     resolution: {integrity: sha512-nt+N2dzIutVRxARx1nghPKGv1xHikU7HKdfafKkLNLindmPU/ch3U31NOCGGA/dmPcmb1VlofO0vnKAcsm0o/Q==}
     engines: {node: '>=12'}
-    dev: true
 
   /whatwg-url@12.0.1:
     resolution: {integrity: sha512-Ed/LrqB8EPlGxjS+TrsXcpUond1mhccS3pchLhzSgPCnTimUCKj3IZE75pAs5m6heB2U2TMerKFUXheyHY+VDQ==}
@@ -22668,7 +22580,6 @@ packages:
     dependencies:
       tr46: 4.1.1
       webidl-conversions: 7.0.0
-    dev: true
 
   /whatwg-url@5.0.0:
     resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
@@ -22828,7 +22739,6 @@ packages:
   /xml-name-validator@4.0.0:
     resolution: {integrity: sha512-ICP2e+jsHvAj2E2lIHxa5tjXRlKDJo4IdvPvCXbXQGdzSfmSpNVyIKMvoZHjDY9DP0zV17iI85o90vRFXNccRw==}
     engines: {node: '>=12'}
-    dev: true
 
   /xml2js@0.5.0:
     resolution: {integrity: sha512-drPFnkQJik/O+uPKpqSgr22mpuFHqKdbS835iAQrUC73L2F5WkboIRd63ai/2Yg6I1jzifPFKH2NTK+cfglkIA==}
@@ -22845,7 +22755,6 @@ packages:
 
   /xmlchars@2.2.0:
     resolution: {integrity: sha512-JZnDKK8B0RCDw84FNdDAIpZK+JuJw+s7Lz8nksI7SIuU3UXJJslUthsi+uWBUYOwPFwW7W7PRLRfUKpxjtjFCw==}
-    dev: true
 
   /xtend@4.0.2:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
