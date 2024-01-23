@@ -252,31 +252,31 @@ Other attributes that are also translated are:
 
 ### Programmatic Navigation with Translated Paths
 
-SvelteKit offers a few ways of navigating programmatically. Mainly `goto` and `redirect`. Unfortunately, translating these automatically is not practical. For these cases, you can use the `route` method on the `i18n` instance. It takes the absolute path that you want to translate and the language you want to translate it to.
+SvelteKit offers a few ways of navigating programmatically. Mainly `goto` and `redirect`. Unfortunately, translating these automatically is not practical. For these cases, you can use the `resolveRoute` method on the `i18n` instance. It takes the absolute path that you want to translate and the language you want to translate it to.
 
 ```js
 import { i18n } from '$lib/i18n.js'
 import { redirect } from '@sveltejs/kit'
 import { goto } from '$app/navigation'
 
-redirect(i18n.route("/about", "en"))
+redirect(i18n.resolveRoute("/about", "en"))
 
 //Omitting the language defaults to the current language
-goto(i18n.route("/about"))
+goto(i18n.resolveRoute("/about"))
 ```
 
 Fortunately you don't need to do this often. Most of the time the an `a` tag is enough.
 
 ### Language Switchers
 
-Language switchers are tricky, because we need to get the translated version of the current URL path. This is tricky because the path in the URL is already translated. We need to somehow get the untranslated version of the path, so that we can translate it again.
+Language switchers are tricky, because we need to get the route correspondingto the current URL path, which is of course translated. We need to somehow get the untranslated version of the path, so that we can translate it again.
 
-Fortunately, the `i18n` instance can help us with that. It exposes a `getCanonicalPath` method that takes the current path and return the untranslated version of it.
+Fortunately, the `i18n` instance can help us with that. It exposes a `route` method that takes the current path and return the untranslated version of it.
 
 ```ts
 // $page.url.pathname = "/base/de/uber-uns"
-const canonicalPath = i18n.getCanonicalPath($page.url.pathname)
-// canonicalPath = "/base/about"
+const route = i18n.route($page.url.pathname)
+// route = "/base/about"
 ```
 
 We can use this to create a language switcher that links to the current page in a different language.
@@ -292,11 +292,23 @@ We can use this to create a language switcher that links to the current page in 
 
 {#each availableLanguageTags as lang}
 	<a 
-		href={i18n.getCanonicalPath($page.url.pathname)}
+		href={i18n.route($page.url.pathname)}
 		hreflang={lang}
 		aria-current={lang === languageTag() ? "page" : undefined}
 	>
 		{lang}
 	</a>
 {/each}
+```
+
+This is also usefull for detecting which navigation item is currently active.
+
+```svelte
+<li aria-current={i18n.route($page.url.pathname) === "/" ? "page" : undefined}>
+	<a href="/">{m.home()}</a>
+</li>
+
+<li aria-current={i18n.route($page.url.pathname) === "/about" ? "page" : undefined}>
+	<a href="/about">{m.about()}</a>
+</li>
 ```
