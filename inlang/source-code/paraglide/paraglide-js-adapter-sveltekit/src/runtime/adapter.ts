@@ -9,6 +9,7 @@ import { getTranslatedPath } from "./path-translations/getTranslatedPath.js"
 import { serializeRoute } from "./utils/serialize-path.js"
 import { getCanonicalPath } from "./path-translations/getCanonicalPath.js"
 import { getPathInfo } from "./utils/get-path-info.js"
+import { normaliseBase as canonicalNormaliseBase } from "./utils/normaliseBase.js"
 
 export type I18nUserConfig<T extends string> = {
 	/**
@@ -157,7 +158,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		 * @returns
 		 */
 		getLanguageFromUrl(url: URL): T {
-			const pathWithLanguage = url.pathname.slice(normalizeBase(base).length)
+			const pathWithLanguage = url.pathname.slice(normaliseBase(base).length)
 			const lang = pathWithLanguage.split("/").filter(Boolean).at(0)
 
 			if (runtime.isAvailableLanguageTag(lang)) return lang
@@ -182,13 +183,13 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 
 			lang = lang ?? runtime.languageTag()
 
-			const canonicalPath = path.slice(normalizeBase(base).length)
+			const canonicalPath = path.slice(normaliseBase(base).length)
 			const translatedPath = getTranslatedPath(canonicalPath, lang, translations)
 
 			return serializeRoute({
 				path: translatedPath,
 				lang,
-				base: normalizeBase(base),
+				base: normaliseBase(base),
 				dataSuffix: undefined,
 				includeLanguage: true,
 				defaultLanguageTag,
@@ -214,27 +215,19 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		 */
 		getCanonicalPath(translatedPath: string) {
 			const { path, lang } = getPathInfo(translatedPath, {
-				base: normalizeBase(base),
+				base: normaliseBase(base),
 				availableLanguageTags: config.runtime.availableLanguageTags,
 				defaultLanguageTag: config.defaultLanguageTag,
 			})
 
 			const canonicalPath = getCanonicalPath(path, lang, translations)
-			return normalizeBase(base) + canonicalPath
+			return normaliseBase(base) + canonicalPath
 		},
 	}
 }
 
-function normalizeBase(base: string) {
-	if (base == "") return base
-
-	//The base may be a relative path during SSR component initialization.
-	//If that's the case, we need to make it absolute.
-	if (!base.startsWith("/")) {
-		const absoluteBase = new URL(base, get(page).url).pathname
-		return absoluteBase
-	}
-	return base
+function normaliseBase(base: string) {
+	return canonicalNormaliseBase(base, new URL(get(page).url))
 }
 
 export type I18n<T extends string> = ReturnType<typeof createI18n<T>>

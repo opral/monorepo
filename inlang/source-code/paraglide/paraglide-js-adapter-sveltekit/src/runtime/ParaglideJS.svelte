@@ -4,12 +4,9 @@
 	It also adds `<link rel="alternate">` tags to the head of your page
 -->
 <script lang="ts" generics="T extends string">
+	import { normaliseBase } from "./utils/normaliseBase.js"
 	import { getPathInfo } from "./utils/get-path-info.js"
-
 	import { getHrefBetween } from "./utils/diff-urls.js"
-
-	import { normalize } from "./utils/path.js"
-
 	import { serializeRoute } from "./utils/serialize-path.js"
 	import { page } from "$app/stores"
 	import { browser } from "$app/environment"
@@ -23,7 +20,7 @@
 
 	// The base path may be relative during SSR.
 	// To make sure it is absolute, we need to resolve it against the current page URL.
-	const absoluteBase = normalize(new URL(maybe_relative_base, new URL($page.url)).pathname)
+	const absoluteBase = normaliseBase(maybe_relative_base, new URL($page.url)) || "/";
 
 	/**
 	 * Override the language detection with a specific language tag.
@@ -45,7 +42,6 @@
 	 * The language tag that was autodetected from the URL.
 	 */
 	$: autodetectedLanguage = i18n.getLanguageFromUrl($page.url)
-
 	$: lang = languageTag ?? autodetectedLanguage
 	$: i18n.config.runtime.setLanguageTag(lang)
 	$: if (browser) document.documentElement.lang = lang
