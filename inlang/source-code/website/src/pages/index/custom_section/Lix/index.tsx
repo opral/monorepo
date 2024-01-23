@@ -14,7 +14,7 @@ const LixSection = () => {
 			description: "Include who is needed inside a flexible review workflow.",
 			icon: <IconCheck />,
 			imagePath: "/images/lix-review-cover.png",
-			link: "https://github.com/opral/monorepo/tree/main/lix",
+			link: "/g/oostafhs",
 		},
 		{
 			title: "Automation",
