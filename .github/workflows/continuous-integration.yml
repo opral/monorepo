@@ -12,7 +12,7 @@ jobs:
   ci:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest]
         version: [18]
     runs-on: ${{ matrix.os }}
     steps:
@@ -45,11 +45,5 @@ jobs:
 
       - run: pnpm fetch-env:internal && pnpm check-all
         if: ${{ env.DOPPLER_TOKEN != '' }}
-        env:
-          DOPPLER_TOKEN: ${{ secrets.DOPPLER_CI_ENV_TOKEN }}
-
-      - run: pnpm config set script-shell "$(which bash)" && pnpm fetch-env:internal && pnpm check-all
-        if: startsWith(matrix.os, 'windows') && ${{ env.DOPPLER_TOKEN != '' }}
-        shell: bash
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_CI_ENV_TOKEN }}
