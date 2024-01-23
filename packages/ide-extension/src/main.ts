@@ -1,7 +1,6 @@
 import * as vscode from "vscode"
 import { msg } from "./utilities/messages/msg.js"
 import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview.js"
-import { isInWorkspaceRecommendation, recommendation } from "./utilities/settings/recommendation.js"
 import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
 import { handleError, telemetryCapture } from "./utilities/utils.js"
 import { CONFIGURATION } from "./configuration.js"
@@ -17,11 +16,16 @@ import fs from "node:fs/promises"
 import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
 import { gettingStartedView } from "./utilities/getting-started/gettingStarted.js"
 import { closestInlangProject } from "./utilities/project/closestInlangProject.js"
+import {
+	isInWorkspaceRecommendation,
+	recommendationBannerView,
+} from "./utilities/recommendation/recommendation.js"
 
 // Entry Point
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
 		vscode.commands.executeCommand("setContext", "inlang:hasProjectInWorkspace", false)
+		vscode.commands.executeCommand("setContext", "inlang:showRecommendationBanner", false)
 		const workspaceFolder = vscode.workspace.workspaceFolders?.[0]
 
 		if (!workspaceFolder) {
@@ -71,6 +75,7 @@ async function main(args: {
 
 		vscode.commands.executeCommand("setContext", "inlang:hasProjectInWorkspace", true)
 
+		await recommendationBannerView(args)
 		await projectView(args)
 		await messageView(args)
 		await errorView(args)
@@ -132,7 +137,6 @@ function registerExtensionComponents(args: {
 
 	messagePreview(args)
 	propertiesMissingPreview()
-	recommendation(args)
 	linterDiagnostics(args)
 }
 
