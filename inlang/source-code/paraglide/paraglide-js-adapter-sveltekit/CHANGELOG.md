@@ -1,5 +1,15 @@
 # @inlang/paraglide-js-adapter-sveltekit
 
+## 0.2.0
+
+### Minor Changes
+
+- 87135ae38: Rename `route` to `resolveRoute` and `getCanonicalPath` to `route` - As to be more inline with SvelteKit's naming convention
+
+### Patch Changes
+
+- 87135ae38: fix base-path normalisation issue
+
 ## 0.1.2
 
 ### Patch Changes
