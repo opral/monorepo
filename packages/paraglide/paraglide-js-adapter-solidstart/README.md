@@ -39,7 +39,7 @@ import { createI18n } from "@inlang/paraglide-js-adapter-solidstart"
 const { LanguageTagProvider, languageTag, setLanguageTag } = createI18n(paraglide)
 ```
 
-Take a look at [example/src/i18n/index.tsx](https://github.com/inlang/monorepo/blob/main/inlang/source-code/paraglide/paraglide-js-adapter-solidstart/example/src/i18n/index.tsx) to see how the adapter is used in a example project. With an addition to some convenience functions.
+Take a look at [example/src/i18n/index.tsx](https://github.com/thetarnav/paraglide-solidstart-hackernews/blob/main/src/i18n/index.tsx) to see how the adapter is used in a example project. With an addition to some convenience functions.
 
 ### 4. Provide language tag to your app, and Solid Router.
 
