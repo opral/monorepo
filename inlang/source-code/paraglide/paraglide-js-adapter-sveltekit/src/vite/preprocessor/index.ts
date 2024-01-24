@@ -37,7 +37,7 @@ const PASSES: PreprocessingPass[] = [
 ]
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function preprocess(_config: PreprocessorConfig): PreprocessorGroup {
+export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
 	return {
 		name: "@inlang/paraglide-js-adapter-sveltekit",
 		markup: ({ filename, content }) => {
