@@ -1,5 +1,11 @@
 # @inlang/paraglide-js-adapter-sveltekit
 
+## 0.2.3
+
+### Patch Changes
+
+- 0305ce54e: fix broken globbing for `exclude` option causing the wrong routes to be excluded
+
 ## 0.2.2
 
 ### Patch Changes
