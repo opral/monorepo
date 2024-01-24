@@ -1,5 +1,4 @@
-import type { NodeishFilesystemSubset } from "@inlang/plugin"
-import { normalizePath } from "@lix-js/fs"
+import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
 import { isAbsolutePath } from "./isAbsolutePath.js"
 
 /**
@@ -10,8 +9,8 @@ import { isAbsolutePath } from "./isAbsolutePath.js"
  */
 export const createNodeishFsWithAbsolutePaths = (args: {
 	projectPath: string
-	nodeishFs: NodeishFilesystemSubset
-}): NodeishFilesystemSubset => {
+	nodeishFs: NodeishFilesystem
+}): NodeishFilesystem => {
 	if (!isAbsolutePath(args.projectPath)) {
 		throw new Error(`Expected an absolute path but received "${args.projectPath}".`)
 	}
@@ -38,6 +37,7 @@ export const createNodeishFsWithAbsolutePaths = (args: {
 		writeFile: (path: string, data: string) => args.nodeishFs.writeFile(makeAbsolute(path), data),
 		stat: (path: string) => args.nodeishFs.stat(makeAbsolute(path)),
 		rm: (path: string) => args.nodeishFs.rm(makeAbsolute(path)),
+		rmdir: (path: string) => (args.nodeishFs as any).rmdir(makeAbsolute(path)),
 		watch: (
 			path: string,
 			options: { signal: AbortSignal | undefined; recursive: boolean | undefined }

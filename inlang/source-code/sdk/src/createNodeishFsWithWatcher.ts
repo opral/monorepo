@@ -1,4 +1,4 @@
-import type { NodeishFilesystemSubset } from "@inlang/plugin"
+import type { NodeishFilesystem } from "@lix-js/fs"
 
 /**
  * Wraps the nodeish filesystem subset with a function that intercepts paths
@@ -7,9 +7,9 @@ import type { NodeishFilesystemSubset } from "@inlang/plugin"
  * The paths are resolved from the `projectPath` argument.
  */
 export const createNodeishFsWithWatcher = (args: {
-	nodeishFs: NodeishFilesystemSubset
+	nodeishFs: NodeishFilesystem
 	updateMessages: () => void
-}): NodeishFilesystemSubset => {
+}): NodeishFilesystem => {
 	const pathList: string[] = []
 
 	const makeWatcher = (path: string) => {
@@ -53,6 +53,8 @@ export const createNodeishFsWithWatcher = (args: {
 		rm: args.nodeishFs.rm,
 		readdir: args.nodeishFs.readdir,
 		mkdir: args.nodeishFs.mkdir,
+		// TODO #1844 why the subsystem?
+		rmdir: (args.nodeishFs as any).rmdir,
 		writeFile: args.nodeishFs.writeFile,
 		watch: args.nodeishFs.watch,
 		stat: args.nodeishFs.stat,

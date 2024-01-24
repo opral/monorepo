@@ -1,6 +1,7 @@
 import { it, expect, vi } from "vitest"
 import { createNodeishFsWithAbsolutePaths } from "./createNodeishFsWithAbsolutePaths.js"
 import type { NodeishFilesystemSubset } from "./versionedInterfaces.js"
+import type { NodeishFilesystem } from "@lix-js/fs"
 
 it("throws an error if projectPath is not an absolute path", () => {
 	const relativePath = "relative/path"
@@ -27,11 +28,16 @@ it("intercepts paths correctly for readFile", async () => {
 		readFile: vi.fn(),
 		readdir: vi.fn(),
 		mkdir: vi.fn(),
+		rmdir: vi.fn(),
 		writeFile: vi.fn(),
 		watch: vi.fn(),
 		rm: vi.fn(),
 		stat: vi.fn(),
-	} satisfies Record<keyof NodeishFilesystemSubset, any>
+		lstat: vi.fn(),
+		symlink: vi.fn(),
+		unlink: vi.fn(),
+		readlink: vi.fn(),
+	} satisfies Record<keyof NodeishFilesystem, any>
 
 	const interceptedFs = createNodeishFsWithAbsolutePaths({
 		projectPath,
@@ -40,7 +46,6 @@ it("intercepts paths correctly for readFile", async () => {
 
 	for (const [path, expectedPath] of filePaths) {
 		for (const fn of Object.keys(mockNodeishFs)) {
-			// @ts-expect-error
 			await interceptedFs[fn](path)
 			// @ts-expect-error
 			// expect the first argument to be the expectedPath

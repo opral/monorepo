@@ -447,7 +447,13 @@ export async function loadProject(args: {
 									await fs.writeFile(path, stringifyMessage(message))
 
 									// TODO #1844 we don't wait for the file to be persisted - investigate could this become a problem when we batch update messages
-									saveMessages(fs, messagesQuery, settings()!, saveMessagesPlugin)
+									await saveMessages(
+										fs,
+										messageBaseFolderFolderPath,
+										messagesQuery,
+										settings()!,
+										saveMessagesPlugin
+									)
 									// debouncedSave(messagesQuery.getAll())
 								}
 								const messageFilePath = messageFolderPath + "/" + getPathFromMessageId(message.id)
@@ -476,9 +482,16 @@ export async function loadProject(args: {
 			for (const deletedMessage of deletedMessageTrackedMessage) {
 				const messageFilePath = messageFolderPath + "/" + getPathFromMessageId(deletedMessage[0])
 				try {
-					nodeishFs.rm(messageFilePath)
-					// TODO #1844 we don't wait for the file to be persisted - investigate could this become a problem when we batch update messages
-					saveMessages(nodeishFs, messagesQuery, settings()!, saveMessagesPlugin)
+					nodeishFs.rm(messageFilePath).then(() => {
+						// TODO #1844 we don't wait for the file to be persisted - investigate could this become a problem when we batch update messages
+						return saveMessages(
+							nodeishFs,
+							messageBaseFolderFolderPath,
+							messagesQuery,
+							settings()!,
+							saveMessagesPlugin
+						)
+					})
 				} catch (e) {
 					if ((e as any).code !== "ENOENT") {
 						throw e
@@ -506,15 +519,14 @@ export async function loadProject(args: {
 						(plugin) => plugin.loadMessages !== undefined
 					)
 
-					const monkePatchedFileRead = fsWithWatcher.readFile
-
-					fsWithWatcher.readFile = async function (filename: string) {
-						console.log(filename)
-						return monkePatchedFileRead(filename)
-					} as any
-
 					// TODO #1844 FINK check error handling for plugin load methods (triggered by file change) -> move to separate ticket
-					loadMessages(fsWithWatcher, messagesQuery, settings()!, loadMessagePlugin)
+					loadMessages(
+						fsWithWatcher,
+						messageBaseFolderFolderPath,
+						messagesQuery,
+						settings()!,
+						loadMessagePlugin
+					)
 				}
 			},
 		})
@@ -526,7 +538,13 @@ export async function loadProject(args: {
 			)
 
 			// TODO #1844 FINK check error handling for plugin load methods (initial load) -> move to separate ticket
-			await loadMessages(fsWithWatcher, messagesQuery, _settings, loadMessagePlugin)
+			await loadMessages(
+				fsWithWatcher,
+				messageBaseFolderFolderPath,
+				messagesQuery,
+				_settings,
+				loadMessagePlugin
+			)
 		}
 
 		const lintReportsQuery = createMessageLintReportsQuery(
@@ -799,6 +817,8 @@ let sheduledLoadMessages:
  */
 async function loadMessages(
 	fs: NodeishFilesystemSubset,
+	messagesFolderPath: string,
+	//messagesPath: string,
 	messagesQuery: InlangProject["query"]["messages"],
 	settingsValue: ProjectSettings,
 	loadPlugin: any
@@ -823,13 +843,15 @@ async function loadMessages(
 	isLoading = true
 
 	const loadPluginId = loadPlugin!.id
-
+	const lockFilePath = messagesFolderPath + "/messages.lockfile"
+	const lockTime = (await accquireFileLock(fs as NodeishFilesystem, lockFilePath)) as number
 	const loadedMessages = await makeTrulyAsync(
 		loadPlugin.loadMessages({
 			settings: settingsValue,
 			nodeishFs: fs,
 		})
 	)
+	await releaseLock(fs as NodeishFilesystem, lockFilePath, lockTime)
 
 	for (const loadedMessage of loadedMessages) {
 		const currentMessages = messagesQuery
@@ -889,7 +911,7 @@ async function loadMessages(
 		sheduledLoadMessages = undefined
 
 		// recall load unawaited to allow stack to pop
-		loadMessages(fs, messagesQuery, settingsValue, loadPlugin).then(
+		loadMessages(fs, messagesFolderPath, messagesQuery, settingsValue, loadPlugin).then(
 			() => {
 				executingScheduledMessages[1]()
 			},
@@ -902,10 +924,11 @@ async function loadMessages(
 
 async function saveMessages(
 	fs: NodeishFilesystemSubset,
+	messagesFolderPath: string,
 	messagesQuery: InlangProject["query"]["messages"],
 	settingsValue: ProjectSettings,
 	savePlugin: any
-) {
+): Promise<any> {
 	// queue next save if we have a save ongoing
 	if (isSaving) {
 		if (!sheduledSaveMessages) {
@@ -932,13 +955,19 @@ async function saveMessages(
 
 				messagesToExport.push(fixedExportMessage)
 			}
+			const lockFilePath = messagesFolderPath + "/messages.lockfile"
+
+			const lockTime = (await accquireFileLock(fs as NodeishFilesystem, lockFilePath)) as number
 
 			// TODO #1844 SPLIT (separate ticket) make sure save messages produces the same output again and again
+			// TODO #1844v Versioning on plugins? cache issue?
 			await savePlugin.saveMessages({
 				settings: settingsValue,
 				messages: messagesToExport,
 				nodeishFs: fs,
 			})
+
+			await releaseLock(fs as NodeishFilesystem, lockFilePath, lockTime)
 		} catch (err) {
 			throw new PluginSaveMessagesError({
 				cause: err,
@@ -954,13 +983,127 @@ async function saveMessages(
 		const executingSheduledSaveMessages = sheduledSaveMessages
 		sheduledSaveMessages = undefined
 
-		saveMessages(fs, messagesQuery, settingsValue, savePlugin).then(
+		return await saveMessages(
+			fs,
+			messagesFolderPath,
+			messagesQuery,
+			settingsValue,
+			savePlugin
+		).then(
 			() => {
-				executingSheduledSaveMessages[1]()
+				return executingSheduledSaveMessages[1]()
 			},
-			(e) => {
-				executingSheduledSaveMessages[2](e)
+			(e: Error) => {
+				return executingSheduledSaveMessages[2](e)
 			}
 		)
+	}
+}
+
+const maxRetries = 5
+async function accquireFileLock(fs: NodeishFilesystem, lockFilePath: string, tryCount: number = 0) {
+	if (tryCount > maxRetries) {
+		throw new Error("maximum lock accuriations reached")
+	}
+
+	try {
+		console.log("FILE LOCKING FILE LOCKING FILE LOCKING trying to lock the file " + tryCount)
+		await fs.mkdir(lockFilePath)
+		const stats = await fs.stat(lockFilePath)
+		return stats.mtimeMs
+	} catch (error: any) {
+		if (error.code !== "EEXIST") {
+			// we only expect the error that the file exists already (locked by other process)
+			throw error
+		}
+
+		try {
+			const stats = await fs.stat(lockFilePath)
+			const currentLockTime = stats.mtimeMs
+
+			console.log(
+				"FILE LOCKING FILE LOCKING FILE LOCKING waiting a second to get a lock run " + tryCount
+			)
+			return new Promise((resolve, reject) => {
+				setTimeout(async () => {
+					try {
+						console.log(
+							"FILE LOCKING FILE LOCKING FILE LOCKING scond passed - try to get lock again run " +
+								tryCount
+						)
+						// alright lets give it another try
+						const stats = await fs.stat(lockFilePath)
+
+						if (stats.mtimeMs === currentLockTime) {
+							console.log(
+								"FILE LOCKING FILE LOCKING FILE LOCKING scond passed - ILLEGAL LOCK DETECTED - removing it run " +
+									tryCount
+							)
+							// the lock seems to be illegal - we don't allow locks longer than 1 second (we don't support updates at the moment)
+							await fs.rmdir(lockFilePath)
+
+							console.log(
+								"FILE LOCKING FILE LOCKING FILE LOCKING scond passed - ILLEGAL LOCK DETECTED - removed trying to reacquiring it " +
+									tryCount
+							)
+							// TODO accquireFileLock#
+							try {
+								const lock = await accquireFileLock(fs, lockFilePath, tryCount + 1)
+								resolve(lock)
+							} catch (error) {
+								reject(error)
+							}
+						} else {
+							// alright seems we have another lock file already
+							console.log(
+								"FILE LOCKING FILE LOCKING FILE LOCKING scond passed - LOCK accquired by someone else :-/ - removing it run " +
+									tryCount
+							)
+							try {
+								const lock = await accquireFileLock(fs, lockFilePath, tryCount + 1)
+								resolve(lock)
+							} catch (error) {
+								reject(error)
+							}
+						}
+					} catch (fstatError: any) {
+						console.log(error)
+						if (fstatError.code === "ENOENT") {
+							// lock file seems to be gone :) - lets try again
+							const lock = accquireFileLock(fs, lockFilePath, tryCount + 1)
+							resolve(lock)
+							return
+						}
+						reject(fstatError)
+					}
+				}, 10000)
+			})
+		} catch (fstatError: any) {
+			if (fstatError.code === "ENOENT") {
+				// lock file seems to be gone :) - lets try again
+				return accquireFileLock(fs, lockFilePath, tryCount + 1)
+			}
+			throw fstatError
+		}
+	}
+}
+
+async function releaseLock(fs: NodeishFilesystem, lockFilePath: string, lockTime: number) {
+	console.log("FILE LOCKING FILE LOCKING FILE LOCKING releasing the lock ")
+	try {
+		const stats = await fs.stat(lockFilePath)
+		if (stats.mtimeMs === lockTime) {
+			// this can be corrupt as welll since the last getStat and the current a modification could have occured :-/
+			await fs.rmdir(lockFilePath)
+		}
+	} catch (statError: any) {
+		console.log("COULDNT RELEASE THE LOCK :/ ! ")
+		console.log(statError)
+		if (statError.code === "ENOENT") {
+			// ok seeks like the log was released by someone else
+			console.log("WARNING - the lock was released by a different process")
+			return
+		}
+		throw statError
 	}
 }
