@@ -11,6 +11,7 @@ import { normaliseBase as canonicalNormaliseBase } from "./utils/normaliseBase.j
 import type { PathTranslations } from "./path-translations/types.js"
 import type { Paraglide } from "./runtime.js"
 import { resolve } from "./utils/path.js"
+import { createExclude, type ExcludeConfig } from "./exclude.js"
 
 export type I18nUserConfig<T extends string> = {
 	/**
@@ -64,7 +65,7 @@ export type I18nUserConfig<T extends string> = {
 	 * exclude: ["/base/admin", /^\/base\/admin\/.* /]
 	 * ```
 	 */
-	exclude?: (string | RegExp)[]
+	exclude?: ExcludeConfig
 
 	/**
 	 * Whether to prefix the language tag to the path even if it's the default language.
@@ -107,19 +108,13 @@ export type I18nConfig<T extends string> = {
 export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I18nUserConfig<T>) {
 	const translations = options?.pathnames ?? {}
 
-	const exclude = options?.exclude ?? []
-	const stringExcludes = exclude.filter((e) => typeof e === "string") as string[]
-	const regexExcludes = exclude.filter((e) => e instanceof RegExp) as RegExp[]
+	const excludeConfig = options?.exclude ?? []
 	const defaultLanguageTag = options?.defaultLanguageTag ?? runtime.sourceLanguageTag
 
 	const config: I18nConfig<T> = {
 		runtime,
 		translations,
-		exclude: (path) => {
-			if (stringExcludes.some((e) => path.startsWith(e))) return true
-			if (regexExcludes.some((e) => e.test(path))) return true
-			return false
-		},
+		exclude: createExclude(excludeConfig),
 		defaultLanguageTag,
 		prefixDefaultLanguage: options?.prefixDefaultLanguage ?? "never",
 	}
