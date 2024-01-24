@@ -13,81 +13,82 @@ export function createTranslateAttributePass(
 ): PreprocessingPass {
 	return {
 		condition: ({ content }) => {
-			return content.includes(attribute_name) || content.includes("{...")
+			const includesAttribute = content.includes(attribute_name)
+			const includesSpread = content.includes("{...")
+			const includesElement = content.includes(`<${element_name}`)
+			const includesSvelteElement = content.includes("<svelte:element")
+
+			return (includesSpread || includesAttribute) && (includesElement || includesSvelteElement)
 		},
 
 		apply: ({ ast, code, originalCode }) => {
 			const i = identifier(`translate_attribute_pass_${element_name}_${attribute_name}`)
 
-			const links = getElementsFromAst(ast, element_name)
-
-			let rewroteAttribute = false
-			let rewroteSpread = false
+			const elements = getElementsFromAst(ast, element_name)
+			const svelteElements = getElementsFromAst(ast, "svelte:element")
 
 			const before: string[] = []
 			const after: string[] = []
 
 			//Replace all links with the new links
-			for (const link of links) {
-				//If the link has no href attribute there is nothing to do
-				const attribute = link.attributes.find(
-					(attribute): attribute is Attribute<string> =>
-						attribute.type === "Attribute" && attribute.name === attribute_name
-				)
-				if (!attribute) continue
+			for (const element of elements) {
+				let attributes = "{"
 
-				const optOutAttribute = link.attributes.find(
-					(attribute): attribute is Attribute<string> =>
-						attribute.type === "Attribute" && attribute.name === "data-no-translate"
-				)
-				if (optOutAttribute) continue
+				const replacedAttributes = new Set<(typeof element.attributes)[number]>()
 
-				//Turn the href attribute contents into a template string
-				const attributeAsTemplateString = attrubuteValuesToJSValue(attribute.value, originalCode)
+				for (const attribute of element.attributes) {
+					switch (attribute.type) {
+						case "Attribute": {
+							const isMainAttribute = attribute.name === attribute_name
+							const isLangAttribute = lang_attribute_name && attribute.name === lang_attribute_name
+							const isDataNoTranslate = attribute.name === "data-no-translate"
+							if (!isMainAttribute && !isLangAttribute && !isDataNoTranslate) continue
 
-				//If the link has a hreflang attribute, use it as the language tag
-				const langAttribute = lang_attribute_name
-					? link.attributes.find((attribute) => attribute.name === lang_attribute_name)
-					: undefined
-				const langAttributeValue = langAttribute
-					? attrubuteValuesToJSValue(langAttribute.value, originalCode)
-					: `undefined`
+							if (isDataNoTranslate) {
+								console.log(JSON.stringify(attribute, null, 2))
+							}
 
-				//Replace the href attribute with the new href attribute
-				const newAttributeString = `${attribute_name}={${i(
-					"translateHref"
-				)}(${attributeAsTemplateString}, ${langAttributeValue})}`
-				code.overwrite(attribute.start, attribute.end, newAttributeString)
+							attributes += `"${escapeForDoubleQuotes(attribute.name)}": ${attrubuteValuesToJSValue(
+								attribute.value,
+								originalCode
+							)},`
+							replacedAttributes.add(attribute)
+							break
+						}
+						case "Spread": {
+							const code: string = originalCode.slice(
+								//@ts-ignore
+								attribute.expression.start,
+								//@ts-ignore
+								attribute.expression.end
+							)
 
-				rewroteAttribute = true
-			}
-
-			//Loop over all Spread attributes
-			for (let link_index = 0; link_index < links.length; link_index++) {
-				const link = links[link_index]
-				if (!link) continue
-
-				const spreadAttributes = link.attributes.filter(
-					(attribute): attribute is SpreadAttribute => attribute.type === "Spread"
-				)
-
-				//Wrap the spread attributes in a function call
-				for (const spreadAttribute of spreadAttributes) {
-					//Get the value of the spread attribute, without the spread operator - Already a JS expression
-					const value = code.slice(spreadAttribute.start + 4, spreadAttribute.end - 1)
-
-					const newSpreadAttributeString = `{...${i("handle_spread")}(${value})}`
-					code.overwrite(spreadAttribute.start, spreadAttribute.end, newSpreadAttributeString)
-
-					rewroteSpread = true
+							attributes += `...(${code}),`
+							replacedAttributes.add(attribute)
+							break
+						}
+					}
 				}
+
+				attributes += "}"
+
+				if (replacedAttributes.size === 0) continue
+
+				// remove the replaced attributes from the code
+				for (const attribute of replacedAttributes) {
+					code.remove(attribute.start, attribute.end)
+				}
+
+				// add a new spread attribute at the end of the element
+				const newSpreadAttributeString = ` {...(${i("handle_attributes")}(${attributes}))}`
+
+				code.appendRight(element.start + element.name.length + 1, newSpreadAttributeString)
 			}
 
-			if (rewroteAttribute || rewroteSpread) {
-				before.push(`import { getContext as ${i("getContext")} } from 'svelte';`)
+			before.push(`import { getContext as ${i("getContext")} } from 'svelte';`)
 
-				after.push(
-					dedent`
+			after.push(
+				dedent`
                             const ${i("context")} = ${i("getContext")}('${PARAGLIDE_CONTEXT_KEY}');
     
                             function ${i("translateHref")}(href, hreflang) {
@@ -95,19 +96,20 @@ export function createTranslateAttributePass(
                                 return ${i("context")}.translateHref(href, hreflang);
                             }
 
-							function ${i("handle_spread")}(props) {
-								if(!${i("context")}) 
-									return props;
-								
-								if("href" in props) {
-									props.href = ${i("translateHref")}(props.href, props.hreflang);
+							function ${i("handle_attributes")}(attrs) {
+
+								//If the element has the data-no-translate attribute, don't translate it
+								if(attrs["data-no-translate"] === true) return attrs;
+
+
+								if("href" in attrs) {
+									attrs.href = ${i("translateHref")}(attrs.href, attrs.hreflang);
 								}
 
-								return props;
+								return attrs;
 							}
                         `
-				)
-			}
+			)
 
 			return {
 				scriptAdditions: {
@@ -118,3 +120,5 @@ export function createTranslateAttributePass(
 		},
 	}
 }
+
+const escapeForDoubleQuotes = (str: string) => str.replace(/"/g, '\\"')

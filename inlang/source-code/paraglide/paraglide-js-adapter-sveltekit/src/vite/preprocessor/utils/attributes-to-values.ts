@@ -6,7 +6,12 @@ import type { AttributeValue } from "../types.js"
  * @param originalCode - The original code that the AST was parsed from, neede to sample the expression code
  * @returns A JS expression that evaluates to the same value as the AttributeValue
  */
-export function attrubuteValuesToJSValue(values: AttributeValue[], originalCode: string): string {
+export function attrubuteValuesToJSValue(
+	values: AttributeValue[] | boolean,
+	originalCode: string
+): string {
+	if (typeof values === "boolean") return values.toString()
+
 	let templateString = "`"
 
 	for (const value of values) {

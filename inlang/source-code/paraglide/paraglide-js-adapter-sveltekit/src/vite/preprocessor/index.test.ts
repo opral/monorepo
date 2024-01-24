@@ -85,6 +85,28 @@ describe("preprocessor", () => {
 		expect(html).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
 	})
 
+	it.concurrent("translates <svelte:element> tags if they are links", async () => {
+		const code = `
+        <script>
+            const props = { href: "/test", hreflang: "de" }
+        </script>
+        <svelte:element this="a" {...props} />`
+
+		const html = await renderComponent(code)
+		expect(html).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
+	})
+
+	it.concurrent("doesn't translate <svelte:element> tags if they are not links", async () => {
+		const code = `
+        <script>
+            const props = { href: "/test", hreflang: "de" }
+        </script>
+        <svelte:element this="div" {...props} />`
+
+		const html = await renderComponent(code)
+		expect(html).toBe(`<div href="/test" hreflang="de"></div>`)
+	})
+
 	/* Future Goals
 	it.concurrent("translates the spread operator - with external hreflang", async () => {
 		const code = `
