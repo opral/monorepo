@@ -1,6 +1,6 @@
-![image](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/translation-review-system/assets/lix-guide-reviewV2.png)
+![image](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/translation-automation/assets/lix-guide-automation.png)
 
-## Translation Automation - Enhance Project Efficiency
+## Translation Automation - with lint and machine translation
 
 A common problem with i18n processes is the presence of manual steps and broken translations. These efforts are continuous instead of being a one-time activity. However, an automation system can help manage this issue. To establish the automation we can use the [CLI](https://inlang.com/m/2qj2w8pu/app-inlang-cli).
 
