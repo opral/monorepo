@@ -18,10 +18,10 @@
     "dependencies": {
         "@inlang/paraglide-js-adapter-vite": "workspace:*",
         "dedent": "1.5.1",
-        "magic-string": "^0.30.5",
-        "svelte": "^4.2.8"
+        "magic-string": "^0.30.5"
     },
     "peerDependencies": {
+        "svelte": "^4.0.0 || ^3.0.0",
         "@sveltejs/kit": "^2.3.0"
     },
     "devDependencies": {
@@ -31,7 +31,6 @@
         "@sveltejs/vite-plugin-svelte": "^3.0.1",
         "prettier-plugin-svelte": "^3.1.2",
         "rollup": "3.29.1",
-        "rollup-plugin-svelte": "^7.1.6",
         "typescript": "^5.3.2",
         "vite": "^5.0.4",
         "vitest": "^0.34.6"
