@@ -54,7 +54,7 @@ export default function Card(props: { item: any; displayName: string }) {
 										.map((keyword: string) => keyword.toLowerCase())
 										.includes("external")}
 								>
-									<ExternalBadge />
+									<EcosystemIncompatibleBadge />
 								</Show>
 							</div>
 							<p class="text-sm line-clamp-2 text-surface-500 transition-colors group-hover:text-surface-600 mb-2">
@@ -138,19 +138,24 @@ export default function Card(props: { item: any; displayName: string }) {
 										{props.displayName}
 									</h4>
 
-									<div class="flex items-center mt-2 gap-1">
-										<Show
-											when={props.item.keywords
-												.map((keyword: string) => keyword.toLowerCase())
-												.includes("external")}
-										>
-											<ExternalBadge />
-										</Show>
+									<div class="flex items-center mt-2 gap-1 flex-wrap">
 										<Chip
 											text={typeOfIdToTitle(props.item.id)}
 											color={colorForTypeOf(props.item.id)}
 											customClasses="text-xs"
 										/>
+										<Show
+											when={
+												props.item.keywords
+													.map((keyword: string) => keyword.toLowerCase())
+													.includes("external") &&
+												!props.item.keywords
+													.map((keyword: string) => keyword.toLowerCase())
+													.includes("inlang")
+											}
+										>
+											<EcosystemIncompatibleBadge />
+										</Show>
 									</div>
 								</div>
 							</div>
@@ -221,10 +226,10 @@ export function CardBuildOwn() {
 	)
 }
 
-const ExternalBadge = () => {
+const EcosystemIncompatibleBadge = () => {
 	return (
 		<div class="px-1.5 h-5 rounded bg-surface-200 flex items-center font-medium text-surface-500 text-[12px]">
-			External
+			Ecosystem Incompatible
 		</div>
 	)
 }
