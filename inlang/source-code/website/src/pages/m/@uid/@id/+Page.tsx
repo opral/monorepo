@@ -21,7 +21,6 @@ import EditOutline from "~icons/material-symbols/edit-outline-rounded"
 import Documentation from "~icons/material-symbols/description-outline-rounded"
 import Changelog from "~icons/material-symbols/manage-history"
 import Link from "#src/renderer/Link.jsx"
-import { InlangBadge } from "#src/interface/marketplace/categoryHeaders/categoryHeros/appHeader.jsx"
 
 const isProduction = process.env.NODE_ENV === "production"
 
@@ -157,22 +156,23 @@ export default function Page(props: PageProps) {
 												<div class="flex gap-3 flex-col">
 													<div class="flex flex-col lg:flex-row gap-4 lg:items-center">
 														<h1 class="text-3xl font-bold">{displayName()}</h1>
+
 														<Show
 															when={props.manifest.keywords
 																.map((keyword: string) => keyword.toLowerCase())
-																.includes("inlang")}
+																.includes("external")}
 														>
-															<sl-tooltip prop:content="Learn more">
-																<Link
-																	href="/g/7777asdy"
-																	class="flex flex-row gap-2 items-center hover:opacity-70"
+															<div class="flex gap-2 items-center">
+																<ExternalBadgeBig />
+
+																<Show
+																	when={props.manifest.keywords
+																		.map((keyword: string) => keyword.toLowerCase())
+																		.includes("inlang")}
 																>
-																	<InlangBadge />
-																	<div class="flex-1 text-sm text-primary font-medium">
-																		inlang ecosystem compatible
-																	</div>
-																</Link>
-															</sl-tooltip>
+																	<EcosystemBadgeBig />
+																</Show>
+															</div>
 														</Show>
 													</div>
 													<div class="inline-block text-surface-500 ">
@@ -464,6 +464,38 @@ export default function Page(props: PageProps) {
 				</Show>
 			</MarketplaceLayout>
 		</>
+	)
+}
+
+const ExternalBadgeBig = () => {
+	return (
+		<div class="px-3 h-8 rounded-lg bg-surface-200 flex items-center font-medium text-surface-500 text-[16px]">
+			External
+		</div>
+	)
+}
+
+const EcosystemBadgeBig = () => {
+	return (
+		<sl-tooltip prop:content="Learn more">
+			<Link href="/g/7777asdy" class="flex flex-row gap-2 items-center hover:opacity-70">
+				<div class="px-3 pl-2 gap-1 h-8 rounded-lg bg-background border border-surface-200 flex items-center font-medium text-surface-500 text-[16px]">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="24"
+						height="24"
+						fill="none"
+						viewBox="0 0 24 24"
+					>
+						<path
+							fill="currentColor"
+							d="M9.552 18.002l-5.7-5.7 1.425-1.425 4.275 4.275 9.175-9.175 1.425 1.425-10.6 10.6z"
+						/>
+					</svg>
+					inlang Ecosystem Compatible
+				</div>
+			</Link>
+		</sl-tooltip>
 	)
 }
 

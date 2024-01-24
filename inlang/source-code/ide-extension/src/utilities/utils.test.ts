@@ -16,7 +16,6 @@ vi.mock("../../package.json", () => ({
 	version: "1.2.3",
 }))
 
-
 describe("handleError", () => {
 	beforeEach(() => {
 		vi.spyOn(console, "error").mockImplementation(() => {})
