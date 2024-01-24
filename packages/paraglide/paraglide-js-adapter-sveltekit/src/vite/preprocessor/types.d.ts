@@ -11,12 +11,24 @@ export type ElementNode<Name extends stirng> = {
 	attributes: Attribute<any>[]
 }
 
-export type Attribute<Name extends string> = {
-	start: number
-	end: number
-	name: Name
-	value: AttributeValue[]
-}
+export type Attribute<Name extends string> =
+	| {
+			type: "Attribute"
+			start: number
+			end: number
+			name: Name
+			value: AttributeValue[]
+	  }
+	| {
+			type: "Spread"
+			start: number
+			end: number
+			name: Name
+			expression: {
+				start: number
+				end: number
+			}
+	  }
 
 export type AttributeValue =
 	| {
