@@ -158,21 +158,16 @@ export default function Page(props: PageProps) {
 														<h1 class="text-3xl font-bold">{displayName()}</h1>
 
 														<Show
-															when={props.manifest.keywords
-																.map((keyword: string) => keyword.toLowerCase())
-																.includes("external")}
+															when={
+																props.manifest.keywords
+																	.map((keyword: string) => keyword.toLowerCase())
+																	.includes("external") &&
+																!props.manifest.keywords
+																	.map((keyword: string) => keyword.toLowerCase())
+																	.includes("inlang")
+															}
 														>
-															<div class="flex gap-2 items-center">
-																<ExternalBadgeBig />
-
-																<Show
-																	when={props.manifest.keywords
-																		.map((keyword: string) => keyword.toLowerCase())
-																		.includes("inlang")}
-																>
-																	<EcosystemBadgeBig />
-																</Show>
-															</div>
+															<EcosystemIncompatibleBadgeBig />
 														</Show>
 													</div>
 													<div class="inline-block text-surface-500 ">
@@ -467,32 +462,12 @@ export default function Page(props: PageProps) {
 	)
 }
 
-const ExternalBadgeBig = () => {
-	return (
-		<div class="px-3 h-8 rounded-lg bg-surface-200 flex items-center font-medium text-surface-500 text-[16px]">
-			External
-		</div>
-	)
-}
-
-const EcosystemBadgeBig = () => {
+const EcosystemIncompatibleBadgeBig = () => {
 	return (
 		<sl-tooltip prop:content="Learn more">
 			<Link href="/g/7777asdy" class="flex flex-row gap-2 items-center hover:opacity-70">
-				<div class="px-3 pl-2 gap-1 h-8 rounded-lg bg-background border border-surface-200 flex items-center font-medium text-surface-500 text-[16px]">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="24"
-						height="24"
-						fill="none"
-						viewBox="0 0 24 24"
-					>
-						<path
-							fill="currentColor"
-							d="M9.552 18.002l-5.7-5.7 1.425-1.425 4.275 4.275 9.175-9.175 1.425 1.425-10.6 10.6z"
-						/>
-					</svg>
-					inlang Ecosystem Compatible
+				<div class="px-3 gap-1 h-8 rounded-lg bg-surface-200 flex items-center font-medium text-surface-500 text-[16px]">
+					Ecosystem Incompatible
 				</div>
 			</Link>
 		</sl-tooltip>
