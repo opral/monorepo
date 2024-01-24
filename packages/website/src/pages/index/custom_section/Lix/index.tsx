@@ -22,7 +22,7 @@ const LixSection = () => {
 			description: m.home_lix_automation_description(),
 			icon: <IconAutomation />,
 			imagePath: "/images/lix-automation-cover.png",
-			link: "https://github.com/opral/monorepo/tree/main/lix",
+			link: "/g/ssryldhd",
 		},
 		{
 			title: m.home_lix_traceability_title(),
