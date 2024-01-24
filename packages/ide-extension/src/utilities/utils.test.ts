@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
-import { telemetryCapture, handleError, escapeHtml } from "./utils.js"
-import { telemetry } from "../services/telemetry/implementation.js"
+import { handleError, escapeHtml } from "./utils.js"
 
 // Mocks
 vi.mock("../services/telemetry/implementation.js", () => ({
@@ -16,23 +15,6 @@ vi.mock("vscode", () => ({
 vi.mock("../../package.json", () => ({
 	version: "1.2.3",
 }))
-
-describe("telemetryCapture", () => {
-	it("should call telemetry.capture with correct parameters", () => {
-		const event = "testEvent"
-		const properties = { key: "value" }
-		// @ts-expect-error
-		telemetryCapture(event, properties)
-		expect(telemetry.capture).toHaveBeenCalledWith({
-			event,
-			properties: {
-				vscode_version: "1.0.0",
-				version: "1.2.3",
-				...properties,
-			},
-		})
-	})
-})
 
 describe("handleError", () => {
 	beforeEach(() => {

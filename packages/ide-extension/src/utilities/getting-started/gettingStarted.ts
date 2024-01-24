@@ -43,7 +43,7 @@ export function getNoProjectsFoundHtml(): string {
 					color: var(--vscode-button-foreground);
 					background-color: var(--vscode-button-background);
 					border: none;
-					padding: 5px 10px;
+					padding: 6px 10px;
 					width: 100%;
 					text-align: center;
 					text-decoration: none;

@@ -27,14 +27,12 @@ export default async function onBeforeRender(pageContext: any) {
 		category: categoryValue,
 	})
 
-	let items = JSON.parse(results.data as string).map((item: any) => {
+	const items = JSON.parse(results.data as string).map((item: any) => {
 		item.uniqueID = item.objectID
 		delete item.readme
 		delete item.objectID
 		return item
 	})
-
-	items = items.filter((i: any) => i.keywords.includes("external") === false)
 
 	if (!q && items.length === 0) {
 		throw render(404)
