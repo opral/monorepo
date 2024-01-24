@@ -21,7 +21,6 @@ import EditOutline from "~icons/material-symbols/edit-outline-rounded"
 import Documentation from "~icons/material-symbols/description-outline-rounded"
 import Changelog from "~icons/material-symbols/manage-history"
 import Link from "#src/renderer/Link.jsx"
-import { InlangBadge } from "#src/interface/marketplace/categoryHeaders/categoryHeros/appHeader.jsx"
 
 const isProduction = process.env.NODE_ENV === "production"
 
@@ -157,22 +156,18 @@ export default function Page(props: PageProps) {
 												<div class="flex gap-3 flex-col">
 													<div class="flex flex-col lg:flex-row gap-4 lg:items-center">
 														<h1 class="text-3xl font-bold">{displayName()}</h1>
+
 														<Show
-															when={props.manifest.keywords
-																.map((keyword: string) => keyword.toLowerCase())
-																.includes("inlang")}
+															when={
+																props.manifest.keywords
+																	.map((keyword: string) => keyword.toLowerCase())
+																	.includes("external") &&
+																!props.manifest.keywords
+																	.map((keyword: string) => keyword.toLowerCase())
+																	.includes("inlang")
+															}
 														>
-															<sl-tooltip prop:content="Learn more">
-																<Link
-																	href="/g/7777asdy"
-																	class="flex flex-row gap-2 items-center hover:opacity-70"
-																>
-																	<InlangBadge />
-																	<div class="flex-1 text-sm text-primary font-medium">
-																		inlang ecosystem compatible
-																	</div>
-																</Link>
-															</sl-tooltip>
+															<EcosystemIncompatibleBadgeBig />
 														</Show>
 													</div>
 													<div class="inline-block text-surface-500 ">
@@ -464,6 +459,18 @@ export default function Page(props: PageProps) {
 				</Show>
 			</MarketplaceLayout>
 		</>
+	)
+}
+
+const EcosystemIncompatibleBadgeBig = () => {
+	return (
+		<sl-tooltip prop:content="Learn more">
+			<Link href="/g/7777asdy" class="flex flex-row gap-2 items-center hover:opacity-70">
+				<div class="px-3 gap-1 h-8 rounded-lg bg-surface-200 flex items-center font-medium text-surface-500 text-[16px]">
+					Ecosystem Incompatible
+				</div>
+			</Link>
+		</sl-tooltip>
 	)
 }
 

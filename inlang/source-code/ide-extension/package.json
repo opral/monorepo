@@ -10,7 +10,7 @@
 		"url": "https://github.com/opral/monorepo.git"
 	},
 	"icon": "assets/icon-vscode-marketplace.png",
-	"version": "1.28.1",
+	"version": "1.28.2",
 	"engines": {
 		"vscode": "^1.84.2"
 	},
@@ -38,28 +38,39 @@
 		"views": {
 			"inlang": [
 				{
+					"when": "inlang:showRecommendationBanner && inlang:hasProjectInWorkspace",
+					"id": "recommendationBanner",
+					"name": "Recommendation",
+					"type": "webview",
+					"group": "inlang@1"
+				},
+				{
 					"when": "!inlang:hasProjectInWorkspace",
 					"id": "gettingStartedView",
 					"name": "Getting Started",
-					"type": "webview"
+					"type": "webview",
+					"group": "inlang@2"
 				},
 				{
 					"when": "inlang:hasProjectInWorkspace",
 					"id": "projectView",
 					"name": "Projects",
-					"type": "tree"
+					"type": "tree",
+					"group": "inlang@3"
 				},
 				{
 					"when": "inlang:hasProjectInWorkspace",
 					"id": "messageView",
 					"name": "Messages",
-					"type": "webview"
+					"type": "webview",
+					"group": "inlang@4"
 				},
 				{
 					"when": "inlang:hasProjectInWorkspace",
 					"id": "errorView",
 					"name": "Errors",
-					"type": "tree"
+					"type": "tree",
+					"group": "inlang@5"
 				}
 			]
 		},
