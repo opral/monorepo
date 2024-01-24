@@ -14,7 +14,7 @@ export type ElementNode<Name extends stirng> = {
 
 type SpreadAttribute = Extract<TemplateNode, { type: "Spread" }>
 type Attribute<Name extends string> = Extract<TemplateNode, { type: "Attribute"; name: Name }> & {
-	value: AttributeValue[]
+	value: AttributeValue[] | boolean
 }
 
 export type AttributeValue =
