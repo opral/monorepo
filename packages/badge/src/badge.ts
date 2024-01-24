@@ -12,13 +12,13 @@ const fontMedium = readFileSync(new URL("../assets/static/Inter-Medium.ttf", imp
 const fontBold = readFileSync(new URL("../assets/static/Inter-Bold.ttf", import.meta.url))
 
 const cache = await caching("memory", {
-	ttl: 60 * 60 * 24 * 1, // 1 day,
+	ttl: 1000 * 60 * 60 * 24 * 1, // 1 day,
 	sizeCalculation: () => 40000, // approx 40kb per badge
 	maxSize: 1000 * 1000 * 1000 * 0.25, // 250 MB
 })
 
 const errorCache = await caching("memory", {
-	ttl: 60 * 60 * 2, // 2 hours,
+	ttl: 1000 * 60 * 60 * 2, // 2 hours,
 	sizeCalculation: () => 1000,
 	maxSize: 1000 * 1000 * 1000 * 0.25, // 250 MB
 })
