@@ -84,6 +84,31 @@ describe("preprocessor", () => {
 		const html = await renderComponent(code)
 		expect(html).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
 	})
+
+	/* Future Goals
+	it.concurrent("translates the spread operator - with external hreflang", async () => {
+		const code = `
+        <script>
+            const props = { href: "/test" }
+        </script>
+        <a {...props} hreflang="de" />`
+
+		const html = await renderComponent(code)
+		expect(html).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
+	})
+
+	it.concurrent("handles conflicting hreflang values (last one wins)", async () => {
+		const code = `
+        <script>
+            const props_1 = { href: "/test", hreflang: "en" }
+            const props_2 = { hreflang: "de" }
+        </script>
+        <a {...props_1} hreflang="fr" {...props_2} />`
+
+		const html = await renderComponent(code)
+		expect(html).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
+	})
+    */
 })
 
 /**

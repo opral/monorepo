@@ -1,4 +1,5 @@
 import type { parse } from "svelte/compiler"
+import type { BaseDirective } from "svelte/types/compiler/interfaces"
 
 export type Ast = ReturnType<typeof parse>
 export type TemplateNode = Ast["html"]
@@ -8,27 +9,13 @@ export type ElementNode<Name extends stirng> = {
 	end: number
 	type: "Element"
 	name: Name
-	attributes: Attribute<any>[]
+	attributes: (Attribute<any> | SpreadAttribute | BaseDirective)[]
 }
 
-export type Attribute<Name extends string> =
-	| {
-			type: "Attribute"
-			start: number
-			end: number
-			name: Name
-			value: AttributeValue[]
-	  }
-	| {
-			type: "Spread"
-			start: number
-			end: number
-			name: Name
-			expression: {
-				start: number
-				end: number
-			}
-	  }
+type SpreadAttribute = Extract<TemplateNode, { type: "Spread" }>
+type Attribute<Name extends string> = Extract<TemplateNode, { type: "Attribute"; name: Name }> & {
+	value: AttributeValue[]
+}
 
 export type AttributeValue =
 	| {

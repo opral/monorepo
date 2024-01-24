@@ -1,5 +1,6 @@
 import { PARAGLIDE_CONTEXT_KEY } from "../../../runtime/constants.js"
 import type { PreprocessingPass } from "../index.js"
+import type { Attribute, SpreadAttribute } from "../types.js"
 import { getElementsFromAst } from "../utils/ast.js"
 import { attrubuteValuesToJSValue } from "../utils/attributes-to-values.js"
 import { identifier } from "../utils/identifier.js"
@@ -8,11 +9,11 @@ import dedent from "dedent"
 export function createTranslateAttributePass(
 	element_name: string,
 	attribute_name: string,
-	lang_attribute_name?: string,
+	lang_attribute_name?: string
 ): PreprocessingPass {
 	return {
 		condition: ({ content }) => {
-			return content.includes(attribute_name)
+			return content.includes(attribute_name) || content.includes("{...")
 		},
 
 		apply: ({ ast, code, originalCode }) => {
@@ -21,15 +22,23 @@ export function createTranslateAttributePass(
 			const links = getElementsFromAst(ast, element_name)
 
 			let rewroteAttribute = false
+			let rewroteSpread = false
+
+			const before: string[] = []
+			const after: string[] = []
 
 			//Replace all links with the new links
 			for (const link of links) {
 				//If the link has no href attribute there is nothing to do
-				const attribute = link.attributes.find((attribute) => attribute.name === attribute_name)
+				const attribute = link.attributes.find(
+					(attribute): attribute is Attribute<string> =>
+						attribute.type === "Attribute" && attribute.name === attribute_name
+				)
 				if (!attribute) continue
 
 				const optOutAttribute = link.attributes.find(
-					(attribute) => attribute.name === "data-no-translate",
+					(attribute): attribute is Attribute<string> =>
+						attribute.type === "Attribute" && attribute.name === "data-no-translate"
 				)
 				if (optOutAttribute) continue
 
@@ -46,31 +55,64 @@ export function createTranslateAttributePass(
 
 				//Replace the href attribute with the new href attribute
 				const newAttributeString = `${attribute_name}={${i(
-					"translateHref",
+					"translateHref"
 				)}(${attributeAsTemplateString}, ${langAttributeValue})}`
 				code.overwrite(attribute.start, attribute.end, newAttributeString)
 
 				rewroteAttribute = true
 			}
 
-			if (!rewroteAttribute) {
-				return {}
+			//Loop over all Spread attributes
+			for (let link_index = 0; link_index < links.length; link_index++) {
+				const link = links[link_index]
+				if (!link) continue
+
+				const spreadAttributes = link.attributes.filter(
+					(attribute): attribute is SpreadAttribute => attribute.type === "Spread"
+				)
+
+				//Wrap the spread attributes in a function call
+				for (const spreadAttribute of spreadAttributes) {
+					//Get the value of the spread attribute, without the spread operator - Already a JS expression
+					const value = code.slice(spreadAttribute.start + 4, spreadAttribute.end - 1)
+
+					const newSpreadAttributeString = `{...${i("handle_spread")}(${value})}`
+					code.overwrite(spreadAttribute.start, spreadAttribute.end, newSpreadAttributeString)
+
+					rewroteSpread = true
+				}
 			}
 
-			return {
-				scriptAdditions: {
-					before: [`import { getContext as ${i("getContext")} } from 'svelte';`],
+			if (rewroteAttribute || rewroteSpread) {
+				before.push(`import { getContext as ${i("getContext")} } from 'svelte';`)
 
-					after: [
-						dedent`
+				after.push(
+					dedent`
                             const ${i("context")} = ${i("getContext")}('${PARAGLIDE_CONTEXT_KEY}');
     
                             function ${i("translateHref")}(href, hreflang) {
                                 if(!${i("context")}) return href;
                                 return ${i("context")}.translateHref(href, hreflang);
                             }
-                        `,
-					],
+
+							function ${i("handle_spread")}(props) {
+								if(!${i("context")}) 
+									return props;
+								
+								if("href" in props) {
+									props.href = ${i("translateHref")}(props.href, props.hreflang);
+								}
+
+								return props;
+							}
+                        `
+				)
+			}
+
+			return {
+				scriptAdditions: {
+					before,
+					after,
 				},
 			}
 		},
