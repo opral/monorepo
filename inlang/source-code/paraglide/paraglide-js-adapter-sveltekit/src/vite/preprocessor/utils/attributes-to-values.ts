@@ -7,10 +7,11 @@ import type { AttributeValue } from "../types.js"
  * @returns A JS expression that evaluates to the same value as the AttributeValue
  */
 export function attrubuteValuesToJSValue(
-	values: AttributeValue[] | boolean,
+	values: AttributeValue[] | boolean | string,
 	originalCode: string
 ): string {
 	if (typeof values === "boolean") return values.toString()
+	if (typeof values === "string") return "`" + escapeStringLiteral(values) + "`"
 
 	let templateString = "`"
 

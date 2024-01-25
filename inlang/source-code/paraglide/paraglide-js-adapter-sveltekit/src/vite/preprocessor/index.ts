@@ -1,7 +1,7 @@
 import { parse, type PreprocessorGroup } from "svelte/compiler"
 import MagicString from "magic-string"
 import type { Ast } from "./types.js"
-import { createTranslateAttributePass } from "./passes/translateAttribute.js"
+import { createTranslateAttributePass } from "./rewrites/pass.js"
 
 export type PreprocessorConfig = Record<string, never>
 
@@ -32,8 +32,8 @@ export type PreprocessingPass = {
 
 const PASSES: PreprocessingPass[] = [
 	createTranslateAttributePass("a", "href", "hreflang"),
-	createTranslateAttributePass("button", "formaction"),
-	createTranslateAttributePass("form", "action"),
+	// createTranslateAttributePass("button", "formaction"),
+	// createTranslateAttributePass("form", "action"),
 ]
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
