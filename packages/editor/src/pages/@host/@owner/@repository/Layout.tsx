@@ -239,7 +239,7 @@ export function Layout(props: { children: JSXElement }) {
 									</sl-button>
 								}
 							>
-								<sl-dropdown prop:distance={8}>
+								<sl-dropdown prop:distance={8} class="animate-blendIn">
 									<sl-button prop:size="small" slot="trigger">
 										<button slot="prefix">
 											<IconAdd class="w-5 h-5 -mx-0.5" />
@@ -573,7 +573,7 @@ function LanguageFilter(props: { clearFunction: any; setAddLanguageModalOpen: Se
 				on:sl-clear={() => {
 					props.clearFunction
 				}}
-				class="filter border-0 focus:ring-background/100 p-0 m-0 text-sm"
+				class="filter border-0 focus:ring-background/100 p-0 m-0 text-sm animate-blendIn"
 			>
 				<div class="flex items-center gap-2 ml-1" slot="prefix">
 					<p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-on-surface-variant">
@@ -683,7 +683,7 @@ function LintFilter(props: { clearFunction: any }) {
 			on:sl-clear={() => {
 				props.clearFunction
 			}}
-			class="filter border-0 focus:ring-background/100 p-0 m-0 text-sm"
+			class="filter border-0 focus:ring-background/100 p-0 m-0 text-sm animate-blendIn"
 		>
 			<div class={"flex items-center gap-2 ml-1 mr-0"} slot="prefix">
 				<p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-on-surface-variant">
