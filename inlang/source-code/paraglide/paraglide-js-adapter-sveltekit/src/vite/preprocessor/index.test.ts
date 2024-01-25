@@ -52,7 +52,7 @@ describe("preprocessor", () => {
 	it.concurrent("translates links inside {:else} blocks", async () => {
 		const ifCode = `
 		{#if false}
-			<span>Swag</span>
+			<span>If</span>
 		{:else}
         	<a href = "/test">Test</a>
 		{/if}
@@ -60,16 +60,29 @@ describe("preprocessor", () => {
 
 		const eachCode = `
 		{#each [] as item}
-			<span>Swag</span>
+			<span>Each</span>
 		{:else}
 			<a href = "/test">Test</a>
 		{/each}
 		`
 
+		const elseIfCode = `
+		{#if false}
+			<span>If</span>
+		{:else if true}
+			<a href = "/test">Test</a>
+		{:else}
+			<span>Else</span>
+		{/if}
+		`
+
 		const ifHtml = await renderComponent(ifCode)
 		const eachHtml = await renderComponent(eachCode)
+		const elseIfHtml = await renderComponent(elseIfCode)
+
 		expect(ifHtml).toBe(`<a href="/rewritten">Test</a>`)
 		expect(eachHtml).toBe(`<a href="/rewritten">Test</a>`)
+		expect(elseIfHtml).toBe(`<a href="/rewritten">Test</a>`)
 	})
 
 	it.concurrent("translates links inside {:then} and {:catch} blocks", async () => {
