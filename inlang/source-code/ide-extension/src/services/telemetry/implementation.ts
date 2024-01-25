@@ -33,7 +33,8 @@ async function capture(args: CaptureEventArguments) {
 	if (userID === undefined) {
 		userID = await getUserId()
 	}
-	const project = state().project
+	// state might me undefined on bootup
+	const project = state()?.project
 	return telemetryNode.capture({
 		...args,
 		// automatically add the project if one exists
