@@ -88,6 +88,7 @@ export const compileMessage = (
 
 			//if the fallback has the pattern, reexport the message from the fallback language
 			if (compiledFallbackPattern) {
+				// TODO #1844 do we need to reexport aliases as well - check the alias handling
 				resource[languageTag] = reexportMessage(message.id, fallbackLanguage)
 			} else {
 				//otherwise, fallback to the message ID
@@ -156,7 +157,18 @@ const messageFunction = (args: {
  * @returns {string}
  */
 /* @__NO_SIDE_EFFECTS__ */
-export const ${args.message.id} = (${hasParams ? "params" : ""}) => ${args.compiledPattern}`
+export const ${args.message.id} = (${hasParams ? "params" : ""}) => ${args.compiledPattern}
+${
+	args.message.alias["default"] &&
+	args.message.id !== args.message.alias["default"] &&
+	` 
+/**
+ * This message is an alias of ${args.message.id}
+ */
+export const ${args.message.alias["default"]} = ${args.message.id};
+`
+}
+`
 }
 
 function reexportMessage(messageId: string, fromLanguageTag: string) {
@@ -169,5 +181,6 @@ function messageIdFallback(messageId: string, languageTag: string) {
 * @returns {string}
 */
 /* @__NO_SIDE_EFFECTS__ */
-export const ${messageId} = () => "${escapeForDoubleQuoteString(messageId)}"`
+export const ${messageId} = () => "${escapeForDoubleQuoteString(messageId)}"
+`
 }
