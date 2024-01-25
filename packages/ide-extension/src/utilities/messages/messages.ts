@@ -5,7 +5,10 @@ import { CONFIGURATION } from "../../configuration.js"
 import { getStringFromPattern } from "./query.js"
 import { escapeHtml } from "../utils.js"
 
-export function createMessageWebviewProvider(args: { context: vscode.ExtensionContext }) {
+export function createMessageWebviewProvider(args: {
+	context: vscode.ExtensionContext
+	workspaceFolder: vscode.WorkspaceFolder
+}) {
 	let messages: Message[] | undefined
 	let isLoading = true
 	let activeFileContent: string | undefined
@@ -116,7 +119,13 @@ export function createMessageWebviewProvider(args: { context: vscode.ExtensionCo
 						? `<div class="highlighted-section">
                         <div class="banner"><span class="active-dot"></span><span>Current file<span></div>
                         ${highlightedMessages
-													.map((message) => createMessageHtml({ message, isHighlighted: true }))
+													.map((message) =>
+														createMessageHtml({
+															message,
+															isHighlighted: true,
+															workspaceFolder: args.workspaceFolder,
+														})
+													)
 													.join("")}
                     </div>`
 						: ""
@@ -127,7 +136,13 @@ export function createMessageWebviewProvider(args: { context: vscode.ExtensionCo
 					mainContentHtml = createMessagesLoadingHtml()
 				} else if (messages && messages.length > 0) {
 					mainContentHtml = `${highlightedMessagesHtml}<main>${allMessagesBanner}${messages
-						.map((message) => createMessageHtml({ message, isHighlighted: false }))
+						.map((message) =>
+							createMessageHtml({
+								message,
+								isHighlighted: false,
+								workspaceFolder: args.workspaceFolder,
+							})
+						)
 						.join("")}</main>`
 				} else {
 					mainContentHtml = `${highlightedMessagesHtml}<main>${
@@ -147,8 +162,15 @@ export function createMessageWebviewProvider(args: { context: vscode.ExtensionCo
 	}
 }
 
-export function createMessageHtml(args: { message: Message; isHighlighted: boolean }): string {
-	const translationsTableHtml = getTranslationsTableHtml(args.message)
+export function createMessageHtml(args: {
+	message: Message
+	isHighlighted: boolean
+	workspaceFolder: vscode.WorkspaceFolder
+}): string {
+	const translationsTableHtml = getTranslationsTableHtml({
+		message: args.message,
+		workspaceFolder: args.workspaceFolder,
+	})
 
 	return `
         <div class="tree-item">
@@ -168,18 +190,19 @@ export function createNoMessagesFoundHtml(): string {
             </div>`
 }
 
-// function for createMessagesLoadingHtml
 export function createMessagesLoadingHtml(): string {
 	return `<div class="loading">
 				<span>Loading messages...</span>
 			</div>`
 }
 
-export function getTranslationsTableHtml(message: Message): string {
+export function getTranslationsTableHtml(args: {
+	message: Message
+	workspaceFolder: vscode.WorkspaceFolder
+}): string {
 	const configuredLanguageTags = state().project.settings()?.languageTags || []
 	const contextTableRows = configuredLanguageTags.map((languageTag) => {
-		// ... similar logic to contextTooltip for generating rows ...
-		const variant = message.variants.find((v) => v.languageTag === languageTag)
+		const variant = args.message.variants.find((v) => v.languageTag === languageTag)
 
 		let m = CONFIGURATION.STRINGS.MISSING_TRANSLATION_MESSAGE as string
 
@@ -187,13 +210,18 @@ export function getTranslationsTableHtml(message: Message): string {
 			m = getStringFromPattern({
 				pattern: variant.pattern,
 				languageTag: variant.languageTag,
-				messageId: message.id,
+				messageId: args.message.id,
 			})
 		}
 
-		// Replace these commands with appropriate actions for your webview
-		const editCommand = `editMessage('${message.id}', '${escapeHtml(languageTag)}')`
-		const openCommand = `openInEditor('${message.id}', '${state().selectedProjectPath}')`
+		// Fink needs the relative path from the workspace/git root
+		const relativeProjectPathFromWorkspace = state().selectedProjectPath.replace(
+			args.workspaceFolder.uri.fsPath,
+			""
+		)
+
+		const editCommand = `editMessage('${args.message.id}', '${escapeHtml(languageTag)}')`
+		const openCommand = `openInEditor('${args.message.id}', '${relativeProjectPathFromWorkspace}')`
 
 		return `
             <div class="section">
@@ -342,7 +370,10 @@ export function getHtml(args: {
     `
 }
 
-export async function messageView(args: { context: vscode.ExtensionContext }) {
+export async function messageView(args: {
+	context: vscode.ExtensionContext
+	workspaceFolder: vscode.WorkspaceFolder
+}) {
 	const provider = createMessageWebviewProvider({ ...args })
 
 	args.context.subscriptions.push(
