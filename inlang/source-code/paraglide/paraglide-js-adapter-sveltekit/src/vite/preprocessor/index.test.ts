@@ -150,29 +150,34 @@ describe("preprocessor", () => {
 		expect(html).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
 	})
 
-	/*
 	it.concurrent.only("translates <svelte:element> tags if they are links", async () => {
-		const code = `
-        <script>
-            const props = { href: "/test", hreflang: "de" }
-        </script>
-        <svelte:element this="a" {...props} />`
+		const hardcoded = `<svelte:element this="a" href="/test" hreflang="de" />`
+		const parameterized = `<script>
+			const as = "a"
+		</script>
+		<svelte:element this={as} href="/test" hreflang="de" />`
 
-		const html = await renderComponent(code)
-		expect(html).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
+		const hardcodedHtml = await renderComponent(hardcoded)
+		const parameterizedHtml = await renderComponent(parameterized)
+
+		expect(hardcodedHtml).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
+		expect(parameterizedHtml).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
 	})
 
 	it.concurrent("doesn't translate <svelte:element> tags if they are not links", async () => {
-		const code = `
+		const hardcoded = `<svelte:element this="div" href="/test" hreflang="de" />`
+		const parameterized = `
         <script>
-            const props = { href: "/test", hreflang: "de" }
+            const as = "div"
         </script>
-        <svelte:element this="div" {...props} />`
+        <svelte:element this={as} href="/test" hreflang="de" />`
 
-		const html = await renderComponent(code)
-		expect(html).toBe(`<div href="/test" hreflang="de"></div>`)
+		const hardcodedHtml = await renderComponent(hardcoded)
+		const parameterizedHtml = await renderComponent(parameterized)
+
+		expect(hardcodedHtml).toBe(`<div href="/test" hreflang="de"></div>`)
+		expect(parameterizedHtml).toBe(`<div href="/test" hreflang="de"></div>`)
 	})
-	*/
 
 	/* Future Goals
 	it.concurrent("translates the spread operator - with external hreflang", async () => {
@@ -230,7 +235,7 @@ async function renderComponent(svelteCode: string, props: Record<string, any> = 
 		filename: "src/Component.svelte",
 	})
 
-	const compiledComponent = compile(preprocessedComponent.code, compilerOptions).js.code
+	console.log(preprocessedComponent.code)
 
 	const bundle = await rollup({
 		input: "src/Entry.svelte",
