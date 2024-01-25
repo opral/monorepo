@@ -1,6 +1,6 @@
 import { it, expect, vi } from "vitest"
 import { createNodeishFsWithAbsolutePaths } from "./createNodeishFsWithAbsolutePaths.js"
-import type { NodeishFilesystemSubset } from "./versionedInterfaces.js"
+// import type { NodeishFilesystemSubset } from "./versionedInterfaces.js"
 import type { NodeishFilesystem } from "@lix-js/fs"
 
 it("throws an error if projectPath is not an absolute path", () => {
