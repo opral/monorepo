@@ -187,7 +187,7 @@ function TheActualPage() {
 function NoInlangProjectFoundCard() {
 	return (
 		<div class="min-h-[calc(100vh_-_324px)] flex grow items-center justify-center">
-			<div class="border border-outline p-8 rounded flex flex-col max-w-lg">
+			<div class="bg-background border border-outline p-8 rounded flex flex-col max-w-lg">
 				<MaterialSymbolsUnknownDocumentOutlineRounded class="w-10 h-10 self-center" />
 				<h1 class="font-semibold pt-5">Inlang has not been set up for this repository yet.</h1>
 				<p class="pt-1.5 pb-8">Please refer to product page and setup a inlang project.</p>
@@ -214,7 +214,7 @@ function NoInlangProjectFoundCard() {
 function RepositoryDoesNotExistOrNotAuthorizedCard(args: { code: number; user: any }) {
 	return (
 		<div class="min-h-[calc(100vh_-_324px)] flex grow items-center justify-center">
-			<div class="border border-outline p-12 rounded-xl flex flex-col max-w-lg">
+			<div class="bg-background border border-outline p-12 rounded-xl flex flex-col max-w-lg">
 				<h2 class="font-semibold pt-12">Cannot access the repository</h2>
 
 				<ul class="pt-8 list-disc pl-4">
