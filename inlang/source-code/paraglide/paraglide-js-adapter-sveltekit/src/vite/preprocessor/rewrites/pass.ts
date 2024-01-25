@@ -6,6 +6,7 @@ import { identifier } from "../utils/identifier.js"
 import dedent from "dedent"
 import { escapeForDoubleQuotes } from "./escape.js"
 import type { ElementNode } from "../types.js"
+import { uneval } from "devalue"
 
 export type AttributeTranslation = {
 	element_name: string
@@ -86,12 +87,12 @@ export function createTranslateAttributePass(
 								originalCode
 						  )} === "${element_name}" ?  ${i(
 								"handle_attributes"
-						  )}(${attributes}, "${attribute_name}", ${
-								lang_attribute_name ? `"${lang_attribute_name}"` : "undefined"
-						  }): ${attributes} )}`
-						: `{...(${i("handle_attributes")}(${attributes}, "${attribute_name}",  ${
-								lang_attribute_name ? `"${lang_attribute_name}"` : "undefined"
-						  }))}`
+						  )}(${attributes}, "${attribute_name}", ${uneval(
+								lang_attribute_name
+						  )}): ${attributes} )}`
+						: `{...(${i("handle_attributes")}(${attributes}, "${attribute_name}",  ${uneval(
+								lang_attribute_name
+						  )}))}`
 
 					code.appendRight(element.start + element.name.length + 1, " " + newSpreadAttributeString)
 				}

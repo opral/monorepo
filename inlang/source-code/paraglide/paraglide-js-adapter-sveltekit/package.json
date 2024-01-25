@@ -18,11 +18,12 @@
     "dependencies": {
         "@inlang/paraglide-js-adapter-vite": "workspace:*",
         "dedent": "1.5.1",
+        "devalue": "^4.3.2",
         "magic-string": "^0.30.5"
     },
     "peerDependencies": {
-        "svelte": "^4.0.0 || ^3.0.0",
-        "@sveltejs/kit": "^2.3.0"
+        "@sveltejs/kit": "^2.3.0",
+        "svelte": "^4.0.0 || ^3.0.0"
     },
     "devDependencies": {
         "@rollup/plugin-node-resolve": "^15.2.3",
