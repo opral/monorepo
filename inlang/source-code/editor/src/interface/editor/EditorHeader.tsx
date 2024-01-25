@@ -71,7 +71,12 @@ function EditorHeader() {
 							</a>
 							{/* <p class="self-center text-left font-regular text-surface-400 pl-3 pr-1">/</p> */}
 							<div class="w-full content-center">
-								<div class="hidden md:flex justify-end items-center gap-8">
+								<div
+									class={
+										"hidden md:flex justify-end items-center gap-8 transition-[margin] duration-200 " +
+										(user()?.isLoggedIn && "mr-16")
+									}
+								>
 									<For each={getLinks()}>
 										{(link) => (
 											<>
@@ -82,7 +87,9 @@ function EditorHeader() {
 										)}
 									</For>
 									<Show when={user()?.isLoggedIn}>
-										<UserDropdown />
+										<div class="absolute right-4 xl:right-[calc((100%_-_1240px)_/_2)] animate-fadeIn">
+											<UserDropdown />
+										</div>
 									</Show>
 								</div>
 							</div>
