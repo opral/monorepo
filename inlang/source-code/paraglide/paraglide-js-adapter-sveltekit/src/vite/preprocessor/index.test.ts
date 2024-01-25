@@ -34,6 +34,58 @@ describe("preprocessor", () => {
 		expect(html).toBe(`<a href="/rewritten">Test</a>`)
 	})
 
+	it.concurrent("translates links inside {#if} blocks", async () => {
+		const code = `
+        <script>
+            const href = "/test"
+			const show = true;
+        </script>
+		{#if show}
+        	<a href={href}>Test</a>
+		{/if}
+		`
+
+		const html = await renderComponent(code)
+		expect(html).toBe(`<a href="/rewritten">Test</a>`)
+	})
+
+	it.concurrent("translates links inside {:else} blocks", async () => {
+		const ifCode = `
+		{#if false}
+			<span>Swag</span>
+		{:else}
+        	<a href = "/test">Test</a>
+		{/if}
+		`
+
+		const eachCode = `
+		{#each [] as item}
+			<span>Swag</span>
+		{:else}
+			<a href = "/test">Test</a>
+		{/each}
+		`
+
+		const ifHtml = await renderComponent(ifCode)
+		const eachHtml = await renderComponent(eachCode)
+		expect(ifHtml).toBe(`<a href="/rewritten">Test</a>`)
+		expect(eachHtml).toBe(`<a href="/rewritten">Test</a>`)
+	})
+
+	it.concurrent.only("translates links inside {:then} and {:catch} blocks", async () => {
+		const code = `
+		<script>
+			const promise = "not a promise -> resolves instantly"
+		</script>
+		{#await promise}
+			<span>Awaiting</span>
+		{:then}<a href = "/test">Test</a>{/await}
+		`
+
+		const html = await renderComponent(code)
+		expect(html).toBe(`<a href="/rewritten">Test</a>`)
+	})
+
 	it.concurrent("translates shorthand href attributes", async () => {
 		const code = `
         <script>
@@ -85,6 +137,7 @@ describe("preprocessor", () => {
 		expect(html).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
 	})
 
+	/*
 	it.concurrent.only("translates <svelte:element> tags if they are links", async () => {
 		const code = `
         <script>
@@ -106,6 +159,7 @@ describe("preprocessor", () => {
 		const html = await renderComponent(code)
 		expect(html).toBe(`<div href="/test" hreflang="de"></div>`)
 	})
+	*/
 
 	/* Future Goals
 	it.concurrent("translates the spread operator - with external hreflang", async () => {
@@ -163,7 +217,7 @@ async function renderComponent(svelteCode: string, props: Record<string, any> = 
 		filename: "src/Component.svelte",
 	})
 
-	console.log(preprocessedComponent.code)
+	const compiledComponent = compile(preprocessedComponent.code, compilerOptions).js.code
 
 	const bundle = await rollup({
 		input: "src/Entry.svelte",

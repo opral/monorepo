@@ -11,10 +11,13 @@ export function getElementsFromAst<Name extends string>(
 			links.push(templateNode as ElementNode<Name>)
 		}
 
-		if (!templateNode.children) return
-		for (const child of templateNode.children) {
+		for (const child of templateNode.children || []) {
 			walk(child)
 		}
+
+		if (templateNode.else) walk(templateNode.else)
+		if (templateNode.then) walk(templateNode.then)
+		if (templateNode.catch) walk(templateNode.catch)
 	}
 
 	walk(ast.html)
