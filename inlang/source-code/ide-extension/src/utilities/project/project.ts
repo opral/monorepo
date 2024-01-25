@@ -103,23 +103,6 @@ export async function handleTreeSelection(args: {
 			_import: _import(normalizePath(args.workspaceFolder.uri.fsPath)),
 		})
 
-		if (inlangProject.id) {
-			telemetry.groupIdentify({
-				groupType: "project",
-				groupKey: inlangProject.id,
-			})
-		}
-
-		telemetry.capture({
-			event: "IDE-EXTENSION loaded project",
-			properties: {
-				errors: inlangProject?.errors(),
-				isInWorkspaceRecommendation: await isInWorkspaceRecommendation({
-					workspaceFolder: args.workspaceFolder,
-				}),
-			},
-		})
-
 		setState({
 			...state(),
 			project: inlangProject,
@@ -132,6 +115,16 @@ export async function handleTreeSelection(args: {
 		// Refresh the entire tree to reflect selection changes
 		CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.fire(undefined)
 		CONFIGURATION.EVENTS.ON_DID_ERROR_TREE_VIEW_CHANGE.fire(undefined)
+
+		telemetry.capture({
+			event: "IDE-EXTENSION loaded project",
+			properties: {
+				errors: inlangProject?.errors(),
+				isInWorkspaceRecommendation: await isInWorkspaceRecommendation({
+					workspaceFolder: args.workspaceFolder,
+				}),
+			},
+		})
 	} catch (error) {
 		//console.log(error, selectedProject)
 
