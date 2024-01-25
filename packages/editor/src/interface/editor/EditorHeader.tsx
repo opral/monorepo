@@ -64,7 +64,7 @@ function EditorHeader() {
 							</a>
 							<p class="self-center text-left font-regular text-surface-400 pl-4 pr-1">/</p>
 							<a
-								class="self-center pl-2 text-left font-medium text-surface-900 hover:text-surface-800"
+								class="self-center pl-2 text-left font-medium text-surface-900 hover:text-primary transition-colors duration-150"
 								href="/"
 							>
 								Fink
