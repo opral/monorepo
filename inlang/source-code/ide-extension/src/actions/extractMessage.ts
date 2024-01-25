@@ -22,7 +22,6 @@ export class ExtractMessage implements vscode.CodeActionProvider {
 	}
 
 	public async resolveCodeAction(): Promise<vscode.CodeAction> {
-		console.info("code action resolved")
 		telemetry.capture({
 			event: "IDE-EXTENSION code action resolved",
 			properties: { name: "extract message" },
