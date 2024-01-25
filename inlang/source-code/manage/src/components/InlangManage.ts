@@ -412,7 +412,7 @@ export class InlangManage extends TwLitElement {
 						<p class="self-center text-left font-regular text-slate-400 pl-4 pr-1">/</p>
 						<a
 							href="/"
-							class="self-center pl-2 text-left font-medium text-slate-900 truncate hover:text-slate-800"
+							class="self-center pl-2 text-left font-medium text-slate-900 truncate hover:text-[#0B91B2] transition-colors duration-150"
 							>Manage</a
 						>
 					</div>
