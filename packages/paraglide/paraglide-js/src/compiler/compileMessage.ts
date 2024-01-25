@@ -12,8 +12,6 @@ type Resource = {
 	[languageTag: string]: string
 }
 
-const inlanAliasKey = "library.inlang.paraglideJs"
-
 /**
  * Returns the compiled messages for the given message.
  *
