@@ -656,7 +656,7 @@ export async function openRepository(
 					firstCommitHash = lastHashInPage
 				}
 
-				if (commits.length < 50) {
+				if (commits.length < 550) {
 					break
 				}
 			}

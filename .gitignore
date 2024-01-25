@@ -372,3 +372,4 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/windows,macos,linux,node,visualstudiocode,intellij
 inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/example/build
 inlang/source-code/paraglide/paraglide-js-adapter-solidstart/example/.solid
+*.h.ts.mjs

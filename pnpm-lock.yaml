@@ -64,7 +64,7 @@ importers:
         specifier: workspace:*
         version: link:../../../lix/source-code/client
       '@resvg/resvg-js':
-        specifier: ^2.4.1
+        specifier: 2.6.0
         version: 2.6.0
       '@sentry/node':
         specifier: ^7.47.0
