@@ -85,7 +85,7 @@ describe("preprocessor", () => {
 		expect(html).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
 	})
 
-	it.concurrent("translates <svelte:element> tags if they are links", async () => {
+	it.concurrent.only("translates <svelte:element> tags if they are links", async () => {
 		const code = `
         <script>
             const props = { href: "/test", hreflang: "de" }
@@ -138,7 +138,7 @@ describe("preprocessor", () => {
  *
  * This truly is one of the test utilities of all time
  */
-async function renderComponent(svelteCode: string) {
+async function renderComponent(svelteCode: string, props: Record<string, any> = {}) {
 	const EntrySvelteCode = `
     <script>
         import Component from './Component.svelte'
@@ -163,6 +163,8 @@ async function renderComponent(svelteCode: string) {
 		filename: "src/Component.svelte",
 	})
 
+	console.log(preprocessedComponent.code)
+
 	const bundle = await rollup({
 		input: "src/Entry.svelte",
 		plugins: [
@@ -177,6 +179,6 @@ async function renderComponent(svelteCode: string) {
 	const compiledBundle = await bundle.generate({ format: "esm" })
 	const module = await import("data:text/javascript;base64," + btoa(compiledBundle.output[0].code))
 	const Component = module.default
-	const { html } = Component.render({})
+	const { html } = Component.render(props)
 	return html
 }

@@ -31,9 +31,21 @@ export type PreprocessingPass = {
 }
 
 const PASSES: PreprocessingPass[] = [
-	createTranslateAttributePass("a", "href", "hreflang"),
-	// createTranslateAttributePass("button", "formaction"),
-	// createTranslateAttributePass("form", "action"),
+	createTranslateAttributePass([
+		{
+			element_name: "a",
+			attribute_name: "href",
+			lang_attribute_name: "hreflang",
+		},
+		{
+			element_name: "form",
+			attribute_name: "action",
+		},
+		{
+			element_name: "button",
+			attribute_name: "formaction",
+		},
+	]),
 ]
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -91,7 +103,7 @@ export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
 function modifyScriptTag(
 	ast: Ast,
 	code: MagicString,
-	additions: { before?: Iterable<string>; after?: Iterable<string> },
+	additions: { before?: Iterable<string>; after?: Iterable<string> }
 ) {
 	const before = additions.before ? [...additions.before] : []
 	const after = additions.after ? [...additions.after] : []
