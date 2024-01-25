@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.29.0
+
+### Minor Changes
+
+- c98ea1dfe: refactor: internal change how projects are identified
+
 ## 1.28.3
 
 ### Patch Changes
