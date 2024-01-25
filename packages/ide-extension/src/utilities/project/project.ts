@@ -125,7 +125,6 @@ export async function handleTreeSelection(args: {
 				}),
 			},
 		})
-
 	} catch (error) {
 		//console.log(error, selectedProject)
 
