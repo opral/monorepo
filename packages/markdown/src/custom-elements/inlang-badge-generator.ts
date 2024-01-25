@@ -184,7 +184,7 @@ export class InlangBadgeGenerator extends LitElement {
 			this.markdownCopied = true
 			navigator.clipboard.writeText(
 				`[![inlang status badge](${this.badgeURL})](https://fink.inlang.com/${this.badgeURL
-					.replace("https://badge.inlang.com/badge?url=", "")
+					.replace("https://badge.inlang.com/?url=", "")
 					.replace(
 						this._projectInput.value
 							? `&project=${this._projectInput.value}`

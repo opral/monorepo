@@ -1,5 +1,12 @@
 # @inlang/badge
 
+## 0.6.0
+
+### Minor Changes
+
+- edb7d145f: update svg renderer
+- 345c277f1: add badge error cache
+
 ## 0.5.8
 
 ### Patch Changes

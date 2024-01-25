@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.28.3
+
+### Patch Changes
+
+- f26c19758: fix Fink url for cross-selling
+
 ## 1.28.2
 
 ### Patch Changes

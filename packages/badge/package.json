@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/badge",
 	"type": "module",
-	"version": "0.5.8",
+	"version": "0.6.0",
 	"private": true,
 	"exports": {
 		".": "./dist/index.js",
@@ -21,7 +21,7 @@
 	"dependencies": {
 		"@inlang/sdk": "workspace:*",
 		"@lix-js/client": "workspace:*",
-		"@resvg/resvg-js": "^2.4.1",
+		"@resvg/resvg-js": "2.6.0",
 		"@sentry/node": "^7.47.0",
 		"@sentry/tracing": "^7.47.0",
 		"cache-manager": "^5.2.3",
