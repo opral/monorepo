@@ -88,7 +88,6 @@ export async function loadProject(args: {
 		nodeishFs: fs,
 	})
 
-
 	// -- migratations ------------------------------------------------
 
 	await maybeMigrateToDirectory({ nodeishFs: fs, projectPath })
@@ -297,6 +296,8 @@ export async function loadProject(args: {
 						if (watcher) {
 							//eslint-disable-next-line @typescript-eslint/no-unused-vars
 							for await (const event of watcher) {
+								// TODO #1844 remove console log
+								// eslint-disable-next-line no-console
 								console.log(event)
 								if (!event.filename) {
 									throw new Error("filename not set in event...")
@@ -524,7 +525,8 @@ export async function loadProject(args: {
 						(plugin) => plugin.loadMessages !== undefined
 					)
 					// TODO #1844 check if update is triggered once on setup the fs
-
+					// TODO #1844 remove console log
+					// eslint-disable-next-line no-console
 					console.log("load messages because of a change in the message.json files")
 					// TODO #1844 FINK check error handling for plugin load methods (triggered by file change) -> move to separate ticket
 					loadMessages(
@@ -543,7 +545,8 @@ export async function loadProject(args: {
 			const loadMessagePlugin = _resolvedModules.plugins.find(
 				(plugin) => plugin.loadMessages !== undefined
 			)
-
+			// TODO #1844 remove console log
+			// eslint-disable-next-line no-console
 			console.log(
 				"Initial load messages  - will also use the filewatcher system and schedule events"
 			)
@@ -852,7 +855,8 @@ async function loadMessages(
 	// set loading flag
 	isLoading = true
 
-	const loadPluginId = loadPlugin!.id
+	// TODO #1844 JL - check if we can remove this
+	// const loadPluginId = loadPlugin!.id
 	const lockFilePath = messagesFolderPath + "/messages.lockfile"
 	const lockTime = await accquireFileLock(fs as NodeishFilesystem, lockFilePath, "loadMessage")
 	const loadedMessages = await makeTrulyAsync(
@@ -951,7 +955,8 @@ async function saveMessages(
 	// set isSavingFlag
 	isSaving = true
 
-	const savePluginId = savePlugin!.id
+	// TODO #1844 JL - check if we can remove this
+	//	const savePluginId = savePlugin!.id
 
 	currentSaveMessages = (async function () {
 		try {
@@ -1024,9 +1029,13 @@ async function accquireFileLock(
 	}
 
 	try {
+		// TODO #1844 remove console log
+		// eslint-disable-next-line no-console
 		console.log(lockOrigin + " tries to accquire a lockfile Retry Nr.: " + tryCount)
 		await fs.mkdir(lockFilePath)
 		const stats = await fs.stat(lockFilePath)
+		// TODO #1844 remove console log
+		// eslint-disable-next-line no-console
 		console.log(lockOrigin + " accquired a lockfile Retry Nr.: " + tryCount)
 		return stats.mtimeMs
 	} catch (error: any) {
@@ -1048,7 +1057,8 @@ async function accquireFileLock(
 		}
 		throw fstatError
 	}
-
+	// TODO #1844 remove console log
+	// eslint-disable-next-line no-console
 	console.log(
 		lockOrigin +
 			" tries to accquire a lockfile  - lock currently in use... starting probe phase " +
@@ -1062,6 +1072,8 @@ async function accquireFileLock(
 				probeCounts += 1
 				let lockFileStats: undefined | NodeishStats = undefined
 				try {
+					// TODO #1844 remove console log
+					// eslint-disable-next-line no-console
 					console.log(
 						lockOrigin +
 							" tries to accquire a lockfile - check if the lock is free now " +
@@ -1072,6 +1084,8 @@ async function accquireFileLock(
 					lockFileStats = await fs.stat(lockFilePath)
 				} catch (fstatError: any) {
 					if (fstatError.code === "ENOENT") {
+						// TODO #1844 remove console log
+						// eslint-disable-next-line no-console
 						console.log(
 							lockOrigin +
 								" tries to accquire a lockfile - lock file seems to be free now - try to accquire" +
@@ -1088,6 +1102,8 @@ async function accquireFileLock(
 				if (lockFileStats.mtimeMs === currentLockTime) {
 					if (probeCounts >= nProbes) {
 						// ok maximum lock time ran up (we waitetd nProbes * probeInterval) - we consider the lock to be stale
+						// TODO #1844 remove console log
+						// eslint-disable-next-line no-console
 						console.log(
 							lockOrigin +
 								" tries to accquire a lockfile  - lock not free - but stale lets drop it" +
@@ -1133,6 +1149,8 @@ async function releaseLock(
 	lockOrigin: string,
 	lockTime: number
 ) {
+	// TODO #1844 remove console log
+	// eslint-disable-next-line no-console
 	console.log(lockOrigin + " releasing the lock ")
 	try {
 		const stats = await fs.stat(lockFilePath)
@@ -1141,12 +1159,18 @@ async function releaseLock(
 			await fs.rmdir(lockFilePath)
 		}
 	} catch (statError: any) {
+		// TODO #1844 remove console log
+		// eslint-disable-next-line no-console
 		console.log(lockOrigin + " couldn't release the lock")
 		if (statError.code === "ENOENT") {
 			// ok seeks like the log was released by someone else
+			// TODO #1844 remove console log
+			// eslint-disable-next-line no-console
 			console.log(lockOrigin + "WARNING - the lock was released by a different process")
 			return
 		}
+		// TODO #1844 remove console log
+		// eslint-disable-next-line no-console
 		console.log(statError)
 		throw statError
 	}
