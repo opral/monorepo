@@ -256,6 +256,12 @@ export const Gitfloat = () => {
 		},
 	}
 
+	// prevent user from making to changes when not logged in
+	createEffect(() => {
+		if ((gitState() === "login" || gitState() === "fork") && localChanges() > 2)
+			setSignInModalOpen(true)
+	})
+
 	// animations
 	onMount(() => {
 		const gitfloat = document.querySelector(".gitfloat")
