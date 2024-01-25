@@ -44,6 +44,7 @@ import { maybeCreateFirstProjectId } from "./migrations/maybeCreateFirstProjectI
 
 import { capture } from "./telemetry/capture.js"
 import { identifyProject } from "./telemetry/groupIdentify.js"
+import type { NodeishStats } from "../../../../lix/source-code/fs/dist/NodeishFilesystemApi.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -86,6 +87,7 @@ export async function loadProject(args: {
 		projectPath,
 		nodeishFs: fs,
 	})
+
 
 	// -- migratations ------------------------------------------------
 
@@ -295,6 +297,7 @@ export async function loadProject(args: {
 						if (watcher) {
 							//eslint-disable-next-line @typescript-eslint/no-unused-vars
 							for await (const event of watcher) {
+								console.log(event)
 								if (!event.filename) {
 									throw new Error("filename not set in event...")
 								}
@@ -505,6 +508,8 @@ export async function loadProject(args: {
 			initialSetup = false
 		})
 
+		// TODO #1844 deal with wrong messages in inlang folder (change the type one message to something like Text2)
+
 		// run import
 		const _resolvedModules = resolvedModules()
 		const _settings = settings()
@@ -518,7 +523,9 @@ export async function loadProject(args: {
 					const loadMessagePlugin = _resolvedModules.plugins.find(
 						(plugin) => plugin.loadMessages !== undefined
 					)
+					// TODO #1844 check if update is triggered once on setup the fs
 
+					console.log("load messages because of a change in the message.json files")
 					// TODO #1844 FINK check error handling for plugin load methods (triggered by file change) -> move to separate ticket
 					loadMessages(
 						fsWithWatcher,
@@ -537,6 +544,9 @@ export async function loadProject(args: {
 				(plugin) => plugin.loadMessages !== undefined
 			)
 
+			console.log(
+				"Initial load messages  - will also use the filewatcher system and schedule events"
+			)
 			// TODO #1844 FINK check error handling for plugin load methods (initial load) -> move to separate ticket
 			await loadMessages(
 				fsWithWatcher,
@@ -844,14 +854,14 @@ async function loadMessages(
 
 	const loadPluginId = loadPlugin!.id
 	const lockFilePath = messagesFolderPath + "/messages.lockfile"
-	const lockTime = (await accquireFileLock(fs as NodeishFilesystem, lockFilePath)) as number
+	const lockTime = await accquireFileLock(fs as NodeishFilesystem, lockFilePath, "loadMessage")
 	const loadedMessages = await makeTrulyAsync(
 		loadPlugin.loadMessages({
 			settings: settingsValue,
 			nodeishFs: fs,
 		})
 	)
-	await releaseLock(fs as NodeishFilesystem, lockFilePath, lockTime)
+	await releaseLock(fs as NodeishFilesystem, lockFilePath, "loadMessage", lockTime)
 
 	for (const loadedMessage of loadedMessages) {
 		const currentMessages = messagesQuery
@@ -957,7 +967,7 @@ async function saveMessages(
 			}
 			const lockFilePath = messagesFolderPath + "/messages.lockfile"
 
-			const lockTime = (await accquireFileLock(fs as NodeishFilesystem, lockFilePath)) as number
+			const lockTime = await accquireFileLock(fs as NodeishFilesystem, lockFilePath, "saveMessage")
 
 			// TODO #1844 SPLIT (separate ticket) make sure save messages produces the same output again and again
 			// TODO #1844v Versioning on plugins? cache issue?
@@ -967,7 +977,7 @@ async function saveMessages(
 				nodeishFs: fs,
 			})
 
-			await releaseLock(fs as NodeishFilesystem, lockFilePath, lockTime)
+			await releaseLock(fs as NodeishFilesystem, lockFilePath, "saveMessage", lockTime)
 		} catch (err) {
 			throw new PluginSaveMessagesError({
 				cause: err,
@@ -1001,95 +1011,129 @@ async function saveMessages(
 }
 
 const maxRetries = 5
-async function accquireFileLock(fs: NodeishFilesystem, lockFilePath: string, tryCount: number = 0) {
+const nProbes = 10
+const probeInterval = 100
+async function accquireFileLock(
+	fs: NodeishFilesystem,
+	lockFilePath: string,
+	lockOrigin: string,
+	tryCount: number = 0
+): Promise<number> {
 	if (tryCount > maxRetries) {
 		throw new Error("maximum lock accuriations reached")
 	}
 
 	try {
-		console.log("FILE LOCKING FILE LOCKING FILE LOCKING trying to lock the file " + tryCount)
+		console.log(lockOrigin + " tries to accquire a lockfile Retry Nr.: " + tryCount)
 		await fs.mkdir(lockFilePath)
 		const stats = await fs.stat(lockFilePath)
+		console.log(lockOrigin + " accquired a lockfile Retry Nr.: " + tryCount)
 		return stats.mtimeMs
 	} catch (error: any) {
 		if (error.code !== "EEXIST") {
 			// we only expect the error that the file exists already (locked by other process)
 			throw error
 		}
-
-		try {
-			const stats = await fs.stat(lockFilePath)
-			const currentLockTime = stats.mtimeMs
-
-			console.log(
-				"FILE LOCKING FILE LOCKING FILE LOCKING waiting a second to get a lock run " + tryCount
-			)
-			return new Promise((resolve, reject) => {
-				setTimeout(async () => {
-					try {
-						console.log(
-							"FILE LOCKING FILE LOCKING FILE LOCKING scond passed - try to get lock again run " +
-								tryCount
-						)
-						// alright lets give it another try
-						const stats = await fs.stat(lockFilePath)
-
-						if (stats.mtimeMs === currentLockTime) {
-							console.log(
-								"FILE LOCKING FILE LOCKING FILE LOCKING scond passed - ILLEGAL LOCK DETECTED - removing it run " +
-									tryCount
-							)
-							// the lock seems to be illegal - we don't allow locks longer than 1 second (we don't support updates at the moment)
-							await fs.rmdir(lockFilePath)
-
-							console.log(
-								"FILE LOCKING FILE LOCKING FILE LOCKING scond passed - ILLEGAL LOCK DETECTED - removed trying to reacquiring it " +
-									tryCount
-							)
-							// TODO accquireFileLock#
-							try {
-								const lock = await accquireFileLock(fs, lockFilePath, tryCount + 1)
-								resolve(lock)
-							} catch (error) {
-								reject(error)
-							}
-						} else {
-							// alright seems we have another lock file already
-							console.log(
-								"FILE LOCKING FILE LOCKING FILE LOCKING scond passed - LOCK accquired by someone else :-/ - removing it run " +
-									tryCount
-							)
-							try {
-								const lock = await accquireFileLock(fs, lockFilePath, tryCount + 1)
-								resolve(lock)
-							} catch (error) {
-								reject(error)
-							}
-						}
-					} catch (fstatError: any) {
-						console.log(error)
-						if (fstatError.code === "ENOENT") {
-							// lock file seems to be gone :) - lets try again
-							const lock = accquireFileLock(fs, lockFilePath, tryCount + 1)
-							resolve(lock)
-							return
-						}
-						reject(fstatError)
-					}
-				}, 10000)
-			})
-		} catch (fstatError: any) {
-			if (fstatError.code === "ENOENT") {
-				// lock file seems to be gone :) - lets try again
-				return accquireFileLock(fs, lockFilePath, tryCount + 1)
-			}
-			throw fstatError
-		}
 	}
+
+	let currentLockTime: number
+
+	try {
+		const stats = await fs.stat(lockFilePath)
+		currentLockTime = stats.mtimeMs
+	} catch (fstatError: any) {
+		if (fstatError.code === "ENOENT") {
+			// lock file seems to be gone :) - lets try again
+			return accquireFileLock(fs, lockFilePath, lockOrigin, tryCount + 1)
+		}
+		throw fstatError
+	}
+
+	console.log(
+		lockOrigin +
+			" tries to accquire a lockfile  - lock currently in use... starting probe phase " +
+			+tryCount
+	)
+
+	return new Promise((resolve, reject) => {
+		let probeCounts = 0
+		const scheduleProbationTimeout = () => {
+			setTimeout(async () => {
+				probeCounts += 1
+				let lockFileStats: undefined | NodeishStats = undefined
+				try {
+					console.log(
+						lockOrigin +
+							" tries to accquire a lockfile - check if the lock is free now " +
+							+tryCount
+					)
+
+					// alright lets give it another try
+					lockFileStats = await fs.stat(lockFilePath)
+				} catch (fstatError: any) {
+					if (fstatError.code === "ENOENT") {
+						console.log(
+							lockOrigin +
+								" tries to accquire a lockfile - lock file seems to be free now - try to accquire" +
+								+tryCount
+						)
+						// lock file seems to be gone :) - lets try again
+						const lock = accquireFileLock(fs, lockFilePath, lockOrigin, tryCount + 1)
+						return resolve(lock)
+					}
+					return reject(fstatError)
+				}
+
+				// still the same locker! -
+				if (lockFileStats.mtimeMs === currentLockTime) {
+					if (probeCounts >= nProbes) {
+						// ok maximum lock time ran up (we waitetd nProbes * probeInterval) - we consider the lock to be stale
+						console.log(
+							lockOrigin +
+								" tries to accquire a lockfile  - lock not free - but stale lets drop it" +
+								+tryCount
+						)
+						try {
+							await fs.rmdir(lockFilePath)
+						} catch (rmLockError: any) {
+							if (rmLockError.code === "ENOENT") {
+								// lock already gone?
+								// Option 1: The "stale process" decided to get rid of it
+								// Option 2: Another process accquiring the lock and detected a stale one as well
+							}
+							return reject(rmLockError)
+						}
+						try {
+							const lock = await accquireFileLock(fs, lockFilePath, lockOrigin, tryCount + 1)
+							return resolve(lock)
+						} catch (lockAquireException) {
+							return reject(lockAquireException)
+						}
+					} else {
+						// lets schedule a new probation
+						return scheduleProbationTimeout()
+					}
+				} else {
+					try {
+						const lock = await accquireFileLock(fs, lockFilePath, lockOrigin, tryCount + 1)
+						return resolve(lock)
+					} catch (error) {
+						return reject(error)
+					}
+				}
+			}, probeInterval)
+		}
+		scheduleProbationTimeout()
+	})
 }
 
-async function releaseLock(fs: NodeishFilesystem, lockFilePath: string, lockTime: number) {
-	console.log("FILE LOCKING FILE LOCKING FILE LOCKING releasing the lock ")
+async function releaseLock(
+	fs: NodeishFilesystem,
+	lockFilePath: string,
+	lockOrigin: string,
+	lockTime: number
+) {
+	console.log(lockOrigin + " releasing the lock ")
 	try {
 		const stats = await fs.stat(lockFilePath)
 		if (stats.mtimeMs === lockTime) {
@@ -1097,13 +1141,13 @@ async function releaseLock(fs: NodeishFilesystem, lockFilePath: string, lockTime
 			await fs.rmdir(lockFilePath)
 		}
 	} catch (statError: any) {
-		console.log("COULDNT RELEASE THE LOCK :/ ! ")
-		console.log(statError)
+		console.log(lockOrigin + " couldn't release the lock")
 		if (statError.code === "ENOENT") {
 			// ok seeks like the log was released by someone else
-			console.log("WARNING - the lock was released by a different process")
+			console.log(lockOrigin + "WARNING - the lock was released by a different process")
 			return
 		}
+		console.log(statError)
 		throw statError
 	}
 }
