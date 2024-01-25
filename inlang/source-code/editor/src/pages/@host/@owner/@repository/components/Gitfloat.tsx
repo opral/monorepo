@@ -78,10 +78,18 @@ export const Gitfloat = () => {
 	let signInDialog: SlDialog | undefined
 	let forkPermissionDialog: SlDialog | undefined
 	let pushPermissionDialog: SlDialog | undefined
-
+	let forkDialog: SlDialog | undefined
+	const [forkModalOpen, setForkModalOpen] = createSignal(false)
+	
 	createEffect(() => {
 		if (signInModalOpen()) {
 			signInDialog?.show()
+		}
+	})
+
+	createEffect(() => {
+		if (forkModalOpen()) {
+			forkDialog?.show()
 		}
 	})
 
@@ -258,8 +266,13 @@ export const Gitfloat = () => {
 
 	// prevent user from making to changes when not logged in
 	createEffect(() => {
-		if ((gitState() === "login" || gitState() === "fork") && localChanges() > 2)
+		if ((gitState() === "login") && localChanges() > 2)
 			setSignInModalOpen(true)
+	})
+
+	createEffect(() => {
+		if ((gitState() === "fork") && localChanges() > 2)
+			setForkModalOpen(true)
 	})
 
 	// animations
@@ -448,6 +461,29 @@ export const Gitfloat = () => {
 					pushPermissionDialog?.hide()
 				}}
 			/>
+			<sl-dialog
+				ref={forkDialog!}
+				on:sl-show={() => setForkModalOpen(true)}
+				on:sl-after-hide={() => setForkModalOpen(false)}
+			>
+					<h3 slot="label">Fork</h3>
+					<p>To conduct changes, you must fork this repository and submit changes with a pullrequest.</p>
+					<sl-button
+						slot="footer"
+						prop:variant="primary"
+						onClick={() => {
+							handleFork()
+							forkDialog?.hide()
+							setForkModalOpen(false)
+						}}
+					>
+						Fork repository
+						{/* @ts-ignore */}
+						<div slot="suffix">
+							<IconFork />
+						</div>
+					</sl-button>
+			</sl-dialog>
 		</>
 	)
 }
