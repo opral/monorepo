@@ -8,9 +8,13 @@ export type ElementNode<Name extends stirng> = {
 	start: number
 	end: number
 	type: "Element"
-	name: Name
 	attributes: (Attribute<any> | SpreadAttribute | BaseDirective)[]
-}
+} & (Name extends "svelte:element"
+	? {
+			name: "svelte:element"
+			tag: string
+	  }
+	: { name: Name })
 
 type SpreadAttribute = Extract<TemplateNode, { type: "Spread" }>
 type Attribute<Name extends string> = Extract<TemplateNode, { type: "Attribute"; name: Name }> & {

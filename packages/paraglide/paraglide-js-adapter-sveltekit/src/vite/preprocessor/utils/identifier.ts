@@ -1,3 +1,5 @@
+import { toJSIdentifier } from "../rewrites/escape.js"
+
 /**
  * Returns a unique identifier for a given original name.
  * Used to avoid name collisions when generating code.
@@ -6,4 +8,4 @@
  * @returns A unique identifier for the given original name
  */
 export const identifier = (context: string) => (original_name: string) =>
-	`pArAgLiDe_${context}_${original_name}`
+	`pArAgLiDe_${toJSIdentifier(context)}_${toJSIdentifier(original_name)}`
