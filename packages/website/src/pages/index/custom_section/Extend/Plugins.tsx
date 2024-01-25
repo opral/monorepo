@@ -39,9 +39,14 @@ const PluginSection = () => {
 								</For>
 							</div>
 						</div>
-						<Button type="secondaryOnGray" href="/c/plugins" chevron>
-							{m.home_extend_plugins_button()}
-						</Button>
+						<div class="flex flex-wrap gap-x-4 gap-y-2">
+							<Button type="secondaryOnGray" href="/c/plugins">
+								{m.home_extend_plugins_button()}
+							</Button>
+							<Button type="text" href="/c/plugins" chevron>
+								Why Plugins?
+							</Button>
+						</div>
 					</div>
 					<div class="col-span-8">
 						<div class="grid grid-rows-4 sm:grid-rows-2 sm:grid-cols-2 gap-4 w-full lg:translate-x-16">

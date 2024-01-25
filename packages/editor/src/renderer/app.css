@@ -250,6 +250,7 @@ sl-button[variant="default"]::part(base):hover {
 sl-button.on-inverted::part(base) {
 	background-color: theme(colors.on-inverted-surface);
 	color: theme(colors.inverted-surface);
+	transition: opacity 0.15s;
 }
 
 sl-button.on-inverted::part(base):hover {
