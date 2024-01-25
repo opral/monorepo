@@ -262,6 +262,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					if (newRepo.errors().length > 0) {
 						setLixErrors(newRepo.errors())
 						return
+					} else {
+						setLixErrors([])
 					}
 
 					// @ts-expect-error
@@ -428,8 +430,21 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	)
 
+	// refetch private repo after login
 	createEffect(() => {
-		if (localStorage?.user?.isLoggedIn) refetchRepoInfo()
+		if (
+			!repo.loading &&
+			repo() === undefined &&
+			githubRepositoryInformation() === undefined &&
+			localStorage?.user?.isLoggedIn
+		) {
+			refetchRepo()
+		}
+	})
+
+	// refetch repo info after login
+	createEffect(() => {
+		if (localStorage?.user?.isLoggedIn && !githubRepositoryInformation.loading) refetchRepoInfo()
 	})
 
 	const [currentBranch] = createResource(
