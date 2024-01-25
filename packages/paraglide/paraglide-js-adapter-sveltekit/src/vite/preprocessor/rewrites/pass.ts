@@ -5,7 +5,7 @@ import { attrubuteValuesToJSValue } from "../utils/attributes-to-values.js"
 import { identifier } from "../utils/identifier.js"
 import dedent from "dedent"
 import { escapeForDoubleQuotes } from "./escape.js"
-import type { ElementNode } from "../types.js"
+import type { Attribute, ElementNode } from "../types.js"
 import { uneval } from "devalue"
 
 export type AttributeTranslation = {
@@ -36,10 +36,11 @@ export function createTranslateAttributePass(
 
 		apply: ({ ast, code, originalCode }) => {
 			const i = identifier(`translate_attribute_pass`)
+
 			const svelteElements = getElementsFromAst(ast, "svelte:element")
 
 			for (const { element_name, attribute_name, lang_attribute_name } of attribute_translations) {
-				const elements = [...getElementsFromAst(ast, element_name), ...svelteElements]
+				const elements = [...getElementsFromAst(ast, element_name)]
 
 				//Replace all links with the new links
 				for (const element of elements) {
@@ -81,20 +82,49 @@ export function createTranslateAttributePass(
 					}
 
 					// add a new spread attribute at the end of the element
-					const newSpreadAttributeString = isSvelteElement(element)
-						? `{...( ${attrubuteValuesToJSValue(
-								element.tag,
-								originalCode
-						  )} === "${element_name}" ?  ${i(
-								"handle_attributes"
-						  )}(${attributes}, "${attribute_name}", ${uneval(
-								lang_attribute_name
-						  )}): ${attributes} )}`
-						: `{...(${i("handle_attributes")}(${attributes}, "${attribute_name}",  ${uneval(
-								lang_attribute_name
-						  )}))}`
+					const newSpreadAttributeString = `{...(${i(
+						"handle_attributes"
+					)}(${attributes}, "${attribute_name}",  ${uneval(lang_attribute_name)}))}`
 
 					code.appendRight(element.start + element.name.length + 1, " " + newSpreadAttributeString)
+				}
+
+				for (const element of svelteElements) {
+					let thisAttribute = element.tag
+					if (typeof thisAttribute !== "string") thisAttribute = [thisAttribute]
+					//every svelte:element should have a this attribute -> if not, something is wrong
+					if (!thisAttribute) continue
+
+					const attribute = element.attributes.find(
+						(attr) => attr.type === "Attribute" && attr.name === attribute_name
+					)
+
+					if (!attribute) continue
+
+					const langAttribute = lang_attribute_name
+						? element.attributes.find(
+								(attr) => attr.type === "Attribute" && attr.name === lang_attribute_name
+						  )
+						: undefined
+
+					const newLangAttribute = `
+					${attribute_name}={
+
+							${attrubuteValuesToJSValue(thisAttribute, originalCode)} === ${uneval(element_name)} ?
+
+							${i("translateHref")}(
+								${attrubuteValuesToJSValue(attribute.value, originalCode)},
+								${langAttribute ? attrubuteValuesToJSValue(langAttribute.value, originalCode) : "undefined"}
+							)
+
+							: 
+							${attrubuteValuesToJSValue(attribute.value, originalCode)}
+
+					}
+					`
+
+					//replace the attribute with the new attribute
+					code.overwrite(attribute.start, attribute.end, newLangAttribute)
 				}
 			}
 

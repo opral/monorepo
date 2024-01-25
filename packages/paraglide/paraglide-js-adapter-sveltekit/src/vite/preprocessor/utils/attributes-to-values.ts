@@ -15,6 +15,11 @@ export function attrubuteValuesToJSValue(
 
 	let templateString = "`"
 
+
+	if (!(Symbol.iterator in Object(values))) {
+		console.error(values)
+	}
+
 	for (const value of values) {
 		switch (value.type) {
 			case "Text":
