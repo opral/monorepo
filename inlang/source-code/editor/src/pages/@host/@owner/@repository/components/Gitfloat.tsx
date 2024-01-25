@@ -46,15 +46,19 @@ export const Gitfloat = () => {
 
 	// ui states
 	const gitState: () => "login" | "loading" | "fork" | "pullrequest" | "hasChanges" = () => {
-		const repoInfo = githubRepositoryInformation()
+		// type check for githubRepositoryInformation
+		// eslint-disable-next-line prefer-const
+		let repoInfo = githubRepositoryInformation()
+		const isFork = () => repoInfo && "isFork" in repoInfo
+			? repoInfo.isFork
+			: false
 
 		if (localStorage?.user === undefined) {
 			return "loading"
 		} else if (localStorage?.user?.isLoggedIn === false) {
 			return "login"
 		} else if (
-			typeof repoInfo === "undefined" ||
-			"error" in repoInfo ||
+			typeof githubRepositoryInformation() === "undefined" ||
 			userIsCollaborator.loading ||
 			!projectList() ||
 			isForking()
@@ -62,7 +66,7 @@ export const Gitfloat = () => {
 			return "loading"
 		} else if (userIsCollaborator() === false) {
 			return "fork"
-		} else if (hasPushedChanges() && localChanges() === 0 && repoInfo.isFork) {
+		} else if (hasPushedChanges() && localChanges() === 0 && isFork()) {
 			// if changes exist in a fork, show the pull request button
 			return "pullrequest"
 		}
@@ -292,14 +296,7 @@ export const Gitfloat = () => {
 		}
 	})
 
-	// // trigger refetch of repo when user is logged in and
-	// createEffect(() => {
-	// 	if (lixErrors().some((err) => err.message.includes("401")) && localStorage?.user?.isLoggedIn && repo()) {
-	// 		refetchRepo()
-	// 	}
-	// })
-
-	// wait until fork fetch is done
+	// wait until fork fetch is done and user is collaborator
 	createEffect(
 		on(userIsCollaborator, () => {
 			if (userIsCollaborator()) {
@@ -348,6 +345,7 @@ export const Gitfloat = () => {
 									refetchRepo()
 									setIsMerging(false)
 									setTimeout(() => {
+										// optimistic reset
 										mutateForkStatus({ ...forkStatus(), behind: 0, conflicts: false })
 										refetchForkStatus()
 									}, 400)
