@@ -72,7 +72,7 @@ describe("preprocessor", () => {
 		expect(eachHtml).toBe(`<a href="/rewritten">Test</a>`)
 	})
 
-	it.concurrent.only("translates links inside {:then} and {:catch} blocks", async () => {
+	it.concurrent("translates links inside {:then} and {:catch} blocks", async () => {
 		const code = `
 		<script>
 			const promise = "not a promise -> resolves instantly"
