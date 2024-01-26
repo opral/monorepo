@@ -115,13 +115,6 @@ importers:
 
   inlang/source-code/cli:
     dependencies:
-      esbuild-wasm:
-        specifier: ^0.19.2
-        version: 0.19.6
-      fs-extra:
-        specifier: 11.1.1
-        version: 11.1.1
-    devDependencies:
       '@inlang/language-tag':
         specifier: workspace:*
         version: link:../versioned-interfaces/language-tag
@@ -143,6 +136,13 @@ importers:
       '@lix-js/fs':
         specifier: workspace:*
         version: link:../../../lix/source-code/fs
+      esbuild-wasm:
+        specifier: ^0.19.2
+        version: 0.19.6
+      fs-extra:
+        specifier: 11.1.1
+        version: 11.1.1
+    devDependencies:
       '@sentry/node':
         specifier: ^7.64.0
         version: 7.81.0
