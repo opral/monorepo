@@ -1,5 +1,11 @@
 # @inlang/paraglide-js
 
+## 1.2.2
+
+### Patch Changes
+
+- 613ef9877: fix: Bump `@lix-js/client` dependency
+
 ## 1.2.1
 
 ### Patch Changes
