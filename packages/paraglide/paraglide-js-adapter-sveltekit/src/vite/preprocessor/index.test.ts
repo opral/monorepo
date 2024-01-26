@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest"
 import { CompileOptions, preprocess } from "svelte/compiler"
 import { preprocessor as createPreprocessor } from "./index"
 import { compile } from "svelte/compiler"
-import { PARAGLIDE_CONTEXT_KEY } from "../../runtime/constants"
+import { PARAGLIDE_CONTEXT_KEY } from "../../constants"
 import { rollup } from "rollup"
 import virtual from "@rollup/plugin-virtual"
 import { nodeResolve } from "@rollup/plugin-node-resolve"
@@ -10,8 +10,8 @@ import { nodeResolve } from "@rollup/plugin-node-resolve"
 const preprocessor = createPreprocessor({})
 
 //Make sure these tests are run concurrently - Otherwise they will take forever
-describe("preprocessor", () => {
-	it.concurrent("leaves non-translatable attributes alone", async () => {
+describe.concurrent("preprocessor", () => {
+	it("leaves non-translatable attributes alone", async () => {
 		const hardcodedElementCode = `<a href="/test" data-no-translate>Test</a>`
 		const dynamicElementCode = `<svelte:element this="a" href="/test" data-no-translate>Test</svelte:element>`
 
@@ -22,13 +22,13 @@ describe("preprocessor", () => {
 		expect(dynamicElementHtml).toBe(`<a href="/test" data-no-translate>Test</a>`)
 	})
 
-	it.concurrent("translates hardcoded href attributes", async () => {
+	it("translates hardcoded href attributes", async () => {
 		const code = `<a href="/test">Test</a>`
 		const html = await renderComponent(code)
 		expect(html).toBe(`<a href="/rewritten">Test</a>`)
 	})
 
-	it.concurrent("translates parameterized href attributes", async () => {
+	it("translates parameterized href attributes", async () => {
 		const code = `
         <script>
             const href = "/test"
@@ -39,7 +39,7 @@ describe("preprocessor", () => {
 		expect(html).toBe(`<a href="/rewritten">Test</a>`)
 	})
 
-	it.concurrent("translates links inside {#if} blocks", async () => {
+	it("translates links inside {#if} blocks", async () => {
 		const code = `
         <script>
             const href = "/test"
@@ -54,7 +54,7 @@ describe("preprocessor", () => {
 		expect(html).toBe(`<a href="/rewritten">Test</a>`)
 	})
 
-	it.concurrent("translates links inside {:else} blocks", async () => {
+	it("translates links inside {:else} blocks", async () => {
 		const ifCode = `
 		{#if false}
 			<span>If</span>
@@ -90,7 +90,7 @@ describe("preprocessor", () => {
 		expect(elseIfHtml).toBe(`<a href="/rewritten">Test</a>`)
 	})
 
-	it.concurrent("translates links inside {:then} and {:catch} blocks", async () => {
+	it("translates links inside {:then} and {:catch} blocks", async () => {
 		const code = `
 		<script>
 			const promise = "not a promise -> resolves instantly"
@@ -104,7 +104,7 @@ describe("preprocessor", () => {
 		expect(html).toBe(`<a href="/rewritten">Test</a>`)
 	})
 
-	it.concurrent("translates shorthand href attributes", async () => {
+	it("translates shorthand href attributes", async () => {
 		const code = `
         <script>
             const href = "/test"
@@ -115,14 +115,14 @@ describe("preprocessor", () => {
 		expect(html).toBe(`<a href="/rewritten">Test</a>`)
 	})
 
-	it.concurrent("uses the hreflang attribute", async () => {
+	it("uses the hreflang attribute", async () => {
 		const code = `<a href="/test" hreflang="de" />`
 
 		const html = await renderComponent(code)
 		expect(html).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
 	})
 
-	it.concurrent("uses the hreflang attribute with shorthand", async () => {
+	it("uses the hreflang attribute with shorthand", async () => {
 		const code = `
         <script>
             const lang = "de"
@@ -133,7 +133,7 @@ describe("preprocessor", () => {
 		expect(html).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
 	})
 
-	it.concurrent("translates the spread operator - no hreflang", async () => {
+	it("translates the spread operator - no hreflang", async () => {
 		const code = `
         <script>
             const props = { href: "/test" }
@@ -144,7 +144,7 @@ describe("preprocessor", () => {
 		expect(html).toBe(`<a href="/rewritten"></a>`)
 	})
 
-	it.concurrent("translates the spread operator - with hreflang", async () => {
+	it("translates the spread operator - with hreflang", async () => {
 		const code = `
         <script>
             const props = { href: "/test", hreflang: "de" }
@@ -155,7 +155,7 @@ describe("preprocessor", () => {
 		expect(html).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
 	})
 
-	it.concurrent("translates <svelte:element> tags if they are links", async () => {
+	it("translates <svelte:element> tags if they are links", async () => {
 		const hardcoded = `<svelte:element this="a" href="/test" hreflang="de" />`
 		const parameterized = `<script>
 			const as = "a"
@@ -169,7 +169,7 @@ describe("preprocessor", () => {
 		expect(parameterizedHtml).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
 	})
 
-	it.concurrent("handles the spread operator on <svelte:element> tags", async () => {
+	it("handles the spread operator on <svelte:element> tags", async () => {
 		const formCode = `
 		<script>
 			//Hreflang doens't do anything on forms, but it's a good test case
@@ -190,14 +190,14 @@ describe("preprocessor", () => {
 		expect(linkHtml).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
 	})
 
-	it.concurrent("translates the action attribute of forms", async () => {
+	it("translates the action attribute of forms", async () => {
 		const code = `<form action="/test" />`
 
 		const html = await renderComponent(code)
 		expect(html).toBe(`<form action="/rewritten"></form>`)
 	})
 
-	it.concurrent("translates the formaction attribute of buttons", async () => {
+	it("translates the formaction attribute of buttons", async () => {
 		const code = `<button formaction="/test" />`
 
 		const html = await renderComponent(code)
@@ -205,7 +205,7 @@ describe("preprocessor", () => {
 	})
 
 	/* Future Goals
-	it.concurrent("translates the spread operator - with external hreflang", async () => {
+	it("translates the spread operator - with external hreflang", async () => {
 		const code = `
         <script>
             const props = { href: "/test" }
@@ -216,7 +216,7 @@ describe("preprocessor", () => {
 		expect(html).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
 	})
 
-	it.concurrent("handles conflicting hreflang values (last one wins)", async () => {
+	it("handles conflicting hreflang values (last one wins)", async () => {
 		const code = `
         <script>
             const props_1 = { href: "/test", hreflang: "en" }

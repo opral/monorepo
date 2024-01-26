@@ -1,22 +1,19 @@
 import { parse, type PreprocessorGroup } from "svelte/compiler"
 import MagicString from "magic-string"
 import type { Ast } from "./types.js"
-import { createTranslateAttributePass, type TranslationDefinition } from "./rewrites/pass.js"
+import { createTranslateAttributePass } from "./rewrites/pass.js"
+import { shouldApply } from "./precheck.js"
 
 export type PreprocessorConfig = Record<string, never>
 
-type MarkupPreprocessorArgs = {
-	filename: string
-	content: string
+export type AttributeTranslation = {
+	attribute_name: string
+	lang_attribute_name?: string
 }
 
-export type PreprocessingPass = {
-	/**
-	 * A quick and cheap check to see if this pass should be applied.
-	 * This is used to avoid parsing the file if it's not necessary.
-	 */
-	condition: (data: MarkupPreprocessorArgs) => boolean
+export type TranslationDefinition = Record<string, AttributeTranslation[]>
 
+export type PreprocessingPass = {
 	/**
 	 * Applies the pass to the file.
 	 * Should only be called if `condition` returned true, since it may assume that.
@@ -65,7 +62,7 @@ export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
 			if (filename.includes(".svelte-kit")) return NOOP
 
 			//Run quick checks to see if preprocessing should be applied - skip parsing if not
-			if (!PASS.condition({ filename, content })) return NOOP
+			if (!shouldApply(content, TRANSLATIONS)) return NOOP
 
 			//Parse the file
 			const ast = parse(content)
