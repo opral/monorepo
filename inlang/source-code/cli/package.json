@@ -58,7 +58,8 @@
 		"node-fetch": "^3.3.2",
 		"prompts": "^2.4.2",
 		"typescript": "5.2.2",
-		"vitest": "0.34.3"
+		"vitest": "0.34.3",
+		"@inlang/telemetry": "workspace:*"
 	},
 	"license": "Apache-2.0",
 	"__comment__": "the esbuild-wasm dependency must be a regular dependency to be resolved by the host system. otherwise, esbuild throws errors",
@@ -69,7 +70,6 @@
 		"@inlang/result": "workspace:*",
 		"@inlang/rpc": "workspace:*",
 		"@inlang/sdk": "workspace:*",
-		"@inlang/telemetry": "workspace:*",
 		"@lix-js/fs": "workspace:*",
 		"@lix-js/client": "workspace:*"
 	}

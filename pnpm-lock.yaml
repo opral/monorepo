@@ -127,9 +127,6 @@ importers:
       '@inlang/sdk':
         specifier: workspace:*
         version: link:../sdk
-      '@inlang/telemetry':
-        specifier: workspace:*
-        version: link:../telemetry
       '@lix-js/client':
         specifier: workspace:*
         version: link:../../../lix/source-code/client
@@ -143,6 +140,9 @@ importers:
         specifier: 11.1.1
         version: 11.1.1
     devDependencies:
+      '@inlang/telemetry':
+        specifier: workspace:*
+        version: link:../telemetry
       '@sentry/node':
         specifier: ^7.64.0
         version: 7.81.0
