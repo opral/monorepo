@@ -204,7 +204,6 @@ describe.concurrent("preprocessor", () => {
 		expect(html).toBe(`<button formaction="/rewritten"></button>`)
 	})
 
-	/* Future Goals
 	it("translates the spread operator - with external hreflang", async () => {
 		const code = `
         <script>
@@ -227,7 +226,6 @@ describe.concurrent("preprocessor", () => {
 		const html = await renderComponent(code)
 		expect(html).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
 	})
-    */
 })
 
 /**
