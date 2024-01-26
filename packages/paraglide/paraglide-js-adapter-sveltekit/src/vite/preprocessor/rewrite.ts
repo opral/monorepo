@@ -1,4 +1,4 @@
-import { PARAGLIDE_CONTEXT_KEY } from "../../constants.js"
+import { NO_TRANSLATE_ATTRIBUTE, PARAGLIDE_CONTEXT_KEY } from "../../constants.js"
 import type { TranslationDefinition } from "./index.js"
 import { getAttributeByName, getElementsFromAst } from "./utils/ast.js"
 import { attrubuteValuesToJSValue } from "./utils/attributes-to-values.js"
@@ -9,23 +9,22 @@ import dedent from "dedent"
 import type { Ast, ElementNode } from "./types.js"
 import type MagicString from "magic-string"
 
-export const rewrite = (
-	TRANSLATIONS: TranslationDefinition,
-	{
-		ast,
-		code,
-		originalCode,
-	}: {
-		ast: Ast
-		code: MagicString
-		originalCode: string
-	}
-) => {
+export const rewrite = ({
+	ast,
+	code,
+	originalCode,
+	translations,
+}: {
+	ast: Ast
+	code: MagicString
+	originalCode: string
+	translations: TranslationDefinition
+}) => {
 	const i = identifier(`translate_attribute_pass`)
 
 	const svelteElements = getElementsFromAst(ast, "svelte:element")
 
-	for (const [element_name, attribute_translations] of Object.entries(TRANSLATIONS)) {
+	for (const [element_name, attribute_translations] of Object.entries(translations)) {
 		const elements = [...getElementsFromAst(ast, element_name)]
 
 		for (const element of elements) {
@@ -76,13 +75,13 @@ export const rewrite = (
 
 				code.appendRight(element.start + element.name.length + 1, " " + newSpreadAttributeString)
 			} else {
-				for (const element_translations of Object.entries(TRANSLATIONS)) {
+				for (const element_translations of Object.entries(translations)) {
 					const attribute_translations = element_translations[1]
 					for (const { attribute_name, lang_attribute_name } of attribute_translations) {
 						const attribute = getAttributeByName(element, attribute_name)
 						if (!attribute) continue
 
-						if (getAttributeByName(element, "data-no-translate")) continue
+						if (getAttributeByName(element, NO_TRANSLATE_ATTRIBUTE)) continue
 
 						const langAttribute = lang_attribute_name
 							? getAttributeByName(element, lang_attribute_name)
@@ -164,7 +163,7 @@ export const rewrite = (
 			}
 
 			let value = attributes
-			for (const [element_name, attribute_translations] of Object.entries(TRANSLATIONS)) {
+			for (const [element_name, attribute_translations] of Object.entries(translations)) {
 				value = c.ternary(
 					c.eq(thisValue, c.str(element_name)),
 					`${i("handle_attributes")}(${attributes}, ${uneval(attribute_translations)})`,
@@ -177,12 +176,12 @@ export const rewrite = (
 
 			code.appendRight(element.start + element.name.length + 1, " " + newSpreadAttributeString)
 		} else {
-			for (const [element_name, attribute_translations] of Object.entries(TRANSLATIONS)) {
+			for (const [element_name, attribute_translations] of Object.entries(translations)) {
 				for (const { attribute_name, lang_attribute_name } of attribute_translations) {
 					const attribute = getAttributeByName(element, attribute_name)
 					if (!attribute) continue
 
-					if (getAttributeByName(element, "data-no-translate")) continue
+					if (getAttributeByName(element, NO_TRANSLATE_ATTRIBUTE)) continue
 
 					const langAttribute = lang_attribute_name
 						? getAttributeByName(element, lang_attribute_name)
@@ -244,8 +243,8 @@ export const rewrite = (
              * @param {AttributeTranslation[]} attribute_translations
              */
             function ${i("handle_attributes")}(attrs, attribute_translations) {
-                //If the element has the data-no-translate attribute, don't translate it
-                if(attrs["data-no-translate"] === true) return attrs;
+                //If the element has the ${NO_TRANSLATE_ATTRIBUTE} attribute, don't translate it
+                if(attrs[${c.str(NO_TRANSLATE_ATTRIBUTE)}] === true) return attrs;
 
                 for (const { attribute_name, lang_attribute_name } of attribute_translations){
                     if(attribute_name in attrs) {

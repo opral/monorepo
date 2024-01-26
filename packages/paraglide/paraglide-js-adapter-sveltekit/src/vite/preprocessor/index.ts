@@ -52,7 +52,7 @@ export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
 			const ast = parse(content)
 			const code = new MagicString(content)
 
-			const passResult = rewrite(TRANSLATIONS, { ast, code, originalCode: content })
+			const passResult = rewrite({ ast, code, originalCode: content, translations: TRANSLATIONS })
 
 			const before = new Set<string>(passResult.scriptAdditions?.before)
 			const after = new Set<string>(passResult.scriptAdditions?.after)
@@ -70,7 +70,7 @@ export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
 function modifyScriptTag(
 	ast: Ast,
 	code: MagicString,
-	additions: { before?: Iterable<string>; after?: Iterable<string> },
+	additions: { before?: Iterable<string>; after?: Iterable<string> }
 ) {
 	const before = additions.before ? [...additions.before] : []
 	const after = additions.after ? [...additions.after] : []
