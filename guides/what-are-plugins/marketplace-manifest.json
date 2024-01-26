@@ -10,7 +10,16 @@
 	"readme": {
 		"en": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/what-are-plugins/what-are-plugins.md"
 	},
-	"keywords": ["application", "website", "inlang", "getting-started", "guide", "plugins", "plugin"],
+	"keywords": [
+		"application",
+		"website",
+		"inlang",
+		"getting-started",
+		"guide",
+		"plugins",
+		"plugin",
+		"svelte"
+	],
 	"recommends": ["g/2fg8ng94", "g/00162hsd", "g/wxcebbig", "g/uxohikde"],
 	"publisherName": "Nils Jacobsen",
 	"publisherIcon": "https://avatars.githubusercontent.com/u/58360188?s=96&v=4",
