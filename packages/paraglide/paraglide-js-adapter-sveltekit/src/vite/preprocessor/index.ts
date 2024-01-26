@@ -1,8 +1,8 @@
 import { parse, type PreprocessorGroup } from "svelte/compiler"
 import MagicString from "magic-string"
 import type { Ast } from "./types.js"
-import { createTranslateAttributePass } from "./rewrites/pass.js"
 import { shouldApply } from "./precheck.js"
+import { rewrite } from "./rewrite.js"
 
 export type PreprocessorConfig = Record<string, never>
 
@@ -12,20 +12,6 @@ export type AttributeTranslation = {
 }
 
 export type TranslationDefinition = Record<string, AttributeTranslation[]>
-
-export type PreprocessingPass = {
-	/**
-	 * Applies the pass to the file.
-	 * Should only be called if `condition` returned true, since it may assume that.
-	 *
-	 * @param ast 	The AST of the file.
-	 * @param code 	The code of the file. Modify this directly.
-	 * @returns A list of imports that should be injected into the file.
-	 */
-	apply: (data: { ast: Ast; code: MagicString; originalCode: string }) => {
-		scriptAdditions?: { before?: Iterable<string>; after?: Iterable<string> }
-	}
-}
 
 const TRANSLATIONS: TranslationDefinition = {
 	a: [
@@ -45,8 +31,6 @@ const TRANSLATIONS: TranslationDefinition = {
 		},
 	],
 }
-
-const PASS = createTranslateAttributePass(TRANSLATIONS)
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
@@ -68,7 +52,7 @@ export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
 			const ast = parse(content)
 			const code = new MagicString(content)
 
-			const passResult = PASS.apply({ ast, code, originalCode: content })
+			const passResult = rewrite(TRANSLATIONS, { ast, code, originalCode: content })
 
 			const before = new Set<string>(passResult.scriptAdditions?.before)
 			const after = new Set<string>(passResult.scriptAdditions?.after)
