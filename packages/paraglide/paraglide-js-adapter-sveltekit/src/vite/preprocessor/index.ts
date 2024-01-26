@@ -30,24 +30,22 @@ export type PreprocessingPass = {
 	}
 }
 
-const PASSES: PreprocessingPass[] = [
-	createTranslateAttributePass([
-		{
-			element_name: "a",
-			attribute_name: "href",
-			lang_attribute_name: "hreflang",
-		},
+const PASS = createTranslateAttributePass([
+	{
+		element_name: "a",
+		attribute_name: "href",
+		lang_attribute_name: "hreflang",
+	},
 
-		{
-			element_name: "form",
-			attribute_name: "action",
-		},
-		{
-			element_name: "button",
-			attribute_name: "formaction",
-		},
-	]),
-]
+	{
+		element_name: "form",
+		attribute_name: "action",
+	},
+	{
+		element_name: "button",
+		attribute_name: "formaction",
+	},
+])
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
@@ -62,12 +60,8 @@ export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
 			//dont' process components owned by the framework
 			if (filename.includes(".svelte-kit")) return NOOP
 
-			//Run quick checks to see if any passes should be applied - skip parsing if not
-
-			/** A boolean mask describing which passes passed and which didn't */
-			const passMask = PASSES.map((pass) => pass.condition({ filename, content }))
-			const skipProcessing = passMask.every((pass) => pass === false)
-			if (skipProcessing) return NOOP
+			//Run quick checks to see if preprocessing should be applied - skip parsing if not
+			if (!PASS.condition({ filename, content })) return NOOP
 
 			//Parse the file
 			const ast = parse(content)
@@ -76,20 +70,11 @@ export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
 			const scriptAdditonsStart = new Set<string>()
 			const scriptAdditonsEnd = new Set<string>()
 
-			//Apply the passes whose conditions returned true (be as lazy as possible)
-			for (const [i, element] of passMask.entries()) {
-				if (!element) continue
-
-				//pass is always defined, but eslint doesn't know that
-				const pass = PASSES[i]
-				if (!pass) continue
-
-				const passResult = pass.apply({ ast, code, originalCode: content })
-				for (const addition of passResult.scriptAdditions?.before ?? [])
-					scriptAdditonsStart.add(addition)
-				for (const addition of passResult.scriptAdditions?.after ?? [])
-					scriptAdditonsEnd.add(addition)
-			}
+			const passResult = PASS.apply({ ast, code, originalCode: content })
+			for (const addition of passResult.scriptAdditions?.before ?? [])
+				scriptAdditonsStart.add(addition)
+			for (const addition of passResult.scriptAdditions?.after ?? [])
+				scriptAdditonsEnd.add(addition)
 
 			//Inject any imports that were added by the passes
 			modifyScriptTag(ast, code, { before: scriptAdditonsStart, after: scriptAdditonsEnd })
