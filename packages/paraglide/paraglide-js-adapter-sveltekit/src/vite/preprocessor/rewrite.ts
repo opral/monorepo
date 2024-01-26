@@ -6,8 +6,10 @@ import { identifier } from "./utils/identifier.js"
 import { uneval } from "devalue"
 import * as c from "./utils/codegen.js"
 import dedent from "dedent"
-import type { Ast, ElementNode } from "./types.js"
+import type { Ast, Attribute, ElementNode, SpreadAttribute } from "./types.js"
 import type MagicString from "magic-string"
+
+const i = identifier(`translate_attribute_pass`)
 
 export const rewrite = ({
 	ast,
@@ -20,8 +22,6 @@ export const rewrite = ({
 	originalCode: string
 	translations: TranslationDefinition
 }) => {
-	const i = identifier(`translate_attribute_pass`)
-
 	const svelteElements = getElementsFromAst(ast, "svelte:element")
 
 	for (const [element_name, attribute_translations] of Object.entries(translations)) {
@@ -29,50 +29,20 @@ export const rewrite = ({
 
 		for (const element of elements) {
 			if (hasSpreadAttribute(element)) {
-				const attributeEntries: string[] = []
-				const replacedAttributes = new Set<(typeof element.attributes)[number]>()
-
-				for (const attribute of element.attributes) {
-					switch (attribute.type) {
-						case "Attribute": {
-							attributeEntries.push(
-								`${c.str(attribute.name)} : ${attrubuteValuesToJSValue(
-									attribute.value,
-									originalCode
-								)}`
-							)
-							replacedAttributes.add(attribute)
-							break
-						}
-						case "Spread": {
-							const code: string = originalCode.slice(
-								//@ts-ignore
-								attribute.expression.start,
-								//@ts-ignore
-								attribute.expression.end
-							)
-
-							attributeEntries.push(`...(${code})`)
-							replacedAttributes.add(attribute)
-							break
-						}
-					}
-				}
-
-				const attributes = `{${attributeEntries.join(", ")}}`
-
-				if (replacedAttributes.size === 0) continue
-
-				// remove the replaced attributes from the code
-				for (const attribute of replacedAttributes) {
-					code.remove(attribute.start, attribute.end)
-				}
+				const { attributeObjectSource, attributes } = getAttributesObject(element, originalCode)
+				if (attributes.size === 0) continue //fast path
 
 				// add a new spread attribute at the end of the element
 				const newSpreadAttributeString = c.spreadAttr(
-					`${i("handle_attributes")}(${attributes}, ${uneval(attribute_translations)})`
+					`${i("handle_attributes")}(${attributeObjectSource}, ${uneval(attribute_translations)})`
 				)
 
+				// remove all attributes that were replaced from the code
+				for (const attribute of attributes) {
+					code.remove(attribute.start, attribute.end)
+				}
+
+				//Add the new spread attribute
 				code.appendRight(element.start + element.name.length + 1, " " + newSpreadAttributeString)
 			} else {
 				for (const element_translations of Object.entries(translations)) {
@@ -124,51 +94,22 @@ export const rewrite = ({
 				: "`${" + originalCode.slice(thisAttribute.start, thisAttribute.end) + "}`"
 
 		if (hasSpreadAttribute(element)) {
-			const attributeEntries: string[] = []
-			const replacedAttributes = new Set<(typeof element.attributes)[number]>()
+			const { attributeObjectSource, attributes } = getAttributesObject(element, originalCode)
+			if (attributes.size === 0) continue //fast path
 
-			for (const attribute of element.attributes) {
-				switch (attribute.type) {
-					case "Attribute": {
-						attributeEntries.push(
-							`${c.str(attribute.name)} : ${attrubuteValuesToJSValue(
-								attribute.value,
-								originalCode
-							)}`
-						)
-						replacedAttributes.add(attribute)
-						break
-					}
-					case "Spread": {
-						const code: string = originalCode.slice(
-							//@ts-ignore
-							attribute.expression.start,
-							//@ts-ignore
-							attribute.expression.end
-						)
-
-						attributeEntries.push(`...(${code})`)
-						replacedAttributes.add(attribute)
-						break
-					}
-				}
-			}
-
-			const attributes = `{${attributeEntries.join(", ")}}`
-			if (replacedAttributes.size === 0) continue
-
-			// remove the replaced attributes from the code
-			for (const attribute of replacedAttributes) {
-				code.remove(attribute.start, attribute.end)
-			}
-
-			let value = attributes
+			// builds a giant ternary expression that applies the translated attributes based on the thisAttribute
+			let value = attributeObjectSource
 			for (const [element_name, attribute_translations] of Object.entries(translations)) {
 				value = c.ternary(
 					c.eq(thisValue, c.str(element_name)),
-					`${i("handle_attributes")}(${attributes}, ${uneval(attribute_translations)})`,
+					`${i("handle_attributes")}(${attributeObjectSource}, ${uneval(attribute_translations)})`,
 					value
 				)
+			}
+
+			// remove the replaced attributes from the code
+			for (const attribute of attributes) {
+				code.remove(attribute.start, attribute.end)
 			}
 
 			// add a new spread attribute at the end of the element
@@ -263,6 +204,46 @@ export const rewrite = ({
 			before,
 			after,
 		},
+	}
+}
+
+function getAttributesObject(
+	element: ElementNode<string>,
+	originalCode: string
+): {
+	attributes: Set<Attribute<string> | SpreadAttribute>
+	attributeObjectSource: string
+} {
+	const attributeEntries: string[] = []
+	const replacedAttributes = new Set<Attribute<string> | SpreadAttribute>()
+
+	for (const attribute of element.attributes) {
+		switch (attribute.type) {
+			case "Attribute": {
+				attributeEntries.push(
+					`${c.str(attribute.name)} : ${attrubuteValuesToJSValue(attribute.value, originalCode)}`
+				)
+				replacedAttributes.add(attribute)
+				break
+			}
+			case "Spread": {
+				const code: string = originalCode.slice(
+					//@ts-ignore
+					attribute.expression.start,
+					//@ts-ignore
+					attribute.expression.end
+				)
+
+				attributeEntries.push(`...(${code})`)
+				replacedAttributes.add(attribute)
+				break
+			}
+		}
+	}
+
+	return {
+		attributes: replacedAttributes,
+		attributeObjectSource: `{${attributeEntries.join(", ")}}`,
 	}
 }
 
