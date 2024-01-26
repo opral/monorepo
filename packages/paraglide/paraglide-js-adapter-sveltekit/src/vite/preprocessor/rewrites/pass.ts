@@ -96,7 +96,8 @@ export function createTranslateAttributePass(
 							" " + newSpreadAttributeString
 						)
 					} else {
-						for (const [element_name, attribute_translations] of Object.entries(TRANSLATIONS)) {
+						for (const element_translations of Object.entries(TRANSLATIONS)) {
+							const attribute_translations = element_translations[1]
 							for (const { attribute_name, lang_attribute_name } of attribute_translations) {
 								const attribute = getAttributeByName(element, attribute_name)
 								if (!attribute) continue
