@@ -260,7 +260,7 @@ async function renderComponent(svelteCode: string, props: Record<string, any> = 
 		filename: "src/Component.svelte",
 	})
 
-	console.log(preprocessedComponent.code)
+	//console.log(preprocessedComponent.code)
 
 	const bundle = await rollup({
 		input: "src/Entry.svelte",

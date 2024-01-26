@@ -1,11 +1,7 @@
 import { parse, type PreprocessorGroup } from "svelte/compiler"
 import MagicString from "magic-string"
 import type { Ast } from "./types.js"
-import {
-	createTranslateAttributePass,
-	type AttributeTranslation,
-	type TranslationDefinition,
-} from "./rewrites/pass.js"
+import { createTranslateAttributePass, type TranslationDefinition } from "./rewrites/pass.js"
 
 export type PreprocessorConfig = Record<string, never>
 
