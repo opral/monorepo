@@ -12,9 +12,14 @@ export type ElementNode<Name extends stirng> = {
 } & (Name extends "svelte:element"
 	? {
 			name: "svelte:element"
-			tag: string
+			tag: string | Expression
 	  }
 	: { name: Name })
+
+type Expression = {
+	start: number
+	end: number
+}
 
 type SpreadAttribute = Extract<TemplateNode, { type: "Spread" }>
 type Attribute<Name extends string> = Extract<TemplateNode, { type: "Attribute"; name: Name }> & {

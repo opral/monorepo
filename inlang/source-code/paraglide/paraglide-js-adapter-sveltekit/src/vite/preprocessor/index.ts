@@ -37,7 +37,7 @@ const PASSES: PreprocessingPass[] = [
 			attribute_name: "href",
 			lang_attribute_name: "hreflang",
 		},
-		/*
+
 		{
 			element_name: "form",
 			attribute_name: "action",
@@ -45,7 +45,7 @@ const PASSES: PreprocessingPass[] = [
 		{
 			element_name: "button",
 			attribute_name: "formaction",
-		},*/
+		},
 	]),
 ]
 
