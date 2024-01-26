@@ -25,7 +25,8 @@
 		"svelte",
 		"nextjs",
 		"astro",
-		"inlang"
+		"inlang",
+		"solid"
 	],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
