@@ -5,7 +5,6 @@ import { attrubuteValuesToJSValue } from "../utils/attributes-to-values.js"
 import { identifier } from "../utils/identifier.js"
 import dedent from "dedent"
 import { escapeForDoubleQuotes } from "../utils/escape.js"
-import type { ElementNode } from "../types.js"
 import { uneval } from "devalue"
 
 export type AttributeTranslation = {
@@ -90,7 +89,7 @@ export function createTranslateAttributePass(
 				}
 
 				for (const element of svelteElements) {
-					let thisAttribute = element.tag
+					const thisAttribute = element.tag
 
 					//every svelte:element should have a this attribute -> if not, something is wrong
 					if (!thisAttribute) continue
@@ -176,9 +175,4 @@ export function createTranslateAttributePass(
 			}
 		},
 	}
-}
-
-
-function isSvelteElement(element: ElementNode<string>): element is ElementNode<"svelte:element"> {
-	return element.name === "svelte:element"
 }
