@@ -1,7 +1,11 @@
 import { parse, type PreprocessorGroup } from "svelte/compiler"
 import MagicString from "magic-string"
 import type { Ast } from "./types.js"
-import { createTranslateAttributePass, type AttributeTranslation } from "./rewrites/pass.js"
+import {
+	createTranslateAttributePass,
+	type AttributeTranslation,
+	type TranslationDefinition,
+} from "./rewrites/pass.js"
 
 export type PreprocessorConfig = Record<string, never>
 
@@ -30,22 +34,24 @@ export type PreprocessingPass = {
 	}
 }
 
-const TRANSLATIONS: AttributeTranslation[] = [
-	{
-		element_name: "a",
-		attribute_name: "href",
-		lang_attribute_name: "hreflang",
-	},
-
-	{
-		element_name: "form",
-		attribute_name: "action",
-	},
-	{
-		element_name: "button",
-		attribute_name: "formaction",
-	},
-]
+const TRANSLATIONS: TranslationDefinition = {
+	a: [
+		{
+			attribute_name: "href",
+			lang_attribute_name: "hreflang",
+		},
+	],
+	form: [
+		{
+			attribute_name: "action",
+		},
+	],
+	button: [
+		{
+			attribute_name: "formaction",
+		},
+	],
+}
 
 const PASS = createTranslateAttributePass(TRANSLATIONS)
 
