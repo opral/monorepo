@@ -49,9 +49,7 @@ export const Gitfloat = () => {
 		// type check for githubRepositoryInformation
 		// eslint-disable-next-line prefer-const
 		let repoInfo = githubRepositoryInformation()
-		const isFork = () => repoInfo && "isFork" in repoInfo
-			? repoInfo.isFork
-			: false
+		const isFork = () => (repoInfo && "isFork" in repoInfo ? repoInfo.isFork : false)
 
 		if (localStorage?.user === undefined) {
 			return "loading"
