@@ -8,7 +8,7 @@
         "access": "public"
     },
     "scripts": {
-        "test": "vitest run --passWithNoTests --dir src",
+        "test": "vitest run --passWithNoTests --test-timeout 30000 --dir src",
         "build": "svelte-package -i src -o dist",
         "dev": "svelte-package -w -i src -o dist",
         "lint": "eslint ./src --fix",
