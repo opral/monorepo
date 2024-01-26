@@ -164,17 +164,26 @@ describe("preprocessor", () => {
 		expect(parameterizedHtml).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
 	})
 
-	/*
 	it.concurrent("handles the spread operator on <svelte:element> tags", async () => {
-		const code = `<script>
-			const props = { href: "/test", hreflang: "de" }
+		const formCode = `
+		<script>
+			//Hreflang doens't do anything on forms, but it's a good test case
+			const props = { action: "/test", hreflang: "de" }
+		</script>
+		<svelte:element this="form" {...props} />`
+
+		const linkCode = `
+		<script>
+			const props = { href: "/test", hreflang:  "de"	 }
 		</script>
 		<svelte:element this="a" {...props} />`
 
-		const html = await renderComponent(code)
-		expect(html).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
+		const formHtml = await renderComponent(formCode)
+		const linkHtml = await renderComponent(linkCode)
+
+		expect(formHtml).toBe(`<form action="/rewritten" hreflang="de"></form>`)
+		expect(linkHtml).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
 	})
-	*/
 
 	it.concurrent("translates the action attribute of forms", async () => {
 		const code = `<form action="/test" />`
@@ -246,7 +255,7 @@ async function renderComponent(svelteCode: string, props: Record<string, any> = 
 		filename: "src/Component.svelte",
 	})
 
-	//console.log(preprocessedComponent.code)
+	console.log(preprocessedComponent.code)
 
 	const bundle = await rollup({
 		input: "src/Entry.svelte",
