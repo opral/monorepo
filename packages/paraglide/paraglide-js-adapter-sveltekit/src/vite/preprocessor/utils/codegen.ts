@@ -44,3 +44,8 @@ export function str(value: string) {
 export function attribute(name: string, value: string) {
 	return `${name}={${value}}`
 }
+
+
+export function spreadAttr(value: string) {
+	return `{...(${value})}`
+}
