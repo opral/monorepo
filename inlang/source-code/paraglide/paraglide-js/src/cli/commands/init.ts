@@ -46,14 +46,7 @@ export const initCommand = new Command()
 		ctx.logger.box("Welcome to inlang Paraglide-JS 🪂")
 
 		telemetry.capture({ event: "PARAGLIDE-JS init started" })
-		// TODO add a project UUID to the tele.groups internal #196
-		// telemetry.groupIdentify({
-		// 	groupType: "repository",
-		// 	groupKey: gitOrigin,
-		// 	properties: {
-		// 		name: gitOrigin,
-		// 	},
-		// })
+
 		await checkIfUncommittedChanges(ctx)
 		await checkIfPackageJsonExists(ctx)
 		const projectPath = await initializeInlangProject(ctx)

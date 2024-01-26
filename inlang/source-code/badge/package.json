@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/badge",
 	"type": "module",
-	"version": "0.6.0",
+	"version": "0.6.1",
 	"private": true,
 	"exports": {
 		".": "./dist/index.js",
@@ -10,7 +10,7 @@
 	"scripts": {
 		"dev": "node --loader tsx ./src/main.ts",
 		"build": "tsc --build",
-		"production": "NODE_ENV=production tsx ./src/main.ts",
+		"production": "NODE_ENV=production NODE_OPTIONS=--max-old-space-size=1000 tsx ./src/main.ts",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage src",
 		"e2e:install": "npx playwright install --with-deps",
 		"e2e": "npx playwright test",

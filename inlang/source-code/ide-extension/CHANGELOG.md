@@ -1,5 +1,20 @@
 # inlang-vs-code-extension
 
+## 1.29.1
+
+### Patch Changes
+
+- Updated dependencies [3bf94ddb5]
+  - @lix-js/client@0.8.0
+  - @inlang/sdk@0.26.1
+  - @inlang/telemetry@0.3.9
+
+## 1.29.0
+
+### Minor Changes
+
+- c98ea1dfe: refactor: internal change how projects are identified
+
 ## 1.28.3
 
 ### Patch Changes
