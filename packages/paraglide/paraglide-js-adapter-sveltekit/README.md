@@ -340,7 +340,10 @@ This is also usefull for detecting which navigation item is currently active.
 ## Roadmap
 
 - [ ] Rewrite `hrefs` on `<svelte:element>` components if they have are links
-- [ ] Optional & Catch-all parameters in Path translation
+- [ ] Expand the route features in Path translation
+  - [ ] Optional parameters
+  - [ ] Catch-all parameters
+  - [ ] Parameter matchers
 
 ## Playground
 
