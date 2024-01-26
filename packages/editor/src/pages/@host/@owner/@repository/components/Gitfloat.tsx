@@ -466,8 +466,8 @@ export const Gitfloat = () => {
 				on:sl-show={() => setForkModalOpen(true)}
 				on:sl-after-hide={() => setForkModalOpen(false)}
 			>
-					<h3 slot="label">Fork</h3>
-				<p>To push changes you must fork this repository and submit changes with a pullrequest.</p>
+				<h3 slot="label">Fork</h3>
+				<p>To push changes you need to fork this repository and submit changes with a pullrequest.</p>
 					<sl-button
 						slot="footer"
 						prop:variant="primary"
