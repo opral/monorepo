@@ -9,7 +9,7 @@ import { escapeForTemplateString } from "./escape.js"
  */
 export function attrubuteValuesToJSValue(
 	values: AttributeValue[] | boolean | string,
-	originalCode: string
+	originalCode: string,
 ): string {
 	if (typeof values === "boolean") return values.toString()
 	if (typeof values === "string") return "`" + escapeForTemplateString(values) + "`"
