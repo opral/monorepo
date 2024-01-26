@@ -16,7 +16,7 @@ export type AttributeTranslation = {
 export type TranslationDefinition = Record<string, AttributeTranslation[]>
 
 export function createTranslateAttributePass(
-	TRANSLATIONS: TranslationDefinition
+	TRANSLATIONS: TranslationDefinition,
 ): PreprocessingPass {
 	return {
 		condition: ({ content }) => {
@@ -26,7 +26,7 @@ export function createTranslateAttributePass(
 			for (const [element_name, attribute_translations] of Object.entries(TRANSLATIONS)) {
 				const includesElement = content.includes(element_name)
 				const includesAttribute = attribute_translations.some((tr) =>
-					content.includes(tr.attribute_name)
+					content.includes(tr.attribute_name),
 				)
 
 				if ((includesSpread || includesAttribute) && (includesElement || includesSvelteElement)) {
@@ -56,8 +56,8 @@ export function createTranslateAttributePass(
 									attributeEntries.push(
 										`${c.str(attribute.name)} : ${attrubuteValuesToJSValue(
 											attribute.value,
-											originalCode
-										)}`
+											originalCode,
+										)}`,
 									)
 									replacedAttributes.add(attribute)
 									break
@@ -67,7 +67,7 @@ export function createTranslateAttributePass(
 										//@ts-ignore
 										attribute.expression.start,
 										//@ts-ignore
-										attribute.expression.end
+										attribute.expression.end,
 									)
 
 									attributeEntries.push(`...(${code})`)
@@ -88,12 +88,12 @@ export function createTranslateAttributePass(
 
 						// add a new spread attribute at the end of the element
 						const newSpreadAttributeString = c.spreadAttr(
-							`${i("handle_attributes")}(${attributes}, ${uneval(attribute_translations)})`
+							`${i("handle_attributes")}(${attributes}, ${uneval(attribute_translations)})`,
 						)
 
 						code.appendRight(
 							element.start + element.name.length + 1,
-							" " + newSpreadAttributeString
+							" " + newSpreadAttributeString,
 						)
 					} else {
 						for (const element_translations of Object.entries(TRANSLATIONS)) {
@@ -114,7 +114,7 @@ export function createTranslateAttributePass(
 									`${i("translateAttribute")}(
 													${attrubuteValuesToJSValue(attribute.value, originalCode)},
 													${langAttribute ? attrubuteValuesToJSValue(langAttribute.value, originalCode) : "undefined"}
-												)`
+												)`,
 								)
 
 								//replace the attribute with the new attribute
@@ -144,8 +144,8 @@ export function createTranslateAttributePass(
 								attributeEntries.push(
 									`${c.str(attribute.name)} : ${attrubuteValuesToJSValue(
 										attribute.value,
-										originalCode
-									)}`
+										originalCode,
+									)}`,
 								)
 								replacedAttributes.add(attribute)
 								break
@@ -155,7 +155,7 @@ export function createTranslateAttributePass(
 									//@ts-ignore
 									attribute.expression.start,
 									//@ts-ignore
-									attribute.expression.end
+									attribute.expression.end,
 								)
 
 								attributeEntries.push(`...(${code})`)
@@ -178,7 +178,7 @@ export function createTranslateAttributePass(
 						value = c.ternary(
 							c.eq(thisValue, c.str(element_name)),
 							`${i("handle_attributes")}(${attributes}, ${uneval(attribute_translations)})`,
-							value
+							value,
 						)
 					}
 
@@ -206,8 +206,8 @@ export function createTranslateAttributePass(
 												${attrubuteValuesToJSValue(attribute.value, originalCode)},
 												${langAttribute ? attrubuteValuesToJSValue(langAttribute.value, originalCode) : "undefined"}
 											)`,
-									attrubuteValuesToJSValue(attribute.value, originalCode)
-								)
+									attrubuteValuesToJSValue(attribute.value, originalCode),
+								),
 							)
 
 							//replace the attribute with the new attribute
@@ -258,7 +258,7 @@ export function createTranslateAttributePass(
 						}
 
 						return attrs;
-					}`
+					}`,
 			)
 
 			return {
