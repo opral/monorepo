@@ -66,7 +66,7 @@ export const getEditorConfig = (
 		editorProps: {
 			attributes: {
 				class: "focus:outline-none",
-				spellcheck: false,
+				spellcheck: true,
 			},
 		},
 		content:

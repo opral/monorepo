@@ -121,7 +121,6 @@ export const extractMessageCommand = {
 
 		telemetry.capture({
 			event: "IDE-EXTENSION command executed",
-			properties: { name: "extract message" },
 		})
 		return msg("Message extracted.")
 	},

@@ -73,6 +73,7 @@ export function Message(props: { id: string }) {
 			// web components. See https://github.com/opral/monorepo/pull/555
 			classList={{
 				["hidden"]: message() ? shouldMessageBeShown() : true,
+				["animate-fadeInBottom"]: !shouldMessageBeShown(),
 			}}
 		>
 			<div class="flex gap-2 items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-4 bg-surface-2 border-x border-b-0 border-surface-2">

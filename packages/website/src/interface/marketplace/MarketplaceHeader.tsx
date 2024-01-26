@@ -38,7 +38,7 @@ const MarketplaceHeader = () => {
 			<Show when={languageTag() !== "en" && languageTag() !== "de"}>
 				<Banner
 					text="This language is community translated. Contribute to the translation here."
-					href="/editor/github.com/opral/monorepo"
+					href="https://fink.inlang.com/github.com/opral/monorepo"
 				/>
 			</Show>
 			<header class="sticky top-0 w-full z-[9999] sm:bg-background border-b border-surface-200 md:px-4">

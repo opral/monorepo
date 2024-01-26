@@ -78,10 +78,18 @@ export const Gitfloat = () => {
 	let signInDialog: SlDialog | undefined
 	let forkPermissionDialog: SlDialog | undefined
 	let pushPermissionDialog: SlDialog | undefined
+	let forkDialog: SlDialog | undefined
+	const [forkModalOpen, setForkModalOpen] = createSignal(false)
 
 	createEffect(() => {
 		if (signInModalOpen()) {
 			signInDialog?.show()
+		}
+	})
+
+	createEffect(() => {
+		if (forkModalOpen()) {
+			forkDialog?.show()
 		}
 	})
 
@@ -256,6 +264,15 @@ export const Gitfloat = () => {
 		},
 	}
 
+	// prevent user from making to changes when not logged in
+	createEffect(() => {
+		if (gitState() === "login" && localChanges() > 2) setSignInModalOpen(true)
+	})
+
+	createEffect(() => {
+		if (gitState() === "fork" && localChanges() > 2) setForkModalOpen(true)
+	})
+
 	// animations
 	onMount(() => {
 		const gitfloat = document.querySelector(".gitfloat")
@@ -364,29 +381,35 @@ export const Gitfloat = () => {
 					<div class="w-full flex justify-start items-center rounded-lg bg-inverted-surface shadow-xl z-20">
 						<Show when={loggedInUser(localStorage.user)}>
 							{(user) => (
-								<div class="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2 p-1.5 rounded-tl-lg rounded-bl-lg border-t-0 border-r border-b-0 border-l-0 border-background/10">
+								<div class="absolute flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 gap-2 p-1.5 rounded-tl-lg rounded-bl-lg border-t-0 border-r border-b-0 border-l-0 border-background/10 animate-blendIn">
 									<img
 										src={user().avatarUrl}
 										alt="user avatar"
-										class="flex-grow-0 flex-shrink-0 w-[30px] h-[30px] rounded object-cover bg-on-inverted-surface"
+										class="flex-grow-0 flex-shrink-0 w-[30px] h-[30px] rounded object-cover bg-on-inverted-surface animate-fadeIn"
 									/>
 								</div>
 							)}
 						</Show>
 						<div
 							class={
-								"flex justify-start items-center self-stretch flex-grow relative gap-2 pr-1.5 py-1.5 " +
-								(gitState() === "pullrequest" ? "pl-1.5" : "pl-3")
+								"flex justify-start items-center self-stretch flex-grow relative gap-2 pr-1.5 py-1.5 transition-all duration-200 " +
+								(gitState() === "pullrequest" ? "pl-1.5 " : "pl-3 ") +
+								(loggedInUser(localStorage.user) && "ml-11")
 							}
 						>
 							<p
 								class={
-									"flex items-center gap-2 flex-grow text-xs font-medium text-left text-on-inverted-surface " +
+									"flex items-center gap-2 flex-grow text-xs font-medium text-left text-on-inverted-surface transition-all duration-200 " +
 									(gitState() === "pullrequest" && "hidden")
 								}
 							>
 								<Show when={gitState() === "hasChanges"}>
-									<div class="flex flex-col justify-center items-center flex-grow-0 flex-shrink-0 h-5 w-5 relative gap-2 p-2 rounded bg-info">
+									<div
+										class={
+											"flex flex-col justify-center items-center flex-grow-0 flex-shrink-0 h-5 min-w-[1.25rem] gap-2 py-2 px-1 rounded bg-info " +
+											(gitState() === "hasChanges" && "animate-fadeIn")
+										}
+									>
 										<p class="flex-grow-0 flex-shrink-0 text-xs font-medium text-left text-slate-100">
 											{localChanges()}
 										</p>
@@ -401,7 +424,7 @@ export const Gitfloat = () => {
 								prop:target="_blank"
 								prop:loading={isLoading() || gitState() === "loading"}
 								prop:disabled={localChanges() === 0 && gitState() === "hasChanges"}
-								class={"on-inverted " + (gitState() === "pullrequest" && "grow")}
+								class={"on-inverted " + (gitState() === "pullrequest" ? "grow " : "w-[76.8px]")}
 							>
 								{data[gitState()].buttontext}
 								<div slot="suffix">{data[gitState()].icon()}</div>
@@ -436,6 +459,30 @@ export const Gitfloat = () => {
 					pushPermissionDialog?.hide()
 				}}
 			/>
+			<sl-dialog
+				ref={forkDialog!}
+				on:sl-show={() => setForkModalOpen(true)}
+				on:sl-after-hide={() => setForkModalOpen(false)}
+			>
+				<h3 slot="label">Fork</h3>
+				<p>
+					To push changes you need to fork this repository and submit changes with a pullrequest.
+				</p>
+				<sl-button
+					slot="footer"
+					prop:variant="primary"
+					onClick={() => {
+						handleFork()
+						forkDialog?.hide()
+						setForkModalOpen(false)
+					}}
+				>
+					<div slot="prefix">
+						<IconFork />
+					</div>
+					Fork repository
+				</sl-button>
+			</sl-dialog>
 		</>
 	)
 }
