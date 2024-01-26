@@ -55,17 +55,10 @@ export default defineConfig({
 })
 ```
 
-This replaces the need for calling `paraglide-js compile` in your build script. It will automatically compiler and recompile your translations when you run `npm run dev` or `npm run build`. 
-
-```diff 
-// package.json
-	"scripts": {
--		"build": "paraglide-js compile && vite build",
-+		"build": "vite build",
-	}
-```
-
-It also registers the Svelte Preprocessor that's necessary for translating links, but more on that later.
+<doc-accordion 
+	heading="Do I still need to run `paraglide-js compile` ?" 
+	text="This replaces the need for calling `paraglide-js compile` in your build script. It will automatically compiler and recompile your translations when you run npm run dev or npm run build. ">
+</doc-accordion>
 
 ### 2. Initialise the Adapter
 
@@ -271,6 +264,12 @@ Fortunately you don't need to do this often. Most of the time the an `a` tag is 
 
 Language switchers are tricky, because we need to get the route correspondingto the current URL path, which is of course translated. We need to somehow get the untranslated version of the path, so that we can translate it again.
 
+<doc-accordion
+	heading="Wait, do I thought I don't need wrap my links with the Adapter?"
+	text="Language switchers are the one exception to this rule.">
+</doc-accordion>
+
+
 Fortunately, the `i18n` instance can help us with that. It exposes a `route` method that takes the current path and return the untranslated version of it.
 
 ```ts
@@ -313,6 +312,38 @@ This is also usefull for detecting which navigation item is currently active.
 </li>
 ```
 
+## FAQ
+
+<doc-accordion
+	heading="Can I also prefix the default language?"
+	text="Yes, you can also include the default language in the URL by passing prefixDefaultLanguage: 'always' to createI18n.">
+</doc-accordion>
+
+
+<doc-accordion
+	heading="Can I change default language?"
+	text="Yes, using the 'defaultLanguage' option on 'createI18n'.">
+</doc-accordion>
+
+<doc-accordion
+	heading="Do I have to have the language in the URL?"
+	text="Using the right options you can get the language from anywhere, but the main benefit of using this library is the i18n routing. If you don't plan on using that you might be
+	better off using ParaglideJS directly.">
+</doc-accordion>
+
+
+<doc-accordion
+	heading="'Can't find module $paraglide/runtime.js' - What do I do?"
+	text="This likely means that you haven't registered the $paraglide alias for src/paraglide in svelte.config.js. Try adding that. Check the example if you're stuck">
+</doc-accordion>
+
+## Roadmap
+
+- [ ] Rewrite `hrefs` on `<svelte:element>` components if they have are links
+- [ ] Expand the route features in Path translation
+  - [ ] Optional parameters
+  - [ ] Catch-all parameters
+  - [ ] Parameter matchers
 
 ## Playground
 
