@@ -1,8 +1,8 @@
-import type { Ast, ElementNode, TemplateNode } from "../types.js"
+import type { Ast, Attribute, ElementNode, TemplateNode } from "../types.js"
 
 export function getElementsFromAst<Name extends string>(
 	ast: Ast,
-	elementName: Name,
+	elementName: Name
 ): ElementNode<Name>[] {
 	const links: ElementNode<Name>[] = []
 
@@ -22,4 +22,17 @@ export function getElementsFromAst<Name extends string>(
 
 	walk(ast.html)
 	return links
+}
+
+export function hasSpreadAttribute(element: ElementNode<string>): boolean {
+	return element.attributes.some((attribute) => attribute.type === "Spread")
+}
+
+export function getAttributeByName<T extends string>(
+	element: ElementNode<string>,
+	name: T
+): Attribute<T> | undefined {
+	return element.attributes.find(
+		(attribute) => attribute.type === "Attribute" && attribute.name === name
+	) as Attribute<T> | undefined
 }

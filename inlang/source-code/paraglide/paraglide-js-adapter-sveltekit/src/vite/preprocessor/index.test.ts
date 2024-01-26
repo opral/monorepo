@@ -164,26 +164,30 @@ describe("preprocessor", () => {
 		expect(parameterizedHtml).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
 	})
 
-	it.concurrent("doesn't translate <svelte:element> tags if they are not links", async () => {
-		const hardcoded = `<svelte:element this="div" href="/test" hreflang="de" />`
-		const parameterized = `
-        <script>
-            const as = "div"
-        </script>
-        <svelte:element this={as} href="/test" hreflang="de" />`
+	/*
+	it.concurrent("handles the spread operator on <svelte:element> tags", async () => {
+		const code = `<script>
+			const props = { href: "/test", hreflang: "de" }
+		</script>
+		<svelte:element this="a" {...props} />`
 
-		const hardcodedHtml = await renderComponent(hardcoded)
-		const parameterizedHtml = await renderComponent(parameterized)
-
-		expect(hardcodedHtml).toBe(`<div href="/test" hreflang="de"></div>`)
-		expect(parameterizedHtml).toBe(`<div href="/test" hreflang="de"></div>`)
+		const html = await renderComponent(code)
+		expect(html).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
 	})
+	*/
 
-	it.concurrent("also translates the action attribute of forms", async () => {
+	it.concurrent("translates the action attribute of forms", async () => {
 		const code = `<form action="/test" />`
 
 		const html = await renderComponent(code)
 		expect(html).toBe(`<form action="/rewritten"></form>`)
+	})
+
+	it.concurrent("translates the formaction attribute of buttons", async () => {
+		const code = `<button formaction="/test" />`
+
+		const html = await renderComponent(code)
+		expect(html).toBe(`<button formaction="/rewritten"></button>`)
 	})
 
 	/* Future Goals

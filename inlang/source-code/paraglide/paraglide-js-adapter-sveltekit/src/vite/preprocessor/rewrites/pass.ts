@@ -1,11 +1,11 @@
 import { PARAGLIDE_CONTEXT_KEY } from "../../../runtime/constants.js"
 import type { PreprocessingPass } from "../index.js"
-import { getElementsFromAst } from "../utils/ast.js"
+import { getAttributeByName, getElementsFromAst } from "../utils/ast.js"
 import { attrubuteValuesToJSValue } from "../utils/attributes-to-values.js"
 import { identifier } from "../utils/identifier.js"
-import dedent from "dedent"
-import { escapeForDoubleQuotes } from "../utils/escape.js"
 import { uneval } from "devalue"
+import * as c from "../utils/codegen.js"
+import dedent from "dedent"
 
 export type AttributeTranslation = {
 	element_name: string
@@ -43,16 +43,18 @@ export function createTranslateAttributePass(
 
 				//Replace all links with the new links
 				for (const element of elements) {
-					let attributes = "{"
-
+					const attributeEntries: string[] = []
 					const replacedAttributes = new Set<(typeof element.attributes)[number]>()
 
 					for (const attribute of element.attributes) {
 						switch (attribute.type) {
 							case "Attribute": {
-								attributes += `"${escapeForDoubleQuotes(
-									attribute.name
-								)}": ${attrubuteValuesToJSValue(attribute.value, originalCode)},`
+								attributeEntries.push(
+									`${c.str(attribute.name)} : ${attrubuteValuesToJSValue(
+										attribute.value,
+										originalCode
+									)}`
+								)
 								replacedAttributes.add(attribute)
 								break
 							}
@@ -64,14 +66,14 @@ export function createTranslateAttributePass(
 									attribute.expression.end
 								)
 
-								attributes += `...(${code}),`
+								attributeEntries.push(`...(${code})`)
 								replacedAttributes.add(attribute)
 								break
 							}
 						}
 					}
 
-					attributes += "}"
+					const attributes = `{${attributeEntries.join(", ")}}`
 
 					if (replacedAttributes.size === 0) continue
 
@@ -89,46 +91,34 @@ export function createTranslateAttributePass(
 				}
 
 				for (const element of svelteElements) {
-					const thisAttribute = element.tag
-
-					//every svelte:element should have a this attribute -> if not, something is wrong
-					if (!thisAttribute) continue
-
-					const attribute = element.attributes.find(
-						(attr) => attr.type === "Attribute" && attr.name === attribute_name
-					)
-
+					const attribute = getAttributeByName(element, attribute_name)
 					if (!attribute) continue
 
 					const langAttribute = lang_attribute_name
-						? element.attributes.find(
-								(attr) => attr.type === "Attribute" && attr.name === lang_attribute_name
-						  )
+						? getAttributeByName(element, lang_attribute_name)
 						: undefined
 
-					const thisAttributeValue =
+					const thisAttribute = element.tag
+					if (!thisAttribute) continue
+					const thisValue =
 						typeof thisAttribute === "string"
-							? uneval(thisAttribute)
+							? c.str(thisAttribute)
 							: "`${" + originalCode.slice(thisAttribute.start, thisAttribute.end) + "}`"
 
-					const newLangAttribute = `
-					${attribute_name}={
-
-							${thisAttributeValue} === ${uneval(element_name)} ?
-
-							${i("translateHref")}(
-								${attrubuteValuesToJSValue(attribute.value, originalCode)},
-								${langAttribute ? attrubuteValuesToJSValue(langAttribute.value, originalCode) : "undefined"}
-							)
-
-							: 
-							${attrubuteValuesToJSValue(attribute.value, originalCode)}
-
-					}
-					`
+					const newLangAttributeCode = c.attribute(
+						attribute_name,
+						c.ternary(
+							c.eq(thisValue, c.str(element_name)),
+							`${i("translateHref")}(
+									${attrubuteValuesToJSValue(attribute.value, originalCode)},
+									${langAttribute ? attrubuteValuesToJSValue(langAttribute.value, originalCode) : "undefined"}
+								)`,
+							attrubuteValuesToJSValue(attribute.value, originalCode)
+						)
+					)
 
 					//replace the attribute with the new attribute
-					code.overwrite(attribute.start, attribute.end, newLangAttribute)
+					code.overwrite(attribute.start, attribute.end, newLangAttributeCode)
 				}
 			}
 
