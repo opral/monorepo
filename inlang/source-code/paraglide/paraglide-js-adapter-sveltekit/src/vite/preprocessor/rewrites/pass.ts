@@ -83,9 +83,14 @@ export function createTranslateAttributePass(
 					}
 
 					// add a new spread attribute at the end of the element
-					const newSpreadAttributeString = `{...(${i(
-						"handle_attributes"
-					)}(${attributes}, "${attribute_name}",  ${uneval(lang_attribute_name)}))}`
+
+					const relevantTranslations = attribute_translations.filter(
+						(tr) => tr.element_name === element_name
+					)
+
+					const newSpreadAttributeString = c.spreadAttr(
+						`${i("handle_attributes")}(${attributes}, ${uneval(relevantTranslations)})`
+					)
 
 					code.appendRight(element.start + element.name.length + 1, " " + newSpreadAttributeString)
 				}
@@ -131,30 +136,40 @@ export function createTranslateAttributePass(
 				dedent`
 					const ${i("context")} = ${i("getContext")}('${PARAGLIDE_CONTEXT_KEY}');
 				
+					/**
+					 * @param {string} href
+					 * @param {string | undefined} hreflang
+					 */
 					function ${i("translateHref")}(href, hreflang) {
 						if(!${i("context")}) return href;
 						return ${i("context")}.translateHref(href, hreflang);
 					}
 
 					/**
-					 * @param {Record<string, any>} attrs
-					 * @param {string} attribute_name
-					 * @param {string | undefined} lang_attribute_name
+					 * @typedef {{ attribute_name: string, lang_attribute_name?: string }} AttributeTranslation
 					 */
-					function ${i("handle_attributes")}(attrs, attribute_name, lang_attribute_name) {
+
+					/**
+					 * Takes in an object of attributes, and an object of attribute translations
+					 * & applies the translations to the attributes
+					 * 
+					 * @param {Record<string, any>} attrs
+					 * @param {AttributeTranslation[]} attribute_translations
+					 */
+					function ${i("handle_attributes")}(attrs, attribute_translations) {
 						//If the element has the data-no-translate attribute, don't translate it
 						if(attrs["data-no-translate"] === true) return attrs;
 
-
-						if(attribute_name in attrs) {
-							const attr = attrs[attribute_name];
-							const hreflang = lang_attribute_name ? attrs[lang_attribute_name] : undefined;
-							attrs[attribute_name] = ${i("translateHref")}(attr, hreflang);
+						for (const { attribute_name, lang_attribute_name } of attribute_translations){
+							if(attribute_name in attrs) {
+								const attr = attrs[attribute_name];
+								const lang_attr = lang_attribute_name ? attrs[lang_attribute_name] : undefined;
+								attrs[attribute_name] = ${i("translateHref")}(attr, lang_attr);
+							}
 						}
 
 						return attrs;
-					}
-                        `
+					}`
 			)
 
 			return {

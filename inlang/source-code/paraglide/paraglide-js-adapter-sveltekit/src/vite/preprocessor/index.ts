@@ -1,7 +1,7 @@
 import { parse, type PreprocessorGroup } from "svelte/compiler"
 import MagicString from "magic-string"
 import type { Ast } from "./types.js"
-import { createTranslateAttributePass } from "./rewrites/pass.js"
+import { createTranslateAttributePass, type AttributeTranslation } from "./rewrites/pass.js"
 
 export type PreprocessorConfig = Record<string, never>
 
@@ -30,7 +30,7 @@ export type PreprocessingPass = {
 	}
 }
 
-const PASS = createTranslateAttributePass([
+const TRANSLATIONS: AttributeTranslation[] = [
 	{
 		element_name: "a",
 		attribute_name: "href",
@@ -45,7 +45,9 @@ const PASS = createTranslateAttributePass([
 		element_name: "button",
 		attribute_name: "formaction",
 	},
-])
+]
+
+const PASS = createTranslateAttributePass(TRANSLATIONS)
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
@@ -67,17 +69,13 @@ export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
 			const ast = parse(content)
 			const code = new MagicString(content)
 
-			const scriptAdditonsStart = new Set<string>()
-			const scriptAdditonsEnd = new Set<string>()
-
 			const passResult = PASS.apply({ ast, code, originalCode: content })
-			for (const addition of passResult.scriptAdditions?.before ?? [])
-				scriptAdditonsStart.add(addition)
-			for (const addition of passResult.scriptAdditions?.after ?? [])
-				scriptAdditonsEnd.add(addition)
+
+			const before = new Set<string>(passResult.scriptAdditions?.before)
+			const after = new Set<string>(passResult.scriptAdditions?.after)
 
 			//Inject any imports that were added by the passes
-			modifyScriptTag(ast, code, { before: scriptAdditonsStart, after: scriptAdditonsEnd })
+			modifyScriptTag(ast, code, { before, after })
 
 			//Generate the code and map
 			const map = code.generateMap({ hires: true })
