@@ -27,7 +27,9 @@
 		"fink",
 		"inlang",
 		"astro",
-		"nextjs"
+		"nextjs",
+		"svelte",
+		"solid"
 	],
 	"recommends": ["m/gerre34r", "m/reootnfj", "m/4cxm3eqi", "g/6ddyhpoi"],
 	"publisherName": "inlang",
