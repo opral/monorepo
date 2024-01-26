@@ -331,6 +331,12 @@ This is also usefull for detecting which navigation item is currently active.
 	better off using ParaglideJS directly.">
 </doc-accordion>
 
+
+<doc-accordion
+	heading="'Can't find module $paraglide/runtime.js' - What do I do?"
+	text="This likely means that you haven't registered the $paraglide alias for src/paraglide in svelte.config.js. Try adding that. Check the example if you're stuck">
+</doc-accordion>
+
 ## Roadmap
 
 - [ ] Rewrite `hrefs` on `<svelte:element>` components if they have are links
