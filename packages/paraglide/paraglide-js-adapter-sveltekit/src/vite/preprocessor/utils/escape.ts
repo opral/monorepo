@@ -1,5 +1,8 @@
 export const escapeForDoubleQuotes = (str: string) => str.replace(/"/g, '\\"')
 
+export const escapeForTemplateString = (str: string) =>
+	str.replace(/`/g, "\\`").replace(/\${/g, "\\${")
+
 export const toJSIdentifier = (str: string) => {
 	//replace all non-alphanumeric characters with underscores
 	str = str.replace(/[^a-zA-Z0-9]/g, "_")

@@ -1,4 +1,4 @@
-import { toJSIdentifier } from "../rewrites/escape.js"
+import { toJSIdentifier } from "./escape.js"
 
 /**
  * Returns a unique identifier for a given original name.

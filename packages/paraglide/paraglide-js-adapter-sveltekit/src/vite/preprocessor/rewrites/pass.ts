@@ -4,10 +4,9 @@ import { getElementsFromAst } from "../utils/ast.js"
 import { attrubuteValuesToJSValue } from "../utils/attributes-to-values.js"
 import { identifier } from "../utils/identifier.js"
 import dedent from "dedent"
-import { escapeForDoubleQuotes } from "./escape.js"
+import { escapeForDoubleQuotes } from "../utils/escape.js"
 import type { ElementNode } from "../types.js"
 import { uneval } from "devalue"
-import type MagicString from "magic-string"
 
 export type AttributeTranslation = {
 	element_name: string
