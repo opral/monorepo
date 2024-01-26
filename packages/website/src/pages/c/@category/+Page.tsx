@@ -267,6 +267,7 @@ export default function Page(props: {
 								{/* Guides */}
 								<Show
 									when={
+										props.items &&
 										getCategoryContent()?.sections?.includes("guides") &&
 										props.items.some(
 											(item: MarketplaceManifest & { uniqueID: string }) =>
@@ -288,6 +289,7 @@ export default function Page(props: {
 								{/* Apps */}
 								<Show
 									when={
+										props.items &&
 										getCategoryContent()?.sections?.includes("apps") &&
 										props.items.some(
 											(item: MarketplaceManifest & { uniqueID: string }) =>
@@ -309,6 +311,7 @@ export default function Page(props: {
 								{/* Plugins */}
 								<Show
 									when={
+										props.items &&
 										getCategoryContent()?.sections?.includes("plugins") &&
 										props.items.some(
 											(item: MarketplaceManifest & { uniqueID: string }) =>
@@ -329,6 +332,7 @@ export default function Page(props: {
 								{/* Libraries */}
 								<Show
 									when={
+										props.items &&
 										getCategoryContent()?.sections?.includes("libraries") &&
 										props.items.some(
 											(item: MarketplaceManifest & { uniqueID: string }) =>
