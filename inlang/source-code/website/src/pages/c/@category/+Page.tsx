@@ -264,6 +264,27 @@ export default function Page(props: {
 								when={!getCategoryContent()?.sections?.includes("all")}
 								fallback={<Gallery items={props.items} hideBuildYourOwn={false} />}
 							>
+								{/* Guides */}
+								<Show
+									when={
+										getCategoryContent()?.sections?.includes("guides") &&
+										props.items.some(
+											(item: MarketplaceManifest & { uniqueID: string }) =>
+												item.id.split(".")[0] === "guide"
+										)
+									}
+								>
+									<h2 class="pb-4 border-t-surface-200 text-xl font-medium tracking-tight text-surface-900">
+										Guides
+									</h2>
+									<Gallery
+										items={props.items.filter(
+											(item: MarketplaceManifest & { uniqueID: string }) =>
+												item.id.split(".")[0] === "guide"
+										)}
+										hideBuildYourOwn
+									/>
+								</Show>
 								{/* Apps */}
 								<Show
 									when={
@@ -332,27 +353,6 @@ export default function Page(props: {
 												(item: MarketplaceManifest & { uniqueID: string }) =>
 													item.keywords.includes("inlang") || !item.keywords.includes("external")
 											)}
-									/>
-								</Show>
-								{/* Guides */}
-								<Show
-									when={
-										getCategoryContent()?.sections?.includes("guides") &&
-										props.items.some(
-											(item: MarketplaceManifest & { uniqueID: string }) =>
-												item.id.split(".")[0] === "guide"
-										)
-									}
-								>
-									<h2 class="pb-4 border-t-surface-200 text-xl font-medium tracking-tight text-surface-900">
-										Guides
-									</h2>
-									<Gallery
-										items={props.items.filter(
-											(item: MarketplaceManifest & { uniqueID: string }) =>
-												item.id.split(".")[0] === "guide"
-										)}
-										hideBuildYourOwn
 									/>
 								</Show>
 							</Show>
