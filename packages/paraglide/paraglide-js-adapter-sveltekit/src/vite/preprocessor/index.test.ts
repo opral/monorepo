@@ -1,20 +1,25 @@
 import { describe, it, expect } from "vitest"
 import { CompileOptions, preprocess } from "svelte/compiler"
 import { preprocessor as createPreprocessor } from "./index"
+import { compile } from "svelte/compiler"
+import { PARAGLIDE_CONTEXT_KEY } from "../../runtime/constants"
 import { rollup } from "rollup"
 import virtual from "@rollup/plugin-virtual"
 import { nodeResolve } from "@rollup/plugin-node-resolve"
-import { compile } from "svelte/compiler"
-import { PARAGLIDE_CONTEXT_KEY } from "../../runtime/constants"
 
 const preprocessor = createPreprocessor({})
 
 //Make sure these tests are run concurrently - Otherwise they will take forever
 describe("preprocessor", () => {
 	it.concurrent("leaves non-translatable attributes alone", async () => {
-		const code = `<a href="/test" data-no-translate>Test</a>`
-		const html = await renderComponent(code)
-		expect(html).toBe(`<a href="/test" data-no-translate>Test</a>`)
+		const hardcodedElementCode = `<a href="/test" data-no-translate>Test</a>`
+		const dynamicElementCode = `<svelte:element this="a" href="/test" data-no-translate>Test</svelte:element>`
+
+		const hardcodedElementHtml = await renderComponent(hardcodedElementCode)
+		const dynamicElementHtml = await renderComponent(dynamicElementCode)
+
+		expect(hardcodedElementHtml).toBe(`<a href="/test" data-no-translate>Test</a>`)
+		expect(dynamicElementHtml).toBe(`<a href="/test" data-no-translate>Test</a>`)
 	})
 
 	it.concurrent("translates hardcoded href attributes", async () => {

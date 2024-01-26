@@ -46,7 +46,7 @@ export function createTranslateAttributePass(
 				const elements = [...getElementsFromAst(ast, element_name)]
 
 				for (const element of elements) {
-					for (const { attribute_name, lang_attribute_name } of attribute_translations) {
+					if (hasSpreadAttribute(element)) {
 						const attributeEntries: string[] = []
 						const replacedAttributes = new Set<(typeof element.attributes)[number]>()
 
@@ -95,6 +95,31 @@ export function createTranslateAttributePass(
 							element.start + element.name.length + 1,
 							" " + newSpreadAttributeString
 						)
+					} else {
+						for (const [element_name, attribute_translations] of Object.entries(TRANSLATIONS)) {
+							for (const { attribute_name, lang_attribute_name } of attribute_translations) {
+								const attribute = getAttributeByName(element, attribute_name)
+								if (!attribute) continue
+
+								if (getAttributeByName(element, "data-no-translate")) continue
+
+								const langAttribute = lang_attribute_name
+									? getAttributeByName(element, lang_attribute_name)
+									: undefined
+
+								const newAttributeCode = c.attribute(
+									attribute_name,
+
+									`${i("translateAttribute")}(
+													${attrubuteValuesToJSValue(attribute.value, originalCode)},
+													${langAttribute ? attrubuteValuesToJSValue(langAttribute.value, originalCode) : "undefined"}
+												)`
+								)
+
+								//replace the attribute with the new attribute
+								code.overwrite(attribute.start, attribute.end, newAttributeCode)
+							}
+						}
 					}
 				}
 			}
@@ -165,6 +190,8 @@ export function createTranslateAttributePass(
 						for (const { attribute_name, lang_attribute_name } of attribute_translations) {
 							const attribute = getAttributeByName(element, attribute_name)
 							if (!attribute) continue
+
+							if (getAttributeByName(element, "data-no-translate")) continue
 
 							const langAttribute = lang_attribute_name
 								? getAttributeByName(element, lang_attribute_name)
