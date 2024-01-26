@@ -150,7 +150,7 @@ describe("preprocessor", () => {
 		expect(html).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
 	})
 
-	it.concurrent.only("translates <svelte:element> tags if they are links", async () => {
+	it.concurrent("translates <svelte:element> tags if they are links", async () => {
 		const hardcoded = `<svelte:element this="a" href="/test" hreflang="de" />`
 		const parameterized = `<script>
 			const as = "a"
@@ -177,6 +177,13 @@ describe("preprocessor", () => {
 
 		expect(hardcodedHtml).toBe(`<div href="/test" hreflang="de"></div>`)
 		expect(parameterizedHtml).toBe(`<div href="/test" hreflang="de"></div>`)
+	})
+
+	it.concurrent("also translates the action attribute of forms", async () => {
+		const code = `<form action="/test" />`
+
+		const html = await renderComponent(code)
+		expect(html).toBe(`<form action="/rewritten"></form>`)
 	})
 
 	/* Future Goals
@@ -235,7 +242,7 @@ async function renderComponent(svelteCode: string, props: Record<string, any> = 
 		filename: "src/Component.svelte",
 	})
 
-	console.log(preprocessedComponent.code)
+	//console.log(preprocessedComponent.code)
 
 	const bundle = await rollup({
 		input: "src/Entry.svelte",

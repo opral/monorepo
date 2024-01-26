@@ -5,8 +5,9 @@ import { attrubuteValuesToJSValue } from "../utils/attributes-to-values.js"
 import { identifier } from "../utils/identifier.js"
 import dedent from "dedent"
 import { escapeForDoubleQuotes } from "./escape.js"
-import type { Attribute, ElementNode } from "../types.js"
+import type { ElementNode } from "../types.js"
 import { uneval } from "devalue"
+import type MagicString from "magic-string"
 
 export type AttributeTranslation = {
 	element_name: string
@@ -91,7 +92,7 @@ export function createTranslateAttributePass(
 
 				for (const element of svelteElements) {
 					let thisAttribute = element.tag
-					if (typeof thisAttribute !== "string") thisAttribute = [thisAttribute]
+
 					//every svelte:element should have a this attribute -> if not, something is wrong
 					if (!thisAttribute) continue
 
@@ -107,10 +108,15 @@ export function createTranslateAttributePass(
 						  )
 						: undefined
 
+					const thisAttributeValue =
+						typeof thisAttribute === "string"
+							? uneval(thisAttribute)
+							: "`${" + originalCode.slice(thisAttribute.start, thisAttribute.end) + "}`"
+
 					const newLangAttribute = `
 					${attribute_name}={
 
-							${attrubuteValuesToJSValue(thisAttribute, originalCode)} === ${uneval(element_name)} ?
+							${thisAttributeValue} === ${uneval(element_name)} ?
 
 							${i("translateHref")}(
 								${attrubuteValuesToJSValue(attribute.value, originalCode)},
@@ -172,6 +178,7 @@ export function createTranslateAttributePass(
 		},
 	}
 }
+
 
 function isSvelteElement(element: ElementNode<string>): element is ElementNode<"svelte:element"> {
 	return element.name === "svelte:element"
