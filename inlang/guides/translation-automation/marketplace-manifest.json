@@ -29,7 +29,9 @@
 		"cli",
 		"ci/cd",
 		"build",
-		"test"
+		"test",
+		"svelte",
+		"astro"
 	],
 	"recommends": ["g/oostafhs", "g/38fnf03n", "g/940fn8mg", "g/3go4f04m"],
 	"publisherName": "Nils Jacobsen",
