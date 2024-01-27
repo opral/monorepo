@@ -1,5 +1,11 @@
 # @inlang/badge
 
+## 0.7.0
+
+### Minor Changes
+
+- 23a0f5ff8: add memory settings to nodejs
+
 ## 0.6.1
 
 ### Patch Changes
