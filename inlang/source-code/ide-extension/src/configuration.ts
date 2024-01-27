@@ -7,6 +7,7 @@ import { openSettingsFileCommand } from "./commands/openSettingsFile.js"
 import { type ProjectViewNode } from "./utilities/project/project.js"
 import type { ErrorNode } from "./utilities/errors/errors.js"
 import { copyErrorCommand } from "./commands/copyError.js"
+import { previewLanguageTagCommand } from "./commands/previewLanguageTagCommand.js"
 
 export const CONFIGURATION = {
 	EVENTS: {
@@ -18,6 +19,7 @@ export const CONFIGURATION = {
 	COMMANDS: {
 		EDIT_MESSAGE: editMessageCommand,
 		EXTRACT_MESSAGE: extractMessageCommand,
+		SET_PREVIEW_LANGUAGETAG: previewLanguageTagCommand,
 		OPEN_IN_EDITOR: openInEditorCommand,
 		OPEN_PROJECT: openProjectCommand,
 		OPEN_SETTINGS_FILE: openSettingsFileCommand,
