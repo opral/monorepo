@@ -112,7 +112,7 @@ export const Gitfloat = () => {
 		if (response?.status === 202) {
 			showToast({
 				variant: "success",
-				title: "The Fork has been created.",
+				title: "Fork opened successfully.",
 				message: `Don't forget to open a pull request`,
 			})
 			// reset localChanges counter, as changes are not transferred to the fork
@@ -460,9 +460,11 @@ export const Gitfloat = () => {
 				on:sl-show={() => setForkModalOpen(true)}
 				on:sl-after-hide={() => setForkModalOpen(false)}
 			>
-				<h3 slot="label">Fork</h3>
+				<h3 slot="label">No access to this repo</h3>
 				<p>
-					To push changes you need to fork this repository and submit changes with a pullrequest.
+					To push changes, you must use a fork of this repository and submit changes with a pull
+					request. If you already have one, this will be opened, otherwise a new fork will be
+					created for you.
 				</p>
 				<sl-button
 					slot="footer"
@@ -476,7 +478,7 @@ export const Gitfloat = () => {
 					<div slot="prefix">
 						<IconFork />
 					</div>
-					Fork repository
+					Open fork
 				</sl-button>
 			</sl-dialog>
 		</>
