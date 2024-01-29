@@ -35,24 +35,11 @@ You can have multiple projects in your repository. By using the inlang tab, it's
 
 ## Usage
 
-Just _highlight/select_ the text you want and hit `cmd .` or `ctrl +` (Quick Fix / Yellow Bulb) to open the **translate dialog** to provide a id for it.
+Just _highlight/select_ the text you want and hit `cmd .` or `ctrl +` (Quick Fix / Yellow Bulb) to open the **translate dialog** to provide an id for it.
 
 Hover over the message to see the tooltip with the translation.
 
 If something isn't working as expected, please join our [Discord](https://discord.gg/gdMPPWy57R) or [create an issue](https://github.com/opral/monorepo/issues/new/choose). We are happy to help!
-
-## Configuration
-
-You can configure the extension to your needs by defining the `ideExtension` property in the config.
-
-| Property                   | Type    | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| -------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `messageReferenceMatchers` | `Array` | An array of functions that define matchers for message references inside the code. Each function takes an argument of type `{ documentText: string }` and returns a promise that resolves to an array of message references (as defined by the `messageReferenceSchema`).                                                                                                                                                                                           |
-| `extractMessageOptions`    | `Array` | An array of objects that define options for extracting messages. Each object has a property `callback` that is a function which is called when the user finishes the message extraction command. The `callback` function takes two arguments of type `string`: `messageId` (the message identifier entered by the user) and `selection` (the text which was extracted), and returns a `string` that represents the code which should be inserted into the document. |
-| `documentSelectors`        | `Array` | An array of [VS Code DocumentSelectors](https://code.visualstudio.com/api/references/document-selector) that specify for which files/programming languages the extension should be activated. Each document selector is an object with optional properties `language`, `scheme`, `pattern`, and `notebookType`.                                                                                                                                                     |
-
-For this example, the extension parses strings with a `t` translation function & gives the according extract options `{t("messageID")}` & `t("messageID")`.
-You can fully customize this behavior.
 
 ## Quick start
 
@@ -64,7 +51,7 @@ Just install the extension and click on `Getting Started` in the `Inlang Tab`.
 
 ### 1. Create a `project.inlang/settings.json` in the **root** of your project
 
-You can use the following template when using json files as translation files, if not, please look for other [supported resource file types](https://inlang.com/):
+You can use the following template when using JSON files as translation files. If not, please look for other [supported resource file types](https://inlang.com/):
 
 ```json
 {
@@ -83,7 +70,7 @@ You can use the following template when using json files as translation files, i
 
 ### 2. Decide on a **syntax matcher**
 
-You should continue with **installing a syntax matcher**. There are multiple syntax matcher available like:
+You should continue with **installing a syntax matcher**. There are multiple syntax matcher's available:
 
 - m function matcher: https://inlang.com/m/632iow21/plugin-inlang-mFunctionMatcher
 - t function matcher: https://inlang.com/m/698iow33/plugin-inlang-tFunctionMatcher
@@ -91,7 +78,7 @@ You should continue with **installing a syntax matcher**. There are multiple syn
 
 ### 3. ✨ Recommended
 
-If you want to add lint rules to your experience, you can add them from: https://inlang.com/c/lint-rules
+If you want to add lint rules to your experience, you can add them from https://inlang.com/c/lint-rules
 
 #### Requirements:
 
@@ -101,6 +88,19 @@ If you want to add lint rules to your experience, you can add them from: https:/
 ## Support: Join our Discord!
 
 If something isn't working as expected or you have a feature suggestion, please join our [Discord](https://discord.gg/DEHKgmx2) or [create an issue](<[https](https://github.com/opral/monorepo/issues/new/choose)>). We are happy to help!
+
+## Plugin authors
+
+You can configure the extension to your needs by defining the `customApi` property in the `Plugin` interface.
+
+| Property                   | Type    | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| -------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `messageReferenceMatchers` | `Array` | An array of functions that define matcher's for message references inside the code. Each function takes an argument of type `{ documentText: string }` and returns a promise that resolves to an array of message references (as defined by the `messageReferenceSchema`).                                                                                                                                                                                           |
+| `extractMessageOptions`    | `Array` | An array of objects that define options for extracting messages. Each object has a property `callback` which is a function that is called when the user finishes the message extraction command. The `callback` function takes two arguments of type `string`: `messageId` (the message identifier entered by the user) and `selection` (the text which was extracted), and returns a `string` that represents the code which should be inserted into the document. |
+| `documentSelectors`        | `Array` | An array of [VS Code DocumentSelectors](https://code.visualstudio.com/api/references/document-selector) that specify for which files/programming languages the extension should be activated. Each document selector is an object with optional properties `language`, `scheme`, `pattern`, and `notebookType`.                                                                                                                                                     |
+
+For this example, the extension parses strings with a `t` translation function & gives the according extract options `{t("messageID")}` & `t("messageID")`.
+You can fully customize this behavior.
 
 ## Pricing 
 
