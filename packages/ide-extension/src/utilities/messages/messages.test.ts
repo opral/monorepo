@@ -91,13 +91,34 @@ describe("Message Webview Provider Tests", () => {
 	})
 
 	it("should create and return a webview provider", () => {
-		const provider = createMessageWebviewProvider({ context })
+		const workspaceFolder = {
+			uri: { fsPath: "/test/path/project.inlang" },
+		} as vscode.WorkspaceFolder
+		const provider = createMessageWebviewProvider({ context, workspaceFolder })
 		expect(provider).toBeDefined()
 		expect(typeof provider.resolveWebviewView).toBe("function")
 	})
 
 	it("should create HTML for a message", () => {
-		const html = createMessageHtml({ message: mockMessage, isHighlighted: true })
+		const workspaceFolder = {
+			uri: { fsPath: "/test/path/project.inlang" },
+		} as vscode.WorkspaceFolder
+		vi.mocked(state).mockReturnValue({
+			project: {
+				query: {
+					messages: {
+						// @ts-expect-error
+						getAll: vi.fn().mockReturnValue([mockMessage]),
+					},
+				},
+				// @ts-expect-error
+				settings: vi.fn().mockReturnValue({
+					languageTags: ["en"],
+				}),
+			},
+			selectedProjectPath: "/test/path",
+		})
+		const html = createMessageHtml({ message: mockMessage, isHighlighted: true, workspaceFolder })
 		expect(html).toContain("testMessage")
 		expect(html).toContain("collapsible")
 	})
@@ -110,7 +131,25 @@ describe("Message Webview Provider Tests", () => {
 	})
 
 	it("should create a translations table for a message", () => {
-		const html = getTranslationsTableHtml(mockMessage)
+		const workspaceFolder = {
+			uri: { fsPath: "/test/path/project.inlang" },
+		} as vscode.WorkspaceFolder
+		vi.mocked(state).mockReturnValue({
+			project: {
+				query: {
+					messages: {
+						// @ts-expect-error
+						getAll: vi.fn().mockReturnValue([mockMessage]),
+					},
+				},
+				// @ts-expect-error
+				settings: vi.fn().mockReturnValue({
+					languageTags: ["en"],
+				}),
+			},
+			selectedProjectPath: "/test/path",
+		})
+		const html = getTranslationsTableHtml({ message: mockMessage, workspaceFolder })
 		expect(html).toContain("Test Message")
 		expect(html).toContain("en")
 	})
@@ -132,7 +171,10 @@ describe("Message Webview Provider Tests", () => {
 	})
 
 	it("should register a webview view provider", async () => {
-		await messageView({ context })
+		const workspaceFolder = {
+			uri: { fsPath: "/test/path/project.inlang" },
+		} as vscode.WorkspaceFolder
+		await messageView({ context, workspaceFolder })
 		expect(vscode.window.registerWebviewViewProvider).toHaveBeenCalled()
 	})
 })

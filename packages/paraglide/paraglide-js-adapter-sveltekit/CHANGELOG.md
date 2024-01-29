@@ -1,5 +1,36 @@
 # @inlang/paraglide-js-adapter-sveltekit
 
+## 0.3.0
+
+### Minor Changes
+
+- 577c66b45: breaking: move `noAlternateLinks` option from `<ParaglideJS>` component to `seo` option on `createI18n`
+- 021ae3e80: feat: Add `textDirection` option to `createI18n` for text-direction. If omitted, an automatically detected text-direction will be used.
+
+### Patch Changes
+
+- da9b91ff4: fix: Rewrite {...spreadAttributes}
+- cfa1b0175: fix: Crawl `{:else}`, `{:then}` and `{:catch}` blocks for links to rewrite
+- cfa1b0175: fix: Rewrite attributes on `<svelte:element>`
+
+## 0.2.5
+
+### Patch Changes
+
+- @inlang/paraglide-js-adapter-vite@1.2.10
+
+## 0.2.4
+
+### Patch Changes
+
+- @inlang/paraglide-js-adapter-vite@1.2.9
+
+## 0.2.3
+
+### Patch Changes
+
+- 0305ce54e: fix broken globbing for `exclude` option causing the wrong routes to be excluded
+
 ## 0.2.2
 
 ### Patch Changes

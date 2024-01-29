@@ -8,7 +8,6 @@ import { Button } from "#src/pages/index/components/Button.jsx"
 import Link from "#src/renderer/Link.jsx"
 import * as m from "../../paraglide/messages.js"
 import { currentPageContext } from "#src/renderer/state.js"
-import { InlangBadge } from "../marketplace/categoryHeaders/categoryHeros/appHeader.jsx"
 
 export default function Card(props: { item: any; displayName: string }) {
 	const showCover =
@@ -47,15 +46,15 @@ export default function Card(props: { item: any; displayName: string }) {
 						/>
 						<div class="flex flex-1 flex-col items-start px-4">
 							<div class="flex items-center gap-2 mb-2">
-								<p class="m-0 text-[15px] text-surface-800 line-clamp-2 leading-none no-underline font-bold group-hover:text-surface-900 transition-colors">
+								<h4 class="m-0 text-[15px] text-surface-800 line-clamp-2 leading-none no-underline font-bold group-hover:text-surface-900 transition-colors">
 									{props.displayName}
-								</p>
+								</h4>
 								<Show
 									when={props.item.keywords
 										.map((keyword: string) => keyword.toLowerCase())
-										.includes("inlang")}
+										.includes("external")}
 								>
-									<InlangBadge />
+									<EcosystemIncompatibleBadge />
 								</Show>
 							</div>
 							<p class="text-sm line-clamp-2 text-surface-500 transition-colors group-hover:text-surface-600 mb-2">
@@ -131,18 +130,33 @@ export default function Card(props: { item: any; displayName: string }) {
 									</Show>
 								</div>
 								<div class="flex flex-col justify-between items-start">
-									<p
+									<h4
 										// eslint-disable-next-line solid/style-prop
 										style="text-wrap: balance;"
-										class="m-0 mb-2 text-sm text-surface-800 line-clamp-2 leading-none no-underline font-semibold group-hover:text-surface-900 transition-colors"
+										class="m-0 text-sm text-surface-800 line-clamp-2 leading-none no-underline font-semibold group-hover:text-surface-900 transition-colors"
 									>
 										{props.displayName}
-									</p>
-									<Chip
-										text={typeOfIdToTitle(props.item.id)}
-										color={colorForTypeOf(props.item.id)}
-										customClasses="text-xs"
-									/>
+									</h4>
+
+									<div class="flex items-center mt-2 gap-1 flex-wrap">
+										<Chip
+											text={typeOfIdToTitle(props.item.id)}
+											color={colorForTypeOf(props.item.id)}
+											customClasses="text-xs"
+										/>
+										<Show
+											when={
+												props.item.keywords
+													.map((keyword: string) => keyword.toLowerCase())
+													.includes("external") &&
+												!props.item.keywords
+													.map((keyword: string) => keyword.toLowerCase())
+													.includes("inlang")
+											}
+										>
+											<EcosystemIncompatibleBadge />
+										</Show>
+									</div>
 								</div>
 							</div>
 							<p class="text-sm line-clamp-2 text-surface-500 transition-colors group-hover:text-surface-600 mb-4">
@@ -209,6 +223,14 @@ export function CardBuildOwn() {
 				</div>
 			</Link>
 		</>
+	)
+}
+
+const EcosystemIncompatibleBadge = () => {
+	return (
+		<div class="px-1.5 h-5 rounded bg-surface-200 flex items-center font-medium text-surface-500 text-[12px]">
+			Ecosystem Incompatible
+		</div>
 	)
 }
 

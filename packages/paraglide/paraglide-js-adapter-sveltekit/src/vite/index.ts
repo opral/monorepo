@@ -1,5 +1,5 @@
 import { paraglide as vitePluginParaglide } from "@inlang/paraglide-js-adapter-vite"
-import { preprocess, type PreprocessorConfig } from "./preprocessor/index.js"
+import { preprocessor, type PreprocessorConfig } from "./preprocessor/index.js"
 import { type UserConfig, type Config, resolveConfig } from "./config.js"
 import type { Plugin } from "vite"
 
@@ -27,7 +27,7 @@ function registerPreprocessor(
 		name: "paraglide-js-adapter-sveltekit-register-preprocessor",
 		api: {
 			//The Svelte vite-plugin looks for this and automatically adds it to the preprocess array
-			sveltePreprocess: preprocess(preprocessConfig),
+			sveltePreprocess: preprocessor(preprocessConfig),
 		},
 	}
 }

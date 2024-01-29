@@ -52,6 +52,10 @@ module.exports = {
 					"0%": { opacity: 0, scale: 0 },
 					"100%": { opacity: 1, scale: 1 },
 				},
+				blendIn: {
+					"0%": { opacity: 0 },
+					"100%": { opacity: 1 },
+				},
 				ripple: {
 					"0%": {
 						boxShadow:
@@ -83,6 +87,7 @@ module.exports = {
 				jumpMobile: "jumpMobile 0.3s ease 1",
 				fadeInTop: "fadeInTop 0.4s ease-out 1",
 				fadeInBottom: "fadeInBottom 0.4s ease-out 1",
+				blendIn: "blendIn 0.2s ease-out forwards 1",
 				fadeIn: "fadeIn 0.3s ease-out forwards 1",
 				fadeOut: "fadeOut 0.3s ease-in forwards 1",
 				ripple: "ripple 2s linear infinite",

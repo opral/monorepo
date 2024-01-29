@@ -191,7 +191,7 @@ To open the Inlang editor, run the following command:
 npx @inlang/cli open editor
 ```
 
-This command retrieves the remote URL of the repository and constructs the URL for the Inlang editor by appending the GitHub user and repository to https://inlang.com/editor/. The editor will be opened in your default browser.
+This command retrieves the remote URL of the repository and constructs the URL for the Inlang editor by appending the GitHub user and repository to https://fink.inlang.com/. The editor will be opened in your default browser.
 
 ## `module`
 

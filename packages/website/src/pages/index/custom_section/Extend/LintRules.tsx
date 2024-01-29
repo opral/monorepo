@@ -34,7 +34,7 @@ const LintRulesSection = () => {
 										return (
 											<Link
 												href={`/documentation/lint-rule/guide`}
-												class="col-span-1 bg-background border border-surface-200 hover:border-surface-400 rounded-2xl px-6 py-5 flex flex-col gap-4 transition-all w-full"
+												class="col-span-1 bg-background border border-surface-200 hover:border-surface-400 rounded-2xl px-6 py-5 pb-4 flex flex-col gap-4 transition-all w-full"
 											>
 												<img
 													class="rounded-xl w-full bg-surface-100"
@@ -67,7 +67,7 @@ const LintRulesSection = () => {
 									return (
 										<Link
 											href={`/m/${manifest.uniqueID}/${manifest.id.replaceAll(".", "-")}`}
-											class="col-span-1 bg-background border border-surface-200 hover:border-surface-400 rounded-2xl px-6 py-5 flex flex-col gap-4 transition-all"
+											class="col-span-1 bg-background border border-surface-200 hover:border-surface-400 rounded-2xl px-6 py-5 pb-4 flex flex-col gap-4 transition-all"
 										>
 											<img
 												class="rounded-xl w-full bg-surface-100"

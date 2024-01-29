@@ -29,7 +29,10 @@ export function SignInDialog(props: {
 		>
 			<Show when={signInModalOpen()}>
 				<h3 slot="label">Sign in</h3>
-				<p>To conduct changes, you must sign in with a GitHub account.</p>
+				<p>
+					To push changes you need to sign in with a GitHub account. Otherwise further changes will
+					be lost.
+				</p>
 				<sl-button
 					slot="footer"
 					prop:variant="primary"
