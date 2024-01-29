@@ -326,8 +326,6 @@ import * as runtime from "../paraglide/runtime.js"
 export const i18n = createI18n(runtime, {
 	dir: {
 		en: "ltr",
-		de: "ltr",
-		fr: "ltr",
 		ar: "rtl",
 	},
 })
