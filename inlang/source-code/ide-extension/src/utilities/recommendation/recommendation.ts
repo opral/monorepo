@@ -37,10 +37,12 @@ export async function isInWorkspaceRecommendation(args: {
 }
 
 export const isDisabledRecommendation = async (): Promise<boolean> => {
-	return (await getSetting("disableRecommendation")).includes(await getGitOrigin())
+	const disabledRecommendations = await getSetting("disableRecommendation")
+	const gitOrigin = await getGitOrigin()
+	return disabledRecommendations ? disabledRecommendations.includes(gitOrigin) : false
 }
 
-const updateDisabledRecommendation = async (): Promise<void> => {
+export const updateDisabledRecommendation = async (): Promise<void> => {
 	await updateSetting("disableRecommendation", [
 		...(await getSetting("disableRecommendation")),
 		await getGitOrigin(),
