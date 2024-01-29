@@ -71,6 +71,7 @@ export const createHandle = <T extends string>(
 }
 
 declare global {
+	// eslint-disable-next-line @typescript-eslint/no-namespace
 	namespace App {
 		interface Locals {
 			paraglide: {
