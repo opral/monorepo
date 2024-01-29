@@ -11,7 +11,7 @@
 	import { page } from "$app/stores"
 	import { browser } from "$app/environment"
 	import { setContext } from "svelte"
-	import { PARAGLIDE_CONTEXT_KEY } from "./constants.js"
+	import { PARAGLIDE_CONTEXT_KEY } from "../constants.js"
 	import { base as maybe_relative_base } from "$app/paths"
 	import { isExternal } from "./utils/external.js"
 	import { getTranslatedPath } from "./path-translations/getTranslatedPath.js"
