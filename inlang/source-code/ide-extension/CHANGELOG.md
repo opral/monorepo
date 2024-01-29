@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.29.2
+
+### Patch Changes
+
+- f7dc963df: add inline annotation language switching
+
 ## 1.29.1
 
 ### Patch Changes
