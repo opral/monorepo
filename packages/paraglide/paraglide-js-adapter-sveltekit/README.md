@@ -122,21 +122,24 @@ The `<ParaglideJS>` component automatically adds `rel="alternate"` links to your
 <link rel="alternate" hreflang="de" href="/de/uber-uns" />
 ```
 
-Additionally, you need to add the `lang` attribute to your `html` tag. This is important for screen readers. Unfortunately, Svelte doesn't offer a way to do this from inside a component. You need to set it in your `src/hooks.server.js` file. 
+Additionally, you need to add the `lang` and `dir` attributes to your `html` tag. This is important for screen readers. Unfortunately, Svelte doesn't offer a way to do this from inside a component. You need to set it in your `src/hooks.server.js` file. 
 
-The easiest way to do this is to set the `lang` attribute in `src/app.html` with an easy to recognize placeholder.
+The easiest way to do this is to set the `lang` and `dir` attributes in `src/app.html` with an easy to recognize placeholder.
 
 ```html
-<html lang="__LANG__">
+<html lang="%paraglide.lang%" dir="%paraglide.textDirection%"> 
 ```
 
-Then, in your `src/hooks.server.js` file, replace the placeholder with the current language. Again, the `i18n` instance can help you with that.
+Then, in your `src/hooks.server.js` file, you can use `i18n.handle()` to replace the placeholders with the correct values. `%paraglide.lang%` and `%paraglide.textDirection%` are the default placeholders. You can change them by passing the `langPlaceholder` and `textDirectionPlaceholder` options to `handle`.
+
 
 ```js
 import { i18n } from '$lib/i18n.js'
 
-export const handle = i18n.handle({ langPlaceholder: "__LANG__" })
+export const handle = i18n.handle()
 ```
+
+The handle hook will also make `lang` and `textDirection` available in `event.locals.paraglide`, so you can use them elsewhere in your app.
 
 ### Excluding certain routes
 
@@ -311,6 +314,27 @@ This is also usefull for detecting which navigation item is currently active.
 	<a href="/about">{m.about()}</a>
 </li>
 ```
+
+### Determining text direction
+
+Setting the text-direction correctly is very important. By default, Paragldie will try to guess the text direction based on the language using the `Intl.Locale` API. Unfortunately, this API is not supported in all browsers. If you want to make sure that the text direction is always correct, you can pass the `textDirection` option to `createI18n`.
+
+```js
+import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
+import * as runtime from "../paraglide/runtime.js"
+
+export const i18n = createI18n(runtime, {
+	textDirection: {
+		en: "ltr",
+		ar: "rtl",
+	},
+})
+```
+
+
+### Accessing `lang` and `textDirection` 
+
+You can access the current language and text direction on `event.locals.paraglide` anywhere on your server. On the client, you can use the `languageTag()` function from `./paraglide/runtime.js` to access the current language.  
 
 ## FAQ
 

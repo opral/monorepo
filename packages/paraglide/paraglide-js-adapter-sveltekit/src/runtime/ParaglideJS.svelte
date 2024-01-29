@@ -34,17 +34,13 @@
 	export let i18n: I18n<T>
 
 	/**
-	 * If true, no alternate links will be added to the head.
-	 */
-	export let noAlternateLinks = false
-
-	/**
 	 * The language tag that was autodetected from the URL.
 	 */
 	$: autodetectedLanguage = i18n.getLanguageFromUrl($page.url)
 	$: lang = languageTag ?? autodetectedLanguage
 	$: i18n.config.runtime.setLanguageTag(lang)
 	$: if (browser) document.documentElement.lang = lang
+	$: if (browser) document.documentElement.dir = i18n.config.textDirection[lang] ?? "ltr"
 
 	function translateHref(href: string, hreflang: string | undefined): string {
 		const from = new URL($page.url)
@@ -88,7 +84,7 @@
 </script>
 
 <svelte:head>
-	{#if !noAlternateLinks && !i18n.config.exclude($page.url.pathname)}
+	{#if !i18n.config.seo.noAlternateLinks && !i18n.config.exclude($page.url.pathname)}
 		<!-- If there is more than one language, add alternate links -->
 		{#if i18n.config.runtime.availableLanguageTags.length >= 1}
 			{#each i18n.config.runtime.availableLanguageTags as lang}
