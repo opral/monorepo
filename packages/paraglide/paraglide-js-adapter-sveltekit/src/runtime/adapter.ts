@@ -94,6 +94,17 @@ export type I18nUserConfig<T extends string> = {
 	 * ```
 	 */
 	dir?: Record<T, "ltr" | "rtl">
+
+	/**
+	 * SEO related options.
+	 */
+	seo: {
+		/**
+		 * Whether to generate alternate links for each page & language and add them to the head.
+		 * @default true
+		 */
+		noAlternateLinks?: boolean
+	}
 }
 
 /**
@@ -106,6 +117,9 @@ export type I18nConfig<T extends string> = {
 	defaultLanguageTag: T
 	prefixDefaultLanguage: "always" | "never"
 	dir: Record<T, "ltr" | "rtl">
+	seo: {
+		noAlternateLinks: boolean
+	}
 }
 
 /**
@@ -137,6 +151,9 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		defaultLanguageTag,
 		prefixDefaultLanguage: options?.prefixDefaultLanguage ?? "never",
 		dir: options?.dir ?? guessTextDirMap(runtime.availableLanguageTags),
+		seo: {
+			noAlternateLinks: options?.seo?.noAlternateLinks ?? true,
+		},
 	}
 
 	// We don't want the translations to be mutable
