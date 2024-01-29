@@ -1,4 +1,5 @@
 import type { AttributeValue } from "../types.js"
+import { escapeForTemplateString } from "./escape.js"
 
 /**
  * Takes in an AST of an AttributeValue and returns JS code that evaluates to the same value.
@@ -6,13 +7,23 @@ import type { AttributeValue } from "../types.js"
  * @param originalCode - The original code that the AST was parsed from, neede to sample the expression code
  * @returns A JS expression that evaluates to the same value as the AttributeValue
  */
-export function attrubuteValuesToJSValue(values: AttributeValue[], originalCode: string): string {
+export function attrubuteValuesToJSValue(
+	values: AttributeValue[] | boolean | string,
+	originalCode: string,
+): string {
+	if (typeof values === "boolean") return values.toString()
+	if (typeof values === "string") return "`" + escapeForTemplateString(values) + "`"
+
 	let templateString = "`"
+
+	if (!(Symbol.iterator in Object(values))) {
+		console.error(values)
+	}
 
 	for (const value of values) {
 		switch (value.type) {
 			case "Text":
-				templateString += escapeStringLiteral(value.data)
+				templateString += escapeForTemplateString(value.data)
 				break
 			case "AttributeShorthand":
 			case "MustacheTag": {
@@ -27,8 +38,4 @@ export function attrubuteValuesToJSValue(values: AttributeValue[], originalCode:
 
 	templateString += "`"
 	return templateString
-}
-
-function escapeStringLiteral(string: string) {
-	return string.replace(/`/g, "\\`").replace(/\${/g, "\\${")
 }
