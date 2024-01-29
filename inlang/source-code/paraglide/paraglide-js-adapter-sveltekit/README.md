@@ -331,6 +331,11 @@ export const i18n = createI18n(runtime, {
 })
 ```
 
+
+### Accessing `lang` and `dir` 
+
+You can access the current language and text direction on `event.locals.paraglide` anywhere on your server. On the client, you can use the `languageTag()` function from `./paraglide/runtime.js` to access the current language.  
+
 ## FAQ
 
 <doc-accordion
