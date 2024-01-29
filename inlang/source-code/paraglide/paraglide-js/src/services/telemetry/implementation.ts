@@ -27,7 +27,8 @@ export const telemetry = new Proxy(posthog, {
 	get(target, prop) {
 		// If the env variable is set, use the PostHog SDK. Otherwise, use a proxy that
 		// returns a no-op function.
-		if (publicEnv.PUBLIC_POSTHOG_TOKEN === undefined) {
+
+		if (!publicEnv.PUBLIC_POSTHOG_TOKEN) {
 			return () => undefined
 		}
 		// Auto inject the git origin url and user id.
@@ -42,6 +43,10 @@ export const telemetry = new Proxy(posthog, {
  * Wrapper to auto inject the git origin url and user id.
  */
 function capture(args: CaptureEventArguments) {
+	if (!publicEnv.PUBLIC_POSTHOG_TOKEN) {
+		return
+	}
+
 	return posthog.capture({
 		...args,
 		distinctId: "unknown",

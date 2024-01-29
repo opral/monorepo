@@ -1,6 +1,6 @@
 {
 	"name": "@lix-js/client",
-	"version": "0.7.0",
+	"version": "0.8.0",
 	"type": "module",
 	"publishConfig": {
 		"access": "public"

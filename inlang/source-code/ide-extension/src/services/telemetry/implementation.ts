@@ -1,6 +1,7 @@
 import { telemetryNode } from "@inlang/telemetry"
 import type { TelemetryEvents } from "./events.js"
 import { getUserId } from "../../utilities/settings/getUserId.js"
+import { state } from "../../utilities/state.js"
 
 export const telemetry: Omit<typeof telemetryNode, "capture"> & { capture: typeof capture } =
 	new Proxy(telemetryNode, {
@@ -32,8 +33,16 @@ async function capture(args: CaptureEventArguments) {
 	if (userID === undefined) {
 		userID = await getUserId()
 	}
+	// state might me undefined on bootup
+	const project = state()?.project
 	return telemetryNode.capture({
 		...args,
+		// automatically add the project if one exists
+		groups: project?.id
+			? {
+					project: project.id,
+			  }
+			: undefined,
 		distinctId: userID,
 	})
 }

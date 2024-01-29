@@ -28,7 +28,8 @@
 		"svelte",
 		"nextjs",
 		"astro",
-		"inlang"
+		"inlang",
+		"solid"
 	],
 	"pricing": "free",
 	"publisherName": "inlang",

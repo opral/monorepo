@@ -31,6 +31,7 @@
     <br />
 {/each}
 
+<a href="{base}/element">Element</a>
 
 <br/>
 

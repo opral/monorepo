@@ -9,7 +9,7 @@ const SvelteHeader = () => {
 				<div class="relative z-30 flex-1 flex flex-col items-start gap-4 px-6 py-3 md:min-w-[380px]">
 					<div class="flex flex-col gap-2 pt-2 md:pt-6">
 						<p class="text-sm text-[#FF3E00] font-medium">For the Svelte Community</p>
-						<h2 class="font-medium text-xl">Recommended i18n stack</h2>
+						<h2 class="font-medium text-xl">Recommended i18n library</h2>
 					</div>
 					<p class="text-sm text-surface-500 pr-20">
 						A small collection of tooling to get you going to build your global svelt app.
@@ -70,19 +70,18 @@ const SvelteHeader = () => {
 							<Arrow />
 						</div>
 					</Link>
-					<a
-						href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-vite"
-						target="_blanc"
+					<Link
+						href="/m/dxnzrydw"
 						class="w-full bg-background rounded-xl border border-surface-300 relative group hover:border-surface-400 transition-all cursor-pointer"
 					>
-						<h3 class="font-medium text-lg px-8 pb-1 pt-6">Vite Adapter</h3>
+						<h3 class="font-medium text-lg px-8 pb-1 pt-6">SvelteKit Adapter</h3>
 						<p class="text-surface-500 px-8 pb-6 text-sm pr-20">
-							Use Paraglide JS in any Vite Project.
+							A SvelteKit integration for ParaglideJS.
 						</p>
 						<div class="absolute top-4 right-4 w-8 h-8 border border-surface-300 rounded-full flex justify-center items-center group-hover:bg-surface-100 transition-all text-surface-500 group-hover:text-surface-900">
 							<Arrow />
 						</div>
-					</a>
+					</Link>
 				</div>
 			</div>
 		</>

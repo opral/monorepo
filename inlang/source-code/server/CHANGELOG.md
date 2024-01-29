@@ -4,6 +4,33 @@
 
 ### Patch Changes
 
+- Updated dependencies [23a0f5ff8]
+  - @inlang/badge@0.7.0
+  - @inlang/plugin-message-format@2.0.0
+  - @inlang/website@null
+
+## null
+
+### Patch Changes
+
+- @inlang/badge@0.6.1
+- @inlang/website@null
+- @inlang/plugin-message-format@2.0.0
+- @inlang/rpc@0.2.10
+- @inlang/telemetry@0.3.9
+
+## null
+
+### Patch Changes
+
+- Updated dependencies [edb7d145f]
+- Updated dependencies [345c277f1]
+  - @inlang/badge@0.6.0
+
+## null
+
+### Patch Changes
+
 - @inlang/badge@0.5.8
 - @inlang/plugin-message-format@2.0.0
 - @inlang/rpc@0.2.9

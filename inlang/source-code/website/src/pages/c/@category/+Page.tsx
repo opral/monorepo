@@ -2,7 +2,6 @@ import { For, Show, createSignal, type JSX } from "solid-js"
 import { GetHelp } from "#src/interface/components/GetHelp.jsx"
 import { SectionLayout } from "#src/pages/index/components/sectionLayout.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
-import Highlight from "#src/interface/components/Highlight.jsx"
 import Card, { CardBuildOwn, NoResultsCard } from "#src/interface/components/Card.jsx"
 import { Link, Meta, Title } from "@solidjs/meta"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
@@ -32,6 +31,8 @@ const selectedCategory = () => {
 	return currentPageContext.urlParsed.pathname.replace("/", "")
 }
 
+type PossibleSectionsType = Array<"apps" | "libraries" | "plugins" | "guides" | "all">
+
 export default function Page(props: {
 	minimal?: boolean
 	highlights?: Record<string, string>[]
@@ -45,7 +46,7 @@ export default function Page(props: {
 		buttonLink?: string
 		buttonText?: string
 		icon?: string
-		withGuides?: boolean
+		sections?: PossibleSectionsType
 		coverCard?: JSX.Element
 	}
 
@@ -58,6 +59,7 @@ export default function Page(props: {
 					buttonLink: "/documentation/build-app",
 					buttonText: m.marketplace_header_apps_button_text(),
 					coverCard: <AppHeader />,
+					sections: ["all"],
 				}
 			case "libraries":
 				return {
@@ -66,6 +68,7 @@ export default function Page(props: {
 					buttonLink: "/m/gerre34r/library-inlang-paraglideJs",
 					buttonText: m.marketplace_header_libraries_button_text(),
 					coverCard: <ParaglideHeader />,
+					sections: ["all"],
 				}
 			case "plugins":
 				return {
@@ -74,6 +77,7 @@ export default function Page(props: {
 					buttonLink: "/documentation/plugin/guide",
 					buttonText: m.marketplace_header_plugins_button_text(),
 					coverCard: <PluginHeader />,
+					sections: ["all"],
 				}
 			case "lint-rules":
 				return {
@@ -82,6 +86,7 @@ export default function Page(props: {
 					buttonLink: "/documentation/lint-rule",
 					buttonText: m.marketplace_header_lintRules_button_text(),
 					coverCard: <LintRulesHeader />,
+					sections: ["all"],
 				}
 			case "guides":
 				return {
@@ -89,6 +94,7 @@ export default function Page(props: {
 					description: m.marketplace_header_guides_description(),
 					buttonLink: "/documentation/publish-guide",
 					buttonText: m.marketplace_header_guides_button_text(),
+					sections: ["all"],
 				}
 			case "lix":
 				return {
@@ -96,6 +102,7 @@ export default function Page(props: {
 					description: m.marketplace_header_lix_short_description(),
 					buttonLink: "https://github.com/opral/monorepo/tree/main/lix",
 					buttonText: m.marketplace_header_lix_button_text(),
+					sections: ["all"],
 					coverCard: <LixHeader />,
 				}
 			case "svelte":
@@ -103,7 +110,7 @@ export default function Page(props: {
 					title: m.marketplace_header_svelte_title(),
 					description: m.marketplace_header_svelte_description(),
 					icon: "https://avatars.githubusercontent.com/u/23617963?s=200&v=4",
-					withGuides: true,
+					sections: ["apps", "guides", "plugins", "libraries"],
 					coverCard: <SvelteHeader />,
 				}
 			case "nextjs":
@@ -111,7 +118,7 @@ export default function Page(props: {
 					title: m.marketplace_header_nextjs_title(),
 					description: m.marketplace_header_nextjs_description(),
 					icon: "https://assets.vercel.com/image/upload/v1662130559/nextjs/Icon_light_background.png",
-					withGuides: true,
+					sections: ["apps", "guides", "plugins", "libraries"],
 					coverCard: <NextjsHeader />,
 				}
 			case "solid": {
@@ -119,6 +126,7 @@ export default function Page(props: {
 					title: m.marketplace_header_solid_title(),
 					description: m.marketplace_header_solid_description(),
 					icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-solidstart/assets/icon.png",
+					sections: ["apps", "guides", "plugins", "libraries"],
 					coverCard: <GenericHeader />,
 				}
 			}
@@ -127,7 +135,7 @@ export default function Page(props: {
 					title: m.marketplace_header_astro_title(),
 					description: m.marketplace_header_astro_description(),
 					icon: "https://astro.build/favicon.svg",
-					withGuides: true,
+					sections: ["apps", "guides", "plugins", "libraries"],
 					coverCard: <AstroHeader />,
 				}
 			}
@@ -139,6 +147,7 @@ export default function Page(props: {
 						m.marketplace_header_generic_title(),
 					description: m.marketplace_header_generic_description(),
 					coverCard: <GenericHeader />,
+					sections: ["all"],
 				}
 		}
 	}
@@ -251,33 +260,108 @@ export default function Page(props: {
 				<div class="pb-16 md:pb-20 min-h-screen relative">
 					<SectionLayout showLines={false} type="white">
 						<div class="min-h-[70vh]">
-							<Show when={props.highlights}>
-								<Show when={props.highlights && props.highlights.length > 0}>
-									<div
-										class={
-											"flex md:grid justify-between gap-6 md:flex-row flex-col mb-8 " +
-											(props.highlights!.length > 1 ? "md:grid-cols-2" : "md:grid-cols-1")
-										}
-									>
-										<For each={props.highlights}>
-											{/* @ts-expect-error */}
-											{(highlight) => <Highlight {...highlight} />}
-										</For>
-									</div>
+							<Show
+								when={!getCategoryContent()?.sections?.includes("all")}
+								fallback={<Gallery items={props.items} hideBuildYourOwn={false} />}
+							>
+								{/* Guides */}
+								<Show
+									when={
+										props.items &&
+										getCategoryContent()?.sections?.includes("guides") &&
+										props.items.some(
+											(item: MarketplaceManifest & { uniqueID: string }) =>
+												item.id.split(".")[0] === "guide"
+										)
+									}
+								>
+									<h2 class="pb-4 border-t-surface-200 text-xl font-medium tracking-tight text-surface-900">
+										Guides
+									</h2>
+									<Gallery
+										items={props.items.filter(
+											(item: MarketplaceManifest & { uniqueID: string }) =>
+												item.id.split(".")[0] === "guide"
+										)}
+										hideBuildYourOwn
+									/>
+								</Show>
+								{/* Apps */}
+								<Show
+									when={
+										props.items &&
+										getCategoryContent()?.sections?.includes("apps") &&
+										props.items.some(
+											(item: MarketplaceManifest & { uniqueID: string }) =>
+												item.id.split(".")[0] === "app"
+										)
+									}
+								>
+									<h2 class="pb-4 border-t-surface-200 text-xl font-medium tracking-tight text-surface-900">
+										i18n Workflow Apps
+									</h2>
+									<Gallery
+										items={props.items.filter(
+											(item: MarketplaceManifest & { uniqueID: string }) =>
+												item.id.split(".")[0] === "app"
+										)}
+										hideBuildYourOwn
+									/>
+								</Show>
+								{/* Plugins */}
+								<Show
+									when={
+										props.items &&
+										getCategoryContent()?.sections?.includes("plugins") &&
+										props.items.some(
+											(item: MarketplaceManifest & { uniqueID: string }) =>
+												item.id.split(".")[0] === "plugin"
+										)
+									}
+								>
+									<h2 class="pb-4 border-t-surface-200 text-xl font-medium tracking-tight text-surface-900">
+										Extend with plugins
+									</h2>
+									<Gallery
+										items={props.items.filter(
+											(item: MarketplaceManifest & { uniqueID: string }) =>
+												item.id.split(".")[0] === "plugin"
+										)}
+									/>
+								</Show>
+								{/* Libraries */}
+								<Show
+									when={
+										props.items &&
+										getCategoryContent()?.sections?.includes("libraries") &&
+										props.items.some(
+											(item: MarketplaceManifest & { uniqueID: string }) =>
+												item.id.split(".")[0] === "library"
+										) &&
+										props.items.some(
+											(item: MarketplaceManifest & { uniqueID: string }) =>
+												item.keywords.includes("inlang") || !item.keywords.includes("external")
+										)
+									}
+								>
+									<h2 class="pb-4 border-t-surface-200 text-xl font-medium tracking-tight text-surface-900">
+										Compatible i18n libraries
+									</h2>
+									<Gallery
+										items={props.items
+											.filter(
+												(item: MarketplaceManifest & { uniqueID: string }) =>
+													item.id.split(".")[0] === "library"
+											)
+											.filter(
+												(item: MarketplaceManifest & { uniqueID: string }) =>
+													item.keywords.includes("inlang") || !item.keywords.includes("external")
+											)}
+									/>
 								</Show>
 							</Show>
-							<div class="mb-8 grid xl:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
-								<Gallery
-									items={props.items}
-									guides={selectedCategory().includes("c/guides")}
-									hideBuildYourOwn={getCategoryContent()?.withGuides}
-								/>
-							</div>{" "}
-							<Show when={getCategoryContent()?.withGuides}>
-								<p class="text-lg font-semibold leading-snug tracking-tight py-4">Guides</p>
-								<div class="mb-8 grid xl:grid-cols-4 md:grid-cols-2 w-full gap-4 justify-normal items-stretch relative">
-									<Gallery items={props.items} guides={true} />
-								</div>{" "}
+							<Show when={false}>
+								<NoResultsCard category={selectedCategory()} />
 							</Show>
 							<Show
 								when={
@@ -300,26 +384,11 @@ export default function Page(props: {
 	)
 }
 
-const Gallery = (props: { items: any; guides?: boolean; hideBuildYourOwn?: boolean }) => {
+const Gallery = (props: { items: any; hideBuildYourOwn?: boolean }) => {
 	return (
-		<>
-			<Show
-				when={props.items && props.items.length > 0}
-				fallback={!props.guides && <NoResultsCard category={selectedCategory()} />}
-			>
-				<For
-					each={
-						props.guides
-							? props.items.filter(
-									(item: MarketplaceManifest & { uniqueID: string }) =>
-										item.id.split(".")[0] === "guide"
-							  )
-							: props.items.filter(
-									(item: MarketplaceManifest & { uniqueID: string }) =>
-										item.id.split(".")[0] !== "guide"
-							  )
-					}
-				>
+		<div class="mb-10 grid grid-cols-4 gap-4">
+			<Show when={props.items && props.items.length > 0}>
+				<For each={props.items}>
 					{(item) => {
 						const displayName =
 							typeof item.displayName === "object" ? item.displayName.en : item.displayName
@@ -327,10 +396,10 @@ const Gallery = (props: { items: any; guides?: boolean; hideBuildYourOwn?: boole
 						return <Card item={item} displayName={displayName} />
 					}}
 				</For>
-				<Show when={!props.guides && !props.hideBuildYourOwn}>
+				<Show when={!props.hideBuildYourOwn}>
 					<CardBuildOwn />
 				</Show>
 			</Show>
-		</>
+		</div>
 	)
 }
