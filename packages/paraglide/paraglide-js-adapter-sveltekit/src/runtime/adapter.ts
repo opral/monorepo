@@ -93,7 +93,7 @@ export type I18nUserConfig<T extends string> = {
 	 * }
 	 * ```
 	 */
-	dir?: Record<T, "ltr" | "rtl">
+	textDirection?: Record<T, "ltr" | "rtl">
 
 	/**
 	 * SEO related options.
@@ -116,7 +116,7 @@ export type I18nConfig<T extends string> = {
 	exclude: (path: string) => boolean
 	defaultLanguageTag: T
 	prefixDefaultLanguage: "always" | "never"
-	dir: Record<T, "ltr" | "rtl">
+	textDirection: Record<T, "ltr" | "rtl">
 	seo: {
 		noAlternateLinks: boolean
 	}
@@ -150,7 +150,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		exclude: createExclude(excludeConfig),
 		defaultLanguageTag,
 		prefixDefaultLanguage: options?.prefixDefaultLanguage ?? "never",
-		dir: options?.dir ?? guessTextDirMap(runtime.availableLanguageTags),
+		textDirection: options?.textDirection ?? guessTextDirMap(runtime.availableLanguageTags),
 		seo: {
 			noAlternateLinks: options?.seo?.noAlternateLinks ?? true,
 		},

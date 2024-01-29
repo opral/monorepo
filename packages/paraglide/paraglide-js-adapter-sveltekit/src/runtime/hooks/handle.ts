@@ -34,10 +34,10 @@ export type HandleOptions = {
 	 * <html dir="%paraglide.dir%">
 	 * ```
 	 * ```ts
-	 * { dirPlaceholder: "%paraglide.dir%" }
+	 * { textDirectionPlaceholder: "%paraglide.textDirection%" }
 	 * ```
 	 */
-	dirPlaceholder?: string
+	textDirectionPlaceholder?: string
 }
 
 export const createHandle = <T extends string>(
@@ -45,7 +45,7 @@ export const createHandle = <T extends string>(
 	options: HandleOptions
 ): Handle => {
 	const langPlaceholder = options.langPlaceholder ?? "%paraglide.lang%"
-	const dirPlaceholder = options.dirPlaceholder ?? "%paraglide.dir%"
+	const dirPlaceholder = options.textDirectionPlaceholder ?? "%paraglide.textDirection%"
 
 	return ({ resolve, event }) => {
 		const { lang } = getPathInfo(event.url.pathname, {
@@ -54,17 +54,17 @@ export const createHandle = <T extends string>(
 			base,
 		})
 
-		const dir = i18n.dir[lang as T] ?? "ltr"
+		const textDirection = i18n.textDirection[lang as T] ?? "ltr"
 
 		event.locals.paraglide = {
 			lang,
-			dir,
+			textDirection,
 		}
 
 		return resolve(event, {
 			transformPageChunk({ html, done }) {
 				if (!done) return html
-				return html.replace(langPlaceholder, lang).replace(dirPlaceholder, dir)
+				return html.replace(langPlaceholder, lang).replace(dirPlaceholder, textDirection)
 			},
 		})
 	}
@@ -76,7 +76,7 @@ declare global {
 		interface Locals {
 			paraglide: {
 				lang: string
-				dir: "ltr" | "rtl"
+				textDirection: "ltr" | "rtl"
 			}
 		}
 	}
