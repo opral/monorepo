@@ -1,43 +1,39 @@
 import { parse, type PreprocessorGroup } from "svelte/compiler"
 import MagicString from "magic-string"
 import type { Ast } from "./types.js"
-import { createTranslateAttributePass } from "./passes/translateAttribute.js"
+import { shouldApply } from "./precheck.js"
+import { rewrite } from "./rewrite.js"
 
 export type PreprocessorConfig = Record<string, never>
 
-type MarkupPreprocessorArgs = {
-	filename: string
-	content: string
+export type AttributeTranslation = {
+	attribute_name: string
+	lang_attribute_name?: string
 }
 
-export type PreprocessingPass = {
-	/**
-	 * A quick and cheap check to see if this pass should be applied.
-	 * This is used to avoid parsing the file if it's not necessary.
-	 */
-	condition: (data: MarkupPreprocessorArgs) => boolean
+export type TranslationDefinition = Record<string, AttributeTranslation[]>
 
-	/**
-	 * Applies the pass to the file.
-	 * Should only be called if `condition` returned true, since it may assume that.
-	 *
-	 * @param ast 	The AST of the file.
-	 * @param code 	The code of the file. Modify this directly.
-	 * @returns A list of imports that should be injected into the file.
-	 */
-	apply: (data: { ast: Ast; code: MagicString; originalCode: string }) => {
-		scriptAdditions?: { before?: Iterable<string>; after?: Iterable<string> }
-	}
+const TRANSLATIONS: TranslationDefinition = {
+	a: [
+		{
+			attribute_name: "href",
+			lang_attribute_name: "hreflang",
+		},
+	],
+	form: [
+		{
+			attribute_name: "action",
+		},
+	],
+	button: [
+		{
+			attribute_name: "formaction",
+		},
+	],
 }
-
-const PASSES: PreprocessingPass[] = [
-	createTranslateAttributePass("a", "href", "hreflang"),
-	createTranslateAttributePass("button", "formaction"),
-	createTranslateAttributePass("form", "action"),
-]
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function preprocess(_config: PreprocessorConfig): PreprocessorGroup {
+export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
 	return {
 		name: "@inlang/paraglide-js-adapter-sveltekit",
 		markup: ({ filename, content }) => {
@@ -49,37 +45,20 @@ export function preprocess(_config: PreprocessorConfig): PreprocessorGroup {
 			//dont' process components owned by the framework
 			if (filename.includes(".svelte-kit")) return NOOP
 
-			//Run quick checks to see if any passes should be applied - skip parsing if not
-
-			/** A boolean mask describing which passes passed and which didn't */
-			const passMask = PASSES.map((pass) => pass.condition({ filename, content }))
-			const skipProcessing = passMask.every((pass) => pass === false)
-			if (skipProcessing) return NOOP
+			//Run quick checks to see if preprocessing should be applied - skip parsing if not
+			if (!shouldApply(content, TRANSLATIONS)) return NOOP
 
 			//Parse the file
 			const ast = parse(content)
 			const code = new MagicString(content)
 
-			const scriptAdditonsStart = new Set<string>()
-			const scriptAdditonsEnd = new Set<string>()
+			const passResult = rewrite({ ast, code, originalCode: content, translations: TRANSLATIONS })
 
-			//Apply the passes whose conditions returned true (be as lazy as possible)
-			for (const [i, element] of passMask.entries()) {
-				if (!element) continue
-
-				//pass is always defined, but eslint doesn't know that
-				const pass = PASSES[i]
-				if (!pass) continue
-
-				const passResult = pass.apply({ ast, code, originalCode: content })
-				for (const addition of passResult.scriptAdditions?.before ?? [])
-					scriptAdditonsStart.add(addition)
-				for (const addition of passResult.scriptAdditions?.after ?? [])
-					scriptAdditonsEnd.add(addition)
-			}
+			const before = new Set<string>(passResult.scriptAdditions?.before)
+			const after = new Set<string>(passResult.scriptAdditions?.after)
 
 			//Inject any imports that were added by the passes
-			modifyScriptTag(ast, code, { before: scriptAdditonsStart, after: scriptAdditonsEnd })
+			modifyScriptTag(ast, code, { before, after })
 
 			//Generate the code and map
 			const map = code.generateMap({ hires: true })

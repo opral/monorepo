@@ -12,6 +12,7 @@ import type { PathTranslations } from "./path-translations/types.js"
 import type { Paraglide } from "./runtime.js"
 import { resolve } from "./utils/path.js"
 import { createExclude, type ExcludeConfig } from "./exclude.js"
+import { guessTextDirMap } from "./utils/text-dir.js"
 
 export type I18nUserConfig<T extends string> = {
 	/**
@@ -76,6 +77,34 @@ export type I18nUserConfig<T extends string> = {
 	 * @default "never"
 	 */
 	prefixDefaultLanguage?: "always" | "never"
+
+	/**
+	 * The associated text-direction for each language. It's recommended to set this to avoid
+	 * any direction-detection differences between different browsers.
+	 *
+	 * @default Guesses the direction based on the language tag using `Intl.Locale`
+	 *
+	 * @example
+	 * ```ts
+	 * dir: {
+	 *  en: "ltr",
+	 *  de: "ltr",
+	 *  ar: "rtl",
+	 * }
+	 * ```
+	 */
+	textDirection?: Record<T, "ltr" | "rtl">
+
+	/**
+	 * SEO related options.
+	 */
+	seo: {
+		/**
+		 * Whether to generate alternate links for each page & language and add them to the head.
+		 * @default true
+		 */
+		noAlternateLinks?: boolean
+	}
 }
 
 /**
@@ -87,6 +116,10 @@ export type I18nConfig<T extends string> = {
 	exclude: (path: string) => boolean
 	defaultLanguageTag: T
 	prefixDefaultLanguage: "always" | "never"
+	textDirection: Record<T, "ltr" | "rtl">
+	seo: {
+		noAlternateLinks: boolean
+	}
 }
 
 /**
@@ -117,6 +150,10 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		exclude: createExclude(excludeConfig),
 		defaultLanguageTag,
 		prefixDefaultLanguage: options?.prefixDefaultLanguage ?? "never",
+		textDirection: options?.textDirection ?? guessTextDirMap(runtime.availableLanguageTags),
+		seo: {
+			noAlternateLinks: options?.seo?.noAlternateLinks ?? true,
+		},
 	}
 
 	// We don't want the translations to be mutable
@@ -146,7 +183,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		 * Returns a `handle` hook that set's the correct `lang` attribute
 		 * on the `html` element
 		 */
-		handle: (options: HandleOptions) => createHandle(config, options),
+		handle: (options: HandleOptions = {}) => createHandle(config, options),
 
 		/**
 		 * Takes in a URL and returns the language that should be used for it.

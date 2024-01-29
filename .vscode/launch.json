@@ -23,7 +23,7 @@
 				// change this path to specify what folder should be opened upon running this configuration
 				"${workspaceFolder}/inlang/source-code/end-to-end-tests/inlang-nextjs"
 			],
-			"outFiles": ["${workspaceFolder}/inlang/source-code/ide-extension/dist/**/*.cjs"]
+			"outFiles": []
 		},
 		{
 			"name": "debug vs-code-extension e2e",

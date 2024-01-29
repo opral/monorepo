@@ -15,35 +15,55 @@ export function createFileSystemMapper(base: string, fs: NodeishFilesystem): Nod
 		readFile: async (
 			path: Parameters<NodeishFilesystem["readFile"]>[0],
 			options: Parameters<NodeishFilesystem["readFile"]>[1]
-		): Promise<string> => {
-			const fileData = await fs.readFile(
+		): Promise<string | Uint8Array> => {
+			return fs.readFile(
 				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path)),
 				options
 			)
-			if (typeof fileData === "string") {
-				return fileData
-			} else {
-				return new TextDecoder().decode(fileData)
-			}
 		},
 		writeFile: async (
 			path: Parameters<NodeishFilesystem["writeFile"]>[0],
 			data: Parameters<NodeishFilesystem["writeFile"]>[1]
 		) => {
-			await fs.writeFile(
+			return fs.writeFile(
 				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path)),
 				data
 			)
 		},
 		mkdir: async (path: Parameters<NodeishFilesystem["mkdir"]>[0]) => {
-			await fs.mkdir(
+			return fs.mkdir(
 				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path))
 			)
-			return path
+		},
+		rmdir: async (path: Parameters<NodeishFilesystem["rmdir"]>[0]) => {
+			return fs.rmdir(
+				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path))
+			)
+		},
+		unlink: async (path: Parameters<NodeishFilesystem["unlink"]>[0]) => {
+			return fs.unlink(
+				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path))
+			)
 		},
 		readdir: async (path: Parameters<NodeishFilesystem["readdir"]>[0]) => {
 			return fs.readdir(
 				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path))
+			)
+		},
+		readlink: async (path: Parameters<NodeishFilesystem["readlink"]>[0]) => {
+			return fs.readlink(
+				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path))
+			)
+		},
+		symlink: async (
+			path: Parameters<NodeishFilesystem["symlink"]>[0],
+			target: Parameters<NodeishFilesystem["symlink"]>[1]
+		) => {
+			return fs.symlink(
+				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path)),
+				normalizePath(
+					target.startsWith(normalizedBase) ? target : _path.resolve(normalizedBase, target)
+				)
 			)
 		},
 		stat: async (path: Parameters<NodeishFilesystem["stat"]>[0]) => {
