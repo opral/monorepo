@@ -1,5 +1,15 @@
 # @inlang/cli
 
+## 2.11.0
+
+### Minor Changes
+
+- ac7e6fe5e: fix: move bundled dependency to devDependencies
+
+### Patch Changes
+
+- eb60c0408: fix broken dependency
+
 ## 2.10.0
 
 ### Minor Changes
