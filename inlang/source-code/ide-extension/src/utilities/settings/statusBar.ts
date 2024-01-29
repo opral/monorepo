@@ -18,6 +18,7 @@ export const showStatusBar = async () => {
 		? previewLanguageTag
 		: settings.sourceLanguageTag
 
-	statusBar.text = `Language: ${preferredLanguageTag}`
+	statusBar.text = `Inlang: ${preferredLanguageTag}`
+	statusBar.tooltip = "Switch preview language"
 	statusBar.show()
 }
