@@ -604,8 +604,8 @@ function LanguageFilter(props: { clearFunction: any; setAddLanguageModalOpen: Se
 								} else if (!userIsCollaborator()) {
 									showToast({
 										variant: "warning",
-										title: "Not a collaborator",
-										message: "Fork this repository to make changes.",
+										title: "No access to this repo",
+										message: "Use a fork to make changes.",
 									})
 								} else {
 									props.setAddLanguageModalOpen(true)
