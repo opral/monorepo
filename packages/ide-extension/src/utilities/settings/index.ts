@@ -5,6 +5,7 @@ type SettingsProperty =
 	| "disableRecommendation"
 	| "disableConfigFileCreation"
 	| "disableConfigFileDeletion"
+	| "previewLanguageTag"
 
 /**
  * Updates a configuration setting with the specified value.
