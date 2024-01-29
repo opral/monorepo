@@ -45,6 +45,7 @@
 	$: lang = languageTag ?? autodetectedLanguage
 	$: i18n.config.runtime.setLanguageTag(lang)
 	$: if (browser) document.documentElement.lang = lang
+	$: if (browser) document.documentElement.dir = i18n.config.dir[lang]
 
 	function translateHref(href: string, hreflang: string | undefined): string {
 		const from = new URL($page.url)
