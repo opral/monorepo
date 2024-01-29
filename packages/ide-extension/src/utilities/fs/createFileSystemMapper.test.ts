@@ -17,6 +17,10 @@ describe("createFileSystemMapper", () => {
 			stat: vi.fn(),
 			watch: vi.fn(),
 			lstat: vi.fn(),
+			rmdir: vi.fn(),
+			unlink: vi.fn(),
+			readlink: vi.fn(),
+			symlink: vi.fn(),
 		}
 	})
 
@@ -52,6 +56,52 @@ describe("createFileSystemMapper", () => {
 
 		expect(mockFs.readdir).toHaveBeenCalledWith(
 			testPath.startsWith(normalizedBase) ? testPath : _path.resolve(normalizedBase, testPath)
+		)
+	})
+
+	it("should map rmdir correctly", async () => {
+		const fs = createFileSystemMapper(normalizedBase, mockFs)
+		const testPath = "/test/path"
+
+		await fs.rmdir(testPath)
+
+		expect(mockFs.rmdir).toHaveBeenCalledWith(
+			testPath.startsWith(normalizedBase) ? testPath : _path.resolve(normalizedBase, testPath)
+		)
+	})
+
+	it("should map unlink correctly", async () => {
+		const fs = createFileSystemMapper(normalizedBase, mockFs)
+		const testPath = "/test/path"
+
+		await fs.unlink(testPath)
+
+		expect(mockFs.unlink).toHaveBeenCalledWith(
+			testPath.startsWith(normalizedBase) ? testPath : _path.resolve(normalizedBase, testPath)
+		)
+	})
+
+	// make tests for readdir, readlink, symlink, stat, lstat
+	it("should map readlink correctly", async () => {
+		const fs = createFileSystemMapper(normalizedBase, mockFs)
+		const testPath = "/test/path"
+
+		await fs.readlink(testPath)
+
+		expect(mockFs.readlink).toHaveBeenCalledWith(
+			testPath.startsWith(normalizedBase) ? testPath : _path.resolve(normalizedBase, testPath)
+		)
+	})
+
+	it("should map symlink correctly", async () => {
+		const fs = createFileSystemMapper(normalizedBase, mockFs)
+		const testPath = "/test/path"
+
+		await fs.symlink(testPath, "/test/target")
+
+		expect(mockFs.symlink).toHaveBeenCalledWith(
+			testPath.startsWith(normalizedBase) ? testPath : _path.resolve(normalizedBase, testPath),
+			"/test/target"
 		)
 	})
 

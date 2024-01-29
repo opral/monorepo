@@ -14,10 +14,12 @@ export const previewLanguageTagCommand = {
 			placeHolder: "Select a language",
 		})
 
-		if (selectedTag) {
-			await updateSetting("previewLanguageTag", selectedTag)
-			await showStatusBar()
+		if (!selectedTag) {
+			return
 		}
+
+		await updateSetting("previewLanguageTag", selectedTag)
+		await showStatusBar()
 
 		CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire()
 		CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.fire()
