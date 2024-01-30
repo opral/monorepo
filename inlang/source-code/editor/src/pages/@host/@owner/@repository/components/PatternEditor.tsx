@@ -204,23 +204,6 @@ export function PatternEditor(props: {
 		}
 	}
 
-	// const [_isFork] = createResource(
-	// 	() => localStorage.user,
-	// 	async (user) => {
-	// 		const response = await isFork({
-	// 			owner: (currentPageContext.routeParams as EditorRouteParams).owner,
-	// 			repository: (currentPageContext.routeParams as EditorRouteParams)
-	// 				.repository,
-	// 			username: user.username,
-	// 		});
-	// 		if (response.type === "success") {
-	// 			return response.fork;
-	// 		} else {
-	// 			return response;
-	// 		}
-	// 	}
-	// );
-
 	const [machineTranslationIsLoading, setMachineTranslationIsLoading] = createSignal(false)
 
 	const handleMachineTranslate = async () => {
@@ -328,7 +311,7 @@ export function PatternEditor(props: {
 		if (hasChanges() && localStorage.user?.isLoggedIn && !userIsCollaborator()) {
 			notifications.push({
 				notificationTitle: "Fork:",
-				notificationDescription: "Fork the project to commit changes.",
+				notificationDescription: "Use a fork to make changes.",
 				notificationType: "warning",
 			})
 		}
