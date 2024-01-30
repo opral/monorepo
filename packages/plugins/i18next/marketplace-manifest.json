@@ -21,7 +21,10 @@
 		"import",
 		"export",
 		"messages",
-		"plugin"
+		"plugin",
+		"svelte",
+		"solid",
+		"astro"
 	],
 	"recommends": ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g", "m/gerre34r"],
 	"publisherName": "inlang",

@@ -106,12 +106,6 @@ const AppHeader = () => {
 											<div class="w-full font-bold text-surface-900 tracking-tight">
 												{displayName()}
 											</div>
-											<div class="w-full flex flex-row gap-2 items-center">
-												<InlangBadge />
-												<div class="flex-1 text-sm text-primary font-medium">
-													inlang ecosystem compatible
-												</div>
-											</div>
 										</div>
 									</div>
 									<div class="text-surface-500 text-md font-regular line-clamp-2">

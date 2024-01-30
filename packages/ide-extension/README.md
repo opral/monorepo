@@ -1,32 +1,33 @@
 
 
+# inlang – Supercharge i18n in VS Code
+
 <div>
-	<h1>inlang – Supercharge i18n in VS Code</h1>	
 	<p>
 		<br>
-		<a href='https://inlang.com/c/apps' target="_blank">🕹️ Apps</a>
+		<a href='https://inlang.com/c/apps' target="_blank">🕹️ Other i18n Apps</a>
 		·
-		<a href='https://inlang.com/documentation' target="_blank">📄 Docs</a>
+		<a href='https://inlang.com/m/r7kp499g' target="_blank">📄 Docs</a>
 		·
 		<a href='https://discord.gg/gdMPPWy57R' target="_blank">💙 Discord</a>
 		·
 		<a href='https://twitter.com/inlangHQ' target="_blank">🐦 Twitter</a>
-		·
-		<a href='https://github.com/orgs/inlang/projects/39' target="_blank">🗺️ Roadmap</a>
 	</p>
 	<br />
 </div>
 
-✅ Supercharge i18n within VS Code with powerful tools designed to streamline the translation process. 
-
-✅ Visualize, edit, and lint translated strings effortlessly using Inline Decorations & Hover Support. 
-
-✅ Extract new strings with a simple click, making localization tasks more intuitive and efficient.
-
-<br>
-<br>
 
 <img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-extension-cover.png"/>
+
+<br>
+<br>
+
+✅ Streamline the i18n translation process. 
+
+✅ Visualize, edit, and lint translations.
+
+✅ Extract new translations with a simple click.
+
 
 <br>
 
@@ -42,7 +43,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-inline.png"/>
 		</div>
 		<div class="flex-item">
-			<p class="bold">🔎 Inline Annotaions</p>
+			<p class="bold">🔎 Inline Annotations</p>
 			<p>See translations directly in your code. No more back-and-forth looking into the translation files themselves.</p>
 		</div>
 	</div>
@@ -87,7 +88,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 		</div>
 		<div class="flex-item">
 			<p class="bold">📦 Monorepo support</p>
-			<p>You can have multible projects in your repository. The inlang tab makes it easy to switch from one to another.</p>
+			<p>You can have multiple projects in your repository. The inlang tab makes it easy to switch from one to another.</p>
 		</div>
 	</div>
 </div>
@@ -132,7 +133,7 @@ Just install the extension and click on `Getting Started` in the `Inlang Tab`.
 
 #### 1. Create a `project.inlang/settings.json` in the **root** of your project
 
-You can use the following template when using json files as translation files, if not, please look for other [supported resource file types](https://inlang.com/):
+You can use the following template when using JSON files as translation files. If not, please look for other [supported resource file types](https://inlang.com/):
 
 ```json
 {
@@ -151,7 +152,7 @@ You can use the following template when using json files as translation files, i
 
 #### 2. Decide on a **syntax matcher**
 
-You should continue with **installing a syntax matcher**. There are multiple syntax matcher available like:
+You should continue with **installing a syntax matcher**. There are multiple syntax matcher's available:
 
 - m function matcher: https://inlang.com/m/632iow21/plugin-inlang-mFunctionMatcher
 - t function matcher: https://inlang.com/m/698iow33/plugin-inlang-tFunctionMatcher
@@ -159,7 +160,7 @@ You should continue with **installing a syntax matcher**. There are multiple syn
 
 #### 3. ✨ Recommended
 
-If you want to add lint rules to your experience, you can add them from: https://inlang.com/c/lint-rules
+If you want to add lint rules to your experience, you can add them from https://inlang.com/c/lint-rules
 
 #### Requirements:
 
@@ -168,7 +169,7 @@ If you want to add lint rules to your experience, you can add them from: https:/
 
 #### Troubleshooting
 
-If you are having trouble with the **loading icon** not disappearing, this is a known issue & we are working with VSCode to fix it. In the meantime, you can right click the Inlang icon to hide it:
+If you are having trouble with the **loading icon** not disappearing, this is a known issue & we are working with VSCode to fix it. In the meantime, you can right-click the Inlang icon to hide it:
 
 <img width="25%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/hide-badge.png"/>
 
@@ -182,7 +183,6 @@ If something isn't working as expected or you have a feature suggestion, please 
 .flex-container {
 	display: flex;
 	flex-wrap: wrap;
-	padding: 0 16px;
 	align-items: center;
 }
 .flex-item {
@@ -192,6 +192,7 @@ If something isn't working as expected or you have a feature suggestion, please 
 	.flex-item {
 		width: calc(50% - 16px); /* Two columns with a small gap between them */
 		margin-bottom: 0;
+		padding: 0 8px;
 	}
 }
 .flex-item .bold {

@@ -5,6 +5,7 @@ import { getStringFromPattern } from "../utilities/messages/query.js"
 import { CONFIGURATION } from "../configuration.js"
 import { resolveEscapedCharacters } from "../utilities/messages/resolveEscapedCharacters.js"
 import { getActiveTextEditor } from "../main.js"
+import { getSetting } from "../utilities/settings/index.js"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
@@ -44,13 +45,19 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 			const messages = await matcher({
 				documentText: activeTextEditor.document.getText(),
 			})
-			return messages.map((message) => {
+
+			return messages.map(async (message) => {
 				const _message = state().project.query.messages.get({
 					// TODO #1844 CLEARIFY FELIX ALIAS: how should this behave with the aliase we will introduce?
 					where: { id: message.messageId },
 				})
 
-				const variant = _message?.variants?.find((v) => v.languageTag === sourceLanguageTag)
+				const preferredLanguageTag = (await getSetting("previewLanguageTag")) || ""
+				const translationLanguageTag = preferredLanguageTag.length
+					? preferredLanguageTag
+					: sourceLanguageTag
+
+				const variant = _message?.variants?.find((v) => v.languageTag === translationLanguageTag)
 
 				const translationString = getStringFromPattern({
 					pattern: variant?.pattern || [
@@ -59,7 +66,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 							value: "", // TODO: Fix pattern type to be always defined either/or Text / VariableReference
 						},
 					],
-					languageTag: sourceLanguageTag,
+					languageTag: translationLanguageTag,
 					messageId: message.messageId,
 				})
 
@@ -99,7 +106,8 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 			})
 		})
 		const decorations = (await Promise.all(wrappedDecorations || [])).flat()
-		activeTextEditor.setDecorations(messagePreview, decorations)
+		const unwrappedDecorations = await Promise.all(decorations)
+		activeTextEditor.setDecorations(messagePreview, unwrappedDecorations)
 	}
 
 	// in case the active text editor is already open, update decorations

@@ -21,7 +21,8 @@
 		"ide-extension",
 		"javascript",
 		"developer",
-		"i18n"
+		"i18n",
+		"external"
 	],
 	"recommends": ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g"],
 	"pricing": "free",

@@ -1,5 +1,11 @@
 # @inlang/plugin-next-intl
 
+## 1.2.6
+
+### Patch Changes
+
+- @inlang/sdk@0.26.1
+
 ## 1.2.5
 
 ### Patch Changes

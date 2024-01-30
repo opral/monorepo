@@ -1,5 +1,5 @@
 import * as Path from "./path.js"
-import { DATA_SUFFIX } from "../constants.js"
+import { DATA_SUFFIX } from "../../constants.js"
 
 /**
  * Serializes a path with the given options. Does **NOT** include the language.

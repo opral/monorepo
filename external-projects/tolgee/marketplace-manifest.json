@@ -13,7 +13,7 @@
 	"readme": {
 		"en": "./inlang/external-projects/tolgee/README.md"
 	},
-	"keywords": ["apps", "tolgee", "editor", "messages", "translator"],
+	"keywords": ["apps", "tolgee", "editor", "messages", "translator", "external"],
 	"recommends": ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g"],
 	"pricing": "start free",
 	"publisherName": "tolgee",

@@ -9,7 +9,7 @@ const AstroHeader = () => {
 				<div class="relative z-30 flex-1 flex flex-col items-start gap-4 px-6 py-3 md:min-w-[380px]">
 					<div class="flex flex-col gap-2 pt-2 md:pt-6">
 						<p class="text-sm text-[#E23788] font-medium">For the Astro Community</p>
-						<h2 class="font-medium text-xl">Recommended i18n stack</h2>
+						<h2 class="font-medium text-xl">Recommended i18n library</h2>
 					</div>
 					<p class="text-sm text-surface-500 pr-20">
 						A small collection of tooling to get you going to build your global Astro app with

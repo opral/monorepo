@@ -1,5 +1,5 @@
 # Getting started
-1. Visit `inlang.com/editor`
+1. Visit `fink.inlang.com`
 2. Paste the GitHub url of the project.
 2. Sign in using GitHub. (You need a GitHub account to contribute translations.)
 3. At the top, select the language(s) you wish to translate. If your language does not exist yet, you can select Add Language at the top-right.

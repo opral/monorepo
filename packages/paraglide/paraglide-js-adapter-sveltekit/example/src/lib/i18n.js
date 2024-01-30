@@ -30,4 +30,9 @@ export const i18n = createI18n(runtime, {
 		},
 	},
 	exclude: ["/base/not-translated"],
+	dir: {
+		en: "ltr",
+		de: "ltr",
+		fr: "ltr",
+	},
 })
