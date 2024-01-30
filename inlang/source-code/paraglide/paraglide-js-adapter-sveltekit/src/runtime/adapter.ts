@@ -98,7 +98,7 @@ export type I18nUserConfig<T extends string> = {
 	/**
 	 * SEO related options.
 	 */
-	seo: {
+	seo?: {
 		/**
 		 * Whether to generate alternate links for each page & language and add them to the head.
 		 * @default true
