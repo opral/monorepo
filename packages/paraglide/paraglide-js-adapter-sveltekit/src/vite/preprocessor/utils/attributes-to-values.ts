@@ -9,7 +9,7 @@ import { escapeForTemplateString } from "./escape.js"
  */
 export function attrubuteValuesToJSValue(
 	values: AttributeValue[] | boolean | string,
-	originalCode: string,
+	originalCode: string
 ): string {
 	if (typeof values === "boolean") return values.toString()
 	if (typeof values === "string") return "`" + escapeForTemplateString(values) + "`"
@@ -18,6 +18,15 @@ export function attrubuteValuesToJSValue(
 
 	if (!(Symbol.iterator in Object(values))) {
 		console.error(values)
+	}
+
+	//If all values are AttributeShorthand or MustacheTag we don't need to stringify them
+	if (noTextNodes(values)) {
+		let code = ""
+		for (const value of values) {
+			code += originalCode.slice(value.expression.start, value.expression.end)
+		}
+		return code
 	}
 
 	for (const value of values) {
@@ -38,4 +47,10 @@ export function attrubuteValuesToJSValue(
 
 	templateString += "`"
 	return templateString
+}
+
+function noTextNodes(
+	values: AttributeValue[]
+): values is Exclude<AttributeValue, { type: "Text" }>[] {
+	return !values.some((value) => value.type === "Text") as any
 }

@@ -89,7 +89,7 @@ export async function handleTreeSelection(args: {
 		(await findRepoRoot({
 			nodeishFs: args.nodeishFs,
 			path: newSelectedProject,
-		})) || "",
+		})) || newSelectedProject,
 		{
 			nodeishFs: args.nodeishFs,
 		}

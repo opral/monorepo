@@ -1,5 +1,11 @@
 # @inlang/paraglide-js-adapter-sveltekit
 
+## 0.3.1
+
+### Patch Changes
+
+- b10958b71: fix `seo` type not being optional on `createI18n`
+
 ## 0.3.0
 
 ### Minor Changes

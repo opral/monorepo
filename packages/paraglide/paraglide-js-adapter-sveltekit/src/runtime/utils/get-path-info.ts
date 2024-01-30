@@ -1,5 +1,6 @@
 import { DATA_SUFFIX, HTML_DATA_SUFFIX } from "../../constants.js"
 import * as Path from "./path.js"
+import { safeDecode } from "./safe-decode.js"
 
 type ParseOptions = {
 	base: string
@@ -20,6 +21,8 @@ type ParseResult = {
  * @param base
  */
 export function getPathInfo(path: string, options: ParseOptions): ParseResult {
+	path = safeDecode(path)
+
 	path = Path.normalize(path)
 	const base = Path.normalize(options.base)
 	const { availableLanguageTags, defaultLanguageTag } = options
@@ -29,8 +32,8 @@ export function getPathInfo(path: string, options: ParseOptions): ParseResult {
 	const dataSuffix = pathWithoutBase.endsWith(HTML_DATA_SUFFIX)
 		? HTML_DATA_SUFFIX
 		: pathWithoutBase.endsWith(DATA_SUFFIX)
-			? DATA_SUFFIX
-			: undefined
+		? DATA_SUFFIX
+		: undefined
 
 	if (dataSuffix) {
 		pathWithoutBase = pathWithoutBase.replace(dataSuffix, "")
