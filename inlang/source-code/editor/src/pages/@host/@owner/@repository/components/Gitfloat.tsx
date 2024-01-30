@@ -275,6 +275,20 @@ export const Gitfloat = () => {
 		if (gitState() === "fork" && localChanges() > 2) setForkModalOpen(true)
 	})
 
+	// prevent user from leaving the page when changes are not pushed
+	const beforeUnloadHandler = (event: BeforeUnloadEvent) => {
+		event.preventDefault()
+		event.returnValue = ""
+	}
+
+	createEffect(() => {
+		if (localChanges() > 0) {
+			window.addEventListener("beforeunload", beforeUnloadHandler)
+		} else {
+			window.removeEventListener("beforeunload", beforeUnloadHandler)
+		}
+	})
+
 	// animations
 	onMount(() => {
 		const gitfloat = document.querySelector(".gitfloat")
