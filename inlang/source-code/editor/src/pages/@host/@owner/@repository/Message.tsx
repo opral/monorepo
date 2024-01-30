@@ -79,7 +79,7 @@ export function Message(props: { id: string }) {
 			<div class="flex gap-2 items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-4 bg-surface-2 border-x border-b-0 border-surface-2">
 				<h3
 					slot="summary"
-					class="flex-grow-0 flex-shrink-0 text-[13px] font-medium text-left text-on-surface before:text-on-surface"
+					class="flex-grow-0 flex-shrink-0 w-full text-[13px] font-medium text-left text-on-surface before:text-on-surface truncate"
 				>
 					{message() ? message()!.id : "id"}
 				</h3>
