@@ -84,7 +84,7 @@
 </script>
 
 <svelte:head>
-	{#if !i18n.config.seo.noAlternateLinks && !i18n.config.exclude($page.url.pathname)}
+	{#if i18n.config.seo.noAlternateLinks !== true && !i18n.config.exclude($page.url.pathname)}
 		<!-- If there is more than one language, add alternate links -->
 		{#if i18n.config.runtime.availableLanguageTags.length >= 1}
 			{#each i18n.config.runtime.availableLanguageTags as lang}
