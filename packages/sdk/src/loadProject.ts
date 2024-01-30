@@ -913,7 +913,7 @@ async function loadMessagesViaPlugin(
 			nodeishFs: fs,
 		})
 	)
-	
+
 	for (const loadedMessage of loadedMessages) {
 		const currentMessages = messagesQuery
 			.getAll()
@@ -939,7 +939,7 @@ async function loadMessagesViaPlugin(
 			if (messageLoadHash[loadedMessage.id] === importedEnecoded) {
 				continue
 			}
-			
+
 			// NOTE: this might trigger a save before we have the chance to delete - but since save is async and waits for the lock accquired by this method - its save to set the flags afterwards
 			messagesQuery.update({ where: { id: loadedMessage.id }, data: loadedMessage })
 			// we load a fresh version - lets delete dirty flag that got created by the update
@@ -988,7 +988,7 @@ async function loadMessagesViaPlugin(
 		sheduledLoadMessagesViaPlugin = undefined
 
 		// recall load unawaited to allow stack to pop
-		loadMessagesViaPlugin(fs, messagesFolderPath, messagesQuery, settingsValue, loadPlugin).then(
+		loadMessagesViaPlugin(fs, lockFilePath, messagesQuery, settingsValue, loadPlugin).then(
 			() => {
 				executingScheduledMessages[1]()
 			},
@@ -1030,6 +1030,8 @@ async function saveMessagesViaPlugin(
 
 		try {
 			const lockTime = await accquireFileLock(fs as NodeishFilesystem, lockFilePath, "saveMessage")
+
+			// since it may takes some time to accquire the lock we check if the save is required still (loadMessage could have happend in between)
 			if (Object.keys(messageDirtyFlags).length == 0) {
 				return
 			}
@@ -1086,7 +1088,7 @@ async function saveMessagesViaPlugin(
 
 		return await saveMessagesViaPlugin(
 			fs,
-			messagesFolderPath,
+			lockFilePath,
 			messagesQuery,
 			settingsValue,
 			savePlugin
