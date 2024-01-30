@@ -190,6 +190,36 @@ describe.concurrent("preprocessor", () => {
 		expect(linkHtml).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
 	})
 
+	it("ignores the href value if it isn't a string", async () => {
+		const attributeCode = `
+		<script>
+		  let href = undefined
+		</script>
+
+		<a href={href} />
+		`
+
+		const shorthandCode = `
+		<script>
+		  let href = undefined
+		</script>
+
+		<a {href} />
+		`
+
+		const spreadCode = `
+		<script>
+		  let href = undefined
+		</script>
+
+		<a {...{href}} />
+		`
+
+		expect(await renderComponent(attributeCode)).toBe(`<a></a>`)
+		expect(await renderComponent(shorthandCode)).toBe(`<a></a>`)
+		expect(await renderComponent(spreadCode)).toBe(`<a></a>`)
+	})
+
 	it("translates the action attribute of forms", async () => {
 		const code = `<form action="/test" />`
 
