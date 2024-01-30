@@ -120,11 +120,9 @@ export function Layout(props: { children: JSXElement }) {
 	createEffect(
 		on(project, () => {
 			if (lixErrors().length === 0 && project()) {
-				if (filteredLanguageTags().length > 0) {
-					addFilter("Language")
-				} else {
-					if (project()!.settings()) setFilteredLanguageTags(project()!.settings()!.languageTags)
-				}
+				addFilter("Language")
+				if (filteredLanguageTags().length === 0 && project()!.settings())
+					setFilteredLanguageTags(project()!.settings()!.languageTags)
 			}
 		})
 	)
