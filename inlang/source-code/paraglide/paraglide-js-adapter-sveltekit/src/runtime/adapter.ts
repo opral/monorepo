@@ -152,7 +152,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		prefixDefaultLanguage: options?.prefixDefaultLanguage ?? "never",
 		textDirection: options?.textDirection ?? guessTextDirMap(runtime.availableLanguageTags),
 		seo: {
-			noAlternateLinks: options?.seo?.noAlternateLinks ?? true,
+			noAlternateLinks: options?.seo?.noAlternateLinks ?? false,
 		},
 	}
 
