@@ -8,6 +8,7 @@ import { type ProjectViewNode } from "./utilities/project/project.js"
 import type { ErrorNode } from "./utilities/errors/errors.js"
 import { copyErrorCommand } from "./commands/copyError.js"
 import { previewLanguageTagCommand } from "./commands/previewLanguageTagCommand.js"
+import { jumpToPositionCommand } from "./commands/jumpToPosition.js"
 
 export const CONFIGURATION = {
 	EVENTS: {
@@ -20,6 +21,7 @@ export const CONFIGURATION = {
 		EDIT_MESSAGE: editMessageCommand,
 		EXTRACT_MESSAGE: extractMessageCommand,
 		SET_PREVIEW_LANGUAGETAG: previewLanguageTagCommand,
+		JUMP_TO_POSITION: jumpToPositionCommand,
 		OPEN_IN_EDITOR: openInEditorCommand,
 		OPEN_PROJECT: openProjectCommand,
 		OPEN_SETTINGS_FILE: openSettingsFileCommand,
