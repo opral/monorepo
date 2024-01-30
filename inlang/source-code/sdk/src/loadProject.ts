@@ -48,6 +48,15 @@ import type { NodeishStats } from "../../../../lix/source-code/fs/dist/NodeishFi
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
+// TODO #1844 this should be part of the project if we have multiple instances running in the same project
+let messageDirtyFlags = {} as {
+	[messageId: string] : boolean;
+};
+
+const messageLoadHash = {} as {
+	[messageId: string] : string;
+}
+
 /**
  * @param projectPath - Absolute path to the inlang settings file.
  * @param repo - An instance of a lix repo as returned by `openRepository`.
@@ -186,7 +195,9 @@ export async function loadProject(args: {
 			const _resolvedModules = resolvedModules()
 			if (!_resolvedModules) return
 
+			/*
 			// -- initial load of all messages found in the messages folder ----------
+			// TODO #1844 branche persistence strategy - only execute this one when we are running on a project without load- /saveMessages Plugin
 			const loadAndSetMessages = async (fs: NodeishFilesystemSubset) => {
 				const loadedMessages: Message[] = []
 
@@ -275,16 +286,19 @@ export async function loadProject(args: {
 
 					setMessages(loadedMessages)
 
+					// TODO #1844 branche persistence strategy - this needs to be called also for projects using loadMessages
 					markInitAsComplete()
 				} catch (err) {
 					markInitAsFailed(new PluginLoadMessagesError({ cause: err }))
 				}
 			}
 
+			// TODO #1844 branche persistence strategy - watching files in the messages folder is only needed for projects persisting into the inlang messages folder
 			// -- subsequencial upsers and delete of messages on file changes ------------
 			loadAndSetMessages(nodeishFs).then(() => {
 				// when initial message loading is done start watching on file changes in the message dir
-				;(async () => {
+				// TODO #1844 this is the place where we attach event listeners to single message files in our own message format - we deactivate this in iteration 1
+				/* ;(async () => {
 					try {
 						// NOTE: We dont use the abortController at the moment - this is the same for the SDK everywhere atm.
 						// const abortController = new AbortController()
@@ -356,8 +370,8 @@ export async function loadProject(args: {
 						if (err.name === "AbortError") return
 						throw err
 					}
-				})()
-			})
+				})() 
+			})*/
 		})
 
 		// -- installed items ----------------------------------------------------
@@ -408,15 +422,15 @@ export async function loadProject(args: {
 			if (!_resolvedModules) return
 
 			const currentMessageIds = messagesQuery.includedMessageIds()
-			const deletedMessageTrackedMessage = [...trackedMessages].filter(
+			const deletedTrackedMessages = [...trackedMessages].filter(
 				(tracked) => !currentMessageIds.includes(tracked[0])
 			)
 
+			// TODO #1844 branche persistence strategy - this could be used to branch between projects with and without load/saveMessages
 			const saveMessagesPlugin = _resolvedModules.plugins.find(
 				(plugin) => plugin.saveMessages !== undefined
 			)
 
-			// TODO #1844 add reasoning behind salting of project id -> move to new issue
 			for (const messageId of currentMessageIds) {
 				if (!trackedMessages!.has(messageId!)) {
 					// we create a new root to be able to cleanup an effect for a message the got deleted
@@ -432,11 +446,20 @@ export async function loadProject(args: {
 							}
 
 							if (!initialSetup) {
-								const persistMessage = async (
+								messageDirtyFlags[message.id] = true
+								saveMessagesViaPlugin(
+									fs,
+									messageBaseFolderFolderPath,
+									messagesQuery,
+									settings()!,
+									saveMessagesPlugin
+								)
+								/*const persistMessage = async (
 									fs: NodeishFilesystemSubset,
 									path: string,
 									message: Message
 								) => {
+									// TODO #1844 branche persistence strategy - branch here to those project without the saveMessages
 									let dir = getDirname(path)
 									dir = dir.endsWith("/") ? dir.slice(0, -1) : dir
 
@@ -451,7 +474,8 @@ export async function loadProject(args: {
 									await fs.writeFile(path, stringifyMessage(message))
 
 									// TODO #1844 we don't wait for the file to be persisted - investigate could this become a problem when we batch update messages
-									await saveMessages(
+									// TODO #1844 branche persistence strategy - branch here to those project with the saveMessages
+									await saveMessagesViaPlugin(
 										fs,
 										messageBaseFolderFolderPath,
 										messagesQuery,
@@ -476,19 +500,22 @@ export async function loadProject(args: {
 											cause: error,
 										})
 										setMessageSaveErrors(messageLoadErrors)
-									})
+									})*/
 							}
 						})
 					})
 				}
 			}
 
-			for (const deletedMessage of deletedMessageTrackedMessage) {
-				const messageFilePath = messageFolderPath + "/" + getPathFromMessageId(deletedMessage[0])
+			for (const deletedMessage of deletedTrackedMessages) {
+				const deletedMessageId = deletedMessage[0]
+				/* TODO #1844 code that deletes the message files and calles save messages
+				const messageFilePath = messageFolderPath + "/" + getPathFromMessageId(deletedMessageId)
 				try {
+					// TODO #1844 branche persistence strategy - branch here to those project with / without the saveMessages
 					nodeishFs.rm(messageFilePath).then(() => {
 						// TODO #1844 we don't wait for the file to be persisted - investigate could this become a problem when we batch update messages
-						return saveMessages(
+						return saveMessagesViaPlugin(
 							nodeishFs,
 							messageBaseFolderFolderPath,
 							messagesQuery,
@@ -496,14 +523,30 @@ export async function loadProject(args: {
 							saveMessagesPlugin
 						)
 					})
+
 				} catch (e) {
 					if ((e as any).code !== "ENOENT") {
 						throw e
 					}
 				}
-				// dispose
-				trackedMessages.get(deletedMessage[0])?.()
-				trackedMessages.delete(deletedMessage[0])
+				*/
+
+				// NOTE: call dispose to cleanup the effect
+				const messageEffectDisposeFunction = trackedMessages.get(deletedMessageId)
+				if (messageEffectDisposeFunction) {
+					messageEffectDisposeFunction()
+					trackedMessages.delete(deletedMessageId)
+				}
+			}
+
+			if (deletedTrackedMessages.length > 0) {
+				saveMessagesViaPlugin(
+					nodeishFs,
+					messageBaseFolderFolderPath,
+					messagesQuery,
+					settings()!,
+					saveMessagesPlugin
+				)
 			}
 
 			initialSetup = false
@@ -517,6 +560,8 @@ export async function loadProject(args: {
 
 		const fsWithWatcher = createNodeishFsWithWatcher({
 			nodeishFs: nodeishFs,
+			// this message is called whenever a file changes that was read earlier by this filesystem
+			// - the plugin loads messages -> reads the file messages.json -> start watching on messages.json -> updateMessages
 			updateMessages: () => {
 				// NOTE the current solution does not watch on deletion or creation of a file (if one adds de.json in case of the json plugin we wont recognize this until restart)
 				if (_resolvedModules?.resolvedPluginApi.loadMessages && _settings) {
@@ -529,7 +574,7 @@ export async function loadProject(args: {
 					// eslint-disable-next-line no-console
 					console.log("load messages because of a change in the message.json files")
 					// TODO #1844 FINK check error handling for plugin load methods (triggered by file change) -> move to separate ticket
-					loadMessages(
+					loadMessagesViaPlugin(
 						fsWithWatcher,
 						messageBaseFolderFolderPath,
 						messagesQuery,
@@ -551,7 +596,7 @@ export async function loadProject(args: {
 				"Initial load messages  - will also use the filewatcher system and schedule events"
 			)
 			// TODO #1844 FINK check error handling for plugin load methods (initial load) -> move to separate ticket
-			await loadMessages(
+			await loadMessagesViaPlugin(
 				fsWithWatcher,
 				messageBaseFolderFolderPath,
 				messagesQuery,
@@ -805,13 +850,13 @@ export function createSubscribable<T>(signal: () => T): Subscribable<T> {
 // - This will leads to a load of the messages and since en.json has not been saved yet the english variant in the message would get overritten with the old state again
 
 let isSaving: boolean
-let currentSaveMessages: Promise<void> | undefined
+let currentSaveMessagesViaPlugin: Promise<void> | undefined
 let sheduledSaveMessages:
 	| [awaitable: Promise<void>, resolve: () => void, reject: (e: unknown) => void]
 	| undefined
 
 let isLoading = false
-let sheduledLoadMessages:
+let sheduledLoadMessagesViaPlugin:
 	| [awaitable: Promise<void>, resolve: () => void, reject: (e: unknown) => void]
 	| undefined
 
@@ -828,7 +873,7 @@ let sheduledLoadMessages:
  * @param loadPlugin
  * @returns void - updates the files and messages in of the project in place
  */
-async function loadMessages(
+async function loadMessagesViaPlugin(
 	fs: NodeishFilesystemSubset,
 	messagesFolderPath: string,
 	//messagesPath: string,
@@ -839,17 +884,17 @@ async function loadMessages(
 	// the current approach introuces a sync between both systems - the legacy load / save messages plugins and the new format - we dont delete messages that we don't see int he plugins produced messages array anymore
 
 	// let the current save process finish first
-	if (currentSaveMessages) {
-		await currentSaveMessages
+	if (currentSaveMessagesViaPlugin) {
+		await currentSaveMessagesViaPlugin
 	}
 
 	// loading is an asynchronous process - check if another load is in progress - queue this call if so
 	if (isLoading) {
-		if (!sheduledLoadMessages) {
-			sheduledLoadMessages = createAwaitable()
+		if (!sheduledLoadMessagesViaPlugin) {
+			sheduledLoadMessagesViaPlugin = createAwaitable()
 		}
 		// another load will take place right after the current one - its goingt to be idempotent form the current requested one - don't reschedule
-		return sheduledLoadMessages[0]
+		return sheduledLoadMessagesViaPlugin[0]
 	}
 
 	// set loading flag
@@ -880,17 +925,30 @@ async function loadMessages(
 		} else if (currentMessages.length === 1) {
 			// update message in place - leave message id and alias untouched
 			loadedMessage.alias = {} as any
+
 			// TODO #1585 we have to map the id of the importedMessage to the alias and fill the id property with the id of the existing message - change when import mesage provides importedMessage.alias
 			loadedMessage.alias["default"] = loadedMessage.id
 			loadedMessage.id = currentMessages[0]!.id
 
 			// TODO #1844 INFORM stringifyMessage encodes messages independent from key order!
 			const importedEnecoded = stringifyMessage(loadedMessage)
+
+			// TODO #1844 use hash instead of the whole object JSON to save memory...
+			if (messageLoadHash[loadedMessage.id] === importedEnecoded) {
+				continue
+			}
+
 			const currentMessageEncoded = stringifyMessage(currentMessages[0]!)
 			if (importedEnecoded === currentMessageEncoded) {
 				continue
 			}
+
+			// NOTE: this might trigger a save before we have the chance to delete - but since save is async and waits for the lock accquired by this method - its save to set the flags afterwards
 			messagesQuery.update({ where: { id: loadedMessage.id }, data: loadedMessage })
+			// we load a fresh version - lets delete dirty flag that got created by the update
+			delete messageDirtyFlags[loadedMessage.id]
+			// TODO #1844 use hash instead of the whole object JSON to save memory...
+			messageLoadHash[loadedMessage.id] = importedEnecoded
 		} else {
 			// message with the given alias does not exist so far
 			loadedMessage.alias = {} as any
@@ -910,22 +968,27 @@ async function loadMessages(
 			// create a humanId based on a hash of the alias
 			loadedMessage.id = messsageId
 
+			const importedEnecoded = stringifyMessage(loadedMessage)
+
 			// add the message - this will trigger an async file creation in the backgound!
 			messagesQuery.create({ data: loadedMessage })
+			// we load a fresh version - lets delete dirty flag that got created by the create method
+			delete messageDirtyFlags[loadedMessage.id]
+			messageLoadHash[loadedMessage.id] = importedEnecoded
 		}
 	}
 
 	isLoading = false
 
-	const executingScheduledMessages = sheduledLoadMessages
+	const executingScheduledMessages = sheduledLoadMessagesViaPlugin
 	if (executingScheduledMessages) {
 		// a load has been requested during the load - executed it
 
 		// reset sheduling to except scheduling again
-		sheduledLoadMessages = undefined
+		sheduledLoadMessagesViaPlugin = undefined
 
 		// recall load unawaited to allow stack to pop
-		loadMessages(fs, messagesFolderPath, messagesQuery, settingsValue, loadPlugin).then(
+		loadMessagesViaPlugin(fs, messagesFolderPath, messagesQuery, settingsValue, loadPlugin).then(
 			() => {
 				executingScheduledMessages[1]()
 			},
@@ -936,7 +999,7 @@ async function loadMessages(
 	}
 }
 
-async function saveMessages(
+async function saveMessagesViaPlugin(
 	fs: NodeishFilesystemSubset,
 	messagesFolderPath: string,
 	messagesQuery: InlangProject["query"]["messages"],
@@ -955,24 +1018,42 @@ async function saveMessages(
 	// set isSavingFlag
 	isSaving = true
 
-	// TODO #1844 JL - check if we can remove this
-	//	const savePluginId = savePlugin!.id
+	currentSaveMessagesViaPlugin = (async function () {
+		const persistedMessageHashs = {} as { [messageId: string]: string }
 
-	currentSaveMessages = (async function () {
+		// check if we have any dirty message - witho
+		if (Object.keys(messageDirtyFlags).length == 0) {
+			// nothing to save :-)
+			console.log("save was skiped - no messages marked as dirty...")
+			return
+		}
+
 		try {
+			const lockFilePath = messagesFolderPath + "/messages.lockfile"
+			const lockTime = await accquireFileLock(fs as NodeishFilesystem, lockFilePath, "saveMessage")
+			if (Object.keys(messageDirtyFlags).length == 0) {
+				return
+			}
+
 			const currentMessages = messagesQuery.getAll()
 
 			const messagesToExport: Message[] = []
 			for (const message of currentMessages) {
+				if (messageDirtyFlags[message.id]) {
+					const importedEnecoded = stringifyMessage(message)
+					// TODO #1844 use hash instead of the whole object JSON to save memory...
+					persistedMessageHashs[message.id] = importedEnecoded
+				}
+
 				const fixedExportMessage = { ...message }
 				// TODO #1585 here we match using the id to support legacy load message plugins - after we introduced import / export methods we will use importedMessage.alias
 				fixedExportMessage.id = fixedExportMessage.alias["default"] ?? fixedExportMessage.id
 
 				messagesToExport.push(fixedExportMessage)
 			}
-			const lockFilePath = messagesFolderPath + "/messages.lockfile"
-
-			const lockTime = await accquireFileLock(fs as NodeishFilesystem, lockFilePath, "saveMessage")
+			
+			// wa are about to save the messages to the plugin - reset all flags now
+			messageDirtyFlags = {}
 
 			// TODO #1844 SPLIT (separate ticket) make sure save messages produces the same output again and again
 			// TODO #1844v Versioning on plugins? cache issue?
@@ -984,6 +1065,12 @@ async function saveMessages(
 
 			await releaseLock(fs as NodeishFilesystem, lockFilePath, "saveMessage", lockTime)
 		} catch (err) {
+			// something went wrong - add dirty flags again
+			for (const dirtyMessageId of Object.keys(persistedMessageHashs)) {
+				messageDirtyFlags[dirtyMessageId] = true
+			}
+
+			// ok an error
 			throw new PluginSaveMessagesError({
 				cause: err,
 			})
@@ -992,13 +1079,13 @@ async function saveMessages(
 		}
 	})()
 
-	await currentSaveMessages
+	await currentSaveMessagesViaPlugin
 
 	if (sheduledSaveMessages) {
 		const executingSheduledSaveMessages = sheduledSaveMessages
 		sheduledSaveMessages = undefined
 
-		return await saveMessages(
+		return await saveMessagesViaPlugin(
 			fs,
 			messagesFolderPath,
 			messagesQuery,
