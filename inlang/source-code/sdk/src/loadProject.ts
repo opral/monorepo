@@ -372,6 +372,9 @@ export async function loadProject(args: {
 					}
 				})() 
 			})*/
+
+			setMessages([])
+			markInitAsComplete()
 		})
 
 		// -- installed items ----------------------------------------------------
@@ -977,6 +980,8 @@ async function loadMessagesViaPlugin(
 			messageLoadHash[loadedMessage.id] = importedEnecoded
 		}
 	}
+
+	console.log("loadMessagesViaPlugin: " + loadedMessages.length + " Messages processed ")
 
 	isLoading = false
 
