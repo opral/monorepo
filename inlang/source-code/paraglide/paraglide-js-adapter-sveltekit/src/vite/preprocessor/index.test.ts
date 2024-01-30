@@ -190,6 +190,19 @@ describe.concurrent("preprocessor", () => {
 		expect(linkHtml).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
 	})
 
+	it("ignores the href value if it isn't a string", async () => {
+		const code = `
+		<script>
+		  let href = undefined
+		</script>
+
+		<a href={href} />
+		`
+
+		const html = await renderComponent(code)
+		expect(html).toBe(`<a></a>`)
+	})
+
 	it("translates the action attribute of forms", async () => {
 		const code = `<form action="/test" />`
 
@@ -258,7 +271,7 @@ async function renderComponent(svelteCode: string, props: Record<string, any> = 
 		filename: "src/Component.svelte",
 	})
 
-	//console.log(preprocessedComponent.code)
+	console.log(preprocessedComponent.code)
 
 	const bundle = await rollup({
 		input: "src/Entry.svelte",

@@ -168,6 +168,7 @@ export const rewrite = ({
              * @param {string | undefined} lang_value
              */
             function ${i("translateAttribute")}(value, lang_value) {
+				if(typeof value !== "string") return value;
                 if(!${i("context")}) return value;
                 return ${i("context")}.translateHref(value, lang_value);
             }
@@ -196,7 +197,7 @@ export const rewrite = ({
                 }
 
                 return attrs;
-            }`,
+            }`
 	)
 
 	return {
