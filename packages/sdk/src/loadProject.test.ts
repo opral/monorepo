@@ -644,7 +644,7 @@ describe("functionality", () => {
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
 			expect(
-				project.query.messageLintReports.get({ where: { messageId: "some-message" } })
+				project.query.messageLintReports.get({ where: { messageId: "new_alligator_dig_aside" } })
 			).toHaveLength(1)
 		})
 	})
