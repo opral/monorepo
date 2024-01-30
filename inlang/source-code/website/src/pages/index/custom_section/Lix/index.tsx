@@ -22,7 +22,7 @@ const LixSection = () => {
 			description: m.home_lix_automation_description(),
 			icon: <IconAutomation />,
 			imagePath: "/images/lix-automation-cover.png",
-			link: "https://github.com/opral/monorepo/tree/main/lix",
+			link: "/g/ssryldhd",
 		},
 		{
 			title: m.home_lix_traceability_title(),
@@ -45,7 +45,7 @@ const LixSection = () => {
 	]
 
 	return (
-		<div class="pt-12 md:pt-20 flex flex-col items-center pb-20">
+		<div id="lix" class="pt-12 md:pt-20 flex flex-col items-center pb-20">
 			<p class="bg-background px-4 py-1.5 rounded-full text-sm font-medium w-fit border shadow border-surface-300">
 				{m.home_lix_tag()}
 			</p>

@@ -55,17 +55,10 @@ export default defineConfig({
 })
 ```
 
-This replaces the need for calling `paraglide-js compile` in your build script. It will automatically compiler and recompile your translations when you run `npm run dev` or `npm run build`. 
-
-```diff 
-// package.json
-	"scripts": {
--		"build": "paraglide-js compile && vite build",
-+		"build": "vite build",
-	}
-```
-
-It also registers the Svelte Preprocessor that's necessary for translating links, but more on that later.
+<doc-accordion 
+	heading="Do I still need to run `paraglide-js compile` ?" 
+	text="This replaces the need for calling `paraglide-js compile` in your build script. It will automatically compiler and recompile your translations when you run npm run dev or npm run build. ">
+</doc-accordion>
 
 ### 2. Initialise the Adapter
 
@@ -129,21 +122,24 @@ The `<ParaglideJS>` component automatically adds `rel="alternate"` links to your
 <link rel="alternate" hreflang="de" href="/de/uber-uns" />
 ```
 
-Additionally, you need to add the `lang` attribute to your `html` tag. This is important for screen readers. Unfortunately, Svelte doesn't offer a way to do this from inside a component. You need to set it in your `src/hooks.server.js` file. 
+Additionally, you need to add the `lang` and `dir` attributes to your `html` tag. This is important for screen readers. Unfortunately, Svelte doesn't offer a way to do this from inside a component. You need to set it in your `src/hooks.server.js` file. 
 
-The easiest way to do this is to set the `lang` attribute in `src/app.html` with an easy to recognize placeholder.
+The easiest way to do this is to set the `lang` and `dir` attributes in `src/app.html` with an easy to recognize placeholder.
 
 ```html
-<html lang="__LANG__">
+<html lang="%paraglide.lang%" dir="%paraglide.textDirection%"> 
 ```
 
-Then, in your `src/hooks.server.js` file, replace the placeholder with the current language. Again, the `i18n` instance can help you with that.
+Then, in your `src/hooks.server.js` file, you can use `i18n.handle()` to replace the placeholders with the correct values. `%paraglide.lang%` and `%paraglide.textDirection%` are the default placeholders. You can change them by passing the `langPlaceholder` and `textDirectionPlaceholder` options to `handle`.
+
 
 ```js
 import { i18n } from '$lib/i18n.js'
 
-export const handle = i18n.handle({ langPlaceholder: "__LANG__" })
+export const handle = i18n.handle()
 ```
+
+The handle hook will also make `lang` and `textDirection` available in `event.locals.paraglide`, so you can use them elsewhere in your app.
 
 ### Excluding certain routes
 
@@ -271,6 +267,12 @@ Fortunately you don't need to do this often. Most of the time the an `a` tag is 
 
 Language switchers are tricky, because we need to get the route correspondingto the current URL path, which is of course translated. We need to somehow get the untranslated version of the path, so that we can translate it again.
 
+<doc-accordion
+	heading="Wait, do I thought I don't need wrap my links with the Adapter?"
+	text="Language switchers are the one exception to this rule.">
+</doc-accordion>
+
+
 Fortunately, the `i18n` instance can help us with that. It exposes a `route` method that takes the current path and return the untranslated version of it.
 
 ```ts
@@ -313,6 +315,59 @@ This is also usefull for detecting which navigation item is currently active.
 </li>
 ```
 
+### Determining text direction
+
+Setting the text-direction correctly is very important. By default, Paragldie will try to guess the text direction based on the language using the `Intl.Locale` API. Unfortunately, this API is not supported in all browsers. If you want to make sure that the text direction is always correct, you can pass the `textDirection` option to `createI18n`.
+
+```js
+import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
+import * as runtime from "../paraglide/runtime.js"
+
+export const i18n = createI18n(runtime, {
+	textDirection: {
+		en: "ltr",
+		ar: "rtl",
+	},
+})
+```
+
+
+### Accessing `lang` and `textDirection` 
+
+You can access the current language and text direction on `event.locals.paraglide` anywhere on your server. On the client, you can use the `languageTag()` function from `./paraglide/runtime.js` to access the current language.  
+
+## FAQ
+
+<doc-accordion
+	heading="Can I also prefix the default language?"
+	text="Yes, you can also include the default language in the URL by passing prefixDefaultLanguage: 'always' to createI18n.">
+</doc-accordion>
+
+
+<doc-accordion
+	heading="Can I change default language?"
+	text="Yes, using the 'defaultLanguage' option on 'createI18n'.">
+</doc-accordion>
+
+<doc-accordion
+	heading="Do I have to have the language in the URL?"
+	text="Using the right options you can get the language from anywhere, but the main benefit of using this library is the i18n routing. If you don't plan on using that you might be
+	better off using ParaglideJS directly.">
+</doc-accordion>
+
+
+<doc-accordion
+	heading="'Can't find module $paraglide/runtime.js' - What do I do?"
+	text="This likely means that you haven't registered the $paraglide alias for src/paraglide in svelte.config.js. Try adding that. Check the example if you're stuck">
+</doc-accordion>
+
+## Roadmap
+
+- [ ] Rewrite `hrefs` on `<svelte:element>` components if they have are links
+- [ ] Expand the route features in Path translation
+  - [ ] Optional parameters
+  - [ ] Catch-all parameters
+  - [ ] Parameter matchers
 
 ## Playground
 

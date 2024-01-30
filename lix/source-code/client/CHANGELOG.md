@@ -1,5 +1,11 @@
 # @lix-js/client
 
+## 0.8.0
+
+### Minor Changes
+
+- 3bf94ddb5: fix wrong error messages for paraglide
+
 ## 0.7.0
 
 ### Minor Changes

@@ -25,7 +25,7 @@
 		"ci": "pnpm install && pnpm check-all",
 		"check-all": "pnpm audit --audit-level=high && pnpm format && pnpm lint && pnpm build && pnpm test",
 		"ci:publish": "pnpm --filter !vs-code-extension publish -r",
-		"ci:version": "pnpm exec changeset version"
+		"ci:version": "pnpm exec changeset version && pnpm install --lockfile-only"
 	},
 	"engines": {
 		"npm": ">=8.0.0",

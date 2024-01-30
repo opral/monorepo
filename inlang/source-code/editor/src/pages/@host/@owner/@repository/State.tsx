@@ -11,6 +11,7 @@ import {
 	type Setter,
 	useContext,
 	type Accessor,
+	on,
 } from "solid-js"
 import type { EditorRouteParams, EditorSearchParams } from "./types.js"
 import type { LocalStorageSchema } from "#src/services/local-storage/index.js"
@@ -262,6 +263,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					if (newRepo.errors().length > 0) {
 						setLixErrors(newRepo.errors())
 						return
+					} else {
+						setLixErrors([])
 					}
 
 					// @ts-expect-error
@@ -428,9 +431,25 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	)
 
-	createEffect(() => {
-		if (localStorage?.user?.isLoggedIn) refetchRepoInfo()
-	})
+	const [previousLoginStatus, setPreviousLoginStatus] = createSignal(localStorage?.user?.isLoggedIn)
+	createEffect(
+		on(
+			() => localStorage.user?.isLoggedIn,
+			() => {
+				const isLoggedIn = localStorage?.user?.isLoggedIn
+				if (previousLoginStatus() === false && isLoggedIn) {
+					if (!repo.loading && repo() === undefined) {
+						// Refetch private repo after login
+						refetchRepo()
+					} else if (!githubRepositoryInformation.loading) {
+						// Refetch public repo info after login
+						refetchRepoInfo()
+					}
+				}
+				setPreviousLoginStatus(isLoggedIn)
+			}
+		)
+	)
 
 	const [currentBranch] = createResource(
 		() => {

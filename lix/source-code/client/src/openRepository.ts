@@ -34,6 +34,7 @@ const {
 	merge,
 } = isoGit
 
+// TODO: rename to debug?
 const verbose = false
 
 // TODO addd tests for whitelist
@@ -72,6 +73,15 @@ export async function openRepository(
 	}
 ): Promise<Repository> {
 	const rawFs = args.nodeishFs
+
+	if (!url) {
+		throw new Error("repo url is required, use file:// for local repos")
+	}
+
+	if (verbose && typeof window !== "undefined") {
+		// @ts-ignore
+		window["rawFs"] = rawFs
+	}
 
 	// fixme: propper error handling with error return values and no signal dependency
 	const [errors, setErrors] = createSignal<Error[]>([])
@@ -117,8 +127,10 @@ export async function openRepository(
 	}
 
 	const { protocol, lixHost, repoHost, owner, repoName, username, password } = parseLixUri(url)
-	if (username || password) {
-		console.error("username and password are not supported yet")
+	if (verbose && (username || password)) {
+		console.warn(
+			"username and password and providers other than github are not supported yet. Only local commands will work."
+		)
 	}
 
 	const gitProxyUrl = lixHost ? `${protocol}//${lixHost}/git-proxy/` : ""
@@ -670,7 +682,7 @@ export async function openRepository(
 					firstCommitHash = lastHashInPage
 				}
 
-				if (commits.length < 50) {
+				if (commits.length < 550) {
 					break
 				}
 			}
