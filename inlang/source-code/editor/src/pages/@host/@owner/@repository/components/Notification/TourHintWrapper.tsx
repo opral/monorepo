@@ -7,6 +7,7 @@ export type TourStepId =
 	| "missing-lint-rules"
 	| "missing-translation-rule"
 	| "textfield"
+	| "none"
 
 export type Position = "top-right" | "top-left" | "bottom-right" | "bottom-left"
 
