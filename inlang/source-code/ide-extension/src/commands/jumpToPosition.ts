@@ -22,17 +22,19 @@ export const jumpToPositionCommand = {
 	}) {
 		const editor = window.activeTextEditor
 
-		if (editor) {
-			const { start, end } = args.position
-			const startPosition = new Position(start.line, start.character)
-			const endPosition = new Position(end.line, end.character)
-			const range = new Range(startPosition, endPosition)
-			editor.selection = new vscode.Selection(range.start, range.end)
-			editor.revealRange(range, TextEditorRevealType.InCenterIfOutsideViewport)
-
-			telemetry.capture({
-				event: "IDE-EXTENSION jumped to position in editor",
-			})
+		if (!editor) {
+			return
 		}
+
+		const { start, end } = args.position
+		const startPosition = new Position(start.line, start.character)
+		const endPosition = new Position(end.line, end.character)
+		const range = new Range(startPosition, endPosition)
+		editor.selection = new vscode.Selection(range.start, range.end)
+		editor.revealRange(range, TextEditorRevealType.InCenterIfOutsideViewport)
+
+		telemetry.capture({
+			event: "IDE-EXTENSION jumped to position in editor",
+		})
 	},
 }
