@@ -449,6 +449,7 @@ export async function loadProject(args: {
 								trackedMessages?.set(messageId, dispose)
 							}
 
+							// TODO #1844 remove the initial setup?
 							if (!initialSetup) {
 								messageDirtyFlags[message.id] = true
 								saveMessagesViaPlugin(
@@ -880,7 +881,6 @@ let sheduledLoadMessagesViaPlugin:
 async function loadMessagesViaPlugin(
 	fs: NodeishFilesystemSubset,
 	lockFilePath: string,
-	//messagesPath: string,
 	messagesQuery: InlangProject["query"]["messages"],
 	settingsValue: ProjectSettings,
 	loadPlugin: any
@@ -913,8 +913,7 @@ async function loadMessagesViaPlugin(
 			nodeishFs: fs,
 		})
 	)
-	await releaseLock(fs as NodeishFilesystem, lockFilePath, "loadMessage", lockTime)
-
+	
 	for (const loadedMessage of loadedMessages) {
 		const currentMessages = messagesQuery
 			.getAll()
@@ -940,12 +939,7 @@ async function loadMessagesViaPlugin(
 			if (messageLoadHash[loadedMessage.id] === importedEnecoded) {
 				continue
 			}
-
-			const currentMessageEncoded = stringifyMessage(currentMessages[0]!)
-			if (importedEnecoded === currentMessageEncoded) {
-				continue
-			}
-
+			
 			// NOTE: this might trigger a save before we have the chance to delete - but since save is async and waits for the lock accquired by this method - its save to set the flags afterwards
 			messagesQuery.update({ where: { id: loadedMessage.id }, data: loadedMessage })
 			// we load a fresh version - lets delete dirty flag that got created by the update
@@ -980,6 +974,7 @@ async function loadMessagesViaPlugin(
 			messageLoadHash[loadedMessage.id] = importedEnecoded
 		}
 	}
+	await releaseLock(fs as NodeishFilesystem, lockFilePath, "loadMessage", lockTime)
 
 	console.log("loadMessagesViaPlugin: " + loadedMessages.length + " Messages processed ")
 
