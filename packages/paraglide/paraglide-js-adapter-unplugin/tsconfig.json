@@ -5,10 +5,9 @@
 		"outDir": "./dist",
 		"rootDir": "./src",
 		"declaration": true,
-		"sourceMap": false,
+		"sourceMap": true,
 		"checkJs": true,
-		"emitDeclarationOnly": true,
-		"declarationMap": false,
+		"declarationMap": true,
 		"skipLibCheck": true
 	}
 }
