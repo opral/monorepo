@@ -197,7 +197,7 @@ export const rewrite = ({
                 }
 
                 return attrs;
-            }`
+            }`,
 	)
 
 	return {
