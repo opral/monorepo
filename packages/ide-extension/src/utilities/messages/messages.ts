@@ -122,6 +122,8 @@ export function createMessageWebviewProvider(args: {
 													.map((message) =>
 														createMessageHtml({
 															message,
+															position: matchedMessages.find((m) => m.messageId === message.id)
+																?.position,
 															isHighlighted: true,
 															workspaceFolder: args.workspaceFolder,
 														})
@@ -164,6 +166,16 @@ export function createMessageWebviewProvider(args: {
 
 export function createMessageHtml(args: {
 	message: Message
+	position?: {
+		start: {
+			line: number
+			character: number
+		}
+		end: {
+			line: number
+			character: number
+		}
+	}
 	isHighlighted: boolean
 	workspaceFolder: vscode.WorkspaceFolder
 }): string {
@@ -172,15 +184,19 @@ export function createMessageHtml(args: {
 		workspaceFolder: args.workspaceFolder,
 	})
 
+	const positionHtml = encodeURIComponent(JSON.stringify(args.position))
+	const jumpCommand = `jumpToPosition('${args.message.id}', '${positionHtml}');`
+
 	return `
-        <div class="tree-item">
-			<button class="collapsible" data-message-id="${args.message.id}">
-                <span><strong>#</strong></span><span>${args.message.id}<span>
-            </button>
-            <div class="content" style="display: none;">
-                ${translationsTableHtml}
-            </div>
-        </div>
+	<div class="tree-item">
+		<div class="collapsible" data-message-id="${args.message.id}">
+			<span ${args.position ? `onclick="${jumpCommand}"` : undefined}><strong>#</strong></span>
+			<span>${args.message.id}</span>
+		</div>
+		<div class="content" style="display: none;">
+			${translationsTableHtml}
+		</div>
+	</div>
     `
 }
 
@@ -362,6 +378,17 @@ export function getHtml(args: {
 						command: 'executeCommand',
 						commandName: 'inlang.openInEditor',
 						commandArgs: { messageId, selectedProjectPath },
+					});
+				}
+
+				function jumpToPosition(messageId, position) {
+					const decodedPosition = JSON.parse(decodeURIComponent(position));
+					console.log(decodedPosition)
+					console.log(messageId, position)
+					vscode.postMessage({
+						command: 'executeCommand',
+						commandName: 'inlang.jumpToPosition',
+						commandArgs: { messageId, position: decodedPosition },
 					});
 				}
             </script>
