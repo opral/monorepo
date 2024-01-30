@@ -65,4 +65,5 @@ function capture(args: CaptureEventArguments) {
 type CaptureEventArguments =
 	| Omit<Parameters<PostHog["capture"]>[0], "distinctId" | "groups"> & {
 			event: TelemetryEvents
+			properties?: Record<string, any>
 	  }
