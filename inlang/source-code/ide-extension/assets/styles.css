@@ -20,15 +20,38 @@ html, body {
     border: none;
     text-align: left;
     outline: none;
-    width: 100%;
+    min-height: 19px;
     display: flex;
-    justify-content: start;
+    justify-content: space-between;
     align-items: center;
     gap: 5px;
 }
 
 .collapsible:hover {
     background-color: var(--vscode-list-hoverBackground);
+}
+
+.collapsible .messageId {
+    user-select: none;
+    display: inline-flex;
+    gap: 5px;
+    width: 100%;
+}
+
+.collapsible .messageId span {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.collapsible:hover .actionButtons {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.actionButtons {
+    display: none;
 }
 
 .content {
@@ -48,6 +71,7 @@ html, body {
     border-top: 1px solid var(--vscode-sideBar-border);
     font-size: 13px;
     cursor: pointer;
+    user-select: none;
 }
 
 .table .section:last-child {
@@ -65,7 +89,14 @@ html, body {
 .table .section .message {
     align-self: flex-start;
     padding-block-start: 1px;
+    padding-inline-end: 10px;
     margin-inline-end: auto;
+    width: 100%;
+}
+
+.table .section .message button {
+    width: 100%;
+    text-overflow: ellipsis;
 }
 
 .table .section .actionButtons {
