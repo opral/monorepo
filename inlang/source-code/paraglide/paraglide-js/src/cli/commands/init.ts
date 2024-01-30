@@ -12,6 +12,7 @@ import dedent from "dedent"
 import { findRepoRoot, openRepository, type Repository } from "@lix-js/client"
 import nodeFsPromises from "node:fs/promises"
 import { pathExists } from "../../services/file-handling/exists.js"
+import { findPackageJson } from "../../services/environment/package.js"
 
 // TODO add a project UUID to the tele.groups internal #196
 // import { gitOrigin } from "../../services/telemetry/implementation.js"
@@ -252,8 +253,8 @@ export const newProjectTemplate: ProjectSettings = {
 }
 
 export const checkIfPackageJsonExists = async (ctx: Context) => {
-	const exists = await pathExists("./package.json", ctx.repo.nodeishFs)
-	if (exists === false) {
+	const packageJsonPath = await findPackageJson(ctx.repo.nodeishFs, process.cwd())
+	if (!packageJsonPath) {
 		ctx.logger.warn(
 			"No package.json found in the current working directory. Please change the working directory to the directory with a package.json file."
 		)
