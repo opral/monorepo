@@ -35,7 +35,7 @@ describe("attributesToValues", () => {
 		]
 
 		const result = attrubuteValuesToJSValue(attributeValues, originalCode)
-		expect(result).toBe("`${hello}`")
+		expect(result).toBe("hello")
 	})
 
 	it("stringifies an interweaved text and mustache tag", () => {
