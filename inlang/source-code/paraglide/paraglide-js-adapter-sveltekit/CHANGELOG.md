@@ -1,5 +1,14 @@
 # @inlang/paraglide-js-adapter-sveltekit
 
+## 0.3.2
+
+### Patch Changes
+
+- 6e7435185: fix: Don't stringify value-only attributes
+- de595ebf1: fix: Properly encode & decode non-latin pathnames
+- 01e918153: Fix: `noAlternateLinks` default value is now `false`, as it should be
+  - @inlang/paraglide-js-adapter-vite@1.2.11
+
 ## 0.3.1
 
 ### Patch Changes
