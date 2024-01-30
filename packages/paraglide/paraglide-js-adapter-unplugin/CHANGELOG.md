@@ -1,5 +1,11 @@
 # @inlang/paraglide-js-adapter-unplugin
 
+## 1.4.0
+
+### Minor Changes
+
+- 3f9fb411c: No longer bundle `@inlang/paraglide-js-adapter-unplugin`, as all it's dependencies are now properly published
+
 ## 1.3.3
 
 ### Patch Changes
