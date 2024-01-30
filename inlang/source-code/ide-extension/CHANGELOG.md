@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.29.3
+
+### Patch Changes
+
+- d646e6f66: add jump to message position in code
+
 ## 1.29.2
 
 ### Patch Changes
