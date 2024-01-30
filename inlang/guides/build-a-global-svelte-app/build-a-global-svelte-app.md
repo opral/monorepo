@@ -273,20 +273,19 @@ The only thing left to do is to set the `lang` attribute on your `<html>` tag. T
 
 Here too the Adapter has you covered. It exposes a `handle` function that you can use to modify the HTML before it is sent to the client. We can use this to set the `lang` attribute.
 
-First, add an easy-to-find placeholder for the `lang` attribute in `./src/app.html`.
+First, add an easy-to-find placeholder for the `lang` attribute in `./src/app.html`. By default the hook is looking for `%paraglide.lang%`.
 
 ```html
 <!-- ./src/app.html -->
-<html lang="%lang%"></html>
+<html lang="%paraglide.lang%" dir="%paraglide.dir%"></html>
 ```
 
-Then in `hooks.server.ts`, replace the placeholder with the correct language.
+Then in `hooks.server.ts`, register the `handle` function.
 
 ```ts
 // ./src/hooks.server.ts
 import { i18n } from "$lib/i18n";
-
-export const handle = i18n.handle({ langPlaceholder: "%lang%" });
+export const handle = i18n.handle();
 ```
 
 That's it! If you now reload the page and inspect the HTML, you should see the correct `lang` attribute.
