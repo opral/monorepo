@@ -246,7 +246,7 @@ You will also notice that any internal links, like `<a href="/about">About</a>` 
 
 Language switchers are challenging, because they require us to dynamicall translate the path we're currently on. We can do this by first removing the language tag from the path, and then adding it back in the correct language.
 
-The Adapter provides convenient functions for this. `i18n.getCanonicalPath(translatedPath)`.
+The Adapter provides convenient functions for this. `i18n.route(translatedPath)`.
 
 ```svelte
 <script lang="ts">
@@ -257,7 +257,7 @@ The Adapter provides convenient functions for this. `i18n.getCanonicalPath(trans
 
 {#each availableLanguageTags as lang}
   <a 
-  	href={i18n.getCanonicalPath($page.url.pathname)} 
+  	href={i18n.route($page.url.pathname)} 
 	hreflang={lang}>Change language to {lang}</a>
 {/each}
 ```
