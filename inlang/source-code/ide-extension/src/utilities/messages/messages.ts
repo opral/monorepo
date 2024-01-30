@@ -184,14 +184,31 @@ export function createMessageHtml(args: {
 		workspaceFolder: args.workspaceFolder,
 	})
 
+	// Fink needs the relative path from the workspace/git root
+	const relativeProjectPathFromWorkspace = state().selectedProjectPath.replace(
+		args.workspaceFolder.uri.fsPath,
+		""
+	)
+
 	const positionHtml = encodeURIComponent(JSON.stringify(args.position))
 	const jumpCommand = `jumpToPosition('${args.message.id}', '${positionHtml}');`
+	const openCommand = `openInEditor('${args.message.id}', '${relativeProjectPathFromWorkspace}')`
 
 	return `
 	<div class="tree-item">
 		<div class="collapsible" data-message-id="${args.message.id}">
-			<span ${args.position ? `onclick="${jumpCommand}"` : undefined}><strong>#</strong></span>
-			<span>${args.message.id}</span>
+			<div class="messageId">
+				<span><strong>#</strong></span>
+				<span>${args.message.id}</span>
+			</div>
+			<div class="actionButtons">
+				${
+					args.position
+						? `<span title="Jump to message" onclick="${jumpCommand}"><span class="codicon codicon-magnet"></span></span>`
+						: ""
+				}
+				<span title="Open in Fink" onclick="${openCommand}"><span class="codicon codicon-link-external"></span></span>
+			</div>
 		</div>
 		<div class="content" style="display: none;">
 			${translationsTableHtml}
@@ -230,14 +247,7 @@ export function getTranslationsTableHtml(args: {
 			})
 		}
 
-		// Fink needs the relative path from the workspace/git root
-		const relativeProjectPathFromWorkspace = state().selectedProjectPath.replace(
-			args.workspaceFolder.uri.fsPath,
-			""
-		)
-
 		const editCommand = `editMessage('${args.message.id}', '${escapeHtml(languageTag)}')`
-		const openCommand = `openInEditor('${args.message.id}', '${relativeProjectPathFromWorkspace}')`
 
 		return `
             <div class="section">
@@ -247,7 +257,6 @@ export function getTranslationsTableHtml(args: {
 		)}</button></span>
 				<span class="actionButtons">
 					<button title="Edit" onclick="${editCommand}"><span class="codicon codicon-edit"></span></button>
-					<button title="Open in Fink" onclick="${openCommand}"><span class="codicon codicon-link-external"></span></button>
 				</span>
             </div>
         `
@@ -302,6 +311,7 @@ export function getHtml(args: {
 			
 				function initializeCollapsibleItems() {
 					collapsibles.forEach(collapsible => {
+						const messageIdDiv = collapsible.querySelector('.messageId');
 						const messageId = collapsible.getAttribute('data-message-id');
 						const isHighlighted = collapsible.closest('.highlighted-section') !== null;
 						const sectionPrefix = isHighlighted ? 'highlighted' : 'all';
@@ -318,8 +328,8 @@ export function getHtml(args: {
 							content.style.display = 'none';
 						}
 				
-						collapsible.addEventListener('click', function() {
-							this.classList.toggle('active');
+						messageIdDiv.addEventListener('click', function() {
+							collapsible.classList.toggle('active');
 							const isExpanded = content.style.display === 'block';
 							content.style.display = isExpanded ? 'none' : 'block';
 							localStorage.setItem(storageKey, !isExpanded);

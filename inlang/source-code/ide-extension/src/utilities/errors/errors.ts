@@ -55,7 +55,7 @@ export function getTreeItem(element: ErrorNode): vscode.TreeItem {
 	treeItem.description = element.description
 	treeItem.iconPath = element.error
 		? new vscode.ThemeIcon("error", new vscode.ThemeColor("errorForeground"))
-		: new vscode.ThemeIcon("check", new vscode.ThemeColor("statusBar.foreground"))
+		: new vscode.ThemeIcon("check", new vscode.ThemeColor("sideBar.foreground"))
 
 	if (element.error) {
 		treeItem.contextValue = "errorNode"
