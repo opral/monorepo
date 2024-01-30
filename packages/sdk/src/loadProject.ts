@@ -187,8 +187,9 @@ export async function loadProject(args: {
 			[messageId: string]: Error
 		}>({})
 
-		const messageBaseFolderFolderPath = projectPath + "/messages"
-		const messageFolderPath = messageBaseFolderFolderPath + "/v1"
+		// const messageBaseFolderFolderPath = projectPath + "/messages"
+		// const messageFolderPath = messageBaseFolderFolderPath + "/v1"
+		const messageLockFilePath = projectPath + "messagelock"
 
 		createEffect(() => {
 			// wait for first effect excution until modules are resolved
@@ -452,7 +453,7 @@ export async function loadProject(args: {
 								messageDirtyFlags[message.id] = true
 								saveMessagesViaPlugin(
 									fs,
-									messageBaseFolderFolderPath,
+									messageLockFilePath,
 									messagesQuery,
 									settings()!,
 									saveMessagesPlugin
@@ -545,7 +546,7 @@ export async function loadProject(args: {
 			if (deletedTrackedMessages.length > 0) {
 				saveMessagesViaPlugin(
 					nodeishFs,
-					messageBaseFolderFolderPath,
+					messageLockFilePath,
 					messagesQuery,
 					settings()!,
 					saveMessagesPlugin
@@ -579,7 +580,7 @@ export async function loadProject(args: {
 					// TODO #1844 FINK check error handling for plugin load methods (triggered by file change) -> move to separate ticket
 					loadMessagesViaPlugin(
 						fsWithWatcher,
-						messageBaseFolderFolderPath,
+						messageLockFilePath,
 						messagesQuery,
 						settings()!,
 						loadMessagePlugin
@@ -601,7 +602,7 @@ export async function loadProject(args: {
 			// TODO #1844 FINK check error handling for plugin load methods (initial load) -> move to separate ticket
 			await loadMessagesViaPlugin(
 				fsWithWatcher,
-				messageBaseFolderFolderPath,
+				messageLockFilePath,
 				messagesQuery,
 				_settings,
 				loadMessagePlugin
@@ -878,7 +879,7 @@ let sheduledLoadMessagesViaPlugin:
  */
 async function loadMessagesViaPlugin(
 	fs: NodeishFilesystemSubset,
-	messagesFolderPath: string,
+	lockFilePath: string,
 	//messagesPath: string,
 	messagesQuery: InlangProject["query"]["messages"],
 	settingsValue: ProjectSettings,
@@ -905,7 +906,6 @@ async function loadMessagesViaPlugin(
 
 	// TODO #1844 JL - check if we can remove this
 	// const loadPluginId = loadPlugin!.id
-	const lockFilePath = messagesFolderPath + "/messages.lockfile"
 	const lockTime = await accquireFileLock(fs as NodeishFilesystem, lockFilePath, "loadMessage")
 	const loadedMessages = await makeTrulyAsync(
 		loadPlugin.loadMessages({
@@ -1006,7 +1006,7 @@ async function loadMessagesViaPlugin(
 
 async function saveMessagesViaPlugin(
 	fs: NodeishFilesystemSubset,
-	messagesFolderPath: string,
+	lockFilePath: string,
 	messagesQuery: InlangProject["query"]["messages"],
 	settingsValue: ProjectSettings,
 	savePlugin: any
@@ -1034,7 +1034,6 @@ async function saveMessagesViaPlugin(
 		}
 
 		try {
-			const lockFilePath = messagesFolderPath + "/messages.lockfile"
 			const lockTime = await accquireFileLock(fs as NodeishFilesystem, lockFilePath, "saveMessage")
 			if (Object.keys(messageDirtyFlags).length == 0) {
 				return
@@ -1056,7 +1055,7 @@ async function saveMessagesViaPlugin(
 
 				messagesToExport.push(fixedExportMessage)
 			}
-			
+
 			// wa are about to save the messages to the plugin - reset all flags now
 			messageDirtyFlags = {}
 
