@@ -109,7 +109,7 @@ const LintRulesSection = () => {
 								</For>
 							</div>
 						</div>
-						<Button type="secondaryOnGray" href="/c/plugins" chevron>
+						<Button type="secondaryOnGray" href="/c/lint-rules" chevron>
 							{m.home_extend_lint_button()}
 						</Button>
 					</div>
