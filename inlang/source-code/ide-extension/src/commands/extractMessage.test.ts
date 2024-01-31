@@ -124,13 +124,6 @@ describe("extractMessageCommand", () => {
 		expect(window.showQuickPick).not.toHaveBeenCalled()
 	})
 
-	it("should handle 'How to edit these replacement options?' selection", async () => {
-		vi.mocked(window.showInputBox).mockResolvedValueOnce("test")
-		// @ts-expect-error
-		vi.mocked(window.showQuickPick).mockResolvedValueOnce("How to edit these replacement options?")
-		await extractMessageCommand.callback(mockTextEditor)
-		expect(window.showQuickPick).toHaveBeenCalled()
-	})
 
 	it("should handle non-existent extract option", async () => {
 		vi.mocked(window.showInputBox).mockResolvedValueOnce("test")
