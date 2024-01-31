@@ -196,7 +196,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	const [fsChange, setFsChange] = createSignal(new Date())
 
-	const [tourStep, setTourStep] = createSignal<TourStepId>("github-login")
+	const [tourStep, setTourStep] = createSignal<TourStepId>("none")
 
 	/**
 	 *  Date of the last push to the Repo
@@ -389,9 +389,11 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	//the effect should skip tour guide steps if not needed
 	createEffect(() => {
-		if (localStorage?.user?.isLoggedIn === false) {
+		if (localStorage?.user === undefined || userIsCollaborator.loading) {
+			setTourStep("none")
+		} else if (localStorage?.user?.isLoggedIn === false) {
 			setTourStep("github-login")
-		} else if (!userIsCollaborator()) {
+		} else if (userIsCollaborator() === false) {
 			setTourStep("fork-repository")
 		} else if (tourStep() === "fork-repository" && project()) {
 			if (project()?.installed.messageLintRules().length === 0) {
