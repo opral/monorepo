@@ -126,8 +126,6 @@ export async function handleTreeSelection(args: {
 			},
 		})
 	} catch (error) {
-		//console.log(error, selectedProject)
-
 		vscode.window.showErrorMessage(`Failed to load project "${selectedProject}": ${error}`)
 	}
 }
