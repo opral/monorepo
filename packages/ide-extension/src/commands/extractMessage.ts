@@ -1,6 +1,6 @@
 import { state } from "../utilities/state.js"
 import { msg } from "../utilities/messages/msg.js"
-import { commands, type TextEditor, window, env, Uri } from "vscode"
+import { commands, type TextEditor, window } from "vscode"
 import { telemetry } from "../services/telemetry/index.js"
 import type { Message } from "@inlang/sdk"
 import { CONFIGURATION } from "../configuration.js"
