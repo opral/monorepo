@@ -18,3 +18,15 @@ export async function findPackageJson(
 	if (packageJsonExists) return potentialPackageJsonPath
 	return undefined
 }
+
+
+export async function getPackageJson(fs: NodeishFilesystem, cwd: string): Promise<{} | undefined> {
+	const packageJsonPath = await findPackageJson(fs, cwd)
+	if (!packageJsonPath) return undefined
+	try {
+		const packageJsonContents = await fs.readFile(packageJsonPath, { encoding: "utf-8" })
+		return JSON.parse(packageJsonContents)
+	} catch {
+		return undefined
+	}
+}

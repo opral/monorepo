@@ -1,35 +1,65 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 import { findPackageJson } from "../environment/package.js"
 
-export enum Stack {
-	Unknown = "Unknown",
-	SvelteKit = "SvelteKit",
-	NextJS = "NextJS",
-	Astro = "Astro",
-	NuxtJS = "NuxtJS",
-	ReactNative = "ReactNative",
+/**
+ * A list of packages that we consider relevant for stack detection.
+ */
+const RelevantPackages = [
+	"next",
+	"solid",
+	"solid-start",
+	"svelte",
+	"@sveltejs/kit",
+	"vue",
+	"nuxt",
+	"react",
+	"react-native",
+	"remix",
+	"astro",
+	"flutter",
+	"vite",
+	"webpack",
+	"rollup",
+	"esbuild",
+] as const
+
+type RelevantPackage = (typeof RelevantPackages)[number]
+
+export type StackInfo = {
+	/**
+	 * A map of relevant packages to their versions.
+	 */
+	packages: {
+		[packageName in RelevantPackage]?: string
+	}
 }
 
-export async function detectStack(fs: NodeishFilesystem, cwd: string): Promise<Stack> {
+export async function getStackInfo(fs: NodeishFilesystem, cwd: string): Promise<StackInfo> {
 	const packageJsonPath = await findPackageJson(fs, cwd)
-	if (packageJsonPath === undefined) return Stack.Unknown
+	if (packageJsonPath === undefined)
+		return {
+			packages: {},
+		}
+
+	const packages: { [packageName in RelevantPackage]?: string } = {}
 
 	try {
 		const packageJson = JSON.parse(await fs.readFile(packageJsonPath, { encoding: "utf-8" }))
-		const dependencies = Object.keys(packageJson.dependencies ?? {})
-		//const devDependencies = Object.keys(packageJson.devDependencies ?? {})
+		const dependencies = packageJson.dependencies ?? {}
+		const devDependencies = packageJson.devDependencies ?? {}
+		const peerDependencies = packageJson.peerDependencies ?? {}
 
-		if (dependencies.includes("svelte") && dependencies.includes("@sveltejs/kit"))
-			return Stack.SvelteKit
-		if (dependencies.includes("next")) return Stack.NextJS
-		if (dependencies.includes("astro")) return Stack.Astro
-		if (dependencies.includes("nuxt")) return Stack.NuxtJS
-		if (dependencies.includes("react-native") || dependencies.includes("expo"))
-			return Stack.ReactNative
+		const allDependencies = { ...dependencies, ...devDependencies, ...peerDependencies }
 
-		return Stack.Unknown
+		for (const packageName of RelevantPackages) {
+			if (packageName in allDependencies) {
+				packages[packageName] = allDependencies[packageName]
+			}
+		}
+
+		return { packages }
 	} catch (error) {
 		console.error(`Failed to parse package.json at ${packageJsonPath}`, error)
-		return Stack.Unknown
+		return { packages }
 	}
 }
