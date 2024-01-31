@@ -281,11 +281,20 @@ export const Gitfloat = () => {
 		event.returnValue = ""
 	}
 
+	// remove event listener when navigating away
+	const popstateHandler = (event: BeforeUnloadEvent) => {
+		event.preventDefault()
+		window.removeEventListener("beforeunload", beforeUnloadHandler)
+		window.removeEventListener("popstate", popstateHandler)
+	}
+
 	createEffect(() => {
 		if (localChanges() > 0) {
 			window.addEventListener("beforeunload", beforeUnloadHandler)
+			window.addEventListener("popstate", popstateHandler)
 		} else {
 			window.removeEventListener("beforeunload", beforeUnloadHandler)
+			window.removeEventListener("popstate", popstateHandler)
 		}
 	})
 
