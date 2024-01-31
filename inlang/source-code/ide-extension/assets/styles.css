@@ -20,8 +20,8 @@ html, body {
     border: none;
     text-align: left;
     outline: none;
-    min-height: 19px;
     display: flex;
+    height: 19px;
     justify-content: space-between;
     align-items: center;
     gap: 5px;
@@ -64,10 +64,10 @@ html, body {
 }
 
 .table .section {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 4px 10px;
+    display: grid;
+    grid-template-columns: 1fr 4fr 1fr;
+    gap: 8px;
+    padding: 5px 10px 4px 10px;
     border-top: 1px solid var(--vscode-sideBar-border);
     font-size: 13px;
     cursor: pointer;
@@ -79,18 +79,13 @@ html, body {
 }
 
 .table .section .languageTag {
-    align-self: flex-start;
-    padding-block-start: 1px;
-    margin-inline-end: 8px;
-    margin-inline-start: 12px;
-    
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    padding-inline-start: 8px;
 }
 
 .table .section .message {
-    align-self: flex-start;
-    padding-block-start: 1px;
-    padding-inline-end: 10px;
-    margin-inline-end: auto;
     width: 100%;
 }
 
@@ -101,7 +96,6 @@ html, body {
 
 .table .section .actionButtons {
     align-self: flex-start;
-    padding-block-start: 1px;
     display: flex;
     gap: 5px;
     align-items: center;
