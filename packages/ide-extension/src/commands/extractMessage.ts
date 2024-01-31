@@ -63,20 +63,12 @@ export const extractMessageCommand = {
 			({ messageReplacement }) => messageReplacement
 		)
 
-		const preparedExtractOption = await window.showQuickPick(
-			[...messageReplacements, "How to edit these replacement options?"],
+		const preparedExtractOption = await window.showQuickPick(messageReplacements,
 			{ title: "Replace highlighted text with:" }
 		)
 		if (preparedExtractOption === undefined) {
 			return
-		} else if (preparedExtractOption === "How to edit these replacement options?") {
-			// TODO #152
-			return env.openExternal(
-				Uri.parse(
-					"https://github.com/opral/monorepo/tree/main/inlang/source-code/ide-extension#3%EF%B8%8F%E2%83%A3-configuration"
-				)
-			)
-		}
+		} 
 
 		const selectedExtractOption = preparedExtractOptions.find(
 			({ messageReplacement }) => messageReplacement === preparedExtractOption
