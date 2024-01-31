@@ -191,8 +191,8 @@ export function createMessageHtml(args: {
 	)
 
 	const positionHtml = encodeURIComponent(JSON.stringify(args.position))
-	const jumpCommand = `jumpToPosition('${args.message.id}', '${positionHtml}');`
-	const openCommand = `openInEditor('${args.message.id}', '${relativeProjectPathFromWorkspace}')`
+	const jumpCommand = `jumpToPosition('${args.message.id}', '${positionHtml}');event.stopPropagation();`
+	const openCommand = `openInEditor('${args.message.id}', '${relativeProjectPathFromWorkspace}');event.stopPropagation();`
 
 	return `
 	<div class="tree-item">
@@ -311,7 +311,6 @@ export function getHtml(args: {
 			
 				function initializeCollapsibleItems() {
 					collapsibles.forEach(collapsible => {
-						const messageIdDiv = collapsible.querySelector('.messageId');
 						const messageId = collapsible.getAttribute('data-message-id');
 						const isHighlighted = collapsible.closest('.highlighted-section') !== null;
 						const sectionPrefix = isHighlighted ? 'highlighted' : 'all';
@@ -328,7 +327,7 @@ export function getHtml(args: {
 							content.style.display = 'none';
 						}
 				
-						messageIdDiv.addEventListener('click', function() {
+						collapsible.addEventListener('click', function() {
 							collapsible.classList.toggle('active');
 							const isExpanded = content.style.display === 'block';
 							content.style.display = isExpanded ? 'none' : 'block';
@@ -393,8 +392,6 @@ export function getHtml(args: {
 
 				function jumpToPosition(messageId, position) {
 					const decodedPosition = JSON.parse(decodeURIComponent(position));
-					console.log(decodedPosition)
-					console.log(messageId, position)
 					vscode.postMessage({
 						command: 'executeCommand',
 						commandName: 'inlang.jumpToPosition',
