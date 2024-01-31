@@ -53,7 +53,7 @@ export const animals = [
 	"dog",
 	"dolphin",
 	"donkey",
-	"dove,",
+	"dove",
 	"dragonfly",
 	"duck",
 	"eagle",
