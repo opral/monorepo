@@ -190,7 +190,6 @@ export function getRecommendationBannerHtml(args: { webview: vscode.Webview }): 
                 <!--<a id="rejectRecommendation" class="link"><span style="text-align: center;">Reject</a></span></a>-->
             </main>
             <script>
-			console.log("test")
                 const vscode = acquireVsCodeApi();
                 document.getElementById('addRecommendation').addEventListener('click', () => {
                     vscode.postMessage({
