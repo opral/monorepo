@@ -15,7 +15,9 @@
     "@astrojs/mdx": "2.0.3",
     "@astrojs/rss": "4.0.1",
     "@astrojs/sitemap": "3.0.4",
+    "@astrojs/svelte": "^5.0.3",
     "astro": "4.0.8",
+    "svelte": "^4.2.9",
     "typescript": "5.3.3"
   },
   "devDependencies": {
