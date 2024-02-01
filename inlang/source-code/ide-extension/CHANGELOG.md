@@ -1,5 +1,25 @@
 # inlang-vs-code-extension
 
+## 1.30.0
+
+### Minor Changes
+
+- 7037bc8b3: remove outdated "configure replacement options" prompt.
+
+  - https://github.com/opral/monorepo/discussions/2159#discussioncomment-8325600
+
+## 1.29.4
+
+### Patch Changes
+
+- 008313fa1: fix message view layout
+
+## 1.29.3
+
+### Patch Changes
+
+- d646e6f66: add jump to message position in code
+
 ## 1.29.2
 
 ### Patch Changes

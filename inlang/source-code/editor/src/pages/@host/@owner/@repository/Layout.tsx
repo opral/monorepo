@@ -120,11 +120,9 @@ export function Layout(props: { children: JSXElement }) {
 	createEffect(
 		on(project, () => {
 			if (lixErrors().length === 0 && project()) {
-				if (filteredLanguageTags().length > 0) {
-					addFilter("Language")
-				} else {
-					if (project()!.settings()) setFilteredLanguageTags(project()!.settings()!.languageTags)
-				}
+				addFilter("Language")
+				if (filteredLanguageTags().length === 0 && project()!.settings())
+					setFilteredLanguageTags(project()!.settings()!.languageTags)
 			}
 		})
 	)
@@ -203,7 +201,7 @@ export function Layout(props: { children: JSXElement }) {
 						Settings
 					</sl-button>
 				</div>
-				<div class="flex flex-wrap justify-between gap-2 py-5 sticky top-12 md:top-16 z-10 bg-surface-50">
+				<div class="flex flex-wrap justify-between gap-2 py-4 md:py-5 sticky top-14 md:top-16 z-10 bg-surface-50">
 					<div class="flex flex-wrap z-20 gap-2 items-center">
 						<Show when={project()}>
 							<For each={filterOptions()}>

@@ -43,7 +43,7 @@ const PluginSection = () => {
 							<Button type="secondaryOnGray" href="/c/plugins">
 								{m.home_extend_plugins_button()}
 							</Button>
-							<Button type="text" href="/c/plugins" chevron>
+							<Button type="text" href="/g/00162hsd" chevron>
 								Why Plugins?
 							</Button>
 						</div>

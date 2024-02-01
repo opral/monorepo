@@ -5,7 +5,9 @@ const Link = (props: { href?: string; [key: string]: any }) => {
 	if (
 		languageTag() !== sourceLanguageTag &&
 		!props.href?.includes("http") &&
-		!props.href?.includes("mailto")
+		!props.href?.includes("mailto") &&
+		!props.href?.includes("/g/") &&
+		!props.href?.includes("/m/")
 	) {
 		modifiedHref = "/" + languageTag() + props.href
 	}

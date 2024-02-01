@@ -246,7 +246,7 @@ You will also notice that any internal links, like `<a href="/about">About</a>` 
 
 Language switchers are challenging, because they require us to dynamicall translate the path we're currently on. We can do this by first removing the language tag from the path, and then adding it back in the correct language.
 
-The Adapter provides convenient functions for this. `i18n.getCanonicalPath(translatedPath)`.
+The Adapter provides convenient functions for this. `i18n.route(translatedPath)`.
 
 ```svelte
 <script lang="ts">
@@ -257,7 +257,7 @@ The Adapter provides convenient functions for this. `i18n.getCanonicalPath(trans
 
 {#each availableLanguageTags as lang}
   <a 
-  	href={i18n.getCanonicalPath($page.url.pathname)} 
+  	href={i18n.route($page.url.pathname)} 
 	hreflang={lang}>Change language to {lang}</a>
 {/each}
 ```
@@ -273,20 +273,19 @@ The only thing left to do is to set the `lang` attribute on your `<html>` tag. T
 
 Here too the Adapter has you covered. It exposes a `handle` function that you can use to modify the HTML before it is sent to the client. We can use this to set the `lang` attribute.
 
-First, add an easy-to-find placeholder for the `lang` attribute in `./src/app.html`.
+First, add an easy-to-find placeholder for the `lang` attribute in `./src/app.html`. By default the hook is looking for `%paraglide.lang%`.
 
 ```html
 <!-- ./src/app.html -->
-<html lang="%lang%"></html>
+<html lang="%paraglide.lang%" dir="%paraglide.dir%"></html>
 ```
 
-Then in `hooks.server.ts`, replace the placeholder with the correct language.
+Then in `hooks.server.ts`, register the `handle` function.
 
 ```ts
 // ./src/hooks.server.ts
 import { i18n } from "$lib/i18n";
-
-export const handle = i18n.handle({ langPlaceholder: "%lang%" });
+export const handle = i18n.handle();
 ```
 
 That's it! If you now reload the page and inspect the HTML, you should see the correct `lang` attribute.

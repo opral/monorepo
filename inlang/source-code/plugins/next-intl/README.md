@@ -95,6 +95,8 @@ function About() {
 
 To learn about namespaces and how to use translation functions in your code, you can refer to [next-intl documentation](https://next-intl-docs.vercel.app/docs/usage/messages). The plugin is capable of parsing the code and providing the IDE-extension with this information.
 
+With version `1.3` it supports also `getTranslations`.
+
 # Expected behavior
 
 The message IDs are sorted in the order in which they appear in the sourceLanguage file. The nesting or flattening of IDs is detected on a file-by-file basis. If the sourceLanguage file contains nested IDs, the plugin will also create nested IDs in the targetLanguage files. If the sourceLanguage file contains flattened IDs, the plugin will also create flattened IDs in the targetLanguage files.

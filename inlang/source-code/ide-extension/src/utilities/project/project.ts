@@ -60,8 +60,8 @@ export function getTreeItem(args: {
 		label: args.element.label,
 		tooltip: args.element.path,
 		iconPath: args.element.isSelected
-			? new vscode.ThemeIcon("pass-filled", new vscode.ThemeColor("statusBar.foreground"))
-			: new vscode.ThemeIcon("circle-large-outline", new vscode.ThemeColor("statusBar.foreground")),
+			? new vscode.ThemeIcon("pass-filled", new vscode.ThemeColor("sideBar.foreground"))
+			: new vscode.ThemeIcon("circle-large-outline", new vscode.ThemeColor("sideBar.foreground")),
 		contextValue: "projectViewNode",
 		command: {
 			command: "inlang.openProject",
@@ -126,8 +126,6 @@ export async function handleTreeSelection(args: {
 			},
 		})
 	} catch (error) {
-		//console.log(error, selectedProject)
-
 		vscode.window.showErrorMessage(`Failed to load project "${selectedProject}": ${error}`)
 	}
 }
