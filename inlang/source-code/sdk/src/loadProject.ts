@@ -11,11 +11,8 @@ import {
 	ProjectSettingsFileJSONSyntaxError,
 	ProjectSettingsFileNotFoundError,
 	ProjectSettingsInvalidError,
-	PluginLoadMessagesError,
 	PluginSaveMessagesError,
 	LoadProjectInvalidArgument,
-	LoadMessageError,
-	SaveMessageError,
 } from "./errors.js"
 import { createRoot, createSignal, createEffect } from "./reactivity/solid.js"
 import { createMessagesQuery } from "./createMessagesQuery.js"
@@ -29,9 +26,6 @@ import { isAbsolutePath } from "./isAbsolutePath.js"
 import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
 
 import {
-	getMessageIdFromPath,
-	getPathFromMessageId,
-	parseMessage,
 	stringifyMessage as stringifyMessage,
 } from "./storage/helper.js"
 
@@ -196,184 +190,7 @@ export async function loadProject(args: {
 			const _resolvedModules = resolvedModules()
 			if (!_resolvedModules) return
 
-			/*
-			// -- initial load of all messages found in the messages folder ----------
-			// TODO #1844 branche persistence strategy - only execute this one when we are running on a project without load- /saveMessages Plugin
-			const loadAndSetMessages = async (fs: NodeishFilesystemSubset) => {
-				const loadedMessages: Message[] = []
-
-				try {
-					// make sure the message folder exists within the .inlang folder
-					try {
-						await fs.mkdir(messageBaseFolderFolderPath, { recursive: true })
-					} catch (e) {
-						if ((e as any).code !== "EEXIST") {
-							throw e
-						}
-					}
-
-					try {
-						await fs.mkdir(messageFolderPath, { recursive: true })
-					} catch (e) {
-						if ((e as any).code !== "EEXIST") {
-							throw e
-						}
-					}
-
-					// helper function that traverses recursivly through the tree
-					const readFilesFromFolderRecursive = async (
-						fileSystem: NodeishFilesystemSubset,
-						rootPath: string,
-						pathToRead: string
-					) => {
-						let filePaths: string[] = []
-						const paths = await fileSystem.readdir(rootPath + pathToRead)
-						for (const path of paths) {
-							// TODO #1844 CLEARIFY Felix FILESYSTEM - what is inlangs best practice to handle other file systems atm?
-							const stat = await fileSystem.stat(rootPath + pathToRead + "/" + path)
-
-							if (stat.isDirectory()) {
-								const subfolderPaths = await readFilesFromFolderRecursive(
-									fileSystem,
-									rootPath,
-									// TODO #1844 CLEARIFY Felix FILESYSTEM - what is inlangs best practice to handle other file systems atm?
-									pathToRead + "/" + path
-								)
-								filePaths = filePaths.concat(subfolderPaths)
-							} else {
-								// TODO #1844 CLEARIFY Felix FILESYSTEM - what is inlangs best practice to handle other file systems atm?
-								filePaths.push(pathToRead + "/" + path)
-							}
-						}
-						return filePaths
-					}
-
-					const messageFilePaths = await readFilesFromFolderRecursive(fs, messageFolderPath, "")
-					const parallelMessageLoad = []
-					for (const messageFilePath of messageFilePaths) {
-						const messageId = getMessageIdFromPath(messageFilePath)
-						if (!messageId) {
-							// ignore files not matching the expected id file path
-							continue
-						}
-						parallelMessageLoad.push(async () => {
-							try {
-								const messageRaw = await fs.readFile(`${messageFolderPath}${messageFilePath}`, {
-									encoding: "utf-8",
-								})
-
-								const message = parseMessage(messageFilePath, messageRaw) as Message
-
-								// if we end up here - message parsing was successfull remove entry in erros map if it exists
-								const _messageLoadErrors = { ...messageLoadErrors() }
-								delete _messageLoadErrors[messageId]
-								setMessageLoadErrors(messageLoadErrors)
-
-								loadedMessages.push(message)
-							} catch (e) {
-								// TODO #1844 FINK - test errors being propagated - fink doesnt show errors other than lints at the moment... -> move to new issue
-								// if reading of a single message fails we propagate the error to the project errors
-								messageLoadErrors()[messageId] = new LoadMessageError({
-									path: messageFilePath,
-									messageId,
-									cause: e,
-								})
-								setMessageLoadErrors(messageLoadErrors)
-							}
-						})
-					}
-
-					await Promise.all(parallelMessageLoad)
-
-					setMessages(loadedMessages)
-
-					// TODO #1844 branche persistence strategy - this needs to be called also for projects using loadMessages
-					markInitAsComplete()
-				} catch (err) {
-					markInitAsFailed(new PluginLoadMessagesError({ cause: err }))
-				}
-			}
-
-			// TODO #1844 branche persistence strategy - watching files in the messages folder is only needed for projects persisting into the inlang messages folder
-			// -- subsequencial upsers and delete of messages on file changes ------------
-			loadAndSetMessages(nodeishFs).then(() => {
-				// when initial message loading is done start watching on file changes in the message dir
-				// TODO #1844 this is the place where we attach event listeners to single message files in our own message format - we deactivate this in iteration 1
-				/* ;(async () => {
-					try {
-						// NOTE: We dont use the abortController at the moment - this is the same for the SDK everywhere atm.
-						// const abortController = new AbortController()
-						const watcher = nodeishFs.watch(messageFolderPath, {
-							// signal: abortController.signal,
-							persistent: false,
-							recursive: true,
-						})
-						if (watcher) {
-							//eslint-disable-next-line @typescript-eslint/no-unused-vars
-							for await (const event of watcher) {
-								// TODO #1844 remove console log
-								// eslint-disable-next-line no-console
-								console.log(event)
-								if (!event.filename) {
-									throw new Error("filename not set in event...")
-								}
-
-								const messageId = getMessageIdFromPath(event.filename)
-								if (!messageId) {
-									// ignore files not matching the expected id file path
-									continue
-								}
-
-								let fileContent: string | undefined
-								try {
-									fileContent = await nodeishFs.readFile(messageFolderPath + "/" + event.filename, {
-										encoding: "utf-8",
-									})
-								} catch (e) {
-									// check for file not exists error (expected in case of deletion of a message) rethrow on everything else
-									if ((e as any).code !== "ENOENT") {
-										throw e
-									}
-								}
-
-								if (!fileContent) {
-									// file was deleted - drop the corresponding message
-									messagesQuery.delete({ where: { id: messageId } })
-								} else {
-									try {
-										const message = parseMessage(event.filename, fileContent)
-
-										// if we end up here - message parsing was successfull remove entry in erros map if it exists
-										const _messageLoadErrors = messageLoadErrors()
-										delete _messageLoadErrors[messageId]
-										setMessageLoadErrors(_messageLoadErrors)
-
-										const currentMessage = messagesQuery.get({ where: { id: messageId } })
-										const currentMessageStringified = stringifyMessage(currentMessage)
-										if (currentMessage && currentMessageStringified === fileContent) {
-											continue
-										}
-
-										messagesQuery.upsert({ where: { id: messageId }, data: message })
-									} catch (e) {
-										// TODO #1844 FINK - test errors being propagated - fink doesnt show errors other than lints at the moment... -> move to new issue
-										messageLoadErrors()[messageId] = new LoadMessageError({
-											path: messageFolderPath + "/" + event.filename,
-											messageId,
-											cause: e,
-										})
-										setMessageLoadErrors(messageLoadErrors)
-									}
-								}
-							}
-						}
-					} catch (err: any) {
-						if (err.name === "AbortError") return
-						throw err
-					}
-				})() 
-			})*/
-
+			// NOTE: this is the code where we would normaly load the the messages from our message folder - since we first introduce the new save/load mechanisem this block stays empty for now
 			setMessages([])
 			markInitAsComplete()
 		})
@@ -459,53 +276,6 @@ export async function loadProject(args: {
 									settings()!,
 									saveMessagesPlugin
 								)
-								/*const persistMessage = async (
-									fs: NodeishFilesystemSubset,
-									path: string,
-									message: Message
-								) => {
-									// TODO #1844 branche persistence strategy - branch here to those project without the saveMessages
-									let dir = getDirname(path)
-									dir = dir.endsWith("/") ? dir.slice(0, -1) : dir
-
-									try {
-										await fs.mkdir(dir, { recursive: true })
-									} catch (e) {
-										if ((e as any).code !== "EEXIST") {
-											throw e
-										}
-									}
-
-									await fs.writeFile(path, stringifyMessage(message))
-
-									// TODO #1844 we don't wait for the file to be persisted - investigate could this become a problem when we batch update messages
-									// TODO #1844 branche persistence strategy - branch here to those project with the saveMessages
-									await saveMessagesViaPlugin(
-										fs,
-										messageBaseFolderFolderPath,
-										messagesQuery,
-										settings()!,
-										saveMessagesPlugin
-									)
-									// debouncedSave(messagesQuery.getAll())
-								}
-								const messageFilePath = messageFolderPath + "/" + getPathFromMessageId(message.id)
-								persistMessage(nodeishFs, messageFilePath, message)
-									.then(() => {
-										const _messageSaveErrors = messageSaveErrors()
-										delete _messageSaveErrors[messageId]
-										setMessageLoadErrors(_messageSaveErrors)
-									})
-									.catch((error) => {
-										// TODO #1844 FINK - test if errors get propagated -> move to new issue
-										// in case saving didn't work (problem during serialization or saving to file) - add to message error array in project
-										messageSaveErrors()[messageId] = new SaveMessageError({
-											path: messageFilePath,
-											messageId,
-											cause: error,
-										})
-										setMessageSaveErrors(messageLoadErrors)
-									})*/
 							}
 						})
 					})
@@ -514,28 +284,7 @@ export async function loadProject(args: {
 
 			for (const deletedMessage of deletedTrackedMessages) {
 				const deletedMessageId = deletedMessage[0]
-				/* TODO #1844 code that deletes the message files and calles save messages
-				const messageFilePath = messageFolderPath + "/" + getPathFromMessageId(deletedMessageId)
-				try {
-					// TODO #1844 branche persistence strategy - branch here to those project with / without the saveMessages
-					nodeishFs.rm(messageFilePath).then(() => {
-						// TODO #1844 we don't wait for the file to be persisted - investigate could this become a problem when we batch update messages
-						return saveMessagesViaPlugin(
-							nodeishFs,
-							messageBaseFolderFolderPath,
-							messagesQuery,
-							settings()!,
-							saveMessagesPlugin
-						)
-					})
-
-				} catch (e) {
-					if ((e as any).code !== "ENOENT") {
-						throw e
-					}
-				}
-				*/
-
+				
 				// NOTE: call dispose to cleanup the effect
 				const messageEffectDisposeFunction = trackedMessages.get(deletedMessageId)
 				if (messageEffectDisposeFunction) {
@@ -618,51 +367,6 @@ export async function loadProject(args: {
 			hasWatcher
 		)
 
-		// TODO #1844 INFORM this is no longer needed
-		// 	const debouncedSave = skipFirst(
-		// 		debounce(
-		// 			500,
-		// 			async (newMessages) => {
-		// 				// entered maximum every 500ms - doesn't mean its finished by that time
-		// 				try {
-		// 					const loadMessagePlugin = _resolvedModules.plugins.find(
-		// 						(plugin) => plugin.loadMessages !== undefined
-		// 					)
-		// 					const loadPluginId = loadMessagePlugin!.id
-
-		// 					const messagesToExport: Message[] = []
-		// 					for (const message of newMessages) {
-		// 						const fixedExportMessage = { ...message }
-		// 						// TODO #1585 here we match using the id to support legacy load message plugins - after we introduced import / export methods we will use importedMessage.alias
-		// 						fixedExportMessage.id =
-		// 							fixedExportMessage.alias[loadPluginId] ?? fixedExportMessage.id
-
-		// 						messagesToExport.push(fixedExportMessage)
-		// 					}
-
-		// 					// this will execute on the next tick - processing of the maschine translations that returned within the tick will kick in
-		// 					await resolvedModules()?.resolvedPluginApi.saveMessages({
-		// 						settings: settingsValue,
-		// 						messages: messagesToExport,
-		// 					})
-		// 				} catch (err) {
-		// 					throw new PluginSaveMessagesError({
-		// 						cause: err,
-		// 					})
-		// 				}
-		// 				const abortController = new AbortController()
-		// 				if (
-		// 					newMessages.length !== 0 &&
-		// 					JSON.stringify(newMessages) !== JSON.stringify(messages()) &&
-		// 					nodeishFs.watch("/", { signal: abortController.signal }) !== undefined
-		// 				) {
-		// 					setMessages(newMessages)
-		// 				}
-		// 			},
-		// 			{ atBegin: false }
-		// 		)
-		// 	)
-
 		/**
 		 * Utility to escape reactive tracking and avoid multiple calls to
 		 * the capture event.
@@ -718,8 +422,6 @@ export async function loadProject(args: {
 		} satisfies InlangProject
 	})
 }
-
-//const x = {} as InlangProject
 
 // ------------------------------------------------------------------------------------------------
 
