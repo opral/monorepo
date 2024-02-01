@@ -1,0 +1,24 @@
+{
+    "name": "@inlang/paraglide-js-adapter-astro",
+    "version": "0.0.1",
+    "private": true,
+    "author": "inlang <hello@inlang.com> (https://inlang.com/)",
+    "description": "Inlang adapter for Astro",
+    "type": "module",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "test": "vitest run --passWithNoTests --dir src",
+        "build": "tsc",
+        "dev": "tsc -w",
+        "lint": "eslint ./src --fix",
+        "format": "prettier ./src --write",
+        "clean": "rm -rf ./dist ./node_modules"
+    },
+    "dependencies": {
+        "@inlang/paraglide-js-adapter-vite": "workspace:*"
+    },
+    "peerDependencies": {
+        "astro": "^4.0.0"
+    }
+}
