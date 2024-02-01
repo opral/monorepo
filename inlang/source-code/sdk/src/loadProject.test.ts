@@ -52,7 +52,7 @@ const mockPlugin: Plugin = {
 	description: { en: "Mock plugin description" },
 	displayName: { en: "Mock Plugin" },
 
-	loadMessages: () => exampleMessages,
+	loadMessages: () => JSON.parse(JSON.stringify(exampleMessages)) as Message[],
 	saveMessages: () => undefined as any,
 	addCustomApi: () => ({
 		"app.project.ideExtension": {
@@ -726,7 +726,7 @@ describe("functionality", () => {
 				description: { en: "Mock plugin description" },
 				displayName: { en: "Mock Plugin" },
 
-				loadMessages: () => exampleMessages,
+				loadMessages: () => JSON.parse(JSON.stringify(exampleMessages)) as Message[],
 				saveMessages: mockSaveFn,
 			}
 
@@ -808,7 +808,8 @@ describe("functionality", () => {
 				},
 			})
 
-			await new Promise((resolve) => setTimeout(resolve, 1510))
+			// lets wait for the next tick
+			await new Promise((resolve) => setTimeout(resolve, 100))
 
 			expect(mockSaveFn.mock.calls.length).toBe(1)
 
@@ -1056,15 +1057,24 @@ describe("functionality", () => {
 
 			expect(counter).toBe(1)
 
-			// change file
+			// saving the file without changing should not trigger a message query
 			await fs.writeFile("./messages.json", JSON.stringify(messages))
-			await new Promise((resolve) => setTimeout(resolve, 0))
+			await new Promise((resolve) => setTimeout(resolve, 200)) // file event will lock a file and be handled sequentially - give it time to pickup the change
+
+			expect(counter).toBe(1)
+
+			// saving the file without changing should trigger a change
+			messages.data[0]!.variants[0]!.pattern[0]!.value = "changed"
+			await fs.writeFile("./messages.json", JSON.stringify(messages))
+			await new Promise((resolve) => setTimeout(resolve, 200)) // file event will lock a file and be handled sequentially - give it time to pickup the change
 
 			expect(counter).toBe(2)
 
+			messages.data[0]!.variants[0]!.pattern[0]!.value = "changed3"
+
 			// change file
 			await fs.writeFile("./messages.json", JSON.stringify(messages))
-			await new Promise((resolve) => setTimeout(resolve, 0))
+			await new Promise((resolve) => setTimeout(resolve, 200)) // file event will lock a file and be handled sequentially - give it time to pickup the change
 
 			expect(counter).toBe(3)
 		})
