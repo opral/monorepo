@@ -4,8 +4,8 @@ import { Button } from "../components/Button.jsx"
 
 const HeroSearch = () => {
 	return (
-		<div class="relative flex flex-col items-center lg:items-start">
-			<div class="items-center lg:items-start relative z-30 flex flex-col w-1/2gap-2 pb-6 mt-4 md:mt-8">
+		<div class="relative flex flex-col lg:flex-row items-center lg:items-start">
+			<div class="items-center lg:items-start relative z-30 flex flex-col w-full lg:w-1/2 gap-2 pb-6 mt-4 md:mt-8">
 				<div class="pt-4 group">
 					<Link
 						href="https://www.youtube.com/live/pTgIx-ucMsY?feature=shared&t=3825"
@@ -34,20 +34,9 @@ const HeroSearch = () => {
 					</Button>
 				</div>
 			</div>
-			<div class="hidden mb-4 lg:block relative lg:absolute z-10 lg:top-[50%] lg:-translate-y-[40%] lg:right-0 w-full lg:w-[600px] xl:w-[900px] flex-1 md:mt-0 mt-12 overflow-hidden">
-				<div class="lg:block absolute inset-0 bg-gradient-to-r from-surface-50 from-20% via-surface-50/0 via-40% hidden" />
-				<div class="lg:block absolute inset-0 bg-gradient-to-r from-surface-50/0 from-80% to-surface-50 hidden" />
-				<img
-					class="w-full lg:min-w-[900px] xl:min-w-[1000px] h-full object-contain object-right"
-					src="/images/lix-transparent.webp"
-					alt="lix header image"
-				/>
+			<div class="w-full lg:w-1/2 mb-10 lg:mb-0 mt-6 lg:mt-16 overflow-hidden flex items-center justify-center self-stretch">
+				<img class="w-full max-w-[500px]" src="/images/hero-cover.png" alt="lix header image" />
 			</div>
-			<img
-				class="lg:hidden w-full my-8 mb-16 max-w-[500px]"
-				src="/images/lixProcess.png"
-				alt="lix header image"
-			/>
 		</div>
 	)
 }
