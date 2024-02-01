@@ -2,7 +2,6 @@ import * as vscode from "vscode"
 import { updateSetting } from "../utilities/settings/index.js"
 import { state } from "../utilities/state.js"
 import { CONFIGURATION } from "../configuration.js"
-import { showStatusBar } from "../utilities/settings/statusBar.js"
 
 export const previewLanguageTagCommand = {
 	command: "inlang.previewLanguageTag",
