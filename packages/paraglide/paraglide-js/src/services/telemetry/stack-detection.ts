@@ -27,6 +27,11 @@ const RelevantPackages = [
 	"webpack",
 	"rollup",
 	"esbuild",
+	"qwick",
+	"parcel",
+	"lit",
+	"lit-html",
+	"@angular/core",
 ] as const
 
 type RelevantPackage = (typeof RelevantPackages)[number]
