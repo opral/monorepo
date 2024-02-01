@@ -67,6 +67,8 @@ export async function loadProject(args: {
 }): Promise<InlangProject> {
 	const projectPath = normalizePath(args.projectPath)
 
+	let ongoingSave: Promise<void> | undefined
+
 	// -- validation --------------------------------------------------------
 	// the only place where throwing is acceptable because the project
 	// won't even be loaded. do not throw anywhere else. otherwise, apps
@@ -269,7 +271,8 @@ export async function loadProject(args: {
 							// TODO #1844 remove the initial setup?
 							if (!initialSetup) {
 								messageDirtyFlags[message.id] = true
-								saveMessagesViaPlugin(
+								// we keep track of the latest save within the loadProject call to await it at the end - this is not used in subsequetial upserts
+								ongoingSave = saveMessagesViaPlugin(
 									fs,
 									messageLockFilePath,
 									messagesQuery,
@@ -294,7 +297,8 @@ export async function loadProject(args: {
 			}
 
 			if (deletedTrackedMessages.length > 0) {
-				saveMessagesViaPlugin(
+				// we keep track of the latest save within the loadProject call to await it at the end - this is not used in subsequetial upserts
+				ongoingSave = saveMessagesViaPlugin(
 					nodeishFs,
 					messageLockFilePath,
 					messagesQuery,
@@ -357,6 +361,9 @@ export async function loadProject(args: {
 				_settings,
 				loadMessagePlugin
 			)
+
+			// load upserts messges in the load initialy - make sure the "blind" save is done before we return from the load project function
+			await ongoingSave
 		}
 
 		const lintReportsQuery = createMessageLintReportsQuery(
