@@ -20,7 +20,10 @@ export async function findPackageJson(
 }
 
 
-export async function getPackageJson(fs: NodeishFilesystem, cwd: string): Promise<{} | undefined> {
+export async function getPackageJson(
+	fs: NodeishFilesystem,
+	cwd: string
+): Promise<unknown | undefined> {
 	const packageJsonPath = await findPackageJson(fs, cwd)
 	if (!packageJsonPath) return undefined
 	try {

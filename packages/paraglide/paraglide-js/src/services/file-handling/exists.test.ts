@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest"
 import { pathExists } from "./exists.js"
 import memfs from "memfs"
-import nodeFsPromises from "fs/promises"
+import nodeFsPromises from "node:fs/promises"
 import { createNodeishMemoryFs, type NodeishFilesystem } from "@lix-js/fs"
 
 describe("fileExists", () => {
