@@ -19,9 +19,9 @@ export const previewLanguageTagCommand = {
 		}
 
 		await updateSetting("previewLanguageTag", selectedTag)
-		await showStatusBar()
 
 		CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire()
 		CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.fire()
+		CONFIGURATION.EVENTS.ON_DID_PREVIEW_LANGUAGE_TAG_CHANGE.fire(selectedTag)
 	},
 }
