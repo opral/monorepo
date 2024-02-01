@@ -144,7 +144,7 @@ function registerExtensionComponents(args: {
 	messagePreview(args)
 	propertiesMissingPreview()
 	linterDiagnostics(args)
-	showStatusBar()
+	showStatusBar(args)
 }
 
 function handleInlangErrors() {
