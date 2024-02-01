@@ -31,7 +31,7 @@ export const showStatusBar = async () => {
 	const sourceLanguageTag = settings?.sourceLanguageTag
 
 	if (!sourceLanguageTag) return
-	const previewLanguageTag = await getSetting("previewLanguageTag")
+	const previewLanguageTag = (await getSetting("previewLanguageTag")) || ""
 
 	statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100)
 	statusBarItem.command = "inlang.previewLanguageTag"
@@ -42,3 +42,4 @@ export const showStatusBar = async () => {
 	statusBarItem.tooltip = "Switch preview language"
 	statusBarItem.show()
 }
+
