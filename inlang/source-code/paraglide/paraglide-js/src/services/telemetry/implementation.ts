@@ -1,6 +1,6 @@
 import { publicEnv } from "@inlang/env-variables"
 import { PostHog } from "posthog-node"
-import type { TelemetryEvents } from "./events.js"
+import type { EventMap } from "./events.js"
 // TODO add a project UUID to the tele.groups internal #196
 // import { getGitRemotes } from "../../utils/git.js"
 // import { parseOrigin } from "@inlang/telemetry"
@@ -63,7 +63,4 @@ function capture(args: CaptureEventArguments) {
  * Exists to avoid typos/always set the correct event name and properties.
  */
 type CaptureEventArguments =
-	| Omit<Parameters<PostHog["capture"]>[0], "distinctId" | "groups"> & {
-			event: TelemetryEvents
-			properties?: Record<string, any>
-	  }
+	| Omit<Parameters<PostHog["capture"]>[0], "distinctId" | "groups"> & EventMap

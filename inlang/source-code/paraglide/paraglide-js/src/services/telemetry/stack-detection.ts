@@ -1,8 +1,8 @@
-import type { NodeishFilesystem } from "@lix-js/fs"
-import { findPackageJson } from "../environment/package.js"
-
 /**
  * A list of packages that we consider relevant for stack detection.
+ *
+ * We (Loris & Nils) decided against using _all_ packages because that would be too much unnecessary data
+ * that would slow down queries.
  */
 const RelevantPackages = [
 	"next",
@@ -10,6 +10,12 @@ const RelevantPackages = [
 	"solid-start",
 	"svelte",
 	"@sveltejs/kit",
+	"@sveltejs/adaper-static",
+	"@sveltejs/adapter-node",
+	"@sveltejs/adapter-netlify",
+	"@sveltejs/adapter-vercel",
+	"@sveltejs/adapter-cloudflare-workers",
+	"@sveltejs/adapter-auto",
 	"vue",
 	"nuxt",
 	"react",
@@ -34,32 +40,28 @@ export type StackInfo = {
 	}
 }
 
-export async function getStackInfo(fs: NodeishFilesystem, cwd: string): Promise<StackInfo> {
-	const packageJsonPath = await findPackageJson(fs, cwd)
-	if (packageJsonPath === undefined)
-		return {
-			packages: {},
-		}
-
+export function getStackInfo(packageJson: unknown): StackInfo {
 	const packages: { [packageName in RelevantPackage]?: string } = {}
 
 	try {
-		const packageJson = JSON.parse(await fs.readFile(packageJsonPath, { encoding: "utf-8" }))
-		const dependencies = packageJson.dependencies ?? {}
-		const devDependencies = packageJson.devDependencies ?? {}
-		const peerDependencies = packageJson.peerDependencies ?? {}
+		const pkg = packageJson as { [key: string]: any }
+		const dependencies = pkg?.dependencies ?? {}
+		const devDependencies = pkg?.devDependencies ?? {}
+		const peerDependencies = pkg?.peerDependencies ?? {}
 
 		const allDependencies = { ...dependencies, ...devDependencies, ...peerDependencies }
 
-		for (const packageName of RelevantPackages) {
-			if (packageName in allDependencies) {
-				packages[packageName] = allDependencies[packageName]
+		for (const dependencyName of RelevantPackages) {
+			if (dependencyName in allDependencies) {
+				const dependencyVersion = allDependencies[dependencyName]
+				if (typeof dependencyVersion !== "string") continue
+				packages[dependencyName] = dependencyVersion
 			}
 		}
 
 		return { packages }
 	} catch (error) {
-		console.error(`Failed to parse package.json at ${packageJsonPath}`, error)
+		console.error(`Failed to parse package.json`, error)
 		return { packages }
 	}
 }
