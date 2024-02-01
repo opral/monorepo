@@ -361,6 +361,13 @@ You can access the current language and text direction on `event.locals.paraglid
 	text="This likely means that you haven't registered the $paraglide alias for src/paraglide in svelte.config.js. Try adding that. Check the example if you're stuck">
 </doc-accordion>
 
+
+<doc-accordion
+	heading="My prerenderd pages include 'http://sveltekit-prerender', what's going on?"
+	text="There are some URLs that need to be fully qualified to be spec compliant. Usually SvelteKit
+	can guess the URL based on your current page, but during prerendering it has no idea where the files will be deployed, so it defaults to 'http://sveltekit-prerender'. You need to explicity tell it the URL of your Site. You can do this with the 'kit.prerender.origin' option in 'svelte.config.js'.">
+</doc-accordion>
+
 ## Roadmap
 
 - [ ] Rewrite `hrefs` on `<svelte:element>` components if they have are links
