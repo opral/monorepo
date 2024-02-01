@@ -1,5 +1,11 @@
 # @inlang/plugin-next-intl
 
+## 1.3.0
+
+### Minor Changes
+
+- 49dd676eb: Support getTranslations with object syntax for namespace
+
 ## 1.2.6
 
 ### Patch Changes

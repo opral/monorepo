@@ -1,5 +1,13 @@
 # inlang-vs-code-extension
 
+## 1.30.0
+
+### Minor Changes
+
+- 7037bc8b3: remove outdated "configure replacement options" prompt.
+
+  - https://github.com/opral/monorepo/discussions/2159#discussioncomment-8325600
+
 ## 1.29.4
 
 ### Patch Changes
