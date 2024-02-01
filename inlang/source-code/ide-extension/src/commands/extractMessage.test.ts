@@ -124,7 +124,6 @@ describe("extractMessageCommand", () => {
 		expect(window.showQuickPick).not.toHaveBeenCalled()
 	})
 
-
 	it("should handle non-existent extract option", async () => {
 		vi.mocked(window.showInputBox).mockResolvedValueOnce("test")
 		// @ts-expect-error

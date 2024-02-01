@@ -63,12 +63,12 @@ export const extractMessageCommand = {
 			({ messageReplacement }) => messageReplacement
 		)
 
-		const preparedExtractOption = await window.showQuickPick(messageReplacements,
-			{ title: "Replace highlighted text with:" }
-		)
+		const preparedExtractOption = await window.showQuickPick(messageReplacements, {
+			title: "Replace highlighted text with:",
+		})
 		if (preparedExtractOption === undefined) {
 			return
-		} 
+		}
 
 		const selectedExtractOption = preparedExtractOptions.find(
 			({ messageReplacement }) => messageReplacement === preparedExtractOption
