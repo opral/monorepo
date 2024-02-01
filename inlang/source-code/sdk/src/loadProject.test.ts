@@ -99,6 +99,47 @@ const exampleMessages: Message[] = [
 	},
 ]
 
+const exampleAliasedMessages: Message[] = [
+	{
+		id: "raw_tapir_pause_grateful",
+		alias: {
+			default: "a",
+		},
+		selectors: [],
+		variants: [
+			{
+				languageTag: "en",
+				match: [],
+				pattern: [
+					{
+						type: "Text",
+						value: "test",
+					},
+				],
+			},
+		],
+	},
+	{
+		id: "dizzy_halibut_dial_vaguely",
+		alias: {
+			default: "b",
+		},
+		selectors: [],
+		variants: [
+			{
+				languageTag: "en",
+				match: [],
+				pattern: [
+					{
+						type: "Text",
+						value: "test",
+					},
+				],
+			},
+		],
+	},
+]
+
 const mockMessageLintRule: MessageLintRule = {
 	id: "messageLintRule.project.mock",
 	description: { en: "Mock lint rule description" },
@@ -696,7 +737,7 @@ describe("functionality", () => {
 				_import,
 			})
 
-			expect(Object.values(project.query.messages.getAll())).toEqual(exampleMessages)
+			expect(Object.values(project.query.messages.getAll())).toEqual(exampleAliasedMessages)
 		})
 	})
 
