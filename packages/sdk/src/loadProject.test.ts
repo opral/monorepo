@@ -743,10 +743,12 @@ describe("functionality", () => {
 			})
 
 			await project.query.messages.upsert({
-				where: { id: "a" },
+				where: { id: "raw_tapir_pause_grateful" },
 				data: {
-					id: "a",
-					alias: {},
+					id: "raw_tapir_pause_grateful",
+					alias: {
+						default: "a",
+					},
 					selectors: [],
 					variants: [
 						{
@@ -774,10 +776,12 @@ describe("functionality", () => {
 			})
 
 			await project.query.messages.upsert({
-				where: { id: "b" },
+				where: { id: "dizzy_halibut_dial_vaguely" },
 				data: {
-					id: "b",
-					alias: {},
+					id: "dizzy_halibut_dial_vaguely",
+					alias: {
+						default: "b",
+					},
 					selectors: [],
 					variants: [
 						{
@@ -804,7 +808,7 @@ describe("functionality", () => {
 				},
 			})
 
-			await new Promise((resolve) => setTimeout(resolve, 510))
+			await new Promise((resolve) => setTimeout(resolve, 1510))
 
 			expect(mockSaveFn.mock.calls.length).toBe(1)
 
@@ -813,18 +817,11 @@ describe("functionality", () => {
 			expect(Object.values(mockSaveFn.mock.calls[0][0].messages)).toStrictEqual([
 				{
 					id: "a",
+					alias: {
+						default: "a",
+					},
 					selectors: [],
 					variants: [
-						{
-							languageTag: "en",
-							match: [],
-							pattern: [
-								{
-									type: "Text",
-									value: "a en",
-								},
-							],
-						},
 						{
 							languageTag: "de",
 							match: [],
@@ -835,22 +832,25 @@ describe("functionality", () => {
 								},
 							],
 						},
-					],
-				},
-				{
-					id: "b",
-					selectors: [],
-					variants: [
 						{
 							languageTag: "en",
 							match: [],
 							pattern: [
 								{
 									type: "Text",
-									value: "b en",
+									value: "a en",
 								},
 							],
 						},
+					],
+				},
+				{
+					id: "b",
+					alias: {
+						default: "b",
+					},
+					selectors: [],
+					variants: [
 						{
 							languageTag: "de",
 							match: [],
@@ -858,6 +858,16 @@ describe("functionality", () => {
 								{
 									type: "Text",
 									value: "b de",
+								},
+							],
+						},
+						{
+							languageTag: "en",
+							match: [],
+							pattern: [
+								{
+									type: "Text",
+									value: "b en",
 								},
 							],
 						},

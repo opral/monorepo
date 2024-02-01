@@ -734,6 +734,7 @@ async function saveMessagesViaPlugin(
 		if (Object.keys(messageDirtyFlags).length == 0) {
 			// nothing to save :-)
 			console.log("save was skiped - no messages marked as dirty...")
+			isSaving = false
 			return
 		}
 
@@ -742,6 +743,8 @@ async function saveMessagesViaPlugin(
 
 			// since it may takes some time to accquire the lock we check if the save is required still (loadMessage could have happend in between)
 			if (Object.keys(messageDirtyFlags).length == 0) {
+				console.log("save was skiped - no messages marked as dirty...")
+				isSaving = false
 				return
 			}
 
