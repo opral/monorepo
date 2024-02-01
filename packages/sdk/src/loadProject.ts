@@ -42,13 +42,14 @@ import type { NodeishStats } from "../../../../lix/source-code/fs/dist/NodeishFi
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
-// TODO #1844 this should be part of the project if we have multiple instances running in the same project
-let messageDirtyFlags = {} as {
-	[messageId: string] : boolean;
-};
 
-const messageLoadHash = {} as {
-	[messageId: string] : string;
+export type MessageState = {
+	messageDirtyFlags: {
+		[messageId: string]: boolean
+	}
+	messageLoadHash: {
+		[messageId: string]: string
+	}
 }
 
 /**
@@ -68,6 +69,11 @@ export async function loadProject(args: {
 	const projectPath = normalizePath(args.projectPath)
 
 	let ongoingSave: Promise<void> | undefined
+
+	const messageStates = {
+		messageDirtyFlags: {},
+		messageLoadHash: {},
+	} as MessageState
 
 	// -- validation --------------------------------------------------------
 	// the only place where throwing is acceptable because the project
@@ -270,11 +276,12 @@ export async function loadProject(args: {
 
 							// TODO #1844 remove the initial setup?
 							if (!initialSetup) {
-								messageDirtyFlags[message.id] = true
+								messageStates.messageDirtyFlags[message.id] = true
 								// we keep track of the latest save within the loadProject call to await it at the end - this is not used in subsequetial upserts
 								ongoingSave = saveMessagesViaPlugin(
 									fs,
 									messageLockFilePath,
+									messageStates,
 									messagesQuery,
 									settings()!,
 									saveMessagesPlugin
@@ -287,7 +294,7 @@ export async function loadProject(args: {
 
 			for (const deletedMessage of deletedTrackedMessages) {
 				const deletedMessageId = deletedMessage[0]
-				
+
 				// NOTE: call dispose to cleanup the effect
 				const messageEffectDisposeFunction = trackedMessages.get(deletedMessageId)
 				if (messageEffectDisposeFunction) {
@@ -301,6 +308,7 @@ export async function loadProject(args: {
 				ongoingSave = saveMessagesViaPlugin(
 					nodeishFs,
 					messageLockFilePath,
+					messageStates,
 					messagesQuery,
 					settings()!,
 					saveMessagesPlugin
@@ -335,6 +343,7 @@ export async function loadProject(args: {
 					loadMessagesViaPlugin(
 						fsWithWatcher,
 						messageLockFilePath,
+						messageStates,
 						messagesQuery,
 						settings()!,
 						loadMessagePlugin
@@ -357,6 +366,7 @@ export async function loadProject(args: {
 			await loadMessagesViaPlugin(
 				fsWithWatcher,
 				messageLockFilePath,
+				messageStates,
 				messagesQuery,
 				_settings,
 				loadMessagePlugin
@@ -590,6 +600,7 @@ let sheduledLoadMessagesViaPlugin:
 async function loadMessagesViaPlugin(
 	fs: NodeishFilesystemSubset,
 	lockFilePath: string,
+	messageState: MessageState,
 	messagesQuery: InlangProject["query"]["messages"],
 	settingsValue: ProjectSettings,
 	loadPlugin: any
@@ -645,16 +656,16 @@ async function loadMessagesViaPlugin(
 			const importedEnecoded = stringifyMessage(loadedMessage)
 
 			// TODO #1844 use hash instead of the whole object JSON to save memory...
-			if (messageLoadHash[loadedMessage.id] === importedEnecoded) {
+			if (messageState.messageLoadHash[loadedMessage.id] === importedEnecoded) {
 				continue
 			}
 
 			// NOTE: this might trigger a save before we have the chance to delete - but since save is async and waits for the lock accquired by this method - its save to set the flags afterwards
 			messagesQuery.update({ where: { id: loadedMessage.id }, data: loadedMessage })
 			// we load a fresh version - lets delete dirty flag that got created by the update
-			delete messageDirtyFlags[loadedMessage.id]
+			delete messageState.messageDirtyFlags[loadedMessage.id]
 			// TODO #1844 use hash instead of the whole object JSON to save memory...
-			messageLoadHash[loadedMessage.id] = importedEnecoded
+			messageState.messageLoadHash[loadedMessage.id] = importedEnecoded
 		} else {
 			// message with the given alias does not exist so far
 			loadedMessage.alias = {} as any
@@ -679,8 +690,8 @@ async function loadMessagesViaPlugin(
 			// add the message - this will trigger an async file creation in the backgound!
 			messagesQuery.create({ data: loadedMessage })
 			// we load a fresh version - lets delete dirty flag that got created by the create method
-			delete messageDirtyFlags[loadedMessage.id]
-			messageLoadHash[loadedMessage.id] = importedEnecoded
+			delete messageState.messageDirtyFlags[loadedMessage.id]
+			messageState.messageLoadHash[loadedMessage.id] = importedEnecoded
 		}
 	}
 	await releaseLock(fs as NodeishFilesystem, lockFilePath, "loadMessage", lockTime)
@@ -697,7 +708,14 @@ async function loadMessagesViaPlugin(
 		sheduledLoadMessagesViaPlugin = undefined
 
 		// recall load unawaited to allow stack to pop
-		loadMessagesViaPlugin(fs, lockFilePath, messagesQuery, settingsValue, loadPlugin).then(
+		loadMessagesViaPlugin(
+			fs,
+			lockFilePath,
+			messageState,
+			messagesQuery,
+			settingsValue,
+			loadPlugin
+		).then(
 			() => {
 				executingScheduledMessages[1]()
 			},
@@ -711,6 +729,7 @@ async function loadMessagesViaPlugin(
 async function saveMessagesViaPlugin(
 	fs: NodeishFilesystemSubset,
 	lockFilePath: string,
+	messageState: MessageState,
 	messagesQuery: InlangProject["query"]["messages"],
 	settingsValue: ProjectSettings,
 	savePlugin: any
@@ -731,9 +750,9 @@ async function saveMessagesViaPlugin(
 		const persistedMessageHashs = {} as { [messageId: string]: string }
 
 		// check if we have any dirty message - witho
-		if (Object.keys(messageDirtyFlags).length == 0) {
+		if (Object.keys(messageState.messageDirtyFlags).length == 0) {
 			// nothing to save :-)
-			console.log("save was skiped - no messages marked as dirty...")
+			console.log("save was skiped - no messages marked as dirty... build!")
 			isSaving = false
 			return
 		}
@@ -742,9 +761,10 @@ async function saveMessagesViaPlugin(
 			const lockTime = await accquireFileLock(fs as NodeishFilesystem, lockFilePath, "saveMessage")
 
 			// since it may takes some time to accquire the lock we check if the save is required still (loadMessage could have happend in between)
-			if (Object.keys(messageDirtyFlags).length == 0) {
-				console.log("save was skiped - no messages marked as dirty...")
+			if (Object.keys(messageState.messageDirtyFlags).length == 0) {
+				console.log("save was skiped - no messages marked as dirty... releasing lock again")
 				isSaving = false
+				await releaseLock(fs as NodeishFilesystem, lockFilePath, "saveMessage", lockTime)
 				return
 			}
 
@@ -752,7 +772,7 @@ async function saveMessagesViaPlugin(
 
 			const messagesToExport: Message[] = []
 			for (const message of currentMessages) {
-				if (messageDirtyFlags[message.id]) {
+				if (messageState.messageDirtyFlags[message.id]) {
 					const importedEnecoded = stringifyMessage(message)
 					// TODO #1844 use hash instead of the whole object JSON to save memory...
 					persistedMessageHashs[message.id] = importedEnecoded
@@ -766,7 +786,7 @@ async function saveMessagesViaPlugin(
 			}
 
 			// wa are about to save the messages to the plugin - reset all flags now
-			messageDirtyFlags = {}
+			messageState.messageDirtyFlags = {}
 
 			// TODO #1844 SPLIT (separate ticket) make sure save messages produces the same output again and again
 			// TODO #1844v Versioning on plugins? cache issue?
@@ -775,12 +795,10 @@ async function saveMessagesViaPlugin(
 				messages: messagesToExport,
 				nodeishFs: fs,
 			})
-
-			await releaseLock(fs as NodeishFilesystem, lockFilePath, "saveMessage", lockTime)
 		} catch (err) {
 			// something went wrong - add dirty flags again
 			for (const dirtyMessageId of Object.keys(persistedMessageHashs)) {
-				messageDirtyFlags[dirtyMessageId] = true
+				messageState.messageDirtyFlags[dirtyMessageId] = true
 			}
 
 			// ok an error
@@ -801,6 +819,7 @@ async function saveMessagesViaPlugin(
 		return await saveMessagesViaPlugin(
 			fs,
 			lockFilePath,
+			messageState,
 			messagesQuery,
 			settingsValue,
 			savePlugin
@@ -816,7 +835,7 @@ async function saveMessagesViaPlugin(
 }
 
 const maxRetries = 5
-const nProbes = 10
+const nProbes = 50
 const probeInterval = 100
 async function accquireFileLock(
 	fs: NodeishFilesystem,
