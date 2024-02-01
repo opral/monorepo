@@ -20,6 +20,15 @@ export function attrubuteValuesToJSValue(
 		console.error(values)
 	}
 
+	//If all values are AttributeShorthand or MustacheTag we don't need to stringify them
+	if (noTextNodes(values)) {
+		let code = ""
+		for (const value of values) {
+			code += originalCode.slice(value.expression.start, value.expression.end)
+		}
+		return code
+	}
+
 	for (const value of values) {
 		switch (value.type) {
 			case "Text":
@@ -38,4 +47,10 @@ export function attrubuteValuesToJSValue(
 
 	templateString += "`"
 	return templateString
+}
+
+function noTextNodes(
+	values: AttributeValue[],
+): values is Exclude<AttributeValue, { type: "Text" }>[] {
+	return !values.some((value) => value.type === "Text") as any
 }

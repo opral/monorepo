@@ -204,3 +204,42 @@ it("should add the defined namespaces by getTranslations hook", async () => {
 	expect(matches).toHaveLength(1)
 	expect(matches[0]?.messageId).toBe("login.test.button.a")
 })
+
+it("should add the defined namespaces by getTranslations hook with namespace object", async () => {
+	const sourceCode = `
+		const { t } = await getTranslations({locale, namespace: "Metadata"});
+		<p>{t("button.a")}</p>
+	`
+	const settings: PluginSettings = {
+		pathPattern: "./{language}.json",
+	}
+	const matches = parse(sourceCode, settings)
+	expect(matches).toHaveLength(1)
+	expect(matches[0]?.messageId).toBe("Metadata.button.a")
+})
+
+it("should add the defined namespaces by getTranslations hook with namespace object variation", async () => {
+	const sourceCode = `
+		const { t } = await getTranslations({locale: "en", namespace: "Metadata"});
+		<p>{t("button.a")}</p>
+	`
+	const settings: PluginSettings = {
+		pathPattern: "./{language}.json",
+	}
+	const matches = parse(sourceCode, settings)
+	expect(matches).toHaveLength(1)
+	expect(matches[0]?.messageId).toBe("Metadata.button.a")
+})
+
+it("should add the defined namespaces by getTranslations hook with namespace object variation two", async () => {
+	const sourceCode = `
+		const { t } = await getTranslations({namespace: "Metadata"});
+		<p>{t("button.a")}</p>
+	`
+	const settings: PluginSettings = {
+		pathPattern: "./{language}.json",
+	}
+	const matches = parse(sourceCode, settings)
+	expect(matches).toHaveLength(1)
+	expect(matches[0]?.messageId).toBe("Metadata.button.a")
+})

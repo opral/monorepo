@@ -20,15 +20,38 @@ html, body {
     border: none;
     text-align: left;
     outline: none;
-    width: 100%;
     display: flex;
-    justify-content: start;
+    height: 19px;
+    justify-content: space-between;
     align-items: center;
     gap: 5px;
 }
 
 .collapsible:hover {
     background-color: var(--vscode-list-hoverBackground);
+}
+
+.collapsible .messageId {
+    user-select: none;
+    display: inline-flex;
+    gap: 5px;
+    width: 100%;
+}
+
+.collapsible .messageId span {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.collapsible:hover .actionButtons {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.actionButtons {
+    display: none;
 }
 
 .content {
@@ -41,13 +64,14 @@ html, body {
 }
 
 .table .section {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 4px 10px;
+    display: grid;
+    grid-template-columns: 1fr 4fr 1fr;
+    gap: 8px;
+    padding: 5px 10px 4px 10px;
     border-top: 1px solid var(--vscode-sideBar-border);
     font-size: 13px;
     cursor: pointer;
+    user-select: none;
 }
 
 .table .section:last-child {
@@ -55,22 +79,23 @@ html, body {
 }
 
 .table .section .languageTag {
-    align-self: flex-start;
-    padding-block-start: 1px;
-    margin-inline-end: 8px;
-    margin-inline-start: 12px;
-    
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    padding-inline-start: 8px;
 }
 
 .table .section .message {
-    align-self: flex-start;
-    padding-block-start: 1px;
-    margin-inline-end: auto;
+    width: 100%;
+}
+
+.table .section .message button {
+    width: 100%;
+    text-overflow: ellipsis;
 }
 
 .table .section .actionButtons {
     align-self: flex-start;
-    padding-block-start: 1px;
     display: flex;
     gap: 5px;
     align-items: center;

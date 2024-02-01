@@ -113,9 +113,9 @@ export const ListHeader = () => {
 										class={
 											filteredMessageLintRules()?.includes(lintRule || "")
 												? getLintRule(lintRule)!.level === "warning"
-													? "ring-warning/20 ring-1 rounded"
-													: "ring-danger/20 ring-1 rounded"
-												: ""
+													? "ring-warning/20 ring-1 rounded animate-blendIn"
+													: "ring-danger/20 ring-1 rounded animate-blendIn"
+												: "animate-blendIn"
 										}
 										onClick={() => {
 											if (filteredMessageLintRules().includes(lintRule)) {
