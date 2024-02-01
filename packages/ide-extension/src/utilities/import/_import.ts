@@ -6,7 +6,6 @@ import type { ImportFunction } from "@inlang/sdk"
 import fs from "node:fs/promises"
 import { HttpsProxyAgent } from "https-proxy-agent"
 import { workspace } from "vscode"
-import path from "node:path"
 
 /**
  * Wraps the import function to inject the base path.
