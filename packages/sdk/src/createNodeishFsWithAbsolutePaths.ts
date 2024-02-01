@@ -42,5 +42,11 @@ export const createNodeishFsWithAbsolutePaths = (args: {
 			path: string,
 			options: { signal: AbortSignal | undefined; recursive: boolean | undefined }
 		) => args.nodeishFs.watch(makeAbsolute(path), options),
+		// This might be surprising when symlinks were intended to be relative
+		symlink: (target: string, path: string) =>
+			args.nodeishFs.symlink(makeAbsolute(target), makeAbsolute(path)),
+		unlink: (path: string) => args.nodeishFs.unlink(makeAbsolute(path)),
+		readlink: (path: string) => args.nodeishFs.readlink(makeAbsolute(path)),
+		lstat: (path: string) => args.nodeishFs.lstat(makeAbsolute(path)),
 	}
 }
