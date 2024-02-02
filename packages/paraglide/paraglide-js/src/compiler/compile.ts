@@ -20,22 +20,23 @@ const ignoreDirectory = `# ignore everything because the directory is auto-gener
  *   console.log(output)
  *   >> { "messages.js": "...", "runtime.js": "..." }
  */
-export const compile = (args: {
+export const compile = async (args: {
 	messages: Readonly<Message[]>
 	settings: ProjectSettings
-}): Record<string, string> => {
+}): Promise<Record<string, string>> => {
 	const compiledMessages = args.messages.map((message) =>
 		compileMessage(message, args.settings.languageTags, args.settings.sourceLanguageTag)
 	)
 
-	getPackageJson(fs, process.cwd()).then((packageJson) => {
-		const stack = getStackInfo(packageJson)
-		telemetry.capture({
-			event: "PARAGLIDE-JS compile executed",
-			properties: {
-				stack,
-			},
-		})
+	const pkgJson = await getPackageJson(fs, process.cwd())
+	const stack = getStackInfo(pkgJson)
+
+	//Don't wait for this, the request fires synchronously, we don't care about a response
+	telemetry.capture({
+		event: "PARAGLIDE-JS compile executed",
+		properties: {
+			stack,
+		},
 	})
 
 	const resources: Record<string, string> = {}
