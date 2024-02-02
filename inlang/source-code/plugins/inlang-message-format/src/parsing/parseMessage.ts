@@ -8,6 +8,7 @@ export const parseMessage = (args: {
 }): Message => {
 	return {
 		id: args.key,
+		alias: {},
 		selectors: [],
 		variants: [
 			{
