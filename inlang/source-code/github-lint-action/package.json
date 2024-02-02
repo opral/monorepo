@@ -1,5 +1,6 @@
 {
-	"name": "@inlang/action",
+	"name": "@inlang/github-lint-action",
+	"description": "This action checks for translation issues within your PRs.",
 	"version": "0.1.0",
 	"private": false,
 	"publishConfig": {
@@ -10,13 +11,10 @@
 		"l10n",
 		"translation",
 		"internationalization",
-		"svelte",
 		"localization",
+		"action",
 		"lint",
-		"i18next",
-		"react",
-		"vue",
-		"angular"
+		"github"
 	],
 	"exports": {
 		".": "./dist/index.js"
@@ -42,6 +40,7 @@
 	"dependencies": {
 		"@actions/core": "^1.10.1",
 		"@actions/github": "^6.0.0",
-		"@lix-js/client": "workspace:*"
+		"@lix-js/client": "workspace:*",
+		"@inlang/sdk": "workspace:*"
 	}
 }

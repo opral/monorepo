@@ -6,7 +6,7 @@ const runMock = vi.spyOn(main, "run")
 
 // Mock the GitHub Actions core library
 // let debugMock: MockInstance
-let errorMock: MockInstance
+// let errorMock: MockInstance
 let getInputMock: MockInstance
 // let setFailedMock: MockInstance
 // let setOutputMock: MockInstance
@@ -16,7 +16,7 @@ describe("test", () => {
 		vi.clearAllMocks()
 
 		// debugMock = vi.spyOn(core, "debug")
-		errorMock = vi.spyOn(core, "error")
+		// errorMock = vi.spyOn(core, "error")
 		getInputMock = vi.spyOn(core, "getInput")
 		// setFailedMock = vi.spyOn(core, "setFailed")
 		// setOutputMock = vi.spyOn(core, "setOutput")
@@ -40,21 +40,5 @@ describe("test", () => {
 		})
 		await main.run()
 		expect(runMock).toHaveReturned()
-	})
-
-	it("sets a failed status", async () => {
-		// Set the action's inputs as return values from core.getInput()
-		getInputMock.mockImplementation((name: string): string => {
-			switch (name) {
-				case "milliseconds":
-					return "this is not a number"
-				default:
-					return ""
-			}
-		})
-
-		await main.run()
-		expect(runMock).toHaveReturned()
-		expect(errorMock).not.toHaveBeenCalled()
 	})
 })

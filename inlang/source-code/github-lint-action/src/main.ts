@@ -84,11 +84,11 @@ export async function run(): Promise<void> {
 			repo,
 			issue_number: pr_number,
 			body: `
-        Pull Request #${pr_number} has been updated with: \n
-        - ${diffData.changes} changes \n
-        - ${diffData.additions} additions \n
-        - ${diffData.deletions} deletions \n
-      `,
+		    Pull Request #${pr_number} has been updated with: \n
+		    - ${diffData.changes} changes \n
+		    - ${diffData.additions} additions \n
+		    - ${diffData.deletions} deletions \n
+		  `,
 		})
 	} catch (error) {
 		// Fail the workflow run if an error occurs
