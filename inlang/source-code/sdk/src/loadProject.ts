@@ -612,9 +612,6 @@ async function loadMessagesViaPlugin(
 
 	// set loading flag
 	isLoading = true
-
-	// TODO #1844 JL - check if we can remove this
-	// const loadPluginId = loadPlugin!.id
 	const lockTime = await accquireFileLock(fs as NodeishFilesystem, lockFilePath, "loadMessage")
 	const loadedMessages = await makeTrulyAsync(
 		loadPlugin.loadMessages({
