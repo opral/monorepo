@@ -363,7 +363,6 @@ You can access the current language and text direction on `event.locals.paraglid
 
 ## Roadmap
 
-- [ ] Rewrite `hrefs` on `<svelte:element>` components if they have are links
 - [ ] Expand the route features in Path translation
   - [ ] Optional parameters
   - [ ] Catch-all parameters
