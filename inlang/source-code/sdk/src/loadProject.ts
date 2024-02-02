@@ -13,6 +13,7 @@ import {
 	ProjectSettingsInvalidError,
 	PluginSaveMessagesError,
 	LoadProjectInvalidArgument,
+	PluginLoadMessagesError,
 } from "./errors.js"
 import { createRoot, createSignal, createEffect } from "./reactivity/solid.js"
 import { createMessagesQuery } from "./createMessagesQuery.js"
@@ -25,9 +26,7 @@ import { normalizePath, type NodeishFilesystem, getDirname } from "@lix-js/fs"
 import { isAbsolutePath } from "./isAbsolutePath.js"
 import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
 
-import {
-	stringifyMessage as stringifyMessage,
-} from "./storage/helper.js"
+import { stringifyMessage as stringifyMessage } from "./storage/helper.js"
 
 import { humanIdHash } from "./storage/human-id/human-readable-id.js"
 
@@ -41,7 +40,6 @@ import { identifyProject } from "./telemetry/groupIdentify.js"
 import type { NodeishStats } from "../../../../lix/source-code/fs/dist/NodeishFilesystemApi.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
-
 
 export type MessageState = {
 	messageDirtyFlags: {
@@ -179,7 +177,7 @@ export async function loadProject(args: {
 
 		// please don't use this as source of truth, use the query instead
 		// needed for granular linting
-		const [messages, setMessages] = createSignal<Message[]>()
+		const [messages, setMessages] = createSignal<Message[]>([])
 
 		const [messageLoadErrors, setMessageLoadErrors] = createSignal<{
 			[messageId: string]: Error
@@ -188,6 +186,8 @@ export async function loadProject(args: {
 		const [messageSaveErrors, setMessageSaveErrors] = createSignal<{
 			[messageId: string]: Error
 		}>({})
+
+		const messagesQuery = createMessagesQuery(() => messages())
 
 		// const messageBaseFolderFolderPath = projectPath + "/messages"
 		// const messageFolderPath = messageBaseFolderFolderPath + "/v1"
@@ -198,9 +198,54 @@ export async function loadProject(args: {
 			const _resolvedModules = resolvedModules()
 			if (!_resolvedModules) return
 
-			// NOTE: this is the code where we would normaly load the the messages from our message folder - since we first introduce the new save/load mechanisem this block stays empty for now
-			setMessages([])
-			markInitAsComplete()
+			if (!_resolvedModules.resolvedPluginApi.loadMessages) {
+				markInitAsFailed(undefined)
+				return
+			}
+
+			const _settings = settings()
+			if (!_settings) return
+
+			// get plugin finding the plugin that provides loadMessages function
+			const loadMessagePlugin = _resolvedModules.plugins.find(
+				(plugin) => plugin.loadMessages !== undefined
+			)
+
+			// TODO #1844 this watcher needs to get pruned when we have a change in the configs which will trigger this again
+			const fsWithWatcher = createNodeishFsWithWatcher({
+				nodeishFs: nodeishFs,
+				// this message is called whenever a file changes that was read earlier by this filesystem
+				// - the plugin loads messages -> reads the file messages.json -> start watching on messages.json -> updateMessages
+				updateMessages: () => {
+					// eslint-disable-next-line no-console -- TODO #1844 remove console log
+					console.log("load messages because of a change in the message.json files")
+					// TODO #1844 FINK check error handling for plugin load methods (triggered by file change) -> move to separate ticket
+					loadMessagesViaPlugin(
+						fsWithWatcher,
+						messageLockFilePath,
+						messageStates,
+						messagesQuery,
+						settings()!,
+						loadMessagePlugin
+					)
+				},
+			})
+
+			// TODO #1844 FINK check error handling for plugin load methods (initial load) -> move to separate ticket
+			loadMessagesViaPlugin(
+				fsWithWatcher,
+				messageLockFilePath,
+				messageStates,
+				messagesQuery,
+				_settings,
+				loadMessagePlugin
+			)
+				.then(() => {
+					markInitAsComplete()
+				})
+				.catch((err) => {
+					markInitAsFailed(new PluginLoadMessagesError({ cause: err }))
+				})
 		})
 
 		// -- installed items ----------------------------------------------------
@@ -237,11 +282,11 @@ export async function loadProject(args: {
 		// -- app ---------------------------------------------------------------
 
 		const initializeError: Error | undefined = await initialized.catch((error) => error)
+		// load upserts messges in the load initialy - make sure the "blind" save is done before we return from the load project function
+		await ongoingSave
 
 		const abortController = new AbortController()
 		const hasWatcher = nodeishFs.watch("/", { signal: abortController.signal }) !== undefined
-
-		const messagesQuery = createMessagesQuery(() => messages() || [])
 
 		const trackedMessages: Map<string, () => void> = new Map()
 		let initialSetup = true
@@ -319,62 +364,6 @@ export async function loadProject(args: {
 		})
 
 		// TODO #1844 deal with wrong messages in inlang folder (change the type one message to something like Text2)
-
-		// run import
-		const _resolvedModules = resolvedModules()
-		const _settings = settings()
-
-		const fsWithWatcher = createNodeishFsWithWatcher({
-			nodeishFs: nodeishFs,
-			// this message is called whenever a file changes that was read earlier by this filesystem
-			// - the plugin loads messages -> reads the file messages.json -> start watching on messages.json -> updateMessages
-			updateMessages: () => {
-				// NOTE the current solution does not watch on deletion or creation of a file (if one adds de.json in case of the json plugin we wont recognize this until restart)
-				if (_resolvedModules?.resolvedPluginApi.loadMessages && _settings) {
-					// get plugin finding the plugin that provides loadMessages function
-					const loadMessagePlugin = _resolvedModules.plugins.find(
-						(plugin) => plugin.loadMessages !== undefined
-					)
-					// TODO #1844 check if update is triggered once on setup the fs
-					// TODO #1844 remove console log
-					// eslint-disable-next-line no-console
-					console.log("load messages because of a change in the message.json files")
-					// TODO #1844 FINK check error handling for plugin load methods (triggered by file change) -> move to separate ticket
-					loadMessagesViaPlugin(
-						fsWithWatcher,
-						messageLockFilePath,
-						messageStates,
-						messagesQuery,
-						settings()!,
-						loadMessagePlugin
-					)
-				}
-			},
-		})
-		// initial project setup finished - import all messages using legacy load Messages method
-		if (_resolvedModules?.resolvedPluginApi.loadMessages && _settings) {
-			// get plugin finding the plugin that provides loadMessages function
-			const loadMessagePlugin = _resolvedModules.plugins.find(
-				(plugin) => plugin.loadMessages !== undefined
-			)
-			// TODO #1844 remove console log
-			// eslint-disable-next-line no-console
-			console.log(
-				"Initial load messages  - will also use the filewatcher system and schedule events"
-			)
-			// TODO #1844 FINK check error handling for plugin load methods (initial load) -> move to separate ticket
-			await loadMessagesViaPlugin(
-				fsWithWatcher,
-				messageLockFilePath,
-				messageStates,
-				messagesQuery,
-				_settings,
-				loadMessagePlugin
-			)
-
-			// load upserts messges in the load initialy - make sure the "blind" save is done before we return from the load project function
-			await ongoingSave
-		}
 
 		const lintReportsQuery = createMessageLintReportsQuery(
 			messagesQuery,
@@ -657,6 +646,7 @@ async function loadMessagesViaPlugin(
 
 			// TODO #1844 use hash instead of the whole object JSON to save memory...
 			if (messageState.messageLoadHash[loadedMessage.id] === importedEnecoded) {
+				console.log("skiping upsert!!!!!")
 				continue
 			}
 

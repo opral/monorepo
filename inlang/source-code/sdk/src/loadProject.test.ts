@@ -1096,12 +1096,14 @@ describe("functionality", () => {
 				counter = counter + 1
 			})
 
+			// subscribe fires once
 			expect(counter).toBe(1)
 
 			// saving the file without changing should not trigger a message query
 			await fs.writeFile("./messages.json", JSON.stringify(messages))
 			await new Promise((resolve) => setTimeout(resolve, 200)) // file event will lock a file and be handled sequentially - give it time to pickup the change
 
+			// we didn't change the message we write into message.json - shouldn't change the messages
 			expect(counter).toBe(1)
 
 			// saving the file without changing should trigger a change
