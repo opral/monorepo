@@ -45,6 +45,28 @@ export type StackInfo = {
 	}
 }
 
+
+/**
+ * Returns information about the tech-stack used based on the package.json.
+ * It will return an object with a map of relevant packages and their versions 
+ * as the `packages` property.
+ * 
+ * If no interestring packages are found, the `packages` property will be an empty object.
+ * If an error occurs, the `packages` property will be an empty object.
+ * 
+ * @example
+ * 
+ * ```ts
+ * {
+ *  "packages": {
+ *     "next": "^14.0.0",
+ *     "react": "^17.0.0"
+ *   }
+ * }
+ * ```
+ * 
+ * @param packageJson The JSON parsed package.json file.
+ */
 export function getStackInfo(packageJson: unknown): StackInfo {
 	const packages: { [packageName in RelevantPackage]?: string } = {}
 
@@ -66,7 +88,6 @@ export function getStackInfo(packageJson: unknown): StackInfo {
 
 		return { packages }
 	} catch (error) {
-		console.error(`Failed to parse package.json`, error)
 		return { packages }
 	}
 }
