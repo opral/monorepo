@@ -86,7 +86,7 @@ describe("loadMessages", () => {
 				settings: {} as any,
 				nodeishFs: {} as any,
 			})
-		).toEqual([{ id: "test", expressions: [], selectors: [], variants: [] }])
+		).toEqual([{ id: "test", alias: {}, expressions: [], selectors: [], variants: [] }])
 	})
 
 	it("should collect an error if function is defined twice in multiple plugins", async () => {

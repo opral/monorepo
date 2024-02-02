@@ -624,6 +624,9 @@ async function loadMessagesViaPlugin(
 	)
 
 	for (const loadedMessage of loadedMessages) {
+
+		const loadedMessageClone = JSON.parse(JSON.stringify(loadedMessage))
+
 		const currentMessages = messagesQuery
 			.getAll()
 			// TODO #1585 here we match using the id to support legacy load message plugins - after we introduced import / export methods we will use importedMessage.alias
@@ -635,37 +638,37 @@ async function loadMessagesViaPlugin(
 			throw new Error("more than one message with the same alias found ")
 		} else if (currentMessages.length === 1) {
 			// update message in place - leave message id and alias untouched
-			loadedMessage.alias = {} as any
+			loadedMessageClone.alias = {} as any
 
 			// TODO #1585 we have to map the id of the importedMessage to the alias and fill the id property with the id of the existing message - change when import mesage provides importedMessage.alias
-			loadedMessage.alias["default"] = loadedMessage.id
-			loadedMessage.id = currentMessages[0]!.id
+			loadedMessageClone.alias["default"] = loadedMessageClone.id
+			loadedMessageClone.id = currentMessages[0]!.id
 
 			// TODO #1844 INFORM stringifyMessage encodes messages independent from key order!
-			const importedEnecoded = stringifyMessage(loadedMessage)
+			const importedEnecoded = stringifyMessage(loadedMessageClone)
 
 			// TODO #1844 use hash instead of the whole object JSON to save memory...
-			if (messageState.messageLoadHash[loadedMessage.id] === importedEnecoded) {
+			if (messageState.messageLoadHash[loadedMessageClone.id] === importedEnecoded) {
 				console.log("skiping upsert!!!!!")
 				continue
 			}
 
 			// NOTE: this might trigger a save before we have the chance to delete - but since save is async and waits for the lock accquired by this method - its save to set the flags afterwards
-			messagesQuery.update({ where: { id: loadedMessage.id }, data: loadedMessage })
+			messagesQuery.update({ where: { id: loadedMessageClone.id }, data: loadedMessageClone })
 			// we load a fresh version - lets delete dirty flag that got created by the update
-			delete messageState.messageDirtyFlags[loadedMessage.id]
+			delete messageState.messageDirtyFlags[loadedMessageClone.id]
 			// TODO #1844 use hash instead of the whole object JSON to save memory...
-			messageState.messageLoadHash[loadedMessage.id] = importedEnecoded
+			messageState.messageLoadHash[loadedMessageClone.id] = importedEnecoded
 		} else {
 			// message with the given alias does not exist so far
-			loadedMessage.alias = {} as any
+			loadedMessageClone.alias = {} as any
 			// TODO #1585 we have to map the id of the importedMessage to the alias - change when import mesage provides importedMessage.alias
-			loadedMessage.alias["default"] = loadedMessage.id
+			loadedMessageClone.alias["default"] = loadedMessageClone.id
 
 			let currentOffset = 0
 			let messsageId: string | undefined
 			do {
-				messsageId = humanIdHash(loadedMessage.id, currentOffset)
+				messsageId = humanIdHash(loadedMessageClone.id, currentOffset)
 				if (messagesQuery.get({ where: { id: messsageId } })) {
 					currentOffset += 1
 					messsageId = undefined
@@ -673,15 +676,15 @@ async function loadMessagesViaPlugin(
 			} while (messsageId === undefined)
 
 			// create a humanId based on a hash of the alias
-			loadedMessage.id = messsageId
+			loadedMessageClone.id = messsageId
 
-			const importedEnecoded = stringifyMessage(loadedMessage)
+			const importedEnecoded = stringifyMessage(loadedMessageClone)
 
 			// add the message - this will trigger an async file creation in the backgound!
-			messagesQuery.create({ data: loadedMessage })
+			messagesQuery.create({ data: loadedMessageClone })
 			// we load a fresh version - lets delete dirty flag that got created by the create method
-			delete messageState.messageDirtyFlags[loadedMessage.id]
-			messageState.messageLoadHash[loadedMessage.id] = importedEnecoded
+			delete messageState.messageDirtyFlags[loadedMessageClone.id]
+			messageState.messageLoadHash[loadedMessageClone.id] = importedEnecoded
 		}
 	}
 	await releaseLock(fs as NodeishFilesystem, lockFilePath, "loadMessage", lockTime)
