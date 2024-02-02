@@ -88,16 +88,16 @@
 		<!-- If there is more than one language, add alternate links -->
 		{#if i18n.config.runtime.availableLanguageTags.length >= 1}
 			{#each i18n.config.runtime.availableLanguageTags as lang}
-				<link
-					rel="alternate"
-					hreflang={lang}
-					href={translatePath($page.url.pathname, lang, i18n.config.translations, {
-						base: absoluteBase,
-						availableLanguageTags: i18n.config.runtime.availableLanguageTags,
-						defaultLanguageTag: i18n.config.defaultLanguageTag,
-						prefixDefaultLanguage: i18n.config.prefixDefaultLanguage,
-					})}
-				/>
+				{@const path = translatePath($page.url.pathname, lang, i18n.config.translations, {
+					base: absoluteBase,
+					availableLanguageTags: i18n.config.runtime.availableLanguageTags,
+					defaultLanguageTag: i18n.config.defaultLanguageTag,
+					prefixDefaultLanguage: i18n.config.prefixDefaultLanguage,
+				})}
+				{@const fullUrl = new URL(path, new URL($page.url))}
+
+				<!-- Should be a fully qualified href, including protocol -->
+				<link rel="alternate" hreflang={lang} href={fullUrl.href} />
 			{/each}
 		{/if}
 	{/if}
