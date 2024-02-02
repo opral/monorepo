@@ -49,6 +49,7 @@ describe("editMessageCommand", () => {
 		const mockLanguageTag = "en"
 		const mockMessage: Message = {
 			id: mockMessageId,
+			alias: {},
 			selectors: [],
 			variants: [
 				{
@@ -109,6 +110,7 @@ describe("editMessageCommand", () => {
 		const mockLanguageTag = "en"
 		const mockMessage: Message = {
 			id: mockMessageId,
+			alias: {},
 			selectors: [],
 			variants: [
 				{

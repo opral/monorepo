@@ -146,8 +146,8 @@ test.runIf(process.env.GOOGLE_TRANSLATE_API_KEY)(
 
 		const messages = project.query.messages.getAll()
 
-		expect(messages[0]!.variants.length).toBe(2)
-		expect(messages[0]!.variants.map((variant) => variant.languageTag).sort()).toStrictEqual([
+		expect(messages[0]?.variants.length).toBe(2)
+		expect(messages[0]?.variants.map((variant) => variant.languageTag).sort()).toStrictEqual([
 			"de",
 			"en",
 		])
