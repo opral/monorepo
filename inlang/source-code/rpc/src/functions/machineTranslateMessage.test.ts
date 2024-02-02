@@ -21,6 +21,7 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 		expect(result.error).toBeUndefined()
 		expect(result.data).toEqual({
 			id: "mockMessage",
+			alias: {},
 			selectors: [],
 			variants: [
 				{ languageTag: "en", match: [], pattern: [{ type: "Text", value: "Hello world" }] },

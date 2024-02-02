@@ -49,6 +49,7 @@ vi.mock("../../configuration.js", () => ({
 // Mock data
 const mockMessage: Message = {
 	id: "testMessage",
+	alias: {},
 	selectors: [],
 	variants: [
 		{
