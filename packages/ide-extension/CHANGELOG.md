@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.30.1
+
+### Patch Changes
+
+- 30e03afa5: fix potential reactivity issue
+
 ## 1.30.0
 
 ### Minor Changes

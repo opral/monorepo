@@ -1,5 +1,13 @@
 # @inlang/paraglide-js-adapter-sveltekit
 
+## 0.3.3
+
+### Patch Changes
+
+- 0efbc35c5: The `href` attribute on `<link rel="alternate"` is now always a fully qualified URL, including the protocol, as the spec demands.
+
+  If you are prerendering, you should set `kit.prerendering.origin` in `svelte.config.js` to make sure the correct URL gets prerendered.
+
 ## 0.3.2
 
 ### Patch Changes
