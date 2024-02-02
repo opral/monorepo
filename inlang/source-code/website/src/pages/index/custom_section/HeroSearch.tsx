@@ -35,7 +35,11 @@ const HeroSearch = () => {
 				</div>
 			</div>
 			<div class="w-full lg:w-1/2 mb-10 lg:mb-0 mt-6 lg:mt-16 overflow-hidden flex items-center justify-center self-stretch">
-				<img class="w-full max-w-[500px]" src="/images/hero-cover.png" alt="lix header image" />
+				<img
+					class="w-full max-w-[500px]"
+					src="/images/hero-cover-updated.png"
+					alt="lix header image"
+				/>
 			</div>
 		</div>
 	)
