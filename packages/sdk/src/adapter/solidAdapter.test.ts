@@ -187,8 +187,7 @@ describe("messages", () => {
 				en: "wo",
 			},
 
-			loadMessages: ({ settings }) =>
-				settings.languageTags.length ? JSON.parse(JSON.stringify(exampleMessages)) : [],
+			loadMessages: ({ settings }) => (settings.languageTags.length ? exampleMessages : []),
 			saveMessages: () => undefined,
 		}
 
@@ -252,7 +251,7 @@ describe("messages", () => {
 		).toBe("test")
 
 		project.query.messages.update({
-			where: { id: "a" },
+			where: { id: "raw_tapir_pause_grateful" },
 			// TODO: use `createMessage` utility
 			data: {
 				...exampleMessages[0],
