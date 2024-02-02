@@ -1311,13 +1311,14 @@ importers:
         version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/example:
+    dependencies:
+      '@inlang/paraglide-js-adapter-sveltekit':
+        specifier: workspace:*
+        version: link:..
     devDependencies:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../../paraglide-js
-      '@inlang/paraglide-js-adapter-sveltekit':
-        specifier: workspace:*
-        version: link:..
       '@sveltejs/adapter-auto':
         specifier: ^3.0.0
         version: 3.1.1(@sveltejs/kit@2.4.3)
