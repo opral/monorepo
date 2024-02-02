@@ -31,7 +31,6 @@ export const compile = async (args: {
 	const pkgJson = await getPackageJson(fs, process.cwd())
 	const stack = getStackInfo(pkgJson)
 
-	//Don't wait for this, the request fires synchronously, we don't care about a response
 	telemetry.capture({
 		event: "PARAGLIDE-JS compile executed",
 		properties: {
