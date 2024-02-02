@@ -187,7 +187,8 @@ describe("messages", () => {
 				en: "wo",
 			},
 
-			loadMessages: ({ settings }) => (settings.languageTags.length ? exampleMessages : []),
+			loadMessages: ({ settings }) =>
+				settings.languageTags.length ? JSON.parse(JSON.stringify(exampleMessages)) : [],
 			saveMessages: () => undefined,
 		}
 
@@ -204,10 +205,10 @@ describe("messages", () => {
 			{ from }
 		)
 
-		let counter = 0
+		let effectOnMessagesCounter = 0
 		createEffect(() => {
 			project.query.messages.getAll()
-			counter += 1
+			effectOnMessagesCounter += 1
 		})
 
 		expect(Object.values(project.query.messages.getAll()).length).toBe(2)
@@ -217,7 +218,7 @@ describe("messages", () => {
 		// TODO: how can we await `setConfig` correctly
 		await new Promise((resolve) => setTimeout(resolve, 510))
 
-		expect(counter).toBe(1) // 2 times because effect creation + set
+		expect(effectOnMessagesCounter).toBe(1) // 2 times because effect creation + set
 		expect(Object.values(project.query.messages.getAll()).length).toBe(2)
 	})
 
