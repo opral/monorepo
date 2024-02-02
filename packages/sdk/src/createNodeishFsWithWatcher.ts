@@ -53,7 +53,6 @@ export const createNodeishFsWithWatcher = (args: {
 		rm: args.nodeishFs.rm,
 		readdir: args.nodeishFs.readdir,
 		mkdir: args.nodeishFs.mkdir,
-		// TODO #1844 why the subsystem?
 		rmdir: (args.nodeishFs as any).rmdir,
 		writeFile: args.nodeishFs.writeFile,
 		watch: args.nodeishFs.watch,

@@ -21,8 +21,6 @@ import { telemetry } from "./services/telemetry/implementation.js"
 import { version } from "../package.json"
 import { showStatusBar } from "./utilities/settings/statusBar.js"
 
-// TODO #1844 CLEARIFY Felix  - why is this important now? The lifecycle of the information flow is crutial now that we deal with so many files and watch on so many files
-
 // Entry Point
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	try {
@@ -107,7 +105,6 @@ function setupFileSystemWatcher(args: {
 	const watcher = vscode.workspace.createFileSystemWatcher(
 		new vscode.RelativePattern(
 			args.workspaceFolder,
-			// TODO #1844 CLEARIFY Felix we don't await the main function here (CHECK does this still trigger main()?)
 			state().selectedProjectPath || CONFIGURATION.FILES.PROJECT
 		)
 	)
@@ -139,7 +136,6 @@ function registerExtensionComponents(args: {
 	]
 
 	args.context.subscriptions.push(
-		// TODO #1844 CLEARIFY Felix shouldn't the state object be registered for later disposal here as well?
 		vscode.languages.registerCodeActionsProvider(documentSelectors, new ExtractMessage(), {
 			providedCodeActionKinds: ExtractMessage.providedCodeActionKinds,
 		})

@@ -79,7 +79,6 @@ export const extractMessageCommand = {
 		}
 
 		const message: Message = {
-			// TODO #1844 CLEARIFY Felix ALIAS we seem to ask the user for an id in the extension - how shall this be handled with the new id?
 			id: selectedExtractOption.messageId,
 			selectors: [],
 			variants: [

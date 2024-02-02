@@ -95,7 +95,6 @@ export async function initProject(args: {
 		return { project: undefined, error }
 	}
 
-	// TODO #1844 CLEARIFY Felix while we set this at the end of the initialization we never clear this up again -> if project initialization fails the old project will be referenced
 	setState({
 		project,
 	})
