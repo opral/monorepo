@@ -22,7 +22,7 @@ import { ProjectSettings, Message, type NodeishFilesystemSubset } from "./versio
 import { tryCatch, type Result } from "@inlang/result"
 import { migrateIfOutdated } from "@inlang/project-settings/migration"
 import { createNodeishFsWithAbsolutePaths } from "./createNodeishFsWithAbsolutePaths.js"
-import { normalizePath, type NodeishFilesystem, getDirname } from "@lix-js/fs"
+import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
 import { isAbsolutePath } from "./isAbsolutePath.js"
 import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
 
@@ -177,12 +177,15 @@ export async function loadProject(args: {
 
 		// please don't use this as source of truth, use the query instead
 		// needed for granular linting
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const [messages, setMessages] = createSignal<Message[]>([])
 
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const [messageLoadErrors, setMessageLoadErrors] = createSignal<{
 			[messageId: string]: Error
 		}>({})
 
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const [messageSaveErrors, setMessageSaveErrors] = createSignal<{
 			[messageId: string]: Error
 		}>({})
@@ -217,7 +220,7 @@ export async function loadProject(args: {
 				// this message is called whenever a file changes that was read earlier by this filesystem
 				// - the plugin loads messages -> reads the file messages.json -> start watching on messages.json -> updateMessages
 				updateMessages: () => {
-					// eslint-disable-next-line no-console -- TODO #1844 remove console log
+					// eslint-disable-next-line no-console
 					console.log("load messages because of a change in the message.json files")
 					// TODO #1844 FINK check error handling for plugin load methods (triggered by file change) -> move to separate ticket
 					loadMessagesViaPlugin(
@@ -621,7 +624,6 @@ async function loadMessagesViaPlugin(
 	)
 
 	for (const loadedMessage of loadedMessages) {
-
 		const loadedMessageClone = JSON.parse(JSON.stringify(loadedMessage))
 
 		const currentMessages = messagesQuery
@@ -646,6 +648,7 @@ async function loadMessagesViaPlugin(
 
 			// TODO #1844 use hash instead of the whole object JSON to save memory...
 			if (messageState.messageLoadHash[loadedMessageClone.id] === importedEnecoded) {
+				// eslint-disable-next-line no-console
 				console.log("skiping upsert!!!!!")
 				continue
 			}
@@ -686,6 +689,7 @@ async function loadMessagesViaPlugin(
 	}
 	await releaseLock(fs as NodeishFilesystem, lockFilePath, "loadMessage", lockTime)
 
+	// eslint-disable-next-line no-console
 	console.log("loadMessagesViaPlugin: " + loadedMessages.length + " Messages processed ")
 
 	isLoading = false
@@ -742,6 +746,7 @@ async function saveMessagesViaPlugin(
 		// check if we have any dirty message - witho
 		if (Object.keys(messageState.messageDirtyFlags).length == 0) {
 			// nothing to save :-)
+			// eslint-disable-next-line no-console
 			console.log("save was skiped - no messages marked as dirty... build!")
 			isSaving = false
 			return
@@ -752,6 +757,7 @@ async function saveMessagesViaPlugin(
 
 			// since it may takes some time to accquire the lock we check if the save is required still (loadMessage could have happend in between)
 			if (Object.keys(messageState.messageDirtyFlags).length == 0) {
+				// eslint-disable-next-line no-console
 				console.log("save was skiped - no messages marked as dirty... releasing lock again")
 				isSaving = false
 				await releaseLock(fs as NodeishFilesystem, lockFilePath, "saveMessage", lockTime)
@@ -838,12 +844,10 @@ async function accquireFileLock(
 	}
 
 	try {
-		// TODO #1844 remove console log
 		// eslint-disable-next-line no-console
 		console.log(lockOrigin + " tries to accquire a lockfile Retry Nr.: " + tryCount)
 		await fs.mkdir(lockFilePath)
 		const stats = await fs.stat(lockFilePath)
-		// TODO #1844 remove console log
 		// eslint-disable-next-line no-console
 		console.log(lockOrigin + " accquired a lockfile Retry Nr.: " + tryCount)
 		return stats.mtimeMs
@@ -866,7 +870,6 @@ async function accquireFileLock(
 		}
 		throw fstatError
 	}
-	// TODO #1844 remove console log
 	// eslint-disable-next-line no-console
 	console.log(
 		lockOrigin +
@@ -881,7 +884,6 @@ async function accquireFileLock(
 				probeCounts += 1
 				let lockFileStats: undefined | NodeishStats = undefined
 				try {
-					// TODO #1844 remove console log
 					// eslint-disable-next-line no-console
 					console.log(
 						lockOrigin +
@@ -893,7 +895,6 @@ async function accquireFileLock(
 					lockFileStats = await fs.stat(lockFilePath)
 				} catch (fstatError: any) {
 					if (fstatError.code === "ENOENT") {
-						// TODO #1844 remove console log
 						// eslint-disable-next-line no-console
 						console.log(
 							lockOrigin +
@@ -911,7 +912,6 @@ async function accquireFileLock(
 				if (lockFileStats.mtimeMs === currentLockTime) {
 					if (probeCounts >= nProbes) {
 						// ok maximum lock time ran up (we waitetd nProbes * probeInterval) - we consider the lock to be stale
-						// TODO #1844 remove console log
 						// eslint-disable-next-line no-console
 						console.log(
 							lockOrigin +
@@ -958,7 +958,6 @@ async function releaseLock(
 	lockOrigin: string,
 	lockTime: number
 ) {
-	// TODO #1844 remove console log
 	// eslint-disable-next-line no-console
 	console.log(lockOrigin + " releasing the lock ")
 	try {
@@ -968,17 +967,14 @@ async function releaseLock(
 			await fs.rmdir(lockFilePath)
 		}
 	} catch (statError: any) {
-		// TODO #1844 remove console log
 		// eslint-disable-next-line no-console
 		console.log(lockOrigin + " couldn't release the lock")
 		if (statError.code === "ENOENT") {
 			// ok seeks like the log was released by someone else
-			// TODO #1844 remove console log
 			// eslint-disable-next-line no-console
 			console.log(lockOrigin + "WARNING - the lock was released by a different process")
 			return
 		}
-		// TODO #1844 remove console log
 		// eslint-disable-next-line no-console
 		console.log(statError)
 		throw statError
