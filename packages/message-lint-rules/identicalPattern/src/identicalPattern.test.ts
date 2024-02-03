@@ -6,6 +6,7 @@ import { identicalPatternRule } from "./identicalPattern.js"
 
 const message1: Message = {
 	id: "1",
+	alias: {},
 	selectors: [],
 	variants: [
 		{ languageTag: "en", match: [], pattern: [{ type: "Text", value: "This is Inlang" }] },
