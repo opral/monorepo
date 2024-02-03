@@ -6,23 +6,25 @@ test("should create a simple message", () => {
 		createMessage("welcome", {
 			de: "Hallo inlang",
 		})
-	).toMatchInlineSnapshot({
-		alias: {},
-		id: "welcome",
-		selectors: [],
-		variants: [
-			{
-				languageTag: "de",
-				match: [],
-				pattern: [
-					{
-						type: "Text",
-						value: "Hallo inlang",
-					},
-				],
-			},
-		],
-	}, `
+	).toMatchInlineSnapshot(
+		{
+			alias: {},
+			id: "welcome",
+			selectors: [],
+			variants: [
+				{
+					languageTag: "de",
+					match: [],
+					pattern: [
+						{
+							type: "Text",
+							value: "Hallo inlang",
+						},
+					],
+				},
+			],
+		},
+		`
 		{
 		  "alias": {},
 		  "id": "welcome",
@@ -40,7 +42,8 @@ test("should create a simple message", () => {
 		    },
 		  ],
 		}
-	`)
+	`
+	)
 })
 
 test("should create a message with pattern", () => {
