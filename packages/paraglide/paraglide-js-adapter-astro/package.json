@@ -4,6 +4,12 @@
     "private": true,
     "author": "inlang <hello@inlang.com> (https://inlang.com/)",
     "description": "Inlang adapter for Astro",
+    "homepage": "https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-astro",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/opral/monorepo.git",
+        "directory": "inlang/source-code/paraglide/paraglide-js-adapter-astro"
+    },
     "type": "module",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -15,6 +21,7 @@
         "format": "prettier ./src --write",
         "clean": "rm -rf ./dist ./node_modules"
     },
+
     "dependencies": {
         "@inlang/paraglide-js-adapter-vite": "workspace:*"
     },
@@ -22,6 +29,16 @@
         "astro": "^4.0.0"
     },
     "keywords": [
-        "astro-integration"
+        "paraglide",
+        "javascript i18n",
+        "i18n",
+        "l10n",
+        "translation",
+        "internationalization",
+        "localization",
+        "lint",
+        "astro-integration",
+        "astro",
+        "astro i18n"
     ]
 }
