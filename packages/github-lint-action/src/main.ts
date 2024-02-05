@@ -1,6 +1,9 @@
 import * as core from "@actions/core"
 import * as github from "@actions/github"
+import * as fs from "node:fs/promises"
 import "dotenv/config"
+import { openRepository, findRepoRoot } from "@lix-js/client"
+import { loadProject } from "@inlang/sdk"
 
 /**
  * The main function for the action.
@@ -12,9 +15,41 @@ export async function run(): Promise<void> {
 		const repo: string = core.getInput("repo", { required: true })
 		const pr_number: string = core.getInput("pr_number", { required: true })
 		const token: string = core.getInput("token", { required: true })
+		const projectPath: string = core.getInput("projectPath", { required: true })
 
 		// Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
 		core.debug(`I got all inputs: ${owner} ${repo} ${pr_number} ${token}`)
+
+		const baseDirectory = process.cwd()
+		const absoluteProjectPath = baseDirectory + projectPath
+		const repoRoot = await findRepoRoot({ nodeishFs: fs, path: absoluteProjectPath })
+
+		if (!repoRoot) {
+			core.debug(
+				`Could not find repository root for path ${projectPath}, falling back to direct fs access`
+			)
+			return
+		}
+
+		const inlangRepo = await openRepository(repoRoot, {
+			nodeishFs: fs,
+		})
+
+		const project = await loadProject({
+			projectPath,
+			repo: inlangRepo,
+			// appId: id,
+		})
+		console.log(project)
+
+		if (project.errors().length > 0) {
+			for (const error of project.errors()) {
+				console.error(error)
+			}
+		}
+
+		core.debug(`settings: ${project.settings()}`)
+		core.debug(`messages:" ${project.query.messages.getAll()}`)
 
 		// @ts-ignore
 		const octokit = new github.getOctokit(token)
@@ -79,17 +114,20 @@ export async function run(): Promise<void> {
 
 		core.debug(`I got diffData: ${diffData}`)
 
+		const commentContent = `
+		Pull Request #${pr_number} has been updated with: \n
+		- ${diffData.changes} changes \n
+		- ${diffData.additions} additions \n
+		- ${diffData.deletions} deletions \n
+	`
+
 		await octokit.rest.issues.createComment({
 			owner,
 			repo,
 			issue_number: pr_number,
-			body: `
-		    Pull Request #${pr_number} has been updated with: \n
-		    - ${diffData.changes} changes \n
-		    - ${diffData.additions} additions \n
-		    - ${diffData.deletions} deletions \n
-		  `,
+			body: commentContent,
 		})
+		core.setOutput("comment-content", commentContent)
 	} catch (error) {
 		// Fail the workflow run if an error occurs
 		if (error instanceof Error) core.setFailed(error.message)
