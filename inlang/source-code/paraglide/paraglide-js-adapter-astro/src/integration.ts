@@ -12,7 +12,7 @@ export function integration(integrationConfig: {
 	return {
 		name: "paraglide",
 		hooks: {
-			"astro:config:setup": async ({ addMiddleware, updateConfig, injectScript, isRestart }) => {
+			"astro:config:setup": async ({ addMiddleware, updateConfig, injectScript }) => {
 				//Register the middleware
 				addMiddleware({
 					order: "pre", //Run before user-defined middleware (why not?)
