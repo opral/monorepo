@@ -2,8 +2,12 @@ import type { AstroIntegration } from "astro"
 import { paraglide } from "@inlang/paraglide-js-adapter-vite"
 import path from "node:path"
 import { alias } from "./alias.js"
+import { fileURLToPath } from "node:url"
 
-const middlewarePath = path.resolve(import.meta.dirname, "middleware.js")
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+const middlewarePath = path.join(__dirname, "middleware.js")
 
 export function integration(integrationConfig: {
 	project: string
@@ -51,12 +55,5 @@ export function integration(integrationConfig: {
 				return undefined
 			},
 		},
-	}
-}
-
-declare global {
-	interface ImportMeta {
-		dirname: string
-		filename: string
 	}
 }
