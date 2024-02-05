@@ -28,7 +28,7 @@ export function paraglide(integrationConfig: {
 								outdir: integrationConfig.outdir,
 							}),
 							alias({
-								"$$$$$$paraglide/runtime": path.resolve(
+								"paraglide-js-adapter-astro:runtime": path.resolve(
 									process.cwd(),
 									integrationConfig.outdir,
 									"runtime.js"
@@ -41,7 +41,7 @@ export function paraglide(integrationConfig: {
 				injectScript(
 					"before-hydration",
 					`
-                    import { isAvailableLanguageTag, setLanguageTag, sourceLanguageTag } from "$$$$$$paraglide/runtime";
+                    import { isAvailableLanguageTag, setLanguageTag, sourceLanguageTag } from "paraglide-js-adapter-astro:runtime";
 					const htmlLang = document.documentElement.lang;
 					const language = isAvailableLanguageTag(htmlLang) ? htmlLang : sourceLanguageTag;
 					setLanguageTag(language);
