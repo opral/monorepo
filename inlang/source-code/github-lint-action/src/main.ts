@@ -40,7 +40,7 @@ export async function run(): Promise<void> {
 			repo: inlangRepo,
 			// appId: id,
 		})
-		core.debug(project?.settings().toString())
+		console.log(project?.settings().toString())
 
 		if (project.errors().length > 0) {
 			for (const error of project.errors()) {
@@ -48,8 +48,8 @@ export async function run(): Promise<void> {
 			}
 		}
 
-		core.debug(`settings: ${project.settings()}`)
-		core.debug(`messages:" ${project.query.messages.getAll()}`)
+		console.log(`settings: ${project.settings()}`)
+		console.log(`messages:" ${project.query.messages.getAll()}`)
 
 		// @ts-ignore
 		const octokit = new github.getOctokit(token)
@@ -60,7 +60,7 @@ export async function run(): Promise<void> {
 			pull_number: pr_number,
 		})
 
-		core.debug(`I got changed files: ${changedFiles}`)
+		console.log(`I got changed files: ${changedFiles}`)
 
 		let diffData = {
 			additions: 0,
