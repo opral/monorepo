@@ -49,7 +49,7 @@ jobs:
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
-          source_files: 'dist/index.js'
+          source_file: 'dist/index.js'
           destination_repo: 'opral/i18n-action'
           destination_folder: 'dist'
           user_email: 'nils.jacobsen98@gmail.com'
