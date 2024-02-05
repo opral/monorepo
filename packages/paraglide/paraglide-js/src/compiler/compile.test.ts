@@ -37,7 +37,7 @@ test("imports in the messages.js index file should use underscores instead of hy
 })
 
 test("it should be possible to directly import a message function via a resource file", async () => {
-	const output = compile({
+	const output = await compile({
 		messages: [
 			createMessage("mock_message", {
 				en: "A simple message.",
@@ -63,22 +63,23 @@ test("it should be possible to directly import a message function via a resource
 // unexpected type errors if the language is not defined in settings will occur. hence throw.
 // if we deem this too strict, we can implement a more sophisticated solution in the future
 test("it should throw if a message uses a language tag that is not defined in the project settings", async () => {
-	expect(() =>
-		compile({
-			messages: [
-				createMessage("mock_message", {
-					en: "A simple message.",
-					de: "Eine einfache Nachricht",
-				}),
-			],
-			settings: {
-				sourceLanguageTag: "en",
-				// de is not contained
-				languageTags: ["en"],
-				modules: [],
-			},
-		})
-	).toThrow()
+	expect(
+		async () =>
+			await compile({
+				messages: [
+					createMessage("mock_message", {
+						en: "A simple message.",
+						de: "Eine einfache Nachricht",
+					}),
+				],
+				settings: {
+					sourceLanguageTag: "en",
+					// de is not contained
+					languageTags: ["en"],
+					modules: [],
+				},
+			})
+	).rejects.toBeTruthy()
 })
 
 describe("e2e", async () => {
@@ -552,4 +553,4 @@ const mockSettings: ProjectSettings = {
 	modules: [],
 }
 
-const output = compile({ messages: mockMessages, settings: mockSettings })
+const output = await compile({ messages: mockMessages, settings: mockSettings })

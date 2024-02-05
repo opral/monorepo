@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import * as vscode from "vscode"
 import * as settings from "../utilities/settings/index.js"
-import * as statusBar from "../utilities/settings/statusBar.js"
 import { previewLanguageTagCommand } from "./previewLanguageTagCommand.js"
 import { CONFIGURATION } from "../configuration.js"
 
@@ -31,6 +30,7 @@ describe("previewLanguageTagCommand", () => {
 				EVENTS: {
 					ON_DID_EDIT_MESSAGE: { fire: vi.fn() },
 					ON_DID_EXTRACT_MESSAGE: { fire: vi.fn() },
+					ON_DID_PREVIEW_LANGUAGE_TAG_CHANGE: { fire: vi.fn() },
 				},
 			},
 		}))
@@ -39,6 +39,7 @@ describe("previewLanguageTagCommand", () => {
 	afterEach(() => {
 		vi.restoreAllMocks()
 	})
+
 	it("should register the command", () => {
 		expect(previewLanguageTagCommand.command).toBe("inlang.previewLanguageTag")
 		expect(previewLanguageTagCommand.title).toBe("Inlang: Change preview language tag")
@@ -56,9 +57,9 @@ describe("previewLanguageTagCommand", () => {
 			placeHolder: "Select a language",
 		})
 		expect(settings.updateSetting).toHaveBeenCalledWith("previewLanguageTag", "en")
-		expect(statusBar.showStatusBar).toHaveBeenCalled()
 		expect(CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire).toHaveBeenCalledTimes(1)
 		expect(CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.fire).toHaveBeenCalledTimes(1)
+		expect(CONFIGURATION.EVENTS.ON_DID_PREVIEW_LANGUAGE_TAG_CHANGE.fire).toHaveBeenCalledTimes(1)
 	})
 
 	it("should not update setting if no tag is selected", async () => {
@@ -67,8 +68,8 @@ describe("previewLanguageTagCommand", () => {
 		await previewLanguageTagCommand.callback()
 
 		expect(settings.updateSetting).not.toHaveBeenCalled()
-		expect(statusBar.showStatusBar).not.toHaveBeenCalled()
 		expect(CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire).not.toHaveBeenCalled()
 		expect(CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.fire).not.toHaveBeenCalled()
+		expect(CONFIGURATION.EVENTS.ON_DID_PREVIEW_LANGUAGE_TAG_CHANGE.fire).not.toHaveBeenCalled()
 	})
 })

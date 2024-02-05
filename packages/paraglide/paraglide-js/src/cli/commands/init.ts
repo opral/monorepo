@@ -10,8 +10,9 @@ import { telemetry } from "../../services/telemetry/implementation.js"
 import { Logger } from "../../services/logger/index.js"
 import dedent from "dedent"
 import { findRepoRoot, openRepository, type Repository } from "@lix-js/client"
-import type { NodeishFilesystem } from "@lix-js/fs"
 import nodeFsPromises from "node:fs/promises"
+import { pathExists } from "../../services/file-handling/exists.js"
+import { findPackageJson } from "../../services/environment/package.js"
 
 // TODO add a project UUID to the tele.groups internal #196
 // import { gitOrigin } from "../../services/telemetry/implementation.js"
@@ -129,7 +130,7 @@ export const maybeAddVsCodeExtension = async (args: { projectPath: string }, ctx
 	}
 	if (extensions.recommendations.includes("inlang.vs-code-extension") === false) {
 		extensions.recommendations.push("inlang.vs-code-extension")
-		if ((await fileExists("./.vscode", ctx.repo.nodeishFs)) === false) {
+		if ((await pathExists("./.vscode", ctx.repo.nodeishFs)) === false) {
 			await ctx.repo.nodeishFs.mkdir("./.vscode")
 		}
 		await ctx.repo.nodeishFs.writeFile(
@@ -162,7 +163,7 @@ export const addParaglideJsToDevDependencies = async (ctx: Context) => {
 
 export const findExistingInlangProjectPath = async (ctx: Context): Promise<string | undefined> => {
 	for (const path of ["./project.inlang", "../project.inlang", "../../project.inlang"]) {
-		if (await fileExists(path, ctx.repo.nodeishFs)) {
+		if (await pathExists(path, ctx.repo.nodeishFs)) {
 			return path
 		}
 		continue
@@ -252,8 +253,8 @@ export const newProjectTemplate: ProjectSettings = {
 }
 
 export const checkIfPackageJsonExists = async (ctx: Context) => {
-	const exists = await fileExists("./package.json", ctx.repo.nodeishFs)
-	if (exists === false) {
+	const packageJsonPath = await findPackageJson(ctx.repo.nodeishFs, process.cwd())
+	if (!packageJsonPath) {
 		ctx.logger.warn(
 			"No package.json found in the current working directory. Please change the working directory to the directory with a package.json file."
 		)
@@ -342,7 +343,7 @@ Please add the following command to your build script manually:
  * errors with Paraglide-JS.
  */
 export const maybeChangeTsConfigModuleResolution = async (ctx: Context): Promise<void> => {
-	if ((await fileExists("./tsconfig.json", ctx.repo.nodeishFs)) === false) {
+	if ((await pathExists("./tsconfig.json", ctx.repo.nodeishFs)) === false) {
 		return
 	}
 	const file = await ctx.repo.nodeishFs.readFile("./tsconfig.json", { encoding: "utf-8" })
@@ -419,7 +420,7 @@ export const maybeChangeTsConfigModuleResolution = async (ctx: Context): Promise
  * Paraligde JS compiles to JS with JSDoc comments. TypeScript doesn't allow JS files by default.
  */
 export const maybeChangeTsConfigAllowJs = async (ctx: Context): Promise<void> => {
-	if ((await fileExists("./tsconfig.json", ctx.repo.nodeishFs)) === false) {
+	if ((await pathExists("./tsconfig.json", ctx.repo.nodeishFs)) === false) {
 		return
 	}
 	const file = await ctx.repo.nodeishFs.readFile("./tsconfig.json", { encoding: "utf-8" })
@@ -476,19 +477,6 @@ const prompt: typeof consola.prompt = async (message, options) => {
 	return response
 }
 
-export async function fileExists(filePath: string, nodeishFs: NodeishFilesystem) {
-	try {
-		await nodeishFs.stat(filePath)
-		return true
-	} catch (error) {
-		//@ts-ignore
-		if (error.code === "ENOENT") {
-			return false
-		} else {
-			throw new Error(`Failed to check if file exists: ${error}`, { cause: error })
-		}
-	}
-}
 
 /**
  * Executes a command asynchronously in a separate process.

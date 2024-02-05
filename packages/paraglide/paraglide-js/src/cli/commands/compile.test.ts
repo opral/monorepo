@@ -7,7 +7,7 @@ import { compileCommand } from "./compile.js"
 import type { ProjectSettings } from "@inlang/sdk"
 import { resolve } from "node:path"
 import { Logger } from "../../services/logger/index.js"
-import { fileExists } from "./init.js"
+import { pathExists } from "../../services/file-handling/exists.js"
 
 beforeEach(() => {
 	vi.resetAllMocks()
@@ -74,7 +74,7 @@ test("it should compile into the default outdir", async () => {
 
 	// I have no idea why, but the { from: "user" } is required for the test to pass
 	await compileCommand.parseAsync(["--project", "./project.inlang"], { from: "user" })
-	expect(await fileExists("./src/paraglide/messages.js", fs)).toBe(true)
+	expect(await pathExists("./src/paraglide/messages.js", fs)).toBe(true)
 })
 
 test("it should compile a project into the provided outdir", async () => {
@@ -112,7 +112,7 @@ test("it should compile a project into the provided outdir", async () => {
 		await compileCommand.parseAsync(["--project", "./project.inlang", "--outdir", outdir], {
 			from: "user",
 		})
-		expect(await fileExists(`${outdir}/messages.js`, fs)).toBe(true)
+		expect(await pathExists(`${outdir}/messages.js`, fs)).toBe(true)
 	}
 })
 

@@ -12,7 +12,6 @@ import {
 	initializeInlangProject,
 	maybeAddVsCodeExtension,
 	newProjectTemplate,
-	fileExists,
 } from "./init.js"
 import consola from "consola"
 import { describe } from "node:test"
@@ -25,6 +24,7 @@ import { createNodeishMemoryFs } from "@inlang/sdk/test-utilities"
 import { Logger } from "../../services/logger/index.js"
 import { openRepository } from "@lix-js/client"
 import type { NodeishFilesystem } from "@lix-js/fs"
+import { pathExists } from "../../services/file-handling/exists.js"
 
 const logger = new Logger()
 
@@ -104,7 +104,7 @@ describe("initializeInlangProject()", () => {
 		mockUserInput(["newProject"])
 		const path = await initializeInlangProject({ logger, repo })
 		expect(path).toBe("./project.inlang")
-		expect(await fileExists("./project.inlang", fs)).toBe(true)
+		expect(await pathExists("./project.inlang", fs)).toBe(true)
 	})
 })
 
@@ -327,7 +327,7 @@ describe("existingProjectFlow()", () => {
 		// info that a new project is created
 		expect(logger.info).toHaveBeenCalledOnce()
 		// the newly created project file should exist
-		expect(await fileExists("/project.inlang", fs)).toBe(true)
+		expect(await pathExists("/project.inlang", fs)).toBe(true)
 	})
 
 	test("it should exit if the existing project contains errors", async () => {
@@ -415,7 +415,7 @@ describe("maybeAddVsCodeExtension()", () => {
 			true,
 		])
 		await maybeAddVsCodeExtension({ projectPath: "/project.inlang" }, { logger, repo })
-		expect(await fileExists("/.vscode/extensions.json", fs)).toBe(true)
+		expect(await pathExists("/.vscode/extensions.json", fs)).toBe(true)
 	})
 
 	test("it should skip asking about vscode if the command is being run inside the vscode terminal", async () => {
@@ -457,7 +457,7 @@ describe("createNewProjectFlow()", async () => {
 			// user is informed that the project has successfully been created
 			expect(logger.success).toHaveBeenCalledOnce()
 			// the project file should exist
-			expect(await fileExists("/project.inlang", fs)).toBe(true)
+			expect(await pathExists("/project.inlang", fs)).toBe(true)
 		},
 		{
 			// i am testing this while i am on an airplane with slow internet

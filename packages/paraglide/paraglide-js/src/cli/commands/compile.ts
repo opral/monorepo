@@ -80,7 +80,7 @@ async function executeCompilation(
 	outputDirectory: string,
 	fs: NodeishFilesystem
 ) {
-	const output = compile({
+	const output = await compile({
 		messages: project.query.messages.getAll(),
 		settings: project.settings(),
 	})

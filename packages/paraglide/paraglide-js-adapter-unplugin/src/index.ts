@@ -39,7 +39,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		}
 
 		logMessageChange()
-		const output = compile({ messages, settings })
+		const output = await compile({ messages, settings })
 		await writeOutput(outputDirectory, output, fs)
 		numCompiles++
 		previousMessagesHash = currentMessagesHash
