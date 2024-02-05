@@ -10,3 +10,12 @@ declare module "paraglide-js-adapter-astro:runtime" {
 	export const availableLanguageTags: readonly string[]
 	export const sourceLanguageTag: string
 }
+
+declare namespace App {
+	interface Locals {
+		paraglide: {
+			lang: string
+			dir: "ltr" | "rtl"
+		}
+	}
+}

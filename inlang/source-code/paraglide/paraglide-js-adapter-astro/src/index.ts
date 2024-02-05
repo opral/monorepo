@@ -15,7 +15,7 @@ export function paraglide(integrationConfig: {
 			"astro:config:setup": async ({ addMiddleware, updateConfig, injectScript }) => {
 				//Register the middleware
 				addMiddleware({
-					order: "pre",
+					order: "pre", //Run before user-defined middleware (why not?)
 					entrypoint: middlewarePath,
 				})
 
