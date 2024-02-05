@@ -15,18 +15,18 @@ export async function run(): Promise<void> {
 		const repo: string = core.getInput("repo", { required: true })
 		const pr_number: string = core.getInput("pr_number", { required: true })
 		const token: string = core.getInput("token", { required: true })
-		const projectPath: string = core.getInput("projectPath", { required: true })
+		const project_path: string = core.getInput("projectPath", { required: true })
 
 		// Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
 		core.debug(`I got all inputs: ${owner} ${repo} ${pr_number} ${token}`)
 
 		const baseDirectory = process.cwd()
-		const absoluteProjectPath = baseDirectory + projectPath
+		const absoluteProjectPath = baseDirectory + project_path
 		const repoRoot = await findRepoRoot({ nodeishFs: fs, path: absoluteProjectPath })
 
 		if (!repoRoot) {
 			core.debug(
-				`Could not find repository root for path ${projectPath}, falling back to direct fs access`
+				`Could not find repository root for path ${project_path}, falling back to direct fs access`
 			)
 			return
 		}
@@ -36,11 +36,11 @@ export async function run(): Promise<void> {
 		})
 
 		const project = await loadProject({
-			projectPath,
+			projectPath: project_path,
 			repo: inlangRepo,
 			// appId: id,
 		})
-		console.log(project)
+		core.debug(project?.settings().toString())
 
 		if (project.errors().length > 0) {
 			for (const error of project.errors()) {
