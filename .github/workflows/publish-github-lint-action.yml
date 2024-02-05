@@ -44,10 +44,17 @@ jobs:
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
+      - name: Generate a token
+        id: generate_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.INLANG_ACTION_PUBLISHER_APP_ID }}
+          private-key: ${{ secrets.INLANG_ACTION_PUBLISHER_KEY }}
+
       - name: Pushes build to action repo
         uses: dmnemec/copy_file_to_another_repo_action@main
         env:
-          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+          API_TOKEN_GITHUB: ${{ steps.generate_token.outputs.token }}
         with:
           source_file: 'inlang/source-code/github-lint-action/dist/index.js'
           destination_repo: 'opral/i18n-action'
