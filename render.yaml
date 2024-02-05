@@ -28,7 +28,7 @@ services:
     runtime: node
     region: frankfurt
     plan: starter
-    branch: main
+    # branch: main
     buildCommand: pnpm install && pnpm run build
     startCommand: pnpm --filter @lix-js/server production
     autoDeploy: true
