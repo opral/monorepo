@@ -224,6 +224,7 @@ export function PatternEditor(props: {
 				}
 			})
 			.join("")
+
 		if (text === "") {
 			return showToast({
 				variant: "info",
@@ -255,6 +256,7 @@ export function PatternEditor(props: {
 			sourceLanguageTag: project()!.settings()!.sourceLanguageTag!,
 			targetLanguageTags: [props.languageTag],
 		})
+
 		if (translation.error !== undefined) {
 			showToast({
 				variant: "warning",
