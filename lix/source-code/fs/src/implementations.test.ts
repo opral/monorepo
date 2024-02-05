@@ -267,6 +267,41 @@ const runFsTestSuite = async (
 		])
 	})
 
+  test.skipIf(isNodeFs)("placeholders", async () => {
+		const placeholderPath = `/placeholders/subdir`
+
+		await fs.mkdir(placeholderPath, { recursive: true })
+
+		await fs.writeFile(`${placeholderPath}/file`, "")
+
+		fs._createPlaceholder(placeholderPath + "/test")
+
+		expect(fs._isPlaceholder(placeholderPath + "/test")).toBe(true)
+		expect(fs._isPlaceholder(placeholderPath + "/noexists")).toBe(false)
+		expect(fs._isPlaceholder(placeholderPath + "/file")).toBe(false)
+
+		const dirents = await fs.readdir(`/placeholders/subdir`)
+
+		expect(dirents).toStrictEqual(["file", "test"])
+
+		await expect(async () => await fs.readFile(`${placeholderPath}/test`)).rejects.toThrow(
+			/EPLACEHOLDER/
+		)
+
+		await fs.rm("/placeholders", { recursive: true })
+
+		const finalDirents = await fs.readdir(`/`)
+
+		expect(finalDirents).toStrictEqual([
+			"home",
+			"file2",
+			"file3",
+			"file1.link",
+			"file3.link",
+			"user1.link",
+		])
+	})
+
 	test("unlink", async () => {
 		await fs.unlink(`${tempDir}/user1.link`)
 		await fs.unlink(`${tempDir}/file1.link`)
