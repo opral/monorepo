@@ -45,13 +45,13 @@ jobs:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
       - name: Pushes build to action repo
-            uses: dmnemec/copy_file_to_another_repo_action@main
-            env:
-              API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
-            with:
-              source_files: 'dist/index.js'
-              destination_repo: 'opral/i18n-action'
-              destination_folder: 'dist'
-              user_email: 'nils.jacobsen98@gmail.com'
-              user_name: 'NilsJacobsen'
-              commit_message: 'A custom message for the commit'
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source_files: 'dist/index.js'
+          destination_repo: 'opral/i18n-action'
+          destination_folder: 'dist'
+          user_email: 'nils.jacobsen98@gmail.com'
+          user_name: 'NilsJacobsen'
+          commit_message: 'A custom message for the commit'
