@@ -1,0 +1,42 @@
+name: Test GitHub Actions Lint
+
+on:
+  pull_request:
+    branches:
+      - main
+
+# explicitly configure permissions, in case your GITHUB_TOKEN workflow permissions are set to read-only in repository settings
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+  statuses: write
+  
+jobs:
+  test-action:
+    name: GitHub Actions Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Test Local Action
+        id: test-action
+        uses: ./inlang/source-code/github-action-lint
+        with:
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.repository }}
+          pull_number: ${{ github.event.pull_request.number }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          project_path: ./inlang/source-code/
+
+      - name: Print Output
+        id: output
+        run: echo "${{ steps.test-action.outputs.commentContent }}"
