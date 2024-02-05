@@ -25,6 +25,7 @@ export default defineConfig({
 			outdir: "./src/paraglide",
 		}),
 	],
+	output: "server",
 	i18n: {
 		defaultLocale: sourceLanguageTag,
 		locales: [...availableLanguageTags],
