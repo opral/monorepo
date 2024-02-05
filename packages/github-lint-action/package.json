@@ -14,7 +14,8 @@
 		"localization",
 		"action",
 		"lint",
-		"github"
+		"github",
+		"workflow"
 	],
 	"exports": {
 		".": "./dist/index.js"
