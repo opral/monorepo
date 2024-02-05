@@ -15,7 +15,7 @@ export async function run(): Promise<void> {
 		const repo: string = core.getInput("repo", { required: true })
 		const pr_number: string = core.getInput("pr_number", { required: true })
 		const token: string = core.getInput("token", { required: true })
-		const project_path: string = core.getInput("projectPath", { required: true })
+		const project_path: string = core.getInput("project_path", { required: true })
 
 		// Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
 		core.debug(`I got all inputs: ${owner} ${repo} ${pr_number} ${token}`)
