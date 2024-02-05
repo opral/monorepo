@@ -29,7 +29,7 @@ jobs:
 
       - name: Test Local Action
         id: test-action
-        uses: ./inlang/source-code/github-action-lint
+        uses: ./inlang/source-code/github-lint-action
         with:
           owner: ${{ github.repository_owner }}
           repo: ${{ github.repository }}
