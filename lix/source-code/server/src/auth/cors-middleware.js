@@ -287,10 +287,10 @@ export default ({ origins, insecure_origins = [], authorization = noop } = {}) =
 			headers["user-agent"] = "git/@isomorphic-git/cors-proxy"
 		}
 
-		let p = u.path
-		let parts = p.match(/\/([^/]*)\/(.*)/)
-		let pathdomain = parts[1]
-		let remainingpath = parts[2]
+		let p = u.path // 'github.com/opral/example/git-upload-pack'
+		let parts = p.split("/").filter((elem) => !!elem)
+		let pathdomain = parts.shift()
+		let remainingpath = parts.join("/")
 		let protocol = insecure_origins.includes(pathdomain) ? "http" : "https"
 
 		fetch(`${protocol}://${pathdomain}/${remainingpath}`, {
@@ -298,24 +298,30 @@ export default ({ origins, insecure_origins = [], authorization = noop } = {}) =
 			redirect: "manual",
 			headers,
 			body: req.method !== "GET" && req.method !== "HEAD" ? req : undefined,
-		}).then((f) => {
-			if (f.headers.has("location")) {
-				// Modify the location so the client continues to use the proxy
-				let newUrl = f.headers.get("location").replace(/^https?:\//, "")
-				f.headers.set("location", newUrl)
-			}
-			res.statusCode = f.status
-			for (let h of exposeHeaders) {
-				if (h === "content-length") continue
-				if (f.headers.has(h)) {
-					res.setHeader(h, f.headers.get(h))
-				}
-			}
-			if (f.redirected) {
-				res.setHeader("x-redirected-url", f.url)
-			}
-			f.body.pipe(res)
 		})
+			.then((f) => {
+				if (f.headers.has("location")) {
+					// Modify the location so the client continues to use the proxy
+					let newUrl = f.headers.get("location").replace(/^https?:\//, "")
+					f.headers.set("location", newUrl)
+				}
+				res.statusCode = f.status
+				for (let h of exposeHeaders) {
+					if (h === "content-length") continue
+					if (f.headers.has(h)) {
+						res.setHeader(h, f.headers.get(h))
+					}
+				}
+				if (f.redirected) {
+					res.setHeader("x-redirected-url", f.url)
+				}
+				f.body.pipe(res)
+			})
+			.catch((err) => {
+				console.error(err)
+				res.statusCode = 500
+				res.end()
+			})
 	}
 
 	const cors = microCors({
