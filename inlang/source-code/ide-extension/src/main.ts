@@ -19,7 +19,7 @@ import { closestInlangProject } from "./utilities/project/closestInlangProject.j
 import { recommendationBannerView } from "./utilities/recommendation/recommendation.js"
 import { telemetry } from "./services/telemetry/implementation.js"
 import { version } from "../package.json"
-import { showStatusBar } from "./utilities/settings/statusBar.js"
+import { statusBar } from "./utilities/settings/statusBar.js"
 
 // Entry Point
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
@@ -84,7 +84,7 @@ async function main(args: {
 		await projectView(args)
 		await messageView(args)
 		await errorView(args)
-		await showStatusBar()
+		await statusBar(args)
 
 		registerExtensionComponents(args)
 		// TODO: Replace by reactive settings API?
@@ -144,7 +144,6 @@ function registerExtensionComponents(args: {
 	messagePreview(args)
 	propertiesMissingPreview()
 	linterDiagnostics(args)
-	showStatusBar()
 }
 
 function handleInlangErrors() {

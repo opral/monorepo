@@ -386,7 +386,7 @@ export default function Page(props: {
 
 const Gallery = (props: { items: any; hideBuildYourOwn?: boolean }) => {
 	return (
-		<div class="mb-10 grid grid-cols-4 gap-4">
+		<div class="mb-10 grid md:grid-cols-2 lg:grid-cols-4 gap-4">
 			<Show when={props.items && props.items.length > 0}>
 				<For each={props.items}>
 					{(item) => {

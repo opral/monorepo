@@ -1,9 +1,7 @@
 name: Test ide-extension with E2E tests
 
 on:
-  pull_request:
-    branches:
-      - "main"
+  workflow_dispatch:
 
 jobs:
   test:
