@@ -8,10 +8,11 @@ import type { MiddlewareHandler } from "astro"
 
 export const onRequest: MiddlewareHandler = ({ url, locals, site }, next) => {
 	const locale = getLangFromPath(url.pathname)
+	const dir = guessTextDirection(locale)
 
 	locals.paraglide = {
 		lang: locale,
-		dir: "ltr",
+		dir,
 	}
 
 	setLanguageTag(locale)
@@ -24,4 +25,27 @@ function getLangFromPath(path: string) {
 	const langFromPath = getLocaleByPath(langOrPath || "")
 	if (isAvailableLanguageTag(langFromPath)) return langFromPath
 	return sourceLanguageTag
+}
+
+function guessTextDirection(lang: string): "ltr" | "rtl" {
+	try {
+		const locale = new Intl.Locale(lang)
+
+		// Node
+		if ("textInfo" in locale) {
+			// @ts-ignore
+			return locale.textInfo.direction
+		}
+
+		// Spec compliant (future proofing)
+		if ("getTextInfo" in locale) {
+			// @ts-ignore
+			return locale.getTextInfo().direction
+		}
+
+		// Fallback
+		return "ltr"
+	} catch (e) {
+		return "ltr"
+	}
 }
