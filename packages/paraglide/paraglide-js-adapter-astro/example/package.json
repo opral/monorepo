@@ -1,7 +1,7 @@
 {
   "name": "@inlang/paraglide-js-adapter-astro-example",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": "true",
   "scripts": {
     "_dev": "astro dev",
