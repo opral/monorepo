@@ -27,6 +27,12 @@ jobs:
         with:
           node-version: 20
 
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
       - name: Test Local Action
         id: test-action
         uses: ./inlang/source-code/github-lint-action
