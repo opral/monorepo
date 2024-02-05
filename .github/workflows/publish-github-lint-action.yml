@@ -1,4 +1,4 @@
-name: Publish lint action extension
+name: Publish lint action
 
 on:
   workflow_dispatch:
@@ -65,4 +65,4 @@ jobs:
           destination_folder: 'dist'
           user_email: 'hello@inlang.com'
           user_name: 'inlang-bot'
-          commit_message: 'Version: v${{ env.LINT_ACTION_PACKAGE_VERSION }} new relase of i18n-action'
+          commit_message: '[v${{ env.LINT_ACTION_PACKAGE_VERSION }}]: new release of i18n-action'
