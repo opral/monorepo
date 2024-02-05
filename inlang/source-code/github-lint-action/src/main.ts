@@ -10,6 +10,7 @@ import { loadProject } from "@inlang/sdk"
  * @returns {Promise<void>} Resolves when the action is complete.
  */
 export async function run(): Promise<void> {
+	core.debug("Running the action")
 	try {
 		const owner: string = core.getInput("owner", { required: true })
 		const repo: string = core.getInput("repo", { required: true })
@@ -40,7 +41,7 @@ export async function run(): Promise<void> {
 			repo: inlangRepo,
 			// appId: id,
 		})
-		console.log(project?.settings().toString())
+		core.debug(project?.settings().toString())
 
 		if (project.errors().length > 0) {
 			for (const error of project.errors()) {
@@ -48,8 +49,8 @@ export async function run(): Promise<void> {
 			}
 		}
 
-		console.log(`settings: ${project.settings()}`)
-		console.log(`messages:" ${project.query.messages.getAll()}`)
+		core.debug(`settings: ${project.settings()}`)
+		core.debug(`messages:" ${project.query.messages.getAll()}`)
 
 		// @ts-ignore
 		const octokit = new github.getOctokit(token)
@@ -60,7 +61,7 @@ export async function run(): Promise<void> {
 			pull_number: pr_number,
 		})
 
-		console.log(`I got changed files: ${changedFiles}`)
+		core.debug(`I got changed files: ${changedFiles}`)
 
 		let diffData = {
 			additions: 0,

@@ -1,6 +1,6 @@
-name: 'The name of your action here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'i18n lint action'
+description: 'This action checks for translation issues within your PRs.'
+author: 'inlang'
 
 # Define your inputs here.
 inputs:
