@@ -49,7 +49,7 @@ jobs:
         with:
           owner: ${{ github.repository_owner }}
           repo: ${{ github.repository }}
-          pull_number: ${{ github.event.pull_request.number }}
+          pr_number: ${{ github.event.pull_request.number }}
           token: ${{ secrets.GITHUB_TOKEN }}
           project_path: ./inlang/source-code/
 
