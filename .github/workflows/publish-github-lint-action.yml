@@ -1,0 +1,57 @@
+name: Publish lint action extension
+
+on:
+  workflow_dispatch:
+
+  push:
+    paths:
+      - "inlang/source-code/github-lint-action/package.json"
+    branches:
+      - main
+
+jobs:
+  copy-build-to-action-repo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install Doppler CLI for env variables
+        uses: dopplerhq/cli-action@v2
+
+      - name: Build
+        run: doppler run -- pnpm build
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
+
+      - name: Test
+        run: doppler run -- pnpm test
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
+
+      - name: Pushes build to action repo
+            uses: dmnemec/copy_file_to_another_repo_action@main
+            env:
+              API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+            with:
+              source_files: 'dist/index.js'
+              destination_repo: 'opral/i18n-action'
+              destination_folder: 'dist'
+              user_email: 'nils.jacobsen98@gmail.com'
+              user_name: 'NilsJacobsen'
+              commit_message: 'A custom message for the commit'
