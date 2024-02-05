@@ -1,9 +1,5 @@
----
-import { languageTag } from "$paraglide/runtime";
----
-
 <!doctype html>
-<html lang={languageTag()}>
+<html lang={Astro.locals.paraglide.lang} dir={Astro.locals.paraglide.dir}>
     <slot />
 </html>
 

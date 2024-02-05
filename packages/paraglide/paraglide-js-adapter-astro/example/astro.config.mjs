@@ -1,5 +1,5 @@
 import { sourceLanguageTag, availableLanguageTags } from "./src/paraglide/runtime.js"
-import { paraglide } from "@inlang/paraglide-js-adapter-astro"
+import paraglide from "@inlang/paraglide-js-adapter-astro"
 import { defineConfig } from "astro/config"
 import mdx from "@astrojs/mdx"
 import sitemap from "@astrojs/sitemap"

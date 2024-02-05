@@ -20,5 +20,8 @@
     },
     "peerDependencies": {
         "astro": "^4.0.0"
-    }
+    },
+    "keywords": [
+        "astro-integration"
+    ]
 }
