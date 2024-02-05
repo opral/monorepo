@@ -6,7 +6,7 @@ import {
 import { getLocaleByPath } from "astro:i18n"
 import type { MiddlewareHandler } from "astro"
 
-export const onRequest: MiddlewareHandler = ({ url, locals, site }, next) => {
+export const onRequest: MiddlewareHandler = ({ url, locals }, next) => {
 	const locale = getLangFromPath(url.pathname)
 	const dir = guessTextDirection(locale)
 
@@ -20,7 +20,7 @@ export const onRequest: MiddlewareHandler = ({ url, locals, site }, next) => {
 }
 
 function getLangFromPath(path: string) {
-	const [langOrPath] = path.split("/").filter(Boolean)
+	const langOrPath = path.split("/").find(Boolean)
 	if (isAvailableLanguageTag(langOrPath)) return langOrPath
 	const langFromPath = getLocaleByPath(langOrPath || "")
 	if (isAvailableLanguageTag(langFromPath)) return langFromPath
