@@ -22,13 +22,18 @@ jobs:
         id: checkout
         uses: actions/checkout@v4
 
+      - name: Setup Pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
       - name: Install Dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Build
         run: npm run build
