@@ -17,6 +17,7 @@
 	import { getTranslatedPath } from "./path-translations/getTranslatedPath.js"
 	import { translatePath } from "./path-translations/translatePath.js"
 	import type { I18n } from "./adapter.js"
+	import { get } from "svelte/store"
 
 	// The base path may be relative during SSR.
 	// To make sure it is absolute, we need to resolve it against the current page URL.
@@ -43,7 +44,7 @@
 	$: if (browser) document.documentElement.dir = i18n.config.textDirection[lang] ?? "ltr"
 
 	function translateHref(href: string, hreflang: string | undefined): string {
-		const from = new URL($page.url)
+		const from = new URL(get(page).url)
 		const original_to = new URL(href, new URL(from))
 
 		if (isExternal(original_to, from, absoluteBase)) {
