@@ -115,11 +115,12 @@ export async function run(): Promise<void> {
 		core.debug(`I got diffData: ${diffData}`)
 
 		const commentContent = `
-		Pull Request #${pr_number} has been updated with: \n
-		- ${diffData.changes} changes \n
-		- ${diffData.additions} additions \n
-		- ${diffData.deletions} deletions \n
-	`
+			Pull Request #${pr_number} has been updated with: \n
+			- ${diffData.changes} changes \n
+			- ${diffData.additions} additions \n
+			- ${diffData.deletions} deletions \n
+			- ${project.query.messages.getAll().length} inlang messages \n
+		`
 
 		await octokit.rest.issues.createComment({
 			owner,
@@ -127,7 +128,7 @@ export async function run(): Promise<void> {
 			issue_number: pr_number,
 			body: commentContent,
 		})
-		core.setOutput("comment-content", commentContent)
+		core.setOutput("comment_content", commentContent)
 	} catch (error) {
 		// Fail the workflow run if an error occurs
 		if (error instanceof Error) core.setFailed(error.message)

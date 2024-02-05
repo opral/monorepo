@@ -51,7 +51,6 @@ jobs:
           repo: ${{ github.repository }}
           pr_number: ${{ github.event.pull_request.number }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          project_path: ./inlang/source-code/
 
       - name: Print Output
         id: output
