@@ -1,0 +1,31 @@
+name: 'i18n lint action'
+description: 'This action checks for translation issues within your PRs.'
+author: 'inlang'
+
+# Define your inputs here.
+inputs:
+  owner:
+    description: 'Owner name'
+    required: true
+  repo:
+    description: 'Repo name'
+    required: true 
+  pr_number:
+    description: 'PR number'
+    required: true
+  token:
+    description: 'Your GitHub token'
+    required: true
+  project_path:
+    description: 'Project path'
+    required: false
+    default: './project.inlang'
+
+# Define your outputs here.
+outputs:
+  comment_content:
+    description: 'GitHub PR comment content'
+
+runs:
+  using: node20
+  main: dist/index.js
