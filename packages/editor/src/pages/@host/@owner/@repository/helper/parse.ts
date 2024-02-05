@@ -60,7 +60,19 @@ export const setTipTapMessage = (patterns: Pattern) => {
 		switch (pattern.type) {
 			case "Text":
 				if (pattern.value !== "") {
-					tiptap_nodes.push(getTextFromAstElement(pattern))
+					const textNodes = pattern.value.split(/(?=[\n])|(?<=[\n])/g)
+					textNodes.map((textNode) => {
+						if (textNode !== "\n") {
+							tiptap_nodes.push({
+								type: "text",
+								text: textNode,
+							})
+						} else {
+							tiptap_nodes.push({
+								type: "hardBreak",
+							})
+						}
+					})
 				}
 				break
 			case "VariableReference":
@@ -79,15 +91,6 @@ export const setTipTapMessage = (patterns: Pattern) => {
 		],
 	}
 	return tiptapObject
-}
-
-// TEXT
-
-const getTextFromAstElement = (pattern: Text) => {
-	return {
-		type: "text",
-		text: (pattern as Text | undefined)?.value,
-	}
 }
 
 // VARIABLE REFERENCE
