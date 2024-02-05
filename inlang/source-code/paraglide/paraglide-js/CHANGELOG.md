@@ -1,5 +1,11 @@
 # @inlang/paraglide-js
 
+## 1.2.3
+
+### Patch Changes
+
+- 4c26fa70a: bump dependencies
+
 ## 1.2.2
 
 ### Patch Changes
