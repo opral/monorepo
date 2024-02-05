@@ -59,8 +59,6 @@ const exampleMessages: Message[] = [
 
 async function setupProject(enabledLintRule?: MessageLintRule) {
 	const repo = await mockRepo()
-	// const fs = repo.nodeishFs
-
 	await fs.mkdir("project.inlang", { recursive: true })
 	await fs.writeFile(
 		"./project.inlang/settings.json",
@@ -140,7 +138,7 @@ describe("test", () => {
 					return "nilsjacobsen"
 				case "repo":
 					return "test-repo-for-action"
-				case "pr_number":
+				case "project_path":
 					return "1"
 				case "token":
 					return process.env.GITHUB_TOKEN || ""
