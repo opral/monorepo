@@ -32,6 +32,20 @@ You can ensure that your manifest is valid by loading the following schema.
 `readme`                 | The readme acts as documentation for your item and is written in markdown. Feel free to use github flavored markdown, additionally you use inlang's custom web components (doc-elements).                      |
 `keywords`                 | Keywords are always written in lowercase e.g. `i18n`, `adoptable` …                          |
 
+#### inlang ecosystem compatible badge
+
+Please use this badge in your `README.md` to show the your contributor that your software is inlang ecosystem compatible.
+
+```md
+[![badge](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/assets/md-badges/inlang.svg)](https://inlang.com)
+```
+
+##### Preview
+
+[![badge](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/assets/md-badges/inlang.svg)](https://inlang.com)
+
+---
+
 #### Custom web components
 
 #### `<doc-figure>`
