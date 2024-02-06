@@ -1,0 +1,31 @@
+{
+	"id": "app.inlang.githubI18nLintAction",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/cli/assets/cli-icon.png",
+	"gallery": [],
+	"displayName": {
+		"en": "GitHub i18n Lint Action"
+	},
+	"description": {
+		"en": "This action checks for translation issues within your PRs."
+	},
+	"readme": {
+		"en": "./inlang/source-code/github-lint-action/README.md"
+	},
+	"keywords": [
+		"developer",
+		"ci/cd",
+		"github",
+		"lint",
+		"action",
+		"application",
+		"website",
+		"translation",
+		"localization",
+		"i18n",
+		"inlang"
+	],
+	"pricing": "free",
+	"publisherName": "inlang",
+	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"license": "Apache-2.0"
+}

@@ -39,7 +39,7 @@ export async function run(): Promise<void> {
 		const project = await loadProject({
 			projectPath: project_path,
 			repo: inlangRepo,
-			// appId: id,
+			appId: "app.inlang.githubI18nLintAction",
 		})
 		core.debug(project?.settings().toString())
 
@@ -123,15 +123,16 @@ export async function run(): Promise<void> {
 			- ${project.query.messages.getAll().length} inlang messages \n
 		`
 
-		await octokit.rest.issues.createComment({
-			owner,
-			repo,
-			issue_number: pr_number,
-			body: commentContent,
-		})
+		// await octokit.rest.issues.createComment({
+		// 	owner,
+		// 	repo,
+		// 	issue_number: pr_number,
+		// 	body: commentContent,
+		// })
 		core.setOutput("comment_content", commentContent)
 	} catch (error) {
 		// Fail the workflow run if an error occurs
+		console.log(error)
 		if (error instanceof Error) core.setFailed(error.message)
 	}
 }
