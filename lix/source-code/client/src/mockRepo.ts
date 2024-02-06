@@ -3,6 +3,7 @@ import { createNodeishMemoryFs, fromSnapshot as loadSnapshot, type Snapshot } fr
 import isoGit from "isomorphic-git"
 // @ts-ignore
 // to load from json file JSON.parse(readFileSync("../mocks/ci-test-repo.json", { encoding: "utf-8" }))
+// TODO: allow json init support
 
 export async function mockRepo({ fromSnapshot }: { fromSnapshot?: Snapshot } = {}) {
 	const nodeishFs = createNodeishMemoryFs()
