@@ -4,7 +4,7 @@ import type { ImportFunction } from "../resolve-modules/index.js"
 import { createEffect, from, createRoot } from "../reactivity/solid.js"
 import { solidAdapter } from "./solidAdapter.js"
 import { loadProject } from "../loadProject.js"
-import { createNodeishMemoryFs } from "@lix-js/fs"
+import { mockRepo } from "@lix-js/client"
 import type {
 	Message,
 	ProjectSettings,
@@ -89,13 +89,14 @@ const $import: ImportFunction = async (name) => ({
 
 describe("config", () => {
 	it("should react to changes in config", async () => {
-		const fs = createNodeishMemoryFs()
+		const repo = await mockRepo()
+		const fs = repo.nodeishFs
 		await fs.mkdir("/user/project.inlang", { recursive: true })
 		await fs.writeFile("/user/project.inlang/settings.json", JSON.stringify(config))
 		const project = solidAdapter(
 			await loadProject({
 				projectPath: "/user/project.inlang",
-				nodeishFs: fs,
+				repo,
 				_import: $import,
 			}),
 			{ from }
@@ -122,13 +123,14 @@ describe("config", () => {
 
 describe("installed", () => {
 	it("react to changes that are unrelated to installed items", async () => {
-		const fs = createNodeishMemoryFs()
+		const repo = await mockRepo()
+		const fs = repo.nodeishFs
 		await fs.mkdir("/user/project.inlang", { recursive: true })
 		await fs.writeFile("/user/project.inlang/settings.json", JSON.stringify(config))
 		const project = solidAdapter(
 			await loadProject({
 				projectPath: "/user/project.inlang",
-				nodeishFs: fs,
+				repo,
 				_import: $import,
 			}),
 			{ from }
@@ -158,7 +160,8 @@ describe("installed", () => {
 
 describe("messages", () => {
 	it("should react to changes in config", async () => {
-		const fs = createNodeishMemoryFs()
+		const repo = await mockRepo()
+		const fs = repo.nodeishFs
 		const mockConfig: ProjectSettings = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
@@ -193,7 +196,7 @@ describe("messages", () => {
 		const project = solidAdapter(
 			await loadProject({
 				projectPath: "/user/project.inlang.inlang",
-				nodeishFs: fs,
+				repo,
 				_import: mockImport,
 			}),
 			{ from }
@@ -217,13 +220,14 @@ describe("messages", () => {
 	})
 
 	it("should react to changes in messages", async () => {
-		const fs = createNodeishMemoryFs()
+		const repo = await mockRepo()
+		const fs = repo.nodeishFs
 		await fs.mkdir("/user/project.inlang.inlang", { recursive: true })
 		await fs.writeFile("/user/project.inlang.inlang/settings.json", JSON.stringify(config))
 		const project = solidAdapter(
 			await loadProject({
 				projectPath: "/user/project.inlang.inlang",
-				nodeishFs: fs,
+				repo,
 				_import: $import,
 			}),
 			{ from }
@@ -279,13 +283,14 @@ describe("messages", () => {
 describe("lint", () => {
 	it.todo("should react to changes in config", async () => {
 		await createRoot(async () => {
-			const fs = createNodeishMemoryFs()
+			const repo = await mockRepo()
+			const fs = repo.nodeishFs
 			await fs.mkdir("./project.inlang", { recursive: true })
 			await fs.writeFile("./project.inlang/settings.json", JSON.stringify(config))
 			const project = solidAdapter(
 				await loadProject({
 					projectPath: "./project.inlang",
-					nodeishFs: fs,
+					repo,
 					_import: $import,
 				}),
 				{ from }
@@ -318,12 +323,13 @@ describe("lint", () => {
 
 	it.todo("should react to changes to messages", async () => {
 		await createRoot(async () => {
-			const fs = createNodeishMemoryFs()
+			const repo = await mockRepo()
+			const fs = repo.nodeishFs
 			await fs.writeFile("./project.config.json", JSON.stringify(config))
 			const project = solidAdapter(
 				await loadProject({
 					projectPath: "./project.config.json",
-					nodeishFs: fs,
+					repo,
 					_import: $import,
 				}),
 				{ from }

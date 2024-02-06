@@ -1,5 +1,32 @@
 # @inlang/paraglide-js
 
+## 1.2.3
+
+### Patch Changes
+
+- 4c26fa70a: bump dependencies
+
+## 1.2.2
+
+### Patch Changes
+
+- 613ef9877: fix: Bump `@lix-js/client` dependency
+
+## 1.2.1
+
+### Patch Changes
+
+- 74dc1f8c6: Update dependencies
+- 4ae6295d0: Detect when `paraglide-js init` is being run inside the VsCode terminal and skip the VsCode question if so
+- Updated dependencies [74ac11c47]
+  - @inlang/language-tag@1.4.0
+
+## 1.2.0
+
+### Minor Changes
+
+- 0f0e8496d: Throw runtime error if `languageTag()` returns a non-language tag value
+
 ## 1.1.1
 
 ### Patch Changes

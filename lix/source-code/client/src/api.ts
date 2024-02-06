@@ -15,6 +15,7 @@ export class LixError extends Error {
 	response?: { status?: number }
 }
 
+// TODO: return type of openRepository instead of seperate type defs
 export type Repository = {
 	// we dont want to add isogit to types but its required for teting comparison and debugging
 	[x: string]: any
@@ -37,7 +38,9 @@ export type Repository = {
 		Endpoints["POST /repos/{owner}/{repo}/merge-upstream"]["response"]["data"] | { error: any }
 	>
 	createFork: () => Promise<Endpoints["POST /repos/{owner}/{repo}/forks"]["response"]>
-	forkStatus: () => Promise<{ ahead: number; behind: number } | { error: string }>
+	forkStatus: () => Promise<
+		{ ahead: number; behind: number; conflicts: boolean } | { error: string }
+	>
 	getOrigin: (arg?: { safeHashOnly?: boolean }) => Promise<string>
 	getCurrentBranch: () => Promise<string | undefined>
 	getBranches: () => Promise<string[] | undefined>

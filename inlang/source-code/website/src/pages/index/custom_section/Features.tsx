@@ -6,7 +6,7 @@ import { registry } from "@inlang/marketplace-registry"
 const Features = () => {
 	const getProducts = () => [
 		"library.inlang.paraglideJs",
-		"app.inlang.editor",
+		"app.inlang.finkLocalizationEditor",
 		"app.inlang.ideExtension",
 		"app.inlang.cli",
 	]

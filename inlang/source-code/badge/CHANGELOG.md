@@ -1,5 +1,64 @@
 # @inlang/badge
 
+## 0.7.0
+
+### Minor Changes
+
+- 23a0f5ff8: add memory settings to nodejs
+
+## 0.6.1
+
+### Patch Changes
+
+- Updated dependencies [3bf94ddb5]
+  - @lix-js/client@0.8.0
+  - @inlang/sdk@0.26.1
+
+## 0.6.0
+
+### Minor Changes
+
+- edb7d145f: update svg renderer
+- 345c277f1: add badge error cache
+
+## 0.5.8
+
+### Patch Changes
+
+- Updated dependencies [676c0f905]
+  - @inlang/sdk@0.26.0
+
+## 0.5.7
+
+### Patch Changes
+
+- Updated dependencies [87bed968b]
+- Updated dependencies [23ca73060]
+  - @inlang/sdk@0.25.0
+
+## 0.5.6
+
+### Patch Changes
+
+- Updated dependencies [23ce3f0ea]
+  - @lix-js/client@0.7.0
+  - @inlang/sdk@0.24.1
+
+## 0.5.5
+
+### Patch Changes
+
+- Updated dependencies [c38faebce]
+  - @inlang/sdk@0.24.0
+  - @lix-js/client@0.6.0
+
+## 0.5.4
+
+### Patch Changes
+
+- Updated dependencies [b920761e6]
+  - @inlang/sdk@0.23.0
+
 ## 0.5.3
 
 ### Patch Changes

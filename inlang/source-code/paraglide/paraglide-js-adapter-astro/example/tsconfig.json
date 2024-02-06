@@ -3,7 +3,12 @@
 	"compilerOptions": {
 		"strictNullChecks": true,
 		"allowJs": true,
-		"moduleResolution": "Bundler"
+		"checkJs": true,
+		"moduleResolution": "Bundler",
+		"baseUrl": ".",
+		"paths": {
+			"$paraglide/*": ["./src/paraglide/*"]
+		}
 	},
 	"include": ["src", ".astro"]
 }

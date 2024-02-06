@@ -37,12 +37,16 @@
 	"[typescript]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	},
-	"cSpell.words": ["inlang"],
+	"cSpell.words": ["inlang", "vinxi"],
 	"[astro]": {
 		"editor.defaultFormatter": "astro-build.astro-vscode"
 	},
 	"[svg]": {
 		"editor.defaultFormatter": "jock.svg"
 	},
-	"testing.automaticallyOpenPeekView": "never"
+	"testing.automaticallyOpenPeekView": "never",
+	"git.mergeEditor": true,
+	"[xml]": {
+		"editor.defaultFormatter": "redhat.vscode-xml"
+	}
 }

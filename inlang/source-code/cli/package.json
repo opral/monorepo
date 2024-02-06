@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/cli",
-	"version": "2.4.0",
+	"version": "2.11.0",
 	"private": false,
 	"publishConfig": {
 		"access": "public"
@@ -31,13 +31,6 @@
 		"/bin",
 		"/dist"
 	],
-	"exports": {
-		"./src/utlilities/fs": "./src/utilities/fs/index.ts",
-		"./src/utlilities/format": "./src/utilities/format.ts",
-		"./src/utilities/getLanguageFolderPath": "./src/utilities/getLanguageFolderPath.ts",
-		"./src/utilities/getSupportedLibrary": "./src/utilities/getSupportedLibrary.ts",
-		"./src/utilities/getConfigContent": "./src/utilities/getConfigContent.ts"
-	},
 	"scripts": {
 		"dev": "node ./build.js",
 		"build": "cross-env NODE_ENV=production node ./build.js",
@@ -47,15 +40,6 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"devDependencies": {
-		"@inlang/create-project": "workspace:*",
-		"@inlang/env-variables": "workspace:*",
-		"@inlang/language-tag": "workspace:*",
-		"@inlang/result": "workspace:*",
-		"@inlang/rpc": "workspace:*",
-		"@inlang/sdk": "workspace:*",
-		"@inlang/telemetry": "workspace:*",
-		"@lix-js/fs": "workspace:*",
-		"@lix-js/client": "workspace:*",
 		"@sentry/node": "^7.64.0",
 		"@sinclair/typebox": "^0.31.17",
 		"@types/cli-progress": "^3.11.5",
@@ -72,15 +56,21 @@
 		"esbuild": "^0.19.2",
 		"isomorphic-git": "1.24.5",
 		"node-fetch": "^3.3.2",
-		"posthog-node": "^3.1.2",
 		"prompts": "^2.4.2",
 		"typescript": "5.2.2",
-		"vitest": "0.34.3"
+		"vitest": "0.34.3",
+		"@inlang/telemetry": "workspace:*",
+		"@inlang/rpc": "workspace:*"
 	},
 	"license": "Apache-2.0",
 	"__comment__": "the esbuild-wasm dependency must be a regular dependency to be resolved by the host system. otherwise, esbuild throws errors",
 	"dependencies": {
 		"esbuild-wasm": "^0.19.2",
-		"fs-extra": "11.1.1"
+		"fs-extra": "11.1.1",
+		"@inlang/language-tag": "workspace:*",
+		"@inlang/result": "workspace:*",
+		"@inlang/sdk": "workspace:*",
+		"@lix-js/fs": "workspace:*",
+		"@lix-js/client": "workspace:*"
 	}
 }

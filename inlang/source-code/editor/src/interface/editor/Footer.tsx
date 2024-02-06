@@ -38,7 +38,9 @@ const Footer = () => {
 			},
 			{
 				name: m.footer_documentation_title(),
-				href: "/documentation",
+				href: import.meta.env.PROD
+					? "https://inlang.com/documentation"
+					: "http://localhost:3000/documentation",
 			},
 		]
 	}
@@ -56,7 +58,10 @@ const Footer = () => {
 				name: m.footer_contact_feedback(),
 				href: "https://github.com/opral/monorepo/discussions/categories/feedback",
 			},
-			{ name: m.footer_contact_blog(), href: "/blog" },
+			{
+				name: m.footer_contact_blog(),
+				href: import.meta.env.PROD ? "https://inlang.com/blog" : "http://localhost:3000/blog",
+			},
 		]
 	}
 

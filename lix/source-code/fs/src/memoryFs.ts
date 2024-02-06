@@ -299,7 +299,7 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			path = normalPath(path)
 			const watchName = getBasename(path)
 			const watchDir = getDirname(path)
-			const watchPath = watchDir + watchName
+			const watchPath = watchName === "/" ? watchDir : watchDir + watchName
 
 			// @ts-ignore
 			if (options?.persistent || options?.encoding) {
@@ -315,7 +315,12 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 				rejecteNext = reject
 			})
 
-			const listener = (event: FileChangeInfo) => {
+			const listener = ({ eventType, filename }: FileChangeInfo) => {
+				const event: FileChangeInfo = {
+					eventType,
+					filename,
+				}
+
 				if (event.filename === null) {
 					throw new Error("Internal watcher error: missing filename")
 				}
@@ -326,13 +331,12 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 					event.filename = changeName
 					queue.push(event)
 					setTimeout(() => handleNext(undefined), 0)
-				} else if (changeDir === watchPath + "/") {
-					event.filename = event.filename.replace(watchPath + "/", "") || changeName
+				} else if (changeDir === `${watchPath}/`) {
+					event.filename = event.filename.replace(`${watchPath}/`, "") || changeName
 					queue.push(event)
 					setTimeout(() => handleNext(undefined), 0)
 				} else if (options?.recursive && event.filename.startsWith(watchPath)) {
-					// console.log(event.filename, { watchPath, changeDir, changeName })
-					event.filename = event.filename.replace(watchPath + "/", "") || changeName
+					event.filename = event.filename.replace(`${watchPath}/`, "") || changeName
 					queue.push(event)
 					setTimeout(() => handleNext(undefined), 0)
 				}
@@ -355,19 +359,24 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 				)
 			}
 
-			return (async function* () {
+			// inline async definition like "return (async function* () {" are not supported by the figma api
+			const asyncIterator = async function* () {
 				while (!options?.signal?.aborted) {
 					if (queue.length > 0) {
 						yield queue.shift() as FileChangeInfo
 					} else {
+						// eslint-disable-next-line no-await-in-loop
 						await changeEvent
+						// eslint-disable-next-line @typescript-eslint/no-loop-func
 						changeEvent = new Promise((resolve, reject) => {
 							handleNext = resolve
 							rejecteNext = reject
 						})
 					}
 				}
-			})()
+			}
+
+			return asyncIterator()
 		},
 
 		rmdir: async function (path: Parameters<NodeishFilesystem["rmdir"]>[0]) {

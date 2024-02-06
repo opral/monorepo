@@ -8,7 +8,7 @@
 		"en": "A plugin for inlang projects that works with i18next and reads + writes resources."
 	},
 	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/plugins/i18next/README.md"
+		"en": "./inlang/source-code/plugins/i18next/README.md"
 	},
 	"keywords": [
 		"i18next",
@@ -21,7 +21,10 @@
 		"import",
 		"export",
 		"messages",
-		"plugin"
+		"plugin",
+		"svelte",
+		"solid",
+		"astro"
 	],
 	"recommends": ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g", "m/gerre34r"],
 	"publisherName": "inlang",

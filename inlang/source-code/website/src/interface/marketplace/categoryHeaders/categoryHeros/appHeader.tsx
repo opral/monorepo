@@ -5,7 +5,7 @@ import { For, Match, Show, Switch } from "solid-js"
 
 const AppHeader = () => {
 	const getProducts = () => [
-		"app.inlang.editor",
+		"app.inlang.finkLocalizationEditor",
 		"app.inlang.ideExtension",
 		"app.parrot.figmaPlugin",
 	]
@@ -13,7 +13,7 @@ const AppHeader = () => {
 	// const data: Array<DataItem> = [
 	// 	{
 	// 		title: "Fink – Message editor",
-	// 		link: "/m/tdozzpar/app-inlang-editor",
+	// 		link: "/m/tdozzpar/app-inlang-finkLocalizationEditor",
 	// 		description:
 	// 			"The Fink message editor enables you to work with globalized codebases in your browser...",
 	// 		pricing: "Free Beta",
@@ -71,7 +71,7 @@ const AppHeader = () => {
 							>
 								<div class="w-full h-[200px] overflow-hidden">
 									<Switch>
-										<Match when={manifest.id === "app.inlang.editor"}>
+										<Match when={manifest.id === "app.inlang.finkLocalizationEditor"}>
 											<img
 												class="group-hover:scale-105 h-full w-full bg-surface-400 object-cover transition-all duration-500"
 												src={"/images/fink-cover.png"}
@@ -106,12 +106,6 @@ const AppHeader = () => {
 											<div class="w-full font-bold text-surface-900 tracking-tight">
 												{displayName()}
 											</div>
-											<div class="w-full flex flex-row gap-2 items-center">
-												<InlangBadge />
-												<div class="flex-1 text-sm text-primary font-medium">
-													inlang ecosystem compatible
-												</div>
-											</div>
 										</div>
 									</div>
 									<div class="text-surface-500 text-md font-regular line-clamp-2">
@@ -141,9 +135,6 @@ const AppHeader = () => {
 					}}
 				</For>
 			</div>
-			<h2 class="pb-4 border-t-surface-200 text-xl font-medium tracking-tight text-surface-900">
-				All Apps
-			</h2>
 		</>
 	)
 }

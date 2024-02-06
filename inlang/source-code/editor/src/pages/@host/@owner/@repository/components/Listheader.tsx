@@ -3,8 +3,8 @@ import { For, Show, createMemo } from "solid-js"
 import { showFilteredMessage } from "./../helper/showFilteredMessage.js"
 import { TourHintWrapper } from "./Notification/TourHintWrapper.jsx"
 import IconArrowLeft from "~icons/material-symbols/arrow-back-rounded"
+import IconAdd from "~icons/material-symbols/add"
 import { type InstalledMessageLintRule, type MessageLintRule } from "@inlang/sdk"
-import { navigate } from "vike/client/router"
 
 export const messageCount = (ids: string[]) => {
 	const { project } = useEditorState()
@@ -62,7 +62,7 @@ export const ListHeader = () => {
 			.find((rule) => rule.id === lintRuleId)
 
 	return (
-		<div class="w-full bg-background border border-surface-3 rounded-t-md flex flex-wrap items-center justify-between gap-2 p-4">
+		<div class="w-full bg-background border border-surface-3 rounded-t-md flex flex-wrap items-center justify-between gap-2 p-4 animate-blendIn">
 			<Show
 				when={filteredId() === ""}
 				fallback={
@@ -113,9 +113,9 @@ export const ListHeader = () => {
 										class={
 											filteredMessageLintRules()?.includes(lintRule || "")
 												? getLintRule(lintRule)!.level === "warning"
-													? "ring-warning/20 ring-1 rounded"
-													: "ring-danger/20 ring-1 rounded"
-												: ""
+													? "ring-warning/20 ring-1 rounded animate-blendIn"
+													: "ring-danger/20 ring-1 rounded animate-blendIn"
+												: "animate-blendIn"
 										}
 										onClick={() => {
 											if (filteredMessageLintRules().includes(lintRule)) {
@@ -161,31 +161,39 @@ export const ListHeader = () => {
 						</Show>
 					)}
 				</For>
-				<Show when={project()?.installed.messageLintRules().length === 0}>
-					<TourHintWrapper
-						currentId="missing-lint-rules"
-						position="bottom-right"
-						offset={{ x: 0, y: 40 }}
-						isVisible={tourStep() === "missing-lint-rules"}
+				<TourHintWrapper
+					currentId="missing-lint-rules"
+					position="bottom-right"
+					offset={{ x: 0, y: 40 }}
+					isVisible={tourStep() === "missing-lint-rules"}
+				>
+					<sl-tooltip
+						prop:content={
+							"Install lint rules from the marketplace. They will help you write better translations."
+						}
+						prop:placement="bottom"
+						prop:trigger="hover"
+						style={{ "--show-delay": "1s" }}
 					>
-						<sl-tooltip
-							prop:content={
-								"Install lint rules from the marketplace. They will help you write better translations."
+						<sl-button
+							prop:size="small"
+							prop:href={
+								import.meta.env.PROD
+									? "https://inlang.com/c/lint-rules"
+									: "http://localhost:3000/c/lint-rules"
 							}
-							prop:placement="bottom"
-							prop:trigger="hover"
-							style={{ "--show-delay": "1s" }}
+							prop:target="_blank"
 						>
-							<sl-button
-								prop:size="small"
-								// @ts-ignore
-								onClick={() => navigate("/c/lint-rules")}
-							>
+							<Show when={project()?.installed.messageLintRules().length === 0}>
 								Install lint rules
-							</sl-button>
-						</sl-tooltip>
-					</TourHintWrapper>
-				</Show>
+							</Show>
+							<Show when={project()?.installed.messageLintRules().length !== 0}>
+								{/* @ts-ignore */}
+								<IconAdd slot="prefix" class="w-5 h-5 -mx-1" />
+							</Show>
+						</sl-button>
+					</sl-tooltip>
+				</TourHintWrapper>
 			</div>
 		</div>
 	)

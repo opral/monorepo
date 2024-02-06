@@ -25,7 +25,7 @@ This will have done a few things:
 - Added the required devDependencies to your `package.json`
 - Added the paraglide compiler to your `package.json` build scripts
 
-It's recommended to also modify your `dev` command to include the `paraglide compile` command. This will cause the compiler to re-run whenever your messages change.
+It's recommended to also modify your `dev` command to include the `paraglide-js compile` command. This will cause the compiler to re-run whenever your messages change.
 
 ```json
 // package.json

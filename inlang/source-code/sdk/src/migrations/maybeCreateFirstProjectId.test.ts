@@ -18,7 +18,7 @@ it("should return if repo is undefined", async () => {
 
 it("should generate a project id", async () => {
 	const projectId = await generateProjectId({ repo, projectPath: "mocked_project_path" })
-	expect(projectId).toBe("959bcf0a30e678c9b90a3c76d1a281d085eab55f289c5439b6b10849baa1920c")
+	expect(projectId).toBe("432d7ef29c510e99d95e2d14ef57a0797a1603859b5a851b7dff7e77161b8c08")
 })
 
 it("should return undefined if repoMeta contains error", async () => {

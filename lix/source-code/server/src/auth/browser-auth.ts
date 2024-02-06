@@ -23,7 +23,7 @@ const githubAppClientId = publicEnv.PUBLIC_LIX_GITHUB_APP_CLIENT_ID
 // TODO: later use url with default instead of env var: args: { url?: string }
 export async function login() {
 	const loginWindow = window.open(
-		`https://github.com/login/oauth/authorize?client_id=${githubAppClientId}`,
+		`https://github.com/login/oauth/authorize?client_id=${githubAppClientId}`, // &redirect_uri=${
 		"_blank"
 	)
 

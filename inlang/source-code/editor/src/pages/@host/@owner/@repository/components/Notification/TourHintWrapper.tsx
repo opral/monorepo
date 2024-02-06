@@ -7,6 +7,7 @@ export type TourStepId =
 	| "missing-lint-rules"
 	| "missing-translation-rule"
 	| "textfield"
+	| "none"
 
 export type Position = "top-right" | "top-left" | "bottom-right" | "bottom-left"
 
@@ -164,8 +165,8 @@ const ForkRepository = () => {
 				/>
 			</div>
 			<div class="pt-2 pb-1 px-1 flex flex-col gap-1">
-				<p class="text-sm font-medium text-info-on-inverted-container">No access on this repo</p>
-				<p>Please fork it to make changes.</p>
+				<p class="text-sm font-medium text-info-on-inverted-container">No access to this repo</p>
+				<p>Please use a fork to make changes.</p>
 				<p
 					onClick={() => setLocalStorage("isFirstUse", false)}
 					class="cursor-pointer pt-2 text-primary-on-inverted-container"

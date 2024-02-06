@@ -32,7 +32,51 @@ You can ensure that your manifest is valid by loading the following schema.
 `readme`                 | The readme acts as documentation for your item and is written in markdown. Feel free to use github flavored markdown, additionally you use inlang's custom web components (doc-elements).                      |
 `keywords`                 | Keywords are always written in lowercase e.g. `i18n`, `adoptable` …                          |
 
-#### Custom web components
+### 2. Writing your readme
+
+#### ❗ Please note
+
+It is completely up to you how you want to style your product pages. This is just an inspiration for you to get started.
+
+#### How we at inlang style product pages
+
+We are using an engaging header image with up to three key features of the product. If it is important to the product, we introduce a `Getting started` section beforehand. 
+
+![How we style product pages at inlang](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/styleguide-mockup.svg)
+
+Of course styling product pages can change from time to time. If you have any questions regarding this, please reach out to us on [Discord](https://discord.com/invite/gdMPPWy57R).
+
+### 3. Add the link to your marketplace manifest to the registry
+
+Please note that you need to include a key of a 8 character long random string. You can generate one [here](https://passwordsgenerator.net/). Allowed are numbers and lowercase letters. This key is necessary for the marketplace to identify your item.
+
+If you are publishing an app, plugin or lint rule, you can add your product to the "m" category.
+
+Add the raw link of your manifest to [this file](https://github.com/opral/monorepo/blob/main/inlang/source-code/marketplace-registry/registry.json). You can fork the repository to do so.
+
+### 4. Create a pull request and wait for approval
+
+Create a pull request with your changes and wait for approval from our team. Usually, this will take less than 24 hours. After that, your item will be available in the marketplace.
+
+Feel free to [join our Discord](https://discord.gg/gdMPPWy57R) if you have any questions or need help with publishing your item.
+
+## Markdown assets
+
+### inlang ecosystem compatible badge
+
+Please use this badge in your `README.md` to show the your contributor that your software is inlang ecosystem compatible.
+
+```md
+[![badge](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/assets/md-badges/inlang.svg)](https://inlang.com)
+```
+
+##### Preview
+
+[![badge](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/assets/md-badges/inlang.svg)](https://inlang.com)
+
+---
+
+### Custom web components
 
 #### `<doc-figure>`
 
@@ -135,30 +179,4 @@ Attributes:
 ##### Preview
 <doc-accordion heading="Question" text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, diam quis aliquam ultricies, nisl nunc ultricies nunc, vitae ultrices nisl nunc eu nunc."></doc-accordion>
 
-### Writing your readme
 
-#### ❗ Please note
-
-It is completely up to you how you want to style your product pages. This is just an inspiration for you to get started.
-
-#### How we at inlang style product pages
-
-We are using an engaging header image with up to three key features of the product. If it is important to the product, we introduce a `Getting started` section beforehand. 
-
-![How we style product pages at inlang](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/styleguide-mockup.svg)
-
-Of course styling product pages can change from time to time. If you have any questions regarding this, please reach out to us on [Discord](https://discord.com/invite/gdMPPWy57R).
-
-### 2. Add the link to your marketplace manifest to the registry
-
-Please note that you need to include a key of a 8 character long random string. You can generate one [here](https://passwordsgenerator.net/). Allowed are numbers and lowercase letters. This key is necessary for the marketplace to identify your item.
-
-If you are publishing an app, plugin or lint rule, you can add your product to the "m" category.
-
-Add the raw link of your manifest to [this file](https://github.com/opral/monorepo/blob/main/inlang/source-code/marketplace-registry/registry.json). You can fork the repository to do so.
-
-### 3. Create a pull request and wait for approval
-
-Create a pull request with your changes and wait for approval from our team. Usually, this will take less than 24 hours. After that, your item will be available in the marketplace.
-
-Feel free to [join our Discord](https://discord.gg/gdMPPWy57R) if you have any questions or need help with publishing your item.

@@ -1,5 +1,11 @@
 # @lix-js/fs
 
+## 0.6.0
+
+### Minor Changes
+
+- c38faebce: release fixed project id and catchup missed releases for cli and lix
+
 ## 0.5.0
 
 ### Minor Changes

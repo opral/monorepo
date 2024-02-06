@@ -1,5 +1,12 @@
 # @inlang/marketplace-manifest
 
+## 1.3.1
+
+### Patch Changes
+
+- @inlang/project-settings@2.2.1
+- @inlang/translatable@1.2.1
+
 ## 1.3.0
 
 ### Minor Changes

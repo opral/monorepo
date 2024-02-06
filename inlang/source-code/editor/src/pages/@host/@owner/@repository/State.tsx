@@ -11,6 +11,7 @@ import {
 	type Setter,
 	useContext,
 	type Accessor,
+	on,
 } from "solid-js"
 import type { EditorRouteParams, EditorSearchParams } from "./types.js"
 import type { LocalStorageSchema } from "#src/services/local-storage/index.js"
@@ -30,16 +31,31 @@ import {
 } from "@inlang/sdk"
 import { posthog as telemetryBrowser } from "posthog-js"
 import type { Result } from "@inlang/result"
+import { id } from "../../../../../marketplace-manifest.json"
 
 type EditorStateSchema = {
 	/**
 	 * Returns a repository object
 	 */
 	repo: () => Repository | undefined
+	/**
+	 * Refetch the repository.
+	 */
+	refetchRepo: () => void
+	/**
+	 * Fork status of the repository.
+	 */
 
+	forkStatus: () => { ahead: number; behind: number; conflicts: boolean }
+	/**
+	 * Refetch the fork status.
+	 */
+	refetchForkStatus: () => void
 	/**
 	 * The current branch.
 	 */
+	mutateForkStatus: (args: { ahead: number; behind: number; conflicts: boolean }) => void
+
 	currentBranch: Resource<string | undefined>
 	/**
 	 * The branch names of current repo.
@@ -48,6 +64,7 @@ type EditorStateSchema = {
 	/**
 	 * Additional information about a repository provided by GitHub.
 	 */
+
 	githubRepositoryInformation: Resource<Awaited<ReturnType<Repository["getMeta"]>> | undefined>
 	/**
 	 * Route parameters like `/github.com/inlang/website`.
@@ -179,7 +196,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	const [fsChange, setFsChange] = createSignal(new Date())
 
-	const [tourStep, setTourStep] = createSignal<TourStepId>("github-login")
+	const [tourStep, setTourStep] = createSignal<TourStepId>("none")
 
 	/**
 	 *  Date of the last push to the Repo
@@ -227,7 +244,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			setSearchParams({ key: "branch", value: branch })
 		}
 	})
-	const [repo] = createResource(
+	const [repo, { refetch: refetchRepo }] = createResource(
 		() => {
 			return { routeParams: routeParams(), user: localStorage.user, branch: activeBranch() }
 		},
@@ -246,6 +263,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					if (newRepo.errors().length > 0) {
 						setLixErrors(newRepo.errors())
 						return
+					} else {
+						setLixErrors([])
 					}
 
 					// @ts-expect-error
@@ -267,6 +286,25 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	repo()?.errors.subscribe((errors) => {
 		setLixErrors(errors)
 	})
+
+	const [forkStatus, { refetch: refetchForkStatus, mutate: mutateForkStatus }] = createResource(
+		() => {
+			if (repo()) {
+				return repo()
+			} else {
+				return false
+			}
+		},
+		async (args) => {
+			const value = await args.forkStatus()
+			if ("error" in value) {
+				return { ahead: 0, behind: 0, conflicts: false }
+			} else {
+				return value
+			}
+		},
+		{ initialValue: { ahead: 0, behind: 0, conflicts: false } }
+	)
 
 	const [projectList] = createResource(
 		() => {
@@ -317,13 +355,13 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					await loadProject({
 						repo: newRepo,
 						projectPath: activeProject!,
-						_capture(id, props) {
-							telemetryBrowser.capture(id, props)
-						},
+						appId: id,
 					}),
 					{ from }
 				)
-
+				if (project.id) {
+					telemetryBrowser.group("project", project.id)
+				}
 				telemetryBrowser.capture("EDITOR cloned repository", {
 					userPermission: userIsCollaborator() ? "iscollaborator" : "isNotCollaborator",
 				})
@@ -351,9 +389,11 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	//the effect should skip tour guide steps if not needed
 	createEffect(() => {
-		if (localStorage?.user?.isLoggedIn === false) {
+		if (localStorage?.user === undefined || userIsCollaborator.loading) {
+			setTourStep("none")
+		} else if (localStorage?.user?.isLoggedIn === false) {
 			setTourStep("github-login")
-		} else if (!userIsCollaborator()) {
+		} else if (userIsCollaborator() === false) {
 			setTourStep("fork-repository")
 		} else if (tourStep() === "fork-repository" && project()) {
 			if (project()?.installed.messageLintRules().length === 0) {
@@ -372,7 +412,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	})
 
-	const [githubRepositoryInformation, { refetch }] = createResource(
+	const [githubRepositoryInformation, { refetch: refetchRepoInfo }] = createResource(
 		() => {
 			if (
 				localStorage?.user === undefined ||
@@ -393,9 +433,25 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	)
 
-	createEffect(() => {
-		if (localStorage?.user?.isLoggedIn) refetch()
-	})
+	const [previousLoginStatus, setPreviousLoginStatus] = createSignal(localStorage?.user?.isLoggedIn)
+	createEffect(
+		on(
+			() => localStorage.user?.isLoggedIn,
+			() => {
+				const isLoggedIn = localStorage?.user?.isLoggedIn
+				if (previousLoginStatus() === false && isLoggedIn) {
+					if (!repo.loading && repo() === undefined) {
+						// Refetch private repo after login
+						refetchRepo()
+					} else if (!githubRepositoryInformation.loading) {
+						// Refetch public repo info after login
+						refetchRepoInfo()
+					}
+				}
+				setPreviousLoginStatus(isLoggedIn)
+			}
+		)
+	)
 
 	const [currentBranch] = createResource(
 		() => {
@@ -459,6 +515,10 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			value={
 				{
 					repo: repo,
+					refetchRepo,
+					forkStatus,
+					mutateForkStatus,
+					refetchForkStatus,
 					currentBranch,
 					branchNames,
 					githubRepositoryInformation,

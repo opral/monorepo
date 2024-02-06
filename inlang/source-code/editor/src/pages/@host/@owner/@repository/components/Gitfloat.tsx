@@ -19,9 +19,16 @@ import {
 	setSignInModalOpen,
 	signInModalOpen,
 } from "#src/services/auth/src/components/SignInDialog.jsx"
+import { WarningIcon } from "./Notification/NotificationHint.jsx"
+import IconArrowDownward from "~icons/material-symbols/arrow-downward-alt"
 
 export const Gitfloat = () => {
 	const {
+		repo,
+		refetchRepo,
+		forkStatus,
+		mutateForkStatus,
+		refetchForkStatus,
 		userIsCollaborator,
 		githubRepositoryInformation,
 		currentBranch,
@@ -29,7 +36,6 @@ export const Gitfloat = () => {
 		setLocalChanges,
 		setFsChange,
 		routeParams,
-		repo,
 		setLastPullTime,
 		tourStep,
 		project,
@@ -40,15 +46,17 @@ export const Gitfloat = () => {
 
 	// ui states
 	const gitState: () => "login" | "loading" | "fork" | "pullrequest" | "hasChanges" = () => {
-		const repoInfo = githubRepositoryInformation()
+		// type check for githubRepositoryInformation
+		// eslint-disable-next-line prefer-const
+		let repoInfo = githubRepositoryInformation()
+		const isFork = () => (repoInfo && "isFork" in repoInfo ? repoInfo.isFork : false)
 
 		if (localStorage?.user === undefined) {
 			return "loading"
 		} else if (localStorage?.user?.isLoggedIn === false) {
 			return "login"
 		} else if (
-			typeof repoInfo === "undefined" ||
-			"error" in repoInfo ||
+			typeof githubRepositoryInformation() === "undefined" ||
 			userIsCollaborator.loading ||
 			!projectList() ||
 			isForking()
@@ -56,7 +64,7 @@ export const Gitfloat = () => {
 			return "loading"
 		} else if (userIsCollaborator() === false) {
 			return "fork"
-		} else if (hasPushedChanges() && localChanges() === 0 && repoInfo.isFork) {
+		} else if (hasPushedChanges() && localChanges() === 0 && isFork()) {
 			// if changes exist in a fork, show the pull request button
 			return "pullrequest"
 		}
@@ -66,15 +74,24 @@ export const Gitfloat = () => {
 
 	const [isLoading, setIsLoading] = createSignal(false)
 	const [isForking, setIsForking] = createSignal(false)
+	const [isMerging, setIsMerging] = createSignal(false)
 	const [hasPushedChanges, setHasPushedChanges] = createSignal(false)
 
 	let signInDialog: SlDialog | undefined
 	let forkPermissionDialog: SlDialog | undefined
 	let pushPermissionDialog: SlDialog | undefined
+	let forkDialog: SlDialog | undefined
+	const [forkModalOpen, setForkModalOpen] = createSignal(false)
 
 	createEffect(() => {
 		if (signInModalOpen()) {
 			signInDialog?.show()
+		}
+	})
+
+	createEffect(() => {
+		if (forkModalOpen()) {
+			forkDialog?.show()
 		}
 	})
 
@@ -95,9 +112,11 @@ export const Gitfloat = () => {
 		if (response?.status === 202) {
 			showToast({
 				variant: "success",
-				title: "The Fork has been created.",
+				title: "Fork opened successfully.",
 				message: `Don't forget to open a pull request`,
 			})
+			// reset localChanges counter, as changes are not transferred to the fork
+			setLocalChanges(0)
 
 			setTimeout(() => {
 				// @ts-expect-error - type mismatch fix after refactoring
@@ -247,6 +266,39 @@ export const Gitfloat = () => {
 		},
 	}
 
+	// prevent user from making to changes when not logged in
+	createEffect(() => {
+		if (gitState() === "login" && localChanges() > 2) setSignInModalOpen(true)
+	})
+
+	createEffect(() => {
+		if (gitState() === "fork" && localChanges() > 2) setForkModalOpen(true)
+	})
+
+	// prevent user from leaving the page when changes are not pushed
+	const beforeUnloadHandler = (event: BeforeUnloadEvent) => {
+		event.preventDefault()
+		event.returnValue = ""
+	}
+
+	// remove event listener when navigating away
+	const popstateHandler = (event: BeforeUnloadEvent) => {
+		event.preventDefault()
+		window.removeEventListener("beforeunload", beforeUnloadHandler)
+		window.removeEventListener("popstate", popstateHandler)
+	}
+
+	createEffect(() => {
+		if (localChanges() > 0) {
+			window.addEventListener("beforeunload", beforeUnloadHandler)
+			window.addEventListener("popstate", popstateHandler)
+		} else {
+			window.removeEventListener("beforeunload", beforeUnloadHandler)
+			window.removeEventListener("popstate", popstateHandler)
+		}
+	})
+
+	// animations
 	onMount(() => {
 		const gitfloat = document.querySelector(".gitfloat")
 		gitfloat?.classList.add("animate-slideIn")
@@ -261,7 +313,28 @@ export const Gitfloat = () => {
 		}
 	})
 
-	// wait until fork fetch is done
+	createEffect(() => {
+		if (
+			forkStatus().behind > 0 &&
+			(tourStep() !== "github-login" || tourStep() !== "fork-repository")
+		) {
+			const gitfloat = document.querySelector(".syncfork")
+			gitfloat?.classList.remove("hidden")
+			gitfloat?.classList.add("animate-slideInFromBehind", "-z-10")
+			setTimeout(() => gitfloat?.classList.remove("animate-slideInFromBehind", "-z-10"), 400)
+		}
+	})
+
+	createEffect(() => {
+		if (!isMerging()) {
+			const gitfloat = document.querySelector(".syncfork")
+			gitfloat?.classList.add("animate-slideOutFromBehind", "-z-10")
+			setTimeout(() => gitfloat?.classList.remove("animate-slideOutFromBehind", "-z-10"), 400)
+			setTimeout(() => gitfloat?.classList.add("hidden"), 400)
+		}
+	})
+
+	// wait until fork fetch is done and user is collaborator
 	createEffect(
 		on(userIsCollaborator, () => {
 			if (userIsCollaborator()) {
@@ -289,32 +362,73 @@ export const Gitfloat = () => {
 						lixErrors().length === 0
 					}
 				>
-					<div class="w-full flex justify-start items-center rounded-lg bg-inverted-surface shadow-xl ">
+					<Show
+						when={
+							forkStatus() &&
+							forkStatus().behind > 0 &&
+							!forkStatus().conflicts &&
+							userIsCollaborator()
+						}
+					>
+						<div class="syncfork w-full relative flex justify-start items-center gap-1.5 rounded-t-lg bg-[#293344] p-1.5 text-xs font-medium text-on-inverted-surface after:content-[''] after:absolute after:w-full after:h-8 after:translate-y-6 after:-m-1.5 after:bg-[#293344] after:-z-10">
+							<div class="text-warning-on-inverted-container px-1.5 py-[5px]">
+								<WarningIcon />
+							</div>
+							Get new project changes
+							<sl-button
+								prop:size="small"
+								onClick={async () => {
+									setIsMerging(true)
+									await repo()?.mergeUpstream()
+									refetchRepo()
+									setIsMerging(false)
+									setTimeout(() => {
+										// optimistic reset
+										mutateForkStatus({ ...forkStatus(), behind: 0, conflicts: false })
+										refetchForkStatus()
+									}, 400)
+								}}
+								prop:loading={isMerging()}
+								class="ml-auto on-inverted"
+							>
+								{/* @ts-ignore */}
+								<IconArrowDownward slot="prefix" class="w-6 h-6 -mx-1 opacity-90" />
+								<span class="opacity-90">{forkStatus().behind}</span>
+							</sl-button>
+						</div>
+					</Show>
+					<div class="w-full flex justify-start items-center rounded-lg bg-inverted-surface shadow-xl z-20">
 						<Show when={loggedInUser(localStorage.user)}>
 							{(user) => (
-								<div class="flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 relative gap-2 p-1.5 rounded-tl-lg rounded-bl-lg border-t-0 border-r border-b-0 border-l-0 border-background/10">
+								<div class="absolute flex justify-start items-center self-stretch flex-grow-0 flex-shrink-0 gap-2 p-1.5 rounded-tl-lg rounded-bl-lg border-t-0 border-r border-b-0 border-l-0 border-background/10 animate-blendIn">
 									<img
 										src={user().avatarUrl}
 										alt="user avatar"
-										class="flex-grow-0 flex-shrink-0 w-[30px] h-[30px] rounded object-cover bg-on-inverted-surface"
+										class="flex-grow-0 flex-shrink-0 w-[30px] h-[30px] rounded object-cover bg-on-inverted-surface animate-fadeIn"
 									/>
 								</div>
 							)}
 						</Show>
 						<div
 							class={
-								"flex justify-start items-center self-stretch flex-grow relative gap-2 pr-1.5 py-1.5 " +
-								(gitState() === "pullrequest" ? "pl-1.5" : "pl-3")
+								"flex justify-start items-center self-stretch flex-grow relative gap-2 pr-1.5 py-1.5 transition-all duration-200 " +
+								(gitState() === "pullrequest" ? "pl-1.5 " : "pl-3 ") +
+								(loggedInUser(localStorage.user) && "ml-11")
 							}
 						>
 							<p
 								class={
-									"flex items-center gap-2 flex-grow text-xs font-medium text-left text-on-inverted-surface " +
+									"flex items-center gap-2 flex-grow text-xs font-medium text-left text-on-inverted-surface transition-all duration-200 " +
 									(gitState() === "pullrequest" && "hidden")
 								}
 							>
 								<Show when={gitState() === "hasChanges"}>
-									<div class="flex flex-col justify-center items-center flex-grow-0 flex-shrink-0 h-5 w-5 relative gap-2 p-2 rounded bg-info">
+									<div
+										class={
+											"flex flex-col justify-center items-center flex-grow-0 flex-shrink-0 h-5 min-w-[1.25rem] gap-2 py-2 px-1 rounded bg-info " +
+											(gitState() === "hasChanges" && "animate-fadeIn")
+										}
+									>
 										<p class="flex-grow-0 flex-shrink-0 text-xs font-medium text-left text-slate-100">
 											{localChanges()}
 										</p>
@@ -329,7 +443,7 @@ export const Gitfloat = () => {
 								prop:target="_blank"
 								prop:loading={isLoading() || gitState() === "loading"}
 								prop:disabled={localChanges() === 0 && gitState() === "hasChanges"}
-								class={"on-inverted " + (gitState() === "pullrequest" && "grow")}
+								class={"on-inverted " + (gitState() === "pullrequest" ? "grow " : "w-[76.8px]")}
 							>
 								{data[gitState()].buttontext}
 								<div slot="suffix">{data[gitState()].icon()}</div>
@@ -364,6 +478,32 @@ export const Gitfloat = () => {
 					pushPermissionDialog?.hide()
 				}}
 			/>
+			<sl-dialog
+				ref={forkDialog!}
+				on:sl-show={() => setForkModalOpen(true)}
+				on:sl-after-hide={() => setForkModalOpen(false)}
+			>
+				<h3 slot="label">No access to this repo</h3>
+				<p>
+					To push changes, you must use a fork of this repository and submit changes with a pull
+					request. If you already have one, this will be opened, otherwise a new fork will be
+					created for you.
+				</p>
+				<sl-button
+					slot="footer"
+					prop:variant="primary"
+					onClick={() => {
+						handleFork()
+						forkDialog?.hide()
+						setForkModalOpen(false)
+					}}
+				>
+					<div slot="prefix">
+						<IconFork />
+					</div>
+					Open fork
+				</sl-button>
+			</sl-dialog>
 		</>
 	)
 }

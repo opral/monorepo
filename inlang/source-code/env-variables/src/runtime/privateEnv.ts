@@ -10,7 +10,7 @@ import type { AllEnvVariables } from "../api.js"
 export const privateEnv: AllEnvVariables = getPrivateEnvVariables()
 
 function getPrivateEnvVariables(): AllEnvVariables {
-	if (typeof process === "undefined") {
+	if (typeof process === "undefined" || typeof process.cwd === "undefined") {
 		// mock privateEnv for the browser (if import is not tree-shaken)
 		return new Proxy(
 			{},

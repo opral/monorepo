@@ -250,6 +250,7 @@ sl-button[variant="default"]::part(base):hover {
 sl-button.on-inverted::part(base) {
 	background-color: theme(colors.on-inverted-surface);
 	color: theme(colors.inverted-surface);
+	transition: opacity 0.15s;
 }
 
 sl-button.on-inverted::part(base):hover {
@@ -297,4 +298,8 @@ sl-details::part(content) {
 	overflow-y: scroll;
 	height: calc(100vh - 124px);
 	padding-bottom: 8rem;
+}
+
+sl-button::part(caret) {
+	width: 1rem;
 }

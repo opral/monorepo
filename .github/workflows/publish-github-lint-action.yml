@@ -1,0 +1,79 @@
+name: Publish lint action
+
+on:
+  workflow_dispatch:
+
+  push:
+    paths:
+      - "inlang/source-code/github-lint-action/package.json"
+    branches:
+      - main
+
+jobs:
+  copy-build-to-action-repo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install Doppler CLI for env variables
+        uses: dopplerhq/cli-action@v2
+
+      - name: Build
+        run: doppler run -- pnpm build
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
+
+      - name: Test
+        run: doppler run -- pnpm test
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
+
+      - name: Extract Package Version
+        run: |
+          LINT_ACTION_PACKAGE_VERSION=$(cat inlang/source-code/github-lint-action/package.json \
+            | grep version \
+            | head -1 \
+            | awk -F: '{ print $2 }' \
+            | sed 's/[",]//g')
+          echo "LINT_ACTION_PACKAGE_VERSION=$LINT_ACTION_PACKAGE_VERSION" >> $GITHUB_ENV
+          echo $LINT_ACTION_PACKAGE_VERSION
+        shell: bash
+
+      - name: Pushes action.yaml file to action repo
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.INLANG_BOT_TOKEN }}
+        with:
+          source_file: 'inlang/source-code/github-lint-action/action.yaml'
+          destination_repo: 'opral/i18n-action'
+          user_email: 'hello@inlang.com'
+          user_name: 'inlang-bot'
+          commit_message: '[v${{ env.LINT_ACTION_PACKAGE_VERSION }}]: update action.yaml'
+
+      - name: Pushes build to action repo
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.INLANG_BOT_TOKEN }}
+        with:
+          source_file: 'inlang/source-code/github-lint-action/dist/index.js'
+          destination_repo: 'opral/i18n-action'
+          destination_folder: 'dist'
+          user_email: 'hello@inlang.com'
+          user_name: 'inlang-bot'
+          commit_message: '[v${{ env.LINT_ACTION_PACKAGE_VERSION }}]: new release of i18n-action'

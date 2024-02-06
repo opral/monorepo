@@ -27,7 +27,9 @@
 		"lix",
 		"svelte",
 		"nextjs",
-		"inlang"
+		"astro",
+		"inlang",
+		"solid"
 	],
 	"pricing": "free",
 	"publisherName": "inlang",
