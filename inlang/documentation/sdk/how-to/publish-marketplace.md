@@ -36,11 +36,15 @@ You can ensure that your manifest is valid by loading the following schema.
 
 Please use this badge in your `README.md` to show the your contributor that your software is inlang ecosystem compatible.
 
-[![badge](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/assets/md-badges/inlang.svg)](https://inlang.com)
-
 ```md
 [![badge](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/assets/md-badges/inlang.svg)](https://inlang.com)
 ```
+
+##### Preview
+
+[![badge](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/assets/md-badges/inlang.svg)](https://inlang.com)
+
+---
 
 #### Custom web components
 
