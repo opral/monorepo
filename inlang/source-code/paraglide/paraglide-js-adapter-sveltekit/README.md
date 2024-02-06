@@ -368,6 +368,16 @@ You can access the current language and text direction on `event.locals.paraglid
 	can guess the URL based on your current page, but during prerendering it has no idea where the files will be deployed, so it defaults to 'http://sveltekit-prerender'. You need to explicity tell it the URL of your Site. You can do this with the 'kit.prerender.origin' option in 'svelte.config.js'.">
 </doc-accordion>
 
+<doc-accordion
+	heading="Does this work with vite-plugin-kit-routes"
+	text="Yes! Vite-plugin-kit-routes should work with no additional configuration">
+</doc-accordion>
+
+<doc-accordion
+	heading="Can I dynamically fetch translations from an external server?"
+	text="Paraglide is a compiler, so all translations need to be known at build time. You can of course manually react to the current language & fetch external content, but you will end up implementing your own solution for dynamically fetched translations.">
+</doc-accordion>
+
 ## Roadmap
 
 - [ ] Expand the route features in Path translation

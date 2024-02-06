@@ -1,5 +1,12 @@
 # @inlang/paraglide-js-adapter-sveltekit
 
+## 0.3.4
+
+### Patch Changes
+
+- 3aa1b6ca3: fix [#2717](https://github.com/opral/monorepo/issues/2171) - Link rewrite reactivity issue when navigating between pages
+  - @inlang/paraglide-js-adapter-vite@1.2.12
+
 ## 0.3.3
 
 ### Patch Changes
