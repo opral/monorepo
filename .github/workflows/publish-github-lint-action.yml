@@ -1,4 +1,4 @@
-name: Publish lint action extension
+name: Publish lint action
 
 on:
   workflow_dispatch:
@@ -44,21 +44,36 @@ jobs:
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
-      - name: Generate a token
-        id: generate_token
-        uses: actions/create-github-app-token@v1
+      - name: Extract Package Version
+        run: |
+          LINT_ACTION_PACKAGE_VERSION=$(cat inlang/source-code/github-lint-action/package.json \
+            | grep version \
+            | head -1 \
+            | awk -F: '{ print $2 }' \
+            | sed 's/[",]//g')
+          echo "LINT_ACTION_PACKAGE_VERSION=$LINT_ACTION_PACKAGE_VERSION" >> $GITHUB_ENV
+          echo $LINT_ACTION_PACKAGE_VERSION
+        shell: bash
+
+      - name: Pushes action.yaml file to action repo
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.INLANG_BOT_TOKEN }}
         with:
-          app-id: ${{ secrets.INLANG_ACTION_PUBLISHER_APP_ID }}
-          private-key: ${{ secrets.INLANG_ACTION_PUBLISHER_KEY }}
+          source_file: 'inlang/source-code/github-lint-action/action.yaml'
+          destination_repo: 'opral/i18n-action'
+          user_email: 'hello@inlang.com'
+          user_name: 'inlang-bot'
+          commit_message: '[v${{ env.LINT_ACTION_PACKAGE_VERSION }}]: update action.yaml'
 
       - name: Pushes build to action repo
         uses: dmnemec/copy_file_to_another_repo_action@main
         env:
-          API_TOKEN_GITHUB: ${{ steps.generate_token.outputs.token }}
+          API_TOKEN_GITHUB: ${{ secrets.INLANG_BOT_TOKEN }}
         with:
           source_file: 'inlang/source-code/github-lint-action/dist/index.js'
           destination_repo: 'opral/i18n-action'
           destination_folder: 'dist'
-          user_email: 'nils.jacobsen98@gmail.com'
-          user_name: 'NilsJacobsen'
-          commit_message: 'A custom message for the commit'
+          user_email: 'hello@inlang.com'
+          user_name: 'inlang-bot'
+          commit_message: '[v${{ env.LINT_ACTION_PACKAGE_VERSION }}]: new release of i18n-action'

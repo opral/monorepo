@@ -45,5 +45,8 @@
 		"editor.defaultFormatter": "jock.svg"
 	},
 	"testing.automaticallyOpenPeekView": "never",
-	"git.mergeEditor": true
+	"git.mergeEditor": true,
+	"[xml]": {
+		"editor.defaultFormatter": "redhat.vscode-xml"
+	}
 }
