@@ -168,8 +168,8 @@
 		"@inlang/result": "workspace:*",
 		"@inlang/sdk": "workspace:*",
 		"@inlang/telemetry": "workspace:*",
-		"@lix-js/fs": "workspace:*",
 		"@lix-js/client": "workspace:*",
+		"@lix-js/fs": "workspace:*",
 		"@vitest/coverage-v8": "0.34.6",
 		"https-proxy-agent": "7.0.2",
 		"require-from-string": "^2.0.2",
@@ -177,9 +177,11 @@
 		"vitest": "0.34.6"
 	},
 	"devDependencies": {
+		"@sentry/node": "^7.99.0",
 		"@types/fs-extra": "^11.0.2",
 		"@types/glob": "^8.1.0",
 		"@types/mocha": "^10.0.2",
+		"@types/node": "^20.11.16",
 		"@types/require-from-string": "^1.2.1",
 		"@types/throttle-debounce": "^5.0.2",
 		"@types/ungap__structured-clone": "^0.3.3",
