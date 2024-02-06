@@ -1,6 +1,6 @@
 # Paraglide Adapter Astro
 
-This package provides an Astro Integration for Paraglide. It automatically sets the language based on the URL, and manages the language for you.
+This package provides an Astro Integration making it trivial to use Paraglide in your Astro project. It is purpousefully narrow in scope. It manages the language state and integrates with the Paraglied compiler. It does not provide routing utilities or UI components.
 
 ## Installation
 
