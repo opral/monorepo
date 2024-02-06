@@ -1,16 +1,5 @@
----
-import { languageTag } from "../paraglide/runtime";
----
-
-<script>
-    import { isAvailableLanguageTag, setLanguageTag, sourceLanguageTag } from "../paraglide/runtime";
-    const htmlLang = document.documentElement.lang;
-    const language = isAvailableLanguageTag(htmlLang) ? htmlLang : sourceLanguageTag;
-    setLanguageTag(language);
-</script>
-
 <!doctype html>
-<html lang={languageTag()}>
+<html lang={Astro.locals.paraglide.lang} dir={Astro.locals.paraglide.dir}>
     <slot />
 </html>
 
