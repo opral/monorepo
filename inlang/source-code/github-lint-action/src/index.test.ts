@@ -138,11 +138,11 @@ describe("test", () => {
 					return "nilsjacobsen"
 				case "repo":
 					return "test-repo-for-action"
-				case "project_path":
+				case "pr_number":
 					return "1"
 				case "token":
 					return process.env.GITHUB_TOKEN || ""
-				case "projectPath":
+				case "project_path":
 					return "/project.inlang"
 				default:
 					return ""
