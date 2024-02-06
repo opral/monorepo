@@ -115,3 +115,7 @@ import * as m from "$paraglide/messages.js";
 
 <h1>{m.hello_world()}</h1>
 ```
+
+## Playground
+
+Check out an example Astro project with Paraglide integration on [StackBlitz](https://stackblitz.com/~/github.com/LorisSigrist/paraglide-astro-example)
