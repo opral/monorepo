@@ -73,7 +73,7 @@ import { languageTag } from "$paraglide/runtime";
 
 You can also access the current language and text-direction via `Astro.locals.paraglide.lang` and `Astro.locals.paraglide.dir` respectively.
 
-### Using Messages
+### Using Messages
 
 You can import messages from the generated `paraglide` folder like so:
 

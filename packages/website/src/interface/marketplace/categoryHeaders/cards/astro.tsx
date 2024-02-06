@@ -75,17 +75,18 @@ const AstroHeader = () => {
 							<Arrow />
 						</div>
 					</Link>
-					<a
-						href="https://stackblitz.com/~/github.com/LorisSigrist/paraglide-astro-example"
-						target="_blanc"
+					<Link
+						href="/m/iljlwzfs/library-inlang-paraglideJsAdapterAstro"
 						class="w-full bg-background rounded-xl border border-surface-300 relative group hover:border-surface-400 transition-all cursor-pointer"
 					>
-						<h3 class="font-medium text-lg px-8 pb-1 pt-6">Code Example</h3>
-						<p class="text-surface-500 px-8 pb-6 text-sm pr-20">Visit our stackblitz example.</p>
+						<h3 class="font-medium text-lg px-8 pb-1 pt-6">Astro Adapter</h3>
+						<p class="text-surface-500 px-8 pb-6 text-sm pr-20">
+							An Astro Integration for ParaglideJS
+						</p>
 						<div class="absolute top-4 right-4 w-8 h-8 border border-surface-300 rounded-full flex justify-center items-center group-hover:bg-surface-100 transition-all text-surface-500 group-hover:text-surface-900">
 							<Arrow />
 						</div>
-					</a>
+					</Link>
 				</div>
 			</div>
 		</>
