@@ -1,4 +1,3 @@
-import { sourceLanguageTag, availableLanguageTags } from "./src/paraglide/runtime.js"
 import paraglide from "@inlang/paraglide-js-adapter-astro"
 import { defineConfig } from "astro/config"
 import mdx from "@astrojs/mdx"
@@ -28,15 +27,7 @@ export default defineConfig({
 			outdir: "./src/paraglide",
 		}),
 	],
-	output: "server",
-	i18n: {
-		defaultLocale: sourceLanguageTag,
-		locales: [...availableLanguageTags],
-		routing: {
-			prefixDefaultLocale: false,
-			strategy: "pathname",
-		},
-	},
+	//output: "server",
 	adapter: node({
 		mode: "standalone",
 	}),
