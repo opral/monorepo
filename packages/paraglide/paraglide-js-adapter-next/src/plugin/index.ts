@@ -30,11 +30,22 @@ export function withParaglide(config: Config): NextConfig {
 	if (router === "app") {
 		addRewrites(config, async () => {
 			const { loadProject } = await import("@inlang/sdk")
+			const { openRepository, findRepoRoot } = await import("@lix-js/client")
 			const projectPath = resolve(process.cwd(), config.paraglide.project)
-			const project = await loadProject({
-				projectPath,
+			const repoRoot = await findRepoRoot({
+				nodeishFs: fs,
+				path: projectPath,
+			})
+
+			const repo = await openRepository(repoRoot || process.cwd(), {
 				nodeishFs: fs,
 			})
+
+			const project = await loadProject({
+				projectPath,
+				repo,
+			})
+
 			const { languageTags } = project.settings()
 
 			return [
