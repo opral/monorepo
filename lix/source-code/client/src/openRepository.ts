@@ -551,20 +551,14 @@ export async function openRepository(
 		 *
 		 * The function ensures that the same orgin is always returned for the same repository.
 		 */
-		async getOrigin({ safeHashOnly = false } = {}): Promise<string> {
-			if (safeHashOnly) {
-				// FIXME: handle forks and upstream!
-				const safeOriginHash = await hash(`${lixHost}__${repoHost}__${owner}__${repoName}`)
-				return safeOriginHash
-			}
-
+		async getOrigin(): Promise<string | undefined> {
 			// TODO: this flow is obsolete and can be unified with the initialization of the repo
 			const repo = await this
 			const remotes: Array<{ remote: string; url: string }> | undefined = await repo.listRemotes()
 
 			const origin = remotes?.find((elements) => elements.remote === "origin")
 			if (origin === undefined) {
-				return "unknown"
+				return undefined
 			}
 			// polyfill for some editor related origin issues
 			let result = origin.url

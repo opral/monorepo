@@ -41,7 +41,7 @@ export type Repository = {
 	forkStatus: () => Promise<
 		{ ahead: number; behind: number; conflicts: boolean } | { error: string }
 	>
-	getOrigin: (arg?: { safeHashOnly?: boolean }) => Promise<string>
+	getOrigin: () => Promise<string | undefined>
 	getCurrentBranch: () => Promise<string | undefined>
 	getBranches: () => Promise<string[] | undefined>
 	errors: Subscribable<LixError[]>
