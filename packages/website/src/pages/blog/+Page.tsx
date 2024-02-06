@@ -14,7 +14,7 @@ export default function Page() {
 				name="description"
 				content="Posts that revolve around inlang, git, and globalization (i18n)."
 			/>
-			<Meta name="og:image" content="/images/inlang-social-image.jpg" />
+			<Meta name="og:image" content="/images/opengraph/inlang-social-image.jpg" />
 			<MetaLink
 				href={`https://inlang.com${i18nRouting(currentPageContext.urlParsed.pathname).url}`}
 				rel="canonical"

@@ -14,6 +14,9 @@ import { z } from "zod"
 @customElement("inlang-install")
 export class InlangInstall extends TwLitElement {
 	@property({ type: Boolean })
+	isProduction: boolean = !window.location.origin.includes("localhost")
+
+	@property({ type: Boolean })
 	manual: boolean = false
 
 	@property({ type: String })
@@ -164,7 +167,6 @@ export class InlangInstall extends TwLitElement {
 		const inlangProject = await loadProject({
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			projectPath: this.url.project!,
-			nodeishFs: repo.nodeishFs,
 			repo,
 		})
 
@@ -205,7 +207,6 @@ export class InlangInstall extends TwLitElement {
 		const inlangProjectAfter = await loadProject({
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			projectPath: this.url.project!,
-			nodeishFs: repo.nodeishFs,
 			repo,
 		})
 
@@ -310,7 +311,7 @@ export class InlangInstall extends TwLitElement {
 						</p>
 						<a
 							class="bg-slate-800 px-4 text-white text-center py-2 rounded-md font-medium hover:bg-slate-900 transition-colors"
-							href=${`https://inlang.com/?` +
+							href=${(this.isProduction ? `https://inlang.com/?` : "http://localhost:3000/?") +
 							(this.url.repo ? `repo=${this.url.repo}` : "") +
 							(this.url.project ? `&project=${this.url.project}` : "")}
 						>
@@ -438,11 +439,11 @@ export class InlangInstall extends TwLitElement {
 					</div>
 				</div>
 				<a
-					href="https://inlang.com/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang"
+					href=${(this.isProduction ? `https://inlang.com` : "http://localhost:3000") + "/c/apps"}
 					target="_blank"
 					class="text-[#098DAC] font-medium transition-colors hover:text-[#06b6d4]"									"
 				>
-					You don't have project file? Read how to get started
+					Visit product pages to learn how to get started.
 					<doc-icon class="inline-block ml-1 translate-y-0.5" size="1.2em" icon="mdi:arrow-top-right"></doc-icon>
 				</a>
 			</div>
@@ -568,7 +569,8 @@ export class InlangInstall extends TwLitElement {
 									</p>
 									<a
 										target="_blank"
-										href=${`https://inlang.com/m/${
+										href=${(this.isProduction ? `https://inlang.com` : "http://localhost:3000") +
+										`/m/${
 											// @ts-ignore
 											registry.find((x) => x.id === this.url.module)?.uniqueID
 										}`}
@@ -744,11 +746,11 @@ export class InlangInstall extends TwLitElement {
 					</div>
 				</div>
 				<a
-					href="https://inlang.com/g/49fn9ggo/guide-niklasbuchfink-howToSetupInlang"
+				href=${(this.isProduction ? `https://inlang.com` : "http://localhost:3000") + "/c/apps"}
 					target="_blank"
 					class="text-[#098DAC] font-medium transition-colors hover:text-[#06b6d4]"									"
 				>
-					You don't have project file? Read how to get started
+					Go to the product pages to learn how to get started.
 					<doc-icon class="inline-block ml-1 translate-y-0.5" size="1.2em" icon="mdi:arrow-top-right"></doc-icon>
 				</a>
 			</div>

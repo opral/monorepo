@@ -1,13 +1,13 @@
-import type nodeFsPromises from "node:fs/promises"
 import path from "node:path"
 import crypto from "node:crypto"
+import type { NodeishFilesystem } from "@lix-js/fs"
 
 let previousOutputHash: string | undefined
 
 export async function writeOutput(
 	outputDirectory: string,
 	output: Record<string, string>,
-	fs: typeof nodeFsPromises
+	fs: NodeishFilesystem
 ) {
 	// if the output hasn't changed, don't write it
 	const currentOutputHash = hashOutput(output, outputDirectory)
@@ -39,10 +39,7 @@ export async function writeOutput(
 	await Promise.allSettled(
 		Object.entries(output).map(async ([filePath, fileContent]) => {
 			const fullPath = path.resolve(outputDirectory, filePath)
-
-			await fs.writeFile(fullPath, fileContent, {
-				encoding: "utf-8",
-			})
+			await fs.writeFile(fullPath, fileContent)
 		})
 	)
 

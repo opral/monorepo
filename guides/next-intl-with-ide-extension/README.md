@@ -14,7 +14,7 @@ In this guide, I'll walk you through the seamless integration of the [next-intl]
 
 ## Why Choose the IDE Extension and next-intl Combo?
 
-The synergy of the next-intl i18n library and an IDE extension provides a robust solution for internationalization in Next.js. Here's why it's a winning combination:
+The synergy of the next-intl i18n library and an [IDE extension](/m/r7kp499g) provides a robust solution for internationalization in Next.js. Here's why it's a winning combination:
 
 - **Extract translations:** via the `Inlang: Extract Message` code action.
 - **Translation Linting:** Get notified about missing translations and other issues directly in your IDE.

@@ -20,7 +20,7 @@ export default function Page(pageContext: PageContextRenderer) {
 								<p>Something went wrong, we couldn't find your page.</p>
 							</div>
 
-							<Link href="https://inlang.com">
+							<Link href={import.meta.env.PROD ? "https://inlang.com" : "http://localhost:3000"}>
 								<sl-button prop:variant="text">
 									{/* @ts-ignore */}
 									<MaterialSymbolsArrowBackRounded slot="prefix" />

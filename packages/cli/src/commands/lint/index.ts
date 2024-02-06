@@ -125,9 +125,8 @@ export async function lintCommandAction(args: { project: InlangProject; logger: 
 				"ℹ️  You can add the `--no-fail` flag to disable throwing an error if linting fails."
 			)
 			console.error("🚫 Lint failed with errors.")
-			process.exit(1)
+			process.exitCode = 1
 		}
-
 		return { lintTable, summaryTable }
 	} catch (error) {
 		args.logger.error(error)

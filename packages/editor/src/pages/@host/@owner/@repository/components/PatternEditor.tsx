@@ -204,23 +204,6 @@ export function PatternEditor(props: {
 		}
 	}
 
-	// const [_isFork] = createResource(
-	// 	() => localStorage.user,
-	// 	async (user) => {
-	// 		const response = await isFork({
-	// 			owner: (currentPageContext.routeParams as EditorRouteParams).owner,
-	// 			repository: (currentPageContext.routeParams as EditorRouteParams)
-	// 				.repository,
-	// 			username: user.username,
-	// 		});
-	// 		if (response.type === "success") {
-	// 			return response.fork;
-	// 		} else {
-	// 			return response;
-	// 		}
-	// 	}
-	// );
-
 	const [machineTranslationIsLoading, setMachineTranslationIsLoading] = createSignal(false)
 
 	const handleMachineTranslate = async () => {
@@ -241,6 +224,7 @@ export function PatternEditor(props: {
 				}
 			})
 			.join("")
+
 		if (text === "") {
 			return showToast({
 				variant: "info",
@@ -272,6 +256,7 @@ export function PatternEditor(props: {
 			sourceLanguageTag: project()!.settings()!.sourceLanguageTag!,
 			targetLanguageTags: [props.languageTag],
 		})
+
 		if (translation.error !== undefined) {
 			showToast({
 				variant: "warning",
@@ -318,17 +303,17 @@ export function PatternEditor(props: {
 			}
 		})
 
-		if (hasChanges() && localStorage.user === undefined) {
+		if (hasChanges() && !localStorage.user?.isLoggedIn) {
 			notifications.push({
 				notificationTitle: "Access:",
 				notificationDescription: "Sign in to commit changes.",
 				notificationType: "warning",
 			})
 		}
-		if (hasChanges() && userIsCollaborator() === false) {
+		if (hasChanges() && localStorage.user?.isLoggedIn && !userIsCollaborator()) {
 			notifications.push({
 				notificationTitle: "Fork:",
-				notificationDescription: "Fork the project to commit changes.",
+				notificationDescription: "Use a fork to make changes.",
 				notificationType: "warning",
 			})
 		}
@@ -349,7 +334,7 @@ export function PatternEditor(props: {
 			timer = setTimeout(() => {
 				showToast({
 					variant: "info",
-					title: "Inlang saves automatically but make shure to push your changes.",
+					title: "Inlang saves automatically, but make sure you push your changes.",
 				})
 			}, 500)
 		}

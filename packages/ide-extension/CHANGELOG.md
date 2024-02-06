@@ -1,5 +1,133 @@
 # inlang-vs-code-extension
 
+## 1.30.1
+
+### Patch Changes
+
+- 30e03afa5: fix potential reactivity issue
+
+## 1.30.0
+
+### Minor Changes
+
+- 7037bc8b3: remove outdated "configure replacement options" prompt.
+
+  - https://github.com/opral/monorepo/discussions/2159#discussioncomment-8325600
+
+## 1.29.4
+
+### Patch Changes
+
+- 008313fa1: fix message view layout
+
+## 1.29.3
+
+### Patch Changes
+
+- d646e6f66: add jump to message position in code
+
+## 1.29.2
+
+### Patch Changes
+
+- f7dc963df: add inline annotation language switching
+
+## 1.29.1
+
+### Patch Changes
+
+- Updated dependencies [3bf94ddb5]
+  - @lix-js/client@0.8.0
+  - @inlang/sdk@0.26.1
+  - @inlang/telemetry@0.3.9
+
+## 1.29.0
+
+### Minor Changes
+
+- c98ea1dfe: refactor: internal change how projects are identified
+
+## 1.28.3
+
+### Patch Changes
+
+- f26c19758: fix Fink url for cross-selling
+
+## 1.28.2
+
+### Patch Changes
+
+- 365fd5610: update readme & recommendation view
+
+## 1.28.1
+
+### Patch Changes
+
+- 9a55e9390: update codicon location
+
+## 1.28.0
+
+### Minor Changes
+
+- f2b4e23e5: add inlang tab
+
+### Patch Changes
+
+- 870143a22: update import with workspaceFolder
+
+## 1.27.0
+
+### Minor Changes
+
+- 676c0f905: remove deprecated loadProject({nodeishFs})
+
+### Patch Changes
+
+- Updated dependencies [676c0f905]
+  - @inlang/sdk@0.26.0
+  - @inlang/telemetry@0.3.8
+
+## 1.26.0
+
+### Minor Changes
+
+- 2f55a1a0d: chore: add project group identify
+
+### Patch Changes
+
+- Updated dependencies [87bed968b]
+- Updated dependencies [23ca73060]
+  - @inlang/sdk@0.25.0
+  - @inlang/create-project@1.1.8
+  - @inlang/telemetry@0.3.7
+
+## 1.25.5
+
+### Patch Changes
+
+- @inlang/sdk@0.24.1
+- @inlang/create-project@1.1.7
+- @inlang/telemetry@0.3.6
+
+## 1.25.4
+
+### Patch Changes
+
+- Updated dependencies [c38faebce]
+  - @inlang/sdk@0.24.0
+  - @lix-js/fs@0.6.0
+  - @inlang/create-project@1.1.6
+  - @inlang/telemetry@0.3.5
+
+## 1.25.3
+
+### Patch Changes
+
+- Updated dependencies [b920761e6]
+  - @inlang/sdk@0.23.0
+  - @inlang/create-project@1.1.5
+  - @inlang/telemetry@0.3.4
+
 ## 1.25.2
 
 ### Patch Changes

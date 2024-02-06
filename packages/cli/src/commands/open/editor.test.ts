@@ -33,12 +33,12 @@ describe("open editor command", () => {
 		}
 		const execMock = vi.fn()
 
-		await editorCommandAction({ exec: execMock, nodeishFs: fs, filepath: "/", logger })
+		await editorCommandAction({ exec: execMock, nodeishFs: fs, path: "/", logger })
 
 		expect(logger.error.mock.calls.length).toBe(0)
 		expect(execMock.mock.calls.length).toBe(1)
 		expect(execMock.mock.calls[0][0]).toMatch(
-			/((open)|(start)|(xdg-open)) https:\/\/inlang\.com\/editor\/github\.com\/inlang\/example(\/)?/g
+			/((open)|(start)|(xdg-open)) https:\/\/fink.inlang\.com\/github\.com\/inlang\/example(\/)?/g
 		)
 	})
 
@@ -53,7 +53,7 @@ describe("open editor command", () => {
 		}
 		const execMock = vi.fn()
 
-		await editorCommandAction({ exec: execMock, nodeishFs: fs, filepath: "/", logger })
+		await editorCommandAction({ exec: execMock, nodeishFs: fs, path: "/", logger })
 
 		expect(logger.error.mock.calls.length).toBe(1)
 		expect(execMock.mock.calls.length).toBe(0)

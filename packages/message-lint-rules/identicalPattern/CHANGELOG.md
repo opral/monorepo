@@ -1,5 +1,11 @@
 # @inlang/message-lint-rule-identical-pattern
 
+## 1.5.1
+
+### Patch Changes
+
+- @inlang/message-lint-rule@1.4.1
+
 ## 1.5.0
 
 ### Minor Changes

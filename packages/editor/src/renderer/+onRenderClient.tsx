@@ -44,7 +44,7 @@ import "@shoelace-style/shoelace/dist/components/option/option.js"
 // enable error logging via sentry in production
 if (import.meta.env.PROD) {
 	Sentry.init({
-		dsn: publicEnv.PUBLIC_WEBSITE_SENTRY_DSN,
+		dsn: publicEnv.PUBLIC_FINK_SENTRY_DSN,
 		integrations: [],
 		tracesSampleRate: 0.1,
 	})

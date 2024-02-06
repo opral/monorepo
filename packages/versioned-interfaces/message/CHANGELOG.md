@@ -1,5 +1,12 @@
 # @inlang/message
 
+## 2.0.1
+
+### Patch Changes
+
+- Updated dependencies [74ac11c47]
+  - @inlang/language-tag@1.4.0
+
 ## 2.0.0
 
 ### Major Changes

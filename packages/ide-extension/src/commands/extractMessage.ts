@@ -1,10 +1,10 @@
-import { state } from "../state.js"
-import { msg } from "../utilities/message.js"
-import { commands, type TextEditor, window, env, Uri } from "vscode"
+import { state } from "../utilities/state.js"
+import { msg } from "../utilities/messages/msg.js"
+import { commands, type TextEditor, window } from "vscode"
 import { telemetry } from "../services/telemetry/index.js"
 import type { Message } from "@inlang/sdk"
 import { CONFIGURATION } from "../configuration.js"
-import { isQuoted, stripQuotes } from "../utilities/isQuoted.js"
+import { isQuoted, stripQuotes } from "../utilities/messages/isQuoted.js"
 
 /**
  * Helps the user to extract messages from the active text editor.
@@ -15,6 +15,7 @@ export const extractMessageCommand = {
 	register: commands.registerTextEditorCommand,
 	callback: async function (textEditor: TextEditor) {
 		const ideExtension = state().project.customApi()["app.inlang.ideExtension"]
+		const sourceLanguageTag = state().project.settings().sourceLanguageTag
 
 		// guards
 		if (!ideExtension) {
@@ -31,7 +32,7 @@ export const extractMessageCommand = {
 				"notification"
 			)
 		}
-		if (state().project.settings()?.sourceLanguageTag === undefined) {
+		if (sourceLanguageTag === undefined) {
 			return msg(
 				"The `sourceLanguageTag` is not defined in the project but required to extract a message.",
 				"warn",
@@ -62,19 +63,11 @@ export const extractMessageCommand = {
 			({ messageReplacement }) => messageReplacement
 		)
 
-		const preparedExtractOption = await window.showQuickPick(
-			[...messageReplacements, "How to edit these replacement options?"],
-			{ title: "Replace highlighted text with:" }
-		)
+		const preparedExtractOption = await window.showQuickPick(messageReplacements, {
+			title: "Replace highlighted text with:",
+		})
 		if (preparedExtractOption === undefined) {
 			return
-		} else if (preparedExtractOption === "How to edit these replacement options?") {
-			// TODO #152
-			return env.openExternal(
-				Uri.parse(
-					"https://github.com/opral/monorepo/tree/main/inlang/source-code/ide-extension#3%EF%B8%8F%E2%83%A3-configuration"
-				)
-			)
 		}
 
 		const selectedExtractOption = preparedExtractOptions.find(
@@ -120,7 +113,6 @@ export const extractMessageCommand = {
 
 		telemetry.capture({
 			event: "IDE-EXTENSION command executed",
-			properties: { name: "extract message" },
 		})
 		return msg("Message extracted.")
 	},

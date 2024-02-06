@@ -29,47 +29,24 @@ import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
 import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
 import { maybeCreateFirstProjectId } from "./migrations/maybeCreateFirstProjectId.js"
 import type { Repository } from "@lix-js/client"
+import { capture } from "./telemetry/capture.js"
+import { identifyProject } from "./telemetry/groupIdentify.js"
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
-
-/**
- * Creates an inlang instance.
- *
- * @param projectPath - Absolute path to the inlang settings file.
- * @param @deprecated nodeishFs - Filesystem that implements the NodeishFilesystemSubset interface.
- * @param _import - Use `_import` to pass a custom import function for testing,
- *   and supporting legacy resolvedModules such as CJS.
- * @param _capture - Use `_capture` to capture events for analytics.
- *
- */
-export async function loadProject(args: {
-	projectPath: string
-	nodeishFs: Repository["nodeishFs"]
-	_import?: ImportFunction
-	_capture?: (id: string, props: Record<string, unknown>) => void
-}): Promise<InlangProject>
 
 /**
  * @param projectPath - Absolute path to the inlang settings file.
  * @param repo - An instance of a lix repo as returned by `openRepository`.
  * @param _import - Use `_import` to pass a custom import function for testing,
  *   and supporting legacy resolvedModules such as CJS.
- * @param _capture - Use `_capture` to capture events for analytics.
+ * @param appId - The app id to use for telemetry e.g "app.inlang.badge"
  *
  */
 export async function loadProject(args: {
 	projectPath: string
 	repo: Repository
+	appId?: string
 	_import?: ImportFunction
-	_capture?: (id: string, props: Record<string, unknown>) => void
-}): Promise<InlangProject>
-
-export async function loadProject(args: {
-	projectPath: string
-	repo?: Repository
-	_import?: ImportFunction
-	_capture?: (id: string, props: Record<string, unknown>) => void
-	nodeishFs?: Repository["nodeishFs"]
 }): Promise<InlangProject> {
 	const projectPath = normalizePath(args.projectPath)
 
@@ -90,15 +67,7 @@ export async function loadProject(args: {
 		)
 	}
 
-	let fs: Repository["nodeishFs"]
-	if (args.nodeishFs) {
-		// TODO: deprecate
-		fs = args.nodeishFs
-	} else if (args.repo) {
-		fs = args.repo.nodeishFs
-	} else {
-		throw new LoadProjectInvalidArgument(`Repo missing from arguments.`, { argument: "repo" })
-	}
+	const fs = args.repo.nodeishFs
 
 	const nodeishFs = createNodeishFsWithAbsolutePaths({
 		projectPath,
@@ -111,7 +80,15 @@ export async function loadProject(args: {
 	await maybeCreateFirstProjectId({ projectPath, repo: args.repo })
 
 	// -- load project ------------------------------------------------------
+
 	return await createRoot(async () => {
+		// TODO remove tryCatch after https://github.com/opral/monorepo/issues/2013
+		// - a repo will always be present
+		// - if a repo is present, the project id will always be present
+		const { data: projectId } = await tryCatch(() =>
+			fs.readFile(args.projectPath + "/project_id", { encoding: "utf-8" })
+		)
+
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
 		// -- settings ------------------------------------------------------------
 
@@ -125,12 +102,7 @@ export async function loadProject(args: {
 			// }
 
 			loadSettings({ settingsFilePath: projectPath + "/settings.json", nodeishFs })
-				.then((settings) => {
-					setSettings(settings)
-					// rename settings to get a convenient access to the data in Posthog
-					const project_settings = settings
-					args._capture?.("SDK used settings", { project_settings })
-				})
+				.then((settings) => setSettings(settings))
 				.catch((err) => {
 					markInitAsFailed(err)
 				})
@@ -297,7 +269,39 @@ export async function loadProject(args: {
 			debouncedSave(messagesQuery.getAll())
 		})
 
+		/**
+		 * Utility to escape reactive tracking and avoid multiple calls to
+		 * the capture event.
+		 *
+		 * Should be addressed with https://github.com/opral/monorepo/issues/1772
+		 */
+		let projectLoadedCapturedAlready = false
+
+		if (projectId && projectLoadedCapturedAlready === false) {
+			projectLoadedCapturedAlready = true
+			// TODO ensure that capture is "awaited" without blocking the the app from starting
+			await identifyProject({
+				projectId,
+				properties: {
+					// using the id for now as a name but can be changed in the future
+					// we need at least one property to make a project visible in the dashboard
+					name: projectId,
+				},
+			})
+			await capture("SDK loaded project", {
+				projectId,
+				properties: {
+					appId: args.appId,
+					settings: settings(),
+					installedPluginIds: installedPlugins().map((p) => p.id),
+					installedMessageLintRuleIds: installedMessageLintRules().map((r) => r.id),
+					numberOfMessages: messagesQuery.includedMessageIds().length,
+				},
+			})
+		}
+
 		return {
+			id: projectId,
 			installed: {
 				plugins: createSubscribable(() => installedPlugins()),
 				messageLintRules: createSubscribable(() => installedMessageLintRules()),
@@ -305,8 +309,6 @@ export async function loadProject(args: {
 			errors: createSubscribable(() => [
 				...(initializeError ? [initializeError] : []),
 				...(resolvedModules() ? resolvedModules()!.errors : []),
-				// have a query error exposed
-				//...(lintErrors() ?? []),
 			]),
 			settings: createSubscribable(() => settings() as ProjectSettings),
 			setSettings,

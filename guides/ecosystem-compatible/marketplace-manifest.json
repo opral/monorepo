@@ -23,7 +23,10 @@
 		"guide",
 		"ecosystem",
 		"compatible",
-		"ecosystem compatible"
+		"ecosystem compatible",
+		"astro",
+		"nextjs",
+		"svelte"
 	],
 	"recommends": ["g/2fg8ng94", "g/00162hsd", "g/wxcebbig", "g/uxohikde"],
 	"publisherName": "Nils Jacobsen",

@@ -16,7 +16,7 @@ inlang provides a lot of different lint rules to help you with this. You can fin
 
 Implement locale-specific date, time, and number formats to align with the conventions of your target regions. Utilize libraries or frameworks that support locale-aware formatting to ensure consistency and accuracy across different languages and regions.
 
-The editor inlang offers, Fink, supports variables out of the box. You can use them to format dates, times, and numbers. You can find more information about this on the [Fink Product Page](/m/tdozzpar/app-inlang-editor).
+The editor inlang offers, Fink, supports variables out of the box. You can use them to format dates, times, and numbers. You can find more information about this on the [Fink Product Page](/m/tdozzpar/app-inlang-finkLocalizationEditor).
 
 ### Mistake 3: Failing to Test Across Multiple Devices and Platforms
 

@@ -3,7 +3,7 @@ import { registry } from "@inlang/marketplace-registry"
 
 const siteURL = "https://inlang.com"
 
-const locales = ["", "/de"]
+const locales = ["", "/de", "/fr", "/it", "/pt-BR", "/sk", "/zh"]
 
 // Add all routes that should be included in the sitemap here, dynamic routes should be marked with dynamic: true
 const routes = [
@@ -18,7 +18,7 @@ const routes = [
 ]
 
 // Hardcoded categories for the marketplace
-const categories = ["application", "website", "markdown", "lint-rules"]
+const categories = ["apps", "libraries", "plugins", "lint-rules", "guides", "lix"]
 
 const repositoryRoot = import.meta.url.slice(0, import.meta.url.lastIndexOf("inlang/source-code"))
 
@@ -108,12 +108,13 @@ async function generateSitemap() {
 					...JSON.parse(lintRuleTableOfContents),
 				]
 				for (const item of tableOfContents) {
-					for (const locale of locales) {
-						content = `${content}${formatPage(
-							siteURL + locale + route.path + "/" + item.slug,
-							publishDate
-						)}`
-					}
+					// for (const locale of locales) {
+					// 	content = `${content}${formatPage(
+					// 		siteURL + locale + route.path + "/" + item.slug,
+					// 		publishDate
+					// 	)}`
+					// }
+					content = `${content}${formatPage(siteURL + route.path + "/" + item.slug, publishDate)}`
 				}
 			} else {
 				const tableOfContents = [
@@ -123,12 +124,16 @@ async function generateSitemap() {
 				for (const items of tableOfContents) {
 					for (const item of items) {
 						if (item.slug !== "")
-							for (const locale of locales) {
-								content = `${content}${formatPage(
-									siteURL + locale + route.path + "/" + item.slug,
-									publishDate
-								)}`
-							}
+							// for (const locale of locales) {
+							// 	content = `${content}${formatPage(
+							// 		siteURL + locale + route.path + "/" + item.slug,
+							// 		publishDate
+							// 	)}`
+							// }
+							content = `${content}${formatPage(
+								siteURL + route.path + "/" + item.slug,
+								publishDate
+							)}`
 					}
 				}
 			}
@@ -140,32 +145,34 @@ async function generateSitemap() {
 
 			if (Array.isArray(JSON.parse(tableOfContents))) {
 				for (const item of JSON.parse(tableOfContents)) {
-					for (const locale of locales) {
-						content = `${content}${formatPage(
-							siteURL + locale + route.path + "/" + item.slug,
-							publishDate
-						)}`
-					}
+					// for (const locale of locales) {
+					// 	content = `${content}${formatPage(
+					// 		siteURL + locale + route.path + "/" + item.slug,
+					// 		publishDate
+					// 	)}`
+					// }
+					content = `${content}${formatPage(siteURL + route.path + "/" + item.slug, publishDate)}`
 				}
 			} else {
 				for (const items of Object.values(JSON.parse(tableOfContents))) {
 					for (const item of items) {
 						if (item.slug !== "")
-							for (const locale of locales) {
-								content = `${content}${formatPage(
-									siteURL + locale + route.path + "/" + item.slug,
-									publishDate
-								)}`
-							}
+							// for (const locale of locales) {
+							// 	content = `${content}${formatPage(
+							// 		siteURL + locale + route.path + "/" + item.slug,
+							// 		publishDate
+							// 	)}`
+							// }
+							content = `${content}${formatPage(
+								siteURL + route.path + "/" + item.slug,
+								publishDate
+							)}`
 					}
 				}
 			}
-		} else if (route.path === "/newsletter"){
+		} else if (route.path === "/newsletter") {
 			for (const locale of locales) {
-				content = `${content}${formatPage(
-					siteURL + locale + route.path,
-					publishDate
-				)}`
+				content = `${content}${formatPage(siteURL + locale + route.path, publishDate)}`
 			}
 		}
 	}

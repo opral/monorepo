@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/sdk",
 	"type": "module",
-	"version": "0.22.0",
+	"version": "0.26.1",
 	"license": "Apache-2.0",
 	"publishConfig": {
 		"access": "public"
@@ -17,9 +17,10 @@
 		"./src"
 	],
 	"scripts": {
-		"build": "tsc --build",
-		"dev": "tsc --watch",
-		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"build": "npm run prepare-env-variables && tsc --build",
+		"dev": "npm run prepare-env-variables && tsc --watch",
+		"prepare-env-variables": "node ./src/env-variables/createIndexFile.js",
+		"test": "npm run prepare-env-variables && tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"

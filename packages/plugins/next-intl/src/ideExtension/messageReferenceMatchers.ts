@@ -65,15 +65,6 @@ const createParser = (settings: PluginSettings, defaultNS: string | undefined) =
 			return Parsimmon.string(",").trim(r.whitespace!)
 		},
 
-		// Parser for namespace value
-		nsValue: (r) => {
-			return Parsimmon.seq(
-				r.whitespace!,
-				Parsimmon.string("ns").trim(r.whitespace!).skip(r.colon!), // namespace key parser
-				r.stringLiteral!.trim(r.whitespace!)
-			).map(([, , val]) => `${val}`)
-		},
-
 		// Parser for t function calls
 		FunctionCall: function (r) {
 			return Parsimmon.seqMap(
@@ -145,10 +136,10 @@ const createNamespaceParser = (pattern: string) => {
 			return Parsimmon.string(":").trim(r.whitespace!)
 		},
 
-		keyPrefixValue: (r) => {
+		nsValue: (r) => {
 			return Parsimmon.seq(
 				r.whitespace!,
-				Parsimmon.string("keyPrefix").trim(r.whitespace!).skip(r.colon!), // namespace key parser
+				Parsimmon.string("namespace").trim(r.whitespace!).skip(r.colon!), // namespace key parser
 				r.stringLiteral!.trim(r.whitespace!)
 			).map(([, , val]) => `${val}`)
 		},
@@ -160,11 +151,39 @@ const createNamespaceParser = (pattern: string) => {
 				Parsimmon.regex(/\b(?:use|get)Translations\b/), // starts with useTranslation or getTranslations
 				Parsimmon.string(pattern), // then an opening parenthesis
 				Parsimmon.index, // start position of the message id
-				r.stringLiteral!, // message id
+				Parsimmon.regex(/[^)]*/), // inside string
 				Parsimmon.index, // end position of the message id
 				Parsimmon.regex(/[^)]*/), // ignore the rest of the function call
 				Parsimmon.string(")"), // end with a closing parenthesis
-				(_, __, ___, ____, namespace) => {
+				(_, __, ___, ____, insideString) => {
+					const namespaceParser = Parsimmon.alt(
+						Parsimmon.seq(
+							Parsimmon.string("{").trim(r.whitespace!),
+							Parsimmon.string("locale").trim(r.whitespace!),
+							Parsimmon.alt(
+								Parsimmon.seq(r.comma!, r.nsValue!).map(([, val]) => val),
+								Parsimmon.seq(
+									r.colon!,
+									r.stringLiteral!.trim(r.whitespace!),
+									r.comma!,
+									r.nsValue!,
+									Parsimmon.regex(/[^)}]*/)
+								).map(([, , , val]) => val)
+							),
+							Parsimmon.string("}").trim(r.whitespace!)
+						).map(([, , val]) => val),
+						Parsimmon.seq(
+							Parsimmon.string("{").trim(r.whitespace!),
+							r.nsValue!,
+							Parsimmon.regex(/[^)}]*/),
+							Parsimmon.string("}").trim(r.whitespace!)
+						).map(([, val]) => val),
+						Parsimmon.seq(r.stringLiteral!)
+					)
+					const namespace = (
+						namespaceParser.parse(insideString) as { status: boolean; value: string }
+					).value
+
 					return {
 						ns: namespace,
 					}

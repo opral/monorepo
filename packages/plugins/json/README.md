@@ -101,6 +101,10 @@ The plugin can be used with the [IDE extension](https://inlang.com/m/r7kp499g/ap
 3. Optional: Add lint rules: https://inlang.com/c/lint-rules
 4. 🎉 Done!
 
+## Pricing 
+
+<doc-dev-tool-pricing></doc-dev-tool-pricing>
+
 # Contributing
 
 ## Getting started

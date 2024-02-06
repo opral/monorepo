@@ -21,7 +21,6 @@ import EditOutline from "~icons/material-symbols/edit-outline-rounded"
 import Documentation from "~icons/material-symbols/description-outline-rounded"
 import Changelog from "~icons/material-symbols/manage-history"
 import Link from "#src/renderer/Link.jsx"
-import { InlangBadge } from "#src/interface/marketplace/categoryHeaders/categoryHeros/appHeader.jsx"
 
 const isProduction = process.env.NODE_ENV === "production"
 
@@ -37,6 +36,25 @@ export type PageProps = {
 }
 
 const pagesToHideSlider = ["badge", "editor", "ide", "cli", "paraglide"]
+
+const scrollToAnchor = (anchor: string, behavior?: ScrollBehavior) => {
+	const element = document.getElementById(anchor)
+	if (element && window) {
+		window.scrollTo({
+			top: element.offsetTop - 128,
+			behavior: behavior ?? "instant",
+		})
+	}
+	window.history.pushState(
+		{},
+		"",
+		`${currentPageContext.urlParsed.pathname}${
+			currentPageContext.urlParsed.search.view
+				? `?view=${currentPageContext.urlParsed.search.view}`
+				: ""
+		}#${anchor}`
+	)
+}
 
 export default function Page(props: PageProps) {
 	const [readmore, setReadmore] = createSignal<boolean>(false)
@@ -79,13 +97,19 @@ export default function Page(props: PageProps) {
 			{props.manifest && props.manifest.gallery ? (
 				<Meta name="og:image" content={props.manifest.gallery[0]} />
 			) : (
-				<Meta name="og:image" content="/images/inlang-social-image.jpg" />
+				<Meta
+					name="og:image"
+					content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/website/public/opengraph/inlang-social-image.jpg"
+				/>
 			)}
 			<Meta name="twitter:card" content="summary_large_image" />
 			{props.manifest && props.manifest.gallery ? (
 				<Meta name="twitter:image" content={props.manifest.gallery[0]} />
 			) : (
-				<Meta name="twitter:image" content="/images/inlang-social-image.jpg" />
+				<Meta
+					name="twitter:image"
+					content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/website/public/opengraph/inlang-social-image.jpg"
+				/>
 			)}
 			<Meta
 				name="twitter:image:alt"
@@ -132,22 +156,18 @@ export default function Page(props: PageProps) {
 												<div class="flex gap-3 flex-col">
 													<div class="flex flex-col lg:flex-row gap-4 lg:items-center">
 														<h1 class="text-3xl font-bold">{displayName()}</h1>
+
 														<Show
-															when={props.manifest.keywords
-																.map((keyword: string) => keyword.toLowerCase())
-																.includes("inlang")}
+															when={
+																props.manifest.keywords
+																	.map((keyword: string) => keyword.toLowerCase())
+																	.includes("external") &&
+																!props.manifest.keywords
+																	.map((keyword: string) => keyword.toLowerCase())
+																	.includes("inlang")
+															}
 														>
-															<sl-tooltip prop:content="Learn more">
-																<Link
-																	href="/g/7777asdy"
-																	class="flex flex-row gap-2 items-center hover:opacity-70"
-																>
-																	<InlangBadge />
-																	<div class="flex-1 text-sm text-primary font-medium">
-																		inlang ecosystem compatible
-																	</div>
-																</Link>
-															</sl-tooltip>
+															<EcosystemIncompatibleBadgeBig />
 														</Show>
 													</div>
 													<div class="inline-block text-surface-500 ">
@@ -238,9 +258,7 @@ export default function Page(props: PageProps) {
 										<Show when={props.tab}>
 											<div class="flex items-center gap-6 mt-6 w-full border-b border-surface-2">
 												<a
-													href=""
-													onClick={(e) => {
-														e.preventDefault()
+													onClick={() => {
 														typeof window !== "undefined" &&
 															window.location.replace(`${currentPageContext.urlParsed.pathname}`)
 													}}
@@ -264,7 +282,6 @@ export default function Page(props: PageProps) {
 													</div>
 												</a>
 												<a
-													href="?view=changelog"
 													onClick={(e) => {
 														e.preventDefault()
 														typeof window !== "undefined" &&
@@ -377,7 +394,10 @@ export default function Page(props: PageProps) {
 													props.manifest.pricing
 												}
 											>
-												<div>
+												<div
+													class="cursor-pointer"
+													onClick={() => scrollToAnchor("pricing", "smooth")}
+												>
 													<h3 class="text-surface-400 text-sm mb-2">Pricing</h3>
 													<p class="text-surface-600 font-medium">
 														{
@@ -442,6 +462,18 @@ export default function Page(props: PageProps) {
 	)
 }
 
+const EcosystemIncompatibleBadgeBig = () => {
+	return (
+		<sl-tooltip prop:content="Learn more">
+			<Link href="/g/7777asdy" class="flex flex-row gap-2 items-center hover:opacity-70">
+				<div class="px-3 gap-1 h-8 rounded-lg bg-surface-200 flex items-center font-medium text-surface-500 text-[16px]">
+					Ecosystem Incompatible
+				</div>
+			</Link>
+		</sl-tooltip>
+	)
+}
+
 export function Recommends(props: { recommends: MarketplaceManifest[] }) {
 	return (
 		<>
@@ -464,25 +496,6 @@ export function Recommends(props: { recommends: MarketplaceManifest[] }) {
 function Markdown(props: { markdown: string }) {
 	// eslint-disable-next-line solid/no-innerhtml
 	return <article class="w-full" innerHTML={props.markdown} />
-}
-
-const scrollToAnchor = (anchor: string, behavior?: ScrollBehavior) => {
-	const element = document.getElementById(anchor)
-	if (element && window) {
-		window.scrollTo({
-			top: element.offsetTop - 128,
-			behavior: behavior ?? "instant",
-		})
-	}
-	window.history.pushState(
-		{},
-		"",
-		`${currentPageContext.urlParsed.pathname}${
-			currentPageContext.urlParsed.search.view
-				? `?view=${currentPageContext.urlParsed.search.view}`
-				: ""
-		}#${anchor}`
-	)
 }
 
 function NavbarCommon(props: {

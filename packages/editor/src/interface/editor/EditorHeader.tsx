@@ -7,15 +7,21 @@ function EditorHeader() {
 	const getLinks = () => {
 		return [
 			{
-				href: "https://inlang.com/m/tdozzpar",
+				href: import.meta.env.PROD
+					? "https://inlang.com/m/tdozzpar"
+					: "http://localhost:3000/m/tdozzpar",
 				name: "What is Fink?",
 			},
 			{
-				href: "https://inlang.com/g/6ddyhpoi",
+				href: import.meta.env.PROD
+					? "https://inlang.com/g/6ddyhpoi"
+					: "http://localhost:3000/g/6ddyhpoi",
 				name: "How to translate?",
 			},
 			{
-				href: "https://inlang.com/c/lint-rules",
+				href: import.meta.env.PROD
+					? "https://inlang.com/c/lint-rules"
+					: "http://localhost:3000/c/lint-rules",
 				name: "Find Lint Rules",
 			},
 		]
@@ -27,7 +33,6 @@ function EditorHeader() {
 		return localStorage.user
 	}
 
-	// const [mobileMenuIsOpen, setMobileMenuIsOpen] = createSignal(false)
 	return (
 		<>
 			<header class="sticky top-0 left-0 right-0 z-[100] w-full bg-transparent bg-background py-3.5 px-4 border-b border-surface-200">
@@ -35,7 +40,7 @@ function EditorHeader() {
 					<nav class="max-w-[1248px] w-full mx-auto -mt-[0.8px] -mb-[1.5px]">
 						<div class="flex items-center">
 							<a
-								href="https://inlang.com"
+								href={import.meta.env.PROD ? "https://inlang.com" : "http://localhost:3000"}
 								target="_blank"
 								class="flex items-center w-fit pointer-events-auto transition-opacity hover:opacity-75"
 							>
@@ -59,14 +64,19 @@ function EditorHeader() {
 							</a>
 							<p class="self-center text-left font-regular text-surface-400 pl-4 pr-1">/</p>
 							<a
-								class="self-center pl-2 text-left font-medium text-surface-900 hover:text-surface-800"
-								href="/"
+								class="self-center pl-2 text-left font-medium text-surface-900 hover:text-primary transition-colors duration-150"
+								href={import.meta.env.PROD ? "https://fink.inlang.com" : "http://localhost:4003"}
 							>
 								Fink
 							</a>
 							{/* <p class="self-center text-left font-regular text-surface-400 pl-3 pr-1">/</p> */}
 							<div class="w-full content-center">
-								<div class="hidden md:flex justify-end items-center gap-8">
+								<div
+									class={
+										"hidden md:flex justify-end items-center gap-8 transition-[margin] duration-200 " +
+										(user()?.isLoggedIn && "mr-16")
+									}
+								>
 									<For each={getLinks()}>
 										{(link) => (
 											<>
@@ -77,7 +87,9 @@ function EditorHeader() {
 										)}
 									</For>
 									<Show when={user()?.isLoggedIn}>
-										<UserDropdown />
+										<div class="absolute right-4 xl:right-[calc((100%_-_1240px)_/_2)] animate-fadeIn">
+											<UserDropdown />
+										</div>
 									</Show>
 								</div>
 							</div>

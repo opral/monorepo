@@ -34,6 +34,11 @@ export type InstalledMessageLintRule = {
 }
 
 export type InlangProject = {
+	/**
+	 * The project's id.
+	 */
+	// TODO #2063 make project id non-optional when every project is guaranteed to a project id
+	id?: string
 	installed: {
 		plugins: Subscribable<InstalledPlugin[]>
 		messageLintRules: Subscribable<InstalledMessageLintRule[]>

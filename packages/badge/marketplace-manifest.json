@@ -24,7 +24,9 @@
 		"lix",
 		"svelte",
 		"nextjs",
-		"inlang"
+		"astro",
+		"inlang",
+		"solid"
 	],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",

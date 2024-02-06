@@ -13,6 +13,7 @@ export const solidAdapter = (
 	}
 
 	return {
+		id: project.id,
 		customApi: convert(project.customApi),
 		settings: convert(project.settings),
 		errors: convert(project.errors),
@@ -45,6 +46,7 @@ export const solidAdapter = (
 }
 
 export type InlangProjectWithSolidAdapter = {
+	id: InlangProject["id"]
 	customApi: () => ReturnType<InlangProject["customApi"]>
 	installed: {
 		plugins: () => ReturnType<InlangProject["installed"]["plugins"]>

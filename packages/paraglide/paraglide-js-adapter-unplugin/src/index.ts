@@ -1,5 +1,6 @@
 import { createUnplugin } from "unplugin"
 import { Message, ProjectSettings, loadProject, type InlangProject } from "@inlang/sdk"
+import { openRepository, findRepoRoot } from "@lix-js/client"
 import path from "node:path"
 import fs from "node:fs/promises"
 import { compile, writeOutput, Logger } from "@inlang/paraglide-js/internal"
@@ -19,6 +20,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		...config,
 	}
 
+	const projectPath = path.resolve(process.cwd(), options.project)
 	const outputDirectory = path.resolve(process.cwd(), options.outdir)
 	const logger = new Logger({ silent: options.silent, prefix: true })
 
@@ -37,7 +39,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		}
 
 		logMessageChange()
-		const output = compile({ messages, settings })
+		const output = await compile({ messages, settings })
 		await writeOutput(outputDirectory, output, fs)
 		numCompiles++
 		previousMessagesHash = currentMessagesHash
@@ -59,10 +61,19 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 	let project: InlangProject | undefined = undefined
 	async function getProject(): Promise<InlangProject> {
 		if (project) return project
-		project = await loadProject({
-			projectPath: path.resolve(process.cwd(), options.project),
+
+		const repoRoot = await findRepoRoot({ nodeishFs: fs, path: projectPath })
+
+		const repo = await openRepository(repoRoot || process.cwd(), {
 			nodeishFs: fs,
 		})
+
+		project = await loadProject({
+			appId: "library.inlang.paraglideJs",
+			projectPath: path.resolve(process.cwd(), options.project),
+			repo,
+		})
+
 		return project
 	}
 

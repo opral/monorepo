@@ -26,13 +26,13 @@ This will have done a few things:
 - Added the paraglide compiler to your `package.json` build scripts
 
 
-It's recommended to also modify your `dev` command to include the `paraglide compile` command. This will cause the compiler to re-run whenever your messages change.
+It's recommended to also modify your `dev` command to include the `paraglide-js compile` command. This will cause the compiler to re-run whenever your messages change.
 
 ```json
 // package.json
 {
 	"scripts": {
-		"dev": "next dev & paraglide compile --project ./project.inlang --watch"
+		"dev": "next dev & paraglide-js compile --project ./project.inlang --watch"
 	}
 }
 ```

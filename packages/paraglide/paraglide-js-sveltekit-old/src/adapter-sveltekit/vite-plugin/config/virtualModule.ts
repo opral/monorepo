@@ -14,6 +14,7 @@ import { shouldContentBePrerendered } from "./utils/shouldContentBePrerendered.j
 import { getSettings } from "./utils/getSettings.js"
 import { doesPathExist } from "./utils/utils.js"
 import { getNodeishFs } from "./utils/getNodeishFs.js"
+import { openRepository, findRepoRoot } from "@lix-js/client"
 
 type VersionString = `${number}.${number}.${number}${string}`
 
@@ -57,7 +58,12 @@ export const initVirtualModule = async (): Promise<VirtualModule> => {
 
 	// eslint-disable-next-line no-async-promise-executor
 	return (VirtualModule = new Promise<VirtualModule>(async (resolve, reject) => {
-		const inlang = await loadProject({ nodeishFs, projectPath: PATH_TO_INLANG_CONFIG })
+		const repoRoot = await findRepoRoot({ nodeishFs, path: PATH_TO_CWD })
+
+		const repo = await openRepository(repoRoot || process.cwd(), {
+			nodeishFs,
+		})
+		const inlang = await loadProject({ repo, projectPath: PATH_TO_INLANG_CONFIG })
 
 		const errors = inlang.errors()
 		if (errors.length) {
@@ -90,7 +96,7 @@ export const initVirtualModule = async (): Promise<VirtualModule> => {
 			return {
 				default: new InlangSdkException(
 					`Could not find 'svelte.config.js' file (${PATH_TO_SVELTE_CONFIG})`,
-					error as Error,
+					error as Error
 				),
 			}
 		})) as { default: SvelteConfig | InlangSdkException }
@@ -101,15 +107,15 @@ export const initVirtualModule = async (): Promise<VirtualModule> => {
 		const files = {
 			appTemplate: path.resolve(
 				PATH_TO_CWD,
-				svelteConfig.kit?.files?.appTemplate || path.resolve("src", "app.html"),
+				svelteConfig.kit?.files?.appTemplate || path.resolve("src", "app.html")
 			),
 			routes: path.resolve(
 				PATH_TO_CWD,
-				svelteConfig.kit?.files?.routes || path.resolve("src", "routes"),
+				svelteConfig.kit?.files?.routes || path.resolve("src", "routes")
 			),
 			serverHooks: path.resolve(
 				PATH_TO_CWD,
-				svelteConfig.kit?.files?.hooks?.server || path.resolve("src", "hooks.server"),
+				svelteConfig.kit?.files?.hooks?.server || path.resolve("src", "hooks.server")
 			),
 		}
 
@@ -123,7 +129,7 @@ export const initVirtualModule = async (): Promise<VirtualModule> => {
 
 		const usesTypeScript = await doesPathExist(
 			nodeishFs,
-			path.resolve(PATH_TO_CWD, "tsconfig.json"),
+			path.resolve(PATH_TO_CWD, "tsconfig.json")
 		)
 
 		const svelteKitVersion = await getSvelteKitVersion()
