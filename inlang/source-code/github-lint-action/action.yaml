@@ -19,7 +19,7 @@ inputs:
   project_path:
     description: 'Project path'
     required: false
-    default: './project.inlang'
+    default: '/project.inlang'
 
 # Define your outputs here.
 outputs:
