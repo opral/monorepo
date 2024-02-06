@@ -69,6 +69,10 @@ async function setupProject(enabledLintRule?: MessageLintRule) {
 			messageLintRuleLevels: {},
 		} satisfies ProjectSettings)
 	)
+	await fs.writeFile(
+		"./project.inlang/project_id",
+		"0f7195366da49da9fb1c41ee28e29f7d284606a3ab4764499751489da7511a7d"
+	)
 
 	const _mockPlugin: Plugin = {
 		id: "plugin.inlang.json",
@@ -143,7 +147,7 @@ describe("test", () => {
 				case "token":
 					return process.env.GITHUB_TOKEN || ""
 				case "project_path":
-					return "/project.inlang"
+					return "/inlang/source-code/github-lint-action/project.inlang"
 				default:
 					return ""
 			}

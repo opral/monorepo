@@ -37,7 +37,7 @@ export async function run(): Promise<void> {
 		})
 
 		const project = await loadProject({
-			projectPath: project_path,
+			projectPath: absoluteProjectPath,
 			repo: inlangRepo,
 			appId: "app.inlang.githubI18nLintAction",
 		})
@@ -45,7 +45,7 @@ export async function run(): Promise<void> {
 
 		if (project.errors().length > 0) {
 			for (const error of project.errors()) {
-				console.error(error)
+				throw error
 			}
 		}
 
