@@ -373,3 +373,5 @@ $RECYCLE.BIN/
 inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/example/build
 inlang/source-code/paraglide/paraglide-js-adapter-solidstart/example/.solid
 *.h.ts.mjs
+**/vite.config.ts.timestamp-*
+**/vite.config.js.timestamp-*
