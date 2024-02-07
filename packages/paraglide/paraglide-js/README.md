@@ -364,7 +364,7 @@ Of course, we're not done yet! We plan on adding the following features to Parag
 
 Paraglide JS is part of the inlang ecosystem, so it integrates nicely with all the other inlang compatible tools. If you are working with translators and/or designers you will find the following tools useful:
 
-- [Fink](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor) - An Online UI for editing translations. Any changes made in Fink will be pushed to your repository, where your CI/CD pipeline will pick them up and redeploy automatically.
+- [Fink](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor) - An Online UI for editing translations. Changes made in Fink are committed to a translation branch or submitted via pull request.
 - [Parrot](https://inlang.com/m/gkrpgoir/app-parrot-figmaPlugin) - A Figma Plugin for previewing translations right in your Figma designs. This avoids any layout issues that might occur due to different text lengths in different languages.
 
 # Pricing 
