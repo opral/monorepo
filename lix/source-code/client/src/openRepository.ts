@@ -313,16 +313,22 @@ export async function openRepository(
 		return execute()
 	}
 
-	return {
-		_isoGit: isoGit,
-		_enableExperimentalFeatures: enableExperimentalFeatures,
-		nodeishFs: withLazyFetching({
+	const nodeishFs = withLazyFetching({
 			nodeishFs: rawFs,
 			verbose,
 			description: "app",
-			intercept: delayedAction,
-		}),
-    fs: experimentalLixFs ?  {
+		intercept: doLixClone ? delayedAction : undefined,
+	})
+
+	return {
+		_isoGit: isoGit,
+		_enableExperimentalFeatures: enableExperimentalFeatures,
+		_rawFs: rawFs,
+
+		nodeishFs,
+
+		fs: experimentalLixFs
+			? {
       read(path: string) {
         return nodeishFs.readFile(path, { encoding: "utf-8" })
       },
