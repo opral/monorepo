@@ -267,6 +267,10 @@ export async function openRepository(
 		async checkout({ branch }: { branch: string }) {
 			branchName = branch
 
+      if (doLixClone) {
+        throw new Error("not implemented for lazy lix mode yet, use openRepo with different branch instead")
+      }
+
 			await checkout({
 				fs: withLazyFetching({
 					nodeishFs: rawFs,
