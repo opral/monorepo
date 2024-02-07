@@ -173,6 +173,98 @@ export async function openRepository(
 	// Bail commit/ push on errors that are relevant or unknown
 
 	let pending: Promise<void | { error: Error }> | undefined
+  const checkedOut = new Set()
+  let nextBatch: string[] = []
+  async function doCheckout() {
+    if (nextBatch.length < 1) {
+      return
+    }
+    const thisBatch = [...nextBatch]
+    nextBatch = []
+    if (verbose) {
+      console.warn("checking out ", thisBatch)
+    }
+
+    for (const maybePlacholder of thisBatch.filter((entry) => rawFs._isPlaceholder(entry))) {
+      await rawFs.rm(maybePlacholder)
+    }
+
+    const res = await checkout({
+      fs: withLazyFetching({
+        nodeishFs: rawFs,
+        verbose,
+        description: "checkout",
+      }),
+      dir,
+      cache,
+      ref: args.branch,
+      filepaths: thisBatch,
+    })
+
+    for (const entry of thisBatch) {
+      checkedOut.add(entry)
+    }
+
+    if (nextBatch.length) {
+      // console.warn("next batch", nextBatch)
+      return doCheckout()
+    }
+
+    pending = undefined
+    return res
+  }
+
+  async function checkOutPlaceholders() {
+    await checkout({
+      fs: withLazyFetching({
+        nodeishFs: rawFs,
+        verbose,
+        description: "checkout",
+      }),
+      dir,
+      ref: branchName,
+      filepaths: [],
+    })
+
+    const fs = withLazyFetching({ nodeishFs: rawFs, verbose, description: "checkout placeholders" })
+    await walk({
+      fs,
+      dir,
+      cache,
+      gitdir: ".git",
+      trees: [TREE({ ref: args.branch })],
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      map: async function (fullpath, [commit]) {
+        if (!commit) {
+          return undefined
+        }
+
+        const commitType = await commit.type()
+        if (commitType === "tree" && !checkedOut.has(fullpath)) {
+          if (fullpath !== ".") {
+            try {
+              await fs.mkdir(fullpath)
+            } catch {
+              // ignore
+            }
+          }
+
+          return fullpath
+        } else if (commitType === "blob" && !checkedOut.has(fullpath)) {
+          try {
+            fs._createPlaceholder(fullpath)
+          } catch (err) {
+            console.warn(err)
+            // ignore
+          }
+
+          return fullpath
+        }
+
+        return undefined
+      },
+    })
+  }
 
 	if (doLixClone) {
 		pending = clone({
