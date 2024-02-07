@@ -1,7 +1,10 @@
 name: Test ide-extension with E2E tests
 
 on:
-  workflow_dispatch:
+  pull_request:
+    paths: 
+        - 'inlang/source-code/ide-extension/**'
+        - '.github/workflows/**'
 
 jobs:
   test:

@@ -171,6 +171,6 @@ We encourage you to run `npm run build` and inspect the output. You will see tha
 
 ## What's Next?
 
-You can read the [Paragldie](https://inlang.com/m/gerre34r/library-inlang-paraglideJs)() and [Paraglide-Adapter-Astro](https://inlang.com/m/iljlwzfs/library-inlang-paraglideJsAdapterAstro) documentation to get a more complete understanding of what's possible. You can also check out our [Astro + Paraglide](https://stackblitz.com/~/github.com/LorisSigrist/paraglide-astro-example) example on StackBlitz.
+You can read the [Paragldie](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) and [Paraglide-Adapter-Astro](https://inlang.com/m/iljlwzfs/library-inlang-paraglideJsAdapterAstro) documentation to get a more complete understanding of what's possible. You can also check out our [Astro + Paraglide](https://stackblitz.com/~/github.com/LorisSigrist/paraglide-astro-example) example on StackBlitz.
 
 If you have any suggestions for this guide, please reach out to us on [Discord](https://discord.gg/gdMPPWy57R), or open an issue on [GitHub](https://www.github.com/opral/monorepo/issues). If you have trouble following, don't hesitate to ask for help. We are happy to help getting you set up.

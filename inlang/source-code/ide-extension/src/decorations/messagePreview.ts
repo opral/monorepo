@@ -4,7 +4,6 @@ import { contextTooltip } from "./contextTooltip.js"
 import { getStringFromPattern } from "../utilities/messages/query.js"
 import { CONFIGURATION } from "../configuration.js"
 import { resolveEscapedCharacters } from "../utilities/messages/resolveEscapedCharacters.js"
-import { getActiveTextEditor } from "../main.js"
 import { getSetting } from "../utilities/settings/index.js"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
@@ -17,7 +16,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 	})
 
 	async function updateDecorations() {
-		const activeTextEditor = getActiveTextEditor()
+		const activeTextEditor = vscode.window.activeTextEditor
 
 		if (!activeTextEditor) {
 			return
