@@ -51,6 +51,7 @@ async function $import(
 	try {
 		return await import(/* @vite-ignore */ moduleWithMimeType)
 	} catch (error) {
+		console.log("error import", error)
 		if (error instanceof SyntaxError && uri.includes("jsdelivr")) {
 			error.message += dedent`\n\n
 Are you sure that the file exists on JSDelivr?
