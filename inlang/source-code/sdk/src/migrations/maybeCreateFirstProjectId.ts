@@ -24,7 +24,11 @@ export async function maybeCreateFirstProjectId(args: {
 		if (error.code === "ENOENT" && args.repo) {
 			const projectId = await generateProjectId({ repo: args.repo, projectPath: args.projectPath })
 			if (projectId) {
-				await args.repo.nodeishFs.writeFile(args.projectPath + "/project_id", projectId)
+				await args.repo.nodeishFs
+					.writeFile(args.projectPath + "/project_id", projectId)
+					.catch((error) => {
+						console.error("Failed to write project_id", error)
+					})
 			}
 		}
 	}
