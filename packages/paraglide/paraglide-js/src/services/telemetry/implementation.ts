@@ -1,7 +1,7 @@
 import { publicEnv } from "@inlang/env-variables"
 import { PostHog } from "posthog-node"
 import type { TelemetryEvents } from "./events.js"
-import type { InlangProject } from "@inlang/sdk"
+
 // TODO add a project UUID to the tele.groups internal #196
 // import { getGitRemotes } from "../../utils/git.js"
 // import { parseOrigin } from "@inlang/telemetry"
