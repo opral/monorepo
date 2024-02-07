@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.32.0
+
+### Minor Changes
+
+- b3090c279: fix env issues in vscode extension
+
 ## 1.31.0
 
 ### Minor Changes
