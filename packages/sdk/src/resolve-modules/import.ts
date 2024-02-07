@@ -46,8 +46,6 @@ async function $import(
 		})
 	}
 
-	console.log(moduleAsText)
-
 	const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(moduleAsText)
 
 	try {
