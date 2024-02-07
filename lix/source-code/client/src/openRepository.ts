@@ -267,7 +267,7 @@ export async function openRepository(
   }
 
 	if (doLixClone) {
-		pending = clone({
+    await clone({
 			fs: withLazyFetching({ nodeishFs: rawFs, verbose, description: "clone" }),
 			http: makeHttpClient({
 				verbose,
@@ -310,9 +310,7 @@ export async function openRepository(
 				setErrors((previous) => [...(previous || []), newError])
 			})
 
-		await pending
 	}
-
 	// delay all fs and repo operations until the repo clone and checkout have finished, this is preparation for the lazy feature
 	function delayedAction({ execute }: { execute: () => any }) {
 		if (pending) {
