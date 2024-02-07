@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.31.0
+
+### Minor Changes
+
+- 2f160c130: refactor: clean up env variable usage
+
 ## 1.30.2
 
 ### Patch Changes
