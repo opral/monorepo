@@ -173,101 +173,101 @@ export async function openRepository(
 	// Bail commit/ push on errors that are relevant or unknown
 
 	let pending: Promise<void | { error: Error }> | undefined
-  const checkedOut = new Set()
-  let nextBatch: string[] = []
-  async function doCheckout() {
-    if (nextBatch.length < 1) {
-      return
-    }
-    const thisBatch = [...nextBatch]
-    nextBatch = []
-    if (verbose) {
-      console.warn("checking out ", thisBatch)
-    }
+	const checkedOut = new Set()
+	let nextBatch: string[] = []
+	async function doCheckout() {
+		if (nextBatch.length < 1) {
+			return
+		}
+		const thisBatch = [...nextBatch]
+		nextBatch = []
+		if (verbose) {
+			console.warn("checking out ", thisBatch)
+		}
 
-    for (const maybePlacholder of thisBatch.filter((entry) => rawFs._isPlaceholder(entry))) {
-      await rawFs.rm(maybePlacholder)
-    }
+		for (const maybePlacholder of thisBatch.filter((entry) => rawFs._isPlaceholder(entry))) {
+			await rawFs.rm(maybePlacholder)
+		}
 
-    const res = await checkout({
-      fs: withLazyFetching({
-        nodeishFs: rawFs,
-        verbose,
-        description: "checkout",
-      }),
-      dir,
-      cache,
-      ref: args.branch,
-      filepaths: thisBatch,
-    })
+		const res = await checkout({
+			fs: withLazyFetching({
+				nodeishFs: rawFs,
+				verbose,
+				description: "checkout",
+			}),
+			dir,
+			cache,
+			ref: args.branch,
+			filepaths: thisBatch,
+		})
 
-    for (const entry of thisBatch) {
-      checkedOut.add(entry)
-    }
+		for (const entry of thisBatch) {
+			checkedOut.add(entry)
+		}
 
-    if (nextBatch.length) {
-      // console.warn("next batch", nextBatch)
-      return doCheckout()
-    }
+		if (nextBatch.length) {
+			// console.warn("next batch", nextBatch)
+			return doCheckout()
+		}
 
-    pending = undefined
-    return res
-  }
+		pending = undefined
+		return res
+	}
 
-  async function checkOutPlaceholders() {
-    await checkout({
-      fs: withLazyFetching({
-        nodeishFs: rawFs,
-        verbose,
-        description: "checkout",
-      }),
-      dir,
-      ref: branchName,
-      filepaths: [],
-    })
+	async function checkOutPlaceholders() {
+		await checkout({
+			fs: withLazyFetching({
+				nodeishFs: rawFs,
+				verbose,
+				description: "checkout",
+			}),
+			dir,
+			ref: branchName,
+			filepaths: [],
+		})
 
-    const fs = withLazyFetching({ nodeishFs: rawFs, verbose, description: "checkout placeholders" })
-    await walk({
-      fs,
-      dir,
-      cache,
-      gitdir: ".git",
-      trees: [TREE({ ref: args.branch })],
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      map: async function (fullpath, [commit]) {
-        if (!commit) {
-          return undefined
-        }
+		const fs = withLazyFetching({ nodeishFs: rawFs, verbose, description: "checkout placeholders" })
+		await walk({
+			fs,
+			dir,
+			cache,
+			gitdir: ".git",
+			trees: [TREE({ ref: args.branch })],
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			map: async function (fullpath, [commit]) {
+				if (!commit) {
+					return undefined
+				}
 
-        const commitType = await commit.type()
-        if (commitType === "tree" && !checkedOut.has(fullpath)) {
-          if (fullpath !== ".") {
-            try {
-              await fs.mkdir(fullpath)
-            } catch {
-              // ignore
-            }
-          }
+				const commitType = await commit.type()
+				if (commitType === "tree" && !checkedOut.has(fullpath)) {
+					if (fullpath !== ".") {
+						try {
+							await fs.mkdir(fullpath)
+						} catch {
+							// ignore
+						}
+					}
 
-          return fullpath
-        } else if (commitType === "blob" && !checkedOut.has(fullpath)) {
-          try {
-            fs._createPlaceholder(fullpath)
-          } catch (err) {
-            console.warn(err)
-            // ignore
-          }
+					return fullpath
+				} else if (commitType === "blob" && !checkedOut.has(fullpath)) {
+					try {
+						fs._createPlaceholder(fullpath)
+					} catch (err) {
+						console.warn(err)
+						// ignore
+					}
 
-          return fullpath
-        }
+					return fullpath
+				}
 
-        return undefined
-      },
-    })
-  }
+				return undefined
+			},
+		})
+	}
 
 	if (doLixClone) {
-    await clone({
+		await clone({
 			fs: withLazyFetching({ nodeishFs: rawFs, verbose, description: "clone" }),
 			http: makeHttpClient({
 				verbose,
@@ -291,7 +291,7 @@ export async function openRepository(
 			depth: 1,
 			noTags: true,
 		})
-      .then(() => checkOutPlaceholders())
+			.then(() => checkOutPlaceholders())
 			.finally(() => {
 				pending = undefined
 			})
@@ -300,23 +300,54 @@ export async function openRepository(
 			})
 	}
 	// delay all fs and repo operations until the repo clone and checkout have finished, this is preparation for the lazy feature
-	function delayedAction({ execute }: { execute: () => any }) {
+	function delayedAction({
+		execute,
+		prop,
+		argumentsList,
+	}: {
+		execute: () => any
+		prop: any
+		argumentsList: any[]
+	}) {
+		const filename = argumentsList?.[0]?.replace(/^(\.)?(\/)?\//, "")
+		const pathParts = filename?.split("/") || []
+		const rootObject = pathParts[0]
+
+		if (verbose) {
+			console.warn("delayedAction", prop, argumentsList)
+		}
+
+		if (
+			rootObject !== ".git" &&
+			["readFile", "readlink"].includes(prop) &&
+			rootObject &&
+			!checkedOut.has(rootObject) &&
+			!checkedOut.has(filename)
+		) {
+			if (pending) {
+				nextBatch.push(filename)
+			} else {
+				nextBatch.push(filename)
+				pending = doCheckout()
+			}
+		}
+
 		if (pending) {
 			return pending.then(execute)
-      // .finally(() => {
-      //   if (verbose) {
-      //     console.warn("executed", filename, prop)
-      //   }
-      // })
+			// .finally(() => {
+			//   if (verbose) {
+			//     console.warn("executed", filename, prop)
+			//   }
+			// })
 		}
 
 		return execute()
 	}
 
 	const nodeishFs = withLazyFetching({
-			nodeishFs: rawFs,
-			verbose,
-			description: "app",
+		nodeishFs: rawFs,
+		verbose,
+		description: "app",
 		intercept: doLixClone ? delayedAction : undefined,
 	})
 
@@ -329,9 +360,9 @@ export async function openRepository(
 
 		fs: experimentalLixFs
 			? {
-      read(path: string) {
-        return nodeishFs.readFile(path, { encoding: "utf-8" })
-      },
+					read(path: string) {
+						return nodeishFs.readFile(path, { encoding: "utf-8" })
+					},
 			  }
 			: undefined,
 
@@ -363,11 +394,11 @@ export async function openRepository(
 		async checkout({ branch }: { branch: string }) {
 			branchName = branch
 
-      if (doLixClone) {
+			if (doLixClone) {
 				throw new Error(
 					"not implemented for lazy lix mode yet, use openRepo with different branch instead"
 				)
-      }
+			}
 
 			await checkout({
 				fs: withLazyFetching({
