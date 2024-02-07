@@ -22,7 +22,7 @@ let buildOptions = {
 	external: ["vscode"],
 	define: {
 		ENV_DEFINED_IN_BUILD_STEP: JSON.stringify({
-			isProduction: !isDev,
+			IS_PRODUCTION: !isDev,
 		}),
 	},
 }
