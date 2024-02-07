@@ -2,11 +2,13 @@ import Link from "#src/renderer/Link.jsx"
 import * as m from "#src/paraglide/messages.js"
 import { Button } from "../components/Button.jsx"
 
+const isProduction = process.env.NODE_ENV === "production"
+
 const HeroSearch = () => {
 	return (
-		<div class="relative flex flex-col lg:flex-row items-center lg:items-start">
-			<div class="items-center lg:items-start relative z-30 flex flex-col w-full lg:w-1/2 gap-2 pb-6 mt-4 md:mt-8">
-				<div class="pt-4 group">
+		<div class="relative grid grid-cols-12">
+			<div class="col-span-12 lg:col-span-7 items-center lg:items-start relative z-30 flex flex-col gap-2 pb-6 mt-4 md:mt-8">
+				<div class="pt-8 group">
 					<Link
 						href="https://www.youtube.com/live/pTgIx-ucMsY?feature=shared&t=3825"
 						target="_blanc"
@@ -17,11 +19,11 @@ const HeroSearch = () => {
 						</Button>
 					</Link>
 				</div>
-				<h1 class="text-4xl max-w-[650px] md:text-5xl text-surface-900 text-center lg:text-start font-bold tracking-tight mt-6">
+				<h1 class="text-4xl md:text-6xl text-surface-900 text-center lg:text-start font-bold tracking-tight mt-6">
 					{m.home_inlang_title()}
 				</h1>
-				<p class="text-center lg:text-start text-lg max-w-[450px] text-surface-500 pt-5">
-					{m.home_inlang_description()}
+				<p class="text-center lg:text-start text-xl max-w-[600px] text-surface-500 pt-5">
+					{addLinksToText(m.home_inlang_description())}
 				</p>
 
 				<div class="mt-8">
@@ -34,7 +36,7 @@ const HeroSearch = () => {
 					</Button>
 				</div>
 			</div>
-			<div class="w-full lg:w-1/2 mb-10 lg:mb-0 mt-6 lg:mt-16 overflow-hidden flex items-center justify-center self-stretch">
+			<div class="col-span-12 lg:col-span-5 mb-10 lg:mb-0 mt-6 lg:mt-16 overflow-hidden flex items-center justify-center w-full">
 				<img
 					class="w-full max-w-[500px]"
 					src="/images/hero-cover-updated.png"
@@ -56,4 +58,55 @@ function Play() {
 			/>
 		</svg>
 	)
+}
+
+function addLinksToText(text: string) {
+	const replacements: { [key: string]: string } = {
+		"use case": `${isProduction ? `https://inlang.com?` : "http://localhost:3000?"}#personas`,
+		"change control": `${isProduction ? `https://inlang.com?` : "http://localhost:3000?"}#lix`,
+	}
+
+	const elements = []
+	let lastIndex = 0
+
+	for (const phrase in replacements) {
+		if (Object.prototype.hasOwnProperty.call(replacements, phrase)) {
+			const url = replacements[phrase]
+			const regex = new RegExp(`\\b${phrase}\\b`, "g")
+			const matches = [...text.matchAll(regex)]
+
+			for (const match of matches) {
+				const index: number = match.index || 0
+				elements.push(text.slice(lastIndex, index))
+				elements.push(
+					<a
+						href={url}
+						class="font-semibold text-surface-900 hover:opacity-70 underline underline-offset-2"
+						onClick={(e) => {
+							e.preventDefault()
+							scrollToAnchor(url!.split("#")[1]!, "smooth")
+						}}
+					>
+						{phrase}
+					</a>
+				)
+				lastIndex = index + match[0].length
+			}
+		}
+	}
+
+	elements.push(text.slice(Math.max(0, lastIndex)))
+
+	return elements
+}
+
+const scrollToAnchor = (anchor: string, behavior?: ScrollBehavior) => {
+	const element = document.getElementById(anchor)
+	if (element && window) {
+		window.scrollTo({
+			top: element.offsetTop - 96,
+			behavior: behavior ?? "instant",
+		})
+	}
+	//window.history.pushState({}, "", `${currentPageContext.urlParsed.pathname}#${anchor}`)
 }
