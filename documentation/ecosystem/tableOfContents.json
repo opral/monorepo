@@ -1,15 +1,8 @@
 {
 	"Overview": [
 		{
-			"startpage": true,
-			"path": "overview/introduction.md",
-			"slug": "",
-			"title": "What is an ecosystem?",
-			"description": "Introduction to inlang's ecosystem."
-		},
-		{
 			"path": "overview/architecture.md",
-			"slug": "architecture",
+			"slug": "",
 			"title": "Architecture",
 			"description": "Learn about inlang's architecture."
 		}
