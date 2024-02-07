@@ -49,7 +49,7 @@ async function $import(
 	const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(moduleAsText)
 
 	try {
-		return await import(/* @vite-ignore */ moduleWithMimeType)
+		return await import(moduleWithMimeType)
 	} catch (error) {
 		if (error instanceof SyntaxError && uri.includes("jsdelivr")) {
 			error.message += dedent`\n\n
