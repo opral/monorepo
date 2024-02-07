@@ -298,12 +298,16 @@ export async function openRepository(
 			.catch((newError: Error) => {
 				setErrors((previous) => [...(previous || []), newError])
 			})
-
 	}
 	// delay all fs and repo operations until the repo clone and checkout have finished, this is preparation for the lazy feature
 	function delayedAction({ execute }: { execute: () => any }) {
 		if (pending) {
 			return pending.then(execute)
+      // .finally(() => {
+      //   if (verbose) {
+      //     console.warn("executed", filename, prop)
+      //   }
+      // })
 		}
 
 		return execute()
@@ -322,7 +326,8 @@ export async function openRepository(
       read(path: string) {
         return nodeishFs.readFile(path, { encoding: "utf-8" })
       },
-    } : undefined,
+			  }
+			: undefined,
 
 		/**
 		 * Gets the git origin url of the current repository.
@@ -353,7 +358,9 @@ export async function openRepository(
 			branchName = branch
 
       if (doLixClone) {
-        throw new Error("not implemented for lazy lix mode yet, use openRepo with different branch instead")
+				throw new Error(
+					"not implemented for lazy lix mode yet, use openRepo with different branch instead"
+				)
       }
 
 			await checkout({
