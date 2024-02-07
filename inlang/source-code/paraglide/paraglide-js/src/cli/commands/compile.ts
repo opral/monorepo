@@ -83,6 +83,7 @@ async function executeCompilation(
 	const output = await compile({
 		messages: project.query.messages.getAll(),
 		settings: project.settings(),
+		projectId: project.id,
 	})
 
 	await writeOutput(outputDirectory, output, fs)

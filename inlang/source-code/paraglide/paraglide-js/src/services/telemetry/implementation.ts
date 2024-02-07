@@ -1,6 +1,7 @@
 import { publicEnv } from "@inlang/env-variables"
 import { PostHog } from "posthog-node"
 import type { TelemetryEvents } from "./events.js"
+
 // TODO add a project UUID to the tele.groups internal #196
 // import { getGitRemotes } from "../../utils/git.js"
 // import { parseOrigin } from "@inlang/telemetry"
@@ -42,19 +43,23 @@ export const telemetry = new Proxy(posthog, {
 /**
  * Wrapper to auto inject the git origin url and user id.
  */
-function capture(args: CaptureEventArguments) {
+function capture(args: CaptureEventArguments, projectId?: string) {
 	if (!publicEnv.PUBLIC_POSTHOG_TOKEN) {
 		return
 	}
 
-	return posthog.capture({
+	const data: Parameters<PostHog["capture"]>[0] = {
 		...args,
 		distinctId: "unknown",
-		// TODO add a project UUID to the tele.groups internal #196
-		// groups: {
-		// 	repository: gitOrigin,
-		// },
-	})
+	}
+
+	if (projectId) {
+		data.groups = {
+			project: projectId,
+		}
+	}
+
+	return posthog.capture(data)
 }
 
 /**
