@@ -120,7 +120,7 @@ export async function openRepository(
 		}
 	} else {
 		// Simple check for existing git repos
-		const maybeGitDir = await rawFs.lstat(".git").catch((error) => ({ error }))
+		const maybeGitDir = await rawFs.lstat(".git").catch((error: any) => ({ error }))
 		if ("error" in maybeGitDir) {
 			doLixClone = true
 		}
@@ -133,13 +133,13 @@ export async function openRepository(
 		)
 	}
 
-	const gitProxyUrl = lixHost ? `${protocol}//${lixHost}/git-proxy/` : ""
-	const gitHubProxyUrl = lixHost ? `${protocol}//${lixHost}/github-proxy/` : ""
+	const gitProxyUrl = lixHost ? `${protocol}//${lixHost}/git-proxy` : ""
+	const gitHubProxyUrl = lixHost ? `${protocol}//${lixHost}/github-proxy` : ""
 
 	const github = new Octokit({
 		request: {
 			fetch: (...ghArgs: any) => {
-				ghArgs[0] = gitHubProxyUrl + ghArgs[0]
+				ghArgs[0] = gitHubProxyUrl + "/" + ghArgs[0]
 				if (!ghArgs[1]) {
 					ghArgs[1] = {}
 				}
