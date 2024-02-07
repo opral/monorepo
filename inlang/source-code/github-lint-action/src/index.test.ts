@@ -147,7 +147,7 @@ describe("test", () => {
 				case "token":
 					return process.env.GITHUB_TOKEN || ""
 				case "project_path":
-					return "/inlang/source-code/github-lint-action/project.inlang"
+					return "/project.inlang"
 				default:
 					return ""
 			}
