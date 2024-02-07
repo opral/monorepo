@@ -12,6 +12,10 @@ export const messageCount = (ids: string[]) => {
 	for (const id of ids) {
 		if (showFilteredMessage(project()?.query.messages.get({ where: { id: id } }))) counter++
 	}
+  if (counter > 0 && !import.meta.env.PROD) {
+		console.timeEnd("openRepository")
+	}
+
 	return counter
 }
 

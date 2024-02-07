@@ -251,6 +251,10 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		async ({ routeParams: { host, owner, repository }, branch, user }) => {
 			if (host && owner && repository && user) {
 				try {
+					if (!import.meta.env.PROD) {
+						console.time("openRepository")
+					}
+
 					const newRepo = await openRepository(
 						`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${host}/${owner}/${repository}`,
 						{
@@ -260,6 +264,11 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 						}
 					)
 
+					if (window && !import.meta.env.PROD) {
+						// @ts-expect-error
+						window.repo = newRepo
+					}
+
 					if (newRepo.errors().length > 0) {
 						setLixErrors(newRepo.errors())
 						return
@@ -267,7 +276,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 						setLixErrors([])
 					}
 
-					// @ts-expect-error
 					newRepo.nodeishFs.watch = () => undefined
 					setLastPullTime(new Date())
 					// Invalidate the project while we switch branches
@@ -283,7 +291,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	)
 
-	repo()?.errors.subscribe((errors) => {
+	repo()?.errors.subscribe((errors: any) => {
 		setLixErrors(errors)
 	})
 
