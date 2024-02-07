@@ -71,6 +71,7 @@ export async function openRepository(
 		auth?: unknown // unimplemented
 	}
 ): Promise<Repository> {
+	const cache = undefined // to enable cache use {}
 	const rawFs = args.nodeishFs
 
 	if (!url) {
@@ -282,6 +283,7 @@ export async function openRepository(
 					intercept: delayedAction,
 				}),
 				dir,
+				cache,
 				filepath: cmdArgs.filepath,
 			})
 		},
@@ -327,6 +329,7 @@ export async function openRepository(
 					depth: 1,
 					singleBranch: true,
 					dir,
+					cache,
 					ref: useBranchName,
 					remote: "upstream",
 					http: makeHttpClient({ verbose, description: "forkStatus" }),
@@ -424,6 +427,7 @@ export async function openRepository(
 					intercept: delayedAction,
 				}),
 				dir,
+				cache,
 				filter: cmdArgs.filter,
 			})
 		},
@@ -437,6 +441,7 @@ export async function openRepository(
 					intercept: delayedAction,
 				}),
 				dir,
+				cache,
 				filepath: cmdArgs.filepath,
 			})
 		},
@@ -450,6 +455,7 @@ export async function openRepository(
 					intercept: delayedAction,
 				}),
 				dir,
+				cache,
 				author: cmdArgs.author,
 				message: cmdArgs.message,
 			}
@@ -470,6 +476,7 @@ export async function openRepository(
 					intercept: delayedAction,
 				}),
 				url: gitUrl,
+				cache,
 				corsProxy: gitProxyUrl,
 				http: makeHttpClient({ verbose, description: "push" }),
 				dir,
@@ -488,6 +495,7 @@ export async function openRepository(
 				corsProxy: gitProxyUrl,
 				http: makeHttpClient({ verbose, description: "pull" }),
 				dir,
+				cache,
 				fastForward: cmdArgs.fastForward,
 				singleBranch: cmdArgs.singleBranch,
 				author: cmdArgs.author,
@@ -504,6 +512,7 @@ export async function openRepository(
 				}),
 				depth: cmdArgs?.depth,
 				dir,
+				cache,
 				since: cmdArgs?.since,
 			})
 		},
