@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.30.2
+
+### Patch Changes
+
+- 431ee545d: add sentry error monitoring
+
 ## 1.30.1
 
 ### Patch Changes
