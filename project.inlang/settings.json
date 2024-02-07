@@ -11,7 +11,7 @@
 		"zh"
 	],
 	"modules": [
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@1/dist/index.js",
+		"https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format/dist/index.js",
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation/dist/index.js",
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern/dist/index.js",
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-without-source/dist/index.js",
