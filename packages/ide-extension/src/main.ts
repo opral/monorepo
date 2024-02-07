@@ -20,6 +20,10 @@ import { recommendationBannerView } from "./utilities/recommendation/recommendat
 import { telemetry } from "./services/telemetry/implementation.js"
 import { version } from "../package.json"
 import { statusBar } from "./utilities/settings/statusBar.js"
+import { initErrorMonitoring } from "./services/error-monitoring/implementation.js"
+
+// Sentry Error Handling
+initErrorMonitoring()
 
 // Entry Point
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
@@ -151,9 +155,4 @@ function handleInlangErrors() {
 	if (inlangErrors.length > 0) {
 		console.error("Inlang VSCode Extension errors:", inlangErrors)
 	}
-}
-
-// Helper Functions
-export function getActiveTextEditor(): vscode.TextEditor | undefined {
-	return vscode.window.activeTextEditor
 }
