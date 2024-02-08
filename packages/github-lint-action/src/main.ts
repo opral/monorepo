@@ -4,6 +4,8 @@ import * as core from "@actions/core"
 import * as github from "@actions/github"
 import { openRepository, findRepoRoot } from "@lix-js/client"
 import { loadProject } from "@inlang/sdk"
+import { normalizePath } from "@lix-js/fs"
+import { _import } from "../import/_import.js"
 
 /**
  * The main function for the action.
@@ -40,6 +42,7 @@ export async function run(): Promise<void> {
 			projectPath: absoluteProjectPath,
 			repo: inlangRepo,
 			appId: "app.inlang.githubI18nLintAction",
+			_import: _import(normalizePath(absoluteProjectPath)),
 		})
 		core.debug(project?.settings().toString())
 
