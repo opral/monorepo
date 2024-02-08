@@ -1,7 +1,7 @@
-import * as core from "@actions/core"
-import * as github from "@actions/github"
 import * as fs from "node:fs/promises"
 import "dotenv/config"
+import * as core from "@actions/core"
+import * as github from "@actions/github"
 import { openRepository, findRepoRoot } from "@lix-js/client"
 import { loadProject } from "@inlang/sdk"
 
