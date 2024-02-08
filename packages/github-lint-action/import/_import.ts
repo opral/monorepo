@@ -23,12 +23,11 @@ const createImport: ImportFunction = async (uri: string) => {
 	// http imports yet like VSCode.
 
 	const moduleAsText = uri.startsWith("http")
-		? await (await fetch(uri)).text()
+		? await(await fetch(uri)).text()
 		: await fs.readFile(uri, { encoding: "utf-8" })
 
 	try {
-		const asCjs = transpileToCjs(moduleAsText)
-		const module = requireFromString(asCjs)
+		const module = requireFromString(moduleAsText)
 		// for whatever reason, the default export is a function
 		// that we need to call to get the property
 		// if (module.default) {
@@ -41,14 +40,4 @@ const createImport: ImportFunction = async (uri: string) => {
 			{ cause: error }
 		)
 	}
-}
-
-function transpileToCjs(code: string): string {
-	const compilerOptions: ts.CompilerOptions = {
-		module: ts.ModuleKind.CommonJS,
-		target: ts.ScriptTarget.ES2020,
-	}
-
-	const result = ts.transpileModule(code, { compilerOptions })
-	return result.outputText
 }
