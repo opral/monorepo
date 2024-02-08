@@ -18,10 +18,10 @@ export function _import(basePath: string): ImportFunction {
 
 const createImport = async (uri: string, basePath: string) => {
 	const moduleAsText = uri.startsWith("http")
-		? await (await fetch(uri)).text()
+		? await(await fetch(uri)).text()
 		: await fs.readFile(uri, { encoding: "utf-8" })
 
-	const savePath = basePath + "/modules/" + uri.replace("https://cdn.jsdelivr.net/npm/", "")
+	const savePath = basePath + "/" + uri.slice(2)
 	console.log("Saving to", savePath)
 	await fs.writeFile(savePath, moduleAsText).catch((e) => {
 		console.error("Error while saving file", e)
