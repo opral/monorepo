@@ -30,6 +30,8 @@ export type Repository = {
 	add: (args: { filepath: string | string[] }) => Promise<Awaited<ReturnType<typeof raw.add>>>
 	listRemotes: () => Promise<Awaited<ReturnType<typeof raw.listRemotes>> | undefined>
 	log: (args?: { since?: Date; depth?: number }) => Promise<Awaited<ReturnType<typeof raw.log>>>
+
+	// @deprecated
 	statusMatrix: (args: {
 		filter?: any
 		filepaths?: string[]
