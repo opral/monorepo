@@ -1,6 +1,6 @@
 {
 	"extends": "./../tsconfig.base.json",
-	"include": ["src/**.ts", "src/main.mts"],
+	"include": ["src/**.ts", "src/main.ts"],
 	"compilerOptions": {
 		"target": "ESNext",
 		"outDir": "dist",
