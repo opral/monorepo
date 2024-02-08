@@ -22,7 +22,7 @@ const createImport = async (uri: string, basePath: string) => {
 		: await fs.readFile(uri, { encoding: "utf-8" })
 
 	const parts = uri.split("/")
-	const savePath = basePath + "/" + parts.at(-2) + ".js"
+	const savePath = basePath + "/" + parts.at(parts.length - 2) + ".js"
 	console.log("Saving to", savePath)
 	await fs.writeFile(savePath, moduleAsText).catch((e) => {
 		console.error("Error while saving file", e)
