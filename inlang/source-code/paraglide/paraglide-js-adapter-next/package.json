@@ -3,29 +3,21 @@
     "version": "0.0.1",
     "private": true,
     "scripts": {
-        "build": "node ./build.mjs",
+        "build": "tsc",
+        "dev": "tsc -w",
         "test": "vitest run --passWithNoTests"
     },
     "exports": {
         ".": {
-            "import": "./dist/index.js",
-            "types": "./dist/index.d.ts"
-        },
-        "./middleware": {
-            "import": "./dist/app/middleware.js",
-            "types": "./dist/app/middleware.d.ts"
-        },
-        "./navigation": {
-            "import": "./dist/app/navigation/index.js",
-            "types": "./dist/app/navigation/index.d.ts"
-        },
-        "./plugin": {
-            "require": "./dist/plugin/index.cjs",
-            "types": "./dist/plugin/index.d.ts"
-        },
-        "./pages": {
-            "import": "./dist/pages/entry.js",
-            "types": "./dist/pages/index.d.ts"
+            "types": "./dist/client/index.d.ts",
+            "react-server": {
+                "browser": "./dist/server/index.js",
+                "node": "./dist/server/index.js"
+            },
+            "default": {
+                "browser": "./dist/client/index.js",
+                "node": "./dist/client/index.js"
+            }
         }
     },
     "keywords": [

@@ -1287,6 +1287,9 @@ importers:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../../../paraglide-js
+      '@inlang/paraglide-js-adapter-next':
+        specifier: workspace:*
+        version: link:../..
       next:
         specifier: ^14.0.0
         version: 14.0.4(react-dom@18.2.0)(react@18.2.0)
