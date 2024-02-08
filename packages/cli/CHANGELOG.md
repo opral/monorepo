@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 2.12.0
+
+### Minor Changes
+
+- 2f160c130: refactor: clean up env variable usage
+
 ## 2.11.0
 
 ### Minor Changes
