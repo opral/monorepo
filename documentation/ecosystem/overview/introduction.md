@@ -51,5 +51,12 @@ In order to make your repository compatible with the inlang applications, you wi
 You can have multiple inlang projects in your repository. This is useful in a monorepo setup. If you need a guide to get started, visit the individual pages of the inlang [apps](/c/apps).
 
 <br/>
+
+<doc-links>
+    <doc-link title="inlang sdk" icon="mdi:book-open-page-variant" href="/documentation/sdk" description="Start build with the inlang sdk."></doc-link>
+	<doc-link title="inlang architecture" icon="mdi:skip-next" href="/documentation/architecture" description="Learn more about inlangs architecture."></doc-link>
+</doc-links>
+
+<br/>
 <br/>
 <br/>
