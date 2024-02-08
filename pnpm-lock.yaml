@@ -540,9 +540,6 @@ importers:
       '@lix-js/fs':
         specifier: workspace:*
         version: link:../../../lix/source-code/fs
-      '@types/require-from-string':
-        specifier: ^1.2.1
-        version: 1.2.3
       require-from-string:
         specifier: ^2.0.2
         version: 2.0.2
@@ -550,6 +547,9 @@ importers:
       '@types/node':
         specifier: ^20.11.16
         version: 20.11.16
+      '@types/require-from-string':
+        specifier: ^1.2.1
+        version: 1.2.3
       '@vercel/ncc':
         specifier: ^0.38.1
         version: 0.38.1
@@ -8561,6 +8561,7 @@ packages:
 
   /@types/require-from-string@1.2.3:
     resolution: {integrity: sha512-kxLU5xvefySGpp1Z7VCt4m5AhQJUZ8HjW8ADdeS7GieqFPHLAde007fd9bxeXEsFXyaA0LeWIoQXyXP17mGpIg==}
+    dev: true
 
   /@types/resolve@1.20.2:
     resolution: {integrity: sha512-60BCwRFOZCQhDncwQdxxeOEEkbc5dIMccYLwbxsS4TUNeVECQ/pBJ0j09mrHOl/JJvpRPGwO9SvE4nR2Nb/a4Q==}
