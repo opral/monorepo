@@ -1052,6 +1052,8 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)
 
+  inlang/source-code/paraglide/next-export-condition-test: {}
+
   inlang/source-code/paraglide/paraglide-js:
     dependencies:
       '@inlang/detect-json-formatting':
@@ -1284,6 +1286,9 @@ importers:
 
   inlang/source-code/paraglide/paraglide-js-adapter-next/examples/turbo:
     dependencies:
+      '@inlang/next-export-condition-test':
+        specifier: workspace:*
+        version: link:../../../next-export-condition-test
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../../../paraglide-js
