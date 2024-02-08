@@ -9,7 +9,20 @@ You also no longer need the `paraglide` commands in your `package.json`.
 
 ## Usage
 
-After having set up paraglide-js, you can add this plugin to your vite config.
+First make sure you have set up `@inlang/paraglide-js`. If you haven't you can get started by running
+this command and following the instructions.
+
+```bash
+npx @inlang/paraglide-js init
+```
+
+Install the vite adapter with
+
+```bash
+npm install @inlang/paraglide-js-adapter-vite
+```
+
+and add it to your `vite.config.js`
 
 ```js
 import { defineConfig } from "vite"
