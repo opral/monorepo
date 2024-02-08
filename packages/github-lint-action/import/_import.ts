@@ -10,22 +10,19 @@ import fs from "node:fs/promises"
 export function _import(basePath: string): ImportFunction {
 	return (uri: string) => {
 		if (uri.startsWith("./")) {
-			return createImport(normalizePath(basePath + "/" + uri.slice(2)))
+			return createImport(normalizePath(basePath + "/" + uri.slice(2)), basePath)
 		}
-		return createImport(uri)
+		return createImport(uri, basePath)
 	}
 }
 
-const createImport: ImportFunction = async (uri: string) => {
+const createImport = async (uri: string, basePath: string) => {
 	const moduleAsText = uri.startsWith("http")
-		? await(await fetch(uri)).text()
+		? await (await fetch(uri)).text()
 		: await fs.readFile(uri, { encoding: "utf-8" })
 
-	const savePath = "./" + uri.replace("https://cdn.jsdelivr.net/npm/", "")
+	const savePath = basePath + "/" + uri.replace("https://cdn.jsdelivr.net/npm/", "")
 	await fs.writeFile(savePath, moduleAsText)
 	console.log("Saving to", savePath)
-	// log dir content
-	const root = await fs.readdir("./")
-	console.log("Files in root dir:", root)
 	return savePath
 }
