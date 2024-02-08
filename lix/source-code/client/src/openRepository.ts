@@ -10,7 +10,6 @@ import { createSignal, createEffect } from "./solid.js"
 
 import { commit as lixCommit } from "./git/commit.js"
 import isoGit from "isomorphic-git"
-import { hash } from "./hash.js"
 
 // TODO: LSTAT is not properly in the memory fs!
 
@@ -36,7 +35,7 @@ const {
 } = isoGit
 
 // TODO: rename to debug?
-const verbose = false
+const verbose = true
 const experimentalLixFs = false
 
 // TODO addd tests for whitelist
@@ -319,7 +318,7 @@ export async function openRepository(
 
 		if (
 			rootObject !== ".git" &&
-			["readFile", "readlink"].includes(prop) &&
+			["readFile", "readlink", "writeFile"].includes(prop) &&
 			rootObject &&
 			!checkedOut.has(rootObject) &&
 			!checkedOut.has(filename)
@@ -426,6 +425,7 @@ export async function openRepository(
 		},
 
 		async forkStatus() {
+			return { ahead: 0, behind: 0, conflicts: false }
 			const repo = await this
 
 			const { isFork, parent } = (await repo.getMeta()) as {
@@ -561,11 +561,12 @@ export async function openRepository(
 					nodeishFs: rawFs,
 					verbose,
 					description: "statusMatrix",
-					intercept: delayedAction,
+					// intercept: delayedAction,
 				}),
 				dir,
 				cache,
 				filter: cmdArgs.filter,
+				filepaths: cmdArgs.filepaths,
 			})
 		},
 

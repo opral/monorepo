@@ -30,7 +30,10 @@ export type Repository = {
 	add: (args: { filepath: string | string[] }) => Promise<Awaited<ReturnType<typeof raw.add>>>
 	listRemotes: () => Promise<Awaited<ReturnType<typeof raw.listRemotes>> | undefined>
 	log: (args?: { since?: Date; depth?: number }) => Promise<Awaited<ReturnType<typeof raw.log>>>
-	statusMatrix: (args: { filter: any }) => Promise<Awaited<ReturnType<typeof raw.statusMatrix>>>
+	statusMatrix: (args: {
+		filter?: any
+		filepaths?: string[]
+	}) => Promise<Awaited<ReturnType<typeof raw.statusMatrix>>>
 	status: (args: { filepath: string }) => Promise<Awaited<ReturnType<typeof raw.status>>>
 	mergeUpstream: (args?: {
 		branch?: string
