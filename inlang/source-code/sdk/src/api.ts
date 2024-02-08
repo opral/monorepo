@@ -66,7 +66,9 @@ export type Subscribable<Value> = {
 
 export type MessageQueryApi = {
 	create: (args: { data: Message }) => boolean
-	get: ((args: { where: { id: Message["id"] } }) => Readonly<Message>) & {
+	get: ((args: {
+		where: { id: Message["id"] } | { alias: Message["alias"]["default"] }
+	}) => Readonly<Message>) & {
 		subscribe: (
 			args: { where: { id: Message["id"] } },
 			callback: (message: Message) => void

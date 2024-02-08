@@ -19,6 +19,19 @@ describe("create", () => {
 		expect(created).toBe(true)
 	})
 
+	it("should create a message with a default alias", () => {
+		const query = createMessagesQuery(() => [])
+		expect(query.get({ where: { id: "first-message" } })).toBeUndefined()
+
+		const mockMessage = createMessage("first-message", { en: "Hello World" })
+		mockMessage.alias = { default: "first-message-alias" }
+		const created = query.create({ data: mockMessage })
+
+		expect(query.get({ where: { id: "first-message" } })).toEqual(mockMessage)
+		expect(query.get({ where: { alias: "first-message-alias" } })).toEqual(mockMessage)
+		expect(created).toBe(true)
+	})
+
 	it("should return false if message with id already exists", () => {
 		const query = createMessagesQuery(() => [createMessage("first-message", { en: "Hello World" })])
 		expect(query.get({ where: { id: "first-message" } })).toBeDefined()
