@@ -1,5 +1,6 @@
 import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
 import * as runtime from "$paraglide/runtime.js"
+import * as m from "$paraglide/messages.js"
 
 export const i18n = createI18n(runtime, {
 	pathnames: {
@@ -9,6 +10,7 @@ export const i18n = createI18n(runtime, {
 			fr: "/a-propos",
 			ru: "/о-нас",
 		},
+		"/from-message": m.about,
 		"/users": {
 			en: "/users",
 			de: "/benutzer",
