@@ -1,5 +1,23 @@
 # inlang-vs-code-extension
 
+## 1.32.0
+
+### Minor Changes
+
+- b3090c279: fix env issues in vscode extension
+
+## 1.31.0
+
+### Minor Changes
+
+- 2f160c130: refactor: clean up env variable usage
+
+## 1.30.2
+
+### Patch Changes
+
+- 431ee545d: add sentry error monitoring
+
 ## 1.30.1
 
 ### Patch Changes

@@ -2,14 +2,11 @@ import { Link, Meta, Title } from "@solidjs/meta"
 import HeroSearch from "./custom_section/HeroSearch.jsx"
 import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
-import Guides from "./custom_section/Guides.jsx"
-import Features from "./custom_section/Features.jsx"
 import ParaglideHeader from "#src/interface/marketplace/categoryHeaders/cards/paraglide.jsx"
 import * as m from "#src/paraglide/messages.js"
 import { renderLocales } from "#src/renderer/renderLocales.js"
 import { i18nRouting } from "#src/renderer/+onBeforeRoute.js"
 import Personas from "./custom_section/Personas/index.jsx"
-import ExtendSection from "./custom_section/Extend/index.jsx"
 import LixSection from "./custom_section/Lix/index.jsx"
 
 export default function Page() {
@@ -49,11 +46,11 @@ export default function Page() {
 			/>
 			<MarketplaceLayout>
 				<HeroSearch />
-				<Features />
+				{/* <Features /> */}
 				<Personas />
-				<ExtendSection />
+				{/* <ExtendSection /> */}
 				{/* <EcosystemComponents /> */}
-				<Guides />
+				{/* <Guides /> */}
 				<LixSection />
 				<ParaglideHeader />
 			</MarketplaceLayout>

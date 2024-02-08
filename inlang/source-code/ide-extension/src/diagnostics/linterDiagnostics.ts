@@ -1,13 +1,12 @@
 import * as vscode from "vscode"
 import { state } from "../utilities/state.js"
 import type { MessageLintReport } from "@inlang/sdk"
-import { getActiveTextEditor } from "../main.js"
 
 export async function linterDiagnostics(args: { context: vscode.ExtensionContext }) {
 	const linterDiagnosticCollection = vscode.languages.createDiagnosticCollection("inlang-lint")
 
 	async function updateLintDiagnostics() {
-		const activeTextEditor = getActiveTextEditor()
+		const activeTextEditor = vscode.window.activeTextEditor
 		if (!activeTextEditor) {
 			return
 		}
@@ -63,6 +62,7 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 								mapLintLevelToSeverity(level)
 							)
 							if (!diagnosticsIndex[message.messageId]) diagnosticsIndex[message.messageId] = {}
+							// eslint-disable-next-line
 							diagnosticsIndex[message.messageId]![getRangeIndex(diagnostic.range)] = diagnostics
 							diagnostics.push(diagnostic)
 						}
@@ -107,7 +107,7 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 	// update lints when the text changes in a document
 	vscode.workspace.onDidChangeTextDocument(
 		(event) => {
-			if (event.document === getActiveTextEditor()?.document) {
+			if (event.document === vscode.window.activeTextEditor?.document) {
 				updateLintDiagnostics()
 			}
 		},
@@ -128,6 +128,7 @@ function flattenDiagnostics(
 	const messageIds = Object.keys(index)
 
 	for (const messageId of messageIds) {
+		// eslint-disable-next-line
 		result = [...result, ...Object.values(index[messageId]!).flat()]
 	}
 
