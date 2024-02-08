@@ -18,7 +18,6 @@ id: "banana_car_sky_door"
 - You have pre-existing messages with keys and want to adopt parts of inlang ecosystem without refactoring code.
 - You target multiple platforms that need a different syntax to reference the same message e.g. iOS must use `UPPERCASE_WITH_UNDERSCORES` and Android must use `kebap-case`.
 
-
 ## Why should new messages not use aliases?
 
 _See GitHub issue [[#1892](https://github.com/opral/monorepo/issues/1892)]_
@@ -29,7 +28,7 @@ _See GitHub issue [[#1892](https://github.com/opral/monorepo/issues/1892)]_
 
 ### The lack of immutability of keys
 
-<!-- TODO illustration -->
+![lackOfImmutability](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/documentation/ecosystem/assets/alias-key-immutability.png)
 
 Keys like "login-button-label" are mutable. Anyone can rename a key. The moment a key is renamed, history like "What was the previous English text?" of a message is lost.
 
@@ -37,7 +36,7 @@ Suppose someone renamed "login-button-label" to "signup-button-label", the messa
 
 ### Avoiding naming convention discussions
 
-<!-- TODO illustration -->
+![naming](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/documentation/ecosystem/assets/alias-naming.png)
 
 The nature of given a something a "name" (key) leads to naming convention discussions. Should the key be "login-button-label", "login_button_label", or even "loginScreenButton"? In reality, it does not matter. The purpose of a "key" is to reference the message. Context can be provided with tooling. Any attempt to establish a naming convention will lead to discussions, be broken by someone on the team, and ultimately fail. 
 
