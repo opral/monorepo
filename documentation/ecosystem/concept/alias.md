@@ -21,6 +21,8 @@ id: "banana_car_sky_door"
 
 ## Why should new messages not use aliases?
 
+_See GitHub issue [[#1892](https://github.com/opral/monorepo/issues/1892)]_
+
 1. Risk of loosing change history.
 2. Avoid discussions around naming conventions.
 3. Newly created messages via inlang apps like [fink](/m/tdozzpar) or [parrot](m/gkrpgoir) wont't have aliases.
