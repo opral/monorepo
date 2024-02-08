@@ -21,16 +21,11 @@ const createImport: ImportFunction = async (uri: string) => {
 		? await(await fetch(uri)).text()
 		: await fs.readFile(uri, { encoding: "utf-8" })
 
-	// eslint-disable-next-line prefer-const
-	let savePath = uri
-	await fs.mkdir("./modules", { recursive: true })
-	savePath = "./modules/" + uri.replace("https://cdn.jsdelivr.net/npm/", "")
+	const savePath = "./" + uri.replace("https://cdn.jsdelivr.net/npm/", "")
 	await fs.writeFile(savePath, moduleAsText)
 	console.log("Saving to", savePath)
 	// log dir content
 	const root = await fs.readdir("./")
 	console.log("Files in root dir:", root)
-	const files = await fs.readdir("./modules")
-	console.log("Files in modules dir:", files)
 	return savePath
 }
