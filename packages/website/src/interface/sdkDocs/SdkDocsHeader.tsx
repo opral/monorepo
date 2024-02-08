@@ -2,7 +2,12 @@ import { Button } from "#src/pages/index/components/Button.jsx"
 import { For } from "solid-js"
 import Link from "#src/renderer/Link.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
-import { LintRuleIcon, PluginIcon, SDKIcon } from "#src/pages/documentation/icons/NavbarIcons.jsx"
+import {
+	EcosystemIcon,
+	LintRuleIcon,
+	PluginIcon,
+	SDKIcon,
+} from "#src/pages/documentation/icons/NavbarIcons.jsx"
 
 const SdkDocsHeader = () => {
 	return (
@@ -48,6 +53,8 @@ export const getDocsBaseUrl = (link: string) => {
 		return "/documentation/plugin"
 	} else if (link.split("/")[2] === "lint-rule") {
 		return "/documentation/lint-rule"
+	} else if (link.split("/")[2] === "sdk") {
+		return "/documentation/sdk"
 	} else {
 		return "/documentation"
 	}
@@ -57,8 +64,13 @@ const SdkDocsSubHeader = () => {
 	const getCategories = () => {
 		return [
 			{
-				name: "SDK",
+				name: "Ecosystem",
 				href: "/documentation",
+				icon: <EcosystemIcon />,
+			},
+			{
+				name: "SDK",
+				href: "/documentation/sdk",
 				icon: <SDKIcon />,
 			},
 			{

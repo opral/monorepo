@@ -1,82 +1,30 @@
 {
 	"Overview": [
 		{
-			"startpage": true,
 			"path": "./overview/introduction.md",
-			"slug": "",
+			"slug": "sdk",
 			"title": "What is the SDK?",
 			"description": "Extend the ecosystem with inlang's SDK."
-		},
-		{
-			"path": "./overview/architecture.md",
-			"slug": "architecture",
-			"title": "Architecture",
-			"description": "Architecture of inlang's SDK."
 		}
 	],
-	"How to": [
+	"Getting Started": [
 		{
 			"path": "./how-to/build-app.md",
-			"slug": "build-app",
+			"slug": "sdk/build-app",
 			"title": "Develop App",
 			"description": "Develop an app"
 		},
 		{
 			"path": "/how-to/publish-marketplace.md",
-			"slug": "publish-to-marketplace",
+			"slug": "sdk/publish-to-marketplace",
 			"title": "Publish Marketplace",
 			"description": "How to publish your product to inlang's marketplace."
 		},
 		{
 			"path": "./how-to/publish-guide.md",
-			"slug": "publish-guide",
+			"slug": "sdk/publish-guide",
 			"title": "Publish Guide",
 			"description": "Learn how to publish your own guide on inlang."
-		}
-	],
-	"Concepts": [
-		{
-			"path": "./concept/app.md",
-			"slug": "concept/app",
-			"title": "App",
-			"description": "App concept"
-		},
-		{
-			"path": "./concept/project.md",
-			"slug": "concept/project",
-			"title": "Project",
-			"description": "Project concept"
-		},
-		{
-			"path": "./concept/message.md",
-			"slug": "concept/message",
-			"title": "Message",
-			"description": "Message concept"
-		},
-
-		{
-			"path": "./concept/library.md",
-			"slug": "concept/library",
-			"title": "Library",
-			"description": "Library concept"
-		},
-		{
-			"path": "./concept/language-tag.md",
-			"slug": "concept/language-tag",
-			"title": "Language Tag",
-			"description": "Language Tag concept"
-		},
-		{
-			"path": "./../plugin/getting-started/introduction.md",
-			"slug": "plugin",
-			"title": "Plugin",
-			"description": "Plugin concept"
-		},
-		{
-			"path": "./../lint-rule/getting-started/introduction.md",
-			"slug": "lint-rule",
-			"title": "Lint Rule",
-			"description": "Lint Rule concept"
 		}
 	]
 }

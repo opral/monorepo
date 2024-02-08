@@ -42,3 +42,25 @@ export const LintRuleIcon = () => {
 		</svg>
 	)
 }
+
+export function EcosystemIcon() {
+	return (
+		<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 16 16">
+			<g
+				stroke="currentColor"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="1.65"
+				clip-path="url(#clip0_3596_11028)"
+			>
+				<path d="M13.686 4.643a6.601 6.601 0 01-6.413 9.912m-4.96-3.207a6.602 6.602 0 016.413-9.912" />
+				<path d="M11.5 4.5a1.65 1.65 0 102.334-2.334A1.65 1.65 0 0011.5 4.5zM2.166 13.834A1.65 1.65 0 104.5 11.5a1.65 1.65 0 00-2.334 2.334zM6.834 9.164A1.65 1.65 0 109.168 6.83a1.65 1.65 0 00-2.334 2.334z" />
+			</g>
+			<defs>
+				<clipPath id="clip0_3596_11028">
+					<path fill="#fff" d="M0 0H16V16H0z" />
+				</clipPath>
+			</defs>
+		</svg>
+	)
+}

@@ -23,6 +23,7 @@ const ignoreDirectory = `# ignore everything because the directory is auto-gener
 export const compile = async (args: {
 	messages: Readonly<Message[]>
 	settings: ProjectSettings
+	projectId?: string | undefined
 }): Promise<Record<string, string>> => {
 	const compiledMessages = args.messages.map((message) =>
 		compileMessage(message, args.settings.languageTags, args.settings.sourceLanguageTag)
@@ -31,12 +32,15 @@ export const compile = async (args: {
 	const pkgJson = await getPackageJson(fs, process.cwd())
 	const stack = getStackInfo(pkgJson)
 
-	telemetry.capture({
-		event: "PARAGLIDE-JS compile executed",
-		properties: {
-			stack,
+	telemetry.capture(
+		{
+			event: "PARAGLIDE-JS compile executed",
+			properties: {
+				stack,
+			},
 		},
-	})
+		args.projectId
+	)
 
 	const resources: Record<string, string> = {}
 
