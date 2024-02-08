@@ -21,10 +21,8 @@
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
 	},
-	"peerDependencies": {
-		"@sinclair/typebox": "^0.31.17"
-	},
 	"devDependencies": {
+		"@sinclair/typebox": "^0.31.17",
 		"tsd": "0.28.1",
 		"typescript": "5.2.2",
 		"vitest": "0.34.4"
