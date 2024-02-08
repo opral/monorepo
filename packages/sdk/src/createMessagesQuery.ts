@@ -13,19 +13,34 @@ export function createMessagesQuery(
 	// @ts-expect-error
 	const index = new ReactiveMap<string, Message>()
 
+	// Map default alias to messageId
+	// Not reactive, only used for get query by alias
+	// Assumes that aliases are only created and deleted, not updated
+	// TODO refine to hold messageId[], if default alias is not unique
+	const defaultAliasIndex = new Map<string, Message["id"]>()
+
 	createEffect(() => {
 		index.clear()
 		for (const message of structuredClone(messages())) {
 			index.set(message.id, message)
+			if ("default" in message.alias) {
+				defaultAliasIndex.set(message.alias.default, message.id)
+			}
 		}
 	})
 
-	const get = (args: Parameters<MessageQueryApi["get"]>[0]) => index.get(args.where.id)
+	const get = (args: Parameters<MessageQueryApi["get"]>[0]) => {
+		if ("id" in args.where) return index.get(args.where.id)
+		return index.get(defaultAliasIndex.get(args.where.alias))
+	}
 
 	return {
 		create: ({ data }): boolean => {
 			if (index.has(data.id)) return false
 			index.set(data.id, data)
+			if ("default" in data.alias) {
+				defaultAliasIndex.set(data.alias.default, data.id)
+			}
 			return true
 		},
 		get: Object.assign(get, {
@@ -50,13 +65,20 @@ export function createMessagesQuery(
 			const message = index.get(where.id)
 			if (message === undefined) {
 				index.set(where.id, data)
+				if ("default" in data.alias) {
+					defaultAliasIndex.set(data.alias.default, data.id)
+				}
 			} else {
 				index.set(where.id, { ...message, ...data })
 			}
 			return true
 		},
 		delete: ({ where }): boolean => {
-			if (!index.has(where.id)) return false
+			const message = index.get(where.id)
+			if (message === undefined) return false
+			if ("default" in message.alias) {
+				defaultAliasIndex.delete(message.alias.default)
+			}
 			index.delete(where.id)
 			return true
 		},
