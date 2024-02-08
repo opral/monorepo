@@ -12,5 +12,8 @@ export const createI18n = <T extends string>(
 		},
 		ClientProvider: () => null,
 		ServerProvider: () => null,
+		middleware: (request, response) => {
+			console.log("middleware")
+		},
 	}
 }
