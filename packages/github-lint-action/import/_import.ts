@@ -18,8 +18,15 @@ export function _import(basePath: string): ImportFunction {
 
 const createImport: ImportFunction = async (uri: string) => {
 	const moduleAsText = uri.startsWith("http")
-		? await (await fetch(uri)).text()
+		? await(await fetch(uri)).text()
 		: await fs.readFile(uri, { encoding: "utf-8" })
-		console.log(moduleAsText)
-	return moduleAsText
+
+	// eslint-disable-next-line prefer-const
+	let savePath = uri
+	if (uri.startsWith("http")) {
+		savePath = uri.replace("https://cdn.jsdelivr.net/npm/", "")
+		console.log("Saving to", savePath)
+		fs.writeFile(savePath, moduleAsText)
+	}
+	return savePath
 }
