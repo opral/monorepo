@@ -9,6 +9,7 @@ import { Octokit } from "octokit"
 import { createSignal, createEffect } from "./solid.js"
 
 import { commit as lixCommit } from "./git/commit.js"
+import { status as lixStatus } from "./git/status.js"
 import isoGit from "isomorphic-git"
 
 // TODO: LSTAT is not properly in the memory fs!
@@ -35,8 +36,8 @@ const {
 } = isoGit
 
 // TODO: rename to debug?
-const verbose = true
-const experimentalLixFs = false
+const verbose = false
+const experimentalLixFs = true
 
 // TODO addd tests for whitelist
 
@@ -229,7 +230,7 @@ export async function openRepository(
 		await walk({
 			fs,
 			dir,
-			cache,
+			cache: cache || {},
 			gitdir: ".git",
 			trees: [TREE({ ref: args.branch })],
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -362,6 +363,12 @@ export async function openRepository(
 					read(path: string) {
 						return nodeishFs.readFile(path, { encoding: "utf-8" })
 					},
+					write(path: string, content: string) {
+						return nodeishFs.writeFile(path, content)
+					},
+					list(path: string) {
+						return nodeishFs.readdir(path)
+					},
 			  }
 			: undefined,
 
@@ -411,6 +418,21 @@ export async function openRepository(
 		},
 
 		status(cmdArgs) {
+			if (!cmdArgs) {
+				return lixStatus({
+					fs: withLazyFetching({
+						nodeishFs: rawFs,
+						verbose,
+						description: "lixStatus",
+						// intercept: delayedAction,
+					}),
+					dir,
+					cache,
+					// filter: cmdArgs.filter,
+					// filepaths: cmdArgs.filepaths,
+				})
+			}
+
 			return status({
 				fs: withLazyFetching({
 					nodeishFs: rawFs,
@@ -420,12 +442,12 @@ export async function openRepository(
 				}),
 				dir,
 				cache,
-				filepath: cmdArgs.filepath,
+				filepath: cmdArgs?.filepath,
 			})
 		},
 
 		async forkStatus() {
-			return { ahead: 0, behind: 0, conflicts: false }
+			// uncomment to disable: return { ahead: 0, behind: 0, conflicts: false }
 			const repo = await this
 
 			const { isFork, parent } = (await repo.getMeta()) as {
@@ -556,6 +578,8 @@ export async function openRepository(
 		},
 
 		statusMatrix(cmdArgs) {
+      console.warn("statusMatrix is deprecated, use status() instead")
+
 			return statusMatrix({
 				fs: withLazyFetching({
 					nodeishFs: rawFs,
