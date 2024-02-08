@@ -24,9 +24,11 @@ const createImport: ImportFunction = async (uri: string) => {
 	// eslint-disable-next-line prefer-const
 	let savePath = uri
 	if (uri.startsWith("http")) {
-		savePath = uri.replace("https://cdn.jsdelivr.net/npm/", "")
-		console.log("Saving to", savePath)
+		fs.mkdir("./modules", { recursive: true })
+		savePath = "./modules/" + uri.replace("https://cdn.jsdelivr.net/npm/", "")
 		await fs.writeFile(savePath, moduleAsText)
+		console.log("Saving to", savePath)
+		console.log("Saved file:", await fs.readFile(savePath, { encoding: "utf-8" }))
 	}
 	return savePath
 }
