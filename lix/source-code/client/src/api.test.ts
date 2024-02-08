@@ -115,6 +115,82 @@ describe("main workflow", () => {
 		expect(statusPost).toBe("unmodified")
 	})
 
+	it.only("can open repo with lazy checkout", async () => {
+		const lazyRepo = await openRepository("https://github.com/inlang/ci-test-repo", {
+			branch: "test-symlink",
+			nodeishFs: createNodeishMemoryFs(),
+		})
+
+		const files = await lazyRepo.nodeishFs.readdir("/")
+
+		expect(files.sort()).toStrictEqual(
+			[
+				".git",
+				".eslintignore",
+				".eslintrc.cjs",
+				".gitignore",
+				".gitmodules",
+				".npmrc",
+				".prettierignore",
+				".prettierrc",
+				"README.md",
+				"package-lock.json",
+				"package.json",
+				"postcss.config.js",
+				"project.inlang.json",
+				"svelte.config.js",
+				"tailwind.config.js",
+				"test-symlink",
+				"test-symlink-not-existing-target",
+				"tsconfig.eslint.json",
+				"tsconfig.json",
+				"vite.config.ts",
+				".vscode",
+				"project.inlang",
+				"resources",
+				"src",
+				"static",
+			].sort()
+		)
+
+		const status = await lazyRepo.statusMatrix({
+			filepaths: [".npmrc", "README.md"],
+		})
+		console.log(status)
+
+		expect(lazyRepo.nodeishFs._isPlaceholder("./README.md")).toBe(true)
+
+		const statusPre = await lazyRepo.status({ filepath: "README.md" })
+		expect(statusPre).toBe("unmodified")
+
+		expect(lazyRepo.nodeishFs._isPlaceholder("./.npmrc")).toBe(true)
+		expect(await lazyRepo.nodeishFs.readFile("./.npmrc", { encoding: "utf-8" })).toBe(
+			"engine-strict=true\n"
+		)
+
+		expect(lazyRepo.nodeishFs._isPlaceholder("./README.md")).toBe(true)
+		expect(lazyRepo.nodeishFs._isPlaceholder("./.npmrc")).toBe(false)
+
+		await lazyRepo.nodeishFs.writeFile("./README.md", "test")
+		expect(await lazyRepo.nodeishFs.readFile("./README.md", { encoding: "utf-8" })).toBe("test")
+		expect(lazyRepo.nodeishFs._isPlaceholder("./README.md")).toBe(false)
+
+		await lazyRepo.nodeishFs.writeFile("./newfile", "test2")
+		expect(await lazyRepo.nodeishFs.readFile("./newfile", { encoding: "utf-8" })).toBe("test2")
+		expect(lazyRepo.nodeishFs._isPlaceholder("./newfile")).toBe(false)
+
+		const statusPost = await lazyRepo.status({ filepath: "README.md" })
+		expect(statusPost).toBe("*modified")
+
+		// await repository.add({ filepath: "README.md" })
+		// await repository.commit({
+		// 	author: { name: "tests", email: "test@inlang.dev" },
+		// 	message: "test changes commit",
+		// })
+		// const statusPost = await repository.status({ filepath: "README.md" })
+		// expect(statusPost).toBe("s")
+	}, 100000)
+
 	it("can commit open repos without origin or git config (the case eg. on render.com or other deoployment scenarios)", async () => {
 		const fs = createNodeishMemoryFs()
 
