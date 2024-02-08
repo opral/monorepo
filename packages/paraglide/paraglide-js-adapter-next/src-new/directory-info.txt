@@ -1,0 +1,2 @@
+The `client` directory is what get's imported in Client Components / the Pages router, 
+the `sever` component get's imported for RSC.

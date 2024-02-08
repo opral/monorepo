@@ -1,0 +1,31 @@
+import React from "react"
+import { Paraglide } from "../shared/paraglide"
+
+/**
+ * Set's the language tag for the current page and renders the children
+ *
+ * PAGES ROUTER ONLY
+ */
+export default function ParaglideJS<T extends string>(props: {
+	runtime: Paraglide<T>
+	language?: string //this intentionally isn't T because Next's types arent as strict as ours
+	children: React.ReactNode
+}): React.ReactNode {
+	const { isAvailableLanguageTag, setLanguageTag, sourceLanguageTag, availableLanguageTags } =
+		props.runtime
+
+	if (isAvailableLanguageTag(props.language)) {
+		setLanguageTag(props.language)
+	} else {
+		// dev only log
+		if (process.env.NODE_ENV === "development") {
+			console.error(
+				`[paraglide]: "${props.language}" is not one of the available language tags. Falling back to "${sourceLanguageTag}"`
+			)
+		}
+
+		setLanguageTag(sourceLanguageTag)
+	}
+
+	return <React.Fragment>{props.children}</React.Fragment>
+}

@@ -1,12 +1,4 @@
 import * as runtime from "@/paraglide/runtime.js"
-import { Paraglide } from "./paraglide"
+import { createI18n } from "@inlang/paraglide-js-adapter-next"
 
 export const i18n = createI18n(runtime)
-
-function createI18n<T extends string>(runtime: Paraglide<T>) {
-	return {
-		method: () => {
-			return runtime.sourceLanguageTag
-		},
-	}
-}
