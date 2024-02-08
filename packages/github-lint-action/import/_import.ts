@@ -20,5 +20,6 @@ const createImport: ImportFunction = async (uri: string) => {
 	const moduleAsText = uri.startsWith("http")
 		? await (await fetch(uri)).text()
 		: await fs.readFile(uri, { encoding: "utf-8" })
+		console.log(moduleAsText)
 	return moduleAsText
 }
