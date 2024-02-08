@@ -24,12 +24,10 @@
 	"dependencies": {
 		"@inlang/language-tag": "workspace:*"
 	},
-	"peerDependencies": {
-		"@sinclair/typebox": "^0.31.17"
-	},
 	"devDependencies": {
 		"tsd": "0.28.1",
 		"typescript": "5.2.2",
-		"vitest": "0.34.3"
+		"vitest": "0.34.3",
+		"@sinclair/typebox": "^0.31.17"
 	}
 }
