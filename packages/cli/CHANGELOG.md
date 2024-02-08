@@ -1,5 +1,13 @@
 # @inlang/cli
 
+## 2.12.1
+
+### Patch Changes
+
+- Updated dependencies [244442698]
+  - @inlang/language-tag@1.5.0
+  - @inlang/sdk@0.26.2
+
 ## 2.12.0
 
 ### Minor Changes
