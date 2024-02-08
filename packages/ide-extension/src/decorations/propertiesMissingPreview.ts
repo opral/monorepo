@@ -1,14 +1,14 @@
-import { getActiveTextEditor } from "../main.js"
 import { state } from "../utilities/state.js"
 import * as vscode from "vscode"
 
 export const propertiesMissingPreview = () => {
-	const ideExtension = state().project.customApi()["app.inlang.ideExtension"]
+	const activeTextEditor = vscode.window.activeTextEditor
 
-	const activeTextEditor = getActiveTextEditor()
 	if (!activeTextEditor) {
 		return
 	}
+
+	const ideExtension = state().project.customApi()["app.inlang.ideExtension"]
 
 	if (!ideExtension) {
 		// create decoration in project.inlang file stating that the ideExtension properties are missing

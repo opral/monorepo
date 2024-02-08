@@ -69,7 +69,7 @@ export const compileCommand = new Command()
 			}
 		}
 
-		logger.info("Sucessfully compiled the project.")
+		logger.info("Successfully compiled the project.")
 	})
 
 /**
@@ -83,6 +83,7 @@ async function executeCompilation(
 	const output = await compile({
 		messages: project.query.messages.getAll(),
 		settings: project.settings(),
+		projectId: project.id,
 	})
 
 	await writeOutput(outputDirectory, output, fs)

@@ -1,6 +1,6 @@
 {
     "name": "@inlang/paraglide-js-adapter-astro",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "author": "inlang <hello@inlang.com> (https://inlang.com/)",
     "description": "Inlang adapter for Astro",
     "homepage": "https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-astro",
@@ -41,6 +41,7 @@
         "lint",
         "astro-integration",
         "astro",
-        "astro i18n"
+        "astro i18n",
+        "withastro"
     ]
 }

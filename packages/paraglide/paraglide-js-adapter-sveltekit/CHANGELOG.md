@@ -1,5 +1,11 @@
 # @inlang/paraglide-js-adapter-sveltekit
 
+## 0.3.5
+
+### Patch Changes
+
+- eaef718ee: Treeshake away `i18n.handle` on the client to reduce bundle size
+
 ## 0.3.4
 
 ### Patch Changes
