@@ -3,6 +3,7 @@ import { createReroute } from "./hooks/reroute.js"
 import { base } from "$app/paths"
 import { page } from "$app/stores"
 import { get } from "svelte/store"
+import { browser, dev } from "$app/environment"
 import { getTranslatedPath } from "./path-translations/getTranslatedPath.js"
 import { serializeRoute } from "./utils/serialize-path.js"
 import { getCanonicalPath } from "./path-translations/getCanonicalPath.js"
@@ -182,8 +183,16 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		/**
 		 * Returns a `handle` hook that set's the correct `lang` attribute
 		 * on the `html` element
+		 *
+		 * SERVER ONLY
 		 */
-		handle: (options: HandleOptions = {}) => createHandle(config, options),
+		handle: (options: HandleOptions = {}) => {
+			if (!browser) {
+				//We only want this on the server
+				return createHandle(config, options)
+			}
+			throw new Error(dev ? "`i18n.handle` hook should only be used on the server." : "")
+		},
 
 		/**
 		 * Takes in a URL and returns the language that should be used for it.

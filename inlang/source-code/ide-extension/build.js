@@ -20,6 +20,11 @@ let buildOptions = {
 	minify: true,
 	sourcemap: false,
 	external: ["vscode"],
+	define: {
+		ENV_DEFINED_IN_BUILD_STEP: JSON.stringify({
+			IS_PRODUCTION: !isDev,
+		}),
+	},
 }
 
 // Dev configuration
