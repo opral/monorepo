@@ -24,13 +24,13 @@ _A message always has an auto-generated but human readable ID. The alias is an o
 
 You create a new message that has no pre-existing key. In this case, only use the auto-generated human readable ID. 
 
-## What is bad about keys/aliases like `account-settings-button-label`?
+## What is bad about using keys like `account-settings-button-label` as an ID?
 
 1. Risk of loosing change history.
 2. Discussions around name conventions.
 3. Translators and designers have no possibility to create messages via inlang apps like [fink](/m/tdozzpar) or [parrot](m/gkrpgoir).
   
-GitHub issue [[#1892](https://github.com/opral/monorepo/issues/1892)] provides more context on our decision to use auto-generated but human readable IDs for messages instead of keys.
+GitHub issue [#1892](https://github.com/opral/monorepo/issues/1892) provides more context on our decision to use auto-generated but human readable IDs for messages instead of keys.
 
 
 ### Unnecessary name convention discussions
