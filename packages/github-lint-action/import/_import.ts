@@ -1,7 +1,5 @@
 import { normalizePath } from "@lix-js/fs"
-import ts from "typescript"
 import type { ImportFunction } from "@inlang/sdk"
-import requireFromString from "require-from-string"
 import fs from "node:fs/promises"
 
 /**
@@ -19,25 +17,8 @@ export function _import(basePath: string): ImportFunction {
 }
 
 const createImport: ImportFunction = async (uri: string) => {
-	// polyfill for environments that don't support dynamic
-	// http imports yet like VSCode.
-
 	const moduleAsText = uri.startsWith("http")
-		? await(await fetch(uri)).text()
+		? await (await fetch(uri)).text()
 		: await fs.readFile(uri, { encoding: "utf-8" })
-
-	try {
-		const module = requireFromString(moduleAsText)
-		// for whatever reason, the default export is a function
-		// that we need to call to get the property
-		// if (module.default) {
-		// 	module.default = module.default()
-		// }
-		return module
-	} catch (error) {
-		throw new Error(
-			`Error while importing ${uri}: ${(error as Error)?.message ?? "Unknown error"}`,
-			{ cause: error }
-		)
-	}
+	return moduleAsText
 }
