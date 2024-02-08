@@ -21,8 +21,10 @@ const createImport = async (uri: string, basePath: string) => {
 		? await (await fetch(uri)).text()
 		: await fs.readFile(uri, { encoding: "utf-8" })
 
-	const savePath = basePath + "/" + uri.replace("https://cdn.jsdelivr.net/npm/", "")
-	await fs.writeFile(savePath, moduleAsText)
+	const savePath = basePath + "/modules/" + uri.replace("https://cdn.jsdelivr.net/npm/", "")
 	console.log("Saving to", savePath)
+	await fs.writeFile(savePath, moduleAsText).catch((e) => {
+		console.error("Error while saving file", e)
+	})
 	return savePath
 }
