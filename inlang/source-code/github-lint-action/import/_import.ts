@@ -26,7 +26,7 @@ const createImport: ImportFunction = async (uri: string) => {
 	if (uri.startsWith("http")) {
 		savePath = uri.replace("https://cdn.jsdelivr.net/npm/", "")
 		console.log("Saving to", savePath)
-		fs.writeFile(savePath, moduleAsText)
+		await fs.writeFile(savePath, moduleAsText)
 	}
 	return savePath
 }
