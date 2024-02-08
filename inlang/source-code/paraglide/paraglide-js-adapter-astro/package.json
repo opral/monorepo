@@ -1,6 +1,6 @@
 {
     "name": "@inlang/paraglide-js-adapter-astro",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "author": "inlang <hello@inlang.com> (https://inlang.com/)",
     "description": "Inlang adapter for Astro",
     "homepage": "https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-astro",
@@ -23,7 +23,6 @@
         "format": "prettier ./src --write",
         "clean": "rm -rf ./dist ./node_modules"
     },
-
     "dependencies": {
         "@inlang/paraglide-js-adapter-vite": "workspace:*"
     },
