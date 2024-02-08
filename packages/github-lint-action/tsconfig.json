@@ -1,8 +1,7 @@
 {
-	"include": ["src/**.ts", "src/main.mts"],
+	"extends": "./../tsconfig.base.json",
+	"include": ["src/**.ts", "src/main.ts"],
 	"compilerOptions": {
-		"module": "ES2022",
-		"moduleResolution": "Bundler",
 		"target": "ES2022",
 		"outDir": "dist",
 		"types": ["node"],
