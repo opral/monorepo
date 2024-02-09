@@ -18,7 +18,7 @@ export function _import(basePath: string): ImportFunction {
 
 const createImport = async (uri: string, basePath: string) => {
 	const moduleAsText = uri.startsWith("http")
-		? await(await fetch(uri)).text()
+		? await (await fetch(uri)).text()
 		: await fs.readFile(uri, { encoding: "utf-8" })
 
 	const parts = uri.split("/")

@@ -11,13 +11,7 @@
 		"zh"
 	],
 	"modules": [
-		"file:///home/runner/work/monorepo/monorepo/inlang/source-code/plugins/inlang-message-format/dist/index.js",
-		"file:///home/runner/work/monorepo/monorepo/inlang/source-code/plugins/message-lint-rule-missing-translation/dist/index.js",
-		"file:///home/runner/work/monorepo/monorepo/inlang/source-code/plugins/message-lint-rule-empty-pattern/dist/index.js",
-		"file:///home/runner/work/monorepo/monorepo/inlang/source-code/plugins/message-lint-rule-without-source/dist/index.js",
-		"file:///home/runner/work/monorepo/monorepo/inlang/source-code/plugins/message-lint-rule-identical-pattern/dist/index.js",
-		"file:///home/runner/work/monorepo/monorepo/inlang/source-code/plugins/message-lint-rule-valid-js-identifier/dist/index.js",
-		"file:///home/runner/work/monorepo/monorepo/inlang/source-code/plugins/plugin-m-function-matcher/dist/index.js"
+		"../inlang/source-code/plugins/inlang-message-format/dist/index.js"
 	],
 	"plugin.inlang.messageFormat": {
 		"filePath": "./inlang/source-code/website/messages.json"
