@@ -1,5 +1,12 @@
 # @inlang/message
 
+## 2.0.2
+
+### Patch Changes
+
+- Updated dependencies [244442698]
+  - @inlang/language-tag@1.5.0
+
 ## 2.0.1
 
 ### Patch Changes

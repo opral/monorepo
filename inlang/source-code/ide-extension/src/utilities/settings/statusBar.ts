@@ -42,4 +42,3 @@ export const showStatusBar = async () => {
 	statusBarItem.tooltip = "Switch preview language"
 	statusBarItem.show()
 }
-

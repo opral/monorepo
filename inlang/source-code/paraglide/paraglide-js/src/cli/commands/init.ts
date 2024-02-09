@@ -477,7 +477,6 @@ const prompt: typeof consola.prompt = async (message, options) => {
 	return response
 }
 
-
 /**
  * Executes a command asynchronously in a separate process.
  * It will not print the output to the console.
