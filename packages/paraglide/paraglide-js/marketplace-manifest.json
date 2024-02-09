@@ -1,6 +1,6 @@
 {
 	"id": "library.inlang.paraglideJs",
-	"icon": "https://emojis.wiki/thumbs/emojis/parachute.webp",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/paraglideNoBg.png",
 	"gallery": [
 		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/paraglide-marketplace-cover.jpg",
 		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-1.jpg",
