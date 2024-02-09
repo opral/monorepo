@@ -187,7 +187,7 @@ function reexportAliases(message: Message) {
  * \`\`\`
  * ---
  * \`${message.alias["default"]}\` is an alias for the message \`${message.id}\`.
- * Referencing aliases instead of the message ID has severe downsides like:
+ * Referencing aliases instead of the message ID has downsides like:
  *
  * - The alias might be renamed in the future, breaking the code.
  * - Constant naming convention discussions.
