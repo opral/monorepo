@@ -164,6 +164,7 @@ function messageIdFallback(message: Message, languageTag: string) {
 */
 /* @__NO_SIDE_EFFECTS__ */
 export const ${message.id} = () => "${escapeForDoubleQuoteString(message.id)}"
+${reexportAliases(message)}
 `
 }
 
@@ -179,7 +180,7 @@ function reexportAliases(message: Message) {
 	if (message.alias["default"] && message.id !== message.alias["default"]) {
 		code += `
 /**
- * Change the reference from the alias \`m.footer_category_title()\` to \`m.grumpy_flying_unicorn()\`:
+ * Change the reference from the alias \`m.${message.alias["default"]}()\` to \`m.${message.id}()\`:
  *
  * \`\`\`diff
  * - m.${message.alias["default"]}()
