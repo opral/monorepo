@@ -32,7 +32,7 @@ const createImport = async (uri: string, basePath: string) => {
 	})
 
 	try {
-		return await import(savePath)
+		return moduleWithMimeType
 	} catch (error) {
 		throw new ModuleImportError({ module: uri, cause: error as Error })
 	}
