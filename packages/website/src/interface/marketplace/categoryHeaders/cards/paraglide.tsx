@@ -4,7 +4,7 @@ import * as m from "#src/paraglide/messages.js"
 const ParaglideHeader = () => {
 	return (
 		<>
-			<div class="relative bg-surface-100 items-end overflow-hidden rounded-xl border border-surface-200 flex flex-col md:flex-row mb-4">
+			<div class="relative bg-surface-100 md:items-end overflow-hidden rounded-xl border border-surface-200 flex flex-col md:flex-row mb-4">
 				<div class="relative z-30 flex-1 flex flex-col items-start gap-4 px-8 md:py-8">
 					<div class="p-1 rounded-lg overflow-hidden mt-8 md:mt-0">
 						<img
@@ -35,7 +35,7 @@ const ParaglideHeader = () => {
 						</Button>
 					</div>
 				</div>
-				<div class="relative z-20 flex-1 max-w-[550px] md:pr-20 pt-8 md:pt-12">
+				<div class="relative z-20 flex-1 max-w-[550px] mx-auto md:pr-20 pt-8 md:pt-12">
 					<img class="w-full h-full" src="/images/paraglidePage.png" alt="svelte header image" />
 				</div>
 			</div>
