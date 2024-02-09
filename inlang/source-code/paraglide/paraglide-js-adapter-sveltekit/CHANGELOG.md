@@ -1,5 +1,11 @@
 # @inlang/paraglide-js-adapter-sveltekit
 
+## 0.4.0
+
+### Minor Changes
+
+- 45f5d8256: Message function can now be used as pathname translations
+
 ## 0.3.7
 
 ### Patch Changes
