@@ -23,6 +23,8 @@ const createImport = async (uri: string, basePath: string) => {
 
 	const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(moduleAsText)
 
+	console.log("moduleWithMimeType", moduleWithMimeType)
+
 	// const parts = uri.split("/")
 	// const savePath =
 	// 	basePath + "/" + parts.at(parts.length - 4) + "-" + parts.at(parts.length - 3) + ".js"
