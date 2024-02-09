@@ -211,7 +211,7 @@ function reexportMessage(message: Message, fromLanguageTag: string) {
 	const exports: string[] = [message.id]
 
 	if (message.alias["default"] && message.id !== message.alias["default"]) {
-		exports.push(`${message.id} as ${message.alias["default"]}`)
+		exports.push(message.alias["default"])
 	}
 
 	return `export { ${exports.join(", ")} } from "./${fromLanguageTag}.js"`
