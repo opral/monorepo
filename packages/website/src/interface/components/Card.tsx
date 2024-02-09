@@ -21,6 +21,13 @@ export default function Card(props: { item: any; displayName: string }) {
 		// eslint-disable-next-line solid/reactivity
 		props.item.id.split(".")[0] === "app" && currentPageContext.urlParsed.pathname.includes("/apps")
 
+	const library =
+		// eslint-disable-next-line solid/reactivity
+		props.item.id.split(".")[0] === "library" &&
+		currentPageContext.urlParsed.pathname.includes("/apps")
+
+	const showOnApps = app || library
+
 	return (
 		<>
 			<Link
@@ -31,11 +38,11 @@ export default function Card(props: { item: any; displayName: string }) {
 				}
 				class={
 					"relative no-underline z-10 flex justify-between gap-4 overflow-hidden flex-col group w-full bg-background transition-all border border-surface-200 rounded-xl hover:shadow-lg hover:shadow-surface-100 hover:border-surface-300 active:border-surface-400 " +
-					(showCover || app ? " " : /* min-h-48 */ " min-h-[12rem] p-5")
+					(showCover || showOnApps ? " " : /* min-h-48 */ " min-h-[12rem] p-5")
 				}
 			>
 				<Switch>
-					<Match when={app && props.item.gallery}>
+					<Match when={showOnApps && props.item}>
 						<img
 							src={props.item.icon}
 							alt={
@@ -92,7 +99,7 @@ export default function Card(props: { item: any; displayName: string }) {
 							</Show>
 						</div>
 					</Match>
-					<Match when={!app && showCover && props.item.gallery}>
+					<Match when={!showOnApps && showCover && props.item.gallery}>
 						<img
 							class="w-full h-36 object-cover object-center rounded-xl"
 							alt={
@@ -107,7 +114,7 @@ export default function Card(props: { item: any; displayName: string }) {
 							</p>
 						</div>
 					</Match>
-					<Match when={(!app && !showCover) || (!app && props.item.gallery)}>
+					<Match when={(!showOnApps && !showCover) || (!showOnApps && props.item.gallery)}>
 						<div class="flex flex-1 flex-col gap-4">
 							<div class="w-full flex gap-4 items-start">
 								<div class="flex items-center gap-8 flex-shrink-0">
@@ -186,7 +193,6 @@ export default function Card(props: { item: any; displayName: string }) {
 										.includes("lix")}
 								>
 									<div class="w-5 text-primary group transition-colors">
-										{/* <sl-tooltip prop:content={m.marketplace_card_lix_tooltip()}> */}
 										<LixBadge />
 									</div>
 								</Show>
