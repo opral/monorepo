@@ -69,7 +69,7 @@ export const compileCommand = new Command()
 			}
 		}
 
-		logger.info("Sucessfully compiled the project.")
+		logger.info("Successfully compiled the project.")
 	})
 
 /**
