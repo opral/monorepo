@@ -540,10 +540,16 @@ importers:
       '@lix-js/fs':
         specifier: workspace:*
         version: link:../../../lix/source-code/fs
+      require-from-string:
+        specifier: ^2.0.2
+        version: 2.0.2
     devDependencies:
       '@types/node':
         specifier: ^20.11.16
         version: 20.11.16
+      '@types/require-from-string':
+        specifier: ^1.2.1
+        version: 1.2.3
       '@vercel/ncc':
         specifier: ^0.38.1
         version: 0.38.1
