@@ -32,9 +32,7 @@ const createImport = async (uri: string, basePath: string) => {
 	})
 
 	try {
-		return await import(
-			"./" + parts.at(parts.length - 4) + "-" + parts.at(parts.length - 3) + ".js"
-		)
+		return await import(savePath)
 	} catch (error) {
 		throw new ModuleImportError({ module: uri, cause: error as Error })
 	}
