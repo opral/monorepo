@@ -22,10 +22,8 @@ const createImport = async (uri: string, basePath: string) => {
 		: await fs.readFile(uri, { encoding: "utf-8" })
 
 	const parts = uri.split("/")
-	// eslint-disable-next-line unicorn/prefer-at
 	const savePath =
 		basePath + "/" + parts.at(parts.length - 4) + "-" + parts.at(parts.length - 3) + ".js"
-	console.log("Saving to", savePath)
 	await fs.writeFile(savePath, moduleAsText).catch((e) => {
 		console.error("Error while saving file", e)
 	})
