@@ -12,7 +12,7 @@ Inlang's architecture consists of three main components:
 
 For every use case, there is an app, a plugin, a lint rule, or a custom solution that can be built. Inlang's infrastructure powers an ecosystem of tools, applications, best practices, and automations for organizations to go global.
 
-![inlang ecosystem](https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/documentation/sdk/assets/ecosystem.jpg)
+![ecosystem illustration](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/documentation/ecosystem/assets/ecosystem-atom.jpg)
 
 
 ### Version control and automation via CI/CD
