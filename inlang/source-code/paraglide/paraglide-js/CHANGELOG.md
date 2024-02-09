@@ -1,5 +1,11 @@
 # @inlang/paraglide-js
 
+## 1.2.5
+
+### Patch Changes
+
+- 00f181ad3: fix broken dependency
+
 ## 1.2.4
 
 ### Patch Changes
