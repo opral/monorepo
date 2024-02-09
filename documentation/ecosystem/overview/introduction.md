@@ -42,7 +42,7 @@ Read more about this here: [inlang ecosystem](/g/7777asdy/)
 
 In order to make your repository compatible with the inlang applications, you will need to create an inlang [project](/documentation/concept/project). This project essentially consists of a folder (`[project_name].inlang`) that includes a `settings.json` file and a `project_id` file. The `settings.json` file determines how your localization data is stored, as well as how you want to lint your data. The `project_id` is automatically generated.
 
-![Project directory](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/documentation/ecosystem/assets/project_new3.png)
+![Project directory](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/documentation/ecosystem/assets/project_new4.png)
 
 We invision the project directory as a file in the future. Just like you open a `.pptx` file, that under the hood is a directory, that contains project files. 
 
