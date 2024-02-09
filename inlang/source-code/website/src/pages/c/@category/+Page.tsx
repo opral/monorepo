@@ -293,7 +293,7 @@ export default function Page(props: {
 										getCategoryContent()?.sections?.includes("apps") &&
 										props.items.some(
 											(item: MarketplaceManifest & { uniqueID: string }) =>
-												item.id.split(".")[0] === "app"
+												item.id.split(".")[0] === "app" || item.id.split(".")[0] === "library"
 										)
 									}
 								>
@@ -303,7 +303,7 @@ export default function Page(props: {
 									<Gallery
 										items={props.items.filter(
 											(item: MarketplaceManifest & { uniqueID: string }) =>
-												item.id.split(".")[0] === "app" || "library"
+												item.id.split(".")[0] === "app" || item.id.split(".")[0] === "library"
 										)}
 										hideBuildYourOwn
 									/>
