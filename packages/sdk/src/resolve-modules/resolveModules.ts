@@ -47,6 +47,8 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 
 		// -- MODULE DOES NOT EXPORT ANYTHING --
 
+		console.log(importedModule.data)
+
 		if (importedModule.data?.default === undefined) {
 			moduleErrors.push(
 				new ModuleHasNoExportsError({
