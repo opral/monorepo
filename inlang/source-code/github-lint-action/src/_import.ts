@@ -29,5 +29,8 @@ const createImport = async (uri: string, basePath: string) => {
 	await fs.writeFile(savePath, moduleWithMimeType).catch((e) => {
 		console.error("Error while saving file", e)
 	})
+	fs.readdir(basePath).then((files) => {
+		console.log("files", files)
+	})
 	return await import(/* @vite-ignore */ savePath)
 }
