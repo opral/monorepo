@@ -54,7 +54,7 @@ test("should create a message with pattern", () => {
 			        },
 			        {
 			          "type": "Text",
-			          "value": "\\"",
+			          "value": """,
 			        },
 			      ],
 			    },

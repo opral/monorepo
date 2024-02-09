@@ -77,6 +77,6 @@ it("shouldn't be able to import an inlang plugin from http without working proxy
 			"https://raw.githubusercontent.com/samuelstroschein/inlang-plugin-json/3e322bf01763fc6d8c9f9f9489be889ae96ca6f2/dist/index.js"
 		)
 	).rejects.toThrowErrorMatchingInlineSnapshot(
-		'"request to https://raw.githubusercontent.com/samuelstroschein/inlang-plugin-json/3e322bf01763fc6d8c9f9f9489be889ae96ca6f2/dist/index.js failed, reason: getaddrinfo ENOTFOUND inlang-is-not-a-proxy.com"'
+		"[FetchError: request to https://raw.githubusercontent.com/samuelstroschein/inlang-plugin-json/3e322bf01763fc6d8c9f9f9489be889ae96ca6f2/dist/index.js failed, reason: getaddrinfo ENOTFOUND inlang-is-not-a-proxy.com]"
 	)
 })
