@@ -4,13 +4,7 @@ import * as m from "$paraglide/messages.js"
 
 export const i18n = createI18n(runtime, {
 	pathnames: {
-		"/about": {
-			en: "/about",
-			de: "/ueber-uns",
-			fr: "/a-propos",
-			ru: "/о-нас",
-		},
-		"/from-message": m.about,
+		"/about": m.about_path,
 		"/users": {
 			en: "/users",
 			de: "/benutzer",

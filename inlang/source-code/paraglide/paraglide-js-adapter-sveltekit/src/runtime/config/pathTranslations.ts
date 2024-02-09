@@ -27,4 +27,7 @@ export type PathTranslations<T extends string = string> = {
 	[canonicalPath: `/${string}`]: Record<T, `/${string}`>
 }
 
-export type Message<T extends string> = (params: {}, options: { languageTag: T }) => string
+export type Message<T extends string> = (
+	params: Record<string, never>,
+	options: { languageTag: T }
+) => string

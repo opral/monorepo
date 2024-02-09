@@ -17,7 +17,7 @@ describe("resolvePathTranslations", () => {
 
 	it("resolves message translations", () => {
 		const userTranslations: UserPathTranslations<"en" | "de"> = {
-			"/about": ({}, { languageTag }) => {
+			"/about": (_, { languageTag }) => {
 				switch (languageTag) {
 					case "en":
 						return "/about"
