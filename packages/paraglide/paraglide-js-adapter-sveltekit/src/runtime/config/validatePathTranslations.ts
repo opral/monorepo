@@ -6,13 +6,20 @@ export type PathTranslationIssue = {
 	message: string
 }
 
+
+/**
+ * Check that the path translations are valid.
+ * Should only be called in development, this is a waste of time in production.
+ */
 export function validatePathTranslations<T extends string>(
-	pathTranslations: PathTranslations<T>
+	pathTranslations: PathTranslations<T>,
+	availableLanguageTags: readonly T[]
 ): PathTranslationIssue[] {
 	const issues: PathTranslationIssue[] = []
+	const expectedLanguages = new Set(availableLanguageTags)
 
 	for (const path in pathTranslations) {
-		if (path[0] !== "/") {
+		if (!isValidPath(path)) {
 			issues.push({
 				path,
 				message: "Path must start with a slash.",
@@ -20,30 +27,59 @@ export function validatePathTranslations<T extends string>(
 			continue
 		}
 
-		const params = parsePathDefinition(path)
-		const expectedParams = new Set<string>()
-		for (const param of params) {
-			if (param.type === "param") {
-				expectedParams.add(param.name)
+		const expectedParams = getParams(path)
+
+		//@ts-ignore
+		const translations = pathTranslations[path]!
+
+		for (const [lang, translatedPath] of Object.entries(translations) as [string, string][]) {
+			if (!isValidPath(translatedPath)) {
+				issues.push({
+					path,
+					message: `The translation for language ${lang} must start with a slash.`,
+				})
+			}
+
+			if (!setsEqual(getParams(translatedPath), expectedParams)) {
+				issues.push({
+					path,
+					message: `The translation for language ${lang} must have the same parameters as the canonical path.`,
+				})
 			}
 		}
 
-		//@ts-ignore
-		const translations = pathTranslations[path]
-
-		const languages = new Set(...Object.keys(translations))
-		const expectedLanguages = new Set(...Object.keys(translations))
-
-		if (!setsEqual(expectedLanguages, languages)) {
+		//Check that all languages are translated
+		const translatedLanguages = new Set(Object.keys(translations))
+		if (!setsEqual(expectedLanguages, translatedLanguages)) {
+			const missingLanguages = new Set(expectedLanguages)
+			for (const lang of translatedLanguages) {
+				missingLanguages.delete(lang as T)
+			}
 			issues.push({
 				path,
-				message: "Not all languages are translated.",
+				message: `The following languages are missing translations: ${Array.from(
+					missingLanguages
+				).join(", ")}`,
 			})
-			continue
 		}
 	}
 
 	return issues
+}
+
+function isValidPath(maybePath: string): maybePath is `/${string}` {
+	return maybePath.startsWith("/")
+}
+
+function getParams(path: string): Set<string> {
+	const semgents = parsePathDefinition(path)
+	const params = new Set<string>()
+	for (const segment of semgents) {
+		if (segment.type === "param") {
+			params.add(segment.name)
+		}
+	}
+	return params
 }
 
 function setsEqual(a: Set<any>, b: Set<any>): boolean {
