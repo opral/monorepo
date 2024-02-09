@@ -23,7 +23,7 @@ const createImport = async (uri: string, basePath: string) => {
 
 	const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(moduleAsText)
 
-	console.log("moduleWithMimeType", moduleWithMimeType)
+	console.log("dataloss?", moduleAsText.length, moduleWithMimeType.length)
 
 	// const parts = uri.split("/")
 	// const savePath =
@@ -31,5 +31,5 @@ const createImport = async (uri: string, basePath: string) => {
 	// await fs.writeFile(savePath, moduleAsText).catch((e) => {
 	// 	console.error("Error while saving file", e)
 	// })
-	return moduleWithMimeType
+	return await import(/* @vite-ignore */ moduleWithMimeType)
 }
