@@ -87,7 +87,7 @@ export const compileMessage = (
 			//if the fallback has the pattern, reexport the message from the fallback language
 			if (compiledFallbackPattern) {
 				// TODO #1844 do we need to reexport aliases as well - check the alias handling
-				resource[languageTag] = reexportMessage(message.id, fallbackLanguage)
+				resource[languageTag] = reexportMessage(message, fallbackLanguage)
 			} else {
 				//otherwise, fallback to the message ID
 				resource[languageTag] = messageIdFallback(message.id, languageTag)
@@ -132,7 +132,26 @@ ${
 	args.message.id !== args.message.alias["default"] &&
 	` 
 /**
- * This message is an alias of ${args.message.id}
+ * Change the reference from the alias \`m.footer_category_title()\` to \`m.grumpy_flying_unicorn()\`:
+ *
+ * \`\`\`diff
+ * - m.${args.message.alias["default"]}()
+ * + m.${args.message.id}()
+ * \`\`\`
+ *
+ * ---
+ *
+ * \`${args.message.alias["default"]}\` is an alias for the message \`${args.message.id}\`.
+ * Referencing aliases instead of the message ID has severe downsides like:
+ *
+ * - The alias might be renamed in the future, breaking the code.
+ * - Constant naming convention discussions.
+ *
+ * Read more about aliases and their downsides here 
+ * @see inlang.com/link.
+ * ---
+ *
+ * @deprecated reference the message by id \`m.${args.message.id}()\` instead
  */
 export const ${args.message.alias["default"]} = ${args.message.id};
 `
@@ -161,7 +180,26 @@ ${
 	args.message.id !== args.message.alias["default"] &&
 	` 
 /**
- * This message is an alias of ${args.message.id}
+ * Change the reference from the alias \`m.footer_category_title()\` to \`m.grumpy_flying_unicorn()\`:
+ *
+ * \`\`\`diff
+ * - m.${args.message.alias["default"]}()
+ * + m.${args.message.id}()
+ * \`\`\`
+ *
+ * ---
+ *
+ * \`${args.message.alias["default"]}\` is an alias for the message \`${args.message.id}\`.
+ * Referencing aliases instead of the message ID has severe downsides like:
+ *
+ * - The alias might be renamed in the future, breaking the code.
+ * - Constant naming convention discussions.
+ *
+ * Read more about aliases and their downsides here 
+ * @see inlang.com/link.
+ * ---
+ *
+ * @deprecated reference the message by id \`m.${args.message.id}()\` instead
  */
 export const ${args.message.alias["default"]} = ${args.message.id};
 `
@@ -169,8 +207,14 @@ export const ${args.message.alias["default"]} = ${args.message.id};
 `
 }
 
-function reexportMessage(messageId: string, fromLanguageTag: string) {
-	return `export { ${messageId} } from "./${fromLanguageTag}.js"`
+function reexportMessage(message: Message, fromLanguageTag: string) {
+	const exports: string[] = [message.id]
+
+	if (message.alias["default"] && message.id !== message.alias["default"]) {
+		exports.push(`${message.id} as ${message.alias["default"]}`)
+	}
+
+	return `export { ${exports.join(", ")} } from "./${fromLanguageTag}.js"`
 }
 
 function messageIdFallback(messageId: string, languageTag: string) {

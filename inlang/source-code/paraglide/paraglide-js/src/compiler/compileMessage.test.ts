@@ -204,3 +204,51 @@ it("should return the message ID if no fallback can be found", async () => {
 
 	expect(result.en?.includes('export const some_message = () => "some_message"')).toBe(true)
 })
+
+
+it("should inclide aliases for messages", async () => {
+	const result = compileMessage(
+		{
+			id: "some_message",
+			alias: {
+				default: "some_message_alias",
+			},
+			selectors: [],
+			variants: [
+				{
+					match: [],
+					languageTag: "en",
+					pattern: [{ type: "Text", value: "Etwas Text" }],
+				},
+			],
+		},
+		["en", "de"],
+		"en"
+	)
+
+	expect(result.en?.includes("export const some_message_alias")).toBe(true)
+})
+
+it("should inclide aliases for fallback messages", async () => {
+	const result = compileMessage(
+		{
+			id: "some_message",
+			alias: {
+				default: "some_message_alias",
+			},
+			selectors: [],
+			variants: [
+				{
+					match: [],
+					languageTag: "de",
+					pattern: [{ type: "Text", value: "Etwas Text" }],
+				},
+			],
+		},
+		["en", "de"],
+		"de"
+	)
+
+	console.log(result.en)
+	expect(result.en?.includes("some_message_alias")).toBe(true)
+})
