@@ -32,5 +32,5 @@ const createImport = async (uri: string, basePath: string) => {
 	fs.readdir(basePath).then((files) => {
 		console.log("files", files)
 	})
-	return await import(/* @vite-ignore */ "file:///" + savePath)
+	return "/" + parts.at(parts.length - 4) + "-" + parts.at(parts.length - 3) + ".js"
 }
