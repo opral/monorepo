@@ -1,6 +1,7 @@
 import { normalizePath } from "@lix-js/fs"
 import type { ImportFunction } from "@inlang/sdk"
 import fs from "node:fs/promises"
+import { ModuleImportError } from "../../sdk/dist/resolve-modules/errors.js"
 
 /**
  * Wraps the import function to inject the base path.
@@ -29,8 +30,12 @@ const createImport = async (uri: string, basePath: string) => {
 	await fs.writeFile(savePath, moduleWithMimeType).catch((e) => {
 		console.error("Error while saving file", e)
 	})
-	fs.readdir(basePath).then((files) => {
-		console.log("files", files)
-	})
-	return await import("./" + parts.at(parts.length - 4) + "-" + parts.at(parts.length - 3) + ".js")
+
+	try {
+		return await import(
+			"./" + parts.at(parts.length - 4) + "-" + parts.at(parts.length - 3) + ".js"
+		)
+	} catch (error) {
+		throw new ModuleImportError({ module: uri, cause: error as Error })
+	}
 }
