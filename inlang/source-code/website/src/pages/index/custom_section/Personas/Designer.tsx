@@ -29,7 +29,7 @@ const DesignrSlide = () => {
 								{m.home_personas_designer_main_description()}
 							</p>
 						</div>
-						<div class="text-sm font-medium h-10 px-4 bg-surface-200 hover:bg-surface-300 flex justify-center items-center w-fit rounded">
+						<div class="text-sm font-medium h-10 px-4 mt-8 bg-surface-200 hover:bg-surface-300 flex justify-center items-center w-fit rounded">
 							{m.home_personas_designer_main_button()}
 						</div>
 					</div>
