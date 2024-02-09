@@ -35,7 +35,7 @@ const ParaglideHeader = () => {
 						</Button>
 					</div>
 				</div>
-				<div class="relative z-20 flex-1 max-w-[550px] mx-auto md:pr-20 pt-8 md:pt-12">
+				<div class="relative z-20 flex-1 px-4 max-w-[550px] mx-auto md:pr-20 pt-8 md:pt-12">
 					<img class="w-full h-full" src="/images/paraglidePage.png" alt="svelte header image" />
 				</div>
 			</div>
