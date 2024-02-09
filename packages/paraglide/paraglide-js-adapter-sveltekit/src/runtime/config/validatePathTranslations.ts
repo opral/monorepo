@@ -30,7 +30,8 @@ export function validatePathTranslations<T extends string>(
 		const expectedParams = getParams(path)
 
 		//@ts-ignore
-		const translations = pathTranslations[path]!
+		const translations = pathTranslations[path]
+		if (!translations) continue
 
 		for (const [lang, translatedPath] of Object.entries(translations) as [string, string][]) {
 			if (!isValidPath(translatedPath)) {
@@ -57,9 +58,9 @@ export function validatePathTranslations<T extends string>(
 			}
 			issues.push({
 				path,
-				message: `The following languages are missing translations: ${Array.from(
-					missingLanguages
-				).join(", ")}`,
+				message: `The following languages are missing translations: ${[...missingLanguages].join(
+					", "
+				)}`,
 			})
 		}
 	}

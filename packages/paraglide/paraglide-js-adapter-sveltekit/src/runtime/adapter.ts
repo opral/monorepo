@@ -149,7 +149,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 
 	if (dev) {
 		const issues = validatePathTranslations(translations, runtime.availableLanguageTags)
-		if (issues) {
+		if (issues.length) {
 			console.warn(
 				`The following issues were found in your path translations. Make sure to fix them before deploying your app:`
 			)
