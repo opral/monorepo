@@ -8,6 +8,7 @@ import Root from "./+Root.jsx"
 import "./app.css"
 import { MetaProvider, renderTags } from "@solidjs/meta"
 import { languageTag } from "#src/paraglide/runtime.js"
+import type { Component } from "solid-js"
 
 // See https://vike.dev/data-fetching
 export const passToClient = ["pageProps", "routeParams", "languageTag"] as const
@@ -35,7 +36,7 @@ export default async function onRenderHtml(pageContext: PageContextRenderer): Pr
 
 	const renderedPage = renderToString(() => (
 		<MetaProvider tags={tags}>
-			<Root page={pageContext.Page} pageProps={pageContext.pageProps} />
+			<Root page={pageContext.Page as Component} pageProps={pageContext.pageProps} />
 		</MetaProvider>
 	))
 
