@@ -18,14 +18,16 @@ export function _import(basePath: string): ImportFunction {
 
 const createImport = async (uri: string, basePath: string) => {
 	const moduleAsText = uri.startsWith("http")
-		? await (await fetch(uri)).text()
+		? await(await fetch(uri)).text()
 		: await fs.readFile(uri, { encoding: "utf-8" })
 
-	const parts = uri.split("/")
-	const savePath =
-		basePath + "/" + parts.at(parts.length - 4) + "-" + parts.at(parts.length - 3) + ".js"
-	await fs.writeFile(savePath, moduleAsText).catch((e) => {
-		console.error("Error while saving file", e)
-	})
+	console.log("moduleAsText", moduleAsText)
+
+	// const parts = uri.split("/")
+	// const savePath =
+	// 	basePath + "/" + parts.at(parts.length - 4) + "-" + parts.at(parts.length - 3) + ".js"
+	// await fs.writeFile(savePath, moduleAsText).catch((e) => {
+	// 	console.error("Error while saving file", e)
+	// })
 	return moduleAsText
 }
