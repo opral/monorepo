@@ -6,15 +6,11 @@ Welcome to the inlang documentation!
 
 ## What is inlang?
 
+![ecosystem illustration](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/documentation/ecosystem/assets/ecosystem-atom.jpg)
+
+<br>
+
 inlang offers tailored localization products for each [use case](/#personas) (Developer, Designer, Translator). You only have to set inlang up once; then, you can use every inlang app out of the box. 
-
-All the data is derived from a single source of truth, stored in your repository, and managed under [change control](/#lix) to enable collaboration and automation. This allows you to focus on building your application instead of spending time with localization.
-
-Whether you're an individual developer or part of a larger team, inlang can help you enjoy building global applications.
-
----
-
-## First class features
 
 Some of the main inlang features include:
 
@@ -27,7 +23,7 @@ Some of the main inlang features include:
 
 ---
 
-## What makes inlang an ecosystem?
+## How does the ecosystem work?
 
 ![Project directory](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/documentation/ecosystem/assets/ecosystem_new.png)
 
@@ -42,11 +38,13 @@ Read more about this here: [inlang ecosystem](/g/7777asdy/)
 
 ---
 
-## inlang Project
+## *.project directory (file)
 
 In order to make your repository compatible with the inlang applications, you will need to create an inlang [project](/documentation/concept/project). This project essentially consists of a folder (`[project_name].inlang`) that includes a `settings.json` file and a `project_id` file. The `settings.json` file determines how your localization data is stored, as well as how you want to lint your data. The `project_id` is automatically generated.
 
-![Project directory](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/documentation/ecosystem/assets/project_new2.png)
+![Project directory](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/documentation/ecosystem/assets/project_new3.png)
+
+We invision the project directory as a file in the future. Just like you open a `.pptx` file, that under the hood is a directory, that contains project files. 
 
 You can have multiple inlang projects in your repository. This is useful in a monorepo setup. If you need a guide to get started, visit the individual pages of the inlang [apps](/c/apps).
 
