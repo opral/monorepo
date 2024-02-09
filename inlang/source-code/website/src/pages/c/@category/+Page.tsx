@@ -333,7 +333,13 @@ export default function Page(props: {
 							<Show when={false}>
 								<NoResultsCard category={selectedCategory()} />
 							</Show>
-							<Show when={selectedCategory().includes("c/plugins")}>
+							<Show
+								when={
+									selectedCategory().includes("c/plugins") ||
+									selectedCategory().includes("c/apps") ||
+									selectedCategory().includes("c/lint-rules")
+								}
+							>
 								<Stacks />
 							</Show>
 						</div>

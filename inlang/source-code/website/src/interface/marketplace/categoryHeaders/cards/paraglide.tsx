@@ -4,20 +4,22 @@ import * as m from "#src/paraglide/messages.js"
 const ParaglideHeader = () => {
 	return (
 		<>
-			<div class="relative bg-surface-100 items-end overflow-hidden rounded-xl border border-surface-200 flex flex-col md:flex-row mb-8">
+			<div class="relative bg-surface-100 items-end overflow-hidden rounded-xl border border-surface-200 flex flex-col md:flex-row mb-4">
 				<div class="relative z-30 flex-1 flex flex-col items-start gap-4 px-8 md:py-8">
-					<div class="p-1 rounded-lg overflow-hidden bg-background mt-8 md:mt-0">
+					<div class="p-1 rounded-lg overflow-hidden mt-8 md:mt-0">
 						<img
 							class="w-10 h-10 object-cover"
-							src="/images/paraglide-logo.webp"
+							src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/paraglideNoBg.png"
 							alt="paraglide logo"
 						/>
 					</div>
 
 					<div class="flex md:items-center flex-col md:flex-row gap-2 pt-2">
-						<h2 class="font-medium text-md">{m.marketplace_header_paraglide_title()}</h2>
+						<h2 class="font-bold text-surface-900 tracking-tight text-xl">
+							{m.marketplace_header_paraglide_title()}
+						</h2>
 					</div>
-					<p class="max-w-[400px] text-sm text-surface-500 leading-relaxed">
+					<p class="max-w-[400px] text-surface-500 text-md font-regular leading-relaxed">
 						{m.marketplace_header_paraglide_description()}
 					</p>
 					<div class="pt-2 flex flex-wrap gap-4">
