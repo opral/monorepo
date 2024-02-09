@@ -181,14 +181,11 @@ function reexportAliases(message: Message) {
 		code += `
 /**
  * Change the reference from the alias \`m.${message.alias["default"]}()\` to \`m.${message.id}()\`:
- *
  * \`\`\`diff
  * - m.${message.alias["default"]}()
  * + m.${message.id}()
  * \`\`\`
- *
  * ---
- *
  * \`${message.alias["default"]}\` is an alias for the message \`${message.id}\`.
  * Referencing aliases instead of the message ID has severe downsides like:
  *
@@ -198,7 +195,6 @@ function reexportAliases(message: Message) {
  * Read more about aliases and their downsides here 
  * @see inlang.com/link.
  * ---
- *
  * @deprecated reference the message by id \`m.${message.id}()\` instead
  */
 export const ${message.alias["default"]} = ${message.id};
