@@ -21,7 +21,9 @@ const createImport = async (uri: string, basePath: string) => {
 		? await(await fetch(uri)).text()
 		: await fs.readFile(uri, { encoding: "utf-8" })
 
-	console.log("moduleAsText", moduleAsText)
+	const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(moduleAsText)
+
+	await import(moduleWithMimeType)
 
 	// const parts = uri.split("/")
 	// const savePath =
@@ -29,5 +31,5 @@ const createImport = async (uri: string, basePath: string) => {
 	// await fs.writeFile(savePath, moduleAsText).catch((e) => {
 	// 	console.error("Error while saving file", e)
 	// })
-	return moduleAsText
+	return moduleWithMimeType
 }
