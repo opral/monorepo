@@ -29,10 +29,10 @@ export function createMessagesQuery(
 		}
 	})
 
-	const get = (args: Parameters<MessageQueryApi["get"]>[0]) => {
-		if ("id" in args.where) return index.get(args.where.id)
-		return index.get(defaultAliasIndex.get(args.where.alias))
-	}
+	const get = (args: Parameters<MessageQueryApi["get"]>[0]) => index.get(args.where.id)
+
+	const getByDefaultAlias = (alias: Parameters<MessageQueryApi["getByDefaultAlias"]>[0]) =>
+		index.get(defaultAliasIndex.get(alias))
 
 	return {
 		create: ({ data }): boolean => {
@@ -49,6 +49,7 @@ export function createMessagesQuery(
 				callback: Parameters<MessageQueryApi["get"]["subscribe"]>[1]
 			) => createSubscribable(() => get(args)).subscribe(callback),
 		}) as any,
+		getByDefaultAlias,
 		includedMessageIds: createSubscribable(() => {
 			return [...index.keys()]
 		}),
