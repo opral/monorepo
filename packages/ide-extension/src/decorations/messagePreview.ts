@@ -46,13 +46,11 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 			})
 
 			return messages.map(async (message) => {
+				// resolve message from id or alias
 				const _message =
 					state().project.query.messages.get({
 						where: { id: message.messageId },
-					}) ??
-					state().project.query.messages.get({
-						where: { alias: message.messageId },
-					})
+					}) ?? state().project.query.messages.getByDefaultAlias(message.messageId)
 
 				const preferredLanguageTag = (await getSetting("previewLanguageTag")) || ""
 				const translationLanguageTag = preferredLanguageTag.length

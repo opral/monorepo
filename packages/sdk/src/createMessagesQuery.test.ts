@@ -28,7 +28,7 @@ describe("create", () => {
 		const created = query.create({ data: mockMessage })
 
 		expect(query.get({ where: { id: "first-message" } })).toEqual(mockMessage)
-		expect(query.get({ where: { alias: "first-message-alias" } })).toEqual(mockMessage)
+		expect(query.getByDefaultAlias("first-message-alias")).toEqual(mockMessage)
 		expect(created).toBe(true)
 	})
 

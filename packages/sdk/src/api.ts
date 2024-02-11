@@ -66,14 +66,14 @@ export type Subscribable<Value> = {
 
 export type MessageQueryApi = {
 	create: (args: { data: Message }) => boolean
-	get: ((args: {
-		where: { id: Message["id"] } | { alias: Message["alias"]["default"] }
-	}) => Readonly<Message>) & {
+	get: ((args: { where: { id: Message["id"] } }) => Readonly<Message>) & {
 		subscribe: (
 			args: { where: { id: Message["id"] } },
 			callback: (message: Message) => void
 		) => void
 	}
+	// use getByDefaultAlias() to resolve a message from its alias, not subscribable
+	getByDefaultAlias: (alias: Message["alias"]["default"]) => Readonly<Message>
 	includedMessageIds: Subscribable<Message["id"][]>
 	/*
 	 * getAll is depricated do not use it

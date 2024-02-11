@@ -25,58 +25,66 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 			const diagnosticsIndex: Record<string, Record<string, vscode.Diagnostic[]>> = {}
 
 			for (const message of messages) {
-				state().project.query.messageLintReports.get.subscribe(
-					{
-						where: {
-							messageId: message.messageId,
+				// resolve message from id or alias
+				const _message =
+					state().project.query.messages.get({
+						where: { id: message.messageId },
+					}) ?? state().project.query.messages.getByDefaultAlias(message.messageId)
+
+				if (_message) {
+					state().project.query.messageLintReports.get.subscribe(
+						{
+							where: {
+								messageId: _message.id,
+							},
 						},
-					},
-					(reports) => {
-						const diagnostics: vscode.Diagnostic[] = []
+						(reports) => {
+							const diagnostics: vscode.Diagnostic[] = []
 
-						if (!reports) {
-							return
-						}
+							if (!reports) {
+								return
+							}
 
-						for (const report of reports) {
-							const { level } = report
+							for (const report of reports) {
+								const { level } = report
 
-							const diagnosticRange = new vscode.Range(
-								new vscode.Position(
-									message.position.start.line - 1,
-									message.position.start.character - 1
-								),
-								new vscode.Position(
-									message.position.end.line - 1,
-									message.position.end.character - 1
+								const diagnosticRange = new vscode.Range(
+									new vscode.Position(
+										message.position.start.line - 1,
+										message.position.start.character - 1
+									),
+									new vscode.Position(
+										message.position.end.line - 1,
+										message.position.end.character - 1
+									)
 								)
+
+								// Get the lint message for the source language tag or fallback to "en"
+
+								const lintMessage = typeof report.body === "object" ? report.body.en : report.body
+
+								const diagnostic = new vscode.Diagnostic(
+									diagnosticRange,
+									`[${message.messageId}] – ${lintMessage}`,
+									mapLintLevelToSeverity(level)
+								)
+								if (!diagnosticsIndex[message.messageId]) diagnosticsIndex[message.messageId] = {}
+								// eslint-disable-next-line
+								diagnosticsIndex[message.messageId]![getRangeIndex(diagnostic.range)] = diagnostics
+								diagnostics.push(diagnostic)
+							}
+
+							if (reports.length === 0) {
+								diagnosticsIndex[message.messageId] = {}
+							}
+
+							linterDiagnosticCollection.set(
+								activeTextEditor.document.uri,
+								flattenDiagnostics(diagnosticsIndex)
 							)
-
-							// Get the lint message for the source language tag or fallback to "en"
-
-							const lintMessage = typeof report.body === "object" ? report.body.en : report.body
-
-							const diagnostic = new vscode.Diagnostic(
-								diagnosticRange,
-								`[${message.messageId}] – ${lintMessage}`,
-								mapLintLevelToSeverity(level)
-							)
-							if (!diagnosticsIndex[message.messageId]) diagnosticsIndex[message.messageId] = {}
-							// eslint-disable-next-line
-							diagnosticsIndex[message.messageId]![getRangeIndex(diagnostic.range)] = diagnostics
-							diagnostics.push(diagnostic)
 						}
-
-						if (reports.length === 0) {
-							diagnosticsIndex[message.messageId] = {}
-						}
-
-						linterDiagnosticCollection.set(
-							activeTextEditor.document.uri,
-							flattenDiagnostics(diagnosticsIndex)
-						)
-					}
-				)
+					)
+				}
 			}
 		})
 
