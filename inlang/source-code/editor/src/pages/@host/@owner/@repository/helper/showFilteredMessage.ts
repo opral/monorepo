@@ -49,7 +49,10 @@ export const showFilteredMessage = (message: Message | undefined) => {
 	const filteredBySearch =
 		searchLower.length === 0 ||
 		(message !== undefined &&
-			(message.id.toLowerCase().includes(searchLower) || patternsLower.includes(searchLower)))
+			(message.id.toLowerCase().includes(searchLower) ||
+				(typeof message.alias === "object" &&
+					JSON.stringify(message.alias).toLowerCase().includes(searchLower)) ||
+				patternsLower.includes(searchLower)))
 			? filteredById
 			: false
 
