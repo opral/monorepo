@@ -25,7 +25,7 @@ const createImport = async (uri: string, basePath: string) => {
 		return import(normalizePath(basePath + "/" + uri))
 	}
 
-	const moduleAsText = await (await fetch(uri)).text()
+	const moduleAsText = await(await fetch(uri)).text()
 
 	// 1. absolute path "/"
 	// 2. hash the uri to remove directory blabla stuff and add .mjs to make node load the module as ESM
@@ -35,19 +35,9 @@ const createImport = async (uri: string, basePath: string) => {
 
 	await fs.writeFile(interimPath, moduleAsText, { encoding: "utf-8" })
 
-	import { module } from "file:///home/runner/work/monorepo/monorepo/c77662115cbd321df4c8f67753b9ea462cc9ed5cd9cd604ad125eb0375a05735.mjs"
-	console.log(module) // Log the imported module to see if it loads correctly
+	const stat = await fs.stat(interimPath)
 
-	const helperPath = import.meta.resolve(interimPath)
-	console.log("helperPath", helperPath)
+	console.log("stat", stat)
 
-	try {
-		const module = await import(helperPath)
-		console.log("module", module)
-		return module
-	} catch (error) {
-		console.log("error", error)
-		throw error // Optionally, rethrow the error if needed
-	}
+	return import(interimPath)
 }
-
