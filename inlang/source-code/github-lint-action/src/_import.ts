@@ -35,5 +35,9 @@ const createImport = async (uri: string, basePath: string) => {
 
 	await fs.writeFile(interimPath, moduleAsText, { encoding: "utf-8" })
 
+	const stat = await fs.stat(interimPath)
+
+	console.log("stat", stat)
+
 	return import(interimPath)
 }
