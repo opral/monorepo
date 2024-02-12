@@ -1,39 +1,36 @@
 {
-    "id": "library.inlang.paraglideJsAdapterSvelteKit",
-    "icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/assets/icon.png",
-    "displayName": {
-        "en": "Paraglide JS Adapter SvelteKit"
-    },
-    "description": {
-        "en": "A SvelteKit integration for ParaglideJS, providing you with everything you need for i18n routing"
-    },
-    "readme": {
-        "en": "./inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/README.md"
-    },
-    "keywords": [
-        "paraglide js",
-        "libraries",
-        "website",
-        "developer",
-        "paraglide",
-        "i18n",
-        "library",
-        "localization",
-        "sdk",
-        "sdk-js",
-        "svelte",
-        "sveltekit",
-        "vite",
-        "javascript",
-        "typescript"
-    ],
-    "recommends": [
-        "m/reootnfj",
-        "m/632iow21",
-        "m/r7kp499g",
-        "m/teldgniy"
-    ],
-    "publisherName": "inlang",
-    "publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
-    "license": "Apache-2.0"
+	"id": "library.inlang.paraglideJsAdapterSvelteKit",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/assets/icon.png",
+	"displayName": {
+		"en": "Paraglide JS Adapter SvelteKit"
+	},
+	"description": {
+		"en": "A SvelteKit integration for ParaglideJS, providing you with everything you need for i18n routing"
+	},
+	"readme": {
+		"en": "./inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/README.md"
+	},
+	"keywords": [
+		"paraglide js",
+		"libraries",
+		"website",
+		"developer",
+		"paraglide",
+		"i18n",
+		"library",
+		"localization",
+		"sdk",
+		"sdk-js",
+		"svelte",
+		"sveltekit",
+		"vite",
+		"javascript",
+		"typescript",
+		"inlang"
+	],
+	"recommends": ["m/reootnfj", "m/632iow21", "m/r7kp499g", "m/teldgniy"],
+	"publisherName": "inlang",
+	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"license": "Apache-2.0",
+	"pricing": "Free"
 }

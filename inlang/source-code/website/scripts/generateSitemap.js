@@ -18,7 +18,7 @@ const routes = [
 ]
 
 // Hardcoded categories for the marketplace
-const categories = ["apps", "libraries", "plugins", "lint-rules", "guides", "lix"]
+const categories = ["apps", "plugins", "lint-rules", "guides", "lix"]
 
 const repositoryRoot = import.meta.url.slice(0, import.meta.url.lastIndexOf("inlang/source-code"))
 

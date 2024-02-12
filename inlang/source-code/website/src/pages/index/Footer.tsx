@@ -80,10 +80,6 @@ const Footer = () => {
 				href: "/c/apps",
 			},
 			{
-				name: m.footer_categories_libraries(),
-				href: "/c/libraries",
-			},
-			{
 				name: m.footer_categories_plugins(),
 				href: "/c/plugins",
 			},
