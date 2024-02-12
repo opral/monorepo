@@ -27,11 +27,7 @@ const HeroSearch = () => {
 				</p>
 
 				<div class="mt-8">
-					<Button
-						class="w-fit"
-						type="secondary"
-						href="/g/7777asdy/guide-nilsjacobsen-ecosystemCompatible"
-					>
+					<Button class="w-fit" type="secondary" href="/documentation">
 						{m.home_inlang_button()}
 					</Button>
 				</div>
