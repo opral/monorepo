@@ -13,7 +13,16 @@
 	"readme": {
 		"en": "./inlang/external-projects/i18next/README.md"
 	},
-	"keywords": ["libraries", "i18next", "javascript", "developer", "i18n", "external", "inlang"],
+	"keywords": [
+		"libraries",
+		"i18next",
+		"javascript",
+		"developer",
+		"i18n",
+		"external",
+		"inlang",
+		"unlisted"
+	],
 	"recommends": ["m/3i8bor92", "m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g"],
 	"publisherName": "i18next",
 	"publisherIcon": "https://avatars.githubusercontent.com/u/8546082?s=200&v=4",
