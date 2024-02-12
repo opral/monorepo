@@ -12,7 +12,7 @@ import { _import } from "./_import.js"
  * @returns {Promise<void>} Resolves when the action is complete.
  */
 export async function run(): Promise<void> {
-	core.debug("Running the action")
+	console.log("Running the action")
 	try {
 		const owner: string = core.getInput("owner", { required: true })
 		const repo: string = core.getInput("repo", { required: true })
@@ -21,14 +21,14 @@ export async function run(): Promise<void> {
 		const project_path: string = core.getInput("project_path", { required: true })
 
 		// Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-		core.debug(`I got all inputs: ${owner} ${repo} ${pr_number} ${token}`)
+		console.log(`I got all inputs: ${owner} ${repo} ${pr_number} ${token}`)
 
 		const baseDirectory = process.cwd()
 		const absoluteProjectPath = baseDirectory + project_path
 		const repoRoot = await findRepoRoot({ nodeishFs: fs, path: absoluteProjectPath })
 
 		if (!repoRoot) {
-			core.debug(
+			console.log(
 				`Could not find repository root for path ${project_path}, falling back to direct fs access`
 			)
 			return
@@ -44,7 +44,7 @@ export async function run(): Promise<void> {
 			appId: "app.inlang.githubI18nLintAction",
 			_import: _import(normalizePath(absoluteProjectPath)),
 		})
-		core.debug(project?.settings().toString())
+		console.log(project?.settings().toString())
 
 		if (project.errors().length > 0) {
 			for (const error of project.errors()) {
@@ -52,8 +52,8 @@ export async function run(): Promise<void> {
 			}
 		}
 
-		core.debug(`settings: ${project.settings()}`)
-		core.debug(`messages:" ${project.query.messages.getAll()}`)
+		console.log(`settings: ${project.settings()}`)
+		console.log(`messages:" ${project.query.messages.getAll()}`)
 
 		// @ts-ignore
 		const octokit = new github.getOctokit(token)
@@ -64,7 +64,7 @@ export async function run(): Promise<void> {
 			pull_number: pr_number,
 		})
 
-		core.debug(`I got changed files: ${changedFiles}`)
+		console.log(`I got changed files: ${changedFiles}`)
 
 		let diffData = {
 			additions: 0,
@@ -116,7 +116,7 @@ export async function run(): Promise<void> {
 			}
 		}
 
-		core.debug(`I got diffData: ${diffData}`)
+		console.log(`I got diffData: ${diffData}`)
 
 		const commentContent = `
 			Pull Request #${pr_number} has been updated with: \n

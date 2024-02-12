@@ -17,6 +17,7 @@ export function _import(basePath: string): ImportFunction {
 }
 
 const createImport = async (uri: string, basePath: string) => {
+	console.log("createImport")
 	if (!uri.startsWith("http")) {
 		// support for local modules
 		return import(normalizePath(basePath + "/" + uri))
