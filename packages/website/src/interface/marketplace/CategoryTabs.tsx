@@ -12,10 +12,6 @@ const CategoryTabs = () => {
 				href: "/c/apps",
 			},
 			{
-				name: m.marketplace_header_libraries_title(),
-				href: "/c/libraries",
-			},
-			{
 				name: m.marketplace_header_plugins_title(),
 				href: "/c/plugins",
 			},

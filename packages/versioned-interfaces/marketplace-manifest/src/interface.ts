@@ -46,6 +46,7 @@ const MarketplaceManifestBase = Type.Object({
 			])
 		)
 	),
+	pricing: Type.Optional(Type.String()),
 	keywords: Type.Array(Type.String()),
 	license: Type.String({ description: "The license of the item (e.g. Apache-2.0)." }),
 	website: Type.Optional(

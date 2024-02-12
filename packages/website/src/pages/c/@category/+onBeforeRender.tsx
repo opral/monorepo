@@ -27,11 +27,18 @@ export default async function onBeforeRender(pageContext: any) {
 		category: categoryValue,
 	})
 
-	const items = JSON.parse(results.data as string).map((item: any) => {
+	let items = JSON.parse(results.data as string).map((item: any) => {
 		item.uniqueID = item.objectID
 		delete item.readme
 		delete item.objectID
 		return item
+	})
+
+	//rename the old libraries in item
+
+	// filter out every item with keyword.include(unlisted)
+	items = items.filter((item: any) => {
+		return !item.keywords.includes("unlisted")
 	})
 
 	if (!q && items.length === 0) {

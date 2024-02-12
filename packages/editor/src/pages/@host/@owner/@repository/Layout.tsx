@@ -52,6 +52,8 @@ export function Layout(props: { children: JSXElement }) {
 		routeParams,
 	} = useEditorState()
 
+	const [localStorage, setLocalStorage] = useLocalStorage()
+
 	const removeFilter = (filterName: string) => {
 		setSelectedFilters(selectedFilters().filter((filter: Filter) => filter.name !== filterName))
 	}
@@ -371,6 +373,32 @@ export function Layout(props: { children: JSXElement }) {
 					alt="Sync Fork GitHub UI"
 					class="w-4/5 mx-auto mt-2"
 				/>
+				<sl-checkbox
+					class="pt-4"
+					prop:checked={localStorage.disableForkSyncWarning?.some(
+						(repo) =>
+							repo.owner === routeParams().owner && repo.repository === routeParams().repository
+					)}
+					on:sl-change={(event: { target: { checked: boolean } }) => {
+						setLocalStorage({
+							...localStorage,
+							disableForkSyncWarning: event.target.checked
+								? [
+										...localStorage.disableForkSyncWarning,
+										{ owner: routeParams().owner, repository: routeParams().repository },
+								  ]
+								: localStorage.disableForkSyncWarning.filter(
+										(repo) =>
+											!(
+												repo.owner === routeParams().owner &&
+												repo.repository === routeParams().repository
+											)
+								  ),
+						})
+					}}
+				>
+					Disable checking for updates in the upstream branch
+				</sl-checkbox>
 				<div class="flex flex-col gap-4 pt-6">
 					<sl-button
 						class="w-full"

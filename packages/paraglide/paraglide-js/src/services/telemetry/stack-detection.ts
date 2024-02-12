@@ -45,17 +45,16 @@ export type StackInfo = {
 	}
 }
 
-
 /**
  * Returns information about the tech-stack used based on the package.json.
- * It will return an object with a map of relevant packages and their versions 
+ * It will return an object with a map of relevant packages and their versions
  * as the `packages` property.
- * 
+ *
  * If no interestring packages are found, the `packages` property will be an empty object.
  * If an error occurs, the `packages` property will be an empty object.
- * 
+ *
  * @example
- * 
+ *
  * ```ts
  * {
  *  "packages": {
@@ -64,7 +63,7 @@ export type StackInfo = {
  *   }
  * }
  * ```
- * 
+ *
  * @param packageJson The JSON parsed package.json file.
  */
 export function getStackInfo(packageJson: unknown): StackInfo {
