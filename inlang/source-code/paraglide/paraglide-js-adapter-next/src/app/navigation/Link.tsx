@@ -1,8 +1,4 @@
-import {
-	availableLanguageTags,
-	languageTag,
-	sourceLanguageTag,
-} from "$paraglide-adapter-next-internal/runtime.js"
+import { availableLanguageTags, languageTag, sourceLanguageTag } from "$paraglide/runtime.js"
 import { prefixStrategy } from "./prefixStrategy"
 import NextLink from "next/link"
 import React from "react"

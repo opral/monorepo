@@ -23,7 +23,7 @@ const app_build = await rollup({
 	},
 	external: [
 		/node_modules/,
-		"$paraglide-adapter-next-internal/runtime.js",
+		"$paraglide/runtime.js",
 		"path",
 		"url",
 		"fs/promises",
@@ -41,7 +41,7 @@ const pages_build = await rollup({
 	},
 	external: [
 		/node_modules/,
-		"$paraglide-adapter-next-internal/runtime.js",
+		"$paraglide/runtime.js",
 		"path",
 		"url",
 		"fs/promises",
@@ -59,7 +59,7 @@ const pluginBuild = await rollup({
 	},
 	external: [
 		/node_modules/,
-		"$paraglide-adapter-next-internal/runtime.js",
+		"$paraglide/runtime.js",
 		"path",
 		"url",
 		"fs/promises",

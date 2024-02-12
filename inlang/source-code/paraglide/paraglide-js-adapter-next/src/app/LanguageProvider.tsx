@@ -4,7 +4,7 @@ import {
 	setLanguageTag,
 	isAvailableLanguageTag,
 	sourceLanguageTag,
-} from "$paraglide-adapter-next-internal/runtime.js"
+} from "$paraglide/runtime.js"
 import { headers } from "next/headers"
 import { ClientLanguageProvider } from "./ClientLanguageProvider"
 import { LanguageSpy } from "./LanguageSpy"

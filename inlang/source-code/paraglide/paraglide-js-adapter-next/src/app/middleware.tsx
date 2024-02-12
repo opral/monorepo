@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server"
 import { NextRequest } from "next/server"
-import {
-	sourceLanguageTag,
-	availableLanguageTags,
-} from "$paraglide-adapter-next-internal/runtime.js"
+import { sourceLanguageTag, availableLanguageTags } from "$paraglide/runtime.js"
 import { LANGUAGE_HEADER } from "../constants"
 import { prefixStrategy } from "./navigation/prefixStrategy"
 
