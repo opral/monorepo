@@ -35,9 +35,8 @@ const createImport = async (uri: string, basePath: string) => {
 
 	await fs.writeFile(interimPath, moduleAsText, { encoding: "utf-8" })
 
-	const stat = await fs.stat(interimPath)
+	const helperPath = import.meta.resolve(interimPath)
+	console.log("helperPath", helperPath)
 
-	console.log("stat", stat)
-
-	return import.meta.resolve(interimPath)
+	return await import(helperPath)
 }
