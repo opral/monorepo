@@ -35,6 +35,9 @@ const createImport = async (uri: string, basePath: string) => {
 
 	await fs.writeFile(interimPath, moduleAsText, { encoding: "utf-8" })
 
+	import { module } from "file:///home/runner/work/monorepo/monorepo/c77662115cbd321df4c8f67753b9ea462cc9ed5cd9cd604ad125eb0375a05735.mjs"
+	console.log(module) // Log the imported module to see if it loads correctly
+
 	const helperPath = import.meta.resolve(interimPath)
 	console.log("helperPath", helperPath)
 
