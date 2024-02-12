@@ -47,9 +47,6 @@ jobs:
         id: test-action
         uses: ./inlang/source-code/github-lint-action
         with:
-          owner: ${{ github.repository_owner }}
-          repo: ${{ github.repository }}
-          pr_number: ${{ github.event.pull_request.number }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Print Output
