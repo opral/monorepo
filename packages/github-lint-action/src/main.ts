@@ -14,14 +14,15 @@ import { _import } from "./_import.js"
 export async function run(): Promise<void> {
 	console.log("Running the action")
 	try {
-		const owner: string = core.getInput("owner", { required: true })
-		const repo: string = core.getInput("repo", { required: true })
-		const pr_number: string = core.getInput("pr_number", { required: true })
 		const token: string = core.getInput("token", { required: true })
 		const project_path: string = core.getInput("project_path", { required: true })
+		const { owner, repo } = github.context.repo
+		const pr_number = github.context.payload.pull_request?.number
+		// You can also pass in additional options as a second parameter to getOctokit
+		// const octokit = github.getOctokit(myToken, {userAgent: "MyActionVersion1"});
 
 		// Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-		console.log(`I got all inputs: ${owner} ${repo} ${pr_number} ${token}`)
+		console.log(`I got all inputs: ${token} ${project_path}`)
 
 		const baseDirectory = process.cwd()
 		const absoluteProjectPath = baseDirectory + project_path

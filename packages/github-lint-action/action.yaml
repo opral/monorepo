@@ -4,15 +4,6 @@ author: 'inlang'
 
 # Define your inputs here.
 inputs:
-  owner:
-    description: 'Owner name'
-    required: true
-  repo:
-    description: 'Repo name'
-    required: true 
-  pr_number:
-    description: 'PR number'
-    required: true
   token:
     description: 'Your GitHub token'
     required: true
