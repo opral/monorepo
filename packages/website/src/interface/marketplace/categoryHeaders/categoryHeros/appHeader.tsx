@@ -2,6 +2,7 @@ import { LixBadge } from "#src/interface/components/Card.jsx"
 import Link from "#src/renderer/Link.jsx"
 import { registry } from "@inlang/marketplace-registry"
 import { For, Match, Show, Switch } from "solid-js"
+import ParaglideHeader from "../cards/paraglide.jsx"
 
 const AppHeader = () => {
 	const getProducts = () => [
@@ -9,37 +10,14 @@ const AppHeader = () => {
 		"app.inlang.ideExtension",
 		"app.parrot.figmaPlugin",
 	]
-
-	// const data: Array<DataItem> = [
-	// 	{
-	// 		title: "Fink – Message editor",
-	// 		link: "/m/tdozzpar/app-inlang-finkLocalizationEditor",
-	// 		description:
-	// 			"The Fink message editor enables you to work with globalized codebases in your browser...",
-	// 		pricing: "Free Beta",
-	// 		image:
-	// 			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/fink-logo.webp",
-	// 		cover: "/images/fink-cover.png",
-	// 	},
-	// 	{
-	// 		title: "IDE - Extension for  i18n",
-	// 		link: "/m/r7kp499g/app-inlang-vscode-extension",
-	// 		description:
-	// 			"Supercharge i18n within VS Code — Visualize, edit & lint translated strings at a glance.",
-	// 		pricing: "Free",
-	// 		image:
-	// 			"https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/ide-extension/assets/icon-vscode-marketplace.png",
-	// 		cover: "/images/ide-cover.png",
-	// 	},
-	// 	{
-	// 		title: "Parrot - i18n Figma plugin",
-	// 		link: "/m/gkrpgoir/app-inlang-figma-plugin",
-	// 		description: "Parrot simplifies the translation management process right within Figma.",
-	// 		pricing: "Free Beta",
-	// 		image: "https://cdn.jsdelivr.net/gh/parrot-global/parrot@latest/parrot-logo.svg",
-	// 		cover: "/images/parrot-cover.png",
-	// 	},
-	// ]
+	const getDevProducts = () => [
+		"library.inlang.paraglideJs",
+		"library.inlang.paraglideJsAdapterAstro",
+		"library.inlang.paraglideJsAdapterSvelteKit",
+		"library.inlang.paraglideJsAdapterSolidStart",
+		"app.inlang.cli",
+		"app.inlang.ideExtension",
+	]
 
 	return (
 		<>
@@ -95,6 +73,76 @@ const AppHeader = () => {
 									</Switch>
 								</div>
 
+								<div class="p-5 flex flex-col gap-5">
+									<div class="flex gap-5 items-center">
+										<img
+											class="h-10 w-10 object-cover rounded"
+											src={manifest.icon}
+											alt={displayName()}
+										/>
+										<div class="flex-1">
+											<div class="w-full font-bold text-surface-900 tracking-tight">
+												{displayName()}
+											</div>
+										</div>
+									</div>
+									<div class="text-surface-500 text-md font-regular line-clamp-2">
+										{description()}
+									</div>
+									<div class="flex flex-row-reverse justify-between items-center h-[30px]">
+										<div class="w-5 text-primary group transition-colors relative z-60">
+											<LixBadge />
+										</div>
+										<Show
+											when={
+												// @ts-ignore (Show components are not typed)
+												manifest.pricing
+											}
+										>
+											<div class="h-[30px] px-4 rounded-full bg-surface-200 flex items-center text-surface-500 font-semibold text-[13px]">
+												{
+													// @ts-ignore
+													manifest.pricing.toUpperCase()
+												}
+											</div>
+										</Show>
+									</div>
+								</div>
+							</Link>
+						)
+					}}
+				</For>
+			</div>
+			<h2 class="pb-4 border-t-surface-200 text-xl font-medium tracking-tight text-surface-900 pt-4">
+				Apps for Developer
+			</h2>
+			<ParaglideHeader />
+			<div class="flex flex-row w-full justify-between pb-12 flex-wrap gap-y-4">
+				<For each={getDevProducts()}>
+					{(product) => {
+						const manifest = registry.find((manifest) => manifest.id === product)
+						if (!manifest) {
+							return undefined
+						}
+						const displayName = () =>
+							typeof manifest.displayName === "object"
+								? manifest.displayName.en
+								: manifest.displayName
+
+						const description = () =>
+							typeof manifest.description === "object"
+								? manifest.description.en
+								: manifest.description
+
+						return (
+							<Link
+								href={
+									manifest.id.split(".")[0] === "guide"
+										? `/g/${manifest.uniqueID}/${manifest.id.replaceAll(".", "-")}`
+										: `/m/${manifest.uniqueID}/${manifest.id.replaceAll(".", "-")}`
+								}
+								class="group sm:w-[calc((100%_-_16px)_/_2)] lg:w-[calc((100%_-_32px)_/_3)] bg-background border border-surface-200 rounded-xl overflow-hidden hover:border-surface-300 transition-all cursor-pointer"
+							>
 								<div class="p-5 flex flex-col gap-5">
 									<div class="flex gap-5 items-center">
 										<img
