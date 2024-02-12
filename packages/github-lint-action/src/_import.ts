@@ -37,13 +37,14 @@ const createImport = async (uri: string, basePath: string) => {
 
 	const helperPath = import.meta.resolve(interimPath)
 	console.log("helperPath", helperPath)
-	import(helperPath)
-		.then((module) => {
-			console.log("module", module)
-		})
-		.catch((error) => {
-			console.log("error", error)
-		})
 
-	return await import(helperPath)
+	try {
+		const module = await import(helperPath)
+		console.log("module", module)
+		return module
+	} catch (error) {
+		console.log("error", error)
+		throw error // Optionally, rethrow the error if needed
+	}
 }
+
