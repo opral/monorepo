@@ -8,5 +8,6 @@
 	"users": "Benutzer",
 	"next_user": "Nächster Benutzer",
 	"previous_user": "Vorheriger Benutzer",
-	"edit": "Bearbeiten"
+	"edit": "Bearbeiten",
+	"about_path": "/ueber-uns"
 }
