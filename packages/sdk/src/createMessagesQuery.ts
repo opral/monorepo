@@ -13,18 +13,19 @@ export function createMessagesQuery(
 	// @ts-expect-error
 	const index = new ReactiveMap<string, Message>()
 
-	// Map default alias to messageId
-	// Not reactive, only used for get query by alias
+	// Map default alias to message
 	// Assumes that aliases are only created and deleted, not updated
+	// TODO handle updates to aliases
 	// TODO refine to hold messageId[], if default alias is not unique
-	const defaultAliasIndex = new Map<string, Message["id"]>()
+	// @ts-expect-error
+	const defaultAliasIndex = new ReactiveMap<string, Message>()
 
 	createEffect(() => {
 		index.clear()
 		for (const message of structuredClone(messages())) {
 			index.set(message.id, message)
 			if ("default" in message.alias) {
-				defaultAliasIndex.set(message.alias.default, message.id)
+				defaultAliasIndex.set(message.alias.default, message)
 			}
 		}
 	})
@@ -32,14 +33,14 @@ export function createMessagesQuery(
 	const get = (args: Parameters<MessageQueryApi["get"]>[0]) => index.get(args.where.id)
 
 	const getByDefaultAlias = (alias: Parameters<MessageQueryApi["getByDefaultAlias"]>[0]) =>
-		index.get(defaultAliasIndex.get(alias))
+		defaultAliasIndex.get(alias)
 
 	return {
 		create: ({ data }): boolean => {
 			if (index.has(data.id)) return false
 			index.set(data.id, data)
 			if ("default" in data.alias) {
-				defaultAliasIndex.set(data.alias.default, data.id)
+				defaultAliasIndex.set(data.alias.default, data)
 			}
 			return true
 		},
@@ -49,7 +50,12 @@ export function createMessagesQuery(
 				callback: Parameters<MessageQueryApi["get"]["subscribe"]>[1]
 			) => createSubscribable(() => get(args)).subscribe(callback),
 		}) as any,
-		getByDefaultAlias,
+		getByDefaultAlias: Object.assign(getByDefaultAlias, {
+			subscribe: (
+				alias: Parameters<MessageQueryApi["getByDefaultAlias"]["subscribe"]>[0],
+				callback: Parameters<MessageQueryApi["getByDefaultAlias"]["subscribe"]>[1]
+			) => createSubscribable(() => getByDefaultAlias(alias)).subscribe(callback),
+		}) as any,
 		includedMessageIds: createSubscribable(() => {
 			return [...index.keys()]
 		}),
@@ -67,7 +73,7 @@ export function createMessagesQuery(
 			if (message === undefined) {
 				index.set(where.id, data)
 				if ("default" in data.alias) {
-					defaultAliasIndex.set(data.alias.default, data.id)
+					defaultAliasIndex.set(data.alias.default, data)
 				}
 			} else {
 				index.set(where.id, { ...message, ...data })
