@@ -29,6 +29,10 @@ const Features = () => {
 								typeof manifest.displayName === "object"
 									? manifest.displayName.en
 									: manifest.displayName
+							const description = () =>
+								typeof manifest.description === "object"
+									? manifest.description.en
+									: manifest.description
 							return (
 								<Link
 									href={`/m/${manifest.uniqueID}/${manifest.id.replaceAll(".", "-")}`}
@@ -76,7 +80,7 @@ const Features = () => {
 											</div>
 										</div>
 										<p class="text-sm line-clamp-2 text-surface-500 transition-colors group-hover:text-surface-600">
-											{manifest.description.en}
+											{description()}
 										</p>
 									</div>
 									{/* <div class="flex items-center gap-2 justify-between">
