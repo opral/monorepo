@@ -1,5 +1,5 @@
 "use client"
-import { setLanguageTag } from "$paraglide-adapter-next-internal/runtime.js"
+import { setLanguageTag } from "$paraglide/runtime.js"
 
 /**
  * A client side component that sets the language tag on mount.

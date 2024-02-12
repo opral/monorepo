@@ -23,7 +23,7 @@ type Config = NextConfig & {
  */
 export function withParaglide(config: Config): NextConfig {
 	addAlias(config, {
-		"$paraglide-adapter-next-internal/runtime.js": config.paraglide.outdir + "/runtime.js",
+		"$paraglide/runtime.js": config.paraglide.outdir + "/runtime.js",
 	})
 
 	const router = config.i18n ? "pages" : "app"

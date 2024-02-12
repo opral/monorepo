@@ -1,10 +1,6 @@
 import * as NextNavigation from "next/navigation"
 import { prefixStrategy } from "./prefixStrategy"
-import {
-	availableLanguageTags,
-	languageTag,
-	sourceLanguageTag,
-} from "$paraglide-adapter-next-internal/runtime.js"
+import { availableLanguageTags, languageTag, sourceLanguageTag } from "$paraglide/runtime.js"
 
 const { translateHref } = prefixStrategy(availableLanguageTags, sourceLanguageTag)
 

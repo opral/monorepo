@@ -12,6 +12,6 @@
 		"skipLibCheck": true,
 		"declarationMap": true
 	},
-	"include": ["src-new"],
+	"include": ["src", "src-new"],
 	"exclude": ["example-*", "src/**/*.test.ts", "src/**/*.test.tsx"]
 }
