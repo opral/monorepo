@@ -1,12 +1,4 @@
-# Introduction
-
-Welcome to the inlang documentation!
-
----
-
-## What is inlang?
-
-![ecosystem illustration](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/documentation/ecosystem/assets/globe-handdrawn-3.png)
+# What is inlang?
 
 **inlang** is globalization infrastructure that powers an ecosystem of inlang apps, plugins and solutions that make globalization simple.
 
