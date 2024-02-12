@@ -68,6 +68,13 @@ const stacks = [
 const DeveloperSlide = () => {
 	const cards = [
 		{
+			title: "Paraglide JS",
+			description: "Simple, adaptable, and tiny",
+			href: "/m/gerre34r",
+			logo: "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/paraglide/paraglide-js/assets/paraglideNoBg.png",
+			cover: "/images/paraglide-cover-landingpage.png",
+		},
+		{
 			title: m.home_personas_developer_cards_cli_title(),
 			description: m.home_personas_developer_cards_cli_description(),
 			href: "/m/2qj2w8pu",
@@ -95,22 +102,22 @@ const DeveloperSlide = () => {
 						</div>
 					</Link>
 				</div>
-				<div class="grid md:grid-cols-2 h-[430px] sm:h-[530px] md:h-[244px] gap-4 mt-4">
+				<div class="grid lg:grid-cols-3 h-[750px] sm:h-[900px] lg:h-[244px] gap-4 mt-4">
 					<For each={cards}>
 						{(card) => (
 							<Link
 								class="relative bg-gradient-to-b from-surface-200 rounded-xl p-[1px] hover:from-surface-300 transition-all"
 								href={card.href}
 							>
-								<div class="absolute w-full top-0 left-0 pointer-events-none">
-									<img src={card.cover} alt="cover" />
+								<div class="absolute w-full flex justify-center top-0 left-0 pointer-events-none">
+									<img class="max-w-[400px] w-full" src={card.cover} alt="cover" />
 								</div>
 								<div class="flex flex-col justify-end col-span-1 h-full rounded-[11px] bg-gradient-to-b from-surface-50 hover:from-surface-100 to-background hover:to-background p-6">
-									<div class="flex items-center gap-4">
-										<div class="w-10 h-10 rounded overflow-hidden">
+									<div class="flex items-start gap-4">
+										<div class="mt-1 w-10 h-10 rounded overflow-hidden">
 											<img src={card.logo} alt="logo" />
 										</div>
-										<div>
+										<div class="flex-1">
 											<h4 class="font-bold text-surface-600">{card.title}</h4>
 											<p class="text-surface-500 text-sm">{card.description}</p>
 										</div>

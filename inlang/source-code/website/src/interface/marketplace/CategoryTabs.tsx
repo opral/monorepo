@@ -8,12 +8,8 @@ const CategoryTabs = () => {
 	const getCategories = () => {
 		return [
 			{
-				name: m.marketplace_header_apps_title(),
+				name: "Apps",
 				href: "/c/apps",
-			},
-			{
-				name: m.marketplace_header_libraries_title(),
-				href: "/c/libraries",
 			},
 			{
 				name: m.marketplace_header_plugins_title(),
@@ -26,10 +22,6 @@ const CategoryTabs = () => {
 			{
 				name: m.marketplace_header_guides_title(),
 				href: "/c/guides",
-			},
-			{
-				name: m.marketplace_header_lix_title(),
-				href: "/c/lix",
 			},
 		]
 	}

@@ -10,7 +10,7 @@
 		"url": "https://github.com/opral/monorepo.git"
 	},
 	"icon": "assets/icon-vscode-marketplace.png",
-	"version": "1.32.0",
+	"version": "1.32.1",
 	"engines": {
 		"vscode": "^1.84.2"
 	},
