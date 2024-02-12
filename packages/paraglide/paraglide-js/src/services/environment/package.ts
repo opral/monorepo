@@ -19,7 +19,6 @@ export async function findPackageJson(
 	return undefined
 }
 
-
 export async function getPackageJson(
 	fs: NodeishFilesystem,
 	cwd: string

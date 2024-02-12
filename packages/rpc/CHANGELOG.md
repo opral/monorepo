@@ -1,5 +1,15 @@
 # @inlang/rpc
 
+## 0.2.11
+
+### Patch Changes
+
+- Updated dependencies [244442698]
+  - @inlang/language-tag@1.5.0
+  - @inlang/sdk@0.26.2
+  - @inlang/message@2.0.2
+  - @inlang/marketplace-registry@1.5.3
+
 ## 0.2.10
 
 ### Patch Changes

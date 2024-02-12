@@ -1,8 +1,14 @@
 {
 	"Overview": [
 		{
-			"path": "overview/architecture.md",
+			"path": "overview/introduction.md",
 			"slug": "",
+			"title": "Introduction",
+			"description": "Learn about inlang's architecture."
+		},
+		{
+			"path": "overview/architecture.md",
+			"slug": "architecture",
 			"title": "Architecture",
 			"description": "Learn about inlang's architecture."
 		}

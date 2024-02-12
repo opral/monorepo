@@ -28,6 +28,13 @@ export async function search(args: {
 					objectID: product.uniqueID,
 					...product,
 				})
+
+				// workaround to not change the ids of old libraries but still show them in apps
+			} else if (product.id.split(".")[0] === "library" && args.category === "app") {
+				hits.push({
+					objectID: product.uniqueID,
+					...product,
+				})
 			}
 		}
 		return { data: JSON.stringify(hits) }

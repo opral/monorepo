@@ -19,7 +19,8 @@
 		"interface",
 		"types",
 		"typescript",
-		"library"
+		"library",
+		"unlisted"
 	],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
