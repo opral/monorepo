@@ -214,6 +214,7 @@ import * as runtime from "../paraglide/runtime.js"
 import * as m from "../paraglide/messages.js"
 
 export const i18n = createI18n(runtime, {
+	// do not call the function - pass a reference
 	"/about" : m.about_path
 })
 ```
