@@ -8,5 +8,6 @@
 	"users": "Users",
 	"next_user": "Next user",
 	"previous_user": "Previous user",
-	"edit": "Edit"
+	"edit": "Edit",
+	"about_path": "/about"
 }

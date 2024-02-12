@@ -16,6 +16,10 @@ export type LocalStorageSchema = {
 	 * See https://github.com/opral/monorepo/issues/241
 	 */
 	showMachineTranslationWarning: boolean
+	disableForkSyncWarning: Array<{
+		owner: string
+		repository: string
+	}>
 	isFirstUse: boolean
 	recentProjects: RecentProjectType[]
 }
@@ -33,5 +37,6 @@ export type RecentProjectType = {
 export const defaultLocalStorage: LocalStorageSchema = {
 	showMachineTranslationWarning: true,
 	isFirstUse: true,
+	disableForkSyncWarning: [],
 	recentProjects: [],
 }
