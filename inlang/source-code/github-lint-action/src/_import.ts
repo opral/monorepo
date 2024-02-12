@@ -39,5 +39,5 @@ const createImport = async (uri: string, basePath: string) => {
 
 	console.log("stat", stat)
 
-	return import(interimPath)
+	return import.meta.resolve(interimPath)
 }
