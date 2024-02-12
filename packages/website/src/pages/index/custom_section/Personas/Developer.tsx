@@ -69,7 +69,7 @@ const DeveloperSlide = () => {
 	const cards = [
 		{
 			title: "Paraglide JS",
-			description: "Simple, adaptable, and tiny i18n lib.",
+			description: "Simple, adaptable, and tiny",
 			href: "/m/gerre34r",
 			logo: "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/paraglide/paraglide-js/assets/paraglideNoBg.png",
 			cover: "/images/paraglide-cover-landingpage.png",

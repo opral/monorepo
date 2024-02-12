@@ -8,6 +8,7 @@ import { renderLocales } from "#src/renderer/renderLocales.js"
 import { i18nRouting } from "#src/renderer/+onBeforeRoute.js"
 import Personas from "./custom_section/Personas/index.jsx"
 import LixSection from "./custom_section/Lix/index.jsx"
+import Features from "./custom_section/Features.jsx"
 
 export default function Page() {
 	return (
@@ -46,7 +47,7 @@ export default function Page() {
 			/>
 			<MarketplaceLayout>
 				<HeroSearch />
-				{/* <Features /> */}
+				<Features />
 				<Personas />
 				{/* <ExtendSection /> */}
 				{/* <EcosystemComponents /> */}
