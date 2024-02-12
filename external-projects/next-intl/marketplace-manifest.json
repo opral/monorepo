@@ -20,7 +20,8 @@
 		"developer",
 		"i18n",
 		"external",
-		"inlang"
+		"inlang",
+		"unlisted"
 	],
 	"recommends": ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g"],
 	"publisherName": "amannn",

@@ -206,6 +206,18 @@ Optional parameters, catch-all parameters and param matchers are not yet support
 
 > You need to use all parameters in all translations. If you don't, Paraglide will not be able to use the correct path.
 
+For convenience, you can also pass a message-function as the value of the pathnames object. 
+
+```js
+import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
+import * as runtime from "../paraglide/runtime.js"
+import * as m from "../paraglide/messages.js"
+
+export const i18n = createI18n(runtime, {
+	"/about" : m.about_path
+})
+```
+
 ## Customizing Link Translation
 
 Links are translated automatically using a preprocessor. This means that you can use the normal `a` tag and the adapter will translate it for you.

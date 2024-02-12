@@ -1,5 +1,11 @@
 # @inlang/language-tag
 
+## 1.5.0
+
+### Minor Changes
+
+- 244442698: fix: include typebox as a dev dependency
+
 ## 1.4.0
 
 ### Minor Changes

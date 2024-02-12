@@ -1,6 +1,6 @@
 {
 	"id": "library.inlang.paraglideJs",
-	"icon": "https://emojis.wiki/thumbs/emojis/parachute.webp",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/paraglideNoBg.png",
 	"gallery": [
 		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/paraglide-marketplace-cover.jpg",
 		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-1.jpg",
@@ -20,6 +20,7 @@
 	"keywords": [
 		"paraglide js",
 		"libraries",
+		"apps",
 		"website",
 		"developer",
 		"paraglide",
@@ -37,12 +38,8 @@
 		"solid",
 		"typescript"
 	],
-	"recommends": [
-		"m/reootnfj",
-		"m/632iow21",
-		"m/r7kp499g",
-		"m/teldgniy"
-	],
+	"recommends": ["m/reootnfj", "m/632iow21", "m/r7kp499g", "m/teldgniy"],
+	"pricing": "free",
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0"
