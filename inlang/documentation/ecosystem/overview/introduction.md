@@ -14,7 +14,7 @@ inlang is globalization infrastructure that powers an ecosystem of inlang apps, 
 
 ## Ecosystem Approach
 
-![Project directory](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/documentation/ecosystem/assets/ecosystem_new.png)
+![Project directory](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/documentation/ecosystem/assets/file-and-apps.png)
 
 For every use case, there is an app, a plugin, a lint rule, or a custom solution that can be built. Once you have set up your inlang project, you can use all of them without any additional effort.
 
