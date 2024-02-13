@@ -22,13 +22,6 @@ jobs:
         id: checkout
         uses: actions/checkout@v4
 
-      - name: Read JSON file
-        id: read-json
-        run: |
-          json_file_path="./project.inlang/settings.json"
-          json_content=$(cat "$json_file_path")
-          echo "::set-output name=json_content::$json_content"
-
       - name: Setup Pnpm
         uses: pnpm/action-setup@v2
         with:
@@ -41,30 +34,6 @@ jobs:
 
       - name: Install Dependencies
         run: pnpm install
-
-      - name: Run Node.js script
-        run: |
-          // Example Node.js script to import modules
-          const fs = require('fs');
-          const path = require('path');
-  
-          // Accessing the JSON content passed from previous step
-          const jsonContent = JSON.parse(process.env.json_content);
-          
-          // Example of using the JSON content
-          console.log('JSON content:', jsonContent);
-          
-          try {
-            // Example of importing Node.js modules from jsDelivr
-            const modules = jsonContent.modules.map(moduleUrl => {
-              console.log('Importing module:', moduleUrl);
-              return require(moduleUrl);
-            });
-          
-            console.log('Imported modules:', modules);
-          } catch (error) {
-            console.error('Error importing modules:', error);
-          }
 
       - name: Install Doppler CLI for env variables
         uses: dopplerhq/cli-action@v2
