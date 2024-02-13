@@ -3,7 +3,6 @@ import type { ImportFunction } from "@inlang/sdk"
 import fs from "node:fs/promises"
 import crypto from "node:crypto"
 import path from "node:path"
-import url from "node:url"
 
 /**
  * Wraps the import function to inject the base path.
@@ -35,10 +34,13 @@ const createImport = async (uri: string, basePath: string) => {
 	)
 
 	await fs.writeFile(interimPath, moduleAsText, { encoding: "utf-8" })
-	const q = url.parse(uri, true)
-	const queryData = q.query
-	console.log("queryData", queryData)
-	console.log("queryDefault", queryData.default)
 
 	return import(interimPath)
+		.then((module) => {
+			console.log("imported module", module, module.default)
+			return module
+		})
+		.catch((error) => {
+			console.error("error", error)
+		})
 }
