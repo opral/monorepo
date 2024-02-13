@@ -2,6 +2,10 @@
 
 **inlang** is globalization infrastructure that powers an ecosystem of inlang apps, plugins and solutions that make globalization simple.
 
+![Go global mockups](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/documentation/ecosystem/assets/go-global-mockup.png)
+
+<br/>
+
 ---
 
 ## Ecosystem Approach
@@ -13,7 +17,8 @@ For every use case, there is an app, a plugin, a lint rule, or a custom solution
 <br/>
 
 <doc-links>
-    <doc-link title="Project directory (file)" icon="mdi:skip-next" href="/documentation/concept/project" description="Learn about the inlang project."></doc-link>
+    <doc-link title="Project directory (file)" icon="mdi:file-outline" href="/documentation/concept/project" description="Learn about the inlang project."></doc-link>
+    <doc-link title="inlang Apps" icon="mdi:apps" href="/c/apps" description="Discover the inlang apps."></doc-link>
 </doc-links>
 
 <br/>
