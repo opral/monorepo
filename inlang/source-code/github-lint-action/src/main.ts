@@ -45,7 +45,7 @@ export async function run(): Promise<void> {
 	// dynamically import the module from filePath
 	try {
 		const module = await import(filePath)
-		module.default()
+		console.log(module.default.add(1, 2))
 	} catch (err) {
 		console.log(err)
 	}
