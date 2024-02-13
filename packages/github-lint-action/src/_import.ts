@@ -35,7 +35,7 @@ const createImport = async (uri: string, basePath: string) => {
 
 	await fs.writeFile(interimPath, moduleAsText, { encoding: "utf-8" })
 
-	return await import(interimPath)
+	return await import("./" + crypto.createHash("sha256").update(uri).digest("hex") + ".mjs")
 		.then((module) => {
 			console.log("imported module", module, module.default)
 			return module
