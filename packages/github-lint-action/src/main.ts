@@ -15,7 +15,12 @@ export async function run(): Promise<void> {
 	console.log("Running the action")
 	// test with local module
 	// syntax duplicate from inlang/source-code/sdk/src/resolve-modules/import.ts
-	const moduleAsText = await fs.readFile(process.cwd() + "/testmodule.js", { encoding: "utf-8" })
+	const moduleAsText = await(
+		await fetch(
+			"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js"
+		)
+	).text()
+	// const moduleAsText = await fs.readFile(process.cwd() + "/testmodule.js", { encoding: "utf-8" })
 	const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(moduleAsText)
 
 	await import(moduleWithMimeType)
