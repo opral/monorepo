@@ -13,19 +13,36 @@ import { _import } from "./_import.js"
  */
 export async function run(): Promise<void> {
 	console.log("Running the action")
-	// list modules in current directory
-	fs.readdir(process.cwd()).then((files) => {
-		console.log(files)
-	})
-	await import(process.cwd() + "/inlang/source-code/github-lint-action/src/testpluginmodule.js")
-		.then((module) => {
-			console.log(module)
+
+	const filePath =
+		"/home/runner/work/monorepo/monorepo/inlang/source-code/github-lint-action/src/testpluginmodule.js"
+
+	// Use fs.promises.stat() to asynchronously check if the file exists
+	await fs
+		.stat(filePath)
+		.then(() => {
+			console.log("File exists.")
 		})
-		.catch((error) => {
-			console.log(error)
+		.catch((err) => {
+			if (err.code === "ENOENT") {
+				console.log("File does not exist.")
+			} else {
+				console.error("Error occurred while checking file existence:", err)
+			}
 		})
 
-	await import(process.cwd() + "/inlang/source-code/github-lint-action/src/testlintmodule.js")
+	// Use fs.promises.access() to check file access permissions
+	await fs
+		.access(filePath, fs.constants.R_OK)
+		.then(() => {
+			console.log("File is readable.")
+		})
+		.catch((err) => {
+			console.error("Error accessing file:", err)
+			console.log("File is not readable or does not exist.")
+		})
+
+	await import(filePath)
 		.then((module) => {
 			console.log(module)
 		})
