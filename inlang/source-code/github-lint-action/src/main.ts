@@ -13,6 +13,10 @@ import { _import } from "./_import.js"
  */
 export async function run(): Promise<void> {
 	console.log("Running the action")
+	// list modules in current directory
+	fs.readdir(process.cwd()).then((files) => {
+		console.log(files)
+	})
 	await import(process.cwd() + "/inlang/source-code/github-lint-action/src/testpluginmodule.js")
 		.then((module) => {
 			console.log(module)
