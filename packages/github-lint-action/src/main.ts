@@ -14,8 +14,7 @@ import * as fs from "node:fs/promises"
 export async function run(): Promise<void> {
 	console.log("Running the action")
 
-	const filePath =
-		"/home/runner/work/monorepo/monorepo/inlang/source-code/github-lint-action/src/module.ts"
+	const filePath = "/home/runner/work/monorepo/monorepo/project.inlang/module.js"
 
 	// Use fs.promises.stat() to asynchronously check if the file exists
 	await fs
@@ -42,6 +41,7 @@ export async function run(): Promise<void> {
 			console.log("File is not readable or does not exist.")
 		})
 
+	console.log("path:", filePath)
 	// dynamically import the module from filePath
 	try {
 		const module = await import(filePath)
