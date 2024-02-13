@@ -25,12 +25,13 @@ const createImport = async (uri: string, basePath: string) => {
 		return import(normalizePath(basePath + "/" + uri))
 	}
 
-	const moduleAsText = await (await fetch(uri)).text()
+	const moduleAsText = await(await fetch(uri)).text()
+	// const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(moduleAsText)
 
 	// 1. absolute path "/"
 	// 2. hash the uri to remove directory blabla stuff and add .mjs to make node load the module as ESM
 	const interimPath = path.resolve(
-		process.cwd() + "/" + crypto.createHash("sha256").update(uri).digest("hex") + ".mjs"
+		"./" + crypto.createHash("sha256").update(uri).digest("hex") + ".mjs"
 	)
 
 	await fs.writeFile(interimPath, moduleAsText, { encoding: "utf-8" })
