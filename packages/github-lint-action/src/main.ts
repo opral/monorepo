@@ -50,6 +50,13 @@ export async function run(): Promise<void> {
 		console.log(err)
 	}
 
+	try {
+		const module = await import("./testlintmodule.js")
+		console.log(module.default)
+	} catch (err) {
+		console.log(err)
+	}
+
 	// 	try {
 	// 		const token: string = core.getInput("token", { required: true })
 	// 		const project_path: string = core.getInput("project_path", { required: true })
