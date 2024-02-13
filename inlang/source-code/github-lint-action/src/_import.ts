@@ -12,14 +12,13 @@ import path from "node:path"
 export function _import(basePath: string): ImportFunction {
 	return (uri: string) => {
 		if (uri.startsWith("./")) {
-			return createImport(normalizePath(basePath + "/" + uri.slice(2)), basePath)
+			return createImport(normalizePath(basePath + "/" + uri.slice(2)))
 		}
-		return createImport(uri, basePath)
+		return createImport(uri)
 	}
 }
 
-const createImport = async (uri: string, project_path: string) => {
-	console.log("createImport")
+const createImport = async (uri: string) => {
 	if (!uri.startsWith("http")) {
 		// support for local modules
 		return import(normalizePath(process.cwd() + "/" + uri))
@@ -31,16 +30,13 @@ const createImport = async (uri: string, project_path: string) => {
 	// 1. absolute path "/"
 	// 2. hash the uri to remove directory blabla stuff and add .mjs to make node load the module as ESM
 	const interimPath = path.resolve(
-		process.cwd() + "/" + crypto.createHash("sha256").update(uri).digest("hex") + ".mjs"
+		process.cwd() + "/" + crypto.createHash("sha256").update(uri).digest("hex") + ".js"
 	)
 
 	await fs.writeFile(interimPath, moduleAsText, { encoding: "utf-8" })
 
 	// check if module exists
-	fs.access(
-		"./" + crypto.createHash("sha256").update(uri).digest("hex") + ".mjs",
-		fs.constants.F_OK
-	)
+	fs.access("./" + crypto.createHash("sha256").update(uri).digest("hex") + ".js", fs.constants.F_OK)
 		.then(() => {
 			console.log("module exists")
 		})
@@ -48,7 +44,7 @@ const createImport = async (uri: string, project_path: string) => {
 			console.log("module does not exist")
 		})
 
-	return await import("./" + crypto.createHash("sha256").update(uri).digest("hex") + ".mjs")
+	return await import("./" + crypto.createHash("sha256").update(uri).digest("hex") + ".js")
 		.then((module) => {
 			console.log("imported module", module, module.default)
 			return module
