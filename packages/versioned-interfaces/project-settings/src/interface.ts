@@ -76,6 +76,9 @@ const InternalProjectSettings = Type.Object({
 			],
 		})
 	),
+	featureFlags: Type.Optional(
+		Type.Record(Type.String(), Type.Union([Type.Boolean(), Type.Number(), Type.String()]))
+	),
 })
 
 /**
