@@ -14,7 +14,7 @@ import * as fs from "node:fs/promises"
 export async function run(): Promise<void> {
 	console.log("Running the action")
 
-	const filePath = "/home/runner/work/monorepo/monorepo/project.inlang/module.js"
+	const filePath = "/home/runner/work/monorepo/monorepo/module.js"
 
 	// Use fs.promises.stat() to asynchronously check if the file exists
 	await fs
