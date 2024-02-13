@@ -13,7 +13,7 @@ import { _import } from "./_import.js"
  */
 export async function run(): Promise<void> {
 	console.log("Running the action")
-	import("./module.js")
+	await import("./module.js")
 		.then((module) => {
 			console.log("imported module", module)
 		})
