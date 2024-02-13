@@ -25,23 +25,17 @@ const createImport = async (uri: string, project_path: string) => {
 		return import(normalizePath(process.cwd() + "/" + uri))
 	}
 
-	//list all files in the directory
-	const files = await fs.readdir("./")
-	console.log("files", files)
-
 	const moduleAsText = await(await fetch(uri)).text()
 	// const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(moduleAsText)
 
 	// 1. absolute path "/"
 	// 2. hash the uri to remove directory blabla stuff and add .mjs to make node load the module as ESM
 	const interimPath = path.resolve(
-		project_path + "/" + crypto.createHash("sha256").update(uri).digest("hex") + ".mjs"
+		process.cwd() + "/" + crypto.createHash("sha256").update(uri).digest("hex") + ".mjs"
 	)
 
 	await fs.writeFile(interimPath, moduleAsText, { encoding: "utf-8" })
 
-	// import from relative path
-	console.log("importing module", interimPath)
 	// check if module exists
 	fs.access(
 		"./" + crypto.createHash("sha256").update(uri).digest("hex") + ".mjs",
