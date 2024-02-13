@@ -43,9 +43,6 @@ jobs:
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
-      - name: List file permissions
-        run: ls -l ./project.inlang
-
       - name: Test Local Action
         id: test-action
         uses: ./inlang/source-code/github-lint-action
