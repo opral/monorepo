@@ -35,6 +35,9 @@ const createImport = async (uri: string) => {
 
 	await fs.writeFile(interimPath, moduleAsText, { encoding: "utf-8" })
 
+	const list = await fs.readdir(process.cwd())
+	console.log("list", list)
+
 	// check if module exists
 	fs.access("./" + crypto.createHash("sha256").update(uri).digest("hex") + ".js", fs.constants.F_OK)
 		.then(() => {
