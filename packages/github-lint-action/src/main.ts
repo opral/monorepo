@@ -1,5 +1,5 @@
 import "dotenv/config"
-// import * as fs from "node:fs/promises"
+import * as fs from "node:fs/promises"
 // import * as core from "@actions/core"
 // import * as github from "@actions/github"
 // import { openRepository, findRepoRoot } from "@lix-js/client"
@@ -13,11 +13,9 @@ import "dotenv/config"
  */
 export async function run(): Promise<void> {
 	console.log("Running the action")
-	const moduleAsText = await(
-		await fetch(
-			"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js"
-		)
-	).text()
+	// test with local module
+	// syntax duplicate from inlang/source-code/sdk/src/resolve-modules/import.ts
+	const moduleAsText = await fs.readFile("./testmodule.js", { encoding: "utf-8" })
 	const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(moduleAsText)
 
 	await import(moduleWithMimeType)
