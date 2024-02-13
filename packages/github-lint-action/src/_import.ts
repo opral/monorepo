@@ -35,14 +35,10 @@ const createImport = async (uri: string, basePath: string) => {
 	)
 
 	await fs.writeFile(interimPath, moduleAsText, { encoding: "utf-8" })
-	const q = url.parse(interimPath, true)
+	const q = url.parse(uri, true)
 	const queryData = q.query
 	console.log("queryData", queryData)
 	console.log("queryDefault", queryData.default)
-
-	const stat = await fs.stat(interimPath)
-
-	console.log("stat", stat)
 
 	return import(interimPath)
 }
