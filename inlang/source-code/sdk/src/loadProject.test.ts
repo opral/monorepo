@@ -101,10 +101,12 @@ const exampleMessages: Message[] = [
 
 const exampleAliasedMessages: Message[] = [
 	{
-		id: "raw_tapir_pause_grateful",
-		alias: {
-			default: "a",
-		},
+		id: "a",
+		alias: {},
+		// TODO featureFlag // id: "raw_tapir_pause_grateful",
+		// TODO featureFlag // alias: {
+		// TODO featureFlag // 	default: "a",
+		// TODO featureFlag // },
 		selectors: [],
 		variants: [
 			{
@@ -120,10 +122,12 @@ const exampleAliasedMessages: Message[] = [
 		],
 	},
 	{
-		id: "dizzy_halibut_dial_vaguely",
-		alias: {
-			default: "b",
-		},
+		id: "b",
+		alias: {},
+		// TODO featureFlag // id: "dizzy_halibut_dial_vaguely",
+		// TODO featureFlag // alias: {
+		// TODO featureFlag // 	default: "b",
+		// TODO featureFlag // },
 		selectors: [],
 		variants: [
 			{
@@ -685,7 +689,7 @@ describe("functionality", () => {
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
 			expect(
-				project.query.messageLintReports.get({ where: { messageId: "new_alligator_dig_aside" } })
+				project.query.messageLintReports.get({ where: { messageId: "some-message" } }) // TODO featureFlag // new_alligator_dig_aside" } })
 			).toHaveLength(1)
 		})
 	})
@@ -784,12 +788,15 @@ describe("functionality", () => {
 			})
 
 			await project.query.messages.upsert({
-				where: { id: "raw_tapir_pause_grateful" },
+				where: { id: "a" },
 				data: {
-					id: "raw_tapir_pause_grateful",
-					alias: {
-						default: "a",
-					},
+					id: "a",
+					alias: {},
+					// TODO featureFlag // data: {
+					// TODO featureFlag // id: "raw_tapir_pause_grateful",
+					// TODO featureFlag // alias: {
+					// TODO featureFlag // 	default: "a",
+					// TODO featureFlag // },
 					selectors: [],
 					variants: [
 						{
@@ -817,12 +824,16 @@ describe("functionality", () => {
 			})
 
 			await project.query.messages.upsert({
-				where: { id: "dizzy_halibut_dial_vaguely" },
+				where: { id: "b" },
 				data: {
-					id: "dizzy_halibut_dial_vaguely",
-					alias: {
-						default: "b",
-					},
+					id: "b",
+					alias: {},
+					// TODO featureFlag // where: { id: "dizzy_halibut_dial_vaguely" },
+					// TODO featureFlag // data: {
+					// TODO featureFlag // 	id: "dizzy_halibut_dial_vaguely",
+					// TODO featureFlag // 	alias: {
+					// TODO featureFlag // 		default: "b",
+					// TODO featureFlag // 	},
 					selectors: [],
 					variants: [
 						{
@@ -859,9 +870,10 @@ describe("functionality", () => {
 			expect(Object.values(mockSaveFn.mock.calls[0][0].messages)).toStrictEqual([
 				{
 					id: "a",
-					alias: {
-						default: "a",
-					},
+					alias: {},
+					// TODO featureFlag // alias: {
+					// TODO featureFlag //	default: "a",
+					// TODO featureFlag //},
 					selectors: [],
 					variants: [
 						{
@@ -888,9 +900,10 @@ describe("functionality", () => {
 				},
 				{
 					id: "b",
-					alias: {
-						default: "b",
-					},
+					alias: {},
+					// TODO featureFlag // alias: {
+					// TODO featureFlag // 	default: "b",
+					// TODO featureFlag // },
 					selectors: [],
 					variants: [
 						{

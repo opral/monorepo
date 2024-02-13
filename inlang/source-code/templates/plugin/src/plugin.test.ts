@@ -32,5 +32,6 @@ it("should return fake messages to illustrate how a plugin works", async () => {
 
 	expect(project.installed.plugins()[0]?.id).toBe(pluginId)
 
-	expect(project.query.messages.get({ where: { id: "steep_alpaca_drum_intense" } })).toBeDefined()
+	expect(project.query.messages.get({ where: { id: "this-is-a-test-message" } })).toBeDefined()
+	// TODO featureFlag // expect(project.query.messages.get({ where: { id: "steep_alpaca_drum_intense" } })).toBeDefined()
 })

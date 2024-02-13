@@ -251,7 +251,8 @@ describe("messages", () => {
 		).toBe("test")
 
 		project.query.messages.update({
-			where: { id: "raw_tapir_pause_grateful" },
+			where: { id: "a" },
+			// TODO featureFlag // where: { id: "raw_tapir_pause_grateful" },
 			// TODO: use `createMessage` utility
 			data: {
 				...exampleMessages[0],

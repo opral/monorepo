@@ -28,7 +28,7 @@ import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
 
 import { stringifyMessage as stringifyMessage } from "./storage/helper.js"
 
-import { humanIdHash } from "./storage/human-id/human-readable-id.js"
+// TODO featureFlag // import { humanIdHash } from "./storage/human-id/human-readable-id.js"
 
 import type { Repository } from "@lix-js/client"
 import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
@@ -629,19 +629,19 @@ async function loadMessagesViaPlugin(
 		const currentMessages = messagesQuery
 			.getAll()
 			// TODO #1585 here we match using the id to support legacy load message plugins - after we introduced import / export methods we will use importedMessage.alias
-			.filter((message: any) => message.alias["default"] === loadedMessage.id)
+			.filter((message: any) => message.id === loadedMessage.id) // TODO featureFlag // message.alias["default"] === loadedMessage.id)
 
 		if (currentMessages.length > 1) {
 			// NOTE: if we happen to find two messages witht the sam alias we throw for now
 			// - this could be the case if one edits the aliase manualy
-			throw new Error("more than one message with the same alias found ")
+			throw new Error("more than one message with the same id found ") // TODO featureFlag // alias found ")
 		} else if (currentMessages.length === 1) {
 			// update message in place - leave message id and alias untouched
 			loadedMessageClone.alias = {} as any
 
 			// TODO #1585 we have to map the id of the importedMessage to the alias and fill the id property with the id of the existing message - change when import mesage provides importedMessage.alias
-			loadedMessageClone.alias["default"] = loadedMessageClone.id
-			loadedMessageClone.id = currentMessages[0]!.id
+			// TODO featureFlag // loadedMessageClone.alias["default"] = loadedMessageClone.id
+			// TODO featureFlag // loadedMessageClone.id = currentMessages[0]!.id
 
 			// TODO #1844 INFORM stringifyMessage encodes messages independent from key order!
 			const importedEnecoded = stringifyMessage(loadedMessageClone)
@@ -663,20 +663,20 @@ async function loadMessagesViaPlugin(
 			// message with the given alias does not exist so far
 			loadedMessageClone.alias = {} as any
 			// TODO #1585 we have to map the id of the importedMessage to the alias - change when import mesage provides importedMessage.alias
-			loadedMessageClone.alias["default"] = loadedMessageClone.id
+			// TODO featureFlag // loadedMessageClone.alias["default"] = loadedMessageClone.id
 
-			let currentOffset = 0
-			let messsageId: string | undefined
-			do {
-				messsageId = humanIdHash(loadedMessageClone.id, currentOffset)
-				if (messagesQuery.get({ where: { id: messsageId } })) {
-					currentOffset += 1
-					messsageId = undefined
-				}
-			} while (messsageId === undefined)
+			// TODO featureFlag // let currentOffset = 0
+			// TODO featureFlag // let messsageId: string | undefined
+			// TODO featureFlag // do {
+			// TODO featureFlag // 	messsageId = humanIdHash(loadedMessageClone.id, currentOffset)
+			// TODO featureFlag // 	if (messagesQuery.get({ where: { id: messsageId } })) {
+			// TODO featureFlag // 		currentOffset += 1
+			// TODO featureFlag // 		messsageId = undefined
+			// TODO featureFlag // 	}
+			// TODO featureFlag // } while (messsageId === undefined)
 
 			// create a humanId based on a hash of the alias
-			loadedMessageClone.id = messsageId
+			// TODO featureFlag // loadedMessageClone.id = messsageId
 
 			const importedEnecoded = stringifyMessage(loadedMessageClone)
 
@@ -776,7 +776,7 @@ async function saveMessagesViaPlugin(
 
 				const fixedExportMessage = { ...message }
 				// TODO #1585 here we match using the id to support legacy load message plugins - after we introduced import / export methods we will use importedMessage.alias
-				fixedExportMessage.id = fixedExportMessage.alias["default"] ?? fixedExportMessage.id
+				// TODO featureFlag // fixedExportMessage.id = fixedExportMessage.alias["default"] ?? fixedExportMessage.id
 
 				messagesToExport.push(fixedExportMessage)
 			}
