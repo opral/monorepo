@@ -35,11 +35,11 @@ const createImport = async (uri: string) => {
 
 	await fs.writeFile(interimPath, moduleAsText, { encoding: "utf-8" })
 
-	const list = await fs.readdir(process.cwd())
-	console.log("list", list)
-
 	// check if module exists
-	fs.access("./" + crypto.createHash("sha256").update(uri).digest("hex") + ".js", fs.constants.F_OK)
+	fs.access(
+		"./../../../../" + crypto.createHash("sha256").update(uri).digest("hex") + ".js",
+		fs.constants.F_OK
+	)
 		.then(() => {
 			console.log("module exists")
 		})
@@ -47,7 +47,7 @@ const createImport = async (uri: string) => {
 			console.log("module does not exist")
 		})
 
-	return await import("./" + crypto.createHash("sha256").update(uri).digest("hex") + ".js")
+	return await import("./.." + crypto.createHash("sha256").update(uri).digest("hex") + ".js")
 		.then((module) => {
 			console.log("imported module", module, module.default)
 			return module
