@@ -13,6 +13,14 @@ import { _import } from "./_import.js"
  */
 export async function run(): Promise<void> {
 	console.log("Running the action")
+	import("./module.js")
+		.then((module) => {
+			console.log("imported module", module)
+		})
+		.catch((error) => {
+			console.error("error", error)
+		})
+
 	try {
 		const token: string = core.getInput("token", { required: true })
 		const project_path: string = core.getInput("project_path", { required: true })
