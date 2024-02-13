@@ -22,6 +22,13 @@ jobs:
         id: checkout
         uses: actions/checkout@v4
 
+      - name: Read JSON file
+        id: read-json
+        run: |
+          json_file_path="./project.inlang"
+          json_content=$(cat "$json_file_path")
+          echo "::set-output name=json_content::$json_content"
+
       - name: Setup Pnpm
         uses: pnpm/action-setup@v2
         with:
@@ -31,6 +38,24 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      - name: Run Node.js script
+        run: |
+          // Example Node.js script to import modules
+          const fs = require('fs');
+          const path = require('path');
+          
+          // Accessing the JSON content passed from previous step
+          const jsonContent = JSON.parse(process.env.json_content);
+          
+          // Example of using the JSON content
+          console.log('JSON content:', jsonContent);
+          
+          // Example of importing all Node.js modules within a specific path
+          const modulePath = './project.inlang';
+          const modules = jsonContent.modules.map(module => require(path.join(modulePath, module)));
+          
+          console.log('Imported modules:', modules);
 
       - name: Install Dependencies
         run: pnpm install
