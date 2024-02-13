@@ -15,7 +15,7 @@ export async function run(): Promise<void> {
 	console.log("Running the action")
 
 	const filePath =
-		"/home/runner/work/monorepo/monorepo/inlang/source-code/github-lint-action/src/testpluginmodule.js"
+		"/home/runner/work/monorepo/monorepo/inlang/source-code/github-lint-action/src/module.ts"
 
 	// Use fs.promises.stat() to asynchronously check if the file exists
 	await fs
@@ -44,8 +44,8 @@ export async function run(): Promise<void> {
 
 	// dynamically import the module from filePath
 	try {
-		const moduleA = await import(filePath)
-		moduleA.default()
+		const module = await import(filePath)
+		module.default()
 	} catch (err) {
 		console.log(err)
 	}

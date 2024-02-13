@@ -1,23 +1,23 @@
-var yn = Object.create
-var We = Object.defineProperty
-var In = Object.getOwnPropertyDescriptor
-var gn = Object.getOwnPropertyNames
-var On = Object.getPrototypeOf,
+const yn = Object.create
+const We = Object.defineProperty
+const In = Object.getOwnPropertyDescriptor
+const gn = Object.getOwnPropertyNames
+const On = Object.getPrototypeOf,
 	bn = Object.prototype.hasOwnProperty
-var mn = (a, t) => () => (t || a((t = { exports: {} }).exports, t), t.exports)
-var Un = (a, t, s, T) => {
+const mn = (a, t) => () => (t || a((t = { exports: {} }).exports, t), t.exports)
+const Un = (a, t, s, T) => {
 	if ((t && typeof t == "object") || typeof t == "function")
-		for (let c of gn(t))
+		for (const c of gn(t))
 			!bn.call(a, c) &&
 				c !== s &&
 				We(a, c, { get: () => t[c], enumerable: !(T = In(t, c)) || T.enumerable })
 	return a
 }
-var Pn = (a, t, s) => (
+const Pn = (a, t, s) => (
 	(s = a != undefined ? yn(On(a)) : {}),
 	Un(t || !a || !a.__esModule ? We(s, "default", { value: a, enumerable: !0 }) : s, a)
 )
-var Ge = mn((i) => {
+const Ge = mn((i) => {
 	"use strict"
 	Object.defineProperty(i, "__esModule", { value: !0 })
 	i.Type =
@@ -79,9 +79,9 @@ var Ge = mn((i) => {
 	i.PatternBooleanExact = `^${i.PatternBoolean}$`
 	i.PatternNumberExact = `^${i.PatternNumber}$`
 	i.PatternStringExact = `^${i.PatternString}$`
-	var Be
+	let Be
 	;(function (a) {
-		let t = new Map()
+		const t = new Map()
 		function s() {
 			return new Map(t)
 		}
@@ -107,15 +107,15 @@ var Ge = mn((i) => {
 		}
 		a.Get = d
 	})(Be || (i.TypeRegistry = Be = {}))
-	var M = class extends Error {
+	const M = class extends Error {
 		constructor(t) {
 			super(t)
 		}
 	}
 	i.TypeBoxError = M
-	var Ye
+	let Ye
 	;(function (a) {
-		let t = new Map()
+		const t = new Map()
 		function s() {
 			return new Map(t)
 		}
@@ -141,7 +141,7 @@ var Ge = mn((i) => {
 		}
 		a.Get = d
 	})(Ye || (i.FormatRegistry = Ye = {}))
-	var y
+	let y
 	;(function (a) {
 		function t(I) {
 			return Array.isArray(I)
@@ -176,9 +176,9 @@ var Ge = mn((i) => {
 		}
 		a.IsUndefined = m
 	})(y || (i.ValueGuard = y = {}))
-	var ke = class extends M {}
+	const ke = class extends M {}
 	i.TypeGuardUnknownTypeError = ke
-	var o
+	let o
 	;(function (a) {
 		function t(r) {
 			try {
@@ -190,7 +190,7 @@ var Ge = mn((i) => {
 		function s(r) {
 			if (!y.IsString(r)) return !1
 			for (let w = 0; w < r.length; w++) {
-				let B = r.charCodeAt(w)
+				const B = r.charCodeAt(w)
 				if ((B >= 7 && B <= 13) || B === 27 || B === 127) return !1
 			}
 			return !0
@@ -401,7 +401,7 @@ var Ge = mn((i) => {
 				T(r.additionalProperties) &&
 				y.IsObject(r.patternProperties) &&
 				((w) => {
-					let B = Object.getOwnPropertyNames(w.patternProperties)
+					const B = Object.getOwnPropertyNames(w.patternProperties)
 					return (
 						B.length === 1 &&
 						t(B[0]) &&
@@ -554,7 +554,7 @@ var Ge = mn((i) => {
 		}
 		a.TSchema = C
 	})(o || (i.TypeGuard = o = {}))
-	var Ze
+	let Ze
 	;(function (a) {
 		function t(s) {
 			return s[i.Kind] === "Intersect"
@@ -569,13 +569,13 @@ var Ge = mn((i) => {
 		}
 		a.Check = t
 	})(Ze || (i.ExtendsUndefined = Ze = {}))
-	var be = class extends M {}
+	const be = class extends M {}
 	i.TypeExtendsError = be
-	var p
+	let p
 	;(function (a) {
 		;(a[(a.Union = 0)] = "Union"), (a[(a.True = 1)] = "True"), (a[(a.False = 2)] = "False")
 	})(p || (i.TypeExtendsResult = p = {}))
-	var z
+	let z
 	;(function (a) {
 		function t(e) {
 			return e === p.False ? e : p.True
@@ -808,7 +808,7 @@ var Ge = mn((i) => {
 			return V(e)
 		}
 		function fe(e) {
-			let n = i.Type.Number()
+			const n = i.Type.Number()
 			return (
 				$(e, 0) || ($(e, 1) && "length" in e.properties && t(L(e.properties.length, n)) === p.True)
 			)
@@ -817,13 +817,13 @@ var Ge = mn((i) => {
 			return $(e, 0)
 		}
 		function V(e) {
-			let n = i.Type.Number()
+			const n = i.Type.Number()
 			return (
 				$(e, 0) || ($(e, 1) && "length" in e.properties && t(L(e.properties.length, n)) === p.True)
 			)
 		}
 		function Ie(e) {
-			let n = i.Type.Function([i.Type.Any()], i.Type.Any())
+			const n = i.Type.Function([i.Type.Any()], i.Type.Any())
 			return $(e, 0) || ($(e, 1) && "then" in e.properties && t(L(e.properties.then, n)) === p.True)
 		}
 		function re(e, n) {
@@ -863,7 +863,7 @@ var Ge = mn((i) => {
 				? E(e, n)
 				: o.TObject(n)
 				? (() => {
-						for (let x of Object.getOwnPropertyNames(n.properties)) {
+						for (const x of Object.getOwnPropertyNames(n.properties)) {
 							if (!(x in e.properties) && !o.TOptional(n.properties[x])) return p.False
 							if (o.TOptional(n.properties[x])) return p.True
 							if (re(e.properties[x], n.properties[x]) === p.False) return p.False
@@ -896,7 +896,7 @@ var Ge = mn((i) => {
 				: s("Unable to get record value schema")
 		}
 		function E(e, n) {
-			let [x, k] = [q(n), W(n)]
+			const [x, k] = [q(n), W(n)]
 			return o.TLiteralString(e) && o.TNumber(x) && t(L(e, k)) === p.True
 				? p.True
 				: (o.TUint8Array(e) && o.TNumber(x)) ||
@@ -905,7 +905,7 @@ var Ge = mn((i) => {
 				? L(e, k)
 				: o.TObject(e)
 				? (() => {
-						for (let fn of Object.getOwnPropertyNames(e.properties))
+						for (const fn of Object.getOwnPropertyNames(e.properties))
 							if (re(k, e.properties[fn]) === p.False) return p.False
 						return p.True
 				  })()
@@ -1109,10 +1109,10 @@ var Ge = mn((i) => {
 		}
 		a.Extends = dn
 	})(z || (i.TypeExtends = z = {}))
-	var b
+	let b
 	;(function (a) {
 		function t(u) {
-			let d = Object.fromEntries(Object.getOwnPropertyNames(u).map((g) => [g, T(u[g])])),
+			const d = Object.fromEntries(Object.getOwnPropertyNames(u).map((g) => [g, T(u[g])])),
 				m = Object.fromEntries(Object.getOwnPropertySymbols(u).map((g) => [g, T(u[g])]))
 			return { ...d, ...m }
 		}
@@ -1131,11 +1131,11 @@ var Ge = mn((i) => {
 		}
 		a.Type = l
 	})(b || (i.TypeClone = b = {}))
-	var Me
+	let Me
 	;(function (a) {
 		function t(f) {
 			return f.map((O) => {
-				let { [i.Optional]: P, ...N } = b.Type(O)
+				const { [i.Optional]: P, ...N } = b.Type(O)
 				return N
 			})
 		}
@@ -1155,24 +1155,24 @@ var Ge = mn((i) => {
 			return f[i.Kind] === "Intersect" ? c(f) : f[i.Kind] === "Union" ? l(f) : f
 		}
 		function d(f, O) {
-			let P = f.allOf.reduce((N, S) => {
-				let v = U(S, O)
+			const P = f.allOf.reduce((N, S) => {
+				const v = U(S, O)
 				return v[i.Kind] === "Never" ? N : [...N, v]
 			}, [])
 			return u(i.Type.Intersect(P))
 		}
 		function m(f, O) {
-			let P = f.anyOf.map((N) => U(N, O))
+			const P = f.anyOf.map((N) => U(N, O))
 			return u(i.Type.Union(P))
 		}
 		function I(f, O) {
-			let P = f.properties[O]
+			const P = f.properties[O]
 			return y.IsUndefined(P) ? i.Type.Never() : i.Type.Union([P])
 		}
 		function g(f, O) {
-			let P = f.items
+			const P = f.items
 			if (y.IsUndefined(P)) return i.Type.Never()
-			let N = P[O]
+			const N = P[O]
 			return y.IsUndefined(N) ? i.Type.Never() : N
 		}
 		function U(f, O) {
@@ -1187,19 +1187,19 @@ var Ge = mn((i) => {
 				: i.Type.Never()
 		}
 		function j(f, O, P = {}) {
-			let N = O.map((S) => U(f, S.toString()))
+			const N = O.map((S) => U(f, S.toString()))
 			return u(i.Type.Union(N, P))
 		}
 		a.Resolve = j
 	})(Me || (i.IndexedAccessor = Me = {}))
-	var _
+	let _
 	;(function (a) {
 		function t(g) {
-			let [U, j] = [g.slice(0, 1), g.slice(1)]
+			const [U, j] = [g.slice(0, 1), g.slice(1)]
 			return `${U.toLowerCase()}${j}`
 		}
 		function s(g) {
-			let [U, j] = [g.slice(0, 1), g.slice(1)]
+			const [U, j] = [g.slice(0, 1), g.slice(1)]
 			return `${U.toUpperCase()}${j}`
 		}
 		function T(g) {
@@ -1209,9 +1209,9 @@ var Ge = mn((i) => {
 			return g.toLowerCase()
 		}
 		function l(g, U) {
-			let j = X.ParseExact(g.pattern)
+			const j = X.ParseExact(g.pattern)
 			if (!Y.Check(j)) return { ...g, pattern: u(g.pattern, U) }
-			let P = [...Z.Generate(j)].map((v) => i.Type.Literal(v)),
+			const P = [...Z.Generate(j)].map((v) => i.Type.Literal(v)),
 				N = d(P, U),
 				S = i.Type.Union(N)
 			return i.Type.TemplateLiteral([S])
@@ -1231,7 +1231,7 @@ var Ge = mn((i) => {
 		}
 		function d(g, U) {
 			if (g.length === 0) return []
-			let [j, ...f] = g
+			const [j, ...f] = g
 			return [I(j, U), ...d(f, U)]
 		}
 		function m(g, U) {
@@ -1248,7 +1248,7 @@ var Ge = mn((i) => {
 		}
 		a.Map = I
 	})(_ || (i.Intrinsic = _ = {}))
-	var Q
+	let Q
 	;(function (a) {
 		function t(u, d) {
 			return i.Type.Intersect(
@@ -1279,7 +1279,7 @@ var Ge = mn((i) => {
 		}
 		a.Map = l
 	})(Q || (i.ObjectMap = Q = {}))
-	var me
+	let me
 	;(function (a) {
 		function t(I) {
 			return I[0] === "^" && I.at(-1) === "$" ? I.slice(1, I.length - 1) : I
@@ -1288,7 +1288,7 @@ var Ge = mn((i) => {
 			return I.allOf.reduce((U, j) => [...U, ...u(j, g)], [])
 		}
 		function T(I, g) {
-			let U = I.anyOf.map((j) => u(j, g))
+			const U = I.anyOf.map((j) => u(j, g))
 			return [
 				...U.reduce(
 					(j, f) => f.map((O) => (U.every((P) => P.includes(O)) ? j.add(O) : j))[0],
@@ -1324,9 +1324,9 @@ var Ge = mn((i) => {
 		}
 		a.ResolvePattern = m
 	})(me || (i.KeyResolver = me = {}))
-	var Ue = class extends M {}
+	const Ue = class extends M {}
 	i.KeyArrayResolverError = Ue
-	var oe
+	let oe
 	;(function (a) {
 		function t(s) {
 			return Array.isArray(s)
@@ -1337,7 +1337,7 @@ var Ge = mn((i) => {
 				? [s.const]
 				: o.TTemplateLiteral(s)
 				? (() => {
-						let T = X.ParseExact(s.pattern)
+						const T = X.ParseExact(s.pattern)
 						if (!Y.Check(T)) throw new Ue("Cannot resolve keys from infinite template expression")
 						return [...Z.Generate(T)]
 				  })()
@@ -1345,19 +1345,19 @@ var Ge = mn((i) => {
 		}
 		a.Resolve = t
 	})(oe || (i.KeyArrayResolver = oe = {}))
-	var De
+	let De
 	;(function (a) {
 		function* t(T) {
-			for (let c of T.anyOf) c[i.Kind] === "Union" ? yield* t(c) : yield c
+			for (const c of T.anyOf) c[i.Kind] === "Union" ? yield* t(c) : yield c
 		}
 		function s(T) {
 			return i.Type.Union([...t(T)], { ...T })
 		}
 		a.Resolve = s
 	})(De || (i.UnionResolver = De = {}))
-	var Pe = class extends M {}
+	const Pe = class extends M {}
 	i.TemplateLiteralPatternError = Pe
-	var Re
+	let Re
 	;(function (a) {
 		function t(l) {
 			throw new Pe(l)
@@ -1389,19 +1389,19 @@ var Ge = mn((i) => {
 		}
 		a.Create = c
 	})(Re || (i.TemplateLiteralPattern = Re = {}))
-	var D
+	let D
 	;(function (a) {
 		function t(s) {
-			let T = X.ParseExact(s.pattern)
+			const T = X.ParseExact(s.pattern)
 			if (!Y.Check(T)) return i.Type.String()
-			let c = [...Z.Generate(T)].map((l) => i.Type.Literal(l))
+			const c = [...Z.Generate(T)].map((l) => i.Type.Literal(l))
 			return i.Type.Union(c)
 		}
 		a.Resolve = t
 	})(D || (i.TemplateLiteralResolver = D = {}))
-	var se = class extends M {}
+	const se = class extends M {}
 	i.TemplateLiteralParserError = se
-	var X
+	let X
 	;(function (a) {
 		function t(f, O, P) {
 			return f[O] === P && f.charCodeAt(O - 1) !== 92
@@ -1440,10 +1440,10 @@ var Ge = mn((i) => {
 				N = []
 			for (let v = 0; v < f.length; v++)
 				if ((s(f, v) && (O += 1), T(f, v) && (O -= 1), c(f, v) && O === 0)) {
-					let F = f.slice(P, v)
+					const F = f.slice(P, v)
 					F.length > 0 && N.push(U(F)), (P = v + 1)
 				}
-			let S = f.slice(P)
+			const S = f.slice(P)
 			return (
 				S.length > 0 && N.push(U(S)),
 				N.length === 0
@@ -1465,14 +1465,14 @@ var Ge = mn((i) => {
 				for (let F = v; F < S.length; F++) if (s(S, F)) return [v, F]
 				return [v, S.length]
 			}
-			let N = []
+			const N = []
 			for (let S = 0; S < f.length; S++)
 				if (s(f, S)) {
-					let [v, F] = O(f, S),
+					const [v, F] = O(f, S),
 						K = f.slice(v, F + 1)
 					N.push(U(K)), (S = F)
 				} else {
-					let [v, F] = P(f, S),
+					const [v, F] = P(f, S),
 						K = f.slice(v, F)
 					K.length > 0 && N.push(U(K)), (S = F - 1)
 				}
@@ -1491,9 +1491,9 @@ var Ge = mn((i) => {
 		}
 		a.ParseExact = j
 	})(X || (i.TemplateLiteralParser = X = {}))
-	var Ne = class extends M {}
+	const Ne = class extends M {}
 	i.TemplateLiteralFiniteError = Ne
-	var Y
+	let Y
 	;(function (a) {
 		function t(u) {
 			throw new Ne(u)
@@ -1536,19 +1536,19 @@ var Ge = mn((i) => {
 		}
 		a.Check = l
 	})(Y || (i.TemplateLiteralFinite = Y = {}))
-	var ve = class extends M {}
+	const ve = class extends M {}
 	i.TemplateLiteralGeneratorError = ve
-	var Z
+	let Z
 	;(function (a) {
 		function* t(u) {
 			if (u.length === 1) return yield* u[0]
-			for (let d of u[0]) for (let m of t(u.slice(1))) yield `${d}${m}`
+			for (const d of u[0]) for (const m of t(u.slice(1))) yield `${d}${m}`
 		}
 		function* s(u) {
 			return yield* t(u.expr.map((d) => [...l(d)]))
 		}
 		function* T(u) {
-			for (let d of u.expr) yield* l(d)
+			for (const d of u.expr) yield* l(d)
 		}
 		function* c(u) {
 			return yield u.const
@@ -1566,10 +1566,10 @@ var Ge = mn((i) => {
 		}
 		a.Generate = l
 	})(Z || (i.TemplateLiteralGenerator = Z = {}))
-	var Je
+	let Je
 	;(function (a) {
 		function* t(l) {
-			let u = l.trim().replace(/"|'/g, "")
+			const u = l.trim().replace(/"|'/g, "")
 			return u === "boolean"
 				? yield i.Type.Boolean()
 				: u === "number"
@@ -1579,19 +1579,19 @@ var Ge = mn((i) => {
 				: u === "string"
 				? yield i.Type.String()
 				: yield (() => {
-						let d = u.split("|").map((m) => i.Type.Literal(m.trim()))
+						const d = u.split("|").map((m) => i.Type.Literal(m.trim()))
 						return d.length === 0 ? i.Type.Never() : d.length === 1 ? d[0] : i.Type.Union(d)
 				  })()
 		}
 		function* s(l) {
 			if (l[1] !== "{") {
-				let u = i.Type.Literal("$"),
+				const u = i.Type.Literal("$"),
 					d = T(l.slice(1))
 				return yield* [u, ...d]
 			}
 			for (let u = 2; u < l.length; u++)
 				if (l[u] === "}") {
-					let d = t(l.slice(2, u)),
+					const d = t(l.slice(2, u)),
 						m = T(l.slice(u + 1))
 					return yield* [...d, ...m]
 				}
@@ -1600,7 +1600,7 @@ var Ge = mn((i) => {
 		function* T(l) {
 			for (let u = 0; u < l.length; u++)
 				if (l[u] === "$") {
-					let d = i.Type.Literal(l.slice(0, u)),
+					const d = i.Type.Literal(l.slice(0, u)),
 						m = s(l.slice(u))
 					return yield* [d, ...m]
 				}
@@ -1611,7 +1611,7 @@ var Ge = mn((i) => {
 		}
 		a.Parse = c
 	})(Je || (i.TemplateLiteralDslParser = Je = {}))
-	var xe = class {
+	const xe = class {
 		constructor(t) {
 			this.schema = t
 		}
@@ -1625,26 +1625,26 @@ var Ge = mn((i) => {
 			;(this.schema = t), (this.decode = s)
 		}
 		Encode(t) {
-			let s = b.Type(this.schema)
+			const s = b.Type(this.schema)
 			return o.TTransform(s)
 				? (() => {
-						let l = {
+						const l = {
 							Encode: (u) => s[i.Transform].Encode(t(u)),
 							Decode: (u) => this.decode(s[i.Transform].Decode(u)),
 						}
 						return { ...s, [i.Transform]: l }
 				  })()
 				: (() => {
-						let T = { Decode: this.decode, Encode: t }
+						const T = { Decode: this.decode, Encode: t }
 						return { ...s, [i.Transform]: T }
 				  })()
 		}
 	}
 	i.TransformEncodeBuilder = Se
-	var Rn = 0,
+	let Rn = 0,
 		Le = class extends M {}
 	i.TypeBuilderError = Le
-	var we = class {
+	const we = class {
 		Create(t) {
 			return t
 		}
@@ -1653,7 +1653,7 @@ var Ge = mn((i) => {
 		}
 		Discard(t, s) {
 			return s.reduce((T, c) => {
-				let { [c]: l, ...u } = T
+				const { [c]: l, ...u } = T
 				return u
 			}, t)
 		}
@@ -1662,7 +1662,7 @@ var Ge = mn((i) => {
 		}
 	}
 	i.TypeBuilder = we
-	var ue = class extends we {
+	const ue = class extends we {
 		ReadonlyOptional(t) {
 			return this.Readonly(this.Optional(t))
 		}
@@ -1685,7 +1685,7 @@ var Ge = mn((i) => {
 			return { ..._.Map(b.Type(t), "Capitalize"), ...s }
 		}
 		Composite(t, s) {
-			let T = i.Type.Intersect(t, {}),
+			const T = i.Type.Intersect(t, {}),
 				l = Object.fromEntries(
 					me.ResolveKeys(T, { includePatterns: !1 }).map((d) => [d, i.Type.Index(T, [d])])
 				)
@@ -1693,7 +1693,7 @@ var Ge = mn((i) => {
 		}
 		Enum(t, s = {}) {
 			if (y.IsUndefined(t)) return this.Throw("Enum undefined or empty")
-			let T = Object.getOwnPropertyNames(t)
+			const T = Object.getOwnPropertyNames(t)
 					.filter((u) => isNaN(u))
 					.map((u) => t[u]),
 				l = [...new Set(T)].map((u) => i.Type.Literal(u))
@@ -1716,7 +1716,7 @@ var Ge = mn((i) => {
 				? this.Exclude(t, D.Resolve(s), T)
 				: o.TUnion(t)
 				? (() => {
-						let c = t.anyOf.filter((l) => z.Extends(l, s) === p.False)
+						const c = t.anyOf.filter((l) => z.Extends(l, s) === p.False)
 						return c.length === 1 ? b.Type(c[0], T) : this.Union(c, T)
 				  })()
 				: z.Extends(t, s) !== p.False
@@ -1730,7 +1730,7 @@ var Ge = mn((i) => {
 				? this.Extract(t, D.Resolve(s), T)
 				: o.TUnion(t)
 				? (() => {
-						let c = t.anyOf.filter((l) => z.Extends(l, s) !== p.False)
+						const c = t.anyOf.filter((l) => z.Extends(l, s) !== p.False)
 						return c.length === 1 ? b.Type(c[0], T) : this.Union(c, T)
 				  })()
 				: z.Extends(t, s) !== p.False
@@ -1742,11 +1742,11 @@ var Ge = mn((i) => {
 				? (() => b.Type(t.items, T))()
 				: o.TTuple(t) && o.TNumber(s)
 				? (() => {
-						let l = (y.IsUndefined(t.items) ? [] : t.items).map((u) => b.Type(u))
+						const l = (y.IsUndefined(t.items) ? [] : t.items).map((u) => b.Type(u))
 						return this.Union(l, T)
 				  })()
 				: (() => {
-						let c = oe.Resolve(s),
+						const c = oe.Resolve(s),
 							l = b.Type(t)
 						return Me.Resolve(l, c, T)
 				  })()
@@ -1758,7 +1758,7 @@ var Ge = mn((i) => {
 			if (t.length === 0) return i.Type.Never()
 			if (t.length === 1) return b.Type(t[0], s)
 			t.some((u) => o.TTransform(u)) && this.Throw("Cannot intersect transform types")
-			let T = t.every((u) => o.TObject(u)),
+			const T = t.every((u) => o.TObject(u)),
 				c = b.Rest(t),
 				l = o.TSchema(s.unevaluatedProperties)
 					? { unevaluatedProperties: b.Type(s.unevaluatedProperties) }
@@ -1770,7 +1770,7 @@ var Ge = mn((i) => {
 		KeyOf(t, s = {}) {
 			return o.TRecord(t)
 				? (() => {
-						let T = Object.getOwnPropertyNames(t.patternProperties)[0]
+						const T = Object.getOwnPropertyNames(t.patternProperties)[0]
 						return T === i.PatternNumberExact
 							? this.Number(s)
 							: T === i.PatternStringExact
@@ -1779,7 +1779,7 @@ var Ge = mn((i) => {
 				  })()
 				: o.TTuple(t)
 				? (() => {
-						let c = (y.IsUndefined(t.items) ? [] : t.items).map((l, u) =>
+						const c = (y.IsUndefined(t.items) ? [] : t.items).map((l, u) =>
 							i.Type.Literal(u.toString())
 						)
 						return this.Union(c, s)
@@ -1787,9 +1787,9 @@ var Ge = mn((i) => {
 				: o.TArray(t)
 				? (() => this.Number(s))()
 				: (() => {
-						let T = me.ResolveKeys(t, { includePatterns: !1 })
+						const T = me.ResolveKeys(t, { includePatterns: !1 })
 						if (T.length === 0) return this.Never(s)
-						let c = T.map((l) => this.Literal(l))
+						const c = T.map((l) => this.Literal(l))
 						return this.Union(c, s)
 				  })()
 		}
@@ -1812,7 +1812,7 @@ var Ge = mn((i) => {
 			return this.Create({ ...t, [i.Kind]: "Number", type: "number" })
 		}
 		Object(t, s = {}) {
-			let T = Object.getOwnPropertyNames(t),
+			const T = Object.getOwnPropertyNames(t),
 				c = T.filter((m) => o.TOptional(t[m])),
 				l = T.filter((m) => !c.includes(m)),
 				u = o.TSchema(s.additionalProperties)
@@ -1831,14 +1831,14 @@ var Ge = mn((i) => {
 				: this.Create({ ...s, ...u, [i.Kind]: "Object", type: "object", properties: d })
 		}
 		Omit(t, s, T = {}) {
-			let c = oe.Resolve(s)
+			const c = oe.Resolve(s)
 			return Q.Map(
 				this.Discard(b.Type(t), ["$id", i.Transform]),
 				(l) => {
 					y.IsArray(l.required) &&
 						((l.required = l.required.filter((u) => !c.includes(u))),
 						l.required.length === 0 && delete l.required)
-					for (let u of Object.getOwnPropertyNames(l.properties))
+					for (const u of Object.getOwnPropertyNames(l.properties))
 						c.includes(u) && delete l.properties[u]
 					return this.Create(l)
 				},
@@ -1849,7 +1849,7 @@ var Ge = mn((i) => {
 			return Q.Map(
 				this.Discard(b.Type(t), ["$id", i.Transform]),
 				(T) => {
-					let c = Object.fromEntries(
+					const c = Object.fromEntries(
 						Object.getOwnPropertyNames(T.properties).map((u) => [u, this.Optional(T.properties[u])])
 					)
 					return this.Object(c, this.Discard(T, ["required"]))
@@ -1858,14 +1858,14 @@ var Ge = mn((i) => {
 			)
 		}
 		Pick(t, s, T = {}) {
-			let c = oe.Resolve(s)
+			const c = oe.Resolve(s)
 			return Q.Map(
 				this.Discard(b.Type(t), ["$id", i.Transform]),
 				(l) => {
 					y.IsArray(l.required) &&
 						((l.required = l.required.filter((u) => c.includes(u))),
 						l.required.length === 0 && delete l.required)
-					for (let u of Object.getOwnPropertyNames(l.properties))
+					for (const u of Object.getOwnPropertyNames(l.properties))
 						c.includes(u) || delete l.properties[u]
 					return this.Create(l)
 				},
@@ -1875,7 +1875,7 @@ var Ge = mn((i) => {
 		Record(t, s, T = {}) {
 			return o.TTemplateLiteral(t)
 				? (() => {
-						let c = X.ParseExact(t.pattern)
+						const c = X.ParseExact(t.pattern)
 						return Y.Check(c)
 							? this.Object(Object.fromEntries([...Z.Generate(c)].map((u) => [u, b.Type(s)])), T)
 							: this.Create({
@@ -1887,9 +1887,9 @@ var Ge = mn((i) => {
 				  })()
 				: o.TUnion(t)
 				? (() => {
-						let c = De.Resolve(t)
+						const c = De.Resolve(t)
 						if (o.TUnionLiteral(c)) {
-							let l = Object.fromEntries(c.anyOf.map((d) => [d.const, b.Type(s)]))
+							const l = Object.fromEntries(c.anyOf.map((d) => [d.const, b.Type(s)]))
 							return this.Object(l, { ...T, [i.Hint]: "Record" })
 						} else this.Throw("Record key of type union contains non-literal types")
 				  })()
@@ -1908,7 +1908,7 @@ var Ge = mn((i) => {
 						}))()
 				: o.TString(t)
 				? (() => {
-						let c = y.IsUndefined(t.pattern) ? i.PatternStringExact : t.pattern
+						const c = y.IsUndefined(t.pattern) ? i.PatternStringExact : t.pattern
 						return this.Create({
 							...T,
 							[i.Kind]: "Record",
@@ -1920,7 +1920,7 @@ var Ge = mn((i) => {
 		}
 		Recursive(t, s = {}) {
 			y.IsUndefined(s.$id) && (s.$id = `T${Rn++}`)
-			let T = t({ [i.Kind]: "This", $ref: `${s.$id}` })
+			const T = t({ [i.Kind]: "This", $ref: `${s.$id}` })
 			return (T.$id = s.$id), this.Create({ ...s, [i.Hint]: "Recursive", ...T })
 		}
 		Ref(t, s = {}) {
@@ -1933,7 +1933,7 @@ var Ge = mn((i) => {
 			return Q.Map(
 				this.Discard(b.Type(t), ["$id", i.Transform]),
 				(T) => {
-					let c = Object.fromEntries(
+					const c = Object.fromEntries(
 						Object.getOwnPropertyNames(T.properties).map((u) => [
 							u,
 							this.Discard(T.properties[u], [i.Optional]),
@@ -1957,14 +1957,14 @@ var Ge = mn((i) => {
 			return this.Create({ ...t, [i.Kind]: "String", type: "string" })
 		}
 		TemplateLiteral(t, s = {}) {
-			let T = y.IsString(t) ? Re.Create(Je.Parse(t)) : Re.Create(t)
+			const T = y.IsString(t) ? Re.Create(Je.Parse(t)) : Re.Create(t)
 			return this.Create({ ...s, [i.Kind]: "TemplateLiteral", type: "string", pattern: T })
 		}
 		Transform(t) {
 			return new xe(t)
 		}
 		Tuple(t, s = {}) {
-			let [T, c, l] = [!1, t.length, t.length],
+			const [T, c, l] = [!1, t.length, t.length],
 				u = b.Rest(t),
 				d =
 					t.length > 0
@@ -1987,10 +1987,10 @@ var Ge = mn((i) => {
 			return o.TTemplateLiteral(t)
 				? D.Resolve(t)
 				: (() => {
-						let T = t
+						const T = t
 						if (T.length === 0) return this.Never(s)
 						if (T.length === 1) return this.Create(b.Type(T[0], s))
-						let c = b.Rest(T)
+						const c = b.Rest(T)
 						return this.Create({ ...s, [i.Kind]: "Union", anyOf: c })
 				  })()
 		}
@@ -2005,7 +2005,7 @@ var Ge = mn((i) => {
 		}
 	}
 	i.JsonTypeBuilder = ue
-	var je = class extends ue {
+	const je = class extends ue {
 		AsyncIterator(t, s = {}) {
 			return this.Create({
 				...s,
@@ -2015,10 +2015,10 @@ var Ge = mn((i) => {
 			})
 		}
 		Awaited(t, s = {}) {
-			let T = (c) =>
+			const T = (c) =>
 				c.length > 0
 					? (() => {
-							let [l, ...u] = c
+							const [l, ...u] = c
 							return [this.Awaited(l), ...T(u)]
 					  })()
 					: c
@@ -2037,7 +2037,7 @@ var Ge = mn((i) => {
 			return this.Tuple([...t.parameters], { ...s })
 		}
 		Constructor(t, s, T) {
-			let [c, l] = [b.Rest(t), b.Type(s)]
+			const [c, l] = [b.Rest(t), b.Type(s)]
 			return this.Create({
 				...T,
 				[i.Kind]: "Constructor",
@@ -2050,7 +2050,7 @@ var Ge = mn((i) => {
 			return this.Create({ ...t, [i.Kind]: "Date", type: "Date" })
 		}
 		Function(t, s, T) {
-			let [c, l] = [b.Rest(t), b.Type(s)]
+			const [c, l] = [b.Rest(t), b.Type(s)]
 			return this.Create({
 				...T,
 				[i.Kind]: "Function",
@@ -2072,7 +2072,7 @@ var Ge = mn((i) => {
 			return this.Create({ ...s, [i.Kind]: "Promise", type: "Promise", item: b.Type(t) })
 		}
 		RegExp(t, s = {}) {
-			let T = y.IsString(t) ? t : t.source
+			const T = y.IsString(t) ? t : t.source
 			return this.Create({ ...s, [i.Kind]: "String", type: "string", pattern: T })
 		}
 		RegEx(t, s = {}) {
@@ -2098,9 +2098,9 @@ var Ge = mn((i) => {
 	i.JsonType = new ue()
 	i.Type = new je()
 })
-var Qe = { en: "inlang message format" },
+const Qe = { en: "inlang message format" },
 	Xe = { en: "The simplest storage plugin for inlang." }
-var ae = Pn(Ge(), 1),
+const ae = Pn(Ge(), 1),
 	he = ae.Type.Object({
 		filePath: ae.Type.Optional(
 			ae.Type.String({ description: "DEPRECATED. Use filePathPattern instead.", deprecated: !0 })
@@ -2112,15 +2112,15 @@ var ae = Pn(Ge(), 1),
 		}),
 	})
 var Nn = (a) => {
-		let t = en(a, 0)
+		const t = en(a, 0)
 		if (t === void 0 || !xn(a[t])) return
-		let s = en(a, t + 1)
+		const s = en(a, t + 1)
 		if (s !== void 0) return Sn(a, t, s)
 	},
 	nn = Nn,
 	en = (a, t) => {
 		for (let s = t; s < a.length; s += 1) {
-			let T = a[s]
+			const T = a[s]
 			if (!vn(T)) return s
 		}
 	},
@@ -2135,7 +2135,7 @@ var Nn = (a) => {
 	Sn = (a, t, s) => {
 		let T
 		for (let c = s - 1; c > t; c -= 1) {
-			let l = a[c]
+			const l = a[c]
 			if (l === "\r") return
 			if (
 				l ===
@@ -2149,8 +2149,8 @@ var Nn = (a) => {
 		}
 	},
 	Ln = (a) => (a === void 0 ? 0 : a[0] === " " ? a.length : a)
-var Ve = (a) => {
-	let t = a.endsWith(`
+const Ve = (a) => {
+	const t = a.endsWith(`
 `),
 		s = nn(a)
 	return (T, c) =>
@@ -2160,7 +2160,7 @@ var Ve = (a) => {
 `
 			: "")
 }
-var tn = (a) =>
+const tn = (a) =>
 	a
 		.map((t) => {
 			switch (t.type) {
@@ -2171,9 +2171,9 @@ var tn = (a) =>
 			}
 		})
 		.join("")
-var rn = (a) => {
-	let t = {}
-	for (let s of a.variants) {
+const rn = (a) => {
+	const t = {}
+	for (const s of a.variants) {
 		if (t[s.languageTag] !== void 0)
 			throw new Error(
 				`The message "${a.id}" has multiple variants for the language tag "${s.languageTag}". The inlang-message-format plugin does not support multiple variants for the same language tag at the moment.`
@@ -2182,22 +2182,22 @@ var rn = (a) => {
 	}
 	return t
 }
-var on = (a) => {
+const on = (a) => {
 	let t = /\{([^}]+)\}/g,
 		s,
 		T = 0,
 		c = []
 	for (; (s = t.exec(a)) !== null; ) {
-		let u = s[1],
+		const u = s[1],
 			d = a.slice(T, s.index)
 		d.length > 0 && c.push({ type: "Text", value: d }),
 			c.push({ type: "VariableReference", name: u }),
 			(T = s.index + s[0].length)
 	}
-	let l = a.slice(Math.max(0, T))
+	const l = a.slice(Math.max(0, T))
 	return l.length > 0 && c.push({ type: "Text", value: l }), c
 }
-var qe = (a) => ({
+const qe = (a) => ({
 	id: a.key,
 	selectors: [],
 	variants: [{ languageTag: a.languageTag, match: [], pattern: on(a.value) }],
@@ -2211,16 +2211,16 @@ var wn = "plugin.inlang.messageFormat",
 		settingsSchema: he,
 		loadMessages: async ({ settings: a, nodeishFs: t }) => {
 			await An({ settings: a, nodeishFs: t })
-			let s = {}
-			for (let T of a.languageTags)
+			const s = {}
+			for (const T of a.languageTags)
 				try {
-					let c = await t.readFile(
+					const c = await t.readFile(
 						a["plugin.inlang.messageFormat"].pathPattern.replace("{languageTag}", T),
 						{ encoding: "utf-8" }
 					)
 					sn[T] = Ve(c)
-					let l = JSON.parse(c)
-					for (let u in l)
+					const l = JSON.parse(c)
+					for (const u in l)
 						u !== "$schema" &&
 							(s[u]
 								? (s[u].variants = [
@@ -2232,13 +2232,13 @@ var wn = "plugin.inlang.messageFormat",
 			return Object.values(s)
 		},
 		saveMessages: async ({ settings: a, nodeishFs: t, messages: s }) => {
-			let T = {}
-			for (let c of s) {
-				let l = rn(c)
-				for (let [u, d] of Object.entries(l)) T[u] === void 0 && (T[u] = {}), (T[u][c.id] = d)
+			const T = {}
+			for (const c of s) {
+				const l = rn(c)
+				for (const [u, d] of Object.entries(l)) T[u] === void 0 && (T[u] = {}), (T[u][c.id] = d)
 			}
-			for (let [c, l] of Object.entries(T)) {
-				let u = a["plugin.inlang.messageFormat"].pathPattern.replace("{languageTag}", c)
+			for (const [c, l] of Object.entries(T)) {
+				const u = a["plugin.inlang.messageFormat"].pathPattern.replace("{languageTag}", c)
 				await jn({ path: u, nodeishFs: t }),
 					await t.writeFile(
 						a["plugin.inlang.messageFormat"].pathPattern.replace("{languageTag}", c),
@@ -2273,7 +2273,7 @@ function Fn(a) {
 var An = async (a) => {
 	if (a.settings["plugin.inlang.messageFormat"].filePath != undefined)
 		try {
-			let t = await a.nodeishFs.readFile(a.settings["plugin.inlang.messageFormat"].filePath, {
+			const t = await a.nodeishFs.readFile(a.settings["plugin.inlang.messageFormat"].filePath, {
 				encoding: "utf-8",
 			})
 			await ze.saveMessages?.({
@@ -2286,5 +2286,5 @@ var An = async (a) => {
 				)
 		} catch {}
 }
-var nt = ze
+const nt = ze
 export { nt as default }
