@@ -3,6 +3,7 @@ import type { ImportFunction } from "@inlang/sdk"
 import fs from "node:fs/promises"
 import crypto from "node:crypto"
 import path from "node:path"
+import url from "node:url"
 
 /**
  * Wraps the import function to inject the base path.
@@ -25,7 +26,7 @@ const createImport = async (uri: string, basePath: string) => {
 		return import(normalizePath(basePath + "/" + uri))
 	}
 
-	const moduleAsText = await(await fetch(uri)).text()
+	const moduleAsText = await (await fetch(uri)).text()
 
 	// 1. absolute path "/"
 	// 2. hash the uri to remove directory blabla stuff and add .mjs to make node load the module as ESM
@@ -34,6 +35,10 @@ const createImport = async (uri: string, basePath: string) => {
 	)
 
 	await fs.writeFile(interimPath, moduleAsText, { encoding: "utf-8" })
+	const q = url.parse(interimPath, true)
+	const queryData = q.query
+	console.log("queryData", queryData)
+	console.log("queryDefault", queryData.default)
 
 	const stat = await fs.stat(interimPath)
 
