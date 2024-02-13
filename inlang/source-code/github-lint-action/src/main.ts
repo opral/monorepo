@@ -13,6 +13,22 @@ import { _import } from "./_import.js"
  */
 export async function run(): Promise<void> {
 	console.log("Running the action")
+	await import(process.cwd() + "/inlang/source-code/github-lint-action/src/testpluginmodule.js")
+		.then((module) => {
+			console.log(module)
+		})
+		.catch((error) => {
+			console.log(error)
+		})
+
+	await import(process.cwd() + "/inlang/source-code/github-lint-action/src/testlintmodule.js")
+		.then((module) => {
+			console.log(module)
+		})
+		.catch((error) => {
+			console.log(error)
+		})
+
 	try {
 		const token: string = core.getInput("token", { required: true })
 		const project_path: string = core.getInput("project_path", { required: true })
