@@ -18,20 +18,20 @@ export function _import(basePath: string): ImportFunction {
 	}
 }
 
-const createImport = async (uri: string, basePath: string) => {
+const createImport = async (uri: string, project_path: string) => {
 	console.log("createImport")
 	if (!uri.startsWith("http")) {
 		// support for local modules
-		return import(normalizePath(basePath + "/" + uri))
+		return import(normalizePath(process.cwd() + "/" + uri))
 	}
 
-	const moduleAsText = await(await fetch(uri)).text()
+	const moduleAsText = await (await fetch(uri)).text()
 	// const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(moduleAsText)
 
 	// 1. absolute path "/"
 	// 2. hash the uri to remove directory blabla stuff and add .mjs to make node load the module as ESM
 	const interimPath = path.resolve(
-		process.cwd() + "/" + crypto.createHash("sha256").update(uri).digest("hex") + ".mjs"
+		project_path + "/" + crypto.createHash("sha256").update(uri).digest("hex") + ".mjs"
 	)
 
 	await fs.writeFile(interimPath, moduleAsText, { encoding: "utf-8" })
