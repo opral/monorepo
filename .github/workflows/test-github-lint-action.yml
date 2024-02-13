@@ -25,7 +25,7 @@ jobs:
       - name: Read JSON file
         id: read-json
         run: |
-          json_file_path="./project.inlang"
+          json_file_path="./project.inlang/settings.json"
           json_content=$(cat "$json_file_path")
           echo "::set-output name=json_content::$json_content"
 
