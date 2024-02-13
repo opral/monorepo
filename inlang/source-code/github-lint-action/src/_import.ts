@@ -25,7 +25,11 @@ const createImport = async (uri: string, project_path: string) => {
 		return import(normalizePath(process.cwd() + "/" + uri))
 	}
 
-	const moduleAsText = await (await fetch(uri)).text()
+	//list all files in the directory
+	const files = await fs.readdir("./")
+	console.log("files", files)
+
+	const moduleAsText = await(await fetch(uri)).text()
 	// const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(moduleAsText)
 
 	// 1. absolute path "/"
