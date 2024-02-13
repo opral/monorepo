@@ -13,9 +13,14 @@ import "dotenv/config"
  */
 export async function run(): Promise<void> {
 	console.log("Running the action")
-	await import(
-		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js"
-	)
+	const moduleAsText = await(
+		await fetch(
+			"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js"
+		)
+	).text()
+	const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(moduleAsText)
+
+	await import(moduleWithMimeType)
 		.then((module) => {
 			console.log("imported module", module, module.default)
 			return module
