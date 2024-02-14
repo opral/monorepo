@@ -1001,14 +1001,14 @@ describe("functionality", () => {
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
 			expect(mockSaveFn.mock.calls.length).toBe(2)
-			expect(mockSaveFn.mock.calls[0][0].messages).toHaveLength(5)
+			expect(mockSaveFn.mock.calls[1][0].messages).toHaveLength(5)
 
 			project.query.messages.delete({ where: { id: "fourth" } })
 
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
 			expect(mockSaveFn.mock.calls.length).toBe(3)
-			expect(mockSaveFn.mock.calls[1][0].messages).toHaveLength(4)
+			expect(mockSaveFn.mock.calls[2][0].messages).toHaveLength(4)
 		})
 	})
 
