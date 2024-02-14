@@ -1,6 +1,5 @@
 import type { InlangProject, listProjects } from "@inlang/sdk"
 
-// TODO #1844 CLEARIFY Felix the state seems to set in the initProject method but seams to never be disposed?
 /**
  * The state of the vscode extension.
  */

@@ -222,19 +222,22 @@ export async function loadProject(args: {
 				updateMessages: () => {
 					// eslint-disable-next-line no-console
 					console.log("load messages because of a change in the message.json files")
-					// TODO #1844 FINK check error handling for plugin load methods (triggered by file change) -> move to separate ticket
+					// TODO FINK check error handling for plugin load methods (triggered by file change) -> move to separate ticket
+					// TODO JL #2108 add catch and put error into project errors
+					//      why: loadMessagesViaPlugin function is async so we need to .catch()
+					//      this is a runtime error (unlike the catch below this) - project errors should be reactive at runtime
 					loadMessagesViaPlugin(
 						fsWithWatcher,
 						messageLockFilePath,
 						messageStates,
 						messagesQuery,
-						settings()!,
+						settings()!, // TODO revalidate whether this is always non-null
 						loadMessagePlugin
 					)
 				},
 			})
 
-			// TODO #1844 FINK check error handling for plugin load methods (initial load) -> move to separate ticket
+			// TODO FINK check error handling for plugin load methods (initial load)
 			loadMessagesViaPlugin(
 				fsWithWatcher,
 				messageLockFilePath,
@@ -291,6 +294,7 @@ export async function loadProject(args: {
 		const abortController = new AbortController()
 		const hasWatcher = nodeishFs.watch("/", { signal: abortController.signal }) !== undefined
 
+		// map of message id => dispose function from createRoot for each message
 		const trackedMessages: Map<string, () => void> = new Map()
 		let initialSetup = true
 		// -- subscribe to all messages and write to files on signal -------------
@@ -303,14 +307,13 @@ export async function loadProject(args: {
 				(tracked) => !currentMessageIds.includes(tracked[0])
 			)
 
-			// TODO #1844 branche persistence strategy - this could be used to branch between projects with and without load/saveMessages
 			const saveMessagesPlugin = _resolvedModules.plugins.find(
 				(plugin) => plugin.saveMessages !== undefined
 			)
 
 			for (const messageId of currentMessageIds) {
 				if (!trackedMessages!.has(messageId!)) {
-					// we create a new root to be able to cleanup an effect for a message the got deleted
+					// we create a new root to be able to cleanup an effect for a message that got deleted
 					createRoot((dispose) => {
 						createEffect(() => {
 							const message = messagesQuery.get({ where: { id: messageId } })!
@@ -322,7 +325,7 @@ export async function loadProject(args: {
 								trackedMessages?.set(messageId, dispose)
 							}
 
-							// TODO #1844 remove the initial setup?
+							// don't trigger saves or set dirty flags during initial setup
 							if (!initialSetup) {
 								messageStates.messageDirtyFlags[message.id] = true
 								// we keep track of the latest save within the loadProject call to await it at the end - this is not used in subsequetial upserts
@@ -365,8 +368,6 @@ export async function loadProject(args: {
 
 			initialSetup = false
 		})
-
-		// TODO #1844 deal with wrong messages in inlang folder (change the type one message to something like Text2)
 
 		const lintReportsQuery = createMessageLintReportsQuery(
 			messagesQuery,
@@ -624,7 +625,7 @@ async function loadMessagesViaPlugin(
 	)
 
 	for (const loadedMessage of loadedMessages) {
-		const loadedMessageClone = JSON.parse(JSON.stringify(loadedMessage))
+		const loadedMessageClone = structuredClone(loadedMessage)
 
 		const currentMessages = messagesQuery
 			.getAll()
@@ -643,21 +644,24 @@ async function loadMessagesViaPlugin(
 			// TODO featureFlag // loadedMessageClone.alias["default"] = loadedMessageClone.id
 			// TODO featureFlag // loadedMessageClone.id = currentMessages[0]!.id
 
-			// TODO #1844 INFORM stringifyMessage encodes messages independent from key order!
+			// NOTE stringifyMessage encodes messages independent from key order!
 			const importedEnecoded = stringifyMessage(loadedMessageClone)
 
-			// TODO #1844 use hash instead of the whole object JSON to save memory...
+			// NOTE could use hash instead of the whole object JSON to save memory...
 			if (messageState.messageLoadHash[loadedMessageClone.id] === importedEnecoded) {
 				// eslint-disable-next-line no-console
 				console.log("skiping upsert!!!!!")
 				continue
 			}
 
+			// This logic is preventing cycles - could also be handled if update api had a parameter for who triggered update
+			// e.g. when FS was updated, we don't need to write back to FS
+			// update is synchronous, so update effect will be triggered immediately
 			// NOTE: this might trigger a save before we have the chance to delete - but since save is async and waits for the lock accquired by this method - its save to set the flags afterwards
 			messagesQuery.update({ where: { id: loadedMessageClone.id }, data: loadedMessageClone })
 			// we load a fresh version - lets delete dirty flag that got created by the update
 			delete messageState.messageDirtyFlags[loadedMessageClone.id]
-			// TODO #1844 use hash instead of the whole object JSON to save memory...
+			// NOTE could use hash instead of the whole object JSON to save memory...
 			messageState.messageLoadHash[loadedMessageClone.id] = importedEnecoded
 		} else {
 			// message with the given alias does not exist so far
@@ -770,7 +774,7 @@ async function saveMessagesViaPlugin(
 			for (const message of currentMessages) {
 				if (messageState.messageDirtyFlags[message.id]) {
 					const importedEnecoded = stringifyMessage(message)
-					// TODO #1844 use hash instead of the whole object JSON to save memory...
+					// NOTE: could use hash instead of the whole object JSON to save memory...
 					persistedMessageHashs[message.id] = importedEnecoded
 				}
 
@@ -784,8 +788,7 @@ async function saveMessagesViaPlugin(
 			// wa are about to save the messages to the plugin - reset all flags now
 			messageState.messageDirtyFlags = {}
 
-			// TODO #1844 SPLIT (separate ticket) make sure save messages produces the same output again and again
-			// TODO #1844v Versioning on plugins? cache issue?
+			// NOTE: this assumes that the plugin will handle message ordering
 			await savePlugin.saveMessages({
 				settings: settingsValue,
 				messages: messagesToExport,
