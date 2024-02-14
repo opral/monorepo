@@ -19,14 +19,6 @@ export function _import(basePath: string): ImportFunction {
 }
 
 const createImport = async (uri: string) => {
-	try {
-		const module = await import("./../../../../module.js")
-		console.log("module imported")
-		console.log(module.default.add(1, 2))
-	} catch (err) {
-		console.log(err)
-	}
-
 	if (!uri.startsWith("http")) {
 		// support for local modules
 		return import(normalizePath(process.cwd() + "/" + uri))

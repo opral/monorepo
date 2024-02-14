@@ -4,8 +4,8 @@ import * as core from "@actions/core"
 import * as github from "@actions/github"
 import { openRepository, findRepoRoot } from "@lix-js/client"
 import { loadProject } from "@inlang/sdk"
-import { normalizePath } from "@lix-js/fs"
-import { _import } from "./_import.js"
+// import { normalizePath } from "@lix-js/fs"
+// import { _import } from "./_import.js"
 
 /**
  * The main function for the action.
@@ -13,17 +13,6 @@ import { _import } from "./_import.js"
  */
 export async function run(): Promise<void> {
 	console.log("Running the action")
-
-	const __import = new Function("p", "return import(p)")
-
-	const uri = "https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"
-	try {
-		const module = await __import(uri)
-		console.log("module imported")
-		console.log(module.default)
-	} catch (err) {
-		console.log(err)
-	}
 
 	try {
 		const token: string = core.getInput("token", { required: true })
@@ -55,9 +44,8 @@ export async function run(): Promise<void> {
 			projectPath: absoluteProjectPath,
 			repo: inlangRepo,
 			appId: "app.inlang.githubI18nLintAction",
-			_import: _import(normalizePath(project_path)),
+			// _import: _import(normalizePath(project_path)),
 		})
-		console.log(project?.settings().toString())
 
 		if (project.errors().length > 0) {
 			for (const error of project.errors()) {
