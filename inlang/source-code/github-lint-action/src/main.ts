@@ -44,7 +44,7 @@ export async function run(): Promise<void> {
 			projectPath: absoluteProjectPath,
 			repo: inlangRepo,
 			appId: "app.inlang.githubI18nLintAction",
-			_import: _import(normalizePath(project_path)),
+			_import: _import(normalizePath(project_path), project_path),
 		})
 		console.log(project?.settings().toString())
 
