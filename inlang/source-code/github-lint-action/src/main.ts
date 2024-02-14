@@ -1,11 +1,12 @@
 import "dotenv/config"
 import * as fs from "node:fs/promises"
+import crypto from "node:crypto"
+import path from "node:path"
 import * as core from "@actions/core"
 import * as github from "@actions/github"
 import { openRepository, findRepoRoot } from "@lix-js/client"
-import { loadProject } from "@inlang/sdk"
+import { loadProject, type ImportFunction } from "@inlang/sdk"
 import { normalizePath } from "@lix-js/fs"
-import { _import } from "./_import.js"
 
 /**
  * The main function for the action.
@@ -150,3 +151,55 @@ export async function run(): Promise<void> {
 }
 
 export default run
+
+/**
+ * Wraps the import function to inject the base path.
+ *
+ * The wrapping is necessary to resolve relative imports.
+ */
+function _import(basePath: string): ImportFunction {
+	return (uri: string) => {
+		if (uri.startsWith("./")) {
+			return createImport(normalizePath(basePath + "/" + uri.slice(2)))
+		}
+		return createImport(uri)
+	}
+}
+
+const createImport = async (uri: string) => {
+	if (!uri.startsWith("http")) {
+		// support for local modules
+		return import(normalizePath(process.cwd() + "/" + uri))
+	}
+
+	const moduleAsText = await (await fetch(uri)).text()
+	// const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(moduleAsText)
+
+	// 1. absolute path "/"
+	// 2. hash the uri to remove directory blabla stuff and add .mjs to make node load the module as ESM
+	const interimPath = path.resolve(
+		process.cwd() + "/" + crypto.createHash("sha256").update(uri).digest("hex") + ".js"
+	)
+
+	await fs.writeFile(interimPath, moduleAsText, { encoding: "utf-8" })
+
+	// check if module exists
+	fs.access("./" + crypto.createHash("sha256").update(uri).digest("hex") + ".js", fs.constants.F_OK)
+		.then(() => {
+			console.log("module exists")
+		})
+		.catch(() => {
+			throw new Error("module does not exist")
+		})
+
+	let module
+	try {
+		module = await import("./" + crypto.createHash("sha256").update(uri).digest("hex") + ".js")
+		console.log("module imported")
+		console.log(module.default)
+	} catch (err) {
+		console.log(err)
+	}
+
+	return module
+}
