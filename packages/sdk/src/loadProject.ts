@@ -346,12 +346,14 @@ export async function loadProject(args: {
 			for (const deletedMessage of deletedTrackedMessages) {
 				const deletedMessageId = deletedMessage[0]
 
-				// NOTE: call dispose to cleanup the effect
+				// call dispose to cleanup the effect
 				const messageEffectDisposeFunction = trackedMessages.get(deletedMessageId)
 				if (messageEffectDisposeFunction) {
 					messageEffectDisposeFunction()
 					trackedMessages.delete(deletedMessageId)
 				}
+				// mark the deleted message as dirty to force a save
+				messageStates.messageDirtyFlags[deletedMessageId] = true
 			}
 
 			if (deletedTrackedMessages.length > 0) {
