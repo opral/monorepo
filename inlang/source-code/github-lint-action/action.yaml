@@ -9,8 +9,7 @@ inputs:
     required: true
   project_path:
     description: 'Project path'
-    required: false
-    default: '/project.inlang'
+    required: true
 
 # Define your outputs here.
 outputs:

@@ -1,4 +1,4 @@
-import * as fs from "node:fs"
+import * as fs from "node:fs/promises"
 import * as core from "@actions/core"
 import * as github from "@actions/github"
 import { openRepository, findRepoRoot } from "@lix-js/client"
@@ -26,7 +26,7 @@ export async function run(): Promise<void> {
 
 		const baseDirectory = process.cwd()
 		const absoluteProjectPath = baseDirectory + project_path
-		const repoRoot = await findRepoRoot({ nodeishFs: fs.promises, path: absoluteProjectPath })
+		const repoRoot = await findRepoRoot({ nodeishFs: fs, path: absoluteProjectPath })
 
 		if (!repoRoot) {
 			console.log(

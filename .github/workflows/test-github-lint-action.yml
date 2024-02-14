@@ -48,6 +48,7 @@ jobs:
         uses: ./inlang/source-code/github-lint-action
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          project_path: "/project.inlang"
 
       - name: Print Output
         id: output
