@@ -24,7 +24,7 @@ const createImport = async (uri: string) => {
 		return import(normalizePath(process.cwd() + "/" + uri))
 	}
 
-	const moduleAsText = await (await fetch(uri)).text()
+	const moduleAsText = await(await fetch(uri)).text()
 	// const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(moduleAsText)
 
 	// 1. absolute path "/"
@@ -36,6 +36,19 @@ const createImport = async (uri: string) => {
 	await fs.writeFile(interimPath, moduleAsText, { encoding: "utf-8" })
 
 	let module
+
+	// check if module exists
+	fs.access(
+		"./" + crypto.createHash("sha256").update(uri).digest("hex") + ".mjs",
+		fs.constants.F_OK
+	)
+		.then(() => {
+			console.log("module exists")
+		})
+		.catch(() => {
+			throw new Error("module does not exist")
+		})
+
 	try {
 		module = await import("./" + crypto.createHash("sha256").update(uri).digest("hex") + ".mjs")
 		console.log("module imported")
