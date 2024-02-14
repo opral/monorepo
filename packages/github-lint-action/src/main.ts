@@ -13,13 +13,13 @@ import { _import } from "./_import.js"
  */
 export async function run(): Promise<void> {
 	console.log("Running the action")
-	await import("./../../../../module.js")
-		.then((module) => {
-			console.log("imported module", module)
-		})
-		.catch((error) => {
-			console.error("error", error)
-		})
+	try {
+		const module = await import("./../../../../module.js")
+		console.log("module imported")
+		console.log(module.default.add(1, 2))
+	} catch (err) {
+		console.log(err)
+	}
 
 	try {
 		const token: string = core.getInput("token", { required: true })
