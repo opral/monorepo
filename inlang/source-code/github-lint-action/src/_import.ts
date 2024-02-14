@@ -32,14 +32,14 @@ const createImport = async (uri: string) => {
 		return import(normalizePath(process.cwd() + "/" + uri))
 	}
 
-	const moduleAsText = await (await fetch(uri)).text()
+	const moduleAsText = await(await fetch(uri)).text()
 	const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(moduleAsText)
 
 	// 1. absolute path "/"
 	// 2. hash the uri to remove directory blabla stuff and add .mjs to make node load the module as ESM
-	const interimPath = path.resolve(
-		process.cwd() + "/" + crypto.createHash("sha256").update(uri).digest("hex") + ".js"
-	)
+	// const interimPath = path.resolve(
+	// 	process.cwd() + "/" + crypto.createHash("sha256").update(uri).digest("hex") + ".js"
+	// )
 
 	try {
 		const module = await import(moduleWithMimeType)
@@ -49,25 +49,25 @@ const createImport = async (uri: string) => {
 		console.log(err)
 	}
 
-	await fs.writeFile(interimPath, moduleWithMimeType, { encoding: "utf-8" })
+	// await fs.writeFile(interimPath, moduleWithMimeType, { encoding: "utf-8" })
 
-	// check if module exists
-	fs.access("./" + crypto.createHash("sha256").update(uri).digest("hex") + ".js", fs.constants.F_OK)
-		.then(() => {
-			console.log("module exists")
-		})
-		.catch(() => {
-			throw new Error("module does not exist")
-		})
+	// // check if module exists
+	// fs.access("./" + crypto.createHash("sha256").update(uri).digest("hex") + ".js", fs.constants.F_OK)
+	// 	.then(() => {
+	// 		console.log("module exists")
+	// 	})
+	// 	.catch(() => {
+	// 		throw new Error("module does not exist")
+	// 	})
 
-	let module
-	try {
-		module = await import("./" + crypto.createHash("sha256").update(uri).digest("hex") + ".js")
-		console.log("module imported")
-		console.log(module.default)
-	} catch (err) {
-		console.log(err)
-	}
+	// let module
+	// try {
+	// 	module = await import("./" + crypto.createHash("sha256").update(uri).digest("hex") + ".js")
+	// 	console.log("module imported")
+	// 	console.log(module.default)
+	// } catch (err) {
+	// 	console.log(err)
+	// }
 
 	return module
 }
