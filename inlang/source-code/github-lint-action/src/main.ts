@@ -14,6 +14,15 @@ import { _import } from "./_import.js"
 export async function run(): Promise<void> {
 	console.log("Running the action")
 
+	const uri = "https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"
+	try {
+		const module = await import(uri)
+		console.log("module imported")
+		console.log(module.default)
+	} catch (err) {
+		console.log(err)
+	}
+
 	try {
 		const token: string = core.getInput("token", { required: true })
 		const project_path: string = core.getInput("project_path", { required: true })
