@@ -9,16 +9,16 @@ import type { ImportFunction } from "@inlang/sdk"
  *
  * The wrapping is necessary to resolve relative imports.
  */
-export function _import(basePath: string, project_path: string): ImportFunction {
+export function _import(basePath: string): ImportFunction {
 	return (uri: string) => {
 		if (uri.startsWith("./")) {
-			return createImport(normalizePath(basePath + "/" + uri.slice(2)), project_path)
+			return createImport(normalizePath(basePath + "/" + uri.slice(2)))
 		}
-		return createImport(uri, project_path)
+		return createImport(uri)
 	}
 }
 
-const createImport = async (uri: string, project_path: string) => {
+const createImport = async (uri: string) => {
 	try {
 		const module = await import("./../../../../module.js")
 		console.log("module imported")
@@ -33,26 +33,26 @@ const createImport = async (uri: string, project_path: string) => {
 	}
 
 	const moduleAsText = await (await fetch(uri)).text()
-	// const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(moduleAsText)
+	const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(moduleAsText)
 
 	// 1. absolute path "/"
 	// 2. hash the uri to remove directory blabla stuff and add .mjs to make node load the module as ESM
 	const interimPath = path.resolve(
-		process.cwd() +
-			"/" +
-			project_path +
-			"/" +
-			crypto.createHash("sha256").update(uri).digest("hex") +
-			".js"
+		process.cwd() + "/" + crypto.createHash("sha256").update(uri).digest("hex") + ".js"
 	)
 
-	await fs.writeFile(interimPath, moduleAsText, { encoding: "utf-8" })
+	try {
+		const module = await import(moduleWithMimeType)
+		console.log("module imported")
+		console.log(module.default)
+	} catch (err) {
+		console.log(err)
+	}
+
+	await fs.writeFile(interimPath, moduleWithMimeType, { encoding: "utf-8" })
 
 	// check if module exists
-	fs.access(
-		project_path + "/" + crypto.createHash("sha256").update(uri).digest("hex") + ".js",
-		fs.constants.F_OK
-	)
+	fs.access("./" + crypto.createHash("sha256").update(uri).digest("hex") + ".js", fs.constants.F_OK)
 		.then(() => {
 			console.log("module exists")
 		})
@@ -62,9 +62,7 @@ const createImport = async (uri: string, project_path: string) => {
 
 	let module
 	try {
-		module = await import(
-			project_path + "/" + crypto.createHash("sha256").update(uri).digest("hex") + ".js"
-		)
+		module = await import("./" + crypto.createHash("sha256").update(uri).digest("hex") + ".js")
 		console.log("module imported")
 		console.log(module.default)
 	} catch (err) {
