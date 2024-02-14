@@ -25,7 +25,7 @@
 	},
 	"scripts": {
 		"dev": "node ./build.js",
-		"build": "pnpm run format && esbuild src/index.ts --bundle --minify --format=esm --platform=node --outfile=dist/index.js",
+		"build": "pnpm run format && esbuild src/index.ts --bundle --minify --platform=node --target=node16 --outfile=dist/index.js",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage --test-timeout=10000",
 		"lint": "eslint ./src --fix",
 		"format": "prettier --write **/*.ts",
