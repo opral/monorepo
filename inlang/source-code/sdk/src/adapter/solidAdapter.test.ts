@@ -28,6 +28,11 @@ const config: ProjectSettings = {
 	},
 }
 
+const configWithAliases: ProjectSettings = {
+	...config,
+	featureFlags: { aliases: true },
+}
+
 const mockPlugin: Plugin = {
 	id: "plugin.project.i18next",
 	description: { en: "Mock plugin description" },
@@ -252,7 +257,6 @@ describe("messages", () => {
 
 		project.query.messages.update({
 			where: { id: "a" },
-			// TODO featureFlag // where: { id: "raw_tapir_pause_grateful" },
 			// TODO: use `createMessage` utility
 			data: {
 				...exampleMessages[0],
@@ -269,6 +273,71 @@ describe("messages", () => {
 					},
 				],
 			},
+		})
+
+		it("should react to message udpate (with aliases)", async () => {
+			const repo = await mockRepo()
+			const fs = repo.nodeishFs
+			await fs.mkdir("/user/project.inlang.inlang", { recursive: true })
+			await fs.writeFile(
+				"/user/project.inlang.inlang/settings.json",
+				JSON.stringify(configWithAliases)
+			)
+			const project = solidAdapter(
+				await loadProject({
+					projectPath: "/user/project.inlang.inlang",
+					repo,
+					_import: $import,
+				}),
+				{ from }
+			)
+
+			let counter = 0
+			createEffect(() => {
+				project.query.messages.getAll()
+				counter += 1
+			})
+
+			const messagesBefore = project.query.messages.getAll
+			expect(Object.values(messagesBefore()).length).toBe(2)
+			expect(
+				(
+					Object.values(messagesBefore())[0]?.variants.find(
+						(variant) => variant.languageTag === "en"
+					)?.pattern[0] as Text
+				).value
+			).toBe("test")
+
+			project.query.messages.update({
+				where: { id: "raw_tapir_pause_grateful" },
+				// TODO: use `createMessage` utility
+				data: {
+					...exampleMessages[0],
+					variants: [
+						{
+							languageTag: "en",
+							match: [],
+							pattern: [
+								{
+									type: "Text",
+									value: "test2",
+								},
+							],
+						},
+					],
+				},
+			})
+
+			expect(counter).toBe(2) // 2 times because effect creation + set
+			const messagesAfter = project.query.messages.getAll
+			expect(Object.values(messagesAfter()).length).toBe(2)
+			expect(
+				(
+					Object.values(messagesAfter())[0]?.variants.find(
+						(variant) => variant.languageTag === "en"
+					)?.pattern[0] as Text
+				).value
+			).toBe("test2")
 		})
 
 		expect(counter).toBe(2) // 2 times because effect creation + set
@@ -307,7 +376,41 @@ describe("messages", () => {
 
 		project.query.messages.delete({
 			where: { id: "a" },
-			// TODO featureFlag // where: { id: "raw_tapir_pause_grateful" },
+		})
+
+		expect(counter).toBe(2) // 2 times because effect creation + set
+		const messagesAfter = project.query.messages.getAll()
+		expect(Object.values(messagesAfter).length).toBe(1)
+	})
+
+	it("should react to message delete (with aliases)", async () => {
+		const repo = await mockRepo()
+		const fs = repo.nodeishFs
+		await fs.mkdir("/user/project.inlang.inlang", { recursive: true })
+		await fs.writeFile(
+			"/user/project.inlang.inlang/settings.json",
+			JSON.stringify(configWithAliases)
+		)
+		const project = solidAdapter(
+			await loadProject({
+				projectPath: "/user/project.inlang.inlang",
+				repo,
+				_import: $import,
+			}),
+			{ from }
+		)
+
+		let counter = 0
+		createEffect(() => {
+			project.query.messages.getAll()
+			counter += 1
+		})
+
+		const messagesBefore = project.query.messages.getAll()
+		expect(Object.values(messagesBefore).length).toBe(2)
+
+		project.query.messages.delete({
+			where: { id: "raw_tapir_pause_grateful" },
 		})
 
 		expect(counter).toBe(2) // 2 times because effect creation + set

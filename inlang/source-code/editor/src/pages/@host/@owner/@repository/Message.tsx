@@ -103,11 +103,9 @@ export function Message(props: { id: string }) {
 					slot="summary"
 					class="flex-grow-0 flex-shrink-0 text-[13px] font-medium text-left text-on-surface before:text-on-surface"
 				>
-					{
-						message() && Object.keys(message()!.alias).length > 0
-							? message()!.alias[Object.keys(message()!.alias)[0]!]
-							: "" /* // TODO featureFlag // "alias" */
-					}
+					{message() && Object.keys(message()!.alias).length > 0
+						? message()!.alias[Object.keys(message()!.alias)[0]!]
+						: ""}
 				</h3>
 			</div>
 			<div>
