@@ -14,9 +14,11 @@ import { _import } from "./_import.js"
 export async function run(): Promise<void> {
 	console.log("Running the action")
 
+	const __import = new Function("p", "return import(p)")
+
 	const uri = "https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"
 	try {
-		const module = await import(uri)
+		const module = await __import(uri)
 		console.log("module imported")
 		console.log(module.default)
 	} catch (err) {

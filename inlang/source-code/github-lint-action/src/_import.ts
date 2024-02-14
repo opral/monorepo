@@ -34,9 +34,10 @@ const createImport = async (uri: string) => {
 
 	const moduleAsText = await (await fetch(uri)).text()
 	const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(moduleAsText)
+	const __import = new Function("p", "return import(p)")
 
 	try {
-		const module = await import(moduleWithMimeType)
+		const module = await __import(moduleWithMimeType)
 		console.log("module imported")
 		console.log(module.default)
 	} catch (err) {
