@@ -2,10 +2,8 @@
 	"extends": "./../tsconfig.base.json",
 	"include": ["src/**.ts", "src/main.ts"],
 	"compilerOptions": {
-		"target": "ES2022",
 		"outDir": "dist",
-		"types": ["node"],
-		"esModuleInterop": true
+		"types": ["node"]
 	},
 	"exclude": ["./dist", "./node_modules", "./vitest.config.ts", "*/*.test.ts"]
 }
