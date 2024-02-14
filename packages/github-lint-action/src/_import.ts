@@ -32,14 +32,8 @@ const createImport = async (uri: string) => {
 		return import(normalizePath(process.cwd() + "/" + uri))
 	}
 
-	const moduleAsText = await(await fetch(uri)).text()
+	const moduleAsText = await (await fetch(uri)).text()
 	const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(moduleAsText)
-
-	// 1. absolute path "/"
-	// 2. hash the uri to remove directory blabla stuff and add .mjs to make node load the module as ESM
-	// const interimPath = path.resolve(
-	// 	process.cwd() + "/" + crypto.createHash("sha256").update(uri).digest("hex") + ".js"
-	// )
 
 	try {
 		const module = await import(moduleWithMimeType)
@@ -48,6 +42,12 @@ const createImport = async (uri: string) => {
 	} catch (err) {
 		console.log(err)
 	}
+
+	// 1. absolute path "/"
+	// 2. hash the uri to remove directory blabla stuff and add .mjs to make node load the module as ESM
+	// const interimPath = path.resolve(
+	// 	process.cwd() + "/" + crypto.createHash("sha256").update(uri).digest("hex") + ".js"
+	// )
 
 	// await fs.writeFile(interimPath, moduleWithMimeType, { encoding: "utf-8" })
 
