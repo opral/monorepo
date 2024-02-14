@@ -2,7 +2,7 @@
 
 **inlang** is globalization infrastructure that powers an ecosystem of inlang apps, plugins and solutions that make globalization simple.
 
-![Go global mockups](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/documentation/ecosystem/assets/go-global-mockup.png)
+![Go global mockups](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/documentation/ecosystem/assets/go-global-mockup02.png)
 
 <br/>
 
