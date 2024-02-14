@@ -26,7 +26,10 @@ const HeroSearch = () => {
 					{addLinksToText(m.home_inlang_description())}
 				</p>
 
-				<div class="mt-8">
+				<div class="mt-8 flex gap-2 flex-wrap">
+					<Button class="w-fit" type="primary" href="/c/apps">
+						{m.home_inlang_cta()}
+					</Button>
 					<Button class="w-fit" type="secondary" href="/documentation">
 						{m.home_inlang_button()}
 					</Button>
