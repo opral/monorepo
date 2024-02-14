@@ -30,26 +30,19 @@ const createImport = async (uri: string) => {
 	// 1. absolute path "/"
 	// 2. hash the uri to remove directory blabla stuff and add .mjs to make node load the module as ESM
 	const interimPath = path.resolve(
-		process.cwd() + "/" + crypto.createHash("sha256").update(uri).digest("hex") + ".js"
+		process.cwd() + "/" + crypto.createHash("sha256").update(uri).digest("hex") + ".mjs"
 	)
 
 	await fs.writeFile(interimPath, moduleAsText, { encoding: "utf-8" })
 
-	// check if module exists
-	fs.access("./" + crypto.createHash("sha256").update(uri).digest("hex") + ".js", fs.constants.F_OK)
-		.then(() => {
-			console.log("module exists")
-		})
-		.catch(() => {
-			console.log("module does not exist")
-		})
+	let module
+	try {
+		module = await import("./" + crypto.createHash("sha256").update(uri).digest("hex") + ".mjs")
+		console.log("module imported")
+		console.log(module.default)
+	} catch (err) {
+		console.log(err)
+	}
 
-	return await import("./" + crypto.createHash("sha256").update(uri).digest("hex") + ".js")
-		.then((module) => {
-			console.log("imported module", module, module.default)
-			return module
-		})
-		.catch((error) => {
-			console.error("error", error)
-		})
+	return module
 }
