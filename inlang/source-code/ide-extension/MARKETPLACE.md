@@ -46,10 +46,10 @@ If something isn't working as expected, please join our [Discord](https://discor
 
 1. Add a `project.inlang` folder to your repository
 2. Create a `settings.json` file to that new dir `project.inlang/settings.json`
-3. Install a installing a syntax matcher/function matcher from the [inlang marketplace](https://inlang.com/c/plugins)
-4. Install a plugin that reads and writes your messages from the [inlang marketplace](https://inlang.com/c/plugins)
+3. Install a plugin that reads and writes your messages from the [inlang marketplace](https://inlang.com/c/plugins)
+4. Install a installing a syntax matcher/function matcher from the [inlang marketplace](https://inlang.com/c/plugins)
 ---
-5. **Optional**: Install lint rules to find errors in your translations from the [inlang marketplace](https://inlang.com/c/lint-rules)
+1. **Optional**: Install lint rules to find errors in your translations from the [inlang marketplace](https://inlang.com/c/lint-rules)
 
 Look at the [example repository](https://github.com/opral/example) and it's [settings.json](https://github.com/opral/example/blob/main/project.inlang/settings.json) for a working example.
 
