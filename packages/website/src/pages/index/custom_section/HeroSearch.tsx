@@ -1,7 +1,7 @@
-import Link from "#src/renderer/Link.jsx"
 import * as m from "#src/paraglide/messages.js"
 import { Button } from "../components/Button.jsx"
 import { createSignal } from "solid-js"
+import CredibilityTag from "../components/CredibilityTag.jsx"
 
 const isProduction = process.env.NODE_ENV === "production"
 
@@ -28,17 +28,8 @@ const HeroSearch = () => {
 				</div>
 			</sl-dialog>
 			<div class="col-span-12 lg:col-span-7 items-center lg:items-start relative z-30 flex flex-col gap-2 pb-6 mt-4 md:mt-8">
-				<div class="pt-8 group">
-					<Link
-						href="https://www.youtube.com/live/pTgIx-ucMsY?feature=shared&t=3825"
-						target="_blanc"
-					>
-						<Button class="w-fit" type="text">
-							<Play />
-							<p>{m.home_inlang_secondary_link()}</p>
-						</Button>
-					</Link>
-				</div>
+				<CredibilityTag />
+
 				<h1 class="text-4xl md:text-6xl text-surface-900 text-center lg:text-start font-bold tracking-tight mt-6">
 					{m.home_inlang_title()}
 				</h1>
@@ -46,18 +37,18 @@ const HeroSearch = () => {
 					{addLinksToText(m.home_inlang_description())}
 				</p>
 
-				<div class="mt-8 flex gap-2 flex-wrap">
+				<div class="mt-8 flex gap-2 flex-wrap justify-center lg:justify-start">
 					<Button class="w-fit rounded-lg" type="primary" href="/c/apps">
 						{m.home_inlang_cta()}
 					</Button>
-					{/* <div
+					<div
 						onClick={() => setOpen(true)}
 						class="pointer-events-auto flex justify-center items-center h-10 relative gap-2 rounded-md flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer transition-all duration-200 text-surface-800 bg-surface-200 hover:text-surface-900 hover:bg-surface-300 px-4"
 					>
 						<Play />
 						{m.home_inlang_button()}
 						<p class="opacity-50">90s</p>
-					</div> */}
+					</div>
 				</div>
 			</div>
 			<div class="col-span-12 lg:col-span-5 mb-10 lg:mb-0 mt-6 lg:mt-16 overflow-hidden flex items-center justify-center w-full">

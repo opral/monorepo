@@ -5,7 +5,7 @@ import type { PathTranslations } from "./types.js"
 export function getTranslatedPath(
 	canonicalPath: string,
 	lang: string,
-	translations: PathTranslations,
+	translations: PathTranslations
 ) {
 	const match = matches(canonicalPath, Object.keys(translations))
 	if (!match) return canonicalPath
