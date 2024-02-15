@@ -29,7 +29,7 @@ export async function run(): Promise<void> {
 		const changedJsonFiles = changedFiles.filter((file: any) => file.filename.endsWith(".json"))
 		console.log(`I got ${changedJsonFiles.length} changed json files`)
 
-		if (changedJsonFiles.length === 0) {
+		if (changedJsonFiles === undefined || changedJsonFiles.length === 0) {
 			console.log("No json files were changed in this PR, skipping the action.")
 			return
 		}
@@ -73,6 +73,7 @@ export async function run(): Promise<void> {
 
 		const commentContent = `
 				Pull Request #${pr_number} has been updated with: \n
+				- ${changedJsonFiles.length} translation files changed \n
 				- ${pr_lint_summary.errors} errors \n
 				- ${pr_lint_summary.warnings} warnings \n
 			`
