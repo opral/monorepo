@@ -1,5 +1,13 @@
 # inlang-vs-code-extension
 
+## 1.32.2
+
+### Patch Changes
+
+- 073c78864: Changed the hreft from the 'create project’ button in the IDE extension and update docs
+- 4e8cafcdd: remove missing custom api setings decoration in settings file
+- 9ed82b43d: disable sentry error logging for now
+
 ## 1.32.1
 
 ### Patch Changes
