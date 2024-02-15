@@ -27,12 +27,6 @@
 			"description": "Message concept"
 		},
 		{
-			"path": "concept/alias.md",
-			"slug": "concept/alias",
-			"title": "Message Alias",
-			"description": "Using aliases (names) for messages."
-		},
-		{
 			"path": "concept/language-tag.md",
 			"slug": "concept/language-tag",
 			"title": "Language Tag",
