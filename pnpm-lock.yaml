@@ -2048,10 +2048,11 @@ importers:
         version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/versioned-interfaces/language-tag:
-    devDependencies:
+    dependencies:
       '@sinclair/typebox':
         specifier: ^0.31.17
         version: 0.31.28
+    devDependencies:
       tsd:
         specifier: 0.28.1
         version: 0.28.1
