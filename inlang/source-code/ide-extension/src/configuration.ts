@@ -36,9 +36,8 @@ export const CONFIGURATION = {
 	STRINGS: {
 		MISSING_TRANSLATION_MESSAGE: "[missing]",
 		EDITOR_BASE_URL: "https://fink.inlang.com/",
-		GETTING_STARTED_URL:
-			"https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension",
-		DOCS_URL: "https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension",
+		GETTING_STARTED_URL: "https://inlang.com/m/r7kp499g/app-inlang-ideExtension",
+		DOCS_URL: "https://inlang.com/m/r7kp499g/app-inlang-ideExtension",
 		APP_ID: "app.inlang.ideExtension",
 	},
 } as const
