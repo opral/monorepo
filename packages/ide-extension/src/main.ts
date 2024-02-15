@@ -19,12 +19,12 @@ import { recommendationBannerView } from "./utilities/recommendation/recommendat
 import { telemetry } from "./services/telemetry/implementation.js"
 import { version } from "../package.json"
 import { statusBar } from "./utilities/settings/statusBar.js"
-import { initErrorMonitoring } from "./services/error-monitoring/implementation.js"
+//import { initErrorMonitoring } from "./services/error-monitoring/implementation.js"
 
 // Entry Point
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	// Sentry Error Handling
-	initErrorMonitoring()
+	//initErrorMonitoring()
 
 	try {
 		vscode.commands.executeCommand("setContext", "inlang:hasProjectInWorkspace", false)
