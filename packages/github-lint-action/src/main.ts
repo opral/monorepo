@@ -3,8 +3,6 @@ import * as core from "@actions/core"
 import * as github from "@actions/github"
 import { openRepository, findRepoRoot } from "@lix-js/client"
 import { loadProject } from "@inlang/sdk"
-// import { normalizePath } from "@lix-js/fs"
-// import { _import } from "./_import.js"
 
 /**
  * The main function for the action.
@@ -31,7 +29,7 @@ export async function run(): Promise<void> {
 		const changedJsonFiles = changedFiles.filter((file: any) => file.filename.endsWith(".json"))
 		console.log(`I got ${changedJsonFiles.length} changed json files`)
 
-		if (changedJsonFiles.length > 0) {
+		if (changedJsonFiles.length === 0) {
 			console.log("No json files were changed in this PR, skipping the action.")
 			return
 		}
