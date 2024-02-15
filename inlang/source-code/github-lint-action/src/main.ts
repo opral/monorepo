@@ -18,11 +18,27 @@ export async function run(): Promise<void> {
 		const project_path: string = core.getInput("project_path", { required: true })
 		const { owner, repo } = github.context.repo
 		const pr_number = github.context.payload.pull_request?.number
-		// You can also pass in additional options as a second parameter to getOctokit
-		// const octokit = github.getOctokit(myToken, {userAgent: "MyActionVersion1"});
 
-		// Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-		console.log(`I got all inputs: ${token} ${project_path}`)
+		// @ts-ignore
+		const octokit = new github.getOctokit(token)
+
+		const { data: changedFiles } = await octokit.rest.pulls.listFiles({
+			owner,
+			repo,
+			pull_number: pr_number,
+		})
+
+		const changedJsonFiles = changedFiles.filter((file: any) => {
+			file.filename.endsWith(".json") &&
+				// log the changed file properties
+				console.log(file.filename, file.status, file.changes)
+		})
+		console.log(`I got ${changedJsonFiles} changed json files`)
+
+		if (changedJsonFiles.length > 0) {
+			console.log("No json files were changed in this PR, skipping the action.")
+			return
+		}
 
 		const baseDirectory = process.cwd()
 		const absoluteProjectPath = baseDirectory + project_path
@@ -43,7 +59,6 @@ export async function run(): Promise<void> {
 			projectPath: absoluteProjectPath,
 			repo: inlangRepo,
 			appId: "app.inlang.githubI18nLintAction",
-			// _import: _import(normalizePath(project_path)),
 		})
 
 		if (project.errors().length > 0) {
@@ -52,80 +67,22 @@ export async function run(): Promise<void> {
 			}
 		}
 
-		console.log(`settings: ${project.settings()}`)
-		console.log(`messages:" ${project.query.messages.getAll()}`)
-
-		// @ts-ignore
-		const octokit = new github.getOctokit(token)
-
-		const { data: changedFiles } = await octokit.rest.pulls.listFiles({
-			owner,
-			repo,
-			pull_number: pr_number,
-		})
-
-		console.log(`I got changed files: ${changedFiles}`)
-
-		let diffData = {
-			additions: 0,
-			deletions: 0,
-			changes: 0,
-		}
-
-		diffData = changedFiles.reduce((acc: any, file: any) => {
-			acc.additions += file.additions
-			acc.deletions += file.deletions
-			acc.changes += file.changes
-			return acc
-		}, diffData)
-
-		for (const file of changedFiles) {
-			const fileExtension = file.filename.split(".").pop()
-			switch (fileExtension) {
-				case "md":
-					await octokit.rest.issues.addLabels({
-						owner,
-						repo,
-						issue_number: pr_number,
-						labels: ["markdown"],
-					})
-					break
-				case "js":
-					await octokit.rest.issues.addLabels({
-						owner,
-						repo,
-						issue_number: pr_number,
-						labels: ["javascript"],
-					})
-					break
-				case "yml":
-					await octokit.rest.issues.addLabels({
-						owner,
-						repo,
-						issue_number: pr_number,
-						labels: ["yaml"],
-					})
-					break
-				case "yaml":
-					await octokit.rest.issues.addLabels({
-						owner,
-						repo,
-						issue_number: pr_number,
-						labels: ["yaml"],
-					})
-			}
-		}
-
-		console.log(`I got diffData: ${diffData}`)
+		const pr_reports = project.query.messageLintReports.getAll()
+		const pr_lint_summary = pr_reports.reduce(
+			(acc: any, report: any) => {
+				acc.errors += report.errors.length
+				acc.warnings += report.warnings.length
+				return acc
+			},
+			{ errors: 0, warnings: 0 }
+		)
 
 		const commentContent = `
 				Pull Request #${pr_number} has been updated with: \n
-				- ${diffData.changes} changes \n
-				- ${diffData.additions} additions \n
-				- ${diffData.deletions} deletions \n
-				- ${project.query.messages.getAll().length} inlang messages \n
+				- ${pr_lint_summary.errors} errors \n
+				- ${pr_lint_summary.warnings} warnings \n
 			`
-
+		console.log(`I'm going to comment on the PR with:`, commentContent)
 		// await octokit.rest.issues.createComment({
 		// 	owner,
 		// 	repo,
