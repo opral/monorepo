@@ -76,7 +76,7 @@ const InternalProjectSettings = Type.Object({
 			],
 		})
 	),
-	featureFlags: Type.Optional(Type.Record(Type.String(), Type.Boolean())),
+	featureFlags: Type.Optional(Type.Record(Type.String(), Type.Literal(true))),
 })
 
 /**

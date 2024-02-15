@@ -220,8 +220,9 @@ export async function loadProject(args: {
 				// this message is called whenever a file changes that was read earlier by this filesystem
 				// - the plugin loads messages -> reads the file messages.json -> start watching on messages.json -> updateMessages
 				updateMessages: () => {
+					// preserving console.logs as comments pending #
 					// eslint-disable-next-line no-console
-					console.log("load messages because of a change in the message.json files")
+					// console.log("load messages because of a change in the message.json files")
 					// TODO FINK check error handling for plugin load methods (triggered by file change) -> move to separate ticket
 					// TODO JL #2108 add catch and put error into project errors
 					//      why: loadMessagesViaPlugin function is async so we need to .catch()
@@ -658,7 +659,7 @@ async function loadMessagesViaPlugin(
 			// NOTE could use hash instead of the whole object JSON to save memory...
 			if (messageState.messageLoadHash[loadedMessageClone.id] === importedEnecoded) {
 				// eslint-disable-next-line no-console
-				console.log("skipping upsert!!!!!")
+				// console.log("skipping upsert!")
 				continue
 			}
 
@@ -704,7 +705,7 @@ async function loadMessagesViaPlugin(
 	await releaseLock(fs as NodeishFilesystem, lockFilePath, "loadMessage", lockTime)
 
 	// eslint-disable-next-line no-console
-	console.log("loadMessagesViaPlugin: " + loadedMessages.length + " Messages processed ")
+	// console.log("loadMessagesViaPlugin: " + loadedMessages.length + " Messages processed ")
 
 	isLoading = false
 
@@ -761,7 +762,7 @@ async function saveMessagesViaPlugin(
 		if (Object.keys(messageState.messageDirtyFlags).length == 0) {
 			// nothing to save :-)
 			// eslint-disable-next-line no-console
-			console.log("save was skiped - no messages marked as dirty... build!")
+			// console.log("save was skiped - no messages marked as dirty... build!")
 			isSaving = false
 			return
 		}
@@ -774,7 +775,7 @@ async function saveMessagesViaPlugin(
 			// since it may takes some time to accquire the lock we check if the save is required still (loadMessage could have happend in between)
 			if (Object.keys(messageState.messageDirtyFlags).length == 0) {
 				// eslint-disable-next-line no-console
-				console.log("save was skiped - no messages marked as dirty... releasing lock again")
+				// console.log("save was skiped - no messages marked as dirty... releasing lock again")
 				isSaving = false
 				// release lock in finally block
 				return
@@ -872,11 +873,11 @@ async function accquireFileLock(
 
 	try {
 		// eslint-disable-next-line no-console
-		console.log(lockOrigin + " tries to accquire a lockfile Retry Nr.: " + tryCount)
+		// console.log(lockOrigin + " tries to accquire a lockfile Retry Nr.: " + tryCount)
 		await fs.mkdir(lockFilePath)
 		const stats = await fs.stat(lockFilePath)
 		// eslint-disable-next-line no-console
-		console.log(lockOrigin + " accquired a lockfile Retry Nr.: " + tryCount)
+		// console.log(lockOrigin + " accquired a lockfile Retry Nr.: " + tryCount)
 		return stats.mtimeMs
 	} catch (error: any) {
 		if (error.code !== "EEXIST") {
@@ -898,11 +899,11 @@ async function accquireFileLock(
 		throw fstatError
 	}
 	// eslint-disable-next-line no-console
-	console.log(
-		lockOrigin +
-			" tries to accquire a lockfile  - lock currently in use... starting probe phase " +
-			+tryCount
-	)
+	// console.log(
+	// 	lockOrigin +
+	// 		" tries to accquire a lockfile  - lock currently in use... starting probe phase " +
+	// 		+tryCount
+	// )
 
 	return new Promise((resolve, reject) => {
 		let probeCounts = 0
@@ -912,22 +913,22 @@ async function accquireFileLock(
 				let lockFileStats: undefined | NodeishStats = undefined
 				try {
 					// eslint-disable-next-line no-console
-					console.log(
-						lockOrigin +
-							" tries to accquire a lockfile - check if the lock is free now " +
-							+tryCount
-					)
+					// console.log(
+					// 	lockOrigin +
+					// 		" tries to accquire a lockfile - check if the lock is free now " +
+					// 		+tryCount
+					// )
 
 					// alright lets give it another try
 					lockFileStats = await fs.stat(lockFilePath)
 				} catch (fstatError: any) {
 					if (fstatError.code === "ENOENT") {
 						// eslint-disable-next-line no-console
-						console.log(
-							lockOrigin +
-								" tries to accquire a lockfile - lock file seems to be free now - try to accquire" +
-								+tryCount
-						)
+						// console.log(
+						// 	lockOrigin +
+						// 		" tries to accquire a lockfile - lock file seems to be free now - try to accquire" +
+						// 		+tryCount
+						// )
 						// lock file seems to be gone :) - lets try again
 						const lock = accquireFileLock(fs, lockFilePath, lockOrigin, tryCount + 1)
 						return resolve(lock)
@@ -940,11 +941,11 @@ async function accquireFileLock(
 					if (probeCounts >= nProbes) {
 						// ok maximum lock time ran up (we waitetd nProbes * probeInterval) - we consider the lock to be stale
 						// eslint-disable-next-line no-console
-						console.log(
-							lockOrigin +
-								" tries to accquire a lockfile  - lock not free - but stale lets drop it" +
-								+tryCount
-						)
+						// console.log(
+						// 	lockOrigin +
+						// 		" tries to accquire a lockfile  - lock not free - but stale lets drop it" +
+						// 		+tryCount
+						// )
 						try {
 							await fs.rmdir(lockFilePath)
 						} catch (rmLockError: any) {
@@ -986,7 +987,7 @@ async function releaseLock(
 	lockTime: number
 ) {
 	// eslint-disable-next-line no-console
-	console.log(lockOrigin + " releasing the lock ")
+	// console.log(lockOrigin + " releasing the lock ")
 	try {
 		const stats = await fs.stat(lockFilePath)
 		if (stats.mtimeMs === lockTime) {
@@ -995,15 +996,15 @@ async function releaseLock(
 		}
 	} catch (statError: any) {
 		// eslint-disable-next-line no-console
-		console.log(lockOrigin + " couldn't release the lock")
+		// console.log(lockOrigin + " couldn't release the lock")
 		if (statError.code === "ENOENT") {
 			// ok seeks like the log was released by someone else
 			// eslint-disable-next-line no-console
-			console.log(lockOrigin + "WARNING - the lock was released by a different process")
+			// console.log(lockOrigin + "WARNING - the lock was released by a different process")
 			return
 		}
 		// eslint-disable-next-line no-console
-		console.log(statError)
+		// console.log(statError)
 		throw statError
 	}
 }

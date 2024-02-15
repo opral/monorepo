@@ -13,7 +13,6 @@ it("should return fake messages (without aliases) to illustrate how a plugin wor
 		sourceLanguageTag: "en",
 		modules: ["./plugin.js"],
 		languageTags: ["en", "de"],
-		featureFlags: { aliases: false },
 	} satisfies ProjectSettings
 
 	// writing the project file to the virtual filesystem
