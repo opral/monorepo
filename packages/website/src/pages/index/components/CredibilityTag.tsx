@@ -19,7 +19,7 @@ const CredibilityTag = () => {
 				<TrophyIcon />
 			</div>
 			<p>
-				Used by more than <span class="font-bold text-surface-900">{` ${number()} `}</span> teams
+				Used in more than <span class="font-bold text-surface-900">{` ${number()} `}</span> projects
 			</p>
 		</div>
 	)
