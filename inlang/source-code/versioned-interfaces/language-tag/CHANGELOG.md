@@ -1,5 +1,11 @@
 # @inlang/language-tag
 
+## 1.5.1
+
+### Patch Changes
+
+- 32746a9ff: fix `@sinclair/typebox` dependency
+
 ## 1.5.0
 
 ### Minor Changes
