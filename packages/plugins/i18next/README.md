@@ -2,6 +2,27 @@
 
 This plugin works with [i18next](https://inlang.com/m/kl95463j) to read and write messages. It also determines how translation functions and namespaces are parsed and handled by the IDE extension.
 
+## Manual Installation
+
+> We recommend using the install button, but if you want to do it manually:
+
+- Add this to the modules in your `project.inlang/settings.json`
+- Change the `sourceLanuge` if needed 
+- Include existing languagetags in the `languageTags` array
+
+```json
+{
+	"sourceLanguageTag": "en",
+	"languageTags": ["en", "de"], 
+	"modules": [
+		"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@latest/dist/index.js"
+  	],
+	"plugin.inlang.i18next97": {
+		"pathPattern": "./resources/{languageTag}.json"
+  	}
+}
+```
+
 # Settings
 
 The plugin offers further configuration options that can be passed as arguments. The following settings exist:
