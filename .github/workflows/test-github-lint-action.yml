@@ -49,7 +49,3 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           project_path: "/project.inlang"
-
-      - name: Print Output
-        id: output
-        run: echo "${{ steps.test-action.outputs.comment_content }}"
