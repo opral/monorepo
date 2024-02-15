@@ -56,7 +56,7 @@ export default function Page(props: {
 				return {
 					title: m.marketplace_header_apps_title(),
 					description: m.marketplace_header_apps_description(),
-					buttonLink: "/documentation/build-app",
+					buttonLink: "/documentation/sdk/build-app",
 					buttonText: m.marketplace_header_apps_button_text(),
 					coverCard: <AppHeader />,
 					sections: ["all"],
