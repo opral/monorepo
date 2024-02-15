@@ -53,7 +53,7 @@ You create a new message that has no pre-existing key. In this case, only use th
 
 1. Risk of loosing change history.
 2. Discussions around name conventions.
-3. Translators and designers have no possibility to create messages via inlang apps like [fink](/m/tdozzpar) or [parrot](m/gkrpgoir).
+3. Translators and designers have no possibility to create messages via inlang apps like [fink](https://inlang.com/m/tdozzpar) or [parrot](https://inlang.com/m/gkrpgoir).
   
 GitHub issue [#1892](https://github.com/opral/monorepo/issues/1892) provides more context on our decision to use auto-generated but human readable IDs for messages instead of keys.
 
