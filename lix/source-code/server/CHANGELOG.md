@@ -4,6 +4,12 @@
 
 ### Patch Changes
 
+- @inlang/telemetry@0.3.11
+
+## null
+
+### Patch Changes
+
 - @inlang/telemetry@0.3.10
 
 ## null
