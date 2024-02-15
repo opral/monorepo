@@ -1,5 +1,12 @@
 # inlang-vs-code-extension
 
+## 1.32.3
+
+### Patch Changes
+
+- @inlang/sdk@0.26.3
+- @inlang/telemetry@0.3.11
+
 ## 1.32.2
 
 ### Patch Changes
