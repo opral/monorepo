@@ -1,6 +1,5 @@
 import * as vscode from "vscode"
 import { msg } from "./utilities/messages/msg.js"
-import { propertiesMissingPreview } from "./decorations/propertiesMissingPreview.js"
 import { linterDiagnostics } from "./diagnostics/linterDiagnostics.js"
 import { handleError } from "./utilities/utils.js"
 import { CONFIGURATION } from "./configuration.js"
@@ -146,7 +145,6 @@ function registerExtensionComponents(args: {
 	)
 
 	messagePreview(args)
-	propertiesMissingPreview()
 	linterDiagnostics(args)
 }
 
