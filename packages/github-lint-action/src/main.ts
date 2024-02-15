@@ -29,9 +29,9 @@ export async function run(): Promise<void> {
 		})
 
 		const changedJsonFiles = changedFiles.filter((file: any) => {
-			file.filename.endsWith(".json") &&
-				// log the changed file properties
-				console.log(file.filename, file.status, file.changes)
+			console.log(file.filename)
+			return file.filename.endsWith(".json")
+			// log the changed file properties
 		})
 		console.log(`I got ${changedJsonFiles} changed json files`)
 
