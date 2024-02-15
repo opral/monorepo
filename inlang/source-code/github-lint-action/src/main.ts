@@ -28,12 +28,8 @@ export async function run(): Promise<void> {
 			pull_number: pr_number,
 		})
 
-		const changedJsonFiles = changedFiles.filter((file: any) => {
-			console.log(file.filename)
-			return file.filename.endsWith(".json")
-			// log the changed file properties
-		})
-		console.log(`I got ${changedJsonFiles} changed json files`)
+		const changedJsonFiles = changedFiles.filter((file: any) => file.filename.endsWith(".json"))
+		console.log(`I got ${changedJsonFiles.length} changed json files`)
 
 		if (changedJsonFiles.length > 0) {
 			console.log("No json files were changed in this PR, skipping the action.")
