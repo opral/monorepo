@@ -2,7 +2,7 @@ import * as fs from "node:fs/promises"
 import * as core from "@actions/core"
 import * as github from "@actions/github"
 import { openRepository, findRepoRoot } from "@lix-js/client"
-import { loadProject } from "@inlang/sdk"
+import { loadProject, type MessageLintReport } from "@inlang/sdk"
 
 /**
  * The main function for the action.
@@ -63,9 +63,9 @@ export async function run(): Promise<void> {
 
 		const pr_reports = project.query.messageLintReports.getAll()
 		const pr_lint_summary = pr_reports.reduce(
-			(acc: any, report: any) => {
-				acc.errors += report.errors.length
-				acc.warnings += report.warnings.length
+			(acc, report: MessageLintReport) => {
+				acc.errors += report.level === "error" ? 1 : 0
+				acc.warnings += report.level === "warning" ? 1 : 0
 				return acc
 			},
 			{ errors: 0, warnings: 0 }
