@@ -299,16 +299,16 @@ sl-details::part(content) {
 	padding-bottom: 8rem;
 }
 
-sl-dialog.video-dialog::part(panel){
+sl-dialog.video-dialog::part(panel) {
 	max-width: 800px;
 	width: 95%;
 	border-radius: 12px;
 }
 
-sl-dialog.video-dialog::part(title){
+sl-dialog.video-dialog::part(title) {
 	font-weight: 600;
 }
 
-sl-dialog.video-dialog::part(body){
+sl-dialog.video-dialog::part(body) {
 	padding-top: 0;
 }
