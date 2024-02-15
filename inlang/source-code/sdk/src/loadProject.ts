@@ -658,7 +658,7 @@ async function loadMessagesViaPlugin(
 			// NOTE could use hash instead of the whole object JSON to save memory...
 			if (messageState.messageLoadHash[loadedMessageClone.id] === importedEnecoded) {
 				// eslint-disable-next-line no-console
-				console.log("skiping upsert!!!!!")
+				console.log("skipping upsert!!!!!")
 				continue
 			}
 
@@ -755,7 +755,7 @@ async function saveMessagesViaPlugin(
 	isSaving = true
 
 	currentSaveMessagesViaPlugin = (async function () {
-		const persistedMessageHashs = {} as { [messageId: string]: string }
+		const saveMessageHashes = {} as { [messageId: string]: string }
 
 		// check if we have any dirty message - witho
 		if (Object.keys(messageState.messageDirtyFlags).length == 0) {
@@ -766,15 +766,17 @@ async function saveMessagesViaPlugin(
 			return
 		}
 
+		let messageDirtyFlagsBeforeSave: typeof messageState.messageDirtyFlags | undefined
+		let lockTime: number | undefined
 		try {
-			const lockTime = await accquireFileLock(fs as NodeishFilesystem, lockFilePath, "saveMessage")
+			lockTime = await accquireFileLock(fs as NodeishFilesystem, lockFilePath, "saveMessage")
 
 			// since it may takes some time to accquire the lock we check if the save is required still (loadMessage could have happend in between)
 			if (Object.keys(messageState.messageDirtyFlags).length == 0) {
 				// eslint-disable-next-line no-console
 				console.log("save was skiped - no messages marked as dirty... releasing lock again")
 				isSaving = false
-				await releaseLock(fs as NodeishFilesystem, lockFilePath, "saveMessage", lockTime)
+				// release lock in finally block
 				return
 			}
 
@@ -785,7 +787,7 @@ async function saveMessagesViaPlugin(
 				if (messageState.messageDirtyFlags[message.id]) {
 					const importedEnecoded = stringifyMessage(message)
 					// NOTE: could use hash instead of the whole object JSON to save memory...
-					persistedMessageHashs[message.id] = importedEnecoded
+					saveMessageHashes[message.id] = importedEnecoded
 				}
 
 				const fixedExportMessage = { ...message }
@@ -798,6 +800,7 @@ async function saveMessagesViaPlugin(
 			}
 
 			// wa are about to save the messages to the plugin - reset all flags now
+			messageDirtyFlagsBeforeSave = { ...messageState.messageDirtyFlags }
 			messageState.messageDirtyFlags = {}
 
 			// NOTE: this assumes that the plugin will handle message ordering
@@ -806,10 +809,16 @@ async function saveMessagesViaPlugin(
 				messages: messagesToExport,
 				nodeishFs: fs,
 			})
+
+			for (const [messageId, messageHash] of Object.entries(saveMessageHashes)) {
+				messageState.messageLoadHash[messageId] = messageHash
+			}
 		} catch (err) {
 			// something went wrong - add dirty flags again
-			for (const dirtyMessageId of Object.keys(persistedMessageHashs)) {
-				messageState.messageDirtyFlags[dirtyMessageId] = true
+			if (messageDirtyFlagsBeforeSave !== undefined) {
+				for (const dirtyMessageId of Object.keys(messageDirtyFlagsBeforeSave)) {
+					messageState.messageDirtyFlags[dirtyMessageId] = true
+				}
 			}
 
 			// ok an error
@@ -818,6 +827,9 @@ async function saveMessagesViaPlugin(
 			})
 		} finally {
 			isSaving = false
+			if (lockTime !== undefined) {
+				await releaseLock(fs as NodeishFilesystem, lockFilePath, "saveMessage", lockTime)
+			}
 		}
 	})()
 
