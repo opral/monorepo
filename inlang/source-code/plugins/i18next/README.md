@@ -17,7 +17,7 @@ This plugin works with [i18next](https://inlang.com/m/kl95463j) to read and writ
 	"modules": [
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@latest/dist/index.js"
   	],
-	"plugin.inlang.i18next97": {
+	"plugin.inlang.i18next": {
 		"pathPattern": "./resources/{languageTag}.json"
   	}
 }
