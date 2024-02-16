@@ -76,18 +76,6 @@
 		},
 		"commands": [
 			{
-				"command": "inlang.editMessage",
-				"title": "Inlang: Edit a Message"
-			},
-			{
-				"command": "inlang.extractMessage",
-				"title": "Inlang: Extract Message"
-			},
-			{
-				"command": "inlang.openInEditor",
-				"title": "Inlang: Open in Editor"
-			},
-			{
 				"command": "inlang.openProject",
 				"title": "Open project"
 			},
