@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.32.5
+
+### Patch Changes
+
+- d9cf66170: update docs for apps and plugins
+
 ## 1.32.4
 
 ### Patch Changes
