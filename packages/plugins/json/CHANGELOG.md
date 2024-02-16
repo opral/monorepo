@@ -1,5 +1,12 @@
 # @inlang/plugin-json
 
+## 5.1.13
+
+### Patch Changes
+
+- d9cf66170: update docs for apps and plugins
+- b7344152a: updated the docs
+
 ## 5.1.12
 
 ### Patch Changes
