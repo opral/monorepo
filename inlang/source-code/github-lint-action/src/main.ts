@@ -17,11 +17,6 @@ export async function run(): Promise<void> {
 		const { owner, repo } = github.context.repo
 		const pr_number = github.context.payload.pull_request?.number
 
-		console.log(JSON.stringify(github.context.payload.pull_request))
-
-		// @ts-ignore
-		const octokit = new github.getOctokit(token)
-
 		const baseDirectory = process.cwd()
 		const absoluteProjectPath = baseDirectory + project_path
 		const repoRoot = await findRepoRoot({ nodeishFs: fs, path: absoluteProjectPath })
@@ -51,15 +46,7 @@ export async function run(): Promise<void> {
 			}
 		}
 
-		const pr_reports = project.query.messageLintReports.getAll()
-		const pr_lint_summary = pr_reports.reduce(
-			(acc, report: MessageLintReport) => {
-				acc.errors += report.level === "error" ? 1 : 0
-				acc.warnings += report.level === "warning" ? 1 : 0
-				return acc
-			},
-			{ errors: 0, warnings: 0 }
-		)
+		const lintSummary = createLintSummary(project.query.messageLintReports.getAll())
 
 		// checkout main branch
 		const repoMain = await openRepository(repoRoot, {
@@ -78,21 +65,18 @@ export async function run(): Promise<void> {
 			}
 		}
 
-		const pr_reports_main = projectMain.query.messageLintReports.getAll()
-		const pr_lint_summary_main = pr_reports_main.reduce(
-			(acc, report: MessageLintReport) => {
-				acc.errors += report.level === "error" ? 1 : 0
-				acc.warnings += report.level === "warning" ? 1 : 0
-				return acc
-			},
-			{ errors: 0, warnings: 0 }
-		)
-		console.log(pr_lint_summary_main)
+		const lintSummaryMain = createLintSummary(projectMain.query.messageLintReports.getAll())
+		console.log(lintSummaryMain)
+
+		if (JSON.stringify(lintSummary) === JSON.stringify(lintSummaryMain)) {
+			console.log("No changes in linting errors")
+			return
+		}
 
 		const commentContent = `
 				Pull Request #${pr_number} has been updated with: \n
-				- ${pr_lint_summary.errors} errors \n
-				- ${pr_lint_summary.warnings} warnings \n
+				- ${lintSummary.errors} errors \n
+				- ${lintSummary.warnings} warnings \n
 			`
 		console.log(`I'm going to comment on the PR with:`, commentContent)
 		// await octokit.rest.issues.createComment({
@@ -107,6 +91,17 @@ export async function run(): Promise<void> {
 		console.log(error)
 		if (error instanceof Error) core.setFailed(error.message)
 	}
+}
+
+function createLintSummary(reports: MessageLintReport[]) {
+	return reports.reduce(
+		(acc, report: MessageLintReport) => {
+			acc.errors += report.level === "error" ? 1 : 0
+			acc.warnings += report.level === "warning" ? 1 : 0
+			return acc
+		},
+		{ errors: 0, warnings: 0 }
+	)
 }
 
 export default run
