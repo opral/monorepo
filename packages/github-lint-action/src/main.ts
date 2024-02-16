@@ -20,6 +20,14 @@ export async function run(): Promise<void> {
 		const baseDirectory = process.cwd()
 		const absoluteProjectPath = baseDirectory + project_path
 		const repoRoot = await findRepoRoot({ nodeishFs: fs, path: absoluteProjectPath })
+		console.log(
+			"repoRoot: ",
+			repoRoot,
+			"project_path: ",
+			project_path,
+			"absoluteProjectPath: ",
+			absoluteProjectPath
+		)
 
 		if (!repoRoot) {
 			console.log(
@@ -28,30 +36,29 @@ export async function run(): Promise<void> {
 			return
 		}
 
+		// head
 		const inlangRepo = await openRepository(repoRoot, {
 			nodeishFs: fs,
 			branch: github.context.payload.pull_request?.head.ref,
 		})
-
-		const repoMeta = await inlangRepo?.getMeta()
-		console.log("isFork", repoMeta.isFork)
-		console.log("Merge head: ", github.context.payload.pull_request?.head.label.split(":"))
-		console.log("Merge base: ", github.context.payload.pull_request?.base.label.split(":"))
-
 		const project = await loadProject({
 			projectPath: absoluteProjectPath,
 			repo: inlangRepo,
 			appId: "app.inlang.githubI18nLintAction",
 		})
-
 		if (project.errors().length > 0) {
 			for (const error of project.errors()) {
 				throw error
 			}
 		}
-
 		const lintSummaryHead = createLintSummary(project.query.messageLintReports.getAll())
 
+		// const repoMeta = await inlangRepo?.getMeta()
+		// console.log("isFork", repoMeta.isFork)
+		// console.log("Merge head: ", github.context.payload.pull_request?.head.label.split(":"))
+		// console.log("Merge base: ", github.context.payload.pull_request?.base.label.split(":"))
+
+		// base
 		const inlangRepoBase = await openRepository(repoRoot, {
 			nodeishFs: fs,
 			branch: github.context.payload.pull_request?.base.ref,
