@@ -71,7 +71,7 @@ export async function run(): Promise<void> {
 		}
 
 		const lintSummaryBase = createLintSummary(projectBase.query.messageLintReports.getAll())
-		console.log("lintSummaryHead: ", JSON.stringify(lintSummary))
+		console.log("lintSummaryHead: ", JSON.stringify(lintSummaryHead))
 		console.log("lintSummaryBase: ", JSON.stringify(lintSummaryBase))
 
 		if (JSON.stringify(lintSummaryHead) === JSON.stringify(lintSummaryBase)) {
