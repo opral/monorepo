@@ -37,38 +37,44 @@ export async function run(): Promise<void> {
 		// console.log("isFork", repoMeta.isFork)
 		// console.log("Merge head: ", github.context.payload.pull_request?.head.label.split(":"))
 		// console.log("Merge base: ", github.context.payload.pull_request?.base.label.split(":"))
-
+		const headMeta = {
+			owner: owner,
+			repo: github.context.payload.pull_request?.head.label.split(":")[0],
+			branch: github.context.payload.pull_request?.head.label.split(":")[1],
+		}
 		const commentContent = `
 				Pull Request #${pr_number} has been updated with: \n
 				- ${lintSummary.errors} errors \n
 				- ${lintSummary.warnings} warnings \n
+
+				[Open in Fink](https://fink.inlang.com/github.com/${headMeta.owner}/${headMeta.repo}/?branch=${headMeta.branch}&project=${project_path})
 			`
 		console.log(`I'm going to comment on the PR with:`, commentContent)
 
 		const octokit = github.getOctokit(token)
 		//check if PR already has a comment from this action
-		const existingComment = await octokit.rest.issues.listComments({
-			owner,
-			repo,
-			issue_number: pr_number as number,
-		})
-		console.log("existingComment: ", existingComment)
-		if (existingComment.data.length > 0) {
-			console.log("Comment already exists, updating it")
-			const commentId = existingComment.data.find((comment) =>
-				comment.body?.includes("Pull Request #")
-			)?.id
-			if (commentId) {
-				await octokit.rest.issues.updateComment({
-					owner,
-					repo,
-					comment_id: commentId,
-					body: commentContent,
-				})
-				core.setOutput("comment_content", commentContent)
-				return
-			}
-		}
+		// const existingComment = await octokit.rest.issues.listComments({
+		// 	owner,
+		// 	repo,
+		// 	issue_number: pr_number as number,
+		// })
+		// console.log("existingComment: ", existingComment)
+		// if (existingComment.data.length > 0) {
+		// 	console.log("Comment already exists, updating it")
+		// 	const commentId = existingComment.data.find((comment) =>
+		// 		comment.body?.includes("Pull Request #")
+		// 	)?.id
+		// 	if (commentId) {
+		// 		await octokit.rest.issues.updateComment({
+		// 			owner,
+		// 			repo,
+		// 			comment_id: commentId,
+		// 			body: commentContent,
+		// 		})
+		// 		core.setOutput("comment_content", commentContent)
+		// 		return
+		// 	}
+		// }
 		console.log("Creating a new comment")
 		await octokit.rest.issues.createComment({
 			owner,
