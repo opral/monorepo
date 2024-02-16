@@ -1,5 +1,17 @@
 ## 1.0.0
 
+## 1.0.3
+
+### Patch Changes
+
+- @inlang/message-lint-rule@1.4.3
+
+## 1.0.2
+
+### Patch Changes
+
+- @inlang/message-lint-rule@1.4.2
+
 ## 1.0.1
 
 ### Patch Changes

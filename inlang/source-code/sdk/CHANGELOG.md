@@ -1,5 +1,31 @@
 # @inlang/sdk
 
+## 0.26.3
+
+### Patch Changes
+
+- Updated dependencies [32746a9ff]
+  - @inlang/language-tag@1.5.1
+  - @inlang/message@2.0.3
+  - @inlang/message-lint-rule@1.4.3
+  - @inlang/plugin@2.4.5
+  - @inlang/project-settings@2.2.3
+  - @inlang/translatable@1.3.1
+  - @inlang/module@1.2.5
+
+## 0.26.2
+
+### Patch Changes
+
+- Updated dependencies [244442698]
+  - @inlang/language-tag@1.5.0
+  - @inlang/translatable@1.3.0
+  - @inlang/message@2.0.2
+  - @inlang/message-lint-rule@1.4.2
+  - @inlang/plugin@2.4.4
+  - @inlang/project-settings@2.2.2
+  - @inlang/module@1.2.4
+
 ## 0.26.1
 
 ### Patch Changes

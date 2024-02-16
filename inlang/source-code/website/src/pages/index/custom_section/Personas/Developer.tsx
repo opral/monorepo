@@ -103,7 +103,7 @@ const DeveloperSlide = () => {
 								href={card.href}
 							>
 								<div class="absolute w-full top-0 left-0 pointer-events-none">
-									<img src={card.cover} alt="cover" />
+									<img class="sm:w-3/4 md:w-full xl:w-3/4 mx-auto" src={card.cover} alt="cover" />
 								</div>
 								<div class="flex flex-col justify-end col-span-1 h-full rounded-[11px] bg-gradient-to-b from-surface-50 hover:from-surface-100 to-background hover:to-background p-6">
 									<div class="flex items-center gap-4">

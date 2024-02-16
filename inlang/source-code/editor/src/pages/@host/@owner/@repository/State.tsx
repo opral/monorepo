@@ -297,9 +297,14 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		setLixErrors(errors)
 	})
 
+	const isForkSyncDisabled = () =>
+		localStorage.disableForkSyncWarning?.some(
+			(repo) => repo.owner === routeParams().owner && repo.repository === routeParams().repository
+		)
+
 	const [forkStatus, { refetch: refetchForkStatus, mutate: mutateForkStatus }] = createResource(
 		() => {
-			if (repo()) {
+			if (repo() && !isForkSyncDisabled()) {
 				return repo()
 			} else {
 				return false

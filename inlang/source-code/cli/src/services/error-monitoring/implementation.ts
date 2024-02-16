@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/node"
 import { version } from "../../../package.json"
-import { isProduction } from "../../env.js"
+import { ENV_VARIABLES } from "../../env-variables/index.js"
 
 export function initErrorMonitoring() {
 	Sentry.init({
@@ -8,7 +8,7 @@ export function initErrorMonitoring() {
 		release: version,
 		// Not interested in performance data
 		tracesSampleRate: 0,
-		environment: isProduction ? "production" : "development",
+		environment: ENV_VARIABLES.IS_PRODUCTION ? "production" : "development",
 	})
 }
 

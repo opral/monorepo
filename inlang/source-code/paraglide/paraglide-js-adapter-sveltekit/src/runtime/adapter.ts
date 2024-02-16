@@ -3,16 +3,19 @@ import { createReroute } from "./hooks/reroute.js"
 import { base } from "$app/paths"
 import { page } from "$app/stores"
 import { get } from "svelte/store"
+import { browser, dev } from "$app/environment"
 import { getTranslatedPath } from "./path-translations/getTranslatedPath.js"
 import { serializeRoute } from "./utils/serialize-path.js"
 import { getCanonicalPath } from "./path-translations/getCanonicalPath.js"
 import { getPathInfo } from "./utils/get-path-info.js"
 import { normaliseBase as canonicalNormaliseBase } from "./utils/normaliseBase.js"
-import type { PathTranslations } from "./path-translations/types.js"
+import type { PathTranslations, UserPathTranslations } from "./config/pathTranslations.js"
 import type { Paraglide } from "./runtime.js"
 import { resolve } from "./utils/path.js"
 import { createExclude, type ExcludeConfig } from "./exclude.js"
 import { guessTextDirMap } from "./utils/text-dir.js"
+import { resolvePathTranslations } from "./config/resolvePathTranslations.js"
+import { validatePathTranslations } from "./config/validatePathTranslations.js"
 
 export type I18nUserConfig<T extends string> = {
 	/**
@@ -50,7 +53,7 @@ export type I18nUserConfig<T extends string> = {
 	 * }
 	 * ```
 	 */
-	pathnames?: PathTranslations<T>
+	pathnames?: UserPathTranslations<T>
 
 	/**
 	 * A list of paths to exclude from translation. You can use strings or regular expressions.
@@ -139,7 +142,20 @@ export type I18nConfig<T extends string> = {
  * ```
  */
 export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I18nUserConfig<T>) {
-	const translations = options?.pathnames ?? {}
+	const translations = resolvePathTranslations(
+		options?.pathnames ?? {},
+		runtime.availableLanguageTags
+	)
+
+	if (dev) {
+		const issues = validatePathTranslations(translations, runtime.availableLanguageTags)
+		if (issues.length) {
+			console.warn(
+				`The following issues were found in your path translations. Make sure to fix them before deploying your app:`
+			)
+			console.table(issues)
+		}
+	}
 
 	const excludeConfig = options?.exclude ?? []
 	const defaultLanguageTag = options?.defaultLanguageTag ?? runtime.sourceLanguageTag
@@ -182,8 +198,16 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		/**
 		 * Returns a `handle` hook that set's the correct `lang` attribute
 		 * on the `html` element
+		 *
+		 * SERVER ONLY
 		 */
-		handle: (options: HandleOptions = {}) => createHandle(config, options),
+		handle: (options: HandleOptions = {}) => {
+			if (!browser) {
+				//We only want this on the server
+				return createHandle(config, options)
+			}
+			throw new Error(dev ? "`i18n.handle` hook should only be used on the server." : "")
+		},
 
 		/**
 		 * Takes in a URL and returns the language that should be used for it.

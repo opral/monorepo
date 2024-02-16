@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/project-settings",
 	"type": "module",
-	"version": "2.2.1",
+	"version": "2.2.3",
 	"license": "Apache-2.0",
 	"publishConfig": {
 		"access": "public"

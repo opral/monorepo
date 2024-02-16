@@ -1,5 +1,20 @@
 # @inlang/marketplace-manifest
 
+## 1.3.3
+
+### Patch Changes
+
+- @inlang/project-settings@2.2.3
+- @inlang/translatable@1.3.1
+
+## 1.3.2
+
+### Patch Changes
+
+- Updated dependencies [244442698]
+  - @inlang/translatable@1.3.0
+  - @inlang/project-settings@2.2.2
+
 ## 1.3.1
 
 ### Patch Changes

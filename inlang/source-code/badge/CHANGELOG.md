@@ -1,5 +1,17 @@
 # @inlang/badge
 
+## 0.7.2
+
+### Patch Changes
+
+- @inlang/sdk@0.26.3
+
+## 0.7.1
+
+### Patch Changes
+
+- @inlang/sdk@0.26.2
+
 ## 0.7.0
 
 ### Minor Changes

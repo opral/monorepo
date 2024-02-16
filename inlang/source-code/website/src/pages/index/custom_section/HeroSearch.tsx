@@ -1,24 +1,35 @@
-import Link from "#src/renderer/Link.jsx"
 import * as m from "#src/paraglide/messages.js"
 import { Button } from "../components/Button.jsx"
+import { createSignal } from "solid-js"
+import CredibilityTag from "../components/CredibilityTag.jsx"
 
 const isProduction = process.env.NODE_ENV === "production"
 
 const HeroSearch = () => {
+	const [open, setOpen] = createSignal(false)
+
 	return (
 		<div class="relative grid grid-cols-12">
-			<div class="col-span-12 lg:col-span-7 items-center lg:items-start relative z-30 flex flex-col gap-2 pb-6 mt-4 md:mt-8">
-				<div class="pt-8 group">
-					<Link
-						href="https://www.youtube.com/live/pTgIx-ucMsY?feature=shared&t=3825"
-						target="_blanc"
-					>
-						<Button class="w-fit" type="text">
-							<Play />
-							<p>{m.home_inlang_secondary_link()}</p>
-						</Button>
-					</Link>
+			<sl-dialog
+				prop:label="What is inlang?"
+				class="video-dialog"
+				prop:open={open()}
+				on:sl-after-hide={() => setOpen(false)}
+			>
+				<div style={{ position: "relative", "padding-bottom": "56.25%", height: "0" }}>
+					<iframe
+						src="https://www.loom.com/embed/f35656b7ac464f57816793c79bb7938b?sid=f96b57bd-6f45-45ac-ba43-814857598ce1"
+						frame-border="0"
+						web-kit-allow-fullscreen
+						moz-allow-fullscreen
+						allow-fullscreen
+						style={{ position: "absolute", top: "0", left: "0", width: "100%", height: "100%" }}
+					/>
 				</div>
+			</sl-dialog>
+			<div class="col-span-12 lg:col-span-7 items-center lg:items-start relative z-30 flex flex-col gap-2 pb-6 mt-4 md:mt-8">
+				<CredibilityTag />
+
 				<h1 class="text-4xl md:text-6xl text-surface-900 text-center lg:text-start font-bold tracking-tight mt-6">
 					{m.home_inlang_title()}
 				</h1>
@@ -26,14 +37,18 @@ const HeroSearch = () => {
 					{addLinksToText(m.home_inlang_description())}
 				</p>
 
-				<div class="mt-8">
-					<Button
-						class="w-fit"
-						type="secondary"
-						href="/g/7777asdy/guide-nilsjacobsen-ecosystemCompatible"
-					>
-						{m.home_inlang_button()}
+				<div class="mt-8 flex gap-2 flex-wrap justify-center lg:justify-start">
+					<Button class="w-fit rounded-lg" type="primary" href="/c/apps">
+						{m.home_inlang_cta()}
 					</Button>
+					<div
+						onClick={() => setOpen(true)}
+						class="pointer-events-auto flex justify-center items-center h-10 relative gap-2 rounded-md flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer transition-all duration-200 text-surface-800 bg-surface-200 hover:text-surface-900 hover:bg-surface-300 px-4"
+					>
+						<Play />
+						{m.home_inlang_button()}
+						<p class="opacity-50">90s</p>
+					</div>
 				</div>
 			</div>
 			<div class="col-span-12 lg:col-span-5 mb-10 lg:mb-0 mt-6 lg:mt-16 overflow-hidden flex items-center justify-center w-full">
@@ -51,11 +66,8 @@ export default HeroSearch
 
 function Play() {
 	return (
-		<svg xmlns="http://www.w3.org/2000/svg" width="20" height="18" fill="none" viewBox="0 0 20 18">
-			<path
-				fill="currentColor"
-				d="M0 3.25A3.25 3.25 0 013.25 0h13.5A3.25 3.25 0 0120 3.25v11.5A3.25 3.25 0 0116.75 18H3.25A3.25 3.25 0 010 14.75V3.25zM3.25 1.5A1.75 1.75 0 001.5 3.25v11.5c0 .966.784 1.75 1.75 1.75h13.5a1.75 1.75 0 001.75-1.75V3.25a1.75 1.75 0 00-1.75-1.75H3.25zM7 6.25v5.5a1 1 0 001.482.876l5-2.75a1 1 0 000-1.752l-5-2.75A1 1 0 007 6.251V6.25z"
-			/>
+		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+			<path fill="currentColor" d="M12 2a10 10 0 100 20 10 10 0 000-20zm-2 14.5v-9l6 4.5-6 4.5z" />
 		</svg>
 	)
 }

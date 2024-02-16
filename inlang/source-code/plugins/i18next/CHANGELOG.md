@@ -1,5 +1,24 @@
 # @inlang/plugin-i18next
 
+## 4.13.12
+
+### Patch Changes
+
+- d9cf66170: update docs for apps and plugins
+- b7344152a: updated the docs
+
+## 4.13.11
+
+### Patch Changes
+
+- @inlang/sdk@0.26.3
+
+## 4.13.10
+
+### Patch Changes
+
+- @inlang/sdk@0.26.2
+
 ## 4.13.9
 
 ### Patch Changes

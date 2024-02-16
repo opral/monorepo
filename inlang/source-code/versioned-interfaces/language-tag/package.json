@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/language-tag",
 	"type": "module",
-	"version": "1.4.0",
+	"version": "1.5.1",
 	"license": "Apache-2.0",
 	"publishConfig": {
 		"access": "public"
@@ -21,7 +21,7 @@
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
 	},
-	"peerDependencies": {
+	"dependencies": {
 		"@sinclair/typebox": "^0.31.17"
 	},
 	"devDependencies": {

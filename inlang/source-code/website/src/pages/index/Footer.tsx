@@ -41,10 +41,6 @@ const Footer = () => {
 				href: "https://github.com/orgs/inlang/projects?query=is%3Aopen",
 			},
 			{
-				name: m.footer_resources_guides(),
-				href: "/c/guides",
-			},
-			{
 				name: m.footer_resources_inlang_manage(),
 				href: import.meta.env.PROD ? "https://manage.inlang.com" : "http://localhost:4004",
 			},
@@ -80,15 +76,11 @@ const Footer = () => {
 				href: "/c/apps",
 			},
 			{
-				name: m.footer_categories_libraries(),
-				href: "/c/libraries",
-			},
-			{
 				name: m.footer_categories_plugins(),
 				href: "/c/plugins",
 			},
 			{ name: m.footer_categories_lintrules(), href: "/c/lint-rules" },
-			{ name: m.footer_categories_lix(), href: "/c/lix" },
+			{ name: m.footer_resources_guides(), href: "/c/guides" },
 		]
 	}
 

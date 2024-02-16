@@ -56,7 +56,7 @@ export default function Page(props: {
 				return {
 					title: m.marketplace_header_apps_title(),
 					description: m.marketplace_header_apps_description(),
-					buttonLink: "/documentation/build-app",
+					buttonLink: "/documentation/sdk/build-app",
 					buttonText: m.marketplace_header_apps_button_text(),
 					coverCard: <AppHeader />,
 					sections: ["all"],
@@ -293,7 +293,7 @@ export default function Page(props: {
 										getCategoryContent()?.sections?.includes("apps") &&
 										props.items.some(
 											(item: MarketplaceManifest & { uniqueID: string }) =>
-												item.id.split(".")[0] === "app"
+												item.id.split(".")[0] === "app" || item.id.split(".")[0] === "library"
 										)
 									}
 								>
@@ -303,7 +303,7 @@ export default function Page(props: {
 									<Gallery
 										items={props.items.filter(
 											(item: MarketplaceManifest & { uniqueID: string }) =>
-												item.id.split(".")[0] === "app"
+												item.id.split(".")[0] === "app" || item.id.split(".")[0] === "library"
 										)}
 										hideBuildYourOwn
 									/>
@@ -329,44 +329,15 @@ export default function Page(props: {
 										)}
 									/>
 								</Show>
-								{/* Libraries */}
-								<Show
-									when={
-										props.items &&
-										getCategoryContent()?.sections?.includes("libraries") &&
-										props.items.some(
-											(item: MarketplaceManifest & { uniqueID: string }) =>
-												item.id.split(".")[0] === "library"
-										) &&
-										props.items.some(
-											(item: MarketplaceManifest & { uniqueID: string }) =>
-												item.keywords.includes("inlang") || !item.keywords.includes("external")
-										)
-									}
-								>
-									<h2 class="pb-4 border-t-surface-200 text-xl font-medium tracking-tight text-surface-900">
-										Compatible i18n libraries
-									</h2>
-									<Gallery
-										items={props.items
-											.filter(
-												(item: MarketplaceManifest & { uniqueID: string }) =>
-													item.id.split(".")[0] === "library"
-											)
-											.filter(
-												(item: MarketplaceManifest & { uniqueID: string }) =>
-													item.keywords.includes("inlang") || !item.keywords.includes("external")
-											)}
-									/>
-								</Show>
 							</Show>
 							<Show when={false}>
 								<NoResultsCard category={selectedCategory()} />
 							</Show>
 							<Show
 								when={
-									selectedCategory().includes("c/libraries") ||
-									selectedCategory().includes("c/plugins")
+									selectedCategory().includes("c/plugins") ||
+									selectedCategory().includes("c/apps") ||
+									selectedCategory().includes("c/lint-rules")
 								}
 							>
 								<Stacks />

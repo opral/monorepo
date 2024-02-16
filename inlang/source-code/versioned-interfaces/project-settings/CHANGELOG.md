@@ -1,5 +1,19 @@
 # @inlang/project-settings
 
+## 2.2.3
+
+### Patch Changes
+
+- Updated dependencies [32746a9ff]
+  - @inlang/language-tag@1.5.1
+
+## 2.2.2
+
+### Patch Changes
+
+- Updated dependencies [244442698]
+  - @inlang/language-tag@1.5.0
+
 ## 2.2.1
 
 ### Patch Changes

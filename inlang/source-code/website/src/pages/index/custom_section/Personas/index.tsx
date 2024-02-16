@@ -53,21 +53,21 @@ const Personas = () => {
 			</div>
 			<Switch>
 				<Match when={slide() === "developer"}>
-					<div class="grid grid-cols-12 h-[700px] sm:h-[800px] md:h-[496px] mt-8 w-full">
+					<div class="grid grid-cols-12 lg:h-[496px] mt-8 w-full">
 						<div class="col-span-12 lg:col-span-10 lg:col-start-2 bg-background h-full rounded-2xl border border-surface-200">
 							<DeveloperSlide />
 						</div>
 					</div>
 				</Match>
 				<Match when={slide() === "translator"}>
-					<div class="grid grid-cols-12 h-[830px] md:h-[496px] mt-8 w-full">
+					<div class="grid grid-cols-12 lg:h-[496px] mt-8 w-full">
 						<div class="col-span-12 lg:col-span-10 lg:col-start-2 bg-background h-full rounded-2xl border border-surface-200">
 							<TranslatorSlide />
 						</div>
 					</div>
 				</Match>
 				<Match when={slide() === "designer"}>
-					<div class="grid grid-cols-12 sm:h-[480px] md:h-[496px] mt-8 w-full">
+					<div class="grid grid-cols-12 lg:h-[496px] mt-8 w-full">
 						<div class="col-span-12 lg:col-span-10 lg:col-start-2 bg-background h-full rounded-2xl border border-surface-200">
 							<DesignrSlide />
 						</div>
