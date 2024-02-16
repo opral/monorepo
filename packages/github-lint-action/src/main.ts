@@ -17,22 +17,24 @@ export async function run(): Promise<void> {
 		const { owner, repo } = github.context.repo
 		const pr_number = github.context.payload.pull_request?.number
 
+		console.log(JSON.stringify(github.context.payload.pull_request))
+
 		// @ts-ignore
 		const octokit = new github.getOctokit(token)
 
-		const { data: changedFiles } = await octokit.rest.pulls.listFiles({
-			owner,
-			repo,
-			pull_number: pr_number,
-		})
+		// const { data: changedFiles } = await octokit.rest.pulls.listFiles({
+		// 	owner,
+		// 	repo,
+		// 	pull_number: pr_number,
+		// })
 
-		const changedJsonFiles = changedFiles.filter((file: any) => file.filename.endsWith(".json"))
-		console.log(`I got ${changedJsonFiles.length} changed json files`)
+		// const changedJsonFiles = changedFiles.filter((file: any) => file.filename.endsWith(".json"))
+		// console.log(`I got ${changedJsonFiles.length} changed json files`)
 
-		if (changedJsonFiles === undefined || changedJsonFiles.length === 0) {
-			console.log("No json files were changed in this PR, skipping the action.")
-			return
-		}
+		// if (changedJsonFiles === undefined || changedJsonFiles.length === 0) {
+		// 	console.log("No json files were changed in this PR, skipping the action.")
+		// 	return
+		// }
 
 		const baseDirectory = process.cwd()
 		const absoluteProjectPath = baseDirectory + project_path
@@ -71,9 +73,36 @@ export async function run(): Promise<void> {
 			{ errors: 0, warnings: 0 }
 		)
 
+		// checkout main branch
+		const repoMain = await openRepository(repoRoot, {
+			nodeishFs: fs,
+			branch: "main",
+		})
+		const projectMain = await loadProject({
+			projectPath: absoluteProjectPath,
+			repo: repoMain,
+			appId: "app.inlang.githubI18nLintAction",
+		})
+
+		if (projectMain.errors().length > 0) {
+			for (const error of projectMain.errors()) {
+				throw error
+			}
+		}
+
+		const pr_reports_main = projectMain.query.messageLintReports.getAll()
+		const pr_lint_summary_main = pr_reports_main.reduce(
+			(acc, report: MessageLintReport) => {
+				acc.errors += report.level === "error" ? 1 : 0
+				acc.warnings += report.level === "warning" ? 1 : 0
+				return acc
+			},
+			{ errors: 0, warnings: 0 }
+		)
+		console.log(pr_lint_summary_main)
+
 		const commentContent = `
 				Pull Request #${pr_number} has been updated with: \n
-				- ${changedJsonFiles.length} translation files changed \n
 				- ${pr_lint_summary.errors} errors \n
 				- ${pr_lint_summary.warnings} warnings \n
 			`
