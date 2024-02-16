@@ -17,6 +17,7 @@ export const publicEnvVariablesSchema = z.object({
 	PUBLIC_WEBSITE_SENTRY_DSN: z.string().optional().describe("DSN for Sentry (in the browser)"),
 	PUBLIC_FINK_SENTRY_DSN: z.string().optional().describe("DSN for Sentry (in the fink)"),
 	PUBLIC_POSTHOG_TOKEN: z.string().optional(),
+	PUBLIC_POSTHOG_PROJECT_ID: z.string(),
 	PUBLIC_SERVER_BASE_URL: z
 		.string()
 		.url()
@@ -36,5 +37,6 @@ export const privateEnvVariablesSchema = z.object({
 	SERVER_SENTRY_DSN: z.string().optional().describe("DSN for Sentry (on the server)"),
 	ALGOLIA_ADMIN: z.string(),
 	ALGOLIA_APPLICATION: z.string(),
+	POSTHOG_API_KEY: z.string(),
 	// prefixed with INLANG_ because github doesn't allow env vars with GITHUB_ in ci/cd.
 })

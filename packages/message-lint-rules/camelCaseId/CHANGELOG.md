@@ -1,5 +1,11 @@
 # @inlang/message-lint-rule-camel-case-id
 
+## 1.1.3
+
+### Patch Changes
+
+- @inlang/message-lint-rule@1.4.3
+
 ## 1.1.2
 
 ### Patch Changes
