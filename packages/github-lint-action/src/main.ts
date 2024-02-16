@@ -36,8 +36,8 @@ export async function run(): Promise<void> {
 
 		const repoMeta = await inlangRepo?.getMeta()
 		console.log("isFork", repoMeta.isFork)
-		console.log("Merge head: ", github.context.payload.pull_request?.head.label)
-		console.log("Merge base: ", github.context.payload.pull_request?.base.label)
+		console.log("Merge head: ", github.context.payload.pull_request?.head.label.split(":"))
+		console.log("Merge base: ", github.context.payload.pull_request?.base.label.split(":"))
 
 		const project = await loadProject({
 			projectPath: absoluteProjectPath,
@@ -51,7 +51,7 @@ export async function run(): Promise<void> {
 			}
 		}
 
-		const lintSummary = createLintSummary(project.query.messageLintReports.getAll())
+		const lintSummaryHead = createLintSummary(project.query.messageLintReports.getAll())
 
 		// if not fork checkout base repo
 		const repoBase = await openRepository(repoRoot, {
@@ -70,18 +70,19 @@ export async function run(): Promise<void> {
 			}
 		}
 
-		const lintSummaryMain = createLintSummary(projectBase.query.messageLintReports.getAll())
-		console.log(lintSummaryMain)
+		const lintSummaryBase = createLintSummary(projectBase.query.messageLintReports.getAll())
+		console.log("lintSummaryHead: ", JSON.stringify(lintSummary))
+		console.log("lintSummaryBase: ", JSON.stringify(lintSummaryBase))
 
-		if (JSON.stringify(lintSummary) === JSON.stringify(lintSummaryMain)) {
+		if (JSON.stringify(lintSummaryHead) === JSON.stringify(lintSummaryBase)) {
 			console.log("No changes in linting errors")
 			return
 		}
 
 		const commentContent = `
 				Pull Request #${pr_number} has been updated with: \n
-				- ${lintSummary.errors} errors \n
-				- ${lintSummary.warnings} warnings \n
+				- ${lintSummaryHead.errors} errors \n
+				- ${lintSummaryHead.warnings} warnings \n
 			`
 		console.log(`I'm going to comment on the PR with:`, commentContent)
 		// await octokit.rest.issues.createComment({
