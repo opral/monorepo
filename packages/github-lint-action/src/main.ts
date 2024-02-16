@@ -22,20 +22,6 @@ export async function run(): Promise<void> {
 		// @ts-ignore
 		const octokit = new github.getOctokit(token)
 
-		// const { data: changedFiles } = await octokit.rest.pulls.listFiles({
-		// 	owner,
-		// 	repo,
-		// 	pull_number: pr_number,
-		// })
-
-		// const changedJsonFiles = changedFiles.filter((file: any) => file.filename.endsWith(".json"))
-		// console.log(`I got ${changedJsonFiles.length} changed json files`)
-
-		// if (changedJsonFiles === undefined || changedJsonFiles.length === 0) {
-		// 	console.log("No json files were changed in this PR, skipping the action.")
-		// 	return
-		// }
-
 		const baseDirectory = process.cwd()
 		const absoluteProjectPath = baseDirectory + project_path
 		const repoRoot = await findRepoRoot({ nodeishFs: fs, path: absoluteProjectPath })
@@ -50,6 +36,8 @@ export async function run(): Promise<void> {
 		const inlangRepo = await openRepository(repoRoot, {
 			nodeishFs: fs,
 		})
+		console.log("Merge origin: ", inlangRepo.origin)
+		console.log("merge base: ", github.context.payload.pull_request?.base.label)
 
 		const project = await loadProject({
 			projectPath: absoluteProjectPath,
@@ -76,7 +64,7 @@ export async function run(): Promise<void> {
 		// checkout main branch
 		const repoMain = await openRepository(repoRoot, {
 			nodeishFs: fs,
-			branch: "main",
+			branch: github.context.payload.pull_request?.base.ref,
 		})
 		const projectMain = await loadProject({
 			projectPath: absoluteProjectPath,
