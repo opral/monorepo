@@ -28,7 +28,6 @@ export async function run(): Promise<void> {
 			return
 		}
 
-		// head repo
 		const inlangRepo = await openRepository(repoRoot, {
 			nodeishFs: fs,
 			branch: github.context.payload.pull_request?.head.ref,
@@ -53,13 +52,20 @@ export async function run(): Promise<void> {
 
 		const lintSummaryHead = createLintSummary(project.query.messageLintReports.getAll())
 
-		// if not fork checkout base repo
-		inlangRepo.checkout(github.context.payload.pull_request?.base.ref)
-		inlangRepo.pull
+		const inlangRepoBase = await openRepository(repoRoot, {
+			nodeishFs: fs,
+			branch: github.context.payload.pull_request?.base.ref,
+		})
+		const baseProject = await loadProject({
+			projectPath: absoluteProjectPath,
+			repo: inlangRepoBase,
+			appId: "app.inlang.githubI18nLintAction",
+		})
+		const lintSummaryBase = createLintSummary(baseProject.query.messageLintReports.getAll())
 
-		const lintSummaryBase = createLintSummary(project.query.messageLintReports.getAll())
-		console.log("lintSummaryHead: ", JSON.stringify(lintSummaryHead))
-		console.log("lintSummaryBase: ", JSON.stringify(lintSummaryBase))
+		// const lintSummaryBase = createLintSummary(project.query.messageLintReports.getAll())
+		// console.log("lintSummaryHead: ", JSON.stringify(lintSummaryHead))
+		// console.log("lintSummaryBase: ", JSON.stringify(lintSummaryBase))
 
 		if (JSON.stringify(lintSummaryHead) === JSON.stringify(lintSummaryBase)) {
 			console.log("No changes in linting errors")
