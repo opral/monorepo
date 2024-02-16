@@ -54,23 +54,10 @@ export async function run(): Promise<void> {
 		const lintSummaryHead = createLintSummary(project.query.messageLintReports.getAll())
 
 		// if not fork checkout base repo
-		const repoBase = await openRepository(repoRoot, {
-			nodeishFs: fs,
-			branch: github.context.payload.pull_request?.base.ref,
-		})
-		const projectBase = await loadProject({
-			projectPath: absoluteProjectPath,
-			repo: repoBase,
-			appId: "app.inlang.githubI18nLintAction",
-		})
+		inlangRepo.checkoutBranch(github.context.payload.pull_request?.base.ref)
+		inlangRepo.pull
 
-		if (projectBase.errors().length > 0) {
-			for (const error of projectBase.errors()) {
-				throw error
-			}
-		}
-
-		const lintSummaryBase = createLintSummary(projectBase.query.messageLintReports.getAll())
+		const lintSummaryBase = createLintSummary(project.query.messageLintReports.getAll())
 		console.log("lintSummaryHead: ", JSON.stringify(lintSummaryHead))
 		console.log("lintSummaryBase: ", JSON.stringify(lintSummaryBase))
 
