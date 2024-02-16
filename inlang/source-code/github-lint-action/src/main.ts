@@ -55,7 +55,7 @@ export async function run(): Promise<void> {
 
 		// if not fork checkout base repo
 		inlangRepo.checkout(github.context.payload.pull_request?.base.ref)
-		// inlangRepo.pull
+		inlangRepo.pull
 
 		const lintSummaryBase = createLintSummary(project.query.messageLintReports.getAll())
 		console.log("lintSummaryHead: ", JSON.stringify(lintSummaryHead))
