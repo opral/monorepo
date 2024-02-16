@@ -116,7 +116,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 		</div>
 		<div class="flex-item">
 			<p class="bold">⚠ Transparent Errors</p>
-			<p>In the tab menu you can see project errors if the setup is broken.</p>
+			<p>In the tab menu, you can see project errors if the setup is broken.</p>
 		</div>
 	</div>
 </div>
@@ -127,7 +127,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 
 <img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-start.png"/>
 
-Just install the extension and click on `Getting Started` in the `Inlang Tab`. 
+Install the extension and click `Getting Started` in the `Inlang Tab`. 
 
 ### Manual setup
 
@@ -152,7 +152,7 @@ You can use the following template when using JSON files as translation files. I
 
 #### 2. Decide on a **syntax matcher**
 
-You should continue with **installing a syntax matcher**. There are multiple syntax matcher's available:
+You should continue with **installing a syntax matcher**. There are multiple syntax matcher available:
 
 - m function matcher: https://inlang.com/m/632iow21/plugin-inlang-mFunctionMatcher
 - t function matcher: https://inlang.com/m/698iow33/plugin-inlang-tFunctionMatcher

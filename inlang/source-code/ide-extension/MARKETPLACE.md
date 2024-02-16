@@ -41,44 +41,20 @@ Hover over the message to see the tooltip with the translation.
 
 If something isn't working as expected, please join our [Discord](https://discord.gg/gdMPPWy57R) or [create an issue](https://github.com/opral/monorepo/issues/new/choose). We are happy to help!
 
-## Quick start
 
-<doc-image src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-start.png" alt="Get Started"></doc-image>
+# Let's get started
 
-Just install the extension and click on `Getting Started` in the `Inlang Tab`. 
+1. Add a `project.inlang` folder to your repository
+2. Create a `settings.json` file to that new dir `project.inlang/settings.json`
+3. Install a plugin that reads and writes your messages from the [inlang marketplace](https://inlang.com/c/plugins)
+4. Install a syntax matcher/function matcher from the [inlang marketplace](https://inlang.com/c/plugins)
+---
+1. **Optional**: Install lint rules to find errors in your translations from the [inlang marketplace](https://inlang.com/c/lint-rules)
 
-## Manual setup
+Look at the [example repository](https://github.com/opral/example) and it's [settings.json](https://github.com/opral/example/blob/main/project.inlang/settings.json) for a working example.
 
-### 1. Create a `project.inlang/settings.json` in the **root** of your project
 
-You can use the following template when using JSON files as translation files. If not, please look for other [supported resource file types](https://inlang.com/):
 
-```json
-{
-	// official schema ensures that your project file is valid
-	"$schema": "https://inlang.com/schema/project-settings",
-	// the "source" language tag that is used in your project
-	"sourceLanguageTag": "en",
-	// all the language tags you want to support in your project
-	"languageTags": ["en", "de"],
-	"modules": [
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-json@4/dist/index.js"
-	], // or use another storage module: https://inlang.com/c/plugins (i18next, json, inlang message format)
-	"settings": {}
-}
-```
-
-### 2. Decide on a **syntax matcher**
-
-You should continue with **installing a syntax matcher**. There are multiple syntax matcher's available:
-
-- m function matcher: https://inlang.com/m/632iow21/plugin-inlang-mFunctionMatcher
-- t function matcher: https://inlang.com/m/698iow33/plugin-inlang-tFunctionMatcher
-- *if you are using the i18next module, everything is already built-in*
-
-### 3. ✨ Recommended
-
-If you want to add lint rules to your experience, you can add them from https://inlang.com/c/lint-rules
 
 #### Requirements:
 
