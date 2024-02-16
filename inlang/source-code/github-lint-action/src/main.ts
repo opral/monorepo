@@ -38,8 +38,8 @@ export async function run(): Promise<void> {
 		// console.log("Merge head: ", github.context.payload.pull_request?.head.label.split(":"))
 		// console.log("Merge base: ", github.context.payload.pull_request?.base.label.split(":"))
 		const headMeta = {
-			owner: owner,
-			repo: github.context.payload.pull_request?.head.label.split(":")[0],
+			owner: github.context.payload.pull_request?.head.label.split(":")[0],
+			repo: repo,
 			branch: github.context.payload.pull_request?.head.label.split(":")[1],
 		}
 		const commentContent = `
