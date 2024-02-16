@@ -62,10 +62,8 @@ export async function run(): Promise<void> {
 			appId: "app.inlang.githubI18nLintAction",
 		})
 		const lintSummaryBase = createLintSummary(baseProject.query.messageLintReports.getAll())
-
-		// const lintSummaryBase = createLintSummary(project.query.messageLintReports.getAll())
-		// console.log("lintSummaryHead: ", JSON.stringify(lintSummaryHead))
-		// console.log("lintSummaryBase: ", JSON.stringify(lintSummaryBase))
+		console.log("lintSummaryHead: ", JSON.stringify(lintSummaryHead))
+		console.log("lintSummaryBase: ", JSON.stringify(lintSummaryBase))
 
 		if (JSON.stringify(lintSummaryHead) === JSON.stringify(lintSummaryBase)) {
 			console.log("No changes in linting errors")
