@@ -31,8 +31,11 @@ export async function run(): Promise<void> {
 		const inlangRepo = await openRepository(repoRoot, {
 			nodeishFs: fs,
 		})
-		console.log("Merge origin: ", inlangRepo.origin)
-		console.log("merge base: ", github.context.payload.pull_request?.base.label)
+		const repoMeta = await inlangRepo?.getMeta()
+		console.log("isFork", repoMeta.isFork)
+		console.log("Merge origin: ", repoMeta.owner.name, repoMeta.name)
+		console.log("Merge parent: ", repoMeta.parent.owner, repoMeta.parent.repo)
+		console.log("Merge base: ", github.context.payload.pull_request?.base.label)
 
 		const project = await loadProject({
 			projectPath: absoluteProjectPath,
