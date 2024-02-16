@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest"
 import { openRepository, findRepoRoot } from "./index.ts"
+// @ts-ignore -- ts import not working correctly, TODO: find out why
 import { createNodeishMemoryFs, fromSnapshot } from "@lix-js/fs"
 import { readFileSync } from "node:fs"
 
@@ -53,7 +54,7 @@ describe("main workflow", () => {
 		})
 
 		// test random repo action to make sure opening worked
-		const status = await repository.status({ filepath: "README.md" })
+		const status = await repository.status("README.md")
 
 		expect(status).toBe("unmodified")
 	})
@@ -78,7 +79,7 @@ describe("main workflow", () => {
 		})
 
 		// test random repo action to make sure opening worked
-		const status = await repository.status({ filepath: "README.md" })
+		const status = await repository.status("README.md")
 
 		expect(status).toBe("unmodified")
 	})
@@ -100,22 +101,22 @@ describe("main workflow", () => {
 	})
 
 	it("can commit local modifications to the repo", async () => {
-		const statusPre = await repository.status({ filepath: "README.md" })
+		const statusPre = await repository.status("README.md")
 
 		expect(statusPre).toBe("*modified")
 
-		await repository.add({ filepath: "README.md" })
 		await repository.commit({
+			include: ["README.md"],
 			author: { name: "tests", email: "test@inlang.dev" },
 			message: "test changes commit",
 		})
 
-		const statusPost = await repository.status({ filepath: "README.md" })
+		const statusPost = await repository.status("README.md")
 
 		expect(statusPost).toBe("unmodified")
 	})
 
-	it.only("can open repo with lazy checkout", async () => {
+	it("can open repo with lazy checkout", async () => {
 		const lazyRepo = await openRepository("https://github.com/inlang/ci-test-repo", {
 			branch: "test-symlink",
 			nodeishFs: createNodeishMemoryFs(),
@@ -153,42 +154,153 @@ describe("main workflow", () => {
 			].sort()
 		)
 
-		const status = await lazyRepo.statusMatrix({
+		const status = await lazyRepo.statusList({
 			filepaths: [".npmrc", "README.md"],
+			includeStatus: ["materialized"],
 		})
-		console.log(status)
 
-		expect(lazyRepo.nodeishFs._isPlaceholder("./README.md")).toBe(true)
+		expect(status).toStrictEqual([
+			[
+				".npmrc",
+				"unmodified",
+				{
+					placeholder: true,
+					headOid: "b6f27f135954640c8cc5bfd7b8c9922ca6eb2aad",
+					workdirOid: "b6f27f135954640c8cc5bfd7b8c9922ca6eb2aad",
+					stageOid: "b6f27f135954640c8cc5bfd7b8c9922ca6eb2aad",
+				},
+			],
+			[
+				"README.md",
+				"unmodified",
+				{
+					placeholder: true,
+					headOid: "aa6fb2c3d7b34969ffc630276e586e8a42382d50",
+					workdirOid: "aa6fb2c3d7b34969ffc630276e586e8a42382d50",
+					stageOid: "aa6fb2c3d7b34969ffc630276e586e8a42382d50",
+				},
+			],
+		])
 
-		const statusPre = await lazyRepo.status({ filepath: "README.md" })
+		expect(await lazyRepo.nodeishFs._isPlaceholder("./README.md")).toBe(true)
+
+		const statusPre = await lazyRepo.status("README.md")
 		expect(statusPre).toBe("unmodified")
 
-		expect(lazyRepo.nodeishFs._isPlaceholder("./.npmrc")).toBe(true)
+		expect(await lazyRepo.nodeishFs._isPlaceholder("./.npmrc")).toBe(true)
 		expect(await lazyRepo.nodeishFs.readFile("./.npmrc", { encoding: "utf-8" })).toBe(
 			"engine-strict=true\n"
 		)
 
-		expect(lazyRepo.nodeishFs._isPlaceholder("./README.md")).toBe(true)
-		expect(lazyRepo.nodeishFs._isPlaceholder("./.npmrc")).toBe(false)
+		expect(await lazyRepo.nodeishFs._isPlaceholder("./README.md")).toBe(true)
+		expect(await lazyRepo.nodeishFs._isPlaceholder("./.npmrc")).toBe(false)
 
 		await lazyRepo.nodeishFs.writeFile("./README.md", "test")
 		expect(await lazyRepo.nodeishFs.readFile("./README.md", { encoding: "utf-8" })).toBe("test")
-		expect(lazyRepo.nodeishFs._isPlaceholder("./README.md")).toBe(false)
+		expect(await lazyRepo.nodeishFs._isPlaceholder("./README.md")).toBe(false)
 
 		await lazyRepo.nodeishFs.writeFile("./newfile", "test2")
 		expect(await lazyRepo.nodeishFs.readFile("./newfile", { encoding: "utf-8" })).toBe("test2")
-		expect(lazyRepo.nodeishFs._isPlaceholder("./newfile")).toBe(false)
+		expect(await lazyRepo.nodeishFs._isPlaceholder("./newfile")).toBe(false)
 
-		const statusPost = await lazyRepo.status({ filepath: "README.md" })
+		expect(
+			await lazyRepo.statusList({
+				includeStatus: ["materialized"],
+			})
+		).toStrictEqual([
+			[
+				".gitignore",
+				"unmodified",
+				{
+					headOid: "6635cf5542756197081eedaa1ec3a7c2c5a0b537",
+					stageOid: "6635cf5542756197081eedaa1ec3a7c2c5a0b537",
+					workdirOid: "6635cf5542756197081eedaa1ec3a7c2c5a0b537",
+				},
+			],
+			[
+				".npmrc",
+				"unmodified",
+				{
+					headOid: "b6f27f135954640c8cc5bfd7b8c9922ca6eb2aad",
+					workdirOid: "b6f27f135954640c8cc5bfd7b8c9922ca6eb2aad",
+					stageOid: "b6f27f135954640c8cc5bfd7b8c9922ca6eb2aad",
+				},
+			],
+			[
+				"README.md",
+				"*modified",
+				{
+					headOid: "aa6fb2c3d7b34969ffc630276e586e8a42382d50",
+					workdirOid: "30d74d258442c7c65512eafab474568dd706c430",
+					stageOid: "aa6fb2c3d7b34969ffc630276e586e8a42382d50",
+				},
+			],
+			[
+				"newfile",
+				"*added",
+				{
+					headOid: undefined,
+					stageOid: undefined,
+					workdirOid: "42",
+				},
+			],
+		])
+
+		const statusPost = await lazyRepo.status("README.md")
 		expect(statusPost).toBe("*modified")
 
-		// await repository.add({ filepath: "README.md" })
-		// await repository.commit({
-		// 	author: { name: "tests", email: "test@inlang.dev" },
-		// 	message: "test changes commit",
-		// })
-		// const statusPost = await repository.status({ filepath: "README.md" })
-		// expect(statusPost).toBe("s")
+		await lazyRepo.commit({
+			author: { name: "tests", email: "test@inlang.dev" },
+			message: "test changes commit",
+			include: ["README.md"],
+		})
+
+		expect(
+			await lazyRepo.statusList({
+				includeStatus: ["materialized"],
+			})
+		).toStrictEqual([
+			[
+				".gitignore",
+				"unmodified",
+				{
+					headOid: "6635cf5542756197081eedaa1ec3a7c2c5a0b537",
+					stageOid: "6635cf5542756197081eedaa1ec3a7c2c5a0b537",
+					workdirOid: "6635cf5542756197081eedaa1ec3a7c2c5a0b537",
+				},
+			],
+			[
+				".npmrc",
+				"unmodified",
+				{
+					headOid: "b6f27f135954640c8cc5bfd7b8c9922ca6eb2aad",
+					workdirOid: "b6f27f135954640c8cc5bfd7b8c9922ca6eb2aad",
+					stageOid: "b6f27f135954640c8cc5bfd7b8c9922ca6eb2aad",
+				},
+			],
+			[
+				"README.md",
+				"unmodified",
+				{
+					headOid: "30d74d258442c7c65512eafab474568dd706c430",
+					workdirOid: "30d74d258442c7c65512eafab474568dd706c430",
+					stageOid: "30d74d258442c7c65512eafab474568dd706c430",
+				},
+			],
+			[
+				"newfile",
+				"*added",
+				{
+					headOid: undefined,
+					stageOid: undefined,
+					workdirOid: "42",
+				},
+			],
+		])
+
+		const statusPo = await lazyRepo.status("README.md")
+
+		expect(statusPo).toBe("unmodified")
 	}, 100000)
 
 	it("can commit open repos without origin or git config (the case eg. on render.com or other deoployment scenarios)", async () => {
@@ -213,7 +325,7 @@ describe("main workflow", () => {
 		})
 
 		// test random repo action to make sure opening worked
-		const status = await repository.status({ filepath: "README.md" })
+		const status = await repository.status("README.md")
 
 		expect(status).toBe("unmodified")
 	})

@@ -138,6 +138,7 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 		return Object.assign({}, stats)
 	}
 
+	// lstat is like stat, but does not follow symlinks
 	async function lstat(path: Parameters<NodeishFilesystem["lstat"]>[0]) {
 		path = normalPath(path)
 		const stats: NodeishStats | undefined = state.fsStats.get(path)
@@ -149,15 +150,24 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 	return {
 		_state: state,
 
-		_createPlaceholder: function (
+		_createPlaceholder: async function (
 			path: Parameters<NodeishFilesystem["writeFile"]>[0],
 			options?: Parameters<NodeishFilesystem["writeFile"]>[2]
 		) {
+			// TODO: mkdir recursive
 			path = normalPath(path)
 			const dirName = getDirname(path)
 			const baseName = getBasename(path)
-			const parentDir: Inode | undefined = state.fsMap.get(dirName)
-			if (!(parentDir instanceof Set)) throw new FilesystemError("ENOENT", path, "writeFile")
+			let parentDir: Inode | undefined = state.fsMap.get(dirName)
+			if (!(parentDir instanceof Set)) {
+				await this.mkdir(dirName, { recursive: true })
+
+				parentDir = state.fsMap.get(dirName)
+				if (!(parentDir instanceof Set)) {
+					throw new FilesystemError("ENOENT", path, "writeFile")
+				}
+			}
+
 			parentDir.add(baseName)
 			newStatEntry(path, state.fsStats, 0, options?.mode ?? 0o644)
 			state.fsMap.set(path, { placeholder: true })

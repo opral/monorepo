@@ -276,7 +276,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 						setLixErrors([])
 					}
 
-					newRepo.nodeishFs.watch = () => undefined
+					// @ts-ignore -- causes reactivity bugs because the sdk uses watch and triggers updates on changes caused by itself
+					newRepo.nodeishFs.watch = () => {}
+
 					setLastPullTime(new Date())
 					// Invalidate the project while we switch branches
 					setProject(undefined)
@@ -601,8 +603,7 @@ export async function pushChanges(args: {
 		return { error: new PushException("User not logged in") }
 	}
 
-	// stage all changes
-	const status = await args.repo.statusMatrix({
+	const filesWithUncommittedChanges = await args.repo.statusList({
 		filter: (f: any) =>
 			f.endsWith("project_id") ||
 			f.endsWith(".json") ||
@@ -613,19 +614,7 @@ export async function pushChanges(args: {
 			f.endsWith(".ts"),
 	})
 
-	const filesWithUncommittedChanges = status.filter(
-		(row: any) =>
-			// files with unstaged and uncommitted changes
-			(row[2] === 2 && row[3] === 1) ||
-			// added files
-			(row[2] === 2 && row[3] === 0)
-	)
-
 	if (filesWithUncommittedChanges.length > 0) {
-		// add all changes
-		for (const file of filesWithUncommittedChanges) {
-			await args.repo.add({ filepath: file[0] })
-		}
 		// commit changes
 		await args.repo.commit({
 			author: {
@@ -633,6 +622,7 @@ export async function pushChanges(args: {
 				email: args.user.email,
 			},
 			message: "inlang: update translations",
+			include: filesWithUncommittedChanges.map((f) => f[0]),
 		})
 	}
 

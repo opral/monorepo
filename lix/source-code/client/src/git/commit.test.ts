@@ -1,14 +1,18 @@
 import { describe, it, expect, vi } from "vitest"
 import { openRepository } from "../index.ts"
+// @ts-ignore -- ts import not working correctly, TODO: find out why
 import { createNodeishMemoryFs, toSnapshot, fromSnapshot } from "@lix-js/fs"
 import { readFileSync } from "node:fs"
+import { resolve } from "node:path"
 // import { writeFileSync } from "node:fs"
 
 describe("main workflow", async () => {
 	async function testCommit({ useCustomCommit }) {
 		const fs = createNodeishMemoryFs()
 
-		const snapshot = JSON.parse(readFileSync("./mocks/ci-test-repo.json", { encoding: "utf-8" }))
+		const snapshot = JSON.parse(
+			readFileSync(resolve(__dirname, "../../mocks/ci-test-repo.json"), { encoding: "utf-8" })
+		)
 		fromSnapshot(fs, snapshot)
 
 		const repository: Awaited<ReturnType<typeof openRepository>> = await openRepository(
@@ -27,9 +31,23 @@ describe("main workflow", async () => {
 		// 	JSON.stringify(toSnapshot(repository.nodeishFs), undefined, 4)
 		// )
 
-		const commitFun = useCustomCommit ? repository.commit : repository._isoGit.commit
+		const commitFun = useCustomCommit
+			? repository.commit
+			: async (args) => {
+					for (const file of args.include) {
+						await repository._isoGit.add({ fs, dir: "/", filepath: file })
+					}
+
+					return repository._isoGit.commit({
+						fs,
+						dir: "/",
+						author: args.author,
+						message: args.message,
+					})
+			  }
 
 		let fileContent = ""
+
 		fileContent = await repository.nodeishFs.readFile("./README.md", {
 			encoding: "utf-8",
 		})
@@ -38,40 +56,38 @@ describe("main workflow", async () => {
 		await repository.nodeishFs.writeFile("./README.md", fileContent)
 		await repository.nodeishFs.mkdir("./folder")
 		await repository.nodeishFs.writeFile("./folder/README_newfile.md", fileContent)
-		const statusPre = await repository.status({ filepath: "README.md" })
+
+		const statusPre = await repository.status("README.md")
 
 		expect(statusPre).toBe("*modified")
 
-		await repository.add({ filepath: "README.md" })
-		await repository.add({ filepath: "folder/README_newfile.md" })
 		await commitFun({
-			fs,
-			dir: "/",
 			author: { name: "tests", email: "test@inlang.dev" },
+			include: ["README.md", "folder/README_newfile.md"],
 			message: "test changes commit",
 		})
 
-		const statusPost = await repository.status({ filepath: "README.md" })
-		const statusPost2 = await repository.status({ filepath: "folder/README_newfile.md" })
+		const statusPost = await repository.status("README.md")
+		const statusPost2 = await repository.status("folder/README_newfile.md")
 
 		expect(statusPost).toBe("unmodified")
 		expect(statusPost2).toBe("unmodified")
 
-		const statusPost3 = await repository.status({ filepath: "test-symlink-not-existing-target" })
-		const statusPost4 = await repository.status({ filepath: "test-symlink" })
-		// const statusPost5 = await repository.status({ filepath: "test-submodule" }) not supported yet
-
+		const statusPost3 = await repository.status("test-symlink-not-existing-target")
 		expect(statusPost3).toBe("unmodified")
+
+		const statusPost4 = await repository.status("test-symlink")
 		expect(statusPost4).toBe("unmodified")
+
+		// const statusPost5 = await repository.status("test-submodule" }) not supported yet
 		// expect(statusPost5).toBe("unmodified")
 
 		fileContent += "\n// bar"
 		await repository.nodeishFs.writeFile("./README.md", fileContent)
 
-		await repository.add({ filepath: "README.md" })
+		// check readfile content
 		await commitFun({
-			fs,
-			dir: "/",
+			include: ["README.md"],
 			author: { name: "tests", email: "test@inlang.dev" },
 			message: "test changes commit",
 		})
@@ -84,6 +100,10 @@ describe("main workflow", async () => {
 		const snapA = await testCommit({ useCustomCommit: true })
 
 		const snapB = await testCommit({ useCustomCommit: false })
+
+		// reset modtime of git internal file that has bumped modtime for internal reasons
+		snapA.fsStats["/.git/index/"].mtimeMs = -1
+		snapB.fsStats["/.git/index/"].mtimeMs = -1
 
 		expect(snapA).toStrictEqual(snapB)
 		vi.useRealTimers()

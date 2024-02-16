@@ -26,7 +26,7 @@ export const compileCommand = new Command()
 		logger.info(`Compiling inlang project at "${options.project}".`)
 
 		const repoRoot = await findRepoRoot({ nodeishFs: nodeFsPromises, path })
-		const repo = await openRepository(repoRoot || process.cwd(), {
+		const repo = await openRepository(repoRoot || "file://" + process.cwd(), {
 			nodeishFs: nodeFsPromises,
 		})
 
