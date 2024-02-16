@@ -33,9 +33,8 @@ export async function run(): Promise<void> {
 		})
 		const repoMeta = await inlangRepo?.getMeta()
 		console.log("isFork", repoMeta.isFork)
-		console.log("currentBranch", await inlangRepo.getCurrentBranch())
-		console.log("repoMeta", JSON.stringify(repoMeta))
 		console.log("Merge origin: ", repoMeta.name)
+		console.log("currentBranch", JSON.stringify(github.context.payload))
 		console.log("Merge base: ", github.context.payload.pull_request?.base.label)
 
 		const project = await loadProject({
