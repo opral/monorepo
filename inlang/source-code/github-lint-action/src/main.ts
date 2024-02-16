@@ -1,7 +1,7 @@
 import * as fs from "node:fs/promises"
 import * as core from "@actions/core"
 import * as github from "@actions/github"
-import { openRepository, findRepoRoot } from "@lix-js/client"
+import { openRepository } from "@lix-js/client"
 import { loadProject, type MessageLintReport } from "@inlang/sdk"
 
 /**
@@ -17,32 +17,12 @@ export async function run(): Promise<void> {
 		const { owner, repo } = github.context.repo
 		const pr_number = github.context.payload.pull_request?.number
 
-		const baseDirectory = process.cwd()
-		const absoluteProjectPath = baseDirectory + project_path
-		const repoRoot = await findRepoRoot({ nodeishFs: fs, path: absoluteProjectPath })
-		console.log(
-			"repoRoot: ",
-			repoRoot,
-			"project_path: ",
-			project_path,
-			"absoluteProjectPath: ",
-			absoluteProjectPath
-		)
-
-		if (!repoRoot) {
-			console.log(
-				`Could not find repository root for path ${project_path}, falling back to direct fs access`
-			)
-			return
-		}
-
-		// head
-		const inlangRepo = await openRepository(repoRoot, {
+		const inlangRepo = await openRepository(process.cwd(), {
 			nodeishFs: fs,
 			branch: github.context.payload.pull_request?.head.ref,
 		})
 		const project = await loadProject({
-			projectPath: absoluteProjectPath,
+			projectPath: process.cwd() + project_path,
 			repo: inlangRepo,
 			appId: "app.inlang.githubI18nLintAction",
 		})
@@ -51,44 +31,51 @@ export async function run(): Promise<void> {
 				throw error
 			}
 		}
-		const lintSummaryHead = createLintSummary(project.query.messageLintReports.getAll())
+		const lintSummary = createLintSummary(project.query.messageLintReports.getAll())
 
 		// const repoMeta = await inlangRepo?.getMeta()
 		// console.log("isFork", repoMeta.isFork)
 		// console.log("Merge head: ", github.context.payload.pull_request?.head.label.split(":"))
 		// console.log("Merge base: ", github.context.payload.pull_request?.base.label.split(":"))
 
-		// base
-		const inlangRepoBase = await openRepository(repoRoot, {
-			nodeishFs: fs,
-			branch: github.context.payload.pull_request?.base.ref,
-		})
-		const baseProject = await loadProject({
-			projectPath: absoluteProjectPath,
-			repo: inlangRepoBase,
-			appId: "app.inlang.githubI18nLintAction",
-		})
-		const lintSummaryBase = createLintSummary(baseProject.query.messageLintReports.getAll())
-		console.log("lintSummaryHead: ", JSON.stringify(lintSummaryHead))
-		console.log("lintSummaryBase: ", JSON.stringify(lintSummaryBase))
-
-		if (JSON.stringify(lintSummaryHead) === JSON.stringify(lintSummaryBase)) {
-			console.log("No changes in linting errors")
-			return
-		}
-
 		const commentContent = `
 				Pull Request #${pr_number} has been updated with: \n
-				- ${lintSummaryHead.errors} errors \n
-				- ${lintSummaryHead.warnings} warnings \n
+				- ${lintSummary.errors} errors \n
+				- ${lintSummary.warnings} warnings \n
 			`
 		console.log(`I'm going to comment on the PR with:`, commentContent)
-		// await octokit.rest.issues.createComment({
-		// 	owner,
-		// 	repo,
-		// 	issue_number: pr_number,
-		// 	body: commentContent,
-		// })
+
+		const octokit = github.getOctokit(token)
+		//check if PR already has a comment from this action
+		const existingComment = await octokit.rest.issues.listComments({
+			owner,
+			repo,
+			issue_number: pr_number as number,
+		})
+		console.log("existingComment: ", existingComment)
+		if (existingComment.data.length > 0) {
+			console.log("Comment already exists, updating it")
+			const commentId = existingComment.data.find((comment) =>
+				comment.body?.includes("Pull Request #")
+			)?.id
+			if (commentId) {
+				await octokit.rest.issues.updateComment({
+					owner,
+					repo,
+					comment_id: commentId,
+					body: commentContent,
+				})
+				core.setOutput("comment_content", commentContent)
+				return
+			}
+		}
+		console.log("Creating a new comment")
+		await octokit.rest.issues.createComment({
+			owner,
+			repo,
+			issue_number: pr_number as number,
+			body: commentContent,
+		})
 		core.setOutput("comment_content", commentContent)
 	} catch (error) {
 		// Fail the workflow run if an error occurs
