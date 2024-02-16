@@ -52,6 +52,13 @@ export async function run(): Promise<void> {
 		console.log(`I'm going to comment on the PR with:`, commentContent)
 
 		const octokit = github.getOctokit(token)
+		// Fetch issue details
+		const issue = await octokit.rest.issues.get({
+			owner,
+			repo,
+			issue_number: pr_number as number,
+		})
+		if (issue.data.locked) return console.log("PR is locked, skipping comment")
 		//check if PR already has a comment from this action
 		// const existingComment = await octokit.rest.issues.listComments({
 		// 	owner,
@@ -76,6 +83,7 @@ export async function run(): Promise<void> {
 		// 	}
 		// }
 		console.log("Creating a new comment")
+
 		await octokit.rest.issues.createComment({
 			owner,
 			repo,
