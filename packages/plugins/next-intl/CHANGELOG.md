@@ -1,5 +1,12 @@
 # @inlang/plugin-next-intl
 
+## 1.3.3
+
+### Patch Changes
+
+- d9cf66170: update docs for apps and plugins
+- b7344152a: updated the docs
+
 ## 1.3.2
 
 ### Patch Changes
