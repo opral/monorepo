@@ -28,14 +28,16 @@ export async function run(): Promise<void> {
 			return
 		}
 
-		const inlangRepo = await openRepository(repoRoot, {
-			nodeishFs: fs,
-		})
 		const repoMeta = await inlangRepo?.getMeta()
 		console.log("isFork", repoMeta.isFork)
-		console.log("Merge origin: ", repoMeta.name)
-		console.log("currentBranch", JSON.stringify(github.context.payload))
+		console.log("Current branch: ", github.context.payload.pull_request?.head.label)
 		console.log("Merge base: ", github.context.payload.pull_request?.base.label)
+
+		// head repo
+		const inlangRepo = await openRepository(repoRoot, {
+			nodeishFs: fs,
+			branch: github.context.payload.pull_request?.head.ref,
+		})
 
 		const project = await loadProject({
 			projectPath: absoluteProjectPath,
@@ -51,24 +53,24 @@ export async function run(): Promise<void> {
 
 		const lintSummary = createLintSummary(project.query.messageLintReports.getAll())
 
-		// checkout main branch
-		const repoMain = await openRepository(repoRoot, {
+		// if not fork checkout base repo
+		const repoBase = await openRepository(repoRoot, {
 			nodeishFs: fs,
 			branch: github.context.payload.pull_request?.base.ref,
 		})
-		const projectMain = await loadProject({
+		const projectBase = await loadProject({
 			projectPath: absoluteProjectPath,
-			repo: repoMain,
+			repo: repoBase,
 			appId: "app.inlang.githubI18nLintAction",
 		})
 
-		if (projectMain.errors().length > 0) {
-			for (const error of projectMain.errors()) {
+		if (projectBase.errors().length > 0) {
+			for (const error of projectBase.errors()) {
 				throw error
 			}
 		}
 
-		const lintSummaryMain = createLintSummary(projectMain.query.messageLintReports.getAll())
+		const lintSummaryMain = createLintSummary(projectBase.query.messageLintReports.getAll())
 		console.log(lintSummaryMain)
 
 		if (JSON.stringify(lintSummary) === JSON.stringify(lintSummaryMain)) {
