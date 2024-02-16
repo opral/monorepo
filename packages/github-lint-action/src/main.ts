@@ -28,16 +28,16 @@ export async function run(): Promise<void> {
 			return
 		}
 
-		const repoMeta = await inlangRepo?.getMeta()
-		console.log("isFork", repoMeta.isFork)
-		console.log("Current branch: ", github.context.payload.pull_request?.head.label)
-		console.log("Merge base: ", github.context.payload.pull_request?.base.label)
-
 		// head repo
 		const inlangRepo = await openRepository(repoRoot, {
 			nodeishFs: fs,
 			branch: github.context.payload.pull_request?.head.ref,
 		})
+
+		const repoMeta = await inlangRepo?.getMeta()
+		console.log("isFork", repoMeta.isFork)
+		console.log("Merge head: ", github.context.payload.pull_request?.head.label)
+		console.log("Merge base: ", github.context.payload.pull_request?.base.label)
 
 		const project = await loadProject({
 			projectPath: absoluteProjectPath,
