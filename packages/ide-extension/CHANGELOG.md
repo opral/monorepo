@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.32.4
+
+### Patch Changes
+
+- f5f65581e: remove commands from command palette
+
 ## 1.32.3
 
 ### Patch Changes
