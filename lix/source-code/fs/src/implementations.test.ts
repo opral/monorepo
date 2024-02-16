@@ -267,14 +267,14 @@ const runFsTestSuite = async (
 		])
 	})
 
-  test.skipIf(isNodeFs)("placeholders", async () => {
+	test.skipIf(isNodeFs)("placeholders", async () => {
 		const placeholderPath = `/placeholders/subdir`
 
 		await fs.mkdir(placeholderPath, { recursive: true })
 
 		await fs.writeFile(`${placeholderPath}/file`, "")
 
-		fs._createPlaceholder(placeholderPath + "/test")
+		await fs._createPlaceholder(placeholderPath + "/test")
 
 		expect(fs._isPlaceholder(placeholderPath + "/test")).toBe(true)
 		expect(fs._isPlaceholder(placeholderPath + "/noexists")).toBe(false)

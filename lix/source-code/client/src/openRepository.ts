@@ -8,23 +8,23 @@ import { Octokit } from "octokit"
 
 import { createSignal, createEffect } from "./solid.js"
 
+import type { OptStatus } from "./git/status.js"
 import { commit as lixCommit } from "./git/commit.js"
 import { status as lixStatus } from "./git/status.js"
 import isoGit from "isomorphic-git"
+import { modeToFileType } from "./git/helpers.js"
 
 // TODO: LSTAT is not properly in the memory fs!
-
+// TODO: --filter=tree:0 for commit history?
+// TODO: fix strartswith .git > .github affected
 const {
 	TREE,
 	clone,
 	listRemotes,
-	status,
-	statusMatrix,
 	push,
 	pull,
 	walk,
 	currentBranch,
-	add,
 	log,
 	listServerRefs,
 	checkout,
@@ -37,7 +37,6 @@ const {
 
 // TODO: rename to debug?
 const verbose = false
-const experimentalLixFs = true
 
 // TODO addd tests for whitelist
 
@@ -68,16 +67,23 @@ export async function findRepoRoot(args: {
 export async function openRepository(
 	url: string,
 	args: {
+		author?: any
 		nodeishFs: NodeishFilesystem
 		workingDirectory?: string
 		branch?: string
 		auth?: unknown // unimplemented
+		experimentalLixFs?: boolean
+		sparseFilter?: any
 	}
 ): Promise<Repository> {
-	const cache = undefined // to enable cache use {}
+	const cache = {}
 	const rawFs = args.nodeishFs
+	const author = args.author
 
-	if (!url) {
+	if (
+		!url ||
+		(!url.startsWith("file://") && !url.startsWith("https://") && !url.startsWith("http://"))
+	) {
 		throw new Error("repo url is required, use file:// for local repos")
 	}
 
@@ -123,7 +129,7 @@ export async function openRepository(
 		}
 	} else {
 		// Simple check for existing git repos
-		const maybeGitDir = await rawFs.lstat(".git").catch((error: any) => ({ error }))
+		const maybeGitDir = await rawFs.stat(".git").catch((error: any) => ({ error }))
 		if ("error" in maybeGitDir) {
 			doLixClone = true
 			console.info("Lix lazy features are enabled")
@@ -162,6 +168,10 @@ export async function openRepository(
 	// TODO: support for url scheme to use local repo already in the fs
 	const gitUrl = repoName ? `https://${repoHost}/${owner}/${repoName}` : ""
 
+	if (!gitUrl) {
+		console.warn("valid repo url / local repo not found, only limited features will be available.")
+	}
+
 	const enableExperimentalFeatures = whitelistedExperimentalRepos.includes(
 		`${owner}/${repoName}`.toLocaleLowerCase()
 	)
@@ -189,6 +199,10 @@ export async function openRepository(
 			await rawFs.rm(maybePlacholder)
 		}
 
+		for (const entry of thisBatch) {
+			checkedOut.add(entry)
+		}
+
 		const res = await checkout({
 			fs: withLazyFetching({
 				nodeishFs: rawFs,
@@ -200,10 +214,6 @@ export async function openRepository(
 			ref: args.branch,
 			filepaths: thisBatch,
 		})
-
-		for (const entry of thisBatch) {
-			checkedOut.add(entry)
-		}
 
 		if (nextBatch.length) {
 			// console.warn("next batch", nextBatch)
@@ -223,8 +233,9 @@ export async function openRepository(
 			}),
 			dir,
 			ref: branchName,
-			filepaths: [],
+			filepaths: [".gitignore"],
 		})
+		checkedOut.add(".gitignore")
 
 		const fs = withLazyFetching({ nodeishFs: rawFs, verbose, description: "checkout placeholders" })
 		await walk({
@@ -238,24 +249,39 @@ export async function openRepository(
 				if (!commit) {
 					return undefined
 				}
+				const fileMode = await commit.mode()
 
-				const commitType = await commit.type()
-				if (commitType === "tree" && !checkedOut.has(fullpath)) {
-					if (fullpath !== ".") {
-						try {
-							await fs.mkdir(fullpath)
-						} catch {
-							// ignore
-						}
+				const fileType: string = modeToFileType(fileMode)
+
+				if (
+					args.sparseFilter &&
+					!args.sparseFilter({
+						filename: fullpath,
+						type: fileType,
+					})
+				) {
+					return undefined
+				}
+
+				if (fileType === "folder" && !checkedOut.has(fullpath)) {
+					return fullpath
+				}
+
+				if (fileType === "file" && !checkedOut.has(fullpath)) {
+					try {
+						await fs._createPlaceholder(fullpath)
+					} catch (err) {
+						console.warn(err)
 					}
 
 					return fullpath
-				} else if (commitType === "blob" && !checkedOut.has(fullpath)) {
+				}
+
+				if (fileType === "symlink" && !checkedOut.has(fullpath)) {
 					try {
-						fs._createPlaceholder(fullpath)
+						await fs._createPlaceholder(fullpath, { mode: fileMode })
 					} catch (err) {
 						console.warn(err)
-						// ignore
 					}
 
 					return fullpath
@@ -314,13 +340,22 @@ export async function openRepository(
 		const rootObject = pathParts[0]
 
 		if (verbose) {
-			console.warn("delayedAction", prop, argumentsList)
+			console.warn("delayedAction", {
+				prop,
+				argumentsList,
+				rootObject,
+				checkedOut,
+				filename,
+				pending,
+				nextBatch,
+			})
 		}
 
 		if (
-			rootObject !== ".git" &&
-			["readFile", "readlink", "writeFile"].includes(prop) &&
 			rootObject &&
+			rootObject !== ".git" &&
+			filename !== ".gitignore" &&
+			["readFile", "readlink", "writeFile"].includes(prop) &&
 			!checkedOut.has(rootObject) &&
 			!checkedOut.has(filename)
 		) {
@@ -351,6 +386,65 @@ export async function openRepository(
 		intercept: doLixClone ? delayedAction : undefined,
 	})
 
+	const add = (filepath: string | string[]) =>
+		isoGit.add({
+			fs: withLazyFetching({
+				nodeishFs: rawFs,
+				verbose,
+				description: "add",
+				// intercept: delayedAction,
+			}),
+			dir,
+			cache,
+			filepath,
+		})
+
+	type StatusArgs = {
+		// ref?: string support custom refs
+		filepaths?: string[]
+		filter?: (filepath: string) => boolean
+		sparseFilter?: (entry: { filename: string; type: "file" | "folder" }) => boolean
+		includeStatus?: OptStatus[]
+	}
+	async function statusList(statusArg?: StatusArgs): ReturnType<typeof lixStatus> {
+		return lixStatus({
+			fs: withLazyFetching({
+				nodeishFs: rawFs,
+				verbose,
+				description: "lixStatus",
+				// intercept: delayedAction,
+			}),
+			dir,
+			cache,
+			sparseFilter: args?.sparseFilter,
+			filter: statusArg?.filter,
+			filepaths: statusArg?.filepaths,
+			includeStatus: statusArg?.includeStatus,
+		})
+	}
+
+	async function status(statusArg: string) {
+		if (typeof statusArg !== "string") {
+			throw new Error("parameter must be a string")
+		}
+		const statusList = await lixStatus({
+			fs: withLazyFetching({
+				nodeishFs: rawFs,
+				verbose,
+				description: "lixStatus",
+				// intercept: delayedAction,
+			}),
+			dir,
+			cache,
+			sparseFilter: args.sparseFilter,
+			includeStatus: ["unmodified", "ignored", "materialized"],
+			filepaths: [statusArg],
+		})
+
+		const maybeStatusEntry: [string, string] = statusList[0] || [statusArg, "unknown"]
+		return maybeStatusEntry?.[1] as string
+	}
+
 	return {
 		_isoGit: isoGit,
 		_enableExperimentalFeatures: enableExperimentalFeatures,
@@ -358,7 +452,7 @@ export async function openRepository(
 
 		nodeishFs,
 
-		fs: experimentalLixFs
+		files: args.experimentalLixFs
 			? {
 					read(path: string) {
 						return nodeishFs.readFile(path, { encoding: "utf-8" })
@@ -417,34 +511,9 @@ export async function openRepository(
 			})
 		},
 
-		status(cmdArgs) {
-			if (!cmdArgs) {
-				return lixStatus({
-					fs: withLazyFetching({
-						nodeishFs: rawFs,
-						verbose,
-						description: "lixStatus",
-						// intercept: delayedAction,
-					}),
-					dir,
-					cache,
-					// filter: cmdArgs.filter,
-					// filepaths: cmdArgs.filepaths,
-				})
-			}
+		status,
 
-			return status({
-				fs: withLazyFetching({
-					nodeishFs: rawFs,
-					verbose,
-					description: "status",
-					intercept: delayedAction,
-				}),
-				dir,
-				cache,
-				filepath: cmdArgs?.filepath,
-			})
-		},
+		statusList,
 
 		async forkStatus() {
 			// uncomment to disable: return { ahead: 0, behind: 0, conflicts: false }
@@ -577,38 +646,23 @@ export async function openRepository(
 			return { ahead: compare.data.ahead_by, behind: compare.data.behind_by, conflicts }
 		},
 
-		statusMatrix(cmdArgs) {
-      console.warn("statusMatrix is deprecated, use status() instead")
+		async commit({
+			author: overrideAuthor,
+			message,
+			include,
+		}: // TODO: exclude,
+		{
+			author?: any
+			message: string
+			include: string[]
+			// exclude: string[]
+		}) {
+			if (include) {
+				await add(include)
+			} else {
+				// TODO: commit all
+			}
 
-			return statusMatrix({
-				fs: withLazyFetching({
-					nodeishFs: rawFs,
-					verbose,
-					description: "statusMatrix",
-					// intercept: delayedAction,
-				}),
-				dir,
-				cache,
-				filter: cmdArgs.filter,
-				filepaths: cmdArgs.filepaths,
-			})
-		},
-
-		add(cmdArgs) {
-			return add({
-				fs: withLazyFetching({
-					nodeishFs: rawFs,
-					verbose,
-					description: "add",
-					intercept: delayedAction,
-				}),
-				dir,
-				cache,
-				filepath: cmdArgs.filepath,
-			})
-		},
-
-		commit(cmdArgs) {
 			const commitArgs = {
 				fs: withLazyFetching({
 					nodeishFs: rawFs,
@@ -618,10 +672,11 @@ export async function openRepository(
 				}),
 				dir,
 				cache,
-				author: cmdArgs.author,
-				message: cmdArgs.message,
+				author: overrideAuthor || author,
+				message: message,
 			}
-			if (enableExperimentalFeatures) {
+
+			if (enableExperimentalFeatures || args.experimentalLixFs) {
 				console.warn("using experimental commit for this repo.")
 				return lixCommit(commitArgs)
 			} else {
@@ -664,7 +719,7 @@ export async function openRepository(
 			})
 		},
 
-		log(cmdArgs) {
+		log(cmdArgs = {}) {
 			return log({
 				fs: withLazyFetching({
 					nodeishFs: rawFs,
@@ -672,10 +727,12 @@ export async function openRepository(
 					description: "log",
 					intercept: delayedAction,
 				}),
-				depth: cmdArgs?.depth,
+				depth: cmdArgs.depth,
+				filepath: cmdArgs.filepath,
 				dir,
+				ref: cmdArgs.ref,
 				cache,
-				since: cmdArgs?.since,
+				since: cmdArgs.since,
 			})
 		},
 
