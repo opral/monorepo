@@ -17,7 +17,7 @@ const { error: errors } = validateEnvVariables({ forProduction: false })
 
 if (errors) {
 	console.error(
-		"❗️❗️ Some env variables are not defined or do not pass validation. If you are an external developer, please run `npm run fetch-env:public` to get the latest version, if you are part of the inlang team, please check your doppler setup."
+		"❗️❗️ Some env variables are not defined or do not pass validation. Please check your doppler setup."
 	)
 	console.error(errors)
 	process.exit(1)
