@@ -13,7 +13,6 @@
 	],
 	"scripts": {
 		"build": "tsx ./build.ts && tsc --emitDeclarationOnly",
-		"fetch-env:public": "tsx ./src/build/fetchPublicEnv.ts",
 		"dev": "DEV=true npm run build",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"lint": "eslint ./src --fix",
