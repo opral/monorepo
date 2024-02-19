@@ -41,23 +41,21 @@ export async function run(): Promise<void> {
 			repo: repo,
 			branch: github.context.payload.pull_request?.head.label.split(":")[1],
 		}
-		const commentContent = (): string => {
-			return `
-		### 🌐 Translation change detected
-
-		${countMissingTranslation(project.query.messageLintReports.getAll())} missing translations
-		
-		📊 Summary:
-		| Level    | Count    |
-		|----------|----------|
-		| Errors   | ${lintSummary.errors}    |
-		| Warnings | ${lintSummary.warnings}  |
-		
-		[Open in Fink](https://fink.inlang.com/github.com/${headMeta.owner}/${headMeta.repo}/?branch=${
-				headMeta.branch
-			}&project=${project_path})
+		const commentContent = `
+		 ### 🌐 Translation change detected
+		 
+		 ${countMissingTranslation(project.query.messageLintReports.getAll())} missing translations
+		 
+		 📊 Summary:
+		 | Level    | Count    |
+		 |----------|----------|
+		 | Errors   | ${lintSummary.errors}    |
+		 | Warnings | ${lintSummary.warnings}  |
+		 
+		 [Open in Fink](https://fink.inlang.com/github.com/${headMeta.owner}/${headMeta.repo}/?branch=${
+			headMeta.branch
+		}&project=${project_path})
 		`
-		}
 
 		const octokit = github.getOctokit(token)
 		const issue = await octokit.rest.issues.get({
@@ -85,7 +83,7 @@ export async function run(): Promise<void> {
 					owner,
 					repo,
 					comment_id: commentId,
-					body: commentContent(),
+					body: commentContent,
 				})
 				return
 			}
@@ -96,7 +94,7 @@ export async function run(): Promise<void> {
 			owner,
 			repo,
 			issue_number: pr_number as number,
-			body: commentContent(),
+			body: commentContent,
 		})
 	} catch (error) {
 		// Fail the workflow run if an error occurs
