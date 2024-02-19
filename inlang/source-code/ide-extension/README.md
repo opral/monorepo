@@ -31,6 +31,18 @@
 
 <br>
 
+
+
+# Let's get started
+
+1. Add a `project.inlang` folder to your repository
+2. Create a `settings.json` file to that new dir `project.inlang/settings.json`
+3. Install a plugin that reads and writes your messages from the [inlang marketplace](https://inlang.com/c/plugins)
+4. Install a installing a syntax matcher/function matcher from the [inlang marketplace](https://inlang.com/c/plugins)
+---
+1. **Optional**: Install lint rules to find errors in your translations from the [inlang marketplace](https://inlang.com/c/lint-rules)
+
+
 ## Manage Translations directly from your Code
 
 See translations and edit them directly in your code. No more back-and-forth looking into the translation files themselves.
@@ -116,7 +128,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 		</div>
 		<div class="flex-item">
 			<p class="bold">⚠ Transparent Errors</p>
-			<p>In the tab menu you can see project errors if the setup is broken.</p>
+			<p>In the tab menu, you can see project errors if the setup is broken.</p>
 		</div>
 	</div>
 </div>
@@ -127,7 +139,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 
 <img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-start.png"/>
 
-Just install the extension and click on `Getting Started` in the `Inlang Tab`. 
+Install the extension and click `Getting Started` in the `Inlang Tab`. 
 
 ### Manual setup
 
@@ -152,7 +164,7 @@ You can use the following template when using JSON files as translation files. I
 
 #### 2. Decide on a **syntax matcher**
 
-You should continue with **installing a syntax matcher**. There are multiple syntax matcher's available:
+You should continue with **installing a syntax matcher**. There are multiple syntax matcher available:
 
 - m function matcher: https://inlang.com/m/632iow21/plugin-inlang-mFunctionMatcher
 - t function matcher: https://inlang.com/m/698iow33/plugin-inlang-tFunctionMatcher

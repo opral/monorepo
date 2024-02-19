@@ -1,7 +1,9 @@
-import { For } from "solid-js"
+import { For, Show } from "solid-js"
 import * as m from "#src/paraglide/messages.js"
-import Card from "#src/interface/components/Card.jsx"
 import { registry } from "@inlang/marketplace-registry"
+import Link from "#src/renderer/Link.jsx"
+import { Chip } from "#src/interface/components/Chip.jsx"
+import { colorForTypeOf } from "#src/pages/m/utilities.js"
 
 const Features = () => {
 	const getProducts = () => [
@@ -18,8 +20,8 @@ const Features = () => {
 				</h2>
 				<div class="grid lg:grid-cols-4 md:grid-cols-2 gap-4">
 					<For each={getProducts()}>
-						{(guide) => {
-							const manifest = registry.find((manifest) => manifest.id === guide)
+						{(apps) => {
+							const manifest = registry.find((manifest) => manifest.id === apps)
 							if (!manifest) {
 								return undefined
 							}
@@ -27,13 +29,89 @@ const Features = () => {
 								typeof manifest.displayName === "object"
 									? manifest.displayName.en
 									: manifest.displayName
+							const description = () =>
+								typeof manifest.description === "object"
+									? manifest.description.en
+									: manifest.description
 							return (
-								<div class="relative">
-									<Card item={manifest} displayName={displayName()} />
-									{/* <Show when={getProducts().indexOf(guide) === 0}>
-										<div class="blur-[128px] absolute inset-0 pointer-events-none animate-pulse bg-gradient-to-tr from-hover-danger to-hover-warning opacity-5" />
-									</Show> */}
-								</div>
+								<Link
+									href={`/m/${manifest.uniqueID}/${manifest.id.replaceAll(".", "-")}`}
+									class={
+										"px-6 py-6 relative no-underline z-10 flex justify-between gap-4 overflow-hidden flex-col group w-full bg-background transition-all border border-surface-200 rounded-xl hover:shadow-lg hover:shadow-surface-100 hover:border-surface-300 active:border-surface-400"
+									}
+								>
+									<div class="flex flex-1 flex-col gap-4">
+										<div class="w-full flex gap-4 items-start">
+											<div class="flex items-center gap-8 flex-shrink-0">
+												<Show
+													when={manifest.icon}
+													fallback={
+														<div class="w-10 h-10 font-semibold text-xl line-clamp-2 rounded-md m-0 shadow-lg object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
+															{displayName().split(" ")[0]![0]}
+														</div>
+													}
+												>
+													<img
+														alt={
+															// @ts-ignore
+															displayName().en
+														}
+														class="w-10 h-10 rounded-lg m-0 object-cover object-center"
+														src={manifest.icon}
+													/>
+												</Show>
+											</div>
+											<div class="flex flex-col justify-between items-start">
+												<h4
+													// eslint-disable-next-line solid/style-prop
+													style="text-wrap: balance;"
+													class="m-0 text-sm text-surface-800 line-clamp-2 leading-none no-underline font-semibold group-hover:text-surface-900 transition-colors"
+												>
+													{displayName()}
+												</h4>
+
+												<div class="flex items-center mt-2 gap-1 flex-wrap">
+													<Chip
+														text={"app"}
+														color={colorForTypeOf("app.x.x")}
+														customClasses="text-xs"
+													/>
+												</div>
+											</div>
+										</div>
+										<p class="text-sm line-clamp-2 text-surface-500 transition-colors group-hover:text-surface-600">
+											{description()}
+										</p>
+									</div>
+									{/* <div class="flex items-center gap-2 justify-between">
+										<Show when={props.item.publisherIcon}>
+											<div class="flex gap-2">
+												<img
+													alt={
+														// @ts-ignore
+														props.item.publisherName.en
+													}
+													class="w-5 h-5 rounded-full object-cover object-center"
+													src={props.item.publisherIcon}
+												/>
+												<p class="text-sm text-surface-500 group-hover:text-surface-600 transition-colors">
+													{props.item.publisherName}
+												</p>
+											</div>
+										</Show>
+										<div>
+											<Show
+												when={props.item.keywords
+													.map((keyword: string) => keyword.toLowerCase())
+													.includes("lix")}
+											>
+												<div class="w-5 text-primary group transition-colors">
+													<LixBadge />
+												</div>
+											</Show>
+										</div>
+									</div> */}
+								</Link>
 							)
 						}}
 					</For>

@@ -4,6 +4,18 @@
 
 ### Patch Changes
 
+- @inlang/rpc@0.2.12
+- @inlang/project-settings@2.2.3
+- @inlang/plugin-message-format@2.0.0
+- @inlang/website@null
+- @inlang/badge@0.7.2
+- @inlang/telemetry@0.3.11
+- @inlang/marketplace-manifest@1.3.3
+
+## null
+
+### Patch Changes
+
 - @inlang/rpc@0.2.11
 - @inlang/project-settings@2.2.2
 - @inlang/marketplace-manifest@1.3.2

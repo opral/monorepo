@@ -11,7 +11,7 @@ import type { PathTranslations } from "../path-translations/types.js"
  */
 export const handleRedirects: (
 	runtime: Paraglide<any>,
-	translations: PathTranslations<string>,
+	translations: PathTranslations<string>
 ) => Handle =
 	(runtime, translations) =>
 	async ({ event, resolve }) => {

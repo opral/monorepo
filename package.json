@@ -17,7 +17,6 @@
 		"build:no-nx": "pnpm --stream --parallel build",
 		"dev:no-nx": "pnpm --stream --parallel dev",
 		"dev:no-clear": "pnpm dev:no-nx | sed -u 's/\\x1Bc//g'",
-		"fetch-env:public": "pnpm --filter=@inlang/env-variables fetch-env:public",
 		"fetch-env:internal": "doppler secrets download --no-file --format env > .env",
 		"changeset": "npx changeset",
 		"clean": "pnpm recursive run clean && rm -rf ./.env ./node_modules",

@@ -8,8 +8,9 @@ import { renderLocales } from "#src/renderer/renderLocales.js"
 import { i18nRouting } from "#src/renderer/+onBeforeRoute.js"
 import Personas from "./custom_section/Personas/index.jsx"
 import LixSection from "./custom_section/Lix/index.jsx"
+import Features from "./custom_section/Features.jsx"
 
-export default function Page() {
+export default function Page(props: { projectCount: number }) {
 	return (
 		<>
 			<Title>{m.inlang_global_title()}</Title>
@@ -45,8 +46,8 @@ export default function Page() {
 				rel="canonical"
 			/>
 			<MarketplaceLayout>
-				<HeroSearch />
-				{/* <Features /> */}
+				<HeroSearch projectCount={props.projectCount} />
+				<Features />
 				<Personas />
 				{/* <ExtendSection /> */}
 				{/* <EcosystemComponents /> */}

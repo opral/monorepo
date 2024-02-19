@@ -298,3 +298,17 @@ sl-details::part(content) {
 	height: calc(100vh - 124px);
 	padding-bottom: 8rem;
 }
+
+sl-dialog.video-dialog::part(panel) {
+	max-width: 800px;
+	width: 95%;
+	border-radius: 12px;
+}
+
+sl-dialog.video-dialog::part(title) {
+	font-weight: 600;
+}
+
+sl-dialog.video-dialog::part(body) {
+	padding-top: 0;
+}
