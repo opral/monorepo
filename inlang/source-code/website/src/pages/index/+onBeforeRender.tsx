@@ -7,7 +7,6 @@ export default async function onBeforeRender() {
 		if (result.error) {
 			throw new Error(result.error.message)
 		}
-
 		const projectCount = result.data
 		if (!projectCount) {
 			throw new Error("Project count is not defined")
