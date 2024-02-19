@@ -42,15 +42,16 @@ export async function run(): Promise<void> {
 			branch: github.context.payload.pull_request?.head.label.split(":")[1],
 		}
 		const commentContent = `
-				Pull Request contains translations updates. \n
-				
-				📊 Summary: \n
-				| Level | Count | \n
-				| Errors | ${lintSummary.errors} | \n
-				| Warnings | ${lintSummary.warnings} | \n
-
-				[Open in Fink](https://fink.inlang.com/github.com/${headMeta.owner}/${headMeta.repo}/?branch=${headMeta.branch}&project=${project_path})
-			`.toString()
+		Pull Request contains translations updates.
+		
+		📊 Summary:
+		| Level    | Count    |
+		|----------|----------|
+		| Errors   | ${lintSummary.errors}    |
+		| Warnings | ${lintSummary.warnings}  |
+		
+		[Open in Fink](https://fink.inlang.com/github.com/${headMeta.owner}/${headMeta.repo}/?branch=${headMeta.branch}&project=${project_path})
+		`
 		console.log(`I'm going to comment on the PR with:`, commentContent)
 
 		const octokit = github.getOctokit(token)
