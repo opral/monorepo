@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'inlang/project.inlang/**.json'
+      - 'project.inlang/**'
       - 'inlang/source-code/website/messages.json'
 
 jobs:
