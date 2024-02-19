@@ -1,14 +1,16 @@
 "use client"
 import * as m from "@/paraglide/messages"
 import { languageTag } from "@/paraglide/runtime"
-import { i18n } from "@/lib/i18n"
+import { useRouter } from "@inlang/paraglide-js-adapter-next"
 
 export function ClientComponent() {
+	const router = useRouter()
+
 	return (
 		<div>
 			<h1>{m.on_the_client()}</h1>
 			<p>{m.currentLanguageTag({ languageTag: languageTag() })}</p>
-			<p>{i18n._env}</p>
+			<button onClick={() => router.push("/about")}>{m.about()}</button>
 		</div>
 	)
 }

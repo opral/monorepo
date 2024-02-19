@@ -1,6 +1,6 @@
 "use client"
 import { availableLanguageTags } from "@/paraglide/runtime"
-import Link from "next/link"
+import { Link } from "@inlang/paraglide-js-adapter-next"
 import { usePathname } from "next/navigation"
 import { Fragment } from "react"
 

@@ -60,5 +60,10 @@ export function paraglide(config: Config): NextConfig {
 	const nextConfig: NextConfig = { ...config }
 	delete nextConfig.paraglide
 
+	// add @inlang/paraglide-js-adapter-next to the optimizePackageImports. This reduces the Client / Server component import issues
+	nextConfig.experimental ||= {}
+	nextConfig.experimental.optimizePackageImports ||= []
+	nextConfig.experimental.optimizePackageImports.push("@inlang/paraglide-js-adapter-next")
+
 	return nextConfig
 }

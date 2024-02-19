@@ -31,5 +31,4 @@ const permanentRedirect: NextPermanentRedirect = (...args) => {
 	NextNavigation.permanentRedirect(...args)
 }
 
-export * from "next/navigation"
 export { useRouter, redirect, permanentRedirect }

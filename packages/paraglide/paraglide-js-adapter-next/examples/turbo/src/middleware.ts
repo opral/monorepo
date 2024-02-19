@@ -1,3 +1,8 @@
-import { i18n } from "./lib/i18n"
+import { paraglideMiddleware } from "@inlang/paraglide-js-adapter-next"
 
-export const middleware = i18n.middleware
+export const middleware = paraglideMiddleware
+
+export const config = {
+	//Must be hardcoded string
+	matcher: ["/", `/(de|en|de-CH)/:path*`],
+}
