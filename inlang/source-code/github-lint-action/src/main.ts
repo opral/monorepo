@@ -74,7 +74,7 @@ export async function run(): Promise<void> {
 		if (existingComment.data.length > 0) {
 			const commentId = existingComment.data.find(
 				(comment) =>
-					comment.body?.includes("🌐 Translation change detected") &&
+					comment.body?.includes("⚠️ Translation change detected") &&
 					comment.user?.login === "github-actions[bot]"
 			)?.id
 			if (commentId) {
