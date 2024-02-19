@@ -1,5 +1,6 @@
 import { Match, Switch } from "solid-js"
 import {
+	AliasIcon,
 	AppIcon,
 	LanguageTagIcon,
 	LibraryIcon,
@@ -37,6 +38,11 @@ const NavbarIcon = (props: { slug: string }) => {
 				<Match when={props.slug === "concept/message"}>
 					<div class="mr-3 w-4 h-4">
 						<MessageIcon />
+					</div>
+				</Match>
+				<Match when={props.slug === "concept/alias"}>
+					<div class="mr-3 w-4 h-4">
+						<AliasIcon />
 					</div>
 				</Match>
 				<Match when={props.slug === "concept/library"}>
