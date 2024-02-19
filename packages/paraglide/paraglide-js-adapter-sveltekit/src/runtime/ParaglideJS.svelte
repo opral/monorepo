@@ -95,10 +95,14 @@
 					defaultLanguageTag: i18n.config.defaultLanguageTag,
 					prefixDefaultLanguage: i18n.config.prefixDefaultLanguage,
 				})}
-				{@const fullUrl = new URL(path, new URL($page.url))}
+
+				{@const href = $page.url.host === "sveltekit-prerender" 
+						? path 
+						: (new URL(path, new URL($page.url))).href 
+				}
 
 				<!-- Should be a fully qualified href, including protocol -->
-				<link rel="alternate" hreflang={lang} href={fullUrl.href} />
+				<link rel="alternate" hreflang={lang} href={href} />
 			{/each}
 		{/if}
 	{/if}
