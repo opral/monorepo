@@ -85,7 +85,7 @@ export async function run(): Promise<void> {
 					owner,
 					repo,
 					comment_id: commentId,
-					body: commentContent,
+					body: commentContent(),
 				})
 				return
 			}
@@ -96,7 +96,7 @@ export async function run(): Promise<void> {
 			owner,
 			repo,
 			issue_number: pr_number as number,
-			body: commentContent,
+			body: commentContent(),
 		})
 	} catch (error) {
 		// Fail the workflow run if an error occurs
