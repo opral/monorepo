@@ -12,6 +12,15 @@ npx @inlang/cli [command]
 
 See all available commands [here](#commands).
 
+# Let's get started
+
+1. Add a `project.inlang` folder to your repository
+2. Create a `settings.json` file to that new dir `project.inlang/settings.json`
+3. Install a plugin that reads and writes your messages from the [inlang marketplace](https://inlang.com/c/plugins)
+---
+4. **Optional** Install lint rules to find errors in your translations from the [inlang marketplace](https://inlang.com/c/lint-rules)
+
+
 # Core features
 
 <doc-features>
@@ -33,11 +42,11 @@ See all available commands [here](#commands).
 
 #### Automate
 
-You can use the CLI to automate localization tasks, such as machine translation, linting, and more.
+You can use the CLI to automate localization tasks like machine translation, linting, and more.
 
 #### Machine Translation
 
-The CLI allows you to machine translate your resources. This is useful if you want to get a first draft of your translations and then have them reviewed by a human translator. Via machine translation, you're able to do translation automation e.g. in your CI/CD pipeline.
+The CLI allows you to machine translate your resources. This is useful if you want to get a first draft of your translations and then have them reviewed by a human translator. Via machine translation, you can do translation automation e.g. in your CI/CD pipeline.
 
 #### Validation
 
@@ -71,7 +80,7 @@ npx @inlang/cli [command]
 
 Minimum node version: `v18.0.0`
 
-If one of the commands can't be found, you are probably using an outdated version of the CLI. You can always get the **latest version** by running `npx @inlang/cli@latest [command]`.
+If one of the commands can't be found, you probably use an outdated CLI version. You can always get the **latest version** by running `npx @inlang/cli@latest [command]`.
 
 
 # Commands
@@ -91,12 +100,12 @@ If one of the commands can't be found, you are probably using an outdated versio
 
 We recommend using the CLI with `npx` to avoid installing the CLI globally. Not installing the CLI globally has the following advantages:
 
-- the installed CLI version is scoped to the project, ensuring that it always works.
+- the installed CLI version is scoped to the project, ensuring it always works.
 - the CLI gets installed for team members, avoiding "why is this command not working for me" questions.
 
 `npx` is auto-installed with Node and NPM.
 
-If one of the commands can't be found, you are probably using an outdated version of the CLI. You can always get the **latest version** by running `npx @inlang/cli@latest [command]`.
+If one of the commands can't be found, you probably use an outdated CLI version. You can always get the **latest version** by running `npx @inlang/cli@latest [command]`.
 
 ```sh
 CLI for inlang.
@@ -210,7 +219,7 @@ npx @inlang/cli module init
 **Options**
 
 The init command has the following options:
-`--type <type>`: The type of the module. Currently, `lintRule` or `plugin` is supported.
+`--type <type>`: The module type. Currently, `lintRule` or `plugin` is supported.
 
 ### `module build`
 
@@ -224,11 +233,18 @@ npx @inlang/cli module build --entry ./path/to/index.ts --outdir ./path/to/dist
 
 **Options**
 
-`--entry <entry>`: Specifies the path to the entry point of the module, typically src/index.js or src/index.ts.
+`--entry <entry>`: Specifies the path to the module's entry point, typically src/index.js or src/index.ts.
 `--outdir <path>`: Specifies the output directory for the build files. The default output directory is "./dist."
 `--watch`: An optional flag that, when provided, enables a watch mode to monitor for changes and automatically rebuild the module when changes are detected.
 
 See how there is also a `--watch` flag, which enables a watch mode to monitor for changes and automatically rebuild the module when changes are detected. This command runs with `esbuild` under the hood. -->
+
+## Troubleshoot
+
+If something isn't working as expected or you are getting errors, make sure to run on the latest version of the CLI. 
+You can always get the latest version by executing `npx @inlang/cli@latest`.
+
+If the error persists, [please create an issue](https://github.com/opral/monorepo/issues/new/choose) – we're happy to help.
 
 ## Pricing 
 

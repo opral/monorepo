@@ -36,7 +36,7 @@ flowchart BT
 
 **An interesting observation with translation files.**
 
-Compared to other (content) files, translation files are unique: They are saved directly in the source code. Software engineering has solved the collaboration problem for decades. At first, with a database-like approach (one central server; what most startups are implementing nowadays). But since a decade distributed version control, the frontier being git, took the software engineering world by storm. Over 90% of modern source code is now tracked with [Git](https://en.wikipedia.org/wiki/Git) [[source1](https://insights.stackoverflow.com/survey/2018#work-_-version-control), [source2](https://insights.stackoverflow.com/survey/2021#other-tools)].
+Compared to other (content) files, translation files are unique: They are saved directly in the source code. Software engineering has solved the collaboration problem for decades. At first, with a database-like approach (one central server; what most startups are implementing nowadays). But since a decade distributed version control, the frontier being git, took the software engineering world by storm. Over 90% of modern source code is now tracked with [Git](https://en.wikipedia.org/wiki/Git) - based on the 2018 StackOverflow developer survey.
 
 > **Git** is software for tracking changes in any set of [files](https://en.wikipedia.org/wiki/Computer_file), usually used for coordinating work among [programmers](https://en.wikipedia.org/wiki/Programmer) collaboratively developing [source code](https://en.wikipedia.org/wiki/Source_code) during [software development](https://en.wikipedia.org/wiki/Software_development).
 > [_https://en.wikipedia.org/wiki/Git_](https://en.wikipedia.org/wiki/Git)

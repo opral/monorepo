@@ -10,7 +10,7 @@
 		"url": "https://github.com/opral/monorepo.git"
 	},
 	"icon": "assets/icon-vscode-marketplace.png",
-	"version": "1.32.1",
+	"version": "1.32.6",
 	"engines": {
 		"vscode": "^1.84.2"
 	},
@@ -75,18 +75,6 @@
 			]
 		},
 		"commands": [
-			{
-				"command": "inlang.editMessage",
-				"title": "Inlang: Edit a Message"
-			},
-			{
-				"command": "inlang.extractMessage",
-				"title": "Inlang: Extract Message"
-			},
-			{
-				"command": "inlang.openInEditor",
-				"title": "Inlang: Open in Editor"
-			},
 			{
 				"command": "inlang.openProject",
 				"title": "Open project"
@@ -204,7 +192,7 @@
 		"posthog-node": "^3.1.2",
 		"ts-node": "^10.9.1",
 		"typescript": "5.3.2",
-		"wdio-vscode-service": "^5.2.2"
+		"wdio-vscode-service": "^6.0.0"
 	},
 	"activationEvents": [
 		"onStartupFinished"

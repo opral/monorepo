@@ -1,5 +1,38 @@
 # inlang-vs-code-extension
 
+## 1.32.6
+
+### Patch Changes
+
+- 22336898c: Subscribe message view to sdk message changes for dynamic updates
+
+## 1.32.5
+
+### Patch Changes
+
+- d9cf66170: update docs for apps and plugins
+
+## 1.32.4
+
+### Patch Changes
+
+- f5f65581e: remove commands from command palette
+
+## 1.32.3
+
+### Patch Changes
+
+- @inlang/sdk@0.26.3
+- @inlang/telemetry@0.3.11
+
+## 1.32.2
+
+### Patch Changes
+
+- 073c78864: Changed the hreft from the 'create project’ button in the IDE extension and update docs
+- 4e8cafcdd: remove missing custom api setings decoration in settings file
+- 9ed82b43d: disable sentry error logging for now
+
 ## 1.32.1
 
 ### Patch Changes
