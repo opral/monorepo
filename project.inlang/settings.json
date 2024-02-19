@@ -16,6 +16,7 @@
 	},
 	"messageLintRuleLevels": {
 		"messageLintRule.inlang.missingTranslation": "error",
+		"messageLintRule.inlang.emptyPattern": "error",
 		"messageLintRule.inlang.validJsIdentifier": "error"
 	}
 }
