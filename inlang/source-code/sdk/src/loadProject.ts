@@ -311,6 +311,9 @@ export async function loadProject(args: {
 			const saveMessagesPlugin = _resolvedModules.plugins.find(
 				(plugin) => plugin.saveMessages !== undefined
 			)
+			const loadMessagesPlugin = _resolvedModules.plugins.find(
+				(plugin) => plugin.loadMessages !== undefined
+			)
 
 			for (const messageId of currentMessageIds) {
 				if (!trackedMessages!.has(messageId!)) {
@@ -336,7 +339,8 @@ export async function loadProject(args: {
 									messageStates,
 									messagesQuery,
 									settings()!,
-									saveMessagesPlugin
+									saveMessagesPlugin,
+									loadMessagesPlugin
 								)
 							}
 						})
@@ -365,7 +369,8 @@ export async function loadProject(args: {
 					messageStates,
 					messagesQuery,
 					settings()!,
-					saveMessagesPlugin
+					saveMessagesPlugin,
+					loadMessagesPlugin
 				)
 			}
 
@@ -741,7 +746,8 @@ async function saveMessagesViaPlugin(
 	messageState: MessageState,
 	messagesQuery: InlangProject["query"]["messages"],
 	settingsValue: ProjectSettings,
-	savePlugin: any
+	savePlugin: any,
+	loadPlugin: any
 ): Promise<any> {
 	// queue next save if we have a save ongoing
 	if (isSaving) {
@@ -836,6 +842,33 @@ async function saveMessagesViaPlugin(
 
 	await currentSaveMessagesViaPlugin
 
+	// JL: kick off scheduled load here first before additional saves get too greedy with the lock
+	// Per Martin's suggestion Feb 19. 2024 - to avoid flurry of saves without allowing loads
+	// TODO: JL Try to replace async gymnastics -- very hard to follow
+	if (sheduledLoadMessagesViaPlugin) {
+		const scheduledLoadMessages = sheduledLoadMessagesViaPlugin
+		sheduledLoadMessagesViaPlugin = undefined
+
+		// await so that lock can be acquired before the next save
+		// eslint-disable-next-line no-console
+		console.log("saveMessage running scheduled loadMessagesViaPlugin to avoid load starvation")
+		await loadMessagesViaPlugin(
+			fs,
+			lockFilePath,
+			messageState,
+			messagesQuery,
+			settingsValue,
+			loadPlugin
+		).then(
+			() => {
+				scheduledLoadMessages[1]()
+			},
+			(e: Error) => {
+				scheduledLoadMessages[2](e)
+			}
+		)
+	}
+
 	if (sheduledSaveMessages) {
 		const executingSheduledSaveMessages = sheduledSaveMessages
 		sheduledSaveMessages = undefined
@@ -846,7 +879,8 @@ async function saveMessagesViaPlugin(
 			messageState,
 			messagesQuery,
 			settingsValue,
-			savePlugin
+			savePlugin,
+			loadPlugin
 		).then(
 			() => {
 				return executingSheduledSaveMessages[1]()
