@@ -41,7 +41,8 @@ export async function run(): Promise<void> {
 			repo: repo,
 			branch: github.context.payload.pull_request?.head.label.split(":")[1],
 		}
-		const commentContent = `
+		const commentContent = (): string => {
+			return `
 		### 🌐 Translation change detected
 
 		${countMissingTranslation(project.query.messageLintReports.getAll())} missing translations
@@ -53,9 +54,10 @@ export async function run(): Promise<void> {
 		| Warnings | ${lintSummary.warnings}  |
 		
 		[Open in Fink](https://fink.inlang.com/github.com/${headMeta.owner}/${headMeta.repo}/?branch=${
-			headMeta.branch
-		}&project=${project_path})
+				headMeta.branch
+			}&project=${project_path})
 		`
+		}
 
 		const octokit = github.getOctokit(token)
 		const issue = await octokit.rest.issues.get({
