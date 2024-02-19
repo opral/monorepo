@@ -9,7 +9,7 @@ import { loadProject, type MessageLintReport } from "@inlang/sdk"
  * @returns {Promise<void>} Resolves when the action is complete.
  */
 export async function run(): Promise<void> {
-	console.log("Running the action")
+	core.debug("Running the action")
 
 	try {
 		const token = process.env.GITHUB_TOKEN
@@ -42,7 +42,9 @@ export async function run(): Promise<void> {
 			branch: github.context.payload.pull_request?.head.label.split(":")[1],
 		}
 		const commentContent = `
-		Pull Request contains translations updates.
+		### 🌐 Translation change detected
+
+		${countMissingTranslation(project.query.messageLintReports.getAll())} missing translations
 		
 		📊 Summary:
 		| Level    | Count    |
@@ -50,18 +52,19 @@ export async function run(): Promise<void> {
 		| Errors   | ${lintSummary.errors}    |
 		| Warnings | ${lintSummary.warnings}  |
 		
-		[Open in Fink](https://fink.inlang.com/github.com/${headMeta.owner}/${headMeta.repo}/?branch=${headMeta.branch}&project=${project_path})
+		[Open in Fink](https://fink.inlang.com/github.com/${headMeta.owner}/${headMeta.repo}/?branch=${
+			headMeta.branch
+		}&project=${project_path})
 		`
-		console.log(`I'm going to comment on the PR with:`, commentContent)
 
 		const octokit = github.getOctokit(token)
-		// Fetch issue details
 		const issue = await octokit.rest.issues.get({
 			owner,
 			repo,
 			issue_number: pr_number as number,
 		})
 		if (issue.data.locked) return core.debug("PR is locked, skipping comment")
+
 		//check if PR already has a comment from this action
 		const existingComment = await octokit.rest.issues.listComments({
 			owner,
@@ -71,11 +74,11 @@ export async function run(): Promise<void> {
 		if (existingComment.data.length > 0) {
 			const commentId = existingComment.data.find(
 				(comment) =>
-					comment.body?.includes("Pull Request contains translations updates.") &&
+					comment.body?.includes("🌐 Translation change detected") &&
 					comment.user?.login === "github-actions[bot]"
 			)?.id
 			if (commentId) {
-				console.log("Comment already exists, updating it")
+				core.debug("Comment already exists, updating it")
 				await octokit.rest.issues.updateComment({
 					owner,
 					repo,
@@ -86,7 +89,7 @@ export async function run(): Promise<void> {
 			}
 		}
 
-		console.log("Creating a new comment")
+		core.debug("Creating a new comment")
 		await octokit.rest.issues.createComment({
 			owner,
 			repo,
@@ -95,7 +98,6 @@ export async function run(): Promise<void> {
 		})
 	} catch (error) {
 		// Fail the workflow run if an error occurs
-		console.log(error)
 		if (error instanceof Error) core.setFailed(error.message)
 	}
 }
@@ -109,6 +111,14 @@ function createLintSummary(reports: MessageLintReport[]) {
 		},
 		{ errors: 0, warnings: 0 }
 	)
+}
+
+function countMissingTranslation(reports: MessageLintReport[]) {
+	return reports.filter(
+		(r) =>
+			r.ruleId === "messageLintRule.inlang.missingTranslation" ||
+			r.ruleId === "messageLintRule.inlang.emptyPattern"
+	).length
 }
 
 export default run
