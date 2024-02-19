@@ -3,10 +3,11 @@ import { Command } from "commander"
 import { rpc } from "@inlang/rpc"
 import { getInlangProject } from "../../utilities/getInlangProject.js"
 import { log } from "../../utilities/log.js"
-import { type InlangProject, ProjectSettings } from "@inlang/sdk"
+import { type InlangProject, ProjectSettings, Message } from "@inlang/sdk"
 import prompts from "prompts"
 import { projectOption } from "../../utilities/globalFlags.js"
 import progessBar from "cli-progress"
+import plimit from "p-limit"
 
 export const translate = new Command()
 	.command("translate")
@@ -103,8 +104,7 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 
 		const logs: Array<() => void> = []
 
-		// parallelize in the future
-		const promises = messageIds.map(async (id) => {
+		const rpcTranslate = async (id: Message["id"]) => {
 			const toBeTranslatedMessage = args.project.query.messages.get({ where: { id } })!
 			const { data: translatedMessage, error } = await rpc.machineTranslateMessage({
 				message: toBeTranslatedMessage,
@@ -122,7 +122,10 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 				logs.push(() => log.info(`Machine translated message "${id}"`))
 			}
 			bar.increment()
-		})
+		}
+		// parallelize rpcTranslate calls with a limit of 100 concurrent calls
+		const limit = plimit(100)
+		const promises = messageIds.map((id) => limit(() => rpcTranslate(id)))
 		await Promise.all(promises)
 
 		bar.stop()
