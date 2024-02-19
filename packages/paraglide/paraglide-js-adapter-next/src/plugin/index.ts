@@ -21,7 +21,7 @@ type Config = NextConfig & {
  *
  * @returns
  */
-export function withParaglide(config: Config): NextConfig {
+export function paraglide(config: Config): NextConfig {
 	addAlias(config, {
 		"$paraglide/runtime.js": config.paraglide.outdir + "/runtime.js",
 	})
@@ -51,7 +51,7 @@ export function withParaglide(config: Config): NextConfig {
 			return [
 				{
 					source: `/:locale(${languageTags.join("|")})/:path*`,
-					destination: "/:path*?locale=:locale",
+					destination: "/:path*",
 				},
 			]
 		})

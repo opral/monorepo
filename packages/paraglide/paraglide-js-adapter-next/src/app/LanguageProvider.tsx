@@ -10,11 +10,6 @@ import { ClientLanguageProvider } from "./ClientLanguageProvider"
 import { LanguageSpy } from "./LanguageSpy"
 import { LANGUAGE_HEADER } from "../constants"
 
-/**
- * 
- * @param props 
- * @returns 
- */
 export default function LanguageProvider(props: { children: React.ReactNode }): React.ReactElement {
 	setLanguageTag(() => {
 		const langHeader = headers().get(LANGUAGE_HEADER)
