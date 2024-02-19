@@ -60,30 +60,30 @@ export async function run(): Promise<void> {
 		})
 		if (issue.data.locked) return console.log("PR is locked, skipping comment")
 		//check if PR already has a comment from this action
-		// const existingComment = await octokit.rest.issues.listComments({
-		// 	owner,
-		// 	repo,
-		// 	issue_number: pr_number as number,
-		// })
-		// console.log("existingComment: ", existingComment)
-		// if (existingComment.data.length > 0) {
-		// 	console.log("Comment already exists, updating it")
-		// 	const commentId = existingComment.data.find((comment) =>
-		// 		comment.body?.includes("Pull Request #")
-		// 	)?.id
-		// 	if (commentId) {
-		// 		await octokit.rest.issues.updateComment({
-		// 			owner,
-		// 			repo,
-		// 			comment_id: commentId,
-		// 			body: commentContent,
-		// 		})
-		// 		core.setOutput("comment_content", commentContent)
-		// 		return
-		// 	}
-		// }
-		console.log("Creating a new comment")
+		const existingComment = await octokit.rest.issues.listComments({
+			owner,
+			repo,
+			issue_number: pr_number as number,
+		})
+		console.log("existingComment: ", existingComment)
+		if (existingComment.data.length > 0) {
+			console.log("Comment already exists, updating it")
+			const commentId = existingComment.data.find((comment) =>
+				comment.body?.includes("Pull Request #")
+			)?.id
+			if (commentId) {
+				await octokit.rest.issues.updateComment({
+					owner,
+					repo,
+					comment_id: commentId,
+					body: commentContent,
+				})
+				core.setOutput("comment_content", commentContent)
+				return
+			}
+		}
 
+		console.log("Creating a new comment")
 		await octokit.rest.issues.createComment({
 			owner,
 			repo,
