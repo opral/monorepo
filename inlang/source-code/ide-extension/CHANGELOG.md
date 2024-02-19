@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.32.6
+
+### Patch Changes
+
+- 22336898c: Subscribe message view to sdk message changes for dynamic updates
+
 ## 1.32.5
 
 ### Patch Changes
