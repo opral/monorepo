@@ -12,6 +12,6 @@
 		"skipLibCheck": true,
 		"declarationMap": true
 	},
-	"include": ["src", "src-new"],
-	"exclude": ["example-*"]
+	"include": ["src"],
+	"exclude": ["examples"]
 }
