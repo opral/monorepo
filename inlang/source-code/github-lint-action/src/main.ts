@@ -52,9 +52,9 @@ export async function run(): Promise<void> {
 | Errors   | ${lintSummary.errors}    |
 | Warnings | ${lintSummary.warnings}  |
 
-[Open in Fink](https://fink.inlang.com/github.com/${headMeta.owner}/${headMeta.repo}/?branch=${
-			headMeta.branch
-		}&project=${project_path})
+[![Open in Fink](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/assets/md-badges/fink-action-button.svg)](https://fink.inlang.com/github.com/${
+			headMeta.owner
+		}/${headMeta.repo}/?branch=${headMeta.branch}&project=${project_path})
 `
 
 		const octokit = github.getOctokit(token)
