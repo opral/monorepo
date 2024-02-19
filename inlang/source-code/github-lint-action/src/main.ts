@@ -42,19 +42,19 @@ export async function run(): Promise<void> {
 			branch: github.context.payload.pull_request?.head.label.split(":")[1],
 		}
 		const commentContent = `
-### 🌐 Translation change detected
-
-### \`${countMissingTranslation(project.query.messageLintReports.getAll())}\` missing translations
-
-📊 Summary:
-| Level    | Count    |
-|----------|----------|
-| Errors   | ${lintSummary.errors}    |
-| Warnings | ${lintSummary.warnings}  |
+### ⚠️ Translation change detected: \`${countMissingTranslation(
+			project.query.messageLintReports.getAll()
+		)}\` missing translations
 
 [![Open in Fink](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/assets/md-badges/fink-action-button.svg)](https://fink.inlang.com/github.com/${
 			headMeta.owner
 		}/${headMeta.repo}/?branch=${headMeta.branch}&project=${project_path})
+
+📊 **Summary**
+| Level    | Count    |
+|----------|----------|
+| Errors   | ${lintSummary.errors}    |
+| Warnings | ${lintSummary.warnings}  |
 `
 
 		const octokit = github.getOctokit(token)
