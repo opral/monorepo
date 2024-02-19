@@ -50,7 +50,7 @@ export async function run(): Promise<void> {
 				| Warnings | ${lintSummary.warnings} | \n
 
 				[Open in Fink](https://fink.inlang.com/github.com/${headMeta.owner}/${headMeta.repo}/?branch=${headMeta.branch}&project=${project_path})
-			`
+			`.toString()
 		console.log(`I'm going to comment on the PR with:`, commentContent)
 
 		const octokit = github.getOctokit(token)
@@ -68,13 +68,11 @@ export async function run(): Promise<void> {
 			issue_number: pr_number as number,
 		})
 		if (existingComment.data.length > 0) {
-			const commentId = existingComment.data.find((comment) => {
-				console.log(comment.body, comment.user?.login)
-				return (
+			const commentId = existingComment.data.find(
+				(comment) =>
 					comment.body?.includes("Pull Request contains translations updates.") &&
 					comment.user?.login === "github-actions[bot]"
-				)
-			})?.id
+			)?.id
 			if (commentId) {
 				console.log("Comment already exists, updating it")
 				await octokit.rest.issues.updateComment({
@@ -94,7 +92,6 @@ export async function run(): Promise<void> {
 			issue_number: pr_number as number,
 			body: commentContent,
 		})
-		core.setOutput("comment_content", commentContent)
 	} catch (error) {
 		// Fail the workflow run if an error occurs
 		console.log(error)
