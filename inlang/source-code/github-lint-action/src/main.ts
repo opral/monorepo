@@ -68,11 +68,13 @@ export async function run(): Promise<void> {
 			issue_number: pr_number as number,
 		})
 		if (existingComment.data.length > 0) {
-			const commentId = existingComment.data.find(
-				(comment) =>
+			const commentId = existingComment.data.find((comment) => {
+				console.log(comment.body, comment.user?.login)
+				return (
 					comment.body?.includes("Pull Request contains translations updates.") &&
 					comment.user?.login === "github-actions[bot]"
-			)?.id
+				)
+			})?.id
 			if (commentId) {
 				console.log("Comment already exists, updating it")
 				await octokit.rest.issues.updateComment({
