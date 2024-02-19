@@ -42,7 +42,7 @@ export type HandleOptions = {
 
 export const createHandle = <T extends string>(
 	i18n: I18nConfig<T>,
-	options: HandleOptions,
+	options: HandleOptions
 ): Handle => {
 	const langPlaceholder = options.langPlaceholder ?? "%paraglide.lang%"
 	const dirPlaceholder = options.textDirectionPlaceholder ?? "%paraglide.textDirection%"

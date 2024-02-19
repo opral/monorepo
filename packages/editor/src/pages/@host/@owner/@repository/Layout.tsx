@@ -375,9 +375,27 @@ export function Layout(props: { children: JSXElement }) {
 				/>
 				<sl-checkbox
 					class="pt-4"
-					prop:checked={localStorage.disableForkSyncWarning?.some((repo) => repo.owner === routeParams().owner && repo.repository === routeParams().repository)}
-				on:sl-change={(event: { target: { checked: boolean } }) => {
-					setLocalStorage({ ...localStorage, disableForkSyncWarning: event.target.checked ? [...localStorage.disableForkSyncWarning, { owner: routeParams().owner, repository: routeParams().repository }] : localStorage.disableForkSyncWarning.filter((repo) => !(repo.owner === routeParams().owner && repo.repository === routeParams().repository)) })}}
+					prop:checked={localStorage.disableForkSyncWarning?.some(
+						(repo) =>
+							repo.owner === routeParams().owner && repo.repository === routeParams().repository
+					)}
+					on:sl-change={(event: { target: { checked: boolean } }) => {
+						setLocalStorage({
+							...localStorage,
+							disableForkSyncWarning: event.target.checked
+								? [
+										...localStorage.disableForkSyncWarning,
+										{ owner: routeParams().owner, repository: routeParams().repository },
+								  ]
+								: localStorage.disableForkSyncWarning.filter(
+										(repo) =>
+											!(
+												repo.owner === routeParams().owner &&
+												repo.repository === routeParams().repository
+											)
+								  ),
+						})
+					}}
 				>
 					Disable checking for updates in the upstream branch
 				</sl-checkbox>

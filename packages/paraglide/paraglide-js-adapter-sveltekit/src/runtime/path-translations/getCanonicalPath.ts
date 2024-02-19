@@ -9,7 +9,7 @@ import type { PathTranslations } from "./types.js"
 export function getCanonicalPath(
 	translatedPath: string,
 	lang: string,
-	translations: PathTranslations,
+	translations: PathTranslations
 ): string {
 	for (const [canonicalPathDefinition, translationsForPath] of Object.entries(translations)) {
 		if (!(lang in translationsForPath)) continue

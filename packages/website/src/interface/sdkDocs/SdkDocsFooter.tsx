@@ -71,12 +71,24 @@ const Footer = () => {
 	const getDocsLinks = () => {
 		return [
 			{
-				name: "SDK",
+				name: "What is inlang?",
 				href: "/documentation",
+			},
+			{
+				name: "Architecture",
+				href: "/documentation/architecture",
+			},
+			{
+				name: "inlang SDK",
+				href: "/documentation/sdk",
 			},
 			{
 				name: "Plugin",
 				href: "/documentation/plugin",
+			},
+			{
+				name: "Lint Rule",
+				href: "/documentation/lint-rule",
 			},
 		]
 	}

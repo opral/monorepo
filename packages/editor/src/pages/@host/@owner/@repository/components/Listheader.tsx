@@ -62,7 +62,7 @@ export const ListHeader = () => {
 			.find((rule) => rule.id === lintRuleId)
 
 	return (
-		<div class="w-full bg-background border border-surface-3 rounded-t-md flex flex-wrap items-center justify-between gap-2 p-4 animate-blendIn">
+		<div class="w-full bg-background border border-surface-3 rounded-t-md flex flex-wrap items-center justify-between gap-2 p-4 animate-blendIn z-[1] relative">
 			<Show
 				when={filteredId() === ""}
 				fallback={
