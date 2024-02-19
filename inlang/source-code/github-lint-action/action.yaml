@@ -4,9 +4,6 @@ author: 'inlang'
 
 # Define your inputs here.
 inputs:
-  token:
-    description: 'Your GitHub token'
-    required: true
   project_path:
     description: 'Project path'
     required: true

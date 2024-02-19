@@ -42,6 +42,7 @@ jobs:
       - name: Test Local Action
         id: test-action
         uses: ./inlang/source-code/github-lint-action
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           project_path: "/project.inlang"
