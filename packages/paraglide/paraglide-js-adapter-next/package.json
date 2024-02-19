@@ -23,10 +23,6 @@
             "types": "./dist/index.d.ts",
             "import": "./dist/index.js"
         },
-        "./middleware": {
-            "types": "./dist/app/middleware.d.ts",
-            "import": "./dist/app/middleware.js"
-        },
         "./navigation": {
             "types": "./dist/app/navigation/index.d.ts",
             "import": "./dist/app/navigation/index.js"

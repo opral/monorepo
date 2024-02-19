@@ -19,7 +19,6 @@ const app_build = await rollup({
 	input: {
 		index: "src/index.tsx",
 		"app/navigation/index": "src/app/navigation/index.tsx",
-		"app/middleware": "src/app/middleware.tsx",
 	},
 	external: [
 		/node_modules/,
