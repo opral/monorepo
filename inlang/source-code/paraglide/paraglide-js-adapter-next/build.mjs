@@ -14,23 +14,24 @@ const dependencies = Object.keys(packageJson.dependencies || {})
 
 console.log(`Building ${packageJson.name} v${packageJson.version}...`)
 
+const external = [
+	/node_modules/,
+	"$paraglide/runtime.js",
+	"path",
+	"url",
+	"fs/promises",
+	"@lix-js/client",
+	"@inlang/sdk",
+	...peerDependencies,
+	...dependencies,
+]
+
 const app_build = await rollup({
 	plugins: [typescript({ tsconfig: "./tsconfig.json" }), cjs(), resolve(), preserveDirectives()],
 	input: {
 		index: "src/index.tsx",
-		"app/navigation/index": "src/app/navigation/index.tsx",
 	},
-	external: [
-		/node_modules/,
-		"$paraglide/runtime.js",
-		"path",
-		"url",
-		"fs/promises",
-		"@lix-js/client",
-		"@inlang/sdk",
-		...peerDependencies,
-		...dependencies,
-	],
+	external,
 })
 
 const pages_build = await rollup({
@@ -38,17 +39,7 @@ const pages_build = await rollup({
 	input: {
 		"pages/entry": "src/pages/index.tsx",
 	},
-	external: [
-		/node_modules/,
-		"$paraglide/runtime.js",
-		"path",
-		"url",
-		"fs/promises",
-		"@lix-js/client",
-		"@inlang/sdk",
-		...peerDependencies,
-		...dependencies,
-	],
+	external,
 })
 
 const pluginBuild = await rollup({
@@ -56,17 +47,7 @@ const pluginBuild = await rollup({
 	input: {
 		"plugin/index": "src/plugin/index.ts",
 	},
-	external: [
-		/node_modules/,
-		"$paraglide/runtime.js",
-		"path",
-		"url",
-		"fs/promises",
-		"@inlang/sdk",
-		"@lix-js/client",
-		...peerDependencies,
-		...dependencies,
-	],
+	external,
 })
 
 await pluginBuild.write({
