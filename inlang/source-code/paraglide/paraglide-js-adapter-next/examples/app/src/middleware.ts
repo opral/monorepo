@@ -1,4 +1,4 @@
-import { paraglideMiddleware } from "@inlang/paraglide-js-adapter-next/middleware"
+import { paraglideMiddleware } from "@inlang/paraglide-js-adapter-next"
 
 export const middleware = paraglideMiddleware
 
