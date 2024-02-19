@@ -12,7 +12,10 @@ export async function run(): Promise<void> {
 	console.log("Running the action")
 
 	try {
-		const token: string = core.getInput("token", { required: true })
+		const token = process.env.GITHUB_TOKEN
+		if (!token) {
+			throw new Error("GITHUB_TOKEN is not set")
+		}
 		const project_path: string = core.getInput("project_path", { required: true })
 		const { owner, repo } = github.context.repo
 		const pr_number = github.context.payload.pull_request?.number
@@ -39,9 +42,12 @@ export async function run(): Promise<void> {
 			branch: github.context.payload.pull_request?.head.label.split(":")[1],
 		}
 		const commentContent = `
-				Pull Request #${pr_number} has been updated with: \n
-				- ${lintSummary.errors} errors \n
-				- ${lintSummary.warnings} warnings \n
+				Pull Request contains translations updates. \n
+				
+				📊 Summary: \n
+				| Level | Count | \n
+				| Errors | ${lintSummary.errors} | \n
+				| Warnings | ${lintSummary.warnings} | \n
 
 				[Open in Fink](https://fink.inlang.com/github.com/${headMeta.owner}/${headMeta.repo}/?branch=${headMeta.branch}&project=${project_path})
 			`
@@ -54,27 +60,27 @@ export async function run(): Promise<void> {
 			repo,
 			issue_number: pr_number as number,
 		})
-		// if (issue.data.locked) return console.log("PR is locked, skipping comment")
+		if (issue.data.locked) return core.debug("PR is locked, skipping comment")
 		//check if PR already has a comment from this action
 		const existingComment = await octokit.rest.issues.listComments({
 			owner,
 			repo,
 			issue_number: pr_number as number,
 		})
-		console.log("existingComment: ", existingComment)
 		if (existingComment.data.length > 0) {
-			console.log("Comment already exists, updating it")
-			const commentId = existingComment.data.find((comment) =>
-				comment.body?.includes("Pull Request #")
+			const commentId = existingComment.data.find(
+				(comment) =>
+					comment.body?.includes("Pull Request contains translations updates.") &&
+					comment.user?.login === "github-actions[bot]"
 			)?.id
 			if (commentId) {
+				console.log("Comment already exists, updating it")
 				await octokit.rest.issues.updateComment({
 					owner,
 					repo,
 					comment_id: commentId,
 					body: commentContent,
 				})
-				core.setOutput("comment_content", commentContent)
 				return
 			}
 		}
