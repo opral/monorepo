@@ -33,10 +33,6 @@ export async function run(): Promise<void> {
 		}
 		const lintSummary = createLintSummary(project.query.messageLintReports.getAll())
 
-		// const repoMeta = await inlangRepo?.getMeta()
-		// console.log("isFork", repoMeta.isFork)
-		// console.log("Merge head: ", github.context.payload.pull_request?.head.label.split(":"))
-		// console.log("Merge base: ", github.context.payload.pull_request?.base.label.split(":"))
 		const headMeta = {
 			owner: github.context.payload.pull_request?.head.label.split(":")[0],
 			repo: repo,
@@ -58,7 +54,7 @@ export async function run(): Promise<void> {
 			repo,
 			issue_number: pr_number as number,
 		})
-		if (issue.data.locked) return console.log("PR is locked, skipping comment")
+		// if (issue.data.locked) return console.log("PR is locked, skipping comment")
 		//check if PR already has a comment from this action
 		const existingComment = await octokit.rest.issues.listComments({
 			owner,
