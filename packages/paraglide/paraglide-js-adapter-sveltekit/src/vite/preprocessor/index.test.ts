@@ -256,6 +256,24 @@ describe.concurrent("preprocessor", () => {
 		const html = await renderComponent(code)
 		expect(html).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
 	})
+
+	it("handles a language switcher", async () => {
+		const code = `
+        <script>
+            const availableLanguageTags = ["de", "en"]
+        </script>
+     
+
+		{#each availableLanguageTags as lang}
+			<a href="/test" hreflang={lang}>{lang}</a>
+		{/each}
+		`
+
+		const html = await renderComponent(code)
+		expect(html).toBe(
+			`<a href="/rewritten/de" hreflang="de">de</a><a href="/rewritten/en" hreflang="en">en</a>`
+		)
+	})
 })
 
 /**
