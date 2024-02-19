@@ -1,34 +1,36 @@
 import * as m from "#src/paraglide/messages.js"
 import { Button } from "../components/Button.jsx"
-import { createSignal } from "solid-js"
+import { Show, createSignal } from "solid-js"
 import CredibilityTag from "../components/CredibilityTag.jsx"
 
 const isProduction = process.env.NODE_ENV === "production"
 
-const HeroSearch = () => {
+const HeroSearch = (props: { projectCount: number }) => {
 	const [open, setOpen] = createSignal(false)
 
 	return (
 		<div class="relative grid grid-cols-12">
-			<sl-dialog
-				prop:label="What is inlang?"
-				class="video-dialog"
-				prop:open={open()}
-				on:sl-after-hide={() => setOpen(false)}
-			>
-				<div style={{ position: "relative", "padding-bottom": "56.25%", height: "0" }}>
-					<iframe
-						src="https://www.loom.com/embed/f35656b7ac464f57816793c79bb7938b?sid=f96b57bd-6f45-45ac-ba43-814857598ce1"
-						frame-border="0"
-						web-kit-allow-fullscreen
-						moz-allow-fullscreen
-						allow-fullscreen
-						style={{ position: "absolute", top: "0", left: "0", width: "100%", height: "100%" }}
-					/>
-				</div>
-			</sl-dialog>
+			<Show when={open()}>
+				<sl-dialog
+					prop:label="What is inlang?"
+					class="video-dialog"
+					prop:open={open()}
+					on:sl-after-hide={() => setOpen(false)}
+				>
+					<div style={{ position: "relative", "padding-bottom": "56.25%", height: "0" }}>
+						<iframe
+							src="https://www.loom.com/embed/f35656b7ac464f57816793c79bb7938b?sid=f96b57bd-6f45-45ac-ba43-814857598ce1"
+							frame-border="0"
+							web-kit-allow-fullscreen
+							moz-allow-fullscreen
+							allow-fullscreen
+							style={{ position: "absolute", top: "0", left: "0", width: "100%", height: "100%" }}
+						/>
+					</div>
+				</sl-dialog>
+			</Show>
 			<div class="col-span-12 lg:col-span-7 items-center lg:items-start relative z-30 flex flex-col gap-2 pb-6 mt-4 md:mt-8">
-				<CredibilityTag />
+				<CredibilityTag projectCount={props.projectCount} />
 
 				<h1 class="text-4xl md:text-6xl text-surface-900 text-center lg:text-start font-bold tracking-tight mt-6">
 					{m.home_inlang_title()}

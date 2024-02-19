@@ -10,7 +10,7 @@
 		"url": "https://github.com/opral/monorepo.git"
 	},
 	"icon": "assets/icon-vscode-marketplace.png",
-	"version": "1.32.3",
+	"version": "1.32.5",
 	"engines": {
 		"vscode": "^1.84.2"
 	},
@@ -75,18 +75,6 @@
 			]
 		},
 		"commands": [
-			{
-				"command": "inlang.editMessage",
-				"title": "Inlang: Edit a Message"
-			},
-			{
-				"command": "inlang.extractMessage",
-				"title": "Inlang: Extract Message"
-			},
-			{
-				"command": "inlang.openInEditor",
-				"title": "Inlang: Open in Editor"
-			},
 			{
 				"command": "inlang.openProject",
 				"title": "Open project"
