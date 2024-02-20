@@ -1,6 +1,6 @@
 import * as m from "@/paraglide/messages.js"
 import { languageTag } from "@/paraglide/runtime"
-import { redirect } from "@inlang/paraglide-js-adapter-next"
+import { redirect, Link } from "@inlang/paraglide-js-adapter-next"
 
 export default function About() {
 	async function log(formData: FormData) {
@@ -13,6 +13,8 @@ export default function About() {
 		<>
 			<main>
 				<p>{m.about()}</p>
+
+				<Link href="/">Home</Link>
 
 				<form action={log}>
 					<input name="text" type="text" placeholder="asd" />
