@@ -24,9 +24,9 @@ Depending on which router you are using your setup will be different. Make sure 
 
 ### With NextJS Pages Router
 
-The Pages router already comes with i18n support out of the box. You can read more about it [here](https://nextjs.org/docs/advanced-features/i18n-routing). Thanks to this, Paraglide doesn't need to provide it's own routing, all it needs to do is react to the language state.
+The Pages router already comes with i18n support out of the box. You can read more about it in the[NextJS Pages router documentation](https://nextjs.org/docs/advanced-features/i18n-routing). Thanks to this, Paraglide doesn't need to provide it's own routing. All the Adapter does in the Pages router is react to the language change.
 
-To set up basic i18n routing in NextJS add an `i18n` object to your `next.config.js` file. In it you should specify the locales you want to support and the default locale. Make sure these match the ones in your `project.inlang/settings.json` file.
+To set up i18n routing in NextJS add an `i18n` object to your `next.config.js` file. In it you should specify the locales you want to support and the default locale. Make sure these match the ones in your `project.inlang/settings.json` file.
 
 ```js
 module.exports = {
@@ -37,7 +37,7 @@ module.exports = {
 }
 ```
 
-> If you are using ESM for your NextJS config, you can also import `availableLanguageTags` and `sourceLanguageTag` from `./src/paraglide/runtime.js` and use them instead of hardcoding the locales.
+> If you are using ESM for your NextJS config, you can also import `availableLanguageTags` and `sourceLanguageTag` from `./src/paraglide/runtime.js` and use them instead of hardcoding the locales. However, this requires `"type": "module"` in your `package.json` & is entirely optional.
 
 This will have the effect that NextJS will automatically prefix all routes with the locale. For example, the route `/about` will become `/en/about` for the English locale and `/de/about` for the German locale. The only language that won't be prefixed is the default locale.
 
@@ -98,10 +98,10 @@ The App router is the new recommended router for NextJS. It is more flexible, bu
 To register the Paraglide Plugin in `next.config.js`, import the `withParaglide` function from `@inlang/paraglide-js-adapter-next/plugin`, wrap your config object with it and add a `paraglide` key. 
 
 ```js
-const { withParaglide } = require("@inlang/paraglide-js-adapter-next/plugin")
+const { paraglide } = require("@inlang/paraglide-js-adapter-next/plugin")
 
 /** @type {import('next').NextConfig} */
-module.exports = withParaglide({
+module.exports = paraglide({
     paraglide: {
         project: "./project.inlang",
         outdir: "./src/paraglide",
@@ -115,7 +115,7 @@ The available languages are automatically determined from your `project.inlang/s
 Next, we need to register the Locale Middleware. Create a `src/middleware.js` file and add paraglide's middleware to it.
 
 ```js
-import { paraglideMiddleware } from "@inlang/paraglide-js-adapter-next/middleware"
+import { middleware as paraglideMiddleware } from "@inlang/paraglide-js-adapter-next"
 
 export const middleware = paraglideMiddleware
 ```
@@ -142,13 +142,36 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 ```
 
 You can now use Paraglide's messages in your components.
-However, your Links won't link to the correct language yet. To fix this we provide a `Link` component that you can use instead of the one from `next/link`. It will automatically prefix the correct language to the `href` attribute. 
+
+### Navigation
+
+We still need to localise the `<Link>`s, so that we link to pages in the correct language. 
+
+NextJS doesn't offer this in the App-Router, so we will need to use our own `<Link>` component. 
+
+The Adapter Provides one for you. It's a drop-in replacemenet for the one from `next/link`. It's probably easiest to do a "find-and-replace" across your code-base for the import. 
 
 ```diff
 - import Link from "next/link"
-+ import { Link } from "@inlang/paraglide-js-adapter-next/link"
++ import { Link } from "@inlang/paraglide-js-adapter-next"
 ```
 
-Both Link components have the same API, so you can safely find & replace the imports.
+You can now link to a page without needing to include the language. 
+
+```jsx
+<Link href="/about">
+
+//renders as
+
+<a href="/de/about">
+
+//depending on the language
+```
+
+For programmatic Navigations using `useRouter`, `redirect` or `permanentRedirect` there are also localised options available:
+
+```ts
+import { useRouter, redirect, permanentRedirect } from "@inlang/paraglide-js-adapter-next"
+```
 
 That's it! You're done!
