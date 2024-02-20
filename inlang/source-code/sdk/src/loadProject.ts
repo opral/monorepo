@@ -66,8 +66,6 @@ export async function loadProject(args: {
 }): Promise<InlangProject> {
 	const projectPath = normalizePath(args.projectPath)
 
-	let ongoingSave: Promise<void> | undefined
-
 	const messageStates = {
 		messageDirtyFlags: {},
 		messageLoadHash: {},
@@ -180,15 +178,13 @@ export async function loadProject(args: {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const [messages, setMessages] = createSignal<Message[]>([])
 
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const [messageLoadErrors, setMessageLoadErrors] = createSignal<{
-			[messageId: string]: Error
-		}>({})
+		const [loadMessagesViaPluginError, setLoadMessagesViaPluginError] = createSignal<
+			Error | undefined
+		>()
 
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const [messageSaveErrors, setMessageSaveErrors] = createSignal<{
-			[messageId: string]: Error
-		}>({})
+		const [saveMessagesViaPluginError, setSaveMessagesViaPluginError] = createSignal<
+			Error | undefined
+		>()
 
 		const messagesQuery = createMessagesQuery(() => messages())
 
@@ -235,6 +231,12 @@ export async function loadProject(args: {
 						settings()!, // TODO revalidate whether this is always non-null
 						loadMessagePlugin
 					)
+						.catch((e) => setLoadMessagesViaPluginError(new PluginLoadMessagesError({ cause: e })))
+						.then(() => {
+							if (loadMessagesViaPluginError() !== undefined) {
+								setLoadMessagesViaPluginError(undefined)
+							}
+						})
 				},
 			})
 
@@ -289,8 +291,6 @@ export async function loadProject(args: {
 		// -- app ---------------------------------------------------------------
 
 		const initializeError: Error | undefined = await initialized.catch((error) => error)
-		// load upserts messges in the load initialy - make sure the "blind" save is done before we return from the load project function
-		await ongoingSave
 
 		const abortController = new AbortController()
 		const hasWatcher = nodeishFs.watch("/", { signal: abortController.signal }) !== undefined
@@ -332,8 +332,7 @@ export async function loadProject(args: {
 							// don't trigger saves or set dirty flags during initial setup
 							if (!initialSetup) {
 								messageStates.messageDirtyFlags[message.id] = true
-								// we keep track of the latest save within the loadProject call to await it at the end - this is not used in subsequetial upserts
-								ongoingSave = saveMessagesViaPlugin(
+								saveMessagesViaPlugin(
 									fs,
 									messageLockFilePath,
 									messageStates,
@@ -342,6 +341,14 @@ export async function loadProject(args: {
 									saveMessagesPlugin,
 									loadMessagesPlugin
 								)
+									.catch((e) =>
+										setSaveMessagesViaPluginError(new PluginSaveMessagesError({ cause: e }))
+									)
+									.then(() => {
+										if (saveMessagesViaPluginError() !== undefined) {
+											setSaveMessagesViaPluginError(undefined)
+										}
+									})
 							}
 						})
 					})
@@ -363,7 +370,7 @@ export async function loadProject(args: {
 
 			if (deletedTrackedMessages.length > 0) {
 				// we keep track of the latest save within the loadProject call to await it at the end - this is not used in subsequetial upserts
-				ongoingSave = saveMessagesViaPlugin(
+				saveMessagesViaPlugin(
 					nodeishFs,
 					messageLockFilePath,
 					messageStates,
@@ -372,6 +379,12 @@ export async function loadProject(args: {
 					saveMessagesPlugin,
 					loadMessagesPlugin
 				)
+					.catch((e) => setSaveMessagesViaPluginError(new PluginSaveMessagesError({ cause: e })))
+					.then(() => {
+						if (saveMessagesViaPluginError() !== undefined) {
+							setSaveMessagesViaPluginError(undefined)
+						}
+					})
 			}
 
 			initialSetup = false
@@ -425,8 +438,8 @@ export async function loadProject(args: {
 			errors: createSubscribable(() => [
 				...(initializeError ? [initializeError] : []),
 				...(resolvedModules() ? resolvedModules()!.errors : []),
-				...Object.values(messageLoadErrors()),
-				...Object.values(messageSaveErrors()),
+				...(loadMessagesViaPluginError() ? [loadMessagesViaPluginError()!] : []),
+				...(saveMessagesViaPluginError() ? [saveMessagesViaPluginError()!] : []),
 				// have a query error exposed
 				//...(lintErrors() ?? []),
 			]),
@@ -723,21 +736,15 @@ async function loadMessagesViaPlugin(
 		sheduledLoadMessagesViaPlugin = undefined
 
 		// recall load unawaited to allow stack to pop
-		loadMessagesViaPlugin(
-			fs,
-			lockFilePath,
-			messageState,
-			messagesQuery,
-			settingsValue,
-			loadPlugin
-		).then(
-			() => {
+		loadMessagesViaPlugin(fs, lockFilePath, messageState, messagesQuery, settingsValue, loadPlugin)
+			.then(() => {
+				// resolve the scheduled load message promise
 				executingScheduledMessages[1]()
-			},
-			(e: Error) => {
+			})
+			.catch((e: Error) => {
+				// reject the scheduled load message promise
 				executingScheduledMessages[2](e)
-			}
-		)
+			})
 	}
 }
 
@@ -749,7 +756,7 @@ async function saveMessagesViaPlugin(
 	settingsValue: ProjectSettings,
 	savePlugin: any,
 	loadPlugin: any
-): Promise<any> {
+): Promise<void> {
 	// queue next save if we have a save ongoing
 	if (isSaving) {
 		if (!sheduledSaveMessages) {
@@ -874,7 +881,7 @@ async function saveMessagesViaPlugin(
 		const executingSheduledSaveMessages = sheduledSaveMessages
 		sheduledSaveMessages = undefined
 
-		return await saveMessagesViaPlugin(
+		saveMessagesViaPlugin(
 			fs,
 			lockFilePath,
 			messageState,
@@ -882,14 +889,13 @@ async function saveMessagesViaPlugin(
 			settingsValue,
 			savePlugin,
 			loadPlugin
-		).then(
-			() => {
-				return executingSheduledSaveMessages[1]()
-			},
-			(e: Error) => {
-				return executingSheduledSaveMessages[2](e)
-			}
 		)
+			.then(() => {
+				executingSheduledSaveMessages[1]()
+			})
+			.catch((e: Error) => {
+				executingSheduledSaveMessages[2](e)
+			})
 	}
 }
 
