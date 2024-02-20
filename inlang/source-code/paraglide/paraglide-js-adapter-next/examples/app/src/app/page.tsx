@@ -11,8 +11,6 @@ export default function Home() {
 
 			<Link href="/about">{m.about()}</Link>
 
-			<br />
-
 			<Link href="/form">Form Flow</Link>
 			<ClientComponent />
 		</main>

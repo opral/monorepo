@@ -7,9 +7,9 @@
 		"test": "vitest run --passWithNoTests"
 	},
 	"type": "module",
-	"main": "dist/index.server.js",
-	"module": "dist/index.server.js",
-	"types": "dist/index.server.d.ts",
+	"main": "dist/app/index.server.js",
+	"module": "dist/app/index.server.js",
+	"types": "dist/app/index.server.d.ts",
 	"exports": {
 		"./plugin": {
 			"types": "./dist/plugin/index.d.ts",
@@ -20,9 +20,9 @@
 			"import": "./dist/pages/index.mjs"
 		},
 		".": {
-			"types": "./dist/index.server.d.ts",
-			"react-server": "./dist/index.server.js",
-			"default": "./dist/index.client.js"
+			"types": "./dist/app/index.server.d.ts",
+			"react-server": "./dist/app/index.server.js",
+			"default": "./dist/app/index.client.js"
 		}
 	},
 	"keywords": [
