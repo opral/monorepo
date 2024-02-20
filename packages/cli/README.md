@@ -246,6 +246,7 @@ You can always get the latest version by executing `npx @inlang/cli@latest`.
 
 If the error persists, [please create an issue](https://github.com/opral/monorepo/issues/new/choose) – we're happy to help.
 
-## Pricing 
+# Pricing 
 
-<doc-dev-tool-pricing></doc-dev-tool-pricing>
+<doc-pricing heading="The core features are free for all users." content="While we may introduce enterprise features with associated costs due to API integrations, these enhancements are designed to meet the needs of larger companies. Our commitment remains to provide essential tools for developers, empowering them to address the challenges of international expansion for free."></doc-pricing>
+
