@@ -40,7 +40,7 @@ const app_build = await rollup({
 const pages_build = await rollup({
 	plugins: [typescript({ tsconfig: "./tsconfig.json" }), cjs(), resolve(), preserveDirectives()],
 	input: {
-		"pages/entry": "src/pages/index.tsx",
+		"pages/index": "src/pages/index.tsx",
 	},
 	external,
 })
@@ -53,13 +53,6 @@ const pluginBuild = await rollup({
 	external,
 })
 
-await pluginBuild.write({
-	preserveModules: false,
-	format: "cjs",
-	entryFileNames: "[name].cjs",
-	dir: "dist",
-})
-
 await app_build.write({
 	preserveModules: true,
 	format: "es",
@@ -70,6 +63,20 @@ await app_build.write({
 await pages_build.write({
 	preserveModules: false,
 	format: "es",
-	entryFileNames: "[name].js",
+	entryFileNames: "[name].mjs",
+	dir: "dist",
+})
+
+await pages_build.write({
+	preserveModules: false,
+	format: "cjs",
+	entryFileNames: "[name].cjs",
+	dir: "dist",
+})
+
+await pluginBuild.write({
+	preserveModules: false,
+	format: "cjs",
+	entryFileNames: "[name].cjs",
 	dir: "dist",
 })
