@@ -22,10 +22,6 @@ export function getPathFromMessageId(id: string) {
 	return path
 }
 
-export function parseMessage(messagePath: string, messageRaw: string) {
-	return JSON.parse(messageRaw)
-}
-
 export function stringifyMessage(message: Message) {
 	// create a new object do specify key output order
 	const messageWithSortedKeys: any = {}
