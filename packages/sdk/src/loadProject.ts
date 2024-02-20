@@ -862,33 +862,6 @@ async function saveMessagesViaPlugin(
 
 	await currentSaveMessagesViaPlugin
 
-	// JL: kick off scheduled load here first before additional saves get too greedy with the lock
-	// Per Martin's suggestion Feb 19. 2024 - to avoid flurry of saves without allowing loads
-	// TODO: JL Try to replace async gymnastics -- very hard to follow
-	if (sheduledLoadMessagesViaPlugin) {
-		const scheduledLoadMessages = sheduledLoadMessagesViaPlugin
-		sheduledLoadMessagesViaPlugin = undefined
-
-		// await so that lock can be acquired before the next save
-		// eslint-disable-next-line no-console
-		console.log("saveMessage running scheduled loadMessagesViaPlugin to avoid load starvation")
-		await loadMessagesViaPlugin(
-			fs,
-			lockFilePath,
-			messageState,
-			messagesQuery,
-			settingsValue,
-			loadPlugin
-		).then(
-			() => {
-				scheduledLoadMessages[1]()
-			},
-			(e: Error) => {
-				scheduledLoadMessages[2](e)
-			}
-		)
-	}
-
 	if (sheduledSaveMessages) {
 		const executingSheduledSaveMessages = sheduledSaveMessages
 		sheduledSaveMessages = undefined
