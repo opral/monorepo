@@ -11,13 +11,14 @@
 	import { page } from "$app/stores"
 	import { browser } from "$app/environment"
 	import { setContext } from "svelte"
-	import { PARAGLIDE_CONTEXT_KEY } from "../constants.js"
+	import { LANGUAGE_CHANGE_INVALIDATION_KEY, PARAGLIDE_CONTEXT_KEY } from "../constants.js"
 	import { base as maybe_relative_base } from "$app/paths"
 	import { isExternal } from "./utils/external.js"
 	import { getTranslatedPath } from "./path-translations/getTranslatedPath.js"
 	import { translatePath } from "./path-translations/translatePath.js"
 	import type { I18n } from "./adapter.js"
 	import { get } from "svelte/store"
+	import { invalidate } from "$app/navigation"
 
 	// The base path may be relative during SSR.
 	// To make sure it is absolute, we need to resolve it against the current page URL.
@@ -42,6 +43,10 @@
 	$: i18n.config.runtime.setLanguageTag(lang)
 	$: if (browser) document.documentElement.lang = lang
 	$: if (browser) document.documentElement.dir = i18n.config.textDirection[lang] ?? "ltr"
+	$: if(browser && lang) {
+		console.log("Language changed to", lang)
+		invalidate(LANGUAGE_CHANGE_INVALIDATION_KEY)
+	}
 
 	function translateHref(href: string, hreflang: string | undefined): string {
 		const from = new URL(get(page).url)
