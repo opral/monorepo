@@ -4,6 +4,6 @@ import { LANGUAGE_HEADER } from "../constants"
 
 export function getLanguage() {
 	const langHeader = headers().get(LANGUAGE_HEADER)
-	if (isAvailableLanguageTag(langHeader)) return langHeader
-	return sourceLanguageTag
+	const lang = isAvailableLanguageTag(langHeader) ? langHeader : sourceLanguageTag
+	return lang
 }
