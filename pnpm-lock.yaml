@@ -2461,8 +2461,8 @@ importers:
         specifier: '12.4.0 '
         version: 12.4.0
       isomorphic-git:
-        specifier: git@github.com:martin-lysk/isomorphic-git.git#build
-        version: github.com/martin-lysk/isomorphic-git/e61cc00316a41edee2edf214b3698fad12300062
+        specifier: 1.24.5
+        version: 1.24.5
       octokit:
         specifier: 3.1.2
         version: 3.1.2
@@ -24082,24 +24082,4 @@ packages:
 
   /zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
-    dev: false
-
-  github.com/martin-lysk/isomorphic-git/e61cc00316a41edee2edf214b3698fad12300062:
-    resolution: {tarball: https://codeload.github.com/martin-lysk/isomorphic-git/tar.gz/e61cc00316a41edee2edf214b3698fad12300062}
-    name: isomorphic-git
-    version: 0.0.0-development
-    engines: {node: '>=12'}
-    hasBin: true
-    dependencies:
-      async-lock: 1.4.0
-      clean-git-ref: 2.0.1
-      crc-32: 1.2.2
-      diff3: 0.0.3
-      ignore: 5.3.0
-      minimisted: 2.0.1
-      pako: 1.0.11
-      pify: 4.0.1
-      readable-stream: 3.6.2
-      sha.js: 2.4.11
-      simple-get: 4.0.1
     dev: false
