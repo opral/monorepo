@@ -2,6 +2,7 @@
 	"name": "@inlang/paraglide-js-adapter-next-example-pages",
 	"version": "0.1.0",
 	"private": true,
+	"sideEffects": false,
 	"scripts": {
 		"_dev": "paraglide-js compile --project ./project.inlang && next dev",
 		"build": "paraglide-js compile --project ./project.inlang && next build",

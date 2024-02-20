@@ -6,10 +6,11 @@ import { setLanguageTag, sourceLanguageTag } from "$paraglide/runtime.js"
 
 describe("<Link>", () => {
 	beforeEach(() => {
+		//known starting state
 		setLanguageTag(sourceLanguageTag)
 	})
+	afterEach(() => cleanup())
 
-	afterEach(cleanup)
 	it("renders a link with the correct localised href", () => {
 		render(
 			<>
