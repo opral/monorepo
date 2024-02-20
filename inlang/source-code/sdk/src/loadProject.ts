@@ -824,14 +824,19 @@ async function saveMessagesViaPlugin(
 				lockTime = undefined
 			}
 
-			await loadMessagesViaPlugin(
-				fs,
-				lockFilePath,
-				messageState,
-				messagesQuery,
-				settingsValue,
-				loadPlugin
-			)
+			// if there is a queued load, allow it to take the lock before we run additional saves.
+			if (sheduledLoadMessagesViaPlugin) {
+				// eslint-disable-next-line no-console
+				console.log("saveMessagesViaPlugin calling queued loadMessagesViaPlugin to share lock")
+				await loadMessagesViaPlugin(
+					fs,
+					lockFilePath,
+					messageState,
+					messagesQuery,
+					settingsValue,
+					loadPlugin
+				)
+			}
 
 			isSaving = false
 		} catch (err) {
@@ -955,7 +960,7 @@ async function acquireFileLock(
 						// eslint-disable-next-line no-console
 						console.log(
 							lockOrigin +
-								" tryCount++ in Promise - tries to acquire a lockfile - lock file seems to be free now - try to acquire" +
+								" tryCount++ in Promise - tries to acquire a lockfile - lock file seems to be free now - try to acquire " +
 								tryCount
 						)
 						const lock = acquireFileLock(fs, lockFilePath, lockOrigin, tryCount + 1)
