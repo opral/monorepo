@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 2.12.4
+
+### Patch Changes
+
+- f75af45af: Use p-limit to constrain rpc concurrency in cli translate
+
 ## 2.12.3
 
 ### Patch Changes

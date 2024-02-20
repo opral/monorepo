@@ -29,7 +29,7 @@ const HeroSearch = (props: { projectCount: number }) => {
 					</div>
 				</sl-dialog>
 			</Show>
-			<div class="col-span-12 lg:col-span-7 items-center lg:items-start relative z-30 flex flex-col gap-2 pb-6 mt-4 md:mt-8">
+			<div class="col-span-12 lg:col-span-6 items-center lg:items-start relative z-30 flex flex-col gap-2 pb-6 mt-4 md:mt-8">
 				<CredibilityTag projectCount={props.projectCount} />
 
 				<h1 class="text-4xl md:text-6xl text-surface-900 text-center lg:text-start font-bold tracking-tight mt-6">
@@ -53,10 +53,10 @@ const HeroSearch = (props: { projectCount: number }) => {
 					</div>
 				</div>
 			</div>
-			<div class="col-span-12 lg:col-span-5 mb-10 lg:mb-0 mt-6 lg:mt-16 overflow-hidden flex items-center justify-center w-full">
+			<div class="col-span-12 lg:col-span-6 mb-10 lg:mb-0 mt-6 lg:mt-16 overflow-hidden flex items-center justify-center w-full">
 				<img
-					class="w-full max-w-[500px]"
-					src="/images/hero-cover-updated.png"
+					class="w-full max-w-[600px] lg:ml-auto"
+					src="/images/go-global-mockup.png"
 					alt="lix header image"
 				/>
 			</div>

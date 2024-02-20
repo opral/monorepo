@@ -13,6 +13,7 @@ export function createMessageWebviewProvider(args: {
 	let isLoading = true
 	let activeFileContent: string | undefined
 	let debounceTimer: NodeJS.Timeout | undefined
+	const subscribedMessageIds = new Set<string>()
 
 	return {
 		resolveWebviewView(webviewView: vscode.WebviewView) {
@@ -44,7 +45,23 @@ export function createMessageWebviewProvider(args: {
 				const fetchedMessages = state().project.query.messages.getAll()
 				messages = fetchedMessages ? [...fetchedMessages] : []
 				isLoading = false
+
+				// Subscribe to message changes
+				for (const message of messages) {
+					if (!subscribedMessageIds.has(message.id)) {
+						subscribeToMessageChange(message.id)
+					}
+				}
+
 				updateWebviewContent()
+			}
+
+			function subscribeToMessageChange(messageId: string) {
+				subscribedMessageIds.add(messageId) // Track subscribed message IDs
+
+				state().project.query.messages.get.subscribe({ where: { id: messageId } }, () => {
+					updateMessages()
+				})
 			}
 
 			const debounceUpdate = () => {
@@ -163,6 +180,7 @@ export function createMessageWebviewProvider(args: {
 		},
 	}
 }
+
 
 export function createMessageHtml(args: {
 	message: Message
