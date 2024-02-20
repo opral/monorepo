@@ -17,8 +17,7 @@
 		},
 		"./pages": {
 			"types": "./dist/pages/index.d.ts",
-			"import": "./dist/pages/index.mjs",
-			"require": "./dist/pages/index.cjs"
+			"import": "./dist/pages/index.mjs"
 		},
 		".": {
 			"types": "./dist/index.server.d.ts",

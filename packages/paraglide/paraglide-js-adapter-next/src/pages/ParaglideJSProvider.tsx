@@ -1,6 +1,6 @@
 import React from "react"
 import Header from "./Header"
-import { Paraglide } from "../paraglide"
+import type { Paraglide } from "../paraglide"
 
 export default function ParaglideJS<T extends string>(props: {
 	runtime: Paraglide<T>
