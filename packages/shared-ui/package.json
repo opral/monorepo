@@ -1,15 +1,30 @@
 {
-	"name": "shared-ui",
+	"name": "@inlang/ui",
+	"type": "module",
 	"version": "0.0.1",
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"storybook": "storybook dev -p 6006",
+		"build-storybook": "storybook build"
 	},
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
 	"devDependencies": {
-		"@nx/storybook": "^18.0.4"
+		"@nx/storybook": "^18.0.4",
+		"@storybook/addon-essentials": "^7.6.16",
+		"@storybook/addon-links": "^7.6.16",
+		"@storybook/blocks": "^7.6.16",
+		"@storybook/web-components": "^7.6.16",
+		"@storybook/web-components-vite": "^7.6.16",
+		"lit": "^3.1.2",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0",
+		"storybook": "^7.6.16"
+	},
+	"dependencies": {
+		"@shoelace-style/shoelace": "2.3.0"
 	}
 }
