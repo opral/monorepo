@@ -623,11 +623,6 @@ async function loadMessagesViaPlugin(
 
 	const aliasesFeatureFlag = !!settingsValue.featureFlags?.aliases
 
-	// let the current save process finish first
-	if (currentSaveMessagesViaPlugin) {
-		await currentSaveMessagesViaPlugin
-	}
-
 	// loading is an asynchronous process - check if another load is in progress - queue this call if so
 	if (isLoading) {
 		if (!sheduledLoadMessagesViaPlugin) {
@@ -828,6 +823,22 @@ async function saveMessagesViaPlugin(
 			for (const [messageId, messageHash] of Object.entries(saveMessageHashes)) {
 				messageState.messageLoadHash[messageId] = messageHash
 			}
+
+			if (lockTime !== undefined) {
+				await releaseLock(fs as NodeishFilesystem, lockFilePath, "saveMessage", lockTime)
+				lockTime = undefined
+			}
+
+			await loadMessagesViaPlugin(
+				fs,
+				lockFilePath,
+				messageState,
+				messagesQuery,
+				settingsValue,
+				loadPlugin
+			)
+
+			isSaving = false
 		} catch (err) {
 			// something went wrong - add dirty flags again
 			if (messageDirtyFlagsBeforeSave !== undefined) {
@@ -836,15 +847,16 @@ async function saveMessagesViaPlugin(
 				}
 			}
 
+			if (lockTime !== undefined) {
+				await releaseLock(fs as NodeishFilesystem, lockFilePath, "saveMessage", lockTime)
+				lockTime = undefined
+			}
+			isSaving = false
+
 			// ok an error
 			throw new PluginSaveMessagesError({
 				cause: err,
 			})
-		} finally {
-			isSaving = false
-			if (lockTime !== undefined) {
-				await releaseLock(fs as NodeishFilesystem, lockFilePath, "saveMessage", lockTime)
-			}
 		}
 	})()
 
