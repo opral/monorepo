@@ -51,8 +51,6 @@ export async function run(): Promise<void> {
 		// If the PR is from a fork, we need to fetch the base reports from the base repo
 
 		// log available branches using git CLI
-		const branches = exec("git branch -a")
-		console.log(branches)
 
 		await checkoutBranch(baseMeta.branch)
 			.then(() => {
@@ -160,6 +158,16 @@ function createLintSummary(
 // Function to checkout a branch
 async function checkoutBranch(branchName: string) {
 	return new Promise<void>((resolve, reject) => {
+		exec(`git fetch origin ${branchName}`, { cwd: process.cwd() }, (error, stdout, stderr) => {
+			if (error) {
+				console.error(`Error executing command: ${error}`)
+				reject(error)
+				return
+			}
+			// Log the output of the command
+			console.log(`stdout: ${stdout}`)
+			console.error(`stderr: ${stderr}`)
+		})
 		// Execute the git command to checkout the branch
 		exec(`git checkout ${branchName}`, { cwd: process.cwd() }, (error, stdout, stderr) => {
 			if (error) {
