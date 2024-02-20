@@ -1,2 +1,2 @@
 export { Link } from "./Link.jsx"
-export * from "./navigation.jsx"
+export { useRouter, redirect, permanentRedirect } from "./programmatic-navigation.jsx"

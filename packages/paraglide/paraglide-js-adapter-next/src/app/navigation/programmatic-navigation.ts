@@ -13,9 +13,21 @@ const useRouter: NextUseRouter = (...args) => {
 		nextRouter.push(...args)
 	}
 
+	const replace: (typeof nextRouter)["replace"] = (...args) => {
+		args[0] = translateHref(args[0], languageTag())
+		nextRouter.replace(...args)
+	}
+
+	const prefetch: (typeof nextRouter)["prefetch"] = (...args) => {
+		args[0] = translateHref(args[0], languageTag())
+		nextRouter.prefetch(...args)
+	}
+
 	return {
 		...nextRouter,
 		push,
+		replace,
+		prefetch,
 	}
 }
 
