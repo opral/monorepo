@@ -3,7 +3,7 @@ import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
 import { usePathname } from "next/navigation"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { prefixStrategy } from "./navigation/prefixStrategy"
+import { prefixStrategy } from "../routing/prefix"
 
 const { getLocaleFromPath } = prefixStrategy(availableLanguageTags, sourceLanguageTag)
 
@@ -24,5 +24,5 @@ export function LanguageSpy() {
 		}
 	}, [pathname])
 
-	return null
+	return undefined
 }

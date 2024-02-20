@@ -1,5 +1,5 @@
 import { it, expect, describe } from "vitest"
-import { prefixStrategy } from "./prefixStrategy"
+import { prefixStrategy } from "./prefix"
 
 const { getLocaleFromPath, translatePath, translateHref } = prefixStrategy(
 	["en", "de", "de-CH"],

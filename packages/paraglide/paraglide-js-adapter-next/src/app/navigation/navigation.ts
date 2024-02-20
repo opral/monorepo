@@ -1,5 +1,5 @@
 import * as NextNavigation from "next/navigation"
-import { prefixStrategy } from "./prefixStrategy"
+import { prefixStrategy } from "../routing/prefix"
 import { availableLanguageTags, languageTag, sourceLanguageTag } from "$paraglide/runtime.js"
 
 const { translateHref } = prefixStrategy(availableLanguageTags, sourceLanguageTag)

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { NextRequest } from "next/server"
 import { sourceLanguageTag, availableLanguageTags } from "$paraglide/runtime.js"
 import { LANGUAGE_HEADER } from "../constants"
-import { prefixStrategy } from "./navigation/prefixStrategy"
+import { prefixStrategy } from "./routing/prefix"
 
 const { getLocaleFromPath, translatePath } = prefixStrategy(
 	availableLanguageTags,
