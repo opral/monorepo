@@ -47,7 +47,7 @@ export async function run(): Promise<void> {
 			repo: repo,
 			branch: github.context.payload.pull_request?.base.label.split(":")[1],
 		}
-		const isFork = headMeta.owner !== baseMeta.owner
+		// const isFork = headMeta.owner !== baseMeta.owner
 		// If the PR is from a fork, we need to fetch the base reports from the base repo
 
 		await fetchBranch(baseMeta.branch)
@@ -119,6 +119,8 @@ ${lintSummary
 	}
 }
 
+export default run
+
 function createLintSummary(
 	reportsHead: MessageLintReport[],
 	reportsBase: MessageLintReport[],
@@ -183,5 +185,3 @@ async function fetchBranch(branchName: string) {
 		})
 	})
 }
-
-export default run
