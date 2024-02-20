@@ -69,8 +69,8 @@ export async function run(): Promise<void> {
 			}
 		}
 		const reportsBase = projectBase.query.messageLintReports.getAll()
-		core.debug(`Reports head: ${JSON.stringify(reportsHead)}`)
-		core.debug(`Reports base: ${JSON.stringify(reportsBase)}`)
+		core.debug(`Reports head: ${reportsHead.length}`)
+		core.debug(`Reports base: ${reportsBase.length}`)
 
 		const lintSummary = createLintSummary(
 			reportsHead,
