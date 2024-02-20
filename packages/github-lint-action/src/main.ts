@@ -51,7 +51,7 @@ export async function run(): Promise<void> {
 		// If the PR is from a fork, we need to fetch the base reports from the base repo
 
 		// Usage example
-		checkoutBranch(baseMeta.branch)
+		await checkoutBranch(baseMeta.branch)
 			.then(() => {
 				console.log("Branch checked out successfully.")
 			})
@@ -155,8 +155,8 @@ function createLintSummary(
 }
 
 // Function to checkout a branch
-function checkoutBranch(branchName: string) {
-	return new Promise((resolve, reject) => {
+async function checkoutBranch(branchName: string) {
+	return new Promise<void>((resolve, reject) => {
 		// Execute the git command to checkout the branch
 		exec(`git checkout ${branchName}`, { cwd: process.cwd() }, (error, stdout, stderr) => {
 			if (error) {
