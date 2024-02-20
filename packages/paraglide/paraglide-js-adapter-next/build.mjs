@@ -31,8 +31,8 @@ const external = [
 const app_build = await rollup({
 	plugins: [typescript({ tsconfig: "./tsconfig.json" }), cjs(), resolve(), preserveDirectives()],
 	input: {
-		"index.server": "src/app/index.server.tsx",
-		"index.client": "src/app/index.client.tsx",
+		"app/index.server": "src/app/index.server.tsx",
+		"app/index.client": "src/app/index.client.tsx",
 	},
 	external,
 })
