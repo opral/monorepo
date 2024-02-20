@@ -3,7 +3,7 @@ import preserveDirectives from "rollup-preserve-directives"
 import typescript from "@rollup/plugin-typescript"
 import cjs from "@rollup/plugin-commonjs"
 import resolve from "@rollup/plugin-node-resolve"
-import fs from "fs/promises"
+import fs from "node:fs/promises"
 
 //remove the old dist folder
 await fs.rm("./dist", { recursive: true, force: true })
@@ -12,7 +12,9 @@ const packageJson = JSON.parse(await fs.readFile("./package.json", "utf-8"))
 const peerDependencies = Object.keys(packageJson.peerDependencies || {})
 const dependencies = Object.keys(packageJson.dependencies || {})
 
-console.log(`Building ${packageJson.name} v${packageJson.version}...`)
+// eslint-disable-next-line no-console
+// eslint-disable-next-line no-undef
+console.info(`Building ${packageJson.name} v${packageJson.version}...`)
 
 const external = [
 	/node_modules/,
@@ -29,8 +31,8 @@ const external = [
 const app_build = await rollup({
 	plugins: [typescript({ tsconfig: "./tsconfig.json" }), cjs(), resolve(), preserveDirectives()],
 	input: {
-		"index.server": "src/index.server.tsx",
-		"index.client": "src/index.client.tsx",
+		"index.server": "src/app/index.server.tsx",
+		"index.client": "src/app/index.client.tsx",
 	},
 	external,
 })
