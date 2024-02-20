@@ -4,9 +4,6 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - 'project.inlang/**'
-      - 'inlang/source-code/website/messages.json'
 
 jobs:
   test-action:

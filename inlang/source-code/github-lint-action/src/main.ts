@@ -2,7 +2,8 @@ import * as fs from "node:fs/promises"
 import * as core from "@actions/core"
 import * as github from "@actions/github"
 import { openRepository } from "@lix-js/client"
-import { loadProject, type MessageLintReport } from "@inlang/sdk"
+import { loadProject, type InstalledMessageLintRule, type MessageLintReport } from "@inlang/sdk"
+import { exec } from "node:child_process"
 
 /**
  * The main function for the action.
@@ -34,27 +35,49 @@ export async function run(): Promise<void> {
 				throw error
 			}
 		}
-		const lintSummary = createLintSummary(project.query.messageLintReports.getAll())
 
+		const reportsHead = project.query.messageLintReports.getAll()
 		const headMeta = {
 			owner: github.context.payload.pull_request?.head.label.split(":")[0],
 			repo: repo,
 			branch: github.context.payload.pull_request?.head.label.split(":")[1],
 		}
+		const baseMeta = {
+			owner: github.context.payload.pull_request?.base.label.split(":")[0],
+			repo: repo,
+			branch: github.context.payload.pull_request?.base.label.split(":")[1],
+		}
+		const isFork = headMeta.owner !== baseMeta.owner
+		// If the PR is from a fork, we need to fetch the base reports from the base repo
+
+		// Usage example
+		checkoutBranch(baseMeta.branch)
+			.then(() => {
+				console.log("Branch checked out successfully.")
+			})
+			.catch((error) => {
+				console.error("Failed to checkout branch:", error)
+			})
+
+		const reportsBase = project.query.messageLintReports.getAll()
+		console.log("Reports", reportsHead.length, reportsBase.length)
+
+		const lintSummary = createLintSummary(
+			reportsHead,
+			reportsBase,
+			project.installed.messageLintRules()
+		)
 		const commentContent = `
-### ⚠️ Translation change detected: \`${countMissingTranslation(
-			project.query.messageLintReports.getAll()
-		)}\` missing translations
+### 🛎️ Translations need to be updated
 
-[![Open in Fink](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/assets/md-badges/fink-action-button.svg)](https://fink.inlang.com/github.com/${
-			headMeta.owner
-		}/${headMeta.repo}/?branch=${headMeta.branch}&project=${project_path})
-
-📊 **Summary**
-| Level    | Count    |
-|----------|----------|
-| Errors   | ${lintSummary.errors}    |
-| Warnings | ${lintSummary.warnings}  |
+| lint rule | new reports | link |
+|-----------|-------------|------|
+${lintSummary
+	.map(
+		(lintSummary) =>
+			`| ${lintSummary.name} | ${lintSummary.count} | [contribute (via Fink 🐦)](https://fink.inlang.com/github.com/${headMeta.owner}/${headMeta.repo}/?branch=${headMeta.branch}&project=${project_path}&lint=${lintSummary.id}) |`
+	)
+	.join("\n")}
 `
 
 		const octokit = github.getOctokit(token)
@@ -74,7 +97,7 @@ export async function run(): Promise<void> {
 		if (existingComment.data.length > 0) {
 			const commentId = existingComment.data.find(
 				(comment) =>
-					comment.body?.includes("⚠️ Translation change detected") &&
+					comment.body?.includes("🛎️ Translations need to be updated") &&
 					comment.user?.login === "github-actions[bot]"
 			)?.id
 			if (commentId) {
@@ -102,23 +125,51 @@ export async function run(): Promise<void> {
 	}
 }
 
-function createLintSummary(reports: MessageLintReport[]) {
-	return reports.reduce(
-		(acc, report: MessageLintReport) => {
-			acc.errors += report.level === "error" ? 1 : 0
-			acc.warnings += report.level === "warning" ? 1 : 0
-			return acc
-		},
-		{ errors: 0, warnings: 0 }
+function createLintSummary(
+	reportsHead: MessageLintReport[],
+	reportsBase: MessageLintReport[],
+	installedRules: InstalledMessageLintRule[]
+) {
+	const summary: { id: string; name: string; count: number }[] = []
+	const diffReports = reportsHead.filter(
+		(report) =>
+			!reportsBase.some(
+				(baseReport) =>
+					baseReport.ruleId === report.ruleId &&
+					baseReport.languageTag === report.languageTag &&
+					baseReport.messageId === report.messageId
+			)
 	)
+	for (const installedRule of installedRules) {
+		const id = installedRule.id
+		const name =
+			typeof installedRule.displayName === "object"
+				? installedRule.displayName.en
+				: installedRule.displayName
+		const count = diffReports.filter((report) => report.ruleId === id).length
+		if (count > 0) {
+			summary.push({ id, name, count: count })
+		}
+	}
+	return summary
 }
 
-function countMissingTranslation(reports: MessageLintReport[]) {
-	return reports.filter(
-		(r) =>
-			r.ruleId === "messageLintRule.inlang.missingTranslation" ||
-			r.ruleId === "messageLintRule.inlang.emptyPattern"
-	).length
+// Function to checkout a branch
+function checkoutBranch(branchName: string) {
+	return new Promise((resolve, reject) => {
+		// Execute the git command to checkout the branch
+		exec(`git checkout ${branchName}`, (error, stdout, stderr) => {
+			if (error) {
+				console.error(`Error executing command: ${error}`)
+				reject(error)
+				return
+			}
+			// Log the output of the command
+			console.log(`stdout: ${stdout}`)
+			console.error(`stderr: ${stderr}`)
+			resolve()
+		})
+	})
 }
 
 export default run
