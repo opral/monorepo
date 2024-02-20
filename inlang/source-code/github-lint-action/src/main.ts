@@ -52,10 +52,12 @@ export async function run(): Promise<void> {
 
 		await fetchBranch(baseMeta.branch)
 		await checkoutBranch(baseMeta.branch)
+		await pull()
 		const baseInlangRepo = await openRepository(process.cwd(), {
 			nodeishFs: fs,
 			branch: baseMeta.branch,
 		})
+
 		const projectBase = await loadProject({
 			projectPath: process.cwd() + project_path,
 			repo: baseInlangRepo,
@@ -186,6 +188,24 @@ async function fetchBranch(branchName: string) {
 	return new Promise<void>((resolve, reject) => {
 		// Execute the git command to fetch the branch
 		exec(`git fetch origin ${branchName}`, { cwd: process.cwd() }, (error, stdout, stderr) => {
+			if (error) {
+				console.error(`Error executing command: ${error}`)
+				reject(error)
+				return
+			}
+			// Log the output of the command
+			console.log(`stdout: ${stdout}`)
+			console.error(`stderr: ${stderr}`)
+			resolve()
+		})
+	})
+}
+
+// Funtion to pull latest changes
+async function pull() {
+	return new Promise<void>((resolve, reject) => {
+		// Execute the git command to pull the latest changes
+		exec(`git pull`, { cwd: process.cwd() }, (error, stdout, stderr) => {
 			if (error) {
 				console.error(`Error executing command: ${error}`)
 				reject(error)
