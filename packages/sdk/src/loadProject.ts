@@ -608,7 +608,7 @@ async function loadMessagesViaPlugin(
 ) {
 	// TODO #1844 review this comment: the current approach introuces a sync between both systems - the legacy load / save messages plugins and the new format - we dont delete messages that we don't see int he plugins produced messages array anymore
 
-	const ffAliases = !!settingsValue.featureFlags?.aliases
+	const aliasesFeatureFlag = !!settingsValue.featureFlags?.aliases
 
 	// let the current save process finish first
 	if (currentSaveMessagesViaPlugin) {
@@ -641,7 +641,8 @@ async function loadMessagesViaPlugin(
 			.getAll()
 			// TODO #1585 here we match using the id to support legacy load message plugins - after we introduced import / export methods we will use importedMessage.alias
 			.filter(
-				(message: any) => (ffAliases ? message.alias["default"] : message.id) === loadedMessage.id
+				(message: any) =>
+					(aliasesFeatureFlag ? message.alias["default"] : message.id) === loadedMessage.id
 			)
 
 		if (currentMessages.length > 1) {
@@ -653,7 +654,7 @@ async function loadMessagesViaPlugin(
 			loadedMessageClone.alias = {} as any
 
 			// TODO #1585 we have to map the id of the importedMessage to the alias and fill the id property with the id of the existing message - change when import mesage provides importedMessage.alias
-			if (ffAliases) {
+			if (aliasesFeatureFlag) {
 				loadedMessageClone.alias["default"] = loadedMessageClone.id
 				loadedMessageClone.id = currentMessages[0]!.id
 			}
@@ -681,7 +682,7 @@ async function loadMessagesViaPlugin(
 			// message with the given alias does not exist so far
 			loadedMessageClone.alias = {} as any
 			// TODO #1585 we have to map the id of the importedMessage to the alias - change when import mesage provides importedMessage.alias
-			if (ffAliases) {
+			if (aliasesFeatureFlag) {
 				loadedMessageClone.alias["default"] = loadedMessageClone.id
 
 				let currentOffset = 0

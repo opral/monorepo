@@ -52,7 +52,7 @@ const mockPlugin: Plugin = {
 	description: { en: "Mock plugin description" },
 	displayName: { en: "Mock Plugin" },
 
-	loadMessages: () => exampleMessages as Message[],
+	loadMessages: () => exampleMessages,
 	saveMessages: () => undefined as any,
 	addCustomApi: () => ({
 		"app.project.ideExtension": {
@@ -771,7 +771,7 @@ describe("functionality", () => {
 				description: { en: "Mock plugin description" },
 				displayName: { en: "Mock Plugin" },
 
-				loadMessages: () => exampleMessages as Message[],
+				loadMessages: () => exampleMessages,
 				saveMessages: mockSaveFn,
 			}
 

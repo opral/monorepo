@@ -20,7 +20,7 @@ describe("create", () => {
 		expect(created).toBe(true)
 	})
 
-	it("should create a message with a default alias", () => {
+	it("query.getByDefaultAlias should return a message with a default alias", () => {
 		const query = createMessagesQuery(() => [])
 		expect(query.get({ where: { id: "first-message" } })).toBeUndefined()
 
