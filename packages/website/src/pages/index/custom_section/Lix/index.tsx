@@ -53,6 +53,14 @@ const LixSection = () => {
 				{m.home_lix_title()}
 			</h2>
 			<p class="text-center text-lg max-w-[600px] text-surface-500 pt-5">{m.home_lix_desc()}</p>
+			<div class="w-full flex justify-center">
+				<img
+					class="lg:hidden pt-12 pb-4 max-w-[500px] w-full"
+					src="/images/lixProcess.png"
+					alt="lix process"
+				/>
+				<img class="hidden lg:block w-full" src="/images/lixProcessBig.png" alt="lix process" />
+			</div>
 			<div class="grid grid-cols-12 w-full">
 				<div class="col-span-12 lg:col-span-10 lg:col-start-2 mt-10 grid grid-cols-6 gap-4">
 					<Show when={data[0]}>
