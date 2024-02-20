@@ -599,7 +599,7 @@ let sheduledLoadMessagesViaPlugin:
  * @returns void - updates the files and messages in of the project in place
  */
 async function loadMessagesViaPlugin(
-	fs: NodeishFilesystemSubset,
+	fs: NodeishFilesystem,
 	lockFilePath: string,
 	messageState: MessageState,
 	messagesQuery: InlangProject["query"]["messages"],
@@ -742,7 +742,7 @@ async function loadMessagesViaPlugin(
 }
 
 async function saveMessagesViaPlugin(
-	fs: NodeishFilesystemSubset,
+	fs: NodeishFilesystem,
 	lockFilePath: string,
 	messageState: MessageState,
 	messagesQuery: InlangProject["query"]["messages"],
