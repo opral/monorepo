@@ -6,7 +6,7 @@ import { log } from "../../utilities/log.js"
 import { type InlangProject, ProjectSettings, Message } from "@inlang/sdk"
 import prompts from "prompts"
 import { projectOption } from "../../utilities/globalFlags.js"
-import progessBar from "cli-progress"
+// import progessBar from "cli-progress"
 import plimit from "p-limit"
 
 export const translate = new Command()
