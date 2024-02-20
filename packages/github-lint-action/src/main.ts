@@ -52,7 +52,7 @@ export async function run(): Promise<void> {
 
 		await fetchBranch(baseMeta.branch)
 		await checkoutBranch(baseMeta.branch)
-
+		inlangRepo.pull
 		const reportsBase = project.query.messageLintReports.getAll()
 		console.log("Reports", reportsHead.length, reportsBase.length)
 
