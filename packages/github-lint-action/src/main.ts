@@ -50,7 +50,10 @@ export async function run(): Promise<void> {
 		const isFork = headMeta.owner !== baseMeta.owner
 		// If the PR is from a fork, we need to fetch the base reports from the base repo
 
-		// Usage example
+		// log available branches using git CLI
+		const branches = exec("git branch -a")
+		console.log(branches)
+
 		await checkoutBranch(baseMeta.branch)
 			.then(() => {
 				console.log("Branch checked out successfully.")
