@@ -220,9 +220,6 @@ export async function loadProject(args: {
 					// eslint-disable-next-line no-console
 					console.log("load messages because of a change in the message.json files")
 					// TODO FINK check error handling for plugin load methods (triggered by file change) -> move to separate ticket
-					// TODO JL #2108 add catch and put error into project errors
-					//      why: loadMessagesViaPlugin function is async so we need to .catch()
-					//      this is a runtime error (unlike the catch below this) - project errors should be reactive at runtime
 					loadMessagesViaPlugin(
 						fsWithWatcher,
 						messageLockFilePath,
@@ -619,8 +616,6 @@ async function loadMessagesViaPlugin(
 	settingsValue: ProjectSettings,
 	loadPlugin: any
 ) {
-	// TODO #1844 review this comment: the current approach introuces a sync between both systems - the legacy load / save messages plugins and the new format - we dont delete messages that we don't see int he plugins produced messages array anymore
-
 	const aliasesFeatureFlag = !!settingsValue.featureFlags?.aliases
 
 	// loading is an asynchronous process - check if another load is in progress - queue this call if so
@@ -857,6 +852,12 @@ async function saveMessagesViaPlugin(
 			throw new PluginSaveMessagesError({
 				cause: err,
 			})
+		} finally {
+			if (lockTime !== undefined) {
+				await releaseLock(fs as NodeishFilesystem, lockFilePath, "saveMessage", lockTime)
+				lockTime = undefined
+			}
+			isSaving = false
 		}
 	})()
 
