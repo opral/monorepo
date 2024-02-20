@@ -2,7 +2,7 @@
 import { Command } from "commander"
 import { rpc } from "@inlang/rpc"
 import { getInlangProject } from "../../utilities/getInlangProject.js"
-import { log } from "../../utilities/log.js"
+import { log, logError } from "../../utilities/log.js"
 import { type InlangProject, ProjectSettings, Message } from "@inlang/sdk"
 import prompts from "prompts"
 import { projectOption } from "../../utilities/globalFlags.js"
@@ -40,7 +40,7 @@ export const translate = new Command()
 			const project = await getInlangProject({ projectPath: args.project })
 			await translateCommandAction({ project })
 		} catch (error) {
-			log.error(error)
+			logError(error)
 		}
 	})
 
@@ -142,6 +142,6 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 		// Log the message counts
 		log.success("Machine translate complete.")
 	} catch (error) {
-		log.error(error)
+		logError(error)
 	}
 }

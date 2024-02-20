@@ -47,7 +47,8 @@ Promise<Result<Message, string>> {
 					{ method: "POST" }
 				)
 				if (!response.ok) {
-					return { error: response.statusText }
+					const err = `${response.status} ${response.statusText}: translating from ${args.sourceLanguageTag} to ${targetLanguageTag}`
+					return { error: err }
 				}
 				const json = await response.json()
 				const translation = json.data.translations[0].translatedText
