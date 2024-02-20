@@ -69,13 +69,19 @@ export async function run(): Promise<void> {
 			}
 		}
 		const reportsBase = projectBase.query.messageLintReports.getAll()
-		console.log("Reports", reportsHead.length, reportsBase.length)
+		core.debug(`Reports head: ${JSON.stringify(reportsHead)}`)
+		core.debug(`Reports base: ${JSON.stringify(reportsBase)}`)
 
 		const lintSummary = createLintSummary(
 			reportsHead,
 			reportsBase,
 			project.installed.messageLintRules()
 		)
+		if (lintSummary.length === 0) {
+			core.debug("No lint reports found, skipping comment")
+			return
+		}
+
 		const commentContent = `
 ### 🛎️ Translations need to be updated
 
@@ -175,9 +181,8 @@ async function checkoutBranch(branchName: string) {
 				reject(error)
 				return
 			}
-			// Log the output of the command
-			console.log(`stdout: ${stdout}`)
-			console.error(`stderr: ${stderr}`)
+			core.debug(`stdout: ${stdout}`)
+			core.debug(`stderr: ${stderr}`)
 			resolve()
 		})
 	})
@@ -193,9 +198,8 @@ async function fetchBranch(branchName: string) {
 				reject(error)
 				return
 			}
-			// Log the output of the command
-			console.log(`stdout: ${stdout}`)
-			console.error(`stderr: ${stderr}`)
+			core.debug(`stdout: ${stdout}`)
+			core.debug(`stderr: ${stderr}`)
 			resolve()
 		})
 	})
@@ -211,9 +215,8 @@ async function pull() {
 				reject(error)
 				return
 			}
-			// Log the output of the command
-			console.log(`stdout: ${stdout}`)
-			console.error(`stderr: ${stderr}`)
+			core.debug(`stdout: ${stdout}`)
+			core.debug(`stderr: ${stderr}`)
 			resolve()
 		})
 	})
