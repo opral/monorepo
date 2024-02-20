@@ -52,8 +52,21 @@ export async function run(): Promise<void> {
 
 		await fetchBranch(baseMeta.branch)
 		await checkoutBranch(baseMeta.branch)
-		inlangRepo.pull
-		const reportsBase = project.query.messageLintReports.getAll()
+		const baseInlangRepo = await openRepository(process.cwd(), {
+			nodeishFs: fs,
+			branch: baseMeta.branch,
+		})
+		const projectBase = await loadProject({
+			projectPath: process.cwd() + project_path,
+			repo: baseInlangRepo,
+			appId: "app.inlang.githubI18nLintAction",
+		})
+		if (projectBase.errors().length > 0) {
+			for (const error of projectBase.errors()) {
+				throw error
+			}
+		}
+		const reportsBase = projectBase.query.messageLintReports.getAll()
 		console.log("Reports", reportsHead.length, reportsBase.length)
 
 		const lintSummary = createLintSummary(
