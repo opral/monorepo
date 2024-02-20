@@ -10,6 +10,10 @@ export default function Home() {
 			<p>{m.currentLanguageTag({ languageTag: languageTag() })}</p>
 
 			<Link href="/about">{m.about()}</Link>
+
+			<br />
+
+			<Link href="/form">Form Flow</Link>
 			<ClientComponent />
 		</main>
 	)
