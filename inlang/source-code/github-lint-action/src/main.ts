@@ -158,7 +158,7 @@ function createLintSummary(
 function checkoutBranch(branchName: string) {
 	return new Promise((resolve, reject) => {
 		// Execute the git command to checkout the branch
-		exec(`git checkout ${branchName}`, (error, stdout, stderr) => {
+		exec(`git checkout ${branchName}`, { cwd: process.cwd() }, (error, stdout, stderr) => {
 			if (error) {
 				console.error(`Error executing command: ${error}`)
 				reject(error)
