@@ -1,5 +1,5 @@
 import { availableLanguageTags, languageTag, sourceLanguageTag } from "$paraglide/runtime.js"
-import { prefixStrategy } from "../routing/prefix"
+import { prefixStrategy } from "./routing/prefix"
 import NextLink from "next/link"
 import React from "react"
 
