@@ -377,13 +377,13 @@ Unfortunately, if you have a lot of messages this can get quite tedious. Fortuna
 
 #### Re-Loading Language-Dependent data
 
-Sometimes a piece of data needs to be reloaded when the language changes. You can do that by calling the `depends("paraglide.lang")` function during `load`
+Sometimes a piece of data needs to be reloaded when the language changes. You can do that by calling the `depends("paraglide:lang")` function during `load`
 
 ```ts
 export async function load({ depends }) {
-  // The Adapter automatically calls `invalidate("paraglide.lang")` whenever the langauge changes
+  // The Adapter automatically calls `invalidate("paraglide:lang")` whenever the langauge changes
   // This tells SvelteKit to re-run this function whenever that happens
-  depends("paraglide.lang") 
+  depends("paraglide:lang") 
   
   return await myLanguageSpecificData();
 }
