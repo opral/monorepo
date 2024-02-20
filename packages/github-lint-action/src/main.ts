@@ -50,15 +50,8 @@ export async function run(): Promise<void> {
 		const isFork = headMeta.owner !== baseMeta.owner
 		// If the PR is from a fork, we need to fetch the base reports from the base repo
 
-		// log available branches using git CLI
-
+		await fetchBranch(baseMeta.branch)
 		await checkoutBranch(baseMeta.branch)
-			.then(() => {
-				console.log("Branch checked out successfully.")
-			})
-			.catch((error) => {
-				console.error("Failed to checkout branch:", error)
-			})
 
 		const reportsBase = project.query.messageLintReports.getAll()
 		console.log("Reports", reportsHead.length, reportsBase.length)
@@ -158,7 +151,8 @@ function createLintSummary(
 // Function to checkout a branch
 async function checkoutBranch(branchName: string) {
 	return new Promise<void>((resolve, reject) => {
-		exec(`git fetch origin ${branchName}`, { cwd: process.cwd() }, (error, stdout, stderr) => {
+		// Execute the git command to checkout the branch
+		exec(`git checkout ${branchName}`, { cwd: process.cwd() }, (error, stdout, stderr) => {
 			if (error) {
 				console.error(`Error executing command: ${error}`)
 				reject(error)
@@ -167,9 +161,16 @@ async function checkoutBranch(branchName: string) {
 			// Log the output of the command
 			console.log(`stdout: ${stdout}`)
 			console.error(`stderr: ${stderr}`)
+			resolve()
 		})
-		// Execute the git command to checkout the branch
-		exec(`git checkout ${branchName}`, { cwd: process.cwd() }, (error, stdout, stderr) => {
+	})
+}
+
+// Function to fetch the branches
+async function fetchBranch(branchName: string) {
+	return new Promise<void>((resolve, reject) => {
+		// Execute the git command to fetch the branch
+		exec(`git fetch origin ${branchName}`, { cwd: process.cwd() }, (error, stdout, stderr) => {
 			if (error) {
 				console.error(`Error executing command: ${error}`)
 				reject(error)
