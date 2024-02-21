@@ -1,29 +1,37 @@
 import type { LinkProps } from "next/link"
 
+/*
+	Canonical Path = Path without locale (how you write the href)
+	Localised Path = Path with locale (how the path is visible in the URL bar)
+*/
+
 export function prefixStrategy(
 	availableLanguageTags: readonly string[],
 	sourceLanguageTag: string
 ) {
-	function getLocaleFromPath(path: string): string | undefined {
-		const maybeLocale = path.split("/")[1]
+	function getLocaleFromLocalisedPath(localisedPath: string): string | undefined {
+		const maybeLocale = localisedPath.split("/")[1]
 		if (!availableLanguageTags.includes(maybeLocale)) return undefined
 		return maybeLocale
 	}
 
-	function getPathWithoutLocale(path: string): string {
-		const locale = getLocaleFromPath(path)
-		if (!locale) return path
+	function getCanonicalPath(localisedPath: string): string {
+		const locale = getLocaleFromLocalisedPath(localisedPath)
+		if (!locale) return localisedPath
 
-		const pathWithoutLocale = path.replace(`/${locale}`, "")
+		const pathWithoutLocale = localisedPath.replace(`/${locale}`, "")
 		if (pathWithoutLocale === "") return "/"
 		return pathWithoutLocale
 	}
 
-	function translatePath(path: string, newLocale: string): string {
-		const pathWithoutLocale = getPathWithoutLocale(path)
-		if (newLocale === sourceLanguageTag) return pathWithoutLocale
-		const newPath = `/${newLocale}${pathWithoutLocale}`
-		return newPath
+	function getLocalisedPath(canonicalPath: string, locale: string): string {
+		if (locale === sourceLanguageTag) return canonicalPath
+		return `/${locale}${canonicalPath}`
+	}
+
+	function translatePath(localisedPath: string, newLocale: string): string {
+		const canonicalPath = getCanonicalPath(localisedPath)
+		return getLocalisedPath(canonicalPath, newLocale)
 	}
 
 	/**
@@ -37,11 +45,13 @@ export function prefixStrategy(
 		if (isExternal(href)) return href
 		if (typeof href === "object" && !href.pathname) return href
 
-		const pathname: string = typeof href === "object" ? href.pathname ?? "" : href
+		const canonicalPathname: string = typeof href === "object" ? href.pathname ?? "" : href
 
 		//dont' touch relative links
-		const isRelative = !pathname.startsWith("/")
-		const translatedPathaname = isRelative ? pathname : translatePath(pathname, lang)
+		const isRelative = !canonicalPathname.startsWith("/")
+		const translatedPathaname = isRelative
+			? canonicalPathname
+			: getLocalisedPath(canonicalPathname, lang)
 
 		// @ts-ignore
 		return typeof href === "object"
@@ -49,36 +59,38 @@ export function prefixStrategy(
 			: translatedPathaname
 	}
 
-	/**
-	 * Returns true if the href explicitly includes the origin, even if it's the current origin
-	 */
-	function isExternal(href: LinkProps["href"]) {
-		if (typeof href === "object") {
-			//Make sure none of the telltales for external links are set
-			const externalTelltales = [href.protocol, href.auth, href.port, href.hostname, href.host]
-			for (const telltale of externalTelltales) {
-				if (telltale) return true
-			}
-			return false
-		}
-
-		//Make sure the href isn't a full url
-		const [maybeProtocol, ...rest] = href.split(":")
-		if (rest.length === 0) return false
-
-		// href must not start with a url scheme
-		// see: https://datatracker.ietf.org/doc/html/rfc3986#section-3.1
-		const schemeRegex = /^[a-z][a-z0-9+\-.]*:/i
-		if (schemeRegex.test(maybeProtocol)) return true
-
-		//If the href starts with // it's a protocol relative url -> must include the host -> external
-		if (href.startsWith("//")) return true
-		return false
-	}
-
 	return {
-		getLocaleFromPath,
+		getLocaleFromLocalisedPath,
+		getLocalisedPath,
+		getCanonicalPath,
 		translatePath,
 		translateHref,
 	}
+}
+
+/**
+ * Returns true if the href explicitly includes the origin, even if it's the current origin
+ */
+function isExternal(href: LinkProps["href"]) {
+	if (typeof href === "object") {
+		//Make sure none of the telltales for external links are set
+		const externalTelltales = [href.protocol, href.auth, href.port, href.hostname, href.host]
+		for (const telltale of externalTelltales) {
+			if (telltale) return true
+		}
+		return false
+	}
+
+	//Make sure the href isn't a full url
+	const [maybeProtocol, ...rest] = href.split(":")
+	if (rest.length === 0) return false
+
+	// href must not start with a url scheme
+	// see: https://datatracker.ietf.org/doc/html/rfc3986#section-3.1
+	const schemeRegex = /^[a-z][a-z0-9+\-.]*:/i
+	if (schemeRegex.test(maybeProtocol)) return true
+
+	//If the href starts with // it's a protocol relative url -> must include the host -> external
+	if (href.startsWith("//")) return true
+	return false
 }

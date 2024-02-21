@@ -1,20 +1,46 @@
 import { it, expect, describe } from "vitest"
 import { prefixStrategy } from "./prefix"
 
-const { getLocaleFromPath, translatePath, translateHref } = prefixStrategy(
-	["en", "de", "de-CH"],
-	"en"
-)
+const {
+	getLocaleFromLocalisedPath,
+	translatePath,
+	translateHref,
+	getCanonicalPath,
+	getLocalisedPath,
+} = prefixStrategy(["en", "de", "de-CH"], "en")
 
-describe("getLocaleFromPath", () => {
+describe("getLocaleFromLocalisedPath", () => {
 	it("returns the locale if there is one", () => {
-		expect(getLocaleFromPath("/de/some/path")).toBe("de")
-		expect(getLocaleFromPath("/en/some/path")).toBe("en")
-		expect(getLocaleFromPath("/de-CH/some/path")).toBe("de-CH")
+		expect(getLocaleFromLocalisedPath("/de/some/path")).toBe("de")
+		expect(getLocaleFromLocalisedPath("/en/some/path")).toBe("en")
+		expect(getLocaleFromLocalisedPath("/de-CH/some/path")).toBe("de-CH")
 	})
 
 	it("returns the undefined if there is no locale", () => {
-		expect(getLocaleFromPath("/some/path")).toBe(undefined)
+		expect(getLocaleFromLocalisedPath("/some/path")).toBe(undefined)
+	})
+})
+
+describe("getCanonicalPath", () => {
+	it("removes the language prefix if there is one", () => {
+		expect(getCanonicalPath("/de/some/path")).toBe("/some/path")
+		expect(getCanonicalPath("/en/some/path")).toBe("/some/path")
+		expect(getCanonicalPath("/de-CH/some/path")).toBe("/some/path")
+	})
+
+	it("returns the path if there is no language prefix", () => {
+		expect(getCanonicalPath("/some/path")).toBe("/some/path")
+	})
+})
+
+describe("getLocalisedPath", () => {
+	it("adds a language prefix if there isn't one", () => {
+		expect(getLocalisedPath("/some/path", "de")).toBe("/de/some/path")
+		expect(getLocalisedPath("/some/path", "de-CH")).toBe("/de-CH/some/path")
+	})
+
+	it("does not add a language prefix if the new locale is the source language tag", () => {
+		expect(getLocalisedPath("/some/path", "en")).toBe("/some/path")
 	})
 })
 
