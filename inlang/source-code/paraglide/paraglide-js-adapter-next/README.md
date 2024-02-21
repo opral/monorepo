@@ -115,9 +115,8 @@ The available languages are automatically determined from your `project.inlang/s
 Next, we need to register the Locale Middleware. Create a `src/middleware.js` file and add paraglide's middleware to it.
 
 ```js
-import { middleware as paraglideMiddleware } from "@inlang/paraglide-js-adapter-next"
-
-export const middleware = paraglideMiddleware
+// src/middleware.js
+export { middleware } from "@inlang/paraglide-js-adapter-next"
 ```
 
 Finally, we need to register the Paraglide Language Provider in `src/app/layout.jsx`. This is where we will set the language for each request.
