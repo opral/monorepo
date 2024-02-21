@@ -1,8 +1,8 @@
 import type { NextConfig } from "next"
 import { addRewrites } from "./rewrites"
 import { addAlias } from "./alias"
-import { resolve } from "path"
-import fs from "fs/promises"
+import { resolve } from "node:path"
+import fs from "node:fs/promises"
 
 type ParaglideConfig = {
 	project: string

@@ -16,7 +16,10 @@ export function createLink(languageTag: () => string) {
 		return lang == currentLanguageTag ? (
 			<NextLink {...props} href={href} />
 		) : (
-			<a {...props} href={href.toString()} />
+			<>
+				{/* make sure to apply basePath manually */}
+				<a {...props} href={href.toString()} />
+			</>
 		)
 	}
 }
