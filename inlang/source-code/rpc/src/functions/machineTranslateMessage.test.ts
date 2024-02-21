@@ -190,3 +190,56 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 		})
 	}
 )
+
+it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
+	"should not keep line breaks in multiline translations",
+	async () => {
+		const result = await machineTranslateMessage({
+			sourceLanguageTag: "en",
+			targetLanguageTags: ["de"],
+			message: {
+				id: "mockMessage",
+				selectors: [],
+				variants: [
+					{
+						languageTag: "en",
+						match: [],
+						pattern: [
+							{
+								type: "Text",
+								value: "This is a test\r\nwith line break.",
+							},
+						],
+					},
+				],
+			},
+		})
+		expect(result.error).toBeUndefined()
+		expect(result.data).toEqual({
+			id: "mockMessage",
+			selectors: [],
+			variants: [
+				{
+					languageTag: "en",
+					match: [],
+					pattern: [
+						{
+							type: "Text",
+							value: "This is a test\r\nwith line break.",
+						},
+					],
+				},
+				{
+					languageTag: "de",
+					match: [],
+					pattern: [
+						{
+							type: "Text",
+							value: "Das ist ein Test\r\nmit Zeilenumbruch.",
+						},
+					],
+				},
+			],
+		})
+	}
+)
