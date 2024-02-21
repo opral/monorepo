@@ -1,7 +1,7 @@
 import React from "react"
 import { describe, it, expect, beforeEach, afterEach } from "vitest"
 import { render, screen, cleanup } from "@testing-library/react"
-import { Link } from "./Link"
+import { Link } from "./Link.client"
 import { setLanguageTag, sourceLanguageTag } from "$paraglide/runtime.js"
 
 describe("<Link>", () => {

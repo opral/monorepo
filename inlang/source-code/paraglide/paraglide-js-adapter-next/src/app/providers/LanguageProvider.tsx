@@ -5,9 +5,7 @@ import { LanguageSpy } from "./LanguageSpy"
 import { getLanguage } from "../getLanguage.server"
 
 export default function LanguageProvider(props: { children: React.ReactNode }): React.ReactElement {
-	setLanguageTag(() => {
-		return getLanguage()
-	})
+	setLanguageTag(getLanguage)
 
 	//we make the client side language provider a sibling of the children
 	//That way the entire app isn't turned into a client component
@@ -17,6 +15,7 @@ export default function LanguageProvider(props: { children: React.ReactNode }): 
 			<ClientLanguageProvider language={languageTag()} />
 			{/* Refresh when the language changes */}
 			<LanguageSpy />
+			{/* Re-render if the language changes */}
 			<React.Fragment key={languageTag()}>{props.children}</React.Fragment>
 		</>
 	)
