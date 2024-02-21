@@ -4,6 +4,10 @@ import { ClientLanguageProvider } from "./ClientLanguageProvider"
 import { LanguageSpy } from "./LanguageSpy"
 import { getLanguage } from "../getLanguage.server"
 
+
+// avoid flash of wrong language on startup
+setLanguageTag(getLanguage)
+
 //If we can reliably call setLanguageTag() from middleware.tsx, we can probably get rid of this component
 export default function LanguageProvider(props: { children: React.ReactNode }): React.ReactElement {
 	setLanguageTag(getLanguage)
