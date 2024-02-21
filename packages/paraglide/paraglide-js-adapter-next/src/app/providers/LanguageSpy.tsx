@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { prefixStrategy } from "../routing/prefix"
 
-const { getLocaleFromPath } = prefixStrategy(availableLanguageTags, sourceLanguageTag)
+const { getLocaleFromLocalisedPath } = prefixStrategy(availableLanguageTags, sourceLanguageTag)
 
 /**
  * This component keeps track of the language in the URL and refreshes the page when it changes.
@@ -14,7 +14,7 @@ export function LanguageSpy() {
 	const router = useRouter()
 	const pathname = usePathname()
 
-	const language = getLocaleFromPath(pathname) ?? sourceLanguageTag
+	const language = getLocaleFromLocalisedPath(pathname) ?? sourceLanguageTag
 	const [currentLanguage, setCurrentLanguage] = useState(language)
 
 	useEffect(() => {

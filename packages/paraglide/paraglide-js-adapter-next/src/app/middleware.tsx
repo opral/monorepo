@@ -4,7 +4,7 @@ import { sourceLanguageTag, availableLanguageTags } from "$paraglide/runtime.js"
 import { LANGUAGE_HEADER } from "../constants"
 import { prefixStrategy } from "./routing/prefix"
 
-const { getLocaleFromPath, translatePath } = prefixStrategy(
+const { getLocaleFromLocalisedPath, translatePath } = prefixStrategy(
 	availableLanguageTags,
 	sourceLanguageTag
 )
@@ -14,7 +14,7 @@ const { getLocaleFromPath, translatePath } = prefixStrategy(
  * https://nextjs.org/docs/pages/building-your-application/routing/middleware#setting-headers
  */
 export function middleware(request: NextRequest) {
-	const locale = getLocaleFromPath(request.nextUrl.pathname) ?? sourceLanguageTag
+	const locale = getLocaleFromLocalisedPath(request.nextUrl.pathname) ?? sourceLanguageTag
 	const headers = new Headers(request.headers)
 
 	headers.set(LANGUAGE_HEADER, locale)

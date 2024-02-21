@@ -1,6 +1,10 @@
 import * as NextNavigation from "next/navigation"
 import { prefixStrategy } from "./routing/prefix"
-import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
+import {
+	availableLanguageTags,
+	isAvailableLanguageTag,
+	sourceLanguageTag,
+} from "$paraglide/runtime.js"
 
 const { translateHref } = prefixStrategy(availableLanguageTags, sourceLanguageTag)
 
@@ -44,5 +48,20 @@ export const createNavigation = (languageTag: () => string) => {
 		NextNavigation.permanentRedirect(...args)
 	}
 
-	return { useRouter, redirect, permanentRedirect }
+	type NextUsePathname = (typeof NextNavigation)["usePathname"]
+
+	/**
+	 * Get the current **non-localised** pathname. For example usePathname() on /de/dashboard?foo=bar would return "/dashboard"
+	 */
+	const usePathname: NextUsePathname = (...args) => {
+		const localisedPathname = NextNavigation.usePathname(...args)
+		const segments = localisedPathname.split("/").filter(Boolean)
+		const languageTag = segments[0]
+		if (!isAvailableLanguageTag(languageTag)) {
+			return localisedPathname
+		}
+		return "/" + segments.slice(1).join("/")
+	}
+
+	return { useRouter, redirect, permanentRedirect, usePathname }
 }
