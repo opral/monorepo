@@ -3,6 +3,14 @@ import type { LanguageTag } from "@inlang/language-tag"
 import { getVariant, Text, type Message, VariableReference } from "@inlang/sdk"
 import type { Result } from "@inlang/result"
 
+if (process.env.MOCK_TRANSLATE) {
+	const n = Number(process.env.MOCK_TRANSLATE) || 0
+	if (!Number.isInteger(n)) throw new Error(`MOCK_TRANSLATE should be an integer or non-number`)
+	const errors = n === 0 ? "no" : n === 1 ? "all" : `1/${n}`
+	// eslint-disable-next-line no-console
+	console.log(`🥸 Mocking machine translate api with ${errors} errors`)
+}
+
 export async function machineTranslateMessage(args: {
 	message: Message
 	sourceLanguageTag: LanguageTag
@@ -34,24 +42,35 @@ Promise<Result<Message, string>> {
 					continue
 				}
 				const placeholderMetadata: PlaceholderMetadata = {}
-				const response = await fetch(
-					"https://translation.googleapis.com/language/translate/v2?" +
-						new URLSearchParams({
-							q: serializePattern(variant.pattern, placeholderMetadata),
-							target: targetLanguageTag,
-							source: args.sourceLanguageTag,
-							// html to escape placeholders
-							format: "html",
-							key: privateEnv.GOOGLE_TRANSLATE_API_KEY,
-						}),
-					{ method: "POST" }
-				)
-				if (!response.ok) {
-					const err = `${response.status} ${response.statusText}: translating from ${args.sourceLanguageTag} to ${targetLanguageTag}`
-					return { error: err }
+				const q = serializePattern(variant.pattern, placeholderMetadata)
+				let translation: string
+
+				if (!process.env.MOCK_TRANSLATE) {
+					const response = await fetch(
+						"https://translation.googleapis.com/language/translate/v2?" +
+							new URLSearchParams({
+								q,
+								target: targetLanguageTag,
+								source: args.sourceLanguageTag,
+								// html to escape placeholders
+								format: "html",
+								key: privateEnv.GOOGLE_TRANSLATE_API_KEY,
+							}),
+						{ method: "POST" }
+					)
+					if (!response.ok) {
+						const err = `${response.status} ${response.statusText}: translating from ${args.sourceLanguageTag} to ${targetLanguageTag}`
+						return { error: err }
+					}
+					const json = await response.json()
+					translation = json.data.translations[0].translatedText
+				} else {
+					const mockTranslation = await mockTranslate(q, args.sourceLanguageTag, targetLanguageTag)
+					if (mockTranslation.error) {
+						return { error: mockTranslation.error }
+					}
+					translation = mockTranslation.translation
 				}
-				const json = await response.json()
-				const translation = json.data.translations[0].translatedText
 				copy.variants.push({
 					languageTag: targetLanguageTag,
 					match: variant.match,
@@ -63,6 +82,33 @@ Promise<Result<Message, string>> {
 	} catch (error) {
 		console.error(error)
 		return { error: error?.toString() ?? "unknown error" }
+	}
+}
+
+let countMocks = 0
+
+/**
+ * Mock the google translate api with a 1s delay.
+ * Enable by setting env var MOCK_TRANSLATE to:
+ * - not-a-number: no errors
+ * - 1: only errors
+ * - integer n > 1: 1/n fraction of errors
+ */
+async function mockTranslate(
+	q: string,
+	sourceLanguageTag: string,
+	targetLanguageTag: string
+): Promise<{ translation: string; error?: string }> {
+	countMocks++
+	const MOD = Number(process.env.MOCK_TRANSLATE) || 0
+	const error = countMocks % MOD === 0 ? "Mock error" : undefined
+	const prefix = `Mock translate ${sourceLanguageTag} to ${targetLanguageTag}: `
+	// eslint-disable-next-line no-console
+	console.log(`${error ? "💥 Error " : ""}${prefix}${q.length > 50 ? q.slice(0, 50) + "..." : q}`)
+	await new Promise((resolve) => setTimeout(resolve, 1000))
+	return {
+		translation: prefix + q,
+		error,
 	}
 }
 

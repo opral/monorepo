@@ -190,7 +190,7 @@ export async function loadProject(args: {
 
 		// const messageBaseFolderFolderPath = projectPath + "/messages"
 		// const messageFolderPath = messageBaseFolderFolderPath + "/v1"
-		const messageLockFilePath = projectPath + "messagelock"
+		const messageLockFilePath = projectPath + "/messagelock"
 
 		createEffect(() => {
 			// wait for first effect excution until modules are resolved
