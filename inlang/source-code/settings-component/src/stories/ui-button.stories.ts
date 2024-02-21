@@ -40,8 +40,5 @@ export const Big: StoryObj = {
 }
 
 export const Test: StoryObj = {
-	render: () => html`
-		<sl-button size="medium" variant="primary">Test</sl-button>
-		<ui-button label="Test" size="medium" variant="primary"></ui-button>
-	`,
+	render: () => html` <ui-button label="Test" size="medium" variant="primary"></ui-button> `,
 }
