@@ -13,7 +13,7 @@ const { getLocaleFromPath, translatePath } = prefixStrategy(
  * Sets the request headers to resolve the language tag in RSC.
  * https://nextjs.org/docs/pages/building-your-application/routing/middleware#setting-headers
  */
-export function paraglideMiddleware(request: NextRequest) {
+export function middleware(request: NextRequest) {
 	const locale = getLocaleFromPath(request.nextUrl.pathname) ?? sourceLanguageTag
 	const headers = new Headers(request.headers)
 
