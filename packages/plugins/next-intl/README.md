@@ -105,7 +105,7 @@ The message IDs are sorted in the order in which they appear in the sourceLangua
 
 # Pricing 
 
-<doc-dev-tool-pricing></doc-dev-tool-pricing>
+<doc-pricing></doc-pricing>
 
 # Contributing
 
