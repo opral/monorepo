@@ -1,8 +1,6 @@
 import { html } from "lit"
 import "./ui-button.ts"
-import "./overwrite-styles.css"
 import type { Meta, StoryObj } from "@storybook/web-components"
-import "@shoelace-style/shoelace/dist/components/button/button.js"
 
 const meta: Meta = {
 	component: "ui-button",
