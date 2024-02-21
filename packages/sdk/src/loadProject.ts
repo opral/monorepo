@@ -41,13 +41,22 @@ import type { NodeishStats } from "../../../../lix/source-code/fs/dist/NodeishFi
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
-export type MessageState = {
+type MessageState = {
 	messageDirtyFlags: {
 		[messageId: string]: boolean
 	}
 	messageLoadHash: {
 		[messageId: string]: string
 	}
+	isSaving: boolean
+	currentSaveMessagesViaPlugin: Promise<void> | undefined
+	sheduledSaveMessages:
+		| [awaitable: Promise<void>, resolve: () => void, reject: (e: unknown) => void]
+		| undefined
+	isLoading: boolean
+	sheduledLoadMessagesViaPlugin:
+		| [awaitable: Promise<void>, resolve: () => void, reject: (e: unknown) => void]
+		| undefined
 }
 
 /**
@@ -69,6 +78,11 @@ export async function loadProject(args: {
 	const messageStates = {
 		messageDirtyFlags: {},
 		messageLoadHash: {},
+		isSaving: false,
+		currentSaveMessagesViaPlugin: undefined,
+		sheduledSaveMessages: undefined,
+		isLoading: false,
+		sheduledLoadMessagesViaPlugin: undefined,
 	} as MessageState
 
 	// -- validation --------------------------------------------------------
@@ -584,17 +598,6 @@ export function createSubscribable<T>(signal: () => T): Subscribable<T> {
 // - saving a message in two different languages would lead to a write in de.json first
 // - This will leads to a load of the messages and since en.json has not been saved yet the english variant in the message would get overritten with the old state again
 
-let isSaving: boolean
-let currentSaveMessagesViaPlugin: Promise<void> | undefined
-let sheduledSaveMessages:
-	| [awaitable: Promise<void>, resolve: () => void, reject: (e: unknown) => void]
-	| undefined
-
-let isLoading = false
-let sheduledLoadMessagesViaPlugin:
-	| [awaitable: Promise<void>, resolve: () => void, reject: (e: unknown) => void]
-	| undefined
-
 /**
  * Messsage that loads messages from a plugin - this method synchronizes with the saveMessage funciton.
  * If a save is in progress loading will wait until saving is done. If another load kicks in during this load it will queue the
@@ -619,16 +622,16 @@ async function loadMessagesViaPlugin(
 	const aliasesFeatureFlag = !!settingsValue.featureFlags?.aliases
 
 	// loading is an asynchronous process - check if another load is in progress - queue this call if so
-	if (isLoading) {
-		if (!sheduledLoadMessagesViaPlugin) {
-			sheduledLoadMessagesViaPlugin = createAwaitable()
+	if (messageState.isLoading) {
+		if (!messageState.sheduledLoadMessagesViaPlugin) {
+			messageState.sheduledLoadMessagesViaPlugin = createAwaitable()
 		}
 		// another load will take place right after the current one - its goingt to be idempotent form the current requested one - don't reschedule
-		return sheduledLoadMessagesViaPlugin[0]
+		return messageState.sheduledLoadMessagesViaPlugin[0]
 	}
 
 	// set loading flag
-	isLoading = true
+	messageState.isLoading = true
 	let lockTime: number | undefined = undefined
 
 	try {
@@ -720,20 +723,20 @@ async function loadMessagesViaPlugin(
 		// eslint-disable-next-line no-console
 		console.log("loadMessagesViaPlugin: " + loadedMessages.length + " Messages processed ")
 
-		isLoading = false
+		messageState.isLoading = false
 	} finally {
 		if (lockTime !== undefined) {
 			await releaseLock(fs as NodeishFilesystem, lockFilePath, "loadMessage", lockTime)
 		}
-		isLoading = false
+		messageState.isLoading = false
 	}
 
-	const executingScheduledMessages = sheduledLoadMessagesViaPlugin
+	const executingScheduledMessages = messageState.sheduledLoadMessagesViaPlugin
 	if (executingScheduledMessages) {
 		// a load has been requested during the load - executed it
 
 		// reset sheduling to except scheduling again
-		sheduledLoadMessagesViaPlugin = undefined
+		messageState.sheduledLoadMessagesViaPlugin = undefined
 
 		// recall load unawaited to allow stack to pop
 		loadMessagesViaPlugin(fs, lockFilePath, messageState, messagesQuery, settingsValue, loadPlugin)
@@ -758,18 +761,18 @@ async function saveMessagesViaPlugin(
 	loadPlugin: any
 ): Promise<void> {
 	// queue next save if we have a save ongoing
-	if (isSaving) {
-		if (!sheduledSaveMessages) {
-			sheduledSaveMessages = createAwaitable()
+	if (messageState.isSaving) {
+		if (!messageState.sheduledSaveMessages) {
+			messageState.sheduledSaveMessages = createAwaitable()
 		}
 
-		return sheduledSaveMessages[0]
+		return messageState.sheduledSaveMessages[0]
 	}
 
 	// set isSavingFlag
-	isSaving = true
+	messageState.isSaving = true
 
-	currentSaveMessagesViaPlugin = (async function () {
+	messageState.currentSaveMessagesViaPlugin = (async function () {
 		const saveMessageHashes = {} as { [messageId: string]: string }
 
 		// check if we have any dirty message - witho
@@ -777,7 +780,7 @@ async function saveMessagesViaPlugin(
 			// nothing to save :-)
 			// eslint-disable-next-line no-console
 			console.log("save was skipped - no messages marked as dirty... build!")
-			isSaving = false
+			messageState.isSaving = false
 			return
 		}
 
@@ -790,7 +793,7 @@ async function saveMessagesViaPlugin(
 			if (Object.keys(messageState.messageDirtyFlags).length == 0) {
 				// eslint-disable-next-line no-console
 				console.log("save was skipped - no messages marked as dirty... releasing lock again")
-				isSaving = false
+				messageState.isSaving = false
 				// release lock in finally block
 				return
 			}
@@ -835,7 +838,7 @@ async function saveMessagesViaPlugin(
 			}
 
 			// if there is a queued load, allow it to take the lock before we run additional saves.
-			if (sheduledLoadMessagesViaPlugin) {
+			if (messageState.sheduledLoadMessagesViaPlugin) {
 				// eslint-disable-next-line no-console
 				console.log("saveMessagesViaPlugin calling queued loadMessagesViaPlugin to share lock")
 				await loadMessagesViaPlugin(
@@ -848,7 +851,7 @@ async function saveMessagesViaPlugin(
 				)
 			}
 
-			isSaving = false
+			messageState.isSaving = false
 		} catch (err) {
 			// something went wrong - add dirty flags again
 			if (messageDirtyFlagsBeforeSave !== undefined) {
@@ -861,7 +864,7 @@ async function saveMessagesViaPlugin(
 				await releaseLock(fs as NodeishFilesystem, lockFilePath, "saveMessage", lockTime)
 				lockTime = undefined
 			}
-			isSaving = false
+			messageState.isSaving = false
 
 			// ok an error
 			throw new PluginSaveMessagesError({
@@ -872,15 +875,15 @@ async function saveMessagesViaPlugin(
 				await releaseLock(fs as NodeishFilesystem, lockFilePath, "saveMessage", lockTime)
 				lockTime = undefined
 			}
-			isSaving = false
+			messageState.isSaving = false
 		}
 	})()
 
-	await currentSaveMessagesViaPlugin
+	await messageState.currentSaveMessagesViaPlugin
 
-	if (sheduledSaveMessages) {
-		const executingSheduledSaveMessages = sheduledSaveMessages
-		sheduledSaveMessages = undefined
+	if (messageState.sheduledSaveMessages) {
+		const executingSheduledSaveMessages = messageState.sheduledSaveMessages
+		messageState.sheduledSaveMessages = undefined
 
 		saveMessagesViaPlugin(
 			fs,
