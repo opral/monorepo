@@ -1,6 +1,7 @@
 import { html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
 import "@shoelace-style/shoelace/dist/components/button/button.js"
+import { baseStyling } from "../styling/base.js"
 
 @customElement("ui-button")
 export class UiButton extends LitElement {
@@ -12,6 +13,8 @@ export class UiButton extends LitElement {
 
 	@property()
 	label: string = "Button"
+
+	static override styles = baseStyling
 
 	override render() {
 		return html` <sl-button size=${this.size} variant=${this.variant}>${this.label}</sl-button> `

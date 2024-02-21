@@ -1,8 +1,8 @@
 import { html } from "lit"
 import "./ui-button.ts"
-import "./ootb-styles.css"
 import "./overwrite-styles.css"
 import type { Meta, StoryObj } from "@storybook/web-components"
+import "@shoelace-style/shoelace/dist/components/button/button.js"
 
 const meta: Meta = {
 	component: "ui-button",
@@ -40,5 +40,8 @@ export const Big: StoryObj = {
 }
 
 export const Test: StoryObj = {
-	render: () => html`<ui-button label="Test" size="medium" primary></ui-button>`,
+	render: () => html`
+		<sl-button size="medium" variant="primary">Test</sl-button>
+		<ui-button label="Test" size="medium" variant="primary"></ui-button>
+	`,
 }

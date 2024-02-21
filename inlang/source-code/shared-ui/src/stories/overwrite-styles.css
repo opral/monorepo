@@ -1,33 +1,13 @@
-:root,
-:host,
-.sl-theme-light {
-    --sl-color-primary-50: #f0f5ff;
-    --sl-color-primary-100: #dfe3ff;
-    --sl-color-primary-200: #bfcfff;
-    --sl-color-primary-300: #9faaff;
-    --sl-color-primary-400: #8096ff;
-    --sl-color-primary-500: #607dff;
-    --sl-color-primary-600: #4c63e7;
-    --sl-color-primary-700: #4055dc;
-    --sl-color-primary-800: #35469c;
-    --sl-color-primary-900: #2d3a8c;
-    --sl-color-primary-950: #19216c;
-    --sl-color-primary-contrast: #ffffff;
-    --sl-color-primary-contrast-text: #ffffff;
-    --sl-color-primary-contrast-hover: #ffffff;
-    --sl-color-primary-contrast-hover-text: #ffffff;
-    --sl-color-primary-contrast-active: #ffffff;
-    --sl-color-primary-contrast-active-text: #ffffff;
-    --sl-color-primary-contrast-disabled: #ffffff;
-    --sl-color-primary-contrast-disabled-text: #ffffff;
-    --sl-color-primary-50-a: rgba(96, 125, 255, 0.04);
-    --sl-color-primary-100-a: rgba(96, 125, 255, 0.08);
-    --sl-color-primary-200-a: rgba(96, 125, 255, 0.12);
-    --sl-color-primary-300-a: rgba(96, 125, 255, 0.16);
-    --sl-color-primary-400-a: rgba(96, 125, 255, 0.24);
-    --sl-color-primary-500-a: rgba(96, 125, 255, 0.36);
-    --sl-color-primary-600-a: rgba(96, 125, 255, 0.48);
-    --sl-color-primary-700-a: rgba(96, 125, 255, 0.64);
-    --sl-color-primary-800-a: rgba(96, 125, 255, 0.80);
-    --sl-color-primary-900-a: rgba(96, 125, 255, 0.92);
+:root * {
+    --inlang-color-primary-50: #f0f5ff;
+    --inlang-color-primary-100: #dfe3ff;
+    --inlang-color-primary-200: #bfcfff;
+    --inlang-color-primary-300: #9faaff;
+    --inlang-color-primary-400: #8096ff;
+    --inlang-color-primary-500: #607dff;
+    --inlang-color-primary-600: #4c63e7;
+    --inlang-color-primary-700: #4055dc;
+    --inlang-color-primary-800: #35469c;
+    --inlang-color-primary-900: #2d3a8c;
+    --inlang-color-primary-950: #19216c;
 }
