@@ -6,4 +6,5 @@ module.exports = paraglide({
 		project: "./project.inlang",
 		outdir: "./src/paraglide",
 	},
+	basePath: "/base",
 })

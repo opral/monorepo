@@ -1,5 +1,10 @@
 import { NextConfig } from "next"
-import { resolve } from "path"
+import { resolve } from "node:path"
+
+enum Bundler {
+	Webpack,
+	Turborepo,
+}
 
 /**
  * Adds an alias to the bundler config.
@@ -7,9 +12,9 @@ import { resolve } from "path"
  * @param aliases A map of aliases to their relative paths
  */
 export function addAlias(nextConfig: NextConfig, aliases: Record<string, string>) {
-	const bundler = process.env.TURBOPACK ? "turbo" : "webpack"
+	const bundler = process.env.TURBOPACK ? Bundler.Turborepo : Bundler.Webpack
 
-	if (bundler === "webpack") {
+	if (bundler === Bundler.Webpack) {
 		const originalWebpack = nextConfig.webpack
 		const wrappedWebpack: NextConfig["webpack"] = (config, options) => {
 			const absoluteAliases: Record<string, string> = {}
@@ -34,11 +39,12 @@ export function addAlias(nextConfig: NextConfig, aliases: Record<string, string>
 		}
 
 		nextConfig.webpack = wrappedWebpack
-	} else if (bundler === "turbo") {
+	} else if (bundler === Bundler.Turborepo) {
 		nextConfig.experimental = nextConfig.experimental ?? {}
 		nextConfig.experimental.turbo = nextConfig.experimental.turbo ?? {}
 		nextConfig.experimental.turbo.resolveAlias = nextConfig.experimental.turbo.resolveAlias ?? {}
 
+		nextConfig.experimental.turbo.loaders
 		nextConfig.experimental.turbo.resolveAlias = {
 			...nextConfig.experimental.turbo.resolveAlias,
 			...aliases,
