@@ -629,94 +629,104 @@ async function loadMessagesViaPlugin(
 
 	// set loading flag
 	isLoading = true
-	const lockTime = await acquireFileLock(fs as NodeishFilesystem, lockFilePath, "loadMessage")
-	const loadedMessages = await makeTrulyAsync(
-		loadPlugin.loadMessages({
-			settings: settingsValue,
-			nodeishFs: fs,
-		})
-	)
+	let lockTime: number | undefined = undefined
 
-	for (const loadedMessage of loadedMessages) {
-		const loadedMessageClone = structuredClone(loadedMessage)
+	try {
+		lockTime = await acquireFileLock(fs as NodeishFilesystem, lockFilePath, "loadMessage")
+		const loadedMessages = await makeTrulyAsync(
+			loadPlugin.loadMessages({
+				settings: settingsValue,
+				nodeishFs: fs,
+			})
+		)
 
-		const currentMessages = messagesQuery
-			.getAll()
-			// TODO #1585 here we match using the id to support legacy load message plugins - after we introduced import / export methods we will use importedMessage.alias
-			.filter(
-				(message: any) =>
-					(aliasesFeatureFlag ? message.alias["default"] : message.id) === loadedMessage.id
-			)
+		for (const loadedMessage of loadedMessages) {
+			const loadedMessageClone = structuredClone(loadedMessage)
 
-		if (currentMessages.length > 1) {
-			// NOTE: if we happen to find two messages witht the sam alias we throw for now
-			// - this could be the case if one edits the aliase manualy
-			throw new Error("more than one message with the same id or alias found ")
-		} else if (currentMessages.length === 1) {
-			// update message in place - leave message id and alias untouched
-			loadedMessageClone.alias = {} as any
+			const currentMessages = messagesQuery
+				.getAll()
+				// TODO #1585 here we match using the id to support legacy load message plugins - after we introduced import / export methods we will use importedMessage.alias
+				.filter(
+					(message: any) =>
+						(aliasesFeatureFlag ? message.alias["default"] : message.id) === loadedMessage.id
+				)
 
-			// TODO #1585 we have to map the id of the importedMessage to the alias and fill the id property with the id of the existing message - change when import mesage provides importedMessage.alias
-			if (aliasesFeatureFlag) {
-				loadedMessageClone.alias["default"] = loadedMessageClone.id
-				loadedMessageClone.id = currentMessages[0]!.id
+			if (currentMessages.length > 1) {
+				// NOTE: if we happen to find two messages witht the sam alias we throw for now
+				// - this could be the case if one edits the aliase manualy
+				throw new Error("more than one message with the same id or alias found ")
+			} else if (currentMessages.length === 1) {
+				// update message in place - leave message id and alias untouched
+				loadedMessageClone.alias = {} as any
+
+				// TODO #1585 we have to map the id of the importedMessage to the alias and fill the id property with the id of the existing message - change when import mesage provides importedMessage.alias
+				if (aliasesFeatureFlag) {
+					loadedMessageClone.alias["default"] = loadedMessageClone.id
+					loadedMessageClone.id = currentMessages[0]!.id
+				}
+
+				// NOTE stringifyMessage encodes messages independent from key order!
+				const importedEnecoded = stringifyMessage(loadedMessageClone)
+
+				// NOTE could use hash instead of the whole object JSON to save memory...
+				if (messageState.messageLoadHash[loadedMessageClone.id] === importedEnecoded) {
+					// eslint-disable-next-line no-console
+					console.log("skipping upsert!")
+					continue
+				}
+
+				// This logic is preventing cycles - could also be handled if update api had a parameter for who triggered update
+				// e.g. when FS was updated, we don't need to write back to FS
+				// update is synchronous, so update effect will be triggered immediately
+				// NOTE: this might trigger a save before we have the chance to delete - but since save is async and waits for the lock acquired by this method - its save to set the flags afterwards
+				messagesQuery.update({ where: { id: loadedMessageClone.id }, data: loadedMessageClone })
+				// we load a fresh version - lets delete dirty flag that got created by the update
+				delete messageState.messageDirtyFlags[loadedMessageClone.id]
+				// NOTE could use hash instead of the whole object JSON to save memory...
+				messageState.messageLoadHash[loadedMessageClone.id] = importedEnecoded
+			} else {
+				// message with the given alias does not exist so far
+				loadedMessageClone.alias = {} as any
+				// TODO #1585 we have to map the id of the importedMessage to the alias - change when import mesage provides importedMessage.alias
+				if (aliasesFeatureFlag) {
+					loadedMessageClone.alias["default"] = loadedMessageClone.id
+
+					let currentOffset = 0
+					let messsageId: string | undefined
+					do {
+						messsageId = humanIdHash(loadedMessageClone.id, currentOffset)
+						if (messagesQuery.get({ where: { id: messsageId } })) {
+							currentOffset += 1
+							messsageId = undefined
+						}
+					} while (messsageId === undefined)
+
+					// create a humanId based on a hash of the alias
+					loadedMessageClone.id = messsageId
+				}
+
+				const importedEnecoded = stringifyMessage(loadedMessageClone)
+
+				// add the message - this will trigger an async file creation in the backgound!
+				messagesQuery.create({ data: loadedMessageClone })
+				// we load a fresh version - lets delete dirty flag that got created by the create method
+				delete messageState.messageDirtyFlags[loadedMessageClone.id]
+				messageState.messageLoadHash[loadedMessageClone.id] = importedEnecoded
 			}
-
-			// NOTE stringifyMessage encodes messages independent from key order!
-			const importedEnecoded = stringifyMessage(loadedMessageClone)
-
-			// NOTE could use hash instead of the whole object JSON to save memory...
-			if (messageState.messageLoadHash[loadedMessageClone.id] === importedEnecoded) {
-				// eslint-disable-next-line no-console
-				console.log("skipping upsert!")
-				continue
-			}
-
-			// This logic is preventing cycles - could also be handled if update api had a parameter for who triggered update
-			// e.g. when FS was updated, we don't need to write back to FS
-			// update is synchronous, so update effect will be triggered immediately
-			// NOTE: this might trigger a save before we have the chance to delete - but since save is async and waits for the lock acquired by this method - its save to set the flags afterwards
-			messagesQuery.update({ where: { id: loadedMessageClone.id }, data: loadedMessageClone })
-			// we load a fresh version - lets delete dirty flag that got created by the update
-			delete messageState.messageDirtyFlags[loadedMessageClone.id]
-			// NOTE could use hash instead of the whole object JSON to save memory...
-			messageState.messageLoadHash[loadedMessageClone.id] = importedEnecoded
-		} else {
-			// message with the given alias does not exist so far
-			loadedMessageClone.alias = {} as any
-			// TODO #1585 we have to map the id of the importedMessage to the alias - change when import mesage provides importedMessage.alias
-			if (aliasesFeatureFlag) {
-				loadedMessageClone.alias["default"] = loadedMessageClone.id
-
-				let currentOffset = 0
-				let messsageId: string | undefined
-				do {
-					messsageId = humanIdHash(loadedMessageClone.id, currentOffset)
-					if (messagesQuery.get({ where: { id: messsageId } })) {
-						currentOffset += 1
-						messsageId = undefined
-					}
-				} while (messsageId === undefined)
-
-				// create a humanId based on a hash of the alias
-				loadedMessageClone.id = messsageId
-			}
-
-			const importedEnecoded = stringifyMessage(loadedMessageClone)
-
-			// add the message - this will trigger an async file creation in the backgound!
-			messagesQuery.create({ data: loadedMessageClone })
-			// we load a fresh version - lets delete dirty flag that got created by the create method
-			delete messageState.messageDirtyFlags[loadedMessageClone.id]
-			messageState.messageLoadHash[loadedMessageClone.id] = importedEnecoded
 		}
+		await releaseLock(fs as NodeishFilesystem, lockFilePath, "loadMessage", lockTime)
+		lockTime = undefined
+
+		// eslint-disable-next-line no-console
+		console.log("loadMessagesViaPlugin: " + loadedMessages.length + " Messages processed ")
+
+		isLoading = false
+	} finally {
+		if (lockTime !== undefined) {
+			await releaseLock(fs as NodeishFilesystem, lockFilePath, "loadMessage", lockTime)
+		}
+		isLoading = false
 	}
-	await releaseLock(fs as NodeishFilesystem, lockFilePath, "loadMessage", lockTime)
-
-	// eslint-disable-next-line no-console
-	console.log("loadMessagesViaPlugin: " + loadedMessages.length + " Messages processed ")
-
-	isLoading = false
 
 	const executingScheduledMessages = sheduledLoadMessagesViaPlugin
 	if (executingScheduledMessages) {
