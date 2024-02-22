@@ -10,7 +10,7 @@ const {
 } = prefixStrategy({
 	availableLanguageTags: ["en", "de", "de-CH"],
 	sourceLanguageTag: "en",
-	exclude: [],
+	exclude: [/^\/api\//],
 })
 
 describe("getLocaleFromLocalisedPath", () => {
@@ -45,6 +45,10 @@ describe("getLocalisedPath", () => {
 
 	it("does not add a language prefix if the new locale is the source language tag", () => {
 		expect(getLocalisedPath("/some/path", "en")).toBe("/some/path")
+	})
+
+	it("does not localise excluded paths", () => {
+		expect(getLocalisedPath("/api/some/path", "de")).toBe("/api/some/path")
 	})
 })
 
@@ -163,3 +167,4 @@ describe("localiseHref", () => {
 		})
 	})
 })
+

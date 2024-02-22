@@ -8,11 +8,16 @@ import type { LinkProps } from "next/link"
 export function prefixStrategy({
 	availableLanguageTags,
 	sourceLanguageTag,
+	exclude,
 }: {
 	availableLanguageTags: readonly string[]
 	sourceLanguageTag: string
 	exclude: RegExp[]
 }) {
+	function isExcluded(path: string) {
+		return exclude.some((pattern) => pattern.test(path))
+	}
+
 	function getLocaleFromLocalisedPath(localisedPath: string): string | undefined {
 		const maybeLocale = localisedPath.split("/")[1]
 		if (!availableLanguageTags.includes(maybeLocale)) return undefined
@@ -29,7 +34,7 @@ export function prefixStrategy({
 	}
 
 	function getLocalisedPath(canonicalPath: string, locale: string): string {
-		if (locale === sourceLanguageTag) return canonicalPath
+		if (isExcluded(canonicalPath) || locale === sourceLanguageTag) return canonicalPath
 		return `/${locale}${canonicalPath}`
 	}
 
