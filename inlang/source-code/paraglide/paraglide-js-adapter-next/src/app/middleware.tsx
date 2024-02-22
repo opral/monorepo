@@ -4,8 +4,10 @@ import { sourceLanguageTag, availableLanguageTags } from "$paraglide/runtime.js"
 import { LANGUAGE_HEADER } from "../constants"
 import { prefixStrategy } from "./routing/prefix"
 
-const { getLocaleFromLocalisedPath, translatePath, getCanonicalPath, getLocalisedPath } =
-	prefixStrategy(availableLanguageTags, sourceLanguageTag)
+const { getLocaleFromLocalisedPath, translatePath, getCanonicalPath } = prefixStrategy(
+	availableLanguageTags,
+	sourceLanguageTag
+)
 
 /**
  * Sets the request headers to resolve the language tag in RSC.
