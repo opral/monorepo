@@ -204,7 +204,7 @@ export async function loadProject(args: {
 
 		// const messageBaseFolderFolderPath = projectPath + "/messages"
 		// const messageFolderPath = messageBaseFolderFolderPath + "/v1"
-		const messageLockFilePath = projectPath + "/messagelock"
+		const messageLockDirPath = projectPath + "/messagelock"
 
 		createEffect(() => {
 			// wait for first effect excution until modules are resolved
@@ -236,7 +236,7 @@ export async function loadProject(args: {
 					// TODO FINK check error handling for plugin load methods (triggered by file change) -> move to separate ticket
 					loadMessagesViaPlugin(
 						fsWithWatcher,
-						messageLockFilePath,
+						messageLockDirPath,
 						messageStates,
 						messagesQuery,
 						settings()!, // TODO revalidate whether this is always non-null
@@ -254,7 +254,7 @@ export async function loadProject(args: {
 			// TODO FINK check error handling for plugin load methods (initial load)
 			loadMessagesViaPlugin(
 				fsWithWatcher,
-				messageLockFilePath,
+				messageLockDirPath,
 				messageStates,
 				messagesQuery,
 				_settings,
@@ -345,7 +345,7 @@ export async function loadProject(args: {
 								messageStates.messageDirtyFlags[message.id] = true
 								saveMessagesViaPlugin(
 									fs,
-									messageLockFilePath,
+									messageLockDirPath,
 									messageStates,
 									messagesQuery,
 									settings()!,
@@ -383,7 +383,7 @@ export async function loadProject(args: {
 				// we keep track of the latest save within the loadProject call to await it at the end - this is not used in subsequetial upserts
 				saveMessagesViaPlugin(
 					nodeishFs,
-					messageLockFilePath,
+					messageLockDirPath,
 					messageStates,
 					messagesQuery,
 					settings()!,
@@ -613,7 +613,7 @@ export function createSubscribable<T>(signal: () => T): Subscribable<T> {
  */
 async function loadMessagesViaPlugin(
 	fs: NodeishFilesystem,
-	lockFilePath: string,
+	lockDirPath: string,
 	messageState: MessageState,
 	messagesQuery: InlangProject["query"]["messages"],
 	settingsValue: ProjectSettings,
@@ -635,7 +635,7 @@ async function loadMessagesViaPlugin(
 	let lockTime: number | undefined = undefined
 
 	try {
-		lockTime = await acquireFileLock(fs as NodeishFilesystem, lockFilePath, "loadMessage")
+		lockTime = await acquireFileLock(fs as NodeishFilesystem, lockDirPath, "loadMessage")
 		const loadedMessages = await makeTrulyAsync(
 			loadPlugin.loadMessages({
 				settings: settingsValue,
@@ -717,7 +717,7 @@ async function loadMessagesViaPlugin(
 				messageState.messageLoadHash[loadedMessageClone.id] = importedEnecoded
 			}
 		}
-		await releaseLock(fs as NodeishFilesystem, lockFilePath, "loadMessage", lockTime)
+		await releaseLock(fs as NodeishFilesystem, lockDirPath, "loadMessage", lockTime)
 		lockTime = undefined
 
 		// eslint-disable-next-line no-console
@@ -726,7 +726,7 @@ async function loadMessagesViaPlugin(
 		messageState.isLoading = false
 	} finally {
 		if (lockTime !== undefined) {
-			await releaseLock(fs as NodeishFilesystem, lockFilePath, "loadMessage", lockTime)
+			await releaseLock(fs as NodeishFilesystem, lockDirPath, "loadMessage", lockTime)
 		}
 		messageState.isLoading = false
 	}
@@ -739,7 +739,7 @@ async function loadMessagesViaPlugin(
 		messageState.sheduledLoadMessagesViaPlugin = undefined
 
 		// recall load unawaited to allow stack to pop
-		loadMessagesViaPlugin(fs, lockFilePath, messageState, messagesQuery, settingsValue, loadPlugin)
+		loadMessagesViaPlugin(fs, lockDirPath, messageState, messagesQuery, settingsValue, loadPlugin)
 			.then(() => {
 				// resolve the scheduled load message promise
 				executingScheduledMessages[1]()
@@ -753,7 +753,7 @@ async function loadMessagesViaPlugin(
 
 async function saveMessagesViaPlugin(
 	fs: NodeishFilesystem,
-	lockFilePath: string,
+	lockDirPath: string,
 	messageState: MessageState,
 	messagesQuery: InlangProject["query"]["messages"],
 	settingsValue: ProjectSettings,
@@ -787,7 +787,7 @@ async function saveMessagesViaPlugin(
 		let messageDirtyFlagsBeforeSave: typeof messageState.messageDirtyFlags | undefined
 		let lockTime: number | undefined
 		try {
-			lockTime = await acquireFileLock(fs as NodeishFilesystem, lockFilePath, "saveMessage")
+			lockTime = await acquireFileLock(fs as NodeishFilesystem, lockDirPath, "saveMessage")
 
 			// since it may takes some time to acquire the lock we check if the save is required still (loadMessage could have happend in between)
 			if (Object.keys(messageState.messageDirtyFlags).length == 0) {
@@ -833,7 +833,7 @@ async function saveMessagesViaPlugin(
 			}
 
 			if (lockTime !== undefined) {
-				await releaseLock(fs as NodeishFilesystem, lockFilePath, "saveMessage", lockTime)
+				await releaseLock(fs as NodeishFilesystem, lockDirPath, "saveMessage", lockTime)
 				lockTime = undefined
 			}
 
@@ -843,7 +843,7 @@ async function saveMessagesViaPlugin(
 				console.log("saveMessagesViaPlugin calling queued loadMessagesViaPlugin to share lock")
 				await loadMessagesViaPlugin(
 					fs,
-					lockFilePath,
+					lockDirPath,
 					messageState,
 					messagesQuery,
 					settingsValue,
@@ -861,7 +861,7 @@ async function saveMessagesViaPlugin(
 			}
 
 			if (lockTime !== undefined) {
-				await releaseLock(fs as NodeishFilesystem, lockFilePath, "saveMessage", lockTime)
+				await releaseLock(fs as NodeishFilesystem, lockDirPath, "saveMessage", lockTime)
 				lockTime = undefined
 			}
 			messageState.isSaving = false
@@ -872,7 +872,7 @@ async function saveMessagesViaPlugin(
 			})
 		} finally {
 			if (lockTime !== undefined) {
-				await releaseLock(fs as NodeishFilesystem, lockFilePath, "saveMessage", lockTime)
+				await releaseLock(fs as NodeishFilesystem, lockDirPath, "saveMessage", lockTime)
 				lockTime = undefined
 			}
 			messageState.isSaving = false
@@ -887,7 +887,7 @@ async function saveMessagesViaPlugin(
 
 		saveMessagesViaPlugin(
 			fs,
-			lockFilePath,
+			lockDirPath,
 			messageState,
 			messagesQuery,
 			settingsValue,
@@ -908,7 +908,7 @@ const nProbes = 50
 const probeInterval = 100
 async function acquireFileLock(
 	fs: NodeishFilesystem,
-	lockFilePath: string,
+	lockDirPath: string,
 	lockOrigin: string,
 	tryCount: number = 0
 ): Promise<number> {
@@ -919,8 +919,8 @@ async function acquireFileLock(
 	try {
 		// eslint-disable-next-line no-console
 		console.log(lockOrigin + " tries to acquire a lockfile Retry Nr.: " + tryCount)
-		await fs.mkdir(lockFilePath)
-		const stats = await fs.stat(lockFilePath)
+		await fs.mkdir(lockDirPath)
+		const stats = await fs.stat(lockDirPath)
 		// eslint-disable-next-line no-console
 		console.log(lockOrigin + " acquired a lockfile Retry Nr.: " + tryCount)
 		return stats.mtimeMs
@@ -934,7 +934,7 @@ async function acquireFileLock(
 	let currentLockTime: number
 
 	try {
-		const stats = await fs.stat(lockFilePath)
+		const stats = await fs.stat(lockDirPath)
 		currentLockTime = stats.mtimeMs
 	} catch (fstatError: any) {
 		if (fstatError.code === "ENOENT") {
@@ -943,7 +943,7 @@ async function acquireFileLock(
 			console.log(
 				lockOrigin + " tryCount++ lock file seems to be gone :) - lets try again " + tryCount
 			)
-			return acquireFileLock(fs, lockFilePath, lockOrigin, tryCount + 1)
+			return acquireFileLock(fs, lockDirPath, lockOrigin, tryCount + 1)
 		}
 		throw fstatError
 	}
@@ -967,7 +967,7 @@ async function acquireFileLock(
 					)
 
 					// alright lets give it another try
-					lockFileStats = await fs.stat(lockFilePath)
+					lockFileStats = await fs.stat(lockDirPath)
 				} catch (fstatError: any) {
 					if (fstatError.code === "ENOENT") {
 						// eslint-disable-next-line no-console
@@ -976,7 +976,7 @@ async function acquireFileLock(
 								" tryCount++ in Promise - tries to acquire a lockfile - lock file seems to be free now - try to acquire " +
 								tryCount
 						)
-						const lock = acquireFileLock(fs, lockFilePath, lockOrigin, tryCount + 1)
+						const lock = acquireFileLock(fs, lockDirPath, lockOrigin, tryCount + 1)
 						return resolve(lock)
 					}
 					return reject(fstatError)
@@ -993,7 +993,7 @@ async function acquireFileLock(
 								tryCount
 						)
 						try {
-							await fs.rmdir(lockFilePath)
+							await fs.rmdir(lockDirPath)
 						} catch (rmLockError: any) {
 							if (rmLockError.code === "ENOENT") {
 								// lock already gone?
@@ -1009,7 +1009,7 @@ async function acquireFileLock(
 									" tryCount++ same locker - try to acquire again after removing stale lock " +
 									tryCount
 							)
-							const lock = await acquireFileLock(fs, lockFilePath, lockOrigin, tryCount + 1)
+							const lock = await acquireFileLock(fs, lockDirPath, lockOrigin, tryCount + 1)
 							return resolve(lock)
 						} catch (lockAquireException) {
 							return reject(lockAquireException)
@@ -1024,7 +1024,7 @@ async function acquireFileLock(
 						console.log(
 							lockOrigin + " tryCount++ different locker - try to acquire again " + tryCount
 						)
-						const lock = await acquireFileLock(fs, lockFilePath, lockOrigin, tryCount + 1)
+						const lock = await acquireFileLock(fs, lockDirPath, lockOrigin, tryCount + 1)
 						return resolve(lock)
 					} catch (error) {
 						return reject(error)
@@ -1038,17 +1038,17 @@ async function acquireFileLock(
 
 async function releaseLock(
 	fs: NodeishFilesystem,
-	lockFilePath: string,
+	lockDirPath: string,
 	lockOrigin: string,
 	lockTime: number
 ) {
 	// eslint-disable-next-line no-console
 	console.log(lockOrigin + " releasing the lock ")
 	try {
-		const stats = await fs.stat(lockFilePath)
+		const stats = await fs.stat(lockDirPath)
 		if (stats.mtimeMs === lockTime) {
 			// this can be corrupt as welll since the last getStat and the current a modification could have occured :-/
-			await fs.rmdir(lockFilePath)
+			await fs.rmdir(lockDirPath)
 		}
 	} catch (statError: any) {
 		// eslint-disable-next-line no-console
