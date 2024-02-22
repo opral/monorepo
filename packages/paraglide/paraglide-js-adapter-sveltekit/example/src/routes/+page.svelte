@@ -24,12 +24,15 @@
 
 <br/>
 
+<ul>
 {#each availableLanguageTags as lang}
+<li>
     <a href={i18n.route($page.url.pathname)} hreflang={lang}>
     {m.change_language_to({ languageTag: lang })}
     </a>
-    <br />
+</li>
 {/each}
+</ul>
 
 <a href="{base}/element">Element</a>
 
