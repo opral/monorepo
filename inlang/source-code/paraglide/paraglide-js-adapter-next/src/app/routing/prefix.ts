@@ -5,10 +5,14 @@ import type { LinkProps } from "next/link"
 	Localised Path = Path with locale (how the path is visible in the URL bar)
 */
 
-export function prefixStrategy(
-	availableLanguageTags: readonly string[],
+export function prefixStrategy({
+	availableLanguageTags,
+	sourceLanguageTag,
+}: {
+	availableLanguageTags: readonly string[]
 	sourceLanguageTag: string
-) {
+	exclude: RegExp[]
+}) {
 	function getLocaleFromLocalisedPath(localisedPath: string): string | undefined {
 		const maybeLocale = localisedPath.split("/")[1]
 		if (!availableLanguageTags.includes(maybeLocale)) return undefined
@@ -36,16 +40,17 @@ export function prefixStrategy(
 
 	/**
 	 * Takes an argument that could be passed to next/link's href prop
-	 * and translates it to the given language.
+	 * and localises it in the given language.
 	 *
 	 * The type of the returned value is the same as the type of the argument. (Eg string stays string, object stays object)
 	 */
-	function translateHref<T extends LinkProps["href"]>(href: T, lang: string): T {
+	function localiseHref<T extends LinkProps["href"]>(canonicalHref: T, lang: string): T {
 		//don't translate external links
-		if (isExternal(href)) return href
-		if (typeof href === "object" && !href.pathname) return href
+		if (isExternal(canonicalHref)) return canonicalHref
+		if (typeof canonicalHref === "object" && !canonicalHref.pathname) return canonicalHref
 
-		const canonicalPathname: string = typeof href === "object" ? href.pathname ?? "" : href
+		const canonicalPathname: string =
+			typeof canonicalHref === "object" ? canonicalHref.pathname ?? "" : canonicalHref
 
 		//dont' touch relative links
 		const isRelative = !canonicalPathname.startsWith("/")
@@ -54,8 +59,8 @@ export function prefixStrategy(
 			: getLocalisedPath(canonicalPathname, lang)
 
 		// @ts-ignore
-		return typeof href === "object"
-			? { ...href, pathname: translatedPathaname }
+		return typeof canonicalHref === "object"
+			? { ...canonicalHref, pathname: translatedPathaname }
 			: translatedPathaname
 	}
 
@@ -64,7 +69,7 @@ export function prefixStrategy(
 		getLocalisedPath,
 		getCanonicalPath,
 		translatePath,
-		translateHref,
+		localiseHref,
 	}
 }
 

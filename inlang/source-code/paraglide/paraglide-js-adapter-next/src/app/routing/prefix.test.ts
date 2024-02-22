@@ -4,10 +4,14 @@ import { prefixStrategy } from "./prefix"
 const {
 	getLocaleFromLocalisedPath,
 	translatePath,
-	translateHref,
 	getCanonicalPath,
 	getLocalisedPath,
-} = prefixStrategy(["en", "de", "de-CH"], "en")
+	localiseHref,
+} = prefixStrategy({
+	availableLanguageTags: ["en", "de", "de-CH"],
+	sourceLanguageTag: "en",
+	exclude: [],
+})
 
 describe("getLocaleFromLocalisedPath", () => {
 	it("returns the locale if there is one", () => {
@@ -79,30 +83,30 @@ describe("translatePath", () => {
 	})
 })
 
-describe("translateHref", () => {
+describe("localiseHref", () => {
 	it("translates absolute paths (string)", () => {
-		expect(translateHref("/some/path", "de")).toBe("/de/some/path")
-		expect(translateHref("/some/path", "de-CH")).toBe("/de-CH/some/path")
-		expect(translateHref("/some/path", "en")).toBe("/some/path")
+		expect(localiseHref("/some/path", "de")).toBe("/de/some/path")
+		expect(localiseHref("/some/path", "de-CH")).toBe("/de-CH/some/path")
+		expect(localiseHref("/some/path", "en")).toBe("/some/path")
 	})
 
 	it("translates absolute paths (object)", () => {
-		expect(translateHref({ pathname: "/some/path" }, "de")).toEqual({ pathname: "/de/some/path" })
-		expect(translateHref({ pathname: "/some/path" }, "de-CH")).toEqual({
+		expect(localiseHref({ pathname: "/some/path" }, "de")).toEqual({ pathname: "/de/some/path" })
+		expect(localiseHref({ pathname: "/some/path" }, "de-CH")).toEqual({
 			pathname: "/de-CH/some/path",
 		})
-		expect(translateHref({ pathname: "/some/path" }, "en")).toEqual({ pathname: "/some/path" })
+		expect(localiseHref({ pathname: "/some/path" }, "en")).toEqual({ pathname: "/some/path" })
 	})
 
 	it("keeps search params and hash (string)", () => {
-		expect(translateHref("/some/path?foo=bar#hash", "de")).toBe("/de/some/path?foo=bar#hash")
-		expect(translateHref("/some/path?foo=bar#hash", "de-CH")).toBe("/de-CH/some/path?foo=bar#hash")
-		expect(translateHref("/some/path?foo=bar#hash", "en")).toBe("/some/path?foo=bar#hash")
+		expect(localiseHref("/some/path?foo=bar#hash", "de")).toBe("/de/some/path?foo=bar#hash")
+		expect(localiseHref("/some/path?foo=bar#hash", "de-CH")).toBe("/de-CH/some/path?foo=bar#hash")
+		expect(localiseHref("/some/path?foo=bar#hash", "en")).toBe("/some/path?foo=bar#hash")
 	})
 
 	it("keeps search params and hash (object)", () => {
 		expect(
-			translateHref({ pathname: "/some/path", search: "?foo=bar", hash: "#hash" }, "de")
+			localiseHref({ pathname: "/some/path", search: "?foo=bar", hash: "#hash" }, "de")
 		).toEqual({
 			pathname: "/de/some/path",
 			search: "?foo=bar",
@@ -110,7 +114,7 @@ describe("translateHref", () => {
 		})
 
 		expect(
-			translateHref({ pathname: "/some/path", search: "?foo=bar", hash: "#hash" }, "de-CH")
+			localiseHref({ pathname: "/some/path", search: "?foo=bar", hash: "#hash" }, "de-CH")
 		).toEqual({
 			pathname: "/de-CH/some/path",
 			search: "?foo=bar",
@@ -118,7 +122,7 @@ describe("translateHref", () => {
 		})
 
 		expect(
-			translateHref({ pathname: "/some/path", search: "?foo=bar", hash: "#hash" }, "en")
+			localiseHref({ pathname: "/some/path", search: "?foo=bar", hash: "#hash" }, "en")
 		).toEqual({
 			pathname: "/some/path",
 			search: "?foo=bar",
@@ -127,33 +131,33 @@ describe("translateHref", () => {
 	})
 
 	it("does not translate relative paths (string)", () => {
-		expect(translateHref("some/path", "de")).toBe("some/path")
-		expect(translateHref("some/path", "de-CH")).toBe("some/path")
-		expect(translateHref("some/path", "en")).toBe("some/path")
+		expect(localiseHref("some/path", "de")).toBe("some/path")
+		expect(localiseHref("some/path", "de-CH")).toBe("some/path")
+		expect(localiseHref("some/path", "en")).toBe("some/path")
 	})
 
 	it("does not translate relative paths (object)", () => {
-		expect(translateHref({ pathname: "some/path" }, "de")).toEqual({ pathname: "some/path" })
-		expect(translateHref({ pathname: "some/path" }, "de-CH")).toEqual({ pathname: "some/path" })
-		expect(translateHref({ pathname: "some/path" }, "en")).toEqual({ pathname: "some/path" })
+		expect(localiseHref({ pathname: "some/path" }, "de")).toEqual({ pathname: "some/path" })
+		expect(localiseHref({ pathname: "some/path" }, "de-CH")).toEqual({ pathname: "some/path" })
+		expect(localiseHref({ pathname: "some/path" }, "en")).toEqual({ pathname: "some/path" })
 	})
 
 	it("does not translate external links (string)", () => {
-		expect(translateHref("https://some/path", "de")).toBe("https://some/path")
-		expect(translateHref("https://some/path", "de-CH")).toBe("https://some/path")
-		expect(translateHref("https://some/path", "en")).toBe("https://some/path")
+		expect(localiseHref("https://some/path", "de")).toBe("https://some/path")
+		expect(localiseHref("https://some/path", "de-CH")).toBe("https://some/path")
+		expect(localiseHref("https://some/path", "en")).toBe("https://some/path")
 	})
 
 	it("does not translate external links (object)", () => {
-		expect(translateHref({ host: "some", pathname: "path" }, "de")).toEqual({
+		expect(localiseHref({ host: "some", pathname: "path" }, "de")).toEqual({
 			host: "some",
 			pathname: "path",
 		})
-		expect(translateHref({ host: "some", pathname: "path" }, "de-CH")).toEqual({
+		expect(localiseHref({ host: "some", pathname: "path" }, "de-CH")).toEqual({
 			host: "some",
 			pathname: "path",
 		})
-		expect(translateHref({ host: "some", pathname: "path" }, "en")).toEqual({
+		expect(localiseHref({ host: "some", pathname: "path" }, "en")).toEqual({
 			host: "some",
 			pathname: "path",
 		})

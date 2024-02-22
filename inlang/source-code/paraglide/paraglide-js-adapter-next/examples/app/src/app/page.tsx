@@ -15,7 +15,7 @@ export default function Home() {
 			<Link href="/form">Form Flow</Link>
 			<br />
 
-			<Link href="/form" locale="enasdf">
+			<Link href="/form" locale="en">
 				Form Flow (en)
 			</Link>
 			<br />

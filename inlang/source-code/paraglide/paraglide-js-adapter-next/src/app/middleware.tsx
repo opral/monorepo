@@ -4,10 +4,11 @@ import { sourceLanguageTag, availableLanguageTags } from "$paraglide/runtime.js"
 import { LANGUAGE_HEADER } from "../constants"
 import { prefixStrategy } from "./routing/prefix"
 
-const { getLocaleFromLocalisedPath, translatePath, getCanonicalPath } = prefixStrategy(
+const { getLocaleFromLocalisedPath, translatePath } = prefixStrategy({
 	availableLanguageTags,
-	sourceLanguageTag
-)
+	sourceLanguageTag,
+	exclude: [],
+})
 
 /**
  * Sets the request headers to resolve the language tag in RSC.
@@ -15,7 +16,6 @@ const { getLocaleFromLocalisedPath, translatePath, getCanonicalPath } = prefixSt
  */
 export function middleware(request: NextRequest) {
 	const locale = getLocaleFromLocalisedPath(request.nextUrl.pathname) ?? sourceLanguageTag
-	const canonicalPath = getCanonicalPath(request.nextUrl.pathname)
 	const headers = new Headers(request.headers)
 
 	headers.set(LANGUAGE_HEADER, locale)
