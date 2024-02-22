@@ -180,7 +180,7 @@
 		"@wdio/mocha-framework": "^8.24.6",
 		"@wdio/spec-reporter": "^8.24.2",
 		"@wdio/types": "^8.24.2",
-		"chromedriver": "^119.0.1",
+		"chromedriver": "^121.0.2",
 		"comment-json": "^4.2.3",
 		"esbuild": "^0.19.8",
 		"expect-webdriverio": "^4.6.1",
