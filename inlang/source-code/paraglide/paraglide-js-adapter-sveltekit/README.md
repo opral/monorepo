@@ -219,7 +219,7 @@ export const i18n = createI18n(runtime, {
 })
 ```
 
-## Customizing Link Translation
+### Customizing Link Translation
 
 Links are translated automatically using a preprocessor. This means that you can use the normal `a` tag and the adapter will translate it for you.
 
@@ -389,6 +389,14 @@ export async function load({ depends }) {
 }
 ```
 
+## Caveats
+
+Because we are using a Preprocessor for link localisation there are a few caveats to be aware of: 
+
+1. Links in the same Layout Component as `<ParagldieJS>` will not be translated. 
+2. Using a `{...speread}` operator on an element will cause the preprocessor to place all props on that element into one giant `{...spread}`. If you are using proxies that may cause issues.
+3. If you are using a function-call as the value to `hreflang` the function will be called twice per render. If it has side-effects this may cause issues.
+
 ## FAQ
 
 <doc-accordion
@@ -426,6 +434,12 @@ export async function load({ depends }) {
 	heading="Can I dynamically fetch translations from an external server?"
 	text="Paraglide is a compiler, so all translations need to be known at build time. You can of course manually react to the current language & fetch external content, but you will end up implementing your own solution for dynamically fetched translations.">
 </doc-accordion>
+
+<doc-accordion
+	heading="Help! Links in +layout.svelte aren't being translated"
+	text="As stated in the caveats, <a> tags are not translated if they are in the same component as the <ParaglideJS> component. Move your Links into a different component and it should work.">
+</doc-accordion>
+
 
 ## Roadmap to 1.0
 
