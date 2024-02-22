@@ -4,10 +4,8 @@ import { sourceLanguageTag, availableLanguageTags } from "$paraglide/runtime.js"
 import { LANGUAGE_HEADER } from "../constants"
 import { prefixStrategy } from "./routing/prefix"
 
-const { getLocaleFromLocalisedPath, translatePath } = prefixStrategy(
-	availableLanguageTags,
-	sourceLanguageTag
-)
+const { getLocaleFromLocalisedPath, translatePath, getCanonicalPath, getLocalisedPath } =
+	prefixStrategy(availableLanguageTags, sourceLanguageTag)
 
 /**
  * Sets the request headers to resolve the language tag in RSC.
@@ -15,18 +13,16 @@ const { getLocaleFromLocalisedPath, translatePath } = prefixStrategy(
  */
 export function middleware(request: NextRequest) {
 	const locale = getLocaleFromLocalisedPath(request.nextUrl.pathname) ?? sourceLanguageTag
+	const canonicalPath = getCanonicalPath(request.nextUrl.pathname)
 	const headers = new Headers(request.headers)
 
 	headers.set(LANGUAGE_HEADER, locale)
 
 	//set Link header for alternate language versions
-	const linkHeader = availableLanguageTags
-		.map(
-			(lang) =>
-				`<${translatePath(request.nextUrl.pathname, lang)}>; rel="alternate"; hreflang="${locale}"`
-		)
-		.join(", ")
-
+	const linkHeader = generateLinkHeader({
+		availableLanguageTags,
+		localisedPathname: request.nextUrl.pathname,
+	})
 	headers.set("Link", linkHeader)
 
 	return NextResponse.next({
@@ -34,4 +30,21 @@ export function middleware(request: NextRequest) {
 			headers,
 		},
 	})
+}
+
+/**
+ * Generates the Link header for the available language versions of the current page.
+ */
+function generateLinkHeader({
+	localisedPathname,
+	availableLanguageTags,
+}: {
+	localisedPathname: string
+	availableLanguageTags: readonly string[]
+}): string {
+	return availableLanguageTags
+		.map(
+			(lang) => `<${translatePath(localisedPathname, lang)}>; rel="alternate"; hreflang="${lang}"`
+		)
+		.join(", ")
 }
