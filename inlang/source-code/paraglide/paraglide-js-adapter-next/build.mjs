@@ -62,8 +62,8 @@ await app_build.write({
 
 await pages_build.write({
 	preserveModules: false,
-	format: "es",
-	entryFileNames: "[name].mjs",
+	format: "cjs",
+	entryFileNames: "[name].js",
 	dir: "dist",
 })
 
