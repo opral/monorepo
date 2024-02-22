@@ -43,10 +43,8 @@
 	$: i18n.config.runtime.setLanguageTag(lang)
 	$: if (browser) document.documentElement.lang = lang
 	$: if (browser) document.documentElement.dir = i18n.config.textDirection[lang] ?? "ltr"
-	$: if(browser && lang) {
-		console.log("Language changed to", lang)
-		invalidate(LANGUAGE_CHANGE_INVALIDATION_KEY)
-	}
+	$: if(browser && lang) invalidate(LANGUAGE_CHANGE_INVALIDATION_KEY)
+	
 
 	function translateHref(href: string, hreflang: string | undefined): string {
 		const from = new URL(get(page).url)
@@ -92,6 +90,7 @@
     // In svelte 5 the #key block will re-render the second the key changes, 
 	// not after the all the updates in the Component are done.
 	// We need to make sure that changing the key happens last.
+	// See https://github.com/sveltejs/svelte/issues/10597
 	$: langKey = lang;
 </script>
 
