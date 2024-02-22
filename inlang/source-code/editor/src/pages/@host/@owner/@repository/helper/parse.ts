@@ -22,6 +22,9 @@ export const getTextValue = (editor: Accessor<EditorRef>) => {
 					switch (tiptap_node.type) {
 						case "text":
 							if (patterns.at(-1)?.type === "Text") {
+								if (tiptap_nodes.at(+1).type === "text") {
+									patterns.at(-1).value += "\n"
+								}
 								patterns.at(-1).value += tiptap_node.text
 							} else {
 								patterns.push({ type: "Text", value: tiptap_node.text } as Text)
