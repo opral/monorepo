@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.32.7
+
+### Patch Changes
+
+- b0d016e93: Use latest chromedriver to help CI install
+
 ## 1.32.6
 
 ### Patch Changes
