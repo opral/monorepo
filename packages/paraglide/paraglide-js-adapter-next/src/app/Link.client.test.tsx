@@ -8,6 +8,7 @@ describe("<Link>", () => {
 	beforeEach(() => {
 		//known starting state
 		setLanguageTag(sourceLanguageTag)
+		process.env.__NEXT_ROUTER_BASE_PATH = ""
 	})
 	afterEach(() => cleanup())
 
