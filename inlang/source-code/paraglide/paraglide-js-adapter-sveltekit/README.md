@@ -384,7 +384,6 @@ export async function load({ depends }) {
   // The Adapter automatically calls `invalidate("paraglide:lang")` whenever the langauge changes
   // This tells SvelteKit to re-run this function whenever that happens
   depends("paraglide:lang") 
-  
   return await myLanguageSpecificData();
 }
 ```
