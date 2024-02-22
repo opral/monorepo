@@ -207,6 +207,7 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 			targetLanguageTags: ["de"],
 			message: {
 				id: "mockMessage",
+				alias: {},
 				selectors: [],
 				variants: [
 					{
@@ -225,6 +226,7 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 		expect(result.error).toBeUndefined()
 		expect(result.data).toEqual({
 			id: "mockMessage",
+			alias: {},
 			selectors: [],
 			variants: [
 				{
