@@ -2,6 +2,7 @@ import { createLink } from "./Link.base"
 import { getLanguage } from "./getLanguage.server"
 import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
 import { prefixStrategy } from "./routing/prefix"
+import { createNavigation } from "./navigation.base"
 
 export type I18nOptions = {
 	/**
@@ -30,9 +31,17 @@ export function createI18n(options: I18nOptions = {}) {
 	 * Automatically localises the href based on the current language.
 	 */
 	const Link = createLink(getLanguage, strategy)
+	const { usePathname, useRouter, redirect, permanentRedirect } = createNavigation(
+		getLanguage,
+		strategy
+	)
 
 	return {
 		Link,
+		usePathname,
+		useRouter,
+		redirect,
+		permanentRedirect,
 	}
 }
 
