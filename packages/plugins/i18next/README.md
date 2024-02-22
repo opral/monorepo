@@ -126,7 +126,7 @@ Read the [jsDelivr documentation](https://www.jsdelivr.com/?docs=gh) on importin
 
 ## Pricing 
 
-<doc-dev-tool-pricing></doc-dev-tool-pricing>
+<doc-pricing></doc-pricing>
 
 ---
 

@@ -22,4 +22,4 @@ The plugin will automatically extract messages from your code and show them inli
 
 #### Pricing 
 
-<doc-dev-tool-pricing></doc-dev-tool-pricing>
+<doc-pricing></doc-pricing>

@@ -52,6 +52,10 @@ This is how the editor could look like for your project:
 
 [![Fink Guide Ad](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/editor-guide-image.jpg) Read in-depth guide](https://inlang.com/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink)
 
+# Pricing 
+ 
+<doc-pricing heading="Fink has and will have a free tier." content="In the future, we will likely monetize features that bring value to larger (enterprise) projects. If you have a small project, don't worry about paying for fink."></doc-pricing>
+
 # Login via GitHub
 
 If your repository can't be accessed anonymously, you can login via GitHub. The editor will ask you to login if it can't access your repository.
