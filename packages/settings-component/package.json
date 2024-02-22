@@ -26,6 +26,7 @@
 	},
 	"dependencies": {
 		"@inlang/sdk": "workspace:^",
+		"@lit/task": "^1.0.0",
 		"@shoelace-style/shoelace": "2.3.0"
 	}
 }
