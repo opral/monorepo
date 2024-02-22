@@ -4,6 +4,7 @@
 	"private": true,
 	"scripts": {
 		"build": "node ./build.mjs",
+		"clean": "rm -rf dist && rm -rf node_modules",
 		"test": "vitest run --passWithNoTests"
 	},
 	"type": "module",
@@ -28,12 +29,14 @@
 	"keywords": [
 		"inlang",
 		"i18n",
+		"l10n",
 		"localization",
 		"translation",
 		"internationalization",
 		"next.js",
 		"next",
-		"react"
+		"react",
+		"react.js"
 	],
 	"files": [
 		"dist"
