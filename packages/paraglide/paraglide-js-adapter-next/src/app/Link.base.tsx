@@ -8,7 +8,7 @@ import { prefixStrategy } from "./routing/prefix"
 import NextLink from "next/link"
 import React from "react"
 
-const { translateHref } = prefixStrategy(availableLanguageTags, sourceLanguageTag)
+const { localiseHref } = prefixStrategy({ availableLanguageTags, sourceLanguageTag, exclude: [] })
 
 /**
  * Creates a link component that localises the href based on the current language.
@@ -36,7 +36,7 @@ export function createLink(languageTag: () => string) {
 		let lang = props.locale || currentLanguageTag
 		if (!isAvailableLanguageTag(lang)) lang = sourceLanguageTag
 
-		const localisedHref = translateHref(props.href, lang)
+		const localisedHref = localiseHref(props.href, lang)
 
 		//If the language changes, we don't want client navigation
 		return lang == currentLanguageTag ? (
