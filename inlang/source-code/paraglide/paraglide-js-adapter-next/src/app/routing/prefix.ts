@@ -104,3 +104,6 @@ function isExternal(href: LinkProps["href"]) {
 	if (href.startsWith("//")) return true
 	return false
 }
+
+
+export type RoutingStrategy = ReturnType<typeof prefixStrategy>

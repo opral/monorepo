@@ -4,17 +4,15 @@ import {
 	isAvailableLanguageTag,
 } from "$paraglide/runtime.js"
 import { addBasePath } from "./routing/basePath"
-import { prefixStrategy } from "./routing/prefix"
+import type { RoutingStrategy } from "./routing/prefix"
 import NextLink from "next/link"
 import React from "react"
-
-const { localiseHref } = prefixStrategy({ availableLanguageTags, sourceLanguageTag, exclude: [] })
 
 /**
  * Creates a link component that localises the href based on the current language.
  * @param languageTag A function that returns the current language tag.
  */
-export function createLink(languageTag: () => string) {
+export function createLink(languageTag: () => string, strategy: RoutingStrategy) {
 	return function Link(props: Parameters<typeof NextLink>[0]): ReturnType<typeof NextLink> {
 		const currentLanguageTag = languageTag()
 
@@ -36,7 +34,7 @@ export function createLink(languageTag: () => string) {
 		let lang = props.locale || currentLanguageTag
 		if (!isAvailableLanguageTag(lang)) lang = sourceLanguageTag
 
-		const localisedHref = localiseHref(props.href, lang)
+		const localisedHref = strategy.localiseHref(props.href, lang)
 
 		//If the language changes, we don't want client navigation
 		return lang == currentLanguageTag ? (

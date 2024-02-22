@@ -85,6 +85,10 @@ describe("translatePath", () => {
 		expect(translatePath("/some/path?foo=bar#hash", "de-CH")).toBe("/de-CH/some/path?foo=bar#hash")
 		expect(translatePath("/some/path?foo=bar#hash", "en")).toBe("/some/path?foo=bar#hash")
 	})
+
+	it("leaves excluded paths alone", () => {
+		expect(translatePath("/api/some/path", "de")).toBe("/api/some/path")
+	})
 })
 
 describe("localiseHref", () => {

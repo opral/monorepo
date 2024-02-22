@@ -1,9 +1,13 @@
+import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
 import { createLink } from "./Link.base"
 import { getLanguage } from "./getLanguage.server"
+import { prefixStrategy } from "./routing/prefix"
 
-/**
- * React Component that enables client-side transitions between routes.
- * 
- * Automatically localises the href based on the current language.
- */
-export const Link = createLink(getLanguage)
+export const Link = createLink(
+	getLanguage,
+	prefixStrategy({
+		availableLanguageTags,
+		sourceLanguageTag,
+		exclude: [],
+	})
+)
