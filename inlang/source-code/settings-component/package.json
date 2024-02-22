@@ -25,6 +25,7 @@
 		"storybook": "^7.6.16"
 	},
 	"dependencies": {
+		"@inlang/sdk": "workspace:^",
 		"@shoelace-style/shoelace": "2.3.0"
 	}
 }

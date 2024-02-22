@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from "@storybook/web-components"
 
 const meta: Meta = {
 	component: "ui-button",
-	title: "Example/ui-button",
+	title: "Private/ui-button",
 	tags: ["autodocs"],
 	argTypes: {
 		label: { type: "string" },
