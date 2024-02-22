@@ -37,7 +37,7 @@ module.exports = {
 }
 ```
 
-> If you are using ESM for your NextJS config, you can also import `availableLanguageTags` and `sourceLanguageTag` from `./src/paraglide/runtime.js` and use them instead of hardcoding the locales. However, this requires `"type": "module"` in your `package.json` & is entirely optional.
+> If you are using ESM for your NextJS config, you can also import `availableLanguageTags` and `sourceLanguageTag` from `./src/paraglide/runtime.js` and use them instead of hardcoding the locales. Doing this requires `"type": "module"` in your `package.json` & is entirely optional.
 
 This will have the effect that NextJS will automatically prefix all routes with the locale. For example, the route `/about` will become `/en/about` for the English locale and `/de/about` for the German locale. The only language that won't be prefixed is the default locale.
 
