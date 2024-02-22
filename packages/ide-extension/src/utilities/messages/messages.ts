@@ -185,7 +185,6 @@ export function createMessageWebviewProvider(args: {
 	}
 }
 
-
 export function createMessageHtml(args: {
 	message: Message
 	position?: {
