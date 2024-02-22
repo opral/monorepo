@@ -369,4 +369,4 @@ Paraglide JS is part of the inlang ecosystem, so it integrates nicely with all t
 
 # Pricing 
 
-<doc-dev-tool-pricing></doc-dev-tool-pricing>
+<doc-pricing></doc-pricing>

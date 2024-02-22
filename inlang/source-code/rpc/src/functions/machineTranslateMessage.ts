@@ -89,7 +89,11 @@ function serializePattern(
 	let result = ""
 	for (const [i, element] of pattern.entries()) {
 		if (element.type === "Text") {
+			// google translate api doesn't like carrigage returns and line feeds in html format,
+			// so we replace them with placeholders and replace them back after translation
 			result += element.value
+				.replaceAll("\r", "<inlang-CarriageReturn>")
+				.replaceAll("\n", "<inlang-LineFeed>")
 		} else {
 			// ugliest code ever thanks to https://issuetracker.google.com/issues/119256504?pli=1
 			//   1. escape placeholders
@@ -109,7 +113,11 @@ function serializePattern(
 function deserializePattern(text: string): Message["variants"][number]["pattern"] {
 	const result: Message["variants"][number]["pattern"] = []
 	// google translate espaces quotes, need to replace the escaped stuff
-	const unescapedText = text.replaceAll("&quot;", '"').replaceAll("&#39;", "'")
+	const unescapedText = text
+		.replaceAll("&quot;", '"')
+		.replaceAll("&#39;", "'")
+		.replaceAll("<inlang-CarriageReturn>", "\r")
+		.replaceAll("<inlang-LineFeed> ", "\n")
 	let i = 0
 	while (i < unescapedText.length) {
 		const start = unescapedText.indexOf(escapeStart, i)
