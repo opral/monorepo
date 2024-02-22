@@ -87,6 +87,12 @@
 	}
 
 	setContext(PARAGLIDE_CONTEXT_KEY, { translateHref })
+
+
+    // In svelte 5 the #key block will re-render the second the key changes, 
+	// not after the all the updates in the Component are done.
+	// We need to make sure that changing the key happens last.
+	$: langKey = lang;
 </script>
 
 <svelte:head>
@@ -114,6 +120,6 @@
 </svelte:head>
 
 <!-- Trigger a Re-Render whenever the language changes -->
-{#key lang}
+{#key langKey}
 	<slot />
 {/key}
