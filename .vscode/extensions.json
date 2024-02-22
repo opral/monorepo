@@ -4,7 +4,7 @@
 		"dbaeumer.vscode-eslint",
 		"esbenp.prettier-vscode",
 		"inlang.vs-code-extension",
-		"zixuanchen.vitest-explorer",
+		"vitest.explorer",
 		"aaron-bond.better-comments"
 	]
 }
