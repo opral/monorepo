@@ -1,40 +1,99 @@
-import { html, LitElement } from "lit"
+import { html, LitElement, css } from "lit"
 import { customElement, property } from "lit/decorators.js"
 import { baseStyling } from "../styling/base.js"
-import { type InlangProject, ProjectSettings } from "@inlang/sdk"
+import { type InlangProject, ProjectSettings, InlangModule } from "@inlang/sdk"
+import { Task } from "@lit/task"
 
 import "./input-fields/simple-input.js"
 
 @customElement("inlang-settings")
 export class InlangSettings extends LitElement {
-	static override styles = baseStyling
+	static override styles = [
+		baseStyling,
+		css`
+			.container {
+				display: flex;
+				flex-direction: column;
+				gap: 20px;
+			}
+			.module-container {
+				display: flex;
+				flex-direction: column;
+				gap: 20px;
+			}
+		`,
+	]
 
 	@property()
-	inlangProject: InlangProject["settings"] | undefined = undefined
+	inlangProject: ReturnType<InlangProject["settings"]> | undefined = undefined
 
-	private get _projectProperties() {
-		return ProjectSettings.allOf[0].properties
-	}
+	// private get _projectProperties() {
+	// 	return ProjectSettings.allOf[0].properties
+	// }
+
+	private _projectProperties = new Task(this, {
+		task: async ([inlangProject]) => {
+			if (!inlangProject) throw new Error("No inlang project")
+
+			const generalSchema: Record<
+				InlangModule["default"]["id"] | "internal",
+				{ meta?: InlangModule["default"]; schema: Record<string, Record<string, unknown>> }
+			> = { internal: { schema: ProjectSettings.allOf[0] } }
+
+			for (const module of inlangProject.modules) {
+				const plugin = await import(module)
+				if (plugin.default.settingsSchema?.properties) {
+					generalSchema[plugin.default.id] = {
+						schema: plugin.default.settingsSchema,
+						meta: plugin.default,
+					}
+				}
+			}
+			return generalSchema
+		},
+		args: () => [this.inlangProject],
+	})
 
 	override render() {
-		//console.log(this.inlangProject)
-
-		return this.inlangProject
-			? html` <ul>
-					${Object.entries(this.inlangProject).map(([key, value]) => {
-						return this._projectProperties[key as keyof typeof this._projectProperties] &&
-							key !== "$schema"
-							? html`<li>
-									<simple-input
-										.property=${key}
-										.value=${value}
-										.schema=${this._projectProperties[key as keyof typeof this._projectProperties]}
-									></simple-input>
-							  </li>`
+		return this._projectProperties.render({
+			pending: () => html`<div>Loading...</div>`,
+			complete: (properties) =>
+				html` <div class="container">
+					${Object.entries(properties).map(([key, value]) => {
+						return value.schema.properties && this.inlangProject
+							? html`<div class="module-container">
+									<h2>
+										${(value.meta as { displayName?: { en: string } })?.displayName?.en || key}
+									</h2>
+									${Object.entries(value.schema.properties).map(([property, schema]) => {
+										return key === "internal"
+											? html`
+													<simple-input
+														.property=${property}
+														.value=${this.inlangProject?.[
+															property as keyof typeof this.inlangProject
+														]}
+														.schema=${schema}
+													></simple-input>
+											  `
+											: html`
+													<simple-input
+														.property=${property}
+														.value=${JSON.stringify(
+															// @ts-ignore
+															this.inlangProject?.[key]?.[property]
+														)}
+														.schema=${schema}
+													></simple-input>
+											  `
+									})}
+							  </div>`
 							: undefined
 					})}
-			  </ul>`
-			: html`<div>No inlang project</div>`
+				</div>`,
+
+			error: (e) => html`<p>Error: ${e}</p>`,
+		})
 	}
 }
 

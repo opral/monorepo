@@ -1968,6 +1968,9 @@ importers:
       '@inlang/sdk':
         specifier: workspace:^
         version: link:../sdk
+      '@lit/task':
+        specifier: ^1.0.0
+        version: 1.0.0
       '@shoelace-style/shoelace':
         specifier: 2.3.0
         version: 2.3.0
@@ -6606,7 +6609,6 @@ packages:
 
   /@lit-labs/ssr-dom-shim@1.2.0:
     resolution: {integrity: sha512-yWJKmpGE6lUURKAaIltoPIE/wrbY3TEkqQt+X0m+7fQNnAv0keydnYvbiJFP1PnMhizmIWRWOG5KLhYyc/xl+g==}
-    dev: true
 
   /@lit/reactive-element@1.6.3:
     resolution: {integrity: sha512-QuTgnG52Poic7uM1AN5yJ09QMe0O28e10XzSvWDz02TJiiKee4stsiownEIadWm8nYzyDAyT+gKzUoZmiWQtsQ==}
@@ -6618,7 +6620,12 @@ packages:
     resolution: {integrity: sha512-GFn91inaUa2oHLak8awSIigYz0cU0Payr1rcFsrkf5OJ5eSPxElyZfKh0f2p9FsTiZWXQdWGJeXZICEfXXYSXQ==}
     dependencies:
       '@lit-labs/ssr-dom-shim': 1.2.0
-    dev: true
+
+  /@lit/task@1.0.0:
+    resolution: {integrity: sha512-7jocGBh3yGlo3kKxQggZph2txK4X5GYNWp2FAsmV9u2spzUypwrzRzXe8I72icAb02B00+k2nlvxVcrQB6vyrw==}
+    dependencies:
+      '@lit/reactive-element': 2.0.4
+    dev: false
 
   /@ljharb/through@2.3.11:
     resolution: {integrity: sha512-ccfcIDlogiXNq5KcbAwbaO7lMh3Tm1i3khMPYpxlK8hH/W53zN81KM9coerRLOnTGu3nfXIniAmQbRI9OxbC0w==}
