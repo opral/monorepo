@@ -1,8 +1,8 @@
 import { html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
 import { baseStyling } from "../../styling/base.js"
-import "@shoelace-style/shoelace/dist/components/input/input.js"
-
+import "./string-input.js"
+import "./array-input.js"
 @customElement("simple-input")
 export class SimpleInput extends LitElement {
 	static override styles = baseStyling
@@ -22,25 +22,60 @@ export class SimpleInput extends LitElement {
 	@property()
 	handleInlangProjectChange: (value: string, key: string, moduleId?: string) => void = () => {}
 
-	private get _description(): string | undefined {
-		return this.schema.description || undefined
-	}
-
 	override render() {
-		return html` <div>
-			<sl-input
-				label=${this.property}
-				help-text=${this._description}
-				value=${JSON.stringify(this.value)}
-				@sl-change=${(e: Event) => {
-					this.handleInlangProjectChange(
-						(e.target as HTMLInputElement).value,
-						this.property,
-						this.moduleId
-					)
-				}}
-			></sl-input>
-		</div>`
+		if (this.schema.type) {
+			if (this.schema.type === "string") {
+				return html` <div>
+					<string-input
+						.property=${this.property}
+						.moduleId=${this.moduleId}
+						.value=${this.value}
+						.schema=${this.schema}
+						.handleInlangProjectChange=${this.handleInlangProjectChange}
+					></string-input>
+				</div>`
+			} else if (this.schema.type === "array") {
+				return html` <div>
+					<array-input
+						.property=${this.property}
+						.moduleId=${this.moduleId}
+						.value=${this.value}
+						.schema=${this.schema}
+						.handleInlangProjectChange=${this.handleInlangProjectChange}
+					></array-input>
+				</div>`
+			} else if (this.schema.type === "object") {
+				return html` <div>
+					<string-input
+						.property=${this.property}
+						.moduleId=${this.moduleId}
+						.value=${this.value}
+						.schema=${this.schema}
+						.handleInlangProjectChange=${this.handleInlangProjectChange}
+					></string-input>
+				</div>`
+			} else {
+				return html` <div>
+					<string-input
+						.property=${this.property}
+						.moduleId=${this.moduleId}
+						.value=${this.value}
+						.schema=${this.schema}
+						.handleInlangProjectChange=${this.handleInlangProjectChange}
+					></string-input>
+				</div>`
+			}
+		} else {
+			return html` <div>
+				<string-input
+					.property=${this.property}
+					.moduleId=${this.moduleId}
+					.value=${this.value}
+					.schema=${this.schema}
+					.handleInlangProjectChange=${this.handleInlangProjectChange}
+				></string-input>
+			</div>`
+		}
 	}
 }
 
