@@ -10,13 +10,13 @@ This guide assumes that you have a Next.js project set up, and you are using the
 
 ## 2. Install ParaglideJS
 
-The recommended way to install ParaglideJS is via the cli. This will create any files that are required for Paraglide.js to work and install the required dependencies.
+We will need to install two things. ParaglideJs itself, and the ParaglideJS Adapter for NextJS. 
 
 In your project root, run the following commands and follow the instructions.
 
 ```bash
 npx @inlang/paraglide-js init
-npm install
+npm install @inlang/paraglide-js-adapter-next
 ```
 
 This will have done a few things:
@@ -24,18 +24,7 @@ This will have done a few things:
 - Created an inlang project in your project root
 - Added the required devDependencies to your `package.json`
 - Added the paraglide compiler to your `package.json` build scripts
-
-
-It's recommended to also modify your `dev` command to include the `paraglide-js compile` command. This will cause the compiler to re-run whenever your messages change.
-
-```json
-// package.json
-{
-	"scripts": {
-		"dev": "next dev & paraglide-js compile --project ./project.inlang --watch"
-	}
-}
-```
+- Installed the ParaglideJS Adapter for Next. This will handle setting the Locale automatically
 
 ## 3. Our first Messages
 
@@ -72,7 +61,7 @@ Your messages live at `./src/paraglide/messages.js`, you will be importing from 
 Let's use the `hello_world` message on our homepage. Open `pages/index.js`, import all messages from `paraglide/messages.js` and use the `hello_world` message in the `h1` tag.
 
 ```jsx
-import * as m from "@/paraglide/messages" //use nextjs's default alias for src folder
+import * as m from "@/paraglide/messages" // @ is next's default alias for the src/ folder
 
 export default function Home() {
 	return (
