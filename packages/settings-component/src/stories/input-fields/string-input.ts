@@ -42,9 +42,8 @@ export class StringInput extends LitElement {
 
 	override render() {
 		return html` <div>
-			${this.property}
-			<p class="help-text">${this._description}</p>
-			<p class="help-text">${this._examples}</p>
+			${this.property} ${this._description && html`<p class="help-text">${this._description}</p>`}
+			${this._examples && html`<p class="help-text">${this._examples}</p>`}
 			<sl-input
 				value=${this.value}
 				@input=${(e: Event) => {
