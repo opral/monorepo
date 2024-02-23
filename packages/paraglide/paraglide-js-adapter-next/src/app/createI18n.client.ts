@@ -12,7 +12,7 @@ export function createI18n<T extends string = string>(options: I18nOptions<T> = 
 
 	const strategy = prefixStrategy<T>({
 		availableLanguageTags,
-		defaultLanguage: sourceLanguageTag as T,
+		defaultLanguage: options.defaultLanguage ?? (sourceLanguageTag as T),
 		exclude,
 	})
 
