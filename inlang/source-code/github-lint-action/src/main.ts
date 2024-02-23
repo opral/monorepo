@@ -60,10 +60,12 @@ export async function run(): Promise<void> {
 
 		let baseInlangRepo
 		if (isFork) {
-			// Change the working directory two levels up
-			process.chdir("../../")
+			// Change the working directory three levels up
+			process.chdir("../../../")
 			// Clone the base repository to the working directory from the baseMeta
 			await cloneRepository(baseMeta)
+			// Change the working directory to the base repository
+			process.chdir(baseMeta.repo)
 
 			baseInlangRepo = await openRepository(process.cwd(), {
 				nodeishFs: fs,
