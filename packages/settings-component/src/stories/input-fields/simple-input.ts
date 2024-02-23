@@ -11,10 +11,16 @@ export class SimpleInput extends LitElement {
 	property: string = ""
 
 	@property()
+	moduleId?: string
+
+	@property()
 	value: string = ""
 
 	@property()
 	schema: any = {}
+
+	@property()
+	handleInlangProjectChange: (value: string, key: string, moduleId?: string) => void = () => {}
 
 	private get _description(): string | undefined {
 		return this.schema.description || undefined
@@ -25,7 +31,14 @@ export class SimpleInput extends LitElement {
 			<sl-input
 				label=${this.property}
 				help-text=${this._description}
-				value=${this.value}
+				value=${JSON.stringify(this.value)}
+				@sl-change=${(e: Event) => {
+					this.handleInlangProjectChange(
+						(e.target as HTMLInputElement).value,
+						this.property,
+						this.moduleId
+					)
+				}}
 			></sl-input>
 		</div>`
 	}

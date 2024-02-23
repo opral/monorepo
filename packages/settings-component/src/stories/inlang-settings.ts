@@ -1,5 +1,5 @@
 import { html, LitElement, css } from "lit"
-import { customElement, property } from "lit/decorators.js"
+import { customElement, property, state } from "lit/decorators.js"
 import { baseStyling } from "../styling/base.js"
 import { type InlangProject, ProjectSettings, InlangModule } from "@inlang/sdk"
 import { Task } from "@lit/task"
@@ -27,9 +27,44 @@ export class InlangSettings extends LitElement {
 	@property()
 	inlangProject: ReturnType<InlangProject["settings"]> | undefined = undefined
 
-	// private get _projectProperties() {
-	// 	return ProjectSettings.allOf[0].properties
-	// }
+	@property()
+	private _project: ReturnType<InlangProject["settings"]> | undefined = undefined
+
+	override async firstUpdated() {
+		await this.updateComplete
+
+		if (this.inlangProject) {
+			this._project = JSON.parse(JSON.stringify(this.inlangProject))
+		}
+	}
+
+	handleInlangProjectChange = (
+		//value needs to be exactly how it goes in the project settings json
+		value: string,
+		property: string,
+		moduleId?: InlangModule["default"]["id"]
+	) => {
+		//update state object
+		if (this._project && moduleId) {
+			this._project = {
+				...this._project,
+				[moduleId]: {
+					...this._project[moduleId],
+					[property]: value,
+				},
+			}
+		} else if (this._project) {
+			this._project = {
+				...this._project,
+				[property]: value,
+			}
+		}
+		// update ui when modules get updated
+		if (property === "modules" && moduleId === undefined) {
+			this.inlangProject = this._project
+		}
+		console.log(this._project)
+	}
 
 	private _projectProperties = new Task(this, {
 		task: async ([inlangProject]) => {
@@ -41,12 +76,16 @@ export class InlangSettings extends LitElement {
 			> = { internal: { schema: ProjectSettings.allOf[0] } }
 
 			for (const module of inlangProject.modules) {
-				const plugin = await import(module)
-				if (plugin.default.settingsSchema?.properties) {
-					generalSchema[plugin.default.id] = {
-						schema: plugin.default.settingsSchema,
-						meta: plugin.default,
+				try {
+					const plugin = await import(module)
+					if (plugin.default.settingsSchema?.properties) {
+						generalSchema[plugin.default.id] = {
+							schema: plugin.default.settingsSchema,
+							meta: plugin.default,
+						}
 					}
+				} catch (e) {
+					console.error(e)
 				}
 			}
 			return generalSchema
@@ -74,6 +113,7 @@ export class InlangSettings extends LitElement {
 															property as keyof typeof this.inlangProject
 														]}
 														.schema=${schema}
+														.handleInlangProjectChange=${this.handleInlangProjectChange}
 													></simple-input>
 											  `
 											: html`
@@ -84,6 +124,8 @@ export class InlangSettings extends LitElement {
 															this.inlangProject?.[key]?.[property]
 														)}
 														.schema=${schema}
+														.moduleId=${key}
+														.handleInlangProjectChange=${this.handleInlangProjectChange}
 													></simple-input>
 											  `
 									})}
