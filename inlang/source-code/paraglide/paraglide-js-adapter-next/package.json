@@ -1,7 +1,9 @@
 {
 	"name": "@inlang/paraglide-js-adapter-next",
-	"version": "0.0.1",
-	"private": true,
+	"version": "0.1.0",
+	"publishConfig": {
+		"access": "public"
+	},
 	"scripts": {
 		"build": "node ./build.mjs",
 		"clean": "rm -rf dist && rm -rf node_modules",
