@@ -1,8 +1,23 @@
 import React from "react"
 import { describe, it, expect, beforeEach, afterEach } from "vitest"
 import { render, screen, cleanup } from "@testing-library/react"
-import { Link } from "./Link.client"
-import { setLanguageTag, sourceLanguageTag } from "$paraglide/runtime.js"
+import {
+	availableLanguageTags,
+	languageTag,
+	setLanguageTag,
+	sourceLanguageTag,
+} from "$paraglide/runtime.js"
+import { createLink } from "./Link.base"
+import { prefixStrategy } from "./routing/prefix"
+
+const Link = createLink(
+	languageTag,
+	prefixStrategy({
+		availableLanguageTags,
+		sourceLanguageTag,
+		exclude: () => false,
+	})
+)
 
 describe("<Link>", () => {
 	beforeEach(() => {

@@ -12,12 +12,8 @@ export function prefixStrategy({
 }: {
 	availableLanguageTags: readonly string[]
 	sourceLanguageTag: string
-	exclude: RegExp[]
+	exclude: (path: string) => boolean
 }) {
-	function isExcluded(path: string) {
-		return exclude.some((pattern) => pattern.test(path))
-	}
-
 	function getLocaleFromLocalisedPath(localisedPath: string): string | undefined {
 		const maybeLocale = localisedPath.split("/")[1]
 		if (!availableLanguageTags.includes(maybeLocale)) return undefined
@@ -34,7 +30,7 @@ export function prefixStrategy({
 	}
 
 	function getLocalisedPath(canonicalPath: string, locale: string): string {
-		if (isExcluded(canonicalPath) || locale === sourceLanguageTag) return canonicalPath
+		if (exclude(canonicalPath) || locale === sourceLanguageTag) return canonicalPath
 		return `/${locale}${canonicalPath}`
 	}
 

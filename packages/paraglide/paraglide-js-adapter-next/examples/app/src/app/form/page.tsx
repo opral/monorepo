@@ -1,6 +1,6 @@
 import * as m from "@/paraglide/messages.js"
 import { languageTag } from "@/paraglide/runtime"
-import { redirect, Link } from "@inlang/paraglide-js-adapter-next"
+import { redirect, Link } from "@/lib/i18n"
 
 export default function About() {
 	async function log(formData: FormData) {

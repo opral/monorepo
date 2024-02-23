@@ -10,7 +10,7 @@ const {
 } = prefixStrategy({
 	availableLanguageTags: ["en", "de", "de-CH"],
 	sourceLanguageTag: "en",
-	exclude: [/^\/api\//],
+	exclude: (path) => path.startsWith("/api/"),
 })
 
 describe("getLocaleFromLocalisedPath", () => {

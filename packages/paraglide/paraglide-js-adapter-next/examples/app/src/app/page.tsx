@@ -1,7 +1,7 @@
 import * as m from "@/paraglide/messages.js"
 import { languageTag } from "@/paraglide/runtime"
 import { ClientComponent } from "./ClientComponent"
-import { Link } from "@inlang/paraglide-js-adapter-next"
+import { Link } from "@/lib/i18n"
 
 export default function Home() {
 	return (

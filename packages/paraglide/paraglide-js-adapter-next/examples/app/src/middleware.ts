@@ -1,4 +1,4 @@
-export { middleware } from "@inlang/paraglide-js-adapter-next"
+export { middleware } from "@/lib/i18n"
 
 export const config = {
 	//Must be hardcoded string
