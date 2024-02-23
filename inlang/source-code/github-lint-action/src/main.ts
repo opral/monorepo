@@ -46,13 +46,13 @@ export async function run(): Promise<void> {
 			owner: github.context.payload.pull_request?.head.label.split(":")[0],
 			repo: repo,
 			branch: github.context.payload.pull_request?.head.label.split(":")[1],
-			link: github.context.payload.pull_request?.head.repo.git_url,
+			link: github.context.payload.pull_request?.head.repo.html_url,
 		}
 		const baseMeta = {
 			owner: github.context.payload.pull_request?.base.label.split(":")[0],
 			repo: repo,
 			branch: github.context.payload.pull_request?.base.label.split(":")[1],
-			link: github.context.payload.pull_request?.base.repo.git_url,
+			link: github.context.payload.pull_request?.base.repo.html_url,
 		}
 
 		const isFork = headMeta.owner !== baseMeta.owner
