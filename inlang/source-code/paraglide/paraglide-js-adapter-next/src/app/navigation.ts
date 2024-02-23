@@ -2,7 +2,6 @@ import * as NextNavigation from "next/navigation"
 import type { RoutingStrategy } from "./routing/prefix"
 import { isAvailableLanguageTag } from "$paraglide/runtime.js"
 
-
 export const createNavigation = <T extends string>(
 	languageTag: () => T,
 	startegy: RoutingStrategy<T>
@@ -11,19 +10,33 @@ export const createNavigation = <T extends string>(
 	const useRouter: NextUseRouter = (...args) => {
 		const nextRouter = NextNavigation.useRouter(...args)
 
-		const push: (typeof nextRouter)["push"] = (...args) => {
-			args[0] = startegy.localiseHref(args[0], languageTag())
-			nextRouter.push(...args)
+		type NavigateOptions = Parameters<(typeof nextRouter)["push"]>[1]
+		type PrefetchOptions = Parameters<(typeof nextRouter)["prefetch"]>[1]
+
+		type OptionalLanguageOption = { locale?: T }
+
+		const push = (
+			canonicalPath: string,
+			options?: (NavigateOptions & OptionalLanguageOption) | undefined
+		) => {
+			const locale = options?.locale ?? languageTag()
+			const localisedPath = startegy.localiseHref(canonicalPath, locale)
+			return nextRouter.push(localisedPath, options)
 		}
 
-		const replace: (typeof nextRouter)["replace"] = (...args) => {
-			args[0] = startegy.localiseHref(args[0], languageTag())
-			nextRouter.replace(...args)
+		const replace = (
+			canonicalPath: string,
+			options?: (NavigateOptions & OptionalLanguageOption) | undefined
+		) => {
+			const locale = options?.locale ?? languageTag()
+			const localisedPath = startegy.localiseHref(canonicalPath, locale)
+			return nextRouter.replace(localisedPath, options)
 		}
 
-		const prefetch: (typeof nextRouter)["prefetch"] = (...args) => {
-			args[0] = startegy.localiseHref(args[0], languageTag())
-			nextRouter.prefetch(...args)
+		const prefetch = (canonicalPath: string, options: PrefetchOptions & OptionalLanguageOption) => {
+			const locale = options?.locale ?? languageTag()
+			const localisedPath = startegy.localiseHref(canonicalPath, locale)
+			return nextRouter.prefetch(localisedPath, options)
 		}
 
 		return {

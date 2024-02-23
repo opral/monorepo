@@ -1,8 +1,8 @@
-import { createLink } from "./Link.base"
+import { createLink } from "./Link"
 import { getLanguage } from "./getLanguage.server"
 import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
 import { prefixStrategy } from "./routing/prefix"
-import { createNoopNavigation, createRedirects } from "./navigation.base"
+import { createNoopNavigation, createRedirects } from "./navigation"
 import { ExcludeConfig, createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
 
@@ -52,7 +52,7 @@ export function createI18n<T extends string = string>(options: I18nOptions<T> = 
 
 	const strategy = prefixStrategy<T>({
 		availableLanguageTags,
-		sourceLanguageTag,
+		defaultLanguage: sourceLanguageTag,
 		exclude,
 	})
 
