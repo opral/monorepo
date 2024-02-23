@@ -40,7 +40,7 @@ export type I18nOptions<T extends string> = {
  * @param options
  * @returns
  */
-export function createI18n(options: I18nOptions<string> = {}) {
+export function createI18n<T extends string = string>(options: I18nOptions<T> = {}) {
 	const exclude = createExclude(options.exclude ?? [])
 
 	const strategy = prefixStrategy({
@@ -54,7 +54,7 @@ export function createI18n(options: I18nOptions<string> = {}) {
 	 *
 	 * Automatically localises the href based on the current language.
 	 */
-	const Link = createLink(getLanguage, strategy)
+	const Link = createLink<T>(getLanguage, strategy)
 	const { usePathname, useRouter } = createNavigation(getLanguage, strategy)
 	const { redirect, permanentRedirect } = createRedirects(getLanguage, strategy)
 	const middleware = createMiddleware(strategy)

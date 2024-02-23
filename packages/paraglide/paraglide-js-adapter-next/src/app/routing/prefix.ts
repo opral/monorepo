@@ -5,7 +5,7 @@ import type { LinkProps } from "next/link"
 	Localised Path = Path with locale (how the path is visible in the URL bar)
 */
 
-export function prefixStrategy({
+export function prefixStrategy<T extends string>({
 	availableLanguageTags,
 	sourceLanguageTag,
 	exclude,
@@ -14,10 +14,10 @@ export function prefixStrategy({
 	sourceLanguageTag: string
 	exclude: (path: string) => boolean
 }) {
-	function getLocaleFromLocalisedPath(localisedPath: string): string | undefined {
+	function getLocaleFromLocalisedPath(localisedPath: string): T | undefined {
 		const maybeLocale = localisedPath.split("/")[1]
 		if (!availableLanguageTags.includes(maybeLocale)) return undefined
-		return maybeLocale
+		return maybeLocale as T
 	}
 
 	function getCanonicalPath(localisedPath: string): string {
@@ -101,5 +101,4 @@ function isExternal(href: LinkProps["href"]) {
 	return false
 }
 
-
-export type RoutingStrategy = ReturnType<typeof prefixStrategy>
+export type RoutingStrategy<T extends string> = ReturnType<typeof prefixStrategy<T>>

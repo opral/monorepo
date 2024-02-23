@@ -3,7 +3,10 @@ import type { RoutingStrategy } from "./routing/prefix"
 import { isAvailableLanguageTag } from "$paraglide/runtime.js"
 
 
-export const createNavigation = (languageTag: () => string, startegy: RoutingStrategy) => {
+export const createNavigation = <T extends string>(
+	languageTag: () => T,
+	startegy: RoutingStrategy<T>
+) => {
 	type NextUseRouter = (typeof NextNavigation)["useRouter"]
 	const useRouter: NextUseRouter = (...args) => {
 		const nextRouter = NextNavigation.useRouter(...args)
@@ -48,7 +51,25 @@ export const createNavigation = (languageTag: () => string, startegy: RoutingStr
 	return { useRouter, usePathname }
 }
 
-export function createRedirects(languageTag: () => string, startegy: RoutingStrategy) {
+/**
+ * Implements the same API as NextNavigation, but throws an error when used.
+ * Usefull for poisoning the client-side navigation hooks on the server.
+ */
+export function createNoopNavigation(): ReturnType<typeof createNavigation> {
+	return {
+		usePathname: () => {
+			throw new Error("usePathname is not available on the server")
+		},
+		useRouter: () => {
+			throw new Error("useRouter is not available on the server")
+		},
+	}
+}
+
+export function createRedirects<T extends string>(
+	languageTag: () => T,
+	startegy: RoutingStrategy<T>
+) {
 	type NextRedirect = (typeof NextNavigation)["redirect"]
 	const redirect: NextRedirect = (...args) => {
 		args[0] = startegy.localiseHref(args[0], languageTag())

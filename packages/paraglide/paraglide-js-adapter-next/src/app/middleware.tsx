@@ -2,17 +2,9 @@ import { NextResponse } from "next/server"
 import { NextRequest } from "next/server"
 import { sourceLanguageTag, availableLanguageTags } from "$paraglide/runtime.js"
 import { HeaderNames } from "../constants"
-import { prefixStrategy, type RoutingStrategy } from "./routing/prefix"
+import type { RoutingStrategy } from "./routing/prefix"
 
-export const middleware = createMiddleware(
-	prefixStrategy({
-		availableLanguageTags,
-		sourceLanguageTag,
-		exclude: () => false,
-	})
-)
-
-export function createMiddleware(strategy: RoutingStrategy) {
+export function createMiddleware<T extends string>(strategy: RoutingStrategy<T>) {
 	/**
 	 * Sets the request headers to resolve the language tag in RSC.
 	 * https://nextjs.org/docs/pages/building-your-application/routing/middleware#setting-headers
@@ -28,7 +20,7 @@ export function createMiddleware(strategy: RoutingStrategy) {
 
 		//set Link header for alternate language versions
 		const linkHeader = generateLinkHeader({
-			availableLanguageTags,
+			availableLanguageTags: availableLanguageTags as T[],
 			canonicalPath,
 		})
 		headers.set(HeaderNames.Link, linkHeader)
@@ -55,7 +47,7 @@ export function createMiddleware(strategy: RoutingStrategy) {
 		availableLanguageTags,
 	}: {
 		canonicalPath: string
-		availableLanguageTags: readonly string[]
+		availableLanguageTags: readonly T[]
 	}): string {
 		return availableLanguageTags
 			.map(
