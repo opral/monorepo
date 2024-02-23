@@ -84,15 +84,15 @@ export async function run(): Promise<void> {
 
 		const shortenedProjectPath = () => {
 			const parts = project_path.split("/")
-			if (parts.length > 3) {
-				return `/${parts.at(-3)}/${parts.at(-2)}/${parts.at(-1)}`
+			if (parts.length > 2) {
+				return `/${parts.at(-2)}/${parts.at(-1)}`
 			} else {
 				return project_path
 			}
 		}
 
 		const commentContent = `
-### 🛎️ Translations need to be updated in \`${shortenedProjectPath}\`
+### 🛎️ Translations need to be updated in \`${shortenedProjectPath()}\`
 
 | lint rule | new reports | link |
 |-----------|-------------|------|
