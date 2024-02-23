@@ -1,5 +1,18 @@
 # @inlang/paraglide-js-adapter-sveltekit
 
+## 0.5.0
+
+### Minor Changes
+
+- e4e879c77: feat: Automatically call `invalidate("paraglide:lang")` when the language changes. You can now call `depends("paraglide:lang")` in your server-load functions to have them re-run on language changes.
+
+### Patch Changes
+
+- 7f566ae73: fix reactivity issue in Svelte 5 [#2270](https://github.com/opral/monorepo/issues/2270)
+- 21a3890cc: fix: Corrected comments saying the default placeholder for the text-direction is `%paraglide.dir%` when it's `%paraglide.textDirection%`
+- 37a247c0e: fix: `i18n.resolveRoute` now ignores paths that don't start with the base
+- 37a247c0e: fix: Alternate links will not include the origin during prerendering, unless one is explicitly specified in `kit.prerender.origin`
+
 ## 0.4.1
 
 ### Patch Changes

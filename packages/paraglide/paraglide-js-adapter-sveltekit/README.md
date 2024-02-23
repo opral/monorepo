@@ -219,7 +219,7 @@ export const i18n = createI18n(runtime, {
 })
 ```
 
-## Customizing Link Translation
+### Customizing Link Translation
 
 Links are translated automatically using a preprocessor. This means that you can use the normal `a` tag and the adapter will translate it for you.
 
@@ -344,10 +344,57 @@ export const i18n = createI18n(runtime, {
 })
 ```
 
-
 ### Accessing `lang` and `textDirection` 
 
-You can access the current language and text direction on `event.locals.paraglide` anywhere on your server. On the client, you can use the `languageTag()` function from `./paraglide/runtime.js` to access the current language.  
+You can access the current language and text direction on `event.locals.paraglide` object anywhere on your server. On the client, you can use the `languageTag()` function from `./paraglide/runtime.js` to access the current language.  
+
+### Using the Language on the Server
+
+#### Avoiding Cross-Talk
+
+The work SvelteKit does on the server can be split into two parts: Loading and Rendering. Data-Loading includes tasks like running your `load` functions, `actions` or server-hooks. Rendering is anything that happens in, or is called from, a `.svelte` file.
+
+In general: loading is asynchronous & rendering is synchronous. 
+
+During the asynchronous loading, there is danger of crosstalk. Crosstalkt is when one request affectst the other. The danger during loading is that one requests overrides the language of another & causes it to return the wrong language. We need to take care to make sure this doesn't happen. 
+
+Because rendering is synchronous there is no danger of crosstalk & you can safely use messages and the `langaugeTag()` function without worrying about anything. The correct `languageTag()` will be set by the `<ParaglideJs>` component.
+
+Here are some strategies to avoid cross-talk during loading:
+
+By default, paraglide makes the language of the current request available in `locals.paraglide.lang`. You can explicitly specify which langauge a message should be in by passing in the language tag as an argument.
+
+```ts
+import * as m from "../paraglide/messages.js"
+
+export async function load({ locals }) {
+  const translatedText = m.some_message({ ...message_params }, { languageTag: locals.paraglide.lang })
+  return { translatedText }
+}
+```
+
+Unfortunately, if you have a lot of messages this can get quite tedious. Fortunately there is an easier way. 
+
+#### Re-Loading Language-Dependent data
+
+Sometimes a piece of data needs to be reloaded when the language changes. You can do that by calling the `depends("paraglide:lang")` function during `load`
+
+```ts
+export async function load({ depends }) {
+  // The Adapter automatically calls `invalidate("paraglide:lang")` whenever the langauge changes
+  // This tells SvelteKit to re-run this function whenever that happens
+  depends("paraglide:lang") 
+  return await myLanguageSpecificData();
+}
+```
+
+## Caveats
+
+Because we are using a Preprocessor for link localisation there are a few caveats to be aware of: 
+
+1. Links in the same Layout Component as `<ParagldieJS>` will not be translated. 
+2. Using a `{...speread}` operator on an element will cause the preprocessor to place all props on that element into one giant `{...spread}`. If you are using proxies that may cause issues.
+3. If you are using a function-call as the value to `hreflang` the function will be called twice per render. If it has side-effects this may cause issues.
 
 ## FAQ
 
@@ -355,7 +402,6 @@ You can access the current language and text direction on `event.locals.paraglid
 	heading="Can I also prefix the default language?"
 	text="Yes, you can also include the default language in the URL by passing prefixDefaultLanguage: 'always' to createI18n.">
 </doc-accordion>
-
 
 <doc-accordion
 	heading="Can I change default language?"
@@ -368,17 +414,14 @@ You can access the current language and text direction on `event.locals.paraglid
 	better off using ParaglideJS directly.">
 </doc-accordion>
 
-
 <doc-accordion
 	heading="'Can't find module $paraglide/runtime.js' - What do I do?"
 	text="This likely means that you haven't registered the $paraglide alias for src/paraglide in svelte.config.js. Try adding that. Check the example if you're stuck">
 </doc-accordion>
 
-
 <doc-accordion
-	heading="My prerenderd pages include 'http://sveltekit-prerender', what's going on?"
-	text="There are some URLs that need to be fully qualified to be spec compliant. Usually SvelteKit
-	can guess the URL based on your current page, but during prerendering it has no idea where the files will be deployed, so it defaults to 'http://sveltekit-prerender'. You need to explicity tell it the URL of your Site. You can do this with the 'kit.prerender.origin' option in 'svelte.config.js'.">
+	heading="How can I make my alternate links full urls when prerendering?"
+	text="According to the spec, alternate links should be full urls that include the protocol and origin. By default the adapter can't know which URL your page will be deployed to while prerendering, so it only includes the path in the alternate url, not the origin or protocol. This works, but is suboptimal. You can tell the adapter which url you will be deploying to by setting kit.prerender.origin in your svelte.config.js">
 </doc-accordion>
 
 <doc-accordion
@@ -391,12 +434,20 @@ You can access the current language and text direction on `event.locals.paraglid
 	text="Paraglide is a compiler, so all translations need to be known at build time. You can of course manually react to the current language & fetch external content, but you will end up implementing your own solution for dynamically fetched translations.">
 </doc-accordion>
 
-## Roadmap
+<doc-accordion
+	heading="Help! Links in +layout.svelte aren't being translated"
+	text="As stated in the caveats, <a> tags are not translated if they are in the same component as the <ParaglideJS> component. Move your Links into a different component and it should work.">
+</doc-accordion>
 
-- [ ] Expand the route features in Path translation
-  - [ ] Optional parameters
-  - [ ] Catch-all parameters
-  - [ ] Parameter matchers
+
+## Roadmap to 1.0
+
+- Expand the route features in Path translation
+  - Optional parameters
+  - Catch-all parameters
+  - Parameter matchers
+- Improve Stability
+- Improve Useability
 
 ## Playground
 

@@ -26,12 +26,12 @@ export type HandleOptions = {
 	/**
 	 * Which placeholder to find and replace with the text-direction of the current language.
 	 *
-	 * @default "%paraglide.dir%"
+	 * @default "%paraglide.textDirection%"
 	 *
 	 * @example
 	 * ```html
 	 * <!-- src/app.html -->
-	 * <html dir="%paraglide.dir%">
+	 * <html dir="%paraglide.textDirection%">
 	 * ```
 	 * ```ts
 	 * { textDirectionPlaceholder: "%paraglide.textDirection%" }

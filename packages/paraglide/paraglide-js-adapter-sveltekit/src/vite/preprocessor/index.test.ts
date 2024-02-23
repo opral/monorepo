@@ -256,6 +256,36 @@ describe.concurrent("preprocessor", () => {
 		const html = await renderComponent(code)
 		expect(html).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
 	})
+
+	it("handles a language switcher", async () => {
+		const code = `
+        <script>
+            const availableLanguageTags = ["de", "en"]
+        </script>
+     
+
+		{#each availableLanguageTags as lang}
+			<a href="/test" hreflang={lang}>{lang}</a>
+		{/each}
+		`
+
+		const html = await renderComponent(code)
+		expect(html).toBe(
+			`<a href="/rewritten/de" hreflang="de">de</a><a href="/rewritten/en" hreflang="en">en</a>`
+		)
+	})
+
+
+	it("handles stores as hrefs", async () => {
+		const code = `
+        <script>
+            import { readable } from 'svelte/store';
+			const href = readable("/test");
+        </script>
+        <a href={$href} hreflang="de"></a>`
+		const html = await renderComponent(code)
+		expect(html).toBe(`<a href="/rewritten/de" hreflang="de"></a>`)
+	})
 })
 
 /**
