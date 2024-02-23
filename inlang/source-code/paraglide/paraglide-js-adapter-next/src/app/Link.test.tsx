@@ -39,7 +39,6 @@ describe("<Link>", () => {
 	})
 
 	it("renders a link with the current language if no locale is provided", () => {
-		setLanguageTag("de")
 		const Link = createLink(
 			() => languageTag(), //For some reason we can't pass languageTag as a reference directly
 			prefixStrategy({
@@ -49,6 +48,7 @@ describe("<Link>", () => {
 			})
 		)
 
+		setLanguageTag("de")
 		render(
 			<Link href="/about" data-testid="german-link">
 				{languageTag()}
