@@ -17,9 +17,13 @@ export async function run(): Promise<void> {
 		if (!token) {
 			throw new Error("GITHUB_TOKEN is not set")
 		}
-		const project_path: string = core.getInput("project_path", { required: true })
+		let project_path: string = core.getInput("project_path", { required: true })
 		const { owner, repo } = github.context.repo
 		const pr_number = github.context.payload.pull_request?.number
+		// check if project_path starts with a slash, otherwise add it
+		if (!project_path.startsWith("/")) {
+			project_path = `/${project_path}`
+		}
 
 		const inlangRepo = await openRepository(process.cwd(), {
 			nodeishFs: fs,
@@ -77,11 +81,8 @@ export async function run(): Promise<void> {
 			reportsBase,
 			project.installed.messageLintRules()
 		)
-		if (lintSummary.length === 0) {
-			core.debug("No lint reports found, skipping comment")
-			return
-		}
 
+		// Create a comment with the lint summary
 		const shortenedProjectPath = () => {
 			const parts = project_path.split("/")
 			if (parts.length > 2) {
@@ -126,15 +127,32 @@ ${lintSummary
 					comment.user?.login === "github-actions[bot]"
 			)?.id
 			if (commentId) {
-				core.debug("Comment already exists, updating it")
-				await octokit.rest.issues.updateComment({
-					owner,
-					repo,
-					comment_id: commentId,
-					body: commentContent,
-				})
+				core.debug("Updating existing comment")
+				if (lintSummary.length === 0) {
+					core.debug("Reports have been fixed, updating comment and removing it")
+					await octokit.rest.issues.updateComment({
+						owner,
+						repo,
+						comment_id: commentId,
+						body: `### Translations for ${shortenedProjectPath()} have been successfully updated 🎉`,
+					})
+					return
+				} else {
+					core.debug("Reports have not been fixed, updating comment")
+					await octokit.rest.issues.updateComment({
+						owner,
+						repo,
+						comment_id: commentId,
+						body: commentContent,
+					})
+				}
 				return
 			}
+		}
+
+		if (lintSummary.length === 0) {
+			core.debug("No lint reports found, skipping comment")
+			return
 		}
 
 		core.debug("Creating a new comment")
