@@ -1,8 +1,5 @@
 import type { NextConfig } from "next"
-import { addRewrites } from "./rewrites"
 import { addAlias } from "./alias"
-import { resolve } from "node:path"
-import fs from "node:fs/promises"
 import { once } from "./utils"
 import { useCompiler } from "./useCompiler"
 
@@ -37,37 +34,6 @@ export function paraglide(config: Config): NextConfig {
 			watch: process.env.NODE_ENV === "development",
 		})
 	})
-
-	const router = config.i18n ? "pages" : "app"
-	if (router === "app") {
-		addRewrites(config, async () => {
-			const { loadProject } = await import("@inlang/sdk")
-			const { openRepository, findRepoRoot } = await import("@lix-js/client")
-			const projectPath = resolve(process.cwd(), config.paraglide.project)
-			const repoRoot = await findRepoRoot({
-				nodeishFs: fs,
-				path: projectPath,
-			})
-
-			const repo = await openRepository(repoRoot || process.cwd(), {
-				nodeishFs: fs,
-			})
-
-			const project = await loadProject({
-				projectPath,
-				repo,
-			})
-
-			const { languageTags } = project.settings()
-
-			return [
-				{
-					source: `/:locale(${languageTags.join("|")})/:path*`,
-					destination: "/:path*",
-				},
-			]
-		})
-	}
 
 	const nextConfig: NextConfig = { ...config }
 	delete nextConfig.paraglide

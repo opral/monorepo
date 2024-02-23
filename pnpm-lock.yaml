@@ -1185,6 +1185,9 @@ importers:
 
   inlang/source-code/paraglide/paraglide-js-adapter-next:
     dependencies:
+      '@inlang/paraglide-js':
+        specifier: '*'
+        version: link:../paraglide-js
       next:
         specifier: ^13.0.0 || ^14.0.0
         version: 14.0.4(@babel/core@7.23.7)(react-dom@18.2.0)(react@18.2.0)
@@ -1192,12 +1195,6 @@ importers:
         specifier: ^18 || ^19
         version: 18.2.0
     devDependencies:
-      '@inlang/sdk':
-        specifier: workspace:*
-        version: link:../../sdk
-      '@lix-js/client':
-        specifier: workspace:*
-        version: link:../../../../lix/source-code/client
       '@rollup/plugin-commonjs':
         specifier: ^25.0.7
         version: 25.0.7(rollup@3.29.1)
