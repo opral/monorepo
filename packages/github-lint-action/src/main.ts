@@ -60,17 +60,9 @@ export async function run(): Promise<void> {
 
 		let baseInlangRepo
 		if (isFork) {
-			// Change the working directory three levels up
 			process.chdir("../../../")
-			// Clone the base repository to the working directory from the baseMeta
 			await cloneRepository(baseMeta)
-			console.log(`Cloned base repository to ${process.cwd()}`)
-			// list tree to see if the baseMeta.repo is in the directory
-			console.log(await fs.readdir(process.cwd()))
-			// Change the working directory to the base repository
 			process.chdir(baseMeta.repo)
-			console.log(await fs.readdir(process.cwd()))
-
 			baseInlangRepo = await openRepository(process.cwd(), {
 				nodeishFs: fs,
 				branch: baseMeta.branch,
@@ -96,8 +88,8 @@ export async function run(): Promise<void> {
 			}
 		}
 		const reportsBase = projectBase.query.messageLintReports.getAll()
-		core.debug(`Reports head: ${reportsHead.length}`)
-		core.debug(`Reports base: ${reportsBase.length}`)
+		console.log(`Reports head: ${reportsHead.length}`)
+		console.log(`Reports base: ${reportsBase.length}`)
 
 		const lintSummary = createLintSummary(
 			reportsHead,
