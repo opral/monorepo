@@ -30,19 +30,6 @@ export const createNavigation = (languageTag: () => string, startegy: RoutingStr
 			prefetch,
 		}
 	}
-
-	type NextRedirect = (typeof NextNavigation)["redirect"]
-	const redirect: NextRedirect = (...args) => {
-		args[0] = startegy.localiseHref(args[0], languageTag())
-		NextNavigation.redirect(...args)
-	}
-
-	type NextPermanentRedirect = (typeof NextNavigation)["permanentRedirect"]
-	const permanentRedirect: NextPermanentRedirect = (...args) => {
-		args[0] = startegy.localiseHref(args[0], languageTag())
-		NextNavigation.permanentRedirect(...args)
-	}
-
 	type NextUsePathname = (typeof NextNavigation)["usePathname"]
 
 	/**
@@ -58,5 +45,21 @@ export const createNavigation = (languageTag: () => string, startegy: RoutingStr
 		return "/" + segments.slice(1).join("/")
 	}
 
-	return { useRouter, redirect, permanentRedirect, usePathname }
+	return { useRouter, usePathname }
+}
+
+export function createRedirects(languageTag: () => string, startegy: RoutingStrategy) {
+	type NextRedirect = (typeof NextNavigation)["redirect"]
+	const redirect: NextRedirect = (...args) => {
+		args[0] = startegy.localiseHref(args[0], languageTag())
+		NextNavigation.redirect(...args)
+	}
+
+	type NextPermanentRedirect = (typeof NextNavigation)["permanentRedirect"]
+	const permanentRedirect: NextPermanentRedirect = (...args) => {
+		args[0] = startegy.localiseHref(args[0], languageTag())
+		NextNavigation.permanentRedirect(...args)
+	}
+
+	return { redirect, permanentRedirect }
 }
