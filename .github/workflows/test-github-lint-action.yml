@@ -1,7 +1,8 @@
 name: Test GitHub Actions Lint
 
 on:
-  pull_request:
+  pull_request_target:
+    types: [opened,closed,synchronize]
     branches:
       - main
       - github-lint-action
