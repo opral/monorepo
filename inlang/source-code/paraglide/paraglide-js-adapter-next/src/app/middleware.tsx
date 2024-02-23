@@ -2,7 +2,15 @@ import { NextResponse } from "next/server"
 import { NextRequest } from "next/server"
 import { sourceLanguageTag, availableLanguageTags } from "$paraglide/runtime.js"
 import { LANGUAGE_HEADER } from "../constants"
-import type { RoutingStrategy } from "./routing/prefix"
+import { prefixStrategy, type RoutingStrategy } from "./routing/prefix"
+
+export const middleware = createMiddleware(
+	prefixStrategy({
+		availableLanguageTags,
+		sourceLanguageTag,
+		exclude: [],
+	})
+)
 
 export function createMiddleware(strategy: RoutingStrategy) {
 	/**

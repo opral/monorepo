@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { prefixStrategy } from "../routing/prefix"
 
-const { getLocaleFromLocalisedPath } = prefixStrategy(availableLanguageTags, sourceLanguageTag)
+const { getLocaleFromLocalisedPath } = prefixStrategy({
+	availableLanguageTags,
+	sourceLanguageTag,
+	exclude: [],
+})
 
 /**
  * This component keeps track of the language in the URL and refreshes the page when it changes.
