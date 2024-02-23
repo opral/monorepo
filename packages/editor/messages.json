@@ -2,32 +2,6 @@
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"data": [
 		{
-			"id": "action_test_pr_fork_1",
-			"selectors": [],
-			"variants": [
-				{
-					"languageTag": "en",
-					"match": [],
-					"pattern": [
-						{ "type": "Text", "value": "test message for github-lint-action case PR from Fork #1" }
-					]
-				}
-			]
-		},
-		{
-			"id": "action_test_pr_fork_2",
-			"selectors": [],
-			"variants": [
-				{
-					"languageTag": "en",
-					"match": [],
-					"pattern": [
-						{ "type": "Text", "value": "test message for github-lint-action case PR from Fork #2" }
-					]
-				}
-			]
-		},
-		{
 			"id": "footer_category_application",
 			"selectors": [],
 			"variants": [

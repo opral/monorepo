@@ -62,10 +62,8 @@ export async function run(): Promise<void> {
 			process.chdir("../../../")
 			await cloneRepository(baseMeta)
 			process.chdir(baseMeta.repo)
-			console.log("Current path:", process.cwd())
 			baseInlangRepo = await openRepository(process.cwd(), {
 				nodeishFs: fs,
-				branch: baseMeta.branch,
 			})
 		} else {
 			core.debug("Fork not detected, fetching and checking out base repository")
