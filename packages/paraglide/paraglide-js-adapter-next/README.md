@@ -20,7 +20,122 @@ npm install @inlang/paraglide-js-adapter-next
 
 ## Setup
 
-Depending on which router you are using your setup will be different. Make sure to read the documentation for your router. Mixing routers is currently not supported.
+Depending on which router you are using your setup will be different. Make sure to read the documentation for the corerct router. Mixing routers is currently not supported.
+
+However, the first step is the same for both. Let's install the Paraglide Next Plugin. 
+
+In your `next.config.js`, import the `paraglide` plugin from `@inlang/paraglide-js-adapter-next/plugin`, wrap your config object with it and add a `paraglide` key. 
+
+```js
+const { paraglide } = require("@inlang/paraglide-js-adapter-next/plugin")
+
+/** @type {import('next').NextConfig} */
+module.exports = paraglide({
+    paraglide: {
+        project: "./project.inlang",
+        outdir: "./src/paraglide",
+    },
+})
+```
+
+If you are using a newer version of Next, you can also use an `import` instead of calling `require`. 
+
+## With NextJS App Router
+
+The App router is the new recommended router for NextJS. It is more flexible, but less opinionated than the Pages router, so it requires a bit more setup. We will need to do the following:
+
+1. Register the Paraglide Plugin in `next.config.js`. This will run the paraglide compiler on message changes.
+2. Initialise the Adapter
+3. Register the Locale Middleware in `src/middleware.js`
+4. Register the Paraglide Language Provider in `src/app/layout.jsx`
+5. Incrementally switch to the localised Navigation APIs
+
+To register the Paraglide Plugin 
+
+
+Now when you start your NextJS app, you should see requests to `/en` be rewritten to your homepage, even if you didn't add a `[lang]` parameter to your routes. 
+
+The available languages are automatically determined from your `project.inlang/settings.json` file.
+
+Next, we need to register the Locale Middleware. Create a `src/middleware.js` file and add paraglide's middleware to it.
+
+```js
+// src/middleware.js
+export { middleware } from "@inlang/paraglide-js-adapter-next"
+```
+
+Finally, we need to register the Paraglide Language Provider in `src/app/layout.jsx`. This is where we will set the language for each request.
+
+```jsx
+import { LanguageProvider } from "@inlang/paraglide-js-adapter-next"
+import { languageTag } from "@/paraglide/runtime"
+import { LanguageSwitcher } from "@/lib/LanguageSwitcher"
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+	return (
+		<LanguageProvider>
+			<html lang={languageTag()}>
+				<body>
+					<LanguageSwitcher />
+					{children}
+				</body>
+			</html>
+		</LanguageProvider>
+	)
+}
+```
+
+You can now use Paraglide's messages in your components.
+
+### Navigation
+
+We still need to localise the `<Link>`s, so that we link to pages in the correct language. 
+
+NextJS doesn't offer this in the App-Router, so we will need to use our own `<Link>` component. 
+
+The Adapter Provides one for you. It's a drop-in replacemenet for the one from `next/link`. It's probably easiest to do a "find-and-replace" across your code-base for the import. 
+
+```diff
+- import Link from "next/link"
++ import { Link } from  "@/lib/i18n"
+```
+
+You can now link to a page without needing to include the language. 
+
+```jsx
+<Link href="/about">
+
+//renders as
+
+<a href="/de/about">
+
+//depending on the language
+```
+
+For programmatic Navigations using `useRouter`, `redirect` or `permanentRedirect` there are also localised options available:
+
+```ts
+import { useRouter, redirect, permanentRedirect } from "@/lib/i18n"
+```
+
+That's it! You're done!$
+
+### Advanced Setup
+
+#### Translated Metadata
+
+Next offers two ways of defining Metadata on a page. `export const metadata` and `generateMetadata`. We need to use `generateMetadata`, since we need to return different metadata for different languages.
+
+```ts
+export async function generateMetadata() {
+  return {
+    title: m.home_metadata_title(),
+    description: m.home_metadata_description()
+  };  
+}
+```
+
+> If you were to use `export const metadata` your metadata would always end up in the source language. 
 
 ### With NextJS Pages Router
 
@@ -86,111 +201,6 @@ export default function Document() {
 ```
 
 You're done!
-
-## With NextJS App Router
-
-The App router is the new recommended router for NextJS. It is more flexible, but less opinionated than the Pages router, so it requires a bit more setup. We will need to do the following:
-
-1. Register the Paraglide Plugin in `next.config.js`. This will add the necessary rewrite rules to the NextJS router.
-2. Register the Locale Middleware in `src/middleware.js`. This will set the language for each request.
-3. Register the Paraglide Language Provider in `src/app/layout.jsx`
-
-To register the Paraglide Plugin in `next.config.js`, import the `withParaglide` function from `@inlang/paraglide-js-adapter-next/plugin`, wrap your config object with it and add a `paraglide` key. 
-
-```js
-const { paraglide } = require("@inlang/paraglide-js-adapter-next/plugin")
-
-/** @type {import('next').NextConfig} */
-module.exports = paraglide({
-    paraglide: {
-        project: "./project.inlang",
-        outdir: "./src/paraglide",
-    },
-})
-```
-Now when you start your NextJS app, you should see requests to `/en` be rewritten to your homepage, even if you didn't add a `[lang]` parameter to your routes. 
-
-The available languages are automatically determined from your `project.inlang/settings.json` file.
-
-Next, we need to register the Locale Middleware. Create a `src/middleware.js` file and add paraglide's middleware to it.
-
-```js
-// src/middleware.js
-export { middleware } from "@inlang/paraglide-js-adapter-next"
-```
-
-Finally, we need to register the Paraglide Language Provider in `src/app/layout.jsx`. This is where we will set the language for each request.
-
-```jsx
-import { LanguageProvider } from "@inlang/paraglide-js-adapter-next"
-import { languageTag } from "@/paraglide/runtime"
-import { LanguageSwitcher } from "@/lib/LanguageSwitcher"
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-	return (
-		<LanguageProvider>
-			<html lang={languageTag()}>
-				<body>
-					<LanguageSwitcher />
-					{children}
-				</body>
-			</html>
-		</LanguageProvider>
-	)
-}
-```
-
-You can now use Paraglide's messages in your components.
-
-### Navigation
-
-We still need to localise the `<Link>`s, so that we link to pages in the correct language. 
-
-NextJS doesn't offer this in the App-Router, so we will need to use our own `<Link>` component. 
-
-The Adapter Provides one for you. It's a drop-in replacemenet for the one from `next/link`. It's probably easiest to do a "find-and-replace" across your code-base for the import. 
-
-```diff
-- import Link from "next/link"
-+ import { Link } from "@inlang/paraglide-js-adapter-next"
-```
-
-You can now link to a page without needing to include the language. 
-
-```jsx
-<Link href="/about">
-
-//renders as
-
-<a href="/de/about">
-
-//depending on the language
-```
-
-For programmatic Navigations using `useRouter`, `redirect` or `permanentRedirect` there are also localised options available:
-
-```ts
-import { useRouter, redirect, permanentRedirect } from "@inlang/paraglide-js-adapter-next"
-```
-
-That's it! You're done!$
-
-### Advanced Setup
-
-#### Translated Metadata
-
-Next offers two ways of defining Metadata on a page. `export const metadata` and `generateMetadata`. We need to use `generateMetadata`, since we need to return different metadata for different languages.
-
-```ts
-export async function generateMetadata() {
-  return {
-    title: m.home_metadata_title(),
-    description: m.home_metadata_description()
-  };  
-}
-```
-
-> If you were to use `export const metadata` your metadata would always end up in the source language. 
 
 ## Roadmap to 1.0
 - Translated Pathnames
