@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - main
+      - github-lint-action
 
 jobs:
   test-action:
