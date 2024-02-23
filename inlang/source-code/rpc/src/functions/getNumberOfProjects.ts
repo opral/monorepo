@@ -27,7 +27,7 @@ export async function getNumberOfProjects(): Promise<Result<string, Error>> {
 					},
 					filterTestAccounts: true,
 					dateRange: {
-						date_to: "null",
+						date_to: null,
 						date_from: "-30d",
 					},
 					series: [

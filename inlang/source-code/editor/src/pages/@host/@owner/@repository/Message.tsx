@@ -3,7 +3,7 @@ import { useEditorState } from "./State.jsx"
 import { createVisibilityObserver } from "@solid-primitives/intersection-observer"
 import { PatternEditor } from "./components/PatternEditor.jsx"
 import { showFilteredMessage } from "./helper/showFilteredMessage.js"
-import IconCopy from "~icons/material-symbols/content-copy-outline"
+import IconLink from "~icons/material-symbols/link"
 import copy from "clipboard-copy"
 import { showToast } from "#src/interface/components/Toast.jsx"
 import type { MessageLintReport, Message as MessageType } from "@inlang/sdk"
@@ -79,7 +79,11 @@ export function Message(props: { id: string }) {
 			<div class="flex w-full gap-2 items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-4 bg-surface-2 border-x border-b-0 border-surface-2">
 				<h3
 					slot="summary"
-					class="flex-grow-0 flex-shrink-0 max-w-[calc(100%_-_38px)] text-[13px] font-medium text-left text-on-surface before:text-on-surface truncate"
+					class="flex-grow-0 flex-shrink-0 max-w-[calc(100%_-_38px)] text-[13px] font-medium text-left text-on-surface before:text-on-surface truncate hover:cursor-pointer"
+					onClick={() => {
+						copy(message() ? message()!.id : "id"),
+							showToast({ variant: "success", title: "Message ID copied to clipboard", duration: 3000 })
+					}}
 				>
 					{message() ? message()!.id : "id"}
 				</h3>
@@ -93,11 +97,11 @@ export function Message(props: { id: string }) {
 								"?id=" +
 								message()?.id
 						),
-							showToast({ variant: "success", title: "Copy to clipboard", duration: 3000 })
+							showToast({ variant: "success", title: "Message ID link copied to clipboard", duration: 3000 })
 					}}
 					class="opacity-0 transition-all group-hover:opacity-100 text-info/70 h-7 w-7 text-sm rounded flex items-center justify-center hover:bg-on-background/10 hover:text-info cursor-pointer"
 				>
-					<IconCopy />
+					<IconLink />
 				</div>
 			</div>
 			<div>
