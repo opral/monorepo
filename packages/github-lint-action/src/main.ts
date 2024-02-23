@@ -269,6 +269,7 @@ async function pull() {
 async function cloneRepository(repoData: { link: string; branch: string }) {
 	return new Promise<void>((resolve, reject) => {
 		// Execute the git command to clone the base repository
+		console.log(`git clone -b ${repoData.branch} --single-branch --depth 1 ${repoData.link}`)
 		exec(
 			`git clone -b ${repoData.branch} --single-branch --depth 1 ${repoData.link}`, // Clone only the latest commit
 			{ cwd: process.cwd() },
