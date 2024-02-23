@@ -1,5 +1,11 @@
 # @inlang/paraglide-js-adapter-astro
 
+## 0.1.4
+
+### Patch Changes
+
+- 26c0a8b0c: update `package.json` metadata
+
 ## 0.1.3
 
 ### Patch Changes
