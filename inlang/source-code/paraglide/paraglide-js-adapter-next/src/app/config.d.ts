@@ -19,9 +19,4 @@ export type I18nOptions<T extends string> = {
 	 * @default sourceLanguageTag
 	 */
 	defaultLanguage?: T
-
-	/**
-	 * A map of text-directions for each language.
-	 */
-	textDirection?: Record<T, "ltr" | "rtl">
 }
