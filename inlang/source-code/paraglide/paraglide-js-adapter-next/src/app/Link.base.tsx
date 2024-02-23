@@ -12,7 +12,7 @@ import React from "react"
  * Creates a link component that localises the href based on the current language.
  * @param languageTag A function that returns the current language tag.
  */
-export function createLink(languageTag: () => string, strategy: RoutingStrategy) {
+export function createLink<T extends string>(languageTag: () => T, strategy: RoutingStrategy) {
 	return function Link(props: Parameters<typeof NextLink>[0]): ReturnType<typeof NextLink> {
 		const currentLanguageTag = languageTag()
 

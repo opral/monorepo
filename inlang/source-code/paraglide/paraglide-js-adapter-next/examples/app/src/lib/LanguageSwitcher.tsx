@@ -1,6 +1,6 @@
 "use client"
 import { availableLanguageTags } from "@/paraglide/runtime"
-import { Link, usePathname } from "@inlang/paraglide-js-adapter-next"
+import { Link, usePathname } from "@/lib/i18n"
 import { Fragment } from "react"
 
 export function LanguageSwitcher() {

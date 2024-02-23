@@ -5,7 +5,8 @@
 	"scripts": {
 		"build": "node ./build.mjs",
 		"clean": "rm -rf dist && rm -rf node_modules",
-		"test": "vitest run --passWithNoTests"
+		"test": "vitest run --passWithNoTests",
+		"lint": "eslint ./src --fix"
 	},
 	"main": "dist/app/index.server.js",
 	"module": "dist/app/index.server.js",

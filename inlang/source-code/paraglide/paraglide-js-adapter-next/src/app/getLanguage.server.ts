@@ -8,8 +8,8 @@ import { HeaderNames } from "../constants"
  *
  * TODO: Replace with languageTag() from paraglide/runtime.js - Needs reliable way to call setLanguageTag() from middleware.tsx
  */
-export function getLanguage() {
+export function getLanguage<T extends string>(): T {
 	const langHeader = headers().get(HeaderNames.ParaglideLanguage)
 	const lang = isAvailableLanguageTag(langHeader) ? langHeader : sourceLanguageTag
-	return lang
+	return lang as T
 }

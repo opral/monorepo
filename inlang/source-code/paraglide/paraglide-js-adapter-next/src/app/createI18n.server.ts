@@ -2,7 +2,7 @@ import { createLink } from "./Link.base"
 import { getLanguage } from "./getLanguage.server"
 import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
 import { prefixStrategy } from "./routing/prefix"
-import { createNavigation, createRedirects } from "./navigation.base"
+import { createNoopNavigation, createRedirects } from "./navigation.base"
 import { ExcludeConfig, createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
 
@@ -47,10 +47,10 @@ export type I18nOptions<T extends string> = {
  * export const i18n = createI18n({ ...options })
  * ```
  */
-export function createI18n(options: I18nOptions<string> = {}) {
+export function createI18n<T extends string = string>(options: I18nOptions<T> = {}) {
 	const exclude = createExclude(options.exclude ?? [])
 
-	const strategy = prefixStrategy({
+	const strategy = prefixStrategy<T>({
 		availableLanguageTags,
 		sourceLanguageTag,
 		exclude,
@@ -61,10 +61,10 @@ export function createI18n(options: I18nOptions<string> = {}) {
 	 *
 	 * Automatically localises the href based on the current language.
 	 */
-	const Link = createLink(getLanguage, strategy)
-	const { usePathname, useRouter } = createNavigation(getLanguage, strategy)
-	const { redirect, permanentRedirect } = createRedirects(getLanguage, strategy)
-	const middleware = createMiddleware(strategy)
+	const Link = createLink<T>(getLanguage, strategy)
+	const { usePathname, useRouter } = createNoopNavigation()
+	const { redirect, permanentRedirect } = createRedirects<T>(getLanguage, strategy)
+	const middleware = createMiddleware<T>(strategy)
 
 	return {
 		Link,
