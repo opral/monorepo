@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { NextRequest } from "next/server"
 import { sourceLanguageTag, availableLanguageTags } from "$paraglide/runtime.js"
-import { LANGUAGE_HEADER } from "../constants"
+import { HeaderNames } from "../constants"
 import { prefixStrategy, type RoutingStrategy } from "./routing/prefix"
 
 export const middleware = createMiddleware(
@@ -24,14 +24,14 @@ export function createMiddleware(strategy: RoutingStrategy) {
 		const canonicalPath = strategy.translatePath(request.nextUrl.pathname, sourceLanguageTag)
 		const headers = new Headers(request.headers)
 
-		headers.set(LANGUAGE_HEADER, locale)
+		headers.set(HeaderNames.ParaglideLanguage, locale)
 
 		//set Link header for alternate language versions
 		const linkHeader = generateLinkHeader({
 			availableLanguageTags,
 			canonicalPath,
 		})
-		headers.set("Link", linkHeader)
+		headers.set(HeaderNames.Link, linkHeader)
 
 		if (canonicalPath !== request.nextUrl.pathname) {
 			request.nextUrl.pathname = canonicalPath

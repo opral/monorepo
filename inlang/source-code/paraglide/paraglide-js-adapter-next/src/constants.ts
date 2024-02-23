@@ -1,1 +1,4 @@
-export const LANGUAGE_HEADER = "x-language-tag"
+export enum HeaderNames {
+	Link = "Link",
+	ParaglideLanguage = "x-language-tag",
+}
