@@ -10,9 +10,7 @@ export function ClientComponent() {
 	return (
 		<div>
 			<p>{pathname}</p>
-			<Link href="/about" prefetch>
-				{m.about()}
-			</Link>
+			<Link href="/about">{m.about()}</Link>
 			<h1>{m.on_the_client()}</h1>
 			<p>{m.currentLanguageTag({ languageTag: languageTag() })}</p>
 			<button onClick={() => router.push("/about")}>{m.about()}</button>

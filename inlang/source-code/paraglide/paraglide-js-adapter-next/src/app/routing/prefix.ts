@@ -11,7 +11,7 @@ export function prefixStrategy<T extends string>({
 	exclude,
 }: {
 	availableLanguageTags: readonly string[]
-	defaultLanguage: string
+	defaultLanguage: T
 	exclude: (path: string) => boolean
 }) {
 	function getLocaleFromLocalisedPath(localisedPath: string): T | undefined {

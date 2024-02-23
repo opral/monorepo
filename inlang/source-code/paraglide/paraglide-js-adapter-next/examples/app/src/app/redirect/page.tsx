@@ -1,4 +1,4 @@
-import { redirect } from "@inlang/paraglide-js-adapter-next"
+import { redirect } from "@/lib/i18n"
 
 export default async function Redirect() {
 	redirect("/about")

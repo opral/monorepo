@@ -3,34 +3,9 @@ import { getLanguage } from "./getLanguage.server"
 import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
 import { prefixStrategy } from "./routing/prefix"
 import { createNoopNavigation, createRedirects } from "./navigation"
-import { ExcludeConfig, createExclude } from "./exclude"
+import { createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
-
-export type I18nOptions<T extends string> = {
-	/**
-	 * A list of patterns that should not be localized.
-	 *
-	 * @example
-	 * ```ts
-	 * exclude: [/^\/api\//] // Exclude `/api/*` from localization
-	 * ```
-	 *
-	 * @default []
-	 */
-	exclude?: ExcludeConfig
-
-	/**
-	 * The default language to use when no language is set.
-	 *
-	 * @default sourceLanguageTag
-	 */
-	defaultLanguage?: T
-
-	/**
-	 * A map of text-directions for each language.
-	 */
-	textDirection?: Record<T, "ltr" | "rtl">
-}
+import { I18nOptions } from "./config"
 
 /**
  * Creates an i18n instance that manages your internationalization.
@@ -52,7 +27,7 @@ export function createI18n<T extends string = string>(options: I18nOptions<T> = 
 
 	const strategy = prefixStrategy<T>({
 		availableLanguageTags,
-		defaultLanguage: sourceLanguageTag,
+		defaultLanguage: sourceLanguageTag as T,
 		exclude,
 	})
 
