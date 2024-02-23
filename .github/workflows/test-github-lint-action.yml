@@ -6,10 +6,6 @@ on:
       - main
       - github-lint-action
 
-# explicitly configure permissions, in case your GITHUB_TOKEN workflow permissions are set to read-only in repository settings
-permissions: write-all
-
-
 jobs:
   test-action:
     name: GitHub Actions Test
