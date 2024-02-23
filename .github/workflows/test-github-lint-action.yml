@@ -1,7 +1,18 @@
 name: Test GitHub Actions Lint
 
 on:
-  pull_request:
+  pull_request_target:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+      - unlabeled
+      - review_requested
+      - review_request_removed
+      - ready_for_review
+      - converted_to_draft
+      - edited
     branches:
       - main
       - github-lint-action
