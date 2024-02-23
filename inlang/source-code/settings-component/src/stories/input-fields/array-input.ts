@@ -85,8 +85,7 @@ export class ArrayInput extends LitElement {
 
 	override render() {
 		return html` <div class="container">
-			${this.property}
-			<p class="help-text">${this._description}</p>
+			${this.property} ${this._description && html`<p class="help-text">${this._description}</p>`}
 			${this.value &&
 			this.value.map((arrayItem, index) => {
 				return html`<div>
