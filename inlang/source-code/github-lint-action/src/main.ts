@@ -40,29 +40,44 @@ export async function run(): Promise<void> {
 			}
 		}
 
+		console.log(github.context.payload.pull_request?.base.repo.git_url)
 		const reportsHead = project.query.messageLintReports.getAll()
 		const headMeta = {
 			owner: github.context.payload.pull_request?.head.label.split(":")[0],
 			repo: repo,
 			branch: github.context.payload.pull_request?.head.label.split(":")[1],
+			link: github.context.payload.pull_request?.head.repo.git_url,
 		}
 		const baseMeta = {
 			owner: github.context.payload.pull_request?.base.label.split(":")[0],
 			repo: repo,
 			branch: github.context.payload.pull_request?.base.label.split(":")[1],
+			link: github.context.payload.pull_request?.base.repo.git_url,
 		}
 
-		// If the PR is from a fork, we need to fetch the base reports from the base repo
 		const isFork = headMeta.owner !== baseMeta.owner
 		console.log(`Is fork: ${isFork}`)
 
-		await fetchBranch(baseMeta.branch)
-		await checkoutBranch(baseMeta.branch)
-		await pull()
-		const baseInlangRepo = await openRepository(process.cwd(), {
-			nodeishFs: fs,
-			branch: baseMeta.branch,
-		})
+		let baseInlangRepo
+		if (isFork) {
+			// Change the working directory two levels up
+			process.chdir("../../")
+			// Clone the base repository to the working directory from the baseMeta
+			await cloneRepository(baseMeta)
+
+			baseInlangRepo = await openRepository(process.cwd(), {
+				nodeishFs: fs,
+				branch: baseMeta.branch,
+			})
+		} else {
+			await fetchBranch(baseMeta.branch)
+			await checkoutBranch(baseMeta.branch)
+			await pull()
+			baseInlangRepo = await openRepository(process.cwd(), {
+				nodeishFs: fs,
+				branch: baseMeta.branch,
+			})
+		}
 
 		const projectBase = await loadProject({
 			projectPath: process.cwd() + project_path,
@@ -249,5 +264,29 @@ async function pull() {
 			core.debug(`stderr: ${stderr}`)
 			resolve()
 		})
+	})
+}
+
+// Function to clone the base repository
+async function cloneRepository(repoData: { link: string; branch: string }) {
+	return new Promise<void>((resolve, reject) => {
+		// Execute the git command to clone the base repository
+		exec(
+			`git clone ${repoData.link}
+			--branch ${repoData.branch}
+			--single-branch
+			--depth 1`, // Clone only the latest commit
+			{ cwd: process.cwd() },
+			(error, stdout, stderr) => {
+				if (error) {
+					console.error(`Error executing command: ${error}`)
+					reject(error)
+					return
+				}
+				core.debug(`stdout: ${stdout}`)
+				core.debug(`stderr: ${stderr}`)
+				resolve()
+			}
+		)
 	})
 }
