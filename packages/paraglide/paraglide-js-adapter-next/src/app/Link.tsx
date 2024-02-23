@@ -1,8 +1,4 @@
-import {
-	availableLanguageTags,
-	sourceLanguageTag,
-	isAvailableLanguageTag,
-} from "$paraglide/runtime.js"
+import { availableLanguageTags, isAvailableLanguageTag } from "$paraglide/runtime.js"
 import { addBasePath } from "./routing/basePath"
 import type { RoutingStrategy } from "./routing/prefix"
 import NextLink from "next/link"
@@ -13,7 +9,9 @@ import React from "react"
  * @param languageTag A function that returns the current language tag.
  */
 export function createLink<T extends string>(languageTag: () => T, strategy: RoutingStrategy<T>) {
-	return function Link(props: Parameters<typeof NextLink>[0]): ReturnType<typeof NextLink> {
+	return function Link(
+		props: Omit<Parameters<typeof NextLink>[0], "locale"> & { locale?: T }
+	): ReturnType<typeof NextLink> {
 		const currentLanguageTag = languageTag()
 
 		if (
@@ -32,7 +30,7 @@ export function createLink<T extends string>(languageTag: () => T, strategy: Rou
 		}
 
 		let lang = props.locale || currentLanguageTag
-		if (!isAvailableLanguageTag(lang)) lang = sourceLanguageTag
+		if (!isAvailableLanguageTag(lang)) lang = strategy.defaultLanguage
 
 		const localisedHref = strategy.localiseHref(props.href, lang)
 
