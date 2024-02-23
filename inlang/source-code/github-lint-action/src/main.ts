@@ -90,9 +90,9 @@ export async function run(): Promise<void> {
 				return project_path
 			}
 		}
-
+		const commentHeadline = `### 🛎️ Translations need to be updated in \`${shortenedProjectPath()}\``
 		const commentContent = `
-### 🛎️ Translations need to be updated in \`${shortenedProjectPath()}\`
+${commentHeadline}
 
 | lint rule | new reports | link |
 |-----------|-------------|------|
@@ -121,7 +121,8 @@ ${lintSummary
 		if (existingComment.data.length > 0) {
 			const commentId = existingComment.data.find(
 				(comment) =>
-					comment.body?.includes("🛎️ Translations need to be updated") &&
+					comment.body?.includes(commentHeadline) &&
+					comment.body?.includes(project_path) &&
 					comment.user?.login === "github-actions[bot]"
 			)?.id
 			if (commentId) {
