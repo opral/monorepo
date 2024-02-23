@@ -173,4 +173,26 @@ For programmatic Navigations using `useRouter`, `redirect` or `permanentRedirect
 import { useRouter, redirect, permanentRedirect } from "@inlang/paraglide-js-adapter-next"
 ```
 
-That's it! You're done!
+That's it! You're done!$
+
+### Advanced Setup
+
+#### Translated Metadata
+
+Next offers two ways of defining Metadata on a page. `export const metadata` and `generateMetadata`. We need to use `generateMetadata`, since we need to return different metadata for different languages.
+
+```ts
+export async function generateMetadata() {
+  return {
+    title: m.home_metadata_title(),
+    description: m.home_metadata_description()
+  };  
+}
+```
+
+> If you were to use `export const metadata` your metadata would always end up in the source language. 
+
+## Roadmap to 1.0
+- Translated Pathnames
+- Support Static Export
+- Simplify Setup
