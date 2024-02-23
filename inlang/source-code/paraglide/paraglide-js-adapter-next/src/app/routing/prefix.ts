@@ -11,6 +11,11 @@ export function prefixStrategy<T extends string>({
 	exclude,
 }: {
 	availableLanguageTags: readonly string[]
+
+	/**
+	 * The language that should not be prefixed with a language tag
+	 * Usually is the source language, but doesn't have to be
+	 */
 	defaultLanguage: T
 	exclude: (path: string) => boolean
 }) {
