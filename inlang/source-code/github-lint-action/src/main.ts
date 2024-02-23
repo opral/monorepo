@@ -51,8 +51,10 @@ export async function run(): Promise<void> {
 			repo: repo,
 			branch: github.context.payload.pull_request?.base.label.split(":")[1],
 		}
-		// const isFork = headMeta.owner !== baseMeta.owner
+
 		// If the PR is from a fork, we need to fetch the base reports from the base repo
+		const isFork = headMeta.owner !== baseMeta.owner
+		console.log(`Is fork: ${isFork}`)
 
 		await fetchBranch(baseMeta.branch)
 		await checkoutBranch(baseMeta.branch)
