@@ -40,7 +40,6 @@ export async function run(): Promise<void> {
 			}
 		}
 
-		console.log(github.context.payload.pull_request?.base.repo.git_url)
 		const reportsHead = project.query.messageLintReports.getAll()
 		const headMeta = {
 			owner: github.context.payload.pull_request?.head.label.split(":")[0],
@@ -56,10 +55,10 @@ export async function run(): Promise<void> {
 		}
 
 		const isFork = headMeta.owner !== baseMeta.owner
-		console.log(`Is fork: ${isFork}`)
 
 		let baseInlangRepo
 		if (isFork) {
+			core.debug("Fork detected, cloning base repository")
 			process.chdir("../../../")
 			await cloneRepository(baseMeta)
 			process.chdir(baseMeta.repo)
@@ -68,6 +67,7 @@ export async function run(): Promise<void> {
 				branch: baseMeta.branch,
 			})
 		} else {
+			core.debug("Fork not detected, fetching and checking out base repository")
 			await fetchBranch(baseMeta.branch)
 			await checkoutBranch(baseMeta.branch)
 			await pull()
@@ -270,7 +270,7 @@ async function cloneRepository(repoData: { link: string; branch: string }) {
 	return new Promise<void>((resolve, reject) => {
 		// Execute the git command to clone the base repository
 		exec(
-			`git clone ${repoData.link} --branch ${repoData.branch} --single-branch --depth 1`, // Clone only the latest commit
+			`git clone -b ${repoData.branch} --single-branch --depth 1 ${repoData.link}`, // Clone only the latest commit
 			{ cwd: process.cwd() },
 			(error, stdout, stderr) => {
 				if (error) {
