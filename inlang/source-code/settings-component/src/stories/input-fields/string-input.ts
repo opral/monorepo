@@ -36,10 +36,15 @@ export class StringInput extends LitElement {
 		return this.schema.description || undefined
 	}
 
+	private get _examples(): string | undefined {
+		return this.schema.examples ? "Example: " + JSON.stringify(this.schema.examples) : undefined
+	}
+
 	override render() {
 		return html` <div>
 			${this.property}
 			<p class="help-text">${this._description}</p>
+			<p class="help-text">${this._examples}</p>
 			<sl-input
 				value=${this.value}
 				@input=${(e: Event) => {
