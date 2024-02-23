@@ -13,7 +13,10 @@ export function ClientComponent() {
 			<Link href="/about">{m.about()}</Link>
 			<h1>{m.on_the_client()}</h1>
 			<p>{m.currentLanguageTag({ languageTag: languageTag() })}</p>
-			<button onClick={() => router.push("/about")}>{m.about()}</button>
+
+			<button onClick={() => router.push("/about", { locale: "de" })}>
+				{m.about({}, { languageTag: "de" })}
+			</button>
 		</div>
 	)
 }

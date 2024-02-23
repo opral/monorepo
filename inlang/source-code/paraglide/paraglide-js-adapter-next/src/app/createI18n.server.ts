@@ -37,7 +37,7 @@ export function createI18n<T extends string = string>(options: I18nOptions<T> = 
 	 * Automatically localises the href based on the current language.
 	 */
 	const Link = createLink<T>(getLanguage, strategy)
-	const { usePathname, useRouter } = createNoopNavigation()
+	const { usePathname, useRouter } = createNoopNavigation<T>()
 	const { redirect, permanentRedirect } = createRedirects<T>(getLanguage, strategy)
 	const middleware = createMiddleware<T>(strategy)
 
