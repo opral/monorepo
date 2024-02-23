@@ -2,9 +2,9 @@ import { createLink } from "./Link.base"
 import { getLanguage } from "./getLanguage.server"
 import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
 import { prefixStrategy } from "./routing/prefix"
-import { createNavigation } from "./navigation.base"
+import { createNavigation, createRedirects } from "./navigation.base"
 
-export type I18nOptions = {
+export type I18nOptions<T extends string> = {
 	/**
 	 * A list of patterns that should not be localized.
 	 *
@@ -16,9 +16,21 @@ export type I18nOptions = {
 	 * @default []
 	 */
 	exclude?: (string | RegExp)[]
+
+	/**
+	 * The default language to use when no language is set.
+	 *
+	 * @default sourceLanguageTag
+	 */
+	defaultLanguage?: T
+
+	/**
+	 * A map of text-directions for each language.
+	 */
+	textDirection?: Record<T, "ltr" | "rtl">
 }
 
-export function createI18n(options: I18nOptions = {}) {
+export function createI18n(options: I18nOptions<string> = {}) {
 	const strategy = prefixStrategy({
 		availableLanguageTags,
 		sourceLanguageTag,
@@ -31,10 +43,8 @@ export function createI18n(options: I18nOptions = {}) {
 	 * Automatically localises the href based on the current language.
 	 */
 	const Link = createLink(getLanguage, strategy)
-	const { usePathname, useRouter, redirect, permanentRedirect } = createNavigation(
-		getLanguage,
-		strategy
-	)
+	const { usePathname, useRouter } = createNavigation(getLanguage, strategy)
+	const { redirect, permanentRedirect } = createRedirects(getLanguage, strategy)
 
 	return {
 		Link,
