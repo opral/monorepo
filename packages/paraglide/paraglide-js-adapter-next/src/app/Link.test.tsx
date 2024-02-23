@@ -10,15 +10,6 @@ import {
 import { createLink } from "./Link"
 import { prefixStrategy } from "./routing/prefix"
 
-const Link = createLink(
-	languageTag,
-	prefixStrategy({
-		availableLanguageTags,
-		defaultLanguage: sourceLanguageTag,
-		exclude: () => false,
-	})
-)
-
 describe("<Link>", () => {
 	beforeEach(() => {
 		//known starting state
@@ -28,6 +19,15 @@ describe("<Link>", () => {
 	afterEach(() => cleanup())
 
 	it("renders a link with the correct localised href", () => {
+		const Link = createLink(
+			languageTag,
+			prefixStrategy({
+				availableLanguageTags,
+				defaultLanguage: sourceLanguageTag,
+				exclude: () => false,
+			})
+		)
+
 		render(
 			<>
 				<Link href="/about" locale="de" data-testid="german-link" />
@@ -40,7 +40,20 @@ describe("<Link>", () => {
 
 	it("renders a link with the current language if no locale is provided", () => {
 		setLanguageTag("de")
-		render(<Link href="/about" data-testid="german-link" />)
+		const Link = createLink(
+			() => languageTag(), //For some reason we can't pass languageTag as a reference directly
+			prefixStrategy({
+				availableLanguageTags,
+				defaultLanguage: sourceLanguageTag,
+				exclude: () => false,
+			})
+		)
+
+		render(
+			<Link href="/about" data-testid="german-link">
+				{languageTag()}
+			</Link>
+		)
 		expect(screen.getByTestId("german-link").getAttribute("href")).toEqual("/de/about")
 
 		setLanguageTag("en")
