@@ -29,13 +29,8 @@ jobs:
       - name: Install Dependencies
         run: pnpm install
 
-      - name: Install Doppler CLI for env variables
-        uses: dopplerhq/cli-action@v2
-
       - name: Build
-        run: doppler run -- pnpm --filter @inlang/github-lint-action... build
-        env:
-          DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
+        run: pnpm --filter @inlang/github-lint-action... build
 
       - name: Test Local Action
         id: test-action
