@@ -1,8 +1,10 @@
 import { html, LitElement, css } from "lit"
-import { customElement, property, state } from "lit/decorators.js"
+import { customElement, property } from "lit/decorators.js"
 import { baseStyling } from "../styling/base.js"
 import { type InlangProject, ProjectSettings, InlangModule } from "@inlang/sdk"
 import { Task } from "@lit/task"
+import { setBasePath } from "@shoelace-style/shoelace/dist/utilities/base-path.js"
+setBasePath("./../../node_modules/@shoelace-style/shoelace/dist")
 
 import "./input-fields/simple-input.js"
 
@@ -14,12 +16,12 @@ export class InlangSettings extends LitElement {
 			.container {
 				display: flex;
 				flex-direction: column;
-				gap: 20px;
+				gap: 32px;
 			}
 			.module-container {
 				display: flex;
 				flex-direction: column;
-				gap: 20px;
+				gap: 32px;
 			}
 		`,
 	]
@@ -63,7 +65,7 @@ export class InlangSettings extends LitElement {
 		if (property === "modules" && moduleId === undefined) {
 			this.inlangProject = this._project
 		}
-		console.log(this._project)
+		//console.log(this._project)
 	}
 
 	private _projectProperties = new Task(this, {
@@ -105,6 +107,7 @@ export class InlangSettings extends LitElement {
 										${(value.meta as { displayName?: { en: string } })?.displayName?.en || key}
 									</h2>
 									${Object.entries(value.schema.properties).map(([property, schema]) => {
+										if (property === "$schema") return undefined
 										return key === "internal"
 											? html`
 													<simple-input

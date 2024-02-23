@@ -1,9 +1,9 @@
-import "./simple-input.ts"
+import "./array-input.ts"
 import type { Meta, StoryObj } from "@storybook/web-components"
 
 const meta: Meta = {
-	component: "simple-input",
-	title: "Private/simple-input",
+	component: "array-input",
+	title: "Private/input/array",
 	tags: ["autodocs"],
 	argTypes: {
 		property: { type: "string" },
