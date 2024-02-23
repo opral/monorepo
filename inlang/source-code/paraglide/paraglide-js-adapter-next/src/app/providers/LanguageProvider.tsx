@@ -1,9 +1,7 @@
 import React from "react"
 import { languageTag, setLanguageTag } from "$paraglide/runtime.js"
 import { ClientLanguageProvider } from "./ClientLanguageProvider"
-import { LanguageSpy } from "./LanguageSpy"
 import { getLanguage } from "../getLanguage.server"
-
 
 // avoid flash of wrong language on startup
 setLanguageTag(getLanguage)
@@ -18,8 +16,6 @@ export default function LanguageProvider(props: { children: React.ReactNode }): 
 		<>
 			{/* Pass the language tag to the client */}
 			<ClientLanguageProvider language={languageTag()} />
-			{/* Refresh when the language changes */}
-			<LanguageSpy />
 			{/* Re-render if the language changes */}
 			<React.Fragment key={languageTag()}>{props.children}</React.Fragment>
 		</>

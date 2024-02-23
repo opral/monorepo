@@ -1,7 +1,7 @@
 "use client"
 import * as m from "@/paraglide/messages"
 import { languageTag } from "@/paraglide/runtime"
-import { useRouter, Link, usePathname } from "@inlang/paraglide-js-adapter-next"
+import { useRouter, Link, usePathname } from "@/lib/i18n"
 
 export function ClientComponent() {
 	const router = useRouter()

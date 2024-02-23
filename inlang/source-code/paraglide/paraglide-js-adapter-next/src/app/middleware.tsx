@@ -8,7 +8,7 @@ export const middleware = createMiddleware(
 	prefixStrategy({
 		availableLanguageTags,
 		sourceLanguageTag,
-		exclude: [],
+		exclude: () => false,
 	})
 )
 

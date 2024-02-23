@@ -1,11 +1,14 @@
 import { createLink } from "./Link.base"
-import { getLanguage } from "./getLanguage.server"
+import { getLanguage } from "./getLanguage.client"
 import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
 import { prefixStrategy } from "./routing/prefix"
 import { createNavigation, createRedirects } from "./navigation.base"
 import { ExcludeConfig, createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
 
+/**
+ * Configuration for the Adapter.
+ */
 export type I18nOptions<T extends string> = {
 	/**
 	 * A list of patterns that should not be localized.
@@ -33,19 +36,9 @@ export type I18nOptions<T extends string> = {
 }
 
 /**
- * Creates an i18n instance that manages your internationalization.
  *
- * @param options The options for the i18n instance.
- * @returns An i18n instance.
- *
- * @example
- * ```ts
- * // src/lib/i18n.js:
- * import * as runtime from "../paraglide/runtime.js"
- * import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
- *
- * export const i18n = createI18n({ ...options })
- * ```
+ * @param options
+ * @returns
  */
 export function createI18n(options: I18nOptions<string> = {}) {
 	const exclude = createExclude(options.exclude ?? [])
