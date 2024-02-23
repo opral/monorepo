@@ -64,7 +64,7 @@ export async function run(): Promise<void> {
 			process.chdir("../../../")
 			// Clone the base repository to the working directory from the baseMeta
 			await cloneRepository(baseMeta)
-			cponsole.log(`Cloned base repository to ${process.cwd()}`)
+			console.log(`Cloned base repository to ${process.cwd()}`)
 			// list tree to see if the baseMeta.repo is in the directory
 			console.log(await fs.readdir(process.cwd()))
 			// Change the working directory to the base repository
