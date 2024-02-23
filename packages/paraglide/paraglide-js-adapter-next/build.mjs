@@ -18,12 +18,8 @@ console.info(`Building ${packageJson.name} v${packageJson.version}...`)
 
 const external = [
 	/node_modules/,
+	/^node:/,
 	"$paraglide/runtime.js",
-	"path",
-	"url",
-	"fs/promises",
-	"@lix-js/client",
-	"@inlang/sdk",
 	...peerDependencies,
 	...dependencies,
 ]

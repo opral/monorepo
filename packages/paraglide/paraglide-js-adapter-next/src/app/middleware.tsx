@@ -22,7 +22,6 @@ export function createMiddleware(strategy: RoutingStrategy) {
 			strategy.getLocaleFromLocalisedPath(request.nextUrl.pathname) ?? sourceLanguageTag
 
 		const canonicalPath = strategy.translatePath(request.nextUrl.pathname, sourceLanguageTag)
-
 		const headers = new Headers(request.headers)
 
 		headers.set(LANGUAGE_HEADER, locale)
@@ -33,6 +32,13 @@ export function createMiddleware(strategy: RoutingStrategy) {
 			canonicalPath,
 		})
 		headers.set("Link", linkHeader)
+
+		if (canonicalPath !== request.nextUrl.pathname) {
+			request.nextUrl.pathname = canonicalPath
+			return NextResponse.rewrite(request.nextUrl, {
+				headers,
+			})
+		}
 
 		return NextResponse.next({
 			request: {
