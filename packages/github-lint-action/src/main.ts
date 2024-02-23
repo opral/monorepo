@@ -278,10 +278,7 @@ async function cloneRepository(repoData: { link: string; branch: string }) {
 	return new Promise<void>((resolve, reject) => {
 		// Execute the git command to clone the base repository
 		exec(
-			`git clone ${repoData.link}
-			--branch ${repoData.branch}
-			--single-branch
-			--depth 1`, // Clone only the latest commit
+			`git clone ${repoData.link} --branch ${repoData.branch} --single-branch --depth 1`, // Clone only the latest commit
 			{ cwd: process.cwd() },
 			(error, stdout, stderr) => {
 				if (error) {
