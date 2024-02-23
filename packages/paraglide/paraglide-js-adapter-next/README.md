@@ -248,3 +248,7 @@ export default function Document() {
 - Simplify Setup
 
 ## Examples
+
+You can find example projects on our Github Repository:
+- [App Router Example](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next/examples/app)
+- [Pages Router Example](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next/examples/pages)
