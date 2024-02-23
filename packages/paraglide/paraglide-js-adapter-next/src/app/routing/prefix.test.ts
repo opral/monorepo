@@ -9,7 +9,7 @@ const {
 	localiseHref,
 } = prefixStrategy({
 	availableLanguageTags: ["en", "de", "de-CH"],
-	sourceLanguageTag: "en",
+	defaultLanguage: "en",
 	exclude: (path) => path.startsWith("/api/"),
 })
 

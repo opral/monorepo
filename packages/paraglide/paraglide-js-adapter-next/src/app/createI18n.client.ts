@@ -1,8 +1,8 @@
-import { createLink } from "./Link.base"
+import { createLink } from "./Link"
 import { getLanguage } from "./getLanguage.client"
 import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
 import { prefixStrategy } from "./routing/prefix"
-import { createNavigation, createRedirects } from "./navigation.base"
+import { createNavigation, createRedirects } from "./navigation"
 import { ExcludeConfig, createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
 
@@ -35,29 +35,24 @@ export type I18nOptions<T extends string> = {
 	textDirection?: Record<T, "ltr" | "rtl">
 }
 
-/**
- *
- * @param options
- * @returns
- */
 export function createI18n<T extends string = string>(options: I18nOptions<T> = {}) {
 	const exclude = createExclude(options.exclude ?? [])
 
-	const strategy = prefixStrategy({
+	const strategy = prefixStrategy<T>({
 		availableLanguageTags,
-		sourceLanguageTag,
+		defaultLanguage: sourceLanguageTag,
 		exclude,
 	})
 
 	/**
-	 * React Component that enables client-side transitions between routes.
+	 * React Component that enables cslient-side transitions between routes.
 	 *
 	 * Automatically localises the href based on the current language.
 	 */
 	const Link = createLink<T>(getLanguage, strategy)
-	const { usePathname, useRouter } = createNavigation(getLanguage, strategy)
-	const { redirect, permanentRedirect } = createRedirects(getLanguage, strategy)
-	const middleware = createMiddleware(strategy)
+	const { usePathname, useRouter } = createNavigation<T>(getLanguage, strategy)
+	const { redirect, permanentRedirect } = createRedirects<T>(getLanguage, strategy)
+	const middleware = createMiddleware<T>(strategy)
 
 	return {
 		Link,

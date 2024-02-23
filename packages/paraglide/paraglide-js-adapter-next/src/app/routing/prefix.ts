@@ -7,11 +7,11 @@ import type { LinkProps } from "next/link"
 
 export function prefixStrategy<T extends string>({
 	availableLanguageTags,
-	sourceLanguageTag,
+	defaultLanguage,
 	exclude,
 }: {
 	availableLanguageTags: readonly string[]
-	sourceLanguageTag: string
+	defaultLanguage: string
 	exclude: (path: string) => boolean
 }) {
 	function getLocaleFromLocalisedPath(localisedPath: string): T | undefined {
@@ -30,7 +30,7 @@ export function prefixStrategy<T extends string>({
 	}
 
 	function getLocalisedPath(canonicalPath: string, locale: string): string {
-		if (exclude(canonicalPath) || locale === sourceLanguageTag) return canonicalPath
+		if (exclude(canonicalPath) || locale === defaultLanguage) return canonicalPath
 		return `/${locale}${canonicalPath}`
 	}
 
@@ -71,6 +71,7 @@ export function prefixStrategy<T extends string>({
 		getCanonicalPath,
 		translatePath,
 		localiseHref,
+		defaultLanguage,
 	}
 }
 

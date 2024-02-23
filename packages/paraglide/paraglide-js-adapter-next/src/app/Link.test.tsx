@@ -7,14 +7,14 @@ import {
 	setLanguageTag,
 	sourceLanguageTag,
 } from "$paraglide/runtime.js"
-import { createLink } from "./Link.base"
+import { createLink } from "./Link"
 import { prefixStrategy } from "./routing/prefix"
 
 const Link = createLink(
 	languageTag,
 	prefixStrategy({
 		availableLanguageTags,
-		sourceLanguageTag,
+		defaultLanguage: sourceLanguageTag,
 		exclude: () => false,
 	})
 )

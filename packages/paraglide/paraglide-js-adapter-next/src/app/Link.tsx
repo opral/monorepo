@@ -12,7 +12,7 @@ import React from "react"
  * Creates a link component that localises the href based on the current language.
  * @param languageTag A function that returns the current language tag.
  */
-export function createLink<T extends string>(languageTag: () => T, strategy: RoutingStrategy) {
+export function createLink<T extends string>(languageTag: () => T, strategy: RoutingStrategy<T>) {
 	return function Link(props: Parameters<typeof NextLink>[0]): ReturnType<typeof NextLink> {
 		const currentLanguageTag = languageTag()
 
@@ -27,7 +27,7 @@ export function createLink<T extends string>(languageTag: () => T, strategy: Rou
 			)
 
 			console.warn(
-				`Invalid locale prop passed to <Link> component.\nExpected ${availableLanguageTagsString}, but got "${props.locale}".\nFalling back to the source language tag "${sourceLanguageTag}". \n\n(This warning will not be shown in production)`
+				`Invalid locale prop passed to <Link> component.\nExpected ${availableLanguageTagsString}, but got "${props.locale}".\nFalling back to the default language "${strategy.defaultLanguage}". \n\n(This warning will not be shown in production)`
 			)
 		}
 
