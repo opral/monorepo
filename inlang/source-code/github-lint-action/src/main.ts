@@ -62,6 +62,7 @@ export async function run(): Promise<void> {
 			process.chdir("../../../")
 			await cloneRepository(baseMeta)
 			process.chdir(baseMeta.repo)
+			console.log("Current path:", process.cwd())
 			baseInlangRepo = await openRepository(process.cwd(), {
 				nodeishFs: fs,
 				branch: baseMeta.branch,
@@ -269,7 +270,6 @@ async function pull() {
 async function cloneRepository(repoData: { link: string; branch: string }) {
 	return new Promise<void>((resolve, reject) => {
 		// Execute the git command to clone the base repository
-		console.log(`git clone -b ${repoData.branch} --single-branch --depth 1 ${repoData.link}`)
 		exec(
 			`git clone -b ${repoData.branch} --single-branch --depth 1 ${repoData.link}`, // Clone only the latest commit
 			{ cwd: process.cwd() },
