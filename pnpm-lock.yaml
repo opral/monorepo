@@ -1914,6 +1914,15 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)
 
+  inlang/source-code/sdk/load-test/repo-i18next:
+    devDependencies:
+      '@inlang/cli':
+        specifier: workspace:*
+        version: link:../../../cli
+      i18next:
+        specifier: ^23.10.0
+        version: 23.10.0
+
   inlang/source-code/server:
     dependencies:
       '@inlang/badge':
@@ -14795,6 +14804,12 @@ packages:
   /hyperdyperid@1.2.0:
     resolution: {integrity: sha512-Y93lCzHYgGWdrJ66yIktxiaGULYc6oGiABxhcO5AufBeOyoIdZF7bIfLaOrbM0iGIOXQQgxxRrFEnb+Y6w1n4A==}
     engines: {node: '>=10.18'}
+    dev: true
+
+  /i18next@23.10.0:
+    resolution: {integrity: sha512-/TgHOqsa7/9abUKJjdPeydoyDc0oTi/7u9F8lMSj6ufg4cbC1Oj3f/Jja7zj7WRIhEQKB7Q4eN6y68I9RDxxGQ==}
+    dependencies:
+      '@babel/runtime': 7.23.4
     dev: true
 
   /iconify-icon@1.0.8:
