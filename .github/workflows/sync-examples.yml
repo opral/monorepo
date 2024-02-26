@@ -49,10 +49,11 @@ jobs:
         run: pnpm install --lockfile-only
 
       - name: Pack & Unpack
-        run: 
-          cd ${{ matrix.path }}
-          pnpm pack --pack-destination ./tmp 
+        run: | 
+          cd ${{ matrix.path }} &&
+          pnpm pack --pack-destination ./tmp &&
           tar -xvf ./tmp/*.tgz
+
       - name: log
         run: ls -la
         working-directory: ${{ matrix.path }}
