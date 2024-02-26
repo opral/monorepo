@@ -1,4 +1,4 @@
-import "./string-input.ts"
+import "./string-input.js"
 import type { Meta, StoryObj } from "@storybook/web-components"
 
 const meta: Meta = {

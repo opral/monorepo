@@ -1,26 +1,20 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
-import { baseStyling } from "../../styling/base.js"
+import { baseStyling } from "../../../styling/base.js"
 import "@shoelace-style/shoelace/dist/components/input/input.js"
 import "@shoelace-style/shoelace/dist/components/icon-button/icon-button.js"
+import "@shoelace-style/shoelace/dist/components/button/button.js"
 import "https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.14.0/cdn/components/icon/icon.js"
 import type { InlangModule } from "@inlang/sdk"
 
-@customElement("object-input")
-export class ObjectInput extends LitElement {
+@customElement("default-object-input")
+export class DefaultObjectInput extends LitElement {
 	static override styles = [
 		baseStyling,
 		css`
-			.container {
-				display: flex;
-				flex-direction: column;
-				gap: 4px;
-			}
 			.help-text {
 				font-size: 0.8rem;
 				color: var(--sl-input-help-text-color);
-				margin-top: 0.2rem;
-				margin-bottom: 0.2rem;
 			}
 			.disabled-input::part(base) {
 				cursor: unset;
@@ -43,6 +37,15 @@ export class ObjectInput extends LitElement {
 			}
 			.add-item-side {
 				flex-grow: 1;
+			}
+			.remove-icon {
+				width: 50px;
+			}
+			.list-container {
+				display: flex;
+				flex-direction: column;
+				gap: 3px;
+				padding-bottom: 8px;
 			}
 		`,
 	]
@@ -105,25 +108,45 @@ export class ObjectInput extends LitElement {
 	}
 
 	override render() {
-		return html` <div class="container">
-			${this.property} ${this._description && html`<p class="help-text">${this._description}</p>`}
-			${this.value &&
-			Object.entries(this.value).map(([key, value]) => {
-				return html`<div class="add-item-container">
-					<sl-input class="disabled-input add-item-side" value=${key} disabled filled> </sl-input>
-					<sl-input class="disabled-input add-item-side" value=${value} disabled filled> </sl-input>
-					<sl-icon-button
-						@click=${() => {
-							this.handleDeleteItemClick(key as InlangModule["default"]["id"])
-						}}
-						name="trash"
-					></sl-icon-button>
-				</div>`
-			})}
+		return html` <div>
+			<p>${this.property}</p>
+			${this._description && html`<p class="help-text">${this._description}</p>`}
+			<div class="list-container">
+				${this.value &&
+				Object.entries(this.value).map(([key, value]) => {
+					return html`<div class="add-item-container">
+						<sl-input
+							class="disabled-input add-item-side"
+							size="small"
+							value=${key}
+							disabled
+							filled
+						>
+						</sl-input>
+						<sl-input
+							class="disabled-input add-item-side"
+							size="small"
+							value=${value}
+							disabled
+							filled
+						>
+						</sl-input>
+						<div class="remove-icon">
+							<sl-icon-button
+								@click=${() => {
+									this.handleDeleteItemClick(key as InlangModule["default"]["id"])
+								}}
+								name="x-lg"
+							></sl-icon-button>
+						</div>
+					</div>`
+				})}
+			</div>
 			<div class="add-item-container">
 				<sl-input
 					class="add-item-side"
 					placeholder="Enter key"
+					size="small"
 					@input=${(e: Event) => {
 						this._inputKey = (e.target as HTMLInputElement).value
 					}}
@@ -138,6 +161,7 @@ export class ObjectInput extends LitElement {
 				<sl-input
 					class="add-item-side"
 					placeholder="Enter value"
+					size="small"
 					@input=${(e: Event) => {
 						this._inputValue = (e.target as HTMLInputElement).value
 					}}
@@ -149,12 +173,15 @@ export class ObjectInput extends LitElement {
 					value=${this._inputValue}
 				>
 				</sl-input>
-				<sl-icon-button
+				<sl-button
+					size="small"
+					variant="neutral"
 					@click=${() => {
 						this.handleAddItemClick()
 					}}
-					name="plus-circle"
-				></sl-icon-button>
+				>
+					Add
+				</sl-button>
 			</div>
 		</div>`
 	}
@@ -163,6 +190,6 @@ export class ObjectInput extends LitElement {
 // add types
 declare global {
 	interface HTMLElementTagNameMap {
-		"object-input": ObjectInput
+		"default-object-input": DefaultObjectInput
 	}
 }

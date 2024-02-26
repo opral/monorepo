@@ -1,9 +1,9 @@
 import { html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
 import { baseStyling } from "../../styling/base.js"
-import "./string-input.js"
-import "./array-input.js"
-import "./object-input.js"
+import "./string/string-input.js"
+import "./array/array-input.js"
+import "./object/object-input.js"
 @customElement("simple-input")
 export class SimpleInput extends LitElement {
 	static override styles = baseStyling
@@ -13,6 +13,9 @@ export class SimpleInput extends LitElement {
 
 	@property()
 	moduleId?: string
+
+	@property()
+	modules?: string
 
 	@property()
 	value: string = ""
@@ -50,6 +53,7 @@ export class SimpleInput extends LitElement {
 					<object-input
 						.property=${this.property}
 						.moduleId=${this.moduleId}
+						.modules=${this.modules}
 						.value=${this.value}
 						.schema=${this.schema}
 						.handleInlangProjectChange=${this.handleInlangProjectChange}
