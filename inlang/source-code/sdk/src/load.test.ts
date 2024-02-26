@@ -22,8 +22,8 @@ const translateCommand = cli + " machine translate -f --project ./project.inlang
 const mockServer = "http://localhost:3000"
 
 describe("translate message with 1 source and 37 target languages", () => {
-	beforeAll(checkIfServerIsRunning)
-	beforeEach(clean)
+	beforeAll(async () => await checkIfServerIsRunning())
+	beforeEach(async () => await clean())
 
 	test(
 		"open the project and translate messages using the cli",
@@ -41,7 +41,7 @@ describe("translate message with 1 source and 37 target languages", () => {
 				console.log("messages changed", messages.length)
 			})
 			await generateSourceMessageFile(1000)
-			await new Promise((resolve) => setTimeout(resolve, 1000))
+			// await new Promise((resolve) => setTimeout(resolve, 1000))
 			// await exec(translateCommand, { cwd: repoI18next })
 		},
 		{ timeout: 60000 }
