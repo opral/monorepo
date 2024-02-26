@@ -1,6 +1,6 @@
 
 
-# inlang – Supercharge i18n in VS Code
+# sherlock – i18n inspector for Visual Studio Code
 
 <div>
 	<p>
