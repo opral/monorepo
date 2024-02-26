@@ -57,24 +57,25 @@ export async function run(): Promise<void> {
 		console.log("Base meta", JSON.stringify(baseMeta))
 
 		const isFork = headMeta.owner !== baseMeta.owner
+		core.debug(`Is fork: ${isFork}`)
 
 		let repoHead
 		if (isFork) {
 			core.debug("Fork detected, cloning base repository")
 			process.chdir("../../../")
-			await cloneRepository(baseMeta)
-			process.chdir(baseMeta.repo)
+			await cloneRepository(headMeta)
+			process.chdir(headMeta.repo)
 			repoHead = await openRepository(process.cwd(), {
 				nodeishFs: fs,
 			})
 		} else {
 			core.debug("Fork not detected, fetching and checking out base repository")
-			await fetchBranch(baseMeta.branch)
-			await checkoutBranch(baseMeta.branch)
+			await fetchBranch(headMeta.branch)
+			await checkoutBranch(headMeta.branch)
 			await pull()
 			repoHead = await openRepository(process.cwd(), {
 				nodeishFs: fs,
-				branch: baseMeta.branch,
+				branch: headMeta.branch,
 			})
 		}
 
@@ -95,7 +96,7 @@ export async function run(): Promise<void> {
 		const lintSummary = createLintSummary(
 			reportsHead,
 			reportsBase,
-			repoHead.installed.messageLintRules()
+			projectHead.installed.messageLintRules()
 		)
 		console.log("headMeta", JSON.stringify(headMeta))
 		console.log("baseMeta", JSON.stringify(baseMeta))
