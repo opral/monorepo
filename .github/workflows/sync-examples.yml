@@ -62,7 +62,7 @@ jobs:
           src_path: ${{ matrix.path }}/package
           dst_path: /
           dst_owner: LorisSigrist
-          dst_repo_name: paraglide-sveltekit-exampl
+          dst_repo_name: paraglide-sveltekit-example
           dst_branch: main
           src_branch: main
           commit_message: "chore: sync with opral/monorepo"
