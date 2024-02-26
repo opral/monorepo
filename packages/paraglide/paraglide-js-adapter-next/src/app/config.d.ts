@@ -36,6 +36,8 @@ export type I18nOptions<T extends string> = {
 	 *      // parameters don't have to be in the same position
 	 *      fr: "/[slug]/utilisateurs",
 	 *    },
+	 *    //you can also use messages for pathnames (pass as reference)
+	 *    "/admin": m.admin_path
 	 * }
 	 * ```
 	 */

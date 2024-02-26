@@ -28,11 +28,11 @@ export function prefixStrategy<T extends string>({
 	}
 
 	function getCanonicalPath(localisedPath: string): string {
-		const locale = getLocaleFromLocalisedPath(localisedPath)
-		if (!locale) return localisedPath
+		const locale = getLocaleFromLocalisedPath(localisedPath) ?? defaultLanguage
+		let pathWithoutLocale =
+			locale === defaultLanguage ? localisedPath : localisedPath.replace(`/${locale}`, "")
+		pathWithoutLocale ||= "/"
 
-		const pathWithoutLocale = localisedPath.replace(`/${locale}`, "")
-		if (pathWithoutLocale === "") return "/"
 		return pathWithoutLocale
 	}
 
