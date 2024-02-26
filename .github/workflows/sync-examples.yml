@@ -65,3 +65,4 @@ jobs:
           user_email: 'noreply@opral.com'
           user_name: 'sync-examples-action'
           commit_msg: 'Sync example with opral/monorepo'
+          destination_branch: 'main'
