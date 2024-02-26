@@ -25,22 +25,22 @@ export async function run(): Promise<void> {
 			project_path = `/${project_path}`
 		}
 
-		const inlangRepo = await openRepository(process.cwd(), {
+		const repoBase = await openRepository(process.cwd(), {
 			nodeishFs: fs,
 			branch: github.context.payload.pull_request?.head.ref,
 		})
-		const project = await loadProject({
+		const projectBase = await loadProject({
 			projectPath: process.cwd() + project_path,
-			repo: inlangRepo,
+			repo: repoBase,
 			appId: "app.inlang.githubI18nLintAction",
 		})
-		if (project.errors().length > 0) {
-			for (const error of project.errors()) {
+		if (projectBase.errors().length > 0) {
+			for (const error of projectBase.errors()) {
 				throw error
 			}
 		}
 
-		const reportsHead = project.query.messageLintReports.getAll()
+		const reportsBase = projectBase.query.messageLintReports.getAll()
 		const headMeta = {
 			owner: github.context.payload.pull_request?.head.label.split(":")[0],
 			repo: repo,
@@ -58,13 +58,13 @@ export async function run(): Promise<void> {
 
 		const isFork = headMeta.owner !== baseMeta.owner
 
-		let baseInlangRepo
+		let repoHead
 		if (isFork) {
 			core.debug("Fork detected, cloning base repository")
 			process.chdir("../../../")
 			await cloneRepository(baseMeta)
 			process.chdir(baseMeta.repo)
-			baseInlangRepo = await openRepository(process.cwd(), {
+			repoHead = await openRepository(process.cwd(), {
 				nodeishFs: fs,
 			})
 		} else {
@@ -72,30 +72,30 @@ export async function run(): Promise<void> {
 			await fetchBranch(baseMeta.branch)
 			await checkoutBranch(baseMeta.branch)
 			await pull()
-			baseInlangRepo = await openRepository(process.cwd(), {
+			repoHead = await openRepository(process.cwd(), {
 				nodeishFs: fs,
 				branch: baseMeta.branch,
 			})
 		}
 
-		const projectBase = await loadProject({
+		const projectHead = await loadProject({
 			projectPath: process.cwd() + project_path,
-			repo: baseInlangRepo,
+			repo: repoHead,
 			appId: "app.inlang.githubI18nLintAction",
 		})
-		if (projectBase.errors().length > 0) {
-			for (const error of projectBase.errors()) {
+		if (projectHead.errors().length > 0) {
+			for (const error of projectHead.errors()) {
 				throw error
 			}
 		}
-		const reportsBase = projectBase.query.messageLintReports.getAll()
+		const reportsHead = projectHead.query.messageLintReports.getAll()
 		console.log(`Reports head: ${reportsHead.length}`)
 		console.log(`Reports base: ${reportsBase.length}`)
 
 		const lintSummary = createLintSummary(
 			reportsHead,
 			reportsBase,
-			project.installed.messageLintRules()
+			repoHead.installed.messageLintRules()
 		)
 		console.log("headMeta", JSON.stringify(headMeta))
 		console.log("baseMeta", JSON.stringify(baseMeta))
