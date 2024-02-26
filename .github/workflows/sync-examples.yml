@@ -55,15 +55,14 @@ jobs:
           pnpm pack --pack-destination ./tmp &&
           tar -xvf ./tmp/*.tgz
 
-      - name: Pushes test folder
+      - name: Push Package Folder
         uses: datalbry/copy_folder_to_another_repo_action@1.0.0
         env:
           API_TOKEN_GITHUB: ${{ secrets.EXAMPLE_REPOS_ACCESS_TOKEN }}
         with:
-          source_folder: 'packages'
+          source_folder: '${{ matrix.path }}/packages'
           destination_repo: 'LorisSigrist/paraglide-sveltekit-example'
           user_email: 'noreply@opral.com'
           user_name: 'sync-examples-action'
           commit_msg: 'Sync example with opral/monorepo'
           destination_branch: 'main'
-        working-directory: ${{ matrix.path }}
