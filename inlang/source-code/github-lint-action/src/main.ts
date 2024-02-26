@@ -97,6 +97,8 @@ export async function run(): Promise<void> {
 			reportsBase,
 			project.installed.messageLintRules()
 		)
+		console.log("headMeta", JSON.stringify(headMeta))
+		console.log("baseMeta", JSON.stringify(baseMeta))
 
 		// Create a comment with the lint summary
 		const shortenedProjectPath = () => {
