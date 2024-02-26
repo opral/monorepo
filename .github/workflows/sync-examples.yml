@@ -57,7 +57,7 @@ jobs:
 
       - name: Push Package Folder
         run: |
-          cd ${{ matrix.path }}/tmp/package
+          cd ${{ matrix.path }}/package
           git init
           git config user.name "sync-examples-action"
           git config user.email "noreply@opral.com"
