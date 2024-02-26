@@ -40,8 +40,6 @@ export async function run(): Promise<void> {
 			}
 		}
 
-		console.log(github.context.payload.pull_request?.head.repo.name)
-
 		const reportsBase = projectBase.query.messageLintReports.getAll()
 		const headMeta = {
 			owner: github.context.payload.pull_request?.head.label.split(":")[0],
@@ -55,8 +53,6 @@ export async function run(): Promise<void> {
 			branch: github.context.payload.pull_request?.base.label.split(":")[1],
 			link: github.context.payload.pull_request?.base.repo.html_url,
 		}
-		console.log("Head meta", JSON.stringify(headMeta))
-		console.log("Base meta", JSON.stringify(baseMeta))
 
 		const isFork = headMeta.owner !== baseMeta.owner
 		core.debug(`Is fork: ${isFork}`)
@@ -92,16 +88,14 @@ export async function run(): Promise<void> {
 			}
 		}
 		const reportsHead = projectHead.query.messageLintReports.getAll()
-		console.log(`Reports head: ${reportsHead.length}`)
-		console.log(`Reports base: ${reportsBase.length}`)
+		core.debug(`Reports head: ${reportsHead.length}`)
+		core.debug(`Reports base: ${reportsBase.length}`)
 
 		const lintSummary = createLintSummary(
 			reportsHead,
 			reportsBase,
 			projectHead.installed.messageLintRules()
 		)
-		console.log("headMeta", JSON.stringify(headMeta))
-		console.log("baseMeta", JSON.stringify(baseMeta))
 
 		// Create a comment with the lint summary
 		const shortenedProjectPath = () => {
@@ -176,7 +170,7 @@ ${lintSummary
 			return
 		}
 
-		console.log("Creating a new comment")
+		core.debug("Creating a new comment")
 		await octokit.rest.issues.createComment({
 			owner,
 			repo,
@@ -185,7 +179,6 @@ ${lintSummary
 		})
 	} catch (error) {
 		// Fail the workflow run if an error occurs
-		console.log(error)
 		if (error instanceof Error) core.setFailed(error.message)
 	}
 }
