@@ -48,16 +48,11 @@ jobs:
       - name: Create Lockfile
         run: pnpm install --lockfile-only
 
-      - name: Pack
-        run: pnpm pack --pack-destination ./tmp 
-        working-directory: ${{ matrix.path }}
-
-      - name: Unpack
-        # The tarball contains a package/ directory
-        # This will create a ./package
-        run: tar -xvf ./tmp/*.tgz
-        working-directory: ${{ matrix.path }}
-
+      - name: Pack & Unpack
+        run: 
+          cd ${{ matrix.path }}
+          pnpm pack --pack-destination ./tmp 
+          tar -xvf ./tmp/*.tgz
       - name: log
         run: ls -la
         working-directory: ${{ matrix.path }}
