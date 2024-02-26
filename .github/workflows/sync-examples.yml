@@ -56,13 +56,11 @@ jobs:
           tar -xvf ./tmp/*.tgz
 
       - name: Push Package Folder
-        uses: datalbry/copy_folder_to_another_repo_action@1.0.0
-        env:
-          API_TOKEN_GITHUB: ${{ secrets.EXAMPLE_REPOS_ACCESS_TOKEN }}
+        uses: andstor/copycat-action@v3
         with:
-          source_folder: '${{ matrix.path }}/package'
-          destination_repo: 'LorisSigrist/paraglide-sveltekit-example'
-          user_email: 'noreply@opral.com'
-          user_name: 'sync-examples-action'
-          commit_msg: 'Sync example with opral/monorepo'
-          destination_branch: 'main'
+          personal_token: ${{ secrets.EXAMPLE_REPOS_ACCESS_TOKEN }}
+          src_path: ${{ matrix.path }}/package
+          dst_path: /
+          dst_owner: LorisSigrist
+          dst_repo_name: paraglide-sveltekit-exampl
+          dst_branch: main
