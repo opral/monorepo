@@ -13,15 +13,20 @@ export class InlangSettings extends LitElement {
 	static override styles = [
 		baseStyling,
 		css`
+			h3 {
+				margin: 0;
+				padding-bottom: 24px;
+				border-bottom: 1px solid var(--sl-panel-border-color);
+			}
 			.container {
 				display: flex;
 				flex-direction: column;
-				gap: 32px;
+				gap: 48px;
 			}
 			.module-container {
 				display: flex;
 				flex-direction: column;
-				gap: 32px;
+				gap: 24px;
 			}
 		`,
 	]
@@ -74,13 +79,13 @@ export class InlangSettings extends LitElement {
 
 			const generalSchema: Record<
 				InlangModule["default"]["id"] | "internal",
-				{ meta?: InlangModule["default"]; schema: Record<string, Record<string, unknown>> }
+				{ meta?: InlangModule["default"]; schema?: Record<string, Record<string, unknown>> }
 			> = { internal: { schema: ProjectSettings.allOf[0] } }
 
 			for (const module of inlangProject.modules) {
 				try {
 					const plugin = await import(module)
-					if (plugin.default.settingsSchema?.properties) {
+					if (plugin.default) {
 						generalSchema[plugin.default.id] = {
 							schema: plugin.default.settingsSchema,
 							meta: plugin.default,
@@ -101,17 +106,18 @@ export class InlangSettings extends LitElement {
 			complete: (properties) =>
 				html` <div class="container">
 					${Object.entries(properties).map(([key, value]) => {
-						return value.schema.properties && this.inlangProject
+						return value.schema?.properties && this.inlangProject
 							? html`<div class="module-container">
-									<h2>
+									<h3>
 										${(value.meta as { displayName?: { en: string } })?.displayName?.en || key}
-									</h2>
+									</h3>
 									${Object.entries(value.schema.properties).map(([property, schema]) => {
-										if (property === "$schema") return undefined
+										if (property === "$schema" || property === "modules") return undefined
 										return key === "internal"
 											? html`
 													<simple-input
 														.property=${property}
+														.modules=${properties}
 														.value=${this.inlangProject?.[
 															property as keyof typeof this.inlangProject
 														]}

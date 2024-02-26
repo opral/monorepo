@@ -1,6 +1,6 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
-import { baseStyling } from "../../styling/base.js"
+import { baseStyling } from "../../../styling/base.js"
 import "@shoelace-style/shoelace/dist/components/input/input.js"
 
 @customElement("string-input")
@@ -11,8 +11,6 @@ export class StringInput extends LitElement {
 			.help-text {
 				font-size: 0.8rem;
 				color: var(--sl-input-help-text-color);
-				margin-top: 0.2rem;
-				margin-bottom: 0.2rem;
 			}
 		`,
 	]
@@ -42,10 +40,12 @@ export class StringInput extends LitElement {
 
 	override render() {
 		return html` <div>
-			${this.property} ${this._description && html`<p class="help-text">${this._description}</p>`}
+			<p>${this.property}</p>
+			${this._description && html`<p class="help-text">${this._description}</p>`}
 			${this._examples && html`<p class="help-text">${this._examples}</p>`}
 			<sl-input
 				value=${this.value}
+				size="small"
 				@input=${(e: Event) => {
 					this.handleInlangProjectChange(
 						(e.target as HTMLInputElement).value,
@@ -54,7 +54,6 @@ export class StringInput extends LitElement {
 					)
 				}}
 			>
-				<p slot="suffix">string</p>
 			</sl-input>
 		</div>`
 	}

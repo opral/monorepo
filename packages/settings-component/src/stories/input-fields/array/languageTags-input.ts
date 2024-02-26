@@ -1,24 +1,24 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
-import { baseStyling } from "../../styling/base.js"
+import { baseStyling } from "../../../styling/base.js"
 import "@shoelace-style/shoelace/dist/components/input/input.js"
+import "@shoelace-style/shoelace/dist/components/tag/tag.js"
 import "https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.14.0/cdn/components/icon/icon.js"
 
-@customElement("array-input")
-export class ArrayInput extends LitElement {
+@customElement("language-tags-input")
+export class LanguageTagsInput extends LitElement {
 	static override styles = [
 		baseStyling,
 		css`
-			.container {
+			.tags-container {
 				display: flex;
-				flex-direction: column;
+				flex-wrap: wrap;
 				gap: 4px;
+				padding-bottom: 8px;
 			}
 			.help-text {
 				font-size: 0.8rem;
 				color: var(--sl-input-help-text-color);
-				margin-top: 0.2rem;
-				margin-bottom: 0.2rem;
 			}
 			.disabled-input::part(base) {
 				cursor: unset;
@@ -31,8 +31,15 @@ export class ArrayInput extends LitElement {
 			.disabled-input::part(suffix):hover {
 				opacity: 1;
 			}
+			.add-input {
+				flex-grow: 1;
+			}
 			.add-input::part(suffix) {
 				cursor: pointer;
+			}
+			.new-line-container {
+				display: flex;
+				gap: 4px;
 			}
 		`,
 	]
@@ -84,41 +91,48 @@ export class ArrayInput extends LitElement {
 	}
 
 	override render() {
-		return html` <div class="container">
-			${this.property} ${this._description && html`<p class="help-text">${this._description}</p>`}
-			${this.value &&
-			this.value.map((arrayItem, index) => {
-				return html`<div>
-					<sl-input class="disabled-input" value=${arrayItem} disabled filled>
-						<sl-icon
-							@click=${() => {
+		return html`<div class="container">
+			<p class="property">${this.property}</p>
+			${this._description && html`<p class="help-text">${this._description}</p>`}
+			<div class="tags-container">
+				${this.value &&
+				this.value.map((arrayItem, index) => {
+					return html`
+						<sl-tag
+							@sl-remove=${() => {
 								this.handleDeleteItemClick(index)
 							}}
-							slot="suffix"
-							name="trash"
-						></sl-icon>
-					</sl-input>
-				</div>`
-			})}
-			<sl-input
-				class="add-input"
-				placeholder="Add new item"
-				@input=${(e: Event) => this.handleInputChange(e)}
-				@keydown=${(e: KeyboardEvent) => {
-					if (e.key === "Enter") {
-						this.handleAddItemClick()
-					}
-				}}
-				value=${this._inputValue}
-			>
-				<sl-icon
+							removable
+							size="small"
+							>${arrayItem}</sl-tag
+						>
+					`
+				})}
+			</div>
+			<div class="new-line-container">
+				<sl-input
+					class="add-input"
+					size="small"
+					placeholder="Enter languageTag ..."
+					@input=${(e: Event) => this.handleInputChange(e)}
+					@keydown=${(e: KeyboardEvent) => {
+						if (e.key === "Enter") {
+							this.handleAddItemClick()
+						}
+					}}
+					value=${this._inputValue}
+				>
+				</sl-input>
+				<sl-button
+					size="small"
+					variant="neutral"
 					@click=${() => {
 						this.handleAddItemClick()
 					}}
-					slot="suffix"
-					name="plus-circle"
-				></sl-icon>
-			</sl-input>
+				>
+					Add
+				</sl-button>
+			</div>
 		</div>`
 	}
 }
@@ -126,6 +140,6 @@ export class ArrayInput extends LitElement {
 // add types
 declare global {
 	interface HTMLElementTagNameMap {
-		"array-input": ArrayInput
+		"language-tags-input": LanguageTagsInput
 	}
 }
