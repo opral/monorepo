@@ -43,7 +43,7 @@ export async function run(): Promise<void> {
 		const reportsBase = projectBase.query.messageLintReports.getAll()
 		const headMeta = {
 			owner: github.context.payload.pull_request?.head.label.split(":")[0],
-			repo: repo,
+			repo: github.context.payload.pull_request?.head.full_name,
 			branch: github.context.payload.pull_request?.head.label.split(":")[1],
 			link: github.context.payload.pull_request?.head.repo.html_url,
 		}
