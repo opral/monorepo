@@ -2,14 +2,14 @@
 
 <doc-image src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-extension-cover-small.png" alt="Visual Studio Code extension (sherlock) header image"></doc-image>
 
-# Superchange your i18n dev workflow
+# 🕵️‍♂️ i18n inspector for VS Code
 
 #### Used by developers from:
 <doc-proof organisations="calcom, appflowy, openassistant, listmonk, jitsi"></doc-proof>
 
 <br />
 
-Supercharge i18n within VS Code with powerful tools designed to streamline the translation process. Visualize, edit, and lint translated strings effortlessly using Inline Decorations & Hover Support. Extract new strings with a simple click, making localization tasks more intuitive and efficient.
+Inspect i18n within VS Code with powerful tools designed to streamline the translation process. Visualize, edit, and lint translated strings effortlessly using Inline Decorations & Hover Support. Extract new strings with a simple click, making localization tasks more intuitive and efficient.
 
 [Inlang](https://inlang.com) is a powerful [open-source](https://github.com/opral/monorepo/tree/main/inlang/source-code/ide-extension) extension for [Visual Studio Code](https://code.visualstudio.com/)
 
