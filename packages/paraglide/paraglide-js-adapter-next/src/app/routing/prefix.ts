@@ -1,4 +1,5 @@
 import type { LinkProps } from "next/link"
+import { PathTranslations } from "../pathnames/types"
 
 /*
 	Canonical Path = Path without locale (how you write the href)
@@ -10,18 +11,19 @@ export function prefixStrategy<T extends string>({
 	defaultLanguage,
 	exclude,
 }: {
-	availableLanguageTags: readonly string[]
+	availableLanguageTags: readonly T[]
 
 	/**
 	 * The language that should not be prefixed with a language tag
 	 * Usually is the source language, but doesn't have to be
 	 */
 	defaultLanguage: T
+	pathnames: PathTranslations<T>
 	exclude: (path: string) => boolean
 }) {
 	function getLocaleFromLocalisedPath(localisedPath: string): T | undefined {
 		const maybeLocale = localisedPath.split("/")[1]
-		if (!availableLanguageTags.includes(maybeLocale)) return undefined
+		if (!availableLanguageTags.includes(maybeLocale as T)) return undefined
 		return maybeLocale as T
 	}
 
