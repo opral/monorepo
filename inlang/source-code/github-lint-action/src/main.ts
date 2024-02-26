@@ -25,46 +25,13 @@ export async function run(): Promise<void> {
 			project_path = `/${project_path}`
 		}
 
-		const inlangRepo = await openRepository(process.cwd(), {
+		const repoBase = await openRepository(process.cwd(), {
 			nodeishFs: fs,
 			branch: github.context.payload.pull_request?.head.ref,
 		})
-		const project = await loadProject({
-			projectPath: process.cwd() + project_path,
-			repo: inlangRepo,
-			appId: "app.inlang.githubI18nLintAction",
-		})
-		if (project.errors().length > 0) {
-			for (const error of project.errors()) {
-				throw error
-			}
-		}
-
-		const reportsHead = project.query.messageLintReports.getAll()
-		const headMeta = {
-			owner: github.context.payload.pull_request?.head.label.split(":")[0],
-			repo: repo,
-			branch: github.context.payload.pull_request?.head.label.split(":")[1],
-		}
-		const baseMeta = {
-			owner: github.context.payload.pull_request?.base.label.split(":")[0],
-			repo: repo,
-			branch: github.context.payload.pull_request?.base.label.split(":")[1],
-		}
-		// const isFork = headMeta.owner !== baseMeta.owner
-		// If the PR is from a fork, we need to fetch the base reports from the base repo
-
-		await fetchBranch(baseMeta.branch)
-		await checkoutBranch(baseMeta.branch)
-		await pull()
-		const baseInlangRepo = await openRepository(process.cwd(), {
-			nodeishFs: fs,
-			branch: baseMeta.branch,
-		})
-
 		const projectBase = await loadProject({
 			projectPath: process.cwd() + project_path,
-			repo: baseInlangRepo,
+			repo: repoBase,
 			appId: "app.inlang.githubI18nLintAction",
 		})
 		if (projectBase.errors().length > 0) {
@@ -72,14 +39,63 @@ export async function run(): Promise<void> {
 				throw error
 			}
 		}
+
 		const reportsBase = projectBase.query.messageLintReports.getAll()
+		const headMeta = {
+			owner: github.context.payload.pull_request?.head.label.split(":")[0],
+			repo: repo,
+			branch: github.context.payload.pull_request?.head.label.split(":")[1],
+			link: github.context.payload.pull_request?.head.repo.html_url,
+		}
+		const baseMeta = {
+			owner: github.context.payload.pull_request?.base.label.split(":")[0],
+			repo: repo,
+			branch: github.context.payload.pull_request?.base.label.split(":")[1],
+			link: github.context.payload.pull_request?.base.repo.html_url,
+		}
+		console.log("Head meta", JSON.stringify(headMeta))
+		console.log("Base meta", JSON.stringify(baseMeta))
+
+		const isFork = headMeta.owner !== baseMeta.owner
+
+		let repoHead
+		if (isFork) {
+			core.debug("Fork detected, cloning base repository")
+			process.chdir("../../../")
+			await cloneRepository(baseMeta)
+			process.chdir(baseMeta.repo)
+			repoHead = await openRepository(process.cwd(), {
+				nodeishFs: fs,
+			})
+		} else {
+			core.debug("Fork not detected, fetching and checking out base repository")
+			await fetchBranch(baseMeta.branch)
+			await checkoutBranch(baseMeta.branch)
+			await pull()
+			repoHead = await openRepository(process.cwd(), {
+				nodeishFs: fs,
+				branch: baseMeta.branch,
+			})
+		}
+
+		const projectHead = await loadProject({
+			projectPath: process.cwd() + project_path,
+			repo: repoHead,
+			appId: "app.inlang.githubI18nLintAction",
+		})
+		if (projectHead.errors().length > 0) {
+			for (const error of projectHead.errors()) {
+				throw error
+			}
+		}
+		const reportsHead = projectHead.query.messageLintReports.getAll()
 		console.log(`Reports head: ${reportsHead.length}`)
 		console.log(`Reports base: ${reportsBase.length}`)
 
 		const lintSummary = createLintSummary(
 			reportsHead,
 			reportsBase,
-			project.installed.messageLintRules()
+			repoHead.installed.messageLintRules()
 		)
 		console.log("headMeta", JSON.stringify(headMeta))
 		console.log("baseMeta", JSON.stringify(baseMeta))
@@ -157,7 +173,7 @@ ${lintSummary
 			return
 		}
 
-		core.debug("Creating a new comment")
+		console.log("Creating a new comment")
 		await octokit.rest.issues.createComment({
 			owner,
 			repo,
@@ -166,6 +182,7 @@ ${lintSummary
 		})
 	} catch (error) {
 		// Fail the workflow run if an error occurs
+		console.log(error)
 		if (error instanceof Error) core.setFailed(error.message)
 	}
 }
@@ -249,5 +266,26 @@ async function pull() {
 			core.debug(`stderr: ${stderr}`)
 			resolve()
 		})
+	})
+}
+
+// Function to clone the base repository
+async function cloneRepository(repoData: { link: string; branch: string }) {
+	return new Promise<void>((resolve, reject) => {
+		// Execute the git command to clone the base repository
+		exec(
+			`git clone -b ${repoData.branch} --single-branch --depth 1 ${repoData.link}`, // Clone only the latest commit
+			{ cwd: process.cwd() },
+			(error, stdout, stderr) => {
+				if (error) {
+					console.error(`Error executing command: ${error}`)
+					reject(error)
+					return
+				}
+				core.debug(`stdout: ${stdout}`)
+				core.debug(`stderr: ${stderr}`)
+				resolve()
+			}
+		)
 	})
 }
