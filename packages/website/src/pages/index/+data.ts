@@ -1,10 +1,13 @@
-import type { Result } from "@inlang/result"
 import { privateEnv } from "@inlang/env-variables"
 
-export async function getNumberOfProjects(): Promise<Result<string, Error>> {
+export { data }
+export type Data = Awaited<ReturnType<typeof data>>
+
+async function data() {
 	try {
 		// prettier-ignore
 		const raw = JSON.stringify({
+			refresh: true,
 			query: {
 				kind: "InsightVizNode",
 				source: {
@@ -61,6 +64,7 @@ export async function getNumberOfProjects(): Promise<Result<string, Error>> {
 				},
 				body: raw,
 				redirect: "follow",
+				cache: "no-cache",
 			}
 		)
 		const json = await response.json()
@@ -68,8 +72,12 @@ export async function getNumberOfProjects(): Promise<Result<string, Error>> {
 			json.results[0].data[0] > json.results[0].data[1]
 				? json.results[0].data[0]
 				: json.results[0].data[1]
-		return { data: JSON.stringify(number) }
+		return {
+			projectCount: JSON.stringify(number),
+		}
 	} catch (error) {
-		return { error: error as Error }
+		return {
+			projectCount: "500+",
+		}
 	}
 }
