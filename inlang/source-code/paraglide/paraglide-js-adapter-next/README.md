@@ -182,6 +182,25 @@ function Component() {
 }
 ```
 
+#### Excluding certain routes from i18n
+
+You can exclude certain routes from i18n using the `exclude` option on `createI18n`. You can either pass a string or a regex.
+
+```ts
+export const { ... } =
+	createI18n<AvailableLanguageTag>({
+		 //array of routes to exclude
+		exclude: [
+			/^\/api(\/.*)?$/ //excludes all routes starting with /api
+			"/admin" //excludes /admin, but not /admin/anything - globs are not supported
+		],
+	})
+```
+
+Excluded routes won't be prefixed with the language tag & the middleware will not add `Link` headers to them.
+
+> Tip: LLMs are really good at writing regexes.
+
 ## (legacy) Setup With the Pages Router
 
 The Pages router already comes with i18n support out of the box. You can read more about it in the[NextJS Pages router documentation](https://nextjs.org/docs/advanced-features/i18n-routing). Thanks to this, Paraglide doesn't need to provide it's own routing. All the Adapter does in the Pages router is react to the language change.
