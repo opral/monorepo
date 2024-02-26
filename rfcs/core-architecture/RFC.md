@@ -237,7 +237,7 @@ import Translated from 'i18n-library';
 
 #### Decision
 
-Develop a CLI and Visual Studio Code extension (sherlock) to extract and validate resources and messages.
+Develop a CLI and Visual Studio Code extension (Sherlock) to extract and validate resources and messages.
 
 {% Figure
     src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/rfcs/core-architecture/assets/001-ide-extension.gif"
