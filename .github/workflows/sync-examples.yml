@@ -8,8 +8,8 @@ on:
     paths:
       - "**/example/CHANGELOG.md"
       - "**/examples/*/CHANGELOG.md"
+  # TODO REMOVE - ONLY FOR TESTING
   pull_request:
-    # TODO REMOVE - ONLY FOR TESTING
     branches:
       - "main"
   workflow_dispatch:
@@ -25,11 +25,12 @@ on:
 
 jobs:
   sync-examples:
+    strategy:
+      matrix:
+        path:
+          - ./inlang/source-code/paraglide/paraglide-js/example
+          - ./inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/example
     runs-on: ubuntu-latest
-    matrix:
-      path:
-        - ./inlang/source-code/paraglide/paraglide-js/example
-        - ./inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/example
     steps:
       - name: Checkout
         uses: actions/checkout@v2
