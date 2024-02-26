@@ -182,7 +182,7 @@ function Component() {
 }
 ```
 
-#### Excluding certain routes from i18n
+#### Excluding certain routes from i18n
 
 You can exclude certain routes from i18n using the `exclude` option on `createI18n`. You can either pass a string or a regex.
 
