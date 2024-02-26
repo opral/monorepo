@@ -46,12 +46,12 @@ jobs:
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
-      - name: Build VSCode extension package
+      - name: Build Visual Studio Code extension (sherlock) package
         run: doppler run -- pnpm --filter vs-code-extension package
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
-      - name: Publish to VSCode Marketplace
+      - name: Publish to Visual Studio Code Marketplace
         run: pnpm --filter vs-code-extension run publish -p ${{secrets.VSCODE_MARKETPLACE_TOKEN}}
         working-directory: ./inlang/source-code/ide-extension
         env:
