@@ -8,6 +8,7 @@
 			"autoAttachChildProcesses": true,
 			"skipFiles": ["<node_internals>/**", "**/node_modules/**"],
 			"program": "${workspaceRoot}/node_modules/vitest/vitest.mjs",
+			"env": { "NODE_OPTIONS": "--max-old-space-size=8192" },
 			"args": ["run", "${relativeFile}"],
 			"smartStep": true,
 			"console": "integratedTerminal"

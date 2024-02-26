@@ -23,11 +23,13 @@ const mockServer = "http://localhost:3000"
 
 describe("translate message with 1 source and 37 target languages", () => {
 	beforeAll(async () => await checkIfServerIsRunning())
-	beforeEach(async () => await clean())
+	beforeEach(clean)
 
 	test(
 		"open the project and translate messages using the cli",
 		async () => {
+			// eslint-disable-next-line no-console
+			// console.log("Opening repo-i18next and loading project")
 			const repo = await openRepository(repoI18next, { nodeishFs: fs })
 			const project = await loadProject({ repo, projectPath })
 			project.errors.subscribe((errors) => {
@@ -41,7 +43,7 @@ describe("translate message with 1 source and 37 target languages", () => {
 				console.log("messages changed", messages.length)
 			})
 			await generateSourceMessageFile(1000)
-			// await new Promise((resolve) => setTimeout(resolve, 1000))
+			await new Promise((resolve) => setTimeout(resolve, 1000))
 			// await exec(translateCommand, { cwd: repoI18next })
 		},
 		{ timeout: 60000 }
@@ -56,11 +58,16 @@ async function checkIfServerIsRunning() {
 async function clean() {
 	// eslint-disable-next-line no-console
 	console.log("Cleaning repo-i18next")
+	// await new Promise((resolve) => setTimeout(resolve, 1000))
 	await exec("pnpm clean", { cwd: repoI18next })
+	// eslint-disable-next-line no-console
+	// console.log("Finished cleaning repo-i18next")
 }
 
 async function generateSourceMessageFile(count: number) {
 	const messages: Record<string, string> = {}
+	// eslint-disable-next-line no-console
+	console.log(`Generating ${count} messages`)
 	for (let i = 1; i <= count; i++) {
 		messages[`message_key_${i}`] = `Generated message (${i})`
 	}
@@ -69,4 +76,6 @@ async function generateSourceMessageFile(count: number) {
 		JSON.stringify(messages, undefined, 2),
 		"utf-8"
 	)
+	// eslint-disable-next-line no-console
+	console.log(`Finished generating ${count} messages`)
 }
