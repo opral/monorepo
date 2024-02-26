@@ -64,4 +64,4 @@ jobs:
           git add .
           git commit -m "chore: sync with opral/monorepo"
           git remote add origin "https://x-access-token:${{ secrets.EXAMPLE_REPOS_ACCESS_TOKEN }}@github.com/LorisSigrist/paraglide-js-example"
-          git push --force
+          git push --force origin main
