@@ -40,10 +40,12 @@ export async function run(): Promise<void> {
 			}
 		}
 
+		console.log(JSON.stringify(github.context.payload.pull_request?.head))
+
 		const reportsBase = projectBase.query.messageLintReports.getAll()
 		const headMeta = {
 			owner: github.context.payload.pull_request?.head.label.split(":")[0],
-			repo: github.context.payload.pull_request?.head.full_name,
+			repo: "monorepo-copy",
 			branch: github.context.payload.pull_request?.head.label.split(":")[1],
 			link: github.context.payload.pull_request?.head.repo.html_url,
 		}
