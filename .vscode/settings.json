@@ -49,8 +49,6 @@
 	"[xml]": {
 		"editor.defaultFormatter": "redhat.vscode-xml"
 	},
-	"vitest.commandLine": "pnpm vitest",
-	"vitest.nodeEnv": {
-		"MOCK_TRANSLATE": "true"
-	}
+	// required for sdk load.test
+	"vitest.commandLine": "pnpm vitest"
 }
