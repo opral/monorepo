@@ -19,6 +19,7 @@ export async function run(): Promise<void> {
 		}
 		let project_path: string = core.getInput("project_path", { required: true })
 		const { owner, repo } = github.context.repo
+		console.log(owner, repo)
 		const pr_number = github.context.payload.pull_request?.number
 		// check if project_path starts with a slash, otherwise add it
 		if (!project_path.startsWith("/")) {
