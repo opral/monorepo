@@ -46,6 +46,9 @@ jobs:
           node-version: ${{ matrix.version }}
           cache: "pnpm"
 
+      - name: Create Lockfile
+        run: pnpm install --lockfile-only
+
       - name: Pack
         run: pnpm pack --pack-destination ./tmp 
         working-directory: ${{ matrix.path }}
