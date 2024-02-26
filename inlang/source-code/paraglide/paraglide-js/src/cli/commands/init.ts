@@ -138,7 +138,7 @@ export const maybeAddVsCodeExtension = async (args: { projectPath: string }, ctx
 			JSON.stringify(extensions, undefined, 2)
 		)
 		ctx.logger.success(
-			"Added the inlang Visual Studio Code extension (sherlock) to the workspace recommendations."
+			"Added the inlang Visual Studio Code extension (Sherlock) to the workspace recommendations."
 		)
 	}
 }
@@ -244,7 +244,7 @@ export const newProjectTemplate: ProjectSettings = {
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-valid-js-identifier@latest/dist/index.js",
 		// default to the message format plugin because it supports all features
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@latest/dist/index.js",
-		// the m function matcher should be installed by default in case sherlock (VS Code extension) is adopted
+		// the m function matcher should be installed by default in case Sherlock (VS Code extension) is adopted
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js",
 	],
 	"plugin.inlang.messageFormat": {

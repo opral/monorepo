@@ -9,4 +9,4 @@
 "@inlang/plugin-json": patch
 ---
 
-rename the vscode extension to "sherlock"
+rename the vscode extension to "Sherlock"

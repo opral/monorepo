@@ -1,6 +1,6 @@
 
 
-# sherlock – i18n inspector for Visual Studio Code
+# Sherlock – i18n inspector for Visual Studio Code
 
 <div>
 	<p>

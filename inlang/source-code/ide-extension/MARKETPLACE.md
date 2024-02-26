@@ -1,6 +1,6 @@
 [<img width="256px" height="auto" alt="Visual Studio Code install badge" src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/vscode-install-badge.svg" />](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension)
 
-<doc-image src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-extension-cover-small.png" alt="Visual Studio Code extension (sherlock) header image"></doc-image>
+<doc-image src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-extension-cover-small.png" alt="Visual Studio Code extension (Sherlock) header image"></doc-image>
 
 # 🕵️‍♂️ i18n inspector for VS Code
 

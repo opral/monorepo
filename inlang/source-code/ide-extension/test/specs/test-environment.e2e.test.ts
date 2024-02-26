@@ -2,7 +2,7 @@ import { browser, expect } from "@wdio/globals"
 import vscode from "vscode"
 import {} from "wdio-vscode-service"
 
-describe("Visual Studio Code extension (sherlock) E2E Testing Environment", () => {
+describe("Visual Studio Code extension (Sherlock) E2E Testing Environment", () => {
 	it("should be able to load Visual Studio Code with inlang example code", async () => {
 		const workbench = await browser.getWorkbench()
 		const title = await workbench.getTitleBar().getTitle()
@@ -10,7 +10,7 @@ describe("Visual Studio Code extension (sherlock) E2E Testing Environment", () =
 		expect(title).toContain("inlang")
 	})
 
-	it("should load and install our Visual Studio Code extension (sherlock)", async () => {
+	it("should load and install our Visual Studio Code extension (Sherlock)", async () => {
 		const extensions = await browser.executeWorkbench((vscodeApi: typeof vscode) => {
 			return vscodeApi.extensions.all
 		})
