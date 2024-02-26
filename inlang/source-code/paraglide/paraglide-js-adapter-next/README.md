@@ -201,6 +201,20 @@ Excluded routes won't be prefixed with the language tag & the middleware will no
 
 > Tip: LLMs are really good at writing regexes.
 
+#### Changing the default language
+
+Usually the default language is the `sourceLanguageTag` you defined in your `project.inlang/settings.json`. If you want to change it, you can use the `defaultLanguage` option on `createI18n`.
+
+
+```ts
+export const { ... } =
+	createI18n<AvailableLanguageTag>({
+		defaultLanguage: "de"
+	})
+```
+
+This will change which langauge doesn't get a prefix in the URL.
+
 ## (legacy) Setup With the Pages Router
 
 The Pages router already comes with i18n support out of the box. You can read more about it in the[NextJS Pages router documentation](https://nextjs.org/docs/advanced-features/i18n-routing). Thanks to this, Paraglide doesn't need to provide it's own routing. All the Adapter does in the Pages router is react to the language change.
