@@ -10,6 +10,6 @@
 	},
 	"scripts": {
 		"translate": "inlang machine translate -f --project ./project.inlang",
-		"clean": "git clean -fdX ./locales"
+		"clean": "git clean -fdx . && git checkout ."
 	}
 }
