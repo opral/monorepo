@@ -95,7 +95,7 @@ export const maybeAddVsCodeExtension = async (args: { projectPath: string }, ctx
 
 	let response = isCertainlyVsCode
 	if (!isCertainlyVsCode) {
-		response = await prompt(`Are you using VSCode?`, {
+		response = await prompt(`Are you using Visual Studio Code?`, {
 			type: "confirm",
 			initial: true,
 		})
@@ -137,7 +137,9 @@ export const maybeAddVsCodeExtension = async (args: { projectPath: string }, ctx
 			"./.vscode/extensions.json",
 			JSON.stringify(extensions, undefined, 2)
 		)
-		ctx.logger.success("Added the inlang vs code extension to the workspace recommendations.")
+		ctx.logger.success(
+			"Added the inlang Visual Studio Code extension (sherlock) to the workspace recommendations."
+		)
 	}
 }
 
