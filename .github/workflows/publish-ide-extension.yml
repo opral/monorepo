@@ -1,4 +1,4 @@
-name: Publish ide extension
+name: Publish sherlock (VS Code extension)
 
 on:
   workflow_dispatch:
