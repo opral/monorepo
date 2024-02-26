@@ -56,13 +56,12 @@ jobs:
           tar -xvf ./tmp/*.tgz
 
       - name: Push Package Folder
-        uses: andstor/copycat-action@v3
-        with:
-          personal_token: ${{ secrets.EXAMPLE_REPOS_ACCESS_TOKEN }}
-          src_path: ${{ matrix.path }}/package
-          dst_path: /
-          dst_owner: LorisSigrist
-          dst_repo_name: paraglide-sveltekit-example
-          dst_branch: main
-          src_branch: main
-          commit_message: "chore: sync with opral/monorepo"
+        run: |
+          cd ${{ matrix.path }}/tmp/package
+          git init
+          git config user.name "sync-examples-action"
+          git config user.email "noreply@opral.com"
+          git add .
+          git commit -m "chore: sync with opral/monorepo"
+          git remote add origin "https://x-access-token:${{ secrets.EXAMPLE_REPOS_ACCESS_TOKEN }}@github.com/LorisSigrist/paraglide-js-example"
+          git push --force "
