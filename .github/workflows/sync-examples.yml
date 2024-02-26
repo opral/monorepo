@@ -28,7 +28,7 @@ jobs:
     strategy:
       matrix:
         path:
-          - ./inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/example
+          - inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/example
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
