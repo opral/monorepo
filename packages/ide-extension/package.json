@@ -1,9 +1,9 @@
 {
 	"name": "vs-code-extension",
 	"private": true,
-	"displayName": "inlang – i18n supercharged",
+	"displayName": "sherlock – i18n inspector (prev inlang)",
 	"type": "module",
-	"description": "Supercharge i18n within VS Code — Visualize, edit & lint translated strings at a glance via Inline Decorations & Hover Support, and extract new strings with a single click.",
+	"description": "Visualize, edit & lint translated strings at a glance via Inline Decorations & Hover Support, and extract new strings with a single click.",
 	"publisher": "inlang",
 	"repository": {
 		"type": "git",
@@ -17,7 +17,9 @@
 	"keywords": [
 		"i18n",
 		"localization",
-		"translation"
+		"translation",
+		"inspector",
+		"sherlock"
 	],
 	"categories": [
 		"Other",
