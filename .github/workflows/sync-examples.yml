@@ -54,7 +54,9 @@ jobs:
           cd ${{ matrix.path }} &&
           pnpm pack --pack-destination ./tmp &&
           tar -xvf ./tmp/*.tgz
-
+          cd package
       - name: log
-        run: ls -la
+        run: | 
+          ls -la
+          cat package.json
         working-directory: ${{ matrix.path }}
