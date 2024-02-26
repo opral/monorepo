@@ -64,3 +64,5 @@ jobs:
           dst_owner: LorisSigrist
           dst_repo_name: paraglide-sveltekit-exampl
           dst_branch: main
+          src_branch: main
+          commit_message: "chore: sync with opral/monorepo"
