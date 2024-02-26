@@ -19,7 +19,6 @@ export async function run(): Promise<void> {
 		}
 		let project_path: string = core.getInput("project_path", { required: true })
 		const { owner, repo } = github.context.repo
-		console.log(owner, repo)
 		const pr_number = github.context.payload.pull_request?.number
 		// check if project_path starts with a slash, otherwise add it
 		if (!project_path.startsWith("/")) {
@@ -170,7 +169,7 @@ ${lintSummary
 			return
 		}
 
-		core.debug("Creating a new comment")
+		console.log("Creating a new comment")
 		await octokit.rest.issues.createComment({
 			owner,
 			repo,
@@ -179,6 +178,7 @@ ${lintSummary
 		})
 	} catch (error) {
 		// Fail the workflow run if an error occurs
+		console.log(error)
 		if (error instanceof Error) core.setFailed(error.message)
 	}
 }
