@@ -311,6 +311,9 @@ export async function loadProject(args: {
 		let initialSetup = true
 		// -- subscribe to all messages and write to files on signal -------------
 		createEffect(() => {
+			// eslint-disable-next-line no-console
+			console.log("Outer createEffect")
+
 			const _resolvedModules = resolvedModules()
 			if (!_resolvedModules) return
 
@@ -331,6 +334,9 @@ export async function loadProject(args: {
 					// we create a new root to be able to cleanup an effect for a message that got deleted
 					createRoot((dispose) => {
 						createEffect(() => {
+							// eslint-disable-next-line no-console
+							console.log("Inner createEffect", messageId)
+
 							const message = messagesQuery.get({ where: { id: messageId } })!
 							if (!message) {
 								return
