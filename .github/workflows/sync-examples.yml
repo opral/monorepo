@@ -45,8 +45,9 @@ jobs:
           node-version: ${{ matrix.version }}
           cache: "pnpm"
 
-      - name: Create Lockfile
-        run: pnpm install --lockfile-only
+      # Unfortunately this is necessary
+      - name: Install Dependencies
+        run: pnpm install
 
       - name: Pack & Unpack
         run: | 
