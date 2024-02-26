@@ -1,0 +1,28 @@
+{
+	"name": "@inlang/sdk-load-test",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"license": "Apache-2.0",
+	"dependencies": {
+		"@inlang/cli": "workspace:*",
+		"@inlang/sdk": "workspace:*",
+		"@lix-js/client": "workspace:*",
+		"i18next": "^23.10.0"
+	},
+	"devDependencies": {
+		"@types/node": "^20.11.20",
+		"tsx": "^4.7.1"
+	},
+	"scripts": {
+		"clean": "git clean -fdx ./locales && git checkout ./locales",
+		"translate": "PUBLIC_SERVER_BASE_URL=http://localhost:3000 pnpm inlang machine translate -f --project ./project.inlang",
+		"test": "tsx ./main.ts",
+		"inspect": "tsx --inspect-brk ./main.ts"
+	},
+	"prettier": {
+		"semi": false,
+		"useTabs": true,
+		"printWidth": 100
+	}
+}
