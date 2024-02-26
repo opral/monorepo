@@ -112,7 +112,7 @@ export default function Home() {
 
 You should now see the message "Hello World!" on your homepage!
 
-> Note: If you are using Visual Studio Code, you should install the [inlang IDE Extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension). It will give you inline previews of messages and allow you to edit them right in your source code.
+> Note: If you are using Visual Studio Code, you should install [sherlock (VS Code extension)](https://inlang.com/m/r7kp499g/app-inlang-ideExtension). It will give you inline previews of messages and allow you to edit them right in your source code.
 
 ## Adding more languages
 
