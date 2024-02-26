@@ -48,7 +48,5 @@
 	"git.mergeEditor": true,
 	"[xml]": {
 		"editor.defaultFormatter": "redhat.vscode-xml"
-	},
-	// required for sdk load.test
-	"vitest.commandLine": "pnpm vitest"
+	}
 }
