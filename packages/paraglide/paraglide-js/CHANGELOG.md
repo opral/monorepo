@@ -202,7 +202,7 @@ What you need to change:
 
 ## 1.0.0-prerelease.5
 
-improve: `paraglide-js init` now adds the vs code extension if vscode is used
+improve: `paraglide-js init` now adds the Visual Studio Code extension (sherlock) if vscode is used
 
 ## 1.0.0-prerelease.4
 
