@@ -60,9 +60,10 @@ jobs:
         env:
           API_TOKEN_GITHUB: ${{ secrets.EXAMPLE_REPOS_ACCESS_TOKEN }}
         with:
-          source_folder: '${{ matrix.path }}/packages'
+          source_folder: 'packages'
           destination_repo: 'LorisSigrist/paraglide-sveltekit-example'
           user_email: 'noreply@opral.com'
           user_name: 'sync-examples-action'
           commit_msg: 'Sync example with opral/monorepo'
           destination_branch: 'main'
+        working-directory: ${{ matrix.path }}
