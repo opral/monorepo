@@ -1,0 +1,60 @@
+name: Sync Examples
+
+on:
+  push:
+    # Trigger if an example CHANGELOG is changed on main -> usually after a release
+    branches:
+      - "main"
+    paths:
+      - "**/example/CHANGELOG.md"
+      - "**/examples/*/CHANGELOG.md"
+  pull_request:
+    # TODO REMOVE - ONLY FOR TESTING
+    branches:
+      - "main"
+  workflow_dispatch:
+
+#
+# The jobs should do a few things:
+# 1. Check out the repository
+# 2. Set up pnpm
+# 3. Run `pnpm pack` in the /inlang/source-code/paraglide/paraglide-js/example directory
+# 4. Unpack the generated tarball 
+# 5. Commit the unpacked tarball to https://github.com/lorissigrist/paraglide-js-example
+# 6. Force Push the commit to the repository
+
+jobs:
+  sync-examples:
+    runs-on: ubuntu-latest
+    matrix:
+      path:
+        - ./inlang/source-code/paraglide/paraglide-js/example
+        - ./inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/example
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+     
+      - name: Setup Pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.version }}
+          cache: "pnpm"
+
+      - name: Pack
+        run: pnpm pack --pack-destination ./tmp 
+        working-directory: ${{ matrix.path }}
+
+      - name: Unpack
+        # The tarball contains a package/ directory
+        # This will create a ./package
+        run: tar -xvf ./tmp/*.tgz
+        working-directory: ${{ matrix.path }}
+
+      - name: log
+        run: ls -la
+        working-directory: ${{ matrix.path }}
