@@ -63,5 +63,5 @@ jobs:
           git config user.email "noreply@opral.com"
           git add -A . 
           git commit -m "chore: sync with opral/monorepo"
-          git remote add origin "https://x-access-token:${{ secrets.EXAMPLE_REPOS_ACCESS_TOKEN }}@github.com/LorisSigrist/paraglide-sveltekit-example"
+          git remote add origin "https://LorisSigrist:${{ secrets.EXAMPLE_REPOS_ACCESS_TOKEN }}@github.com/LorisSigrist/paraglide-sveltekit-example.git"
           git push --force origin main
