@@ -61,7 +61,7 @@ jobs:
           git init
           git config user.name "sync-examples-action"
           git config user.email "noreply@opral.com"
-          git add .
+          git add -A . 
           git commit -m "chore: sync with opral/monorepo"
           git remote add origin "https://x-access-token:${{ secrets.EXAMPLE_REPOS_ACCESS_TOKEN }}@github.com/LorisSigrist/paraglide-js-example"
-          git push origin main --force
+          git push --force origin main
