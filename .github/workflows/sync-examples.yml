@@ -58,10 +58,11 @@ jobs:
       - name: Push Package Folder
         run: |
           cd ${{ matrix.path }}/package
-          git init
+          git init -b main
           git config user.name "sync-examples-action"
           git config user.email "noreply@opral.com"
           git add -A . 
           git commit -m "chore: sync with opral/monorepo"
+          git status
           git remote add origin "https://LorisSigrist:${{ secrets.EXAMPLE_REPOS_ACCESS_TOKEN }}@github.com/LorisSigrist/paraglide-sveltekit-example.git"
           git push --force origin main
