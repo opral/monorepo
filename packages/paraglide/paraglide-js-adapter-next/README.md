@@ -5,7 +5,7 @@ Everything you need to internationalize your NextJS app with [ParaglideJS](https
 **Features**
 
 - 🪂 Automatically set & manage the language for Paraglide
-- 💨 A breeze to set up - No need to change your `routes`
+- 💨 A breeze to set up - No need to change your `app/` folder
 - 📦 Built for RSC
 - 🪄 Supports both App & Pages router
 - 🤖 SEO friendly out of the box
