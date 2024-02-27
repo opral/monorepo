@@ -51,7 +51,6 @@ export async function run(): Promise<void> {
 			})
 			if (projectBase.errors().length > 0) {
 				if (result) result.errorsBase = projectBase.errors()
-				console.error(projectBase.errors())
 				console.debug("Skip project ", result.projectPath, " in base repo because of errors")
 				continue
 			}
@@ -147,11 +146,11 @@ export async function run(): Promise<void> {
 		// Create a comment content for each project
 		for (const result of results) {
 			if (result.errorsBase.length > 0 && result.errorsHead.length === 0) {
-				result.commentContent = `#### ✅ Setup of project \`${result.projectPath}\` fixed`
+				console.debug(`#### ✅ Setup of project \`${result.projectPath}\` fixed`)
 				continue
 			}
 			if (result.errorsBase.length === 0 && result.errorsHead.length > 0) {
-				result.commentContent = `#### ❗️ New errors in setup of project \`${result.projectPath}\` found`
+				console.debug(`#### ❗️ New errors in setup of project \`${result.projectPath}\` found`)
 				continue
 			}
 			if (result.errorsBase.length > 0 || result.errorsHead.length > 0) continue
