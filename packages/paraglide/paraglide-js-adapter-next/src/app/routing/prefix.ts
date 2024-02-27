@@ -87,21 +87,22 @@ export function prefixStrategy<T extends string>({
 	function localiseHref<P extends LinkProps["href"]>(canonicalHref: P, lang: T): P {
 		//don't translate external links
 		if (isExternal(canonicalHref)) return canonicalHref
+
+		//guard against empty pathnames on object hrefs
 		if (typeof canonicalHref === "object" && !canonicalHref.pathname) return canonicalHref
 
 		const canonicalPathname: string =
-			typeof canonicalHref === "object" ? canonicalHref.pathname ?? "" : canonicalHref
+			typeof canonicalHref === "object" ? canonicalHref.pathname ?? "" : getPathname(canonicalHref)
+
+		if (!isAbsolute(canonicalPathname)) return canonicalHref
 
 		//dont' touch relative links
-		const isRelative = !canonicalPathname.startsWith("/")
-		const translatedPathaname = isRelative
-			? canonicalPathname
-			: getLocalisedPath(canonicalPathname, lang)
+		const translatedPathaname = getLocalisedPath(canonicalPathname, lang)
 
 		// @ts-ignore
 		return typeof canonicalHref === "object"
 			? { ...canonicalHref, pathname: translatedPathaname }
-			: translatedPathaname
+			: canonicalHref.replace(canonicalPathname, translatedPathaname)
 	}
 
 	return {
@@ -114,10 +115,19 @@ export function prefixStrategy<T extends string>({
 	}
 }
 
+function getPathname(href: string): string {
+	const url = new URL(href, "http://example.com")
+	return url.pathname
+}
+
+function isAbsolute(path: string): path is `/${string}` {
+	return path.startsWith("/")
+}
+
 /**
  * Returns true if the href explicitly includes the origin, even if it's the current origin
  */
-function isExternal(href: LinkProps["href"]) {
+export function isExternal(href: LinkProps["href"]) {
 	if (typeof href === "object") {
 		//Make sure none of the telltales for external links are set
 		const externalTelltales = [href.protocol, href.auth, href.port, href.hostname, href.host]
@@ -134,10 +144,11 @@ function isExternal(href: LinkProps["href"]) {
 	// href must not start with a url scheme
 	// see: https://datatracker.ietf.org/doc/html/rfc3986#section-3.1
 	const schemeRegex = /^[a-z][a-z0-9+\-.]*:/i
-	if (schemeRegex.test(maybeProtocol)) return true
+	if (schemeRegex.test(href)) return true
 
 	//If the href starts with // it's a protocol relative url -> must include the host -> external
 	if (href.startsWith("//")) return true
+
 	return false
 }
 
