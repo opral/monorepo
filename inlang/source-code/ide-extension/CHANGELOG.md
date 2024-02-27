@@ -1,5 +1,13 @@
 # inlang-vs-code-extension
 
+## 1.32.8
+
+### Patch Changes
+
+- 960f8fb70: rename the vscode extension to "Sherlock"
+  - @inlang/sdk@0.26.4
+  - @inlang/telemetry@0.3.12
+
 ## 1.32.7
 
 ### Patch Changes

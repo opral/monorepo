@@ -1,5 +1,11 @@
 # @inlang/paraglide-js
 
+## 1.2.6
+
+### Patch Changes
+
+- 960f8fb70: rename the vscode extension to "Sherlock"
+
 ## 1.2.5
 
 ### Patch Changes
