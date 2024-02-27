@@ -7,7 +7,7 @@
 		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/vscode_extension-gallery/vscode_extension-gallery-image-2.jpg",
 		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/vscode_extension-gallery/vscode_extension-gallery-image-3.jpg"
 	],
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/ide-extension/assets/icon-vscode-marketplace.png",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/ide-extension/assets/sherlock-logo.png",
 	"displayName": {
 		"en": "Sherlock - VS Code extension"
 	},
