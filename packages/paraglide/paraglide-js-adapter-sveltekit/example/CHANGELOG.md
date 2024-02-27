@@ -1,5 +1,10 @@
 # @inlang/paraglide-js-adapter-sveltekit-example
 
+## 0.0.10
+
+- Add `start` command for StackBlitz
+- Remove `/base` path
+
 ## 0.0.9
 
 ### Patch Changes

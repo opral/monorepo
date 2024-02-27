@@ -4,6 +4,7 @@
 	"private": true,
 	"scripts": {
 		"_dev": "vite dev",
+		"start": "vite dev",
 		"build": "vite build",
 		"test": "vite build",
 		"preview": "vite preview",
