@@ -13,6 +13,7 @@ export type PageContextRenderer<PageProps = Record<string, unknown>> =
 		pageProps: PageProps
 		languageTag: string
 		meta: any
+		data: any
 	}
 
 /**
@@ -49,5 +50,6 @@ export type PageContext<PageProps = Record<string, unknown>> = Pick<
 export type OnBeforeRender<PageProps> = (pageContext: PageContextRenderer) => Promise<{
 	pageContext: {
 		pageProps: PageProps
+		data: any
 	}
 }>
