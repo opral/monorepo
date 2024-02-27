@@ -138,6 +138,7 @@ export function isExternal(href: LinkProps["href"]) {
 	}
 
 	//Make sure the href isn't a full url
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [maybeProtocol, ...rest] = href.split(":")
 	if (rest.length === 0) return false
 
