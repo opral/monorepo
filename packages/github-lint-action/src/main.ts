@@ -43,7 +43,7 @@ export async function run(): Promise<void> {
 
 		// Collect all reports from the base repository
 		for (const result of results) {
-			console.debug("Checking project:", result.projectPath)
+			core.debug(`Checking project: ${result.projectPath}`)
 			const projectBase = await loadProject({
 				projectPath: process.cwd() + result.projectPath,
 				repo: repoBase,
