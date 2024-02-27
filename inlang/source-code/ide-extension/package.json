@@ -9,7 +9,7 @@
 		"type": "git",
 		"url": "https://github.com/opral/monorepo.git"
 	},
-	"icon": "assets/icon-vscode-marketplace.png",
+	"icon": "assets/sherlock-logo.png",
 	"version": "1.32.7",
 	"engines": {
 		"vscode": "^1.84.2"
@@ -33,7 +33,7 @@
 				{
 					"id": "inlang",
 					"title": "Inlang",
-					"icon": "assets/logo-negative.svg"
+					"icon": "assets/sherlock-vscode-logo.svg"
 				}
 			]
 		},
