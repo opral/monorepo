@@ -1,5 +1,11 @@
 # @inlang/paraglide-js-adapter-sveltekit
 
+## 0.5.1
+
+### Patch Changes
+
+- a7b593e9a: fix: double-execution of `load` on initial load
+
 ## 0.5.0
 
 ### Minor Changes
