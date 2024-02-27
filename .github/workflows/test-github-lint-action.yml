@@ -4,7 +4,8 @@ on:
   pull_request_target:
 
 # explicitly configure permissions, in case your GITHUB_TOKEN workflow permissions are set to read-only in repository settings
-permissions: write-all
+permissions:
+  contents: read
 
 jobs:
   test-action:
@@ -37,5 +38,3 @@ jobs:
         uses: ./inlang/source-code/github-lint-action
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          project_path: "/project.inlang"
