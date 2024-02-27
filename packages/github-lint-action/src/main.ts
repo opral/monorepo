@@ -155,6 +155,7 @@ export async function run(): Promise<void> {
 				continue
 			}
 			if (result.errorsBase.length > 0 || result.errorsHead.length > 0) continue
+			if (result.lintSummary.length === 0) continue
 			const lintSummary = result.lintSummary
 			const shortenedProjectPath = () => {
 				const parts = result.projectPath.split("/")
@@ -164,7 +165,7 @@ export async function run(): Promise<void> {
 					return result.projectPath
 				}
 			}
-			const commentContent = `#### Project: \`${shortenedProjectPath()}\`
+			const commentContent = `#### Project \`${shortenedProjectPath()}\`
 | lint rule | new reports | link |
 |-----------|-------------|------|
 ${lintSummary
