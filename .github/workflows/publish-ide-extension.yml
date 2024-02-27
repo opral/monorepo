@@ -1,4 +1,4 @@
-name: Publish ide extension
+name: Publish Sherlock (VS Code extension)
 
 on:
   workflow_dispatch:
@@ -46,12 +46,12 @@ jobs:
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
-      - name: Build VSCode extension package
+      - name: Build Visual Studio Code extension (Sherlock) package
         run: doppler run -- pnpm --filter vs-code-extension package
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_PRODUCTION_ENV_TOKEN }}
 
-      - name: Publish to VSCode Marketplace
+      - name: Publish to Visual Studio Code Marketplace
         run: pnpm --filter vs-code-extension run publish -p ${{secrets.VSCODE_MARKETPLACE_TOKEN}}
         working-directory: ./inlang/source-code/ide-extension
         env:

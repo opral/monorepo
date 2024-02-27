@@ -7,12 +7,12 @@
 		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/vscode_extension-gallery/vscode_extension-gallery-image-2.jpg",
 		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/vscode_extension-gallery/vscode_extension-gallery-image-3.jpg"
 	],
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/ide-extension/assets/icon-vscode-marketplace.png",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/ide-extension/assets/sherlock-logo.png",
 	"displayName": {
-		"en": "IDE Extension for i18n"
+		"en": "Sherlock - VS Code extension"
 	},
 	"description": {
-		"en": "Supercharge i18n within VS Code — Visualize, edit & lint translated strings at a glance via Inline Decorations & Hover Support, and extract new strings with a single click."
+		"en": "Visualize, edit & lint translated strings at a glance via Inline Decorations & Hover Support, and extract new strings with a single click."
 	},
 	"readme": {
 		"en": "./inlang/source-code/ide-extension/MARKETPLACE.md"
@@ -25,6 +25,8 @@
 		"ide",
 		"extension",
 		"lix",
+		"Sherlock",
+		"inspector",
 		"svelte",
 		"nextjs",
 		"astro",

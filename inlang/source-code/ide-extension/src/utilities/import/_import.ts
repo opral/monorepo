@@ -27,10 +27,10 @@ const createImport: ImportFunction = async (uri: string) => {
 	const httpsAgent = httpsProxy ? new HttpsProxyAgent(httpsProxy) : undefined
 
 	// polyfill for environments that don't support dynamic
-	// http imports yet like VSCode.
+	// http imports yet like Visual Studio Code.
 
 	const moduleAsText = uri.startsWith("http")
-		? await (await fetch(uri, { agent: httpsAgent })).text()
+		? await(await fetch(uri, { agent: httpsAgent })).text()
 		: await fs.readFile(uri, { encoding: "utf-8" })
 
 	try {
