@@ -40,27 +40,23 @@ export async function run(): Promise<void> {
 			lintSummary: [] as { id: string; name: string; count: number }[],
 			commentContent: "" as string,
 		}))
-		// log all project paths
-		console.log(results.map((project) => project.projectPath))
 
 		// Collect all reports from the base repository
-		for (const project of projectListBase) {
-			console.debug("Checking project:", project.projectPath)
-			const result = results.find((result) => result.projectPath === project.projectPath)
+		for (const result of results) {
+			console.debug("Checking project:", result.projectPath)
 			const projectBase = await loadProject({
-				projectPath: process.cwd() + project.projectPath,
+				projectPath: process.cwd() + result.projectPath,
 				repo: repoBase,
 				appId: "app.inlang.ninjaI18nAction",
 			})
-			console.log("Errors:", projectBase.errors().length)
 			if (projectBase.errors().length > 0) {
 				if (result) result.errorsBase = projectBase.errors()
-				console.log(projectBase.errors())
-				console.debug("Skip project ", project.projectPath, " because of errors")
+				console.error(projectBase.errors())
+				console.debug("Skip project ", result.projectPath, " because of errors")
 				continue
 			}
-			result?.installedRules.push(...projectBase.installed.messageLintRules())
-			result?.reportsBase.push(...projectBase.query.messageLintReports.getAll())
+			result.installedRules.push(...projectBase.installed.messageLintRules())
+			result.reportsBase.push(...projectBase.query.messageLintReports.getAll())
 		}
 
 		// Collect meta data for head and base repository
@@ -124,16 +120,15 @@ export async function run(): Promise<void> {
 		}
 
 		// Collect all reports from the head repository
-		for (const project of projectListHead) {
-			const result = results.find((result) => result.projectPath === project.projectPath)
+		for (const result of results) {
 			const projectHead = await loadProject({
-				projectPath: process.cwd() + project.projectPath,
+				projectPath: process.cwd() + result.projectPath,
 				repo: repoHead,
 				appId: "app.inlang.ninjaI18nAction",
 			})
 			if (projectHead.errors().length > 0) {
 				if (result) result.errorsHead = projectHead.errors()
-				console.debug("Skip project ", project.projectPath, " because of errors")
+				console.debug("Skip project ", result.projectPath, " because of errors")
 				continue
 			}
 			result?.reportsHead.push(...projectHead.query.messageLintReports.getAll())
