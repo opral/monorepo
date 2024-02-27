@@ -66,7 +66,7 @@ export default function onRenderClient(pageContext: PageContextRenderer) {
 			hydrate(
 				() => (
 					<MetaProvider>
-						<Root page={currentPage()!} pageProps={currentPageProps} />
+						<Root page={currentPage()!} pageProps={currentPageProps} data={pageContext.data} />
 					</MetaProvider>
 				),
 				rootElement

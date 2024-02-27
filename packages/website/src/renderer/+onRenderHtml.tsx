@@ -35,7 +35,7 @@ export default async function onRenderHtml(pageContext: PageContextRenderer): Pr
 
 	const renderedPage = renderToString(() => (
 		<MetaProvider tags={tags}>
-			<Root page={pageContext.Page} pageProps={pageContext.pageProps} />
+			<Root page={pageContext.Page} pageProps={pageContext.pageProps} data={pageContext.data} />
 		</MetaProvider>
 	))
 
