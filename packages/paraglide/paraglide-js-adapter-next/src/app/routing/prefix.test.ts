@@ -7,9 +7,21 @@ const {
 	getCanonicalPath,
 	getLocalisedPath,
 	localiseHref,
-} = prefixStrategy({
+} = prefixStrategy<"en" | "de" | "de-CH">({
 	availableLanguageTags: ["en", "de", "de-CH"],
 	defaultLanguage: "en",
+	pathnames: {
+		"/canonical-translated": {
+			de: "/uebersetzt",
+			"de-CH": "/uebersetzt",
+			en: "/translated",
+		},
+		"/canonical-translated/[id]": {
+			de: "/uebersetzt/[id]",
+			"de-CH": "/uebersetzt/[id]",
+			en: "/translated/[id]",
+		},
+	},
 	exclude: (path) => path.startsWith("/api/"),
 })
 
@@ -35,6 +47,18 @@ describe("getCanonicalPath", () => {
 	it("returns the path if there is no language prefix", () => {
 		expect(getCanonicalPath("/some/path")).toBe("/some/path")
 	})
+
+	it("get's the canonical path for translated paths", () => {
+		expect(getCanonicalPath("/de/uebersetzt")).toBe("/canonical-translated")
+		expect(getCanonicalPath("/en/translated")).toBe("/canonical-translated")
+		expect(getCanonicalPath("/de-CH/uebersetzt")).toBe("/canonical-translated")
+	})
+
+	it("get's the canonical path for translated paths with params", () => {
+		expect(getCanonicalPath("/de/uebersetzt/1")).toBe("/canonical-translated/1")
+		expect(getCanonicalPath("/en/translated/1")).toBe("/canonical-translated/1")
+		expect(getCanonicalPath("/de-CH/uebersetzt/1")).toBe("/canonical-translated/1")
+	})
 })
 
 describe("getLocalisedPath", () => {
@@ -49,6 +73,18 @@ describe("getLocalisedPath", () => {
 
 	it("does not localise excluded paths", () => {
 		expect(getLocalisedPath("/api/some/path", "de")).toBe("/api/some/path")
+	})
+
+	it("get's translated paths", () => {
+		expect(getLocalisedPath("/canonical-translated", "de")).toBe("/de/uebersetzt")
+		expect(getLocalisedPath("/canonical-translated", "en")).toBe("/translated")
+		expect(getLocalisedPath("/canonical-translated", "de-CH")).toBe("/de-CH/uebersetzt")
+	})
+
+	it("get's translated paths with params", () => {
+		expect(getLocalisedPath("/canonical-translated/1", "de")).toBe("/de/uebersetzt/1")
+		expect(getLocalisedPath("/canonical-translated/1", "en")).toBe("/translated/1")
+		expect(getLocalisedPath("/canonical-translated/1", "de-CH")).toBe("/de-CH/uebersetzt/1")
 	})
 })
 
@@ -88,6 +124,18 @@ describe("translatePath", () => {
 
 	it("leaves excluded paths alone", () => {
 		expect(translatePath("/api/some/path", "de")).toBe("/api/some/path")
+	})
+
+	it("translates paths with path translations", () => {
+		expect(translatePath("/de/uebersetzt", "en")).toBe("/translated")
+		expect(translatePath("/translated", "de")).toBe("/de/uebersetzt")
+		expect(translatePath("/de-CH/uebersetzt", "en")).toBe("/translated")
+	})
+
+	it("translates paths with path translations with params", () => {
+		expect(translatePath("/de/uebersetzt/1", "en")).toBe("/translated/1")
+		expect(translatePath("/translated/1", "de")).toBe("/de/uebersetzt/1")
+		expect(translatePath("/de-CH/uebersetzt/1", "en")).toBe("/translated/1")
 	})
 })
 

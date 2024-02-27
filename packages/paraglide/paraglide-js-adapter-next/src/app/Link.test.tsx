@@ -24,6 +24,7 @@ describe("<Link>", () => {
 			prefixStrategy({
 				availableLanguageTags,
 				defaultLanguage: sourceLanguageTag,
+				pathnames: {},
 				exclude: () => false,
 			})
 		)
@@ -44,6 +45,7 @@ describe("<Link>", () => {
 			prefixStrategy({
 				availableLanguageTags,
 				defaultLanguage: sourceLanguageTag,
+				pathnames: {},
 				exclude: () => false,
 			})
 		)
