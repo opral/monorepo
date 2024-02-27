@@ -5,7 +5,7 @@
 		"en": "t-function-matcher"
 	},
 	"description": {
-		"en": "Enables the inlang VSCode extension to work with t-functions"
+		"en": "Enables the inlang Visual Studio Code extension (Sherlock) to work with t-functions"
 	},
 	"readme": {
 		"en": "./inlang/source-code/plugins/t-function-matcher/README.md"

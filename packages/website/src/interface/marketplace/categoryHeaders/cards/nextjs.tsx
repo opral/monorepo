@@ -71,24 +71,13 @@ const NextjsHeader = () => {
 						</div>
 					</Link>
 					<Link
-						href="/g/uxohikde/guide-lorissigrist-useParaglideJsWithNextjsPagesRouter"
+						href="/m/osslbuzt/library-inlang-paraglideJsAdapterNextJs"
 						class="w-full flex-1 bg-background rounded-xl border border-surface-300 flex flex-col relative group hover:border-surface-400 transition-all cursor-pointer"
 					>
-						<div class="pl-8 pb-2 -mt-[2px]">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								width="20"
-								height="30"
-								fill="none"
-								viewBox="0 0 28 38"
-							>
-								<path fill="#CBD5E1" d="M0 0h28v38L14 26.057 0 38V0z" />
-							</svg>
-						</div>
 						<div class="flex-1 flex flex-col justify-end">
-							<h3 class="font-medium text-lg px-8 pb-1">Pages Router - 18n Guide</h3>
+							<h3 class="font-medium text-lg px-8 pb-1">NextJS Adapter</h3>
 							<p class="text-surface-500 px-8 pb-6 text-sm pr-20">
-								I18n Routing and SEO Pitfalls and more.
+								A NextJS Integration for ParaglideJS.
 							</p>
 						</div>
 						<div class="absolute top-4 right-4 w-8 h-8 border border-surface-300 rounded-full flex justify-center items-center group-hover:bg-surface-100 transition-all text-surface-500 group-hover:text-surface-900">

@@ -1,0 +1,66 @@
+{
+	"name": "@inlang/paraglide-js-adapter-next",
+	"version": "0.2.0",
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"build": "node ./build.mjs",
+		"clean": "rm -rf dist && rm -rf node_modules",
+		"test": "vitest run --passWithNoTests",
+		"lint": "eslint ./src --fix"
+	},
+	"main": "dist/app/index.server.js",
+	"module": "dist/app/index.server.js",
+	"types": "dist/app/index.server.d.ts",
+	"exports": {
+		"./plugin": {
+			"types": "./dist/plugin/index.d.ts",
+			"require": "./dist/plugin/index.cjs",
+			"default": "./dist/plugin/index.cjs"
+		},
+		"./pages": {
+			"types": "./dist/pages/index.d.ts",
+			"import": "./dist/pages/index.js"
+		},
+		".": {
+			"types": "./dist/app/index.server.d.ts",
+			"react-server": "./dist/app/index.server.js",
+			"default": "./dist/app/index.client.js"
+		}
+	},
+	"keywords": [
+		"inlang",
+		"i18n",
+		"l10n",
+		"localization",
+		"translation",
+		"internationalization",
+		"next.js",
+		"next",
+		"react",
+		"react.js"
+	],
+	"files": [
+		"dist"
+	],
+	"peerDependencies": {
+		"@inlang/paraglide-js": "*",
+		"next": "^13.0.0 || ^14.0.0",
+		"react": "^18 || ^19"
+	},
+	"devDependencies": {
+		"@rollup/plugin-commonjs": "^25.0.7",
+		"@rollup/plugin-node-resolve": "^15.2.3",
+		"@rollup/plugin-typescript": "^11.1.5",
+		"@testing-library/react": "^14.2.1",
+		"@types/react": "^18",
+		"@vitejs/plugin-react": "^4.2.1",
+		"jsdom": "22.1.0",
+		"rollup": "3.29.1",
+		"rollup-plugin-peer-deps-external": "^2.2.4",
+		"rollup-preserve-directives": "^1.1.0",
+		"typescript": "^5.3.3",
+		"vitest": "0.34.6"
+	}
+}

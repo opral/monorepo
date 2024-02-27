@@ -1,5 +1,20 @@
 # @inlang/plugin-m-function-matcher
 
+## 0.8.1
+
+### Patch Changes
+
+- 960f8fb70: rename the vscode extension to "Sherlock"
+- Updated dependencies [960f8fb70]
+  - @inlang/plugin@2.4.6
+  - @inlang/sdk@0.26.4
+
+## 0.8.0
+
+### Minor Changes
+
+- 92f7c9532: improve matcher to include function referencing & improve test coverage
+
 ## 0.7.3
 
 ### Patch Changes

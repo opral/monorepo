@@ -151,6 +151,6 @@ function registerExtensionComponents(args: {
 function handleInlangErrors() {
 	const inlangErrors = state().project.errors() || []
 	if (inlangErrors.length > 0) {
-		console.error("Inlang VSCode Extension errors:", inlangErrors)
+		console.error("Extension errors (Sherlock):", inlangErrors)
 	}
 }
