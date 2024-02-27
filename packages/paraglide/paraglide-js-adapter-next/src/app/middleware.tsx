@@ -18,7 +18,7 @@ export function createMiddleware<T extends string>(
 		const locale =
 			strategy.getLocaleFromLocalisedPath(request.nextUrl.pathname) ?? sourceLanguageTag
 
-		const canonicalPath = strategy.translatePath(request.nextUrl.pathname, sourceLanguageTag)
+		const canonicalPath = strategy.translatePath(request.nextUrl.pathname, sourceLanguageTag as T)
 		const headers = new Headers(request.headers)
 
 		headers.set(HeaderNames.ParaglideLanguage, locale)
