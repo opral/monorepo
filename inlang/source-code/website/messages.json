@@ -2,6 +2,17 @@
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"data": [
 		{
+			"id": "test_action_for_branches",
+			"selectors": [],
+			"variants": [
+				{
+					"languageTag": "en",
+					"match": [],
+					"pattern": [{ "type": "Text", "value": "Test Action for branches" }]
+				}
+			]
+		},
+		{
 			"id": "footer_categories_libraries",
 			"selectors": [],
 			"variants": [
