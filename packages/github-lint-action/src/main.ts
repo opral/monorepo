@@ -30,8 +30,9 @@ export async function run(): Promise<void> {
 			branch: github.context.payload.pull_request?.head.ref,
 		})
 		const projectListBase = await listProjects(repoBase.nodeishFs, process.cwd())
-		console.log(process.cwd())
-		console.log(projectListBase)
+		console.log(
+			projectListBase.map((project) => console.log(project.projectPath.replace(process.cwd(), "")))
+		)
 		const results = projectListBase.map((project) => ({
 			projectPath: project.projectPath.replace(process.cwd(), ""),
 			errorsBase: [] as any[],
