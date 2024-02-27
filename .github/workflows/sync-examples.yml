@@ -27,6 +27,18 @@ jobs:
   sync-examples:
     strategy:
       matrix:
+        include:
+
+          - path: inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/example
+            repo: "LorisSigrist/paraglide-sveltekit-example"
+            token: ${{ secrets.EXAMPLE_REPOS_ACCESS_TOKEN }}
+            token_user: "LorisSigrist"
+
+          - path: inlang/source-code/paraglide/paraglide-js-adapter-astro/example
+            repo: "LorisSigrist/paraglide-astro-example"
+            token: ${{ secrets.EXAMPLE_REPOS_ACCESS_TOKEN }}
+            token_user: "LorisSigrist"
+          
         path:
           - inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/example
     runs-on: ubuntu-latest
@@ -42,7 +54,7 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.version }}
+          node-version: "18"
           cache: "pnpm"
 
       # Unfortunately this is necessary
@@ -64,5 +76,5 @@ jobs:
           git add -A . 
           git commit -m "chore: sync with opral/monorepo"
           git status
-          git remote add origin "https://LorisSigrist:${{ secrets.EXAMPLE_REPOS_ACCESS_TOKEN }}@github.com/LorisSigrist/paraglide-sveltekit-example.git"
+          git remote add origin "https://${{ matrix.token_user }}:${{ matrix.token }}@github.com/${{ matrix.repo }}.git"
           git push --force origin main
