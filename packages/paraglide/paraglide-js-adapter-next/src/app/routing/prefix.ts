@@ -32,9 +32,11 @@ export function prefixStrategy<T extends string>({
 
 	function getCanonicalPath(localisedPath: string): string {
 		const locale = getLocaleFromLocalisedPath(localisedPath) ?? defaultLanguage
-		const pathWithoutLocale = localisedPath.startsWith(`/${locale}`)
+		let pathWithoutLocale = localisedPath.startsWith(`/${locale}`)
 			? localisedPath.replace(`/${locale}`, "")
 			: localisedPath
+
+		pathWithoutLocale ||= "/"
 
 		for (const [canonicalPathDefinition, translationsForPath] of Object.entries(pathnames)) {
 			if (!(locale in translationsForPath)) continue
@@ -56,8 +58,11 @@ export function prefixStrategy<T extends string>({
 
 		const translatedPath = getTranslatedPath(canonicalPath, locale, pathnames)
 
-		if (locale === defaultLanguage) return translatedPath
-		return `/${locale}${translatedPath}`
+		let localisedPath = locale === defaultLanguage ? translatedPath : `/${locale}${translatedPath}`
+
+		if (localisedPath.endsWith("/")) localisedPath = localisedPath.slice(0, -1)
+		localisedPath ||= "/"
+		return localisedPath
 	}
 
 	function getTranslatedPath(canonicalPath: string, lang: T, translations: PathTranslations<T>) {
