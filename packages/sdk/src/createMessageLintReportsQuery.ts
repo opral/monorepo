@@ -10,6 +10,7 @@ import type { resolveModules } from "./resolve-modules/index.js"
 import type { MessageLintReport, Message } from "./versionedInterfaces.js"
 import { lintSingleMessage } from "./lint/index.js"
 import { ReactiveMap } from "./reactivity/map.js"
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { debounce } from "throttle-debounce"
 import { createRoot, createEffect } from "./reactivity/solid.js"
 
@@ -21,6 +22,7 @@ export function createMessageLintReportsQuery(
 	settings: () => ProjectSettings,
 	installedMessageLintRules: () => Array<InstalledMessageLintRule>,
 	resolvedModules: () => Awaited<ReturnType<typeof resolveModules>> | undefined,
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	hasWatcher: boolean
 ): InlangProject["query"]["messageLintReports"] {
 	// @ts-expect-error

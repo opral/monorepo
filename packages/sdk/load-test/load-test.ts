@@ -1,3 +1,5 @@
+/* eslint-disable no-restricted-imports */
+/* eslint-disable no-console */
 import { openRepository } from "@lix-js/client"
 import { loadProject } from "@inlang/sdk"
 
@@ -20,7 +22,14 @@ const mockServer = "http://localhost:3000"
 const cli = `PUBLIC_SERVER_BASE_URL=${mockServer} pnpm inlang`
 const translateCommand = cli + " machine translate -f --project ./project.inlang"
 
-export async function runLoadTest(messageCount: number = 1000, translate: boolean = true) {
+export async function runLoadTest(
+	messageCount: number = 1000,
+	translate: boolean = true,
+	subscribeToMessages: boolean = true,
+	subscribeToLintReports: boolean = false
+) {
+	log("load-test start")
+
 	if (translate && !(await isServerRunning())) {
 		console.error(
 			`Please start the mock rpc server with "MOCK_TRANSLATE=true pnpm --filter @inlang/server dev"`
@@ -28,40 +37,49 @@ export async function runLoadTest(messageCount: number = 1000, translate: boolea
 		return
 	}
 
-	console.log("opening repo and loading project")
+	log("opening repo and loading project")
 	const repo = await openRepository(repoI18next, { nodeishFs: fs })
 	const project = await loadProject({ repo, projectPath })
 
-	console.log("subscribing to project.errors")
+	log("subscribing to project.errors")
 	project.errors.subscribe((errors) => {
 		if (errors.length > 0) {
-			console.log("project errors", errors[0])
+			log(`load=test project errors ${errors[0]}`)
 		}
 	})
 
-	console.log("subscribing to messages.getAll")
-	project.query.messages.getAll.subscribe((messages) => {
-		if (messages.length % 1000 === 1) {
-			console.log(Date())
-			console.log("messages changed", messages.length)
-		}
-	})
+	if (subscribeToMessages) {
+		log("subscribing to messages.getAll")
+		let messagesEvents = 0
+		project.query.messages.getAll.subscribe((messages) => {
+			if (messagesEvents++ % 1000 === 1) {
+				log(`messages changed ${messages.length}`)
+			}
+		})
+	}
 
-	project.query.messageLintReports.getAll.subscribe((reports) => {
-		// console.log("lint reports:", reports.length)
-	})
+	if (subscribeToLintReports) {
+		log("subscribing to lintReports.getAll")
+		let lintEvents = 0
+		project.query.messageLintReports.getAll.subscribe((reports) => {
+			if (lintEvents++ % 1000 === 1) {
+				log(`lint reports changed ${reports.length}`)
+			}
+		})
+	}
 
 	await generateMessageFile(messageCount)
 
 	if (translate) {
-		console.log("translating messages - shipping cli will pause for 8s when done")
+		log("translating messages with inlang cli")
 		await exec(translateCommand, { cwd: repoI18next })
 	}
+	log("load-test end")
 }
 
 async function generateMessageFile(messageCount: number) {
 	const messages: Record<string, string> = {}
-	console.log(`generating ${messageCount} messages`)
+	log(`generating ${messageCount} messages`)
 	for (let i = 1; i <= messageCount; i++) {
 		messages[`message_key_${i}`] = `Generated message (${i})`
 	}
@@ -70,7 +88,7 @@ async function generateMessageFile(messageCount: number) {
 		JSON.stringify(messages, undefined, 2),
 		"utf-8"
 	)
-	console.log(`finished generating ${messageCount} messages`)
+	log(`finished generating ${messageCount} messages`)
 }
 
 async function isServerRunning(): Promise<boolean> {
@@ -80,4 +98,8 @@ async function isServerRunning(): Promise<boolean> {
 	} catch (error) {
 		return false
 	}
+}
+
+function log(message: string) {
+	console.log(new Date().toLocaleTimeString("en-GB"), message)
 }

@@ -15,10 +15,10 @@
 		"tsx": "^4.7.1"
 	},
 	"scripts": {
-		"clean": "git clean -fdx ./locales && git checkout ./locales",
+		"clean": "git checkout ./locales",
 		"translate": "PUBLIC_SERVER_BASE_URL=http://localhost:3000 pnpm inlang machine translate -f --project ./project.inlang",
-		"test": "tsx ./main.ts",
-		"inspect": "tsx --inspect-brk ./main.ts"
+		"test": "pnpm clean && tsx ./main.ts",
+		"inspect": "pnpm clean && tsx --inspect-brk ./main.ts"
 	},
 	"prettier": {
 		"semi": false,
