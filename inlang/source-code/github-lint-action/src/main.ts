@@ -30,9 +30,6 @@ export async function run(): Promise<void> {
 			branch: github.context.payload.pull_request?.head.ref,
 		})
 		const projectListBase = await listProjects(repoBase.nodeishFs, process.cwd())
-		console.log(
-			projectListBase.map((project) => console.log(project.projectPath.replace(process.cwd(), "")))
-		)
 		const results = projectListBase.map((project) => ({
 			projectPath: project.projectPath.replace(process.cwd(), ""),
 			errorsBase: [] as any[],
@@ -56,6 +53,7 @@ export async function run(): Promise<void> {
 			console.log("Errors:", projectBase.errors().length)
 			if (projectBase.errors().length > 0) {
 				if (result) result.errorsBase = projectBase.errors()
+				console.log(projectBase.errors())
 				console.debug("Skip project ", project.projectPath, " because of errors")
 				continue
 			}
@@ -104,7 +102,10 @@ export async function run(): Promise<void> {
 		// Check if the head repository has a new project compared to the base repository
 		const projectListHead = await listProjects(repoHead.nodeishFs, process.cwd())
 		const newProjects = projectListHead.filter(
-			(project) => !results.some((result) => result.projectPath === project.projectPath)
+			(project) =>
+				!results.some(
+					(result) => result.projectPath === project.projectPath.replace(process.cwd(), "")
+				)
 		)
 		// Add new projects to the results
 		for (const project of newProjects) {
