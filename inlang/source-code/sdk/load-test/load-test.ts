@@ -14,13 +14,16 @@ const exec = promisify(childProcess.exec)
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-const repoI18next = __dirname
-const projectPath = join(repoI18next, "project.inlang")
+const projectPath = join(__dirname, "project.inlang")
 
 const mockServer = "http://localhost:3000"
 
 const cli = `PUBLIC_SERVER_BASE_URL=${mockServer} pnpm inlang`
 const translateCommand = cli + " machine translate -f --project ./project.inlang"
+
+const messageDir = join(__dirname, "locales", "en")
+const messageFile = join(__dirname, "locales", "en", "common.json")
+
 
 export async function runLoadTest(
 	messageCount: number = 1000,
@@ -37,8 +40,10 @@ export async function runLoadTest(
 		return
 	}
 
+	await generateMessageFile(1)
+
 	log("opening repo and loading project")
-	const repo = await openRepository(repoI18next, { nodeishFs: fs })
+	const repo = await openRepository(__dirname, { nodeishFs: fs })
 	const project = await loadProject({ repo, projectPath })
 
 	log("subscribing to project.errors")
@@ -68,27 +73,27 @@ export async function runLoadTest(
 		})
 	}
 
+	log(`generating ${messageCount} messages`)
 	await generateMessageFile(messageCount)
 
 	if (translate) {
 		log("translating messages with inlang cli")
-		await exec(translateCommand, { cwd: repoI18next })
+		await exec(translateCommand, { cwd: __dirname })
 	}
 	log("load-test end")
 }
 
 async function generateMessageFile(messageCount: number) {
+	await exec(`mkdir -p ${messageDir}`)
 	const messages: Record<string, string> = {}
-	log(`generating ${messageCount} messages`)
 	for (let i = 1; i <= messageCount; i++) {
 		messages[`message_key_${i}`] = `Generated message (${i})`
 	}
 	await fs.writeFile(
-		join(".", "locales", "en", "common.json"),
+		messageFile,
 		JSON.stringify(messages, undefined, 2),
 		"utf-8"
 	)
-	log(`finished generating ${messageCount} messages`)
 }
 
 async function isServerRunning(): Promise<boolean> {
