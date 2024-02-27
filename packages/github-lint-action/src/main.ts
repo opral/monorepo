@@ -147,10 +147,9 @@ export async function run(): Promise<void> {
 		for (const result of results) {
 			if (result.errorsBase.length > 0 && result.errorsHead.length === 0) {
 				console.debug(`#### ✅ Setup of project \`${result.projectPath}\` fixed`)
-				continue
 			}
 			if (result.errorsBase.length === 0 && result.errorsHead.length > 0) {
-				console.debug(`#### ❗️ New errors in setup of project \`${result.projectPath}\` found`)
+				result.commentContent = `#### ❗️ New errors in setup of project \`${result.projectPath}\` found`
 				continue
 			}
 			if (result.errorsBase.length > 0 || result.errorsHead.length > 0) continue
@@ -192,7 +191,7 @@ ${lintSummary
 			repo,
 			issue_number: pr_number as number,
 		})
-		if (issue.data.locked) return core.debug("PR is locked, skipping comment")
+		if (issue.data.locked) return console.debug("PR is locked, comment is skipped")
 
 		//check if PR already has a comment from this action
 		const existingComment = await octokit.rest.issues.listComments({
@@ -207,7 +206,7 @@ ${lintSummary
 			)?.id
 			if (commentId) {
 				core.debug("Updating existing comment")
-				if (results.every((result) => result.lintSummary.length === 0)) {
+				if (results.every((result) => result.commentContent.length === 0)) {
 					core.debug("Reports have been fixed, updating comment and removing it")
 					await octokit.rest.issues.updateComment({
 						owner,
@@ -229,7 +228,7 @@ ${lintSummary
 			}
 		}
 
-		if (results.every((result) => result.lintSummary.length === 0)) {
+		if (results.every((result) => result.commentContent.length === 0)) {
 			core.debug("No lint reports found, skipping comment")
 			return
 		}
