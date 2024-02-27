@@ -38,5 +38,3 @@ jobs:
         uses: ./inlang/source-code/github-lint-action
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          project_path: "/project.inlang"
