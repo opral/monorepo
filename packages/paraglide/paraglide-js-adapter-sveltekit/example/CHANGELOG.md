@@ -1,5 +1,9 @@
 # @inlang/paraglide-js-adapter-sveltekit-example
 
+## 0.0.11
+
+- Update Inlang Modules
+
 ## 0.0.10
 
 - Add `start` command for StackBlitz
