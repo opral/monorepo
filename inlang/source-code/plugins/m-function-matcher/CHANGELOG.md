@@ -1,5 +1,11 @@
 # @inlang/plugin-m-function-matcher
 
+## 0.8.0
+
+### Minor Changes
+
+- 92f7c9532: improve matcher to include function referencing & improve test coverage
+
 ## 0.7.3
 
 ### Patch Changes
