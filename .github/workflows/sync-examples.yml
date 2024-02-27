@@ -8,10 +8,7 @@ on:
     paths:
       - "**/example/CHANGELOG.md"
       - "**/examples/*/CHANGELOG.md"
-  # TODO REMOVE - ONLY FOR TESTING
-  pull_request:
-    branches:
-      - "main"
+
   workflow_dispatch:
 
 #
