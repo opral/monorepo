@@ -177,6 +177,7 @@ ${lintSummary
 		}
 
 		const commentHeadline = `### 🛎️ Translations need to be updated`
+		const commentResolved = `### 🎉 Translations have been successfully updated`
 		const commentContent =
 			commentHeadline +
 			"\n\n" +
@@ -202,7 +203,8 @@ ${lintSummary
 		if (existingComment.data.length > 0) {
 			const commentId = existingComment.data.find(
 				(comment) =>
-					comment.body?.includes(commentHeadline) && comment.user?.login === "github-actions[bot]"
+					(comment.body?.includes(commentHeadline) || comment.body?.includes(commentResolved)) &&
+					comment.user?.login === "github-actions[bot]"
 			)?.id
 			if (commentId) {
 				core.debug("Updating existing comment")
@@ -212,7 +214,7 @@ ${lintSummary
 						owner,
 						repo,
 						comment_id: commentId,
-						body: `### 🎉 Translations have been successfully updated`,
+						body: commentResolved,
 					})
 					return
 				} else {
