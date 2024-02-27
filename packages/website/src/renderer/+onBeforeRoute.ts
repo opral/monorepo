@@ -2,12 +2,13 @@ import type { LanguageTag } from "@inlang/sdk"
 import { sourceLanguageTag, availableLanguageTags } from "#src/paraglide/runtime.js"
 import type { PageContext } from "vike/types"
 
-export default function onBeforeRoute(pageContext: PageContext) {
+export default function onBeforeRoute(pageContext: PageContext, data?: { projectCount: string }) {
 	const { url: urlWithoutLanguageTag, languageTag } = i18nRouting(pageContext.urlOriginal)
 	return {
 		pageContext: {
 			languageTag,
 			urlOriginal: urlWithoutLanguageTag,
+			data,
 		},
 	}
 }

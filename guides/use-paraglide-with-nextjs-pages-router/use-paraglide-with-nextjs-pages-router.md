@@ -72,12 +72,10 @@ Last, let's add the `<ParaglideJS>` component to your `_app.js` file. This will 
 // _app.js
 import type { AppProps } from "next/app"
 import { ParaglideJS } from "@inlang/paraglide-js-adapter-next/pages"
-//This may not exist until you add your first message & start your dev server
-import * as runtime from "@/paraglide/runtime.js" 
 
-export default function App({ Component, pageProps, router }: AppProps) {
+export default function App({ Component, pageProps }: AppProps) {
 	return (
-		<ParaglideJS runtime={runtime} language={router.locale}>
+		<ParaglideJS>
 			<Component {...pageProps} />
 		</ParaglideJS>
 	)

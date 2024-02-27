@@ -43,7 +43,10 @@
 	$: i18n.config.runtime.setLanguageTag(lang)
 	$: if (browser) document.documentElement.lang = lang
 	$: if (browser) document.documentElement.dir = i18n.config.textDirection[lang] ?? "ltr"
-	$: if(browser && lang) invalidate(LANGUAGE_CHANGE_INVALIDATION_KEY)
+
+	let numberOfLanugageChanges = 0
+	$: if(lang)numberOfLanugageChanges += 1;
+	$: if(browser && lang && numberOfLanugageChanges > 1) invalidate(LANGUAGE_CHANGE_INVALIDATION_KEY)
 	
 
 	function translateHref(href: string, hreflang: string | undefined): string {
