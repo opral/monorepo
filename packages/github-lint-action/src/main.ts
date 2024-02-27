@@ -52,7 +52,7 @@ export async function run(): Promise<void> {
 			if (projectBase.errors().length > 0) {
 				if (result) result.errorsBase = projectBase.errors()
 				console.error(projectBase.errors())
-				console.debug("Skip project ", result.projectPath, " because of errors")
+				console.debug("Skip project ", result.projectPath, " in base repo because of errors")
 				continue
 			}
 			result.installedRules.push(...projectBase.installed.messageLintRules())
@@ -128,7 +128,7 @@ export async function run(): Promise<void> {
 			})
 			if (projectHead.errors().length > 0) {
 				if (result) result.errorsHead = projectHead.errors()
-				console.debug("Skip project ", result.projectPath, " because of errors")
+				console.debug("Skip project ", result.projectPath, " in head repo because of errors")
 				continue
 			}
 			result?.reportsHead.push(...projectHead.query.messageLintReports.getAll())
