@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/paraglide-js-adapter-next-example-app",
-	"version": "0.1.9",
+	"version": "0.1.10",
 	"private": true,
 	"scripts": {
 		"_dev": "next dev",
@@ -19,5 +19,9 @@
 		"@types/react": "^18",
 		"@types/react-dom": "^18",
 		"typescript": "^5.3.2"
-	}
+	},
+	"files": [
+		"*",
+		".gitignore"
+	]
 }

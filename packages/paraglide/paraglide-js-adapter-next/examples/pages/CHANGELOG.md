@@ -1,8 +1,4 @@
-# @inlang/paraglide-js-adapter-next-example-app
-
-## 0.1.10
-
-- Update Config
+# @inlang/paraglide-js-adapter-next-example-pages
 
 ## 0.1.9
 
