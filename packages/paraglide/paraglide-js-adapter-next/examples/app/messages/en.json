@@ -3,5 +3,6 @@
 	"currentLanguageTag": "The current language tag is \"{languageTag}\".",
 	"greeting": "Welcome {name}! You have {count} messages.",
 	"about": "About",
-	"on_the_client": "I'm on the client!"
+	"on_the_client": "I'm on the client!",
+	"about_path": "/about"
 }

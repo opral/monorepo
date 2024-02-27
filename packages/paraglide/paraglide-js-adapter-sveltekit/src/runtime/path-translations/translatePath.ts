@@ -2,7 +2,7 @@ import { getPathInfo } from "../utils/get-path-info.js"
 import { serializeRoute } from "../utils/serialize-path.js"
 import { getCanonicalPath } from "./getCanonicalPath.js"
 import { getTranslatedPath } from "./getTranslatedPath.js"
-import type { PathTranslations } from "./types.js"
+import type { PathTranslations } from "../config/pathTranslations.js"
 
 /**
  * Utility function to translate a path in one language to another language

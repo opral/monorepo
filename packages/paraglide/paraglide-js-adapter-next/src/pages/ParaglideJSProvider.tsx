@@ -1,22 +1,23 @@
 import React from "react"
 import Header from "./Header"
-import type { Paraglide } from "../paraglide"
+import {
+	isAvailableLanguageTag,
+	setLanguageTag,
+	sourceLanguageTag,
+	availableLanguageTags,
+} from "$paraglide/runtime.js"
+import { useRouter } from "next/router"
 
-export default function ParaglideJS<T extends string>(props: {
-	runtime: Paraglide<T>
-	language?: string //this intentionally isn't T because Next's types arent as strict as ours
-	children: React.ReactNode
-}): React.ReactNode {
-	const { isAvailableLanguageTag, setLanguageTag, sourceLanguageTag, availableLanguageTags } =
-		props.runtime
+export default function ParaglideJS(props: { children: React.ReactNode }): React.ReactNode {
+	const { locale } = useRouter()
 
-	if (isAvailableLanguageTag(props.language)) {
-		setLanguageTag(props.language)
+	if (isAvailableLanguageTag(locale)) {
+		setLanguageTag(locale)
 	} else {
 		// dev only log
 		if (process.env.NODE_ENV === "development") {
 			console.error(
-				`[paraglide]: "${props.language}" is not one of the available language tags. Falling back to "${sourceLanguageTag}"`
+				`[paraglide]: "${locale}" is not one of the available language tags. Falling back to "${sourceLanguageTag}"`
 			)
 		}
 
