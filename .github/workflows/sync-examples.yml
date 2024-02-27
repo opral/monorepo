@@ -28,15 +28,18 @@ jobs:
     strategy:
       matrix:
         include:
-
+            # The folder where the example is located
           - path: inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/example
+            # the repository to commit to
             repo: "LorisSigrist/paraglide-sveltekit-example"
-            token: ${{ secrets.EXAMPLE_REPOS_ACCESS_TOKEN }}
+            #We can't use variables in matrix definition , so we pass the _name_ of the token secret instead of the token itself
+            token_secret_name: EXAMPLE_REPOS_ACCESS_TOKEN
+            # The user to whom the token belongs
             token_user: "LorisSigrist"
 
           - path: inlang/source-code/paraglide/paraglide-js-adapter-astro/example
             repo: "LorisSigrist/paraglide-astro-example"
-            token: ${{ secrets.EXAMPLE_REPOS_ACCESS_TOKEN }}
+            token_secret_name: EXAMPLE_REPOS_ACCESS_TOKEN
             token_user: "LorisSigrist"
           
         path:
@@ -76,5 +79,5 @@ jobs:
           git add -A . 
           git commit -m "chore: sync with opral/monorepo"
           git status
-          git remote add origin "https://${{ matrix.token_user }}:${{ matrix.token }}@github.com/${{ matrix.repo }}.git"
+          git remote add origin "https://${{ matrix.token_user }}:${{ secrets[matrix.token_secret_name] }}@github.com/${{ matrix.repo }}.git"
           git push --force origin main
