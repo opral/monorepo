@@ -39,6 +39,9 @@ import { capture } from "./telemetry/capture.js"
 import { identifyProject } from "./telemetry/groupIdentify.js"
 import type { NodeishStats } from "../../../../lix/source-code/fs/dist/NodeishFilesystemApi.js"
 
+import _debug from "debug"
+const debug = _debug("loadProject")
+
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
 type MessageState = {
@@ -232,7 +235,7 @@ export async function loadProject(args: {
 				updateMessages: () => {
 					// preserving console.logs as comments pending #
 					// eslint-disable-next-line no-console
-					console.log("load messages because of a change in the message.json files")
+					debug("load messages because of a change in the message.json files")
 					// TODO FINK check error handling for plugin load methods (triggered by file change) -> move to separate ticket
 					loadMessagesViaPlugin(
 						fsWithWatcher,
@@ -312,7 +315,7 @@ export async function loadProject(args: {
 		// -- subscribe to all messages and write to files on signal -------------
 		createEffect(() => {
 			// eslint-disable-next-line no-console
-			// console.log("Outer createEffect")
+			// debug("Outer createEffect")
 
 			const _resolvedModules = resolvedModules()
 			if (!_resolvedModules) return
@@ -335,7 +338,7 @@ export async function loadProject(args: {
 					createRoot((dispose) => {
 						createEffect(() => {
 							// eslint-disable-next-line no-console
-							// console.log("Inner createEffect", messageId)
+							// debug("Inner createEffect", messageId)
 
 							const message = messagesQuery.get({ where: { id: messageId } })!
 							if (!message) {
@@ -680,7 +683,7 @@ async function loadMessagesViaPlugin(
 				// NOTE could use hash instead of the whole object JSON to save memory...
 				if (messageState.messageLoadHash[loadedMessageClone.id] === importedEnecoded) {
 					// eslint-disable-next-line no-console
-					console.log("skipping upsert!")
+					debug("skipping upsert!")
 					continue
 				}
 
@@ -727,7 +730,7 @@ async function loadMessagesViaPlugin(
 		lockTime = undefined
 
 		// eslint-disable-next-line no-console
-		console.log("loadMessagesViaPlugin: " + loadedMessages.length + " Messages processed ")
+		debug("loadMessagesViaPlugin: " + loadedMessages.length + " Messages processed ")
 
 		messageState.isLoading = false
 	} finally {
@@ -785,7 +788,7 @@ async function saveMessagesViaPlugin(
 		if (Object.keys(messageState.messageDirtyFlags).length == 0) {
 			// nothing to save :-)
 			// eslint-disable-next-line no-console
-			console.log("save was skipped - no messages marked as dirty... build!")
+			debug("save was skipped - no messages marked as dirty... build!")
 			messageState.isSaving = false
 			return
 		}
@@ -798,7 +801,7 @@ async function saveMessagesViaPlugin(
 			// since it may takes some time to acquire the lock we check if the save is required still (loadMessage could have happend in between)
 			if (Object.keys(messageState.messageDirtyFlags).length == 0) {
 				// eslint-disable-next-line no-console
-				console.log("save was skipped - no messages marked as dirty... releasing lock again")
+				debug("save was skipped - no messages marked as dirty... releasing lock again")
 				messageState.isSaving = false
 				// release lock in finally block
 				return
@@ -846,7 +849,7 @@ async function saveMessagesViaPlugin(
 			// if there is a queued load, allow it to take the lock before we run additional saves.
 			if (messageState.sheduledLoadMessagesViaPlugin) {
 				// eslint-disable-next-line no-console
-				console.log("saveMessagesViaPlugin calling queued loadMessagesViaPlugin to share lock")
+				debug("saveMessagesViaPlugin calling queued loadMessagesViaPlugin to share lock")
 				await loadMessagesViaPlugin(
 					fs,
 					lockDirPath,
@@ -924,11 +927,11 @@ async function acquireFileLock(
 
 	try {
 		// eslint-disable-next-line no-console
-		console.log(lockOrigin + " tries to acquire a lockfile Retry Nr.: " + tryCount)
+		debug(lockOrigin + " tries to acquire a lockfile Retry Nr.: " + tryCount)
 		await fs.mkdir(lockDirPath)
 		const stats = await fs.stat(lockDirPath)
 		// eslint-disable-next-line no-console
-		console.log(lockOrigin + " acquired a lockfile Retry Nr.: " + tryCount)
+		debug(lockOrigin + " acquired a lockfile Retry Nr.: " + tryCount)
 		return stats.mtimeMs
 	} catch (error: any) {
 		if (error.code !== "EEXIST") {
@@ -946,15 +949,13 @@ async function acquireFileLock(
 		if (fstatError.code === "ENOENT") {
 			// lock file seems to be gone :) - lets try again
 			// eslint-disable-next-line no-console
-			console.log(
-				lockOrigin + " tryCount++ lock file seems to be gone :) - lets try again " + tryCount
-			)
+			debug(lockOrigin + " tryCount++ lock file seems to be gone :) - lets try again " + tryCount)
 			return acquireFileLock(fs, lockDirPath, lockOrigin, tryCount + 1)
 		}
 		throw fstatError
 	}
 	// eslint-disable-next-line no-console
-	console.log(
+	debug(
 		lockOrigin +
 			" tries to acquire a lockfile  - lock currently in use... starting probe phase " +
 			tryCount
@@ -968,7 +969,7 @@ async function acquireFileLock(
 				let lockFileStats: undefined | NodeishStats = undefined
 				try {
 					// eslint-disable-next-line no-console
-					console.log(
+					debug(
 						lockOrigin + " tries to acquire a lockfile - check if the lock is free now " + tryCount
 					)
 
@@ -977,7 +978,7 @@ async function acquireFileLock(
 				} catch (fstatError: any) {
 					if (fstatError.code === "ENOENT") {
 						// eslint-disable-next-line no-console
-						console.log(
+						debug(
 							lockOrigin +
 								" tryCount++ in Promise - tries to acquire a lockfile - lock file seems to be free now - try to acquire " +
 								tryCount
@@ -993,7 +994,7 @@ async function acquireFileLock(
 					if (probeCounts >= nProbes) {
 						// ok maximum lock time ran up (we waitetd nProbes * probeInterval) - we consider the lock to be stale
 						// eslint-disable-next-line no-console
-						console.log(
+						debug(
 							lockOrigin +
 								" tries to acquire a lockfile  - lock not free - but stale lets drop it" +
 								tryCount
@@ -1010,7 +1011,7 @@ async function acquireFileLock(
 						}
 						try {
 							// eslint-disable-next-line no-console
-							console.log(
+							debug(
 								lockOrigin +
 									" tryCount++ same locker - try to acquire again after removing stale lock " +
 									tryCount
@@ -1027,9 +1028,7 @@ async function acquireFileLock(
 				} else {
 					try {
 						// eslint-disable-next-line no-console
-						console.log(
-							lockOrigin + " tryCount++ different locker - try to acquire again " + tryCount
-						)
+						debug(lockOrigin + " tryCount++ different locker - try to acquire again " + tryCount)
 						const lock = await acquireFileLock(fs, lockDirPath, lockOrigin, tryCount + 1)
 						return resolve(lock)
 					} catch (error) {
@@ -1049,7 +1048,7 @@ async function releaseLock(
 	lockTime: number
 ) {
 	// eslint-disable-next-line no-console
-	console.log(lockOrigin + " releasing the lock ")
+	debug(lockOrigin + " releasing the lock ")
 	try {
 		const stats = await fs.stat(lockDirPath)
 		if (stats.mtimeMs === lockTime) {
@@ -1058,15 +1057,15 @@ async function releaseLock(
 		}
 	} catch (statError: any) {
 		// eslint-disable-next-line no-console
-		console.log(lockOrigin + " couldn't release the lock")
+		debug(lockOrigin + " couldn't release the lock")
 		if (statError.code === "ENOENT") {
 			// ok seeks like the log was released by someone else
 			// eslint-disable-next-line no-console
-			console.log(lockOrigin + " WARNING - the lock was released by a different process")
+			debug(lockOrigin + " WARNING - the lock was released by a different process")
 			return
 		}
 		// eslint-disable-next-line no-console
-		console.log(statError)
+		debug(statError)
 		throw statError
 	}
 }
