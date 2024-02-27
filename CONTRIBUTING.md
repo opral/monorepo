@@ -21,7 +21,7 @@ To work on Windows, you will need to [change](https://pnpm.io/cli/run#script-she
 ## Debugging
 
 1. Run `doppler run -- pnpm dev`.
-2. Several debug launch configs can be found in the VSCode side menu. Select the correct one depending on the subject of your contribution and launch Debug mode.
+2. Several debug launch configs can be found in the Visual Studio Code side menu. Select the correct one depending on the subject of your contribution and launch Debug mode.
 
 ## Tips for running tests locally
 

@@ -1,5 +1,13 @@
 # inlang-vs-code-extension
 
+## 1.32.8
+
+### Patch Changes
+
+- 960f8fb70: rename the vscode extension to "Sherlock"
+  - @inlang/sdk@0.26.4
+  - @inlang/telemetry@0.3.12
+
 ## 1.32.7
 
 ### Patch Changes
@@ -51,7 +59,7 @@
 
 ### Minor Changes
 
-- b3090c279: fix env issues in vscode extension
+- b3090c279: fix env issues in Visual Studio Code extension (Sherlock)
 
 ## 1.31.0
 
@@ -258,7 +266,7 @@
 
 ### Minor Changes
 
-- 82ccb9e80: add quote stripping to extract messages in vs code extension
+- 82ccb9e80: add quote stripping to extract messages in Visual Studio Code extension (Sherlock)
 - cc3c17d8a: add resolve string escape for inline preview
 
 ## 1.20.0
@@ -271,7 +279,7 @@
 
 ### Minor Changes
 
-- change logo of vs code extension
+- change logo of Visual Studio Code extension (Sherlock)
 
 ## 1.18.0
 
@@ -358,7 +366,7 @@
 
 ### Minor Changes
 
-- 9df069d11: quickfix: vs code extension config create
+- 9df069d11: quickfix: Visual Studio Code extension (Sherlock) config create
 
 ## 1.6.0
 
@@ -520,9 +528,9 @@
 
 ### Minor Changes
 
-- 9cd701a3: The VSCode extension should now work for the majority of projects.
+- 9cd701a3: The Visual Studio Code extension (Sherlock) should now work for the majority of projects.
 
-  We fixed a problem that blocked the VSCode extension for months. The extension transpiles ESM under the hood to CJS now because Electron, and thus VSCode, do not support ESM.
+  We fixed a problem that blocked the Visual Studio Code extension (Sherlock) for months. The extension transpiles ESM under the hood to CJS now because Electron, and thus Visual Studio Code, do not support ESM.
 
 ## 0.5.9
 

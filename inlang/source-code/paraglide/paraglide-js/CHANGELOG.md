@@ -1,5 +1,11 @@
 # @inlang/paraglide-js
 
+## 1.2.6
+
+### Patch Changes
+
+- 960f8fb70: rename the vscode extension to "Sherlock"
+
 ## 1.2.5
 
 ### Patch Changes
@@ -202,7 +208,7 @@ What you need to change:
 
 ## 1.0.0-prerelease.5
 
-improve: `paraglide-js init` now adds the vs code extension if vscode is used
+improve: `paraglide-js init` now adds the Visual Studio Code extension (Sherlock) if vscode is used
 
 ## 1.0.0-prerelease.4
 

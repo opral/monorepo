@@ -303,6 +303,49 @@ describe("Paraglide Message Parser", () => {
 		])
 	})
 
+	it("should parse function calls without parentheses", () => {
+		const sourceCode = `import * as m from 'module';
+
+		const a = {
+			b: m.helloWorld,
+			c: m.helloWorld(),
+			d: m.helloWorld().someFunction(),
+			e: m.this_is_a_message123,
+		}
+		`
+		const result = parse(sourceCode)
+		expect(result).toEqual([
+			{
+				messageId: "helloWorld",
+				position: {
+					start: { line: 4, character: 9 },
+					end: { line: 4, character: 19 },
+				},
+			},
+			{
+				messageId: "helloWorld",
+				position: {
+					start: { line: 5, character: 9 },
+					end: { line: 5, character: 21 },
+				},
+			},
+			{
+				messageId: "helloWorld",
+				position: {
+					start: { line: 6, character: 9 },
+					end: { line: 6, character: 21 },
+				},
+			},
+			{
+				messageId: "this_is_a_message123",
+				position: {
+					start: { line: 7, character: 9 },
+					end: { line: 7, character: 29 },
+				},
+			},
+		])
+	})
+
 	it("should match if m is defined before the reference to paraglide", () => {
 		const sourceCode = `
 		m.helloWorld();
@@ -338,6 +381,13 @@ describe("Paraglide Message Parser", () => {
 	it("should match invalid syntax", () => {
 		const sourceCode = "const x = 42; m.helloWorld("
 		const result = parse(sourceCode)
+		expect(result).toEqual([])
+	})
+
+	it("should return an empty array when parsing fails", () => {
+		const sourceCode = undefined
+
+		const result = parse(sourceCode as unknown as string)
 		expect(result).toEqual([])
 	})
 })

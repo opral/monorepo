@@ -24,12 +24,16 @@ export type RootProps = Accessor<{
  * to provide the page with the required context and provide
  * error boundaries.
  */
-export default function Root(props: { page: Component; pageProps: Record<string, unknown> }) {
+export default function Root(props: {
+	page: Component
+	pageProps: Record<string, unknown>
+	data?: any
+}) {
 	return (
 		<ErrorBoundary fallback={(error) => <ErrorMessage error={error} />}>
 			<ParaglideJsProvider>
 				<LocalStorageProvider>
-					<Dynamic component={props.page} {...(props.pageProps ?? {})} />
+					<Dynamic component={props.page} {...(props.pageProps ?? {})} {...(props.data ?? {})} />
 				</LocalStorageProvider>
 			</ParaglideJsProvider>
 		</ErrorBoundary>

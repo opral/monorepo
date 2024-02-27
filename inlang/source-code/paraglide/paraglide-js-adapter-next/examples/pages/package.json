@@ -1,0 +1,28 @@
+{
+	"name": "@inlang/paraglide-js-adapter-next-example-pages",
+	"version": "0.1.2",
+	"private": true,
+	"sideEffects": false,
+	"scripts": {
+		"_dev": "next dev",
+		"build": "next build",
+		"preview": "next start"
+	},
+	"dependencies": {
+		"@inlang/paraglide-js": "workspace:*",
+		"@inlang/paraglide-js-adapter-next": "workspace:*",
+		"react": "^18",
+		"react-dom": "^18",
+		"next": "14.0.4"
+	},
+	"devDependencies": {
+		"typescript": "^5",
+		"@types/node": "^20",
+		"@types/react": "^18",
+		"@types/react-dom": "^18"
+	},
+	"files": [
+		"*",
+		".gitignore"
+	]
+}

@@ -1,5 +1,12 @@
 # @inlang/module
 
+## 1.2.6
+
+### Patch Changes
+
+- Updated dependencies [960f8fb70]
+  - @inlang/plugin@2.4.6
+
 ## 1.2.5
 
 ### Patch Changes

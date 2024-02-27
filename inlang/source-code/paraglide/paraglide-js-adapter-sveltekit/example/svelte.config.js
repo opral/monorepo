@@ -12,7 +12,6 @@ const config = {
 	],
 	kit: {
 		adapter: adapter(),
-
 		alias: {
 			$paraglide: "./src/paraglide/",
 			$lib: "./src/lib/",
@@ -20,10 +19,6 @@ const config = {
 		prerender: {
 			//Needed for correctly prerendering <link rel="alternate" hreflang="x" href="y">
 			origin: "https://example.com",
-		},
-
-		paths: {
-			base: "/base",
 		},
 	},
 
