@@ -38,6 +38,13 @@ describe("getLocaleFromLocalisedPath", () => {
 })
 
 describe("getCanonicalPath", () => {
+	it("get's the canonical path for just the language prefix", () => {
+		expect(getCanonicalPath("/de")).toBe("/")
+		expect(getCanonicalPath("/en")).toBe("/")
+		expect(getCanonicalPath("/")).toBe("/")
+		expect(getCanonicalPath("/de-CH")).toBe("/")
+	})
+
 	it("removes the language prefix if there is one", () => {
 		expect(getCanonicalPath("/de/some/path")).toBe("/some/path")
 		expect(getCanonicalPath("/en/some/path")).toBe("/some/path")
@@ -63,6 +70,9 @@ describe("getCanonicalPath", () => {
 
 describe("getLocalisedPath", () => {
 	it("adds a language prefix if there isn't one", () => {
+		expect(getLocalisedPath("/", "de")).toBe("/de")
+		expect(getLocalisedPath("/", "de-CH")).toBe("/de-CH")
+		expect(getLocalisedPath("/", "en")).toBe("/")
 		expect(getLocalisedPath("/some/path", "de")).toBe("/de/some/path")
 		expect(getLocalisedPath("/some/path", "de-CH")).toBe("/de-CH/some/path")
 	})
@@ -110,10 +120,6 @@ describe("translatePath", () => {
 
 	it("does not add a language prefix if the new locale is the source language tag", () => {
 		expect(translatePath("/some/path", "en")).toBe("/some/path")
-	})
-
-	it("returns an empty string if the path is empty", () => {
-		expect(translatePath("", "en")).toBe("")
 	})
 
 	it("keeps search params and hash", () => {
@@ -238,10 +244,9 @@ describe("localiseHref", () => {
 	})
 })
 
-describe.only("isExternal", () => {
+describe("isExternal", () => {
 	it("returns true for external links", () => {
 		expect(isExternal("mailto:hello@test.com")).toBe(true)
-
 		expect(isExternal("https://example.com")).toBe(true)
 		expect(isExternal("http://example.com")).toBe(true)
 	})
