@@ -38,9 +38,17 @@ jobs:
             repo: "LorisSigrist/paraglide-astro-example"
             token_secret_name: EXAMPLE_REPOS_ACCESS_TOKEN
             token_user: "LorisSigrist"
+
+          - path: inlang/source-code/paraglide/paraglide-js-adapter-next/examples/app
+            repo: "LorisSigrist/paraglide-next-app-router-example"
+            token_secret_name: EXAMPLE_REPOS_ACCESS_TOKEN
+            token_user: "LorisSigrist"
+
+          - path: inlang/source-code/paraglide/paraglide-js-adapter-next/examples/pages
+            repo: "LorisSigrist/paraglide-next-pages-router-example"
+            token_secret_name: EXAMPLE_REPOS_ACCESS_TOKEN
+            token_user: "LorisSigrist"
           
-        path:
-          - inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/example
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
