@@ -4,11 +4,11 @@ This is an example Project for using Paraglide with SvelteKit. It implements i18
 
 Use this as a reference for your own project.
 
-## Links
+## Links
 - [Paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs)
 - [Paraglide SvelteKit Adapter](https://inlang.com/m/dxnzrydw/library-inlang-paraglideJsAdapterSveltekit)
 
-## Interesting Files
+## Interesting Files
 - `vite.config.js`
 - `src/lib/i18n.js`
 - `src/routes/+layout.svelte`
