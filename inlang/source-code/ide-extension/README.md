@@ -17,7 +17,7 @@
 </div>
 
 
-<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-extension-cover.png"/>
+<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/sherlock-cover-small.png"/>
 
 <br>
 <br>
@@ -96,7 +96,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 <div>
 	<div class="flex-container">
 		<div class="flex-item">
-			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-monorepo.png"/>
+			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/sherlock-monorepo.png"/>
 		</div>
 		<div class="flex-item">
 			<p class="bold">📦 Monorepo support</p>
@@ -110,7 +110,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 <div>
 	<div class="flex-container">
 		<div class="flex-item">
-			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-update.png"/>
+			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/sherlock-update.png"/>
 		</div>
 		<div class="flex-item">
 			<p class="bold">🔁 Update Translations</p>
@@ -124,7 +124,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 <div>
 	<div class="flex-container">
 		<div class="flex-item">
-			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-errors.png"/>
+			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/sherlock-errors.png"/>
 		</div>
 		<div class="flex-item">
 			<p class="bold">⚠ Transparent Errors</p>
@@ -137,7 +137,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 
 ## Quick start
 
-<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-start.png"/>
+<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/sherlock-start.png"/>
 
 Install the extension and click `Getting Started` in the `Inlang Tab`. 
 
