@@ -279,9 +279,12 @@ export default function Document() {
 - Translated Pathnames
 - Better Static Export support
 - Simplify Setup
+- Expand Routing Strategies
 
 ## Examples
 
-You can find example projects on our Github Repository:
-- [App Router Example](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next/examples/app)
+You can find example projects on our Github, or try them on StackBlitz:
+- [App Router Example Repository](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next/examples/app)
+- [App Router Example on StackBlitz](https://stackblitz.com/~/LorisSigrist/paraglide-next-app-router-example)
 - [Pages Router Example](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next/examples/pages)
+- [Pages Router Example on StackBlitz](https://stackblitz.com/~/LorisSigrist/paraglide-next-pages-router-example)
