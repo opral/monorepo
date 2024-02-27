@@ -41,7 +41,14 @@ export async function runLoadTest(messageCount: number = 1000, translate: boolea
 
 	console.log("subscribing to messages.getAll")
 	project.query.messages.getAll.subscribe((messages) => {
-		console.log("messages changed", messages.length)
+		if (messages.length % 1000 === 1) {
+			console.log(Date())
+			console.log("messages changed", messages.length)
+		}
+	})
+
+	project.query.messageLintReports.getAll.subscribe((reports) => {
+		// console.log("lint reports:", reports.length)
 	})
 
 	await generateMessageFile(messageCount)
