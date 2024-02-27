@@ -9,6 +9,9 @@ import { dirname, join } from "node:path"
 import childProcess from "node:child_process"
 import { promisify } from "node:util"
 
+import _debug from "debug"
+const debug = _debug("load-test")
+
 const exec = promisify(childProcess.exec)
 
 const __filename = fileURLToPath(import.meta.url)
@@ -31,7 +34,7 @@ export async function runLoadTest(
 	subscribeToMessages: boolean = true,
 	subscribeToLintReports: boolean = false
 ) {
-	log("load-test start")
+	debug("load-test start")
 
 	if (translate && !(await isServerRunning())) {
 		console.error(
@@ -42,45 +45,45 @@ export async function runLoadTest(
 
 	await generateMessageFile(1)
 
-	log("opening repo and loading project")
+	debug("opening repo and loading project")
 	const repo = await openRepository(__dirname, { nodeishFs: fs })
 	const project = await loadProject({ repo, projectPath })
 
-	log("subscribing to project.errors")
+	debug("subscribing to project.errors")
 	project.errors.subscribe((errors) => {
 		if (errors.length > 0) {
-			log(`load=test project errors ${errors[0]}`)
+			debug(`load=test project errors ${errors[0]}`)
 		}
 	})
 
 	if (subscribeToMessages) {
-		log("subscribing to messages.getAll")
+		debug("subscribing to messages.getAll")
 		let messagesEvents = 0
 		project.query.messages.getAll.subscribe((messages) => {
 			if (messagesEvents++ % 1000 === 1) {
-				log(`messages changed ${messages.length}`)
+				debug(`messages changed ${messages.length}`)
 			}
 		})
 	}
 
 	if (subscribeToLintReports) {
-		log("subscribing to lintReports.getAll")
+		debug("subscribing to lintReports.getAll")
 		let lintEvents = 0
 		project.query.messageLintReports.getAll.subscribe((reports) => {
 			if (lintEvents++ % 1000 === 1) {
-				log(`lint reports changed ${reports.length}`)
+				debug(`lint reports changed ${reports.length}`)
 			}
 		})
 	}
 
-	log(`generating ${messageCount} messages`)
+	debug(`generating ${messageCount} messages`)
 	await generateMessageFile(messageCount)
 
 	if (translate) {
-		log("translating messages with inlang cli")
+		debug("translating messages with inlang cli")
 		await exec(translateCommand, { cwd: __dirname })
 	}
-	log("load-test end")
+	debug("load-test end")
 }
 
 async function generateMessageFile(messageCount: number) {
@@ -105,6 +108,3 @@ async function isServerRunning(): Promise<boolean> {
 	}
 }
 
-function log(message: string) {
-	console.log(new Date().toLocaleTimeString("en-GB"), message)
-}
