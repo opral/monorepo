@@ -53,7 +53,7 @@ export async function run(): Promise<void> {
 			if (projectBase.errors().length > 0) {
 				if (result) result.errorsBase = projectBase.errors()
 				console.debug("Skip project ", project.projectPath, " because of errors")
-				break
+				continue
 			}
 			result?.installedRules.push(...projectBase.installed.messageLintRules())
 			result?.reportsBase.push(...projectBase.query.messageLintReports.getAll())
