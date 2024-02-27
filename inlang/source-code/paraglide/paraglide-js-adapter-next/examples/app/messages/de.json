@@ -3,5 +3,6 @@
 	"currentLanguageTag": "Der aktuelle Sprachtag ist \"{languageTag}\".",
 	"greeting": "Hallo {name}! Du hast {count} Nachrichten.",
 	"about": "Über uns",
-	"on_the_client": "Ich bin auf dem Client."
+	"on_the_client": "Ich bin auf dem Client.",
+	"about_path": "/ueber-uns"
 }

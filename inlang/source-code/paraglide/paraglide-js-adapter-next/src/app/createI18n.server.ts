@@ -34,7 +34,7 @@ export function createI18n<T extends string = string>(options: I18nOptions<T> = 
 			console.warn(
 				`The following issues were found in your path translations. Make sure to fix them before deploying your app:`
 			)
-			console.table(issues)
+			console.info(JSON.stringify(issues, undefined, 2))
 		}
 	}
 

@@ -7,21 +7,10 @@ import { createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
 import { I18nOptions } from "./config"
 import { resolvePathTranslations } from "./pathnames/resolvePathTranslations"
-import { validatePathTranslations } from "./pathnames/validatePathTranslations"
 
 export function createI18n<T extends string = string>(options: I18nOptions<T> = {}) {
 	const exclude = createExclude(options.exclude ?? [])
 	const pathnames = resolvePathTranslations(options.pathnames ?? {}, availableLanguageTags as T[])
-
-	if (process.env.NODE_ENV === "development") {
-		const issues = validatePathTranslations(pathnames, availableLanguageTags as T[])
-		if (issues.length) {
-			console.warn(
-				`The following issues were found in your path translations. Make sure to fix them before deploying your app:`
-			)
-			console.table(issues)
-		}
-	}
 
 	const strategy = prefixStrategy<T>({
 		availableLanguageTags: availableLanguageTags as readonly T[],
