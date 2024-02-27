@@ -45,7 +45,8 @@ export async function run(): Promise<void> {
 		for (const project of projectListBase) {
 			console.debug("Checking project:", project.projectPath)
 			const result = results.find((result) => result.projectPath === project.projectPath)
-			const projectBase = await loadProject({
+			// eslint-disable-next-line prefer-const
+			let projectBase = await loadProject({
 				projectPath: process.cwd() + project.projectPath,
 				repo: repoBase,
 				appId: "app.inlang.githubI18nLintAction",
