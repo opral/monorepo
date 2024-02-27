@@ -215,6 +215,43 @@ export const { ... } =
 
 This will change which langauge doesn't get a prefix in the URL.
 
+#### Translated Pathnames
+You can translate pathnames by adding a `pathname` option to `createI18n`. This allows you to define a different pathname for each language.
+
+```ts
+export const { ... } =
+	createI18n<AvailableLanguageTag>({
+		pathname: {
+			"/about": {
+				de: "/ueber-uns",
+				en: "/about"
+			}
+		}
+	})
+```
+
+An even better option is to use a message to manage the pathnames. This way you can change the pathnames without changing the code.
+
+```json
+// messages/en.json
+{
+	"about_pathname": "/about"
+}
+// messages/de.json
+{
+	"about_pathname": "/ueber-uns"
+}
+```
+
+```ts
+export const { ... } =
+	createI18n<AvailableLanguageTag>({
+		pathname: {
+			"/about": m.about_pathname //pass as reference
+		}
+	})
+```
+
 ## (legacy) Setup With the Pages Router
 
 The Pages router already comes with i18n support out of the box. You can read more about it in the[NextJS Pages router documentation](https://nextjs.org/docs/advanced-features/i18n-routing). Thanks to this, Paraglide doesn't need to provide it's own routing. All the Adapter does in the Pages router is react to the language change.
