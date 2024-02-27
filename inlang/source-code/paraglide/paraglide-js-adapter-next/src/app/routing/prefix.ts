@@ -1,5 +1,7 @@
 import type { LinkProps } from "next/link"
 import { PathTranslations } from "../pathnames/types"
+import { resolvePath } from "../pathnames/matching/resolvePath"
+import { matches } from "../pathnames/matching/match"
 
 /*
 	Canonical Path = Path without locale (how you write the href)
@@ -9,6 +11,7 @@ import { PathTranslations } from "../pathnames/types"
 export function prefixStrategy<T extends string>({
 	availableLanguageTags,
 	defaultLanguage,
+	pathnames,
 	exclude,
 }: {
 	availableLanguageTags: readonly T[]
@@ -29,19 +32,48 @@ export function prefixStrategy<T extends string>({
 
 	function getCanonicalPath(localisedPath: string): string {
 		const locale = getLocaleFromLocalisedPath(localisedPath) ?? defaultLanguage
-		let pathWithoutLocale =
-			locale === defaultLanguage ? localisedPath : localisedPath.replace(`/${locale}`, "")
-		pathWithoutLocale ||= "/"
+		const pathWithoutLocale = localisedPath.startsWith(`/${locale}`)
+			? localisedPath.replace(`/${locale}`, "")
+			: localisedPath
+
+		for (const [canonicalPathDefinition, translationsForPath] of Object.entries(pathnames)) {
+			if (!(locale in translationsForPath)) continue
+
+			const translatedPathDefinition = translationsForPath[locale]
+			if (!translatedPathDefinition) continue
+
+			const match = matches(pathWithoutLocale, [translatedPathDefinition])
+			if (!match) continue
+
+			return resolvePath(canonicalPathDefinition, match.params)
+		}
 
 		return pathWithoutLocale
 	}
 
-	function getLocalisedPath(canonicalPath: string, locale: string): string {
-		if (exclude(canonicalPath) || locale === defaultLanguage) return canonicalPath
-		return `/${locale}${canonicalPath}`
+	function getLocalisedPath(canonicalPath: string, locale: T): string {
+		if (exclude(canonicalPath)) return canonicalPath
+
+		const translatedPath = getTranslatedPath(canonicalPath, locale, pathnames)
+
+		if (locale === defaultLanguage) return translatedPath
+		return `/${locale}${translatedPath}`
 	}
 
-	function translatePath(localisedPath: string, newLocale: string): string {
+	function getTranslatedPath(canonicalPath: string, lang: T, translations: PathTranslations<T>) {
+		const match = matches(canonicalPath, Object.keys(translations))
+		if (!match) return canonicalPath
+
+		const translationsForPath = translations[match.id as `/${string}`]
+		if (!translationsForPath) return canonicalPath
+
+		const translatedPath = translationsForPath[lang]
+		if (!translatedPath) return canonicalPath
+
+		return resolvePath(translatedPath, match.params)
+	}
+
+	function translatePath(localisedPath: string, newLocale: T): string {
 		const canonicalPath = getCanonicalPath(localisedPath)
 		return getLocalisedPath(canonicalPath, newLocale)
 	}
@@ -52,7 +84,7 @@ export function prefixStrategy<T extends string>({
 	 *
 	 * The type of the returned value is the same as the type of the argument. (Eg string stays string, object stays object)
 	 */
-	function localiseHref<T extends LinkProps["href"]>(canonicalHref: T, lang: string): T {
+	function localiseHref<P extends LinkProps["href"]>(canonicalHref: P, lang: T): P {
 		//don't translate external links
 		if (isExternal(canonicalHref)) return canonicalHref
 		if (typeof canonicalHref === "object" && !canonicalHref.pathname) return canonicalHref
