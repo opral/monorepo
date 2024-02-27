@@ -271,15 +271,14 @@ module.exports = {
 
 This will have the effect that NextJS will automatically prefix all routes with the locale. For example, the route `/about` will become `/en/about` for the English locale and `/de/about` for the German locale. The only language that won't be prefixed is the default locale.
 
-Now all that's left is to tell paraglide which language to use. To do that, wrap your `_app.js` file with the `ParaglideJS` component, pass it the current language and the paraglide runtime module.
+Now all that's left is to tell paraglide which language to use. To do that, wrap your `_app.js` file with the `ParaglideJS` component.
 
 ```jsx
 import { ParaglideJS } from "@inlang/paraglide-js-adapter-next/pages"
-import * as runtime from "@/paraglide/runtime.js"
 
-export default function App({ Component, pageProps, router }: AppProps) {
+export default function App({ Component, pageProps }: AppProps) {
 	return (
-		<ParaglideJS runtime={runtime} language={router.locale}>
+		<ParaglideJS>
 			<Component {...pageProps} />
 		</ParaglideJS>
 	)
