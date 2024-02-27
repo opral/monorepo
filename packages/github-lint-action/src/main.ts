@@ -40,6 +40,8 @@ export async function run(): Promise<void> {
 			lintSummary: [] as { id: string; name: string; count: number }[],
 			commentContent: "" as string,
 		}))
+		// log all project paths
+		console.log(results.map((project) => project.projectPath))
 
 		// Collect all reports from the base repository
 		for (const project of projectListBase) {
@@ -110,7 +112,7 @@ export async function run(): Promise<void> {
 		// Add new projects to the results
 		for (const project of newProjects) {
 			results.push({
-				projectPath: project.projectPath,
+				projectPath: project.projectPath.replace(process.cwd(), ""),
 				errorsBase: [] as any[],
 				errorsHead: [] as any[],
 				installedRules: [] as InstalledMessageLintRule[],
