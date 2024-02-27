@@ -45,12 +45,12 @@ export async function run(): Promise<void> {
 		for (const project of projectListBase) {
 			console.debug("Checking project:", project.projectPath)
 			const result = results.find((result) => result.projectPath === project.projectPath)
-			// eslint-disable-next-line prefer-const
-			let projectBase = await loadProject({
+			const projectBase = await loadProject({
 				projectPath: process.cwd() + project.projectPath,
 				repo: repoBase,
-				appId: "app.inlang.githubI18nLintAction",
+				appId: "app.inlang.ninjaI18nAction",
 			})
+			console.log("Errors:", projectBase.errors().length)
 			if (projectBase.errors().length > 0) {
 				if (result) result.errorsBase = projectBase.errors()
 				console.debug("Skip project ", project.projectPath, " because of errors")
@@ -123,7 +123,7 @@ export async function run(): Promise<void> {
 			const projectHead = await loadProject({
 				projectPath: process.cwd() + project.projectPath,
 				repo: repoHead,
-				appId: "app.inlang.githubI18nLintAction",
+				appId: "app.inlang.ninjaI18nAction",
 			})
 			if (projectHead.errors().length > 0) {
 				if (result) result.errorsHead = projectHead.errors()
