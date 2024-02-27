@@ -53,7 +53,7 @@ export async function run(): Promise<void> {
 			branch: github.context.payload.pull_request?.base.label.split(":")[1],
 			link: github.context.payload.pull_request?.base.repo.html_url,
 		}
-		console.log("Head meta", JSON.stringify(headMeta))
+		core.debug("Head meta", JSON.stringify(headMeta))
 		console.log("Base meta", JSON.stringify(baseMeta))
 
 		const isFork = headMeta.owner !== baseMeta.owner
