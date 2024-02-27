@@ -312,14 +312,14 @@ export async function loadProject(args: {
 		// -- subscribe to all messages and write to files on signal -------------
 		createEffect(() => {
 			// eslint-disable-next-line no-console
-			console.log("Outer createEffect")
+			// console.log("Outer createEffect")
 
 			const _resolvedModules = resolvedModules()
 			if (!_resolvedModules) return
 
-			const currentMessageIds = messagesQuery.includedMessageIds()
+			const currentMessageIds = new Set(messagesQuery.includedMessageIds())
 			const deletedTrackedMessages = [...trackedMessages].filter(
-				(tracked) => !currentMessageIds.includes(tracked[0])
+				(tracked) => !currentMessageIds.has(tracked[0])
 			)
 
 			const saveMessagesPlugin = _resolvedModules.plugins.find(
@@ -335,7 +335,7 @@ export async function loadProject(args: {
 					createRoot((dispose) => {
 						createEffect(() => {
 							// eslint-disable-next-line no-console
-							console.log("Inner createEffect", messageId)
+							// console.log("Inner createEffect", messageId)
 
 							const message = messagesQuery.get({ where: { id: messageId } })!
 							if (!message) {
