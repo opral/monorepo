@@ -15,7 +15,7 @@
 		"tsx": "^4.7.1"
 	},
 	"scripts": {
-		"clean": "git checkout ./locales",
+		"clean": "rm -rf ./locales",
 		"translate": "PUBLIC_SERVER_BASE_URL=http://localhost:3000 pnpm inlang machine translate -f --project ./project.inlang",
 		"test": "pnpm clean && tsx ./main.ts",
 		"inspect": "pnpm clean && tsx --inspect-brk ./main.ts"

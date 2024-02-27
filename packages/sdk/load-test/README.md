@@ -1,10 +1,12 @@
 # inlang sdk load-test
 
-This repo can be used for volume testing, with more meesages than existing unit tests.
+This repo can be used for volume testing, with more messages than existing unit tests.
 
-The test opens an inlang project and then generates json messages, overwriting ./locales/en/common.json. It can "mock-translate" those into 37 preconfigured languages using the inlang cli.
-
-Lint-rule plugins are configured in the project settings but not subscribed (see usage).
+- The test starts by opening an inlang project with just one english message.
+- It generates additional engish messages, overwriting ./locales/en/common.json.
+- It can "mock-translate" those into 37 preconfigured languages using the inlang cli.
+- Lint-rule plugins are configured in the project settings but lint reports are not subscribed, unless requested.
+- The test uses the i18next message storage plugin.
 
 To allow additional testing on the generated project e.g. with the ide-extension, the test calls `pnpm clean` when it starts, but not after it runs.
 
@@ -18,7 +20,7 @@ Defaults: translate: 1, subscribeToMessages: 1, subscribeToLintReports: 0
 ```
 
 ### mock rpc server
-This test expects the rpc server from PR [#2108](https://github.com/opral/monorepo/pull/2108) running on localhost:3000 with MOCK_TRANSLATE=true
+This test expects the rpc server from PR [#2108](https://github.com/opral/monorepo/pull/2108) running on localhost:3000 with MOCK_TRANSLATE=true.
 
 ```sh
 # in your opral/monorepo
@@ -42,13 +44,13 @@ pnpm test messageCount [translate] [subscribeToMessages] [subscribeToLintReports
 ```
 
 ### clean
-runs `git checkout ./locales`
+Called before each test run, does `rm -rf ./locales`.
 ```sh
 pnpm clean
 ```
 
 ### debug in chrome dev tools with node inspector
-passes --inpect-brk to node
+Passes --inpect-brk to node.
 ```sh
 pnpm inspect messageCount [translate] [subscribeToMessages] [subscribeToLintReports]
 ```
