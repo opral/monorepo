@@ -2,7 +2,12 @@ import * as fs from "node:fs/promises"
 import * as core from "@actions/core"
 import * as github from "@actions/github"
 import { openRepository } from "@lix-js/client"
-import { loadProject, type InstalledMessageLintRule, type MessageLintReport } from "@inlang/sdk"
+import {
+	loadProject,
+	type InstalledMessageLintRule,
+	type MessageLintReport,
+	listProjects,
+} from "@inlang/sdk"
 import { exec } from "node:child_process"
 
 /**
@@ -17,30 +22,44 @@ export async function run(): Promise<void> {
 		if (!token) {
 			throw new Error("GITHUB_TOKEN is not set")
 		}
-		let project_path: string = core.getInput("project_path", { required: true })
 		const { owner, repo } = github.context.repo
 		const pr_number = github.context.payload.pull_request?.number
-		// check if project_path starts with a slash, otherwise add it
-		if (!project_path.startsWith("/")) {
-			project_path = `/${project_path}`
-		}
 
 		const repoBase = await openRepository(process.cwd(), {
 			nodeishFs: fs,
 			branch: github.context.payload.pull_request?.head.ref,
 		})
-		const projectBase = await loadProject({
-			projectPath: process.cwd() + project_path,
-			repo: repoBase,
-			appId: "app.inlang.githubI18nLintAction",
-		})
-		if (projectBase.errors().length > 0) {
-			for (const error of projectBase.errors()) {
-				throw error
+		const projectListBase = await listProjects(repoBase.nodeishFs, process.cwd())
+		const results = projectListBase.map((project) => ({
+			projectPath: project.projectPath,
+			errorsBase: [] as any[],
+			errorsHead: [] as any[],
+			installedRules: [] as InstalledMessageLintRule[],
+			reportsBase: [] as MessageLintReport[],
+			reportsHead: [] as MessageLintReport[],
+			lintSummary: [] as { id: string; name: string; count: number }[],
+			commentContent: "" as string,
+		}))
+
+		// Collect all reports from the base repository
+		for (const project of projectListBase) {
+			console.debug("Checking project:", project.projectPath)
+			const result = results.find((result) => result.projectPath === project.projectPath)
+			const projectBase = await loadProject({
+				projectPath: process.cwd() + project.projectPath,
+				repo: repoBase,
+				appId: "app.inlang.githubI18nLintAction",
+			})
+			if (projectBase.errors().length > 0) {
+				if (result) result.errorsBase = projectBase.errors()
+				console.debug("Skip project ", project.projectPath, " because of errors")
+				break
 			}
+			result?.installedRules.push(...projectBase.installed.messageLintRules())
+			result?.reportsBase.push(...projectBase.query.messageLintReports.getAll())
 		}
 
-		const reportsBase = projectBase.query.messageLintReports.getAll()
+		// Collect meta data for head and base repository
 		const headMeta = {
 			owner: github.context.payload.pull_request?.head.label.split(":")[0],
 			repo: github.context.payload.pull_request?.head.repo.name,
@@ -57,6 +76,7 @@ export async function run(): Promise<void> {
 		const isFork = headMeta.owner !== baseMeta.owner
 		core.debug(`Is fork: ${isFork}`)
 
+		// Prepare base repo
 		let repoHead
 		if (isFork) {
 			core.debug("Fork detected, cloning base repository")
@@ -77,48 +97,92 @@ export async function run(): Promise<void> {
 			})
 		}
 
-		const projectHead = await loadProject({
-			projectPath: process.cwd() + project_path,
-			repo: repoHead,
-			appId: "app.inlang.githubI18nLintAction",
-		})
-		if (projectHead.errors().length > 0) {
-			for (const error of projectHead.errors()) {
-				throw error
-			}
-		}
-		const reportsHead = projectHead.query.messageLintReports.getAll()
-		core.debug(`Reports head: ${reportsHead.length}`)
-		core.debug(`Reports base: ${reportsBase.length}`)
-
-		const lintSummary = createLintSummary(
-			reportsHead,
-			reportsBase,
-			projectHead.installed.messageLintRules()
+		// Check if the head repository has a new project compared to the base repository
+		const projectListHead = await listProjects(repoHead.nodeishFs, process.cwd())
+		const newProjects = projectListHead.filter(
+			(project) => !results.some((result) => result.projectPath === project.projectPath)
 		)
-
-		// Create a comment with the lint summary
-		const shortenedProjectPath = () => {
-			const parts = project_path.split("/")
-			if (parts.length > 2) {
-				return `/${parts.at(-2)}/${parts.at(-1)}`
-			} else {
-				return project_path
-			}
+		// Add new projects to the results
+		for (const project of newProjects) {
+			results.push({
+				projectPath: project.projectPath,
+				errorsBase: [] as any[],
+				errorsHead: [] as any[],
+				installedRules: [] as InstalledMessageLintRule[],
+				reportsBase: [] as MessageLintReport[],
+				reportsHead: [] as MessageLintReport[],
+				lintSummary: [] as { id: string; name: string; count: number }[],
+				commentContent: "" as string,
+			})
 		}
-		const commentHeadline = `### 🛎️ Translations need to be updated in \`${shortenedProjectPath()}\``
-		const commentContent = `
-${commentHeadline}
 
+		// Collect all reports from the head repository
+		for (const project of projectListHead) {
+			const result = results.find((result) => result.projectPath === project.projectPath)
+			const projectHead = await loadProject({
+				projectPath: process.cwd() + project.projectPath,
+				repo: repoHead,
+				appId: "app.inlang.githubI18nLintAction",
+			})
+			if (projectHead.errors().length > 0) {
+				if (result) result.errorsHead = projectHead.errors()
+				console.debug("Skip project ", project.projectPath, " because of errors")
+				continue
+			}
+			result?.reportsHead.push(...projectHead.query.messageLintReports.getAll())
+		}
+
+		// Create a lint summary for each project
+		for (const result of results) {
+			if (result.errorsBase.length > 0 || result.errorsHead.length > 0) continue
+			result.lintSummary = createLintSummary(
+				result.reportsHead,
+				result.reportsBase,
+				result.installedRules
+			)
+		}
+
+		// Create a comment content for each project
+		for (const result of results) {
+			if (result.errorsBase.length > 0 && result.errorsHead.length === 0) {
+				result.commentContent = `#### ✅ Setup of project \`${result.projectPath}\` fixed`
+				continue
+			}
+			if (result.errorsBase.length === 0 && result.errorsHead.length > 0) {
+				result.commentContent = `#### ❗️ New errors in setup of project \`${result.projectPath}\` found`
+				continue
+			}
+			if (result.errorsBase.length > 0 || result.errorsHead.length > 0) continue
+			const lintSummary = result.lintSummary
+			const shortenedProjectPath = () => {
+				const parts = result.projectPath.split("/")
+				if (parts.length > 2) {
+					return `/${parts.at(-2)}/${parts.at(-1)}`
+				} else {
+					return result.projectPath
+				}
+			}
+			const commentContent = `#### Project: \`${shortenedProjectPath()}\`
 | lint rule | new reports | link |
 |-----------|-------------|------|
 ${lintSummary
 	.map(
 		(lintSummary) =>
-			`| ${lintSummary.name} | ${lintSummary.count} | [contribute (via Fink 🐦)](https://fink.inlang.com/github.com/${headMeta.owner}/${headMeta.repo}?branch=${headMeta.branch}&project=${project_path}&lint=${lintSummary.id}) |`
+			`| ${lintSummary.name} | ${lintSummary.count} | [contribute (via Fink 🐦)](https://fink.inlang.com/github.com/${headMeta.owner}/${headMeta.repo}?branch=${headMeta.branch}&project=${result.projectPath}&lint=${lintSummary.id}) |`
 	)
 	.join("\n")}
 `
+			result.commentContent = commentContent
+		}
+
+		const commentHeadline = `### 🛎️ Translations need to be updated`
+		const commentContent =
+			commentHeadline +
+			"\n\n" +
+			results
+				.map((result) => result.commentContent)
+				.filter((content) => content.length > 0)
+				.join("\n")
 
 		const octokit = github.getOctokit(token)
 		const issue = await octokit.rest.issues.get({
@@ -137,19 +201,17 @@ ${lintSummary
 		if (existingComment.data.length > 0) {
 			const commentId = existingComment.data.find(
 				(comment) =>
-					comment.body?.includes(commentHeadline) &&
-					comment.body?.includes(project_path) &&
-					comment.user?.login === "github-actions[bot]"
+					comment.body?.includes(commentHeadline) && comment.user?.login === "github-actions[bot]"
 			)?.id
 			if (commentId) {
 				core.debug("Updating existing comment")
-				if (lintSummary.length === 0) {
+				if (results.every((result) => result.lintSummary.length === 0)) {
 					core.debug("Reports have been fixed, updating comment and removing it")
 					await octokit.rest.issues.updateComment({
 						owner,
 						repo,
 						comment_id: commentId,
-						body: `### Translations for ${shortenedProjectPath()} have been successfully updated 🎉`,
+						body: `### Translations have been successfully updated 🎉`,
 					})
 					return
 				} else {
@@ -165,7 +227,7 @@ ${lintSummary
 			}
 		}
 
-		if (lintSummary.length === 0) {
+		if (results.every((result) => result.lintSummary.length === 0)) {
 			core.debug("No lint reports found, skipping comment")
 			return
 		}
@@ -213,6 +275,8 @@ function createLintSummary(
 	}
 	return summary
 }
+
+// All functions below will be replaced by the @lix-js/client package in the future
 
 // Function to checkout a branch
 async function checkoutBranch(branchName: string) {

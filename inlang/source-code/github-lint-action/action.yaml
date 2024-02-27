@@ -2,12 +2,6 @@ name: 'i18n lint action'
 description: 'This action checks for translation issues within your PRs.'
 author: 'inlang'
 
-# Define your inputs here.
-inputs:
-  project_path:
-    description: 'Project path'
-    required: true
-
 runs:
   using: node20
   main: dist/index.cjs
