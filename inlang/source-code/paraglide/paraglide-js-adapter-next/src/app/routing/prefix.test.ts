@@ -1,5 +1,5 @@
 import { it, expect, describe } from "vitest"
-import { prefixStrategy } from "./prefix"
+import { prefixStrategy, isExternal } from "./prefix"
 
 const {
 	getLocaleFromLocalisedPath,
@@ -199,8 +199,8 @@ describe("localiseHref", () => {
 	})
 
 	it("does not translate external links (string)", () => {
-		expect(localiseHref("https://some/path", "de")).toBe("https://some/path")
 		expect(localiseHref("https://some/path", "de-CH")).toBe("https://some/path")
+		expect(localiseHref("https://some/path", "de")).toBe("https://some/path")
 		expect(localiseHref("https://some/path", "en")).toBe("https://some/path")
 	})
 
@@ -218,5 +218,36 @@ describe("localiseHref", () => {
 			pathname: "path",
 		})
 	})
+
+	it("applies path translations", () => {
+		expect(localiseHref("/canonical-translated", "de")).toBe("/de/uebersetzt")
+		expect(localiseHref("/canonical-translated", "en")).toBe("/translated")
+		expect(localiseHref("/canonical-translated", "de-CH")).toBe("/de-CH/uebersetzt")
+	})
+
+	it("applies path translations with search params and hash (string)", () => {
+		expect(localiseHref("/canonical-translated?foo=bar#hash", "de")).toBe(
+			"/de/uebersetzt?foo=bar#hash"
+		)
+		expect(localiseHref("/canonical-translated?foo=bar#hash", "de-CH")).toBe(
+			"/de-CH/uebersetzt?foo=bar#hash"
+		)
+		expect(localiseHref("/canonical-translated?foo=bar#hash", "en")).toBe(
+			"/translated?foo=bar#hash"
+		)
+	})
 })
 
+describe.only("isExternal", () => {
+	it("returns true for external links", () => {
+		expect(isExternal("mailto:hello@test.com")).toBe(true)
+
+		expect(isExternal("https://example.com")).toBe(true)
+		expect(isExternal("http://example.com")).toBe(true)
+	})
+
+	it("returns false for path-only links", () => {
+		expect(isExternal("/some/path")).toBe(false)
+		expect(isExternal("some/path")).toBe(false)
+	})
+})
