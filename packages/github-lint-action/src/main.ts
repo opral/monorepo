@@ -135,7 +135,7 @@ export async function run(): Promise<void> {
 
 		// Create a lint summary for each project
 		for (const result of results) {
-			if (result.errorsBase.length > 0 || result.errorsHead.length > 0) continue
+			if (result.errorsHead.length > 0) continue
 			result.lintSummary = createLintSummary(
 				result.reportsHead,
 				result.reportsBase,
@@ -212,7 +212,7 @@ ${lintSummary
 						owner,
 						repo,
 						comment_id: commentId,
-						body: `### Translations have been successfully updated 🎉`,
+						body: `### 🎉 Translations have been successfully updated`,
 					})
 					return
 				} else {
