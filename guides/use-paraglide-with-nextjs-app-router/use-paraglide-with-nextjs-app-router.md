@@ -24,7 +24,7 @@ This will have done a few things:
 - Installed the ParaglideJS Adapter for Next
 
 
-## Setting Up
+## Setting Up
 
 In your `next.config.js`, import the Paraglide Plugin and apply it to your config.
 
@@ -140,7 +140,7 @@ Then add a messages file for the new language.
 
 If you now run the dev server, and visit `/en` and `/de`, you should see the Server Components switch languages. 
 
-## Navigating
+## Navigating
 
 Because the App router (currently) doesn't offer i18n routing out of the box, you will need to use the custom Navigation Components & Hooks you exported from `src/lib/i18n.js`.
 
@@ -192,7 +192,7 @@ router.push("/about")
 router.replace("/about")
 ```
 
-## Building a Language Switcher
+## Building a Language Switcher
 
 You can build a Language Switcher by linking to the current page with a different language. This can be done with an `<Link>` tag or with a programmatic navigation.
 
@@ -210,7 +210,7 @@ export default function LanguageSwitcher() {
 }
 ```
 
-##  Next Steps
+## Next Steps
 
 You should now have a fully functional multilingual NextJS app using ParaglideJS. Wasn't that hard was it?
 
