@@ -1,6 +1,6 @@
 import * as NextNavigation from "next/navigation"
 import type { RoutingStrategy } from "./routing/prefix"
-import { isAvailableLanguageTag, setLanguageTag } from "$paraglide/runtime.js"
+import { setLanguageTag } from "$paraglide/runtime.js"
 import { addBasePath } from "./routing/basePath"
 
 export const createNavigation = <T extends string>(
@@ -104,12 +104,7 @@ export const createNavigation = <T extends string>(
 	 */
 	const usePathname: NextUsePathname = (...args) => {
 		const localisedPathname = NextNavigation.usePathname(...args)
-		const segments = localisedPathname.split("/").filter(Boolean)
-		const languageTag = segments[0]
-		if (!isAvailableLanguageTag(languageTag)) {
-			return localisedPathname
-		}
-		return "/" + segments.slice(1).join("/")
+		return startegy.getCanonicalPath(localisedPathname)
 	}
 
 	return { useRouter, usePathname }

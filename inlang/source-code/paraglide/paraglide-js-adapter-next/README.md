@@ -182,6 +182,76 @@ function Component() {
 }
 ```
 
+#### Excluding certain routes from i18n
+
+You can exclude certain routes from i18n using the `exclude` option on `createI18n`. You can either pass a string or a regex.
+
+```ts
+export const { ... } =
+	createI18n<AvailableLanguageTag>({
+		 //array of routes to exclude
+		exclude: [
+			/^\/api(\/.*)?$/ //excludes all routes starting with /api
+			"/admin" //excludes /admin, but not /admin/anything - globs are not supported
+		],
+	})
+```
+
+Excluded routes won't be prefixed with the language tag & the middleware will not add `Link` headers to them.
+
+> Tip: LLMs are really good at writing regexes.
+
+#### Changing the default language
+
+Usually the default language is the `sourceLanguageTag` you defined in your `project.inlang/settings.json`. If you want to change it, you can use the `defaultLanguage` option on `createI18n`.
+
+
+```ts
+export const { ... } =
+	createI18n<AvailableLanguageTag>({
+		defaultLanguage: "de"
+	})
+```
+
+This will change which langauge doesn't get a prefix in the URL.
+
+#### Translated Pathnames
+You can translate pathnames by adding a `pathname` option to `createI18n`. This allows you to define a different pathname for each language.
+
+```ts
+export const { ... } =
+	createI18n<AvailableLanguageTag>({
+		pathname: {
+			"/about": {
+				de: "/ueber-uns",
+				en: "/about"
+			}
+		}
+	})
+```
+
+An even better option is to use a message to manage the pathnames. This way you can change the pathnames without changing the code.
+
+```json
+// messages/en.json
+{
+	"about_pathname": "/about"
+}
+// messages/de.json
+{
+	"about_pathname": "/ueber-uns"
+}
+```
+
+```ts
+export const { ... } =
+	createI18n<AvailableLanguageTag>({
+		pathname: {
+			"/about": m.about_pathname //pass as reference
+		}
+	})
+```
+
 ## (legacy) Setup With the Pages Router
 
 The Pages router already comes with i18n support out of the box. You can read more about it in the[NextJS Pages router documentation](https://nextjs.org/docs/advanced-features/i18n-routing). Thanks to this, Paraglide doesn't need to provide it's own routing. All the Adapter does in the Pages router is react to the language change.
@@ -201,15 +271,14 @@ module.exports = {
 
 This will have the effect that NextJS will automatically prefix all routes with the locale. For example, the route `/about` will become `/en/about` for the English locale and `/de/about` for the German locale. The only language that won't be prefixed is the default locale.
 
-Now all that's left is to tell paraglide which language to use. To do that, wrap your `_app.js` file with the `ParaglideJS` component, pass it the current language and the paraglide runtime module.
+Now all that's left is to tell paraglide which language to use. To do that, wrap your `_app.js` file with the `ParaglideJS` component.
 
 ```jsx
 import { ParaglideJS } from "@inlang/paraglide-js-adapter-next/pages"
-import * as runtime from "@/paraglide/runtime.js"
 
-export default function App({ Component, pageProps, router }: AppProps) {
+export default function App({ Component, pageProps }: AppProps) {
 	return (
-		<ParaglideJS runtime={runtime} language={router.locale}>
+		<ParaglideJS>
 			<Component {...pageProps} />
 		</ParaglideJS>
 	)
