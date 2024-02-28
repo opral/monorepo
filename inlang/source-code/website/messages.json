@@ -5,7 +5,22 @@
 			"id": "test_lint_action_from_fork",
 			"selectors": [],
 			"variants": [
-				{ "languageTag": "en", "match": [], "pattern": [{ "type": "Text", "value": "Test for Action" }] }
+				{
+					"languageTag": "en",
+					"match": [],
+					"pattern": [{ "type": "Text", "value": "Test for Action" }]
+				}
+			]
+		},
+		{
+			"id": "test_lint_action_from_fork_2",
+			"selectors": [],
+			"variants": [
+				{
+					"languageTag": "en",
+					"match": [],
+					"pattern": [{ "type": "Text", "value": "Test for Action 2" }]
+				}
 			]
 		},
 		{
