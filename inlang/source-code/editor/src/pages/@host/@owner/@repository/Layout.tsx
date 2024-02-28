@@ -883,7 +883,7 @@ function IdsFilter(props: { clearFunction: any }) {
 							class="small"
 							style={{ "--show-delay": "1s" }}
 						>
-							<sl-option prop:value={id} class="ids-filter text-ellipsis">
+							<sl-option prop:value={id} class="ids-filter">
 								{id}
 							</sl-option>
 						</sl-tooltip>

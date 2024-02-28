@@ -309,6 +309,7 @@ sl-select.ids-filter::part(tags) {
 }
 
 sl-option.ids-filter::part(label) {
+	display: inline;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
