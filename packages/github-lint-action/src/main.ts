@@ -38,6 +38,7 @@ export async function run(): Promise<void> {
 			reportsBase: [] as MessageLintReport[],
 			reportsHead: [] as MessageLintReport[],
 			lintSummary: [] as { id: string; name: string; count: number }[],
+			changedIds: [] as string[],
 			commentContent: "" as string,
 		}))
 
@@ -114,6 +115,7 @@ export async function run(): Promise<void> {
 				reportsBase: [] as MessageLintReport[],
 				reportsHead: [] as MessageLintReport[],
 				lintSummary: [] as { id: string; name: string; count: number }[],
+				changedIds: [] as string[],
 				commentContent: "" as string,
 			})
 		}
@@ -136,11 +138,13 @@ export async function run(): Promise<void> {
 		// Create a lint summary for each project
 		for (const result of results) {
 			if (result.errorsHead.length > 0) continue
-			result.lintSummary = createLintSummary(
+			const LintSummary = createLintSummary(
 				result.reportsHead,
 				result.reportsBase,
 				result.installedRules
 			)
+			result.lintSummary = LintSummary.summary
+			result.changedIds = LintSummary.changedIds
 		}
 
 		// Create a comment content for each project
@@ -169,7 +173,13 @@ export async function run(): Promise<void> {
 ${lintSummary
 	.map(
 		(lintSummary) =>
-			`| ${lintSummary.name} | ${lintSummary.count} | [contribute (via Fink 🐦)](https://fink.inlang.com/github.com/${headMeta.owner}/${headMeta.repo}?branch=${headMeta.branch}&project=${result.projectPath}&lint=${lintSummary.id}) |`
+			`| ${lintSummary.name} | ${
+				lintSummary.count
+			} | [contribute (via Fink 🐦)](https://fink.inlang.com/github.com/${headMeta.owner}/${
+				headMeta.repo
+			}?branch=${headMeta.branch}&project=${result.projectPath}&lint=${
+				lintSummary.id
+			}&${result.changedIds.map((id) => `id=${id}`).join("&")}) |`
 	)
 	.join("\n")}
 `
@@ -276,7 +286,7 @@ function createLintSummary(
 			summary.push({ id, name, count: count })
 		}
 	}
-	return summary
+	return { summary, changedIds: diffReports.map((report) => report.messageId) }
 }
 
 // All functions below will be replaced by the @lix-js/client package in the future
