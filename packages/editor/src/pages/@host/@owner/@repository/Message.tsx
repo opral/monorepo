@@ -8,6 +8,7 @@ import copy from "clipboard-copy"
 import { showToast } from "#src/interface/components/Toast.jsx"
 import type { MessageLintReport, Message as MessageType } from "@inlang/sdk"
 import { sortLanguageTags } from "./helper/sortLanguageTags.js"
+import { setMessageCount } from "./+Page.jsx"
 
 export function Message(props: { id: string }) {
 	const { project, filteredLanguageTags, filteredId, filteredMessageLintRules, textSearch } =
@@ -58,7 +59,16 @@ export function Message(props: { id: string }) {
 		on(
 			[filteredLanguageTags, filteredMessageLintRules, filteredId, textSearch, hasBeenLinted],
 			() => {
-				setShouldMessageBeShown(!showFilteredMessage(message()))
+				setShouldMessageBeShown(prev => {
+					const result = !showFilteredMessage(message())
+					// check if message count changed and update the global message count
+					if (result !== prev && result === true) {
+						setMessageCount((prev) => prev - 1)
+					} else if (result !== prev && result === false) {
+						setMessageCount((prev) => prev + 1)
+					}
+					return result
+				})
 			}
 		)
 	)
