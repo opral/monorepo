@@ -1,19 +1,10 @@
 import { useEditorState } from "../State.jsx"
 import { For, Show, createMemo } from "solid-js"
-import { showFilteredMessage } from "./../helper/showFilteredMessage.js"
 import { TourHintWrapper } from "./Notification/TourHintWrapper.jsx"
 import IconArrowLeft from "~icons/material-symbols/arrow-back-rounded"
 import IconAdd from "~icons/material-symbols/add"
 import { type InstalledMessageLintRule, type MessageLintRule } from "@inlang/sdk"
-
-export const messageCount = (ids: string[]) => {
-	const { project } = useEditorState()
-	let counter = 0
-	for (const id of ids) {
-		if (showFilteredMessage(project()?.query.messages.get({ where: { id: id } }))) counter++
-	}
-	return counter
-}
+import { messageCount } from "../+Page.jsx"
 
 export const ListHeader = () => {
 	const {
@@ -21,8 +12,8 @@ export const ListHeader = () => {
 		setFilteredMessageLintRules,
 		filteredMessageLintRules,
 		filteredLanguageTags,
-		filteredId,
-		setFilteredId,
+		filteredIds,
+		setFilteredIds,
 		setTourStep,
 		tourStep,
 	} = useEditorState()
@@ -31,7 +22,7 @@ export const ListHeader = () => {
 		const summary = new Map<string, number>() // Use a Map with explicit types for better performance
 		const filteredRules = new Set<string>(filteredMessageLintRules())
 		const filteredTags = new Set<string>(filteredLanguageTags())
-		const filteredIdValue = filteredId()
+		const filteredIdsValue = filteredIds()
 
 		for (const report of project()?.query.messageLintReports.getAll() || []) {
 			const ruleId = report.ruleId
@@ -41,7 +32,7 @@ export const ListHeader = () => {
 			if (
 				(filteredRules.size === 0 || filteredRules.has(ruleId)) &&
 				(filteredTags.size === 0 || filteredTags.has(languageTag)) &&
-				(filteredIdValue === "" || filteredIdValue === messageId)
+				(filteredIdsValue.length === 0 || filteredIdsValue.includes(messageId))
 			) {
 				summary.set(ruleId, (summary.get(ruleId) || 0) + 1)
 			}
@@ -64,23 +55,21 @@ export const ListHeader = () => {
 	return (
 		<div class="w-full bg-background border border-surface-3 rounded-t-md flex flex-wrap items-center justify-between gap-2 p-4 animate-blendIn z-[1] relative">
 			<Show
-				when={filteredId() === ""}
+				when={filteredIds().length === 0}
 				fallback={
 					<div class="flex gap-2 items-center">
-						<sl-button prop:size="small" onClick={() => setFilteredId("")}>
+						<sl-button prop:size="small" onClick={() => setFilteredIds([])}>
 							{/* @ts-ignore */}
 							<IconArrowLeft slot="prefix" />
 							Back to all messages
 						</sl-button>
 						<div class="h-[30px] px-3 flex gap-2 font-medium items-center rounded-md text-xs bg-hover-primary/10 text-primary">
-							Isolated view (single ID)
+							Isolated view
 						</div>
 					</div>
 				}
 			>
-				<div class="font-medium text-on-surface">
-					{messageCount(project()?.query.messages.includedMessageIds() || []) + " Messages"}
-				</div>
+				<div class="font-medium text-on-surface">{messageCount() + " Messages"}</div>
 			</Show>
 
 			<div class="flex flex-wrap gap-2">

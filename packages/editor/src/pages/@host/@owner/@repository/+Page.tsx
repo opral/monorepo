@@ -1,9 +1,9 @@
-import { For, Match, Switch, onMount, Show } from "solid-js"
+import { For, Match, Switch, onMount, Show, createSignal } from "solid-js"
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded"
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded"
 import { EditorStateProvider, useEditorState } from "./State.jsx"
 import NoMatchPlaceholder from "./components/NoMatchPlaceholder.jsx"
-import { ListHeader, messageCount } from "./components/Listheader.jsx"
+import { ListHeader } from "./components/Listheader.jsx"
 import { TourHintWrapper } from "./components/Notification/TourHintWrapper.jsx"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import type { RecentProjectType } from "#src/services/local-storage/src/schema.js"
@@ -14,6 +14,8 @@ import Link from "#src/renderer/Link.jsx"
 import { browserAuth } from "@lix-js/server"
 import { currentPageContext } from "#src/renderer/state.js"
 import { replaceMetaInfo } from "./helper/ReplaceMetaInfo.js"
+
+export const [messageCount, setMessageCount] = createSignal(0)
 
 export default function Page() {
 	onMount(() => {
@@ -165,8 +167,7 @@ function TheActualPage() {
 						<div
 							class="flex flex-col h-[calc(100vh_-_324px)] grow justify-center items-center min-w-full gap-2"
 							classList={{
-								["hidden"]:
-									messageCount(project()?.query.messages.includedMessageIds() || []) !== 0,
+								["hidden"]: messageCount() !== 0,
 							}}
 						>
 							<NoMatchPlaceholder />
