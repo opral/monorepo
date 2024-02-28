@@ -872,7 +872,7 @@ function IdsFilter(props: { clearFunction: any }) {
 				</Link>
 			</div>
 			<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
-			<div class="max-h-[300px] overflow-y-auto">
+			<div class="max-h-[300px] max-w-[300px]">
 				<For each={project()?.query.messages.includedMessageIds() ?? []}>
 					{(id) => (
 						<sl-tooltip
@@ -880,8 +880,8 @@ function IdsFilter(props: { clearFunction: any }) {
 							prop:placement="top"
 							prop:trigger="hover"
 							prop:disabled={id.length < 28}
-							class="small"
-							style={{ "--show-delay": "1s" }}
+							class="ids-filter small overflow-hidden"
+							style={{ "--show-delay": "1s", "--max-width": "260px", "word-break": "break-all" }}
 						>
 							<sl-option prop:value={id} class="ids-filter">
 								{id}
