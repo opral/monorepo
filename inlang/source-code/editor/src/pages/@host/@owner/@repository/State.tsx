@@ -83,8 +83,8 @@ type EditorStateSchema = {
 	/**
 	 * Id to filter messages
 	 */
-	filteredId: () => string
-	setFilteredId: Setter<string>
+	filteredIds: () => string[]
+	setFilteredIds: Setter<string[]>
 
 	/**
 	 * TextSearch to filter messages
@@ -206,9 +206,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	//set filter with search params
 	const params = new URL(document.URL).searchParams
 
-	const [filteredId, setFilteredId] = createSignal<string>((params.get("id") || "") as string)
+	const [filteredIds, setFilteredIds] = createSignal<string[]>(params.getAll("id") as string[])
 	createEffect(() => {
-		setSearchParams({ key: "id", value: filteredId() })
+		setSearchParams({ key: "id", value: filteredIds() })
 	})
 
 	const [textSearch, setTextSearch] = createSignal<string>((params.get("search") || "") as string)
@@ -319,7 +319,10 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			if (args.repo?.nodeishFs === undefined) return []
 			const projects = await listProjects(args.repo?.nodeishFs, "/")
 
-			if (searchParams().project && projects.some((project) => project.projectPath === searchParams().project)) {
+			if (
+				searchParams().project &&
+				projects.some((project) => project.projectPath === searchParams().project)
+			) {
 				setActiveProject(searchParams().project)
 			} else if (projects.length === 1) {
 				setActiveProject(projects[0]?.projectPath)
@@ -529,8 +532,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					githubRepositoryInformation,
 					routeParams,
 					searchParams,
-					filteredId,
-					setFilteredId,
+					filteredIds,
+					setFilteredIds,
 					textSearch,
 					setTextSearch,
 					fsChange,
