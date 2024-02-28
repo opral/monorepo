@@ -1,7 +1,6 @@
 import { useEditorState } from "../State.jsx"
 import { For, Show, createMemo } from "solid-js"
 import { TourHintWrapper } from "./Notification/TourHintWrapper.jsx"
-import IconArrowLeft from "~icons/material-symbols/arrow-back-rounded"
 import IconAdd from "~icons/material-symbols/add"
 import { type InstalledMessageLintRule, type MessageLintRule } from "@inlang/sdk"
 import { messageCount } from "../+Page.jsx"
@@ -13,7 +12,6 @@ export const ListHeader = () => {
 		filteredMessageLintRules,
 		filteredLanguageTags,
 		filteredIds,
-		setFilteredIds,
 		setTourStep,
 		tourStep,
 	} = useEditorState()
@@ -54,24 +52,7 @@ export const ListHeader = () => {
 
 	return (
 		<div class="w-full bg-background border border-surface-3 rounded-t-md flex flex-wrap items-center justify-between gap-2 p-4 animate-blendIn z-[1] relative">
-			<Show
-				when={filteredIds().length === 0}
-				fallback={
-					<div class="flex gap-2 items-center">
-						<sl-button prop:size="small" onClick={() => setFilteredIds([])}>
-							{/* @ts-ignore */}
-							<IconArrowLeft slot="prefix" />
-							Back to all messages
-						</sl-button>
-						<div class="h-[30px] px-3 flex gap-2 font-medium items-center rounded-md text-xs bg-hover-primary/10 text-primary">
-							Isolated view
-						</div>
-					</div>
-				}
-			>
-				<div class="font-medium text-on-surface">{messageCount() + " Messages"}</div>
-			</Show>
-
+			<div class="font-medium text-on-surface">{messageCount() + " Messages"}</div>
 			<div class="flex flex-wrap gap-2">
 				<For each={Object.keys(getLintSummary()) as MessageLintRule["id"][]}>
 					{(lintRule) => (
