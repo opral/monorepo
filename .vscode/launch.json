@@ -6,9 +6,9 @@
 			"type": "node",
 			"request": "launch",
 			"autoAttachChildProcesses": true,
-			"skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+			"skipFiles": ["<node_internals>/**"], // "**/node_modules/**"
 			"program": "${workspaceRoot}/node_modules/vitest/vitest.mjs",
-			"args": ["run", "${relativeFile}"],
+			"args": ["dev", "--singleThread=true", "${relativeFile}"],
 			"smartStep": true,
 			"console": "integratedTerminal"
 		},

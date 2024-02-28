@@ -169,7 +169,8 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			}
 
 			parentDir.add(baseName)
-			newStatEntry(path, state.fsStats, 0, options?.mode ?? 0o644)
+			const isSymbolicLink = options?.mode === 120000
+			newStatEntry(path, state.fsStats, isSymbolicLink ? 2 : 0, options?.mode ?? 0o644)
 			state.fsMap.set(path, { placeholder: true })
 		},
 
@@ -258,22 +259,27 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 
 			if (parentDir && parentDir instanceof Set) {
 				if (state.fsMap.has(path)) {
-					throw new FilesystemError("EEXIST", path, "mkdir")
+					if (!options?.recursive) {
+						throw new FilesystemError("EEXIST", path, "mkdir")
+					} else {
+						return undefined
+					}
 				}
 
 				parentDir.add(baseName)
+
 				newStatEntry(path, state.fsStats, 1, 0o755)
 				state.fsMap.set(path, new Set())
+
 				for (const listener of listeners) {
 					listener({ eventType: "rename", filename: dirName + baseName })
 				}
 				return path
-			}
-
-			if (options?.recursive) {
-				const firstPath = await mkdir(getDirname(path), options)
+			} else if (options?.recursive) {
+				const parent = getDirname(path)
+				const parentRes = await mkdir(parent, options)
 				await mkdir(path, options)
-				return firstPath
+				return parentRes
 			}
 
 			throw new FilesystemError("ENOENT", path, "mkdir")
@@ -299,6 +305,7 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 				parentDir.delete(baseName)
 				state.fsStats.delete(path)
 				state.fsMap.delete(path)
+				// TODO: check if placeholder should skip firing
 				for (const listener of listeners) {
 					listener({ eventType: "rename", filename: dirName + baseName })
 				}
@@ -502,7 +509,6 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			state.fsMap.delete(path)
 		},
 		readlink: async function (path: Parameters<NodeishFilesystem["readlink"]>[0]) {
-			path = normalPath(path)
 			const linkStats = await lstat(path)
 
 			if (linkStats === undefined) {

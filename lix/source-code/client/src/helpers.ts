@@ -15,7 +15,7 @@ type Args = {
 	}) => any
 }
 
-export const withLazyFetching = ({
+export const withProxy = ({
 	nodeishFs,
 	verbose = false,
 	description,

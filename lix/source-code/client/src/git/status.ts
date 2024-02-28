@@ -1,7 +1,7 @@
 /* eslint-disable unicorn/no-null -- required for isogit walk api */
 import type { NodeishFilesystem } from "@lix-js/fs"
 import isoGit from "isomorphic-git"
-import { modeToFileType } from "./helpers.js"
+// import { modeToFileType } from "./helpers.js"
 
 // TODO: LSTAT is not properly impl. in the memory fs!
 
@@ -18,6 +18,7 @@ const {
 export type OptStatus = "unmodified" | "materialized" | "ignored"
 
 type StatusText =
+	| "unmodified"
 	| "*added"
 	| "added"
 	| "*modified"
@@ -95,8 +96,6 @@ export async function status({
 	cache = {},
 	includeStatus = [],
 }: StatusArgs): Promise<StatusList> {
-	const shouldIgnore = includeStatus.includes("ignored")
-
 	try {
 		return await walk({
 			fs,
@@ -106,12 +105,17 @@ export async function status({
 			trees: [TREE({ ref }), WORKDIR(), STAGE()],
 			map: async function (filepath, [head, workdir, stage]) {
 				// Ignore ignored files, but only if they are not already tracked.
-				if (!head && !stage && workdir && !shouldIgnore) {
+
+				if (!head && !stage && workdir) {
 					const ignored = await isIgnored({ fs, dir, filepath })
 					if (ignored) {
-						// "ignored"	file ignored by a .gitignore rule, will not be shown
-						if (shouldIgnore || filepaths.includes(filepath)) {
-							return [filepath, "ignored", { headOid: null, workdirOid: "42", stageOid: null }]
+						// "ignored" file ignored by a .gitignore rule, will not be shown unless explicitly asked for
+						if (includeStatus.includes("ignored") || filepaths.includes(filepath)) {
+							return [
+								filepath,
+								"ignored",
+								{ headOid: undefined, workdirOid: "ignored", stageOid: undefined },
+							]
 						}
 						return null
 					}
@@ -121,25 +125,11 @@ export async function status({
 					return null
 				}
 				// Late filter against file names
-				if (filter && !filter(filepath)) return
-
-				let fileMode
-				try {
-					fileMode = await workdir?.mode()
-				} catch (error) {
-					// console.warn(error)
-					// skip broken iteration into symlinks or broken directories
-					return undefined
+				if (filter && !filter(filepath)) {
+					return
 				}
 
-				// @ts-ignore
-				const fileType: string = modeToFileType(fileMode)
-
-				if (
-					fileType === "symlink" ||
-					(fileType === "file" && fs._isPlaceholder && fs._isPlaceholder(filepath))
-				) {
-					// TODO: 1, 2, 0 > check this meaning? + check if stageid can differ
+				if (fs._isPlaceholder && fs._isPlaceholder(filepath)) {
 					if (includeStatus.includes("unmodified") || filepaths.includes(filepath)) {
 						const headType = head && (await head.type())
 						const headOid = headType === "blob" ? await head?.oid() : undefined
@@ -153,11 +143,19 @@ export async function status({
 					return null
 				}
 
-				const [headType, workdirType, stageType] = await Promise.all([
-					head && head.type(),
-					workdir && workdir.type(),
-					stage && stage.type(),
-				])
+				let types
+				try {
+					types = await Promise.all([
+						head && head.type(),
+						workdir && workdir.type(),
+						stage && stage.type(),
+					])
+				} catch (error) {
+					// skip broken iteration into symlinks or broken directories, can probably be removed when memfs supports proper lstat/symlinks
+					return undefined
+				}
+
+				const [headType, workdirType, stageType] = types
 
 				const isBlob = [headType, workdirType, stageType].includes("blob")
 
@@ -187,9 +185,7 @@ export async function status({
 				let workdirOid
 
 				if (headType !== "blob" && workdirType === "blob" && stageType !== "blob") {
-					// We don't actually NEED the sha. Any sha will do
-					// TODO: update this logic to handle N trees instead of just 3.
-					workdirOid = "42"
+					workdirOid = await workdir?.oid() // (isogit uses "42" here to avoid hashing as its not exposed)
 				} else if (workdirType === "blob") {
 					workdirOid = await workdir?.oid()
 				}
@@ -201,7 +197,8 @@ export async function status({
 					placeholder?: boolean
 				} = { headOid, workdirOid, stageOid }
 
-				// todo: only if asked for this file "absent"	file not present in HEAD commit, staging area, or working dir
+				// TODO: 1, 2, 0 > check this meaning? + check if stageid can differ
+				// TODO: only if asked for this file "absent"	file not present in HEAD commit, staging area, or working dir
 
 				// [ 1, 1, 1] "unmodified"  todo: unless explicitly asked
 				if (entry.headOid === entry.workdirOid && entry.workdirOid === entry.stageOid) {

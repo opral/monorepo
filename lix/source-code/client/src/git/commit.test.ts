@@ -91,6 +91,18 @@ describe("main workflow", async () => {
 			author: { name: "tests", email: "test@inlang.dev" },
 			message: "test changes commit",
 		})
+    expect(await repository.statusList()).toStrictEqual([])
+
+		await repository.nodeishFs.rm("./README.md")
+		await repository._isoGit.remove({ fs, dir: "/", filepath: "README.md" })
+
+		await commitFun({
+			include: [],
+			author: { name: "tests", email: "test@inlang.dev" },
+			message: "test delete commit",
+		})
+
+		expect(await repository.statusList()).toStrictEqual([])
 
 		return toSnapshot(repository.nodeishFs)
 	}

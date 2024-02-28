@@ -272,6 +272,10 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 							nodeishFs: createNodeishMemoryFs(),
 							auth: browserAuth,
 							branch,
+							experimentalFeatures: {
+								lazyClone: true,
+								lixCommit: true,
+							},
 						}
 					)
 
@@ -647,7 +651,7 @@ export async function pushChanges(args: {
 		})
 	}
 
-	// triggering a side effect here to trigger a re-render
+	// triggerin g a side effect here to trigger a re-render
 	// of components that depends on fs
 	args.setFsChange(new Date())
 	// push changes

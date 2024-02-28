@@ -168,11 +168,11 @@ export const Gitfloat = () => {
 
 		setIsLoading(false)
 
-		telemetryBrowser.capture("EDITOR pushed changes", {
-			owner: routeParams().owner,
-			repository: routeParams().repository,
-			sucess: pushResult.error === undefined,
-		})
+		// telemetryBrowser.capture("EDITOR pushed changes", {
+		// 	owner: routeParams().owner,
+		// 	repository: routeParams().repository,
+		// 	sucess: pushResult.error === undefined,
+		// })
 
 		if (pushResult.error?.data?.statusCode === 403) {
 			pushPermissionDialog.show()

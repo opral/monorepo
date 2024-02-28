@@ -39,10 +39,11 @@ export type Repository = {
 		ref?: string
 	}) => Promise<Awaited<ReturnType<typeof raw.log>>>
 	status: (arg: string) => Promise<string>
-	statusList: (arg: StatusArgs) => ReturnType<typeof status>
+	statusList: (arg?: StatusArgs) => ReturnType<typeof status>
 	forkStatus: () => Promise<
 		{ ahead: number; behind: number; conflicts: boolean } | { error: string }
 	>
+	// emptyWorkdir: () => Promise<void>
 	getOrigin: () => Promise<string | undefined> // move to property
 	getCurrentBranch: () => Promise<string | undefined> // move to property
 	getBranches: () => Promise<string[] | undefined>

@@ -85,7 +85,7 @@ describe("main workflow", () => {
 	})
 
 	it("usees the lix custom commit for the whitelistesd ci test repo", () => {
-		expect(repository._enableExperimentalFeatures).toBe(true)
+		expect(repository._experimentalFeatures).toStrictEqual({ lixCommit: true, lazyClone: true })
 	})
 
 	let fileContent = ""
@@ -241,7 +241,7 @@ describe("main workflow", () => {
 				{
 					headOid: undefined,
 					stageOid: undefined,
-					workdirOid: "42",
+					workdirOid: "d606037cb232bfda7788a8322492312d55b2ae9d",
 				},
 			],
 		])
@@ -293,7 +293,7 @@ describe("main workflow", () => {
 				{
 					headOid: undefined,
 					stageOid: undefined,
-					workdirOid: "42",
+					workdirOid: "d606037cb232bfda7788a8322492312d55b2ae9d",
 				},
 			],
 		])
@@ -337,7 +337,7 @@ describe("main workflow", () => {
 				nodeishFs: createNodeishMemoryFs(),
 			}
 		)
-		expect(nonWhitelistedRepo._enableExperimentalFeatures).toBe(false)
+		expect(nonWhitelistedRepo._experimentalFeatures).toStrictEqual({})
 	})
 
 	it("exposes proper origin", async () => {
@@ -391,3 +391,5 @@ describe("main workflow", () => {
 		// await repository.push()
 	})
 })
+
+// TODO: pull integration tests

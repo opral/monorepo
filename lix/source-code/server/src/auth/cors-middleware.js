@@ -317,8 +317,8 @@ export default ({ origins, insecure_origins = [], authorization = noop } = {}) =
 				}
 				f.body.pipe(res)
 			})
-			.catch((err) => {
-				console.error(err)
+			.catch(() => {
+				// console.error(err)
 				res.statusCode = 500
 				res.end()
 			})

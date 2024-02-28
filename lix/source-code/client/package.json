@@ -27,7 +27,7 @@
 	"dependencies": {
 		"@lix-js/fs": "workspace:*",
 		"@octokit/types": "12.4.0 ",
-		"isomorphic-git": "1.24.5",
+		"isomorphic-git": "workspace:*",
 		"octokit": "3.1.2",
 		"solid-js": "1.7.11"
 	},

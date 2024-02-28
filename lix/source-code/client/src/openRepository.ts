@@ -1,6 +1,6 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 import type { Repository, LixError } from "./api.js"
-import { transformRemote, withLazyFetching, parseLixUri } from "./helpers.js"
+import { transformRemote, withProxy, parseLixUri } from "./helpers.js"
 // @ts-ignore
 import { makeHttpClient } from "./git-http/client.js"
 import { optimizedRefsRes, optimizedRefsReq } from "./git-http/optimize-refs.js"
@@ -14,15 +14,12 @@ import { status as lixStatus } from "./git/status.js"
 import isoGit from "isomorphic-git"
 import { modeToFileType } from "./git/helpers.js"
 
-// TODO: LSTAT is not properly in the memory fs!
 // TODO: --filter=tree:0 for commit history?
-// TODO: fix strartswith .git > .github affected
 const {
 	TREE,
 	clone,
 	listRemotes,
 	push,
-	pull,
 	walk,
 	currentBranch,
 	log,
@@ -33,12 +30,8 @@ const {
 	commit: isoCommit,
 	findRoot,
 	merge,
+	isIgnored,
 } = isoGit
-
-// TODO: rename to debug?
-const verbose = false
-
-// TODO addd tests for whitelist
 
 const whitelistedExperimentalRepos = [
 	"inlang/example",
@@ -68,17 +61,28 @@ export async function openRepository(
 	url: string,
 	args: {
 		author?: any
-		nodeishFs: NodeishFilesystem
+		nodeishFs?: NodeishFilesystem
 		workingDirectory?: string
 		branch?: string
 		auth?: unknown // unimplemented
-		experimentalLixFs?: boolean
-		sparseFilter?: any
+
+		// Do not expose experimental arg types
+		[x: string]: any
+		// sparseFilter?: any
+		// debug?: boolean
+		// experimentalFeatures?: {
+		// 	lixFs?: boolean
+		// 	lazyClone?: boolean
+		// 	lixCommit?: boolean
+		// }
 	}
 ): Promise<Repository> {
-	const cache = {}
-	const rawFs = args.nodeishFs
+	const rawFs = args.nodeishFs || (await import("@lix-js/fs")).createNodeishMemoryFs()
 	const author = args.author
+
+	let debug: boolean
+	// eslint-disable-next-line prefer-const -- used for development
+	debug = args.debug || false
 
 	if (
 		!url ||
@@ -87,7 +91,7 @@ export async function openRepository(
 		throw new Error("repo url is required, use file:// for local repos")
 	}
 
-	if (verbose && typeof window !== "undefined") {
+	if (debug && typeof window !== "undefined") {
 		// @ts-ignore
 		window["rawFs"] = rawFs
 	}
@@ -105,7 +109,7 @@ export async function openRepository(
 	// the url for opening a local repo allready in the fs provider is file://path/to/repo (not implemented yet)
 
 	// TODO: check for same origin
-	let doLixClone = false
+	let freshClone = false
 
 	let branchName = args.branch
 
@@ -117,7 +121,7 @@ export async function openRepository(
 		dir = url.replace("file://", "")
 
 		const remotes = await listRemotes({
-			fs: args.nodeishFs,
+			fs: rawFs,
 			dir: url.replace("file://", ""),
 		}).catch(() => [])
 		const origin = remotes.find(({ remote }) => remote === "origin")?.url || ""
@@ -131,17 +135,24 @@ export async function openRepository(
 		// Simple check for existing git repos
 		const maybeGitDir = await rawFs.stat(".git").catch((error: any) => ({ error }))
 		if ("error" in maybeGitDir) {
-			doLixClone = true
-			console.info("Lix lazy features are enabled")
+			freshClone = true
 		}
 	}
 
 	const { protocol, lixHost, repoHost, owner, repoName, username, password } = parseLixUri(url)
-	if (verbose && (username || password)) {
+	if (debug && (username || password)) {
 		console.warn(
 			"username and password and providers other than github are not supported yet. Only local commands will work."
 		)
 	}
+
+	const isWhitelistedRepo = whitelistedExperimentalRepos.includes(
+		`${owner}/${repoName}`.toLocaleLowerCase()
+	)
+	const experimentalFeatures =
+		args.experimentalFeatures || (isWhitelistedRepo ? { lazyClone: true, lixCommit: true } : {})
+	const lazyFS = freshClone || experimentalFeatures.lazyClone
+	const cache = lazyFS ? {} : undefined
 
 	const gitProxyUrl = lixHost ? `${protocol}//${lixHost}/git-proxy` : ""
 	const gitHubProxyUrl = lixHost ? `${protocol}//${lixHost}/github-proxy` : ""
@@ -172,12 +183,11 @@ export async function openRepository(
 		console.warn("valid repo url / local repo not found, only limited features will be available.")
 	}
 
-	const enableExperimentalFeatures = whitelistedExperimentalRepos.includes(
-		`${owner}/${repoName}`.toLocaleLowerCase()
-	)
-
-	if (enableExperimentalFeatures) {
-		console.warn("using experimental git features for this repo.")
+	const expFeatures = Object.entries(experimentalFeatures) // eslint-disable-next-line @typescript-eslint/no-unused-vars
+		.filter(([_, value]) => value)
+		.map(([key]) => key)
+	if (expFeatures.length) {
+		console.warn("using experimental git features for this repo.", expFeatures)
 	}
 
 	// Bail commit/ push on errors that are relevant or unknown
@@ -191,29 +201,49 @@ export async function openRepository(
 		}
 		const thisBatch = [...nextBatch]
 		nextBatch = []
-		if (verbose) {
+		if (debug) {
 			console.warn("checking out ", thisBatch)
 		}
 
-		for (const maybePlacholder of thisBatch.filter((entry) => rawFs._isPlaceholder(entry))) {
-			await rawFs.rm(maybePlacholder)
+		for (const placeholder of thisBatch.filter((entry) => rawFs._isPlaceholder(entry))) {
+			await rawFs.rm(placeholder)
+
+			// if file is in stage but not workdir, isogit will not checkout file but assume its deleted
+			// CHECK if still reqired, as stage for placeholder is empty
+			// await isoGit.remove({
+			// 	fs: withProxy({
+			// 		nodeishFs: rawFs,
+			// 		verbose: debug,
+			// 		description: "lazy checkout",
+			// 	}),
+			// 	dir,
+			// 	cache,
+			// 	filepath: placeholder,
+			// })
 		}
 
 		for (const entry of thisBatch) {
 			checkedOut.add(entry)
 		}
-
+		console.info("checking out", thisBatch)
 		const res = await checkout({
-			fs: withLazyFetching({
+			fs: withProxy({
 				nodeishFs: rawFs,
-				verbose,
-				description: "checkout",
+				verbose: debug,
+				description: debug ? "checkout: " + JSON.stringify(thisBatch) : "checkout",
 			}),
 			dir,
 			cache,
 			ref: args.branch,
 			filepaths: thisBatch,
+		}).catch((error) => {
+			console.error({ error, thisBatch })
 		})
+		console.info("checked out", thisBatch)
+
+		if (debug) {
+			console.warn("checked out ", thisBatch)
+		}
 
 		if (nextBatch.length) {
 			// console.warn("next batch", nextBatch)
@@ -225,23 +255,27 @@ export async function openRepository(
 	}
 
 	async function checkOutPlaceholders() {
+		if (!experimentalFeatures.lazyClone) {
+			return
+		}
 		await checkout({
-			fs: withLazyFetching({
+			fs: withProxy({
 				nodeishFs: rawFs,
-				verbose,
+				verbose: debug,
 				description: "checkout",
 			}),
+			cache,
 			dir,
 			ref: branchName,
 			filepaths: [".gitignore"],
 		})
 		checkedOut.add(".gitignore")
 
-		const fs = withLazyFetching({ nodeishFs: rawFs, verbose, description: "checkout placeholders" })
+		const fs = withProxy({ nodeishFs: rawFs, verbose: debug, description: "checkout placeholders" })
 		await walk({
 			fs,
 			dir,
-			cache: cache || {},
+			cache: cache, //  || {},
 			gitdir: ".git",
 			trees: [TREE({ ref: args.branch })],
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -269,7 +303,7 @@ export async function openRepository(
 
 				if (fileType === "file" && !checkedOut.has(fullpath)) {
 					try {
-						await fs._createPlaceholder(fullpath)
+						await fs._createPlaceholder(fullpath, { mode: fileMode })
 					} catch (err) {
 						console.warn(err)
 					}
@@ -290,13 +324,16 @@ export async function openRepository(
 				return undefined
 			},
 		})
+		pending && (await pending)
 	}
 
-	if (doLixClone) {
+	if (freshClone) {
+		console.info("Using lix for cloning repo")
+
 		await clone({
-			fs: withLazyFetching({ nodeishFs: rawFs, verbose, description: "clone" }),
+			fs: withProxy({ nodeishFs: rawFs, verbose: debug, description: "clone" }),
 			http: makeHttpClient({
-				verbose,
+				debug,
 				description: "clone",
 
 				onReq: ({ url, body }: { url: string; body: any }) => {
@@ -310,7 +347,7 @@ export async function openRepository(
 			corsProxy: gitProxyUrl,
 			url: gitUrl,
 			singleBranch: true,
-			noCheckout: true,
+			noCheckout: experimentalFeatures.lazyClone,
 			ref: branchName,
 
 			// TODO: use only first and last commit in lazy clone? (we need first commit for repo id)
@@ -324,7 +361,10 @@ export async function openRepository(
 			.catch((newError: Error) => {
 				setErrors((previous) => [...(previous || []), newError])
 			})
+	} else {
+		console.info("Using existing cloned repo")
 	}
+
 	// delay all fs and repo operations until the repo clone and checkout have finished, this is preparation for the lazy feature
 	function delayedAction({
 		execute,
@@ -339,65 +379,115 @@ export async function openRepository(
 		const pathParts = filename?.split("/") || []
 		const rootObject = pathParts[0]
 
-		if (verbose) {
-			console.warn("delayedAction", {
-				prop,
-				argumentsList,
-				rootObject,
-				checkedOut,
-				filename,
-				pending,
-				nextBatch,
-			})
-		}
-
 		if (
+			experimentalFeatures.lazyClone &&
 			rootObject &&
 			rootObject !== ".git" &&
 			filename !== ".gitignore" &&
-			["readFile", "readlink", "writeFile"].includes(prop) &&
+			["readFile", "readlink"].includes(prop) &&
 			!checkedOut.has(rootObject) &&
 			!checkedOut.has(filename)
 		) {
+			if (debug) {
+				console.warn("delayedAction", {
+					prop,
+					argumentsList,
+					rootObject,
+					checkedOut,
+					filename,
+					pending,
+					nextBatch,
+				})
+			}
+
 			if (pending) {
 				nextBatch.push(filename)
 			} else {
 				nextBatch.push(filename)
 				pending = doCheckout()
 			}
+		} else {
+			// excluded files execute immediately without waiting for other lazy actions either
+			return execute()
 		}
 
 		if (pending) {
-			return pending.then(execute)
-			// .finally(() => {
-			//   if (verbose) {
-			//     console.warn("executed", filename, prop)
-			//   }
-			// })
+			return pending.then(execute).finally(() => {
+				if (debug) {
+					console.warn("executed", filename, prop)
+				}
+			})
 		}
 
 		return execute()
 	}
 
-	const nodeishFs = withLazyFetching({
+	const nodeishFs = withProxy({
 		nodeishFs: rawFs,
-		verbose,
+		verbose: debug,
 		description: "app",
-		intercept: doLixClone ? delayedAction : undefined,
+		intercept: lazyFS ? delayedAction : undefined,
 	})
 
 	const add = (filepath: string | string[]) =>
 		isoGit.add({
-			fs: withLazyFetching({
+			fs: withProxy({
 				nodeishFs: rawFs,
-				verbose,
+				verbose: debug,
 				description: "add",
-				// intercept: delayedAction,
+			}),
+			parallel: true,
+			dir,
+			cache,
+			filepath,
+		})
+
+	const remove = (filepath: string) =>
+		isoGit.remove({
+			fs: withProxy({
+				nodeishFs: rawFs,
+				verbose: debug,
+				description: "add",
 			}),
 			dir,
 			cache,
 			filepath,
 		})
+
+	async function emptyWorkdir() {
+		const statusResult = await statusList()
+		if (statusResult.length > 0) {
+			throw new Error("could not pull, uncommitted changes")
+		}
+
+		const listing = (await rawFs.readdir("/")).filter((entry) => {
+			return !checkedOut.has(entry) && entry !== ".git" && entry !== ".gitignore"
+		})
+
+		const notIgnored = (
+			await Promise.all(
+				listing.map((entry) =>
+					isIgnored({ fs: rawFs, dir, filepath: entry }).then((ignored) => {
+						return { ignored, entry }
+					})
+				)
+			)
+		)
+			.filter(({ ignored }) => !ignored)
+			.map(({ entry }) => entry)
+
+		for (const toDelete of notIgnored) {
+			await rawFs.rm(toDelete, { recursive: true }).catch(() => {})
+
+			await isoGit.remove({
+				fs: rawFs,
+				// ref: args.branch,
+				dir: "/",
+				cache,
+				filepath: toDelete,
+			})
+		}
+	}
 
 	type StatusArgs = {
 		// ref?: string support custom refs
@@ -408,11 +498,10 @@ export async function openRepository(
 	}
 	async function statusList(statusArg?: StatusArgs): ReturnType<typeof lixStatus> {
 		return lixStatus({
-			fs: withLazyFetching({
+			fs: withProxy({
 				nodeishFs: rawFs,
-				verbose,
+				verbose: debug,
 				description: "lixStatus",
-				// intercept: delayedAction,
 			}),
 			dir,
 			cache,
@@ -428,16 +517,14 @@ export async function openRepository(
 			throw new Error("parameter must be a string")
 		}
 		const statusList = await lixStatus({
-			fs: withLazyFetching({
+			fs: withProxy({
 				nodeishFs: rawFs,
-				verbose,
+				verbose: debug,
 				description: "lixStatus",
-				// intercept: delayedAction,
 			}),
 			dir,
 			cache,
 			sparseFilter: args.sparseFilter,
-			includeStatus: ["unmodified", "ignored", "materialized"],
 			filepaths: [statusArg],
 		})
 
@@ -446,13 +533,17 @@ export async function openRepository(
 	}
 
 	return {
-		_isoGit: isoGit,
-		_enableExperimentalFeatures: enableExperimentalFeatures,
+		// _isoGit: isoGit,
+		_experimentalFeatures: experimentalFeatures,
 		_rawFs: rawFs,
+		_emptyWorkdir: emptyWorkdir,
+		_checkOutPlaceholders: checkOutPlaceholders,
+		_add: add,
+		_remove: remove,
 
 		nodeishFs,
 
-		files: args.experimentalLixFs
+		...(experimentalFeatures.lixFs
 			? {
 					read(path: string) {
 						return nodeishFs.readFile(path, { encoding: "utf-8" })
@@ -460,11 +551,11 @@ export async function openRepository(
 					write(path: string, content: string) {
 						return nodeishFs.writeFile(path, content)
 					},
-					list(path: string) {
+					listDir(path: string) {
 						return nodeishFs.readdir(path)
 					},
 			  }
-			: undefined,
+			: {}),
 
 		/**
 		 * Gets the git origin url of the current repository.
@@ -473,15 +564,15 @@ export async function openRepository(
 		 */
 		async listRemotes() {
 			try {
-				const withLazyFetchingpedFS = withLazyFetching({
+				const withProxypedFS = withProxy({
 					nodeishFs: rawFs,
-					verbose,
+					verbose: debug,
 					description: "listRemotes",
 					intercept: delayedAction,
 				})
 
 				const remotes = await listRemotes({
-					fs: withLazyFetchingpedFS,
+					fs: withProxypedFS,
 					dir,
 				})
 
@@ -494,18 +585,19 @@ export async function openRepository(
 		async checkout({ branch }: { branch: string }) {
 			branchName = branch
 
-			if (doLixClone) {
+			if (lazyFS) {
 				throw new Error(
 					"not implemented for lazy lix mode yet, use openRepo with different branch instead"
 				)
 			}
 
 			await checkout({
-				fs: withLazyFetching({
+				fs: withProxy({
 					nodeishFs: rawFs,
-					verbose,
+					verbose: debug,
 					description: "checkout",
 				}),
+				cache,
 				dir,
 				ref: branchName,
 			})
@@ -528,9 +620,9 @@ export async function openRepository(
 				return { error: "could not get fork upstream or repo not a fork" }
 			}
 
-			const forkFs = withLazyFetching({
+			const forkFs = withProxy({
 				nodeishFs: rawFs,
-				verbose,
+				verbose: debug,
 				description: "forkStatus",
 				intercept: delayedAction,
 			})
@@ -560,7 +652,7 @@ export async function openRepository(
 					cache,
 					ref: useBranchName,
 					remote: "upstream",
-					http: makeHttpClient({ verbose, description: "forkStatus" }),
+					http: makeHttpClient({ debug, description: "forkStatus" }),
 					fs: forkFs,
 				})
 			} catch (err) {
@@ -613,7 +705,7 @@ export async function openRepository(
 				singleBranch: true,
 				dir,
 				ref: useBranchName,
-				http: makeHttpClient({ verbose, description: "forkStatus" }),
+				http: makeHttpClient({ debug, description: "forkStatus" }),
 				fs: forkFs,
 			})
 
@@ -623,7 +715,7 @@ export async function openRepository(
 				singleBranch: true,
 				ref: useBranchName,
 				dir,
-				http: makeHttpClient({ verbose, description: "forkStatus" }),
+				http: makeHttpClient({ debug, description: "forkStatus" }),
 				corsProxy: gitProxyUrl,
 				fs: forkFs,
 			})
@@ -658,15 +750,27 @@ export async function openRepository(
 			// exclude: string[]
 		}) {
 			if (include) {
-				await add(include)
+				const additions: string[] = []
+				const deletions: string[] = []
+
+				for (const entry of include) {
+					if (await rawFs.lstat(entry).catch(() => undefined)) {
+						additions.push(entry)
+					} else {
+						deletions.push(entry)
+					}
+				}
+
+				additions.length && (await add(additions))
+				deletions.length && (await Promise.all(deletions.map((del) => remove(del))))
 			} else {
 				// TODO: commit all
 			}
 
 			const commitArgs = {
-				fs: withLazyFetching({
+				fs: withProxy({
 					nodeishFs: rawFs,
-					verbose,
+					verbose: debug,
 					description: "commit",
 					intercept: delayedAction,
 				}),
@@ -676,7 +780,7 @@ export async function openRepository(
 				message: message,
 			}
 
-			if (enableExperimentalFeatures || args.experimentalLixFs) {
+			if (experimentalFeatures.lixCommit) {
 				console.warn("using experimental commit for this repo.")
 				return lixCommit(commitArgs)
 			} else {
@@ -686,44 +790,93 @@ export async function openRepository(
 
 		push() {
 			return push({
-				fs: withLazyFetching({
+				fs: withProxy({
 					nodeishFs: rawFs,
-					verbose,
+					verbose: debug,
 					description: "push",
 					intercept: delayedAction,
 				}),
 				url: gitUrl,
 				cache,
 				corsProxy: gitProxyUrl,
-				http: makeHttpClient({ verbose, description: "push" }),
+				http: makeHttpClient({ debug, description: "push" }),
 				dir,
 			})
 		},
 
-		pull(cmdArgs) {
-			return pull({
-				fs: withLazyFetching({
-					nodeishFs: rawFs,
-					verbose,
-					description: "pull",
-					intercept: delayedAction,
-				}),
-				url: gitUrl,
-				corsProxy: gitProxyUrl,
-				http: makeHttpClient({ verbose, description: "pull" }),
-				dir,
-				cache,
-				fastForward: cmdArgs.fastForward,
-				singleBranch: cmdArgs.singleBranch,
-				author: cmdArgs.author,
+		async pull(cmdArgs) {
+			const pullFs = withProxy({
+				nodeishFs: rawFs,
+				verbose: debug,
+				description: "pull",
+				intercept: delayedAction,
 			})
+
+			const { fetchHead, fetchHeadDescription } = await gitFetch({
+				depth: 5, // TODO: how to handle depth with upstream? reuse logic from fork sync
+				fs: pullFs,
+				cache,
+				http: makeHttpClient({ verbose: debug, description: "pull" }),
+				corsProxy: gitProxyUrl,
+				ref: branchName,
+				tags: false,
+				dir,
+				url: gitUrl,
+				// remote: "origin",
+				// remoteRef,
+				singleBranch: cmdArgs?.singleBranch || true,
+			})
+
+			if (!fetchHead) {
+				throw new Error("could not fetch head")
+			}
+
+			await merge({
+				fs: pullFs,
+				cache,
+				dir,
+				ours: branchName,
+				theirs: fetchHead,
+				fastForward: cmdArgs?.fastForward,
+				message: `Merge ${fetchHeadDescription}`,
+				author: cmdArgs?.author || author,
+				dryRun: false,
+				noUpdateBranch: false,
+				// committer,
+				// signingKey,
+				// fastForwardOnly,
+			})
+
+			if (experimentalFeatures.lazyClone) {
+				console.warn(
+					"enableExperimentalFeatures.lazyClone is set for this repo but pull not fully implemented. disabling lazy files"
+				)
+
+				await emptyWorkdir()
+
+				await checkout({
+					fs: rawFs,
+					cache,
+					dir,
+					ref: branchName,
+					noCheckout: false,
+				})
+			} else {
+				await checkout({
+					fs: rawFs,
+					cache,
+					dir,
+					ref: branchName,
+					noCheckout: false,
+				})
+			}
 		},
 
 		log(cmdArgs = {}) {
 			return log({
-				fs: withLazyFetching({
+				fs: withProxy({
 					nodeishFs: rawFs,
-					verbose,
+					verbose: debug,
 					description: "log",
 					intercept: delayedAction,
 				}),
@@ -740,9 +893,9 @@ export async function openRepository(
 			const branch =
 				cmdArgs?.branch ||
 				(await isoGit.currentBranch({
-					fs: withLazyFetching({
+					fs: withProxy({
 						nodeishFs: rawFs,
-						verbose,
+						verbose: debug,
 						description: "mergeUpstream",
 						intercept: delayedAction,
 					}),
@@ -801,9 +954,9 @@ export async function openRepository(
 			// TODO: make stateless?
 			return (
 				(await currentBranch({
-					fs: withLazyFetching({
+					fs: withProxy({
 						nodeishFs: rawFs,
-						verbose,
+						verbose: debug,
 						description: "getCurrentBranch",
 						intercept: delayedAction,
 					}),
@@ -817,7 +970,7 @@ export async function openRepository(
 				url: gitUrl,
 				corsProxy: gitProxyUrl,
 				prefix: "refs/heads",
-				http: makeHttpClient({ verbose, description: "getBranches" }),
+				http: makeHttpClient({ verbose: debug, description: "getBranches" }),
 			}).catch((error) => {
 				return { error }
 			})
@@ -847,20 +1000,20 @@ export async function openRepository(
 		}),
 
 		async getFirstCommitHash() {
-			const getFirstCommitFs = withLazyFetching({
+			const getFirstCommitFs = withProxy({
 				nodeishFs: rawFs,
-				verbose,
+				verbose: debug,
 				description: "getFirstCommitHash",
 				intercept: delayedAction,
 			})
 
-			if (doLixClone) {
+			if (lazyFS) {
 				try {
 					await gitFetch({
 						singleBranch: true,
 						dir,
 						depth: 2147483647, // the magic number for all commits
-						http: makeHttpClient({ verbose, description: "getFirstCommitHash" }),
+						http: makeHttpClient({ verbose: debug, description: "getFirstCommitHash" }),
 						corsProxy: gitProxyUrl,
 						fs: getFirstCommitFs,
 					})

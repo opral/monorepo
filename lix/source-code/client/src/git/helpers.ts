@@ -5,8 +5,11 @@ const fileModeTypeMapping = {
 	"120000": "symlink",
 	"": "unknown",
 }
+
+// TODO change .toString(8) with only relevant digits
+
 export function modeToFileType(mode: number) {
-	const fileMode: string = mode.toString(8) || ""
+	const fileMode: string = mode?.toString(8) || ""
 	// @ts-ignore
 	return fileModeTypeMapping[fileMode]
 }
