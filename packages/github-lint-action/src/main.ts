@@ -286,7 +286,11 @@ function createLintSummary(
 			summary.push({ id, name, count: count })
 		}
 	}
-	return { summary, changedIds: diffReports.map((report) => report.messageId) }
+	const changedIds = diffReports
+		.map((report) => report.messageId)
+		.filter((value, index, self) => self.indexOf(value) === index)
+
+	return { summary, changedIds }
 }
 
 // All functions below will be replaced by the @lix-js/client package in the future
