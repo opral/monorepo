@@ -27,12 +27,12 @@ const translateCommand = cli + " machine translate -f --project ./project.inlang
 const messageDir = join(__dirname, "locales", "en")
 const messageFile = join(__dirname, "locales", "en", "common.json")
 
-
 export async function runLoadTest(
 	messageCount: number = 1000,
 	translate: boolean = true,
 	subscribeToMessages: boolean = true,
-	subscribeToLintReports: boolean = false
+	subscribeToLintReports: boolean = false,
+	watchMode: boolean = false
 ) {
 	debug("load-test start")
 
@@ -60,8 +60,9 @@ export async function runLoadTest(
 		debug("subscribing to messages.getAll")
 		let messagesEvents = 0
 		project.query.messages.getAll.subscribe((messages) => {
-			if (messagesEvents++ % 1000 === 1) {
-				debug(`messages changed ${messages.length}`)
+			messagesEvents++
+			if (messagesEvents === 1 || messagesEvents % 100 === 0) {
+				debug(`messages changed event: ${messagesEvents}, length: ${messages.length}`)
 			}
 		})
 	}
@@ -70,8 +71,9 @@ export async function runLoadTest(
 		debug("subscribing to lintReports.getAll")
 		let lintEvents = 0
 		project.query.messageLintReports.getAll.subscribe((reports) => {
-			if (lintEvents++ % 1000 === 1) {
-				debug(`lint reports changed ${reports.length}`)
+			lintEvents++
+			if (lintEvents === 1 || lintEvents % 100 === 0) {
+				debug(`lint reports changed event: ${lintEvents}, length: ${reports.length}`)
 			}
 		})
 	}
@@ -83,7 +85,15 @@ export async function runLoadTest(
 		debug("translating messages with inlang cli")
 		await exec(translateCommand, { cwd: __dirname })
 	}
-	debug("load-test end")
+
+	if (watchMode) {
+		debug("watching project")
+		await new Promise<void>((resolve) => {
+			setTimeout(resolve, 1000 * 60 * 60 * 24)
+		})
+	} else {
+		debug("load-test end")
+	}
 }
 
 async function generateMessageFile(messageCount: number) {

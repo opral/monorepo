@@ -2,16 +2,17 @@
 import { runLoadTest } from "./load-test.js"
 
 const usage = `
-USAGE: pnpm test [messageCount] [translate] [subscribeToMessages] [subscribeToLintReports]
+USAGE:
+	pnpm test messageCount [translate] [subscribeToMessages] [subscribeToLintReports] [watchMode]
 e.g.
-      pnpm test 300
-      pnpm test 100 1 1 0
+  pnpm test 300
+  pnpm test 100 1 1 0
 
-Defaults: translate: 1, subscribeToMessages: 1, subscribeToLintReports: 0
+Defaults: translate: 1, subscribeToMessages: 1, subscribeToLintReports: 0, watchMode: 0
 `
 
 if (numArg(2)) {
-	await runLoadTest(numArg(2), boolArg(3), boolArg(4), boolArg(5))
+	await runLoadTest(numArg(2), boolArg(3), boolArg(4), boolArg(5), boolArg(6))
 } else {
 	console.log(usage)
 }

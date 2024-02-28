@@ -11,12 +11,13 @@ This repo can be used for volume testing, with more messages than existing unit 
 To allow additional testing on the generated project e.g. with the ide-extension, the test calls `pnpm clean` when it starts, but not after it runs.
 
 ```
-USAGE: pnpm test messageCount [translate] [subscribeToMessages] [subscribeToLintReports]
+USAGE:
+  pnpm test messageCount [translate] [subscribeToMessages] [subscribeToLintReports] [watchMode]
 e.g.
-      pnpm test 300
-      pnpm test 1000 1 1 0
+  pnpm test 300
+  pnpm test 100 1 1 0
 
-Defaults: translate: 1, subscribeToMessages: 1, subscribeToLintReports: 0
+Defaults: translate: 1, subscribeToMessages: 1, subscribeToLintReports: 0, watchMode: 0
 ```
 
 ### mock rpc server
@@ -40,7 +41,7 @@ This test is also available under /inlang/source-code/sdk/load-test in the monor
 
 ### run
 ```sh
-pnpm test messageCount [translate] [subscribeToMessages] [subscribeToLintReports]
+pnpm test messageCount [translate] [subscribeToMessages] [subscribeToLintReports] [watchMode]
 ```
 
 ### clean
@@ -52,5 +53,5 @@ pnpm clean
 ### debug in chrome dev tools with node inspector
 Passes --inpect-brk to node.
 ```sh
-pnpm inspect messageCount [translate] [subscribeToMessages] [subscribeToLintReports]
+pnpm inspect messageCount [translate] [subscribeToMessages] [subscribeToLintReports] [watchMode]
 ```
