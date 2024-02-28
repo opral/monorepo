@@ -1,19 +1,10 @@
 import { useEditorState } from "../State.jsx"
 import { For, Show, createMemo } from "solid-js"
-import { showFilteredMessage } from "./../helper/showFilteredMessage.js"
 import { TourHintWrapper } from "./Notification/TourHintWrapper.jsx"
 import IconArrowLeft from "~icons/material-symbols/arrow-back-rounded"
 import IconAdd from "~icons/material-symbols/add"
 import { type InstalledMessageLintRule, type MessageLintRule } from "@inlang/sdk"
-
-export const messageCount = (ids: string[]) => {
-	const { project } = useEditorState()
-	let counter = 0
-	for (const id of ids) {
-		if (showFilteredMessage(project()?.query.messages.get({ where: { id: id } }))) counter++
-	}
-	return counter
-}
+import { messageCount } from "../+Page.jsx"
 
 export const ListHeader = () => {
 	const {
@@ -79,7 +70,7 @@ export const ListHeader = () => {
 				}
 			>
 				<div class="font-medium text-on-surface">
-					{messageCount(project()?.query.messages.includedMessageIds() || []) + " Messages"}
+					{messageCount() + " Messages"}
 				</div>
 			</Show>
 
