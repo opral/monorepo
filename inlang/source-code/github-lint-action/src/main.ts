@@ -289,7 +289,7 @@ function createLintSummary(
 	const changedIds = diffReports
 		.map((report) => report.messageId)
 		.filter((value, index, self) => self.indexOf(value) === index)
-
+	console.log(changedIds)
 	return { summary, changedIds }
 }
 
