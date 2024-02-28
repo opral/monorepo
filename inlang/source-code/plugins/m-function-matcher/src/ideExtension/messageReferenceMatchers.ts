@@ -25,10 +25,10 @@ const createParser = () => {
 		findMessage: () => {
 			return Parsimmon.seqMap(
 				Parsimmon.regex(/.*?(?<![a-zA-Z0-9/])m\./s), // no preceding letters or numbers
-				Parsimmon.index, // start position of the message id
-				Parsimmon.regex(/[^(]*/), // message id
-				Parsimmon.index, // end position of the message id
-				Parsimmon.regex(/\((?:[^()]|\([^()]*\))*\)/), // function arguments
+				Parsimmon.index, // Capture start position
+				Parsimmon.regex(/\w+/), // Match the function name
+				Parsimmon.index, // Capture end position of function name
+				Parsimmon.regex(/\((?:[^()]|\([^()]*\))*\)/).or(Parsimmon.succeed("")), // function arguments or empty string
 				(_, start, messageId, end, args) => {
 					return {
 						messageId: `${messageId}`,

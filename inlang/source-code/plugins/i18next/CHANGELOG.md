@@ -1,5 +1,12 @@
 # @inlang/plugin-i18next
 
+## 4.13.13
+
+### Patch Changes
+
+- 960f8fb70: rename the vscode extension to "Sherlock"
+  - @inlang/sdk@0.26.4
+
 ## 4.13.12
 
 ### Patch Changes

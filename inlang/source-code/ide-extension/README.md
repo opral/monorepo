@@ -1,6 +1,6 @@
 
 
-# inlang – Supercharge i18n in VS Code
+# Sherlock – i18n inspector for Visual Studio Code
 
 <div>
 	<p>
@@ -17,7 +17,7 @@
 </div>
 
 
-<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-extension-cover.png"/>
+<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/sherlock-cover-small.png"/>
 
 <br>
 <br>
@@ -96,7 +96,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 <div>
 	<div class="flex-container">
 		<div class="flex-item">
-			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-monorepo.png"/>
+			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/sherlock-monorepo.png"/>
 		</div>
 		<div class="flex-item">
 			<p class="bold">📦 Monorepo support</p>
@@ -110,7 +110,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 <div>
 	<div class="flex-container">
 		<div class="flex-item">
-			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-update.png"/>
+			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/sherlock-update.png"/>
 		</div>
 		<div class="flex-item">
 			<p class="bold">🔁 Update Translations</p>
@@ -124,7 +124,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 <div>
 	<div class="flex-container">
 		<div class="flex-item">
-			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-errors.png"/>
+			<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/sherlock-errors.png"/>
 		</div>
 		<div class="flex-item">
 			<p class="bold">⚠ Transparent Errors</p>
@@ -137,7 +137,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 
 ## Quick start
 
-<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-start.png"/>
+<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/sherlock-start.png"/>
 
 Install the extension and click `Getting Started` in the `Inlang Tab`. 
 
@@ -181,7 +181,7 @@ If you want to add lint rules to your experience, you can add them from https://
 
 #### Troubleshooting
 
-If you are having trouble with the **loading icon** not disappearing, this is a known issue & we are working with VSCode to fix it. In the meantime, you can right-click the Inlang icon to hide it:
+If you are having trouble with the **loading icon** not disappearing, this is a known issue & we are working with Visual Studio Code to fix it. In the meantime, you can right-click the Inlang icon to hide it:
 
 <img width="25%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/hide-badge.png"/>
 
