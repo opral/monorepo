@@ -1937,6 +1937,9 @@ importers:
       i18next:
         specifier: ^23.10.0
         version: 23.10.0
+      throttle-debounce:
+        specifier: ^5.0.0
+        version: 5.0.0
     devDependencies:
       '@types/debug':
         specifier: ^4.1.12
