@@ -1,0 +1,1 @@
+export invalid function name()
