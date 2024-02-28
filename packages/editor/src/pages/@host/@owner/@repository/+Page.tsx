@@ -167,8 +167,7 @@ function TheActualPage() {
 						<div
 							class="flex flex-col h-[calc(100vh_-_324px)] grow justify-center items-center min-w-full gap-2"
 							classList={{
-								["hidden"]:
-									messageCount() !== 0,
+								["hidden"]: messageCount() !== 0,
 							}}
 						>
 							<NoMatchPlaceholder />

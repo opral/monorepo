@@ -11,7 +11,7 @@ import { sortLanguageTags } from "./helper/sortLanguageTags.js"
 import { setMessageCount } from "./+Page.jsx"
 
 export function Message(props: { id: string }) {
-	const { project, filteredLanguageTags, filteredId, filteredMessageLintRules, textSearch } =
+	const { project, filteredLanguageTags, filteredIds, filteredMessageLintRules, textSearch } =
 		useEditorState()
 	const [message, setMessage] = createSignal<MessageType>()
 	const [lintReports, setLintReports] = createSignal<Readonly<MessageLintReport[]>>([])
@@ -57,9 +57,9 @@ export function Message(props: { id: string }) {
 
 	createEffect(
 		on(
-			[filteredLanguageTags, filteredMessageLintRules, filteredId, textSearch, hasBeenLinted],
+			[filteredLanguageTags, filteredMessageLintRules, filteredIds, textSearch, hasBeenLinted],
 			() => {
-				setShouldMessageBeShown(prev => {
+				setShouldMessageBeShown((prev) => {
 					const result = !showFilteredMessage(message())
 					// check if message count changed and update the global message count
 					if (result !== prev && result === true) {
@@ -103,7 +103,11 @@ export function Message(props: { id: string }) {
 								"?id=" +
 								message()?.id
 						),
-							showToast({ variant: "success", title: "Message ID link copied to clipboard", duration: 3000 })
+							showToast({
+								variant: "success",
+								title: "Message ID link copied to clipboard",
+								duration: 3000,
+							})
 					}}
 					class="opacity-0 transition-all group-hover:opacity-100 text-info/70 h-7 w-7 text-sm rounded flex items-center justify-center hover:bg-on-background/10 hover:text-info cursor-pointer"
 				>
