@@ -79,11 +79,7 @@ export function Message(props: { id: string }) {
 			<div class="flex w-full gap-2 items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-4 bg-surface-2 border-x border-b-0 border-surface-2">
 				<h3
 					slot="summary"
-					class="flex-grow-0 flex-shrink-0 max-w-[calc(100%_-_38px)] text-[13px] font-medium text-left text-on-surface before:text-on-surface truncate hover:cursor-pointer"
-					onClick={() => {
-						copy(message() ? message()!.id : "id"),
-							showToast({ variant: "success", title: "Message ID copied to clipboard", duration: 3000 })
-					}}
+					class="flex-grow-0 flex-shrink-0 max-w-[calc(100%_-_38px)] text-[13px] font-medium text-left text-on-surface before:text-on-surface truncate"
 				>
 					{message() ? message()!.id : "id"}
 				</h3>
