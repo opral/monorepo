@@ -205,13 +205,13 @@ sl-option::part(checked-icon) {
 }
 
 sl-option::part(base) {
+	padding-block: 0.375rem;
 	padding-inline: 0.75rem;
 }
 
 sl-option::part(label) {
 	display: flex;
 	align-items: center;
-	line-height: 1;
 }
 
 sl-select::part(tag) {
@@ -302,4 +302,14 @@ sl-details::part(content) {
 
 sl-button::part(caret) {
 	width: 1rem;
+}
+
+sl-select.ids-filter::part(tags) {
+	display: none;
+}
+
+sl-option.ids-filter::part(label) {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
