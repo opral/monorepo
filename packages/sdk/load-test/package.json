@@ -9,11 +9,13 @@
 		"@inlang/sdk": "workspace:*",
 		"@lix-js/client": "workspace:*",
 		"debug": "^4.3.4",
-		"i18next": "^23.10.0"
+		"i18next": "^23.10.0",
+		"throttle-debounce": "^5.0.0"
 	},
 	"devDependencies": {
 		"@types/debug": "^4.1.12",
 		"@types/node": "^20.11.20",
+		"@types/throttle-debounce": "5.0.0",
 		"tsx": "^4.7.1"
 	},
 	"scripts": {

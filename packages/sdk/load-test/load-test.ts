@@ -3,16 +3,19 @@
 import { openRepository } from "@lix-js/client"
 import { loadProject } from "@inlang/sdk"
 
-import fs from "node:fs/promises"
-import { fileURLToPath } from "node:url"
 import { dirname, join } from "node:path"
-import childProcess from "node:child_process"
+import { fileURLToPath } from "node:url"
 import { promisify } from "node:util"
+import { throttle } from "throttle-debounce"
+import childProcess from "node:child_process"
+import fs from "node:fs/promises"
 
 import _debug from "debug"
 const debug = _debug("load-test")
 
 const exec = promisify(childProcess.exec)
+
+const throttleEventLogs = 2000
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -34,7 +37,7 @@ export async function runLoadTest(
 	subscribeToLintReports: boolean = false,
 	watchMode: boolean = false
 ) {
-	debug("load-test start")
+	debug("load-test start" + (watchMode ? " - watchMode on, ctrl C to exit" : ""))
 
 	if (translate && !(await isServerRunning())) {
 		console.error(
@@ -42,6 +45,11 @@ export async function runLoadTest(
 		)
 		return
 	}
+
+	process.on("SIGINT", () => {
+		debug("bye bye")
+		process.exit(0)
+	})
 
 	await generateMessageFile(1)
 
@@ -59,22 +67,24 @@ export async function runLoadTest(
 	if (subscribeToMessages) {
 		debug("subscribing to messages.getAll")
 		let messagesEvents = 0
+		const logMessagesEvent = throttle(throttleEventLogs, (messages: any) => {
+			debug(`messages changed event: ${messagesEvents}, length: ${messages.length}`)
+		})
 		project.query.messages.getAll.subscribe((messages) => {
 			messagesEvents++
-			if (messagesEvents === 1 || messagesEvents % 100 === 0) {
-				debug(`messages changed event: ${messagesEvents}, length: ${messages.length}`)
-			}
+			logMessagesEvent(messages)
 		})
 	}
 
 	if (subscribeToLintReports) {
 		debug("subscribing to lintReports.getAll")
 		let lintEvents = 0
+		const logLintEvent = throttle(throttleEventLogs, (reports: any) => {
+			debug(`lint reports changed event: ${lintEvents}, length: ${reports.length}`)
+		})
 		project.query.messageLintReports.getAll.subscribe((reports) => {
 			lintEvents++
-			if (lintEvents === 1 || lintEvents % 100 === 0) {
-				debug(`lint reports changed event: ${lintEvents}, length: ${reports.length}`)
-			}
+			logLintEvent(reports)
 		})
 	}
 
@@ -86,13 +96,12 @@ export async function runLoadTest(
 		await exec(translateCommand, { cwd: __dirname })
 	}
 
+	debug("load-test done - " + (watchMode ? "watching for events" : "exiting"))
+
 	if (watchMode) {
-		debug("watching project")
 		await new Promise<void>((resolve) => {
 			setTimeout(resolve, 1000 * 60 * 60 * 24)
 		})
-	} else {
-		debug("load-test end")
 	}
 }
 
@@ -102,11 +111,7 @@ async function generateMessageFile(messageCount: number) {
 	for (let i = 1; i <= messageCount; i++) {
 		messages[`message_key_${i}`] = `Generated message (${i})`
 	}
-	await fs.writeFile(
-		messageFile,
-		JSON.stringify(messages, undefined, 2),
-		"utf-8"
-	)
+	await fs.writeFile(messageFile, JSON.stringify(messages, undefined, 2), "utf-8")
 }
 
 async function isServerRunning(): Promise<boolean> {
@@ -117,4 +122,3 @@ async function isServerRunning(): Promise<boolean> {
 		return false
 	}
 }
-
