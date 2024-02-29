@@ -101,12 +101,10 @@ const exampleMessages: Message[] = [
 
 const exampleAliasedMessages: Message[] = [
 	{
-		id: "a",
-		alias: {},
-		// TODO featureFlag // id: "raw_tapir_pause_grateful",
-		// TODO featureFlag // alias: {
-		// TODO featureFlag // 	default: "a",
-		// TODO featureFlag // },
+		id: "raw_tapir_pause_grateful",
+		alias: {
+			default: "a",
+		},
 		selectors: [],
 		variants: [
 			{
@@ -122,12 +120,10 @@ const exampleAliasedMessages: Message[] = [
 		],
 	},
 	{
-		id: "b",
-		alias: {},
-		// TODO featureFlag // id: "dizzy_halibut_dial_vaguely",
-		// TODO featureFlag // alias: {
-		// TODO featureFlag // 	default: "b",
-		// TODO featureFlag // },
+		id: "dizzy_halibut_dial_vaguely",
+		alias: {
+			default: "b",
+		},
 		selectors: [],
 		variants: [
 			{
@@ -689,7 +685,7 @@ describe("functionality", () => {
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
 			expect(
-				project.query.messageLintReports.get({ where: { messageId: "some-message" } }) // TODO featureFlag // new_alligator_dig_aside" } })
+				project.query.messageLintReports.get({ where: { messageId: "some-message" } })
 			).toHaveLength(1)
 		})
 	})
@@ -735,6 +731,25 @@ describe("functionality", () => {
 			const fs = repo.nodeishFs
 			await fs.mkdir("/user/project.inlang", { recursive: true })
 			await fs.writeFile("/user/project.inlang/settings.json", JSON.stringify(settings))
+			const project = await loadProject({
+				projectPath: "/user/project.inlang",
+				repo,
+				_import,
+			})
+
+			expect(Object.values(project.query.messages.getAll())).toEqual(exampleMessages)
+		})
+	})
+
+	describe("messages with aliases", () => {
+		it("should return the messages", async () => {
+			const repo = await mockRepo()
+			const fs = repo.nodeishFs
+			await fs.mkdir("/user/project.inlang", { recursive: true })
+			await fs.writeFile(
+				"/user/project.inlang/settings.json",
+				JSON.stringify({ ...settings, experimental: { aliases: true } })
+			)
 			const project = await loadProject({
 				projectPath: "/user/project.inlang",
 				repo,
@@ -792,11 +807,6 @@ describe("functionality", () => {
 				data: {
 					id: "a",
 					alias: {},
-					// TODO featureFlag // data: {
-					// TODO featureFlag // id: "raw_tapir_pause_grateful",
-					// TODO featureFlag // alias: {
-					// TODO featureFlag // 	default: "a",
-					// TODO featureFlag // },
 					selectors: [],
 					variants: [
 						{
@@ -828,12 +838,6 @@ describe("functionality", () => {
 				data: {
 					id: "b",
 					alias: {},
-					// TODO featureFlag // where: { id: "dizzy_halibut_dial_vaguely" },
-					// TODO featureFlag // data: {
-					// TODO featureFlag // 	id: "dizzy_halibut_dial_vaguely",
-					// TODO featureFlag // 	alias: {
-					// TODO featureFlag // 		default: "b",
-					// TODO featureFlag // 	},
 					selectors: [],
 					variants: [
 						{
@@ -871,9 +875,6 @@ describe("functionality", () => {
 				{
 					id: "a",
 					alias: {},
-					// TODO featureFlag // alias: {
-					// TODO featureFlag //	default: "a",
-					// TODO featureFlag //},
 					selectors: [],
 					variants: [
 						{
@@ -901,9 +902,6 @@ describe("functionality", () => {
 				{
 					id: "b",
 					alias: {},
-					// TODO featureFlag // alias: {
-					// TODO featureFlag // 	default: "b",
-					// TODO featureFlag // },
 					selectors: [],
 					variants: [
 						{
