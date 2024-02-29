@@ -1,3 +1,4 @@
 {
-	"extends": "../../inlang/source-code/tsconfig.base.json"
+	"extends": "../../inlang/source-code/tsconfig.base.json",
+	"exclude": ["isomorphic-git"]
 }

@@ -12,12 +12,14 @@ type PartialEntry = {
 }
 
 export async function commit({
+	cache,
 	fs,
 	dir,
 	ref,
 	author,
 	message,
 }: {
+	cache: any
 	fs: NodeishFilesystem
 	dir: string
 	ref?: string
@@ -70,7 +72,8 @@ export async function commit({
 	await walk({
 		fs,
 		dir,
-		// cache, gitdir,
+		cache,
+		// gitdir,
 		trees: [TREE({ ref }), STAGE()],
 		// @ts-ignore FIXME
 		map: async function (filepath: string, [refState, stagingState]) {
@@ -154,6 +157,7 @@ export async function commit({
 	const tree = await createTree("/", fileStates)
 
 	return doCommit({
+		cache,
 		fs,
 		dir,
 		author,

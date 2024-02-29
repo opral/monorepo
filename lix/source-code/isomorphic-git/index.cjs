@@ -1007,6 +1007,9 @@ class GitIndexManager {
 }
 
 function basename(path) {
+  if (!path?.lastIndexOf) {
+    debugger
+  }
   const last = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\'));
   if (last > -1) {
     path = path.slice(last + 1);
@@ -1536,7 +1539,7 @@ const VARIABLE_VALUE_COMMENT_REGEX = /^(.*?)( *[#;].*)$/;
 
 const extractSectionLine = line => {
   const matches = SECTION_LINE_REGEX.exec(line);
-  if (matches != null) {
+  if (matches != undefined) {
     const [section, subsection] = matches.slice(1);
     return [section, subsection]
   }
@@ -1545,7 +1548,7 @@ const extractSectionLine = line => {
 
 const extractVariableLine = line => {
   const matches = VARIABLE_LINE_REGEX.exec(line);
-  if (matches != null) {
+  if (matches != undefined) {
     const [name, rawValue = 'true'] = matches.slice(1);
     const valueWithoutComments = removeComments(rawValue);
     const valueWithoutQuotes = removeQuotes(valueWithoutComments);
@@ -1556,7 +1559,7 @@ const extractVariableLine = line => {
 
 const removeComments = rawValue => {
   const commentMatches = VARIABLE_VALUE_COMMENT_REGEX.exec(rawValue);
-  if (commentMatches == null) {
+  if (commentMatches == undefined) {
     return rawValue
   }
   const [valueWithoutComment, comment] = commentMatches.slice(1);
@@ -1587,12 +1590,12 @@ const removeQuotes = text => {
 };
 
 const lower = text => {
-  return text != null ? text.toLowerCase() : null
+  return text != undefined ? text.toLowerCase() : null
 };
 
 const getPath = (section, subsection, name) => {
   return [lower(section), subsection, lower(name)]
-    .filter(a => a != null)
+    .filter(a => a != undefined)
     .join('.')
 };
 
@@ -1629,12 +1632,12 @@ class GitConfig {
 
       const trimmedLine = line.trim();
       const extractedSection = extractSectionLine(trimmedLine);
-      const isSection = extractedSection != null;
+      const isSection = extractedSection != undefined;
       if (isSection) {
         ;[section, subsection] = extractedSection;
       } else {
         const extractedVariable = extractVariableLine(trimmedLine);
-        const isVariable = extractedVariable != null;
+        const isVariable = extractedVariable != undefined;
         if (isVariable) {
           ;[name, value] = extractedVariable;
         }
@@ -1693,7 +1696,7 @@ class GitConfig {
       this.parsedConfig,
       config => config.path === normalizedPath
     );
-    if (value == null) {
+    if (value == undefined) {
       if (configIndex !== -1) {
         this.parsedConfig.splice(configIndex, 1);
       }
@@ -1748,14 +1751,14 @@ class GitConfig {
         if (!modified) {
           return line
         }
-        if (name != null && value != null) {
+        if (name != undefined && value != undefined) {
           if (typeof value === 'string' && /[#;]/.test(value)) {
             // A `#` or `;` symbol denotes a comment, so we have to wrap it in double quotes
             return `\t${name} = "${value}"`
           }
           return `\t${name} = ${value}`
         }
-        if (subsection != null) {
+        if (subsection != undefined) {
           return `[${section} "${subsection}"]`
         }
         return `[${section}]`
@@ -1841,14 +1844,12 @@ class GitRefManager {
     // Add all tags if the fetch tags argument is true.
     if (tags) {
       for (const serverRef of refs.keys()) {
-        if (serverRef.startsWith('refs/tags') && !serverRef.endsWith('^{}')) {
-          // Git's behavior is to only fetch tags that do not conflict with tags already present.
-          if (!(await GitRefManager.exists({ fs, gitdir, ref: serverRef }))) {
+        if (serverRef.startsWith('refs/tags') && !serverRef.endsWith('^{}') && // Git's behavior is to only fetch tags that do not conflict with tags already present.
+          !(await GitRefManager.exists({ fs, gitdir, ref: serverRef }))) {
             // Always use the object id of the tag itself, and not the peeled object id.
             const oid = refs.get(serverRef);
             actualRefsToWrite.set(serverRef, oid);
           }
-        }
       }
     }
     // Combine refs and symrefs giving symrefs priority
@@ -2764,15 +2765,13 @@ class GitPackIndex {
       const percent = Math.floor(
         ((totalObjectCount - num) * 100) / totalObjectCount
       );
-      if (percent !== lastPercent) {
-        if (onProgress) {
+      if (percent !== lastPercent && onProgress) {
           await onProgress({
             phase: 'Receiving objects',
             loaded: totalObjectCount - num,
             total: totalObjectCount,
           });
         }
-      }
       lastPercent = percent;
       // Change type from a number to a meaningful string
       type = listpackTypes[type];
@@ -2823,15 +2822,13 @@ class GitPackIndex {
     for (let offset in offsetToObject) {
       offset = Number(offset);
       const percent = Math.floor((count * 100) / totalObjectCount);
-      if (percent !== lastPercent) {
-        if (onProgress) {
+      if (percent !== lastPercent && onProgress) {
           await onProgress({
             phase: 'Resolving deltas',
             loaded: count,
             total: totalObjectCount,
           });
         }
-      }
       count++;
       lastPercent = percent;
 
@@ -3694,12 +3691,12 @@ ${obj.gpgsig ? obj.gpgsig : ''}`
 
   withoutSignature() {
     const tag = normalizeNewlines(this._tag);
-    if (tag.indexOf('\n-----BEGIN PGP SIGNATURE-----') === -1) return tag
+    if (!tag.includes('\n-----BEGIN PGP SIGNATURE-----')) return tag
     return tag.slice(0, tag.lastIndexOf('\n-----BEGIN PGP SIGNATURE-----'))
   }
 
   gpgsig() {
-    if (this._tag.indexOf('\n-----BEGIN PGP SIGNATURE-----') === -1) return
+    if (!this._tag.includes('\n-----BEGIN PGP SIGNATURE-----')) return
     const signature = this._tag.slice(
       this._tag.indexOf('-----BEGIN PGP SIGNATURE-----'),
       this._tag.indexOf('-----END PGP SIGNATURE-----') +
@@ -3863,7 +3860,7 @@ class GitCommit {
 
   withoutSignature() {
     const commit = normalizeNewlines(this._commit);
-    if (commit.indexOf('\ngpgsig') === -1) return commit
+    if (!commit.includes('\ngpgsig')) return commit
     const headers = commit.slice(0, commit.indexOf('\ngpgsig'));
     const message = commit.slice(
       commit.indexOf('-----END PGP SIGNATURE-----\n') +
@@ -4403,7 +4400,7 @@ async function _walk({
  */
 async function rmRecursive(fs, filepath) {
   const entries = await fs.readdir(filepath);
-  if (entries == null) {
+  if (entries == undefined) {
     await fs.rm(filepath);
   } else if (entries.length) {
     await Promise.all(
@@ -5502,9 +5499,9 @@ async function normalizeAuthorObject({ fs, gitdir, author = {} }) {
     return undefined
   }
 
-  timestamp = timestamp != null ? timestamp : Math.floor(Date.now() / 1000);
+  timestamp = timestamp != undefined ? timestamp : Math.floor(Date.now() / 1000);
   timezoneOffset =
-    timezoneOffset != null
+    timezoneOffset != undefined
       ? timezoneOffset
       : new Date(timestamp * 1000).getTimezoneOffset();
 
@@ -5636,13 +5633,11 @@ async function _addRemote({ fs, gitdir, remote, url, force }) {
   if (!force) {
     // Check that setting it wouldn't overwrite.
     const remoteNames = await config.getSubsections('remote');
-    if (remoteNames.includes(remote)) {
-      // Throw an error if it would overwrite an existing remote,
+    if (remoteNames.includes(remote) && // Throw an error if it would overwrite an existing remote,
       // but not if it's simply setting the same value again.
-      if (url !== (await config.get(`remote.${remote}.url`))) {
+      url !== (await config.get(`remote.${remote}.url`))) {
         throw new AlreadyExistsError('remote', remote)
       }
-    }
   }
   await config.set(`remote.${remote}.url`, url);
   await config.set(
@@ -5989,7 +5984,7 @@ async function branch({
 const worthWalking = (filepath, root) => {
   if (
     filepath === '.' ||
-    root == null ||
+    root == undefined ||
     root.length === 0 ||
     root === '.' ||
     root === filepath
@@ -6763,7 +6758,7 @@ function extractAuthFromUrl(url) {
   // Note: I tried using new URL(url) but that throws a security exception in Edge. :rolleyes:
   let userpass = url.match(/^https?:\/\/([^/]+)@/);
   // No credentials, return the url unmodified and an empty auth object
-  if (userpass == null) return { url, auth: {} }
+  if (userpass == undefined) return { url, auth: {} }
   userpass = userpass[1];
   const [username, password] = userpass.split(':');
   // Remove credentials from URL
@@ -6855,12 +6850,12 @@ class GitPktLine {
     return async function read() {
       try {
         let length = await reader.read(4);
-        if (length == null) return true
+        if (length == undefined) return true
         length = parseInt(length.toString('utf8'), 16);
         if (length === 0) return null
         if (length === 1) return null // delim packets
         const buffer = await reader.read(length - 4);
-        if (buffer == null) return true
+        if (buffer == undefined) return true
         return buffer
       } catch (err) {
         stream.error = err;
@@ -8688,7 +8683,7 @@ async function _expandOid({ fs, cache, gitdir, oid: short }) {
   });
   // Objects can exist in a pack file as well as loose, make sure we only get a list of unique oids.
   for (const packedOid of packedOids) {
-    if (results.indexOf(packedOid) === -1) {
+    if (!results.includes(packedOid)) {
       results.push(packedOid);
     }
   }
@@ -8830,7 +8825,7 @@ async function _findMergeBase({ fs, cache, gitdir, oids }) {
         // do nothing
       }
     }
-    heads = Array.from(newheads.values());
+    heads = [...newheads.values()];
   }
   return []
 }
@@ -10050,7 +10045,7 @@ function formatInfoRefs(remote, prefix, symrefs, peelTags) {
       if (peelTags) {
         const _key = key.replace('^{}', '');
         // Peeled tags are almost always listed immediately after the original tag
-        const last = refs[refs.length - 1];
+        const last = refs.at(-1);
         const r = last.ref === _key ? last : refs.find(x => x.ref === _key);
         if (r === undefined) {
           throw new Error('I did not expect this to happen')
@@ -10061,11 +10056,9 @@ function formatInfoRefs(remote, prefix, symrefs, peelTags) {
     }
     /** @type ServerRef */
     const ref = { ref: key, oid: value };
-    if (symrefs) {
-      if (remote.symrefs.has(key)) {
+    if (symrefs && remote.symrefs.has(key)) {
         ref.target = remote.symrefs.get(key);
       }
-    }
     refs.push(ref);
   }
   return refs
@@ -11312,7 +11305,7 @@ async function _log({
                     fileId: lastFileOid,
                   });
                   if (Array.isArray(lastFound)) {
-                    found = found.filter(p => lastFound.indexOf(p) === -1);
+                    found = found.filter(p => !lastFound.includes(p));
                     if (found.length === 1) {
                       found = found[0];
                       filepath = found;
@@ -13738,11 +13731,10 @@ async function status({
           object,
         });
         // If the oid in the index === working dir oid but stats differed update cache
-        if (I && indexEntry.oid === workdirOid) {
-          // and as long as our fs.stats aren't bad.
+        if (I && indexEntry.oid === workdirOid && // and as long as our fs.stats aren't bad.
           // size of -1 happens over a BrowserFS HTTP Backend that doesn't serve Content-Length headers
           // (like the Karma webserver) because BrowserFS HTTP Backend uses HTTP HEAD requests to do fs.stat
-          if (stats.size !== -1) {
+          stats.size !== -1) {
             // We don't await this so we can return faster for one-off cases.
             GitIndexManager.acquire({ fs, gitdir, cache }, async function(
               index
@@ -13750,7 +13742,6 @@ async function status({
               index.insert({ filepath, stats, oid: workdirOid });
             });
           }
-        }
         return workdirOid
       }
     };
@@ -14012,8 +14003,7 @@ async function statusMatrix({
       trees: [TREE({ ref }), WORKDIR(), STAGE()],
       map: async function(filepath, [head, workdir, stage]) {
         // Ignore ignored files, but only if they are not already tracked.
-        if (!head && !stage && workdir) {
-          if (!shouldIgnore) {
+        if (!head && !stage && workdir && !shouldIgnore) {
             const isIgnored = await GitIgnoreManager.isIgnored({
               fs,
               dir,
@@ -14023,15 +14013,12 @@ async function statusMatrix({
               return null
             }
           }
-        }
         // match against base paths
         if (!filepaths.some(base => worthWalking(filepath, base))) {
           return null
         }
         // Late filter against file names
-        if (filter) {
-          if (!filter(filepath)) return
-        }
+        if (filter && !filter(filepath)) return
 
         const [headType, workdirType, stageType] = await Promise.all([
           head && head.type(),

@@ -225,7 +225,7 @@ export async function openRepository(
 		for (const entry of thisBatch) {
 			checkedOut.add(entry)
 		}
-		console.info("checking out", thisBatch)
+		// console.info("checking out", thisBatch)
 		const res = await checkout({
 			fs: withProxy({
 				nodeishFs: rawFs,
@@ -239,7 +239,7 @@ export async function openRepository(
 		}).catch((error) => {
 			console.error({ error, thisBatch })
 		})
-		console.info("checked out", thisBatch)
+		// console.info("checked out", thisBatch)
 
 		if (debug) {
 			console.warn("checked out ", thisBatch)
@@ -384,7 +384,7 @@ export async function openRepository(
 			rootObject &&
 			rootObject !== ".git" &&
 			filename !== ".gitignore" &&
-			["readFile", "readlink"].includes(prop) &&
+			["readFile", "readlink", "writeFile"].includes(prop) &&
 			!checkedOut.has(rootObject) &&
 			!checkedOut.has(filename)
 		) {
@@ -399,11 +399,17 @@ export async function openRepository(
 					nextBatch,
 				})
 			}
+			// TODO: optimize writes? only needs adding the head hash to staging instead of full checkout....
+			// if (prop === "writeFile") {
+			// 	checkedOut.add(filename)
+			// } else {
 
-			if (pending) {
-				nextBatch.push(filename)
-			} else {
-				nextBatch.push(filename)
+			nextBatch.push(filename)
+
+			// }
+
+			//  && nextBatch.length > 0
+			if (!pending) {
 				pending = doCheckout()
 			}
 		} else {
@@ -447,7 +453,7 @@ export async function openRepository(
 			fs: withProxy({
 				nodeishFs: rawFs,
 				verbose: debug,
-				description: "add",
+				description: "remove",
 			}),
 			dir,
 			cache,
@@ -533,13 +539,25 @@ export async function openRepository(
 	}
 
 	return {
-		// _isoGit: isoGit,
 		_experimentalFeatures: experimentalFeatures,
 		_rawFs: rawFs,
 		_emptyWorkdir: emptyWorkdir,
 		_checkOutPlaceholders: checkOutPlaceholders,
 		_add: add,
 		_remove: remove,
+		// @ts-ignore
+		_isoCommit: ({ author: overrideAuthor, message }) =>
+			isoCommit({
+				fs: withProxy({
+					nodeishFs: rawFs,
+					verbose: debug,
+					description: "iso commit",
+				}),
+				dir,
+				cache,
+				author: overrideAuthor || author,
+				message: message,
+			}),
 
 		nodeishFs,
 
@@ -724,6 +742,7 @@ export async function openRepository(
 			try {
 				await merge({
 					fs: forkFs,
+					cache,
 					author: { name: "lix" },
 					dir,
 					ours: useBranchName,

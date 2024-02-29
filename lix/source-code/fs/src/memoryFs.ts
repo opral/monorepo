@@ -26,10 +26,18 @@ export function toSnapshot(fs: NodeishFilesystem) {
 	return {
 		fsMap: Object.fromEntries(
 			[...fs._state.fsMap].map(([path, content]) => {
+				let serializedContent
+				if (content instanceof Set) {
+					serializedContent = [...content].sort()
+				} else if (content.placeholder) {
+					serializedContent = content
+				} else {
+					serializedContent = content.toString("base64")
+				}
 				return [
 					path,
 					// requires node buffers, but no web standard method exists
-					content instanceof Set ? [...content].sort() : content.toString("base64"),
+					serializedContent,
 
 					// Alternative to try:
 					// onst binaryData = new Uint8Array([255, 116, 79, 99 /*...*/]);
@@ -74,6 +82,10 @@ export function fromSnapshot(
 				const data = Buffer.from(content, "base64")
 				// new TextEncoder().encode(decodeURIComponent(escape(atob(content)))) Buffer.from()
 				return [pathPrefix + path, data]
+
+				// @ts-ignore
+			} else if (content?.placeholder) {
+				return [pathPrefix + path, content]
 			}
 
 			return [pathPrefix + path, new Set(content as string[])]

@@ -14,16 +14,6 @@
   "engines": {
     "node": ">=12"
   },
-  "scripts": {
-    "start": "nps",
-    "format": "nps format",
-    "build": "nps build",
-    "test": "nps test",
-    "publish-website": "nps website",
-    "prepublishOnly": "nps prepublish",
-    "semantic-release": "semantic-release",
-    "add-contributor": "nps contributors.add"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/isomorphic-git/isomorphic-git.git"

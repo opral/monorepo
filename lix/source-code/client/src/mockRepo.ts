@@ -5,7 +5,13 @@ import isoGit from "isomorphic-git"
 // to load from json file JSON.parse(readFileSync("../mocks/ci-test-repo.json", { encoding: "utf-8" }))
 // TODO: allow json init support
 
-export async function mockRepo({ fromSnapshot }: { fromSnapshot?: Snapshot } = {}) {
+export async function mockRepo({
+	fromSnapshot,
+	repoOptions,
+}: {
+	fromSnapshot?: Snapshot
+	repoOptions?: { experimentalFeatures: { lazyClone: boolean; lixCommit: boolean } }
+} = {}) {
 	const nodeishFs = createNodeishMemoryFs()
 
 	if (fromSnapshot) {
@@ -16,6 +22,7 @@ export async function mockRepo({ fromSnapshot }: { fromSnapshot?: Snapshot } = {
 
 	const repo = await openRepository("file://", {
 		nodeishFs,
+		...(repoOptions || {}),
 	})
 
 	return repo

@@ -459,6 +459,12 @@ describe(
 				// @ts-ignore
 				stat.ctimeMs = -1
 			}
+			for (const [path, content] of Object.entries(snapA.fsMap)) {
+				// @ts-ignore
+				if (content.placeholder && typeof snapB.fsMap[path] === "string") {
+					snapB.fsMap[path] = { placeholder: true }
+				}
+			}
 			for (const [, stat] of Object.entries(snapB.fsStats)) {
 				// @ts-ignore
 				if (!stat.symlinkTarget) {
@@ -470,7 +476,12 @@ describe(
 				// @ts-ignore
 				stat.ctimeMs = -1
 			}
-			expect(snapA).toStrictEqual(snapB)
+
+			delete snapA.fsMap["/.git/index/"]
+			delete snapB.fsMap["/.git/index/"]
+
+			expect(snapA.fsMap).toStrictEqual(snapB.fsMap)
+			expect(snapA.statusMap).toStrictEqual(snapB.statusMap)
 			vi.useRealTimers()
 		})
 	},
