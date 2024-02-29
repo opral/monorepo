@@ -11,6 +11,7 @@ export const { Link, middleware, useRouter, usePathname, redirect, permanentRedi
 				en: "/form",
 				de: "/formular",
 				"de-CH": "/formular",
+				ru: "/форма",
 			},
 		},
 	})
