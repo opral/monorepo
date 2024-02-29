@@ -1,5 +1,11 @@
 # @inlang/paraglide-js-adapter-next-example-pages
 
+## 0.2.0
+
+### Minor Changes
+
+- 8d48af361: Update Example to be a better onramp
+
 ## 0.1.3
 
 ### Patch Changes
