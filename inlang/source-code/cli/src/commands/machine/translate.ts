@@ -6,7 +6,7 @@ import { log, logError } from "../../utilities/log.js"
 import { type InlangProject, ProjectSettings, Message } from "@inlang/sdk"
 import prompts from "prompts"
 import { projectOption } from "../../utilities/globalFlags.js"
-// import progessBar from "cli-progress"
+import progessBar from "cli-progress"
 import plimit from "p-limit"
 
 export const translate = new Command()
@@ -93,16 +93,15 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 
 		const messageIds = args.project.query.messages.includedMessageIds()
 
-		// TODO JL #2108  - bring back the progress bar or make it optional
-		// const bar = new progessBar.SingleBar(
-		// 	{
-		// 		clearOnComplete: true,
-		// 		format: `🤖 Machine translating messages | {bar} | {percentage}% | {value}/{total} Messages`,
-		// 	},
-		// 	progessBar.Presets.shades_grey
-		// )
+		const bar = new progessBar.SingleBar(
+			{
+				clearOnComplete: true,
+				format: `🤖 Machine translating messages | {bar} | {percentage}% | {value}/{total} Messages`,
+			},
+			progessBar.Presets.shades_grey
+		)
 
-		// bar.start(messageIds.length, 0)
+		bar.start(messageIds.length, 0)
 
 		const logs: Array<() => void> = []
 
@@ -127,14 +126,14 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 				args.project.query.messages.update({ where: { id: id }, data: translatedMessage! })
 				logs.push(() => log.info(`Machine translated message ${logId}`))
 			}
-			// bar.increment()
+			bar.increment()
 		}
 		// parallelize rpcTranslate calls with a limit of 100 concurrent calls
 		const limit = plimit(100)
 		const promises = messageIds.map((id) => limit(() => rpcTranslate(id)))
 		await Promise.all(promises)
 
-		// bar.stop()
+		bar.stop()
 		for (const log of logs) {
 			log()
 		}
