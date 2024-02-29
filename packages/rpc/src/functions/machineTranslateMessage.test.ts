@@ -245,7 +245,7 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 					pattern: [
 						{
 							type: "Text",
-							value: "Das ist ein Test\r\nmit Zeilenumbruch.",
+							value: "Das ist ein Test\r\n mit Zeilenumbruch.",
 						},
 					],
 				},
