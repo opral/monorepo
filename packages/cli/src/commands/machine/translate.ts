@@ -53,7 +53,7 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 			log.error(`No inlang project found`)
 			return
 		}
-		const aliasesFeatureFlag = args.project.settings().featureFlags?.aliases
+		const experimentalAliases = args.project.settings().experimental?.aliases
 
 		const allLanguageTags = [...projectConfig.languageTags, projectConfig.sourceLanguageTag]
 
@@ -109,7 +109,7 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 			const toBeTranslatedMessage = args.project.query.messages.get({ where: { id } })!
 			const logId =
 				`"${id}"` +
-				(aliasesFeatureFlag ? ` (alias "${toBeTranslatedMessage.alias.default ?? ""}")` : "")
+				(experimentalAliases ? ` (alias "${toBeTranslatedMessage.alias.default ?? ""}")` : "")
 
 			const { data: translatedMessage, error } = await rpc.machineTranslateMessage({
 				message: toBeTranslatedMessage,
