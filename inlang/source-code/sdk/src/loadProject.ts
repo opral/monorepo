@@ -628,7 +628,7 @@ async function loadMessagesViaPlugin(
 	settingsValue: ProjectSettings,
 	loadPlugin: any
 ) {
-	const aliasesFeatureFlag = !!settingsValue.featureFlags?.aliases
+	const experimentalAliases = !!settingsValue.experimental?.aliases
 
 	// loading is an asynchronous process - check if another load is in progress - queue this call if so
 	if (messageState.isLoading) {
@@ -660,7 +660,7 @@ async function loadMessagesViaPlugin(
 				// TODO #1585 here we match using the id to support legacy load message plugins - after we introduced import / export methods we will use importedMessage.alias
 				.filter(
 					(message: any) =>
-						(aliasesFeatureFlag ? message.alias["default"] : message.id) === loadedMessage.id
+						(experimentalAliases ? message.alias["default"] : message.id) === loadedMessage.id
 				)
 
 			if (currentMessages.length > 1) {
@@ -672,7 +672,7 @@ async function loadMessagesViaPlugin(
 				loadedMessageClone.alias = {} as any
 
 				// TODO #1585 we have to map the id of the importedMessage to the alias and fill the id property with the id of the existing message - change when import mesage provides importedMessage.alias
-				if (aliasesFeatureFlag) {
+				if (experimentalAliases) {
 					loadedMessageClone.alias["default"] = loadedMessageClone.id
 					loadedMessageClone.id = currentMessages[0]!.id
 				}
@@ -700,7 +700,7 @@ async function loadMessagesViaPlugin(
 				// message with the given alias does not exist so far
 				loadedMessageClone.alias = {} as any
 				// TODO #1585 we have to map the id of the importedMessage to the alias - change when import mesage provides importedMessage.alias
-				if (aliasesFeatureFlag) {
+				if (experimentalAliases) {
 					loadedMessageClone.alias["default"] = loadedMessageClone.id
 
 					let currentOffset = 0
@@ -819,7 +819,7 @@ async function saveMessagesViaPlugin(
 
 				const fixedExportMessage = { ...message }
 				// TODO #1585 here we match using the id to support legacy load message plugins - after we introduced import / export methods we will use importedMessage.alias
-				if (settingsValue.featureFlags?.aliases) {
+				if (settingsValue.experimental?.aliases) {
 					fixedExportMessage.id = fixedExportMessage.alias["default"] ?? fixedExportMessage.id
 				}
 

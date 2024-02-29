@@ -30,7 +30,7 @@ const config: ProjectSettings = {
 
 const configWithAliases: ProjectSettings = {
 	...config,
-	featureFlags: { aliases: true },
+	experimental: { aliases: true },
 }
 
 const mockPlugin: Plugin = {

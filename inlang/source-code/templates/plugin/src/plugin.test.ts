@@ -45,7 +45,7 @@ it("should return fake messages (with aliases) to illustrate how a plugin works"
 		sourceLanguageTag: "en",
 		modules: ["./plugin.js"],
 		languageTags: ["en", "de"],
-		featureFlags: { aliases: true },
+		experimental: { aliases: true },
 	} satisfies ProjectSettings
 
 	// writing the project file to the virtual filesystem
