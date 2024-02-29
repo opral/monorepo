@@ -19,9 +19,7 @@
      */
     const labels = {
         en: "🇬🇧 English",
-        de: "🇩🇪 Deutsch",
-        fr: "🇫🇷 Français",
-        ru: "🇷🇺 Русский",
+        de: "🇩🇪 Deutsch"
     }
 </script>
 
