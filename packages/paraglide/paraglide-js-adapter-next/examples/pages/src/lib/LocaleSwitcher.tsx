@@ -8,7 +8,7 @@ import { useRouter } from "next/router"
 export function LocaleSwitcher() {
 	const { asPath } = useRouter()
 	return (
-		<>
+		<div style={{ display: "flex", gap: "1rem" }}>
 			{availableLanguageTags.map((lang) => {
 				return (
 					<Link href={asPath} locale={lang} style={{ marginRight: 2 }} key={lang}>
@@ -16,6 +16,6 @@ export function LocaleSwitcher() {
 					</Link>
 				)
 			})}
-		</>
+		</div>
 	)
 }

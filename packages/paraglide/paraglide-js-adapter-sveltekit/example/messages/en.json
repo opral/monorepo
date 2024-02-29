@@ -1,13 +1,16 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"currentLanguageTag": "The current language tag is \"{languageTag}\".",
-	"greeting": "Welcome {name}! You have {count} messages.",
-	"change_language_to": "Change language to {languageTag}",
 	"about": "About",
 	"home": "Home",
 	"users": "Users",
 	"next_user": "Next user",
 	"previous_user": "Previous user",
-	"edit": "Edit",
-	"about_path": "/about"
+	"about_path": "/about",
+
+	"paraglide_and_next_app_router": "ParaglideJS + NextJS App Router",
+	"this_app_was_localised_with_paraglide": "This is a NextJS App using the App router. It was localised using Paraglide and the ParaglideJS Adapter for NextJS.",
+	"switch_languages_in_top_right": "You can switch languages in the top right corner.",
+	"learn_more_at_following_links": "Learn more at the following links",
+	"paraglide_documentation": "Paraglide Documentation",
+	"source_code": "Source Code"
 }
