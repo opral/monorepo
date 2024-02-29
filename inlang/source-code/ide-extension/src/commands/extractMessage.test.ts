@@ -95,7 +95,7 @@ describe("extractMessageCommand", () => {
 		})
 		await extractMessageCommand.callback(mockTextEditor)
 		expect(msg).toHaveBeenCalledWith(
-			"There is no `plugin` configuration for the inlang extension. One of the `modules` should expose a `plugin` which has `customApi` containing `app.inlang.ideExtension`",
+			"There is no `plugin` configuration for the Visual Studio Code extension (Sherlock). One of the `modules` should expose a `plugin` which has `customApi` containing `app.inlang.ideExtension`",
 			"warn",
 			"notification"
 		)

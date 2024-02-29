@@ -5,7 +5,7 @@ packages:
   - 'inlang/source-code/paraglide/*'
   - 'inlang/source-code/paraglide/paraglide-js-adapter-vite/tests/*'
   - 'inlang/source-code/paraglide/*/example'
-  - 'inlang/source-code/paraglide/paraglide-js-adapter-next/example-*'
+  - 'inlang/source-code/paraglide/paraglide-js-adapter-next/examples/*'
   - 'inlang/source-code/templates/*'
   - 'inlang/source-code/message-lint-rules/*'
   - 'inlang/source-code/versioned-interfaces/*'

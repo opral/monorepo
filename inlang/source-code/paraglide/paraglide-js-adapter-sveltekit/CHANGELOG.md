@@ -1,5 +1,29 @@
 # @inlang/paraglide-js-adapter-sveltekit
 
+## 0.5.4
+
+### Patch Changes
+
+- 5d25b889a: log warning if the `lang` attribute isn't updated in `src/app.html`
+
+## 0.5.3
+
+### Patch Changes
+
+- 726690acb: fix: Disable some lint errors when internally rewriting links with the spread syntax to avoid annoying logs (https://discord.com/channels/897438559458430986/1070750156644962434/1212320293578874880)
+
+## 0.5.2
+
+### Patch Changes
+
+- @inlang/paraglide-js-adapter-vite@1.2.16
+
+## 0.5.1
+
+### Patch Changes
+
+- a7b593e9a: fix: double-execution of `load` on initial load
+
 ## 0.5.0
 
 ### Minor Changes

@@ -26,7 +26,7 @@
 - Realtime linting and message update
 - Autosaving for faster workflows
 
-## VS Code Extension
+## Visual Studio Code extension (Sherlock)
 
 - Faster startup time & Realtime linting and message update
 - Auto migration of inlang.config.js to project.inlang.json
