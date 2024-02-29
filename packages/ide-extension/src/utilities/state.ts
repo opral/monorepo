@@ -1,7 +1,7 @@
 import type { InlangProject, listProjects } from "@inlang/sdk"
 
 /**
- * The state of the vscode extension.
+ * The state of the Visual Studio Code extension (Sherlock).
  */
 type State = {
 	/**

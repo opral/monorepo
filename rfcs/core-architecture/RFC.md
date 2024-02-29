@@ -237,7 +237,7 @@ import Translated from 'i18n-library';
 
 #### Decision
 
-Develop a CLI and VSCode extension to extract and validate resources and messages.
+Develop a CLI and Visual Studio Code extension (Sherlock) to extract and validate resources and messages.
 
 {% Figure
     src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/rfcs/core-architecture/assets/001-ide-extension.gif"
@@ -274,7 +274,7 @@ Single-user editors are displaced by cloud-based editors for _simple_ string loc
 
 #### Proposal
 
-A git-based editor that combines the collaboration of cloud-based solutions with the simplicity of a local-first solution. Think of a combination of Figma and VSCode: VSCode brings out-of-the-box git and local file support while Figma brings ease of use to the table by running in the browser. A working proof of concept can be found [here](https://inlang-web-app-demo-5kw9a.ondigitalocean.app/git/https://github.com/inlang/demo/in-editor).
+A git-based editor that combines the collaboration of cloud-based solutions with the simplicity of a local-first solution. Think of a combination of Figma and Visual Studio Code: Visual Studio Code brings out-of-the-box git and local file support while Figma brings ease of use to the table by running in the browser. A working proof of concept can be found [here](https://inlang-web-app-demo-5kw9a.ondigitalocean.app/git/https://github.com/inlang/demo/in-editor).
 
 ##### Pros
 

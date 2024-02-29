@@ -1,5 +1,41 @@
 # @inlang/paraglide-js-adapter-sveltekit-example
 
+## 0.0.15
+
+### Patch Changes
+
+- Updated dependencies [5d25b889a]
+  - @inlang/paraglide-js-adapter-sveltekit@0.5.4
+
+## 0.0.14
+
+### Patch Changes
+
+- Updated dependencies [726690acb]
+  - @inlang/paraglide-js-adapter-sveltekit@0.5.3
+
+## 0.0.13
+
+### Patch Changes
+
+- @inlang/paraglide-js-adapter-sveltekit@0.5.2
+
+## 0.0.12
+
+### Patch Changes
+
+- Updated dependencies [a7b593e9a]
+  - @inlang/paraglide-js-adapter-sveltekit@0.5.1
+
+## 0.0.11
+
+- Update Inlang Modules
+
+## 0.0.10
+
+- Add `start` command for StackBlitz
+- Remove `/base` path
+
 ## 0.0.9
 
 ### Patch Changes

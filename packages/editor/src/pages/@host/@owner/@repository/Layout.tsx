@@ -18,6 +18,7 @@ import IconSync from "~icons/material-symbols/sync-outline"
 import IconTranslate from "~icons/material-symbols/translate"
 import IconSettings from "~icons/material-symbols/settings-outline"
 import IconDescription from "~icons/material-symbols/description-outline"
+import IconTag from "~icons/material-symbols/tag"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 import { showToast } from "#src/interface/components/Toast.jsx"
 import { isValidLanguageTag, type LanguageTag } from "@inlang/sdk"
@@ -46,6 +47,8 @@ export function Layout(props: { children: JSXElement }) {
 		setFilteredMessageLintRules,
 		filteredLanguageTags,
 		setFilteredLanguageTags,
+		filteredIds,
+		setFilteredIds,
 		languageTags,
 		currentBranch,
 		activeProject,
@@ -86,6 +89,11 @@ export function Layout(props: { children: JSXElement }) {
 				/>
 			),
 		},
+		{
+			name: "Message Ids",
+			icon: <IconTag class="w-5 h-5" />,
+			component: <IdsFilter clearFunction={removeFilter("Message Ids")} />,
+		},
 	])
 
 	const [selectedFilters, setSelectedFilters] = createSignal<Filter[]>([])
@@ -121,10 +129,21 @@ export function Layout(props: { children: JSXElement }) {
 	//add initial language filter
 	createEffect(
 		on(project, () => {
-			if (lixErrors().length === 0 && project()) {
+			if (project()) {
 				addFilter("Language")
 				if (filteredLanguageTags().length === 0 && project()!.settings())
 					setFilteredLanguageTags(project()!.settings()!.languageTags)
+			}
+		})
+	)
+
+	//add initial language filter
+	createEffect(
+		on(project, () => {
+			if (project() && filteredIds().length > 0) {
+				addFilter("Message Ids")
+				if (filteredLanguageTags().length === 0 && project()!.settings())
+					setFilteredIds(project()!.query.messages.includedMessageIds())
 			}
 		})
 	)
@@ -720,7 +739,7 @@ function LintFilter(props: { clearFunction: any }) {
 				</p>
 				<Show when={filteredMessageLintRules().length === 0} fallback={<div />}>
 					<sl-tag prop:size="small" class="font-medium text-sm">
-						everyMessage
+						not selected
 					</sl-tag>
 					<button
 						class="hover:text-on-surface hover:bg-surface-variant rounded-sm"
@@ -773,6 +792,101 @@ function LintFilter(props: { clearFunction: any }) {
 								? lintRule.displayName.en
 								: lintRule.displayName}
 						</sl-option>
+					)}
+				</For>
+			</div>
+		</sl-select>
+	)
+}
+
+function IdsFilter(props: { clearFunction: any }) {
+	const { project, filteredIds, setFilteredIds } = useEditorState()
+	return (
+		<sl-select
+			prop:name="Ids Filter Select"
+			prop:size="small"
+			prop:multiple={true}
+			prop:clearable={true}
+			prop:value={filteredIds()}
+			on:sl-change={(event: any) => {
+				setFilteredIds(event.target.value ?? [])
+			}}
+			on:sl-clear={() => {
+				props.clearFunction
+			}}
+			class="ids-filter filter border-0 focus:ring-background/100 p-0 m-0 text-sm animate-blendIn"
+		>
+			<div class={"flex items-center gap-2 ml-1 mr-0"} slot="prefix">
+				<p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-on-surface-variant">
+					Id
+				</p>
+				<p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-left text-on-surface-variant/60">
+					is
+				</p>
+				<Show
+					when={filteredIds().length === 0}
+					fallback={
+						<div class="flex gap-1">
+							<sl-tag slot="label" prop:size="small" class="font-medium text-sm">
+								{filteredIds()[0]}
+							</sl-tag>
+							<Show when={filteredIds().length > 1}>
+								<sl-tag slot="label" prop:size="small" class="font-medium text-sm">
+									+{filteredIds().length - 1}
+								</sl-tag>
+							</Show>
+						</div>
+					}
+				>
+					<sl-tag prop:size="small" class="font-medium text-sm">
+						not selected
+					</sl-tag>
+					<button
+						class="hover:text-on-surface hover:bg-surface-variant rounded-sm ml-1 mr-0.5"
+						onClick={() => {
+							setFilteredIds(setFilteredIds(project()?.query.messages.includedMessageIds() ?? []))
+							props.clearFunction
+						}}
+					>
+						<IconClose />
+					</button>
+				</Show>
+			</div>
+			<button slot="clear-icon" class="p-0.5">
+				<IconClose class="w-4 h-4" />
+			</button>
+
+			<div class="flex px-3 gap-2 text-sm font-medium">
+				<span class="text-left text-outline-variant grow">Select</span>
+				<Link
+					class="cursor-pointer link link-primary opacity-75"
+					onClick={() => setFilteredIds(project()?.query.messages.includedMessageIds() ?? [])}
+				>
+					All
+				</Link>
+				<Link
+					class="cursor-pointer link link-primary opacity-75"
+					onClick={() => setFilteredIds([])}
+				>
+					None
+				</Link>
+			</div>
+			<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
+			<div class="max-h-[300px] max-w-[300px]">
+				<For each={project()?.query.messages.includedMessageIds() ?? []}>
+					{(id) => (
+						<sl-tooltip
+							prop:content={id}
+							prop:placement="top"
+							prop:trigger="hover"
+							prop:disabled={id.length < 28}
+							class="ids-filter small overflow-hidden"
+							style={{ "--show-delay": "1s", "--max-width": "260px", "word-break": "break-all" }}
+						>
+							<sl-option prop:value={id} class="ids-filter">
+								{id}
+							</sl-option>
+						</sl-tooltip>
 					)}
 				</For>
 			</div>

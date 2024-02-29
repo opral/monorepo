@@ -73,7 +73,7 @@ export const IdeExtensionConfigSchema = Type.Object({
 		})
 	),
 	/**
-	 * An array of VSCode DocumentSelectors.
+	 * An array of Visual Studio Code DocumentSelectors.
 	 *
 	 * The document selectors specify for which files/programming languages
 	 * (typescript, svelte, etc.) the extension should be activated.
