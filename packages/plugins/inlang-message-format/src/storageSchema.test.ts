@@ -22,16 +22,18 @@ test("it should be possible to define $schema for typesafety", () => {
 	expect(Value.Check(StorageSchema, messages)).toBe(true)
 })
 
+// #2325 - types have been loosened to allow for new/unknown properties
 test("using a hyphen (-) should not be possible to increase compatibility with libraries", () => {
 	const messages: StorageSchema = {
 		"hello-world": "property",
 	}
-	expect(Value.Check(StorageSchema, messages)).toBe(false)
+	expect(Value.Check(StorageSchema, messages)).toBe(true)
 })
 
+// #2325 - types have been loosened to allow for new/unknown properties
 test("using a dot (.) should not be possible to increase compatibility with libraries", () => {
 	const messages: StorageSchema = {
 		"hello.world": "property",
 	}
-	expect(Value.Check(StorageSchema, messages)).toBe(false)
+	expect(Value.Check(StorageSchema, messages)).toBe(true)
 })

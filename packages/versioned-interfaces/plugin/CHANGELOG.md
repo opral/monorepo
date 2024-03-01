@@ -1,5 +1,12 @@
 # @inlang/plugin
 
+## 2.4.7
+
+### Patch Changes
+
+- Updated dependencies [0c272619a]
+  - @inlang/project-settings@2.3.0
+
 ## 2.4.6
 
 ### Patch Changes

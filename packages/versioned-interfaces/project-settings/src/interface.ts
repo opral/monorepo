@@ -101,7 +101,7 @@ export const ExternalProjectSettings = Type.Record(
 	// intersection between `InternalSettings`, which contains an array,
 	// and `ExternalSettings` which are objects possible
 	JSON as unknown as typeof JSONObject,
-	{ additionalProperties: false, description: "Settings defined by apps, plugins, etc." }
+	{ description: "Settings defined by apps, plugins, etc." }
 )
 
 export type ProjectSettings = Static<typeof ProjectSettings>
