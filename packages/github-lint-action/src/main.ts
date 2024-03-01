@@ -179,7 +179,7 @@ ${lintSummary
 				headMeta.repo
 			}?branch=${headMeta.branch}&project=${result.projectPath}&lint=${
 				lintSummary.id
-			}&${result.changedIds.map((id) => `id=${id}`).join("&")})&ref=ninja-${prNumber} |`
+			}&${result.changedIds.map((id) => `id=${id}`).join("&")}&ref=ninja-${prNumber}) |`
 	)
 	.join("\n")}
 `
