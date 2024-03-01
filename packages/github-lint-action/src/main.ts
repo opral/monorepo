@@ -76,7 +76,7 @@ export async function run(): Promise<void> {
 		const isFork = headMeta.owner !== baseMeta.owner
 		core.debug(`Is fork: ${isFork}`)
 
-		// Prepare base repo
+		// Prepare head repo
 		let repoHead
 		if (isFork) {
 			core.debug("Fork detected, cloning base repository")
@@ -186,8 +186,8 @@ ${lintSummary
 			result.commentContent = commentContent
 		}
 
-		const commentHeadline = `### 🛎️ Translations need to be updated`
-		const commentResolved = `### 🎉 Translations have been successfully updated`
+		const commentHeadline = `### 🛎️ Ninja i18n – Translations need to be updated`
+		const commentResolved = `### 🎉 Ninja i18n – Translations have been successfully updated`
 		const commentContent =
 			commentHeadline +
 			"\n\n" +
@@ -204,7 +204,7 @@ ${lintSummary
 		})
 		if (issue.data.locked) return console.debug("PR is locked, comment is skipped")
 
-		//check if PR already has a comment from this action
+		// Check if PR already has a comment from this action
 		const existingComment = await octokit.rest.issues.listComments({
 			owner,
 			repo,
