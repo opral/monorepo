@@ -14952,16 +14952,6 @@
 							"value": "Test for Action"
 						}
 					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Aktionstest"
-						}
-					]
 				}
 			]
 		},
