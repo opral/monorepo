@@ -315,7 +315,7 @@ describe(
 			const statusPo = await lazyRepo.status("README.md")
 
 			expect(statusPo).toBe("unmodified")
-		}, 100000)
+		})
 
 		it("can commit open repos without origin or git config (the case eg. on render.com or other deoployment scenarios)", async () => {
 			const fs = createNodeishMemoryFs()
