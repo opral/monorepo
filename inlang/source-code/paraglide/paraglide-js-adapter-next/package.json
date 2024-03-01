@@ -7,7 +7,7 @@
 	"scripts": {
 		"build": "node ./build.mjs",
 		"clean": "rm -rf dist && rm -rf node_modules",
-		"test": "vitest run --passWithNoTests",
+		"test": "NODE_ENV=development vitest run && NODE_ENV=production vitest run",
 		"lint": "eslint ./src --fix"
 	},
 	"main": "dist/app/index.server.js",

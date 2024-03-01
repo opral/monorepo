@@ -10,9 +10,8 @@ import {
 import { createLink } from "./Link"
 import { prefixStrategy } from "./routing/prefix"
 
-describe("<Link>", () => {
+describe.skipIf(() => process.env.NODE_ENV !== "development")("<Link>", () => {
 	beforeEach(() => {
-		//known starting state
 		setLanguageTag(sourceLanguageTag)
 		process.env.__NEXT_ROUTER_BASE_PATH = ""
 	})
@@ -115,6 +114,4 @@ describe("<Link>", () => {
 		render(<Link href="/about?param=1" data-testid="english-link" />)
 		expect(screen.getByTestId("english-link").getAttribute("href")).toEqual("/about?param=1")
 	})
-
-
 })
