@@ -206,7 +206,7 @@ export async function status({
 				// TODO: 1, 2, 0 > check this meaning? + check if stageid can differ
 				// TODO: only if asked for this file "absent"	file not present in HEAD commit, staging area, or working dir
 
-				// [ 1, 1, 1] "unmodified"  todo: unless explicitly asked
+				// [ 1, 1, 1] "unmodified"
 				if (entry.headOid === entry.workdirOid && entry.workdirOid === entry.stageOid) {
 					if (
 						includeStatus.includes("unmodified") ||
