@@ -262,7 +262,7 @@ export async function openRepository(
 			dir,
 			cache,
 			gitdir: ".git",
-			trees: [TREE({ ref: args.branch })],
+			trees: [TREE({ ref: branchName })],
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			map: async function (fullpath, [commit]) {
 				if (!commit) {
