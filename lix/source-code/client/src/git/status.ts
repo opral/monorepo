@@ -99,7 +99,7 @@ export async function status({
 	filepaths = ["."],
 	filter,
 	sparseFilter,
-	cache = {},
+	cache,
 	includeStatus = [],
 }: StatusArgs): Promise<StatusList> {
 	try {
