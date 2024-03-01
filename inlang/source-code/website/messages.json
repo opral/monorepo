@@ -14952,66 +14952,6 @@
 							"value": "Test for Action"
 						}
 					]
-				},
-				{
-					"languageTag": "de",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Aktionstest"
-						}
-					]
-				},
-				{
-					"languageTag": "fr",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Test pour l'action"
-						}
-					]
-				},
-				{
-					"languageTag": "it",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Prova per l'azione"
-						}
-					]
-				},
-				{
-					"languageTag": "pt-BR",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Teste para ação"
-						}
-					]
-				},
-				{
-					"languageTag": "sk",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "Test pre akciu"
-						}
-					]
-				},
-				{
-					"languageTag": "zh",
-					"match": [],
-					"pattern": [
-						{
-							"type": "Text",
-							"value": "行动测试"
-						}
-					]
 				}
 			]
 		},
