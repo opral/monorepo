@@ -1,6 +1,6 @@
 import { openRepository } from "./openRepository.js"
 import { createNodeishMemoryFs, fromSnapshot as loadSnapshot, type Snapshot } from "@lix-js/fs"
-import isoGit from "isomorphic-git"
+import isoGit from "../vendored/isomorphic-git/index.js"
 // @ts-ignore
 // to load from json file JSON.parse(readFileSync("../mocks/ci-test-repo.json", { encoding: "utf-8" }))
 // TODO: allow json init support

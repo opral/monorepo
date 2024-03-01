@@ -1,6 +1,6 @@
 /* eslint-disable unicorn/no-null -- required for isogit walk api */
 import type { NodeishFilesystem } from "@lix-js/fs"
-import isoGit from "isomorphic-git"
+import isoGit from "../../vendored/isomorphic-git/index.js"
 // import { modeToFileType } from "./helpers.js"
 
 // TODO: LSTAT is not properly impl. in the memory fs!

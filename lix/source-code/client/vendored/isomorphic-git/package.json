@@ -58,15 +58,5 @@
     "type": "opencollective",
     "url": "https://opencollective.com/isomorphic-git",
     "logo": "https://opencollective.com/isomorphic-git/logo.txt"
-  },
-  "dependencies": {
-    "async-lock": "^1.4.1",
-    "clean-git-ref": "^2.0.1",
-    "crc-32": "^1.2.2",
-    "diff3": "^0.0.4",
-    "ignore": "^5.3.1",
-    "pako": "^1.0.11",
-    "pify": "^5.0.0",
-    "sha.js": "^2.4.11"
   }
 }

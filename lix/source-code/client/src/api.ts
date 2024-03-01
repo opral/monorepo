@@ -1,5 +1,5 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
-import type raw from "isomorphic-git"
+import type raw from "../vendored/isomorphic-git/index.js"
 import type { Endpoints } from "@octokit/types"
 import type { status, OptStatus } from "./git/status.js"
 

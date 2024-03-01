@@ -1,4 +1,11 @@
-import { walk, TREE, STAGE, writeTree, commit as doCommit, type TreeEntry } from "isomorphic-git"
+import {
+	walk,
+	TREE,
+	STAGE,
+	writeTree,
+	commit as doCommit,
+	type TreeEntry,
+} from "../../vendored/isomorphic-git/index.js"
 import { getDirname, getBasename } from "@lix-js/fs"
 
 import type { NodeishFilesystem } from "@lix-js/fs"

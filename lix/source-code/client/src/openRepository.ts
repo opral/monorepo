@@ -11,7 +11,7 @@ import { createSignal, createEffect } from "./solid.js"
 import type { OptStatus } from "./git/status.js"
 import { commit as lixCommit } from "./git/commit.js"
 import { status as lixStatus } from "./git/status.js"
-import isoGit from "isomorphic-git"
+import isoGit from "../vendored/isomorphic-git/index.js"
 import { modeToFileType } from "./git/helpers.js"
 
 // TODO: --filter=tree:0 for commit history?
@@ -205,7 +205,7 @@ export async function openRepository(
 			console.warn("checking out ", thisBatch)
 		}
 
-		for (const placeholder of thisBatch.filter((entry) => rawFs._isPlaceholder(entry))) {
+		for (const placeholder of thisBatch.filter((entry) => rawFs._isPlaceholder?.(entry))) {
 			await rawFs.rm(placeholder)
 
 			// if file is in stage but not workdir, isogit will not checkout file but assume its deleted
