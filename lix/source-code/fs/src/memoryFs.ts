@@ -521,6 +521,7 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			state.fsMap.delete(path)
 		},
 		readlink: async function (path: Parameters<NodeishFilesystem["readlink"]>[0]) {
+			path = normalPath(path)
 			const linkStats = await lstat(path)
 
 			if (linkStats === undefined) {
