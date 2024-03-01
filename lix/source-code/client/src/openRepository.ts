@@ -207,25 +207,12 @@ export async function openRepository(
 
 		for (const placeholder of thisBatch.filter((entry) => rawFs._isPlaceholder?.(entry))) {
 			await rawFs.rm(placeholder)
-
-			// if file is in stage but not workdir, isogit will not checkout file but assume its deleted
-			// CHECK if still reqired, as stage for placeholder is empty
-			// await isoGit.remove({
-			// 	fs: withProxy({
-			// 		nodeishFs: rawFs,
-			// 		verbose: debug,
-			// 		description: "lazy checkout",
-			// 	}),
-			// 	dir,
-			// 	cache,
-			// 	filepath: placeholder,
-			// })
 		}
 
 		for (const entry of thisBatch) {
 			checkedOut.add(entry)
 		}
-		// console.info("checking out", thisBatch)
+
 		const res = await checkout({
 			fs: withProxy({
 				nodeishFs: rawFs,
@@ -239,14 +226,12 @@ export async function openRepository(
 		}).catch((error) => {
 			console.error({ error, thisBatch })
 		})
-		// console.info("checked out", thisBatch)
 
 		if (debug) {
 			console.warn("checked out ", thisBatch)
 		}
 
 		if (nextBatch.length) {
-			// console.warn("next batch", nextBatch)
 			return doCheckout()
 		}
 
