@@ -7,12 +7,24 @@ export const createNavigation = <T extends string>(
 	languageTag: () => T,
 	startegy: RoutingStrategy<T>
 ) => {
+
+	type NextUsePathname = (typeof NextNavigation)["usePathname"]
+
+	/**
+	 * Get the current **non-localised** pathname. For example usePathname() on /de/dashboard?foo=bar would return "/dashboard"
+	 */
+	const usePathname: NextUsePathname = (...args) => {
+		const encodedLocalisedPathname = NextNavigation.usePathname(...args)
+		const localisedPathname = decodeURI(encodedLocalisedPathname)
+		return startegy.getCanonicalPath(localisedPathname)
+	}
+
 	/**
 	 * Get the router methods. For example router.push('/dashboard')
 	 */
 	const useRouter = () => {
 		const nextRouter = NextNavigation.useRouter()
-		const localisedCurrentPathname = NextNavigation.usePathname()
+		const localisedCurrentPathname = usePathname()
 		const canonicalCurrentPathname = startegy.getCanonicalPath(localisedCurrentPathname)
 
 		type NavigateOptions = Parameters<(typeof nextRouter)["push"]>[1]
@@ -95,16 +107,6 @@ export const createNavigation = <T extends string>(
 			replace,
 			prefetch,
 		}
-	}
-
-	type NextUsePathname = (typeof NextNavigation)["usePathname"]
-
-	/**
-	 * Get the current **non-localised** pathname. For example usePathname() on /de/dashboard?foo=bar would return "/dashboard"
-	 */
-	const usePathname: NextUsePathname = (...args) => {
-		const localisedPathname = NextNavigation.usePathname(...args)
-		return startegy.getCanonicalPath(localisedPathname)
 	}
 
 	return { useRouter, usePathname }

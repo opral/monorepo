@@ -1,5 +1,5 @@
 import type { ExcludeConfig } from "./exclude"
-import { UserPathTranslations } from "./pathnames/types"
+import type { UserPathTranslations } from "./pathnames/types"
 
 export type I18nOptions<T extends string> = {
 	/**

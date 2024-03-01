@@ -5,7 +5,7 @@
 		"en": "m-function-matcher"
 	},
 	"description": {
-		"en": "Enables the inlang VSCode extension to work with paraglide"
+		"en": "Enables the inlang Visual Studio Code extension (Sherlock) to work with paraglide"
 	},
 	"readme": {
 		"en": "./inlang/source-code/plugins/m-function-matcher/README.md"

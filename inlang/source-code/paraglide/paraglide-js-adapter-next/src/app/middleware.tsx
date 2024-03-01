@@ -13,12 +13,13 @@ export function createMiddleware<T extends string>(
 	 * https://nextjs.org/docs/pages/building-your-application/routing/middleware#setting-headers
 	 */
 	return function middleware(request: NextRequest) {
-		if (exclude(request.nextUrl.pathname)) return NextResponse.next()
+		const localisedPathname = decodeURI(request.nextUrl.pathname)
 
-		const locale =
-			strategy.getLocaleFromLocalisedPath(request.nextUrl.pathname) ?? sourceLanguageTag
+		const locale = strategy.getLocaleFromLocalisedPath(localisedPathname) ?? sourceLanguageTag
 
-		const canonicalPath = strategy.translatePath(request.nextUrl.pathname, sourceLanguageTag as T)
+		const canonicalPath = strategy.translatePath(localisedPathname, sourceLanguageTag as T)
+		if (exclude(canonicalPath)) return NextResponse.next()
+
 		const headers = new Headers(request.headers)
 
 		headers.set(HeaderNames.ParaglideLanguage, locale)
@@ -54,11 +55,14 @@ export function createMiddleware<T extends string>(
 		canonicalPath: string
 		availableLanguageTags: readonly T[]
 	}): string {
-		return availableLanguageTags
-			.map(
-				(lang) =>
-					`<${strategy.getLocalisedPath(canonicalPath, lang)}>; rel="alternate"; hreflang="${lang}"`
-			)
-			.join(", ")
+		const alternates: string[] = []
+
+		for (const lang of availableLanguageTags) {
+			const translatedPathname = strategy.translatePath(canonicalPath, lang)
+			const encodedPathname = encodeURI(translatedPathname)
+			alternates.push(`<${encodedPathname}>; rel="alternate"; hreflang="${lang}"`)
+		}
+
+		return alternates.join(", ")
 	}
 }

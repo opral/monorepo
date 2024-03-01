@@ -31,7 +31,7 @@ The inlang editor currently uses the git JS implementation. The JS implementatio
 
 ### Not coupled to the browser [High Confidence]
 
-The git-sdk must run on the server, in a VSCode extension, in CI/CD, in the browser. In short, everywhere.
+The git-sdk must run on the server, in a Visual Studio Code extension (Sherlock), in CI/CD, in the browser. In short, everywhere.
 
 The model to run the git-sdk everywhere is simple: have a filesystem. All environments except for the browser have a filesystem concept. Thus, we need to build a filesystem implementation for the browser.
 

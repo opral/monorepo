@@ -1,5 +1,21 @@
 # @inlang/plugin-t-function-matcher
 
+## 0.5.5
+
+### Patch Changes
+
+- @inlang/sdk@0.26.5
+- @inlang/plugin@2.4.7
+
+## 0.5.4
+
+### Patch Changes
+
+- 960f8fb70: rename the vscode extension to "Sherlock"
+- Updated dependencies [960f8fb70]
+  - @inlang/plugin@2.4.6
+  - @inlang/sdk@0.26.4
+
 ## 0.5.3
 
 ### Patch Changes
