@@ -32,6 +32,7 @@ export function createI18n<T extends string = string>(options: I18nOptions<T> = 
 	return {
 		Link,
 		usePathname,
+		localizePath: strategy.getLocalisedPath,
 		middleware,
 		useRouter,
 		redirect,

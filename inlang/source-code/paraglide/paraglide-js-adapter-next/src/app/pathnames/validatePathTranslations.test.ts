@@ -37,6 +37,18 @@ describe("validatePathTranslations", () => {
 		expect(result.length).toBe(1)
 	})
 
+	it("does not complain if there are extra languages", () => {
+		const pathTranslations = {
+			"/about": {
+				en: "/about",
+				de: "/ueber-uns",
+			},
+		}
+		// @ts-ignore
+		const result = validatePathTranslations(pathTranslations, ["en"])
+		expect(result.length).toBe(0)
+	})
+
 	it("complains if not all variants have the same parameters", () => {
 		const pathTranslations = {
 			"/about/[id]": {
