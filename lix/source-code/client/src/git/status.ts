@@ -34,13 +34,19 @@ type StatusText =
 type StatusList = [string, StatusText][]
 
 const worthWalking = (filepath: string, root: string) => {
-	if (filepath === "." || root == undefined || root.length === 0 || root === ".") {
+	if (
+		filepath === "." ||
+		root == undefined ||
+		root.length === 0 ||
+		root === "." ||
+		root === filepath
+	) {
 		return true
 	}
-	if (root.length >= filepath.length) {
-		return root.startsWith(filepath)
+	if (root.length > filepath.length) {
+		return root.startsWith(filepath + "/")
 	} else {
-		return filepath.startsWith(root)
+		return filepath.startsWith(root + "/")
 	}
 }
 
