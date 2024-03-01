@@ -1,5 +1,11 @@
 # @inlang/plugin-message-format
 
+## 2.1.0
+
+### Minor Changes
+
+- 0c272619a: types loosened to allow for new/unknown properties
+
 ## 2.0.0
 
 ### Major Changes
