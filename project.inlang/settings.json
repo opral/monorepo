@@ -25,5 +25,8 @@
 	"messageLintRuleLevels": {
 		"messageLintRule.inlang.missingTranslation": "error",
 		"messageLintRule.inlang.validJsIdentifier": "error"
+	},
+	"experimental": {
+		"aliases": true
 	}
 }

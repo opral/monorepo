@@ -48,5 +48,8 @@
 	],
 	"plugin.inlang.i18next": {
 		"pathPattern": "./locales/{languageTag}/common.json"
+	},
+	"experimental": {
+		"aliases": true
 	}
 }
