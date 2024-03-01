@@ -4,13 +4,9 @@ import * as m from "@/paraglide/messages"
 
 export const { Link, middleware, useRouter, usePathname, redirect, permanentRedirect } =
 	createI18n<AvailableLanguageTag>({
-		exclude: ["/not-translated"],
 		pathnames: {
 			"/about": m.about_path,
-			"/form": {
-				en: "/form",
-				de: "/formular",
-				"de-CH": "/formular",
-			},
 		},
+
+		exclude: ["/not-translated"], //makes sure that the /not-translated page is not translated
 	})

@@ -42,7 +42,7 @@ Markdown: [Markdoc](https://markdoc.dev/)
 - One-click "ready to use" ✅
 - Compatible with local and remote files ❔
 
-The requirements above resemble a fusion of VSCode and Figma. VSCode due to the tight git integration that localization of software requires, and Figma due to the browser-based architecture. Figma does not need to be downloaded, installed and opened. Open a link in the browser and get started. A similar "one click ready to use" experience is desired for the inlang editor. VSCode recently released their effort to bring VSCode into the browser, see https://vscode.dev/. VSCode.dev brings another feature that the inlang editor requires: Local repositories and remote repositories can be used. Local repositories would allow developers to easily use the inlang editor, while remote repositories would make life easy for translators.
+The requirements above resemble a fusion of Visual Studio Code and Figma. Visual Studio Code due to the tight git integration that localization of software requires, and Figma due to the browser-based architecture. Figma does not need to be downloaded, installed and opened. Open a link in the browser and get started. A similar "one click ready to use" experience is desired for the inlang editor. Visual Studio Code recently released their effort to bring Visual Studio Code into the browser, see https://vscode.dev/. Visual Studio Code.dev brings another feature that the inlang editor requires: Local repositories and remote repositories can be used. Local repositories would allow developers to easily use the inlang editor, while remote repositories would make life easy for translators.
 
 - Real-time collaboration ❔
 
@@ -50,9 +50,9 @@ Git's async collaboration features are expected to be sufficient for the start. 
 
 - Embeddable ❔
 
-Making the editor embeddable, like Microsoft's Monaco that powers VSCode could lead to interesting usecases.
+Making the editor embeddable, like Microsoft's Monaco that powers Visual Studio Code could lead to interesting usecases.
 
-For example, integrating the editor into an IDE or text editor like VSCode could streamline the experience for developers by removing the requirement for app/context switching. Furthermore, the editor could work with local repositories, removing the requirement for a backend entirely. Leveraging PWA (Progressive Web Application) features can achieve full offline support.
+For example, integrating the editor into an IDE or text editor like Visual Studio Code could streamline the experience for developers by removing the requirement for app/context switching. Furthermore, the editor could work with local repositories, removing the requirement for a backend entirely. Leveraging PWA (Progressive Web Application) features can achieve full offline support.
 
 Reasons against embeddability include runtime-dependent features like networking, web worker support, and more. For the sake of increasing development speed, embeddability is not focused on, but accounted for by the architecture. The metaframework vike allows the unbundling of the editor from a monolith architecture.
 

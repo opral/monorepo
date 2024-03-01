@@ -1,7 +1,7 @@
 import type { MessageLintReport, Message } from "@inlang/sdk"
 import { useEditorState } from "../State.jsx"
 export const showFilteredMessage = (message: Message | undefined) => {
-	const { filteredMessageLintRules, filteredLanguageTags, filteredId, textSearch, project } =
+	const { filteredMessageLintRules, filteredLanguageTags, filteredIds, textSearch, project } =
 		useEditorState()
 
 	// Early exit if variants are empty
@@ -41,7 +41,7 @@ export const showFilteredMessage = (message: Message | undefined) => {
 
 	// filteredById
 	const filteredById =
-		filteredId() === "" || (message !== undefined && message.id === filteredId())
+		filteredIds().length === 0 || (message !== undefined && filteredIds().includes(message.id))
 			? filteredByLanguage
 			: false
 

@@ -1,12 +1,22 @@
 <script>
+	import "$lib/ui/styles.css"
 	import { ParaglideJS } from "@inlang/paraglide-js-adapter-sveltekit"
 	import { i18n } from "$lib/i18n.js"
-
-	export let data;
+	import Header from "$lib/ui/Header.svelte"
 </script>
 
-<p>{data.serverLang}</p>
-
 <ParaglideJS {i18n}>
-	<slot />
+	<Header />
+
+	<main>
+		<slot />
+	</main>
 </ParaglideJS>
+
+<style>
+	main {
+		max-width: 800px;
+		margin: 0 auto;
+		padding: 1em;
+	}
+</style>

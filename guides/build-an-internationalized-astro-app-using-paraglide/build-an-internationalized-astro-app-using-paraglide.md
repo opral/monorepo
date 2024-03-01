@@ -92,7 +92,7 @@ The default path for translation files is `./messages/{lang}.json`. You can chan
 You can add messages in two ways:
 
 1. Manually editing the translation files
-2. Using the [inlang IDE Extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension)
+2. Using [Sherlock (VS Code extension)](https://inlang.com/m/r7kp499g/app-inlang-ideExtension)
 
 ## Using Messages
 
@@ -125,7 +125,7 @@ import { languageTag } from "../paraglide/runtime.js"
 That's it. The message functions will now return the correct language on the client and the server.
 
 ## Translating the Page Shell
-Now it's really just a matter of going through your app and extracting any hard-coded strings into messages. This is easiest to do with the [inlang IDE Extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension).
+Now it's really just a matter of going through your app and extracting any hard-coded strings into messages. This is easiest to do with [Sherlock (VS Code extension)](https://inlang.com/m/r7kp499g/app-inlang-ideExtension).
 
 Then you just import the messages and use them in your components. 
 

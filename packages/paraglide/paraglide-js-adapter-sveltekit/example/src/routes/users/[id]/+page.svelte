@@ -1,7 +1,6 @@
 <script>
 	import { page } from "$app/stores"
     import { base } from "$app/paths"
-	import { availableLanguageTags } from "$paraglide/runtime"
     import * as m from "$paraglide/messages.js"
 
     const totalUsers = 10;
@@ -17,25 +16,3 @@
 <a data-sveltekit-keepfocus href="{base}/users/{prev}">{m.previous_user()}</a>
 <br />
 <a data-sveltekit-keepfocus href="{base}/users/{next}">{m.next_user()}</a>
-
-<br />
-<br />
-
-<a href="{base}/users/{$page.params.id}/edit">{m.edit()}</a>
-
-<br />
-<br />
-{#each availableLanguageTags as lang}
-    <a href="{base}/users/{num_users}" hreflang={lang}>
-    {m.change_language_to({ languageTag: lang })}
-    </a>
-    <br />
-{/each}
-
-
-
-
-<br />
-<br />
-
-<a href="{base}/">{m.home()}</a>
