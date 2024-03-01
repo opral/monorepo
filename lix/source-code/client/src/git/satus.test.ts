@@ -241,15 +241,6 @@ describe(
 				],
 			])
 
-			// // WHYYYY?
-			// await repository._isoGit.resetIndex({
-			// 	fs, // : rawFs,
-			// 	// ref: args.branch,
-			// 	dir: "/",
-			// 	// cache,
-			// 	filepath: "/",
-			// })
-
 			await repository._remove("svelte.config.js")
 			await repository._add(".env")
 
