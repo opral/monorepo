@@ -260,7 +260,7 @@ export async function openRepository(
 		await walk({
 			fs,
 			dir,
-			cache: cache, //  || {},
+			cache,
 			gitdir: ".git",
 			trees: [TREE({ ref: args.branch })],
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
