@@ -36,6 +36,7 @@ export const Gitfloat = () => {
 		setLocalChanges,
 		setFsChange,
 		routeParams,
+		refLink,
 		setLastPullTime,
 		tourStep,
 		project,
@@ -196,6 +197,9 @@ export const Gitfloat = () => {
 		if (typeof repoInfo === "undefined" || "error" in repoInfo) {
 			return
 		}
+		if (refLink().includes("ninja-")) {
+			return `https://github.com/${repoInfo?.parent?.fullName}/pull/${refLink().replace("ninja-", "")}`
+		}
 		return `https://github.com/${repoInfo?.parent?.fullName}/compare/${currentBranch()}...${
 			routeParams().owner
 		}:${
@@ -253,14 +257,17 @@ export const Gitfloat = () => {
 		},
 		pullrequest: {
 			text: "",
-			buttontext: "New pull request",
+			buttontext: refLink().includes("ninja-") ? "View pull request" : "Open pull request",
 			icon: IconPullrequest,
 			href: "pullrequest",
 			onClick: () => {
-				telemetryBrowser.capture("EDITOR opened pull request", {
-					owner: routeParams().owner,
-					repository: routeParams().repository,
-				})
+				// ToDo: @jannesblobel - has to create an action for view pull request
+				if (!refLink().includes("ninja-")) {
+					telemetryBrowser.capture("EDITOR opened pull request", {
+						owner: routeParams().owner,
+						repository: routeParams().repository,
+					})
+				}
 				setHasPushedChanges(false)
 			},
 		},

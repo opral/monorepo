@@ -23,7 +23,7 @@ export async function run(): Promise<void> {
 			throw new Error("GITHUB_TOKEN is not set")
 		}
 		const { owner, repo } = github.context.repo
-		const pr_number = github.context.payload.pull_request?.number
+		const prNumber = github.context.payload.pull_request?.number
 
 		const repoBase = await openRepository(process.cwd(), {
 			nodeishFs: fs,
@@ -179,7 +179,7 @@ ${lintSummary
 				headMeta.repo
 			}?branch=${headMeta.branch}&project=${result.projectPath}&lint=${
 				lintSummary.id
-			}&${result.changedIds.map((id) => `id=${id}`).join("&")}) |`
+			}&${result.changedIds.map((id) => `id=${id}`).join("&")})&ref=ninja-${prNumber} |`
 	)
 	.join("\n")}
 `
@@ -200,7 +200,7 @@ ${lintSummary
 		const issue = await octokit.rest.issues.get({
 			owner,
 			repo,
-			issue_number: pr_number as number,
+			issue_number: prNumber as number,
 		})
 		if (issue.data.locked) return console.debug("PR is locked, comment is skipped")
 
@@ -208,7 +208,7 @@ ${lintSummary
 		const existingComment = await octokit.rest.issues.listComments({
 			owner,
 			repo,
-			issue_number: pr_number as number,
+			issue_number: prNumber as number,
 		})
 		if (existingComment.data.length > 0) {
 			const commentId = existingComment.data.find(
@@ -249,7 +249,7 @@ ${lintSummary
 		await octokit.rest.issues.createComment({
 			owner,
 			repo,
-			issue_number: pr_number as number,
+			issue_number: prNumber as number,
 			body: commentContent,
 		})
 	} catch (error) {
