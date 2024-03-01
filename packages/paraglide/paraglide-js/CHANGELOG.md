@@ -1,5 +1,11 @@
 # @inlang/paraglide-js
 
+## 1.2.7
+
+### Patch Changes
+
+- f6ec6cdc9: bump `@inlang/sdk` dependency
+
 ## 1.2.6
 
 ### Patch Changes

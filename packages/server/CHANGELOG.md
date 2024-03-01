@@ -4,6 +4,19 @@
 
 ### Patch Changes
 
+- Updated dependencies [0c272619a]
+  - @inlang/project-settings@2.3.0
+  - @inlang/plugin-message-format@2.1.0
+  - @inlang/website@null
+  - @inlang/marketplace-manifest@1.3.4
+  - @inlang/badge@0.7.4
+  - @inlang/rpc@0.2.14
+  - @inlang/telemetry@0.3.13
+
+## null
+
+### Patch Changes
+
 - @inlang/website@null
 - @inlang/badge@0.7.3
 - @inlang/plugin-message-format@2.0.0
