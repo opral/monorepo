@@ -8,8 +8,6 @@ import type {
 import { type ImportFunction, resolveModules } from "./resolve-modules/index.js"
 import { TypeCompiler, ValueErrorType } from "@sinclair/typebox/compiler"
 import {
-	ProjectSettingsFileJSONSyntaxError,
-	ProjectSettingsFileNotFoundError,
 	ProjectSettingsInvalidError,
 	PluginLoadMessagesError,
 	PluginSaveMessagesError,
@@ -329,24 +327,10 @@ const loadSettings = async (args: {
 	settingsFilePath: string
 	nodeishFs: NodeishFilesystemSubset
 }) => {
-	const { data: settingsFile, error: settingsFileError } = await tryCatch(
-		async () => await args.nodeishFs.readFile(args.settingsFilePath, { encoding: "utf-8" })
-	)
-	if (settingsFileError)
-		throw new ProjectSettingsFileNotFoundError({
-			cause: settingsFileError,
-			path: args.settingsFilePath,
-		})
-
-	const json = tryCatch(() => JSON.parse(settingsFile!))
-
-	if (json.error) {
-		throw new ProjectSettingsFileJSONSyntaxError({
-			cause: json.error,
-			path: args.settingsFilePath,
-		})
-	}
-	return parseSettings(json.data)
+	// caller should handle errors
+	const settingsFile = await args.nodeishFs.readFile(args.settingsFilePath, { encoding: "utf-8" })
+	const json = JSON.parse(settingsFile)
+	return parseSettings(json)
 }
 
 const parseSettings = (settings: unknown) => {
