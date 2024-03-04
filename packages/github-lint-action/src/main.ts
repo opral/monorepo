@@ -168,6 +168,7 @@ ${result.errorsHead
 <summary>${error?.name}</summary>
 ${error?.message}
 ${
+	error?.cause &&
 	error?.cause.message &&
 	`**Error cause**
 ${error?.cause.message}`
