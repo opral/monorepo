@@ -4,7 +4,7 @@ const InternalProperties = Type.Object(
 	{
 		$schema: Type.Optional(Type.Literal("https://inlang.com/schema/inlang-message-format")),
 	},
-	{ additionalProperties: false }
+	{ additionalProperties: true }
 )
 
 const Messages = Type.Record(
@@ -15,7 +15,7 @@ const Messages = Type.Record(
 		examples: ["helloWorld", "hello_world", "helloWorld123", "hello_world_123"],
 	}),
 	Type.String(),
-	{ additionalProperties: false }
+	{ additionalProperties: true }
 )
 
 /**

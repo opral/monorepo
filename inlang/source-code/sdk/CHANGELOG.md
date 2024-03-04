@@ -1,5 +1,15 @@
 # @inlang/sdk
 
+## 0.26.5
+
+### Patch Changes
+
+- Updated dependencies [0c272619a]
+  - @inlang/project-settings@2.3.0
+  - @inlang/message-lint-rule@1.4.4
+  - @inlang/plugin@2.4.7
+  - @inlang/module@1.2.7
+
 ## 0.26.4
 
 ### Patch Changes

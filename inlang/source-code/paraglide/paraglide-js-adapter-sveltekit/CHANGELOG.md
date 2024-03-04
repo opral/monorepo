@@ -1,5 +1,17 @@
 # @inlang/paraglide-js-adapter-sveltekit
 
+## 0.5.5
+
+### Patch Changes
+
+- @inlang/paraglide-js-adapter-vite@1.2.17
+
+## 0.5.4
+
+### Patch Changes
+
+- 5d25b889a: log warning if the `lang` attribute isn't updated in `src/app.html`
+
 ## 0.5.3
 
 ### Patch Changes

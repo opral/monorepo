@@ -1,5 +1,12 @@
 # @inlang/paraglide-js-adapter-next
 
+## 0.2.1
+
+### Patch Changes
+
+- 1f54e6dbb: fix `pathnames` type
+- f711e65b6: Make sure path translations can hande non-latin characters
+
 ## 0.2.0
 
 ### Minor Changes

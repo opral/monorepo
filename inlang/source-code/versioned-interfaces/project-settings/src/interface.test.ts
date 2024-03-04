@@ -120,6 +120,7 @@ describe("settings.* (external settings)", () => {
 		}
 	})
 
+	// #2325 - types have been loosened to allow for new/unknown properties
 	it("should enforce namespaces", () => {
 		const settings: ProjectSettings = {
 			sourceLanguageTag: "en",
@@ -128,10 +129,11 @@ describe("settings.* (external settings)", () => {
 			// @ts-expect-error - Namespace is missing
 			withoutNamespace: {},
 		}
-		expect(Value.Check(ProjectSettings, settings)).toBe(false)
+		expect(Value.Check(ProjectSettings, settings)).toBe(true)
 	})
 
-	it("should fail on unknown types", () => {
+	// #2325 - types have been loosened to allow for new/unknown properties
+	it("should not fail on unknown types", () => {
 		const settings: ProjectSettings = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
@@ -139,10 +141,11 @@ describe("settings.* (external settings)", () => {
 			// @ts-expect-error - unknown type
 			"namespace.unknownType.name": {},
 		}
-		expect(Value.Check(ProjectSettings, settings)).toBe(false)
+		expect(Value.Check(ProjectSettings, settings)).toBe(true)
 	})
 
-	it("should enforce camelCase", () => {
+	// #2325 - types have been loosened to allow for new/unknown properties
+	it("should not enforce camelCase", () => {
 		const settings: ProjectSettings = {
 			sourceLanguageTag: "en",
 			languageTags: ["en", "de"],
@@ -159,7 +162,7 @@ describe("settings.* (external settings)", () => {
 
 		for (const failCase of failCases) {
 			const config = { ...settings, settings: { [failCase]: {} } }
-			expect(Value.Check(ProjectSettings, config)).toBe(false)
+			expect(Value.Check(ProjectSettings, config)).toBe(true)
 		}
 	})
 
@@ -196,7 +199,8 @@ describe("settings.* (external settings)", () => {
 		expect(Value.Check(ProjectSettings, settings)).toBe(true)
 	})
 
-	// (reserving project namespace for internal use only)
+	// #2325 - no longer blocking new/unknown keys since that breaks installed apps
+	// when new features in project settings are rolled out
 	it("should not be possible to define unknown project settings", () => {
 		const settings: ProjectSettings = {
 			sourceLanguageTag: "en",
@@ -205,7 +209,7 @@ describe("settings.* (external settings)", () => {
 			// @ts-expect-error - unknown project key
 			"project.unknown.name": {},
 		}
-		expect(Value.Check(ProjectSettings, settings)).toBe(false)
+		expect(Value.Check(ProjectSettings, settings)).toBe(true)
 	})
 
 	it("should be possible to define known project settings", () => {
