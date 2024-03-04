@@ -66,7 +66,7 @@ import { createI18n } from "@inlang/paraglide-js-adapter-next"
 import type { AvailableLanguageTag } from "@/paraglide/runtime.js"
 
 // All available functions exported. Just use the ones you need
-export const { middleware, Link, useRouter, usePathname, redirect, permanentRedirect } =
+export const { middleware, Link, useRouter, usePathname, redirect, permanentRedirect, localizePathname } =
 	createI18n<AvailableLanguageTag>()
 ```
 
@@ -252,6 +252,19 @@ export const { ... } =
 	})
 ```
 
+#### Getting a localised Pathname
+
+There are situations where you need to know the localised version of a pathname. You can use the `localizePathname` function for that.
+
+```ts
+import { localizePathname } from "@/lib/i18n"
+localizePathname("/about", "de") // de/ueber-uns
+```
+
+#### SEO
+
+Search engines like Google expect you to tell them about translated versions of your pages. The adapter does this by default by setting the `Link` Header on requests.
+
 ## (legacy) Setup With the Pages Router
 
 The Pages router already comes with i18n support out of the box. You can read more about it in the[NextJS Pages router documentation](https://nextjs.org/docs/advanced-features/i18n-routing). Thanks to this, Paraglide doesn't need to provide it's own routing. All the Adapter does in the Pages router is react to the language change.
@@ -309,6 +322,12 @@ export default function Document() {
 	return <Html lang={languageTag()}>...</Html>
 }
 ```
+
+## Known Limitations
+
+There are some NextJS features that can not be used with the Paraglide Adapter. These are:
+- `output: static`
+- Evaluating messages in the module-scope in server components
 
 ## Roadmap to 1.0
 

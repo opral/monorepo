@@ -1,5 +1,18 @@
 # @inlang/paraglide-js-adapter-next-example-app
 
+## 0.2.1
+
+### Patch Changes
+
+- Updated dependencies [f6ec6cdc9]
+  - @inlang/paraglide-js@1.2.7
+
+## 0.2.0
+
+### Minor Changes
+
+- a47f31a1d: Redesign to make onboarding experience better
+
 ## 0.1.11
 
 ### Patch Changes
