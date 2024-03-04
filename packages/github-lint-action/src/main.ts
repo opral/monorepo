@@ -241,19 +241,21 @@ ${lintSummary
 				if (results.every((result) => result.commentContent.length === 0)) {
 					core.debug("Reports have been fixed, updating comment and removing it")
 					await octokit.rest.issues.updateComment({
-						owner: "ninja-i18n",
+						owner,
 						repo,
 						comment_id: commentId,
 						body: commentResolved,
+						as: "ninja-i18n",
 					})
 					return
 				} else {
 					core.debug("Reports have not been fixed, updating comment")
 					await octokit.rest.issues.updateComment({
-						owner: "ninja-i18n",
+						owner,
 						repo,
 						comment_id: commentId,
 						body: commentContent,
+						as: "ninja-i18n",
 					})
 				}
 				return
@@ -267,14 +269,15 @@ ${lintSummary
 
 		core.debug("Creating a new comment")
 		await octokit.rest.issues.createComment({
-			owner: "ninja-i18n",
+			owner,
 			repo,
 			issue_number: prNumber as number,
 			body: commentContent,
+			as: "ninja-i18n",
 		})
 	} catch (error) {
 		// Fail the workflow run if an error occurs
-		if (error instanceof Error) core.setFailed(error.message)
+		if (error instanceof Error) core.setFailed(error)
 	}
 }
 
