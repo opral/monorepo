@@ -10,7 +10,7 @@ import { exec } from "node:child_process"
  * @returns {Promise<void>} Resolves when the action is complete.
  */
 export async function run(): Promise<void> {
-	// core.debug("Running the action")
+	core.debug("Running the action")
 
 	try {
 		const token = process.env.GITHUB_TOKEN
