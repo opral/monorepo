@@ -163,26 +163,21 @@ export async function run(): Promise<void> {
 			if (result.errorsBase.length === 0 && result.errorsHead.length > 0) {
 				result.commentContent = `#### ❗️ New errors in setup of project \`${shortenedProjectPath()}\` found
 ${result.errorsHead
-	.map(
-		(error) =>
-			`<details>
+	.map((error) => {
+		let errorLog = `<details>
 <summary>${error?.name}</summary>
-${error?.message}\n
-${
-	error?.cause &&
-	error?.cause.message &&
-	`**Error cause**
+${error?.message}\n`
+		if (error?.cause && error?.cause?.message) {
+			errorLog += `**Error cause**
 ${error?.cause.message}\n`
-}
-${
-	error?.cause &&
-	error?.cause.message &&
-	error?.cause.stack &&
-	`**Stack trace**
+		}
+		if (error?.cause && error?.cause?.message && error?.cause?.stack) {
+			errorLog += `**Stack trace**
 ${error?.cause.stack}`
-}
-</details>`
-	)
+		}
+		errorLog += `</details>`
+		return errorLog
+	})
 	.join("\n")}`
 				continue
 			}
