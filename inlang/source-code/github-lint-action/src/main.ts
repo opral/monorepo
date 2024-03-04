@@ -203,8 +203,8 @@ ${lintSummary
 			result.commentContent = commentContent
 		}
 
-		const commentHeadline = `### 🛎️ Translations need to be updated`
-		const commentResolved = `### 🎉 Translations have been successfully updated`
+		const commentHeadline = `### Ninja i18n – 🛎️ Translations need to be updated`
+		const commentResolved = `### Ninja i18n – 🎉 Translations have been successfully updated`
 		const commentContent =
 			commentHeadline +
 			"\n\n" +
