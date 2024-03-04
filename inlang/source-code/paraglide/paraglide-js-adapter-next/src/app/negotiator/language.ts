@@ -89,7 +89,11 @@ function getLanguagePriority(
 /**
  * Get the specificity of the language.
  */
-function specify(language: string, spec: LanguageSpec, index: number) {
+function specify(
+	language: string,
+	spec: LanguageSpec,
+	index: number
+): LanguagePriority | undefined {
 	const parsed = parseLanguage(language, 0)
 	if (!parsed) return undefined
 
@@ -111,7 +115,7 @@ function specify(language: string, spec: LanguageSpec, index: number) {
 	}
 
 	return {
-		i: index,
+		index,
 		o: spec.index,
 		q: spec.q,
 		s: s,
