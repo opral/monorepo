@@ -10,7 +10,11 @@ import type {
 } from "./versionedInterfaces.js"
 import type { ImportFunction } from "./resolve-modules/index.js"
 import type { InlangModule } from "@inlang/module"
-import { LoadProjectInvalidArgument, ProjectSettingsInvalidError } from "./errors.js"
+import {
+	LoadProjectInvalidArgument,
+	ProjectSettingsFileJSONSyntaxError,
+	ProjectSettingsInvalidError,
+} from "./errors.js"
 import { normalizePath } from "@lix-js/fs"
 import { createMessage } from "./test-utilities/createMessage.js"
 import { tryCatch } from "@inlang/result"
@@ -276,8 +280,7 @@ describe("initialization", () => {
 				_import,
 			})
 
-			const errors = project.errors()
-			expect(errors[0]).toBeInstanceOf(SyntaxError)
+			expect(project.errors()![0]).toBeInstanceOf(ProjectSettingsFileJSONSyntaxError)
 		})
 
 		it("should return an error if settings file is does not match schema", async () => {
