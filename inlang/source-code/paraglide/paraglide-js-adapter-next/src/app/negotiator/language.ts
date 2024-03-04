@@ -3,7 +3,7 @@
  */
 
 type LanguageSpec = {
-	i: number
+	index: number
 	q: number
 	full: string
 	prefix: string
@@ -11,7 +11,7 @@ type LanguageSpec = {
 }
 
 type LanguagePriority = {
-	i: number
+	index: number
 	o: number
 	q: number
 	s: number
@@ -22,24 +22,22 @@ const LANGUAGE_REGEXP = /^\s*([^\s\-;]+)(?:-([^\s;]+))?\s*(?:;(.*))?$/
 /**
  * Parse the Accept-Language header.
  */
-function parseAcceptLanguage(accept: string): LanguageSpec[] {
-	const accepts = accept.split(",")
-	const languageSpec: LanguageSpec[] = []
+function parseAcceptLanguage(acceptLanguage: string): LanguageSpec[] {
+	const accepts = acceptLanguage.split(",")
+	const specs: LanguageSpec[] = []
 
-	for (const [i, accept_] of accepts.entries()) {
-		const language = parseLanguage(accept_.trim(), i)
-		if (language) {
-			languageSpec.push(language)
-		}
+	for (const [i, accept] of accepts.entries()) {
+		const language = parseLanguage(accept.trim(), i)
+		if (language) specs.push(language)
 	}
 
-	return languageSpec
+	return specs
 }
 
 /**
  * Parse a language from the Accept-Language header.
  */
-function parseLanguage(str: string, i: number): LanguageSpec | undefined {
+function parseLanguage(str: string, index: number): LanguageSpec | undefined {
 	const match = LANGUAGE_REGEXP.exec(str)
 	if (!match) return undefined
 
@@ -62,7 +60,7 @@ function parseLanguage(str: string, i: number): LanguageSpec | undefined {
 		prefix: prefix,
 		suffix: suffix,
 		q: q,
-		i: i,
+		index,
 		full: full,
 	}
 }
@@ -75,13 +73,13 @@ function getLanguagePriority(
 	accepted: LanguageSpec[],
 	index: number
 ): LanguagePriority {
-	let priority = { i: 0, o: -1, q: 0, s: 0 }
+	let priority: LanguagePriority = { index: 0, o: -1, q: 0, s: 0 }
 
 	for (const element of accepted) {
 		const spec = specify(language, element, index)
 
 		if (spec && (priority.s - spec.s || priority.q - spec.q || priority.o - spec.o) < 0) {
-			priority = spec
+			priority = spec as any
 		}
 	}
 
@@ -92,14 +90,21 @@ function getLanguagePriority(
  * Get the specificity of the language.
  */
 function specify(language: string, spec: LanguageSpec, index: number) {
-	const p = parseLanguage(language, 0)
-	if (!p) return undefined
+	const parsed = parseLanguage(language, 0)
+	if (!parsed) return undefined
+
+	/**
+	 * Bitflag for the specificity
+	 * 100 = exact match
+	 * 010 = prefix match
+	 * 001 = full match
+	 */
 	let s = 0
-	if (spec.full.toLowerCase() === p.full.toLowerCase()) {
+	if (spec.full.toLowerCase() === parsed.full.toLowerCase()) {
 		s |= 4
-	} else if (spec.prefix.toLowerCase() === p.full.toLowerCase()) {
+	} else if (spec.prefix.toLowerCase() === parsed.full.toLowerCase()) {
 		s |= 2
-	} else if (spec.full.toLowerCase() === p.prefix.toLowerCase()) {
+	} else if (spec.full.toLowerCase() === parsed.prefix.toLowerCase()) {
 		s |= 1
 	} else if (spec.full !== "*") {
 		return undefined
@@ -107,7 +112,7 @@ function specify(language: string, spec: LanguageSpec, index: number) {
 
 	return {
 		i: index,
-		o: spec.i,
+		o: spec.index,
 		q: spec.q,
 		s: s,
 	}
@@ -135,16 +140,15 @@ function preferredLanguages(accept: string, provided: string[]) {
 }
 
 function compareSpecs(a: LanguageSpec, b: LanguageSpec) {
-	return b.q - a.q || a.i - b.i || 0
+	return b.q - a.q || a.index - b.index || 0
 }
 
 function comparePriorities(a: LanguagePriority, b: LanguagePriority) {
-	return b.q - a.q || b.s - a.s || a.o - b.o || a.i - b.i || 0
+	return b.q - a.q || b.s - a.s || a.o - b.o || a.index - b.index || 0
 }
 
 /**
  * Get full language string.
- * @private
  */
 function getFullLanguage(spec: LanguageSpec) {
 	return spec.full
@@ -152,7 +156,6 @@ function getFullLanguage(spec: LanguageSpec) {
 
 /**
  * Check if a spec has any quality.
- * @private
  */
 function isQuality(spec: LanguageSpec | LanguagePriority) {
 	return spec.q > 0
