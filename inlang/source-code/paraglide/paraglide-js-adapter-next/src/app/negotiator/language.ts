@@ -4,7 +4,7 @@
 
 type LanguageSpec = {
 	index: number
-	q: number
+	quality: number
 	full: string
 	prefix: string
 	suffix: string
@@ -13,7 +13,7 @@ type LanguageSpec = {
 type LanguagePriority = {
 	index: number
 	o: number
-	q: number
+	quality: number
 	s: number
 }
 
@@ -47,19 +47,19 @@ function parseLanguage(str: string, index: number): LanguageSpec | undefined {
 
 	if (suffix) full += "-" + suffix
 
-	let q = 1
+	let quality = 1
 	if (match[3]) {
 		const params = match[3].split(";")
 		for (const param of params) {
 			const p = param.split("=")
-			if (p[0] === "q") q = parseFloat(p[1])
+			if (p[0] === "q") quality = parseFloat(p[1])
 		}
 	}
 
 	return {
 		prefix: prefix,
 		suffix: suffix,
-		q: q,
+		quality,
 		index,
 		full: full,
 	}
@@ -73,12 +73,15 @@ function getLanguagePriority(
 	accepted: LanguageSpec[],
 	index: number
 ): LanguagePriority {
-	let priority: LanguagePriority = { index: 0, o: -1, q: 0, s: 0 }
+	let priority: LanguagePriority = { index: 0, o: -1, quality: 0, s: 0 }
 
 	for (const element of accepted) {
 		const spec = specify(language, element, index)
 
-		if (spec && (priority.s - spec.s || priority.q - spec.q || priority.o - spec.o) < 0) {
+		if (
+			spec &&
+			(priority.s - spec.s || priority.quality - spec.quality || priority.o - spec.o) < 0
+		) {
 			priority = spec as any
 		}
 	}
@@ -117,7 +120,7 @@ function specify(
 	return {
 		index,
 		o: spec.index,
-		q: spec.q,
+		quality: spec.quality,
 		s: s,
 	}
 }
@@ -144,11 +147,11 @@ function preferredLanguages(accept: string, provided: string[]) {
 }
 
 function compareSpecs(a: LanguageSpec, b: LanguageSpec) {
-	return b.q - a.q || a.index - b.index || 0
+	return b.quality - a.quality || a.index - b.index || 0
 }
 
 function comparePriorities(a: LanguagePriority, b: LanguagePriority) {
-	return b.q - a.q || b.s - a.s || a.o - b.o || a.index - b.index || 0
+	return b.quality - a.quality || b.s - a.s || a.o - b.o || a.index - b.index || 0
 }
 
 /**
@@ -162,7 +165,7 @@ function getFullLanguage(spec: LanguageSpec) {
  * Check if a spec has any quality.
  */
 function isQuality(spec: LanguageSpec | LanguagePriority) {
-	return spec.q > 0
+	return spec.quality > 0
 }
 
 export { preferredLanguages }
