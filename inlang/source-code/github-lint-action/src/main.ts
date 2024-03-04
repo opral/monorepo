@@ -173,8 +173,12 @@ ${
 	`**Error cause**
 ${error?.cause.message}`
 }
-**Stack trace**
-${error?.cause.stack}
+${
+	error?.cause &&
+	error?.cause.message &&
+	`**Stack trace**
+${error?.cause.stack}`
+}
 </details>`
 	)
 	.join("\n")}`
@@ -202,8 +206,8 @@ ${lintSummary
 			result.commentContent = commentContent
 		}
 
-		const commentHeadline = `### 🛎️ Ninja i18n – Translations need to be updated`
-		const commentResolved = `### 🎉 Ninja i18n – Translations have been successfully updated`
+		const commentHeadline = `### 🛎️ Translations need to be updated`
+		const commentResolved = `### 🎉 Translations have been successfully updated`
 		const commentContent =
 			commentHeadline +
 			"\n\n" +
@@ -230,14 +234,14 @@ ${lintSummary
 			const commentId = existingComment.data.find(
 				(comment) =>
 					(comment.body?.includes(commentHeadline) || comment.body?.includes(commentResolved)) &&
-					comment.user?.login === "github-actions[bot]"
+					comment.user?.login === "ninja-i18n"
 			)?.id
 			if (commentId) {
 				core.debug("Updating existing comment")
 				if (results.every((result) => result.commentContent.length === 0)) {
 					core.debug("Reports have been fixed, updating comment and removing it")
 					await octokit.rest.issues.updateComment({
-						owner,
+						owner: "ninja-i18n",
 						repo,
 						comment_id: commentId,
 						body: commentResolved,
@@ -246,7 +250,7 @@ ${lintSummary
 				} else {
 					core.debug("Reports have not been fixed, updating comment")
 					await octokit.rest.issues.updateComment({
-						owner,
+						owner: "ninja-i18n",
 						repo,
 						comment_id: commentId,
 						body: commentContent,
@@ -263,7 +267,7 @@ ${lintSummary
 
 		core.debug("Creating a new comment")
 		await octokit.rest.issues.createComment({
-			owner,
+			owner: "ninja-i18n",
 			repo,
 			issue_number: prNumber as number,
 			body: commentContent,
