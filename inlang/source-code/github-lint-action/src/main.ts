@@ -166,13 +166,13 @@ ${result.errorsHead
 	.map((error) => {
 		let errorLog = `<details>
 <summary>${error?.name}</summary>
-${error?.message}\n`
+${error?.message}`
 		if (error?.cause && error?.cause?.message) {
-			errorLog += `**Error cause**
-${error?.cause.message}\n`
+			errorLog += `\n\n**Error cause**
+${error?.cause.message}`
 		}
 		if (error?.cause && error?.cause?.message && error?.cause?.stack) {
-			errorLog += `**Stack trace**
+			errorLog += `\n\n**Stack trace**
 ${error?.cause.stack}`
 		}
 		errorLog += `</details>`
