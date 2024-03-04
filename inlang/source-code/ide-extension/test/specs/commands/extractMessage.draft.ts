@@ -8,7 +8,7 @@ describe("Extract Message command", () => {
 		const testFile = "page.js"
 		const testFilePath = `app [lng] ${testFile}`
 		const testKey = "e2etest"
-		const testCommand = "inlang: extract message"
+		const testCommand = "sherlock: extract message"
 		const workbench = await browser.getWorkbench()
 
 		// open test file
