@@ -166,7 +166,12 @@ ${result.errorsHead
 	.map(
 		(error) => `* <details>
 <summary>${error?.name}</summary>
-${error?.cause.message}
+${error?.message}
+${
+	error?.cause.message &&
+	`**Error cause**
+${error?.cause.message}`
+}
 **Stack trace**
 ${error?.cause.stack}
 </details>`
