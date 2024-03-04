@@ -164,7 +164,8 @@ export async function run(): Promise<void> {
 				result.commentContent = `#### ❗️ New errors in setup of project \`${shortenedProjectPath()}\` found
 ${result.errorsHead
 	.map(
-		(error) => `* <details>
+		(error) =>
+			`<details>
 <summary>${error?.name}</summary>
 ${error?.message}
 ${
