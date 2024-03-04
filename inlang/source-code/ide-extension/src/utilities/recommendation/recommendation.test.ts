@@ -56,7 +56,7 @@ describe("isInWorkspaceRecommendation", () => {
 		vi.mocked(fs.existsSync).mockReturnValue(true)
 		vi.mocked(fs.readFileSync).mockReturnValue(
 			JSON.stringify({
-				recommendations: ["sherlock.vs-code-extension"],
+				recommendations: ["inlang.vs-code-extension"],
 			})
 		)
 

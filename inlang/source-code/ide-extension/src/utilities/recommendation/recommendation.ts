@@ -27,7 +27,7 @@ export async function isInWorkspaceRecommendation(args: {
 	}
 	const extensionsResult =
 		// @ts-expect-error
-		extensions?.recommendations?.includes("sherlock.vs-code-extension") || false
+		extensions?.recommendations?.includes("inlang.vs-code-extension") || false
 
 	if (extensionsResult === true) {
 		return true
