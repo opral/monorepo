@@ -12,9 +12,9 @@ type LanguageSpec = {
 
 type LanguagePriority = {
 	index: number
-	o: number
+	order: number
 	quality: number
-	s: number
+	specificity: number
 }
 
 const LANGUAGE_REGEXP = /^\s*([^\s\-;]+)(?:-([^\s;]+))?\s*(?:;(.*))?$/
@@ -73,14 +73,16 @@ function getLanguagePriority(
 	accepted: LanguageSpec[],
 	index: number
 ): LanguagePriority {
-	let priority: LanguagePriority = { index: 0, o: -1, quality: 0, s: 0 }
+	let priority: LanguagePriority = { index: 0, order: -1, quality: 0, specificity: 0 }
 
 	for (const element of accepted) {
 		const spec = specify(language, element, index)
 
 		if (
 			spec &&
-			(priority.s - spec.s || priority.quality - spec.quality || priority.o - spec.o) < 0
+			(priority.specificity - spec.specificity ||
+				priority.quality - spec.quality ||
+				priority.order - spec.order) < 0
 		) {
 			priority = spec as any
 		}
@@ -119,9 +121,9 @@ function specify(
 
 	return {
 		index,
-		o: spec.index,
+		order: spec.index,
 		quality: spec.quality,
-		s: s,
+		specificity: s,
 	}
 }
 
@@ -151,7 +153,13 @@ function compareSpecs(a: LanguageSpec, b: LanguageSpec) {
 }
 
 function comparePriorities(a: LanguagePriority, b: LanguagePriority) {
-	return b.quality - a.quality || b.s - a.s || a.o - b.o || a.index - b.index || 0
+	return (
+		b.quality - a.quality ||
+		b.specificity - a.specificity ||
+		a.order - b.order ||
+		a.index - b.index ||
+		0
+	)
 }
 
 /**
