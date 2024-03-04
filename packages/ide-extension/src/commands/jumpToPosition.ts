@@ -4,7 +4,7 @@ import type { Message } from "@inlang/sdk"
 import * as vscode from "vscode"
 
 export const jumpToPositionCommand = {
-	command: "inlang.jumpToPosition",
+	command: "sherlock.jumpToPosition",
 	title: "Inlang: Jump to position in editor",
 	register: commands.registerCommand,
 	callback: async function (args: {

@@ -3,7 +3,7 @@ import type { ErrorNode } from "../utilities/errors/errors.js"
 import { msg } from "../utilities/messages/msg.js"
 
 export const copyErrorCommand = {
-	command: "inlang.copyError",
+	command: "sherlock.copyError",
 	title: "Inlang: Copy error",
 	register: vscode.commands.registerCommand,
 	callback: async (error: ErrorNode) => {
