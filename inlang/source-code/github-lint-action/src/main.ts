@@ -167,15 +167,15 @@ ${result.errorsHead
 		(error) =>
 			`<details>
 <summary>${error?.name}</summary>
-${error?.message}
+${error?.message}\n
 ${
-	error?.cause && error?.cause.message
+	error?.cause && error?.cause?.message
 		? `**Error cause**
-${error?.cause.message}`
+${error?.cause.message}\n`
 		: ""
 }
 ${
-	error?.cause && error?.cause.message
+	error?.cause && error?.cause?.message && error?.cause?.stack
 		? `**Stack trace**
 ${error?.cause.stack}`
 		: ""
