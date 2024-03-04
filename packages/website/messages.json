@@ -7987,17 +7987,6 @@
 					"pattern": [{ "type": "Text", "value": "Sei stato disiscritto" }]
 				}
 			]
-		},
-		{
-			"id": "test_lint_action",
-			"selectors": [],
-			"variants": [
-				{
-					"languageTag": "en",
-					"match": [],
-					"pattern": [{ "type": "Text", "value": "This is a test for github-lint-action" }]
-				}
-			]
 		}
 	]
 }
