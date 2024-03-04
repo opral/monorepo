@@ -7,13 +7,13 @@ describe("Visual Studio Code extension (Sherlock) E2E Testing Environment", () =
 		const workbench = await browser.getWorkbench()
 		const title = await workbench.getTitleBar().getTitle()
 		expect(title).toContain("[Extension Development Host]")
-		expect(title).toContain("inlang")
+		expect(title).toContain("sherlock")
 	})
 
 	it("should load and install our Visual Studio Code extension (Sherlock)", async () => {
 		const extensions = await browser.executeWorkbench((vscodeApi: typeof vscode) => {
 			return vscodeApi.extensions.all
 		})
-		expect(extensions.some((extension) => extension.id === "sherlock.vs-code-extension")).toBe(true)
+		expect(extensions.some((extension) => extension.id === "inlang.vs-code-extension")).toBe(true)
 	})
 })
