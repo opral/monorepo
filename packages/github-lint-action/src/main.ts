@@ -152,13 +152,6 @@ export async function run(): Promise<void> {
 			if (result.errorsBase.length > 0 && result.errorsHead.length === 0) {
 				console.debug(`#### ✅ Setup of project \`${result.projectPath}\` fixed`)
 			}
-			if (result.errorsBase.length === 0 && result.errorsHead.length > 0) {
-				result.commentContent = `#### ❗️ New errors in setup of project \`${result.projectPath}\` found`
-				continue
-			}
-			if (result.errorsBase.length > 0 || result.errorsHead.length > 0) continue
-			if (result.lintSummary.length === 0) continue
-			const lintSummary = result.lintSummary
 			const shortenedProjectPath = () => {
 				const parts = result.projectPath.split("/")
 				if (parts.length > 2) {
@@ -167,6 +160,23 @@ export async function run(): Promise<void> {
 					return result.projectPath
 				}
 			}
+			if (result.errorsBase.length === 0 && result.errorsHead.length > 0) {
+				result.commentContent = `#### ❗️ New errors in setup of project \`${shortenedProjectPath()}\` found
+${result.errorsHead
+	.map(
+		(error) => `* <details>
+<summary>${error?.name}</summary>
+${error?.cause.message}
+**Stack trace**
+${error?.cause.stack}
+</details>`
+	)
+	.join("\n")}`
+				continue
+			}
+			if (result.errorsBase.length > 0 || result.errorsHead.length > 0) continue
+			if (result.lintSummary.length === 0) continue
+			const lintSummary = result.lintSummary
 			const commentContent = `#### Project \`${shortenedProjectPath()}\`
 | lint rule | new reports | link |
 |-----------|-------------|------|
