@@ -169,16 +169,16 @@ ${result.errorsHead
 <summary>${error?.name}</summary>
 ${error?.message}
 ${
-	error?.cause &&
-	error?.cause.message &&
-	`**Error cause**
+	error?.cause && error?.cause.message
+		? `**Error cause**
 ${error?.cause.message}`
+		: ""
 }
 ${
-	error?.cause &&
-	error?.cause.message &&
-	`**Stack trace**
+	error?.cause && error?.cause.message
+		? `**Stack trace**
 ${error?.cause.stack}`
+		: ""
 }
 </details>`
 	)
@@ -235,7 +235,7 @@ ${lintSummary
 			const commentId = existingComment.data.find(
 				(comment) =>
 					(comment.body?.includes(commentHeadline) || comment.body?.includes(commentResolved)) &&
-					comment.user?.login === "ninja-i18n"
+					comment.user?.login === "github-actions[bot]"
 			)?.id
 			if (commentId) {
 				core.debug("Updating existing comment")
