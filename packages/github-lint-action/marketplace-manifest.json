@@ -1,9 +1,9 @@
 {
-	"id": "app.inlang.githubI18nLintAction",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/cli/assets/cli-icon.png",
+	"id": "app.inlang.ninjaI18nAction",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/assets/ninja-logo.png",
 	"gallery": [],
 	"displayName": {
-		"en": "GitHub i18n Lint Action"
+		"en": "Ninja i18n - GitHub Lint Action"
 	},
 	"description": {
 		"en": "This action checks for translation issues within your PRs."

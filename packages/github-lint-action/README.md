@@ -1,0 +1,1 @@
+# Ninja i18n - GitHub Lint Action
