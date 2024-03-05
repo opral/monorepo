@@ -2,9 +2,7 @@ import { it, expect, describe } from "vitest"
 import { prefixStrategy } from "./prefixStrategy"
 import { NextRequest } from "next/server"
 
-const { resolveLanguage, translatePath, getCanonicalPath, getLocalisedPath } = prefixStrategy<
-	"en" | "de" | "de-CH"
->({
+const { resolveLanguage, translatePath, getCanonicalPath, getLocalisedPath } = prefixStrategy({
 	availableLanguageTags: ["en", "de", "de-CH"],
 	defaultLanguage: "en",
 	pathnames: {
