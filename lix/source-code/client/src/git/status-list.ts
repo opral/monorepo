@@ -76,6 +76,7 @@ type StatusArgs = {
 	sparseFilter?: (entry: { filename: string; type: "file" | "folder" }) => boolean // Filter the results to only those whose filepath matches a function.
 	cache?: object // an isogit cache object
 	includeStatus?: OptStatus[] // include normally excluded statuses
+	addHashes?: boolean // include hashes of the files for workdir, head and staging
 }
 // * TODO: support this again
 // * ```js live
@@ -91,7 +92,7 @@ type StatusArgs = {
 /**
  * Efficiently get the status of multiple files at once.
  */
-export async function status({
+export async function statusList({
 	fs,
 	dir = "/",
 	gitdir = join(dir, ".git"),
@@ -101,6 +102,7 @@ export async function status({
 	sparseFilter,
 	cache,
 	includeStatus = [],
+	addHashes = false,
 }: StatusArgs): Promise<StatusList> {
 	try {
 		return await walk({
@@ -191,7 +193,7 @@ export async function status({
 				let workdirOid
 
 				if (headType !== "blob" && workdirType === "blob" && stageType !== "blob") {
-					workdirOid = await workdir?.oid() // (isogit uses "42" here to avoid hashing as its not exposed)
+					workdirOid = addHashes ? await workdir?.oid() : "42" // (use "42" here to avoid hashing as its not exposed)
 				} else if (workdirType === "blob") {
 					workdirOid = await workdir?.oid()
 				}

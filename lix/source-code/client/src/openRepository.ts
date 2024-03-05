@@ -8,9 +8,9 @@ import { Octokit } from "octokit"
 
 import { createSignal, createEffect } from "./solid.js"
 
-import type { OptStatus } from "./git/status.js"
+import type { OptStatus } from "./git/status-list.js"
 import { commit as lixCommit } from "./git/commit.js"
-import { status as lixStatus } from "./git/status.js"
+import { statusList as lixStatus } from "./git/status-list.js"
 import isoGit from "../vendored/isomorphic-git/index.js"
 import { modeToFileType } from "./git/helpers.js"
 
