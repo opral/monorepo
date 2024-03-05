@@ -51,6 +51,7 @@ export const showFilteredMessage = (message: Message | undefined) => {
 		(message !== undefined &&
 			(message.id.toLowerCase().includes(searchLower) ||
 				(typeof message.alias === "object" &&
+					// TODO: #2346 review alias search logic not to include "default" key name
 					JSON.stringify(message.alias).toLowerCase().includes(searchLower)) ||
 				patternsLower.includes(searchLower)))
 			? filteredById
