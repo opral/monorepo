@@ -24,8 +24,19 @@ export function prefixStrategy<T extends string>({
 	pathnames: PathTranslations<T>
 	exclude: (path: string) => boolean
 }) {
+	/**
+	 * Get's the language tag from the localised path.
+	 * If no language tag is _explicitly_ in the path, returns undefined
+	 *
+	 * @example
+	 * ```ts
+	 * getLocaleFromLocalisedPath("/de/ueber-uns") // "de"
+	 * getLocaleFromLocalisedPath("/en/about") // "en"
+	 * getLocaleFromLocalisedPath("/about") // undefined
+	 * ```
+	 */
 	function getLocaleFromLocalisedPath(localisedPath: string): T | undefined {
-		const maybeLocale = localisedPath.split("/")[1]
+		const [, maybeLocale] = localisedPath.split("/")
 		if (!availableLanguageTags.includes(maybeLocale as T)) return undefined
 		return maybeLocale as T
 	}

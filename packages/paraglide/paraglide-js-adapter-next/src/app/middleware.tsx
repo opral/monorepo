@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server"
 import { NextRequest } from "next/server"
-import { sourceLanguageTag, availableLanguageTags } from "$paraglide/runtime.js"
+import { availableLanguageTags } from "$paraglide/runtime.js"
 import { HeaderNames } from "../constants"
-import type { RoutingStrategy } from "./routing/prefix"
 import { addBasePath } from "./routing/basePath"
+import { preferredLanguages } from "./negotiator/language"
+import type { RoutingStrategy } from "./routing/prefix"
 
 export function createMiddleware<T extends string>(
 	exclude: (path: string) => boolean,
@@ -14,12 +15,16 @@ export function createMiddleware<T extends string>(
 	 * https://nextjs.org/docs/pages/building-your-application/routing/middleware#setting-headers
 	 */
 	return function middleware(request: NextRequest) {
+		const acceptLanguageValue = request.headers.get(HeaderNames.AcceptLanguage) ?? undefined
+		const preferredLocale = preferredLanguages(acceptLanguageValue, availableLanguageTags)
+		const detectedLanguage = preferredLocale.at(0)
+
 		const localisedPathname = decodeURI(request.nextUrl.pathname)
-
-		const locale = strategy.getLocaleFromLocalisedPath(localisedPathname) ?? sourceLanguageTag
-
-		const canonicalPath = strategy.translatePath(localisedPathname, sourceLanguageTag as T)
+		const localeFromPath = strategy.getLocaleFromLocalisedPath(localisedPathname)
+		const canonicalPath = strategy.getCanonicalPath(localisedPathname)
 		if (exclude(canonicalPath)) return NextResponse.next()
+
+		const locale = localeFromPath ?? detectedLanguage ?? strategy.defaultLanguage
 
 		const headers = new Headers(request.headers)
 		headers.set(HeaderNames.ParaglideLanguage, locale)
