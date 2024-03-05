@@ -17,8 +17,6 @@ type LanguagePriority = {
 	specificity: number
 }
 
-const LANGUAGE_REGEXP = /^\s*([^\s\-;]+)(?:-([^\s;]+))?\s*(?:;(.*))?$/
-
 /**
  * Parse the Accept-Language header.
  */
@@ -38,18 +36,16 @@ function parseAcceptLanguage(acceptLanguage: string): LanguageSpec[] {
  * Parse a language from the Accept-Language header.
  */
 function parseLanguage(str: string, index: number): LanguageSpec | undefined {
+	const LANGUAGE_REGEXP = /^\s*([^\s\-;]+)(?:-([^\s;]+))?\s*(?:;(.*))?$/
 	const match = LANGUAGE_REGEXP.exec(str)
 	if (!match) return undefined
 
-	const prefix = match[1]
-	const suffix = match[2]
-	let full = prefix
-
-	if (suffix) full += "-" + suffix
+	const [, prefix, suffix, qualityMatch] = match
+	const full = suffix ? `${prefix}-${suffix}` : prefix
 
 	let quality = 1
-	if (match[3]) {
-		const params = match[3].split(";")
+	if (qualityMatch) {
+		const params = qualityMatch.split(";")
 		for (const param of params) {
 			const p = param.split("=")
 			if (p[0] === "q") quality = parseFloat(p[1])
@@ -73,18 +69,24 @@ function getLanguagePriority(
 	accepted: LanguageSpec[],
 	index: number
 ): LanguagePriority {
+	//find the spec that matches the best
 	let priority: LanguagePriority = { index: 0, order: -1, quality: 0, specificity: 0 }
 
 	for (const element of accepted) {
 		const spec = specify(language, element, index)
+		if (!spec) continue
 
 		if (
-			spec &&
 			(priority.specificity - spec.specificity ||
 				priority.quality - spec.quality ||
 				priority.order - spec.order) < 0
 		) {
-			priority = spec as any
+			priority = {
+				index: spec.index,
+				quality: spec.quality,
+				order: spec.order,
+				specificity: spec.specificity,
+			}
 		}
 	}
 
@@ -108,13 +110,14 @@ function specify(
 	 * 010 = prefix match
 	 * 001 = full match
 	 */
-	let s = 0
+	let specificity = 0
+	// exact match
 	if (spec.full.toLowerCase() === parsed.full.toLowerCase()) {
-		s |= 4
+		specificity |= 4
 	} else if (spec.prefix.toLowerCase() === parsed.full.toLowerCase()) {
-		s |= 2
+		specificity |= 2
 	} else if (spec.full.toLowerCase() === parsed.prefix.toLowerCase()) {
-		s |= 1
+		specificity |= 1
 	} else if (spec.full !== "*") {
 		return undefined
 	}
@@ -123,7 +126,7 @@ function specify(
 		index,
 		order: spec.index,
 		quality: spec.quality,
-		specificity: s,
+		specificity,
 	}
 }
 
