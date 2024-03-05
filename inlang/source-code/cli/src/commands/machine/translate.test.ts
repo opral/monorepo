@@ -53,11 +53,6 @@ test.runIf(process.env.GOOGLE_TRANSLATE_API_KEY)(
 
 		await translateCommandAction({ project })
 
-		// TODO: guard against race condition here
-		// If loadMessages is called inside the await before reaching the getAll for
-		// translated messages in memory below, then the original exampleMessages
-		// will overwrite the translated messages and this test will fail.
-
 		const messages = project.query.messages.getAll()
 
 		expect(messages[0]?.variants.length).toBe(3)
