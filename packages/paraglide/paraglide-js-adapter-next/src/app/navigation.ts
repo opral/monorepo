@@ -2,11 +2,14 @@ import * as NextNavigation from "next/navigation"
 import { setLanguageTag } from "$paraglide/runtime.js"
 import { addBasePath } from "./routing/basePath"
 import { RoutingStragey } from "./routing/strategy"
+import { createLocaliseHref } from "./localiseHref"
 
 export const createNavigation = <T extends string>(
 	languageTag: () => T,
-	startegy: RoutingStragey<T>
+	strategy: RoutingStragey<T>
 ) => {
+	const localiseHref = createLocaliseHref(strategy)
+
 	type NextUsePathname = (typeof NextNavigation)["usePathname"]
 
 	/**
@@ -15,7 +18,7 @@ export const createNavigation = <T extends string>(
 	const usePathname: NextUsePathname = (...args) => {
 		const encodedLocalisedPathname = NextNavigation.usePathname(...args)
 		const localisedPathname = decodeURI(encodedLocalisedPathname)
-		return startegy.getCanonicalPath(localisedPathname)
+		return strategy.getCanonicalPath(localisedPathname)
 	}
 
 	/**
@@ -24,7 +27,7 @@ export const createNavigation = <T extends string>(
 	const useRouter = () => {
 		const nextRouter = NextNavigation.useRouter()
 		const localisedCurrentPathname = usePathname()
-		const canonicalCurrentPathname = startegy.getCanonicalPath(localisedCurrentPathname)
+		const canonicalCurrentPathname = strategy.getCanonicalPath(localisedCurrentPathname)
 
 		type NavigateOptions = Parameters<(typeof nextRouter)["push"]>[1]
 		type PrefetchOptions = Parameters<(typeof nextRouter)["prefetch"]>[1]
@@ -39,7 +42,7 @@ export const createNavigation = <T extends string>(
 			options?: (NavigateOptions & OptionalLanguageOption) | undefined
 		) => {
 			const locale = options?.locale ?? languageTag()
-			const localisedPath = startegy.localiseHref(canonicalPath, locale)
+			const localisedPath = localiseHref(canonicalPath, locale)
 
 			// If the current and new canonical paths are the same, but the language is different,
 			// we need to do a native reload to make sure the new language is used
@@ -69,7 +72,7 @@ export const createNavigation = <T extends string>(
 			options?: (NavigateOptions & OptionalLanguageOption) | undefined
 		) => {
 			const locale = options?.locale ?? languageTag()
-			const localisedPath = startegy.localiseHref(canonicalPath, locale)
+			const localisedPath = localiseHref(canonicalPath, locale)
 
 			// If the current and new canonical paths are the same, but the language is different,
 			// we need to do a native reload to make sure the new language is used
@@ -96,7 +99,7 @@ export const createNavigation = <T extends string>(
 		 */
 		const prefetch = (canonicalPath: string, options: PrefetchOptions & OptionalLanguageOption) => {
 			const locale = options?.locale ?? languageTag()
-			const localisedPath = startegy.localiseHref(canonicalPath, locale)
+			const localisedPath = localiseHref(canonicalPath, locale)
 			return nextRouter.prefetch(localisedPath, options)
 		}
 
@@ -126,7 +129,12 @@ export function createNoopNavigation<T extends string>(): ReturnType<typeof crea
 	}
 }
 
-export function createRedirects<T extends string>(languageTag: () => T, startegy: RoutingStragey<T>) {
+export function createRedirects<T extends string>(
+	languageTag: () => T,
+	strategy: RoutingStragey<T>
+) {
+	const localiseHref = createLocaliseHref(strategy)
+
 	type NextRedirect = (typeof NextNavigation)["redirect"]
 
 	/**
@@ -136,7 +144,7 @@ export function createRedirects<T extends string>(languageTag: () => T, startegy
 	 *  @param url the url to redirect to
 	 */
 	const redirect: NextRedirect = (...args) => {
-		args[0] = startegy.localiseHref(args[0], languageTag())
+		args[0] = localiseHref(args[0], languageTag())
 		NextNavigation.redirect(...args)
 	}
 
@@ -149,7 +157,7 @@ export function createRedirects<T extends string>(languageTag: () => T, startegy
 	 * @param url the url to redirect to
 	 */
 	const permanentRedirect: NextPermanentRedirect = (...args) => {
-		args[0] = startegy.localiseHref(args[0], languageTag())
+		args[0] = localiseHref(args[0], languageTag())
 		NextNavigation.permanentRedirect(...args)
 	}
 
