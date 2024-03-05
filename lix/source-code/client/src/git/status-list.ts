@@ -19,16 +19,27 @@ export type OptStatus = "unmodified" | "materialized" | "ignored"
 
 type StatusText =
 	| "unmodified"
+	// files added but not staged yet
 	| "*added"
+	// added and added to stage
 	| "added"
+	// files modified but changes not committed to stage
 	| "*modified"
+	// files modified and changes committed to stage
 	| "modified"
+	// deleted but file still in index
 	| "*deleted"
+	// deleted and removed from index
 	| "deleted"
+	// file not present in working dir or HEAD commit, but present in stage
 	| "*absent"
+	// file was deleted from stage, but is present with modifications in the working dir
 	| "*undeletemodified"
+	// working dir and HEAD commit match, but stage differs
 	| "*unmodified"
+	// file was deleted from stage, but is still in the working dir
 	| "*undeleted"
+	// fallback for permutations without existing isogit named status
 	| "unknown"
 
 type StatusList = [string, StatusText][]
