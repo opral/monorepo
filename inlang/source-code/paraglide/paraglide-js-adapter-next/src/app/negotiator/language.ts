@@ -139,14 +139,17 @@ function preferredLanguages(accept: string | undefined, provided: readonly strin
 	const accepts = parseAcceptLanguage(accept === undefined ? "*" : accept || "")
 
 	if (!provided) {
-		return accepts.filter(isQuality).sort(compareSpecs).map(getFullLanguage)
+		return accepts
+			.filter(hasQuality)
+			.sort(compareSpecs)
+			.map((spec) => spec.full)
 	}
 
 	const priorities = provided.map((type, index) => getLanguagePriority(type, accepts, index))
 
 	// sorted list of accepted languages
 	return priorities
-		.filter(isQuality)
+		.filter(hasQuality)
 		.sort(comparePriorities)
 		.map((priority) => provided[priorities.indexOf(priority)])
 }
@@ -166,17 +169,8 @@ function comparePriorities(a: LanguagePriority, b: LanguagePriority) {
 }
 
 /**
- * Get full language string.
- */
-function getFullLanguage(spec: LanguageSpec) {
-	return spec.full
-}
-
-/**
  * Check if a spec has any quality.
  */
-function isQuality(spec: LanguageSpec | LanguagePriority) {
-	return spec.quality > 0
-}
+const hasQuality = (spec: LanguageSpec | LanguagePriority) => spec.quality > 0
 
 export { preferredLanguages }
