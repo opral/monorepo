@@ -7,7 +7,7 @@ describe("Visual Studio Code extension (Sherlock) E2E Testing Environment", () =
 		const workbench = await browser.getWorkbench()
 		const title = await workbench.getTitleBar().getTitle()
 		expect(title).toContain("[Extension Development Host]")
-		expect(title).toContain("sherlock")
+		expect(title).toContain("inlang")
 	})
 
 	it("should load and install our Visual Studio Code extension (Sherlock)", async () => {
