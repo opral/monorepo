@@ -396,6 +396,16 @@ Because we are using a Preprocessor for link localisation there are a few caveat
 2. Using a `{...speread}` operator on an element will cause the preprocessor to place all props on that element into one giant `{...spread}`. If you are using proxies that may cause issues.
 3. If you are using a function-call as the value to `hreflang` the function will be called twice per render. If it has side-effects this may cause issues.
 
+### Issues on Vercel
+
+SvelteKit's `reroute` hook currently doens't play well with Vercel (see [sveltejs/kit#11879](https://github.com/sveltejs/kit/issues/11879)), which means that we need to slightly adapt the adapter setup to make it work when deployed to vercel.
+
+1. Remove the `reroute` hook from `src/hooks.js`
+2. Move the routes you want to localise `routes` into a `[locale]` folder
+3. Don't use translated `pathnames`
+
+We are actively working on contributing a fix for [sveltejs/kit#11879](https://github.com/sveltejs/kit/issues/11879), so this workaround will hopefully not be needed much longer.
+
 ## FAQ
 
 <doc-accordion
