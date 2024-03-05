@@ -1,39 +1,35 @@
 import { it, expect, describe } from "vitest"
 import { prefixStrategy, isExternal } from "./prefix"
+import { NextRequest } from "next/server"
 
-const {
-	getLocaleFromLocalisedPath,
-	translatePath,
-	getCanonicalPath,
-	getLocalisedPath,
-	localiseHref,
-} = prefixStrategy<"en" | "de" | "de-CH">({
-	availableLanguageTags: ["en", "de", "de-CH"],
-	defaultLanguage: "en",
-	pathnames: {
-		"/canonical-translated": {
-			de: "/uebersetzt",
-			"de-CH": "/uebersetzt",
-			en: "/translated",
+const { resolveLanguage, translatePath, getCanonicalPath, getLocalisedPath, localiseHref } =
+	prefixStrategy<"en" | "de" | "de-CH">({
+		availableLanguageTags: ["en", "de", "de-CH"],
+		defaultLanguage: "en",
+		pathnames: {
+			"/canonical-translated": {
+				de: "/uebersetzt",
+				"de-CH": "/uebersetzt",
+				en: "/translated",
+			},
+			"/canonical-translated/[id]": {
+				de: "/uebersetzt/[id]",
+				"de-CH": "/uebersetzt/[id]",
+				en: "/translated/[id]",
+			},
 		},
-		"/canonical-translated/[id]": {
-			de: "/uebersetzt/[id]",
-			"de-CH": "/uebersetzt/[id]",
-			en: "/translated/[id]",
-		},
-	},
-	exclude: (path) => path.startsWith("/api/"),
-})
-
-describe("getLocaleFromLocalisedPath", () => {
-	it("returns the locale if there is one", () => {
-		expect(getLocaleFromLocalisedPath("/de/some/path")).toBe("de")
-		expect(getLocaleFromLocalisedPath("/en/some/path")).toBe("en")
-		expect(getLocaleFromLocalisedPath("/de-CH/some/path")).toBe("de-CH")
+		exclude: (path) => path.startsWith("/api/"),
 	})
 
-	it("returns the undefined if there is no locale", () => {
-		expect(getLocaleFromLocalisedPath("/some/path")).toBe(undefined)
+describe("resolveLanguage", () => {
+	it("returns the locale if there is one", () => {
+		expect(resolveLanguage(new NextRequest("https://example.com/de/some/path"))).toBe("de")
+		expect(resolveLanguage(new NextRequest("https://example.com/en/some/path"))).toBe("en")
+		expect(resolveLanguage(new NextRequest("https://example.com/de-CH/some/path"))).toBe("de-CH")
+	})
+
+	it("returns the default language if there is no locale", () => {
+		expect(resolveLanguage(new NextRequest("https://example.com/some/path"))).toBe("en")
 	})
 })
 

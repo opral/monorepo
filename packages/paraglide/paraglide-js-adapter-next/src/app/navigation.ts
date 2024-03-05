@@ -1,13 +1,12 @@
 import * as NextNavigation from "next/navigation"
-import type { RoutingStrategy } from "./routing/prefix"
 import { setLanguageTag } from "$paraglide/runtime.js"
 import { addBasePath } from "./routing/basePath"
+import { RoutingStragey } from "./routing/strategy"
 
 export const createNavigation = <T extends string>(
 	languageTag: () => T,
-	startegy: RoutingStrategy<T>
+	startegy: RoutingStragey<T>
 ) => {
-
 	type NextUsePathname = (typeof NextNavigation)["usePathname"]
 
 	/**
@@ -127,10 +126,7 @@ export function createNoopNavigation<T extends string>(): ReturnType<typeof crea
 	}
 }
 
-export function createRedirects<T extends string>(
-	languageTag: () => T,
-	startegy: RoutingStrategy<T>
-) {
+export function createRedirects<T extends string>(languageTag: () => T, startegy: RoutingStragey<T>) {
 	type NextRedirect = (typeof NextNavigation)["redirect"]
 
 	/**
