@@ -1,5 +1,5 @@
 import { it, expect, describe } from "vitest"
-import { prefixStrategy } from "./prefix"
+import { prefixStrategy } from "./prefixStrategy"
 import { NextRequest } from "next/server"
 
 const { resolveLanguage, translatePath, getCanonicalPath, getLocalisedPath } = prefixStrategy<

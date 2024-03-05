@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest"
 import { createLocaliseHref, isExternal } from "./localiseHref"
-import { prefixStrategy } from "./routing/prefix"
+import { prefixStrategy } from "./routing/prefixStrategy"
 
 const strategy = prefixStrategy<"en" | "de" | "de-CH">({
 	availableLanguageTags: ["en", "de", "de-CH"],

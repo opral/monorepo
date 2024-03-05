@@ -1,19 +1,19 @@
 import { createLink } from "./Link"
 import { getLanguage } from "./getLanguage.server"
 import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
-import { prefixStrategy } from "./routing/prefix"
+import { prefixStrategy } from "./routing/prefixStrategy"
 import { createNoopNavigation, createRedirects } from "./navigation"
 import { createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
-import { I18nOptions } from "./config"
 import { resolvePathTranslations } from "./pathnames/resolvePathTranslations"
 import { validatePathTranslations } from "./pathnames/validatePathTranslations"
+import type { I18nOptions } from "./config"
 
 /**
  * Creates an i18n instance that manages your internationalization.
  *
  * @param options The options for the i18n instance.
- * @returns An i18n instance.
+ * @returns An i18n instance. 
  *
  * @example
  * ```ts

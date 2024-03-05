@@ -1,7 +1,7 @@
 import { createLink } from "./Link"
 import { getLanguage } from "./getLanguage.client"
 import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
-import { prefixStrategy } from "./routing/prefix"
+import { prefixStrategy } from "./routing/prefixStrategy"
 import { createNavigation, createRedirects } from "./navigation"
 import { createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"

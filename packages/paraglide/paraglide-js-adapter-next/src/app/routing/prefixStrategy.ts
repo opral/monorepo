@@ -16,11 +16,6 @@ export function prefixStrategy<T extends string>({
 	exclude,
 }: {
 	availableLanguageTags: readonly T[]
-
-	/**
-	 * The language that should not be prefixed with a language tag
-	 * Usually is the source language, but doesn't have to be
-	 */
 	defaultLanguage: T
 	pathnames: PathTranslations<T>
 	exclude: (path: string) => boolean
