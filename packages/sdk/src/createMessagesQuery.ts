@@ -15,8 +15,8 @@ export function createMessagesQuery(
 
 	// Map default alias to message
 	// Assumes that aliases are only created and deleted, not updated
-	// TODO handle updates to aliases
-	// TODO refine to hold messageId[], if default alias is not unique
+	// TODO #2346 - handle updates to aliases
+	// TODO #2346 - refine to hold messageId[], if default alias is not unique
 	// @ts-expect-error
 	const defaultAliasIndex = new ReactiveMap<string, Message>()
 
