@@ -3,12 +3,15 @@ import { addBasePath } from "./routing/basePath"
 import NextLink from "next/link"
 import React from "react"
 import { RoutingStragey } from "./routing/strategy"
+import { createLocaliseHref } from "./localiseHref"
 
 /**
  * Creates a link component that localises the href based on the current language.
  * @param languageTag A function that returns the current language tag.
  */
 export function createLink<T extends string>(languageTag: () => T, strategy: RoutingStragey<T>) {
+	const localiseHref = createLocaliseHref(strategy)
+
 	return function Link(
 		props: Omit<Parameters<typeof NextLink>[0], "locale"> & { locale?: T }
 	): ReturnType<typeof NextLink> {
@@ -32,7 +35,7 @@ export function createLink<T extends string>(languageTag: () => T, strategy: Rou
 		let lang = props.locale || currentLanguageTag
 		if (!isAvailableLanguageTag(lang)) lang = strategy.defaultLanguage
 
-		const localisedHref = strategy.localiseHref(props.href, lang)
+		const localisedHref = localiseHref(props.href, lang)
 
 		//If the language changes, we don't want client navigation
 		return lang == currentLanguageTag ? (
