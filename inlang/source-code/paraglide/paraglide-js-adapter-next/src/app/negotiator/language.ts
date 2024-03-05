@@ -134,7 +134,7 @@ function specify(
  * Get the preferred languages from an Accept-Language header.
  * @public
  */
-function preferredLanguages(accept: string, provided: string[]) {
+function preferredLanguages(accept: string | undefined, provided: readonly string[]) {
 	// RFC 2616 sec 14.4: no header = *
 	const accepts = parseAcceptLanguage(accept === undefined ? "*" : accept || "")
 
