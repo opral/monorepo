@@ -1,14 +1,14 @@
 import { availableLanguageTags, isAvailableLanguageTag } from "$paraglide/runtime.js"
 import { addBasePath } from "./routing/basePath"
-import type { RoutingStrategy } from "./routing/prefix"
 import NextLink from "next/link"
 import React from "react"
+import { RoutingStragey } from "./routing/strategy"
 
 /**
  * Creates a link component that localises the href based on the current language.
  * @param languageTag A function that returns the current language tag.
  */
-export function createLink<T extends string>(languageTag: () => T, strategy: RoutingStrategy<T>) {
+export function createLink<T extends string>(languageTag: () => T, strategy: RoutingStragey<T>) {
 	return function Link(
 		props: Omit<Parameters<typeof NextLink>[0], "locale"> & { locale?: T }
 	): ReturnType<typeof NextLink> {

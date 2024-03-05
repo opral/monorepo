@@ -2,6 +2,8 @@ import type { LinkProps } from "next/link"
 import { PathTranslations } from "../pathnames/types"
 import { resolvePath } from "../pathnames/matching/resolvePath"
 import { matches } from "../pathnames/matching/match"
+import { RoutingStragey } from "./strategy"
+import { NextRequest } from "next/server"
 
 /*
 	Canonical Path = Path without locale (how you write the href)
@@ -23,7 +25,7 @@ export function prefixStrategy<T extends string>({
 	defaultLanguage: T
 	pathnames: PathTranslations<T>
 	exclude: (path: string) => boolean
-}) {
+}): RoutingStragey<T> {
 	/**
 	 * Get's the language tag from the localised path.
 	 * If no language tag is _explicitly_ in the path, returns undefined
@@ -39,6 +41,11 @@ export function prefixStrategy<T extends string>({
 		const [, maybeLocale] = localisedPath.split("/")
 		if (!availableLanguageTags.includes(maybeLocale as T)) return undefined
 		return maybeLocale as T
+	}
+
+	function resolveLanguage(request: NextRequest): T {
+		const localisedPathname = decodeURI(request.nextUrl.pathname)
+		return getLocaleFromLocalisedPath(localisedPathname) ?? defaultLanguage
 	}
 
 	function getCanonicalPath(localisedPath: string): string {
@@ -122,10 +129,10 @@ export function prefixStrategy<T extends string>({
 	}
 
 	return {
-		getLocaleFromLocalisedPath,
 		getLocalisedPath,
 		getCanonicalPath,
 		translatePath,
+		resolveLanguage,
 		localiseHref,
 		defaultLanguage,
 	}
@@ -168,5 +175,3 @@ export function isExternal(href: LinkProps["href"]) {
 
 	return false
 }
-
-export type RoutingStrategy<T extends string> = ReturnType<typeof prefixStrategy<T>>

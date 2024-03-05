@@ -3,28 +3,22 @@ import { NextRequest } from "next/server"
 import { availableLanguageTags } from "$paraglide/runtime.js"
 import { HeaderNames } from "../constants"
 import { addBasePath } from "./routing/basePath"
-import { preferredLanguages } from "./negotiator/language"
-import type { RoutingStrategy } from "./routing/prefix"
+import type { RoutingStragey } from "./routing/strategy"
 
 export function createMiddleware<T extends string>(
 	exclude: (path: string) => boolean,
-	strategy: RoutingStrategy<T>
+	strategy: RoutingStragey<T>
 ) {
 	/**
 	 * Sets the request headers to resolve the language tag in RSC.
 	 * https://nextjs.org/docs/pages/building-your-application/routing/middleware#setting-headers
 	 */
 	return function middleware(request: NextRequest) {
-		const acceptLanguageValue = request.headers.get(HeaderNames.AcceptLanguage) ?? undefined
-		const preferredLocale = preferredLanguages(acceptLanguageValue, availableLanguageTags)
-		const detectedLanguage = preferredLocale.at(0)
+		const locale = strategy.resolveLanguage(request)
 
 		const localisedPathname = decodeURI(request.nextUrl.pathname)
-		const localeFromPath = strategy.getLocaleFromLocalisedPath(localisedPathname)
 		const canonicalPath = strategy.getCanonicalPath(localisedPathname)
 		if (exclude(canonicalPath)) return NextResponse.next()
-
-		const locale = localeFromPath ?? detectedLanguage ?? strategy.defaultLanguage
 
 		const headers = new Headers(request.headers)
 		headers.set(HeaderNames.ParaglideLanguage, locale)
