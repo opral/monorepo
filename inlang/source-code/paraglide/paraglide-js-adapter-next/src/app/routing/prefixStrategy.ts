@@ -1,7 +1,7 @@
 import { PathTranslations } from "../pathnames/types"
 import { resolvePath } from "../pathnames/matching/resolvePath"
 import { matches } from "../pathnames/matching/match"
-import { RoutingStragey } from "./strategy"
+import { RoutingStragey } from "./interface"
 import { NextRequest } from "next/server"
 
 /*

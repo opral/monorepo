@@ -1,4 +1,4 @@
-import type { RoutingStragey } from "./routing/strategy"
+import type { RoutingStragey } from "./routing/interface"
 import type { LinkProps } from "next/link"
 
 export function createLocaliseHref<T extends string>(

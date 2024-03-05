@@ -2,7 +2,7 @@ import { availableLanguageTags, isAvailableLanguageTag } from "$paraglide/runtim
 import { addBasePath } from "./routing/basePath"
 import NextLink from "next/link"
 import React from "react"
-import { RoutingStragey } from "./routing/strategy"
+import { RoutingStragey } from "./routing/interface"
 import { createLocaliseHref } from "./localiseHref"
 
 /**

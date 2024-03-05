@@ -1,7 +1,7 @@
 import * as NextNavigation from "next/navigation"
 import { setLanguageTag } from "$paraglide/runtime.js"
 import { addBasePath } from "./routing/basePath"
-import { RoutingStragey } from "./routing/strategy"
+import { RoutingStragey } from "./routing/interface"
 import { createLocaliseHref } from "./localiseHref"
 
 export const createNavigation = <T extends string>(

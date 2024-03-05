@@ -3,7 +3,7 @@ import { NextRequest } from "next/server"
 import { availableLanguageTags } from "$paraglide/runtime.js"
 import { HeaderNames } from "../constants"
 import { addBasePath } from "./routing/basePath"
-import type { RoutingStragey } from "./routing/strategy"
+import type { RoutingStragey } from "./routing/interface"
 
 export function createMiddleware<T extends string>(
 	exclude: (path: string) => boolean,
