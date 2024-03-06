@@ -16,7 +16,6 @@ import { exec } from "node:child_process"
  */
 export async function run(): Promise<void> {
 	core.debug("Running the action")
-	console.log("process.cwd():", process.cwd())
 
 	try {
 		const token = process.env.GITHUB_TOKEN
@@ -26,7 +25,7 @@ export async function run(): Promise<void> {
 		const { owner, repo } = github.context.repo
 		const prNumber = github.context.payload.pull_request?.number
 
-		const repoBase = await openRepository(process.cwd(), {
+		const repoBase = await openRepository("file://" + process.cwd(), {
 			nodeishFs: fs,
 			branch: github.context.payload.pull_request?.head.ref,
 		})
@@ -84,7 +83,7 @@ export async function run(): Promise<void> {
 			process.chdir("../../../")
 			await cloneRepository(headMeta)
 			process.chdir(headMeta.repo)
-			repoHead = await openRepository(process.cwd(), {
+			repoHead = await openRepository("file://" + process.cwd(), {
 				nodeishFs: fs,
 			})
 		} else {
@@ -92,7 +91,7 @@ export async function run(): Promise<void> {
 			await fetchBranch(headMeta.branch)
 			await checkoutBranch(headMeta.branch)
 			await pull()
-			repoHead = await openRepository(process.cwd(), {
+			repoHead = await openRepository("file://" + process.cwd(), {
 				nodeishFs: fs,
 				branch: headMeta.branch,
 			})
