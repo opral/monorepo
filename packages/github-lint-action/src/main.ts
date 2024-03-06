@@ -16,6 +16,7 @@ import { exec } from "node:child_process"
  */
 export async function run(): Promise<void> {
 	core.debug("Running the action")
+	console.log("process.cwd():", process.cwd())
 
 	try {
 		const token = process.env.GITHUB_TOKEN
@@ -79,7 +80,7 @@ export async function run(): Promise<void> {
 		// Prepare head repo
 		let repoHead
 		if (isFork) {
-			core.debug("Fork detected, cloning base repository")
+			core.debug("Fork detected, cloning head repository")
 			process.chdir("../../../")
 			await cloneRepository(headMeta)
 			process.chdir(headMeta.repo)
@@ -87,7 +88,7 @@ export async function run(): Promise<void> {
 				nodeishFs: fs,
 			})
 		} else {
-			core.debug("Fork not detected, fetching and checking out base repository")
+			core.debug("Fork not detected, fetching and checking out head repository")
 			await fetchBranch(headMeta.branch)
 			await checkoutBranch(headMeta.branch)
 			await pull()
@@ -366,10 +367,10 @@ async function pull() {
 	})
 }
 
-// Function to clone the base repository
+// Function to clone the head repository
 async function cloneRepository(repoData: { link: string; branch: string }) {
 	return new Promise<void>((resolve, reject) => {
-		// Execute the git command to clone the base repository
+		// Execute the git command to clone the head repository
 		exec(
 			`git clone -b ${repoData.branch} --single-branch --depth 1 ${repoData.link}`, // Clone only the latest commit
 			{ cwd: process.cwd() },
