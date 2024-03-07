@@ -18,7 +18,7 @@ export const createNavigation = <T extends string>(
 	const usePathname: NextUsePathname = (...args) => {
 		const encodedLocalisedPathname = NextNavigation.usePathname(...args)
 		const localisedPathname = decodeURI(encodedLocalisedPathname)
-		return strategy.getCanonicalPath(localisedPathname)
+		return strategy.getCanonicalPath(localisedPathname, languageTag())
 	}
 
 	/**
@@ -27,7 +27,10 @@ export const createNavigation = <T extends string>(
 	const useRouter = () => {
 		const nextRouter = NextNavigation.useRouter()
 		const localisedCurrentPathname = usePathname()
-		const canonicalCurrentPathname = strategy.getCanonicalPath(localisedCurrentPathname)
+		const canonicalCurrentPathname = strategy.getCanonicalPath(
+			localisedCurrentPathname,
+			languageTag()
+		)
 
 		type NavigateOptions = Parameters<(typeof nextRouter)["push"]>[1]
 		type PrefetchOptions = Parameters<(typeof nextRouter)["prefetch"]>[1]

@@ -17,7 +17,7 @@ export function createMiddleware<T extends string>(
 		const locale = strategy.resolveLanguage(request)
 
 		const localisedPathname = decodeURI(request.nextUrl.pathname)
-		const canonicalPath = strategy.getCanonicalPath(localisedPathname)
+		const canonicalPath = strategy.getCanonicalPath(localisedPathname, locale)
 		if (exclude(canonicalPath)) return NextResponse.next()
 
 		const headers = new Headers(request.headers)
@@ -63,7 +63,7 @@ export function createMiddleware<T extends string>(
 		const alternates: string[] = []
 
 		for (const lang of availableLanguageTags) {
-			const translatedPathname = strategy.translatePath(canonicalPath, lang)
+			const translatedPathname = strategy.translatePath(canonicalPath, locale, lang)
 			const encodedPathname = encodeURI(translatedPathname)
 
 			const withBase = addBasePath(encodedPathname, true)
