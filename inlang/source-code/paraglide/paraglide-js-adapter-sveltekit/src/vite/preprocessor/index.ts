@@ -3,6 +3,7 @@ import MagicString from "magic-string"
 import type { Ast } from "./types.js"
 import { shouldApply } from "./precheck.js"
 import { rewrite } from "./rewrite.js"
+import dedent from "dedent"
 
 export type PreprocessorConfig = Record<string, never>
 
@@ -49,7 +50,19 @@ export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
 			if (!shouldApply(content, TRANSLATIONS)) return NOOP
 
 			//Parse the file
-			const ast = parse(content)
+			let ast: Ast
+			try {
+				ast = parse(content)
+			} catch (error) {
+				throw new Error(
+					dedent`
+						[@inlang/paraglide-js-adapter-sveltekit] Failed to parse ${filename}. 
+						This may be because you are using a signifficantly newer version of the "svelte" package. 
+						Try forcing "@inlang/paraglide-js-adapter-sveltekit" to use your version of "svelte" using pnpm overrides`,
+					{ cause: error }
+				)
+			}
+
 			const code = new MagicString(content)
 
 			const passResult = rewrite({ ast, code, originalCode: content, translations: TRANSLATIONS })
