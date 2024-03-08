@@ -3,6 +3,7 @@ import { customElement, property } from "lit/decorators.js"
 import { baseStyling } from "../../../styling/base.js"
 import "./default-array-input.js"
 import "./languageTags-input.js"
+import "./reference-pattern-input.js"
 
 @customElement("array-input")
 export class ArrayInput extends LitElement {
@@ -40,6 +41,16 @@ export class ArrayInput extends LitElement {
 					.schema=${this.schema}
 					.handleInlangProjectChange=${this.handleInlangProjectChange}
 				></language-tags-input>
+			`
+		} else if (this.property === "variableReferencePattern") {
+			return html`
+				<reference-pattern-input
+					.property=${this.property}
+					.moduleId=${this.moduleId}
+					.value=${this.value}
+					.schema=${this.schema}
+					.handleInlangProjectChange=${this.handleInlangProjectChange}
+				></reference-pattern-input>
 			`
 		} else {
 			return html`

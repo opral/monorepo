@@ -43,3 +43,16 @@ export const LanguageTag: StoryObj = {
 		},
 	},
 }
+
+export const ReferencePattern: StoryObj = {
+	args: {
+		property: "variableReferencePattern",
+		value: ["{", "}"],
+		schema: {
+			type: "array",
+			items: {
+				type: "string",
+			},
+		},
+	},
+}
