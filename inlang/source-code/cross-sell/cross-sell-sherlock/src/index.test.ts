@@ -20,17 +20,23 @@ describe("Cross-sell Sherlock app", () => {
 		expect(await isAdopted(fsMock, "/mock/path")).toBe(false)
 	})
 
-	it("should add recommendation when not present", async () => {
+	it("should merge with other extensions & add recommendation when not present", async () => {
 		const fsMock: any = {
 			stat: vi.fn().mockResolvedValue(true),
-			readFile: vi.fn().mockResolvedValue(JSON.stringify({ recommendations: [] })),
+			readFile: vi
+				.fn()
+				.mockResolvedValue(JSON.stringify({ recommendations: ["some.other-extension"] })),
 			writeFile: vi.fn(),
 			mkdir: vi.fn(),
 		}
 		await add(fsMock, "/mock/path")
 		expect(fsMock.writeFile).toHaveBeenCalledWith(
 			"/mock/path/.vscode/extensions.json",
-			JSON.stringify({ recommendations: ["inlang.vs-code-extension"] }, undefined, 2)
+			JSON.stringify(
+				{ recommendations: ["some.other-extension", "inlang.vs-code-extension"] },
+				undefined,
+				2
+			)
 		)
 	})
 
