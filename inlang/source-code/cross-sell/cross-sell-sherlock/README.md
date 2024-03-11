@@ -7,6 +7,8 @@
 
 ## Installation
 
+Put this one into your `dependencies` in `package.json` & install it with `pnpm install`:
+
 ```bash
 "@inlang/cross-sell-sherlock": "workspace:*"
 ```
