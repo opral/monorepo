@@ -1,4 +1,4 @@
-# Ninja i18n - GitHub Lint Action
+# 🥷 Ninja i18n - GitHub Lint Action
 
 Copy the following code to your `.github/workflows/ninja-i18n.yml` file to enable the GitHub Lint Action for all inlang project files.
 
