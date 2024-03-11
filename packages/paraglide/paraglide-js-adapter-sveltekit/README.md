@@ -175,11 +175,13 @@ import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
 import * as runtime from "$lib/paraglide/runtime.js"
 
 export const i18n = createI18n(runtime, {
-	"/about" : {
-		en: "/about",
-		de: "/uber-uns",
-		fr: "/a-propos",
-	},
+	pathnames: {
+		"/about" : {
+			en: "/about",
+			de: "/uber-uns",
+			fr: "/a-propos",
+		},
+	}
 })
 ```
 
@@ -194,11 +196,13 @@ import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
 import * as runtime from "$lib/paraglide/runtime.js"
 
 export const i18n = createI18n(runtime, {
-	"/user/[username]" : {
-		en: "/user/[username]",
-		de: "/benutzer/[username]",
-		fr: "/utilisateur/[username]",
-	},
+	pathnames: {
+		"/user/[username]" : {
+			en: "/user/[username]",
+			de: "/benutzer/[username]",
+			fr: "/utilisateur/[username]",
+		},
+	}
 })
 ```
 
@@ -214,8 +218,10 @@ import * as runtime from "$lib/paraglide/runtime.js"
 import * as m from "$lib/paraglide/messages.js"
 
 export const i18n = createI18n(runtime, {
-	// do not call the function - pass a reference
-	"/about" : m.about_path
+	pathnames: {
+		// do not call the function - pass a reference
+		"/about" : m.about_path
+	}
 })
 ```
 
