@@ -11,6 +11,14 @@ export class StringInput extends LitElement {
 			.help-text {
 				font-size: 0.8rem;
 				color: var(--sl-input-help-text-color);
+				margin: 0;
+			}
+			.description-container {
+				display: flex;
+				flex-direction: column;
+				gap: 4px;
+				margin-bottom: 1rem;
+				margin-top: 0.8rem;
 			}
 		`,
 	]
@@ -41,8 +49,10 @@ export class StringInput extends LitElement {
 	override render() {
 		return html` <div>
 			<p>${this.property}</p>
-			${this._description && html`<p class="help-text">${this._description}</p>`}
-			${this._examples && html`<p class="help-text">${this._examples}</p>`}
+			<div class="description-container">
+				${this._description && html`<p class="help-text">${this._description}</p>`}
+				${this._examples && html`<p class="help-text">${this._examples}</p>`}
+			</div>
 			<sl-input
 				value=${this.value}
 				size="small"
