@@ -399,7 +399,7 @@ export async function load({ depends }) {
 Because we are using a Preprocessor for link localisation there are a few caveats to be aware of: 
 
 1. Links in the same Layout Component as `<ParagldieJS>` will not be translated. 
-2. Using a `{...speread}` operator on an element will cause the preprocessor to place all props on that element into one giant `{...spread}`. If you are using proxies that may cause issues.
+2. Using a `{...spread}` operator on an element will cause the preprocessor to place all props on that element into one giant `{...spread}`. If you are using proxies that may cause issues.
 3. If you are using a function-call as the value to `hreflang` the function will be called twice per render. If it has side-effects this may cause issues.
 
 ### Using messages in `+layout.svelte`
