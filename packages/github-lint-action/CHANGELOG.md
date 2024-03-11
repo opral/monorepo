@@ -1,5 +1,23 @@
 # @inlang/github-lint-action
 
+## 0.2.0
+
+### Minor Changes
+
+- 8ba15bfa0: First version of Ninja-i18n
+
+## 0.1.8
+
+### Patch Changes
+
+- Retrigger release
+
+## 0.1.7
+
+### Patch Changes
+
+- Retrigger release
+
 ## 0.1.6
 
 ### Patch Changes
