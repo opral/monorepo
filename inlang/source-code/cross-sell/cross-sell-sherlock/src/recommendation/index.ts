@@ -1,8 +1,8 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
-import { joinPath } from "./joinPath.js"
-import { isExtensionsJson } from "./isExtensionJson.js"
+import { joinPath } from "./utils/joinPath.js"
+import { isExtensionsJson } from "./utils/isExtensionJson.js"
 import { parse, type CommentJSONValue, stringify } from "comment-json/index.js"
-import type { ExtensionsJson } from "./types.js"
+import type { ExtensionsJson } from "./utils/types.js"
 
 export async function addRecommendationToWorkspace(
 	fs: NodeishFilesystem,
