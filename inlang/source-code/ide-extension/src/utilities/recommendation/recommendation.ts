@@ -81,7 +81,7 @@ export function createRecommendationBanner(args: { workspaceFolder: vscode.Works
 							const newExtensions: ExtensionsJson = parse(
 								fs.readFileSync(extensionsJsonPath, "utf8")
 							) as any
-							newExtensions.recommendations.push("sherlock.vs-code-extension")
+							newExtensions.recommendations.push("inlang.vs-code-extension")
 
 							// Write the updated extensions.json file
 							fs.writeFileSync(extensionsJsonPath, stringify(newExtensions, undefined, 2))
