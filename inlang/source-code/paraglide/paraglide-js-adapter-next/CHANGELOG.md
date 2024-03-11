@@ -1,5 +1,17 @@
 # @inlang/paraglide-js-adapter-next
 
+## 0.3.0
+
+### Minor Changes
+
+- 60b54a577: feat: expose `localizePath` function from `createI18n`
+
+### Patch Changes
+
+- edb1a9dd1: fix: Use fully qualified hrefs in `Link` headers
+- Updated dependencies [b0f1e908b]
+  - @inlang/paraglide-js@1.2.8
+
 ## 0.2.1
 
 ### Patch Changes
