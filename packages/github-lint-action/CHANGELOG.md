@@ -1,5 +1,11 @@
 # @inlang/github-lint-action
 
+## 0.1.8
+
+### Patch Changes
+
+- Retrigger release
+
 ## 0.1.7
 
 ### Patch Changes
