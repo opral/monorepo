@@ -304,7 +304,7 @@ export async function loadProject(args: {
 		const initializeError: Error | undefined = await initialized.catch((error) => error)
 
 		const abortController = new AbortController()
-		const hasWatcher = nodeishFs.watch("/", { signal: abortController.signal }) !== undefined
+		nodeishFs.watch("/", { signal: abortController.signal }) !== undefined
 
 		// map of message id => dispose function from createRoot for each message
 		const trackedMessages: Map<string, () => void> = new Map()
