@@ -23,7 +23,6 @@ const {
 	pull,
 	currentBranch,
 	add,
-	remove,
 	log,
 	listServerRefs,
 	checkout,
@@ -435,19 +434,6 @@ export async function openRepository(
 					nodeishFs: rawFs,
 					verbose,
 					description: "add",
-					intercept: delayedAction,
-				}),
-				dir,
-				filepath: cmdArgs.filepath,
-			})
-		},
-
-		remove(cmdArgs) {
-			return remove({
-				fs: withLazyFetching({
-					nodeishFs: rawFs,
-					verbose,
-					description: "remove",
 					intercept: delayedAction,
 				}),
 				dir,
