@@ -144,6 +144,7 @@ export function PatternEditor(props: {
 
 	createEffect(
 		// debounce to improve performance when typing
+		// eslint-disable-next-line solid/reactivity
 		on(currentJSON, debounce(500, () => {
 			if (JSON.stringify(currentJSON().content) !== JSON.stringify(previousContent())) {
 				autoSave()

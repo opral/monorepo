@@ -233,7 +233,6 @@ export async function loadProject(args: {
 				updateMessages: () => {
 					// preserving console.logs as comments pending #
 					debug("load messages because of a change in the message.json files")
-					// TODO FINK check error handling for plugin load methods (triggered by file change) -> move to separate ticket
 					loadMessagesViaPlugin(
 						fsWithWatcher,
 						messageLockDirPath,
@@ -251,7 +250,6 @@ export async function loadProject(args: {
 				},
 			})
 
-			// TODO FINK check error handling for plugin load methods (initial load)
 			loadMessagesViaPlugin(
 				fsWithWatcher,
 				messageLockDirPath,
