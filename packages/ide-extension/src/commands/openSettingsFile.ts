@@ -3,7 +3,7 @@ import { type ProjectViewNode } from "../utilities/project/project.js"
 import * as path from "node:path"
 
 export const openSettingsFileCommand = {
-	command: "inlang.openSettingsFile",
+	command: "sherlock.openSettingsFile",
 	title: "Inlang: Open settings file",
 	register: vscode.commands.registerCommand,
 	callback: async (node: ProjectViewNode) => {

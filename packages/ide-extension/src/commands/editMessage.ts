@@ -6,7 +6,7 @@ import { getPatternFromString, getStringFromPattern } from "../utilities/message
 import { CONFIGURATION } from "../configuration.js"
 
 export const editMessageCommand = {
-	command: "inlang.editMessage",
+	command: "sherlock.editMessage",
 	title: "Inlang: Edit a Message",
 	register: commands.registerCommand,
 	callback: async function ({

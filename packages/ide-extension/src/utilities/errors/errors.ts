@@ -60,7 +60,7 @@ export function getTreeItem(element: ErrorNode): vscode.TreeItem {
 	if (element.error) {
 		treeItem.contextValue = "errorNode"
 		treeItem.command = {
-			command: "inlang.copyError",
+			command: "sherlock.copyError",
 			title: "Copy Error",
 			arguments: [element],
 		}

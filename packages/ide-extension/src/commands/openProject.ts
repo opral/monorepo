@@ -3,7 +3,7 @@ import { handleTreeSelection, type ProjectViewNode } from "../utilities/project/
 import type { NodeishFilesystem } from "@lix-js/fs"
 
 export const openProjectCommand = {
-	command: "inlang.openProject",
+	command: "sherlock.openProject",
 	title: "Inlang: Open project",
 	register: vscode.commands.registerCommand,
 	callback: async (
