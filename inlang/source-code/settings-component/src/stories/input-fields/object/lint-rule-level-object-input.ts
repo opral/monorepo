@@ -35,8 +35,8 @@ export class LintRuleLevelObjectInput extends LitElement {
 				flex-wrap: wrap;
 			}
 			.select {
-				max-width: 180px;
-				min-width: 140px;
+				max-width: 120px;
+				min-width: 100px;
 			}
 		`,
 	]
@@ -96,21 +96,20 @@ export class LintRuleLevelObjectInput extends LitElement {
 					([key, module]: [string, Record<string, Record<string, string>>]) => {
 						return key !== "internal" && key.split(".")[0] !== "plugin"
 							? html`<div class="rule-container">
-									<sl-select class="select" size="small" placeholder="warning (default)">
+									<sl-select
+										value=${this.value ? (this.value as any)[key] : "warning"}
+										class="select"
+										size="small"
+										placeholder="warning"
+										@sl-change=${(e: Event) => {
+											this.handleUpdate(
+												key as `plugin.${string}.${string}` | `messageLintRule.${string}.${string}`,
+												(e.target as HTMLInputElement).value
+											)
+										}}
+									>
 										${this._valueOptions?.map((option) => {
-											return html`<sl-option
-												value=${option.const}
-												class="add-item-side"
-												@click=${(e: Event) => {
-													if (!option.const) return undefined
-													this.handleUpdate(
-														key as
-															| `plugin.${string}.${string}`
-															| `messageLintRule.${string}.${string}`,
-														(e.target as HTMLInputElement).value
-													)
-												}}
-											>
+											return html`<sl-option value=${option.const} class="add-item-side">
 												${option.const}
 											</sl-option>`
 										})}

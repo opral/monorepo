@@ -22,8 +22,8 @@ export class PathPatternInput extends LitElement {
 				display: flex;
 				flex-direction: column;
 				gap: 4px;
-				padding-bottom: 1rem;
-				padding-top: 0.8rem;
+				margin-bottom: 1rem;
+				margin-top: 0.8rem;
 			}
 		`,
 	]
@@ -44,13 +44,11 @@ export class PathPatternInput extends LitElement {
 	handleInlangProjectChange: (value: string, key: string, moduleId?: string) => void = () => {}
 
 	private get _descriptionObject(): string | undefined {
-		return this.schema.anyOf[0].description || undefined
+		return this.schema.anyOf[1].patternProperties["^[^.]+$"].description || undefined
 	}
 
 	private get _examplesObject(): string | undefined {
-		return this.schema.anyOf[0].examples
-			? "Example: " + JSON.stringify(this.schema.anyOf[0].examples)
-			: undefined
+		return "Example: { common: './locales/{languageTag}/common.json', app: './locales/{languageTag}/app.json', ... }"
 	}
 
 	private get _descriptionString(): string | undefined {
@@ -104,14 +102,9 @@ export class PathPatternInput extends LitElement {
 							.value=${typeof this.value === "object" ? this.value : ""}
 							.keyPlaceholder=${"Namespace"}
 							.valuePlaceholder=${"Path to resource [./**/*.json]"}
-							size="small"
-							@input=${(e: Event) => {
-								this.handleInlangProjectChange(
-									(e.target as HTMLInputElement).value,
-									this.property,
-									this.moduleId
-								)
-							}}
+							.handleInlangProjectChange=${this.handleInlangProjectChange}
+							.property=${this.property}
+							.moduleId=${this.moduleId}
 						>
 						</object-input>
 				  </div>`
