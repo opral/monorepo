@@ -10,7 +10,7 @@
 		"url": "https://github.com/opral/monorepo.git"
 	},
 	"icon": "assets/sherlock-logo.png",
-	"version": "1.32.9",
+	"version": "1.33.0",
 	"engines": {
 		"vscode": "^1.84.2"
 	},
@@ -31,63 +31,63 @@
 		"viewsContainers": {
 			"activitybar": [
 				{
-					"id": "inlang",
-					"title": "Inlang",
+					"id": "sherlock",
+					"title": "Sherlock – i18n inspector",
 					"icon": "assets/sherlock-vscode-logo.svg"
 				}
 			]
 		},
 		"views": {
-			"inlang": [
+			"sherlock": [
 				{
-					"when": "inlang:showRecommendationBanner && inlang:hasProjectInWorkspace",
+					"when": "sherlock:showRecommendationBanner && sherlock:hasProjectInWorkspace",
 					"id": "recommendationBanner",
 					"name": "Recommendation",
 					"type": "webview",
-					"group": "inlang@1"
+					"group": "sherlock@1"
 				},
 				{
-					"when": "!inlang:hasProjectInWorkspace",
+					"when": "!sherlock:hasProjectInWorkspace",
 					"id": "gettingStartedView",
 					"name": "Getting Started",
 					"type": "webview",
-					"group": "inlang@2"
+					"group": "sherlock@2"
 				},
 				{
-					"when": "inlang:hasProjectInWorkspace",
+					"when": "sherlock:hasProjectInWorkspace",
 					"id": "projectView",
 					"name": "Projects",
 					"type": "tree",
-					"group": "inlang@3"
+					"group": "sherlock@3"
 				},
 				{
-					"when": "inlang:hasProjectInWorkspace",
+					"when": "sherlock:hasProjectInWorkspace",
 					"id": "messageView",
 					"name": "Messages",
 					"type": "webview",
-					"group": "inlang@4"
+					"group": "sherlock@4"
 				},
 				{
-					"when": "inlang:hasProjectInWorkspace",
+					"when": "sherlock:hasProjectInWorkspace",
 					"id": "errorView",
 					"name": "Errors",
 					"type": "tree",
-					"group": "inlang@5"
+					"group": "sherlock@5"
 				}
 			]
 		},
 		"commands": [
 			{
-				"command": "inlang.openProject",
+				"command": "sherlock.openProject",
 				"title": "Open project"
 			},
 			{
-				"command": "inlang.openSettingsFile",
+				"command": "sherlock.openSettingsFile",
 				"title": "Open settings file",
 				"icon": "$(go-to-file)"
 			},
 			{
-				"command": "inlang.copyError",
+				"command": "sherlock.copyError",
 				"title": "Copy Error",
 				"icon": "$(copy)"
 			}
@@ -96,40 +96,40 @@
 			"view/item/context": [
 				{
 					"when": "view == projectView && viewItem == projectViewNode",
-					"command": "inlang.openProject",
+					"command": "sherlock.openProject",
 					"group": "navigation"
 				},
 				{
 					"when": "view == projectView && viewItem == projectViewNode",
-					"command": "inlang.openSettingsFile",
+					"command": "sherlock.openSettingsFile",
 					"group": "inline"
 				},
 				{
 					"when": "view == errorView && viewItem == errorNode",
-					"command": "inlang.copyError",
+					"command": "sherlock.copyError",
 					"group": "inline"
 				}
 			]
 		},
 		"configuration": {
 			"properties": {
-				"inlang.userId": {
+				"sherlock.userId": {
 					"type": "string",
 					"default": ""
 				},
-				"inlang.disableRecommendation": {
+				"sherlock.disableRecommendation": {
 					"type": "array",
 					"default": []
 				},
-				"inlang.disableConfigFileCreation": {
+				"sherlock.disableConfigFileCreation": {
 					"type": "array",
 					"default": []
 				},
-				"inlang.disableConfigFileDeletion": {
+				"sherlock.disableConfigFileDeletion": {
 					"type": "array",
 					"default": []
 				},
-				"inlang.previewLanguageTag": {
+				"sherlock.previewLanguageTag": {
 					"type": "string",
 					"default": ""
 				}

@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/github-lint-action",
 	"description": "This action checks for translation issues within your PRs.",
-	"version": "0.1.6",
+	"version": "0.2.0",
 	"private": false,
 	"publishConfig": {
 		"access": "public"
@@ -17,14 +17,15 @@
 		"github"
 	],
 	"exports": {
-		".": "./dist/index.js"
+		".": "./dist/index.cjs"
 	},
+	"type": "module",
 	"engines": {
-		"node": ">=18.0.0"
+		"node": ">=20.0.0"
 	},
 	"scripts": {
 		"dev": "node ./build.js",
-		"build": "pnpm run format && ncc build src/index.ts",
+		"build": "pnpm run format && esbuild src/index.ts --bundle --platform=node --target=node20 --outfile=dist/index.cjs",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage --test-timeout=10000",
 		"lint": "eslint ./src --fix",
 		"format": "prettier --write **/*.ts",
@@ -32,15 +33,18 @@
 	},
 	"license": "Apache-2.0",
 	"devDependencies": {
-		"@vercel/ncc": "^0.38.1",
+		"@types/node": "^20.11.16",
 		"@vitest/coverage-v8": "^0.33.0",
 		"dotenv": "^16.4.1",
+		"esbuild": "^0.20.0",
+		"typescript": "^5.3.3",
 		"vitest": "0.34.3"
 	},
 	"dependencies": {
 		"@actions/core": "^1.10.1",
 		"@actions/github": "^6.0.0",
+		"@inlang/sdk": "workspace:*",
 		"@lix-js/client": "workspace:*",
-		"@inlang/sdk": "workspace:*"
+		"@lix-js/fs": "workspace:*"
 	}
 }

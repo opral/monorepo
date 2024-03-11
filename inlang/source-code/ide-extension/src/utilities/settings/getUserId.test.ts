@@ -5,6 +5,7 @@ import { getUserId } from "./getUserId.js"
 vi.mock("./index.js", () => ({
 	getSetting: vi.fn(),
 	updateSetting: vi.fn(),
+	migrateSettingsFromInlangToSherlock: vi.fn(),
 }))
 
 describe("getUserId", () => {

@@ -10,7 +10,7 @@ import { isQuoted, stripQuotes } from "../utilities/messages/isQuoted.js"
  * Helps the user to extract messages from the active text editor.
  */
 export const extractMessageCommand = {
-	command: "inlang.extractMessage",
+	command: "sherlock.extractMessage",
 	title: "Inlang: Extract Message",
 	register: commands.registerTextEditorCommand,
 	callback: async function (textEditor: TextEditor) {

@@ -34,7 +34,7 @@ export const showStatusBar = async () => {
 	const previewLanguageTag = (await getSetting("previewLanguageTag")) || ""
 
 	statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100)
-	statusBarItem.command = "inlang.previewLanguageTag"
+	statusBarItem.command = "sherlock.previewLanguageTag"
 
 	const preferredLanguageTag = previewLanguageTag.length ? previewLanguageTag : sourceLanguageTag
 

@@ -87,7 +87,11 @@ export function createRecommendationBanner(args: { workspaceFolder: vscode.Works
 							fs.writeFileSync(extensionsJsonPath, stringify(newExtensions, undefined, 2))
 
 							// Hide the banner
-							vscode.commands.executeCommand("setContext", "inlang:showRecommendationBanner", false)
+							vscode.commands.executeCommand(
+								"setContext",
+								"sherlock:showRecommendationBanner",
+								false
+							)
 						}
 						break
 					case "rejectRecommendation":
@@ -95,7 +99,7 @@ export function createRecommendationBanner(args: { workspaceFolder: vscode.Works
 						await updateDisabledRecommendation()
 
 						// Hide the banner
-						vscode.commands.executeCommand("setContext", "inlang:showRecommendationBanner", false)
+						vscode.commands.executeCommand("setContext", "sherlock:showRecommendationBanner", false)
 						break
 				}
 
@@ -213,7 +217,7 @@ export async function recommendationBannerView(args: { workspaceFolder: vscode.W
 	) {
 		return
 	} else {
-		vscode.commands.executeCommand("setContext", "inlang:showRecommendationBanner", true)
+		vscode.commands.executeCommand("setContext", "sherlock:showRecommendationBanner", true)
 	}
 
 	vscode.window.registerWebviewViewProvider(
