@@ -1,4 +1,4 @@
-import { For, Match, Switch, onMount, Show, createSignal } from "solid-js"
+import { For, Match, Switch, onMount, Show, createSignal, createEffect, on } from "solid-js"
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded"
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded"
 import { EditorStateProvider, useEditorState } from "./State.jsx"
@@ -38,7 +38,7 @@ export default function Page() {
  * is required to use the useEditorState hook.
  */
 function TheActualPage() {
-	const { repo, project, projectList, routeParams, doesInlangConfigExist, tourStep, lixErrors } =
+	const { repo, currentBranch, project, projectList, routeParams, doesInlangConfigExist, tourStep, lixErrors } =
 		useEditorState()
 	const [localStorage, setLocalStorage] = useLocalStorage()
 
@@ -64,6 +64,10 @@ function TheActualPage() {
 			return recentProjects.sort((a, b) => b.lastOpened - a.lastOpened).slice(0, 7)
 		})
 	})
+
+	createEffect(on([project, currentBranch], () => {
+		setMessageCount(0)
+	}))
 
 	return (
 		<>
