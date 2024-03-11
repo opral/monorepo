@@ -40,7 +40,7 @@ Adds the `inlang.vs-code-extension` recommendation to the workspace if it's not 
 ## Example
 
 ```typescript
-import { isAdopted, add } from 'cross-sell-sherlock';
+import { isAdopted, add } from '@inlang/cross-sell-sherlock';
 import { NodeishFilesystem } from '@lix-js/fs';
 
 async function addSherlock(fs: NodeishFilesystem) {
