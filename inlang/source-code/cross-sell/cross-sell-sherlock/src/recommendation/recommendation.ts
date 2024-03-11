@@ -1,4 +1,4 @@
-import type { NodeishFilesystem } from "@lix-js/fs"
+import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
 import { joinPath } from "./utils/joinPath.js"
 import { isExtensionsJson } from "./utils/isExtensionJson.js"
 import { parse, type CommentJSONValue, stringify } from "comment-json"
@@ -8,7 +8,7 @@ export async function addRecommendationToWorkspace(
 	fs: NodeishFilesystem,
 	workingDirectory?: string
 ): Promise<void> {
-	const vscodeFolderPath = joinPath(workingDirectory ?? "", ".vscode")
+	const vscodeFolderPath = normalizePath(joinPath(workingDirectory ?? "", "./.vscode"))
 	const extensionsJsonPath = joinPath(vscodeFolderPath, "extensions.json")
 
 	if (!(await fs.stat(vscodeFolderPath))) {
@@ -41,7 +41,7 @@ export async function isInWorkspaceRecommendation(
 	fs: NodeishFilesystem,
 	workingDirectory?: string
 ): Promise<boolean> {
-	const vscodeFolderPath = joinPath(workingDirectory ?? "", ".vscode")
+	const vscodeFolderPath = normalizePath(joinPath(workingDirectory ?? "", "./.vscode"))
 	const extensionsJsonPath = joinPath(vscodeFolderPath, "extensions.json")
 
 	if (!(await fs.stat(extensionsJsonPath)) || !(await fs.stat(vscodeFolderPath))) {
