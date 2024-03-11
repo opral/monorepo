@@ -212,6 +212,9 @@ importers:
       '@lix-js/fs':
         specifier: workspace:*
         version: link:../../../../lix/source-code/fs
+      '@sinclair/typebox':
+        specifier: ^0.31.17
+        version: 0.31.28
       '@types/vscode':
         specifier: ^1.84.2
         version: 1.84.2

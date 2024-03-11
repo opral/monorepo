@@ -1,8 +1,8 @@
 import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
 import { joinPath } from "./utils/joinPath.js"
-import { isExtensionsJson } from "./utils/isExtensionJson.js"
+import { Value } from "@sinclair/typebox/value"
 import { parse, type CommentJSONValue, stringify } from "comment-json"
-import type { ExtensionsJson } from "./utils/types.js"
+import { type ExtensionsJson as ExtensionsJsonType, ExtensionsJson } from "./utils/types.js"
 
 export async function addRecommendationToWorkspace(
 	fs: NodeishFilesystem,
@@ -15,11 +15,11 @@ export async function addRecommendationToWorkspace(
 		await fs.mkdir(vscodeFolderPath)
 	}
 
-	let extensions: ExtensionsJson
+	let extensions: ExtensionsJsonType
 	if (await fs.stat(extensionsJsonPath)) {
 		try {
 			const parsed = parse(await fs.readFile(extensionsJsonPath, { encoding: "utf-8" }))
-			if (isExtensionsJson(parsed)) {
+			if (Value.Check(ExtensionsJson, parsed)) {
 				extensions = parsed
 			} else {
 				extensions = { recommendations: [] }
@@ -52,7 +52,7 @@ export async function isInWorkspaceRecommendation(
 		await fs.readFile(extensionsJsonPath, { encoding: "utf-8" })
 	) as CommentJSONValue
 
-	if (!isExtensionsJson(extensions)) {
+	if (!Value.Check(ExtensionsJson, extensions)) {
 		return false
 	}
 
