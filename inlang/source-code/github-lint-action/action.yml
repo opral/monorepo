@@ -1,0 +1,7 @@
+name: 'ninja i18n action'
+description: 'This action checks for i18n issues within your PRs.'
+author: 'inlang'
+
+runs:
+  using: node20
+  main: dist/index.cjs
