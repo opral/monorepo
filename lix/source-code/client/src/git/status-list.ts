@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/no-null -- required for isogit walk api */
 import type { NodeishFilesystem } from "@lix-js/fs"
 import isoGit from "../../vendored/isomorphic-git/index.js"
 // import { modeToFileType } from "./helpers.js"
@@ -79,26 +78,39 @@ function join(...parts: string[]) {
 
 type StatusArgs = {
 	fs: NodeishFilesystem
-	dir: string // The [working tree](dir-vs-gitdir.md) directory path
-	gitdir?: string // The [git directory](dir-vs-gitdir.md) path
-	ref?: string // Optionally specify a different commit to compare against the workdir and stage instead of the HEAD
-	filepaths?: string[] // Limit the query to the given files and directories
-	filter?: (filepath: string) => boolean // Filter the results to only those whose filepath matches a function.
-	sparseFilter?: (entry: { filename: string; type: "file" | "folder" }) => boolean // Filter the results to only those whose filepath matches a function.
-	cache?: object // an isogit cache object
-	includeStatus?: OptStatus[] // include normally excluded statuses
-	addHashes?: boolean // include hashes of the files for workdir, head and staging
+	/** The [working tree](dir-vs-gitdir.md) directory path */
+	dir: string
+	/**
+	 * The [git directory](dir-vs-gitdir.md) path
+	 * @default join(dir, ".git")
+	 */
+	gitdir?: string
+	/**
+	 * Optionally specify a different commit to compare against the workdir and stage instead of the HEAD
+	 * @default "HEAD"
+	 */
+	ref?: string
+	/**
+	 * Limit the query to the given files and directories
+	 */
+	filepaths?: string[]
+	/** Filter the results to only those whose filepath matches a function. */
+	filter?: (filepath: string) => boolean
+	/** (experimental filter option) TODO document */
+	sparseFilter?: (entry: { filename: string; type: "file" | "folder" }) => boolean //
+	/** an isogit cache object */
+	cache?: object
+	/**
+	 * include normally excluded statuses
+	 * @default []
+	 **/
+	includeStatus?: OptStatus[]
+	/**
+	 * include hashes of the files for workdir, head and staging
+	 * @default false
+	 */
+	addHashes?: boolean
 }
-// * TODO: support this again
-// * ```js live
-// * // get the status of all the JSON and Markdown files
-// * let status = await git.statusMatrix({
-// *   fs,
-// *   dir: '/tutorial',
-// *   filter: f => f.endsWith('.json') || f.endsWith('.md')
-// * })
-// * console.log(status)
-// * ```
 
 /**
  * Efficiently get the status of multiple files at once.
@@ -122,6 +134,13 @@ export async function statusList({
 			dir,
 			gitdir,
 			trees: [TREE({ ref }), WORKDIR(), STAGE()],
+			/**
+			 * Taken from the isomorphic-git documentation of walk's map function:
+			 *
+			 * This is the function that is called once per entry BEFORE visiting the children of that node.
+			 * (1) If you return null for a tree entry, then none of the children of that tree entry will be walked - but the tree entry is still part of the results.
+			 * (2) If you do not return a value (or return undefined) that entry will be filtered from the results.
+			 */
 			map: async function (filepath, [head, workdir, stage]) {
 				// Ignore ignored files, but only if they are not already tracked.
 
@@ -136,16 +155,21 @@ export async function statusList({
 								{ headOid: undefined, workdirOid: "ignored", stageOid: undefined },
 							]
 						}
+
+						// eslint-disable-next-line unicorn/no-null -- return null to skip walking of ignored trees (folders) - compare (1)
 						return null
 					}
 				}
 				// match against base paths
 				if (!filepaths.some((base) => worthWalking(filepath, base))) {
+					// eslint-disable-next-line unicorn/no-null -- the folder is not worth walking based on the passed filepaths - compare (1)
 					return null
 				}
+
 				// Late filter against file names
 				if (filter && !filter(filepath)) {
-					return
+					// the given file path does not match the filepaths from filter - retrun undefined to skip it in the results - compare (2)
+					return undefined
 				}
 
 				if (fs._isPlaceholder && fs._isPlaceholder(filepath)) {
@@ -159,6 +183,7 @@ export async function statusList({
 							{ headOid, workdirOid: headOid, stageOid: headOid, placeholder: true },
 						]
 					}
+					// eslint-disable-next-line unicorn/no-null -- the placeholder is not worth walking since its file path is not explicit set in filpath NOR do we want unmodified files - compare (1)
 					return null
 				}
 
@@ -189,13 +214,30 @@ export async function statusList({
 				}
 
 				// For now, bail on directories unless the file is also a blob in another tree
-				if ((headType === "tree" || headType === "special") && !isBlob) return
-				if (headType === "commit") return null
+				if ((headType === "tree" || headType === "special") && !isBlob) {
+					// We don't wan't to include directories in the status list but we still want to walk down there files. - compare (2)
+					return undefined
+				}
 
-				if ((workdirType === "tree" || workdirType === "special") && !isBlob) return
+				if (headType === "commit") {
+					// eslint-disable-next-line unicorn/no-null -- commit objects should not be walked, and we stop the walk by returning null - compare (1)
+					return null
+				}
 
-				if (stageType === "commit") return null
-				if ((stageType === "tree" || stageType === "special") && !isBlob) return
+				if ((workdirType === "tree" || workdirType === "special") && !isBlob) {
+					// We don't wan't to include directories in the status list but we still want to walk down there files. - compare (2)
+					return undefined
+				}
+
+				if (stageType === "commit") {
+					// eslint-disable-next-line unicorn/no-null -- commit objects should not be walked, and we stop the walk by returning null - compare (1)
+					return null
+				}
+
+				if ((stageType === "tree" || stageType === "special") && !isBlob) {
+					// We don't wan't to include directories in the status list but we still want to walk down there files. - compare (2)
+					return undefined
+				}
 
 				// Figure out the oids for files, using the staged oid for the working dir oid if the stats match.
 				const headOid = headType === "blob" ? await head?.oid() : undefined
@@ -204,7 +246,7 @@ export async function statusList({
 				let workdirOid
 
 				if (headType !== "blob" && workdirType === "blob" && stageType !== "blob") {
-					workdirOid = addHashes ? await workdir?.oid() : "42" // (use "42" here to avoid hashing as its not exposed)
+					workdirOid = addHashes ? await workdir?.oid() : "42" // (use "42" here to avoid hashing of added files - just to realize they are *added - we only expose it for testing purpose)
 				} else if (workdirType === "blob") {
 					workdirOid = await workdir?.oid()
 				}
@@ -228,7 +270,8 @@ export async function statusList({
 					) {
 						return [filepath, "unmodified", entry]
 					} else {
-						return null
+						// the oid is the same and workdir type can not be different from blob (one of the previous if's would have triggered) - filter it out since unchanged
+						return undefined
 					}
 				}
 
