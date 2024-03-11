@@ -409,8 +409,7 @@ export async function loadProject(args: {
 			messagesQuery,
 			settings as () => ProjectSettings,
 			installedMessageLintRules,
-			resolvedModules,
-			hasWatcher
+			resolvedModules
 		)
 
 		/**
