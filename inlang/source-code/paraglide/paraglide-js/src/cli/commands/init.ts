@@ -13,6 +13,7 @@ import { findRepoRoot, openRepository, type Repository } from "@lix-js/client"
 import nodeFsPromises from "node:fs/promises"
 import { pathExists } from "../../services/file-handling/exists.js"
 import { findPackageJson } from "../../services/environment/package.js"
+import * as Sherlock from "@inlang/cross-sell-sherlock"
 
 // TODO add a project UUID to the tele.groups internal #196
 // import { gitOrigin } from "../../services/telemetry/implementation.js"
@@ -22,6 +23,14 @@ type Context = {
 	logger: Logger
 	repo: Repository
 }
+
+const ADAPTER_LINKS = {
+	sveltekit: "https://inlang.com/m/dxnzrydw/library-inlang-paraglideJsAdapterSvelteKit",
+	nextjs: "https://inlang.com/m/osslbuzt/library-inlang-paraglideJsAdapterNextJs",
+	astro: "https://inlang.com/m/iljlwzfs/library-inlang-paraglideJsAdapterAstro",
+	solidstart: "https://inlang.com/m/n860p17j/library-inlang-paraglideJsAdapterSolidStart",
+	vite: "https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-vite",
+} as const
 
 export const initCommand = new Command()
 	.name("init")
@@ -65,17 +74,36 @@ export const initCommand = new Command()
 		const absoluteSettingsPath = resolve(projectPath, "settings.json")
 		const relativeSettingsFilePath = absoluteSettingsPath.replace(process.cwd(), ".")
 
-		ctx.logger.box(
-			dedent`inlang Paraglide-JS has been set up sucessfully.
+		let successMessage = dedent`inlang Paraglide-JS has been set up sucessfully.
 			
 			1. Run your install command (npm i, yarn install, etc)
 			2. Register all your languages in ${relativeSettingsFilePath}
 			3. Run the build script (npm run build, or similar.)
 			4. Done :) Happy paragliding 🪂
 			
-			For questions and feedback, visit https://github.com/inlang/monorepo/discussions.
 			`
-		)
+
+		const stackChoice = await promtStack()
+
+		if (Object.keys(ADAPTER_LINKS).includes(stackChoice)) {
+			successMessage += "\n\n"
+			successMessage += dedent`
+				HINT:
+				If you are using ${stackChoice} with paraglide, you will likely also want to use 
+
+				\`@inlang/paraglide-js-adapter-${stackChoice}\`
+
+				Read the documentation at:
+				${ADAPTER_LINKS[stackChoice as keyof typeof ADAPTER_LINKS]}
+			`
+		}
+
+		successMessage += "\n\n"
+		successMessage += dedent`
+			For questions and feedback, visit https://github.com/inlang/monorepo/discussions.
+		`
+
+		ctx.logger.box(successMessage)
 	})
 
 export const initializeInlangProject = async (ctx: Context) => {
@@ -95,7 +123,7 @@ export const maybeAddVsCodeExtension = async (args: { projectPath: string }, ctx
 
 	let response = isCertainlyVsCode
 	if (!isCertainlyVsCode) {
-		response = await prompt(`Are you using VSCode?`, {
+		response = await prompt(`Are you using Visual Studio Code?`, {
 			type: "confirm",
 			initial: true,
 		})
@@ -117,27 +145,13 @@ export const maybeAddVsCodeExtension = async (args: { projectPath: string }, ctx
 		)
 		project.setSettings(settings)
 	}
-	let extensions: any = {}
-	try {
-		extensions = JSON5.parse(
-			await ctx.repo.nodeishFs.readFile("./.vscode/extensions.json", { encoding: "utf-8" })
+
+	if (!(await Sherlock.isAdopted(ctx.repo.nodeishFs))) {
+		await Sherlock.add(ctx.repo.nodeishFs)
+
+		ctx.logger.success(
+			"Added the inlang Visual Studio Code extension (Sherlock) to the workspace recommendations."
 		)
-	} catch {
-		// continue
-	}
-	if (extensions.recommendations === undefined) {
-		extensions.recommendations = []
-	}
-	if (extensions.recommendations.includes("inlang.vs-code-extension") === false) {
-		extensions.recommendations.push("inlang.vs-code-extension")
-		if ((await pathExists("./.vscode", ctx.repo.nodeishFs)) === false) {
-			await ctx.repo.nodeishFs.mkdir("./.vscode")
-		}
-		await ctx.repo.nodeishFs.writeFile(
-			"./.vscode/extensions.json",
-			JSON.stringify(extensions, undefined, 2)
-		)
-		ctx.logger.success("Added the inlang vs code extension to the workspace recommendations.")
 	}
 }
 
@@ -242,7 +256,7 @@ export const newProjectTemplate: ProjectSettings = {
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-valid-js-identifier@latest/dist/index.js",
 		// default to the message format plugin because it supports all features
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@latest/dist/index.js",
-		// the m function matcher should be installed by default in case the ide extension is adopted
+		// the m function matcher should be installed by default in case Sherlock (VS Code extension) is adopted
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js",
 	],
 	"plugin.inlang.messageFormat": {
@@ -464,6 +478,31 @@ export const maybeChangeTsConfigAllowJs = async (ctx: Context): Promise<void> =>
 			)
 		}
 	}
+}
+
+/**
+ * Prompts the user to select the stack they are using & links to relevant documentation.
+ */
+async function promtStack() {
+	return await promptSelection("Which tech stack are you using?", {
+		options: [
+			{ label: "Other", value: "other" },
+			{ label: "Vanilla", value: "vanilla" },
+			{ label: "NextJS", value: "nextjs" },
+			{ label: "SvelteKit", value: "sveltekit" },
+			{ label: "Astro", value: "astro" },
+			{ label: "SolidStart", value: "solidstart" },
+			{ label: "Vite", value: "vite" },
+		],
+		initial: "other",
+	})
+}
+
+const promptSelection = async <T extends string>(
+	message: string,
+	options: { initial?: T; options: { label: string; value: T }[] } = { options: [] }
+): Promise<T> => {
+	return prompt(message, { type: "select", ...options }) as unknown as Promise<T>
 }
 
 /**

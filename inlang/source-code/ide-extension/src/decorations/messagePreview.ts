@@ -77,7 +77,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 						: translation)
 
 				const range = new vscode.Range(
-					// VSCode starts to count lines and columns from zero
+					// Visual Studio Code starts to count lines and columns from zero
 					new vscode.Position(
 						message.position.start.line - 1,
 						message.position.start.character - 1

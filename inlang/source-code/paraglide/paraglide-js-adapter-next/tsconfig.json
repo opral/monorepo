@@ -1,0 +1,18 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"isolatedModules": true,
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"strict": true,
+		"declaration": true,
+		"allowJs": true,
+		"checkJs": true,
+		"jsx": "react",
+		"outDir": "dist",
+		"skipLibCheck": true,
+		"declarationMap": false
+	},
+	"include": ["src"],
+	"exclude": ["examples", "examples/*"]
+}

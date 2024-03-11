@@ -1,6 +1,6 @@
 import { matches } from "./matching/match.js"
 import { resolvePath } from "./matching/resolvePath.js"
-import type { PathTranslations } from "./types.js"
+import type { PathTranslations } from "../config/pathTranslations.js"
 
 export function getTranslatedPath(
 	canonicalPath: string,

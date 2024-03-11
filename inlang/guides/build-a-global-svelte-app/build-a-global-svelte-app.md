@@ -104,11 +104,11 @@ The default path for translation files are `./messages/{lang}.json`. You can cha
 You can add messages in two ways:
 
 1. Manually editing the translation files
-2. Using the [inlang IDE Extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension)
+2. Using [Sherlock (VS Code extension)](https://inlang.com/m/r7kp499g/app-inlang-ideExtension)
 
-### Add messages through ide extension (recommended)
+### Add messages through Sherlock (VS Code extension) - recommended
 
-- Install the ide extension from the vs-code marketplace.
+- Install the Sherlock (VS Code extension) from the VS Code marketplace.
   [See extension on inlang.com](https://inlang.com/m/r7kp499g/app-inlang-ideExtension)
   [vs-code marketplace](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension)
 

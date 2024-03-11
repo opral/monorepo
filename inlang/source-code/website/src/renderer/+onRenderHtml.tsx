@@ -10,7 +10,7 @@ import { MetaProvider, renderTags } from "@solidjs/meta"
 import { languageTag } from "#src/paraglide/runtime.js"
 
 // See https://vike.dev/data-fetching
-export const passToClient = ["pageProps", "routeParams", "languageTag"] as const
+export const passToClient = ["pageProps", "routeParams", "languageTag", "data"] as const
 
 export default async function onRenderHtml(pageContext: PageContextRenderer): Promise<unknown> {
 	//! TODO most likely cross request state pollution
@@ -35,7 +35,7 @@ export default async function onRenderHtml(pageContext: PageContextRenderer): Pr
 
 	const renderedPage = renderToString(() => (
 		<MetaProvider tags={tags}>
-			<Root page={pageContext.Page} pageProps={pageContext.pageProps} />
+			<Root page={pageContext.Page} pageProps={pageContext.pageProps} data={pageContext.data} />
 		</MetaProvider>
 	))
 

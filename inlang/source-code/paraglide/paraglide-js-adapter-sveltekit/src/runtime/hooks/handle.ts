@@ -2,6 +2,13 @@ import type { Handle } from "@sveltejs/kit"
 import { getPathInfo } from "../utils/get-path-info.js"
 import { base } from "$app/paths"
 import type { I18nConfig } from "../adapter.js"
+import { dev } from "$app/environment"
+
+/**
+ * The default lang attribute string that's in SvelteKit's `src/app.html` file.
+ * If this is present on the `<html>` attribute it most likely needs to be replaced.
+ */
+const SVELTEKIT_DEFAULT_LANG_ATTRIBUTE = 'lang="en"'
 
 export type HandleOptions = {
 	/**
@@ -64,6 +71,22 @@ export const createHandle = <T extends string>(
 		return resolve(event, {
 			transformPageChunk({ html, done }) {
 				if (!done) return html
+
+				// in dev mode, check if the lang attribute hasn't been replaced
+				if (
+					dev &&
+					!html.includes(langPlaceholder) &&
+					html.includes(SVELTEKIT_DEFAULT_LANG_ATTRIBUTE)
+				) {
+					console.warn(
+						"It seems like you haven't replaced the `lang` attribute in your `src/app.html` file. \n" +
+							`Please replace the \`lang\` attribute with the correct placeholder:"\n\n` +
+							` - <html ${SVELTEKIT_DEFAULT_LANG_ATTRIBUTE}>\n` +
+							` + <html lang="${langPlaceholder}" dir="${dirPlaceholder}">` +
+							`\n\nThis message will not be shown in production.`
+					)
+				}
+
 				return html.replace(langPlaceholder, lang).replace(dirPlaceholder, textDirection)
 			},
 		})

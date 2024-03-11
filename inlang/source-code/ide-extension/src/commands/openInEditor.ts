@@ -5,7 +5,7 @@ import { CONFIGURATION } from "../configuration.js"
 import { getGitOrigin } from "../utilities/settings/getGitOrigin.js"
 
 export const openInEditorCommand = {
-	command: "inlang.openInEditor",
+	command: "sherlock.openInEditor",
 	title: "Inlang: Open in Editor",
 	register: commands.registerCommand,
 	callback: async function (args: { messageId: Message["id"]; selectedProjectPath: string }) {

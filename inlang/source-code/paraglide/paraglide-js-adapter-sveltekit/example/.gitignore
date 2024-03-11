@@ -1,2 +1,5 @@
 .svelte-kit
 build
+node_modules
+.vercel
+dist
