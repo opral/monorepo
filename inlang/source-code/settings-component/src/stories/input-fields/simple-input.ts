@@ -4,6 +4,7 @@ import { baseStyling } from "../../styling/base.js"
 import "./string/string-input.js"
 import "./array/array-input.js"
 import "./object/object-input.js"
+import "./union/path-pattern-input.js"
 @customElement("simple-input")
 export class SimpleInput extends LitElement {
 	static override styles = baseStyling
@@ -70,6 +71,16 @@ export class SimpleInput extends LitElement {
 					></string-input>
 				</div>`
 			}
+		} else if (this.property === "pathPattern" || this.property === "sourceLanguageFilePath") {
+			return html` <div>
+				<path-pattern-input
+					.property=${this.property}
+					.moduleId=${this.moduleId}
+					.value=${this.value}
+					.schema=${this.schema}
+					.handleInlangProjectChange=${this.handleInlangProjectChange}
+				></path-pattern-input>
+			</div>`
 		} else {
 			return html` <div>
 				<string-input

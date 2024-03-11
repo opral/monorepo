@@ -54,6 +54,12 @@ export class DefaultObjectInput extends LitElement {
 	property: string = ""
 
 	@property()
+	keyPlaceholder?: string = "Enter key"
+
+	@property()
+	valuePlaceholder?: string = "Enter value"
+
+	@property()
 	moduleId?: string
 
 	@property()
@@ -109,7 +115,7 @@ export class DefaultObjectInput extends LitElement {
 
 	override render() {
 		return html` <div>
-			<p>${this.property}</p>
+			${this._description && html`<p>${this.property}</p>`}
 			${this._description && html`<p class="help-text">${this._description}</p>`}
 			<div class="list-container">
 				${this.value &&
@@ -145,7 +151,7 @@ export class DefaultObjectInput extends LitElement {
 			<div class="add-item-container">
 				<sl-input
 					class="add-item-side"
-					placeholder="Enter key"
+					placeholder=${this.keyPlaceholder}
 					size="small"
 					@input=${(e: Event) => {
 						this._inputKey = (e.target as HTMLInputElement).value
@@ -160,7 +166,7 @@ export class DefaultObjectInput extends LitElement {
 				</sl-input>
 				<sl-input
 					class="add-item-side"
-					placeholder="Enter value"
+					placeholder=${this.valuePlaceholder}
 					size="small"
 					@input=${(e: Event) => {
 						this._inputValue = (e.target as HTMLInputElement).value
