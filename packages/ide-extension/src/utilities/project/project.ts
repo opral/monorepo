@@ -64,7 +64,7 @@ export function getTreeItem(args: {
 			: new vscode.ThemeIcon("circle-large-outline", new vscode.ThemeColor("sideBar.foreground")),
 		contextValue: "projectViewNode",
 		command: {
-			command: "inlang.openProject",
+			command: "sherlock.openProject",
 			title: "Open File",
 			arguments: [args.element, args.nodeishFs, args.workspaceFolder],
 		},
