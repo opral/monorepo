@@ -10,8 +10,6 @@ import type { resolveModules } from "./resolve-modules/index.js"
 import type { MessageLintReport, Message } from "./versionedInterfaces.js"
 import { lintSingleMessage } from "./lint/index.js"
 import { ReactiveMap } from "./reactivity/map.js"
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { debounce } from "throttle-debounce"
 import { createRoot, createEffect } from "./reactivity/solid.js"
 
 /**
