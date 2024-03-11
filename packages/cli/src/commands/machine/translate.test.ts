@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { test, expect } from "vitest"
 import { translateCommandAction } from "./translate.js"
 import { Message, ProjectSettings, loadProject, Plugin, type InlangModule } from "@inlang/sdk"
@@ -151,6 +150,8 @@ test.runIf(process.env.GOOGLE_TRANSLATE_API_KEY)(
 			"de",
 			"en",
 		])
+
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- we expected the message to exist earlier
 		for (const variant of messages[0]!.variants) {
 			expect(
 				variant.pattern.some(
