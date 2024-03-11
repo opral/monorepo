@@ -3,6 +3,9 @@
 	"description": "A package to cross-sell Sherlock",
 	"version": "0.0.0",
 	"type": "module",
+	"publishConfig": {
+		"access": "public"
+	},
 	"exports": {
 		".": "./dist/index.js"
 	},
