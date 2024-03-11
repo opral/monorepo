@@ -27,8 +27,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	//initErrorMonitoring()
 
 	try {
-		vscode.commands.executeCommand("setContext", "inlang:hasProjectInWorkspace", false)
-		vscode.commands.executeCommand("setContext", "inlang:showRecommendationBanner", false)
+		vscode.commands.executeCommand("setContext", "sherlock:hasProjectInWorkspace", false)
+		vscode.commands.executeCommand("setContext", "sherlock:showRecommendationBanner", false)
 		const workspaceFolder = vscode.workspace.workspaceFolders?.[0]
 
 		if (!workspaceFolder) {
@@ -56,7 +56,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		}
 
 		await main({ context, workspaceFolder, nodeishFs })
-		msg("inlang's extension activated", "info")
+		msg("Sherlock activated", "info")
 	} catch (error) {
 		handleError(error)
 	}
@@ -81,7 +81,7 @@ async function main(args: {
 				closestProjectToWorkspace?.projectPath || state().projectsInWorkspace[0]?.projectPath || "",
 		})
 
-		vscode.commands.executeCommand("setContext", "inlang:hasProjectInWorkspace", true)
+		vscode.commands.executeCommand("setContext", "sherlock:hasProjectInWorkspace", true)
 
 		await recommendationBannerView(args)
 		await projectView(args)
