@@ -19,6 +19,12 @@ export class ObjectInput extends LitElement {
 	modules?: object
 
 	@property()
+	keyPlaceholder?: string
+
+	@property()
+	valuePlaceholder?: string
+
+	@property()
 	value: Record<InlangModule["default"]["id"], string> = {}
 
 	@property()
@@ -47,6 +53,8 @@ export class ObjectInput extends LitElement {
 				.moduleId=${this.moduleId}
 				.value=${this.value}
 				.schema=${this.schema}
+				.keyPlaceholder=${this.keyPlaceholder}
+				.valuePlaceholder=${this.valuePlaceholder}
 				.handleInlangProjectChange=${this.handleInlangProjectChange}
 			></default-object-input>`
 		}

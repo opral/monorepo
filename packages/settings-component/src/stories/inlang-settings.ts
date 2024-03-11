@@ -70,7 +70,7 @@ export class InlangSettings extends LitElement {
 		if (property === "modules" && moduleId === undefined) {
 			this.inlangProject = this._project
 		}
-		//console.log(this._project)
+		console.log(this._project)
 	}
 
 	private _projectProperties = new Task(this, {
@@ -128,10 +128,10 @@ export class InlangSettings extends LitElement {
 											: html`
 													<simple-input
 														.property=${property}
-														.value=${JSON.stringify(
+														.value=${
 															// @ts-ignore
 															this.inlangProject?.[key]?.[property]
-														)}
+														}
 														.schema=${schema}
 														.moduleId=${key}
 														.handleInlangProjectChange=${this.handleInlangProjectChange}
