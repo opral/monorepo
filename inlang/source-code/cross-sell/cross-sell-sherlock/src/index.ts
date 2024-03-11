@@ -2,7 +2,7 @@ import { type NodeishFilesystem } from "@lix-js/fs"
 import {
 	addRecommendationToWorkspace,
 	isInWorkspaceRecommendation,
-} from "./recommendation/index.js"
+} from "./recommendation/recommendation.js"
 
 export async function isAdopted(
 	fs: NodeishFilesystem,
