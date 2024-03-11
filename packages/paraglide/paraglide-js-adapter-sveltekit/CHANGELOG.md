@@ -1,5 +1,12 @@
 # @inlang/paraglide-js-adapter-sveltekit
 
+## 0.5.6
+
+### Patch Changes
+
+- bce060367: fix: make `svelte` a peer dependency
+  - @inlang/paraglide-js-adapter-vite@1.2.18
+
 ## 0.5.5
 
 ### Patch Changes
