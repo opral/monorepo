@@ -71,7 +71,7 @@ jobs:
         env:
           API_TOKEN_GITHUB: ${{ secrets.INLANG_BOT_TOKEN }}
         with:
-          source_file: 'inlang/source-code/github-lint-action/dist/index.js'
+          source_file: 'inlang/source-code/github-lint-action/dist/index.cjs'
           destination_repo: 'opral/i18n-action'
           destination_folder: 'dist'
           user_email: 'hello@inlang.com'
