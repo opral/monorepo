@@ -43,7 +43,7 @@ describe("Cross-sell Sherlock app", () => {
 	it("should handle when the .vscode directory does not exist", async () => {
 		const fsMock: any = {
 			stat: vi.fn((path) =>
-				path.includes(".vscode") ? Promise.resolve(false) : Promise.resolve(true)
+				path.includes(".vscode") ? Promise.reject(false) : Promise.resolve(true)
 			),
 			readFile: vi.fn(),
 			writeFile: vi.fn(),
@@ -60,7 +60,7 @@ describe("Cross-sell Sherlock app", () => {
 	it("should handle when extensions.json does not exist", async () => {
 		const fsMock: any = {
 			stat: vi.fn((path) =>
-				path.includes("extensions.json") ? Promise.resolve(false) : Promise.resolve(true)
+				path.includes("extensions.json") ? Promise.reject(false) : Promise.resolve(true)
 			),
 			readFile: vi.fn(),
 			writeFile: vi.fn(),
@@ -76,7 +76,7 @@ describe("Cross-sell Sherlock app", () => {
 	it("should return false if extensions.json does not exist", async () => {
 		const fsMock: any = {
 			stat: vi.fn((path) => {
-				if (path.includes("extensions.json")) return Promise.resolve(false)
+				if (path.includes("extensions.json")) return Promise.reject(false)
 				return Promise.resolve(true)
 			}),
 			readFile: vi.fn(),
@@ -100,7 +100,7 @@ describe("Cross-sell Sherlock app", () => {
 		const fsMock: any = {
 			stat: vi.fn((path) => {
 				// Simulate .vscode directory exists but extensions.json does not
-				if (path.includes("extensions.json")) return Promise.resolve(false)
+				if (path.includes("extensions.json")) return Promise.reject(false)
 				return Promise.resolve(true)
 			}),
 			readFile: vi.fn(),

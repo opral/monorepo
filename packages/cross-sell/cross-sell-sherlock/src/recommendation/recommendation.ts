@@ -3,6 +3,7 @@ import { joinPath } from "./utils/joinPath.js"
 import { Value } from "@sinclair/typebox/value"
 import { parse, type CommentJSONValue, stringify } from "comment-json"
 import { type ExtensionsJson as ExtensionsJsonType, ExtensionsJson } from "./utils/types.js"
+import { pathExists } from "./utils/exists.js"
 
 export async function addRecommendationToWorkspace(
 	fs: NodeishFilesystem,
@@ -11,12 +12,12 @@ export async function addRecommendationToWorkspace(
 	const vscodeFolderPath = normalizePath(joinPath(workingDirectory ?? "", "./.vscode"))
 	const extensionsJsonPath = joinPath(vscodeFolderPath, "extensions.json")
 
-	if (!(await fs.stat(vscodeFolderPath))) {
+	if (!(await pathExists(vscodeFolderPath, fs))) {
 		await fs.mkdir(vscodeFolderPath)
 	}
 
 	let extensions: ExtensionsJsonType
-	if (await fs.stat(extensionsJsonPath)) {
+	if (await pathExists(extensionsJsonPath, fs)) {
 		try {
 			const parsed = parse(await fs.readFile(extensionsJsonPath, { encoding: "utf-8" }))
 			if (Value.Check(ExtensionsJson, parsed)) {
@@ -44,7 +45,7 @@ export async function isInWorkspaceRecommendation(
 	const vscodeFolderPath = normalizePath(joinPath(workingDirectory ?? "", "./.vscode"))
 	const extensionsJsonPath = joinPath(vscodeFolderPath, "extensions.json")
 
-	if (!(await fs.stat(extensionsJsonPath)) || !(await fs.stat(vscodeFolderPath))) {
+	if (!(await pathExists(extensionsJsonPath, fs)) || !(await pathExists(vscodeFolderPath, fs))) {
 		return false
 	}
 

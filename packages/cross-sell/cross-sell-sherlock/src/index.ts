@@ -1,4 +1,4 @@
-import { type NodeishFilesystem } from "@lix-js/fs"
+import type { NodeishFilesystem } from "@lix-js/fs"
 import {
 	addRecommendationToWorkspace,
 	isInWorkspaceRecommendation,
