@@ -41,7 +41,7 @@ describe("previewLanguageTagCommand", () => {
 	})
 
 	it("should register the command", () => {
-		expect(previewLanguageTagCommand.command).toBe("inlang.previewLanguageTag")
+		expect(previewLanguageTagCommand.command).toBe("sherlock.previewLanguageTag")
 		expect(previewLanguageTagCommand.title).toBe("Inlang: Change preview language tag")
 		expect(previewLanguageTagCommand.register).toBe(vscode.commands.registerCommand)
 	})

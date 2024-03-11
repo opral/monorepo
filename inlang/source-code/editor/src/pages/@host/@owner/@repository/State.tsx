@@ -93,6 +93,12 @@ type EditorStateSchema = {
 	setTextSearch: Setter<string>
 
 	/**
+	 * Reference link to from where the user came from.
+	 */
+	refLink: () => string
+	setRefLink: Setter<string>
+
+	/**
 	 * The filesystem is not reactive, hence setFsChange to manually
 	 * trigger re-renders.
 	 *
@@ -228,6 +234,11 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	>(params.getAll("lint") as MessageLintRule["id"][])
 	createEffect(() => {
 		setSearchParams({ key: "lint", value: filteredMessageLintRules() })
+	})
+
+	const [refLink, setRefLink] = createSignal<string>((params.get("ref") || "") as string)
+	createEffect(() => {
+		setSearchParams({ key: "ref", value: refLink() })
 	})
 
 	const [localStorage] = useLocalStorage() ?? []
@@ -536,6 +547,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					setFilteredIds,
 					textSearch,
 					setTextSearch,
+					refLink,
+					setRefLink,
 					fsChange,
 					setFsChange,
 					project,
@@ -632,7 +645,7 @@ export async function pushChanges(args: {
 				name: args.user.username,
 				email: args.user.email,
 			},
-			message: "inlang: update translations",
+			message: "Fink 🐦: update translations",
 		})
 	}
 
