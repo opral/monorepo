@@ -22,8 +22,6 @@ export function createMessageLintReportsQuery(
 	settings: () => ProjectSettings,
 	installedMessageLintRules: () => Array<InstalledMessageLintRule>,
 	resolvedModules: () => Awaited<ReturnType<typeof resolveModules>> | undefined,
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	hasWatcher: boolean
 ): InlangProject["query"]["messageLintReports"] {
 	// @ts-expect-error
 	const index = new ReactiveMap<MessageLintReport["messageId"], MessageLintReport[]>()
