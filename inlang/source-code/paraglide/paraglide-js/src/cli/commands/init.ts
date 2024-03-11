@@ -13,6 +13,7 @@ import { findRepoRoot, openRepository, type Repository } from "@lix-js/client"
 import nodeFsPromises from "node:fs/promises"
 import { pathExists } from "../../services/file-handling/exists.js"
 import { findPackageJson } from "../../services/environment/package.js"
+import * as Sherlock from "@inlang/cross-sell-sherlock"
 
 // TODO add a project UUID to the tele.groups internal #196
 // import { gitOrigin } from "../../services/telemetry/implementation.js"
@@ -144,26 +145,10 @@ export const maybeAddVsCodeExtension = async (args: { projectPath: string }, ctx
 		)
 		project.setSettings(settings)
 	}
-	let extensions: any = {}
-	try {
-		extensions = JSON5.parse(
-			await ctx.repo.nodeishFs.readFile("./.vscode/extensions.json", { encoding: "utf-8" })
-		)
-	} catch {
-		// continue
-	}
-	if (extensions.recommendations === undefined) {
-		extensions.recommendations = []
-	}
-	if (extensions.recommendations.includes("inlang.vs-code-extension") === false) {
-		extensions.recommendations.push("inlang.vs-code-extension")
-		if ((await pathExists("./.vscode", ctx.repo.nodeishFs)) === false) {
-			await ctx.repo.nodeishFs.mkdir("./.vscode")
-		}
-		await ctx.repo.nodeishFs.writeFile(
-			"./.vscode/extensions.json",
-			JSON.stringify(extensions, undefined, 2)
-		)
+
+	if (!(await Sherlock.isAdopted(ctx.repo.nodeishFs))) {
+		await Sherlock.add(ctx.repo.nodeishFs)
+
 		ctx.logger.success(
 			"Added the inlang Visual Studio Code extension (Sherlock) to the workspace recommendations."
 		)
