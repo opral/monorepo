@@ -1,5 +1,12 @@
 # @lix-js/client
 
+## 0.9.0
+
+### Minor Changes
+
+- 4837297: File locking for concurrent message updates through the load/store plugin api
+  Auto-generated human-IDs and aliases - only with experimental: { aliases: true }
+
 ## 0.8.0
 
 ### Minor Changes

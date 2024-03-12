@@ -1,5 +1,19 @@
 # inlang-vs-code-extension
 
+## 1.34.0
+
+### Minor Changes
+
+- 4837297: File locking for concurrent message updates through the load/store plugin api
+  Auto-generated human-IDs and aliases - only with experimental: { aliases: true }
+
+### Patch Changes
+
+- Updated dependencies [4837297]
+  - @inlang/sdk@0.27.0
+  - @lix-js/client@0.9.0
+  - @inlang/telemetry@0.3.14
+
 ## 1.33.0
 
 ### Minor Changes
