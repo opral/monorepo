@@ -1,13 +1,16 @@
 {
 	"name": "@inlang/settings-component",
 	"type": "module",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"publishConfig": {
 		"access": "public"
 	},
 	"description": "",
 	"exports": {
-		".": "./dist/index.cjs"
+		".": {
+			"import": "./dist/index.cjs",
+			"types": "./dist/index.d.ts"
+		}
 	},
 	"scripts": {
 		"build": "pnpm run format && esbuild src/index.ts --bundle --platform=node --target=node20 --outfile=dist/index.cjs && tsc --emitDeclarationOnly --declaration --outDir dist",
