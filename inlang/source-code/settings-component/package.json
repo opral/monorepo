@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/ui",
+	"name": "@inlang/settings-component",
 	"type": "module",
 	"version": "0.0.1",
 	"description": "",
@@ -24,7 +24,8 @@
 		"lit": "^3.1.2",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
-		"storybook": "^7.6.16"
+		"storybook": "^7.6.16",
+		"esbuild": "^0.20.0"
 	},
 	"dependencies": {
 		"@inlang/sdk": "workspace:^",
