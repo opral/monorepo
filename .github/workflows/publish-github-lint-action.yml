@@ -61,7 +61,7 @@ jobs:
           API_TOKEN_GITHUB: ${{ secrets.INLANG_BOT_TOKEN }}
         with:
           source_file: 'inlang/source-code/github-lint-action/action.yaml'
-          destination_repo: 'opral/i18n-action'
+          destination_repo: 'opral/ninja-i18n-action'
           user_email: 'hello@inlang.com'
           user_name: 'inlang-bot'
           commit_message: '[v${{ env.LINT_ACTION_PACKAGE_VERSION }}]: update action.yaml'
@@ -71,8 +71,8 @@ jobs:
         env:
           API_TOKEN_GITHUB: ${{ secrets.INLANG_BOT_TOKEN }}
         with:
-          source_file: 'inlang/source-code/github-lint-action/dist/index.js'
-          destination_repo: 'opral/i18n-action'
+          source_file: 'inlang/source-code/github-lint-action/dist/index.cjs'
+          destination_repo: 'opral/ninja-i18n-action'
           destination_folder: 'dist'
           user_email: 'hello@inlang.com'
           user_name: 'inlang-bot'

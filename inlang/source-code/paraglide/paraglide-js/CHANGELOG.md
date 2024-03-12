@@ -1,5 +1,11 @@
 # @inlang/paraglide-js
 
+## 1.2.8
+
+### Patch Changes
+
+- b0f1e908b: Prompt user for tech-stack when running `paraglide-js init` & recommend Adapters
+
 ## 1.2.7
 
 ### Patch Changes

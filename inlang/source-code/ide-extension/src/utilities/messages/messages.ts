@@ -331,7 +331,7 @@ export function getHtml(args: {
 						const messageId = collapsible.getAttribute('data-message-id');
 						const isHighlighted = collapsible.closest('.highlighted-section') !== null;
 						const sectionPrefix = isHighlighted ? 'highlighted' : 'all';
-						const storageKey = 'inlang.collapsibleState.' + sectionPrefix + '.' + messageId;
+						const storageKey = 'sherlock.collapsibleState.' + sectionPrefix + '.' + messageId;
 				
 						const storedState = localStorage.getItem(storageKey);
 						const content = collapsible.nextElementSibling;
@@ -364,7 +364,7 @@ export function getHtml(args: {
 
                 function initializeSearchFunctionality() {
                     const searchInput = document.getElementById('searchInput');
-                    const storedSearchValue = localStorage.getItem('inlang.searchValue') || '';
+                    const storedSearchValue = localStorage.getItem('sherlock.searchValue') || '';
                     searchInput.value = storedSearchValue;
 
                     // Apply filter based on stored value on load
@@ -372,7 +372,7 @@ export function getHtml(args: {
 
                     searchInput.addEventListener('input', () => {
                         const searchTerm = searchInput.value.toLowerCase();
-                        localStorage.setItem('inlang.searchValue', searchTerm);
+                        localStorage.setItem('sherlock.searchValue', searchTerm);
                         filterItems(searchTerm);
                     });
                 }
@@ -394,7 +394,7 @@ export function getHtml(args: {
 				function editMessage(messageId, languageTag) {
 					vscode.postMessage({
 						command: 'executeCommand',
-						commandName: 'inlang.editMessage',
+						commandName: 'sherlock.editMessage',
 						commandArgs: { messageId, languageTag },
 					});
 				}
@@ -402,7 +402,7 @@ export function getHtml(args: {
 				function openInEditor(messageId, selectedProjectPath) {
 					vscode.postMessage({
 						command: 'executeCommand',
-						commandName: 'inlang.openInEditor',
+						commandName: 'sherlock.openInEditor',
 						commandArgs: { messageId, selectedProjectPath },
 					});
 				}
@@ -411,7 +411,7 @@ export function getHtml(args: {
 					const decodedPosition = JSON.parse(decodeURIComponent(position));
 					vscode.postMessage({
 						command: 'executeCommand',
-						commandName: 'inlang.jumpToPosition',
+						commandName: 'sherlock.jumpToPosition',
 						commandArgs: { messageId, position: decodedPosition },
 					});
 				}

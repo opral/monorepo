@@ -1,11 +1,14 @@
 import * as vscode from "vscode"
 
-type SettingsProperty =
-	| "userId"
-	| "disableRecommendation"
-	| "disableConfigFileCreation"
-	| "disableConfigFileDeletion"
-	| "previewLanguageTag"
+const settingsProperty = [
+	"userId",
+	"disableRecommendation",
+	"disableConfigFileCreation",
+	"disableConfigFileDeletion",
+	"previewLanguageTag",
+] as const
+
+type SettingsProperty = (typeof settingsProperty)[number]
 
 /**
  * Updates a configuration setting with the specified value.
@@ -14,7 +17,7 @@ type SettingsProperty =
  * @returns {Promise<void>} - A Promise that resolves once the configuration property has been updated.
  */
 export const updateSetting = async (property: SettingsProperty, value: any): Promise<void> => {
-	await vscode.workspace.getConfiguration("inlang").update(property, value, true)
+	await vscode.workspace.getConfiguration("sherlock").update(property, value, true)
 }
 
 /**
@@ -25,9 +28,31 @@ export const updateSetting = async (property: SettingsProperty, value: any): Pro
  *
  */
 export const getSetting = async (property: SettingsProperty): Promise<any> => {
-	const value = vscode.workspace.getConfiguration("inlang").get(property)
+	// TODO: remove this migrate settings from inlang to sherlock after 01 April 2024
+	migrateSettingsFromInlangToSherlock()
+
+	const value = vscode.workspace.getConfiguration("sherlock").get(property)
 	if (value === undefined) {
 		throw new Error(`Could not find configuration property ${property}`)
 	}
 	return value
+}
+
+/**
+ * Migrates settings from the old inlang namespace to the new sherlock namespace.
+ */
+// TODO: remove this migrate settings from inlang to sherlock after 01 April 2024
+export const migrateSettingsFromInlangToSherlock = async () => {
+	if (vscode.workspace.getConfiguration("sherlock").get("userId")) {
+		return
+	}
+
+	const inlangSettings = vscode.workspace.getConfiguration("inlang")
+
+	for (const property of settingsProperty) {
+		const value = inlangSettings.get(property)
+		if (value !== undefined) {
+			await updateSetting(property, value)
+		}
+	}
 }
