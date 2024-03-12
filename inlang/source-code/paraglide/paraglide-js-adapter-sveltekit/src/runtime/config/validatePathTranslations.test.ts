@@ -72,4 +72,17 @@ describe("validatePathTranslations", () => {
 		const result = validatePathTranslations(pathTranslations, ["en", "de"])
 		expect(result.length).toBe(0)
 	})
+
+	it("doesn't complain if there are extra languages", () => {
+		const pathTranslations = {
+			"/about": {
+				en: "/about",
+				de: "/ueber-uns",
+				es: "/acerca-de",
+			},
+		}
+		// @ts-ignore
+		const result = validatePathTranslations(pathTranslations, ["en", "de"])
+		expect(result.length).toBe(0)
+	})
 })
