@@ -16,7 +16,7 @@ Make sure you have an inlang project set up in your repository. If you don't hav
 Add the following workflow file to your repository in this path `.github/workflows/ninja-i18n.yml`
 
 ```yml
-name: Test GitHub Actions Lint
+name: Ninja i18n action
 
 on:
   pull_request_target:
@@ -37,9 +37,10 @@ jobs:
 
       - name: Run Ninja i18n
         id: ninja-i18n
-        uses: opral/ninja-i18n@v1
+        uses: opral/ninja-i18n@v0.2.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
 ```
 
 ### Environmental Variables:

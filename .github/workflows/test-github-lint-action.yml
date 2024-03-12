@@ -1,4 +1,4 @@
-name: Test GitHub Actions Lint
+name: Ninja i18n action
 
 on:
   pull_request_target:
