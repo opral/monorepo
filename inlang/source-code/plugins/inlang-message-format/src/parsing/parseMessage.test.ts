@@ -1,7 +1,29 @@
 import { test, expect } from "vitest"
 import { parseMessage } from "./parseMessage.js"
+import type { Message } from "@inlang/sdk"
 
-test("it parse a variable reference", async () => {
+test("it parses a text-only message", async () => {
+	const parsed = parseMessage({
+		key: "test",
+		value: "Hello World!",
+		languageTag: "en",
+	})
+
+	expect(parsed).toStrictEqual({
+		id: "test",
+		alias: {},
+		selectors: [],
+		variants: [
+			{
+				languageTag: "en",
+				match: [],
+				pattern: [{ type: "Text", value: "Hello World!" }],
+			},
+		],
+	})
+})
+
+test("it parses a message with a variable reference", async () => {
 	const parsed = parseMessage({
 		key: "test",
 		value: "Hello {name}!",
@@ -24,4 +46,71 @@ test("it parse a variable reference", async () => {
 			},
 		],
 	})
+})
+
+test("parses a message with a match statement", () => {
+	const parsed = parseMessage({
+		key: "test",
+		value: "match {gender} when female {Hello actress} when * {Hello actor}",
+		languageTag: "en",
+	})
+
+	const message: Message = {
+		id: "test",
+		alias: {},
+		selectors: [
+			{
+				type: "VariableReference",
+				name: "gender",
+			},
+		],
+		variants: [
+			{ match: ["female"], languageTag: "en", pattern: [{ type: "Text", value: "Hello actress" }] },
+			{ match: ["*"], languageTag: "en", pattern: [{ type: "Text", value: "Hello actor" }] },
+		],
+	}
+
+	expect(parsed).toEqual(message)
+})
+
+test("it parses a message with multiple selectors", () => {
+	const parsed = parseMessage({
+		key: "test",
+		value:
+			"match {notifications} {gender} when 0 female {She has no notificactions} when * * {They have {notifications} notificactions}",
+		languageTag: "en",
+	})
+
+	const message: Message = {
+		id: "test",
+		alias: {},
+		selectors: [
+			{
+				type: "VariableReference",
+				name: "notifications",
+			},
+			{
+				type: "VariableReference",
+				name: "gender",
+			},
+		],
+		variants: [
+			{
+				match: ["0", "female"],
+				languageTag: "en",
+				pattern: [{ type: "Text", value: "She has no notificactions" }],
+			},
+			{
+				match: ["*", "*"],
+				languageTag: "en",
+				pattern: [
+					{ type: "Text", value: "They have " },
+					{ type: "VariableReference", name: "notifications" },
+					{ type: "Text", value: " notificactions" },
+				],
+			},
+		],
+	}
+
+	expect(parsed).toEqual(message)
 })
