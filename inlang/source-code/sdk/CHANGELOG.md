@@ -1,5 +1,22 @@
 # @inlang/sdk
 
+## 0.27.0
+
+### Minor Changes
+
+- 4837297: File locking for concurrent message updates through the load/store plugin api
+  Auto-generated human-IDs and aliases - only with experimental: { aliases: true }
+
+### Patch Changes
+
+- Updated dependencies [4837297]
+  - @inlang/project-settings@2.4.0
+  - @inlang/message@2.1.0
+  - @lix-js/client@0.9.0
+  - @inlang/message-lint-rule@1.4.5
+  - @inlang/plugin@2.4.8
+  - @inlang/module@1.2.8
+
 ## 0.26.5
 
 ### Patch Changes
