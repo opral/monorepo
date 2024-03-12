@@ -1,6 +1,9 @@
-name: 'ninja i18n action'
-description: 'This action checks for i18n issues within your PRs.'
-author: 'inlang'
+name: 'Ninja i18n'
+description: 'Automatic i18n checks, issue reports and correction workflow for your pull requests'
+author: 'opral'
+branding:
+  icon: 'globe'
+  color: 'gray-dark'
 
 runs:
   using: node20
