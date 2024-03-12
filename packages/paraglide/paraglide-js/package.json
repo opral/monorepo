@@ -51,7 +51,6 @@
 	},
 	"dependencies": {
 		"@inlang/detect-json-formatting": "workspace:*",
-		"@inlang/cross-sell-sherlock": "workspace:*",
 		"commander": "11.1.0",
 		"consola": "3.2.3",
 		"dedent": "1.5.1",
@@ -61,6 +60,7 @@
 	},
 	"devDependencies": {
 		"@inlang/env-variables": "workspace:*",
+		"@inlang/cross-sell-sherlock": "workspace:*",
 		"@inlang/sdk": "workspace:*",
 		"@inlang/language-tag": "workspace:*",
 		"@inlang/telemetry": "workspace:*",
