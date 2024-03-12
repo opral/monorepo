@@ -10,7 +10,7 @@ import { createSignal, createEffect } from "./solid.js"
 
 import type { OptStatus } from "./git/status-list.js"
 import { commit as lixCommit } from "./git/commit.js"
-import { statusList as lixStatus } from "./git/status-list.js"
+import { statusList as lixStatusList } from "./git/status-list.js"
 import isoGit from "../vendored/isomorphic-git/index.js"
 import { modeToFileType } from "./git/helpers.js"
 
@@ -60,6 +60,7 @@ export async function findRepoRoot(args: {
 export async function openRepository(
 	url: string,
 	args: {
+		// TODO add Type and documentation
 		author?: any
 		nodeishFs?: NodeishFilesystem
 		workingDirectory?: string
@@ -80,9 +81,8 @@ export async function openRepository(
 	const rawFs = args.nodeishFs || (await import("@lix-js/fs")).createNodeishMemoryFs()
 	const author = args.author
 
-	let debug: boolean
 	// eslint-disable-next-line prefer-const -- used for development
-	debug = args.debug || false
+	let debug: boolean = args.debug || false
 
 	if (
 		!url ||
@@ -92,7 +92,7 @@ export async function openRepository(
 	}
 
 	if (debug && typeof window !== "undefined") {
-		// @ts-ignore
+		// @ts-ignore -- for debup purose we expose the raw fs to the window object
 		window["rawFs"] = rawFs
 	}
 
@@ -213,7 +213,7 @@ export async function openRepository(
 			checkedOut.add(entry)
 		}
 
-		const res = await checkout({
+		const res = await isoGit.checkout({
 			fs: withProxy({
 				nodeishFs: rawFs,
 				verbose: debug,
@@ -243,7 +243,7 @@ export async function openRepository(
 		if (!experimentalFeatures.lazyClone) {
 			return
 		}
-		await checkout({
+		await isoGit.checkout({
 			fs: withProxy({
 				nodeishFs: rawFs,
 				verbose: debug,
@@ -315,7 +315,7 @@ export async function openRepository(
 	if (freshClone) {
 		console.info("Using lix for cloning repo")
 
-		await clone({
+		await isoGit.clone({
 			fs: withProxy({ nodeishFs: rawFs, verbose: debug, description: "clone" }),
 			http: makeHttpClient({
 				debug,
@@ -458,7 +458,7 @@ export async function openRepository(
 		const notIgnored = (
 			await Promise.all(
 				listing.map((entry) =>
-					isIgnored({ fs: rawFs, dir, filepath: entry }).then((ignored) => {
+					isoGit.isIgnored({ fs: rawFs, dir, filepath: entry }).then((ignored) => {
 						return { ignored, entry }
 					})
 				)
@@ -487,12 +487,12 @@ export async function openRepository(
 		sparseFilter?: (entry: { filename: string; type: "file" | "folder" }) => boolean
 		includeStatus?: OptStatus[]
 	}
-	async function statusList(statusArg?: StatusArgs): ReturnType<typeof lixStatus> {
-		return lixStatus({
+	async function statusList(statusArg?: StatusArgs): ReturnType<typeof lixStatusList> {
+		return lixStatusList({
 			fs: withProxy({
 				nodeishFs: rawFs,
 				verbose: debug,
-				description: "lixStatus",
+				description: "lixStatusList",
 			}),
 			dir,
 			cache,
@@ -503,11 +503,11 @@ export async function openRepository(
 		})
 	}
 
-	async function status(statusArg: string) {
-		if (typeof statusArg !== "string") {
+	async function status(filepath: string) {
+		if (typeof filepath !== "string") {
 			throw new Error("parameter must be a string")
 		}
-		const statusList = await lixStatus({
+		const statusList = await lixStatusList({
 			fs: withProxy({
 				nodeishFs: rawFs,
 				verbose: debug,
@@ -516,10 +516,10 @@ export async function openRepository(
 			dir,
 			cache,
 			sparseFilter: args.sparseFilter,
-			filepaths: [statusArg],
+			filepaths: [filepath],
 		})
 
-		const maybeStatusEntry: [string, string] = statusList[0] || [statusArg, "unknown"]
+		const maybeStatusEntry: [string, string] = statusList[0] || [filepath, "unknown"]
 		return maybeStatusEntry?.[1] as string
 	}
 
@@ -574,7 +574,7 @@ export async function openRepository(
 					intercept: delayedAction,
 				})
 
-				const remotes = await listRemotes({
+				const remotes = await isoGit.listRemotes({
 					fs: withProxypedFS,
 					dir,
 				})
@@ -594,7 +594,7 @@ export async function openRepository(
 				)
 			}
 
-			await checkout({
+			await isoGit.checkout({
 				fs: withProxy({
 					nodeishFs: rawFs,
 					verbose: debug,
@@ -640,7 +640,7 @@ export async function openRepository(
 				return { error: "could not get fork status for detached head" }
 			}
 
-			await addRemote({
+			await isoGit.addRemote({
 				dir,
 				remote: "upstream",
 				url: "https://" + parent.url,
@@ -648,7 +648,7 @@ export async function openRepository(
 			})
 
 			try {
-				await gitFetch({
+				await isoGit.fetch({
 					depth: 1,
 					singleBranch: true,
 					dir,
@@ -701,7 +701,7 @@ export async function openRepository(
 				return { error: compare.error || "could not diff repos on github" }
 			}
 
-			await gitFetch({
+			await isoGit.fetch({
 				depth: compare.data.behind_by + 1,
 				remote: "upstream",
 
@@ -788,12 +788,12 @@ export async function openRepository(
 				console.warn("using experimental commit for this repo.")
 				return lixCommit(commitArgs)
 			} else {
-				return isoCommit(commitArgs)
+				return isoGit.commit(commitArgs)
 			}
 		},
 
 		push() {
-			return push({
+			return isoGit.push({
 				fs: withProxy({
 					nodeishFs: rawFs,
 					verbose: debug,
@@ -816,7 +816,7 @@ export async function openRepository(
 				intercept: delayedAction,
 			})
 
-			const { fetchHead, fetchHeadDescription } = await gitFetch({
+			const { fetchHead, fetchHeadDescription } = await isoGit.fetch({
 				depth: 5, // TODO: how to handle depth with upstream? reuse logic from fork sync
 				fs: pullFs,
 				cache,
@@ -835,7 +835,7 @@ export async function openRepository(
 				throw new Error("could not fetch head")
 			}
 
-			await merge({
+			await isoGit.merge({
 				fs: pullFs,
 				cache,
 				dir,
@@ -877,7 +877,7 @@ export async function openRepository(
 		},
 
 		log(cmdArgs = {}) {
-			return log({
+			return isoGit.log({
 				fs: withProxy({
 					nodeishFs: rawFs,
 					verbose: debug,

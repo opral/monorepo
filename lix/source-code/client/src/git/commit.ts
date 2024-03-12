@@ -3,7 +3,7 @@ import {
 	TREE,
 	STAGE,
 	writeTree,
-	commit as doCommit,
+	commit as isoGitCommit,
 	type TreeEntry,
 } from "../../vendored/isomorphic-git/index.js"
 import { getDirname, getBasename } from "@lix-js/fs"
@@ -163,7 +163,7 @@ export async function commit({
 
 	const tree = await createTree("/", fileStates)
 
-	return doCommit({
+	return isoGitCommit({
 		cache,
 		fs,
 		dir,
