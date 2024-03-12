@@ -10,6 +10,8 @@ import { throttle } from "throttle-debounce"
 import childProcess from "node:child_process"
 import fs from "node:fs/promises"
 
+import { createRoot, createMemo } from "solid-js"
+
 import _debug from "debug"
 const debug = _debug("load-test")
 
@@ -82,9 +84,19 @@ export async function runLoadTest(
 		const logLintEvent = throttle(throttleEventLogs, (reports: any) => {
 			debug(`lint reports changed event: ${lintEvents}, length: ${reports.length}`)
 		})
-		project.query.messageLintReports.getAll.subscribe((reports) => {
-			lintEvents++
-			logLintEvent(reports)
+		// project.query.messageLintReports.getAll.subscribe((reports) => {
+		// 	lintEvents++
+		// 	logLintEvent(reports)
+		// })
+
+		createRoot(() => {
+			const getLintReports = createMemo(() => {
+				return project.query.messageLintReports.getAll()
+			})
+			setInterval(() => {
+				lintEvents++
+				logLintEvent(getLintReports())
+			}, 2000)
 		})
 	}
 
@@ -138,7 +150,7 @@ async function isMockRpcServerRunning(): Promise<boolean> {
 	return true
 }
 
-function causeString(error: any) {
+function causeString(error: any): string {
 	if (typeof error === "object" && error.cause) {
 		if (error.cause.errors?.length) return error.cause.errors.join(", ")
 		if (error.cause.code) return "" + error.cause.code

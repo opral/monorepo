@@ -12,6 +12,10 @@ import { lintSingleMessage } from "./lint/index.js"
 import { ReactiveMap } from "./reactivity/map.js"
 import { createRoot, createEffect } from "./reactivity/solid.js"
 
+import { throttle } from "throttle-debounce"
+import _debug from "debug"
+const debug = _debug("sdk:lintReports")
+
 /**
  * Creates a reactive query API for messages.
  */
@@ -19,7 +23,7 @@ export function createMessageLintReportsQuery(
 	messagesQuery: MessageQueryApi,
 	settings: () => ProjectSettings,
 	installedMessageLintRules: () => Array<InstalledMessageLintRule>,
-	resolvedModules: () => Awaited<ReturnType<typeof resolveModules>> | undefined,
+	resolvedModules: () => Awaited<ReturnType<typeof resolveModules>> | undefined
 ): InlangProject["query"]["messageLintReports"] {
 	// @ts-expect-error
 	const index = new ReactiveMap<MessageLintReport["messageId"], MessageLintReport[]>()
@@ -40,6 +44,14 @@ export function createMessageLintReportsQuery(
 	const messages = messagesQuery.getAll() as Message[]
 
 	const trackedMessages: Map<string, () => void> = new Map()
+
+	debug(`createMessageLintReportsQuery ${rulesArray?.length} rules, ${messages.length} messages`)
+
+	// TODO: don't throttle when no debug
+	let lintMessageCount = 0
+	const throttledLogLintMessage = throttle(2000, (messageId) => {
+		debug(`lintSingleMessage: ${lintMessageCount} id: ${messageId}`)
+	})
 
 	createEffect(() => {
 		const currentMessageIds = new Set(messagesQuery.includedMessageIds())
@@ -68,6 +80,8 @@ export function createMessageLintReportsQuery(
 								messages: messages,
 								message: message,
 							}).then((report) => {
+								lintMessageCount++
+								throttledLogLintMessage(messageId)
 								if (report.errors.length === 0 && index.get(messageId) !== report.data) {
 									index.set(messageId, report.data)
 								}
