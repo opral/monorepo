@@ -1,5 +1,14 @@
 # @inlang/plugin-json
 
+## 5.1.16
+
+### Patch Changes
+
+- 4837297: File locking for concurrent message updates through the load/store plugin api
+  Auto-generated human-IDs and aliases - only with experimental: { aliases: true }
+- Updated dependencies [4837297]
+  - @inlang/sdk@0.27.0
+
 ## 5.1.15
 
 ### Patch Changes

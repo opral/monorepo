@@ -1,5 +1,13 @@
 # @inlang/plugin
 
+## 2.4.8
+
+### Patch Changes
+
+- Updated dependencies [4837297]
+  - @inlang/project-settings@2.4.0
+  - @inlang/message@2.1.0
+
 ## 2.4.7
 
 ### Patch Changes
