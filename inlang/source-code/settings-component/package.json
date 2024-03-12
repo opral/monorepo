@@ -3,11 +3,13 @@
 	"type": "module",
 	"version": "0.0.1",
 	"description": "",
-	"main": "index.js",
+	"exports": {
+		".": "./dist/index.cjs"
+	},
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
-		"storybook": "storybook dev -p 6006",
-		"build-storybook": "storybook build"
+		"build": "pnpm run format && esbuild src/index.ts --bundle --platform=node --target=node20 --outfile=dist/index.cjs",
+		"format": "prettier --write **/*.ts",
+		"storybook": "storybook dev -p 6006"
 	},
 	"keywords": [],
 	"author": "",

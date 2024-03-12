@@ -12,6 +12,6 @@
 		"rootDir": "./src",
 		"resolveJsonModule": true
 	},
-	"exclude": ["**/*.stories.ts", "**/*.stories.js", "**/*.mdx"],
+	"exclude": ["**/*.stories.ts", "**/*.stories.js", "**/*.mdx", "dist"],
 	"references": []
 }
