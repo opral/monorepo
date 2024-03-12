@@ -205,6 +205,7 @@ export async function openRepository(
 			console.warn("checking out ", thisBatch)
 		}
 
+		// TODO: this has to be part of the checkout it self - to prevent race condition
 		for (const placeholder of thisBatch.filter((entry) => rawFs._isPlaceholder?.(entry))) {
 			await rawFs.rm(placeholder)
 		}
@@ -343,6 +344,7 @@ export async function openRepository(
 			.finally(() => {
 				pending = undefined
 			})
+			.then(() => checkOutPlaceholders())
 			.catch((newError: Error) => {
 				setErrors((previous) => [...(previous || []), newError])
 			})
@@ -368,6 +370,7 @@ export async function openRepository(
 			experimentalFeatures.lazyClone &&
 			rootObject &&
 			rootObject !== ".git" &&
+			// TODO we only support ./.gitignore for now and not .gitignore in subfolders
 			filename !== ".gitignore" &&
 			["readFile", "readlink", "writeFile"].includes(prop) &&
 			!checkedOut.has(rootObject) &&
@@ -389,6 +392,7 @@ export async function openRepository(
 			// 	checkedOut.add(filename)
 			// } else {
 
+			// TODO we will tackle this with the refactoring / our own implementation of checkout
 			nextBatch.push(filename)
 
 			// }
@@ -448,7 +452,7 @@ export async function openRepository(
 	async function emptyWorkdir() {
 		const statusResult = await statusList()
 		if (statusResult.length > 0) {
-			throw new Error("could not pull, uncommitted changes")
+			throw new Error("could not empty the workdir, uncommitted changes")
 		}
 
 		const listing = (await rawFs.readdir("/")).filter((entry) => {
@@ -470,6 +474,7 @@ export async function openRepository(
 		for (const toDelete of notIgnored) {
 			await rawFs.rm(toDelete, { recursive: true }).catch(() => {})
 
+			// remove it from isoGit's index as well
 			await isoGit.remove({
 				fs: rawFs,
 				// ref: args.branch,
@@ -701,10 +706,11 @@ export async function openRepository(
 				return { error: compare.error || "could not diff repos on github" }
 			}
 
+			// fetch from forks upstream
 			await isoGit.fetch({
 				depth: compare.data.behind_by + 1,
 				remote: "upstream",
-
+				cache: cache,
 				singleBranch: true,
 				dir,
 				ref: useBranchName,
@@ -712,9 +718,10 @@ export async function openRepository(
 				fs: forkFs,
 			})
 
-			await gitFetch({
+			// fetch from fors remote
+			await isoGit.fetch({
 				depth: compare.data.ahead_by + 1,
-
+				cache: cache,
 				singleBranch: true,
 				ref: useBranchName,
 				dir,
@@ -723,6 +730,7 @@ export async function openRepository(
 				fs: forkFs,
 			})
 
+			// finally try to merge the changes from upstream
 			let conflicts = false
 			try {
 				await merge({
@@ -876,6 +884,7 @@ export async function openRepository(
 			}
 		},
 
+		// experimental - it uses delayed actions
 		log(cmdArgs = {}) {
 			return isoGit.log({
 				fs: withProxy({

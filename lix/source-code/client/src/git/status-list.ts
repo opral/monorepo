@@ -195,8 +195,9 @@ export async function statusList({
 						stage && stage.type(),
 					])
 				} catch (error) {
-					// skip broken iteration into symlinks or broken directories, can probably be removed when memfs supports proper lstat/symlinks
-					return undefined
+					// skip iteration into broken symlinks or broken directories, can probably be removed when memfs supports proper lstat/symlinks
+					// eslint-disable-next-line unicorn/no-null -- in case of a broken directory we don't want to travese into it - compare(1)
+					return null
 				}
 
 				const [headType, workdirType, stageType] = types
@@ -210,7 +211,8 @@ export async function statusList({
 						type: isBlob ? "file" : "folder",
 					})
 				) {
-					return
+					// eslint-disable-next-line unicorn/no-null -- in case a folder is filtered using sparse - we wan't to skipp traversation of the tree
+					return null
 				}
 
 				// For now, bail on directories unless the file is also a blob in another tree
@@ -275,9 +277,10 @@ export async function statusList({
 					}
 				}
 
-				// [ 0, 2, 0] new, untracked  "*added"	file is untracked, not yet staged
+				// [ 0, 2, 0] new, untracked  "*untracked"	file is untracked, not yet staged
 				if (!entry.headOid && !entry.stageOid && entry.workdirOid) {
-					return [filepath, "*added", entry]
+					// we prefix untracked with * to allow to check for the asterix at the beginning to know if a file was not staged
+					return [filepath, "*untracked", entry]
 				}
 
 				// [ 0, 2, 2] added, stage  "added"	previously untracked file, staged
@@ -305,7 +308,7 @@ export async function statusList({
 					return [filepath, "*modified", entry]
 				}
 				// (not exposed as different from above in string)
-				// [ 1, 2, 3] modified, staged, with unstaged changes, "*modified"
+				// [ 1, 2, 3] modified, staged, with unstaged changes, "*modified2"
 				if (
 					entry.headOid &&
 					entry.workdirOid &&
@@ -314,7 +317,7 @@ export async function statusList({
 					entry.stageOid !== entry.workdirOid &&
 					entry.headOid !== entry.workdirOid
 				) {
-					return [filepath, "*modified", entry]
+					return [filepath, "*modified2", entry]
 				}
 
 				// [ 1, 2, 2] modified, staged "modified"	file has modifications, staged
