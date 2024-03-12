@@ -39,7 +39,7 @@ export async function runLoadTest(
 ) {
 	debug("load-test start" + (watchMode ? " - watchMode on, ctrl C to exit" : ""))
 
-	if (translate && !(await isServerRunning())) {
+	if (translate && !(await isMockRpcServerRunning())) {
 		console.error(
 			`Please start the mock rpc server with "MOCK_TRANSLATE=true pnpm --filter @inlang/server dev"`
 		)
@@ -114,11 +114,35 @@ async function generateMessageFile(messageCount: number) {
 	await fs.writeFile(messageFile, JSON.stringify(messages, undefined, 2), "utf-8")
 }
 
-async function isServerRunning(): Promise<boolean> {
+async function isMockRpcServerRunning(): Promise<boolean> {
 	try {
-		await exec(`curl ${mockServer}/ping`)
-		return true
+		const req = await fetch(`${mockServer}/ping`)
+		if (!req.ok) {
+			console.error(`Mock rpc server responded with status: ${req.status}`)
+			return false
+		}
+		const res = await req.text()
+		const expected = `${mockServer} MOCK_TRANSLATE\n`
+		if (res !== expected) {
+			console.error(
+				`Mock rpc server responded with: ${JSON.stringify(res)} instead of ${JSON.stringify(
+					expected
+				)}`
+			)
+			return false
+		}
 	} catch (error) {
+		console.error(`Mock rpc server error: ${error} ${causeString(error)}`)
 		return false
 	}
+	return true
+}
+
+function causeString(error: any) {
+	if (typeof error === "object" && error.cause) {
+		if (error.cause.errors?.length) return error.cause.errors.join(", ")
+		if (error.cause.code) return "" + error.cause.code
+		return JSON.stringify(error.cause)
+	}
+	return ""
 }
