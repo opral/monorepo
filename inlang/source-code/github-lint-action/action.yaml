@@ -1,7 +1,0 @@
-name: 'i18n lint action'
-description: 'This action checks for translation issues within your PRs.'
-author: 'inlang'
-
-runs:
-  using: node20
-  main: dist/index.cjs

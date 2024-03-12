@@ -17,5 +17,6 @@ export const pattern =
 
 export const LanguageTag = Type.String({
 	pattern: pattern,
+	description: "The language tag must be a valid IETF BCP 47 language tag.",
 	examples: ["en", "de", "en-US", "zh-Hans", "es-419"],
 })
