@@ -1,0 +1,9 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"paraglide_and_next_pages_router": "ParaglideJS + NextJS Pages Router",
+	"this_app_was_localised_with_paraglide": "Dies ist eine NextJS App mit dem Pages Router. Sie wurde mit Paraglide und dem Paraglide Adapter für NextJS lokalisiert.",
+	"switch_languages_in_top_right": "Sie können die Sprache oben rechts ändern",
+	"learn_more_at_following_links": "Erfahren sie mehr über Paraglide und NextJS mit den folgenden Links:",
+	"paraglide_documentation": "Paraglide Dokumentation",
+	"source_code": "Quell-Code"
+}

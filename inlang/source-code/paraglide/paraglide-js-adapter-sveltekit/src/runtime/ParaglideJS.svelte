@@ -11,13 +11,14 @@
 	import { page } from "$app/stores"
 	import { browser } from "$app/environment"
 	import { setContext } from "svelte"
-	import { PARAGLIDE_CONTEXT_KEY } from "../constants.js"
+	import { LANGUAGE_CHANGE_INVALIDATION_KEY, PARAGLIDE_CONTEXT_KEY } from "../constants.js"
 	import { base as maybe_relative_base } from "$app/paths"
 	import { isExternal } from "./utils/external.js"
 	import { getTranslatedPath } from "./path-translations/getTranslatedPath.js"
 	import { translatePath } from "./path-translations/translatePath.js"
 	import type { I18n } from "./adapter.js"
 	import { get } from "svelte/store"
+	import { invalidate } from "$app/navigation"
 
 	// The base path may be relative during SSR.
 	// To make sure it is absolute, we need to resolve it against the current page URL.
@@ -42,6 +43,11 @@
 	$: i18n.config.runtime.setLanguageTag(lang)
 	$: if (browser) document.documentElement.lang = lang
 	$: if (browser) document.documentElement.dir = i18n.config.textDirection[lang] ?? "ltr"
+
+	let numberOfLanugageChanges = 0
+	$: if(lang)numberOfLanugageChanges += 1;
+	$: if(browser && lang && numberOfLanugageChanges > 1) invalidate(LANGUAGE_CHANGE_INVALIDATION_KEY)
+	
 
 	function translateHref(href: string, hreflang: string | undefined): string {
 		const from = new URL(get(page).url)
@@ -82,6 +88,13 @@
 	}
 
 	setContext(PARAGLIDE_CONTEXT_KEY, { translateHref })
+
+
+    // In svelte 5 the #key block will re-render the second the key changes, 
+	// not after the all the updates in the Component are done.
+	// We need to make sure that changing the key happens last.
+	// See https://github.com/sveltejs/svelte/issues/10597
+	$: langKey = lang;
 </script>
 
 <svelte:head>
@@ -95,16 +108,20 @@
 					defaultLanguageTag: i18n.config.defaultLanguageTag,
 					prefixDefaultLanguage: i18n.config.prefixDefaultLanguage,
 				})}
-				{@const fullUrl = new URL(path, new URL($page.url))}
+
+				{@const href = $page.url.host === "sveltekit-prerender" 
+						? path 
+						: (new URL(path, new URL($page.url))).href 
+				}
 
 				<!-- Should be a fully qualified href, including protocol -->
-				<link rel="alternate" hreflang={lang} href={fullUrl.href} />
+				<link rel="alternate" hreflang={lang} href={href} />
 			{/each}
 		{/if}
 	{/if}
 </svelte:head>
 
 <!-- Trigger a Re-Render whenever the language changes -->
-{#key lang}
+{#key langKey}
 	<slot />
 {/key}

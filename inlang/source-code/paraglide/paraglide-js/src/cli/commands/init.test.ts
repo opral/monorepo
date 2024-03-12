@@ -344,7 +344,7 @@ describe("existingProjectFlow()", () => {
 })
 
 describe("maybeAddVsCodeExtension()", () => {
-	test("it should add the vscode extension if the user uses vscode", async () => {
+	test("it should add the Visual Studio Code extension (Sherlock) if the user uses vscode", async () => {
 		const fs = mockFiles({
 			"/project.inlang/settings.json": JSON.stringify(newProjectTemplate),
 		})
@@ -369,7 +369,7 @@ describe("maybeAddVsCodeExtension()", () => {
 			)
 		)
 	})
-	test("it should not add the vscode extension if the user doesn't use vscode", async () => {
+	test("it should not add the Visual Studio Code extension (Sherlock) if the user doesn't use vscode", async () => {
 		const fs = mockFiles({
 			"/project.inlang/settings.json": JSON.stringify(newProjectTemplate),
 		})

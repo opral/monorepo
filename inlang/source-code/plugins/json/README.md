@@ -114,7 +114,7 @@ An array of strings that are used to ignore certain files. The strings are match
 
 The message IDs are sorted in the order in which they appear in the sourceLanguage file. The nesting or flattening of IDs is detected on a file-by-file basis. If the sourceLanguage file contains nested IDs, the plugin will also create nested IDs in the targetLanguage files. If the sourceLanguage file contains flattened IDs, the plugin will also create flattened IDs in the targetLanguage files.
 
-# Supercharge your i18n workflow by installing the Inlang VS Code extension
+# Supercharge your i18n workflow by installing the Inlang Visual Studio Code extension (Sherlock)
 
 The plugin can be used with the [IDE extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) to extract keys from your code, display inline annotations, have quality checks with lint rules & more. There are only 2 steps to get started:
 
@@ -127,7 +127,7 @@ The plugin can be used with the [IDE extension](https://inlang.com/m/r7kp499g/ap
 
 ## Pricing 
 
-<doc-dev-tool-pricing></doc-dev-tool-pricing>
+<doc-pricing></doc-pricing>
 
 # Contributing
 

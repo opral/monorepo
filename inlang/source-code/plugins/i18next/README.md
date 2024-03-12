@@ -87,7 +87,7 @@ This setting is optional and should only be used if the file name of your source
 }
 ```
 
-# Install the Inlang VS Code extension to supercharge your i18n workflow
+# Install the Inlang Visual Studio Code extension (Sherlock) to supercharge your i18n workflow
 
 The plugin automatically informs the [IDE extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) how to extract keys and namespaces from your code in order to display inline annotations. A quick run through of the most important features can be found [here (loom)](https://www.loom.com/share/68bc13eceb454a8fa69a7cfec5569b8a). Install: [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension).
 
@@ -126,7 +126,7 @@ Read the [jsDelivr documentation](https://www.jsdelivr.com/?docs=gh) on importin
 
 ## Pricing 
 
-<doc-dev-tool-pricing></doc-dev-tool-pricing>
+<doc-pricing></doc-pricing>
 
 ---
 
