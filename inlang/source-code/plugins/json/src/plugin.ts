@@ -175,6 +175,7 @@ const addVariantToMessages = (
 		// message does not exist
 		const message: Message = {
 			id: key,
+			alias: {},
 			selectors: [],
 			variants: [],
 		}

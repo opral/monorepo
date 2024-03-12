@@ -70,7 +70,9 @@ describe("loadMessages", () => {
 			id: "plugin.namespace.placeholder",
 			description: { en: "My plugin description" },
 			displayName: { en: "My plugin" },
-			loadMessages: async () => [{ id: "test", expressions: [], selectors: [], variants: [] }],
+			loadMessages: async () => [
+				{ id: "test", alias: {}, expressions: [], selectors: [], variants: [] },
+			],
 		}
 
 		const resolved = await resolvePlugins({
@@ -84,7 +86,7 @@ describe("loadMessages", () => {
 				settings: {} as any,
 				nodeishFs: {} as any,
 			})
-		).toEqual([{ id: "test", expressions: [], selectors: [], variants: [] }])
+		).toEqual([{ id: "test", alias: {}, expressions: [], selectors: [], variants: [] }])
 	})
 
 	it("should collect an error if function is defined twice in multiple plugins", async () => {

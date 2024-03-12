@@ -127,8 +127,12 @@ export function createMessageWebviewProvider(args: {
 				).flat()
 
 				const highlightedMessages = matchedMessages
+					// resolve messages from id or alias
 					.map((message) => {
-						return state().project.query.messages.get({ where: { id: message.messageId } })
+						return (
+							state().project.query.messages.get({ where: { id: message.messageId } }) ??
+							state().project.query.messages.getByDefaultAlias(message.messageId)
+						)
 					})
 					.filter((message): message is Message => message !== undefined)
 				const highlightedMessagesHtml =

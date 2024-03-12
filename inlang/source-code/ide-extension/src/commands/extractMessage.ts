@@ -80,6 +80,7 @@ export const extractMessageCommand = {
 
 		const message: Message = {
 			id: selectedExtractOption.messageId,
+			alias: {},
 			selectors: [],
 			variants: [
 				{

@@ -28,6 +28,8 @@ services:
     runtime: node
     region: frankfurt
     plan: starter
+    # PR preview deployments use the shared production git-proxy
+    # This disables branch previews for the git-proxy
     branch: main
     buildCommand: pnpm install && pnpm run build
     startCommand: pnpm --filter @lix-js/server production
