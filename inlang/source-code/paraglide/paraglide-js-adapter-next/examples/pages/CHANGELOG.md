@@ -1,5 +1,12 @@
 # @inlang/paraglide-js-adapter-next-example-pages
 
+## 0.2.6
+
+### Patch Changes
+
+- Updated dependencies [45975c0]
+  - @inlang/paraglide-js@1.3.2
+
 ## 0.2.5
 
 ### Patch Changes
