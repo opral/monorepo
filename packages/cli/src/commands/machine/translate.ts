@@ -2,7 +2,7 @@
 import { Command } from "commander"
 import { rpc } from "@inlang/rpc"
 import { getInlangProject } from "../../utilities/getInlangProject.js"
-import { log } from "../../utilities/log.js"
+import { log, logError } from "../../utilities/log.js"
 import { type InlangProject, ProjectSettings, Message } from "@inlang/sdk"
 import prompts from "prompts"
 import { projectOption } from "../../utilities/globalFlags.js"
@@ -40,7 +40,7 @@ export const translate = new Command()
 			const project = await getInlangProject({ projectPath: args.project })
 			await translateCommandAction({ project })
 		} catch (error) {
-			log.error(error)
+			logError(error)
 		}
 	})
 
@@ -53,6 +53,7 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 			log.error(`No inlang project found`)
 			return
 		}
+		const experimentalAliases = args.project.settings().experimental?.aliases
 
 		const allLanguageTags = [...projectConfig.languageTags, projectConfig.sourceLanguageTag]
 
@@ -106,20 +107,24 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 
 		const rpcTranslate = async (id: Message["id"]) => {
 			const toBeTranslatedMessage = args.project.query.messages.get({ where: { id } })!
+			const logId =
+				`"${id}"` +
+				(experimentalAliases ? ` (alias "${toBeTranslatedMessage.alias.default ?? ""}")` : "")
+
 			const { data: translatedMessage, error } = await rpc.machineTranslateMessage({
 				message: toBeTranslatedMessage,
 				sourceLanguageTag,
 				targetLanguageTags,
 			})
 			if (error) {
-				logs.push(() => log.error(`Couldn't translate message "${id}": ${error}`))
+				logs.push(() => log.error(`Couldn't translate message ${logId}: ${error}`))
 				return
 			} else if (
 				translatedMessage &&
 				translatedMessage?.variants.length > toBeTranslatedMessage.variants.length
 			) {
 				args.project.query.messages.update({ where: { id: id }, data: translatedMessage! })
-				logs.push(() => log.info(`Machine translated message "${id}"`))
+				logs.push(() => log.info(`Machine translated message ${logId}`))
 			}
 			bar.increment()
 		}
@@ -133,12 +138,9 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 			log()
 		}
 
-		// https://github.com/opral/monorepo/issues/1846
-		// https://github.com/opral/monorepo/issues/1968
-		await new Promise((resolve) => setTimeout(resolve, 8002))
 		// Log the message counts
 		log.success("Machine translate complete.")
 	} catch (error) {
-		log.error(error)
+		logError(error)
 	}
 }

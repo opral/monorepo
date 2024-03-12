@@ -290,6 +290,7 @@ describe("saveMessage", () => {
 		const messages: Message[] = [
 			{
 				id: "test",
+				alias: {},
 				selectors: [],
 				variants: [
 					{
@@ -326,6 +327,7 @@ describe("saveMessage", () => {
 		const messages: Message[] = [
 			{
 				id: "common:test",
+				alias: {},
 				selectors: [],
 				variants: [
 					{
@@ -342,6 +344,7 @@ describe("saveMessage", () => {
 			},
 			{
 				id: "common:test2",
+				alias: {},
 				selectors: [],
 				variants: [
 					{
@@ -561,6 +564,7 @@ describe("formatting", () => {
 		const reference: Message[] = [
 			{
 				id: "common:test.",
+				alias: {},
 				selectors: [],
 				variants: [
 					{
@@ -577,6 +581,7 @@ describe("formatting", () => {
 			},
 			{
 				id: "common:test.test",
+				alias: {},
 				selectors: [],
 				variants: [
 					{
@@ -626,6 +631,7 @@ describe("formatting", () => {
 		const reference: Message[] = [
 			{
 				id: "common:a..b",
+				alias: {},
 				selectors: [],
 				variants: [
 					{
@@ -642,6 +648,7 @@ describe("formatting", () => {
 			},
 			{
 				id: "common:c.",
+				alias: {},
 				selectors: [],
 				variants: [
 					{
@@ -747,6 +754,7 @@ describe("formatting", () => {
 
 		messages.push({
 			id: "test.test",
+			alias: {},
 			selectors: [],
 			variants: [
 				{
@@ -814,6 +822,7 @@ describe("roundTrip", () => {
 		}
 		const newMessage: Message = {
 			id: "test2",
+			alias: {},
 			selectors: [],
 			variants: [variant],
 		}
@@ -856,6 +865,7 @@ describe("roundTrip", () => {
 		const reference: Message[] = [
 			{
 				id: "common:test",
+				alias: {},
 				selectors: [],
 				variants: [
 					{

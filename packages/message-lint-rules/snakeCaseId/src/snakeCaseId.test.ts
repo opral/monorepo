@@ -6,6 +6,7 @@ import { snakeCaseId } from "./snakeCaseId.js"
 
 const messageValid: Message = {
 	id: "message_with_valid_id",
+	alias: {},
 	selectors: [],
 	variants: [
 		{ languageTag: "en", match: [], pattern: [] },
@@ -15,6 +16,7 @@ const messageValid: Message = {
 
 const messageInvalid: Message = {
 	id: "messageWithInvalidId",
+	alias: {},
 	selectors: [],
 	variants: [
 		{ languageTag: "en", match: [], pattern: [] },

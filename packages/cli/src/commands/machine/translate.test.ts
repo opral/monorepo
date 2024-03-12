@@ -73,7 +73,8 @@ test.runIf(process.env.GOOGLE_TRANSLATE_API_KEY)(
 				}
 			}
 		}
-	}
+	},
+	{ timeout: 10000 }
 )
 
 test.runIf(process.env.GOOGLE_TRANSLATE_API_KEY)(
@@ -82,6 +83,7 @@ test.runIf(process.env.GOOGLE_TRANSLATE_API_KEY)(
 		const exampleMessages: Message[] = [
 			{
 				id: "a",
+				alias: {},
 				selectors: [],
 				variants: [
 					{
@@ -144,11 +146,19 @@ test.runIf(process.env.GOOGLE_TRANSLATE_API_KEY)(
 		const messages = project.query.messages.getAll()
 
 		expect(messages[0]?.variants.length).toBe(2)
-		expect(messages[0]?.variants[1]?.languageTag).toBe("de")
-		expect(
-			messages[0]?.variants[1]?.pattern.some(
-				(value) => value.type === "VariableReference" && value.name === "username"
-			)
-		).toBeTruthy()
-	}
+		expect(messages[0]?.variants.map((variant) => variant.languageTag).sort()).toStrictEqual([
+			"de",
+			"en",
+		])
+
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- we expected the message to exist earlier
+		for (const variant of messages[0]!.variants) {
+			expect(
+				variant.pattern.some(
+					(value) => value.type === "VariableReference" && value.name === "username"
+				)
+			).toBeTruthy()
+		}
+	},
+	{ timeout: 10000 }
 )
