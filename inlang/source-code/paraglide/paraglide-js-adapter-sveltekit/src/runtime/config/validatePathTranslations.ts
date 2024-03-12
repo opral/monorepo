@@ -50,7 +50,7 @@ export function validatePathTranslations<T extends string>(
 
 		//Check that all languages are translated
 		const translatedLanguages = new Set(Object.keys(translations))
-		if (!setsEqual(expectedLanguages, translatedLanguages)) {
+		if (!isSubset(expectedLanguages, translatedLanguages)) {
 			const missingLanguages = new Set(expectedLanguages)
 			for (const lang of translatedLanguages) {
 				missingLanguages.delete(lang as T)
@@ -69,6 +69,13 @@ export function validatePathTranslations<T extends string>(
 
 function isValidPath(maybePath: string): maybePath is `/${string}` {
 	return maybePath.startsWith("/")
+}
+
+function isSubset<T>(a: Set<T>, b: Set<T>): boolean {
+	for (const value of a) {
+		if (!b.has(value)) return false
+	}
+	return true
 }
 
 function getParams(path: string): Set<string> {
