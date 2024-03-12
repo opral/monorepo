@@ -1,5 +1,11 @@
 # @inlang/github-lint-action
 
+## 0.2.1
+
+### Patch Changes
+
+- 3954ed987: - update README.md
+
 ## 0.2.0
 
 ### Minor Changes

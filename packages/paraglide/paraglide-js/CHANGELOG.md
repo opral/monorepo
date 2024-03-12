@@ -1,5 +1,13 @@
 # @inlang/paraglide-js
 
+## 1.2.9
+
+### Patch Changes
+
+- a99e35fee: use `@inlang/cross-sell-sherlock` during vscode extension initialization
+- Updated dependencies [a99e35fee]
+  - @inlang/cross-sell-sherlock@0.0.2
+
 ## 1.2.8
 
 ### Patch Changes
