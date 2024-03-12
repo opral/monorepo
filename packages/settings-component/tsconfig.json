@@ -1,0 +1,17 @@
+{
+	"extends": "../tsconfig.base.json",
+	"include": ["src/**/*"],
+	"compilerOptions": {
+		"lib": ["ESNext", "DOM"],
+		"declaration": true,
+		"declarationMap": true,
+		"experimentalDecorators": true,
+		"useDefineForClassFields": false,
+		"types": [],
+		"outDir": "./dist",
+		"rootDir": "./src",
+		"resolveJsonModule": true
+	},
+	"exclude": ["**/*.stories.ts", "**/*.stories.js", "**/*.mdx", "dist"],
+	"references": []
+}
