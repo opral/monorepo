@@ -198,8 +198,7 @@ export const Gitfloat = () => {
 			return
 		}
 		if (refLink().includes("ninja-")) {
-			return `https://github.com/${repoInfo?.parent?.fullName}/pull/${refLink()
-				.replace("ninja-", "")}`
+			return `https://github.com/${refLink().replace("ninja-", "")}`
 		}
 		return `https://github.com/${repoInfo?.parent?.fullName}/compare/${currentBranch()}...${
 			routeParams().owner
