@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.33.0
+
+### Minor Changes
+
+- fee938e1c: update variables to branding under the hood
+
 ## 1.32.9
 
 ### Patch Changes

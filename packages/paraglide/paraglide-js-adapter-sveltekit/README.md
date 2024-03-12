@@ -48,7 +48,7 @@ export default defineConfig({
 	plugins: [
 		paraglide({
 			project: "./project.inlang",
-			outdir: "./src/paraglide",
+			outdir: "./src/lib/paraglide",
 		}),
 		sveltekit(),
 	],
@@ -66,7 +66,7 @@ Create a file somewhere, for example `src/lib/i18n.js` and add the following cod
 
 ```js
 import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
-import * as runtime from "$paraglide/runtime.js"
+import * as runtime from "$lib/paraglide/runtime.js"
 
 export const i18n = createI18n(runtime);
 ```
@@ -147,7 +147,7 @@ If you have routes that you don't want to translate, you can exclude them by pas
 
 ```js
 import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
-import * as runtime from "../paraglide/runtime.js"
+import * as runtime from "$lib/paraglide/runtime.js"
 
 export const i18n = createI18n(runtime, {
 	exclude: ["/admin", "/login", /^\/user\/\d+$/],
@@ -172,14 +172,16 @@ Setting this up is easy with the `pathnames` option. Specify it duting initialis
 
 ```js
 import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
-import * as runtime from "../paraglide/runtime.js"
+import * as runtime from "$lib/paraglide/runtime.js"
 
 export const i18n = createI18n(runtime, {
-	"/about" : {
-		en: "/about",
-		de: "/uber-uns",
-		fr: "/a-propos",
-	},
+	pathnames: {
+		"/about" : {
+			en: "/about",
+			de: "/uber-uns",
+			fr: "/a-propos",
+		},
+	}
 })
 ```
 
@@ -191,14 +193,16 @@ You can also use parameters in your translations. This is useful for pages that 
 
 ```js
 import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
-import * as runtime from "../paraglide/runtime.js"
+import * as runtime from "$lib/paraglide/runtime.js"
 
 export const i18n = createI18n(runtime, {
-	"/user/[username]" : {
-		en: "/user/[username]",
-		de: "/benutzer/[username]",
-		fr: "/utilisateur/[username]",
-	},
+	pathnames: {
+		"/user/[username]" : {
+			en: "/user/[username]",
+			de: "/benutzer/[username]",
+			fr: "/utilisateur/[username]",
+		},
+	}
 })
 ```
 
@@ -210,12 +214,14 @@ For convenience, you can also pass a message-function as the value of the pathna
 
 ```js
 import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
-import * as runtime from "../paraglide/runtime.js"
-import * as m from "../paraglide/messages.js"
+import * as runtime from "$lib/paraglide/runtime.js"
+import * as m from "$lib/paraglide/messages.js"
 
 export const i18n = createI18n(runtime, {
-	// do not call the function - pass a reference
-	"/about" : m.about_path
+	pathnames: {
+		// do not call the function - pass a reference
+		"/about" : m.about_path
+	}
 })
 ```
 
@@ -300,7 +306,7 @@ We can use this to create a language switcher that links to the current page in 
 
 ```svelte
 <script>
-	import { availableLanguageTags } from "../paraglide/runtime.js"
+	import { availableLanguageTags } from "$lib/paraglide/runtime.js"
 	import { i18n } from '$lib/i18n.js'
 	import { page } from '$app/stores'
 </script>
@@ -334,7 +340,7 @@ Setting the text-direction correctly is very important. By default, Paragldie wi
 
 ```js
 import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
-import * as runtime from "../paraglide/runtime.js"
+import * as runtime from "$lib/paraglide/runtime.js"
 
 export const i18n = createI18n(runtime, {
 	textDirection: {
@@ -365,7 +371,7 @@ Here are some strategies to avoid cross-talk during loading:
 By default, paraglide makes the language of the current request available in `locals.paraglide.lang`. You can explicitly specify which langauge a message should be in by passing in the language tag as an argument.
 
 ```ts
-import * as m from "../paraglide/messages.js"
+import * as m from "$lib/paraglide/messages.js"
 
 export async function load({ locals }) {
   const translatedText = m.some_message({ ...message_params }, { languageTag: locals.paraglide.lang })
@@ -393,7 +399,7 @@ export async function load({ depends }) {
 Because we are using a Preprocessor for link localisation there are a few caveats to be aware of: 
 
 1. Links in the same Layout Component as `<ParagldieJS>` will not be translated. 
-2. Using a `{...speread}` operator on an element will cause the preprocessor to place all props on that element into one giant `{...spread}`. If you are using proxies that may cause issues.
+2. Using a `{...spread}` operator on an element will cause the preprocessor to place all props on that element into one giant `{...spread}`. If you are using proxies that may cause issues.
 3. If you are using a function-call as the value to `hreflang` the function will be called twice per render. If it has side-effects this may cause issues.
 
 ### Using messages in `+layout.svelte`
