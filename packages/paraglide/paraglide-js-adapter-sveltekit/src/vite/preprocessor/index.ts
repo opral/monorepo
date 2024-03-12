@@ -46,6 +46,15 @@ export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
 			//dont' process components owned by the framework
 			if (filename.includes(".svelte-kit")) return NOOP
 
+			if (
+				content.includes("<ParaglideJS") &&
+				content.match(/<a\b[^>]*>.*?<\/a\s*>|<a\b[^>]*\/>/g)
+			) {
+				console.warn(
+					"[paraglide] `<a>` tags in the same component as `<ParaglideJS>` won't be translated.\nConsider moving it into another component."
+				)
+			}
+
 			//Run quick checks to see if preprocessing should be applied - skip parsing if not
 			if (!shouldApply(content, TRANSLATIONS)) return NOOP
 
