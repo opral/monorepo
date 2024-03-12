@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/plugin-message-format",
-	"version": "2.1.0",
+	"version": "2.1.1",
 	"type": "module",
 	"exports": {
 		"./storage-schema": "./src/storageSchema.ts"

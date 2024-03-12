@@ -1,5 +1,13 @@
 # @inlang/message-lint-rule-identical-pattern
 
+## 1.5.5
+
+### Patch Changes
+
+- 4837297: File locking for concurrent message updates through the load/store plugin api
+  Auto-generated human-IDs and aliases - only with experimental: { aliases: true }
+  - @inlang/message-lint-rule@1.4.5
+
 ## 1.5.4
 
 ### Patch Changes

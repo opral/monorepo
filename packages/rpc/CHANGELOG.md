@@ -1,5 +1,19 @@
 # @inlang/rpc
 
+## 0.3.0
+
+### Minor Changes
+
+- 4837297: File locking for concurrent message updates through the load/store plugin api
+  Auto-generated human-IDs and aliases - only with experimental: { aliases: true }
+
+### Patch Changes
+
+- Updated dependencies [4837297]
+  - @inlang/message@2.1.0
+  - @inlang/sdk@0.27.0
+  - @inlang/marketplace-registry@1.5.6
+
 ## 0.2.14
 
 ### Patch Changes

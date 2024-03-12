@@ -4,6 +4,14 @@
 
 ### Patch Changes
 
+- Updated dependencies [4837297]
+  - @lix-js/client@0.9.0
+  - @lix-js/server@null
+
+## null
+
+### Patch Changes
+
 - @lix-js/server@null
 
 ## null

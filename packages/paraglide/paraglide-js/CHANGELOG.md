@@ -1,5 +1,17 @@
 # @inlang/paraglide-js
 
+## 1.3.0
+
+### Minor Changes
+
+- 4970afc: paraglide deprecate aliases
+- 4837297: File locking for concurrent message updates through the load/store plugin api
+  Auto-generated human-IDs and aliases - only with experimental: { aliases: true }
+
+### Patch Changes
+
+- @inlang/cross-sell-sherlock@0.0.2
+
 ## 1.2.9
 
 ### Patch Changes
