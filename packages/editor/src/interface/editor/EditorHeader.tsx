@@ -37,7 +37,7 @@ function EditorHeader() {
 		<>
 			<header class="sticky top-0 left-0 right-0 z-[100] w-full bg-transparent bg-background py-3.5 px-4 border-b border-surface-200">
 				<div class="w-full h-full relative z-10 bg-background max-w-7xl mx-auto flex flex-row justify-between sm:static">
-					<nav class="max-w-[1248px] w-full mx-auto -mt-[0.8px] -mb-[1.5px]">
+					<nav class="max-w-[1248px] w-full mx-auto">
 						<div class="flex items-center">
 							<a
 								href={import.meta.env.PROD ? "https://inlang.com" : "http://localhost:3000"}
@@ -73,7 +73,7 @@ function EditorHeader() {
 							<div class="w-full content-center">
 								<div
 									class={
-										"hidden md:flex justify-end items-center gap-8 transition-[margin] duration-200 " +
+										"hidden md:flex justify-end items-center gap-8 transition-[margin] duration-200 -my-1 " +
 										(user()?.isLoggedIn && "mr-16")
 									}
 								>

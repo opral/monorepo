@@ -122,7 +122,7 @@ export function PatternEditor(props: {
 					.map((variableReference) => variableReference) as VariableReference[]
 			)
 		}
-		setPreviousContent(currentJSON().content[0].content)
+		setPreviousContent(currentJSON().content)
 
 		document.addEventListener("focusin", handleLineItemFocusIn)
 		return () => {
@@ -143,9 +143,9 @@ export function PatternEditor(props: {
 
 	createEffect(
 		on(currentJSON, () => {
-			if (JSON.stringify(currentJSON().content[0].content) !== JSON.stringify(previousContent())) {
+			if (JSON.stringify(currentJSON().content) !== JSON.stringify(previousContent())) {
 				autoSave()
-				setPreviousContent(currentJSON().content[0].content)
+				setPreviousContent(currentJSON().content)
 				setHasChanges((prev) => {
 					const hasChanged =
 						JSON.stringify(referencePattern()) !== JSON.stringify(newPattern()) &&

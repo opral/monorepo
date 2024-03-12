@@ -1,15 +1,15 @@
-[<img width="256px" height="auto" alt="VSCode install badge" src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/vscode-install-badge.svg" />](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension)
+[<img width="256px" height="auto" alt="Visual Studio Code install badge" src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/vscode-install-badge.svg" />](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension)
 
-<doc-image src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-extension-cover-small.png" alt="inlang VS Code extension header image"></doc-image>
+<doc-image src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/sherlock-cover-small.png" alt="Visual Studio Code extension (Sherlock) header image"></doc-image>
 
-# Superchange your i18n dev workflow
+# 🕵️‍♂️ i18n inspector for VS Code
 
 #### Used by developers from:
 <doc-proof organisations="calcom, appflowy, openassistant, listmonk, jitsi"></doc-proof>
 
 <br />
 
-Supercharge i18n within VS Code with powerful tools designed to streamline the translation process. Visualize, edit, and lint translated strings effortlessly using Inline Decorations & Hover Support. Extract new strings with a simple click, making localization tasks more intuitive and efficient.
+Inspect i18n within VS Code with powerful tools designed to streamline the translation process. Visualize, edit, and lint translated strings effortlessly using Inline Decorations & Hover Support. Extract new strings with a simple click, making localization tasks more intuitive and efficient.
 
 [Inlang](https://inlang.com) is a powerful [open-source](https://github.com/opral/monorepo/tree/main/inlang/source-code/ide-extension) extension for [Visual Studio Code](https://code.visualstudio.com/)
 
@@ -28,9 +28,9 @@ View translations within your code, extract new strings with a simple click, and
 You can have multiple projects in your repository. By using the inlang tab, it's easy to switch between projects. Whenever you change the source text, translations from the resource files will be automatically updated. Additionally, the tab menu provides a quick overview of any project errors in the setup.
 
 <doc-features>
-  <doc-feature text-color="#000000" color="#F7FAFC" title="Monorepo support" image="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-monorepo-small.png"></doc-feature>
-  <doc-feature text-color="#000000" color="#F7FAFC" title="Update Translations" image="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-update-small.png"></doc-feature>
-  <doc-feature text-color="#000000" color="#F7FAFC" title="Transparent Errors" image="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-errors-small.png"></doc-feature>
+  <doc-feature text-color="#000000" color="#F7FAFC" title="Monorepo support" image="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/sherlock-monorepo.png"></doc-feature>
+  <doc-feature text-color="#000000" color="#F7FAFC" title="Update Translations" image="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/sherlock-update.png"></doc-feature>
+  <doc-feature text-color="#000000" color="#F7FAFC" title="Transparent Errors" image="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/sherlock-errors.png"></doc-feature>
 </doc-features>
 
 ## Usage
@@ -80,4 +80,4 @@ You can fully customize this behavior.
 
 ## Pricing 
 
-<doc-dev-tool-pricing></doc-dev-tool-pricing>
+<doc-pricing heading="The core features are free for all users." content="While we may introduce enterprise features with associated costs due to API integrations, these enhancements are designed to meet the needs of larger companies. Our commitment remains to provide essential tools for developers, empowering them to address the challenges of international expansion for free."></doc-pricing>

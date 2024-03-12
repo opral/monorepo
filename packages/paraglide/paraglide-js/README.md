@@ -46,9 +46,9 @@ This will:
 Adapters are framework specific integrations for Paraglide. If you are using a framework, using an adapter is recommended (but not required). If you don't use a framework, you can skip this step.
 
 <doc-links>
+	<doc-link title="Adapter for NextJS" icon="tabler:brand-nextjs" href="https://inlang.com/m/osslbuzt/library-inlang-paraglideJsAdapterNextJs" description="Go to Library"></doc-link>
     <doc-link title="Adapter for SvelteKit" icon="simple-icons:svelte" href="https://inlang.com/m/dxnzrydw/library-inlang-paraglideJsAdapterSvelteKit" description="Go to Library"></doc-link>
     <doc-link title="Adapter for SolidJS" icon="tabler:brand-solidjs" href="https://inlang.com/m/n860p17j/library-inlang-paraglideJsAdapterSolidStart" description="Go to Library"></doc-link>
-    <doc-link title="Adapter for NextJS" icon="tabler:brand-nextjs" href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next" description="Go to GitHub example"></doc-link>
     <doc-link title="Adapter for Vite" icon="tabler:brand-vite" href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-vite" description="Go to GitHub"></doc-link>
 </doc-links>
 
@@ -369,4 +369,4 @@ Paraglide JS is part of the inlang ecosystem, so it integrates nicely with all t
 
 # Pricing 
 
-<doc-dev-tool-pricing></doc-dev-tool-pricing>
+<doc-pricing></doc-pricing>

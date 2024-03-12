@@ -1,5 +1,48 @@
 # @inlang/paraglide-js-adapter-sveltekit
 
+## 0.5.5
+
+### Patch Changes
+
+- @inlang/paraglide-js-adapter-vite@1.2.17
+
+## 0.5.4
+
+### Patch Changes
+
+- 5d25b889a: log warning if the `lang` attribute isn't updated in `src/app.html`
+
+## 0.5.3
+
+### Patch Changes
+
+- 726690acb: fix: Disable some lint errors when internally rewriting links with the spread syntax to avoid annoying logs (https://discord.com/channels/897438559458430986/1070750156644962434/1212320293578874880)
+
+## 0.5.2
+
+### Patch Changes
+
+- @inlang/paraglide-js-adapter-vite@1.2.16
+
+## 0.5.1
+
+### Patch Changes
+
+- a7b593e9a: fix: double-execution of `load` on initial load
+
+## 0.5.0
+
+### Minor Changes
+
+- e4e879c77: feat: Automatically call `invalidate("paraglide:lang")` when the language changes. You can now call `depends("paraglide:lang")` in your server-load functions to have them re-run on language changes.
+
+### Patch Changes
+
+- 7f566ae73: fix reactivity issue in Svelte 5 [#2270](https://github.com/opral/monorepo/issues/2270)
+- 21a3890cc: fix: Corrected comments saying the default placeholder for the text-direction is `%paraglide.dir%` when it's `%paraglide.textDirection%`
+- 37a247c0e: fix: `i18n.resolveRoute` now ignores paths that don't start with the base
+- 37a247c0e: fix: Alternate links will not include the origin during prerendering, unless one is explicitly specified in `kit.prerender.origin`
+
 ## 0.4.1
 
 ### Patch Changes

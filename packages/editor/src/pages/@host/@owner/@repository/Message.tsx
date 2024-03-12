@@ -3,14 +3,15 @@ import { useEditorState } from "./State.jsx"
 import { createVisibilityObserver } from "@solid-primitives/intersection-observer"
 import { PatternEditor } from "./components/PatternEditor.jsx"
 import { showFilteredMessage } from "./helper/showFilteredMessage.js"
-import IconCopy from "~icons/material-symbols/content-copy-outline"
+import IconLink from "~icons/material-symbols/link"
 import copy from "clipboard-copy"
 import { showToast } from "#src/interface/components/Toast.jsx"
 import type { MessageLintReport, Message as MessageType } from "@inlang/sdk"
 import { sortLanguageTags } from "./helper/sortLanguageTags.js"
+import { setMessageCount } from "./+Page.jsx"
 
 export function Message(props: { id: string }) {
-	const { project, filteredLanguageTags, filteredId, filteredMessageLintRules, textSearch } =
+	const { project, filteredLanguageTags, filteredIds, filteredMessageLintRules, textSearch } =
 		useEditorState()
 	const [message, setMessage] = createSignal<MessageType>()
 	const [lintReports, setLintReports] = createSignal<Readonly<MessageLintReport[]>>([])
@@ -56,9 +57,18 @@ export function Message(props: { id: string }) {
 
 	createEffect(
 		on(
-			[filteredLanguageTags, filteredMessageLintRules, filteredId, textSearch, hasBeenLinted],
+			[filteredLanguageTags, filteredMessageLintRules, filteredIds, textSearch, hasBeenLinted],
 			() => {
-				setShouldMessageBeShown(!showFilteredMessage(message()))
+				setShouldMessageBeShown((prev) => {
+					const result = !showFilteredMessage(message())
+					// check if message count changed and update the global message count
+					if (result !== prev && result === true) {
+						setMessageCount((prev) => prev - 1)
+					} else if (result !== prev && result === false) {
+						setMessageCount((prev) => prev + 1)
+					}
+					return result
+				})
 			}
 		)
 	)
@@ -93,11 +103,15 @@ export function Message(props: { id: string }) {
 								"?id=" +
 								message()?.id
 						),
-							showToast({ variant: "success", title: "Copy to clipboard", duration: 3000 })
+							showToast({
+								variant: "success",
+								title: "Message ID link copied to clipboard",
+								duration: 3000,
+							})
 					}}
 					class="opacity-0 transition-all group-hover:opacity-100 text-info/70 h-7 w-7 text-sm rounded flex items-center justify-center hover:bg-on-background/10 hover:text-info cursor-pointer"
 				>
-					<IconCopy />
+					<IconLink />
 				</div>
 			</div>
 			<div>

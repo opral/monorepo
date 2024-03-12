@@ -1,18 +1,11 @@
 import adapter from "@sveltejs/adapter-static"
 import { vitePreprocess } from "@sveltejs/vite-plugin-svelte"
-import { mdsvex } from "mdsvex"
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-	preprocess: [
-		vitePreprocess(),
-		mdsvex({
-			extension: ".svx",
-		}),
-	],
+	preprocess: [vitePreprocess()],
 	kit: {
 		adapter: adapter(),
-
 		alias: {
 			$paraglide: "./src/paraglide/",
 			$lib: "./src/lib/",
@@ -20,10 +13,6 @@ const config = {
 		prerender: {
 			//Needed for correctly prerendering <link rel="alternate" hreflang="x" href="y">
 			origin: "https://example.com",
-		},
-
-		paths: {
-			base: "/base",
 		},
 	},
 
