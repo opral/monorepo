@@ -9,7 +9,7 @@ setBasePath("./../../node_modules/@shoelace-style/shoelace/dist")
 import "./input-fields/simple-input.js"
 
 @customElement("inlang-settings")
-export class InlangSettings extends LitElement {
+export default class InlangSettings extends LitElement {
 	static override styles = [
 		baseStyling,
 		css`
