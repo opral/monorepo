@@ -71,10 +71,6 @@ export const compileMessage = (
 		variantsByLanguage[variant.languageTag] = variantsForLanugage
 	}
 
-	if (message.variants.length > availableLanguageTags.length) {
-		console.log(JSON.stringify(message.variants))
-	}
-
 	const resource: Resource = {
 		index: messageIndexFunction({ message, params, availableLanguageTags }),
 	}

@@ -878,22 +878,22 @@ describe("functionality", () => {
 					selectors: [],
 					variants: [
 						{
-							languageTag: "de",
-							match: [],
-							pattern: [
-								{
-									type: "Text",
-									value: "a de",
-								},
-							],
-						},
-						{
 							languageTag: "en",
 							match: [],
 							pattern: [
 								{
 									type: "Text",
 									value: "a en",
+								},
+							],
+						},
+						{
+							languageTag: "de",
+							match: [],
+							pattern: [
+								{
+									type: "Text",
+									value: "a de",
 								},
 							],
 						},
@@ -905,22 +905,22 @@ describe("functionality", () => {
 					selectors: [],
 					variants: [
 						{
-							languageTag: "de",
-							match: [],
-							pattern: [
-								{
-									type: "Text",
-									value: "b de",
-								},
-							],
-						},
-						{
 							languageTag: "en",
 							match: [],
 							pattern: [
 								{
 									type: "Text",
 									value: "b en",
+								},
+							],
+						},
+						{
+							languageTag: "de",
+							match: [],
+							pattern: [
+								{
+									type: "Text",
+									value: "b de",
 								},
 							],
 						},

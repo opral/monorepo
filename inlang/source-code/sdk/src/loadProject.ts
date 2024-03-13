@@ -26,7 +26,7 @@ import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
 import { isAbsolutePath } from "./isAbsolutePath.js"
 import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
 
-import { stringifyMessage as stringifyMessage } from "./storage/helper.js"
+import { stringifyMessage } from "./storage/helper.js"
 
 import { humanIdHash } from "./storage/human-id/human-readable-id.js"
 
@@ -644,6 +644,8 @@ async function loadMessagesViaPlugin(
 			})
 		)
 
+		console.log("loadedMessages", JSON.stringify(loadedMessages, undefined, 2))
+
 		for (const loadedMessage of loadedMessages) {
 			const loadedMessageClone = structuredClone(loadedMessage)
 
@@ -709,6 +711,7 @@ async function loadMessagesViaPlugin(
 				}
 
 				const importedEnecoded = stringifyMessage(loadedMessageClone)
+				console.log("importedEnecoded", importedEnecoded)
 
 				// add the message - this will trigger an async file creation in the backgound!
 				messagesQuery.create({ data: loadedMessageClone })
