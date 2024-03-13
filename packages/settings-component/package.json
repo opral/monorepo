@@ -39,6 +39,6 @@
 		"@inlang/message-lint-rule": "workspace:^",
 		"@inlang/plugin": "workspace:^",
 		"@lit/task": "^1.0.0",
-		"@shoelace-style/shoelace": "2.3.0"
+		"@shoelace-style/shoelace": "2.14.0"
 	}
 }

@@ -1,7 +1,6 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
 import { baseStyling } from "../../../styling/base.js"
-import "@shoelace-style/shoelace/dist/components/input/input.js"
 
 @customElement("string-input")
 export class StringInput extends LitElement {
