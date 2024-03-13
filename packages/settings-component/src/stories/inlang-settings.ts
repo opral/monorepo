@@ -4,8 +4,6 @@ import { baseStyling } from "../styling/base.js"
 import { ProjectSettings } from "@inlang/project-settings"
 import { InlangModule } from "@inlang/module"
 import { Task } from "@lit/task"
-import { setBasePath } from "@shoelace-style/shoelace/dist/utilities/base-path.js"
-setBasePath("./../../node_modules/@shoelace-style/shoelace/dist")
 
 import "./input-fields/simple-input.js"
 

@@ -1,8 +1,6 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import { baseStyling } from "../../../styling/base.js"
-import "@shoelace-style/shoelace/dist/components/input/input.js"
-import "@shoelace-style/shoelace/dist/components/checkbox/checkbox.js"
 import "./../object/object-input.js"
 
 @customElement("path-pattern-input")

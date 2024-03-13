@@ -1,10 +1,6 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import { baseStyling } from "../../../styling/base.js"
-import "@shoelace-style/shoelace/dist/components/input/input.js"
-import "@shoelace-style/shoelace/dist/components/icon-button/icon-button.js"
-import "@shoelace-style/shoelace/dist/components/button/button.js"
-import "https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.14.0/cdn/components/icon/icon.js"
 import { InlangModule } from "@inlang/module"
 
 @customElement("default-object-input")

@@ -1,9 +1,6 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import { baseStyling } from "../../../styling/base.js"
-import "@shoelace-style/shoelace/dist/components/input/input.js"
-import "@shoelace-style/shoelace/dist/components/tag/tag.js"
-import "https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.14.0/cdn/components/icon/icon.js"
 
 @customElement("default-array-input")
 export class DefaultArrayInput extends LitElement {

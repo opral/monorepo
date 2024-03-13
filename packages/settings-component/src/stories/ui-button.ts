@@ -1,6 +1,5 @@
 import { html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
-import "@shoelace-style/shoelace/dist/components/button/button.js"
 import { baseStyling } from "../styling/base.js"
 
 @customElement("ui-button")
