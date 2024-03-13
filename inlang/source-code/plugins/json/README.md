@@ -8,7 +8,7 @@ This plugin is a general purpose plugin to read and write messages of json files
 > We recommend using the install button, but if you want to do it manually:
 
 - Add this to the modules in your `project.inlang/settings.json`
-- Change the `sourceLanuge` if needed 
+- Change the `sourceLanguageTag` if needed 
 - Include existing languagetags in the `languageTags` array
 
 
