@@ -1,7 +1,8 @@
 import { html, LitElement, css } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import { baseStyling } from "../styling/base.js"
-import { type InlangProject, ProjectSettings, InlangModule } from "@inlang/sdk"
+import { ProjectSettings } from "@inlang/project-settings"
+import { InlangModule } from "@inlang/module"
 import { Task } from "@lit/task"
 import { setBasePath } from "@shoelace-style/shoelace/dist/utilities/base-path.js"
 setBasePath("./../../node_modules/@shoelace-style/shoelace/dist")
@@ -60,13 +61,13 @@ export default class InlangSettings extends LitElement {
 	]
 
 	@property()
-	inlangProject: ReturnType<InlangProject["settings"]> | undefined = undefined
+	inlangProject: ProjectSettings | undefined = undefined
 
 	@property()
-	onSaveProject?: (project: ReturnType<InlangProject["settings"]>) => void = () => {}
+	onSaveProject?: (project: ProjectSettings) => void = () => {}
 
 	@state()
-	private _project: ReturnType<InlangProject["settings"]> | undefined = undefined
+	private _project: ProjectSettings | undefined = undefined
 
 	@state()
 	private _unsavedChanges: boolean = false
