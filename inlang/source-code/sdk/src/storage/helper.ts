@@ -1,4 +1,4 @@
-import { Message, Variant } from "../versionedInterfaces.js"
+import type { Message, Variant } from "../versionedInterfaces.js"
 
 const fileExtension = ".json"
 
