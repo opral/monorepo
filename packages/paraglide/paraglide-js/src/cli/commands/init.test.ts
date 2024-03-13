@@ -346,17 +346,20 @@ describe("existingProjectFlow()", () => {
 describe("maybeAddVsCodeExtension()", () => {
 	test("it should add the Visual Studio Code extension (Sherlock) if the user uses vscode", async () => {
 		const fs = mockFiles({
-			"/project.inlang/settings.json": JSON.stringify(newProjectTemplate),
+			"/folder/project.inlang/settings.json": JSON.stringify(newProjectTemplate),
 		})
-		const repo = await openRepository("file://", { nodeishFs: fs })
+
+		process.cwd = () => "/folder"
+
+		const repo = await openRepository("file://folder/", { nodeishFs: fs })
 
 		mockUserInput([
 			// user uses vscode
 			true,
 		])
-		await maybeAddVsCodeExtension({ projectPath: "/project.inlang" }, { logger, repo })
+		await maybeAddVsCodeExtension({ projectPath: "/folder/project.inlang" }, { logger, repo })
 		expect(consola.prompt).toHaveBeenCalledOnce()
-		const extensions = await fs.readFile("/.vscode/extensions.json", {
+		const extensions = await fs.readFile("/folder/.vscode/extensions.json", {
 			encoding: "utf-8",
 		})
 		expect(extensions).toBe(
