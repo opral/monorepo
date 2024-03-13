@@ -147,8 +147,8 @@ export const maybeAddVsCodeExtension = async (args: { projectPath: string }, ctx
 	}
 
 	try {
-		if (!(await Sherlock.isAdopted(ctx.repo.nodeishFs))) {
-			await Sherlock.add(ctx.repo.nodeishFs)
+		if (!(await Sherlock.isAdopted({ fs: ctx.repo.nodeishFs }))) {
+			await Sherlock.add({ fs: ctx.repo.nodeishFs })
 
 			ctx.logger.success(
 				"Added the inlang Visual Studio Code extension (Sherlock) to the workspace recommendations."
