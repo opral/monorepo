@@ -306,7 +306,7 @@ We can use this to create a language switcher that links to the current page in 
 
 ```svelte
 <script>
-	import { availableLanguageTags } from "$lib/paraglide/runtime.js"
+	import { availableLanguageTags, languageTag } from "$lib/paraglide/runtime.js"
 	import { i18n } from '$lib/i18n.js'
 	import { page } from '$app/stores'
 </script>
