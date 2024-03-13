@@ -1,15 +1,10 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
 import { baseStyling } from "../../../styling/base.js"
-import "@shoelace-style/shoelace/dist/components/input/input.js"
-import "@shoelace-style/shoelace/dist/components/icon-button/icon-button.js"
-import "@shoelace-style/shoelace/dist/components/button/button.js"
-import "@shoelace-style/shoelace/dist/components/select/select.js"
-import "@shoelace-style/shoelace/dist/components/option/option.js"
-import "https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.14.0/cdn/components/icon/icon.js"
 import { Plugin } from "@inlang/plugin"
 import { MessageLintRule } from "@inlang/message-lint-rule"
 import { InlangModule } from "@inlang/module"
+
 @customElement("lint-rule-level-object-input")
 export class LintRuleLevelObjectInput extends LitElement {
 	static override styles = [
