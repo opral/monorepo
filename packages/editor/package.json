@@ -45,6 +45,7 @@
 		"clipboard-copy": "^4.0.1",
 		"compression": "^1.7.4",
 		"cookie-session": "^2.0.0",
+		"core-js": "^3.36.0",
 		"date-fns": "^2.29.3",
 		"dotenv": "^16.0.3",
 		"flat": "^5.0.2",
