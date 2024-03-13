@@ -644,8 +644,6 @@ async function loadMessagesViaPlugin(
 			})
 		)
 
-		console.log("loadedMessages", JSON.stringify(loadedMessages, undefined, 2))
-
 		for (const loadedMessage of loadedMessages) {
 			const loadedMessageClone = structuredClone(loadedMessage)
 
@@ -711,7 +709,6 @@ async function loadMessagesViaPlugin(
 				}
 
 				const importedEnecoded = stringifyMessage(loadedMessageClone)
-				console.log("importedEnecoded", importedEnecoded)
 
 				// add the message - this will trigger an async file creation in the backgound!
 				messagesQuery.create({ data: loadedMessageClone })
