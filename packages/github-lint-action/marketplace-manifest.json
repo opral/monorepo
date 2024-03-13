@@ -27,7 +27,7 @@
 	"recommends": ["g/ssryldhd", "g/6ddyhpoi", "m/r7kp499g", "m/tdozzpar"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
-	"website": "https://github.com/opral/ninja-i18n-action",
+	"website": "https://github.com/marketplace/actions/ninja-i18n",
 	"license": "Apache-2.0",
 	"pricing": "Free"
 }
