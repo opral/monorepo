@@ -73,6 +73,44 @@ test("parses a message with a match statement", () => {
 	expect(parsed).toEqual(message)
 })
 
+test("parses a message with a number in the match statement", () => {
+	const parsed = parseMessage({
+		key: "test",
+		value:
+			"match {messages} when 0 {Du hast keine nachrichten} when * {Du hast {messages} nachrichten}",
+		languageTag: "en",
+	})
+
+	const message: Message = {
+		id: "test",
+		alias: {},
+		selectors: [
+			{
+				type: "VariableReference",
+				name: "messages",
+			},
+		],
+		variants: [
+			{
+				match: ["0"],
+				languageTag: "en",
+				pattern: [{ type: "Text", value: "Du hast keine nachrichten" }],
+			},
+			{
+				match: ["*"],
+				languageTag: "en",
+				pattern: [
+					{ type: "Text", value: "Du hast " },
+					{ type: "VariableReference", name: "messages" },
+					{ type: "Text", value: " nachrichten" },
+				],
+			},
+		],
+	}
+
+	expect(parsed).toEqual(message)
+})
+
 test("it parses a message with multiple selectors", () => {
 	const parsed = parseMessage({
 		key: "test",
