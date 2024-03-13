@@ -2,6 +2,7 @@
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"currentLanguageTag": "The current language tag is \"{languageTag}\".",
 	"greeting": "Welcome {name}! You have {count} messages.",
+	"plural": "match {messages} when 0 {You have no messages} when * {You have {count} messages}",
 	"hello": "Hello World!",
 	"missing_in_german": "This is missing in German"
 }

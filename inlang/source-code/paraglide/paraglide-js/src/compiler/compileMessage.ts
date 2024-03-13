@@ -36,6 +36,20 @@ export const compileMessage = (
 		)
 	}
 
+	/**
+	 * The variants grouped by language tag.
+	 */
+	const variantsByLanguage: Record<LanguageTag, Message["variants"]> = {}
+
+	for (const variant of message.variants) {
+		const variantsForLanugage = variantsByLanguage[variant.languageTag] ?? []
+		variantsForLanugage.push(variant)
+		variantsByLanguage[variant.languageTag] = variantsForLanugage
+	}
+
+	/**
+	 * The compiled patterns by language tag.
+	 */
 	const compiledPatterns: Record<LanguageTag, string> = {}
 	// parameter names and TypeScript types
 	// only allowing types that JS transpiles to strings under the hood like string and number.

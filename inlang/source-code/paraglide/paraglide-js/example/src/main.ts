@@ -17,3 +17,6 @@ console.log(m.greeting({ name: "Samuel", count: 5 }))
 console.log(en_US.greeting({ name: "Samuel", count: 5 }))
 
 console.log(m.missing_in_german())
+
+console.log(m.plural({ messages: 0 }))
+console.log(m.plural({ messages: 10 }))
