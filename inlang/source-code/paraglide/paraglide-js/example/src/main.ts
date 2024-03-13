@@ -20,3 +20,8 @@ console.log(m.missing_in_german())
 
 console.log(m.plural({ messages: 0 }))
 console.log(m.plural({ messages: 10 }))
+
+setLanguageTag("en-US")
+
+console.log(m.plural({ messages: 0 }))
+console.log(m.plural({ messages: 10 }))

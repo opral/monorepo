@@ -3,8 +3,7 @@ import { test, expect, vi } from "vitest"
 test("should log the messages in the correct language tag", async () => {
 	const consoleMock = vi.spyOn(console, "log").mockImplementation(() => {})
 	await import("./src/main.js")
-	expect(consoleMock).toHaveBeenCalledTimes(8)
-
+	expect(consoleMock).toHaveBeenCalledTimes(10)
 	expect(consoleMock.mock.calls[0][0]).toBe('The current language tag is "en".')
 	expect(consoleMock.mock.calls[1][0]).toBe("Welcome Samuel! You have 5 messages.")
 
@@ -15,9 +14,12 @@ test("should log the messages in the correct language tag", async () => {
 	expect(consoleMock.mock.calls[4][0]).toBe("Welcome Samuel! You have 5 messages.")
 
 	//Test fallback
-	//expect(consoleMock.mock.calls[5][0]).toBe("This is missing in German")
+	expect(consoleMock.mock.calls[5][0]).toBe("This is missing in German")
 
 	//Test plural
 	expect(consoleMock.mock.calls[6][0]).toBe("Du hast keine nachrichten")
 	expect(consoleMock.mock.calls[7][0]).toBe("Du hast 10 nachrichten")
+
+	expect(consoleMock.mock.calls[8][0]).toBe("You have no messages")
+	expect(consoleMock.mock.calls[9][0]).toBe("You have 10 messages")
 })

@@ -80,8 +80,16 @@ export const compileMessage = (
 
 		//If there isn't a variant for the language tag -> fallback
 		if (variants.length == 0) {
+			const fallbackLanguageTag = lookup(languageTag, {
+				languageTags: availableLanguageTags,
+				defaultLanguageTag: sourceLanguageTag,
+			})
+
 			//if the fallback has the pattern, reexport the message from the fallback language
-			resource[languageTag] = messageIdFallback(message, languageTag)
+			resource[languageTag] =
+				languageTag !== fallbackLanguageTag
+					? reexportMessage(message, fallbackLanguageTag)
+					: messageIdFallback(message, languageTag)
 			continue
 		}
 
