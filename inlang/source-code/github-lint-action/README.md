@@ -37,11 +37,13 @@ jobs:
 
       - name: Run Ninja i18n
         id: ninja-i18n
-        uses: opral/ninja-i18n-action@v0.2.3
+        uses: opral/ninja-i18n-action@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
 ```
+
+**Note:** The `opral/ninja-i18n-action` is tagged to always use the latest commit on `main`. This ensures that you always get the latest version of the action. Since the repository is only used for publishing the action, it is safe to use the `main` branch.
 
 ### Environmental Variables:
 

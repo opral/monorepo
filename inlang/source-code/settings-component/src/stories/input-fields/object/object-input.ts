@@ -1,7 +1,7 @@
 import { html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
 import { baseStyling } from "../../../styling/base.js"
-import type { InlangModule } from "@inlang/sdk"
+import { InlangModule } from "@inlang/module"
 import "./default-object-input.js"
 import "./lint-rule-level-object-input.js"
 
