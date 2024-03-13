@@ -5,11 +5,15 @@ import { parse, type CommentJSONValue, stringify } from "comment-json"
 import { type ExtensionsJson as ExtensionsJsonType, ExtensionsJson } from "./utils/types.js"
 import { pathExists } from "./utils/exists.js"
 
+const vsCodePath = "./.vscode"
+
 export async function addRecommendationToWorkspace(
 	fs: NodeishFilesystem,
 	workingDirectory?: string
 ): Promise<void> {
-	const vscodeFolderPath = normalizePath(joinPath(workingDirectory ?? "", "./.vscode"))
+	const vscodeFolderPath = workingDirectory
+		? normalizePath(joinPath(workingDirectory ?? "", vsCodePath))
+		: vsCodePath
 	const extensionsJsonPath = joinPath(vscodeFolderPath, "extensions.json")
 
 	if (!(await pathExists(vscodeFolderPath, fs))) {
@@ -42,7 +46,9 @@ export async function isInWorkspaceRecommendation(
 	fs: NodeishFilesystem,
 	workingDirectory?: string
 ): Promise<boolean> {
-	const vscodeFolderPath = normalizePath(joinPath(workingDirectory ?? "", "./.vscode"))
+	const vscodeFolderPath = workingDirectory
+		? normalizePath(joinPath(workingDirectory ?? "", vsCodePath))
+		: vsCodePath
 	const extensionsJsonPath = joinPath(vscodeFolderPath, "extensions.json")
 
 	if (!(await pathExists(extensionsJsonPath, fs)) || !(await pathExists(vscodeFolderPath, fs))) {
