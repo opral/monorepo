@@ -40,6 +40,8 @@ test("roundtrip (saving/loading messages)", async () => {
 	const deInitial = JSON.stringify({
 		$schema: "https://inlang.com/schema/inlang-message-format",
 		second_message: "Mal sehen ob das funktioniert",
+		third_message:
+			"match {messages} when 0 {Du hast keine nachrichten} when * {Du hast {messages} nachrichten}",
 	} satisfies StorageSchema)
 
 	await fs.mkdir("./messages")
@@ -77,6 +79,20 @@ test("roundtrip (saving/loading messages)", async () => {
 				{
 					match: ["*"],
 					languageTag: "en",
+					pattern: [
+						{ type: "Text", value: "Du hast " },
+						{ type: "VariableReference", name: "messages" },
+						{ type: "Text", value: " nachrichten" },
+					],
+				},
+				{
+					match: ["0"],
+					languageTag: "de",
+					pattern: [{ type: "Text", value: "Du hast keine nachrichten" }],
+				},
+				{
+					match: ["*"],
+					languageTag: "de",
 					pattern: [
 						{ type: "Text", value: "Du hast " },
 						{ type: "VariableReference", name: "messages" },
