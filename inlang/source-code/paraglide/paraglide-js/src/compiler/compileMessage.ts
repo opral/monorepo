@@ -80,8 +80,13 @@ export const compileMessage = (
 
 		//If there isn't a variant for the language tag -> fallback
 		if (variants.length == 0) {
+			//find all the languages that _do_ have the pattern
+			const languagesWithPattern = Object.keys(variantsByLanguage).filter((languageTag) => {
+				return variantsByLanguage[languageTag]?.some((variant) => variant.pattern.length > 0)
+			})
+
 			const fallbackLanguageTag = lookup(languageTag, {
-				languageTags: availableLanguageTags,
+				languageTags: languagesWithPattern,
 				defaultLanguageTag: sourceLanguageTag,
 			})
 
@@ -90,10 +95,7 @@ export const compileMessage = (
 				languageTag !== fallbackLanguageTag
 					? reexportMessage(message, fallbackLanguageTag)
 					: messageIdFallback(message, languageTag)
-			continue
-		}
-
-		if (variants.length == 1) {
+		} else if (variants.length == 1) {
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			const compiledPattern = compiledPatterns.get(variants[0]!)!
 
@@ -103,35 +105,33 @@ export const compileMessage = (
 				languageTag,
 				compiledPattern,
 			})
+		} else {
+			let code = "{\n"
+			for (const variant of variants) {
+				const compiledPattern = compiledPatterns.get(variant)
+				if (!compiledPattern) continue
 
-			continue
-		}
+				const predicates = []
+				for (let i = 0; i < message.selectors.length; i++) {
+					const selector = message.selectors[i]
+					const match = variant.match[i]
+					if (!selector || !match) continue
 
-		let code = "{\n"
-		for (const variant of variants) {
-			const compiledPattern = compiledPatterns.get(variant)
-			if (!compiledPattern) continue
+					if (match === "*") predicates.push("true")
+					else predicates.push(`params.${selector.name} == "${match}"`)
+				}
 
-			const predicates = []
-			for (let i = 0; i < message.selectors.length; i++) {
-				const selector = message.selectors[i]
-				const match = variant.match[i]
-				if (!selector || !match) continue
-
-				if (match === "*") predicates.push("true")
-				else predicates.push(`params.${selector.name} == "${match}"`)
+				code += `if (${predicates.join(" && ")}) return ${compiledPattern}\n`
 			}
+			code += "\n}"
 
-			code += `if (${predicates.join(" && ")}) return ${compiledPattern}\n`
+			resource[languageTag] = messageFunction({
+				message,
+				params,
+				languageTag,
+				compiledPattern: code,
+			})
 		}
-		code += "\n}"
-
-		resource[languageTag] = messageFunction({
-			message,
-			params,
-			languageTag,
-			compiledPattern: code,
-		})
 	}
 
 	return resource

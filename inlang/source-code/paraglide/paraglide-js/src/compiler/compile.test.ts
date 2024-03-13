@@ -251,9 +251,7 @@ describe("e2e", async () => {
 		expect(runtime.isAvailableLanguageTag("--")).toBe(false)
 	})
 
-	test.only("falls back to messages according to BCP 47 lookup order", async () => {
-		console.log(compiledBundle.output[0].code)
-
+	test("falls back to messages according to BCP 47 lookup order", async () => {
 		const { m, runtime } = await import(
 			`data:application/javascript;base64,${Buffer.from(
 				compiledBundle.output[0].code,
@@ -560,4 +558,3 @@ const mockSettings: ProjectSettings = {
 }
 
 const output = await compile({ messages: mockMessages, settings: mockSettings })
-console.log(JSON.stringify(output, undefined, 2))
