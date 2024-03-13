@@ -5,7 +5,7 @@ import "@shoelace-style/shoelace/dist/components/input/input.js"
 import "@shoelace-style/shoelace/dist/components/icon-button/icon-button.js"
 import "@shoelace-style/shoelace/dist/components/button/button.js"
 import "https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.14.0/cdn/components/icon/icon.js"
-import type { InlangModule } from "@inlang/sdk"
+import { InlangModule } from "@inlang/module"
 
 @customElement("default-object-input")
 export class DefaultObjectInput extends LitElement {

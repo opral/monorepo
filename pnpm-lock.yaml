@@ -2142,9 +2142,18 @@ importers:
 
   inlang/source-code/settings-component:
     dependencies:
-      '@inlang/sdk':
+      '@inlang/message-lint-rule':
         specifier: workspace:^
-        version: link:../sdk
+        version: link:../versioned-interfaces/message-lint-rule
+      '@inlang/module':
+        specifier: workspace:^
+        version: link:../versioned-interfaces/module
+      '@inlang/plugin':
+        specifier: workspace:^
+        version: link:../versioned-interfaces/plugin
+      '@inlang/project-settings':
+        specifier: workspace:^
+        version: link:../versioned-interfaces/project-settings
       '@lit/task':
         specifier: ^1.0.0
         version: 1.0.0

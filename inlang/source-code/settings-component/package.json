@@ -13,7 +13,7 @@
 		}
 	},
 	"scripts": {
-		"build": "pnpm run format && esbuild src/index.ts --bundle --format=esm --outfile=dist/index.mjs && tsc --emitDeclarationOnly --declaration --outDir dist",
+		"build": "pnpm run format && esbuild src/index.ts --bundle --format=esm --platform=browser --outfile=dist/index.mjs && tsc --emitDeclarationOnly --declaration --outDir dist",
 		"format": "prettier --write **/*.ts",
 		"storybook": "storybook dev -p 6006"
 	},
@@ -34,7 +34,10 @@
 		"esbuild": "^0.20.0"
 	},
 	"dependencies": {
-		"@inlang/sdk": "workspace:^",
+		"@inlang/project-settings": "workspace:^",
+		"@inlang/module": "workspace:^",
+		"@inlang/message-lint-rule": "workspace:^",
+		"@inlang/plugin": "workspace:^",
 		"@lit/task": "^1.0.0",
 		"@shoelace-style/shoelace": "2.3.0"
 	}
