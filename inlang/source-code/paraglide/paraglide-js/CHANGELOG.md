@@ -1,5 +1,17 @@
 # @inlang/paraglide-js
 
+## 1.3.2
+
+### Patch Changes
+
+- 45975c0: Fail gracefully if adding `.vscode` folder fails
+
+## 1.3.1
+
+### Patch Changes
+
+- afaaffa: Bundle `@inlang/cross-sell-sherlock`. This is used to promot _once_ during `paraglide-js init` to ask if you want to install the Sherlock vscode extension
+
 ## 1.3.0
 
 ### Minor Changes
