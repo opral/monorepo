@@ -9,7 +9,7 @@ describe("Cross-sell Sherlock app", () => {
 				.fn()
 				.mockResolvedValue(JSON.stringify({ recommendations: ["inlang.vs-code-extension"] })),
 		}
-		expect(await isAdopted(fsMock, "/mock/path")).toBe(true)
+		expect(await isAdopted({ fs: fsMock, workingDirectory: "/mock/path" })).toBe(true)
 	})
 
 	it("should recognize when extension is not adopted", async () => {
@@ -17,7 +17,7 @@ describe("Cross-sell Sherlock app", () => {
 			stat: vi.fn().mockResolvedValue(true),
 			readFile: vi.fn().mockResolvedValue(JSON.stringify({ recommendations: [] })),
 		}
-		expect(await isAdopted(fsMock, "/mock/path")).toBe(false)
+		expect(await isAdopted({ fs: fsMock, workingDirectory: "/mock/path" })).toBe(false)
 	})
 
 	it("should merge with other extensions & add recommendation when not present", async () => {
@@ -29,7 +29,7 @@ describe("Cross-sell Sherlock app", () => {
 			writeFile: vi.fn(),
 			mkdir: vi.fn(),
 		}
-		await add(fsMock, "/mock/path")
+		await add({ fs: fsMock, workingDirectory: "/mock/path" })
 		expect(fsMock.writeFile).toHaveBeenCalledWith(
 			"/mock/path/.vscode/extensions.json",
 			JSON.stringify(
@@ -37,6 +37,48 @@ describe("Cross-sell Sherlock app", () => {
 				undefined,
 				2
 			)
+		)
+	})
+
+	it("should handle the case when a workingDirectory is provided", async () => {
+		const fsMock: any = {
+			stat: vi.fn().mockResolvedValue(true),
+			readFile: vi.fn().mockResolvedValue(JSON.stringify({ recommendations: [] })),
+			writeFile: vi.fn(),
+			mkdir: vi.fn(),
+		}
+		await add({ fs: fsMock, workingDirectory: "/mock/path" })
+		expect(fsMock.writeFile).toHaveBeenCalledWith(
+			"/mock/path/.vscode/extensions.json",
+			JSON.stringify({ recommendations: ["inlang.vs-code-extension"] }, undefined, 2)
+		)
+	})
+
+	it("should handle the case when a workingDirectory is not provided", async () => {
+		const fsMock: any = {
+			stat: vi.fn().mockResolvedValue(true),
+			readFile: vi.fn().mockResolvedValue(JSON.stringify({ recommendations: [] })),
+			writeFile: vi.fn(),
+			mkdir: vi.fn(),
+		}
+		await add({ fs: fsMock })
+		expect(fsMock.writeFile).toHaveBeenCalledWith(
+			"./.vscode/extensions.json",
+			JSON.stringify({ recommendations: ["inlang.vs-code-extension"] }, undefined, 2)
+		)
+	})
+
+	it("should add recommendation array if parsed content is not of the expected type", async () => {
+		const fsMock: any = {
+			stat: vi.fn().mockResolvedValue(true),
+			readFile: vi.fn().mockResolvedValue("invalid json"),
+			writeFile: vi.fn(),
+			mkdir: vi.fn(),
+		}
+		await add({ fs: fsMock, workingDirectory: "/mock/path" })
+		expect(fsMock.writeFile).toHaveBeenCalledWith(
+			"/mock/path/.vscode/extensions.json",
+			JSON.stringify({ recommendations: ["inlang.vs-code-extension"] }, undefined, 2)
 		)
 	})
 
@@ -49,7 +91,7 @@ describe("Cross-sell Sherlock app", () => {
 			writeFile: vi.fn(),
 			mkdir: vi.fn(),
 		}
-		await add(fsMock, "/mock/path")
+		await add({ fs: fsMock, workingDirectory: "/mock/path" })
 		expect(fsMock.mkdir).toHaveBeenCalledWith("/mock/path/.vscode")
 		expect(fsMock.writeFile).toHaveBeenCalledWith(
 			"/mock/path/.vscode/extensions.json",
@@ -66,7 +108,7 @@ describe("Cross-sell Sherlock app", () => {
 			writeFile: vi.fn(),
 			mkdir: vi.fn(),
 		}
-		await add(fsMock, "/mock/path")
+		await add({ fs: fsMock, workingDirectory: "/mock/path" })
 		expect(fsMock.writeFile).toHaveBeenCalledWith(
 			"/mock/path/.vscode/extensions.json",
 			expect.any(String)
@@ -83,7 +125,7 @@ describe("Cross-sell Sherlock app", () => {
 			writeFile: vi.fn(),
 			mkdir: vi.fn(),
 		}
-		expect(await isAdopted(fsMock, "/mock/path")).toBe(false)
+		expect(await isAdopted({ fs: fsMock, workingDirectory: "/mock/path" })).toBe(false)
 	})
 
 	it("should return false for invalid extensions.json content", async () => {
@@ -93,7 +135,18 @@ describe("Cross-sell Sherlock app", () => {
 			writeFile: vi.fn(),
 			mkdir: vi.fn(),
 		}
-		expect(await isAdopted(fsMock, "/mock/path")).toBe(false)
+		expect(await isAdopted({ fs: fsMock, workingDirectory: "/mock/path" })).toBe(false)
+	})
+
+	it("should call readFile with the correct path on isAdopted when no workingDirectory is provided", async () => {
+		const fsMock: any = {
+			stat: vi.fn().mockResolvedValue(true),
+			readFile: vi.fn().mockResolvedValue(JSON.stringify({ recommendations: [] })),
+			writeFile: vi.fn(),
+			mkdir: vi.fn(),
+		}
+		expect(await isAdopted({ fs: fsMock })).toBe(false)
+		expect(fsMock.readFile).toHaveBeenCalledWith("./.vscode/extensions.json", { encoding: "utf-8" })
 	})
 
 	it("should create extensions.json in the .vscode folder if it does not exist", async () => {
@@ -108,7 +161,7 @@ describe("Cross-sell Sherlock app", () => {
 			mkdir: vi.fn(),
 		}
 
-		await add(fsMock, "/mock/path")
+		await add({ fs: fsMock, workingDirectory: "/mock/path" })
 
 		expect(fsMock.writeFile).toHaveBeenCalledWith(
 			"/mock/path/.vscode/extensions.json",
@@ -125,7 +178,7 @@ describe("Cross-sell Sherlock app", () => {
 			writeFile: vi.fn(),
 			mkdir: vi.fn(),
 		}
-		await add(fsMock, "/mock/path")
+		await add({ fs: fsMock, workingDirectory: "/mock/path" })
 		expect(fsMock.writeFile).not.toHaveBeenCalled()
 	})
 
@@ -138,7 +191,9 @@ describe("Cross-sell Sherlock app", () => {
 			mkdir: vi.fn().mockRejectedValue(error),
 		}
 
-		await expect(add(fsMock, "/mock/path")).rejects.toThrow("File operation failed")
+		await expect(add({ fs: fsMock, workingDirectory: "/mock/path" })).rejects.toThrow(
+			"File operation failed"
+		)
 	})
 
 	it("should reset extensions.json if it contains malformed content", async () => {
@@ -152,7 +207,7 @@ describe("Cross-sell Sherlock app", () => {
 		}
 
 		// @ts-expect-error
-		await add(fsMock, "/test/dir")
+		await add({ fs: fsMock, workingDirectory: "/test/dir" })
 		expect(fsMock.writeFile).toHaveBeenCalledWith(
 			"/test/dir/.vscode/extensions.json",
 			expect.any(String)
@@ -170,6 +225,8 @@ describe("Cross-sell Sherlock app", () => {
 		}
 
 		// @ts-expect-error
-		await expect(add(fsMock, "/test/dir")).rejects.toThrow("File operation failed")
+		await expect(add({ fs: fsMock, workingDirectory: "/test/dir" })).rejects.toThrow(
+			"File operation failed"
+		)
 	})
 })
