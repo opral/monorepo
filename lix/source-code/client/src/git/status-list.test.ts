@@ -159,11 +159,11 @@ describe(
 			expect(statusWithoutGitFolder).toStrictEqual([
 				[
 					".env",
-					"*added",
+					"*untracked",
 					{
 						headOid: undefined,
 						stageOid: undefined,
-						workdirOid: "74756744f2149fafa1c98e40981bb081a4e53392",
+						workdirOid: "42",
 					},
 				],
 				[
@@ -223,11 +223,11 @@ describe(
 			expect(await repository.statusList()).toStrictEqual([
 				[
 					".env",
-					"*added",
+					"*untracked",
 					{
 						headOid: undefined,
 						stageOid: undefined,
-						workdirOid: "74756744f2149fafa1c98e40981bb081a4e53392",
+						workdirOid: "42",
 					},
 				],
 				[
@@ -304,11 +304,11 @@ describe(
 			expect(await repository.statusList()).toStrictEqual([
 				[
 					"postcss.config.js",
-					"*added",
+					"*untracked",
 					{
 						headOid: undefined,
 						stageOid: undefined,
-						workdirOid: "0f7721681d725ddea512a5ed734891cf6545ca3c",
+						workdirOid: "42",
 					},
 				],
 			])

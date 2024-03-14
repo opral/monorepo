@@ -251,11 +251,11 @@ describe(
 				],
 				[
 					"newfile",
-					"*added",
+					"*untracked",
 					{
 						headOid: undefined,
 						stageOid: undefined,
-						workdirOid: "d606037cb232bfda7788a8322492312d55b2ae9d",
+						workdirOid: "42",
 					},
 				],
 			])
@@ -303,11 +303,11 @@ describe(
 				],
 				[
 					"newfile",
-					"*added",
+					"*untracked",
 					{
 						headOid: undefined,
 						stageOid: undefined,
-						workdirOid: "d606037cb232bfda7788a8322492312d55b2ae9d",
+						workdirOid: "42",
 					},
 				],
 			])
