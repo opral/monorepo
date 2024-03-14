@@ -71,6 +71,17 @@ function TheActualPage() {
 
 	return (
 		<>
+			<Show
+				when={project()?.settings()}
+			>
+				<inlang-settings
+					prop:inlangProject={project()?.settings()}
+					prop:onSaveProject={(newSettings) => {
+						console.log(newSettings)
+						project()?.setSettings(newSettings)
+					}}
+				/>
+			</Show>
 			<Switch
 				fallback={
 					<p class="text-danger">

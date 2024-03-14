@@ -274,6 +274,9 @@ importers:
 
   inlang/source-code/editor:
     dependencies:
+      '@inlang/settings-component':
+        specifier: workspace:*
+        version: link:../settings-component
       '@isomorphic-git/cors-proxy':
         specifier: ^2.7.1
         version: 2.7.1
