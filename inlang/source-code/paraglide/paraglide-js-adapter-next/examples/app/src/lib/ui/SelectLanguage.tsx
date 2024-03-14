@@ -1,5 +1,10 @@
 "use client"
-import { availableLanguageTags, AvailableLanguageTag, languageTag } from "@/paraglide/runtime"
+import {
+	availableLanguageTags,
+	AvailableLanguageTag,
+	languageTag,
+	setLanguageTag,
+} from "@/paraglide/runtime"
 import { useRouter, usePathname } from "../i18n"
 
 export function SelectLanguage() {
@@ -15,7 +20,7 @@ export function SelectLanguage() {
 	return (
 		<select
 			value={languageTag()}
-			onChange={(e) => router.replace(pathname, { locale: e.target.value as AvailableLanguageTag })}
+			onChange={(e) => setLanguageTag(e.target.value as AvailableLanguageTag)}
 		>
 			{availableLanguageTags.map((lang) => (
 				<option key={lang} value={lang}>
