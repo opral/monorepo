@@ -1,11 +1,14 @@
 blank_issues_enabled: true
 contact_links:
-  - name: Feature request
-    url: https://github.com/opral/monorepo/discussions
-    about: Have an idea for a new feature? Let us know here.
-  - name: Question
-    url: https://github.com/opral/monorepo/discussions
-    about: Please ask and answer questions here.
-  - name: Discord Chat
-    url: https://discord.gg/WUhmpYhq
-    about: Come chat with us on discord.
+  - name: Paraglide JS
+    url: https://github.com/opral/inlang-paraglide-js
+  - name: Sherlock (VSCode Extension)
+    url: https://github.com/opral/inlang-sherlock
+  - name: Fink 
+    url: https://github.com/opral/inlang-fink
+  - name: Ninja i18n GitHub action
+    url: https://github.com/opral/ninja-i18n-action
+  - name: Inlang Message SDK
+    url: https://github.com/opral/inlang-message-sdk
+  - name: Lix SDK
+    url: https://github.com/opral/lix-sdk
