@@ -427,7 +427,7 @@ Try moving any logic that uses messages into a different component.
 SvelteKit's `reroute` hook currently doens't play well with Vercel (see [sveltejs/kit#11879](https://github.com/sveltejs/kit/issues/11879)), which means that we need to slightly adapt the adapter setup to make it work when deployed to vercel.
 
 1. Remove the `reroute` hook from `src/hooks.js`
-2. Move the routes you want to localise `routes` into a `[locale]` folder
+2. Move the routes you want to localise `routes` into a `[[locale]]` folder
 3. Don't use translated `pathnames`
 
 We are actively working on contributing a fix for [sveltejs/kit#11879](https://github.com/sveltejs/kit/issues/11879), so this workaround will hopefully not be needed much longer.
