@@ -179,7 +179,12 @@ export default class InlangSettings extends LitElement {
 										${(value.meta as { displayName?: { en: string } })?.displayName?.en || key}
 									</h3>
 									${Object.entries(value.schema.properties).map(([property, schema]) => {
-										if (property === "$schema" || property === "modules") return undefined
+										if (
+											property === "$schema" ||
+											property === "modules" ||
+											property === "experimental"
+										)
+											return undefined
 										return key === "internal"
 											? html`
 													<simple-input
