@@ -5,7 +5,6 @@ import {
 	languageTag,
 	setLanguageTag,
 } from "@/paraglide/runtime"
-import { useRouter, usePathname } from "../i18n"
 
 export function SelectLanguage() {
 	const labels: Record<AvailableLanguageTag, string> = {
@@ -13,9 +12,6 @@ export function SelectLanguage() {
 		de: "🇩🇪 Deutsch",
 		"de-CH": "🇨🇭 Schweizerdeutsch",
 	}
-
-	const pathname = usePathname()
-	const router = useRouter()
 
 	return (
 		<select
