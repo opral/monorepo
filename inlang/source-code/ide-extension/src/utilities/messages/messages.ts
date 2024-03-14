@@ -269,6 +269,9 @@ export function getTranslationsTableHtml(args: {
 		}
 
 		const editCommand = `editMessage('${args.message.id}', '${escapeHtml(languageTag)}')`
+		const machineTranslateCommand = `machineTranslate('${args.message.id}', '${
+			state().project.settings()?.sourceLanguageTag
+		}', ['${languageTag}'])`
 
 		return `
             <div class="section">
@@ -278,6 +281,7 @@ export function getTranslationsTableHtml(args: {
 		)}</button></span>
 				<span class="actionButtons">
 					<button title="Edit" onclick="${editCommand}"><span class="codicon codicon-edit"></span></button>
+					<button title="Machine translate" onclick="${machineTranslateCommand}"><span class="codicon codicon-globe"></span></button>
 				</span>
             </div>
         `
@@ -417,6 +421,14 @@ export function getHtml(args: {
 						command: 'executeCommand',
 						commandName: 'sherlock.jumpToPosition',
 						commandArgs: { messageId, position: decodedPosition },
+					});
+				}
+
+				function machineTranslate(messageId, sourceLanguageTag, targetLanguageTags) {
+					vscode.postMessage({
+						command: 'executeCommand',
+						commandName: 'sherlock.machineTranslateMessage',
+						commandArgs: { messageId, sourceLanguageTag, targetLanguageTags },
 					});
 				}
             </script>
