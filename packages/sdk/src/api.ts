@@ -96,4 +96,5 @@ export type MessageLintReportsQueryApi = {
 			callback: (MessageLintRules: Readonly<MessageLintReport[]>) => void
 		) => void
 	}
+	includedMessageIds: Subscribable<Message["id"][]>
 }

@@ -10,8 +10,6 @@ import { throttle } from "throttle-debounce"
 import childProcess from "node:child_process"
 import fs from "node:fs/promises"
 
-import { createRoot, createMemo } from "solid-js"
-
 import _debug from "debug"
 const debug = _debug("load-test")
 
@@ -76,27 +74,37 @@ export async function runLoadTest(
 			messagesEvents++
 			logMessagesEvent(messages)
 		})
+		debug("subscribing to messages.includedMessageIds")
+		let messageIDsEvents = 0
+		const logMessageIDsEvent = throttle(throttleEventLogs, (ids: string[]) => {
+			debug(`includedMessageIds changed event: ${messageIDsEvents}, length: ${ids.length}`)
+		})
+		project.query.messages.includedMessageIds.subscribe((ids) => {
+			messageIDsEvents++
+			logMessageIDsEvent(ids)
+		})
 	}
 
 	if (subscribeToLintReports) {
-		debug("subscribing to lintReports.getAll")
-		let lintEvents = 0
-		const logLintEvent = throttle(throttleEventLogs, (reports: any) => {
-			debug(`lint reports changed event: ${lintEvents}, length: ${reports.length}`)
-		})
+		// debug("subscribing to lintReports.getAll")
+		// let lintEvents = 0
+		// const logLintEvent = throttle(throttleEventLogs, (reports: any) => {
+		// 	debug(`lint reports changed event: ${lintEvents}, length: ${reports.length}`)
+		// })
 		// project.query.messageLintReports.getAll.subscribe((reports) => {
 		// 	lintEvents++
 		// 	logLintEvent(reports)
 		// })
-
-		createRoot(() => {
-			const getLintReports = createMemo(() => {
-				return project.query.messageLintReports.getAll()
-			})
-			setInterval(() => {
-				lintEvents++
-				logLintEvent(getLintReports())
-			}, 2000)
+		debug("subscribing to lintReports.includedMessageIds")
+		let lintMessageIdsEvents = 0
+		const logLintMessageIdsEvent = throttle(throttleEventLogs, (ids: string[]) => {
+			debug(
+				`lint reports includedMessageIds changed event: ${lintMessageIdsEvents}, length: ${ids.length}`
+			)
+		})
+		project.query.messageLintReports.includedMessageIds.subscribe((ids) => {
+			lintMessageIdsEvents++
+			logLintMessageIdsEvent(ids)
 		})
 	}
 

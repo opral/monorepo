@@ -101,6 +101,7 @@ export function createMessageLintReportsQuery(
 					trackedMessages.delete(deletedMessageId)
 					// remove lint report result
 					index.delete(deletedMessageId)
+					debug(`delete lint message id: ${deletedMessageId}`)
 				}
 			}
 		}
@@ -122,5 +123,8 @@ export function createMessageLintReportsQuery(
 				callback: Parameters<MessageLintReportsQueryApi["get"]["subscribe"]>[1]
 			) => createSubscribable(() => get(args)).subscribe(callback),
 		}) as any,
+		includedMessageIds: createSubscribable(() => {
+			return [...index.keys()].filter((id) => index.get(id).length > 0)
+		}),
 	}
 }
