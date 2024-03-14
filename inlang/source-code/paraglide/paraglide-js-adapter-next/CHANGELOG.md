@@ -1,5 +1,13 @@
 # @inlang/paraglide-js-adapter-next
 
+## 1.0.0
+
+### Patch Changes
+
+- Updated dependencies [4970afc]
+- Updated dependencies [4837297]
+  - @inlang/paraglide-js@1.3.0
+
 ## 0.3.0
 
 ### Minor Changes

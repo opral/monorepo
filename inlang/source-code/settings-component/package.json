@@ -1,0 +1,44 @@
+{
+	"name": "@inlang/settings-component",
+	"type": "module",
+	"version": "0.0.7",
+	"publishConfig": {
+		"access": "public"
+	},
+	"description": "",
+	"exports": {
+		".": {
+			"import": "./dist/index.mjs",
+			"types": "./dist/index.d.ts"
+		}
+	},
+	"scripts": {
+		"build": "pnpm run format && esbuild src/index.ts --bundle --format=esm --platform=browser --outfile=dist/index.mjs && tsc --emitDeclarationOnly --declaration --outDir dist",
+		"format": "prettier --write **/*.ts",
+		"storybook": "storybook dev -p 6006"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"@nx/storybook": "^18.0.4",
+		"@storybook/addon-essentials": "^7.6.16",
+		"@storybook/addon-links": "^7.6.16",
+		"@storybook/blocks": "^7.6.16",
+		"@storybook/web-components": "^7.6.16",
+		"@storybook/web-components-vite": "^7.6.16",
+		"lit": "^3.1.2",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0",
+		"storybook": "^7.6.16",
+		"esbuild": "^0.20.0"
+	},
+	"dependencies": {
+		"@inlang/project-settings": "workspace:^",
+		"@inlang/module": "workspace:^",
+		"@inlang/message-lint-rule": "workspace:^",
+		"@inlang/plugin": "workspace:^",
+		"@lit/task": "^1.0.0",
+		"@shoelace-style/shoelace": "2.14.0"
+	}
+}

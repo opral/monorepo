@@ -1,5 +1,15 @@
 # @inlang/badge
 
+## 0.7.5
+
+### Patch Changes
+
+- 4837297: File locking for concurrent message updates through the load/store plugin api
+  Auto-generated human-IDs and aliases - only with experimental: { aliases: true }
+- Updated dependencies [4837297]
+  - @inlang/sdk@0.27.0
+  - @lix-js/client@0.9.0
+
 ## 0.7.4
 
 ### Patch Changes

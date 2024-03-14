@@ -56,6 +56,5 @@ export const cli = new Command()
 				version,
 			},
 		})
-		// https://github.com/tj/commander.js/issues/1745
-		process.exit(0)
+		// process should exit by itself once promises are resolved
 	})

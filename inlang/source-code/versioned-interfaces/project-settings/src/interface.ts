@@ -76,6 +76,7 @@ const InternalProjectSettings = Type.Object({
 			],
 		})
 	),
+	experimental: Type.Optional(Type.Record(Type.String(), Type.Literal(true))),
 })
 
 /**

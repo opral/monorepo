@@ -548,6 +548,14 @@ function ProjectMenu() {
 		)
 	}
 
+	const shortenProjectName = (projectPath: string) => {
+		const projectPathArray = projectPath.split("/")
+		if (projectPathArray.length > 3) {
+			return "/" + projectPathArray.at(-3) + "/" + projectPathArray.at(-2) + "/" + projectPathArray.at(-1)
+		}
+		return projectPath
+	}
+
 	return (
 		<sl-tooltip
 			prop:content="Select inlang project"
@@ -579,7 +587,7 @@ function ProjectMenu() {
 									prop:type="checkbox"
 									prop:checked={activeProject() === project.projectPath}
 								>
-									{project.projectPath}
+									{shortenProjectName(project.projectPath)}
 								</sl-menu-item>
 							</div>
 						)}

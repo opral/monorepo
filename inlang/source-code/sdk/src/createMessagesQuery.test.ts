@@ -6,6 +6,7 @@ import type { Message, Text } from "@inlang/message"
 import { createMessage } from "./test-utilities/createMessage.js"
 
 const createChangeListener = async (cb: () => void) => createEffect(cb)
+const nextTick = () => new Promise((resolve) => setTimeout(resolve, 0))
 
 describe("create", () => {
 	it("should create a message", () => {
@@ -16,6 +17,19 @@ describe("create", () => {
 		const created = query.create({ data: mockMessage })
 
 		expect(query.get({ where: { id: "first-message" } })).toEqual(mockMessage)
+		expect(created).toBe(true)
+	})
+
+	it("query.getByDefaultAlias should return a message with a default alias", () => {
+		const query = createMessagesQuery(() => [])
+		expect(query.get({ where: { id: "first-message" } })).toBeUndefined()
+
+		const mockMessage = createMessage("first-message", { en: "Hello World" })
+		mockMessage.alias = { default: "first-message-alias" }
+		const created = query.create({ data: mockMessage })
+
+		expect(query.get({ where: { id: "first-message" } })).toEqual(mockMessage)
+		expect(query.getByDefaultAlias("first-message-alias")).toEqual(mockMessage)
 		expect(created).toBe(true)
 	})
 
@@ -266,8 +280,46 @@ describe("reactivity", () => {
 		})
 	})
 
-	describe.todo("subscribe", () => {
-		// TODO: add tests for `subscribe`
+	describe("subscribe", () => {
+		describe("get", () => {
+			it("should subscribe to `create`", async () => {
+				await createRoot(async () => {
+					const query = createMessagesQuery(() => [])
+
+					// eslint-disable-next-line unicorn/no-null
+					let message: Message | undefined | null = null
+					query.get.subscribe({ where: { id: "1" } }, (v) => {
+						void (message = v)
+					})
+					await nextTick()
+					expect(message).toBeUndefined()
+
+					query.create({ data: createMessage("1", { en: "before" }) })
+					expect(message).toBeDefined()
+				})
+			})
+		})
+		describe("getByDefaultAlias", () => {
+			it("should subscribe to `create`", async () => {
+				await createRoot(async () => {
+					const query = createMessagesQuery(() => [])
+
+					// eslint-disable-next-line unicorn/no-null
+					let message: Message | undefined | null = null
+					query.getByDefaultAlias.subscribe("message-alias", (v) => {
+						void (message = v)
+					})
+					await nextTick() // required for effect to run on reactive map
+					expect(message).toBeUndefined()
+
+					const mockMessage = createMessage("1", { en: "before" })
+					mockMessage.alias = { default: "message-alias" }
+					query.create({ data: mockMessage })
+
+					expect(message).toBeDefined()
+				})
+			})
+		})
 	})
 
 	describe("getAll", () => {

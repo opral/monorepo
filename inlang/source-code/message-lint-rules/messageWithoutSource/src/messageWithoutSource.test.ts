@@ -6,6 +6,7 @@ import { messageWithoutSourceRule } from "./messageWithoutSource.js"
 
 const message1: Message = {
 	id: "1",
+	alias: {},
 	selectors: [],
 	variants: [
 		{ languageTag: "en", match: [], pattern: [] },

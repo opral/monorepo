@@ -1,5 +1,12 @@
 # @inlang/message
 
+## 2.1.0
+
+### Minor Changes
+
+- 4837297: File locking for concurrent message updates through the load/store plugin api
+  Auto-generated human-IDs and aliases - only with experimental: { aliases: true }
+
 ## 2.0.3
 
 ### Patch Changes

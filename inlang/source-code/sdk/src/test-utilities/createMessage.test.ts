@@ -6,8 +6,27 @@ test("should create a simple message", () => {
 		createMessage("welcome", {
 			de: "Hallo inlang",
 		})
-	).toMatchInlineSnapshot(`
+	).toMatchInlineSnapshot(
 		{
+			alias: {},
+			id: "welcome",
+			selectors: [],
+			variants: [
+				{
+					languageTag: "de",
+					match: [],
+					pattern: [
+						{
+							type: "Text",
+							value: "Hallo inlang",
+						},
+					],
+				},
+			],
+		},
+		`
+		{
+		  "alias": {},
 		  "id": "welcome",
 		  "selectors": [],
 		  "variants": [
@@ -23,7 +42,8 @@ test("should create a simple message", () => {
 		    },
 		  ],
 		}
-	`)
+	`
+	)
 })
 
 test("should create a message with pattern", () => {
@@ -35,32 +55,31 @@ test("should create a message with pattern", () => {
 				{ type: "Text", value: '"' },
 			],
 		})
-	).toMatchInlineSnapshot(`
+	).toStrictEqual({
+		alias: {},
+		id: "greeting",
+		selectors: [],
+		variants: [
 			{
-			  "id": "greeting",
-			  "selectors": [],
-			  "variants": [
-			    {
-			      "languageTag": "en",
-			      "match": [],
-			      "pattern": [
-			        {
-			          "type": "Text",
-			          "value": "Hi ",
-			        },
-			        {
-			          "name": "name",
-			          "type": "VariableReference",
-			        },
-			        {
-			          "type": "Text",
-			          "value": "\\"",
-			        },
-			      ],
-			    },
-			  ],
-			}
-		`)
+				languageTag: "en",
+				match: [],
+				pattern: [
+					{
+						type: "Text",
+						value: "Hi ",
+					},
+					{
+						name: "name",
+						type: "VariableReference",
+					},
+					{
+						type: "Text",
+						value: '"',
+					},
+				],
+			},
+		],
+	})
 })
 
 test("should create a message with a pattern", () => {
@@ -69,32 +88,31 @@ test("should create a message with a pattern", () => {
 			en: "hello inlang",
 			de: [{ type: "Text", value: "Hallo inlang" }],
 		})
-	).toMatchInlineSnapshot(`
+	).toStrictEqual({
+		alias: {},
+		id: "welcome",
+		selectors: [],
+		variants: [
 			{
-			  "id": "welcome",
-			  "selectors": [],
-			  "variants": [
-			    {
-			      "languageTag": "en",
-			      "match": [],
-			      "pattern": [
-			        {
-			          "type": "Text",
-			          "value": "hello inlang",
-			        },
-			      ],
-			    },
-			    {
-			      "languageTag": "de",
-			      "match": [],
-			      "pattern": [
-			        {
-			          "type": "Text",
-			          "value": "Hallo inlang",
-			        },
-			      ],
-			    },
-			  ],
-			}
-		`)
+				languageTag: "en",
+				match: [],
+				pattern: [
+					{
+						type: "Text",
+						value: "hello inlang",
+					},
+				],
+			},
+			{
+				languageTag: "de",
+				match: [],
+				pattern: [
+					{
+						type: "Text",
+						value: "Hallo inlang",
+					},
+				],
+			},
+		],
+	})
 })

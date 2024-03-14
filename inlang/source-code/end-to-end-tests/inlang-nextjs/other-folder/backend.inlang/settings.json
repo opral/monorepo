@@ -16,5 +16,8 @@
 			"second-page": "./../../app/i18n/locales/{languageTag}/second-page.json",
 			"translation": "./../../app/i18n/locales/{languageTag}/translation.json"
 		}
+	},
+	"experimental": {
+		"aliases": true
 	}
 }

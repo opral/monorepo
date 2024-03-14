@@ -65,6 +65,7 @@ const mockPlugin: Plugin = {
 const exampleMessages: Message[] = [
 	{
 		id: "a",
+		alias: {},
 		selectors: [],
 		variants: [
 			{
@@ -81,6 +82,48 @@ const exampleMessages: Message[] = [
 	},
 	{
 		id: "b",
+		alias: {},
+		selectors: [],
+		variants: [
+			{
+				languageTag: "en",
+				match: [],
+				pattern: [
+					{
+						type: "Text",
+						value: "test",
+					},
+				],
+			},
+		],
+	},
+]
+
+const exampleAliasedMessages: Message[] = [
+	{
+		id: "raw_tapir_pause_grateful",
+		alias: {
+			default: "a",
+		},
+		selectors: [],
+		variants: [
+			{
+				languageTag: "en",
+				match: [],
+				pattern: [
+					{
+						type: "Text",
+						value: "test",
+					},
+				],
+			},
+		],
+	},
+	{
+		id: "dizzy_halibut_dial_vaguely",
+		alias: {
+			default: "b",
+		},
 		selectors: [],
 		variants: [
 			{
@@ -561,7 +604,7 @@ describe("functionality", () => {
 				description: { en: "Mock plugin description" },
 				displayName: { en: "Mock Plugin" },
 
-				loadMessages: () => [{ id: "some-message", selectors: [], variants: [] }],
+				loadMessages: () => [{ id: "some-message", alias: {}, selectors: [], variants: [] }],
 				saveMessages: () => undefined,
 			}
 			const repo = await mockRepo()
@@ -613,7 +656,7 @@ describe("functionality", () => {
 				description: { en: "Mock plugin description" },
 				displayName: { en: "Mock Plugin" },
 
-				loadMessages: () => [{ id: "some-message", selectors: [], variants: [] }],
+				loadMessages: () => [{ id: "some-message", alias: {}, selectors: [], variants: [] }],
 				saveMessages: () => undefined,
 			}
 			const repo = await mockRepo()
@@ -698,6 +741,25 @@ describe("functionality", () => {
 		})
 	})
 
+	describe("messages with aliases", () => {
+		it("should return the messages", async () => {
+			const repo = await mockRepo()
+			const fs = repo.nodeishFs
+			await fs.mkdir("/user/project.inlang", { recursive: true })
+			await fs.writeFile(
+				"/user/project.inlang/settings.json",
+				JSON.stringify({ ...settings, experimental: { aliases: true } })
+			)
+			const project = await loadProject({
+				projectPath: "/user/project.inlang",
+				repo,
+				_import,
+			})
+
+			expect(Object.values(project.query.messages.getAll())).toEqual(exampleAliasedMessages)
+		})
+	})
+
 	describe("query", () => {
 		it("should call saveMessages() on updates", async () => {
 			const repo = await mockRepo()
@@ -744,6 +806,7 @@ describe("functionality", () => {
 				where: { id: "a" },
 				data: {
 					id: "a",
+					alias: {},
 					selectors: [],
 					variants: [
 						{
@@ -774,6 +837,7 @@ describe("functionality", () => {
 				where: { id: "b" },
 				data: {
 					id: "b",
+					alias: {},
 					selectors: [],
 					variants: [
 						{
@@ -800,7 +864,8 @@ describe("functionality", () => {
 				},
 			})
 
-			await new Promise((resolve) => setTimeout(resolve, 510))
+			// lets wait for the next tick
+			await new Promise((resolve) => setTimeout(resolve, 100))
 
 			expect(mockSaveFn.mock.calls.length).toBe(1)
 
@@ -809,18 +874,9 @@ describe("functionality", () => {
 			expect(Object.values(mockSaveFn.mock.calls[0][0].messages)).toStrictEqual([
 				{
 					id: "a",
+					alias: {},
 					selectors: [],
 					variants: [
-						{
-							languageTag: "en",
-							match: [],
-							pattern: [
-								{
-									type: "Text",
-									value: "a en",
-								},
-							],
-						},
 						{
 							languageTag: "de",
 							match: [],
@@ -831,22 +887,23 @@ describe("functionality", () => {
 								},
 							],
 						},
-					],
-				},
-				{
-					id: "b",
-					selectors: [],
-					variants: [
 						{
 							languageTag: "en",
 							match: [],
 							pattern: [
 								{
 									type: "Text",
-									value: "b en",
+									value: "a en",
 								},
 							],
 						},
+					],
+				},
+				{
+					id: "b",
+					alias: {},
+					selectors: [],
+					variants: [
 						{
 							languageTag: "de",
 							match: [],
@@ -854,6 +911,16 @@ describe("functionality", () => {
 								{
 									type: "Text",
 									value: "b de",
+								},
+							],
+						},
+						{
+							languageTag: "en",
+							match: [],
+							pattern: [
+								{
+									type: "Text",
+									value: "b en",
 								},
 							],
 						},
@@ -926,6 +993,20 @@ describe("functionality", () => {
 
 			expect(mockSaveFn.mock.calls.length).toBe(1)
 			expect(mockSaveFn.mock.calls[0][0].messages).toHaveLength(4)
+
+			project.query.messages.create({ data: createMessage("fifth", { en: "fifth message" }) })
+
+			await new Promise((resolve) => setTimeout(resolve, 510))
+
+			expect(mockSaveFn.mock.calls.length).toBe(2)
+			expect(mockSaveFn.mock.calls[1][0].messages).toHaveLength(5)
+
+			project.query.messages.delete({ where: { id: "fourth" } })
+
+			await new Promise((resolve) => setTimeout(resolve, 510))
+
+			expect(mockSaveFn.mock.calls.length).toBe(3)
+			expect(mockSaveFn.mock.calls[2][0].messages).toHaveLength(4)
 		})
 	})
 
@@ -1040,17 +1121,28 @@ describe("functionality", () => {
 				counter = counter + 1
 			})
 
+			// subscribe fires once
 			expect(counter).toBe(1)
 
-			// change file
+			// saving the file without changing should not trigger a message query
 			await fs.writeFile("./messages.json", JSON.stringify(messages))
-			await new Promise((resolve) => setTimeout(resolve, 0))
+			await new Promise((resolve) => setTimeout(resolve, 200)) // file event will lock a file and be handled sequentially - give it time to pickup the change
+
+			// we didn't change the message we write into message.json - shouldn't change the messages
+			expect(counter).toBe(1)
+
+			// saving the file without changing should trigger a change
+			messages.data[0]!.variants[0]!.pattern[0]!.value = "changed"
+			await fs.writeFile("./messages.json", JSON.stringify(messages))
+			await new Promise((resolve) => setTimeout(resolve, 200)) // file event will lock a file and be handled sequentially - give it time to pickup the change
 
 			expect(counter).toBe(2)
 
+			messages.data[0]!.variants[0]!.pattern[0]!.value = "changed3"
+
 			// change file
 			await fs.writeFile("./messages.json", JSON.stringify(messages))
-			await new Promise((resolve) => setTimeout(resolve, 0))
+			await new Promise((resolve) => setTimeout(resolve, 200)) // file event will lock a file and be handled sequentially - give it time to pickup the change
 
 			expect(counter).toBe(3)
 		})

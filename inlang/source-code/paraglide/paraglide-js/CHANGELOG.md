@@ -1,5 +1,37 @@
 # @inlang/paraglide-js
 
+## 1.3.2
+
+### Patch Changes
+
+- 45975c0: Fail gracefully if adding `.vscode` folder fails
+
+## 1.3.1
+
+### Patch Changes
+
+- afaaffa: Bundle `@inlang/cross-sell-sherlock`. This is used to promot _once_ during `paraglide-js init` to ask if you want to install the Sherlock vscode extension
+
+## 1.3.0
+
+### Minor Changes
+
+- 4970afc: paraglide deprecate aliases
+- 4837297: File locking for concurrent message updates through the load/store plugin api
+  Auto-generated human-IDs and aliases - only with experimental: { aliases: true }
+
+### Patch Changes
+
+- @inlang/cross-sell-sherlock@0.0.2
+
+## 1.2.9
+
+### Patch Changes
+
+- a99e35fee: use `@inlang/cross-sell-sherlock` during vscode extension initialization
+- Updated dependencies [a99e35fee]
+  - @inlang/cross-sell-sherlock@0.0.2
+
 ## 1.2.8
 
 ### Patch Changes

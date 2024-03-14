@@ -13,6 +13,7 @@ import { mockRepo } from "@lix-js/client"
 const exampleMessages: Message[] = [
 	{
 		id: "a",
+		alias: {},
 		selectors: [],
 		variants: [
 			{
@@ -29,6 +30,7 @@ const exampleMessages: Message[] = [
 	},
 	{
 		id: "b",
+		alias: {},
 		selectors: [],
 		variants: [
 			{

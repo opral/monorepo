@@ -10,3 +10,4 @@ packages:
   - 'inlang/source-code/templates/*'
   - 'inlang/source-code/message-lint-rules/*'
   - 'inlang/source-code/versioned-interfaces/*'
+  - 'inlang/source-code/sdk/load-test'
