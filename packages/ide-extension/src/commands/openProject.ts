@@ -4,7 +4,7 @@ import type { NodeishFilesystem } from "@lix-js/fs"
 
 export const openProjectCommand = {
 	command: "sherlock.openProject",
-	title: "Inlang: Open project",
+	title: "Sherlock: Open project",
 	register: vscode.commands.registerCommand,
 	callback: async (
 		node: ProjectViewNode,

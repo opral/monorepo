@@ -9,6 +9,7 @@ import type { ErrorNode } from "./utilities/errors/errors.js"
 import { copyErrorCommand } from "./commands/copyError.js"
 import { previewLanguageTagCommand } from "./commands/previewLanguageTagCommand.js"
 import { jumpToPositionCommand } from "./commands/jumpToPosition.js"
+import { machineTranslateMessageCommand } from "./commands/machineTranslate.js"
 
 export const CONFIGURATION = {
 	EVENTS: {
@@ -27,6 +28,7 @@ export const CONFIGURATION = {
 		OPEN_PROJECT: openProjectCommand,
 		OPEN_SETTINGS_FILE: openSettingsFileCommand,
 		COPY_ERROR: copyErrorCommand,
+		MACHINE_TRANSLATE_MESSAGE: machineTranslateMessageCommand,
 	},
 	FILES: {
 		// TODO: remove this hardcoded assumption for multi project support
