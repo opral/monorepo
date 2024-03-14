@@ -166,7 +166,6 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			path: Parameters<NodeishFilesystem["writeFile"]>[0],
 			options?: Parameters<NodeishFilesystem["writeFile"]>[2]
 		) {
-			// TODO: mkdir recursive
 			path = normalPath(path)
 			const dirName = getDirname(path)
 			const baseName = getBasename(path)

@@ -1,7 +1,7 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 import type raw from "../vendored/isomorphic-git/index.js"
 import type { Endpoints } from "@octokit/types"
-import type { status, OptStatus } from "./git/status.js"
+import type { statusList, OptStatus } from "./git/status-list.js"
 
 // TODO: restructure types to implementation and split up openRepository into smaller functions
 export type Author = {
@@ -39,7 +39,7 @@ export type Repository = {
 		ref?: string
 	}) => Promise<Awaited<ReturnType<typeof raw.log>>>
 	status: (arg: string) => Promise<string>
-	statusList: (arg?: StatusArgs) => ReturnType<typeof status>
+	statusList: (arg?: StatusArgs) => ReturnType<typeof statusList>
 	forkStatus: () => Promise<
 		{ ahead: number; behind: number; conflicts: boolean } | { error: string }
 	>

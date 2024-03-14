@@ -107,11 +107,11 @@ describe(
 				],
 				[
 					"folder/README_newfile.md",
-					"*added",
+					"*untracked",
 					{
 						headOid: undefined,
 						stageOid: undefined,
-						workdirOid: "20aaabed6743b8b267d9a2caf7aa56486058e057",
+						workdirOid: "42", // TODO we could utilize addHash parameter as well here "20aaabed6743b8b267d9a2caf7aa56486058e057",
 					},
 				],
 			])

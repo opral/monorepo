@@ -24,6 +24,8 @@ type StatusText =
 	| "added"
 	// files modified but changes not committed to stage
 	| "*modified"
+	// files modified but changes not committed to stage AND stage has uncommited changes
+	| "*modified2"
 	// files modified and changes committed to stage
 	| "modified"
 	// deleted but file still in index
