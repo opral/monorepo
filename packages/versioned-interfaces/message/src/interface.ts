@@ -58,6 +58,7 @@ export const Variant = Type.Object({
 export type Message = Static<typeof Message>
 export const Message = Type.Object({
 	id: Type.String(),
+	alias: Type.Record(Type.String(), Type.String()),
 	/**
 	 * The order in which the selectors are placed determines the precedence of patterns.
 	 */

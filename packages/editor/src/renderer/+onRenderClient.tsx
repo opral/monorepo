@@ -1,3 +1,4 @@
+import "core-js/stable/structured-clone" // polyfill structuredClone
 import { type Component, createSignal } from "solid-js"
 import { createStore } from "solid-js/store"
 import { render } from "solid-js/web"

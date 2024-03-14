@@ -6,6 +6,7 @@ it("should throw if a message uses `-` because `-` are invalid JS function names
 		compileMessage(
 			{
 				id: "message-with-invalid-js-variable-name",
+				alias: {},
 				selectors: [],
 				variants: [],
 			},
@@ -20,6 +21,7 @@ it("should throw an error if a message has multiple variants with the same langu
 		compileMessage(
 			{
 				id: "duplicateLanguageTag",
+				alias: {},
 				selectors: [],
 				variants: [
 					{
@@ -44,6 +46,7 @@ it("should compile a message with a language tag that contains a hyphen - to an 
 	const result = compileMessage(
 		{
 			id: "login_button",
+			alias: {},
 			selectors: [],
 			variants: [
 				{
@@ -66,6 +69,7 @@ it("should compile a message to a function", async () => {
 	const result = compileMessage(
 		{
 			id: "multipleParams",
+			alias: {},
 			selectors: [],
 			variants: [
 				{
@@ -141,6 +145,7 @@ it("should add a /* @__NO_SIDE_EFFECTS__ */ comment to the compiled message", as
 	const result = compileMessage(
 		{
 			id: "some_message",
+			alias: {},
 			selectors: [],
 			variants: [
 				{
@@ -162,6 +167,7 @@ it("should re-export the message from a fallback language tag if the message is 
 	const result = compileMessage(
 		{
 			id: "some_message",
+			alias: {},
 			selectors: [],
 			variants: [
 				{
@@ -182,6 +188,7 @@ it("should return the message ID if no fallback can be found", async () => {
 	const result = compileMessage(
 		{
 			id: "some_message",
+			alias: {},
 			selectors: [],
 			variants: [
 				{
@@ -196,4 +203,73 @@ it("should return the message ID if no fallback can be found", async () => {
 	)
 
 	expect(result.en?.includes('export const some_message = () => "some_message"')).toBe(true)
+})
+
+it("should inclide aliases for messages", async () => {
+	const result = compileMessage(
+		{
+			id: "some_message",
+			alias: {
+				default: "some_message_alias",
+			},
+			selectors: [],
+			variants: [
+				{
+					match: [],
+					languageTag: "en",
+					pattern: [{ type: "Text", value: "Etwas Text" }],
+				},
+			],
+		},
+		["en", "de"],
+		"en"
+	)
+
+	expect(result.en?.includes("export const some_message_alias")).toBe(true)
+})
+
+it("should inclide aliases for messages from a fallback language", async () => {
+	const result = compileMessage(
+		{
+			id: "some_message",
+			alias: {
+				default: "some_message_alias",
+			},
+			selectors: [],
+			variants: [
+				{
+					match: [],
+					languageTag: "de",
+					pattern: [{ type: "Text", value: "Etwas Text" }],
+				},
+			],
+		},
+		["en", "de"],
+		"de"
+	)
+
+	expect(result.en?.includes("some_message_alias")).toBe(true)
+})
+
+it("should inclide aliases for fallback messages", async () => {
+	const result = compileMessage(
+		{
+			id: "some_message",
+			alias: {
+				default: "some_message_alias",
+			},
+			selectors: [],
+			variants: [
+				{
+					match: [],
+					languageTag: "de",
+					pattern: [{ type: "Text", value: "Etwas Text" }],
+				},
+			],
+		},
+		["en", "de"],
+		"en"
+	)
+
+	expect(result.en?.includes("some_message_alias")).toBe(true)
 })

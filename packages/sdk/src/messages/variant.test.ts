@@ -43,6 +43,7 @@ describe("getVariant", () => {
 	test("it should not throw error if selector is empty and match", () => {
 		const mockMessage: Message = {
 			id: "mockMessage",
+			alias: {},
 			selectors: [],
 			variants: [
 				{
@@ -69,6 +70,7 @@ describe("getVariant", () => {
 	test("it should not throw error if selector is empty, return undefined", () => {
 		const mockMessage: Message = {
 			id: "mockMessage",
+			alias: {},
 			selectors: [],
 			variants: [
 				{
@@ -397,6 +399,7 @@ describe("updateVariant", () => {
 const getMockMessage = (): Message => {
 	return {
 		id: "first-message",
+		alias: {},
 		selectors: [
 			{ type: "VariableReference", name: "gender" },
 			{ type: "VariableReference", name: "guestOther" },

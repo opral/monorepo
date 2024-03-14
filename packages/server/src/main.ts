@@ -49,6 +49,15 @@ if (isProduction) {
 
 // ----------------- ROUTES ----------------------
 
+// used by sdk load test
+app.get("/ping", (_, response) => {
+	response.send(
+		`http://localhost:${process.env.PORT ?? 3000} ${
+			process.env.MOCK_TRANSLATE ? "MOCK_TRANSLATE" : ""
+		}\n`
+	)
+})
+
 const serializedMarketplaceManifest = JSON.stringify(MarketplaceManifest)
 
 app.get("/schema/marketplace-manifest", (_, response) => {

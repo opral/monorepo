@@ -32,9 +32,11 @@ export function contextTooltip(
 		ReturnType<CustomApiInlangIdeExtension["messageReferenceMatchers"][number]>
 	>[number]
 ) {
-	const message = state().project.query.messages.get({
-		where: { id: referenceMessage.messageId },
-	})
+	// resolve message from id or alias
+	const message =
+		state().project.query.messages.get({
+			where: { id: referenceMessage.messageId },
+		}) ?? state().project.query.messages.getByDefaultAlias(referenceMessage.messageId)
 
 	if (!message) {
 		return undefined // Return early if message is not found

@@ -10,6 +10,7 @@ test("it parse a variable reference", async () => {
 
 	expect(parsed).toStrictEqual({
 		id: "test",
+		alias: {},
 		selectors: [],
 		variants: [
 			{

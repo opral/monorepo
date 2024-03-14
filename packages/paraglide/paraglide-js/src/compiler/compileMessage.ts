@@ -85,12 +85,9 @@ export const compileMessage = (
 			const compiledFallbackPattern = compiledPatterns[fallbackLanguage]
 
 			//if the fallback has the pattern, reexport the message from the fallback language
-			if (compiledFallbackPattern) {
-				resource[languageTag] = reexportMessage(message.id, fallbackLanguage)
-			} else {
-				//otherwise, fallback to the message ID
-				resource[languageTag] = messageIdFallback(message.id, languageTag)
-			}
+			resource[languageTag] = compiledFallbackPattern
+				? reexportMessage(message, fallbackLanguage)
+				: messageIdFallback(message, languageTag)
 		}
 	}
 
@@ -125,7 +122,9 @@ ${args.availableLanguageTags
 	.map((tag) => `\t\t${isValidJSIdentifier(tag) ? tag : `"${tag}"`}: ${i(tag)}.${args.message.id}`)
 	.join(",\n")}
 	}[options.languageTag ?? languageTag()](${hasParams ? "params" : ""})
-}`
+}
+${reexportAliases(args.message)}
+`
 }
 
 const messageFunction = (args: {
@@ -137,23 +136,70 @@ const messageFunction = (args: {
 	const hasParams = Object.keys(args.params).length > 0
 
 	return `
+	
 /**
  * ${paramsType(args.params, false)}
  * @returns {string}
  */
 /* @__NO_SIDE_EFFECTS__ */
-export const ${args.message.id} = (${hasParams ? "params" : ""}) => ${args.compiledPattern}`
+export const ${args.message.id} = (${hasParams ? "params" : ""}) => ${args.compiledPattern}
+${reexportAliases(args.message)}
+`
 }
 
-function reexportMessage(messageId: string, fromLanguageTag: string) {
-	return `export { ${messageId} } from "./${fromLanguageTag}.js"`
+function reexportMessage(message: Message, fromLanguageTag: string) {
+	const exports: string[] = [message.id]
+
+	if (message.alias["default"] && message.id !== message.alias["default"]) {
+		exports.push(message.alias["default"])
+	}
+
+	return `export { ${exports.join(", ")} } from "./${fromLanguageTag}.js"`
 }
 
-function messageIdFallback(messageId: string, languageTag: string) {
+function messageIdFallback(message: Message, languageTag: string) {
 	return `/**
-* Failed to resolve message ${messageId} for languageTag "${languageTag}". 
+* Failed to resolve message ${message.id} for languageTag "${languageTag}". 
 * @returns {string}
 */
 /* @__NO_SIDE_EFFECTS__ */
-export const ${messageId} = () => "${escapeForDoubleQuoteString(messageId)}"`
+export const ${message.id} = () => "${escapeForDoubleQuoteString(message.id)}"
+${reexportAliases(message)}
+`
+}
+
+/**
+ * Returns re-export statements for each alias of a message.
+ * If no aliases are present, this function returns an empty string.
+ *
+ * @param message
+ */
+function reexportAliases(message: Message) {
+	let code = ""
+
+	if (message.alias["default"] && message.id !== message.alias["default"]) {
+		code += `
+/**
+ * Change the reference from the alias \`m.${message.alias["default"]}()\` to \`m.${message.id}()\`:
+ * \`\`\`diff
+ * - m.${message.alias["default"]}()
+ * + m.${message.id}()
+ * \`\`\`
+ * ---
+ * \`${message.alias["default"]}\` is an alias for the message \`${message.id}\`.
+ * Referencing aliases instead of the message ID has downsides like:
+ *
+ * - The alias might be renamed in the future, breaking the code.
+ * - Constant naming convention discussions.
+ *
+ * Read more about aliases and their downsides here 
+ * @see inlang.com/link.
+ * ---
+ * @deprecated reference the message by id \`m.${message.id}()\` instead
+ */
+export const ${message.alias["default"]} = ${message.id};
+`
+	}
+
+	return code
 }
