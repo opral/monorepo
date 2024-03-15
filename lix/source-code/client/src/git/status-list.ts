@@ -1,6 +1,6 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 import isoGit from "../../vendored/isomorphic-git/index.js"
-// import { modeToFileType } from "./helpers.js"
+import { modeToFileType } from "./helpers.js"
 
 // TODO: LSTAT is not properly impl. in the memory fs!
 
@@ -99,7 +99,7 @@ type StatusArgs = {
 	/** Filter the results to only those whose filepath matches a function. */
 	filter?: (filepath: string) => boolean
 	/** (experimental filter option) TODO document */
-	sparseFilter?: (entry: { filename: string; type: "file" | "folder" }) => boolean //
+	sparseFilter?: (entry: { filename: string; type: "file" | "folder" | "symlink" }) => boolean //
 	/** an isogit cache object */
 	cache?: object
 	/**
@@ -124,7 +124,7 @@ export async function statusList({
 	ref = "HEAD",
 	filepaths = ["."],
 	filter,
-	sparseFilter,
+	sparseFilter, // experimental, not yet exposed as lix api!
 	cache,
 	includeStatus = [],
 	addHashes = false,
@@ -206,15 +206,20 @@ export async function statusList({
 
 				const isBlob = [headType, workdirType, stageType].includes("blob")
 
-				if (
-					sparseFilter &&
-					!sparseFilter({
-						filename: filepath,
-						type: isBlob ? "file" : "folder",
-					})
-				) {
-					// eslint-disable-next-line unicorn/no-null -- in case a folder is filtered using sparse - we wan't to skipp traversation of the tree
-					return null
+				if (sparseFilter) {
+					const fileMode = await(head || workdir)?.mode()
+					// @ts-ignore -- cannot be undefined
+					const fileType: "file" | "folder" | "symlink" = modeToFileType(fileMode)
+
+					if (
+						!sparseFilter({
+							filename: filepath,
+							type: fileType,
+						})
+					) {
+						// eslint-disable-next-line unicorn/no-null -- in case a folder is filtered using sparse - we wan't to skipp traversation of the tree
+						return null
+					}
 				}
 
 				// For now, bail on directories unless the file is also a blob in another tree
