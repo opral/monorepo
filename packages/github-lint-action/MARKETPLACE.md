@@ -1,6 +1,6 @@
-# 🥷 Ninja i18n - GitHub Lint Action
+# Automate your i18n linting for pull requests
 
-Automate your i18n workflow and ensure that your i18n files are always up to date with the latest changes in your source code.
+Ensure that your i18n files are always up to date with the latest changes in your source code.
 
 ## Features
 
