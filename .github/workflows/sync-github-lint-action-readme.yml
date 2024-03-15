@@ -6,7 +6,7 @@ on:
     branches:
       - "main"
     paths:
-      - "**/github-lint-action/README.md"
+      - "inlang/source-code/github-lint-action/README.md"
 
 jobs:
   sync-ninja-readme:
