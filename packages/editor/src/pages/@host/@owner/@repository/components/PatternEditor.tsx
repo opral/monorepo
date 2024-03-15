@@ -165,7 +165,8 @@ export function PatternEditor(props: {
 				})
 			}
 		})
-		))
+		)
+	)
 
 	const autoSave = () => {
 		let newMessage
