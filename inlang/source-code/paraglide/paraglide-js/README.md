@@ -37,9 +37,9 @@ npx @inlang/paraglide-js@latest init
 
 This will:
 
-1. Install the necessary dependencies
-2. Call the Paraglide compiler in your `build` script
-3. Set up any necessary configuration files
+1. Install necessary dependencies
+2. Add the Paraglide compiler to your `build` script
+3. Set up configuration files
 
 ### 2. Set up an adapter (optional)
 
@@ -57,9 +57,8 @@ Adapters are framework-integrations for Paraglide. If you are using a framework,
 # Usage
 
 Running your `build` script will generate a `src/paraglide` folder. This folder contains all the code that you need to use paraglide-js.
-Throughout this guide, you will see imports from `./paraglide/*`. These are all to this folder.
 
-> Tip: If you are using a bundler, you can set up an alias to `./src/paraglide` to make the imports shorter. We recommend `$paraglide/*`
+> Tip: If you are using a bundler, you can set up an alias to `./src/paraglide` to make the imports shorter.
 
 ## Adding Messages
 
@@ -73,7 +72,7 @@ By default, paraglide expects your messages to be in `messages/{lang}.json`.
 
 ## Using Messages
 
-You can import messages with `import * as m from "./paraglide/messages"`. Don't worry, your bundler will only bundle the messages that you actually use.
+You can import messages with `import * as m from "./paraglide/messages"`. Don't worry, your bundler will only include the messages that you actually use.
 
 ```js
 import * as m from "./paraglide/messages.js"
@@ -83,9 +82,9 @@ m.hello() // Hello world!
 m.loginHeader({ name: "Samuel" }) // Hello Samuel, please login to continue.
 ```
 
-If you want to dynamically choose between a set of messages, you can create a record of messages and index into it.
+If you want to choose between messages at runtime, you can create a record of messages and index into it.
 
-```js
+```ts
 import * as m from "./paraglide/messages.js"
 
 const season = {
@@ -93,10 +92,17 @@ const season = {
 	summer: m.summer,
 	autumn: m.autumn,
 	winter: m.winter,
-}
+} as const;
 
 const msg = season["spring"]() // Hello spring!
 ```
+
+
+### (optional) Using the [Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) IDE Extension
+
+[Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) integrates with paraglide to give you the optimal dev-experience. 
+
+![VsCode screenshot showing Sherlock adding inlay hints next to messages and making an "extract message" code action available for hardcoded text](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/sherlock-preview.png)
 
 ## Adding Languages
 
