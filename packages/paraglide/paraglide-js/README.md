@@ -60,7 +60,7 @@ Running your `build` script will generate a `src/paraglide` folder. This folder 
 
 > Tip: If you are using a bundler, you can set up an alias to `./src/paraglide` to make the imports shorter.
 
-## Adding Messages
+## Adding Messages
 
 By default, paraglide expects your messages to be in `messages/{lang}.json`. 
 ```json
@@ -104,7 +104,7 @@ const msg = season["spring"]() // Hello spring!
 
 ![VsCode screenshot showing Sherlock adding inlay hints next to messages and making an "extract message" code action available for hardcoded text](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/sherlock-preview.png)
 
-## Adding Languages
+## Adding Languages
 
 You can declare which languages you support in `./project.inlang/settings.json` in the `languageTags` array.
 
