@@ -169,8 +169,6 @@ export default function Page(props: {
 		}
 	}
 
-	console.log(props.items)
-
 	return (
 		<>
 			<Title>
