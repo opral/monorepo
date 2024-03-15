@@ -354,7 +354,7 @@ export default function Page(props: {
 										props.items &&
 										getCategoryContent()?.sections?.includes("guides-developer") &&
 										props.items.some((item: MarketplaceManifest & { uniqueID: string }) =>
-											item.keywords.some((keyword) => keyword === "guides-developer")
+											item.keywords.includes("guides-developer")
 										)
 									}
 								>
@@ -363,8 +363,9 @@ export default function Page(props: {
 									</h2>
 									<Gallery
 										items={props.items.filter((item: MarketplaceManifest & { uniqueID: string }) =>
-											item.keywords.some((keyword) => keyword === "guides-developer")
+											item.keywords.includes("guides-developer")
 										)}
+										hideBuildYourOwn
 									/>
 								</Show>
 								{/* Change control */}
@@ -373,7 +374,7 @@ export default function Page(props: {
 										props.items &&
 										getCategoryContent()?.sections?.includes("guides-change-control") &&
 										props.items.some((item: MarketplaceManifest & { uniqueID: string }) =>
-											item.keywords.some((keyword) => keyword === "guides-change-control")
+											item.keywords.includes("guides-change-control")
 										)
 									}
 								>
@@ -382,8 +383,9 @@ export default function Page(props: {
 									</h2>
 									<Gallery
 										items={props.items.filter((item: MarketplaceManifest & { uniqueID: string }) =>
-											item.keywords.some((keyword) => keyword === "guides-change-control")
+											item.keywords.includes("guides-change-control")
 										)}
+										hideBuildYourOwn
 									/>
 								</Show>
 								{/* General */}
@@ -392,7 +394,7 @@ export default function Page(props: {
 										props.items &&
 										getCategoryContent()?.sections?.includes("guides-general") &&
 										props.items.some((item: MarketplaceManifest & { uniqueID: string }) =>
-											item.keywords.some((keyword) => keyword === "guides-general")
+											item.keywords.includes("guides-general")
 										)
 									}
 								>
@@ -401,8 +403,9 @@ export default function Page(props: {
 									</h2>
 									<Gallery
 										items={props.items.filter((item: MarketplaceManifest & { uniqueID: string }) =>
-											item.keywords.some((keyword) => keyword === "guides-general")
+											item.keywords.includes("guides-general")
 										)}
+										hideBuildYourOwn
 									/>
 								</Show>
 								{/* i18n */}
@@ -411,7 +414,7 @@ export default function Page(props: {
 										props.items &&
 										getCategoryContent()?.sections?.includes("guides-i18n") &&
 										props.items.some((item: MarketplaceManifest & { uniqueID: string }) =>
-											item.keywords.some((keyword) => keyword === "guides-i18n")
+											item.keywords.includes("guides-i18n")
 										)
 									}
 								>
@@ -420,8 +423,9 @@ export default function Page(props: {
 									</h2>
 									<Gallery
 										items={props.items.filter((item: MarketplaceManifest & { uniqueID: string }) =>
-											item.keywords.some((keyword) => keyword === "guides-i18n")
+											item.keywords.includes("guides-i18n")
 										)}
+										hideBuildYourOwn
 									/>
 								</Show>
 								{/* Translator */}
@@ -430,7 +434,7 @@ export default function Page(props: {
 										props.items &&
 										getCategoryContent()?.sections?.includes("guides-translator") &&
 										props.items.some((item: MarketplaceManifest & { uniqueID: string }) =>
-											item.keywords.some((keyword) => keyword === "guides-translator")
+											item.keywords.includes("guides-translator")
 										)
 									}
 								>
@@ -439,8 +443,9 @@ export default function Page(props: {
 									</h2>
 									<Gallery
 										items={props.items.filter((item: MarketplaceManifest & { uniqueID: string }) =>
-											item.keywords.some((keyword) => keyword === "guides-translator")
+											item.keywords.includes("guides-translator")
 										)}
+										hideBuildYourOwn
 									/>
 								</Show>
 							</Show>
