@@ -19,7 +19,8 @@
 		"getting-started",
 		"i18n",
 		"localization",
-		"guide"
+		"guide",
+		"guides-general"
 	],
 	"recommends": ["g/00162hsd", "g/6ddyhpoi", "g/38fnf03n"],
 	"publisherName": "Niklas Buchfink",

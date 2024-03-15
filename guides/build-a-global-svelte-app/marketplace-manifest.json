@@ -22,7 +22,8 @@
 		"svelte",
 		"javascript",
 		"ide",
-		"guide"
+		"guide",
+		"guides-developer"
 	],
 	"recommends": ["g/3go4f04m", "g/00162hsd", "g/wxcebbig", "g/uxohikde"],
 	"publisherName": "Nils Jacobsen",
