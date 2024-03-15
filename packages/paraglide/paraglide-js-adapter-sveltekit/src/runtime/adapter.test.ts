@@ -73,6 +73,5 @@ describe("createI18n", () => {
 			expect(i18n.route(base + "/about/")).toBe(base + "/about")
 			expect(i18n.route(base + "/de/about/")).toBe(base + "/about")
 		})
-
 	})
 })
