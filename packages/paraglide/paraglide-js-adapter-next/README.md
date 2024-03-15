@@ -18,18 +18,25 @@ First, let's set up [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-p
 npx @inlang/paraglide-js@latest init
 ```
 
-This will have created a `./project.inlang` folder containing a `settings.json` file. There you will configure which languages you want to support.
+This will have created a `./project.inlang` folder containing a `settings.json` file. There, configure which languages you want to support. 
 
-Add a `./messages` folder and add a json file for each of your languages:
+```json
+// project.inlang/settings.json
+{
+	"languageTags": ["en", "de"]
+}
+```
+
+Add a `./messages` folder with a json file for language. Then add some messages
 
 ```json
 // messages/en.json
 {
-	"hello_world": "Hello World"
+	"hello": "Hello {name}"
 }
 ```
 
-Your messages will live in these files. You can either add & edit them manually, or use the [IDE Extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension).
+You can edit messages manually or use the [Sherlock IDE Extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension).
 
 Then, install the Paraglide NextJS Adapter:
 
@@ -37,22 +44,21 @@ Then, install the Paraglide NextJS Adapter:
 npm install @inlang/paraglide-js-adapter-next
 ```
 
-Install the Paraglide Next Plugin in `next.config.js`.
+Add the plugin in `next.config.mjs`.
 
 ```ts
-const { paraglide } = require("@inlang/paraglide-js-adapter-next/plugin")
+// make sure to import from /plugin!
+import { paraglide } from "@inlang/paraglide-js-adapter-next/plugin";
 
-/** @type {import('next').NextConfig} */
-module.exports = paraglide({
+const config = paraglide({
     paraglide: {
-        // recommended setup
-        project: "./project.inlang", / /the path to the Inlang project
+		//recommended setup
+        project: "./project.inlang", //the path to the Inlang project
         outdir: "./src/paraglide", // where you want the generated files to go
     },
 })
+export default config;
 ```
-
-> In newer versions of Next, the config may be using ESM. Use an import statement instead.
 
 ## App Router Setup
 
@@ -94,6 +100,7 @@ import { languageTag } from "@/paraglide/runtime"
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<LanguageProvider>
+			{/* setting the lang attribute is important! */}
 			<html lang={languageTag()}>
 				<body>{children}</body>
 			</html>
@@ -121,7 +128,7 @@ The same goes for the other navigation APIs.
 
 ### 5. Have Fun!
 
-You should now have working localised routing set up! Try visiting `/de` or whatever languages you have configured.
+You should now have working localised routing set up! Try visiting `/de` or whatever language you have configured.
 
 Using messages works by importing them from `@/paraglide/messages.js`.
 
@@ -138,17 +145,15 @@ export function Home() {
 }
 ```
 
-Messages are fully typesafe. If you are using the [IDE Extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) you will
-get previews of the text-content right in your code!
+Messages are fully typesafe. If you are using the [Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) you will get previews of the text-content right in your code!
 
-Only the messages that are used in client components will be sent to the client. Messages used in Server Components don't
-increase your bundle size. Isn't that neat?
+Only the messages that are used in client components will be sent to the client. Messages used in Server Components don't increase your bundle size.
 
 ### Usage
 
 #### Translated Metadata
 
-Next offers two ways of defining Metadata on a page. `export const metadata` and `generateMetadata`. We need to use `generateMetadata`, since we need to return different metadata for different languages.
+To return different metadata for each language, we will need to use `generateMetadata`.
 
 ```ts
 export async function generateMetadata() {
@@ -203,8 +208,9 @@ Excluded routes won't be prefixed with the language tag & the middleware will no
 
 #### Changing the default language
 
-Usually the default language is the `sourceLanguageTag` you defined in your `project.inlang/settings.json`. If you want to change it, you can use the `defaultLanguage` option on `createI18n`.
+The default language is the one that get's used when there is no language in the URL.
 
+By default the default language is the `sourceLanguageTag` you defined in your `project.inlang/settings.json`. You can change it with the `defaultLanguage` option.
 
 ```ts
 export const { ... } =
@@ -213,10 +219,9 @@ export const { ... } =
 	})
 ```
 
-This will change which langauge doesn't get a prefix in the URL.
 
 #### Translated Pathnames
-You can translate pathnames by adding a `pathname` option to `createI18n`. This allows you to define a different pathname for each language.
+You can translate pathnames with the `pathname` option. You can define different pathnames for each language.
 
 ```ts
 export const { ... } =
@@ -230,7 +235,7 @@ export const { ... } =
 	})
 ```
 
-An even better option is to use a message to manage the pathnames. This way you can change the pathnames without changing the code.
+You can also use a message as the pathname. This way you can change the pathnames without changing the code.
 
 ```json
 // messages/en.json
@@ -263,13 +268,13 @@ localizePathname("/about", "de") // de/ueber-uns
 
 #### SEO
 
-Search engines like Google expect you to tell them about translated versions of your pages. The adapter does this by default by setting the `Link` Header on requests.
+Search engines like Google expect you to tell them about translated versions of your pages. The adapter does this by default by adding the `Link` Header to requests.
 
 ## (legacy) Setup With the Pages Router
 
-The Pages router already comes with i18n support out of the box. You can read more about it in the[NextJS Pages router documentation](https://nextjs.org/docs/advanced-features/i18n-routing). Thanks to this, Paraglide doesn't need to provide it's own routing. All the Adapter does in the Pages router is react to the language change.
+The Pages router already comes with [i18n support out of the box](https://nextjs.org/docs/advanced-features/i18n-routing). Thus, Paraglide doesn't need to provide it's own routing. All the Adapter does in the Pages router is react to the language change.
 
-To set up i18n routing in NextJS add an `i18n` object to your `next.config.js` file. In it you should specify the locales you want to support and the default locale. Make sure these match the ones in your `project.inlang/settings.json` file.
+Add an `i18n` object to your `next.config.js` file. In it, specify the locales you want to support and the default locale. Make sure these match the ones in your `project.inlang/settings.json` file.
 
 ```js
 module.exports = {
@@ -280,11 +285,11 @@ module.exports = {
 }
 ```
 
-> If you are using ESM for your NextJS config, you can also import `availableLanguageTags` and `sourceLanguageTag` from `./src/paraglide/runtime.js` and use them instead of hardcoding the locales. Doing this requires `"type": "module"` in your `package.json` & is entirely optional.
+> If you are using ESM for your NextJS config, you can also import `availableLanguageTags` and `sourceLanguageTag` from `./src/paraglide/runtime.js` and use them instead of hardcoding the locales.
 
-This will have the effect that NextJS will automatically prefix all routes with the locale. For example, the route `/about` will become `/en/about` for the English locale and `/de/about` for the German locale. The only language that won't be prefixed is the default locale.
+NextJS will now automatically prefix all routes with the locale. For example, the route `/about` will become `/en/about` for the English locale and `/de/about` for the German locale. Only the default locale won't be prefixed. 
 
-Now all that's left is to tell paraglide which language to use. To do that, wrap your `_app.js` file with the `ParaglideJS` component.
+Finally, wrap your `_app.js` file with the `ParaglideJS` component.
 
 ```jsx
 import { ParaglideJS } from "@inlang/paraglide-js-adapter-next/pages"
@@ -312,7 +317,7 @@ export default function Home() {
 }
 ```
 
-Now we just need to set the `lang` attribute on the `html` element. Do that in `src/pages/_document.js` using the `languageTag()`function.
+Don't forget to set the `lang` attribute on the `html` element in `src/pages/_document.js`.
 
 ```jsx
 import { languageTag } from "@/paraglide/runtime"
@@ -325,16 +330,15 @@ export default function Document() {
 
 ## Known Limitations
 
-There are some NextJS features that can not be used with the Paraglide Adapter. These are:
-- `output: static`
-- Evaluating messages in the module-scope in server components
+There are some known limitation with this adapter:
+- `output: static` isn't supported yet.
+- Evaluating messages in the module-scope in server components always renders the source language.
 
 ## Roadmap to 1.0
 
-- Translated Pathnames
-- Better Static Export support
+- Static Export support
 - Simplify Setup
-- Expand Routing Strategies
+- Cookie & Domain Routing Strategies
 
 ## Examples
 
