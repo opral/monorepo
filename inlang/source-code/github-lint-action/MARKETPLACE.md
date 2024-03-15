@@ -53,7 +53,9 @@ jobs:
 
 ## Workflow
 
+<doc-video src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/github-lint-action/assets/Ninja-showcase.mp4"></doc-video>
+
 - When a pull request is opened or updated, the action will run and check for new i18n issues.
-- If any issues are found, the action will create a comment on the pull request with a link to the Fink localization editor to fix the issues.
-- After the issues are fixed, the action will automatically update the comment on the pull request to reflect the changes.
+- If issues are found, the action creates a comment on the pull request with an issues report including links to the Fink localization editor to resolve the issues.
+- After the issues are resolved, the action will automatically update the pull request comment to reflect the changes.
 - If no issues are found, the action will simply not create any comments.
