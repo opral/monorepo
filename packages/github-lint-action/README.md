@@ -11,7 +11,7 @@ Automate your i18n workflow and ensure that your i18n files are always up to dat
 
 ## Getting Started
 
-Make sure you have an inlang project set up in your repository. If you don't have one yet, you can create one [here](https://inlang.com/documentation/concept/project).
+Please ensure you have set up an [inlang project](https://inlang.com//documentation/concept/project) with [lint rules](https://inlang.com/c/lint-rules) in your repository.
 
 Add the following workflow file to your repository in this path `.github/workflows/ninja-i18n.yml`
 
@@ -52,6 +52,8 @@ jobs:
 | `GITHUB_TOKEN`        | _required_ | Usage: `GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}`,  Ninja i18n action uses this in-built GitHub token to make the API calls for interacting with GitHub. It is built into Github Actions and does not need to be manually specified in your secrets store. [More Info](https://help.github.com/en/actions/configuring-and-managing-workflows/authenticating-with-the-github_token)|
 
 ## Workflow
+
+https://github.com/opral/monorepo/assets/59048346/99049121-11db-4672-a7a8-e0d606426f4b
 
 - When a pull request is opened or updated, the action will run and check for new i18n issues.
 - If any issues are found, the action will create a comment on the pull request with a link to the Fink localization editor to fix the issues.
