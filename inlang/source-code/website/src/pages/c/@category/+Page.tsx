@@ -31,7 +31,18 @@ const selectedCategory = () => {
 	return currentPageContext.urlParsed.pathname.replace("/", "")
 }
 
-type PossibleSectionsType = Array<"apps" | "libraries" | "plugins" | "guides" | "all">
+type PossibleSectionsType = Array<
+	| "apps"
+	| "libraries"
+	| "plugins"
+	| "guides"
+	| "guides-developer"
+	| "guides-translator"
+	| "guides-change-control"
+	| "guides-general"
+	| "guides-i18n"
+	| "all"
+>
 
 export default function Page(props: {
 	minimal?: boolean
@@ -94,7 +105,13 @@ export default function Page(props: {
 					description: m.marketplace_header_guides_description(),
 					buttonLink: "/documentation/publish-guide",
 					buttonText: m.marketplace_header_guides_button_text(),
-					sections: ["all"],
+					sections: [
+						"guides-developer",
+						"guides-translator",
+						"guides-change-control",
+						"guides-general",
+						"guides-i18n",
+					],
 				}
 			case "lix":
 				return {
@@ -151,6 +168,8 @@ export default function Page(props: {
 				}
 		}
 	}
+
+	console.log(props.items)
 
 	return (
 		<>
@@ -298,7 +317,7 @@ export default function Page(props: {
 									}
 								>
 									<h2 class="pb-4 border-t-surface-200 text-xl font-medium tracking-tight text-surface-900">
-										i18n Workflow Apps
+										inlang Apps
 									</h2>
 									<Gallery
 										items={props.items.filter(
@@ -326,6 +345,101 @@ export default function Page(props: {
 										items={props.items.filter(
 											(item: MarketplaceManifest & { uniqueID: string }) =>
 												item.id.split(".")[0] === "plugin"
+										)}
+									/>
+								</Show>
+								{/* Developer */}
+								<Show
+									when={
+										props.items &&
+										getCategoryContent()?.sections?.includes("guides-developer") &&
+										props.items.some((item: MarketplaceManifest & { uniqueID: string }) =>
+											item.keywords.some((keyword) => keyword === "guides-developer")
+										)
+									}
+								>
+									<h2 class="pb-4 border-t-surface-200 text-xl font-medium tracking-tight text-surface-900">
+										Guides for developers
+									</h2>
+									<Gallery
+										items={props.items.filter((item: MarketplaceManifest & { uniqueID: string }) =>
+											item.keywords.some((keyword) => keyword === "guides-developer")
+										)}
+									/>
+								</Show>
+								{/* Change control */}
+								<Show
+									when={
+										props.items &&
+										getCategoryContent()?.sections?.includes("guides-change-control") &&
+										props.items.some((item: MarketplaceManifest & { uniqueID: string }) =>
+											item.keywords.some((keyword) => keyword === "guides-change-control")
+										)
+									}
+								>
+									<h2 class="pb-4 border-t-surface-200 text-xl font-medium tracking-tight text-surface-900">
+										Guides about change control
+									</h2>
+									<Gallery
+										items={props.items.filter((item: MarketplaceManifest & { uniqueID: string }) =>
+											item.keywords.some((keyword) => keyword === "guides-change-control")
+										)}
+									/>
+								</Show>
+								{/* General */}
+								<Show
+									when={
+										props.items &&
+										getCategoryContent()?.sections?.includes("guides-general") &&
+										props.items.some((item: MarketplaceManifest & { uniqueID: string }) =>
+											item.keywords.some((keyword) => keyword === "guides-general")
+										)
+									}
+								>
+									<h2 class="pb-4 border-t-surface-200 text-xl font-medium tracking-tight text-surface-900">
+										Guides about inlang
+									</h2>
+									<Gallery
+										items={props.items.filter((item: MarketplaceManifest & { uniqueID: string }) =>
+											item.keywords.some((keyword) => keyword === "guides-general")
+										)}
+									/>
+								</Show>
+								{/* i18n */}
+								<Show
+									when={
+										props.items &&
+										getCategoryContent()?.sections?.includes("guides-i18n") &&
+										props.items.some((item: MarketplaceManifest & { uniqueID: string }) =>
+											item.keywords.some((keyword) => keyword === "guides-i18n")
+										)
+									}
+								>
+									<h2 class="pb-4 border-t-surface-200 text-xl font-medium tracking-tight text-surface-900">
+										Guides about globalization
+									</h2>
+									<Gallery
+										items={props.items.filter((item: MarketplaceManifest & { uniqueID: string }) =>
+											item.keywords.some((keyword) => keyword === "guides-i18n")
+										)}
+									/>
+								</Show>
+								{/* Translator */}
+								<Show
+									when={
+										props.items &&
+										getCategoryContent()?.sections?.includes("guides-translator") &&
+										props.items.some((item: MarketplaceManifest & { uniqueID: string }) =>
+											item.keywords.some((keyword) => keyword === "guides-translator")
+										)
+									}
+								>
+									<h2 class="pb-4 border-t-surface-200 text-xl font-medium tracking-tight text-surface-900">
+										Guides for translators
+									</h2>
+									<Gallery
+										items={props.items.filter((item: MarketplaceManifest & { uniqueID: string }) =>
+											item.keywords.some((keyword) => keyword === "guides-translator")
 										)}
 									/>
 								</Show>
