@@ -11,7 +11,7 @@ Ensure that your i18n files are always up to date with the latest changes in you
 
 ## Getting Started
 
-Make sure you have an inlang project set up in your repository. If you don't have one yet, you can create one [here](https://inlang.com/documentation/concept/project).
+Please ensure you have set up an [inlang project](https://inlang.com//documentation/concept/project) with [lint rules](https://inlang.com/c/lint-rules) in your repository.
 
 Add the following workflow file to your repository in this path `.github/workflows/ninja-i18n.yml`
 
