@@ -19,7 +19,7 @@ export function createMessageLintReportsQuery(
 	messagesQuery: MessageQueryApi,
 	settings: () => ProjectSettings,
 	installedMessageLintRules: () => Array<InstalledMessageLintRule>,
-	resolvedModules: () => Awaited<ReturnType<typeof resolveModules>> | undefined,
+	resolvedModules: () => Awaited<ReturnType<typeof resolveModules>> | undefined
 ): InlangProject["query"]["messageLintReports"] {
 	// @ts-expect-error
 	const index = new ReactiveMap<MessageLintReport["messageId"], MessageLintReport[]>()
