@@ -43,6 +43,7 @@ export async function convert(markdown: string): Promise<string> {
 				"doc-image",
 				"doc-pricing",
 				"doc-important",
+				"doc-video",
 				...defaultSchema.tagNames!,
 			],
 			attributes: {
@@ -58,6 +59,7 @@ export async function convert(markdown: string): Promise<string> {
 				"doc-image": ["src", "alt"],
 				"doc-important": ["title", "description"],
 				"doc-pricing": ["heading", "content"],
+				"doc-video": ["src", "type"],
 				...defaultSchema.attributes,
 			},
 		})

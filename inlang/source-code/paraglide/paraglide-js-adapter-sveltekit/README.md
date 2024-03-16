@@ -1,14 +1,14 @@
 # Paraglide Adapter SvelteKit
 
-Everything you need to internationalize your SvelteKit app with Paraglide.
+The best way to internationalize your SvelteKit App!
 
-**Features**
-
-- 🪂 Automatically set & manage the language for Paraglide
+- 🪂 Automatically detect & manage the language
 - 💨 A breeze to set up - No need to change your `routes`
 - 🪄 Automatically translate existing links
 - 💬 Translated paths
 - 🤖 SEO friendly out of the box
+
+This is a SvelteKit integration for the [ParaglideJS i18n library](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
 
 ## Quickstart
 
@@ -19,19 +19,19 @@ There are four steps to setting up the Paraglide Adapter with SvelteKit.
 3. Add the Adapter Component to your Layout
 4. Add the Hooks.
 
-We assume that you already have a SvelteKit app set up. If you don't, please follow the [SvelteKit's getting Started Guide](https://kit.svelte.dev/docs/creating-a-project).
+If you don't already have a SvelteKit app set up please follow [SvelteKit's getting Started Guide](https://kit.svelte.dev/docs/creating-a-project).
 
 ### Step Zero: Set up Paraglide
 
-Before you can use the adapter, you need to set up Paraglide. If you have already done this, you can skip this step.
-
-Otherwise, run the following command in your project root and follow the instructions:
+To use the adapter you have Paraglide set up.
 
 ```bash
 npx @inlang/paraglide-js init
 ```
 
-To learn more, please read the official [Paraglide documentation](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
+This will do a few things:
+- Install necessary dependencies
+- Create necessary configuration files
 
 ### 1. Add the Vite Plugin
 
@@ -47,6 +47,7 @@ import { paraglide } from "@inlang/paraglide-js-adapter-sveltekit/vite"
 export default defineConfig({
 	plugins: [
 		paraglide({
+			//recommended
 			project: "./project.inlang",
 			outdir: "./src/lib/paraglide",
 		}),
@@ -62,20 +63,26 @@ export default defineConfig({
 
 ### 2. Initialise the Adapter
 
-Create a file somewhere, for example `src/lib/i18n.js` and add the following code:
+Create a `src/lib/i18n.js` file:
 
 ```js
+// src/lib/i18n.js
 import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
 import * as runtime from "$lib/paraglide/runtime.js"
 
 export const i18n = createI18n(runtime);
 ```
 
-This `i18n` instance is the heart of the adapter. It will provide you with all the functionality you need. `createI18n` is your one-stop-shop for configuring the adapter.
+`createI18n` will be your one-stop-shop for configuring the adapter.
+
+<doc-accordion
+	heading="Does it need to be in src/lib/i18n.js ?"
+	text="No. You can place this file anywhere. Be aware that you will be importing from here a lot, so make sure it's somewhere convenient.">
+</doc-accordion>
 
 ### 3. Set up the Language Provider
 
-To provide the language to your app, add the `ParaglideJS` component to your layout and pass it the `routing` instance.
+Add the `ParaglideJS` component to your layout and pass it the `i18n` instance.
 
 ```svelte
 <!-- src/routes/+layout.svelte -->
@@ -89,14 +96,14 @@ To provide the language to your app, add the `ParaglideJS` component to your lay
 </ParaglideJS>
 ```
 
-This will do a few things for you:
-1. Automatically set the language for Paraglide
-2. Automatically add `rel="alternate"` links to your page head
-3. Automatically translate any `<a href>` attributes on your page. You don't need to change them
+This does a few things:
+1. Detect the language
+2. Add `rel="alternate"` links to your page head
+3. Translate any `<a href>` attributes on your page. 
 
-### 4. Add the Reroute hook
+### 4. Add the Hooks
 
-Finally, let's add the `reroute` hook that makes it all possible. In your `src/hooks.js` file, use the `i18n` instance to add the `reroute` hook:
+In your `src/hooks.js` file, use the `i18n` instance to add the `reroute` hook:
 
 ```js
 import { i18n } from '$lib/i18n.js'
@@ -105,9 +112,17 @@ export const reroute = i18n.reroute()
 
 > The reroute hook was added in SvelteKit 2.3.0. You might have to update your SvelteKit version.
 
-## 5. Go try it out!
+In `src/hooks.server.js` add the handle hook. 
 
-That's it, you should now have i18n routing in your SvelteKit app. Go try it out!
+```js
+// src/hooks.server.js
+import { i18n } from '$lib/i18n.js'
+export const handle = i18n.handle()
+```
+
+This will make the language and text-direction on `event.locals.paraglide`.
+
+## 5. Go try it out!
 
 Visit `/` to see your default language, and `/{lang}` to see other languages. All links should be translated automatically.
 
@@ -115,41 +130,26 @@ Visit `/` to see your default language, and `/{lang}` to see other languages. Al
 
 ### SEO Considerations
 
-The `<ParaglideJS>` component automatically adds `rel="alternate"` links to your page head. This is important for SEO. It tells search engines that there are other versions of this page in other languages.
+The `<ParaglideJS>` component automatically adds `rel="alternate"` links to your page head. You don't have to do that yourself.
 
-```html
-<link rel="alternate" hreflang="en" href="/en/about" />
-<link rel="alternate" hreflang="de" href="/de/uber-uns" />
-```
-
-Additionally, you need to add the `lang` and `dir` attributes to your `html` tag. This is important for screen readers. Unfortunately, Svelte doesn't offer a way to do this from inside a component. You need to set it in your `src/hooks.server.js` file. 
-
-The easiest way to do this is to set the `lang` and `dir` attributes in `src/app.html` with an easy to recognize placeholder.
+To set the `lang` and `dir` attributes on your `<html>` tag add placeholders in `src/app.html`.
 
 ```html
 <html lang="%paraglide.lang%" dir="%paraglide.textDirection%"> 
 ```
 
-Then, in your `src/hooks.server.js` file, you can use `i18n.handle()` to replace the placeholders with the correct values. `%paraglide.lang%` and `%paraglide.textDirection%` are the default placeholders. You can change them by passing the `langPlaceholder` and `textDirectionPlaceholder` options to `handle`.
-
-
-```js
-import { i18n } from '$lib/i18n.js'
-
-export const handle = i18n.handle()
-```
-
-The handle hook will also make `lang` and `textDirection` available in `event.locals.paraglide`, so you can use them elsewhere in your app.
+These will automatically be replaced with the correct values.
 
 ### Excluding certain routes
 
-If you have routes that you don't want to translate, you can exclude them by passing them to the `exclude` option:
+Exclude routes from being translated with the `exclude` option.
 
 ```js
 import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
 import * as runtime from "$lib/paraglide/runtime.js"
 
 export const i18n = createI18n(runtime, {
+	// don't include the language or base path
 	exclude: ["/admin", "/login", /^\/user\/\d+$/],
 })
 ```
@@ -159,58 +159,16 @@ Excluded routes will:
 - Not have their Paths translated
 - Not have links pointing to them translated
 
-If you still want outgoing links to be translated, make sure the page is till wrapped in the `ParaglideJS` component.
+Make sure excluded pages are still wrapped in the `<ParaglideJS>` so that outgoing links are still translated. 
 
 ### Translated Paths
 
-With the Paraglide SvelteKit Adapter, you can have different paths for each language. For example, you can have:
 - `/en/about` for English
 - `/de/uber-uns` for German
 - `/fr/a-propos` for French
 
-Setting this up is easy with the `pathnames` option. Specify it duting initialisation:
-
-```js
-import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
-import * as runtime from "$lib/paraglide/runtime.js"
-
-export const i18n = createI18n(runtime, {
-	pathnames: {
-		"/about" : {
-			en: "/about",
-			de: "/uber-uns",
-			fr: "/a-propos",
-		},
-	}
-})
-```
-
-> You don't need to include the language, or your site's base path. Those will be added automatically.
-
-If you now visit `/fr/a-propos` you should see the French version of your about page.
-
-You can also use parameters in your translations. This is useful for pages that have a dynamic ID, like a user profile page. Parameters are added in square brackets.
-
-```js
-import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
-import * as runtime from "$lib/paraglide/runtime.js"
-
-export const i18n = createI18n(runtime, {
-	pathnames: {
-		"/user/[username]" : {
-			en: "/user/[username]",
-			de: "/benutzer/[username]",
-			fr: "/utilisateur/[username]",
-		},
-	}
-})
-```
-
-Optional parameters, catch-all parameters and param matchers are not yet supported.
-
-> You need to use all parameters in all translations. If you don't, Paraglide will not be able to use the correct path.
-
-For convenience, you can also pass a message-function as the value of the pathnames object. 
+You can have different paths for each language with the `pathnames` option. 
+Don't include the language or the [base path](https://kit.svelte.dev/docs/configuration#paths).
 
 ```js
 import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
@@ -219,8 +177,20 @@ import * as m from "$lib/paraglide/messages.js"
 
 export const i18n = createI18n(runtime, {
 	pathnames: {
-		// do not call the function - pass a reference
-		"/about" : m.about_path
+		"/about" : {
+			en: "/about",
+			de: "/uber-uns",
+			fr: "/a-propos",
+		},
+		// you can use parameters
+		// optional parameters and spread params aren't supported (yet)
+		"/user/[username]" : {
+			en: "/user/[username]",
+			de: "/benutzer/[username]",
+			fr: "/utilisateur/[username]",
+		},
+		// or use a message function (recommended)
+		"/admin" : m.admin_path
 	}
 })
 ```
@@ -231,31 +201,29 @@ Links are translated automatically using a preprocessor. This means that you can
 
 ```svelte
 <a href="/about">{m.about()}</a>
-```
 
-Will become:
+<!-- will become -->
 
-```svelte
 <a href="/en/about">{m.about()}</a>
 <a href="/de/uber-uns">{m.about()}</a>
 <a href="/fr/a-propos">{m.about()}</a>
+
+<!-- depending on the current language -->
 ```
 
-depending on the current language.
-
-If you want a link to be translated into a specific language, you can use the `hreflang` attribute.
+If you want a link to be translated into a specific language set the `hreflang` attribute.
 
 ```svelte
-<!-- This -->
 <a href="/about" hreflang="de">{m.about()}</a>
 
-<!-- Will become -->
+<!-- Will always be german, regardless of the current language -->
 <a href="/de/uber-uns" hreflang="de">{m.about()}</a>
 ```
 
-You can also opt out of translation alltogether by adding a `data-no-translate` attribute. This will leave the `href` attribute as is.
+Opt-out of translation by adding a `data-no-translate` attribute.
 
 ```svelte
+<!-- this will not be translated -->
 <a href="/about" data-no-translate>{m.about()}</a>
 ```
 
@@ -263,11 +231,11 @@ Other attributes that are also translated are:
 - The `action` attribute on `form` elements
 - The `formaction` attribute on `button` elements
 
-> If you have more attributes that you want to be translated, please open an issue.
+> If you have other attributes that you want to be translated [open an issue](https://www.github.com/opral/monorepo/issues).
 
 ### Programmatic Navigation with Translated Paths
 
-SvelteKit offers a few ways of navigating programmatically. Mainly `goto` and `redirect`. Unfortunately, translating these automatically is not practical. For these cases, you can use the `resolveRoute` method on the `i18n` instance. It takes the absolute path that you want to translate and the language you want to translate it to.
+SvelteKit offers `goto` and `redirect` to navigate programmatically. These cannot be translated automatically. Localize these with the `i18n.resolveRoute()` method.
 
 ```js
 import { i18n } from '$lib/i18n.js'
@@ -276,23 +244,20 @@ import { goto } from '$app/navigation'
 
 redirect(i18n.resolveRoute("/about", "en"))
 
-//Omitting the language defaults to the current language
+//Omitting the language argument uses the current language
 goto(i18n.resolveRoute("/about"))
 ```
 
-Fortunately you don't need to do this often. Most of the time the an `a` tag is enough.
-
 ### Language Switchers
 
-Language switchers are tricky, because we need to get the route correspondingto the current URL path, which is of course translated. We need to somehow get the untranslated version of the path, so that we can translate it again.
+Language switchers are tricky, because we need to dynamically translate the current URL path, which is itself translated. We need to get the untranslated version of the current path & translate it into the target language.
 
 <doc-accordion
 	heading="Wait, do I thought I don't need wrap my links with the Adapter?"
 	text="Language switchers are the one exception to this rule.">
 </doc-accordion>
 
-
-Fortunately, the `i18n` instance can help us with that. It exposes a `route` method that takes the current path and return the untranslated version of it.
+You can get the untranslated path using `i18n.route()`
 
 ```ts
 // $page.url.pathname = "/base/de/uber-uns"
@@ -300,18 +265,17 @@ const route = i18n.route($page.url.pathname)
 // route = "/base/about"
 ```
 
-We can use this to create a language switcher that links to the current page in a different language.
-1. Get the untranslated version of the current path
-2. Automatically translate it into all available languages with the `<a>` tag using the `hreflang` attribute
+Use this to create a language switcher.
 
 ```svelte
 <script>
-	import { availableLanguageTags } from "$lib/paraglide/runtime.js"
+	import { availableLanguageTags, languageTag } from "$lib/paraglide/runtime.js"
 	import { i18n } from '$lib/i18n.js'
 	import { page } from '$app/stores'
 </script>
 
 {#each availableLanguageTags as lang}
+	<!-- the hreflang attribute decides which language the link points to -->
 	<a 
 		href={i18n.route($page.url.pathname)}
 		hreflang={lang}
@@ -322,21 +286,17 @@ We can use this to create a language switcher that links to the current page in 
 {/each}
 ```
 
-This is also usefull for detecting which navigation item is currently active.
+This is also usefull for deciding which navigation item is currently active.
 
 ```svelte
 <li aria-current={i18n.route($page.url.pathname) === "/" ? "page" : undefined}>
-	<a href="/">{m.home()}</a>
-</li>
-
-<li aria-current={i18n.route($page.url.pathname) === "/about" ? "page" : undefined}>
-	<a href="/about">{m.about()}</a>
+	...
 </li>
 ```
 
 ### Determining text direction
 
-Setting the text-direction correctly is very important. By default, Paragldie will try to guess the text direction based on the language using the `Intl.Locale` API. Unfortunately, this API is not supported in all browsers. If you want to make sure that the text direction is always correct, you can pass the `textDirection` option to `createI18n`.
+Paraglide guesses the text direction using the `Intl.Locale` API. This is not supported in all browsers. Use the `textDirection` option to make sure the text direction is always correct.
 
 ```js
 import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
@@ -352,23 +312,21 @@ export const i18n = createI18n(runtime, {
 
 ### Accessing `lang` and `textDirection` 
 
-You can access the current language and text direction on `event.locals.paraglide` object anywhere on your server. On the client, you can use the `languageTag()` function from `./paraglide/runtime.js` to access the current language.  
+On the server you can access the current language and text direction on `event.locals.paraglide`. 
+On the client, you can call `languageTag()` exported `./paraglide/runtime.js`.  
 
 ### Using the Language on the Server
 
 #### Avoiding Cross-Talk
 
-The work SvelteKit does on the server can be split into two parts: Loading and Rendering. Data-Loading includes tasks like running your `load` functions, `actions` or server-hooks. Rendering is anything that happens in, or is called from, a `.svelte` file.
+SvelteKit does two kinds of work on the server: _Loading_ and _Rendering_. 
 
-In general: loading is asynchronous & rendering is synchronous. 
+- _Loading_ includes running your `load` functions, `actions` or server-hooks. 
+- _Rendering_ is anything that happens in, or is called from, a `.svelte` file.
 
-During the asynchronous loading, there is danger of crosstalk. Crosstalkt is when one request affectst the other. The danger during loading is that one requests overrides the language of another & causes it to return the wrong language. We need to take care to make sure this doesn't happen. 
+Loading is asynchronous & rendering is synchronous. 
 
-Because rendering is synchronous there is no danger of crosstalk & you can safely use messages and the `langaugeTag()` function without worrying about anything. The correct `languageTag()` will be set by the `<ParaglideJs>` component.
-
-Here are some strategies to avoid cross-talk during loading:
-
-By default, paraglide makes the language of the current request available in `locals.paraglide.lang`. You can explicitly specify which langauge a message should be in by passing in the language tag as an argument.
+During the asynchronous loading, there is danger of crosstalk. If you aren't careful it's possible for one request to override the language of another request. You can avoid this by explicitly specify which langauge a message should be in.
 
 ```ts
 import * as m from "$lib/paraglide/messages.js"
@@ -379,11 +337,11 @@ export async function load({ locals }) {
 }
 ```
 
-Unfortunately, if you have a lot of messages this can get quite tedious. Fortunately there is an easier way. 
+During rendering there is no danger of crosstal. You can safely use messages and the `langaugeTag()` function. 
 
 #### Re-Loading Language-Dependent data
 
-Sometimes a piece of data needs to be reloaded when the language changes. You can do that by calling the `depends("paraglide:lang")` function during `load`
+You can tell a load function to re-run on language changes by calling `depends("paraglide:lang")`.
 
 ```ts
 export async function load({ depends }) {
@@ -396,7 +354,7 @@ export async function load({ depends }) {
 
 ## Caveats
 
-Because we are using a Preprocessor for link localisation there are a few caveats to be aware of: 
+The adapter is using a Preprocessor for link localisation. There are a few caveats to be aware of: 
 
 1. Links in the same Layout Component as `<ParagldieJS>` will not be translated. 
 2. Using a `{...spread}` operator on an element will cause the preprocessor to place all props on that element into one giant `{...spread}`. If you are using proxies that may cause issues.
@@ -404,7 +362,7 @@ Because we are using a Preprocessor for link localisation there are a few caveat
 
 ### Using messages in `+layout.svelte`
 
-The language state during rendering get's set when the `<ParaglideJS>` component is mounted. Since you usually place it in `+layout.svelte`, using messages in the `<script>` of `+layout.svelte` itself can cause issues.
+The language state get's set when the `<ParaglideJS>` component is mounted. Since you usually place it inside `+layout.svelte` using messages in the layout's `<script>` can cause issues.
 
 ```svelte
 <script>
@@ -420,17 +378,15 @@ The language state during rendering get's set when the `<ParaglideJS>` component
 </ParaglideJS>
 ```
 
-Try moving any logic that uses messages into a different component. 
-
 ### Issues on Vercel
 
 SvelteKit's `reroute` hook currently doens't play well with Vercel (see [sveltejs/kit#11879](https://github.com/sveltejs/kit/issues/11879)), which means that we need to slightly adapt the adapter setup to make it work when deployed to vercel.
 
 1. Remove the `reroute` hook from `src/hooks.js`
-2. Move the routes you want to localise `routes` into a `[locale]` folder
+2. Move the routes you want to localise `routes` into a `[[locale]]` folder
 3. Don't use translated `pathnames`
 
-We are actively working on contributing a fix for [sveltejs/kit#11879](https://github.com/sveltejs/kit/issues/11879), so this workaround will hopefully not be needed much longer.
+We are working on contributing a fix for [sveltejs/kit#11879](https://github.com/sveltejs/kit/issues/11879), so this workaround will hopefully not be needed much longer.
 
 ## FAQ
 
@@ -482,6 +438,7 @@ We are actively working on contributing a fix for [sveltejs/kit#11879](https://g
   - Optional parameters
   - Catch-all parameters
   - Parameter matchers
+  - Parameter Translations
 - Improve Stability
 - Improve Useability
 
