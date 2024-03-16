@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { state } from "../utilities/state.js"
 import { rpc } from "@inlang/rpc"
 import { CONFIGURATION } from "../configuration.js"
 import { machineTranslateMessageCommand } from "./machineTranslate.js"
+import { msg } from "../utilities/messages/msg.js"
 
 vi.mock("vscode", () => ({
 	commands: {
@@ -13,102 +13,135 @@ vi.mock("vscode", () => ({
 		Right: 2,
 	},
 	window: {
-		createStatusBarItem: () => ({
+		createStatusBarItem: vi.fn(() => ({
 			show: vi.fn(),
 			text: "",
-			command: "",
-			tooltip: "",
-		}),
+		})),
 	},
 }))
+
 vi.mock("@inlang/rpc", () => ({
 	rpc: {
 		machineTranslateMessage: vi.fn(),
 	},
 }))
-// Mock the state object structure
-const mockState = {
-	project: {
-		query: {
-			messages: {
-				get: vi.fn(),
-				upsert: vi.fn(),
+
+vi.mock("../configuration", () => ({
+	CONFIGURATION: {
+		EVENTS: {
+			ON_DID_EDIT_MESSAGE: {
+				fire: vi.fn(),
 			},
 		},
 	},
-}
-
-vi.mock("../utilities/state.js", () => {
-	return {
-		state: () => mockState,
-	}
-})
-vi.mock("../configuration.js", () => ({
-	CONFIGURATION: {
-		EVENTS: {
-			ON_DID_EDIT_MESSAGE: { fire: vi.fn() },
-		},
-	},
 }))
+
+vi.mock("../utilities/messages/msg", () => ({
+	msg: vi.fn(),
+}))
+
+vi.mock("../utilities/state", () => ({
+	state: () => ({
+		project: {
+			query: {
+				messages: {
+					get: (args: any) => {
+						if (args.where && args.where.id === "validId") {
+							return mockMessage
+						}
+						return undefined
+					},
+					upsert: vi.fn(),
+				},
+			},
+		},
+	}),
+}))
+
+const mockMessage = {
+	id: "validId",
+	alias: {},
+	selectors: [],
+	variants: [
+		{
+			languageTag: "en",
+			match: [],
+			pattern: [
+				{
+					type: "Text",
+					value: "Original content",
+				},
+			],
+		},
+	],
+}
 
 describe("machineTranslateMessageCommand", () => {
 	beforeEach(() => {
 		vi.clearAllMocks()
 	})
 
-	it("should return a not found message if the message does not exist", async () => {
-		// @ts-expect-error
-		state().project.query.messages.get.mockReturnValue(undefined)
-		const result = await machineTranslateMessageCommand.callback({
-			messageId: "123",
+	it("should return a message if messageId is not found", async () => {
+		await machineTranslateMessageCommand.callback({
+			messageId: "nonexistent",
 			sourceLanguageTag: "en",
 			targetLanguageTags: ["es"],
 		})
-		expect(result).toBe("Message with id 123 not found.")
+
+		expect(msg).toHaveBeenCalledWith("Message with id nonexistent not found.")
 	})
 
-	it("should return an error message if the RPC call fails", async () => {
+	it("should return an error message on RPC error", async () => {
 		// @ts-expect-error
-		state().project.query.messages.get.mockReturnValue({ id: "123", content: "Hello" })
-		// @ts-expect-error
-		rpc.machineTranslateMessage.mockRejectedValue(new Error("RPC error"))
-		const result = await machineTranslateMessageCommand.callback({
-			messageId: "123",
+		rpc.machineTranslateMessage.mockResolvedValueOnce({ error: "RPC Error" })
+
+		await machineTranslateMessageCommand.callback({
+			messageId: "validId",
 			sourceLanguageTag: "en",
 			targetLanguageTags: ["es"],
 		})
-		expect(result).toBe("Error translating message: RPC error")
+
+		expect(msg).toHaveBeenCalledWith("Error translating message: RPC Error")
 	})
 
 	it("should return a message if no translation is available", async () => {
 		// @ts-expect-error
-		state().project.query.messages.get.mockReturnValue({ id: "123", content: "Hello" })
-		// @ts-expect-error
-		rpc.machineTranslateMessage.mockResolvedValue({ data: undefined })
-		const result = await machineTranslateMessageCommand.callback({
-			messageId: "123",
+		rpc.machineTranslateMessage.mockResolvedValueOnce({ data: undefined })
+
+		await machineTranslateMessageCommand.callback({
+			messageId: "validId",
 			sourceLanguageTag: "en",
 			targetLanguageTags: ["es"],
 		})
-		expect(result).toBe("No translation available.")
+
+		expect(msg).toHaveBeenCalledWith("No translation available.")
 	})
 
-	it("should handle successful translation and upserting of the message", async () => {
-		const mockMessage = { id: "123", content: "Hello" }
+	it("should successfully translate and update a message", async () => {
+		const mockTranslation = { translatedText: "Translated content" }
 		// @ts-expect-error
-		state().project.query.messages.get.mockReturnValue(mockMessage)
-		// @ts-expect-error
-		rpc.machineTranslateMessage.mockResolvedValue({ data: { id: "123", content: "Hola" } })
-		const result = await machineTranslateMessageCommand.callback({
-			messageId: "123",
+		rpc.machineTranslateMessage.mockResolvedValueOnce({ data: mockTranslation })
+
+		await machineTranslateMessageCommand.callback({
+			messageId: "validId",
 			sourceLanguageTag: "en",
 			targetLanguageTags: ["es"],
 		})
-		expect(state().project.query.messages.upsert).toHaveBeenCalledWith({
-			where: { id: "123" },
-			data: { id: "123", content: "Hola" },
+
+		expect(msg).toHaveBeenCalledWith("Message translated.")
+	})
+
+	it("should emit ON_DID_EDIT_MESSAGE event after successful translation", async () => {
+		const mockTranslation = { translatedText: "Translated content" }
+		// @ts-expect-error
+		rpc.machineTranslateMessage.mockResolvedValueOnce({ data: mockTranslation })
+
+		await machineTranslateMessageCommand.callback({
+			messageId: "validId",
+			sourceLanguageTag: "en",
+			targetLanguageTags: ["es"],
 		})
+
 		expect(CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire).toHaveBeenCalled()
-		expect(result).toBe("Message translated.")
 	})
 })
