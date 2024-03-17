@@ -62,17 +62,24 @@
 				},
 				{
 					"when": "sherlock:hasProjectInWorkspace",
+					"id": "settingsView",
+					"name": "Settings",
+					"type": "webview",
+					"group": "sherlock@4"
+				},
+				{
+					"when": "sherlock:hasProjectInWorkspace",
 					"id": "messageView",
 					"name": "Messages",
 					"type": "webview",
-					"group": "sherlock@4"
+					"group": "sherlock@5"
 				},
 				{
 					"when": "sherlock:hasProjectInWorkspace",
 					"id": "errorView",
 					"name": "Errors",
 					"type": "tree",
-					"group": "sherlock@5"
+					"group": "sherlock@6"
 				}
 			]
 		},
@@ -156,11 +163,13 @@
 	"dependencies": {
 		"@inlang/result": "workspace:*",
 		"@inlang/sdk": "workspace:*",
+		"@inlang/settings-component": "workspace:*",
 		"@inlang/telemetry": "workspace:*",
 		"@lix-js/client": "workspace:*",
 		"@lix-js/fs": "workspace:*",
 		"@vitest/coverage-v8": "0.34.6",
 		"https-proxy-agent": "7.0.2",
+		"lit-html": "^3.1.2",
 		"require-from-string": "^2.0.2",
 		"throttle-debounce": "^5.0.0",
 		"vitest": "0.34.6"

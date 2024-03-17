@@ -19,6 +19,7 @@ import { recommendationBannerView } from "./utilities/recommendation/recommendat
 import { telemetry } from "./services/telemetry/implementation.js"
 import { version } from "../package.json"
 import { statusBar } from "./utilities/settings/statusBar.js"
+import { settingsView } from "./utilities/settings/settingsView.js"
 //import { initErrorMonitoring } from "./services/error-monitoring/implementation.js"
 
 // Entry Point
@@ -83,10 +84,17 @@ async function main(args: {
 
 		vscode.commands.executeCommand("setContext", "sherlock:hasProjectInWorkspace", true)
 
+		// Recommendation Banner
 		await recommendationBannerView(args)
+		// Project Listings
 		await projectView(args)
+		// Settings
+		await settingsView(args)
+		// Messages
 		await messageView(args)
+		// Errors
 		await errorView(args)
+		// Status Bar
 		await statusBar(args)
 
 		registerExtensionComponents(args)
