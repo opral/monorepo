@@ -41,7 +41,9 @@ function getWebviewContent(args: {
                 <title>Settings</title>
             </head>
             <body>
-                <inlang-settings inlangproject=${state().project.settings()}></inlang-settings>
+                <inlang-settings inlangproject=${JSON.stringify(
+									state().project.settings()
+								)}></inlang-settings>
                 <script type="module" src="${scriptUri}"></script>
             </body>
             </html>`
