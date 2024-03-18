@@ -159,13 +159,31 @@ There are a few things to know about `onSetLanguageTag()`:
 - You can only register one listener. If you register a second listener it will throw an error.
 - `setLanguageTag` shouldn't be used on the server.
 
-## Forcing a language
+## Getting a message in a specific language
 
-During tests or on the server you may need to force a message function to use a certain language. You can do this by passing an options object as a second parameter.
+You can import a message in a specific language from `paraglide/messages/{lang}.js`. This is great if you always need the same language in a given file. 
+
+```ts
+import * as m from "./paraglide/messages/de.js"
+m.hello() // Hallo Welt
+```
+
+If you want to force a language, but don't know ahead of time _which_ language you can pass the `languageTag` option as the second parameter to a message function. This is often needed on the server.
 
 ```js
 import * as m from "./paraglide/messages.js"
 const msg = m.hello({ name: "Samuel" }, { languageTag: "de" }) // Hallo Samuel!
+```
+
+## Lazy-Loading
+
+Paraglide consciously discourages lazy-loading translations since it seriously hurts
+your web-vitals. Learn more about why lazy-loading is bad & what to do instead in [this blog post](https://inlang.com/g/mqlyfa7l/guide-lorissigrist-dontlazyload).
+
+If you _really_ want to do it anway, you can lazily import the language-specific message files. Be careful with this, as it's easy to accidenally break tree-shaking.
+
+```ts
+const lazyGerman = await import("./paraglide/messages/de.js")
 ```
 
 ## Usage with a Bundler

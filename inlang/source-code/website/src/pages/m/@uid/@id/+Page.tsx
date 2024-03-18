@@ -477,12 +477,7 @@ const EcosystemIncompatibleBadgeBig = () => {
 export function Recommends(props: { recommends: MarketplaceManifest[] }) {
 	return (
 		<>
-			<Show
-				when={currentPageContext.urlParsed.pathname.includes("/m/")}
-				fallback={<h3 class="font-semibold mb-4">Read more:</h3>}
-			>
-				<h3 class="font-semibold mb-4">Recommended to use with:</h3>
-			</Show>
+			<h3 class="font-semibold mb-4">Recommended:</h3>
 			<div class="flex items-center gap-4 md:flex-row flex-col">
 				<For each={props.recommends}>
 					{/* @ts-ignore */}

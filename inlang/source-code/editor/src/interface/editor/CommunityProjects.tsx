@@ -18,7 +18,14 @@ export function CommunityProjects() {
 							Projects that you recently opened with the editor.
 						</p>
 					</div>
-					<Link href={import.meta.env.PROD ? `https://inlang.com/m/tdozzpar` : `http://localhost:3000/m/tdozzpar`} class="w-full md:w-auto">
+					<Link
+						href={
+							import.meta.env.PROD
+								? `https://inlang.com/m/tdozzpar`
+								: `http://localhost:3000/m/tdozzpar`
+						}
+						class="w-full md:w-auto"
+					>
 						<sl-button prop:variant="default" prop:size="medium" class="w-full pt-4 md:pt-0">
 							Get started
 							<MaterialSymbolsArrowOutward
