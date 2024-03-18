@@ -1,5 +1,11 @@
 # @inlang/github-lint-action
 
+## 0.2.11
+
+### Patch Changes
+
+- e169f29: Remove project not found comment
+
 ## 0.2.10
 
 ### Patch Changes
