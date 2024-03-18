@@ -21,6 +21,7 @@ export const createReroute = <T extends string>({
 				lang,
 				path: translatedPath,
 				dataSuffix,
+				trailingSlash,
 			} = getPathInfo(url.pathname, {
 				base,
 				availableLanguageTags: runtime.availableLanguageTags,
@@ -33,6 +34,7 @@ export const createReroute = <T extends string>({
 				path: canonicalPath,
 				base,
 				dataSuffix,
+				trailingSlash,
 				includeLanguage: false,
 			})
 
