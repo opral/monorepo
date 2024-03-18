@@ -4,7 +4,7 @@ import { availableLanguageTags } from "$paraglide/runtime.js"
 import { HeaderNames } from "../constants"
 import { addBasePath } from "./routing/basePath"
 import type { RoutingStragey } from "./routing/interface"
-import { ResolvedI18nConfig } from "./config"
+import type { ResolvedI18nConfig } from "./config"
 
 export function createMiddleware<T extends string>(
 	config: ResolvedI18nConfig<T>,
