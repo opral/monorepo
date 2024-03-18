@@ -1,0 +1,37 @@
+{
+	"id": "guide.lorissigrist.dontlazyload",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/dont-lazy-load/assets/thumbnail.png",
+	"displayName": {
+		"en": "Don't Lazy-Load Translations"
+	},
+	"description": {
+		"en": "Lazy-loading translations can seriously hurt your web-vitals. Here is what to do instead."
+	},
+	"readme": {
+		"en": "./inlang/guides/dont-lazy-load/README.md"
+	},
+	"keywords": [
+		"i18n",
+		"developer",
+		"translator",
+		"designer",
+		"editor",
+		"contribute",
+		"localization",
+		"globalization",
+		"internationalization",
+		"guide",
+		"ecosystem",
+		"compatible",
+		"ecosystem compatible",
+		"astro",
+		"nextjs",
+		"svelte",
+		"guides-general",
+		"guides-i18n"
+	],
+	"recommends": ["g/2fg8ng94", "g/00162hsd", "g/wxcebbig", "g/uxohikde"],
+	"publisherName": "Loris Sigrist",
+	"publisherIcon": "https://avatars.githubusercontent.com/u/43482866?v=4",
+	"license": "Apache-2.0"
+}
