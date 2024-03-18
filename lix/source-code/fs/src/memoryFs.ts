@@ -503,16 +503,12 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			if (parentDir === undefined || target === undefined)
 				throw new FilesystemError("ENOENT", path, "unlink")
 
-			if (parentDir instanceof Uint8Array) {
+			if (parentDir instanceof Uint8Array || "placeholder" in parentDir) {
 				throw new FilesystemError("ENOTDIR", path, "unlink")
 			}
 
 			if (targetStats?.isDirectory()) {
 				throw new FilesystemError("EISDIR", path, "unlink")
-			}
-
-			if ("placeholder" in parentDir || "placeholder" in target) {
-				throw new FilesystemError("EPLACEHOLDER", path, "readFile")
 			}
 
 			parentDir.delete(getBasename(path))
