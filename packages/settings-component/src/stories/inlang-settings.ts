@@ -79,10 +79,10 @@ export default class InlangSettings extends LitElement {
 	]
 
 	@property()
-	inlangProject: ProjectSettings | undefined = undefined
+	settings: ProjectSettings | undefined = undefined
 
 	@property()
-	onSaveProject?: (project: ProjectSettings) => void = () => {}
+	onSetSettings?: (settings: ProjectSettings) => void = () => {}
 
 	@state()
 	private _project: ProjectSettings | undefined = undefined
@@ -93,8 +93,8 @@ export default class InlangSettings extends LitElement {
 	override async firstUpdated() {
 		await this.updateComplete
 
-		if (this.inlangProject) {
-			this._project = JSON.parse(JSON.stringify(this.inlangProject))
+		if (this.settings) {
+			this._project = JSON.parse(JSON.stringify(this.settings))
 		}
 	}
 
@@ -119,7 +119,7 @@ export default class InlangSettings extends LitElement {
 				[property]: value,
 			}
 		}
-		if (JSON.stringify(this.inlangProject) !== JSON.stringify(this._project)) {
+		if (JSON.stringify(this.settings) !== JSON.stringify(this._project)) {
 			this._unsavedChanges = true
 		} else {
 			this._unsavedChanges = false
@@ -127,15 +127,15 @@ export default class InlangSettings extends LitElement {
 	}
 
 	_revertChanges = () => {
-		if (this.inlangProject) {
-			this._project = JSON.parse(JSON.stringify(this.inlangProject))
+		if (this.settings) {
+			this._project = JSON.parse(JSON.stringify(this.settings))
 		}
 		this._unsavedChanges = false
 	}
 
 	_saveChanges = () => {
-		if (this._project && this.onSaveProject) {
-			this.onSaveProject(this._project)
+		if (this._project && this.onSetSettings) {
+			this.onSetSettings(this._project)
 		}
 		this._unsavedChanges = false
 	}
@@ -164,7 +164,7 @@ export default class InlangSettings extends LitElement {
 			}
 			return generalSchema
 		},
-		args: () => [this.inlangProject],
+		args: () => [this.settings],
 	})
 
 	override render() {
