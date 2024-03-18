@@ -21,6 +21,7 @@ import {
 } from "#src/services/auth/src/components/SignInDialog.jsx"
 import { WarningIcon } from "./Notification/NotificationHint.jsx"
 import IconArrowDownward from "~icons/material-symbols/arrow-downward-alt"
+import { debounce } from "throttle-debounce"
 
 export const Gitfloat = () => {
 	const {
@@ -93,6 +94,8 @@ export const Gitfloat = () => {
 	createEffect(() => {
 		if (forkModalOpen()) {
 			forkDialog?.show()
+		} else {
+			forkDialog?.hide()
 		}
 	})
 
@@ -278,9 +281,14 @@ export const Gitfloat = () => {
 		if (gitState() === "login" && localChanges() > 2) setSignInModalOpen(true)
 	})
 
-	createEffect(() => {
-		if (gitState() === "fork" && localChanges() > 2) setForkModalOpen(true)
+	const debouncedForkModalState = debounce(2000, () => {
+		if (gitState() === "hasChanges") {
+			setForkModalOpen(false)
+		} else if (gitState() === "fork" && localChanges() > 2) {
+			setForkModalOpen(true)
+		}
 	})
+	createEffect(on([gitState, localChanges], debouncedForkModalState))
 
 	// prevent user from leaving the page when changes are not pushed
 	const beforeUnloadHandler = (event: BeforeUnloadEvent) => {

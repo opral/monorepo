@@ -1,6 +1,6 @@
-# 🥷 Ninja i18n [<img src="https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/assets/md-badges/inlang.svg" alt="inlang ecosystem compatible badge" align="right" width="243" height="36">](https://inlang.com)
+# Automate your i18n linting for pull requests
 
-Automate your i18n workflow and ensure that your i18n files are always up to date with the latest changes in your source code.
+Ensure that your i18n files are always up to date with the latest changes in your source code.
 
 ## Features
 
@@ -53,7 +53,7 @@ jobs:
 
 ## Workflow
 
-https://github.com/opral/monorepo/assets/59048346/99049121-11db-4672-a7a8-e0d606426f4b
+<doc-video src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/github-lint-action/assets/Ninja-showcase.mp4"></doc-video>
 
 - When a pull request is opened or updated, the action will run and check for new i18n issues.
 - If issues are found, the action creates a comment on the pull request with an issues report including links to the Fink localization editor to resolve the issues.

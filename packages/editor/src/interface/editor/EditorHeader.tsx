@@ -87,7 +87,7 @@ function EditorHeader() {
 										)}
 									</For>
 									<Show when={user()?.isLoggedIn}>
-										<div class="absolute right-4 xl:right-[calc((100%_-_1240px)_/_2)] animate-fadeIn">
+										<div class="absolute h-8 right-4 xl:right-[calc((100%_-_1240px)_/_2)] animate-fadeIn">
 											<UserDropdown />
 										</div>
 									</Show>
