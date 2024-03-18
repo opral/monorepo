@@ -173,17 +173,7 @@ export async function run(): Promise<void> {
 					return result.projectPath
 				}
 			}
-			// Case: Project not found in head repo
-			if (
-				projectListHead.some(
-					(project) => project.projectPath.replace(process.cwd(), "") === result.projectPath
-				) === false
-			) {
-				result.commentContent = `#### ❗️ Project \`${shortenedProjectPath()}\` not found in head repo.
-If you have not intentionally deleted the project, check whether the head repository is up to date with the base repository.`
-				continue
-			}
-			// Case: New errors in proejct setup
+			// Case: New errors in project setup
 			if (result.errorsBase.length === 0 && result.errorsHead.length > 0) {
 				result.commentContent = `#### ❗️ New errors in setup of project \`${shortenedProjectPath()}\` found
 ${result.errorsHead
