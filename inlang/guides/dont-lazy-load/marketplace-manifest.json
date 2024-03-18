@@ -12,10 +12,8 @@
 	},
 	"keywords": [
 		"i18n",
+		"l10n",
 		"developer",
-		"translator",
-		"designer",
-		"editor",
 		"contribute",
 		"localization",
 		"globalization",
@@ -26,6 +24,10 @@
 		"ecosystem compatible",
 		"astro",
 		"nextjs",
+		"vue",
+		"angular",
+		"flutter",
+		"solidstart",
 		"svelte",
 		"guides-general",
 		"guides-developer"
