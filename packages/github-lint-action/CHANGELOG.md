@@ -1,5 +1,11 @@
 # @inlang/github-lint-action
 
+## 0.2.9
+
+### Patch Changes
+
+- 54d51b7: Handle project not found in head repo
+
 ## 0.2.8
 
 ### Patch Changes
