@@ -78,7 +78,7 @@ export default class InlangSettings extends LitElement {
 		`,
 	]
 
-	@property()
+	@property({ type: Object })
 	settings: ProjectSettings | undefined = undefined
 
 	@property()
@@ -141,15 +141,15 @@ export default class InlangSettings extends LitElement {
 	}
 
 	private _projectProperties = new Task(this, {
-		task: async ([inlangProject]) => {
-			if (!inlangProject) throw new Error("No inlang project")
+		task: async ([settings]) => {
+			if (!settings) throw new Error("No inlang project")
 
 			const generalSchema: Record<
 				InlangModule["default"]["id"] | "internal",
 				{ meta?: InlangModule["default"]; schema?: Record<string, Record<string, unknown>> }
 			> = { internal: { schema: ProjectSettings.allOf[0] } }
 
-			for (const module of inlangProject.modules) {
+			for (const module of settings.modules) {
 				try {
 					const plugin = await import(module)
 					if (plugin.default) {
