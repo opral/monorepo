@@ -23,3 +23,18 @@ export const Default: StoryObj = {
 			></inlang-settings>
 		`,
 }
+
+const setSetting = (settings: any) => {
+	console.info(settings)
+}
+
+export const HTML: StoryObj = {
+	render: () =>
+		`
+		<inlang-settings
+			id="my-element"
+			settings=${JSON.stringify(mockProject)}
+			onSetSettings=${setSetting}
+		></inlang-settings>
+	`,
+}
