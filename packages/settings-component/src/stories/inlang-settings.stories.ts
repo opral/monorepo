@@ -18,8 +18,8 @@ export const Default: StoryObj = {
 	render: () =>
 		html`
 			<inlang-settings
-				.inlangProject=${mockProject}
-				.onSaveProject=${(project: any) => console.info("save", project)}
+				.settings=${mockProject}
+				.onSetSettings=${(settings: any) => console.info("save", settings)}
 			></inlang-settings>
 		`,
 }
