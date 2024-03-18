@@ -8,6 +8,7 @@ describe("serializePath", () => {
 			base: "/base",
 			dataSuffix: undefined,
 			includeLanguage: false,
+			trailingSlash: false,
 		})
 
 		expect(path).toBe("/base/foo/bar")
@@ -19,6 +20,7 @@ describe("serializePath", () => {
 			base: "/",
 			dataSuffix: undefined,
 			includeLanguage: false,
+			trailingSlash: false,
 		})
 
 		expect(path).toBe("/foo/bar")
@@ -30,6 +32,7 @@ describe("serializePath", () => {
 			base: "/",
 			dataSuffix: "__data.json",
 			includeLanguage: false,
+			trailingSlash: false,
 		})
 
 		expect(path).toBe("/foo/bar/__data.json")
@@ -41,6 +44,7 @@ describe("serializePath", () => {
 			base: "/base",
 			dataSuffix: "__data.json",
 			includeLanguage: false,
+			trailingSlash: false,
 		})
 
 		expect(path).toBe("/base/foo/bar/__data.json")
@@ -55,6 +59,7 @@ describe("serializePath", () => {
 			lang: "en",
 			defaultLanguageTag: "en",
 			prefixDefaultLanguage: "never",
+			trailingSlash: false,
 		})
 
 		expect(path).toBe("/base/foo/bar")
@@ -69,6 +74,7 @@ describe("serializePath", () => {
 			lang: "en",
 			defaultLanguageTag: "fr",
 			prefixDefaultLanguage: "never",
+			trailingSlash: false,
 		})
 
 		expect(path).toBe("/base/en/foo/bar")
@@ -83,8 +89,21 @@ describe("serializePath", () => {
 			lang: "en",
 			defaultLanguageTag: "en",
 			prefixDefaultLanguage: "always",
+			trailingSlash: false,
 		})
 
 		expect(path).toBe("/base/en/foo/bar")
+	})
+
+	it("correctly sets the trailing slash", () => {
+		const path = serializeRoute({
+			path: "/foo/bar",
+			base: "/base",
+			dataSuffix: undefined,
+			includeLanguage: false,
+			trailingSlash: true,
+		})
+
+		expect(path).toBe("/base/foo/bar/")
 	})
 })
