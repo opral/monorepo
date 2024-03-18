@@ -7,13 +7,13 @@ import { createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
 import { resolvePathTranslations } from "./pathnames/resolvePathTranslations"
 import { validatePathTranslations } from "./pathnames/validatePathTranslations"
-import type { I18nOptions } from "./config"
+import type { I18nOptions, ResolvedI18nConfig } from "./config"
 
 /**
  * Creates an i18n instance that manages your internationalization.
  *
  * @param options The options for the i18n instance.
- * @returns An i18n instance. 
+ * @returns An i18n instance.
  *
  * @example
  * ```ts
@@ -24,12 +24,16 @@ import type { I18nOptions } from "./config"
  * export const i18n = createI18n({ ...options })
  * ```
  */
-export function createI18n<T extends string = string>(options: I18nOptions<T> = {}) {
-	const exclude = createExclude(options.exclude ?? [])
-	const pathnames = resolvePathTranslations(options.pathnames ?? {}, availableLanguageTags as T[])
+export function createI18n<T extends string = string>(userConfig: I18nOptions<T> = {}) {
+	const config: ResolvedI18nConfig<T> = {
+		availableLanguageTags: availableLanguageTags as readonly T[],
+		defaultLanguage: userConfig.defaultLanguage ?? (sourceLanguageTag as T),
+		exclude: createExclude(userConfig.exclude ?? []),
+		pathnames: resolvePathTranslations(userConfig.pathnames ?? {}, availableLanguageTags as T[]),
+	}
 
 	if (process.env.NODE_ENV === "development") {
-		const issues = validatePathTranslations(pathnames, availableLanguageTags as T[])
+		const issues = validatePathTranslations(config.pathnames, availableLanguageTags as T[])
 		if (issues.length) {
 			console.warn(
 				`The following issues were found in your path translations. Make sure to fix them before deploying your app:`
@@ -38,22 +42,17 @@ export function createI18n<T extends string = string>(options: I18nOptions<T> = 
 		}
 	}
 
-	const strategy = prefixStrategy<T>({
-		availableLanguageTags: availableLanguageTags as readonly T[],
-		pathnames,
-		defaultLanguage: options.defaultLanguage ?? (sourceLanguageTag as T),
-		exclude,
-	})
+	const strategy = prefixStrategy<T>(config)
 
 	/**
 	 * React Component that enables client-side transitions between routes.
 	 *
 	 * Automatically localises the href based on the current language.
 	 */
-	const Link = createLink<T>(getLanguage, strategy)
+	const Link = createLink<T>(getLanguage, config, strategy)
 	const { usePathname, useRouter } = createNoopNavigation<T>()
 	const { redirect, permanentRedirect } = createRedirects<T>(getLanguage, strategy)
-	const middleware = createMiddleware<T>(exclude, strategy)
+	const middleware = createMiddleware<T>(config, strategy)
 
 	return {
 		Link,

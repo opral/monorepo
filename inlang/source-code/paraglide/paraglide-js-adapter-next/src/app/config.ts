@@ -1,5 +1,5 @@
 import type { ExcludeConfig } from "./exclude"
-import type { UserPathTranslations } from "./pathnames/types"
+import type { PathTranslations, UserPathTranslations } from "./pathnames/types"
 
 export type I18nOptions<T extends string> = {
 	/**
@@ -49,4 +49,11 @@ export type I18nOptions<T extends string> = {
 	 * @default sourceLanguageTag
 	 */
 	defaultLanguage?: T
+}
+
+export type ResolvedI18nConfig<T extends string> = {
+	availableLanguageTags: readonly T[]
+	defaultLanguage: T
+	exclude: (path: string) => boolean
+	pathnames: PathTranslations<T>
 }

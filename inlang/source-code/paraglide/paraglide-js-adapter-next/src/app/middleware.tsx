@@ -4,9 +4,10 @@ import { availableLanguageTags } from "$paraglide/runtime.js"
 import { HeaderNames } from "../constants"
 import { addBasePath } from "./routing/basePath"
 import type { RoutingStragey } from "./routing/interface"
+import { ResolvedI18nConfig } from "./config"
 
 export function createMiddleware<T extends string>(
-	exclude: (path: string) => boolean,
+	config: ResolvedI18nConfig<T>,
 	strategy: RoutingStragey<T>
 ) {
 	/**
@@ -18,7 +19,7 @@ export function createMiddleware<T extends string>(
 
 		const localisedPathname = decodeURI(request.nextUrl.pathname)
 		const canonicalPath = strategy.getCanonicalPath(localisedPathname, locale)
-		if (exclude(canonicalPath)) return NextResponse.next()
+		if (config.exclude(canonicalPath)) return NextResponse.next()
 
 		const headers = new Headers(request.headers)
 		headers.set(HeaderNames.ParaglideLanguage, locale)

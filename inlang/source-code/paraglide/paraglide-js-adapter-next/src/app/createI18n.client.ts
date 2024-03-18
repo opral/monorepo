@@ -5,18 +5,22 @@ import { prefixStrategy } from "./routing/prefixStrategy"
 import { createNavigation, createRedirects } from "./navigation"
 import { createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
-import { I18nOptions } from "./config"
+import type { I18nOptions, ResolvedI18nConfig } from "./config"
 import { resolvePathTranslations } from "./pathnames/resolvePathTranslations"
 
-export function createI18n<T extends string = string>(options: I18nOptions<T> = {}) {
-	const exclude = createExclude(options.exclude ?? [])
-	const pathnames = resolvePathTranslations(options.pathnames ?? {}, availableLanguageTags as T[])
+export function createI18n<T extends string = string>(userConfig: I18nOptions<T> = {}) {
+	const config: ResolvedI18nConfig<T> = {
+		availableLanguageTags: availableLanguageTags as readonly T[],
+		defaultLanguage: userConfig.defaultLanguage ?? (sourceLanguageTag as T),
+		exclude: createExclude(userConfig.exclude ?? []),
+		pathnames: resolvePathTranslations(userConfig.pathnames ?? {}, availableLanguageTags as T[]),
+	}
 
 	const strategy = prefixStrategy<T>({
-		availableLanguageTags: availableLanguageTags as readonly T[],
-		pathnames,
-		defaultLanguage: options.defaultLanguage ?? (sourceLanguageTag as T),
-		exclude,
+		availableLanguageTags: config.availableLanguageTags,
+		pathnames: config.pathnames,
+		defaultLanguage: config.defaultLanguage,
+		exclude: config.exclude,
 	})
 
 	/**
@@ -24,10 +28,10 @@ export function createI18n<T extends string = string>(options: I18nOptions<T> = 
 	 *
 	 * Automatically localises the href based on the current language.
 	 */
-	const Link = createLink<T>(getLanguage, strategy)
+	const Link = createLink<T>(getLanguage, config, strategy)
 	const { usePathname, useRouter } = createNavigation<T>(getLanguage, strategy)
 	const { redirect, permanentRedirect } = createRedirects<T>(getLanguage, strategy)
-	const middleware = createMiddleware<T>(exclude, strategy)
+	const middleware = createMiddleware<T>(config, strategy)
 
 	return {
 		Link,
