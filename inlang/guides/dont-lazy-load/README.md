@@ -16,7 +16,7 @@ This is well-intentioned. You shouldn't send what you don't use. Unfortunately i
 In order to lazy-load you need to execute the JS for your i18n runtime. This means that your app's entire module-graph needs to be fully downloaded, parsed and executed before you even start _loading_. This is worse than a regular waterfall, since you usually don't need to execute before loading. This can easily add 300ms+ to your app's time-to-interactive, regardless of how few/many messages you are loading.
 
 ## What should I do instead?
-You need to find a way to statically link translations in the correct language on your pages.
+You need to find a way to statically link translations in the correct language on your pages. Either through imports, or by eagerly loading the needed translations in load functions.
 
 If you have a content-focused site this may be as simple as having separate components for each language. In them you can only import the translations that you need. 
 
