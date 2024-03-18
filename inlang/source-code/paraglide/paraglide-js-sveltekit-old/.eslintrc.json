@@ -1,4 +1,0 @@
-{
-	"extends": [],
-	"ignorePatterns": ["examples/**/.svelte-kit", "examples/**/build"]
-}
