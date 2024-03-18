@@ -8,7 +8,7 @@ import {
 	sourceLanguageTag,
 } from "$paraglide/runtime.js"
 import { createLink } from "./Link"
-import { prefixStrategy } from "./routing/prefixStrategy"
+import { PrefixStrategy } from "./routing/prefixStrategy"
 
 describe.skipIf(() => process.env.NODE_ENV !== "development")("<Link>", () => {
 	beforeEach(() => {
@@ -20,7 +20,7 @@ describe.skipIf(() => process.env.NODE_ENV !== "development")("<Link>", () => {
 	it("renders a link with the correct localised href", () => {
 		const Link = createLink(
 			languageTag,
-			prefixStrategy({
+			PrefixStrategy({
 				availableLanguageTags,
 				defaultLanguage: sourceLanguageTag,
 				pathnames: {},
@@ -41,7 +41,7 @@ describe.skipIf(() => process.env.NODE_ENV !== "development")("<Link>", () => {
 	it("renders a link with the current language if no locale is provided", () => {
 		const Link = createLink(
 			() => languageTag(), //For some reason we can't pass languageTag as a reference directly
-			prefixStrategy({
+			PrefixStrategy({
 				availableLanguageTags,
 				defaultLanguage: sourceLanguageTag,
 				pathnames: {},
@@ -65,7 +65,7 @@ describe.skipIf(() => process.env.NODE_ENV !== "development")("<Link>", () => {
 	it("renders a link with searchParams", () => {
 		const Link = createLink(
 			() => languageTag(), //For some reason we can't pass languageTag as a reference directly
-			prefixStrategy({
+			PrefixStrategy({
 				availableLanguageTags,
 				defaultLanguage: sourceLanguageTag,
 				pathnames: {},
@@ -89,7 +89,7 @@ describe.skipIf(() => process.env.NODE_ENV !== "development")("<Link>", () => {
 	it("localises hrefs with path translations and searchParams", () => {
 		const Link = createLink(
 			() => languageTag(), //For some reason we can't pass languageTag as a reference directly
-			prefixStrategy({
+			PrefixStrategy({
 				availableLanguageTags,
 				defaultLanguage: sourceLanguageTag,
 				pathnames: {

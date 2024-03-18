@@ -1,7 +1,7 @@
 import type { ExcludeConfig } from "./exclude"
 import type { PathTranslations, UserPathTranslations } from "./pathnames/types"
 
-export type I18nOptions<T extends string> = {
+export type I18nUserConfig<T extends string> = {
 	/**
 	 * A list of patterns that should not be localized.
 	 *
