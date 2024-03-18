@@ -6,6 +6,7 @@ const config = {
 	preprocess: [vitePreprocess()],
 	kit: {
 		adapter: adapter(),
+
 		alias: {
 			$paraglide: "./src/paraglide/",
 			$lib: "./src/lib/",
