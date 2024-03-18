@@ -1,5 +1,11 @@
 # @inlang/cross-sell-sherlock
 
+## 0.0.3
+
+### Patch Changes
+
+- eb7823d: update API of cross-sell package to be more flexible + fix bugs
+
 ## 0.0.2
 
 ### Patch Changes

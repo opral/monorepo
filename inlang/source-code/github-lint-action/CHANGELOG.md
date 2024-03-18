@@ -1,5 +1,11 @@
 # @inlang/github-lint-action
 
+## 0.2.8
+
+### Patch Changes
+
+- 05d1914: set required node version down to v18
+
 ## 0.2.5
 
 ### Patch Changes
