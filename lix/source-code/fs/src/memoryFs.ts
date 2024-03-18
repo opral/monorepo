@@ -264,7 +264,7 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			const baseName = getBasename(path)
 			const parentDir: Inode | undefined = state.fsMap.get(dirName)
 
-			if (typeof parentDir === "string") {
+			if (typeof parentDir === "string" || (parentDir && "palceholder" in parentDir)) {
 				throw new FilesystemError("ENOTDIR", path, "mkdir")
 			}
 
