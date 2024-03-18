@@ -63,7 +63,6 @@ const runFsTestSuite = async (
 	})
 
 	test("recursive mkdir", async () => {
-
 		expect(await fs.mkdir(`${tempDir}/home/user1/documents/`, { recursive: true })).toMatch(
 			/^.*\/home\/?$/
 		)

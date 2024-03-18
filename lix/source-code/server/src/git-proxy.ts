@@ -19,7 +19,7 @@ const production = process.env.NODE_ENV === "production"
 const middleware = createMiddleware({
 	// This is the cors allowed origin:
 	origins: allowedOrigins,
-	insecure_origins: production ? [] : ["localhost:8089"],
+	insecure_origins: production ? [] : ["localhost:8089", "josh.local"],
 
 	authorization: async (request: Request, _response: Response, next: NextFunction) => {
 		try {

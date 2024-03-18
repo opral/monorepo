@@ -20,6 +20,8 @@ type StatusText =
 	| "unmodified"
 	// files added but not staged yet
 	| "*added"
+	// files added, staged, but not all changes staged yet
+	| "*added2"
 	// added and added to stage
 	| "added"
 	// files modified but changes not committed to stage
@@ -302,7 +304,7 @@ export async function statusList({
 					entry.workdirOid &&
 					entry.workdirOid !== entry.stageOid
 				) {
-					return [filepath, "*added", entry]
+					return [filepath, "*added2", entry]
 				}
 
 				// [ 1, 2, 1] modified, unstaged "*modified"	file has modifications, not yet staged
