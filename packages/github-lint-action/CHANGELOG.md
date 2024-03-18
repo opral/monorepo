@@ -1,5 +1,11 @@
 # @inlang/github-lint-action
 
+## 0.2.10
+
+### Patch Changes
+
+- 033a6cc: Fix project not found error
+
 ## 0.2.9
 
 ### Patch Changes
