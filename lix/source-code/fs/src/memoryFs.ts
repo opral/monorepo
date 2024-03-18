@@ -475,19 +475,16 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 				throw new FilesystemError("EEXIST", path, "symlink", target)
 			}
 
-			if (parentDir instanceof Uint8Array) {
-				throw new FilesystemError("ENOTDIR", path, "symlink", target)
-			}
-
 			if (parentDir === undefined) {
 				throw new FilesystemError("ENOENT", path, "symlink", target)
 			}
 
+			if (parentDir instanceof Uint8Array || "placeholder" in parentDir) {
+				throw new FilesystemError("ENOTDIR", path, "symlink", target)
+			}
+
 			if (targetInode !== undefined) {
 				state.fsMap.set(path, targetInode)
-			}
-			if ("placeholder" in parentDir) {
-				throw new FilesystemError("EPLACEHOLDER", path, "readFile")
 			}
 
 			parentDir.add(getBasename(path))
