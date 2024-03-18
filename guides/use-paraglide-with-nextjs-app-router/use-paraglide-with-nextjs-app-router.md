@@ -200,7 +200,7 @@ You can build a Language Switcher by linking to the current page with a differen
 import { Link, usePathname } from "@/lib/i18n"
 
 export default function LanguageSwitcher() {
-	const { pathname } = usePathname()
+	const pathname = usePathname()
 	return (
 		<div>
 			<Link href={pathname} locale="en">English</Link>

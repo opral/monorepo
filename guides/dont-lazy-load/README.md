@@ -20,7 +20,7 @@ You need to find a way to statically link translations in the correct language o
 
 If you have a content-focused site this may be as simple as having separate components for each language. In them you can only import the translations that you need. 
 
-```
+```txt
 app/
 ├── de/
 │   └── page.tsx
