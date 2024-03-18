@@ -1,5 +1,11 @@
 # @inlang/plugin-next-intl
 
+## 1.3.7
+
+### Patch Changes
+
+- f3b0489: fix typo
+
 ## 1.3.6
 
 ### Patch Changes
