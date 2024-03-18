@@ -1,13 +1,13 @@
 import { createLink } from "./Link"
 import { getLanguage } from "./getLanguage.server"
 import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
-import { prefixStrategy } from "./routing/prefixStrategy"
+import { PrefixStrategy } from "./routing/prefixStrategy"
 import { createNoopNavigation, createRedirects } from "./navigation"
 import { createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
 import { resolvePathTranslations } from "./pathnames/resolvePathTranslations"
 import { validatePathTranslations } from "./pathnames/validatePathTranslations"
-import type { I18nOptions, ResolvedI18nConfig } from "./config"
+import type { I18nUserConfig, ResolvedI18nConfig } from "./config"
 
 /**
  * Creates an i18n instance that manages your internationalization.
@@ -24,7 +24,7 @@ import type { I18nOptions, ResolvedI18nConfig } from "./config"
  * export const i18n = createI18n({ ...options })
  * ```
  */
-export function createI18n<T extends string = string>(userConfig: I18nOptions<T> = {}) {
+export function createI18n<T extends string = string>(userConfig: I18nUserConfig<T> = {}) {
 	const config: ResolvedI18nConfig<T> = {
 		availableLanguageTags: availableLanguageTags as readonly T[],
 		defaultLanguage: userConfig.defaultLanguage ?? (sourceLanguageTag as T),
@@ -42,7 +42,7 @@ export function createI18n<T extends string = string>(userConfig: I18nOptions<T>
 		}
 	}
 
-	const strategy = prefixStrategy<T>(config)
+	const strategy = PrefixStrategy<T>(config)
 
 	/**
 	 * React Component that enables client-side transitions between routes.

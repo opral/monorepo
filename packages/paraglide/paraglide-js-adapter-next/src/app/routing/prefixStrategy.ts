@@ -10,7 +10,7 @@ import type { ResolvedI18nConfig } from "../config"
 	Localised Path = Path with locale (how the path is visible in the URL bar)
 */
 
-export function prefixStrategy<T extends string>({
+export function PrefixStrategy<T extends string>({
 	availableLanguageTags,
 	defaultLanguage,
 	pathnames,
