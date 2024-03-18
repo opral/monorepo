@@ -196,8 +196,11 @@ function reexportAliases(message: Message) {
  * @see inlang.com/link.
  * ---
  * @deprecated reference the message by id \`m.${message.id}()\` instead
+ * 
+ * @param {Parameters<typeof ${message.id}>} args
+ * @returns {ReturnType<typeof ${message.id}>}
  */
-export const ${message.alias["default"]} = ${message.id};
+export const ${message.alias["default"]} = (...args) => ${message.id}(...args);
 `
 	}
 
