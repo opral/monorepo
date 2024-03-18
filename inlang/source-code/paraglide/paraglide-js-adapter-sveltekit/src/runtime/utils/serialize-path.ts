@@ -19,13 +19,14 @@ export function serializeRoute(opts: SerializePathOptions): string {
 	parts.push(opts.path)
 
 	if (opts.dataSuffix) parts.push(DATA_SUFFIX)
-	return Path.resolve(...parts)
+	return Path.resolve(...parts) + (opts.trailingSlash && !opts.dataSuffix ? "/" : "")
 }
 
 type SerializePathOptions = {
 	path: string
 	base: string
 	dataSuffix: string | undefined
+	trailingSlash: boolean
 } & (
 	| { includeLanguage: false }
 	| {
