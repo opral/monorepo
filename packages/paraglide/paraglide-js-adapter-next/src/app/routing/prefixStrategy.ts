@@ -1,8 +1,9 @@
 import { PathTranslations } from "../pathnames/types"
 import { resolvePath } from "../pathnames/matching/resolvePath"
 import { matches } from "../pathnames/matching/match"
-import { RoutingStragey } from "./interface"
-import { NextRequest } from "next/server"
+import type { RoutingStragey } from "./interface"
+import type { NextRequest } from "next/server"
+import type { ResolvedI18nConfig } from "../config"
 
 /*
 	Canonical Path = Path without locale (how you write the href)
@@ -14,12 +15,7 @@ export function prefixStrategy<T extends string>({
 	defaultLanguage,
 	pathnames,
 	exclude,
-}: {
-	availableLanguageTags: readonly T[]
-	defaultLanguage: T
-	pathnames: PathTranslations<T>
-	exclude: (path: string) => boolean
-}): RoutingStragey<T> {
+}: ResolvedI18nConfig<T>): RoutingStragey<T> {
 	/**
 	 * Get's the language tag from the localised path.
 	 * If no language tag is _explicitly_ in the path, returns undefined
@@ -99,6 +95,5 @@ export function prefixStrategy<T extends string>({
 		getCanonicalPath,
 		translatePath,
 		resolveLanguage,
-		defaultLanguage,
 	}
 }
