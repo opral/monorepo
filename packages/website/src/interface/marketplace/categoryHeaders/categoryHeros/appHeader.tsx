@@ -12,11 +12,11 @@ const AppHeader = () => {
 	]
 	const getDevProducts = () => [
 		"library.inlang.paraglideJs",
+		"app.inlang.ninjaI18nAction",
+		"app.inlang.ideExtension",
 		"library.inlang.paraglideJsAdapterAstro",
 		"library.inlang.paraglideJsAdapterSvelteKit",
 		"library.inlang.paraglideJsAdapterSolidStart",
-		"app.inlang.cli",
-		"app.inlang.ideExtension",
 	]
 
 	return (
