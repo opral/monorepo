@@ -145,26 +145,28 @@ export function PatternEditor(props: {
 	createEffect(
 		// debounce to improve performance when typing
 		// eslint-disable-next-line solid/reactivity
-		on(currentJSON, debounce(500, () => {
-			if (JSON.stringify(currentJSON().content) !== JSON.stringify(previousContent())) {
-				autoSave()
-				setPreviousContent(currentJSON().content)
-				setHasChanges((prev) => {
-					const hasChanged =
-						JSON.stringify(referencePattern()) !== JSON.stringify(newPattern()) &&
-						!(
-							referencePattern() === undefined &&
-							JSON.stringify(newPattern()) === `[{"type":"Text","value":""}]`
-						)
-					if (prev !== hasChanged && hasChanged) {
-						setLocalChanges((prev) => (prev += 1))
-					} else if (prev !== hasChanged && !hasChanged) {
-						setLocalChanges((prev) => (prev -= 1))
-					}
-					return hasChanged
-				})
-			}
-		})
+		on(
+			currentJSON,
+			debounce(500, () => {
+				if (JSON.stringify(currentJSON().content) !== JSON.stringify(previousContent())) {
+					autoSave()
+					setPreviousContent(currentJSON().content)
+					setHasChanges((prev) => {
+						const hasChanged =
+							JSON.stringify(referencePattern()) !== JSON.stringify(newPattern()) &&
+							!(
+								referencePattern() === undefined &&
+								JSON.stringify(newPattern()) === `[{"type":"Text","value":""}]`
+							)
+						if (prev !== hasChanged && hasChanged) {
+							setLocalChanges((prev) => (prev += 1))
+						} else if (prev !== hasChanged && !hasChanged) {
+							setLocalChanges((prev) => (prev -= 1))
+						}
+						return hasChanged
+					})
+				}
+			})
 		)
 	)
 
