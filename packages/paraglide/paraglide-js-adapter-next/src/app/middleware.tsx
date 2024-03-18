@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { NextRequest } from "next/server"
 import { availableLanguageTags } from "$paraglide/runtime.js"
-import { HeaderNames } from "../constants"
+import { HeaderNames, LANG_COOKIE } from "../constants"
 import { addBasePath } from "./routing/basePath"
 import type { RoutingStragey } from "./routing/interface"
 import type { ResolvedI18nConfig } from "./config"
@@ -15,6 +15,7 @@ export function createMiddleware<T extends string>(
 	 * https://nextjs.org/docs/pages/building-your-application/routing/middleware#setting-headers
 	 */
 	return function middleware(request: NextRequest) {
+		const localeCooke = request.cookies.get(LANG_COOKIE)
 		const locale = strategy.resolveLanguage(request)
 
 		const localisedPathname = decodeURI(request.nextUrl.pathname)
