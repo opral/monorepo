@@ -1,5 +1,12 @@
 # @inlang/paraglide-js
 
+## 1.3.3
+
+### Patch Changes
+
+- 11f0e18: Update dependency
+- 10e3c28: fix JSDoc annotations on message aliases
+
 ## 1.3.2
 
 ### Patch Changes
