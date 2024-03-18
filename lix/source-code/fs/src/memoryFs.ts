@@ -449,7 +449,7 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 				throw new FilesystemError("ENOTDIR", path, "rmdir")
 
 			if ("placeholder" in parentDir || "placeholder" in target) {
-				throw new FilesystemError("EPLACEHOLDER", path, "readFile")
+				throw new FilesystemError("ENOTDIR", path, "rmdir")
 			}
 
 			if (target.size) throw new FilesystemError("ENOTEMPTY", path, "rmdir")
