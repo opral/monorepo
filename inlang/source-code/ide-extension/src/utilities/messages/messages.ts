@@ -200,6 +200,30 @@ export function createMessageHtml(args: {
 	isHighlighted: boolean
 	workspaceFolder: vscode.WorkspaceFolder
 }): string {
+	// Function to check if the record has any keys
+	const hasAliases = (aliases: Message["alias"]): boolean => {
+		return Object.keys(aliases).length > 0
+	}
+
+	const isExperimentalAliasesEnabled = state().project.settings()?.experimental?.aliases
+
+	const aliasHtml =
+		isExperimentalAliasesEnabled && hasAliases(args.message.alias)
+			? `<div class="aliases" title="Alias">
+				<span><strong>@</strong></span>
+				<div>
+				${Object.entries(args.message.alias)
+					.map(
+						([key, value]) =>
+							`<span data-alias="${escapeHtml(value)}"><i>${escapeHtml(key)}</i>: ${escapeHtml(
+								value
+							)}</span>`
+					)
+					.join("")}
+				</div>
+			</div>`
+			: ""
+
 	const translationsTableHtml = getTranslationsTableHtml({
 		message: args.message,
 		workspaceFolder: args.workspaceFolder,
@@ -233,6 +257,7 @@ export function createMessageHtml(args: {
 		</div>
 		<div class="content" style="display: none;">
 			${translationsTableHtml}
+			${aliasHtml}
 		</div>
 	</div>
     `
@@ -389,8 +414,15 @@ export function getHtml(args: {
 						messageButtons.forEach(button => {
 							translationsText += button.textContent.toLowerCase() + ' ';
 						});
+
+						// Use the data-alias attribute for search
+						const aliases = item.querySelectorAll('.aliases [data-alias]');
+						let aliasesText = '';
+						aliases.forEach(alias => {
+							aliasesText += alias.getAttribute('data-alias').toLowerCase() + ' ';
+						});
 				
-						const itemVisible = messageId.includes(searchTerm) || translationsText.includes(searchTerm);
+						const itemVisible = messageId.includes(searchTerm) || translationsText.includes(searchTerm) || aliasesText.includes(searchTerm);
 						item.style.display = itemVisible ? '' : 'none';
 					});
 				}
