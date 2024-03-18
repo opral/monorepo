@@ -182,7 +182,7 @@ your web-vitals. Learn more about why lazy-loading is bad & what to do instead i
 
 If you _really_ want to do it anway, you can lazily import the language-specific message files. Be careful with this, as it's easy to accidenally break tree-shaking.
 
-```
+```ts
 const lazyGerman = await import("./paraglide/messages/de.js")
 ```
 
