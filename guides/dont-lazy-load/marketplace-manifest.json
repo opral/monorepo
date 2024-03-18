@@ -1,6 +1,6 @@
 {
 	"id": "guide.lorissigrist.dontlazyload",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/dont-lazy-load/assets/thumbnail.png",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/dont-lazy-load/assets/icon.png",
 	"displayName": {
 		"en": "Don't Lazy-Load Translations"
 	},
@@ -30,7 +30,7 @@
 		"guides-general",
 		"guides-i18n"
 	],
-	"recommends": ["g/2fg8ng94", "g/00162hsd", "g/wxcebbig", "g/uxohikde"],
+	"recommends": ["m/gerre34r", "g/00162hsd", "g/wxcebbig", "g/uxohikde"],
 	"publisherName": "Loris Sigrist",
 	"publisherIcon": "https://avatars.githubusercontent.com/u/43482866?v=4",
 	"license": "Apache-2.0"
