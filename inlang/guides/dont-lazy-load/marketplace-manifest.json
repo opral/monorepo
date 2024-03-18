@@ -28,7 +28,7 @@
 		"nextjs",
 		"svelte",
 		"guides-general",
-		"guides-i18n"
+		"guides-developer"
 	],
 	"recommends": ["m/gerre34r", "g/00162hsd", "g/wxcebbig", "g/uxohikde"],
 	"publisherName": "Loris Sigrist",
