@@ -6,12 +6,9 @@ import { createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
 import type { I18nUserConfig, ResolvedI18nConfig } from "./config"
 import { resolvePathTranslations } from "./pathnames/resolvePathTranslations"
-import type { RoutingStragey } from "./routing/interface"
+import { PrefixStrategy } from "./routing/prefixStrategy"
 
-export function createI18n<T extends string = string>(
-	userConfig: I18nUserConfig<T> = {},
-	StrategyContructor: (config: ResolvedI18nConfig<T>) => RoutingStragey<T>
-) {
+export function createI18n<T extends string = string>(userConfig: I18nUserConfig<T> = {}) {
 	const config: ResolvedI18nConfig<T> = {
 		availableLanguageTags: availableLanguageTags as readonly T[],
 		defaultLanguage: userConfig.defaultLanguage ?? (sourceLanguageTag as T),
@@ -19,7 +16,7 @@ export function createI18n<T extends string = string>(
 		pathnames: resolvePathTranslations(userConfig.pathnames ?? {}, availableLanguageTags as T[]),
 	}
 
-	const strategy = StrategyContructor({
+	const strategy = PrefixStrategy({
 		availableLanguageTags: config.availableLanguageTags,
 		pathnames: config.pathnames,
 		defaultLanguage: config.defaultLanguage,
