@@ -1,13 +1,13 @@
 import { createLink } from "./Link"
 import { getLanguage } from "./getLanguage.server"
 import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
-import { prefixStrategy } from "./routing/prefix"
 import { createNoopNavigation, createRedirects } from "./navigation"
 import { createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
-import { I18nOptions } from "./config"
 import { resolvePathTranslations } from "./pathnames/resolvePathTranslations"
 import { validatePathTranslations } from "./pathnames/validatePathTranslations"
+import { I18nUserConfig, ResolvedI18nConfig } from "./config"
+import { PrefixStrategy } from "./routing/prefixStrategy"
 
 /**
  * Creates an i18n instance that manages your internationalization.
@@ -24,12 +24,17 @@ import { validatePathTranslations } from "./pathnames/validatePathTranslations"
  * export const i18n = createI18n({ ...options })
  * ```
  */
-export function createI18n<T extends string = string>(options: I18nOptions<T> = {}) {
-	const exclude = createExclude(options.exclude ?? [])
-	const pathnames = resolvePathTranslations(options.pathnames ?? {}, availableLanguageTags as T[])
+export function createI18n<T extends string = string>(userConfig: I18nUserConfig<T> = {}) {
+	const config: ResolvedI18nConfig<T> = {
+		availableLanguageTags: availableLanguageTags as readonly T[],
+		defaultLanguage: userConfig.defaultLanguage ?? (sourceLanguageTag as T),
+		exclude: createExclude(userConfig.exclude ?? []),
+		pathnames: resolvePathTranslations(userConfig.pathnames ?? {}, availableLanguageTags as T[]),
+		prefix: userConfig.prefix ?? "except-default",
+	}
 
 	if (process.env.NODE_ENV === "development") {
-		const issues = validatePathTranslations(pathnames, availableLanguageTags as T[])
+		const issues = validatePathTranslations(config.pathnames, availableLanguageTags as T[])
 		if (issues.length) {
 			console.warn(
 				`The following issues were found in your path translations. Make sure to fix them before deploying your app:`
@@ -38,22 +43,17 @@ export function createI18n<T extends string = string>(options: I18nOptions<T> = 
 		}
 	}
 
-	const strategy = prefixStrategy<T>({
-		availableLanguageTags: availableLanguageTags as readonly T[],
-		pathnames,
-		defaultLanguage: options.defaultLanguage ?? (sourceLanguageTag as T),
-		exclude,
-	})
+	const strategy = PrefixStrategy(config)
 
 	/**
 	 * React Component that enables client-side transitions between routes.
 	 *
 	 * Automatically localises the href based on the current language.
 	 */
-	const Link = createLink<T>(getLanguage, strategy)
+	const Link = createLink<T>(getLanguage, config, strategy)
 	const { usePathname, useRouter } = createNoopNavigation<T>()
 	const { redirect, permanentRedirect } = createRedirects<T>(getLanguage, strategy)
-	const middleware = createMiddleware<T>(exclude, strategy)
+	const middleware = createMiddleware<T>(config, strategy)
 
 	return {
 		Link,

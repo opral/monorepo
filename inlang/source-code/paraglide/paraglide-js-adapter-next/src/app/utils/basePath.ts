@@ -7,9 +7,7 @@ export function addBasePath(path: string, required?: boolean): string {
 }
 
 export function addPathPrefix(path: string, prefix?: string) {
-	if (!path.startsWith("/") || !prefix) {
-		return path
-	}
+	if (!path.startsWith("/") || !prefix) return path
 
 	const { pathname, query, hash } = parsePath(path)
 	return `${prefix}${pathname}${query}${hash}`
