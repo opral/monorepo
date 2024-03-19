@@ -1,5 +1,29 @@
 # @inlang/github-lint-action
 
+## 0.2.11
+
+### Patch Changes
+
+- e169f29: Remove project not found comment
+
+## 0.2.10
+
+### Patch Changes
+
+- 033a6cc: Fix project not found error
+
+## 0.2.9
+
+### Patch Changes
+
+- 54d51b7: Handle project not found in head repo
+
+## 0.2.8
+
+### Patch Changes
+
+- 05d1914: set required node version down to v18
+
 ## 0.2.5
 
 ### Patch Changes

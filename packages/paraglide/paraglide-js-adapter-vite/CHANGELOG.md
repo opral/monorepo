@@ -1,5 +1,11 @@
 # @inlang/paraglide-js-adapter-vite
 
+## 1.2.23
+
+### Patch Changes
+
+- @inlang/paraglide-js-adapter-unplugin@1.4.12
+
 ## 1.2.22
 
 ### Patch Changes
