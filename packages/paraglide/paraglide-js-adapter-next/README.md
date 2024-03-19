@@ -208,9 +208,7 @@ Excluded routes won't be prefixed with the language tag & the middleware will no
 
 #### Changing the default language
 
-The default language is the one that get's used when there is no language in the URL.
-
-By default the default language is the `sourceLanguageTag` you defined in your `project.inlang/settings.json`. You can change it with the `defaultLanguage` option.
+By default the default language is the `sourceLanguageTag` you defined in `project.inlang/settings.json`. You can change it with the `defaultLanguage` option.
 
 ```ts
 export const { ... } =
@@ -220,8 +218,19 @@ export const { ... } =
 ```
 
 
+#### How language-detection works
+
+The adapter follows these steps to determine the language.
+
+- First, the adapter will try to determine the language based on the URL.
+- If that fails, it will look for a `NEXT_LOCALE` cookie. 
+- If that isn't available either, it will try to negotiate the language based on the `Accept-Language` header. 
+- Finally it will fallback to the default language.
+
+If a language has been determined once, it will set the `NEXT_LOCALE` cookie so that future ambiguities don't result in random language switches. 
+
 #### Translated Pathnames
-You can translate pathnames with the `pathname` option. You can define different pathnames for each language.
+You can use different pathnames for each language with the `pathname` option. 
 
 ```ts
 export const { ... } =
@@ -235,7 +244,7 @@ export const { ... } =
 	})
 ```
 
-You can also use a message as the pathname. This way you can change the pathnames without changing the code.
+Even better: You can use a message as the pathname. This way you can change the pathnames without changing the code.
 
 ```json
 // messages/en.json
@@ -257,6 +266,8 @@ export const { ... } =
 	})
 ```
 
+Be careful when using translated pathnames in combination with `prefix: "never"`. Links may not work if they are shared between people with different languages.
+
 #### Getting a localised Pathname
 
 There are situations where you need to know the localised version of a pathname. You can use the `localizePathname` function for that.
@@ -265,6 +276,8 @@ There are situations where you need to know the localised version of a pathname.
 import { localizePathname } from "@/lib/i18n"
 localizePathname("/about", "de") // de/ueber-uns
 ```
+
+This does not include the `basePath`.
 
 #### SEO
 
