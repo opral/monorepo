@@ -1,12 +1,16 @@
 import * as NextNavigation from "next/navigation"
-import type { RoutingStrategy } from "./routing/prefix"
 import { setLanguageTag } from "$paraglide/runtime.js"
-import { addBasePath } from "./routing/basePath"
+import { addBasePath, basePath } from "./utils/basePath"
+import { RoutingStragey } from "./routing/interface"
+import { createLocaliseHref } from "./localiseHref"
+import { serializeCookie } from "./utils/cookie"
+import { LANG_COOKIE } from "./constants"
 
 export const createNavigation = <T extends string>(
 	languageTag: () => T,
-	startegy: RoutingStrategy<T>
+	strategy: RoutingStragey<T>
 ) => {
+	const localiseHref = createLocaliseHref(strategy)
 
 	type NextUsePathname = (typeof NextNavigation)["usePathname"]
 
@@ -16,7 +20,7 @@ export const createNavigation = <T extends string>(
 	const usePathname: NextUsePathname = (...args) => {
 		const encodedLocalisedPathname = NextNavigation.usePathname(...args)
 		const localisedPathname = decodeURI(encodedLocalisedPathname)
-		return startegy.getCanonicalPath(localisedPathname)
+		return strategy.getCanonicalPath(localisedPathname, languageTag())
 	}
 
 	/**
@@ -25,7 +29,11 @@ export const createNavigation = <T extends string>(
 	const useRouter = () => {
 		const nextRouter = NextNavigation.useRouter()
 		const localisedCurrentPathname = usePathname()
-		const canonicalCurrentPathname = startegy.getCanonicalPath(localisedCurrentPathname)
+		const searchParams = NextNavigation.useSearchParams()
+		const canonicalCurrentPathname = strategy.getCanonicalPath(
+			localisedCurrentPathname,
+			languageTag()
+		)
 
 		type NavigateOptions = Parameters<(typeof nextRouter)["push"]>[1]
 		type PrefetchOptions = Parameters<(typeof nextRouter)["prefetch"]>[1]
@@ -40,7 +48,7 @@ export const createNavigation = <T extends string>(
 			options?: (NavigateOptions & OptionalLanguageOption) | undefined
 		) => {
 			const locale = options?.locale ?? languageTag()
-			const localisedPath = startegy.localiseHref(canonicalPath, locale)
+			const localisedPath = localiseHref(canonicalPath, locale)
 
 			// If the current and new canonical paths are the same, but the language is different,
 			// we need to do a native reload to make sure the new language is used
@@ -49,7 +57,19 @@ export const createNavigation = <T extends string>(
 				options?.locale &&
 				options.locale !== languageTag()
 			) {
-				history.pushState({}, "", addBasePath(localisedPath, true))
+				let destination = addBasePath(localisedPath, true)
+				const searchParamString = searchParams.toString()
+				if (searchParamString) {
+					destination += `?${searchParamString}`
+				}
+				history.pushState({}, "", destination)
+
+				document.cookie = serializeCookie({
+					...LANG_COOKIE,
+					value: locale,
+					path: basePath,
+				})
+
 				window.location.reload()
 				return
 			}
@@ -70,7 +90,7 @@ export const createNavigation = <T extends string>(
 			options?: (NavigateOptions & OptionalLanguageOption) | undefined
 		) => {
 			const locale = options?.locale ?? languageTag()
-			const localisedPath = startegy.localiseHref(canonicalPath, locale)
+			const localisedPath = localiseHref(canonicalPath, locale)
 
 			// If the current and new canonical paths are the same, but the language is different,
 			// we need to do a native reload to make sure the new language is used
@@ -79,7 +99,19 @@ export const createNavigation = <T extends string>(
 				options?.locale &&
 				options.locale !== languageTag()
 			) {
-				history.replaceState({}, "", addBasePath(localisedPath, true))
+				let destination = addBasePath(localisedPath, true)
+				const searchParamString = searchParams.toString()
+				if (searchParamString) {
+					destination += `?${searchParamString}`
+				}
+				history.replaceState({}, "", destination)
+
+				document.cookie = serializeCookie({
+					...LANG_COOKIE,
+					value: locale,
+					path: basePath,
+				})
+
 				window.location.reload()
 				return
 			}
@@ -97,7 +129,7 @@ export const createNavigation = <T extends string>(
 		 */
 		const prefetch = (canonicalPath: string, options: PrefetchOptions & OptionalLanguageOption) => {
 			const locale = options?.locale ?? languageTag()
-			const localisedPath = startegy.localiseHref(canonicalPath, locale)
+			const localisedPath = localiseHref(canonicalPath, locale)
 			return nextRouter.prefetch(localisedPath, options)
 		}
 
@@ -129,8 +161,10 @@ export function createNoopNavigation<T extends string>(): ReturnType<typeof crea
 
 export function createRedirects<T extends string>(
 	languageTag: () => T,
-	startegy: RoutingStrategy<T>
+	strategy: RoutingStragey<T>
 ) {
+	const localiseHref = createLocaliseHref(strategy)
+
 	type NextRedirect = (typeof NextNavigation)["redirect"]
 
 	/**
@@ -140,7 +174,7 @@ export function createRedirects<T extends string>(
 	 *  @param url the url to redirect to
 	 */
 	const redirect: NextRedirect = (...args) => {
-		args[0] = startegy.localiseHref(args[0], languageTag())
+		args[0] = localiseHref(args[0], languageTag())
 		NextNavigation.redirect(...args)
 	}
 
@@ -153,7 +187,7 @@ export function createRedirects<T extends string>(
 	 * @param url the url to redirect to
 	 */
 	const permanentRedirect: NextPermanentRedirect = (...args) => {
-		args[0] = startegy.localiseHref(args[0], languageTag())
+		args[0] = localiseHref(args[0], languageTag())
 		NextNavigation.permanentRedirect(...args)
 	}
 
