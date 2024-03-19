@@ -134,7 +134,10 @@ function specify(
  * Get the preferred languages from an Accept-Language header.
  * @public
  */
-function preferredLanguages(accept: string | undefined, provided: readonly string[]) {
+function preferredLanguages<T extends string = string>(
+	accept: string | undefined,
+	provided: readonly T[]
+): T[] {
 	// RFC 2616 sec 14.4: no header = *
 	const accepts = parseAcceptLanguage(accept === undefined ? "*" : accept || "")
 
@@ -142,7 +145,7 @@ function preferredLanguages(accept: string | undefined, provided: readonly strin
 		return accepts
 			.filter(hasQuality)
 			.sort(compareSpecs)
-			.map((spec) => spec.full)
+			.map((spec) => spec.full) as T[]
 	}
 
 	const priorities = provided.map((type, index) => getLanguagePriority(type, accepts, index))

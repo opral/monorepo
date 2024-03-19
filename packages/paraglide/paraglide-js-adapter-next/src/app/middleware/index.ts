@@ -5,6 +5,7 @@ import { HeaderNames, LANG_COOKIE } from "../constants"
 import type { NextRequest } from "next/server"
 import type { RoutingStragey } from "../routing/interface"
 import type { ResolvedI18nConfig } from "../config"
+import { resolveLanguage } from "./resolveLanguage"
 
 export function createMiddleware<T extends string>(
 	config: ResolvedI18nConfig<T>,
@@ -16,7 +17,7 @@ export function createMiddleware<T extends string>(
 	 */
 	return function middleware(request: NextRequest) {
 		const localeCookeValue = request.cookies.get(LANG_COOKIE.name)?.value
-		const locale = strategy.resolveLanguage(request)
+		const locale = resolveLanguage(request, config, strategy)
 
 		const localisedPathname = decodeURI(request.nextUrl.pathname)
 		const canonicalPath = strategy.getCanonicalPath(localisedPathname, locale)
