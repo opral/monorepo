@@ -6,7 +6,7 @@ import { createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
 import { resolvePathTranslations } from "./pathnames/resolvePathTranslations"
 import { validatePathTranslations } from "./pathnames/validatePathTranslations"
-import type { I18nUserConfig, ResolvedI18nConfig } from "./config"
+import { I18nUserConfig, ResolvedI18nConfig } from "./config"
 import { PrefixStrategy } from "./routing/prefixStrategy"
 
 /**

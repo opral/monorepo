@@ -4,7 +4,7 @@ import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
 import { createNavigation, createRedirects } from "./navigation"
 import { createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
-import type { I18nUserConfig, ResolvedI18nConfig } from "./config"
+import { I18nUserConfig, ResolvedI18nConfig } from "./config"
 import { resolvePathTranslations } from "./pathnames/resolvePathTranslations"
 import { PrefixStrategy } from "./routing/prefixStrategy"
 

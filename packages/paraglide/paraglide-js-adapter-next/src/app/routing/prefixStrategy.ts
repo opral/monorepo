@@ -34,9 +34,21 @@ export function PrefixStrategy<T extends string>({
 		return maybeLocale as T
 	}
 
-	function resolveLanguage(request: NextRequest): T {
+	function resolveLanguage(request: NextRequest): T | undefined {
 		const localisedPathname = decodeURI(request.nextUrl.pathname)
-		return getLocaleFromLocalisedPath(localisedPathname) ?? defaultLanguage
+		const localeInPath = getLocaleFromLocalisedPath(localisedPathname)
+
+		switch (prefix) {
+			case "all": {
+				return localeInPath
+			}
+			case "except-default": {
+				return localeInPath ?? defaultLanguage
+			}
+			case "never": {
+				return undefined
+			}
+		}
 	}
 
 	function getCanonicalPath(localisedPath: string, locale: T): string {
