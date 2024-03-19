@@ -15,23 +15,8 @@ export const Default: StoryObj = {
 	render: () =>
 		html`
 			<inlang-settings
-				.settings=${mockProject}
+				.project=${mockProject}
 				@onSetSettings=${(settings: any) => console.info("save", settings)}
 			></inlang-settings>
 		`,
-}
-
-export const HTML: StoryObj = {
-	render: () =>
-		`
-		<script>
-			document.querySelector('inlang-settings').addEventListener('onSetSettings', (settings) => {
-				console.info("save", settings);
-		  	});
-		</script>
-		<inlang-settings
-			id="my-element"
-			settings=${JSON.stringify(mockProject)}
-		></inlang-settings>
-	`,
 }

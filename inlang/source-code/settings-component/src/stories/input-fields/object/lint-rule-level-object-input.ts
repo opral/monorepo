@@ -1,9 +1,7 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
 import { baseStyling } from "../../../styling/base.js"
-import { Plugin } from "@inlang/plugin"
-import { MessageLintRule } from "@inlang/message-lint-rule"
-import { InlangModule } from "@inlang/module"
+import { Plugin, MessageLintRule, InlangModule } from "@inlang/sdk"
 
 @customElement("lint-rule-level-object-input")
 export class LintRuleLevelObjectInput extends LitElement {
