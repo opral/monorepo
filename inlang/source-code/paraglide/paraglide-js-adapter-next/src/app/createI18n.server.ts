@@ -30,6 +30,8 @@ export function createI18n<T extends string = string>(userConfig: I18nUserConfig
 		defaultLanguage: userConfig.defaultLanguage ?? (sourceLanguageTag as T),
 		exclude: createExclude(userConfig.exclude ?? []),
 		pathnames: resolvePathTranslations(userConfig.pathnames ?? {}, availableLanguageTags as T[]),
+		detectLanguage: userConfig.detectLanguage || (() => undefined),
+		prefix: userConfig.prefix ?? "except-default",
 	}
 
 	if (process.env.NODE_ENV === "development") {
@@ -42,12 +44,7 @@ export function createI18n<T extends string = string>(userConfig: I18nUserConfig
 		}
 	}
 
-	const strategy = PrefixStrategy({
-		availableLanguageTags: config.availableLanguageTags,
-		pathnames: config.pathnames,
-		defaultLanguage: config.defaultLanguage,
-		exclude: config.exclude,
-	})
+	const strategy = PrefixStrategy(config)
 
 	/**
 	 * React Component that enables client-side transitions between routes.

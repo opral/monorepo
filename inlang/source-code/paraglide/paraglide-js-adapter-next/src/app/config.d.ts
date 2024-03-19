@@ -49,7 +49,7 @@ export type I18nUserConfig<T extends string> = {
 	 *
 	 * @case "except-default" Only add the language to the URL if it is not the default language
 	 * @case "all" Always add the language to the URL. If no language is present, detec language and redirect
-	 * @case "never" Always use language detection
+	 * @case "never" Rely entirely on language detection
 	 *
 	 * Language detection works by:
 	 * 1. Checking if a NEXT_LOCALE cookie is set
@@ -62,8 +62,10 @@ export type I18nUserConfig<T extends string> = {
 
 	/**
 	 * Override the language detection. This runs as part of your middleware.
+	 *
+	 * If `undefined` is returned, the default langauge detection will be used as a fallback
 	 */
-	detectLanguage?: (request: NextRequest) => T
+	detectLanguage?: (request: NextRequest) => T | undefined
 
 	/**
 	 * The language to use in case language detection fails.
@@ -77,4 +79,6 @@ export type ResolvedI18nConfig<T extends string> = {
 	defaultLanguage: T
 	exclude: (path: string) => boolean
 	pathnames: PathTranslations<T>
+	detectLanguage: (request: NextRequest) => T | undefined
+	prefix: "all" | "except-default" | "never"
 }
