@@ -6,6 +6,7 @@ import type { NextRequest } from "next/server"
 import type { RoutingStragey } from "../routing/interface"
 import type { ResolvedI18nConfig } from "../config"
 import { resolveLanguage } from "./resolveLanguage"
+import { NextURL } from "next/dist/server/web/next-url"
 
 export function createMiddleware<T extends string>(
 	config: ResolvedI18nConfig<T>,
@@ -38,12 +39,10 @@ export function createMiddleware<T extends string>(
 			headers,
 		}
 
-		request.nextUrl.pathname = canonicalPath
-
 		const response: NextResponse = shouldRedirect
-			? NextResponse.redirect(request.nextUrl, requestInit)
+			? redirect(request.nextUrl, localisedPathname, requestInit)
 			: rewriteRequired
-			? NextResponse.rewrite(request.nextUrl, requestInit)
+			? rewrite(request.nextUrl, canonicalPath, requestInit)
 			: NextResponse.next(requestInit)
 
 		// Update the locale-cookie
@@ -67,4 +66,14 @@ export function createMiddleware<T extends string>(
 
 		return response
 	}
+}
+
+const rewrite = (nextUrl: NextURL, pathname: string, init: RequestInit): NextResponse => {
+	nextUrl.pathname = pathname
+	return NextResponse.rewrite(nextUrl, init)
+}
+
+const redirect = (nextUrl: NextURL, pathname: string, init: RequestInit): NextResponse => {
+	nextUrl.pathname = pathname
+	return NextResponse.redirect(nextUrl, init)
 }
