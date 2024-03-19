@@ -15,6 +15,7 @@ export function PrefixStrategy<T extends string>({
 	defaultLanguage,
 	pathnames,
 	exclude,
+	prefix,
 }: ResolvedI18nConfig<T>): RoutingStragey<T> {
 	/**
 	 * Get's the language tag from the localised path.
@@ -65,11 +66,16 @@ export function PrefixStrategy<T extends string>({
 
 		const translatedPath = getTranslatedPath(canonicalPath, locale, pathnames)
 
-		let localisedPath = locale === defaultLanguage ? translatedPath : `/${locale}${translatedPath}`
+		const shouldAddPrefix =
+			prefix === "never" ? false : prefix === "except-default" ? locale !== defaultLanguage : true
 
+		let localisedPath = shouldAddPrefix ? `/${locale}${translatedPath}` : translatedPath
+
+		//remove trailing slash
 		if (localisedPath.endsWith("/")) localisedPath = localisedPath.slice(0, -1)
-		localisedPath ||= "/"
-		return localisedPath
+
+		//add "/" if path is empty
+		return localisedPath || "/"
 	}
 
 	function getTranslatedPath(canonicalPath: string, lang: T, translations: PathTranslations<T>) {
