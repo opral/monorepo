@@ -39,17 +39,25 @@ export function createMiddleware<T extends string>(
 			headers.set(HeaderNames.Link, linkHeader)
 		}
 
+		let response: NextResponse
 		if (canonicalPath !== request.nextUrl.pathname) {
 			request.nextUrl.pathname = canonicalPath
-			return NextResponse.rewrite(request.nextUrl, {
+			response = NextResponse.rewrite(request.nextUrl, {
 				headers,
 			})
 		} else {
-			return NextResponse.next({
+			response = NextResponse.next({
 				request: {
 					headers,
 				},
 			})
 		}
+
+		response.cookies.set(LANG_COOKIE.name, locale, {
+			sameSite: LANG_COOKIE.sameSite,
+			maxAge: LANG_COOKIE.maxAge,
+		})
+
+		return response
 	}
 }
