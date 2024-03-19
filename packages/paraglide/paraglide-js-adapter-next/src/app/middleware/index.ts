@@ -34,11 +34,10 @@ export function createMiddleware<T extends string>(
 			headers,
 		}
 
+		request.nextUrl.pathname = canonicalPath
+
 		const response: NextResponse = rewriteRequired
-			? NextResponse.rewrite(
-					{ ...request.nextUrl, pathname: canonicalPath } as typeof request.nextUrl,
-					requestInit
-			  )
+			? NextResponse.rewrite(request.nextUrl, requestInit)
 			: NextResponse.next(requestInit)
 
 		// Update the locale-cookie
