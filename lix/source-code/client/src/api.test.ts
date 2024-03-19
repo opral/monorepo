@@ -338,6 +338,128 @@ describe("main workflow", () => {
 		expect(status).toBe("unmodified")
 	})
 
+	it("uses nested gitignore files correctly", async () => {
+		const fs = createNodeishMemoryFs()
+
+		const snapshot = JSON.parse(
+			readFileSync(resolve(__dirname, "../mocks/ci-test-repo.json"), { encoding: "utf-8" })
+		)
+		fromSnapshot(fs, snapshot)
+
+		const repo: Awaited<ReturnType<typeof openRepository>> = await openRepository("file:///", {
+			nodeishFs: fs,
+			experimentalFeatures: { lazyClone: true, lixCommit: true },
+			branch: "test-symlink",
+		})
+
+		await repo.nodeishFs.writeFile("/static/test1", "file content\n")
+		try {
+			await repo._emptyWorkdir()
+		} catch (err) {
+			expect(err.message).toBe("could not empty the workdir, uncommitted changes")
+		}
+		await repo.nodeishFs.rm("/static/test1")
+
+		await repo._emptyWorkdir()
+		await repo._checkOutPlaceholders()
+
+		await repo.nodeishFs.mkdir("/static/test/nested/deep/deeper", { recursive: true })
+
+		await repo.nodeishFs.writeFile("/static/test/nested/deep/test1", "file content\n")
+		await repo.nodeishFs.writeFile("/static/test/nested/deep/deeper/test3", "file content3\n")
+		await repo.nodeishFs.writeFile("/static/test/nested/test2", "file content2\n")
+		await repo.nodeishFs.writeFile("/static/test/nested/.gitignore", "deep\ntestparent\n")
+		await repo.nodeishFs.writeFile("/static/test/testparent", "file content\n")
+
+		const status = (await repo.statusList({ includeStatus: ["materialized", "ignored"] })).filter(
+			([name]) => !name.startsWith(".git/")
+		)
+
+		expect(status).toStrictEqual([
+			[
+				".git",
+				"ignored",
+				{
+					headOid: undefined,
+					stageOid: undefined,
+					workdirOid: "ignored",
+				},
+			],
+			[
+				".gitignore",
+				"unmodified",
+				{
+					headOid: "6635cf5542756197081eedaa1ec3a7c2c5a0b537",
+					stageOid: "6635cf5542756197081eedaa1ec3a7c2c5a0b537",
+					workdirOid: "6635cf5542756197081eedaa1ec3a7c2c5a0b537",
+				},
+			],
+			[
+				"static/test/nested/.gitignore",
+				"*untracked",
+				{
+					headOid: undefined,
+					stageOid: undefined,
+					workdirOid: "42",
+				},
+			],
+			[
+				"static/test/nested/deep",
+				"ignored",
+				{
+					headOid: undefined,
+					stageOid: undefined,
+					workdirOid: "ignored",
+				},
+			],
+			[
+				"static/test/nested/deep/deeper",
+				"ignored",
+				{
+					headOid: undefined,
+					stageOid: undefined,
+					workdirOid: "ignored",
+				},
+			],
+			[
+				"static/test/nested/deep/deeper/test3",
+				"ignored",
+				{
+					headOid: undefined,
+					stageOid: undefined,
+					workdirOid: "ignored",
+				},
+			],
+			[
+				"static/test/nested/deep/test1",
+				"ignored",
+				{
+					headOid: undefined,
+					stageOid: undefined,
+					workdirOid: "ignored",
+				},
+			],
+			[
+				"static/test/nested/test2",
+				"*untracked",
+				{
+					headOid: undefined,
+					stageOid: undefined,
+					workdirOid: "42",
+				},
+			],
+			[
+				"static/test/testparent",
+				"*untracked",
+				{
+					headOid: undefined,
+					stageOid: undefined,
+					workdirOid: "42",
+				},
+			],
+		])
+	})
+
 	it("uses standard commit logic for non whitelisted repos", async () => {
 		const nonWhitelistedRepo = await openRepository(
 			"https://github.com/janfjohannes/unicode-bug-issues-1404",

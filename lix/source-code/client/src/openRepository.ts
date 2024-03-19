@@ -255,11 +255,13 @@ export async function openRepository(
 			cache,
 			dir,
 			ref: branchName,
-			filepaths: [".gitignore"],
+			filepaths: [],
 		})
-		checkedOut.add(".gitignore")
 
 		const fs = withProxy({ nodeishFs: rawFs, verbose: debug, description: "checkout placeholders" })
+
+		const gitignoreFiles: string[] = []
+
 		await isoGit.walk({
 			fs,
 			dir,
@@ -274,6 +276,11 @@ export async function openRepository(
 				const fileMode = await commit.mode()
 
 				const fileType: string = modeToFileType(fileMode)
+
+				if (fullpath.endsWith(".gitignore")) {
+					gitignoreFiles.push(fullpath)
+					return undefined
+				}
 
 				if (
 					args.sparseFilter &&
@@ -312,6 +319,22 @@ export async function openRepository(
 				return undefined
 			},
 		})
+
+		if (gitignoreFiles.length) {
+			await isoGit.checkout({
+				fs: withProxy({
+					nodeishFs: rawFs,
+					verbose: debug,
+					description: "checkout gitignores: " + JSON.stringify(gitignoreFiles),
+				}),
+				dir,
+				cache,
+				ref: args.branch,
+				filepaths: gitignoreFiles,
+			})
+			gitignoreFiles.map(file => checkedOut.add(file))
+		}
+
 		pending && (await pending)
 	}
 
@@ -369,8 +392,6 @@ export async function openRepository(
 			experimentalFeatures.lazyClone &&
 			rootObject &&
 			rootObject !== ".git" &&
-			// TODO we only support ./.gitignore for now and not .gitignore in subfolders
-			filename !== ".gitignore" &&
 			["readFile", "readlink", "writeFile"].includes(prop) &&
 			!checkedOut.has(rootObject) &&
 			!checkedOut.has(filename)
@@ -455,7 +476,7 @@ export async function openRepository(
 		}
 
 		const listing = (await rawFs.readdir("/")).filter((entry) => {
-			return !checkedOut.has(entry) && entry !== ".git" && entry !== ".gitignore"
+			return !checkedOut.has(entry) && entry !== ".git"
 		})
 
 		const notIgnored = (
