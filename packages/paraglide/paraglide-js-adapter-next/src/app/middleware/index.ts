@@ -29,16 +29,6 @@ export function createMiddleware<T extends string>(
 		const headers = new Headers(request.headers)
 		headers.set(HeaderNames.ParaglideLanguage, locale)
 
-		if (shouldAddLinkHeader(request)) {
-			const linkHeader = generateLinkHeader(strategy, {
-				availableLanguageTags: availableLanguageTags as T[],
-				canonicalPath,
-				request,
-				currentLocale: locale,
-			})
-			headers.set(HeaderNames.Link, linkHeader)
-		}
-
 		const rewriteRequired = request.nextUrl.pathname !== canonicalPath
 		const requestInit: RequestInit = {
 			headers,
@@ -58,6 +48,16 @@ export function createMiddleware<T extends string>(
 				maxAge: LANG_COOKIE.maxAge,
 				path: request.nextUrl.basePath || undefined,
 			})
+		}
+
+		if (shouldAddLinkHeader(request)) {
+			const linkHeader = generateLinkHeader(strategy, {
+				availableLanguageTags: availableLanguageTags as T[],
+				canonicalPath,
+				request,
+				currentLocale: locale,
+			})
+			response.headers.set(HeaderNames.Link, linkHeader)
 		}
 
 		return response
