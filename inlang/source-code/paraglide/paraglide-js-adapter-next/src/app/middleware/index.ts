@@ -19,8 +19,11 @@ export function createMiddleware<T extends string>(
 		const localeCookeValue = request.cookies.get(LANG_COOKIE.name)?.value
 		const locale = resolveLanguage(request, config, strategy)
 
-		const localisedPathname = decodeURI(request.nextUrl.pathname)
-		const canonicalPath = strategy.getCanonicalPath(localisedPathname, locale)
+		const decodedPathname = decodeURI(request.nextUrl.pathname)
+		const canonicalPath = strategy.getCanonicalPath(decodedPathname, locale)
+		const localisedPathname = strategy.getLocalisedPath(canonicalPath, locale)
+
+		const shouldRedirect = localisedPathname !== decodedPathname
 
 		const localeCookieMatches =
 			isAvailableLanguageTag(localeCookeValue) && localeCookeValue === locale
@@ -37,7 +40,9 @@ export function createMiddleware<T extends string>(
 
 		request.nextUrl.pathname = canonicalPath
 
-		const response: NextResponse = rewriteRequired
+		const response: NextResponse = shouldRedirect
+			? NextResponse.redirect(request.nextUrl, requestInit)
+			: rewriteRequired
 			? NextResponse.rewrite(request.nextUrl, requestInit)
 			: NextResponse.next(requestInit)
 
