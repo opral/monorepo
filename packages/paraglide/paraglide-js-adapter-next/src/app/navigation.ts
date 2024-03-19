@@ -29,6 +29,7 @@ export const createNavigation = <T extends string>(
 	const useRouter = () => {
 		const nextRouter = NextNavigation.useRouter()
 		const localisedCurrentPathname = usePathname()
+		const searchParams = NextNavigation.useSearchParams()
 		const canonicalCurrentPathname = strategy.getCanonicalPath(
 			localisedCurrentPathname,
 			languageTag()
@@ -56,7 +57,12 @@ export const createNavigation = <T extends string>(
 				options?.locale &&
 				options.locale !== languageTag()
 			) {
-				history.pushState({}, "", addBasePath(localisedPath, true))
+				let destination = addBasePath(localisedPath, true)
+				const searchParamString = searchParams.toString()
+				if (searchParamString) {
+					destination += `?${searchParamString}`
+				}
+				history.pushState({}, "", destination)
 
 				document.cookie = serializeCookie({
 					...LANG_COOKIE,
@@ -93,7 +99,12 @@ export const createNavigation = <T extends string>(
 				options?.locale &&
 				options.locale !== languageTag()
 			) {
-				history.replaceState({}, "", addBasePath(localisedPath, true))
+				let destination = addBasePath(localisedPath, true)
+				const searchParamString = searchParams.toString()
+				if (searchParamString) {
+					destination += `?${searchParamString}`
+				}
+				history.replaceState({}, "", destination)
 
 				document.cookie = serializeCookie({
 					...LANG_COOKIE,
