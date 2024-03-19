@@ -1,8 +1,7 @@
 import { html, LitElement, css } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import { baseStyling } from "../styling/base.js"
-import { ProjectSettings } from "@inlang/project-settings"
-import { InlangModule } from "@inlang/module"
+import { type InlangModule, ProjectSettings, type InlangProject } from "@inlang/sdk"
 import { Task } from "@lit/task"
 
 import "./input-fields/simple-input.js"
@@ -78,20 +77,11 @@ export default class InlangSettings extends LitElement {
 		`,
 	]
 
-	@property({ type: Object })
-	settings: ProjectSettings | undefined = undefined
-
-	dispatchOnSetSettings(settings: ProjectSettings) {
-		const onSetSettings = new CustomEvent("onSetSettings", {
-			detail: {
-				argument: settings,
-			},
-		})
-		this.dispatchEvent(onSetSettings)
-	}
+	@property({ attribute: false })
+	project: InlangProject = {} as InlangProject
 
 	@state()
-	private _project: ProjectSettings | undefined = undefined
+	private _newProject: ProjectSettings | undefined = undefined
 
 	@state()
 	private _unsavedChanges: boolean = false
@@ -99,8 +89,8 @@ export default class InlangSettings extends LitElement {
 	override async firstUpdated() {
 		await this.updateComplete
 
-		if (this.settings) {
-			this._project = JSON.parse(JSON.stringify(this.settings))
+		if (this.project?.settings()) {
+			this._newProject = JSON.parse(JSON.stringify(this.project.settings()))
 		}
 	}
 
@@ -111,21 +101,21 @@ export default class InlangSettings extends LitElement {
 		moduleId?: InlangModule["default"]["id"]
 	) => {
 		//update state object
-		if (this._project && moduleId) {
-			this._project = {
-				...this._project,
+		if (this._newProject && moduleId) {
+			this._newProject = {
+				...this._newProject,
 				[moduleId]: {
-					...this._project[moduleId],
+					...this._newProject[moduleId],
 					[property]: value,
 				},
 			}
-		} else if (this._project) {
-			this._project = {
-				...this._project,
+		} else if (this._newProject) {
+			this._newProject = {
+				...this._newProject,
 				[property]: value,
 			}
 		}
-		if (JSON.stringify(this.settings) !== JSON.stringify(this._project)) {
+		if (JSON.stringify(this.project?.settings()) !== JSON.stringify(this._newProject)) {
 			this._unsavedChanges = true
 		} else {
 			this._unsavedChanges = false
@@ -133,44 +123,60 @@ export default class InlangSettings extends LitElement {
 	}
 
 	_revertChanges = () => {
-		if (this.settings) {
-			this._project = JSON.parse(JSON.stringify(this.settings))
+		if (this.project?.settings()) {
+			this._newProject = JSON.parse(JSON.stringify(this.project?.settings()))
 		}
 		this._unsavedChanges = false
 	}
 
 	_saveChanges = () => {
-		if (this._project) {
-			this.dispatchOnSetSettings(this._project)
+		if (this._newProject) {
+			this.project?.setSettings(this._newProject)
 		}
 		this._unsavedChanges = false
 	}
 
 	private _projectProperties = new Task(this, {
-		task: async ([settings]) => {
-			if (!settings) throw new Error("No inlang project")
+		task: async ([project]) => {
+			const _project = project
+			if (!_project) throw new Error("No inlang project")
+			if (!_project.settings()) throw new Error("No inlang project")
 
 			const generalSchema: Record<
 				InlangModule["default"]["id"] | "internal",
 				{ meta?: InlangModule["default"]; schema?: Record<string, Record<string, unknown>> }
 			> = { internal: { schema: ProjectSettings.allOf[0] } }
 
-			for (const module of settings.modules) {
+			for (const plugin of _project.installed.plugins()) {
 				try {
-					const plugin = await import(module)
-					if (plugin.default) {
-						generalSchema[plugin.default.id] = {
-							schema: plugin.default.settingsSchema,
-							meta: plugin.default,
+					const importedPlugin = await import(plugin.module)
+					if (importedPlugin.default) {
+						generalSchema[importedPlugin.default.id] = {
+							schema: importedPlugin.default.settingsSchema,
+							meta: importedPlugin.default,
 						}
 					}
 				} catch (e) {
 					console.error(e)
 				}
 			}
+			for (const lintRule of _project.installed.messageLintRules()) {
+				try {
+					const importedLintRule = await import(lintRule.module)
+					if (importedLintRule.default) {
+						generalSchema[importedLintRule.default.id] = {
+							schema: importedLintRule.default.settingsSchema,
+							meta: importedLintRule.default,
+						}
+					}
+				} catch (e) {
+					console.error(e)
+				}
+			}
+
 			return generalSchema
 		},
-		args: () => [this.settings],
+		args: () => [this.project],
 	})
 
 	override render() {
@@ -179,7 +185,7 @@ export default class InlangSettings extends LitElement {
 			complete: (properties) =>
 				html` <div class="container">
 					${Object.entries(properties).map(([key, value]) => {
-						return value.schema?.properties && this._project
+						return value.schema?.properties && this._newProject
 							? html`<div class="module-container">
 									<h3>
 										${(value.meta as { displayName?: { en: string } })?.displayName?.en || key}
@@ -196,7 +202,7 @@ export default class InlangSettings extends LitElement {
 													<simple-input
 														.property=${property}
 														.modules=${properties}
-														.value=${this._project?.[property as keyof typeof this._project]}
+														.value=${this._newProject?.[property as keyof typeof this._newProject]}
 														.schema=${schema}
 														.handleInlangProjectChange=${this.handleInlangProjectChange}
 													></simple-input>

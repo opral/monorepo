@@ -1,4 +1,4 @@
-export const mockProject = {
+export let mockSettings = {
 	$schema: "https://inlang.com/schema/project-settings",
 	sourceLanguageTag: "en",
 	languageTags: ["en", "es", "fr", "pt-br", "ru", "zh-cn"],
@@ -31,4 +31,51 @@ export const mockProject = {
 			user: "./frontend/public/locales/{languageTag}/user.json",
 		},
 	},
+}
+
+export const mockProject = {
+	id: "mock-project",
+	installed: {
+		plugins: () => [
+			{
+				id: "plugin.inlang.i18next",
+				displayName: "i18next",
+				description: "i18next",
+				module: "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@4/dist/index.js",
+			},
+		],
+		messageLintRules: () => [
+			{
+				id: "message-lint-rule-empty-pattern",
+				displayName: "Empty Pattern",
+				description: "Empty Pattern",
+				module:
+					"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js",
+			},
+			{
+				id: "message-lint-rule-identical-pattern",
+				displayName: "Identical Pattern",
+				description: "Identical Pattern",
+				module:
+					"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-identical-pattern@latest/dist/index.js",
+			},
+			{
+				id: "message-lint-rule-missing-translation",
+				displayName: "Missing Translation",
+				description: "Missing Translation",
+				module:
+					"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js",
+			},
+			{
+				id: "message-lint-rule-without-source",
+				displayName: "Without Source",
+				description: "Without Source",
+				module:
+					"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-without-source@latest/dist/index.js",
+			},
+		],
+	},
+	errors: () => [],
+	settings: () => mockSettings,
+	setSettings: (settings: any) => (mockSettings = settings),
 }
