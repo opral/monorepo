@@ -199,19 +199,16 @@ export async function openRepository(
 		if (nextBatch.length < 1) {
 			return
 		}
+
 		const thisBatch = [...nextBatch]
 		nextBatch = []
 		if (debug) {
 			console.warn("checking out ", thisBatch)
 		}
 
-		// TODO: this has to be part of the checkout it self - to prevent race condition
+		// FIXME: this has to be part of the checkout it self - to prevent race condition!!
 		for (const placeholder of thisBatch.filter((entry) => rawFs._isPlaceholder?.(entry))) {
 			await rawFs.rm(placeholder)
-		}
-
-		for (const entry of thisBatch) {
-			checkedOut.add(entry)
 		}
 
 		const res = await isoGit
@@ -230,6 +227,10 @@ export async function openRepository(
 				console.error({ error, thisBatch })
 			})
 
+		for (const entry of thisBatch) {
+			checkedOut.add(entry)
+		}
+
 		if (debug) {
 			console.warn("checked out ", thisBatch)
 		}
@@ -238,7 +239,6 @@ export async function openRepository(
 			return doCheckout()
 		}
 
-		pending = undefined
 		return res
 	}
 
@@ -297,25 +297,16 @@ export async function openRepository(
 				}
 
 				if (fileType === "file" && !checkedOut.has(fullpath)) {
-					try {
-						await fs._createPlaceholder(fullpath, { mode: fileMode })
-					} catch (err) {
-						console.warn(err)
-					}
-
+					await fs._createPlaceholder(fullpath, { mode: fileMode })
 					return fullpath
 				}
 
 				if (fileType === "symlink" && !checkedOut.has(fullpath)) {
-					try {
-						await fs._createPlaceholder(fullpath, { mode: fileMode })
-					} catch (err) {
-						console.warn(err)
-					}
-
+					await fs._createPlaceholder(fullpath, { mode: fileMode })
 					return fullpath
 				}
 
+				console.log("ignored", fullpath, fileType)
 				return undefined
 			},
 		})
@@ -332,13 +323,16 @@ export async function openRepository(
 				ref: args.branch,
 				filepaths: gitignoreFiles,
 			})
-			gitignoreFiles.map(file => checkedOut.add(file))
+			gitignoreFiles.map((file) => checkedOut.add(file))
 		}
 
 		pending && (await pending)
 	}
 
 	if (freshClone) {
+		if (!rawFs._createPlaceholder && !rawFs._isPlaceholder) {
+			throw new Error("fs provider does not support placeholders")
+		}
 		console.info("Using lix for cloning repo")
 
 		await isoGit
@@ -388,11 +382,12 @@ export async function openRepository(
 		const pathParts = filename?.split("/") || []
 		const rootObject = pathParts[0]
 
+		// TODO: we need to delay readdir to prevent race condition for removing placeholders, remove when we have our own checkout implementation
 		if (
 			experimentalFeatures.lazyClone &&
-			rootObject &&
+			typeof rootObject !== "undefined" &&
 			rootObject !== ".git" &&
-			["readFile", "readlink", "writeFile"].includes(prop) &&
+			["readFile", "readlink", "writeFile", "readdir"].includes(prop) &&
 			!checkedOut.has(rootObject) &&
 			!checkedOut.has(filename)
 		) {
@@ -413,7 +408,9 @@ export async function openRepository(
 			// } else {
 
 			// TODO we will tackle this with the refactoring / our own implementation of checkout
-			nextBatch.push(filename)
+			if (prop !== "readdir") {
+				nextBatch.push(filename)
+			}
 
 			// }
 
@@ -428,6 +425,7 @@ export async function openRepository(
 
 		if (pending) {
 			return pending.then(execute).finally(() => {
+				pending = undefined
 				if (debug) {
 					console.warn("executed", filename, prop)
 				}
