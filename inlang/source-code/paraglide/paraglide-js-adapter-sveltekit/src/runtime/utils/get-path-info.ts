@@ -12,6 +12,7 @@ type ParseResult = {
 	base: string
 	lang: string
 	path: string
+	trailingSlash: boolean
 	dataSuffix: string | undefined
 }
 
@@ -22,6 +23,7 @@ type ParseResult = {
  */
 export function getPathInfo(path: string, options: ParseOptions): ParseResult {
 	path = safeDecode(path)
+	const trailingSlash = path.endsWith("/") && path !== "/"
 
 	path = Path.normalize(path)
 	const base = Path.normalize(options.base)
@@ -42,7 +44,7 @@ export function getPathInfo(path: string, options: ParseOptions): ParseResult {
 	const [maybeLang, ...rest] = pathWithoutBase.split("/").filter(Boolean)
 
 	if (!maybeLang) {
-		return { base, lang: defaultLanguageTag, path: "/", dataSuffix }
+		return { base, lang: defaultLanguageTag, path: "/", dataSuffix, trailingSlash }
 	}
 
 	const lang = availableLanguageTags.includes(maybeLang as any) ? maybeLang : defaultLanguageTag
@@ -50,5 +52,5 @@ export function getPathInfo(path: string, options: ParseOptions): ParseResult {
 		? Path.normalize(rest.join("/"))
 		: Path.normalize(pathWithoutBase)
 
-	return { base, lang, path: pathSegment, dataSuffix }
+	return { base, lang, path: pathSegment, dataSuffix, trailingSlash }
 }
