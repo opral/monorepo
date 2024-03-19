@@ -8,6 +8,7 @@ import { createMiddleware } from "./middleware"
 import { resolvePathTranslations } from "./pathnames/resolvePathTranslations"
 import { validatePathTranslations } from "./pathnames/validatePathTranslations"
 import type { I18nUserConfig, ResolvedI18nConfig } from "./config"
+import { CookieStrategy } from "./routing/cookieStrategy"
 
 /**
  * Creates an i18n instance that manages your internationalization.
@@ -42,7 +43,7 @@ export function createI18n<T extends string = string>(userConfig: I18nUserConfig
 		}
 	}
 
-	const strategy = PrefixStrategy<T>(config)
+	const strategy = CookieStrategy<T>(config)
 
 	/**
 	 * React Component that enables client-side transitions between routes.
