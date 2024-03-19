@@ -1,3 +1,4 @@
+import { NextRequest } from "next/server"
 import type { ExcludeConfig } from "./exclude"
 import type { PathTranslations, UserPathTranslations } from "./pathnames/types"
 
@@ -58,6 +59,11 @@ export type I18nUserConfig<T extends string> = {
 	 * @default "except-default"
 	 */
 	prefix?: "all" | "except-default" | "never"
+
+	/**
+	 * Override the language detection. This runs as part of your middleware.
+	 */
+	detectLanguage?: (request: NextRequest) => T
 
 	/**
 	 * The language to use in case language detection fails.
