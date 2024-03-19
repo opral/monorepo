@@ -41,10 +41,15 @@ function getWebviewContent(args: {
                 <title>Settings</title>
             </head>
             <body>
-                <inlang-settings inlangproject=${JSON.stringify(
+                <inlang-settings settings=${JSON.stringify(
 									state().project.settings()
 								)}></inlang-settings>
                 <script type="module" src="${scriptUri}"></script>
+				<script>
+					document.querySelector('inlang-settings').addEventListener('onSetSettings', (settings) => {
+						console.log("save", settings);
+					});
+				</script>
             </body>
             </html>`
 }
