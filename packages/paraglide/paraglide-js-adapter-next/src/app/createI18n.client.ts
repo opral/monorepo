@@ -1,15 +1,17 @@
 import { createLink } from "./Link"
 import { getLanguage } from "./getLanguage.client"
 import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
-import { PrefixStrategy } from "./routing/prefixStrategy"
 import { createNavigation, createRedirects } from "./navigation"
 import { createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
 import type { I18nUserConfig, ResolvedI18nConfig } from "./config"
 import { resolvePathTranslations } from "./pathnames/resolvePathTranslations"
-import { CookieStrategy } from "./routing/cookieStrategy"
+import type { RoutingStragey } from "./routing/interface"
 
-export function createI18n<T extends string = string>(userConfig: I18nUserConfig<T> = {}) {
+export function createI18n<T extends string = string>(
+	userConfig: I18nUserConfig<T> = {},
+	StrategyContructor: (config: ResolvedI18nConfig<T>) => RoutingStragey<T>
+) {
 	const config: ResolvedI18nConfig<T> = {
 		availableLanguageTags: availableLanguageTags as readonly T[],
 		defaultLanguage: userConfig.defaultLanguage ?? (sourceLanguageTag as T),
@@ -17,7 +19,7 @@ export function createI18n<T extends string = string>(userConfig: I18nUserConfig
 		pathnames: resolvePathTranslations(userConfig.pathnames ?? {}, availableLanguageTags as T[]),
 	}
 
-	const strategy = CookieStrategy<T>({
+	const strategy = StrategyContructor({
 		availableLanguageTags: config.availableLanguageTags,
 		pathnames: config.pathnames,
 		defaultLanguage: config.defaultLanguage,
