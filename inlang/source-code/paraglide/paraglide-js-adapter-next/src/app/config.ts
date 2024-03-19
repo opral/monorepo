@@ -1,7 +1,7 @@
 import type { ExcludeConfig } from "./exclude"
-import type { UserPathTranslations } from "./pathnames/types"
+import type { PathTranslations, UserPathTranslations } from "./pathnames/types"
 
-export type I18nOptions<T extends string> = {
+export type I18nUserConfig<T extends string> = {
 	/**
 	 * A list of patterns that should not be localized.
 	 *
@@ -44,9 +44,32 @@ export type I18nOptions<T extends string> = {
 	pathnames?: UserPathTranslations<T>
 
 	/**
-	 * The default language to use when no language is set.
+	 * In what cases should the language be added to the URL?
 	 *
+	 * @case "except-default" Only add the language to the URL if it is not the default language
+	 * @case "all" Always add the language to the URL. If no language is present, detec language and redirect
+	 * @case "never" Rely entirely on language detection
+	 *
+	 * Language detection works by:
+	 * 1. Checking if a NEXT_LOCALE cookie is set
+	 * 2. Checking using the accept-language header
+	 * 3. Fallback to the default language
+	 *
+	 * @default "except-default"
+	 */
+	prefix?: "all" | "except-default" | "never"
+
+	/**
+	 * The language to use in case language detection fails.
 	 * @default sourceLanguageTag
 	 */
 	defaultLanguage?: T
+}
+
+export type ResolvedI18nConfig<T extends string> = {
+	availableLanguageTags: readonly T[]
+	defaultLanguage: T
+	exclude: (path: string) => boolean
+	pathnames: PathTranslations<T>
+	prefix: "all" | "except-default" | "never"
 }
