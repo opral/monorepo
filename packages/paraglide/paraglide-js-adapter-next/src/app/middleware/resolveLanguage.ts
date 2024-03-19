@@ -20,9 +20,6 @@ export function resolveLanguage<T extends string>(
 	config: ResolvedI18nConfig<T>,
 	strategy: RoutingStragey<T>
 ): T {
-	const detectedLanguage = config.detectLanguage(request)
-	if (detectedLanguage) return detectedLanguage
-
 	const locale = strategy.resolveLanguage(request)
 	if (locale) return locale
 
