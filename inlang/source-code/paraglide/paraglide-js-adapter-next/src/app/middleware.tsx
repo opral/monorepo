@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { NextRequest } from "next/server"
 import { availableLanguageTags } from "$paraglide/runtime.js"
 import { HeaderNames, LANG_COOKIE } from "./constants"
-import { addBasePath } from "./routing/basePath"
+import { addBasePath } from "./utils/basePath"
 import type { RoutingStragey } from "./routing/interface"
 import type { ResolvedI18nConfig } from "./config"
 

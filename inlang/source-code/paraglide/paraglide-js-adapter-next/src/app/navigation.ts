@@ -1,6 +1,6 @@
 import * as NextNavigation from "next/navigation"
 import { setLanguageTag } from "$paraglide/runtime.js"
-import { addBasePath } from "./routing/basePath"
+import { addBasePath } from "./utils/basePath"
 import { RoutingStragey } from "./routing/interface"
 import { createLocaliseHref } from "./localiseHref"
 

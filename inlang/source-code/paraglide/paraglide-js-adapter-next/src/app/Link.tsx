@@ -1,5 +1,5 @@
 import { availableLanguageTags, isAvailableLanguageTag } from "$paraglide/runtime.js"
-import { addBasePath } from "./routing/basePath"
+import { addBasePath } from "./utils/basePath"
 import NextLink from "next/link"
 import React from "react"
 import { RoutingStragey } from "./routing/interface"
