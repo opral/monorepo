@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.35.0
+
+### Minor Changes
+
+- 4305883: introduce alias rendering with experimental human readable ids
+
 ## 1.34.0
 
 ### Minor Changes
