@@ -7,6 +7,7 @@ import { createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
 import type { I18nUserConfig, ResolvedI18nConfig } from "./config"
 import { resolvePathTranslations } from "./pathnames/resolvePathTranslations"
+import { CookieStrategy } from "./routing/cookieStrategy"
 
 export function createI18n<T extends string = string>(userConfig: I18nUserConfig<T> = {}) {
 	const config: ResolvedI18nConfig<T> = {
@@ -16,7 +17,7 @@ export function createI18n<T extends string = string>(userConfig: I18nUserConfig
 		pathnames: resolvePathTranslations(userConfig.pathnames ?? {}, availableLanguageTags as T[]),
 	}
 
-	const strategy = PrefixStrategy<T>({
+	const strategy = CookieStrategy<T>({
 		availableLanguageTags: config.availableLanguageTags,
 		pathnames: config.pathnames,
 		defaultLanguage: config.defaultLanguage,

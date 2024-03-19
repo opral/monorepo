@@ -1,8 +1,10 @@
 import * as NextNavigation from "next/navigation"
 import { setLanguageTag } from "$paraglide/runtime.js"
-import { addBasePath } from "./utils/basePath"
+import { addBasePath, basePath } from "./utils/basePath"
 import { RoutingStragey } from "./routing/interface"
 import { createLocaliseHref } from "./localiseHref"
+import { serializeCookie } from "./utils/cookie"
+import { LANG_COOKIE } from "./constants"
 
 export const createNavigation = <T extends string>(
 	languageTag: () => T,
@@ -55,6 +57,13 @@ export const createNavigation = <T extends string>(
 				options.locale !== languageTag()
 			) {
 				history.pushState({}, "", addBasePath(localisedPath, true))
+
+				document.cookie = serializeCookie({
+					...LANG_COOKIE,
+					value: locale,
+					path: basePath,
+				})
+
 				window.location.reload()
 				return
 			}
@@ -85,6 +94,13 @@ export const createNavigation = <T extends string>(
 				options.locale !== languageTag()
 			) {
 				history.replaceState({}, "", addBasePath(localisedPath, true))
+
+				document.cookie = serializeCookie({
+					...LANG_COOKIE,
+					value: locale,
+					path: basePath,
+				})
+
 				window.location.reload()
 				return
 			}
