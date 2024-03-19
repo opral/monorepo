@@ -1,10 +1,12 @@
 import { availableLanguageTags, isAvailableLanguageTag } from "$paraglide/runtime.js"
-import { addBasePath } from "./utils/basePath"
+import { addBasePath, basePath } from "./utils/basePath"
 import NextLink from "next/link"
 import React from "react"
 import { RoutingStragey } from "./routing/interface"
 import { createLocaliseHref } from "./localiseHref"
 import type { ResolvedI18nConfig } from "./config"
+import { serializeCookie } from "./utils/cookie"
+import { LANG_COOKIE } from "./constants"
 
 /**
  * Creates a link component that localises the href based on the current language.
@@ -42,13 +44,26 @@ export function createLink<T extends string>(
 
 		const localisedHref = localiseHref(props.href, lang)
 
+		function updateLangCookie(newLang: T) {
+			document.cookie = serializeCookie({
+				...LANG_COOKIE,
+				value: newLang,
+				path: basePath,
+			})
+		}
+
 		//If the language changes, we don't want client navigation
 		return lang == currentLanguageTag ? (
 			<>
 				<NextLink {...props} href={localisedHref} />
 			</>
 		) : (
-			<a {...props} href={addBasePath(localisedHref.toString())} />
+			<a
+				{...props}
+				onClick={() => updateLangCookie(lang)}
+				hrefLang={lang}
+				href={addBasePath(localisedHref.toString())}
+			/>
 		)
 	}
 }
