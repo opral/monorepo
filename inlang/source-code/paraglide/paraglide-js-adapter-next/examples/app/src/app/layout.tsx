@@ -16,7 +16,7 @@ export function generateMetadata(): Metadata {
 const direction: Record<AvailableLanguageTag, "ltr" | "rtl"> = {
 	en: "ltr",
 	"de-CH": "ltr",
-	de: "rtl",
+	de: "ltr",
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
