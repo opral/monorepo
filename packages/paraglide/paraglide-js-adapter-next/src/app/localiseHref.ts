@@ -26,14 +26,9 @@ export function createLocaliseHref<T extends string>(
 	}
 }
 
-function getPathname(href: string): string {
-	const url = new URL(href, "http://example.com")
-	return url.pathname
-}
+const getPathname = (href: string): string => new URL(href, "http://example.com").pathname
 
-function isAbsolute(path: string): path is `/${string}` {
-	return path.startsWith("/")
-}
+const isAbsolute = (path: string): path is `/${string}` => path.startsWith("/")
 
 /**
  * Returns true if the href explicitly includes the origin, even if it's the current origin
