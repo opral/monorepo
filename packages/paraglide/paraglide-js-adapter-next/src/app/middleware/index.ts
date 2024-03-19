@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server"
-import { NextRequest } from "next/server"
 import { availableLanguageTags, isAvailableLanguageTag } from "$paraglide/runtime.js"
 import { generateLinkHeader, shouldAddLinkHeader } from "./linkHeader"
 import { HeaderNames, LANG_COOKIE } from "../constants"
+import type { NextRequest } from "next/server"
 import type { RoutingStragey } from "../routing/interface"
 import type { ResolvedI18nConfig } from "../config"
 
@@ -39,24 +39,26 @@ export function createMiddleware<T extends string>(
 			headers.set(HeaderNames.Link, linkHeader)
 		}
 
-		let response: NextResponse
-		if (canonicalPath !== request.nextUrl.pathname) {
-			request.nextUrl.pathname = canonicalPath
-			response = NextResponse.rewrite(request.nextUrl, {
-				headers,
-			})
-		} else {
-			response = NextResponse.next({
-				request: {
-					headers,
-				},
-			})
+		const rewriteRequired = request.nextUrl.pathname !== canonicalPath
+		const requestInit: RequestInit = {
+			headers,
 		}
 
-		response.cookies.set(LANG_COOKIE.name, locale, {
-			sameSite: LANG_COOKIE.sameSite,
-			maxAge: LANG_COOKIE.maxAge,
-		})
+		const response: NextResponse = rewriteRequired
+			? NextResponse.rewrite(
+					{ ...request.nextUrl, pathname: canonicalPath } as typeof request.nextUrl,
+					requestInit
+			  )
+			: NextResponse.next(requestInit)
+
+		// Update the locale-cookie
+		if (!localeCookieMatches) {
+			response.cookies.set(LANG_COOKIE.name, locale, {
+				sameSite: LANG_COOKIE.sameSite,
+				maxAge: LANG_COOKIE.maxAge,
+				path: request.nextUrl.basePath || undefined,
+			})
+		}
 
 		return response
 	}
