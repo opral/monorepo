@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server"
 import { RoutingStragey } from "../routing/interface"
-import { addBasePath } from "../utils/basePath"
+import { addPathPrefix } from "../utils/basePath"
 
 export function shouldAddLinkHeader(request: NextRequest) {
 	const acceptHeader = request.headers.get("accept")
@@ -30,7 +30,7 @@ export function generateLinkHeader<T extends string>(
 		const translatedPathname = strategy.translatePath(canonicalPath, currentLocale, lang)
 		const encodedPathname = encodeURI(translatedPathname)
 
-		const withBase = addBasePath(encodedPathname, true)
+		const withBase = addPathPrefix(encodedPathname, request.nextUrl.basePath)
 
 		//withBase should be an absolute path, so this should never do relative path resolution
 		const fullHref = new URL(withBase, request.nextUrl.href).href
