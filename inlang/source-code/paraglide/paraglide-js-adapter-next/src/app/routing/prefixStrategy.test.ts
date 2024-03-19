@@ -19,7 +19,6 @@ const { resolveLanguage, translatePath, getCanonicalPath, getLocalisedPath } = P
 	},
 	exclude: (path) => path.startsWith("/api/"),
 	prefix: "except-default",
-	detectLanguage: () => undefined,
 })
 
 describe("resolveLanguage", () => {

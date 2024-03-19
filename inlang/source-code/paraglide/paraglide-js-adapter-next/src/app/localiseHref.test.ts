@@ -18,7 +18,6 @@ const strategy = PrefixStrategy<"en" | "de" | "de-CH">({
 		},
 	},
 	prefix: "except-default",
-	detectLanguage: () => undefined,
 	exclude: (path) => path.startsWith("/api/"),
 })
 
