@@ -7,6 +7,6 @@ export const { Link, middleware, useRouter, usePathname, redirect, permanentRedi
 		pathnames: {
 			"/about": m.about_path,
 		},
-
+		prefix: "all",
 		exclude: ["/not-translated"], //makes sure that the /not-translated page is not translated
 	})
