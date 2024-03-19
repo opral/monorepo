@@ -270,6 +270,29 @@ localizePathname("/about", "de") // de/ueber-uns
 
 Search engines like Google expect you to tell them about translated versions of your pages. The adapter does this by default by adding the `Link` Header to requests.
 
+
+### Right-to-Left Support
+Define a map of all languages to their text-direction. Then use that.
+
+```tsx
+import { languageTag, type AvailableLanguageTag } from "@/paraglide/runtime.js"
+
+// This is fully type-safe & forces you to keep it up-to-date
+const direction: Record<AvailableLanguageTag, "rtl" | "ltr"> = {
+	en: "ltr",
+	ar: "rtl",
+}
+
+// src/app/layout.tsx
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+	return (
+		<LanguageProvider>
+			<html lang={languageTag()} dir={direction[languageTag()]}>
+	//...
+```
+
+> Using the `Intl.Locale` API for text-direction isn't recommended, as it is still poorly supported
+
 ## (legacy) Setup With the Pages Router
 
 The Pages router already comes with [i18n support out of the box](https://nextjs.org/docs/advanced-features/i18n-routing). Thus, Paraglide doesn't need to provide it's own routing. All the Adapter does in the Pages router is react to the language change.
