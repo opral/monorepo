@@ -81,8 +81,14 @@ export default class InlangSettings extends LitElement {
 	@property({ type: Object })
 	settings: ProjectSettings | undefined = undefined
 
-	@property()
-	onSetSettings?: (settings: ProjectSettings) => void = () => {}
+	dispatchOnSetSettings(settings: ProjectSettings) {
+		const onSetSettings = new CustomEvent("onSetSettings", {
+			detail: {
+				argument: settings,
+			},
+		})
+		this.dispatchEvent(onSetSettings)
+	}
 
 	@state()
 	private _project: ProjectSettings | undefined = undefined
@@ -134,8 +140,8 @@ export default class InlangSettings extends LitElement {
 	}
 
 	_saveChanges = () => {
-		if (this._project && this.onSetSettings) {
-			this.onSetSettings(this._project)
+		if (this._project) {
+			this.dispatchOnSetSettings(this._project)
 		}
 		this._unsavedChanges = false
 	}
