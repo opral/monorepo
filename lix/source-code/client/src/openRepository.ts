@@ -291,18 +291,7 @@ export async function openRepository(
 			depth: 1,
 			noTags: true,
 		})
-			.then(() => {
-				return checkout({
-					fs: withLazyFetching({
-						nodeishFs: rawFs,
-						verbose,
-						description: "checkout",
-					}),
-					dir,
-					ref: branchName,
-					// filepaths: ["resources/en.json", "resources/de.json", "project.inlang.json"],
-				})
-			})
+      .then(() => checkOutPlaceholders())
 			.finally(() => {
 				pending = undefined
 			})
