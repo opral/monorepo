@@ -1,18 +1,17 @@
 # Paraglide Adapter Astro
 
-This Integration makes it trivial to use Paraglide to internationalize your Astro project.
+This Integration makes it trivial to use [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) to internationalize your Astro project.
 
 **Features**
 
 - 🏝️ Only messages used on islands get shipped to the client.
-- 📦 Fully Typesafe messages, params and all
+- 🛟 Fully Typesafe messages, params and all
 - 🤏 Tiny runtime (<100 bytes)
-- 💨 A breeze to set up - No need to change your `pages/` folder
+- 📦 Integrates with Astro's i18n routing
 
+This integration doesn't do routing. It simply reads the language from [Astro's built in i18n routing](https://docs.astro.build/en/guides/internationalization/) & sets the language for [Paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
 
-This integration doesn't do any routing. It simply reads the language from [Astro's built in i18n router](https://docs.astro.build/en/guides/internationalization/) & uses that to set the language for Paraglide.
-
-Paraglide is a _compiler_ for your messages. It generates _tree-shakeable_ message functions. This is great for astro, since messages are only shipped to the client if messages are used in islands. 
+[Paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) is a compiler for your messages. It generates _type-safe_, _tree-shakeable_ message functions. This way messages are only shipped to the client if messages are used on islands. 
 
 ## Installation
 
