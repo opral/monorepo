@@ -272,10 +272,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 							nodeishFs: createNodeishMemoryFs(),
 							auth: browserAuth,
 							branch,
-							experimentalFeatures: {
-								lazyClone: true,
-								lixCommit: true,
-							},
 						}
 					)
 
