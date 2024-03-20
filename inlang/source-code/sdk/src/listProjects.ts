@@ -1,5 +1,7 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 
+const ignores = ["node_modules", ".git"]
+
 export const listProjects = async (
 	nodeishFs: NodeishFilesystem,
 	from: string
@@ -20,7 +22,7 @@ export const listProjects = async (
 			try {
 				const stats = await nodeishFs.stat(filePath)
 				if (stats.isDirectory()) {
-					if (file === "node_modules") {
+					if (ignores.includes(file)) {
 						continue
 					}
 
