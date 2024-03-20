@@ -3,7 +3,7 @@ import {
 	setLanguageTag,
 	sourceLanguageTag,
 } from "paraglide-js-adapter-astro:runtime"
-import type { MiddlewareHandler, Locales } from "astro"
+import type { MiddlewareHandler } from "astro"
 
 export const onRequest: MiddlewareHandler = async ({ url, locals, currentLocale }, next) => {
 	const locale = currentLocale ?? getLangFromPath(url.pathname)
