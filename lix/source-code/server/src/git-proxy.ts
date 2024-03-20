@@ -13,11 +13,13 @@ import type { NextFunction, Request, Response } from "express"
 import createMiddleware from "./auth/cors-middleware.js"
 import { decryptAccessToken } from "./auth/implementation.js"
 import { privateEnv } from "@inlang/env-variables"
-const allowedOrigins = privateEnv.PUBLIC_ALLOWED_AUTH_URLS.split(",")
+const allowedOrigins = privateEnv.PUBLIC_ALLOWED_AUTH_URLS?.split(",")
+const production = process.env.NODE_ENV === "production"
 
 const middleware = createMiddleware({
 	// This is the cors allowed origin:
 	origins: allowedOrigins,
+	insecure_origins: production ? [] : ["127.0.0.1:8089"],
 
 	authorization: async (request: Request, _response: Response, next: NextFunction) => {
 		try {
@@ -42,19 +44,24 @@ const middleware = createMiddleware({
 export async function proxy(request: Request, response: Response, next: NextFunction) {
 	try {
 		// remove the proxy path from the url
-		const targetUrl = request.url.split("/git-proxy/")[1]
+		let targetUrl = request.url.split("git-proxy/")[1]
 
 		if (typeof targetUrl === "undefined") {
 			response.status(400).send("Missing target url")
 			return
 		}
 
-		if (!targetUrl.startsWith("/github.com/")) {
+		if (!targetUrl.startsWith("github.com/")) {
 			response.status(403).send("Only github supported")
 			return
 		}
 
-		request.url = targetUrl
+		if (!production) {
+			// replace test repo github url with local hosted git server to work with less github/ network dependencies
+			targetUrl = targetUrl.replace("github.com/janfjohannes/cal.com", "127.0.0.1:8089/cal.com.git")
+		}
+
+		request.url = "/" + targetUrl
 
 		response.set("Access-Control-Allow-Credentials", "true")
 		response.set("Access-Control-Allow-Headers", "user-agent")
