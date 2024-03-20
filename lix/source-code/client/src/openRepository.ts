@@ -37,6 +37,7 @@ const {
 
 // TODO: rename to debug?
 const verbose = false
+const experimentalLixFs = false
 
 // TODO addd tests for whitelist
 
@@ -238,6 +239,11 @@ export async function openRepository(
 			description: "app",
 			intercept: delayedAction,
 		}),
+    fs: experimentalLixFs ?  {
+      read(path: string) {
+        return nodeishFs.readFile(path, { encoding: "utf-8" })
+      },
+    } : undefined,
 
 		/**
 		 * Gets the git origin url of the current repository.
