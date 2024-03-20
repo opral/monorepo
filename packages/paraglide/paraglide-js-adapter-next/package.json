@@ -1,8 +1,12 @@
 {
 	"name": "@inlang/paraglide-js-adapter-next",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"publishConfig": {
 		"access": "public"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/opral/inlang-paraglide-js"
 	},
 	"scripts": {
 		"build": "node ./build.mjs",

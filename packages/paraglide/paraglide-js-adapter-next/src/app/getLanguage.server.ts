@@ -1,6 +1,6 @@
 import { headers } from "next/headers"
 import { sourceLanguageTag, isAvailableLanguageTag } from "$paraglide/runtime.js"
-import { HeaderNames } from "../constants"
+import { HeaderNames } from "./constants"
 
 /**
  * Returns the current language tag.

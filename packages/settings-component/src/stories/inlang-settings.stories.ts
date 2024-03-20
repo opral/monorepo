@@ -25,7 +25,7 @@ export const HTML: StoryObj = {
 	render: () =>
 		`
 		<script>
-			document.querySelector('inlang-settings').addEventListener('onSetSettings', (event) => {
+			document.querySelector('inlang-settings').addEventListener('onSetSettings', (settings) => {
 				console.info("save", settings);
 		  	});
 		</script>
