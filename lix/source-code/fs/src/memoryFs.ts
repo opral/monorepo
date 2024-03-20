@@ -2,11 +2,11 @@ import type { NodeishFilesystem, NodeishStats, FileChangeInfo } from "./NodeishF
 import { FilesystemError } from "./errors/FilesystemError.js"
 import { normalPath, getBasename, getDirname } from "./utilities/helpers.js"
 
-type Inode = Uint8Array | Set<string>
+type Inode = Uint8Array | Set<string> | { placeholder: true }
 
 export type Snapshot = {
 	fsMap: {
-		[key: string]: string[] | string
+		[key: string]: string[] | string | { placeholder: true }
 	}
 	fsStats: {
 		[key: string]: {
@@ -148,6 +148,31 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 
 	return {
 		_state: state,
+
+		_createPlaceholder: function (
+			path: Parameters<NodeishFilesystem["writeFile"]>[0],
+			options?: Parameters<NodeishFilesystem["writeFile"]>[2]
+		) {
+			path = normalPath(path)
+			const dirName = getDirname(path)
+			const baseName = getBasename(path)
+			const parentDir: Inode | undefined = state.fsMap.get(dirName)
+			if (!(parentDir instanceof Set)) throw new FilesystemError("ENOENT", path, "writeFile")
+			parentDir.add(baseName)
+			newStatEntry(path, state.fsStats, 0, options?.mode ?? 0o644)
+			state.fsMap.set(path, { placeholder: true })
+		},
+
+		_isPlaceholder: function (path: Parameters<NodeishFilesystem["writeFile"]>[0]) {
+			path = normalPath(path)
+			const entry = state.fsMap.get(path)
+
+			if (entry && "placeholder" in entry) {
+				return true
+			}
+			return false
+		},
+
 		writeFile: async function (
 			path: Parameters<NodeishFilesystem["writeFile"]>[0],
 			data: Parameters<NodeishFilesystem["writeFile"]>[1],
@@ -194,6 +219,7 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 
 			if (file instanceof Set) throw new FilesystemError("EISDIR", path, "readFile")
 			if (file === undefined) throw new FilesystemError("ENOENT", path, "readFile")
+			if ("placeholder" in file) throw new FilesystemError("EPLACEHOLDER", path, "readFile")
 			if (!(options?.encoding || typeof options === "string")) return file
 
 			return decoder.decode(file)
@@ -257,8 +283,9 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 				throw new FilesystemError("ENOENT", path, "rm")
 
 			if (parentDir instanceof Uint8Array) throw new FilesystemError("ENOTDIR", path, "rm")
+			if ("placeholder" in parentDir) throw new FilesystemError("EPLACEHOLDER", path, "readFile")
 
-			if (target instanceof Uint8Array) {
+			if (target instanceof Uint8Array || "placeholder" in target) {
 				parentDir.delete(baseName)
 				state.fsStats.delete(path)
 				state.fsMap.delete(path)
@@ -392,6 +419,10 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			if (parentDir instanceof Uint8Array || target instanceof Uint8Array)
 				throw new FilesystemError("ENOTDIR", path, "rmdir")
 
+			if ("placeholder" in parentDir || "placeholder" in target) {
+				throw new FilesystemError("EPLACEHOLDER", path, "readFile")
+			}
+
 			if (target.size) throw new FilesystemError("ENOTEMPTY", path, "rmdir")
 
 			parentDir.delete(baseName)
@@ -427,6 +458,9 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			if (targetInode !== undefined) {
 				state.fsMap.set(path, targetInode)
 			}
+			if ("placeholder" in parentDir) {
+				throw new FilesystemError("EPLACEHOLDER", path, "readFile")
+			}
 
 			parentDir.add(getBasename(path))
 			newStatEntry(path, state.fsStats, 2, 0o777, target)
@@ -447,6 +481,10 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 
 			if (targetStats?.isDirectory()) {
 				throw new FilesystemError("EISDIR", path, "unlink")
+			}
+
+			if ("placeholder" in parentDir || "placeholder" in target) {
+				throw new FilesystemError("EPLACEHOLDER", path, "readFile")
 			}
 
 			parentDir.delete(getBasename(path))
