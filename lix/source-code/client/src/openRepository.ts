@@ -138,7 +138,10 @@ export async function openRepository(
 	)
 	const experimentalFeatures =
 		args.experimentalFeatures || (isWhitelistedRepo ? { lazyClone: true, lixCommit: true } : {})
-	const lazyFS = freshClone || experimentalFeatures.lazyClone
+	const lazyFS =
+		typeof experimentalFeatures.lazyClone === "undefined"
+			? freshClone
+			: experimentalFeatures.lazyClone
 	const cache = lazyFS ? {} : undefined
 
 	const gitProxyUrl = lixHost ? `${protocol}//${lixHost}/git-proxy` : ""
@@ -306,7 +309,7 @@ export async function openRepository(
 					return fullpath
 				}
 
-				console.log("ignored", fullpath, fileType)
+				console.warn("ignored checkout palcholder path", fullpath, fileType)
 				return undefined
 			},
 		})
@@ -424,6 +427,7 @@ export async function openRepository(
 		}
 
 		if (pending) {
+			// TODO: move to real queue?
 			return pending.then(execute).finally(() => {
 				pending = undefined
 				if (debug) {

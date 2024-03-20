@@ -179,7 +179,10 @@ export async function statusList({
 				if (fs._isPlaceholder && fs._isPlaceholder(filepath)) {
 					if (includeStatus.includes("unmodified") || filepaths.includes(filepath)) {
 						const headType = head && (await head.type())
-						const headOid = headType === "blob" ? await head?.oid() : undefined
+						if (headType !== "blob") {
+							throw new Error("Placeholder file is not a blob in head: " + filepath)
+						}
+						const headOid = await head?.oid()
 
 						return [
 							filepath,
