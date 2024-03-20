@@ -508,11 +508,14 @@ function NavbarCommon(props: {
 			.replaceAll("(", "")
 			.replaceAll(")", "")
 			.replaceAll("?", "")
+			.replaceAll("!", "")
 			.replaceAll(".", "")
 			.replaceAll("@", "")
 			.replaceAll(/([\uE000-\uF8FF]|\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDDFF])/g, "")
 			.replaceAll("✂", "")
 			.replaceAll(":", "")
+			.replaceAll("'", "")
+			.replaceAll("&", "")
 	}
 
 	const isSelected = (heading: string) => {
@@ -538,7 +541,7 @@ function NavbarCommon(props: {
 					)
 				)
 
-				//scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()), "smooth")
+				scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()), "smooth")
 				setHighlightedAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
 			} else {
 				for (const heading of props.tableOfContents[sectionTitle]!) {
