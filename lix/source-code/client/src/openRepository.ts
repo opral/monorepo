@@ -15,12 +15,14 @@ import { hash } from "./hash.js"
 // TODO: LSTAT is not properly in the memory fs!
 
 const {
+	TREE,
 	clone,
 	listRemotes,
 	status,
 	statusMatrix,
 	push,
 	pull,
+	walk,
 	currentBranch,
 	add,
 	log,
@@ -123,6 +125,7 @@ export async function openRepository(
 		const maybeGitDir = await rawFs.lstat(".git").catch((error: any) => ({ error }))
 		if ("error" in maybeGitDir) {
 			doLixClone = true
+			console.info("Lix lazy features are enabled")
 		}
 	}
 
@@ -184,6 +187,7 @@ export async function openRepository(
 				onRes: optimizedRefsRes,
 			}),
 			dir,
+			cache,
 			corsProxy: gitProxyUrl,
 			url: gitUrl,
 			singleBranch: true,
