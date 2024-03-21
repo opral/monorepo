@@ -107,7 +107,7 @@ export class LintRuleLevelObjectInput extends LitElement {
 										</sl-option>`
 									})}
 								</sl-select>
-								<p class="ruleId">${module.displayName}</p>
+								<p class="ruleId">${(module.displayName as { en: string }).en}</p>
 						  </div>`
 						: undefined
 				})}
