@@ -13,7 +13,7 @@ Automate your i18n workflow and ensure that your i18n files are always up to dat
 
 Please ensure you have set up an [inlang project](https://inlang.com//documentation/concept/project) with [lint rules](https://inlang.com/c/lint-rules) in your repository.
 
-Add the following workflow file to your repository in this path `.github/workflows/ninja-i18n.yml`
+Add the following workflow file to your repository in this path `.github/workflows/ninja_i18n.yml`
 
 ```yml
 name: Ninja i18n action
