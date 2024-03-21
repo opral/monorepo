@@ -38,8 +38,16 @@ export default function Page() {
  * is required to use the useEditorState hook.
  */
 function TheActualPage() {
-	const { repo, currentBranch, project, projectList, routeParams, doesInlangConfigExist, tourStep, lixErrors } =
-		useEditorState()
+	const {
+		repo,
+		currentBranch,
+		project,
+		projectList,
+		routeParams,
+		doesInlangConfigExist,
+		tourStep,
+		lixErrors,
+	} = useEditorState()
 	const [localStorage, setLocalStorage] = useLocalStorage()
 
 	onMount(() => {
@@ -65,9 +73,11 @@ function TheActualPage() {
 		})
 	})
 
-	createEffect(on([project, currentBranch], () => {
-		setMessageCount(0)
-	}))
+	createEffect(
+		on([project, currentBranch], () => {
+			setMessageCount(0)
+		})
+	)
 
 	return (
 		<>

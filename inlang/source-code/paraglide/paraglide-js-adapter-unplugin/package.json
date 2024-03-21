@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/paraglide-js-adapter-unplugin",
-	"version": "1.4.11",
+	"version": "1.4.12",
 	"description": "Unplugin adapter for Paraglide.js",
 	"license": "Apache-2.0",
 	"type": "module",

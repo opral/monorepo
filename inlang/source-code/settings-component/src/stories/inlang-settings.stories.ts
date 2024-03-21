@@ -7,19 +7,10 @@ const meta: Meta = {
 	component: "inlang-settings",
 	title: "Public/inlang-settings",
 	tags: ["autodocs"],
-	// argTypes: {
-	// 	inlangProject: { control: { type: "object" } },
-	// },
 }
 
 export default meta
 
 export const Default: StoryObj = {
-	render: () =>
-		html`
-			<inlang-settings
-				.inlangProject=${mockProject}
-				.onSaveProject=${(project: any) => console.info("save", project)}
-			></inlang-settings>
-		`,
+	render: () => html` <inlang-settings .project=${mockProject}></inlang-settings> `,
 }

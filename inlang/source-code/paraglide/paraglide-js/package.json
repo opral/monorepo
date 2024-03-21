@@ -1,17 +1,16 @@
 {
 	"name": "@inlang/paraglide-js",
 	"type": "module",
-	"version": "1.3.2",
+	"version": "1.3.3",
 	"license": "Apache-2.0",
 	"publishConfig": {
 		"access": "public"
 	},
 	"author": "inlang <hello@inlang.com> (https://inlang.com/)",
-	"homepage": "https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js",
+	"homepage": "https://inlang.com/m/gerre34r/library-inlang-paraglideJs",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/opral/monorepo.git",
-		"directory": "inlang/source-code/paraglide/paraglide-js"
+		"url": "https://github.com/opral/inlang-paraglide-js"
 	},
 	"keywords": [
 		"paraglide",

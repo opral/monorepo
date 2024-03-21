@@ -1,16 +1,15 @@
 {
-  "$schema": "https://inlang.com/schema/project-settings",
-  "sourceLanguageTag": "en",
-  "languageTags": [
-    "en",
-    "de",
-    "en-US"
-  ],
-  "modules": [
-    "../../../plugins/inlang-message-format/dist/index.js",
-    "https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js"
-  ],
-  "plugin.inlang.messageFormat": {
-    "pathPattern": "./messages/{languageTag}.json"
-  }
+	"$schema": "https://inlang.com/schema/project-settings",
+	"sourceLanguageTag": "en",
+	"languageTags": ["en", "de", "en-US"],
+	"modules": [
+		"../../../plugins/inlang-message-format/dist/index.js",
+		"https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js"
+	],
+	"plugin.inlang.messageFormat": {
+		"pathPattern": "./messages/{languageTag}.json"
+	},
+	"experimental": {
+		"aliases": true
+	}
 }

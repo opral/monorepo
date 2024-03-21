@@ -20,7 +20,8 @@
 		"localization",
 		"globalization",
 		"internationalization",
-		"guide"
+		"guide",
+		"guides-i18n"
 	],
 	"recommends": ["g/38fnf03n", "m/3i8bor92", "g/3go4f04m", "g/6ddyhpoi"],
 	"publisherName": "Florian Kiem",

@@ -1,5 +1,11 @@
 # @inlang/plugin-json
 
+## 5.1.17
+
+### Patch Changes
+
+- f3b0489: fix typo
+
 ## 5.1.16
 
 ### Patch Changes

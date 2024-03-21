@@ -5,7 +5,7 @@ import { CONFIGURATION } from "../configuration.js"
 
 export const previewLanguageTagCommand = {
 	command: "sherlock.previewLanguageTag",
-	title: "Inlang: Change preview language tag",
+	title: "Sherlock: Change preview language tag",
 	register: vscode.commands.registerCommand,
 	callback: async () => {
 		const settings = state().project?.settings()
