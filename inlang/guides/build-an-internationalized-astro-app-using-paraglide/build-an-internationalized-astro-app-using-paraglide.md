@@ -1,47 +1,68 @@
-# Build an internationalized Astro App using Paraglide
+# Build an internationalized Astro App
 
-In this Guide, we'll integrate the [ParaglideJs](/m/gerre34r/library-inlang-paraglideJs) i18n library into an Astro project. We'll use Paraglide to translate the page shell, aswell as some client side islands.
+In this guide, we will be learning how to build an multilingual Astro.
 
-If you are looking to translate the _content_ of your app, you should check out the official [Astro i18n Recipie](https://docs.astro.build/en/recipes/i18n#_top). Astro does this very well out of the box. You only need an i18n library for the page-shell and client side components.
+Astro comes with [great internationalization out of the box](https://docs.astro.build/en/recipes/i18n/). It makes it very easy to translate the content of our pages.
 
+For stuff that's shared between pages, such as layouts or components, we still need an i18n library to inject the correct messages. We'll be using [ParaglideJS](/m/gerre34r/library-inlang-paraglideJs). 
 
-## Why Paraglide?
-
-There is no shortage of i18n libraries for JavaScript, so why go with Paraglide? Paraglide offers some unique features that make it a great fit for Astro in particular.
-
-When using Astro, usually only a small part of your app runs on the client. Consequently you usually only have a few messages that are needed on the client. If you were to use i18next, you would need to ship a 40kb runtime to the client, even if you only need to translate a few words. 
-
-Paraglide avoids this in a few ways. First, it's runtime is tiny, usually less than 100 bytes. Second, it only ships the messages that are actually used on the client. Even if you have thousands of messages in your app, if your island only uses 10 of them, only those 10 will be shipped to the client. Paraglide's bundle scales to zero. 
-
-Finally, Paraglide is fully typesafe. This means you get autocompletion on which messages are available, and on which arguments they take.
+[Paraglide](/m/gerre34r/library-inlang-paraglideJs) offers some unique features that make it a great fit for Astro
+- Only messages that are used on 🏝️Islands are shipped to the client
+- Fully typesafe
+- Tiny runtime (<100bytes on the client)
 
 ## Setup
 
-We assume that you already have an Astro project set up. If you don't, you can follow the [official Astro Quickstart](https://docs.astro.build/en/install/auto/).
+Set up an Astro app with:
 
-Start by setting up your routes so that each language (except the default) has it's own folder. For example:
-
-```txt
-├── src/
-│   ├── pages/
-│   │   ├── index.astro
-│   │   ├── about.astro
-│   │   ├── de/
-│   │   │   ├── index.astro
-│   │   │   ├── about.astro
-│   │   ├── fr/
-│   │   │   ├── index.astro
-│   │   │   ├── about.astro
+```bash
+pnpm create astro@latest
 ```
 
-You can just author the content of each page in the correct language. You can also query content from `astro:content` by having language-specific collections. You will only be using Paraglide for translating the page shell and client side components.
+Then set up [Astro i18n](https://docs.astro.build/en/recipes/i18n/) in `astro.config.mjs`:
 
-Let's install Paraglide, and the Paraglide Astro Adapter.
+```ts
+export default defineConfig({
+	i18n: {
+		defaultLocale: "en", // the default locale
+		locales: ["en", "de"] // the locales you want to support
+	},
+})
+```
+
+This doesn't affect the routing in any way, but it describes which paths will have which language.
+- `/*` will use the default language (english)
+- `/en/*` will use english
+- `/de/*` will use german 
+
+Let's set up our routes to match that:
+
+```fs
+├── src/
+│   ├── pages/
+│   │   ├── index.astro //default language
+│   │   ├── about.astro //default language
+│   │   ├── de/
+│   │   │   ├── index.astro //german
+│   │   │   ├── about.astro//german
+```
+
+It's easiest to author content directly in these files.
+
+If you are using the `content/` directory, you should set up different collections for each langauge. Follow the [Astro i18n recipie](https://docs.astro.build/en/recipes/i18n/#use-collections-for-translated-content) to do so.  
+
+Inside `.astro` files, we can access the current language with `Astro.currentLocale`. We can use this to query content in the correct language.
+
+## Adding ParaglideJS
+
+For translating layouts and components we need an i18n library. Let's install [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) and the [Paraglide Astro Integration](https://inlang.com/m/iljlwzfs/library-inlang-paraglideJsAdapterAstro).
 
 ```bash
 npx @inlang/paraglide-js init
 npm i @inlang/paraglide-js-adapter-astro
 ```
+
+This will have genrated all the files needed for Paraglid & added the necessary dependencies.
 
 Then register the Integration in your `astro.config.mjs`:
 
@@ -55,30 +76,32 @@ export default {
       outdir: "./src/paraglide",
     }),
   ],
+  i18n: {
+    defaultLocale: "en",
+    locales: ["en", "de"],
+  }
 }
 ```
 
 This integration will do a few things:
-1. It will automatically run the Paraglide compiler when you run `npm run dev` or `npm run build`.
-2. It will automatically run the Paraglide compiler when messages are changed.
-3. It will set the language based on the URL, using middleware.
+1. Run the Paraglide compiler when you run `npm run dev` or `npm run build`.
+2. Run the Paraglide compiler when messages are changed.
+3. Set Paraglide's language based on your astro i18n routing config.
 
-## Configuring Languages
-
-You can tell Paraglide which languages are available, and which is the default language in `project.inlang/settings.json`. For example:
+You need to tell Paraglide which languages are available, and which is the default language in `project.inlang/settings.json`. 
 
 ```json
 {
-    "languageTags": ["en", "de", "ar"],
+    "languageTags": ["en", "de"],
     "sourceLanguageTag": "en",
 }
 ```
 
-Will make English the default language, and make German and Arabic available.
+> Paraglide is a compiler that runs outside of your dev server, so it unfortunately can't just read the i18n config from `astro.config.mjs`. Oh well...
 
-## Adding Messages
+### Adding Messages
 
-The default path for translation files is `./messages/{lang}.json`. You can change this option in `project.inlang/settings.json`. The Files just contain a Key-Value pair of the message ID and the message itself.
+Messages are located in `./messages/{lang}.json`. You can change this in `project.inlang/settings.json`. The files contain a key-calue pair of the message ID and the message itself.
 
 ```json
 // messages/en.json
@@ -89,14 +112,11 @@ The default path for translation files is `./messages/{lang}.json`. You can chan
 }
 ```
 
-You can add messages in two ways:
-
-1. Manually editing the translation files
-2. Using [Sherlock (VS Code extension)](https://inlang.com/m/r7kp499g/app-inlang-ideExtension)
+If you already have a lot of hardcoded text in your app you should use the [Sherlock VS Code extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) to extract them automatically.
 
 ## Using Messages
 
-After the compiler has run (should happen automatically if your dev server is running), you can import messages into your code by importing the `src/paraglide/messages.js` file. It's recommended to do a wildcard import.
+You can import messages from `src/paraglide/messages.js`. It's recommended to do a wildcard import.
 
 ```ts
 import * as m from "../paraglide/messages.js"
@@ -109,23 +129,18 @@ Each message is a function that returns the message in the current language. If 
 
 ### Passing the Language to the Client
 
-To save on bundle size,Paraglide doesn't ship language detection logic to the client. Instead it just reads the `lang` attribute on the `<html>` tag. Make sure this is set correctly when rendering on the server / statically. You should do this anyway for SEO reasons.
+To save bundle size, Paraglide doesn't ship language detection logic to the client. Instead it just reads the `lang` attribute on the `<html>` tag. Make sure this is set correctly. 
 
 In your global Astro layout, add the following:
 ```tsx
----
-import { languageTag } from "../paraglide/runtime.js"
----
-
-<html lang={languageTag()}>
+<html lang={Astro.currentLocale}>
     <slot/>
 </html>
 ```
 
-That's it. The message functions will now return the correct language on the client and the server.
-
 ## Translating the Page Shell
-Now it's really just a matter of going through your app and extracting any hard-coded strings into messages. This is easiest to do with [Sherlock (VS Code extension)](https://inlang.com/m/r7kp499g/app-inlang-ideExtension).
+
+Now it's really just a matter of going through your app and extracting any hard-coded strings into messages. This is easiest to do with the [Sherlock VSCode extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension).
 
 Then you just import the messages and use them in your components. 
 
@@ -143,12 +158,11 @@ import * as m from "../paraglide/messages.js"
 
 ```
 
-## Translating Client Side Components
-
-Now let's get to the main reason we are using Paraglide. We want to translate client side components.
-Because all messages are separate functions, vite will be able to tree-shake them. This means that only the messages that are actually used on the client will be shipped to the client. This drastically reduces the bundle size & requires no extra work from you.
+## Translating Components
 
 Let's translate an example `Counter.svelte` component.
+
+You use messages in components the same way you use messages in layouts. By importing from `src/paraglide/messages.js`.
 
 ```svelte
 <sciprt>
@@ -167,10 +181,20 @@ Let's translate an example `Counter.svelte` component.
 </div>
 ```
 
-We encourage you to run `npm run build` and inspect the output. You will see that only the message `m.count` is shipped to the client. Any other messages are not included in the bundle.
+Since all messages are separate exports, Vite will be able to treeshake them. Only messages that are _used_ in hydrated components will be sent to the client. This drastically reduces bundle size & requires no extra work.
+
+In components you can access the current language using the `languageTag()` function.
+
+```svelte
+<sciprt>
+  import { languageTag } from "../paraglide/runtime"
+</script>
+
+<h1>{languageTag()}</h1>
+```
 
 ## What's Next?
 
-You can read the [Paragldie](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) and [Paraglide-Adapter-Astro](https://inlang.com/m/iljlwzfs/library-inlang-paraglideJsAdapterAstro) documentation to get a more complete understanding of what's possible. You can also check out our [Astro + Paraglide](https://stackblitz.com/~/github.com/LorisSigrist/paraglide-astro-example) example on StackBlitz.
+You can read the [Paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) and [Paraglide-Adapter-Astro](https://inlang.com/m/iljlwzfs/library-inlang-paraglideJsAdapterAstro) documentation to get a more complete understanding of what's possible. You can also check out our [Astro + Paraglide](https://stackblitz.com/~/github.com/LorisSigrist/paraglide-astro-example) example on StackBlitz.
 
-If you have any suggestions for this guide, please reach out to us on [Discord](https://discord.gg/gdMPPWy57R), or open an issue on [GitHub](https://www.github.com/opral/monorepo/issues). If you have trouble following, don't hesitate to ask for help. We are happy to help getting you set up.
+If you have any suggestions for this guide, please reach out to us on [Discord](https://discord.gg/gdMPPWy57R), or open an issue on [GitHub](https://www.github.com/opral/inlang-paraglide-js/issues). If you have trouble following, don't hesitate to ask for help. We are happy to help getting you set up.
