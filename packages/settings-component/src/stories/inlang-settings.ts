@@ -185,7 +185,7 @@ export default class InlangSettings extends LitElement {
 			${Object.entries(this._projectSettingProperties).map(([key, value]) => {
 				return value.schema?.properties && this._newSettings
 					? html`<div class="module-container">
-							<h3>${value.meta?.displayName || key}</h3>
+							<h3>${(value.meta && (value.meta?.displayName as { en: string }).en) || key}</h3>
 							${Object.entries(value.schema.properties).map(([property, schema]) => {
 								if (property === "$schema" || property === "modules" || property === "experimental")
 									return undefined

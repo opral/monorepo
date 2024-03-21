@@ -44,8 +44,12 @@ export const mockProject = {
 		plugins: () => [
 			{
 				id: "plugin.inlang.i18next",
-				displayName: "i18next",
-				description: "i18next",
+				displayName: {
+					en: "i18next",
+				},
+				description: {
+					en: "i18next",
+				},
 				module: "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@4/dist/index.js",
 				settingsSchema: {
 					type: "object",
@@ -130,15 +134,23 @@ export const mockProject = {
 		messageLintRules: () => [
 			{
 				id: "messageLintRule.inlang.emptyPattern",
-				displayName: "Empty Pattern",
-				description: "Empty Pattern",
+				displayName: {
+					en: "Empty Pattern",
+				},
+				description: {
+					en: "Empty Pattern",
+				},
 				module:
 					"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js",
 			},
 			{
 				id: "messageLintRule.inlang.identicalPattern",
-				displayName: "Identical Pattern",
-				description: "Identical Pattern",
+				displayName: {
+					en: "Identical Pattern",
+				},
+				description: {
+					en: "Identical Pattern",
+				},
 				module:
 					"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-identical-pattern@latest/dist/index.js",
 				settingsSchema: {
@@ -157,15 +169,23 @@ export const mockProject = {
 			},
 			{
 				id: "messageLintRule.inlang.missingTranslation",
-				displayName: "Missing Translation",
-				description: "Missing Translation",
+				displayName: {
+					en: "Missing Translation",
+				},
+				description: {
+					en: "Missing Translation",
+				},
 				module:
 					"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js",
 			},
 			{
 				id: "messageLintRule.inlang.messageWithoutSource",
-				displayName: "Without Source",
-				description: "Without Source",
+				displayName: {
+					en: "Message Without Source",
+				},
+				description: {
+					en: "Message Without Source",
+				},
 				module:
 					"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-without-source@latest/dist/index.js",
 			},
