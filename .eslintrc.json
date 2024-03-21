@@ -6,6 +6,9 @@
 		"ecmaVersion": "latest",
 		"sourceType": "module224"
 	},
+
+
+	
 	"rules": {
 		"unicorn/no-null": "warn",
 		"unicorn/no-for-loop": "error",

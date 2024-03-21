@@ -12,7 +12,6 @@ overrides:
   vite: 4.5.2
 
 importers:
-
   .:
     devDependencies:
       '@changesets/cli':
@@ -55,7 +54,7 @@ importers:
   inlang/source-code/badge:
     dependencies:
       '@inlang/env-variables':
-        specifier: workspace:*
+    
         version: link:../env-variables
       '@inlang/sdk':
         specifier: workspace:*
