@@ -1,49 +1,48 @@
 {
-    "name": "@inlang/paraglide-js-adapter-astro",
-    "version": "0.1.12",
-    "author": "inlang <hello@inlang.com> (https://inlang.com/)",
-    "description": "A fully type-safe i18n library specifically designed for partial hydration patterns like Astro's islands.",
-    "homepage": "https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-astro",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/opral/monorepo.git",
-        "directory": "inlang/source-code/paraglide/paraglide-js-adapter-astro"
-    },
-    "type": "module",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
-    "publishConfig": {
-        "access": "public"
-    },
-    "scripts": {
-        "test": "vitest run --passWithNoTests --dir src",
-        "build": "tsc",
-        "dev": "tsc -w",
-        "lint": "eslint ./src --fix",
-        "format": "prettier ./src --write",
-        "clean": "rm -rf ./dist ./node_modules"
-    },
-    "dependencies": {
-        "@inlang/paraglide-js-adapter-vite": "workspace:*"
-    },
-    "peerDependencies": {
-        "astro": "^4.0.0"
-    },
-    "keywords": [
-        "paraglide",
-        "javascript i18n",
-        "i18n",
-        "l10n",
-        "translation",
-        "internationalization",
-        "internationalisation",
-        "localization",
-        "lint",
-        "astro-integration",
-        "astro",
-        "astro i18n",
-        "seo",
-        "accessibility",
-        "withastro"
-    ]
+	"name": "@inlang/paraglide-js-adapter-astro",
+	"version": "0.1.13",
+	"author": "inlang <hello@inlang.com> (https://inlang.com/)",
+	"description": "A fully type-safe i18n library specifically designed for partial hydration patterns like Astro's islands.",
+	"homepage": "https://inlang.com/m/iljlwzfs/library-inlang-paraglideJsAdapterAstro",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/opral/inlang-paraglide-js"
+	},
+	"type": "module",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"test": "vitest run --passWithNoTests --dir src",
+		"build": "tsc",
+		"dev": "tsc -w",
+		"lint": "eslint ./src --fix",
+		"format": "prettier ./src --write",
+		"clean": "rm -rf ./dist ./node_modules"
+	},
+	"dependencies": {
+		"@inlang/paraglide-js-adapter-vite": "workspace:*"
+	},
+	"peerDependencies": {
+		"astro": "^4.0.0"
+	},
+	"keywords": [
+		"paraglide",
+		"javascript i18n",
+		"i18n",
+		"l10n",
+		"translation",
+		"internationalization",
+		"internationalisation",
+		"localization",
+		"lint",
+		"astro-integration",
+		"astro",
+		"astro i18n",
+		"seo",
+		"accessibility",
+		"withastro"
+	]
 }

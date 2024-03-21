@@ -1,5 +1,11 @@
 # @inlang/paraglide-js-adapter-astro
 
+## 0.1.13
+
+### Patch Changes
+
+- bcd4ad8: Respect the `path` when using astro's built in i18n
+
 ## 0.1.12
 
 ### Patch Changes
