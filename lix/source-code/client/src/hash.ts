@@ -1,11 +1,16 @@
 export async function hash(inputStr: string) {
-	if (!globalThis?.crypto) {
+	let usedCrypto
+	// @ts-ignore
+	if (typeof crypto === "undefined" && typeof process !== "undefined" && process?.versions?.node) {
+		const modName = "crypto"
+		usedCrypto = await import(`node:${modName}`)
+	} else if (typeof crypto !== "undefined") {
+		usedCrypto = crypto
+	}
+	if (!usedCrypto) {
 		throw new Error("Could not find crypto features in runtime")
 	}
 
-	const idDigest = await globalThis.crypto.subtle.digest(
-		"SHA-256",
-		new TextEncoder().encode(inputStr)
-	)
+	const idDigest = await usedCrypto.subtle.digest("SHA-256", new TextEncoder().encode(inputStr))
 	return [...new Uint8Array(idDigest)].map((b) => ("00" + b.toString(16)).slice(-2)).join("")
 }
