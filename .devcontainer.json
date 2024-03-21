@@ -6,8 +6,8 @@
 	"features": {
 		"ghcr.io/devcontainers/features/desktop-lite:1": {
 			"password": "vscode",
-			"webPort": "6080",
-			"vncPort": "5901"
+			"webPort": "60830",
+			"vncPort": "590133"
 		}
 	},
 	"customizations": {
