@@ -552,6 +552,7 @@ describe("functionality", () => {
 				description: mockPlugin.description,
 				displayName: mockPlugin.displayName,
 				module: settings.modules[0],
+				settingsSchema: mockPlugin.settingsSchema,
 			})
 
 			expect(project.installed.messageLintRules()[0]).toEqual({
@@ -560,6 +561,7 @@ describe("functionality", () => {
 				displayName: mockMessageLintRule.displayName,
 				module: settings.modules[1],
 				level: "warning",
+				settingsSchema: mockMessageLintRule.settingsSchema,
 			})
 		})
 

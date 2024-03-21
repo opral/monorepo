@@ -8,6 +8,16 @@ import node from "@astrojs/node"
 // https://astro.build/config
 export default defineConfig({
 	site: "https://example.com",
+	i18n: {
+		defaultLocale: "en",
+		locales: [
+			"en",
+			{
+				codes: ["de"],
+				path: "deutsch",
+			},
+		],
+	},
 	integrations: [
 		mdx(),
 		sitemap({
