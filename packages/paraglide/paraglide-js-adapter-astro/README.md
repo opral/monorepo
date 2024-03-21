@@ -47,7 +47,7 @@ export default {
 
 ## Usage
 
-### Adding & using messages
+### Adding & using messages
 Messages are placed in `messages/{lang}.json`. 
 
 ```json
