@@ -14,6 +14,7 @@ import Link from "#src/renderer/Link.jsx"
 import { browserAuth } from "@lix-js/server"
 import { currentPageContext } from "#src/renderer/state.js"
 import { replaceMetaInfo } from "./helper/ReplaceMetaInfo.js"
+import type { InlangProject } from "@inlang/sdk"
 
 export const [messageCount, setMessageCount] = createSignal(0)
 
@@ -81,16 +82,8 @@ function TheActualPage() {
 
 	return (
 		<>
-			<Show
-				when={project()?.settings()}
-			>
-				<inlang-settings
-					prop:inlangProject={project()?.settings()}
-					prop:onSaveProject={(newSettings) => {
-						console.log(newSettings)
-						project()?.setSettings(newSettings)
-					}}
-				/>
+			<Show when={project()}>
+				<inlang-settings prop:project={project() as InlangProject} />
 			</Show>
 			<Switch
 				fallback={
