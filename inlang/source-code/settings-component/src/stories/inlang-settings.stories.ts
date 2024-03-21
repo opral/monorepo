@@ -12,11 +12,5 @@ const meta: Meta = {
 export default meta
 
 export const Default: StoryObj = {
-	render: () =>
-		html`
-			<inlang-settings
-				.project=${mockProject}
-				@onSetSettings=${(settings: any) => console.info("save", settings)}
-			></inlang-settings>
-		`,
+	render: () => html` <inlang-settings .project=${mockProject}></inlang-settings> `,
 }

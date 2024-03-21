@@ -1,10 +1,15 @@
 import { html, LitElement, css } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import { baseStyling } from "../styling/base.js"
-import { type InlangModule, ProjectSettings, type InlangProject } from "@inlang/sdk"
-import { Task } from "@lit/task"
+import {
+	type InlangModule,
+	ProjectSettings,
+	type InlangProject,
+	type InstalledPlugin,
+	type InstalledMessageLintRule,
+} from "@inlang/sdk"
 
-import "./input-fields/simple-input.js"
+import "./input-fields/general-input.js"
 
 import SlSelect from "@shoelace-style/shoelace/dist/components/select/select.component.js"
 import SLOption from "@shoelace-style/shoelace/dist/components/option/option.component.js"
@@ -81,7 +86,7 @@ export default class InlangSettings extends LitElement {
 	project: InlangProject = {} as InlangProject
 
 	@state()
-	private _newProject: ProjectSettings | undefined = undefined
+	private _newSettings: ProjectSettings | undefined = undefined
 
 	@state()
 	private _unsavedChanges: boolean = false
@@ -90,7 +95,7 @@ export default class InlangSettings extends LitElement {
 		await this.updateComplete
 
 		if (this.project?.settings()) {
-			this._newProject = JSON.parse(JSON.stringify(this.project.settings()))
+			this._newSettings = JSON.parse(JSON.stringify(this.project.settings()))
 		}
 	}
 
@@ -101,21 +106,21 @@ export default class InlangSettings extends LitElement {
 		moduleId?: InlangModule["default"]["id"]
 	) => {
 		//update state object
-		if (this._newProject && moduleId) {
-			this._newProject = {
-				...this._newProject,
+		if (this._newSettings && moduleId) {
+			this._newSettings = {
+				...this._newSettings,
 				[moduleId]: {
-					...this._newProject[moduleId],
+					...this._newSettings[moduleId],
 					[property]: value,
 				},
 			}
-		} else if (this._newProject) {
-			this._newProject = {
-				...this._newProject,
+		} else if (this._newSettings) {
+			this._newSettings = {
+				...this._newSettings,
 				[property]: value,
 			}
 		}
-		if (JSON.stringify(this.project?.settings()) !== JSON.stringify(this._newProject)) {
+		if (JSON.stringify(this.project?.settings()) !== JSON.stringify(this._newSettings)) {
 			this._unsavedChanges = true
 		} else {
 			this._unsavedChanges = false
@@ -124,136 +129,120 @@ export default class InlangSettings extends LitElement {
 
 	_revertChanges = () => {
 		if (this.project?.settings()) {
-			this._newProject = JSON.parse(JSON.stringify(this.project?.settings()))
+			this._newSettings = JSON.parse(JSON.stringify(this.project?.settings()))
 		}
 		this._unsavedChanges = false
 	}
 
 	_saveChanges = () => {
-		if (this._newProject) {
-			this.project?.setSettings(this._newProject)
+		if (this._newSettings) {
+			this.project?.setSettings(this._newSettings)
 		}
 		this._unsavedChanges = false
 	}
 
-	private _projectProperties = new Task(this, {
-		task: async ([project]) => {
-			const _project = project
-			if (!_project) throw new Error("No inlang project")
-			if (!_project.settings()) throw new Error("No inlang project")
+	private get _projectSettingProperties(): Record<
+		InlangModule["default"]["id"] | "internal",
+		{
+			meta?: InstalledPlugin | InstalledMessageLintRule
+			schema?: Record<string, Record<string, unknown>>
+		}
+	> {
+		const _project = this.project
+		if (!_project) throw new Error("No inlang project")
+		if (!_project.settings()) throw new Error("No inlang project settings")
 
-			const generalSchema: Record<
-				InlangModule["default"]["id"] | "internal",
-				{ meta?: InlangModule["default"]; schema?: Record<string, Record<string, unknown>> }
-			> = { internal: { schema: ProjectSettings.allOf[0] } }
+		const generalSchema: Record<
+			InlangModule["default"]["id"] | "internal",
+			{
+				meta?: InstalledPlugin | InstalledMessageLintRule
+				schema?: Record<string, Record<string, unknown>>
+			}
+		> = { internal: { schema: ProjectSettings.allOf[0] } }
 
-			for (const plugin of _project.installed.plugins()) {
-				try {
-					const importedPlugin = await import(plugin.module)
-					if (importedPlugin.default) {
-						generalSchema[importedPlugin.default.id] = {
-							schema: importedPlugin.default.settingsSchema,
-							meta: importedPlugin.default,
-						}
-					}
-				} catch (e) {
-					console.error(e)
+		for (const plugin of _project.installed.plugins()) {
+			if (plugin.settingsSchema) {
+				generalSchema[plugin.id] = {
+					schema: plugin.settingsSchema,
+					meta: plugin,
 				}
 			}
-			for (const lintRule of _project.installed.messageLintRules()) {
-				try {
-					const importedLintRule = await import(lintRule.module)
-					if (importedLintRule.default) {
-						generalSchema[importedLintRule.default.id] = {
-							schema: importedLintRule.default.settingsSchema,
-							meta: importedLintRule.default,
-						}
-					}
-				} catch (e) {
-					console.error(e)
+		}
+		for (const lintRule of _project.installed.messageLintRules()) {
+			if (lintRule.settingsSchema) {
+				generalSchema[lintRule.id] = {
+					schema: lintRule.settingsSchema,
+					meta: lintRule,
 				}
 			}
+		}
 
-			return generalSchema
-		},
-		args: () => [this.project],
-	})
+		return generalSchema
+	}
 
 	override render() {
-		return this._projectProperties.render({
-			pending: () => html`<div>Loading...</div>`,
-			complete: (properties) =>
-				html` <div class="container">
-					${Object.entries(properties).map(([key, value]) => {
-						return value.schema?.properties && this._newProject
-							? html`<div class="module-container">
-									<h3>
-										${(value.meta as { displayName?: { en: string } })?.displayName?.en || key}
-									</h3>
-									${Object.entries(value.schema.properties).map(([property, schema]) => {
-										if (
-											property === "$schema" ||
-											property === "modules" ||
-											property === "experimental"
-										)
-											return undefined
-										return key === "internal"
-											? html`
-													<simple-input
-														.property=${property}
-														.modules=${properties}
-														.value=${this._newProject?.[property as keyof typeof this._newProject]}
-														.schema=${schema}
-														.handleInlangProjectChange=${this.handleInlangProjectChange}
-													></simple-input>
-											  `
-											: html`
-													<simple-input
-														.property=${property}
-														.value=${
-															// @ts-ignore
-															this._project?.[key]?.[property]
-														}
-														.schema=${schema}
-														.moduleId=${key}
-														.handleInlangProjectChange=${this.handleInlangProjectChange}
-													></simple-input>
-											  `
-									})}
-							  </div>`
-							: undefined
-					})}
-					${this._unsavedChanges
-						? html`<div class="hover-bar-container">
-								<div class="hover-bar">
-									<p class="hover-bar-text">Attention, you have unsaved changes.</p>
-									<div>
-										<sl-button
-											size="medium"
-											@click=${() => {
-												this._revertChanges()
-											}}
-											varaint="default"
-										>
-											Cancel
-										</sl-button>
-										<sl-button
-											size="medium"
-											@click=${() => {
-												this._saveChanges()
-											}}
-											variant="primary"
-										>
-											Save Changes
-										</sl-button>
-									</div>
-								</div>
-						  </div>`
-						: html``}
-				</div>`,
-
-			error: (e) => html`<p>Error: ${e}</p>`,
-		})
+		return html` <div class="container">
+			${Object.entries(this._projectSettingProperties).map(([key, value]) => {
+				return value.schema?.properties && this._newSettings
+					? html`<div class="module-container">
+							<h3>${value.meta?.displayName || key}</h3>
+							${Object.entries(value.schema.properties).map(([property, schema]) => {
+								if (property === "$schema" || property === "modules" || property === "experimental")
+									return undefined
+								return key === "internal"
+									? html`
+											<general-input
+												.property=${property}
+												.modules=${this.project.installed.messageLintRules() || []}
+												.value=${this._newSettings?.[property as keyof typeof this._newSettings]}
+												.schema=${schema}
+												.handleInlangProjectChange=${this.handleInlangProjectChange}
+											></general-input>
+									  `
+									: html`
+											<general-input
+												.property=${property}
+												.value=${
+													// @ts-ignore
+													this._newSettings?.[key]?.[property]
+												}
+												.schema=${schema}
+												.moduleId=${key}
+												.handleInlangProjectChange=${this.handleInlangProjectChange}
+											></general-input>
+									  `
+							})}
+					  </div>`
+					: undefined
+			})}
+			${this._unsavedChanges
+				? html`<div class="hover-bar-container">
+						<div class="hover-bar">
+							<p class="hover-bar-text">Attention, you have unsaved changes.</p>
+							<div>
+								<sl-button
+									size="medium"
+									@click=${() => {
+										this._revertChanges()
+									}}
+									varaint="default"
+								>
+									Cancel
+								</sl-button>
+								<sl-button
+									size="medium"
+									@click=${() => {
+										this._saveChanges()
+									}}
+									variant="primary"
+								>
+									Save Changes
+								</sl-button>
+							</div>
+						</div>
+				  </div>`
+				: html``}
+		</div>`
 	}
 }
 
