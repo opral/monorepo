@@ -11,7 +11,7 @@ import { isQuoted, stripQuotes } from "../utilities/messages/isQuoted.js"
  */
 export const extractMessageCommand = {
 	command: "sherlock.extractMessage",
-	title: "Inlang: Extract Message",
+	title: "Sherlock: Extract Message",
 	register: commands.registerTextEditorCommand,
 	callback: async function (textEditor: TextEditor) {
 		const ideExtension = state().project.customApi()["app.inlang.ideExtension"]
