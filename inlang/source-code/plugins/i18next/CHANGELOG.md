@@ -1,5 +1,11 @@
 # @inlang/plugin-i18next
 
+## 4.13.16
+
+### Patch Changes
+
+- f3b0489: fix typo
+
 ## 4.13.15
 
 ### Patch Changes

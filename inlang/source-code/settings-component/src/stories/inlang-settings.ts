@@ -78,11 +78,17 @@ export default class InlangSettings extends LitElement {
 		`,
 	]
 
-	@property()
-	inlangProject: ProjectSettings | undefined = undefined
+	@property({ type: Object })
+	settings: ProjectSettings | undefined = undefined
 
-	@property()
-	onSaveProject?: (project: ProjectSettings) => void = () => {}
+	dispatchOnSetSettings(settings: ProjectSettings) {
+		const onSetSettings = new CustomEvent("onSetSettings", {
+			detail: {
+				argument: settings,
+			},
+		})
+		this.dispatchEvent(onSetSettings)
+	}
 
 	@state()
 	private _project: ProjectSettings | undefined = undefined
@@ -93,8 +99,8 @@ export default class InlangSettings extends LitElement {
 	override async firstUpdated() {
 		await this.updateComplete
 
-		if (this.inlangProject) {
-			this._project = JSON.parse(JSON.stringify(this.inlangProject))
+		if (this.settings) {
+			this._project = JSON.parse(JSON.stringify(this.settings))
 		}
 	}
 
@@ -119,7 +125,7 @@ export default class InlangSettings extends LitElement {
 				[property]: value,
 			}
 		}
-		if (JSON.stringify(this.inlangProject) !== JSON.stringify(this._project)) {
+		if (JSON.stringify(this.settings) !== JSON.stringify(this._project)) {
 			this._unsavedChanges = true
 		} else {
 			this._unsavedChanges = false
@@ -127,29 +133,29 @@ export default class InlangSettings extends LitElement {
 	}
 
 	_revertChanges = () => {
-		if (this.inlangProject) {
-			this._project = JSON.parse(JSON.stringify(this.inlangProject))
+		if (this.settings) {
+			this._project = JSON.parse(JSON.stringify(this.settings))
 		}
 		this._unsavedChanges = false
 	}
 
 	_saveChanges = () => {
-		if (this._project && this.onSaveProject) {
-			this.onSaveProject(this._project)
+		if (this._project) {
+			this.dispatchOnSetSettings(this._project)
 		}
 		this._unsavedChanges = false
 	}
 
 	private _projectProperties = new Task(this, {
-		task: async ([inlangProject]) => {
-			if (!inlangProject) throw new Error("No inlang project")
+		task: async ([settings]) => {
+			if (!settings) throw new Error("No inlang project")
 
 			const generalSchema: Record<
 				InlangModule["default"]["id"] | "internal",
 				{ meta?: InlangModule["default"]; schema?: Record<string, Record<string, unknown>> }
 			> = { internal: { schema: ProjectSettings.allOf[0] } }
 
-			for (const module of inlangProject.modules) {
+			for (const module of settings.modules) {
 				try {
 					const plugin = await import(module)
 					if (plugin.default) {
@@ -164,7 +170,7 @@ export default class InlangSettings extends LitElement {
 			}
 			return generalSchema
 		},
-		args: () => [this.inlangProject],
+		args: () => [this.settings],
 	})
 
 	override render() {

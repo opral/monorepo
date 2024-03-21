@@ -1,9 +1,20 @@
+import { redirect } from "@/lib/i18n"
 import * as m from "@/paraglide/messages.js"
+
 export default function About() {
+	async function redirectHome() {
+		"use server"
+		redirect("/")
+	}
+
 	return (
 		<>
 			<main>
 				<h1>{m.about()}</h1>
+
+				<form action={redirectHome}>
+					<button type="submit">Home</button>
+				</form>
 
 				<p>
 					Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt

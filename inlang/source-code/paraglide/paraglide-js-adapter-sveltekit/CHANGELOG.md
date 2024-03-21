@@ -1,5 +1,12 @@
 # @inlang/paraglide-js-adapter-sveltekit
 
+## 0.5.11
+
+### Patch Changes
+
+- ef4e0ab: fix: preserve trailing slash when translating hrefs
+  - @inlang/paraglide-js-adapter-vite@1.2.23
+
 ## 0.5.10
 
 ### Patch Changes
