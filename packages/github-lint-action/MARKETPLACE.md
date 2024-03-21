@@ -1,3 +1,5 @@
+<doc-image src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/github-lint-action/assets/ninja-i18n-cover.png"></doc-image>
+
 # Automate your i18n linting for pull requests
 
 Ensure that your i18n files are always up to date with the latest changes in your source code.

@@ -1,5 +1,16 @@
 # @inlang/paraglide-js-adapter-next
 
+## 1.1.0
+
+### Minor Changes
+
+- 124435c: Use cookie to store language & add language negotiation
+
+### Patch Changes
+
+- 7115a13: preserve search params when switching languages
+- 0dc1be3: correctly set the `Link` header
+
 ## 1.0.0
 
 ### Patch Changes

@@ -7,9 +7,6 @@ const meta: Meta = {
 	component: "inlang-settings",
 	title: "Public/inlang-settings",
 	tags: ["autodocs"],
-	// argTypes: {
-	// 	inlangProject: { control: { type: "object" } },
-	// },
 }
 
 export default meta
@@ -18,8 +15,23 @@ export const Default: StoryObj = {
 	render: () =>
 		html`
 			<inlang-settings
-				.inlangProject=${mockProject}
-				.onSaveProject=${(project: any) => console.info("save", project)}
+				.settings=${mockProject}
+				@onSetSettings=${(settings: any) => console.info("save", settings)}
 			></inlang-settings>
 		`,
+}
+
+export const HTML: StoryObj = {
+	render: () =>
+		`
+		<script>
+			document.querySelector('inlang-settings').addEventListener('onSetSettings', (settings) => {
+				console.info("save", settings);
+		  	});
+		</script>
+		<inlang-settings
+			id="my-element"
+			settings=${JSON.stringify(mockProject)}
+		></inlang-settings>
+	`,
 }
