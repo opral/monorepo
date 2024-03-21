@@ -34,10 +34,7 @@
 		"esbuild": "^0.20.0"
 	},
 	"dependencies": {
-		"@inlang/project-settings": "workspace:^",
-		"@inlang/module": "workspace:^",
-		"@inlang/message-lint-rule": "workspace:^",
-		"@inlang/plugin": "workspace:^",
+		"@inlang/sdk": "workspace:^",
 		"@lit/task": "^1.0.0",
 		"@shoelace-style/shoelace": "2.14.0"
 	}
