@@ -1,5 +1,11 @@
 # @inlang/paraglide-js-adapter-sveltekit-example
 
+## 0.1.8
+
+### Patch Changes
+
+- @inlang/paraglide-js-adapter-sveltekit@0.5.12
+
 ## 0.1.7
 
 ### Patch Changes
