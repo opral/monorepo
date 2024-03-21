@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/github-lint-action",
 	"description": "This action checks for translation issues within your PRs.",
-	"version": "0.2.7",
+	"version": "0.2.11",
 	"private": true,
 	"publishConfig": {
 		"access": "public"
@@ -21,7 +21,7 @@
 	},
 	"type": "module",
 	"engines": {
-		"node": ">=20.0.0"
+		"node": ">=18.0.0"
 	},
 	"scripts": {
 		"dev": "node ./build.js",

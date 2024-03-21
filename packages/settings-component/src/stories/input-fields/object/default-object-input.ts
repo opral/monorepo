@@ -1,7 +1,7 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import { baseStyling } from "../../../styling/base.js"
-import { InlangModule } from "@inlang/module"
+import { InlangModule } from "@inlang/sdk"
 
 @customElement("default-object-input")
 export class DefaultObjectInput extends LitElement {

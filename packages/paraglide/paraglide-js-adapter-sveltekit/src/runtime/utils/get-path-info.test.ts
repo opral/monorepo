@@ -7,6 +7,7 @@ describe("parsePath", () => {
 			lang,
 			base,
 			path: canonicalPath,
+			trailingSlash,
 		} = getPathInfo("/base/de/foo/bar", {
 			base: "/base",
 			availableLanguageTags: ["en", "de"],
@@ -16,6 +17,7 @@ describe("parsePath", () => {
 		expect(lang).toBe("de")
 		expect(base).toBe("/base")
 		expect(canonicalPath).toBe("/foo/bar")
+		expect(trailingSlash).toBe(false)
 	})
 
 	it("correctly identifies the segments (without base path)", () => {
@@ -23,6 +25,7 @@ describe("parsePath", () => {
 			lang,
 			base,
 			path: canonicalPath,
+			trailingSlash,
 		} = getPathInfo("/de/foo/bar", {
 			base: "/",
 			availableLanguageTags: ["en", "de"],
@@ -32,6 +35,7 @@ describe("parsePath", () => {
 		expect(lang).toBe("de")
 		expect(base).toBe("/")
 		expect(canonicalPath).toBe("/foo/bar")
+		expect(trailingSlash).toBe(false)
 	})
 
 	it("deals with empty inputs", () => {
@@ -39,6 +43,7 @@ describe("parsePath", () => {
 			lang,
 			base,
 			path: canonicalPath,
+			trailingSlash,
 		} = getPathInfo("/", {
 			base: "/",
 			availableLanguageTags: ["en", "de"],
@@ -48,6 +53,7 @@ describe("parsePath", () => {
 		expect(lang).toBe("en")
 		expect(base).toBe("/")
 		expect(canonicalPath).toBe("/")
+		expect(trailingSlash).toBe(false)
 	})
 
 	it("deals with an input that is just the base inputs", () => {
@@ -55,6 +61,7 @@ describe("parsePath", () => {
 			lang,
 			base,
 			path: canonicalPath,
+			trailingSlash,
 		} = getPathInfo("/base", {
 			base: "/base",
 			availableLanguageTags: ["en", "de"],
@@ -64,6 +71,7 @@ describe("parsePath", () => {
 		expect(lang).toBe("en")
 		expect(base).toBe("/base")
 		expect(canonicalPath).toBe("/")
+		expect(trailingSlash).toBe(false)
 	})
 
 	it("falls backt to the default language if no language segment is present", () => {
@@ -102,5 +110,15 @@ describe("parsePath", () => {
 		})
 		expect(dataSuffix).toBeUndefined()
 		expect(path).toBe("/foo/bar")
+	})
+
+	it("returns the correct trailing slash", () => {
+		const { trailingSlash } = getPathInfo("/foo/bar/", {
+			base: "/",
+			availableLanguageTags: ["en"],
+			defaultLanguageTag: "en",
+		})
+
+		expect(trailingSlash).toBe(true)
 	})
 })

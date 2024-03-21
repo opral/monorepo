@@ -1,9 +1,7 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
 import { baseStyling } from "../../../styling/base.js"
-import { Plugin } from "@inlang/plugin"
-import { MessageLintRule } from "@inlang/message-lint-rule"
-import { InlangModule } from "@inlang/module"
+import { InlangModule, type InstalledMessageLintRule, type InstalledPlugin } from "@inlang/sdk"
 
 @customElement("lint-rule-level-object-input")
 export class LintRuleLevelObjectInput extends LitElement {
@@ -44,7 +42,7 @@ export class LintRuleLevelObjectInput extends LitElement {
 	moduleId?: string
 
 	@property()
-	modules?: object
+	modules?: Array<InstalledMessageLintRule | InstalledPlugin>
 
 	@property()
 	value: Record<InlangModule["default"]["id"], string> = {}
@@ -88,33 +86,31 @@ export class LintRuleLevelObjectInput extends LitElement {
 			${this._description && html`<p class="help-text">${this._description}</p>`}
 			<div class="container">
 				${this.modules &&
-				Object.entries(this.modules).map(
-					([key, module]: [string, Record<string, Record<string, string>>]) => {
-						return key !== "internal" && key.split(".")[0] !== "plugin"
-							? html`<div class="rule-container">
-									<sl-select
-										value=${this.value ? (this.value as any)[key] : "warning"}
-										class="select"
-										size="small"
-										placeholder="warning"
-										@sl-change=${(e: Event) => {
-											this.handleUpdate(
-												key as `plugin.${string}.${string}` | `messageLintRule.${string}.${string}`,
-												(e.target as HTMLInputElement).value
-											)
-										}}
-									>
-										${this._valueOptions?.map((option) => {
-											return html`<sl-option value=${option.const} class="add-item-side">
-												${option.const}
-											</sl-option>`
-										})}
-									</sl-select>
-									<p class="ruleId">${(module.meta as Plugin | MessageLintRule | undefined)?.id}</p>
-							  </div>`
-							: undefined
-					}
-				)}
+				this.modules.map((module) => {
+					return module.id.split(".")[0] !== "plugin"
+						? html`<div class="rule-container">
+								<sl-select
+									value=${this.value ? (this.value as any)[module.id] : "warning"}
+									class="select"
+									size="small"
+									placeholder="warning"
+									@sl-change=${(e: Event) => {
+										this.handleUpdate(
+											module.id as `messageLintRule.${string}.${string}`,
+											(e.target as HTMLInputElement).value
+										)
+									}}
+								>
+									${this._valueOptions?.map((option) => {
+										return html`<sl-option value=${option.const} class="add-item-side">
+											${option.const}
+										</sl-option>`
+									})}
+								</sl-select>
+								<p class="ruleId">${module.displayName}</p>
+						  </div>`
+						: undefined
+				})}
 			</div>
 		</div>`
 	}

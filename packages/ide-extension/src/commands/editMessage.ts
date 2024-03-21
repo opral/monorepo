@@ -7,7 +7,7 @@ import { CONFIGURATION } from "../configuration.js"
 
 export const editMessageCommand = {
 	command: "sherlock.editMessage",
-	title: "Inlang: Edit a Message",
+	title: "Sherlock: Edit a Message",
 	register: commands.registerCommand,
 	callback: async function ({
 		messageId,

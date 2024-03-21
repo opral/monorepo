@@ -122,6 +122,15 @@ export async function run(): Promise<void> {
 
 		// Collect all reports from the head repository
 		for (const result of results) {
+			// Check if project is found in head repo
+			if (
+				projectListHead.some(
+					(project) => project.projectPath.replace(process.cwd(), "") === result.projectPath
+				) === false
+			) {
+				console.debug(`Project ${result.projectPath} not found in head repo`)
+				continue
+			}
 			const projectHead = await loadProject({
 				projectPath: process.cwd() + result.projectPath,
 				repo: repoHead,
@@ -131,6 +140,13 @@ export async function run(): Promise<void> {
 				if (result) result.errorsHead = projectHead.errors()
 				console.debug("Skip project ", result.projectPath, " in head repo because of errors")
 				continue
+			}
+			// Extend installedRules with new rules
+			const newInstalledRules = projectHead.installed.messageLintRules()
+			for (const newRule of newInstalledRules) {
+				if (!result.installedRules.some((rule) => rule.id === newRule.id)) {
+					result.installedRules.push(newRule)
+				}
 			}
 			result?.reportsHead.push(...projectHead.query.messageLintReports.getAll())
 		}
@@ -149,9 +165,6 @@ export async function run(): Promise<void> {
 
 		// Create a comment content for each project
 		for (const result of results) {
-			if (result.errorsBase.length > 0 && result.errorsHead.length === 0) {
-				console.debug(`#### ✅ Setup of project \`${result.projectPath}\` fixed`)
-			}
 			const shortenedProjectPath = () => {
 				const parts = result.projectPath.split("/")
 				if (parts.length > 2) {
@@ -160,6 +173,7 @@ export async function run(): Promise<void> {
 					return result.projectPath
 				}
 			}
+			// Case: New errors in project setup
 			if (result.errorsBase.length === 0 && result.errorsHead.length > 0) {
 				result.commentContent = `#### ❗️ New errors in setup of project \`${shortenedProjectPath()}\` found
 ${result.errorsHead
@@ -181,8 +195,14 @@ ${error?.cause.stack}`
 	.join("\n")}`
 				continue
 			}
+			// Case: setup of project fixed -> no comment
+			if (result.errorsBase.length > 0 && result.errorsHead.length === 0) {
+				console.debug(`#### ✅ Setup of project \`${result.projectPath}\` fixed`)
+			}
+			// Case: No lint reports found -> no comment
 			if (result.errorsBase.length > 0 || result.errorsHead.length > 0) continue
 			if (result.lintSummary.length === 0) continue
+			// Case: Lint reports found -> create comment with lint summary
 			const lintSummary = result.lintSummary
 			const commentContent = `#### Project \`${shortenedProjectPath()}\`
 | lint rule | new reports | link |

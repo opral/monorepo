@@ -1,11 +1,15 @@
 {
 	"name": "@inlang/paraglide-js-adapter-sveltekit",
-	"version": "0.5.10",
+	"version": "0.5.11",
 	"type": "module",
 	"main": "./dist/runtime/index.js",
 	"types": "./dist/runtime/index.d.ts",
 	"publishConfig": {
 		"access": "public"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/opral/inlang-paraglide-js"
 	},
 	"scripts": {
 		"test": "vitest run --passWithNoTests --test-timeout 30000 --dir src",

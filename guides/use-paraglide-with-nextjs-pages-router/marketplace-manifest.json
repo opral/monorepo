@@ -28,7 +28,8 @@
 		"nextjs",
 		"react",
 		"pages router",
-		"i18n routing"
+		"i18n routing",
+		"guides-developer"
 	],
 	"recommends": ["g/wxcebbig", "g/2fg8ng94", "g/00162hsd"],
 	"publisherName": "Loris Sigrist",
