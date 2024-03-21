@@ -155,6 +155,7 @@
 	},
 	"dependencies": {
 		"@inlang/result": "workspace:*",
+		"@inlang/rpc": "workspace:*",
 		"@inlang/sdk": "workspace:*",
 		"@inlang/telemetry": "workspace:*",
 		"@lix-js/client": "workspace:*",
