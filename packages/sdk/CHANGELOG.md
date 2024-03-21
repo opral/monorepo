@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 0.28.0
+
+### Minor Changes
+
+- 1e43ae4: Add settingsSchema to installedPlugin & installedMessageLintRule
+
 ## 0.27.0
 
 ### Minor Changes
