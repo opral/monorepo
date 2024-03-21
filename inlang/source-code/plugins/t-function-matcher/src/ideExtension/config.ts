@@ -29,6 +29,12 @@ export const ideExtensionConfig = (): ReturnType<Exclude<Plugin["addCustomApi"],
 			{
 				language: "svelte",
 			},
+			{
+				language: "astro",
+			},
+			{
+				language: "vue",
+			},
 		],
 	} satisfies CustomApiInlangIdeExtension,
 })
