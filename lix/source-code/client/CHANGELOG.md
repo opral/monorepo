@@ -1,5 +1,11 @@
 # @lix-js/client
 
+## 1.1.0
+
+### Minor Changes
+
+- d1b361e: fix missing vendored folder form npm release
+
 ## 1.0.0
 
 ### Major Changes
