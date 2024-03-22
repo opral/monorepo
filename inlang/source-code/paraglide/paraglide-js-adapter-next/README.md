@@ -15,6 +15,8 @@ npx @inlang/paraglide-js@latest init
 npm install @inlang/paraglide-js-adapter-next
 ```
 
+### Step 0. Set up Paraglide
+
 In the generated `./project.inlang/settings.json`, configure which languages you want to support.
 
 ```json
@@ -25,7 +27,7 @@ In the generated `./project.inlang/settings.json`, configure which languages you
 }
 ```
 
-Add a `./messages` folder with a json file for language. Then add some messages
+Create a `./messages` folder with a json file per language and add some messages
 
 ```json
 // messages/en.json
@@ -34,25 +36,26 @@ Add a `./messages` folder with a json file for language. Then add some messages
 }
 ```
 
-Then add the Next-Plugin in `next.config.mjs`.
+### Step 1. Add the Next-Plugin
+
+Add the Next-Plugin in `next.config.mjs`.
 
 ```ts
-// make sure to import from /plugin!
+// make sure to import from /plugin
 import { paraglide } from "@inlang/paraglide-js-adapter-next/plugin"
 
-const config = paraglide({
+export default paraglide({
 	paraglide: {
 		//recommended setup
 		project: "./project.inlang", //the path to the Inlang project
 		outdir: "./src/paraglide", // where you want the generated files to go
 	},
+
+	// ... rest of your next config
 })
-export default config
 ```
 
-## App Router Setup
-
-### 1. Initialise the Adapter
+### Step 2. Initialise the Adapter
 
 Create an `src/lib/i18n.ts` file
 
@@ -78,7 +81,7 @@ export const {
 	text="Sure, you can put it anywhere. Just be aware that you will be importing from this file a lot, so make sure it's somewhere convenient">
 </doc-accordion>
 
-### 2. Add the Middleware
+### Step 3. Add the Middleware
 
 In `src/middleware.ts`:
 
@@ -86,7 +89,7 @@ In `src/middleware.ts`:
 export { middleware } from "@/lib/i18n.js"
 ```
 
-### 3. Add the Language Provider
+### Step 4. Add the Language Provider
 
 In `src/app/layout.tsx` add the `<LanguageProvider>` component & set the lang attribute on your html element:
 
@@ -106,7 +109,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 ```
 
-### 4. Use the localized navigation APIs
+### Step 5. Use the localized navigation APIs
 
 In order to get localised `<Link>`s you need to replace the ones from `next/link` with the ones from `@/lib/i18n.js`. Just find & replace the imports.
 
@@ -122,7 +125,7 @@ The same goes for the other navigation APIs.
 + import { usePathname, useRouter, redirect, permanentRedirect} from "@/lib/i18n"
 ```
 
-### 5. Have Fun!
+### Done!
 
 You have set up localised routing! Try visiting `/de` or whatever language you have configured.
 
@@ -140,8 +143,6 @@ export function Home() {
 	)
 }
 ```
-
-Messages are fully typesafe.
 
 Only messages used in client components are sent to the client. Messages in Server Components don't impact bundle size.
 
