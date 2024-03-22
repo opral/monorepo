@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/paraglide-js-adapter-vite",
-	"version": "1.2.24",
+	"version": "1.2.25",
 	"description": "Vite adapter for Paraglide.js",
 	"license": "Apache-2.0",
 	"type": "module",
