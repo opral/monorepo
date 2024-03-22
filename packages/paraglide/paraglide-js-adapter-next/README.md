@@ -1,4 +1,10 @@
-![Dead Simple i18n. Typesafe, Small Footprint, SEO-Friendly and IDE Integration.](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/assets/header.png)
+![Dead Simple i18n. Typesafe, Small Footprint, SEO-Friendly and IDE Integration.](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-next/assets/header.png)
+
+<doc-features>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="Internationalized Routing" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-next/assets/i18n-routing.png"></doc-feature>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="Tiny Bundle Size" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-next/assets/bundle-size.png"></doc-feature>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="No route Param needed" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-next/assets/no-param.png"></doc-feature>
+</doc-features>
 
 ## Getting Started
 
@@ -32,16 +38,16 @@ Then add the Next-Plugin in `next.config.mjs`.
 
 ```ts
 // make sure to import from /plugin!
-import { paraglide } from "@inlang/paraglide-js-adapter-next/plugin";
+import { paraglide } from "@inlang/paraglide-js-adapter-next/plugin"
 
 const config = paraglide({
-    paraglide: {
+	paraglide: {
 		//recommended setup
-        project: "./project.inlang", //the path to the Inlang project
-        outdir: "./src/paraglide", // where you want the generated files to go
-    },
+		project: "./project.inlang", //the path to the Inlang project
+		outdir: "./src/paraglide", // where you want the generated files to go
+	},
 })
-export default config;
+export default config
 ```
 
 ## App Router Setup
@@ -56,8 +62,15 @@ import { createI18n } from "@inlang/paraglide-js-adapter-next"
 import type { AvailableLanguageTag } from "@/paraglide/runtime.js" //generated file
 
 // All available functions exported. Just use the ones you need
-export const { middleware, Link, useRouter, usePathname, redirect, permanentRedirect, localizePathname } =
-	createI18n<AvailableLanguageTag>()
+export const {
+	middleware,
+	Link,
+	useRouter,
+	usePathname,
+	redirect,
+	permanentRedirect,
+	localizePathname,
+} = createI18n<AvailableLanguageTag>()
 ```
 
 <doc-accordion
@@ -164,9 +177,9 @@ If you are using `router.push` to navigate you can pass `locale` as an option.
 ```ts
 function Component() {
 	const router = useRouter()
-	return <button onClick={()=>router.push("/about", { locale: "de" })}>
-        Go to German About page
-    </button>
+	return (
+		<button onClick={() => router.push("/about", { locale: "de" })}>Go to German About page</button>
+	)
 }
 ```
 
@@ -200,20 +213,20 @@ export const { ... } =
 	})
 ```
 
-
 #### How language-detection works
 
 The adapter follows these steps to determine the language.
 
 - First, the adapter will try to determine the language based on the URL.
-- If that fails, it will look for a `NEXT_LOCALE` cookie. 
-- If that isn't available either, it will try to negotiate the language based on the `Accept-Language` header. 
+- If that fails, it will look for a `NEXT_LOCALE` cookie.
+- If that isn't available either, it will try to negotiate the language based on the `Accept-Language` header.
 - Finally it will fallback to the default language.
 
-If a language has been determined once, it will set the `NEXT_LOCALE` cookie so that future ambiguities don't result in random language switches. 
+If a language has been determined once, it will set the `NEXT_LOCALE` cookie so that future ambiguities don't result in random language switches.
 
 #### Translated Pathnames
-You can use different pathnames for each language with the `pathname` option. 
+
+You can use different pathnames for each language with the `pathname` option.
 
 ```ts
 export const { ... } =
@@ -227,7 +240,7 @@ export const { ... } =
 	})
 ```
 
-You can also use a message as a pathname 
+You can also use a message as a pathname
 
 ```json
 // messages/en.json
@@ -269,6 +282,7 @@ Search engines like Google expect you to tell them about translated versions of 
 You **don't** need to add the translated versions of your site to your sitemap, although it doesn't hurt if you do.
 
 ### Right-to-Left Support
+
 Define a map of all languages to their text-direction & index into it.
 
 ```tsx
@@ -307,7 +321,7 @@ module.exports = {
 
 > If you are using ESM for your NextJS config, you can also import `availableLanguageTags` and `sourceLanguageTag` from `./src/paraglide/runtime.js` and use them instead of hardcoding the locales.
 
-NextJS will now automatically prefix all routes with the locale. For example, the route `/about` will become `/en/about` for the English locale and `/de/about` for the German locale. Only the default locale won't be prefixed. 
+NextJS will now automatically prefix all routes with the locale. For example, the route `/about` will become `/en/about` for the English locale and `/de/about` for the German locale. Only the default locale won't be prefixed.
 
 Finally, wrap your `_app.js` file with the `ParaglideJS` component.
 
@@ -351,6 +365,7 @@ export default function Document() {
 ## Known Limitations
 
 There are some known limitation with this adapter:
+
 - `output: static` isn't supported yet.
 - Evaluating messages in the module-scope in server components always renders the source language.
 - Server actions that aren't inside a tsx file will always read the default language, unless `setLanguageTag(()=>headers().get("x-language-tag"))` is called at the top of the file.
@@ -364,6 +379,7 @@ There are some known limitation with this adapter:
 ## Examples
 
 You can find example projects on our Github, or try them on StackBlitz:
+
 - [App Router Example Repository](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next/examples/app)
 - [App Router Example on StackBlitz](https://stackblitz.com/~/LorisSigrist/paraglide-next-app-router-example)
 - [Pages Router Example](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next/examples/pages)
