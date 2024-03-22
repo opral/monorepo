@@ -9,17 +9,9 @@
 
 ## Getting Started
 
-The steps are:
+### Step Zero: Set up [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs)
 
-0. Set up [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs)
-1. Set up the Vite Plugin
-2. Initialise the Adapter
-3. Add the Adapter Component to your Layout
-4. Add the Hooks.
-
-### Step Zero: Set up Paraglide
-
-To use the adapter you have Paraglide set up.
+To use the adapter you need to have Paraglide set up.
 
 ```bash
 npx @inlang/paraglide-js init
