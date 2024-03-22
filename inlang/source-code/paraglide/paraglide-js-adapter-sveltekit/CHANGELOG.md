@@ -1,5 +1,12 @@
 # @inlang/paraglide-js-adapter-sveltekit
 
+## 0.5.14
+
+### Patch Changes
+
+- d052495: fix: Log filename when warning about using `<a>` tags in the same file as `<ParaglideJS>`
+  - @inlang/paraglide-js-adapter-vite@1.2.26
+
 ## 0.5.13
 
 ### Patch Changes

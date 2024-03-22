@@ -1,5 +1,13 @@
 # @inlang/badge
 
+## 0.7.8
+
+### Patch Changes
+
+- Updated dependencies [d1b361e]
+  - @lix-js/client@1.1.0
+  - @inlang/sdk@0.28.2
+
 ## 0.7.7
 
 ### Patch Changes
