@@ -262,16 +262,18 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		async ({ routeParams: { host, owner, repository }, branch, user }) => {
 			if (host && owner && repository && user) {
 				try {
-					if (!import.meta.env.PROD) {
-						console.time("openRepository")
-					}
-
 					const newRepo = await openRepository(
 						`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${host}/${owner}/${repository}`,
 						{
 							nodeishFs: createNodeishMemoryFs(),
 							auth: browserAuth,
 							branch,
+							// debugTime: true,
+							// for testing purposes. if commented out, will use whitelist to enable for certain repos
+							// experimentalFeatures: {
+							// 	lazyClone: true,
+							// 	lixCommit: true,
+							// }
 						}
 					)
 
@@ -342,14 +344,14 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 			if (
 				searchParams().project &&
-				projects.some((project) => project.projectPath === searchParams().project)
+				projects.some((project: any) => project.projectPath === searchParams().project)
 			) {
 				setActiveProject(searchParams().project)
 			} else if (projects.length === 1) {
 				setActiveProject(projects[0]?.projectPath)
 			} else if (
 				projects.length > 1 &&
-				projects.some((project) => project.projectPath === "/project.inlang")
+				projects.some((project: any) => project.projectPath === "/project.inlang")
 			) {
 				setActiveProject("/project.inlang")
 			} else {
