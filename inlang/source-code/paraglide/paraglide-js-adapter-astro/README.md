@@ -1,17 +1,10 @@
-# Paraglide Adapter Astro
+![Dead Simple i18n. Typesafe, Small Footprint, SEO-Friendly and with an IDE Integration.](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-astro/assets/header.png)
 
-This Integration makes it trivial to use [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) to internationalize your Astro project.
-
-**Features**
-
-- 🏝️ Only messages used on islands get shipped to the client.
-- 🛟 Fully Typesafe messages, params and all
-- 🤏 Tiny runtime (<100 bytes)
-- 📦 Integrates with Astro's i18n routing
-
-This integration doesn't do routing. It simply reads the language from [Astro's built in i18n routing](https://docs.astro.build/en/guides/internationalization/) & sets the language for [Paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
-
-[Paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) is a compiler for your messages. It generates _type-safe_, _tree-shakeable_ message functions. This way messages are only shipped to the client if messages are used on islands.
+<doc-features>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="Uses astro:i18n for language & routing" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-next/assets/use-astro-i18n.png"></doc-feature>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="Tiny Bundle Size" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-astro/assets/bundle-size.png"></doc-feature>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="Only ship what's on islands" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-astro/assets/islands-only.png"></doc-feature>
+</doc-features>
 
 ## Installation
 
