@@ -284,7 +284,7 @@ You can add more languages to your project by adding them to the `languageTags` 
 Then add a messages file for the new language. 
 
 ```json
-// messages/de.json
+// messages/es.json
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"title": "Remix web de ejemplo",
