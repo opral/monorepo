@@ -262,6 +262,10 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		async ({ routeParams: { host, owner, repository }, branch, user }) => {
 			if (host && owner && repository && user) {
 				try {
+					if (!import.meta.env.PROD) {
+						console.time("openRepository")
+					}
+
 					const newRepo = await openRepository(
 						`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${host}/${owner}/${repository}`,
 						{
@@ -271,6 +275,11 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 						}
 					)
 
+					if (window && !import.meta.env.PROD) {
+						// @ts-expect-error
+						window.repo = newRepo
+					}
+
 					if (newRepo.errors().length > 0) {
 						setLixErrors(newRepo.errors())
 						return
@@ -278,8 +287,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 						setLixErrors([])
 					}
 
-					// @ts-expect-error
-					newRepo.nodeishFs.watch = () => undefined
+					// @ts-ignore -- causes reactivity bugs because the sdk uses watch and triggers updates on changes caused by itself
+					newRepo.nodeishFs.watch = () => {}
+
 					setLastPullTime(new Date())
 					// Invalidate the project while we switch branches
 					setProject(undefined)
@@ -294,7 +304,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	)
 
-	repo()?.errors.subscribe((errors) => {
+	repo()?.errors.subscribe((errors: any) => {
 		setLixErrors(errors)
 	})
 
@@ -614,8 +624,7 @@ export async function pushChanges(args: {
 		return { error: new PushException("User not logged in") }
 	}
 
-	// stage all changes
-	const status = await args.repo.statusMatrix({
+	const filesWithUncommittedChanges = await args.repo.statusList({
 		filter: (f: any) =>
 			f.endsWith("project_id") ||
 			f.endsWith(".json") ||
@@ -626,18 +635,7 @@ export async function pushChanges(args: {
 			f.endsWith(".ts"),
 	})
 
-	const filesWithUncommittedChanges = status.filter(
-		(row: any) =>
-			// files with unstaged and uncommitted changes
-			(row[2] === 2 && row[3] === 1) ||
-			// added files
-			(row[2] === 2 && row[3] === 0)
-	)
-
 	if (filesWithUncommittedChanges.length > 0) {
-		// add all changes
-		await args.repo.add({ filepath: filesWithUncommittedChanges.map((file) => file[0]) })
-
 		// commit changes
 		await args.repo.commit({
 			author: {
@@ -645,6 +643,7 @@ export async function pushChanges(args: {
 				email: args.user.email,
 			},
 			message: "Fink 🐦: update translations",
+			include: filesWithUncommittedChanges.map((f) => f[0]),
 		})
 	}
 
