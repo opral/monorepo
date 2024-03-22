@@ -63,7 +63,7 @@ Declare which languages you support in `project.inlang/settings.json`.
 
 Use messages like so:
 
-```markdown
+```astro
 ---
 import * as m from "../paraglide/messages.js";
 ---
