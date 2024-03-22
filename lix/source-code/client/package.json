@@ -6,6 +6,7 @@
 		"access": "public"
 	},
 	"exports": {
+		"test": "commit 3",
 		".": "./dist/index.js",
 		"./src/*.ts": "./src/*.ts",
 		"./src/browser-auth.ts": "./src/browser-auth.ts"
