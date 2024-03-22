@@ -1,6 +1,7 @@
 {
 	"name": "@lix-js/server",
 	"type": "module",
+	"version": "0.0.1",
 	"private": true,
 	"exports": {
 		".": "./dist/index.js"
@@ -39,6 +40,5 @@
 		"typescript": "5.2.2",
 		"vitest": "0.34.3"
 	},
-	"license": "Apache-2.0",
-	"version": null
+	"license": "Apache-2.0"
 }

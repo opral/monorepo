@@ -45,9 +45,9 @@
 	$: if (browser) document.documentElement.dir = i18n.config.textDirection[lang] ?? "ltr"
 
 	let numberOfLanugageChanges = 0
-	$: if(lang)numberOfLanugageChanges += 1;
-	$: if(browser && lang && numberOfLanugageChanges > 1) invalidate(LANGUAGE_CHANGE_INVALIDATION_KEY)
-	
+	$: if (lang) numberOfLanugageChanges += 1
+	$: if (browser && lang && numberOfLanugageChanges > 1)
+		invalidate(LANGUAGE_CHANGE_INVALIDATION_KEY)
 
 	function translateHref(href: string, hreflang: string | undefined): string {
 		const from = new URL(get(page).url)
@@ -90,12 +90,11 @@
 
 	setContext(PARAGLIDE_CONTEXT_KEY, { translateHref })
 
-
-    // In svelte 5 the #key block will re-render the second the key changes, 
+	// In svelte 5 the #key block will re-render the second the key changes,
 	// not after the all the updates in the Component are done.
 	// We need to make sure that changing the key happens last.
 	// See https://github.com/sveltejs/svelte/issues/10597
-	$: langKey = lang;
+	$: langKey = lang
 </script>
 
 <svelte:head>
@@ -110,13 +109,11 @@
 					prefixDefaultLanguage: i18n.config.prefixDefaultLanguage,
 				})}
 
-				{@const href = $page.url.host === "sveltekit-prerender" 
-						? path 
-						: (new URL(path, new URL($page.url))).href 
-				}
+				{@const href =
+					$page.url.host === "sveltekit-prerender" ? path : new URL(path, new URL($page.url)).href}
 
 				<!-- Should be a fully qualified href, including protocol -->
-				<link rel="alternate" hreflang={lang} href={href} />
+				<link rel="alternate" hreflang={lang} {href} />
 			{/each}
 		{/if}
 	{/if}

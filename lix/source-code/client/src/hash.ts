@@ -2,8 +2,8 @@ export async function hash(inputStr: string) {
 	let usedCrypto
 	// @ts-ignore
 	if (typeof crypto === "undefined" && typeof process !== "undefined" && process?.versions?.node) {
-		// @ts-ignore
-		usedCrypto = await import("node:crypto")
+		const modName = "crypto"
+		usedCrypto = await import(`node:${modName}`)
 	} else if (typeof crypto !== "undefined") {
 		usedCrypto = crypto
 	}
