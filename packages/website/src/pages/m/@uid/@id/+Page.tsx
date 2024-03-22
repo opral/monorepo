@@ -508,11 +508,14 @@ function NavbarCommon(props: {
 			.replaceAll("(", "")
 			.replaceAll(")", "")
 			.replaceAll("?", "")
+			.replaceAll("!", "")
 			.replaceAll(".", "")
 			.replaceAll("@", "")
 			.replaceAll(/([\uE000-\uF8FF]|\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDDFF])/g, "")
 			.replaceAll("✂", "")
 			.replaceAll(":", "")
+			.replaceAll("'", "")
+			.replaceAll("&", "")
 	}
 
 	const isSelected = (heading: string) => {
@@ -537,9 +540,10 @@ function NavbarCommon(props: {
 							: new Promise((resolve) => img.addEventListener("load", resolve))
 					)
 				)
-
-				//scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()), "smooth")
-				setHighlightedAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
+				setTimeout(() => {
+					scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()), "smooth")
+					setHighlightedAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
+				}, 100)
 			} else {
 				for (const heading of props.tableOfContents[sectionTitle]!) {
 					if (
@@ -554,9 +558,10 @@ function NavbarCommon(props: {
 									: new Promise((resolve) => img.addEventListener("load", resolve))
 							)
 						)
-
-						scrollToAnchor(replaceChars(heading.toString().toLowerCase()), "smooth")
-						setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
+						setTimeout(() => {
+							scrollToAnchor(replaceChars(heading.toString().toLowerCase()), "smooth")
+							setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
+						}, 100)
 					}
 				}
 			}

@@ -21,8 +21,8 @@ export function CommunityProjects() {
 					<Link
 						href={
 							import.meta.env.PROD
-								? `https://inlang.com/m/tdozzpar`
-								: `http://localhost:3000/m/tdozzpar`
+								? `https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor#lets-get-started`
+								: `http://localhost:3000/m/tdozzpar/app-inlang-finkLocalizationEditor#lets-get-started`
 						}
 						class="w-full md:w-auto"
 					>
