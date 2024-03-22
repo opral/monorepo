@@ -19,23 +19,19 @@ Register the Integration in `astro.config.mjs`:
 import paraglide from "@inlang/paraglide-js-adapter-astro"
 
 export default {
+	// Use astro's i18n routing for deciding which language to use
+	i18n: {
+		locales: ["en", { code: "de", path: "deutsch" }],
+		defaultLocale: "en",
+	},
+
 	integrations: [
 		paraglide({
-      // recommended settings
+			// recommended settings
 			project: "./project.inlang",
 			outdir: "./src/paraglide", //where your files should be
 		}),
 	],
-
-	// you can, but don't have to, use astro's i18n routing
-  // Everything including paths just works
-	i18n: {
-		locales: [
-			"en",
-			{ code: "de", path: "deutsch" },
-		],
-		defaultLocale: "en",
-	},
 }
 ```
 
@@ -130,7 +126,7 @@ For SEO reasons, you should add alternate links to your page's head that point t
 </head>
 ```
 
-Since only you know which pages correspond to each other this needs to be done manually.
+Since only you know which pages correspond to each other this can't reliably be done automatically.
 
 ## Roadmap
 
