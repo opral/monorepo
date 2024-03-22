@@ -1,5 +1,15 @@
 # @lix-js/server
 
+## 1.0.0
+
+### Major Changes
+
+- 03fa6f2: New lazy checkout features and breaking api improvements
+
+### Patch Changes
+
+- @inlang/telemetry@0.3.16
+
 ## null
 
 ### Patch Changes
