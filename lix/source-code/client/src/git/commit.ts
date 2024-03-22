@@ -1,4 +1,11 @@
-import { walk, TREE, STAGE, writeTree, commit as doCommit, type TreeEntry } from "isomorphic-git"
+import {
+	walk,
+	TREE,
+	STAGE,
+	writeTree,
+	commit as isoGitCommit,
+	type TreeEntry,
+} from "../../vendored/isomorphic-git/index.js"
 import { getDirname, getBasename } from "@lix-js/fs"
 
 import type { NodeishFilesystem } from "@lix-js/fs"
@@ -12,12 +19,14 @@ type PartialEntry = {
 }
 
 export async function commit({
+	cache,
 	fs,
 	dir,
 	ref,
 	author,
 	message,
 }: {
+	cache: any
 	fs: NodeishFilesystem
 	dir: string
 	ref?: string
@@ -70,10 +79,11 @@ export async function commit({
 	await walk({
 		fs,
 		dir,
-		// cache, gitdir,
+		cache,
+		// gitdir,
 		trees: [TREE({ ref }), STAGE()],
 		// @ts-ignore FIXME
-		map: async function (fullpath: string, [refState, stagingState]) {
+		map: async function (filepath: string, [refState, stagingState]) {
 			if (!refState && !stagingState) {
 				// skip unmanaged files (not indexed nor in ref) and skip root
 				throw new Error("At least one of the trees should contain an entry")
@@ -85,7 +95,7 @@ export async function commit({
 
 			// 'commit' used by TREE to represent submodules
 			if (refStateType === "commit" || stagingStateType === "commit") {
-				throw new Error("Submodule found in " + fullpath + " currently not supported")
+				throw new Error("Submodule found in " + filepath + " currently not supported")
 			}
 
 			// - `'special'` used by `WORKDIR` to represent irregular files like sockets and FIFOs
@@ -94,24 +104,29 @@ export async function commit({
 			}
 			// <<< FiXME
 
-			if (fullpath === ".") {
+			if (filepath === ".") {
 				// skip root folder
 				return
 			}
 
-			const fileDir = getDirname(fullpath)
+			const fileDir = getDirname(filepath)
 			if (fileStates[fileDir] === undefined) {
 				fileStates[fileDir] = []
 			}
 
 			if (!stagingState && refState) {
-				// file was not checked out - open question how do we distinguis it from deleted?
-				fileStates[fileDir]?.push({
-					mode: (await refState.mode()).toString(8),
-					path: getBasename(fullpath),
-					type: refStateType as "tree" | "blob",
-					oid: await refState.oid(),
-				})
+				// placeholders are not in the index - we need to add the proper state entry to the commit to prevent deletion
+				if (refStateType === "tree" || (fs._isPlaceholder && fs._isPlaceholder(filepath))) {
+					fileStates[fileDir]?.push({
+						mode: (await refState.mode()).toString(8),
+						path: getBasename(filepath),
+						type: refStateType as "tree" | "blob",
+						oid: await refState.oid(),
+					})
+					return
+				}
+
+				// file was deleted
 				return
 			}
 
@@ -121,7 +136,7 @@ export async function commit({
 
 				fileStates[fileDir]?.push({
 					mode: stMode?.toString(8),
-					path: getBasename(fullpath),
+					path: getBasename(filepath),
 					type: stagingStateType as "tree" | "blob",
 					oid: await stagingState.oid(),
 				})
@@ -136,7 +151,7 @@ export async function commit({
 
 				fileStates[fileDir]?.push({
 					mode: stagingType === "tree" ? "040000" : stagingMode.toString(8),
-					path: getBasename(fullpath),
+					path: getBasename(filepath),
 					type: stagingStateType as "tree" | "blob",
 					oid: await stagingState.oid(),
 				})
@@ -149,7 +164,8 @@ export async function commit({
 
 	const tree = await createTree("/", fileStates)
 
-	return doCommit({
+	return isoGitCommit({
+		cache,
 		fs,
 		dir,
 		author,

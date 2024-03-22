@@ -1,5 +1,11 @@
 # @lix-js/fs
 
+## 1.0.0
+
+### Major Changes
+
+- 03fa6f2: New lazy checkout features and breaking api improvements
+
 ## 0.6.0
 
 ### Minor Changes
