@@ -14,8 +14,9 @@ const AppHeader = () => {
 		"library.inlang.paraglideJs",
 		"app.inlang.ninjaI18nAction",
 		"app.inlang.ideExtension",
-		"library.inlang.paraglideJsAdapterAstro",
+		"library.inlang.paraglideJsAdapterNextJs",
 		"library.inlang.paraglideJsAdapterSvelteKit",
+		"library.inlang.paraglideJsAdapterAstro",
 		"library.inlang.paraglideJsAdapterSolidStart",
 	]
 
