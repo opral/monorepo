@@ -365,7 +365,7 @@ export async function openRepository(
 			})
 			.then(() => checkOutPlaceholders())
 			.catch((newError: Error) => {
-				setErrors((previous) => [...(previous || []), newError])
+				setErrors((previous: any) => [...(previous || []), newError])
 			})
 	} else {
 		console.info("Using existing cloned repo")
@@ -550,6 +550,11 @@ export async function openRepository(
 		return maybeStatusEntry?.[1] as string
 	}
 
+
+	if (args.debugTime) {
+		console.timeEnd('repo')
+	}
+
 	return {
 		_experimentalFeatures: experimentalFeatures,
 		_rawFs: rawFs,
@@ -718,7 +723,7 @@ export async function openRepository(
 					head: currentOriginCommit,
 				})
 				.catch((newError: Error) => {
-					setErrors((previous) => [...(previous || []), newError])
+					setErrors((previous: any) => [...(previous || []), newError])
 					return { error: newError }
 				})
 
@@ -888,6 +893,10 @@ export async function openRepository(
 
 				await emptyWorkdir()
 
+				// remember we are now leaving lazy mode
+				experimentalFeatures.lazyClone = false
+
+				true && console.info('checking out "HEAD" after pull')
 				await isoGit.checkout({
 					fs: rawFs,
 					cache,
@@ -1102,7 +1111,7 @@ export async function openRepository(
 					repo: repoName,
 				})
 				.catch((newError: Error) => {
-					setErrors((previous) => [...(previous || []), newError])
+					setErrors((previous: any) => [...(previous || []), newError])
 					return { error: newError }
 				})
 

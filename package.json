@@ -9,6 +9,7 @@
 		"build": "pnpm exec nx run-many --nx-bail --target=build --parallel",
 		"dev:lix": "pnpm --filter @inlang/env-variables build && pnpm --stream --parallel --filter @lix-js/* --filter @inlang/server dev",
 		"dev:editor": "pnpm --filter @inlang/env-variables build && pnpm --stream --parallel --filter @inlang/manage --filter @inlang/editor --filter @inlang/website dev",
+		"dev:lixeditor": "pnpm --filter @inlang/env-variables build && pnpm --stream --parallel --filter @lix-js/* --filter @inlang/serve --filter @inlang/manage --filter @inlang/editor --filter @inlang/website dev",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "pnpm exec nx run-many --target=test --parallel",
 		"---- LINT ----------------------------------------------------------": "",
