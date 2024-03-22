@@ -1,6 +1,4 @@
-# Paraglide Adapter SvelteKit
-
-The best way to internationalize your SvelteKit App!
+![Dead Simple i18n. Typesafe, Small Footprint, SEO-Friendly and IDE Integration.](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/assets/header.png)
 
 - 🪂 Automatically detect & manage the language
 - 💨 A breeze to set up - No need to change your `routes`
@@ -8,9 +6,7 @@ The best way to internationalize your SvelteKit App!
 - 💬 Translated paths
 - 🤖 SEO friendly out of the box
 
-This is a SvelteKit integration for the [ParaglideJS i18n library](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
-
-## Quickstart
+## Getting Started
 
 There are four steps to setting up the Paraglide Adapter with SvelteKit.
 
