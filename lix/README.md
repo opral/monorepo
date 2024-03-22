@@ -1,8 +1,8 @@
-# Lix 
+# Lix
 
 Lix is a change control backend for web apps.
 
-Using lix as a backend unlocks automatic change control, distributed collaboration, and automation without cloud complexity like auth, data protection, and integrations.  
+Using lix as a backend unlocks automatic change control, distributed collaboration, and automation without cloud complexity like auth, data protection, and integrations.
 
 **What is a change control system?**
 
@@ -27,5 +27,4 @@ If you are interested, check out the [design principles](./documentation/design-
 
 **[🗣️ Discord](https://discord.gg/gdMPPWy57R)** - Hanging out with the community.
 
-
-teets commit 1
+teets commit 1 and test commit 4 erm 5
