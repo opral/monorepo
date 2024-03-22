@@ -36,6 +36,8 @@
 
 - 23ce3f0ea: support conflict detection in fork status api
 
+test commit 2
+
 ## 0.6.0
 
 ### Minor Changes
