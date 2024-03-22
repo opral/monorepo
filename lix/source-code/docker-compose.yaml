@@ -1,0 +1,89 @@
+version: '3.7'
+services:
+  git:
+    container_name: git
+    image: git:10
+    hostname: git
+    ports: [ "8000" ]
+    labels: [ dev.orbstack.domains=git.local ]
+    entrypoint: /start.sh
+    # stdin_open: true
+    # tty: true
+    # entrypoint: /bin/bash
+    build:
+      context: ./server/git-test-server
+      dockerfile: Dockerfile
+    networks:
+      - lix
+    # depends_on:
+    #   - exp
+    # restart: always
+    # image downgrades user but that seems not to work, see: https://caddy.community/t/basic-docker-compose-setup-failing/6892/7?u=alexander_gabriel
+    user: root
+    # env_file:
+    #   - ./.env
+
+  exp:
+    # restart: always
+    container_name: exp
+    hostname: exp
+    labels: [ dev.orbstack.domains=exp.local ]
+    image: exp:3
+    build:
+      dockerfile_inline: |
+        FROM node:20-slim
+        RUN apt upgrade && apt update
+        RUN apt-get install openssl curl libssl-dev -y
+        RUN corepack enable pnpm
+        COPY --chown=app:app . /workspace
+        RUN cd /workspace && pnpm --filter=@lix-js/client --filter=@lix-js/fs install
+        RUN cd /workspace/exp && pnpm install
+        
+        # todo: shell aliase
+    ports: [ "3334" ]
+    working_dir: /workspace/exp
+    entrypoint: pnpm dev
+    # working_dir: /workspace/exp
+    # entrypoint: /bin/bash
+    # stdin_open: true
+    # tty: true
+    networks:
+      - lix
+    develop:
+      watch:
+        - action: sync
+          path: ./
+          target: /workspace/
+          ignore:
+            - node_modules
+            - .pnpm-store
+    volumes:
+      - pnpm-store:/root/.local/share/pnpm/store/v3
+
+  # josh:
+  #   # restart: always
+  #   container_name: josh
+  #   hostname: josh
+  #   labels: [ dev.orbstack.domains=josh.local ]
+  #   image: joshproject/josh-proxy:latest
+  #   platform: linux/amd64
+  #   # entrypoint: /bin/bash
+  #   # stdin_open: true
+  #   # tty: true
+  #   networks:
+  #     - lix
+  #   ports:
+  #     - "8000"
+  #   environment:
+  #     JOSH_REMOTE: https://github.com/opral
+  #     JOSH_EXTRA_OPTS: "--require-auth"
+  #   volumes:
+  #     - josh-vol:/data/git
+
+networks:
+  lix:
+    driver: bridge
+
+volumes:
+  josh-vol: {}
+  pnpm-store: {}
