@@ -19,6 +19,7 @@ export type InstalledPlugin = {
 	 * The module which the plugin is installed from.
 	 */
 	module: string
+	settingsSchema: Plugin["settingsSchema"]
 	// disabled: boolean
 }
 
@@ -31,6 +32,7 @@ export type InstalledMessageLintRule = {
 	 */
 	module: string
 	level: MessageLintLevel
+	settingsSchema: MessageLintRule["settingsSchema"]
 }
 
 export type InlangProject = {

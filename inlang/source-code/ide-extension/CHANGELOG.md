@@ -1,5 +1,18 @@
 # inlang-vs-code-extension
 
+## 1.36.0
+
+### Minor Changes
+
+- 8721ce8: add machine translate
+
+### Patch Changes
+
+- Updated dependencies [1e43ae4]
+  - @inlang/sdk@0.28.0
+  - @inlang/rpc@0.3.1
+  - @inlang/telemetry@0.3.15
+
 ## 1.35.0
 
 ### Minor Changes

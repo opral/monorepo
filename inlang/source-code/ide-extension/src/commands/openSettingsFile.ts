@@ -4,7 +4,7 @@ import * as path from "node:path"
 
 export const openSettingsFileCommand = {
 	command: "sherlock.openSettingsFile",
-	title: "Inlang: Open settings file",
+	title: "Sherlock: Open settings file",
 	register: vscode.commands.registerCommand,
 	callback: async (node: ProjectViewNode) => {
 		const settingsFile = vscode.Uri.file(path.join(node.path, "settings.json"))

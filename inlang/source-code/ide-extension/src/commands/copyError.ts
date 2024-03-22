@@ -4,7 +4,7 @@ import { msg } from "../utilities/messages/msg.js"
 
 export const copyErrorCommand = {
 	command: "sherlock.copyError",
-	title: "Inlang: Copy error",
+	title: "Sherlock: Copy error",
 	register: vscode.commands.registerCommand,
 	callback: async (error: ErrorNode) => {
 		vscode.env.clipboard.writeText(`${error.label}: ${error.tooltip}`)

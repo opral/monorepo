@@ -1,5 +1,18 @@
 # @inlang/plugin-t-function-matcher
 
+## 0.6.0
+
+### Minor Changes
+
+- df3b735: add astro support
+
+## 0.5.7
+
+### Patch Changes
+
+- Updated dependencies [1e43ae4]
+  - @inlang/sdk@0.28.0
+
 ## 0.5.6
 
 ### Patch Changes
