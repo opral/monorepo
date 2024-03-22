@@ -2,8 +2,6 @@
 
 <!-- ![Paraglide JS header image](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/paraglide-js-header.png) -->
 
-# Simple, adaptable, and tiny i18n library for JS
-
 Get started with:
 
 ```bash
@@ -13,9 +11,9 @@ npx @inlang/paraglide-js@latest init
 # Features
 
 <doc-features>
-  <doc-feature title="No unused translations" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/unused-translations.png"></doc-feature>
-  <doc-feature title="Minimal payload" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/reduced-payload.png"></doc-feature>
-  <doc-feature title="Typesafety" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/typesafe.png"></doc-feature>
+  <doc-feature title="Only used translations are shipped" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/unused-translations.png"></doc-feature>
+  <doc-feature title="Tiny Bundle-Size" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/reduced-payload.png"></doc-feature>
+  <doc-feature title="Typesafe" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/typesafe.png"></doc-feature>
 </doc-features>
 
 ### Treeshaking
