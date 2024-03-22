@@ -4,6 +4,16 @@
 
 ### Patch Changes
 
+- @inlang/badge@0.7.8
+- @inlang/website@null
+- @inlang/plugin-message-format@2.1.1
+- @inlang/rpc@0.3.3
+- @inlang/telemetry@0.3.17
+
+## null
+
+### Patch Changes
+
 - @inlang/badge@0.7.7
 - @inlang/website@null
 - @inlang/plugin-message-format@2.1.1
