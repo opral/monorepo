@@ -39,6 +39,8 @@ function getWebviewContent(args: {
 
 		const project = state().project
 
+		console.log(project.settings())
+
 		return `<!DOCTYPE html>
 				<html lang="en">
 					<head>
@@ -50,6 +52,7 @@ function getWebviewContent(args: {
 					</head>
 					<body>
 						<div id="settings-container"></div>
+						<p>Current Date: <script>document.write(new Date().toLocaleString());</script></p>
 						<script type="module">
 							import {html, render} from '${litHtmlUri}';
 							const settingsContainer = document.getElementById('settings-container');
