@@ -13,7 +13,8 @@
 	"types": "./dist/index.d.ts",
 	"files": [
 		"./dist",
-		"./src"
+		"./src",
+		"./vendored"
 	],
 	"scripts": {
 		"build": "tsc --build",
