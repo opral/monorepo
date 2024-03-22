@@ -2,7 +2,7 @@ import { exec } from "node:child_process"
 import { Command } from "commander"
 import { log } from "../../utilities/log.js"
 import fs from "node:fs/promises"
-import { findRoot, listRemotes } from "isomorphic-git"
+import { findRepoRoot, _listRemotes } from "@lix-js/client"
 import { parseOrigin } from "@inlang/telemetry"
 import type { NodeishFilesystem } from "@lix-js/fs"
 
@@ -21,15 +21,20 @@ export async function editorCommandAction(args: {
 }) {
 	let repoRoot: string | undefined
 	try {
-		repoRoot = await findRoot({ fs: args.nodeishFs, filepath: args.path })
+		repoRoot = await findRepoRoot({ nodeishFs: args.nodeishFs, path: args.path })
+		if (!repoRoot) {
+			args.logger.error("Failed to find repository root.")
+			return
+		}
 	} catch (error) {
 		args.logger.error("Failed to find repository root.")
 		return
 	}
 
-	const remotes = await listRemotes({
+	// _listReomotes deprecated, open repo and use repo.listRemotes
+	const remotes = await _listRemotes({
 		fs: args.nodeishFs,
-		dir: repoRoot,
+		dir: repoRoot?.replace("file://", ""),
 	})
 
 	const origin = parseOrigin({ remotes })
