@@ -51,7 +51,8 @@ export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
 				content.match(/<a\b[^>]*>.*?<\/a\s*>|<a\b[^>]*\/>/g)
 			) {
 				console.warn(
-					"[paraglide] `<a>` tags in the same component as `<ParaglideJS>` won't be translated.\nConsider moving it into another component."
+					"[paraglide] `<a>` tags in the same file as `<ParaglideJS>` won't be translated.\nConsider moving it into another component.\n" +
+						filename
 				)
 			}
 

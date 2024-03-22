@@ -1,25 +1,21 @@
-# Paraglide Adapter SvelteKit
+![Dead Simple i18n. Typesafe, Small Footprint, SEO-Friendly and with an IDE Integration.](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/assets/header.png)
 
-The best way to internationalize your SvelteKit App!
+<doc-features>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="Internationalized Routing" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-next/assets/i18n-routing.png"></doc-feature>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="Tiny Bundle Size" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-next/assets/bundle-size.png"></doc-feature>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="No route Param needed" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-next/assets/no-param.png"></doc-feature>
+</doc-features>
 
-- 🪂 Automatically detect & manage the language
-- 💨 A breeze to set up - No need to change your `routes`
-- 🪄 Automatically translate existing links
-- 💬 Translated paths
-- 🤖 SEO friendly out of the box
 
-This is a SvelteKit integration for the [ParaglideJS i18n library](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
+## Getting Started
 
-## Quickstart
+The steps are:
 
-There are four steps to setting up the Paraglide Adapter with SvelteKit.
-
+0. Set up [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs)
 1. Set up the Vite Plugin
 2. Initialise the Adapter
 3. Add the Adapter Component to your Layout
 4. Add the Hooks.
-
-If you don't already have a SvelteKit app set up please follow [SvelteKit's getting Started Guide](https://kit.svelte.dev/docs/creating-a-project).
 
 ### Step Zero: Set up Paraglide
 
