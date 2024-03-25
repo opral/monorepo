@@ -3,7 +3,7 @@
 <doc-features>
 <doc-feature text-color="#0F172A" color="#E1EFF7" title="Uses astro:i18n for routing" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-astro/assets/use-astro-i18n.png"></doc-feature>
 <doc-feature text-color="#0F172A" color="#E1EFF7" title="Tiny Bundle Size" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-astro/assets/bundle-size.png"></doc-feature>
-<doc-feature text-color="#0F172A" color="#E1EFF7" title="Only ship what's on islands" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-astro/assets/islands-only.png"></doc-feature>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="Only ships messages used on islands" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-astro/assets/islands-only.png"></doc-feature>
 </doc-features>
 
 ## Installation
