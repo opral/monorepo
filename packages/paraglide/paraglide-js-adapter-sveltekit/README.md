@@ -313,6 +313,7 @@ export async function load({ depends }) {
 
 1. Links in the same Layout Component as `<ParagldieJS>` will not be translated. This will also log a warngin in development.
 2. Messages are not reactive. Don't use them in server-side module scope.
+3. Sideeffects triggered by `data` will run on language changes even if the data didn't change. If the data is language-dependent the sideeffect will run twice. 
 
 ### Using messages in `+layout.svelte`
 
