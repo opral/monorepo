@@ -156,14 +156,14 @@ There are a few things to know about `onSetLanguageTag()`:
 
 ## Getting a message in a specific language
 
-You can import a message in a specific language from `paraglide/messages/{lang}.js`. This is great if you always need the same language in a given file.
+You can import a message in a specific language from `paraglide/messages/{lang}.js`.
 
 ```ts
 import * as m from "./paraglide/messages/de.js"
 m.hello() // Hallo Welt
 ```
 
-If you want to force a language, but don't know ahead of time _which_ language you can pass the `languageTag` option as the second parameter to a message function. This is often needed on the server.
+If you want to force a language, but don't know _which_ language ahead of time you can pass the `languageTag` option as the second parameter to a message function. This is often handy on the server.
 
 ```js
 import * as m from "./paraglide/messages.js"
@@ -175,7 +175,7 @@ const msg = m.hello({ name: "Samuel" }, { languageTag: "de" }) // Hallo Samuel!
 Paraglide consciously discourages lazy-loading translations since it seriously hurts
 your web-vitals. Learn more about why lazy-loading is bad & what to do instead in [this blog post](https://inlang.com/g/mqlyfa7l/guide-lorissigrist-dontlazyload).
 
-If you _really_ want to do it anway, you can lazily import the language-specific message files. Be careful with this, as it's easy to accidenally break tree-shaking.
+If you _really_ want to do it anway, you can lazily import the language-specific message files. Be careful with this.
 
 ```ts
 const lazyGerman = await import("./paraglide/messages/de.js")
@@ -227,8 +227,6 @@ Paraglide consists of four main parts:
 
 The compiler loads an Inlang project and compiles the messages into tree-shakable and typesafe message functions.
 
-#### Example
-
 **Input**
 
 ```js
@@ -262,46 +260,40 @@ Bundlers like Rollup, Webpack, or Turbopack tree-shake the messages that are not
 
 # Writing an Adapter
 
-An "Adapter" is a library that integrates with a framework's liefcycle and does two main things:
+An "Adapter" is a library that integrates with a framework's liefcycle and does two things:
 
-- Calls `setLanguageTag()` at appropriate times to set the language
-- Reacts to `onSetLanguageTag()`, usually by navigating or relading the page.
+1. Calls `setLanguageTag()` at appropriate times to set the language
+2. Reacts to `onSetLanguageTag()`, usually by navigating or relading the page.
 
-Here is an example that adapts Paraglide-JS to a fictitious metaframework like NextJS or SvelteKit.
+This example adapts Paraglide to a fictitious fullstack framework.
 
 ```tsx
-import { setLanguageTag, onSetLanguageTag } from "../paraglide/runtime.js"
-import { isServer, request, render } from "@example/framework"
+import { setLanguageTag, onSetLanguageTag, type AvailableLanguageTag } from "../paraglide/runtime.js"
+import { isServer, isClient, request, render } from "@example/framework"
+import { detectLanguage } from "./utils.js"
 
-// On a server, the language tag needs to be resolved on a
-// per-request basis. Hence, we need to pass a getter
-// function () => string to setLanguageTag.
-//
-// Most frameworks offer a way to access the current
-// request. In this example, we assume that the language tag
-// is available in the request object.
 if (isServer) {
-	setLanguageTag(() => request.languageTag)
+	// On the server the language tag needs to be resolved on a
+	// per-request basis. 
+	// Pass a getter function that resolves the language from the correct request
+	setLanguageTag(() : AvailableLanguageTag => detectLanguage(request))
 }
-// On a client, the language tag could be resolved from
-// the document's html lang tag.
-//
-// In addition, we also want to trigger a side-effect
-// to request the site if the language changes.
-else {
+
+if(isClient) {
+	// On the client, the language tag can be resolved from
+	// the document's html lang tag.
 	setLanguageTag(() => document.documentElement.lang)
 
-	//! Make sure to call `onSetLanguageTag` after
-	//! the initial language tag has been set to
-	//! avoid an infinite loop.
-
-	// route to the page in the new language
+	// When the language changes we want to re-render the page in the new language
+	// Here we just navigate to the new route
+	//
+	// Make sure to call `onSetLanguageTag` after `setLanguageTag` to avoid an infinite loop.
 	onSetLanguageTag((newLanguageTag) => {
 		window.location.pathname = `/${newLanguageTag}${window.location.pathname}`
 	})
 }
 
-// make sure the app renders _after_ you've done your setup
+// Once the language setup is done, render the app.
 render((page) => (
 	<html lang={request.languageTag}>
 		<body>{page}</body>
