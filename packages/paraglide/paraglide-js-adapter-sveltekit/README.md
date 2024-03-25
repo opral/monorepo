@@ -309,13 +309,11 @@ export async function load({ depends }) {
 }
 ```
 
-There currently is a caveat with this. When switching languages, any side-effects triggererd by `data` changing will be run twice if the data is language dependent. Once with the new language + old data and then with the new language + new data. We're working to fix this.
-
 ## Caveats
 
 1. Links in the same Layout Component as `<ParagldieJS>` will not be translated. This will also log a warngin in development.
 2. Messages are not reactive. Don't use them in server-side module scope.
-3. Sideeffects triggered by `data` changing will be run twice if the data is language dependent. 
+3. Sideeffects triggered by `data` will run on language changes even if the data didn't change. If the data is language-dependent the sideeffect will run twice. 
 
 ### Using messages in `+layout.svelte`
 
