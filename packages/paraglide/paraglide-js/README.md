@@ -273,10 +273,13 @@ import { isServer, isClient, request, render } from "@example/framework"
 import { detectLanguage } from "./utils.js"
 
 if (isServer) {
-	// On the server the language tag needs to be resolved on a
-	// per-request basis. 
+	// On the server the language tag needs to be resolved on a per-request basis. 
 	// Pass a getter function that resolves the language from the correct request
-	setLanguageTag(() : AvailableLanguageTag => detectLanguage(request))
+
+	const detectLanguage = (request: Request) : AvailableLanguageTag => {
+		//your logic ...
+	}
+	setLanguageTag(() => detectLanguage(request))
 }
 
 if(isClient) {
@@ -293,7 +296,7 @@ if(isClient) {
 	})
 }
 
-// Once the language setup is done, render the app.
+// Render the app once the setup is done
 render((page) => (
 	<html lang={request.languageTag}>
 		<body>{page}</body>
@@ -309,9 +312,9 @@ If you have any feedback / problems, please let us know on [GitHub](https://gith
 
 <doc-comments>
 <doc-comment text="Just tried Paraglide JS from @inlangHQ. This is how i18n should be done! Totally new level of DX for both implementation and managing translations! Superb support for SvelteKit as well ⭐" author="Patrik Engborg" icon="mdi:twitter" data-source="https://twitter.com/patrikengborg/status/1747260930873053674"></doc-comment>
+<doc-comment text="I was messing with various i18n frameworks and tools in combination with Astro, and i must say that Paraglide was the smoothest experience. I have migrated my website from i18next and it was a breeze. SSG and SSR worked out of the box (which was the first one for me), and overall DX is great. Thanks for your work!" author="Dally H" icon="mdi:discord" data-source="https://discord.com/channels/897438559458430986/1096039983116202034/1220796380772307004"></doc-comment>
 <doc-comment text="The lib is great guys!" author="ktarmyshov" icon="mdi:github"></doc-comment>
 <doc-comment text="Thank you for that huge work you have done and still doing!" author="ZerdoX-x" icon="mdi:github"></doc-comment>
-<doc-comment text="[...] the switch between the sdk-js and paraglide has been pretty great! " author="albbus" icon="mdi:discord"></doc-comment>
 <doc-comment text="Thanks for all the great work @Samuel Stroschein" author="Willem" icon="mdi:discord"></doc-comment>
 </doc-comments>
 
