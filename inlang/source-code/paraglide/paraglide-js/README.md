@@ -179,12 +179,12 @@ If you _really_ want to do it anway, you can lazily import the language-specific
 
 ```ts
 const lazyGerman = await import("./paraglide/messages/de.js")
+lazyGerman.hello() // Hallo Welt
 ```
 
 ## Usage with a Bundler
 
-We provide bundler plugins to make it easier to use Paraglide with a bundler. If you
-are using one we recommed using the corresponding plugin.
+If you are using a bundler you should use the corresponding plugin. The plugin will keep your message-functions up-to-date by compiling whenever your messages change and before build.
 
 <doc-links>
 	<doc-link title="Vite Plugin" icon="tabler:brand-vite" href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-vite" description="Go to Github"></doc-link>
@@ -192,11 +192,9 @@ are using one we recommed using the corresponding plugin.
     <doc-link title="Webpack Plugin" icon="mdi:webpack" href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-webpack" description="Go to Github"></doc-link>
 </doc-links>
 
-These plugins compile your messages when you build your project or whenever your messages change during dev.
-
 # Playground
 
-You can find many examples for how to use paraglide on codesandbox, or in [our GitHub repository](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide).
+Find examples for how to use paraglide on codesandbox or in [our GitHub repository](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide).
 
 <doc-links>
     <doc-link title="NextJS + Paraglide JS" icon="lucide:codesandbox" href="https://stackblitz.com/~/LorisSigrist/paraglide-next-app-router-example" description="Play around with NextJS and Paraglide JS"></doc-link>
@@ -206,9 +204,13 @@ You can find many examples for how to use paraglide on codesandbox, or in [our G
 
 # Architecture
 
-ParaglideJS leverages a compiler to emit vanilla JavaScript functions.
+ParaglideJS leverages a compiler to generate vanilla JavaScript functions from your messages. We call these "message functions".
 
-The emitted functions are referred to as "message functions". By emitting message functions ParaglideJS eliminates a whole class of edge cases while also being simpler, faster, and more reliable than other i18n libraries. The compiled runtime contains less than 50 LOC (lines of code) and is less than 300 bytes minified & gzipped.
+Message Functions are fully typed using JSDoc. They are exported individually from the `messages.js` file making them tree-shakable. They aren't reactive, they just return a string.
+
+This avoids many edge cases associated with reactivity, lazy-loading and namespacing that other i18n libraries have to work around.
+
+In addition to the message functions, ParaglideJS also emits a runtime. The runtime is used to set the language tag. It contains less than 50 LOC (lines of code) and is less than 300 bytes minified & gzipped.
 
 ![paraglide JS architecture](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/architecture.svg)
 
