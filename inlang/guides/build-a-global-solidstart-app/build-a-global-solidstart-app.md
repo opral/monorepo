@@ -203,4 +203,4 @@ If you want to navigate to a different route in a specific language, you can use
 
 
 ## Feedback
-The Solid Adapter for Paraglide is still very young. If you have any feedback, please reach out to us on [Discord](https://discord.gg/gdMPPWy57R), or open an issue on [GitHub](https://www.github.com/opral/monorepo/issues).
+The Solid Adapter for Paraglide is still very young. If you have any feedback, please reach out to us on [Discord](https://discord.gg/CNPfhWpcAa), or open an issue on [GitHub](https://www.github.com/opral/monorepo/issues).
