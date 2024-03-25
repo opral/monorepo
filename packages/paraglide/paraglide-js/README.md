@@ -27,7 +27,7 @@ Treeshaking gives us superpowers. With it, each page of your app only loads the 
 
 ### 1. Initialize paraglide-js
 
-Initialize paraglide-js whith:
+Initialize ParaglideJS whith:
 
 ```bash
 npx @inlang/paraglide-js@latest init
@@ -55,8 +55,6 @@ Adapters are framework-integrations for Paraglide. If you are using a framework,
 # Usage
 
 Running your `build` script will generate a `src/paraglide` folder. This folder contains all the code that you need to use paraglide-js.
-
-> Tip: If you are using a bundler, you can set up an alias to `./src/paraglide` to make the imports shorter.
 
 ## Adding Messages
 
@@ -96,7 +94,7 @@ const season = {
 const msg = season["spring"]() // Hello spring!
 ```
 
-### (optional) Using the [Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) IDE Extension
+### Using the [Sherlock IDE Extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) (optional)
 
 [Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) integrates with paraglide to give you the optimal dev-experience.
 
@@ -104,8 +102,7 @@ const msg = season["spring"]() // Hello spring!
 
 ## Adding Languages
 
-You can declare which languages you support in `./project.inlang/settings.json` in the `languageTags` array.
-
+You can declare which languages you support in `./project.inlang/settings.json`.
 ```json
 // project.inlang/settings.json
 {
@@ -173,7 +170,7 @@ import * as m from "./paraglide/messages.js"
 const msg = m.hello({ name: "Samuel" }, { languageTag: "de" }) // Hallo Samuel!
 ```
 
-## Lazy-Loading
+## Lazy-Loading
 
 Paraglide consciously discourages lazy-loading translations since it seriously hurts
 your web-vitals. Learn more about why lazy-loading is bad & what to do instead in [this blog post](https://inlang.com/g/mqlyfa7l/guide-lorissigrist-dontlazyload).
