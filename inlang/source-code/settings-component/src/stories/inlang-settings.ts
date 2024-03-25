@@ -38,8 +38,6 @@ export default class InlangSettings extends LitElement {
 		css`
 			h3 {
 				margin: 0;
-				padding-bottom: 24px;
-				border-bottom: 1px solid var(--sl-panel-border-color);
 			}
 			.container {
 				position: relative;
@@ -50,7 +48,7 @@ export default class InlangSettings extends LitElement {
 			.module-container {
 				display: flex;
 				flex-direction: column;
-				gap: 24px;
+				gap: 16px;
 			}
 			.hover-bar-container {
 				width: 100%;
@@ -185,7 +183,9 @@ export default class InlangSettings extends LitElement {
 			${Object.entries(this._projectSettingProperties).map(([key, value]) => {
 				return value.schema?.properties && this._newSettings
 					? html`<div class="module-container">
-							<h3>${(value.meta && (value.meta?.displayName as { en: string }).en) || key}</h3>
+							${value.meta &&
+							(value.meta?.displayName as { en: string }).en &&
+							html`<h3>${value.meta && (value.meta?.displayName as { en: string }).en}</h3>`}
 							${Object.entries(value.schema.properties).map(([property, schema]) => {
 								if (property === "$schema" || property === "modules" || property === "experimental")
 									return undefined
