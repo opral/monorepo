@@ -2,6 +2,16 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
+			"name": "debug paraglide example",
+			"program": "${workspaceFolder}/inlang/source-code/paraglide/paraglide-js/bin/run.js",
+			"request": "launch",
+			"skipFiles": [],
+			"args": ["compile", "--project", "./project.inlang"],
+			"cwd": "${workspaceFolder}/inlang/source-code/paraglide/paraglide-js/example",
+			"type": "node",
+			"console": "integratedTerminal"
+		},
+		{
 			"name": "debug current vitest",
 			"type": "node",
 			"request": "launch",

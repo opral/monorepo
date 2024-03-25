@@ -13,7 +13,6 @@ import type { InlangModule } from "@inlang/module"
 import {
 	LoadProjectInvalidArgument,
 	ProjectSettingsFileJSONSyntaxError,
-	ProjectSettingsFileNotFoundError,
 	ProjectSettingsInvalidError,
 } from "./errors.js"
 import { normalizePath } from "@lix-js/fs"
@@ -307,7 +306,9 @@ describe("initialization", () => {
 				_import,
 			})
 
-			expect(project.errors()![0]).toBeInstanceOf(ProjectSettingsFileNotFoundError)
+			const errors = project.errors()
+			// @ts-ignore
+			expect(errors[0].code).toBe("ENOENT")
 		})
 
 		it("should return an error if settings file is not a valid JSON", async () => {
