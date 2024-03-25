@@ -49,7 +49,7 @@ export type HandleOptions = {
 
 export const createHandle = <T extends string>(
 	i18n: I18nConfig<T>,
-	options: HandleOptions
+	options: HandleOptions,
 ): Handle => {
 	const langPlaceholder = options.langPlaceholder ?? "%paraglide.lang%"
 	const dirPlaceholder = options.textDirectionPlaceholder ?? "%paraglide.textDirection%"
@@ -83,7 +83,7 @@ export const createHandle = <T extends string>(
 							`Please replace the \`lang\` attribute with the correct placeholder:"\n\n` +
 							` - <html ${SVELTEKIT_DEFAULT_LANG_ATTRIBUTE}>\n` +
 							` + <html lang="${langPlaceholder}" dir="${dirPlaceholder}">` +
-							`\n\nThis message will not be shown in production.`
+							`\n\nThis message will not be shown in production.`,
 					)
 				}
 

@@ -15,7 +15,7 @@ export function shouldApply(content: string, TRANSLATIONS: TranslationDefinition
 	for (const [element_name, attribute_translations] of Object.entries(TRANSLATIONS)) {
 		const includesElement = content.includes(element_name)
 		const includesAttribute = attribute_translations.some((tr) =>
-			content.includes(tr.attribute_name)
+			content.includes(tr.attribute_name),
 		)
 
 		if ((includesSpread || includesAttribute) && (includesElement || includesSvelteElement)) {

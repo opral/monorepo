@@ -253,7 +253,7 @@ describe("initialization", () => {
 	it("should reuse projectId on existing projectid", async () => {
 		const repo = await mockRepo({ fromSnapshot: ciTestRepoSnapshot })
 
-		repo.nodeishFs.writeFile("/project.inlang/project_id", "testId")
+		await repo.nodeishFs.writeFile("/project.inlang/project_id", "testId")
 
 		const result = await tryCatch(() =>
 			loadProject({

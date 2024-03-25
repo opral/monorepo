@@ -17,7 +17,7 @@ Examples of great lix apps have an "edit > review > automate" workflow:
 - CAD software (Fusion 360, Autodesk)
 - data science analyzation (Jupyter Notebooks)
 
-If you are interested, check out the [design principles](./design-principles.md).
+If you are interested, check out the [design principles](./documentation/design-principles.md).
 
 ## Community & Support
 

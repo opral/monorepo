@@ -1,5 +1,29 @@
 # @inlang/paraglide-js-adapter-rollup
 
+## 1.0.33
+
+### Patch Changes
+
+- @inlang/paraglide-js-adapter-unplugin@1.4.16
+
+## 1.0.32
+
+### Patch Changes
+
+- @inlang/paraglide-js-adapter-unplugin@1.4.15
+
+## 1.0.31
+
+### Patch Changes
+
+- @inlang/paraglide-js-adapter-unplugin@1.4.14
+
+## 1.0.30
+
+### Patch Changes
+
+- @inlang/paraglide-js-adapter-unplugin@1.4.13
+
 ## 1.0.29
 
 ### Patch Changes

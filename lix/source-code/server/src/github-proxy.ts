@@ -4,7 +4,7 @@ import { decryptAccessToken } from "./auth/implementation.js"
 import { privateEnv } from "@inlang/env-variables"
 
 const PATH = "/github-proxy/"
-const allowedAuthUrls = privateEnv.PUBLIC_ALLOWED_AUTH_URLS.split(",")
+const allowedAuthUrls = privateEnv.PUBLIC_ALLOWED_AUTH_URLS?.split(",")
 
 /**
  * Routes for the GitHub service.

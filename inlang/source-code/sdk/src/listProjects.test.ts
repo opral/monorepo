@@ -62,7 +62,10 @@ describe("listProjects", () => {
 		const ciTestRepo: Snapshot = JSON.parse(
 			readFileSync("./mocks/ci-test-repo-no-shallow.json", { encoding: "utf-8" })
 		)
-		const repo = await mockRepo({ fromSnapshot: ciTestRepo })
+		const repo = await mockRepo({
+			fromSnapshot: ciTestRepo,
+			repoOptions: { experimentalFeatures: { lixCommit: true, lazyClone: false } },
+		})
 		repo.checkout({ branch: "test-symlink" })
 
 		const link = await repo.nodeishFs.readlink("test-symlink-not-existing-target")
