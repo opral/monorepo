@@ -29,5 +29,5 @@ export type PathTranslations<T extends string = string> = {
 
 export type Message<T extends string> = (
 	params: Record<string, never>,
-	options: { languageTag: T }
+	options: { languageTag: T },
 ) => string

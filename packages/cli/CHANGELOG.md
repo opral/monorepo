@@ -1,5 +1,29 @@
 # @inlang/cli
 
+## 2.13.3
+
+### Patch Changes
+
+- Updated dependencies [d1b361e]
+  - @lix-js/client@1.1.0
+  - @inlang/sdk@0.28.2
+
+## 2.13.2
+
+### Patch Changes
+
+- Updated dependencies [03fa6f2]
+  - @lix-js/client@1.0.0
+  - @lix-js/fs@1.0.0
+  - @inlang/sdk@0.28.1
+
+## 2.13.1
+
+### Patch Changes
+
+- Updated dependencies [1e43ae4]
+  - @inlang/sdk@0.28.0
+
 ## 2.13.0
 
 ### Minor Changes

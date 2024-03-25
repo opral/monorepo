@@ -60,53 +60,76 @@ async function loadMessages(args: {
 	settings: ProjectSettings
 }): Promise<Message[]> {
 	const messages: Message[] = []
-	for (const languageTag of resolveOrderOfLanguageTags(
+
+	const languageTags = resolveOrderOfLanguageTags(
 		args.settings.languageTags,
 		args.settings.sourceLanguageTag
-	)) {
-		if (typeof args.pluginSettings.pathPattern !== "string") {
-			for (const [prefix, path] of Object.entries(args.pluginSettings.pathPattern)) {
-				const messagesFromFile = await getFileToParse(
-					path,
-					languageTag,
-					args.settings.sourceLanguageTag,
-					args.nodeishFs,
-					typeof args.pluginSettings.sourceLanguageFilePath === "object" &&
-						languageTag === args.settings.sourceLanguageTag
-						? args.pluginSettings.sourceLanguageFilePath[prefix]
-						: undefined
-				)
-				for (const [key, value] of Object.entries(messagesFromFile)) {
-					if (Object.keys(value).length !== 0) {
-						const prefixedKey = prefix + ":" + replaceAll(key, "u002E", ".")
-						addVariantToMessages(messages, prefixedKey, languageTag, value, args.pluginSettings)
-					}
-				}
-			}
-		} else {
-			const messagesFromFile = await getFileToParse(
-				args.pluginSettings.pathPattern,
-				languageTag,
-				args.settings.sourceLanguageTag,
-				args.nodeishFs,
-				typeof args.pluginSettings.sourceLanguageFilePath === "string" &&
-					languageTag === args.settings.sourceLanguageTag
-					? args.pluginSettings.sourceLanguageFilePath
-					: undefined
-			)
-			for (const [key, value] of Object.entries(messagesFromFile)) {
-				if (Object.keys(value).length !== 0) {
-					addVariantToMessages(
-						messages,
-						replaceAll(key, "u002E", "."),
-						languageTag,
-						value,
-						args.pluginSettings
-					)
-				}
-			}
-		}
+	)
+
+	// split languageTags into batches, based on experiements < 20 is slow for too many iterations and > 50 is slow for too many parallel file handlings so it seems like a good default.
+	const batchSize = 30
+	const languageTagBatches: LanguageTag[][] = []
+	for (let i = 0; i < languageTags.length; i += batchSize) {
+		languageTagBatches.push(languageTags.slice(i, i + batchSize))
 	}
+
+	for (const languageTagBatch of languageTagBatches) {
+		await Promise.all(
+			languageTagBatch.flatMap((languageTag) => {
+				if (typeof args.pluginSettings.pathPattern !== "string") {
+					return Object.entries(args.pluginSettings.pathPattern).map(([prefix, path]) => {
+						return getFileToParse(
+							path,
+							languageTag,
+							args.settings.sourceLanguageTag,
+							args.nodeishFs,
+							typeof args.pluginSettings.sourceLanguageFilePath === "object" &&
+								languageTag === args.settings.sourceLanguageTag
+								? args.pluginSettings.sourceLanguageFilePath[prefix]
+								: undefined
+						).then((messagesFromFile) => {
+							for (const [key, value] of Object.entries(messagesFromFile)) {
+								if (Object.keys(value).length !== 0) {
+									const prefixedKey = prefix + ":" + replaceAll(key, "u002E", ".")
+									addVariantToMessages(
+										messages,
+										prefixedKey,
+										languageTag,
+										value,
+										args.pluginSettings
+									)
+								}
+							}
+						})
+					})
+				} else {
+					return getFileToParse(
+						args.pluginSettings.pathPattern,
+						languageTag,
+						args.settings.sourceLanguageTag,
+						args.nodeishFs,
+						typeof args.pluginSettings.sourceLanguageFilePath === "string" &&
+							languageTag === args.settings.sourceLanguageTag
+							? args.pluginSettings.sourceLanguageFilePath
+							: undefined
+					).then((messagesFromFile) => {
+						for (const [key, value] of Object.entries(messagesFromFile)) {
+							if (Object.keys(value).length !== 0) {
+								addVariantToMessages(
+									messages,
+									replaceAll(key, "u002E", "."),
+									languageTag,
+									value,
+									args.pluginSettings
+								)
+							}
+						}
+					})
+				}
+			})
+		)
+	}
+
 	return messages
 }
 
