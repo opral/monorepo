@@ -26,6 +26,7 @@
 		"ecosystem compatible",
 		"astro",
 		"nextjs",
+		"remix",
 		"svelte",
 		"guides-general"
 	],
