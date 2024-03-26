@@ -15,7 +15,7 @@ export type TreeEntry = {
     /**
      * - the type of object
      */
-    type: "blob" | "tree" | "commit";
+    type: "blob" | "commit" | "tree";
 };
 /**
  * - The object returned has the following schema:
@@ -211,7 +211,7 @@ export type WrappedObject = {
 };
 export type RawObject = {
     oid: string;
-    type: "blob" | "tree" | "commit" | "tag";
+    type: "blob" | "tag" | "commit" | "tree";
     format: "content";
     object: Uint8Array;
     source?: string;
@@ -409,7 +409,7 @@ export type TagObject = {
     /**
      * the type of the object being tagged
      */
-    type: "blob" | "tree" | "commit" | "tag";
+    type: "blob" | "tag" | "commit" | "tree";
     /**
      * the tag name
      */
@@ -480,7 +480,7 @@ export type Stat = {
  * The `WalkerEntry` is an interface that abstracts computing many common tree / blob stats.
  */
 export type WalkerEntry = {
-    type: () => Promise<"blob" | "tree" | "commit" | "special">;
+    type: () => Promise<"blob" | "commit" | "tree" | "special">;
     mode: () => Promise<number>;
     oid: () => Promise<string>;
     content: () => Promise<void | Uint8Array>;
@@ -3659,7 +3659,7 @@ export function writeObject({ fs: _fs, dir, gitdir, type, object, format, oid, e
     dir?: string;
     gitdir?: string;
     object: string | Uint8Array | TreeEntry[] | CommitObject | TagObject;
-    type?: "blob" | "tree" | "commit" | "tag";
+    type?: "blob" | "tag" | "commit" | "tree";
     format?: "parsed" | "deflated" | "content" | "wrapped";
     oid?: string;
     encoding?: string;
@@ -3774,11 +3774,11 @@ declare class AlreadyExistsError extends BaseError {
      * @param {string} where
      * @param {boolean} canForce
      */
-    constructor(noun: "tag" | "remote" | "note" | "branch", where: string, canForce?: boolean);
+    constructor(noun: "note" | "remote" | "tag" | "branch", where: string, canForce?: boolean);
     code: "AlreadyExistsError";
     name: "AlreadyExistsError";
     data: {
-        noun: "tag" | "remote" | "note" | "branch";
+        noun: "note" | "remote" | "tag" | "branch";
         where: string;
         canForce: boolean;
     };
@@ -3792,11 +3792,11 @@ declare class AmbiguousError extends BaseError {
      * @param {string} short
      * @param {string[]} matches
      */
-    constructor(nouns: "refs" | "oids", short: string, matches: string[]);
+    constructor(nouns: "oids" | "refs", short: string, matches: string[]);
     code: "AmbiguousError";
     name: "AmbiguousError";
     data: {
-        nouns: "refs" | "oids";
+        nouns: "oids" | "refs";
         short: string;
         matches: string[];
     };
@@ -4083,13 +4083,13 @@ declare class ObjectTypeError extends BaseError {
      * @param {'blob'|'commit'|'tag'|'tree'} expected
      * @param {string} [filepath]
      */
-    constructor(oid: string, actual: "blob" | "tree" | "commit" | "tag", expected: "blob" | "tree" | "commit" | "tag", filepath?: string | undefined);
+    constructor(oid: string, actual: "blob" | "tag" | "commit" | "tree", expected: "blob" | "tag" | "commit" | "tree", filepath?: string | undefined);
     code: "ObjectTypeError";
     name: "ObjectTypeError";
     data: {
         oid: string;
-        actual: "blob" | "tree" | "commit" | "tag";
-        expected: "blob" | "tree" | "commit" | "tag";
+        actual: "blob" | "tag" | "commit" | "tree";
+        expected: "blob" | "tag" | "commit" | "tree";
         filepath: string | undefined;
     };
 }
