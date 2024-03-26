@@ -54,7 +54,7 @@ export async function runLoadTest(
 	await generateMessageFile(1)
 
 	debug("opening repo and loading project")
-	const repo = await openRepository(__dirname, { nodeishFs: fs })
+	const repo = await openRepository(`file://${__dirname}`, { nodeishFs: fs })
 	const project = await loadProject({ repo, projectPath })
 
 	debug("subscribing to project.errors")
