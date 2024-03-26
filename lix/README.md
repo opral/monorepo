@@ -25,6 +25,6 @@ If you are interested, check out the [design principles](./documentation/design-
 
 **[💬 Discussions](https://github.com/opral/monorepo/discussions)** - Get help, ask questions, request features, and discuss inlang.
 
-**[🗣️ Discord](https://discord.gg/gdMPPWy57R)** - Hanging out with the community.
+**[🗣️ Discord](https://discord.gg/CNPfhWpcAa)** - Hanging out with the community.
 
 
