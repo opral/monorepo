@@ -1,5 +1,11 @@
 # @inlang/plugin-json
 
+## 5.1.21
+
+### Patch Changes
+
+- 923a4bb: fix discord link
+
 ## 5.1.20
 
 ### Patch Changes

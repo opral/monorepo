@@ -1,5 +1,12 @@
 # @inlang/paraglide-js-adapter-astro
 
+## 0.1.18
+
+### Patch Changes
+
+- 95cf84e: fix: `languageTag()` not being set properly on windows. This bug was caused by duplicate module instantiation.
+  - @inlang/paraglide-js-adapter-vite@1.2.28
+
 ## 0.1.17
 
 ### Patch Changes
