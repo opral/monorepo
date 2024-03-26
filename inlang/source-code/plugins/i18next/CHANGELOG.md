@@ -1,5 +1,36 @@
 # @inlang/plugin-i18next
 
+## 4.13.20
+
+### Patch Changes
+
+- 923a4bb: fix discord link
+
+## 4.13.19
+
+### Patch Changes
+
+- @inlang/sdk@0.28.2
+
+## 4.13.18
+
+### Patch Changes
+
+- @inlang/sdk@0.28.1
+
+## 4.13.17
+
+### Patch Changes
+
+- Updated dependencies [1e43ae4]
+  - @inlang/sdk@0.28.0
+
+## 4.13.16
+
+### Patch Changes
+
+- f3b0489: fix typo
+
 ## 4.13.15
 
 ### Patch Changes

@@ -1,10 +1,15 @@
 {
 	"name": "@inlang/sdk",
 	"type": "module",
-	"version": "0.27.0",
+	"version": "0.28.2",
 	"license": "Apache-2.0",
 	"publishConfig": {
 		"access": "public"
+	},
+	"homepage": "https://inlang.com/documentation/sdk",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/opral/inlang-message-sdk"
 	},
 	"exports": {
 		".": "./dist/index.js",

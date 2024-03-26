@@ -268,8 +268,19 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 							nodeishFs: createNodeishMemoryFs(),
 							auth: browserAuth,
 							branch,
+							// debugTime: true,
+							// for testing purposes. if commented out, will use whitelist to enable for certain repos
+							// experimentalFeatures: {
+							// 	lazyClone: true,
+							// 	lixCommit: true,
+							// }
 						}
 					)
+
+					if (window && !import.meta.env.PROD) {
+						// @ts-expect-error
+						window.repo = newRepo
+					}
 
 					if (newRepo.errors().length > 0) {
 						setLixErrors(newRepo.errors())
@@ -278,8 +289,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 						setLixErrors([])
 					}
 
-					// @ts-expect-error
-					newRepo.nodeishFs.watch = () => undefined
+					// @ts-ignore -- causes reactivity bugs because the sdk uses watch and triggers updates on changes caused by itself
+					newRepo.nodeishFs.watch = () => {}
+
 					setLastPullTime(new Date())
 					// Invalidate the project while we switch branches
 					setProject(undefined)
@@ -294,7 +306,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	)
 
-	repo()?.errors.subscribe((errors) => {
+	repo()?.errors.subscribe((errors: any) => {
 		setLixErrors(errors)
 	})
 
@@ -332,14 +344,14 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 			if (
 				searchParams().project &&
-				projects.some((project) => project.projectPath === searchParams().project)
+				projects.some((project: any) => project.projectPath === searchParams().project)
 			) {
 				setActiveProject(searchParams().project)
 			} else if (projects.length === 1) {
 				setActiveProject(projects[0]?.projectPath)
 			} else if (
 				projects.length > 1 &&
-				projects.some((project) => project.projectPath === "/project.inlang")
+				projects.some((project: any) => project.projectPath === "/project.inlang")
 			) {
 				setActiveProject("/project.inlang")
 			} else {
@@ -614,8 +626,7 @@ export async function pushChanges(args: {
 		return { error: new PushException("User not logged in") }
 	}
 
-	// stage all changes
-	const status = await args.repo.statusMatrix({
+	const filesWithUncommittedChanges = await args.repo.statusList({
 		filter: (f: any) =>
 			f.endsWith("project_id") ||
 			f.endsWith(".json") ||
@@ -626,18 +637,7 @@ export async function pushChanges(args: {
 			f.endsWith(".ts"),
 	})
 
-	const filesWithUncommittedChanges = status.filter(
-		(row: any) =>
-			// files with unstaged and uncommitted changes
-			(row[2] === 2 && row[3] === 1) ||
-			// added files
-			(row[2] === 2 && row[3] === 0)
-	)
-
 	if (filesWithUncommittedChanges.length > 0) {
-		// add all changes
-		await args.repo.add({ filepath: filesWithUncommittedChanges.map((file) => file[0]) })
-
 		// commit changes
 		await args.repo.commit({
 			author: {
@@ -645,6 +645,7 @@ export async function pushChanges(args: {
 				email: args.user.email,
 			},
 			message: "Fink 🐦: update translations",
+			include: filesWithUncommittedChanges.map((f) => f[0]),
 		})
 	}
 

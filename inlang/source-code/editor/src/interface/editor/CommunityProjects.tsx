@@ -18,7 +18,14 @@ export function CommunityProjects() {
 							Projects that you recently opened with the editor.
 						</p>
 					</div>
-					<Link href={"/c/guides"} class="w-full md:w-auto">
+					<Link
+						href={
+							import.meta.env.PROD
+								? `https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor#lets-get-started`
+								: `http://localhost:3000/m/tdozzpar/app-inlang-finkLocalizationEditor#lets-get-started`
+						}
+						class="w-full md:w-auto"
+					>
 						<sl-button prop:variant="default" prop:size="medium" class="w-full pt-4 md:pt-0">
 							Get started
 							<MaterialSymbolsArrowOutward

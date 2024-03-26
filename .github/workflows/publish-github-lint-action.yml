@@ -55,17 +55,6 @@ jobs:
           echo $LINT_ACTION_PACKAGE_VERSION
         shell: bash
 
-      - name: Pushes README.md to action repo
-        uses: dmnemec/copy_file_to_another_repo_action@main
-        env:
-          API_TOKEN_GITHUB: ${{ secrets.INLANG_BOT_TOKEN }}
-        with:
-          source_file: 'inlang/source-code/github-lint-action/README.md'
-          destination_repo: 'opral/ninja-i18n-action'
-          user_email: 'hello@inlang.com'
-          user_name: 'inlang-bot'
-          commit_message: '[v${{ env.LINT_ACTION_PACKAGE_VERSION }}]: update README.md'
-
       - name: Pushes action.yml file to action repo
         uses: dmnemec/copy_file_to_another_repo_action@main
         env:

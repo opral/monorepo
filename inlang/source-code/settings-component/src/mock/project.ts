@@ -1,7 +1,12 @@
-export const mockProject = {
+import type { InlangProject } from "@inlang/sdk"
+
+export let mockSettings: ReturnType<InlangProject["settings"]> = {
 	$schema: "https://inlang.com/schema/project-settings",
 	sourceLanguageTag: "en",
 	languageTags: ["en", "es", "fr", "pt-br", "ru", "zh-cn"],
+	messageLintRuleLevels: {
+		"messageLintRule.inlang.identicalPattern": "error",
+	},
 	modules: [
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@4/dist/index.js",
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js",
@@ -31,4 +36,162 @@ export const mockProject = {
 			user: "./frontend/public/locales/{languageTag}/user.json",
 		},
 	},
+}
+
+export const mockProject = {
+	id: "mock-project",
+	installed: {
+		plugins: () => [
+			{
+				id: "plugin.inlang.i18next",
+				displayName: {
+					en: "i18next",
+				},
+				description: {
+					en: "i18next",
+				},
+				module: "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@4/dist/index.js",
+				settingsSchema: {
+					type: "object",
+					properties: {
+						pathPattern: {
+							anyOf: [
+								{
+									pattern: "^(\\./|\\../|/)[^*]*\\{languageTag\\}[^*]*\\.json",
+									description: "The pathPattern must contain `{languageTag}` and end with `.json`.",
+									examples: [
+										"./{languageTag}/file.json",
+										"../folder/{languageTag}/file.json",
+										"./{languageTag}.json",
+									],
+									type: "string",
+								},
+								{
+									type: "object",
+									patternProperties: {
+										"^[^.]+$": {
+											pattern: "^(\\./|\\../|/)[^*]*\\{languageTag\\}[^*]*\\.json",
+											description:
+												"The pathPattern must contain `{languageTag}` and end with `.json`.",
+											examples: [
+												"./{languageTag}/file.json",
+												"../folder/{languageTag}/file.json",
+												"./{languageTag}.json",
+											],
+											type: "string",
+										},
+									},
+								},
+							],
+						},
+						variableReferencePattern: {
+							type: "array",
+							items: {
+								type: "string",
+							},
+						},
+						sourceLanguageFilePath: {
+							anyOf: [
+								{
+									pattern: "^(\\./|\\../|/)[^*]*\\{languageTag\\}[^*]*\\.json",
+									description: "The pathPattern must contain `{languageTag}` and end with `.json`.",
+									examples: [
+										"./{languageTag}/file.json",
+										"../folder/{languageTag}/file.json",
+										"./{languageTag}.json",
+									],
+									type: "string",
+								},
+								{
+									type: "object",
+									patternProperties: {
+										"^[^.]+$": {
+											pattern: "^(\\./|\\../|/)[^*]*\\{languageTag\\}[^*]*\\.json",
+											description:
+												"The pathPattern must contain `{languageTag}` and end with `.json`.",
+											examples: [
+												"./{languageTag}/file.json",
+												"../folder/{languageTag}/file.json",
+												"./{languageTag}.json",
+											],
+											type: "string",
+										},
+									},
+								},
+							],
+						},
+						ignore: {
+							type: "array",
+							items: {
+								type: "string",
+							},
+						},
+					},
+					required: ["pathPattern"],
+				},
+			},
+		],
+		messageLintRules: () => [
+			{
+				id: "messageLintRule.inlang.emptyPattern",
+				displayName: {
+					en: "Empty Pattern",
+				},
+				description: {
+					en: "Empty Pattern",
+				},
+				module:
+					"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js",
+			},
+			{
+				id: "messageLintRule.inlang.identicalPattern",
+				displayName: {
+					en: "Identical Pattern",
+				},
+				description: {
+					en: "Identical Pattern",
+				},
+				module:
+					"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-identical-pattern@latest/dist/index.js",
+				settingsSchema: {
+					type: "object",
+					properties: {
+						ignore: {
+							type: "array",
+							items: {
+								pattern: "[^*]",
+								description: "All items in the array need quotaion marks at the end and beginning",
+								type: "string",
+							},
+						},
+					},
+				},
+			},
+			{
+				id: "messageLintRule.inlang.missingTranslation",
+				displayName: {
+					en: "Missing Translation",
+				},
+				description: {
+					en: "Missing Translation",
+				},
+				module:
+					"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js",
+			},
+			{
+				id: "messageLintRule.inlang.messageWithoutSource",
+				displayName: {
+					en: "Message Without Source",
+				},
+				description: {
+					en: "Message Without Source",
+				},
+				module:
+					"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-without-source@latest/dist/index.js",
+			},
+		],
+	},
+	errors: () => [],
+	settings: () => mockSettings,
+	setSettings: (settings: any) => (mockSettings = settings),
 }

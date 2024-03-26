@@ -44,7 +44,7 @@ export const initCommand = new Command()
 		// We are risking that there is no git repo. As long as we only use FS features and no Git features
 		// from the SDK we should be fine.
 		// Basic operations like `loadProject` should always work without a repo since it's used in CI.
-		const repo = await openRepository(repoRoot ?? process.cwd(), {
+		const repo = await openRepository(repoRoot ?? "file://" + process.cwd(), {
 			nodeishFs: nodeFsPromises,
 		})
 
@@ -146,11 +146,17 @@ export const maybeAddVsCodeExtension = async (args: { projectPath: string }, ctx
 		project.setSettings(settings)
 	}
 
-	if (!(await Sherlock.isAdopted(ctx.repo.nodeishFs))) {
-		await Sherlock.add(ctx.repo.nodeishFs)
+	try {
+		if (!(await Sherlock.isAdopted({ fs: ctx.repo.nodeishFs }))) {
+			await Sherlock.add({ fs: ctx.repo.nodeishFs })
 
-		ctx.logger.success(
-			"Added the inlang Visual Studio Code extension (Sherlock) to the workspace recommendations."
+			ctx.logger.success(
+				"Added the inlang Visual Studio Code extension (Sherlock) to the workspace recommendations."
+			)
+		}
+	} catch (error) {
+		ctx.logger.error(
+			"Failed to add the inlang Visual Studio Code extension (Sherlock). Please open an issue"
 		)
 	}
 }
