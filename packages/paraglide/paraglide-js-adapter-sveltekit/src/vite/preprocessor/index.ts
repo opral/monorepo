@@ -93,7 +93,7 @@ export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
 function modifyScriptTag(
 	ast: Ast,
 	code: MagicString,
-	additions: { before?: Iterable<string>; after?: Iterable<string> },
+	additions: { before?: Iterable<string>; after?: Iterable<string> }
 ) {
 	const before = additions.before ? [...additions.before] : []
 	const after = additions.after ? [...additions.after] : []

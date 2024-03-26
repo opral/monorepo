@@ -1,6 +1,6 @@
 {
 	"id": "guide.kevinccbsg.useParaglideJsWithRemix",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/use-paraglide-with-remix/remix-logo.png",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/external-projects/remix-paraglidejs/assets/remix.svg",
 	"displayName": {
 		"en": "Use ParaglideJS with Remix"
 	},
