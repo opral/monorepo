@@ -3,19 +3,23 @@
  */
 
 import { parseOrigin } from "@inlang/telemetry"
-import { findRoot, listRemotes } from "isomorphic-git"
+import { findRepoRoot, _listRemotes } from "@lix-js/client"
 import * as vscode from "vscode"
-import * as fs from "node:fs"
+import * as fs from "node:fs/promises"
 
 export async function getGitOrigin() {
 	try {
 		const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath
-		const remotes = await listRemotes({
+
+		// FIXME _listRemotes is deprecated. openRepo and then call repo.listRemotes instead!
+		const remotes = await _listRemotes({
 			fs,
-			dir: await findRoot({
-				fs,
-				filepath: workspaceRoot ?? process.cwd(),
-			}),
+			dir: (
+				await findRepoRoot({
+					nodeishFs: fs,
+					path: workspaceRoot ?? process.cwd(),
+				})
+			)?.replace("file://", ""),
 		})
 		const gitOrigin = parseOrigin({ remotes })
 		return gitOrigin

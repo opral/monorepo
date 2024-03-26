@@ -1,5 +1,45 @@
 # inlang-vs-code-extension
 
+## 1.36.3
+
+### Patch Changes
+
+- 923a4bb: fix discord link
+
+## 1.36.2
+
+### Patch Changes
+
+- Updated dependencies [d1b361e]
+  - @lix-js/client@1.1.0
+  - @inlang/sdk@0.28.2
+  - @inlang/rpc@0.3.3
+  - @inlang/telemetry@0.3.17
+
+## 1.36.1
+
+### Patch Changes
+
+- Updated dependencies [03fa6f2]
+  - @lix-js/client@1.0.0
+  - @lix-js/fs@1.0.0
+  - @inlang/sdk@0.28.1
+  - @inlang/rpc@0.3.2
+  - @inlang/telemetry@0.3.16
+
+## 1.36.0
+
+### Minor Changes
+
+- 8721ce8: add machine translate
+
+### Patch Changes
+
+- Updated dependencies [1e43ae4]
+  - @inlang/sdk@0.28.0
+  - @inlang/rpc@0.3.1
+  - @inlang/telemetry@0.3.15
+
 ## 1.35.0
 
 ### Minor Changes

@@ -51,7 +51,8 @@ export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
 				content.match(/<a\b[^>]*>.*?<\/a\s*>|<a\b[^>]*\/>/g)
 			) {
 				console.warn(
-					"[paraglide] `<a>` tags in the same component as `<ParaglideJS>` won't be translated.\nConsider moving it into another component."
+					"[paraglide] `<a>` tags in the same file as `<ParaglideJS>` won't be translated.\nConsider moving it into another component.\n" +
+						filename
 				)
 			}
 
@@ -92,7 +93,7 @@ export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
 function modifyScriptTag(
 	ast: Ast,
 	code: MagicString,
-	additions: { before?: Iterable<string>; after?: Iterable<string> }
+	additions: { before?: Iterable<string>; after?: Iterable<string> },
 ) {
 	const before = additions.before ? [...additions.before] : []
 	const after = additions.after ? [...additions.after] : []

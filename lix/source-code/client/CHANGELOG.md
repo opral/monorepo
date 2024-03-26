@@ -1,5 +1,22 @@
 # @lix-js/client
 
+## 1.1.0
+
+### Minor Changes
+
+- d1b361e: fix missing vendored folder form npm release
+
+## 1.0.0
+
+### Major Changes
+
+- 03fa6f2: New lazy checkout features and breaking api improvements
+
+### Patch Changes
+
+- Updated dependencies [03fa6f2]
+  - @lix-js/fs@1.0.0
+
 ## 0.9.0
 
 ### Minor Changes

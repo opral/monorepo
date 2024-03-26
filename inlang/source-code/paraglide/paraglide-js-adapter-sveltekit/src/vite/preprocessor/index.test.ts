@@ -271,7 +271,7 @@ describe.concurrent("preprocessor", () => {
 
 		const html = await renderComponent(code)
 		expect(html).toBe(
-			`<a href="/rewritten/de" hreflang="de">de</a><a href="/rewritten/en" hreflang="en">en</a>`
+			`<a href="/rewritten/de" hreflang="de">de</a><a href="/rewritten/en" hreflang="en">en</a>`,
 		)
 	})
 

@@ -1,33 +1,33 @@
-# Paraglide Adapter Next
+![Dead Simple i18n. Typesafe, Small Footprint, SEO-Friendly and IDE Integration.](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-next/assets/header.png)
 
-Everything you need to internationalize your NextJS app with [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
+<doc-features>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="Internationalized Routing" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-next/assets/i18n-routing.png"></doc-feature>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="Tiny Bundle Size" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-next/assets/bundle-size.png"></doc-feature>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="No route Param needed" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-next/assets/no-param.png"></doc-feature>
+</doc-features>
 
-**Features**
+## Getting Started
 
-- 🪂 Automatically set & manage the language for Paraglide
-- 💨 A breeze to set up - No need to change your `app/` folder
-- 📦 Built for RSC
-- 🪄 Supports both App & Pages router
-- 🤖 SEO friendly out of the box
-
-## Installation & Setup
-
-First, let's set up [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) itself.
+Install [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) and the [Paraglide NextJS Adapter](https://inlang.com/m/osslbuzt/library-inlang-paraglideJsAdapterNextJs).
 
 ```bash
 npx @inlang/paraglide-js@latest init
+npm install @inlang/paraglide-js-adapter-next
 ```
 
-This will have created a `./project.inlang` folder containing a `settings.json` file. There, configure which languages you want to support. 
+### Step 0. Set up Paraglide
+
+In the generated `./project.inlang/settings.json`, configure which languages you want to support.
 
 ```json
 // project.inlang/settings.json
 {
-	"languageTags": ["en", "de"]
+	"languageTags": ["en", "de"],
+	"sourceLanguageTag": "en"
 }
 ```
 
-Add a `./messages` folder with a json file for language. Then add some messages
+Create a `./messages` folder with a json file per language and add some messages
 
 ```json
 // messages/en.json
@@ -36,52 +36,52 @@ Add a `./messages` folder with a json file for language. Then add some messages
 }
 ```
 
-You can edit messages manually or use the [Sherlock IDE Extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension).
+### Step 1. Add the Next-Plugin
 
-Then, install the Paraglide NextJS Adapter:
-
-```bash
-npm install @inlang/paraglide-js-adapter-next
-```
-
-Add the plugin in `next.config.mjs`.
+Add the Next-Plugin in `next.config.mjs`.
 
 ```ts
-// make sure to import from /plugin!
-import { paraglide } from "@inlang/paraglide-js-adapter-next/plugin";
+// make sure to import from /plugin
+import { paraglide } from "@inlang/paraglide-js-adapter-next/plugin"
 
-const config = paraglide({
-    paraglide: {
+export default paraglide({
+	paraglide: {
 		//recommended setup
-        project: "./project.inlang", //the path to the Inlang project
-        outdir: "./src/paraglide", // where you want the generated files to go
-    },
+		project: "./project.inlang", //the path to the Inlang project
+		outdir: "./src/paraglide", // where you want the generated files to go
+	},
+
+	// ... rest of your next config
 })
-export default config;
 ```
 
-## App Router Setup
+### Step 2. Initialise the Adapter
 
-### 1. Initialise the Adapter
-
-Create this file in `src/lib/i18n.ts`:
+Create an `src/lib/i18n.ts` file
 
 ```ts
 // src/lib/i18n.ts
 import { createI18n } from "@inlang/paraglide-js-adapter-next"
-import type { AvailableLanguageTag } from "@/paraglide/runtime.js"
+import type { AvailableLanguageTag } from "@/paraglide/runtime.js" //generated file
 
 // All available functions exported. Just use the ones you need
-export const { middleware, Link, useRouter, usePathname, redirect, permanentRedirect, localizePathname } =
-	createI18n<AvailableLanguageTag>()
+export const {
+	middleware,
+	Link,
+	useRouter,
+	usePathname,
+	redirect,
+	permanentRedirect,
+	localizePathname,
+} = createI18n<AvailableLanguageTag>()
 ```
 
 <doc-accordion
-	heading="Can I put this somewhere else?"
+	heading="Can I put this file somewhere else?"
 	text="Sure, you can put it anywhere. Just be aware that you will be importing from this file a lot, so make sure it's somewhere convenient">
 </doc-accordion>
 
-### 2. Add the Middleware
+### Step 3. Add the Middleware
 
 In `src/middleware.ts`:
 
@@ -89,7 +89,7 @@ In `src/middleware.ts`:
 export { middleware } from "@/lib/i18n.js"
 ```
 
-### 3. Add the Language Provider
+### Step 4. Add the Language Provider
 
 In `src/app/layout.tsx` add the `<LanguageProvider>` component & set the lang attribute on your html element:
 
@@ -109,10 +109,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 ```
 
-### 4. Use the localised navigation APIs
+### Step 5. Use the localized navigation APIs
 
-In order to get localised `<Link>`s you need to replace the ones from `next/link` with the ones from `@/lib/i18n.js`.
-You can easily find & replace the imports.
+In order to get localised `<Link>`s you need to replace the ones from `next/link` with the ones from `@/lib/i18n.js`. Just find & replace the imports.
 
 ```diff
 - import Link from "next/link"
@@ -126,11 +125,11 @@ The same goes for the other navigation APIs.
 + import { usePathname, useRouter, redirect, permanentRedirect} from "@/lib/i18n"
 ```
 
-### 5. Have Fun!
+### Done!
 
-You should now have working localised routing set up! Try visiting `/de` or whatever language you have configured.
+You have set up localised routing! Try visiting `/de` or whatever language you have configured.
 
-Using messages works by importing them from `@/paraglide/messages.js`.
+Use messages by importing them from `@/paraglide/messages.js`. By convention we do a wildcard import as `m`.
 
 ```tsx
 import * as m from "@/paraglide/messages.js"
@@ -145,13 +144,11 @@ export function Home() {
 }
 ```
 
-Messages are fully typesafe. If you are using the [Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) you will get previews of the text-content right in your code!
+Only messages used in client components are sent to the client. Messages in Server Components don't impact bundle size.
 
-Only the messages that are used in client components will be sent to the client. Messages used in Server Components don't increase your bundle size.
+## Usage
 
-### Usage
-
-#### Translated Metadata
+### Translated Metadata
 
 To return different metadata for each language, we will need to use `generateMetadata`.
 
@@ -166,7 +163,7 @@ export async function generateMetadata() {
 
 > If you were to use `export const metadata` your metadata would always end up in the source language.
 
-#### Linking to Pages in other Languages
+### Linking to Pages in other Languages
 
 If you want a Link to be in a specific language you can use the `locale` prop.
 
@@ -181,13 +178,13 @@ If you are using `router.push` to navigate you can pass `locale` as an option.
 ```ts
 function Component() {
 	const router = useRouter()
-	return <button onClick={()=>router.push("/about", { locale: "de" })}>
-        Go to German About page
-    </button>
+	return (
+		<button onClick={() => router.push("/about", { locale: "de" })}>Go to German About page</button>
+	)
 }
 ```
 
-#### Excluding certain routes from i18n
+### Excluding certain routes from i18n
 
 You can exclude certain routes from i18n using the `exclude` option on `createI18n`. You can either pass a string or a regex.
 
@@ -208,7 +205,7 @@ Excluded routes won't be prefixed with the language tag & the middleware will no
 
 #### Changing the default language
 
-By default the default language is the `sourceLanguageTag` you defined in `project.inlang/settings.json`. You can change it with the `defaultLanguage` option.
+By default the default language is the `sourceLanguageTag` defined in `project.inlang/settings.json`. You can change it with the `defaultLanguage` option.
 
 ```ts
 export const { ... } =
@@ -217,20 +214,20 @@ export const { ... } =
 	})
 ```
 
-
 #### How language-detection works
 
 The adapter follows these steps to determine the language.
 
 - First, the adapter will try to determine the language based on the URL.
-- If that fails, it will look for a `NEXT_LOCALE` cookie. 
-- If that isn't available either, it will try to negotiate the language based on the `Accept-Language` header. 
+- If that fails, it will look for a `NEXT_LOCALE` cookie.
+- If that isn't available either, it will try to negotiate the language based on the `Accept-Language` header.
 - Finally it will fallback to the default language.
 
-If a language has been determined once, it will set the `NEXT_LOCALE` cookie so that future ambiguities don't result in random language switches. 
+If a language has been determined once, it will set the `NEXT_LOCALE` cookie so that future ambiguities don't result in random language switches.
 
 #### Translated Pathnames
-You can use different pathnames for each language with the `pathname` option. 
+
+You can use different pathnames for each language with the `pathname` option.
 
 ```ts
 export const { ... } =
@@ -244,7 +241,7 @@ export const { ... } =
 	})
 ```
 
-Even better: You can use a message as the pathname. This way you can change the pathnames without changing the code.
+You can also use a message as a pathname
 
 ```json
 // messages/en.json
@@ -283,9 +280,11 @@ This does not include the `basePath`.
 
 Search engines like Google expect you to tell them about translated versions of your pages. The adapter does this by default by adding the `Link` Header to requests.
 
+You **don't** need to add the translated versions of your site to your sitemap, although it doesn't hurt if you do.
 
 ### Right-to-Left Support
-Define a map of all languages to their text-direction. Then use that.
+
+Define a map of all languages to their text-direction & index into it.
 
 ```tsx
 import { languageTag, type AvailableLanguageTag } from "@/paraglide/runtime.js"
@@ -304,7 +303,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 	//...
 ```
 
-> Using the `Intl.Locale` API for text-direction isn't recommended, as it is still poorly supported
+> We discourage using the `Intl.Locale` API for text-direction as that's still poorly supported
 
 ## (legacy) Setup With the Pages Router
 
@@ -323,7 +322,7 @@ module.exports = {
 
 > If you are using ESM for your NextJS config, you can also import `availableLanguageTags` and `sourceLanguageTag` from `./src/paraglide/runtime.js` and use them instead of hardcoding the locales.
 
-NextJS will now automatically prefix all routes with the locale. For example, the route `/about` will become `/en/about` for the English locale and `/de/about` for the German locale. Only the default locale won't be prefixed. 
+NextJS will now automatically prefix all routes with the locale. For example, the route `/about` will become `/en/about` for the English locale and `/de/about` for the German locale. Only the default locale won't be prefixed.
 
 Finally, wrap your `_app.js` file with the `ParaglideJS` component.
 
@@ -367,8 +366,10 @@ export default function Document() {
 ## Known Limitations
 
 There are some known limitation with this adapter:
+
 - `output: static` isn't supported yet.
 - Evaluating messages in the module-scope in server components always renders the source language.
+- Server actions that aren't inside a tsx file will always read the default language, unless `setLanguageTag(()=>headers().get("x-language-tag"))` is called at the top of the file.
 
 ## Roadmap to 1.0
 
@@ -379,6 +380,7 @@ There are some known limitation with this adapter:
 ## Examples
 
 You can find example projects on our Github, or try them on StackBlitz:
+
 - [App Router Example Repository](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next/examples/app)
 - [App Router Example on StackBlitz](https://stackblitz.com/~/LorisSigrist/paraglide-next-app-router-example)
 - [Pages Router Example](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next/examples/pages)
