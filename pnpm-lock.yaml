@@ -62,7 +62,7 @@ importers:
         version: link:../sdk
       '@lix-js/client':
         specifier: workspace:*
-        version: link:../../../lix/source-code/client
+        version: link:../../../lix/packages/client
       '@resvg/resvg-js':
         specifier: 2.6.0
         version: 2.6.0
@@ -126,10 +126,10 @@ importers:
         version: link:../sdk
       '@lix-js/client':
         specifier: workspace:*
-        version: link:../../../lix/source-code/client
+        version: link:../../../lix/packages/client
       '@lix-js/fs':
         specifier: workspace:*
-        version: link:../../../lix/source-code/fs
+        version: link:../../../lix/packages/fs
       esbuild-wasm:
         specifier: ^0.19.2
         version: 0.19.12
@@ -239,7 +239,7 @@ importers:
         version: link:../../sdk
       '@lix-js/fs':
         specifier: workspace:*
-        version: link:../../../../lix/source-code/fs
+        version: link:../../../../lix/packages/fs
       '@sinclair/typebox':
         specifier: ^0.31.17
         version: 0.31.28
@@ -304,13 +304,13 @@ importers:
     dependencies:
       '@lix-js/client':
         specifier: workspace:*
-        version: link:../../../lix/source-code/client
+        version: link:../../../lix/packages/client
       '@lix-js/fs':
         specifier: workspace:*
-        version: link:../../../lix/source-code/fs
+        version: link:../../../lix/packages/fs
       '@lix-js/server':
         specifier: workspace:*
-        version: link:../../../lix/source-code/server
+        version: link:../../../lix/packages/server
       '@sentry/browser':
         specifier: ^7.27.0
         version: 7.107.0
@@ -603,10 +603,10 @@ importers:
         version: link:../sdk
       '@lix-js/client':
         specifier: workspace:*
-        version: link:../../../lix/source-code/client
+        version: link:../../../lix/packages/client
       '@lix-js/fs':
         specifier: workspace:*
-        version: link:../../../lix/source-code/fs
+        version: link:../../../lix/packages/fs
     devDependencies:
       '@types/node':
         specifier: ^20.11.16
@@ -643,10 +643,10 @@ importers:
         version: link:../telemetry
       '@lix-js/client':
         specifier: workspace:*
-        version: link:../../../lix/source-code/client
+        version: link:../../../lix/packages/client
       '@lix-js/fs':
         specifier: workspace:*
-        version: link:../../../lix/source-code/fs
+        version: link:../../../lix/packages/fs
       '@vitest/coverage-v8':
         specifier: 0.34.6
         version: 0.34.6(vitest@0.34.6)
@@ -811,13 +811,13 @@ importers:
         version: link:../sdk
       '@lix-js/client':
         specifier: workspace:*
-        version: link:../../../lix/source-code/client
+        version: link:../../../lix/packages/client
       '@lix-js/fs':
         specifier: workspace:*
-        version: link:../../../lix/source-code/fs
+        version: link:../../../lix/packages/fs
       '@lix-js/server':
         specifier: workspace:*
-        version: link:../../../lix/source-code/server
+        version: link:../../../lix/packages/server
       '@types/express':
         specifier: ^4.17.21
         version: 4.17.21
@@ -1169,10 +1169,10 @@ importers:
         version: link:../../telemetry
       '@lix-js/client':
         specifier: workspace:*
-        version: link:../../../../lix/source-code/client
+        version: link:../../../../lix/packages/client
       '@lix-js/fs':
         specifier: workspace:*
-        version: link:../../../../lix/source-code/fs
+        version: link:../../../../lix/packages/fs
       '@rollup/plugin-terser':
         specifier: 0.4.3
         version: 0.4.3(rollup@3.29.1)
@@ -1260,7 +1260,7 @@ importers:
     dependencies:
       '@inlang/paraglide-js':
         specifier: '*'
-        version: link:../paraglide-js
+        version: 1.3.5
       next:
         specifier: ^13.0.0 || ^14.0.0
         version: 14.0.4(@babel/core@7.24.1)(react-dom@18.2.0)(react@18.2.0)
@@ -1562,7 +1562,7 @@ importers:
         version: link:../../sdk
       '@lix-js/client':
         specifier: workspace:*
-        version: link:../../../../lix/source-code/client
+        version: link:../../../../lix/packages/client
       unplugin:
         specifier: 1.5.1
         version: 1.5.1
@@ -1693,7 +1693,7 @@ importers:
         version: link:../../versioned-interfaces/plugin
       '@lix-js/fs':
         specifier: workspace:*
-        version: link:../../../../lix/source-code/fs
+        version: link:../../../../lix/packages/fs
       '@size-limit/preset-small-lib':
         specifier: ^8.2.4
         version: 8.2.6(size-limit@8.2.6)
@@ -1766,7 +1766,7 @@ importers:
         version: link:../../cli
       '@lix-js/fs':
         specifier: workspace:*
-        version: link:../../../../lix/source-code/fs
+        version: link:../../../../lix/packages/fs
       '@types/flat':
         specifier: ^5.0.2
         version: 5.0.5
@@ -1806,7 +1806,7 @@ importers:
         version: link:../../cli
       '@lix-js/fs':
         specifier: workspace:*
-        version: link:../../../../lix/source-code/fs
+        version: link:../../../../lix/packages/fs
       '@size-limit/preset-small-lib':
         specifier: ^8.2.4
         version: 8.2.6(size-limit@8.2.6)
@@ -1849,7 +1849,7 @@ importers:
         version: link:../../versioned-interfaces/plugin
       '@lix-js/fs':
         specifier: workspace:*
-        version: link:../../../../lix/source-code/fs
+        version: link:../../../../lix/packages/fs
       '@size-limit/preset-small-lib':
         specifier: ^8.2.4
         version: 8.2.6(size-limit@8.2.6)
@@ -1895,7 +1895,7 @@ importers:
         version: link:../../cli
       '@lix-js/fs':
         specifier: workspace:*
-        version: link:../../../../lix/source-code/fs
+        version: link:../../../../lix/packages/fs
       '@size-limit/preset-small-lib':
         specifier: ^8.2.4
         version: 8.2.6(size-limit@8.2.6)
@@ -2019,10 +2019,10 @@ importers:
         version: link:../versioned-interfaces/translatable
       '@lix-js/client':
         specifier: workspace:*
-        version: link:../../../lix/source-code/client
+        version: link:../../../lix/packages/client
       '@lix-js/fs':
         specifier: workspace:*
-        version: link:../../../lix/source-code/fs
+        version: link:../../../lix/packages/fs
       '@sinclair/typebox':
         specifier: ^0.31.17
         version: 0.31.28
@@ -2083,7 +2083,7 @@ importers:
         version: link:..
       '@lix-js/client':
         specifier: workspace:*
-        version: link:../../../../lix/source-code/client
+        version: link:../../../../lix/packages/client
       debug:
         specifier: ^4.3.4
         version: 4.3.4(supports-color@8.1.1)
@@ -2287,7 +2287,7 @@ importers:
         version: link:../../sdk
       '@lix-js/client':
         specifier: workspace:*
-        version: link:../../../../lix/source-code/client
+        version: link:../../../../lix/packages/client
       typescript:
         specifier: ^5.2.2
         version: 5.3.3
@@ -2409,7 +2409,7 @@ importers:
         version: link:../translatable
       '@lix-js/fs':
         specifier: workspace:*
-        version: link:../../../../lix/source-code/fs
+        version: link:../../../../lix/packages/fs
       '@sinclair/typebox':
         specifier: ^0.31.17
         version: 0.31.28
@@ -2466,13 +2466,13 @@ importers:
     dependencies:
       '@lix-js/client':
         specifier: workspace:*
-        version: link:../../../lix/source-code/client
+        version: link:../../../lix/packages/client
       '@lix-js/fs':
         specifier: workspace:*
-        version: link:../../../lix/source-code/fs
+        version: link:../../../lix/packages/fs
       '@lix-js/server':
         specifier: workspace:*
-        version: link:../../../lix/source-code/server
+        version: link:../../../lix/packages/server
       '@sentry/browser':
         specifier: ^7.27.0
         version: 7.107.0
@@ -2688,7 +2688,7 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)
 
-  lix/source-code/client:
+  lix/packages/client:
     dependencies:
       '@lix-js/fs':
         specifier: workspace:*
@@ -2737,7 +2737,7 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)
 
-  lix/source-code/fs:
+  lix/packages/fs:
     devDependencies:
       '@types/node':
         specifier: 20.8.10
@@ -2755,7 +2755,7 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)
 
-  lix/source-code/server:
+  lix/packages/server:
     dependencies:
       '@inlang/env-variables':
         specifier: workspace:*
@@ -5971,6 +5971,27 @@ packages:
     requiresBuild: true
     dev: false
     optional: true
+
+  /@inlang/detect-json-formatting@1.0.0:
+    resolution: {integrity: sha512-o0jeI8U4TgNlsPwI0y92jld8/18Loh2KEgHCYCJ42rCOdxFrA8R60cydlEd2/6jkdHFn5DxKj8rOyiKv3z9uOw==}
+    dependencies:
+      guess-json-indent: 2.0.0
+    dev: false
+
+  /@inlang/paraglide-js@1.3.5:
+    resolution: {integrity: sha512-winGxqvQhOoPURtqoC3KpeNs/m7cqdONKkYonEA42XGllnMieWql93Zb7SeXH+nqQ01PQbYQxR1usc13OmMXCw==}
+    hasBin: true
+    dependencies:
+      '@inlang/detect-json-formatting': 1.0.0
+      commander: 11.1.0
+      consola: 3.2.3
+      dedent: 1.5.1
+      json5: 2.2.3
+      posthog-node: 3.1.3
+    transitivePeerDependencies:
+      - babel-plugin-macros
+      - debug
+    dev: false
 
   /@isaacs/cliui@8.0.2:
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -13271,6 +13292,7 @@ packages:
 
   /chownr@1.1.4:
     resolution: {integrity: sha512-jJ0bqzaylmJtVnNgzTeSOs8DPavpbYgEr/b0YL8/2GO3xJEhInFmhKMUnEJQjZumK7KXGFhUy89PrsJWlakBVg==}
+    requiresBuild: true
     dev: true
 
   /chownr@2.0.0:
