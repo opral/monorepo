@@ -138,6 +138,14 @@ export default function Page(props: {
 					sections: ["apps", "guides", "plugins", "libraries"],
 					coverCard: <NextjsHeader />,
 				}
+			case "remix":
+				return {
+					title: "Remix - i18n Tooling",
+					description: "Recommend internationalization tooling for your Remix app.",
+					icon: "https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/external-projects/remix-paraglidejs/assets/remix.svg",
+					sections: ["apps", "guides", "plugins", "libraries"],
+					coverCard: <GenericHeader />,
+				}
 			case "solid": {
 				return {
 					title: m.marketplace_header_solid_title(),
@@ -168,6 +176,8 @@ export default function Page(props: {
 				}
 		}
 	}
+
+	console.log(props.items)
 
 	return (
 		<>
