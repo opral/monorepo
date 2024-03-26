@@ -16,7 +16,7 @@ export function translatePath(
 		availableLanguageTags: readonly string[]
 		defaultLanguageTag: string
 		prefixDefaultLanguage: "always" | "never"
-	},
+	}
 ): string {
 	const {
 		path: targetedPathSource,
