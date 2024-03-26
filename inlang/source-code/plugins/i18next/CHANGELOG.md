@@ -1,5 +1,11 @@
 # @inlang/plugin-i18next
 
+## 4.13.20
+
+### Patch Changes
+
+- 923a4bb: fix discord link
+
 ## 4.13.19
 
 ### Patch Changes
