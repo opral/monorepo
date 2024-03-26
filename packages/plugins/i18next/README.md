@@ -7,7 +7,7 @@ This plugin works with [i18next](https://inlang.com/m/kl95463j) to read and writ
 > We recommend using the install button, but if you want to do it manually:
 
 - Add this to the modules in your `project.inlang/settings.json`
-- Change the `sourceLanuge` if needed 
+- Change the `sourceLanguageTag` if needed 
 - Include existing languagetags in the `languageTags` array
 
 ```json
@@ -130,4 +130,4 @@ Read the [jsDelivr documentation](https://www.jsdelivr.com/?docs=gh) on importin
 
 ---
 
-_Is something unclear or do you have questions? Reach out to us in our [Discord channel](https://discord.gg/9vUg7Rr) or open a [Discussion](https://github.com/opral/monorepo/discussions) or an [Issue](https://github.com/opral/monorepo/issues) on [Github](https://github.com/opral/monorepo)._
+_Is something unclear or do you have questions? Reach out to us in our [Discord channel](https://discord.gg/CNPfhWpcAa) or open a [Discussion](https://github.com/opral/monorepo/discussions) or an [Issue](https://github.com/opral/monorepo/issues) on [Github](https://github.com/opral/monorepo)._

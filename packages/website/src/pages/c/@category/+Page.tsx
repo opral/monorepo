@@ -19,6 +19,7 @@ import GenericHeader from "#src/interface/marketplace/categoryHeaders/cards/gene
 import AppHeader from "#src/interface/marketplace/categoryHeaders/categoryHeros/appHeader.jsx"
 import AstroHeader from "#src/interface/marketplace/categoryHeaders/cards/astro.jsx"
 import Stacks from "#src/interface/marketplace/categoryHeaders/toast/stacks.jsx"
+import RemixHeader from "#src/interface/marketplace/categoryHeaders/cards/remix.jsx"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
@@ -31,7 +32,18 @@ const selectedCategory = () => {
 	return currentPageContext.urlParsed.pathname.replace("/", "")
 }
 
-type PossibleSectionsType = Array<"apps" | "libraries" | "plugins" | "guides" | "all">
+type PossibleSectionsType = Array<
+	| "apps"
+	| "libraries"
+	| "plugins"
+	| "guides"
+	| "guides-developer"
+	| "guides-translator"
+	| "guides-change-control"
+	| "guides-general"
+	| "guides-i18n"
+	| "all"
+>
 
 export default function Page(props: {
 	minimal?: boolean
@@ -94,7 +106,13 @@ export default function Page(props: {
 					description: m.marketplace_header_guides_description(),
 					buttonLink: "/documentation/publish-guide",
 					buttonText: m.marketplace_header_guides_button_text(),
-					sections: ["all"],
+					sections: [
+						"guides-developer",
+						"guides-translator",
+						"guides-change-control",
+						"guides-general",
+						"guides-i18n",
+					],
 				}
 			case "lix":
 				return {
@@ -120,6 +138,14 @@ export default function Page(props: {
 					icon: "https://assets.vercel.com/image/upload/v1662130559/nextjs/Icon_light_background.png",
 					sections: ["apps", "guides", "plugins", "libraries"],
 					coverCard: <NextjsHeader />,
+				}
+			case "remix":
+				return {
+					title: "Remix - i18n Tooling",
+					description: "Recommend internationalization tooling for your Remix app.",
+					icon: "https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/external-projects/remix-paraglidejs/assets/remix.svg",
+					sections: ["apps", "guides", "plugins", "libraries"],
+					coverCard: <RemixHeader />,
 				}
 			case "solid": {
 				return {
@@ -298,7 +324,7 @@ export default function Page(props: {
 									}
 								>
 									<h2 class="pb-4 border-t-surface-200 text-xl font-medium tracking-tight text-surface-900">
-										i18n Workflow Apps
+										inlang Apps
 									</h2>
 									<Gallery
 										items={props.items.filter(
@@ -327,6 +353,106 @@ export default function Page(props: {
 											(item: MarketplaceManifest & { uniqueID: string }) =>
 												item.id.split(".")[0] === "plugin"
 										)}
+									/>
+								</Show>
+								{/* Developer */}
+								<Show
+									when={
+										props.items &&
+										getCategoryContent()?.sections?.includes("guides-developer") &&
+										props.items.some((item: MarketplaceManifest & { uniqueID: string }) =>
+											item.keywords.includes("guides-developer")
+										)
+									}
+								>
+									<h2 class="pb-4 border-t-surface-200 text-xl font-medium tracking-tight text-surface-900">
+										Guides for developers
+									</h2>
+									<Gallery
+										items={props.items.filter((item: MarketplaceManifest & { uniqueID: string }) =>
+											item.keywords.includes("guides-developer")
+										)}
+										hideBuildYourOwn
+									/>
+								</Show>
+								{/* Change control */}
+								<Show
+									when={
+										props.items &&
+										getCategoryContent()?.sections?.includes("guides-change-control") &&
+										props.items.some((item: MarketplaceManifest & { uniqueID: string }) =>
+											item.keywords.includes("guides-change-control")
+										)
+									}
+								>
+									<h2 class="pb-4 border-t-surface-200 text-xl font-medium tracking-tight text-surface-900">
+										Guides about change control
+									</h2>
+									<Gallery
+										items={props.items.filter((item: MarketplaceManifest & { uniqueID: string }) =>
+											item.keywords.includes("guides-change-control")
+										)}
+										hideBuildYourOwn
+									/>
+								</Show>
+								{/* General */}
+								<Show
+									when={
+										props.items &&
+										getCategoryContent()?.sections?.includes("guides-general") &&
+										props.items.some((item: MarketplaceManifest & { uniqueID: string }) =>
+											item.keywords.includes("guides-general")
+										)
+									}
+								>
+									<h2 class="pb-4 border-t-surface-200 text-xl font-medium tracking-tight text-surface-900">
+										Guides about inlang
+									</h2>
+									<Gallery
+										items={props.items.filter((item: MarketplaceManifest & { uniqueID: string }) =>
+											item.keywords.includes("guides-general")
+										)}
+										hideBuildYourOwn
+									/>
+								</Show>
+								{/* i18n */}
+								<Show
+									when={
+										props.items &&
+										getCategoryContent()?.sections?.includes("guides-i18n") &&
+										props.items.some((item: MarketplaceManifest & { uniqueID: string }) =>
+											item.keywords.includes("guides-i18n")
+										)
+									}
+								>
+									<h2 class="pb-4 border-t-surface-200 text-xl font-medium tracking-tight text-surface-900">
+										Guides about globalization
+									</h2>
+									<Gallery
+										items={props.items.filter((item: MarketplaceManifest & { uniqueID: string }) =>
+											item.keywords.includes("guides-i18n")
+										)}
+										hideBuildYourOwn
+									/>
+								</Show>
+								{/* Translator */}
+								<Show
+									when={
+										props.items &&
+										getCategoryContent()?.sections?.includes("guides-translator") &&
+										props.items.some((item: MarketplaceManifest & { uniqueID: string }) =>
+											item.keywords.includes("guides-translator")
+										)
+									}
+								>
+									<h2 class="pb-4 border-t-surface-200 text-xl font-medium tracking-tight text-surface-900">
+										Guides for translators
+									</h2>
+									<Gallery
+										items={props.items.filter((item: MarketplaceManifest & { uniqueID: string }) =>
+											item.keywords.includes("guides-translator")
+										)}
+										hideBuildYourOwn
 									/>
 								</Show>
 							</Show>

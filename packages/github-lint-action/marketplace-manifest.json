@@ -1,6 +1,6 @@
 {
 	"id": "app.inlang.ninjaI18nAction",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/assets/ninja-logo.png",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/github-lint-action/assets/ninja-logo.png",
 	"gallery": [],
 	"displayName": {
 		"en": "Ninja i18n - GitHub Lint Action"
@@ -9,7 +9,7 @@
 		"en": "This action checks for translation issues within your PRs."
 	},
 	"readme": {
-		"en": "./inlang/source-code/github-lint-action/README.md"
+		"en": "./inlang/source-code/github-lint-action/MARKETPLACE.md"
 	},
 	"keywords": [
 		"developer",
@@ -24,8 +24,10 @@
 		"i18n",
 		"inlang"
 	],
-	"pricing": "free",
+	"recommends": ["g/ssryldhd", "g/6ddyhpoi", "m/r7kp499g", "m/tdozzpar"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
-	"license": "Apache-2.0"
+	"website": "https://github.com/marketplace/actions/ninja-i18n",
+	"license": "Apache-2.0",
+	"pricing": "Free"
 }

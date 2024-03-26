@@ -154,7 +154,12 @@ export const ListHeader = () => {
 							}
 							prop:target="_blank"
 						>
-							<Show when={project()?.installed.messageLintRules().length === 0}>
+							<Show
+								when={
+									project()?.installed.messageLintRules().length === 0 ||
+									project()?.query.messages.includedMessageIds().length === 0
+								}
+							>
 								Install lint rules
 							</Show>
 							<Show when={project()?.installed.messageLintRules().length !== 0}>

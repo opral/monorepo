@@ -1,9 +1,6 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
 import { baseStyling } from "../../../styling/base.js"
-import "@shoelace-style/shoelace/dist/components/input/input.js"
-import "@shoelace-style/shoelace/dist/components/tag/tag.js"
-import "https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.14.0/cdn/components/icon/icon.js"
 
 @customElement("reference-pattern-input")
 export class ReferencePatternInput extends LitElement {

@@ -8,7 +8,7 @@ import {
 	sourceLanguageTag,
 } from "$paraglide/runtime.js"
 import { createLink } from "./Link"
-import { prefixStrategy } from "./routing/prefix"
+import { PrefixStrategy } from "./routing/prefixStrategy"
 
 describe.skipIf(() => process.env.NODE_ENV !== "development")("<Link>", () => {
 	beforeEach(() => {
@@ -18,15 +18,15 @@ describe.skipIf(() => process.env.NODE_ENV !== "development")("<Link>", () => {
 	afterEach(() => cleanup())
 
 	it("renders a link with the correct localised href", () => {
-		const Link = createLink(
-			languageTag,
-			prefixStrategy({
-				availableLanguageTags,
-				defaultLanguage: sourceLanguageTag,
-				pathnames: {},
-				exclude: () => false,
-			})
-		)
+		const config = {
+			availableLanguageTags,
+			defaultLanguage: sourceLanguageTag,
+			pathnames: {},
+			exclude: () => false,
+			prefix: "except-default",
+		} as const
+
+		const Link = createLink(languageTag, config, PrefixStrategy(config))
 
 		render(
 			<>
@@ -39,15 +39,16 @@ describe.skipIf(() => process.env.NODE_ENV !== "development")("<Link>", () => {
 	})
 
 	it("renders a link with the current language if no locale is provided", () => {
-		const Link = createLink(
-			() => languageTag(), //For some reason we can't pass languageTag as a reference directly
-			prefixStrategy({
-				availableLanguageTags,
-				defaultLanguage: sourceLanguageTag,
-				pathnames: {},
-				exclude: () => false,
-			})
-		)
+		const config = {
+			availableLanguageTags,
+			defaultLanguage: sourceLanguageTag,
+			pathnames: {},
+			exclude: () => false,
+			prefix: "except-default",
+		} as const
+
+		//For some reason we can't pass languageTag as a reference directly
+		const Link = createLink(() => languageTag(), config, PrefixStrategy(config))
 
 		setLanguageTag("de")
 		render(
@@ -63,15 +64,16 @@ describe.skipIf(() => process.env.NODE_ENV !== "development")("<Link>", () => {
 	})
 
 	it("renders a link with searchParams", () => {
-		const Link = createLink(
-			() => languageTag(), //For some reason we can't pass languageTag as a reference directly
-			prefixStrategy({
-				availableLanguageTags,
-				defaultLanguage: sourceLanguageTag,
-				pathnames: {},
-				exclude: () => false,
-			})
-		)
+		const config = {
+			availableLanguageTags,
+			defaultLanguage: sourceLanguageTag,
+			pathnames: {},
+			exclude: () => false,
+			prefix: "except-default",
+		} as const
+
+		//For some reason we can't pass languageTag as a reference directly
+		const Link = createLink(() => languageTag(), config, PrefixStrategy(config))
 
 		setLanguageTag("de")
 		render(
@@ -87,20 +89,21 @@ describe.skipIf(() => process.env.NODE_ENV !== "development")("<Link>", () => {
 	})
 
 	it("localises hrefs with path translations and searchParams", () => {
-		const Link = createLink(
-			() => languageTag(), //For some reason we can't pass languageTag as a reference directly
-			prefixStrategy({
-				availableLanguageTags,
-				defaultLanguage: sourceLanguageTag,
-				pathnames: {
-					"/about": {
-						de: "/ueber-uns",
-						en: "/about",
-					},
+		const config = {
+			availableLanguageTags,
+			defaultLanguage: sourceLanguageTag,
+			pathnames: {
+				"/about": {
+					de: "/ueber-uns",
+					en: "/about",
 				},
-				exclude: () => false,
-			})
-		)
+			},
+			exclude: () => false,
+			prefix: "except-default",
+		} as const
+
+		//For some reason we can't pass languageTag as a reference directly
+		const Link = createLink(() => languageTag(), config, PrefixStrategy(config))
 
 		setLanguageTag("de")
 		render(

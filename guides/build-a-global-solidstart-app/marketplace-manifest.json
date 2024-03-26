@@ -23,10 +23,12 @@
 		"solidstart",
 		"javascript",
 		"ide",
-		"guide"
+		"guide",
+		"guides-developer"
 	],
 	"recommends": ["g/3go4f04m", "g/00162hsd", "g/38fnf03n"],
 	"publisherName": "LorisSigrist",
 	"publisherIcon": "https://avatars.githubusercontent.com/u/43482866?v=4",
+	"publisherLink": "https://github.com/LorisSigrist",
 	"license": "Apache-2.0"
 }

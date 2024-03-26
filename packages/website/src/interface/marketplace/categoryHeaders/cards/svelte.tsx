@@ -34,7 +34,7 @@ const SvelteHeader = () => {
 							alt="ParaglideJS"
 						/>
 					</div>
-					<h3 class="font-medium text-lg px-8 pb-1 z-20">Paraglide JS - 18n library</h3>
+					<h3 class="font-medium text-lg px-8 pb-1 z-20">Paraglide JS - i18n library</h3>
 					<p class="text-surface-500 px-8 pb-6 text-sm pr-20 z-20">
 						A i18n library without async resources. Build for the svelte community.
 					</p>

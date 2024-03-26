@@ -3,29 +3,25 @@ import {
 	setLanguageTag,
 	sourceLanguageTag,
 } from "paraglide-js-adapter-astro:runtime"
-import type { MiddlewareHandler } from "astro"
+import { type MiddlewareHandler } from "astro"
 
-export const onRequest: MiddlewareHandler = ({ url, locals }, next) => {
-	const locale = getLangFromPath(url.pathname)
+export const onRequest: MiddlewareHandler = async ({ url, locals, currentLocale }, next) => {
+	const locale = currentLocale ?? getLangFromPath(url.pathname)
 	const dir = guessTextDirection(locale)
+
+	setLanguageTag(locale)
 
 	locals.paraglide = {
 		lang: locale,
 		dir,
 	}
 
-	setLanguageTag(locale)
-	return next()
+	return await next()
 }
 
 function getLangFromPath(path: string) {
 	const langOrPath = path.split("/").find(Boolean)
 	if (isAvailableLanguageTag(langOrPath)) return langOrPath
-
-	/*
-	const langFromPath = getLocaleByPath(langOrPath || "")
-	if (isAvailableLanguageTag(langFromPath)) return langFromPath
-	*/
 
 	return sourceLanguageTag
 }

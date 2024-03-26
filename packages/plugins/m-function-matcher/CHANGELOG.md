@@ -1,5 +1,31 @@
 # @inlang/plugin-m-function-matcher
 
+## 0.9.2
+
+### Patch Changes
+
+- @inlang/sdk@0.28.2
+
+## 0.9.1
+
+### Patch Changes
+
+- @inlang/sdk@0.28.1
+- @inlang/plugin@2.4.9
+
+## 0.9.0
+
+### Minor Changes
+
+- df3b735: add astro support
+
+## 0.8.4
+
+### Patch Changes
+
+- Updated dependencies [1e43ae4]
+  - @inlang/sdk@0.28.0
+
 ## 0.8.3
 
 ### Patch Changes

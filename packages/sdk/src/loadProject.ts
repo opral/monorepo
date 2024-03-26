@@ -281,6 +281,7 @@ export async function loadProject(args: {
 							"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
 						// default to warning, see https://github.com/opral/monorepo/issues/1254
 						level: settingsValue["messageLintRuleLevels"]?.[rule.id] ?? "warning",
+						settingsSchema: rule.settingsSchema,
 					} satisfies InstalledMessageLintRule)
 			) satisfies Array<InstalledMessageLintRule>
 		}
@@ -294,6 +295,7 @@ export async function loadProject(args: {
 				module:
 					resolvedModules()?.meta.find((m) => m.id.includes(plugin.id))?.module ??
 					"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
+				settingsSchema: plugin.settingsSchema,
 			})) satisfies Array<InstalledPlugin>
 		}
 
