@@ -34,9 +34,6 @@ export default async function onBeforeRender(pageContext: any) {
 		return item
 	})
 
-	console.log(items)
-	//rename the old libraries in item
-
 	// filter out every item with keyword.include(unlisted)
 	items = items.filter((item: any) => {
 		return !item.keywords.includes("unlisted")
