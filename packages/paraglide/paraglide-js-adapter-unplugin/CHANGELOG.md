@@ -1,5 +1,13 @@
 # @inlang/paraglide-js-adapter-unplugin
 
+## 1.4.17
+
+### Patch Changes
+
+- 7dce581: fix `openRepository` crash in non-git environments
+- Updated dependencies [7dce581]
+  - @inlang/paraglide-js@1.3.5
+
 ## 1.4.16
 
 ### Patch Changes
