@@ -23,6 +23,7 @@
 	"recommends": ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g"],
 	"publisherName": "BRIKEV",
 	"publisherIcon": "https://avatars.githubusercontent.com/u/59850028?v=4",
+	"publisherLink": "https://github.com/BRIKEV",
 	"website": "https://github.com/BRIKEV/remix-paraglidejs",
 	"license": "MIT License",
 	"pricing": "Free"

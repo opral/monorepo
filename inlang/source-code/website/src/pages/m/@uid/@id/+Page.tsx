@@ -358,7 +358,14 @@ export default function Page(props: PageProps) {
 											</Show>
 											<div>
 												<h3 class="text-surface-400 text-sm mb-2">Publisher</h3>
-												<div class="flex items-center gap-2">
+												<a
+													href={props.manifest.publisherLink}
+													target="_blanc"
+													class={[
+														"flex items-center gap-2",
+														props.manifest.publisherLink ? "hover:underline" : "",
+													].join(" ")}
+												>
 													<Show
 														when={props.manifest.publisherIcon}
 														fallback={
@@ -380,7 +387,7 @@ export default function Page(props: PageProps) {
 													<p class="m-0 text-surface-600 no-underline font-medium">
 														{props.manifest.publisherName}
 													</p>
-												</div>
+												</a>
 											</div>
 											<div>
 												<h3 class="text-surface-400 text-sm mb-1.5">License</h3>
