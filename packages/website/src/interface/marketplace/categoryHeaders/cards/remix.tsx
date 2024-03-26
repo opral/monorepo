@@ -46,7 +46,7 @@ const RemixHeader = () => {
 				</Link>
 				<div class="flex-1 h-[260px] flex flex-col gap-4 md:min-w-[380px]">
 					<Link
-						href="/g/wxcebbig/guide-lorissigrist-useParaglideJsWithNextjsAppRouter"
+						href="/g/pposhsfh"
 						class="w-full flex-1 bg-background rounded-xl border border-surface-300 flex flex-col relative group hover:border-surface-400 transition-all cursor-pointer"
 					>
 						<div class="pl-8 pb-2 -mt-[2px]">
@@ -71,7 +71,7 @@ const RemixHeader = () => {
 						</div>
 					</Link>
 					<Link
-						href="/m/osslbuzt/library-inlang-paraglideJsAdapterNextJs"
+						href="/m/fnhuwzrx"
 						class="w-full flex-1 bg-background rounded-xl border border-surface-300 flex flex-col relative group hover:border-surface-400 transition-all cursor-pointer"
 					>
 						<div class="flex-1 flex flex-col justify-end">
