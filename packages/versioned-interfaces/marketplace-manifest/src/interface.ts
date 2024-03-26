@@ -27,6 +27,7 @@ const MarketplaceManifestBase = Type.Object({
 	),
 	publisherName: Type.String(),
 	publisherIcon: Type.Optional(Type.String()),
+	publisherLink: Type.Optional(Type.String()),
 	readme: Translatable(
 		Type.TemplateLiteral("${string}.md", { description: "The path to the readme file." })
 	),

@@ -6,7 +6,7 @@ There are many ways users interact with inlang. This documentation gives you inf
 
 ### 1. Open repository
 
-Open a repository locally or with [lix](https://github.com/opral/monorepo/blob/main/lix/design-principles.md). Using lix enables you to use git-based features directly in the browser.
+Open a repository locally or with [lix](https://github.com/opral/monorepo/blob/main/lix/documentation/design-principles.md). Using lix enables you to use git-based features directly in the browser.
 
 ### 2. Open project
 
@@ -40,4 +40,4 @@ In your app's `marketplace-manifest.json` make sure to define the following info
 
 To make your app available in the inlang.com marketplace, see [Publish on marketplace](/documentation/publish-to-marketplace).
 
-Feel free to [join our Discord](https://discord.gg/gdMPPWy57R) if you have any questions or need assistance developing and publishing your app.
+Feel free to [join our Discord](https://discord.gg/CNPfhWpcAa) if you have any questions or need assistance developing and publishing your app.

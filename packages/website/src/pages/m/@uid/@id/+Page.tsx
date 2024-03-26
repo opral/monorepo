@@ -358,7 +358,14 @@ export default function Page(props: PageProps) {
 											</Show>
 											<div>
 												<h3 class="text-surface-400 text-sm mb-2">Publisher</h3>
-												<div class="flex items-center gap-2">
+												<a
+													href={props.manifest.publisherLink}
+													target="_blanc"
+													class={[
+														"flex items-center gap-2",
+														props.manifest.publisherLink ? "hover:underline" : "",
+													].join(" ")}
+												>
 													<Show
 														when={props.manifest.publisherIcon}
 														fallback={
@@ -380,7 +387,7 @@ export default function Page(props: PageProps) {
 													<p class="m-0 text-surface-600 no-underline font-medium">
 														{props.manifest.publisherName}
 													</p>
-												</div>
+												</a>
 											</div>
 											<div>
 												<h3 class="text-surface-400 text-sm mb-1.5">License</h3>
@@ -508,11 +515,14 @@ function NavbarCommon(props: {
 			.replaceAll("(", "")
 			.replaceAll(")", "")
 			.replaceAll("?", "")
+			.replaceAll("!", "")
 			.replaceAll(".", "")
 			.replaceAll("@", "")
 			.replaceAll(/([\uE000-\uF8FF]|\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDDFF])/g, "")
 			.replaceAll("✂", "")
 			.replaceAll(":", "")
+			.replaceAll("'", "")
+			.replaceAll("&", "")
 	}
 
 	const isSelected = (heading: string) => {
@@ -537,9 +547,10 @@ function NavbarCommon(props: {
 							: new Promise((resolve) => img.addEventListener("load", resolve))
 					)
 				)
-
-				//scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()), "smooth")
-				setHighlightedAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
+				setTimeout(() => {
+					scrollToAnchor(replaceChars(sectionTitle.toString().toLowerCase()), "smooth")
+					setHighlightedAnchor(replaceChars(sectionTitle.toString().toLowerCase()))
+				}, 100)
 			} else {
 				for (const heading of props.tableOfContents[sectionTitle]!) {
 					if (
@@ -554,9 +565,10 @@ function NavbarCommon(props: {
 									: new Promise((resolve) => img.addEventListener("load", resolve))
 							)
 						)
-
-						scrollToAnchor(replaceChars(heading.toString().toLowerCase()), "smooth")
-						setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
+						setTimeout(() => {
+							scrollToAnchor(replaceChars(heading.toString().toLowerCase()), "smooth")
+							setHighlightedAnchor(replaceChars(heading.toString().toLowerCase()))
+						}, 100)
 					}
 				}
 			}

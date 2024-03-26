@@ -15,7 +15,7 @@ Ensure that your i18n files are always up to date with the latest changes in you
 
 Please ensure you have set up an [inlang project](https://inlang.com//documentation/concept/project) with [lint rules](https://inlang.com/c/lint-rules) in your repository.
 
-Add the following workflow file to your repository in this path `.github/workflows/ninja-i18n.yml`
+Add the following workflow file to your repository in this path `.github/workflows/ninja_i18n.yml`
 
 ```yml
 name: Ninja i18n action
@@ -46,6 +46,18 @@ jobs:
 ```
 
 **Note:** The `opral/ninja-i18n-action` is tagged to always use the latest commit on `main`. This ensures that you always get the latest version of the action. Since the repository is only used for publishing the action, it is safe to use the `main` branch.
+
+### Test if it works
+
+Create a pull request with changes to your i18n files and see if the action runs and creates a comment with the issues report:
+
+1. Create a new `test-ninja` branch in your repository
+2. Open the `test-ninja` branch in [Fink localization editor](https://fink.inlang.com) and delete a translation for testing purposes
+3. Commit and push the change
+4. Create a pull request from the `test-ninja` branch to `main`
+5. Check if the action runs and creates a comment with the issues report
+
+[Click here to watch a video showing the above steps in GitHub](https://www.loom.com/share/c4d15fefb0854ca4b75a85cdb0d2c7e3)
 
 ### Environmental Variables:
 

@@ -6,6 +6,7 @@ import {
 	IconJavascript,
 	IconNextjs,
 	IconReact,
+	IconRemix,
 	IconSolid,
 	IconSvelte,
 	IconVue,
@@ -38,6 +39,12 @@ const stacks = [
 		param: "astro",
 		icon: <IconAstro class={logoStyling} />,
 		link: "/c/astro",
+	},
+	{
+		name: "Remix",
+		param: "remix",
+		icon: <IconRemix class={"w-[34px] h-[34px] " + logoStyling} />,
+		link: "/c/remix",
 	},
 	{
 		name: "React",

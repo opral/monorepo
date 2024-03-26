@@ -1,14 +1,10 @@
-# Paraglide Adapter Astro
+![Dead Simple i18n. Typesafe, Small Footprint, SEO-Friendly and with an IDE Integration.](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-astro/assets/header.png)
 
-This Astro Integration makes it trivial to use Paraglide in your Astro project. It hooks paraglide into astro's own i18n routing.
-
-## Features
-- 🏝️ Only messages used on islands get shipped to the client.
-- 📦 Fully Typesafe messages, params and all
-- 🤏 Tiny runtime (<100 bytes)
-- 💨 A breeze to set up - No need to change your `pages/` folder
-
-Paraglide is a _compiler_ for your messages.
+<doc-features>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="Uses astro:i18n for routing" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-astro/assets/use-astro-i18n.png"></doc-feature>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="Tiny Bundle Size" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-astro/assets/bundle-size.png"></doc-feature>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="Only ships messages used on islands" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-astro/assets/islands-only.png"></doc-feature>
+</doc-features>
 
 ## Installation
 
@@ -20,28 +16,35 @@ npm i @inlang/paraglide-js-adapter-astro
 Register the Integration in `astro.config.mjs`:
 
 ```js
-import paraglide from '@inlang/paraglide-js-adapter-astro'
+import paraglide from "@inlang/paraglide-js-adapter-astro"
 
 export default {
-  integrations: [
-    paraglide({
-      //recommended setup
-      project: "./project.inlang", 
-      outdir: "./src/paraglide", //where the message files will be placed
-    }),
-  ],
+	// Use astro's i18n routing for deciding which language to use
+	i18n: {
+		locales: ["en", { code: "de", path: "deutsch" }],
+		defaultLocale: "en",
+	},
+
+	integrations: [
+		paraglide({
+			// recommended settings
+			project: "./project.inlang",
+			outdir: "./src/paraglide", //where your files should be
+		}),
+	],
 }
 ```
 
 ## Usage
 
-### Adding & using messages
-Messages are placed in `messages/{lang}.json`. 
+### Adding & using messages
+
+Messages are placed in `messages/{lang}.json`.
 
 ```json
 // messages.en.json
 {
-  "hello": "Hello {name}!"
+	"hello": "Hello {name}!"
 }
 ```
 
@@ -49,14 +52,14 @@ Declare which languages you support in `project.inlang/settings.json`.
 
 ```json
 {
-  "languageTags": ["en", "de"],
-  "sourceLanguageTag": "en",
+	"languageTags": ["en", "de"],
+	"sourceLanguageTag": "en"
 }
 ```
 
-You can use messages like so:
+Use messages like so:
 
-```markdown
+```astro
 ---
 import * as m from "../paraglide/messages.js";
 ---
@@ -68,7 +71,7 @@ Vite is able to tree-shake the messages. Only messages that are used on an Islan
 
 ### Which language get's used
 
-The integration automatically sets the language based on the URL. You can set the language for a given page by placing it in a folder with the language code as the name:
+The integration detects the language from the URL. Simply place your page in a folder named for the language (or the `path` of the language) & all messages will be in that language.
 
 ```filesystem
 src
@@ -93,9 +96,9 @@ src
 │       └── about.astro // de
 ```
 
-You can configure which languages are available, and which is the default language in `project.inlang/settings.json`. 
+You can configure which languages are available, and which is the default language in `project.inlang/settings.json`.
 
-To save bundle size on the client, the integration doesn't ship language detection code to the client. Instead, it will read the `lang` attribute on the `<html>` tag & trust that. Make sure it is set correctly.
+To save bundle size the integration doesn't ship language detection code to the client. Instead, it will read the `lang` attribute on the `<html>` tag. Make sure it is set correctly.
 
 ```astro
 //src/layouts/default.astro
@@ -112,23 +115,22 @@ import { languageTag } from "$paraglide/runtime";
 
 You can also access the current language and text-direction via `Astro.locals.paraglide.lang` and `Astro.locals.paraglide.dir` respectively.
 
-
 ### Adding Alternate Links
 
-For SEO reasons, you should add alternate links to your page's head that point to all translations of the current page. Also include the _current_ page. 
+For SEO reasons, you should add alternate links to your page's head that point to all translations of the current page. Also include the _current_ page.
 
 ```html
 <head>
-    <link rel="alternate" hreflang="en" href="/en/about" />
-    <link rel="alternate" hreflang="de" href="/de/ueber-uns" />
+	<link rel="alternate" hreflang="en" href="/en/about" />
+	<link rel="alternate" hreflang="de" href="/de/ueber-uns" />
 </head>
 ```
 
-Since only you know which pages correspond to each other this needs to be done manually.
+Since only you know which pages correspond to each other this can't reliably be done automatically.
 
 ## Roadmap
-- Support [Astro's i18n-paths](https://docs.astro.build/en/reference/configuration-reference/#i18nlocales) (eg. use `/en` as `/english`)
-- Improve Server-Rendering support
+
+- Improved Server-Rendering support
 
 ## Playground
 
