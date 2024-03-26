@@ -1023,7 +1023,8 @@ describe("functionality", () => {
 			})
 			// TODO: test with real lint rules
 			try {
-				project.query.messageLintReports.getAll.subscribe((r) => expect(r).toEqual(undefined))
+				const r = project.query.messageLintReports.getAll()
+				expect(r).toEqual(undefined)
 				throw new Error("Should not reach this")
 			} catch (e) {
 				expect((e as Error).message).toBe("lint not initialized yet")
@@ -1047,7 +1048,8 @@ describe("functionality", () => {
 				}),
 			})
 			// TODO: test with real lint rules
-			project.query.messageLintReports.getAll.subscribe((r) => expect(r).toEqual([]))
+			const r = project.query.messageLintReports.getAll()
+			expect(r).toEqual([])
 		})
 	})
 
