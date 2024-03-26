@@ -361,7 +361,10 @@ export default function Page(props: PageProps) {
 												<a
 													href={props.manifest.publisherLink}
 													target="_blanc"
-													class="flex items-center gap-2"
+													class={[
+														"flex items-center gap-2",
+														props.manifest.publisherLink ? "hover:underline" : "",
+													].join(" ")}
 												>
 													<Show
 														when={props.manifest.publisherIcon}
