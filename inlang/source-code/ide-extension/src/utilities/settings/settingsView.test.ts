@@ -6,12 +6,10 @@ import { state } from "../state.js"
 vi.mock("vscode", () => ({
 	Uri: {
 		file: vi.fn().mockImplementation((path) => ({
-			// Mock `toString` to return the expected string path directly
 			toString: () => path,
 		})),
 		// @ts-expect-error
 		joinPath: vi.fn().mockImplementation((...args) => ({
-			// Ensure the mock URI object's `toString` returns a concatenated path
 			toString: () => args.join("/"),
 		})),
 	},
@@ -32,9 +30,7 @@ vi.mock("vscode", () => ({
 vi.mock("../state", () => ({
 	state: vi.fn().mockImplementation(() => ({
 		project: {
-			settings: vi.fn().mockReturnValue({
-				/* Mock settings here */
-			}),
+			settings: vi.fn().mockReturnValue({ some: "settings" }),
 			setSettings: vi.fn(),
 		},
 	})),
@@ -77,15 +73,11 @@ describe("createSettingsWebviewProvider", () => {
 		const provider = createSettingsWebviewProvider({ context })
 		provider.resolveWebviewView(webviewView)
 
-		// Extract the string values from the mock Uri objects' toString method
 		const localResourceRootsStrings = webviewView.webview.options.localResourceRoots?.map((uri) =>
 			uri.toString()
 		)
 
-		// Assert the localResourceRoots contains the expected path strings
 		expect(localResourceRootsStrings).toEqual([mockExtensionPath])
-
-		// Assert the expected structure of the HTML content and other tests as before
 		expect(webviewView.webview.html).toContain('<html lang="en">')
 
 		// Simulate a message and test handling.
@@ -100,9 +92,7 @@ describe("createSettingsWebviewProvider", () => {
 		// @ts-expect-error
 		webviewView.webview.onDidReceiveMessage.mock.calls[0][0]({
 			command: "setSettings",
-			settings: {
-				/* Mock settings here */
-			},
+			settings: { some: "settings" },
 		})
 
 		expect(mockSetSettings).toHaveBeenCalled()
