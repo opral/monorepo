@@ -202,7 +202,7 @@ importers:
         version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/cross-sell/cross-sell-ninja:
-    devDependencies:
+    dependencies:
       '@inlang/sdk':
         specifier: workspace:*
         version: link:../../sdk
@@ -212,15 +212,16 @@ importers:
       '@sinclair/typebox':
         specifier: ^0.31.17
         version: 0.31.28
+      js-yaml:
+        specifier: ^4.1.0
+        version: 4.1.0
+    devDependencies:
       '@types/js-yaml':
         specifier: ^4.0.9
         version: 4.0.9
       '@vitest/coverage-v8':
         specifier: 0.34.6
         version: 0.34.6(vitest@0.34.6)
-      js-yaml:
-        specifier: ^4.1.0
-        version: 4.1.0
       patch-package:
         specifier: 6.5.1
         version: 6.5.1
