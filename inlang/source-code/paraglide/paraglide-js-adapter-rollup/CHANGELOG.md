@@ -1,5 +1,12 @@
 # @inlang/paraglide-js-adapter-rollup
 
+## 1.0.34
+
+### Patch Changes
+
+- Updated dependencies [7dce581]
+  - @inlang/paraglide-js-adapter-unplugin@1.4.17
+
 ## 1.0.33
 
 ### Patch Changes
