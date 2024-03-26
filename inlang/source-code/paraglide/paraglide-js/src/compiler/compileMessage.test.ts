@@ -16,32 +16,6 @@ it("should throw if a message uses `-` because `-` are invalid JS function names
 	).toThrow()
 })
 
-it("should throw an error if a message has multiple variants with the same language tag", () => {
-	expect(() =>
-		compileMessage(
-			{
-				id: "duplicateLanguageTag",
-				alias: {},
-				selectors: [],
-				variants: [
-					{
-						match: [],
-						languageTag: "en",
-						pattern: [],
-					},
-					{
-						match: [],
-						languageTag: "en",
-						pattern: [],
-					},
-				],
-			},
-			["en"],
-			"en"
-		)
-	).toThrow()
-})
-
 it("should compile a message with a language tag that contains a hyphen - to an underscore to prevent invalid JS imports", async () => {
 	const result = compileMessage(
 		{

@@ -33,11 +33,15 @@ test("roundtrip (saving/loading messages)", async () => {
 		$schema: "https://inlang.com/schema/inlang-message-format",
 		first_message: "If this fails I will be sad",
 		second_message: "Let's see if this works",
+		third_message:
+			"match {messages} when 0 {Du hast keine nachrichten} when * {Du hast {messages} nachrichten}",
 	} satisfies StorageSchema)
 
 	const deInitial = JSON.stringify({
 		$schema: "https://inlang.com/schema/inlang-message-format",
 		second_message: "Mal sehen ob das funktioniert",
+		third_message:
+			"match {messages} when 0 {Du hast keine nachrichten} when * {Du hast {messages} nachrichten}",
 	} satisfies StorageSchema)
 
 	await fs.mkdir("./messages")
@@ -57,6 +61,46 @@ test("roundtrip (saving/loading messages)", async () => {
 			en: "Let's see if this works",
 			de: "Mal sehen ob das funktioniert",
 		}),
+		{
+			id: "third_message",
+			alias: {},
+			selectors: [
+				{
+					type: "VariableReference",
+					name: "messages",
+				},
+			],
+			variants: [
+				{
+					match: ["0"],
+					languageTag: "en",
+					pattern: [{ type: "Text", value: "Du hast keine nachrichten" }],
+				},
+				{
+					match: ["*"],
+					languageTag: "en",
+					pattern: [
+						{ type: "Text", value: "Du hast " },
+						{ type: "VariableReference", name: "messages" },
+						{ type: "Text", value: " nachrichten" },
+					],
+				},
+				{
+					match: ["0"],
+					languageTag: "de",
+					pattern: [{ type: "Text", value: "Du hast keine nachrichten" }],
+				},
+				{
+					match: ["*"],
+					languageTag: "de",
+					pattern: [
+						{ type: "Text", value: "Du hast " },
+						{ type: "VariableReference", name: "messages" },
+						{ type: "Text", value: " nachrichten" },
+					],
+				},
+			],
+		},
 	])
 
 	await plugin.saveMessages!({

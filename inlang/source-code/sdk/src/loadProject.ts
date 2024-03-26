@@ -26,7 +26,7 @@ import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
 import { isAbsolutePath } from "./isAbsolutePath.js"
 import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
 
-import { stringifyMessage as stringifyMessage } from "./storage/helper.js"
+import { stringifyMessage } from "./storage/helper.js"
 
 import { humanIdHash } from "./storage/human-id/human-readable-id.js"
 

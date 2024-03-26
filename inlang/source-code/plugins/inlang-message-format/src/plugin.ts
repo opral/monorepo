@@ -39,14 +39,17 @@ export const plugin: Plugin<{
 					if (key === "$schema") {
 						continue
 					}
+
 					// message already exists, add the variants
-					else if (result[key]) {
+					const existingResult = result[key]
+					if (existingResult) {
 						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-						result[key]!.variants = [
+						existingResult.variants = [
 							// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-							...result[key]!.variants,
+							...existingResult.variants,
 							...parseMessage({ key, value: json[key], languageTag: tag }).variants,
 						]
+						result[key] = existingResult
 					}
 					// message does not exist yet, create it
 					else {

@@ -1,4 +1,4 @@
-import { Message, Variant } from "../versionedInterfaces.js"
+import type { Message, Variant } from "../versionedInterfaces.js"
 
 const fileExtension = ".json"
 
@@ -30,7 +30,7 @@ export function stringifyMessage(message: Message) {
 	}
 
 	// lets order variants as well
-	messageWithSortedKeys["variants"] = messageWithSortedKeys["variants"].sort(
+	messageWithSortedKeys["variants"] = [...message["variants"]].sort(
 		(variantA: Variant, variantB: Variant) => {
 			// First, compare by language
 			const languageComparison = variantA.languageTag.localeCompare(variantB.languageTag)

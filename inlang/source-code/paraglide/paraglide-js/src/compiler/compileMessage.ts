@@ -1,4 +1,4 @@
-import { LanguageTag, type Message } from "@inlang/sdk"
+import { LanguageTag, Variant, type Message } from "@inlang/sdk"
 import { compilePattern } from "./compilePattern.js"
 import { paramsType, type Params } from "./paramsType.js"
 import { optionsType } from "./optionsType.js"
@@ -36,31 +36,39 @@ export const compileMessage = (
 		)
 	}
 
-	const compiledPatterns: Record<LanguageTag, string> = {}
-	// parameter names and TypeScript types
-	// only allowing types that JS transpiles to strings under the hood like string and number.
-	// the pattern nodes must be extended to hold type information in the future.
-	let params: Params = {}
+	/**
+	 * The variants grouped by language tag.
+	 */
+	const variantsByLanguage: Record<LanguageTag, Variant[]> = {}
+
+	/**
+	 * The compiled patterns. Indexed with the index
+	 * of their corresponding variant.
+	 */
+	const compiledPatterns = new Map<Variant, string>()
+
+	let params: Params = Object.fromEntries(
+		message.selectors.map((selector) => [selector.name, "NonNullable<unknown>"])
+	)
 
 	for (const variant of message.variants) {
-		if (compiledPatterns[variant.languageTag]) {
-			throw new Error(
-				`Duplicate language tag: ${variant.languageTag}. Multiple variants for one language tag are not supported in paraglide yet. `
-			)
-		}
-
 		if (!availableLanguageTags.includes(variant.languageTag)) {
 			throw new Error(
 				`The language tag "${variant.languageTag}" is not included in the project's language tags but contained in of your messages. Please add the language tag to your project's language tags or delete the messages with the language tag "${variant.languageTag}" to avoid unexpected type errors.`
 			)
 		}
 
+		if (variant.match.length !== message.selectors.length) {
+			throw new Error("All variants must provide a selector-value for all selectors")
+		}
+
 		const { compiled, params: variantParams } = compilePattern(variant.pattern)
-		// merge params
+		compiledPatterns.set(variant, compiled)
 		params = { ...params, ...variantParams }
 
-		// set the pattern for the language tag
-		compiledPatterns[variant.languageTag] = compiled
+		const variantsForLanugage = variantsByLanguage[variant.languageTag] ?? []
+		variantsForLanugage.push(variant)
+		variantsByLanguage[variant.languageTag] = variantsForLanugage
 	}
 
 	const resource: Resource = {
@@ -68,26 +76,61 @@ export const compileMessage = (
 	}
 
 	for (const languageTag of availableLanguageTags) {
-		const compiledPattern = compiledPatterns[languageTag]
+		const variants = variantsByLanguage[languageTag] ?? []
 
-		//If there is a pattern for the language tag, compile it, otherwise fallback
-		if (compiledPattern) {
-			resource[languageTag] = messageFunction({ message, params, languageTag, compiledPattern })
-		} else {
-			//Do a lookup using all the languages that do have the pattern
-			const fallbackLanguage = lookup(languageTag, {
-				languageTags: Object.keys(compiledPatterns),
+		//If there isn't a variant for the language tag -> fallback
+		if (variants.length == 0) {
+			//find all the languages that _do_ have the pattern
+			const languagesWithPattern = Object.keys(variantsByLanguage).filter((languageTag) => {
+				return variantsByLanguage[languageTag]?.some((variant) => variant.pattern.length > 0)
+			})
+
+			const fallbackLanguageTag = lookup(languageTag, {
+				languageTags: languagesWithPattern,
 				defaultLanguageTag: sourceLanguageTag,
 			})
 
-			//Get the compiled pattern for the fallback language - if it exists
-			//It may not exist if the fallback language is the source language
-			const compiledFallbackPattern = compiledPatterns[fallbackLanguage]
-
 			//if the fallback has the pattern, reexport the message from the fallback language
-			resource[languageTag] = compiledFallbackPattern
-				? reexportMessage(message, fallbackLanguage)
-				: messageIdFallback(message, languageTag)
+			resource[languageTag] =
+				languageTag !== fallbackLanguageTag
+					? reexportMessage(message, fallbackLanguageTag)
+					: messageIdFallback(message, languageTag)
+		} else if (variants.length == 1) {
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			const compiledPattern = compiledPatterns.get(variants[0]!)!
+
+			resource[languageTag] = messageFunction({
+				message,
+				params,
+				languageTag,
+				compiledPattern,
+			})
+		} else {
+			let code = "{\n"
+			for (const variant of variants) {
+				const compiledPattern = compiledPatterns.get(variant)
+				if (!compiledPattern) continue
+
+				const predicates = []
+				for (let i = 0; i < message.selectors.length; i++) {
+					const selector = message.selectors[i]
+					const match = variant.match[i]
+					if (!selector || !match) continue
+
+					if (match === "*") predicates.push("true")
+					else predicates.push(`params.${selector.name} == "${match}"`)
+				}
+
+				code += `if (${predicates.join(" && ")}) return ${compiledPattern}\n`
+			}
+			code += "\n}"
+
+			resource[languageTag] = messageFunction({
+				message,
+				params,
+				languageTag,
+				compiledPattern: code,
+			})
 		}
 	}
 
