@@ -6,11 +6,11 @@
 
   const host = 'https://git.local'
   const repos = {
-    gitserver: 'https://git.local/git/git.local/opral/example.git',
+    gitserver: 'https://ignored.domain/direct/git.local/opral/example.git',
     test: host + '/git/localhost:8089/janfjohannes/ci-test-repo.git',
-    'cal.com': host + '/git/localhost:8089/janfjohannes/cal.com.git'
+    'cal.com': 'https://ignored.domain/direct/git.local/janfjohannes/cal.com.git'
   }
-  const selectdRepo = 'gitserver'
+  const selectdRepo = 'cal.com'
 
   const repo = openRepo(repos[selectdRepo], {
     branch: "main",
