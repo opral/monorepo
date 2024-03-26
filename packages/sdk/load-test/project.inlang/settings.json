@@ -41,10 +41,10 @@
 		"zh-TW"
 	],
 	"modules": [
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next/dist/index.js",
-		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@1/dist/index.js",
-		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-without-source@1/dist/index.js",
-		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@1/dist/index.js"
+		"../../plugins/i18next/dist/index.js",
+		"../../message-lint-rules/emptyPattern/dist/index.js",
+		"../../message-lint-rules/messageWithoutSource/dist/index.js",
+		"../../message-lint-rules/missingTranslation/dist/index.js"
 	],
 	"plugin.inlang.i18next": {
 		"pathPattern": "./locales/{languageTag}/common.json"

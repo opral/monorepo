@@ -15,7 +15,7 @@ const debug = _debug("load-test")
 
 const exec = promisify(childProcess.exec)
 
-const throttleEventLogs = 2000
+const throttleMessageGetAllEvents = 2000
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -65,46 +65,18 @@ export async function runLoadTest(
 	})
 
 	if (subscribeToMessages) {
-		debug("subscribing to messages.getAll")
-		let messagesEvents = 0
-		const logMessagesEvent = throttle(throttleEventLogs, (messages: any) => {
-			debug(`messages changed event: ${messagesEvents}, length: ${messages.length}`)
+		debug(`subscribing to messages.getAll${subscribeToLintReports ? " with lint reports" : ""}`)
+		let countMessagesGetAllEvents = 0
+		const messagesGetAllEvent = throttle(throttleMessageGetAllEvents, (messages: any) => {
+			debug(`messages getAll event: ${countMessagesGetAllEvents}, length: ${messages.length}`)
+			if (subscribeToLintReports) {
+				const r = project.query.messageLintReports.getAll()
+				debug(`lint reports length: ${r.length}`)
+			}
 		})
 		project.query.messages.getAll.subscribe((messages) => {
-			messagesEvents++
-			logMessagesEvent(messages)
-		})
-		debug("subscribing to messages.includedMessageIds")
-		let messageIDsEvents = 0
-		const logMessageIDsEvent = throttle(throttleEventLogs, (ids: string[]) => {
-			debug(`includedMessageIds changed event: ${messageIDsEvents}, length: ${ids.length}`)
-		})
-		project.query.messages.includedMessageIds.subscribe((ids) => {
-			messageIDsEvents++
-			logMessageIDsEvent(ids)
-		})
-	}
-
-	if (subscribeToLintReports) {
-		// debug("subscribing to lintReports.getAll")
-		// let lintEvents = 0
-		// const logLintEvent = throttle(throttleEventLogs, (reports: any) => {
-		// 	debug(`lint reports changed event: ${lintEvents}, length: ${reports.length}`)
-		// })
-		// project.query.messageLintReports.getAll.subscribe((reports) => {
-		// 	lintEvents++
-		// 	logLintEvent(reports)
-		// })
-		debug("subscribing to lintReports.includedMessageIds")
-		let lintMessageIdsEvents = 0
-		const logLintMessageIdsEvent = throttle(throttleEventLogs, (ids: string[]) => {
-			debug(
-				`lint reports includedMessageIds changed event: ${lintMessageIdsEvents}, length: ${ids.length}`
-			)
-		})
-		project.query.messageLintReports.includedMessageIds.subscribe((ids) => {
-			lintMessageIdsEvents++
-			logLintMessageIdsEvent(ids)
+			countMessagesGetAllEvents++
+			messagesGetAllEvent(messages)
 		})
 	}
 
