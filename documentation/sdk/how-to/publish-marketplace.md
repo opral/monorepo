@@ -58,7 +58,7 @@ Add the raw link of your manifest to [this file](https://github.com/opral/monore
 
 Create a pull request with your changes and wait for approval from our team. Usually, this will take less than 24 hours. After that, your item will be available in the marketplace.
 
-Feel free to [join our Discord](https://discord.gg/gdMPPWy57R) if you have any questions or need help with publishing your item.
+Feel free to [join our Discord](https://discord.gg/CNPfhWpcAa) if you have any questions or need help with publishing your item.
 
 ## Markdown assets
 

@@ -66,4 +66,4 @@ Add the raw link of your manifest to [this file](https://github.com/opral/monore
 
 Create a pull request with your changes and wait for approval from our team. Usually, this will take less than 24 hours. After that, your guide will be available on the inlang website.
 
-Feel free to [join our Discord](https://discord.gg/gdMPPWy57R) if you have any questions or need help with publishing your guide.
+Feel free to [join our Discord](https://discord.gg/CNPfhWpcAa) if you have any questions or need help with publishing your guide.

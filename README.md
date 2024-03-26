@@ -62,7 +62,7 @@
 
 ## :bell: Stay up-to-date
 
-Follow us on [Twitter](https://twitter.com/inlangHQ) or join our [Discord](https://discord.gg/gdMPPWy57R) server. 
+Follow us on [Twitter](https://twitter.com/inlangHQ) or join our [Discord](https://discord.gg/CNPfhWpcAa) server. 
 
 We also regularly send out a newsletter with updates and tips & tricks. You can subscribe to it [here](https://inlang.com/newsletter).
 
