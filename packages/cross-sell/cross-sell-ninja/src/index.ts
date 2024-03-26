@@ -80,6 +80,7 @@ name: Ninja i18n action
 on:
   pull_request_target:
 
+# explicitly configure permissions, in case your GITHUB_TOKEN workflow permissions are set to read-only in repository settings
 permissions: 
   pull-requests: write
 
