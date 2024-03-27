@@ -12,7 +12,7 @@ export type PathTranslationIssue = {
  */
 export function validatePathTranslations<T extends string>(
 	pathTranslations: PathTranslations<T>,
-	availableLanguageTags: readonly T[],
+	availableLanguageTags: readonly T[]
 ): PathTranslationIssue[] {
 	const issues: PathTranslationIssue[] = []
 	const expectedLanguages = new Set(availableLanguageTags)
@@ -58,7 +58,7 @@ export function validatePathTranslations<T extends string>(
 			issues.push({
 				path,
 				message: `The following languages are missing translations: ${[...missingLanguages].join(
-					", ",
+					", "
 				)}`,
 			})
 		}
