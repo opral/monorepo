@@ -99,7 +99,7 @@ function TheActualPage() {
 							InlangProject["installed"]["messageLintRules"]
 						>
 					}
-					on:setSettings={(event: CustomEvent) => {
+					on:set-settings={(event: CustomEvent) => {
 						const _project = project()
 						if (_project) {
 							_project.setSettings(event.detail.argument)
