@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.36.4
+
+### Patch Changes
+
+- 61b277b: update statusbar item
+
 ## 1.36.3
 
 ### Patch Changes
