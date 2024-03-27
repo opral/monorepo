@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-imports */
 /* eslint-disable no-console */
-import { openRepository } from "@lix-js/client"
+import { findRepoRoot, openRepository } from "@lix-js/client"
 import { loadProject } from "@inlang/sdk"
 
 import { dirname, join } from "node:path"
@@ -54,7 +54,12 @@ export async function runLoadTest(
 	await generateMessageFile(1)
 
 	debug("opening repo and loading project")
-	const repo = await openRepository(`file://${__dirname}`, { nodeishFs: fs })
+	const repoRoot = await findRepoRoot({ nodeishFs: fs, path: __dirname })
+	if (!repoRoot) {
+		debug("no repo root.")
+		return
+	}
+	const repo = await openRepository(repoRoot, { nodeishFs: fs })
 	const project = await loadProject({ repo, projectPath })
 
 	debug("subscribing to project.errors")
