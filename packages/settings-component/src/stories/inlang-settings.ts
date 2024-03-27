@@ -93,7 +93,7 @@ export default class InlangSettings extends LitElement {
 		[] as ReturnType<InlangProject["installed"]["messageLintRules"]>
 
 	dispatchOnSetSettings(settings: ProjectSettings) {
-		const onSetSettings = new CustomEvent("setSettings", {
+		const onSetSettings = new CustomEvent("set-settings", {
 			detail: {
 				argument: settings,
 			},
@@ -273,3 +273,4 @@ declare global {
 		"inlang-settings": InlangSettings
 	}
 }
+
