@@ -1,5 +1,11 @@
 # @inlang/paraglide-js-adapter-unplugin
 
+## 1.4.18
+
+### Patch Changes
+
+- 204c53a: Fix errors caused by missing `file://` protocol
+
 ## 1.4.17
 
 ### Patch Changes
