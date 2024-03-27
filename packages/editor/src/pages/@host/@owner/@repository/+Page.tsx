@@ -82,8 +82,32 @@ function TheActualPage() {
 
 	return (
 		<>
-			<Show when={project()}>
-				<inlang-settings prop:project={project() as InlangProject} />
+			<Show
+				when={
+					project()?.settings() &&
+					project()?.installed.plugins() &&
+					project()?.installed.messageLintRules()
+				}
+			>
+				<inlang-settings
+					prop:settings={project()!.settings() as ReturnType<InlangProject["settings"]>}
+					prop:installedPlugins={
+						project()!.installed.plugins() as ReturnType<InlangProject["installed"]["plugins"]>
+					}
+					prop:installedMessageLintRules={
+						project()!.installed.messageLintRules() as ReturnType<
+							InlangProject["installed"]["messageLintRules"]
+						>
+					}
+					on:setSettings={(event: CustomEvent) => {
+						const _project = project()
+						if (_project) {
+							_project.setSettings(event.detail.argument)
+						} else {
+							throw new Error("Settings can not be set, because project is not defined")
+						}
+					}}
+				/>
 			</Show>
 			<Switch
 				fallback={
