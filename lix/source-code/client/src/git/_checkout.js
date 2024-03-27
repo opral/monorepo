@@ -1,22 +1,23 @@
-// @ts-nocheck
-import { STAGE } from "../../vendored/isomorphic-git/index.js"
+import {
+	STAGE,
+	_GitRefManager,
+	_readObject,
+	_writeObject,
+	_GitConfigManager,
+	_flat,
+	walk,
+	Errors,
+	_GitIndexManager,
+	_worthWalking,
+} from "../../vendored/isomorphic-git/index.js"
 import { TREE } from "../../vendored/isomorphic-git/index.js"
 import { WORKDIR } from "../../vendored/isomorphic-git/index.js"
-// @ts-ignore
-import { walk } from "../../vendored/isomorphic-git/index.js"
-import { Errors } from "../../vendored/isomorphic-git/internal-apis.js"
-import { GitConfigManager } from "../../vendored/isomorphic-git/internal-apis.js"
-import { GitIndexManager } from "../../vendored/isomorphic-git/internal-apis.js"
-import { GitRefManager } from "../../vendored/isomorphic-git/internal-apis.js"
-import { _readObject as readObject } from "../../vendored/isomorphic-git/internal-apis.js"
-// @ts-ignore
-import { Utils } from "../../vendored/isomorphic-git/internal-apis.js"
 
 /**
  * @param {object} args
- * @param {import('../../vendored/isomorphic-git/internal-apis.js').FileSystem} args.fs
+ * @param {import("../../vendored/isomorphic-git/index.js")._FileSystem} args.fs
  * @param {any} args.cache
- * @param {import('../../vendored/isomorphic-git/internal-apis.js').ProgressCallback} [args.onProgress]
+ * @param {import('../../vendored/isomorphic-git/index.js').ProgressCallback} [args.onProgress]
  * @param {string} args.dir
  * @param {string} args.gitdir
  * @param {string} args.ref
@@ -49,7 +50,7 @@ export async function _checkout({
 	// Get tree oid
 	let oid
 	try {
-		oid = await GitRefManager.resolve({ fs, gitdir, ref })
+		oid = await _GitRefManager.resolve({ fs, gitdir, ref })
 		// TODO: Figure out what to do if both 'ref' and 'remote' are specified, ref already exists,
 		// and is configured to track a different remote.
 	} catch (err) {
@@ -57,20 +58,20 @@ export async function _checkout({
 		// If `ref` doesn't exist, create a new remote tracking branch
 		// Figure out the commit to checkout
 		const remoteRef = `${remote}/${ref}`
-		oid = await GitRefManager.resolve({
+		oid = await _GitRefManager.resolve({
 			fs,
 			gitdir,
 			ref: remoteRef,
 		})
 		if (track) {
 			// Set up remote tracking branch
-			const config = await GitConfigManager.get({ fs, gitdir })
+			const config = await _GitConfigManager.get({ fs, gitdir })
 			await config.set(`branch.${ref}.remote`, remote)
 			await config.set(`branch.${ref}.merge`, `refs/heads/${ref}`)
-			await GitConfigManager.save({ fs, gitdir, config })
+			await _GitConfigManager.save({ fs, gitdir, config })
 		}
 		// Create a new branch that points at that same commit
-		await GitRefManager.writeRef({
+		await _GitRefManager.writeRef({
 			fs,
 			gitdir,
 			ref: `refs/heads/${ref}`,
@@ -80,6 +81,7 @@ export async function _checkout({
 
 	// Update working dir
 	if (!noCheckout) {
+		// @ts-ignore
 		let ops
 		// First pass - just analyze files (not directories) and figure out what needs to be done
 		try {
@@ -104,6 +106,7 @@ export async function _checkout({
 
 		// Report conflicts
 		const conflicts = ops
+			// @ts-ignore
 			.filter(([method]) => method === "conflict")
 			// @ts-ignore
 			.map(([method, fullpath]) => fullpath)
@@ -113,6 +116,7 @@ export async function _checkout({
 
 		// Collect errors
 		const errors = ops
+			// @ts-ignore
 			.filter(([method]) => method === "error")
 			// @ts-ignore
 			.map(([method, fullpath]) => fullpath)
@@ -133,10 +137,13 @@ export async function _checkout({
 		let count = 0
 		const total = ops.length
 		// @ts-ignore
-		await GitIndexManager.acquire({ fs, gitdir, cache }, async function (index) {
+		await _GitIndexManager.acquire({ fs, gitdir, cache }, async function (index) {
 			await Promise.all(
+				// @ts-ignore
 				ops
+					// @ts-ignore
 					.filter(([method]) => method === "delete" || method === "delete-index")
+					// @ts-ignore
 					.map(async function ([method, fullpath]) {
 						const filepath = `${dir}/${fullpath}`
 						if (method === "delete") {
@@ -156,7 +163,8 @@ export async function _checkout({
 
 		// Note: this is cannot be done naively in parallel
 		// @ts-ignore
-		await GitIndexManager.acquire({ fs, gitdir, cache }, async function (index) {
+		await _GitIndexManager.acquire({ fs, gitdir, cache }, async function (index) {
+			// @ts-ignore
 			for (const [method, fullpath] of ops) {
 				if (method === "rmdir" || method === "rmdir-index") {
 					const filepath = `${dir}/${fullpath}`
@@ -174,6 +182,7 @@ export async function _checkout({
 							})
 						}
 					} catch (e) {
+						// @ts-ignore
 						if (e.code === "ENOTEMPTY") {
 							console.log(`Did not delete ${fullpath} because directory is not empty`)
 						} else {
@@ -186,7 +195,9 @@ export async function _checkout({
 
 		await Promise.all(
 			ops
+				// @ts-ignore
 				.filter(([method]) => method === "mkdir" || method === "mkdir-index")
+				// @ts-ignore
 				.map(async function ([_, fullpath]) {
 					const filepath = `${dir}/${fullpath}`
 					await fs.mkdir(filepath)
@@ -201,21 +212,24 @@ export async function _checkout({
 		)
 
 		// @ts-ignore -- TODO check why this triggers ts
-		await GitIndexManager.acquire({ fs, gitdir, cache }, async function (index) {
+		await _GitIndexManager.acquire({ fs, gitdir, cache }, async function (index) {
 			await Promise.all(
+				// @ts-ignore
 				ops
 					.filter(
+						// @ts-ignore
 						([method]) =>
 							method === "create" ||
 							method === "create-index" ||
 							method === "update" ||
 							method === "mkdir-index"
 					)
+					// @ts-ignore
 					.map(async function ([method, fullpath, oid, mode, chmod]) {
 						const filepath = `${dir}/${fullpath}`
 						try {
 							if (method !== "create-index" && method !== "mkdir-index") {
-								const { object } = await readObject({ fs, cache, gitdir, oid })
+								const { object } = await _readObject({ fs, cache, gitdir, oid })
 								if (chmod) {
 									// Note: the mode option of fs.write only works when creating files,
 									// not updating them. Since the `fs` plugin doesn't expose `chmod` this
@@ -272,9 +286,9 @@ export async function _checkout({
 
 	// Update HEAD
 	if (!noUpdateHead) {
-		const fullRef = await GitRefManager.expand({ fs, gitdir, ref })
+		const fullRef = await _GitRefManager.expand({ fs, gitdir, ref })
 		if (fullRef.startsWith("refs/heads")) {
-			await GitRefManager.writeSymbolicRef({
+			await _GitRefManager.writeSymbolicRef({
 				fs,
 				gitdir,
 				ref: "HEAD",
@@ -282,25 +296,28 @@ export async function _checkout({
 			})
 		} else {
 			// detached head
-			await GitRefManager.writeRef({ fs, gitdir, ref: "HEAD", value: oid })
+			await _GitRefManager.writeRef({ fs, gitdir, ref: "HEAD", value: oid })
 		}
 	}
 }
-
+// @ts-ignore
 async function analyze({ fs, cache, onProgress, dir, gitdir, ref, force, filepaths }) {
 	let count = 0
-	// @ts-ignore
-	return _walk({
+
+	// TODO - we repalaced the original _walk with walk for now
+	return walk({
 		fs,
 		cache,
 		dir,
 		gitdir,
 		trees: [TREE({ ref }), WORKDIR(), STAGE()],
+
+		// @ts-ignore
 		map: async function (fullpath, [commit, workdir, stage]) {
 			if (fullpath === ".") return
 			// match against base paths
 			// @ts-ignore
-			if (filepaths && !filepaths.some((base) => worthWalking(fullpath, base))) {
+			if (filepaths && !filepaths.some((base) => _worthWalking(fullpath, base))) {
 				return null
 			}
 			// Emit progress event
@@ -327,23 +344,28 @@ async function analyze({ fs, cache, onProgress, dir, gitdir, ref, force, filepat
 					return
 				// New entries
 				case "010": {
+					// @ts-ignore
 					switch (await commit.type()) {
 						case "tree": {
 							return ["mkdir", fullpath]
 						}
 						case "blob": {
+							// @ts-ignore
 							return ["create", fullpath, await commit.oid(), await commit.mode()]
 						}
 						case "commit": {
+							// @ts-ignore
 							return ["mkdir-index", fullpath, await commit.oid(), await commit.mode()]
 						}
 						default: {
+							// @ts-ignore
 							return ["error", `new entry Unhandled type ${await commit.type()}`]
 						}
 					}
 				}
 				// New entries but there is already something in the workdir there.
 				case "011": {
+					// @ts-ignore
 					switch (`${await commit.type()}-${await workdir.type()}`) {
 						case "tree-tree": {
 							return // noop
@@ -354,13 +376,17 @@ async function analyze({ fs, cache, onProgress, dir, gitdir, ref, force, filepat
 						}
 						case "blob-blob": {
 							// Is the incoming file different?
+							// @ts-ignore
 							if ((await commit.oid()) !== (await workdir.oid())) {
 								if (force) {
 									return [
 										"update",
 										fullpath,
+										// @ts-ignore
 										await commit.oid(),
+										// @ts-ignore
 										await commit.mode(),
+										// @ts-ignore
 										(await commit.mode()) !== (await workdir.mode()),
 									]
 								} else {
@@ -368,13 +394,16 @@ async function analyze({ fs, cache, onProgress, dir, gitdir, ref, force, filepat
 								}
 							} else {
 								// Is the incoming file a different mode?
+								// @ts-ignore
 								if ((await commit.mode()) !== (await workdir.mode())) {
 									if (force) {
+										// @ts-ignore
 										return ["update", fullpath, await commit.oid(), await commit.mode(), true]
 									} else {
 										return ["conflict", fullpath]
 									}
 								} else {
+									// @ts-ignore
 									return ["create-index", fullpath, await commit.oid(), await commit.mode()]
 								}
 							}
@@ -393,6 +422,7 @@ async function analyze({ fs, cache, onProgress, dir, gitdir, ref, force, filepat
 							return ["conflict", fullpath]
 						}
 						default: {
+							// @ts-ignore
 							return ["error", `new entry Unhandled type ${commit.type}`]
 						}
 					}
@@ -405,12 +435,14 @@ async function analyze({ fs, cache, onProgress, dir, gitdir, ref, force, filepat
 				// Deleted entries
 				// TODO: How to handle if stage type and workdir type mismatch?
 				case "101": {
+					// @ts-ignore
 					switch (await stage.type()) {
 						case "tree": {
 							return ["rmdir", fullpath]
 						}
 						case "blob": {
 							// Git checks that the workdir.oid === stage.oid before deleting file
+							// @ts-ignore
 							if ((await stage.oid()) !== (await workdir.oid())) {
 								if (force) {
 									return ["delete", fullpath]
@@ -425,6 +457,7 @@ async function analyze({ fs, cache, onProgress, dir, gitdir, ref, force, filepat
 							return ["rmdir-index", fullpath]
 						}
 						default: {
+							// @ts-ignore
 							return ["error", `delete entry Unhandled type ${await stage.type()}`]
 						}
 					}
@@ -435,6 +468,7 @@ async function analyze({ fs, cache, onProgress, dir, gitdir, ref, force, filepat
 				// Possibly modified entries
 				case "111": {
 					/* eslint-enable no-fallthrough */
+					// @ts-ignore
 					switch (`${await stage.type()}-${await commit.type()}`) {
 						case "tree-tree": {
 							return
@@ -443,7 +477,9 @@ async function analyze({ fs, cache, onProgress, dir, gitdir, ref, force, filepat
 							// If the file hasn't changed, there is no need to do anything.
 							// Existing file modifications in the workdir can be be left as is.
 							if (
+								// @ts-ignore
 								(await stage.oid()) === (await commit.oid()) &&
+								// @ts-ignore
 								(await stage.mode()) === (await commit.mode()) &&
 								!force
 							) {
@@ -455,15 +491,20 @@ async function analyze({ fs, cache, onProgress, dir, gitdir, ref, force, filepat
 								// Note: canonical git only compares with the stage. But we're smart enough
 								// to compare to the stage AND the incoming commit.
 								if (
+									// @ts-ignore
 									(await workdir.oid()) !== (await stage.oid()) &&
+									// @ts-ignore
 									(await workdir.oid()) !== (await commit.oid())
 								) {
 									if (force) {
 										return [
 											"update",
 											fullpath,
+											// @ts-ignore
 											await commit.oid(),
+											// @ts-ignore
 											await commit.mode(),
+											// @ts-ignore
 											(await commit.mode()) !== (await workdir.mode()),
 										]
 									} else {
@@ -474,35 +515,45 @@ async function analyze({ fs, cache, onProgress, dir, gitdir, ref, force, filepat
 								return [
 									"update",
 									fullpath,
+									// @ts-ignore
 									await commit.oid(),
+									// @ts-ignore
 									await commit.mode(),
+									// @ts-ignore
 									(await commit.mode()) !== (await stage.mode()),
 								]
 							}
 							// Has file mode changed?
+							// @ts-ignore
 							if ((await commit.mode()) !== (await stage.mode())) {
+								// @ts-ignore
 								return ["update", fullpath, await commit.oid(), await commit.mode(), true]
 							}
 							// TODO: HANDLE SYMLINKS
 							// Has the file content changed?
+							// @ts-ignore
 							if ((await commit.oid()) !== (await stage.oid())) {
+								// @ts-ignore
 								return ["update", fullpath, await commit.oid(), await commit.mode(), false]
 							} else {
 								return
 							}
 						}
 						case "tree-blob": {
+							// @ts-ignore
 							return ["update-dir-to-blob", fullpath, await commit.oid()]
 						}
 						case "blob-tree": {
 							return ["update-blob-to-tree", fullpath]
 						}
 						case "commit-commit": {
+							// @ts-ignore
 							return ["mkdir-index", fullpath, await commit.oid(), await commit.mode()]
 						}
 						default: {
 							return [
 								"error",
+								// @ts-ignore
 								`update entry Unhandled type ${await stage.type()}-${await commit.type()}`,
 							]
 						}
@@ -511,9 +562,9 @@ async function analyze({ fs, cache, onProgress, dir, gitdir, ref, force, filepat
 			}
 		},
 		// Modify the default flat mapping
+
 		reduce: async function (parent, children) {
-			// @ts-ignore
-			children = flat(children)
+			children = _flat(children)
 			if (!parent) {
 				return children
 			} else if (parent && parent[0] === "rmdir") {

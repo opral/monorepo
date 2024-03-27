@@ -1,5 +1,5 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
-import isoGit from "../../vendored/isomorphic-git/index.js"
+import isoGit, { _worthWalking } from "../../vendored/isomorphic-git/index.js"
 import { modeToFileType } from "./helpers.js"
 
 // TODO: LSTAT is not properly impl. in the memory fs!
@@ -46,23 +46,6 @@ type StatusText =
 	| "unknown"
 
 type StatusList = [string, StatusText][]
-
-const worthWalking = (filepath: string, root: string) => {
-	if (
-		filepath === "." ||
-		root == undefined ||
-		root.length === 0 ||
-		root === "." ||
-		root === filepath
-	) {
-		return true
-	}
-	if (root.length > filepath.length) {
-		return root.startsWith(filepath + "/")
-	} else {
-		return filepath.startsWith(root + "/")
-	}
-}
 
 function normalizePath(path: string) {
 	return path
@@ -165,7 +148,7 @@ export async function statusList({
 					}
 				}
 				// match against base paths
-				if (!filepaths.some((base) => worthWalking(filepath, base))) {
+				if (!filepaths.some((base) => _worthWalking(filepath, base))) {
 					// eslint-disable-next-line unicorn/no-null -- the folder is not worth walking based on the passed filepaths - compare (1)
 					return null
 				}
