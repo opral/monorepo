@@ -19,6 +19,7 @@ import GenericHeader from "#src/interface/marketplace/categoryHeaders/cards/gene
 import AppHeader from "#src/interface/marketplace/categoryHeaders/categoryHeros/appHeader.jsx"
 import AstroHeader from "#src/interface/marketplace/categoryHeaders/cards/astro.jsx"
 import Stacks from "#src/interface/marketplace/categoryHeaders/toast/stacks.jsx"
+import RemixHeader from "#src/interface/marketplace/categoryHeaders/cards/remix.jsx"
 
 type SubCategoryApplication = "app" | "library" | "plugin" | "messageLintRule"
 
@@ -137,6 +138,14 @@ export default function Page(props: {
 					icon: "https://assets.vercel.com/image/upload/v1662130559/nextjs/Icon_light_background.png",
 					sections: ["apps", "guides", "plugins", "libraries"],
 					coverCard: <NextjsHeader />,
+				}
+			case "remix":
+				return {
+					title: "Remix - i18n Tooling",
+					description: "Recommend internationalization tooling for your Remix app.",
+					icon: "https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/external-projects/remix-paraglidejs/assets/remix.svg",
+					sections: ["apps", "guides", "plugins", "libraries"],
+					coverCard: <RemixHeader />,
 				}
 			case "solid": {
 				return {

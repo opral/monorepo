@@ -2,24 +2,24 @@ import { Button } from "#src/pages/index/components/Button.jsx"
 import * as m from "#src/paraglide/messages.js"
 import Link from "#src/renderer/Link.jsx"
 
-const SvelteHeader = () => {
+const RemixHeader = () => {
 	return (
 		<>
 			<div class="relative bg-surface-100 overflow-hidden rounded-xl border border-surface-200 flex flex-col md:flex-row flex-wrap md:items-end mb-8 px-4 py-4 gap-4">
 				<div class="relative z-30 flex-1 flex flex-col items-start gap-4 px-6 py-3 md:min-w-[380px]">
 					<div class="flex flex-col gap-2 pt-2 md:pt-6">
-						<p class="text-sm text-[#FF3E00] font-medium">For the Svelte Community</p>
+						<p class="text-sm text-surface-400 font-medium">For the Remix Community</p>
 						<h2 class="font-medium text-xl">Recommended i18n library</h2>
 					</div>
 					<p class="text-sm text-surface-500 pr-20">
-						A small collection of tooling to get you going to build your global svelt app.
+						A small collection of tooling to get you going to build your global remix app.
 					</p>
 					<div class="pt-6 flex gap-4">
-						<Button type="secondary" href="/g/2fg8ng94/guide-nilsjacobsen-buildAGlobalSvelteApp">
+						<Button
+							type="secondary"
+							href="/g/wxcebbig/guide-lorissigrist-useParaglideJsWithNextjsAppRouter"
+						>
 							{m.marketplace_application_header_svelte_button()}
-						</Button>
-						<Button type="text" chevron href="/g/2fg8ng94/guide-nilsjacobsen-buildAGlobalSvelteApp">
-							Svelte Summit Talk 2023
 						</Button>
 					</div>
 				</div>
@@ -36,17 +36,17 @@ const SvelteHeader = () => {
 					</div>
 					<h3 class="font-medium text-lg px-8 pb-1 z-20">Paraglide JS - i18n library</h3>
 					<p class="text-surface-500 px-8 pb-6 text-sm pr-20 z-20">
-						A i18n library without async resources. Build for the svelte community.
+						A i18n library without async resources. Build for the Remix community.
 					</p>
 					<div class="absolute z-20 top-4 right-4 w-8 h-8 border border-surface-400 rounded-full flex justify-center items-center group-hover:bg-surface-100 transition-all text-surface-500 group-hover:text-surface-900">
 						<Arrow />
 					</div>
-					<div class="absolute w-full h-full top-0 bg-gradient-to-r from-[#FF8F8F] to-[#FF906C] rounded-xl z-10 opacity-30" />
+					<div class="absolute w-full h-full top-0 bg-surface-300 rounded-xl z-10 opacity-20" />
 					<div class="absolute w-full h-full top-0 bg-gradient-to-t from-background rounded-xl z-10" />
 				</Link>
 				<div class="flex-1 h-[260px] flex flex-col gap-4 md:min-w-[380px]">
 					<Link
-						href="/g/2fg8ng94/guide-nilsjacobsen-buildAGlobalSvelteApp"
+						href="/g/pposhsfh"
 						class="w-full flex-1 bg-background rounded-xl border border-surface-300 flex flex-col relative group hover:border-surface-400 transition-all cursor-pointer"
 					>
 						<div class="pl-8 pb-2 -mt-[2px]">
@@ -61,9 +61,9 @@ const SvelteHeader = () => {
 							</svg>
 						</div>
 						<div class="flex-1 flex flex-col justify-end">
-							<h3 class="font-medium text-lg px-8 pb-1">Complete i18n Svelte Guide</h3>
+							<h3 class="font-medium text-lg px-8 pb-1">Remix Guide</h3>
 							<p class="text-surface-500 px-8 pb-6 text-sm pr-20">
-								A complete guide on how to adopt inlang with Paraglide JS.
+								How to integrate ParaglideJS into a Remix project.
 							</p>
 						</div>
 						<div class="absolute top-4 right-4 w-8 h-8 border border-surface-300 rounded-full flex justify-center items-center group-hover:bg-surface-100 transition-all text-surface-500 group-hover:text-surface-900">
@@ -71,13 +71,15 @@ const SvelteHeader = () => {
 						</div>
 					</Link>
 					<Link
-						href="/m/dxnzrydw"
-						class="w-full bg-background rounded-xl border border-surface-300 relative group hover:border-surface-400 transition-all cursor-pointer"
+						href="/m/fnhuwzrx"
+						class="w-full flex-1 bg-background rounded-xl border border-surface-300 flex flex-col relative group hover:border-surface-400 transition-all cursor-pointer"
 					>
-						<h3 class="font-medium text-lg px-8 pb-1 pt-6">SvelteKit Adapter</h3>
-						<p class="text-surface-500 px-8 pb-6 text-sm pr-20">
-							A SvelteKit integration for ParaglideJS.
-						</p>
+						<div class="flex-1 flex flex-col justify-end">
+							<h3 class="font-medium text-lg px-8 pb-1">Remix Adapter</h3>
+							<p class="text-surface-500 px-8 pb-6 text-sm pr-20">
+								A Remix Integration for ParaglideJS.
+							</p>
+						</div>
 						<div class="absolute top-4 right-4 w-8 h-8 border border-surface-300 rounded-full flex justify-center items-center group-hover:bg-surface-100 transition-all text-surface-500 group-hover:text-surface-900">
 							<Arrow />
 						</div>
@@ -88,7 +90,7 @@ const SvelteHeader = () => {
 	)
 }
 
-export default SvelteHeader
+export default RemixHeader
 
 function Arrow() {
 	return (
