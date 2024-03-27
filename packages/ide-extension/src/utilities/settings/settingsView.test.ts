@@ -32,6 +32,10 @@ vi.mock("../state", () => ({
 		project: {
 			settings: vi.fn().mockReturnValue({ some: "settings" }),
 			setSettings: vi.fn(),
+			installed: {
+				plugins: vi.fn().mockReturnValue([]),
+				messageLintRules: vi.fn().mockReturnValue([]),
+			},
 		},
 	})),
 }))
