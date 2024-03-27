@@ -28,5 +28,6 @@
 	"recommends": ["g/3go4f04m", "g/00162hsd", "g/wxcebbig", "g/uxohikde"],
 	"publisherName": "Nils Jacobsen",
 	"publisherIcon": "https://avatars.githubusercontent.com/u/58360188?s=96&v=4",
+	"publisherLink": "https://github.com/NilsJacobsen",
 	"license": "Apache-2.0"
 }

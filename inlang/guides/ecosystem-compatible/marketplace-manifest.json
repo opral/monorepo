@@ -26,11 +26,13 @@
 		"ecosystem compatible",
 		"astro",
 		"nextjs",
+		"remix",
 		"svelte",
 		"guides-general"
 	],
 	"recommends": ["g/2fg8ng94", "g/00162hsd", "g/wxcebbig", "g/uxohikde"],
 	"publisherName": "Nils Jacobsen",
+	"publisherLink": "https://github.com/NilsJacobsen",
 	"publisherIcon": "https://avatars.githubusercontent.com/u/58360188?s=96&v=4",
 	"license": "Apache-2.0"
 }

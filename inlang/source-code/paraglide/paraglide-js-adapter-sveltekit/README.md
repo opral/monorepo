@@ -1,45 +1,28 @@
-# Paraglide Adapter SvelteKit
+![Dead Simple i18n. Typesafe, Small Footprint, SEO-Friendly and with an IDE Integration.](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/assets/header.png)
 
-The best way to internationalize your SvelteKit App!
+<doc-features>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="Internationalized Routing" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-next/assets/i18n-routing.png"></doc-feature>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="Tiny Bundle Size" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-next/assets/bundle-size.png"></doc-feature>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="No route Param needed" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/assets/no-param.png"></doc-feature>
+</doc-features>
 
-- 🪂 Automatically detect & manage the language
-- 💨 A breeze to set up - No need to change your `routes`
-- 🪄 Automatically translate existing links
-- 💬 Translated paths
-- 🤖 SEO friendly out of the box
 
-This is a SvelteKit integration for the [ParaglideJS i18n library](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
+## Getting Started
 
-## Quickstart
+### 1. Install dependenceies
 
-There are four steps to setting up the Paraglide Adapter with SvelteKit.
-
-1. Set up the Vite Plugin
-2. Initialise the Adapter
-3. Add the Adapter Component to your Layout
-4. Add the Hooks.
-
-If you don't already have a SvelteKit app set up please follow [SvelteKit's getting Started Guide](https://kit.svelte.dev/docs/creating-a-project).
-
-### Step Zero: Set up Paraglide
-
-To use the adapter you have Paraglide set up.
+Install [ParaglideJS]() and the [ParaglideJS SvelteKit Adapter]().
 
 ```bash
 npx @inlang/paraglide-js init
-```
-
-This will do a few things:
-- Install necessary dependencies
-- Create necessary configuration files
-
-### 1. Add the Vite Plugin
-
-```bash
 npm i -D @inlang/paraglide-js-adapter-sveltekit
 ```
 
-Then add the adapter to your `vite.config.js` file:
+This will also generate a `project.inlang/settings.json` file.
+
+### 2. Use Vite Plugin 
+
+Add the adapter-plugin to your `vite.config.js` file:
 
 ```js
 import { paraglide } from "@inlang/paraglide-js-adapter-sveltekit/vite"
@@ -56,12 +39,7 @@ export default defineConfig({
 })
 ```
 
-<doc-accordion 
-	heading="Do I still need to run `paraglide-js compile` ?" 
-	text="This replaces the need for calling `paraglide-js compile` in your build script. It will automatically compiler and recompile your translations when you run npm run dev or npm run build. ">
-</doc-accordion>
-
-### 2. Initialise the Adapter
+### 3. Initialise the Adapter
 
 Create a `src/lib/i18n.js` file:
 
@@ -76,11 +54,11 @@ export const i18n = createI18n(runtime);
 `createI18n` will be your one-stop-shop for configuring the adapter.
 
 <doc-accordion
-	heading="Does it need to be in src/lib/i18n.js ?"
+	heading="Does this need to be in src/lib/i18n.js ?"
 	text="No. You can place this file anywhere. Be aware that you will be importing from here a lot, so make sure it's somewhere convenient.">
 </doc-accordion>
 
-### 3. Set up the Language Provider
+### 4. Add the Language Provider to your Layout
 
 Add the `ParaglideJS` component to your layout and pass it the `i18n` instance.
 
@@ -96,12 +74,7 @@ Add the `ParaglideJS` component to your layout and pass it the `i18n` instance.
 </ParaglideJS>
 ```
 
-This does a few things:
-1. Detect the language
-2. Add `rel="alternate"` links to your page head
-3. Translate any `<a href>` attributes on your page. 
-
-### 4. Add the Hooks
+### 5. Add the Hooks
 
 In your `src/hooks.js` file, use the `i18n` instance to add the `reroute` hook:
 
@@ -110,7 +83,7 @@ import { i18n } from '$lib/i18n.js'
 export const reroute = i18n.reroute()
 ```
 
-> The reroute hook was added in SvelteKit 2.3.0. You might have to update your SvelteKit version.
+> The reroute hook was added in SvelteKit 2.3.0
 
 In `src/hooks.server.js` add the handle hook. 
 
@@ -121,24 +94,18 @@ export const handle = i18n.handle()
 ```
 
 This will make the language and text-direction on `event.locals.paraglide`.
+To set the `lang` and `dir` attributes on your `<html>` tag add placeholders in `src/app.html`. These placeholders will be replaced by the `handle` hook.
 
-## 5. Go try it out!
+```html
+<!-- src/app.html -->
+<html lang="%paraglide.lang%" dir="%paraglide.textDirection%"> 
+```
+
+## Go try it out!
 
 Visit `/` to see your default language, and `/{lang}` to see other languages. All links should be translated automatically.
 
 ## Advanced Setup
-
-### SEO Considerations
-
-The `<ParaglideJS>` component automatically adds `rel="alternate"` links to your page head. You don't have to do that yourself.
-
-To set the `lang` and `dir` attributes on your `<html>` tag add placeholders in `src/app.html`.
-
-```html
-<html lang="%paraglide.lang%" dir="%paraglide.textDirection%"> 
-```
-
-These will automatically be replaced with the correct values.
 
 ### Excluding certain routes
 
@@ -202,16 +169,14 @@ Links are translated automatically using a preprocessor. This means that you can
 ```svelte
 <a href="/about">{m.about()}</a>
 
-<!-- will become -->
+<!-- will become on of -->
 
 <a href="/en/about">{m.about()}</a>
 <a href="/de/uber-uns">{m.about()}</a>
 <a href="/fr/a-propos">{m.about()}</a>
-
-<!-- depending on the current language -->
 ```
 
-If you want a link to be translated into a specific language set the `hreflang` attribute.
+If you want a link to be translated into a _specific_ language set the `hreflang` attribute.
 
 ```svelte
 <a href="/about" hreflang="de">{m.about()}</a>
@@ -223,7 +188,7 @@ If you want a link to be translated into a specific language set the `hreflang` 
 Opt-out of translation by adding a `data-no-translate` attribute.
 
 ```svelte
-<!-- this will not be translated -->
+<!-- this will never be translated -->
 <a href="/about" data-no-translate>{m.about()}</a>
 ```
 
@@ -231,11 +196,11 @@ Other attributes that are also translated are:
 - The `action` attribute on `form` elements
 - The `formaction` attribute on `button` elements
 
-> If you have other attributes that you want to be translated [open an issue](https://www.github.com/opral/monorepo/issues).
+> If you have other attributes that you want to be translated [open an issue](https://www.github.com/opral/inlang-paraglide-js/issues).
 
 ### Programmatic Navigation with Translated Paths
 
-SvelteKit offers `goto` and `redirect` to navigate programmatically. These cannot be translated automatically. Localize these with the `i18n.resolveRoute()` method.
+SvelteKit's `goto` and `redirect` cannot be translated automatically. Localize the urls you pass to them with `i18n.resolveRoute()`.
 
 ```js
 import { i18n } from '$lib/i18n.js'
@@ -244,13 +209,13 @@ import { goto } from '$app/navigation'
 
 redirect(i18n.resolveRoute("/about", "en"))
 
-//Omitting the language argument uses the current language
+//Omitting the language argument uses the current languageTag()
 goto(i18n.resolveRoute("/about"))
 ```
 
 ### Language Switchers
 
-Language switchers are tricky, because we need to dynamically translate the current URL path, which is itself translated. We need to get the untranslated version of the current path & translate it into the target language.
+Language switchers are tricky because we need to dynamically translate the current URL path, which is itself translated. We need to get the untranslated version of the current path & translate it into the target language.
 
 <doc-accordion
 	heading="Wait, do I thought I don't need wrap my links with the Adapter?"
@@ -286,17 +251,9 @@ Use this to create a language switcher.
 {/each}
 ```
 
-This is also usefull for deciding which navigation item is currently active.
+### Overriding Text direction
 
-```svelte
-<li aria-current={i18n.route($page.url.pathname) === "/" ? "page" : undefined}>
-	...
-</li>
-```
-
-### Determining text direction
-
-Paraglide guesses the text direction using the `Intl.Locale` API. This is not supported in all browsers. Use the `textDirection` option to make sure the text direction is always correct.
+Paraglide guesses the text direction using the `Intl.Locale` API. This is not supported in all runtimes. Use the `textDirection` option to provide the text direction yourself.
 
 ```js
 import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
@@ -354,11 +311,9 @@ export async function load({ depends }) {
 
 ## Caveats
 
-The adapter is using a Preprocessor for link localisation. There are a few caveats to be aware of: 
-
-1. Links in the same Layout Component as `<ParagldieJS>` will not be translated. 
-2. Using a `{...spread}` operator on an element will cause the preprocessor to place all props on that element into one giant `{...spread}`. If you are using proxies that may cause issues.
-3. If you are using a function-call as the value to `hreflang` the function will be called twice per render. If it has side-effects this may cause issues.
+1. Links in the same Layout Component as `<ParagldieJS>` will not be translated. This will also log a warngin in development.
+2. Messages are not reactive. Don't use them in server-side module scope.
+3. Sideeffects triggered by `data` will run on language changes even if the data didn't change. If the data is language-dependent the sideeffect will run twice. 
 
 ### Using messages in `+layout.svelte`
 

@@ -27,6 +27,7 @@
 		"ecosystem compatible",
 		"astro",
 		"nextjs",
+		"remix",
 		"vue",
 		"angular",
 		"flutter",
@@ -38,5 +39,6 @@
 	"recommends": ["m/gerre34r", "g/00162hsd", "g/wxcebbig", "g/uxohikde"],
 	"publisherName": "Loris Sigrist",
 	"publisherIcon": "https://avatars.githubusercontent.com/u/43482866?v=4",
+	"publisherLink": "https://github.com/LorisSigrist",
 	"license": "Apache-2.0"
 }

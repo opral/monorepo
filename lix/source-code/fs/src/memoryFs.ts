@@ -2,11 +2,11 @@ import type { NodeishFilesystem, NodeishStats, FileChangeInfo } from "./NodeishF
 import { FilesystemError } from "./errors/FilesystemError.js"
 import { normalPath, getBasename, getDirname } from "./utilities/helpers.js"
 
-type Inode = Uint8Array | Set<string>
+type Inode = Uint8Array | Set<string> | { placeholder: true }
 
 export type Snapshot = {
 	fsMap: {
-		[key: string]: string[] | string
+		[key: string]: string[] | string | { placeholder: true }
 	}
 	fsStats: {
 		[key: string]: {
@@ -26,10 +26,18 @@ export function toSnapshot(fs: NodeishFilesystem) {
 	return {
 		fsMap: Object.fromEntries(
 			[...fs._state.fsMap].map(([path, content]) => {
+				let serializedContent
+				if (content instanceof Set) {
+					serializedContent = [...content].sort()
+				} else if (content.placeholder) {
+					serializedContent = content
+				} else {
+					serializedContent = content.toString("base64")
+				}
 				return [
 					path,
 					// requires node buffers, but no web standard method exists
-					content instanceof Set ? [...content].sort() : content.toString("base64"),
+					serializedContent,
 
 					// Alternative to try:
 					// onst binaryData = new Uint8Array([255, 116, 79, 99 /*...*/]);
@@ -74,6 +82,10 @@ export function fromSnapshot(
 				const data = Buffer.from(content, "base64")
 				// new TextEncoder().encode(decodeURIComponent(escape(atob(content)))) Buffer.from()
 				return [pathPrefix + path, data]
+
+				// @ts-ignore
+			} else if (content?.placeholder) {
+				return [pathPrefix + path, content]
 			}
 
 			return [pathPrefix + path, new Set(content as string[])]
@@ -138,6 +150,7 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 		return Object.assign({}, stats)
 	}
 
+	// lstat is like stat, but does not follow symlinks
 	async function lstat(path: Parameters<NodeishFilesystem["lstat"]>[0]) {
 		path = normalPath(path)
 		const stats: NodeishStats | undefined = state.fsStats.get(path)
@@ -148,6 +161,40 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 
 	return {
 		_state: state,
+
+		_createPlaceholder: async function (
+			path: Parameters<NodeishFilesystem["writeFile"]>[0],
+			options?: Parameters<NodeishFilesystem["writeFile"]>[2]
+		) {
+			path = normalPath(path)
+			const dirName = getDirname(path)
+			const baseName = getBasename(path)
+			let parentDir: Inode | undefined = state.fsMap.get(dirName)
+			if (!(parentDir instanceof Set)) {
+				await this.mkdir(dirName, { recursive: true })
+
+				parentDir = state.fsMap.get(dirName)
+				if (!(parentDir instanceof Set)) {
+					throw new FilesystemError("ENOENT", path, "writeFile")
+				}
+			}
+
+			parentDir.add(baseName)
+			const isSymbolicLink = options?.mode === 120000
+			newStatEntry(path, state.fsStats, isSymbolicLink ? 2 : 0, options?.mode ?? 0o644)
+			state.fsMap.set(path, { placeholder: true })
+		},
+
+		_isPlaceholder: function (path: Parameters<NodeishFilesystem["writeFile"]>[0]) {
+			path = normalPath(path)
+			const entry = state.fsMap.get(path)
+
+			if (entry && "placeholder" in entry) {
+				return true
+			}
+			return false
+		},
+
 		writeFile: async function (
 			path: Parameters<NodeishFilesystem["writeFile"]>[0],
 			data: Parameters<NodeishFilesystem["writeFile"]>[1],
@@ -194,6 +241,7 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 
 			if (file instanceof Set) throw new FilesystemError("EISDIR", path, "readFile")
 			if (file === undefined) throw new FilesystemError("ENOENT", path, "readFile")
+			if ("placeholder" in file) throw new FilesystemError("EPLACEHOLDER", path, "readFile")
 			if (!(options?.encoding || typeof options === "string")) return file
 
 			return decoder.decode(file)
@@ -216,28 +264,33 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			const baseName = getBasename(path)
 			const parentDir: Inode | undefined = state.fsMap.get(dirName)
 
-			if (typeof parentDir === "string") {
+			if (typeof parentDir === "string" || (parentDir && "palceholder" in parentDir)) {
 				throw new FilesystemError("ENOTDIR", path, "mkdir")
 			}
 
 			if (parentDir && parentDir instanceof Set) {
 				if (state.fsMap.has(path)) {
-					throw new FilesystemError("EEXIST", path, "mkdir")
+					if (!options?.recursive) {
+						throw new FilesystemError("EEXIST", path, "mkdir")
+					} else {
+						return undefined
+					}
 				}
 
 				parentDir.add(baseName)
+
 				newStatEntry(path, state.fsStats, 1, 0o755)
 				state.fsMap.set(path, new Set())
+
 				for (const listener of listeners) {
 					listener({ eventType: "rename", filename: dirName + baseName })
 				}
 				return path
-			}
-
-			if (options?.recursive) {
-				const firstPath = await mkdir(getDirname(path), options)
+			} else if (options?.recursive) {
+				const parent = getDirname(path)
+				const parentRes = await mkdir(parent, options)
 				await mkdir(path, options)
-				return firstPath
+				return parentRes
 			}
 
 			throw new FilesystemError("ENOENT", path, "mkdir")
@@ -256,12 +309,15 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			if (parentDir === undefined || target === undefined)
 				throw new FilesystemError("ENOENT", path, "rm")
 
-			if (parentDir instanceof Uint8Array) throw new FilesystemError("ENOTDIR", path, "rm")
+			if (parentDir instanceof Uint8Array || "placeholder" in parentDir) {
+				throw new FilesystemError("ENOTDIR", path, "rm")
+			}
 
-			if (target instanceof Uint8Array) {
+			if (target instanceof Uint8Array || "placeholder" in target) {
 				parentDir.delete(baseName)
 				state.fsStats.delete(path)
 				state.fsMap.delete(path)
+				// TODO: check if placeholder should skip firing
 				for (const listener of listeners) {
 					listener({ eventType: "rename", filename: dirName + baseName })
 				}
@@ -392,6 +448,10 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			if (parentDir instanceof Uint8Array || target instanceof Uint8Array)
 				throw new FilesystemError("ENOTDIR", path, "rmdir")
 
+			if ("placeholder" in parentDir || "placeholder" in target) {
+				throw new FilesystemError("ENOTDIR", path, "rmdir")
+			}
+
 			if (target.size) throw new FilesystemError("ENOTEMPTY", path, "rmdir")
 
 			parentDir.delete(baseName)
@@ -416,12 +476,12 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 				throw new FilesystemError("EEXIST", path, "symlink", target)
 			}
 
-			if (parentDir instanceof Uint8Array) {
-				throw new FilesystemError("ENOTDIR", path, "symlink", target)
-			}
-
 			if (parentDir === undefined) {
 				throw new FilesystemError("ENOENT", path, "symlink", target)
+			}
+
+			if (parentDir instanceof Uint8Array || "placeholder" in parentDir) {
+				throw new FilesystemError("ENOTDIR", path, "symlink", target)
 			}
 
 			if (targetInode !== undefined) {
@@ -441,7 +501,7 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			if (parentDir === undefined || target === undefined)
 				throw new FilesystemError("ENOENT", path, "unlink")
 
-			if (parentDir instanceof Uint8Array) {
+			if (parentDir instanceof Uint8Array || "placeholder" in parentDir) {
 				throw new FilesystemError("ENOTDIR", path, "unlink")
 			}
 

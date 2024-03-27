@@ -33,7 +33,8 @@
 		"1153khjh": "./inlang/external-projects/tolgee/marketplace-manifest.json",
 		"kkfjusgu": "./inlang/external-projects/svelte-i18n/marketplace-manifest.json",
 		"92fst3wd": "./inlang/source-code/globelens/marketplace-manifest.json",
-		"193hsyds": "./inlang/source-code/plugins/next-intl/marketplace-manifest.json"
+		"193hsyds": "./inlang/source-code/plugins/next-intl/marketplace-manifest.json",
+		"fnhuwzrx": "./inlang/external-projects/remix-paraglidejs/marketplace-manifest.json"
 	},
 	"g": {
 		"mqlyfa7l": "./inlang/guides/dont-lazy-load/marketplace-manifest.json",
@@ -51,6 +52,7 @@
 		"hhfueysj": "./inlang/guides/next-intl-with-ide-extension/marketplace-manifest.json",
 		"utqgkmzp": "./inlang/guides/build-an-internationalized-astro-app-using-paraglide/marketplace-manifest.json",
 		"oostafhs": "./inlang/guides/translation-review-system/marketplace-manifest.json",
-		"ssryldhd": "./inlang/guides/translation-automation/marketplace-manifest.json"
+		"ssryldhd": "./inlang/guides/translation-automation/marketplace-manifest.json",
+		"pposhsfh": "./inlang/guides/use-paraglide-with-remix/marketplace-manifest.json"
 	}
 }

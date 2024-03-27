@@ -71,7 +71,7 @@ Before publishing your plugin to the marketplace, thoroughly test it to ensure i
 
 To make your plugin available in the inlang.com marketplace, see [Publish on marketplace](/documentation/publish-to-marketplace).
 
-Feel free to [join our Discord](https://discord.gg/gdMPPWy57R) if you have any questions or need assistance developing and publishing your plugin.
+Feel free to [join our Discord](https://discord.gg/CNPfhWpcAa) if you have any questions or need assistance developing and publishing your plugin.
 
 <br/>
 

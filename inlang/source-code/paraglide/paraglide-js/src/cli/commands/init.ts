@@ -44,7 +44,7 @@ export const initCommand = new Command()
 		// We are risking that there is no git repo. As long as we only use FS features and no Git features
 		// from the SDK we should be fine.
 		// Basic operations like `loadProject` should always work without a repo since it's used in CI.
-		const repo = await openRepository(repoRoot ?? process.cwd(), {
+		const repo = await openRepository(repoRoot ?? "file://" + process.cwd(), {
 			nodeishFs: nodeFsPromises,
 		})
 
