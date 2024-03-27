@@ -46,6 +46,8 @@ function getWebviewContent(args: {
 	)
 
 	const settings = state().project.settings()
+	const installedPlugins = state().project.installed.plugins()
+	const installedMessageLintRules = state().project.installed.messageLintRules()
 
 	return `<!DOCTYPE html>
 				<html lang="en">
@@ -64,11 +66,12 @@ function getWebviewContent(args: {
 							
 							// RENDER WEB COMPONENT
 							const settingsContainer = document.getElementById('settings-container');
-							const settingsTemplate = html\`
-								<inlang-settings .settings=${settings}></inlang-settings>
-							\`;
-							
-							render(settingsTemplate, settingsContainer);
+							const settings = document.createElement('inlang-settings');
+							settings.installedPlugins = ${JSON.stringify(installedPlugins)};
+							settings.installedMessageLintRules = ${JSON.stringify(installedMessageLintRules)};
+							settings.settings = ${JSON.stringify(settings)};
+
+							settingsContainer.appendChild(settings);
 
 							// EVENTS
 							document.querySelector('inlang-settings').addEventListener('onSetSettings', (settings) => {
