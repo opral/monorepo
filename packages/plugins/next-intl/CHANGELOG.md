@@ -1,5 +1,30 @@
 # @inlang/plugin-next-intl
 
+## 1.3.11
+
+### Patch Changes
+
+- 923a4bb: fix discord link
+
+## 1.3.10
+
+### Patch Changes
+
+- @inlang/sdk@0.28.2
+
+## 1.3.9
+
+### Patch Changes
+
+- @inlang/sdk@0.28.1
+
+## 1.3.8
+
+### Patch Changes
+
+- Updated dependencies [1e43ae4]
+  - @inlang/sdk@0.28.0
+
 ## 1.3.7
 
 ### Patch Changes

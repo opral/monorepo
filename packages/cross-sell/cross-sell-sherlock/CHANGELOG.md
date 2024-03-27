@@ -1,5 +1,11 @@
 # @inlang/cross-sell-sherlock
 
+## 0.0.4
+
+### Patch Changes
+
+- 923a4bb: fix discord link
+
 ## 0.0.3
 
 ### Patch Changes

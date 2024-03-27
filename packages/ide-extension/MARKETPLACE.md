@@ -39,7 +39,7 @@ Just _highlight/select_ the text you want and hit `cmd .` or `ctrl +` (Quick Fix
 
 Hover over the message to see the tooltip with the translation.
 
-If something isn't working as expected, please join our [Discord](https://discord.gg/gdMPPWy57R) or [create an issue](https://github.com/opral/monorepo/issues/new/choose). We are happy to help!
+If something isn't working as expected, please join our [Discord](https://discord.gg/CNPfhWpcAa) or [create an issue](https://github.com/opral/monorepo/issues/new/choose). We are happy to help!
 
 
 # Let's get started
@@ -63,7 +63,7 @@ Look at the [example repository](https://github.com/opral/example) and it's [set
 
 ## Support: Join our Discord!
 
-If something isn't working as expected or you have a feature suggestion, please join our [Discord](https://discord.gg/DEHKgmx2) or [create an issue](<[https](https://github.com/opral/monorepo/issues/new/choose)>). We are happy to help!
+If something isn't working as expected or you have a feature suggestion, please join our [Discord](https://discord.gg/CNPfhWpcAa) or [create an issue](<[https](https://github.com/opral/monorepo/issues/new/choose)>). We are happy to help!
 
 ## Plugin authors
 

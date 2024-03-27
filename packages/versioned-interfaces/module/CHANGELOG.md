@@ -1,5 +1,11 @@
 # @inlang/module
 
+## 1.2.9
+
+### Patch Changes
+
+- @inlang/plugin@2.4.9
+
 ## 1.2.8
 
 ### Patch Changes
