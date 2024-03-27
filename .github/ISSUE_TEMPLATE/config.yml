@@ -3,6 +3,9 @@ contact_links:
   - name: Paraglide JS
     url: https://github.com/opral/inlang-paraglide-js
     about: Issue tracker for Paraglide JS.
+  - name: inlang.com (website)
+    url: https://github.com/opral/inlang.com
+    about: Issue tracker for inlang.com
   - name: Sherlock (VSCode Extension)
     url: https://github.com/opral/inlang-sherlock
     about: Issue tracker for Sherlock.
