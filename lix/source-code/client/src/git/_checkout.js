@@ -2,7 +2,6 @@ import {
 	STAGE,
 	_GitRefManager,
 	_readObject,
-	_writeObject,
 	_GitConfigManager,
 	_flat,
 	walk,
@@ -109,6 +108,7 @@ export async function _checkout({
 			// @ts-ignore
 			.filter(([method]) => method === "conflict")
 			// @ts-ignore
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			.map(([method, fullpath]) => fullpath)
 		if (conflicts.length > 0) {
 			throw new Errors.CheckoutConflictError(conflicts)
@@ -119,6 +119,7 @@ export async function _checkout({
 			// @ts-ignore
 			.filter(([method]) => method === "error")
 			// @ts-ignore
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			.map(([method, fullpath]) => fullpath)
 		if (errors.length > 0) {
 			throw new Errors.InternalError(errors.join(", "))
@@ -184,6 +185,7 @@ export async function _checkout({
 					} catch (e) {
 						// @ts-ignore
 						if (e.code === "ENOTEMPTY") {
+							// eslint-disable-next-line no-console, no-undef
 							console.log(`Did not delete ${fullpath} because directory is not empty`)
 						} else {
 							throw e
@@ -198,6 +200,7 @@ export async function _checkout({
 				// @ts-ignore
 				.filter(([method]) => method === "mkdir" || method === "mkdir-index")
 				// @ts-ignore
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 				.map(async function ([_, fullpath]) {
 					const filepath = `${dir}/${fullpath}`
 					await fs.mkdir(filepath)
@@ -247,7 +250,7 @@ export async function _checkout({
 									await fs.writelink(filepath, object)
 								} else {
 									// @ts-ignore
-									throw new InternalError(
+									throw new Errors.InternalError(
 										`Invalid mode 0o${mode.toString(8)} detected in blob ${oid}`
 									)
 								}
@@ -277,6 +280,7 @@ export async function _checkout({
 								})
 							}
 						} catch (e) {
+							// eslint-disable-next-line no-undef, no-console
 							console.log(e)
 						}
 					})
