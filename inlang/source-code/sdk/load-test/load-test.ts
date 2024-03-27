@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-imports */
 /* eslint-disable no-console */
-import { openRepository } from "@lix-js/client"
+import { findRepoRoot, openRepository } from "@lix-js/client"
 import { loadProject } from "@inlang/sdk"
 
 import { dirname, join } from "node:path"
@@ -15,7 +15,7 @@ const debug = _debug("load-test")
 
 const exec = promisify(childProcess.exec)
 
-const throttleEventLogs = 2000
+const throttleMessageGetAllEvents = 2000
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -54,7 +54,12 @@ export async function runLoadTest(
 	await generateMessageFile(1)
 
 	debug("opening repo and loading project")
-	const repo = await openRepository(__dirname, { nodeishFs: fs })
+	const repoRoot = await findRepoRoot({ nodeishFs: fs, path: __dirname })
+	if (!repoRoot) {
+		debug("no repo root.")
+		return
+	}
+	const repo = await openRepository(repoRoot, { nodeishFs: fs })
 	const project = await loadProject({ repo, projectPath })
 
 	debug("subscribing to project.errors")
@@ -65,26 +70,18 @@ export async function runLoadTest(
 	})
 
 	if (subscribeToMessages) {
-		debug("subscribing to messages.getAll")
-		let messagesEvents = 0
-		const logMessagesEvent = throttle(throttleEventLogs, (messages: any) => {
-			debug(`messages changed event: ${messagesEvents}, length: ${messages.length}`)
+		debug(`subscribing to messages.getAll${subscribeToLintReports ? " with lint reports" : ""}`)
+		let countMessagesGetAllEvents = 0
+		const messagesGetAllEvent = throttle(throttleMessageGetAllEvents, (messages: any) => {
+			debug(`messages getAll event: ${countMessagesGetAllEvents}, length: ${messages.length}`)
+			if (subscribeToLintReports) {
+				const r = project.query.messageLintReports.getAll()
+				debug(`lint reports length: ${r.length}`)
+			}
 		})
 		project.query.messages.getAll.subscribe((messages) => {
-			messagesEvents++
-			logMessagesEvent(messages)
-		})
-	}
-
-	if (subscribeToLintReports) {
-		debug("subscribing to lintReports.getAll")
-		let lintEvents = 0
-		const logLintEvent = throttle(throttleEventLogs, (reports: any) => {
-			debug(`lint reports changed event: ${lintEvents}, length: ${reports.length}`)
-		})
-		project.query.messageLintReports.getAll.subscribe((reports) => {
-			lintEvents++
-			logLintEvent(reports)
+			countMessagesGetAllEvents++
+			messagesGetAllEvent(messages)
 		})
 	}
 
@@ -138,7 +135,7 @@ async function isMockRpcServerRunning(): Promise<boolean> {
 	return true
 }
 
-function causeString(error: any) {
+function causeString(error: any): string {
 	if (typeof error === "object" && error.cause) {
 		if (error.cause.errors?.length) return error.cause.errors.join(", ")
 		if (error.cause.code) return "" + error.cause.code
