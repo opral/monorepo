@@ -28,16 +28,18 @@ services:
     container_name: exp
     hostname: exp
     labels: [ dev.orbstack.domains=exp.local ]
-    image: exp:3
+    image: exp:4
     build:
       dockerfile_inline: |
         FROM node:20-slim
         RUN apt upgrade && apt update
         RUN apt-get install openssl curl libssl-dev -y
-        RUN corepack enable pnpm
+        # RUN corepack enable pnpm
+        RUN npm -g install pnpm
         COPY --chown=app:app . /workspace
-        RUN cd /workspace && pnpm --filter=@lix-js/client --filter=@lix-js/fs install
-        RUN cd /workspace/exp && pnpm install
+        WORKDIR /workspace
+        RUN pnpm --filter=@lix-js/client --filter=@lix-js/fs --filter=lix-app install 
+        RUN pnpm --filter=@lix-js/client --filter=@lix-js/fs --filter=lix-app build
         
         # todo: shell aliase
     ports: [ "3334" ]
