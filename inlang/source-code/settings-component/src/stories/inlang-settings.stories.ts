@@ -1,6 +1,10 @@
 import "./inlang-settings.ts"
 import type { Meta, StoryObj } from "@storybook/web-components"
-import { mockSettings, mockInstalledPlugin, mockInstalledMessageLintRule } from "../mock/project.js"
+import {
+	mockSettings,
+	mockInstalledPlugins,
+	mockInstalledMessageLintRules,
+} from "../mock/project.js"
 import { html } from "lit"
 
 const meta: Meta = {
@@ -16,9 +20,9 @@ export const Default: StoryObj = {
 		html`
 			<inlang-settings
 				.settings=${mockSettings}
-				.installedPlugins=${mockInstalledPlugin}
-				.installedMessageLintRules=${mockInstalledMessageLintRule}
-				@setSettings=${(settings: any) => console.info("save", settings)}
+				.installedPlugins=${mockInstalledPlugins}
+				.installedMessageLintRules=${mockInstalledMessageLintRules}
+				@set-settings=${(settings: any) => console.info("save", settings)}
 			></inlang-settings>
 		`,
 }
@@ -28,11 +32,11 @@ export const Stringified: StoryObj = {
 		html`
 			<inlang-settings
 				settings=${JSON.stringify(mockSettings)}
-				installedPlugins=${JSON.stringify(mockInstalledPlugin)}
-				installedMessageLintRules=${JSON.stringify(mockInstalledMessageLintRule)}
+				installedPlugins=${JSON.stringify(mockInstalledPlugins)}
+				installedMessageLintRules=${JSON.stringify(mockInstalledMessageLintRules)}
 			></inlang-settings>
 			<script>
-				document.querySelector("inlang-settings").addEventListener("setSettings", (settings) => {
+				document.querySelector("inlang-settings").addEventListener("set-settings", (settings) => {
 					console.info("save", settings)
 				})
 			</script>
