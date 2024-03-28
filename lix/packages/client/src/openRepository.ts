@@ -126,6 +126,8 @@ export async function openRepository(
 		}
 	}
 
+	// Ignoring parsing errror and just using what we can get from the url, as we support also some edge cases for local repos that are not 100% clear yet
+	// see line 90 for explanation of lix uri parts
 	const { protocol, lixHost, repoHost, owner, repoName, username, password, namespace } =
 		parseLixUri(url)
 	if (debug && (username || password)) {
@@ -134,7 +136,7 @@ export async function openRepository(
 		)
 	}
 
-	// console.log({ namespace, protocol, lixHost, repoHost, owner, repoName, username, password })
+	// console.log({ namespace, protocol, lixHost, repoHost, owner, repoName, username, password, error })
 
 	const isWhitelistedRepo = whitelistedExperimentalRepos.includes(
 		`${owner}/${repoName}`.toLocaleLowerCase()
@@ -191,7 +193,9 @@ export async function openRepository(
 	const gitUrl = repoName ? `https://${repoHost}/${owner}/${repoName}` : ""
 
 	if (!gitUrl && debug) {
-		console.warn("valid repo url / local repo not found, only fs features available outside of repo")
+		console.warn(
+			"valid repo url / local repo not found, only fs features available outside of repo"
+		)
 	}
 
 	const expFeatures = Object.entries(experimentalFeatures) // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -651,7 +655,9 @@ export async function openRepository(
 
 		async forkStatus() {
 			if (!gitUrl) {
-				throw new Error("Could not find repo url, only github supported for forkStatus at the moment")
+				throw new Error(
+					"Could not find repo url, only github supported for forkStatus at the moment"
+				)
 			}
 			// uncomment to disable: return { ahead: 0, behind: 0, conflicts: false }
 			const repo = await this
@@ -951,7 +957,9 @@ export async function openRepository(
 
 		async mergeUpstream(cmdArgs) {
 			if (!gitUrl) {
-				throw new Error("Could not find repo url, only github supported for mergeUpstream at the moment")
+				throw new Error(
+					"Could not find repo url, only github supported for mergeUpstream at the moment"
+				)
 			}
 			const branch =
 				cmdArgs?.branch ||
@@ -1030,7 +1038,9 @@ export async function openRepository(
 
 		async getBranches() {
 			if (!gitUrl) {
-				throw new Error("Could not find repo url, only github supported for getBranches at the moment")
+				throw new Error(
+					"Could not find repo url, only github supported for getBranches at the moment"
+				)
 			}
 			const serverRefs = await isoGit
 				.listServerRefs({
