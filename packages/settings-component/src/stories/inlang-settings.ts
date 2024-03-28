@@ -197,7 +197,7 @@ export default class InlangSettings extends LitElement {
 		return html` <div class="container" exportParts=${setExportparts(this)} part="base">
 			${Object.entries(this._settingProperties).map(([key, value]) => {
 				return value.schema?.properties && this._newSettings
-					? html`<div class="module-container" part="module-container">
+					? html`<div class="module-container" part="module">
 							${value.meta &&
 							(value.meta?.displayName as { en: string }).en &&
 							html`<h2 part="module-title">
