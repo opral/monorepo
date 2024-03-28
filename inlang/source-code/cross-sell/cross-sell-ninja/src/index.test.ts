@@ -17,7 +17,6 @@ describe("GitHub Actions Workflow Adoption Checks", () => {
 
 	beforeEach(() => {
 		fsMock = {
-			exists: vi.fn(),
 			readdir: vi.fn(),
 			// @ts-expect-error
 			readFile: vi.fn(),
@@ -28,7 +27,6 @@ describe("GitHub Actions Workflow Adoption Checks", () => {
 	})
 
 	it("detects adoption of Ninja i18n GitHub Action", async () => {
-		fsMock.exists.mockResolvedValue(true)
 		// @ts-expect-error
 		fsMock.readdir.mockResolvedValue(["ninja_i18n.yml"])
 		// @ts-expect-error
@@ -66,7 +64,8 @@ describe("GitHub Actions Workflow Adoption Checks", () => {
 	})
 
 	it("correctly adds the Ninja i18n GitHub Action workflow", async () => {
-		fsMock.exists.mockResolvedValue(false)
+		// @ts-expect-error
+		fsMock.stat.mockRejectedValue(new Error("File not found"))
 
 		await add({ fs: fsMock })
 
@@ -79,7 +78,8 @@ describe("GitHub Actions Workflow Adoption Checks", () => {
 
 	it("does not find the action in deep nested directories beyond level 3", async () => {
 		// Simulate deep directory structure
-		fsMock.exists.mockResolvedValue(true)
+		// @ts-expect-error
+		fsMock.stat.mockResolvedValue({ isDirectory: () => true })
 		// @ts-expect-error
 		fsMock.readdir.mockImplementation((path) => {
 			if (path.endsWith("level1")) return Promise.resolve(["level2"])
@@ -116,13 +116,15 @@ describe("GitHub Actions Workflow Adoption Checks", () => {
 	})
 
 	it("returns false if checking directory existence throws an error", async () => {
-		fsMock.exists.mockRejectedValue(new Error("Filesystem error"))
+		// @ts-expect-error
+		fsMock.stat.mockRejectedValue(new Error("Filesystem error"))
 
 		await expect(isAdopted({ fs: fsMock })).resolves.toBe(false)
 	})
 
 	it("returns true when the action is found in a nested directory within depth limit", async () => {
-		fsMock.exists.mockResolvedValue(true)
+		// @ts-expect-error
+		fsMock.stat.mockResolvedValue({ isDirectory: () => true })
 		// @ts-expect-error
 		fsMock.readdir.mockImplementation((path) => {
 			if (path === ".github/workflows") return Promise.resolve(["level1"])
@@ -167,7 +169,8 @@ describe("GitHub Actions Workflow Adoption Checks", () => {
 	})
 
 	it("returns false and logs an error for malformed YAML content", async () => {
-		fsMock.exists.mockResolvedValue(true)
+		// @ts-expect-error
+		fsMock.stat.mockResolvedValue({ isDirectory: () => true })
 		// @ts-expect-error
 		fsMock.readdir.mockResolvedValue(["ninja_i18n.yml"])
 		// @ts-expect-error
@@ -179,13 +182,15 @@ describe("GitHub Actions Workflow Adoption Checks", () => {
 	})
 
 	it("handles filesystem errors gracefully in isAdopted function", async () => {
-		fsMock.exists.mockRejectedValue(new Error("Filesystem error"))
+		// @ts-expect-error
+		fsMock.stat.mockRejectedValue(new Error("Filesystem error"))
 
 		await expect(isAdopted({ fs: fsMock })).resolves.toBe(false)
 	})
 
 	it("handles errors when creating the workflow directory in add function", async () => {
-		fsMock.exists.mockResolvedValue(false)
+		// @ts-expect-error
+		fsMock.stat.mockResolvedValue({ isDirectory: () => false })
 		// @ts-expect-error
 		fsMock.mkdir.mockRejectedValue(new Error("Filesystem error"))
 
