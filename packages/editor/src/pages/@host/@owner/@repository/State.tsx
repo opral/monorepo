@@ -32,7 +32,6 @@ import {
 import { posthog as telemetryBrowser } from "posthog-js"
 import type { Result } from "@inlang/result"
 import { id } from "../../../../../marketplace-manifest.json"
-import { isAdopted } from "@inlang/cross-sell-ninja"
 
 type EditorStateSchema = {
 	/**
@@ -307,17 +306,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			}
 		}
 	)
-
-	const isAdoptedNinja = async () => {
-		if (repo()?.nodeishFs === undefined) return;
-		console.log("isAdopted:", await isAdopted({ fs: repo()!.nodeishFs }));
-	};
-
-	createEffect(() => {
-		if (repo !== undefined) {
-			isAdoptedNinja();
-		}
-	});
 
 	repo()?.errors.subscribe((errors: any) => {
 		setLixErrors(errors)
