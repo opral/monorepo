@@ -74,10 +74,10 @@ function getWebviewContent(args: {
 							settingsContainer.appendChild(settings);
 
 							// EVENTS
-							document.querySelector('inlang-settings').addEventListener('onSetSettings', (settings) => {
+							document.querySelector('inlang-settings').addEventListener('set-settings', (settings) => {
 								vscode.postMessage({
 									command: 'setSettings',
-									settings: settings
+									settings: settings.detail.argument
 								});
 							});
 						</script>
