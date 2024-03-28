@@ -33,6 +33,7 @@ export class GeneralInput extends LitElement {
 			if (this.schema.type === "string") {
 				return html` <div>
 					<string-input
+						exportparts="property, property-title, property-paragraph"
 						.property=${this.property}
 						.moduleId=${this.moduleId}
 						.value=${this.value}
@@ -43,6 +44,7 @@ export class GeneralInput extends LitElement {
 			} else if (this.schema.type === "array") {
 				return html` <div>
 					<array-input
+						exportparts="property, property-title, property-paragraph"
 						.property=${this.property}
 						.moduleId=${this.moduleId}
 						.value=${this.value}
@@ -53,6 +55,7 @@ export class GeneralInput extends LitElement {
 			} else if (this.schema.type === "object") {
 				return html` <div>
 					<object-input
+						exportparts="property, property-title, property-paragraph"
 						.property=${this.property}
 						.moduleId=${this.moduleId}
 						.modules=${this.modules}
@@ -64,6 +67,7 @@ export class GeneralInput extends LitElement {
 			} else {
 				return html` <div>
 					<string-input
+						exportparts="property, property-title, property-paragraph"
 						.property=${this.property}
 						.moduleId=${this.moduleId}
 						.value=${this.value}
@@ -75,6 +79,7 @@ export class GeneralInput extends LitElement {
 		} else if (this.property === "pathPattern" || this.property === "sourceLanguageFilePath") {
 			return html` <div>
 				<path-pattern-input
+					exportparts="property, property-title, property-paragraph"
 					.property=${this.property}
 					.moduleId=${this.moduleId}
 					.value=${this.value}
@@ -85,6 +90,7 @@ export class GeneralInput extends LitElement {
 		} else {
 			return html` <div>
 				<string-input
+					exportparts="property, property-title, property-paragraph"
 					.property=${this.property}
 					.moduleId=${this.moduleId}
 					.value=${this.value}

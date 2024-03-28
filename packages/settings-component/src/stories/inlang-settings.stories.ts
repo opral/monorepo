@@ -42,3 +42,29 @@ export const Stringified: StoryObj = {
 			</script>
 		`,
 }
+
+export const StyledWithPartAPI: StoryObj = {
+	render: () =>
+		html`
+			<style>
+				inlang-settings::part(property) {
+					background: lightblue;
+				}
+				inlang-settings::part(property-title) {
+					font-size: 1rem;
+				}
+				inlang-settings::part(property-paragraph) {
+					color: blue;
+				}
+				inlang-settings {
+					--sl-color-primary-600: hsl(333.3 71.4% 50.6%);
+				}
+			</style>
+			<inlang-settings
+				.settings=${mockSettings}
+				.installedPlugins=${mockInstalledPlugins}
+				.installedMessageLintRules=${mockInstalledMessageLintRules}
+				@set-settings=${(settings: any) => console.info("save", settings)}
+			></inlang-settings>
+		`,
+}

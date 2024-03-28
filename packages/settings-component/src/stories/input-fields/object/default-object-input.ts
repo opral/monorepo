@@ -121,9 +121,10 @@ export class DefaultObjectInput extends LitElement {
 	}
 
 	override render() {
-		return html` <div>
-			${this._description && html`<p>${this.property}</p>`}
-			${this._description && html`<p class="help-text">${this._description}</p>`}
+		return html` <div part="property">
+			${this._description && html`<h3 part="property-title">${this.property}</h3>`}
+			${this._description &&
+			html`<p part="property-paragraph" class="help-text">${this._description}</p>`}
 			<div class="list-container">
 				${this.value &&
 				Object.entries(this.value).map(([key, value]) => {
