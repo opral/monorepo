@@ -40,6 +40,7 @@ export class ObjectInput extends LitElement {
 	override render() {
 		if (this.property === "messageLintRuleLevels") {
 			return html`<lint-rule-level-object-input
+				exportparts="property, property-title, property-paragraph"
 				.property=${this.property}
 				.moduleId=${this.moduleId}
 				.modules=${this.modules}
@@ -49,6 +50,7 @@ export class ObjectInput extends LitElement {
 			></lint-rule-level-object-input>`
 		} else {
 			return html`<default-object-input
+				exportparts="property, property-title, property-paragraph"
 				.property=${this.property}
 				.moduleId=${this.moduleId}
 				.value=${this.value}
