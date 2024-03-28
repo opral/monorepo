@@ -48,10 +48,24 @@ export const withProxy = ({
 	})
 }
 
+export function parseOrigin({ remotes }: { remotes?: any[] }): string | undefined {
+	const origin = remotes?.find((elements: any) => elements.remote === "origin")
+	if (origin === undefined) {
+		return undefined
+	}
+	// polyfill for some editor related origin issues
+	let result = origin.url
+	if (result.endsWith(".git") === false) {
+		result += ".git"
+	}
+
+	return transformRemote(result)
+}
+
 /**
  * Transforms a remote URL to a standard format.
  */
-export function transformRemote(remote: string) {
+export function transformRemote(remote: string): string | undefined {
 	// Match HTTPS pattern or SSH pattern
 	const regex = /(?:https:\/\/|@|git:\/\/)([^/]+)\/(.+?)(?:\.git)?$/
 	const matches = remote.match(regex)
@@ -60,12 +74,13 @@ export function transformRemote(remote: string) {
 		let host = matches[1].replace(/:/g, "/") // Replace colons with slashes in the host
 		const repo = matches[2]
 
-		// Remove ghp_ key if present in the host
-		host = host.replace(/ghp_[\w]+@/, "")
+		// Remove ghp_ or ghs_ key if present in the host
+		const hostRegex = /(ghp_|ghs_)[\w]+@/
+		host = host.replace(hostRegex, "")
 
 		return `${host}/${repo}.git`
 	}
-	return "unknown" // Return unchanged if no match
+	return undefined
 }
 
 export function parseLixUri(uriText: string) {
