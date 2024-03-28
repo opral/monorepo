@@ -255,7 +255,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			setSearchParams({ key: "branch", value: branch })
 		}
 	})
-
 	const [repo, { refetch: refetchRepo }] = createResource(
 		() => {
 			return { routeParams: routeParams(), user: localStorage.user, branch: activeBranch() }
