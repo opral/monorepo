@@ -38,6 +38,9 @@ export class DefaultArrayInput extends LitElement {
 				display: flex;
 				gap: 4px;
 			}
+			.icon-wrapper {
+				display: flex;
+			}
 		`,
 	]
 
@@ -101,13 +104,20 @@ export class DefaultArrayInput extends LitElement {
 								disabled
 								filled
 							>
-								<sl-icon
+								<div
+									slot="suffix"
+									class="icon-wrapper"
 									@click=${() => {
 										this.handleDeleteItemClick(index)
 									}}
-									slot="suffix"
-									name="x-lg"
-								></sl-icon>
+								>
+									<svg class="icon" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+										<path
+											xmlns="http://www.w3.org/2000/svg"
+											d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"
+										/>
+									</svg>
+								</div>
 							</sl-input>`
 						})}
 				  </div>`
