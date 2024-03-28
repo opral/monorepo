@@ -91,9 +91,10 @@ export class DefaultArrayInput extends LitElement {
 	}
 
 	override render() {
-		return html`<div class="container">
-			<p>${this.property}</p>
-			${this._description && html`<p class="help-text">${this._description}</p>`}
+		return html`<div part="property" class="container">
+			<h3 part="property-title">${this.property}</h3>
+			${this._description &&
+			html`<p part="property-paragraph" class="help-text">${this._description}</p>`}
 			${this.value && this.value.length > 0
 				? html`<div class="item-container">
 						${this.value.map((arrayItem, index) => {

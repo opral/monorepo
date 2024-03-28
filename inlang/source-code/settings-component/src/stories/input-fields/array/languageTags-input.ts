@@ -88,9 +88,10 @@ export class LanguageTagsInput extends LitElement {
 	}
 
 	override render() {
-		return html`<div class="container">
-			<p class="property">${this.property}</p>
-			${this._description && html`<p class="help-text">${this._description}</p>`}
+		return html`<div part="property" class="container">
+			<h3 part="property-title" class="property">${this.property}</h3>
+			${this._description &&
+			html`<p part="property-paragraph" class="help-text">${this._description}</p>`}
 			<div class="tags-container">
 				${this.value &&
 				this.value.map((arrayItem, index) => {
