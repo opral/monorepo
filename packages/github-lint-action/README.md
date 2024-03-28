@@ -2,7 +2,7 @@
 
 Automate your i18n workflow and ensure that your i18n files are always up to date with the latest changes in your source code.
 
-![Ninja i18n comment cover image](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/github-lint-action/assets/ninja-i18n-cover.png)
+![Ninja i18n comment cover image](https://raw.githubusercontent.com/opral/monorepo/main/inlang/source-code/github-lint-action/assets/ninja-i18n-cover.png)
 
 ## Workflow
 
