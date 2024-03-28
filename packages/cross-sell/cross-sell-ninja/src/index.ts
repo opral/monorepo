@@ -19,7 +19,7 @@ export async function isAdopted(args: { fs: NodeishFilesystem }): Promise<boolea
 		}
 
 		try {
-			await args.fs.exists(directoryPath)
+			await args.fs.stat(directoryPath)
 		} catch (error) {
 			return false
 		}
@@ -102,8 +102,20 @@ jobs:
     `
 
 	// Ensure the workflow directory exists
-	if (!(await args.fs.exists(workflowDirPath))) {
-		await args.fs.mkdir(workflowDirPath, { recursive: true })
+	let workflowDirExists = false
+	try {
+		await args.fs.stat(workflowDirPath)
+	} catch (error) {
+		workflowDirExists = false
+	}
+
+	if (!workflowDirExists) {
+		try {
+			await args.fs.mkdir(workflowDirPath, { recursive: true })
+		} catch (error) {
+			console.error("Failed to create the workflow directory", error)
+			throw error
+		}
 	}
 
 	// Write the Ninja i18n workflow YAML to the file
