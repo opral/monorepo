@@ -4,8 +4,8 @@ const GitHubActionStep = Type.Object({
 	name: Type.Optional(Type.String()),
 	id: Type.Optional(Type.String()),
 	uses: Type.Optional(Type.String()),
-	with: Type.Optional(Type.Record(Type.String(), Type.String())),
-	env: Type.Optional(Type.Record(Type.String(), Type.String())),
+	with: Type.Optional(Type.Record(Type.String(), Type.Any())),
+	env: Type.Optional(Type.Record(Type.String(), Type.Any())),
 })
 
 const GitHubActionJob = Type.Object({
@@ -15,7 +15,7 @@ const GitHubActionJob = Type.Object({
 })
 
 const GitHubActionEvent = Type.Object({
-	pull_request_target: Type.Optional(Type.Object({})),
+	pull_request_target: Type.Optional(Type.Any()),
 	// Define other events as necessary, ensuring correct property names
 })
 
