@@ -1,6 +1,6 @@
 {
   "name": "isomorphic-git",
-  "version": "1.25.7-inlang",
+  "version": "71c13da6c19dbcdf445030d63729df41ec8450f5",
   "description": "A pure JavaScript reimplementation of git for node and browsers",
   "type": "module",
   "typings": "./index.d.ts",

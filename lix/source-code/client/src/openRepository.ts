@@ -11,8 +11,15 @@ import { createSignal, createEffect } from "./solid.js"
 import type { OptStatus } from "./git/status-list.js"
 import { commit as lixCommit } from "./git/commit.js"
 import { statusList as lixStatusList } from "./git/status-list.js"
+import { checkout as lixCheckout } from "./git/checkout.js"
+
 import isoGit from "../vendored/isomorphic-git/index.js"
+
+// @ts-ignore
 import { modeToFileType } from "./git/helpers.js"
+
+// const checkout = isoGit.checkout
+const checkout = lixCheckout
 
 // TODO: --filter=tree:0 for commit history?
 
@@ -214,21 +221,19 @@ export async function openRepository(
 			await rawFs.rm(placeholder)
 		}
 
-		const res = await isoGit
-			.checkout({
-				fs: withProxy({
-					nodeishFs: rawFs,
-					verbose: debug,
-					description: debug ? "checkout: " + JSON.stringify(thisBatch) : "checkout",
-				}),
-				dir,
-				cache,
-				ref: args.branch,
-				filepaths: thisBatch,
-			})
-			.catch((error) => {
-				console.error({ error, thisBatch })
-			})
+		const res = await checkout({
+			fs: withProxy({
+				nodeishFs: rawFs,
+				verbose: debug,
+				description: debug ? "checkout: " + JSON.stringify(thisBatch) : "checkout",
+			}),
+			dir,
+			cache,
+			ref: args.branch,
+			filepaths: thisBatch,
+		}).catch((error) => {
+			console.error({ error, thisBatch })
+		})
 
 		for (const entry of thisBatch) {
 			checkedOut.add(entry)
@@ -249,7 +254,7 @@ export async function openRepository(
 		if (!experimentalFeatures.lazyClone) {
 			return
 		}
-		await isoGit.checkout({
+		await checkout({
 			fs: withProxy({
 				nodeishFs: rawFs,
 				verbose: debug,
@@ -315,7 +320,7 @@ export async function openRepository(
 		})
 
 		if (gitignoreFiles.length) {
-			await isoGit.checkout({
+			await checkout({
 				fs: withProxy({
 					nodeishFs: rawFs,
 					verbose: debug,
@@ -550,9 +555,8 @@ export async function openRepository(
 		return maybeStatusEntry?.[1] as string
 	}
 
-
 	if (args.debugTime) {
-		console.timeEnd('repo')
+		console.timeEnd("repo")
 	}
 
 	return {
@@ -626,7 +630,7 @@ export async function openRepository(
 				)
 			}
 
-			await isoGit.checkout({
+			await checkout({
 				fs: withProxy({
 					nodeishFs: rawFs,
 					verbose: debug,
@@ -897,7 +901,7 @@ export async function openRepository(
 				experimentalFeatures.lazyClone = false
 
 				true && console.info('checking out "HEAD" after pull')
-				await isoGit.checkout({
+				await checkout({
 					fs: rawFs,
 					cache,
 					dir,
@@ -905,7 +909,7 @@ export async function openRepository(
 					noCheckout: false,
 				})
 			} else {
-				await isoGit.checkout({
+				await checkout({
 					fs: rawFs,
 					cache,
 					dir,

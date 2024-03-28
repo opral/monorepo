@@ -1007,9 +1007,6 @@ class GitIndexManager {
 }
 
 function basename(path) {
-  if (!path?.lastIndexOf) {
-    debugger
-  }
   const last = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\'));
   if (last > -1) {
     path = path.slice(last + 1);
@@ -1539,7 +1536,7 @@ const VARIABLE_VALUE_COMMENT_REGEX = /^(.*?)( *[#;].*)$/;
 
 const extractSectionLine = line => {
   const matches = SECTION_LINE_REGEX.exec(line);
-  if (matches != undefined) {
+  if (matches != null) {
     const [section, subsection] = matches.slice(1);
     return [section, subsection]
   }
@@ -1548,7 +1545,7 @@ const extractSectionLine = line => {
 
 const extractVariableLine = line => {
   const matches = VARIABLE_LINE_REGEX.exec(line);
-  if (matches != undefined) {
+  if (matches != null) {
     const [name, rawValue = 'true'] = matches.slice(1);
     const valueWithoutComments = removeComments(rawValue);
     const valueWithoutQuotes = removeQuotes(valueWithoutComments);
@@ -1559,7 +1556,7 @@ const extractVariableLine = line => {
 
 const removeComments = rawValue => {
   const commentMatches = VARIABLE_VALUE_COMMENT_REGEX.exec(rawValue);
-  if (commentMatches == undefined) {
+  if (commentMatches == null) {
     return rawValue
   }
   const [valueWithoutComment, comment] = commentMatches.slice(1);
@@ -1590,12 +1587,12 @@ const removeQuotes = text => {
 };
 
 const lower = text => {
-  return text != undefined ? text.toLowerCase() : null
+  return text != null ? text.toLowerCase() : null
 };
 
 const getPath = (section, subsection, name) => {
   return [lower(section), subsection, lower(name)]
-    .filter(a => a != undefined)
+    .filter(a => a != null)
     .join('.')
 };
 
@@ -1632,12 +1629,12 @@ class GitConfig {
 
       const trimmedLine = line.trim();
       const extractedSection = extractSectionLine(trimmedLine);
-      const isSection = extractedSection != undefined;
+      const isSection = extractedSection != null;
       if (isSection) {
         ;[section, subsection] = extractedSection;
       } else {
         const extractedVariable = extractVariableLine(trimmedLine);
-        const isVariable = extractedVariable != undefined;
+        const isVariable = extractedVariable != null;
         if (isVariable) {
           ;[name, value] = extractedVariable;
         }
@@ -1696,7 +1693,7 @@ class GitConfig {
       this.parsedConfig,
       config => config.path === normalizedPath
     );
-    if (value == undefined) {
+    if (value == null) {
       if (configIndex !== -1) {
         this.parsedConfig.splice(configIndex, 1);
       }
@@ -1751,14 +1748,14 @@ class GitConfig {
         if (!modified) {
           return line
         }
-        if (name != undefined && value != undefined) {
+        if (name != null && value != null) {
           if (typeof value === 'string' && /[#;]/.test(value)) {
             // A `#` or `;` symbol denotes a comment, so we have to wrap it in double quotes
             return `\t${name} = "${value}"`
           }
           return `\t${name} = ${value}`
         }
-        if (subsection != undefined) {
+        if (subsection != null) {
           return `[${section} "${subsection}"]`
         }
         return `[${section}]`
@@ -1844,12 +1841,14 @@ class GitRefManager {
     // Add all tags if the fetch tags argument is true.
     if (tags) {
       for (const serverRef of refs.keys()) {
-        if (serverRef.startsWith('refs/tags') && !serverRef.endsWith('^{}') && // Git's behavior is to only fetch tags that do not conflict with tags already present.
-          !(await GitRefManager.exists({ fs, gitdir, ref: serverRef }))) {
+        if (serverRef.startsWith('refs/tags') && !serverRef.endsWith('^{}')) {
+          // Git's behavior is to only fetch tags that do not conflict with tags already present.
+          if (!(await GitRefManager.exists({ fs, gitdir, ref: serverRef }))) {
             // Always use the object id of the tag itself, and not the peeled object id.
             const oid = refs.get(serverRef);
             actualRefsToWrite.set(serverRef, oid);
           }
+        }
       }
     }
     // Combine refs and symrefs giving symrefs priority
@@ -2765,13 +2764,15 @@ class GitPackIndex {
       const percent = Math.floor(
         ((totalObjectCount - num) * 100) / totalObjectCount
       );
-      if (percent !== lastPercent && onProgress) {
+      if (percent !== lastPercent) {
+        if (onProgress) {
           await onProgress({
             phase: 'Receiving objects',
             loaded: totalObjectCount - num,
             total: totalObjectCount,
           });
         }
+      }
       lastPercent = percent;
       // Change type from a number to a meaningful string
       type = listpackTypes[type];
@@ -2822,13 +2823,15 @@ class GitPackIndex {
     for (let offset in offsetToObject) {
       offset = Number(offset);
       const percent = Math.floor((count * 100) / totalObjectCount);
-      if (percent !== lastPercent && onProgress) {
+      if (percent !== lastPercent) {
+        if (onProgress) {
           await onProgress({
             phase: 'Resolving deltas',
             loaded: count,
             total: totalObjectCount,
           });
         }
+      }
       count++;
       lastPercent = percent;
 
@@ -3691,12 +3694,12 @@ ${obj.gpgsig ? obj.gpgsig : ''}`
 
   withoutSignature() {
     const tag = normalizeNewlines(this._tag);
-    if (!tag.includes('\n-----BEGIN PGP SIGNATURE-----')) return tag
+    if (tag.indexOf('\n-----BEGIN PGP SIGNATURE-----') === -1) return tag
     return tag.slice(0, tag.lastIndexOf('\n-----BEGIN PGP SIGNATURE-----'))
   }
 
   gpgsig() {
-    if (!this._tag.includes('\n-----BEGIN PGP SIGNATURE-----')) return
+    if (this._tag.indexOf('\n-----BEGIN PGP SIGNATURE-----') === -1) return
     const signature = this._tag.slice(
       this._tag.indexOf('-----BEGIN PGP SIGNATURE-----'),
       this._tag.indexOf('-----END PGP SIGNATURE-----') +
@@ -3860,7 +3863,7 @@ class GitCommit {
 
   withoutSignature() {
     const commit = normalizeNewlines(this._commit);
-    if (!commit.includes('\ngpgsig')) return commit
+    if (commit.indexOf('\ngpgsig') === -1) return commit
     const headers = commit.slice(0, commit.indexOf('\ngpgsig'));
     const message = commit.slice(
       commit.indexOf('-----END PGP SIGNATURE-----\n') +
@@ -4400,7 +4403,7 @@ async function _walk({
  */
 async function rmRecursive(fs, filepath) {
   const entries = await fs.readdir(filepath);
-  if (entries == undefined) {
+  if (entries == null) {
     await fs.rm(filepath);
   } else if (entries.length) {
     await Promise.all(
@@ -5499,9 +5502,9 @@ async function normalizeAuthorObject({ fs, gitdir, author = {} }) {
     return undefined
   }
 
-  timestamp = timestamp != undefined ? timestamp : Math.floor(Date.now() / 1000);
+  timestamp = timestamp != null ? timestamp : Math.floor(Date.now() / 1000);
   timezoneOffset =
-    timezoneOffset != undefined
+    timezoneOffset != null
       ? timezoneOffset
       : new Date(timestamp * 1000).getTimezoneOffset();
 
@@ -5633,11 +5636,13 @@ async function _addRemote({ fs, gitdir, remote, url, force }) {
   if (!force) {
     // Check that setting it wouldn't overwrite.
     const remoteNames = await config.getSubsections('remote');
-    if (remoteNames.includes(remote) && // Throw an error if it would overwrite an existing remote,
+    if (remoteNames.includes(remote)) {
+      // Throw an error if it would overwrite an existing remote,
       // but not if it's simply setting the same value again.
-      url !== (await config.get(`remote.${remote}.url`))) {
+      if (url !== (await config.get(`remote.${remote}.url`))) {
         throw new AlreadyExistsError('remote', remote)
       }
+    }
   }
   await config.set(`remote.${remote}.url`, url);
   await config.set(
@@ -5984,7 +5989,7 @@ async function branch({
 const worthWalking = (filepath, root) => {
   if (
     filepath === '.' ||
-    root == undefined ||
+    root == null ||
     root.length === 0 ||
     root === '.' ||
     root === filepath
@@ -6758,7 +6763,7 @@ function extractAuthFromUrl(url) {
   // Note: I tried using new URL(url) but that throws a security exception in Edge. :rolleyes:
   let userpass = url.match(/^https?:\/\/([^/]+)@/);
   // No credentials, return the url unmodified and an empty auth object
-  if (userpass == undefined) return { url, auth: {} }
+  if (userpass == null) return { url, auth: {} }
   userpass = userpass[1];
   const [username, password] = userpass.split(':');
   // Remove credentials from URL
@@ -6850,12 +6855,12 @@ class GitPktLine {
     return async function read() {
       try {
         let length = await reader.read(4);
-        if (length == undefined) return true
+        if (length == null) return true
         length = parseInt(length.toString('utf8'), 16);
         if (length === 0) return null
         if (length === 1) return null // delim packets
         const buffer = await reader.read(length - 4);
-        if (buffer == undefined) return true
+        if (buffer == null) return true
         return buffer
       } catch (err) {
         stream.error = err;
@@ -8683,7 +8688,7 @@ async function _expandOid({ fs, cache, gitdir, oid: short }) {
   });
   // Objects can exist in a pack file as well as loose, make sure we only get a list of unique oids.
   for (const packedOid of packedOids) {
-    if (!results.includes(packedOid)) {
+    if (results.indexOf(packedOid) === -1) {
       results.push(packedOid);
     }
   }
@@ -8825,7 +8830,7 @@ async function _findMergeBase({ fs, cache, gitdir, oids }) {
         // do nothing
       }
     }
-    heads = [...newheads.values()];
+    heads = Array.from(newheads.values());
   }
   return []
 }
@@ -10045,7 +10050,7 @@ function formatInfoRefs(remote, prefix, symrefs, peelTags) {
       if (peelTags) {
         const _key = key.replace('^{}', '');
         // Peeled tags are almost always listed immediately after the original tag
-        const last = refs.at(-1);
+        const last = refs[refs.length - 1];
         const r = last.ref === _key ? last : refs.find(x => x.ref === _key);
         if (r === undefined) {
           throw new Error('I did not expect this to happen')
@@ -10056,9 +10061,11 @@ function formatInfoRefs(remote, prefix, symrefs, peelTags) {
     }
     /** @type ServerRef */
     const ref = { ref: key, oid: value };
-    if (symrefs && remote.symrefs.has(key)) {
+    if (symrefs) {
+      if (remote.symrefs.has(key)) {
         ref.target = remote.symrefs.get(key);
       }
+    }
     refs.push(ref);
   }
   return refs
@@ -11305,7 +11312,7 @@ async function _log({
                     fileId: lastFileOid,
                   });
                   if (Array.isArray(lastFound)) {
-                    found = found.filter(p => !lastFound.includes(p));
+                    found = found.filter(p => lastFound.indexOf(p) === -1);
                     if (found.length === 1) {
                       found = found[0];
                       filepath = found;
@@ -13731,10 +13738,11 @@ async function status({
           object,
         });
         // If the oid in the index === working dir oid but stats differed update cache
-        if (I && indexEntry.oid === workdirOid && // and as long as our fs.stats aren't bad.
+        if (I && indexEntry.oid === workdirOid) {
+          // and as long as our fs.stats aren't bad.
           // size of -1 happens over a BrowserFS HTTP Backend that doesn't serve Content-Length headers
           // (like the Karma webserver) because BrowserFS HTTP Backend uses HTTP HEAD requests to do fs.stat
-          stats.size !== -1) {
+          if (stats.size !== -1) {
             // We don't await this so we can return faster for one-off cases.
             GitIndexManager.acquire({ fs, gitdir, cache }, async function(
               index
@@ -13742,6 +13750,7 @@ async function status({
               index.insert({ filepath, stats, oid: workdirOid });
             });
           }
+        }
         return workdirOid
       }
     };
@@ -14003,7 +14012,8 @@ async function statusMatrix({
       trees: [TREE({ ref }), WORKDIR(), STAGE()],
       map: async function(filepath, [head, workdir, stage]) {
         // Ignore ignored files, but only if they are not already tracked.
-        if (!head && !stage && workdir && !shouldIgnore) {
+        if (!head && !stage && workdir) {
+          if (!shouldIgnore) {
             const isIgnored = await GitIgnoreManager.isIgnored({
               fs,
               dir,
@@ -14013,12 +14023,15 @@ async function statusMatrix({
               return null
             }
           }
+        }
         // match against base paths
         if (!filepaths.some(base => worthWalking(filepath, base))) {
           return null
         }
         // Late filter against file names
-        if (filter && !filter(filepath)) return
+        if (filter) {
+          if (!filter(filepath)) return
+        }
 
         const [headType, workdirType, stageType] = await Promise.all([
           head && head.type(),
@@ -15005,6 +15018,294 @@ async function writeTree({ fs, dir, gitdir = join(dir, '.git'), tree }) {
   }
 }
 
+async function writeRefsAdResponse({ capabilities, refs, symrefs }) {
+  const stream = [];
+  // Compose capabilities string
+  let syms = '';
+  for (const [key, value] of Object.entries(symrefs)) {
+    syms += `symref=${key}:${value} `;
+  }
+  let caps = `\x00${[...capabilities].join(' ')} ${syms}agent=${pkg.agent}`;
+  // stream.write(GitPktLine.encode(`# service=${service}\n`))
+  // stream.write(GitPktLine.flush())
+  // Note: In the edge case of a brand new repo, zero refs (and zero capabilities)
+  // are returned.
+  for (const [key, value] of Object.entries(refs)) {
+    stream.push(GitPktLine.encode(`${value} ${key}${caps}\n`));
+    caps = '';
+  }
+  stream.push(GitPktLine.flush());
+  return stream
+}
+
+async function uploadPack({
+  fs,
+  dir,
+  gitdir = join(dir, '.git'),
+  advertiseRefs = false,
+}) {
+  try {
+    if (advertiseRefs) {
+      // Send a refs advertisement
+      const capabilities = [
+        'thin-pack',
+        'side-band',
+        'side-band-64k',
+        'shallow',
+        'deepen-since',
+        'deepen-not',
+        'allow-tip-sha1-in-want',
+        'allow-reachable-sha1-in-want',
+      ];
+      let keys = await GitRefManager.listRefs({
+        fs,
+        gitdir,
+        filepath: 'refs',
+      });
+      keys = keys.map(ref => `refs/${ref}`);
+      const refs = {};
+      keys.unshift('HEAD'); // HEAD must be the first in the list
+      for (const key of keys) {
+        refs[key] = await GitRefManager.resolve({ fs, gitdir, ref: key });
+      }
+      const symrefs = {};
+      symrefs.HEAD = await GitRefManager.resolve({
+        fs,
+        gitdir,
+        ref: 'HEAD',
+        depth: 2,
+      });
+      return writeRefsAdResponse({
+        capabilities,
+        refs,
+        symrefs,
+      })
+    }
+  } catch (err) {
+    err.caller = 'git.uploadPack';
+    throw err
+  }
+}
+
+const deepget = (keys, map) => {
+  for (const key of keys) {
+    if (!map.has(key)) map.set(key, new Map());
+    map = map.get(key);
+  }
+  return map
+};
+
+class DeepMap {
+  constructor() {
+    this._root = new Map();
+  }
+
+  set(keys, value) {
+    const lastKey = keys.pop();
+    const lastMap = deepget(keys, this._root);
+    lastMap.set(lastKey, value);
+  }
+
+  get(keys) {
+    const lastKey = keys.pop();
+    const lastMap = deepget(keys, this._root);
+    return lastMap.get(lastKey)
+  }
+
+  has(keys) {
+    const lastKey = keys.pop();
+    const lastMap = deepget(keys, this._root);
+    return lastMap.has(lastKey)
+  }
+}
+
+/**
+ * @param {Map} map
+ */
+function fromEntries(map) {
+  /** @type {Object<string, string>} */
+  const o = {};
+  for (const [key, value] of map) {
+    o[key] = value;
+  }
+  return o
+}
+
+// Convert a Node stream to an Async Iterator
+function fromNodeStream(stream) {
+  // Use native async iteration if it's available.
+  const asyncIterator = Object.getOwnPropertyDescriptor(
+    stream,
+    Symbol.asyncIterator
+  );
+  if (asyncIterator && asyncIterator.enumerable) {
+    return stream
+  }
+  // Author's Note
+  // I tried many MANY ways to do this.
+  // I tried two npm modules (stream-to-async-iterator and streams-to-async-iterator) with no luck.
+  // I tried using 'readable' and .read(), and .pause() and .resume()
+  // It took me two loooong evenings to get to this point.
+  // So if you are horrified that this solution just builds up a queue with no backpressure,
+  // and turns Promises inside out, too bad. This is the first code that worked reliably.
+  let ended = false;
+  const queue = [];
+  let defer = {};
+  stream.on('data', chunk => {
+    queue.push(chunk);
+    if (defer.resolve) {
+      defer.resolve({ value: queue.shift(), done: false });
+      defer = {};
+    }
+  });
+  stream.on('error', err => {
+    if (defer.reject) {
+      defer.reject(err);
+      defer = {};
+    }
+  });
+  stream.on('end', () => {
+    ended = true;
+    if (defer.resolve) {
+      defer.resolve({ done: true });
+      defer = {};
+    }
+  });
+  return {
+    next() {
+      return new Promise((resolve, reject) => {
+        if (queue.length === 0 && ended) {
+          return resolve({ done: true })
+        } else if (queue.length > 0) {
+          return resolve({ value: queue.shift(), done: false })
+        } else if (queue.length === 0 && !ended) {
+          defer = { resolve, reject };
+        }
+      })
+    },
+    return() {
+      stream.removeAllListeners();
+      if (stream.destroy) stream.destroy();
+    },
+    [Symbol.asyncIterator]() {
+      return this
+    },
+  }
+}
+
+// Convert a web ReadableStream (not Node stream!) to an Async Iterator
+// adapted from https://jakearchibald.com/2017/async-iterators-and-generators/
+function fromStream(stream) {
+  // Use native async iteration if it's available.
+  if (stream[Symbol.asyncIterator]) return stream
+  const reader = stream.getReader();
+  return {
+    next() {
+      return reader.read()
+    },
+    return() {
+      reader.releaseLock();
+      return {}
+    },
+    [Symbol.asyncIterator]() {
+      return this
+    },
+  }
+}
+
+/**
+ * Determine whether a file is binary (and therefore not worth trying to merge automatically)
+ *
+ * @param {Uint8Array} buffer
+ *
+ * If it looks incredibly simple / naive to you, compare it with the original:
+ *
+ * // xdiff-interface.c
+ *
+ * #define FIRST_FEW_BYTES 8000
+ * int buffer_is_binary(const char *ptr, unsigned long size)
+ * {
+ *  if (FIRST_FEW_BYTES < size)
+ *   size = FIRST_FEW_BYTES;
+ *  return !!memchr(ptr, 0, size);
+ * }
+ *
+ * Yup, that's how git does it. We could try to be smarter
+ */
+function isBinary(buffer) {
+  // in canonical git, this check happens in builtins/merge-file.c
+  // but I think it's DRYer to do it here.
+  // The value picked is explained here: https://github.com/git/git/blob/ab15ad1a3b4b04a29415aef8c9afa2f64fc194a2/xdiff-interface.h#L12
+  const MAX_XDIFF_SIZE = 1024 * 1024 * 1023;
+  if (buffer.length > MAX_XDIFF_SIZE) return true
+  // check for null characters in the first 8000 bytes
+  return buffer.slice(0, 8000).some(value => value === 0)
+}
+
+async function sleep(ms) {
+  return new Promise((resolve, reject) => setTimeout(resolve, ms))
+}
+
+async function parseUploadPackRequest(stream) {
+  const read = GitPktLine.streamReader(stream);
+  let done = false;
+  let capabilities = null;
+  const wants = [];
+  const haves = [];
+  const shallows = [];
+  let depth;
+  let since;
+  const exclude = [];
+  let relative = false;
+  while (!done) {
+    const line = await read();
+    if (line === true) break
+    if (line === null) continue
+    const [key, value, ...rest] = line
+      .toString('utf8')
+      .trim()
+      .split(' ');
+    if (!capabilities) capabilities = rest;
+    switch (key) {
+      case 'want':
+        wants.push(value);
+        break
+      case 'have':
+        haves.push(value);
+        break
+      case 'shallow':
+        shallows.push(value);
+        break
+      case 'deepen':
+        depth = parseInt(value);
+        break
+      case 'deepen-since':
+        since = parseInt(value);
+        break
+      case 'deepen-not':
+        exclude.push(value);
+        break
+      case 'deepen-relative':
+        relative = true;
+        break
+      case 'done':
+        done = true;
+        break
+    }
+  }
+  return {
+    capabilities,
+    wants,
+    haves,
+    shallows,
+    depth,
+    since,
+    exclude,
+    relative,
+    done,
+  }
+}
+
 // default export
 var index = {
   Errors,
@@ -15075,12 +15376,245 @@ var index = {
   writeRef,
   writeTag,
   writeTree,
+  _listObjects: listObjects,
+  _pack,
+  _uploadPack: uploadPack,
+  _GitConfigManager: GitConfigManager,
+  _GitIgnoreManager: GitIgnoreManager,
+  _GitIndexManager: GitIndexManager,
+  _GitRefManager: GitRefManager,
+  _GitRemoteHTTP: GitRemoteHTTP,
+  _GitRemoteManager: GitRemoteManager,
+  _GitShallowManager: GitShallowManager,
+  _FileSystem: FileSystem,
+  _GitAnnotatedTag: GitAnnotatedTag,
+  _GitCommit: GitCommit,
+  _GitConfig: GitConfig,
+  _GitIndex: GitIndex,
+  _GitObject: GitObject,
+  _GitPackIndex: GitPackIndex,
+  _GitPktLine: GitPktLine,
+  _GitRefSpec: GitRefSpec,
+  _GitRefSpecSet: GitRefSpecSet,
+  _GitSideBand: GitSideBand,
+  _GitTree: GitTree,
+  _GitWalkerFs: GitWalkerFs,
+  _GitWalkerIndex: GitWalkerIndex,
+  _GitWalkerRepo: GitWalkerRepo,
+  _RunningMinimum: RunningMinimum,
+  _expandOid,
+  _expandOidLoose: expandOidLoose,
+  _expandOidPacked: expandOidPacked,
+  _hasObject: hasObject,
+  _hasObjectLoose: hasObjectLoose,
+  _hasObjectPacked: hasObjectPacked,
+  _hashObject: hashObject,
+  _readObject,
+  _readObjectLoose: readObjectLoose,
+  _readObjectPacked: readObjectPacked,
+  _readPackIndex: readPackIndex,
+  _writeObject,
+  _writeObjectLoose: writeObjectLoose,
+  _BufferCursor: BufferCursor,
+  _DeepMap: DeepMap,
+  _FIFO: FIFO,
+  _StreamReader: StreamReader,
+  _abbreviateRef: abbreviateRef,
+  _applyDelta: applyDelta,
+  _arrayRange: arrayRange,
+  _assertParameter: assertParameter,
+  // _asyncIteratorToStream,
+  _basename: basename,
+  _calculateBasicAuthHeader: calculateBasicAuthHeader,
+  _collect: collect,
+  _compareAge: compareAge,
+  _comparePath: comparePath,
+  _compareRefNames: compareRefNames,
+  _compareStats: compareStats,
+  _compareStrings: compareStrings,
+  _compareTreeEntryPath: compareTreeEntryPath,
+  _deflate: deflate,
+  _dirname: dirname,
+  _emptyPackfile: emptyPackfile,
+  _extractAuthFromUrl: extractAuthFromUrl,
+  _filterCapabilities: filterCapabilities,
+  _flat: flat,
+  _flatFileListToDirectoryStructure: flatFileListToDirectoryStructure,
+  _forAwait: forAwait,
+  _formatAuthor: formatAuthor,
+  _formatInfoRefs: formatInfoRefs,
+  _fromEntries: fromEntries,
+  _fromNodeStream: fromNodeStream,
+  _fromStream: fromStream,
+  _fromValue: fromValue,
+  _getIterator: getIterator,
+  _listpack: listpack,
+  _utils_hashObject: hashObject$1,
+  _indent: indent,
+  _inflate: inflate,
+  _isBinary: isBinary,
+  _join: join,
+  _mergeFile: mergeFile,
+  _mergeTree: mergeTree,
+  _mode2type: mode2type,
+  _modified: modified,
+  _normalizeAuthorObject: normalizeAuthorObject,
+  _normalizeCommitterObject: normalizeCommitterObject,
+  _normalizeMode: normalizeMode,
+  _normalizeNewlines: normalizeNewlines,
+  _normalizePath: normalizePath,
+  _normalizeStats: normalizeStats,
+  _outdent: outdent,
+  _padHex: padHex,
+  _parseAuthor: parseAuthor,
+  _pkg: pkg,
+  _posixifyPathBuffer: posixifyPathBuffer,
+  _resolveBlob: resolveBlob,
+  _resolveCommit: resolveCommit,
+  _resolveFileIdInTree: resolveFileIdInTree,
+  _resolveFilepath: resolveFilepath,
+  _resolveTree: resolveTree,
+  _rmRecursive: rmRecursive,
+  _shasum: shasum,
+  _sleep: sleep,
+  _splitLines: splitLines,
+  // _symbols,
+  _toHex: toHex,
+  _translateSSHtoHTTP: translateSSHtoHTTP,
+  _unionOfIterators: unionOfIterators,
+  _worthWalking: worthWalking,
+  _parseCapabilitiesV2: parseCapabilitiesV2,
+  _parseListRefsResponse: parseListRefsResponse,
+  _parseReceivePackResponse: parseReceivePackResponse,
+  _parseRefsAdResponse: parseRefsAdResponse,
+  _parseUploadPackRequest: parseUploadPackRequest,
+  _parseUploadPackResponse: parseUploadPackResponse,
+  _writeListRefsRequest: writeListRefsRequest,
+  _writeReceivePackRequest: writeReceivePackRequest,
+  _writeRefsAdResponse: writeRefsAdResponse,
+  _writeUploadPackRequest: writeUploadPackRequest,
 };
 
 exports.Errors = Errors;
 exports.STAGE = STAGE;
 exports.TREE = TREE;
 exports.WORKDIR = WORKDIR;
+exports._BufferCursor = BufferCursor;
+exports._DeepMap = DeepMap;
+exports._FIFO = FIFO;
+exports._FileSystem = FileSystem;
+exports._GitAnnotatedTag = GitAnnotatedTag;
+exports._GitCommit = GitCommit;
+exports._GitConfig = GitConfig;
+exports._GitConfigManager = GitConfigManager;
+exports._GitIgnoreManager = GitIgnoreManager;
+exports._GitIndex = GitIndex;
+exports._GitIndexManager = GitIndexManager;
+exports._GitObject = GitObject;
+exports._GitPackIndex = GitPackIndex;
+exports._GitPktLine = GitPktLine;
+exports._GitRefManager = GitRefManager;
+exports._GitRefSpec = GitRefSpec;
+exports._GitRefSpecSet = GitRefSpecSet;
+exports._GitRemoteHTTP = GitRemoteHTTP;
+exports._GitRemoteManager = GitRemoteManager;
+exports._GitShallowManager = GitShallowManager;
+exports._GitSideBand = GitSideBand;
+exports._GitTree = GitTree;
+exports._GitWalkerFs = GitWalkerFs;
+exports._GitWalkerIndex = GitWalkerIndex;
+exports._GitWalkerRepo = GitWalkerRepo;
+exports._RunningMinimum = RunningMinimum;
+exports._StreamReader = StreamReader;
+exports._abbreviateRef = abbreviateRef;
+exports._applyDelta = applyDelta;
+exports._arrayRange = arrayRange;
+exports._assertParameter = assertParameter;
+exports._basename = basename;
+exports._calculateBasicAuthHeader = calculateBasicAuthHeader;
+exports._collect = collect;
+exports._compareAge = compareAge;
+exports._comparePath = comparePath;
+exports._compareRefNames = compareRefNames;
+exports._compareStats = compareStats;
+exports._compareStrings = compareStrings;
+exports._compareTreeEntryPath = compareTreeEntryPath;
+exports._deflate = deflate;
+exports._dirname = dirname;
+exports._emptyPackfile = emptyPackfile;
+exports._expandOid = _expandOid;
+exports._expandOidLoose = expandOidLoose;
+exports._expandOidPacked = expandOidPacked;
+exports._extractAuthFromUrl = extractAuthFromUrl;
+exports._filterCapabilities = filterCapabilities;
+exports._flat = flat;
+exports._flatFileListToDirectoryStructure = flatFileListToDirectoryStructure;
+exports._forAwait = forAwait;
+exports._formatAuthor = formatAuthor;
+exports._formatInfoRefs = formatInfoRefs;
+exports._fromEntries = fromEntries;
+exports._fromNodeStream = fromNodeStream;
+exports._fromStream = fromStream;
+exports._fromValue = fromValue;
+exports._getIterator = getIterator;
+exports._hasObject = hasObject;
+exports._hasObjectLoose = hasObjectLoose;
+exports._hasObjectPacked = hasObjectPacked;
+exports._hashObject = hashObject;
+exports._indent = indent;
+exports._inflate = inflate;
+exports._isBinary = isBinary;
+exports._join = join;
+exports._listCommitsAndTags = listCommitsAndTags;
+exports._listObjects = listObjects;
+exports._listpack = listpack;
+exports._mergeFile = mergeFile;
+exports._mergeTree = mergeTree;
+exports._mode2type = mode2type;
+exports._modified = modified;
+exports._normalizeAuthorObject = normalizeAuthorObject;
+exports._normalizeCommitterObject = normalizeCommitterObject;
+exports._normalizeMode = normalizeMode;
+exports._normalizeNewlines = normalizeNewlines;
+exports._normalizePath = normalizePath;
+exports._normalizeStats = normalizeStats;
+exports._outdent = outdent;
+exports._pack = _pack;
+exports._padHex = padHex;
+exports._parseAuthor = parseAuthor;
+exports._parseCapabilitiesV2 = parseCapabilitiesV2;
+exports._parseListRefsResponse = parseListRefsResponse;
+exports._parseReceivePackResponse = parseReceivePackResponse;
+exports._parseRefsAdResponse = parseRefsAdResponse;
+exports._parseUploadPackRequest = parseUploadPackRequest;
+exports._parseUploadPackResponse = parseUploadPackResponse;
+exports._pkg = pkg;
+exports._posixifyPathBuffer = posixifyPathBuffer;
+exports._readObject = _readObject;
+exports._readObjectLoose = readObjectLoose;
+exports._readObjectPacked = readObjectPacked;
+exports._readPackIndex = readPackIndex;
+exports._resolveBlob = resolveBlob;
+exports._resolveCommit = resolveCommit;
+exports._resolveFileIdInTree = resolveFileIdInTree;
+exports._resolveFilepath = resolveFilepath;
+exports._resolveTree = resolveTree;
+exports._rmRecursive = rmRecursive;
+exports._shasum = shasum;
+exports._sleep = sleep;
+exports._splitLines = splitLines;
+exports._toHex = toHex;
+exports._translateSSHtoHTTP = translateSSHtoHTTP;
+exports._unionOfIterators = unionOfIterators;
+exports._uploadPack = uploadPack;
+exports._utils_hashObject = hashObject$1;
+exports._worthWalking = worthWalking;
+exports._writeListRefsRequest = writeListRefsRequest;
+exports._writeObject = _writeObject;
+exports._writeObjectLoose = writeObjectLoose;
+exports._writeReceivePackRequest = writeReceivePackRequest;
+exports._writeRefsAdResponse = writeRefsAdResponse;
+exports._writeUploadPackRequest = writeUploadPackRequest;
 exports.abortMerge = abortMerge;
 exports.add = add;
 exports.addNote = addNote;

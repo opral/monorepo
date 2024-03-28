@@ -711,6 +711,121 @@ declare namespace index {
     export { writeRef };
     export { writeTag };
     export { writeTree };
+    export { listObjects as _listObjects };
+    export { _pack };
+    export { uploadPack as _uploadPack };
+    export { GitConfigManager as _GitConfigManager };
+    export { GitIgnoreManager as _GitIgnoreManager };
+    export { GitIndexManager as _GitIndexManager };
+    export { GitRefManager as _GitRefManager };
+    export { GitRemoteHTTP as _GitRemoteHTTP };
+    export { GitRemoteManager as _GitRemoteManager };
+    export { GitShallowManager as _GitShallowManager };
+    export { FileSystem as _FileSystem };
+    export { GitAnnotatedTag as _GitAnnotatedTag };
+    export { GitCommit as _GitCommit };
+    export { GitConfig as _GitConfig };
+    export { GitIndex as _GitIndex };
+    export { GitObject as _GitObject };
+    export { GitPackIndex as _GitPackIndex };
+    export { GitPktLine as _GitPktLine };
+    export { GitRefSpec as _GitRefSpec };
+    export { GitRefSpecSet as _GitRefSpecSet };
+    export { GitSideBand as _GitSideBand };
+    export { GitTree as _GitTree };
+    export { GitWalkerFs as _GitWalkerFs };
+    export { GitWalkerIndex as _GitWalkerIndex };
+    export { GitWalkerRepo as _GitWalkerRepo };
+    export { RunningMinimum as _RunningMinimum };
+    export { _expandOid };
+    export { expandOidLoose as _expandOidLoose };
+    export { expandOidPacked as _expandOidPacked };
+    export { hasObject as _hasObject };
+    export { hasObjectLoose as _hasObjectLoose };
+    export { hasObjectPacked as _hasObjectPacked };
+    export { hashObject as _hashObject };
+    export { _readObject };
+    export { readObjectLoose as _readObjectLoose };
+    export { readObjectPacked as _readObjectPacked };
+    export { readPackIndex as _readPackIndex };
+    export { _writeObject };
+    export { writeObjectLoose as _writeObjectLoose };
+    export { BufferCursor as _BufferCursor };
+    export { DeepMap as _DeepMap };
+    export { FIFO as _FIFO };
+    export { StreamReader as _StreamReader };
+    export { abbreviateRef as _abbreviateRef };
+    export { applyDelta as _applyDelta };
+    export { arrayRange as _arrayRange };
+    export { assertParameter as _assertParameter };
+    export { basename as _basename };
+    export { calculateBasicAuthHeader as _calculateBasicAuthHeader };
+    export { collect as _collect };
+    export { compareAge as _compareAge };
+    export { comparePath as _comparePath };
+    export { compareRefNames as _compareRefNames };
+    export { compareStats as _compareStats };
+    export { compareStrings as _compareStrings };
+    export { compareTreeEntryPath as _compareTreeEntryPath };
+    export { deflate as _deflate };
+    export { dirname as _dirname };
+    export { emptyPackfile as _emptyPackfile };
+    export { extractAuthFromUrl as _extractAuthFromUrl };
+    export { filterCapabilities as _filterCapabilities };
+    export { flat as _flat };
+    export { flatFileListToDirectoryStructure as _flatFileListToDirectoryStructure };
+    export { forAwait as _forAwait };
+    export { formatAuthor as _formatAuthor };
+    export { formatInfoRefs as _formatInfoRefs };
+    export { fromEntries as _fromEntries };
+    export { fromNodeStream as _fromNodeStream };
+    export { fromStream as _fromStream };
+    export { fromValue as _fromValue };
+    export { getIterator as _getIterator };
+    export { listpack as _listpack };
+    export { hashObject$1 as _utils_hashObject };
+    export { indent as _indent };
+    export { inflate as _inflate };
+    export { isBinary as _isBinary };
+    export { join as _join };
+    export { mergeFile as _mergeFile };
+    export { mergeTree as _mergeTree };
+    export { mode2type as _mode2type };
+    export { modified as _modified };
+    export { normalizeAuthorObject as _normalizeAuthorObject };
+    export { normalizeCommitterObject as _normalizeCommitterObject };
+    export { normalizeMode as _normalizeMode };
+    export { normalizeNewlines as _normalizeNewlines };
+    export { normalizePath as _normalizePath };
+    export { normalizeStats as _normalizeStats };
+    export { outdent as _outdent };
+    export { padHex as _padHex };
+    export { parseAuthor as _parseAuthor };
+    export { pkg as _pkg };
+    export { posixifyPathBuffer as _posixifyPathBuffer };
+    export { resolveBlob as _resolveBlob };
+    export { resolveCommit as _resolveCommit };
+    export { resolveFileIdInTree as _resolveFileIdInTree };
+    export { resolveFilepath as _resolveFilepath };
+    export { resolveTree as _resolveTree };
+    export { rmRecursive as _rmRecursive };
+    export { shasum as _shasum };
+    export { sleep as _sleep };
+    export { splitLines as _splitLines };
+    export { toHex as _toHex };
+    export { translateSSHtoHTTP as _translateSSHtoHTTP };
+    export { unionOfIterators as _unionOfIterators };
+    export { worthWalking as _worthWalking };
+    export { parseCapabilitiesV2 as _parseCapabilitiesV2 };
+    export { parseListRefsResponse as _parseListRefsResponse };
+    export { parseReceivePackResponse as _parseReceivePackResponse };
+    export { parseRefsAdResponse as _parseRefsAdResponse };
+    export { parseUploadPackRequest as _parseUploadPackRequest };
+    export { parseUploadPackResponse as _parseUploadPackResponse };
+    export { writeListRefsRequest as _writeListRefsRequest };
+    export { writeReceivePackRequest as _writeReceivePackRequest };
+    export { writeRefsAdResponse as _writeRefsAdResponse };
+    export { writeUploadPackRequest as _writeUploadPackRequest };
 }
 export var Errors: Readonly<{
     __proto__: null;
@@ -762,6 +877,1169 @@ export function TREE({ ref }?: {
  * @returns {Walker}
  */
 export function WORKDIR(): Walker;
+declare class BufferCursor {
+    constructor(buffer: any);
+    buffer: any;
+    _start: number;
+    eof(): boolean;
+    tell(): number;
+    seek(n: any): void;
+    slice(n: any): any;
+    toString(enc: any, length: any): any;
+    write(value: any, length: any, enc: any): any;
+    copy(source: any, start: any, end: any): any;
+    readUInt8(): any;
+    writeUInt8(value: any): any;
+    readUInt16BE(): any;
+    writeUInt16BE(value: any): any;
+    readUInt32BE(): any;
+    writeUInt32BE(value: any): any;
+}
+declare class DeepMap {
+    _root: any;
+    set(keys: any, value: any): void;
+    get(keys: any): any;
+    has(keys: any): any;
+}
+declare class FIFO {
+    _queue: any[];
+    write(chunk: any): void;
+    _waiting: any;
+    end(): void;
+    _ended: boolean | undefined;
+    destroy(err: any): void;
+    error: any;
+    async next(): Promise<any>;
+}
+/**
+ * This is just a collection of helper functions really. At least that's how it started.
+ */
+declare class FileSystem {
+    constructor(fs: any);
+    _original_unwrapped_fs: any;
+    /**
+     * Return true if a file exists, false if it doesn't exist.
+     * Rethrows errors that aren't related to file existence.
+     */
+    async exists(filepath: any, options?: {}): Promise<boolean>;
+    /**
+     * Return the contents of a file if it exists, otherwise returns null.
+     *
+     * @param {string} filepath
+     * @param {object} [options]
+     *
+     * @returns {Promise<Buffer|string|null>}
+     */
+    async read(filepath: string, options?: any): Promise<any>;
+    /**
+     * Write a file (creating missing directories if need be) without throwing errors.
+     *
+     * @param {string} filepath
+     * @param {Buffer|Uint8Array|string} contents
+     * @param {object|string} [options]
+     */
+    async write(filepath: string, contents: any, options?: any): Promise<void>;
+    /**
+     * Make a directory (or series of nested directories) without throwing an error if it already exists.
+     */
+    async mkdir(filepath: any, _selfCall?: boolean): Promise<void>;
+    /**
+     * Delete a file without throwing an error if it is already deleted.
+     */
+    async rm(filepath: any): Promise<void>;
+    /**
+     * Delete a directory without throwing an error if it is already deleted.
+     */
+    async rmdir(filepath: any, opts: any): Promise<void>;
+    /**
+     * Read a directory without throwing an error is the directory doesn't exist
+     */
+    async readdir(filepath: any): Promise<any>;
+    /**
+     * Return a flast list of all the files nested inside a directory
+     *
+     * Based on an elegant concurrent recursive solution from SO
+     * https://stackoverflow.com/a/45130990/2168416
+     */
+    async readdirDeep(dir: any): Promise<any>;
+    /**
+     * Return the Stats of a file/symlink if it exists, otherwise returns null.
+     * Rethrows errors that aren't related to file existence.
+     */
+    async lstat(filename: any): Promise<any>;
+    /**
+     * Reads the contents of a symlink if it exists, otherwise returns null.
+     * Rethrows errors that aren't related to file existence.
+     */
+    async readlink(filename: any, opts?: {
+        encoding: string;
+    }): Promise<any>;
+    /**
+     * Write the contents of buffer to a symlink.
+     */
+    async writelink(filename: any, buffer: any): Promise<any>;
+}
+declare class GitAnnotatedTag {
+    static from(tag: any): GitAnnotatedTag;
+    static render(obj: any): string;
+    static async sign(tag: any, sign: any, secretKey: any): Promise<GitAnnotatedTag>;
+    constructor(tag: any);
+    _tag: any;
+    justHeaders(): any;
+    message(): any;
+    parse(): any;
+    render(): any;
+    headers(): {
+        tagger: any;
+        committer: any;
+    };
+    withoutSignature(): any;
+    gpgsig(): any;
+    payload(): string;
+    toObject(): any;
+}
+declare class GitCommit {
+    static fromPayloadSignature({ payload, signature }: {
+        payload: any;
+        signature: any;
+    }): GitCommit;
+    static from(commit: any): GitCommit;
+    static justMessage(commit: any): any;
+    static justHeaders(commit: any): any;
+    static renderHeaders(obj: any): string;
+    static render(obj: any): string;
+    static async sign(commit: any, sign: any, secretKey: any): Promise<GitCommit>;
+    constructor(commit: any);
+    _commit: any;
+    toObject(): any;
+    headers(): {
+        parent: never[];
+    };
+    message(): any;
+    parse(): any;
+    parseHeaders(): {
+        parent: never[];
+    };
+    render(): any;
+    withoutSignature(): any;
+    isolateSignature(): any;
+}
+declare class GitConfig {
+    static from(text: any): GitConfig;
+    constructor(text: any);
+    parsedConfig: any;
+    async get(path: any, getall?: boolean): Promise<any>;
+    async getall(path: any): Promise<any>;
+    async getSubsections(section: any): Promise<any>;
+    async deleteSection(section: any, subsection: any): Promise<void>;
+    async append(path: any, value: any): Promise<void>;
+    async set(path: any, value: any, append?: boolean): Promise<void>;
+    toString(): any;
+}
+declare class GitConfigManager {
+    static async get({ fs, gitdir }: {
+        fs: any;
+        gitdir: any;
+    }): Promise<GitConfig>;
+    static async save({ fs, gitdir, config }: {
+        fs: any;
+        gitdir: any;
+        config: any;
+    }): Promise<void>;
+}
+declare class GitIgnoreManager {
+    static async isIgnored({ fs, dir, gitdir, filepath }: {
+        fs: any;
+        dir: any;
+        gitdir?: any;
+        filepath: any;
+    }): Promise<boolean>;
+}
+declare class GitIndex {
+    static async from(buffer: any): Promise<GitIndex>;
+    static async fromBuffer(buffer: any): Promise<GitIndex>;
+    static async _entryToBuffer(entry: any): Promise<any>;
+    constructor(entries: any, unmergedPaths: any);
+    _dirty: boolean;
+    _unmergedPaths: any;
+    _entries: any;
+    _addEntry(entry: any): void;
+    get unmergedPaths(): any[];
+    get entries(): any[];
+    get entriesMap(): any;
+    get entriesFlat(): any;
+    [Symbol.iterator](): {};
+    insert({ filepath, stats, oid, stage }: {
+        filepath: any;
+        stats: any;
+        oid: any;
+        stage?: number | undefined;
+    }): void;
+    delete({ filepath }: {
+        filepath: any;
+    }): void;
+    clear(): void;
+    has({ filepath }: {
+        filepath: any;
+    }): any;
+    render(): string;
+    async toObject(): Promise<any>;
+}
+declare class GitIndexManager {
+    /**
+     *
+     * @param {object} opts
+     * @param {import('../models/FileSystem.js').FileSystem} opts.fs
+     * @param {string} opts.gitdir
+     * @param {object} opts.cache
+     * @param {bool} opts.allowUnmerged
+     * @param {function(GitIndex): any} closure
+     */
+    static async acquire({ fs, gitdir, cache, allowUnmerged }: {
+        fs: any;
+        gitdir: string;
+        cache: any;
+        allowUnmerged: (val: any) => boolean;
+    }, closure: (arg0: GitIndex) => any): Promise<undefined>;
+}
+declare class GitObject {
+    static wrap({ type, object }: {
+        type: any;
+        object: any;
+    }): any;
+    static unwrap(buffer: any): {
+        type: any;
+        object: any;
+    };
+}
+declare class GitPackIndex {
+    static async fromIdx({ idx, getExternalRefDelta }: {
+        idx: any;
+        getExternalRefDelta: any;
+    }): Promise<GitPackIndex | undefined>;
+    static async fromPack({ pack, getExternalRefDelta, onProgress }: {
+        pack: any;
+        getExternalRefDelta: any;
+        onProgress: any;
+    }): Promise<GitPackIndex>;
+    constructor(stuff: any);
+    offsetCache: {};
+    async toBuffer(): Promise<any>;
+    async load({ pack }: {
+        pack: any;
+    }): Promise<void>;
+    pack: any;
+    async unload(): Promise<void>;
+    async read({ oid }: {
+        oid: any;
+    }): any;
+    async readSlice({ start }: {
+        start: any;
+    }): any;
+}
+/**
+pkt-line Format
+---------------
+
+Much (but not all) of the payload is described around pkt-lines.
+
+A pkt-line is a variable length binary string.  The first four bytes
+of the line, the pkt-len, indicates the total length of the line,
+in hexadecimal.  The pkt-len includes the 4 bytes used to contain
+the length's hexadecimal representation.
+
+A pkt-line MAY contain binary data, so implementers MUST ensure
+pkt-line parsing/formatting routines are 8-bit clean.
+
+A non-binary line SHOULD BE terminated by an LF, which if present
+MUST be included in the total length. Receivers MUST treat pkt-lines
+with non-binary data the same whether or not they contain the trailing
+LF (stripping the LF if present, and not complaining when it is
+missing).
+
+The maximum length of a pkt-line's data component is 65516 bytes.
+Implementations MUST NOT send pkt-line whose length exceeds 65520
+(65516 bytes of payload + 4 bytes of length data).
+
+Implementations SHOULD NOT send an empty pkt-line ("0004").
+
+A pkt-line with a length field of 0 ("0000"), called a flush-pkt,
+is a special case and MUST be handled differently than an empty
+pkt-line ("0004").
+
+----
+  pkt-line     =  data-pkt / flush-pkt
+
+  data-pkt     =  pkt-len pkt-payload
+  pkt-len      =  4*(HEXDIG)
+  pkt-payload  =  (pkt-len - 4)*(OCTET)
+
+  flush-pkt    = "0000"
+----
+
+Examples (as C-style strings):
+
+----
+  pkt-line          actual value
+  ---------------------------------
+  "0006a\n"         "a\n"
+  "0005a"           "a"
+  "000bfoobar\n"    "foobar\n"
+  "0004"            ""
+----
+*/
+declare class GitPktLine {
+    static flush(): any;
+    static delim(): any;
+    static encode(line: any): any;
+    static streamReader(stream: any): () => Promise<any>;
+}
+declare class GitRefManager {
+    static async updateRemoteRefs({ fs, gitdir, remote, refs, symrefs, tags, refspecs, prune, pruneTags, }: {
+        fs: any;
+        gitdir: any;
+        remote: any;
+        refs: any;
+        symrefs: any;
+        tags: any;
+        refspecs?: any;
+        prune?: boolean | undefined;
+        pruneTags?: boolean | undefined;
+    }): Promise<{
+        pruned: any[];
+    }>;
+    static async writeRef({ fs, gitdir, ref, value }: {
+        fs: any;
+        gitdir: any;
+        ref: any;
+        value: any;
+    }): Promise<void>;
+    static async writeSymbolicRef({ fs, gitdir, ref, value }: {
+        fs: any;
+        gitdir: any;
+        ref: any;
+        value: any;
+    }): Promise<void>;
+    static async deleteRef({ fs, gitdir, ref }: {
+        fs: any;
+        gitdir: any;
+        ref: any;
+    }): Promise<void>;
+    static async deleteRefs({ fs, gitdir, refs }: {
+        fs: any;
+        gitdir: any;
+        refs: any;
+    }): Promise<void>;
+    /**
+     * @param {object} args
+     * @param {import('../models/FileSystem.js').FileSystem} args.fs
+     * @param {string} args.gitdir
+     * @param {string} args.ref
+     * @param {number} [args.depth]
+     * @returns {Promise<string>}
+     */
+    static async resolve({ fs, gitdir, ref, depth }: {
+        fs: any;
+        gitdir: string;
+        ref: string;
+        depth?: number;
+    }): Promise<string>;
+    static async exists({ fs, gitdir, ref }: {
+        fs: any;
+        gitdir: any;
+        ref: any;
+    }): Promise<boolean>;
+    static async expand({ fs, gitdir, ref }: {
+        fs: any;
+        gitdir: any;
+        ref: any;
+    }): Promise<any>;
+    static async expandAgainstMap({ ref, map }: {
+        ref: any;
+        map: any;
+    }): Promise<string>;
+    static resolveAgainstMap({ ref, fullref, depth, map }: {
+        ref: any;
+        fullref?: any;
+        depth?: any;
+        map: any;
+    }): any;
+    static async packedRefs({ fs, gitdir }: {
+        fs: any;
+        gitdir: any;
+    }): Promise<any>;
+    static async listRefs({ fs, gitdir, filepath }: {
+        fs: any;
+        gitdir: any;
+        filepath: any;
+    }): Promise<any>;
+    static async listBranches({ fs, gitdir, remote }: {
+        fs: any;
+        gitdir: any;
+        remote: any;
+    }): Promise<any>;
+    static async listTags({ fs, gitdir }: {
+        fs: any;
+        gitdir: any;
+    }): Promise<any>;
+}
+declare class GitRefSpec {
+    static from(refspec: any): GitRefSpec;
+    constructor({ remotePath, localPath, force, matchPrefix }: {
+        remotePath: any;
+        localPath: any;
+        force: any;
+        matchPrefix: any;
+    });
+    translate(remoteBranch: any): any;
+    reverseTranslate(localBranch: any): any;
+}
+declare class GitRefSpecSet {
+    static from(refspecs: any): GitRefSpecSet;
+    constructor(rules?: any[]);
+    rules: any[];
+    add(refspec: any): void;
+    translate(remoteRefs: any): any[][];
+    translateOne(remoteRef: any): any;
+    localNamespaces(): any[];
+}
+declare class GitRemoteHTTP {
+    static async capabilities(): Promise<string[]>;
+    /**
+     * @param {Object} args
+     * @param {HttpClient} args.http
+     * @param {ProgressCallback} [args.onProgress]
+     * @param {AuthCallback} [args.onAuth]
+     * @param {AuthFailureCallback} [args.onAuthFailure]
+     * @param {AuthSuccessCallback} [args.onAuthSuccess]
+     * @param {string} [args.corsProxy]
+     * @param {string} args.service
+     * @param {string} args.url
+     * @param {Object<string, string>} args.headers
+     * @param {1 | 2} args.protocolVersion - Git Protocol Version
+     */
+    static async discover({ http, onProgress, onAuth, onAuthSuccess, onAuthFailure, corsProxy, service, url: _origUrl, headers, protocolVersion, }: {
+        http: HttpClient;
+        onProgress?: ProgressCallback;
+        onAuth?: AuthCallback;
+        onAuthFailure?: AuthFailureCallback;
+        onAuthSuccess?: AuthSuccessCallback;
+        corsProxy?: string;
+        service: string;
+        url: string;
+        headers: {
+            [x: string]: string;
+        };
+        protocolVersion: 1 | 2;
+    }): Promise<{
+        protocolVersion: number;
+        capabilities2: {
+            [x: string]: string | true;
+        };
+    } | {
+        capabilities: any;
+        refs: any;
+        symrefs: any;
+        protocolVersion?: undefined;
+    } | {
+        protocolVersion: number;
+        capabilities: any;
+        refs: any;
+        symrefs: any;
+    }>;
+    /**
+     * @param {Object} args
+     * @param {HttpClient} args.http
+     * @param {ProgressCallback} [args.onProgress]
+     * @param {string} [args.corsProxy]
+     * @param {string} args.service
+     * @param {string} args.url
+     * @param {Object<string, string>} [args.headers]
+     * @param {any} args.body
+     * @param {any} args.auth
+     */
+    static async connect({ http, onProgress, corsProxy, service, url, auth, body, headers, }: {
+        http: HttpClient;
+        onProgress?: ProgressCallback;
+        corsProxy?: string;
+        service: string;
+        url: string;
+        headers?: {
+            [x: string]: string;
+        };
+        body: any;
+        auth: any;
+    }): Promise<GitHttpResponse>;
+}
+declare class GitRemoteManager {
+    static getRemoteHelperFor({ url }: {
+        url: any;
+    }): any;
+}
+declare class GitShallowManager {
+    static async read({ fs, gitdir }: {
+        fs: any;
+        gitdir: any;
+    }): Promise<any>;
+    static async write({ fs, gitdir, oids }: {
+        fs: any;
+        gitdir: any;
+        oids: any;
+    }): Promise<void>;
+}
+declare class GitSideBand {
+    static demux(input: any): {
+        packetlines: FIFO;
+        packfile: FIFO;
+        progress: FIFO;
+    };
+}
+declare class GitTree {
+    static from(tree: any): GitTree;
+    constructor(entries: any);
+    _entries: any[];
+    render(): string;
+    toObject(): any;
+    /**
+     * @returns {TreeEntry[]}
+     */
+    entries(): TreeEntry[];
+    [Symbol.iterator](): {};
+}
+declare class GitWalkerFs {
+    constructor({ fs, dir, gitdir, cache }: {
+        fs: any;
+        dir: any;
+        gitdir: any;
+        cache: any;
+    });
+    fs: any;
+    cache: any;
+    dir: any;
+    gitdir: any;
+    ConstructEntry: {
+        new (fullpath: any): {
+            _fullpath: any;
+            _type: boolean;
+            _mode: boolean;
+            _stat: boolean;
+            _content: boolean;
+            _oid: boolean;
+            type(): Promise<any>;
+            mode(): Promise<any>;
+            stat(): Promise<any>;
+            content(): Promise<any>;
+            oid(): Promise<any>;
+        };
+    };
+    async readdir(entry: any): Promise<any>;
+    async type(entry: any): Promise<any>;
+    async mode(entry: any): Promise<any>;
+    async stat(entry: any): Promise<any>;
+    async content(entry: any): Promise<any>;
+    async oid(entry: any): Promise<any>;
+}
+declare class GitWalkerIndex {
+    constructor({ fs, gitdir, cache }: {
+        fs: any;
+        gitdir: any;
+        cache: any;
+    });
+    treePromise: Promise<undefined>;
+    ConstructEntry: {
+        new (fullpath: any): {
+            _fullpath: any;
+            _type: boolean;
+            _mode: boolean;
+            _stat: boolean;
+            _oid: boolean;
+            type(): Promise<any>;
+            mode(): Promise<any>;
+            stat(): Promise<any>;
+            content(): Promise<void>;
+            oid(): Promise<any>;
+        };
+    };
+    async readdir(entry: any): Promise<any>;
+    async type(entry: any): Promise<any>;
+    async mode(entry: any): Promise<any>;
+    async stat(entry: any): Promise<any>;
+    async content(_entry: any): Promise<void>;
+    async oid(entry: any): Promise<any>;
+}
+declare class GitWalkerRepo {
+    constructor({ fs, gitdir, ref, cache }: {
+        fs: any;
+        gitdir: any;
+        ref: any;
+        cache: any;
+    });
+    fs: any;
+    cache: any;
+    gitdir: any;
+    mapPromise: Promise<any>;
+    ConstructEntry: {
+        new (fullpath: any): {
+            _fullpath: any;
+            _type: boolean;
+            _mode: boolean;
+            _stat: boolean;
+            _content: boolean;
+            _oid: boolean;
+            type(): Promise<any>;
+            mode(): Promise<any>;
+            stat(): Promise<void>;
+            content(): Promise<any>;
+            oid(): Promise<any>;
+        };
+    };
+    async readdir(entry: any): Promise<any[] | null>;
+    async type(entry: any): Promise<any>;
+    async mode(entry: any): Promise<any>;
+    async stat(_entry: any): Promise<void>;
+    async content(entry: any): Promise<any>;
+    async oid(entry: any): Promise<any>;
+}
+declare class RunningMinimum {
+    value: any;
+    consider(value: any): void;
+    reset(): void;
+}
+declare class StreamReader {
+    constructor(stream: any);
+    stream: any;
+    buffer: any;
+    cursor: any;
+    undoCursor: any;
+    started: boolean;
+    _ended: boolean;
+    _discardedBytes: number;
+    eof(): boolean;
+    tell(): any;
+    async byte(): Promise<any>;
+    async chunk(): Promise<any>;
+    async read(n: any): Promise<any>;
+    async skip(n: any): Promise<void>;
+    async undo(): Promise<void>;
+    async _next(): Promise<any>;
+    _trim(): void;
+    _moveCursor(n: any): void;
+    async _accumulate(n: any): Promise<void>;
+    async _loadnext(): Promise<void>;
+    async _init(): Promise<void>;
+}
+declare function abbreviateRef(ref: any): any;
+/**
+ * @param {Buffer} delta
+ * @param {Buffer} source
+ * @returns {Buffer}
+ */
+declare function applyDelta(delta: any, source: any): any;
+declare function arrayRange(start: any, end: any): any;
+declare function assertParameter(name: any, value: any): void;
+declare function basename(path: any): any;
+declare function calculateBasicAuthHeader({ username, password }: {
+    username?: string | undefined;
+    password?: string | undefined;
+}): string;
+declare function collect(iterable: any): Promise<Uint8Array>;
+declare function compareAge(a: any, b: any): number;
+declare function comparePath(a: any, b: any): number;
+declare function compareRefNames(a: any, b: any): number;
+declare function compareStats(entry: any, stats: any): boolean;
+declare function compareStrings(a: any, b: any): number;
+declare function compareTreeEntryPath(a: any, b: any): number;
+declare function deflate(buffer: any): Promise<any>;
+declare function dirname(path: any): any;
+declare function emptyPackfile(pack: any): boolean;
+export function _expandOid({ fs, cache, gitdir, oid: short }: {
+    fs: any;
+    cache: any;
+    gitdir: any;
+    oid: any;
+}): Promise<any>;
+declare function expandOidLoose({ fs, gitdir, oid: short }: {
+    fs: any;
+    gitdir: any;
+    oid: any;
+}): Promise<any>;
+declare function expandOidPacked({ fs, cache, gitdir, oid: short, getExternalRefDelta, }: {
+    fs: any;
+    cache: any;
+    gitdir: any;
+    oid: any;
+    getExternalRefDelta: any;
+}): Promise<any[]>;
+declare function extractAuthFromUrl(url: any): {
+    url: any;
+    auth: {
+        username?: undefined;
+        password?: undefined;
+    };
+} | {
+    url: any;
+    auth: {
+        username: any;
+        password: any;
+    };
+};
+declare function filterCapabilities(server: any, client: any): any;
+declare function flat(entries: any): any;
+declare function flatFileListToDirectoryStructure(files: any): any;
+declare function forAwait(iterable: any, cb: any): Promise<void>;
+declare function formatAuthor({ name, email, timestamp, timezoneOffset }: {
+    name: any;
+    email: any;
+    timestamp: any;
+    timezoneOffset: any;
+}): string;
+/**
+ * @param {any} remote
+ * @param {string} prefix
+ * @param {boolean} symrefs
+ * @param {boolean} peelTags
+ * @returns {ServerRef[]}
+ */
+declare function formatInfoRefs(remote: any, prefix: string, symrefs: boolean, peelTags: boolean): ServerRef[];
+/**
+ * @param {Map} map
+ */
+declare function fromEntries(map: any): {
+    [x: string]: string;
+};
+declare function fromNodeStream(stream: any): any;
+declare function fromStream(stream: any): any;
+declare function fromValue(value: any): {
+    next(): any;
+    return(): {};
+    [Symbol.asyncIterator](): any;
+};
+declare function getIterator(iterable: any): any;
+declare function hasObject({ fs, cache, gitdir, oid, format, }: {
+    fs: any;
+    cache: any;
+    gitdir: any;
+    oid: any;
+    format?: string | undefined;
+}): Promise<any>;
+declare function hasObjectLoose({ fs, gitdir, oid }: {
+    fs: any;
+    gitdir: any;
+    oid: any;
+}): Promise<any>;
+declare function hasObjectPacked({ fs, cache, gitdir, oid, getExternalRefDelta, }: {
+    fs: any;
+    cache: any;
+    gitdir: any;
+    oid: any;
+    getExternalRefDelta: any;
+}): Promise<boolean>;
+declare function hashObject({ type, object, format, oid, }: {
+    type: any;
+    object: any;
+    format?: string | undefined;
+    oid?: any;
+}): Promise<{
+    oid: any;
+    object: any;
+}>;
+declare function indent(str: any): string;
+declare function inflate(buffer: any): Promise<any>;
+/**
+ * Determine whether a file is binary (and therefore not worth trying to merge automatically)
+ *
+ * @param {Uint8Array} buffer
+ *
+ * If it looks incredibly simple / naive to you, compare it with the original:
+ *
+ * // xdiff-interface.c
+ *
+ * #define FIRST_FEW_BYTES 8000
+ * int buffer_is_binary(const char *ptr, unsigned long size)
+ * {
+ *  if (FIRST_FEW_BYTES < size)
+ *   size = FIRST_FEW_BYTES;
+ *  return !!memchr(ptr, 0, size);
+ * }
+ *
+ * Yup, that's how git does it. We could try to be smarter
+ */
+declare function isBinary(buffer: Uint8Array): boolean;
+declare function join(...parts: any[]): any;
+/**
+ * @param {object} args
+ * @param {import('../models/FileSystem.js').FileSystem} args.fs
+ * @param {any} args.cache
+ * @param {string} [args.dir]
+ * @param {string} args.gitdir
+ * @param {Iterable<string>} args.start
+ * @param {Iterable<string>} args.finish
+ * @returns {Promise<Set<string>>}
+ */
+declare function listCommitsAndTags({ fs, cache, dir, gitdir, start, finish, }: {
+    fs: any;
+    cache: any;
+    dir?: string;
+    gitdir: string;
+    start: any;
+    finish: any;
+}): Promise<any>;
+/**
+ * @param {object} args
+ * @param {import('../models/FileSystem.js').FileSystem} args.fs
+ * @param {any} args.cache
+ * @param {string} [args.dir]
+ * @param {string} args.gitdir
+ * @param {Iterable<string>} args.oids
+ * @returns {Promise<Set<string>>}
+ */
+declare function listObjects({ fs, cache, dir, gitdir, oids, }: {
+    fs: any;
+    cache: any;
+    dir?: string;
+    gitdir: string;
+    oids: any;
+}): Promise<any>;
+declare function listpack(stream: any, onData: any): Promise<void>;
+declare function mergeFile({ branches, contents }: {
+    branches: any;
+    contents: any;
+}): {
+    cleanMerge: boolean;
+    mergedText: string;
+};
+/**
+ * Create a merged tree
+ *
+ * @param {Object} args
+ * @param {import('../models/FileSystem.js').FileSystem} args.fs
+ * @param {object} args.cache
+ * @param {string} [args.dir] - The [working tree](dir-vs-gitdir.md) directory path
+ * @param {string} [args.gitdir=join(dir,'.git')] - [required] The [git directory](dir-vs-gitdir.md) path
+ * @param {string} args.ourOid - The SHA-1 object id of our tree
+ * @param {string} args.baseOid - The SHA-1 object id of the base tree
+ * @param {string} args.theirOid - The SHA-1 object id of their tree
+ * @param {string} [args.ourName='ours'] - The name to use in conflicted files for our hunks
+ * @param {string} [args.baseName='base'] - The name to use in conflicted files (in diff3 format) for the base hunks
+ * @param {string} [args.theirName='theirs'] - The name to use in conflicted files for their hunks
+ * @param {boolean} [args.dryRun=false]
+ * @param {boolean} [args.abortOnConflict=false]
+ * @param {MergeDriverCallback} [args.mergeDriver]
+ *
+ * @returns {Promise<string>} - The SHA-1 object id of the merged tree
+ *
+ */
+declare function mergeTree({ fs, cache, dir, gitdir, index, ourOid, baseOid, theirOid, ourName, baseName, theirName, dryRun, abortOnConflict, mergeDriver, }: {
+    fs: any;
+    cache: any;
+    dir?: string;
+    gitdir?: string;
+    ourOid: string;
+    baseOid: string;
+    theirOid: string;
+    ourName?: string;
+    baseName?: string;
+    theirName?: string;
+    dryRun?: boolean;
+    abortOnConflict?: boolean;
+    mergeDriver?: MergeDriverCallback;
+}): Promise<string>;
+/**
+ *
+ * @param {number} mode
+ */
+declare function mode2type(mode: number): "blob" | "tree" | "commit";
+/**
+ *
+ * @param {WalkerEntry} entry
+ * @param {WalkerEntry} base
+ *
+ */
+declare function modified(entry: WalkerEntry, base: WalkerEntry): Promise<boolean>;
+/**
+ *
+ * @returns {Promise<void | {name: string, email: string, date: Date, timestamp: number, timezoneOffset: number }>}
+ */
+declare function normalizeAuthorObject({ fs, gitdir, author }: {
+    fs: any;
+    gitdir: any;
+    author?: {} | undefined;
+}): Promise<void | {
+    name: string;
+    email: string;
+    date: Date;
+    timestamp: number;
+    timezoneOffset: number;
+}>;
+/**
+ *
+ * @returns {Promise<void | {name: string, email: string, timestamp: number, timezoneOffset: number }>}
+ */
+declare function normalizeCommitterObject({ fs, gitdir, author, committer, }: {
+    fs: any;
+    gitdir: any;
+    author: any;
+    committer: any;
+}): Promise<void | {
+    name: string;
+    email: string;
+    timestamp: number;
+    timezoneOffset: number;
+}>;
+/**
+ * From https://github.com/git/git/blob/master/Documentation/technical/index-format.txt
+ *
+ * 32-bit mode, split into (high to low bits)
+ *
+ *  4-bit object type
+ *    valid values in binary are 1000 (regular file), 1010 (symbolic link)
+ *    and 1110 (gitlink)
+ *
+ *  3-bit unused
+ *
+ *  9-bit unix permission. Only 0755 and 0644 are valid for regular files.
+ *  Symbolic links and gitlinks have value 0 in this field.
+ */
+declare function normalizeMode(mode: any): number;
+declare function normalizeNewlines(str: any): any;
+declare function normalizePath(path: any): any;
+declare function normalizeStats(e: any): {
+    ctimeSeconds: number;
+    ctimeNanoseconds: number;
+    mtimeSeconds: number;
+    mtimeNanoseconds: number;
+    dev: number;
+    ino: number;
+    mode: number;
+    uid: number;
+    gid: number;
+    size: number;
+};
+declare function outdent(str: any): any;
+/**
+ * @param {object} args
+ * @param {import('../models/FileSystem.js').FileSystem} args.fs
+ * @param {any} args.cache
+ * @param {string} [args.dir] - The [working tree](dir-vs-gitdir.md) directory path
+ * @param {string} [args.gitdir=join(dir, '.git')] - [required] The [git directory](dir-vs-gitdir.md) path
+ * @param {string[]} args.oids
+ */
+export function _pack({ fs, cache, dir, gitdir, oids, }: {
+    fs: any;
+    cache: any;
+    dir?: string;
+    gitdir?: string;
+    oids: string[];
+}): Promise<any[]>;
+declare function padHex(b: any, n: any): any;
+declare function parseAuthor(author: any): {
+    name: any;
+    email: any;
+    timestamp: number;
+    timezoneOffset: any;
+};
+/**
+ * @param {function} read
+ */
+declare function parseCapabilitiesV2(read: Function): Promise<{
+    protocolVersion: number;
+    capabilities2: {
+        [x: string]: string | true;
+    };
+}>;
+/**
+ * @typedef {Object} ServerRef - This object has the following schema:
+ * @property {string} ref - The name of the ref
+ * @property {string} oid - The SHA-1 object id the ref points to
+ * @property {string} [target] - The target ref pointed to by a symbolic ref
+ * @property {string} [peeled] - If the oid is the SHA-1 object id of an annotated tag, this is the SHA-1 object id that the annotated tag points to
+ */
+declare function parseListRefsResponse(stream: any): Promise<{
+    ref: any;
+    oid: any;
+}[]>;
+declare function parseReceivePackResponse(packfile: any): Promise<PushResult>;
+declare function parseRefsAdResponse(stream: any, { service }: {
+    service: any;
+}): Promise<{
+    protocolVersion: number;
+    capabilities2: {
+        [x: string]: string | true;
+    };
+} | {
+    capabilities: any;
+    refs: any;
+    symrefs: any;
+    protocolVersion?: undefined;
+} | {
+    protocolVersion: number;
+    capabilities: any;
+    refs: any;
+    symrefs: any;
+}>;
+declare function parseUploadPackRequest(stream: any): Promise<{
+    capabilities: any;
+    wants: any[];
+    haves: any[];
+    shallows: any[];
+    depth: number | undefined;
+    since: number | undefined;
+    exclude: any[];
+    relative: boolean;
+    done: boolean;
+}>;
+declare function parseUploadPackResponse(stream: any): Promise<any>;
+declare namespace pkg {
+    export const name: string;
+    export const version: string;
+    export const agent: string;
+}
+declare function posixifyPathBuffer(buffer: any): any;
+/**
+ * @param {object} args
+ * @param {import('../models/FileSystem.js').FileSystem} args.fs
+ * @param {any} args.cache
+ * @param {string} args.gitdir
+ * @param {string} args.oid
+ * @param {string} [args.format]
+ */
+export function _readObject({ fs, cache, gitdir, oid, format, }: {
+    fs: any;
+    cache: any;
+    gitdir: string;
+    oid: string;
+    format?: string;
+}): Promise<any>;
+declare function readObjectLoose({ fs, gitdir, oid }: {
+    fs: any;
+    gitdir: any;
+    oid: any;
+}): Promise<{
+    object: any;
+    format: string;
+    source: string;
+} | null>;
+declare function readObjectPacked({ fs, cache, gitdir, oid, format, getExternalRefDelta, }: {
+    fs: any;
+    cache: any;
+    gitdir: any;
+    oid: any;
+    format?: string | undefined;
+    getExternalRefDelta: any;
+}): Promise<any>;
+declare function readPackIndex({ fs, cache, filename, getExternalRefDelta, emitter, emitterPrefix, }: {
+    fs: any;
+    cache: any;
+    filename: any;
+    getExternalRefDelta: any;
+    emitter: any;
+    emitterPrefix: any;
+}): any;
+declare function resolveBlob({ fs, cache, gitdir, oid }: {
+    fs: any;
+    cache: any;
+    gitdir: any;
+    oid: any;
+}): any;
+declare function resolveCommit({ fs, cache, gitdir, oid }: {
+    fs: any;
+    cache: any;
+    gitdir: any;
+    oid: any;
+}): any;
+declare function resolveFileIdInTree({ fs, cache, gitdir, oid, fileId }: {
+    fs: any;
+    cache: any;
+    gitdir: any;
+    oid: any;
+    fileId: any;
+}): Promise<any>;
+declare function resolveFilepath({ fs, cache, gitdir, oid, filepath }: {
+    fs: any;
+    cache: any;
+    gitdir: any;
+    oid: any;
+    filepath: any;
+}): Promise<any>;
+declare function resolveTree({ fs, cache, gitdir, oid }: {
+    fs: any;
+    cache: any;
+    gitdir: any;
+    oid: any;
+}): any;
+/**
+ * Removes the directory at the specified filepath recursively. Used internally to replicate the behavior of
+ * fs.promises.rm({ recursive: true, force: true }) from Node.js 14 and above when not available. If the provided
+ * filepath resolves to a file, it will be removed.
+ *
+ * @param {import('../models/FileSystem.js').FileSystem} fs
+ * @param {string} filepath - The file or directory to remove.
+ */
+declare function rmRecursive(fs: any, filepath: string): Promise<void>;
+declare function shasum(buffer: any): Promise<any>;
+declare function sleep(ms: any): Promise<any>;
+declare function splitLines(input: any): FIFO;
+declare function toHex(buffer: any): string;
+declare function translateSSHtoHTTP(url: any): any;
+declare function unionOfIterators(sets: any): {};
+declare function uploadPack({ fs, dir, gitdir, advertiseRefs, }: {
+    fs: any;
+    dir: any;
+    gitdir?: any;
+    advertiseRefs?: boolean | undefined;
+}): Promise<any[] | undefined>;
+declare function hashObject$1({ gitdir, type, object }: {
+    gitdir: any;
+    type: any;
+    object: any;
+}): Promise<any>;
+declare function worthWalking(filepath: any, root: any): any;
+/**
+ * @param {object} args
+ * @param {string} [args.prefix] - Only list refs that start with this prefix
+ * @param {boolean} [args.symrefs = false] - Include symbolic ref targets
+ * @param {boolean} [args.peelTags = false] - Include peeled tags values
+ * @returns {Uint8Array[]}
+ */
+declare function writeListRefsRequest({ prefix, symrefs, peelTags }: {
+    prefix?: string;
+    symrefs?: boolean;
+    peelTags?: boolean;
+}): Uint8Array[];
+export function _writeObject({ fs, gitdir, type, object, format, oid, dryRun, }: {
+    fs: any;
+    gitdir: any;
+    type: any;
+    object: any;
+    format?: string | undefined;
+    oid?: any;
+    dryRun?: boolean | undefined;
+}): Promise<any>;
+declare function writeObjectLoose({ fs, gitdir, object, format, oid }: {
+    fs: any;
+    gitdir: any;
+    object: any;
+    format: any;
+    oid: any;
+}): Promise<void>;
+declare function writeReceivePackRequest({ capabilities, triplets, }: {
+    capabilities?: any[] | undefined;
+    triplets?: any[] | undefined;
+}): Promise<any[]>;
+declare function writeRefsAdResponse({ capabilities, refs, symrefs }: {
+    capabilities: any;
+    refs: any;
+    symrefs: any;
+}): Promise<any[]>;
+declare function writeUploadPackRequest({ capabilities, wants, haves, shallows, depth, since, exclude, }: {
+    capabilities?: any[] | undefined;
+    wants?: any[] | undefined;
+    haves?: any[] | undefined;
+    shallows?: any[] | undefined;
+    depth?: any;
+    since?: any;
+    exclude?: any[] | undefined;
+}): any[];
 /**
  * Abort a merge in progress.
  *
@@ -4523,3 +5801,4 @@ declare class BaseError extends Error {
     fromJSON(json: any): BaseError;
     get isIsomorphicGitError(): boolean;
 }
+export { BufferCursor as _BufferCursor, DeepMap as _DeepMap, FIFO as _FIFO, FileSystem as _FileSystem, GitAnnotatedTag as _GitAnnotatedTag, GitCommit as _GitCommit, GitConfig as _GitConfig, GitConfigManager as _GitConfigManager, GitIgnoreManager as _GitIgnoreManager, GitIndex as _GitIndex, GitIndexManager as _GitIndexManager, GitObject as _GitObject, GitPackIndex as _GitPackIndex, GitPktLine as _GitPktLine, GitRefManager as _GitRefManager, GitRefSpec as _GitRefSpec, GitRefSpecSet as _GitRefSpecSet, GitRemoteHTTP as _GitRemoteHTTP, GitRemoteManager as _GitRemoteManager, GitShallowManager as _GitShallowManager, GitSideBand as _GitSideBand, GitTree as _GitTree, GitWalkerFs as _GitWalkerFs, GitWalkerIndex as _GitWalkerIndex, GitWalkerRepo as _GitWalkerRepo, RunningMinimum as _RunningMinimum, StreamReader as _StreamReader, abbreviateRef as _abbreviateRef, applyDelta as _applyDelta, arrayRange as _arrayRange, assertParameter as _assertParameter, basename as _basename, calculateBasicAuthHeader as _calculateBasicAuthHeader, collect as _collect, compareAge as _compareAge, comparePath as _comparePath, compareRefNames as _compareRefNames, compareStats as _compareStats, compareStrings as _compareStrings, compareTreeEntryPath as _compareTreeEntryPath, deflate as _deflate, dirname as _dirname, emptyPackfile as _emptyPackfile, expandOidLoose as _expandOidLoose, expandOidPacked as _expandOidPacked, extractAuthFromUrl as _extractAuthFromUrl, filterCapabilities as _filterCapabilities, flat as _flat, flatFileListToDirectoryStructure as _flatFileListToDirectoryStructure, forAwait as _forAwait, formatAuthor as _formatAuthor, formatInfoRefs as _formatInfoRefs, fromEntries as _fromEntries, fromNodeStream as _fromNodeStream, fromStream as _fromStream, fromValue as _fromValue, getIterator as _getIterator, hasObject as _hasObject, hasObjectLoose as _hasObjectLoose, hasObjectPacked as _hasObjectPacked, hashObject as _hashObject, indent as _indent, inflate as _inflate, isBinary as _isBinary, join as _join, listCommitsAndTags as _listCommitsAndTags, listObjects as _listObjects, listpack as _listpack, mergeFile as _mergeFile, mergeTree as _mergeTree, mode2type as _mode2type, modified as _modified, normalizeAuthorObject as _normalizeAuthorObject, normalizeCommitterObject as _normalizeCommitterObject, normalizeMode as _normalizeMode, normalizeNewlines as _normalizeNewlines, normalizePath as _normalizePath, normalizeStats as _normalizeStats, outdent as _outdent, padHex as _padHex, parseAuthor as _parseAuthor, parseCapabilitiesV2 as _parseCapabilitiesV2, parseListRefsResponse as _parseListRefsResponse, parseReceivePackResponse as _parseReceivePackResponse, parseRefsAdResponse as _parseRefsAdResponse, parseUploadPackRequest as _parseUploadPackRequest, parseUploadPackResponse as _parseUploadPackResponse, pkg as _pkg, posixifyPathBuffer as _posixifyPathBuffer, readObjectLoose as _readObjectLoose, readObjectPacked as _readObjectPacked, readPackIndex as _readPackIndex, resolveBlob as _resolveBlob, resolveCommit as _resolveCommit, resolveFileIdInTree as _resolveFileIdInTree, resolveFilepath as _resolveFilepath, resolveTree as _resolveTree, rmRecursive as _rmRecursive, shasum as _shasum, sleep as _sleep, splitLines as _splitLines, toHex as _toHex, translateSSHtoHTTP as _translateSSHtoHTTP, unionOfIterators as _unionOfIterators, uploadPack as _uploadPack, hashObject$1 as _utils_hashObject, worthWalking as _worthWalking, writeListRefsRequest as _writeListRefsRequest, writeObjectLoose as _writeObjectLoose, writeReceivePackRequest as _writeReceivePackRequest, writeRefsAdResponse as _writeRefsAdResponse, writeUploadPackRequest as _writeUploadPackRequest };
