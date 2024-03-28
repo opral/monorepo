@@ -35,13 +35,24 @@ export class DefaultObjectInput extends LitElement {
 				flex-grow: 1;
 			}
 			.remove-icon {
-				width: 50px;
+				width: 44px;
+				display: flex;
+				justify-content: flex-start;
+				margin-left: 6px;
+				cursor: pointer;
+				color: var(--sl-color-gray-500);
+			}
+			.remove-icon:hover {
+				color: var(--sl-color-gray-950);
 			}
 			.list-container {
 				display: flex;
 				flex-direction: column;
 				gap: 3px;
 				padding-bottom: 8px;
+			}
+			.icon {
+				padding-top: 0.5rem;
 			}
 		`,
 	]
@@ -134,12 +145,18 @@ export class DefaultObjectInput extends LitElement {
 						>
 						</sl-input>
 						<div class="remove-icon">
-							<sl-icon-button
+							<div
 								@click=${() => {
 									this.handleDeleteItemClick(key as InlangModule["default"]["id"])
 								}}
-								name="x-lg"
-							></sl-icon-button>
+							>
+								<svg class="icon" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+									<path
+										xmlns="http://www.w3.org/2000/svg"
+										d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"
+									/>
+								</svg>
+							</div>
 						</div>
 					</div>`
 				})}
