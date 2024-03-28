@@ -2,8 +2,7 @@ import { exec } from "node:child_process"
 import { Command } from "commander"
 import { log } from "../../utilities/log.js"
 import fs from "node:fs/promises"
-import { findRepoRoot, _listRemotes } from "@lix-js/client"
-import { parseOrigin } from "@inlang/telemetry"
+import { findRepoRoot, openRepository } from "@lix-js/client"
 import type { NodeishFilesystem } from "@lix-js/fs"
 
 export const editor = new Command()
@@ -31,15 +30,9 @@ export async function editorCommandAction(args: {
 		return
 	}
 
-	// _listReomotes deprecated, open repo and use repo.listRemotes
-	const remotes = await _listRemotes({
-		fs: args.nodeishFs,
-		dir: repoRoot?.replace("file://", ""),
-	})
+	const repo = await openRepository(repoRoot, { nodeishFs: args.nodeishFs })
+	const origin = await repo.getOrigin()
 
-	const origin = parseOrigin({ remotes })
-
-	// const origin = parse
 	// Print out the remote URL
 	args.logger.info(`Origin URL: ${origin}`)
 
@@ -82,7 +75,10 @@ export async function editorCommandAction(args: {
 	})
 }
 
-const parseGithubUrl = (url: string): string | undefined => {
+const parseGithubUrl = (url: string | undefined): string | undefined => {
+	if (!url) {
+		return undefined
+	}
 	const regex = /^(?:https?:\/\/)?(?:www\.)?github\.com\/([\w-]+\/[\w-]+)(?:\.git)?$/
 	const match = url.match(regex)
 

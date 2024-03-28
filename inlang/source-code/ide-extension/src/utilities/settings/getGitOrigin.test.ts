@@ -1,39 +1,39 @@
-import { describe, it, expect, vi, beforeEach } from "vitest"
-import { getGitOrigin } from "./getGitOrigin.js"
-import * as lixClient from "@lix-js/client"
+import { describe, it, expect, vi } from "vitest"
+import { createNodeishMemoryFs, fromSnapshot as loadSnapshot, type Snapshot } from "@lix-js/fs"
+import { readFileSync } from "node:fs"
+import { resolve } from "node:path"
 
-// Mocks
 vi.mock("vscode", () => ({
 	workspace: {
-		workspaceFolders: [{ uri: { fsPath: "mock/path" } }],
+		workspaceFolders: [{ uri: { fsPath: "src" } }],
 	},
 }))
-vi.mock("@lix-js/client", () => ({
-	findRepoRoot: vi.fn().mockResolvedValue("mock/root"),
-	_listRemotes: vi.fn().mockResolvedValue([{ url: "git@github.com:user/repo.git" }]),
-}))
-vi.mock("node:fs/promises", () => ({}))
-vi.mock("@inlang/telemetry", () => ({
-	parseOrigin: vi.fn().mockReturnValue("https://github.com/user/repo"),
-}))
 
-describe("getGitOrigin", () => {
-	beforeEach(() => {
-		vi.clearAllMocks()
-		// @ts-expect-error
-		lixClient.findRepoRoot.mockResolvedValue("mock/root")
-		// @ts-expect-error
-		lixClient._listRemotes.mockResolvedValue([{ url: "git@github.com:user/repo.git" }])
-	})
+vi.mock("node:fs/promises", () => {
+	const nodeishFs = createNodeishMemoryFs()
+
+	const ciTestRepo: Snapshot = JSON.parse(
+		readFileSync(resolve(__dirname, "../../../test/mocks/ci-test-repo.json"), {
+			encoding: "utf-8",
+		})
+	)
+
+	loadSnapshot(nodeishFs, ciTestRepo)
+	nodeishFs._original_unwrapped_fs = undefined
+
+	return nodeishFs
+})
+
+describe("getGitOrigin", async () => {
+	const { getGitOrigin } = await import("./getGitOrigin.js")
 
 	it("should return the parsed git origin URL", async () => {
 		const origin = await getGitOrigin()
-		expect(origin).toEqual("https://github.com/user/repo")
+		expect(origin).toEqual("github.com/inlang/ci-test-repo.git")
 	})
 
-	it("should handle errors and return undefined", async () => {
-		// @ts-expect-error
-		lixClient.findRepoRoot.mockRejectedValueOnce(new Error("Mock error"))
+	it.todo("should handle errors and return undefined", async () => {
+		// FIXME: either return not existing worpsace forlder here as mock or mock the findRepoRoot as a before
 		const origin = await getGitOrigin()
 		expect(origin).toBeUndefined()
 	})

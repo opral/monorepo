@@ -212,7 +212,7 @@ export async function statusList({
 				const isBlob = [headType, workdirType, stageType].includes("blob")
 
 				if (sparseFilter) {
-					const fileMode = await(head || workdir)?.mode()
+					const fileMode = await (head || workdir)?.mode()
 					// @ts-ignore -- cannot be undefined
 					const fileType: "file" | "folder" | "symlink" = modeToFileType(fileMode)
 
