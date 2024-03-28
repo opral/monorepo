@@ -126,12 +126,17 @@ export async function openRepository(
 		}
 	}
 
-	const { protocol, lixHost, repoHost, owner, repoName, username, password } = parseLixUri(url)
+	// Ignoring parsing errror and just using what we can get from the url, as we support also some edge cases for local repos that are not 100% clear yet
+	// see line 90 for explanation of lix uri parts
+	const { protocol, lixHost, repoHost, owner, repoName, username, password, namespace } =
+		parseLixUri(url)
 	if (debug && (username || password)) {
 		console.warn(
 			"username and password and providers other than github are not supported yet. Only local commands will work."
 		)
 	}
+
+	// console.log({ namespace, protocol, lixHost, repoHost, owner, repoName, username, password, error })
 
 	const isWhitelistedRepo = whitelistedExperimentalRepos.includes(
 		`${owner}/${repoName}`.toLocaleLowerCase()
@@ -144,8 +149,13 @@ export async function openRepository(
 			: experimentalFeatures.lazyClone
 	const cache = lazyFS ? {} : undefined
 
-	const gitProxyUrl = lixHost ? `${protocol}//${lixHost}/git-proxy` : ""
-	const gitHubProxyUrl = lixHost ? `${protocol}//${lixHost}/github-proxy` : ""
+	let gitProxyUrl: string | undefined
+	let gitHubProxyUrl: string | undefined
+
+	if (namespace === "git") {
+		gitProxyUrl = lixHost ? `${protocol}//${lixHost}/git-proxy` : ""
+		gitHubProxyUrl = lixHost ? `${protocol}//${lixHost}/github-proxy` : ""
+	}
 
 	debug &&
 		console.info({
@@ -182,8 +192,10 @@ export async function openRepository(
 	// TODO: support for url scheme to use local repo already in the fs
 	const gitUrl = repoName ? `https://${repoHost}/${owner}/${repoName}` : ""
 
-	if (!gitUrl) {
-		console.warn("valid repo url / local repo not found, only limited features will be available.")
+	if (!gitUrl && debug) {
+		console.warn(
+			"valid repo url / local repo not found, only fs features available outside of repo"
+		)
 	}
 
 	const expFeatures = Object.entries(experimentalFeatures) // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -550,9 +562,8 @@ export async function openRepository(
 		return maybeStatusEntry?.[1] as string
 	}
 
-
 	if (args.debugTime) {
-		console.timeEnd('repo')
+		console.timeEnd("repo")
 	}
 
 	return {
@@ -643,6 +654,11 @@ export async function openRepository(
 		statusList,
 
 		async forkStatus() {
+			if (!gitUrl) {
+				throw new Error(
+					"Could not find repo url, only github supported for forkStatus at the moment"
+				)
+			}
 			// uncomment to disable: return { ahead: 0, behind: 0, conflicts: false }
 			const repo = await this
 
@@ -828,6 +844,9 @@ export async function openRepository(
 		},
 
 		push() {
+			if (!gitUrl) {
+				throw new Error("Could not find repo url, only github supported for push at the moment")
+			}
 			return isoGit.push({
 				fs: withProxy({
 					nodeishFs: rawFs,
@@ -844,6 +863,9 @@ export async function openRepository(
 		},
 
 		async pull(cmdArgs) {
+			if (!gitUrl) {
+				throw new Error("Could not find repo url, only github supported for pull at the moment")
+			}
 			const pullFs = withProxy({
 				nodeishFs: rawFs,
 				verbose: debug,
@@ -934,6 +956,11 @@ export async function openRepository(
 		},
 
 		async mergeUpstream(cmdArgs) {
+			if (!gitUrl) {
+				throw new Error(
+					"Could not find repo url, only github supported for mergeUpstream at the moment"
+				)
+			}
 			const branch =
 				cmdArgs?.branch ||
 				(await isoGit.currentBranch({
@@ -1010,6 +1037,11 @@ export async function openRepository(
 		},
 
 		async getBranches() {
+			if (!gitUrl) {
+				throw new Error(
+					"Could not find repo url, only github supported for getBranches at the moment"
+				)
+			}
 			const serverRefs = await isoGit
 				.listServerRefs({
 					url: gitUrl,
@@ -1103,6 +1135,9 @@ export async function openRepository(
 		 * Additional information about a repository provided by GitHub.
 		 */
 		async getMeta() {
+			if (!gitUrl) {
+				throw new Error("Could not find repo url, only github supported for getMeta at the moment")
+			}
 			const res: Awaited<
 				ReturnType<typeof github.request<"GET /repos/{owner}/{repo}">> | { error: Error }
 			> = await github

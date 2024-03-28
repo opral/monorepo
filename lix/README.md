@@ -27,4 +27,3 @@ If you are interested, check out the [design principles](./documentation/design-
 
 **[🗣️ Discord](https://discord.gg/CNPfhWpcAa)** - Hanging out with the community.
 
-
