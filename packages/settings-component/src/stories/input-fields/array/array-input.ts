@@ -35,6 +35,7 @@ export class ArrayInput extends LitElement {
 		) {
 			return html`
 				<language-tags-input
+					exportparts="property, property-title, property-paragraph"
 					.property=${this.property}
 					.moduleId=${this.moduleId}
 					.value=${this.value}
@@ -45,6 +46,7 @@ export class ArrayInput extends LitElement {
 		} else if (this.property === "variableReferencePattern") {
 			return html`
 				<reference-pattern-input
+					exportparts="property, property-title, property-paragraph"
 					.property=${this.property}
 					.moduleId=${this.moduleId}
 					.value=${this.value}
@@ -55,6 +57,7 @@ export class ArrayInput extends LitElement {
 		} else {
 			return html`
 				<default-array-input
+					exportparts="property, property-title, property-paragraph"
 					.property=${this.property}
 					.moduleId=${this.moduleId}
 					.value=${this.value}

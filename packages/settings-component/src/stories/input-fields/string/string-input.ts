@@ -46,11 +46,13 @@ export class StringInput extends LitElement {
 	}
 
 	override render() {
-		return html` <div>
-			<p>${this.property}</p>
+		return html` <div part="property">
+			<h3 part="property-title">${this.property}</h3>
 			<div class="description-container">
-				${this._description && html`<p class="help-text">${this._description}</p>`}
-				${this._examples && html`<p class="help-text">${this._examples}</p>`}
+				${this._description &&
+				html`<p part="property-paragraph" class="help-text">${this._description}</p>`}
+				${this._examples &&
+				html`<p part="property-paragraph" class="help-text">${this._examples}</p>`}
 			</div>
 			<sl-input
 				value=${this.value}

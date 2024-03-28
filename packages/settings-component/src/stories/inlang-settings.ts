@@ -16,6 +16,7 @@ import SLOption from "@shoelace-style/shoelace/dist/components/option/option.com
 import SlInput from "@shoelace-style/shoelace/dist/components/input/input.component.js"
 import SlButton from "@shoelace-style/shoelace/dist/components/button/button.component.js"
 import SlCheckbox from "@shoelace-style/shoelace/dist/components/checkbox/checkbox.component.js"
+import { setExportparts } from "../exportParts.js"
 
 // in case an app defines it's own set of shoelace components, prevent double registering
 if (!customElements.get("sl-select")) customElements.define("sl-select", SlSelect)
@@ -193,19 +194,22 @@ export default class InlangSettings extends LitElement {
 	}
 
 	override render() {
-		return html` <div class="container">
+		return html` <div class="container" exportParts=${setExportparts(this)} part="base">
 			${Object.entries(this._settingProperties).map(([key, value]) => {
 				return value.schema?.properties && this._newSettings
-					? html`<div class="module-container">
+					? html`<div class="module-container" part="module">
 							${value.meta &&
 							(value.meta?.displayName as { en: string }).en &&
-							html`<h3>${value.meta && (value.meta?.displayName as { en: string }).en}</h3>`}
+							html`<h2 part="module-title">
+								${value.meta && (value.meta?.displayName as { en: string }).en}
+							</h2>`}
 							${Object.entries(value.schema.properties).map(([property, schema]) => {
 								if (property === "$schema" || property === "modules" || property === "experimental")
 									return undefined
 								return key === "internal"
 									? html`
 											<general-input
+												exportparts="property, property-title, property-paragraph"
 												.property=${property}
 												.modules=${this.installedMessageLintRules || []}
 												.value=${this._newSettings?.[property as keyof typeof this._newSettings]}
@@ -215,6 +219,7 @@ export default class InlangSettings extends LitElement {
 									  `
 									: html`
 											<general-input
+												exportparts="property, property-title, property-paragraph"
 												.property=${property}
 												.value=${
 													// @ts-ignore
