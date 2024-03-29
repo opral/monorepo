@@ -1,0 +1,6 @@
+%include lix/.filesets/lix.sapling
+
+[inlcude]
+inlang/source-code/editor
+inlang/source-code/server
+inlang/source-code/website
