@@ -9,8 +9,12 @@ lix
 .changeset
 .filesets
 .github
-; .gitignore
-inlang/source-code/env-variables
+
+.gitignore
+
+; inlang/source-code/tsconfig.base.json
+; inlang/source-code/env-variables; 
+; inlang/rfcs
 
 [exclude]
 ; exclude rules override include rules, so all files with the extension
