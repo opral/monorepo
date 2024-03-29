@@ -1,4 +1,4 @@
-export type { NodeishFilesystem } from "./NodeishFilesystemApi.js"
+export type { NodeishFilesystem, NodeishStats } from "./NodeishFilesystemApi.js"
 export { createNodeishMemoryFs, toSnapshot, fromSnapshot, type Snapshot } from "./memoryFs.js"
 export {
 	normalizePath,

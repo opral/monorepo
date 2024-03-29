@@ -74,8 +74,8 @@ export class PathPatternInput extends LitElement {
 			}
 			this._isInitialized = true
 		}
-		return html` <div>
-			<p>${this.property}</p>
+		return html` <div part="property">
+			<h3 part="property-title">${this.property}</h3>
 			<sl-checkbox
 				?checked=${this._isObject}
 				@input=${(e: Event) => {
@@ -93,8 +93,9 @@ export class PathPatternInput extends LitElement {
 				? html`<div>
 						<div class="description-container">
 							${this._descriptionObject &&
-							html`<p class="help-text">${this._descriptionObject}</p>`}
-							${this._examplesObject && html`<p class="help-text">${this._examplesObject}</p>`}
+							html`<p part="property-paragraph" class="help-text">${this._descriptionObject}</p>`}
+							${this._examplesObject &&
+							html`<p part="property-paragraph" class="help-text">${this._examplesObject}</p>`}
 						</div>
 						<object-input
 							.value=${typeof this.value === "object" ? this.value : ""}
@@ -109,8 +110,9 @@ export class PathPatternInput extends LitElement {
 				: html`<div>
 						<div class="description-container">
 							${this._descriptionString &&
-							html`<p class="help-text">${this._descriptionString}</p>`}
-							${this._examplesString && html`<p class="help-text">${this._examplesString}</p>`}
+							html`<p part="property-paragraph" class="help-text">${this._descriptionString}</p>`}
+							${this._examplesString &&
+							html`<p part="property-paragraph" class="help-text">${this._examplesString}</p>`}
 						</div>
 						<sl-input
 							value=${typeof this.value === "object" ? "" : this.value}
