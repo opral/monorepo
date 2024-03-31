@@ -72,7 +72,7 @@ export const {
 	usePathname,
 	redirect,
 	permanentRedirect,
-	localizePathname,
+	localizePath,
 } = createI18n<AvailableLanguageTag>()
 ```
 
