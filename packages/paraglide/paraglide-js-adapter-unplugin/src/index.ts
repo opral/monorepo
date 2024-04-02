@@ -30,7 +30,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 	let previousMessagesHash: string | undefined = undefined
 
 	async function triggerCompile(messages: readonly Message[], settings: ProjectSettings) {
-		const currentMessagesHash = hashMessages(messages, settings)
+		const currentMessagesHash = hashMessages(messages ?? [], settings)
 		if (currentMessagesHash === previousMessagesHash) return
 
 		if (messages.length === 0) {
@@ -109,7 +109,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 
 function hashMessages(messages: readonly Message[], settings: ProjectSettings): string {
 	const hash = crypto.createHash("sha256")
-	hash.update(JSON.stringify(messages))
-	hash.update(JSON.stringify(settings))
+	hash.update(JSON.stringify(messages) || "")
+	hash.update(JSON.stringify(settings) || "")
 	return hash.digest("hex")
 }
