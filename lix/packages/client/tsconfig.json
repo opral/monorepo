@@ -1,6 +1,6 @@
 {
 	"extends": "../tsconfig.base.json",
-	"include": ["src/**/*.ts"],
+	"include": ["src/**/*.ts", "src/**/*.js"],
 	"extensionsToTreatAsEsm": [".ts", ".tsx", ".mts", "js"],
 	"exclude": ["**/*.test.ts", "**/*.bench.ts", "**/dist/**", "**/vendored/**"],
 	"compilerOptions": {
