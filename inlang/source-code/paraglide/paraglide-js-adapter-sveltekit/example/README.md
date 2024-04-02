@@ -6,7 +6,7 @@ Use this as a reference for your own project.
 
 ## Links
 - [Paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs)
-- [Paraglide SvelteKit Adapter](https://inlang.com/m/dxnzrydw/library-inlang-paraglideJsAdapterSveltekit)
+- [Paraglide SvelteKit Adapter](https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n)
 
 ## Interesting Files
 - `vite.config.js`

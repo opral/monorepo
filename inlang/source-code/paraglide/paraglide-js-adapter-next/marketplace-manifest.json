@@ -1,5 +1,6 @@
 {
 	"id": "library.inlang.paraglideJsAdapterNextJs",
+	"slug": "paraglide-next-i18n",
 	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-next/assets/next-logo.svg",
 	"gallery": [
 		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-next/assets/og.png"
