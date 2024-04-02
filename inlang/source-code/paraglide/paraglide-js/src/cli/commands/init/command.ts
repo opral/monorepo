@@ -5,18 +5,17 @@ import { resolve } from "node:path"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
 import JSON5 from "json5"
 import childProcess from "node:child_process"
-import { version } from "../state.js"
-import { telemetry } from "../../services/telemetry/implementation.js"
-import { Logger } from "../../services/logger/index.js"
+import { version } from "../../state.js"
+import { telemetry } from "../../../services/telemetry/implementation.js"
+import { Logger } from "../../../services/logger/index.js"
 import dedent from "dedent"
 import { findRepoRoot, openRepository, type Repository } from "@lix-js/client"
 import nodeFsPromises from "node:fs/promises"
-import { pathExists } from "../../services/file-handling/exists.js"
-import { findPackageJson } from "../../services/environment/package.js"
+import { pathExists } from "../../../services/file-handling/exists.js"
+import { findPackageJson } from "../../../services/environment/package.js"
 import * as Sherlock from "@inlang/cross-sell-sherlock"
+import { isValidLanguageTag } from "@inlang/language-tag"
 
-// TODO add a project UUID to the tele.groups internal #196
-// import { gitOrigin } from "../../services/telemetry/implementation.js"
 const DEFAULT_PROJECT_PATH = "./project.inlang"
 
 type Context = {
@@ -222,11 +221,36 @@ export const existingProjectFlow = async (args: { existingProjectPath: string },
 }
 
 export const createNewProjectFlow = async (ctx: Context) => {
+	const languageTags = await prompt(
+		"Which languages do you want to support (separate with spaces)",
+		{
+			type: "text",
+			initial: "en",
+			default: "en",
+			placeholder: "en, de, ar",
+		}
+	)
+
+	const messagesPath = await prompt("Where do you want to put your messages?", {
+		type: "text",
+		default: "./messages",
+		placeholder: "./messages",
+		initial: "./messages",
+	})
+
+	if (!("structuredClone" in globalThis)) {
+		throw new Error("structuredClone is not supported. You need Node 17 or higher")
+	}
+
+	const settings = structuredClone(newProjectTemplate)
+	// @ts-ignore
+	settings["plugin.inlang.messageFormat"].pathPattern = resolve(messagesPath, "{languageTag}.json")
+
 	ctx.logger.info(`Creating a new inlang project in the current working directory.`)
 	await ctx.repo.nodeishFs.mkdir(DEFAULT_PROJECT_PATH, { recursive: true })
 	await ctx.repo.nodeishFs.writeFile(
 		DEFAULT_PROJECT_PATH + "/settings.json",
-		JSON.stringify(newProjectTemplate, undefined, 2)
+		JSON.stringify(settings, undefined, 2)
 	)
 
 	const project = await loadProject({
@@ -247,30 +271,27 @@ export const createNewProjectFlow = async (ctx: Context) => {
 	}
 }
 
-export const newProjectTemplate: ProjectSettings = {
+export const newProjectTemplate = {
 	$schema: "https://inlang.com/schema/project-settings",
-	// defaulting to english to not overwhelm new users
-	// with prompts. The user can change this later.
 	sourceLanguageTag: "en",
 	languageTags: ["en"],
 	modules: [
 		// for instant gratification, we're adding common rules
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js",
-		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-identical-pattern@latest/dist/index.js",
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js",
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-without-source@latest/dist/index.js",
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-valid-js-identifier@latest/dist/index.js",
+
 		// default to the message format plugin because it supports all features
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@latest/dist/index.js",
+
 		// the m function matcher should be installed by default in case Sherlock (VS Code extension) is adopted
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js",
 	],
 	"plugin.inlang.messageFormat": {
-		// using .inlang/paraglide-js as directory to avoid future conflicts when an official .inlang
-		// directory is introduced, see https://github.com/opral/monorepo/discussions/1418
 		pathPattern: "./messages/{languageTag}.json",
 	},
-}
+} as const satisfies ProjectSettings
 
 export const checkIfPackageJsonExists = async (ctx: Context) => {
 	const packageJsonPath = await findPackageJson(ctx.repo.nodeishFs, process.cwd())

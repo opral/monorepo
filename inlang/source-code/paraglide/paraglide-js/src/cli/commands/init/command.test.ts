@@ -12,19 +12,19 @@ import {
 	initializeInlangProject,
 	maybeAddVsCodeExtension,
 	newProjectTemplate,
-} from "./init.js"
+} from "./command.js"
 import consola from "consola"
 import { describe } from "node:test"
 import nodeFsPromises from "node:fs/promises"
 import childProcess from "node:child_process"
 import memfs from "memfs"
 import type { ProjectSettings } from "@inlang/sdk"
-import { version } from "../state.js"
+import { version } from "../../state.js"
 import { createNodeishMemoryFs } from "@inlang/sdk/test-utilities"
-import { Logger } from "../../services/logger/index.js"
+import { Logger } from "../../../services/logger/index.js"
 import { openRepository } from "@lix-js/client"
 import type { NodeishFilesystem } from "@lix-js/fs"
-import { pathExists } from "../../services/file-handling/exists.js"
+import { pathExists } from "../../../services/file-handling/exists.js"
 
 const logger = new Logger()
 
@@ -389,6 +389,7 @@ describe("maybeAddVsCodeExtension()", () => {
 
 	test("it should install the m function matcher if not installed", async () => {
 		const withEmptyModules = structuredClone(newProjectTemplate)
+		//@ts-ignore
 		withEmptyModules.modules = []
 		const fs = mockFiles({
 			"/project.inlang/settings.json": JSON.stringify(withEmptyModules),
