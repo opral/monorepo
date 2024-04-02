@@ -44,10 +44,10 @@ This will:
 Adapters are framework-integrations for Paraglide. If you are using a framework, using an adapter is recommended , but not required.
 
 <doc-links>
-	<doc-link title="Adapter for NextJS" icon="tabler:brand-nextjs" href="/m/osslbuzt/library-inlang-paraglideJsAdapterNextJs" description="Go to Library"></doc-link>
-    <doc-link title="Adapter for SvelteKit" icon="simple-icons:svelte" href="/m/dxnzrydw/library-inlang-paraglideJsAdapterSvelteKit" description="Go to Library"></doc-link>
-    <doc-link title="Adapter for Astro" icon="devicon-plain:astro" href="/m/iljlwzfs/library-inlang-paraglideJsAdapterAstro" description="Go to Library"></doc-link>
-    <doc-link title="Adapter for SolidJS" icon="tabler:brand-solidjs" href="/m/n860p17j/library-inlang-paraglideJsAdapterSolidStart" description="Go to Library"></doc-link>
+	<doc-link title="Adapter for NextJS" icon="tabler:brand-nextjs" href="/m/osslbuzt/paraglide-next-i18n" description="Go to Library"></doc-link>
+    <doc-link title="Adapter for SvelteKit" icon="simple-icons:svelte" href="/m/dxnzrydw/paraglide-sveltekit-i18n" description="Go to Library"></doc-link>
+    <doc-link title="Adapter for Astro" icon="devicon-plain:astro" href="/m/iljlwzfs/paraglide-astro-i18n" description="Go to Library"></doc-link>
+    <doc-link title="Adapter for SolidJS" icon="tabler:brand-solidjs" href="/m/n860p17j/paraglide-solidstart-i18n" description="Go to Library"></doc-link>
 </doc-links>
 
 #### Alternatively, [you can write your own adapter](#writing-an-adapter)
