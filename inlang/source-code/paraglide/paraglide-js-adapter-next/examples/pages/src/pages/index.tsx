@@ -15,7 +15,9 @@ export default function Home() {
 			<p>{m.learn_more_at_following_links()}</p>
 			<ul style={{ color: "blue" }}>
 				<li>
-					<a href="https://inlang.com/m/osslbuzt">{m.paraglide_documentation()}</a>
+					<a href="https://inlang.com/m/osslbuzt/paraglide-next-i18n">
+						{m.paraglide_documentation()}
+					</a>
 				</li>
 				<li>
 					<a href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next/examples/pages">
