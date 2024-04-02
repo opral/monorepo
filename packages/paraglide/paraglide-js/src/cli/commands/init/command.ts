@@ -14,7 +14,7 @@ import { Logger } from "../../../services/logger/index.js"
 import { findRepoRoot, openRepository, type Repository } from "@lix-js/client"
 import { pathExists } from "../../../services/file-handling/exists.js"
 import { findPackageJson } from "../../../services/environment/package.js"
-import { execAsync } from "./utilts.js"
+import { execAsync } from "./utils.js"
 import { getNewProjectTemplate, DEFAULT_PROJECT_PATH } from "./defaults.js"
 
 type Context = {
