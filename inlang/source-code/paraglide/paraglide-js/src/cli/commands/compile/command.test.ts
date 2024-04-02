@@ -47,7 +47,7 @@ test("it should compile into the default outdir", async () => {
 	const realFs: NodeishFilesystem = await vi.importActual("node:fs/promises")
 
 	const pluginCode = await realFs.readFile(
-		resolve(__dirname, "../../../../../plugins/inlang-message-format/dist/index.js"),
+		resolve(__dirname, "../../../../../../plugins/inlang-message-format/dist/index.js"),
 		{ encoding: "utf-8" }
 	)
 
@@ -82,7 +82,7 @@ test("it should compile a project into the provided outdir", async () => {
 
 	const realFs: NodeishFilesystem = await vi.importActual("node:fs/promises")
 	const pluginCode = await realFs.readFile(
-		resolve(__dirname, "../../../../../plugins/inlang-message-format/dist/index.js"),
+		resolve(__dirname, "../../../../../../plugins/inlang-message-format/dist/index.js"),
 		{ encoding: "utf-8" }
 	)
 
