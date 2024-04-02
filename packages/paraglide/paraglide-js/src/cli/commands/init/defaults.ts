@@ -27,11 +27,13 @@ const newProjectTemplate = {
  */
 export function getNewProjectTemplate() {
 	if (!("structuredClone" in globalThis)) {
-		// More helpful error-message than "structuredClone" is not defined
-		// This can happen on very old node versions
-		throw new Error(
-			"[getNewProjectTemplate] structuredClone is not supported in this environment. Please use Node Version 17 or higher"
-		)
+		try {
+			return JSON.parse(JSON.stringify(newProjectTemplate)) as typeof newProjectTemplate
+		} catch {
+			throw new Error(
+				"structuredClone is not supported in your Node Version. Please use version 17 or higher"
+			)
+		}
 	}
 	return structuredClone(newProjectTemplate)
 }
