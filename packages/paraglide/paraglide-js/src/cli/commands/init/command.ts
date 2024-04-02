@@ -13,7 +13,7 @@ import nodeFsPromises from "node:fs/promises"
 import { pathExists } from "../../../services/file-handling/exists.js"
 import { findPackageJson } from "../../../services/environment/package.js"
 import * as Sherlock from "@inlang/cross-sell-sherlock"
-import { isValidLanguageTag } from "@inlang/language-tag"
+import { isValidLanguageTag, LanguageTag } from "@inlang/language-tag"
 import { execAsync } from "./utilts.js"
 import { getNewProjectTemplate, DEFAULT_PROJECT_PATH } from "./defaults.js"
 
@@ -219,25 +219,49 @@ export const existingProjectFlow = async (args: { existingProjectPath: string },
 	}
 }
 
-export const createNewProjectFlow = async (ctx: Context) => {
-	const languageTagsString =
-		(await prompt("Which languages do you want to support (separate with spaces)", {
-			type: "text",
-			placeholder: "en, de-ch, ar",
-		})) ?? ""
-
-	const languageTags = languageTagsString
+function parseLanguageTagInput(input: string): {
+	validLanguageTags: LanguageTag[]
+	invalidLanguageTags: string[]
+} {
+	const languageTags = input
 		.replaceAll(/[,:\s]/g, " ") //replace common separators with spaces
 		.split(" ")
 		.filter(Boolean) //remove empty segments
 		.map((tag) => tag.toLowerCase())
 
-	if (languageTags.length === 0) {
-		consola.error("You must specify at least one language tag")
-		process.exit(1)
+	const validLanguageTags: LanguageTag[] = []
+	const invalidLanguageTags: string[] = []
+
+	for (const tag of languageTags) {
+		if (isValidLanguageTag(tag)) {
+			validLanguageTags.push(tag)
+		} else {
+			invalidLanguageTags.push(tag)
+		}
 	}
 
-	const invalidLanguageTags = languageTags.filter((tag) => !isValidLanguageTag(tag))
+	return {
+		validLanguageTags,
+		invalidLanguageTags,
+	}
+}
+
+async function promptForLanguageTags(
+	initialLanguageTags: LanguageTag[] = []
+): Promise<LanguageTag[]> {
+	const languageTagsInput =
+		(await prompt("Which languages do you want to support (separate with spaces)", {
+			type: "text",
+			placeholder: "en, de-ch, ar",
+			initial: initialLanguageTags.length ? initialLanguageTags.join(" ") : undefined,
+		})) ?? ""
+
+	const { invalidLanguageTags, validLanguageTags } = parseLanguageTagInput(languageTagsInput)
+
+	if (validLanguageTags.length === 0) {
+		consola.error("You must specify at least one language tag")
+		return promptForLanguageTags()
+	}
 
 	if (invalidLanguageTags.length > 0) {
 		const message =
@@ -248,9 +272,13 @@ export const createNewProjectFlow = async (ctx: Context) => {
 				  " aren't valid language tags. Please stick to IEEE BCP-47 Language Tags"
 
 		consola.error(message)
-		process.exit(1)
+		return promptForLanguageTags(validLanguageTags)
 	}
 
+	return validLanguageTags
+}
+export const createNewProjectFlow = async (ctx: Context) => {
+	const languageTags = await promptForLanguageTags()
 	const settings = getNewProjectTemplate()
 
 	//Should always be defined. This is to shut TS up

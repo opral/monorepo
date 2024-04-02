@@ -502,6 +502,22 @@ describe("createNewProjectFlow()", async () => {
 			expect(await pathExists(`/messages/${language}.json`, fs)).toBe(true)
 		}
 	})
+
+	test("it keeps prompting until valid language tags are entered", async () => {
+		const fs = mockFiles({})
+		const repo = await openRepository("file://", { nodeishFs: fs })
+
+		// purpousefully formatted the input weird
+		mockUserInput(["2173, de, en", "en,de,9DE", "en,de-ch"])
+		await createNewProjectFlow({ logger, repo })
+
+		// user is informed that a new project is created
+		expect((await fs.stat("/messages")).isDirectory()).toBe(true)
+
+		for (const language of ["en", "de-ch"]) {
+			expect(await pathExists(`/messages/${language}.json`, fs)).toBe(true)
+		}
+	})
 })
 
 describe("checkIfUncommittedChanges()", () => {
