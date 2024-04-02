@@ -35,25 +35,34 @@ export function Message(props: { id: string }) {
 
 	createEffect(() => {
 		if (!project.loading) {
-			project()!.query.messages.get.subscribe({ where: { id: props.id } }, (message) =>
+			project()!.query.messages.get.subscribe({ where: { id: props.id } }, (message) => {
 				setMessage(message)
-			)
-		}
-	})
-
-	createEffect(() => {
-		if (!project.loading && message()?.id) {
-			project()!.query.messageLintReports.get.subscribe(
-				{ where: { messageId: message()!.id } },
-				(report) => {
-					if (report) {
-						setLintReports(report)
+				if (message?.id) {
+					const reports = project()!.query.messageLintReports.get({
+						where: { messageId: message.id },
+					})
+					if (reports) {
+						setLintReports(reports)
 						setHasBeenLinted(true)
 					}
 				}
-			)
+			})
 		}
 	})
+
+	// createEffect(() => {
+	// 	if (!project.loading && message()?.id) {
+	// 		project()!.query.messageLintReports.get.subscribe(
+	// 			{ where: { messageId: message()!.id } },
+	// 			(report) => {
+	// 				if (report) {
+	// 					setLintReports(report)
+	// 					setHasBeenLinted(true)
+	// 				}
+	// 			}
+	// 		)
+	// 	}
+	// })
 
 	createEffect(
 		on(

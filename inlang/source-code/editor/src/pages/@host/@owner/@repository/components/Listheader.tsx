@@ -22,6 +22,10 @@ export const ListHeader = () => {
 		const filteredTags = new Set<string>(filteredLanguageTags())
 		const filteredIdsValue = filteredIds()
 
+		// force createMemo to re-compute lintreports when messages change
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const messages = project()?.query.messages.getAll() || []
+
 		for (const report of project()?.query.messageLintReports.getAll() || []) {
 			const ruleId = report.ruleId
 			const languageTag = report.languageTag
