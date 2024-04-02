@@ -25,10 +25,10 @@ type Context = {
 }
 
 const ADAPTER_LINKS = {
-	sveltekit: "https://inlang.com/m/dxnzrydw",
-	nextjs: "https://inlang.com/m/osslbuzt",
-	astro: "https://inlang.com/m/iljlwzfs",
-	solidstart: "https://inlang.com/m/n860p17j",
+	sveltekit: "https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n",
+	nextjs: "https://inlang.com/m/osslbuzt/paraglide-next-i18n",
+	astro: "https://inlang.com/m/iljlwzfs/paraglide-astro-i18n",
+	solidstart: "https://inlang.com/m/n860p17j/paraglide-solidstart-i18n",
 	vite: "https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-vite",
 } as const
 
