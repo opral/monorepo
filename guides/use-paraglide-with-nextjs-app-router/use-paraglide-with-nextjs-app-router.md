@@ -1,6 +1,6 @@
 # Using ParaglideJS with Next.js' App Router
 
-In this guide you will lean how to add internationalised routing to your Next.js App that's using the App Router. We will use [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) to manage our messages and the [ParaglideJS NextJS Adapter](https://inlang.com/m/osslbuzt/library-inlang-paraglideJsAdapterNextJs) for internationalised routing.
+In this guide you will lean how to add internationalised routing to your Next.js App that's using the App Router. We will use [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) to manage our messages and the [ParaglideJS NextJS Adapter](https://inlang.com/m/osslbuzt/paraglide-next-i18n) for internationalised routing.
 
 Paraglide is a great fit for the App router because it uses a compiler to generate tree-shakeable messages. That way your client bundle only includes the messages that are used in client components on any given page.
 

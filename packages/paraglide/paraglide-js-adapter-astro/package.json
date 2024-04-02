@@ -3,7 +3,7 @@
 	"version": "0.1.19",
 	"author": "inlang <hello@inlang.com> (https://inlang.com/)",
 	"description": "A fully type-safe i18n library specifically designed for partial hydration patterns like Astro's islands.",
-	"homepage": "https://inlang.com/m/iljlwzfs/library-inlang-paraglideJsAdapterAstro",
+	"homepage": "https://inlang.com/m/iljlwzfs/paraglide-astro-i18n",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/opral/inlang-paraglide-js"
