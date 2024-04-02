@@ -3,11 +3,11 @@ import memfs from "memfs"
 import nodeFsPromises from "node:fs/promises"
 import { type NodeishFilesystem, createNodeishMemoryFs } from "@lix-js/fs"
 import { createMessage } from "@inlang/sdk/test-utilities"
-import { compileCommand } from "./compile.js"
+import { compileCommand } from "./command.js"
 import type { ProjectSettings } from "@inlang/sdk"
 import { resolve } from "node:path"
-import { Logger } from "../../services/logger/index.js"
-import { pathExists } from "../../services/file-handling/exists.js"
+import { Logger } from "../../../services/logger/index.js"
+import { pathExists } from "../../../services/file-handling/exists.js"
 
 beforeEach(() => {
 	vi.resetAllMocks()
@@ -47,7 +47,7 @@ test("it should compile into the default outdir", async () => {
 	const realFs: NodeishFilesystem = await vi.importActual("node:fs/promises")
 
 	const pluginCode = await realFs.readFile(
-		resolve(__dirname, "../../../../../plugins/inlang-message-format/dist/index.js"),
+		resolve(__dirname, "../../../../../../plugins/inlang-message-format/dist/index.js"),
 		{ encoding: "utf-8" }
 	)
 
@@ -82,7 +82,7 @@ test("it should compile a project into the provided outdir", async () => {
 
 	const realFs: NodeishFilesystem = await vi.importActual("node:fs/promises")
 	const pluginCode = await realFs.readFile(
-		resolve(__dirname, "../../../../../plugins/inlang-message-format/dist/index.js"),
+		resolve(__dirname, "../../../../../../plugins/inlang-message-format/dist/index.js"),
 		{ encoding: "utf-8" }
 	)
 
