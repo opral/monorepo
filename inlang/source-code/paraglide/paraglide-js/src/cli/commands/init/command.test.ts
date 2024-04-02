@@ -11,7 +11,6 @@ import {
 	findExistingInlangProjectPath,
 	initializeInlangProject,
 	maybeAddVsCodeExtension,
-	newProjectTemplate,
 } from "./command.js"
 import consola from "consola"
 import { describe } from "node:test"
@@ -25,6 +24,7 @@ import { Logger } from "../../../services/logger/index.js"
 import { openRepository } from "@lix-js/client"
 import type { NodeishFilesystem } from "@lix-js/fs"
 import { pathExists } from "../../../services/file-handling/exists.js"
+import { getNewProjectTemplate } from "./defaults.js"
 
 const logger = new Logger()
 
@@ -83,7 +83,7 @@ describe("initializeInlangProject()", () => {
 		"it should execute existingProjectFlow() if a project has been found",
 		async () => {
 			const fs = mockFiles({
-				"/folder/project.inlang/settings.json": JSON.stringify(newProjectTemplate),
+				"/folder/project.inlang/settings.json": JSON.stringify(getNewProjectTemplate()),
 				"/folder/subfolder": {},
 			})
 			const repo = await openRepository("file://", { nodeishFs: fs })
@@ -101,7 +101,7 @@ describe("initializeInlangProject()", () => {
 	test("it should execute newProjectFlow() if no project has been found", async () => {
 		const fs = mockFiles({})
 		const repo = await openRepository("file://", { nodeishFs: fs })
-		mockUserInput(["newProject"])
+		mockUserInput(["newProject", "en", "./messages"])
 		const path = await initializeInlangProject({ logger, repo })
 		expect(path).toBe("./project.inlang")
 		expect(await pathExists("./project.inlang", fs)).toBe(true)
@@ -305,7 +305,7 @@ describe("addCompileStepToPackageJSON()", () => {
 describe("existingProjectFlow()", () => {
 	test("if the user selects to proceed with the existing project and the project has no errors, the function should return", async () => {
 		const fs = mockFiles({
-			"/project.inlang/settings.json": JSON.stringify(newProjectTemplate),
+			"/project.inlang/settings.json": JSON.stringify(getNewProjectTemplate()),
 		})
 		const repo = await openRepository("file://", { nodeishFs: fs })
 
@@ -317,11 +317,11 @@ describe("existingProjectFlow()", () => {
 
 	test("if the user selects a new project, the newProjectFlow() should be executed", async () => {
 		const fs = mockFiles({
-			"/folder/project.inlang/settings.json": JSON.stringify(newProjectTemplate),
+			"/folder/project.inlang/settings.json": JSON.stringify(getNewProjectTemplate()),
 		})
 		const repo = await openRepository("file://", { nodeishFs: fs })
 
-		mockUserInput(["newProject"])
+		mockUserInput(["newProject", "en", "./messages"])
 
 		await existingProjectFlow({ existingProjectPath: "/folder/project.inlang" }, { logger, repo })
 		// info that a new project is created
@@ -346,7 +346,7 @@ describe("existingProjectFlow()", () => {
 describe("maybeAddVsCodeExtension()", () => {
 	test("it should add the Visual Studio Code extension (Sherlock) if the user uses vscode", async () => {
 		const fs = mockFiles({
-			"/folder/project.inlang/settings.json": JSON.stringify(newProjectTemplate),
+			"/folder/project.inlang/settings.json": JSON.stringify(getNewProjectTemplate()),
 		})
 
 		process.cwd = () => "/folder"
@@ -374,7 +374,7 @@ describe("maybeAddVsCodeExtension()", () => {
 	})
 	test("it should not add the Visual Studio Code extension (Sherlock) if the user doesn't use vscode", async () => {
 		const fs = mockFiles({
-			"/project.inlang/settings.json": JSON.stringify(newProjectTemplate),
+			"/project.inlang/settings.json": JSON.stringify(getNewProjectTemplate()),
 		})
 		const repo = await openRepository("file://", { nodeishFs: fs })
 
@@ -388,7 +388,7 @@ describe("maybeAddVsCodeExtension()", () => {
 	})
 
 	test("it should install the m function matcher if not installed", async () => {
-		const withEmptyModules = structuredClone(newProjectTemplate)
+		const withEmptyModules = getNewProjectTemplate()
 		//@ts-ignore
 		withEmptyModules.modules = []
 		const fs = mockFiles({
@@ -410,7 +410,7 @@ describe("maybeAddVsCodeExtension()", () => {
 	})
 	test("it should create the .vscode folder if not existent", async () => {
 		const fs = mockFiles({
-			"/project.inlang/settings.json": JSON.stringify(newProjectTemplate),
+			"/project.inlang/settings.json": JSON.stringify(getNewProjectTemplate()),
 		})
 		const repo = await openRepository("file://", { nodeishFs: fs })
 
@@ -425,7 +425,7 @@ describe("maybeAddVsCodeExtension()", () => {
 	test("it should skip asking about vscode if the command is being run inside the vscode terminal", async () => {
 		process.env.TERM_PROGRAM = "vscode"
 		const fs = mockFiles({
-			"/project.inlang/settings.json": JSON.stringify(newProjectTemplate),
+			"/project.inlang/settings.json": JSON.stringify(getNewProjectTemplate()),
 		})
 		const repo = await openRepository("file://", { nodeishFs: fs })
 
@@ -453,7 +453,9 @@ describe("createNewProjectFlow()", async () => {
 			const fs = mockFiles({})
 			const repo = await openRepository("file://", { nodeishFs: fs })
 
+			mockUserInput(["en", "./messages"])
 			await createNewProjectFlow({ logger, repo })
+
 			// user is informed that a new project is created
 			expect(logger.info).toHaveBeenCalledOnce()
 			// the project shouldn't have errors
@@ -474,6 +476,8 @@ describe("createNewProjectFlow()", async () => {
 
 		// invalid project settings file
 		vi.spyOn(JSON, "stringify").mockReturnValue(`{}`)
+
+		mockUserInput(["en", "./messages"])
 		await createNewProjectFlow({ logger, repo })
 		// user is informed that a new project is created
 		expect(logger.info).toHaveBeenCalledOnce()
