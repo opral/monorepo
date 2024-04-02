@@ -1,5 +1,5 @@
 import { Command } from "commander"
-import { compileCommand } from "./commands/compile.js"
+import { compileCommand } from "./commands/compile/command.js"
 import { initCommand } from "./commands/init/command.js"
 import { version } from "./state.js"
 
