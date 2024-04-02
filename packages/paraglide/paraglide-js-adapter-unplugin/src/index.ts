@@ -108,8 +108,12 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 })
 
 function hashMessages(messages: readonly Message[], settings: ProjectSettings): string {
-	const hash = crypto.createHash("sha256")
-	hash.update(JSON.stringify(messages) || "")
-	hash.update(JSON.stringify(settings) || "")
-	return hash.digest("hex")
+	try {
+		const hash = crypto.createHash("sha256")
+		hash.update(JSON.stringify(messages) || "")
+		hash.update(JSON.stringify(settings) || "")
+		return hash.digest("hex")
+	} catch (e) {
+		return crypto.randomUUID()
+	}
 }
