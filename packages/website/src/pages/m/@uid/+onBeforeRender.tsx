@@ -12,6 +12,13 @@ export default async function onBeforeRender(pageContext: PageContext) {
 		console.error("Item not found")
 		throw redirect("/not-found", 301)
 	} else {
-		throw redirect(`/m/${item.uniqueID}/${item.id.replaceAll(".", "-").toLowerCase()}`, 301)
+		throw redirect(
+			`/m/${item.uniqueID}/${
+				item.slug
+					? item.slug.replaceAll(".", "-").toLowerCase()
+					: item.id.replaceAll(".", "-").toLowerCase()
+			}`,
+			301
+		)
 	}
 }
