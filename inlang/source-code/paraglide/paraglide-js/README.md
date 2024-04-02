@@ -1,33 +1,36 @@
 [<img src="https://cdn.loom.com/sessions/thumbnails/a8365ec4fa2c4f6bbbf4370cf22dd7f6-with-play.gif" width="100%" /> Watch the demo of Paraglide JS](https://www.youtube.com/watch?v=-YES3CCAG90)
 
-<!-- ![Paraglide JS header image](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/paraglide-js-header.png) -->
-
-Get started with:
-
-```bash
-npx @inlang/paraglide-js@latest init
-```
-
-# Features
-
-<doc-features>
-  <doc-feature title="Only used translations are shipped" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/unused-translations.png"></doc-feature>
-  <doc-feature title="Tiny Bundle-Size" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/reduced-payload.png"></doc-feature>
-  <doc-feature title="Typesafe" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/typesafe.png"></doc-feature>
-</doc-features>
-
-### Treeshaking
+# Why use Paraglide?
 
 <doc-figure src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/tree-shaking.jpg" alt="An illustration explaining the benefits of treeshaking in software" caption="How Paraglide JS treeshaking works">
 </doc-figure>
 
 Treeshaking gives us superpowers. With it, each page of your app only loads the messages that it actually uses. Incremental loading like this would usually take hours of manual tweaking to get right. With Paraglide-JS you get it for free. Say goodbye to huge bundles.
 
+<doc-features>
+  <doc-feature title="Typesafe" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/typesafe.png"></doc-feature>
+  <doc-feature title="IDE Extension" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/typesafe.png"></doc-feature>
+  <doc-feature title="Fast Time-to-interactive" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/typesafe.png"></doc-feature>
+</doc-features>
+
+## Use it with your Favorite Framework
+
+If you are using one of these Frameworks you will want to follow the framework specific documentation instead. If you aren't using one of these, that's fine too! You can read on.
+
+<doc-links>
+	<doc-link title="Adapter for NextJS" icon="tabler:brand-nextjs" href="/m/osslbuzt/paraglide-next-i18n" description="Go to Library"></doc-link>
+    <doc-link title="Adapter for SvelteKit" icon="simple-icons:svelte" href="/m/dxnzrydw/paraglide-sveltekit-i18n" description="Go to Library"></doc-link>
+    <doc-link title="Adapter for Astro" icon="devicon-plain:astro" href="/m/iljlwzfs/paraglide-astro-i18n" description="Go to Library"></doc-link>
+    <doc-link title="Adapter for SolidJS" icon="tabler:brand-solidjs" href="/m/n860p17j/paraglide-solidstart-i18n" description="Go to Library"></doc-link>
+	<doc-link title="Adapter for Remix" icon="simple-icons:remix" href="/m/fnhuwzrx/paraglide-remix-i18n" description="Go to Library"></doc-link>
+</doc-links>
+
+#### Alternatively, [you can write your own adapter](#writing-an-adapter)
+
+
 # Getting started
 
-### 1. Initialize paraglide-js
-
-Initialize ParaglideJS whith:
+Initialize Paraglide with the following command:
 
 ```bash
 npx @inlang/paraglide-js@latest init
@@ -36,40 +39,37 @@ npx @inlang/paraglide-js@latest init
 This will:
 
 1. Install necessary dependencies
-2. Add the Paraglide compiler to your `build` script
-3. Set up configuration files
-
-### 2. Set up an adapter (optional)
-
-Adapters are framework-integrations for Paraglide. If you are using a framework, using an adapter is recommended , but not required.
-
-<doc-links>
-	<doc-link title="Adapter for NextJS" icon="tabler:brand-nextjs" href="/m/osslbuzt/paraglide-next-i18n" description="Go to Library"></doc-link>
-    <doc-link title="Adapter for SvelteKit" icon="simple-icons:svelte" href="/m/dxnzrydw/paraglide-sveltekit-i18n" description="Go to Library"></doc-link>
-    <doc-link title="Adapter for Astro" icon="devicon-plain:astro" href="/m/iljlwzfs/paraglide-astro-i18n" description="Go to Library"></doc-link>
-    <doc-link title="Adapter for SolidJS" icon="tabler:brand-solidjs" href="/m/n860p17j/paraglide-solidstart-i18n" description="Go to Library"></doc-link>
-</doc-links>
-
-#### Alternatively, [you can write your own adapter](#writing-an-adapter)
+2. Generate a `messages/` folder where your messages live
+3. Add the Paraglide compiler to your `build` script
+4. Set up configuration files
 
 # Usage
 
-Running your `build` script will generate a `src/paraglide` folder. This folder contains all the code that you need to use paraglide-js.
+Running the paraglide compiler will generate a `src/paraglide` folder. This folder contains all the code that you need to use paraglide-js.
 
-## Adding Messages
+## Adding and Editing Messages
 
-By default, paraglide expects your messages to be in `messages/{lang}.json`.
+Messages are stored in `messages/{lang}.json`. To add a message simply add a key-value pair. You can add parameters with curly braces.
 
-```json
+```diff
+// messages/en.json
 {
-	"hello": "Hello world!"
-	"loginHeader": "Hello {name}, please login to continue."
+	"$schema": "https://inlang.com/schema/inlang-message-format",
++ 	"greeting": "Hello {name}!"
 }
 ```
 
-## Using Messages
+Make sure to re-run the paraglide compiler after editing your messages.
 
-You can import messages with `import * as m from "./paraglide/messages"`. Don't worry, your bundler will only include the messages that you actually use.
+```
+npx @inlang/paraglide-js compile --project ./project.inlang
+```
+
+If you are using Vite, you can instead use the [paraglide vite-plugin](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-vite) to do this automatically.
+
+## Using Messages in Code
+
+After running the compiler, you can import messages with `import * as m from "./paraglide/messages"`.
 
 ```js
 import * as m from "./paraglide/messages.js"
@@ -100,9 +100,14 @@ const msg = season["spring"]() // Hello spring!
 
 ![VsCode screenshot showing Sherlock adding inlay hints next to messages and making an "extract message" code action available for hardcoded text](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/sherlock-preview.png)
 
+## Language Configuration
+
+You can configure the languages you intend to support
+
 ## Adding Languages
 
 You can declare which languages you support in `./project.inlang/settings.json`.
+
 ```json
 // project.inlang/settings.json
 {
@@ -268,21 +273,25 @@ An "Adapter" is a library that integrates with a framework's liefcycle and does 
 This example adapts Paraglide to a fictitious fullstack framework.
 
 ```tsx
-import { setLanguageTag, onSetLanguageTag, type AvailableLanguageTag } from "../paraglide/runtime.js"
+import {
+	setLanguageTag,
+	onSetLanguageTag,
+	type AvailableLanguageTag,
+} from "../paraglide/runtime.js"
 import { isServer, isClient, request, render } from "@example/framework"
 import { detectLanguage } from "./utils.js"
 
 if (isServer) {
-	// On the server the language tag needs to be resolved on a per-request basis. 
+	// On the server the language tag needs to be resolved on a per-request basis.
 	// Pass a getter function that resolves the language from the correct request
 
-	const detectLanguage = (request: Request) : AvailableLanguageTag => {
+	const detectLanguage = (request: Request): AvailableLanguageTag => {
 		//your logic ...
 	}
 	setLanguageTag(() => detectLanguage(request))
 }
 
-if(isClient) {
+if (isClient) {
 	// On the client, the language tag can be resolved from
 	// the document's html lang tag.
 	setLanguageTag(() => document.documentElement.lang)
