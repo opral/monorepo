@@ -1,11 +1,34 @@
 import { describe, it, expect } from "vitest"
-import { createSignal, createEffect, createMemo } from "./solid.js"
+import { createRoot, createSignal, createEffect, createMemo } from "./solid.js"
 
 function sleep(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
+function delay(rval: any, ms: number) {
+	return new Promise((resolve) => setTimeout(() => resolve(rval), ms))
+}
+
+describe("vitest", () => {
+	it("waits for the result of an async function", async () => {
+		const rval = await delay(42, 1)
+		expect(rval).toBe(42)
+	})
+})
+
 describe("solid", () => {
+	it("await createRoot returns the result the async function", async () => {
+		let count = 0
+		await sleep(0)
+		const rval = await createRoot(async () => {
+			await sleep(0)
+			count++
+			return await delay(42, 1)
+		})
+		expect(rval).toBe(42)
+		expect(count).toBe(1)
+	})
+
 	it("sets and gets", () => {
 		const [get, set] = createSignal(0)
 

@@ -89,7 +89,7 @@ export type MessageQueryApi = {
 }
 
 export type MessageLintReportsQueryApi = {
-	getAll: () => Readonly<MessageLintReport[]>
+	getAll: () => MessageLintReport[]
 	get: (args: {
 		where: { messageId: MessageLintReport["messageId"] }
 	}) => Readonly<MessageLintReport[]>
