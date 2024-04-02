@@ -250,17 +250,17 @@ async function promptForLanguageTags(
 	initialLanguageTags: LanguageTag[] = []
 ): Promise<LanguageTag[]> {
 	const languageTagsInput =
-		(await prompt("Which languages do you want to support (separate with spaces)", {
+		(await prompt("Which languages do you want to support?", {
 			type: "text",
 			placeholder: "en, de-ch, ar",
-			initial: initialLanguageTags.length ? initialLanguageTags.join(" ") : undefined,
+			initial: initialLanguageTags.length ? initialLanguageTags.join(", ") : undefined,
 		})) ?? ""
 
 	const { invalidLanguageTags, validLanguageTags } = parseLanguageTagInput(languageTagsInput)
 
 	if (validLanguageTags.length === 0) {
-		consola.error("You must specify at least one language tag")
-		return promptForLanguageTags()
+		consola.warn("You must specify at least one language tag")
+		return await promptForLanguageTags()
 	}
 
 	if (invalidLanguageTags.length > 0) {
@@ -268,11 +268,11 @@ async function promptForLanguageTags(
 			invalidLanguageTags.length === 1
 				? invalidLanguageTags[0] +
 				  " isn't a valid language tag. Please stick to IEEE BCP-47 Language Tags"
-				: invalidLanguageTags.join(", ") +
+				: invalidLanguageTags.map((tag) => `"${tag}"`).join(", ") +
 				  " aren't valid language tags. Please stick to IEEE BCP-47 Language Tags"
 
-		consola.error(message)
-		return promptForLanguageTags(validLanguageTags)
+		consola.warn(message)
+		return await promptForLanguageTags(validLanguageTags)
 	}
 
 	return validLanguageTags
