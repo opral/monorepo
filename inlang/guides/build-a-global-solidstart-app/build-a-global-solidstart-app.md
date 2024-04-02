@@ -8,7 +8,7 @@ In this guide, you will learn how to set up ParaglideJS in your existing SolidSt
 ## Getting started
 This guide assumes that you already have a solidstart project set up. If you don't, follow the [official getting started guide](https://start.solidjs.com/getting-started/project-setup).
 
-First, we will need to install [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs), aswell as the official [SolidStart adapter for Paraglide](https://inlang.com/m/n860p17j/library-inlang-paraglideJsAdapterSolidStart).
+First, we will need to install [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs), aswell as the official [SolidStart adapter for Paraglide](https://inlang.com/m/n860p17j/paraglide-solidstart-i18n).
 
 ```bash
 npx @inlang/paraglide-js@lates init

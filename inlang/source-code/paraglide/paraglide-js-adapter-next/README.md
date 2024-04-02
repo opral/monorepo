@@ -8,7 +8,7 @@
 
 ## Getting Started
 
-Install [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) and the [Paraglide NextJS Adapter](https://inlang.com/m/osslbuzt/library-inlang-paraglideJsAdapterNextJs).
+Install [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) and the [Paraglide NextJS Adapter](https://inlang.com/m/osslbuzt/paraglide-next-i18n).
 
 ```bash
 npx @inlang/paraglide-js@latest init

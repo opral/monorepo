@@ -9,7 +9,7 @@
 <p>{m.learn_more_at_following_links()}</p>
 <ul style="color: blue">
 	<li>
-		<a href="https://inlang.com/m/dxnzrydw/library-inlang-paraglideJsAdapterSvelteKit">
+		<a href="https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n">
 			{m.paraglide_documentation()}
 		</a>
 	</li>
