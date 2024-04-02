@@ -39,7 +39,7 @@ npx @inlang/paraglide-js@latest init
 This will:
 
 1. Install necessary dependencies
-2. Generate a `messages/` folder where your messages live
+2. Generate a `messages/` folder where your translation files live
 3. Add the Paraglide compiler to your `build` script
 4. Set up configuration files
 
