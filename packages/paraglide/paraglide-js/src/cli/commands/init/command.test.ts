@@ -101,7 +101,7 @@ describe("initializeInlangProject()", () => {
 	test("it should execute newProjectFlow() if no project has been found", async () => {
 		const fs = mockFiles({})
 		const repo = await openRepository("file://", { nodeishFs: fs })
-		mockUserInput(["newProject", "en", "./messages"])
+		mockUserInput(["newProject", "en"])
 		const path = await initializeInlangProject({ logger, repo })
 		expect(path).toBe("./project.inlang")
 		expect(await pathExists("./project.inlang", fs)).toBe(true)
@@ -321,7 +321,7 @@ describe("existingProjectFlow()", () => {
 		})
 		const repo = await openRepository("file://", { nodeishFs: fs })
 
-		mockUserInput(["newProject", "en", "./messages"])
+		mockUserInput(["newProject", "en"])
 
 		await existingProjectFlow({ existingProjectPath: "/folder/project.inlang" }, { logger, repo })
 		// info that a new project is created
@@ -453,7 +453,7 @@ describe("createNewProjectFlow()", async () => {
 			const fs = mockFiles({})
 			const repo = await openRepository("file://", { nodeishFs: fs })
 
-			mockUserInput(["en", "./messages"])
+			mockUserInput(["en"])
 			await createNewProjectFlow({ logger, repo })
 
 			// user is informed that a new project is created
@@ -477,7 +477,7 @@ describe("createNewProjectFlow()", async () => {
 		// invalid project settings file
 		vi.spyOn(JSON, "stringify").mockReturnValue(`{}`)
 
-		mockUserInput(["en", "./messages"])
+		mockUserInput(["en"])
 		await createNewProjectFlow({ logger, repo })
 		// user is informed that a new project is created
 		expect(logger.info).toHaveBeenCalledOnce()
@@ -485,6 +485,22 @@ describe("createNewProjectFlow()", async () => {
 		expect(logger.error).toHaveBeenCalled()
 		// the commands exits
 		expect(process.exit).toHaveBeenCalled()
+	})
+
+	test("it should create the messages folder and a message file for each language", async () => {
+		const fs = mockFiles({})
+		const repo = await openRepository("file://", { nodeishFs: fs })
+
+		// purpousefully formatted the input weird
+		mockUserInput(["  	,en, 	 ,de-ch  "])
+		await createNewProjectFlow({ logger, repo })
+
+		// user is informed that a new project is created
+		expect((await fs.stat("/messages")).isDirectory()).toBe(true)
+
+		for (const language of ["en", "de-ch"]) {
+			expect(await pathExists(`/messages/${language}.json`, fs)).toBe(true)
+		}
 	})
 })
 
