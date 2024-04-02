@@ -1,10 +1,9 @@
 import { Command } from "commander"
-import { loadProject, type ProjectSettings } from "@inlang/sdk"
+import { loadProject } from "@inlang/sdk"
 import consola from "consola"
 import { resolve } from "node:path"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
 import JSON5 from "json5"
-import childProcess from "node:child_process"
 import { version } from "../../state.js"
 import { telemetry } from "../../../services/telemetry/implementation.js"
 import { Logger } from "../../../services/logger/index.js"
@@ -15,8 +14,8 @@ import { pathExists } from "../../../services/file-handling/exists.js"
 import { findPackageJson } from "../../../services/environment/package.js"
 import * as Sherlock from "@inlang/cross-sell-sherlock"
 import { isValidLanguageTag } from "@inlang/language-tag"
-
-const DEFAULT_PROJECT_PATH = "./project.inlang"
+import { execAsync } from "./utilts.js"
+import { getNewProjectTemplate, DEFAULT_PROJECT_PATH } from "./defaults.js"
 
 type Context = {
 	logger: Logger
@@ -221,15 +220,36 @@ export const existingProjectFlow = async (args: { existingProjectPath: string },
 }
 
 export const createNewProjectFlow = async (ctx: Context) => {
-	const languageTags = await prompt(
-		"Which languages do you want to support (separate with spaces)",
-		{
+	const languageTagsString =
+		(await prompt("Which languages do you want to support (separate with spaces)", {
 			type: "text",
-			initial: "en",
-			default: "en",
-			placeholder: "en, de, ar",
-		}
-	)
+			placeholder: "en, de-ch, ar",
+		})) ?? ""
+
+	const languageTags = languageTagsString
+		.replaceAll(/[,:\s]/g, " ") //replace common separators with spaces
+		.split(" ")
+		.filter(Boolean) //remove empty segments
+		.map((tag) => tag.toLowerCase())
+
+	if (languageTags.length === 0) {
+		consola.error("You must specify at least one language tag")
+		process.exit(1)
+	}
+
+	const invalidLanguageTags = languageTags.filter((tag) => !isValidLanguageTag(tag))
+
+	if (invalidLanguageTags.length > 0) {
+		const message =
+			invalidLanguageTags.length === 1
+				? invalidLanguageTags[0] +
+				  " isn't a valid language tag. Please stick to IEEE BCP-47 Language Tags"
+				: invalidLanguageTags.join(", ") +
+				  " aren't valid language tags. Please stick to IEEE BCP-47 Language Tags"
+
+		consola.error(message)
+		process.exit(1)
+	}
 
 	const messagesPath = await prompt("Where do you want to put your messages?", {
 		type: "text",
@@ -238,13 +258,37 @@ export const createNewProjectFlow = async (ctx: Context) => {
 		initial: "./messages",
 	})
 
-	if (!("structuredClone" in globalThis)) {
-		throw new Error("structuredClone is not supported. You need Node 17 or higher")
+	if (!messagesPath.startsWith("./")) {
+		consola.error("The path to your messages folder must be relative")
+		process.exit(1)
 	}
 
-	const settings = structuredClone(newProjectTemplate)
+	const settings = getNewProjectTemplate()
+
+	//Should always be defined. This is to shut TS up
+	const sourceLanguageTag = languageTags.at(0)
+	if (!sourceLanguageTag) throw new Error("sourceLanguageTag is not defined")
+
+	settings.languageTags = languageTags
+	settings.sourceLanguageTag = sourceLanguageTag
+
 	// @ts-ignore
 	settings["plugin.inlang.messageFormat"].pathPattern = resolve(messagesPath, "{languageTag}.json")
+
+	//create the messages dir if it doesn't exist
+	ctx.repo.nodeishFs.mkdir(messagesPath, { recursive: true })
+
+	for (const languageTag of languageTags) {
+		const languageFile = resolve(messagesPath, languageTag + ".json")
+		//create the language file if it doesn't exist
+		ctx.repo.nodeishFs.writeFile(
+			languageFile,
+			dedent`
+			{
+				"$schema": "https://inlang.com/schema/inlang-message-format"
+			}`
+		)
+	}
 
 	ctx.logger.info(`Creating a new inlang project in the current working directory.`)
 	await ctx.repo.nodeishFs.mkdir(DEFAULT_PROJECT_PATH, { recursive: true })
@@ -270,28 +314,6 @@ export const createNewProjectFlow = async (ctx: Context) => {
 		ctx.logger.success("Successfully created a new inlang project.")
 	}
 }
-
-export const newProjectTemplate = {
-	$schema: "https://inlang.com/schema/project-settings",
-	sourceLanguageTag: "en",
-	languageTags: ["en"],
-	modules: [
-		// for instant gratification, we're adding common rules
-		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js",
-		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js",
-		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-without-source@latest/dist/index.js",
-		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-valid-js-identifier@latest/dist/index.js",
-
-		// default to the message format plugin because it supports all features
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@latest/dist/index.js",
-
-		// the m function matcher should be installed by default in case Sherlock (VS Code extension) is adopted
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js",
-	],
-	"plugin.inlang.messageFormat": {
-		pathPattern: "./messages/{languageTag}.json",
-	},
-} as const satisfies ProjectSettings
 
 export const checkIfPackageJsonExists = async (ctx: Context) => {
 	const packageJsonPath = await findPackageJson(ctx.repo.nodeishFs, process.cwd())
@@ -541,23 +563,4 @@ const prompt: typeof consola.prompt = async (message, options) => {
 		process.exit(0)
 	}
 	return response
-}
-
-/**
- * Executes a command asynchronously in a separate process.
- * It will not print the output to the console.
- *
- * @param command The command to execute.
- * @returns The stdout of the command.
- */
-function execAsync(command: string) {
-	return new Promise<string>((resolve, reject) => {
-		childProcess.exec(command, (error, stdout) => {
-			if (error) {
-				reject(error)
-			} else {
-				resolve(stdout)
-			}
-		})
-	})
 }
