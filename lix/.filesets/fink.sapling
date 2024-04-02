@@ -1,6 +1,10 @@
 %include lix/.filesets/lix.sapling
 
+[metadata]
+title: The fink + lix focuesd sparse profile
+description: This is for focussing on testing lix with fink.
+
 [inlcude]
-inlang/source-code/editor
+inlang
 inlang/source-code/server
 inlang/source-code/website
