@@ -1,7 +1,7 @@
 import { Command } from "commander"
 import { loadProject } from "@inlang/sdk"
 import consola from "consola"
-import { resolve } from "node:path"
+import * as nodePath from "node:path"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
 import JSON5 from "json5"
 import { version } from "../../state.js"
@@ -69,7 +69,7 @@ export const initCommand = new Command()
 
 		telemetry.capture({ event: "PARAGLIDE-JS init finished" })
 
-		const absoluteSettingsPath = resolve(projectPath, "settings.json")
+		const absoluteSettingsPath = nodePath.resolve(projectPath, "settings.json")
 		const relativeSettingsFilePath = absoluteSettingsPath.replace(process.cwd(), ".")
 
 		let successMessage = dedent`inlang Paraglide-JS has been set up sucessfully.
@@ -129,7 +129,7 @@ export const maybeAddVsCodeExtension = async (args: { projectPath: string }, ctx
 	if (response === false) return
 
 	const project = await loadProject({
-		projectPath: resolve(process.cwd(), args.projectPath),
+		projectPath: nodePath.resolve(process.cwd(), args.projectPath),
 		repo: ctx.repo,
 	})
 
@@ -206,7 +206,7 @@ export const existingProjectFlow = async (args: { existingProjectPath: string },
 	}
 
 	const project = await loadProject({
-		projectPath: resolve(process.cwd(), args.existingProjectPath),
+		projectPath: nodePath.resolve(process.cwd(), args.existingProjectPath),
 		repo: ctx.repo,
 	})
 
@@ -251,18 +251,6 @@ export const createNewProjectFlow = async (ctx: Context) => {
 		process.exit(1)
 	}
 
-	const messagesPath = await prompt("Where do you want to put your messages?", {
-		type: "text",
-		default: "./messages",
-		placeholder: "./messages",
-		initial: "./messages",
-	})
-
-	if (!messagesPath.startsWith("./")) {
-		consola.error("The path to your messages folder must be relative")
-		process.exit(1)
-	}
-
 	const settings = getNewProjectTemplate()
 
 	//Should always be defined. This is to shut TS up
@@ -272,14 +260,14 @@ export const createNewProjectFlow = async (ctx: Context) => {
 	settings.languageTags = languageTags
 	settings.sourceLanguageTag = sourceLanguageTag
 
-	// @ts-ignore
-	settings["plugin.inlang.messageFormat"].pathPattern = resolve(messagesPath, "{languageTag}.json")
+	const messagePath = settings["plugin.inlang.messageFormat"].pathPattern
 
 	//create the messages dir if it doesn't exist
-	ctx.repo.nodeishFs.mkdir(messagesPath, { recursive: true })
+	const messageDir = nodePath.dirname(nodePath.resolve(process.cwd(), messagePath))
+	ctx.repo.nodeishFs.mkdir(messageDir, { recursive: true })
 
 	for (const languageTag of languageTags) {
-		const languageFile = resolve(messagesPath, languageTag + ".json")
+		const languageFile = nodePath.resolve(messageDir, languageTag + ".json")
 		//create the language file if it doesn't exist
 		ctx.repo.nodeishFs.writeFile(
 			languageFile,
@@ -298,7 +286,7 @@ export const createNewProjectFlow = async (ctx: Context) => {
 	)
 
 	const project = await loadProject({
-		projectPath: resolve(process.cwd(), DEFAULT_PROJECT_PATH),
+		projectPath: nodePath.resolve(process.cwd(), DEFAULT_PROJECT_PATH),
 		repo: ctx.repo,
 	})
 
@@ -417,7 +405,7 @@ export const maybeChangeTsConfigModuleResolution = async (ctx: Context): Promise
 
 	if (tsconfig.extends) {
 		try {
-			const parentTsConfigPath = resolve(process.cwd(), tsconfig.extends)
+			const parentTsConfigPath = nodePath.resolve(process.cwd(), tsconfig.extends)
 			const parentTsConfigFile = await ctx.repo.nodeishFs.readFile(parentTsConfigPath, {
 				encoding: "utf-8",
 			})
