@@ -1,21 +1,20 @@
-[<img src="https://cdn.loom.com/sessions/thumbnails/a8365ec4fa2c4f6bbbf4370cf22dd7f6-with-play.gif" width="100%" /> Watch the demo of Paraglide JS](https://www.youtube.com/watch?v=-YES3CCAG90)
+[<img src="https://cdn.loom.com/sessions/thumbnails/a8365ec4fa2c4f6bbbf4370cf22dd7f6-with-play.gif" width="10000000px" /> Watch the demo of Paraglide JS](https://www.youtube.com/watch?v=-YES3CCAG90)
 
-# Why use Paraglide?
-
-<doc-figure src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/tree-shaking.jpg" alt="An illustration explaining the benefits of treeshaking in software" caption="How Paraglide JS treeshaking works">
-</doc-figure>
-
-Treeshaking gives us superpowers. With it, each page of your app only loads the messages that it actually uses. Incremental loading like this would usually take hours of manual tweaking to get right. With Paraglide-JS you get it for free. Say goodbye to huge bundles.
+# Why Paraglide?
 
 <doc-features>
-  <doc-feature title="Typesafe" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/typesafe.png"></doc-feature>
-  <doc-feature title="IDE Extension" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/typesafe.png"></doc-feature>
-  <doc-feature title="Fast Time-to-interactive" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/typesafe.png"></doc-feature>
+  <doc-feature title="Tiny Runtime" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/bundlesize-feature.png"></doc-feature>
+  <doc-feature title="Fully Typesafe" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/typesafety-feature.png"></doc-feature>
+  <doc-feature title="Fast Time-To-Interactive" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/typesafe.png"></doc-feature>
+   <doc-feature title="Sherlock VsCode Extension" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/sherlock-preview.png"></doc-feature>
 </doc-features>
+
+
+With Paraglide's Treeshsakeable messages, each page only loads the messages it actually uses. Incremental loading like this would usually take forever to get right, with Paraglide you get it for free.
 
 ## Use it with your Favorite Framework
 
-If you are using one of these Frameworks you will want to follow the framework specific documentation instead. If you aren't using one of these, that's fine too! You can read on.
+If you are using Paraglide with a Framework you will want to follow the framework specific documentation instead. If you aren't using one of these, that's fine too! You can read on.
 
 <doc-links>
 	<doc-link title="Adapter for NextJS" icon="tabler:brand-nextjs" href="/m/osslbuzt/paraglide-next-i18n" description="Go to Library"></doc-link>
@@ -23,14 +22,12 @@ If you are using one of these Frameworks you will want to follow the framework s
     <doc-link title="Adapter for Astro" icon="devicon-plain:astro" href="/m/iljlwzfs/paraglide-astro-i18n" description="Go to Library"></doc-link>
     <doc-link title="Adapter for SolidJS" icon="tabler:brand-solidjs" href="/m/n860p17j/paraglide-solidstart-i18n" description="Go to Library"></doc-link>
 	<doc-link title="Adapter for Remix" icon="simple-icons:remix" href="/m/fnhuwzrx/paraglide-remix-i18n" description="Go to Library"></doc-link>
+	<doc-link title="Or write your own" icon="ph:sparkle-fill" href="#writing-an-adapter" description="Learn How"></doc-link>
 </doc-links>
-
-#### Alternatively, [you can write your own adapter](#writing-an-adapter)
-
 
 # Getting started
 
-Initialize Paraglide with the following command:
+To use Paraglide stanadlone without a framework, run the following command:
 
 ```bash
 npx @inlang/paraglide-js@latest init
@@ -38,10 +35,10 @@ npx @inlang/paraglide-js@latest init
 
 This will:
 
-1. Install necessary dependencies
-2. Generate a `messages/` folder where your translation files live
-3. Add the Paraglide compiler to your `build` script
-4. Set up configuration files
+- Install necessary dependencies
+- Generate a `messages/` folder where your translation files live
+- Add the Paraglide compiler to your `build` script
+- Create necessary configuration files
 
 # Usage
 
@@ -79,7 +76,7 @@ m.hello() // Hello world!
 m.loginHeader({ name: "Samuel" }) // Hello Samuel, please login to continue.
 ```
 
-If you want to choose between messages at runtime, you can create a record of messages and index into it.
+To choose between messages at runtime create a map of messages and index into it.
 
 ```ts
 import * as m from "./paraglide/messages.js"
@@ -94,17 +91,11 @@ const season = {
 const msg = season["spring"]() // Hello spring!
 ```
 
-### Using the [Sherlock IDE Extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) (optional)
-
-[Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) integrates with paraglide to give you the optimal dev-experience.
-
-![VsCode screenshot showing Sherlock adding inlay hints next to messages and making an "extract message" code action available for hardcoded text](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/sherlock-preview.png)
-
-## Language Configuration
+## Configuration
 
 You can configure the languages you intend to support
 
-## Adding Languages
+### Languages
 
 You can declare which languages you support in `./project.inlang/settings.json`.
 
