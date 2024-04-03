@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeAll, beforeEach } from "vitest"
-import fs from "node:fs/promises"
+import { prepareEnvironment } from "@gmrchk/cli-testing-library"
 import path from "node:path"
 import child_process from "node:child_process"
-import { respondToPrompts, sleep } from "./utils.js"
 
-const tmpDir = path.resolve(process.cwd(), ".tmp")
+const ParaglideLocation = child_process.execSync("which paraglide-js").toString().trim()
+console.info(`Using paraglide-js at ${ParaglideLocation}`)
 
 describe("paraglide-js", () => {
 	it("prints it's version when run with --version", () => {
@@ -14,68 +14,44 @@ describe("paraglide-js", () => {
 	})
 
 	describe("init", () => {
-		beforeAll(async () => {
-			//remove tmp dir if it exists
-			try {
-				await fs.stat(tmpDir)
-				await fs.rmdir(tmpDir, { recursive: true })
-			} catch (e) {
-				//do nothing
-			}
-		})
-		beforeEach(async () => {
-			//create a tmp dir
-			await fs.mkdir(tmpDir, { recursive: true })
-			return async () => {
-				await fs.rmdir(tmpDir, { recursive: true })
-			}
-		})
-
 		it(
 			"initializes paraglide if no project is present",
 			async () => {
-				await fs.stat(tmpDir)
-				//create empty package.json
-				await fs.writeFile(path.join(tmpDir, "package.json"), "{}", {
-					encoding: "utf-8",
-				})
+				const { spawn, writeFile, readFile, cleanup, path: workingDir } = await prepareEnvironment()
+				await writeFile(path.resolve(workingDir, "package.json"), "{}")
+				process.env.TERM_PROGRAM = "not-vscode"
+				const { wait, waitForText, writeText, debug, pressKey } = await spawn(
+					ParaglideLocation,
+					"init"
+				)
 
-				const process = child_process.spawn("npx", ["paraglide-js", "init"], {
-					cwd: tmpDir,
-				})
+				debug()
 
-				await respondToPrompts(process, {
-					"without committing your current changes?": {
-						response: "y\x0D",
-						required: false,
-					},
-					"Are you using Visual Studio Code?": {
-						response: "y\x0D",
-						required: false,
-					},
-					"Which languages do you want to support?": {
-						response: "en, de \r\n\x0D",
-						required: true,
-					},
-					"Which tech stack are you using?": {
-						response: "\r\n\x0D",
-						required: true,
-					},
-				})
+				await waitForText("Which languages do you want to support?")
+				await wait(200)
+				await writeText("en, de")
+				await wait(200)
+				await pressKey("enter")
 
-				// eslint-disable-next-line no-console
-				console.log("Completed init")
+				await waitForText("Are you using Visual Studio Code?")
+				await wait(200)
+				await writeText("y")
+				await wait(200)
+				await pressKey("enter")
 
-				await sleep(500)
-				process.kill()
+				await waitForText("Which tech stack are you using?")
+				await wait(200)
+				await pressKey("enter")
+				await wait(1000)
 
-				// eslint-disable-next-line no-console
-				console.log("Killed Process")
+				const fileContent = await readFile(path.resolve(workingDir, "project.inlang/settings.json"))
+				const settings = JSON.parse(fileContent)
+				expect(settings.languageTags).toEqual(["en", "de"])
+				expect(settings.sourceLanguageTag).toEqual("en")
 
-				//expect project.inlang/settings.json to be created
-				expect(await fs.stat(path.join(tmpDir, "project.inlang/settings.json"))).toBeDefined()
+				await cleanup()
 			},
-			{ timeout: 180_000 }
+			{ timeout: 30_000 }
 		)
 	})
 })
