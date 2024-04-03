@@ -65,7 +65,7 @@ describe("paraglide-js", () => {
 				//expect project.inlang/settings.json to be created
 				expect(await fs.stat(path.join(tmpDir, "project.inlang/settings.json"))).toBeDefined()
 			},
-			{ timeout: 120000 }
+			{ timeout: 60_000 }
 		)
 	})
 })
