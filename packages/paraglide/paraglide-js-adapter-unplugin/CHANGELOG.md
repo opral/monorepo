@@ -1,5 +1,17 @@
 # @inlang/paraglide-js-adapter-unplugin
 
+## 1.4.19
+
+### Patch Changes
+
+- 449e09c: fix edge-case with hashing function
+- Updated dependencies [526b0ba]
+- Updated dependencies [26d2ba1]
+- Updated dependencies [8a8aec7]
+  - @inlang/paraglide-js@1.3.6
+  - @lix-js/client@1.2.0
+  - @inlang/sdk@0.28.3
+
 ## 1.4.18
 
 ### Patch Changes

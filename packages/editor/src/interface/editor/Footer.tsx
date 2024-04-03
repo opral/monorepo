@@ -1,19 +1,16 @@
-import { NewsletterForm } from "#src/interface/components/NewsletterForm.jsx"
-import { For } from "solid-js"
-import IconTwitter from "~icons/cib/twitter"
+import { For, Show } from "solid-js"
 import IconGithub from "~icons/cib/github"
 import IconDiscord from "~icons/cib/discord"
-import * as m from "#src/paraglide/messages.js"
-// import { LanguagePicker } from "./LanguagePicker.jsx"
 import Link from "#src/renderer/Link.jsx"
-import { Button } from "../components/Button.jsx"
+import IconQuestionMark from "~icons/material-symbols/question-mark"
+// import IconExpandMore from "~icons/material-symbols/expand-more"
 
 const Footer = () => {
 	const socialMediaLinks = [
 		{
 			name: "Twitter",
-			href: "https://twitter.com/inlangHQ",
-			Icon: IconTwitter,
+			href: "https://twitter.com/finkEditor",
+			Icon: IconX,
 			screenreader: "Twitter Profile",
 		},
 		{
@@ -30,111 +27,104 @@ const Footer = () => {
 		},
 	]
 
-	const getResourceLinks = () => {
+	const getResourcesLinks = () => {
 		return [
 			{
-				name: m.footer_resources_roadmap(),
-				href: "https://github.com/orgs/inlang/projects?query=is%3Aopen",
+				name: "About Fink",
+				href: import.meta.env.PROD ? "https://inlang.com/m/tdozzpar" : "http://localhost:3000/m/tdozzpar",
 			},
 			{
-				name: m.footer_documentation_title(),
-				href: import.meta.env.PROD
-					? "https://inlang.com/documentation"
-					: "http://localhost:3000/documentation",
+				name: "User Guide",
+				href: import.meta.env.PROD ? "https://inlang.com/g/6ddyhpoi" : "http://localhost:3000/g/6ddyhpoi",
 			},
-		]
-	}
-	const getContactLinks = () => {
-		return [
 			{
-				name: m.footer_contact_getInTouch(),
+				name: "About the ecosystem",
+				href: import.meta.env.PROD ? "https://inlang.com/documentation" : "http://localhost:3000/documentation",
+			},
+			{
+				name: "Support Forum",
+				href: "https://discord.gg/gdMPPWy57R",
+			},
+			{
+				name: "Report a Bug",
+				href: "https://github.com/opral/inlang-fink/issues/new",
+			},
+			{
+				name: "Feature Request",
+				href: "https://github.com/opral/monorepo/discussions/categories/-fink-general",
+			},
+			{
+				name: "Submit Feedback",
+				href: "https://github.com/orgs/opral/discussions/categories/-fink-general",
+			},
+			{
+				name: "Contact Us",
 				href: "mailto:hello@inlang.com",
 			},
 			{
-				name: m.footer_contact_join(),
+				name: "Join the Team",
 				href: "https://github.com/opral/monorepo/tree/main/careers",
-			},
-			{
-				name: m.footer_contact_feedback(),
-				href: "https://github.com/opral/monorepo/discussions/categories/feedback",
-			},
-			{
-				name: m.footer_contact_blog(),
-				href: import.meta.env.PROD ? "https://inlang.com/blog" : "http://localhost:3000/blog",
-			},
+			}
 		]
 	}
 
 	return (
-		<footer class="overflow-hidden max-w-7xl mx-auto">
-			<div class="flex flex-row flex-wrap-reverse py-16 max-w-7xl mx-auto px-4 xl:px-0 gap-10 sm:gap-x-0 md:gap-y-10 xl:gap-0">
-				<div class="w-full md:w-1/4 xl:px-4 flex flex-col gap-4">
-					<Link href="/" class="flex items-center w-fit">
-						<img class="h-9 w-9" src="/favicon/safari-pinned-tab.svg" alt="Company Logo" />
-						<span class="self-center pl-2 text-left font-semibold text-surface-900">inlang</span>
-					</Link>
-					<p class="text-surface-600 text-sm pt-0.5">{m.footer_inlang_tagline()}</p>
-					<div class="flex flex-wrap gap-6 pt-1">
-						<For each={socialMediaLinks}>
-							{(link) => (
-								<Link
-									target="_blank"
-									class={"link link-primary flex space-x-2 items-center text-xs"}
-									href={link.href}
-								>
-									<link.Icon class="w-5 h-5" />
-									<span class="sr-only">{link.name}</span>
-								</Link>
-							)}
-						</For>
-					</div>
-				</div>
-				<div class="w-full sm:w-1/3 md:w-1/4 xl:px-4 flex flex-col pt-2">
-					<p class="font-semibold text-surface-900 pb-3">{m.footer_resources_title()}</p>
-					<For each={getResourceLinks()}>
-						{(link) => (
-							<div class="w-fit opacity-80">
-								<Button type="text" href={link.href}>
-									{link.name}
-								</Button>
-							</div>
-						)}
-					</For>
-				</div>
-				<div class="w-full sm:w-1/3 md:w-1/4 xl:px-4 flex flex-col pt-2">
-					{/* <p class="font-semibold text-surface-900 pb-3">{m.footer_category_title()}</p>
-					<For each={getProductsLinks()}>
-						{(link) => (
-							<div class="w-fit opacity-80">
-								<Button type="text" href={link.href}>
-									{link.name}
-								</Button>
-							</div>
-						)}
-					</For> */}
-				</div>
-				<div class="w-full sm:w-1/3 md:w-1/4 xl:px-4 xl:flex flex-col pt-2">
-					<p class="font-semibold text-surface-900 pb-3">{m.footer_contact_title()}</p>
-					<For each={getContactLinks()}>
-						{(link) => (
-							<div class="w-fit opacity-80">
-								<Button type="text" href={link.href}>
-									{link.name}
-								</Button>
-							</div>
-						)}
-					</For>
-				</div>
-			</div>
-			<div class="px-4 xl:px-0 flex flex-col xl:flex-row justify-between items-end gap-8 pb-16">
-				<div class="xl:px-4 xl:flex flex-col gap-2 md:gap-4 pt-2 max-xl:w-full">
-					<NewsletterForm />
-				</div>
-				<div class="xl:w-1/4 xl:px-4 flex items-center justify-between pt-2 max-xl:w-full">
+		<footer class="overflow-hidden max-w-7xl mx-auto bg-background border-t border-surface-200 py-4 px-4 overflow-visible">
+			<div class="flex justify-between gap-4">
+				<div class="xl:w-1/4 xl:px-4 flex items-center justify-between">
 					<p class="text-sm text-surface-500">
-						Copyright {new Date().getFullYear().toString()} inlang
+						© {new Date().getFullYear().toString()} Opral
 					</p>
-					{/* <LanguagePicker /> */}
+				</div>
+				<div class="flex gap-4">
+					<For each={socialMediaLinks}>
+						{(link) => (
+							<Link
+								target="_blank"
+								class={"link link-primary flex space-x-2 items-center text-xs"}
+								href={link.href}
+							>
+								<link.Icon class="w-5 h-5" />
+								<span class="sr-only">{link.name}</span>
+							</Link>
+						)}
+					</For>
+				</div>
+				<div class="relative">
+					<sl-dropdown
+						prop:placement="top-end"
+						prop:distance={4}
+						class="peer"
+					>
+						<button slot="trigger" class="bg-surface-800 rounded-full p-1">
+							<IconQuestionMark class="w-4 h-4" color="background" />
+						</button>
+						{/* <button slot="trigger" class="flex items-center link link-primary">
+							Help
+							<IconExpandMore />
+						</button> */}
+						<sl-menu class="w-fit">
+							<For each={getResourcesLinks()}>
+								{(link) => (
+									<>
+										<sl-menu-item>
+											<a
+												href={link.href} target="_blank"
+											>
+												{link.name}
+											</a>
+										</sl-menu-item>
+										<Show when={link.name === "About the ecosystem" || link.name === "Submit Feedback"}>
+											<div class="w-full border-b border-surface-200 my-1" />
+										</Show>
+									</>
+								)}
+							</For>
+						</sl-menu>
+					</sl-dropdown>
+					<div class="opacity-0 transition-opacity peer-hover:opacity-100 absolute text-sm bg-inverted-surface text-on-inverted-surface py-1 px-2 rounded right-0 bottom-8 whitespace-nowrap">
+						Help and resources
+					</div>
 				</div>
 			</div>
 		</footer>
@@ -142,3 +132,21 @@ const Footer = () => {
 }
 
 export default Footer
+
+/* Custom X icon as it is not available within unplugin */
+export function IconX() {
+	return (
+		<svg
+			width="19"
+			height="auto"
+			viewBox="0 0 24 23"
+			fill="none"
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<path
+				d="M18.8782 0.660156H22.5582L14.4782 9.86016L23.9182 22.3402H16.5102L10.7102 14.7562L4.07016 22.3402H0.390156L8.95016 12.5002L-0.0898438 0.660156H7.50216L12.7422 7.58816L18.8782 0.660156ZM17.5902 20.1802H19.6302L6.43016 2.74016H4.23816L17.5902 20.1802Z"
+				fill="currentColor"
+			/>
+		</svg>
+	)
+}

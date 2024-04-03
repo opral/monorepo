@@ -53,6 +53,11 @@ export const Gitfloat = () => {
 		let repoInfo = githubRepositoryInformation()
 		const isFork = () => (repoInfo && "isFork" in repoInfo ? repoInfo.isFork : false)
 
+		// check if the user has disabled the fork sync warning
+		const disableForkSyncWarning = () => localStorage?.disableForkSyncWarning?.some((repo: { owner: string, repository: string }) =>
+			repo.owner === routeParams().owner && repo.repository === routeParams().repository
+		)
+
 		if (localStorage?.user === undefined) {
 			return "loading"
 		} else if (localStorage?.user?.isLoggedIn === false) {
@@ -66,7 +71,7 @@ export const Gitfloat = () => {
 			return "loading"
 		} else if (userIsCollaborator() === false) {
 			return "fork"
-		} else if (hasPushedChanges() && localChanges() === 0 && isFork()) {
+		} else if (hasPushedChanges() && localChanges() === 0 && isFork() && !disableForkSyncWarning()) {
 			// if changes exist in a fork, show the pull request button
 			return "pullrequest"
 		}
