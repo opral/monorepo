@@ -25,10 +25,15 @@ export function respondToPrompts(
 		process.stdout.on("data", (data) => {
 			for (const [prompt, { response }] of Object.entries(responses)) {
 				if (data.toString().includes(prompt) && !alreadyResponded.has(prompt)) {
+					// eslint-disable-next-line no-console
+					console.log("responding to", prompt)
 					process.stdin.write(response)
 					alreadyResponded.add(prompt)
 				}
 			}
+
+			// eslint-disable-next-line no-console
+			console.log(data.toString())
 
 			//if all required prompts have been responded
 			if (requiredPrompts.every(([prompt]) => alreadyResponded.has(prompt))) {
