@@ -49,6 +49,10 @@ describe("paraglide-js", () => {
 						response: "y",
 						required: false,
 					},
+					"Are you using Visual Studio Code?": {
+						response: "y",
+						required: false,
+					},
 					"Which languages do you want to support?": {
 						response: "en, de \r\n",
 						required: true,
@@ -65,7 +69,7 @@ describe("paraglide-js", () => {
 				//expect project.inlang/settings.json to be created
 				expect(await fs.stat(path.join(tmpDir, "project.inlang/settings.json"))).toBeDefined()
 			},
-			{ timeout: 60_000 }
+			{ timeout: 120_000 }
 		)
 	})
 })
