@@ -23,9 +23,9 @@ export function respondToPrompts(
 
 	return new Promise<void>((resolve, reject) => {
 		process.stdout.on("data", (data) => {
-			for (const [prompt, answer] of Object.entries(responses)) {
+			for (const [prompt, { response }] of Object.entries(responses)) {
 				if (data.toString().includes(prompt) && !alreadyResponded.has(prompt)) {
-					process.stdin.write(answer)
+					process.stdin.write(response)
 					alreadyResponded.add(prompt)
 				}
 			}
