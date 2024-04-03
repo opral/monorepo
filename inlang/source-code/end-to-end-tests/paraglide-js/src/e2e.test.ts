@@ -4,7 +4,6 @@ import path from "node:path"
 import child_process from "node:child_process"
 
 const ParaglideLocation = child_process.execSync("which paraglide-js").toString().trim()
-console.info(`Using paraglide-js at ${ParaglideLocation}`)
 
 describe("paraglide-js", () => {
 	it("prints it's version when run with --version", () => {
