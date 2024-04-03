@@ -294,7 +294,7 @@ That's it! If you now reload the page and inspect the HTML, you should see the c
 
 You are now set up with a multi-linguagal SvelteKit app using Paraglide!
 
-The SvelteKit adapter has a few more features that you might want to check out, such as localized paths. Read more about it in the [SvelteKit Adapter Documentation](https://inlang.com/m/dxnzrydw/library-inlang-paraglideJs-adapter-sveltekit).
+The SvelteKit adapter has a few more features that you might want to check out, such as localized paths. Read more about it in the [SvelteKit Adapter Documentation](https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n).
 
 Try it on [StackBlitz](https://stackblitz.com/~/github.com/lorissigrist/paraglide-sveltekit-example)
 

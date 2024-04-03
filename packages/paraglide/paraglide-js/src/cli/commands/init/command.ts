@@ -1,23 +1,21 @@
 import { Command } from "commander"
-import { loadProject, type ProjectSettings } from "@inlang/sdk"
 import consola from "consola"
-import { resolve } from "node:path"
-import { detectJsonFormatting } from "@inlang/detect-json-formatting"
-import JSON5 from "json5"
-import childProcess from "node:child_process"
-import { version } from "../state.js"
-import { telemetry } from "../../services/telemetry/implementation.js"
-import { Logger } from "../../services/logger/index.js"
 import dedent from "dedent"
-import { findRepoRoot, openRepository, type Repository } from "@lix-js/client"
+import * as nodePath from "node:path"
+import JSON5 from "json5"
 import nodeFsPromises from "node:fs/promises"
-import { pathExists } from "../../services/file-handling/exists.js"
-import { findPackageJson } from "../../services/environment/package.js"
+import { loadProject } from "@inlang/sdk"
 import * as Sherlock from "@inlang/cross-sell-sherlock"
-
-// TODO add a project UUID to the tele.groups internal #196
-// import { gitOrigin } from "../../services/telemetry/implementation.js"
-const DEFAULT_PROJECT_PATH = "./project.inlang"
+import { isValidLanguageTag, LanguageTag } from "@inlang/language-tag"
+import { detectJsonFormatting } from "@inlang/detect-json-formatting"
+import { version } from "../../state.js"
+import { telemetry } from "../../../services/telemetry/implementation.js"
+import { Logger } from "../../../services/logger/index.js"
+import { findRepoRoot, openRepository, type Repository } from "@lix-js/client"
+import { pathExists } from "../../../services/file-handling/exists.js"
+import { findPackageJson } from "../../../services/environment/package.js"
+import { execAsync } from "./utils.js"
+import { getNewProjectTemplate, DEFAULT_PROJECT_PATH } from "./defaults.js"
 
 type Context = {
 	logger: Logger
@@ -25,10 +23,10 @@ type Context = {
 }
 
 const ADAPTER_LINKS = {
-	sveltekit: "https://inlang.com/m/dxnzrydw/library-inlang-paraglideJsAdapterSvelteKit",
-	nextjs: "https://inlang.com/m/osslbuzt/library-inlang-paraglideJsAdapterNextJs",
-	astro: "https://inlang.com/m/iljlwzfs/library-inlang-paraglideJsAdapterAstro",
-	solidstart: "https://inlang.com/m/n860p17j/library-inlang-paraglideJsAdapterSolidStart",
+	sveltekit: "https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n",
+	nextjs: "https://inlang.com/m/osslbuzt/paraglide-next-i18n",
+	astro: "https://inlang.com/m/iljlwzfs/paraglide-astro-i18n",
+	solidstart: "https://inlang.com/m/n860p17j/paraglide-solidstart-i18n",
 	vite: "https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-vite",
 } as const
 
@@ -71,7 +69,7 @@ export const initCommand = new Command()
 
 		telemetry.capture({ event: "PARAGLIDE-JS init finished" })
 
-		const absoluteSettingsPath = resolve(projectPath, "settings.json")
+		const absoluteSettingsPath = nodePath.resolve(projectPath, "settings.json")
 		const relativeSettingsFilePath = absoluteSettingsPath.replace(process.cwd(), ".")
 
 		let successMessage = dedent`inlang Paraglide-JS has been set up sucessfully.
@@ -131,7 +129,7 @@ export const maybeAddVsCodeExtension = async (args: { projectPath: string }, ctx
 	if (response === false) return
 
 	const project = await loadProject({
-		projectPath: resolve(process.cwd(), args.projectPath),
+		projectPath: nodePath.resolve(process.cwd(), args.projectPath),
 		repo: ctx.repo,
 	})
 
@@ -208,7 +206,7 @@ export const existingProjectFlow = async (args: { existingProjectPath: string },
 	}
 
 	const project = await loadProject({
-		projectPath: resolve(process.cwd(), args.existingProjectPath),
+		projectPath: nodePath.resolve(process.cwd(), args.existingProjectPath),
 		repo: ctx.repo,
 	})
 
@@ -221,16 +219,102 @@ export const existingProjectFlow = async (args: { existingProjectPath: string },
 	}
 }
 
+function parseLanguageTagInput(input: string): {
+	validLanguageTags: LanguageTag[]
+	invalidLanguageTags: string[]
+} {
+	const languageTags = input
+		.replaceAll(/[,:\s]/g, " ") //replace common separators with spaces
+		.split(" ")
+		.filter(Boolean) //remove empty segments
+		.map((tag) => tag.toLowerCase())
+
+	const validLanguageTags: LanguageTag[] = []
+	const invalidLanguageTags: string[] = []
+
+	for (const tag of languageTags) {
+		if (isValidLanguageTag(tag)) {
+			validLanguageTags.push(tag)
+		} else {
+			invalidLanguageTags.push(tag)
+		}
+	}
+
+	return {
+		validLanguageTags,
+		invalidLanguageTags,
+	}
+}
+
+async function promptForLanguageTags(
+	initialLanguageTags: LanguageTag[] = []
+): Promise<LanguageTag[]> {
+	const languageTagsInput =
+		(await prompt("Which languages do you want to support?", {
+			type: "text",
+			placeholder: "en, de-ch, ar",
+			initial: initialLanguageTags.length ? initialLanguageTags.join(", ") : undefined,
+		})) ?? ""
+
+	const { invalidLanguageTags, validLanguageTags } = parseLanguageTagInput(languageTagsInput)
+
+	if (validLanguageTags.length === 0) {
+		consola.warn("You must specify at least one language tag")
+		return await promptForLanguageTags()
+	}
+
+	if (invalidLanguageTags.length > 0) {
+		const message =
+			invalidLanguageTags.length === 1
+				? invalidLanguageTags[0] +
+				  " isn't a valid language tag. Please stick to IEEE BCP-47 Language Tags"
+				: invalidLanguageTags.map((tag) => `"${tag}"`).join(", ") +
+				  " aren't valid language tags. Please stick to IEEE BCP-47 Language Tags"
+
+		consola.warn(message)
+		return await promptForLanguageTags(validLanguageTags)
+	}
+
+	return validLanguageTags
+}
 export const createNewProjectFlow = async (ctx: Context) => {
+	const languageTags = await promptForLanguageTags()
+	const settings = getNewProjectTemplate()
+
+	//Should always be defined. This is to shut TS up
+	const sourceLanguageTag = languageTags.at(0)
+	if (!sourceLanguageTag) throw new Error("sourceLanguageTag is not defined")
+
+	settings.languageTags = languageTags
+	settings.sourceLanguageTag = sourceLanguageTag
+
+	const messagePath = settings["plugin.inlang.messageFormat"].pathPattern
+
+	//create the messages dir if it doesn't exist
+	const messageDir = nodePath.dirname(nodePath.resolve(process.cwd(), messagePath))
+	ctx.repo.nodeishFs.mkdir(messageDir, { recursive: true })
+
+	for (const languageTag of languageTags) {
+		const languageFile = nodePath.resolve(messageDir, languageTag + ".json")
+		//create the language file if it doesn't exist
+		ctx.repo.nodeishFs.writeFile(
+			languageFile,
+			dedent`
+			{
+				"$schema": "https://inlang.com/schema/inlang-message-format"
+			}`
+		)
+	}
+
 	ctx.logger.info(`Creating a new inlang project in the current working directory.`)
 	await ctx.repo.nodeishFs.mkdir(DEFAULT_PROJECT_PATH, { recursive: true })
 	await ctx.repo.nodeishFs.writeFile(
 		DEFAULT_PROJECT_PATH + "/settings.json",
-		JSON.stringify(newProjectTemplate, undefined, 2)
+		JSON.stringify(settings, undefined, 2)
 	)
 
 	const project = await loadProject({
-		projectPath: resolve(process.cwd(), DEFAULT_PROJECT_PATH),
+		projectPath: nodePath.resolve(process.cwd(), DEFAULT_PROJECT_PATH),
 		repo: ctx.repo,
 	})
 
@@ -245,31 +329,6 @@ export const createNewProjectFlow = async (ctx: Context) => {
 	} else {
 		ctx.logger.success("Successfully created a new inlang project.")
 	}
-}
-
-export const newProjectTemplate: ProjectSettings = {
-	$schema: "https://inlang.com/schema/project-settings",
-	// defaulting to english to not overwhelm new users
-	// with prompts. The user can change this later.
-	sourceLanguageTag: "en",
-	languageTags: ["en"],
-	modules: [
-		// for instant gratification, we're adding common rules
-		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js",
-		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-identical-pattern@latest/dist/index.js",
-		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js",
-		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-without-source@latest/dist/index.js",
-		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-valid-js-identifier@latest/dist/index.js",
-		// default to the message format plugin because it supports all features
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@latest/dist/index.js",
-		// the m function matcher should be installed by default in case Sherlock (VS Code extension) is adopted
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js",
-	],
-	"plugin.inlang.messageFormat": {
-		// using .inlang/paraglide-js as directory to avoid future conflicts when an official .inlang
-		// directory is introduced, see https://github.com/opral/monorepo/discussions/1418
-		pathPattern: "./messages/{languageTag}.json",
-	},
 }
 
 export const checkIfPackageJsonExists = async (ctx: Context) => {
@@ -374,7 +433,7 @@ export const maybeChangeTsConfigModuleResolution = async (ctx: Context): Promise
 
 	if (tsconfig.extends) {
 		try {
-			const parentTsConfigPath = resolve(process.cwd(), tsconfig.extends)
+			const parentTsConfigPath = nodePath.resolve(process.cwd(), tsconfig.extends)
 			const parentTsConfigFile = await ctx.repo.nodeishFs.readFile(parentTsConfigPath, {
 				encoding: "utf-8",
 			})
@@ -520,23 +579,4 @@ const prompt: typeof consola.prompt = async (message, options) => {
 		process.exit(0)
 	}
 	return response
-}
-
-/**
- * Executes a command asynchronously in a separate process.
- * It will not print the output to the console.
- *
- * @param command The command to execute.
- * @returns The stdout of the command.
- */
-function execAsync(command: string) {
-	return new Promise<string>((resolve, reject) => {
-		childProcess.exec(command, (error, stdout) => {
-			if (error) {
-				reject(error)
-			} else {
-				resolve(stdout)
-			}
-		})
-	})
 }

@@ -1,5 +1,12 @@
 # @inlang/paraglide-js
 
+## 1.3.6
+
+### Patch Changes
+
+- 526b0ba: `paraglide-js init` now prompts for which languages should be supported
+- 26d2ba1: No longer add `identical-pattern` lint rule by default
+
 ## 1.3.5
 
 ### Patch Changes

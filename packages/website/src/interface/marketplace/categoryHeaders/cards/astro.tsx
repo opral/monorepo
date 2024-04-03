@@ -76,7 +76,7 @@ const AstroHeader = () => {
 						</div>
 					</Link>
 					<Link
-						href="/m/iljlwzfs/library-inlang-paraglideJsAdapterAstro"
+						href="/m/iljlwzfs/paraglide-astro-i18n"
 						class="w-full bg-background rounded-xl border border-surface-300 relative group hover:border-surface-400 transition-all cursor-pointer"
 					>
 						<h3 class="font-medium text-lg px-8 pb-1 pt-6">Astro Adapter</h3>
