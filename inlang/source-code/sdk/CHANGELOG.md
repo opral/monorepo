@@ -1,5 +1,12 @@
 # @inlang/sdk
 
+## 0.28.3
+
+### Patch Changes
+
+- Updated dependencies [8a8aec7]
+  - @lix-js/client@1.2.0
+
 ## 0.28.2
 
 ### Patch Changes

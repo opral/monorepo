@@ -1790,6 +1790,13 @@ const refpaths = ref => [
 // @see https://git-scm.com/docs/gitrepository-layout
 const GIT_FILES = ['config', 'description', 'index', 'shallow', 'commondir'];
 
+let lock$1;
+
+async function acquireLock(ref, callback) {
+  if (lock$1 === undefined) lock$1 = new AsyncLock();
+  return lock$1.acquire(ref, callback)
+}
+
 class GitRefManager {
   static async updateRemoteRefs({
     fs,
@@ -1896,7 +1903,9 @@ class GitRefManager {
     // are .git/refs/remotes/origin/refs/remotes/remote_mirror_3059
     // and .git/refs/remotes/origin/refs/merge-requests
     for (const [key, value] of actualRefsToWrite) {
-      await fs.write(join(gitdir, key), `${value.trim()}\n`, 'utf8');
+      await acquireLock(key, async () =>
+        fs.write(join(gitdir, key), `${value.trim()}\n`, 'utf8')
+      );
     }
     return { pruned }
   }
@@ -1907,11 +1916,15 @@ class GitRefManager {
     if (!value.match(/[0-9a-f]{40}/)) {
       throw new InvalidOidError(value)
     }
-    await fs.write(join(gitdir, ref), `${value.trim()}\n`, 'utf8');
+    await acquireLock(ref, async () =>
+      fs.write(join(gitdir, ref), `${value.trim()}\n`, 'utf8')
+    );
   }
 
   static async writeSymbolicRef({ fs, gitdir, ref, value }) {
-    await fs.write(join(gitdir, ref), 'ref: ' + `${value.trim()}\n`, 'utf8');
+    await acquireLock(ref, async () =>
+      fs.write(join(gitdir, ref), 'ref: ' + `${value.trim()}\n`, 'utf8')
+    );
   }
 
   static async deleteRef({ fs, gitdir, ref }) {
@@ -1922,7 +1935,9 @@ class GitRefManager {
     // Delete regular ref
     await Promise.all(refs.map(ref => fs.rm(join(gitdir, ref))));
     // Delete any packed ref
-    let text = await fs.read(`${gitdir}/packed-refs`, { encoding: 'utf8' });
+    let text = await acquireLock('packed-refs', async () =>
+      fs.read(`${gitdir}/packed-refs`, { encoding: 'utf8' })
+    );
     const packed = GitPackedRefs.from(text);
     const beforeSize = packed.refs.size;
     for (const ref of refs) {
@@ -1932,7 +1947,9 @@ class GitRefManager {
     }
     if (packed.refs.size < beforeSize) {
       text = packed.toString();
-      await fs.write(`${gitdir}/packed-refs`, text, { encoding: 'utf8' });
+      await acquireLock('packed-refs', async () =>
+        fs.write(`${gitdir}/packed-refs`, text, { encoding: 'utf8' })
+      );
     }
   }
 
@@ -1951,7 +1968,7 @@ class GitRefManager {
         return ref
       }
     }
-    let sha;
+
     // Is it a ref pointer?
     if (ref.startsWith('ref: ')) {
       ref = ref.slice('ref: '.length);
@@ -1967,9 +1984,12 @@ class GitRefManager {
     const allpaths = refpaths(ref).filter(p => !GIT_FILES.includes(p)); // exclude git system files (#709)
 
     for (const ref of allpaths) {
-      sha =
-        (await fs.read(`${gitdir}/${ref}`, { encoding: 'utf8' })) ||
-        packedMap.get(ref);
+      const sha = await acquireLock(
+        ref,
+        async () =>
+          (await fs.read(`${gitdir}/${ref}`, { encoding: 'utf8' })) ||
+          packedMap.get(ref)
+      );
       if (sha) {
         return GitRefManager.resolve({ fs, gitdir, ref: sha.trim(), depth })
       }
@@ -1997,7 +2017,10 @@ class GitRefManager {
     // Look in all the proper paths, in this order
     const allpaths = refpaths(ref);
     for (const ref of allpaths) {
-      if (await fs.exists(`${gitdir}/${ref}`)) return ref
+      const refExists = await acquireLock(ref, async () =>
+        fs.exists(`${gitdir}/${ref}`)
+      );
+      if (refExists) return ref
       if (packedMap.has(ref)) return ref
     }
     // Do we give up?
@@ -2048,7 +2071,9 @@ class GitRefManager {
   }
 
   static async packedRefs({ fs, gitdir }) {
-    const text = await fs.read(`${gitdir}/packed-refs`, { encoding: 'utf8' });
+    const text = await acquireLock('packed-refs', async () =>
+      fs.read(`${gitdir}/packed-refs`, { encoding: 'utf8' })
+    );
     const packed = GitPackedRefs.from(text);
     return packed.refs
   }
@@ -7216,14 +7241,14 @@ class GitRemoteManager {
   }
 }
 
-let lock$1 = null;
+let lock$2 = null;
 
 class GitShallowManager {
   static async read({ fs, gitdir }) {
-    if (lock$1 === null) lock$1 = new AsyncLock();
+    if (lock$2 === null) lock$2 = new AsyncLock();
     const filepath = join(gitdir, 'shallow');
     const oids = new Set();
-    await lock$1.acquire(filepath, async function() {
+    await lock$2.acquire(filepath, async function() {
       const text = await fs.read(filepath, { encoding: 'utf8' });
       if (text === null) return oids // no file
       if (text.trim() === '') return oids // empty file
@@ -7236,18 +7261,18 @@ class GitShallowManager {
   }
 
   static async write({ fs, gitdir, oids }) {
-    if (lock$1 === null) lock$1 = new AsyncLock();
+    if (lock$2 === null) lock$2 = new AsyncLock();
     const filepath = join(gitdir, 'shallow');
     if (oids.size > 0) {
       const text = [...oids].join('\n') + '\n';
-      await lock$1.acquire(filepath, async function() {
+      await lock$2.acquire(filepath, async function() {
         await fs.write(filepath, text, {
           encoding: 'utf8',
         });
       });
     } else {
       // No shallows
-      await lock$1.acquire(filepath, async function() {
+      await lock$2.acquire(filepath, async function() {
         await fs.rm(filepath);
       });
     }
@@ -13887,6 +13912,8 @@ async function getHeadTree({ fs, cache, gitdir }) {
  *   ["g.txt", 1, 2, 3], // modified, staged, with unstaged changes
  *   ["h.txt", 1, 0, 1], // deleted, unstaged
  *   ["i.txt", 1, 0, 0], // deleted, staged
+ *   ["j.txt", 1, 2, 0], // deleted, staged, with unstaged-modified changes (new file of the same name)
+ *   ["k.txt", 1, 1, 0], // deleted, staged, with unstaged changes (new file of the same name)
  * ]
  * ```
  *
@@ -15012,6 +15039,294 @@ async function writeTree({ fs, dir, gitdir = join(dir, '.git'), tree }) {
   }
 }
 
+async function writeRefsAdResponse({ capabilities, refs, symrefs }) {
+  const stream = [];
+  // Compose capabilities string
+  let syms = '';
+  for (const [key, value] of Object.entries(symrefs)) {
+    syms += `symref=${key}:${value} `;
+  }
+  let caps = `\x00${[...capabilities].join(' ')} ${syms}agent=${pkg.agent}`;
+  // stream.write(GitPktLine.encode(`# service=${service}\n`))
+  // stream.write(GitPktLine.flush())
+  // Note: In the edge case of a brand new repo, zero refs (and zero capabilities)
+  // are returned.
+  for (const [key, value] of Object.entries(refs)) {
+    stream.push(GitPktLine.encode(`${value} ${key}${caps}\n`));
+    caps = '';
+  }
+  stream.push(GitPktLine.flush());
+  return stream
+}
+
+async function uploadPack({
+  fs,
+  dir,
+  gitdir = join(dir, '.git'),
+  advertiseRefs = false,
+}) {
+  try {
+    if (advertiseRefs) {
+      // Send a refs advertisement
+      const capabilities = [
+        'thin-pack',
+        'side-band',
+        'side-band-64k',
+        'shallow',
+        'deepen-since',
+        'deepen-not',
+        'allow-tip-sha1-in-want',
+        'allow-reachable-sha1-in-want',
+      ];
+      let keys = await GitRefManager.listRefs({
+        fs,
+        gitdir,
+        filepath: 'refs',
+      });
+      keys = keys.map(ref => `refs/${ref}`);
+      const refs = {};
+      keys.unshift('HEAD'); // HEAD must be the first in the list
+      for (const key of keys) {
+        refs[key] = await GitRefManager.resolve({ fs, gitdir, ref: key });
+      }
+      const symrefs = {};
+      symrefs.HEAD = await GitRefManager.resolve({
+        fs,
+        gitdir,
+        ref: 'HEAD',
+        depth: 2,
+      });
+      return writeRefsAdResponse({
+        capabilities,
+        refs,
+        symrefs,
+      })
+    }
+  } catch (err) {
+    err.caller = 'git.uploadPack';
+    throw err
+  }
+}
+
+const deepget = (keys, map) => {
+  for (const key of keys) {
+    if (!map.has(key)) map.set(key, new Map());
+    map = map.get(key);
+  }
+  return map
+};
+
+class DeepMap {
+  constructor() {
+    this._root = new Map();
+  }
+
+  set(keys, value) {
+    const lastKey = keys.pop();
+    const lastMap = deepget(keys, this._root);
+    lastMap.set(lastKey, value);
+  }
+
+  get(keys) {
+    const lastKey = keys.pop();
+    const lastMap = deepget(keys, this._root);
+    return lastMap.get(lastKey)
+  }
+
+  has(keys) {
+    const lastKey = keys.pop();
+    const lastMap = deepget(keys, this._root);
+    return lastMap.has(lastKey)
+  }
+}
+
+/**
+ * @param {Map} map
+ */
+function fromEntries(map) {
+  /** @type {Object<string, string>} */
+  const o = {};
+  for (const [key, value] of map) {
+    o[key] = value;
+  }
+  return o
+}
+
+// Convert a Node stream to an Async Iterator
+function fromNodeStream(stream) {
+  // Use native async iteration if it's available.
+  const asyncIterator = Object.getOwnPropertyDescriptor(
+    stream,
+    Symbol.asyncIterator
+  );
+  if (asyncIterator && asyncIterator.enumerable) {
+    return stream
+  }
+  // Author's Note
+  // I tried many MANY ways to do this.
+  // I tried two npm modules (stream-to-async-iterator and streams-to-async-iterator) with no luck.
+  // I tried using 'readable' and .read(), and .pause() and .resume()
+  // It took me two loooong evenings to get to this point.
+  // So if you are horrified that this solution just builds up a queue with no backpressure,
+  // and turns Promises inside out, too bad. This is the first code that worked reliably.
+  let ended = false;
+  const queue = [];
+  let defer = {};
+  stream.on('data', chunk => {
+    queue.push(chunk);
+    if (defer.resolve) {
+      defer.resolve({ value: queue.shift(), done: false });
+      defer = {};
+    }
+  });
+  stream.on('error', err => {
+    if (defer.reject) {
+      defer.reject(err);
+      defer = {};
+    }
+  });
+  stream.on('end', () => {
+    ended = true;
+    if (defer.resolve) {
+      defer.resolve({ done: true });
+      defer = {};
+    }
+  });
+  return {
+    next() {
+      return new Promise((resolve, reject) => {
+        if (queue.length === 0 && ended) {
+          return resolve({ done: true })
+        } else if (queue.length > 0) {
+          return resolve({ value: queue.shift(), done: false })
+        } else if (queue.length === 0 && !ended) {
+          defer = { resolve, reject };
+        }
+      })
+    },
+    return() {
+      stream.removeAllListeners();
+      if (stream.destroy) stream.destroy();
+    },
+    [Symbol.asyncIterator]() {
+      return this
+    },
+  }
+}
+
+// Convert a web ReadableStream (not Node stream!) to an Async Iterator
+// adapted from https://jakearchibald.com/2017/async-iterators-and-generators/
+function fromStream(stream) {
+  // Use native async iteration if it's available.
+  if (stream[Symbol.asyncIterator]) return stream
+  const reader = stream.getReader();
+  return {
+    next() {
+      return reader.read()
+    },
+    return() {
+      reader.releaseLock();
+      return {}
+    },
+    [Symbol.asyncIterator]() {
+      return this
+    },
+  }
+}
+
+/**
+ * Determine whether a file is binary (and therefore not worth trying to merge automatically)
+ *
+ * @param {Uint8Array} buffer
+ *
+ * If it looks incredibly simple / naive to you, compare it with the original:
+ *
+ * // xdiff-interface.c
+ *
+ * #define FIRST_FEW_BYTES 8000
+ * int buffer_is_binary(const char *ptr, unsigned long size)
+ * {
+ *  if (FIRST_FEW_BYTES < size)
+ *   size = FIRST_FEW_BYTES;
+ *  return !!memchr(ptr, 0, size);
+ * }
+ *
+ * Yup, that's how git does it. We could try to be smarter
+ */
+function isBinary(buffer) {
+  // in canonical git, this check happens in builtins/merge-file.c
+  // but I think it's DRYer to do it here.
+  // The value picked is explained here: https://github.com/git/git/blob/ab15ad1a3b4b04a29415aef8c9afa2f64fc194a2/xdiff-interface.h#L12
+  const MAX_XDIFF_SIZE = 1024 * 1024 * 1023;
+  if (buffer.length > MAX_XDIFF_SIZE) return true
+  // check for null characters in the first 8000 bytes
+  return buffer.slice(0, 8000).some(value => value === 0)
+}
+
+async function sleep(ms) {
+  return new Promise((resolve, reject) => setTimeout(resolve, ms))
+}
+
+async function parseUploadPackRequest(stream) {
+  const read = GitPktLine.streamReader(stream);
+  let done = false;
+  let capabilities = null;
+  const wants = [];
+  const haves = [];
+  const shallows = [];
+  let depth;
+  let since;
+  const exclude = [];
+  let relative = false;
+  while (!done) {
+    const line = await read();
+    if (line === true) break
+    if (line === null) continue
+    const [key, value, ...rest] = line
+      .toString('utf8')
+      .trim()
+      .split(' ');
+    if (!capabilities) capabilities = rest;
+    switch (key) {
+      case 'want':
+        wants.push(value);
+        break
+      case 'have':
+        haves.push(value);
+        break
+      case 'shallow':
+        shallows.push(value);
+        break
+      case 'deepen':
+        depth = parseInt(value);
+        break
+      case 'deepen-since':
+        since = parseInt(value);
+        break
+      case 'deepen-not':
+        exclude.push(value);
+        break
+      case 'deepen-relative':
+        relative = true;
+        break
+      case 'done':
+        done = true;
+        break
+    }
+  }
+  return {
+    capabilities,
+    wants,
+    haves,
+    shallows,
+    depth,
+    since,
+    exclude,
+    relative,
+    done,
+  }
+}
+
 // default export
 var index = {
   Errors,
@@ -15076,13 +15391,131 @@ var index = {
   tag,
   version,
   walk,
+  _walk,
   writeBlob,
   writeCommit,
   writeObject,
   writeRef,
   writeTag,
   writeTree,
+  _listObjects: listObjects,
+  _pack,
+  _uploadPack: uploadPack,
+  _GitConfigManager: GitConfigManager,
+  _GitIgnoreManager: GitIgnoreManager,
+  _GitIndexManager: GitIndexManager,
+  _GitRefManager: GitRefManager,
+  _GitRemoteHTTP: GitRemoteHTTP,
+  _GitRemoteManager: GitRemoteManager,
+  _GitShallowManager: GitShallowManager,
+  _FileSystem: FileSystem,
+  _GitAnnotatedTag: GitAnnotatedTag,
+  _GitCommit: GitCommit,
+  _GitConfig: GitConfig,
+  _GitIndex: GitIndex,
+  _GitObject: GitObject,
+  _GitPackIndex: GitPackIndex,
+  _GitPktLine: GitPktLine,
+  _GitRefSpec: GitRefSpec,
+  _GitRefSpecSet: GitRefSpecSet,
+  _GitSideBand: GitSideBand,
+  _GitTree: GitTree,
+  _GitWalkerFs: GitWalkerFs,
+  _GitWalkerIndex: GitWalkerIndex,
+  _GitWalkerRepo: GitWalkerRepo,
+  _RunningMinimum: RunningMinimum,
+  _expandOid,
+  _expandOidLoose: expandOidLoose,
+  _expandOidPacked: expandOidPacked,
+  _hasObject: hasObject,
+  _hasObjectLoose: hasObjectLoose,
+  _hasObjectPacked: hasObjectPacked,
+  _hashObject: hashObject,
+  _readObject,
+  _readObjectLoose: readObjectLoose,
+  _readObjectPacked: readObjectPacked,
+  _readPackIndex: readPackIndex,
+  _writeObject,
+  _writeObjectLoose: writeObjectLoose,
+  _BufferCursor: BufferCursor,
+  _DeepMap: DeepMap,
+  _FIFO: FIFO,
+  _StreamReader: StreamReader,
+  _abbreviateRef: abbreviateRef,
+  _applyDelta: applyDelta,
+  _arrayRange: arrayRange,
+  _assertParameter: assertParameter,
+  // _asyncIteratorToStream,
+  _basename: basename,
+  _calculateBasicAuthHeader: calculateBasicAuthHeader,
+  _collect: collect,
+  _compareAge: compareAge,
+  _comparePath: comparePath,
+  _compareRefNames: compareRefNames,
+  _compareStats: compareStats,
+  _compareStrings: compareStrings,
+  _compareTreeEntryPath: compareTreeEntryPath,
+  _deflate: deflate,
+  _dirname: dirname,
+  _emptyPackfile: emptyPackfile,
+  _extractAuthFromUrl: extractAuthFromUrl,
+  _filterCapabilities: filterCapabilities,
+  _flat: flat,
+  _flatFileListToDirectoryStructure: flatFileListToDirectoryStructure,
+  _forAwait: forAwait,
+  _formatAuthor: formatAuthor,
+  _formatInfoRefs: formatInfoRefs,
+  _fromEntries: fromEntries,
+  _fromNodeStream: fromNodeStream,
+  _fromStream: fromStream,
+  _fromValue: fromValue,
+  _getIterator: getIterator,
+  _listpack: listpack,
+  _utils_hashObject: hashObject$1,
+  _indent: indent,
+  _inflate: inflate,
+  _isBinary: isBinary,
+  _join: join,
+  _mergeFile: mergeFile,
+  _mergeTree: mergeTree,
+  _mode2type: mode2type,
+  _modified: modified,
+  _normalizeAuthorObject: normalizeAuthorObject,
+  _normalizeCommitterObject: normalizeCommitterObject,
+  _normalizeMode: normalizeMode,
+  _normalizeNewlines: normalizeNewlines,
+  _normalizePath: normalizePath,
+  _normalizeStats: normalizeStats,
+  _outdent: outdent,
+  _padHex: padHex,
+  _parseAuthor: parseAuthor,
+  _pkg: pkg,
+  _posixifyPathBuffer: posixifyPathBuffer,
+  _resolveBlob: resolveBlob,
+  _resolveCommit: resolveCommit,
+  _resolveFileIdInTree: resolveFileIdInTree,
+  _resolveFilepath: resolveFilepath,
+  _resolveTree: resolveTree,
+  _rmRecursive: rmRecursive,
+  _shasum: shasum,
+  _sleep: sleep,
+  _splitLines: splitLines,
+  // _symbols,
+  _toHex: toHex,
+  _translateSSHtoHTTP: translateSSHtoHTTP,
+  _unionOfIterators: unionOfIterators,
+  _worthWalking: worthWalking,
+  _parseCapabilitiesV2: parseCapabilitiesV2,
+  _parseListRefsResponse: parseListRefsResponse,
+  _parseReceivePackResponse: parseReceivePackResponse,
+  _parseRefsAdResponse: parseRefsAdResponse,
+  _parseUploadPackRequest: parseUploadPackRequest,
+  _parseUploadPackResponse: parseUploadPackResponse,
+  _writeListRefsRequest: writeListRefsRequest,
+  _writeReceivePackRequest: writeReceivePackRequest,
+  _writeRefsAdResponse: writeRefsAdResponse,
+  _writeUploadPackRequest: writeUploadPackRequest,
 };
 
 export default index;
-export { Errors, STAGE, TREE, WORKDIR, abortMerge, add, addNote, addRemote, annotatedTag, branch, checkout, clone, commit, currentBranch, deleteBranch, deleteRef, deleteRemote, deleteTag, expandOid, expandRef, fastForward, fetch, findMergeBase, findRoot, getConfig, getConfigAll, getRemoteInfo, getRemoteInfo2, hashBlob, indexPack, init, isDescendent, isIgnored, listBranches, listFiles, listNotes, listRemotes, listServerRefs, listTags, log, merge, packObjects, pull, push, readBlob, readCommit, readNote, readObject, readTag, readTree, remove, removeNote, renameBranch, resetIndex, resolveRef, setConfig, status, statusMatrix, tag, updateIndex, version, walk, writeBlob, writeCommit, writeObject, writeRef, writeTag, writeTree };
+export { Errors, STAGE, TREE, WORKDIR, BufferCursor as _BufferCursor, DeepMap as _DeepMap, FIFO as _FIFO, FileSystem as _FileSystem, GitAnnotatedTag as _GitAnnotatedTag, GitCommit as _GitCommit, GitConfig as _GitConfig, GitConfigManager as _GitConfigManager, GitIgnoreManager as _GitIgnoreManager, GitIndex as _GitIndex, GitIndexManager as _GitIndexManager, GitObject as _GitObject, GitPackIndex as _GitPackIndex, GitPktLine as _GitPktLine, GitRefManager as _GitRefManager, GitRefSpec as _GitRefSpec, GitRefSpecSet as _GitRefSpecSet, GitRemoteHTTP as _GitRemoteHTTP, GitRemoteManager as _GitRemoteManager, GitShallowManager as _GitShallowManager, GitSideBand as _GitSideBand, GitTree as _GitTree, GitWalkerFs as _GitWalkerFs, GitWalkerIndex as _GitWalkerIndex, GitWalkerRepo as _GitWalkerRepo, RunningMinimum as _RunningMinimum, StreamReader as _StreamReader, abbreviateRef as _abbreviateRef, applyDelta as _applyDelta, arrayRange as _arrayRange, assertParameter as _assertParameter, basename as _basename, calculateBasicAuthHeader as _calculateBasicAuthHeader, collect as _collect, compareAge as _compareAge, comparePath as _comparePath, compareRefNames as _compareRefNames, compareStats as _compareStats, compareStrings as _compareStrings, compareTreeEntryPath as _compareTreeEntryPath, deflate as _deflate, dirname as _dirname, emptyPackfile as _emptyPackfile, _expandOid, expandOidLoose as _expandOidLoose, expandOidPacked as _expandOidPacked, extractAuthFromUrl as _extractAuthFromUrl, filterCapabilities as _filterCapabilities, flat as _flat, flatFileListToDirectoryStructure as _flatFileListToDirectoryStructure, forAwait as _forAwait, formatAuthor as _formatAuthor, formatInfoRefs as _formatInfoRefs, fromEntries as _fromEntries, fromNodeStream as _fromNodeStream, fromStream as _fromStream, fromValue as _fromValue, getIterator as _getIterator, hasObject as _hasObject, hasObjectLoose as _hasObjectLoose, hasObjectPacked as _hasObjectPacked, hashObject as _hashObject, indent as _indent, inflate as _inflate, isBinary as _isBinary, join as _join, listCommitsAndTags as _listCommitsAndTags, listObjects as _listObjects, listpack as _listpack, mergeFile as _mergeFile, mergeTree as _mergeTree, mode2type as _mode2type, modified as _modified, normalizeAuthorObject as _normalizeAuthorObject, normalizeCommitterObject as _normalizeCommitterObject, normalizeMode as _normalizeMode, normalizeNewlines as _normalizeNewlines, normalizePath as _normalizePath, normalizeStats as _normalizeStats, outdent as _outdent, _pack, padHex as _padHex, parseAuthor as _parseAuthor, parseCapabilitiesV2 as _parseCapabilitiesV2, parseListRefsResponse as _parseListRefsResponse, parseReceivePackResponse as _parseReceivePackResponse, parseRefsAdResponse as _parseRefsAdResponse, parseUploadPackRequest as _parseUploadPackRequest, parseUploadPackResponse as _parseUploadPackResponse, pkg as _pkg, posixifyPathBuffer as _posixifyPathBuffer, _readObject, readObjectLoose as _readObjectLoose, readObjectPacked as _readObjectPacked, readPackIndex as _readPackIndex, resolveBlob as _resolveBlob, resolveCommit as _resolveCommit, resolveFileIdInTree as _resolveFileIdInTree, resolveFilepath as _resolveFilepath, resolveTree as _resolveTree, rmRecursive as _rmRecursive, shasum as _shasum, sleep as _sleep, splitLines as _splitLines, toHex as _toHex, translateSSHtoHTTP as _translateSSHtoHTTP, unionOfIterators as _unionOfIterators, uploadPack as _uploadPack, hashObject$1 as _utils_hashObject, _walk, worthWalking as _worthWalking, writeListRefsRequest as _writeListRefsRequest, _writeObject, writeObjectLoose as _writeObjectLoose, writeReceivePackRequest as _writeReceivePackRequest, writeRefsAdResponse as _writeRefsAdResponse, writeUploadPackRequest as _writeUploadPackRequest, abortMerge, add, addNote, addRemote, annotatedTag, branch, checkout, clone, commit, currentBranch, deleteBranch, deleteRef, deleteRemote, deleteTag, expandOid, expandRef, fastForward, fetch, findMergeBase, findRoot, getConfig, getConfigAll, getRemoteInfo, getRemoteInfo2, hashBlob, indexPack, init, isDescendent, isIgnored, listBranches, listFiles, listNotes, listRemotes, listServerRefs, listTags, log, merge, packObjects, pull, push, readBlob, readCommit, readNote, readObject, readTag, readTree, remove, removeNote, renameBranch, resetIndex, resolveRef, setConfig, status, statusMatrix, tag, updateIndex, version, walk, writeBlob, writeCommit, writeObject, writeRef, writeTag, writeTree };

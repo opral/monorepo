@@ -1,5 +1,11 @@
 # @lix-js/client
 
+## 1.2.0
+
+### Minor Changes
+
+- 8a8aec7: improve lix error handling
+
 ## 1.1.0
 
 ### Minor Changes

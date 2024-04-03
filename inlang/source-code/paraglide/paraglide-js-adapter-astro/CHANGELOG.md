@@ -1,5 +1,11 @@
 # @inlang/paraglide-js-adapter-astro
 
+## 0.1.20
+
+### Patch Changes
+
+- @inlang/paraglide-js-adapter-vite@1.2.30
+
 ## 0.1.19
 
 ### Patch Changes

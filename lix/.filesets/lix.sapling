@@ -1,8 +1,8 @@
 ; include other profiles as needed
 
 [metadata]
-title: The lix focuesd sparse profile
-description: This is for focussing on lix, use inlang profiles for running integrations.
+title: lix
+description: This is for focussing on lix, use inlang or fink profiles for running integrations.
 
 [include]
 lix
