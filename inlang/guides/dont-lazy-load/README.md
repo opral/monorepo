@@ -19,7 +19,9 @@ In order to lazy-load you need to execute the JS for your i18n runtime. This mea
 
 This is worse than a regular waterfall, since you usually don't need to execute JS before the waterfall starts. This can easily add 300ms+ to your app's time-to-interactive, regardless of how few/many messages you are loading.
 
-In SPA apps it's even worse since your first render is blocked until the translations are loaded.
+In SPA apps it's even worse since your first render is entirely blocked until the translations are loaded.
+
+This problem compounds further if you need to use fallback messages from other languages. You can't know if you need fallback messages until a langauges is loaded. For this reason many i18n libraries load the entire fallback-language stack immediately. 
 
 ## What should I do instead?
 
@@ -46,7 +48,7 @@ import * as m from "@/paraglide/messages/de.js" // <-- Import only german messag
 import * as m from "@/paraglide/messages/en.js" // <-- Import only english messages
 ```
 
-This works as long as you don't need to load data on the server. If you do, separate components for each language would require duplicating loading-logic. We don't want that. 
+This works as long as you don't need to load data on the server. If you do, separate components for each language would require duplicating loading-logic.
 
 In that case you are reliant on your framework being able to build your pages separately for each language. Lit, Angular and Qwik do just that. 
 
