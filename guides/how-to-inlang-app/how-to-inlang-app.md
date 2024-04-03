@@ -76,27 +76,14 @@ These functions internally handle the loading and saving of messages according t
 
 [Lint rules](/c/lint-rules) are crucial for maintaining code quality and consistency. In your Inlang app, you can leverage lint rules to ensure that your localization messages adhere to specific standards. For example, let's explore working with the [`snakeCaseId`](https://inlang.com/m/messageLintRule.inlang.snakeCaseId) lint rule.
 
-This lint rule checks whether your message id's are in a snale case format or not.
+This lint rule checks whether your message id's are in a snake case format or not.
 
-To access lint reports based on the configured lint rule on a specific `message`, you can subscribe on `inlang.query.messageLintReports.get.subscribe()` – we introduced a subscription pattern here because of the nature of [lint rules](/c/lint-rules) which can frequently update, like with every update of the `message`.
-
-To get the lint reports:
+To fetch lint reports for a message, use the async lintReports.get() function.
 
 ```typescript
-inlang.query.messageLintReports.get.subscribe(
-    {
-        where: {
-            messageId: message.messageId,
-        },
-    },
-    (reports) => {
-        /* do something with reports */
-    }
-);
+const reports = await inlang.query.lintReports.get({ where: { messageId: message.id } })
+/* do something with reports */
 ```
-
-In this example, we subscribe to lint reports for a specific message using `message.messageId` and can now execute a specific action with the `reports` in the callback.
-
 
 ## Publishing your app
 

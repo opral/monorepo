@@ -1,12 +1,12 @@
 import { describe, it, expect } from "vitest"
-import { createRoot, createSignal, createEffect, createMemo } from "./solid.js"
+import { createRoot, createSignal, createEffect, createMemo, createResource } from "./solid.js"
 
 function sleep(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-function delay(rval: any, ms: number) {
-	return new Promise((resolve) => setTimeout(() => resolve(rval), ms))
+function delay(v: unknown, ms: number) {
+	return new Promise((resolve) => setTimeout(() => resolve(v), ms))
 }
 
 describe("vitest", () => {
@@ -114,6 +114,39 @@ describe("solid", () => {
 		expect(count).toBe(1)
 		set(1)
 		expect(count).toBe(2)
+	})
+
+	it("Resource async fetch is triggered by signals, and works in effects", async () => {
+		const [get, set] = createSignal<number>(0)
+
+		const [resource] = createResource(get, async (v) => {
+			return (await delay(v, 10)) as number
+		})
+
+		let count = 0
+		createEffect(() => {
+			count++
+			resource()
+		})
+
+		expect(resource.loading).toBe(true)
+		expect(resource()).toBe(undefined)
+		expect(count).toBe(1)
+
+		await sleep(20)
+		expect(resource.loading).toBe(false)
+		expect(resource()).toBe(0)
+		expect(count).toBe(2)
+
+		set(42)
+		expect(resource.loading).toBe(true)
+		expect(resource()).toBe(0)
+		expect(count).toBe(2)
+
+		await sleep(20)
+		expect(resource.loading).toBe(false)
+		expect(resource()).toBe(42)
+		expect(count).toBe(3)
 	})
 
 	it("memoizes values and updates them when signals change", () => {

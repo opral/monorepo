@@ -56,7 +56,7 @@ export async function run(): Promise<void> {
 				continue
 			}
 			result.installedRules.push(...projectBase.installed.messageLintRules())
-			result.reportsBase.push(...projectBase.query.messageLintReports.getAll())
+			result.reportsBase.push(...(await projectBase.query.messageLintReports.getAll()))
 		}
 
 		// Collect meta data for head and base repository
@@ -148,7 +148,7 @@ export async function run(): Promise<void> {
 					result.installedRules.push(newRule)
 				}
 			}
-			result?.reportsHead.push(...projectHead.query.messageLintReports.getAll())
+			result?.reportsHead.push(...(await projectHead.query.messageLintReports.getAll()))
 		}
 
 		// Create a lint summary for each project

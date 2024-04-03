@@ -1,5 +1,5 @@
 import { useEditorState } from "../State.jsx"
-import { For, Show, createMemo } from "solid-js"
+import { For, Show, createSignal, createEffect, createMemo, createResource } from "solid-js"
 import { TourHintWrapper } from "./Notification/TourHintWrapper.jsx"
 import IconAdd from "~icons/material-symbols/add"
 import { type InstalledMessageLintRule, type MessageLintRule } from "@inlang/sdk"
@@ -16,17 +16,30 @@ export const ListHeader = () => {
 		tourStep,
 	} = useEditorState()
 
+	const [getMessages, setMessages] = createSignal()
+
+	createEffect(() => {
+		if (!project.loading) {
+			const messages = project()!.query.messages.getAll()
+			// console.log("Editor Listheader setMessages messages getAll", messages.length)
+			setMessages(messages)
+		}
+	})
+
+	// createResource re-fetches lintReports via async api whenever messages change
+	const [lintReports] = createResource(getMessages, async () => {
+		const reports = await project()!.query.messageLintReports.getAll()
+		// console.log("Editor Listheader lintReports getAll", reports.length)
+		return reports
+	})
+
 	const getLintSummary = createMemo(() => {
 		const summary = new Map<string, number>() // Use a Map with explicit types for better performance
 		const filteredRules = new Set<string>(filteredMessageLintRules())
 		const filteredTags = new Set<string>(filteredLanguageTags())
 		const filteredIdsValue = filteredIds()
 
-		// force createMemo to re-compute lintreports when messages change
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const messages = project()?.query.messages.getAll() || []
-
-		for (const report of project()?.query.messageLintReports.getAll() || []) {
+		for (const report of lintReports() || []) {
 			const ruleId = report.ruleId
 			const languageTag = report.languageTag
 			const messageId = report.messageId
