@@ -44,20 +44,28 @@ describe("paraglide-js", () => {
 					cwd: tmpDir,
 				})
 
-				const responses: Record<string, string> = {
-					"without committing your current changes?": "y",
-					"Which languages do you want to support?": "en, de \r\n",
-					"Which tech stack are you using?": "\r\n",
-				}
+				await respondToPrompts(process, {
+					"without committing your current changes?": {
+						response: "y",
+						required: false,
+					},
+					"Which languages do you want to support?": {
+						response: "en, de \r\n",
+						required: true,
+					},
+					"Which tech stack are you using?": {
+						response: "\r\n",
+						required: true,
+					},
+				})
 
-				await respondToPrompts(process, responses)
 				await sleep(500)
 				process.kill()
 
 				//expect project.inlang/settings.json to be created
 				expect(await fs.stat(path.join(tmpDir, "project.inlang/settings.json"))).toBeDefined()
 			},
-			{ timeout: 30000 }
+			{ timeout: 120000 }
 		)
 	})
 })

@@ -4,11 +4,23 @@ export function sleep(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
+export type PromptResponseMap = Record<
+	string,
+	{
+		response: string
+
+		/** Does this prompt HAVE to occur or is it optional */
+		required: boolean
+	}
+>
+
 export function respondToPrompts(
 	process: ChildProcessWithoutNullStreams,
-	responses: Record<string, string>
+	responses: PromptResponseMap
 ) {
 	const alreadyResponded = new Set<string>()
+	const requiredPrompts = Object.entries(responses).filter(([, r]) => r.required)
+
 	return new Promise<void>((resolve, reject) => {
 		process.stdout.on("data", (data) => {
 			for (const [prompt, answer] of Object.entries(responses)) {
@@ -18,6 +30,12 @@ export function respondToPrompts(
 				}
 			}
 
+			//if all required prompts have been responded
+			if (requiredPrompts.every(([prompt]) => alreadyResponded.has(prompt))) {
+				resolve()
+			}
+
+			//if we've responded to all prompts
 			if (alreadyResponded.size === Object.keys(responses).length) {
 				resolve()
 			}
