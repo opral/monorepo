@@ -1,5 +1,13 @@
 # @inlang/paraglide-js-adapter-unplugin
 
+## 1.4.20
+
+### Patch Changes
+
+- Updated dependencies [1cc9cbc]
+- Updated dependencies [5401f95]
+  - @inlang/paraglide-js@1.3.7
+
 ## 1.4.19
 
 ### Patch Changes
