@@ -31,11 +31,11 @@ import { paraglide } from "@inlang/paraglide-js-adapter-vite"
 export default defineConfig({
   plugins: [
     paraglide({
-      project: "./project.inlang", //Path to your inlang project 
+      project: "./project.inlang", //Path to your inlang project
       outdir: "./src/paraglide", //Where you want the generated files to be placed
     }),
   ],
-}
+})
 ```
 
 Now, the `paraglide` folder at `./src/paraglide` will be automatically updated when you change your messages.

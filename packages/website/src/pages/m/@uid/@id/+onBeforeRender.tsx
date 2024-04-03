@@ -34,8 +34,16 @@ export default async function onBeforeRender(pageContext: PageContext) {
 
 	if (!item || item.id.split(".")[0] === "guide") throw redirect("/not-found", 301)
 
-	if (item.id.replaceAll(".", "-").toLowerCase() !== pageContext.routeParams.id?.toLowerCase()) {
-		throw redirect(`/m/${item.uniqueID}/${item.id.replaceAll(".", "-").toLowerCase()}`, 301)
+	if (item.slug) {
+		if (
+			item.slug.replaceAll(".", "-").toLowerCase() !== pageContext.routeParams.id?.toLowerCase()
+		) {
+			throw redirect(`/m/${item.uniqueID}/${item.slug.replaceAll(".", "-").toLowerCase()}`, 301)
+		}
+	} else {
+		if (item.id.replaceAll(".", "-").toLowerCase() !== pageContext.routeParams.id?.toLowerCase()) {
+			throw redirect(`/m/${item.uniqueID}/${item.id.replaceAll(".", "-").toLowerCase()}`, 301)
+		}
 	}
 
 	const readme = () => {

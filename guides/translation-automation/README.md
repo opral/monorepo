@@ -14,8 +14,12 @@ A common problem with i18n processes is the presence of manual steps and broken 
 
 ## How does Change Control enable your review system?
 
-- Use machine Translations to fully automate or give a starting point
+- Use machine translations to fully automate or give a starting point
 - Lint your translation content to ensure quality
+
+## Don't want translations to be machine translated?
+
+Sometimes machine translations don't match your quality standards and you want your translations to be done by humans. In this case, you can use the [Ninja i18n](https://inlang.com/m/3gk8n4n4) GitHub action to get lint reports in your pull requests, including links to the relevant messages, and have your team translate the content using the [Fink localization editor](https://inlang.com/m/tdozzpar). You can find more information about Ninja i18n [here](https://inlang.com/m/3gk8n4n4).
 
 ## Hands-on Guide
 
