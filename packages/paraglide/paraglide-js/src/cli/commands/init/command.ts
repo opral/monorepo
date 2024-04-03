@@ -62,8 +62,6 @@ export const initCommand = new Command()
 		await checkIfPackageJsonExists(ctx)
 		const { projectPath, project } = await initializeInlangProject(ctx)
 
-		// eslint-disable-next-line no-console
-		console.log(`Opened Project at: ${projectPath}`)
 		telemetry.capture({ event: "PARAGLIDE-JS init project initialized" })
 		await addParaglideJsToDevDependencies(ctx)
 		telemetry.capture({ event: "PARAGLIDE-JS init added to devDependencies" })
@@ -345,9 +343,6 @@ export const createNewProjectFlow = async (ctx: Context): Promise<InlangProject>
 		DEFAULT_PROJECT_PATH + "/settings.json",
 		JSON.stringify(settings, undefined, 2)
 	)
-
-	// eslint-disable-next-line no-console
-	console.log("Opening project...")
 
 	const project = await loadProject({
 		projectPath: nodePath.resolve(process.cwd(), DEFAULT_PROJECT_PATH),
