@@ -61,7 +61,6 @@ export const initCommand = new Command()
 		await checkIfUncommittedChanges(ctx)
 		await checkIfPackageJsonExists(ctx)
 		const { projectPath, project } = await initializeInlangProject(ctx)
-
 		telemetry.capture({ event: "PARAGLIDE-JS init project initialized" })
 		await addParaglideJsToDevDependencies(ctx)
 		telemetry.capture({ event: "PARAGLIDE-JS init added to devDependencies" })
