@@ -70,8 +70,8 @@ const Footer = () => {
 
 	return (
 		<footer class="bg-background border-t border-surface-200 py-4 px-4 overflow-visible">
-			<div class="max-w-7xl mx-auto flex justify-between gap-4 h-6">
-				<div class="xl:pl-4 flex items-center justify-between">
+			<div class="max-w-7xl mx-auto flex justify-between gap-4 xl:px-4 h-6">
+				<div class="flex items-center justify-between">
 					<p class="text-sm text-surface-500">
 						© {new Date().getFullYear().toString()} Opral
 					</p>
@@ -90,7 +90,7 @@ const Footer = () => {
 						)}
 					</For>
 				</div>
-				<div class="relative xl:pr-4">
+				<div class="relative">
 					<sl-dropdown
 						prop:placement="top-end"
 						prop:distance={4}
