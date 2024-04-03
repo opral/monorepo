@@ -4,7 +4,7 @@ import dedent from "dedent"
 import * as nodePath from "node:path"
 import JSON5 from "json5"
 import nodeFsPromises from "node:fs/promises"
-import { loadProject } from "@inlang/sdk"
+import { loadProject, type InlangProject } from "@inlang/sdk"
 import * as Sherlock from "@inlang/cross-sell-sherlock"
 import { isValidLanguageTag, LanguageTag } from "@inlang/language-tag"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
@@ -16,6 +16,9 @@ import { pathExists } from "../../../services/file-handling/exists.js"
 import { findPackageJson } from "../../../services/environment/package.js"
 import { execAsync } from "./utils.js"
 import { getNewProjectTemplate, DEFAULT_PROJECT_PATH, DEFAULT_OUTDIR } from "./defaults.js"
+import { compile } from "../../../compiler/compile.js"
+import { writeOutput } from "../../../services/file-handling/write-output.js"
+import type { NodeishFilesystem } from "@lix-js/fs"
 
 type Context = {
 	logger: Logger
@@ -57,7 +60,7 @@ export const initCommand = new Command()
 
 		await checkIfUncommittedChanges(ctx)
 		await checkIfPackageJsonExists(ctx)
-		const projectPath = await initializeInlangProject(ctx)
+		const { projectPath, project } = await initializeInlangProject(ctx)
 		telemetry.capture({ event: "PARAGLIDE-JS init project initialized" })
 		await addParaglideJsToDevDependencies(ctx)
 		telemetry.capture({ event: "PARAGLIDE-JS init added to devDependencies" })
@@ -66,6 +69,15 @@ export const initCommand = new Command()
 		await maybeChangeTsConfigModuleResolution(ctx)
 		await maybeChangeTsConfigAllowJs(ctx)
 		await maybeAddVsCodeExtension({ projectPath }, ctx)
+
+		try {
+			await executeCompilation(project, DEFAULT_OUTDIR, ctx.repo.nodeishFs)
+			ctx.logger.success("Run paraglide compiler")
+		} catch (e) {
+			ctx.logger.warn(
+				"Failed to compile project automatically. You will need to run the compiler manually"
+			)
+		}
 
 		telemetry.capture({ event: "PARAGLIDE-JS init finished" })
 
@@ -98,21 +110,34 @@ export const initCommand = new Command()
 
 		successMessage += "\n\n"
 		successMessage += dedent`
-			For questions and feedback, visit https://github.com/inlang/monorepo/discussions.
+			For questions and feedback, visit 
+			https://github.com/opral/monorepo/discussions.
 		`
 
 		ctx.logger.box(successMessage)
 	})
 
-export const initializeInlangProject = async (ctx: Context) => {
+export const initializeInlangProject = async (
+	ctx: Context
+): Promise<{
+	project: InlangProject
+	/** Relative path to the project */
+	projectPath: string
+}> => {
 	const existingProjectPath = await findExistingInlangProjectPath(ctx)
 
 	if (existingProjectPath) {
-		await existingProjectFlow({ existingProjectPath }, ctx)
-		return existingProjectPath
+		const project = await existingProjectFlow({ existingProjectPath }, ctx)
+		return {
+			project,
+			projectPath: existingProjectPath,
+		}
 	} else {
-		await createNewProjectFlow(ctx)
-		return DEFAULT_PROJECT_PATH
+		const project = await createNewProjectFlow(ctx)
+		return {
+			project,
+			projectPath: DEFAULT_PROJECT_PATH,
+		}
 	}
 }
 
@@ -189,7 +214,10 @@ export const findExistingInlangProjectPath = async (ctx: Context): Promise<strin
 	return undefined
 }
 
-export const existingProjectFlow = async (args: { existingProjectPath: string }, ctx: Context) => {
+export const existingProjectFlow = async (
+	args: { existingProjectPath: string },
+	ctx: Context
+): Promise<InlangProject> => {
 	const selection = (await prompt(
 		`Do you want to use the inlang project at "${args.existingProjectPath}" or create a new project?`,
 		{
@@ -217,6 +245,8 @@ export const existingProjectFlow = async (args: { existingProjectPath: string },
 		}
 		process.exit(1)
 	}
+
+	return project
 }
 
 function parseLanguageTagInput(input: string): {
@@ -277,7 +307,7 @@ async function promptForLanguageTags(
 
 	return validLanguageTags
 }
-export const createNewProjectFlow = async (ctx: Context) => {
+export const createNewProjectFlow = async (ctx: Context): Promise<InlangProject> => {
 	const languageTags = await promptForLanguageTags()
 	const settings = getNewProjectTemplate()
 
@@ -329,6 +359,7 @@ export const createNewProjectFlow = async (ctx: Context) => {
 	} else {
 		ctx.logger.success("Successfully created a new inlang project.")
 	}
+	return project
 }
 
 export const checkIfPackageJsonExists = async (ctx: Context) => {
@@ -549,6 +580,21 @@ export const maybeChangeTsConfigAllowJs = async (ctx: Context): Promise<void> =>
 			)
 		}
 	}
+}
+
+async function executeCompilation(
+	project: InlangProject,
+	/** The absolute path to the output directory */
+	outputDirectory: string,
+	fs: NodeishFilesystem
+) {
+	const output = await compile({
+		messages: project.query.messages.getAll(),
+		settings: project.settings(),
+		projectId: project.id,
+	})
+
+	await writeOutput(outputDirectory, output, fs)
 }
 
 /**

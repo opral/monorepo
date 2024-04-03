@@ -90,7 +90,7 @@ describe("initializeInlangProject()", () => {
 
 			process.cwd = () => "/folder/subfolder"
 			mockUserInput(["useExistingProject"])
-			const path = await initializeInlangProject({ logger, repo })
+			const { projectPath: path } = await initializeInlangProject({ logger, repo })
 			expect(path).toBe("../project.inlang")
 		},
 		{
@@ -102,8 +102,9 @@ describe("initializeInlangProject()", () => {
 		const fs = mockFiles({})
 		const repo = await openRepository("file://", { nodeishFs: fs })
 		mockUserInput(["newProject", "en"])
-		const path = await initializeInlangProject({ logger, repo })
+		const { project, projectPath: path } = await initializeInlangProject({ logger, repo })
 		expect(path).toBe("./project.inlang")
+		expect(project.settings().languageTags).toEqual(["en"])
 		expect(await pathExists("./project.inlang", fs)).toBe(true)
 	})
 })
@@ -314,16 +315,19 @@ describe("addCompileStepToPackageJSON()", () => {
 })
 
 describe("existingProjectFlow()", () => {
-	test("if the user selects to proceed with the existing project and the project has no errors, the function should return", async () => {
+	test("if the user selects to proceed with the existing project and the project has no errors, the function should return the project", async () => {
 		const fs = mockFiles({
 			"/project.inlang/settings.json": JSON.stringify(getNewProjectTemplate()),
 		})
 		const repo = await openRepository("file://", { nodeishFs: fs })
 
 		mockUserInput(["useExistingProject"])
-		expect(
-			existingProjectFlow({ existingProjectPath: "/project.inlang" }, { logger, repo })
-		).resolves.toBeUndefined()
+		const project = await existingProjectFlow(
+			{ existingProjectPath: "/project.inlang" },
+			{ logger, repo }
+		)
+
+		expect(project.settings().languageTags).toEqual(getNewProjectTemplate().languageTags)
 	})
 
 	test("if the user selects a new project, the newProjectFlow() should be executed", async () => {
