@@ -134,6 +134,7 @@ describe("addCompileStepToPackageJSON()", () => {
 		await addCompileStepToPackageJSON(
 			{
 				projectPath: "./project.inlang",
+				outdir: "./src/paraglide",
 			},
 			{ logger, repo }
 		)
@@ -142,7 +143,9 @@ describe("addCompileStepToPackageJSON()", () => {
 		const packageJson = JSON.parse(
 			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
 		)
-		expect(packageJson.scripts.build).toBe(`paraglide-js compile --project ./project.inlang`)
+		expect(packageJson.scripts.build).toBe(
+			`paraglide-js compile --project ./project.inlang --outdir ./src/paraglide`
+		)
 	})
 
 	test("if an existing build step exists, it should be preceeded by the paraglide-js compile command", async () => {
@@ -157,6 +160,7 @@ describe("addCompileStepToPackageJSON()", () => {
 		await addCompileStepToPackageJSON(
 			{
 				projectPath: "./project.inlang",
+				outdir: "./src/paraglide",
 			},
 			{ logger, repo }
 		)
@@ -166,7 +170,7 @@ describe("addCompileStepToPackageJSON()", () => {
 			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
 		)
 		expect(packageJson.scripts.build).toBe(
-			`paraglide-js compile --project ./project.inlang && some build step`
+			`paraglide-js compile --project ./project.inlang --outdir ./src/paraglide && some build step`
 		)
 	})
 
@@ -187,6 +191,7 @@ describe("addCompileStepToPackageJSON()", () => {
 		await addCompileStepToPackageJSON(
 			{
 				projectPath: "./project.inlang",
+				outdir: "./src/paraglide",
 			},
 			{ logger, repo }
 		)
@@ -213,6 +218,7 @@ describe("addCompileStepToPackageJSON()", () => {
 		await addCompileStepToPackageJSON(
 			{
 				projectPath: "./project.inlang",
+				outdir: "./src/paraglide",
 			},
 			{ logger, repo }
 		)
@@ -239,6 +245,7 @@ describe("addCompileStepToPackageJSON()", () => {
 		await addCompileStepToPackageJSON(
 			{
 				projectPath: "./project.inlang",
+				outdir: "./src/paraglide",
 			},
 			{ logger, repo }
 		)
@@ -249,7 +256,7 @@ describe("addCompileStepToPackageJSON()", () => {
 			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
 		)
 		expect(packageJson.scripts.postinstall).toBe(
-			`paraglide-js compile --project ./project.inlang && do-something`
+			`paraglide-js compile --project ./project.inlang --outdir ./src/paraglide && do-something`
 		)
 	})
 
@@ -270,6 +277,7 @@ describe("addCompileStepToPackageJSON()", () => {
 		await addCompileStepToPackageJSON(
 			{
 				projectPath: "./project.inlang",
+				outdir: "./src/paraglide",
 			},
 			{ logger, repo }
 		)
@@ -292,13 +300,16 @@ describe("addCompileStepToPackageJSON()", () => {
 		await addCompileStepToPackageJSON(
 			{
 				projectPath: "./project.inlang",
+				outdir: "./src/paraglide",
 			},
 			{ logger, repo }
 		)
 		const packageJson = JSON.parse(
 			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
 		)
-		expect(packageJson.scripts.postinstall).toBe(`paraglide-js compile --project ./project.inlang`)
+		expect(packageJson.scripts.postinstall).toBe(
+			`paraglide-js compile --project ./project.inlang --outdir ./src/paraglide`
+		)
 	})
 })
 
