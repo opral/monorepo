@@ -44,10 +44,15 @@ describe("paraglide-js", () => {
 				await pressKey("enter")
 				await wait(1000)
 
+				//check that the settings.json file exists
 				const fileContent = await readFile(path.resolve(workingDir, "project.inlang/settings.json"))
 				const settings = JSON.parse(fileContent)
 				expect(settings.languageTags).toEqual(["en", "de"])
 				expect(settings.sourceLanguageTag).toEqual("en")
+
+				//Check that the messages/en.json and messages/de.json files exist
+				expect(await readFile(path.resolve(workingDir, "messages/en.json"))).toBeTruthy()
+				expect(await readFile(path.resolve(workingDir, "messages/de.json"))).toBeTruthy()
 
 				await cleanup()
 			},
