@@ -46,19 +46,19 @@ describe("paraglide-js", () => {
 
 				await respondToPrompts(process, {
 					"without committing your current changes?": {
-						response: "y",
+						response: "y\x0D",
 						required: false,
 					},
 					"Are you using Visual Studio Code?": {
-						response: "y",
+						response: "y\x0D",
 						required: false,
 					},
 					"Which languages do you want to support?": {
-						response: "en, de \r\n",
+						response: "en, de \r\n\x0D",
 						required: true,
 					},
 					"Which tech stack are you using?": {
-						response: "\r\n",
+						response: "\r\n\x0D",
 						required: true,
 					},
 				})
