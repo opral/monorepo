@@ -84,7 +84,7 @@ const Footer = () => {
 								class={"link link-primary flex space-x-2 items-center text-xs"}
 								href={link.href}
 							>
-								<link.Icon class="w-5 h-5" />
+								<link.Icon class="w-5 h-5 text-surface-900" />
 								<span class="sr-only">{link.name}</span>
 							</Link>
 						)}
@@ -96,8 +96,8 @@ const Footer = () => {
 						prop:distance={4}
 						class="peer"
 					>
-						<button slot="trigger" class="bg-surface-800 rounded-full p-1">
-							<IconQuestionMark class="w-4 h-4" color="background" />
+						<button slot="trigger" class="bg-surface-900 rounded-full p-1">
+							<IconQuestionMark class="w-4 h-4 text-background" />
 						</button>
 						<sl-menu class="w-fit">
 							<For each={getResourcesLinks()}>
