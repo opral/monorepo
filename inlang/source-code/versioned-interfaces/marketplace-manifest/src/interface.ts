@@ -9,6 +9,11 @@ import { ProjectSettings } from "@inlang/project-settings"
 
 const MarketplaceManifestBase = Type.Object({
 	$schema: Type.Optional(Type.Literal("https://inlang.com/schema/marketplace-manifest")),
+	slug: Type.Optional(
+		Type.RegExp(/^[a-z0-9]+(?:-[a-z0-9]+)*$/gm, {
+			description: "The slug which overrides the slug on inlang.com",
+		})
+	),
 	icon: Type.Optional(Type.String()),
 	gallery: Type.Optional(
 		Type.Array(

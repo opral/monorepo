@@ -1,10 +1,10 @@
 import { loadProject, type InlangProject } from "@inlang/sdk"
-import { compile } from "../../compiler/compile.js"
+import { compile } from "../../../compiler/compile.js"
 import nodeFsPromises from "node:fs/promises"
 import { resolve } from "node:path"
 import { Command } from "commander"
-import { writeOutput } from "../../services/file-handling/write-output.js"
-import { Logger } from "../../services/logger/index.js"
+import { writeOutput } from "../../../services/file-handling/write-output.js"
+import { Logger } from "../../../services/logger/index.js"
 import { openRepository, findRepoRoot } from "@lix-js/client"
 import type { NodeishFilesystem } from "@lix-js/fs"
 
