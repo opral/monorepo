@@ -1,6 +1,8 @@
 version: '3.7'
+name: lix
 services:
   git:
+    restart: always
     container_name: git
     image: git:10
     hostname: git
@@ -17,14 +19,13 @@ services:
       - lix
     # depends_on:
     #   - exp
-    # restart: always
     # image downgrades user but that seems not to work, see: https://caddy.community/t/basic-docker-compose-setup-failing/6892/7?u=alexander_gabriel
     user: root
     # env_file:
     #   - ./.env
 
   exp:
-    # restart: always
+    restart: always
     container_name: exp
     hostname: exp
     labels: [ dev.orbstack.domains=exp.local ]
@@ -34,7 +35,6 @@ services:
         FROM node:20-slim
         RUN apt upgrade && apt update
         RUN apt-get install openssl curl libssl-dev -y
-        # RUN corepack enable pnpm
         RUN npm -g install pnpm
         COPY --chown=app:app . /workspace
         WORKDIR /workspace
@@ -63,7 +63,7 @@ services:
       - pnpm-store:/root/.local/share/pnpm/store/v3
 
   # josh:
-  #   # restart: always
+  #   restart: always
   #   container_name: josh
   #   hostname: josh
   #   labels: [ dev.orbstack.domains=josh.local ]

@@ -1,5 +1,13 @@
 # @inlang/paraglide-js-adapter-next-example-turbo
 
+## 0.1.11
+
+### Patch Changes
+
+- Updated dependencies [526b0ba]
+- Updated dependencies [26d2ba1]
+  - @inlang/paraglide-js@1.3.6
+
 ## 0.1.10
 
 ### Patch Changes
