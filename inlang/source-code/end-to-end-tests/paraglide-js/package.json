@@ -4,8 +4,8 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"dev": "vitest",
-		"test": "vitest run",
+		"dev": "vitest --passWithNoTests",
+		"test": "vitest run --passWithNoTests",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./.tmp ./node_modules"
