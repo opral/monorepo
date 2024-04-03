@@ -15,19 +15,7 @@ npx @inlang/paraglide-js@latest init
 npm install @inlang/paraglide-js-adapter-next
 ```
 
-### Step 0. Set up Paraglide
-
-In the generated `./project.inlang/settings.json`, configure which languages you want to support.
-
-```json
-// project.inlang/settings.json
-{
-	"languageTags": ["en", "de"],
-	"sourceLanguageTag": "en"
-}
-```
-
-Create a `./messages` folder with a json file per language and add some messages
+Your messages live in the generated `messages/{lang}.json` files. Add a message in there to get started.
 
 ```json
 // messages/en.json
@@ -38,7 +26,7 @@ Create a `./messages` folder with a json file per language and add some messages
 
 ### Step 1. Add the Next-Plugin
 
-Add the Next-Plugin in `next.config.mjs`.
+Add the Paraglide-Plugin in `next.config.mjs`. This will make sure to rerun the paraglide compiler when needed.
 
 ```ts
 // make sure to import from /plugin
@@ -57,7 +45,7 @@ export default paraglide({
 
 ### Step 2. Initialise the Adapter
 
-Create an `src/lib/i18n.ts` file
+Create a `src/lib/i18n.ts` file
 
 ```ts
 // src/lib/i18n.ts
