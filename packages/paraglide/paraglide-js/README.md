@@ -14,7 +14,7 @@ With Paraglide's Treeshsakeable messages, each page only loads the messages it a
 
 # Use it with your Favorite Framework
 
-If you are using Paraglide with a Framework you will want to follow the framework specific documentation instead. If you aren't using one of these, that's fine too! You can read on.
+Paraglide is framework agnostic, but it's even better if you pair it with a framework specific library. If you are using one of these frameworks you will want to follow the framework specific documentation instead. If you aren't, that's fine too! You can read on.
 
 <doc-links>
 	<doc-link title="Adapter for NextJS" icon="tabler:brand-nextjs" href="/m/osslbuzt/paraglide-next-i18n" description="Go to Library"></doc-link>
