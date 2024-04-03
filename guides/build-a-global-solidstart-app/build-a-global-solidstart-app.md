@@ -19,6 +19,7 @@ This will have done a few things.
 
 - Created an inlang project in your project root
 - Added the required devDependencies to your `package.json`
+- Created a `messages/` folder with a file for each language
 - Added the paraglide compiler to your `package.json` build scripts
 
 ParaglideJS is a compiler for your messages. It takes in message definitions and outputs javascript code that can be used in your app. This approach enables treeshaking and type safety. The SolidStart adapter for ParaglideJS provides a wrapper around the paraglide runtime to make it easier to use in your SolidStart app. It also provides internationalized routing.
@@ -113,9 +114,9 @@ m.greeting({ name: "John" }) // Hallo John
 Messages are **not** reactive, so you will need to re-render your component when the language changes. We will see how to do that in the next step.
 
 
-### Adding Languages
+### Configuring Languages
 
-You can add languages by adding them in the settings file `project.inlang/settings.json`. The `sourceLanguageTag` is the language that you write your messages in. The `availableLanguageTags` are the languages that you want to translate your messages to.
+You can edit the supported languages by editing the settings file `project.inlang/settings.json`.
 
 ```json
 {

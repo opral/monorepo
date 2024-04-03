@@ -88,9 +88,7 @@ Neat right?
 
 ### Adding Messages
 
-By default, paraglide uses the [inlang-message-format Plugin](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat) for storing messages.
-
-The default path for translation files are `./messages/{lang}.json`. You can change this option in `./project.inlang/settings.json`. The Files just contain a Key-Value pair of the message ID and the message itself.
+The init command will have generated `./messages/{lang}.json` files for each language. This is where your messages live. The Files contain a Key-Value pair of the message ID and the message itself.
 
 ```json
 // messages/en.json
@@ -120,7 +118,7 @@ You can add messages in two ways:
 
 - This command extracts the hard-coded string and places it into the source language translation file `en.json` in the `messages` directory.
 
-### Using Messages
+### Using Messages in Code
 
 You can import messages into your code like this:
 
