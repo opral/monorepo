@@ -1,5 +1,15 @@
 # @lix-js/server
 
+## 1.1.0
+
+### Minor Changes
+
+- 8a8aec7: improve lix error handling
+
+### Patch Changes
+
+- @inlang/telemetry@0.3.18
+
 ## 1.0.1
 
 ### Patch Changes
