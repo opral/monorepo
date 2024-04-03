@@ -1,7 +1,8 @@
 /* eslint-disable no-restricted-imports */
 /* eslint-disable no-console */
 import { findRepoRoot, openRepository } from "@lix-js/client"
-import { loadProject } from "@inlang/sdk"
+import { loadProject, type Message } from "@inlang/sdk"
+import { createSignal, createResource, createEffect } from "../src/reactivity/solid.js"
 
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -15,7 +16,7 @@ const debug = _debug("load-test")
 
 const exec = promisify(childProcess.exec)
 
-const throttleMessageGetAllEvents = 2000
+const throttleMessageGetAllEvents = 3000
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -69,19 +70,37 @@ export async function runLoadTest(
 		}
 	})
 
+	const [messages, setMessages] = createSignal<readonly Message[]>()
+
 	if (subscribeToMessages) {
-		debug(`subscribing to messages.getAll${subscribeToLintReports ? " with lint reports" : ""}`)
+		debug("subscribing to messages.getAll")
 		let countMessagesGetAllEvents = 0
-		const messagesGetAllEvent = throttle(throttleMessageGetAllEvents, (messages: any) => {
-			debug(`messages getAll event: ${countMessagesGetAllEvents}, length: ${messages.length}`)
-			if (subscribeToLintReports) {
-				const r = project.query.messageLintReports.getAll()
-				debug(`lint reports length: ${r.length}`)
+
+		const messagesGetAllEvent = throttle(
+			throttleMessageGetAllEvents,
+			(messages: readonly Message[]) => {
+				debug(`messages getAll event: ${countMessagesGetAllEvents}, length: ${messages.length}`)
+				setMessages(messages)
 			}
-		})
-		project.query.messages.getAll.subscribe((messages) => {
+		)
+
+		createEffect(() => {
 			countMessagesGetAllEvents++
-			messagesGetAllEvent(messages)
+			messagesGetAllEvent(project.query.messages.getAll())
+		})
+	}
+
+	if (subscribeToLintReports) {
+		debug("subscribing to messageLintReports.getAll")
+		let countLintReportsGetAllEvents = 1
+
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const [lintReports] = createResource(messages, async () => {
+			const reports = await project.query.messageLintReports.getAll()
+			debug(
+				`lintReports getAll event: ${countLintReportsGetAllEvents++}, length: ${reports.length}`
+			)
+			return reports
 		})
 	}
 

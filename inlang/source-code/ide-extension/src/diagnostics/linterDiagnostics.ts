@@ -38,8 +38,8 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 								id: _message.id,
 							},
 						},
-						() => {
-							const reports = state().project.query.messageLintReports.get({
+						async () => {
+							const reports = await state().project.query.messageLintReports.get({
 								where: { messageId: _message.id },
 							})
 							const diagnostics: vscode.Diagnostic[] = []

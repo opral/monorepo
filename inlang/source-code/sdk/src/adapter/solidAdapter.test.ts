@@ -1,7 +1,13 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect } from "vitest"
 import type { ImportFunction } from "../resolve-modules/index.js"
-import { createEffect, from, createRoot } from "../reactivity/solid.js"
+import {
+	createResource,
+	createSignal,
+	createEffect,
+	from,
+	createRoot,
+} from "../reactivity/solid.js"
 import { solidAdapter } from "./solidAdapter.js"
 import { loadProject } from "../loadProject.js"
 import { mockRepo } from "@lix-js/client"
@@ -12,6 +18,10 @@ import type {
 	MessageLintRule,
 	Text,
 } from "../versionedInterfaces.js"
+
+function sleep(ms: number) {
+	return new Promise((resolve) => setTimeout(resolve, ms))
+}
 
 // ------------------------------------------------------------------------------------------------
 
@@ -353,78 +363,41 @@ describe("messages", () => {
 })
 
 describe("lint", () => {
-	it.todo("should react to changes in config", async () => {
-		await createRoot(async () => {
-			const repo = await mockRepo()
-			const fs = repo.nodeishFs
-			await fs.mkdir("./project.inlang", { recursive: true })
-			await fs.writeFile("./project.inlang/settings.json", JSON.stringify(config))
-			const project = solidAdapter(
-				await loadProject({
-					projectPath: "./project.inlang",
-					repo,
-					_import: $import,
-				}),
-				{ from }
-			)
-
-			let counter = 0
-			createEffect(() => {
-				project.query.messageLintReports.getAll()
-				counter += 1
-			})
-
-			const newConfig = { ...project.settings()!, languageTags: ["en", "de"] }
-			project.setSettings(newConfig)
-
-			expect(counter).toBe(1)
-			expect(project.query.messageLintReports.getAll()).toEqual([])
-
-			await new Promise((resolve) => setTimeout(resolve, 510))
-
-			const newConfig2 = { ...project.settings()!, languageTags: ["en", "de", "fr"] }
-			project.setSettings(newConfig2)
-
-			expect(counter).toBe(9)
-			expect(project.query.messageLintReports.getAll()).toEqual([])
-		})
-	})
-
 	it.todo("should react to changes to packages")
 	it.todo("should react to changes to modules")
 
-	it.todo("should react to changes to messages", async () => {
+	it("should react to changes to messages", async () => {
 		await createRoot(async () => {
 			const repo = await mockRepo()
 			const fs = repo.nodeishFs
-			await fs.writeFile("./project.config.json", JSON.stringify(config))
+			await fs.mkdir("/user/project.inlang", { recursive: true })
+			await fs.writeFile("/user/project.inlang/settings.json", JSON.stringify(config))
 			const project = solidAdapter(
 				await loadProject({
-					projectPath: "./project.config.json",
+					projectPath: "/user/project.inlang",
 					repo,
 					_import: $import,
 				}),
 				{ from }
 			)
 
+			const [messages, setMessages] = createSignal<readonly Message[]>()
+
 			let counter = 0
+
 			createEffect(() => {
-				project.query.messageLintReports.getAll()
+				setMessages(project.query.messages.getAll())
+			})
+
+			const [lintReports] = createResource(messages, async () => {
+				const reports = await project.query.messageLintReports.getAll()
 				counter += 1
+				return reports
 			})
 
-			project.query.messages.update({
-				where: { id: "a" },
-				data: {
-					...exampleMessages[0],
-					variants: [{ languageTag: "en", match: [], pattern: [{ type: "Text", value: "new" }] }],
-				},
-			})
-
+			await sleep(10)
 			expect(counter).toBe(1)
-			expect(project.query.messageLintReports.getAll()).toEqual([])
-
-			await new Promise((resolve) => setTimeout(resolve, 510))
+			expect(lintReports()).toStrictEqual([])
 
 			project.query.messages.update({
 				where: { id: "a" },
@@ -434,8 +407,21 @@ describe("lint", () => {
 				},
 			})
 
-			expect(counter).toBe(6)
-			expect(project.query.messageLintReports.getAll()).toEqual([])
+			await sleep(10)
+			expect(counter).toBe(2)
+			expect(lintReports()).toStrictEqual([])
+
+			project.query.messages.update({
+				where: { id: "a" },
+				data: {
+					...exampleMessages[0],
+					variants: [{ languageTag: "en", match: [], pattern: [{ type: "Text", value: "new" }] }],
+				},
+			})
+
+			await sleep(10)
+			expect(counter).toBe(3)
+			expect(lintReports()).toStrictEqual([])
 		})
 	})
 })

@@ -2,7 +2,7 @@ import { Command } from "commander"
 import Table from "cli-table3"
 import { getInlangProject } from "../../utilities/getInlangProject.js"
 import { log } from "../../utilities/log.js"
-import { LanguageTag, type InlangProject, type MessageLintReport } from "@inlang/sdk"
+import { LanguageTag, type InlangProject } from "@inlang/sdk"
 import { projectOption } from "../../utilities/globalFlags.js"
 
 export const lint = new Command()
@@ -29,41 +29,7 @@ export async function lintCommandAction(args: { project: InlangProject; logger: 
 
 		const languageTags: LanguageTag[] = options.languageTags ? options.languageTags.split(",") : []
 
-		// TODO: async reports
-		const MessageLintReportsAwaitable = (): Promise<MessageLintReport[]> => {
-			return new Promise((resolve) => {
-				let reports = args.project.query.messageLintReports.getAll()
-
-				if (reports) {
-					// reports where loaded
-					setTimeout(() => {
-						// this is a workaround. We do not know when the report changed. Normally this shouldn't be a issue for cli
-						const newReports = args.project.query.messageLintReports.getAll()
-						if (newReports) {
-							resolve(newReports)
-						}
-					}, 200)
-				} else {
-					let counter = 0
-					const interval = setInterval(() => {
-						reports = args.project.query.messageLintReports.getAll()
-						if (reports) {
-							clearInterval(interval)
-							resolve(reports)
-						} else {
-							counter += 1
-						}
-
-						if (counter > 10) {
-							clearInterval(interval)
-							resolve([])
-						}
-					}, 200)
-				}
-			})
-		}
-
-		let reports = await MessageLintReportsAwaitable()
+		let reports = await args.project.query.messageLintReports.getAll()
 
 		if (reports.length === 0) {
 			args.logger.success("Linting successful.")

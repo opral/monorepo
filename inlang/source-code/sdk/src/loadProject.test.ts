@@ -634,8 +634,8 @@ describe("functionality", () => {
 
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
-			expect(project.query.messageLintReports.getAll()).toHaveLength(1)
-			expect(project.query.messageLintReports.getAll()?.[0]?.ruleId).toBe(_mockLintRule.id)
+			expect(await project.query.messageLintReports.getAll()).toHaveLength(1)
+			expect((await project.query.messageLintReports.getAll())?.[0]?.ruleId).toBe(_mockLintRule.id)
 			expect(project.installed.messageLintRules()).toHaveLength(1)
 		})
 
@@ -687,7 +687,7 @@ describe("functionality", () => {
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
 			expect(
-				project.query.messageLintReports.get({ where: { messageId: "some-message" } })
+				await project.query.messageLintReports.get({ where: { messageId: "some-message" } })
 			).toHaveLength(1)
 		})
 	})
@@ -1025,7 +1025,7 @@ describe("functionality", () => {
 			})
 			// TODO: test with real lint rules
 			try {
-				const r = project.query.messageLintReports.getAll()
+				const r = await project.query.messageLintReports.getAll()
 				expect(r).toEqual(undefined)
 				throw new Error("Should not reach this")
 			} catch (e) {
@@ -1050,7 +1050,7 @@ describe("functionality", () => {
 				}),
 			})
 			// TODO: test with real lint rules
-			const r = project.query.messageLintReports.getAll()
+			const r = await project.query.messageLintReports.getAll()
 			expect(r).toEqual([])
 		})
 	})

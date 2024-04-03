@@ -14,6 +14,10 @@ import { throttle } from "throttle-debounce"
 import _debug from "debug"
 const debug = _debug("sdk:lintReports")
 
+function sleep(ms: number) {
+	return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
 /**
  * Creates a reactive query API for messages.
  */
@@ -80,6 +84,7 @@ export function createMessageLintReportsQuery(
 								lintMessageCount++
 								throttledLogLintMessage(messageId)
 								if (report.errors.length === 0 && index.get(messageId) !== report.data) {
+									// console.log("lintSingleMessage", messageId, report.data.length)
 									index.set(messageId, report.data)
 								}
 							})
@@ -105,12 +110,14 @@ export function createMessageLintReportsQuery(
 	})
 
 	return {
-		getAll: () => {
+		getAll: async () => {
+			await sleep(0) // evaluate on next tick to allow for out-of-order effects
 			return structuredClone(
 				[...index.values()].flat().length === 0 ? [] : [...index.values()].flat()
 			)
 		},
-		get: (args: Parameters<MessageLintReportsQueryApi["get"]>[0]) => {
+		get: async (args: Parameters<MessageLintReportsQueryApi["get"]>[0]) => {
+			await sleep(0) // evaluate on next tick to allow for out-of-order effects
 			return structuredClone(index.get(args.where.messageId) ?? [])
 		},
 	}
