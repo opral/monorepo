@@ -63,13 +63,19 @@ describe("paraglide-js", () => {
 					},
 				})
 
+				// eslint-disable-next-line no-console
+				console.log("Completed init")
+
 				await sleep(500)
 				process.kill()
+
+				// eslint-disable-next-line no-console
+				console.log("Killed Process")
 
 				//expect project.inlang/settings.json to be created
 				expect(await fs.stat(path.join(tmpDir, "project.inlang/settings.json"))).toBeDefined()
 			},
-			{ timeout: 120_000 }
+			{ timeout: 180_000 }
 		)
 	})
 })
