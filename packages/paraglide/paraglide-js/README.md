@@ -1,4 +1,4 @@
-[<img src="https://cdn.loom.com/sessions/thumbnails/a8365ec4fa2c4f6bbbf4370cf22dd7f6-with-play.gif" width="10000000px" /> Watch the demo of Paraglide JS](https://www.youtube.com/watch?v=-YES3CCAG90)
+[<img src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/header.png" alt="Dead Simple i18n. Typesafe, Small Footprint, Treeshsakeable Messages, IDE Integration, Framework Agnostic" width="10000000px" />](https://www.youtube.com/watch?v=-YES3CCAG90)
 
 # Why Paraglide?
 
@@ -12,7 +12,7 @@
 
 With Paraglide's Treeshsakeable messages, each page only loads the messages it actually uses. Incremental loading like this would usually take forever to get right, with Paraglide you get it for free.
 
-## Use it with your Favorite Framework
+# Use it with your Favorite Framework
 
 If you are using Paraglide with a Framework you will want to follow the framework specific documentation instead. If you aren't using one of these, that's fine too! You can read on.
 
@@ -24,6 +24,17 @@ If you are using Paraglide with a Framework you will want to follow the framewor
 	<doc-link title="Adapter for Remix" icon="simple-icons:remix" href="/m/fnhuwzrx/paraglide-remix-i18n" description="Go to Library"></doc-link>
 	<doc-link title="Or write your own" icon="ph:sparkle-fill" href="#writing-an-adapter" description="Learn How"></doc-link>
 </doc-links>
+
+# People Love It
+
+Here are a few comments we've received recently.
+
+<doc-comments>
+<doc-comment text="Just tried Paraglide JS from @inlangHQ. This is how i18n should be done! Totally new level of DX for both implementation and managing translations! Superb support for SvelteKit as well ⭐" author="Patrik Engborg" icon="mdi:twitter" data-source="https://twitter.com/patrikengborg/status/1747260930873053674"></doc-comment>
+<doc-comment text="I was messing with various i18n frameworks and tools in combination with Astro, and i must say that Paraglide was the smoothest experience. I have migrated my website from i18next and it was a breeze. SSG and SSR worked out of the box (which was the first one for me), and overall DX is great. Thanks for your work!" author="Dalibor Hon" icon="mdi:discord" data-source="https://discord.com/channels/897438559458430986/1096039983116202034/1220796380772307004"></doc-comment>
+<doc-comment text="The lib is great guys!" author="ktarmyshov" icon="mdi:github"></doc-comment>
+<doc-comment text="Thank you for that huge work you have done and still doing!" author="ZerdoX-x" icon="mdi:github"></doc-comment>
+</doc-comments>
 
 # Getting started
 
@@ -39,8 +50,6 @@ This will:
 - Generate a `messages/` folder where your translation files live
 - Add the Paraglide compiler to your `build` script
 - Create necessary configuration files
-
-# Usage
 
 Running the paraglide compiler will generate a `src/paraglide` folder. This folder contains all the code that you need to use paraglide-js.
 
@@ -304,20 +313,6 @@ render((page) => (
 ))
 ```
 
-# Community
-
-We are grateful for all the support we get from the community. Here are a few comments we've received recently.
-
-If you have any feedback / problems, please let us know on [GitHub](https://github.com/opral/inlang-paraglide-js/issues/new)
-
-<doc-comments>
-<doc-comment text="Just tried Paraglide JS from @inlangHQ. This is how i18n should be done! Totally new level of DX for both implementation and managing translations! Superb support for SvelteKit as well ⭐" author="Patrik Engborg" icon="mdi:twitter" data-source="https://twitter.com/patrikengborg/status/1747260930873053674"></doc-comment>
-<doc-comment text="I was messing with various i18n frameworks and tools in combination with Astro, and i must say that Paraglide was the smoothest experience. I have migrated my website from i18next and it was a breeze. SSG and SSR worked out of the box (which was the first one for me), and overall DX is great. Thanks for your work!" author="Dally H" icon="mdi:discord" data-source="https://discord.com/channels/897438559458430986/1096039983116202034/1220796380772307004"></doc-comment>
-<doc-comment text="The lib is great guys!" author="ktarmyshov" icon="mdi:github"></doc-comment>
-<doc-comment text="Thank you for that huge work you have done and still doing!" author="ZerdoX-x" icon="mdi:github"></doc-comment>
-<doc-comment text="Thanks for all the great work @Samuel Stroschein" author="Willem" icon="mdi:discord"></doc-comment>
-</doc-comments>
-
 # Roadmap
 
 Of course, we're not done yet! We plan on adding the following features to Paraglide JS soon:
@@ -325,6 +320,7 @@ Of course, we're not done yet! We plan on adding the following features to Parag
 - [ ] Pluralization ([Join the Discussion](https://github.com/opral/monorepo/discussions/2025))
 - [ ] Formatting of numbers and dates ([Join the Discussion](https://github.com/opral/monorepo/discussions/992))
 - [ ] Markup Placeholders ([Join the Discussion](https://github.com/opral/monorepo/discussions/913))
+- [ ] Even Smaller Output
 
 # Talks
 
@@ -337,7 +333,7 @@ Of course, we're not done yet! We plan on adding the following features to Parag
 
 Paraglide JS is part of the Inlang ecosystem and integrates nicely with all the other Inlang compatible tools.
 
-As a developer, you will love the [Sherlock IDE extension](http://localhost:4001/m/r7kp499g/app-inlang-ideExtension).
+As a developer, you will love the [Sherlock VsCode extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension).
 
 If you are working with translators or designers you will find these tools useful:
 
