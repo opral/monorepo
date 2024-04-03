@@ -15,7 +15,7 @@ import { findRepoRoot, openRepository, type Repository } from "@lix-js/client"
 import { pathExists } from "../../../services/file-handling/exists.js"
 import { findPackageJson } from "../../../services/environment/package.js"
 import { execAsync } from "./utils.js"
-import { getNewProjectTemplate, DEFAULT_PROJECT_PATH } from "./defaults.js"
+import { getNewProjectTemplate, DEFAULT_PROJECT_PATH, DEFAULT_OUTDIR } from "./defaults.js"
 
 type Context = {
 	logger: Logger
@@ -61,7 +61,7 @@ export const initCommand = new Command()
 		telemetry.capture({ event: "PARAGLIDE-JS init project initialized" })
 		await addParaglideJsToDevDependencies(ctx)
 		telemetry.capture({ event: "PARAGLIDE-JS init added to devDependencies" })
-		await addCompileStepToPackageJSON({ projectPath }, ctx)
+		await addCompileStepToPackageJSON({ projectPath, outdir: DEFAULT_OUTDIR }, ctx)
 		telemetry.capture({ event: "PARAGLIDE-JS init added compile commands" })
 		await maybeChangeTsConfigModuleResolution(ctx)
 		await maybeChangeTsConfigAllowJs(ctx)
@@ -368,7 +368,13 @@ export const checkIfUncommittedChanges = async (ctx: Context) => {
 	}
 }
 
-export const addCompileStepToPackageJSON = async (args: { projectPath: string }, ctx: Context) => {
+export const addCompileStepToPackageJSON = async (
+	args: {
+		projectPath: string
+		outdir: string
+	},
+	ctx: Context
+) => {
 	const file = await ctx.repo.nodeishFs.readFile("./package.json", { encoding: "utf-8" })
 	const stringify = detectJsonFormatting(file)
 	const pkg = JSON.parse(file)
@@ -380,16 +386,16 @@ export const addCompileStepToPackageJSON = async (args: { projectPath: string },
 	// add the compile command to the postinstall script
 	// this isn't super important, so we won't interrupt the user if it fails
 	if (!pkg.scripts.postinstall) {
-		pkg.scripts.postinstall = `paraglide-js compile --project ${args.projectPath}`
+		pkg.scripts.postinstall = `paraglide-js compile --project ${args.projectPath} --outdir ${args.outdir}`
 	} else if (pkg.scripts.postinstall.includes("paraglide-js compile") === false) {
-		pkg.scripts.postinstall = `paraglide-js compile --project ${args.projectPath} && ${pkg.scripts.postinstall}`
+		pkg.scripts.postinstall = `paraglide-js compile --project ${args.projectPath} --outdir ${args.outdir} && ${pkg.scripts.postinstall}`
 	}
 
 	//Add the compile command to the build script
 	if (pkg?.scripts?.build === undefined) {
-		pkg.scripts.build = `paraglide-js compile --project ${args.projectPath}`
+		pkg.scripts.build = `paraglide-js compile --project ${args.projectPath} --outdir ${args.outdir}`
 	} else if (pkg?.scripts?.build.includes("paraglide-js compile") === false) {
-		pkg.scripts.build = `paraglide-js compile --project ${args.projectPath} && ${pkg.scripts.build}`
+		pkg.scripts.build = `paraglide-js compile --project ${args.projectPath} --outdir ${args.outdir} && ${pkg.scripts.build}`
 	} else {
 		ctx.logger
 			.warn(`The "build" script in the \`package.json\` already contains a "paraglide-js compile" command.

@@ -39,3 +39,4 @@ export function getNewProjectTemplate() {
 }
 
 export const DEFAULT_PROJECT_PATH = "./project.inlang"
+export const DEFAULT_OUTDIR = "./src/paraglide"
