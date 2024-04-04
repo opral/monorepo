@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/paraglide-js-adapter-next-example-pages",
-	"version": "0.2.11",
+	"version": "0.2.12",
 	"private": true,
 	"sideEffects": false,
 	"scripts": {
@@ -11,15 +11,15 @@
 	"dependencies": {
 		"@inlang/paraglide-js": "workspace:*",
 		"@inlang/paraglide-js-adapter-next": "workspace:*",
+		"next": "14.1.2-canary.4",
 		"react": "^18",
-		"react-dom": "^18",
-		"next": "14.0.4"
+		"react-dom": "^18"
 	},
 	"devDependencies": {
-		"typescript": "^5",
 		"@types/node": "^20",
-		"@types/react": "^18",
-		"@types/react-dom": "^18"
+		"@types/react": "^18.2.25",
+		"@types/react-dom": "^18",
+		"typescript": "^5.3.2"
 	},
 	"files": [
 		"*",

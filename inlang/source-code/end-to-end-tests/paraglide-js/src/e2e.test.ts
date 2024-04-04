@@ -32,6 +32,10 @@ describe("paraglide-js", () => {
 				await wait(200)
 				await pressKey("enter")
 
+				await waitForText("Where should the compiled files be placed?")
+				await wait(200)
+				await pressKey("enter") // use default value of ./src/paraglide
+
 				await waitForText("Are you using Visual Studio Code?")
 				await wait(200)
 				await writeText("y")
@@ -53,6 +57,15 @@ describe("paraglide-js", () => {
 				expect(await readFile(path.resolve(workingDir, "messages/en.json"))).toBeTruthy()
 				expect(await readFile(path.resolve(workingDir, "messages/de.json"))).toBeTruthy()
 
+				//Check that the compiler ran and generated the files
+				expect(await readFile(path.resolve(workingDir, "src/paraglide/runtime.js"))).toBeTruthy()
+				expect(await readFile(path.resolve(workingDir, "src/paraglide/messages.js"))).toBeTruthy()
+				expect(await readFile(path.resolve(workingDir, "src/paraglide/messages/en.js"))).includes(
+					"export {}"
+				)
+				expect(await readFile(path.resolve(workingDir, "src/paraglide/messages/de.js"))).includes(
+					"export {}"
+				)
 				await cleanup()
 			},
 			{ timeout: 30_000 }

@@ -1,11 +1,11 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
-import { baseStyling } from "../../../styling/base.js"
+//import { baseStyling } from "../../../styling/base.js"
 
 @customElement("reference-pattern-input")
 export class ReferencePatternInput extends LitElement {
 	static override styles = [
-		baseStyling,
+		//baseStyling,
 		css`
 			.help-text {
 				font-size: 0.8rem;

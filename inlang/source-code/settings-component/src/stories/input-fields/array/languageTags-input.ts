@@ -1,11 +1,11 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
-import { baseStyling } from "../../../styling/base.js"
+//import { baseStyling } from "../../../styling/base.js"
 
 @customElement("language-tags-input")
 export class LanguageTagsInput extends LitElement {
 	static override styles = [
-		baseStyling,
+		//baseStyling,
 		css`
 			.tags-container {
 				display: flex;

@@ -1,5 +1,5 @@
 import { compileMessage } from "./compileMessage.js"
-import { ProjectSettings, type Message } from "@inlang/sdk"
+import { ProjectSettings, type Message, LanguageTag } from "@inlang/sdk"
 import { telemetry } from "../services/telemetry/implementation.js"
 import { i } from "../services/codegen/identifier.js"
 import { getStackInfo } from "../services/telemetry/stack-detection.js"
@@ -50,6 +50,17 @@ export const compile = async (args: {
 			if (!resources[languageTag]) resources[languageTag] = ""
 			resources[languageTag] += "\n\n" + compiledMessage[languageTag]
 		}
+	}
+
+	const languagesWithMessages = new Set<LanguageTag>(Object.keys(resources))
+
+	const languagesWithoutMessages = args.settings.languageTags.filter(
+		(languageTag) => !languagesWithMessages.has(languageTag)
+	)
+
+	for (const languageTag of languagesWithoutMessages) {
+		// only add fallback content if there isn't yet a file with that language
+		if (!resources[languageTag]) resources[languageTag] = "\n\nexport {};"
 	}
 
 	telemetry.shutdown()
