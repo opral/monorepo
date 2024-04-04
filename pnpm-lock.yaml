@@ -28363,7 +28363,7 @@ packages:
 
   file:..:
     resolution: {directory: .., type: directory}
-    name: dev
+    name: git
     dev: true
 
   file:inlang/source-code/cli:

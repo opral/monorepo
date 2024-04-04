@@ -1,6 +1,6 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 import type { Repository, LixError } from "./api.js"
-import { transformRemote, withProxy, parseLixUri } from "./helpers.js"
+import { transformRemote, withProxy, parseLixUri, parseOrigin } from "./helpers.js"
 // @ts-ignore
 import { makeHttpClient } from "./git-http/client.js"
 import { optimizedRefsRes, optimizedRefsReq } from "./git-http/optimize-refs.js"
@@ -1011,19 +1011,10 @@ export async function openRepository(
 		async getOrigin(): Promise<string | undefined> {
 			// TODO: this flow is obsolete and can be unified with the initialization of the repo
 			const repo = await this
-			const remotes: Array<{ remote: string; url: string }> | undefined = await repo.listRemotes()
+			const remotes: Array<{ remote: string; url: string }> | undefined =
+				(await repo.listRemotes()) || []
 
-			const origin = remotes?.find((elements) => elements.remote === "origin")
-			if (origin === undefined) {
-				return undefined
-			}
-			// polyfill for some editor related origin issues
-			let result = origin.url
-			if (result.endsWith(".git") === false) {
-				result += ".git"
-			}
-
-			return transformRemote(result)
+			return parseOrigin({ remotes })
 		},
 
 		async getCurrentBranch() {
@@ -1174,7 +1165,7 @@ export async function openRepository(
 					},
 					parent: res.data.parent
 						? {
-								url: transformRemote(res.data.parent.git_url),
+								url: transformRemote(res.data.parent.git_url) || "unknown",
 								fullName: res.data.parent.full_name,
 						  }
 						: undefined,
