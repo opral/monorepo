@@ -138,7 +138,7 @@ export const Gitfloat = () => {
 		} else {
 			showToast({
 				variant: "danger",
-				title: "The creation of the fork failed.",
+				title: `${response?.status} – The creation of the fork failed.`,
 				message: `Please try it again or report a bug`,
 			})
 			return response
