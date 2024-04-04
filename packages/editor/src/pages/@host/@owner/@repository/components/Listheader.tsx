@@ -21,7 +21,6 @@ export const ListHeader = () => {
 	createEffect(() => {
 		if (!project.loading) {
 			const messages = project()!.query.messages.getAll()
-			// console.log("Editor Listheader setMessages messages getAll", messages.length)
 			setMessages(messages)
 		}
 	})
@@ -29,7 +28,6 @@ export const ListHeader = () => {
 	// createResource re-fetches lintReports via async api whenever messages change
 	const [lintReports] = createResource(getMessages, async () => {
 		const reports = await project()!.query.messageLintReports.getAll()
-		// console.log("Editor Listheader lintReports getAll", reports.length)
 		return reports
 	})
 
