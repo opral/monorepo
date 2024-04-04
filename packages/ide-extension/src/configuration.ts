@@ -10,6 +10,7 @@ import { copyErrorCommand } from "./commands/copyError.js"
 import { previewLanguageTagCommand } from "./commands/previewLanguageTagCommand.js"
 import { jumpToPositionCommand } from "./commands/jumpToPosition.js"
 import { machineTranslateMessageCommand } from "./commands/machineTranslate.js"
+import { openSettingsViewCommand } from "./commands/openSettingsView.js"
 
 export const CONFIGURATION = {
 	EVENTS: {
@@ -27,6 +28,7 @@ export const CONFIGURATION = {
 		OPEN_IN_EDITOR: openInEditorCommand,
 		OPEN_PROJECT: openProjectCommand,
 		OPEN_SETTINGS_FILE: openSettingsFileCommand,
+		OPEN_SETTINGS_VIEW: openSettingsViewCommand,
 		COPY_ERROR: copyErrorCommand,
 		MACHINE_TRANSLATE_MESSAGE: machineTranslateMessageCommand,
 	},
