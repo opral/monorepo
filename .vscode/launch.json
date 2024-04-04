@@ -21,7 +21,7 @@
 				//"--noLazy",
 				"--extensionDevelopmentPath=${workspaceFolder}/inlang/source-code/ide-extension",
 				// change this path to specify what folder should be opened upon running this configuration
-				"${workspaceFolder}/inlang/source-code/end-to-end-tests/inlang-nextjs"
+				"${workspaceFolder}/inlang/development-projects/inlang-nextjs"
 			],
 			"outFiles": []
 		},
