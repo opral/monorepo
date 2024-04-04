@@ -1,12 +1,12 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
-import { baseStyling } from "../../../styling/base.js"
+//import { baseStyling } from "../../../styling/base.js"
 import { InlangModule, type InstalledMessageLintRule, type InstalledPlugin } from "@inlang/sdk"
 
 @customElement("lint-rule-level-object-input")
 export class LintRuleLevelObjectInput extends LitElement {
 	static override styles = [
-		baseStyling,
+		//baseStyling,
 		css`
 			.help-text {
 				font-size: 0.8rem;
