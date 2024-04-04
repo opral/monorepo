@@ -1,12 +1,12 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
-import { baseStyling } from "../../../styling/base.js"
+//import { baseStyling } from "../../../styling/base.js"
 import { InlangModule } from "@inlang/sdk"
 
 @customElement("default-object-input")
 export class DefaultObjectInput extends LitElement {
 	static override styles = [
-		baseStyling,
+		//baseStyling,
 		css`
 			.help-text {
 				font-size: 0.8rem;
