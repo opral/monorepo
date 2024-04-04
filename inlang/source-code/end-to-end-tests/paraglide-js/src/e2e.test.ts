@@ -32,6 +32,10 @@ describe("paraglide-js", () => {
 				await wait(200)
 				await pressKey("enter")
 
+				await waitForText("Where should the compiled files be placed?")
+				await wait(200)
+				await pressKey("enter") // use default value of ./src/paraglide
+
 				await waitForText("Are you using Visual Studio Code?")
 				await wait(200)
 				await writeText("y")
