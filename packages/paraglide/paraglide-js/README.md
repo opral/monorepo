@@ -68,7 +68,7 @@ Messages are stored in `messages/{lang}.json`. To add a message simply add a key
 Make sure to re-run the paraglide compiler after editing your messages.
 
 ```bash
-npx @inlang/paraglide-js compile --project ./project.inlang
+npx @inlang/paraglide-js compile --project ./project.inlang --outdir ./src/paraglide
 ```
 
 If you are using Vite, you can instead use the [paraglide vite-plugin](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-vite) to do this automatically.
@@ -102,11 +102,11 @@ const msg = season["spring"]() // Hello spring!
 
 ## Configuration
 
-You can configure the languages you intend to support
+Most of the configuration is done in `./project.inlang/settings.json`, except for paraglide's output directory, which needs to be passed in when calling the compiler.
 
 ### Languages
 
-You can declare which languages you support in `./project.inlang/settings.json`.
+You can declare which languages you support in the `languageTags` array.
 
 ```json
 // project.inlang/settings.json
@@ -115,7 +115,25 @@ You can declare which languages you support in `./project.inlang/settings.json`.
 }
 ```
 
-Then create another `messages/{lang}.json` file and get translating!
+Create the corresponding `messages/{lang}.json` files and get translating!
+
+### Moving the Translation Files
+
+If you want your language files to be in a different location you can change the `pathPattern` of the [Inlang-Message-Format plugin](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat).
+
+```diff
+// project.inlang/settings.json
+"plugin.inlang.messageFormat": {
+-	"pathPattern": "./messages/{languageTag}.json"
++	"pathPattern": "./i18n/{languageTag}.json"
+},
+```
+
+### Lint Rules
+
+If you're using the [Sherlock VS Code extension]() you might see warnings about certain messages. Perhaps they're duplicates, perhaps they're missing in one language. 
+
+You can configure which lint-rules are active in `./project.inlang/settings.json`. Simply add or remove them from the `modules` array.
 
 ## Setting the language
 
