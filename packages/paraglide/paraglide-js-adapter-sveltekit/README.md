@@ -11,18 +11,18 @@
 
 ### 1. Install dependenceies
 
-Install [ParaglideJS]() and the [ParaglideJS SvelteKit Adapter]().
+Install [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) and the [ParaglideJS SvelteKit Adapter](https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n).
 
 ```bash
 npx @inlang/paraglide-js init
 npm i -D @inlang/paraglide-js-adapter-sveltekit
 ```
 
-This will also generate a `project.inlang/settings.json` file.
+This will generate a `messages/{lang}.json` file for each of your languages. This is where your translation files live. 
 
-### 2. Use Vite Plugin 
+### 2. Add the Vite Plugin 
 
-Add the adapter-plugin to your `vite.config.js` file:
+Add the adapter-plugin to your `vite.config.js` file. This will make sure to rerun the paraglide compiler when needed and add the link preprocessor.
 
 ```js
 import { paraglide } from "@inlang/paraglide-js-adapter-sveltekit/vite"

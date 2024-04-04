@@ -1,13 +1,13 @@
 import { html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
-import { baseStyling } from "../../../styling/base.js"
+//import { baseStyling } from "../../../styling/base.js"
 import { InlangModule } from "@inlang/sdk"
 import "./default-object-input.js"
 import "./lint-rule-level-object-input.js"
 
 @customElement("object-input")
 export class ObjectInput extends LitElement {
-	static override styles = [baseStyling]
+	//static override styles = [baseStyling]
 
 	@property()
 	property: string = ""

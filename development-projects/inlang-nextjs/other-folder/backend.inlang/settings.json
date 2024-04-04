@@ -3,11 +3,11 @@
 	"sourceLanguageTag": "en",
 	"languageTags": ["en", "de"],
 	"modules": [
-		"./../../../plugins/i18next/dist/index.js",
-		"./../../../message-lint-rules/emptyPattern/dist/index.js",
-		"./../../../message-lint-rules/identicalPattern/dist/index.js",
-		"./../../../message-lint-rules/missingTranslation/dist/index.js",
-		"./../../../message-lint-rules/messageWithoutSource/dist/index.js"
+		"./../../../source-code/plugins/i18next/dist/index.js",
+		"./../../../source-code/message-lint-rules/emptyPattern/dist/index.js",
+		"./../../../source-code/message-lint-rules/identicalPattern/dist/index.js",
+		"./../../../source-code/message-lint-rules/missingTranslation/dist/index.js",
+		"./../../../source-code/message-lint-rules/messageWithoutSource/dist/index.js"
 	],
 	"plugin.inlang.i18next": {
 		"pathPattern": {

@@ -1,5 +1,6 @@
 {
 	"id": "library.inlang.paraglideJsAdapterSvelteKit",
+	"slug": "paraglide-sveltekit-i18n",
 	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/assets/icon.png",
 	"gallery": [
 		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/assets/og.png"
