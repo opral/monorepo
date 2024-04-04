@@ -100,41 +100,6 @@ const season = {
 const msg = season["spring"]() // Hello spring!
 ```
 
-## Configuration
-
-Most of the configuration is done in `./project.inlang/settings.json`, except for paraglide's output directory, which needs to be passed in when calling the compiler.
-
-### Languages
-
-You can declare which languages you support in the `languageTags` array.
-
-```json
-// project.inlang/settings.json
-{
-	"languageTags": ["en", "de"]
-}
-```
-
-Create the corresponding `messages/{lang}.json` files and get translating!
-
-### Moving the Translation Files
-
-If you want your language files to be in a different location you can change the `pathPattern` of the [Inlang-Message-Format plugin](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat).
-
-```diff
-// project.inlang/settings.json
-"plugin.inlang.messageFormat": {
--	"pathPattern": "./messages/{languageTag}.json"
-+	"pathPattern": "./i18n/{languageTag}.json"
-},
-```
-
-### Lint Rules
-
-If you're using the [Sherlock VS Code extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) you might see warnings about certain messages. Perhaps they're duplicates, perhaps they're missing in one language. 
-
-You can configure which lint-rules are active in `./project.inlang/settings.json`. Simply add or remove them from the `modules` array.
-
 ## Setting the language
 
 You can set the [language tag](https://www.inlang.com/m/8y8sxj09/library-inlang-languageTag) by calling `setLanguageTag()`. Any subsequent calls to either `languageTag()` or a message function will use the new language tag.
@@ -214,6 +179,41 @@ If you are using a bundler you should use the corresponding plugin. The plugin w
     <doc-link title="Rollup Plugin" icon="file-icons:rollup" href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-rollup" description="Go to Github"></doc-link>
     <doc-link title="Webpack Plugin" icon="mdi:webpack" href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-webpack" description="Go to Github"></doc-link>
 </doc-links>
+
+## Configuration
+
+Most of the configuration is done in `./project.inlang/settings.json`, except for paraglide's output directory, which needs to be passed in when calling the compiler.
+
+### Languages
+
+You can declare which languages you support in the `languageTags` array.
+
+```json
+// project.inlang/settings.json
+{
+	"languageTags": ["en", "de"]
+}
+```
+
+Create the corresponding `messages/{lang}.json` files and get translating!
+
+### Moving the Translation Files
+
+If you want your language files to be in a different location you can change the `pathPattern` of the [Inlang-Message-Format plugin](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat).
+
+```diff
+// project.inlang/settings.json
+"plugin.inlang.messageFormat": {
+-	"pathPattern": "./messages/{languageTag}.json"
++	"pathPattern": "./i18n/{languageTag}.json"
+},
+```
+
+### Lint Rules
+
+If you're using the [Sherlock VS Code extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) you might see warnings about certain messages. Perhaps they're duplicates, perhaps they're missing in one language. 
+
+You can configure which lint-rules are active in `./project.inlang/settings.json`. Simply add or remove them from the `modules` array.
 
 # Playground
 
