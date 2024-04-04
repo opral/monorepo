@@ -1,0 +1,30 @@
+/* settings webview */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe WUI", "Ubuntu", sans-serif;
+    color: var(--vscode-foreground);
+    background-color: var(--vscode-sideBar-background);
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: text;
+    -webkit-user-select: text;
+}
+
+main {
+    padding: 20px;
+}
+
+inlang-settings {
+    --sl-input-background-color: var(--vscode-input-background);
+    --sl-input-border-color: var(--vscode-input-border);
+    --sl-input-border-radius: 4px;
+    --sl-input-border-width: 1px;
+    --sl-input-color: var(--vscode-input-foreground);
+}

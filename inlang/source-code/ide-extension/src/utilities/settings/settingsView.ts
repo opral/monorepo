@@ -1,35 +1,39 @@
 import * as vscode from "vscode"
 import { state } from "../state.js"
 
-export function createSettingsWebviewProvider(args: { context: vscode.ExtensionContext }) {
-	return {
-		resolveWebviewView(webviewView: vscode.WebviewView) {
-			webviewView.webview.options = {
-				enableScripts: true,
-				localResourceRoots: [vscode.Uri.file(args.context.extensionPath)],
-			}
+export async function settingsPanel(args: { context: vscode.ExtensionContext }) {
+	const panel = vscode.window.createWebviewPanel(
+		"settingsPanel",
+		"Settings",
+		vscode.ViewColumn.One,
+		{
+			enableScripts: true,
+			localResourceRoots: [vscode.Uri.file(args.context.extensionPath)],
+		}
+	)
 
-			// Set the HTML content for the webview
-			webviewView.webview.html = getWebviewContent({
-				context: args.context,
-				webview: webviewView.webview,
-			})
+	panel.webview.html = getWebviewContent({
+		context: args.context,
+		webview: panel.webview,
+	})
 
-			webviewView.webview.onDidReceiveMessage(async (message) => {
-				switch (message.command) {
-					case "setSettings":
-						state().project.setSettings(message.settings)
-						break
-				}
-			})
-		},
-	}
+	panel.webview.onDidReceiveMessage(async (message) => {
+		switch (message.command) {
+			case "setSettings":
+				state().project.setSettings(message.settings)
+				break
+		}
+	})
 }
 
 function getWebviewContent(args: {
 	context: vscode.ExtensionContext
 	webview: vscode.Webview
 }): string {
+	const styleUri = args.webview.asWebviewUri(
+		vscode.Uri.joinPath(args.context.extensionUri, "assets", "settings-view.css")
+	)
+
 	const scriptUri = args.webview.asWebviewUri(
 		vscode.Uri.joinPath(
 			args.context.extensionUri,
@@ -50,45 +54,43 @@ function getWebviewContent(args: {
 	const installedMessageLintRules = state().project.installed.messageLintRules()
 
 	return `<!DOCTYPE html>
-				<html lang="en">
-					<head>
-						<meta charset="UTF-8">
-						<meta name="viewport" content="width=device-width, initial-scale=1.0">
-						<title>Settings</title>
-						<script type="module" src="${litHtmlUri}"></script>
-						<script type="module" src="${scriptUri}"></script>
-					</head>
-					<body>
-						<div id="settings-container"></div>
-						<script type="module">
-							import {html, render} from '${litHtmlUri}';
-							const vscode = acquireVsCodeApi();
-							
-							// RENDER WEB COMPONENT
-							const settingsContainer = document.getElementById('settings-container');
-							const settings = document.createElement('inlang-settings');
-							settings.installedPlugins = ${JSON.stringify(installedPlugins)};
-							settings.installedMessageLintRules = ${JSON.stringify(installedMessageLintRules)};
-							settings.settings = ${JSON.stringify(settings)};
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Settings</title>
+            <link href="${styleUri}" rel="stylesheet" />
+            <script type="module" src="${litHtmlUri}"></script>
+            <script type="module" src="${scriptUri}"></script>
+        </head>
+        <body>
+			<main>
+				<h1>Settings</h1>
+				<div id="settings-container"></div>
+			<main>
+            <script type="module">
+                import {html, render} from '${litHtmlUri}';
+                const vscode = acquireVsCodeApi();
+                
+                // RENDER WEB COMPONENT
+                const settingsContainer = document.getElementById('settings-container');
+                const settingsElement = document.createElement('inlang-settings');
+                settingsElement.installedPlugins = ${JSON.stringify(installedPlugins)};
+                settingsElement.installedMessageLintRules = ${JSON.stringify(
+									installedMessageLintRules
+								)};
+                settingsElement.settings = ${JSON.stringify(settings)};
 
-							settingsContainer.appendChild(settings);
+                settingsContainer.appendChild(settingsElement);
 
-							// EVENTS
-							document.querySelector('inlang-settings').addEventListener('set-settings', (settings) => {
-								vscode.postMessage({
-									command: 'setSettings',
-									settings: settings.detail.argument
-								});
-							});
-						</script>
-					</body>
-				</html>`
-}
-
-export async function settingsView(args: { context: vscode.ExtensionContext }) {
-	const provider = createSettingsWebviewProvider({ ...args })
-
-	args.context.subscriptions.push(
-		vscode.window.registerWebviewViewProvider("settingsView", provider)
-	)
+                // EVENTS
+                document.querySelector('inlang-settings').addEventListener('set-settings', (event) => {
+                    vscode.postMessage({
+                        command: 'setSettings',
+                        settings: event.detail.argument
+                    });
+                });
+            </script>
+        </body>
+        </html>`
 }

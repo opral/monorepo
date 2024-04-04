@@ -62,24 +62,17 @@
 				},
 				{
 					"when": "sherlock:hasProjectInWorkspace",
-					"id": "settingsView",
-					"name": "Settings",
-					"type": "webview",
-					"group": "sherlock@4"
-				},
-				{
-					"when": "sherlock:hasProjectInWorkspace",
 					"id": "messageView",
 					"name": "Messages",
 					"type": "webview",
-					"group": "sherlock@5"
+					"group": "sherlock@4"
 				},
 				{
 					"when": "sherlock:hasProjectInWorkspace",
 					"id": "errorView",
 					"name": "Errors",
 					"type": "tree",
-					"group": "sherlock@6"
+					"group": "sherlock@5"
 				}
 			]
 		},
@@ -94,6 +87,11 @@
 				"icon": "$(go-to-file)"
 			},
 			{
+				"command": "sherlock.openSettingsView",
+				"title": "Open settings view",
+				"icon": "$(settings-gear)"
+			},
+			{
 				"command": "sherlock.copyError",
 				"title": "Copy Error",
 				"icon": "$(copy)"
@@ -102,13 +100,13 @@
 		"menus": {
 			"view/item/context": [
 				{
-					"when": "view == projectView && viewItem == projectViewNode",
-					"command": "sherlock.openProject",
+					"when": "view == projectView",
+					"command": "sherlock.openSettingsFile",
 					"group": "navigation"
 				},
 				{
-					"when": "view == projectView && viewItem == projectViewNode",
-					"command": "sherlock.openSettingsFile",
+					"when": "view == projectView && viewItem == projectViewNodeSelected",
+					"command": "sherlock.openSettingsView",
 					"group": "inline"
 				},
 				{
