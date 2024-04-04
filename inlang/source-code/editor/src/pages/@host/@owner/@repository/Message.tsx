@@ -36,9 +36,7 @@ export function Message(props: { id: string }) {
 	//       By contrast, query.messages.getAll() signal does work. see ListHeader.tsx
 	createEffect(() => {
 		if (!project.loading) {
-			// console.log("Editor subscribing to message udpates for", props.id)
 			project()!.query.messages.get.subscribe({ where: { id: props.id } }, (message) => {
-				// console.log("Editor message udpate", message.id)
 				setMessage(message)
 			})
 		}
@@ -50,7 +48,6 @@ export function Message(props: { id: string }) {
 			const reports = await project()!.query.messageLintReports.get({
 				where: { messageId: message.id },
 			})
-			// console.log("Editor message lintReports", message.id, reports.length)
 			setHasBeenLinted(true)
 			return reports
 		}
