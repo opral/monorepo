@@ -14,7 +14,7 @@ With Paraglide's treeshakeable messages, each page only loads the messages it ac
 
 # Use it with your Favorite Framework
 
-Paraglide is framework agnostic, but it's even better if you pair it with a framework-specific library. If you are using one of these frameworks you will want to follow the framework-specific documentation instead. If you aren't, that's fine too! You can read on.
+Paraglide is framework agnostic, but there are framework-specific libraries available. If there is one for your framework you will want to follow its documentation instead. If there isn't, read on.
 
 <doc-links>
 	<doc-link title="Adapter for NextJS" icon="tabler:brand-nextjs" href="/m/osslbuzt/paraglide-next-i18n" description="Go to Library"></doc-link>
@@ -27,7 +27,7 @@ Paraglide is framework agnostic, but it's even better if you pair it with a fram
 
 # People Love It
 
-Here are a few comments we've received recently.
+A few recent comments.
 
 <doc-comments>
 <doc-comment text="Just tried Paraglide JS from @inlangHQ. This is how i18n should be done! Totally new level of DX for both implementation and managing translations! Superb support for SvelteKit as well ⭐" author="Patrik Engborg" icon="mdi:twitter" data-source="https://twitter.com/patrikengborg/status/1747260930873053674"></doc-comment>
@@ -48,10 +48,10 @@ This will:
 
 - Install necessary dependencies
 - Generate a `messages/` folder where your translation files live
-- Add the Paraglide compiler to your `build` script
+- Add the Paraglide compiler to your `build` script in `package.json`
 - Create necessary configuration files
 
-Running the paraglide compiler will generate a `src/paraglide` folder. This folder contains all the code that you need to use paraglide-js.
+Running the Paraglide compiler will generate a `src/paraglide` folder. This folder contains all the code that you will use in your app.
 
 ## Adding and Editing Messages
 
@@ -71,7 +71,7 @@ Make sure to re-run the paraglide compiler after editing your messages.
 npx @inlang/paraglide-js compile --project ./project.inlang --outdir ./src/paraglide
 ```
 
-If you are using Vite, you can instead use the [paraglide vite-plugin](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-vite) to do this automatically.
+If you are using Bundler, you can use one of the [Bundler Plugins](#usage-with-a-bundler) to recompile automatically.
 
 ## Using Messages in Code
 
