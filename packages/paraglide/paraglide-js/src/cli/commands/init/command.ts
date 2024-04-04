@@ -18,7 +18,7 @@ import { execAsync } from "./utils.js"
 import { getNewProjectTemplate, DEFAULT_PROJECT_PATH, DEFAULT_OUTDIR } from "./defaults.js"
 import { compile } from "../../../compiler/compile.js"
 import { writeOutput } from "../../../services/file-handling/write-output.js"
-import type { CliStep } from "./cli.js"
+import type { CliStep } from "./cli-utils.js"
 
 type Context = {
 	logger: Logger
