@@ -52,18 +52,14 @@ export const compile = async (args: {
 		}
 	}
 
-	const languagesWithMessages = new Set<LanguageTag>()
-	for (const message of args.messages) {
-		for (const variant of message.variants) {
-			languagesWithMessages.add(variant.languageTag)
-		}
-	}
+	const languagesWithMessages = new Set<LanguageTag>(Object.keys(resources))
 
 	const languagesWithoutMessages = args.settings.languageTags.filter(
 		(languageTag) => !languagesWithMessages.has(languageTag)
 	)
 
 	for (const languageTag of languagesWithoutMessages) {
+		// only add fallback content if there isn't yet a file with that language
 		if (!resources[languageTag]) resources[languageTag] = "\n\nexport {};"
 	}
 
