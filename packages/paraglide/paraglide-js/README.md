@@ -6,15 +6,15 @@
   <doc-feature title="Tiny Runtime" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/bundlesize-feature.png"></doc-feature>
   <doc-feature title="Fully Typesafe" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/typesafety-feature.png"></doc-feature>
   <doc-feature title="Only Ship Used Messages" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/unused-translations.png"></doc-feature>
-   <doc-feature title="Sherlock VsCode Extension" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/sherlock-preview.png"></doc-feature>
+   <doc-feature title="Sherlock VS Code Extension" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/sherlock-preview.png"></doc-feature>
 </doc-features>
 
 
-With Paraglide's Treeshsakeable messages, each page only loads the messages it actually uses. Incremental loading like this would usually take forever to get right, with Paraglide you get it for free.
+With Paraglide's treeshakeable messages, each page only loads the messages it actually uses. Incremental loading like this would usually take forever to get right, with Paraglide you get it for free.
 
 # Use it with your Favorite Framework
 
-Paraglide is framework agnostic, but it's even better if you pair it with a framework specific library. If you are using one of these frameworks you will want to follow the framework specific documentation instead. If you aren't, that's fine too! You can read on.
+Paraglide is framework agnostic, but it's even better if you pair it with a framework-specific library. If you are using one of these frameworks you will want to follow the framework-specific documentation instead. If you aren't, that's fine too! You can read on.
 
 <doc-links>
 	<doc-link title="Adapter for NextJS" icon="tabler:brand-nextjs" href="/m/osslbuzt/paraglide-next-i18n" description="Go to Library"></doc-link>
@@ -67,7 +67,7 @@ Messages are stored in `messages/{lang}.json`. To add a message simply add a key
 
 Make sure to re-run the paraglide compiler after editing your messages.
 
-```
+```bash
 npx @inlang/paraglide-js compile --project ./project.inlang
 ```
 
@@ -178,9 +178,9 @@ const msg = m.hello({ name: "Samuel" }, { languageTag: "de" }) // Hallo Samuel!
 ## Lazy-Loading
 
 Paraglide consciously discourages lazy-loading translations since it seriously hurts
-your web-vitals. Learn more about why lazy-loading is bad & what to do instead in [this blog post](https://inlang.com/g/mqlyfa7l/guide-lorissigrist-dontlazyload).
+your Web Vitals. Learn more about why lazy-loading is bad & what to do instead in [this blog post](https://inlang.com/g/mqlyfa7l/guide-lorissigrist-dontlazyload).
 
-If you _really_ want to do it anway, you can lazily import the language-specific message files. Be careful with this.
+If you want to do it anyways, you can lazily import the language-specific message files. Be careful with this.
 
 ```ts
 const lazyGerman = await import("./paraglide/messages/de.js")
@@ -189,7 +189,7 @@ lazyGerman.hello() // Hallo Welt
 
 ## Usage with a Bundler
 
-If you are using a bundler you should use the corresponding plugin. The plugin will keep your message-functions up-to-date by compiling whenever your messages change and before build.
+If you are using a bundler you should use the corresponding plugin. The plugin will keep your Message Functions up-to-date by compiling whenever your messages change and before building your app.
 
 <doc-links>
 	<doc-link title="Vite Plugin" icon="tabler:brand-vite" href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-vite" description="Go to Github"></doc-link>
@@ -199,7 +199,7 @@ If you are using a bundler you should use the corresponding plugin. The plugin w
 
 # Playground
 
-Find examples for how to use paraglide on codesandbox or in [our GitHub repository](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide).
+Find examples of how to use Paraglide on CodeSandbox or in [our GitHub repository](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide).
 
 <doc-links>
     <doc-link title="NextJS + Paraglide JS" icon="lucide:codesandbox" href="https://stackblitz.com/~/LorisSigrist/paraglide-next-app-router-example" description="Play around with NextJS and Paraglide JS"></doc-link>
@@ -217,7 +217,7 @@ This avoids many edge cases associated with reactivity, lazy-loading and namespa
 
 In addition to the message functions, ParaglideJS also emits a runtime. The runtime is used to set the language tag. It contains less than 50 LOC (lines of code) and is less than 300 bytes minified & gzipped.
 
-![paraglide JS architecture](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/architecture.svg)
+![Diagram of the Paraglide Compiler Architecture](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/architecture.svg)
 
 Paraglide consists of four main parts:
 
