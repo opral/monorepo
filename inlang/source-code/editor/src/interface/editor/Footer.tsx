@@ -84,7 +84,7 @@ const Footer = () => {
 								class={"link link-primary flex space-x-2 items-center text-xs"}
 								href={link.href}
 							>
-								<link.Icon class="w-5 h-5 text-surface-900" />
+								<link.Icon class="w-5 h-5" />
 								<span class="sr-only">{link.name}</span>
 							</Link>
 						)}

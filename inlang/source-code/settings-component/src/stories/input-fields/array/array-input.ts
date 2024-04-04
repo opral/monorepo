@@ -1,13 +1,13 @@
 import { html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
-import { baseStyling } from "../../../styling/base.js"
+//import { baseStyling } from "../../../styling/base.js"
 import "./default-array-input.js"
 import "./languageTags-input.js"
 import "./reference-pattern-input.js"
 
 @customElement("array-input")
 export class ArrayInput extends LitElement {
-	static override styles = [baseStyling]
+	//static override styles = [baseStyling]
 
 	@property()
 	property: string = ""

@@ -1,6 +1,7 @@
 packages:
   - 'lix/packages/*'
   - '!lix/packages/exp'
+  - 'inlang/development-projects/*'
   - 'inlang/source-code/*'
   - 'inlang/source-code/cross-sell/*'
   - 'inlang/source-code/plugins/*'
