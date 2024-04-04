@@ -1,3 +1,4 @@
+import React from "react"
 import { languageTag } from "@/paraglide/runtime"
 import { Html, Head, Main, NextScript } from "next/document"
 
