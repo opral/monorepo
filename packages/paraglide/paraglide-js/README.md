@@ -131,7 +131,7 @@ If you want your language files to be in a different location you can change the
 
 ### Lint Rules
 
-If you're using the [Sherlock VS Code extension]() you might see warnings about certain messages. Perhaps they're duplicates, perhaps they're missing in one language. 
+If you're using the [Sherlock VS Code extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) you might see warnings about certain messages. Perhaps they're duplicates, perhaps they're missing in one language. 
 
 You can configure which lint-rules are active in `./project.inlang/settings.json`. Simply add or remove them from the `modules` array.
 
