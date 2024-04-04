@@ -113,7 +113,7 @@ function TheActualPage() {
 				</Match>
 
 				<Match when={!repo() || !projectList() || project.loading}>
-					<div class="flex flex-col grow justify-center items-center min-w-full min-h-[calc(100vh_-_324px)] gap-2">
+					<div class="flex flex-col grow justify-center items-center min-w-full min-h-[calc(100vh_-_319px)] gap-2">
 						{/* sl-spinner need a own div otherwise the spinner has a bug. The wheel is rendered on the outer div  */}
 						<div>
 							{/* use font-size to change the spinner size    */}
@@ -179,7 +179,7 @@ function TheActualPage() {
 						</Show>
 
 						<div
-							class="flex flex-col h-[calc(100vh_-_324px)] grow justify-center items-center min-w-full gap-2"
+							class="flex flex-col h-[calc(100vh_-_319px)] grow justify-center items-center min-w-full gap-2"
 							classList={{
 								["hidden"]: messageCount() !== 0,
 							}}

@@ -16,11 +16,7 @@ import SLOption from "@shoelace-style/shoelace/dist/components/option/option.com
 import SlInput from "@shoelace-style/shoelace/dist/components/input/input.component.js"
 import SlButton from "@shoelace-style/shoelace/dist/components/button/button.component.js"
 import SlCheckbox from "@shoelace-style/shoelace/dist/components/checkbox/checkbox.component.js"
-import SlIconButton from "@shoelace-style/shoelace/dist/components/icon-button/icon-button.component.js"
-import SlIcon from "@shoelace-style/shoelace/dist/components/icon/icon.component.js"
-
-import { setBasePath } from "@shoelace-style/shoelace/dist/utilities/base-path.js"
-setBasePath("./../../../../node_modules/@shoelace-style/shoelace/dist")
+import { setExportparts } from "../exportParts.js"
 
 // in case an app defines it's own set of shoelace components, prevent double registering
 if (!customElements.get("sl-select")) customElements.define("sl-select", SlSelect)
@@ -28,8 +24,6 @@ if (!customElements.get("sl-option")) customElements.define("sl-option", SLOptio
 if (!customElements.get("sl-input")) customElements.define("sl-input", SlInput)
 if (!customElements.get("sl-button")) customElements.define("sl-button", SlButton)
 if (!customElements.get("sl-checkbox")) customElements.define("sl-checkbox", SlCheckbox)
-if (!customElements.get("sl-icon-button")) customElements.define("sl-icon-button", SlIconButton)
-if (!customElements.get("sl-icon")) customElements.define("sl-icon", SlIcon)
 
 @customElement("inlang-settings")
 export default class InlangSettings extends LitElement {
@@ -200,19 +194,22 @@ export default class InlangSettings extends LitElement {
 	}
 
 	override render() {
-		return html` <div class="container">
+		return html` <div class="container" exportParts=${setExportparts(this)} part="base">
 			${Object.entries(this._settingProperties).map(([key, value]) => {
 				return value.schema?.properties && this._newSettings
-					? html`<div class="module-container">
+					? html`<div class="module-container" part="module">
 							${value.meta &&
 							(value.meta?.displayName as { en: string }).en &&
-							html`<h3>${value.meta && (value.meta?.displayName as { en: string }).en}</h3>`}
+							html`<h2 part="module-title">
+								${value.meta && (value.meta?.displayName as { en: string }).en}
+							</h2>`}
 							${Object.entries(value.schema.properties).map(([property, schema]) => {
 								if (property === "$schema" || property === "modules" || property === "experimental")
 									return undefined
 								return key === "internal"
 									? html`
 											<general-input
+												exportparts="property, property-title, property-paragraph"
 												.property=${property}
 												.modules=${this.installedMessageLintRules || []}
 												.value=${this._newSettings?.[property as keyof typeof this._newSettings]}
@@ -222,6 +219,7 @@ export default class InlangSettings extends LitElement {
 									  `
 									: html`
 											<general-input
+												exportparts="property, property-title, property-paragraph"
 												.property=${property}
 												.value=${
 													// @ts-ignore

@@ -1,5 +1,6 @@
 {
 	"id": "library.brikev.remix-paraglidejs",
+	"slug": "paraglide-remix-i18n",
 	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/external-projects/remix-paraglidejs/assets/remix.svg",
 	"displayName": {
 		"en": "Remix-ParaglideJS Adapter"

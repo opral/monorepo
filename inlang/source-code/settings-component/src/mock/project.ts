@@ -38,7 +38,7 @@ export const mockSettings: ReturnType<InlangProject["settings"]> = {
 	},
 }
 
-export const mockInstalledPlugin = [
+export const mockInstalledPlugins = [
 	{
 		id: "plugin.inlang.i18next",
 		displayName: {
@@ -127,7 +127,7 @@ export const mockInstalledPlugin = [
 	},
 ]
 
-export const mockInstalledMessageLintRule = [
+export const mockInstalledMessageLintRules = [
 	{
 		id: "messageLintRule.inlang.emptyPattern",
 		displayName: {

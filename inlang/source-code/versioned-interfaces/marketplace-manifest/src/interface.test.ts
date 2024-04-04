@@ -116,3 +116,31 @@ test("should allow apps from third party", () => {
 	}
 	expect(Value.Check(MarketplaceManifest, parrot)).toBe(true)
 })
+
+test("should allow setting a slug", () => {
+	const guide: MarketplaceManifest = {
+		id: "guide.inlang.example",
+		slug: "examle-guide",
+		displayName: { en: "My App" },
+		description: { en: "Hello" },
+		keywords: [],
+		license: "Apache-2.0",
+		readme: { en: "https://my-app.com/readme.md" },
+		publisherName: "inlang",
+	}
+	expect(Value.Check(MarketplaceManifest, guide)).toBe(true)
+})
+
+test("should fail when slug is not valid", () => {
+	const guide: MarketplaceManifest = {
+		id: "guide.inlang.example",
+		slug: "examle/gu ide",
+		displayName: { en: "My App" },
+		description: { en: "Hello" },
+		keywords: [],
+		license: "Apache-2.0",
+		readme: { en: "https://my-app.com/readme.md" },
+		publisherName: "inlang",
+	}
+	expect(Value.Check(MarketplaceManifest, guide)).toBe(false)
+})

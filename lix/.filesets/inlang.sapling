@@ -1,0 +1,15 @@
+[metadata]
+title: inlang
+description: The complete inlang code profile for full platform integration tests
+
+[exclude]
+bin
+careers
+opral
+project.inlang
+cla-signatures.json
+cla.md 
+inlang/blog
+inlang/external-projects
+inlang/guides
+inlang/rfcs
