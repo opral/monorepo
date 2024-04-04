@@ -123,7 +123,7 @@ You will need to call `setLanguageTag` on both the server and the client since t
 
 Messages aren't reactive, so you will need to trigger a re-render when the language changes. You can register a callback using `onSetLanguageTag()`. It is called whenever the [language tag](https://www.inlang.com/m/8y8sxj09/library-inlang-languageTag) changes.
 
-If you are using an adapter this is likely done for you.
+If you are using a [framework-specific library](#use-it-with-your-favorite-framework) this is done for you.
 
 ```js
 import { setLanguageTag, onSetLanguageTag } from "./paraglide/runtime.js"
@@ -137,10 +137,10 @@ setLanguageTag("de") // The language changed to de
 setLanguageTag("en") // The language changed to en
 ```
 
-There are a few things to know about `onSetLanguageTag()`:
+A few things to know about `onSetLanguageTag()`:
 
 - You can only register one listener. If you register a second listener it will throw an error.
-- `setLanguageTag` shouldn't be used on the server.
+- `onSetLanguageTag` shouldn't be used on the server.
 
 ## Getting a message in a specific language
 
@@ -161,7 +161,7 @@ const msg = m.hello({ name: "Samuel" }, { languageTag: "de" }) // Hallo Samuel!
 ## Lazy-Loading
 
 Paraglide consciously discourages lazy-loading translations since it seriously hurts
-your Web Vitals. Learn more about why lazy-loading is bad & what to do instead in [this blog post](https://inlang.com/g/mqlyfa7l/guide-lorissigrist-dontlazyload).
+your Web Vitals. Learn more about why lazy-loading is bad & what to do instead in [our blog post on lazy-loading](https://inlang.com/g/mqlyfa7l/guide-lorissigrist-dontlazyload). 
 
 If you want to do it anyway, lazily import the language-specific message files. Be careful with this.
 
