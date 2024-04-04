@@ -56,12 +56,12 @@ describe("paraglide-js", () => {
 				//Check that the compiler ran and generated the files
 				expect(await readFile(path.resolve(workingDir, "src/paraglide/runtime.js"))).toBeTruthy()
 				expect(await readFile(path.resolve(workingDir, "src/paraglide/messages.js"))).toBeTruthy()
-				expect(
-					await readFile(path.resolve(workingDir, "src/paraglide/messages/en.js"))
-				).toBeTruthy()
-				expect(
-					await readFile(path.resolve(workingDir, "src/paraglide/messages/de.js"))
-				).toBeTruthy()
+				expect(await readFile(path.resolve(workingDir, "src/paraglide/messages/en.js"))).includes(
+					"export {}"
+				)
+				expect(await readFile(path.resolve(workingDir, "src/paraglide/messages/de.js"))).includes(
+					"export {}"
+				)
 				await cleanup()
 			},
 			{ timeout: 30_000 }

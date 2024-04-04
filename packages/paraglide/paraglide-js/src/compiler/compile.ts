@@ -1,5 +1,5 @@
 import { compileMessage } from "./compileMessage.js"
-import { ProjectSettings, type Message } from "@inlang/sdk"
+import { ProjectSettings, type Message, LanguageTag } from "@inlang/sdk"
 import { telemetry } from "../services/telemetry/implementation.js"
 import { i } from "../services/codegen/identifier.js"
 import { getStackInfo } from "../services/telemetry/stack-detection.js"
@@ -50,6 +50,21 @@ export const compile = async (args: {
 			if (!resources[languageTag]) resources[languageTag] = ""
 			resources[languageTag] += "\n\n" + compiledMessage[languageTag]
 		}
+	}
+
+	const languagesWithMessages = new Set<LanguageTag>()
+	for (const message of args.messages) {
+		for (const variant of message.variants) {
+			languagesWithMessages.add(variant.languageTag)
+		}
+	}
+
+	const languagesWithoutMessages = args.settings.languageTags.filter(
+		(languageTag) => !languagesWithMessages.has(languageTag)
+	)
+
+	for (const languageTag of languagesWithoutMessages) {
+		if (!resources[languageTag]) resources[languageTag] = "\n\nexport {};"
 	}
 
 	telemetry.shutdown()
