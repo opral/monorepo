@@ -1,0 +1,23 @@
+{
+	"$schema": "https://inlang.com/schema/project-settings",
+	"sourceLanguageTag": "en",
+	"languageTags": ["en", "de"],
+	"modules": [
+		"./../../../source-code/plugins/i18next/dist/index.js",
+		"./../../../source-code/message-lint-rules/emptyPattern/dist/index.js",
+		"./../../../source-code/message-lint-rules/identicalPattern/dist/index.js",
+		"./../../../source-code/message-lint-rules/missingTranslation/dist/index.js",
+		"./../../../source-code/message-lint-rules/messageWithoutSource/dist/index.js"
+	],
+	"plugin.inlang.i18next": {
+		"pathPattern": {
+			"client-page": "./../../app/i18n/locales/{languageTag}/client-page.json",
+			"footer": "./../../app/i18n/locales/{languageTag}/footer.json",
+			"second-page": "./../../app/i18n/locales/{languageTag}/second-page.json",
+			"translation": "./../../app/i18n/locales/{languageTag}/translation.json"
+		}
+	},
+	"experimental": {
+		"aliases": true
+	}
+}

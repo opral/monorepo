@@ -1,6 +1,6 @@
 import { html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
-import { baseStyling } from "../../styling/base.js"
+//import { baseStyling } from "../../styling/base.js"
 import "./string/string-input.js"
 import "./array/array-input.js"
 import "./object/object-input.js"
@@ -8,7 +8,7 @@ import "./union/path-pattern-input.js"
 import type { InstalledMessageLintRule, InstalledPlugin } from "@inlang/sdk"
 @customElement("general-input")
 export class GeneralInput extends LitElement {
-	static override styles = baseStyling
+	//static override styles = baseStyling
 
 	@property()
 	property: string = ""
