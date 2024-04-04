@@ -1,40 +1,28 @@
-import { describe, it, expect, vi, beforeEach } from "vitest"
-import { getGitOrigin } from "./getGitOrigin.js"
-import * as lixClient from "@lix-js/client"
+import { describe, it, expect } from "vitest"
+import { createNodeishMemoryFs, fromSnapshot as loadSnapshot, type Snapshot } from "@lix-js/fs"
+import { readFileSync } from "node:fs"
+import { resolve } from "node:path"
+import { _getGitOrigin } from "./_getGitOrigin.js"
 
-// Mocks
-vi.mock("vscode", () => ({
-	workspace: {
-		workspaceFolders: [{ uri: { fsPath: "mock/path" } }],
-	},
-}))
-vi.mock("@lix-js/client", () => ({
-	findRepoRoot: vi.fn().mockResolvedValue("mock/root"),
-	_listRemotes: vi.fn().mockResolvedValue([{ url: "git@github.com:user/repo.git" }]),
-}))
-vi.mock("node:fs/promises", () => ({}))
-vi.mock("@inlang/telemetry", () => ({
-	parseOrigin: vi.fn().mockReturnValue("https://github.com/user/repo"),
-}))
+const nodeishFs = createNodeishMemoryFs()
+
+const ciTestRepo: Snapshot = JSON.parse(
+	readFileSync(resolve(__dirname, "../../../test/mocks/ci-test-repo.json"), {
+		encoding: "utf-8",
+	})
+)
+
+loadSnapshot(nodeishFs, ciTestRepo)
 
 describe("getGitOrigin", () => {
-	beforeEach(() => {
-		vi.clearAllMocks()
-		// @ts-expect-error
-		lixClient.findRepoRoot.mockResolvedValue("mock/root")
-		// @ts-expect-error
-		lixClient._listRemotes.mockResolvedValue([{ url: "git@github.com:user/repo.git" }])
+	it("should return the parsed git origin URL when workspace is present", async () => {
+		const origin = await _getGitOrigin({ fs: nodeishFs, workspaceRoot: "src" })
+		expect(origin).toEqual("github.com/inlang/ci-test-repo.git")
 	})
 
-	it("should return the parsed git origin URL", async () => {
-		const origin = await getGitOrigin()
-		expect(origin).toEqual("https://github.com/user/repo")
-	})
-
-	it("should handle errors and return undefined", async () => {
-		// @ts-expect-error
-		lixClient.findRepoRoot.mockRejectedValueOnce(new Error("Mock error"))
-		const origin = await getGitOrigin()
+	it("should handle errors and return undefined when no workspace folder is found", async () => {
+		await nodeishFs.rm(".git", { recursive: true })
+		const origin = await _getGitOrigin({ fs: nodeishFs, workspaceRoot: "src" })
 		expect(origin).toBeUndefined()
 	})
 })
