@@ -23,6 +23,15 @@ test("the files should include a prettierignore file", async () => {
 	expect(output[".prettierignore"]).toContain("*")
 })
 
+test("the files should include a gitignore file", async () => {
+	const output = await compile({
+		messages: [],
+		settings: { languageTags: ["en", "de"], sourceLanguageTag: "en", modules: [] },
+	})
+	expect(output["messages/en.js"]).includes("export {}")
+	expect(output["messages/de.js"]).includes("export {}")
+})
+
 // All JS files must be eslint ignored
 test("the files should include an eslint ignore comment", async () => {
 	for (const [filePath, content] of Object.entries(output)) {
