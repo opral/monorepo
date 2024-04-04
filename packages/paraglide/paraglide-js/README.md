@@ -31,7 +31,7 @@ Here are a few comments we've received recently.
 
 <doc-comments>
 <doc-comment text="Just tried Paraglide JS from @inlangHQ. This is how i18n should be done! Totally new level of DX for both implementation and managing translations! Superb support for SvelteKit as well ⭐" author="Patrik Engborg" icon="mdi:twitter" data-source="https://twitter.com/patrikengborg/status/1747260930873053674"></doc-comment>
-<doc-comment text="I was messing with various i18n frameworks and tools in combination with Astro, and i must say that Paraglide was the smoothest experience. I have migrated my website from i18next and it was a breeze. SSG and SSR worked out of the box (which was the first one for me), and overall DX is great. Thanks for your work!" author="Dalibor Hon" icon="mdi:discord" data-source="https://discord.com/channels/897438559458430986/1096039983116202034/1220796380772307004"></doc-comment>
+<doc-comment text="I was messing with various i18n frameworks and tools in combination with Astro, and must say that Paraglide was the smoothest experience. I have migrated my website from i18next and it was a breeze. SSG and SSR worked out of the box (which was the first one for me), and overall DX is great. Thanks for your work!" author="Dalibor Hon" icon="mdi:discord" data-source="https://discord.com/channels/897438559458430986/1096039983116202034/1220796380772307004"></doc-comment>
 <doc-comment text="The lib is great guys!" author="ktarmyshov" icon="mdi:github"></doc-comment>
 <doc-comment text="Thank you for that huge work you have done and still doing!" author="ZerdoX-x" icon="mdi:github"></doc-comment>
 </doc-comments>
@@ -134,7 +134,7 @@ m.hello() // Hello world!
 
 The [language tag](https://www.inlang.com/m/8y8sxj09/library-inlang-languageTag) is global, so you need to be careful with it on the server to make sure multiple requests don't interfere with each other.
 
-You will need to call `setLanguageTag` on both the server and the client, since they run in separate processes.
+You will need to call `setLanguageTag` on both the server and the client since they run in separate processes.
 
 ## Reacting to language changes
 
@@ -180,7 +180,7 @@ const msg = m.hello({ name: "Samuel" }, { languageTag: "de" }) // Hallo Samuel!
 Paraglide consciously discourages lazy-loading translations since it seriously hurts
 your Web Vitals. Learn more about why lazy-loading is bad & what to do instead in [this blog post](https://inlang.com/g/mqlyfa7l/guide-lorissigrist-dontlazyload).
 
-If you want to do it anyways, you can lazily import the language-specific message files. Be careful with this.
+If you want to do it anyway, lazily import the language-specific message files. Be careful with this.
 
 ```ts
 const lazyGerman = await import("./paraglide/messages/de.js")
@@ -213,7 +213,7 @@ ParaglideJS leverages a compiler to generate vanilla JavaScript functions from y
 
 Message Functions are fully typed using JSDoc. They are exported individually from the `messages.js` file making them tree-shakable. They aren't reactive, they just return a string.
 
-This avoids many edge cases associated with reactivity, lazy-loading and namespacing that other i18n libraries have to work around.
+This avoids many edge cases associated with reactivity, lazy-loading, and namespacing that other i18n libraries have to work around.
 
 In addition to the message functions, ParaglideJS also emits a runtime. The runtime is used to set the language tag. It contains less than 50 LOC (lines of code) and is less than 300 bytes minified & gzipped.
 
@@ -255,7 +255,7 @@ export const hello = (params) => `Hello ${params.name}!`
 
 ## Messages
 
-By convention we import the compiled funcitions with a wildcard import.
+By convention, we import the compiled functions with a wildcard import.
 
 ```js
 import * as m from "../paraglide/messages.js"
@@ -265,12 +265,12 @@ Bundlers like Rollup, Webpack, or Turbopack tree-shake the messages that are not
 
 # Writing an Adapter
 
-An "Adapter" is a library that integrates with a framework's liefcycle and does two things:
+An "Adapter" is a library that integrates with a framework's lifecycle and does two things:
 
 1. Calls `setLanguageTag()` at appropriate times to set the language
 2. Reacts to `onSetLanguageTag()`, usually by navigating or relading the page.
 
-This example adapts Paraglide to a fictitious fullstack framework.
+This example adapts Paraglide to a fictitious full-stack framework.
 
 ```tsx
 import {
@@ -331,7 +331,7 @@ Of course, we're not done yet! We plan on adding the following features to Parag
 
 # Tooling
 
-Paraglide JS is part of the Inlang ecosystem and integrates nicely with all the other Inlang compatible tools.
+Paraglide JS is part of the Inlang ecosystem and integrates nicely with all the other Inlang-compatible tools.
 
 As a developer, you will love the [Sherlock VsCode extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension).
 
