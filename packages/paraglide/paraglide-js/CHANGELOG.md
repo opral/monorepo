@@ -1,5 +1,19 @@
 # @inlang/paraglide-js
 
+## 1.3.7
+
+### Patch Changes
+
+- 1cc9cbc: Run compiler after `paraglide-js init` so that initial files are present
+- 5401f95: Add `--outdir` flag to the generated CLI commands
+
+## 1.3.6
+
+### Patch Changes
+
+- 526b0ba: `paraglide-js init` now prompts for which languages should be supported
+- 26d2ba1: No longer add `identical-pattern` lint rule by default
+
 ## 1.3.5
 
 ### Patch Changes

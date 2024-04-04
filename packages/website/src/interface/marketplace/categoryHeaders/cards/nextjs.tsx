@@ -71,7 +71,7 @@ const NextjsHeader = () => {
 						</div>
 					</Link>
 					<Link
-						href="/m/osslbuzt/library-inlang-paraglideJsAdapterNextJs"
+						href="/m/osslbuzt/paraglide-next-i18n"
 						class="w-full flex-1 bg-background rounded-xl border border-surface-300 flex flex-col relative group hover:border-surface-400 transition-all cursor-pointer"
 					>
 						<div class="flex-1 flex flex-col justify-end">

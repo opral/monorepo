@@ -37,7 +37,7 @@ import { maybeCreateFirstProjectId } from "./migrations/maybeCreateFirstProjectI
 
 import { capture } from "./telemetry/capture.js"
 import { identifyProject } from "./telemetry/groupIdentify.js"
-import type { NodeishStats } from "../../../../lix/source-code/fs/dist/NodeishFilesystemApi.js"
+import type { NodeishStats } from "@lix-js/fs"
 
 import _debug from "debug"
 const debug = _debug("loadProject")

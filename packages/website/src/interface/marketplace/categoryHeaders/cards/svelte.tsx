@@ -71,7 +71,7 @@ const SvelteHeader = () => {
 						</div>
 					</Link>
 					<Link
-						href="/m/dxnzrydw"
+						href="/m/dxnzrydw/paraglide-sveltekit-i18n"
 						class="w-full bg-background rounded-xl border border-surface-300 relative group hover:border-surface-400 transition-all cursor-pointer"
 					>
 						<h3 class="font-medium text-lg px-8 pb-1 pt-6">SvelteKit Adapter</h3>

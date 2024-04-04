@@ -88,9 +88,7 @@ Neat right?
 
 ### Adding Messages
 
-By default, paraglide uses the [inlang-message-format Plugin](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat) for storing messages.
-
-The default path for translation files are `./messages/{lang}.json`. You can change this option in `./project.inlang/settings.json`. The Files just contain a Key-Value pair of the message ID and the message itself.
+The init command will have generated `./messages/{lang}.json` files for each language. This is where your messages live. The Files contain a Key-Value pair of the message ID and the message itself.
 
 ```json
 // messages/en.json
@@ -120,7 +118,7 @@ You can add messages in two ways:
 
 - This command extracts the hard-coded string and places it into the source language translation file `en.json` in the `messages` directory.
 
-### Using Messages
+### Using Messages in Code
 
 You can import messages into your code like this:
 
@@ -294,7 +292,7 @@ That's it! If you now reload the page and inspect the HTML, you should see the c
 
 You are now set up with a multi-linguagal SvelteKit app using Paraglide!
 
-The SvelteKit adapter has a few more features that you might want to check out, such as localized paths. Read more about it in the [SvelteKit Adapter Documentation](https://inlang.com/m/dxnzrydw/library-inlang-paraglideJs-adapter-sveltekit).
+The SvelteKit adapter has a few more features that you might want to check out, such as localized paths. Read more about it in the [SvelteKit Adapter Documentation](https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n).
 
 Try it on [StackBlitz](https://stackblitz.com/~/github.com/lorissigrist/paraglide-sveltekit-example)
 
