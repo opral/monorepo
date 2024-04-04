@@ -1,23 +1,24 @@
 import { Command } from "commander"
-import { loadProject, type ProjectSettings } from "@inlang/sdk"
 import consola from "consola"
-import { resolve } from "node:path"
-import { detectJsonFormatting } from "@inlang/detect-json-formatting"
-import JSON5 from "json5"
-import childProcess from "node:child_process"
-import { version } from "../state.js"
-import { telemetry } from "../../services/telemetry/implementation.js"
-import { Logger } from "../../services/logger/index.js"
 import dedent from "dedent"
-import { findRepoRoot, openRepository, type Repository } from "@lix-js/client"
+import * as nodePath from "node:path"
+import JSON5 from "json5"
 import nodeFsPromises from "node:fs/promises"
-import { pathExists } from "../../services/file-handling/exists.js"
-import { findPackageJson } from "../../services/environment/package.js"
+import { loadProject, type InlangProject } from "@inlang/sdk"
 import * as Sherlock from "@inlang/cross-sell-sherlock"
-
-// TODO add a project UUID to the tele.groups internal #196
-// import { gitOrigin } from "../../services/telemetry/implementation.js"
-const DEFAULT_PROJECT_PATH = "./project.inlang"
+import { isValidLanguageTag, LanguageTag } from "@inlang/language-tag"
+import { detectJsonFormatting } from "@inlang/detect-json-formatting"
+import { version } from "../../state.js"
+import { telemetry } from "../../../services/telemetry/implementation.js"
+import { Logger } from "../../../services/logger/index.js"
+import { findRepoRoot, openRepository, type Repository } from "@lix-js/client"
+import { pathExists } from "../../../services/file-handling/exists.js"
+import { findPackageJson } from "../../../services/environment/package.js"
+import { execAsync } from "./utils.js"
+import { getNewProjectTemplate, DEFAULT_PROJECT_PATH, DEFAULT_OUTDIR } from "./defaults.js"
+import { compile } from "../../../compiler/compile.js"
+import { writeOutput } from "../../../services/file-handling/write-output.js"
+import type { CliStep } from "./cli-utils.js"
 
 type Context = {
 	logger: Logger
@@ -25,10 +26,10 @@ type Context = {
 }
 
 const ADAPTER_LINKS = {
-	sveltekit: "https://inlang.com/m/dxnzrydw/library-inlang-paraglideJsAdapterSvelteKit",
-	nextjs: "https://inlang.com/m/osslbuzt/library-inlang-paraglideJsAdapterNextJs",
-	astro: "https://inlang.com/m/iljlwzfs/library-inlang-paraglideJsAdapterAstro",
-	solidstart: "https://inlang.com/m/n860p17j/library-inlang-paraglideJsAdapterSolidStart",
+	sveltekit: "https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n",
+	nextjs: "https://inlang.com/m/osslbuzt/paraglide-next-i18n",
+	astro: "https://inlang.com/m/iljlwzfs/paraglide-astro-i18n",
+	solidstart: "https://inlang.com/m/n860p17j/paraglide-solidstart-i18n",
 	vite: "https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-vite",
 } as const
 
@@ -48,30 +49,41 @@ export const initCommand = new Command()
 			nodeishFs: nodeFsPromises,
 		})
 
-		const ctx: Context = {
-			logger: new Logger({ silent: false, prefix: false }),
-			repo,
-		}
+		const logger = new Logger({ silent: false, prefix: false })
 
-		ctx.logger.box("Welcome to inlang Paraglide-JS 🪂")
-
+		logger.box("Welcome to inlang Paraglide-JS 🪂")
 		telemetry.capture({ event: "PARAGLIDE-JS init started" })
 
-		await checkIfUncommittedChanges(ctx)
-		await checkIfPackageJsonExists(ctx)
-		const projectPath = await initializeInlangProject(ctx)
+		const ctx = {
+			logger,
+			repo,
+		} as const
+
+		const ctx1 = await checkIfUncommittedChanges(ctx)
+		const ctx2 = await checkIfPackageJsonExists(ctx1)
+		const ctx3 = await initializeInlangProject(ctx2)
+		const ctx4 = await determineOutdir(ctx3)
 		telemetry.capture({ event: "PARAGLIDE-JS init project initialized" })
-		await addParaglideJsToDevDependencies(ctx)
+		const ctx5 = await addParaglideJsToDevDependencies(ctx4)
 		telemetry.capture({ event: "PARAGLIDE-JS init added to devDependencies" })
-		await addCompileStepToPackageJSON({ projectPath }, ctx)
+		const ctx6 = await addCompileStepToPackageJSON(ctx5)
 		telemetry.capture({ event: "PARAGLIDE-JS init added compile commands" })
-		await maybeChangeTsConfigModuleResolution(ctx)
-		await maybeChangeTsConfigAllowJs(ctx)
-		await maybeAddVsCodeExtension({ projectPath }, ctx)
+		const ctx7 = await maybeChangeTsConfigModuleResolution(ctx6)
+		const ctx8 = await maybeChangeTsConfigAllowJs(ctx7)
+		const ctx9 = await maybeAddVsCodeExtension(ctx8)
+
+		try {
+			await executeCompilation(ctx9)
+			ctx.logger.success("Run paraglide compiler")
+		} catch (e) {
+			ctx.logger.warn(
+				"Failed to compile project automatically. You will need to run the compiler manually"
+			)
+		}
 
 		telemetry.capture({ event: "PARAGLIDE-JS init finished" })
 
-		const absoluteSettingsPath = resolve(projectPath, "settings.json")
+		const absoluteSettingsPath = nodePath.resolve(ctx9.projectPath, "settings.json")
 		const relativeSettingsFilePath = absoluteSettingsPath.replace(process.cwd(), ".")
 
 		let successMessage = dedent`inlang Paraglide-JS has been set up sucessfully.
@@ -100,25 +112,48 @@ export const initCommand = new Command()
 
 		successMessage += "\n\n"
 		successMessage += dedent`
-			For questions and feedback, visit https://github.com/inlang/monorepo/discussions.
+			For questions and feedback, visit 
+			https://github.com/opral/monorepo/discussions.
 		`
 
 		ctx.logger.box(successMessage)
 	})
 
-export const initializeInlangProject = async (ctx: Context) => {
-	const existingProjectPath = await findExistingInlangProjectPath(ctx)
+export const initializeInlangProject: CliStep<
+	{ repo: Repository; logger: Logger },
+	{
+		project: InlangProject
+		/** Relative path to the project */
+		projectPath: string
+	}
+> = async (ctx) => {
+	const existingProjectPath = await findExistingInlangProjectPath(ctx.repo)
 
 	if (existingProjectPath) {
-		await existingProjectFlow({ existingProjectPath }, ctx)
-		return existingProjectPath
+		const project = await existingProjectFlow({ existingProjectPath }, ctx)
+		return {
+			...ctx,
+			project,
+			projectPath: existingProjectPath,
+		}
 	} else {
-		await createNewProjectFlow(ctx)
-		return DEFAULT_PROJECT_PATH
+		const project = await createNewProjectFlow(ctx)
+		return {
+			...ctx,
+			project,
+			projectPath: DEFAULT_PROJECT_PATH,
+		}
 	}
 }
 
-export const maybeAddVsCodeExtension = async (args: { projectPath: string }, ctx: Context) => {
+export const maybeAddVsCodeExtension: CliStep<
+	{ 
+		repo: Repository; 
+		logger: Logger; 
+		project: InlangProject
+	},
+	unknown
+> = async (ctx) => {
 	const isCertainlyVsCode = process?.env?.TERM_PROGRAM === "vscode"
 
 	let response = isCertainlyVsCode
@@ -128,14 +163,9 @@ export const maybeAddVsCodeExtension = async (args: { projectPath: string }, ctx
 			initial: true,
 		})
 	}
-	if (response === false) return
+	if (response === false) return ctx
 
-	const project = await loadProject({
-		projectPath: resolve(process.cwd(), args.projectPath),
-		repo: ctx.repo,
-	})
-
-	const settings = project.settings()
+	const settings = ctx.project.settings()
 
 	// m function matcher is not installed
 	if (settings.modules.some((m) => m.includes("plugin-m-function-matcher")) === false) {
@@ -143,7 +173,7 @@ export const maybeAddVsCodeExtension = async (args: { projectPath: string }, ctx
 		settings.modules.push(
 			"https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js"
 		)
-		project.setSettings(settings)
+		ctx.project.setSettings(settings)
 	}
 
 	try {
@@ -159,9 +189,17 @@ export const maybeAddVsCodeExtension = async (args: { projectPath: string }, ctx
 			"Failed to add the inlang Visual Studio Code extension (Sherlock). Please open an issue"
 		)
 	}
+
+	return ctx
 }
 
-export const addParaglideJsToDevDependencies = async (ctx: Context) => {
+export const addParaglideJsToDevDependencies: CliStep<
+	{
+		repo: Repository
+		logger: Logger
+	},
+	unknown
+> = async (ctx) => {
 	const file = await ctx.repo.nodeishFs.readFile("./package.json", { encoding: "utf-8" })
 	const stringify = detectJsonFormatting(file)
 	let pkg: any = {}
@@ -179,11 +217,14 @@ export const addParaglideJsToDevDependencies = async (ctx: Context) => {
 	pkg.devDependencies["@inlang/paraglide-js"] = version
 	await ctx.repo.nodeishFs.writeFile("./package.json", stringify(pkg))
 	ctx.logger.success("Added @inlang/paraglide-js to the devDependencies in package.json.")
+	return ctx
 }
 
-export const findExistingInlangProjectPath = async (ctx: Context): Promise<string | undefined> => {
+export const findExistingInlangProjectPath = async (
+	repo: Repository
+): Promise<string | undefined> => {
 	for (const path of ["./project.inlang", "../project.inlang", "../../project.inlang"]) {
-		if (await pathExists(path, ctx.repo.nodeishFs)) {
+		if (await pathExists(path, repo.nodeishFs)) {
 			return path
 		}
 		continue
@@ -191,7 +232,37 @@ export const findExistingInlangProjectPath = async (ctx: Context): Promise<strin
 	return undefined
 }
 
-export const existingProjectFlow = async (args: { existingProjectPath: string }, ctx: Context) => {
+export const determineOutdir: CliStep<
+	{
+		logger: Logger
+	},
+	{
+		/** Relative path to the output directory */
+		outdir: string
+	}
+> = async (ctx) => {
+	const response = await prompt("Where should the compiled files be placed?", {
+		type: "text",
+		initial: DEFAULT_OUTDIR,
+		default: DEFAULT_OUTDIR,
+		placeholder: "Relative path from the package root to the desired compiler output directory",
+	})
+
+	if (!response.startsWith("./")) {
+		ctx.logger.warn("You must enter a valid relative path starting from the package root.")
+		return await determineOutdir(ctx)
+	}
+
+	return {
+		...ctx,
+		outdir: response,
+	}
+}
+
+export const existingProjectFlow = async (
+	args: { existingProjectPath: string },
+	ctx: Context
+): Promise<InlangProject> => {
 	const selection = (await prompt(
 		`Do you want to use the inlang project at "${args.existingProjectPath}" or create a new project?`,
 		{
@@ -208,7 +279,7 @@ export const existingProjectFlow = async (args: { existingProjectPath: string },
 	}
 
 	const project = await loadProject({
-		projectPath: resolve(process.cwd(), args.existingProjectPath),
+		projectPath: nodePath.resolve(process.cwd(), args.existingProjectPath),
 		repo: ctx.repo,
 	})
 
@@ -219,18 +290,106 @@ export const existingProjectFlow = async (args: { existingProjectPath: string },
 		}
 		process.exit(1)
 	}
+
+	return project
 }
 
-export const createNewProjectFlow = async (ctx: Context) => {
+function parseLanguageTagInput(input: string): {
+	validLanguageTags: LanguageTag[]
+	invalidLanguageTags: string[]
+} {
+	const languageTags = input
+		.replaceAll(/[,:\s]/g, " ") //replace common separators with spaces
+		.split(" ")
+		.filter(Boolean) //remove empty segments
+		.map((tag) => tag.toLowerCase())
+
+	const validLanguageTags: LanguageTag[] = []
+	const invalidLanguageTags: string[] = []
+
+	for (const tag of languageTags) {
+		if (isValidLanguageTag(tag)) {
+			validLanguageTags.push(tag)
+		} else {
+			invalidLanguageTags.push(tag)
+		}
+	}
+
+	return {
+		validLanguageTags,
+		invalidLanguageTags,
+	}
+}
+
+async function promptForLanguageTags(
+	initialLanguageTags: LanguageTag[] = []
+): Promise<LanguageTag[]> {
+	const languageTagsInput =
+		(await prompt("Which languages do you want to support?", {
+			type: "text",
+			placeholder: "en, de-ch, ar",
+			initial: initialLanguageTags.length ? initialLanguageTags.join(", ") : undefined,
+		})) ?? ""
+
+	const { invalidLanguageTags, validLanguageTags } = parseLanguageTagInput(languageTagsInput)
+
+	if (validLanguageTags.length === 0) {
+		consola.warn("You must specify at least one language tag")
+		return await promptForLanguageTags()
+	}
+
+	if (invalidLanguageTags.length > 0) {
+		const message =
+			invalidLanguageTags.length === 1
+				? invalidLanguageTags[0] +
+				  " isn't a valid language tag. Please stick to IEEE BCP-47 Language Tags"
+				: invalidLanguageTags.map((tag) => `"${tag}"`).join(", ") +
+				  " aren't valid language tags. Please stick to IEEE BCP-47 Language Tags"
+
+		consola.warn(message)
+		return await promptForLanguageTags(validLanguageTags)
+	}
+
+	return validLanguageTags
+}
+export const createNewProjectFlow = async (ctx: Context): Promise<InlangProject> => {
+	const languageTags = await promptForLanguageTags()
+	const settings = getNewProjectTemplate()
+
+	//Should always be defined. This is to shut TS up
+	const sourceLanguageTag = languageTags.at(0)
+	if (!sourceLanguageTag) throw new Error("sourceLanguageTag is not defined")
+
+	settings.languageTags = languageTags
+	settings.sourceLanguageTag = sourceLanguageTag
+
+	const messagePath = settings["plugin.inlang.messageFormat"].pathPattern
+
+	//create the messages dir if it doesn't exist
+	const messageDir = nodePath.dirname(nodePath.resolve(process.cwd(), messagePath))
+	ctx.repo.nodeishFs.mkdir(messageDir, { recursive: true })
+
+	for (const languageTag of languageTags) {
+		const languageFile = nodePath.resolve(messageDir, languageTag + ".json")
+		//create the language file if it doesn't exist
+		ctx.repo.nodeishFs.writeFile(
+			languageFile,
+			dedent`
+			{
+				"$schema": "https://inlang.com/schema/inlang-message-format"
+			}`
+		)
+	}
+
 	ctx.logger.info(`Creating a new inlang project in the current working directory.`)
 	await ctx.repo.nodeishFs.mkdir(DEFAULT_PROJECT_PATH, { recursive: true })
 	await ctx.repo.nodeishFs.writeFile(
 		DEFAULT_PROJECT_PATH + "/settings.json",
-		JSON.stringify(newProjectTemplate, undefined, 2)
+		JSON.stringify(settings, undefined, 2)
 	)
 
 	const project = await loadProject({
-		projectPath: resolve(process.cwd(), DEFAULT_PROJECT_PATH),
+		projectPath: nodePath.resolve(process.cwd(), DEFAULT_PROJECT_PATH),
 		repo: ctx.repo,
 	})
 
@@ -245,34 +404,13 @@ export const createNewProjectFlow = async (ctx: Context) => {
 	} else {
 		ctx.logger.success("Successfully created a new inlang project.")
 	}
+	return project
 }
 
-export const newProjectTemplate: ProjectSettings = {
-	$schema: "https://inlang.com/schema/project-settings",
-	// defaulting to english to not overwhelm new users
-	// with prompts. The user can change this later.
-	sourceLanguageTag: "en",
-	languageTags: ["en"],
-	modules: [
-		// for instant gratification, we're adding common rules
-		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js",
-		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-identical-pattern@latest/dist/index.js",
-		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js",
-		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-without-source@latest/dist/index.js",
-		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-valid-js-identifier@latest/dist/index.js",
-		// default to the message format plugin because it supports all features
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@latest/dist/index.js",
-		// the m function matcher should be installed by default in case Sherlock (VS Code extension) is adopted
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js",
-	],
-	"plugin.inlang.messageFormat": {
-		// using .inlang/paraglide-js as directory to avoid future conflicts when an official .inlang
-		// directory is introduced, see https://github.com/opral/monorepo/discussions/1418
-		pathPattern: "./messages/{languageTag}.json",
-	},
-}
-
-export const checkIfPackageJsonExists = async (ctx: Context) => {
+export const checkIfPackageJsonExists: CliStep<
+	{ logger: Logger; repo: Repository },
+	unknown
+> = async (ctx) => {
 	const packageJsonPath = await findPackageJson(ctx.repo.nodeishFs, process.cwd())
 	if (!packageJsonPath) {
 		ctx.logger.warn(
@@ -280,12 +418,13 @@ export const checkIfPackageJsonExists = async (ctx: Context) => {
 		)
 		return process.exit(0)
 	}
+	return ctx
 }
 
-export const checkIfUncommittedChanges = async (ctx: Context) => {
+export const checkIfUncommittedChanges: CliStep<{ logger: Logger }, unknown> = async (ctx) => {
 	try {
 		if ((await execAsync("git status --porcelain")).toString().length === 0) {
-			return
+			return ctx
 		}
 
 		ctx.logger.info(
@@ -299,17 +438,20 @@ export const checkIfUncommittedChanges = async (ctx: Context) => {
 			}
 		)
 		if (response === true) {
-			return
+			return ctx
 		} else {
 			process.exit(0)
 		}
 	} catch (e) {
 		// git cli is not installed
-		return
+		return ctx
 	}
 }
 
-export const addCompileStepToPackageJSON = async (args: { projectPath: string }, ctx: Context) => {
+export const addCompileStepToPackageJSON: CliStep<
+	{ repo: Repository; logger: Logger; projectPath: string; outdir: string },
+	unknown
+> = async (ctx) => {
 	const file = await ctx.repo.nodeishFs.readFile("./package.json", { encoding: "utf-8" })
 	const stringify = detectJsonFormatting(file)
 	const pkg = JSON.parse(file)
@@ -321,23 +463,23 @@ export const addCompileStepToPackageJSON = async (args: { projectPath: string },
 	// add the compile command to the postinstall script
 	// this isn't super important, so we won't interrupt the user if it fails
 	if (!pkg.scripts.postinstall) {
-		pkg.scripts.postinstall = `paraglide-js compile --project ${args.projectPath}`
+		pkg.scripts.postinstall = `paraglide-js compile --project ${ctx.projectPath} --outdir ${ctx.outdir}`
 	} else if (pkg.scripts.postinstall.includes("paraglide-js compile") === false) {
-		pkg.scripts.postinstall = `paraglide-js compile --project ${args.projectPath} && ${pkg.scripts.postinstall}`
+		pkg.scripts.postinstall = `paraglide-js compile --project ${ctx.projectPath} --outdir ${ctx.outdir} && ${pkg.scripts.postinstall}`
 	}
 
 	//Add the compile command to the build script
 	if (pkg?.scripts?.build === undefined) {
-		pkg.scripts.build = `paraglide-js compile --project ${args.projectPath}`
+		pkg.scripts.build = `paraglide-js compile --project ${ctx.projectPath} --outdir ${ctx.outdir}`
 	} else if (pkg?.scripts?.build.includes("paraglide-js compile") === false) {
-		pkg.scripts.build = `paraglide-js compile --project ${args.projectPath} && ${pkg.scripts.build}`
+		pkg.scripts.build = `paraglide-js compile --project ${ctx.projectPath} --outdir ${ctx.outdir} && ${pkg.scripts.build}`
 	} else {
 		ctx.logger
 			.warn(`The "build" script in the \`package.json\` already contains a "paraglide-js compile" command.
 
 Please add the following command to your build script manually:
 
-\`paraglide-js compile --project ${args.projectPath}`)
+\`paraglide-js compile --project ${ctx.projectPath}`)
 		const response = await consola.prompt(
 			"Have you added the compile command to your build script?",
 			{
@@ -349,11 +491,13 @@ Please add the following command to your build script manually:
 			ctx.logger.log("Please add the paraglide-js compile to your build script and try again.")
 			return process.exit(0)
 		} else {
-			return
+			return ctx
 		}
 	}
 	await ctx.repo.nodeishFs.writeFile("./package.json", stringify(pkg))
 	ctx.logger.success("Successfully added the compile command to the build step in package.json.")
+
+	return ctx
 }
 
 /**
@@ -362,9 +506,12 @@ Please add the following command to your build script manually:
  * Otherwise, types defined in `package.exports` are not resolved by TypeScript. Leading to type
  * errors with Paraglide-JS.
  */
-export const maybeChangeTsConfigModuleResolution = async (ctx: Context): Promise<void> => {
+export const maybeChangeTsConfigModuleResolution: CliStep<
+	{ repo: Repository; logger: Logger },
+	unknown
+> = async (ctx) => {
 	if ((await pathExists("./tsconfig.json", ctx.repo.nodeishFs)) === false) {
-		return
+		return ctx
 	}
 	const file = await ctx.repo.nodeishFs.readFile("./tsconfig.json", { encoding: "utf-8" })
 	// tsconfig allows comments ... FML
@@ -374,7 +521,7 @@ export const maybeChangeTsConfigModuleResolution = async (ctx: Context): Promise
 
 	if (tsconfig.extends) {
 		try {
-			const parentTsConfigPath = resolve(process.cwd(), tsconfig.extends)
+			const parentTsConfigPath = nodePath.resolve(process.cwd(), tsconfig.extends)
 			const parentTsConfigFile = await ctx.repo.nodeishFs.readFile(parentTsConfigPath, {
 				encoding: "utf-8",
 			})
@@ -393,7 +540,7 @@ export const maybeChangeTsConfigModuleResolution = async (ctx: Context): Promise
 
 	if (moduleResolution && invalidOptions.includes(moduleResolution.toLowerCase()) === false) {
 		// the moduleResolution is already set to bundler or similar
-		return
+		return ctx
 	}
 
 	ctx.logger.info(
@@ -418,7 +565,7 @@ export const maybeChangeTsConfigModuleResolution = async (ctx: Context): Promise
 			ctx.logger.warn(
 				"Continuing without adjusting the tsconfig.json. This may lead to type errors."
 			)
-			return
+			return ctx
 		}
 		const file = await ctx.repo.nodeishFs.readFile("./tsconfig.json", { encoding: "utf-8" })
 		const tsconfig = JSON5.parse(file)
@@ -427,21 +574,26 @@ export const maybeChangeTsConfigModuleResolution = async (ctx: Context): Promise
 			tsconfig.compilerOptions.moduleResolution.toLowerCase() === "bundler"
 		) {
 			isValid = true
-			return
+			return ctx
 		} else {
 			ctx.logger.error(
 				"The compiler options have not been adjusted. Please set the `compilerOptions.moduleResolution` to `Bundler`."
 			)
 		}
 	}
+
+	return ctx
 }
 
 /**
  * Paraligde JS compiles to JS with JSDoc comments. TypeScript doesn't allow JS files by default.
  */
-export const maybeChangeTsConfigAllowJs = async (ctx: Context): Promise<void> => {
+export const maybeChangeTsConfigAllowJs: CliStep<
+	{ repo: Repository; logger: Logger },
+	unknown
+> = async (ctx) => {
 	if ((await pathExists("./tsconfig.json", ctx.repo.nodeishFs)) === false) {
-		return
+		return ctx
 	}
 	const file = await ctx.repo.nodeishFs.readFile("./tsconfig.json", { encoding: "utf-8" })
 	// tsconfig allows comments ... FML
@@ -449,7 +601,7 @@ export const maybeChangeTsConfigAllowJs = async (ctx: Context): Promise<void> =>
 
 	if (tsconfig.compilerOptions?.allowJs === true) {
 		// all clear, allowJs is already set to true
-		return
+		return ctx
 	}
 
 	ctx.logger.info(
@@ -471,19 +623,41 @@ export const maybeChangeTsConfigAllowJs = async (ctx: Context): Promise<void> =>
 			ctx.logger.warn(
 				"Continuing without adjusting the tsconfig.json. This may lead to type errors."
 			)
-			return
+			return ctx
 		}
 		const file = await ctx.repo.nodeishFs.readFile("./tsconfig.json", { encoding: "utf-8" })
 		const tsconfig = JSON5.parse(file)
 		if (tsconfig?.compilerOptions?.allowJs === true) {
 			isValid = true
-			return
+			return ctx
 		} else {
 			ctx.logger.error(
 				"The compiler options have not been adjusted. Please set the `compilerOptions.allowJs` to `true`."
 			)
 		}
 	}
+	return ctx
+}
+
+const executeCompilation: CliStep<
+	{
+		project: InlangProject
+		/** The absolute path to the output directory */
+		outdir: string
+		repo: Repository
+	},
+	unknown
+> = async (ctx) => {
+	const absoluteOutdir = nodePath.resolve(process.cwd(), ctx.outdir)
+
+	const output = await compile({
+		messages: ctx.project.query.messages.getAll(),
+		settings: ctx.project.settings(),
+		projectId: ctx.project.id,
+	})
+
+	await writeOutput(absoluteOutdir, output, ctx.repo.nodeishFs)
+	return ctx
 }
 
 /**
@@ -520,23 +694,4 @@ const prompt: typeof consola.prompt = async (message, options) => {
 		process.exit(0)
 	}
 	return response
-}
-
-/**
- * Executes a command asynchronously in a separate process.
- * It will not print the output to the console.
- *
- * @param command The command to execute.
- * @returns The stdout of the command.
- */
-function execAsync(command: string) {
-	return new Promise<string>((resolve, reject) => {
-		childProcess.exec(command, (error, stdout) => {
-			if (error) {
-				reject(error)
-			} else {
-				resolve(stdout)
-			}
-		})
-	})
 }

@@ -1,11 +1,11 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
-import { baseStyling } from "../../../styling/base.js"
+//import { baseStyling } from "../../../styling/base.js"
 
 @customElement("default-array-input")
 export class DefaultArrayInput extends LitElement {
 	static override styles = [
-		baseStyling,
+		//baseStyling,
 		css`
 			.item-container {
 				display: flex;
