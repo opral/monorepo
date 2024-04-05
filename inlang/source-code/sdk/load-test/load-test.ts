@@ -1,7 +1,8 @@
 /* eslint-disable no-restricted-imports */
 /* eslint-disable no-console */
-import { openRepository } from "@lix-js/client"
-import { loadProject } from "@inlang/sdk"
+import { findRepoRoot, openRepository } from "@lix-js/client"
+import { loadProject, type Message } from "@inlang/sdk"
+import { createSignal, createResource, createEffect } from "../src/reactivity/solid.js"
 
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -15,7 +16,7 @@ const debug = _debug("load-test")
 
 const exec = promisify(childProcess.exec)
 
-const throttleEventLogs = 2000
+const throttleMessageGetAllEvents = 3000
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -54,7 +55,12 @@ export async function runLoadTest(
 	await generateMessageFile(1)
 
 	debug("opening repo and loading project")
-	const repo = await openRepository(__dirname, { nodeishFs: fs })
+	const repoRoot = await findRepoRoot({ nodeishFs: fs, path: __dirname })
+	if (!repoRoot) {
+		debug("no repo root.")
+		return
+	}
+	const repo = await openRepository(repoRoot, { nodeishFs: fs })
 	const project = await loadProject({ repo, projectPath })
 
 	debug("subscribing to project.errors")
@@ -64,27 +70,37 @@ export async function runLoadTest(
 		}
 	})
 
+	const [messages, setMessages] = createSignal<readonly Message[]>()
+
 	if (subscribeToMessages) {
 		debug("subscribing to messages.getAll")
-		let messagesEvents = 0
-		const logMessagesEvent = throttle(throttleEventLogs, (messages: any) => {
-			debug(`messages changed event: ${messagesEvents}, length: ${messages.length}`)
-		})
-		project.query.messages.getAll.subscribe((messages) => {
-			messagesEvents++
-			logMessagesEvent(messages)
+		let countMessagesGetAllEvents = 0
+
+		const messagesGetAllEvent = throttle(
+			throttleMessageGetAllEvents,
+			(messages: readonly Message[]) => {
+				debug(`messages getAll event: ${countMessagesGetAllEvents}, length: ${messages.length}`)
+				setMessages(messages)
+			}
+		)
+
+		createEffect(() => {
+			countMessagesGetAllEvents++
+			messagesGetAllEvent(project.query.messages.getAll())
 		})
 	}
 
 	if (subscribeToLintReports) {
-		debug("subscribing to lintReports.getAll")
-		let lintEvents = 0
-		const logLintEvent = throttle(throttleEventLogs, (reports: any) => {
-			debug(`lint reports changed event: ${lintEvents}, length: ${reports.length}`)
-		})
-		project.query.messageLintReports.getAll.subscribe((reports) => {
-			lintEvents++
-			logLintEvent(reports)
+		debug("subscribing to messageLintReports.getAll")
+		let countLintReportsGetAllEvents = 1
+
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const [lintReports] = createResource(messages, async () => {
+			const reports = await project.query.messageLintReports.getAll()
+			debug(
+				`lintReports getAll event: ${countLintReportsGetAllEvents++}, length: ${reports.length}`
+			)
+			return reports
 		})
 	}
 
@@ -138,7 +154,7 @@ async function isMockRpcServerRunning(): Promise<boolean> {
 	return true
 }
 
-function causeString(error: any) {
+function causeString(error: any): string {
 	if (typeof error === "object" && error.cause) {
 		if (error.cause.errors?.length) return error.cause.errors.join(", ")
 		if (error.cause.code) return "" + error.cause.code

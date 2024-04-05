@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For, on, Show } from "solid-js"
+import { createResource, createEffect, createSignal, For, on, Show } from "solid-js"
 import { useEditorState } from "./State.jsx"
 import { createVisibilityObserver } from "@solid-primitives/intersection-observer"
 import { PatternEditor } from "./components/PatternEditor.jsx"
@@ -14,7 +14,7 @@ export function Message(props: { id: string }) {
 	const { project, filteredLanguageTags, filteredIds, filteredMessageLintRules, textSearch } =
 		useEditorState()
 	const [message, setMessage] = createSignal<MessageType>()
-	const [lintReports, setLintReports] = createSignal<Readonly<MessageLintReport[]>>([])
+	const [lintReports, setLintReports] = createSignal<readonly MessageLintReport[]>([])
 	const [shouldMessageBeShown, setShouldMessageBeShown] = createSignal(true)
 	// const [blockChangeMessageIsFocused, setBlockChangeMessageIsFocused]  = createSignal<Date>(new Date())
 
@@ -33,26 +33,32 @@ export function Message(props: { id: string }) {
 		}
 	})
 
-	createEffect(() => {
-		if (!project.loading) {
-			project()!.query.messages.get.subscribe({ where: { id: props.id } }, (message) =>
-				setMessage(message)
-			)
-		}
-	})
+	// TODO: Find out why messages.get() in solidAdapter only works with subscribe.
+	//       by contrast, query.messages.getAll() signal does work. see ListHeader.tsx
+	createEffect(
+		on([project], () => {
+			if (!project.loading) {
+				project()!.query.messages.get.subscribe({ where: { id: props.id } }, (message) => {
+					setMessage(message)
+				})
+			}
+		})
+	)
 
-	createEffect(() => {
-		if (!project.loading && message()?.id) {
-			project()!.query.messageLintReports.get.subscribe(
-				{ where: { messageId: message()!.id } },
-				(report) => {
-					if (report) {
-						setLintReports(report)
-						setHasBeenLinted(true)
-					}
-				}
-			)
+	// createResource re-fetches lintReports via async api whenever the message changes
+	createResource(message, async (message) => {
+		if (!project.loading && message?.id) {
+			const reports = await project()!.query.messageLintReports.get({
+				where: { messageId: message.id },
+			})
+			// set lintReports synchronously for setShouldMessageBeShown effect on setHasBeenLinted
+			// createResource waits for next tick to update itself using the return value
+			setLintReports(reports)
+			// trigger hasBeenLinted signal once, the first time the message is linted
+			setHasBeenLinted(true)
+			return reports
 		}
+		return []
 	})
 
 	createEffect(
@@ -60,7 +66,7 @@ export function Message(props: { id: string }) {
 			[filteredLanguageTags, filteredMessageLintRules, filteredIds, textSearch, hasBeenLinted],
 			() => {
 				setShouldMessageBeShown((prev) => {
-					const result = !showFilteredMessage(message())
+					const result = !showFilteredMessage(message(), lintReports())
 					// check if message count changed and update the global message count
 					if (result !== prev && result === true) {
 						setMessageCount((prev) => prev - 1)
@@ -168,7 +174,7 @@ export function Message(props: { id: string }) {
 									<PatternEditor
 										languageTag={languageTag}
 										message={message()!}
-										lintReports={lintReports() as MessageLintReport[]}
+										lintReports={(lintReports() || []) as MessageLintReport[]}
 										// hidden={!(filteredLanguageTags().includes(languageTag) || filteredLanguageTags().length === 0)}
 									/>
 								</Show>
