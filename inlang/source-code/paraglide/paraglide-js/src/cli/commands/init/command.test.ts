@@ -314,10 +314,11 @@ describe("existingProjectFlow()", () => {
 		const repo = await openRepository("file://", { nodeishFs: fs })
 
 		mockUserInput(["useExistingProject"])
-		const project = await existingProjectFlow(
-			{ existingProjectPath: "/project.inlang" },
-			{ logger, repo }
-		)
+		const project = await existingProjectFlow({
+			existingProjectPath: "/project.inlang",
+			logger,
+			repo,
+		})
 
 		expect(project.settings().languageTags).toEqual(getNewProjectTemplate().languageTags)
 	})
@@ -330,7 +331,7 @@ describe("existingProjectFlow()", () => {
 
 		mockUserInput(["newProject", "en"])
 
-		await existingProjectFlow({ existingProjectPath: "/folder/project.inlang" }, { logger, repo })
+		await existingProjectFlow({ existingProjectPath: "/folder/project.inlang", logger, repo })
 		// info that a new project is created
 		expect(logger.info).toHaveBeenCalledOnce()
 		// the newly created project file should exist
@@ -344,7 +345,7 @@ describe("existingProjectFlow()", () => {
 		const repo = await openRepository("file://", { nodeishFs: fs })
 
 		mockUserInput(["useExistingProject"])
-		await existingProjectFlow({ existingProjectPath: "/project.inlang" }, { logger, repo })
+		await existingProjectFlow({ existingProjectPath: "/project.inlang", logger, repo })
 		expect(logger.error).toHaveBeenCalled()
 		expect(process.exit).toHaveBeenCalled()
 	})
