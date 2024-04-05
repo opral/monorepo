@@ -1319,6 +1319,9 @@ importers:
       vite-plugin-dts:
         specifier: ^3.8.1
         version: 3.8.1(@types/node@20.11.30)(rollup@3.29.1)(typescript@5.2.2)(vite@4.5.2)
+      vite-tsconfig-paths:
+        specifier: ^4.3.2
+        version: 4.3.2(typescript@5.2.2)(vite@4.5.2)
       vitest:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)
@@ -26160,7 +26163,6 @@ packages:
         optional: true
     dependencies:
       typescript: 5.2.2
-    dev: false
 
   /tsconfck@3.0.3(typescript@5.3.3):
     resolution: {integrity: sha512-4t0noZX9t6GcPTfBAbIbbIU4pfpCwh0ueq3S4O/5qXI1VwK1outmxhe9dOiEWqMz3MW2LKgDTpqWV+37IWuVbA==}
@@ -27541,6 +27543,23 @@ packages:
     engines: {node: '>=10.6.0'}
     dependencies:
       minimatch: 5.1.6
+    dev: true
+
+  /vite-tsconfig-paths@4.3.2(typescript@5.2.2)(vite@4.5.2):
+    resolution: {integrity: sha512-0Vd/a6po6Q+86rPlntHye7F31zA2URZMbH8M3saAZ/xR9QoGN/L21bxEGfXdWmFdNkqPpRdxFT7nmNe12e9/uA==}
+    peerDependencies:
+      vite: 4.5.2
+    peerDependenciesMeta:
+      vite:
+        optional: true
+    dependencies:
+      debug: 4.3.4(supports-color@8.1.1)
+      globrex: 0.1.2
+      tsconfck: 3.0.3(typescript@5.2.2)
+      vite: 4.5.2(@types/node@20.11.30)
+    transitivePeerDependencies:
+      - supports-color
+      - typescript
     dev: true
 
   /vite@4.5.2(@types/node@20.11.30):
