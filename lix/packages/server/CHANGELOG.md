@@ -1,5 +1,11 @@
 # @lix-js/server
 
+## 1.1.1
+
+### Patch Changes
+
+- @inlang/telemetry@0.3.19
+
 ## 1.1.0
 
 ### Minor Changes
