@@ -8,9 +8,20 @@ export class DefaultObjectInput extends LitElement {
 	static override styles = [
 		//baseStyling,
 		css`
+			.property {
+				display: flex;
+				flex-direction: column;
+				gap: 12px;
+			}
+			h3 {
+				margin: 0;
+				font-size: 1rem;
+				font-weight: 800;
+			}
 			.help-text {
-				font-size: 0.8rem;
+				font-size: 1rem;
 				color: var(--sl-input-help-text-color);
+				margin: 0;
 			}
 			.disabled-input::part(base) {
 				cursor: unset;
@@ -131,50 +142,58 @@ export class DefaultObjectInput extends LitElement {
 	}
 
 	override render() {
-		return html` <div part="property">
+		return html` <div part="property" class="property">
 			${this.withTitle
 				? html`<h3 part="property-title">${this._title ? this._title : this.property}</h3>`
 				: ``}
 			${this.withDescription && this._description
 				? html`<p part="property-paragraph" class="help-text">${this._description}</p>`
 				: ``}
-			<div class="list-container">
-				${this.value &&
-				Object.entries(this.value).map(([key, value]) => {
-					return html`<div class="add-item-container">
-						<sl-input
-							class="disabled-input add-item-side"
-							size="small"
-							value=${key}
-							disabled
-							filled
-						>
-						</sl-input>
-						<sl-input
-							class="disabled-input add-item-side"
-							size="small"
-							value=${value}
-							disabled
-							filled
-						>
-						</sl-input>
-						<div class="remove-icon">
-							<div
-								@click=${() => {
-									this.handleDeleteItemClick(key as InlangModule["default"]["id"])
-								}}
-							>
-								<svg class="icon" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-									<path
-										xmlns="http://www.w3.org/2000/svg"
-										d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"
-									/>
-								</svg>
-							</div>
-						</div>
-					</div>`
-				})}
-			</div>
+			${this.value
+				? html`<div class="list-container">
+						${this.value &&
+						Object.entries(this.value).map(([key, value]) => {
+							return html`<div class="add-item-container">
+								<sl-input
+									class="disabled-input add-item-side"
+									size="small"
+									value=${key}
+									disabled
+									filled
+								>
+								</sl-input>
+								<sl-input
+									class="disabled-input add-item-side"
+									size="small"
+									value=${value}
+									disabled
+									filled
+								>
+								</sl-input>
+								<div class="remove-icon">
+									<div
+										@click=${() => {
+											this.handleDeleteItemClick(key as InlangModule["default"]["id"])
+										}}
+									>
+										<svg
+											class="icon"
+											width="16"
+											height="16"
+											fill="currentColor"
+											viewBox="0 0 16 16"
+										>
+											<path
+												xmlns="http://www.w3.org/2000/svg"
+												d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"
+											/>
+										</svg>
+									</div>
+								</div>
+							</div>`
+						})}
+				  </div>`
+				: ``}
 			<div class="add-item-container">
 				<sl-input
 					class="add-item-side"

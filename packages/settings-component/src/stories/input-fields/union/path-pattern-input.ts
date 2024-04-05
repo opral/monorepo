@@ -8,20 +8,28 @@ export class PathPatternInput extends LitElement {
 	static override styles = [
 		//baseStyling,
 		css`
+			.property {
+				display: flex;
+				flex-direction: column;
+				gap: 12px;
+			}
+			h3 {
+				margin: 0;
+				font-size: 1rem;
+				font-weight: 800;
+			}
 			.help-text {
-				font-size: 0.8rem;
+				font-size: 1rem;
 				color: var(--sl-input-help-text-color);
 				margin: 0;
 			}
 			sl-checkbox::part(base) {
-				font-size: 0.9rem;
+				font-size: 1rem;
 			}
 			.description-container {
 				display: flex;
 				flex-direction: column;
 				gap: 4px;
-				margin-bottom: 1rem;
-				margin-top: 0.8rem;
 			}
 		`,
 	]
@@ -42,7 +50,7 @@ export class PathPatternInput extends LitElement {
 	handleInlangProjectChange: (value: string, key: string, moduleId?: string) => void = () => {}
 
 	private get _descriptionObject(): string | undefined {
-		if(this.schema.description){
+		if (this.schema.description) {
 			return this.schema.description
 		} else {
 			return "Specify the pathPattern to locate language files of specific namespaces in your repository. The namespace is a string taht shouldn't include '.', the path must include `{languageTag}` and end with `.json`."
@@ -86,7 +94,7 @@ export class PathPatternInput extends LitElement {
 			}
 			this._isInitialized = true
 		}
-		return html` <div part="property">
+		return html` <div part="property" class="property">
 			<h3 part="property-title">${this._title ? this._title : this.property}</h3>
 			<sl-checkbox
 				?checked=${this._isObject}
@@ -102,13 +110,11 @@ export class PathPatternInput extends LitElement {
 			>
 
 			${this._isObject
-				? html`<div>
-						<div class="description-container">
-							${this._descriptionObject &&
-							html`<p part="property-paragraph" class="help-text">${this._descriptionObject}</p>`}
-							${this._examplesObject &&
-							html`<p part="property-paragraph" class="help-text">${this._examplesObject}</p>`}
-						</div>
+				? html`<div part="property" class="property">
+						${this._descriptionObject &&
+						html`<p part="property-paragraph" class="help-text">${this._descriptionObject}</p>`}
+						${this._examplesObject &&
+						html`<p part="property-paragraph" class="help-text">${this._examplesObject}</p>`}
 						<object-input
 							.value=${typeof this.value === "object" ? this.value : ""}
 							.keyPlaceholder=${"Namespace"}
@@ -122,13 +128,11 @@ export class PathPatternInput extends LitElement {
 						>
 						</object-input>
 				  </div>`
-				: html`<div>
-						<div class="description-container">
-							${this._descriptionString &&
-							html`<p part="property-paragraph" class="help-text">${this._descriptionString}</p>`}
-							${this._examplesString &&
-							html`<p part="property-paragraph" class="help-text">${this._examplesString}</p>`}
-						</div>
+				: html`<div part="property" class="property">
+						${this._descriptionString &&
+						html`<p part="property-paragraph" class="help-text">${this._descriptionString}</p>`}
+						${this._examplesString &&
+						html`<p part="property-paragraph" class="help-text">${this._examplesString}</p>`}
 						<sl-input
 							value=${typeof this.value === "object" ? "" : this.value}
 							size="small"

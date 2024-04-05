@@ -7,9 +7,20 @@ export class ReferencePatternInput extends LitElement {
 	static override styles = [
 		//baseStyling,
 		css`
+			.property {
+				display: flex;
+				flex-direction: column;
+				gap: 12px;
+			}
+			h3 {
+				margin: 0;
+				font-size: 1rem;
+				font-weight: 800;
+			}
 			.help-text {
-				font-size: 0.8rem;
+				font-size: 1rem;
 				color: var(--sl-input-help-text-color);
+				margin: 0;
 			}
 			.disabled-input::part(base) {
 				cursor: unset;
@@ -70,7 +81,7 @@ export class ReferencePatternInput extends LitElement {
 	}
 
 	override render() {
-		return html`<div part="property" class="container">
+		return html`<div part="property" class="property">
 			<h3 class="property-title">${this._title ? this._title : this.property}</h3>
 			${this._description &&
 			html`<p part="property-paragraph" class="help-text">${this._description}</p>`}

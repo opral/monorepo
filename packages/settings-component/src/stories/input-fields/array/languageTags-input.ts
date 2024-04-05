@@ -7,15 +7,25 @@ export class LanguageTagsInput extends LitElement {
 	static override styles = [
 		//baseStyling,
 		css`
+			.property {
+				display: flex;
+				flex-direction: column;
+				gap: 12px;
+			}
+			h3 {
+				margin: 0;
+				font-size: 1rem;
+				font-weight: 800;
+			}
+			.help-text {
+				font-size: 1rem;
+				color: var(--sl-input-help-text-color);
+				margin: 0;
+			}
 			.tags-container {
 				display: flex;
 				flex-wrap: wrap;
 				gap: 4px;
-				padding-bottom: 8px;
-			}
-			.help-text {
-				font-size: 0.8rem;
-				color: var(--sl-input-help-text-color);
 			}
 			.disabled-input::part(base) {
 				cursor: unset;
@@ -92,7 +102,7 @@ export class LanguageTagsInput extends LitElement {
 	}
 
 	override render() {
-		return html`<div part="property" class="container">
+		return html`<div part="property" class="property">
 			<h3 part="property-title" class="property">${this._title ? this._title : this.property}</h3>
 			${this._description &&
 			html`<p part="property-paragraph" class="help-text">${this._description}</p>`}
