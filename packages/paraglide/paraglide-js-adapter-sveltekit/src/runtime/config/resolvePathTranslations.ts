@@ -12,7 +12,7 @@ import type { Message, PathTranslations, UserPathTranslations } from "./pathTran
  */
 export function resolvePathTranslations<T extends string>(
 	userTranslations: UserPathTranslations<T>,
-	availableLanguageTags: readonly T[]
+	availableLanguageTags: readonly T[],
 ): PathTranslations<T> {
 	const translations: PathTranslations<T> = {}
 	for (const path in userTranslations) {
@@ -33,10 +33,10 @@ export function resolvePathTranslations<T extends string>(
 
 function fromMessage<T extends string>(
 	message: Message<T>,
-	availableLanguageTags: readonly T[]
+	availableLanguageTags: readonly T[],
 ): Record<T, `/${string}`> {
 	const entries = availableLanguageTags.map(
-		(languageTag) => [languageTag, message({}, { languageTag })] as const
+		(languageTag) => [languageTag, message({}, { languageTag })] as const,
 	)
 	return Object.fromEntries(entries) as Record<T, `/${string}`>
 }
