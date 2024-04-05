@@ -901,7 +901,7 @@ async function saveMessagesViaPlugin(
 	}
 }
 
-const maxRetries = 5
+const maxRetries = 10
 const nProbes = 50
 const probeInterval = 100
 async function acquireFileLock(
