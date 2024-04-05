@@ -42,7 +42,11 @@ export class PathPatternInput extends LitElement {
 	handleInlangProjectChange: (value: string, key: string, moduleId?: string) => void = () => {}
 
 	private get _descriptionObject(): string | undefined {
-		return this.schema.anyOf[1].patternProperties["^[^.]+$"].description || undefined
+		if(this.schema.description){
+			return this.schema.description
+		} else {
+			return "Specify the pathPattern to locate language files of specific namespaces in your repository. The namespace is a string taht shouldn't include '.', the path must include `{languageTag}` and end with `.json`."
+		}
 	}
 
 	private get _examplesObject(): string | undefined {
@@ -50,13 +54,21 @@ export class PathPatternInput extends LitElement {
 	}
 
 	private get _descriptionString(): string | undefined {
-		return this.schema.anyOf[0].description || undefined
+		if (this.schema.description) {
+			return this.schema.description
+		} else {
+			return this.schema.anyOf[0].description || undefined
+		}
 	}
 
 	private get _examplesString(): string | undefined {
 		return this.schema.anyOf[0].examples
 			? "Example: " + JSON.stringify(this.schema.anyOf[0].examples)
 			: undefined
+	}
+
+	private get _title(): string | undefined {
+		return this.schema.title || undefined
 	}
 
 	@state()
@@ -75,7 +87,7 @@ export class PathPatternInput extends LitElement {
 			this._isInitialized = true
 		}
 		return html` <div part="property">
-			<h3 part="property-title">${this.property}</h3>
+			<h3 part="property-title">${this._title ? this._title : this.property}</h3>
 			<sl-checkbox
 				?checked=${this._isObject}
 				@input=${(e: Event) => {
@@ -104,6 +116,9 @@ export class PathPatternInput extends LitElement {
 							.handleInlangProjectChange=${this.handleInlangProjectChange}
 							.property=${this.property}
 							.moduleId=${this.moduleId}
+							.schema=${this.schema}
+							.withTitle=${false}
+							.withDescription=${false}
 						>
 						</object-input>
 				  </div>`
