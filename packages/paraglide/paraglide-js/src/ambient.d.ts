@@ -8,7 +8,7 @@ declare const PACKAGE_VERSION: string
 
 /**
  * Additional Environment Variables defined in the build step
- * 
+ *
  * These may be used by dependencies
  */
 declare const ENV_DEFINED_IN_BUILD_STEP: Record<string, string>
