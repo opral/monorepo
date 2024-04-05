@@ -32,13 +32,13 @@ A few recent comments.
 <doc-comments>
 <doc-comment text="Just tried Paraglide JS from @inlangHQ. This is how i18n should be done! Totally new level of DX for both implementation and managing translations! Superb support for SvelteKit as well ⭐" author="Patrik Engborg" icon="mdi:twitter" data-source="https://twitter.com/patrikengborg/status/1747260930873053674"></doc-comment>
 <doc-comment text="I was messing with various i18n frameworks and tools in combination with Astro, and must say that Paraglide was the smoothest experience. I have migrated my website from i18next and it was a breeze. SSG and SSR worked out of the box (which was the first one for me), and overall DX is great. Thanks for your work!" author="Dalibor Hon" icon="mdi:discord" data-source="https://discord.com/channels/897438559458430986/1096039983116202034/1220796380772307004"></doc-comment>
-<doc-comment text="The lib is great guys!" author="ktarmyshov" icon="mdi:github"></doc-comment>
+<doc-comment text="Awesome library 🙂 Thanks so much! 1) The docs were simple and straight forward 2) Everything just worked.. no headaches" author="Dimitry" icon="mdi:discord" data-source="https://discord.com/channels/897438559458430986/1083724234142011392/1225658097016766574"></doc-comment>
 <doc-comment text="Thank you for that huge work you have done and still doing!" author="ZerdoX-x" icon="mdi:github"></doc-comment>
 </doc-comments>
 
 # Getting started
 
-To use Paraglide stanadlone without a framework, run the following command:
+To use Paraglide standalone without a framework, run the following command:
 
 ```bash
 npx @inlang/paraglide-js@latest init
@@ -351,7 +351,7 @@ Of course, we're not done yet! We plan on adding the following features to Parag
 
 Paraglide JS is part of the Inlang ecosystem and integrates nicely with all the other Inlang-compatible tools.
 
-As a developer, you will love the [Sherlock VsCode extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension).
+As a developer, you will love the [Sherlock VS Code extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension).
 
 If you are working with translators or designers you will find these tools useful:
 

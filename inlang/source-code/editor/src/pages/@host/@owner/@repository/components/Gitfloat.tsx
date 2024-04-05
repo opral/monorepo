@@ -54,9 +54,11 @@ export const Gitfloat = () => {
 		const isFork = () => (repoInfo && "isFork" in repoInfo ? repoInfo.isFork : false)
 
 		// check if the user has disabled the fork sync warning
-		const disableForkSyncWarning = () => localStorage?.disableForkSyncWarning?.some((repo: { owner: string, repository: string }) =>
-			repo.owner === routeParams().owner && repo.repository === routeParams().repository
-		)
+		const disableForkSyncWarning = () =>
+			localStorage?.disableForkSyncWarning?.some(
+				(repo: { owner: string; repository: string }) =>
+					repo.owner === routeParams().owner && repo.repository === routeParams().repository
+			)
 
 		if (localStorage?.user === undefined) {
 			return "loading"
@@ -71,7 +73,12 @@ export const Gitfloat = () => {
 			return "loading"
 		} else if (userIsCollaborator() === false) {
 			return "fork"
-		} else if (hasPushedChanges() && localChanges() === 0 && isFork() && !disableForkSyncWarning()) {
+		} else if (
+			hasPushedChanges() &&
+			localChanges() === 0 &&
+			isFork() &&
+			!disableForkSyncWarning()
+		) {
 			// if changes exist in a fork, show the pull request button
 			return "pullrequest"
 		}
@@ -138,7 +145,7 @@ export const Gitfloat = () => {
 		} else {
 			showToast({
 				variant: "danger",
-				title: "The creation of the fork failed.",
+				title: `${response?.status} – The creation of the fork failed.`,
 				message: `Please try it again or report a bug`,
 			})
 			return response
