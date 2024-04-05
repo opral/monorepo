@@ -3,18 +3,18 @@
 
 ## What is this about?
 
-In this guide, I'll walk you through the seamless integration of the [next-intl](/m/hheug211) internationalization library with your favorite [IDE extension](/m/r7kp499g). This powerful combination, featuring next-intl and an IDE extension, enhances your development workflow, offering i18n management for Next.js projects.
+In this guide, I'll walk you through the seamless integration of the [next-intl](/m/hheug211) internationalization library with [Sherlock](/m/r7kp499g). This powerful combination, featuring next-intl and an Sherlock, enhances your development workflow, offering i18n management for Next.js projects.
 
 #### Main Links:
 <doc-links>
     <doc-link title="Next-Intl" icon="mdi:bookmark-box-multiple" href="/m/hheug211" description="Read documentation"></doc-link>
 	<doc-link title="Next-Intl Plugin" icon="mdi:puzzle" href="/m/193hsyds" description="Make it compatible"></doc-link>
-	<doc-link title="IDE Extension" icon="mdi:microsoft-visual-studio-code" href="/m/r7kp499g" description="Supercharge i18n within VS Code"></doc-link>
+	<doc-link title="Sherlock" icon="mdi:microsoft-visual-studio-code" href="/m/r7kp499g" description="Supercharge i18n within VS Code"></doc-link>
 </doc-links>
 
-## Why Choose the IDE Extension and next-intl Combo?
+## Why Choose Sherlock and next-intl together?
 
-The synergy of the next-intl i18n library and an [IDE extension](/m/r7kp499g) provides a robust solution for internationalization in Next.js. Here's why it's a winning combination:
+The synergy of the next-intl i18n library and a [VS Code extension](/m/r7kp499g) provides a robust solution for internationalization in Next.js. Here's why it's a winning combination:
 
 - **Extract translations:** via the `Inlang: Extract Message` code action.
 - **Translation Linting:** Get notified about missing translations and other issues directly in your IDE.
@@ -52,10 +52,10 @@ The synergy of the next-intl i18n library and an [IDE extension](/m/r7kp499g) pr
 Adjust languageTags, and the path to your translations if needed.
 The `plugin-next-intl` is a plugin to make next-intl ecosystem compatible with inlang. For further configuration read the [documentation](https://inlang.com/m/193hsyds/plugin-inlang-nextIntl).
 
-### 2. Install the IDE Extension:
+### 2. Install Sherlock:
 <br/>
 
-- Install the IDE extension from the [vscode marketplace](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension)
+- Install Sherlock from the [vscode marketplace](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension)
 - Reload the VS Code window to activate the extension.
 
 ## Usage:
