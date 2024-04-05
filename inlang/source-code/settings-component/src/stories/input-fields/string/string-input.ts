@@ -45,9 +45,13 @@ export class StringInput extends LitElement {
 		return this.schema.examples ? "Example: " + JSON.stringify(this.schema.examples) : undefined
 	}
 
+	private get _title(): string | undefined {
+		return this.schema.title || undefined
+	}
+
 	override render() {
 		return html` <div part="property">
-			<h3 part="property-title">${this.property}</h3>
+			<h3 part="property-title">${this._title ? this._title : this.property}</h3>
 			<div class="description-container">
 				${this._description &&
 				html`<p part="property-paragraph" class="help-text">${this._description}</p>`}

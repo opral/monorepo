@@ -61,6 +61,10 @@ export class LintRuleLevelObjectInput extends LitElement {
 		return this.schema.description || undefined
 	}
 
+	private get _title(): string | undefined {
+		return this.schema.title || undefined
+	}
+
 	private get _valueOptions(): Array<Record<string, string>> | undefined {
 		//@ts-ignore
 		const valuesOptions = Object.values(this.schema.patternProperties)[0]?.anyOf
@@ -82,7 +86,7 @@ export class LintRuleLevelObjectInput extends LitElement {
 
 	override render() {
 		return html` <div part="property">
-			<h3 part="property-title">${this.property}</h3>
+			<h3 part="property-title">${this._title ? this._title : this.property}</h3>
 			${this._description &&
 			html`<p part="property-paragraph" class="help-text">${this._description}</p>`}
 			<div class="container">
