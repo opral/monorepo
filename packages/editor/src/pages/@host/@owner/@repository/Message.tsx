@@ -14,6 +14,7 @@ export function Message(props: { id: string }) {
 	const { project, filteredLanguageTags, filteredIds, filteredMessageLintRules, textSearch } =
 		useEditorState()
 	const [message, setMessage] = createSignal<MessageType>()
+	const [lintReports, setLintReports] = createSignal<readonly MessageLintReport[]>([])
 	const [shouldMessageBeShown, setShouldMessageBeShown] = createSignal(true)
 	// const [blockChangeMessageIsFocused, setBlockChangeMessageIsFocused]  = createSignal<Date>(new Date())
 
@@ -33,21 +34,27 @@ export function Message(props: { id: string }) {
 	})
 
 	// TODO: Find out why messages.get() in solidAdapter only works with subscribe.
-	//       By contrast, query.messages.getAll() signal does work. see ListHeader.tsx
-	createEffect(() => {
-		if (!project.loading) {
-			project()!.query.messages.get.subscribe({ where: { id: props.id } }, (message) => {
-				setMessage(message)
-			})
-		}
-	})
+	//       by contrast, query.messages.getAll() signal does work. see ListHeader.tsx
+	createEffect(
+		on([project], () => {
+			if (!project.loading) {
+				project()!.query.messages.get.subscribe({ where: { id: props.id } }, (message) => {
+					setMessage(message)
+				})
+			}
+		})
+	)
 
 	// createResource re-fetches lintReports via async api whenever the message changes
-	const [lintReports] = createResource(message, async (message) => {
+	createResource(message, async (message) => {
 		if (!project.loading && message?.id) {
 			const reports = await project()!.query.messageLintReports.get({
 				where: { messageId: message.id },
 			})
+			// set lintReports synchronously for setShouldMessageBeShown effect on setHasBeenLinted
+			// createResource waits for next tick to update itself using the return value
+			setLintReports(reports)
+			// trigger hasBeenLinted signal once, the first time the message is linted
 			setHasBeenLinted(true)
 			return reports
 		}
