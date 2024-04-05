@@ -18,7 +18,6 @@ import nodeFsPromises from "node:fs/promises"
 import childProcess from "node:child_process"
 import memfs from "memfs"
 import { loadProject, type ProjectSettings } from "@inlang/sdk"
-import { version } from "../../state.js"
 import { createNodeishMemoryFs } from "@inlang/sdk/test-utilities"
 import { Logger } from "../../../services/logger/index.js"
 import { openRepository } from "@lix-js/client"
@@ -122,7 +121,7 @@ describe("addParaglideJsToDependencies()", () => {
 		const packageJson = JSON.parse(
 			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
 		)
-		expect(packageJson.devDependencies["@inlang/paraglide-js"]).toBe(version)
+		expect(packageJson.devDependencies["@inlang/paraglide-js"]).toBe(PACKAGE_VERSION)
 	})
 })
 
@@ -315,10 +314,11 @@ describe("existingProjectFlow()", () => {
 		const repo = await openRepository("file://", { nodeishFs: fs })
 
 		mockUserInput(["useExistingProject"])
-		const project = await existingProjectFlow(
-			{ existingProjectPath: "/project.inlang" },
-			{ logger, repo }
-		)
+		const project = await existingProjectFlow({
+			existingProjectPath: "/project.inlang",
+			logger,
+			repo,
+		})
 
 		expect(project.settings().languageTags).toEqual(getNewProjectTemplate().languageTags)
 	})
@@ -331,7 +331,7 @@ describe("existingProjectFlow()", () => {
 
 		mockUserInput(["newProject", "en"])
 
-		await existingProjectFlow({ existingProjectPath: "/folder/project.inlang" }, { logger, repo })
+		await existingProjectFlow({ existingProjectPath: "/folder/project.inlang", logger, repo })
 		// info that a new project is created
 		expect(logger.info).toHaveBeenCalledOnce()
 		// the newly created project file should exist
@@ -345,7 +345,7 @@ describe("existingProjectFlow()", () => {
 		const repo = await openRepository("file://", { nodeishFs: fs })
 
 		mockUserInput(["useExistingProject"])
-		await existingProjectFlow({ existingProjectPath: "/project.inlang" }, { logger, repo })
+		await existingProjectFlow({ existingProjectPath: "/project.inlang", logger, repo })
 		expect(logger.error).toHaveBeenCalled()
 		expect(process.exit).toHaveBeenCalled()
 	})
