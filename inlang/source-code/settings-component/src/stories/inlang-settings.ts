@@ -53,7 +53,8 @@ export default class InlangSettings extends LitElement {
 			.hover-bar {
 				box-sizing: border-box;
 				width: 100%;
-				max-width: 600px;
+				max-width: 500px;
+				height: 48px;
 				margin: 0 auto;
 				display: flex;
 				flex-wrap: wrap;
@@ -61,14 +62,16 @@ export default class InlangSettings extends LitElement {
 				align-items: center;
 				gap: 8px;
 				background-color: var(--sl-panel-background-color);
-				padding: 0.8rem;
 				padding-left: 1rem;
+				padding-right: 0.8rem;
 				border-radius: 0.5rem;
 				border: 1px solid var(--sl-panel-border-color);
 				filter: drop-shadow(0 4px 3px rgb(0 0 0 / 0.07)) drop-shadow(0 2px 2px rgb(0 0 0 / 0.06));
 			}
 			.hover-bar-text {
-				font-weight: 500;
+				font-weight: 600;
+				line-height: 1.5;
+				font-size: 14px;
 				margin: 0;
 			}
 		`,
@@ -236,11 +239,11 @@ export default class InlangSettings extends LitElement {
 			})}
 			${this._unsavedChanges
 				? html`<div class="hover-bar-container">
-						<div class="hover-bar">
+						<div class="hover-bar" part="float">
 							<p class="hover-bar-text">Attention, you have unsaved changes.</p>
 							<div>
 								<sl-button
-									size="medium"
+									size="small"
 									@click=${() => {
 										this._revertChanges()
 									}}
@@ -249,7 +252,7 @@ export default class InlangSettings extends LitElement {
 									Cancel
 								</sl-button>
 								<sl-button
-									size="medium"
+									size="small"
 									@click=${() => {
 										this._saveChanges()
 									}}
