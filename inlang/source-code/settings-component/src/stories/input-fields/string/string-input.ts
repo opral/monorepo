@@ -7,8 +7,18 @@ export class StringInput extends LitElement {
 	static override styles = [
 		//baseStyling,
 		css`
+			.property {
+				display: flex;
+				flex-direction: column;
+				gap: 12px;
+			}
+			h3 {
+				margin: 0;
+				font-size: 1rem;
+				font-weight: 800;
+			}
 			.help-text {
-				font-size: 0.8rem;
+				font-size: 1rem;
 				color: var(--sl-input-help-text-color);
 				margin: 0;
 			}
@@ -16,8 +26,6 @@ export class StringInput extends LitElement {
 				display: flex;
 				flex-direction: column;
 				gap: 4px;
-				margin-bottom: 1rem;
-				margin-top: 0.8rem;
 			}
 		`,
 	]
@@ -50,7 +58,7 @@ export class StringInput extends LitElement {
 	}
 
 	override render() {
-		return html` <div part="property">
+		return html` <div part="property" class="property">
 			<h3 part="property-title">${this._title ? this._title : this.property}</h3>
 			<div class="description-container">
 				${this._description &&
