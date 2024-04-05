@@ -76,6 +76,12 @@ export class DefaultObjectInput extends LitElement {
 	schema: any = {}
 
 	@property()
+	withTitle?: boolean = true
+
+	@property()
+	withDescription?: boolean = true
+
+	@property()
 	handleInlangProjectChange: (
 		value: Record<InlangModule["default"]["id"], string>,
 		key: string,
@@ -126,10 +132,12 @@ export class DefaultObjectInput extends LitElement {
 
 	override render() {
 		return html` <div part="property">
-			${this.property &&
-			html`<h3 part="property-title">${this._title ? this._title : this.property}</h3>`}
-			${this._description &&
-			html`<p part="property-paragraph" class="help-text">${this._description}</p>`}
+			${this.withTitle
+				? html`<h3 part="property-title">${this._title ? this._title : this.property}</h3>`
+				: ``}
+			${this.withDescription && this._description
+				? html`<p part="property-paragraph" class="help-text">${this._description}</p>`
+				: ``}
 			<div class="list-container">
 				${this.value &&
 				Object.entries(this.value).map(([key, value]) => {

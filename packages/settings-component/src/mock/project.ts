@@ -52,10 +52,12 @@ export const mockInstalledPlugins = [
 			type: "object",
 			properties: {
 				pathPattern: {
+					title: "Path to language files",
 					anyOf: [
 						{
 							pattern: "^(\\./|\\../|/)[^*]*\\{languageTag\\}[^*]*\\.json",
-							description: "The pathPattern must contain `{languageTag}` and end with `.json`.",
+							description:
+								"Specify the pathPattern to locate language files in your repository. It must include `{languageTag}` and end with `.json`.",
 							examples: [
 								"./{languageTag}/file.json",
 								"../folder/{languageTag}/file.json",
@@ -68,7 +70,7 @@ export const mockInstalledPlugins = [
 							patternProperties: {
 								"^[^.]+$": {
 									pattern: "^(\\./|\\../|/)[^*]*\\{languageTag\\}[^*]*\\.json",
-									description: "The pathPattern must contain `{languageTag}` and end with `.json`.",
+									description: "It must include `{languageTag}` and end with `.json`.",
 									examples: [
 										"./{languageTag}/file.json",
 										"../folder/{languageTag}/file.json",
@@ -82,11 +84,18 @@ export const mockInstalledPlugins = [
 				},
 				variableReferencePattern: {
 					type: "array",
+					title: "Variable reference pattern",
+					description:
+						"The pattern to match content in the messages. You can define an opening and closing pattern. The closing pattern is not required. The default is '{{' and '}}'.",
+					examples: ["{ and }", "{{ and }}", "< and >", "@:"],
 					items: {
 						type: "string",
 					},
 				},
 				sourceLanguageFilePath: {
+					title: "Source language file path",
+					description:
+						"Sometimes it is necessary to specify the location of the source language file(s) when they do not follow the standard naming or file structure convention.",
 					anyOf: [
 						{
 							pattern: "^(\\./|\\../|/)[^*]*\\{languageTag\\}[^*]*\\.json",
@@ -117,6 +126,8 @@ export const mockInstalledPlugins = [
 				},
 				ignore: {
 					type: "array",
+					title: "Ignore paths",
+					description: "Set a path that should be ignored.",
 					items: {
 						type: "string",
 					},
@@ -159,6 +170,8 @@ export const mockInstalledMessageLintRules = [
 						description: "All items in the array need quotaion marks at the end and beginning",
 						type: "string",
 					},
+					title: "DEPRICATED. Ignore paths",
+					description: "Set a path that should be ignored.",
 				},
 			},
 		},
