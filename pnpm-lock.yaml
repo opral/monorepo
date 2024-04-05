@@ -1304,9 +1304,6 @@ importers:
       '@vitest/coverage-v8':
         specifier: 0.34.6
         version: 0.34.6(vitest@0.34.6)
-      cross-env:
-        specifier: ^7.0.3
-        version: 7.0.3
       memfs:
         specifier: 4.6.0
         version: 4.6.0(quill-delta@5.1.0)(rxjs@7.8.1)(tslib@2.6.2)
