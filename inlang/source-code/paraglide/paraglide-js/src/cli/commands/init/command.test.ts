@@ -18,7 +18,6 @@ import nodeFsPromises from "node:fs/promises"
 import childProcess from "node:child_process"
 import memfs from "memfs"
 import { loadProject, type ProjectSettings } from "@inlang/sdk"
-import { version } from "../../state.js"
 import { createNodeishMemoryFs } from "@inlang/sdk/test-utilities"
 import { Logger } from "../../../services/logger/index.js"
 import { openRepository } from "@lix-js/client"
@@ -122,7 +121,7 @@ describe("addParaglideJsToDependencies()", () => {
 		const packageJson = JSON.parse(
 			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
 		)
-		expect(packageJson.devDependencies["@inlang/paraglide-js"]).toBe(version)
+		expect(packageJson.devDependencies["@inlang/paraglide-js"]).toBe(PACKAGE_VERSION)
 	})
 })
 
