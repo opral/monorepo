@@ -6,7 +6,7 @@ import { readFileSync } from "node:fs"
 import { removeCommas } from "./helper/removeCommas.js"
 import { calculateSummary } from "./helper/calculateSummary.js"
 import { caching } from "cache-manager"
-import { type MessageLintReport, loadProject } from "@inlang/sdk"
+import { loadProject } from "@inlang/sdk"
 
 const fontMedium = readFileSync(new URL("../assets/static/Inter-Medium.ttf", import.meta.url))
 const fontBold = readFileSync(new URL("../assets/static/Inter-Bold.ttf", import.meta.url))
@@ -53,41 +53,7 @@ export const badge = async (urlQuery: string, projectQuery?: string) => {
 
 		const settings = project.settings()
 
-		// TODO: async reports
-		const MessageLintReportsAwaitable = (): Promise<MessageLintReport[]> => {
-			return new Promise((resolve) => {
-				let reports = project.query.messageLintReports.getAll()
-
-				if (reports) {
-					// reports where loaded
-					setTimeout(() => {
-						// this is a workaround. We do not know when the report changed. Normally this shouldn't be a issue for cli
-						const newReports = project.query.messageLintReports.getAll()
-						if (newReports) {
-							resolve(newReports)
-						}
-					}, 200)
-				} else {
-					let counter = 0
-					const interval = setInterval(() => {
-						reports = project.query.messageLintReports.getAll()
-						if (reports) {
-							clearInterval(interval)
-							resolve(reports)
-						} else {
-							counter += 1
-						}
-
-						if (counter > 30) {
-							clearInterval(interval)
-							resolve([])
-						}
-					}, 200)
-				}
-			})
-		}
-
-		const reports = await MessageLintReportsAwaitable()
+		const reports = await project.query.messageLintReports.getAll()
 
 		const { percentage, errors, warnings, numberOfMissingVariants } = calculateSummary({
 			reports: reports,
