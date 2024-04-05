@@ -86,6 +86,10 @@ export class DefaultObjectInput extends LitElement {
 		return this.schema.description || undefined
 	}
 
+	private get _title(): string | undefined {
+		return this.schema.title || undefined
+	}
+
 	@state()
 	private _inputValue: string | undefined = undefined
 
@@ -122,7 +126,8 @@ export class DefaultObjectInput extends LitElement {
 
 	override render() {
 		return html` <div part="property">
-			${this._description && html`<h3 part="property-title">${this.property}</h3>`}
+			${this.property &&
+			html`<h3 part="property-title">${this._title ? this._title : this.property}</h3>`}
 			${this._description &&
 			html`<p part="property-paragraph" class="help-text">${this._description}</p>`}
 			<div class="list-container">

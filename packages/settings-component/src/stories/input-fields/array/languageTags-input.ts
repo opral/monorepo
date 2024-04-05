@@ -61,6 +61,10 @@ export class LanguageTagsInput extends LitElement {
 		return this.schema.description || undefined
 	}
 
+	private get _title(): string | undefined {
+		return this.schema.title || undefined
+	}
+
 	@state()
 	private _inputValue: string | undefined = undefined
 
@@ -89,7 +93,7 @@ export class LanguageTagsInput extends LitElement {
 
 	override render() {
 		return html`<div part="property" class="container">
-			<h3 part="property-title" class="property">${this.property}</h3>
+			<h3 part="property-title" class="property">${this._title ? this._title : this.property}</h3>
 			${this._description &&
 			html`<p part="property-paragraph" class="help-text">${this._description}</p>`}
 			<div class="tags-container">
