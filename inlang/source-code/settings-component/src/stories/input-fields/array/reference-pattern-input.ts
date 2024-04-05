@@ -14,12 +14,13 @@ export class ReferencePatternInput extends LitElement {
 			}
 			h3 {
 				margin: 0;
-				font-size: 1rem;
+				font-size: 14px;
 				font-weight: 800;
 			}
 			.help-text {
-				font-size: 1rem;
+				font-size: 14px;
 				color: var(--sl-input-help-text-color);
+				line-height: 1.5;
 				margin: 0;
 			}
 			.disabled-input::part(base) {

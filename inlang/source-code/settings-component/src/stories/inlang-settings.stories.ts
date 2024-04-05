@@ -51,7 +51,7 @@ export const StyledWithPartAPI: StoryObj = {
 					background: lightblue;
 				}
 				inlang-settings::part(property-title) {
-					font-size: 1rem;
+					font-size: 14px;
 				}
 				inlang-settings::part(property-paragraph) {
 					color: blue;

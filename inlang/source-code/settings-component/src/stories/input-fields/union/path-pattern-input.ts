@@ -15,16 +15,17 @@ export class PathPatternInput extends LitElement {
 			}
 			h3 {
 				margin: 0;
-				font-size: 1rem;
+				font-size: 14px;
 				font-weight: 800;
 			}
 			.help-text {
-				font-size: 1rem;
+				font-size: 14px;
 				color: var(--sl-input-help-text-color);
 				margin: 0;
+				line-height: 1.5;
 			}
 			sl-checkbox::part(base) {
-				font-size: 1rem;
+				font-size: 14px;
 			}
 			.description-container {
 				display: flex;

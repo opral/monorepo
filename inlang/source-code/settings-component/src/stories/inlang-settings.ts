@@ -29,8 +29,9 @@ export default class InlangSettings extends LitElement {
 	static override styles = [
 		baseStyling,
 		css`
-			h3 {
+			h2 {
 				margin: 0;
+				padding-top: 1rem;
 			}
 			.container {
 				position: relative;
@@ -41,7 +42,7 @@ export default class InlangSettings extends LitElement {
 			.module-container {
 				display: flex;
 				flex-direction: column;
-				gap: 16px;
+				gap: 40px;
 			}
 			.hover-bar-container {
 				width: 100%;
