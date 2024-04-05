@@ -50,7 +50,9 @@ async function generateSitemap() {
 							"/" +
 							item.uniqueID +
 							"/" +
-							item.id.replaceAll(".", "-"),
+							item.slug
+							? item.slug.replaceAll(".", "-")
+							: item.id.replaceAll(".", "-"),
 						publishDate
 					)}`
 					// }
@@ -68,7 +70,9 @@ async function generateSitemap() {
 							"/" +
 							item.uniqueID +
 							"/" +
-							item.id.replaceAll(".", "-"),
+							item.slug
+							? item.slug.replaceAll(".", "-")
+							: item.id.replaceAll(".", "-"),
 						publishDate
 					)}`
 					// }
