@@ -2380,11 +2380,11 @@ importers:
   inlang/source-code/templates/message-lint-rule:
     dependencies:
       '@inlang/sdk':
-        specifier: ^0.28.3
+        specifier: ^0.29.0
         version: link:../../sdk
     devDependencies:
       '@inlang/cli':
-        specifier: ^2.13.4
+        specifier: ^2.13.5
         version: link:../../cli
       typescript:
         specifier: ^5.2.2
@@ -28644,7 +28644,7 @@ packages:
 
   file:..:
     resolution: {directory: .., type: directory}
-    name: dev
+    name: monorepo
     dev: true
 
   file:inlang/source-code/cli:
