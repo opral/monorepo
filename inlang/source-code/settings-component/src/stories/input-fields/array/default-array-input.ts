@@ -7,15 +7,27 @@ export class DefaultArrayInput extends LitElement {
 	static override styles = [
 		//baseStyling,
 		css`
+			.property {
+				display: flex;
+				flex-direction: column;
+				gap: 12px;
+			}
+			h3 {
+				margin: 0;
+				font-size: 14px;
+				font-weight: 800;
+			}
+			.help-text {
+				font-size: 14px;
+				color: var(--sl-input-help-text-color);
+				line-height: 1.5;
+				margin: 0;
+			}
 			.item-container {
 				display: flex;
 				flex-direction: column;
 				gap: 4px;
 				padding-bottom: 8px;
-			}
-			.help-text {
-				font-size: 0.8rem;
-				color: var(--sl-input-help-text-color);
 			}
 			.disabled-input::part(base) {
 				cursor: unset;
@@ -64,6 +76,10 @@ export class DefaultArrayInput extends LitElement {
 		return this.schema.description || undefined
 	}
 
+	private get _title(): string | undefined {
+		return this.schema.title || undefined
+	}
+
 	@state()
 	private _inputValue: string | undefined = undefined
 
@@ -91,8 +107,8 @@ export class DefaultArrayInput extends LitElement {
 	}
 
 	override render() {
-		return html`<div part="property" class="container">
-			<h3 part="property-title">${this.property}</h3>
+		return html`<div part="property" class="property">
+			<h3 part="property-title">${this._title ? this._title : this.property}</h3>
 			${this._description &&
 			html`<p part="property-paragraph" class="help-text">${this._description}</p>`}
 			${this.value && this.value.length > 0

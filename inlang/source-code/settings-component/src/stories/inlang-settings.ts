@@ -16,7 +16,6 @@ import SLOption from "@shoelace-style/shoelace/dist/components/option/option.com
 import SlInput from "@shoelace-style/shoelace/dist/components/input/input.component.js"
 import SlButton from "@shoelace-style/shoelace/dist/components/button/button.component.js"
 import SlCheckbox from "@shoelace-style/shoelace/dist/components/checkbox/checkbox.component.js"
-import { setExportparts } from "../exportParts.js"
 
 // in case an app defines it's own set of shoelace components, prevent double registering
 if (!customElements.get("sl-select")) customElements.define("sl-select", SlSelect)
@@ -30,8 +29,9 @@ export default class InlangSettings extends LitElement {
 	static override styles = [
 		baseStyling,
 		css`
-			h3 {
+			h2 {
 				margin: 0;
+				padding-top: 1rem;
 			}
 			.container {
 				position: relative;
@@ -42,7 +42,7 @@ export default class InlangSettings extends LitElement {
 			.module-container {
 				display: flex;
 				flex-direction: column;
-				gap: 16px;
+				gap: 40px;
 			}
 			.hover-bar-container {
 				width: 100%;
@@ -194,7 +194,7 @@ export default class InlangSettings extends LitElement {
 	}
 
 	override render() {
-		return html` <div class="container" exportParts=${setExportparts(this)} part="base">
+		return html` <div class="container" part="base">
 			${Object.entries(this._settingProperties).map(([key, value]) => {
 				return value.schema?.properties && this._newSettings
 					? html`<div class="module-container" part="module">
