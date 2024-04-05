@@ -1,6 +1,6 @@
 import { Command } from "commander"
-import { compileCommand } from "./commands/compile/command.js"
-import { initCommand } from "./commands/init/command.js"
+import { compileCommand } from "~/cli/commands/compile/command.js"
+import { initCommand } from "~/cli/commands/init/command.js"
 
 export const cli = new Command()
 	.name("paraglide-js")

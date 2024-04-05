@@ -1,9 +1,10 @@
 import { defineConfig } from "vite"
 import dts from "vite-plugin-dts"
+import tsconfigPaths from "vite-tsconfig-paths"
 import pkg from "./package.json"
 
 export default defineConfig(({ mode }) => ({
-	plugins: [dts({ insertTypesEntry: true })],
+	plugins: [dts({ insertTypesEntry: true }), tsconfigPaths()],
 	build: {
 		lib: {
 			entry: "src/index.ts",
