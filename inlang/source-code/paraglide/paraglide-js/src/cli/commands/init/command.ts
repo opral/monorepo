@@ -19,11 +19,6 @@ import { compile } from "~/compiler/compile.js"
 import { writeOutput } from "~/services/file-handling/write-output.js"
 import type { CliStep } from "./cli-utils.js"
 
-type Context = {
-	logger: Logger
-	repo: Repository
-}
-
 const ADAPTER_LINKS = {
 	sveltekit: "https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n",
 	nextjs: "https://inlang.com/m/osslbuzt/paraglide-next-i18n",
@@ -129,7 +124,11 @@ export const initializeInlangProject: CliStep<
 	const existingProjectPath = await findExistingInlangProjectPath(ctx.repo)
 
 	if (existingProjectPath) {
-		const project = await existingProjectFlow({ existingProjectPath }, ctx)
+		const project = await existingProjectFlow({
+			existingProjectPath,
+			repo: ctx.repo,
+			logger: ctx.logger,
+		})
 		return {
 			...ctx,
 			project,
@@ -258,12 +257,13 @@ export const determineOutdir: CliStep<
 	}
 }
 
-export const existingProjectFlow = async (
-	args: { existingProjectPath: string },
-	ctx: Context
-): Promise<InlangProject> => {
+export const existingProjectFlow = async (ctx: {
+	existingProjectPath: string
+	repo: Repository
+	logger: Logger
+}): Promise<InlangProject> => {
 	const selection = (await prompt(
-		`Do you want to use the inlang project at "${args.existingProjectPath}" or create a new project?`,
+		`Do you want to use the inlang project at "${ctx.existingProjectPath}" or create a new project?`,
 		{
 			type: "select",
 			options: [
@@ -278,7 +278,7 @@ export const existingProjectFlow = async (
 	}
 
 	const project = await loadProject({
-		projectPath: nodePath.resolve(process.cwd(), args.existingProjectPath),
+		projectPath: nodePath.resolve(process.cwd(), ctx.existingProjectPath),
 		repo: ctx.repo,
 	})
 
@@ -351,7 +351,10 @@ async function promptForLanguageTags(
 
 	return validLanguageTags
 }
-export const createNewProjectFlow = async (ctx: Context): Promise<InlangProject> => {
+export const createNewProjectFlow = async (ctx: {
+	repo: Repository
+	logger: Logger
+}): Promise<InlangProject> => {
 	const languageTags = await promptForLanguageTags()
 	const settings = getNewProjectTemplate()
 
