@@ -147,9 +147,9 @@ export const initializeInlangProject: CliStep<
 }
 
 export const maybeAddVsCodeExtension: CliStep<
-	{ 
-		repo: Repository; 
-		logger: Logger; 
+	{
+		repo: Repository
+		logger: Logger
 		project: InlangProject
 	},
 	unknown
