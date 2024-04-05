@@ -66,6 +66,13 @@ describe("paraglide-js", () => {
 				expect(await readFile(path.resolve(workingDir, "src/paraglide/messages/de.js"))).includes(
 					"export {}"
 				)
+
+				const packageJson = JSON.parse(await readFile(path.resolve(workingDir, "package.json")))
+
+				const expectedVersion = child_process.execSync(ParaglideLocation + " --version").toString()
+				expect(packageJson.devDependencies["@inlang/paraglide-js"].trim()).toEqual(
+					expectedVersion.trim()
+				)
 				await cleanup()
 			},
 			{ timeout: 30_000 }
