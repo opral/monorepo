@@ -11,7 +11,7 @@ A localization strategy is a company’s overall plan and approach to adapting i
 <doc-figure src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/localization-strategy/assets/strategy.jpg" alt="inlang ecosystem" caption="Localization strategy within the inlang ecosystem"></doc-figure>
 
 In this example, a SaaS tool is making use of inlang's products to localize their website and achieve a successful localization strategy.
-The [IDE Extension](/m/r7kp499g/app-inlang-ideExtension) enables translating the content of the web application. Therefore, the developer can connect a wide range of libraries. The most common one in inlang's ecosystem is [Paraglide JS](/m/gerre34r/library-inlang-paraglideJs), which runs with every popular framework. 
+[Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) – a helpful i18n VS Code extension enables translating the content of the web application. Therefore, the developer can connect a wide range of libraries. The most common one in inlang's ecosystem is [Paraglide JS](/m/gerre34r/library-inlang-paraglideJs), which runs with every popular framework. 
 
 The [CLI for automation](/m/2qj2w8pu/app-inlang-cli) enables the developer to automate the translation process, e.g. with [Machine Translation](https://en.wikipedia.org/wiki/Machine_translation). The CLI can be used in a CI/CD pipeline to automatically translate the content of the web application.
 
