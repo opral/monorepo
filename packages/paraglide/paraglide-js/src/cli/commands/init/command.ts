@@ -8,7 +8,6 @@ import { loadProject, type InlangProject } from "@inlang/sdk"
 import * as Sherlock from "@inlang/cross-sell-sherlock"
 import { isValidLanguageTag, LanguageTag } from "@inlang/language-tag"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
-import { version } from "../../state.js"
 import { telemetry } from "../../../services/telemetry/implementation.js"
 import { Logger } from "../../../services/logger/index.js"
 import { findRepoRoot, openRepository, type Repository } from "@lix-js/client"
@@ -214,7 +213,7 @@ export const addParaglideJsToDevDependencies: CliStep<
 	if (pkg.devDependencies === undefined) {
 		pkg.devDependencies = {}
 	}
-	pkg.devDependencies["@inlang/paraglide-js"] = version
+	pkg.devDependencies["@inlang/paraglide-js"] = PACKAGE_VERSION
 	await ctx.repo.nodeishFs.writeFile("./package.json", stringify(pkg))
 	ctx.logger.success("Added @inlang/paraglide-js to the devDependencies in package.json.")
 	return ctx
