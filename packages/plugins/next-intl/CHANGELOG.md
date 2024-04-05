@@ -1,5 +1,12 @@
 # @inlang/plugin-next-intl
 
+## 1.3.13
+
+### Patch Changes
+
+- Updated dependencies [62dfa26]
+  - @inlang/sdk@0.29.0
+
 ## 1.3.12
 
 ### Patch Changes

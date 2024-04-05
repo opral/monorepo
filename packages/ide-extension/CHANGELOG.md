@@ -1,5 +1,16 @@
 # inlang-vs-code-extension
 
+## 1.36.6
+
+### Patch Changes
+
+- 62dfa26: SDK Breaking change: LintReports get() and getAll() are now async, and non-reactive.
+  Reduces (does not eliminate) excessive sdk resource consumption.
+- Updated dependencies [62dfa26]
+  - @inlang/sdk@0.29.0
+  - @inlang/rpc@0.3.5
+  - @inlang/telemetry@0.3.19
+
 ## 1.36.5
 
 ### Patch Changes

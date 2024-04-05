@@ -1,5 +1,12 @@
 # @inlang/sdk
 
+## 0.29.0
+
+### Minor Changes
+
+- 62dfa26: SDK Breaking change: LintReports get() and getAll() are now async, and non-reactive.
+  Reduces (does not eliminate) excessive sdk resource consumption.
+
 ## 0.28.3
 
 ### Patch Changes
