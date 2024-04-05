@@ -22,13 +22,27 @@ export const _MessageLintRuleId = Type.String({
 export const _MessageLintRuleLevel = Type.Union([Type.Literal("error"), Type.Literal("warning")])
 
 /**
+ * ---------------- Specific Language Tag field meta information ----------------
+ */
+
+const SourceLanguageTag = LanguageTag
+SourceLanguageTag.title = "Source language tag"
+SourceLanguageTag.description =
+	"Set the reference language for your project. It needs to be a valid BCP-47 language tag."
+
+/**
  * ---------------- Settings ----------------
  */
 
 const InternalProjectSettings = Type.Object({
 	$schema: Type.Optional(Type.Literal("https://inlang.com/schema/project-settings")),
-	sourceLanguageTag: LanguageTag,
-	languageTags: Type.Array(LanguageTag, { uniqueItems: true }),
+	sourceLanguageTag: SourceLanguageTag,
+	languageTags: Type.Array(LanguageTag, {
+		uniqueItems: true,
+		title: "Language tags",
+		description:
+			"Set the languages that are available in your project. All language tags needs to be a valid BCP-47 language tag. Needs to include the source language tag.",
+	}),
 	/**
 	 * The modules to load.
 	 *
@@ -67,7 +81,9 @@ const InternalProjectSettings = Type.Object({
 	),
 	messageLintRuleLevels: Type.Optional(
 		Type.Record(_MessageLintRuleId, _MessageLintRuleLevel, {
-			description: "The lint rule levels for messages.",
+			title: "Levels for lint rules",
+			description:
+				"Adjust the lint rule levels in your project to choose between 'warning' and 'error'. If set to 'error', you can configure a CI process to prevent merging with existing reports. (When you want to configure your lint rules visit inlang.com/c/lint-rules)",
 			examples: [
 				{
 					"messageLintRule.inlang.missingTranslation": "error",

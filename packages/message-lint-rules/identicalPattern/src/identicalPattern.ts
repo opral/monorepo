@@ -11,7 +11,11 @@ const RuleSettings = Type.Object({
 			Type.String({
 				pattern: "[^*]",
 				description: "All items in the array need quotaion marks at the end and beginning",
-			})
+			}),
+			{
+				title: "DEPRICATED. Ignore paths",
+				description: "Set a path that should be ignored.",
+			}
 		)
 	),
 })
