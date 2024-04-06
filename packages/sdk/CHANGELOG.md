@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 0.30.0
+
+### Minor Changes
+
+- 9b26a31: Fix saveMessages for non-root projects
+
 ## 0.29.0
 
 ### Minor Changes
