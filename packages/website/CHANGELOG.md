@@ -4,6 +4,12 @@
 
 ### Patch Changes
 
+- @lix-js/server@1.1.2
+
+## null
+
+### Patch Changes
+
 - @lix-js/server@1.1.1
 
 ## null
