@@ -1,5 +1,11 @@
 # @inlang/paraglide-js-adapter-sveltekit
 
+## 0.5.21
+
+### Patch Changes
+
+- @inlang/paraglide-js-adapter-vite@1.2.33
+
 ## 0.5.20
 
 ### Patch Changes
