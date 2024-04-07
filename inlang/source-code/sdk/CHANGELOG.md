@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 0.31.0
+
+### Minor Changes
+
+- c068dd2: Handle failure to create new project id
+
 ## 0.30.0
 
 ### Minor Changes
