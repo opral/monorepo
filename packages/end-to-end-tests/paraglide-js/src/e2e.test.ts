@@ -70,6 +70,9 @@ describe("paraglide-js", () => {
 
 				const packageJson = JSON.parse(await readFile(path.resolve(workingDir, "package.json")))
 
+				expect(packageJson.scripts.build).includes("--project ./project.inlang")
+				expect(packageJson.scripts.postinstall).includes("--project ./project.inlang")
+
 				const expectedVersion = child_process.execSync(ParaglideLocation + " --version").toString()
 				expect(packageJson.devDependencies["@inlang/paraglide-js"].trim()).toEqual(
 					expectedVersion.trim()
@@ -87,12 +90,22 @@ describe("paraglide-js", () => {
 				process.env.TERM_PROGRAM = "not-vscode"
 
 				const existingProject: ProjectSettings = {
-					modules: [],
+					modules: [
+						"https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js",
+						"https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@latest/dist/index.js",
+					],
 					sourceLanguageTag: "en",
-					languageTags: ["en"],
+					languageTags: ["en", "de"],
+
+					"plugin.inlang.messageFormat": {
+						pathPattern: "./messages/{languageTag}.json",
+					},
 				}
 
-				writeFile(path.resolve(workingDir, "project.inlang/settings.json"), "{}")
+				writeFile(
+					path.resolve(workingDir, "some/path/project.inlang/settings.json"),
+					JSON.stringify(existingProject)
+				)
 
 				const { wait, waitForText, writeText, debug, pressKey } = await spawn(
 					ParaglideLocation,
@@ -101,9 +114,9 @@ describe("paraglide-js", () => {
 
 				debug()
 
-				await waitForText("Which languages do you want to support?")
+				await waitForText("Do you want to use an existing Inlang Project or create a new one?")
 				await wait(200)
-				await writeText("en, de")
+				await pressKey("arrowDown") //should select the first existing project
 				await wait(200)
 				await pressKey("enter")
 
@@ -122,16 +135,6 @@ describe("paraglide-js", () => {
 				await pressKey("enter")
 				await wait(1000)
 
-				//check that the settings.json file exists
-				const fileContent = await readFile(path.resolve(workingDir, "project.inlang/settings.json"))
-				const settings = JSON.parse(fileContent)
-				expect(settings.languageTags).toEqual(["en", "de"])
-				expect(settings.sourceLanguageTag).toEqual("en")
-
-				//Check that the messages/en.json and messages/de.json files exist
-				expect(await readFile(path.resolve(workingDir, "messages/en.json"))).toBeTruthy()
-				expect(await readFile(path.resolve(workingDir, "messages/de.json"))).toBeTruthy()
-
 				//Check that the compiler ran and generated the files
 				expect(await readFile(path.resolve(workingDir, "src/paraglide/runtime.js"))).toBeTruthy()
 				expect(await readFile(path.resolve(workingDir, "src/paraglide/messages.js"))).toBeTruthy()
@@ -144,10 +147,9 @@ describe("paraglide-js", () => {
 
 				const packageJson = JSON.parse(await readFile(path.resolve(workingDir, "package.json")))
 
-				const expectedVersion = child_process.execSync(ParaglideLocation + " --version").toString()
-				expect(packageJson.devDependencies["@inlang/paraglide-js"].trim()).toEqual(
-					expectedVersion.trim()
-				)
+				expect(packageJson.scripts.build).includes("--project ./some/path/project.inlang")
+				expect(packageJson.scripts.postinstall).includes("--project ./some/path/project.inlang")
+
 				await cleanup()
 			},
 			{ timeout: 30_000 }
