@@ -21,9 +21,9 @@ export const i18n = createI18n(runtime, {
 			en: "/some-subpage",
 			de: "/irgendeine-unterseite",
 		},
-		"/admin/[...rest]": {
-			en: "/admin/[...rest]",
-			de: "/administrator/[...rest]",
+		"/matchall/[...rest]": {
+			en: "/matchall/[...rest]",
+			de: "/joker/[...rest]",
 		},
 	},
 	exclude: ["/base/not-translated"],
