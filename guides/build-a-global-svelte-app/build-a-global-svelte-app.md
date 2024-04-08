@@ -242,7 +242,7 @@ You will also notice that any internal links, like `<a href="/about">About</a>` 
 
 ## 5. Adding a language switcher
 
-Language switchers are challenging, because they require us to dynamicall translate the path we're currently on. We can do this by first removing the language tag from the path, and then adding it back in the correct language.
+Language switchers are challenging, because they require us to dynamically translate the path we're currently on. We can do this by first removing the language tag from the path, and then adding it back in the correct language.
 
 The Adapter provides convenient functions for this. `i18n.route(translatedPath)`.
 
