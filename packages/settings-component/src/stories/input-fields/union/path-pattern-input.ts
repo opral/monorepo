@@ -59,8 +59,10 @@ export class PathPatternInput extends LitElement {
 		}
 	}
 
-	private get _examplesObject(): string | undefined {
-		return "Example: { common: './locales/{languageTag}/common.json', app: './locales/{languageTag}/app.json', ... }"
+	private get _examplesObject(): string[] | undefined {
+		return [
+			'{ common: "./locales/{languageTag}/common.json", app: "./locales/{languageTag}/app.json" }',
+		]
 	}
 
 	private get _descriptionString(): string | undefined {
@@ -71,10 +73,8 @@ export class PathPatternInput extends LitElement {
 		}
 	}
 
-	private get _examplesString(): string | undefined {
+	private get _examplesString(): string[] | undefined {
 		return this.schema.anyOf[0].examples
-			? "Example: " + JSON.stringify(this.schema.anyOf[0].examples)
-			: undefined
 	}
 
 	private get _title(): string | undefined {
