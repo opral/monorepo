@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/telemetry",
 	"type": "module",
-	"version": "0.3.18",
+	"version": "0.3.21",
 	"private": true,
 	"exports": {
 		".": "./dist/index.js",

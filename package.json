@@ -8,7 +8,7 @@
 		"production": "pnpm exec nx run-many --nx-bail --target=production --parallel 1000 --exclude @lix-js/server --exclude @inlang/badge --exclude @inlang/manage --exclude @inlang/editor --exclude @inlang/telemetry-proxy --output-style=stream",
 		"build": "pnpm exec nx run-many --nx-bail --target=build --parallel",
 		"dev:lix": "pnpm --filter @inlang/env-variables build && pnpm --stream --parallel --filter @lix-js/* --filter @inlang/server dev",
-		"dev:lixe-fink": "pnpm --filter @inlang/env-variables build && pnpm --stream --parallel --filter @lix-js/* --filter @inlang/serve --filter @inlang/manage --filter @inlang/editor --filter @inlang/website dev",
+		"dev:lix-fink": "pnpm --filter @inlang/env-variables build && pnpm --stream --parallel --filter @lix-js/* --filter @inlang/server --filter @inlang/manage --filter @inlang/editor --filter @inlang/sdk --filter @inlang/website --filter @inlang/telemetry-proxy dev",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "pnpm exec nx run-many --target=test --parallel",
 		"---- LINT ----------------------------------------------------------": "",

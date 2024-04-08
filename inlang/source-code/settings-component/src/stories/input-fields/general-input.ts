@@ -26,6 +26,9 @@ export class GeneralInput extends LitElement {
 	schema: any = {}
 
 	@property()
+	required: any = {}
+
+	@property()
 	handleInlangProjectChange: (value: string, key: string, moduleId?: string) => void = () => {}
 
 	override render() {
@@ -39,6 +42,7 @@ export class GeneralInput extends LitElement {
 						.value=${this.value}
 						.schema=${this.schema}
 						.handleInlangProjectChange=${this.handleInlangProjectChange}
+						.required=${this.required}
 					></string-input>
 				</div>`
 			} else if (this.schema.type === "array") {
@@ -50,6 +54,7 @@ export class GeneralInput extends LitElement {
 						.value=${this.value}
 						.schema=${this.schema}
 						.handleInlangProjectChange=${this.handleInlangProjectChange}
+						.required=${this.required}
 					></array-input>
 				</div>`
 			} else if (this.schema.type === "object") {
@@ -62,6 +67,7 @@ export class GeneralInput extends LitElement {
 						.value=${this.value}
 						.schema=${this.schema}
 						.handleInlangProjectChange=${this.handleInlangProjectChange}
+						.required=${this.required}
 					></object-input>
 				</div>`
 			} else {
@@ -73,6 +79,7 @@ export class GeneralInput extends LitElement {
 						.value=${this.value}
 						.schema=${this.schema}
 						.handleInlangProjectChange=${this.handleInlangProjectChange}
+						.required=${this.required}
 					></string-input>
 				</div>`
 			}
@@ -85,6 +92,7 @@ export class GeneralInput extends LitElement {
 					.value=${this.value}
 					.schema=${this.schema}
 					.handleInlangProjectChange=${this.handleInlangProjectChange}
+					.required=${this.required}
 				></path-pattern-input>
 			</div>`
 		} else {
@@ -96,6 +104,7 @@ export class GeneralInput extends LitElement {
 					.value=${this.value}
 					.schema=${this.schema}
 					.handleInlangProjectChange=${this.handleInlangProjectChange}
+					.required=${this.required}
 				></string-input>
 			</div>`
 		}

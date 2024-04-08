@@ -105,16 +105,14 @@ export async function loadProject(args: {
 		)
 	}
 
-	const fs = args.repo.nodeishFs
-
 	const nodeishFs = createNodeishFsWithAbsolutePaths({
 		projectPath,
-		nodeishFs: fs,
+		nodeishFs: args.repo.nodeishFs,
 	})
 
 	// -- migratations ------------------------------------------------
 
-	await maybeMigrateToDirectory({ nodeishFs: fs, projectPath })
+	await maybeMigrateToDirectory({ nodeishFs, projectPath })
 	await maybeCreateFirstProjectId({ projectPath, repo: args.repo })
 
 	// -- load project ------------------------------------------------------
@@ -124,7 +122,7 @@ export async function loadProject(args: {
 		// - a repo will always be present
 		// - if a repo is present, the project id will always be present
 		const { data: projectId } = await tryCatch(() =>
-			fs.readFile(args.projectPath + "/project_id", { encoding: "utf-8" })
+			nodeishFs.readFile(args.projectPath + "/project_id", { encoding: "utf-8" })
 		)
 
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
@@ -348,7 +346,7 @@ export async function loadProject(args: {
 							if (!initialSetup) {
 								messageStates.messageDirtyFlags[message.id] = true
 								saveMessagesViaPlugin(
-									fs,
+									nodeishFs,
 									messageLockDirPath,
 									messageStates,
 									messagesQuery,
@@ -901,7 +899,7 @@ async function saveMessagesViaPlugin(
 	}
 }
 
-const maxRetries = 5
+const maxRetries = 10
 const nProbes = 50
 const probeInterval = 100
 async function acquireFileLock(
