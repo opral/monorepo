@@ -13,7 +13,7 @@ import { Logger } from "~/services/logger/index.js"
 import { findRepoRoot, openRepository, type Repository } from "@lix-js/client"
 import { pathExists } from "~/services/file-handling/exists.js"
 import { findPackageJson } from "~/services/environment/package.js"
-import { execAsync } from "./utils.js"
+import { execAsync, getCommonPrefix } from "./utils.js"
 import { getNewProjectTemplate, DEFAULT_PROJECT_PATH, DEFAULT_OUTDIR } from "./defaults.js"
 import { compile } from "~/compiler/compile.js"
 import { writeOutput } from "~/services/file-handling/write-output.js"
@@ -257,6 +257,8 @@ export const existingProjectFlow = async (ctx: {
 }): Promise<{ project: InlangProject; projectPath: string }> => {
 	const NEW_PROJECT_VALUE = "newProject"
 
+	const commonPrefix = getCommonPrefix(ctx.existingProjectPaths)
+
 	const selection = (await prompt(
 		`Do you want to use an existing Inlang Project or create a new one?`,
 		{
@@ -265,7 +267,7 @@ export const existingProjectFlow = async (ctx: {
 				{ label: "Create a new project", value: NEW_PROJECT_VALUE },
 				...ctx.existingProjectPaths.map((path) => {
 					return {
-						label: "Use '" + path + "'",
+						label: "Use '" + path.replace(commonPrefix, "") + "'",
 						value: path,
 					}
 				}),
@@ -354,7 +356,11 @@ async function promptForLanguageTags(
 export const createNewProjectFlow = async (ctx: {
 	repo: Repository
 	logger: Logger
-}): Promise<{ project: InlangProject; projectPath: string }> => {
+}): Promise<{
+	project: InlangProject
+	/** An absolute path to the created project */
+	projectPath: string
+}> => {
 	const languageTags = await promptForLanguageTags()
 	const settings = getNewProjectTemplate()
 
