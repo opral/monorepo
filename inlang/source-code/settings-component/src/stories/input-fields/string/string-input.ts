@@ -53,7 +53,7 @@ export class StringInput extends LitElement {
 	}
 
 	private get _examples(): string | undefined {
-		return this.schema.examples ? "Example: " + JSON.stringify(this.schema.examples) : undefined
+		return this.schema.examples
 	}
 
 	private get _title(): string | undefined {
