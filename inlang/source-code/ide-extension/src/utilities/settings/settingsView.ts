@@ -26,7 +26,7 @@ export async function settingsPanel(args: { context: vscode.ExtensionContext }) 
 	})
 }
 
-function getWebviewContent(args: {
+export function getWebviewContent(args: {
 	context: vscode.ExtensionContext
 	webview: vscode.Webview
 }): string {
