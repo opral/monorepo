@@ -8,6 +8,7 @@ import {
 	type InstalledPlugin,
 	type InstalledMessageLintRule,
 } from "@inlang/sdk"
+import checkOptional from "./../helper/checkOptional.js"
 
 import "./input-fields/general-input.js"
 
@@ -218,6 +219,7 @@ export default class InlangSettings extends LitElement {
 												.value=${this._newSettings?.[property as keyof typeof this._newSettings]}
 												.schema=${schema}
 												.handleInlangProjectChange=${this.handleInlangProjectChange}
+												.required=${checkOptional(value.schema, property)}
 											></general-input>
 									  `
 									: html`
@@ -231,6 +233,7 @@ export default class InlangSettings extends LitElement {
 												.schema=${schema}
 												.moduleId=${key}
 												.handleInlangProjectChange=${this.handleInlangProjectChange}
+												.required=${checkOptional(value.schema, property)}
 											></general-input>
 									  `
 							})}
