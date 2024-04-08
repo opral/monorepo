@@ -29,14 +29,16 @@ export const showStatusBar = async () => {
 
 	const settings = state().project?.settings()
 	const sourceLanguageTag = settings?.sourceLanguageTag
+	const languageTags = settings?.languageTags
 
 	if (!sourceLanguageTag) return
 	const previewLanguageTag = (await getSetting("previewLanguageTag")) || ""
 
+	const isPreviewLanguageValid = languageTags.includes(previewLanguageTag)
+	const preferredLanguageTag = isPreviewLanguageValid ? previewLanguageTag : sourceLanguageTag
+
 	statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100)
 	statusBarItem.command = "sherlock.previewLanguageTag"
-
-	const preferredLanguageTag = previewLanguageTag.length ? previewLanguageTag : sourceLanguageTag
 
 	statusBarItem.text = `Sherlock: ${preferredLanguageTag}`
 	statusBarItem.tooltip = "Switch preview language"
