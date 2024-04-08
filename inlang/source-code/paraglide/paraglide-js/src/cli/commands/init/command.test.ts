@@ -681,7 +681,6 @@ describe("checkIfPackageJsonExists()", () => {
 	})
 })
 
-
 describe("maybeChangeTsConfigModuleResolution()", () => {
 	test("it should return if no tsconfig.json exists", async () => {
 		const fs = mockFiles({})
