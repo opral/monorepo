@@ -3,7 +3,45 @@ import IconGithub from "~icons/cib/github"
 import IconDiscord from "~icons/cib/discord"
 import Link from "#src/renderer/Link.jsx"
 import IconQuestionMark from "~icons/material-symbols/question-mark"
-// import IconExpandMore from "~icons/material-symbols/expand-more"
+
+export const getFinkResourcesLinks = () => {
+	return [
+		{
+			name: "About Fink",
+			href: import.meta.env.PROD
+				? "https://inlang.com/m/tdozzpar"
+				: "http://localhost:3000/m/tdozzpar",
+		},
+		{
+			name: "User Guide",
+			href: import.meta.env.PROD
+				? "https://inlang.com/g/6ddyhpoi"
+				: "http://localhost:3000/g/6ddyhpoi",
+		},
+		{
+			name: "About the ecosystem",
+			href: import.meta.env.PROD
+				? "https://inlang.com/documentation"
+				: "http://localhost:3000/documentation",
+		},
+		{
+			name: "Support Forum",
+			href: "https://discord.gg/gdMPPWy57R",
+		},
+		{
+			name: "Report a Bug",
+			href: "https://github.com/opral/inlang-fink/issues/new",
+		},
+		{
+			name: "Feature Request",
+			href: "https://github.com/opral/monorepo/discussions/categories/-fink-general",
+		},
+		{
+			name: "Submit Feedback",
+			href: "https://github.com/orgs/opral/discussions/categories/-fink-general",
+		}
+	]
+}
 
 const Footer = () => {
 	const socialMediaLinks = [
@@ -26,53 +64,6 @@ const Footer = () => {
 			screenreader: "Discord Server",
 		},
 	]
-
-	const getResourcesLinks = () => {
-		return [
-			{
-				name: "About Fink",
-				href: import.meta.env.PROD
-					? "https://inlang.com/m/tdozzpar"
-					: "http://localhost:3000/m/tdozzpar",
-			},
-			{
-				name: "User Guide",
-				href: import.meta.env.PROD
-					? "https://inlang.com/g/6ddyhpoi"
-					: "http://localhost:3000/g/6ddyhpoi",
-			},
-			{
-				name: "About the ecosystem",
-				href: import.meta.env.PROD
-					? "https://inlang.com/documentation"
-					: "http://localhost:3000/documentation",
-			},
-			{
-				name: "Support Forum",
-				href: "https://discord.gg/gdMPPWy57R",
-			},
-			{
-				name: "Report a Bug",
-				href: "https://github.com/opral/inlang-fink/issues/new",
-			},
-			{
-				name: "Feature Request",
-				href: "https://github.com/opral/monorepo/discussions/categories/-fink-general",
-			},
-			{
-				name: "Submit Feedback",
-				href: "https://github.com/orgs/opral/discussions/categories/-fink-general",
-			},
-			{
-				name: "Contact Us",
-				href: "mailto:hello@inlang.com",
-			},
-			{
-				name: "Join the Team",
-				href: "https://github.com/opral/monorepo/tree/main/careers",
-			},
-		]
-	}
 
 	return (
 		<footer class="bg-background border-t border-surface-200 py-4 px-4 overflow-visible">
@@ -100,7 +91,7 @@ const Footer = () => {
 							<IconQuestionMark class="w-4 h-4 text-background" />
 						</button>
 						<sl-menu class="w-fit">
-							<For each={getResourcesLinks()}>
+							<For each={getFinkResourcesLinks()}>
 								{(link) => (
 									<>
 										<sl-menu-item>
@@ -109,7 +100,7 @@ const Footer = () => {
 											</a>
 										</sl-menu-item>
 										<Show
-											when={link.name === "About the ecosystem" || link.name === "Submit Feedback"}
+											when={link.name === "About the ecosystem"}
 										>
 											<div class="w-full border-b border-surface-200 my-1" />
 										</Show>
