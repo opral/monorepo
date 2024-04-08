@@ -18,3 +18,25 @@ export function execAsync(command: string) {
 		})
 	})
 }
+
+export function longestCommonPrefix(strA: string, strB: string): string {
+	let commonPrefix = ""
+	for (let i = 0; i < Math.min(strA.length, strB.length); i++) {
+		if (strA[i] === strB[i]) {
+			commonPrefix += strA[i]
+		} else {
+			break
+		}
+	}
+	return commonPrefix
+}
+
+export function getCommonPrefix(strings: string[]): string {
+	const strs = strings.filter(Boolean)
+	const firstString = strs[0]
+	if (firstString === undefined) {
+		return ""
+	}
+
+	return strs.reduce((commonPrefix, str) => longestCommonPrefix(commonPrefix, str), firstString)
+}
