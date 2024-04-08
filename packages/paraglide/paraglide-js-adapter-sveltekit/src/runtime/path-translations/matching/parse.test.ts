@@ -2,17 +2,23 @@ import { describe, it, expect } from "vitest"
 import { ParamSegment, parsePathDefinition } from "./parse"
 
 describe("parsePathDefinition", () => {
+	it("returns a static segment for /", () => {
+		const parsed = parsePathDefinition("/")
+		expect(parsed).toEqual([
+			{
+				type: "static",
+				value: "/",
+			},
+		])
+	})
+
 	it("parses a static path", () => {
 		const parsed = parsePathDefinition("/foo/bar")
 
 		expect(parsed).toEqual([
 			{
 				type: "static",
-				value: "foo",
-			},
-			{
-				type: "static",
-				value: "bar",
+				value: "/foo/bar",
 			},
 		])
 	})
@@ -46,7 +52,7 @@ describe("parsePathDefinition", () => {
 	})
 
 	it("parses a rest param", () => {
-		const parsed = parsePathDefinition("/[...slug]/")
+		const parsed = parsePathDefinition("/[...slug]")
 		const expected: ParamSegment = {
 			type: "param",
 			name: "slug",
@@ -60,7 +66,7 @@ describe("parsePathDefinition", () => {
 	})
 
 	it("parses an optional rest param", () => {
-		const parsed = parsePathDefinition("/[[...slug]]/")
+		const parsed = parsePathDefinition("/[[...slug]]")
 		const expected: ParamSegment = {
 			type: "param",
 			name: "slug",

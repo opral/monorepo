@@ -2,6 +2,16 @@ import { parsePathDefinition } from "./parse.js"
 
 type MatchResult = { id: string; params: Record<string, string> }
 
+const match = candidate.pattern.exec(decoded)
+if (!match) continue
+
+const matched = exec(match, candidate.params, matchers)
+if (matched) {
+	route = candidate
+	params = decode_params(matched)
+	break
+}
+
 export function matches(canonicalPath: string, pathDefinitions: string[]): MatchResult | undefined {
 	let bestMatch: MatchResult | undefined = undefined
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { parse_route_id } from "./routeId"
+import { parse_route_id } from "./routing"
 
 describe("parse_route_id", () => {
 	it("should parse a route id", () => {
