@@ -655,6 +655,9 @@ importers:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../../paraglide/paraglide-js
+      '@inlang/sdk':
+        specifier: workspace:*
+        version: link:../../sdk
     devDependencies:
       '@gmrchk/cli-testing-library':
         specifier: ^0.1.2
@@ -28613,7 +28616,7 @@ packages:
 
   file:..:
     resolution: {directory: .., type: directory}
-    name: monorepo
+    name: dev
     dev: true
 
   file:inlang/source-code/cli:
