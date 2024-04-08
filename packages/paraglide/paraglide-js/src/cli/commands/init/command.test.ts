@@ -152,6 +152,7 @@ describe("addCompileStepToPackageJSON()", () => {
 	})
 
 	test("if an existing build step exists, it should be preceeded by the paraglide-js compile command", async () => {
+		process.cwd = () => "/"
 		const fs = mockFiles({
 			"/package.json": JSON.stringify({
 				scripts: {
@@ -229,6 +230,7 @@ describe("addCompileStepToPackageJSON()", () => {
 	})
 
 	test("if there is a postinstall script present, add the paraglide-js compile command to it", async () => {
+		process.cwd = () => "/"
 		const fs = mockFiles({
 			"/package.json": JSON.stringify({
 				scripts: {
@@ -286,6 +288,7 @@ describe("addCompileStepToPackageJSON()", () => {
 	})
 
 	test("if there is no postinstall script present add the paragldie compile command", async () => {
+		process.cwd = () => "/"
 		const fs = mockFiles({
 			"/package.json": JSON.stringify({}),
 		})
