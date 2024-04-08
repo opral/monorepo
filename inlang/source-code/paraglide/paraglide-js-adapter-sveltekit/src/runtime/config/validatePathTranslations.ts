@@ -1,3 +1,4 @@
+import type { RouteParam } from "@sveltejs/kit"
 import { parse_route_id } from "../path-translations/matching/routing.js"
 import type { PathTranslations } from "./pathTranslations.js"
 
@@ -26,7 +27,7 @@ export function validatePathTranslations<T extends string>(
 			continue
 		}
 
-		const expectedParams = getParams(path)
+		const { params: expectedParams } = parse_route_id(path)
 
 		//@ts-ignore
 		const translations = pathTranslations[path]
@@ -40,7 +41,21 @@ export function validatePathTranslations<T extends string>(
 				})
 			}
 
-			if (!setsEqual(getParams(translatedPath), expectedParams)) {
+			const { params: actualParams } = parse_route_id(translatedPath)
+
+			let paramsDontMatch = false
+
+			for (const param of expectedParams) {
+				if (!actualParams.some((actualParam) => paramsAreEqual(param, actualParam))) {
+					paramsDontMatch = true
+				}
+			}
+
+			if (expectedParams.length !== actualParams.length) {
+				paramsDontMatch = true
+			}
+
+			if (paramsDontMatch) {
 				issues.push({
 					path,
 					message: `The translation for language ${lang} must have the same parameters as the canonical path.`,
@@ -67,24 +82,21 @@ export function validatePathTranslations<T extends string>(
 	return issues
 }
 
+function paramsAreEqual(param1: RouteParam, param2: RouteParam): boolean {
+	return (
+		param1.chained == param2.chained &&
+		param1.matcher == param2.matcher &&
+		param1.name == param2.name &&
+		param1.optional == param2.optional &&
+		param1.rest == param2.rest
+	)
+}
+
 function isValidPath(maybePath: string): maybePath is `/${string}` {
 	return maybePath.startsWith("/")
 }
 
 function isSubset<T>(a: Set<T>, b: Set<T>): boolean {
-	for (const value of a) {
-		if (!b.has(value)) return false
-	}
-	return true
-}
-
-function getParams(path: string): Set<string> {
-	const { params } = parse_route_id(path)
-	return new Set(params.map((param) => param.name))
-}
-
-function setsEqual(a: Set<any>, b: Set<any>): boolean {
-	if (a.size !== b.size) return false
 	for (const value of a) {
 		if (!b.has(value)) return false
 	}
