@@ -68,7 +68,7 @@ export class ReferencePatternInput extends LitElement {
 	}
 
 	private get _examples(): string | undefined {
-		return this.schema.examples ? "Example: " + JSON.stringify(this.schema.examples) : undefined
+		return this.schema.examples
 	}
 
 	override render() {

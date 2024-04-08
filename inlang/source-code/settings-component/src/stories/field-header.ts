@@ -30,6 +30,22 @@ export class FieldHeader extends LitElement {
 				font-weight: 500;
 				color: var(--sl-input-help-text-color);
 			}
+			.example-container {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 4px;
+			}
+			.example {
+				background-color: var(--sl-color-gray-100);
+				width: fit-content;
+				padding: 0px 6px;
+				border-radius: 2px;
+				font-size: 14px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				color: var(--sl-color-gray-700);
+			}
 		`,
 	]
 
@@ -39,8 +55,8 @@ export class FieldHeader extends LitElement {
 	@property()
 	description?: string
 
-	@property()
-	examples?: string
+	@property({ type: Array })
+	examples?: Array<string>
 
 	@property({ type: Boolean })
 	optional?: boolean = false
@@ -55,7 +71,15 @@ export class FieldHeader extends LitElement {
 			</h3>`}
 			${this.description &&
 			html`<p part="property-paragraph" class="help-text">${this.description}</p>`}
-			${this.examples && html`<p part="property-paragraph" class="help-text">${this.examples}</p>`}
+			${this.examples
+				? html`<div class="example-container">
+						<p part="property-paragraph" class="help-text">Examples:</p>
+						${this.examples.map(
+							(example) =>
+								html`<p part="property-paragraph" class="help-text example">${example}</p>`
+						)}
+				  </div>`
+				: ``}
 		</div>`
 	}
 }
