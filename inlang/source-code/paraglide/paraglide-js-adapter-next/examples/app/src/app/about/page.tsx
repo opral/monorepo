@@ -1,5 +1,19 @@
 import { redirect } from "@/lib/i18n"
 import * as m from "@/paraglide/messages.js"
+import { languageTag } from "@/paraglide/runtime"
+import { Metadata } from "next"
+
+export function generateMetadata(): Metadata {
+	const locale = languageTag()
+	return {
+		title: m.paraglide_and_next_app_router(),
+		description: m.this_app_was_localised_with_paraglide(),
+		icons: "/favicon.png",
+		openGraph: {
+			locale,
+		},
+	}
+}
 
 export default function About() {
 	async function redirectHome() {
