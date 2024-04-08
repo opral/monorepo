@@ -1,28 +1,16 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
-//import { baseStyling } from "../../../styling/base.js"
 import { InlangModule, type InstalledMessageLintRule, type InstalledPlugin } from "@inlang/sdk"
+import "./../../field-header.js"
 
 @customElement("lint-rule-level-object-input")
 export class LintRuleLevelObjectInput extends LitElement {
 	static override styles = [
-		//baseStyling,
 		css`
 			.property {
 				display: flex;
 				flex-direction: column;
 				gap: 12px;
-			}
-			h3 {
-				margin: 0;
-				font-size: 14px;
-				font-weight: 800;
-			}
-			.help-text {
-				font-size: 14px;
-				color: var(--sl-input-help-text-color);
-				margin: 0;
-				line-height: 1.5;
 			}
 			.container {
 				display: flex;
@@ -44,6 +32,10 @@ export class LintRuleLevelObjectInput extends LitElement {
 				max-width: 120px;
 				min-width: 100px;
 			}
+			.title-container {
+				display: flex;
+				gap: 8px;
+			}
 		`,
 	]
 
@@ -61,6 +53,9 @@ export class LintRuleLevelObjectInput extends LitElement {
 
 	@property()
 	schema: any = {}
+
+	@property()
+	required?: boolean = false
 
 	@property()
 	handleInlangProjectChange: (
@@ -98,9 +93,14 @@ export class LintRuleLevelObjectInput extends LitElement {
 
 	override render() {
 		return html` <div part="property" class="property">
-			<h3 part="property-title">${this._title ? this._title : this.property}</h3>
-			${this._description &&
-			html`<p part="property-paragraph" class="help-text">${this._description}</p>`}
+			<div class="title-container">
+				<field-header
+					.fieldTitle=${this._title ? this._title : this.property}
+					.description=${this._description}
+					.optional=${this.required ? false : true}
+					exportparts="property-title, property-paragraph"
+				></field-header>
+			</div>
 			<div class="container">
 				${this.modules &&
 				this.modules.map((module) => {
