@@ -8,6 +8,7 @@ import {
 	type InstalledPlugin,
 	type InstalledMessageLintRule,
 } from "@inlang/sdk"
+import checkOptional from "./../helper/checkOptional.js"
 
 import "./input-fields/general-input.js"
 
@@ -16,7 +17,6 @@ import SLOption from "@shoelace-style/shoelace/dist/components/option/option.com
 import SlInput from "@shoelace-style/shoelace/dist/components/input/input.component.js"
 import SlButton from "@shoelace-style/shoelace/dist/components/button/button.component.js"
 import SlCheckbox from "@shoelace-style/shoelace/dist/components/checkbox/checkbox.component.js"
-import { setExportparts } from "../exportParts.js"
 
 // in case an app defines it's own set of shoelace components, prevent double registering
 if (!customElements.get("sl-select")) customElements.define("sl-select", SlSelect)
@@ -30,8 +30,9 @@ export default class InlangSettings extends LitElement {
 	static override styles = [
 		baseStyling,
 		css`
-			h3 {
+			h2 {
 				margin: 0;
+				padding-top: 1rem;
 			}
 			.container {
 				position: relative;
@@ -42,7 +43,7 @@ export default class InlangSettings extends LitElement {
 			.module-container {
 				display: flex;
 				flex-direction: column;
-				gap: 16px;
+				gap: 40px;
 			}
 			.hover-bar-container {
 				width: 100%;
@@ -53,7 +54,8 @@ export default class InlangSettings extends LitElement {
 			.hover-bar {
 				box-sizing: border-box;
 				width: 100%;
-				max-width: 600px;
+				max-width: 500px;
+				height: 48px;
 				margin: 0 auto;
 				display: flex;
 				flex-wrap: wrap;
@@ -61,14 +63,16 @@ export default class InlangSettings extends LitElement {
 				align-items: center;
 				gap: 8px;
 				background-color: var(--sl-panel-background-color);
-				padding: 0.8rem;
 				padding-left: 1rem;
+				padding-right: 0.8rem;
 				border-radius: 0.5rem;
 				border: 1px solid var(--sl-panel-border-color);
 				filter: drop-shadow(0 4px 3px rgb(0 0 0 / 0.07)) drop-shadow(0 2px 2px rgb(0 0 0 / 0.06));
 			}
 			.hover-bar-text {
-				font-weight: 500;
+				font-weight: 600;
+				line-height: 1.5;
+				font-size: 14px;
 				margin: 0;
 			}
 		`,
@@ -194,7 +198,7 @@ export default class InlangSettings extends LitElement {
 	}
 
 	override render() {
-		return html` <div class="container" exportParts=${setExportparts(this)} part="base">
+		return html` <div class="container" part="base">
 			${Object.entries(this._settingProperties).map(([key, value]) => {
 				return value.schema?.properties && this._newSettings
 					? html`<div class="module-container" part="module">
@@ -215,6 +219,7 @@ export default class InlangSettings extends LitElement {
 												.value=${this._newSettings?.[property as keyof typeof this._newSettings]}
 												.schema=${schema}
 												.handleInlangProjectChange=${this.handleInlangProjectChange}
+												.required=${checkOptional(value.schema, property)}
 											></general-input>
 									  `
 									: html`
@@ -228,6 +233,7 @@ export default class InlangSettings extends LitElement {
 												.schema=${schema}
 												.moduleId=${key}
 												.handleInlangProjectChange=${this.handleInlangProjectChange}
+												.required=${checkOptional(value.schema, property)}
 											></general-input>
 									  `
 							})}
@@ -236,11 +242,11 @@ export default class InlangSettings extends LitElement {
 			})}
 			${this._unsavedChanges
 				? html`<div class="hover-bar-container">
-						<div class="hover-bar">
+						<div class="hover-bar" part="float">
 							<p class="hover-bar-text">Attention, you have unsaved changes.</p>
 							<div>
 								<sl-button
-									size="medium"
+									size="small"
 									@click=${() => {
 										this._revertChanges()
 									}}
@@ -249,7 +255,7 @@ export default class InlangSettings extends LitElement {
 									Cancel
 								</sl-button>
 								<sl-button
-									size="medium"
+									size="small"
 									@click=${() => {
 										this._saveChanges()
 									}}

@@ -31,6 +31,15 @@ export class ObjectInput extends LitElement {
 	schema: any = {}
 
 	@property()
+	withTitle?: boolean = true
+
+	@property()
+	withDescription?: boolean = true
+
+	@property()
+	required?: boolean = false
+
+	@property()
 	handleInlangProjectChange: (
 		value: Record<InlangModule["default"]["id"], string>,
 		key: string,
@@ -47,6 +56,7 @@ export class ObjectInput extends LitElement {
 				.value=${this.value}
 				.schema=${this.schema}
 				.handleInlangProjectChange=${this.handleInlangProjectChange}
+				.required=${this.required}
 			></lint-rule-level-object-input>`
 		} else {
 			return html`<default-object-input
@@ -58,6 +68,9 @@ export class ObjectInput extends LitElement {
 				.keyPlaceholder=${this.keyPlaceholder}
 				.valuePlaceholder=${this.valuePlaceholder}
 				.handleInlangProjectChange=${this.handleInlangProjectChange}
+				.withTitle=${this.withTitle}
+				.withDescription=${this.withDescription}
+				.required=${this.required}
 			></default-object-input>`
 		}
 	}

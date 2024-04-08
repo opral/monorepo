@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/plugin-json",
-	"version": "5.1.22",
+	"version": "5.1.25",
 	"type": "module",
 	"exports": {
 		".": "./dist/index.js"

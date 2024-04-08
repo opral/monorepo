@@ -2,16 +2,21 @@ import "@/lib/ui/styles.css"
 import { LanguageProvider } from "@inlang/paraglide-js-adapter-next"
 import { AvailableLanguageTag, languageTag } from "@/paraglide/runtime"
 import { Header } from "@/lib/ui/Header"
+import * as m from "@/paraglide/messages.js"
 import type { Metadata } from "next"
 
 export function generateMetadata(): Metadata {
+	const locale = languageTag()
 	return {
-		title: "Paraglide App Router Example",
-		description:
-			"This is a NextJS App using the App router. It was localised using Paraglide and the ParaglideJS Adapter for NextJS.",
+		title: m.paraglide_and_next_app_router(),
+		description: m.this_app_was_localised_with_paraglide(),
 		icons: "/favicon.png",
+		openGraph: {
+			locale,
+		},
 	}
 }
+
 
 const direction: Record<AvailableLanguageTag, "ltr" | "rtl"> = {
 	en: "ltr",

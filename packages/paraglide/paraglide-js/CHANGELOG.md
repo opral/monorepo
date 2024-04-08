@@ -1,5 +1,16 @@
 # @inlang/paraglide-js
 
+## 1.4.0
+
+### Minor Changes
+
+- d47b2aa: Generate empty `messages/{lang}.js` files if no messages are present. This way the "shape" of the generated output is always the same regardless of messages
+
+### Patch Changes
+
+- 192fdec: prompt the user for the `outdir` during `paraglide-js init`
+- 0b7c82e: Inline package-version at build time to be more robust
+
 ## 1.3.7
 
 ### Patch Changes

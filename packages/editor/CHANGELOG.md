@@ -4,6 +4,26 @@
 
 ### Patch Changes
 
+- @lix-js/server@1.1.3
+
+## null
+
+### Patch Changes
+
+- @lix-js/server@1.1.2
+
+## null
+
+### Patch Changes
+
+- 62dfa26: SDK Breaking change: LintReports get() and getAll() are now async, and non-reactive.
+  Reduces (does not eliminate) excessive sdk resource consumption.
+  - @lix-js/server@1.1.1
+
+## null
+
+### Patch Changes
+
 - Updated dependencies [8a8aec7]
   - @lix-js/client@1.2.0
   - @lix-js/server@1.1.0

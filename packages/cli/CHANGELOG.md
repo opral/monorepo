@@ -1,5 +1,28 @@
 # @inlang/cli
 
+## 2.13.7
+
+### Patch Changes
+
+- Updated dependencies [c068dd2]
+  - @inlang/sdk@0.31.0
+
+## 2.13.6
+
+### Patch Changes
+
+- Updated dependencies [9b26a31]
+  - @inlang/sdk@0.30.0
+
+## 2.13.5
+
+### Patch Changes
+
+- 62dfa26: SDK Breaking change: LintReports get() and getAll() are now async, and non-reactive.
+  Reduces (does not eliminate) excessive sdk resource consumption.
+- Updated dependencies [62dfa26]
+  - @inlang/sdk@0.29.0
+
 ## 2.13.4
 
 ### Patch Changes
