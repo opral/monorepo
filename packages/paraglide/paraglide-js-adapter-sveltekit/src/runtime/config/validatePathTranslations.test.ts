@@ -85,4 +85,16 @@ describe("validatePathTranslations", () => {
 		const result = validatePathTranslations(pathTranslations, ["en", "de"])
 		expect(result.length).toBe(0)
 	})
+
+	it("complains if the params aren't of the same type", () => {
+		const pathTranslations = {
+			"/about/[...slug]": {
+				en: "/about/[...slug]",
+				de: "/ueber-uns/[slug]",
+			},
+		}
+		// @ts-ignore
+		const result = validatePathTranslations(pathTranslations, ["en", "de"])
+		expect(result.length).toBe(1)
+	})
 })
