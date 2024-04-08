@@ -76,7 +76,7 @@ export const Gitfloat = () => {
 		} else if (
 			hasPushedChanges() &&
 			localChanges() === 0 &&
-			isFork() &&
+			(isFork() || refLink().includes("ninja-")) &&
 			!disableForkSyncWarning()
 		) {
 			// if changes exist in a fork, show the pull request button
