@@ -9,7 +9,7 @@
 
 ## Getting Started
 
-### 1. Install dependenceies
+### 1. Install dependencies
 
 Install [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) and the [ParaglideJS SvelteKit Adapter](https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n).
 
@@ -150,7 +150,7 @@ export const i18n = createI18n(runtime, {
 			fr: "/a-propos",
 		},
 		// you can use parameters
-		// optional parameters and spread params aren't supported (yet)
+		// optional parameters and rest-parametes are supported
 		"/user/[username]" : {
 			en: "/user/[username]",
 			de: "/benutzer/[username]",
@@ -294,7 +294,7 @@ export async function load({ locals }) {
 }
 ```
 
-During rendering there is no danger of crosstal. You can safely use messages and the `langaugeTag()` function. 
+During rendering there is no danger of crosstalk. You can safely use messages and the `langaugeTag()` function. 
 
 #### Re-Loading Language-Dependent data
 
@@ -311,9 +311,9 @@ export async function load({ depends }) {
 
 ## Caveats
 
-1. Links in the same Layout Component as `<ParagldieJS>` will not be translated. This will also log a warngin in development.
+1. Links in the same Layout Component as `<ParagldieJS>` will not be translated. This will also log a warning in development.
 2. Messages are not reactive. Don't use them in server-side module scope.
-3. Sideeffects triggered by `data` will run on language changes even if the data didn't change. If the data is language-dependent the sideeffect will run twice. 
+3. Side-effects triggered by `data` will run on language changes even if the data didn't change. If the data is language-dependent the sideeffect will run twice. 
 
 ### Using messages in `+layout.svelte`
 
@@ -389,13 +389,11 @@ We are working on contributing a fix for [sveltejs/kit#11879](https://github.com
 
 ## Roadmap to 1.0
 
-- Expand the route features in Path translation
-  - Optional parameters
-  - Catch-all parameters
-  - Parameter matchers
+- Expand the route features in path-translation
+  - Parameter-Matchers
   - Parameter Translations
 - Improve Stability
-- Improve Useability
+- Improve Usability
 
 ## Playground
 
