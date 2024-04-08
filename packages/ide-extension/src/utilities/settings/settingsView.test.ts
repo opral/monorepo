@@ -1,104 +1,62 @@
+import { describe, it, expect, vi } from "vitest"
+import { settingsPanel, getWebviewContent } from "./settingsView.js"
 import * as vscode from "vscode"
-import { beforeEach, describe, expect, it, vi } from "vitest"
-import { settingsView, createSettingsWebviewProvider } from "./settingsView.js"
-import { state } from "../state.js"
 
 vi.mock("vscode", () => ({
-	Uri: {
-		file: vi.fn().mockImplementation((path) => ({
-			toString: () => path,
-		})),
-		// @ts-expect-error
-		joinPath: vi.fn().mockImplementation((...args) => ({
-			toString: () => args.join("/"),
-		})),
-	},
 	window: {
-		createWebviewView: () => ({
+		createWebviewPanel: vi.fn().mockReturnValue({
 			webview: {
-				options: {},
 				html: "",
 				onDidReceiveMessage: vi.fn(),
-				asWebviewUri: vi.fn().mockImplementation((uri) => `mockedUriFor(${uri})`),
+				asWebviewUri: vi.fn().mockImplementation((uri: vscode.Uri) => uri),
 			},
 		}),
-		registerWebviewViewProvider: vi.fn(),
 	},
-	WebviewView: vi.fn(),
+	Uri: {
+		file: vi.fn().mockReturnValue("mock-file-uri"),
+		joinPath: vi.fn().mockReturnValue("mock-join-path-uri"),
+	},
+	ViewColumn: {
+		One: 1,
+	},
 }))
 
-vi.mock("../state", () => ({
-	state: vi.fn().mockImplementation(() => ({
+vi.mock("../state.js", () => ({
+	state: () => ({
 		project: {
-			settings: vi.fn().mockReturnValue({ some: "settings" }),
-			setSettings: vi.fn(),
+			settings: vi.fn().mockReturnValue({}),
 			installed: {
 				plugins: vi.fn().mockReturnValue([]),
 				messageLintRules: vi.fn().mockReturnValue([]),
 			},
 		},
-	})),
+	}),
 }))
 
-describe("settingsView", () => {
-	beforeEach(() => {
-		vi.clearAllMocks()
-	})
-
-	it("registers the webview view provider correctly", async () => {
-		const context = { subscriptions: { push: vi.fn() } } as unknown as vscode.ExtensionContext
-		await settingsView({ context })
-
-		expect(context.subscriptions.push).toHaveBeenCalled()
-		expect(vscode.window.registerWebviewViewProvider).toHaveBeenCalledWith(
-			"settingsView",
-			expect.anything()
+describe("settingsPanel", () => {
+	it("should create a webview panel with the correct properties", async () => {
+		const mockContext = { extensionPath: "path/to/extension" } as unknown as vscode.ExtensionContext
+		await settingsPanel({ context: mockContext })
+		expect(vscode.window.createWebviewPanel).toHaveBeenCalledWith(
+			"settingsPanel",
+			"Settings",
+			vscode.ViewColumn.One,
+			expect.objectContaining({
+				enableScripts: true,
+				localResourceRoots: [expect.anything()],
+			})
 		)
 	})
 })
 
-describe("createSettingsWebviewProvider", () => {
-	beforeEach(() => {
-		vi.clearAllMocks()
-	})
-
-	it("sets up webview options and HTML content correctly", () => {
-		const mockExtensionPath = "path/to/extension"
-		const context = { extensionPath: mockExtensionPath } as unknown as vscode.ExtensionContext
-		const webviewView = {
-			webview: {
-				options: {},
-				html: "",
-				onDidReceiveMessage: vi.fn(),
-				asWebviewUri: vi.fn((uri) => `mockedUriFor(${uri.toString()})`),
-			},
-		} as unknown as vscode.WebviewView
-
-		const provider = createSettingsWebviewProvider({ context })
-		provider.resolveWebviewView(webviewView)
-
-		const localResourceRootsStrings = webviewView.webview.options.localResourceRoots?.map((uri) =>
-			uri.toString()
-		)
-
-		expect(localResourceRootsStrings).toEqual([mockExtensionPath])
-		expect(webviewView.webview.html).toContain('<html lang="en">')
-
-		// Simulate a message and test handling.
-		const mockSetSettings = vi.fn()
-		vi.mocked(state).mockImplementation(() => ({
-			// @ts-expect-error
-			project: {
-				setSettings: mockSetSettings,
-			},
-		}))
-
+describe("getWebviewContent", () => {
+	it("should return expected HTML content", () => {
+		const mockWebview = { asWebviewUri: vi.fn() } as unknown as vscode.Webview
+		const mockContext = { extensionUri: "uri" } as unknown as vscode.ExtensionContext
 		// @ts-expect-error
-		webviewView.webview.onDidReceiveMessage.mock.calls[0][0]({
-			command: "setSettings",
-			settings: { some: "settings" },
-		})
+		mockWebview.asWebviewUri.mockImplementation((uri: any) => uri)
 
-		expect(mockSetSettings).toHaveBeenCalled()
+		const htmlContent = getWebviewContent({ context: mockContext, webview: mockWebview })
+		expect(htmlContent).toContain("<title>Settings</title>")
 	})
 })
