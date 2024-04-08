@@ -461,7 +461,6 @@ export const addCompileStepToPackageJSON: CliStep<
 	{ repo: Repository; logger: Logger; projectPath: string; outdir: string },
 	unknown
 > = async (ctx) => {
-
 	const relativePathToProject = nodePath.relative(process.cwd(), ctx.projectPath)
 	const projectPath = `./${relativePathToProject}`
 
