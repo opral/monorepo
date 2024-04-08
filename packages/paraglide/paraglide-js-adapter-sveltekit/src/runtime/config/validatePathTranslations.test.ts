@@ -3,37 +3,42 @@ import { validatePathTranslations } from "./validatePathTranslations"
 
 describe("validatePathTranslations", () => {
 	it("validates path translations", () => {
-		const pathTranslations = {
-			"/about": {
-				en: "/about",
-				de: "/ueber-uns",
+		const result = validatePathTranslations(
+			{
+				"/about": {
+					en: "/about",
+					de: "/ueber-uns",
+				},
 			},
-		}
-		// @ts-ignore
-		const result = validatePathTranslations(pathTranslations, ["en", "de"])
+			["en", "de"]
+		)
 		expect(result).toEqual([])
 	})
 
 	it("complains if the canonical path does not start with a slash", () => {
-		const pathTranslations = {
-			about: {
-				en: "/about",
-				de: "/ueber-unss",
+		const result = validatePathTranslations(
+			{
+				// @ts-expect-error - Doesn't start with a slash
+				about: {
+					en: "/about",
+					de: "/ueber-unss",
+				},
 			},
-		}
-		// @ts-ignore
-		const result = validatePathTranslations(pathTranslations, ["en", "de"])
+			["en", "de"]
+		)
 		expect(result.length).toBe(1)
 	})
 
 	it("complains if not all languages are translated", () => {
-		const pathTranslations = {
-			"/about": {
-				en: "/about",
+		const result = validatePathTranslations(
+			{
+				// @ts-expect-error - Missing language
+				"/about": {
+					en: "/about",
+				},
 			},
-		}
-		// @ts-ignore
-		const result = validatePathTranslations(pathTranslations, ["en", "de"])
+			["en", "de"]
+		)
 		expect(result.length).toBe(1)
 	})
 
@@ -50,63 +55,83 @@ describe("validatePathTranslations", () => {
 	})
 
 	it("complains if a variant has extra parameters", () => {
-		const pathTranslations = {
-			"/about": {
-				en: "/about",
-				de: "/ueber-uns/[extra]",
+		const result = validatePathTranslations(
+			{
+				"/about": {
+					en: "/about",
+					de: "/ueber-uns/[extra]",
+				},
 			},
-		}
-		// @ts-ignore
-		const result = validatePathTranslations(pathTranslations, ["en", "de"])
+			["en", "de"]
+		)
 		expect(result.length).toBe(1)
 	})
 
 	it("doesn't complain if all variants have the same parameters", () => {
-		const pathTranslations = {
-			"/about/[id]": {
-				en: "/about/[id]",
-				de: "/ueber-uns/[id]",
+		const result = validatePathTranslations(
+			{
+				"/about/[id]": {
+					en: "/about/[id]",
+					de: "/ueber-uns/[id]",
+				},
 			},
-		}
-		// @ts-ignore
-		const result = validatePathTranslations(pathTranslations, ["en", "de"])
+			["en", "de"]
+		)
 		expect(result.length).toBe(0)
 	})
 
 	it("doesn't complain if there are extra languages", () => {
-		const pathTranslations = {
-			"/about": {
-				en: "/about",
-				de: "/ueber-uns",
-				es: "/acerca-de",
+		const result = validatePathTranslations(
+			{
+				"/about": {
+					en: "/about",
+					de: "/ueber-uns",
+
+					// @ts-expect-error - Extra language
+					es: "/acerca-de",
+				},
 			},
-		}
-		// @ts-ignore
-		const result = validatePathTranslations(pathTranslations, ["en", "de"])
+			["en", "de"]
+		)
 		expect(result.length).toBe(0)
 	})
 
 	it("complains if the params aren't of the same type", () => {
-		const pathTranslations = {
-			"/about/[...slug]": {
-				en: "/about/[...slug]",
-				de: "/ueber-uns/[slug]",
+		const result = validatePathTranslations(
+			{
+				"/about/[...slug]": {
+					en: "/about/[...slug]",
+					de: "/ueber-uns/[slug]",
+				},
 			},
-		}
-		// @ts-ignore
-		const result = validatePathTranslations(pathTranslations, ["en", "de"])
+			["en", "de"]
+		)
 		expect(result.length).toBe(1)
 	})
 
-	it("doesn0t complain if the params are complex and of the same type", () => {
-		const pathTranslations = {
-			"/about/[...slug]": {
-				en: "/about/[...slug]",
-				de: "/ueber-uns/[...slug]",
+	it("doesn't complain if the params are complex and of the same type", () => {
+		const result = validatePathTranslations(
+			{
+				"/about/[...slug]": {
+					en: "/about/[...slug]",
+					de: "/ueber-uns/[...slug]",
+				},
 			},
-		}
-		// @ts-ignore
-		const result = validatePathTranslations(pathTranslations, ["en", "de"])
+			["en", "de"]
+		)
 		expect(result.length).toBe(0)
+	})
+
+	it("complains if the params use different matchers", () => {
+		const result = validatePathTranslations(
+			{
+				"/about/[slug=int]": {
+					en: "/about/[slug=int]",
+					de: "/ueber-uns/[slug=float]",
+				},
+			},
+			["en", "de"]
+		)
+		expect(result.length).toBe(1)
 	})
 })
