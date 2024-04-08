@@ -22,6 +22,9 @@ export class ArrayInput extends LitElement {
 	schema: any = {}
 
 	@property()
+	required?: boolean = false
+
+	@property()
 	handleInlangProjectChange: (value: Array<string>, key: string, moduleId?: string) => void =
 		() => {}
 
@@ -41,6 +44,7 @@ export class ArrayInput extends LitElement {
 					.value=${this.value}
 					.schema=${this.schema}
 					.handleInlangProjectChange=${this.handleInlangProjectChange}
+					.required=${this.required}
 				></language-tags-input>
 			`
 		} else if (this.property === "variableReferencePattern") {
@@ -52,6 +56,7 @@ export class ArrayInput extends LitElement {
 					.value=${this.value}
 					.schema=${this.schema}
 					.handleInlangProjectChange=${this.handleInlangProjectChange}
+					.required=${this.required}
 				></reference-pattern-input>
 			`
 		} else {
@@ -63,6 +68,7 @@ export class ArrayInput extends LitElement {
 					.value=${this.value}
 					.schema=${this.schema}
 					.handleInlangProjectChange=${this.handleInlangProjectChange}
+					.required=${this.required}
 				></default-array-input>
 			`
 		}
