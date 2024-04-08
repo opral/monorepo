@@ -1,28 +1,15 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
-//import { baseStyling } from "../../../styling/base.js"
 import { InlangModule } from "@inlang/sdk"
 
 @customElement("default-object-input")
 export class DefaultObjectInput extends LitElement {
 	static override styles = [
-		//baseStyling,
 		css`
 			.property {
 				display: flex;
 				flex-direction: column;
 				gap: 12px;
-			}
-			h3 {
-				margin: 0;
-				font-size: 14px;
-				font-weight: 800;
-			}
-			.help-text {
-				font-size: 14px;
-				color: var(--sl-input-help-text-color);
-				margin: 0;
-				line-height: 1.5;
 			}
 			.disabled-input::part(base) {
 				cursor: unset;
@@ -94,6 +81,9 @@ export class DefaultObjectInput extends LitElement {
 	withDescription?: boolean = true
 
 	@property()
+	required?: boolean = false
+
+	@property()
 	handleInlangProjectChange: (
 		value: Record<InlangModule["default"]["id"], string>,
 		key: string,
@@ -144,12 +134,22 @@ export class DefaultObjectInput extends LitElement {
 
 	override render() {
 		return html` <div part="property" class="property">
-			${this.withTitle
-				? html`<h3 part="property-title">${this._title ? this._title : this.property}</h3>`
-				: ``}
-			${this.withDescription && this._description
-				? html`<p part="property-paragraph" class="help-text">${this._description}</p>`
-				: ``}
+			<field-header
+				.fieldTitle=${JSON.stringify(() => {
+					if (this.withTitle) {
+						if (this._title) {
+							return this._title
+						} else {
+							return this.property
+						}
+					} else {
+						return undefined
+					}
+				})}
+				.description=${this.withDescription ? this._description : ``}
+				.optional=${this.required ? false : true}
+				exportparts="property-title, property-paragraph"
+			></field-header>
 			${this.value
 				? html`<div class="list-container">
 						${this.value &&

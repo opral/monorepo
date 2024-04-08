@@ -1,12 +1,10 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
-//import { baseStyling } from "../../../styling/base.js"
 import "./../object/object-input.js"
 
 @customElement("path-pattern-input")
 export class PathPatternInput extends LitElement {
 	static override styles = [
-		//baseStyling,
 		css`
 			.property {
 				display: flex;
@@ -46,6 +44,9 @@ export class PathPatternInput extends LitElement {
 
 	@property()
 	schema: any = {}
+
+	@property()
+	required?: boolean = false
 
 	@property()
 	handleInlangProjectChange: (value: string, key: string, moduleId?: string) => void = () => {}
@@ -96,7 +97,11 @@ export class PathPatternInput extends LitElement {
 			this._isInitialized = true
 		}
 		return html` <div part="property" class="property">
-			<h3 part="property-title">${this._title ? this._title : this.property}</h3>
+			<field-header
+				.fieldTitle=${this._title ? this._title : this.property}
+				.optional=${this.required ? false : true}
+				exportparts="property-title"
+			></field-header>
 			<sl-checkbox
 				?checked=${this._isObject}
 				@input=${(e: Event) => {
@@ -109,13 +114,14 @@ export class PathPatternInput extends LitElement {
 				}}
 				>with namespaces</sl-checkbox
 			>
-
 			${this._isObject
 				? html`<div part="property" class="property">
-						${this._descriptionObject &&
-						html`<p part="property-paragraph" class="help-text">${this._descriptionObject}</p>`}
-						${this._examplesObject &&
-						html`<p part="property-paragraph" class="help-text">${this._examplesObject}</p>`}
+						<field-header
+							.description=${this._descriptionObject}
+							.examples=${this._examplesObject}
+							.optional=${this.required ? false : true}
+							exportparts="property-title, property-paragraph"
+						></field-header>
 						<object-input
 							.value=${typeof this.value === "object" ? this.value : ""}
 							.keyPlaceholder=${"Namespace"}
@@ -126,14 +132,17 @@ export class PathPatternInput extends LitElement {
 							.schema=${this.schema}
 							.withTitle=${false}
 							.withDescription=${false}
+							.required=${this.required}
 						>
 						</object-input>
 				  </div>`
 				: html`<div part="property" class="property">
-						${this._descriptionString &&
-						html`<p part="property-paragraph" class="help-text">${this._descriptionString}</p>`}
-						${this._examplesString &&
-						html`<p part="property-paragraph" class="help-text">${this._examplesString}</p>`}
+						<field-header
+							.description=${this._descriptionString}
+							.examples=${this._examplesString}
+							.optional=${this.required ? false : true}
+							exportparts="property-title, property-paragraph"
+						></field-header>
 						<sl-input
 							value=${typeof this.value === "object" ? "" : this.value}
 							size="small"
