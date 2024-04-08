@@ -16,8 +16,8 @@ export function translatePath(
 		availableLanguageTags: readonly string[]
 		defaultLanguageTag: string
 		prefixDefaultLanguage: "always" | "never"
-	},
-): string {
+	}
+) {
 	const {
 		path: targetedPathSource,
 		lang,
@@ -39,5 +39,6 @@ export function translatePath(
 		lang: targetLanguage,
 		defaultLanguageTag: opts.defaultLanguageTag,
 		prefixDefaultLanguage: opts.prefixDefaultLanguage,
+		trailingSlash: false,
 	})
 }

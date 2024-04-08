@@ -1,4 +1,4 @@
-import { parsePathDefinition } from "../path-translations/matching/parse.js"
+import { parse_route_id } from "../path-translations/matching/routing.js"
 import type { PathTranslations } from "./pathTranslations.js"
 
 export type PathTranslationIssue = {
@@ -12,7 +12,7 @@ export type PathTranslationIssue = {
  */
 export function validatePathTranslations<T extends string>(
 	pathTranslations: PathTranslations<T>,
-	availableLanguageTags: readonly T[],
+	availableLanguageTags: readonly T[]
 ): PathTranslationIssue[] {
 	const issues: PathTranslationIssue[] = []
 	const expectedLanguages = new Set(availableLanguageTags)
@@ -58,7 +58,7 @@ export function validatePathTranslations<T extends string>(
 			issues.push({
 				path,
 				message: `The following languages are missing translations: ${[...missingLanguages].join(
-					", ",
+					", "
 				)}`,
 			})
 		}
@@ -79,14 +79,8 @@ function isSubset<T>(a: Set<T>, b: Set<T>): boolean {
 }
 
 function getParams(path: string): Set<string> {
-	const semgents = parsePathDefinition(path)
-	const params = new Set<string>()
-	for (const segment of semgents) {
-		if (segment.type === "param") {
-			params.add(segment.name)
-		}
-	}
-	return params
+	const { params } = parse_route_id(path)
+	return new Set(params.map((param) => param.name))
 }
 
 function setsEqual(a: Set<any>, b: Set<any>): boolean {

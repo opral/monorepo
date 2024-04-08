@@ -7,7 +7,10 @@ const param_pattern = /^(\[)?(\.\.\.)?(\w+)(?:=(\w+))?(\])?$/
 /**
  * Creates the regex pattern, extracts parameter names, and generates types for a route
  */
-export function parse_route_id(id: string) {
+export function parse_route_id(id: string): {
+	params: RouteParam[]
+	pattern: RegExp
+} {
 	const params: RouteParam[] = []
 
 	const pattern =
@@ -112,13 +115,6 @@ export function remove_optional_params(id: string): string {
 }
 
 /**
- * Returns `false` for `(group)` segments
- */
-function affects_path(segment: string) {
-	return !/^\([^)]+\)$/.test(segment)
-}
-
-/**
  * Splits a route id into its segments, removing segments that
  * don't affect the path (i.e. groups). The root route is represented by `/`
  * and will be returned as `['']`.
@@ -126,7 +122,7 @@ function affects_path(segment: string) {
  * @returns string[]
  */
 export function get_route_segments(route: string) {
-	return route.slice(1).split("/").filter(affects_path)
+	return route.slice(1).split("/")
 }
 
 export function exec(

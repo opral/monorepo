@@ -1,5 +1,5 @@
-import { matches } from "./matching/match.js"
-import { resolvePath } from "./matching/resolvePath.js"
+import { bestMatch } from "./matching/match.js"
+import { resolve_route } from "./matching/routing.js"
 import type { PathTranslations } from "../config/pathTranslations.js"
 
 /**
@@ -9,7 +9,7 @@ import type { PathTranslations } from "../config/pathTranslations.js"
 export function getCanonicalPath(
 	translatedPath: string,
 	lang: string,
-	translations: PathTranslations,
+	translations: PathTranslations
 ): string {
 	for (const [canonicalPathDefinition, translationsForPath] of Object.entries(translations)) {
 		if (!(lang in translationsForPath)) continue
@@ -17,10 +17,10 @@ export function getCanonicalPath(
 		const translatedPathDefinition = translationsForPath[lang]
 		if (!translatedPathDefinition) continue
 
-		const match = matches(translatedPath, [translatedPathDefinition])
+		const match = bestMatch(translatedPath, [translatedPathDefinition])
 		if (!match) continue
 
-		return resolvePath(canonicalPathDefinition, match.params)
+		return resolve_route(canonicalPathDefinition, match.params)
 	}
 
 	return translatedPath
