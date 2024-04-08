@@ -2,8 +2,7 @@ const param_pattern = /^(\[)?(\.\.\.)?(\w+)(?:=(\w+))?(\])?$/
 const optional_param_regex = /^\[\[(\w+)(?:=(\w+))?\]\]$/
 const wildcard_param_regex = /^\[\.\.\.(\w+)(?:=(\w+))?\]$/
 
-export type ParamSegment = {
-	type: "param"
+export type RouteParam = {
 	name: string
 	matcher?: string
 	optional: boolean
@@ -11,15 +10,9 @@ export type ParamSegment = {
 	chained: boolean
 }
 
-export type StaticSegment = {
-	type: "static"
-	value: string
-}
-
-export type Segment = ParamSegment | StaticSegment
-
 export type PathDefinition = {
-	segments: Segment[]
+	pattern: RegExp
+	params: RouteParam[]
 }
 
 function get_route_segments(route: string) {
@@ -31,8 +24,14 @@ function get_route_segments(route: string) {
  * This parses the path definition so that it can be used to match against a path
  * @param definition
  */
-export function parsePathDefinition(definition: string): Segment[] {
-	if (definition == "/") return []
+export function parsePathDefinition(definition: string): PathDefinition {
+	if (definition == "/")
+		return [
+			{
+				type: "static",
+				value: "/",
+			},
+		]
 
 	const segments = get_route_segments(definition)
 	const parts: Segment[] = []
