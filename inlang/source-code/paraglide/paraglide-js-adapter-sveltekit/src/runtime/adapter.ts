@@ -305,14 +305,14 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		 * ```
 		 */
 		route(translatedPath: string) {
-			const { path, lang } = getPathInfo(translatedPath, {
+			const { path, lang, trailingSlash } = getPathInfo(translatedPath, {
 				base: normaliseBase(base),
 				availableLanguageTags: config.runtime.availableLanguageTags,
 				defaultLanguageTag: config.defaultLanguageTag,
 			})
 
 			const canonicalPath = getCanonicalPath(path, lang, config.translations, config.matchers)
-			return resolve(normaliseBase(base), canonicalPath)
+			return resolve(normaliseBase(base), canonicalPath) + (trailingSlash ? "/" : "")
 		},
 	}
 }
