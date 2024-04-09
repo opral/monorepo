@@ -22,7 +22,7 @@ main {
 }
 
 main > h1 {
-    font-size: 24px;
+    font-size: 22px;
     margin-block-end: 20px;
 }
 
@@ -39,6 +39,11 @@ inlang-settings {
     --sl-input-color-focus: var(--vscode-input-foreground);
     --sl-input-color-disabled: var(--vscode-disabledForeground);
     --sl-input-focus-ring-color: var(--vscode-focusBorder);
+    --sl-input-icon-color: var(--vscode-input-foreground);
+    --sl-input-icon-color-hover: var(--vscode-input-foreground);
+    --sl-input-icon-color-focus: var(--vscode-input-foreground);
+    --sl-input-placeholder-color: var(--vscode-input-foreground);
+    --sl-input-placeholder-color-disabled: var(--vscode-disabledForeground);
     /* Input Filled */
     --sl-input-filled-background-color: var(--vscode-input-background);
     --sl-input-filled-background-color-hover: var(--vscode-input-background);
@@ -64,11 +69,11 @@ inlang-settings {
 
 
 inlang-settings::part(property-title) {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
 }
 
 inlang-settings::part(property-paragraph) {
-    font-size: 14px;
+    font-size: 12px;
     color: var(--vscode-descriptionForeground);
 }
