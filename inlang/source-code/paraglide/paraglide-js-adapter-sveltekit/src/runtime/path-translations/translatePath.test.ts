@@ -1,72 +1,73 @@
 import { describe, it, expect } from "vitest"
 import { translatePath } from "./translatePath"
+import { base } from "$app/paths"
 
 describe("translatePath", () => {
-	it("translates from the default language (no base path)", () => {
+	it("translates from the default language", () => {
 		const translatedPath = translatePath(
-			"/foo/bar",
+			base + "/foo/bar",
 			"de",
 			{},
 			{},
 			{
-				base: "/",
+				base,
 				availableLanguageTags: ["de", "en"],
 				defaultLanguageTag: "en",
 				prefixDefaultLanguage: "never",
 			}
 		)
 
-		expect(translatedPath).toBe("/de/foo/bar")
+		expect(translatedPath).toBe(base + "/de/foo/bar")
 	})
 
-	it("translates a path from the default language (with base)", () => {
+	it("keeps the trailing slash if present", () => {
 		const translatedPath = translatePath(
-			"/base/foo/bar",
+			base + "/foo/bar/",
 			"de",
 			{},
 			{},
 			{
-				base: "/base",
+				base,
 				availableLanguageTags: ["de", "en"],
 				defaultLanguageTag: "en",
 				prefixDefaultLanguage: "never",
 			}
 		)
 
-		expect(translatedPath).toBe("/base/de/foo/bar")
+		expect(translatedPath).toBe(base + "/de/foo/bar/")
 	})
 
-	it("keeps the trailing slash if present (with base)", () => {
+	it("doesn't add a trailing slash if not present", () => {
 		const translatedPath = translatePath(
-			"/base/foo/bar/",
+			base + "/foo/bar",
 			"de",
 			{},
 			{},
 			{
-				base: "/base",
+				base,
 				availableLanguageTags: ["de", "en"],
 				defaultLanguageTag: "en",
 				prefixDefaultLanguage: "never",
 			}
 		)
 
-		expect(translatedPath).toBe("/base/de/foo/bar/")
+		expect(translatedPath).toBe(base + "/de/foo/bar")
 	})
 
-	it("doesn't add a trailing slash if not present (with base)", () => {
+	it("removes the language prefix with trailing slash", () => {
 		const translatedPath = translatePath(
-			"/base/foo/bar",
-			"de",
+			"/de/",
+			"en",
 			{},
 			{},
 			{
-				base: "/base",
+				base,
 				availableLanguageTags: ["de", "en"],
 				defaultLanguageTag: "en",
 				prefixDefaultLanguage: "never",
 			}
 		)
 
-		expect(translatedPath).toBe("/base/de/foo/bar")
+		expect(translatedPath).toBe(base ? base + "/" : "/")
 	})
 })
