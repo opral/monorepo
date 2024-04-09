@@ -85,4 +85,34 @@ describe("getCanonicalPath", () => {
 		)
 		expect(canonicalPath).toBe("/foo/123")
 	})
+
+	it("returns the canonical path in case of a match with catch all", () => {
+		const canonicalPath = getCanonicalPath(
+			"/bar/123/baz",
+			"en",
+			{
+				"/foo/[...rest]": {
+					en: "/bar/[...rest]",
+					de: "/baz/[...rest]",
+				},
+			},
+			{}
+		)
+		expect(canonicalPath).toBe("/foo/123/baz")
+	})
+
+	it.only("returns the canonical path in case of a match with an optional catch all", () => {
+		const canonicalPath = getCanonicalPath(
+			"/bar/",
+			"en",
+			{
+				"/foo/[...rest]": {
+					en: "/bar/[...rest]",
+					de: "/baz/[...rest]",
+				},
+			},
+			{}
+		)
+		expect(canonicalPath).toBe("/foo")
+	})
 })
