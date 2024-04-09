@@ -69,7 +69,7 @@
 			defaultLanguageTag: i18n.config.defaultLanguageTag,
 		})
 
-		const translatedPath = getTranslatedPath(canonicalPath, language, i18n.config.translations)
+		const translatedPath = getTranslatedPath(canonicalPath, language, i18n.config.translations, i18n.config.matchers)
 
 		const newPathname = serializeRoute({
 			base: absoluteBase,
@@ -102,7 +102,9 @@
 		<!-- If there is more than one language, add alternate links -->
 		{#if i18n.config.runtime.availableLanguageTags.length >= 1}
 			{#each i18n.config.runtime.availableLanguageTags as lang}
-				{@const path = translatePath($page.url.pathname, lang, i18n.config.translations, {
+				{@const path = translatePath($page.url.pathname, lang, i18n.config.translations, 
+				i18n.config.matchers,
+				{
 					base: absoluteBase,
 					availableLanguageTags: i18n.config.runtime.availableLanguageTags,
 					defaultLanguageTag: i18n.config.defaultLanguageTag,

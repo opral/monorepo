@@ -27,7 +27,7 @@ describe("parsePath", () => {
 			path: canonicalPath,
 			trailingSlash,
 		} = getPathInfo("/de/foo/bar", {
-			base: "/",
+			base: "",
 			availableLanguageTags: ["en", "de"],
 			defaultLanguageTag: "en",
 		})
