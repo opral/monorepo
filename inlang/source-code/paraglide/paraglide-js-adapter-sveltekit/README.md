@@ -141,6 +141,7 @@ Don't include the language or the [base path](https://kit.svelte.dev/docs/config
 import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
 import * as runtime from "$lib/paraglide/runtime.js"
 import * as m from "$lib/paraglide/messages.js"
+import { match as int } from "../params/int.js"
 
 export const i18n = createI18n(runtime, {
 	pathnames: {
@@ -149,22 +150,26 @@ export const i18n = createI18n(runtime, {
 			de: "/uber-uns",
 			fr: "/a-propos",
 		},
-		// you can use parameters
-		// optional parameters and rest-parametes are supported
-		"/user/[username]" : {
-			en: "/user/[username]",
-			de: "/benutzer/[username]",
-			fr: "/utilisateur/[username]",
+
+		// You can use parameters
+		// All translations must use identical parameters and names
+		"/user/[id=int]/[...rest]" : {
+			en: "/user/[id=int]/[...rest]",
+			de: "/benutzer/[id=int]/[...rest]",
+			fr: "/utilisateur/[id=int]/[...rest]",
 		},
-		// or use a message function (recommended)
+		// Instead of a map, you can also pass a message-function
 		"/admin" : m.admin_path
 	}
+
+	// If you're using matchers in the pathnames, you need to pass them
+	matchers: { int	}
 })
 ```
 
 ### Customizing Link Translation
 
-Links are translated automatically using a preprocessor. This means that you can use the normal `a` tag and the adapter will translate it for you.
+Links are translated automatically using a preprocessor. This means that you can use the normal `a`-tag and the adapter will translate it for you.
 
 ```svelte
 <a href="/about">{m.about()}</a>
@@ -389,11 +394,10 @@ We are working on contributing a fix for [sveltejs/kit#11879](https://github.com
 
 ## Roadmap to 1.0
 
-- Expand the route features in path-translation
-  - Parameter-Matchers
-  - Parameter Translations
-- Improve Stability
-- Improve Usability
+- Translate parameters themselves
+- More routing flexibility
+	- Domain Based routing
+	- Language Detection & Redirects
 
 ## Playground
 
