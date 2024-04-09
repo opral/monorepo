@@ -57,13 +57,13 @@ export const StyledWithPartAPI: StoryObj = {
 					color: blue;
 				}
 				inlang-settings {
-					--sl-color-primary-600: hsl(333.3 71.4% 50.6%);
-				}
-				inlang-settings {
 					--sl-input-background-color: red;
 					--sl-input-color: white;
 					--sl-input-placeholder-color: white;
 					--sl-input-filled-background-color-disabled: blue;
+
+					--inlang-color-primary: #f97316;
+					--inlang-color-neutral: #64748b;
 				}
 			</style>
 			<inlang-settings

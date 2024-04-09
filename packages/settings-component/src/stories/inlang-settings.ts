@@ -9,6 +9,7 @@ import {
 	type InstalledMessageLintRule,
 } from "@inlang/sdk"
 import checkOptional from "./../helper/checkOptional.js"
+import overridePrimitiveColors from "./../helper/overridePrimitiveColors.js"
 
 import "./input-fields/general-input.js"
 
@@ -75,6 +76,10 @@ export default class InlangSettings extends LitElement {
 				font-size: 14px;
 				margin: 0;
 			}
+			.test {
+				width: 50px;
+				height: 50px;
+			}
 		`,
 	]
 
@@ -111,6 +116,9 @@ export default class InlangSettings extends LitElement {
 		if (this.settings) {
 			this._newSettings = JSON.parse(JSON.stringify(this.settings))
 		}
+
+		//override primitive colors to match the design system
+		overridePrimitiveColors()
 	}
 
 	handleInlangProjectChange = (
