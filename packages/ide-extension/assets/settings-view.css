@@ -27,8 +27,12 @@ main > h1 {
 }
 
 inlang-settings {
+    /* Primary */
+    --inlang-color-primary: var(--vscode-button-background);
+    --inlang-color-neutral: var(--vscode-foreground);
     /* Input */
     --sl-input-background-color: var(--vscode-input-background);
+    --sl-input-background-color-disabled: var(--vscode-input-background);
     --sl-input-border-color: var(--vscode-input-border);
     --sl-input-border-color-hover: var(--vscode-input-activeBorder);
     --sl-input-border-color-focus: var(--vscode-input-activeBorder);
@@ -84,4 +88,21 @@ inlang-settings::part(property-title) {
 inlang-settings::part(property-paragraph) {
     font-size: 14px;
     color: var(--vscode-descriptionForeground);
+}
+
+inlang-settings::part(option) {
+    color: var(--vscode-input-foreground);
+    font-size: 14px;
+    padding: 8px 12px;
+}
+
+
+inlang-settings::part(float) {
+    background-color: var(--vscode-sideBar-background);
+    color: var(--vscode-sideBar-foreground);
+    border: 1px solid var(--vscode-sideBar-border);
+}
+inlang-settings::part(cancel) {
+    background-color: var(--vscode-foreground);
+    color: #fff;
 }

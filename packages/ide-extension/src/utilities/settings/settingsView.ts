@@ -1,5 +1,6 @@
 import * as vscode from "vscode"
 import { state } from "../state.js"
+import { CONFIGURATION } from "../../configuration.js"
 
 export async function settingsPanel(args: { context: vscode.ExtensionContext }) {
 	const panel = vscode.window.createWebviewPanel(
@@ -21,6 +22,7 @@ export async function settingsPanel(args: { context: vscode.ExtensionContext }) 
 		switch (message.command) {
 			case "setSettings":
 				state().project.setSettings(message.settings)
+				CONFIGURATION.EVENTS.ON_DID_SETTINGS_VIEW_CHANGE.fire()
 				break
 		}
 	})
