@@ -28681,7 +28681,7 @@ packages:
 
   file:..:
     resolution: {directory: .., type: directory}
-    name: dev
+    name: monorepo
     dev: true
 
   file:inlang/source-code/cli:
