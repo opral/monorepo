@@ -147,6 +147,7 @@ export class LanguageTagsInput extends LitElement {
 				>
 				</sl-input>
 				<sl-button
+					exportparts="base:button"
 					size="small"
 					variant="neutral"
 					@click=${() => {
