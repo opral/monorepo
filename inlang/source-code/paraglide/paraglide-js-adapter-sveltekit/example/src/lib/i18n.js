@@ -10,13 +10,9 @@ export const i18n = createI18n(runtime, {
 			en: "/users",
 			de: "/benutzer",
 		},
-		"/users/[id=int]": {
-			en: "/users/[id=int]",
-			de: "/benutzer/[id=int]",
-		},
-		"/users/[id=int]/edit": {
-			en: "/users/[id=int]/edit",
-			de: "/benutzer/[id=int]/bearbeiten",
+		"/users/[id=int]/[[...rest]]": {
+			en: "/users/[id=int]/[[...rest]]",
+			de: "/benutzer/[id=int]/[[...rest]]",
 		},
 		"/some-subpage": {
 			en: "/some-subpage",
