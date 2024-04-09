@@ -56,6 +56,16 @@ type EditorStateSchema = {
 	 */
 	mutateForkStatus: (args: { ahead: number; behind: number; conflicts: boolean }) => void
 
+	pushChanges: (args: {
+		user: LocalStorageSchema["user"]
+		setFsChange: (date: Date) => void
+		setLastPullTime: (date: Date) => void
+	}) => Promise<Result<true, PushException>>
+
+	mergeUpstream: () => Promise<Awaited<ReturnType<Repository["mergeUpstream"]>>> 
+
+	createFork: () => Promise<Awaited<ReturnType<Repository["createFork"]>>>
+
 	currentBranch: Resource<string | undefined>
 	/**
 	 * The branch names of current repo.
@@ -149,7 +159,7 @@ type EditorStateSchema = {
 	/**
 	 * Expose lix errors that happen wihle opening the repository
 	 */
-	lixErrors: () => ReturnType<Repository["errors"]>
+	lixErrors: () => LixError[]
 
 	/**
 	 * Unpushed changes in the repository.
@@ -244,7 +254,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	const [localStorage] = useLocalStorage() ?? []
 
 	// get lix errors
-	const [lixErrors, setLixErrors] = createSignal<ReturnType<Repository["errors"]>>([])
+	const [lixErrors, setLixErrors] = createSignal<Error[]>([])
 
 	const [activeBranch, setActiveBranch] = createSignal<string | undefined>(
 		params.get("branch") || undefined
@@ -281,34 +291,25 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 						// @ts-expect-error
 						window.repo = newRepo
 					}
-
-					if (newRepo.errors().length > 0) {
-						setLixErrors(newRepo.errors())
-						return
-					} else {
-						setLixErrors([])
-					}
+					// TODO replace this with `setLixErrors([])` as soon as repo throws 
+					setLixErrors(newRepo.errors)
 
 					// @ts-ignore -- causes reactivity bugs because the sdk uses watch and triggers updates on changes caused by itself
 					newRepo.nodeishFs.watch = () => {}
 
 					setLastPullTime(new Date())
+
 					// Invalidate the project while we switch branches
 					setProject(undefined)
 					return newRepo
-				} catch (err) {
-					console.error(err)
-					return
+				} catch (e) {
+					setLixErrors([e as Error])
 				}
 			} else {
 				return
 			}
 		}
 	)
-
-	repo()?.errors.subscribe((errors: any) => {
-		setLixErrors(errors)
-	})
 
 	const isForkSyncDisabled = () =>
 		localStorage.disableForkSyncWarning?.some(
@@ -318,14 +319,15 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	const [forkStatus, { refetch: refetchForkStatus, mutate: mutateForkStatus }] = createResource(
 		() => {
 			if (repo() && !isForkSyncDisabled()) {
-				return repo()
+				return { repo: repo() }
 			} else {
 				return false
 			}
 		},
 		async (args) => {
-			const value = await args.forkStatus()
+			const value = await args.repo!.forkStatus()
 			if ("error" in value) {
+				setLixErrors([new Error(value.error), ...lixErrors()])
 				return { ahead: 0, behind: 0, conflicts: false }
 			} else {
 				return value
@@ -333,6 +335,87 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		},
 		{ initialValue: { ahead: 0, behind: 0, conflicts: false } }
 	)
+
+	async function pushChanges(args: {
+		user: LocalStorageSchema["user"]
+		setFsChange: (date: Date) => void
+		setLastPullTime: (date: Date) => void
+	}): Promise<Result<true, PushException>> {
+		const loadedRepo = repo()
+		if (!loadedRepo) {
+			return { error: new PushException("Repo not loaded") }
+		}
+
+		if (typeof args.user === "undefined" || args.user?.isLoggedIn === false) {
+			return { error: new PushException("User not logged in") }
+		}
+
+		const filesWithUncommittedChanges = await loadedRepo.statusList({
+			filter: (f: any) =>
+				f.endsWith("project_id") ||
+				f.endsWith(".json") ||
+				f.endsWith(".po") ||
+				f.endsWith(".yaml") ||
+				f.endsWith(".yml") ||
+				f.endsWith(".js") ||
+				f.endsWith(".ts"),
+		})
+
+		if (filesWithUncommittedChanges.length > 0) {
+			// commit changes
+			await loadedRepo.commit({
+				author: {
+					name: args.user.username,
+					email: args.user.email,
+				},
+				message: "Fink 🐦: update translations",
+				include: filesWithUncommittedChanges.map((f) => f[0]),
+			})
+		}
+
+		// triggering a side effect here to trigger a re-render
+		// of components that depends on fs
+		args.setFsChange(new Date())
+		// push changes
+		try {
+			const push = await loadedRepo.push()
+			if (push?.ok === false) {
+				return { error: new PushException("Failed to push", { cause: push.error }) }
+			}
+			await loadedRepo.pull({
+				author: {
+					name: args.user.username,
+					email: args.user.email,
+				},
+				fastForward: true,
+				singleBranch: true,
+			})
+			const time = new Date()
+			// triggering a rebuild of everything fs related
+			args.setFsChange(time)
+			args.setLastPullTime(time)
+			return { data: true }
+		} catch (error) {
+			return { error: (error as PushException) ?? "Unknown error" }
+		}
+	}
+
+	async function mergeUpstream(): Promise<Awaited<ReturnType<Repository["mergeUpstream"]>>> {
+		const loadedRepo = repo()
+		if (!loadedRepo) {
+			throw new Error("Repo not loaded")
+		}
+
+		return loadedRepo.mergeUpstream()
+	}
+
+	async function createFork() {
+		const loadedRepo = repo()
+		if (!loadedRepo) {
+			throw new Error("Repo not loaded yet")
+		}
+		return await loadedRepo.createFork()
+	}
 
 	const [projectList] = createResource(
 		() => {
@@ -375,13 +458,13 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	// open the inlang project and store it in a resource
 	const [project, { mutate: setProject }] = createResource(
 		() => {
-			if (repo() === undefined || lixErrors().length > 0 || activeProject() === undefined) {
+			if (repo() === undefined || activeProject() === undefined) {
 				return false
 			}
-			return { newRepo: repo(), lixErrors: lixErrors(), activeProject: activeProject() }
+			return { newRepo: repo(), activeProject: activeProject() }
 		},
-		async ({ newRepo, lixErrors, activeProject }) => {
-			if (lixErrors.length === 0 && newRepo) {
+		async ({ newRepo, activeProject }) => {
+			if (newRepo) {
 				const project = solidAdapter(
 					await loadProject({
 						repo: newRepo,
@@ -459,7 +542,10 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			}
 		},
 		async () => {
-			const repoMeta = await repo()?.getMeta()
+			const repoMeta = await repo()!.getMeta()
+			if ("error" in repoMeta) {
+				setLixErrors([repoMeta.error, ...lixErrors()])
+			}
 			return repoMeta
 		}
 	)
@@ -486,7 +572,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	const [currentBranch] = createResource(
 		() => {
-			if (lixErrors().length > 0 || repo() === undefined) {
+			if (repo() === undefined) {
 				return {}
 			} else {
 				return { repo: repo() }
@@ -524,7 +610,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			return {
 				user: localStorage?.user?.isLoggedIn ?? "not logged in",
 				routeParams: currentPageContext.routeParams as EditorRouteParams,
-				currentRepo: repo(),
 				repoMeta: githubRepositoryInformation(),
 			}
 		},
@@ -550,6 +635,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					forkStatus,
 					mutateForkStatus,
 					refetchForkStatus,
+					pushChanges,
+					mergeUpstream,
+					createFork,
 					currentBranch,
 					branchNames,
 					githubRepositoryInformation,
@@ -610,68 +698,5 @@ export class UnknownException extends Error {
 
 	constructor(readonly id: string) {
 		super(id)
-	}
-}
-
-/**
- * Pushed changes and pulls right afterwards.
- */
-export async function pushChanges(args: {
-	repo: Repository
-	user: LocalStorageSchema["user"]
-	setFsChange: (date: Date) => void
-	setLastPullTime: (date: Date) => void
-}): Promise<Result<true, PushException>> {
-	if (typeof args.user === "undefined" || args.user?.isLoggedIn === false) {
-		return { error: new PushException("User not logged in") }
-	}
-
-	const filesWithUncommittedChanges = await args.repo.statusList({
-		filter: (f: any) =>
-			f.endsWith("project_id") ||
-			f.endsWith(".json") ||
-			f.endsWith(".po") ||
-			f.endsWith(".yaml") ||
-			f.endsWith(".yml") ||
-			f.endsWith(".js") ||
-			f.endsWith(".ts"),
-	})
-
-	if (filesWithUncommittedChanges.length > 0) {
-		// commit changes
-		await args.repo.commit({
-			author: {
-				name: args.user.username,
-				email: args.user.email,
-			},
-			message: "Fink 🐦: update translations",
-			include: filesWithUncommittedChanges.map((f) => f[0]),
-		})
-	}
-
-	// triggering a side effect here to trigger a re-render
-	// of components that depends on fs
-	args.setFsChange(new Date())
-	// push changes
-	try {
-		const push = await args.repo.push()
-		if (push?.ok === false) {
-			return { error: new PushException("Failed to push", { cause: push.error }) }
-		}
-		await args.repo.pull({
-			author: {
-				name: args.user.username,
-				email: args.user.email,
-			},
-			fastForward: true,
-			singleBranch: true,
-		})
-		const time = new Date()
-		// triggering a rebuild of everything fs related
-		args.setFsChange(time)
-		args.setLastPullTime(time)
-		return { data: true }
-	} catch (error) {
-		return { error: (error as PushException) ?? "Unknown error" }
 	}
 }
