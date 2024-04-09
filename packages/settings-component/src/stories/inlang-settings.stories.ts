@@ -43,20 +43,20 @@ export const Stringified: StoryObj = {
 		`,
 }
 
-export const StyledWithPartAPI: StoryObj = {
+export const Styled: StoryObj = {
 	render: () =>
 		html`
 			<style>
-				inlang-settings::part(property) {
+				.styled::part(property) {
 					background: lightblue;
 				}
-				inlang-settings::part(property-title) {
+				.styled::part(property-title) {
 					font-size: 14px;
 				}
-				inlang-settings::part(property-paragraph) {
+				.styled::inlang-settings::part(property-paragraph) {
 					color: blue;
 				}
-				inlang-settings {
+				.styled {
 					--sl-input-background-color: red;
 					--sl-input-color: white;
 					--sl-input-placeholder-color: white;
@@ -67,6 +67,7 @@ export const StyledWithPartAPI: StoryObj = {
 				}
 			</style>
 			<inlang-settings
+				class="styled"
 				.settings=${mockSettings}
 				.installedPlugins=${mockInstalledPlugins}
 				.installedMessageLintRules=${mockInstalledMessageLintRules}
@@ -79,42 +80,42 @@ export const DarkTheme: StoryObj = {
 	render: () =>
 		html`
 			<style>
-				inlang-settings::part(base) {
+				.dark::part(base) {
 					background-color: black;
 					padding: 20px 32px;
 				}
-				inlang-settings::part(property-title) {
+				.dark::part(property-title) {
 					color: white;
 				}
-				inlang-settings::part(module-title) {
+				.dark::part(module-title) {
 					color: white;
 				}
-				inlang-settings::part(property-paragraph) {
+				.dark::part(property-paragraph) {
 					color: #e0e0e0;
 				}
-				inlang-settings::part(float) {
+				.dark::part(float) {
 					background-color: black;
 					color: #e0e0e0;
 					border: 1px solid #606060;
 				}
-				inlang-settings::part(cancel) {
+				.dark::part(cancel) {
 					background-color: #242424;
 					color: #e0e0e0;
 					border: 1px solid #606060;
 				}
 
-				inlang-settings::part(option-wrapper) {
+				.dark::part(option-wrapper) {
 					background-color: #242424;
 					border: 1px solid #606060;
 				}
-				inlang-settings::part(option) {
+				.dark::part(option) {
 					color: #ffffff;
 				}
-				inlang-settings::part(option):hover {
+				.dark::part(option):hover {
 					background-color: #646464;
 				}
 
-				inlang-settings {
+				.dark {
 					--sl-input-background-color: #313131;
 					--sl-input-border-color: #606060;
 					--sl-input-color: #e0e0e0;
@@ -137,6 +138,7 @@ export const DarkTheme: StoryObj = {
 				}
 			</style>
 			<inlang-settings
+				class="dark"
 				.settings=${mockSettings}
 				.installedPlugins=${mockInstalledPlugins}
 				.installedMessageLintRules=${mockInstalledMessageLintRules}
