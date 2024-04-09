@@ -69,7 +69,7 @@
 			defaultLanguageTag: i18n.config.defaultLanguageTag,
 		})
 
-		const translatedPath = getTranslatedPath(canonicalPath, language, i18n.config.translations)
+		const translatedPath = getTranslatedPath(canonicalPath, language, i18n.config.translations, i18n.config.matchers)
 
 		const newPathname = serializeRoute({
 			base: absoluteBase,
