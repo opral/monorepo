@@ -60,7 +60,7 @@ export class GeneralInput extends LitElement {
 			} else if (this.schema.type === "object") {
 				return html` <div>
 					<object-input
-						exportparts="property, property-title, property-paragraph"
+						exportparts="property, property-title, property-paragraph, option, option-wrapper"
 						.property=${this.property}
 						.moduleId=${this.moduleId}
 						.modules=${this.modules}

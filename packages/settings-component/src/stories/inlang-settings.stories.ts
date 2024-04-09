@@ -103,6 +103,17 @@ export const DarkTheme: StoryObj = {
 					border: 1px solid #606060;
 				}
 
+				inlang-settings::part(option-wrapper) {
+					background-color: #242424;
+					border: 1px solid #606060;
+				}
+				inlang-settings::part(option) {
+					color: #ffffff;
+				}
+				inlang-settings::part(option):hover {
+					background-color: #646464;
+				}
+
 				inlang-settings {
 					--sl-input-background-color: #313131;
 					--sl-input-border-color: #606060;
