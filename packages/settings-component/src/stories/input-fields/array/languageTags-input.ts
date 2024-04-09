@@ -38,9 +38,9 @@ export class LanguageTagsInput extends LitElement {
 				gap: 4px;
 			}
 			sl-tag::part(base) {
-				background-color: var(--sl-input-background-color);
+				background-color: var(--sl-input-filled-background-color-disabled);
 				color: var(--sl-input-color);
-				border-color: var(--sl-input-border-color);
+				border-color: transparent;
 				border-radius: var(--sl-input-border-radius-small);
 			}
 			sl-tag::part(remove-button) {
