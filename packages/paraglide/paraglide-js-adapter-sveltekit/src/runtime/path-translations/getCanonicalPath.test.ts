@@ -101,7 +101,7 @@ describe("getCanonicalPath", () => {
 		expect(canonicalPath).toBe("/foo/123/baz")
 	})
 
-	it.only("returns the canonical path in case of a match with an optional catch all", () => {
+	it("returns the canonical path in case of a match with an optional catch all", () => {
 		const canonicalPath = getCanonicalPath(
 			"/bar/",
 			"en",
