@@ -1,23 +1,28 @@
 import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
+import { defineConfig } from "vitest/config"
 
 const __filename = resolve(fileURLToPath(import.meta.url))
 const __dirname = dirname(__filename)
 
-export default {
-	plugins: [
-		virtualModules({
-			"$app/paths": getPathsModule({ base: "/base" }),
-			"$app/environment": getEnvironmentModule({ dev: false, browser: false }),
-			"$app/stores": getStoresModule({}),
-		}),
-	],
-	test: {
-		alias: {
-			"$paraglide/runtime.js": resolve(__dirname, "./mocks/runtime.js"),
+const BASE_PATH = process.env.BASE_PATH ?? ""
+
+export default defineConfig((env) => {
+	return {
+		plugins: [
+			virtualModules({
+				"$app/paths": getPathsModule({ base: BASE_PATH }),
+				"$app/environment": getEnvironmentModule({ dev: false, browser: false }),
+				"$app/stores": getStoresModule({}),
+			}),
+		],
+		test: {
+			alias: {
+				"$paraglide/runtime.js": resolve(__dirname, "./mocks/runtime.js"),
+			},
 		},
-	},
-}
+	}
+})
 
 /**
  * @param {Record<string, string>} map

@@ -190,4 +190,3 @@ export async function convert(markdown: string): Promise<string> {
 	return String(`<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark-dimmed.min.css">
 	${content}`)
 }
-
