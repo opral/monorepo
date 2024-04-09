@@ -60,7 +60,7 @@ export class ObjectInput extends LitElement {
 			></lint-rule-level-object-input>`
 		} else {
 			return html`<default-object-input
-				exportparts="property, property-title, property-paragraph"
+				exportparts="property, property-title, property-paragraph, button"
 				.property=${this.property}
 				.moduleId=${this.moduleId}
 				.value=${this.value}
