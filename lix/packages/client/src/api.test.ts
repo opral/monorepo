@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest"
+import { describe, it, expect } from "vitest"
 import { openRepository, findRepoRoot } from "./index.ts"
 // @ts-ignore -- ts import not working correctly, TODO: find out why
 import { createNodeishMemoryFs, fromSnapshot } from "@lix-js/fs"
