@@ -27,15 +27,17 @@
 		"@storybook/blocks": "^7.6.16",
 		"@storybook/web-components": "^7.6.16",
 		"@storybook/web-components-vite": "^7.6.16",
+		"@types/chroma-js": "^2.4.4",
+		"esbuild": "^0.20.0",
 		"lit": "^3.1.2",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
-		"storybook": "^7.6.16",
-		"esbuild": "^0.20.0"
+		"storybook": "^7.6.16"
 	},
 	"dependencies": {
 		"@inlang/sdk": "workspace:^",
 		"@lit/task": "^1.0.0",
-		"@shoelace-style/shoelace": "2.14.0"
+		"@shoelace-style/shoelace": "2.14.0",
+		"chroma-js": "^2.4.2"
 	}
 }
