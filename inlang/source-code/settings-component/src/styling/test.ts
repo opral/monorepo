@@ -1,16 +1,16 @@
 import { css } from "lit"
 
 /*
-* This gets into the published component
-*/
+ * This gets into the published component
+ */
 
-export const baseStyling = css`
-	:host {
+export const testStyling = css`
+	inlang-settings {
 		font-family: "Inter", sans-serif;
 
 		/*
-		* Color Primitives
-		*/
+        * Color Primitives
+        */
 
 		/* Gray */
 		--sl-color-gray-50: hsl(0 0% 97.5%);
@@ -247,8 +247,8 @@ export const baseStyling = css`
 		--sl-color-rose-950: hsl(341.3 70.1% 17.1%);
 
 		/*
-   * Theme Tokens
-   */
+* Theme Tokens
+*/
 
 		/* Primary */
 		--sl-color-primary-50: var(--sl-color-sky-50);
@@ -320,8 +320,8 @@ export const baseStyling = css`
 		--sl-color-neutral-1000: hsl(0, 0%, 0%);
 
 		/*
-   * Border radii
-   */
+* Border radii
+*/
 
 		--sl-border-radius-small: 0.1875rem; /* 3px */
 		--sl-border-radius-medium: 0.25rem; /* 4px */
@@ -332,8 +332,8 @@ export const baseStyling = css`
 		--sl-border-radius-pill: 9999px;
 
 		/*
-   * Elevations
-   */
+* Elevations
+*/
 
 		--sl-shadow-x-small: 0 1px 2px hsl(240 3.8% 46.1% / 6%);
 		--sl-shadow-small: 0 1px 2px hsl(240 3.8% 46.1% / 12%);
@@ -342,8 +342,8 @@ export const baseStyling = css`
 		--sl-shadow-x-large: 0 4px 16px hsl(240 3.8% 46.1% / 12%);
 
 		/*
-   * Spacings
-   */
+* Spacings
+*/
 
 		--sl-spacing-3x-small: 0.125rem; /* 2px */
 		--sl-spacing-2x-small: 0.25rem; /* 4px */
@@ -357,8 +357,8 @@ export const baseStyling = css`
 		--sl-spacing-4x-large: 4.5rem; /* 72px */
 
 		/*
-   * Transitions
-   */
+* Transitions
+*/
 
 		--sl-transition-x-slow: 1000ms;
 		--sl-transition-slow: 500ms;
@@ -367,8 +367,8 @@ export const baseStyling = css`
 		--sl-transition-x-fast: 50ms;
 
 		/*
-   * Typography
-   */
+* Typography
+*/
 
 		/* Fonts */
 		--sl-font-mono: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
@@ -415,8 +415,8 @@ export const baseStyling = css`
 		--sl-focus-ring-offset: 1px;
 
 		/*
-   * Forms
-   */
+* Forms
+*/
 
 		/* Buttons */
 		--sl-button-font-size-small: var(--sl-font-size-x-small);
@@ -495,22 +495,22 @@ export const baseStyling = css`
 		--sl-toggle-size-large: 1.375rem; /* 22px */
 
 		/*
-   * Overlays
-   */
+* Overlays
+*/
 
 		--sl-overlay-background-color: hsl(240 3.8% 46.1% / 33%);
 
 		/*
-   * Panels
-   */
+* Panels
+*/
 
 		--sl-panel-background-color: var(--sl-color-neutral-0);
 		--sl-panel-border-color: var(--sl-color-neutral-200);
 		--sl-panel-border-width: 1px;
 
 		/*
-   * Tooltips
-   */
+* Tooltips
+*/
 
 		--sl-tooltip-border-radius: var(--sl-border-radius-medium);
 		--sl-tooltip-background-color: var(--sl-color-neutral-800);
@@ -523,8 +523,8 @@ export const baseStyling = css`
 		--sl-tooltip-arrow-size: 6px;
 
 		/*
-   * Z-indexes
-   */
+* Z-indexes
+*/
 
 		--sl-z-index-drawer: 700;
 		--sl-z-index-dialog: 800;
