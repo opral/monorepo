@@ -10,12 +10,28 @@ import { html } from "lit"
 const meta: Meta = {
 	component: "inlang-settings",
 	title: "Public/inlang-settings",
-	tags: ["autodocs"],
+	argTypes: {
+		settings: {
+			control: { type: "object" },
+			description:
+				"Type ProjectSettings (https://github.com/opral/monorepo/blob/main/inlang/source-code/versioned-interfaces/project-settings/src/interface.ts)",
+		},
+		installedPlugins: {
+			control: { type: "object" },
+			description:
+				"Type InstalledPlugin[] (https://github.com/opral/monorepo/blob/57611514bf84d3e03b179ddf8d02725157ec6bd5/inlang/source-code/sdk/src/api.ts#L14)",
+		},
+		installedMessageLintRules: {
+			control: { type: "object" },
+			description:
+				"Type InstalledMessageLintRule[] (https://github.com/opral/monorepo/blob/57611514bf84d3e03b179ddf8d02725157ec6bd5/inlang/source-code/sdk/src/api.ts#L26)",
+		},
+	},
 }
 
 export default meta
 
-export const Default: StoryObj = {
+export const Props: StoryObj = {
 	render: () =>
 		html`
 			<inlang-settings
@@ -27,7 +43,7 @@ export const Default: StoryObj = {
 		`,
 }
 
-export const Stringified: StoryObj = {
+export const Attributes: StoryObj = {
 	render: () =>
 		html`
 			<inlang-settings
@@ -44,39 +60,6 @@ export const Stringified: StoryObj = {
 }
 
 export const Styled: StoryObj = {
-	render: () =>
-		html`
-			<style>
-				.styled::part(property) {
-					background: lightblue;
-				}
-				.styled::part(property-title) {
-					font-size: 14px;
-				}
-				.styled::inlang-settings::part(property-paragraph) {
-					color: blue;
-				}
-				.styled {
-					--sl-input-background-color: red;
-					--sl-input-color: white;
-					--sl-input-placeholder-color: white;
-					--sl-input-filled-background-color-disabled: blue;
-
-					--inlang-color-primary: #f97316;
-					--inlang-color-neutral: #64748b;
-				}
-			</style>
-			<inlang-settings
-				class="styled"
-				.settings=${mockSettings}
-				.installedPlugins=${mockInstalledPlugins}
-				.installedMessageLintRules=${mockInstalledMessageLintRules}
-				@set-settings=${(settings: any) => console.info("save", settings)}
-			></inlang-settings>
-		`,
-}
-
-export const DarkTheme: StoryObj = {
 	render: () =>
 		html`
 			<style>
@@ -113,6 +96,11 @@ export const DarkTheme: StoryObj = {
 				}
 				.dark::part(option):hover {
 					background-color: #646464;
+				}
+				.dark::part(button) {
+					background-color: #242424;
+					color: white;
+					border: #404040;
 				}
 
 				.dark {

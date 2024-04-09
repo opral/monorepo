@@ -113,6 +113,7 @@ export class PathPatternInput extends LitElement {
 							exportparts="property-title, property-paragraph"
 						></field-header>
 						<object-input
+							exportparts="button"
 							.value=${typeof this.value === "object" ? this.value : ""}
 							.keyPlaceholder=${"Namespace"}
 							.valuePlaceholder=${"Path to resource [./**/*.json]"}
