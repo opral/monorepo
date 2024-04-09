@@ -398,6 +398,10 @@ We are working on contributing a fix for [sveltejs/kit#11879](https://github.com
 - More routing flexibility
 	- Domain Based routing
 	- Language Detection & Redirects
+- Fix the Caveats
+	- Allow links in the same component as <ParaglideJS>
+	- Run seamlessly when deployed to Vercel
+	- Fix side-effects that are triggered by page-`data` changing double triggering on language changes if they depend on the language. 
 
 ## Playground
 
