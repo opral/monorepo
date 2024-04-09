@@ -36,6 +36,15 @@ export class LintRuleLevelObjectInput extends LitElement {
 				display: flex;
 				gap: 8px;
 			}
+			sl-select::part(expand-icon) {
+				color: var(--sl-input-placeholder-color);
+			}
+			sl-select::part(expand-icon):hover {
+				color: var(--sl-input-color);
+			}
+			sl-select::part(base):hover {
+				border: var(--sl-input-placeholder-color);
+			}
 		`,
 	]
 
@@ -107,6 +116,7 @@ export class LintRuleLevelObjectInput extends LitElement {
 					return module.id.split(".")[0] !== "plugin"
 						? html`<div class="rule-container">
 								<sl-select
+									exportparts="listbox:option-wrapper"
 									value=${this.value ? (this.value as any)[module.id] : "warning"}
 									class="select"
 									size="small"
@@ -119,7 +129,11 @@ export class LintRuleLevelObjectInput extends LitElement {
 									}}
 								>
 									${this._valueOptions?.map((option) => {
-										return html`<sl-option value=${option.const} class="add-item-side">
+										return html`<sl-option
+											exportparts="base:option"
+											value=${option.const}
+											class="add-item-side"
+										>
 											${option.const}
 										</sl-option>`
 									})}
