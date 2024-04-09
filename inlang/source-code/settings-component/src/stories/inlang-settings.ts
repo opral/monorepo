@@ -221,7 +221,7 @@ export default class InlangSettings extends LitElement {
 								return key === "internal"
 									? html`
 											<general-input
-												exportparts="property, property-title, property-paragraph"
+												exportparts="property, property-title, property-paragraph, option, option-wrapper"
 												.property=${property}
 												.modules=${this.installedMessageLintRules || []}
 												.value=${this._newSettings?.[property as keyof typeof this._newSettings]}
@@ -232,7 +232,7 @@ export default class InlangSettings extends LitElement {
 									  `
 									: html`
 											<general-input
-												exportparts="property, property-title, property-paragraph"
+												exportparts="property, property-title, property-paragraph, option, option-wrapper"
 												.property=${property}
 												.value=${
 													// @ts-ignore
