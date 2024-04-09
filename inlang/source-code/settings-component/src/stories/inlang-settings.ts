@@ -254,6 +254,7 @@ export default class InlangSettings extends LitElement {
 							<p class="hover-bar-text">Attention, you have unsaved changes.</p>
 							<div>
 								<sl-button
+									exportparts="base:cancel"
 									size="small"
 									@click=${() => {
 										this._revertChanges()
