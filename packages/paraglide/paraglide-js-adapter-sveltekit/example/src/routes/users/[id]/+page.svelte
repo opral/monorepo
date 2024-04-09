@@ -1,6 +1,6 @@
 <script>
 	import { page } from "$app/stores"
-    import { base } from "$app/paths"
+    import { base, resolveRoute } from "$app/paths"
     import * as m from "$paraglide/messages.js"
 
     const totalUsers = 10;
@@ -16,3 +16,6 @@
 <a data-sveltekit-keepfocus href="{base}/users/{prev}">{m.previous_user()}</a>
 <br />
 <a data-sveltekit-keepfocus href="{base}/users/{next}">{m.next_user()}</a>
+
+
+<a href={resolveRoute("/users/[id]/edit", { id: num_users.toString() })}>{m.edit_user({ userId: num_users })}</a>
