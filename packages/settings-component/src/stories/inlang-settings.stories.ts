@@ -10,12 +10,28 @@ import { html } from "lit"
 const meta: Meta = {
 	component: "inlang-settings",
 	title: "Public/inlang-settings",
-	tags: ["autodocs"],
+	argTypes: {
+		settings: {
+			control: { type: "object" },
+			description:
+				"Type ProjectSettings (https://github.com/opral/monorepo/blob/main/inlang/source-code/versioned-interfaces/project-settings/src/interface.ts)",
+		},
+		installedPlugins: {
+			control: { type: "object" },
+			description:
+				"Type InstalledPlugin[] (https://github.com/opral/monorepo/blob/57611514bf84d3e03b179ddf8d02725157ec6bd5/inlang/source-code/sdk/src/api.ts#L14)",
+		},
+		installedMessageLintRules: {
+			control: { type: "object" },
+			description:
+				"Type InstalledMessageLintRule[] (https://github.com/opral/monorepo/blob/57611514bf84d3e03b179ddf8d02725157ec6bd5/inlang/source-code/sdk/src/api.ts#L26)",
+		},
+	},
 }
 
 export default meta
 
-export const Default: StoryObj = {
+export const Props: StoryObj = {
 	render: () =>
 		html`
 			<inlang-settings
@@ -27,7 +43,7 @@ export const Default: StoryObj = {
 		`,
 }
 
-export const Stringified: StoryObj = {
+export const Attributes: StoryObj = {
 	render: () =>
 		html`
 			<inlang-settings
@@ -43,78 +59,51 @@ export const Stringified: StoryObj = {
 		`,
 }
 
-export const StyledWithPartAPI: StoryObj = {
+export const Styled: StoryObj = {
 	render: () =>
 		html`
 			<style>
-				inlang-settings::part(property) {
-					background: lightblue;
-				}
-				inlang-settings::part(property-title) {
-					font-size: 14px;
-				}
-				inlang-settings::part(property-paragraph) {
-					color: blue;
-				}
-				inlang-settings {
-					--sl-input-background-color: red;
-					--sl-input-color: white;
-					--sl-input-placeholder-color: white;
-					--sl-input-filled-background-color-disabled: blue;
-
-					--inlang-color-primary: #f97316;
-					--inlang-color-neutral: #64748b;
-				}
-			</style>
-			<inlang-settings
-				.settings=${mockSettings}
-				.installedPlugins=${mockInstalledPlugins}
-				.installedMessageLintRules=${mockInstalledMessageLintRules}
-				@set-settings=${(settings: any) => console.info("save", settings)}
-			></inlang-settings>
-		`,
-}
-
-export const DarkTheme: StoryObj = {
-	render: () =>
-		html`
-			<style>
-				inlang-settings::part(base) {
+				.dark::part(base) {
 					background-color: black;
 					padding: 20px 32px;
 				}
-				inlang-settings::part(property-title) {
+				.dark::part(property-title) {
 					color: white;
 				}
-				inlang-settings::part(module-title) {
+				.dark::part(module-title) {
 					color: white;
 				}
-				inlang-settings::part(property-paragraph) {
+				.dark::part(property-paragraph) {
 					color: #e0e0e0;
 				}
-				inlang-settings::part(float) {
+				.dark::part(float) {
 					background-color: black;
 					color: #e0e0e0;
 					border: 1px solid #606060;
 				}
-				inlang-settings::part(cancel) {
+				.dark::part(cancel) {
 					background-color: #242424;
 					color: #e0e0e0;
 					border: 1px solid #606060;
 				}
 
-				inlang-settings::part(option-wrapper) {
+				.dark::part(option-wrapper) {
 					background-color: #242424;
 					border: 1px solid #606060;
 				}
-				inlang-settings::part(option) {
+				.dark::part(option) {
 					color: #ffffff;
 				}
-				inlang-settings::part(option):hover {
+				.dark::part(option):hover {
 					background-color: #646464;
 				}
+				.dark::part(button) {
+					background-color: #242424;
+					color: white;
+					border: #404040;
+				}
 
-				inlang-settings {
+				.dark {
 					--sl-input-background-color: #313131;
 					--sl-input-border-color: #606060;
 					--sl-input-color: #e0e0e0;
@@ -137,6 +126,7 @@ export const DarkTheme: StoryObj = {
 				}
 			</style>
 			<inlang-settings
+				class="dark"
 				.settings=${mockSettings}
 				.installedPlugins=${mockInstalledPlugins}
 				.installedMessageLintRules=${mockInstalledMessageLintRules}
