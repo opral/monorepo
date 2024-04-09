@@ -4,7 +4,7 @@ import dedent from "dedent"
 import * as nodePath from "node:path"
 import JSON5 from "json5"
 import nodeFsPromises from "node:fs/promises"
-import { loadProject, type InlangProject } from "@inlang/sdk"
+import { loadProject, listProjects, type InlangProject } from "@inlang/sdk"
 import * as Sherlock from "@inlang/cross-sell-sherlock"
 import { isValidLanguageTag, LanguageTag } from "@inlang/language-tag"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
@@ -13,7 +13,7 @@ import { Logger } from "~/services/logger/index.js"
 import { findRepoRoot, openRepository, type Repository } from "@lix-js/client"
 import { pathExists } from "~/services/file-handling/exists.js"
 import { findPackageJson } from "~/services/environment/package.js"
-import { execAsync } from "./utils.js"
+import { execAsync, getCommonPrefix } from "./utils.js"
 import { getNewProjectTemplate, DEFAULT_PROJECT_PATH, DEFAULT_OUTDIR } from "./defaults.js"
 import { compile } from "~/compiler/compile.js"
 import { writeOutput } from "~/services/file-handling/write-output.js"
@@ -51,6 +51,7 @@ export const initCommand = new Command()
 		const ctx = {
 			logger,
 			repo,
+			repoRoot: repoRoot?.replace("file://", "") ?? process.cwd(),
 		} as const
 
 		const ctx1 = await checkIfUncommittedChanges(ctx)
@@ -114,32 +115,35 @@ export const initCommand = new Command()
 	})
 
 export const initializeInlangProject: CliStep<
-	{ repo: Repository; logger: Logger },
+	{ repo: Repository; logger: Logger; repoRoot: string },
 	{
 		project: InlangProject
 		/** Relative path to the project */
 		projectPath: string
 	}
 > = async (ctx) => {
-	const existingProjectPath = await findExistingInlangProjectPath(ctx.repo)
+	const existingProjectPaths = await (
+		await listProjects(ctx.repo.nodeishFs, ctx.repoRoot)
+	).map((v) => v.projectPath)
 
-	if (existingProjectPath) {
-		const project = await existingProjectFlow({
-			existingProjectPath,
+	if (existingProjectPaths.length > 0) {
+		const { project, projectPath } = await existingProjectFlow({
+			existingProjectPaths,
 			repo: ctx.repo,
 			logger: ctx.logger,
 		})
+
 		return {
 			...ctx,
 			project,
-			projectPath: existingProjectPath,
+			projectPath,
 		}
 	} else {
-		const project = await createNewProjectFlow(ctx)
+		const { project, projectPath } = await createNewProjectFlow(ctx)
 		return {
 			...ctx,
 			project,
-			projectPath: DEFAULT_PROJECT_PATH,
+			projectPath,
 		}
 	}
 }
@@ -218,18 +222,6 @@ export const addParaglideJsToDevDependencies: CliStep<
 	return ctx
 }
 
-export const findExistingInlangProjectPath = async (
-	repo: Repository
-): Promise<string | undefined> => {
-	for (const path of ["./project.inlang", "../project.inlang", "../../project.inlang"]) {
-		if (await pathExists(path, repo.nodeishFs)) {
-			return path
-		}
-		continue
-	}
-	return undefined
-}
-
 export const determineOutdir: CliStep<
 	{
 		logger: Logger
@@ -258,39 +250,49 @@ export const determineOutdir: CliStep<
 }
 
 export const existingProjectFlow = async (ctx: {
-	existingProjectPath: string
+	/** An array of absolute paths to existing projects. */
+	existingProjectPaths: string[]
 	repo: Repository
 	logger: Logger
-}): Promise<InlangProject> => {
+}): Promise<{ project: InlangProject; projectPath: string }> => {
+	const NEW_PROJECT_VALUE = "newProject"
+
+	const commonPrefix = getCommonPrefix(ctx.existingProjectPaths)
+
 	const selection = (await prompt(
-		`Do you want to use the inlang project at "${ctx.existingProjectPath}" or create a new project?`,
+		`Do you want to use an existing Inlang Project or create a new one?`,
 		{
 			type: "select",
 			options: [
-				{ label: "Use this project", value: "useExistingProject" },
-				{ label: "Create a new project", value: "newProject" },
+				{ label: "Create a new project", value: NEW_PROJECT_VALUE },
+				...ctx.existingProjectPaths.map((path) => {
+					return {
+						label: "Use '" + path.replace(commonPrefix, "") + "'",
+						value: path,
+					}
+				}),
 			],
 		}
 	)) as unknown as string // the prompt type is incorrect
 
-	if (selection === "newProject") {
-		return createNewProjectFlow(ctx)
-	}
+	//if the user wants to create a new project - create one & use it
+	if (selection === NEW_PROJECT_VALUE) return createNewProjectFlow(ctx)
 
+	const projectPath = selection
 	const project = await loadProject({
-		projectPath: nodePath.resolve(process.cwd(), ctx.existingProjectPath),
+		projectPath,
 		repo: ctx.repo,
 	})
 
 	if (project.errors().length > 0) {
-		ctx.logger.error("The project contains errors: ")
+		ctx.logger.error("The selected project contains errors - Aborting paraglde initialization.")
 		for (const error of project.errors()) {
 			ctx.logger.error(error)
 		}
 		process.exit(1)
 	}
 
-	return project
+	return { project, projectPath }
 }
 
 function parseLanguageTagInput(input: string): {
@@ -354,7 +356,11 @@ async function promptForLanguageTags(
 export const createNewProjectFlow = async (ctx: {
 	repo: Repository
 	logger: Logger
-}): Promise<InlangProject> => {
+}): Promise<{
+	project: InlangProject
+	/** An absolute path to the created project */
+	projectPath: string
+}> => {
 	const languageTags = await promptForLanguageTags()
 	const settings = getNewProjectTemplate()
 
@@ -390,8 +396,9 @@ export const createNewProjectFlow = async (ctx: {
 		JSON.stringify(settings, undefined, 2)
 	)
 
+	const projectPath = nodePath.resolve(process.cwd(), DEFAULT_PROJECT_PATH)
 	const project = await loadProject({
-		projectPath: nodePath.resolve(process.cwd(), DEFAULT_PROJECT_PATH),
+		projectPath,
 		repo: ctx.repo,
 	})
 
@@ -406,7 +413,7 @@ export const createNewProjectFlow = async (ctx: {
 	} else {
 		ctx.logger.success("Successfully created a new inlang project.")
 	}
-	return project
+	return { project, projectPath }
 }
 
 export const checkIfPackageJsonExists: CliStep<
@@ -454,6 +461,9 @@ export const addCompileStepToPackageJSON: CliStep<
 	{ repo: Repository; logger: Logger; projectPath: string; outdir: string },
 	unknown
 > = async (ctx) => {
+	const relativePathToProject = nodePath.relative(process.cwd(), ctx.projectPath)
+	const projectPath = `./${relativePathToProject}`
+
 	const file = await ctx.repo.nodeishFs.readFile("./package.json", { encoding: "utf-8" })
 	const stringify = detectJsonFormatting(file)
 	const pkg = JSON.parse(file)
@@ -465,16 +475,16 @@ export const addCompileStepToPackageJSON: CliStep<
 	// add the compile command to the postinstall script
 	// this isn't super important, so we won't interrupt the user if it fails
 	if (!pkg.scripts.postinstall) {
-		pkg.scripts.postinstall = `paraglide-js compile --project ${ctx.projectPath} --outdir ${ctx.outdir}`
+		pkg.scripts.postinstall = `paraglide-js compile --project ${projectPath} --outdir ${ctx.outdir}`
 	} else if (pkg.scripts.postinstall.includes("paraglide-js compile") === false) {
-		pkg.scripts.postinstall = `paraglide-js compile --project ${ctx.projectPath} --outdir ${ctx.outdir} && ${pkg.scripts.postinstall}`
+		pkg.scripts.postinstall = `paraglide-js compile --project ${projectPath} --outdir ${ctx.outdir} && ${pkg.scripts.postinstall}`
 	}
 
 	//Add the compile command to the build script
 	if (pkg?.scripts?.build === undefined) {
-		pkg.scripts.build = `paraglide-js compile --project ${ctx.projectPath} --outdir ${ctx.outdir}`
+		pkg.scripts.build = `paraglide-js compile --project ${projectPath} --outdir ${ctx.outdir}`
 	} else if (pkg?.scripts?.build.includes("paraglide-js compile") === false) {
-		pkg.scripts.build = `paraglide-js compile --project ${ctx.projectPath} --outdir ${ctx.outdir} && ${pkg.scripts.build}`
+		pkg.scripts.build = `paraglide-js compile --project ${projectPath} --outdir ${ctx.outdir} && ${pkg.scripts.build}`
 	} else {
 		ctx.logger
 			.warn(`The "build" script in the \`package.json\` already contains a "paraglide-js compile" command.
