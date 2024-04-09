@@ -21,10 +21,54 @@ main {
     padding: 20px;
 }
 
+main > h1 {
+    font-size: 24px;
+    margin-block-end: 20px;
+}
+
 inlang-settings {
+    /* Input */
     --sl-input-background-color: var(--vscode-input-background);
     --sl-input-border-color: var(--vscode-input-border);
+    --sl-input-border-color-hover: var(--vscode-input-activeBorder);
+    --sl-input-border-color-focus: var(--vscode-input-activeBorder);
     --sl-input-border-radius: 4px;
     --sl-input-border-width: 1px;
     --sl-input-color: var(--vscode-input-foreground);
+    --sl-input-color-hover: var(--vscode-input-foreground);
+    --sl-input-color-focus: var(--vscode-input-foreground);
+    --sl-input-color-disabled: var(--vscode-disabledForeground);
+    --sl-input-focus-ring-color: var(--vscode-focusBorder);
+    /* Input Filled */
+    --sl-input-filled-background-color: var(--vscode-input-background);
+    --sl-input-filled-background-color-hover: var(--vscode-input-background);
+    --sl-input-filled-background-color-focus: var(--vscode-input-background);
+    --sl-input-filled-background-color-disabled: var(--vscode-input-background);
+    --sl-input-filled-color: var(--vscode-input-foreground);
+    --sl-input-filled-color-hover: var(--vscode-input-foreground);
+    --sl-input-filled-color-focus: var(--vscode-disabledForeground);
+    --sl-input-filled-color-disabled: var(--vscode-);
+    --sl-input-help-text-color: var(--vscode-descriptionForeground);
+    /* Focus Ring */
+    --sl-focus-ring-color: var(--vscode-focusBorder);
+    --sl-focus-ring-width: 3px;
+    --sl-focus-ring-offset: 1px;
+    /* Tooltip */
+    --sl-tooltip-background-color: var(--vscode-button-background);
+    --sl-tooltip-color: var(--vscode-button-foreground);
+    /* Panels */
+    --sl-panel-background-color: var(--vscode-sideBar-background);
+    --sl-panel-border-color: var(--vscode-sideBar-background);
+    --sl-panel-border-width: 1px;
+}
+
+
+inlang-settings::part(property-title) {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+inlang-settings::part(property-paragraph) {
+    font-size: 14px;
+    color: var(--vscode-descriptionForeground);
 }
