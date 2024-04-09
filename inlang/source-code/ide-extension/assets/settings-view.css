@@ -67,13 +67,21 @@ inlang-settings {
     --sl-panel-border-width: 1px;
 }
 
+inlang-settings::part(base) {
+    gap: 36px;
+}
+
+inlang-settings::part(module) {
+    gap: 28px;
+}
+
 
 inlang-settings::part(property-title) {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
 }
 
 inlang-settings::part(property-paragraph) {
-    font-size: 12px;
+    font-size: 14px;
     color: var(--vscode-descriptionForeground);
 }
