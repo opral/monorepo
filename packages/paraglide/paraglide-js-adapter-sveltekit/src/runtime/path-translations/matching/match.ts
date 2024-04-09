@@ -1,8 +1,10 @@
+import type { ParamMatcher } from "@sveltejs/kit"
 import { exec, parse_route_id } from "./routing.js"
 
 export function bestMatch(
 	canonicalPath: string,
-	pathDefinitions: string[]
+	pathDefinitions: string[],
+	matchers: Record<string, ParamMatcher>
 ): { params: Record<string, string>; id: string } | undefined {
 	let bestMatch:
 		| {
@@ -20,7 +22,7 @@ export function bestMatch(
 		if (!match) continue
 
 		//the params are undefined IFF the matchers don't match
-		const params = exec(match, route.params, {})
+		const params = exec(match, route.params, matchers)
 		if (!params) continue
 
 		if (!bestMatch) {

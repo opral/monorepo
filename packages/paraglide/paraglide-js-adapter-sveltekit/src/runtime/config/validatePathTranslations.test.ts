@@ -10,7 +10,8 @@ describe("validatePathTranslations", () => {
 					de: "/ueber-uns",
 				},
 			},
-			["en", "de"]
+			["en", "de"],
+			{}
 		)
 		expect(result).toEqual([])
 	})
@@ -24,7 +25,8 @@ describe("validatePathTranslations", () => {
 					de: "/ueber-unss",
 				},
 			},
-			["en", "de"]
+			["en", "de"],
+			{}
 		)
 		expect(result.length).toBe(1)
 	})
@@ -37,20 +39,23 @@ describe("validatePathTranslations", () => {
 					en: "/about",
 				},
 			},
-			["en", "de"]
+			["en", "de"],
+			{}
 		)
 		expect(result.length).toBe(1)
 	})
 
 	it("complains if not all variants have the same parameters", () => {
-		const pathTranslations = {
-			"/about/[id]": {
-				en: "/about/[id]",
-				de: "/ueber-uns/[notId]",
+		const result = validatePathTranslations(
+			{
+				"/about/[id]": {
+					en: "/about/[id]",
+					de: "/ueber-uns/[notId]",
+				},
 			},
-		}
-		// @ts-ignore
-		const result = validatePathTranslations(pathTranslations, ["en", "de"])
+			["en", "de"],
+			{}
+		)
 		expect(result.length).toBe(1)
 	})
 
@@ -62,7 +67,8 @@ describe("validatePathTranslations", () => {
 					de: "/ueber-uns/[extra]",
 				},
 			},
-			["en", "de"]
+			["en", "de"],
+			{}
 		)
 		expect(result.length).toBe(1)
 	})
@@ -75,7 +81,8 @@ describe("validatePathTranslations", () => {
 					de: "/ueber-uns/[id]",
 				},
 			},
-			["en", "de"]
+			["en", "de"],
+			{}
 		)
 		expect(result.length).toBe(0)
 	})
@@ -91,7 +98,8 @@ describe("validatePathTranslations", () => {
 					es: "/acerca-de",
 				},
 			},
-			["en", "de"]
+			["en", "de"],
+			{}
 		)
 		expect(result.length).toBe(0)
 	})
@@ -104,7 +112,8 @@ describe("validatePathTranslations", () => {
 					de: "/ueber-uns/[slug]",
 				},
 			},
-			["en", "de"]
+			["en", "de"],
+			{}
 		)
 		expect(result.length).toBe(1)
 	})
@@ -117,7 +126,8 @@ describe("validatePathTranslations", () => {
 					de: "/ueber-uns/[...slug]",
 				},
 			},
-			["en", "de"]
+			["en", "de"],
+			{}
 		)
 		expect(result.length).toBe(0)
 	})
@@ -130,8 +140,43 @@ describe("validatePathTranslations", () => {
 					de: "/ueber-uns/[slug=float]",
 				},
 			},
-			["en", "de"]
+			["en", "de"],
+			{
+				int: () => true,
+				float: () => true,
+			}
 		)
 		expect(result.length).toBe(1)
+	})
+
+	it("complains if a matchers is missing", () => {
+		const result = validatePathTranslations(
+			{
+				"/about/[slug=int]": {
+					en: "/about/[slug=int]",
+					de: "/ueber-uns/[slug=int]",
+				},
+			},
+			["en", "de"],
+			{}
+		)
+		expect(result.length).toBe(1)
+	})
+
+	it("doesn't complain if all matchers are present, or if extra matchers are present", () => {
+		const result = validatePathTranslations(
+			{
+				"/about/[slug=int]": {
+					en: "/about/[slug=int]",
+					de: "/ueber-uns/[slug=int]",
+				},
+			},
+			["en", "de"],
+			{
+				int: () => true,
+				float: () => true,
+			}
+		)
+		expect(result.length).toBe(0)
 	})
 })

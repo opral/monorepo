@@ -1,4 +1,4 @@
-import type { RouteParam } from "@sveltejs/kit"
+import type { ParamMatcher, RouteParam } from "@sveltejs/kit"
 import { parse_route_id } from "../path-translations/matching/routing.js"
 import type { PathTranslations } from "./pathTranslations.js"
 
@@ -13,10 +13,16 @@ export type PathTranslationIssue = {
  */
 export function validatePathTranslations<T extends string>(
 	pathTranslations: PathTranslations<T>,
-	availableLanguageTags: readonly T[]
+	availableLanguageTags: readonly T[],
+	matchers: Record<string, ParamMatcher>
 ): PathTranslationIssue[] {
 	const issues: PathTranslationIssue[] = []
+
+	/** The languages that are available */
 	const expectedLanguages = new Set(availableLanguageTags)
+
+	/** The names of the matchers that are available */
+	const availableMatchers = new Set(Object.keys(matchers))
 
 	for (const path in pathTranslations) {
 		if (!isValidPath(path)) {
@@ -28,6 +34,17 @@ export function validatePathTranslations<T extends string>(
 		}
 
 		const { params: expectedParams } = parse_route_id(path)
+
+		const expectedMatchers = expectedParams.map((param) => param.matcher).filter(Boolean)
+
+		for (const matcher of expectedMatchers) {
+			if (!availableMatchers.has(matcher)) {
+				issues.push({
+					path,
+					message: `Matcher ${matcher} is used but not available. Did you forget to pass it to createI18n?`,
+				})
+			}
+		}
 
 		//@ts-ignore
 		const translations = pathTranslations[path]
