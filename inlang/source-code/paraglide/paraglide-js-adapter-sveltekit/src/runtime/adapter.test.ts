@@ -43,6 +43,15 @@ describe("createI18n", () => {
 			expect(i18n.resolveRoute(base + "/about", "en")).toBe(base + "/about")
 			expect(i18n.resolveRoute(base + "/about", "de")).toBe(base + "/about")
 		})
+
+		it("keeps the trailing slash if present", () => {
+			const i18n = createI18n(runtime)
+
+			//don't prefix the default language
+			expect(i18n.resolveRoute(base + "/about/", "en")).toBe(base + "/about/")
+			expect(i18n.resolveRoute(base + "/about/", "de")).toBe(base + "/de/about/")
+		})
+
 	})
 
 	describe("route", () => {
