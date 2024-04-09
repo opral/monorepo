@@ -38,7 +38,7 @@ export class ArrayInput extends LitElement {
 		) {
 			return html`
 				<language-tags-input
-					exportparts="property, property-title, property-paragraph"
+					exportparts="property, property-title, property-paragraph, button"
 					.property=${this.property}
 					.moduleId=${this.moduleId}
 					.value=${this.value}
@@ -62,7 +62,7 @@ export class ArrayInput extends LitElement {
 		} else {
 			return html`
 				<default-array-input
-					exportparts="property, property-title, property-paragraph"
+					exportparts="property, property-title, property-paragraph, button"
 					.property=${this.property}
 					.moduleId=${this.moduleId}
 					.value=${this.value}
