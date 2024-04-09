@@ -14,6 +14,7 @@ export const createReroute = <T extends string>({
 	defaultLanguageTag,
 	runtime,
 	translations,
+	matchers,
 }: I18nConfig<T>): Reroute => {
 	return ({ url }) => {
 		try {
@@ -28,7 +29,7 @@ export const createReroute = <T extends string>({
 				defaultLanguageTag,
 			})
 
-			const canonicalPath = getCanonicalPath(translatedPath, lang, translations)
+			const canonicalPath = getCanonicalPath(translatedPath, lang, translations, matchers)
 
 			const serializedPath = serializeRoute({
 				path: canonicalPath,

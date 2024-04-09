@@ -39,10 +39,10 @@ export class DefaultObjectInput extends LitElement {
 				justify-content: flex-start;
 				margin-left: 6px;
 				cursor: pointer;
-				color: var(--sl-color-gray-500);
+				color: var(--sl-input-placeholder-color);
 			}
 			.remove-icon:hover {
-				color: var(--sl-color-gray-950);
+				color: var(--sl-input-color);
 			}
 			.list-container {
 				display: flex;
