@@ -3,6 +3,7 @@ import { serializeRoute } from "../utils/serialize-path.js"
 import { getCanonicalPath } from "./getCanonicalPath.js"
 import { getTranslatedPath } from "./getTranslatedPath.js"
 import type { PathTranslations } from "../config/pathTranslations.js"
+import type { ParamMatcher } from "@sveltejs/kit"
 
 /**
  * Utility function to translate a path in one language to another language
@@ -11,6 +12,7 @@ export function translatePath(
 	path: string,
 	targetLanguage: string,
 	translations: PathTranslations,
+	matchers: Record<string, ParamMatcher>,
 	opts: {
 		base: string
 		availableLanguageTags: readonly string[]
@@ -28,8 +30,13 @@ export function translatePath(
 		defaultLanguageTag: opts.defaultLanguageTag,
 	})
 
-	const canonicalPath = getCanonicalPath(targetedPathSource, lang, translations)
-	const translatedPathTarget = getTranslatedPath(canonicalPath, targetLanguage, translations)
+	const canonicalPath = getCanonicalPath(targetedPathSource, lang, translations, matchers)
+	const translatedPathTarget = getTranslatedPath(
+		canonicalPath,
+		targetLanguage,
+		translations,
+		matchers
+	)
 
 	return serializeRoute({
 		path: translatedPathTarget,
