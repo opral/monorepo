@@ -1,6 +1,7 @@
 import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
 import * as runtime from "$paraglide/runtime.js"
 import * as m from "$paraglide/messages.js"
+import { match as int } from "../params/int"
 
 export const i18n = createI18n(runtime, {
 	pathnames: {
@@ -13,9 +14,9 @@ export const i18n = createI18n(runtime, {
 			en: "/users/[id]",
 			de: "/benutzer/[id]",
 		},
-		"/users/[id]/edit": {
-			en: "/users/[id]/edit",
-			de: "/benutzer/[id]/bearbeiten",
+		"/users/[id=int]/edit": {
+			en: "/users/[id=int]/edit",
+			de: "/benutzer/[id=int]/bearbeiten",
 		},
 		"/some-subpage": {
 			en: "/some-subpage",
@@ -26,6 +27,7 @@ export const i18n = createI18n(runtime, {
 			de: "/joker/[...rest]",
 		},
 	},
+	matchers: { int },
 	exclude: ["/base/not-translated"],
 	textDirection: {
 		en: "ltr",
