@@ -1,7 +1,9 @@
 <script>
 	import { page } from "$app/stores"
+    import * as m from "$paraglide/messages.js"
 
-    $: User = Number.parseFloat($page.params.id);
+    $: userId = Number.parseFloat($page.params.id);
 </script>
 
-<h1>Edit User {User}</h1>
+<h1>{m.edit_user({ userId })}</h1>
+<a href="/users/{userId}">{m.users()}</a>

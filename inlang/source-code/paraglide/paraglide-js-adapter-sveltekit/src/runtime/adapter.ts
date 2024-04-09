@@ -9,7 +9,6 @@ import { serializeRoute } from "./utils/serialize-path.js"
 import { getCanonicalPath } from "./path-translations/getCanonicalPath.js"
 import { getPathInfo } from "./utils/get-path-info.js"
 import { normaliseBase as canonicalNormaliseBase } from "./utils/normaliseBase.js"
-import { resolve } from "./utils/path.js"
 import { createExclude, type ExcludeConfig } from "./exclude.js"
 import { guessTextDirMap } from "./utils/text-dir.js"
 import { resolvePathTranslations } from "./config/resolvePathTranslations.js"
@@ -256,6 +255,12 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 
 			const normalisedBase = normaliseBase(base)
 
+			const { trailingSlash, dataSuffix } = getPathInfo(path, {
+				base: normalisedBase,
+				availableLanguageTags: runtime.availableLanguageTags,
+				defaultLanguageTag: runtime.sourceLanguageTag,
+			})
+
 			lang = lang ?? runtime.languageTag()
 
 			if (!path.startsWith(normalisedBase)) return path
@@ -272,11 +277,11 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 				path: translatedPath,
 				lang,
 				base: normalisedBase,
-				dataSuffix: undefined,
+				dataSuffix,
 				includeLanguage: true,
 				defaultLanguageTag,
 				prefixDefaultLanguage: config.prefixDefaultLanguage,
-				trailingSlash: false,
+				trailingSlash,
 			})
 		},
 
@@ -299,14 +304,24 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		 * ```
 		 */
 		route(translatedPath: string) {
-			const { path, lang } = getPathInfo(translatedPath, {
-				base: normaliseBase(base),
+
+			const normalizedBase = normaliseBase(base)
+
+			const { path, lang, trailingSlash, dataSuffix } = getPathInfo(translatedPath, {
+				base: normalizedBase,
 				availableLanguageTags: config.runtime.availableLanguageTags,
 				defaultLanguageTag: config.defaultLanguageTag,
 			})
 
 			const canonicalPath = getCanonicalPath(path, lang, config.translations, config.matchers)
-			return resolve(normaliseBase(base), canonicalPath)
+
+			return serializeRoute({
+				path: canonicalPath,
+				base: normalizedBase,
+				trailingSlash,
+				dataSuffix,
+				includeLanguage: false,
+			})
 		},
 	}
 }
