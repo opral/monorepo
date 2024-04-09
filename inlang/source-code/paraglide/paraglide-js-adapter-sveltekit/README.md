@@ -1,4 +1,4 @@
-![Dead Simple i18n. Typesafe, Small Footprint, SEO-Friendly and with an IDE Integration.](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/assets/header.png)
+![Dead Simple i18n. Typesafe, Small Footprint, SEO-Friendly and, with an IDE Integration.](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/assets/header.png)
 
 <doc-features>
 <doc-feature text-color="#0F172A" color="#E1EFF7" title="Internationalized Routing" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-next/assets/i18n-routing.png"></doc-feature>
@@ -51,7 +51,7 @@ import * as runtime from "$lib/paraglide/runtime.js"
 export const i18n = createI18n(runtime);
 ```
 
-`createI18n` will be your one-stop-shop for configuring the adapter.
+`createI18n` will be your one-stop shop for configuring the adapter.
 
 <doc-accordion
 	heading="Does this need to be in src/lib/i18n.js ?"
@@ -205,7 +205,7 @@ Other attributes that are also translated are:
 
 ### Programmatic Navigation with Translated Paths
 
-SvelteKit's `goto` and `redirect` cannot be translated automatically. Localize the urls you pass to them with `i18n.resolveRoute()`.
+SvelteKit's `goto` and `redirect` cannot be translated automatically. Localize the URLs you pass to them with `i18n.resolveRoute()`.
 
 ```js
 import { i18n } from '$lib/i18n.js'
@@ -284,11 +284,11 @@ On the client, you can call `languageTag()` exported `./paraglide/runtime.js`.
 SvelteKit does two kinds of work on the server: _Loading_ and _Rendering_. 
 
 - _Loading_ includes running your `load` functions, `actions` or server-hooks. 
-- _Rendering_ is anything that happens in, or is called from, a `.svelte` file.
+- _Rendering_ is anything that happens in or is called from a `.svelte` file.
 
 Loading is asynchronous & rendering is synchronous. 
 
-During the asynchronous loading, there is danger of crosstalk. If you aren't careful it's possible for one request to override the language of another request. You can avoid this by explicitly specify which langauge a message should be in.
+During the asynchronous loading, there is danger of crosstalk. If you aren't careful it's possible for one request to override the language of another request. You can avoid this by explicitly specifying which language a message should be in.
 
 ```ts
 import * as m from "$lib/paraglide/messages.js"
@@ -318,7 +318,7 @@ export async function load({ depends }) {
 
 1. Links in the same Layout Component as `<ParagldieJS>` will not be translated. This will also log a warning in development.
 2. Messages are not reactive. Don't use them in server-side module scope.
-3. Side-effects triggered by `data` will run on language changes even if the data didn't change. If the data is language-dependent the sideeffect will run twice. 
+3. Side effects triggered by `data` will run on language changes even if the data didn't change. If the data is language-dependent the side effect will run twice. 
 
 ### Using messages in `+layout.svelte`
 
@@ -340,10 +340,10 @@ The language state get's set when the `<ParaglideJS>` component is mounted. Sinc
 
 ### Issues on Vercel
 
-SvelteKit's `reroute` hook currently doens't play well with Vercel (see [sveltejs/kit#11879](https://github.com/sveltejs/kit/issues/11879)), which means that we need to slightly adapt the adapter setup to make it work when deployed to vercel.
+SvelteKit's `reroute` hook currently doens't play well with Vercel (see [sveltejs/kit#11879](https://github.com/sveltejs/kit/issues/11879)), which means that we need to slightly adapt the adapter setup to make it work when deployed to Vercel.
 
 1. Remove the `reroute` hook from `src/hooks.js`
-2. Move the routes you want to localise `routes` into a `[[locale]]` folder
+2. Move the routes you want to localize `routes` into a `[[locale]]` folder
 3. Don't use translated `pathnames`
 
 We are working on contributing a fix for [sveltejs/kit#11879](https://github.com/sveltejs/kit/issues/11879), so this workaround will hopefully not be needed much longer.
