@@ -47,11 +47,16 @@ describe("createI18n", () => {
 		it("keeps the trailing slash if present", () => {
 			const i18n = createI18n(runtime)
 
-			//don't prefix the default language
 			expect(i18n.resolveRoute(base + "/about/", "en")).toBe(base + "/about/")
 			expect(i18n.resolveRoute(base + "/about/", "de")).toBe(base + "/de/about/")
 		})
 
+		it("doesn't add the trailing slash if not present", () => {
+			const i18n = createI18n(runtime)
+
+			expect(i18n.resolveRoute(base + "/about", "en")).toBe(base + "/about")
+			expect(i18n.resolveRoute(base + "/about", "de")).toBe(base + "/de/about")
+		})
 	})
 
 	describe("route", () => {
@@ -76,11 +81,18 @@ describe("createI18n", () => {
 			expect(i18n.route(base + "/de/ueber-uns")).toBe(base + "/about")
 		})
 
-		it("handles trailing slashes", () => {
+		it("keeps the trailing slash if present", () => {
 			const i18n = createI18n(runtime)
 
-			expect(i18n.route(base + "/about/")).toBe(base + "/about")
-			expect(i18n.route(base + "/de/about/")).toBe(base + "/about")
+			expect(i18n.route(base + "/about/")).toBe(base + "/about/")
+			expect(i18n.route(base + "/de/about/")).toBe(base + "/about/")
+		})
+
+		it("doesn't add the trailing shalsh if not present", () => {
+			const i18n = createI18n(runtime)
+
+			expect(i18n.route(base + "/about")).toBe(base + "/about")
+			expect(i18n.route(base + "/de/about")).toBe(base + "/about")
 		})
 	})
 })
