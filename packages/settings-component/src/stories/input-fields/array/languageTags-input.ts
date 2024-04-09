@@ -37,6 +37,22 @@ export class LanguageTagsInput extends LitElement {
 				display: flex;
 				gap: 4px;
 			}
+			sl-tag::part(base) {
+				background-color: var(--sl-input-filled-background-color-disabled);
+				color: var(--sl-input-color);
+				border-color: transparent;
+				border-radius: var(--sl-input-border-radius-small);
+			}
+			sl-tag::part(remove-button) {
+				color: var(--sl-input-placeholder-color);
+			}
+			sl-tag::part(remove-button):hover {
+				color: var(--sl-input-color);
+			}
+			sl-button::part(base) {
+				background-color: var(--sl-color-neutral-500);
+				color: var(--sl-color-neutral-0);
+			}
 		`,
 	]
 
@@ -131,6 +147,7 @@ export class LanguageTagsInput extends LitElement {
 				>
 				</sl-input>
 				<sl-button
+					exportparts="base:button"
 					size="small"
 					variant="neutral"
 					@click=${() => {

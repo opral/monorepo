@@ -1,5 +1,23 @@
 # @inlang/paraglide-js-adapter-sveltekit
 
+## 0.6.1
+
+### Patch Changes
+
+- a4d4e10: Fix crashe when navigating to `/{lang}/` with `trailingSlash="always"`
+
+## 0.6.0
+
+### Minor Changes
+
+- 1642873: Param Matchers are now supported. They can be passed to `createI18n` alongside `pathnames` with the `matchers` option.
+- ce0b961: Wildcard and optional parameters are now supported for translated pathnames
+
+### Patch Changes
+
+- 690656e: Trailing Slashes are now preserverd more reliably if present
+  - @inlang/paraglide-js-adapter-vite@1.2.35
+
 ## 0.5.22
 
 ### Patch Changes

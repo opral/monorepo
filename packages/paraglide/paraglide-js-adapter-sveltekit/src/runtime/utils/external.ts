@@ -1,5 +1,5 @@
 export function isExternal(url: URL, currentUrl: URL, base: string) {
-	const absoluteBase = new URL(base, currentUrl).pathname
+	const absoluteBase = new URL(base ?? "/", currentUrl).pathname
 
 	if (url.origin !== currentUrl.origin) {
 		return true

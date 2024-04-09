@@ -5,7 +5,7 @@ describe("isExternal", () => {
 	it("returns true if the origin is different", () => {
 		const url = new URL("https://example.com")
 		const currentUrl = new URL("https://example.org")
-		const base = "/"
+		const base = ""
 
 		expect(isExternal(url, currentUrl, base)).toBe(true)
 	})
