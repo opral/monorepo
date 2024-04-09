@@ -1,5 +1,11 @@
 # @inlang/paraglide-js-adapter-sveltekit
 
+## 0.6.1
+
+### Patch Changes
+
+- a4d4e10: Fix crashe when navigating to `/{lang}/` with `trailingSlash="always"`
+
 ## 0.6.0
 
 ### Minor Changes
