@@ -9,7 +9,7 @@
 
 ## Getting Started
 
-### 1. Install dependenceies
+### 1. Install dependencies
 
 Install [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) and the [ParaglideJS SvelteKit Adapter](https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n).
 
@@ -141,6 +141,7 @@ Don't include the language or the [base path](https://kit.svelte.dev/docs/config
 import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
 import * as runtime from "$lib/paraglide/runtime.js"
 import * as m from "$lib/paraglide/messages.js"
+import { match as int } from "../params/int.js"
 
 export const i18n = createI18n(runtime, {
 	pathnames: {
@@ -149,22 +150,26 @@ export const i18n = createI18n(runtime, {
 			de: "/uber-uns",
 			fr: "/a-propos",
 		},
-		// you can use parameters
-		// optional parameters and spread params aren't supported (yet)
-		"/user/[username]" : {
-			en: "/user/[username]",
-			de: "/benutzer/[username]",
-			fr: "/utilisateur/[username]",
+
+		// You can use parameters
+		// All translations must use identical parameters and names
+		"/user/[id=int]/[...rest]" : {
+			en: "/user/[id=int]/[...rest]",
+			de: "/benutzer/[id=int]/[...rest]",
+			fr: "/utilisateur/[id=int]/[...rest]",
 		},
-		// or use a message function (recommended)
+		// Instead of a map, you can also pass a message-function
 		"/admin" : m.admin_path
 	}
+
+	// If you're using matchers in the pathnames, you need to pass them
+	matchers: { int	}
 })
 ```
 
 ### Customizing Link Translation
 
-Links are translated automatically using a preprocessor. This means that you can use the normal `a` tag and the adapter will translate it for you.
+Links are translated automatically using a preprocessor. This means that you can use the normal `a`-tag and the adapter will translate it for you.
 
 ```svelte
 <a href="/about">{m.about()}</a>
@@ -294,7 +299,7 @@ export async function load({ locals }) {
 }
 ```
 
-During rendering there is no danger of crosstal. You can safely use messages and the `langaugeTag()` function. 
+During rendering there is no danger of crosstalk. You can safely use messages and the `langaugeTag()` function. 
 
 #### Re-Loading Language-Dependent data
 
@@ -311,9 +316,9 @@ export async function load({ depends }) {
 
 ## Caveats
 
-1. Links in the same Layout Component as `<ParagldieJS>` will not be translated. This will also log a warngin in development.
+1. Links in the same Layout Component as `<ParagldieJS>` will not be translated. This will also log a warning in development.
 2. Messages are not reactive. Don't use them in server-side module scope.
-3. Sideeffects triggered by `data` will run on language changes even if the data didn't change. If the data is language-dependent the sideeffect will run twice. 
+3. Side-effects triggered by `data` will run on language changes even if the data didn't change. If the data is language-dependent the sideeffect will run twice. 
 
 ### Using messages in `+layout.svelte`
 
@@ -389,13 +394,10 @@ We are working on contributing a fix for [sveltejs/kit#11879](https://github.com
 
 ## Roadmap to 1.0
 
-- Expand the route features in Path translation
-  - Optional parameters
-  - Catch-all parameters
-  - Parameter matchers
-  - Parameter Translations
-- Improve Stability
-- Improve Useability
+- Translate parameters themselves
+- More routing flexibility
+	- Domain Based routing
+	- Language Detection & Redirects
 
 ## Playground
 
