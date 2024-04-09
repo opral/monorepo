@@ -36,6 +36,15 @@ export class LintRuleLevelObjectInput extends LitElement {
 				display: flex;
 				gap: 8px;
 			}
+			sl-select::part(expand-icon) {
+				color: var(--sl-input-placeholder-color);
+			}
+			sl-select::part(expand-icon):hover {
+				color: var(--sl-input-color);
+			}
+			sl-select::part(base):hover {
+				border: var(--sl-input-placeholder-color);
+			}
 		`,
 	]
 
