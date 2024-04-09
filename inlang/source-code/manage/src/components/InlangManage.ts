@@ -5,7 +5,7 @@ import { TwLitElement } from "../common/TwLitElement.js"
 import { z } from "zod"
 import "./InlangUninstall"
 import "./InlangInstall"
-import { createNodeishMemoryFs, openRepository } from "@lix-js/client"
+import { createNodeishMemoryFs, openRepository, type Repository } from "@lix-js/client"
 import { listProjects, isValidLanguageTag } from "@inlang/sdk"
 import { publicEnv } from "@inlang/env-variables"
 import { browserAuth, getUser } from "@lix-js/server"
@@ -73,15 +73,17 @@ export class InlangManage extends TwLitElement {
 	projectDropdown: NodeListOf<Element> | undefined
 
 	async projectHandler() {
-		const repo = await openRepository(
-			`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${this.url.repo}`,
-			{
-				nodeishFs: createNodeishMemoryFs(),
-				branch: this.url.branch ? this.url.branch : undefined,
-			}
-		)
+		let repo: Repository;
+		try {
 
-		if (repo.errors().length > 0) {
+			repo = await openRepository(
+				`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${this.url.repo}`,
+				{
+					nodeishFs: createNodeishMemoryFs(),
+					branch: this.url.branch ? this.url.branch : undefined,
+				}
+			)
+		} catch (e) {
 			this.projects = "no-access"
 			return
 		}

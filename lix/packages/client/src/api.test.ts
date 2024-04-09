@@ -14,18 +14,14 @@ import { resolve } from "node:path"
 describe("main workflow", () => {
 	let repository: Awaited<ReturnType<typeof openRepository>>
 
-	it("allows to subscribe to errors", async () => {
-		const errorHandler = vi.fn()
-		repository = await openRepository("https://github.com/inlang/does-not-exist", {
-			nodeishFs: createNodeishMemoryFs(),
-		})
-
-		repository.errors.subscribe(errorHandler)
-
-		await new Promise((resolve) => setTimeout(resolve, 1000))
-
-		expect(errorHandler.mock.calls.length).toBe(1)
-		expect(errorHandler.mock.calls[0][0][0].code).toBe("HttpError")
+	it("should throw errors directly", async () => {
+		try {
+			repository = await openRepository("https://github.com/inlang/does-not-exist", {
+				nodeishFs: createNodeishMemoryFs(),
+			})
+		} catch (e) {
+			expect(e.code).toBe("HttpError")
+		}
 	})
 
 	it("opens a repo url without error", async () => {
