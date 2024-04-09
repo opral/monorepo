@@ -5,7 +5,7 @@
 
     const totalUsers = 10;
 
-    $: num_users = Number.parseInt($page.params.id);
+    $: num_users = Number.parseFloat($page.params.id);
 
     $: next = (num_users + 1) % totalUsers;
     $: prev = (num_users - 1 + totalUsers) % totalUsers;
