@@ -17,5 +17,7 @@
 <br />
 <a data-sveltekit-keepfocus href="{base}/users/{next}">{m.next_user()}</a>
 
+<br />
+<br />
 
-<a href={resolveRoute("/users/[id]/edit", { id: num_users.toString() })}>{m.edit_user({ userId: num_users })}</a>
+<a href={resolveRoute("/users/[id]/edit/", { id: num_users.toString() })}>{m.edit_user({ userId: num_users })}</a>

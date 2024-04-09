@@ -24,6 +24,7 @@ export function translatePath(
 		path: targetedPathSource,
 		lang,
 		dataSuffix,
+		trailingSlash,
 	} = getPathInfo(path, {
 		base: opts.base,
 		availableLanguageTags: opts.availableLanguageTags,
@@ -46,6 +47,6 @@ export function translatePath(
 		lang: targetLanguage,
 		defaultLanguageTag: opts.defaultLanguageTag,
 		prefixDefaultLanguage: opts.prefixDefaultLanguage,
-		trailingSlash: false,
+		trailingSlash,
 	})
 }
