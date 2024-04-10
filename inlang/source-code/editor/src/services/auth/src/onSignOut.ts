@@ -2,7 +2,13 @@ import type { SetStoreFunction } from "solid-js/store"
 import type { LocalStorageSchema } from "../../../services/local-storage/index.js"
 import { publicEnv } from "@inlang/env-variables"
 import { posthog as telemetryBrowser } from "posthog-js"
-import { browserAuth } from "@lix-js/server"
+import { getAuthClient } from "@lix-js/client"
+
+const browserAuth = getAuthClient({
+	gitHubProxyBaseUrl: publicEnv.PUBLIC_GIT_PROXY_BASE_URL,
+	githubAppName: publicEnv.PUBLIC_LIX_GITHUB_APP_NAME,
+	githubAppClientId: publicEnv.PUBLIC_LIX_GITHUB_APP_CLIENT_ID,
+})
 
 /**
  * This function is called when the user clicks the "Sign Out" button.

@@ -399,9 +399,6 @@ importers:
       '@lix-js/fs':
         specifier: workspace:*
         version: link:../../../lix/packages/fs
-      '@lix-js/server':
-        specifier: workspace:*
-        version: link:../../../lix/packages/server
       '@sentry/browser':
         specifier: ^7.27.0
         version: 7.109.0
@@ -934,9 +931,6 @@ importers:
       '@lix-js/fs':
         specifier: workspace:*
         version: link:../../../lix/packages/fs
-      '@lix-js/server':
-        specifier: workspace:*
-        version: link:../../../lix/packages/server
       '@types/express':
         specifier: ^4.17.21
         version: 4.17.21
@@ -2598,9 +2592,6 @@ importers:
       '@lix-js/fs':
         specifier: workspace:*
         version: link:../../../lix/packages/fs
-      '@lix-js/server':
-        specifier: workspace:*
-        version: link:../../../lix/packages/server
       '@sentry/browser':
         specifier: ^7.27.0
         version: 7.109.0

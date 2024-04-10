@@ -5,15 +5,21 @@ import { TwLitElement } from "../common/TwLitElement.js"
 import { z } from "zod"
 import "./InlangUninstall"
 import "./InlangInstall"
-import { createNodeishMemoryFs, openRepository } from "@lix-js/client"
+import { getAuthClient, createNodeishMemoryFs, openRepository } from "@lix-js/client"
 import { listProjects, isValidLanguageTag } from "@inlang/sdk"
 import { publicEnv } from "@inlang/env-variables"
-import { browserAuth, getUser } from "@lix-js/server"
+
 import { tryCatch } from "@inlang/result"
 import { registry } from "@inlang/marketplace-registry"
 import type { MarketplaceManifest } from "../../../versioned-interfaces/marketplace-manifest/dist/interface.js"
 import { posthog } from "posthog-js"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
+
+const browserAuth = getAuthClient({
+	gitHubProxyBaseUrl: publicEnv.PUBLIC_GIT_PROXY_BASE_URL,
+	githubAppName: publicEnv.PUBLIC_LIX_GITHUB_APP_NAME,
+	githubAppClientId: publicEnv.PUBLIC_LIX_GITHUB_APP_CLIENT_ID,
+})
 
 type ManifestWithVersion = MarketplaceManifest & { version: string }
 
@@ -230,7 +236,7 @@ export class InlangManage extends TwLitElement {
 
 		this.url.repo && this.projectHandler()
 
-		const user = await getUser().catch(() => {
+		const user = await browserAuth.getUser().catch(() => {
 			this.user = undefined
 		})
 		if (user) {
