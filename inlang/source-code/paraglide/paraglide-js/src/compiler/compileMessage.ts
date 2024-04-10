@@ -119,7 +119,7 @@ export const ${args.message.id} = (params ${hasParams ? "" : "= {}"}, options = 
 ${args.availableLanguageTags
 	// sort language tags alphabetically to make the generated code more readable
 	.sort((a, b) => a.localeCompare(b))
-	.map((tag) => `\t\t${isValidJSIdentifier(tag) ? tag : `"${tag}"`}: ${i(tag)}.${args.message.id}`)
+	.map((tag) => `\t\t${isValidJSIdentifier(tag) ? tag : `"${tag}"`}: _${i(tag)}.${args.message.id}`)
 	.join(",\n")}
 	}[options.languageTag ?? languageTag()](${hasParams ? "params" : ""})
 }

@@ -90,7 +90,7 @@ export const compile = async (args: {
 /* eslint-disable */
 import { languageTag } from "./runtime.js"
 ${Object.keys(resources)
-	.map((languageTag) => `import * as ${i(languageTag)} from "./messages/${languageTag}.js"`)
+	.map((languageTag) => `import * as _${i(languageTag)} from "./messages/${languageTag}.js"`)
 	.join("\n")}
 
 ${compiledMessages.map((message) => message.index).join("\n\n")}
@@ -136,6 +136,13 @@ export const availableLanguageTags = /** @type {const} */ (${JSON.stringify(
  * @type {() => AvailableLanguageTag}
  */
 export let languageTag = () => sourceLanguageTag
+
+/**
+ * Get the index of the current language tag.
+ * @private
+ * @returns {number}
+ */
+export let _languageTagIdx = () => availableLanguageTags.indexOf(languageTag())
 
 /**
  * Set the language tag.
