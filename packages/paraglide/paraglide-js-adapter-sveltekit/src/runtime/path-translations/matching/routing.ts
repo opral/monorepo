@@ -157,9 +157,7 @@ export function exec(
 			continue
 		}
 
-		const matcher: ParamMatcher = param.matcher
-			? matchers[param.matcher] ?? (() => true)
-			: () => true
+		const matcher: ParamMatcher = matchers[param.matcher] ?? (() => true)
 
 		if (matcher(value)) {
 			result[param.name] = value

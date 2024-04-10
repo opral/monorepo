@@ -1,5 +1,11 @@
 # @inlang/paraglide-js-adapter-sveltekit
 
+## 0.6.2
+
+### Patch Changes
+
+- cdbb415: Fix crash when switching languages on a route tthat ends with a `[...rest]` parameter when there is a trailing slash
+
 ## 0.6.1
 
 ### Patch Changes
