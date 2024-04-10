@@ -6,7 +6,6 @@ import { fileURLToPath } from "node:url"
 import childProcess from "node:child_process"
 import { dirname, join } from "node:path"
 import fs from "node:fs/promises"
-import { s } from "vitest/dist/reporters-5f784f42.js"
 
 const exec = promisify(childProcess.exec)
 const __filename = fileURLToPath(import.meta.url)
