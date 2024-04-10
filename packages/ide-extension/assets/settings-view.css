@@ -92,8 +92,16 @@ inlang-settings::part(property-paragraph) {
 
 inlang-settings::part(option) {
     color: var(--vscode-input-foreground);
+    /* FIXME after */
+    background-color: var(--vscode-input-background) !important;
     font-size: 14px;
     padding: 8px 12px;
+}
+
+inlang-settings::part(button) {
+    color: var(--vscode-button-secondaryForeground);
+    background-color: var(--vscode-button-secondaryBackground);
+    border-color: var(--vscode-button-secondaryBackground);
 }
 
 
@@ -103,6 +111,6 @@ inlang-settings::part(float) {
     border: 1px solid var(--vscode-sideBar-border);
 }
 inlang-settings::part(cancel) {
-    background-color: var(--vscode-foreground);
-    color: #fff;
+    background-color: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
 }
