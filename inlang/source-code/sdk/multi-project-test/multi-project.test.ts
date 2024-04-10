@@ -34,7 +34,7 @@ describe.concurrent("sanity check run behavior", () => {
 })
 
 describe.concurrent("translate multiple projects in different directories", () => {
-	it.skip(
+	it(
 		"project1 in root",
 		async () => {
 			await run("pnpm translate1")
@@ -49,7 +49,7 @@ describe.concurrent("translate multiple projects in different directories", () =
 		{ timeout: 10000 }
 	)
 
-	it.skip(
+	it(
 		"project2 in project2-dir",
 		async () => {
 			await run("pnpm translate2")
