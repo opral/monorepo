@@ -90,9 +90,14 @@ inlang-settings::part(property-paragraph) {
     color: var(--vscode-descriptionForeground);
 }
 
+inlang-settings::part(option-wrapper) {
+    /* FIXME after https://github.com/shoelace-style/shoelace/issues/1968 */
+    background-color: var(--vscode-input-background) !important;
+}
+
 inlang-settings::part(option) {
     color: var(--vscode-input-foreground);
-    /* FIXME after */
+    /* FIXME after https://github.com/shoelace-style/shoelace/issues/1968 */
     background-color: var(--vscode-input-background) !important;
     font-size: 14px;
     padding: 8px 12px;
@@ -103,7 +108,6 @@ inlang-settings::part(button) {
     background-color: var(--vscode-button-secondaryBackground);
     border-color: var(--vscode-button-secondaryBackground);
 }
-
 
 inlang-settings::part(float) {
     background-color: var(--vscode-sideBar-background);
