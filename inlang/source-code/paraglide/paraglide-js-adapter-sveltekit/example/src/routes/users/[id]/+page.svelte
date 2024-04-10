@@ -3,6 +3,8 @@
     import { base, resolveRoute } from "$app/paths"
     import * as m from "$paraglide/messages.js"
 
+    export let data;
+
     const totalUsers = 10;
 
     $: num_users = Number.parseFloat($page.params.id);
@@ -10,6 +12,8 @@
     $: next = (num_users + 1) % totalUsers;
     $: prev = (num_users - 1 + totalUsers) % totalUsers;
 </script>
+
+<h1>{data.lang}</h1>
 
 <h1>{m.users()} {num_users}</h1>
 

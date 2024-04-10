@@ -2,9 +2,9 @@ import { getPathInfo } from "../utils/get-path-info.js"
 import { base } from "$app/paths"
 import { serializeRoute } from "../utils/serialize-path.js"
 import { getCanonicalPath } from "../path-translations/getCanonicalPath.js"
+import { browser, dev } from "$app/environment"
 import type { Reroute } from "@sveltejs/kit"
 import type { I18nConfig } from "../adapter.js"
-import { browser, dev } from "$app/environment"
 
 /**
  * Returns a reroute function that applies the given translations to the paths
@@ -19,8 +19,18 @@ export const createReroute = <T extends string>({
 	return ({ url }) => {
 		if (browser) {
 			runtime.setLanguageTag(() => {
-				const docLang = document.documentElement.lang
-				return runtime.isAvailableLanguageTag(docLang) ? docLang : defaultLanguageTag
+				if (!url.pathname.startsWith(base)) {
+					console.warn(
+						`${url.pathname} does not start with ${base}, using default language tag ${defaultLanguageTag}`
+					)
+					return defaultLanguageTag
+				}
+
+				const pathWithLanguage = url.pathname.slice(base.length)
+				const lang = pathWithLanguage.split("/").at(1)
+
+				if (runtime.isAvailableLanguageTag(lang)) return lang
+				return defaultLanguageTag
 			})
 		}
 
