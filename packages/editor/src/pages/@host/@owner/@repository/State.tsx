@@ -312,31 +312,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	)
 
-	const isForkSyncDisabled = () =>
-		localStorage.disableForkSyncWarning?.some(
-			(repo) => repo.owner === routeParams().owner && repo.repository === routeParams().repository
-		)
-
-	const [forkStatus, { refetch: refetchForkStatus, mutate: mutateForkStatus }] = createResource(
-		() => {
-			if (repo() && !isForkSyncDisabled()) {
-				return { repo: repo() }
-			} else {
-				return false
-			}
-		},
-		async (args) => {
-			const value = await args.repo!.forkStatus()
-			if ("error" in value) {
-				setLixErrors([new Error(value.error), ...lixErrors()])
-				return { ahead: 0, behind: 0, conflicts: false }
-			} else {
-				return value
-			}
-		},
-		{ initialValue: { ahead: 0, behind: 0, conflicts: false } }
-	)
-
 	async function pushChanges(args: {
 		user: LocalStorageSchema["user"]
 		setFsChange: (date: Date) => void
@@ -549,6 +524,32 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			}
 			return repoMeta
 		}
+	)
+
+	const isForkSyncDisabled = () =>
+		localStorage.disableForkSyncWarning?.some(
+			(repo) => repo.owner === routeParams().owner && repo.repository === routeParams().repository
+		)
+
+	const [forkStatus, { refetch: refetchForkStatus, mutate: mutateForkStatus }] = createResource(
+		() => {
+			const repoMeta = githubRepositoryInformation()
+			if (repo() && !isForkSyncDisabled() && repoMeta && !("error" in repoMeta) && repoMeta.isFork) {
+				return { repo: repo() }
+			} else {
+				return false
+			}
+		},
+		async (args) => {
+			const value = await args.repo!.forkStatus()
+			if ("error" in value) {
+				setLixErrors([new Error(value.error), ...lixErrors()])
+				return { ahead: 0, behind: 0, conflicts: false }
+			} else {
+				return value
+			}
+		},
+		{ initialValue: { ahead: 0, behind: 0, conflicts: false } }
 	)
 
 	const [previousLoginStatus, setPreviousLoginStatus] = createSignal(localStorage?.user?.isLoggedIn)
