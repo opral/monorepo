@@ -19,12 +19,7 @@ export const createReroute = <T extends string>({
 	return ({ url }) => {
 		if (browser) {
 			runtime.setLanguageTag(() => {
-				if (!url.pathname.startsWith(base)) {
-					console.warn(
-						`${url.pathname} does not start with ${base}, using default language tag ${defaultLanguageTag}`
-					)
-					return defaultLanguageTag
-				}
+				if (!url.pathname.startsWith(base)) return defaultLanguageTag
 
 				const pathWithLanguage = url.pathname.slice(base.length)
 				const lang = pathWithLanguage.split("/").at(1)
