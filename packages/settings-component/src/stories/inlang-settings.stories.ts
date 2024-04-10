@@ -10,12 +10,28 @@ import { html } from "lit"
 const meta: Meta = {
 	component: "inlang-settings",
 	title: "Public/inlang-settings",
-	tags: ["autodocs"],
+	argTypes: {
+		settings: {
+			control: { type: "object" },
+			description:
+				"Type ProjectSettings (https://github.com/opral/monorepo/blob/main/inlang/source-code/versioned-interfaces/project-settings/src/interface.ts)",
+		},
+		installedPlugins: {
+			control: { type: "object" },
+			description:
+				"Type InstalledPlugin[] (https://github.com/opral/monorepo/blob/57611514bf84d3e03b179ddf8d02725157ec6bd5/inlang/source-code/sdk/src/api.ts#L14)",
+		},
+		installedMessageLintRules: {
+			control: { type: "object" },
+			description:
+				"Type InstalledMessageLintRule[] (https://github.com/opral/monorepo/blob/57611514bf84d3e03b179ddf8d02725157ec6bd5/inlang/source-code/sdk/src/api.ts#L26)",
+		},
+	},
 }
 
 export default meta
 
-export const Default: StoryObj = {
+export const Props: StoryObj = {
 	render: () =>
 		html`
 			<inlang-settings
@@ -27,7 +43,7 @@ export const Default: StoryObj = {
 		`,
 }
 
-export const Stringified: StoryObj = {
+export const Attributes: StoryObj = {
 	render: () =>
 		html`
 			<inlang-settings
@@ -43,30 +59,74 @@ export const Stringified: StoryObj = {
 		`,
 }
 
-export const StyledWithPartAPI: StoryObj = {
+export const Styled: StoryObj = {
 	render: () =>
 		html`
 			<style>
-				inlang-settings::part(property) {
-					background: lightblue;
+				.dark::part(base) {
+					background-color: black;
+					padding: 20px 32px;
 				}
-				inlang-settings::part(property-title) {
-					font-size: 1rem;
+				.dark::part(property-title) {
+					color: white;
 				}
-				inlang-settings::part(property-paragraph) {
-					color: blue;
+				.dark::part(module-title) {
+					color: white;
 				}
-				inlang-settings {
-					--sl-color-primary-600: hsl(333.3 71.4% 50.6%);
+				.dark::part(property-paragraph) {
+					color: #e0e0e0;
 				}
-				inlang-settings {
-					--sl-input-background-color: red;
-					--sl-input-color: white;
-					--sl-input-placeholder-color: white;
-					--sl-input-filled-background-color-disabled: blue;
+				.dark::part(float) {
+					background-color: black;
+					color: #e0e0e0;
+					border: 1px solid #606060;
+				}
+				.dark::part(cancel) {
+					background-color: #242424;
+					color: #e0e0e0;
+					border: 1px solid #606060;
+				}
+
+				.dark::part(option-wrapper) {
+					background-color: #242424;
+					border: 1px solid #606060;
+				}
+				.dark::part(option) {
+					color: #ffffff;
+				}
+				.dark::part(option):hover {
+					background-color: #646464;
+				}
+				.dark::part(button) {
+					background-color: #242424;
+					color: white;
+					border: #404040;
+				}
+
+				.dark {
+					--sl-input-background-color: #313131;
+					--sl-input-border-color: #606060;
+					--sl-input-color: #e0e0e0;
+					--sl-input-border-radius-small: 4px;
+					--sl-input-border-width: 1px;
+					--sl-input-placeholder-color: #a0a0a0;
+					--sl-input-color-hover: #eeeeee;
+
+					--sl-input-help-text-color: #b0b0b0;
+
+					--sl-input-background-color-disabled: #242424;
+					--sl-input-border-color-disabled: transparent;
+					--sl-input-placeholder-color-disabled: #b4b4b4;
+					--sl-input-color-disabled: #c0c0c0;
+
+					--sl-input-filled-background-color-disabled: #424242;
+
+					--inlang-color-primary: #f97316;
+					--sl-input-focus-ring-color: unset;
 				}
 			</style>
 			<inlang-settings
+				class="dark"
 				.settings=${mockSettings}
 				.installedPlugins=${mockInstalledPlugins}
 				.installedMessageLintRules=${mockInstalledMessageLintRules}

@@ -26,6 +26,9 @@ export class GeneralInput extends LitElement {
 	schema: any = {}
 
 	@property()
+	required: any = {}
+
+	@property()
 	handleInlangProjectChange: (value: string, key: string, moduleId?: string) => void = () => {}
 
 	override render() {
@@ -39,29 +42,32 @@ export class GeneralInput extends LitElement {
 						.value=${this.value}
 						.schema=${this.schema}
 						.handleInlangProjectChange=${this.handleInlangProjectChange}
+						.required=${this.required}
 					></string-input>
 				</div>`
 			} else if (this.schema.type === "array") {
 				return html` <div>
 					<array-input
-						exportparts="property, property-title, property-paragraph"
+						exportparts="property, property-title, property-paragraph, button"
 						.property=${this.property}
 						.moduleId=${this.moduleId}
 						.value=${this.value}
 						.schema=${this.schema}
 						.handleInlangProjectChange=${this.handleInlangProjectChange}
+						.required=${this.required}
 					></array-input>
 				</div>`
 			} else if (this.schema.type === "object") {
 				return html` <div>
 					<object-input
-						exportparts="property, property-title, property-paragraph"
+						exportparts="property, property-title, property-paragraph, option, option-wrapper, button"
 						.property=${this.property}
 						.moduleId=${this.moduleId}
 						.modules=${this.modules}
 						.value=${this.value}
 						.schema=${this.schema}
 						.handleInlangProjectChange=${this.handleInlangProjectChange}
+						.required=${this.required}
 					></object-input>
 				</div>`
 			} else {
@@ -73,18 +79,20 @@ export class GeneralInput extends LitElement {
 						.value=${this.value}
 						.schema=${this.schema}
 						.handleInlangProjectChange=${this.handleInlangProjectChange}
+						.required=${this.required}
 					></string-input>
 				</div>`
 			}
 		} else if (this.property === "pathPattern" || this.property === "sourceLanguageFilePath") {
 			return html` <div>
 				<path-pattern-input
-					exportparts="property, property-title, property-paragraph"
+					exportparts="property, property-title, property-paragraph, button"
 					.property=${this.property}
 					.moduleId=${this.moduleId}
 					.value=${this.value}
 					.schema=${this.schema}
 					.handleInlangProjectChange=${this.handleInlangProjectChange}
+					.required=${this.required}
 				></path-pattern-input>
 			</div>`
 		} else {
@@ -96,6 +104,7 @@ export class GeneralInput extends LitElement {
 					.value=${this.value}
 					.schema=${this.schema}
 					.handleInlangProjectChange=${this.handleInlangProjectChange}
+					.required=${this.required}
 				></string-input>
 			</div>`
 		}

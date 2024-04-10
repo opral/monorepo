@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/paraglide-js-e2e",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"private": true,
 	"type": "module",
 	"scripts": {
@@ -11,7 +11,8 @@
 		"clean": "rm -rf ./.tmp ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/paraglide-js": "workspace:*"
+		"@inlang/paraglide-js": "workspace:*",
+		"@inlang/sdk": "workspace:*"
 	},
 	"devDependencies": {
 		"@gmrchk/cli-testing-library": "^0.1.2",

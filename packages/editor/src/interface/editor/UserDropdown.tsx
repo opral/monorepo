@@ -38,12 +38,12 @@ function UserDropdown() {
 		<>
 			<Show when={loggedInUser(localStorage.user)}>
 				{(user) => (
-					<sl-dropdown>
+					<sl-dropdown prop:distance={4}>
 						<div slot="trigger" class="flex items-center cursor-pointer">
 							<img src={user().avatarUrl} alt="user avatar" class="w-8 h-8 rounded-full" />
 						</div>
 						<sl-menu>
-							<div class="px-7 py-2 bg-surface-1 text-on-surface">
+							<div class="px-7 py-2">
 								<p>Signed in as</p>
 								<p class="font-medium">{user().username}</p>
 							</div>
