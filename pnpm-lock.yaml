@@ -2229,6 +2229,19 @@ importers:
         specifier: ^4.7.1
         version: 4.7.2
 
+  inlang/source-code/sdk/multi-project-test:
+    dependencies:
+      '@inlang/cli':
+        specifier: workspace:*
+        version: link:../../cli
+    devDependencies:
+      '@types/node':
+        specifier: ^20.12.6
+        version: 20.12.7
+      vitest:
+        specifier: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
+
   inlang/source-code/server:
     dependencies:
       '@inlang/badge':
