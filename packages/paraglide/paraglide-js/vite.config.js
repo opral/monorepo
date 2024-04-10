@@ -10,6 +10,7 @@ export default defineConfig(({ mode }) => ({
 			entry: "src/index.ts",
 			formats: ["es"],
 		},
+
 		emptyOutDir: true,
 		rollupOptions: {
 			external: Object.keys(pkg.dependencies),
