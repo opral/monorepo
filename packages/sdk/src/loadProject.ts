@@ -113,7 +113,7 @@ export async function loadProject(args: {
 	// -- migratations ------------------------------------------------
 
 	await maybeMigrateToDirectory({ nodeishFs, projectPath })
-	await maybeCreateFirstProjectId({ projectPath, repo: args.repo })
+	// await maybeCreateFirstProjectId({ projectPath, repo: args.repo })
 
 	// -- load project ------------------------------------------------------
 
