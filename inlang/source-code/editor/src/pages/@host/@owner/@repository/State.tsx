@@ -18,7 +18,7 @@ import type { LocalStorageSchema } from "#src/services/local-storage/index.js"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
-import { openRepository, createNodeishMemoryFs, type Repository } from "@lix-js/client"
+import { openRepository, createNodeishMemoryFs, type Repository, LixError } from "@lix-js/client"
 import { browserAuth } from "@lix-js/server"
 import { publicEnv } from "@inlang/env-variables"
 import {
@@ -62,7 +62,7 @@ type EditorStateSchema = {
 		setLastPullTime: (date: Date) => void
 	}) => Promise<Result<true, PushException>>
 
-	mergeUpstream: () => Promise<Awaited<ReturnType<Repository["mergeUpstream"]>>> 
+	mergeUpstream: () => Promise<Awaited<ReturnType<Repository["mergeUpstream"]>>>
 
 	createFork: () => Promise<Awaited<ReturnType<Repository["createFork"]>>>
 
@@ -291,7 +291,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 						// @ts-expect-error
 						window.repo = newRepo
 					}
-					// TODO replace this with `setLixErrors([])` as soon as repo throws 
+					// TODO replace this with `setLixErrors([])` as soon as repo throws
 					setLixErrors(newRepo.errors)
 
 					// @ts-ignore -- causes reactivity bugs because the sdk uses watch and triggers updates on changes caused by itself
@@ -304,6 +304,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					return newRepo
 				} catch (e) {
 					setLixErrors([e as Error])
+					return
 				}
 			} else {
 				return
