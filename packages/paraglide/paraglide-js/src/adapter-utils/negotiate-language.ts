@@ -84,15 +84,17 @@ export function negotiateLanguagePreferences<T extends string = string>(
 	// RFC 2616 sec 14.4: no header = *
 	const accepts = parseAcceptLanguageHeader(!accept ? "*" : accept)
 
+	// compare each avaibale language to each language in the Accept-Language header
+	// and find the one with the highest priority
 	const priorities = availableLanguageTags.map((languageTag, index) =>
 		getHighestLanguagePriority(languageTag, accepts, index)
 	)
 
 	// sorted list of accepted languages
 	return priorities
-		.filter((spec) => spec.quality > 0)
-		.sort(comparePriorities)
-		.map((priority) => availableLanguageTags[priorities.indexOf(priority)] as T)
+		.filter((spec) => spec.quality > 0) //filter out all languages that didn't match any of the headers whatsoever
+		.sort(comparePriorities) //sort them by their priority
+		.map((priority) => availableLanguageTags[priorities.indexOf(priority)] as T) //map back from the priority to the available languages
 }
 
 function parseAcceptLanguageHeader(acceptLanguage: string): LanguageSpec[] {
