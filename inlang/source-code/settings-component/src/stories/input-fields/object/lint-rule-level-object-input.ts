@@ -1,26 +1,27 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
-//import { baseStyling } from "../../../styling/base.js"
 import { InlangModule, type InstalledMessageLintRule, type InstalledPlugin } from "@inlang/sdk"
+import "./../../field-header.js"
 
 @customElement("lint-rule-level-object-input")
 export class LintRuleLevelObjectInput extends LitElement {
 	static override styles = [
-		//baseStyling,
 		css`
-			.help-text {
-				font-size: 0.8rem;
-				color: var(--sl-input-help-text-color);
+			.property {
+				display: flex;
+				flex-direction: column;
+				gap: 12px;
 			}
 			.container {
 				display: flex;
 				flex-direction: column;
-				padding-bottom: 8px;
+				padding-top: 8px;
 				gap: 12px;
 			}
 			.ruleId {
 				font-size: 0.8rem;
 				margin: 0;
+				color: var(--sl-input-color);
 			}
 			.rule-container {
 				display: flex;
@@ -31,6 +32,19 @@ export class LintRuleLevelObjectInput extends LitElement {
 			.select {
 				max-width: 120px;
 				min-width: 100px;
+			}
+			.title-container {
+				display: flex;
+				gap: 8px;
+			}
+			sl-select::part(expand-icon) {
+				color: var(--sl-input-placeholder-color);
+			}
+			sl-select::part(expand-icon):hover {
+				color: var(--sl-input-color);
+			}
+			sl-select::part(base):hover {
+				border: var(--sl-input-placeholder-color);
 			}
 		`,
 	]
@@ -51,6 +65,9 @@ export class LintRuleLevelObjectInput extends LitElement {
 	schema: any = {}
 
 	@property()
+	required?: boolean = false
+
+	@property()
 	handleInlangProjectChange: (
 		value: Record<InlangModule["default"]["id"], string>,
 		key: string,
@@ -59,6 +76,10 @@ export class LintRuleLevelObjectInput extends LitElement {
 
 	private get _description(): string | undefined {
 		return this.schema.description || undefined
+	}
+
+	private get _title(): string | undefined {
+		return this.schema.title || undefined
 	}
 
 	private get _valueOptions(): Array<Record<string, string>> | undefined {
@@ -80,18 +101,39 @@ export class LintRuleLevelObjectInput extends LitElement {
 		}
 	}
 
+	getValueOfLintRule = (
+		id: InlangModule["default"]["id"],
+		value: Record<InlangModule["default"]["id"], string>
+	) => {
+		//TODO: workaround because select field was not updating
+		setTimeout(() => {
+			this.requestUpdate()
+		})
+		if (value && Object.keys(value).includes(id)) {
+			return value[id]
+		} else {
+			return undefined
+		}
+	}
+
 	override render() {
-		return html` <div part="property">
-			<h3 part="property-title">${this.property}</h3>
-			${this._description &&
-			html`<p part="property-paragraph" class="help-text">${this._description}</p>`}
+		return html` <div part="property" class="property">
+			<div class="title-container">
+				<field-header
+					.fieldTitle=${this._title ? this._title : this.property}
+					.description=${this._description}
+					.optional=${this.required ? false : true}
+					exportparts="property-title, property-paragraph"
+				></field-header>
+			</div>
 			<div class="container">
 				${this.modules &&
 				this.modules.map((module) => {
 					return module.id.split(".")[0] !== "plugin"
 						? html`<div class="rule-container">
 								<sl-select
-									value=${this.value ? (this.value as any)[module.id] : "warning"}
+									exportparts="listbox:option-wrapper"
+									value="${this.getValueOfLintRule(module.id, this.value)}"
 									class="select"
 									size="small"
 									placeholder="warning"
@@ -103,7 +145,11 @@ export class LintRuleLevelObjectInput extends LitElement {
 									}}
 								>
 									${this._valueOptions?.map((option) => {
-										return html`<sl-option value=${option.const} class="add-item-side">
+										return html`<sl-option
+											exportparts="base:option"
+											value=${option.const}
+											class="add-item-side"
+										>
 											${option.const}
 										</sl-option>`
 									})}

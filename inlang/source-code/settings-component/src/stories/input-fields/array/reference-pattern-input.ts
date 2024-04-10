@@ -1,15 +1,14 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
-//import { baseStyling } from "../../../styling/base.js"
 
 @customElement("reference-pattern-input")
 export class ReferencePatternInput extends LitElement {
 	static override styles = [
-		//baseStyling,
 		css`
-			.help-text {
-				font-size: 0.8rem;
-				color: var(--sl-input-help-text-color);
+			.property {
+				display: flex;
+				flex-direction: column;
+				gap: 12px;
 			}
 			.disabled-input::part(base) {
 				cursor: unset;
@@ -54,6 +53,9 @@ export class ReferencePatternInput extends LitElement {
 	schema: any = {}
 
 	@property()
+	required?: boolean = false
+
+	@property()
 	handleInlangProjectChange: (value: Array<string>, key: string, moduleId?: string) => void =
 		() => {}
 
@@ -61,17 +63,23 @@ export class ReferencePatternInput extends LitElement {
 		return this.schema.description || undefined
 	}
 
+	private get _title(): string | undefined {
+		return this.schema.title || undefined
+	}
+
 	private get _examples(): string | undefined {
-		return this.schema.examples ? "Example: " + JSON.stringify(this.schema.examples) : undefined
+		return this.schema.examples
 	}
 
 	override render() {
-		return html`<div part="property" class="container">
-			<h3 class="property-title">${this.property}</h3>
-			${this._description &&
-			html`<p part="property-paragraph" class="help-text">${this._description}</p>`}
-			${this._examples &&
-			html`<p part="property-paragraph" class="help-text">${this._examples}</p>`}
+		return html`<div part="property" class="property">
+			<field-header
+				.fieldTitle=${this._title ? this._title : this.property}
+				.description=${this._description}
+				.examples=${this._examples}
+				.optional=${this.required ? false : true}
+				exportparts="property-title, property-paragraph"
+			></field-header>
 			<div class="new-line-container">
 				<sl-input
 					class="add-input"

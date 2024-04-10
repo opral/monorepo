@@ -2,31 +2,9 @@ import { For, Show } from "solid-js"
 import UserDropdown from "./UserDropdown.jsx"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { Button } from "../components/Button.jsx"
+import { getFinkResourcesLinks } from "./Footer.jsx"
 
 function EditorHeader() {
-	const getLinks = () => {
-		return [
-			{
-				href: import.meta.env.PROD
-					? "https://inlang.com/m/tdozzpar"
-					: "http://localhost:3000/m/tdozzpar",
-				name: "What is Fink?",
-			},
-			{
-				href: import.meta.env.PROD
-					? "https://inlang.com/g/6ddyhpoi"
-					: "http://localhost:3000/g/6ddyhpoi",
-				name: "How to translate?",
-			},
-			{
-				href: import.meta.env.PROD
-					? "https://inlang.com/c/lint-rules"
-					: "http://localhost:3000/c/lint-rules",
-				name: "Find Lint Rules",
-			},
-		]
-	}
-
 	const [localStorage] = useLocalStorage()
 	const user = () => {
 		if (!localStorage) return undefined
@@ -69,25 +47,44 @@ function EditorHeader() {
 							>
 								Fink
 							</a>
-							{/* <p class="self-center text-left font-regular text-surface-400 pl-3 pr-1">/</p> */}
 							<div class="w-full content-center">
 								<div
 									class={
-										"hidden md:flex justify-end items-center gap-8 transition-[margin] duration-200 -my-1 " +
-										(user()?.isLoggedIn && "mr-16")
+										"flex justify-end items-center gap-6 transition-[margin] duration-200 -my-1 " +
+										(user()?.isLoggedIn && "mr-14")
 									}
 								>
-									<For each={getLinks()}>
-										{(link) => (
-											<>
-												<Button type="text" href={link.href}>
-													{link.name}
-												</Button>
-											</>
-										)}
-									</For>
+									<Button type="text" class="hidden sm:flex"
+										href={import.meta.env.PROD
+										? "https://inlang.com/c/lint-rules"
+										: "http://localhost:3000/c/lint-rules"}>
+										Find Lint Rules
+									</Button>
+									<sl-dropdown prop:placement="bottom-end" class="peer">
+										<button slot="trigger" class="flex pointer-events-auto justify-center items-center h-10 relative gap-2 rounded-md flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer transition-all duration-200 text-surface-700 hover:text-primary">
+											Need Help?
+										</button>
+										<sl-menu class="w-fit">
+											<For each={getFinkResourcesLinks()}>
+												{(link) => (
+													<>
+														<sl-menu-item>
+															<a href={link.href} target="_blank">
+																{link.name}
+															</a>
+														</sl-menu-item>
+														<Show
+															when={link.name === "About the ecosystem"}
+														>
+															<div class="w-full border-b border-surface-200 my-1" />
+														</Show>
+													</>
+												)}
+											</For>
+										</sl-menu>
+									</sl-dropdown>
 									<Show when={user()?.isLoggedIn}>
-										<div class="absolute h-8 right-4 xl:right-[calc((100%_-_1240px)_/_2)] animate-fadeIn">
+										<div class="absolute h-8 right-0 sm:right-4 xl:right-[calc((100%_-_1240px)_/_2)] animate-fadeIn">
 											<UserDropdown />
 										</div>
 									</Show>

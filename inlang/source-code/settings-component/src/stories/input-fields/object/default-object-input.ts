@@ -1,16 +1,15 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
-//import { baseStyling } from "../../../styling/base.js"
 import { InlangModule } from "@inlang/sdk"
 
 @customElement("default-object-input")
 export class DefaultObjectInput extends LitElement {
 	static override styles = [
-		//baseStyling,
 		css`
-			.help-text {
-				font-size: 0.8rem;
-				color: var(--sl-input-help-text-color);
+			.property {
+				display: flex;
+				flex-direction: column;
+				gap: 12px;
 			}
 			.disabled-input::part(base) {
 				cursor: unset;
@@ -40,10 +39,10 @@ export class DefaultObjectInput extends LitElement {
 				justify-content: flex-start;
 				margin-left: 6px;
 				cursor: pointer;
-				color: var(--sl-color-gray-500);
+				color: var(--sl-input-placeholder-color);
 			}
 			.remove-icon:hover {
-				color: var(--sl-color-gray-950);
+				color: var(--sl-input-color);
 			}
 			.list-container {
 				display: flex;
@@ -76,6 +75,15 @@ export class DefaultObjectInput extends LitElement {
 	schema: any = {}
 
 	@property()
+	withTitle?: boolean = true
+
+	@property()
+	withDescription?: boolean = true
+
+	@property()
+	required?: boolean = false
+
+	@property()
 	handleInlangProjectChange: (
 		value: Record<InlangModule["default"]["id"], string>,
 		key: string,
@@ -84,6 +92,10 @@ export class DefaultObjectInput extends LitElement {
 
 	private get _description(): string | undefined {
 		return this.schema.description || undefined
+	}
+
+	private get _title(): string | undefined {
+		return this.schema.title || undefined
 	}
 
 	@state()
@@ -121,47 +133,68 @@ export class DefaultObjectInput extends LitElement {
 	}
 
 	override render() {
-		return html` <div part="property">
-			${this._description && html`<h3 part="property-title">${this.property}</h3>`}
-			${this._description &&
-			html`<p part="property-paragraph" class="help-text">${this._description}</p>`}
-			<div class="list-container">
-				${this.value &&
-				Object.entries(this.value).map(([key, value]) => {
-					return html`<div class="add-item-container">
-						<sl-input
-							class="disabled-input add-item-side"
-							size="small"
-							value=${key}
-							disabled
-							filled
-						>
-						</sl-input>
-						<sl-input
-							class="disabled-input add-item-side"
-							size="small"
-							value=${value}
-							disabled
-							filled
-						>
-						</sl-input>
-						<div class="remove-icon">
-							<div
-								@click=${() => {
-									this.handleDeleteItemClick(key as InlangModule["default"]["id"])
-								}}
-							>
-								<svg class="icon" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-									<path
-										xmlns="http://www.w3.org/2000/svg"
-										d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"
-									/>
-								</svg>
-							</div>
-						</div>
-					</div>`
+		return html` <div part="property" class="property">
+			<field-header
+				.fieldTitle=${JSON.stringify(() => {
+					if (this.withTitle) {
+						if (this._title) {
+							return this._title
+						} else {
+							return this.property
+						}
+					} else {
+						return undefined
+					}
 				})}
-			</div>
+				.description=${this.withDescription ? this._description : ``}
+				.optional=${this.required ? false : true}
+				exportparts="property-title, property-paragraph"
+			></field-header>
+			${this.value
+				? html`<div class="list-container">
+						${this.value &&
+						Object.entries(this.value).map(([key, value]) => {
+							return html`<div class="add-item-container">
+								<sl-input
+									class="disabled-input add-item-side"
+									size="small"
+									value=${key}
+									disabled
+									filled
+								>
+								</sl-input>
+								<sl-input
+									class="disabled-input add-item-side"
+									size="small"
+									value=${value}
+									disabled
+									filled
+								>
+								</sl-input>
+								<div class="remove-icon">
+									<div
+										@click=${() => {
+											this.handleDeleteItemClick(key as InlangModule["default"]["id"])
+										}}
+									>
+										<svg
+											class="icon"
+											width="16"
+											height="16"
+											fill="currentColor"
+											viewBox="0 0 16 16"
+										>
+											<path
+												xmlns="http://www.w3.org/2000/svg"
+												d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"
+											/>
+										</svg>
+									</div>
+								</div>
+							</div>`
+						})}
+				  </div>`
+				: ``}
 			<div class="add-item-container">
 				<sl-input
 					class="add-item-side"
@@ -194,6 +227,7 @@ export class DefaultObjectInput extends LitElement {
 				>
 				</sl-input>
 				<sl-button
+					exportparts="base:button"
 					size="small"
 					variant="neutral"
 					@click=${() => {

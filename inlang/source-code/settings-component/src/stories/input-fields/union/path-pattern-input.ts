@@ -1,27 +1,24 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
-//import { baseStyling } from "../../../styling/base.js"
 import "./../object/object-input.js"
 
 @customElement("path-pattern-input")
 export class PathPatternInput extends LitElement {
 	static override styles = [
-		//baseStyling,
 		css`
-			.help-text {
-				font-size: 0.8rem;
-				color: var(--sl-input-help-text-color);
-				margin: 0;
+			.property {
+				display: flex;
+				flex-direction: column;
+				gap: 12px;
 			}
 			sl-checkbox::part(base) {
-				font-size: 0.9rem;
+				font-size: 14px;
+				color: var(--sl-input-help-text-color);
 			}
 			.description-container {
 				display: flex;
 				flex-direction: column;
 				gap: 4px;
-				margin-bottom: 1rem;
-				margin-top: 0.8rem;
 			}
 		`,
 	]
@@ -39,24 +36,39 @@ export class PathPatternInput extends LitElement {
 	schema: any = {}
 
 	@property()
+	required?: boolean = false
+
+	@property()
 	handleInlangProjectChange: (value: string, key: string, moduleId?: string) => void = () => {}
 
 	private get _descriptionObject(): string | undefined {
-		return this.schema.anyOf[1].patternProperties["^[^.]+$"].description || undefined
+		if (this.schema.description) {
+			return this.schema.description
+		} else {
+			return "Specify the pathPattern to locate language files of specific namespaces in your repository. The namespace is a string taht shouldn't include '.', the path must include `{languageTag}` and end with `.json`."
+		}
 	}
 
-	private get _examplesObject(): string | undefined {
-		return "Example: { common: './locales/{languageTag}/common.json', app: './locales/{languageTag}/app.json', ... }"
+	private get _examplesObject(): string[] | undefined {
+		return [
+			'{ common: "./locales/{languageTag}/common.json", app: "./locales/{languageTag}/app.json" }',
+		]
 	}
 
 	private get _descriptionString(): string | undefined {
-		return this.schema.anyOf[0].description || undefined
+		if (this.schema.description) {
+			return this.schema.description
+		} else {
+			return this.schema.anyOf[0].description || undefined
+		}
 	}
 
-	private get _examplesString(): string | undefined {
+	private get _examplesString(): string[] | undefined {
 		return this.schema.anyOf[0].examples
-			? "Example: " + JSON.stringify(this.schema.anyOf[0].examples)
-			: undefined
+	}
+
+	private get _title(): string | undefined {
+		return this.schema.title || undefined
 	}
 
 	@state()
@@ -74,8 +86,12 @@ export class PathPatternInput extends LitElement {
 			}
 			this._isInitialized = true
 		}
-		return html` <div part="property">
-			<h3 part="property-title">${this.property}</h3>
+		return html` <div part="property" class="property">
+			<field-header
+				.fieldTitle=${this._title ? this._title : this.property}
+				.optional=${this.required ? false : true}
+				exportparts="property-title"
+			></field-header>
 			<sl-checkbox
 				?checked=${this._isObject}
 				@input=${(e: Event) => {
@@ -88,32 +104,36 @@ export class PathPatternInput extends LitElement {
 				}}
 				>with namespaces</sl-checkbox
 			>
-
 			${this._isObject
-				? html`<div>
-						<div class="description-container">
-							${this._descriptionObject &&
-							html`<p part="property-paragraph" class="help-text">${this._descriptionObject}</p>`}
-							${this._examplesObject &&
-							html`<p part="property-paragraph" class="help-text">${this._examplesObject}</p>`}
-						</div>
+				? html`<div part="property" class="property">
+						<field-header
+							.description=${this._descriptionObject}
+							.examples=${this._examplesObject}
+							.optional=${this.required ? false : true}
+							exportparts="property-title, property-paragraph"
+						></field-header>
 						<object-input
+							exportparts="button"
 							.value=${typeof this.value === "object" ? this.value : ""}
 							.keyPlaceholder=${"Namespace"}
 							.valuePlaceholder=${"Path to resource [./**/*.json]"}
 							.handleInlangProjectChange=${this.handleInlangProjectChange}
 							.property=${this.property}
 							.moduleId=${this.moduleId}
+							.schema=${this.schema}
+							.withTitle=${false}
+							.withDescription=${false}
+							.required=${this.required}
 						>
 						</object-input>
 				  </div>`
-				: html`<div>
-						<div class="description-container">
-							${this._descriptionString &&
-							html`<p part="property-paragraph" class="help-text">${this._descriptionString}</p>`}
-							${this._examplesString &&
-							html`<p part="property-paragraph" class="help-text">${this._examplesString}</p>`}
-						</div>
+				: html`<div part="property" class="property">
+						<field-header
+							.description=${this._descriptionString}
+							.examples=${this._examplesString}
+							.optional=${this.required ? false : true}
+							exportparts="property-title, property-paragraph"
+						></field-header>
 						<sl-input
 							value=${typeof this.value === "object" ? "" : this.value}
 							size="small"

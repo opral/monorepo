@@ -106,4 +106,16 @@ describe("serializePath", () => {
 
 		expect(path).toBe("/base/foo/bar/")
 	})
+
+	it("correctly serializes / with a trailing slash", () => {
+		const path = serializeRoute({
+			path: "/",
+			base: "",
+			dataSuffix: undefined,
+			includeLanguage: false,
+			trailingSlash: true,
+		})
+
+		expect(path).toBe("/")
+	})
 })

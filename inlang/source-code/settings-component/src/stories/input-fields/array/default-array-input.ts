@@ -1,21 +1,21 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
-//import { baseStyling } from "../../../styling/base.js"
+import "./../../field-header.js"
 
 @customElement("default-array-input")
 export class DefaultArrayInput extends LitElement {
 	static override styles = [
-		//baseStyling,
 		css`
+			.property {
+				display: flex;
+				flex-direction: column;
+				gap: 12px;
+			}
 			.item-container {
 				display: flex;
 				flex-direction: column;
 				gap: 4px;
 				padding-bottom: 8px;
-			}
-			.help-text {
-				font-size: 0.8rem;
-				color: var(--sl-input-help-text-color);
 			}
 			.disabled-input::part(base) {
 				cursor: unset;
@@ -57,11 +57,18 @@ export class DefaultArrayInput extends LitElement {
 	schema: any = {}
 
 	@property()
+	required?: boolean = false
+
+	@property()
 	handleInlangProjectChange: (value: Array<string>, key: string, moduleId?: string) => void =
 		() => {}
 
 	private get _description(): string | undefined {
 		return this.schema.description || undefined
+	}
+
+	private get _title(): string | undefined {
+		return this.schema.title || undefined
 	}
 
 	@state()
@@ -91,10 +98,13 @@ export class DefaultArrayInput extends LitElement {
 	}
 
 	override render() {
-		return html`<div part="property" class="container">
-			<h3 part="property-title">${this.property}</h3>
-			${this._description &&
-			html`<p part="property-paragraph" class="help-text">${this._description}</p>`}
+		return html`<div part="property" class="property">
+			<field-header
+				.fieldTitle=${this._title ? this._title : this.property}
+				.description=${this._description}
+				.optional=${this.required ? false : true}
+				exportparts="property-title, property-paragraph"
+			></field-header>
 			${this.value && this.value.length > 0
 				? html`<div class="item-container">
 						${this.value.map((arrayItem, index) => {
@@ -138,6 +148,7 @@ export class DefaultArrayInput extends LitElement {
 				>
 				</sl-input>
 				<sl-button
+					exportparts="base:button"
 					size="small"
 					variant="neutral"
 					@click=${() => {

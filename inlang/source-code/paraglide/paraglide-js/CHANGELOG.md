@@ -1,5 +1,11 @@
 # @inlang/paraglide-js
 
+## 1.5.0
+
+### Minor Changes
+
+- 2428451: `paraglide-js init` now finds more existing projects
+
 ## 1.4.0
 
 ### Minor Changes
