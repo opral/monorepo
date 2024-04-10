@@ -159,6 +159,7 @@ export default class InlangSettings extends LitElement {
 	_saveChanges = () => {
 		if (this._newSettings) {
 			this.dispatchOnSetSettings(this._newSettings)
+			this.settings = JSON.parse(JSON.stringify(this._newSettings))
 		}
 		this._unsavedChanges = false
 	}
@@ -224,7 +225,9 @@ export default class InlangSettings extends LitElement {
 												exportparts="property, property-title, property-paragraph, option, option-wrapper, button"
 												.property=${property}
 												.modules=${this.installedMessageLintRules || []}
-												.value=${this._newSettings?.[property as keyof typeof this._newSettings]}
+												.value=${structuredClone(
+													this._newSettings?.[property as keyof typeof this._newSettings]
+												)}
 												.schema=${schema}
 												.handleInlangProjectChange=${this.handleInlangProjectChange}
 												.required=${checkOptional(value.schema, property)}
@@ -236,7 +239,7 @@ export default class InlangSettings extends LitElement {
 												.property=${property}
 												.value=${
 													// @ts-ignore
-													this._newSettings?.[key]?.[property]
+													structuredClone(this._newSettings?.[key]?.[property])
 												}
 												.schema=${schema}
 												.moduleId=${key}

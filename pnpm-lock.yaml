@@ -55,8 +55,8 @@ importers:
   inlang/development-projects/inlang-nextjs:
     dependencies:
       '@inlang/cli':
-        specifier: file:../../source-code/cli
-        version: file:inlang/source-code/cli
+        specifier: workspace:*
+        version: link:../../source-code/cli
       '@types/node':
         specifier: ^20.2.3
         version: 20.12.6
@@ -115,9 +115,9 @@ importers:
 
   inlang/development-projects/inlang-svelte:
     devDependencies:
-      '@inlang/sdk-js':
-        specifier: file:../../../..
-        version: file:..
+      '@inlang/sdk':
+        specifier: workspace:*
+        version: link:../../source-code/sdk
       '@sveltejs/adapter-auto':
         specifier: ^2.0.1
         version: 2.1.1(@sveltejs/kit@1.30.4)
@@ -565,6 +565,9 @@ importers:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../paraglide/paraglide-js
+      '@inlang/paraglide-js-adapter-vite':
+        specifier: workspace:*
+        version: link:../paraglide/paraglide-js-adapter-vite
       '@inlang/result':
         specifier: workspace:*
         version: link:../result
@@ -28677,25 +28680,4 @@ packages:
 
   /zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
-    dev: false
-
-  file:..:
-    resolution: {directory: .., type: directory}
-    name: inlang
-    dev: true
-
-  file:inlang/source-code/cli:
-    resolution: {directory: inlang/source-code/cli, type: directory}
-    name: '@inlang/cli'
-    engines: {node: '>=18.0.0'}
-    hasBin: true
-    dependencies:
-      '@inlang/language-tag': link:inlang/source-code/versioned-interfaces/language-tag
-      '@inlang/result': link:inlang/source-code/result
-      '@inlang/sdk': link:inlang/source-code/sdk
-      '@lix-js/client': link:lix/packages/client
-      '@lix-js/fs': link:lix/packages/fs
-      esbuild-wasm: 0.19.12
-      fs-extra: 11.1.1
-      p-limit: 5.0.0
     dev: false
