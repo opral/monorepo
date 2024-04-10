@@ -12,7 +12,7 @@ import type { PathTranslations } from "../config/pathTranslations.js"
 export const handleRedirects: (
 	runtime: Paraglide<any>,
 	translations: PathTranslations<string>,
-	matchers: Record<string, ParamMatcher>
+	matchers: Record<string, ParamMatcher>,
 ) => Handle =
 	(runtime, translations, matchers) =>
 	async ({ event, resolve }) => {
