@@ -26,7 +26,6 @@ export function serializeRoute(opts: SerializePathOptions): string {
 	} else {
 		return resolvedPath
 	}
-
 }
 
 type SerializePathOptions = {
