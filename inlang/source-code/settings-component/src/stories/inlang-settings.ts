@@ -159,6 +159,7 @@ export default class InlangSettings extends LitElement {
 	_saveChanges = () => {
 		if (this._newSettings) {
 			this.dispatchOnSetSettings(this._newSettings)
+			this.settings = JSON.parse(JSON.stringify(this._newSettings))
 		}
 		this._unsavedChanges = false
 	}
