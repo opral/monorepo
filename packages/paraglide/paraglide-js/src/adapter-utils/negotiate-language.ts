@@ -57,18 +57,18 @@ type LanguagePriority<T extends string = string> = {
 	/**
 	 * The index of the language in the Accept-Language header
 	 * that was compared against when calculating the specificity.
-	 *
-	 * Used as a tie-breaker when multiple languages have the same quality and specificity
 	 */
 	order: number
 
 	/**
-	 * The specificity of the language tag.
+	 * The specificity measures how close the language is to the language in the Accept-Language header
 	 *
-	 * You can compare specificities by value, but they also act as bitflags
+	 * They act as a bitflag:
 	 * 100 = exact match
 	 * 010 = prefix match
 	 * 001 = full match
+	 *
+	 * You can compare specificities by int-value, higher = better
 	 */
 	specificity: number
 }
@@ -217,14 +217,18 @@ function calculatePriority<T extends string>(
 	const parsed = parseLanguage(language, 0)
 	if (!parsed) return undefined
 
-	let specificity = 0
+	let specificity = 0b000
 	if (spec.full.toLowerCase() === parsed.full.toLowerCase()) {
-		specificity |= 4
+		specificity |= 0b100
 	} else if (spec.prefix.toLowerCase() === parsed.full.toLowerCase()) {
-		specificity |= 2
+		specificity |= 0b010
 	} else if (spec.full.toLowerCase() === parsed.prefix.toLowerCase()) {
-		specificity |= 1
-	} else if (spec.full !== "*") {
+		specificity |= 0b001
+	}
+
+	// if there is no specificity at all _and_ we're not considering a wildcard
+	// then we bail
+	if (specificity === 0 && spec.full !== "*") {
 		return undefined
 	}
 
