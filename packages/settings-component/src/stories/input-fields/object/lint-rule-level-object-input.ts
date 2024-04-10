@@ -107,7 +107,9 @@ export class LintRuleLevelObjectInput extends LitElement {
 	) => {
 		//TODO: workaround because select field was not updating
 		setTimeout(() => {
-			this.requestUpdate()
+			const _value = this.value
+			this.value = {}
+			this.value = _value
 		})
 		if (value && Object.keys(value).includes(id)) {
 			return value[id]
