@@ -89,13 +89,8 @@ export type MessageQueryApi = {
 }
 
 export type MessageLintReportsQueryApi = {
-	getAll: Subscribable<MessageLintReport[]>
-	get: ((args: {
+	getAll: () => Promise<MessageLintReport[]>
+	get: (args: {
 		where: { messageId: MessageLintReport["messageId"] }
-	}) => Readonly<MessageLintReport[]>) & {
-		subscribe: (
-			args: { where: { messageId: MessageLintReport["messageId"] } },
-			callback: (MessageLintRules: Readonly<MessageLintReport[]>) => void
-		) => void
-	}
+	}) => Promise<Readonly<MessageLintReport[]>>
 }

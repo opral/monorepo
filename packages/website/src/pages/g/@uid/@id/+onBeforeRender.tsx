@@ -32,9 +32,8 @@ export default async function onBeforeRender(pageContext: PageContext) {
 	const recommends = item.recommends
 		? registry.filter((i: any) => {
 				for (const recommend of item.recommends!) {
-					if (recommend.replace("g/", "") === i.uniqueID) {
-						return true
-					}
+					if (recommend.replace("m/", "") === i.uniqueID) return true
+					if (recommend.replace("g/", "") === i.uniqueID) return true
 				}
 				return false
 		  })

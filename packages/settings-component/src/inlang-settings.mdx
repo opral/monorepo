@@ -1,0 +1,81 @@
+import { Meta, Primary, Controls, Story, Canvas, ArgTypes, Source } from '@storybook/blocks';
+import * as InlangSettings from './stories/inlang-settings.stories';
+
+<Meta of={InlangSettings} />
+
+# Settings Component
+
+The settings component is a simple form that allows app builders add settings quickly. The component can be used as `inlang-settings`.
+
+## Table of Contents
+- [Example](#example-settings)
+- [Props and Attributes](#props-and-attributes)
+- [Events](#events)
+- [Usage](#usage)
+- [CSS Custom properties](#css-custom-properties)
+- [Part API](#part-api)
+
+## Example Settings
+
+<Canvas>
+    <Story of={InlangSettings.Props} />
+</Canvas>
+
+## Props and Attributes
+
+<ArgTypes/>
+
+Depending on your framework you can use pass the needed information as a prop or as an [attribute](https://lit.dev/docs/components/properties/#attributes).
+
+## Events
+
+The settings component emits the following events:
+
+- `set-settings`: Emitted when the settings are changed. The event detail contains the new settings.
+
+## Usage
+
+- Solidjs - Prop: `prop:settings={obj}` - Event: `on:set-settings`
+- Lit - Attribute: `settings=${JSON.stringify(obj)}` - Event: `@set-settings`
+- Lit - Props: `.settings=${obj}` - Event: `@set-settings`
+- Html - Attribute: `settings=${JSON.stringify(obj)}` - Event: EventListener -> `set-settings`
+
+## CSS Custom properties
+
+The settings component uses the following css properties:
+
+### Primitives
+
+From each property the component derives different shades and maps it on the shoelace components.
+
+- `--inlang-color-primary`
+- `--inlang-color-success`
+- `--inlang-color-warning`
+- `--inlang-color-danger`
+- `--inlang-color-neutral`
+
+### Inputs
+
+Most styles are derrived from input css properties.
+
+Examples:
+- `--sl-input-color`
+- `--sl-input-background-color`
+- `--sl-input-border-color`
+
+You can find all css properties listed [here](https://shoelace.style/tokens/more).
+
+## Part API
+
+The settings component is built with the following parts:
+
+- `base`: Root of component
+- `module-container`: List of modules
+- `module-title`: The title of a module
+- `property`: Root of property
+- `property-title`: The title of a property
+- `property-paragraph`: All p elements in a property
+- `option-wrapper`: Wrapper for options
+- `option`: All options in a dropdown
+- `float`: The floating bar when a change exists
+- `button`: The root of all neutral buttons

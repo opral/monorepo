@@ -2,7 +2,7 @@ import { getTranslatedPath } from "../path-translations/getTranslatedPath.js"
 import { isExternal } from "../utils/external.js"
 import { getPathInfo } from "../utils/get-path-info.js"
 import { base } from "$app/paths"
-import type { Handle } from "@sveltejs/kit"
+import type { Handle, ParamMatcher } from "@sveltejs/kit"
 import type { Paraglide } from "../runtime.js"
 import type { PathTranslations } from "../config/pathTranslations.js"
 
@@ -11,9 +11,10 @@ import type { PathTranslations } from "../config/pathTranslations.js"
  */
 export const handleRedirects: (
 	runtime: Paraglide<any>,
-	translations: PathTranslations<string>
+	translations: PathTranslations<string>,
+	matchers: Record<string, ParamMatcher>
 ) => Handle =
-	(runtime, translations) =>
+	(runtime, translations, matchers) =>
 	async ({ event, resolve }) => {
 		const response = await resolve(event)
 		if (!isRedirect(response)) return response
@@ -33,7 +34,7 @@ export const handleRedirects: (
 			defaultLanguageTag: runtime.sourceLanguageTag,
 		})
 
-		const translatedPath = getTranslatedPath(to.pathname, lang, translations)
+		const translatedPath = getTranslatedPath(to.pathname, lang, translations, matchers)
 
 		response.headers.set("location", translatedPath)
 		return response

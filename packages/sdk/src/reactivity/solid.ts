@@ -3,6 +3,7 @@ import {
 	createMemo as _createMemo,
 	createRoot as _createRoot,
 	createEffect as _createEffect,
+	createResource as _createResource,
 	observable as _observable,
 	batch as _batch,
 	from as _from,
@@ -16,6 +17,7 @@ const createSignal = _createSignal as typeof import("solid-js")["createSignal"]
 const createMemo = _createMemo as typeof import("solid-js")["createMemo"]
 const createRoot = _createRoot as typeof import("solid-js")["createRoot"]
 const createEffect = _createEffect as typeof import("solid-js")["createEffect"]
+const createResource = _createResource as typeof import("solid-js")["createResource"]
 const observable = _observable as typeof import("solid-js")["observable"]
 const from = _from as typeof import("solid-js")["from"]
 const batch = _batch as typeof import("solid-js")["batch"]
@@ -27,6 +29,7 @@ export {
 	createMemo,
 	createRoot,
 	createEffect,
+	createResource,
 	observable,
 	from,
 	batch,

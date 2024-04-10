@@ -1,13 +1,13 @@
 import { html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
-import { baseStyling } from "../../../styling/base.js"
+//import { baseStyling } from "../../../styling/base.js"
 import "./default-array-input.js"
 import "./languageTags-input.js"
 import "./reference-pattern-input.js"
 
 @customElement("array-input")
 export class ArrayInput extends LitElement {
-	static override styles = [baseStyling]
+	//static override styles = [baseStyling]
 
 	@property()
 	property: string = ""
@@ -20,6 +20,9 @@ export class ArrayInput extends LitElement {
 
 	@property()
 	schema: any = {}
+
+	@property()
+	required?: boolean = false
 
 	@property()
 	handleInlangProjectChange: (value: Array<string>, key: string, moduleId?: string) => void =
@@ -35,31 +38,37 @@ export class ArrayInput extends LitElement {
 		) {
 			return html`
 				<language-tags-input
+					exportparts="property, property-title, property-paragraph, button"
 					.property=${this.property}
 					.moduleId=${this.moduleId}
 					.value=${this.value}
 					.schema=${this.schema}
 					.handleInlangProjectChange=${this.handleInlangProjectChange}
+					.required=${this.required}
 				></language-tags-input>
 			`
 		} else if (this.property === "variableReferencePattern") {
 			return html`
 				<reference-pattern-input
+					exportparts="property, property-title, property-paragraph"
 					.property=${this.property}
 					.moduleId=${this.moduleId}
 					.value=${this.value}
 					.schema=${this.schema}
 					.handleInlangProjectChange=${this.handleInlangProjectChange}
+					.required=${this.required}
 				></reference-pattern-input>
 			`
 		} else {
 			return html`
 				<default-array-input
+					exportparts="property, property-title, property-paragraph, button"
 					.property=${this.property}
 					.moduleId=${this.moduleId}
 					.value=${this.value}
 					.schema=${this.schema}
 					.handleInlangProjectChange=${this.handleInlangProjectChange}
+					.required=${this.required}
 				></default-array-input>
 			`
 		}

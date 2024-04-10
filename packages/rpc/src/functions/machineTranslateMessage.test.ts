@@ -191,7 +191,7 @@ it.runIf(privateEnv.GOOGLE_TRANSLATE_API_KEY)(
 					pattern: [
 						{ type: "Text", value: "' " },
 						{ type: "VariableReference", name: "id" },
-						{ type: "Text", value: " ' hat eine neue Aufgabe hinzugefügt" },
+						{ type: "Text", value: " ' hat ein neues To-Do hinzugefügt" },
 					],
 				},
 			],

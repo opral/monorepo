@@ -7,6 +7,8 @@
 	"previous_user": "Previous user",
 	"about_path": "/about",
 
+	"edit_user": "Edit user {userId}",
+
 	"paraglide_and_next_app_router": "ParaglideJS + NextJS App Router",
 	"this_app_was_localised_with_paraglide": "This is a NextJS App using the App router. It was localised using Paraglide and the ParaglideJS Adapter for NextJS.",
 	"switch_languages_in_top_right": "You can switch languages in the top right corner.",

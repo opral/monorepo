@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/paraglide-js-adapter-sveltekit",
-	"version": "0.5.16",
+	"version": "0.6.2",
 	"type": "module",
 	"main": "./dist/runtime/index.js",
 	"types": "./dist/runtime/index.d.ts",
@@ -12,7 +12,9 @@
 		"url": "https://github.com/opral/inlang-paraglide-js"
 	},
 	"scripts": {
-		"test": "vitest run --passWithNoTests --test-timeout 30000 --dir src",
+		"test:with-base": "BASE_PATH=/base vitest run --test-timeout 30000 --dir src",
+		"test:without-base": "BASE_PATH=\"\" vitest run --test-timeout 30000 --dir src",
+		"test": "npm run test:with-base && npm run test:without-base",
 		"build": "svelte-package -i src -o dist",
 		"dev": "svelte-package -w -i src -o dist",
 		"lint": "eslint ./src --fix",
@@ -39,7 +41,7 @@
 		"rollup-plugin-svelte": "^7.1.6",
 		"typescript": "^5.3.2",
 		"vite": "^5.0.4",
-		"vitest": "^0.34.6"
+		"vitest": "^1.0.0"
 	},
 	"files": [
 		"dist"

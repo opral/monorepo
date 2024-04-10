@@ -1,5 +1,65 @@
 # @inlang/paraglide-js-adapter-unplugin
 
+## 1.4.24
+
+### Patch Changes
+
+- Updated dependencies [2428451]
+  - @inlang/paraglide-js@1.5.0
+
+## 1.4.23
+
+### Patch Changes
+
+- Updated dependencies [c068dd2]
+  - @inlang/sdk@0.31.0
+  - @inlang/paraglide-js@1.4.0
+
+## 1.4.22
+
+### Patch Changes
+
+- Updated dependencies [9b26a31]
+  - @inlang/sdk@0.30.0
+  - @inlang/paraglide-js@1.4.0
+
+## 1.4.21
+
+### Patch Changes
+
+- Updated dependencies [d47b2aa]
+- Updated dependencies [62dfa26]
+- Updated dependencies [192fdec]
+- Updated dependencies [0b7c82e]
+  - @inlang/paraglide-js@1.4.0
+  - @inlang/sdk@0.29.0
+
+## 1.4.20
+
+### Patch Changes
+
+- Updated dependencies [1cc9cbc]
+- Updated dependencies [5401f95]
+  - @inlang/paraglide-js@1.3.7
+
+## 1.4.19
+
+### Patch Changes
+
+- 449e09c: fix edge-case with hashing function
+- Updated dependencies [526b0ba]
+- Updated dependencies [26d2ba1]
+- Updated dependencies [8a8aec7]
+  - @inlang/paraglide-js@1.3.6
+  - @lix-js/client@1.2.0
+  - @inlang/sdk@0.28.3
+
+## 1.4.18
+
+### Patch Changes
+
+- 204c53a: Fix errors caused by missing `file://` protocol
+
 ## 1.4.17
 
 ### Patch Changes

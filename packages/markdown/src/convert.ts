@@ -11,6 +11,7 @@ import rehypeAutolinkHeadings from "rehype-autolink-headings"
 import rehypeRewrite from "rehype-rewrite"
 import addClasses from "rehype-class-names"
 import { rehypeAccessibleEmojis } from "rehype-accessible-emojis"
+import { preprocess } from "./preprocess.js"
 
 /* Converts the markdown with remark and the html with rehype to be suitable for being rendered */
 export async function convert(markdown: string): Promise<string> {
@@ -44,7 +45,7 @@ export async function convert(markdown: string): Promise<string> {
 				"doc-pricing",
 				"doc-important",
 				"doc-video",
-				...defaultSchema.tagNames!,
+				...(defaultSchema.tagNames ?? []),
 			],
 			attributes: {
 				"doc-figure": ["src", "alt", "caption"],
@@ -184,14 +185,8 @@ export async function convert(markdown: string): Promise<string> {
 		.use(rehypeAccessibleEmojis)
 		/* @ts-ignore */
 		.use(rehypeStringify)
-		.process(preSanitize(markdown))
+		.process(preprocess(markdown))
 
 	return String(`<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark-dimmed.min.css">
 	${content}`)
-}
-
-/* Some emojis can't be rendered in the font the website provides, therefore presanitization is needed */
-function preSanitize(markdown: string): string {
-	markdown = markdown.replaceAll("1️⃣", "1").replaceAll("2️⃣", "2").replaceAll("3️⃣", "3")
-	return markdown
 }
