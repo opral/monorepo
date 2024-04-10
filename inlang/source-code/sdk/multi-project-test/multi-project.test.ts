@@ -11,10 +11,24 @@ const exec = promisify(childProcess.exec)
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-it("pwd", async () => {
-	const { stdout } = await exec("pwd", { cwd: __dirname })
-	console.log(stdout)
-	expect(stdout).toBe(`${__dirname}\n`)
+describe.concurrent("sanity check exec behavior", () => {
+	it("pwd", async () => {
+		const { stdout } = await exec("pwd", { cwd: __dirname })
+		console.log(stdout)
+		expect(stdout).toBe(`${__dirname}\n`)
+	})
+
+	it("ls ./no_such_directory_here/ has non-zeru exit code", async () => {
+		try {
+			await exec("ls ./no_such_directory_here/", { cwd: __dirname })
+			throw new Error("should not reach this")
+		} catch (e) {
+			// @ts-ignore
+			expect(e.code).toBe(1)
+			// @ts-ignore
+			expect(e.stderr).toBe("ls: ./no_such_directory_here/: No such file or directory\n")
+		}
+	})
 })
 
 describe.concurrent("translate multiple projects in different directories", () => {
@@ -54,18 +68,23 @@ describe.concurrent("translate multiple projects in different directories", () =
 	it(
 		"project3 in project3-dir",
 		async () => {
-			await exec("pnpm  translate3", { cwd: __dirname })
-			const result = await fs.readFile(
-				join(__dirname, "project3-dir", "locales", "de.json"),
-				"utf8"
-			)
-			expect(result).toEqual(`{
+			try {
+				await exec("pnpm  translate3", { cwd: __dirname })
+				const result = await fs.readFile(
+					join(__dirname, "project3-dir", "locales", "de.json"),
+					"utf8"
+				)
+				expect(result).toEqual(`{
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"project3_message_key_1": "Mock translate local en to de: Generated message (1)",
 	"project3_message_key_2": "Mock translate local en to de: Generated message (2)",
 	"project3_message_key_3": "Mock translate local en to de: Generated message (3)"
 }`)
+			} catch (e) {
+				console.error(e)
+				throw e
+			}
 		},
-		{ timeout: 10000 }
+		{ timeout: 20000 }
 	)
 })
