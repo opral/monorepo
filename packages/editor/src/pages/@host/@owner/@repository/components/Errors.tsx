@@ -6,7 +6,7 @@ import MaterialSymbolsChevronRight from "~icons/material-symbols/chevron-right"
 export const Errors = (props: { errors: Array<any>; message: string; messagePlural: string }) => {
 	const [visibleError, setVisibleError] = createSignal(0)
 	return (
-		<div class="w-full h-full flex flex-col min-h-[calc(100vh_-_338px)] items-center justify-center gap-16">
+		<div class="w-full h-full flex flex-col min-h-[calc(100vh_-_319px)] items-center justify-center gap-16">
 			<div class="pt-12 sm:pt-0 w-full sm:w-[600px] mx-auto">
 				<div class="flex sm:w-[600px] items-center gap-4 justify-between pb-4">
 					{props.errors.length === 1 ? (

@@ -115,23 +115,23 @@ describe("paraglide-js", () => {
 				debug()
 
 				await waitForText("Do you want to use an existing Inlang Project or create a new one?")
-				await wait(200)
+				await wait(500)
 				await pressKey("arrowDown") //should select the first existing project
-				await wait(200)
+				await wait(500)
 				await pressKey("enter")
 
 				await waitForText("Where should the compiled files be placed?")
-				await wait(200)
+				await wait(500)
 				await pressKey("enter") // use default value of ./src/paraglide
 
 				await waitForText("Are you using Visual Studio Code?")
-				await wait(200)
+				await wait(500)
 				await writeText("y")
-				await wait(200)
+				await wait(500)
 				await pressKey("enter")
 
 				await waitForText("Which tech stack are you using?")
-				await wait(200)
+				await wait(500)
 				await pressKey("enter")
 				await wait(1000)
 
