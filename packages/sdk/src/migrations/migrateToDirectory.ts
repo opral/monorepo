@@ -34,6 +34,7 @@ export const maybeMigrateToDirectory = async (args: {
 	await args.nodeishFs.mkdir(args.projectPath)
 	await args.nodeishFs.writeFile(`${args.projectPath}/settings.json`, settingsFile.data)
 	await args.nodeishFs.writeFile(args.projectPath + ".README.md", readme)
+	console.log("🔔 migrated project.inlang to directory")
 }
 
 const readme = `
