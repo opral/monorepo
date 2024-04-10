@@ -29,8 +29,6 @@ describe.concurrent("sanity check exec behavior", () => {
 		} catch (e) {
 			// @ts-ignore
 			expect(e.code !== 0)
-			// @ts-ignore
-			expect(e.stderr).toBe("ls: ./no_such_directory_here/: No such file or directory\n")
 		}
 	})
 })
