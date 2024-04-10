@@ -221,7 +221,7 @@ export default class InlangSettings extends LitElement {
 								return key === "internal"
 									? html`
 											<general-input
-												exportparts="property, property-title, property-paragraph, option, option-wrapper"
+												exportparts="property, property-title, property-paragraph, option, option-wrapper, button"
 												.property=${property}
 												.modules=${this.installedMessageLintRules || []}
 												.value=${this._newSettings?.[property as keyof typeof this._newSettings]}
@@ -232,7 +232,7 @@ export default class InlangSettings extends LitElement {
 									  `
 									: html`
 											<general-input
-												exportparts="property, property-title, property-paragraph, option, option-wrapper"
+												exportparts="property, property-title, property-paragraph, option, option-wrapper, button"
 												.property=${property}
 												.value=${
 													// @ts-ignore
@@ -254,7 +254,7 @@ export default class InlangSettings extends LitElement {
 							<p class="hover-bar-text">Attention, you have unsaved changes.</p>
 							<div>
 								<sl-button
-									exportparts="base:cancel"
+									exportparts="base:button"
 									size="small"
 									@click=${() => {
 										this._revertChanges()
