@@ -4,7 +4,7 @@ import { serializeRoute } from "../utils/serialize-path.js"
 import { getCanonicalPath } from "../path-translations/getCanonicalPath.js"
 import type { Reroute } from "@sveltejs/kit"
 import type { I18nConfig } from "../adapter.js"
-import { dev } from "$app/environment"
+import { browser, dev } from "$app/environment"
 
 /**
  * Returns a reroute function that applies the given translations to the paths
@@ -17,6 +17,13 @@ export const createReroute = <T extends string>({
 	matchers,
 }: I18nConfig<T>): Reroute => {
 	return ({ url }) => {
+		if (browser) {
+			runtime.setLanguageTag(() => {
+				const docLang = document.documentElement.lang
+				return runtime.isAvailableLanguageTag(docLang) ? docLang : defaultLanguageTag
+			})
+		}
+
 		try {
 			const {
 				lang,
