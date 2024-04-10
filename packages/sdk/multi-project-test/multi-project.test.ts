@@ -39,7 +39,7 @@ describe.concurrent("translate multiple projects in different directories", () =
 	it(
 		"project1 in root",
 		async () => {
-			await exec("pnpm  translate1", { cwd: __dirname })
+			await exec("pnpm translate1", { cwd: __dirname })
 			const result = await fs.readFile(join(__dirname, "locales", "de.json"), "utf8")
 			expect(result).toEqual(`{
 	"$schema": "https://inlang.com/schema/inlang-message-format",
@@ -54,7 +54,7 @@ describe.concurrent("translate multiple projects in different directories", () =
 	it(
 		"project2 in project2-dir",
 		async () => {
-			await exec("pnpm  translate2", { cwd: __dirname })
+			await exec("pnpm translate2", { cwd: __dirname })
 			const result = await fs.readFile(
 				join(__dirname, "project2-dir", "locales", "de.json"),
 				"utf8"
@@ -73,8 +73,7 @@ describe.concurrent("translate multiple projects in different directories", () =
 		"project3 in project3-dir",
 		async () => {
 			try {
-				await exec("pnpm  translate3", { cwd: __dirname })
-				await sleep(5000)
+				await exec("pnpm translate3", { cwd: __dirname })
 				const result = await fs.readFile(
 					join(__dirname, "project3-dir", "locales", "de.json"),
 					"utf8"
