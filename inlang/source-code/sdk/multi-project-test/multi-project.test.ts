@@ -36,6 +36,25 @@ describe.concurrent("sanity check run behavior", () => {
 describe.concurrent(
 	"translate multiple projects in different directories",
 	() => {
+
+		it(
+			"project3 in project3-dir",
+			async () => {
+				await run("pnpm translate3")
+				const result = await fs.readFile(
+					join(__dirname, "project3-dir", "locales", "de.json"),
+					"utf8"
+				)
+				expect(result).toEqual(`{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"project3_message_key_1": "Mock translate local en to de: Generated message (1)",
+	"project3_message_key_2": "Mock translate local en to de: Generated message (2)",
+	"project3_message_key_3": "Mock translate local en to de: Generated message (3)"
+}`)
+			},
+			{ timeout: 30000 }
+		)
+
 		it(
 			"project1 in root",
 			async () => {
@@ -69,23 +88,6 @@ describe.concurrent(
 			{ timeout: 10000 }
 		)
 
-		it(
-			"project3 in project3-dir",
-			async () => {
-				await run("pnpm translate3")
-				const result = await fs.readFile(
-					join(__dirname, "project3-dir", "locales", "de.json"),
-					"utf8"
-				)
-				expect(result).toEqual(`{
-	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"project3_message_key_1": "Mock translate local en to de: Generated message (1)",
-	"project3_message_key_2": "Mock translate local en to de: Generated message (2)",
-	"project3_message_key_3": "Mock translate local en to de: Generated message (3)"
-}`)
-			},
-			{ timeout: 30000 }
-		)
 	},
 	{ timeout: 50000 }
 )
