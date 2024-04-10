@@ -3,11 +3,16 @@ import { Command } from "commander"
 import { rpc } from "@inlang/rpc"
 import { getInlangProject } from "../../utilities/getInlangProject.js"
 import { log, logError } from "../../utilities/log.js"
-import { type InlangProject, ProjectSettings, Message } from "@inlang/sdk"
+import { getVariant, type InlangProject, ProjectSettings, Message } from "@inlang/sdk"
 import prompts from "prompts"
 import { projectOption } from "../../utilities/globalFlags.js"
 import progessBar from "cli-progress"
 import plimit from "p-limit"
+import type { Result } from "@inlang/result"
+
+const rpcTranslateAction = process.env.MOCK_TRANSLATE_LOCAL
+	? mockMachineTranslateMessage
+	: rpc.machineTranslateMessage
 
 export const translate = new Command()
 	.command("translate")
@@ -111,7 +116,7 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 				`"${id}"` +
 				(experimentalAliases ? ` (alias "${toBeTranslatedMessage.alias.default ?? ""}")` : "")
 
-			const { data: translatedMessage, error } = await rpc.machineTranslateMessage({
+			const { data: translatedMessage, error } = await rpcTranslateAction({
 				message: toBeTranslatedMessage,
 				sourceLanguageTag,
 				targetLanguageTags,
@@ -143,4 +148,37 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 	} catch (error) {
 		logError(error)
 	}
+}
+
+async function mockMachineTranslateMessage(args: {
+	message: Message
+	sourceLanguageTag: string
+	targetLanguageTags: string[]
+}): Promise<Result<Message, string>> {
+	const copy = structuredClone(args.message)
+	for (const targetLanguageTag of args.targetLanguageTags) {
+		for (const variant of args.message.variants.filter(
+			(variant) => variant.languageTag === args.sourceLanguageTag
+		)) {
+			const targetVariant = getVariant(args.message, {
+				where: {
+					languageTag: targetLanguageTag,
+					match: variant.match,
+				},
+			})
+			if (targetVariant) {
+				continue
+			}
+			const prefix = `Mock translate local ${args.sourceLanguageTag} to ${targetLanguageTag}: `
+			const q = variant.pattern[0]?.type === "Text" ? variant.pattern[0].value : ""
+			copy.variants.push({
+				languageTag: targetLanguageTag,
+				match: variant.match,
+				pattern: [{ type: "Text", value: prefix + q }],
+			})
+			// eslint-disable-next-line no-console
+			console.log("mockMachineTranslateMessage", q, targetLanguageTag)
+		}
+	}
+	return { data: copy }
 }
