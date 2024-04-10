@@ -93,9 +93,9 @@ describe.concurrent(
 )
 
 // run command in __dirname
-// returns 0 or rejects promise with error
+// resolves promise with 0 or rejects promise with error
 // inherits stdio so that vitest shows output
-async function run(command: string): Promise<number> {
+function run(command: string): Promise<number> {
 	return new Promise((resolve, reject) => {
 		const p = childProcess.spawn(command, {
 			cwd: __dirname,
