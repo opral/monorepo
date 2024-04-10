@@ -41,8 +41,8 @@ test("the files should include an eslint ignore comment", async () => {
 })
 
 test("imports in the messages.js index file should use underscores instead of hyphens to avoid invalid JS imports", async () => {
-	expect(output["messages.js"]).toContain("import * as en_US")
-	expect(output["messages.js"]).not.toContain("import * as en-US")
+	expect(output["messages.js"]).toContain("import * as _en_US")
+	expect(output["messages.js"]).not.toContain("import * as _en-US")
 })
 
 test("it should be possible to directly import a message function via a resource file", async () => {

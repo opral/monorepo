@@ -88,7 +88,7 @@ export const compile = async (args: {
 		// message index file
 		"messages.js": `
 /* eslint-disable */
-import { languageTag } from "./runtime.js"
+import * as _runtime from "./runtime.js"
 ${Object.keys(resources)
 	.map((languageTag) => `import * as _${i(languageTag)} from "./messages/${languageTag}.js"`)
 	.join("\n")}
@@ -139,10 +139,11 @@ export let languageTag = () => sourceLanguageTag
 
 /**
  * Get the index of the current language tag.
- * @private
+ * @param {AvailableLanguageTag} lang
  * @returns {number}
+ * @private Not for public use
  */
-export let _languageTagIdx = () => availableLanguageTags.indexOf(languageTag())
+export const _languageTagIdx = (lang) => availableLanguageTags.indexOf(lang)
 
 /**
  * Set the language tag.

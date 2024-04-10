@@ -1,7 +1,6 @@
 import { LanguageTag, type Message } from "@inlang/sdk"
 import { compilePattern } from "./compilePattern.js"
 import { paramsType, type Params } from "./paramsType.js"
-import { optionsType } from "./optionsType.js"
 import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
 import { i } from "../services/codegen/identifier.js"
 import { escapeForDoubleQuoteString } from "../services/codegen/escape.js"
@@ -110,19 +109,15 @@ const messageIndexFunction = (args: {
  * - The params are NonNullable<unknown> because the inlang SDK does not provide information on the type of a param (yet).
  * 
  * ${paramsType(args.params, true)}
- * ${optionsType({ languageTags: args.availableLanguageTags })}
+ * @param {{ languageTag?: import("./runtime.js").AvailableLanguageTag }} options
  * @returns {string}
  */
 /* @__NO_SIDE_EFFECTS__ */
-export const ${args.message.id} = (params ${hasParams ? "" : "= {}"}, options = {}) => {
-	return {
-${args.availableLanguageTags
-	// sort language tags alphabetically to make the generated code more readable
-	.sort((a, b) => a.localeCompare(b))
-	.map((tag) => `\t\t${isValidJSIdentifier(tag) ? tag : `"${tag}"`}: _${i(tag)}.${args.message.id}`)
-	.join(",\n")}
-	}[options.languageTag ?? languageTag()](${hasParams ? "params" : ""})
-}
+export const ${args.message.id} = (params${hasParams ? "" : " = {}"}, options = {}) => [
+${args.availableLanguageTags.map((tag) => `\t\t_${i(tag)}.${args.message.id}`).join(",\n")}
+	][_runtime.availableLanguageTags.indexOf(options.languageTag ?? _runtime.languageTag())](${
+		hasParams ? "params" : ""
+	})
 ${reexportAliases(args.message)}
 `
 }
