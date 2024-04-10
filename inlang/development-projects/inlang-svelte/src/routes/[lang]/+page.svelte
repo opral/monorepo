@@ -1,5 +1,5 @@
 <script>
-	import { i, languages, changeLanguageTag } from "@inlang/sdk-js"
+	import { i, languages, changeLanguageTag } from "@inlang/sdk"
 
 	export let data
 </script>
