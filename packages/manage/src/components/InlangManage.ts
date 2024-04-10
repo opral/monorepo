@@ -73,16 +73,12 @@ export class InlangManage extends TwLitElement {
 	projectDropdown: NodeListOf<Element> | undefined
 
 	async projectHandler() {
-		let repo: Repository;
+		let repo: Repository
 		try {
-
-			repo = await openRepository(
-				`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${this.url.repo}`,
-				{
-					nodeishFs: createNodeishMemoryFs(),
-					branch: this.url.branch ? this.url.branch : undefined,
-				}
-			)
+			repo = await openRepository(`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${this.url.repo}`, {
+				nodeishFs: createNodeishMemoryFs(),
+				branch: this.url.branch ? this.url.branch : undefined,
+			})
 		} catch (e) {
 			this.projects = "no-access"
 			return
