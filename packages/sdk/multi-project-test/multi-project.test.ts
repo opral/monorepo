@@ -33,58 +33,62 @@ describe.concurrent("sanity check run behavior", () => {
 	})
 })
 
-describe.concurrent("translate multiple projects in different directories", () => {
-	it(
-		"project1 in root",
-		async () => {
-			await run("pnpm translate1")
-			const result = await fs.readFile(join(__dirname, "locales", "de.json"), "utf8")
-			expect(result).toEqual(`{
+describe.concurrent(
+	"translate multiple projects in different directories",
+	() => {
+		it(
+			"project1 in root",
+			async () => {
+				await run("pnpm translate1")
+				const result = await fs.readFile(join(__dirname, "locales", "de.json"), "utf8")
+				expect(result).toEqual(`{
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"project1_message_key_1": "Mock translate local en to de: Generated message (1)",
 	"project1_message_key_2": "Mock translate local en to de: Generated message (2)",
 	"project1_message_key_3": "Mock translate local en to de: Generated message (3)"
 }`)
-		},
-		{ timeout: 10000 }
-	)
+			},
+			{ timeout: 10000 }
+		)
 
-	it(
-		"project2 in project2-dir",
-		async () => {
-			await run("pnpm translate2")
-			const result = await fs.readFile(
-				join(__dirname, "project2-dir", "locales", "de.json"),
-				"utf8"
-			)
-			expect(result).toEqual(`{
+		it(
+			"project2 in project2-dir",
+			async () => {
+				await run("pnpm translate2")
+				const result = await fs.readFile(
+					join(__dirname, "project2-dir", "locales", "de.json"),
+					"utf8"
+				)
+				expect(result).toEqual(`{
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"project2_message_key_1": "Mock translate local en to de: Generated message (1)",
 	"project2_message_key_2": "Mock translate local en to de: Generated message (2)",
 	"project2_message_key_3": "Mock translate local en to de: Generated message (3)"
 }`)
-		},
-		{ timeout: 10000 }
-	)
+			},
+			{ timeout: 10000 }
+		)
 
-	it(
-		"project3 in project3-dir",
-		async () => {
-			await run("pnpm translate3")
-			const result = await fs.readFile(
-				join(__dirname, "project3-dir", "locales", "de.json"),
-				"utf8"
-			)
-			expect(result).toEqual(`{
+		it(
+			"project3 in project3-dir",
+			async () => {
+				await run("pnpm translate3")
+				const result = await fs.readFile(
+					join(__dirname, "project3-dir", "locales", "de.json"),
+					"utf8"
+				)
+				expect(result).toEqual(`{
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"project3_message_key_1": "Mock translate local en to de: Generated message (1)",
 	"project3_message_key_2": "Mock translate local en to de: Generated message (2)",
 	"project3_message_key_3": "Mock translate local en to de: Generated message (3)"
 }`)
-		},
-		{ timeout: 30000 }
-	)
-})
+			},
+			{ timeout: 30000 }
+		)
+	},
+	{ timeout: 50000 }
+)
 
 // run command in __dirname
 // returns 0 or rejects promise with error
