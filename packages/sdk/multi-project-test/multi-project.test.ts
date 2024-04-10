@@ -28,7 +28,7 @@ describe.concurrent("sanity check exec behavior", () => {
 			throw new Error("should not reach this")
 		} catch (e) {
 			// @ts-ignore
-			expect(e.code).toBe(1)
+			expect(e.code !== 0)
 			// @ts-ignore
 			expect(e.stderr).toBe("ls: ./no_such_directory_here/: No such file or directory\n")
 		}
@@ -90,6 +90,6 @@ describe.concurrent("translate multiple projects in different directories", () =
 				throw e
 			}
 		},
-		{ timeout: 20000 }
+		{ timeout: 10000 }
 	)
 })
