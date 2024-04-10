@@ -3,13 +3,37 @@
  */
 
 type LanguageSpec = {
+	/**
+	 * The index of the language in the Accept-Language header
+	 */
 	index: number
+	/**
+	 * The specificity of the language
+	 */
 	quality: number
-	full: string
+
+	/**
+	 * The language's prefix
+	 * @example For "en-GB", the prefix is "en"
+	 */
 	prefix: string
-	suffix: string
+
+	/**
+	 * If the langauge has a suffix.
+	 * @example For "en-GB", the suffix is "GB"
+	 */
+	suffix?: string
+
+	/**
+	 * The full definition of the language
+	 * @example "en-GB"
+	 */
+	full: string
 }
 
+/**
+ * Information about a language's priority
+ */
 type LanguagePriority = {
 	index: number
 	order: number
@@ -22,12 +46,10 @@ type LanguagePriority = {
  */
 function parseAcceptLanguage(acceptLanguage: string): LanguageSpec[] {
 	const accepts = acceptLanguage.split(",")
-	const specs: LanguageSpec[] = []
 
-	for (const [i, accept] of accepts.entries()) {
-		const language = parseLanguage(accept.trim(), i)
-		if (language) specs.push(language)
-	}
+	const specs = accepts
+		.map((accept, index) => parseLanguage(accept.trim(), index))
+		.filter((maybeSpec): maybeSpec is LanguageSpec => Boolean(maybeSpec))
 
 	return specs
 }
@@ -43,23 +65,31 @@ function parseLanguage(str: string, index: number): LanguageSpec | undefined {
 	const [, prefix, suffix, qualityMatch] = match
 	const full = suffix ? `${prefix}-${suffix}` : prefix
 
-	let quality = 1
-	if (qualityMatch) {
-		const params = qualityMatch.split(";")
-		for (const param of params) {
-			const [key, value] = param.split("=")
-			if (!key || !value) continue
-			if (key === "q") quality = parseFloat(value)
-		}
-	}
+	/**
+	 * If the language specifies a quality, parse it, otherwise default to 1
+	 * as per RFC 2616
+	 */
+	const quality = qualityMatch ? parseQuality(qualityMatch) ?? 1 : 1
 
 	return {
 		prefix: prefix as string,
-		suffix: suffix as string,
+		suffix,
 		quality,
 		index,
 		full: full as string,
 	}
+}
+
+function parseQuality(qualityMatch: string): number | undefined {
+	const params = qualityMatch.split(";")
+	for (const param of params) {
+		const [key, value] = param.split("=")
+		if (!key || !value) continue
+		if (key === "q") {
+			return parseFloat(value)
+		}
+	}
+	return undefined
 }
 
 /**
