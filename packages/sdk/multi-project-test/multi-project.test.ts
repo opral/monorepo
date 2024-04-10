@@ -6,10 +6,15 @@ import { fileURLToPath } from "node:url"
 import childProcess from "node:child_process"
 import { dirname, join } from "node:path"
 import fs from "node:fs/promises"
+import { s } from "vitest/dist/reporters-5f784f42.js"
 
 const exec = promisify(childProcess.exec)
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
+
+function sleep(ms: number) {
+	return new Promise((resolve) => setTimeout(resolve, ms))
+}
 
 describe.concurrent("sanity check exec behavior", () => {
 	it("pwd", async () => {
@@ -70,6 +75,7 @@ describe.concurrent("translate multiple projects in different directories", () =
 		async () => {
 			try {
 				await exec("pnpm  translate3", { cwd: __dirname })
+				await sleep(5000)
 				const result = await fs.readFile(
 					join(__dirname, "project3-dir", "locales", "de.json"),
 					"utf8"
