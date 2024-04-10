@@ -21,6 +21,7 @@ export class LintRuleLevelObjectInput extends LitElement {
 			.ruleId {
 				font-size: 0.8rem;
 				margin: 0;
+				color: var(--sl-input-color);
 			}
 			.rule-container {
 				display: flex;
@@ -100,6 +101,21 @@ export class LintRuleLevelObjectInput extends LitElement {
 		}
 	}
 
+	getValueOfLintRule = (
+		id: InlangModule["default"]["id"],
+		value: Record<InlangModule["default"]["id"], string>
+	) => {
+		//TODO: workaround because select field was not updating
+		setTimeout(() => {
+			this.requestUpdate()
+		})
+		if (value && Object.keys(value).includes(id)) {
+			return value[id]
+		} else {
+			return undefined
+		}
+	}
+
 	override render() {
 		return html` <div part="property" class="property">
 			<div class="title-container">
@@ -117,7 +133,7 @@ export class LintRuleLevelObjectInput extends LitElement {
 						? html`<div class="rule-container">
 								<sl-select
 									exportparts="listbox:option-wrapper"
-									value=${this.value ? (this.value as any)[module.id] : "warning"}
+									value="${this.getValueOfLintRule(module.id, this.value)}"
 									class="select"
 									size="small"
 									placeholder="warning"
