@@ -291,8 +291,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 						// @ts-expect-error
 						window.repo = newRepo
 					}
-					// TODO replace this with `setLixErrors([])` as soon as repo throws
-					setLixErrors(newRepo.errors)
+					setLixErrors([])
 
 					// @ts-ignore -- causes reactivity bugs because the sdk uses watch and triggers updates on changes caused by itself
 					newRepo.nodeishFs.watch = () => {}
