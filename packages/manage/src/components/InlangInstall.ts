@@ -1,15 +1,20 @@
 import type { TemplateResult } from "lit"
 import { html } from "lit"
-import { openRepository, createNodeishMemoryFs } from "@lix-js/client"
+import { getAuthClient, openRepository, createNodeishMemoryFs } from "@lix-js/client"
 import { customElement, property } from "lit/decorators.js"
 import { TwLitElement } from "../common/TwLitElement.js"
-import { browserAuth, getUser } from "@lix-js/server"
 import { registry } from "@inlang/marketplace-registry"
 import { ProjectSettings, loadProject, listProjects } from "@inlang/sdk"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
 import { tryCatch } from "@inlang/result"
 import { publicEnv } from "@inlang/env-variables"
 import { z } from "zod"
+
+const browserAuth = getAuthClient({
+	gitHubProxyBaseUrl: publicEnv.PUBLIC_GIT_PROXY_BASE_URL,
+	githubAppName: publicEnv.PUBLIC_LIX_GITHUB_APP_NAME,
+	githubAppClientId: publicEnv.PUBLIC_LIX_GITHUB_APP_CLIENT_ID,
+})
 
 @customElement("inlang-install")
 export class InlangInstall extends TwLitElement {
@@ -228,7 +233,7 @@ export class InlangInstall extends TwLitElement {
 		// @ts-ignore
 		if (this.url.module) this.module = registry.find((x) => x.id === this.url.module)?.module
 
-		const auth = await getUser().catch(() => {
+		const auth = await browserAuth.getUser().catch(() => {
 			this.authorized = false
 		})
 		if (auth) {
