@@ -20,6 +20,7 @@
 	"scripts": {
 		"clean": "rm -rf ./locales",
 		"translate": "PUBLIC_SERVER_BASE_URL=http://localhost:3000 pnpm inlang machine translate -f --project ./project.inlang",
+		"test-lint": "pnpm inlang lint --project ./project.inlang",
 		"test": "pnpm clean && DEBUG=$DEBUG,load-test tsx ./main.ts",
 		"inspect": "pnpm clean && DEBUG=$DEBUG,load-test tsx --inspect-brk ./main.ts"
 	},

@@ -1,21 +1,21 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
-import { baseStyling } from "../../../styling/base.js"
+import "./../../field-header.js"
 
 @customElement("default-array-input")
 export class DefaultArrayInput extends LitElement {
 	static override styles = [
-		baseStyling,
 		css`
+			.property {
+				display: flex;
+				flex-direction: column;
+				gap: 12px;
+			}
 			.item-container {
 				display: flex;
 				flex-direction: column;
 				gap: 4px;
 				padding-bottom: 8px;
-			}
-			.help-text {
-				font-size: 0.8rem;
-				color: var(--sl-input-help-text-color);
 			}
 			.disabled-input::part(base) {
 				cursor: unset;
@@ -38,6 +38,9 @@ export class DefaultArrayInput extends LitElement {
 				display: flex;
 				gap: 4px;
 			}
+			.icon-wrapper {
+				display: flex;
+			}
 		`,
 	]
 
@@ -54,11 +57,18 @@ export class DefaultArrayInput extends LitElement {
 	schema: any = {}
 
 	@property()
+	required?: boolean = false
+
+	@property()
 	handleInlangProjectChange: (value: Array<string>, key: string, moduleId?: string) => void =
 		() => {}
 
 	private get _description(): string | undefined {
 		return this.schema.description || undefined
+	}
+
+	private get _title(): string | undefined {
+		return this.schema.title || undefined
 	}
 
 	@state()
@@ -73,8 +83,8 @@ export class DefaultArrayInput extends LitElement {
 		if (this._inputValue && this._inputValue.trim() !== "") {
 			this.value ? this.value.push(this._inputValue) : (this.value = [this._inputValue])
 			this.handleInlangProjectChange(this.value, this.property, this.moduleId)
+			this._inputValue = "null"
 			this._inputValue = undefined
-			this.requestUpdate()
 		}
 	}
 
@@ -82,15 +92,19 @@ export class DefaultArrayInput extends LitElement {
 		if (this.value) {
 			this.value.splice(index, 1)
 			this.handleInlangProjectChange(this.value, this.property, this.moduleId)
+			this._inputValue = "null"
 			this._inputValue = undefined
-			this.requestUpdate()
 		}
 	}
 
 	override render() {
-		return html`<div class="container">
-			<p>${this.property}</p>
-			${this._description && html`<p class="help-text">${this._description}</p>`}
+		return html`<div part="property" class="property">
+			<field-header
+				.fieldTitle=${this._title ? this._title : this.property}
+				.description=${this._description}
+				.optional=${this.required ? false : true}
+				exportparts="property-title, property-paragraph"
+			></field-header>
 			${this.value && this.value.length > 0
 				? html`<div class="item-container">
 						${this.value.map((arrayItem, index) => {
@@ -101,13 +115,20 @@ export class DefaultArrayInput extends LitElement {
 								disabled
 								filled
 							>
-								<sl-icon
+								<div
+									slot="suffix"
+									class="icon-wrapper"
 									@click=${() => {
 										this.handleDeleteItemClick(index)
 									}}
-									slot="suffix"
-									name="x-lg"
-								></sl-icon>
+								>
+									<svg class="icon" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+										<path
+											xmlns="http://www.w3.org/2000/svg"
+											d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"
+										/>
+									</svg>
+								</div>
 							</sl-input>`
 						})}
 				  </div>`
@@ -127,6 +148,7 @@ export class DefaultArrayInput extends LitElement {
 				>
 				</sl-input>
 				<sl-button
+					exportparts="base:button"
 					size="small"
 					variant="neutral"
 					@click=${() => {

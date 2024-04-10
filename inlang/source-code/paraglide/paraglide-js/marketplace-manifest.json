@@ -12,7 +12,7 @@
 		"en": "Paraglide JS"
 	},
 	"description": {
-		"en": "Simple, adaptable, and tiny i18n library that integrates with any framework"
+		"en": "Simple, adaptable and tiny i18n library that integrates with any framework"
 	},
 	"readme": {
 		"en": "./inlang/source-code/paraglide/paraglide-js/README.md"

@@ -1,5 +1,7 @@
 /** @type { import('@storybook/web-components').Preview } */
 
+import "./../src/styling/preview.css"
+
 const preview = {
 	parameters: {
 		actions: { argTypesRegex: "^on[A-Z].*" },

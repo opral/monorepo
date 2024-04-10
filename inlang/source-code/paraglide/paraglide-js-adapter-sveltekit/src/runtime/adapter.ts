@@ -9,13 +9,13 @@ import { serializeRoute } from "./utils/serialize-path.js"
 import { getCanonicalPath } from "./path-translations/getCanonicalPath.js"
 import { getPathInfo } from "./utils/get-path-info.js"
 import { normaliseBase as canonicalNormaliseBase } from "./utils/normaliseBase.js"
-import type { PathTranslations, UserPathTranslations } from "./config/pathTranslations.js"
-import type { Paraglide } from "./runtime.js"
-import { resolve } from "./utils/path.js"
 import { createExclude, type ExcludeConfig } from "./exclude.js"
 import { guessTextDirMap } from "./utils/text-dir.js"
 import { resolvePathTranslations } from "./config/resolvePathTranslations.js"
 import { validatePathTranslations } from "./config/validatePathTranslations.js"
+import type { ParamMatcher } from "@sveltejs/kit"
+import type { PathTranslations, UserPathTranslations } from "./config/pathTranslations.js"
+import type { Paraglide } from "./runtime.js"
 
 export type I18nUserConfig<T extends string> = {
 	/**
@@ -54,6 +54,12 @@ export type I18nUserConfig<T extends string> = {
 	 * ```
 	 */
 	pathnames?: UserPathTranslations<T>
+
+	/**
+	 * The matchers for parameters in the pathnames.
+	 * You only need to provide these if you are using the parameter-matchers in the pathnames.
+	 */
+	matchers?: Record<string, ParamMatcher>
 
 	/**
 	 * A list of paths to exclude from translation. You can use strings or regular expressions.
@@ -118,6 +124,7 @@ export type I18nConfig<T extends string> = {
 	translations: PathTranslations<T>
 	exclude: (path: string) => boolean
 	defaultLanguageTag: T
+	matchers: Record<string, ParamMatcher>
 	prefixDefaultLanguage: "always" | "never"
 	textDirection: Record<T, "ltr" | "rtl">
 	seo: {
@@ -148,7 +155,11 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 	)
 
 	if (dev) {
-		const issues = validatePathTranslations(translations, runtime.availableLanguageTags)
+		const issues = validatePathTranslations(
+			translations,
+			runtime.availableLanguageTags,
+			options?.matchers ?? {}
+		)
 		if (issues.length) {
 			console.warn(
 				`The following issues were found in your path translations. Make sure to fix them before deploying your app:`
@@ -163,6 +174,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 	const config: I18nConfig<T> = {
 		runtime,
 		translations,
+		matchers: options?.matchers ?? {},
 		exclude: createExclude(excludeConfig),
 		defaultLanguageTag,
 		prefixDefaultLanguage: options?.prefixDefaultLanguage ?? "never",
@@ -243,21 +255,33 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 
 			const normalisedBase = normaliseBase(base)
 
+			const { trailingSlash, dataSuffix } = getPathInfo(path, {
+				base: normalisedBase,
+				availableLanguageTags: runtime.availableLanguageTags,
+				defaultLanguageTag: runtime.sourceLanguageTag,
+			})
+
 			lang = lang ?? runtime.languageTag()
 
 			if (!path.startsWith(normalisedBase)) return path
 
 			const canonicalPath = path.slice(normalisedBase.length)
-			const translatedPath = getTranslatedPath(canonicalPath, lang, translations)
+			const translatedPath = getTranslatedPath(
+				canonicalPath,
+				lang,
+				config.translations,
+				config.matchers
+			)
 
 			return serializeRoute({
 				path: translatedPath,
 				lang,
 				base: normalisedBase,
-				dataSuffix: undefined,
+				dataSuffix,
 				includeLanguage: true,
 				defaultLanguageTag,
 				prefixDefaultLanguage: config.prefixDefaultLanguage,
+				trailingSlash,
 			})
 		},
 
@@ -280,14 +304,24 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		 * ```
 		 */
 		route(translatedPath: string) {
-			const { path, lang } = getPathInfo(translatedPath, {
-				base: normaliseBase(base),
+
+			const normalizedBase = normaliseBase(base)
+
+			const { path, lang, trailingSlash, dataSuffix } = getPathInfo(translatedPath, {
+				base: normalizedBase,
 				availableLanguageTags: config.runtime.availableLanguageTags,
 				defaultLanguageTag: config.defaultLanguageTag,
 			})
 
-			const canonicalPath = getCanonicalPath(path, lang, translations)
-			return resolve(normaliseBase(base), canonicalPath)
+			const canonicalPath = getCanonicalPath(path, lang, config.translations, config.matchers)
+
+			return serializeRoute({
+				path: canonicalPath,
+				base: normalizedBase,
+				trailingSlash,
+				dataSuffix,
+				includeLanguage: false,
+			})
 		},
 	}
 }

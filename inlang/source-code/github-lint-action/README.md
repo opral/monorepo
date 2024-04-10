@@ -2,6 +2,17 @@
 
 Automate your i18n workflow and ensure that your i18n files are always up to date with the latest changes in your source code.
 
+![Ninja i18n comment cover image](https://raw.githubusercontent.com/opral/monorepo/main/inlang/source-code/github-lint-action/assets/ninja-i18n-cover.png)
+
+## Workflow
+
+https://github.com/opral/monorepo/assets/59048346/99049121-11db-4672-a7a8-e0d606426f4b
+
+- When a pull request is opened or updated, the action will run and check for new i18n issues.
+- If issues are found, the action creates a comment on the pull request with an issues report including links to the Fink localization editor to resolve the issues.
+- After the issues are resolved, the action will automatically update the pull request comment to reflect the changes.
+- If no issues are found, the action will simply not create any comments.
+
 ## Features
 
 - Automated i18n linting for pull requests
@@ -11,7 +22,23 @@ Automate your i18n workflow and ensure that your i18n files are always up to dat
 
 ## Getting Started
 
-Please ensure you have set up an [inlang project](https://inlang.com//documentation/concept/project) with [lint rules](https://inlang.com/c/lint-rules) in your repository.
+**Please make sure that:**
+- you have set up an [inlang project](https://inlang.com//documentation/concept/project) with [lint rules](https://inlang.com/c/lint-rules) in your repository
+- you have activated actions for your repository:
+
+1. On GitHub.com, navigate to the main page of the repository
+2. Click **Actions** tab
+3. Click the button **Enable Actions on this repository**
+
+- actions and workflows are allowed in your repository:
+
+1. On GitHub.com, navigate to the main page of the repository
+2. Click **Settings** tab
+3. Click **Actions** in the left sidebar, then click **General**
+4. Select the desired option (e.g. **Allow all actions and workflows**) under **Actions permissions**
+5. Click **Save** to apply the settings
+
+<br>
 
 Add the following workflow file to your repository in this path `.github/workflows/ninja_i18n.yml`
 
@@ -62,12 +89,3 @@ Create a pull request with changes to your i18n files and see if the action runs
 | Name                  | Requirement | Description |
 | --------------------- | ----------- | ----------- |
 | `GITHUB_TOKEN`        | _required_ | Usage: `GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}`,  Ninja i18n action uses this in-built GitHub token to make the API calls for interacting with GitHub. It is built into Github Actions and does not need to be manually specified in your secrets store. [More Info](https://help.github.com/en/actions/configuring-and-managing-workflows/authenticating-with-the-github_token)|
-
-## Workflow
-
-https://github.com/opral/monorepo/assets/59048346/99049121-11db-4672-a7a8-e0d606426f4b
-
-- When a pull request is opened or updated, the action will run and check for new i18n issues.
-- If issues are found, the action creates a comment on the pull request with an issues report including links to the Fink localization editor to resolve the issues.
-- After the issues are resolved, the action will automatically update the pull request comment to reflect the changes.
-- If no issues are found, the action will simply not create any comments.

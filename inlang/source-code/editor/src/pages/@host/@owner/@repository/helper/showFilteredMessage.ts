@@ -1,6 +1,9 @@
 import type { MessageLintReport, Message } from "@inlang/sdk"
 import { useEditorState } from "../State.jsx"
-export const showFilteredMessage = (message: Message | undefined) => {
+export const showFilteredMessage = (
+	message: Message | undefined,
+	lintReports: readonly MessageLintReport[] | undefined
+) => {
 	const { filteredMessageLintRules, filteredLanguageTags, filteredIds, textSearch, project } =
 		useEditorState()
 
@@ -61,12 +64,10 @@ export const showFilteredMessage = (message: Message | undefined) => {
 	const filteredByLintRules =
 		lintRulesSet.size === 0 ||
 		(message !== undefined &&
-			project()!
-				.query.messageLintReports.get({ where: { messageId: message.id } })
-				?.some(
-					(report: MessageLintReport) =>
-						lintRulesSet.has(report.ruleId) && languageTagsSet.has(report.languageTag)
-				))
+			lintReports?.some(
+				(report: MessageLintReport) =>
+					lintRulesSet.has(report.ruleId) && languageTagsSet.has(report.languageTag)
+			))
 			? filteredBySearch
 			: false
 

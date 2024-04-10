@@ -4,6 +4,7 @@ import type { Message } from "@inlang/sdk"
 import { CONFIGURATION } from "../../configuration.js"
 import { getStringFromPattern } from "./query.js"
 import { escapeHtml } from "../utils.js"
+import { throttle } from "throttle-debounce"
 
 export function createMessageWebviewProvider(args: {
 	context: vscode.ExtensionContext
@@ -11,9 +12,9 @@ export function createMessageWebviewProvider(args: {
 }) {
 	let messages: Message[] | undefined
 	let isLoading = true
+	let subscribedToProjectPath = ""
 	let activeFileContent: string | undefined
 	let debounceTimer: NodeJS.Timeout | undefined
-	const subscribedMessageIds = new Set<string>()
 
 	return {
 		resolveWebviewView(webviewView: vscode.WebviewView) {
@@ -41,27 +42,17 @@ export function createMessageWebviewProvider(args: {
 					return
 				}
 
-				// Load messages
-				const fetchedMessages = state().project.query.messages.getAll()
-				messages = fetchedMessages ? [...fetchedMessages] : []
-				isLoading = false
-
-				// Subscribe to message changes
-				for (const message of messages) {
-					if (!subscribedMessageIds.has(message.id)) {
-						subscribeToMessageChange(message.id)
-					}
+				// Subscribe to messages just once for a project
+				// Assumes that subscriptions will be gc'ed when projects are switched
+				// TODO: set isLoading while switching projects
+				if (subscribedToProjectPath !== state().selectedProjectPath) {
+					subscribedToProjectPath = state().selectedProjectPath
+					state().project.query.messages.getAll.subscribe((fetchedMessages) => {
+						messages = fetchedMessages ? [...fetchedMessages] : []
+						isLoading = false
+						throttledUpdateWebviewContent()
+					})
 				}
-
-				updateWebviewContent()
-			}
-
-			function subscribeToMessageChange(messageId: string) {
-				subscribedMessageIds.add(messageId) // Track subscribed message IDs
-
-				state().project.query.messages.get.subscribe({ where: { id: messageId } }, () => {
-					updateMessages()
-				})
 			}
 
 			const debounceUpdate = () => {
@@ -179,6 +170,7 @@ export function createMessageWebviewProvider(args: {
 					webview: webviewView.webview,
 				})
 			}
+			const throttledUpdateWebviewContent = throttle(500, updateWebviewContent)
 
 			updateMessages() // Initial update
 		},

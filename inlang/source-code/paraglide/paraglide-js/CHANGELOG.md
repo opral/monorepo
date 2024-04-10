@@ -1,5 +1,36 @@
 # @inlang/paraglide-js
 
+## 1.5.0
+
+### Minor Changes
+
+- 2428451: `paraglide-js init` now finds more existing projects
+
+## 1.4.0
+
+### Minor Changes
+
+- d47b2aa: Generate empty `messages/{lang}.js` files if no messages are present. This way the "shape" of the generated output is always the same regardless of messages
+
+### Patch Changes
+
+- 192fdec: prompt the user for the `outdir` during `paraglide-js init`
+- 0b7c82e: Inline package-version at build time to be more robust
+
+## 1.3.7
+
+### Patch Changes
+
+- 1cc9cbc: Run compiler after `paraglide-js init` so that initial files are present
+- 5401f95: Add `--outdir` flag to the generated CLI commands
+
+## 1.3.6
+
+### Patch Changes
+
+- 526b0ba: `paraglide-js init` now prompts for which languages should be supported
+- 26d2ba1: No longer add `identical-pattern` lint rule by default
+
 ## 1.3.5
 
 ### Patch Changes

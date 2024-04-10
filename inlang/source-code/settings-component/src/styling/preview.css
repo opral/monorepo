@@ -1,0 +1,9 @@
+html {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+body {
+    width: 100%;
+    max-width: 800px;
+}

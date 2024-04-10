@@ -1,5 +1,5 @@
 import { useEditorState } from "../State.jsx"
-import { For, Show, createMemo } from "solid-js"
+import { For, Show, createSignal, createEffect, createMemo, createResource } from "solid-js"
 import { TourHintWrapper } from "./Notification/TourHintWrapper.jsx"
 import IconAdd from "~icons/material-symbols/add"
 import { type InstalledMessageLintRule, type MessageLintRule } from "@inlang/sdk"
@@ -16,13 +16,28 @@ export const ListHeader = () => {
 		tourStep,
 	} = useEditorState()
 
+	const [getMessages, setMessages] = createSignal()
+
+	createEffect(() => {
+		if (!project.loading) {
+			const messages = project()!.query.messages.getAll()
+			setMessages(messages)
+		}
+	})
+
+	// createResource re-fetches lintReports via async api whenever messages change
+	const [lintReports] = createResource(getMessages, async () => {
+		const reports = await project()!.query.messageLintReports.getAll()
+		return reports
+	})
+
 	const getLintSummary = createMemo(() => {
 		const summary = new Map<string, number>() // Use a Map with explicit types for better performance
 		const filteredRules = new Set<string>(filteredMessageLintRules())
 		const filteredTags = new Set<string>(filteredLanguageTags())
 		const filteredIdsValue = filteredIds()
 
-		for (const report of project()?.query.messageLintReports.getAll() || []) {
+		for (const report of lintReports() || []) {
 			const ruleId = report.ruleId
 			const languageTag = report.languageTag
 			const messageId = report.messageId
