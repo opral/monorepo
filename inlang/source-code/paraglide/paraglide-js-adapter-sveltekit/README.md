@@ -283,18 +283,21 @@ On the client, you can call `languageTag()` exported `./paraglide/runtime.js`.
 
 SvelteKit does two kinds of work on the server: _Loading_ and _Rendering_. 
 
-- _Loading_ includes running your `load` functions, `actions` or server-hooks. 
+- _Loading_ includes running your [load functions](https://kit.svelte.dev/docs/load), [actions](https://kit.svelte.dev/docs/form-actions), or [server hooks](https://kit.svelte.dev/docs/hooks#server-hooks). 
 - _Rendering_ is anything that happens in or is called from a `.svelte` file.
 
 Loading is asynchronous & rendering is synchronous. 
 
-During the asynchronous loading, there is danger of crosstalk. If you aren't careful it's possible for one request to override the language of another request. You can avoid this by explicitly specifying which language a message should be in.
+During loading, there is danger of crosstalk. If you aren't careful it's possible for one request to override the language of another. Avoid this by explicitly specifying which language a message should be in.
+
+On the server you can safely read the language from `event.locals.paraglide.lang`.
 
 ```ts
 import * as m from "$lib/paraglide/messages.js"
 
 export async function load({ locals }) {
-  const translatedText = m.some_message({ ...message_params }, { languageTag: locals.paraglide.lang })
+	//pass a second argument to specify the language
+  const translatedText = m.some_message({ }, { languageTag: locals.paraglide.lang })
   return { translatedText }
 }
 ```
@@ -307,8 +310,7 @@ You can tell a load function to re-run on language changes by calling `depends("
 
 ```ts
 export async function load({ depends }) {
-  // The Adapter automatically calls `invalidate("paraglide:lang")` whenever the langauge changes
-  // This tells SvelteKit to re-run this function whenever that happens
+  // The Adapter automatically calls `invalidate("paraglide:lang")` whenever the language changes
   depends("paraglide:lang") 
   return await myLanguageSpecificData();
 }
@@ -319,6 +321,7 @@ export async function load({ depends }) {
 1. Links in the same Layout Component as `<ParagldieJS>` will not be translated. This will also log a warning in development.
 2. Messages are not reactive. Don't use them in server-side module scope.
 3. Side effects triggered by `data` will run on language changes even if the data didn't change. If the data is language-dependent the side effect will run twice. 
+4. Using messages or the `languageTag` function in module scope is a bad idea. Both in `.svelte` and `.js` files. 
 
 ### Using messages in `+layout.svelte`
 
