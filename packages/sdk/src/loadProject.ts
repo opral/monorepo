@@ -33,7 +33,7 @@ import { humanIdHash } from "./storage/human-id/human-readable-id.js"
 import type { Repository } from "@lix-js/client"
 import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
 
-import { maybeCreateFirstProjectId } from "./migrations/maybeCreateFirstProjectId.js"
+// import { maybeCreateFirstProjectId } from "./migrations/maybeCreateFirstProjectId.js"
 
 import { capture } from "./telemetry/capture.js"
 import { identifyProject } from "./telemetry/groupIdentify.js"
