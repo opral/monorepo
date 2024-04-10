@@ -2226,6 +2226,19 @@ importers:
         specifier: ^4.7.1
         version: 4.7.2
 
+  inlang/source-code/sdk/multi-project-test:
+    dependencies:
+      '@inlang/cli':
+        specifier: workspace:*
+        version: link:../../cli
+    devDependencies:
+      '@types/node':
+        specifier: ^20.12.6
+        version: 20.12.6
+      vitest:
+        specifier: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
+
   inlang/source-code/server:
     dependencies:
       '@inlang/badge':
@@ -10515,6 +10528,7 @@ packages:
 
   /@tootallnate/quickjs-emscripten@0.23.0:
     resolution: {integrity: sha512-C5Mc6rdnsaJDjO3UpGW/CQTHtCKaYlScZTly4JIu97Jxo/odCiH0ITnDXSJPTOrEKk/ycSZ0AOgTmkDtkOsvIA==}
+    requiresBuild: true
     dev: true
 
   /@ts-morph/bootstrap@0.20.0:
@@ -12807,6 +12821,7 @@ packages:
   /ast-types@0.13.4:
     resolution: {integrity: sha512-x1FCFnFifvYDDzTaLII71vG5uvDwgtmDTEVWAxrgeiR8VjMONcCXJx7E+USjDtHlwFmt9MysbqgF9b9Vjr6w+w==}
     engines: {node: '>=4'}
+    requiresBuild: true
     dependencies:
       tslib: 2.6.2
     dev: true
@@ -13306,6 +13321,7 @@ packages:
   /basic-ftp@5.0.5:
     resolution: {integrity: sha512-4Bcg1P8xhUuqcii/S0Z9wiHIrQVPMermM1any+MX5GeGD7faD3/msQUDGLol9wOcz4/jbg/WJnGqoJF6LiBdtg==}
     engines: {node: '>=10.0.0'}
+    requiresBuild: true
     dev: true
 
   /bcp-47-match@2.0.3:
@@ -13898,6 +13914,7 @@ packages:
 
   /chownr@1.1.4:
     resolution: {integrity: sha512-jJ0bqzaylmJtVnNgzTeSOs8DPavpbYgEr/b0YL8/2GO3xJEhInFmhKMUnEJQjZumK7KXGFhUy89PrsJWlakBVg==}
+    requiresBuild: true
     dev: true
 
   /chownr@2.0.0:
@@ -14629,6 +14646,7 @@ packages:
   /data-uri-to-buffer@6.0.2:
     resolution: {integrity: sha512-7hvf7/GW8e86rW0ptuwS3OcBGDjIi6SZva7hCyWC0yYry2cOPmLIjXAUHI6DK2HsnwJd9ifmt57i8eV2n4YNpw==}
     engines: {node: '>= 14'}
+    requiresBuild: true
     dev: true
 
   /data-urls@4.0.0:
@@ -14944,6 +14962,7 @@ packages:
   /degenerator@5.0.1:
     resolution: {integrity: sha512-TllpMR/t0M5sqCXfj85i4XaAzxmS5tVA16dqvdkMwGmzI+dXLXnw3J+3Vdv7VKw+ThlTMboK6i9rnZ6Nntj5CQ==}
     engines: {node: '>= 14'}
+    requiresBuild: true
     dependencies:
       ast-types: 0.13.4
       escodegen: 2.1.0
@@ -15693,6 +15712,7 @@ packages:
     resolution: {integrity: sha512-2NlIDTwUWJN0mRPQOdtQBzbUHvdGY2P1VXSyU83Q3xKxM7WHX2Ql8dKq782Q9TgQUNOLEzEYu9bzLNj1q88I5w==}
     engines: {node: '>=6.0'}
     hasBin: true
+    requiresBuild: true
     dependencies:
       esprima: 4.0.1
       estraverse: 5.3.0
@@ -17437,6 +17457,7 @@ packages:
   /get-uri@6.0.3:
     resolution: {integrity: sha512-BzUrJBS9EcUb4cFol8r4W3v1cPsSyajLSthNkz5BxbpDcHN5tIrM10E2eNvfnvBn3DaT3DUgx0OpsBKkaOpanw==}
     engines: {node: '>= 14'}
+    requiresBuild: true
     dependencies:
       basic-ftp: 5.0.5
       data-uri-to-buffer: 6.0.2
@@ -18510,6 +18531,7 @@ packages:
   /ip-address@9.0.5:
     resolution: {integrity: sha512-zHtQzGojZXTwZTHQqra+ETKd4Sn3vgi7uBmlPoXVWZqYvuKmtI0l/VZTjqGmJY9x88GGOaZ9+G9ES8hC4T4X8g==}
     engines: {node: '>= 12'}
+    requiresBuild: true
     dependencies:
       jsbn: 1.1.0
       sprintf-js: 1.1.3
@@ -19189,6 +19211,7 @@ packages:
 
   /jsbn@1.1.0:
     resolution: {integrity: sha512-4bYVV3aAMtDTTu4+xsDYa6sy9GyJ69/amsu9sYF2zqjiEoZA5xJi3BrfX3uY+/IekIu7MwdObdbDWpoZdBv3/A==}
+    requiresBuild: true
     dev: true
 
   /jscodeshift@0.15.2(@babel/preset-env@7.24.4):
@@ -21227,6 +21250,7 @@ packages:
 
   /mkdirp-classic@0.5.3:
     resolution: {integrity: sha512-gKLcREMhtuZRwRAfqP3RFW+TK4JqApVBtOIftVgjuABpAtpxhPGaDcfvbhNvD0B8iD1oUr/txX35NjcaY6Ns/A==}
+    requiresBuild: true
     dev: true
 
   /mkdirp@0.5.6:
@@ -21390,6 +21414,7 @@ packages:
   /netmask@2.0.2:
     resolution: {integrity: sha512-dBpDMdxv9Irdq66304OLfEmQ9tbNRFnFTuZiLo+bD+r332bBmMJ8GBLXklIXXgxd3+v9+KUnZaUR5PJMa75Gsg==}
     engines: {node: '>= 0.4.0'}
+    requiresBuild: true
     dev: true
 
   /next@14.1.2-canary.4(react-dom@18.2.0)(react@18.2.0):
@@ -22354,6 +22379,7 @@ packages:
   /pac-resolver@7.0.1:
     resolution: {integrity: sha512-5NPgf87AT2STgwa2ntRMr45jTKrYBGkVU36yT0ig/n/GMAa3oPqhZfIQ2kMEimReg0+t9kZViDVZ83qfVUlckg==}
     engines: {node: '>= 14'}
+    requiresBuild: true
     dependencies:
       degenerator: 5.0.1
       netmask: 2.0.2
@@ -24743,6 +24769,7 @@ packages:
   /smart-buffer@4.2.0:
     resolution: {integrity: sha512-94hK0Hh8rPqQl2xXc3HsaBoOXKV20MToPkcXvwbISWLEs+64sBq5kFgn2kJDHb1Pry9yrP0dxrCI9RRci7RXKg==}
     engines: {node: '>= 6.0.0', npm: '>= 3.0.0'}
+    requiresBuild: true
     dev: true
 
   /smartwrap@2.0.2:
@@ -24775,6 +24802,7 @@ packages:
   /socks@2.8.1:
     resolution: {integrity: sha512-B6w7tkwNid7ToxjZ08rQMT8M9BJAf8DKx8Ft4NivzH0zBUfd6jldGcisJn/RLgxcX3FPNDdNQCUEMMT79b+oCQ==}
     engines: {node: '>= 10.0.0', npm: '>= 3.0.0'}
+    requiresBuild: true
     dependencies:
       ip-address: 9.0.5
       smart-buffer: 4.2.0
@@ -25006,6 +25034,7 @@ packages:
 
   /sprintf-js@1.1.3:
     resolution: {integrity: sha512-Oo+0REFV59/rz3gfJNKQiBlwfHaSESl1pcGyABQsnnIfWOFt6JNj5gCog2U6MLZ//IGYD+nA8nI+mTShREReaA==}
+    requiresBuild: true
     dev: true
 
   /stable@0.1.8:
@@ -28681,7 +28710,7 @@ packages:
 
   file:..:
     resolution: {directory: .., type: directory}
-    name: monorepo
+    name: opral
     dev: true
 
   file:inlang/source-code/cli:
