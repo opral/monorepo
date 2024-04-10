@@ -18,7 +18,7 @@
 		"lint1": "pnpm inlang lint --project ./project.inlang",
 		"lint2": "pnpm inlang lint --project ./project2-dir/project.inlang",
 		"lint3": "pnpm inlang lint --project ./project3-dir/project.inlang",
-		"test": "pnpm clean && vitest run"
+		"test": "pnpm clean && vitest --reporter=tap-flat run"
 	},
 	"prettier": {
 		"semi": false,
