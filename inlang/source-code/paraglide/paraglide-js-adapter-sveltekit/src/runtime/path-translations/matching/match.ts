@@ -16,7 +16,7 @@ export function bestMatch(
 
 	for (const pathDefinition of pathDefinitions) {
 		const route = parse_route_id(pathDefinition)
-		const match = route.pattern.exec(canonicalPath)
+		const match = route.pattern.exec(removeTrailingSlash(canonicalPath))
 
 		//if the path doesn't match the pattern it's not a match
 		if (!match) continue
@@ -59,4 +59,8 @@ export function bestMatch(
 				params: bestMatch.params,
 		  }
 		: undefined
+}
+
+function removeTrailingSlash(path: string): string {
+	return path.endsWith("/") ? path.slice(0, -1) : path
 }

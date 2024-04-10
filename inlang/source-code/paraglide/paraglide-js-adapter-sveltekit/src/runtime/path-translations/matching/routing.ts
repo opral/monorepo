@@ -157,9 +157,8 @@ export function exec(
 			continue
 		}
 
-		const matcher: ParamMatcher = param.matcher
-			? matchers[param.matcher] ?? (() => true)
-			: () => true
+		// if there is no matcher use a matcher that always passes
+		const matcher: ParamMatcher = matchers[param.matcher] ?? (() => true)
 
 		if (matcher(value)) {
 			result[param.name] = value
@@ -247,7 +246,7 @@ export function resolve_route(id: string, params: Record<string, string | undefi
 
 					if (param_value.startsWith("/") || param_value.endsWith("/"))
 						throw new Error(
-							`Parameter '${name}' in route ${id} cannot start or end with a slash -- this would cause an invalid route like foo//bar`
+							`Parameter '${name}' in route ${id} cannot start or end with a slash -- this would cause an invalid route like foo//bar - Value: "${param_value}"`
 						)
 					return param_value
 				})
