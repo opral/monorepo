@@ -381,9 +381,6 @@ export async function openRepository(
 				noTags: true,
 			})
 			.then(() => checkOutPlaceholders())
-			.catch((newError: Error) => {
-				setErrors((previous: any) => [...(previous || []), newError])
-			})
 	} else {
 		console.info("Using existing cloned repo")
 	}
