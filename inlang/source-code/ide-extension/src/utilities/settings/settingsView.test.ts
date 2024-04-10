@@ -19,6 +19,10 @@ vi.mock("vscode", () => ({
 	ViewColumn: {
 		One: 1,
 	},
+	EventEmitter: vi.fn(),
+	commands: {
+		executeCommand: vi.fn(),
+	},
 }))
 
 vi.mock("../state.js", () => ({
