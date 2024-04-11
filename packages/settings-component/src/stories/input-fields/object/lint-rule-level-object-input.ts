@@ -101,20 +101,29 @@ export class LintRuleLevelObjectInput extends LitElement {
 		}
 	}
 
-	getValueOfLintRule = (
-		id: InlangModule["default"]["id"],
-		value: Record<InlangModule["default"]["id"], string>
-	) => {
-		//TODO: workaround because select field was not updating
-		// setTimeout(() => {
-		// 	const _value = this.value
-		// 	this.value = {}
-		// 	this.value = _value
-		// })
-		if (value && Object.keys(value).includes(id)) {
-			return value[id]
-		} else {
-			return undefined
+	override async update(changedProperties: any) {
+		super.update(changedProperties)
+
+		// TODO find a better way to update the value
+		if (changedProperties.has("value")) {
+			await this.updateComplete
+
+			const newValue = changedProperties.get("value")
+
+			if (newValue) {
+				for (const moduleId of Object.keys(newValue)) {
+					const slSelect = this.shadowRoot?.getElementById(moduleId)
+					if (slSelect) {
+						const input =
+							slSelect.shadowRoot?.querySelector<HTMLInputElement>(".select__display-input")
+						if (input && input.value) {
+							input.value = this.value[moduleId as InlangModule["default"]["id"]]
+								? (this.value[moduleId as InlangModule["default"]["id"]] as string)
+								: "warning"
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -130,15 +139,17 @@ export class LintRuleLevelObjectInput extends LitElement {
 			</div>
 			<div class="container">
 				${this.modules &&
+				this.value &&
 				this.modules.map((module) => {
 					return module.id.split(".")[0] !== "plugin"
 						? html`<div class="rule-container">
 								<sl-select
+									id=${module.id}
 									exportparts="listbox:option-wrapper"
-									value="${this.getValueOfLintRule(module.id, this.value)}"
+									value=${this.value ? (this.value as any)[module.id] : "warning"}
+									placeholder="warning"
 									class="select"
 									size="small"
-									placeholder="warning"
 									@sl-change=${(e: Event) => {
 										this.handleUpdate(
 											module.id as `messageLintRule.${string}.${string}`,
