@@ -42,9 +42,6 @@ export async function getInlangProject(args: { projectPath: string }): Promise<I
 			process.exit(1)
 		}
 
-		// eslint-disable-next-line no-console
-		console.log("getInlangProject loaded", projectPath)
-
 		lastUsedProject = project
 		return project
 	} catch (err) {

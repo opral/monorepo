@@ -1,19 +1,11 @@
-/* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { describe, it, expect } from "vitest"
-import { promisify } from "node:util"
 import { fileURLToPath } from "node:url"
-import childProcess from "node:child_process"
 import { dirname, join } from "node:path"
+import childProcess from "node:child_process"
 import fs from "node:fs/promises"
 
-const exec = promisify(childProcess.exec)
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
-
-function sleep(ms: number) {
-	return new Promise((resolve) => setTimeout(resolve, ms))
-}
 
 describe.concurrent("sanity check run behavior", () => {
 	it("pwd", async () => {
@@ -34,24 +26,6 @@ describe.concurrent("sanity check run behavior", () => {
 describe.concurrent(
 	"translate multiple projects in different directories",
 	() => {
-		it(
-			"project3 in project3-dir",
-			async () => {
-				await run("pnpm translate3")
-				const result = await fs.readFile(
-					join(__dirname, "project3-dir", "locales", "de.json"),
-					"utf8"
-				)
-				expect(result).toEqual(`{
-	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"project3_message_key_1": "Mock translate local en to de: Generated message (1)",
-	"project3_message_key_2": "Mock translate local en to de: Generated message (2)",
-	"project3_message_key_3": "Mock translate local en to de: Generated message (3)"
-}`)
-			},
-			{ timeout: 30000 }
-		)
-
 		it(
 			"project1 in root",
 			async () => {
@@ -84,8 +58,27 @@ describe.concurrent(
 			},
 			{ timeout: 10000 }
 		)
+
+		// skip pending resolution of https://github.com/opral/lix-sdk/issues/18 (LIX-60)
+		it.skip(
+			"project3 in project3-dir",
+			async () => {
+				await run("pnpm translate3")
+				const result = await fs.readFile(
+					join(__dirname, "project3-dir", "locales", "de.json"),
+					"utf8"
+				)
+				expect(result).toEqual(`{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"project3_message_key_1": "Mock translate local en to de: Generated message (1)",
+	"project3_message_key_2": "Mock translate local en to de: Generated message (2)",
+	"project3_message_key_3": "Mock translate local en to de: Generated message (3)"
+}`)
+			},
+			{ timeout: 20000 }
+		)
 	},
-	{ timeout: 50000 }
+	{ timeout: 40000 }
 )
 
 // run command in __dirname
