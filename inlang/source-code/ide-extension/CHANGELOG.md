@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.38.0
+
+### Minor Changes
+
+- 32c8b9f: release settings view
+
 ## 1.37.0
 
 ### Minor Changes
