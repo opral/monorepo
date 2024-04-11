@@ -27,6 +27,7 @@ vi.mock("vscode", () => ({
 
 vi.mock("../state.js", () => ({
 	state: () => ({
+		selectedProjectPath: "Users/username/happy-elephant.inlang",
 		project: {
 			settings: vi.fn().mockReturnValue({}),
 			installed: {
@@ -43,7 +44,7 @@ describe("settingsPanel", () => {
 		await settingsPanel({ context: mockContext })
 		expect(vscode.window.createWebviewPanel).toHaveBeenCalledWith(
 			"settingsPanel",
-			"Settings",
+			"happy-elephant.inlang",
 			vscode.ViewColumn.One,
 			expect.objectContaining({
 				enableScripts: true,
