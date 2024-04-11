@@ -1,5 +1,8 @@
-import { resolveRoute, bestMatch } from "@inlang/paraglide-js/internal/adapter-utils"
-import type { PathTranslations } from "../config/pathTranslations.js"
+import {
+	resolveRoute,
+	bestMatch,
+	type PathDefinitionTranslations,
+} from "@inlang/paraglide-js/internal/adapter-utils"
 import type { ParamMatcher } from "@sveltejs/kit"
 
 /**
@@ -9,7 +12,7 @@ import type { ParamMatcher } from "@sveltejs/kit"
 export function getCanonicalPath(
 	translatedPath: string,
 	lang: string,
-	translations: PathTranslations,
+	translations: PathDefinitionTranslations,
 	matchers: Record<string, ParamMatcher>
 ): string {
 	for (const [canonicalPathDefinition, translationsForPath] of Object.entries(translations)) {
