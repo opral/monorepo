@@ -27,7 +27,7 @@ type LanguageSpec = {
 	suffix?: string
 
 	/**
-	 * The full definition of the language
+	 * The full BCP 47 of the language
 	 * @example "en-GB"
 	 */
 	full: string
@@ -51,6 +51,9 @@ type LanguagePriority<T extends string = string> = {
 	/**
 	 * The quality of the language as specified in the Accept-Language header.
 	 * Between 0 and 1
+	 *
+	 * Some code uses the value -1 here to signal "no match"
+	 *
 	 * @default 1
 	 */
 	quality: number
@@ -79,7 +82,7 @@ type LanguagePriority<T extends string = string> = {
  *
  * @param accept The value of the Accept-Language header. If it's missing, it defaults to "*" as per RFC 2616 sec 14.4
  * @param availableLanguageTags The BCP 47 language tags that are available
- * 
+ *
  * @public
  */
 export function negotiateLanguagePreferences<T extends string = string>(
@@ -102,7 +105,7 @@ export function negotiateLanguagePreferences<T extends string = string>(
 
 	// sorted list of accepted languages
 	return priorities
-		.filter((spec) => spec.quality > 0) //filter out all languages that didn't match any of the headers whatsoever
+		.filter((prio) => prio.quality > 0) //filter out all languages that didn't match any of the headers whatsoever
 		.sort(comparePriorities) //sort them by their priority
 		.map((priority) => priority.languageTag)
 }
