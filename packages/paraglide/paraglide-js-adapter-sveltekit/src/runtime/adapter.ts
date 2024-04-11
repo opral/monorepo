@@ -12,7 +12,7 @@ import { normaliseBase as canonicalNormaliseBase } from "./utils/normaliseBase.j
 import { createExclude, type ExcludeConfig } from "./exclude.js"
 import { guessTextDirMap } from "./utils/text-dir.js"
 import { resolvePathTranslations } from "./config/resolvePathTranslations.js"
-import { validatePathTranslations } from "./config/validatePathTranslations.js"
+import { validatePathTranslations } from "@inlang/paraglide-js/internal/adapter-utils"
 import type { ParamMatcher } from "@sveltejs/kit"
 import type { PathTranslations, UserPathTranslations } from "./config/pathTranslations.js"
 import type { Paraglide } from "./runtime.js"
