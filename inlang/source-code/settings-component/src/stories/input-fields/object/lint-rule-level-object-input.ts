@@ -139,7 +139,6 @@ export class LintRuleLevelObjectInput extends LitElement {
 			</div>
 			<div class="container">
 				${this.modules &&
-				this.value &&
 				this.modules.map((module) => {
 					return module.id.split(".")[0] !== "plugin"
 						? html`<div class="rule-container">
