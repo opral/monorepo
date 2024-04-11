@@ -23,6 +23,7 @@
 	},
 	"dependencies": {
 		"@inlang/paraglide-js-adapter-vite": "workspace:*",
+		"@inlang/paraglide-js": "workspace:*",
 		"dedent": "1.5.1",
 		"devalue": "^4.3.2",
 		"magic-string": "^0.30.5"
