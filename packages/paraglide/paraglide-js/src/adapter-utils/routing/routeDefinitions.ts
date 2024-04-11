@@ -1,11 +1,17 @@
-type RouteParam = {
+//vendored in from sveltekit and adapted
+
+export type PathDefinitionTranslations<T extends string = string> = {
+	[canonicalPath: `/${string}`]: Record<T, `/${string}`>
+}
+
+export type RouteParam = {
 	name: string
 	matcher: string
 	optional: boolean
 	rest: boolean
 	chained: boolean
 }
-type ParamMatcher = (segment: string) => boolean
+export type ParamMatcher = (segment: string) => boolean
 
 //vendored in from @sveltejs/kit utils/routing.js
 
@@ -14,7 +20,7 @@ const param_pattern = /^(\[)?(\.\.\.)?(\w+)(?:=(\w+))?(\])?$/
 /**
  * Creates the regex pattern, extracts parameter names, and generates types for a route
  */
-export function parse_route_id(id: string): {
+export function parseRouteDefinition(id: string): {
 	params: RouteParam[]
 	pattern: RegExp
 } {
@@ -109,27 +115,6 @@ export function parse_route_id(id: string): {
 			  )
 
 	return { pattern, params }
-}
-
-const optional_param_regex = /\/\[\[\w+?(?:=\w+)?\]\]/
-
-/**
- * Removes optional params from a route ID.
- * @returns The route id with optional params removed
- */
-export function remove_optional_params(id: string): string {
-	return id.replace(optional_param_regex, "")
-}
-
-/**
- * Splits a route id into its segments, removing segments that
- * don't affect the path (i.e. groups). The root route is represented by `/`
- * and will be returned as `['']`.
- * @param {string} route
- * @returns string[]
- */
-export function get_route_segments(route: string) {
-	return route.slice(1).split("/")
 }
 
 export function exec(
@@ -238,7 +223,7 @@ const basic_param_pattern = /\[(\[)?(\.\.\.)?(\w+?)(?:=(\w+))?\]\]?/g
  * ); // `/blog/hello-world/something/else`
  * ```
  */
-export function resolve_route(id: string, params: Record<string, string | undefined>): string {
+export function resolveRoute(id: string, params: Record<string, string | undefined>): string {
 	const segments = get_route_segments(id)
 	return (
 		"/" +
@@ -266,31 +251,29 @@ export function resolve_route(id: string, params: Record<string, string | undefi
 	)
 }
 
-
-
 /**
  * Returns the id and params for the route that best matches the given path.
  * @param canonicalPath Canonical pathname excluding the base and language e.g. /foo/bar
  * @param pathDefinitions An array of pathDefinitions
  * @param matchers A map of param matcher functions
- * 
+ *
  * @returns undefined if no route matches.
  */
 export function bestMatch(
 	canonicalPath: string,
 	pathDefinitions: string[],
-	matchers: Record<string, ParamMatcher>,
+	matchers: Record<string, ParamMatcher>
 ): { params: Record<string, string>; id: string } | undefined {
 	let bestMatch:
 		| {
 				id: string
 				params: Record<string, string>
-				route: ReturnType<typeof parse_route_id>
+				route: ReturnType<typeof parseRouteDefinition>
 		  }
 		| undefined = undefined
 
 	for (const pathDefinition of pathDefinitions) {
-		const route = parse_route_id(pathDefinition)
+		const route = parseRouteDefinition(pathDefinition)
 		const match = route.pattern.exec(removeTrailingSlash(canonicalPath))
 
 		//if the path doesn't match the pattern it's not a match
@@ -332,10 +315,21 @@ export function bestMatch(
 		? {
 				id: bestMatch.id,
 				params: bestMatch.params,
-			}
+		  }
 		: undefined
 }
 
 function removeTrailingSlash(path: string): string {
 	return path.endsWith("/") ? path.slice(0, -1) : path
+}
+
+/**
+ * Splits a route id into its segments, removing segments that
+ * don't affect the path (i.e. groups). The root route is represented by `/`
+ * and will be returned as `['']`.
+ * @param {string} route
+ * @returns string[]
+ */
+function get_route_segments(route: string) {
+	return route.slice(1).split("/")
 }
