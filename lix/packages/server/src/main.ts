@@ -1,35 +1,31 @@
 import express, { Router } from "express"
 import compression from "compression"
-import { validateEnvVariables, privateEnv } from "@inlang/env-variables"
 import * as Sentry from "@sentry/node"
 import * as Tracing from "@sentry/tracing"
 import cookieSession from "cookie-session"
-
-const isProduction = process.env.NODE_ENV === "production"
 
 import { router as authService } from "./auth/router.js"
 
 import { proxy as gitProxy } from "./git-proxy.js"
 import { router as githubProxy } from "./github-proxy.js"
+import { getEnvVar } from "./util/getEnv.js"
 
-// --- Basic setup ---
-const { error: errors } = validateEnvVariables({ forProduction: isProduction })
-
-if (errors) {
-	throw Error(
-		"Production env variables are missing:\n\n" +
-			errors.map((e: any) => `${e.key}: ${e.errorMessage}`).join("\n")
-	)
-}
+const isProduction = process.env.NODE_ENV === "production"
+const SERVER_SENTRY_DSN = getEnvVar(
+	"SERVER_SENTRY_DSN",
+	"DSN for Sentry (on the server)",
+	!isProduction ? "" : undefined
+)
+const SESSION_COOKIE_SECRET = getEnvVar("SESSION_COOKIE_SECRET", "")
 
 const app = express()
 app.use(compression())
 
 // setup sentry error tracking
 // must happen before the request handlers
-if (isProduction) {
+if (SERVER_SENTRY_DSN !== "") {
 	Sentry.init({
-		dsn: privateEnv.SERVER_SENTRY_DSN,
+		dsn: SERVER_SENTRY_DSN,
 		integrations: [
 			// enable HTTP calls tracing
 			new Sentry.Integrations.Http({ tracing: true }),
@@ -56,7 +52,7 @@ router.use(
 		// secure: isProduction ? true : false,
 		// domain: isProduction ? "inlang.com" : undefined,
 		sameSite: "strict",
-		secret: privateEnv.SESSION_COOKIE_SECRET,
+		secret: SESSION_COOKIE_SECRET,
 		maxAge: 7 * 24 * 3600 * 1000, // 1 week
 	})
 )
