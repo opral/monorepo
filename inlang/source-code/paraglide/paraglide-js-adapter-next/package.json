@@ -49,7 +49,7 @@
 		"dist"
 	],
 	"peerDependencies": {
-		"@inlang/paraglide-js": "*",
+		"@inlang/paraglide-js": "workspace:*",
 		"next": "^13.0.0 || ^14.0.0",
 		"react": "^18 || ^19"
 	},

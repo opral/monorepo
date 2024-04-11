@@ -1381,7 +1381,7 @@ importers:
   inlang/source-code/paraglide/paraglide-js-adapter-next:
     dependencies:
       '@inlang/paraglide-js':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../paraglide-js
       next:
         specifier: ^13.0.0 || ^14.0.0
