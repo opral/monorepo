@@ -1,5 +1,5 @@
 import type { Repository } from "@lix-js/client"
-// import { hash } from "@lix-js/client"
+import { hash } from "@lix-js/client"
 
 /**
  * Creates a project id if it does not exist yet.
@@ -61,7 +61,7 @@ export async function generateProjectId(args: { repo?: Repository; projectPath: 
 
 	if (firstCommitHash) {
 		try {
-			return "1234-1234-1234" // await hash(`${firstCommitHash + args.projectPath}`)
+			return await hash(`${firstCommitHash + args.projectPath}`)
 		} catch (error) {
 			console.error("Failed to generate project_id", error)
 		}
