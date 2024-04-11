@@ -503,7 +503,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	const [githubRepositoryInformation, { refetch: refetchRepoInfo }] = createResource(
 		() => {
-			const loadedRepo = repo();
+			const loadedRepo = repo()
 			if (
 				localStorage?.user === undefined ||
 				routeParams().owner === undefined ||
@@ -518,7 +518,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				routeParams: routeParams(),
 			}
 		},
-		async ({repo: loadedRepo}) => {
+		async ({ repo: loadedRepo }) => {
 			const repoMeta = await loadedRepo.getMeta()
 			if ("error" in repoMeta) {
 				setLixErrors([repoMeta.error, ...lixErrors()])
