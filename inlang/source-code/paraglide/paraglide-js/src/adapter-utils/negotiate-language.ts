@@ -1,4 +1,5 @@
 // Vendored in from https://github.com/jshttp/negotiator
+// Rewritten in Typescript & annotated by Loris Sigrist
 
 type LanguageSpec = {
 	/**
@@ -76,7 +77,10 @@ type LanguagePriority<T extends string = string> = {
 /**
  * Negotiates which of the provided language tags is preferred from an Accept-Language header
  *
- * @throws If no language tags are provided
+ * @param accept The value of the Accept-Language header. If it's missing, it defaults to "*" as per RFC 2616 sec 14.4
+ * @param availableLanguageTags The BCP 47 language tags that are available
+ * 
+ * @public
  */
 export function negotiateLanguagePreferences<T extends string = string>(
 	accept: string | undefined | null,
@@ -85,13 +89,15 @@ export function negotiateLanguagePreferences<T extends string = string>(
 	// No langauges are available -> nothing to negotiate
 	if (availableLanguageTags.length === 0) return []
 
-	// RFC 2616 sec 14.4: no header = *
-	const accepts = parseAcceptLanguageHeader(!accept ? "*" : accept)
+	// No accept-language header -> default to * as per RFC 2616 sec 14.4
+	accept ??= "*"
+
+	const acceptLanguageSpecs = parseAcceptLanguageHeader(accept)
 
 	// compare each avaibale language to each language in the Accept-Language header
 	// and find the one with the highest priority
 	const priorities = availableLanguageTags.map((languageTag, index) =>
-		getHighestLanguagePriority(languageTag, accepts, index)
+		getHighestLanguagePriority(languageTag, acceptLanguageSpecs, index)
 	)
 
 	// sorted list of accepted languages
@@ -105,10 +111,9 @@ function parseAcceptLanguageHeader(acceptLanguage: string): LanguageSpec[] {
 	const acceptableLanguageDefinitions = acceptLanguage.split(",")
 
 	const specs = acceptableLanguageDefinitions
-		.map((acceptableLanguageDefinition, index) =>
-			parseLanguage(acceptableLanguageDefinition.trim(), index)
-		)
-		.filter((maybeSpec): maybeSpec is LanguageSpec => Boolean(maybeSpec))
+		.map((dfn) => dfn.trim())
+		.map((dfn, index) => parseLanguage(dfn, index))
+		.filter((maybeSpec): maybeSpec is LanguageSpec => Boolean(maybeSpec)) //filter out malformed entries
 
 	return specs
 }
@@ -182,7 +187,9 @@ function getHighestLanguagePriority<T extends string>(
 	 */
 	index: number
 ): LanguagePriority<T> {
-	const DEFAULT_PRIORITY: LanguagePriority<T> = {
+	// The spec that matches the best
+	// starts out as a default priority that will be overwritten by basically anything
+	let highestPriority: LanguagePriority<T> = {
 		languageTag: availableLanguageTag,
 		index: 0,
 		order: -1,
@@ -190,14 +197,12 @@ function getHighestLanguagePriority<T extends string>(
 		specificity: 0,
 	}
 
-	//find the spec that matches the best
-	let highestPriority = DEFAULT_PRIORITY
-
 	for (const acceptableLanguage of acceptableLanguages) {
 		const priority = calculatePriority(availableLanguageTag, acceptableLanguage, index)
 		if (!priority) continue
 
 		if (
+			//compare the calculated priority to the highest priority ignoring quality.
 			(highestPriority.specificity - priority.specificity ||
 				highestPriority.quality - priority.quality ||
 				highestPriority.order - priority.order) < 0
@@ -209,6 +214,13 @@ function getHighestLanguagePriority<T extends string>(
 	return highestPriority
 }
 
+/**
+ * Calculates the priority of an available language relative to an acceptable language
+ * @param language A language that is available in the project
+ * @param spec A parsed language from the Accept-Language header
+ * @param index The index of the available language
+ * @returns The priority of the language
+ */
 function calculatePriority<T extends string>(
 	language: T,
 	spec: LanguageSpec,
