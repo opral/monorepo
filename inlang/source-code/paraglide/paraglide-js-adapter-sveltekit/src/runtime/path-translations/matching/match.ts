@@ -4,7 +4,7 @@ import { exec, parse_route_id } from "./routing.js"
 export function bestMatch(
 	canonicalPath: string,
 	pathDefinitions: string[],
-	matchers: Record<string, ParamMatcher>
+	matchers: Record<string, ParamMatcher>,
 ): { params: Record<string, string>; id: string } | undefined {
 	let bestMatch:
 		| {
@@ -57,7 +57,7 @@ export function bestMatch(
 		? {
 				id: bestMatch.id,
 				params: bestMatch.params,
-		  }
+			}
 		: undefined
 }
 
