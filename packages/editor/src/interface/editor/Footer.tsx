@@ -39,7 +39,7 @@ export const getFinkResourcesLinks = () => {
 		{
 			name: "Submit Feedback",
 			href: "https://github.com/orgs/opral/discussions/categories/-fink-general",
-		}
+		},
 	]
 }
 
@@ -99,9 +99,7 @@ const Footer = () => {
 												{link.name}
 											</a>
 										</sl-menu-item>
-										<Show
-											when={link.name === "About the ecosystem"}
-										>
+										<Show when={link.name === "About the ecosystem"}>
 											<div class="w-full border-b border-surface-200 my-1" />
 										</Show>
 									</>
