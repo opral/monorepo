@@ -1,5 +1,5 @@
 import type { Repository } from "@lix-js/client"
-import { hash } from "@lix-js/client"
+// import { hash } from "@lix-js/client"
 
 /**
  * Creates a project id if it does not exist yet.
