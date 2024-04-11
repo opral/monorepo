@@ -21,7 +21,7 @@ import IconDescription from "~icons/material-symbols/description-outline"
 import IconTag from "~icons/material-symbols/tag"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 import { showToast } from "#src/interface/components/Toast.jsx"
-import { isValidLanguageTag, type LanguageTag } from "@inlang/sdk"
+import { isValidLanguageTag, type InlangProject, type LanguageTag } from "@inlang/sdk"
 import { sortLanguageTags } from "./helper/sortLanguageTags.js"
 import EditorLayout from "#src/interface/editor/EditorLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
@@ -50,8 +50,6 @@ export function Layout(props: { children: JSXElement }) {
 		filteredIds,
 		setFilteredIds,
 		languageTags,
-		currentBranch,
-		activeProject,
 		routeParams,
 	} = useEditorState()
 
@@ -62,6 +60,7 @@ export function Layout(props: { children: JSXElement }) {
 	}
 
 	const [forkStatusModalOpen, setForkStatusModalOpen] = createSignal(false)
+	const [settingsOpen, setSettingsOpen] = createSignal(false)
 	const [openedGitHub, setOpenedGitHub] = createSignal(false)
 
 	createEffect(() => {
@@ -186,22 +185,6 @@ export function Layout(props: { children: JSXElement }) {
 		})
 	}
 
-	const settingsLink = () => {
-		if (currentBranch() && activeProject()) {
-			return (
-				(import.meta.env.PROD ? `https://manage.inlang.com/` : `http://localhost:4004/`) +
-				`?repo=${`github.com/${routeParams().owner}/${
-					routeParams().repository
-				}`}&branch=${currentBranch()}&project=${activeProject()}`
-			)
-		} else {
-			return (
-				(import.meta.env.PROD ? `https://manage.inlang.com/` : `http://localhost:4004/`) +
-				`?repo=${`github.com/${routeParams().owner}/${routeParams().repository}`}`
-			)
-		}
-	}
-
 	return (
 		<EditorLayout>
 			<div class="w-full flex flex-col grow bg-surface-50">
@@ -214,105 +197,144 @@ export function Layout(props: { children: JSXElement }) {
 					<sl-button
 						slot="trigger"
 						prop:size="small"
-						prop:href={settingsLink()}
-						prop:target="_blank"
-					>
+						onClick={() => setSettingsOpen(!settingsOpen())}
+						class={
+							settingsOpen()
+								? "ring-primary/50 ring-1 rounded"
+								: ""
+						}
+					>	
 						{/* @ts-ignore */}
 						<IconSettings slot="prefix" class="w-5 h-5 -ml-0.5" />
 						Settings
 					</sl-button>
 				</div>
-				<div class="flex flex-wrap justify-between gap-2 py-4 md:py-5 sticky top-[61px] z-10 bg-surface-50">
-					<div class="flex flex-wrap z-20 gap-2 items-center">
-						<Show when={project()}>
-							<For each={filterOptions()}>
-								{(filter) => (
-									<Show
-										when={
-											selectedFilters().includes(filter) &&
-											(filter.name !== "Linting" || project()?.installed.messageLintRules())
-										}
-									>
-										{filter.component}
-									</Show>
-								)}
-							</For>
-							<Show
-								when={
-									project()?.installed.messageLintRules()
-										? selectedFilters().length !== filterOptions().length
-										: selectedFilters().length !== filterOptions().length - 1
-								}
-								fallback={
-									<sl-button
-										prop:size="small"
-										onClick={() => {
-											setFilteredLanguageTags(
-												setFilteredLanguageTags(project()?.settings()?.languageTags || [])
-											)
-											setFilteredMessageLintRules([])
-											setSelectedFilters([])
-										}}
-									>
-										Clear
-									</sl-button>
-								}
-							>
-								<sl-dropdown prop:distance={8} class="animate-blendIn">
-									<sl-button prop:size="small" slot="trigger">
-										<button slot="prefix">
-											<IconAdd class="w-5 h-5 -mx-0.5" />
-										</button>
-										Filter
-									</sl-button>
-									<sl-menu>
+				<Show
+					when={
+						settingsOpen() &&
+						project()?.settings() &&
+						project()?.installed.plugins() &&
+						project()?.installed.messageLintRules()
+					}
+					fallback={
+						<>
+							<div class="flex flex-wrap justify-between gap-2 py-4 md:py-5 sticky top-[61px] z-10 bg-surface-50">
+								<div class="flex flex-wrap z-20 gap-2 items-center">
+									<Show when={project()}>
 										<For each={filterOptions()}>
 											{(filter) => (
 												<Show
 													when={
-														!selectedFilters().includes(filter) &&
+														selectedFilters().includes(filter) &&
 														(filter.name !== "Linting" || project()?.installed.messageLintRules())
 													}
 												>
-													<sl-menu-item>
-														<button
-															onClick={() => {
-																if (
-																	filter.name === "Linting" &&
-																	filteredMessageLintRules.length === 0
-																) {
-																	setFilteredMessageLintRules(
-																		project()
-																			?.installed.messageLintRules()
-																			.map((lintRule) => lintRule.id) ?? []
-																	)
-																}
-																addFilter(filter.name)
-															}}
-															class="flex gap-2 items-center w-full"
-														>
-															<div slot="prefix" class="-ml-2 mr-2">
-																{filter.icon}
-															</div>
-															{filter.name}
-														</button>
-													</sl-menu-item>
+													{filter.component}
 												</Show>
 											)}
 										</For>
-									</sl-menu>
-								</sl-dropdown>
-							</Show>
-						</Show>
-					</div>
-					<div class="flex flex-wrap gap-2">
-						<SearchInput
-							placeholder="Search ..."
-							handleChange={(text: string) => setTextSearch(text)}
+										<Show
+											when={
+												project()?.installed.messageLintRules()
+													? selectedFilters().length !== filterOptions().length
+													: selectedFilters().length !== filterOptions().length - 1
+											}
+											fallback={
+												<sl-button
+													prop:size="small"
+													onClick={() => {
+														setFilteredLanguageTags(
+															setFilteredLanguageTags(project()?.settings()?.languageTags || [])
+														)
+														setFilteredMessageLintRules([])
+														setSelectedFilters([])
+													}}
+												>
+													Clear
+												</sl-button>
+											}
+										>
+											<sl-dropdown prop:distance={8} class="animate-blendIn">
+												<sl-button prop:size="small" slot="trigger">
+													<button slot="prefix">
+														<IconAdd class="w-5 h-5 -mx-0.5" />
+													</button>
+													Filter
+												</sl-button>
+												<sl-menu>
+													<For each={filterOptions()}>
+														{(filter) => (
+															<Show
+																when={
+																	!selectedFilters().includes(filter) &&
+																	(filter.name !== "Linting" || project()?.installed.messageLintRules())
+																}
+															>
+																<sl-menu-item>
+																	<button
+																		onClick={() => {
+																			if (
+																				filter.name === "Linting" &&
+																				filteredMessageLintRules.length === 0
+																			) {
+																				setFilteredMessageLintRules(
+																					project()
+																						?.installed.messageLintRules()
+																						.map((lintRule) => lintRule.id) ?? []
+																				)
+																			}
+																			addFilter(filter.name)
+																		}}
+																		class="flex gap-2 items-center w-full"
+																	>
+																		<div slot="prefix" class="-ml-2 mr-2">
+																			{filter.icon}
+																		</div>
+																		{filter.name}
+																	</button>
+																</sl-menu-item>
+															</Show>
+														)}
+													</For>
+												</sl-menu>
+											</sl-dropdown>
+										</Show>
+									</Show>
+								</div>
+								<div class="flex flex-wrap gap-2">
+									<SearchInput
+										placeholder="Search ..."
+										handleChange={(text: string) => setTextSearch(text)}
+									/>
+								</div>
+							</div>
+							{props.children}
+						</>
+					}
+				>
+					<div class="max-w-screen-sm mx-auto pt-12 animate-fadeInBottom">
+						<h1 class="text-3xl font-semibold mb-8">inlang Project Settings</h1>
+						<inlang-settings
+							prop:settings={project()!.settings() as ReturnType<InlangProject["settings"]>}
+							prop:installedPlugins={
+								project()!.installed.plugins() as ReturnType<InlangProject["installed"]["plugins"]>
+							}
+							prop:installedMessageLintRules={
+								project()!.installed.messageLintRules() as ReturnType<
+									InlangProject["installed"]["messageLintRules"]
+								>
+							}
+							on:set-settings={(event: CustomEvent) => {
+								const _project = project()
+								if (_project) {
+									_project.setSettings(event.detail.argument)
+								} else {
+									throw new Error("Settings can not be set, because project is not defined")
+								}
+							}}
 						/>
 					</div>
-				</div>
-				{props.children}
+				</Show>
 			</div>
 			<sl-dialog
 				prop:label="Add language tag"

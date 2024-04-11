@@ -14,7 +14,6 @@ import Link from "#src/renderer/Link.jsx"
 import { browserAuth } from "@lix-js/server"
 import { currentPageContext } from "#src/renderer/state.js"
 import { replaceMetaInfo } from "./helper/ReplaceMetaInfo.js"
-import type { InlangProject } from "@inlang/sdk"
 
 export const [messageCount, setMessageCount] = createSignal(0)
 
@@ -82,33 +81,6 @@ function TheActualPage() {
 
 	return (
 		<>
-			<Show
-				when={
-					project()?.settings() &&
-					project()?.installed.plugins() &&
-					project()?.installed.messageLintRules()
-				}
-			>
-				<inlang-settings
-					prop:settings={project()!.settings() as ReturnType<InlangProject["settings"]>}
-					prop:installedPlugins={
-						project()!.installed.plugins() as ReturnType<InlangProject["installed"]["plugins"]>
-					}
-					prop:installedMessageLintRules={
-						project()!.installed.messageLintRules() as ReturnType<
-							InlangProject["installed"]["messageLintRules"]
-						>
-					}
-					on:set-settings={(event: CustomEvent) => {
-						const _project = project()
-						if (_project) {
-							_project.setSettings(event.detail.argument)
-						} else {
-							throw new Error("Settings can not be set, because project is not defined")
-						}
-					}}
-				/>
-			</Show>
 			<Switch
 				fallback={
 					<p class="text-danger">
