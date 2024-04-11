@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.38.2
+
+### Patch Changes
+
+- ef1ac34: fix settings view display
+
 ## 1.38.1
 
 ### Patch Changes
