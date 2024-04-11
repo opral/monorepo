@@ -12,9 +12,9 @@
 	},
 	"scripts": {
 		"clean": "rm -rf ./locales/de.json ./project2-dir/locales/de.json  ./project3-dir/locales/de.json ./project3-dir/project.inlang/ ./project3-dir/project.inlang.README.md",
-		"translate1": "MOCK_TRANSLATE_LOCAL=true inlang machine translate -f --project ./project.inlang",
-		"translate2": "MOCK_TRANSLATE_LOCAL=true inlang machine translate -f --project ./project2-dir/project.inlang",
-		"translate3": "MOCK_TRANSLATE_LOCAL=true inlang machine translate -f --project ./project3-dir/project.inlang",
+		"translate1": "MOCK_TRANSLATE_LOCAL=true inlang machine translate -n -f --project ./project.inlang",
+		"translate2": "MOCK_TRANSLATE_LOCAL=true inlang machine translate -n -f --project ./project2-dir/project.inlang",
+		"translate3": "MOCK_TRANSLATE_LOCAL=true inlang machine translate -n -f --project ./project3-dir/project.inlang",
 		"lint1": "pnpm inlang lint --project ./project.inlang",
 		"lint2": "pnpm inlang lint --project ./project2-dir/project.inlang",
 		"lint3": "pnpm inlang lint --project ./project3-dir/project.inlang",

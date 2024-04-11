@@ -36,7 +36,7 @@ export const maybeMigrateToDirectory = async (args: {
 	await args.nodeishFs.writeFile(args.projectPath + ".README.md", readme)
 
 	// eslint-disable-next-line no-console
-	console.log("🔔 migrated project.inlang to directory")
+	// console.log("🔔 migrated project.inlang to directory")
 }
 
 const readme = `
