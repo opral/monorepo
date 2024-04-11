@@ -1,4 +1,6 @@
-import type { Message, PathTranslations, UserPathTranslations } from "./pathTranslations.js"
+import type { UserPathTranslations } from "./pathTranslations.js"
+import type { PathDefinitionTranslations } from "@inlang/paraglide-js/internal/adapter-utils"
+import type { MessageIndexFunction } from "@inlang/paraglide-js/internal"
 
 /**
  * Fully resolves all path translations.
@@ -12,9 +14,9 @@ import type { Message, PathTranslations, UserPathTranslations } from "./pathTran
  */
 export function resolvePathTranslations<T extends string>(
 	userTranslations: UserPathTranslations<T>,
-	availableLanguageTags: readonly T[],
-): PathTranslations<T> {
-	const translations: PathTranslations<T> = {}
+	availableLanguageTags: readonly T[]
+): PathDefinitionTranslations<T> {
+	const translations: PathDefinitionTranslations<T> = {}
 	for (const path in userTranslations) {
 		const translation = userTranslations[path as `/${string}`]
 		if (!translation) continue
@@ -32,11 +34,11 @@ export function resolvePathTranslations<T extends string>(
 }
 
 function fromMessage<T extends string>(
-	message: Message<T>,
-	availableLanguageTags: readonly T[],
+	message: MessageIndexFunction<T>,
+	availableLanguageTags: readonly T[]
 ): Record<T, `/${string}`> {
 	const entries = availableLanguageTags.map(
-		(languageTag) => [languageTag, message({}, { languageTag })] as const,
+		(languageTag) => [languageTag, message({}, { languageTag })] as const
 	)
 	return Object.fromEntries(entries) as Record<T, `/${string}`>
 }
