@@ -1,5 +1,12 @@
 # inlang-vs-code-extension
 
+## 1.38.1
+
+### Patch Changes
+
+- Updated dependencies [552037b]
+  - @inlang/settings-component@1.0.0
+
 ## 1.38.0
 
 ### Minor Changes
