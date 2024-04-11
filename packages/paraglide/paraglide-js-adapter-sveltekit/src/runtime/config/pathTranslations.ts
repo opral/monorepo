@@ -1,3 +1,5 @@
+import type { MessageIndexFunction } from "@inlang/paraglide-js/internal"
+
 /**
  * Maps canonical paths to translations for each language.
  *
@@ -20,14 +22,5 @@
  * ```
  */
 export type UserPathTranslations<T extends string = string> = {
-	[canonicalPath: `/${string}`]: Record<T, `/${string}`> | Message<T>
+	[canonicalPath: `/${string}`]: Record<T, `/${string}`> | MessageIndexFunction<T>
 }
-
-export type PathTranslations<T extends string = string> = {
-	[canonicalPath: `/${string}`]: Record<T, `/${string}`>
-}
-
-export type Message<T extends string> = (
-	params: Record<string, never>,
-	options: { languageTag: T },
-) => string
