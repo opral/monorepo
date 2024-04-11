@@ -5,7 +5,7 @@ import { createNoopNavigation, createRedirects } from "./navigation"
 import { createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
 import { resolvePathTranslations } from "./pathnames/resolvePathTranslations"
-import { validatePathTranslations } from "./pathnames/validatePathTranslations"
+import { validatePathTranslations } from "@inlang/paraglide-js/internal/adapter-utils"
 import { I18nUserConfig, ResolvedI18nConfig } from "./config"
 import { PrefixStrategy } from "./routing/prefixStrategy"
 
@@ -34,7 +34,7 @@ export function createI18n<T extends string = string>(userConfig: I18nUserConfig
 	}
 
 	if (process.env.NODE_ENV === "development") {
-		const issues = validatePathTranslations(config.pathnames, availableLanguageTags as T[])
+		const issues = validatePathTranslations(config.pathnames, availableLanguageTags as T[], {})
 		if (issues.length) {
 			console.warn(
 				`The following issues were found in your path translations. Make sure to fix them before deploying your app:`
