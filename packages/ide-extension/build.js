@@ -53,7 +53,6 @@ if (isDev) {
 	// eslint-disable-next-line no-undef
 	console.info("👀 watching for changes...")
 } else {
-	await copyDependencies()
 	await ctx.rebuild()
 	// eslint-disable-next-line no-undef
 	console.info("✅ build complete")
