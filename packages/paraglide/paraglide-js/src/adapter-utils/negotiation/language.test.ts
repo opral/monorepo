@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { negotiateLanguagePreferences } from "./negotiate-language.js"
+import { negotiateLanguagePreferences } from "./language.js"
 
 describe("preferredLanguages", () => {
 	it("should return the acceptable languages", () => {
@@ -37,5 +37,4 @@ describe("preferredLanguages", () => {
 			"de",
 		])
 	})
-
 })

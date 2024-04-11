@@ -1,1 +1,2 @@
-export { negotiateLanguagePreferences } from "./negotiate-language.js"
+export { negotiateLanguagePreferences } from "./negotiation/language.js"
+export { detectLanguageFromPath } from "./routing/detectLanguage.js"
