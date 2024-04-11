@@ -1,16 +1,16 @@
 import { describe, it, expect } from "vitest"
-import { exec, parse_route_id, bestMatch } from "./routeDefinitions.js"
+import { exec, parseRouteDefinition, bestMatch } from "./routeDefinitions.js"
 
 // we're testing known-good vendored in code here, but the test are still helpful to understand the logic
 
 describe("parse_route_id", () => {
 	it("should parse a route id", () => {
-		expect(parse_route_id("/foo/bar")).toEqual({
+		expect(parseRouteDefinition("/foo/bar")).toEqual({
 			params: [],
 			pattern: /^\/foo\/bar\/?$/,
 		})
 
-		expect(parse_route_id("/[lang]/test")).toEqual({
+		expect(parseRouteDefinition("/[lang]/test")).toEqual({
 			params: [
 				{
 					chained: false,
@@ -23,7 +23,7 @@ describe("parse_route_id", () => {
 			pattern: /^\/([^/]+?)\/test\/?$/,
 		})
 
-		expect(parse_route_id("/[[lang]]/test")).toEqual({
+		expect(parseRouteDefinition("/[[lang]]/test")).toEqual({
 			params: [
 				{
 					chained: true,
@@ -43,7 +43,7 @@ describe("exec", () => {
 		const routeId = "/foo/[bar]/baz"
 		const path = "/foo/123/baz"
 
-		const route = parse_route_id(routeId)
+		const route = parseRouteDefinition(routeId)
 		const match = route.pattern.exec(path)
 		if (!match) throw new Error("no match")
 
@@ -56,7 +56,7 @@ describe("exec", () => {
 		const path1 = "/foo/123/baz"
 		const path2 = "/foo/baz"
 
-		const route = parse_route_id(routeId)
+		const route = parseRouteDefinition(routeId)
 		const match1 = route.pattern.exec(path1)
 		const match2 = route.pattern.exec(path2)
 		if (!match1) throw new Error("no match")
@@ -72,7 +72,7 @@ describe("exec", () => {
 		const routeId = "/foo/[...bar]/baz"
 		const path = "/foo/123/456/baz"
 
-		const route = parse_route_id(routeId)
+		const route = parseRouteDefinition(routeId)
 		const match = route.pattern.exec(path)
 		if (!match) throw new Error("no match")
 
@@ -84,7 +84,7 @@ describe("exec", () => {
 		const routeId = "/foo/[bar=int]/baz"
 		const path = "/foo/123/baz"
 
-		const route = parse_route_id(routeId)
+		const route = parseRouteDefinition(routeId)
 		const match = route.pattern.exec(path)
 		if (!match) throw new Error("no match")
 
@@ -96,7 +96,7 @@ describe("exec", () => {
 		const routeId = "/foo-[bar]-baz"
 		const path = "/foo-123-baz"
 
-		const route = parse_route_id(routeId)
+		const route = parseRouteDefinition(routeId)
 		const match = route.pattern.exec(path)
 		if (!match) throw new Error("no match")
 
@@ -108,7 +108,7 @@ describe("exec", () => {
 		const routeId = "/foo"
 		const path = "/foo"
 
-		const route = parse_route_id(routeId)
+		const route = parseRouteDefinition(routeId)
 		const match = route.pattern.exec(path)
 		if (!match) throw new Error("no match")
 
@@ -121,7 +121,7 @@ describe("exec", () => {
 		const path1 = "/foo/123/baz"
 		const path2 = "/foo/abc/baz"
 
-		const route = parse_route_id(routeId)
+		const route = parseRouteDefinition(routeId)
 		const match1 = route.pattern.exec(path1)
 		const match2 = route.pattern.exec(path2)
 		if (!match1) throw new Error("no match")
