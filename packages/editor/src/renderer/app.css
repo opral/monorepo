@@ -39,6 +39,23 @@ inlang-settings {
 	--sl-color-primary-800: var(--sl-color-cyan-800);
 	--sl-color-primary-900: var(--sl-color-cyan-900);
 	--sl-color-primary-950: var(--sl-color-cyan-950);
+
+	--sl-color-neutral-50: var(--sl-color-neutral-50);
+	--sl-color-neutral-100: var(--sl-color-neutral-100);
+	--sl-color-neutral-200: var(--sl-color-neutral-200);
+	--sl-color-neutral-300: var(--sl-color-neutral-300);
+	--sl-color-neutral-400: var(--sl-color-neutral-400);
+	--sl-color-neutral-500: var(--sl-color-neutral-500);
+	--sl-color-neutral-600: var(--sl-color-neutral-600);
+	--sl-color-neutral-700: var(--sl-color-neutral-700);
+	--sl-color-neutral-800: var(--sl-color-neutral-800);
+	--sl-color-neutral-900: var(--sl-color-neutral-900);
+
+	--sl-input-background-color-disabled: theme(colors.surface-2);
+	--sl-input-filled-background-color-disabled: theme(colors.secondary-on-inverted-container);
+
+	--sl-input-font-family: "Inter", sans-serif;
+	--sl-font-sans: "Inter", sans-serif;
 }
 
 /* The font Inter with variable font support (if supported) */
