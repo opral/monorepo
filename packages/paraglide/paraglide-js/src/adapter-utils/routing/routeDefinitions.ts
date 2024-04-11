@@ -1,4 +1,11 @@
-import type { RouteParam, ParamMatcher } from "@sveltejs/kit"
+type RouteParam = {
+	name: string
+	matcher: string
+	optional: boolean
+	rest: boolean
+	chained: boolean
+}
+type ParamMatcher = (segment: string) => boolean
 
 //vendored in from @sveltejs/kit utils/routing.js
 
@@ -62,8 +69,8 @@ export function parse_route_id(id: string): {
 													...content
 														.slice(2)
 														.split("-")
-														.map((code) => parseInt(code, 16)),
-												),
+														.map((code) => parseInt(code, 16))
+												)
 											)
 										}
 
@@ -73,7 +80,7 @@ export function parse_route_id(id: string): {
 										const match = /** @type {RegExpExecArray} */ param_pattern.exec(content)
 										if (!match) {
 											throw new Error(
-												`Invalid param: ${content}. Params and matcher names can only have underscores and alphanumeric characters.`,
+												`Invalid param: ${content}. Params and matcher names can only have underscores and alphanumeric characters.`
 											)
 										}
 
@@ -98,8 +105,8 @@ export function parse_route_id(id: string): {
 
 							return "/" + result
 						})
-						.join("")}/?$`,
-				)
+						.join("")}/?$`
+			  )
 
 	return { pattern, params }
 }
@@ -128,7 +135,7 @@ export function get_route_segments(route: string) {
 export function exec(
 	match: RegExpMatchArray,
 	params: RouteParam[],
-	matchers: Record<string, ParamMatcher>,
+	matchers: Record<string, ParamMatcher>
 ) {
 	const result: Record<string, string> = {}
 
@@ -157,7 +164,7 @@ export function exec(
 			continue
 		}
 
-		if (!matchers[param.matcher]) {
+		if (param.matcher && !matchers[param.matcher]) {
 			return undefined
 		}
 
@@ -249,10 +256,10 @@ export function resolve_route(id: string, params: Record<string, string | undefi
 
 					if (param_value.startsWith("/") || param_value.endsWith("/"))
 						throw new Error(
-							`Parameter '${name}' in route ${id} cannot start or end with a slash -- this would cause an invalid route like foo//bar`,
+							`Parameter '${name}' in route ${id} cannot start or end with a slash -- this would cause an invalid route like foo//bar`
 						)
 					return param_value
-				}),
+				})
 			)
 			.filter(Boolean)
 			.join("/")

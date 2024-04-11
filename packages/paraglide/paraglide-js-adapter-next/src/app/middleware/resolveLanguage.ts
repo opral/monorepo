@@ -3,7 +3,10 @@ import { RoutingStragey } from "../routing/interface"
 import { ResolvedI18nConfig } from "../config"
 import { HeaderNames, LANG_COOKIE } from "../constants"
 import { isAvailableLanguageTag } from "$paraglide/runtime.js"
-import { negotiateLanguagePreferences } from "@inlang/paraglide-js/internal/adapter-utils"
+import {
+	negotiateLanguagePreferences,
+	detectLanguageFromPath,
+} from "@inlang/paraglide-js/internal/adapter-utils"
 
 /**
  * Returns the language that should be used for this request
