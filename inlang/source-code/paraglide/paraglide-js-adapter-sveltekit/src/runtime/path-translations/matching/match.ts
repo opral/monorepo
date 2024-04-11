@@ -1,6 +1,14 @@
 import type { ParamMatcher } from "@sveltejs/kit"
 import { exec, parse_route_id } from "./routing.js"
 
+/**
+ * Returns the id and params for the route that best matches the given path.
+ * @param canonicalPath Canonical pathname excluding the base and language e.g. /foo/bar
+ * @param pathDefinitions An array of pathDefinitions
+ * @param matchers A map of param matcher functions
+ * 
+ * @returns undefined if no route matches.
+ */
 export function bestMatch(
 	canonicalPath: string,
 	pathDefinitions: string[],
