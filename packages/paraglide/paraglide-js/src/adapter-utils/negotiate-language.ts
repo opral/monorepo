@@ -90,7 +90,7 @@ export function negotiateLanguagePreferences<T extends string = string>(
 	if (availableLanguageTags.length === 0) return []
 
 	// No accept-language header -> default to * as per RFC 2616 sec 14.4
-	accept ??= "*"
+	accept ||= "*"
 
 	const acceptLanguageSpecs = parseAcceptLanguageHeader(accept)
 
