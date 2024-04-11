@@ -757,6 +757,9 @@ importers:
       '@inlang/sdk':
         specifier: workspace:*
         version: link:../sdk
+      '@inlang/settings-component':
+        specifier: workspace:*
+        version: link:../settings-component
       '@inlang/telemetry':
         specifier: workspace:*
         version: link:../telemetry
@@ -772,6 +775,9 @@ importers:
       https-proxy-agent:
         specifier: 7.0.2
         version: 7.0.2
+      lit-html:
+        specifier: ^3.1.2
+        version: 3.1.2
       require-from-string:
         specifier: ^2.0.2
         version: 2.0.2
