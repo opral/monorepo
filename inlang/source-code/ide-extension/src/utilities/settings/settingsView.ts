@@ -5,7 +5,7 @@ import { CONFIGURATION } from "../../configuration.js"
 export async function settingsPanel(args: { context: vscode.ExtensionContext }) {
 	const panel = vscode.window.createWebviewPanel(
 		"settingsPanel",
-		"Settings",
+		state().selectedProjectPath.split("/").pop() ?? "Settings",
 		vscode.ViewColumn.One,
 		{
 			enableScripts: true,
@@ -67,7 +67,7 @@ export function getWebviewContent(args: {
         </head>
         <body>
 			<main>
-				<h1>Settings</h1>
+				<h1>Project settings</h1>
 				<div id="settings-container"></div>
 			<main>
             <script type="module">
