@@ -85,7 +85,31 @@ m.hello() // Hello world!
 m.loginHeader({ name: "Samuel" }) // Hello Samuel, please login to continue.
 ```
 
-To choose between messages at runtime create a map of messages and index into it.
+## Working with the Inlang Message Format
+
+Paraglide is part of the highly modular Inlang Ecosystem. This allows you to switch between different message formats as you see fit.
+
+By default, the [Inlang Message Format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat) is used. It expects messages to be in `messages/{lang}.json`.
+
+```json
+//messages/en.json
+{
+	//the $schema key is automatically ignored 
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"hello_world: "Hello World!",
+	"greeting": "Hello {name}!"
+}
+```
+
+The `messages/{lang}.json` file contains key-value pairs of message-IDs and their translations. You can use curly braces to insert `{parameters}`.
+
+The Message Format is still quite young and will become more powerful in the future. Features like plurals, param-formatting, and markup interpolation are currently not supported but are all on our roadmap.
+
+**Nesting purposely isn't supported and likely won't be**. Nested messages are way harder to interact with from complementary tools like the [Sherlock IDE Extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension), the [Parrot Figma Plugin](https://inlang.com/m/gkrpgoir/app-parrot-figmaPlugin), or the [Fink Localization editor](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor). Intellisense also becomes less helpful since it only shows the messages at the current level. Additionally enforcing an organization-style side-steps organization discussions with other contributors. 
+
+If you need complex formatting like, plurals, dates, currency or markup interpolation you can achieve them like so:s
+
+For a message with multiple cases, aka a _select message_, you can define a message for each case & then use a Map in JS to index into it.
 
 ```ts
 import * as m from "./paraglide/messages.js"
@@ -99,6 +123,41 @@ const season = {
 
 const msg = season["spring"]() // Hello spring!
 ```
+
+For date & currency formatting use the `.toLocaleString` method on the `Date` or `Number`.
+
+```ts
+import * as m from "./paraglide/messages.js"
+import { languageTag } from "./paraglide/runtime.js"
+
+const todaysDate = new Date();
+m.today_is_the({ 
+	date: todaysDate.toLocaleString(languageTag()) 
+})
+
+const price = 100;
+m.the_price_is({
+	price: price.toLocaleString(languageTag(), {
+		style: "currency",
+		currency: "EUR",
+	})
+})
+```
+
+You can put HTML into the messages. This is useful for links and images. 
+```
+// messages/en.json
+{
+	"you_must_agree_to_the_tos": "You must agree to the <a href='/en/tos'>Terms of Service</a>."
+}
+
+// messages/de.json
+{
+	you_must_agree_to_the_tos": "Sie müssen den <a href='/de/agb'>Nutzungsbedingungen</a> zustimmen."
+}
+```
+
+There is currently no way to put full-blown components into the messages. If you require components mid-message you will need to create a one-off component that includes both the text and the components. We're working on this.
 
 ## Setting the language
 
@@ -338,6 +397,8 @@ Of course, we're not done yet! We plan on adding the following features to Parag
 - [ ] Pluralization ([Join the Discussion](https://github.com/opral/monorepo/discussions/2025))
 - [ ] Formatting of numbers and dates ([Join the Discussion](https://github.com/opral/monorepo/discussions/992))
 - [ ] Markup Placeholders ([Join the Discussion](https://github.com/opral/monorepo/discussions/913))
+- [ ] Component Interpolation
+- [ ] Per-Language Splitting without Lazy-Loading 
 - [ ] Even Smaller Output
 
 # Talks
@@ -347,7 +408,7 @@ Of course, we're not done yet! We plan on adding the following features to Parag
 - Web Zurich December 2023
 - [Svelte London January 2024](https://www.youtube.com/watch?v=eswNQiq4T2w&t=646s)
 
-# Tooling
+# Complementary Tooling
 
 Paraglide JS is part of the Inlang ecosystem and integrates nicely with all the other Inlang-compatible tools.
 
