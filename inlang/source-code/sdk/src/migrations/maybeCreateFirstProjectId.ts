@@ -42,7 +42,7 @@ export async function generateProjectId(args: { repo?: Repository; projectPath: 
 
 	if (firstCommitHash) {
 		try {
-			return await hash(`${firstCommitHash + args.projectPath}`)
+			return "1234-1234-1234" // await hash(`${firstCommitHash + args.projectPath}`)
 		} catch (error) {
 			console.error("Failed to generate project_id", error)
 		}
