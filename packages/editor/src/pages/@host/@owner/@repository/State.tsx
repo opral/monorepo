@@ -503,21 +503,23 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	const [githubRepositoryInformation, { refetch: refetchRepoInfo }] = createResource(
 		() => {
+			const loadedRepo = repo();
 			if (
 				localStorage?.user === undefined ||
 				routeParams().owner === undefined ||
 				routeParams().repository === undefined ||
-				repo() === undefined
+				loadedRepo === undefined
 			) {
 				return false
 			}
 			return {
+				repo: loadedRepo,
 				user: localStorage.user,
 				routeParams: routeParams(),
 			}
 		},
-		async () => {
-			const repoMeta = await repo()!.getMeta()
+		async ({repo: loadedRepo}) => {
+			const repoMeta = await loadedRepo.getMeta()
 			if ("error" in repoMeta) {
 				setLixErrors([repoMeta.error, ...lixErrors()])
 			}
@@ -533,7 +535,13 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	const [forkStatus, { refetch: refetchForkStatus, mutate: mutateForkStatus }] = createResource(
 		() => {
 			const repoMeta = githubRepositoryInformation()
-			if (repo() && !isForkSyncDisabled() && repoMeta && !("error" in repoMeta) && repoMeta.isFork) {
+			if (
+				repo() &&
+				!isForkSyncDisabled() &&
+				repoMeta &&
+				!("error" in repoMeta) &&
+				repoMeta.isFork
+			) {
 				return { repo: repo() }
 			} else {
 				return false
