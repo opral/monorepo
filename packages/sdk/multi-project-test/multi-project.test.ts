@@ -26,9 +26,7 @@ describe.concurrent("sanity check run behavior", () => {
 			await run("ls ./no_such_directory_here/")
 			throw new Error("should not reach this")
 		} catch (e) {
-			// @ts-ignore
-			console.error(e)
-			expect(e.code !== 0).toBeTruthy()
+			expect(e.message).toMatch("non-zero exit code")
 		}
 	})
 })
@@ -36,7 +34,6 @@ describe.concurrent("sanity check run behavior", () => {
 describe.concurrent(
 	"translate multiple projects in different directories",
 	() => {
-
 		it(
 			"project3 in project3-dir",
 			async () => {
@@ -87,7 +84,6 @@ describe.concurrent(
 			},
 			{ timeout: 10000 }
 		)
-
 	},
 	{ timeout: 50000 }
 )
@@ -103,7 +99,15 @@ function run(command: string): Promise<number> {
 			shell: true,
 			detached: false,
 		})
-		p.on("close", () => resolve(0))
-		p.on("error", (err) => reject(err))
+		p.on("close", (code) => {
+			if (code === 0) {
+				resolve(0)
+			} else {
+				reject(new Error(`${command}: non-zero exit code ${code}`))
+			}
+		})
+		p.on("error", (err) => {
+			reject(err)
+		})
 	})
 }
