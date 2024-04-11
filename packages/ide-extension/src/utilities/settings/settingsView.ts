@@ -37,18 +37,11 @@ export function getWebviewContent(args: {
 	)
 
 	const scriptUri = args.webview.asWebviewUri(
-		vscode.Uri.joinPath(
-			args.context.extensionUri,
-			"node_modules",
-			"@inlang",
-			"settings-component",
-			"dist",
-			"index.mjs"
-		)
+		vscode.Uri.joinPath(args.context.extensionUri, "assets", "settings-component.mjs")
 	)
 
 	const litHtmlUri = args.webview.asWebviewUri(
-		vscode.Uri.joinPath(args.context.extensionUri, "node_modules", "lit-html", "lit-html.js")
+		vscode.Uri.joinPath(args.context.extensionUri, "assets", "lit-html.js")
 	)
 
 	const settings = state().project.settings()
