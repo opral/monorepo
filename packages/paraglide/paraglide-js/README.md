@@ -165,7 +165,7 @@ There is currently no way to interpolate full-blown components into the messages
 
 ## Setting the language
 
-You can set the [language tag](https://www.inlang.com/m/8y8sxj09/library-inlang-languageTag) by calling `setLanguageTag()`. Any subsequent calls to either `languageTag()` or a message function will use the new language tag.
+You can set the [language tag](https://www.inlang.com/m/8y8sxj09/library-inlang-languageTag) by calling `setLanguageTag()` with the desired language, or a getter function. Any subsequent calls to either `languageTag()` or a message function will use the new language tag.
 
 ```js
 import { setLanguageTag } from "./paraglide/runtime.js"
@@ -174,11 +174,11 @@ import * as m from "./paraglide/messages.js"
 setLanguageTag("de")
 m.hello() // Hallo Welt!
 
-setLanguageTag("en")
+setLanguageTag(()=>document.documentElement.lang /* en */ )
 m.hello() // Hello world!
 ```
 
-The [language tag](https://www.inlang.com/m/8y8sxj09/library-inlang-languageTag) is global, so you need to be careful with it on the server to make sure multiple requests don't interfere with each other.
+The [language tag](https://www.inlang.com/m/8y8sxj09/library-inlang-languageTag) is global, so you need to be careful with it on the server to make sure multiple requests don't interfere with each other. Always use a getter-function that returns the current language tag _for the current request_.
 
 You will need to call `setLanguageTag` on both the server and the client since they run in separate processes.
 
@@ -200,7 +200,7 @@ setLanguageTag("de") // The language changed to de
 setLanguageTag("en") // The language changed to en
 ```
 
-A few things to know about `onSetLanguageTag()`:
+Things to know about `onSetLanguageTag()`:
 
 - You can only register one listener. If you register a second listener it will throw an error.
 - `onSetLanguageTag` shouldn't be used on the server.
@@ -223,10 +223,9 @@ const msg = m.hello({ name: "Samuel" }, { languageTag: "de" }) // Hallo Samuel!
 
 ## Lazy-Loading
 
-Paraglide consciously discourages lazy-loading translations since it seriously hurts
-your Web Vitals. Learn more about why lazy-loading is bad & what to do instead in [our blog post on lazy-loading](https://inlang.com/g/mqlyfa7l/guide-lorissigrist-dontlazyload). 
+Paraglide consciously discourages lazy-loading translations since it causes a render-fetch waterfall which seriously hurts your Web Vitals. Learn more about why lazy-loading is bad & what to do instead in [our blog post on lazy-loading](https://inlang.com/g/mqlyfa7l/guide-lorissigrist-dontlazyload). 
 
-If you want to do it anyway, lazily import the language-specific message files. Be careful with this.
+If you want to do it anyway, lazily import the language-specific message files. 
 
 ```ts
 const lazyGerman = await import("./paraglide/messages/de.js")
@@ -266,17 +265,13 @@ If you want your language files to be in a different location you can change the
 
 ```diff
 // project.inlang/settings.json
-"plugin.inlang.messageFormat": {
--	"pathPattern": "./messages/{languageTag}.json"
-+	"pathPattern": "./i18n/{languageTag}.json"
-},
+{
+	"plugin.inlang.messageFormat": {
+-		"pathPattern": "./messages/{languageTag}.json"
++		"pathPattern": "./i18n/{languageTag}.json"
+	}
+}
 ```
-
-### Lint Rules
-
-If you're using the [Sherlock VS Code extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) you might see warnings about certain messages. Perhaps they're duplicates, perhaps they're missing in one language. 
-
-You can configure which lint-rules are active in `./project.inlang/settings.json`. Simply add or remove them from the `modules` array.
 
 # Playground
 
@@ -290,11 +285,11 @@ Find examples of how to use Paraglide on CodeSandbox or in [our GitHub repositor
 
 # Architecture
 
-ParaglideJS leverages a compiler to generate vanilla JavaScript functions from your messages. We call these "message functions".
+Paraglide uses a compiler to generate JS functions from your messages. We call these "message functions". 
 
-Message Functions are fully typed using JSDoc. They are exported individually from the `messages.js` file making them tree-shakable. They aren't reactive, they just return a string.
+Message Functions are fully typed using JSDoc. They are exported individually from the `messages.js` file making them tree-shakable. When called, they return a translated string. Message functions aren't reactive in any way, if you want a translation in another language you will need to re-call them.
 
-This avoids many edge cases associated with reactivity, lazy-loading, and namespacing that other i18n libraries have to work around.
+This design avoids many edge cases with reactivity, lazy-loading, and namespacing that other i18n libraries have to work around.
 
 In addition to the message functions, ParaglideJS also emits a runtime. The runtime is used to set the language tag. It contains less than 50 LOC (lines of code) and is less than 300 bytes minified & gzipped.
 
@@ -334,16 +329,6 @@ The compiler loads an Inlang project and compiles the messages into tree-shakabl
 export const hello = (params) => `Hello ${params.name}!`
 ```
 
-## Messages
-
-By convention, we import the compiled functions with a wildcard import.
-
-```js
-import * as m from "../paraglide/messages.js"
-```
-
-Bundlers like Rollup, Webpack, or Turbopack tree-shake the messages that are not used, so using a wildcard import is perfectly fine.
-
 # Writing an Adapter
 
 An "Adapter" is a library that integrates with a framework's lifecycle and does two things:
@@ -351,7 +336,9 @@ An "Adapter" is a library that integrates with a framework's lifecycle and does 
 1. Calls `setLanguageTag()` at appropriate times to set the language
 2. Reacts to `onSetLanguageTag()`, usually by navigating or relading the page.
 
-This example adapts Paraglide to a fictitious full-stack framework.
+Many popular frameworks already have adapters available, check out the [list of available adapters](#use-it-with-your-favorite-framework).
+
+If there isn't one for your framework, you can write your own. This example adapts Paraglide to a fictitious full-stack framework.
 
 ```tsx
 import {
@@ -379,7 +366,7 @@ if (isClient) {
 
 	// When the language changes we want to re-render the page in the new language
 	// Here we just navigate to the new route
-	//
+
 	// Make sure to call `onSetLanguageTag` after `setLanguageTag` to avoid an infinite loop.
 	onSetLanguageTag((newLanguageTag) => {
 		window.location.pathname = `/${newLanguageTag}${window.location.pathname}`
