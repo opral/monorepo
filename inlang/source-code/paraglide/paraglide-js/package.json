@@ -87,6 +87,10 @@
 		"./internal": {
 			"import": "./dist/index.js",
 			"types": "./dist/index.d.ts"
+		},
+		"./internal/adapter-utils": {
+			"import": "./dist/adapter-utils/index.js",
+			"types": "./dist/adapter-utils/index.d.ts"
 		}
 	}
 }

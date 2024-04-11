@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { validatePathTranslations } from "./validatePathTranslations"
+import { validatePathTranslations } from "./validatePathTranslations.js"
 
 describe("validatePathTranslations", () => {
 	it("validates path translations", () => {

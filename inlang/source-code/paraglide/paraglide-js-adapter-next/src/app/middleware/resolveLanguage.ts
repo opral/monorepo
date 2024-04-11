@@ -3,7 +3,7 @@ import { RoutingStragey } from "../routing/interface"
 import { ResolvedI18nConfig } from "../config"
 import { HeaderNames, LANG_COOKIE } from "../constants"
 import { isAvailableLanguageTag } from "$paraglide/runtime.js"
-import { preferredLanguages } from "../utils/language"
+import { negotiateLanguagePreferences } from "@inlang/paraglide-js/internal/adapter-utils"
 
 /**
  * Returns the language that should be used for this request
@@ -27,8 +27,6 @@ export function resolveLanguage<T extends string>(
 	if (isAvailableLanguageTag(localeCookeValue)) return localeCookeValue as T
 
 	const acceptLanguage = request.headers.get(HeaderNames.AcceptLanguage)
-	if (!acceptLanguage) return config.defaultLanguage
-
-	const preferences = preferredLanguages(acceptLanguage, config.availableLanguageTags)
-	return preferences[0] ?? config.defaultLanguage
+	const preferences = negotiateLanguagePreferences(acceptLanguage, config.availableLanguageTags)
+	return preferences.at(0) ?? config.defaultLanguage
 }
