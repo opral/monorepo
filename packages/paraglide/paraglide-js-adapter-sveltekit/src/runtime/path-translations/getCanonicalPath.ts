@@ -11,7 +11,7 @@ export function getCanonicalPath(
 	translatedPath: string,
 	lang: string,
 	translations: PathTranslations,
-	matchers: Record<string, ParamMatcher>
+	matchers: Record<string, ParamMatcher>,
 ): string {
 	for (const [canonicalPathDefinition, translationsForPath] of Object.entries(translations)) {
 		if (!(lang in translationsForPath)) continue

@@ -14,7 +14,7 @@ describe("translatePath", () => {
 				availableLanguageTags: ["de", "en"],
 				defaultLanguageTag: "en",
 				prefixDefaultLanguage: "never",
-			}
+			},
 		)
 
 		expect(translatedPath).toBe(base + "/de/foo/bar")
@@ -31,7 +31,7 @@ describe("translatePath", () => {
 				availableLanguageTags: ["de", "en"],
 				defaultLanguageTag: "en",
 				prefixDefaultLanguage: "never",
-			}
+			},
 		)
 
 		expect(translatedPath).toBe(base + "/de/foo/bar/")
@@ -48,7 +48,7 @@ describe("translatePath", () => {
 				availableLanguageTags: ["de", "en"],
 				defaultLanguageTag: "en",
 				prefixDefaultLanguage: "never",
-			}
+			},
 		)
 
 		expect(translatedPath).toBe(base + "/de/foo/bar")
@@ -65,7 +65,7 @@ describe("translatePath", () => {
 				availableLanguageTags: ["de", "en"],
 				defaultLanguageTag: "en",
 				prefixDefaultLanguage: "never",
-			}
+			},
 		)
 
 		expect(translatedPath).toBe(base ? base + "/" : "/")
