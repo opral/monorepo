@@ -1,6 +1,6 @@
 import * as vscode from "vscode"
 import { CONFIGURATION } from "../../configuration.js"
-import { getPreviewLanguageTag } from "../language-tag/languageTagUtils.js"
+import { getPreviewLanguageTag } from "../../utilities/language-tag/getPreviewLanguageTag.js"
 
 let statusBarItem: vscode.StatusBarItem | undefined = undefined
 
