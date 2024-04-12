@@ -126,6 +126,6 @@ function isSubset<T>(a: Set<T>, b: Set<T>): boolean {
 /**
  * Formats the issues into a nice-looking string that can be logged
  */
-export function prettyPrintIssues(issues: PathTranslationIssue[]): string {
+export function prettyPrintPathDefinitionIssues(issues: PathTranslationIssue[]): string {
 	return issues.map((issue) => `${issue.path}: ${issue.message}`).join("\n")
 }
