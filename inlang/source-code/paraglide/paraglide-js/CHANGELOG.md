@@ -1,5 +1,12 @@
 # @inlang/paraglide-js
 
+## 1.6.1
+
+### Patch Changes
+
+- fa6aa31: Update internal adapter-utilities
+- dee5aa6: Add `--silent` option to `paraglide-js compile` command that will only log errors
+
 ## 1.6.0
 
 ### Minor Changes

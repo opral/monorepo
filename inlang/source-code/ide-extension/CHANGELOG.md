@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.39.0
+
+### Minor Changes
+
+- c9e578f: minor improvements to styling
+
 ## 1.38.2
 
 ### Patch Changes
