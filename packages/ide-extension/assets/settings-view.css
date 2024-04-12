@@ -55,8 +55,8 @@ inlang-settings {
     --sl-input-filled-background-color-disabled: var(--vscode-input-background);
     --sl-input-filled-color: var(--vscode-input-foreground);
     --sl-input-filled-color-hover: var(--vscode-input-foreground);
-    --sl-input-filled-color-focus: var(--vscode-disabledForeground);
-    --sl-input-filled-color-disabled: var(--vscode-);
+    --sl-input-filled-color-focus: var(--vscode-input-foreground);
+    --sl-input-filled-color-disabled: var(--vscode-disabledForeground);
     --sl-input-help-text-color: var(--vscode-descriptionForeground);
     /* Focus Ring */
     --sl-focus-ring-color: var(--vscode-focusBorder);
@@ -91,16 +91,20 @@ inlang-settings::part(property-paragraph) {
 }
 
 inlang-settings::part(option-wrapper) {
-    /* FIXME after https://github.com/shoelace-style/shoelace/issues/1968 */
-    background-color: var(--vscode-input-background) !important;
+    background-color: var(--vscode-input-background);
 }
 
 inlang-settings::part(option) {
     color: var(--vscode-input-foreground);
-    /* FIXME after https://github.com/shoelace-style/shoelace/issues/1968 */
-    background-color: var(--vscode-input-background) !important;
+    background-color: var(--vscode-input-background);
     font-size: 14px;
     padding: 8px 12px;
+}
+
+/* FIXME: after https://linear.app/opral/issue/INLMC-51/not-able-to-style-dropdown */
+inlang-settings[aria-selected="true"]::part(option) {
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
 }
 
 inlang-settings::part(button) {
