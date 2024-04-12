@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server"
 import { RoutingStragey } from "../routing/interface"
 import { ResolvedI18nConfig } from "../config"
-import { HeaderNames, LANG_COOKIE } from "../constants"
+import { ACCEPT_LANGUAGE_HEADER_NAME, LANG_COOKIE } from "../constants"
 import { isAvailableLanguageTag } from "$paraglide/runtime.js"
 import { negotiateLanguagePreferences } from "@inlang/paraglide-js/internal/adapter-utils"
 
@@ -26,7 +26,7 @@ export function resolveLanguage<T extends string>(
 	const localeCookeValue = request.cookies.get(LANG_COOKIE.name)?.value
 	if (isAvailableLanguageTag(localeCookeValue)) return localeCookeValue as T
 
-	const acceptLanguage = request.headers.get(HeaderNames.AcceptLanguage)
+	const acceptLanguage = request.headers.get(ACCEPT_LANGUAGE_HEADER_NAME)
 	const preferences = negotiateLanguagePreferences(acceptLanguage, config.availableLanguageTags)
 	return preferences.at(0) ?? config.defaultLanguage
 }
