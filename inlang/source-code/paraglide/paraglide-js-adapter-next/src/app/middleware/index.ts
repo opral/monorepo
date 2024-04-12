@@ -2,11 +2,11 @@ import { NextResponse } from "next/server"
 import { availableLanguageTags, isAvailableLanguageTag } from "$paraglide/runtime.js"
 import { generateLinkHeader, shouldAddLinkHeader } from "./linkHeader"
 import { HeaderNames, LANG_COOKIE } from "../constants"
+import { resolveLanguage } from "./resolveLanguage"
 import type { NextRequest } from "next/server"
 import type { RoutingStragey } from "../routing/interface"
 import type { ResolvedI18nConfig } from "../config"
-import { resolveLanguage } from "./resolveLanguage"
-import { NextURL } from "next/dist/server/web/next-url"
+import type { NextURL } from "next/dist/server/web/next-url"
 
 export function createMiddleware<T extends string>(
 	config: ResolvedI18nConfig<T>,
@@ -61,7 +61,6 @@ export function createMiddleware<T extends string>(
 				availableLanguageTags: availableLanguageTags as T[],
 				canonicalPath,
 				request,
-				currentLocale: locale,
 			})
 			response.headers.set(HeaderNames.Link, linkHeader)
 		}
