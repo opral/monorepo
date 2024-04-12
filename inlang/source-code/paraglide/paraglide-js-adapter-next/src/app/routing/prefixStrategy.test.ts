@@ -2,7 +2,7 @@ import { it, expect, describe } from "vitest"
 import { PrefixStrategy } from "./prefixStrategy"
 import { NextRequest } from "next/server"
 
-const { resolveLanguage, translatePath, getCanonicalPath, getLocalisedPath } = PrefixStrategy({
+const { resolveLanguage, getCanonicalPath, getLocalisedPath } = PrefixStrategy({
 	availableLanguageTags: ["en", "de", "de-CH"],
 	defaultLanguage: "en",
 	pathnames: {
@@ -107,51 +107,5 @@ describe("getLocalisedPath", () => {
 		expect(getLocalisedPath("/canonical-translated/1", "de-CH", { isLocaleSwitch: false })).toBe(
 			"/de-CH/uebersetzt/1"
 		)
-	})
-})
-
-describe("translatePath", () => {
-	it("adds a language prefix if there isn't one", () => {
-		expect(translatePath("/some/path", "en", "de")).toBe("/de/some/path")
-		expect(translatePath("/some/path", "en", "de-CH")).toBe("/de-CH/some/path")
-	})
-
-	it("replaces the language prefix if there is one", () => {
-		expect(translatePath("/en/some/path", "en", "de")).toBe("/de/some/path")
-		expect(translatePath("/en/some/path", "en", "de-CH")).toBe("/de-CH/some/path")
-	})
-
-	it("removes the language prefix if the new locale is the default language tag", () => {
-		expect(translatePath("/en/some/path", "en", "en")).toBe("/some/path")
-		expect(translatePath("/de/some/path", "de", "en")).toBe("/some/path")
-		expect(translatePath("/de-CH/some/path", "de-CH", "en")).toBe("/some/path")
-	})
-
-	it("does not add a language prefix if the new locale is the default language tag", () => {
-		expect(translatePath("/some/path", "en", "en")).toBe("/some/path")
-	})
-
-	it("keeps search params and hash", () => {
-		expect(translatePath("/some/path?foo=bar#hash", "en", "de")).toBe("/de/some/path?foo=bar#hash")
-		expect(translatePath("/some/path?foo=bar#hash", "en", "de-CH")).toBe(
-			"/de-CH/some/path?foo=bar#hash"
-		)
-		expect(translatePath("/some/path?foo=bar#hash", "en", "en")).toBe("/some/path?foo=bar#hash")
-	})
-
-	it("leaves excluded paths alone", () => {
-		expect(translatePath("/api/some/path", "en", "de")).toBe("/api/some/path")
-	})
-
-	it("translates paths with path translations", () => {
-		expect(translatePath("/de/uebersetzt", "de", "en")).toBe("/translated")
-		expect(translatePath("/translated", "en", "de")).toBe("/de/uebersetzt")
-		expect(translatePath("/de-CH/uebersetzt", "de-CH", "en")).toBe("/translated")
-	})
-
-	it("translates paths with path translations with params", () => {
-		expect(translatePath("/de/uebersetzt/1", "de", "en")).toBe("/translated/1")
-		expect(translatePath("/translated/1", "en", "de")).toBe("/de/uebersetzt/1")
-		expect(translatePath("/de-CH/uebersetzt/1", "de-CH", "en")).toBe("/translated/1")
 	})
 })
