@@ -109,15 +109,10 @@ export function PrefixStrategy<T extends string>({
 		return resolveRoute(translatedPath, match.params)
 	}
 
-	function translatePath(localisedPath: string, currentLocale: T, newLocale: T): string {
-		const canonicalPath = getCanonicalPath(localisedPath, currentLocale)
-		return getLocalisedPath(canonicalPath, newLocale)
-	}
 
 	return {
 		getLocalisedPath,
 		getCanonicalPath,
-		translatePath,
 		resolveLanguage,
 	}
 }
