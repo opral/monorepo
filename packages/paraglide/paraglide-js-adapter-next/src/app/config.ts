@@ -1,5 +1,8 @@
 import type { ExcludeConfig } from "./exclude"
-import type { PathTranslations, UserPathTranslations } from "./pathnames/types"
+import type {
+	UserPathDefinitionTranslations,
+	PathDefinitionTranslations,
+} from "@inlang/paraglide-js/internal/adapter-utils"
 
 export type I18nUserConfig<T extends string> = {
 	/**
@@ -41,7 +44,7 @@ export type I18nUserConfig<T extends string> = {
 	 * }
 	 * ```
 	 */
-	pathnames?: UserPathTranslations<T>
+	pathnames?: UserPathDefinitionTranslations<T>
 
 	/**
 	 * In what cases should the language be added to the URL?
@@ -70,6 +73,6 @@ export type ResolvedI18nConfig<T extends string> = {
 	availableLanguageTags: readonly T[]
 	defaultLanguage: T
 	exclude: (path: string) => boolean
-	pathnames: PathTranslations<T>
+	pathnames: PathDefinitionTranslations<T>
 	prefix: "all" | "except-default" | "never"
 }

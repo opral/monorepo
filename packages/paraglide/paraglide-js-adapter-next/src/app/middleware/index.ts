@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server"
 import { availableLanguageTags, isAvailableLanguageTag } from "$paraglide/runtime.js"
 import { generateLinkHeader, shouldAddLinkHeader } from "./linkHeader"
-import { HeaderNames, LANG_COOKIE } from "../constants"
+import { LANG_COOKIE, PARAGLIDE_LANGUAGE_HEADER_NAME, LINK_HEADER_NAME } from "../constants"
+import { resolveLanguage } from "./resolveLanguage"
 import type { NextRequest } from "next/server"
 import type { RoutingStragey } from "../routing/interface"
 import type { ResolvedI18nConfig } from "../config"
-import { resolveLanguage } from "./resolveLanguage"
-import { NextURL } from "next/dist/server/web/next-url"
+import type { NextURL } from "next/dist/server/web/next-url"
 
 export function createMiddleware<T extends string>(
 	config: ResolvedI18nConfig<T>,
@@ -22,7 +22,9 @@ export function createMiddleware<T extends string>(
 
 		const decodedPathname = decodeURI(request.nextUrl.pathname)
 		const canonicalPath = strategy.getCanonicalPath(decodedPathname, locale)
-		const localisedPathname = strategy.getLocalisedPath(canonicalPath, locale)
+		const localisedPathname = strategy.getLocalisedPath(canonicalPath, locale, {
+			isLocaleSwitch: false,
+		})
 
 		const shouldRedirect = localisedPathname !== decodedPathname
 
@@ -32,7 +34,7 @@ export function createMiddleware<T extends string>(
 		if (config.exclude(canonicalPath)) return NextResponse.next()
 
 		const headers = new Headers(request.headers)
-		headers.set(HeaderNames.ParaglideLanguage, locale)
+		headers.set(PARAGLIDE_LANGUAGE_HEADER_NAME, locale)
 
 		const rewriteRequired = request.nextUrl.pathname !== canonicalPath
 		const requestInit: RequestInit = {
@@ -59,9 +61,8 @@ export function createMiddleware<T extends string>(
 				availableLanguageTags: availableLanguageTags as T[],
 				canonicalPath,
 				request,
-				currentLocale: locale,
 			})
-			response.headers.set(HeaderNames.Link, linkHeader)
+			response.headers.set(LINK_HEADER_NAME, linkHeader)
 		}
 
 		return response

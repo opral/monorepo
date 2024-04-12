@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 0.32.0
+
+### Minor Changes
+
+- bc9875d: sdk multi-project test, MOCK_TRANSLATE_LOCAL for no server testing, inlang machine translate --nobar (-b) hides progressbar
+
 ## 0.31.0
 
 ### Minor Changes

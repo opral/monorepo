@@ -1,5 +1,18 @@
 # @inlang/settings-component
 
+## 1.0.0
+
+### Major Changes
+
+- 552037b: First fully releasable version of the settings componeny
+
+## 0.0.16
+
+### Patch Changes
+
+- Updated dependencies [bc9875d]
+  - @inlang/sdk@0.32.0
+
 ## 0.0.15
 
 ### Patch Changes
