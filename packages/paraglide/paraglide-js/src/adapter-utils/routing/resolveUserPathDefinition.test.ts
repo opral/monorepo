@@ -1,23 +1,25 @@
 import { describe, it, expect } from "vitest"
-import { resolvePathTranslations } from "./resolvePathTranslations"
-import type { UserPathTranslations } from "./types"
+import {
+	resolveUserPathDefinitions,
+	type UserPathDefinitionTranslations,
+} from "./resolveUserPathDefinitions.js"
 
 describe("resolvePathTranslations", () => {
 	it("leaves object translations as is", () => {
-		const userTranslations: UserPathTranslations<"en" | "de"> = {
+		const userTranslations: UserPathDefinitionTranslations<"en" | "de"> = {
 			"/about": {
 				en: "/about",
 				de: "/ueber-uns",
 			},
 		}
 		const availableLanguageTags = ["en", "de"] as const
-		const result = resolvePathTranslations(userTranslations, availableLanguageTags)
+		const result = resolveUserPathDefinitions(userTranslations, availableLanguageTags)
 		expect(result).toEqual(userTranslations)
 	})
 
 	it("resolves message translations", () => {
-		const userTranslations: UserPathTranslations<"en" | "de"> = {
-			"/about": (_, { languageTag }) => {
+		const userTranslations: UserPathDefinitionTranslations<"en" | "de"> = {
+			"/about": (_, { languageTag }: { languageTag: "en" | "de" }) => {
 				switch (languageTag) {
 					case "en":
 						return "/about"
@@ -28,7 +30,7 @@ describe("resolvePathTranslations", () => {
 		}
 
 		const availableLanguageTags = ["en", "de"] as const
-		const result = resolvePathTranslations(userTranslations, availableLanguageTags)
+		const result = resolveUserPathDefinitions(userTranslations, availableLanguageTags)
 		expect(result).toEqual({
 			"/about": {
 				en: "/about",

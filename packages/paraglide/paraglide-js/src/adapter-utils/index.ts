@@ -9,4 +9,11 @@ export {
 	type ParamMatcher,
 	type RouteParam,
 } from "./routing/routeDefinitions.js"
-export { validatePathTranslations, prettyPrintIssues } from "./routing/validatePathTranslations.js"
+export {
+	validatePathTranslations,
+	prettyPrintPathDefinitionIssues,
+} from "./routing/validatePathTranslations.js"
+export {
+	resolveUserPathDefinitions,
+	type UserPathDefinitionTranslations,
+} from "./routing/resolveUserPathDefinitions.js"

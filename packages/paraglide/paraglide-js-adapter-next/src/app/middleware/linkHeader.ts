@@ -16,20 +16,20 @@ export function generateLinkHeader<T extends string>(
 		canonicalPath,
 		availableLanguageTags,
 		request,
-		currentLocale,
 	}: {
 		canonicalPath: string
 		availableLanguageTags: readonly T[]
 		request: NextRequest
-		currentLocale: T
 	}
 ): string {
 	const alternates: string[] = []
 
 	for (const lang of availableLanguageTags) {
-		const translatedPathname = strategy.translatePath(canonicalPath, currentLocale, lang)
-		const encodedPathname = encodeURI(translatedPathname)
+		const localizedPathname = strategy.getLocalisedPath(canonicalPath, lang, {
+			isLocaleSwitch: false,
+		})
 
+		const encodedPathname = encodeURI(localizedPathname)
 		const withBase = addPathPrefix(encodedPathname, request.nextUrl.basePath)
 
 		//withBase should be an absolute path, so this should never do relative path resolution
