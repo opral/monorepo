@@ -293,6 +293,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					newRepo.nodeishFs.watch = () => {}
 
 					setLastPullTime(new Date())
+					setLocalChanges(0)
 					// Invalidate the project while we switch branches
 					setProject(undefined)
 					return newRepo
