@@ -171,7 +171,7 @@ export async function generateMetadata() {
 
 If you want a Link to be in a specific language you can use the `locale` prop.
 
-```
+```tsx
 <Link href="/about" locale="de">
 ```
 
