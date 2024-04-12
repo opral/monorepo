@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest"
 import {
-	resolvePathTranslations,
+	resolveUserPathDefinitions,
 	type UserPathDefinitionTranslations,
 } from "./resolveUserPathDefinitions.js"
 
@@ -13,7 +13,7 @@ describe("resolvePathTranslations", () => {
 			},
 		}
 		const availableLanguageTags = ["en", "de"] as const
-		const result = resolvePathTranslations(userTranslations, availableLanguageTags)
+		const result = resolveUserPathDefinitions(userTranslations, availableLanguageTags)
 		expect(result).toEqual(userTranslations)
 	})
 
@@ -30,7 +30,7 @@ describe("resolvePathTranslations", () => {
 		}
 
 		const availableLanguageTags = ["en", "de"] as const
-		const result = resolvePathTranslations(userTranslations, availableLanguageTags)
+		const result = resolveUserPathDefinitions(userTranslations, availableLanguageTags)
 		expect(result).toEqual({
 			"/about": {
 				en: "/about",
