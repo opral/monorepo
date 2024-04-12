@@ -116,9 +116,10 @@ export class DefaultObjectInput extends LitElement {
 			}
 			this.value[this._inputKey as any] = this._inputValue
 			this.handleInlangProjectChange(this.value, this.property, this.moduleId)
+			this._inputValue = "null"
 			this._inputValue = undefined
+			this._inputKey = "null"
 			this._inputKey = undefined
-			this.requestUpdate()
 		}
 	}
 
@@ -126,9 +127,10 @@ export class DefaultObjectInput extends LitElement {
 		if (this.value) {
 			delete this.value[key]
 			this.handleInlangProjectChange(this.value, this.property, this.moduleId)
+			this._inputValue = "null"
 			this._inputValue = undefined
+			this._inputKey = "null"
 			this._inputKey = undefined
-			this.requestUpdate()
 		}
 	}
 

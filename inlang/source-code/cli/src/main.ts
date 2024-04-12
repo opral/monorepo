@@ -2,7 +2,7 @@ import { Command } from "commander"
 import { machine } from "./commands/machine/index.js"
 import { module } from "./commands/module/index.js"
 import { version } from "../package.json"
-import consola, { Consola } from "consola"
+// import consola, { Consola } from "consola"
 import { initErrorMonitoring } from "./services/error-monitoring/implementation.js"
 import { open } from "./commands/open/index.js"
 import fetchPolyfill from "node-fetch"
@@ -21,8 +21,9 @@ if (typeof fetch === "undefined") {
 
 initErrorMonitoring()
 // checks whether the gitOrigin corresponds to the pattern
+
 // beautiful logging
-;(consola as unknown as Consola).wrapConsole()
+// ;(consola as unknown as Consola).wrapConsole()
 
 // --------------- CLI ---------------
 

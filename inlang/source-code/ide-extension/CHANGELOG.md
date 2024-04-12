@@ -1,5 +1,38 @@
 # inlang-vs-code-extension
 
+## 1.38.2
+
+### Patch Changes
+
+- ef1ac34: fix settings view display
+
+## 1.38.1
+
+### Patch Changes
+
+- Updated dependencies [552037b]
+  - @inlang/settings-component@1.0.0
+
+## 1.38.0
+
+### Minor Changes
+
+- 32c8b9f: release settings view
+
+## 1.37.0
+
+### Minor Changes
+
+- 84268d5: introduce inlang settings component
+
+### Patch Changes
+
+- Updated dependencies [bc9875d]
+  - @inlang/sdk@0.32.0
+  - @inlang/rpc@0.3.8
+  - @inlang/settings-component@0.0.16
+  - @inlang/telemetry@0.3.22
+
 ## 1.36.8
 
 ### Patch Changes

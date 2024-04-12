@@ -66,31 +66,47 @@ describe("getCanonicalPath", () => {
 
 describe("getLocalisedPath", () => {
 	it("adds a language prefix if there isn't one", () => {
-		expect(getLocalisedPath("/", "de")).toBe("/de")
-		expect(getLocalisedPath("/", "de-CH")).toBe("/de-CH")
-		expect(getLocalisedPath("/", "en")).toBe("/")
-		expect(getLocalisedPath("/some/path", "de")).toBe("/de/some/path")
-		expect(getLocalisedPath("/some/path", "de-CH")).toBe("/de-CH/some/path")
+		expect(getLocalisedPath("/", "de", { isLocaleSwitch: false })).toBe("/de")
+		expect(getLocalisedPath("/", "de-CH", { isLocaleSwitch: false })).toBe("/de-CH")
+		expect(getLocalisedPath("/", "en", { isLocaleSwitch: false })).toBe("/")
+		expect(getLocalisedPath("/some/path", "de", { isLocaleSwitch: false })).toBe("/de/some/path")
+		expect(getLocalisedPath("/some/path", "de-CH", { isLocaleSwitch: false })).toBe(
+			"/de-CH/some/path"
+		)
 	})
 
 	it("does not add a language prefix if the new locale is the source language tag", () => {
-		expect(getLocalisedPath("/some/path", "en")).toBe("/some/path")
+		expect(getLocalisedPath("/some/path", "en", { isLocaleSwitch: false })).toBe("/some/path")
 	})
 
 	it("does not localise excluded paths", () => {
-		expect(getLocalisedPath("/api/some/path", "de")).toBe("/api/some/path")
+		expect(getLocalisedPath("/api/some/path", "de", { isLocaleSwitch: false })).toBe(
+			"/api/some/path"
+		)
 	})
 
 	it("get's translated paths", () => {
-		expect(getLocalisedPath("/canonical-translated", "de")).toBe("/de/uebersetzt")
-		expect(getLocalisedPath("/canonical-translated", "en")).toBe("/translated")
-		expect(getLocalisedPath("/canonical-translated", "de-CH")).toBe("/de-CH/uebersetzt")
+		expect(getLocalisedPath("/canonical-translated", "de", { isLocaleSwitch: false })).toBe(
+			"/de/uebersetzt"
+		)
+		expect(getLocalisedPath("/canonical-translated", "en", { isLocaleSwitch: false })).toBe(
+			"/translated"
+		)
+		expect(getLocalisedPath("/canonical-translated", "de-CH", { isLocaleSwitch: false })).toBe(
+			"/de-CH/uebersetzt"
+		)
 	})
 
 	it("get's translated paths with params", () => {
-		expect(getLocalisedPath("/canonical-translated/1", "de")).toBe("/de/uebersetzt/1")
-		expect(getLocalisedPath("/canonical-translated/1", "en")).toBe("/translated/1")
-		expect(getLocalisedPath("/canonical-translated/1", "de-CH")).toBe("/de-CH/uebersetzt/1")
+		expect(getLocalisedPath("/canonical-translated/1", "de", { isLocaleSwitch: false })).toBe(
+			"/de/uebersetzt/1"
+		)
+		expect(getLocalisedPath("/canonical-translated/1", "en", { isLocaleSwitch: false })).toBe(
+			"/translated/1"
+		)
+		expect(getLocalisedPath("/canonical-translated/1", "de-CH", { isLocaleSwitch: false })).toBe(
+			"/de-CH/uebersetzt/1"
+		)
 	})
 })
 

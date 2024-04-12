@@ -83,8 +83,8 @@ export class DefaultArrayInput extends LitElement {
 		if (this._inputValue && this._inputValue.trim() !== "") {
 			this.value ? this.value.push(this._inputValue) : (this.value = [this._inputValue])
 			this.handleInlangProjectChange(this.value, this.property, this.moduleId)
+			this._inputValue = "null"
 			this._inputValue = undefined
-			this.requestUpdate()
 		}
 	}
 
@@ -92,8 +92,8 @@ export class DefaultArrayInput extends LitElement {
 		if (this.value) {
 			this.value.splice(index, 1)
 			this.handleInlangProjectChange(this.value, this.property, this.moduleId)
+			this._inputValue = "null"
 			this._inputValue = undefined
-			this.requestUpdate()
 		}
 	}
 

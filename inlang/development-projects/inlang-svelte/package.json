@@ -10,7 +10,7 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch"
 	},
 	"devDependencies": {
-		"@inlang/sdk-js": "file:../../../..",
+		"@inlang/sdk": "workspace:*",
 		"@sveltejs/adapter-auto": "^2.0.1",
 		"@sveltejs/adapter-static": "^2.0.2",
 		"@sveltejs/adapter-vercel": "^2.4.3",
