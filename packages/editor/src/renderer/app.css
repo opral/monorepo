@@ -49,6 +49,15 @@ inlang-settings::part(base) {
 	padding-bottom: 2.25rem;
 }
 
+inlang-settings::part(module-title) {
+	font-size: 1.375rem;
+	font-weight: 600;
+}
+
+inlang-settings::part(property-title) {
+	font-weight: 600;
+}
+
 inlang-settings::part(button) {
 	--sl-color-neutral-0: theme(colors.on-inverted-surface);
 	--sl-color-neutral-700: theme(colors.inverted-surface);
