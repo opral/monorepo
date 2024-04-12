@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/paraglide-js-adapter-rollup",
-	"version": "1.0.43",
+	"version": "1.0.44",
 	"description": "Rollup adapter for Paraglide.js",
 	"license": "Apache-2.0",
 	"type": "module",

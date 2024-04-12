@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/paraglide-js-adapter-next-example-turbo",
-	"version": "0.1.15",
+	"version": "0.1.16",
 	"private": true,
 	"scripts": {
 		"_dev": "next dev --turbo",
