@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { availableLanguageTags, isAvailableLanguageTag } from "$paraglide/runtime.js"
 import { generateLinkHeader, shouldAddLinkHeader } from "./linkHeader"
-import { HeaderNames, LANG_COOKIE } from "../constants"
+import { LANG_COOKIE, PARAGLIDE_LANGUAGE_HEADER_NAME, LINK_HEADER_NAME } from "../constants"
 import { resolveLanguage } from "./resolveLanguage"
 import type { NextRequest } from "next/server"
 import type { RoutingStragey } from "../routing/interface"
@@ -34,7 +34,7 @@ export function createMiddleware<T extends string>(
 		if (config.exclude(canonicalPath)) return NextResponse.next()
 
 		const headers = new Headers(request.headers)
-		headers.set(HeaderNames.ParaglideLanguage, locale)
+		headers.set(PARAGLIDE_LANGUAGE_HEADER_NAME, locale)
 
 		const rewriteRequired = request.nextUrl.pathname !== canonicalPath
 		const requestInit: RequestInit = {
@@ -62,7 +62,7 @@ export function createMiddleware<T extends string>(
 				canonicalPath,
 				request,
 			})
-			response.headers.set(HeaderNames.Link, linkHeader)
+			response.headers.set(LINK_HEADER_NAME, linkHeader)
 		}
 
 		return response
