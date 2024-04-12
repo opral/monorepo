@@ -216,6 +216,8 @@ export function Layout(props: { children: JSXElement }) {
 	function handleRequestClose(event: { detail: { source: string }; preventDefault: () => void }) {
 		if (event.detail.source === 'overlay') {
 			event.preventDefault();
+		} else {
+			setSettingsModalOpen(false)
 		}
 	}
 
