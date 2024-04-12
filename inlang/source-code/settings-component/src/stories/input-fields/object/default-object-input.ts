@@ -39,10 +39,10 @@ export class DefaultObjectInput extends LitElement {
 				justify-content: flex-start;
 				margin-left: 6px;
 				cursor: pointer;
-				color: var(--sl-color-gray-500);
+				color: var(--sl-input-placeholder-color);
 			}
 			.remove-icon:hover {
-				color: var(--sl-color-gray-950);
+				color: var(--sl-input-color);
 			}
 			.list-container {
 				display: flex;
@@ -116,9 +116,10 @@ export class DefaultObjectInput extends LitElement {
 			}
 			this.value[this._inputKey as any] = this._inputValue
 			this.handleInlangProjectChange(this.value, this.property, this.moduleId)
+			this._inputValue = "null"
 			this._inputValue = undefined
+			this._inputKey = "null"
 			this._inputKey = undefined
-			this.requestUpdate()
 		}
 	}
 
@@ -126,9 +127,10 @@ export class DefaultObjectInput extends LitElement {
 		if (this.value) {
 			delete this.value[key]
 			this.handleInlangProjectChange(this.value, this.property, this.moduleId)
+			this._inputValue = "null"
 			this._inputValue = undefined
+			this._inputKey = "null"
 			this._inputKey = undefined
-			this.requestUpdate()
 		}
 	}
 
@@ -227,6 +229,7 @@ export class DefaultObjectInput extends LitElement {
 				>
 				</sl-input>
 				<sl-button
+					exportparts="base:button"
 					size="small"
 					variant="neutral"
 					@click=${() => {

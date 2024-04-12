@@ -1,13 +1,17 @@
-import { matches } from "./matching/match.js"
-import { resolvePath } from "./matching/resolvePath.js"
-import type { PathTranslations } from "../config/pathTranslations.js"
+import {
+	resolveRoute,
+	bestMatch,
+	type PathDefinitionTranslations,
+} from "@inlang/paraglide-js/internal/adapter-utils"
+import type { ParamMatcher } from "@sveltejs/kit"
 
 export function getTranslatedPath(
 	canonicalPath: string,
 	lang: string,
-	translations: PathTranslations,
+	translations: PathDefinitionTranslations,
+	matchers: Record<string, ParamMatcher>
 ) {
-	const match = matches(canonicalPath, Object.keys(translations))
+	const match = bestMatch(canonicalPath, Object.keys(translations), matchers)
 	if (!match) return canonicalPath
 
 	const translationsForPath = translations[match.id as `/${string}`]
@@ -16,5 +20,5 @@ export function getTranslatedPath(
 	const translatedPath = translationsForPath[lang]
 	if (!translatedPath) return canonicalPath
 
-	return resolvePath(translatedPath, match.params)
+	return resolveRoute(translatedPath, match.params)
 }

@@ -9,6 +9,7 @@ import {
 	type InstalledMessageLintRule,
 } from "@inlang/sdk"
 import checkOptional from "./../helper/checkOptional.js"
+import overridePrimitiveColors from "./../helper/overridePrimitiveColors.js"
 
 import "./input-fields/general-input.js"
 
@@ -75,6 +76,10 @@ export default class InlangSettings extends LitElement {
 				font-size: 14px;
 				margin: 0;
 			}
+			.test {
+				width: 50px;
+				height: 50px;
+			}
 		`,
 	]
 
@@ -111,6 +116,9 @@ export default class InlangSettings extends LitElement {
 		if (this.settings) {
 			this._newSettings = JSON.parse(JSON.stringify(this.settings))
 		}
+
+		//override primitive colors to match the design system
+		overridePrimitiveColors()
 	}
 
 	handleInlangProjectChange = (
@@ -151,6 +159,7 @@ export default class InlangSettings extends LitElement {
 	_saveChanges = () => {
 		if (this._newSettings) {
 			this.dispatchOnSetSettings(this._newSettings)
+			this.settings = JSON.parse(JSON.stringify(this._newSettings))
 		}
 		this._unsavedChanges = false
 	}
@@ -213,10 +222,12 @@ export default class InlangSettings extends LitElement {
 								return key === "internal"
 									? html`
 											<general-input
-												exportparts="property, property-title, property-paragraph"
+												exportparts="property, property-title, property-paragraph, option, option-wrapper, button"
 												.property=${property}
 												.modules=${this.installedMessageLintRules || []}
-												.value=${this._newSettings?.[property as keyof typeof this._newSettings]}
+												.value=${structuredClone(
+													this._newSettings?.[property as keyof typeof this._newSettings]
+												)}
 												.schema=${schema}
 												.handleInlangProjectChange=${this.handleInlangProjectChange}
 												.required=${checkOptional(value.schema, property)}
@@ -224,11 +235,11 @@ export default class InlangSettings extends LitElement {
 									  `
 									: html`
 											<general-input
-												exportparts="property, property-title, property-paragraph"
+												exportparts="property, property-title, property-paragraph, option, option-wrapper, button"
 												.property=${property}
 												.value=${
 													// @ts-ignore
-													this._newSettings?.[key]?.[property]
+													structuredClone(this._newSettings?.[key]?.[property])
 												}
 												.schema=${schema}
 												.moduleId=${key}
@@ -246,6 +257,7 @@ export default class InlangSettings extends LitElement {
 							<p class="hover-bar-text">Attention, you have unsaved changes.</p>
 							<div>
 								<sl-button
+									exportparts="base:button"
 									size="small"
 									@click=${() => {
 										this._revertChanges()
