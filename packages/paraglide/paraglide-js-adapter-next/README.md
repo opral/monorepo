@@ -209,7 +209,7 @@ The adapter follows these steps to determine the language.
 - First, the adapter will try to determine the language based on the URL.
 - If that fails, it will look for a `NEXT_LOCALE` cookie.
 - If that isn't available either, it will try to negotiate the language based on the `Accept-Language` header.
-- Finally it will fallback to the default language.
+- Finally, it will fall back to the default language.
 
 If a language has been determined once, it will set the `NEXT_LOCALE` cookie so that future ambiguities don't result in random language switches.
 
@@ -282,7 +282,7 @@ localizePathname("/about", "de") // de/ueber-uns
 
 This does not include the `basePath`.
 
-#### SEO
+### Alternate Links
 
 Search engines like Google expect you to tell them about translated versions of your pages. The adapter does this by default by adding the `Link` Header to requests.
 
@@ -309,7 +309,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 	//...
 ```
 
-> We discourage using the `Intl.Locale` API for text-direction as that's still poorly supported
+> We discourage using the `Intl.Locale` API for text-direction as it's still poorly supported
 
 ## (Legacy) Setup With the Pages Router
 
