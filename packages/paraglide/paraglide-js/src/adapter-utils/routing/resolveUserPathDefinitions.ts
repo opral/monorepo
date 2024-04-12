@@ -51,12 +51,10 @@ export const resolvePathTranslations = <T extends string>(
 		])
 	)
 
-function fromMessage<T extends string>(
+const fromMessage = <T extends string>(
 	message: MessageIndexFunction<T>,
 	availableLanguageTags: readonly T[]
-): Record<T, `/${string}`> {
-	const entries = availableLanguageTags.map(
-		(languageTag) => [languageTag, message({}, { languageTag })] as const
-	)
-	return Object.fromEntries(entries) as Record<T, `/${string}`>
-}
+): Record<T, `/${string}`> =>
+	Object.fromEntries(
+		availableLanguageTags.map((languageTag) => [languageTag, message({}, { languageTag })])
+	) as Record<T, `/${string}`>
