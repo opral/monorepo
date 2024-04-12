@@ -43,7 +43,7 @@ export default paraglide({
 })
 ```
 
-### Step 2. Initialise the Adapter
+### Step 2. Initialize the Adapter
 
 Create a `src/lib/i18n.ts` file
 
@@ -99,7 +99,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 ### Step 5. Use the localized navigation APIs
 
-In order to get localised `<Link>`s you need to replace the ones from `next/link` with the ones from `@/lib/i18n.js`. Just find & replace the imports.
+To get localized `<Link>`s you need to replace the ones from `next/link` with the ones from `@/lib/i18n.js`. Just find & replace the imports.
 
 ```diff
 - import Link from "next/link"
@@ -115,9 +115,9 @@ The same goes for the other navigation APIs.
 
 ### Done!
 
-You have set up localised routing! Try visiting `/de` or whatever language you have configured.
+You have set up localized routing! Try visiting `/de` or whatever language you have configured.
 
-Use messages by importing them from `@/paraglide/messages.js`. By convention we do a wildcard import as `m`.
+Use messages by importing them from `@/paraglide/messages.js`. By convention, we do a wildcard import as `m`.
 
 ```tsx
 import * as m from "@/paraglide/messages.js"
@@ -151,7 +151,7 @@ export async function generateMetadata() {
 
 > If you were to use `export const metadata` your metadata would always end up in the source language.
 
-### Linking to Pages in other Languages
+### Linking to Pages in Other Languages
 
 If you want a Link to be in a specific language you can use the `locale` prop.
 
@@ -193,7 +193,7 @@ Excluded routes won't be prefixed with the language tag & the middleware will no
 
 #### Changing the default language
 
-By default the default language is the `sourceLanguageTag` defined in `project.inlang/settings.json`. You can change it with the `defaultLanguage` option.
+By default, the default language is the `sourceLanguageTag` defined in `project.inlang/settings.json`. You can change it with the `defaultLanguage` option.
 
 ```ts
 export const { ... } =
@@ -216,20 +216,38 @@ If a language has been determined once, it will set the `NEXT_LOCALE` cookie so 
 #### Translated Pathnames
 
 You can use different pathnames for each language with the `pathname` option.
+Pathnames should not include a language prefix or the base path.
 
 ```ts
 export const { ... } =
 	createI18n<AvailableLanguageTag>({
 		pathname: {
 			"/about": {
-				de: "/ueber-uns",
-				en: "/about"
+				en: "/about",
+				de: "/ueber-uns"
 			}
 		}
 	})
 ```
+ 
+You can use parameters in pathnames with square brackets. You have to use an identical set of parameters in both the canonical and translated pathnames.
 
-You can also use a message as a pathname
+You can use double-square brackets for optional parameters and the spread operator to make it a match-all parameter.
+
+```ts
+pathname: {
+	"/articles/[slug]": {
+		en: "/articles/[slug]",
+		de: "/artikel/[slug]"
+	},
+	"/admin/[...rest]": {
+		en: "/administration/[...rest]",
+		de: "/admin/[...rest]"
+	},
+}
+```
+
+You can also use a message as a pathname. The translation will be used as the pathname. You can use parameters here too. 
 
 ```json
 // messages/en.json
@@ -253,9 +271,9 @@ export const { ... } =
 
 Be careful when using translated pathnames in combination with `prefix: "never"`. Links may not work if they are shared between people with different languages.
 
-#### Getting a localised Pathname
+#### Getting a localized Pathname
 
-There are situations where you need to know the localised version of a pathname. You can use the `localizePathname` function for that.
+There are situations where you need to know the localized version of a pathname. You can use the `localizePathname` function for that.
 
 ```ts
 import { localizePathname } from "@/lib/i18n"
@@ -293,9 +311,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 > We discourage using the `Intl.Locale` API for text-direction as that's still poorly supported
 
-## (legacy) Setup With the Pages Router
+## (Legacy) Setup With the Pages Router
 
-The Pages router already comes with [i18n support out of the box](https://nextjs.org/docs/advanced-features/i18n-routing). Thus, Paraglide doesn't need to provide it's own routing. All the Adapter does in the Pages router is react to the language change.
+The Pages router already comes with [i18n support out of the box](https://nextjs.org/docs/advanced-features/i18n-routing). Thus, Paraglide doesn't need to provide routing. All the Adapter does in the Pages router is react to the language change.
 
 Add an `i18n` object to your `next.config.js` file. In it, specify the locales you want to support and the default locale. Make sure these match the ones in your `project.inlang/settings.json` file.
 
@@ -353,11 +371,11 @@ export default function Document() {
 
 ## Known Limitations
 
-There are some known limitation with this adapter:
+There are some known limitations with this adapter:
 
 - `output: static` isn't supported yet.
-- Evaluating messages in the module-scope in server components always renders the source language.
-- Server actions that aren't inside a tsx file will always read the default language, unless `setLanguageTag(()=>headers().get("x-language-tag"))` is called at the top of the file.
+- Evaluating messages in the module scope in server components always renders the source language.
+- Server actions that aren't inside a tsx file will always read the default language unless `setLanguageTag(()=>headers().get("x-language-tag"))` is called at the top of the file.
 
 ## Roadmap to 1.0
 
