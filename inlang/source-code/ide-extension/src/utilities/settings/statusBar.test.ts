@@ -82,8 +82,16 @@ describe("showStatusBar", () => {
 	})
 
 	it("should do nothing if sourceLanguageTag is not available", async () => {
-		// @ts-expect-error
-		vi.mocked(state).mockReturnValueOnce({ project: undefined })
+		// Modify the mock for state to return a more defensive structure
+		vi.mocked(state).mockReturnValueOnce({
+			project: {
+				settings: () => ({
+					// @ts-expect-error
+					sourceLanguageTag: undefined,
+					languageTags: ["en", "fr"],
+				}),
+			},
+		})
 		await showStatusBar()
 		expect(vscode.window.createStatusBarItem).not.toHaveBeenCalled()
 	})
