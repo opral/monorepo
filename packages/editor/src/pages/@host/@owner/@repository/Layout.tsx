@@ -39,6 +39,7 @@ export function Layout(props: { children: JSXElement }) {
 	const {
 		refetchRepo,
 		forkStatus,
+		setLocalChanges,
 		userIsCollaborator,
 		project,
 		lixErrors,
@@ -51,6 +52,7 @@ export function Layout(props: { children: JSXElement }) {
 		setFilteredIds,
 		languageTags,
 		routeParams,
+		lastPullTime
 	} = useEditorState()
 
 	const [localStorage, setLocalStorage] = useLocalStorage()
@@ -60,7 +62,6 @@ export function Layout(props: { children: JSXElement }) {
 	}
 
 	const [forkStatusModalOpen, setForkStatusModalOpen] = createSignal(false)
-	const [settingsOpen, setSettingsOpen] = createSignal(false)
 	const [openedGitHub, setOpenedGitHub] = createSignal(false)
 
 	createEffect(() => {
@@ -185,6 +186,39 @@ export function Layout(props: { children: JSXElement }) {
 		})
 	}
 
+	// Settings modal related
+	const [settingsModalOpen, setSettingsModalOpen] = createSignal(false)
+	// eslint-disable-next-line solid/reactivity
+	const [, setHasChanges] = createSignal(false)
+	const [previousSettings, setPreviousSettings] = createSignal()
+
+	createEffect(on(lastPullTime, () => setPreviousSettings()))
+	createEffect(on(project, () => {
+		// set once after last pull and the project is loaded
+		if (project && !previousSettings()) {
+			setPreviousSettings(project()?.settings())
+			setHasChanges(false)
+		}
+	}))
+
+	const handleChanges = () =>
+		setHasChanges((prev) => {
+			const hasChanged = JSON.stringify(previousSettings()) !== JSON.stringify(project()?.settings())
+			if (prev !== hasChanged && hasChanged && project() && previousSettings()) {
+				setLocalChanges((prev) => (prev += 1))
+			} else if (prev !== hasChanged && !hasChanged && project() && previousSettings()) {
+				setLocalChanges((prev) => (prev -= 1))
+			}
+			return hasChanged
+		})
+
+	// Prevent the dialog from closing when the user clicks on the overlay
+	function handleRequestClose(event: { detail: { source: string }; preventDefault: () => void }) {
+		if (event.detail.source === 'overlay') {
+			event.preventDefault();
+		}
+	}
+
 	return (
 		<EditorLayout>
 			<div class="w-full flex flex-col grow bg-surface-50">
@@ -197,145 +231,106 @@ export function Layout(props: { children: JSXElement }) {
 					<sl-button
 						slot="trigger"
 						prop:size="small"
-						onClick={() => setSettingsOpen(!settingsOpen())}
-						class={
-							settingsOpen()
-								? "ring-primary/50 ring-1 rounded"
-								: ""
-						}
+						onClick={() => setSettingsModalOpen(!settingsModalOpen())}
 					>	
 						{/* @ts-ignore */}
 						<IconSettings slot="prefix" class="w-5 h-5 -ml-0.5" />
 						Settings
 					</sl-button>
 				</div>
-				<Show
-					when={
-						settingsOpen() &&
-						project()?.settings() &&
-						project()?.installed.plugins() &&
-						project()?.installed.messageLintRules()
-					}
-					fallback={
-						<>
-							<div class="flex flex-wrap justify-between gap-2 py-4 md:py-5 sticky top-[61px] z-10 bg-surface-50">
-								<div class="flex flex-wrap z-20 gap-2 items-center">
-									<Show when={project()}>
+				<div class="flex flex-wrap justify-between gap-2 py-4 md:py-5 sticky top-[61px] z-10 bg-surface-50">
+					<div class="flex flex-wrap z-20 gap-2 items-center">
+						<Show when={project()}>
+							<For each={filterOptions()}>
+								{(filter) => (
+									<Show
+										when={
+											selectedFilters().includes(filter) &&
+											(filter.name !== "Linting" || project()?.installed.messageLintRules())
+										}
+									>
+										{filter.component}
+									</Show>
+								)}
+							</For>
+							<Show
+								when={
+									project()?.installed.messageLintRules()
+										? selectedFilters().length !== filterOptions().length
+										: selectedFilters().length !== filterOptions().length - 1
+								}
+								fallback={
+									<sl-button
+										prop:size="small"
+										onClick={() => {
+											setFilteredLanguageTags(
+												setFilteredLanguageTags(project()?.settings()?.languageTags || [])
+											)
+											setFilteredMessageLintRules([])
+											setSelectedFilters([])
+										}}
+									>
+										Clear
+									</sl-button>
+								}
+							>
+								<sl-dropdown prop:distance={8} class="animate-blendIn">
+									<sl-button prop:size="small" slot="trigger">
+										<button slot="prefix">
+											<IconAdd class="w-5 h-5 -mx-0.5" />
+										</button>
+										Filter
+									</sl-button>
+									<sl-menu>
 										<For each={filterOptions()}>
 											{(filter) => (
 												<Show
 													when={
-														selectedFilters().includes(filter) &&
+														!selectedFilters().includes(filter) &&
 														(filter.name !== "Linting" || project()?.installed.messageLintRules())
 													}
 												>
-													{filter.component}
+													<sl-menu-item>
+														<button
+															onClick={() => {
+																if (
+																	filter.name === "Linting" &&
+																	filteredMessageLintRules.length === 0
+																) {
+																	setFilteredMessageLintRules(
+																		project()
+																			?.installed.messageLintRules()
+																			.map((lintRule) => lintRule.id) ?? []
+																	)
+																}
+																addFilter(filter.name)
+															}}
+															class="flex gap-2 items-center w-full"
+														>
+															<div slot="prefix" class="-ml-2 mr-2">
+																{filter.icon}
+															</div>
+															{filter.name}
+														</button>
+													</sl-menu-item>
 												</Show>
 											)}
 										</For>
-										<Show
-											when={
-												project()?.installed.messageLintRules()
-													? selectedFilters().length !== filterOptions().length
-													: selectedFilters().length !== filterOptions().length - 1
-											}
-											fallback={
-												<sl-button
-													prop:size="small"
-													onClick={() => {
-														setFilteredLanguageTags(
-															setFilteredLanguageTags(project()?.settings()?.languageTags || [])
-														)
-														setFilteredMessageLintRules([])
-														setSelectedFilters([])
-													}}
-												>
-													Clear
-												</sl-button>
-											}
-										>
-											<sl-dropdown prop:distance={8} class="animate-blendIn">
-												<sl-button prop:size="small" slot="trigger">
-													<button slot="prefix">
-														<IconAdd class="w-5 h-5 -mx-0.5" />
-													</button>
-													Filter
-												</sl-button>
-												<sl-menu>
-													<For each={filterOptions()}>
-														{(filter) => (
-															<Show
-																when={
-																	!selectedFilters().includes(filter) &&
-																	(filter.name !== "Linting" || project()?.installed.messageLintRules())
-																}
-															>
-																<sl-menu-item>
-																	<button
-																		onClick={() => {
-																			if (
-																				filter.name === "Linting" &&
-																				filteredMessageLintRules.length === 0
-																			) {
-																				setFilteredMessageLintRules(
-																					project()
-																						?.installed.messageLintRules()
-																						.map((lintRule) => lintRule.id) ?? []
-																				)
-																			}
-																			addFilter(filter.name)
-																		}}
-																		class="flex gap-2 items-center w-full"
-																	>
-																		<div slot="prefix" class="-ml-2 mr-2">
-																			{filter.icon}
-																		</div>
-																		{filter.name}
-																	</button>
-																</sl-menu-item>
-															</Show>
-														)}
-													</For>
-												</sl-menu>
-											</sl-dropdown>
-										</Show>
-									</Show>
-								</div>
-								<div class="flex flex-wrap gap-2">
-									<SearchInput
-										placeholder="Search ..."
-										handleChange={(text: string) => setTextSearch(text)}
-									/>
-								</div>
-							</div>
-							{props.children}
-						</>
-					}
-				>
-					<div class="max-w-screen-sm mx-auto pt-12 animate-fadeInBottom">
-						<h1 class="text-3xl font-semibold mb-8">inlang Project Settings</h1>
-						<inlang-settings
-							prop:settings={project()!.settings() as ReturnType<InlangProject["settings"]>}
-							prop:installedPlugins={
-								project()!.installed.plugins() as ReturnType<InlangProject["installed"]["plugins"]>
-							}
-							prop:installedMessageLintRules={
-								project()!.installed.messageLintRules() as ReturnType<
-									InlangProject["installed"]["messageLintRules"]
-								>
-							}
-							on:set-settings={(event: CustomEvent) => {
-								const _project = project()
-								if (_project) {
-									_project.setSettings(event.detail.argument)
-								} else {
-									throw new Error("Settings can not be set, because project is not defined")
-								}
-							}}
+									</sl-menu>
+								</sl-dropdown>
+							</Show>
+						</Show>
+					</div>
+					<div class="flex flex-wrap gap-2">
+						<SearchInput
+							placeholder="Search ..."
+							handleChange={(text: string) => setTextSearch(text)}
 						/>
 					</div>
-				</Show>
+				</div>
+				{props.children}
 			</div>
+			{/* Add language tag modal */}
 			<sl-dialog
 				prop:label="Add language tag"
 				prop:open={addLanguageModalOpen()}
@@ -400,6 +395,7 @@ export function Layout(props: { children: JSXElement }) {
 					Add language
 				</sl-button>
 			</sl-dialog>
+			{/* Fork Status modal */}
 			<sl-dialog
 				prop:label="Fork out of sync"
 				prop:open={forkStatusModalOpen()}
@@ -471,6 +467,40 @@ export function Layout(props: { children: JSXElement }) {
 					</Show>
 				</div>
 			</sl-dialog>
+			{/* Settings modal */}
+			<Show when={					
+				project()?.settings() &&
+				project()?.installed.plugins() &&
+				project()?.installed.messageLintRules()	}>
+				<sl-dialog
+					style={{ "--width": "600px" }}
+					prop:label="inlang Project Settings"
+					prop:open={	settingsModalOpen()	}
+					on:sl-request-close={handleRequestClose}
+				>
+					<div class="h-[calc(60vh)]">
+						<inlang-settings
+							prop:settings={project()!.settings() as ReturnType<InlangProject["settings"]>}
+							prop:installedPlugins={
+								project()?.installed.plugins() as ReturnType<InlangProject["installed"]["plugins"]>
+							}
+							prop:installedMessageLintRules={
+								project()?.installed.messageLintRules() as ReturnType<
+								InlangProject["installed"]["messageLintRules"]
+								>
+							}
+							on:set-settings={(event: CustomEvent) => {
+								const _project = project()
+								if (_project) {
+									_project.setSettings(event.detail.argument)
+									handleChanges()
+								} else {
+									throw new Error("Settings can not be set, because project is not defined")
+								}
+							}} />
+					</div>
+			 </sl-dialog>
+			</Show>
 			<Gitfloat />
 		</EditorLayout>
 	)
