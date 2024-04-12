@@ -22,7 +22,7 @@ import type { PathDefinitionTranslations } from "./routeDefinitions.js"
  * }
  * ```
  */
-export type UserPathTranslations<T extends string = string> = {
+export type UserPathDefinitionTranslations<T extends string = string> = {
 	[canonicalPath: `/${string}`]: Record<T, `/${string}`> | MessageIndexFunction<T>
 }
 
@@ -38,8 +38,8 @@ export type UserPathTranslations<T extends string = string> = {
  * @param availableLanguageTags The available language tags.
  * @returns The resolved path translations.
  */
-export const resolvePathTranslations = <T extends string>(
-	userTranslations: UserPathTranslations<T>,
+export const resolveUserPathDefinitions = <T extends string>(
+	userTranslations: UserPathDefinitionTranslations<T>,
 	availableLanguageTags: readonly T[]
 ): PathDefinitionTranslations<T> =>
 	Object.fromEntries(
@@ -54,7 +54,7 @@ export const resolvePathTranslations = <T extends string>(
 const fromMessage = <T extends string>(
 	message: MessageIndexFunction<T>,
 	availableLanguageTags: readonly T[]
-): Record<T, `/${string}`> =>
+) =>
 	Object.fromEntries(
 		availableLanguageTags.map((languageTag) => [languageTag, message({}, { languageTag })])
 	) as Record<T, `/${string}`>
