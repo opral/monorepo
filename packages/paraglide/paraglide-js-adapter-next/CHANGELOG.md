@@ -1,5 +1,18 @@
 # @inlang/paraglide-js-adapter-next
 
+## 3.1.0
+
+### Minor Changes
+
+- a7e1266: Optional and Rest parameters are now supported on `pathnames`. Use `[...rest]` to create a wildcard segment that matches zero or more segments. Use `[[optionalParam]]` to create an optional segment that matches zero or one segments.
+
+### Patch Changes
+
+- 55b78f8: The compiler no longer double-logs when starting the dev-server
+- Updated dependencies [fa6aa31]
+- Updated dependencies [dee5aa6]
+  - @inlang/paraglide-js@1.6.1
+
 ## 3.0.1
 
 ### Patch Changes
