@@ -27,7 +27,6 @@
 }
 
 inlang-settings {
-	--sl-input-border-color: theme(colors.outline);
 	--sl-color-primary-50: var(--sl-color-cyan-50);
 	--sl-color-primary-100: var(--sl-color-cyan-100);
 	--sl-color-primary-200: var(--sl-color-cyan-200);
@@ -40,22 +39,35 @@ inlang-settings {
 	--sl-color-primary-900: var(--sl-color-cyan-900);
 	--sl-color-primary-950: var(--sl-color-cyan-950);
 
-	--sl-color-neutral-50: var(--sl-color-neutral-50);
-	--sl-color-neutral-100: var(--sl-color-neutral-100);
-	--sl-color-neutral-200: var(--sl-color-neutral-200);
-	--sl-color-neutral-300: var(--sl-color-neutral-300);
-	--sl-color-neutral-400: var(--sl-color-neutral-400);
-	--sl-color-neutral-500: var(--sl-color-neutral-500);
-	--sl-color-neutral-600: var(--sl-color-neutral-600);
-	--sl-color-neutral-700: var(--sl-color-neutral-700);
-	--sl-color-neutral-800: var(--sl-color-neutral-800);
-	--sl-color-neutral-900: var(--sl-color-neutral-900);
+	--sl-input-color-disabled: theme(colors.secondary-on-inverted-container);
 
-	--sl-input-background-color-disabled: theme(colors.surface-2);
-	--sl-input-filled-background-color-disabled: theme(colors.secondary-on-inverted-container);
+	--sl-panel-border-width: 0;
+	--sl-panel-border-color: transparent;
+}
 
-	--sl-input-font-family: "Inter", sans-serif;
-	--sl-font-sans: "Inter", sans-serif;
+inlang-settings::part(base) {
+	padding-bottom: 2.25rem;
+}
+
+inlang-settings::part(button) {
+	--sl-color-neutral-0: theme(colors.on-inverted-surface);
+	--sl-color-neutral-700: theme(colors.inverted-surface);
+	transition: opacity 0.15s;
+}
+
+inlang-settings::part(button):hover {
+	--sl-color-primary-50: theme(colors.on-inverted-surface);
+	--sl-color-primary-300: var(--sl-color-neutral-300);
+	--sl-color-primary-700: theme(colors.primary);
+}
+
+inlang-settings::part(float) {
+	--sl-panel-background-color: theme(colors.inverted-surface);
+	color: theme(colors.on-inverted-surface);
+	font-size: 0.75rem;
+	border: 0;
+	padding: 0.375rem 0.375rem 0.375rem 0.75rem;
+	height: auto;
 }
 
 /* The font Inter with variable font support (if supported) */
