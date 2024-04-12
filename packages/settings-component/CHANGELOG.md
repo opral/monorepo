@@ -1,5 +1,11 @@
 # @inlang/settings-component
 
+## 1.0.1
+
+### Patch Changes
+
+- ddea787: Don't display the lint rule levels when there are no lint rules installed
+
 ## 1.0.0
 
 ### Major Changes
