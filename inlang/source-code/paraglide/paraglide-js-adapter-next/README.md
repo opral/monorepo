@@ -24,6 +24,8 @@ Your messages live in the generated `messages/{lang}.json` files. Add a message 
 }
 ```
 
+You can learn more about the format [here](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat).
+
 ### Step 1. Add the Next-Plugin
 
 Add the Paraglide-Plugin in `next.config.mjs`. This will make sure to rerun the paraglide compiler when needed.
