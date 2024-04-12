@@ -758,7 +758,7 @@ importers:
         specifier: workspace:*
         version: link:../sdk
       '@inlang/settings-component':
-        specifier: workspace:*
+        specifier: ^1.0.0
         version: link:../settings-component
       '@inlang/telemetry':
         specifier: workspace:*
