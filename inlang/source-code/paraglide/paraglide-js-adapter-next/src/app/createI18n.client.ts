@@ -5,7 +5,7 @@ import { createNavigation, createRedirects } from "./navigation"
 import { createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
 import { I18nUserConfig, ResolvedI18nConfig } from "./config"
-import { resolvePathTranslations } from "./pathnames/resolvePathTranslations"
+import { resolveUserPathDefinitions } from "@inlang/paraglide-js/internal/adapter-utils"
 import { PrefixStrategy } from "./routing/prefixStrategy"
 
 export function createI18n<T extends string = string>(userConfig: I18nUserConfig<T> = {}) {
@@ -13,7 +13,7 @@ export function createI18n<T extends string = string>(userConfig: I18nUserConfig
 		availableLanguageTags: availableLanguageTags as readonly T[],
 		defaultLanguage: userConfig.defaultLanguage ?? (sourceLanguageTag as T),
 		exclude: createExclude(userConfig.exclude ?? []),
-		pathnames: resolvePathTranslations(userConfig.pathnames ?? {}, availableLanguageTags as T[]),
+		pathnames: resolveUserPathDefinitions(userConfig.pathnames ?? {}, availableLanguageTags as T[]),
 		prefix: userConfig.prefix ?? "except-default",
 	}
 

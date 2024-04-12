@@ -10,3 +10,7 @@ export {
 	type RouteParam,
 } from "./routing/routeDefinitions.js"
 export { validatePathTranslations, prettyPrintIssues } from "./routing/validatePathTranslations.js"
+export {
+	resolveUserPathDefinitions,
+	type UserPathDefinitionTranslations,
+} from "./routing/resolveUserPathDefinitions.js"

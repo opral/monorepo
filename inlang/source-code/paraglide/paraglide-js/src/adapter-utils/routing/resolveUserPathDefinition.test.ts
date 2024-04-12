@@ -1,9 +1,12 @@
 import { describe, it, expect } from "vitest"
-import { resolvePathTranslations, type UserPathTranslations } from "./resolveUserPathDefinitions.js"
+import {
+	resolvePathTranslations,
+	type UserPathDefinitionTranslations,
+} from "./resolveUserPathDefinitions.js"
 
 describe("resolvePathTranslations", () => {
 	it("leaves object translations as is", () => {
-		const userTranslations: UserPathTranslations<"en" | "de"> = {
+		const userTranslations: UserPathDefinitionTranslations<"en" | "de"> = {
 			"/about": {
 				en: "/about",
 				de: "/ueber-uns",
@@ -15,7 +18,7 @@ describe("resolvePathTranslations", () => {
 	})
 
 	it("resolves message translations", () => {
-		const userTranslations: UserPathTranslations<"en" | "de"> = {
+		const userTranslations: UserPathDefinitionTranslations<"en" | "de"> = {
 			"/about": (_, { languageTag }: { languageTag: "en" | "de" }) => {
 				switch (languageTag) {
 					case "en":
