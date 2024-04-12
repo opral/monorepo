@@ -5,7 +5,6 @@ import { createNoopNavigation, createRedirects } from "./navigation"
 import { createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
 import { resolveUserPathDefinitions } from "@inlang/paraglide-js/internal/adapter-utils"
-import { validatePathTranslations } from "@inlang/paraglide-js/internal/adapter-utils"
 import { I18nUserConfig, ResolvedI18nConfig } from "./config"
 import { PrefixStrategy } from "./routing/prefixStrategy"
 
@@ -31,16 +30,6 @@ export function createI18n<T extends string = string>(userConfig: I18nUserConfig
 		exclude: createExclude(userConfig.exclude ?? []),
 		pathnames: resolveUserPathDefinitions(userConfig.pathnames ?? {}, availableLanguageTags as T[]),
 		prefix: userConfig.prefix ?? "except-default",
-	}
-
-	if (process.env.NODE_ENV === "development") {
-		const issues = validatePathTranslations(config.pathnames, availableLanguageTags as T[], {})
-		if (issues.length) {
-			console.warn(
-				`The following issues were found in your path translations. Make sure to fix them before deploying your app:`
-			)
-			console.info(JSON.stringify(issues, undefined, 2))
-		}
 	}
 
 	const strategy = PrefixStrategy(config)

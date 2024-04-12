@@ -5,7 +5,11 @@ import { createNavigation, createRedirects } from "./navigation"
 import { createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
 import { I18nUserConfig, ResolvedI18nConfig } from "./config"
-import { resolveUserPathDefinitions } from "@inlang/paraglide-js/internal/adapter-utils"
+import {
+	prettyPrintPathDefinitionIssues,
+	resolveUserPathDefinitions,
+	validatePathTranslations,
+} from "@inlang/paraglide-js/internal/adapter-utils"
 import { PrefixStrategy } from "./routing/prefixStrategy"
 
 export function createI18n<T extends string = string>(userConfig: I18nUserConfig<T> = {}) {
@@ -15,6 +19,16 @@ export function createI18n<T extends string = string>(userConfig: I18nUserConfig
 		exclude: createExclude(userConfig.exclude ?? []),
 		pathnames: resolveUserPathDefinitions(userConfig.pathnames ?? {}, availableLanguageTags as T[]),
 		prefix: userConfig.prefix ?? "except-default",
+	}
+
+	if (process.env.NODE_ENV === "development") {
+		const issues = validatePathTranslations(config.pathnames, availableLanguageTags as T[], {})
+		if (issues.length) {
+			console.warn(
+				"Issues were found with your pathnames. Fix them before deploying:\n\n" +
+					prettyPrintPathDefinitionIssues(issues)
+			)
+		}
 	}
 
 	const strategy = PrefixStrategy(config)
