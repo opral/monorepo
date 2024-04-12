@@ -21,6 +21,7 @@ export class LintRuleLevelObjectInput extends LitElement {
 			.ruleId {
 				font-size: 0.8rem;
 				margin: 0;
+				color: var(--sl-input-color);
 			}
 			.rule-container {
 				display: flex;
@@ -35,6 +36,15 @@ export class LintRuleLevelObjectInput extends LitElement {
 			.title-container {
 				display: flex;
 				gap: 8px;
+			}
+			sl-select::part(expand-icon) {
+				color: var(--sl-input-placeholder-color);
+			}
+			sl-select::part(expand-icon):hover {
+				color: var(--sl-input-color);
+			}
+			sl-select::part(base):hover {
+				border: var(--sl-input-placeholder-color);
 			}
 		`,
 	]
@@ -91,6 +101,32 @@ export class LintRuleLevelObjectInput extends LitElement {
 		}
 	}
 
+	override async update(changedProperties: any) {
+		super.update(changedProperties)
+
+		// TODO find a better way to update the value
+		if (changedProperties.has("value")) {
+			await this.updateComplete
+
+			const newValue = changedProperties.get("value")
+
+			if (newValue) {
+				for (const moduleId of Object.keys(newValue)) {
+					const slSelect = this.shadowRoot?.getElementById(moduleId)
+					if (slSelect) {
+						const input =
+							slSelect.shadowRoot?.querySelector<HTMLInputElement>(".select__display-input")
+						if (input && input.value) {
+							input.value = this.value[moduleId as InlangModule["default"]["id"]]
+								? (this.value[moduleId as InlangModule["default"]["id"]] as string)
+								: "warning"
+						}
+					}
+				}
+			}
+		}
+	}
+
 	override render() {
 		return html` <div part="property" class="property">
 			<div class="title-container">
@@ -107,10 +143,12 @@ export class LintRuleLevelObjectInput extends LitElement {
 					return module.id.split(".")[0] !== "plugin"
 						? html`<div class="rule-container">
 								<sl-select
+									id=${module.id}
+									exportparts="listbox:option-wrapper"
 									value=${this.value ? (this.value as any)[module.id] : "warning"}
+									placeholder="warning"
 									class="select"
 									size="small"
-									placeholder="warning"
 									@sl-change=${(e: Event) => {
 										this.handleUpdate(
 											module.id as `messageLintRule.${string}.${string}`,
@@ -119,7 +157,11 @@ export class LintRuleLevelObjectInput extends LitElement {
 									}}
 								>
 									${this._valueOptions?.map((option) => {
-										return html`<sl-option value=${option.const} class="add-item-side">
+										return html`<sl-option
+											exportparts="base:option"
+											value=${option.const}
+											class="add-item-side"
+										>
 											${option.const}
 										</sl-option>`
 									})}

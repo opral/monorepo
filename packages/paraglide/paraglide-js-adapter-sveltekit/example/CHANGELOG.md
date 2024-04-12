@@ -1,5 +1,40 @@
 # @inlang/paraglide-js-adapter-sveltekit-example
 
+## 0.1.23
+
+### Patch Changes
+
+- @inlang/paraglide-js-adapter-sveltekit@0.6.4
+
+## 0.1.22
+
+### Patch Changes
+
+- @inlang/paraglide-js-adapter-sveltekit@0.6.3
+
+## 0.1.21
+
+### Patch Changes
+
+- Updated dependencies [cdbb415]
+  - @inlang/paraglide-js-adapter-sveltekit@0.6.2
+
+## 0.1.20
+
+### Patch Changes
+
+- Updated dependencies [a4d4e10]
+  - @inlang/paraglide-js-adapter-sveltekit@0.6.1
+
+## 0.1.19
+
+### Patch Changes
+
+- Updated dependencies [1642873]
+- Updated dependencies [690656e]
+- Updated dependencies [ce0b961]
+  - @inlang/paraglide-js-adapter-sveltekit@0.6.0
+
 ## 0.1.18
 
 ### Patch Changes

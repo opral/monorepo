@@ -56,7 +56,7 @@ test("if curly brackets {} does to cointain the word languageTag", async () => {
 	})
 	expect(isValid).toBe(false)
 })
-test("if pathPattern doesn't includes a '*' wildcard. This was depricated in version 3.0.0.", async () => {
+test("if pathPattern doesn't includes a '*' wildcard. This was deprecated in version 3.0.0.", async () => {
 	const pathPattern = "./{languageTag}/*.json"
 	const isValid = Value.Check(plugin.settingsSchema!, {
 		pathPattern,

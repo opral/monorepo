@@ -22,6 +22,10 @@ a {
     color: inherit;
 }
 
+a[aria-current="page"] {
+    font-weight: 700;
+}
+
 .container {
     max-width: 800px;
     margin-inline: auto;
