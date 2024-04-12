@@ -4,7 +4,7 @@ import { contextTooltip } from "./contextTooltip.js"
 import { getStringFromPattern } from "../utilities/messages/query.js"
 import { CONFIGURATION } from "../configuration.js"
 import { resolveEscapedCharacters } from "../utilities/messages/resolveEscapedCharacters.js"
-import { getPreviewLanguageTag } from "../utilities/language-tag/languageTagUtils.js"
+import { getPreviewLanguageTag } from "../utilities/language-tag/getPreviewLanguageTag.js"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
