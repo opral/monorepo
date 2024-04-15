@@ -19,6 +19,7 @@ import IconTranslate from "~icons/material-symbols/translate"
 import IconSettings from "~icons/material-symbols/settings-outline"
 import IconDescription from "~icons/material-symbols/description-outline"
 import IconTag from "~icons/material-symbols/tag"
+import IconBack from "~icons/material-symbols/arrow-back"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 import { showToast } from "#src/interface/components/Toast.jsx"
 import { isValidLanguageTag, type InlangProject, type LanguageTag } from "@inlang/sdk"
@@ -187,7 +188,7 @@ export function Layout(props: { children: JSXElement }) {
 	}
 
 	// Settings modal related
-	const [settingsModalOpen, setSettingsModalOpen] = createSignal(false)
+	const [settingsOpen, setSettingsOpen] = createSignal(false)
 	// eslint-disable-next-line solid/reactivity
 	const [, setHasChanges] = createSignal(false)
 	const [previousSettings, setPreviousSettings] = createSignal()
@@ -212,35 +213,78 @@ export function Layout(props: { children: JSXElement }) {
 			return hasChanged
 		})
 
-	// Prevent the dialog from closing when the user clicks on the overlay
-	function handleRequestClose(event: { detail: { source: string }; preventDefault: () => void }) {
-		if (event.detail.source === 'overlay') {
-			event.preventDefault();
-		} else {
-			setSettingsModalOpen(false)
-		}
+	const [runSettingsCloseAnimation, setRunSettingsCloseAnimation] = createSignal(false)
+	const handleClose = () => {
+		setRunSettingsCloseAnimation(true)
+		setTimeout(() => { 
+			setSettingsOpen(false)
+			setRunSettingsCloseAnimation(false)
+		}, 400)
 	}
 
 	return (
 		<EditorLayout>
-			<div class="w-full flex flex-col grow bg-surface-50">
-				<div class="w-full flex items-end justify-between z-20">
-					<div class="flex flex-wrap gap-2 items-center pt-5">
+			<div class="relative w-full flex flex-col grow bg-surface-50">
+				<div class="w-full flex items-end justify-between z-20 gap-2 pt-4">
+					<div class="flex flex-wrap gap-2 items-center">
 						<Breadcrumbs />
-						<BranchMenu />
-						<ProjectMenu />
+						<div class="flex gap-2">
+							<BranchMenu />
+							<ProjectMenu />
+						</div>
 					</div>
 					<sl-button
 						slot="trigger"
 						prop:size="small"
-						onClick={() => setSettingsModalOpen(!settingsModalOpen())}
+						prop:disabled={userIsCollaborator() !== true}
+						onClick={() => setSettingsOpen(!settingsOpen())}
 					>	
 						{/* @ts-ignore */}
 						<IconSettings slot="prefix" class="w-5 h-5 -ml-0.5" />
 						Settings
 					</sl-button>
 				</div>
-				<div class="flex flex-wrap justify-between gap-2 py-4 md:py-5 sticky top-[61px] z-10 bg-surface-50">
+				<Show
+					when={
+						settingsOpen() &&
+						project()?.settings() &&
+						project()?.installed.plugins() &&
+						project()?.installed.messageLintRules()
+					}
+				>
+					<div class={"requires-no-scroll absolute overflow-y-scroll h-[calc(100vh_-_61px)] w-screen -ml-4 z-50 bg-surface-50 "
+						+ (runSettingsCloseAnimation() ? "animate-fadeOutBottom" : "animate-fadeInBottom")}>
+						<div class="max-w-screen-sm mx-auto pt-12 px-4">
+							<button 
+								class="text-2xl flex items-center hover:link-primary transition-colors duration-150 mb-8" 
+								onClick={() => handleClose()}
+							>
+								<IconBack class="w-6 h-6 -ml-1 mr-1" />
+								Settings
+							</button>
+							<inlang-settings
+								prop:settings={project()!.settings() as ReturnType<InlangProject["settings"]>}
+								prop:installedPlugins={
+									project()?.installed.plugins() as ReturnType<InlangProject["installed"]["plugins"]>
+								}
+								prop:installedMessageLintRules={
+									project()?.installed.messageLintRules() as ReturnType<
+									InlangProject["installed"]["messageLintRules"]
+									>
+								}
+								on:set-settings={(event: CustomEvent) => {
+									const _project = project()
+									if (_project) {
+										_project.setSettings(event.detail.argument)
+										handleChanges()
+									} else {
+										throw new Error("Settings can not be set, because project is not defined")
+									}
+								}} />
+						</div>
+					</div>
+				</Show>
+				<div class="flex flex-wrap justify-between gap-2 py-4 sticky top-[61px] z-10 bg-surface-50">
 					<div class="flex flex-wrap z-20 gap-2 items-center">
 						<Show when={project()}>
 							<For each={filterOptions()}>
@@ -469,40 +513,6 @@ export function Layout(props: { children: JSXElement }) {
 					</Show>
 				</div>
 			</sl-dialog>
-			{/* Settings modal */}
-			<Show when={					
-				project()?.settings() &&
-				project()?.installed.plugins() &&
-				project()?.installed.messageLintRules()	}>
-				<sl-dialog
-					style={{ "--width": "600px" }}
-					prop:label="inlang Project Settings"
-					prop:open={	settingsModalOpen()	}
-					on:sl-request-close={handleRequestClose}
-				>
-					<div class="h-[calc(60vh)]">
-						<inlang-settings
-							prop:settings={project()!.settings() as ReturnType<InlangProject["settings"]>}
-							prop:installedPlugins={
-								project()?.installed.plugins() as ReturnType<InlangProject["installed"]["plugins"]>
-							}
-							prop:installedMessageLintRules={
-								project()?.installed.messageLintRules() as ReturnType<
-								InlangProject["installed"]["messageLintRules"]
-								>
-							}
-							on:set-settings={(event: CustomEvent) => {
-								const _project = project()
-								if (_project) {
-									_project.setSettings(event.detail.argument)
-									handleChanges()
-								} else {
-									throw new Error("Settings can not be set, because project is not defined")
-								}
-							}} />
-					</div>
-			 </sl-dialog>
-			</Show>
 			<Gitfloat />
 		</EditorLayout>
 	)

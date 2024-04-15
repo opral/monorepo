@@ -26,6 +26,10 @@
 	--sl-font-sans: "Inter", sans-serif;
 }
 
+body:has(.requires-no-scroll) {
+  overflow: hidden;
+}
+
 inlang-settings {
 	--sl-color-primary-50: var(--sl-color-cyan-50);
 	--sl-color-primary-100: var(--sl-color-cyan-100);
@@ -39,7 +43,10 @@ inlang-settings {
 	--sl-color-primary-900: var(--sl-color-cyan-900);
 	--sl-color-primary-950: var(--sl-color-cyan-950);
 
+	--sl-input-background-color-disabled: theme(colors.surface-2);
 	--sl-input-color-disabled: theme(colors.secondary-on-inverted-container);
+
+	--sl-input-filled-background-color-disabled: theme(colors.secondary-container);
 
 	--sl-panel-border-width: 0;
 	--sl-panel-border-color: transparent;
@@ -77,6 +84,7 @@ inlang-settings::part(float) {
 	border: 0;
 	padding: 0.375rem 0.375rem 0.375rem 0.75rem;
 	height: auto;
+	margin-bottom: 1rem;
 }
 
 /* The font Inter with variable font support (if supported) */
