@@ -1,20 +1,36 @@
 import type { RoutingStragey } from "./routing/interface"
 import type { LinkProps } from "next/link"
 
-const getPathname = (href: string): string => new URL(href, "https://acme.com").pathname
+const getPathname = (href: string, currentHref: string): string =>
+	new URL(href, currentHref).pathname
 
 export function createLocaliseHref<T extends string>(
 	strategy: RoutingStragey<T>
-): <P extends LinkProps["href"]>(canonicalHref: P, lang: T, isLanugageSwitch: boolean) => P {
-	return <P extends LinkProps["href"]>(canonicalHref: P, lang: T, isLanugageSwitch: boolean): P => {
+): <P extends LinkProps["href"]>(
+	canonicalHref: P,
+	lang: T,
+	currentHref: string,
+	isLanugageSwitch: boolean
+) => P {
+	return <P extends LinkProps["href"]>(
+		canonicalHref: P,
+		lang: T,
+		currentHref: string,
+		isLanugageSwitch: boolean
+	): P => {
 		//don't translate external links
 		if (isExternal(canonicalHref)) return canonicalHref
+
+		// don't touch relative links
+		if (typeof canonicalHref === "string" && !canonicalHref.startsWith("/")) return canonicalHref
 
 		//guard against empty pathnames on object hrefs
 		if (typeof canonicalHref === "object" && !canonicalHref.pathname) return canonicalHref
 
 		const canonicalPathname: string =
-			typeof canonicalHref === "object" ? canonicalHref.pathname ?? "" : getPathname(canonicalHref)
+			typeof canonicalHref === "object"
+				? canonicalHref.pathname ?? ""
+				: getPathname(canonicalHref, currentHref)
 
 		//dont' touch relative links
 		if (!canonicalPathname.startsWith("/")) return canonicalHref
