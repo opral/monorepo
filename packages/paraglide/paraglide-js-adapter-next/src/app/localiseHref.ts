@@ -15,28 +15,25 @@ export function createLocaliseHref<T extends string>(
 			typeof canonicalHref === "object" ? canonicalHref.pathname ?? "" : getPathname(canonicalHref)
 
 		//dont' touch relative links
-		if (!isAbsolute(canonicalPathname)) return canonicalHref
+		if (!canonicalPathname.startsWith("/")) return canonicalHref
 
-		const translatedPathaname =
-			strategy.getLocalisedUrl(canonicalPathname, lang, isLanugageSwitch).pathname ||
-			canonicalPathname
+		const translatedUrl = strategy.getLocalisedUrl(canonicalPathname, lang, isLanugageSwitch)
 
 		// @ts-ignore
 		return typeof canonicalHref === "object"
-			? { ...canonicalHref, pathname: translatedPathaname }
-			: canonicalHref.replace(canonicalPathname, translatedPathaname)
+			? { ...canonicalHref, ...translatedUrl }
+			: canonicalHref.replace(canonicalPathname, translatedUrl.pathname)
 	}
 }
 
 const getPathname = (href: string): string => new URL(href, "https://acme.com").pathname
-const isAbsolute = (path: string): path is `/${string}` => path.startsWith("/")
 
 /**
  * Returns true if the href explicitly includes the origin, even if it's the current origin
  */
 export function isExternal(href: LinkProps["href"]) {
+	//Make sure none of the telltales for external links are set
 	if (typeof href === "object") {
-		//Make sure none of the telltales for external links are set
 		return Boolean(href.protocol || href.auth || href.port || href.hostname || href.host)
 	}
 
@@ -44,11 +41,12 @@ export function isExternal(href: LinkProps["href"]) {
 	const [, ...rest] = href.split(":")
 	if (rest.length === 0) return false
 
-	// href must not start with a url scheme
-	// see: https://datatracker.ietf.org/doc/html/rfc3986#section-3.1
 	const schemeRegex = /^[a-z][a-z0-9+\-.]*:/i
-	if (schemeRegex.test(href)) return true
-
-	//If the href starts with // it's a protocol relative url -> must include the host -> external
-	return href.startsWith("//")
+	return (
+		// href must not start with a url scheme
+		// see: https://datatracker.ietf.org/doc/html/rfc3986#section-3.1
+		schemeRegex.test(href) ||
+		//If the href starts with // it's a protocol relative url -> must include the host -> external
+		href.startsWith("//")
+	)
 }
