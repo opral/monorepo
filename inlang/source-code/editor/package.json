@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "vite",
-		"build": "paraglide-js compile --project ../../../project.inlang && vite build -- --max_old_space_size=1200000",
+		"build": "paraglide-js compile --project ../../../project.inlang && tsc && vite build -- --max_old_space_size=1200000",
 		"production": "NODE_ENV=production tsx ./src/server/main.ts",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "paraglide-js compile --project ../../../project.inlang && tsc --noEmit",

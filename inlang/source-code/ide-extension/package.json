@@ -143,7 +143,7 @@
 	},
 	"scripts": {
 		"check": "tsc --noEmit",
-		"build": "node ./build.js",
+		"build": "tsc && node ./build.js",
 		"dev": "DEV=true node ./build.js",
 		"package": "pnpm vsce package --no-dependencies",
 		"publish": "pnpm vsce publish --no-dependencies",

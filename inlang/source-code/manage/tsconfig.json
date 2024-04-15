@@ -11,5 +11,9 @@
 		"outDir": "./dist",
 		"rootDir": "./src",
 		"resolveJsonModule": true
+		// Don't check imported libraries for type errors.
+		// The imported libraries might have different settings/whatever.
+		// "skipLibCheck": false,
+		// "skipDefaultLibCheck": false
 	}
 }
