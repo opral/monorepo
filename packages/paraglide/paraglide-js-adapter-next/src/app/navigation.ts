@@ -15,7 +15,12 @@ export const createNavigation = <T extends string>(
 	type NextUsePathname = (typeof NextNavigation)["usePathname"]
 
 	/**
-	 * Get the current **non-localised** pathname. For example usePathname() on /de/dashboard?foo=bar would return "/dashboard"
+	 * Get the current canonical pathname.
+	 * @example
+	 * ```ts
+	 * // on https://example.com/de/dashboard?foo=bar
+	 * usePathname() // "/dashboard"
+	 * ```
 	 */
 	const usePathname: NextUsePathname = (...args) => {
 		const encodedLocalisedPathname = NextNavigation.usePathname(...args)
@@ -24,7 +29,12 @@ export const createNavigation = <T extends string>(
 	}
 
 	/**
-	 * Get the router methods. For example router.push('/dashboard')
+	 * Get wrapped router methods so you can interact with them using canonical paths
+	 * @example
+	 * ```ts
+	 * // on https://example.com/de
+	 * useRouter().push("/about") // Pushes "/de/ueber-uns"
+	 * ```
 	 */
 	const useRouter = () => {
 		const nextRouter = NextNavigation.useRouter()
@@ -42,6 +52,11 @@ export const createNavigation = <T extends string>(
 
 		/**
 		 * Navigate to the provided href. Pushes a new history entry.
+		 * @example
+		 * ```ts
+		 * // on https://example.com/de
+		 * useRouter().push("/about") // Pushes "/de/ueber-uns"
+		 * ```
 		 */
 		const push = (
 			canonicalPath: string,
@@ -84,6 +99,12 @@ export const createNavigation = <T extends string>(
 
 		/**
 		 * Navigate to the provided href. Replaces the current history entry.
+		 *
+		 * @example
+		 * ```ts
+		 * // on https://example.com/de
+		 * useRouter().replace("/about") // Replaces entry with "/de/ueber-uns"
+		 * ```
 		 */
 		const replace = (
 			canonicalPath: string,
@@ -126,6 +147,12 @@ export const createNavigation = <T extends string>(
 
 		/**
 		 * Prefetch the provided href.
+		 *
+		 * @example
+		 * ```ts
+		 * // on https://example.com/de
+		 * useRouter().prefetch("/about") // Prefetches data for "/de/ueber-uns"
+		 * ```
 		 */
 		const prefetch = (canonicalPath: string, options: PrefetchOptions & OptionalLanguageOption) => {
 			const locale = options?.locale ?? languageTag()
