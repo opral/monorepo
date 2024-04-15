@@ -48,7 +48,11 @@ export function createI18n<T extends string = string>(userConfig: I18nUserConfig
 		Link,
 		usePathname,
 		middleware,
-		localizePath: strategy.getLocalisedPath,
+		/** @deprecated - Use getLocalisedHref instead */
+		localizePath: (canonicalPath: string, lang: T) => {
+			return strategy.getLocalisedHref(canonicalPath, lang, lang).pathname || canonicalPath
+		},
+		getLocalisedHref: strategy.getLocalisedHref,
 		useRouter,
 		redirect,
 		permanentRedirect,
