@@ -12,7 +12,6 @@ import {
 	ProjectSettingsFileNotFoundError,
 	ProjectSettingsInvalidError,
 	PluginSaveMessagesError,
-	LoadProjectInvalidArgument,
 	PluginLoadMessagesError,
 } from "./errors.js"
 import { createRoot, createSignal, createEffect } from "./reactivity/solid.js"
@@ -23,7 +22,7 @@ import { tryCatch, type Result } from "@inlang/result"
 import { migrateIfOutdated } from "@inlang/project-settings/migration"
 import { createNodeishFsWithAbsolutePaths } from "./createNodeishFsWithAbsolutePaths.js"
 import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
-import { isAbsolutePath } from "./isAbsolutePath.js"
+import { assertValidProjectPath } from "./validateProjectPath.js"
 import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
 
 import { stringifyMessage as stringifyMessage } from "./storage/helper.js"
@@ -93,17 +92,7 @@ export async function loadProject(args: {
 	// won't even be loaded. do not throw anywhere else. otherwise, apps
 	// can't handle errors gracefully.
 
-	if (!isAbsolutePath(args.projectPath)) {
-		throw new LoadProjectInvalidArgument(
-			`Expected an absolute path but received "${args.projectPath}".`,
-			{ argument: "projectPath" }
-		)
-	} else if (/[^\\/]+\.inlang$/.test(projectPath) === false) {
-		throw new LoadProjectInvalidArgument(
-			`Expected a path ending in "{name}.inlang" but received "${projectPath}".\n\nValid examples: \n- "/path/to/micky-mouse.inlang"\n- "/path/to/green-elephant.inlang\n`,
-			{ argument: "projectPath" }
-		)
-	}
+	assertValidProjectPath(projectPath)
 
 	const nodeishFs = createNodeishFsWithAbsolutePaths({
 		projectPath,
