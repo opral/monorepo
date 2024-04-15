@@ -301,8 +301,8 @@ export class InlangManage extends TwLitElement {
 
 		await repo.nodeishFs.writeFile(`.${this.url.project}/settings.json`, generatedProject)
 
-		await repo.add({
-			filepath: `${this.url.project?.slice(1)}/settings.json`,
+		const filesWithUncommittedChanges = await repo.statusList({
+			filter: (f: any) => f.endsWith(".json"),
 		})
 
 		await repo.commit({
@@ -311,6 +311,7 @@ export class InlangManage extends TwLitElement {
 				name: this.user.username,
 				email: this.user.email,
 			},
+			include: filesWithUncommittedChanges.map((f) => f[0]),
 		})
 
 		const result = await repo.push()
@@ -361,8 +362,8 @@ export class InlangManage extends TwLitElement {
 
 		await repo.nodeishFs.writeFile(`.${this.url.project}/settings.json`, generatedProject)
 
-		await repo.add({
-			filepath: `${this.url.project?.slice(1)}/settings.json`,
+		const filesWithUncommittedChanges = await repo.statusList({
+			filter: (f: any) => f.endsWith(".json"),
 		})
 
 		await repo.commit({
@@ -371,6 +372,7 @@ export class InlangManage extends TwLitElement {
 				name: this.user.username,
 				email: this.user.email,
 			},
+			include: filesWithUncommittedChanges.map((f) => f[0]),
 		})
 
 		const result = await repo.push()

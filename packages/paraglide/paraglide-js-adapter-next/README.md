@@ -15,16 +15,30 @@ npx @inlang/paraglide-js@latest init
 npm install @inlang/paraglide-js-adapter-next
 ```
 
-Your messages live in the generated `messages/{lang}.json` files. Add a message in there to get started.
+The Paraglide Init CLi will ask you:
+- Which languages you want to support (can be changed)
+- Where to place the generated files (use `./src/paraglide` or `./paraglide`)
+
+It will generate:
+- An Inlang Project
+- Translation files for each of your languages
+
+Your messages live in `messages/{lang}.json` files. You can add messages in these files as key-value pairs of the message ID and the translations.
+
+Use curly braces to add parameters.
 
 ```json
 // messages/en.json
 {
-	"hello": "Hello {name}"
+	// The $schema key is automatically ignored
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+
+	"hello_world" : "Hello World!",
+	"greetings": "Greetings {name}."
 }
 ```
 
-You can learn more about the format [here](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat).
+Learn more about the format in the [Inlang Message Format Documentation](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat).
 
 ### Step 1. Add the Next-Plugin
 
@@ -157,7 +171,7 @@ export async function generateMetadata() {
 
 If you want a Link to be in a specific language you can use the `locale` prop.
 
-```
+```tsx
 <Link href="/about" locale="de">
 ```
 
