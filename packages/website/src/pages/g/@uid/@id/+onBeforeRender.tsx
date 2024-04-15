@@ -8,7 +8,8 @@ import { redirect } from "vike/abort"
 
 const repositoryRoot = import.meta.url.slice(0, import.meta.url.lastIndexOf("inlang/source-code"))
 
-export default async function onBeforeRender(pageContext: PageContext) {
+// We don't need the return type so we dont define the return type further - this function is only used by vite internaly
+export default async function onBeforeRender(pageContext: PageContext): Promise<any> {
 	const item = registry.find(
 		(item: any) => item.uniqueID === pageContext.routeParams.uid
 	) as MarketplaceManifest & { uniqueID: string }

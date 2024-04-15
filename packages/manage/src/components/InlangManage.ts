@@ -267,7 +267,7 @@ export class InlangManage extends TwLitElement {
 	}
 
 	async removeLanguageTag(languageTag: string) {
-		if (typeof this.user === "undefined") return
+		if (typeof this.user === "undefined" || this.user === "load") return
 
 		this.languageTags = this.languageTags?.map((tag) => {
 			if (tag.name === languageTag) {
@@ -335,8 +335,8 @@ export class InlangManage extends TwLitElement {
 	async addLanguageTag() {
 		if (this.newLanguageTag === "") return
 
-		if (typeof this.user === "undefined") return
-
+		if (typeof this.user === "undefined" || this.user === "load") return
+		
 		this.newLanguageTagLoading = true
 
 		const repo = await openRepository(
@@ -707,7 +707,7 @@ export class InlangManage extends TwLitElement {
 										To access your projects, please enter the URL of your GitHub repository.
 									</p>
 									<div
-										disabled=${this.url.repo}
+										disabled=${this.url?.repo === undefined}
 										class=${`px-1 gap-2 relative max-w-lg z-10 flex items-center w-full border bg-white rounded-lg transition-all relative ${
 											this.url.repo ? "cursor-not-allowed" : ""
 										} ${
@@ -849,8 +849,7 @@ export class InlangManage extends TwLitElement {
 										</a>
 									</div>
 							  </div>`
-							: this.projects !== "load" &&
-							  this.projects !== "no-access" &&
+							: this.projects !== "no-access" &&
 							  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 							  this.projects!.length === 0
 							? html`<div class="flex flex-col gap-0.5 mt-4">
@@ -876,7 +875,6 @@ export class InlangManage extends TwLitElement {
 									</div>
 							  </div>`
 							: !this.url.project &&
-							  this.projects !== "load" &&
 							  this.projects !== "no-access" &&
 							  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 							  this.projects!.length > 0
