@@ -1,6 +1,8 @@
 import type { RoutingStragey } from "./routing/interface"
 import type { LinkProps } from "next/link"
 
+const getPathname = (href: string): string => new URL(href, "https://acme.com").pathname
+
 export function createLocaliseHref<T extends string>(
 	strategy: RoutingStragey<T>
 ): <P extends LinkProps["href"]>(canonicalHref: P, lang: T, isLanugageSwitch: boolean) => P {
@@ -19,14 +21,11 @@ export function createLocaliseHref<T extends string>(
 
 		const translatedUrl = strategy.getLocalisedUrl(canonicalPathname, lang, isLanugageSwitch)
 
-		// @ts-ignore
 		return typeof canonicalHref === "object"
-			? { ...canonicalHref, ...translatedUrl }
-			: canonicalHref.replace(canonicalPathname, translatedUrl.pathname)
+			? ({ ...canonicalHref, ...translatedUrl } as P)
+			: (canonicalHref.replace(canonicalPathname, translatedUrl.pathname) as P)
 	}
 }
-
-const getPathname = (href: string): string => new URL(href, "https://acme.com").pathname
 
 /**
  * Returns true if the href explicitly includes the origin, even if it's the current origin
