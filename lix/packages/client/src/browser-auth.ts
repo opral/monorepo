@@ -1,19 +1,3 @@
-// Promise<{
-// 			username: string
-// 			email: string
-// 			avatarUrl?: string
-// 		}>
-// // export type LixAuthModule = {
-// // 	login: () => Promise<any>
-// // 	logout: () => Promise<any>
-// // 	getUser: () => Promise<{
-// // 		username: string
-// // 		email: string
-// // 		avatarUrl?: string
-// // 	}>
-// // 	addPermissions: () => Promise<any>
-// // }
-
 type getAuthClientArgs = {
 	gitHubProxyBaseUrl: string
 	githubAppName: string
@@ -153,5 +137,3 @@ type Email = {
 	verified: boolean
 	visibility: string | undefined
 }
-
-// export const browserAuth: LixAuthModule = { login, logout, getUser, addPermissions }
