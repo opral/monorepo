@@ -6,13 +6,11 @@ export const createDomainDetection = <T extends string>(cfg: {
 	/** The language to use if no domain matches - Eg. on localhost */
 	defaultLanguage: T
 }): LanguageDetector<T> => {
-	return {
-		resolveLanguage(request) {
-			const language = Object.entries(cfg.domains)
-				.find(([, value]) => value === request.nextUrl.host)
-				?.at(0) as T | undefined
+	return (request) => {
+		const language = Object.entries(cfg.domains)
+			.find(([, value]) => value === request.nextUrl.host)
+			?.at(0) as T | undefined
 
-			return language ?? cfg.defaultLanguage
-		},
+		return language ?? cfg.defaultLanguage
 	}
 }
