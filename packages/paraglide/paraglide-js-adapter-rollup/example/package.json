@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "build": "rollup src/main.js --config rollup.config.js",
+    "build": "tsc && rollup src/main.js --config rollup.config.js",
     "clean": "rm -rf ./dist ./node_modules ./src/paraglide"
   },
   "devDependencies": {

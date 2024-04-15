@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "build": "webpack --config webpack.config.js",
+    "build": "tsc && webpack --config webpack.config.js",
     "clean": "rm -rf ./dist ./node_modules ./src/paraglide"
   },
   "devDependencies": {

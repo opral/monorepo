@@ -25,7 +25,7 @@
 	},
 	"scripts": {
 		"dev": "node ./build.js",
-		"build": "pnpm run format && esbuild src/index.ts --bundle --platform=node --target=node20 --outfile=dist/index.cjs",
+		"build": "pnpm run format && tsc && esbuild src/index.ts --bundle --platform=node --target=node20 --outfile=dist/index.cjs",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage --test-timeout=10000",
 		"lint": "eslint ./src --fix",
 		"format": "prettier --write **/*.ts",

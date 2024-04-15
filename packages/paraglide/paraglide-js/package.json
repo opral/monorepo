@@ -42,7 +42,7 @@
 	],
 	"scripts": {
 		"dev": "vite build --mode development --watch",
-		"build": "vite build --mode production",
+		"build": "tsc && vite build --mode production",
 		"test": "tsc --noEmit --emitDeclarationOnly false && vitest run --coverage ./src/**/*",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
