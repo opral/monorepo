@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.39.2
+
+### Patch Changes
+
+- b25aaab: fix prefferedLanguageTag auto-select
+
 ## 1.39.1
 
 ### Patch Changes
