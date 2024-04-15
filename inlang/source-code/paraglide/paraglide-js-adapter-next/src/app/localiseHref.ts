@@ -3,8 +3,8 @@ import type { LinkProps } from "next/link"
 
 export function createLocaliseHref<T extends string>(
 	strategy: RoutingStragey<T>
-): <P extends LinkProps["href"]>(canonicalHref: P, lang: T) => P {
-	return <P extends LinkProps["href"]>(canonicalHref: P, lang: T): P => {
+): <P extends LinkProps["href"]>(canonicalHref: P, lang: T, isLanugageSwitch: boolean) => P {
+	return <P extends LinkProps["href"]>(canonicalHref: P, lang: T, isLanugageSwitch: boolean): P => {
 		//don't translate external links
 		if (isExternal(canonicalHref)) return canonicalHref
 
@@ -18,7 +18,8 @@ export function createLocaliseHref<T extends string>(
 		if (!isAbsolute(canonicalPathname)) return canonicalHref
 
 		const translatedPathaname =
-			strategy.getLocalisedUrl(canonicalPathname, lang, lang).pathname || canonicalPathname
+			strategy.getLocalisedUrl(canonicalPathname, lang, isLanugageSwitch).pathname ||
+			canonicalPathname
 
 		// @ts-ignore
 		return typeof canonicalHref === "object"

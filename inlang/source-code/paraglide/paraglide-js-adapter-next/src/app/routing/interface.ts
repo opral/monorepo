@@ -25,6 +25,6 @@ export interface RoutingStragey<T extends string> {
 	getLocalisedUrl(
 		canonicalPath: string,
 		targetLocale: T,
-		currentLocale: T
+		isLanugageSwitch: boolean
 	): import("url").UrlObject & { pathname: string }
 }
