@@ -35,7 +35,7 @@ export function detectLanguageFromPath<T extends string>({
 
 	const pathWithoutBase = path.replace(base, "")
 
-	const maybeLang = pathWithoutBase.split("/").at(1)
+	const maybeLang = pathWithoutBase.split("/")[1]
 	if (!maybeLang) return undefined
 
 	for (const lang of availableLanguageTags) {
