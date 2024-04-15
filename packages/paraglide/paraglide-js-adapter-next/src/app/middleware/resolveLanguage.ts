@@ -1,11 +1,6 @@
 import { NextRequest } from "next/server"
 import { ResolvedI18nConfig } from "../config"
-import { ACCEPT_LANGUAGE_HEADER_NAME, LANG_COOKIE } from "../constants"
-import { isAvailableLanguageTag } from "$paraglide/runtime.js"
-import {
-	negotiateLanguagePreferences,
-	detectLanguageFromPath,
-} from "@inlang/paraglide-js/internal/adapter-utils"
+import { LanguageDetector } from "./detection/interface"
 
 /**
  * Returns the language that should be used for this request
@@ -17,17 +12,14 @@ import {
  * @param nextRequst
  * @param strategy
  */
-export function resolveLanguage<T extends string>(request: NextRequest, config: ResolvedI18nConfig<T>): T {
-	const locale = detectLanguageFromPath({
-		path: request.nextUrl.pathname,
-		availableLanguageTags: config.availableLanguageTags,
-	})
-	if (locale) return locale
-
-	const localeCookeValue = request.cookies.get(LANG_COOKIE.name)?.value
-	if (isAvailableLanguageTag(localeCookeValue)) return localeCookeValue as T
-
-	const acceptLanguage = request.headers.get(ACCEPT_LANGUAGE_HEADER_NAME)
-	const preferences = negotiateLanguagePreferences(acceptLanguage, config.availableLanguageTags)
-	return preferences.at(0) ?? config.defaultLanguage
+export function resolveLanguage<T extends string>(
+	request: NextRequest,
+	config: ResolvedI18nConfig<T>,
+	detectors: LanguageDetector<T>[]
+): T {
+	for (const detector of detectors) {
+		const locale = detector(request)
+		if (locale) return locale
+	}
+	return config.defaultLanguage
 }
