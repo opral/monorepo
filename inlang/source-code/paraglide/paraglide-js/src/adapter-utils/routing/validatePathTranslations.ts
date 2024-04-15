@@ -1,6 +1,9 @@
-import type { ParamMatcher, RouteParam } from "@sveltejs/kit"
-import { parse_route_id } from "../path-translations/matching/routing.js"
-import type { PathTranslations } from "./pathTranslations.js"
+import {
+	parseRouteDefinition,
+	type ParamMatcher,
+	type RouteParam,
+	type PathDefinitionTranslations,
+} from "./routeDefinitions.js"
 
 export type PathTranslationIssue = {
 	path: string
@@ -12,7 +15,7 @@ export type PathTranslationIssue = {
  * Should only be called in development, this is a waste of time in production.
  */
 export function validatePathTranslations<T extends string>(
-	pathTranslations: PathTranslations<T>,
+	pathTranslations: PathDefinitionTranslations<T>,
 	availableLanguageTags: readonly T[],
 	matchers: Record<string, ParamMatcher>
 ): PathTranslationIssue[] {
@@ -33,7 +36,7 @@ export function validatePathTranslations<T extends string>(
 			continue
 		}
 
-		const { params: expectedParams } = parse_route_id(path)
+		const { params: expectedParams } = parseRouteDefinition(path)
 
 		const expectedMatchers = expectedParams.map((param) => param.matcher).filter(Boolean)
 
@@ -58,7 +61,7 @@ export function validatePathTranslations<T extends string>(
 				})
 			}
 
-			const { params: actualParams } = parse_route_id(translatedPath)
+			const { params: actualParams } = parseRouteDefinition(translatedPath)
 
 			let paramsDontMatch = false
 
@@ -118,4 +121,11 @@ function isSubset<T>(a: Set<T>, b: Set<T>): boolean {
 		if (!b.has(value)) return false
 	}
 	return true
+}
+
+/**
+ * Formats the issues into a nice-looking string that can be logged
+ */
+export function prettyPrintPathDefinitionIssues(issues: PathTranslationIssue[]): string {
+	return issues.map((issue) => `${issue.path}: ${issue.message}`).join("\n")
 }
