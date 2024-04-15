@@ -28,8 +28,7 @@ export function createLocaliseHref<T extends string>(
 	}
 }
 
-const getPathname = (href: string): string => new URL(href, "http://example.com").pathname
-
+const getPathname = (href: string): string => new URL(href, "https://acme.com").pathname
 const isAbsolute = (path: string): path is `/${string}` => path.startsWith("/")
 
 /**
@@ -38,16 +37,11 @@ const isAbsolute = (path: string): path is `/${string}` => path.startsWith("/")
 export function isExternal(href: LinkProps["href"]) {
 	if (typeof href === "object") {
 		//Make sure none of the telltales for external links are set
-		const externalTelltales = [href.protocol, href.auth, href.port, href.hostname, href.host]
-		for (const telltale of externalTelltales) {
-			if (telltale) return true
-		}
-		return false
+		return Boolean(href.protocol || href.auth || href.port || href.hostname || href.host)
 	}
 
 	//Make sure the href isn't a full url
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const [maybeProtocol, ...rest] = href.split(":")
+	const [, ...rest] = href.split(":")
 	if (rest.length === 0) return false
 
 	// href must not start with a url scheme
@@ -56,7 +50,5 @@ export function isExternal(href: LinkProps["href"]) {
 	if (schemeRegex.test(href)) return true
 
 	//If the href starts with // it's a protocol relative url -> must include the host -> external
-	if (href.startsWith("//")) return true
-
-	return false
+	return href.startsWith("//")
 }
