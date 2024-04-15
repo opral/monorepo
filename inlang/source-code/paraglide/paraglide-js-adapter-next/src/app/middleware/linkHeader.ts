@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server"
 import { RoutingStragey } from "../routing/interface"
-import { addPathPrefix, basePath } from "../utils/basePath"
+import { addPathPrefix } from "../utils/basePath"
 
 export function shouldAddLinkHeader(request: NextRequest) {
 	const acceptHeader = request.headers.get("accept")
@@ -26,7 +26,7 @@ export function generateLinkHeader<T extends string>(
 
 	for (const lang of availableLanguageTags) {
 		const localizedPathname =
-			strategy.getLocalisedHref(canonicalPath, lang, lang, basePath).pathname || canonicalPath
+			strategy.getLocalisedHref(canonicalPath, lang, lang).pathname || canonicalPath
 
 		const encodedPathname = encodeURI(localizedPathname)
 		const withBase = addPathPrefix(encodedPathname, request.nextUrl.basePath)
