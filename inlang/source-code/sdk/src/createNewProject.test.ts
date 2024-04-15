@@ -2,6 +2,12 @@ import { describe, it, expect } from "vitest"
 import { createNewProject } from "./createNewProject.js"
 import { mockRepo } from "@lix-js/client"
 import { defaultProjectSettings } from "./defaultProjectSettings.js"
+import { loadProject } from "./loadProject.js"
+import { createMessage } from "./test-utilities/createMessage.js"
+
+function sleep(ms: number) {
+	return new Promise((resolve) => setTimeout(resolve, ms))
+}
 
 describe("createNewProject", () => {
 	it("should throw if a path does not end with .inlang", async () => {
@@ -54,7 +60,7 @@ describe("createNewProject", () => {
 			projectPath,
 			repo,
 		})
-		const json = await repo.nodeishFs.readFile(`${projectPath}/project-settings.json`, {
+		const json = await repo.nodeishFs.readFile(`${projectPath}/settings.json`, {
 			encoding: "utf-8",
 		})
 		const settings = JSON.parse(json)
@@ -70,11 +76,36 @@ describe("createNewProject", () => {
 			repo,
 			projectSettings,
 		})
-		const json = await repo.nodeishFs.readFile(`${projectPath}/project-settings.json`, {
+		const json = await repo.nodeishFs.readFile(`${projectPath}/settings.json`, {
 			encoding: "utf-8",
 		})
 		const settings = JSON.parse(json)
 		expect(settings).toEqual(projectSettings)
 		expect(settings).not.toEqual(defaultProjectSettings)
+	})
+
+	it("should load the project after creating it", async () => {
+		const repo = await mockRepo()
+
+		const projectPath = "/test/project.inlang"
+		await createNewProject({
+			projectPath,
+			repo,
+		})
+
+		const project = await loadProject({ projectPath, repo })
+		expect(project.errors().length).toBe(0)
+
+		const testMessage = createMessage("test", { en: "test message" })
+		project.query.messages.create({ data: testMessage })
+		const messages = project.query.messages.getAll()
+		expect(messages.length).toBe(1)
+		expect(messages[0]).toEqual(testMessage)
+
+		await sleep(20)
+
+		const json = await repo.nodeishFs.readFile("/test/messages/en.json", { encoding: "utf-8" })
+		const jsonMessages = JSON.parse(json)
+		expect(jsonMessages["test"]).toEqual("test message")
 	})
 })
