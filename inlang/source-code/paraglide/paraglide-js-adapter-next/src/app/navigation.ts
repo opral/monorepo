@@ -63,7 +63,13 @@ export const createNavigation = <T extends string>(
 			options?: (NavigateOptions & OptionalLanguageOption) | undefined
 		) => {
 			const locale = options?.locale ?? languageTag()
-			const localisedPath = localiseHref(canonicalPath, locale, locale !== languageTag())
+			const currentPathname = usePathname()
+			const localisedPath = localiseHref(
+				canonicalPath,
+				locale,
+				currentPathname,
+				locale !== languageTag()
+			)
 
 			// If the current and new canonical paths are the same, but the language is different,
 			// we need to do a native reload to make sure the new language is used
@@ -111,7 +117,13 @@ export const createNavigation = <T extends string>(
 			options?: (NavigateOptions & OptionalLanguageOption) | undefined
 		) => {
 			const locale = options?.locale ?? languageTag()
-			const localisedPath = localiseHref(canonicalPath, locale, locale !== languageTag())
+			const currentPathname = usePathname()
+			const localisedPath = localiseHref(
+				canonicalPath,
+				locale,
+				currentPathname,
+				locale !== languageTag()
+			)
 
 			// If the current and new canonical paths are the same, but the language is different,
 			// we need to do a native reload to make sure the new language is used
@@ -156,7 +168,13 @@ export const createNavigation = <T extends string>(
 		 */
 		const prefetch = (canonicalPath: string, options: PrefetchOptions & OptionalLanguageOption) => {
 			const locale = options?.locale ?? languageTag()
-			const localisedPath = localiseHref(canonicalPath, locale, locale !== languageTag())
+			const currentPathname = usePathname()
+			const localisedPath = localiseHref(
+				canonicalPath,
+				locale,
+				currentPathname,
+				locale !== languageTag()
+			)
 			return nextRouter.prefetch(localisedPath, options)
 		}
 
@@ -201,7 +219,13 @@ export function createRedirects<T extends string>(
 	 *  @param url the url to redirect to
 	 */
 	const redirect: NextRedirect = (...args) => {
-		args[0] = localiseHref(args[0], languageTag(), false)
+		const href = args[0]
+
+		if (process.env.NODE_ENV === "development" && !href.startsWith("/")) {
+			throw new Error("The href passed to redirect cannot be relative")
+		}
+
+		args[0] = localiseHref(href, languageTag(), "/", false)
 		NextNavigation.redirect(...args)
 	}
 
@@ -214,7 +238,12 @@ export function createRedirects<T extends string>(
 	 * @param url the url to redirect to
 	 */
 	const permanentRedirect: NextPermanentRedirect = (...args) => {
-		args[0] = localiseHref(args[0], languageTag(), false)
+		const href = args[0]
+		if (process.env.NODE_ENV === "development" && !href.startsWith("/")) {
+			throw new Error("The href passed to permanentRedirect cannot be relative")
+		}
+
+		args[0] = localiseHref(href, languageTag(), "/", false)
 		NextNavigation.permanentRedirect(...args)
 	}
 
