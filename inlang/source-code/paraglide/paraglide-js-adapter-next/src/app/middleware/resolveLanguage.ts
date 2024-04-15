@@ -28,5 +28,5 @@ export function resolveLanguage<T extends string>(
 
 	const acceptLanguage = request.headers.get(ACCEPT_LANGUAGE_HEADER_NAME)
 	const preferences = negotiateLanguagePreferences(acceptLanguage, config.availableLanguageTags)
-	return preferences.at(0) ?? config.defaultLanguage
+	return preferences[0] ?? config.defaultLanguage
 }

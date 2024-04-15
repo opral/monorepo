@@ -365,7 +365,7 @@ export const createNewProjectFlow = async (ctx: {
 	const settings = getNewProjectTemplate()
 
 	//Should always be defined. This is to shut TS up
-	const sourceLanguageTag = languageTags.at(0)
+	const sourceLanguageTag = languageTags[0]
 	if (!sourceLanguageTag) throw new Error("sourceLanguageTag is not defined")
 
 	settings.languageTags = languageTags
