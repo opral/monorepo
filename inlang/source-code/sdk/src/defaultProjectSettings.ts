@@ -1,5 +1,9 @@
 import type { ProjectSettings } from "@inlang/project-settings"
 
+/**
+ * Default project settings for createNewProject
+ * from paraglide-js/src/cli/commands/init/defaults.ts
+ */
 export const defaultProjectSettings = {
 	$schema: "https://inlang.com/schema/project-settings",
 	sourceLanguageTag: "en",
