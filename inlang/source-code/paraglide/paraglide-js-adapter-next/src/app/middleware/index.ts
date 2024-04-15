@@ -7,7 +7,6 @@ import type { NextRequest } from "next/server"
 import type { RoutingStragey } from "../routing/interface"
 import type { ResolvedI18nConfig } from "../config"
 import type { NextURL } from "next/dist/server/web/next-url"
-import { createPrefixDetection } from "./detection/prefixDetection"
 import { createCookieDetection } from "./detection/CookieDetection"
 import { createAcceptLanguageDetection } from "./detection/AcceptLanguageDetection"
 
@@ -22,7 +21,7 @@ export function createMiddleware<T extends string>(
 	return function middleware(request: NextRequest) {
 		const localeCookeValue = request.cookies.get(LANG_COOKIE.name)?.value
 		const locale = resolveLanguage(request, config, [
-			createPrefixDetection({ availableLanugageTags: config.availableLanguageTags }),
+			strategy.resolveLocale,
 			createCookieDetection({ availableLanguageTags: config.availableLanguageTags }),
 			createAcceptLanguageDetection({ availableLanguageTags: config.availableLanguageTags }),
 		])

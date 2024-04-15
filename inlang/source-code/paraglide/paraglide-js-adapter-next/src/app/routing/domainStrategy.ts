@@ -1,3 +1,4 @@
+import { createDomainDetection } from "../middleware/detection/domainDetection"
 import { RoutingStragey } from "./interface"
 
 export function DomainStrategy<T extends string>({
@@ -18,6 +19,10 @@ export function DomainStrategy<T extends string>({
 				hostname: domain,
 				pathname: canonicalPath,
 			}
+		},
+		resolveLocale(request) {
+			const detect = createDomainDetection({ domains })
+			return detect(request)
 		},
 	}
 }

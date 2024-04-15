@@ -3,11 +3,7 @@ import { ResolvedI18nConfig } from "../config"
 import { LanguageDetector } from "./detection/interface"
 
 /**
- * Returns the language that should be used for this request
- *
- *  1. User-Configured resolveLanuage (may be undefined)
- *  2. NEXT_LOCALE Cookie (may be undefined)
- *  3. Negotiate Language (with default as fallback)
+ * Returns the language that should be used for this request using the listed detectors
  *
  * @param nextRequst
  * @param strategy
