@@ -170,7 +170,7 @@ export class InlangInstall extends TwLitElement {
 		super.connectedCallback()
 		this.url = JSON.parse(this.jsonURL)
 
-		const auth = await getUser().catch(() => {
+		const auth = await browserAuth.getUser().catch(() => {
 			this.authorized = false
 		})
 		if (auth) {
