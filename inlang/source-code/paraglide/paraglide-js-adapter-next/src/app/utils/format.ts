@@ -1,6 +1,8 @@
 import type { UrlObject } from "node:url"
 import querystring from "qs"
 
+// polyfill for node:url's format as it is not available in Next-production mode
+
 const slashedProtocols = ["http:", "https:", "ftp:", "gopher:", "file:"] as const
 
 export function format(url: UrlObject) {
