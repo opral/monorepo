@@ -7,7 +7,6 @@ import type { NextRequest } from "next/server"
 import type { RoutingStragey } from "../routing/interface"
 import type { ResolvedI18nConfig } from "../config"
 import type { NextURL } from "next/dist/server/web/next-url"
-import { basePath } from "../utils/basePath"
 
 export function createMiddleware<T extends string>(
 	config: ResolvedI18nConfig<T>,
@@ -23,7 +22,7 @@ export function createMiddleware<T extends string>(
 
 		const decodedPathname = decodeURI(request.nextUrl.pathname)
 		const canonicalPath = strategy.getCanonicalPath(decodedPathname, locale)
-		const localisedPathname = strategy.getLocalisedHref(canonicalPath, locale, locale, basePath)
+		const localisedPathname = strategy.getLocalisedHref(canonicalPath, locale, locale)
 
 		const shouldRedirect = localisedPathname.pathname !== decodedPathname
 
