@@ -1,13 +1,31 @@
-import { NextRequest } from "next/server"
-
 export interface RoutingStragey<T extends string> {
-	getLocalisedPath(
-		canonicalPath: string,
-		locale: T,
-		ctx: {
-			isLocaleSwitch: boolean
-		}
-	): string
+	/**
+	 * Returns the canonical route that should be rendered.
+	 *
+	 * @param localisedPath - The Path present in the URL with the base removed
+	 * @param locale - The current Lanugage
+	 *
+	 * @example
+	 * ```ts
+	 * getCanonicalPath("/de/ueber-uns", "de") // "/about"
+	 * getCanonicalPath("/en/about", "en") // "/about"
+	 * ```
+	 */
 	getCanonicalPath(localisedPath: string, locale: T): string
-	resolveLanguage(request: NextRequest): T | undefined
+
+	/**
+	 * Returns an href that can be used to navigate to the localised path corresponding to the canonical path.
+	 * This may be an absolute pathname, or a full URL.
+	 *
+	 * @param canonicalPath - The canonical path
+	 * @param targetLocale - The target language the localised href should point to
+	 * @param currentLocale - The current language
+	 * @param basePath - The base path of the application
+	 */
+	getLocalisedHref(
+		canonicalPath: string,
+		targetLocale: T,
+		currentLocale: T,
+		basePath: `/${string}` | ""
+	): string
 }

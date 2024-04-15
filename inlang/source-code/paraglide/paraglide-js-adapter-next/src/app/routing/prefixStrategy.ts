@@ -19,40 +19,6 @@ export function PrefixStrategy<T extends string>({
 	exclude,
 	prefix,
 }: ResolvedI18nConfig<T>): RoutingStragey<T> {
-	/**
-	 * Get's the language tag from the localised path.
-	 * If no language tag is _explicitly_ in the path, returns undefined
-	 *
-	 * @example
-	 * ```ts
-	 * getLocaleFromLocalisedPath("/de/ueber-uns") // "de"
-	 * getLocaleFromLocalisedPath("/en/about") // "en"
-	 * getLocaleFromLocalisedPath("/about") // undefined
-	 * ```
-	 */
-	function getLocaleFromLocalisedPath(localisedPath: string): T | undefined {
-		const [, maybeLocale] = localisedPath.split("/")
-		if (!availableLanguageTags.includes(maybeLocale as T)) return undefined
-		return maybeLocale as T
-	}
-
-	function resolveLanguage(request: NextRequest): T | undefined {
-		const localisedPathname = decodeURI(request.nextUrl.pathname)
-		const localeInPath = getLocaleFromLocalisedPath(localisedPathname)
-
-		switch (prefix) {
-			case "all": {
-				return localeInPath
-			}
-			case "except-default": {
-				return localeInPath ?? defaultLanguage
-			}
-			case "never": {
-				return undefined
-			}
-		}
-	}
-
 	function getCanonicalPath(localisedPath: string, locale: T): string {
 		let pathWithoutLocale = localisedPath.startsWith(`/${locale}`)
 			? localisedPath.replace(`/${locale}`, "")
@@ -75,23 +41,6 @@ export function PrefixStrategy<T extends string>({
 		return pathWithoutLocale
 	}
 
-	function getLocalisedPath(canonicalPath: string, locale: T): string {
-		if (exclude(canonicalPath)) return canonicalPath
-
-		const translatedPath = getTranslatedPath(canonicalPath, locale, pathnames)
-
-		const shouldAddPrefix =
-			prefix === "never" ? false : prefix === "except-default" ? locale !== defaultLanguage : true
-
-		let localisedPath = shouldAddPrefix ? `/${locale}${translatedPath}` : translatedPath
-
-		//remove trailing slash
-		if (localisedPath.endsWith("/")) localisedPath = localisedPath.slice(0, -1)
-
-		//add "/" if path is empty
-		return localisedPath || "/"
-	}
-
 	function getTranslatedPath(
 		canonicalPath: string,
 		lang: T,
@@ -109,10 +58,21 @@ export function PrefixStrategy<T extends string>({
 		return resolveRoute(translatedPath, match.params)
 	}
 
-
 	return {
-		getLocalisedPath,
+		getLocalisedHref(canonicalPath, targetLanguage, currentLanguage, basePath) {
+			if (exclude(canonicalPath)) return canonicalPath
+
+			const translatedPath = getTranslatedPath(canonicalPath, targetLanguage, pathnames)
+			const shouldAddPrefix =
+				prefix === "never"
+					? false
+					: prefix === "except-default"
+					? targetLanguage !== defaultLanguage
+					: true
+
+			const localisedPath = shouldAddPrefix ? `/${targetLanguage}${translatedPath}` : translatedPath
+			return `${basePath}${localisedPath}`
+		},
 		getCanonicalPath,
-		resolveLanguage,
 	}
 }
