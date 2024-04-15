@@ -232,7 +232,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		 */
 		getLanguageFromUrl(url: URL): T {
 			const pathWithLanguage = url.pathname.slice(normaliseBase(base).length)
-			const lang = pathWithLanguage.split("/").filter(Boolean).at(0)
+			const lang = pathWithLanguage.split("/").find(Boolean)
 
 			if (runtime.isAvailableLanguageTag(lang)) return lang
 			return defaultLanguageTag
