@@ -128,50 +128,52 @@ export class LintRuleLevelObjectInput extends LitElement {
 	}
 
 	override render() {
-		return html` <div part="property" class="property">
-			<div class="title-container">
-				<field-header
-					.fieldTitle=${this._title ? this._title : this.property}
-					.description=${this._description}
-					.optional=${this.required ? false : true}
-					exportparts="property-title, property-paragraph"
-				></field-header>
-			</div>
-			<div class="container">
-				${this.modules &&
-				this.modules.map((module) => {
-					return module.id.split(".")[0] !== "plugin"
-						? html`<div class="rule-container">
-								<sl-select
-									id=${module.id}
-									exportparts="listbox:option-wrapper"
-									value=${this.value ? (this.value as any)[module.id] : "warning"}
-									placeholder="warning"
-									class="select"
-									size="small"
-									@sl-change=${(e: Event) => {
-										this.handleUpdate(
-											module.id as `messageLintRule.${string}.${string}`,
-											(e.target as HTMLInputElement).value
-										)
-									}}
-								>
-									${this._valueOptions?.map((option) => {
-										return html`<sl-option
-											exportparts="base:option"
-											value=${option.const}
-											class="add-item-side"
+		return this.modules && this.modules.some((module) => module.id.split(".")[0] !== "plugin")
+			? html` <div part="property" class="property">
+					<div class="title-container">
+						<field-header
+							.fieldTitle=${this._title ? this._title : this.property}
+							.description=${this._description}
+							.optional=${this.required ? false : true}
+							exportparts="property-title, property-paragraph"
+						></field-header>
+					</div>
+					<div class="container">
+						${this.modules &&
+						this.modules.map((module) => {
+							return module.id.split(".")[0] !== "plugin"
+								? html`<div class="rule-container">
+										<sl-select
+											id=${module.id}
+											exportparts="listbox:option-wrapper"
+											value=${this.value ? (this.value as any)[module.id] : "warning"}
+											placeholder="warning"
+											class="select"
+											size="small"
+											@sl-change=${(e: Event) => {
+												this.handleUpdate(
+													module.id as `messageLintRule.${string}.${string}`,
+													(e.target as HTMLInputElement).value
+												)
+											}}
 										>
-											${option.const}
-										</sl-option>`
-									})}
-								</sl-select>
-								<p class="ruleId">${(module.displayName as { en: string }).en}</p>
-						  </div>`
-						: undefined
-				})}
-			</div>
-		</div>`
+											${this._valueOptions?.map((option) => {
+												return html`<sl-option
+													exportparts="base:option"
+													value=${option.const}
+													class="add-item-side"
+												>
+													${option.const}
+												</sl-option>`
+											})}
+										</sl-select>
+										<p class="ruleId">${(module.displayName as { en: string }).en}</p>
+								  </div>`
+								: undefined
+						})}
+					</div>
+			  </div>`
+			: undefined
 	}
 }
 
