@@ -27,5 +27,5 @@ export async function createNewProject(args: {
 
 	const settingsText = JSON.stringify(args.projectSettings ?? defaultProjectSettings, undefined, 2)
 
-	await nodeishFs.writeFile(`${args.projectPath}/project-settings.json`, settingsText)
+	await nodeishFs.writeFile(`${args.projectPath}/settings.json`, settingsText)
 }
