@@ -1,9 +1,11 @@
 import { NextRequest } from "next/server"
-import { RoutingStragey } from "../routing/interface"
 import { ResolvedI18nConfig } from "../config"
 import { ACCEPT_LANGUAGE_HEADER_NAME, LANG_COOKIE } from "../constants"
 import { isAvailableLanguageTag } from "$paraglide/runtime.js"
-import { negotiateLanguagePreferences } from "@inlang/paraglide-js/internal/adapter-utils"
+import {
+	negotiateLanguagePreferences,
+	detectLanguageFromPath,
+} from "@inlang/paraglide-js/internal/adapter-utils"
 
 /**
  * Returns the language that should be used for this request
@@ -15,12 +17,11 @@ import { negotiateLanguagePreferences } from "@inlang/paraglide-js/internal/adap
  * @param nextRequst
  * @param strategy
  */
-export function resolveLanguage<T extends string>(
-	request: NextRequest,
-	config: ResolvedI18nConfig<T>,
-	strategy: RoutingStragey<T>
-): T {
-	const locale = strategy.resolveLanguage(request)
+export function resolveLanguage<T extends string>(request: NextRequest, config: ResolvedI18nConfig<T>): T {
+	const locale = detectLanguageFromPath({
+		path: request.nextUrl.pathname,
+		availableLanguageTags: config.availableLanguageTags,
+	})
 	if (locale) return locale
 
 	const localeCookeValue = request.cookies.get(LANG_COOKIE.name)?.value

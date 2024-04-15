@@ -1,8 +1,13 @@
 import { LanguageDetector } from "./interface"
+import { detectLanguageFromPath } from "@inlang/paraglide-js/internal/adapter-utils"
 
-export const prefixDetection: LanguageDetector<"en"> = {
+export const createPrefixDetection = <T extends string>(cfg: {
+	availableLanugageTags: readonly T[]
+}): LanguageDetector<T> => ({
 	resolveLanguage(request) {
-		const pathname = request.nextUrl.pathname
-		return "en"
+		return detectLanguageFromPath({
+			path: request.nextUrl.pathname,
+			availableLanguageTags: cfg.availableLanugageTags,
+		})
 	},
-}
+})

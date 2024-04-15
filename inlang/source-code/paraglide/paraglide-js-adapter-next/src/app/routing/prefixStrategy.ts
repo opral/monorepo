@@ -4,7 +4,6 @@ import {
 	bestMatch,
 } from "@inlang/paraglide-js/internal/adapter-utils"
 import type { RoutingStragey } from "./interface"
-import type { NextRequest } from "next/server"
 import type { ResolvedI18nConfig } from "../config"
 
 /*
@@ -13,7 +12,6 @@ import type { ResolvedI18nConfig } from "../config"
 */
 
 export function PrefixStrategy<T extends string>({
-	availableLanguageTags,
 	defaultLanguage,
 	pathnames,
 	exclude,
@@ -59,8 +57,11 @@ export function PrefixStrategy<T extends string>({
 	}
 
 	return {
-		getLocalisedHref(canonicalPath, targetLanguage, currentLanguage, basePath) {
-			if (exclude(canonicalPath)) return canonicalPath
+		getLocalisedHref(canonicalPath, targetLanguage) {
+			if (exclude(canonicalPath))
+				return {
+					pathname: canonicalPath,
+				}
 
 			const translatedPath = getTranslatedPath(canonicalPath, targetLanguage, pathnames)
 			const shouldAddPrefix =
@@ -70,8 +71,12 @@ export function PrefixStrategy<T extends string>({
 					? targetLanguage !== defaultLanguage
 					: true
 
-			const localisedPath = shouldAddPrefix ? `/${targetLanguage}${translatedPath}` : translatedPath
-			return `${basePath}${localisedPath}`
+			const localisedPath = shouldAddPrefix
+				? `/${targetLanguage}${translatedPath == "/" ? "" : translatedPath}`
+				: translatedPath
+			return {
+				pathname: localisedPath,
+			}
 		},
 		getCanonicalPath,
 	}

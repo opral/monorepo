@@ -17,9 +17,8 @@ export function createLocaliseHref<T extends string>(
 		//dont' touch relative links
 		if (!isAbsolute(canonicalPathname)) return canonicalHref
 
-		const translatedPathaname = strategy.getLocalisedPath(canonicalPathname, lang, {
-			isLocaleSwitch: true,
-		})
+		const translatedPathaname =
+			strategy.getLocalisedHref(canonicalPathname, lang, lang, "").pathname || canonicalPathname
 
 		// @ts-ignore
 		return typeof canonicalHref === "object"

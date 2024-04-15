@@ -27,5 +27,5 @@ export interface RoutingStragey<T extends string> {
 		targetLocale: T,
 		currentLocale: T,
 		basePath: `/${string}` | ""
-	): string
+	): import("url").UrlObject
 }
