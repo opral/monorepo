@@ -43,16 +43,25 @@ describe("localiseHref", () => {
 	})
 
 	it("keeps search params and hash (string)", () => {
-		expect(localiseHref("/some/path?foo=bar#hash", "de", false)).toBe("/de/some/path?foo=bar#hash")
-		expect(localiseHref("/some/path?foo=bar#hash", "de-CH", false)).toBe(
+		expect(localiseHref("/some/path?foo=bar#hash", "de", "/", false)).toBe(
+			"/de/some/path?foo=bar#hash"
+		)
+		expect(localiseHref("/some/path?foo=bar#hash", "de-CH", "/", false)).toBe(
 			"/de-CH/some/path?foo=bar#hash"
 		)
-		expect(localiseHref("/some/path?foo=bar#hash", "en", false)).toBe("/some/path?foo=bar#hash")
+		expect(localiseHref("/some/path?foo=bar#hash", "en", "/somewhere", false)).toBe(
+			"/some/path?foo=bar#hash"
+		)
 	})
 
 	it("keeps search params and hash (object)", () => {
 		expect(
-			localiseHref({ pathname: "/some/path", search: "?foo=bar", hash: "#hash" }, "de", false)
+			localiseHref(
+				{ pathname: "/some/path", search: "?foo=bar", hash: "#hash" },
+				"de",
+				"/somewhere",
+				false
+			)
 		).toEqual({
 			pathname: "/de/some/path",
 			search: "?foo=bar",
@@ -60,7 +69,12 @@ describe("localiseHref", () => {
 		})
 
 		expect(
-			localiseHref({ pathname: "/some/path", search: "?foo=bar", hash: "#hash" }, "de-CH", false)
+			localiseHref(
+				{ pathname: "/some/path", search: "?foo=bar", hash: "#hash" },
+				"de-CH",
+				"/somewhere",
+				false
+			)
 		).toEqual({
 			pathname: "/de-CH/some/path",
 			search: "?foo=bar",
@@ -68,7 +82,12 @@ describe("localiseHref", () => {
 		})
 
 		expect(
-			localiseHref({ pathname: "/some/path", search: "?foo=bar", hash: "#hash" }, "en", false)
+			localiseHref(
+				{ pathname: "/some/path", search: "?foo=bar", hash: "#hash" },
+				"en",
+				"/somewhere",
+				false
+			)
 		).toEqual({
 			pathname: "/some/path",
 			search: "?foo=bar",
@@ -77,9 +96,9 @@ describe("localiseHref", () => {
 	})
 
 	it("does not translate relative paths (string)", () => {
-		expect(localiseHref("some/path", "de", false)).toBe("some/path")
-		expect(localiseHref("some/path", "de-CH", false)).toBe("some/path")
-		expect(localiseHref("some/path", "en", false)).toBe("some/path")
+		expect(localiseHref("some/path", "de", "/somewhere", false)).toBe("some/path")
+		expect(localiseHref("some/path", "de-CH", "/somewhere", false)).toBe("some/path")
+		expect(localiseHref("some/path", "en", "/somewhere", false)).toBe("some/path")
 	})
 
 	it("does not translate relative paths (object)", () => {

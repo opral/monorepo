@@ -7,6 +7,7 @@ import { createLocaliseHref } from "./localiseHref"
 import type { ResolvedI18nConfig } from "./config"
 import { serializeCookie } from "./utils/cookie"
 import { LANG_COOKIE } from "./constants"
+import { createNavigation } from "./navigation"
 
 /**
  * Creates a link component that localises the href based on the current language.
@@ -18,11 +19,13 @@ export function createLink<T extends string>(
 	strategy: RoutingStragey<T>
 ) {
 	const localiseHref = createLocaliseHref(strategy)
+	const navigation = createNavigation(languageTag, strategy)
 
 	return function Link(
 		props: Omit<Parameters<typeof NextLink>[0], "locale"> & { locale?: T }
 	): ReturnType<typeof NextLink> {
 		const currentLanguageTag = languageTag()
+		const currentPathname = navigation.usePathname()
 
 		if (
 			process.env.NODE_ENV === "development" &&
@@ -43,7 +46,7 @@ export function createLink<T extends string>(
 		if (!isAvailableLanguageTag(lang)) lang = config.defaultLanguage
 		const isLanguageSwitch = lang !== currentLanguageTag
 
-		const localisedHref = localiseHref(props.href, lang, isLanguageSwitch)
+		const localisedHref = localiseHref(props.href, lang, currentPathname, isLanguageSwitch)
 
 		function updateLangCookie(newLang: T) {
 			document.cookie = serializeCookie({
