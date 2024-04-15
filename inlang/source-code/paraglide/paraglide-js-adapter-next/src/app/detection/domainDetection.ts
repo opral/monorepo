@@ -2,6 +2,8 @@ import { LanguageDetector } from "./interface"
 
 export const createDomainDetection = <T extends string>(cfg: {
 	domains: Record<T, string>
+
+	/** The language to use if no domain matches - Eg. on localhost */
 	defaultLanguage: T
 }): LanguageDetector<T> => {
 	return {

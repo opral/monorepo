@@ -41,8 +41,9 @@ export function createLink<T extends string>(
 
 		let lang = props.locale || currentLanguageTag
 		if (!isAvailableLanguageTag(lang)) lang = config.defaultLanguage
+		const isLanguageSwitch = lang !== currentLanguageTag
 
-		const localisedHref = localiseHref(props.href, lang)
+		const localisedHref = localiseHref(props.href, lang, isLanguageSwitch)
 
 		function updateLangCookie(newLang: T) {
 			document.cookie = serializeCookie({
@@ -53,10 +54,8 @@ export function createLink<T extends string>(
 		}
 
 		//If the language changes, we don't want client navigation
-		return lang == currentLanguageTag ? (
-			<>
-				<NextLink {...props} href={localisedHref} />
-			</>
+		return !isLanguageSwitch ? (
+			<NextLink {...props} href={localisedHref} />
 		) : (
 			<a
 				{...props}
