@@ -5,14 +5,20 @@ import { state } from "../state.js"
 import { getSetting } from "./index.js"
 import { CONFIGURATION } from "../../configuration.js"
 
+let lastStatusBarItem: any = undefined // Track the last status bar item created for testing
+
 vi.mock("vscode", () => ({
 	window: {
-		createStatusBarItem: vi.fn().mockReturnValue({
-			dispose: vi.fn(),
-			command: undefined,
-			text: undefined,
-			tooltip: undefined,
-			show: vi.fn(),
+		createStatusBarItem: vi.fn().mockImplementation(() => {
+			const statusBarMock = {
+				dispose: vi.fn(),
+				command: undefined,
+				text: undefined,
+				tooltip: undefined,
+				show: vi.fn(),
+			}
+			lastStatusBarItem = statusBarMock
+			return statusBarMock
 		}),
 	},
 	StatusBarAlignment: {
@@ -29,13 +35,16 @@ vi.mock("vscode", () => ({
 vi.mock("../state", () => ({
 	state: vi.fn().mockImplementation(() => ({
 		project: {
-			settings: vi.fn().mockReturnValue({ sourceLanguageTag: "en" }),
+			settings: vi.fn().mockReturnValue({
+				sourceLanguageTag: "en",
+				languageTags: ["en", "fr"],
+			}),
 		},
 	})),
 }))
 
 vi.mock("./index", () => ({
-	getSetting: vi.fn(),
+	getSetting: vi.fn().mockResolvedValueOnce("de"),
 }))
 
 describe("statusBar", () => {
@@ -65,14 +74,24 @@ describe("showStatusBar", () => {
 
 	it("should dispose the existing status bar item if it exists", async () => {
 		await showStatusBar()
-		const disposeMock = vscode.window.createStatusBarItem().dispose
+		const disposeMock = lastStatusBarItem.dispose
+
 		await showStatusBar()
+
 		expect(disposeMock).toHaveBeenCalled()
 	})
 
 	it("should do nothing if sourceLanguageTag is not available", async () => {
-		// @ts-expect-error
-		vi.mocked(state).mockReturnValueOnce({ project: undefined })
+		// Modify the mock for state to return a more defensive structure
+		vi.mocked(state).mockReturnValueOnce({
+			project: {
+				settings: () => ({
+					// @ts-expect-error
+					sourceLanguageTag: undefined,
+					languageTags: ["en", "fr"],
+				}),
+			},
+		})
 		await showStatusBar()
 		expect(vscode.window.createStatusBarItem).not.toHaveBeenCalled()
 	})
@@ -81,5 +100,12 @@ describe("showStatusBar", () => {
 		vi.mocked(getSetting).mockResolvedValueOnce("")
 		await showStatusBar()
 		expect(vscode.window.createStatusBarItem).toHaveBeenCalledTimes(1)
+	})
+
+	it("should not set previewLanguageTag if it's not in settings.languageTags", async () => {
+		vi.mocked(getSetting).mockResolvedValueOnce("de")
+		await showStatusBar()
+
+		expect(lastStatusBarItem.text).toBe("Sherlock: en")
 	})
 })

@@ -184,9 +184,8 @@ export class InlangInstall extends TwLitElement {
 
 		this.loadingProgress = 90
 
-		// Push the project to the repo
-		await repo.add({
-			filepath: `${this.url.project?.slice(1)}/settings.json`,
+		const filesWithUncommittedChanges = await repo.statusList({
+			filter: (f: any) => f.endsWith(".json"),
 		})
 
 		await repo.commit({
@@ -195,6 +194,7 @@ export class InlangInstall extends TwLitElement {
 				name: this.user.username,
 				email: this.user.email,
 			},
+			include: filesWithUncommittedChanges.map((f) => f[0]),
 		})
 
 		if (this.step === "abort" || this.step === "error") {
