@@ -1,6 +1,6 @@
 ![Paraglide JS header image](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/paraglide-js-header.png)
 
-Attention: This package is in pre-release. It is not yet ready for production use.
+**Currently Unmaintained**
 
 # SolidStart Adapter for [Paraglide JS](/m/gerre34r)
 
