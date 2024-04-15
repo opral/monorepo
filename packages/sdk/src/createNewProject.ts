@@ -6,7 +6,7 @@ import { defaultProjectSettings } from "./defaultProjectSettings.js"
 /**
  * Creates a new project in the given directory.
  * The directory must be an absolute path, must not exist, and must end with {name}.inlang
- * Uses defaultProjectettings unless projectSettings are provided.
+ * Uses defaultProjectSettings unless projectSettings are provided.
  *
  * @param projectPath - Absolute path to the [name].inlang directory
  * @param repo - An instance of a lix repo as returned by `openRepository`
