@@ -1,3 +1,5 @@
+import { LanguageDetector } from "../middleware/detection/interface"
+
 export interface RoutingStragey<T extends string> {
 	/**
 	 * Returns the canonical route that should be rendered.
@@ -27,4 +29,6 @@ export interface RoutingStragey<T extends string> {
 		targetLocale: T,
 		isLanugageSwitch: boolean
 	): import("url").UrlObject & { pathname: string }
+
+	resolveLocale: LanguageDetector<T>
 }

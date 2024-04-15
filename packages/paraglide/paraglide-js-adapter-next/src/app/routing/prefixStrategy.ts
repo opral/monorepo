@@ -5,6 +5,7 @@ import {
 } from "@inlang/paraglide-js/internal/adapter-utils"
 import type { RoutingStragey } from "./interface"
 import type { ResolvedI18nConfig } from "../config"
+import { createPrefixDetection } from "../middleware/detection/prefixDetection"
 
 /*
 	Canonical Path = Path without locale (how you write the href)
@@ -16,6 +17,7 @@ export function PrefixStrategy<T extends string>({
 	pathnames,
 	exclude,
 	prefix,
+	availableLanguageTags,
 }: ResolvedI18nConfig<T>): RoutingStragey<T> {
 	function getCanonicalPath(localisedPath: string, locale: T): string {
 		let pathWithoutLocale = localisedPath.startsWith(`/${locale}`)
@@ -79,5 +81,10 @@ export function PrefixStrategy<T extends string>({
 			}
 		},
 		getCanonicalPath,
+
+		resolveLocale(request) {
+			const detect = createPrefixDetection({ availableLanguageTags })
+			return detect(request)
+		},
 	}
 }
