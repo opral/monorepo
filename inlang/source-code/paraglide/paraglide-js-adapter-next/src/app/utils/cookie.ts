@@ -8,8 +8,7 @@ export type CookieConfig = {
 }
 
 export function serializeCookie(cookieConfig: CookieConfig) {
-	const parts = []
-	parts.push(`${cookieConfig.name}=${cookieConfig.value}`)
+	const parts = [`${cookieConfig.name}=${cookieConfig.value}`]
 	if (cookieConfig.maxAge) {
 		parts.push(`Max-Age=${cookieConfig.maxAge}`)
 	}
