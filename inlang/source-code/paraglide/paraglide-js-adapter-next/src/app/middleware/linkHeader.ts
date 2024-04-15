@@ -25,7 +25,8 @@ export function generateLinkHeader<T extends string>(
 	const alternates: string[] = []
 
 	for (const lang of availableLanguageTags) {
-		const localizedPathname = strategy.getLocalisedHref(canonicalPath, lang, lang, basePath)
+		const localizedPathname =
+			strategy.getLocalisedHref(canonicalPath, lang, lang, basePath).pathname || canonicalPath
 
 		const encodedPathname = encodeURI(localizedPathname)
 		const withBase = addPathPrefix(encodedPathname, request.nextUrl.basePath)

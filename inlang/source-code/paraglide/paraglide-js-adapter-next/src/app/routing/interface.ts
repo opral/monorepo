@@ -25,7 +25,6 @@ export interface RoutingStragey<T extends string> {
 	getLocalisedHref(
 		canonicalPath: string,
 		targetLocale: T,
-		currentLocale: T,
-		basePath: `/${string}` | ""
+		currentLocale: T
 	): import("url").UrlObject
 }

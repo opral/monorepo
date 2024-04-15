@@ -25,7 +25,7 @@ export function createMiddleware<T extends string>(
 		const canonicalPath = strategy.getCanonicalPath(decodedPathname, locale)
 		const localisedPathname = strategy.getLocalisedHref(canonicalPath, locale, locale, basePath)
 
-		const shouldRedirect = localisedPathname !== decodedPathname
+		const shouldRedirect = localisedPathname.pathname !== decodedPathname
 
 		const localeCookieMatches =
 			isAvailableLanguageTag(localeCookeValue) && localeCookeValue === locale
@@ -41,7 +41,7 @@ export function createMiddleware<T extends string>(
 		}
 
 		const response: NextResponse = shouldRedirect
-			? redirect(request.nextUrl, localisedPathname, requestInit)
+			? redirect(request.nextUrl, localisedPathname.pathname || canonicalPath, requestInit)
 			: rewriteRequired
 			? rewrite(request.nextUrl, canonicalPath, requestInit)
 			: NextResponse.next(requestInit)
