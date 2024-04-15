@@ -47,7 +47,7 @@ export function createI18n<T extends string = string>(userConfig: I18nUserConfig
 		Link,
 		usePathname,
 		localizePath: (canonicalPath: string, lang: T) => {
-			return strategy.getLocalisedUrl(canonicalPath, lang, lang).pathname
+			return strategy.getLocalisedUrl(canonicalPath, lang, getLanguage() !== lang).pathname
 		},
 		getLocalisedUrl: strategy.getLocalisedUrl,
 		middleware,

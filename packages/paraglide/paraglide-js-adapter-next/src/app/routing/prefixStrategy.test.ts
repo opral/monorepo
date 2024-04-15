@@ -53,45 +53,45 @@ describe("getCanonicalPath", () => {
 
 describe("getLocalisedPath", () => {
 	it("adds a language prefix if there isn't one", () => {
-		expect(getLocalisedHref("/some/path", "de", "en")).toEqual({ pathname: "/de/some/path" })
-		expect(getLocalisedHref("/some/path", "de-CH", "de-CH")).toEqual({
+		expect(getLocalisedHref("/some/path", "de", false)).toEqual({ pathname: "/de/some/path" })
+		expect(getLocalisedHref("/some/path", "de-CH", false)).toEqual({
 			pathname: "/de-CH/some/path",
 		})
-		expect(getLocalisedHref("/", "de", "de")).toEqual({ pathname: "/de" })
-		expect(getLocalisedHref("/", "de-CH", "de")).toEqual({ pathname: "/de-CH" })
-		expect(getLocalisedHref("/", "en", "de")).toEqual({ pathname: "/" })
+		expect(getLocalisedHref("/", "de", false)).toEqual({ pathname: "/de" })
+		expect(getLocalisedHref("/", "de-CH", false)).toEqual({ pathname: "/de-CH" })
+		expect(getLocalisedHref("/", "en", false)).toEqual({ pathname: "/" })
 	})
 
 	it("does not add a language prefix if the new locale is the source language tag", () => {
-		expect(getLocalisedHref("/some/path", "en", "en")).toEqual({ pathname: "/some/path" })
+		expect(getLocalisedHref("/some/path", "en", false)).toEqual({ pathname: "/some/path" })
 	})
 
 	it("does not localise excluded paths", () => {
-		expect(getLocalisedHref("/api/some/path", "de", "en")).toEqual({
+		expect(getLocalisedHref("/api/some/path", "de", false)).toEqual({
 			pathname: "/api/some/path",
 		})
 	})
 
 	it("get's translated paths", () => {
-		expect(getLocalisedHref("/canonical-translated", "de", "de")).toEqual({
+		expect(getLocalisedHref("/canonical-translated", "de", false)).toEqual({
 			pathname: "/de/uebersetzt",
 		})
-		expect(getLocalisedHref("/canonical-translated", "en", "de")).toEqual({
+		expect(getLocalisedHref("/canonical-translated", "en", false)).toEqual({
 			pathname: "/translated",
 		})
-		expect(getLocalisedHref("/canonical-translated", "de-CH", "de")).toEqual({
+		expect(getLocalisedHref("/canonical-translated", "de-CH", false)).toEqual({
 			pathname: "/de-CH/uebersetzt",
 		})
 	})
 
 	it("get's translated paths with params", () => {
-		expect(getLocalisedHref("/canonical-translated/1", "de", "en")).toEqual({
+		expect(getLocalisedHref("/canonical-translated/1", "de", false)).toEqual({
 			pathname: "/de/uebersetzt/1",
 		})
-		expect(getLocalisedHref("/canonical-translated/1", "en", "en")).toEqual({
+		expect(getLocalisedHref("/canonical-translated/1", "en", false)).toEqual({
 			pathname: "/translated/1",
 		})
-		expect(getLocalisedHref("/canonical-translated/1", "de-CH", "de-CH")).toEqual({
+		expect(getLocalisedHref("/canonical-translated/1", "de-CH", false)).toEqual({
 			pathname: "/de-CH/uebersetzt/1",
 		})
 	})

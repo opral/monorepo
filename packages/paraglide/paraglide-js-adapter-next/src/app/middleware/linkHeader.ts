@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server"
 import { RoutingStragey } from "../routing/interface"
 import { addPathPrefix } from "../utils/basePath"
-import { format } from "node:url"
+import { format } from "../utils/format"
 
 export function shouldAddLinkHeader(request: NextRequest) {
 	const acceptHeader = request.headers.get("accept")
@@ -26,9 +26,16 @@ export function generateLinkHeader<T extends string>(
 	const alternates: string[] = []
 
 	for (const lang of availableLanguageTags) {
-		const localizedUrl = strategy.getLocalisedUrl(canonicalPath, lang, lang)
+		const localizedUrl = strategy.getLocalisedUrl(canonicalPath, lang, true)
 		localizedUrl.pathname = encodeURI(localizedUrl.pathname || "")
 		localizedUrl.pathname = addPathPrefix(localizedUrl.pathname, request.nextUrl.basePath)
+
+		localizedUrl.protocol ??= request.nextUrl.protocol
+		localizedUrl.host ??= request.nextUrl.host
+		localizedUrl.hostname ??= request.nextUrl.hostname
+		localizedUrl.port ??= request.nextUrl.port
+		localizedUrl.hash ??= request.nextUrl.hash
+		localizedUrl.search ??= request.nextUrl.search
 
 		//withBase should be an absolute path, so this should never do relative path resolution
 		const fullHref = format(localizedUrl)

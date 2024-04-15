@@ -49,7 +49,8 @@
 		"dist"
 	],
 	"dependencies": {
-		"@inlang/paraglide-js": "workspace:*"
+		"@inlang/paraglide-js": "workspace:*",
+		"qs": "^6.12.1"
 	},
 	"peerDependencies": {
 		"next": "^13.0.0 || ^14.0.0",
@@ -60,6 +61,7 @@
 		"@rollup/plugin-node-resolve": "^15.2.3",
 		"@rollup/plugin-typescript": "^11.1.5",
 		"@testing-library/react": "^14.2.1",
+		"@types/qs": "^6.9.14",
 		"@types/react": "^18",
 		"@vitejs/plugin-react": "^4.2.1",
 		"jsdom": "22.1.0",
