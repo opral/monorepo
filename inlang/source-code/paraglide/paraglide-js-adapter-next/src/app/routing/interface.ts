@@ -14,7 +14,7 @@ export interface RoutingStragey<T extends string> {
 	getCanonicalPath(localisedPath: string, locale: T): string
 
 	/**
-	 * Returns an href that can be used to navigate to the localised path corresponding to the canonical path.
+	 * Returns a localised URL that can be used to navigate to the localised path corresponding to the canonical path.
 	 * This may be an absolute pathname, or a full URL.
 	 *
 	 * @param canonicalPath - The canonical path
@@ -22,9 +22,9 @@ export interface RoutingStragey<T extends string> {
 	 * @param currentLocale - The current language
 	 * @param basePath - The base path of the application
 	 */
-	getLocalisedHref(
+	getLocalisedUrl(
 		canonicalPath: string,
 		targetLocale: T,
 		currentLocale: T
-	): import("url").UrlObject
+	): import("url").UrlObject & { pathname: string }
 }

@@ -22,7 +22,7 @@ export function createMiddleware<T extends string>(
 
 		const decodedPathname = decodeURI(request.nextUrl.pathname)
 		const canonicalPath = strategy.getCanonicalPath(decodedPathname, locale)
-		const localisedPathname = strategy.getLocalisedHref(canonicalPath, locale, locale)
+		const localisedPathname = strategy.getLocalisedUrl(canonicalPath, locale, locale)
 
 		const shouldRedirect = localisedPathname.pathname !== decodedPathname
 

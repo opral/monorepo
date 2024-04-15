@@ -57,7 +57,7 @@ export function PrefixStrategy<T extends string>({
 	}
 
 	return {
-		getLocalisedHref(canonicalPath, targetLanguage) {
+		getLocalisedUrl(canonicalPath, targetLanguage) {
 			if (exclude(canonicalPath))
 				return {
 					pathname: canonicalPath,

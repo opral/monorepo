@@ -1,7 +1,7 @@
 import { it, expect, describe } from "vitest"
 import { PrefixStrategy } from "./prefixStrategy"
 
-const { getCanonicalPath, getLocalisedHref } = PrefixStrategy({
+const { getCanonicalPath, getLocalisedUrl: getLocalisedHref } = PrefixStrategy({
 	availableLanguageTags: ["en", "de", "de-CH"],
 	defaultLanguage: "en",
 	pathnames: {
