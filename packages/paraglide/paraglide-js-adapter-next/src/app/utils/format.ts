@@ -6,12 +6,7 @@ import querystring from "qs"
 const slashedProtocols = ["http:", "https:", "ftp:", "gopher:", "file:"] as const
 
 export function format(url: UrlObject) {
-	let auth = url.auth || ""
-	if (auth) {
-		auth = encodeURIComponent(auth)
-		auth = auth.replace(/%3A/i, ":")
-		auth += "@"
-	}
+	const auth = url.auth ? encodeURIComponent(url.auth).replace(/%3A/i, ":") + "@" : ""
 
 	let protocol = url.protocol || "",
 		pathname = url.pathname || "",

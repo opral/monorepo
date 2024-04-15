@@ -36,7 +36,7 @@ export function paraglide(config: Config): NextConfig {
 	})
 
 	const nextConfig: NextConfig = { ...config }
-	delete nextConfig.paraglide
+	delete nextConfig.paraglide //remove the paraglide config as to not confuse other plugins
 
 	return nextConfig
 }

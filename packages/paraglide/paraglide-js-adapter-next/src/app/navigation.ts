@@ -77,11 +77,11 @@ export const createNavigation = <T extends string>(
 				options?.locale &&
 				options.locale !== languageTag()
 			) {
-				let destination = addBasePath(localisedPath, true)
 				const searchParamString = searchParams.toString()
-				if (searchParamString) {
-					destination += `?${searchParamString}`
-				}
+				const destination = searchParamString
+					? addBasePath(localisedPath, true) + `?${searchParamString}`
+					: addBasePath(localisedPath, true)
+
 				history.pushState({}, "", destination)
 
 				document.cookie = serializeCookie({
@@ -130,11 +130,11 @@ export const createNavigation = <T extends string>(
 				options?.locale &&
 				options.locale !== languageTag()
 			) {
-				let destination = addBasePath(localisedPath, true)
 				const searchParamString = searchParams.toString()
-				if (searchParamString) {
-					destination += `?${searchParamString}`
-				}
+				const destination = searchParamString
+					? addBasePath(localisedPath, true) + `?${searchParamString}`
+					: addBasePath(localisedPath, true)
+
 				history.replaceState({}, "", destination)
 
 				document.cookie = serializeCookie({
