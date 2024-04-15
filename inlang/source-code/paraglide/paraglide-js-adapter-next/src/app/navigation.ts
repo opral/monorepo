@@ -38,10 +38,10 @@ export const createNavigation = <T extends string>(
 	 */
 	const useRouter = () => {
 		const nextRouter = NextNavigation.useRouter()
-		const localisedCurrentPathname = usePathname()
+		const currentCanonicalPathname = usePathname()
 		const searchParams = NextNavigation.useSearchParams()
 		const canonicalCurrentPathname = strategy.getCanonicalPath(
-			localisedCurrentPathname,
+			currentCanonicalPathname,
 			languageTag()
 		)
 
@@ -63,11 +63,10 @@ export const createNavigation = <T extends string>(
 			options?: (NavigateOptions & OptionalLanguageOption) | undefined
 		) => {
 			const locale = options?.locale ?? languageTag()
-			const currentPathname = usePathname()
 			const localisedPath = localiseHref(
 				canonicalPath,
 				locale,
-				currentPathname,
+				currentCanonicalPathname,
 				locale !== languageTag()
 			)
 
@@ -117,11 +116,10 @@ export const createNavigation = <T extends string>(
 			options?: (NavigateOptions & OptionalLanguageOption) | undefined
 		) => {
 			const locale = options?.locale ?? languageTag()
-			const currentPathname = usePathname()
 			const localisedPath = localiseHref(
 				canonicalPath,
 				locale,
-				currentPathname,
+				currentCanonicalPathname,
 				locale !== languageTag()
 			)
 
@@ -168,11 +166,10 @@ export const createNavigation = <T extends string>(
 		 */
 		const prefetch = (canonicalPath: string, options: PrefetchOptions & OptionalLanguageOption) => {
 			const locale = options?.locale ?? languageTag()
-			const currentPathname = usePathname()
 			const localisedPath = localiseHref(
 				canonicalPath,
 				locale,
-				currentPathname,
+				currentCanonicalPathname,
 				locale !== languageTag()
 			)
 			return nextRouter.prefetch(localisedPath, options)
