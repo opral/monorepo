@@ -15,7 +15,7 @@ import consola from "consola"
 import dedent from "dedent"
 
 export const initializeInlangProject: CliStep<
-	{ repo: Repository; logger: Logger; repoRoot: string },
+	{ repo: Repository; logger: Logger; repoRoot: string; appId: string },
 	{
 		project: InlangProject
 		/** Relative path to the project */
@@ -31,6 +31,7 @@ export const initializeInlangProject: CliStep<
 			existingProjectPaths,
 			repo: ctx.repo,
 			logger: ctx.logger,
+			appId: ctx.appId,
 		})
 
 		return {
@@ -53,6 +54,7 @@ export const existingProjectFlow = async (ctx: {
 	existingProjectPaths: string[]
 	repo: Repository
 	logger: Logger
+	appId: string
 }): Promise<{ project: InlangProject; projectPath: string }> => {
 	const NEW_PROJECT_VALUE = "newProject"
 
@@ -79,6 +81,7 @@ export const existingProjectFlow = async (ctx: {
 	const project = await loadProject({
 		projectPath,
 		repo: ctx.repo,
+		appId: ctx.appId,
 	})
 
 	if (project.errors().length > 0) {
@@ -155,6 +158,7 @@ async function promptForLanguageTags(
 export const createNewProjectFlow = async (ctx: {
 	repo: Repository
 	logger: Logger
+	appId: string
 }): Promise<{
 	project: InlangProject
 	/** An absolute path to the created project */
@@ -199,6 +203,7 @@ export const createNewProjectFlow = async (ctx: {
 	const project = await loadProject({
 		projectPath,
 		repo: ctx.repo,
+		appId: ctx.appId,
 	})
 
 	if (project.errors().length > 0) {

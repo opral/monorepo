@@ -50,6 +50,7 @@ export const initCommand = new Command()
 			logger,
 			repo,
 			repoRoot: repoRoot?.replace("file://", "") ?? process.cwd(),
+			appId: MARKTEPLACE_ID,
 		} as const
 
 		const ctx1 = await checkForUncommittedChanges(ctx)

@@ -2,6 +2,7 @@ import { defineConfig } from "vite"
 import dts from "vite-plugin-dts"
 import tsconfigPaths from "vite-tsconfig-paths"
 import pkg from "./package.json"
+import manifest from "./marketplace-manifest.json"
 
 export default defineConfig(({ mode }) => ({
 	plugins: [dts({ insertTypesEntry: true }), tsconfigPaths()],
@@ -37,5 +38,6 @@ export default defineConfig(({ mode }) => ({
 		}),
 
 		PACKAGE_VERSION: JSON.stringify(pkg.version),
+		MARKTEPLACE_ID: JSON.stringify(manifest.id),
 	},
 }))
