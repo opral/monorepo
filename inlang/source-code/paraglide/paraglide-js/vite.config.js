@@ -7,7 +7,7 @@ export default defineConfig(({ mode }) => ({
 	plugins: [dts({ insertTypesEntry: true }), tsconfigPaths()],
 	build: {
 		lib: {
-			entry: ["src/index.ts", "src/adapter-utils/index.ts"],
+			entry: ["src/index.ts", "src/adapter-utils/index.ts", "src/cli/index.ts"],
 			formats: ["es"],
 		},
 
@@ -17,6 +17,7 @@ export default defineConfig(({ mode }) => ({
 			input: {
 				index: "src/index.ts",
 				"adapter-utils/index": "src/adapter-utils/index.ts",
+				"cli/index": "src/cli/index.ts",
 			},
 			output: {
 				format: "es",
