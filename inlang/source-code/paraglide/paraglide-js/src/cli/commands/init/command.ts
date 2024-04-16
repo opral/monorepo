@@ -2,16 +2,14 @@ import { Command } from "commander"
 import consola from "consola"
 import dedent from "dedent"
 import * as nodePath from "node:path"
-import JSON5 from "json5"
 import nodeFsPromises from "node:fs/promises"
 import type { InlangProject } from "@inlang/sdk"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
 import { telemetry } from "~/services/telemetry/implementation.js"
 import { Logger } from "~/services/logger/index.js"
 import { findRepoRoot, openRepository, type Repository } from "@lix-js/client"
-import { pathExists } from "~/services/file-handling/exists.js"
 import { findPackageJson } from "~/services/environment/package.js"
-import { prompt } from "./utils.js"
+import { prompt, promptSelection } from "./utils.js"
 import { DEFAULT_OUTDIR } from "./defaults.js"
 import { compile } from "~/compiler/compile.js"
 import { writeOutput } from "~/services/file-handling/write-output.js"
@@ -19,6 +17,7 @@ import type { CliStep } from "./cli-utils.js"
 import { checkForUncommittedChanges } from "./steps/check-for-uncomitted-changes.js"
 import { initializeInlangProject } from "./steps/initialize-inlang-project.js"
 import { maybeAddSherlock } from "./steps/maybe-add-sherlock.js"
+import { maybeChangeTsConfig } from "./steps/update-ts-config.js"
 
 const ADAPTER_LINKS = {
 	sveltekit: "https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n",
@@ -64,12 +63,11 @@ export const initCommand = new Command()
 		telemetry.capture({ event: "PARAGLIDE-JS init added to devDependencies" })
 		const ctx6 = await addCompileStepToPackageJSON(ctx5)
 		telemetry.capture({ event: "PARAGLIDE-JS init added compile commands" })
-		const ctx7 = await maybeChangeTsConfigModuleResolution(ctx6)
-		const ctx8 = await maybeChangeTsConfigAllowJs(ctx7)
-		const ctx9 = await maybeAddSherlock(ctx8)
+		const ctx7 = await maybeChangeTsConfig(ctx6)
+		const ctx8 = await maybeAddSherlock(ctx7)
 
 		try {
-			await executeCompilation(ctx9)
+			await executeCompilation(ctx8)
 			ctx.logger.success("Run paraglide compiler")
 		} catch (e) {
 			ctx.logger.warn(
@@ -79,7 +77,7 @@ export const initCommand = new Command()
 
 		telemetry.capture({ event: "PARAGLIDE-JS init finished" })
 
-		const absoluteSettingsPath = nodePath.resolve(ctx9.projectPath, "settings.json")
+		const absoluteSettingsPath = nodePath.resolve(ctx8.projectPath, "settings.json")
 		const relativeSettingsFilePath = absoluteSettingsPath.replace(process.cwd(), ".")
 
 		let successMessage = dedent`inlang Paraglide-JS has been set up sucessfully.
@@ -245,145 +243,6 @@ Please add the following command to your build script manually:
 	return ctx
 }
 
-/**
- * Ensures that the moduleResolution compiler option is set to "bundler" or similar in the tsconfig.json.
- *
- * Otherwise, types defined in `package.exports` are not resolved by TypeScript. Leading to type
- * errors with Paraglide-JS.
- */
-export const maybeChangeTsConfigModuleResolution: CliStep<
-	{ repo: Repository; logger: Logger },
-	unknown
-> = async (ctx) => {
-	if ((await pathExists("./tsconfig.json", ctx.repo.nodeishFs)) === false) {
-		return ctx
-	}
-	const file = await ctx.repo.nodeishFs.readFile("./tsconfig.json", { encoding: "utf-8" })
-	// tsconfig allows comments ... FML
-	const tsconfig = JSON5.parse(file)
-
-	let parentTsConfig: any | undefined
-
-	if (tsconfig.extends) {
-		try {
-			const parentTsConfigPath = nodePath.resolve(process.cwd(), tsconfig.extends)
-			const parentTsConfigFile = await ctx.repo.nodeishFs.readFile(parentTsConfigPath, {
-				encoding: "utf-8",
-			})
-			parentTsConfig = JSON5.parse(parentTsConfigFile)
-		} catch {
-			ctx.logger.warn(
-				`The tsconfig.json is extended from a tsconfig that couldn't be read. Maybe the file doesn't exist yet or is a NPM package. Continuing without taking the extended from tsconfig into consideration.`
-			)
-		}
-	}
-
-	// options that don't support package.exports
-	const invalidOptions = ["classic", "node", "node10"]
-	const moduleResolution =
-		tsconfig.compilerOptions?.moduleResolution ?? parentTsConfig?.compilerOptions?.moduleResolution
-
-	if (moduleResolution && invalidOptions.includes(moduleResolution.toLowerCase()) === false) {
-		// the moduleResolution is already set to bundler or similar
-		return ctx
-	}
-
-	ctx.logger.info(
-		`You need to set the \`compilerOptions.moduleResolution\` to "Bundler" in the \`tsconfig.json\` file:
-
-\`{
-  "compilerOptions": {
-    "moduleResolution": "Bundler"
-  }
-}\``
-	)
-	let isValid = false
-	while (isValid === false) {
-		const response = await prompt(
-			`Did you set the \`compilerOptions.moduleResolution\` to "Bundler"?`,
-			{
-				type: "confirm",
-				initial: true,
-			}
-		)
-		if (response === false) {
-			ctx.logger.warn(
-				"Continuing without adjusting the tsconfig.json. This may lead to type errors."
-			)
-			return ctx
-		}
-		const file = await ctx.repo.nodeishFs.readFile("./tsconfig.json", { encoding: "utf-8" })
-		const tsconfig = JSON5.parse(file)
-		if (
-			tsconfig?.compilerOptions?.moduleResolution &&
-			tsconfig.compilerOptions.moduleResolution.toLowerCase() === "bundler"
-		) {
-			isValid = true
-			return ctx
-		} else {
-			ctx.logger.error(
-				"The compiler options have not been adjusted. Please set the `compilerOptions.moduleResolution` to `Bundler`."
-			)
-		}
-	}
-
-	return ctx
-}
-
-/**
- * Paraligde JS compiles to JS with JSDoc comments. TypeScript doesn't allow JS files by default.
- */
-export const maybeChangeTsConfigAllowJs: CliStep<
-	{ repo: Repository; logger: Logger },
-	unknown
-> = async (ctx) => {
-	if ((await pathExists("./tsconfig.json", ctx.repo.nodeishFs)) === false) {
-		return ctx
-	}
-	const file = await ctx.repo.nodeishFs.readFile("./tsconfig.json", { encoding: "utf-8" })
-	// tsconfig allows comments ... FML
-	const tsconfig = JSON5.parse(file)
-
-	if (tsconfig.compilerOptions?.allowJs === true) {
-		// all clear, allowJs is already set to true
-		return ctx
-	}
-
-	ctx.logger.info(
-		`You need to set the \`compilerOptions.allowJs\` to \`true\` in the \`tsconfig.json\` file:
-
-\`{
-  "compilerOptions": {
-    "allowJs": true
-  }
-}\``
-	)
-	let isValid = false
-	while (isValid === false) {
-		const response = await prompt(`Did you set the \`compilerOptions.allowJs\` to \`true\`?`, {
-			type: "confirm",
-			initial: true,
-		})
-		if (response === false) {
-			ctx.logger.warn(
-				"Continuing without adjusting the tsconfig.json. This may lead to type errors."
-			)
-			return ctx
-		}
-		const file = await ctx.repo.nodeishFs.readFile("./tsconfig.json", { encoding: "utf-8" })
-		const tsconfig = JSON5.parse(file)
-		if (tsconfig?.compilerOptions?.allowJs === true) {
-			isValid = true
-			return ctx
-		} else {
-			ctx.logger.error(
-				"The compiler options have not been adjusted. Please set the `compilerOptions.allowJs` to `true`."
-			)
-		}
-	}
-	return ctx
-}
-
 const executeCompilation: CliStep<
 	{
 		project: InlangProject
@@ -421,11 +280,4 @@ async function promtStack() {
 		],
 		initial: "other",
 	})
-}
-
-const promptSelection = async <T extends string>(
-	message: string,
-	options: { initial?: T; options: { label: string; value: T }[] } = { options: [] }
-): Promise<T> => {
-	return prompt(message, { type: "select", ...options }) as unknown as Promise<T>
 }

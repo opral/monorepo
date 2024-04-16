@@ -64,3 +64,10 @@ export const prompt: typeof consola.prompt = async (message, options) => {
 	}
 	return response
 }
+
+export const promptSelection = async <T extends string>(
+	message: string,
+	options: { initial?: T; options: { label: string; value: T }[] } = { options: [] }
+): Promise<T> => {
+	return prompt(message, { type: "select", ...options }) as unknown as Promise<T>
+}

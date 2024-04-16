@@ -2,8 +2,6 @@ import { test, expect, vi, beforeAll, beforeEach } from "vitest"
 import {
 	addCompileStepToPackageJSON,
 	addParaglideJsToDevDependencies,
-	maybeChangeTsConfigAllowJs,
-	maybeChangeTsConfigModuleResolution,
 	enforcePackageJsonExists,
 } from "./command.js"
 import consola from "consola"
@@ -25,6 +23,10 @@ import {
 	initializeInlangProject,
 } from "./steps/initialize-inlang-project.js"
 import { maybeAddSherlock } from "./steps/maybe-add-sherlock.js"
+import {
+	maybeChangeTsConfigAllowJs,
+	maybeChangeTsConfigModuleResolution,
+} from "./steps/update-ts-config.js"
 
 const logger = new Logger()
 
