@@ -18,7 +18,7 @@ export function translatePath(
 		availableLanguageTags: readonly string[]
 		defaultLanguageTag: string
 		prefixDefaultLanguage: "always" | "never"
-	},
+	}
 ) {
 	const {
 		path: targetedPathSource,
@@ -36,7 +36,7 @@ export function translatePath(
 		canonicalPath,
 		targetLanguage,
 		translations,
-		matchers,
+		matchers
 	)
 
 	return serializeRoute({
