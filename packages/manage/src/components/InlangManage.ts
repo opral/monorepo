@@ -5,15 +5,21 @@ import { TwLitElement } from "../common/TwLitElement.js"
 import { z } from "zod"
 import "./InlangUninstall"
 import "./InlangInstall"
-import { createNodeishMemoryFs, openRepository, type Repository } from "@lix-js/client"
+import { getAuthClient, createNodeishMemoryFs, openRepository } from "@lix-js/client"
 import { listProjects, isValidLanguageTag } from "@inlang/sdk"
 import { publicEnv } from "@inlang/env-variables"
-import { browserAuth, getUser } from "@lix-js/server"
+
 import { tryCatch } from "@inlang/result"
 import { registry } from "@inlang/marketplace-registry"
 import type { MarketplaceManifest } from "../../../versioned-interfaces/marketplace-manifest/dist/interface.js"
 import { posthog } from "posthog-js"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
+
+const browserAuth = getAuthClient({
+	gitHubProxyBaseUrl: publicEnv.PUBLIC_GIT_PROXY_BASE_URL,
+	githubAppName: publicEnv.PUBLIC_LIX_GITHUB_APP_NAME,
+	githubAppClientId: publicEnv.PUBLIC_LIX_GITHUB_APP_CLIENT_ID,
+})
 
 type ManifestWithVersion = MarketplaceManifest & { version: string }
 
@@ -228,7 +234,7 @@ export class InlangManage extends TwLitElement {
 
 		this.url.repo && this.projectHandler()
 
-		const user = await getUser().catch(() => {
+		const user = await browserAuth.getUser().catch(() => {
 			this.user = undefined
 		})
 		if (user) {
@@ -299,8 +305,8 @@ export class InlangManage extends TwLitElement {
 
 		await repo.nodeishFs.writeFile(`.${this.url.project}/settings.json`, generatedProject)
 
-		await repo.add({
-			filepath: `${this.url.project?.slice(1)}/settings.json`,
+		const filesWithUncommittedChanges = await repo.statusList({
+			filter: (f: any) => f.endsWith(".json"),
 		})
 
 		await repo.commit({
@@ -309,6 +315,7 @@ export class InlangManage extends TwLitElement {
 				name: this.user.username,
 				email: this.user.email,
 			},
+			include: filesWithUncommittedChanges.map((f) => f[0]),
 		})
 
 		const result = await repo.push()
@@ -359,8 +366,8 @@ export class InlangManage extends TwLitElement {
 
 		await repo.nodeishFs.writeFile(`.${this.url.project}/settings.json`, generatedProject)
 
-		await repo.add({
-			filepath: `${this.url.project?.slice(1)}/settings.json`,
+		const filesWithUncommittedChanges = await repo.statusList({
+			filter: (f: any) => f.endsWith(".json"),
 		})
 
 		await repo.commit({
@@ -369,6 +376,7 @@ export class InlangManage extends TwLitElement {
 				name: this.user.username,
 				email: this.user.email,
 			},
+			include: filesWithUncommittedChanges.map((f) => f[0]),
 		})
 
 		const result = await repo.push()

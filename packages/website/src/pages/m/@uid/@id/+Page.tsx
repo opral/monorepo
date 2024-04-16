@@ -427,16 +427,18 @@ export default function Page(props: PageProps) {
 										</Show>
 									</div>
 								</section>
-								<div>
-									<a
-										class="text-info/80 hover:text-info/100 text-sm font-semibold flex items-center"
-										href={convertLinkToGithub(readme())}
-										target="_blank"
-									>
-										<EditOutline class="inline-block mr-2" />
-										Edit on GitHub
-									</a>
-								</div>
+								<Show when={readme()}>
+									<div>
+										<a
+											class="text-info/80 hover:text-info/100 text-sm font-semibold flex items-center"
+											href={convertLinkToGithub(readme()!)}
+											target="_blank"
+										>
+											<EditOutline class="inline-block mr-2" />
+											Edit on GitHub
+										</a>
+									</div>
+								</Show>
 								<div class="md:col-span-3 md:my-0 my-12">
 									<div>
 										<h3 class="text-surface-400 text-sm mb-2">Keywords</h3>
