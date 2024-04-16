@@ -18,6 +18,10 @@
 	"readme": {
 		"en": "./inlang/source-code/editor/README.md"
 	},
+	"pages": {
+		"/": "./inlang/source-code/editor/README.md",
+		"/changelog": "./inlang/source-code/editor/CHANGELOG.md"
+	},
 	"keywords": [
 		"editor",
 		"web",
