@@ -1,7 +1,7 @@
 import type { Logger } from "~/services/logger/index.js"
 import type { CliStep } from "../utils.js"
 import { prompt } from "~/cli/utils.js"
-import { execAsync } from "~/cli/commands/init/utils.js"
+import childProcess from "node:child_process"
 
 export const checkForUncommittedChanges: CliStep<{ logger: Logger }, unknown> = async (ctx) => {
 	try {
@@ -28,4 +28,16 @@ export const checkForUncommittedChanges: CliStep<{ logger: Logger }, unknown> = 
 		// git cli is not installed
 		return ctx
 	}
+}
+
+function execAsync(command: string) {
+	return new Promise<string>((resolve, reject) => {
+		childProcess.exec(command, (error, stdout) => {
+			if (error) {
+				reject(error)
+			} else {
+				resolve(stdout)
+			}
+		})
+	})
 }
