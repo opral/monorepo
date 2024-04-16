@@ -49,6 +49,14 @@ const pluginBuild = await rollup({
 	external,
 })
 
+const cliBuild = await rollup({
+	plugins: [typescript({ tsconfig: "./tsconfig.json" }), cjs(), resolve(), preserveDirectives()],
+	input: {
+		"cli/index": "src/cli/index.ts",
+	},
+	external,
+})
+
 await app_build.write({
 	preserveModules: true,
 	format: "es",
@@ -67,5 +75,12 @@ await pluginBuild.write({
 	preserveModules: false,
 	format: "cjs",
 	entryFileNames: "[name].cjs",
+	dir: "dist",
+})
+
+await cliBuild.write({
+	preserveModules: false,
+	format: "es",
+	entryFileNames: "[name].mjs",
 	dir: "dist",
 })
