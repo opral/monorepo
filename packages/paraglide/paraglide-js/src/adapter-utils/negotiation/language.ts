@@ -82,7 +82,7 @@ type LanguagePriority<T extends string = string> = {
  *
  * @param accept The value of the Accept-Language header. If it's missing, it defaults to "*" as per RFC 2616 sec 14.4
  * @param availableLanguageTags The BCP 47 language tags that are available
- * 
+ *
  * @returns The acceptable available language tags in descending order of preference
  */
 export function negotiateLanguagePreferences<T extends string = string>(

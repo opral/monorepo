@@ -1,4 +1,5 @@
 {
+	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "guide.inlang.buildOwnApp",
 	"displayName": {
 		"en": "How to build an inlang app"
