@@ -1,7 +1,6 @@
 import { generateProjectId } from "./maybeCreateFirstProjectId.js"
 import { it, expect } from "vitest"
-import { openRepository } from "@lix-js/client/src/openRepository.ts"
-import { mockRepo, createNodeishMemoryFs } from "@lix-js/client"
+import { mockRepo } from "@lix-js/client"
 import { type Snapshot } from "@lix-js/fs"
 // eslint-disable-next-line no-restricted-imports -- test
 import { readFileSync } from "node:fs"
@@ -22,12 +21,10 @@ it("should generate a project id", async () => {
 })
 
 it("should return undefined if repoMeta contains error", async () => {
-	const repoWithError = await openRepository("https://github.com/inlang/no-exist", {
-		nodeishFs: createNodeishMemoryFs(),
-	})
+	await repo.nodeishFs.rm("/.git", { recursive: true })
 
 	const projectId = await generateProjectId({
-		repo: repoWithError,
+		repo: repo,
 		projectPath: "mocked_project_path",
 	})
 	expect(projectId).toBeUndefined()

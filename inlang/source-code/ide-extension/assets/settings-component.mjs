@@ -29291,47 +29291,47 @@ var LintRuleLevelObjectInput = class extends s3 {
     }
   }
   render() {
-    return x` <div part="property" class="property">
-			<div class="title-container">
-				<field-header
-					.fieldTitle=${this._title ? this._title : this.property}
-					.description=${this._description}
-					.optional=${this.required ? false : true}
-					exportparts="property-title, property-paragraph"
-				></field-header>
-			</div>
-			<div class="container">
-				${this.modules && this.modules.map((module) => {
+    return this.modules && this.modules.some((module) => module.id.split(".")[0] !== "plugin") ? x` <div part="property" class="property">
+					<div class="title-container">
+						<field-header
+							.fieldTitle=${this._title ? this._title : this.property}
+							.description=${this._description}
+							.optional=${this.required ? false : true}
+							exportparts="property-title, property-paragraph"
+						></field-header>
+					</div>
+					<div class="container">
+						${this.modules && this.modules.map((module) => {
       return module.id.split(".")[0] !== "plugin" ? x`<div class="rule-container">
-								<sl-select
-									id=${module.id}
-									exportparts="listbox:option-wrapper"
-									value=${this.value ? this.value[module.id] : "warning"}
-									placeholder="warning"
-									class="select"
-									size="small"
-									@sl-change=${(e11) => {
+										<sl-select
+											id=${module.id}
+											exportparts="listbox:option-wrapper"
+											value=${this.value ? this.value[module.id] : "warning"}
+											placeholder="warning"
+											class="select"
+											size="small"
+											@sl-change=${(e11) => {
         this.handleUpdate(
           module.id,
           e11.target.value
         );
       }}
-								>
-									${this._valueOptions?.map((option) => {
-        return x`<sl-option
-											exportparts="base:option"
-											value=${option.const}
-											class="add-item-side"
 										>
-											${option.const}
-										</sl-option>`;
+											${this._valueOptions?.map((option) => {
+        return x`<sl-option
+													exportparts="base:option"
+													value=${option.const}
+													class="add-item-side"
+												>
+													${option.const}
+												</sl-option>`;
       })}
-								</sl-select>
-								<p class="ruleId">${module.displayName.en}</p>
-						  </div>` : void 0;
+										</sl-select>
+										<p class="ruleId">${module.displayName.en}</p>
+								  </div>` : void 0;
     })}
-			</div>
-		</div>`;
+					</div>
+			  </div>` : void 0;
   }
 };
 LintRuleLevelObjectInput.styles = [

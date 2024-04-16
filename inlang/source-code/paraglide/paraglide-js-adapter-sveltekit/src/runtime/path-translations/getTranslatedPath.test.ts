@@ -17,7 +17,7 @@ describe("getTranslatedPath", () => {
 					de: "/baz",
 				},
 			},
-			{},
+			{}
 		)
 		expect(translatedPath).toBe("/bar")
 	})
@@ -32,7 +32,7 @@ describe("getTranslatedPath", () => {
 					de: "/baz/[id]/cvb",
 				},
 			},
-			{},
+			{}
 		)
 		expect(translatedPath).toBe("/bar/123/cvb")
 	})
