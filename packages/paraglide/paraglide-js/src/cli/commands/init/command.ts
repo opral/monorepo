@@ -58,7 +58,7 @@ export const initCommand = new Command()
 		const ctx1 = await checkForUncommittedChanges(ctx)
 		const ctx2 = await enforcePackageJsonExists(ctx1)
 		const ctx3 = await initializeInlangProject(ctx2)
-		const ctx4 = await determineOutdir(ctx3)
+		const ctx4 = await promptForOutdir(ctx3)
 		telemetry.capture({ event: "PARAGLIDE-JS init project initialized" })
 		const ctx5 = await addParaglideJsToDevDependencies(ctx4)
 		telemetry.capture({ event: "PARAGLIDE-JS init added to devDependencies" })
@@ -166,10 +166,11 @@ export const addParaglideJsToDevDependencies: CliStep<
 	{
 		repo: Repository
 		logger: Logger
+		packageJsonPath: string
 	},
 	unknown
 > = async (ctx) => {
-	const file = await ctx.repo.nodeishFs.readFile("./package.json", { encoding: "utf-8" })
+	const file = await ctx.repo.nodeishFs.readFile(ctx.packageJsonPath, { encoding: "utf-8" })
 	const stringify = detectJsonFormatting(file)
 	let pkg: any = {}
 	try {
@@ -189,7 +190,7 @@ export const addParaglideJsToDevDependencies: CliStep<
 	return ctx
 }
 
-export const determineOutdir: CliStep<
+export const promptForOutdir: CliStep<
 	{
 		logger: Logger
 	},
@@ -207,7 +208,7 @@ export const determineOutdir: CliStep<
 
 	if (!response.startsWith("./")) {
 		ctx.logger.warn("You must enter a valid relative path starting from the package root.")
-		return await determineOutdir(ctx)
+		return await promptForOutdir(ctx)
 	}
 
 	return {
@@ -218,7 +219,7 @@ export const determineOutdir: CliStep<
 
 export const enforcePackageJsonExists: CliStep<
 	{ logger: Logger; repo: Repository },
-	unknown
+	{ packageJsonPath: string }
 > = async (ctx) => {
 	const packageJsonPath = await findPackageJson(ctx.repo.nodeishFs, process.cwd())
 	if (!packageJsonPath) {
@@ -227,17 +228,23 @@ export const enforcePackageJsonExists: CliStep<
 		)
 		return process.exit(0)
 	}
-	return ctx
+	return { ...ctx, packageJsonPath }
 }
 
 export const addCompileStepToPackageJSON: CliStep<
-	{ repo: Repository; logger: Logger; projectPath: string; outdir: string },
+	{
+		repo: Repository
+		logger: Logger
+		projectPath: string
+		outdir: string
+		packageJsonPath: string
+	},
 	unknown
 > = async (ctx) => {
 	const relativePathToProject = nodePath.relative(process.cwd(), ctx.projectPath)
 	const projectPath = `./${relativePathToProject}`
 
-	const file = await ctx.repo.nodeishFs.readFile("./package.json", { encoding: "utf-8" })
+	const file = await ctx.repo.nodeishFs.readFile(ctx.packageJsonPath, { encoding: "utf-8" })
 	const stringify = detectJsonFormatting(file)
 	const pkg = JSON.parse(file)
 
