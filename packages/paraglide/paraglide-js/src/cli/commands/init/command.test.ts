@@ -15,7 +15,7 @@ import { Logger } from "../../../services/logger/index.js"
 import { openRepository } from "@lix-js/client"
 import type { NodeishFilesystem } from "@lix-js/fs"
 import { pathExists } from "../../../services/file-handling/exists.js"
-import { getNewProjectTemplate } from "./defaults.js"
+import { getNewProjectTemplate } from "../../defaults.js"
 import { checkForUncommittedChanges } from "~/cli/steps/check-for-uncomitted-changes.js"
 import {
 	createNewProjectFlow,
