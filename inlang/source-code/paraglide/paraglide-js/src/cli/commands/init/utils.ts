@@ -31,8 +31,20 @@ export function longestCommonPrefix(strA: string, strB: string): string {
 	return commonPrefix
 }
 
+/**
+ * Get's the common prefix of a set of strings. 
+ * If only one string is passed the prefix will be the empty string
+ * 
+ * @example
+ * ```ts
+ * getCommonPrefix(["foo", "foobar"]) // "foo"
+ * getCommonPrefix(["foobar"]) // ""
+ * ```
+ */
 export function getCommonPrefix(strings: string[]): string {
 	const strs = strings.filter(Boolean)
+	if (strs.length <= 1) return ""
+
 	const firstString = strs[0]
 	if (firstString === undefined) {
 		return ""

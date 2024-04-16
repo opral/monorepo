@@ -258,20 +258,18 @@ export const existingProjectFlow = async (ctx: {
 	const NEW_PROJECT_VALUE = "newProject"
 
 	const commonPrefix = getCommonPrefix(ctx.existingProjectPaths)
+	const options = ctx.existingProjectPaths.map((path) => {
+		return {
+			label: path.replace(commonPrefix, ""),
+			value: path,
+		}
+	})
 
 	const selection = (await prompt(
 		`Do you want to use an existing Inlang Project or create a new one?`,
 		{
 			type: "select",
-			options: [
-				{ label: "Create a new project", value: NEW_PROJECT_VALUE },
-				...ctx.existingProjectPaths.map((path) => {
-					return {
-						label: "Use '" + path.replace(commonPrefix, "") + "'",
-						value: path,
-					}
-				}),
-			],
+			options: [{ label: "Create a new project", value: NEW_PROJECT_VALUE }, ...options],
 		}
 	)) as unknown as string // the prompt type is incorrect
 
@@ -285,7 +283,9 @@ export const existingProjectFlow = async (ctx: {
 	})
 
 	if (project.errors().length > 0) {
-		ctx.logger.error("The selected project contains errors - Aborting paraglde initialization.")
+		ctx.logger.error(
+			"Aborting paragilde initialization. - The selected project has errors. Either fix them, or remove the project and create a new one."
+		)
 		for (const error of project.errors()) {
 			ctx.logger.error(error)
 		}
@@ -375,26 +375,26 @@ export const createNewProjectFlow = async (ctx: {
 
 	//create the messages dir if it doesn't exist
 	const messageDir = nodePath.dirname(nodePath.resolve(process.cwd(), messagePath))
-	ctx.repo.nodeishFs.mkdir(messageDir, { recursive: true })
+	await ctx.repo.nodeishFs.mkdir(messageDir, { recursive: true })
 
-	for (const languageTag of languageTags) {
-		const languageFile = nodePath.resolve(messageDir, languageTag + ".json")
-		//create the language file if it doesn't exist
-		ctx.repo.nodeishFs.writeFile(
-			languageFile,
-			dedent`
+	await Promise.allSettled(
+		languageTags.map(async (languageTag) => {
+			const languageFile = nodePath.resolve(messageDir, languageTag + ".json")
+			await ctx.repo.nodeishFs.writeFile(
+				languageFile,
+				dedent`
 			{
 				"$schema": "https://inlang.com/schema/inlang-message-format"
 			}`
-		)
-	}
+			)
+		})
+	)
 
 	ctx.logger.info(`Creating a new inlang project in the current working directory.`)
 	await ctx.repo.nodeishFs.mkdir(DEFAULT_PROJECT_PATH, { recursive: true })
-	await ctx.repo.nodeishFs.writeFile(
-		DEFAULT_PROJECT_PATH + "/settings.json",
-		JSON.stringify(settings, undefined, 2)
-	)
+
+	const settingsFilePath = nodePath.resolve(process.cwd(), DEFAULT_PROJECT_PATH, "settings.json")
+	await ctx.repo.nodeishFs.writeFile(settingsFilePath, JSON.stringify(settings, undefined, 2))
 
 	const projectPath = nodePath.resolve(process.cwd(), DEFAULT_PROJECT_PATH)
 	const project = await loadProject({
