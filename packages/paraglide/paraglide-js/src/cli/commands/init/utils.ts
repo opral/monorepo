@@ -43,7 +43,8 @@ export function longestCommonPrefix(strA: string, strB: string): string {
  */
 export function getCommonPrefix(strings: string[]): string {
 	const strs = strings.filter(Boolean)
-	if (strs.length === 0) return ""
+	if (strs.length <= 1) return ""
+
 	const firstString = strs[0]
 	if (firstString === undefined) {
 		return ""
