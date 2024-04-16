@@ -23,6 +23,7 @@ import {
 	openRepository,
 	createNodeishMemoryFs,
 	type Repository,
+	type LixError
 } from "@lix-js/client"
 
 import { publicEnv } from "@inlang/env-variables"
