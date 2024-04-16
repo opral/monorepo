@@ -6,14 +6,14 @@ import type { ProjectSettings } from "@inlang/sdk"
 
 const ParaglideLocation = child_process.execSync("which paraglide-js").toString().trim()
 
-describe("paraglide-js", () => {
+describe.concurrent("paraglide-js", () => {
 	it("prints it's version when run with --version", () => {
 		const semverRegex = /[0-9]+\.[0-9]+\.[0-9]+/g
 		const stdout = child_process.execSync("npx paraglide-js --version").toString()
 		expect(semverRegex.test(stdout)).toBe(true)
 	})
 
-	describe("init", () => {
+	describe.concurrent("init", () => {
 		it(
 			"initializes paraglide if no project is present",
 			async () => {
