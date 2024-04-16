@@ -1,5 +1,17 @@
 # inlang-vs-code-extension
 
+## 1.39.2
+
+### Patch Changes
+
+- b25aaab: fix prefferedLanguageTag auto-select
+
+## 1.39.1
+
+### Patch Changes
+
+- 8b091e1: fix lint rules not showing when missing
+
 ## 1.39.0
 
 ### Minor Changes

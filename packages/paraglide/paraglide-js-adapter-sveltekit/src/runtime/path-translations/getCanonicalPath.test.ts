@@ -17,7 +17,7 @@ describe("getCanonicalPath", () => {
 					de: "/uber-uns",
 				},
 			},
-			{},
+			{}
 		)
 		expect(translatedPath).toBe("/")
 	})
@@ -41,7 +41,7 @@ describe("getCanonicalPath", () => {
 					de: "/baz",
 				},
 			},
-			{},
+			{}
 		)
 		expect(canonicalPath).toBe("/foo")
 	})
@@ -61,7 +61,7 @@ describe("getCanonicalPath", () => {
 					de: "/baz/[id]/[slug]",
 				},
 			},
-			{},
+			{}
 		)
 		expect(canonicalPath).toBe("/foo/123")
 	})
@@ -81,7 +81,7 @@ describe("getCanonicalPath", () => {
 					de: "/baz/[id]/[slug]",
 				},
 			},
-			{},
+			{}
 		)
 		expect(canonicalPath).toBe("/foo/123")
 	})
@@ -96,7 +96,7 @@ describe("getCanonicalPath", () => {
 					de: "/baz/[...rest]",
 				},
 			},
-			{},
+			{}
 		)
 		expect(canonicalPath).toBe("/foo/123/baz")
 	})
@@ -111,7 +111,7 @@ describe("getCanonicalPath", () => {
 					de: "/baz/[...rest]",
 				},
 			},
-			{},
+			{}
 		)
 		expect(canonicalPath).toBe("/foo")
 	})

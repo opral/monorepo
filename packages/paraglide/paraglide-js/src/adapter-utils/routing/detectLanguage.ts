@@ -8,10 +8,10 @@
  *
  * @example
  * /base/de/ueber-uns -> de
- * 
+ *
  * /base/about -> undefined because it does not explicitly include the language
  * /en/about -> undefined because the path is not in the base
- * 
+ *
  * @returns the language tag if present
  *
  */
@@ -35,7 +35,7 @@ export function detectLanguageFromPath<T extends string>({
 
 	const pathWithoutBase = path.replace(base, "")
 
-	const maybeLang = pathWithoutBase.split("/").at(1)
+	const maybeLang = pathWithoutBase.split("/")[1]
 	if (!maybeLang) return undefined
 
 	for (const lang of availableLanguageTags) {
