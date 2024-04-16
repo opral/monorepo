@@ -66,12 +66,10 @@ const MarketplaceManifestBase = Type.Object({
 				Type.TemplateLiteral("m/${string}", {
 					description:
 						"The uniqueIDs, starting with m/[UNIQUEID] of the recommended items with a max amount of 3.",
-					maxLength: 3,
 				}),
 				Type.TemplateLiteral("g/${string}", {
 					description:
 						"The uniqueIDs, starting with g/[UNIQUEID] of the recommended items with a max amount of 3.",
-					maxLength: 3,
 				}),
 			])
 		)

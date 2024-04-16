@@ -1,4 +1,5 @@
 {
+	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "app.inlang.badge",
 	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/badge/assets/images/badge-icon.jpg",
 	"gallery": [
