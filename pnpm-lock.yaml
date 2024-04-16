@@ -399,9 +399,6 @@ importers:
       '@lix-js/fs':
         specifier: workspace:*
         version: link:../../../lix/packages/fs
-      '@lix-js/server':
-        specifier: workspace:*
-        version: link:../../../lix/packages/server
       '@sentry/browser':
         specifier: ^7.27.0
         version: 7.109.0
@@ -757,6 +754,9 @@ importers:
       '@inlang/sdk':
         specifier: workspace:*
         version: link:../sdk
+      '@inlang/settings-component':
+        specifier: ^1.0.0
+        version: link:../settings-component
       '@inlang/telemetry':
         specifier: workspace:*
         version: link:../telemetry
@@ -772,6 +772,9 @@ importers:
       https-proxy-agent:
         specifier: 7.0.2
         version: 7.0.2
+      lit-html:
+        specifier: ^3.1.2
+        version: 3.1.2
       require-from-string:
         specifier: ^2.0.2
         version: 2.0.2
@@ -934,9 +937,6 @@ importers:
       '@lix-js/fs':
         specifier: workspace:*
         version: link:../../../lix/packages/fs
-      '@lix-js/server':
-        specifier: workspace:*
-        version: link:../../../lix/packages/server
       '@types/express':
         specifier: ^4.17.21
         version: 4.17.21
@@ -1381,7 +1381,7 @@ importers:
   inlang/source-code/paraglide/paraglide-js-adapter-next:
     dependencies:
       '@inlang/paraglide-js':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../paraglide-js
       next:
         specifier: ^13.0.0 || ^14.0.0
@@ -1596,6 +1596,9 @@ importers:
 
   inlang/source-code/paraglide/paraglide-js-adapter-sveltekit:
     dependencies:
+      '@inlang/paraglide-js':
+        specifier: workspace:*
+        version: link:../paraglide-js
       '@inlang/paraglide-js-adapter-vite':
         specifier: workspace:*
         version: link:../paraglide-js-adapter-vite
@@ -2229,6 +2232,19 @@ importers:
         specifier: ^4.7.1
         version: 4.7.2
 
+  inlang/source-code/sdk/multi-project-test:
+    dependencies:
+      '@inlang/cli':
+        specifier: workspace:*
+        version: link:../../cli
+    devDependencies:
+      '@types/node':
+        specifier: ^20.12.6
+        version: 20.12.7
+      vitest:
+        specifier: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
+
   inlang/source-code/server:
     dependencies:
       '@inlang/badge':
@@ -2392,11 +2408,11 @@ importers:
   inlang/source-code/templates/message-lint-rule:
     dependencies:
       '@inlang/sdk':
-        specifier: ^0.31.0
+        specifier: ^0.32.0
         version: link:../../sdk
     devDependencies:
       '@inlang/cli':
-        specifier: ^2.13.7
+        specifier: ^2.14.0
         version: link:../../cli
       typescript:
         specifier: ^5.2.2
@@ -2598,9 +2614,6 @@ importers:
       '@lix-js/fs':
         specifier: workspace:*
         version: link:../../../lix/packages/fs
-      '@lix-js/server':
-        specifier: workspace:*
-        version: link:../../../lix/packages/server
       '@sentry/browser':
         specifier: ^7.27.0
         version: 7.109.0

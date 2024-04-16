@@ -1,6 +1,8 @@
-import { PathTranslations } from "../pathnames/types"
-import { resolvePath } from "../pathnames/matching/resolvePath"
-import { matches } from "../pathnames/matching/match"
+import {
+	PathDefinitionTranslations,
+	resolveRoute,
+	bestMatch,
+} from "@inlang/paraglide-js/internal/adapter-utils"
 import type { RoutingStragey } from "./interface"
 import type { NextRequest } from "next/server"
 import type { ResolvedI18nConfig } from "../config"
@@ -64,10 +66,10 @@ export function PrefixStrategy<T extends string>({
 			const translatedPathDefinition = translationsForPath[locale]
 			if (!translatedPathDefinition) continue
 
-			const match = matches(pathWithoutLocale, [translatedPathDefinition])
+			const match = bestMatch(pathWithoutLocale, [translatedPathDefinition], {})
 			if (!match) continue
 
-			return resolvePath(canonicalPathDefinition, match.params)
+			return resolveRoute(canonicalPathDefinition, match.params)
 		}
 
 		return pathWithoutLocale
@@ -90,8 +92,12 @@ export function PrefixStrategy<T extends string>({
 		return localisedPath || "/"
 	}
 
-	function getTranslatedPath(canonicalPath: string, lang: T, translations: PathTranslations<T>) {
-		const match = matches(canonicalPath, Object.keys(translations))
+	function getTranslatedPath(
+		canonicalPath: string,
+		lang: T,
+		translations: PathDefinitionTranslations<T>
+	) {
+		const match = bestMatch(canonicalPath, Object.keys(translations), {})
 		if (!match) return canonicalPath
 
 		const translationsForPath = translations[match.id as `/${string}`]
@@ -100,18 +106,13 @@ export function PrefixStrategy<T extends string>({
 		const translatedPath = translationsForPath[lang]
 		if (!translatedPath) return canonicalPath
 
-		return resolvePath(translatedPath, match.params)
+		return resolveRoute(translatedPath, match.params)
 	}
 
-	function translatePath(localisedPath: string, currentLocale: T, newLocale: T): string {
-		const canonicalPath = getCanonicalPath(localisedPath, currentLocale)
-		return getLocalisedPath(canonicalPath, newLocale)
-	}
 
 	return {
 		getLocalisedPath,
 		getCanonicalPath,
-		translatePath,
 		resolveLanguage,
 	}
 }

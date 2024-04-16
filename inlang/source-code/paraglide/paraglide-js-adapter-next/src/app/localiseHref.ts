@@ -14,10 +14,12 @@ export function createLocaliseHref<T extends string>(
 		const canonicalPathname: string =
 			typeof canonicalHref === "object" ? canonicalHref.pathname ?? "" : getPathname(canonicalHref)
 
+		//dont' touch relative links
 		if (!isAbsolute(canonicalPathname)) return canonicalHref
 
-		//dont' touch relative links
-		const translatedPathaname = strategy.getLocalisedPath(canonicalPathname, lang)
+		const translatedPathaname = strategy.getLocalisedPath(canonicalPathname, lang, {
+			isLocaleSwitch: true,
+		})
 
 		// @ts-ignore
 		return typeof canonicalHref === "object"

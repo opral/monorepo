@@ -1,5 +1,13 @@
 # @inlang/plugin-i18next
 
+## 4.13.25
+
+### Patch Changes
+
+- bc00427: fix typo
+- Updated dependencies [bc9875d]
+  - @inlang/sdk@0.32.0
+
 ## 4.13.24
 
 ### Patch Changes

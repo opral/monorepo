@@ -1,4 +1,4 @@
-<doc-image src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/github-lint-action/assets/ninja-i18n-cover.png"></doc-image>
+<doc-image src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/github-lint-action/assets/ninja-i18n-cover.webp"></doc-image>
 
 # Automate your i18n linting for pull requests
 
