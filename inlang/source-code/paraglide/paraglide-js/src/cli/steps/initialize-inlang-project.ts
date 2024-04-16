@@ -8,7 +8,7 @@ import {
 import type { Repository } from "@lix-js/client"
 import type { Logger } from "~/services/logger/index.js"
 import type { CliStep } from "../utils.js"
-import { getCommonPrefix, prompt } from "~/cli/commands/init/utils.js"
+import { prompt } from "~/cli/utils.js"
 import { DEFAULT_PROJECT_PATH, getNewProjectTemplate } from "~/cli/defaults.js"
 import nodePath from "node:path"
 import consola from "consola"
@@ -218,4 +218,38 @@ export const createNewProjectFlow = async (ctx: {
 		ctx.logger.success("Successfully created a new inlang project.")
 	}
 	return { project, projectPath }
+}
+
+/**
+ * Get's the common prefix of a set of strings.
+ * If only one string is passed the prefix will be the empty string
+ *
+ * @example
+ * ```ts
+ * getCommonPrefix(["foo", "foobar"]) // "foo"
+ * getCommonPrefix(["foobar"]) // ""
+ * ```
+ */
+export function getCommonPrefix(strings: string[]): string {
+	const strs = strings.filter(Boolean)
+	if (strs.length <= 1) return ""
+
+	const firstString = strs[0]
+	if (firstString === undefined) {
+		return ""
+	}
+
+	return strs.reduce((commonPrefix, str) => longestCommonPrefix(commonPrefix, str), firstString)
+}
+
+function longestCommonPrefix(strA: string, strB: string): string {
+	let commonPrefix = ""
+	for (let i = 0; i < Math.min(strA.length, strB.length); i++) {
+		if (strA[i] === strB[i]) {
+			commonPrefix += strA[i]
+		} else {
+			break
+		}
+	}
+	return commonPrefix
 }
