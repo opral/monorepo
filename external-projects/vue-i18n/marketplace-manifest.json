@@ -1,4 +1,5 @@
 {
+	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "library.kazupon.vuei18n",
 	"icon": "https://raw.githubusercontent.com/kazupon/vue-i18n/ca513046480ecdb4565072a3b38ec0e2643f43e3/assets/vue-i18n-logo.svg",
 	"gallery": [

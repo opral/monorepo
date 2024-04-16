@@ -6,4 +6,8 @@ describe("getCommonPrefix()", () => {
 		expect(getCommonPrefix(["foo", "foobar"])).toBe("foo")
 		expect(getCommonPrefix(["foobar", "foo"])).toBe("foo")
 	})
+
+	it("The common prefix of a single string is ''", () => {
+		expect(getCommonPrefix(["foo"])).toBe("")
+	})
 })
