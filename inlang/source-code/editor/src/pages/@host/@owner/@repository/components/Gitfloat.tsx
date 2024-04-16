@@ -1,7 +1,7 @@
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { createEffect, createSignal, type JSXElement, onMount, Show, on } from "solid-js"
 import IconGithub from "~icons/cib/github"
-import { pushChanges, useEditorState } from "../State.jsx"
+import { useEditorState } from "../State.jsx"
 import type { SlDialog } from "@shoelace-style/shoelace"
 import { showToast } from "#src/interface/components/Toast.jsx"
 import { navigate } from "vike/client/router"
@@ -37,9 +37,12 @@ export const Gitfloat = () => {
 		forkStatus,
 		mutateForkStatus,
 		refetchForkStatus,
+		createFork,
 		userIsCollaborator,
 		githubRepositoryInformation,
 		currentBranch,
+		pushChanges,
+		mergeUpstream,
 		localChanges,
 		setLocalChanges,
 		setFsChange,
@@ -72,7 +75,7 @@ export const Gitfloat = () => {
 		} else if (localStorage?.user?.isLoggedIn === false) {
 			return "login"
 		} else if (
-			typeof githubRepositoryInformation() === "undefined" ||
+			typeof repoInfo === "undefined" ||
 			userIsCollaborator.loading ||
 			!projectList() ||
 			isForking()
@@ -123,9 +126,7 @@ export const Gitfloat = () => {
 			return
 		}
 		setIsForking(true)
-		const response = await repo()
-			?.createFork()
-			.catch((err) => err)
+		const response = await createFork().catch((err) => err)
 
 		telemetryBrowser.capture("EDITOR created fork", {
 			owner: routeParams().owner,
@@ -179,7 +180,6 @@ export const Gitfloat = () => {
 		}
 
 		const pushResult = await pushChanges({
-			repo: repo()!,
 			user: localStorage.user,
 			setFsChange,
 			setLastPullTime,
@@ -413,7 +413,7 @@ export const Gitfloat = () => {
 								prop:size="small"
 								onClick={async () => {
 									setIsMerging(true)
-									await repo()?.mergeUpstream()
+									await mergeUpstream()
 									refetchRepo()
 									setIsMerging(false)
 									setTimeout(() => {
