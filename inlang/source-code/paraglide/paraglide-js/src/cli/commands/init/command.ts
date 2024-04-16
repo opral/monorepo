@@ -9,8 +9,7 @@ import { telemetry } from "~/services/telemetry/implementation.js"
 import { Logger } from "~/services/logger/index.js"
 import { findRepoRoot, openRepository, type Repository } from "@lix-js/client"
 import { findPackageJson } from "~/services/environment/package.js"
-import { prompt, promptSelection } from "./utils.js"
-import { DEFAULT_OUTDIR } from "./defaults.js"
+import { promptSelection } from "./utils.js"
 import { compile } from "~/compiler/compile.js"
 import { writeOutput } from "~/services/file-handling/write-output.js"
 import type { CliStep } from "./cli-utils.js"
@@ -18,6 +17,8 @@ import { checkForUncommittedChanges } from "./steps/check-for-uncomitted-changes
 import { initializeInlangProject } from "./steps/initialize-inlang-project.js"
 import { maybeAddSherlock } from "./steps/maybe-add-sherlock.js"
 import { maybeChangeTsConfig } from "./steps/update-ts-config.js"
+import { promptForOutdir } from "./steps/prompt-for-outdir.js"
+import { updatePackageJson } from "./steps/update-package-json.js"
 
 const ADAPTER_LINKS = {
 	sveltekit: "https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n",
@@ -121,51 +122,14 @@ export const addParaglideJsToDevDependencies: CliStep<
 	},
 	unknown
 > = async (ctx) => {
-	const file = await ctx.repo.nodeishFs.readFile(ctx.packageJsonPath, { encoding: "utf-8" })
-	const stringify = detectJsonFormatting(file)
-	let pkg: any = {}
-	try {
-		pkg = JSON.parse(file)
-	} catch {
-		ctx.logger.error(
-			`Your ./package.json does not contain valid JSON. Please fix it and try again.`
-		)
-		process.exit(1)
-	}
-	if (pkg.devDependencies === undefined) {
-		pkg.devDependencies = {}
-	}
-	pkg.devDependencies["@inlang/paraglide-js"] = PACKAGE_VERSION
-	await ctx.repo.nodeishFs.writeFile("./package.json", stringify(pkg))
+	const ctx1 = await updatePackageJson({
+		devDependencies: (devDeps) => ({
+			...devDeps,
+			"@inlang/paraglide-js": PACKAGE_VERSION,
+		}),
+	})(ctx)
 	ctx.logger.success("Added @inlang/paraglide-js to the devDependencies in package.json.")
-	return ctx
-}
-
-export const promptForOutdir: CliStep<
-	{
-		logger: Logger
-	},
-	{
-		/** Relative path to the output directory */
-		outdir: string
-	}
-> = async (ctx) => {
-	const response = await prompt("Where should the compiled files be placed?", {
-		type: "text",
-		initial: DEFAULT_OUTDIR,
-		default: DEFAULT_OUTDIR,
-		placeholder: "Relative path from the package root to the desired compiler output directory",
-	})
-
-	if (!response.startsWith("./")) {
-		ctx.logger.warn("You must enter a valid relative path starting from the package root.")
-		return await promptForOutdir(ctx)
-	}
-
-	return {
-		...ctx,
-		outdir: response,
-	}
+	return ctx1
 }
 
 export const enforcePackageJsonExists: CliStep<
