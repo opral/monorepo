@@ -1,5 +1,5 @@
 import type { InlangProject } from "@inlang/sdk"
-import type { CliStep } from "../cli-utils.js"
+import type { CliStep } from "../utils.js"
 import path from "node:path"
 import { compile } from "~/compiler/compile.js"
 import { writeOutput } from "~/services/file-handling/write-output.js"

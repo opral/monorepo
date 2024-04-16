@@ -1,7 +1,7 @@
 import type { Logger } from "~/services/logger/index.js"
 import { prompt } from "~/cli/commands/init/utils.js"
 import type { Repository } from "@lix-js/client"
-import type { CliStep } from "../cli-utils.js"
+import type { CliStep } from "../utils.js"
 import type { InlangProject } from "@inlang/sdk"
 import * as Sherlock from "@inlang/cross-sell-sherlock"
 

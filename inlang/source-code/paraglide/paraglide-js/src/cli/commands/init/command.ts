@@ -15,7 +15,7 @@ import { maybeChangeTsConfig } from "~/cli/steps/update-ts-config.js"
 import { promptForOutdir } from "~/cli/steps/prompt-for-outdir.js"
 import { updatePackageJson } from "~/cli/steps/update-package-json.js"
 import { runCompiler } from "~/cli/steps/run-compiler.js"
-import type { CliStep } from "../../cli-utils.js"
+import type { CliStep } from "../../utils.js"
 
 const ADAPTER_LINKS = {
 	sveltekit: "https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n",

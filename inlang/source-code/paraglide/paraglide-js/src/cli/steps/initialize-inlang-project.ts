@@ -7,7 +7,7 @@ import {
 } from "@inlang/sdk"
 import type { Repository } from "@lix-js/client"
 import type { Logger } from "~/services/logger/index.js"
-import type { CliStep } from "../cli-utils.js"
+import type { CliStep } from "../utils.js"
 import { getCommonPrefix, prompt } from "~/cli/commands/init/utils.js"
 import { DEFAULT_PROJECT_PATH, getNewProjectTemplate } from "~/cli/commands/init/defaults.js"
 import nodePath from "node:path"
