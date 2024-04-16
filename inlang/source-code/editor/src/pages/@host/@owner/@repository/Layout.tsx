@@ -43,6 +43,7 @@ export function Layout(props: { children: JSXElement }) {
 		setLocalChanges,
 		userIsCollaborator,
 		project,
+		refetchProject,
 		lixErrors,
 		setTextSearch,
 		filteredMessageLintRules,
@@ -276,6 +277,7 @@ export function Layout(props: { children: JSXElement }) {
 									const _project = project()
 									if (_project) {
 										_project.setSettings(event.detail.argument)
+										refetchProject()
 										handleChanges()
 									} else {
 										throw new Error("Settings can not be set, because project is not defined")
