@@ -376,17 +376,18 @@ export const createNewProjectFlow = async (ctx: {
 	const messageDir = nodePath.dirname(nodePath.resolve(process.cwd(), messagePath))
 	await ctx.repo.nodeishFs.mkdir(messageDir, { recursive: true })
 
-	for (const languageTag of languageTags) {
-		const languageFile = nodePath.resolve(messageDir, languageTag + ".json")
-		//create the language file if it doesn't exist
-		await ctx.repo.nodeishFs.writeFile(
-			languageFile,
-			dedent`
+	await Promise.allSettled(
+		languageTags.map(async (languageTag) => {
+			const languageFile = nodePath.resolve(messageDir, languageTag + ".json")
+			await ctx.repo.nodeishFs.writeFile(
+				languageFile,
+				dedent`
 			{
 				"$schema": "https://inlang.com/schema/inlang-message-format"
 			}`
-		)
-	}
+			)
+		})
+	)
 
 	ctx.logger.info(`Creating a new inlang project in the current working directory.`)
 	await ctx.repo.nodeishFs.mkdir(DEFAULT_PROJECT_PATH, { recursive: true })
