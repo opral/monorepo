@@ -2,6 +2,7 @@ import { rollup } from "rollup"
 import preserveDirectives from "rollup-preserve-directives"
 import typescript from "@rollup/plugin-typescript"
 import cjs from "@rollup/plugin-commonjs"
+import json from "@rollup/plugin-json"
 import resolve from "@rollup/plugin-node-resolve"
 import fs from "node:fs/promises"
 
@@ -25,7 +26,13 @@ const external = [
 ]
 
 const app_build = await rollup({
-	plugins: [typescript({ tsconfig: "./tsconfig.json" }), cjs(), resolve(), preserveDirectives()],
+	plugins: [
+		typescript({ tsconfig: "./tsconfig.json" }),
+		cjs(),
+		resolve(),
+		preserveDirectives(),
+		json(),
+	],
 	input: {
 		"app/index.server": "src/app/index.server.tsx",
 		"app/index.client": "src/app/index.client.tsx",
@@ -34,7 +41,13 @@ const app_build = await rollup({
 })
 
 const pages_build = await rollup({
-	plugins: [typescript({ tsconfig: "./tsconfig.json" }), cjs(), resolve(), preserveDirectives()],
+	plugins: [
+		typescript({ tsconfig: "./tsconfig.json" }),
+		cjs(),
+		resolve(),
+		preserveDirectives(),
+		json(),
+	],
 	input: {
 		"pages/index": "src/pages/index.tsx",
 	},
@@ -42,7 +55,13 @@ const pages_build = await rollup({
 })
 
 const pluginBuild = await rollup({
-	plugins: [typescript({ tsconfig: "./tsconfig.json" }), cjs(), resolve(), preserveDirectives()],
+	plugins: [
+		typescript({ tsconfig: "./tsconfig.json" }),
+		cjs(),
+		resolve(),
+		preserveDirectives(),
+		json(),
+	],
 	input: {
 		"plugin/index": "src/plugin/index.ts",
 	},
@@ -50,11 +69,17 @@ const pluginBuild = await rollup({
 })
 
 const cliBuild = await rollup({
-	plugins: [typescript({ tsconfig: "./tsconfig.json" }), cjs(), resolve(), preserveDirectives()],
+	plugins: [
+		typescript({ tsconfig: "./tsconfig.json" }),
+		cjs(),
+		resolve(),
+		preserveDirectives(),
+		json(),
+	],
 	input: {
 		"cli/index": "src/cli/index.ts",
 	},
-	external,
+	external: [/^node:/, ...peerDependencies, ...dependencies],
 })
 
 await app_build.write({
@@ -79,8 +104,8 @@ await pluginBuild.write({
 })
 
 await cliBuild.write({
-	preserveModules: false,
-	format: "es",
+	preserveModules: true,
+	format: "esm",
 	entryFileNames: "[name].mjs",
 	dir: "dist",
 })

@@ -13,11 +13,12 @@ import { Logger } from "~/services/logger/index.js"
 import { findRepoRoot, openRepository, type Repository } from "@lix-js/client"
 import { pathExists } from "~/services/file-handling/exists.js"
 import { findPackageJson } from "~/services/environment/package.js"
-import { execAsync, getCommonPrefix } from "./utils.js"
+import { getCommonPrefix, prompt } from "./utils.js"
 import { getNewProjectTemplate, DEFAULT_PROJECT_PATH, DEFAULT_OUTDIR } from "./defaults.js"
 import { compile } from "~/compiler/compile.js"
 import { writeOutput } from "~/services/file-handling/write-output.js"
 import type { CliStep } from "./cli-utils.js"
+import { checkForUncommittedChanges } from "./steps/check-for-uncomitted-changes.js"
 
 const ADAPTER_LINKS = {
 	sveltekit: "https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n",
@@ -54,8 +55,8 @@ export const initCommand = new Command()
 			repoRoot: repoRoot?.replace("file://", "") ?? process.cwd(),
 		} as const
 
-		const ctx1 = await checkIfUncommittedChanges(ctx)
-		const ctx2 = await checkIfPackageJsonExists(ctx1)
+		const ctx1 = await checkForUncommittedChanges(ctx)
+		const ctx2 = await enforcePackageJsonExists(ctx1)
 		const ctx3 = await initializeInlangProject(ctx2)
 		const ctx4 = await determineOutdir(ctx3)
 		telemetry.capture({ event: "PARAGLIDE-JS init project initialized" })
@@ -416,7 +417,7 @@ export const createNewProjectFlow = async (ctx: {
 	return { project, projectPath }
 }
 
-export const checkIfPackageJsonExists: CliStep<
+export const enforcePackageJsonExists: CliStep<
 	{ logger: Logger; repo: Repository },
 	unknown
 > = async (ctx) => {
@@ -428,33 +429,6 @@ export const checkIfPackageJsonExists: CliStep<
 		return process.exit(0)
 	}
 	return ctx
-}
-
-export const checkIfUncommittedChanges: CliStep<{ logger: Logger }, unknown> = async (ctx) => {
-	try {
-		if ((await execAsync("git status --porcelain")).toString().length === 0) {
-			return ctx
-		}
-
-		ctx.logger.info(
-			`You have uncommitted changes.\n\nPlease commit your changes before initializing inlang Paraglide-JS. Committing outstanding changes ensures that you don't lose any work, and see the changes the paraglide-js init command introduces.`
-		)
-		const response = await prompt(
-			"Do you want to initialize inlang Paraglide-JS without committing your current changes?",
-			{
-				type: "confirm",
-				initial: false,
-			}
-		)
-		if (response === true) {
-			return ctx
-		} else {
-			process.exit(0)
-		}
-	} catch (e) {
-		// git cli is not installed
-		return ctx
-	}
 }
 
 export const addCompileStepToPackageJSON: CliStep<
@@ -695,15 +669,4 @@ const promptSelection = async <T extends string>(
 	options: { initial?: T; options: { label: string; value: T }[] } = { options: [] }
 ): Promise<T> => {
 	return prompt(message, { type: "select", ...options }) as unknown as Promise<T>
-}
-
-/**
- * Wrapper to exit the process if the user presses CTRL+C.
- */
-const prompt: typeof consola.prompt = async (message, options) => {
-	const response = await consola.prompt(message, options)
-	if (response?.toString() === "Symbol(clack:cancel)") {
-		process.exit(0)
-	}
-	return response
 }
