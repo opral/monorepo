@@ -259,9 +259,8 @@ export const existingProjectFlow = async (ctx: {
 
 	const commonPrefix = getCommonPrefix(ctx.existingProjectPaths)
 	const options = ctx.existingProjectPaths.map((path) => {
-		const label = commonPrefix !== path ? path.replace(commonPrefix, "") : path
 		return {
-			label: label,
+			label: path.replace(commonPrefix, ""),
 			value: path,
 		}
 	})
