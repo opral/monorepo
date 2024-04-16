@@ -1,11 +1,12 @@
 "use client"
 import * as m from "@/paraglide/messages.js"
-import { Link } from "@/lib/i18n"
+import { Link, usePathname } from "@/lib/i18n"
 import { SelectLanguage } from "./SelectLanguage"
-import { usePathname } from "next/navigation"
+import { usePathname as useNextPathname } from "next/navigation"
 
 export function Header() {
-	const nextPathname = usePathname()
+	const nextPathname = useNextPathname()
+	const pathname = usePathname()
 
 	return (
 		<header
@@ -23,8 +24,12 @@ export function Header() {
 					gap: "1rem",
 				}}
 			>
-				<Link href="/">{m.home()}</Link>
-				<Link href="/about">{m.about()}</Link>
+				<Link aria-current={pathname == "/" ? "page" : undefined} href="/">
+					{m.home()}
+				</Link>
+				<Link aria-current={pathname == "/about" ? "page" : undefined} href="/about">
+					{m.about()}
+				</Link>
 			</nav>
 			<div>{nextPathname}</div>
 

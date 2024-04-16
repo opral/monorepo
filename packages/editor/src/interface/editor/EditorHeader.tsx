@@ -54,14 +54,22 @@ function EditorHeader() {
 										(user()?.isLoggedIn && "mr-14")
 									}
 								>
-									<Button type="text" class="hidden sm:flex"
-										href={import.meta.env.PROD
-										? "https://inlang.com/c/lint-rules"
-										: "http://localhost:3000/c/lint-rules"}>
+									<Button
+										type="text"
+										class="hidden sm:flex"
+										href={
+											import.meta.env.PROD
+												? "https://inlang.com/c/lint-rules"
+												: "http://localhost:3000/c/lint-rules"
+										}
+									>
 										Find Lint Rules
 									</Button>
 									<sl-dropdown prop:placement="bottom-end" class="peer">
-										<button slot="trigger" class="flex pointer-events-auto justify-center items-center h-10 relative gap-2 rounded-md flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer transition-all duration-200 text-surface-700 hover:text-primary">
+										<button
+											slot="trigger"
+											class="flex pointer-events-auto justify-center items-center h-10 relative gap-2 rounded-md flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer transition-all duration-200 text-surface-700 hover:text-primary"
+										>
 											Need Help?
 										</button>
 										<sl-menu class="w-fit">
@@ -73,9 +81,7 @@ function EditorHeader() {
 																{link.name}
 															</a>
 														</sl-menu-item>
-														<Show
-															when={link.name === "About the ecosystem"}
-														>
+														<Show when={link.name === "About the ecosystem"}>
 															<div class="w-full border-b border-surface-200 my-1" />
 														</Show>
 													</>

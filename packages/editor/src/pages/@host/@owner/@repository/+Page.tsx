@@ -11,9 +11,16 @@ import { Message } from "./Message.jsx"
 import { Errors } from "./components/Errors.jsx"
 import { Layout } from "./Layout.jsx"
 import Link from "#src/renderer/Link.jsx"
-import { browserAuth } from "@lix-js/server"
+import { getAuthClient } from "@lix-js/client"
 import { currentPageContext } from "#src/renderer/state.js"
 import { replaceMetaInfo } from "./helper/ReplaceMetaInfo.js"
+import { publicEnv } from "@inlang/env-variables"
+
+const browserAuth = getAuthClient({
+	gitHubProxyBaseUrl: publicEnv.PUBLIC_GIT_PROXY_BASE_URL,
+	githubAppName: publicEnv.PUBLIC_LIX_GITHUB_APP_NAME,
+	githubAppClientId: publicEnv.PUBLIC_LIX_GITHUB_APP_CLIENT_ID,
+})
 
 export const [messageCount, setMessageCount] = createSignal(0)
 

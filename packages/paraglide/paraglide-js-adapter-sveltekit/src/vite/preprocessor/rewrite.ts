@@ -34,7 +34,7 @@ export const rewrite = ({
 
 				// add a new spread attribute at the end of the element
 				const newSpreadAttributeString = c.spreadAttr(
-					`${i("handle_attributes")}(${attributeObjectSource}, ${uneval(attribute_translations)})`,
+					`${i("handle_attributes")}(${attributeObjectSource}, ${uneval(attribute_translations)})`
 				)
 
 				// remove all attributes that were replaced from the code
@@ -66,17 +66,17 @@ export const rewrite = ({
 							`${i("translateAttribute")}(
                                             ${attrubuteValuesToJSValue(
 																							attribute.value,
-																							originalCode,
+																							originalCode
 																						)},
                                             ${
 																							langAttribute
 																								? attrubuteValuesToJSValue(
 																										langAttribute.value,
-																										originalCode,
-																									)
+																										originalCode
+																								  )
 																								: "undefined"
 																						}
-                                        )`,
+                                        )`
 						)
 
 						//replace the attribute with the new attribute
@@ -106,7 +106,7 @@ export const rewrite = ({
 				value = c.ternary(
 					c.eq(thisValue, c.str(element_name)),
 					`${i("handle_attributes")}(${attributeObjectSource}, ${uneval(attribute_translations)})`,
-					value,
+					value
 				)
 			}
 
@@ -144,13 +144,13 @@ export const rewrite = ({
 																					langAttribute
 																						? attrubuteValuesToJSValue(
 																								langAttribute.value,
-																								originalCode,
-																							)
+																								originalCode
+																						  )
 																						: "undefined"
 																				}
                                     )`,
-							attrubuteValuesToJSValue(attribute.value, originalCode),
-						),
+							attrubuteValuesToJSValue(attribute.value, originalCode)
+						)
 					)
 
 					//replace the attribute with the new attribute
@@ -203,7 +203,7 @@ export const rewrite = ({
                 }
 
                 return attrs;
-            }`,
+            }`
 	)
 
 	return {
@@ -216,7 +216,7 @@ export const rewrite = ({
 
 function getAttributesObject(
 	element: ElementNode<string>,
-	originalCode: string,
+	originalCode: string
 ): {
 	attributes: Set<Attribute<string> | SpreadAttribute>
 	attributeObjectSource: string
@@ -228,7 +228,7 @@ function getAttributesObject(
 		switch (attribute.type) {
 			case "Attribute": {
 				attributeEntries.push(
-					`${c.str(attribute.name)} : ${attrubuteValuesToJSValue(attribute.value, originalCode)}`,
+					`${c.str(attribute.name)} : ${attrubuteValuesToJSValue(attribute.value, originalCode)}`
 				)
 				replacedAttributes.add(attribute)
 				break
@@ -238,7 +238,7 @@ function getAttributesObject(
 					//@ts-ignore
 					attribute.expression.start,
 					//@ts-ignore
-					attribute.expression.end,
+					attribute.expression.end
 				)
 
 				attributeEntries.push(`...(${code})`)

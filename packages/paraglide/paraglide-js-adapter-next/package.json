@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/paraglide-js-adapter-next",
-	"version": "3.0.0",
+	"version": "3.1.0",
 	"publishConfig": {
 		"access": "public"
 	},
@@ -48,8 +48,10 @@
 	"files": [
 		"dist"
 	],
+	"dependencies": {
+		"@inlang/paraglide-js": "workspace:*"
+	},
 	"peerDependencies": {
-		"@inlang/paraglide-js": "*",
 		"next": "^13.0.0 || ^14.0.0",
 		"react": "^18 || ^19"
 	},

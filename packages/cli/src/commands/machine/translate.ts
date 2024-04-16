@@ -3,11 +3,16 @@ import { Command } from "commander"
 import { rpc } from "@inlang/rpc"
 import { getInlangProject } from "../../utilities/getInlangProject.js"
 import { log, logError } from "../../utilities/log.js"
-import { type InlangProject, ProjectSettings, Message } from "@inlang/sdk"
+import { getVariant, type InlangProject, ProjectSettings, Message } from "@inlang/sdk"
 import prompts from "prompts"
 import { projectOption } from "../../utilities/globalFlags.js"
 import progessBar from "cli-progress"
 import plimit from "p-limit"
+import type { Result } from "@inlang/result"
+
+const rpcTranslateAction = process.env.MOCK_TRANSLATE_LOCAL
+	? mockMachineTranslateMessage
+	: rpc.machineTranslateMessage
 
 export const translate = new Command()
 	.command("translate")
@@ -18,6 +23,7 @@ export const translate = new Command()
 		"--targetLanguageTags <targets...>",
 		"Comma separated list of target language tags for translation."
 	)
+	.option("-n, --nobar", "disable progress bar", false)
 	.description("Machine translate all resources.")
 	.action(async (args: { force: boolean; project: string }) => {
 		try {
@@ -93,15 +99,17 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 
 		const messageIds = args.project.query.messages.includedMessageIds()
 
-		const bar = new progessBar.SingleBar(
-			{
-				clearOnComplete: true,
-				format: `🤖 Machine translating messages | {bar} | {percentage}% | {value}/{total} Messages`,
-			},
-			progessBar.Presets.shades_grey
-		)
+		const bar = options.nobar
+			? undefined
+			: new progessBar.SingleBar(
+					{
+						clearOnComplete: true,
+						format: `🤖 Machine translating messages | {bar} | {percentage}% | {value}/{total} Messages`,
+					},
+					progessBar.Presets.shades_grey
+			  )
 
-		bar.start(messageIds.length, 0)
+		bar?.start(messageIds.length, 0)
 
 		const logs: Array<() => void> = []
 
@@ -111,7 +119,7 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 				`"${id}"` +
 				(experimentalAliases ? ` (alias "${toBeTranslatedMessage.alias.default ?? ""}")` : "")
 
-			const { data: translatedMessage, error } = await rpc.machineTranslateMessage({
+			const { data: translatedMessage, error } = await rpcTranslateAction({
 				message: toBeTranslatedMessage,
 				sourceLanguageTag,
 				targetLanguageTags,
@@ -126,14 +134,14 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 				args.project.query.messages.update({ where: { id: id }, data: translatedMessage! })
 				logs.push(() => log.info(`Machine translated message ${logId}`))
 			}
-			bar.increment()
+			bar?.increment()
 		}
 		// parallelize rpcTranslate calls with a limit of 100 concurrent calls
 		const limit = plimit(100)
 		const promises = messageIds.map((id) => limit(() => rpcTranslate(id)))
 		await Promise.all(promises)
 
-		bar.stop()
+		bar?.stop()
 		for (const log of logs) {
 			log()
 		}
@@ -143,4 +151,37 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 	} catch (error) {
 		logError(error)
 	}
+}
+
+async function mockMachineTranslateMessage(args: {
+	message: Message
+	sourceLanguageTag: string
+	targetLanguageTags: string[]
+}): Promise<Result<Message, string>> {
+	const copy = structuredClone(args.message)
+	for (const targetLanguageTag of args.targetLanguageTags) {
+		for (const variant of args.message.variants.filter(
+			(variant) => variant.languageTag === args.sourceLanguageTag
+		)) {
+			const targetVariant = getVariant(args.message, {
+				where: {
+					languageTag: targetLanguageTag,
+					match: variant.match,
+				},
+			})
+			if (targetVariant) {
+				continue
+			}
+			const prefix = `Mock translate local ${args.sourceLanguageTag} to ${targetLanguageTag}: `
+			const q = variant.pattern[0]?.type === "Text" ? variant.pattern[0].value : ""
+			copy.variants.push({
+				languageTag: targetLanguageTag,
+				match: variant.match,
+				pattern: [{ type: "Text", value: prefix + q }],
+			})
+			// eslint-disable-next-line no-console
+			console.log("mockMachineTranslateMessage", q, targetLanguageTag)
+		}
+	}
+	return { data: copy }
 }

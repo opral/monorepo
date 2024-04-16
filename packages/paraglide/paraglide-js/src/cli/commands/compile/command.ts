@@ -17,9 +17,10 @@ export const compileCommand = new Command()
 		'The path to the output directory. Example: "./src/paraglide"',
 		"./src/paraglide"
 	)
+	.requiredOption("--silent", "Only log errors to the console", false)
 	.requiredOption("--watch", "Watch for changes and recompile.", false)
-	.action(async (options: { project: string; outdir: string; watch: boolean }) => {
-		const logger = new Logger({ silent: false, prefix: true })
+	.action(async (options: { silent: boolean; project: string; outdir: string; watch: boolean }) => {
+		const logger = new Logger({ silent: options.silent, prefix: true })
 		const path = resolve(process.cwd(), options.project)
 		const outputDirectory = resolve(process.cwd(), options.outdir)
 

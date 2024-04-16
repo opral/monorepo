@@ -1,4 +1,5 @@
 {
+	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "library.QuiiBz.nextinternational",
 	"icon": "https://github.com/QuiiBz/next-international/blob/main/assets/logo-black.png?raw=true",
 	"gallery": [

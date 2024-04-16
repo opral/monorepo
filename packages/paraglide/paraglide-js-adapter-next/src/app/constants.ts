@@ -1,10 +1,8 @@
-import { CookieConfig } from "./utils/cookie"
+import type { CookieConfig } from "./utils/cookie"
 
-export const HeaderNames = {
-	Link: "Link",
-	ParaglideLanguage: "x-language-tag",
-	AcceptLanguage: "accept-language",
-} as const
+export const LINK_HEADER_NAME = "Link"
+export const PARAGLIDE_LANGUAGE_HEADER_NAME = "x-language-tag"
+export const ACCEPT_LANGUAGE_HEADER_NAME = "accept-language"
 
 // settings for the native language cookie in the pages router
 // someone on discord suggested we use these, which seems reasonable
