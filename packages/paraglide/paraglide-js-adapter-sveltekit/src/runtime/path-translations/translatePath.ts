@@ -2,7 +2,7 @@ import { getPathInfo } from "../utils/get-path-info.js"
 import { serializeRoute } from "../utils/serialize-path.js"
 import { getCanonicalPath } from "./getCanonicalPath.js"
 import { getTranslatedPath } from "./getTranslatedPath.js"
-import type { PathTranslations } from "../config/pathTranslations.js"
+import { type PathDefinitionTranslations } from "@inlang/paraglide-js/internal/adapter-utils"
 import type { ParamMatcher } from "@sveltejs/kit"
 
 /**
@@ -11,7 +11,7 @@ import type { ParamMatcher } from "@sveltejs/kit"
 export function translatePath(
 	path: string,
 	targetLanguage: string,
-	translations: PathTranslations,
+	translations: PathDefinitionTranslations,
 	matchers: Record<string, ParamMatcher>,
 	opts: {
 		base: string
