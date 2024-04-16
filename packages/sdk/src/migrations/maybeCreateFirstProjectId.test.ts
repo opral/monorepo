@@ -19,3 +19,13 @@ it("should generate a project id", async () => {
 	const projectId = await generateProjectId({ repo, projectPath: "mocked_project_path" })
 	expect(projectId).toBe("432d7ef29c510e99d95e2d14ef57a0797a1603859b5a851b7dff7e77161b8c08")
 })
+
+it("should return undefined if repoMeta contains error", async () => {
+	await repo.nodeishFs.rm("/.git", { recursive: true })
+
+	const projectId = await generateProjectId({
+		repo: repo,
+		projectPath: "mocked_project_path",
+	})
+	expect(projectId).toBeUndefined()
+})
