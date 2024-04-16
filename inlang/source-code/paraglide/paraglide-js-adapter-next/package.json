@@ -48,8 +48,12 @@
 	"files": [
 		"dist"
 	],
+	"bin": {
+		"paraglide-next": "./bin/run.mjs"
+	},
 	"dependencies": {
-		"@inlang/paraglide-js": "workspace:*"
+		"@inlang/paraglide-js": "workspace:*",
+		"commander": "^12.0.0"
 	},
 	"peerDependencies": {
 		"next": "^13.0.0 || ^14.0.0",
