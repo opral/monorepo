@@ -1,5 +1,5 @@
 import type { Logger } from "~/services/logger/index.js"
-import type { CliStep } from "../cli-utils.js"
+import type { CliStep } from "../utils.js"
 import type { Repository } from "@lix-js/client"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
 
