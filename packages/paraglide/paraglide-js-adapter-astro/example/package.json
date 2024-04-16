@@ -6,7 +6,7 @@
 	"scripts": {
 		"_dev": "astro dev",
 		"start": "astro dev",
-		"build": "paraglide-js compile --project ./project.inlang && astro check && astro build",
+		"build": "paraglide-js compile --project ./project.inlang && tsc --noEmit && astro check && astro build",
 		"preview": "astro preview",
 		"astro": "astro"
 	},

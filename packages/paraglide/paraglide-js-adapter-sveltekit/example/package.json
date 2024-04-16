@@ -5,7 +5,7 @@
 	"scripts": {
 		"_dev": "vite dev",
 		"start": "vite dev",
-		"build": "vite build",
+		"build": "paraglide-js compile --project ./project.inlang && tsc --noEmit && vite build",
 		"test": "vite build",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",

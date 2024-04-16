@@ -4,10 +4,10 @@
 	"private": true,
 	"scripts": {
 		"dev": "vite",
-		"build": "paraglide-js compile --project ../../../project.inlang && vite build -- --max_old_space_size=1200000",
+		"build": "paraglide-js compile --project ../../../project.inlang && tsc --noEmit && vite build -- --max_old_space_size=1200000",
 		"production": "NODE_ENV=production tsx ./src/server/main.ts",
 		"---- TEST ----------------------------------------------------------": "",
-		"test": "paraglide-js compile --project ../../../project.inlang && tsc --noEmit",
+		"test": "paraglide-js compile --project ../../../project.inlang",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
