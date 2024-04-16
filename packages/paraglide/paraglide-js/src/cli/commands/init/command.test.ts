@@ -5,9 +5,6 @@ import {
 	maybeChangeTsConfigAllowJs,
 	maybeChangeTsConfigModuleResolution,
 	enforcePackageJsonExists,
-	createNewProjectFlow,
-	existingProjectFlow,
-	initializeInlangProject,
 	maybeAddVsCodeExtension,
 } from "./command.js"
 import consola from "consola"
@@ -23,6 +20,11 @@ import type { NodeishFilesystem } from "@lix-js/fs"
 import { pathExists } from "../../../services/file-handling/exists.js"
 import { getNewProjectTemplate } from "./defaults.js"
 import { checkForUncommittedChanges } from "./steps/check-for-uncomitted-changes.js"
+import {
+	createNewProjectFlow,
+	existingProjectFlow,
+	initializeInlangProject,
+} from "./steps/initialize-inlang-project.js"
 
 const logger = new Logger()
 
