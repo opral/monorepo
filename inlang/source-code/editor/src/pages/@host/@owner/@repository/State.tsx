@@ -18,8 +18,12 @@ import type { LocalStorageSchema } from "#src/services/local-storage/index.js"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import type { TourStepId } from "./components/Notification/TourHintWrapper.jsx"
 import { setSearchParams } from "./helper/setSearchParams.js"
-import { openRepository, createNodeishMemoryFs, type Repository } from "@lix-js/client"
-import { browserAuth } from "@lix-js/server"
+import {
+	getAuthClient,
+	openRepository,
+	createNodeishMemoryFs,
+	type Repository,
+} from "@lix-js/client"
 import { publicEnv } from "@inlang/env-variables"
 import {
 	LanguageTag,
@@ -32,6 +36,12 @@ import {
 import { posthog as telemetryBrowser } from "posthog-js"
 import type { Result } from "@inlang/result"
 import { id } from "../../../../../marketplace-manifest.json"
+
+const browserAuth = getAuthClient({
+	gitHubProxyBaseUrl: publicEnv.PUBLIC_GIT_PROXY_BASE_URL,
+	githubAppName: publicEnv.PUBLIC_LIX_GITHUB_APP_NAME,
+	githubAppClientId: publicEnv.PUBLIC_LIX_GITHUB_APP_CLIENT_ID,
+})
 
 type EditorStateSchema = {
 	/**

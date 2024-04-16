@@ -3,12 +3,18 @@ import { html } from "lit"
 import { openRepository, createNodeishMemoryFs } from "@lix-js/client"
 import { customElement, property } from "lit/decorators.js"
 import { TwLitElement } from "../common/TwLitElement.js"
-import { browserAuth, getUser } from "@lix-js/server"
+import { getAuthClient } from "@lix-js/client"
 import { registry } from "@inlang/marketplace-registry"
 import { ProjectSettings } from "@inlang/sdk"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
 import { tryCatch } from "@inlang/result"
 import { publicEnv } from "@inlang/env-variables"
+
+const browserAuth = getAuthClient({
+	gitHubProxyBaseUrl: publicEnv.PUBLIC_GIT_PROXY_BASE_URL,
+	githubAppName: publicEnv.PUBLIC_LIX_GITHUB_APP_NAME,
+	githubAppClientId: publicEnv.PUBLIC_LIX_GITHUB_APP_CLIENT_ID,
+})
 
 @customElement("inlang-uninstall")
 export class InlangInstall extends TwLitElement {
@@ -164,7 +170,7 @@ export class InlangInstall extends TwLitElement {
 		super.connectedCallback()
 		this.url = JSON.parse(this.jsonURL)
 
-		const auth = await getUser().catch(() => {
+		const auth = await browserAuth.getUser().catch(() => {
 			this.authorized = false
 		})
 		if (auth) {

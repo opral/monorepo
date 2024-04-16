@@ -14,7 +14,7 @@ import {
 } from "#src/services/auth/index.js"
 import { posthog as telemetryBrowser } from "posthog-js"
 import { TourHintWrapper, type TourStepId } from "./Notification/TourHintWrapper.jsx"
-import { browserAuth } from "@lix-js/server"
+import { getAuthClient } from "@lix-js/client"
 import {
 	setSignInModalOpen,
 	signInModalOpen,
@@ -22,6 +22,13 @@ import {
 import { WarningIcon } from "./Notification/NotificationHint.jsx"
 import IconArrowDownward from "~icons/material-symbols/arrow-downward-alt"
 import { debounce } from "throttle-debounce"
+import { publicEnv } from "@inlang/env-variables"
+
+const browserAuth = getAuthClient({
+	gitHubProxyBaseUrl: publicEnv.PUBLIC_GIT_PROXY_BASE_URL,
+	githubAppName: publicEnv.PUBLIC_LIX_GITHUB_APP_NAME,
+	githubAppClientId: publicEnv.PUBLIC_LIX_GITHUB_APP_CLIENT_ID,
+})
 
 export const Gitfloat = () => {
 	const {
