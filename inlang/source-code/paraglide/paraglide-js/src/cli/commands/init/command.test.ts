@@ -4,8 +4,7 @@ import {
 	addParaglideJsToDevDependencies,
 	maybeChangeTsConfigAllowJs,
 	maybeChangeTsConfigModuleResolution,
-	checkIfPackageJsonExists,
-	checkIfUncommittedChanges,
+	enforcePackageJsonExists,
 	createNewProjectFlow,
 	existingProjectFlow,
 	initializeInlangProject,
@@ -23,6 +22,7 @@ import { openRepository } from "@lix-js/client"
 import type { NodeishFilesystem } from "@lix-js/fs"
 import { pathExists } from "../../../services/file-handling/exists.js"
 import { getNewProjectTemplate } from "./defaults.js"
+import { checkForUncommittedChanges } from "./steps/check-for-uncomitted-changes.js"
 
 const logger = new Logger()
 
@@ -68,7 +68,7 @@ describe("end to end tests", () => {
 			throw "process.exit"
 		})
 		try {
-			await checkIfPackageJsonExists({ logger, repo })
+			await enforcePackageJsonExists({ logger, repo })
 		} catch (e) {
 			expect(e).toBe("process.exit")
 		}
@@ -580,7 +580,7 @@ describe("createNewProjectFlow()", async () => {
 	})
 })
 
-describe("checkIfUncommittedChanges()", () => {
+describe("checkForUncommittedChanges()", () => {
 	test("it should not fail if the git cli is not installed", async () => {
 		const fs = mockFiles({})
 		const repo = await openRepository("file://", { nodeishFs: fs })
@@ -590,7 +590,7 @@ describe("checkIfUncommittedChanges()", () => {
 			cb(new Error("Command failed: git status"), Buffer.from(""), Buffer.from(""))
 		})
 
-		expect(checkIfUncommittedChanges({ logger, repo })).resolves.toBeDefined()
+		expect(checkForUncommittedChanges({ logger, repo })).resolves.toBeDefined()
 	})
 
 	test("it should continue if no uncomitted changes exist", async () => {
@@ -602,7 +602,7 @@ describe("checkIfUncommittedChanges()", () => {
 			cb(undefined, Buffer.from(""), Buffer.from(""))
 		})
 
-		expect(checkIfUncommittedChanges({ logger, repo })).resolves.toBeDefined()
+		expect(checkForUncommittedChanges({ logger, repo })).resolves.toBeDefined()
 	})
 
 	test("it should prompt the user if there are uncommitted changes and exit if the user doesn't want to continue", async () => {
@@ -620,7 +620,7 @@ describe("checkIfUncommittedChanges()", () => {
 			false,
 		])
 
-		await checkIfUncommittedChanges({ logger, repo })
+		await checkForUncommittedChanges({ logger, repo })
 		expect(logger.info).toHaveBeenCalledOnce()
 		expect(consola.prompt).toHaveBeenCalledOnce()
 		expect(processExit).toHaveBeenCalledOnce()
@@ -641,7 +641,7 @@ describe("checkIfUncommittedChanges()", () => {
 			true,
 		])
 
-		await checkIfUncommittedChanges({ logger, repo })
+		await checkForUncommittedChanges({ logger, repo })
 
 		expect(logger.info).toHaveBeenCalledOnce()
 		expect(consola.prompt).toHaveBeenCalledOnce()
@@ -656,17 +656,17 @@ describe("checkIfUncommittedChanges()", () => {
 			cb(undefined, Buffer.from(""), Buffer.from(""))
 		})
 
-		await checkIfUncommittedChanges({ logger, repo })
+		await checkForUncommittedChanges({ logger, repo })
 		expect(consola.prompt).not.toHaveBeenCalled()
 	})
 })
 
-describe("checkIfPackageJsonExists()", () => {
+describe("enforcePackageJsonExists()", () => {
 	test("it should exit if no package.json has been found", async () => {
 		const fs = mockFiles({})
 		const repo = await openRepository("file://", { nodeishFs: fs })
 
-		await checkIfPackageJsonExists({ logger, repo })
+		await enforcePackageJsonExists({ logger, repo })
 		expect(logger.warn).toHaveBeenCalledOnce()
 		expect(process.exit).toHaveBeenCalledOnce()
 	})
@@ -675,7 +675,7 @@ describe("checkIfPackageJsonExists()", () => {
 		const fs = mockFiles({ "package.json": "" })
 		const repo = await openRepository("file://", { nodeishFs: fs })
 
-		await checkIfPackageJsonExists({ logger, repo })
+		await enforcePackageJsonExists({ logger, repo })
 		expect(logger.warn).not.toHaveBeenCalled()
 		expect(process.exit).not.toHaveBeenCalled()
 	})

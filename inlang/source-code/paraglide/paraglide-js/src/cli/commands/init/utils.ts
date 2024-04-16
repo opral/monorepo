@@ -1,3 +1,4 @@
+import consola from "consola"
 import childProcess from "node:child_process"
 
 /**
@@ -51,4 +52,15 @@ export function getCommonPrefix(strings: string[]): string {
 	}
 
 	return strs.reduce((commonPrefix, str) => longestCommonPrefix(commonPrefix, str), firstString)
+}
+
+/**
+ * Wrapper to exit the process if the user presses CTRL+C.
+ */
+export const prompt: typeof consola.prompt = async (message, options) => {
+	const response = await consola.prompt(message, options)
+	if (response?.toString() === "Symbol(clack:cancel)") {
+		process.exit(0)
+	}
+	return response
 }
