@@ -142,14 +142,16 @@ export default function Page(props: PageProps) {
 								</section>
 								<section class="max-w-4xl mx-auto mb-24">
 									<Markdown markdown={props.markdown} />
-									<a
-										class="text-info/80 hover:text-info/100 text-sm font-semibold flex items-center"
-										href={convertLinkToGithub(readme())}
-										target="_blank"
-									>
-										<EditOutline class="inline-block mr-2" />
-										Edit on GitHub
-									</a>
+									<Show when={readme()}>
+										<a
+											class="text-info/80 hover:text-info/100 text-sm font-semibold flex items-center"
+											href={convertLinkToGithub(readme()!)}
+											target="_blank"
+										>
+											<EditOutline class="inline-block mr-2" />
+											Edit on GitHub
+										</a>
+									</Show>
 								</section>
 								<section class="max-w-4xl mx-auto">
 									<h3 class="text-surface-400 text-sm mb-4">Keywords</h3>
