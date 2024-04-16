@@ -31,12 +31,12 @@ export const InitCommand = new Command()
 			repo,
 			repoRoot: repoRoot || "file://" + process.cwd(),
 			logger,
-			outdir: "./src/outdir",
 			appId: "library.inlang.paraglideJsAdapterNextJs",
 		})
 		const ctx1 = await findAndEnforceRequiredFiles(ctx0)
-		const ctx2 = await Steps.initializeInlangProject(ctx1)
-		const ctx3 = await Steps.updatePackageJson({
+		const ctx2 = { ...ctx1, outdir: path.resolve(ctx1.srcRoot, "paraglide") }
+		const ctx3 = await Steps.initializeInlangProject(ctx2)
+		const ctx4 = await Steps.updatePackageJson({
 			dependencies: async (deps) => ({
 				...deps,
 				"@inlang/paraglide-js-adapter-next": "^0.0.0",
@@ -45,10 +45,10 @@ export const InitCommand = new Command()
 				...deps,
 				"@inlang/paraglide-js": "^0.0.0",
 			}),
-		})(ctx2)
+		})(ctx3)
 
 		try {
-			await Steps.runCompiler(ctx3)
+			await Steps.runCompiler(ctx4)
 		} catch (e) {
 			//silently ignore
 		}
@@ -65,6 +65,7 @@ const findAndEnforceRequiredFiles: CliStep<
 		/** Absolute Path to the next.config.js or next.config.mjs */
 		nextConfigFile: NextConfigFile
 		packageJsonPath: string
+		srcRoot: string
 	}
 > = async (ctx) => {
 	const packageJsonPath = await findPackageJson(ctx.repo.nodeishFs, process.cwd())
@@ -79,7 +80,19 @@ const findAndEnforceRequiredFiles: CliStep<
 		process.exit(1)
 	}
 
-	return { ...ctx, nextConfigFile: nextConfigFile, packageJsonPath }
+	// if the ./src directory exists -> srcRoot = ./src
+	// otherwise -> srcRoot  = .
+
+	let srcRoot
+	try {
+		const stat = await ctx.repo.nodeishFs.stat(path.resolve(process.cwd(), "src"))
+		if (!stat.isDirectory()) throw Error()
+		srcRoot = path.resolve(process.cwd(), "src")
+	} catch {
+		srcRoot = process.cwd()
+	}
+
+	return { ...ctx, srcRoot, nextConfigFile: nextConfigFile, packageJsonPath }
 }
 
 /**
