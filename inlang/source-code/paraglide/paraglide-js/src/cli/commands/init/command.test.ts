@@ -93,7 +93,12 @@ describe("initializeInlangProject()", () => {
 			process.cwd = () => "/folder/subfolder"
 			mockUserInput(["/folder/project.inlang"])
 
-			const { projectPath } = await initializeInlangProject({ logger, repo, repoRoot: "/" })
+			const { projectPath } = await initializeInlangProject({
+				logger,
+				repo,
+				repoRoot: "/",
+				appId: "library.inlang.paraglideJs",
+			})
 			expect(projectPath).toBe("/folder/project.inlang")
 		},
 		{
@@ -109,6 +114,7 @@ describe("initializeInlangProject()", () => {
 			logger,
 			repo,
 			repoRoot: "/",
+			appId: "library.inlang.paraglideJs",
 		})
 		expect(path).toBe("/project.inlang")
 		expect(project.settings().languageTags).toEqual(["en"])
@@ -336,6 +342,7 @@ describe("existingProjectFlow()", () => {
 			existingProjectPaths: ["/project.inlang"],
 			logger,
 			repo,
+			appId: "library.inlang.paraglideJs",
 		})
 
 		expect(project.settings().languageTags).toEqual(getNewProjectTemplate().languageTags)
@@ -360,6 +367,7 @@ describe("existingProjectFlow()", () => {
 			existingProjectPaths: ["/folder/project.inlang", "/project.inlang"],
 			logger,
 			repo,
+			appId: "library.inlang.paraglideJs",
 		})
 
 		// the newly created project file should exist
@@ -375,7 +383,12 @@ describe("existingProjectFlow()", () => {
 
 		mockUserInput(["newProject", "en"])
 
-		await existingProjectFlow({ existingProjectPaths: ["/folder/project.inlang"], logger, repo })
+		await existingProjectFlow({
+			existingProjectPaths: ["/folder/project.inlang"],
+			logger,
+			repo,
+			appId: "library.inlang.paraglideJs",
+		})
 		// info that a new project is created
 		expect(logger.info).toHaveBeenCalledOnce()
 		// the newly created project file should exist
@@ -389,7 +402,12 @@ describe("existingProjectFlow()", () => {
 		const repo = await openRepository("file://", { nodeishFs: fs })
 
 		mockUserInput(["/project.inlang"])
-		await existingProjectFlow({ existingProjectPaths: ["/project.inlang"], logger, repo })
+		await existingProjectFlow({
+			existingProjectPaths: ["/project.inlang"],
+			logger,
+			repo,
+			appId: "library.inlang.paraglideJs",
+		})
 		expect(logger.error).toHaveBeenCalled()
 		expect(process.exit).toHaveBeenCalled()
 	})
@@ -525,7 +543,7 @@ describe("createNewProjectFlow()", async () => {
 			const repo = await openRepository("file://", { nodeishFs: fs })
 
 			mockUserInput(["en"])
-			await createNewProjectFlow({ logger, repo })
+			await createNewProjectFlow({ logger, repo, appId: "library.inlang.paraglideJs" })
 
 			// user is informed that a new project is created
 			expect(logger.info).toHaveBeenCalledOnce()
@@ -549,7 +567,7 @@ describe("createNewProjectFlow()", async () => {
 		vi.spyOn(JSON, "stringify").mockReturnValue(`{}`)
 
 		mockUserInput(["en"])
-		await createNewProjectFlow({ logger, repo })
+		await createNewProjectFlow({ logger, repo, appId: "library.inlang.paraglideJs" })
 		// user is informed that a new project is created
 		expect(logger.info).toHaveBeenCalledOnce()
 		// the project has errors
@@ -564,7 +582,7 @@ describe("createNewProjectFlow()", async () => {
 
 		// purpousefully formatted the input weird
 		mockUserInput(["  	,en, 	 ,de-ch  "])
-		await createNewProjectFlow({ logger, repo })
+		await createNewProjectFlow({ logger, repo, appId: "library.inlang.paraglideJs" })
 
 		// user is informed that a new project is created
 		expect((await fs.stat("/messages")).isDirectory()).toBe(true)
@@ -580,7 +598,7 @@ describe("createNewProjectFlow()", async () => {
 
 		// purpousefully formatted the input weird
 		mockUserInput(["2173, de, en", "en,de,9DE", "en,de-ch"])
-		await createNewProjectFlow({ logger, repo })
+		await createNewProjectFlow({ logger, repo, appId: "library.inlang.paraglideJs" })
 
 		// user is informed that a new project is created
 		expect((await fs.stat("/messages")).isDirectory()).toBe(true)

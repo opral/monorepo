@@ -5,6 +5,7 @@ import { Command } from "commander"
 import { Logger } from "~/services/logger/index.js"
 import { openRepository, findRepoRoot } from "@lix-js/client"
 import { runCompiler } from "~/cli/steps/run-compiler.js"
+import { DEFAULT_OUTDIR } from "~/cli/defaults.js"
 
 export const compileCommand = new Command()
 	.name("compile")
@@ -13,7 +14,7 @@ export const compileCommand = new Command()
 	.requiredOption(
 		"--outdir <path>",
 		'The path to the output directory. Example: "./src/paraglide"',
-		"./src/paraglide"
+		DEFAULT_OUTDIR
 	)
 	.requiredOption("--silent", "Only log errors to the console", false)
 	.requiredOption("--watch", "Watch for changes and recompile.", false)
@@ -36,7 +37,7 @@ export const compileCommand = new Command()
 			await loadProject({
 				projectPath: path,
 				repo,
-				appId: "library.inlang.paraglideJs",
+				appId: MARKTEPLACE_ID,
 			}),
 			logger
 		)
