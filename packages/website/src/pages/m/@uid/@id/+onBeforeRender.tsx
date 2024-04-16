@@ -50,8 +50,10 @@ export default async function onBeforeRender(pageContext: PageContext) {
 		return typeof item.readme === "object" ? item.readme.en : item.readme
 	}
 
+	if (!readme()) throw redirect("/not-found", 301)
+
 	const changelog = async () => {
-		const changelogPath = readme().replace(/\/[^/]*$/, "/CHANGELOG.md")
+		const changelogPath = readme()!.replace(/\/[^/]*$/, "/CHANGELOG.md")
 
 		if (await fileExists(changelogPath)) {
 			return changelogPath
@@ -65,7 +67,7 @@ export default async function onBeforeRender(pageContext: PageContext) {
 			? fetch(path).then((res) => res.text())
 			: fs.readFile(new URL(path, repositoryRoot)).then((res) => res.toString())
 
-	const readmeMarkdown = await convert(await text(readme()))
+	const readmeMarkdown = await convert(await text(readme()!))
 
 	const changelogPath = await changelog()
 	const changelogMarkdown = changelogPath ? await convert(await text(changelogPath)) : undefined
