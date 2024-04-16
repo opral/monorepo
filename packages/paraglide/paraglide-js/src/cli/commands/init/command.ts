@@ -284,7 +284,9 @@ export const existingProjectFlow = async (ctx: {
 	})
 
 	if (project.errors().length > 0) {
-		ctx.logger.error("The selected project contains errors - Aborting paragilde initialization.")
+		ctx.logger.error(
+			"Aborting paragilde initialization. - The selected project has errors. Either fix them, or remove the project and create a new one."
+		)
 		for (const error of project.errors()) {
 			ctx.logger.error(error)
 		}
