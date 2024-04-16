@@ -258,20 +258,19 @@ export const existingProjectFlow = async (ctx: {
 	const NEW_PROJECT_VALUE = "newProject"
 
 	const commonPrefix = getCommonPrefix(ctx.existingProjectPaths)
+	const options = ctx.existingProjectPaths.map((path) => {
+		const label = commonPrefix !== path ? path.replace(commonPrefix, "") : path
+		return {
+			label: label,
+			value: path,
+		}
+	})
 
 	const selection = (await prompt(
 		`Do you want to use an existing Inlang Project or create a new one?`,
 		{
 			type: "select",
-			options: [
-				{ label: "Create a new project", value: NEW_PROJECT_VALUE },
-				...ctx.existingProjectPaths.map((path) => {
-					return {
-						label: "Use '" + path.replace(commonPrefix, "") + "'",
-						value: path,
-					}
-				}),
-			],
+			options: [{ label: "Create a new project", value: NEW_PROJECT_VALUE }, ...options],
 		}
 	)) as unknown as string // the prompt type is incorrect
 
@@ -285,7 +284,7 @@ export const existingProjectFlow = async (ctx: {
 	})
 
 	if (project.errors().length > 0) {
-		ctx.logger.error("The selected project contains errors - Aborting paraglde initialization.")
+		ctx.logger.error("The selected project contains errors - Aborting paragilde initialization.")
 		for (const error of project.errors()) {
 			ctx.logger.error(error)
 		}
@@ -375,12 +374,12 @@ export const createNewProjectFlow = async (ctx: {
 
 	//create the messages dir if it doesn't exist
 	const messageDir = nodePath.dirname(nodePath.resolve(process.cwd(), messagePath))
-	ctx.repo.nodeishFs.mkdir(messageDir, { recursive: true })
+	await ctx.repo.nodeishFs.mkdir(messageDir, { recursive: true })
 
 	for (const languageTag of languageTags) {
 		const languageFile = nodePath.resolve(messageDir, languageTag + ".json")
 		//create the language file if it doesn't exist
-		ctx.repo.nodeishFs.writeFile(
+		await ctx.repo.nodeishFs.writeFile(
 			languageFile,
 			dedent`
 			{
