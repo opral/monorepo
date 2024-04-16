@@ -136,6 +136,8 @@ type EditorStateSchema = {
 	 */
 	project: Resource<InlangProjectWithSolidAdapter | undefined>
 
+	refetchProject: () => void
+
 	/**
 	 * List of projects in the repository.
 	 */
@@ -443,7 +445,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	})
 
 	// open the inlang project and store it in a resource
-	const [project, { mutate: setProject }] = createResource(
+	const [project, { refetch: refetchProject, mutate: setProject }] = createResource(
 		() => {
 			if (repo() === undefined || activeProject() === undefined) {
 				return false
@@ -673,6 +675,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					fsChange,
 					setFsChange,
 					project,
+					refetchProject,
 					projectList,
 					doesInlangConfigExist,
 					sourceLanguageTag,
