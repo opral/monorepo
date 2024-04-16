@@ -5,6 +5,7 @@ import nodeFsPromises from "node:fs/promises"
 import { NodeishFilesystem } from "@lix-js/fs"
 import path from "node:path"
 import { Logger } from "@inlang/paraglide-js/internal"
+import { Steps } from "@inlang/paraglide-js/internal/cli"
 
 type NextConfigFile = {
 	path: string
@@ -26,28 +27,34 @@ export const InitCommand = new Command()
 
 		const logger = new Logger()
 
-		const ctx1 = await findAndEnforceRequiredFiles({ repo, repoRoot, logger })
-		const ctx2 = await addDependenciesToPackageJson(ctx1)
+		const ctx0 = await Steps.checkForUncommittedChanges({
+			repo,
+			repoRoot: repoRoot || "file://" + process.cwd(),
+			logger,
+			outdir: "./src/outdir",
+			appId: "library.inlang.paraglideJsAdapterNextJs",
+		})
+		const ctx1 = await findAndEnforceRequiredFiles(ctx0)
+		const ctx2 = await Steps.initializeInlangProject(ctx1)
+		const ctx3 = await Steps.updatePackageJson({
+			dependencies: async (deps) => ({
+				...deps,
+				"@inlang/paraglide-js-adapter-next": "^0.0.0",
+			}),
+			devDependencies: async (deps) => ({
+				...deps,
+				"@inlang/paraglide-js": "^0.0.0",
+			}),
+		})(ctx2)
 
-		logger.success(
-			JSON.stringify(
-				{ hasSrcDir: ctx1.hasSrcDir, nextConfigFile: ctx1.nextConfigFile },
-				undefined,
-				2
-			)
-		)
+		try {
+			await Steps.runCompiler(ctx3)
+		} catch (e) {
+			//silently ignore
+		}
+
+		logger.success(JSON.stringify({ nextConfigFile: ctx1.nextConfigFile }, undefined, 2))
 	})
-
-const addDependenciesToPackageJson: CliStep<
-	{
-		repo: Repository
-		logger: Logger
-		packageJsonPath: string
-	},
-	unknown
-> = async (ctx) => {
-	return ctx
-}
 
 const findAndEnforceRequiredFiles: CliStep<
 	{
@@ -55,7 +62,6 @@ const findAndEnforceRequiredFiles: CliStep<
 		logger: Logger
 	},
 	{
-		hasSrcDir: boolean
 		/** Absolute Path to the next.config.js or next.config.mjs */
 		nextConfigFile: NextConfigFile
 		packageJsonPath: string
@@ -73,7 +79,7 @@ const findAndEnforceRequiredFiles: CliStep<
 		process.exit(1)
 	}
 
-	return { ...ctx, hasSrcDir: false, nextConfigFile: nextConfigFile, packageJsonPath }
+	return { ...ctx, nextConfigFile: nextConfigFile, packageJsonPath }
 }
 
 /**
