@@ -11,7 +11,7 @@ describe("validatePathTranslations", () => {
 				},
 			},
 			["en", "de"],
-			{},
+			{}
 		)
 		expect(result).toEqual([])
 	})
@@ -26,7 +26,7 @@ describe("validatePathTranslations", () => {
 				},
 			},
 			["en", "de"],
-			{},
+			{}
 		)
 		expect(result.length).toBe(1)
 	})
@@ -40,7 +40,7 @@ describe("validatePathTranslations", () => {
 				},
 			},
 			["en", "de"],
-			{},
+			{}
 		)
 		expect(result.length).toBe(1)
 	})
@@ -54,7 +54,7 @@ describe("validatePathTranslations", () => {
 				},
 			},
 			["en", "de"],
-			{},
+			{}
 		)
 		expect(result.length).toBe(1)
 	})
@@ -68,7 +68,7 @@ describe("validatePathTranslations", () => {
 				},
 			},
 			["en", "de"],
-			{},
+			{}
 		)
 		expect(result.length).toBe(1)
 	})
@@ -82,7 +82,7 @@ describe("validatePathTranslations", () => {
 				},
 			},
 			["en", "de"],
-			{},
+			{}
 		)
 		expect(result.length).toBe(0)
 	})
@@ -99,7 +99,7 @@ describe("validatePathTranslations", () => {
 				},
 			},
 			["en", "de"],
-			{},
+			{}
 		)
 		expect(result.length).toBe(0)
 	})
@@ -113,7 +113,7 @@ describe("validatePathTranslations", () => {
 				},
 			},
 			["en", "de"],
-			{},
+			{}
 		)
 		expect(result.length).toBe(1)
 	})
@@ -127,7 +127,7 @@ describe("validatePathTranslations", () => {
 				},
 			},
 			["en", "de"],
-			{},
+			{}
 		)
 		expect(result.length).toBe(0)
 	})
@@ -144,7 +144,7 @@ describe("validatePathTranslations", () => {
 			{
 				int: () => true,
 				float: () => true,
-			},
+			}
 		)
 		expect(result.length).toBe(1)
 	})
@@ -158,7 +158,7 @@ describe("validatePathTranslations", () => {
 				},
 			},
 			["en", "de"],
-			{},
+			{}
 		)
 		expect(result.length).toBe(1)
 	})
@@ -175,7 +175,7 @@ describe("validatePathTranslations", () => {
 			{
 				int: () => true,
 				float: () => true,
-			},
+			}
 		)
 		expect(result.length).toBe(0)
 	})
