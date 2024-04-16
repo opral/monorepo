@@ -4,7 +4,6 @@ import dedent from "dedent"
 import * as nodePath from "node:path"
 import nodeFsPromises from "node:fs/promises"
 import type { InlangProject } from "@inlang/sdk"
-import { detectJsonFormatting } from "@inlang/detect-json-formatting"
 import { telemetry } from "~/services/telemetry/implementation.js"
 import { Logger } from "~/services/logger/index.js"
 import { findRepoRoot, openRepository, type Repository } from "@lix-js/client"
@@ -123,7 +122,7 @@ export const addParaglideJsToDevDependencies: CliStep<
 	unknown
 > = async (ctx) => {
 	const ctx1 = await updatePackageJson({
-		devDependencies: (devDeps) => ({
+		devDependencies: async (devDeps) => ({
 			...devDeps,
 			"@inlang/paraglide-js": PACKAGE_VERSION,
 		}),
@@ -156,54 +155,55 @@ export const addCompileStepToPackageJSON: CliStep<
 	},
 	unknown
 > = async (ctx) => {
-	const relativePathToProject = nodePath.relative(process.cwd(), ctx.projectPath)
-	const projectPath = `./${relativePathToProject}`
+	const projectPath = "./" + nodePath.relative(process.cwd(), ctx.projectPath)
 
-	const file = await ctx.repo.nodeishFs.readFile(ctx.packageJsonPath, { encoding: "utf-8" })
-	const stringify = detectJsonFormatting(file)
-	const pkg = JSON.parse(file)
+	let shouldExit = false
 
-	if (pkg.scripts === undefined) {
-		pkg.scripts = {}
-	}
-
-	// add the compile command to the postinstall script
-	// this isn't super important, so we won't interrupt the user if it fails
-	if (!pkg.scripts.postinstall) {
-		pkg.scripts.postinstall = `paraglide-js compile --project ${projectPath} --outdir ${ctx.outdir}`
-	} else if (pkg.scripts.postinstall.includes("paraglide-js compile") === false) {
-		pkg.scripts.postinstall = `paraglide-js compile --project ${projectPath} --outdir ${ctx.outdir} && ${pkg.scripts.postinstall}`
-	}
-
-	//Add the compile command to the build script
-	if (pkg?.scripts?.build === undefined) {
-		pkg.scripts.build = `paraglide-js compile --project ${projectPath} --outdir ${ctx.outdir}`
-	} else if (pkg?.scripts?.build.includes("paraglide-js compile") === false) {
-		pkg.scripts.build = `paraglide-js compile --project ${projectPath} --outdir ${ctx.outdir} && ${pkg.scripts.build}`
-	} else {
-		ctx.logger
-			.warn(`The "build" script in the \`package.json\` already contains a "paraglide-js compile" command.
-
-Please add the following command to your build script manually:
-
-\`paraglide-js compile --project ${ctx.projectPath}`)
-		const response = await consola.prompt(
-			"Have you added the compile command to your build script?",
-			{
-				type: "confirm",
-				initial: false,
+	ctx = await updatePackageJson({
+		scripts: async (scripts) => {
+			// add the compile command to the postinstall script
+			// this isn't super important, so we won't interrupt the user if it fails
+			if (!scripts.postinstall?.includes("paraglide-js compile")) {
+				scripts.postinstall =
+					`paraglide-js compile --project ${projectPath} --outdir ${ctx.outdir}` +
+					(scripts.postinstall ? " && " + scripts.postinstall : "")
 			}
-		)
-		if (response === false) {
-			ctx.logger.log("Please add the paraglide-js compile to your build script and try again.")
-			return process.exit(0)
-		} else {
-			return ctx
-		}
-	}
-	await ctx.repo.nodeishFs.writeFile("./package.json", stringify(pkg))
-	ctx.logger.success("Successfully added the compile command to the build step in package.json.")
 
+			if (scripts.build === undefined) {
+				scripts.build = `paraglide-js compile --project ${ctx.projectPath} --outdir ${ctx.outdir}`
+			} else if (scripts.build.includes("paraglide-js compile") === false) {
+				scripts.build = `paraglide-js compile --project ${projectPath} --outdir ${ctx.outdir} && ${scripts.build}`
+			} else {
+				ctx.logger
+					.warn(`The "build" script in the \`package.json\` already contains a "paraglide-js compile" command.
+				
+				Please add the following command to your build script manually:
+				
+				\`paraglide-js compile --project ${ctx.projectPath}`)
+				const response = await consola.prompt(
+					"Have you added the compile command to your build script?",
+					{
+						type: "confirm",
+						initial: false,
+					}
+				)
+				if (response === false) {
+					ctx.logger.log("Please add the paraglide-js compile to your build script and try again.")
+					shouldExit = true
+					throw new Error("Skip write")
+				} else {
+					throw new Error("Skip write")
+				}
+			}
+
+			ctx.logger.success(
+				"Successfully added the compile command to the build step in package.json."
+			)
+			return scripts
+		},
+	})(ctx)
+
+	if (shouldExit) process.exit(1)
 	return ctx
 }
 
