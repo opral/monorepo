@@ -3,21 +3,19 @@ import consola from "consola"
 import dedent from "dedent"
 import * as nodePath from "node:path"
 import nodeFsPromises from "node:fs/promises"
-import type { InlangProject } from "@inlang/sdk"
 import { telemetry } from "~/services/telemetry/implementation.js"
 import { Logger } from "~/services/logger/index.js"
 import { findRepoRoot, openRepository, type Repository } from "@lix-js/client"
 import { findPackageJson } from "~/services/environment/package.js"
 import { promptSelection } from "./utils.js"
-import { compile } from "~/compiler/compile.js"
-import { writeOutput } from "~/services/file-handling/write-output.js"
-import type { CliStep } from "./cli-utils.js"
-import { checkForUncommittedChanges } from "./steps/check-for-uncomitted-changes.js"
-import { initializeInlangProject } from "./steps/initialize-inlang-project.js"
-import { maybeAddSherlock } from "./steps/maybe-add-sherlock.js"
-import { maybeChangeTsConfig } from "./steps/update-ts-config.js"
-import { promptForOutdir } from "./steps/prompt-for-outdir.js"
-import { updatePackageJson } from "./steps/update-package-json.js"
+import { checkForUncommittedChanges } from "~/cli/steps/check-for-uncomitted-changes.js"
+import { initializeInlangProject } from "~/cli/steps/initialize-inlang-project.js"
+import { maybeAddSherlock } from "~/cli/steps/maybe-add-sherlock.js"
+import { maybeChangeTsConfig } from "~/cli/steps/update-ts-config.js"
+import { promptForOutdir } from "~/cli/steps/prompt-for-outdir.js"
+import { updatePackageJson } from "~/cli/steps/update-package-json.js"
+import { runCompiler } from "~/cli/steps/run-compiler.js"
+import type { CliStep } from "../../cli-utils.js"
 
 const ADAPTER_LINKS = {
 	sveltekit: "https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n",
@@ -67,7 +65,7 @@ export const initCommand = new Command()
 		const ctx8 = await maybeAddSherlock(ctx7)
 
 		try {
-			await executeCompilation(ctx8)
+			await runCompiler(ctx8)
 			ctx.logger.success("Run paraglide compiler")
 		} catch (e) {
 			ctx.logger.warn(
@@ -204,27 +202,6 @@ export const addCompileStepToPackageJSON: CliStep<
 	})(ctx)
 
 	if (shouldExit) process.exit(1)
-	return ctx
-}
-
-const executeCompilation: CliStep<
-	{
-		project: InlangProject
-		/** The absolute path to the output directory */
-		outdir: string
-		repo: Repository
-	},
-	unknown
-> = async (ctx) => {
-	const absoluteOutdir = nodePath.resolve(process.cwd(), ctx.outdir)
-
-	const output = await compile({
-		messages: ctx.project.query.messages.getAll(),
-		settings: ctx.project.settings(),
-		projectId: ctx.project.id,
-	})
-
-	await writeOutput(absoluteOutdir, output, ctx.repo.nodeishFs)
 	return ctx
 }
 

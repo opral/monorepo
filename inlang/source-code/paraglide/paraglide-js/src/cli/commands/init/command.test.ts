@@ -16,17 +16,17 @@ import { openRepository } from "@lix-js/client"
 import type { NodeishFilesystem } from "@lix-js/fs"
 import { pathExists } from "../../../services/file-handling/exists.js"
 import { getNewProjectTemplate } from "./defaults.js"
-import { checkForUncommittedChanges } from "./steps/check-for-uncomitted-changes.js"
+import { checkForUncommittedChanges } from "~/cli/steps/check-for-uncomitted-changes.js"
 import {
 	createNewProjectFlow,
 	existingProjectFlow,
 	initializeInlangProject,
-} from "./steps/initialize-inlang-project.js"
-import { maybeAddSherlock } from "./steps/maybe-add-sherlock.js"
+} from "~/cli/steps/initialize-inlang-project.js"
+import { maybeAddSherlock } from "~/cli/steps/maybe-add-sherlock.js"
 import {
 	maybeChangeTsConfigAllowJs,
 	maybeChangeTsConfigModuleResolution,
-} from "./steps/update-ts-config.js"
+} from "~/cli/steps/update-ts-config.js"
 
 const logger = new Logger()
 
