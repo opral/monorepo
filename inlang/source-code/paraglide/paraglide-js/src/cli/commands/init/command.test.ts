@@ -5,7 +5,6 @@ import {
 	maybeChangeTsConfigAllowJs,
 	maybeChangeTsConfigModuleResolution,
 	enforcePackageJsonExists,
-	maybeAddVsCodeExtension,
 } from "./command.js"
 import consola from "consola"
 import { describe } from "node:test"
@@ -25,6 +24,7 @@ import {
 	existingProjectFlow,
 	initializeInlangProject,
 } from "./steps/initialize-inlang-project.js"
+import { maybeAddSherlock } from "./steps/maybe-add-sherlock.js"
 
 const logger = new Logger()
 
@@ -121,7 +121,7 @@ describe("addParaglideJsToDependencies()", () => {
 		})
 		const repo = await openRepository("file://", { nodeishFs: fs })
 
-		await addParaglideJsToDevDependencies({ logger, repo })
+		await addParaglideJsToDevDependencies({ logger, repo, packageJsonPath: "/package.json" })
 		expect(fs.writeFile).toHaveBeenCalledOnce()
 		expect(logger.success).toHaveBeenCalledOnce()
 		const packageJson = JSON.parse(
@@ -140,6 +140,7 @@ describe("addCompileStepToPackageJSON()", () => {
 		await addCompileStepToPackageJSON({
 			projectPath: "./project.inlang",
 			outdir: "./src/paraglide",
+			packageJsonPath: "/package.json",
 			logger,
 			repo,
 		})
@@ -166,6 +167,7 @@ describe("addCompileStepToPackageJSON()", () => {
 		await addCompileStepToPackageJSON({
 			projectPath: "./project.inlang",
 			outdir: "./src/paraglide",
+			packageJsonPath: "/package.json",
 			logger,
 			repo,
 		})
@@ -196,6 +198,7 @@ describe("addCompileStepToPackageJSON()", () => {
 		await addCompileStepToPackageJSON({
 			projectPath: "./project.inlang",
 			outdir: "./src/paraglide",
+			packageJsonPath: "/package.json",
 			logger,
 			repo,
 		})
@@ -222,6 +225,7 @@ describe("addCompileStepToPackageJSON()", () => {
 		await addCompileStepToPackageJSON({
 			projectPath: "./project.inlang",
 			outdir: "./src/paraglide",
+			packageJsonPath: "/package.json",
 			logger,
 			repo,
 		})
@@ -249,6 +253,7 @@ describe("addCompileStepToPackageJSON()", () => {
 		await addCompileStepToPackageJSON({
 			projectPath: "./project.inlang",
 			outdir: "./src/paraglide",
+			packageJsonPath: "/package.json",
 			logger,
 			repo,
 		})
@@ -280,6 +285,7 @@ describe("addCompileStepToPackageJSON()", () => {
 		await addCompileStepToPackageJSON({
 			projectPath: "./project.inlang",
 			outdir: "./src/paraglide",
+			packageJsonPath: "/package.json",
 			logger,
 			repo,
 		})
@@ -303,6 +309,7 @@ describe("addCompileStepToPackageJSON()", () => {
 		await addCompileStepToPackageJSON({
 			projectPath: "./project.inlang",
 			outdir: "./src/paraglide",
+			packageJsonPath: "/package.json",
 			logger,
 			repo,
 		})
@@ -386,7 +393,7 @@ describe("existingProjectFlow()", () => {
 	})
 })
 
-describe("maybeAddVsCodeExtension()", () => {
+describe("maybeAddSherlock", () => {
 	test("it should add the Visual Studio Code extension (Sherlock) if the user uses vscode", async () => {
 		const fs = mockFiles({
 			"/folder/project.inlang/settings.json": JSON.stringify(getNewProjectTemplate()),
@@ -403,7 +410,7 @@ describe("maybeAddVsCodeExtension()", () => {
 			// user uses vscode
 			true,
 		])
-		await maybeAddVsCodeExtension({ project, logger, repo })
+		await maybeAddSherlock({ project, logger, repo })
 		expect(consola.prompt).toHaveBeenCalledOnce()
 		const extensions = await fs.readFile("/folder/.vscode/extensions.json", {
 			encoding: "utf-8",
@@ -432,7 +439,7 @@ describe("maybeAddVsCodeExtension()", () => {
 			// user does not use vscode
 			false,
 		])
-		await maybeAddVsCodeExtension({ project, logger, repo })
+		await maybeAddSherlock({ project, logger, repo })
 		expect(consola.prompt).toHaveBeenCalledOnce()
 		expect(fs.writeFile).not.toHaveBeenCalled()
 	})
@@ -454,7 +461,7 @@ describe("maybeAddVsCodeExtension()", () => {
 			// user uses vscode
 			true,
 		])
-		await maybeAddVsCodeExtension({ project, logger, repo })
+		await maybeAddSherlock({ project, logger, repo })
 		const projectSettings = JSON.parse(
 			await fs.readFile("/project.inlang/settings.json", {
 				encoding: "utf-8",
@@ -476,7 +483,7 @@ describe("maybeAddVsCodeExtension()", () => {
 			// user uses vscode
 			true,
 		])
-		await maybeAddVsCodeExtension({ project, logger, repo })
+		await maybeAddSherlock({ project, logger, repo })
 		expect(await pathExists("/.vscode/extensions.json", fs)).toBe(true)
 	})
 
@@ -491,7 +498,7 @@ describe("maybeAddVsCodeExtension()", () => {
 			repo,
 		})
 
-		await maybeAddVsCodeExtension({ project, logger, repo })
+		await maybeAddSherlock({ project, logger, repo })
 		expect(consola.prompt).not.toHaveBeenCalled()
 		const extensions = await fs.readFile("/.vscode/extensions.json", {
 			encoding: "utf-8",
