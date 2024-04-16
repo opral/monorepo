@@ -219,12 +219,12 @@ export function Layout(props: { children: JSXElement }) {
 		setTimeout(() => { 
 			setSettingsOpen(false)
 			setRunSettingsCloseAnimation(false)
-		}, 400)
+		}, 380)
 	}
 
 	return (
 		<EditorLayout>
-			<div class="relative w-full flex flex-col grow bg-surface-50">
+			<div class="w-full flex flex-col grow bg-surface-50">
 				<div class="w-full flex items-end justify-between z-20 gap-2 pt-4">
 					<div class="flex flex-wrap gap-2 items-center">
 						<Breadcrumbs />
@@ -252,7 +252,7 @@ export function Layout(props: { children: JSXElement }) {
 						project()?.installed.messageLintRules()
 					}
 				>
-					<div class={"requires-no-scroll absolute overflow-y-scroll h-[calc(100vh_-_61px)] w-screen -ml-4 z-50 bg-surface-50 "
+					<div class={"requires-no-scroll absolute left-0 overflow-y-scroll h-[calc(100vh_-_61px)] w-screen mx-auto z-50 bg-surface-50 "
 						+ (runSettingsCloseAnimation() ? "animate-fadeOutBottom" : "animate-fadeInBottom")}>
 						<div class="max-w-screen-sm mx-auto pt-12 px-4">
 							<button 
