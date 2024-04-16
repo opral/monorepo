@@ -5,7 +5,6 @@ import * as nodePath from "node:path"
 import JSON5 from "json5"
 import nodeFsPromises from "node:fs/promises"
 import type { InlangProject } from "@inlang/sdk"
-import * as Sherlock from "@inlang/cross-sell-sherlock"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
 import { telemetry } from "~/services/telemetry/implementation.js"
 import { Logger } from "~/services/logger/index.js"
@@ -19,6 +18,7 @@ import { writeOutput } from "~/services/file-handling/write-output.js"
 import type { CliStep } from "./cli-utils.js"
 import { checkForUncommittedChanges } from "./steps/check-for-uncomitted-changes.js"
 import { initializeInlangProject } from "./steps/initialize-inlang-project.js"
+import { maybeAddSherlock } from "./steps/maybe-add-sherlock.js"
 
 const ADAPTER_LINKS = {
 	sveltekit: "https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n",
@@ -66,7 +66,7 @@ export const initCommand = new Command()
 		telemetry.capture({ event: "PARAGLIDE-JS init added compile commands" })
 		const ctx7 = await maybeChangeTsConfigModuleResolution(ctx6)
 		const ctx8 = await maybeChangeTsConfigAllowJs(ctx7)
-		const ctx9 = await maybeAddVsCodeExtension(ctx8)
+		const ctx9 = await maybeAddSherlock(ctx8)
 
 		try {
 			await executeCompilation(ctx9)
@@ -114,53 +114,6 @@ export const initCommand = new Command()
 
 		ctx.logger.box(successMessage)
 	})
-
-export const maybeAddVsCodeExtension: CliStep<
-	{
-		repo: Repository
-		logger: Logger
-		project: InlangProject
-	},
-	unknown
-> = async (ctx) => {
-	const isCertainlyVsCode = process?.env?.TERM_PROGRAM === "vscode"
-
-	let response = isCertainlyVsCode
-	if (!isCertainlyVsCode) {
-		response = await prompt(`Are you using Visual Studio Code?`, {
-			type: "confirm",
-			initial: true,
-		})
-	}
-	if (response === false) return ctx
-
-	const settings = ctx.project.settings()
-
-	// m function matcher is not installed
-	if (settings.modules.some((m) => m.includes("plugin-m-function-matcher")) === false) {
-		// add the m function matcher plugin
-		settings.modules.push(
-			"https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js"
-		)
-		ctx.project.setSettings(settings)
-	}
-
-	try {
-		if (!(await Sherlock.isAdopted({ fs: ctx.repo.nodeishFs }))) {
-			await Sherlock.add({ fs: ctx.repo.nodeishFs })
-
-			ctx.logger.success(
-				"Added the inlang Visual Studio Code extension (Sherlock) to the workspace recommendations."
-			)
-		}
-	} catch (error) {
-		ctx.logger.error(
-			"Failed to add the inlang Visual Studio Code extension (Sherlock). Please open an issue"
-		)
-	}
-
-	return ctx
-}
 
 export const addParaglideJsToDevDependencies: CliStep<
 	{
