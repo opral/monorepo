@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { getCommonPrefix } from "./utils.js"
+import { getCommonPrefix } from "./initialize-inlang-project.js"
 
 describe("getCommonPrefix()", () => {
 	it("returns the common prefix of two strings", () => {

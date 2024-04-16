@@ -1,6 +1,7 @@
 import type { Logger } from "~/services/logger/index.js"
 import type { CliStep } from "../utils.js"
-import { execAsync, prompt } from "~/cli/commands/init/utils.js"
+import { prompt } from "~/cli/utils.js"
+import { execAsync } from "~/cli/commands/init/utils.js"
 
 export const checkForUncommittedChanges: CliStep<{ logger: Logger }, unknown> = async (ctx) => {
 	try {
