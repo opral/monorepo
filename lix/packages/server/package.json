@@ -12,7 +12,7 @@
 	],
 	"scripts": {
 		"build": "tsc --build",
-		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"test": "vitest run --passWithNoTests --coverage",
 		"dev": "node --loader tsx ./src/main.ts",
 		"production": "NODE_ENV=production NODE_OPTIONS=--max-old-space-size=500 tsx ./src/main.ts",
 		"lint": "eslint ./src --fix",
