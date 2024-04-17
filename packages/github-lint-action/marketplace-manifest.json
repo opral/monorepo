@@ -9,8 +9,9 @@
 	"description": {
 		"en": "This action checks for translation issues within your PRs."
 	},
-	"readme": {
-		"en": "./inlang/source-code/github-lint-action/MARKETPLACE.md"
+	"pages": {
+		"/": "./inlang/source-code/github-lint-action/MARKETPLACE.md",
+		"/changelog": "./inlang/source-code/github-lint-action/CHANGELOG.md"
 	},
 	"keywords": [
 		"developer",

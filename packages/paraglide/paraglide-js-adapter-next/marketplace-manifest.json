@@ -12,8 +12,9 @@
 	"description": {
 		"en": "A NextJS integration for ParaglideJS, providing you with everything you need for i18n routing"
 	},
-	"readme": {
-		"en": "./inlang/source-code/paraglide/paraglide-js-adapter-next/README.md"
+	"pages": {
+		"/": "./inlang/source-code/paraglide/paraglide-js-adapter-next/README.md",
+		"/changelog": "./inlang/source-code/paraglide/paraglide-js-adapter-next/CHANGELOG.md"
 	},
 	"keywords": [
 		"paraglide js",
