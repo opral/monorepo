@@ -1,7 +1,7 @@
 {
 	"semi": false,
 	"useTabs": true,
-	"trailingComma": "all",
+	"trailingComma": "es5",
 
 	"XXX flaky line length formatting in vs code (changed range is not enought for the computation)": 1,
 	"rangeStart": 0,

@@ -2,7 +2,7 @@
 	"semi": false,
 	"useTabs": true,
 	"printWidth": 100,
-	"trailingComma": "all",
+	"trailingComma": "es5",
 	"plugins": ["prettier-plugin-svelte"],
 	"overrides": [
 		{
