@@ -11,55 +11,52 @@ function sleep(ms: number) {
 
 describe("createNewProject", () => {
 	it("should throw if a path does not end with .inlang", async () => {
+		const repo = await mockRepo()
+		const projectPath = "/test/project.inl"
 		try {
-			await createNewProject({
-				projectPath: "/boom/ba/da/bang",
-				repo: await mockRepo(),
-			})
+			await createNewProject({ projectPath, repo, projectSettings: defaultProjectSettings })
+			// should not reach this point
 			throw new Error("Expected an error")
 		} catch (e) {
 			expect((e as Error).message).toMatch(
-				'Expected a path ending in "{name}.inlang" but received '
+				'Expected a path ending in "{name}.inlang" but received "/test/project.inl"'
 			)
 		}
 	})
 
 	it("should throw if projectPath is not an absolute path", async () => {
+		const repo = await mockRepo()
+		const projectPath = "test/project.inlang"
 		try {
-			const repo = await mockRepo()
-			const projectPath = "test/project.inlang"
-			await createNewProject({
-				projectPath,
-				repo,
-			})
+			await createNewProject({ projectPath, repo, projectSettings: defaultProjectSettings })
+			// should not reach this point
 			throw new Error("Expected an error")
 		} catch (e) {
-			expect((e as Error).message).toMatch("Expected an absolute path but received")
+			expect((e as Error).message).toMatch(
+				'Expected an absolute path but received "test/project.inlang"'
+			)
 		}
 	})
 
 	it("should throw if the path already exists", async () => {
+		const repo = await mockRepo()
+		const projectPath = "/test/project.inlang"
+		await repo.nodeishFs.mkdir(projectPath, { recursive: true })
 		try {
-			const repo = await mockRepo()
-			const projectPath = "/test/project.inlang"
-			await repo.nodeishFs.mkdir(projectPath, { recursive: true })
-			await createNewProject({
-				projectPath,
-				repo,
-			})
+			await createNewProject({ projectPath, repo, projectSettings: defaultProjectSettings })
+			// should not reach this point
 			throw new Error("Expected an error")
 		} catch (e) {
-			expect((e as Error).message).toMatch("projectPath already exists")
+			expect((e as Error).message).toMatch(
+				'projectPath already exists, received "/test/project.inlang"'
+			)
 		}
 	})
 
 	it("should create default defaultProjectSettings in projectPath", async () => {
 		const repo = await mockRepo()
 		const projectPath = "/test/project.inlang"
-		await createNewProject({
-			projectPath,
-			repo,
-		})
+		await createNewProject({ projectPath, repo, projectSettings: defaultProjectSettings })
 		const json = await repo.nodeishFs.readFile(`${projectPath}/settings.json`, {
 			encoding: "utf-8",
 		})
@@ -71,11 +68,7 @@ describe("createNewProject", () => {
 		const repo = await mockRepo()
 		const projectPath = "/test/project.inlang"
 		const projectSettings = { ...defaultProjectSettings, languageTags: ["en", "de", "fr"] }
-		await createNewProject({
-			projectPath,
-			repo,
-			projectSettings,
-		})
+		await createNewProject({ projectPath, repo, projectSettings })
 		const json = await repo.nodeishFs.readFile(`${projectPath}/settings.json`, {
 			encoding: "utf-8",
 		})
@@ -86,13 +79,17 @@ describe("createNewProject", () => {
 
 	it("should load the project after creating it", async () => {
 		const repo = await mockRepo()
-
 		const projectPath = "/test/project.inlang"
-		await createNewProject({
-			projectPath,
-			repo,
-		})
+		await createNewProject({ projectPath, repo, projectSettings: defaultProjectSettings })
 
+		const project = await loadProject({ projectPath, repo })
+		expect(project.errors().length).toBe(0)
+	})
+
+	it("should create messages inside the project directory", async () => {
+		const repo = await mockRepo()
+		const projectPath = "/test/project.inlang"
+		await createNewProject({ projectPath, repo, projectSettings: defaultProjectSettings })
 		const project = await loadProject({ projectPath, repo })
 		expect(project.errors().length).toBe(0)
 

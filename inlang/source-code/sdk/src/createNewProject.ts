@@ -15,7 +15,7 @@ import { defaultProjectSettings } from "./defaultProjectSettings.js"
 export async function createNewProject(args: {
 	projectPath: string
 	repo: Repository
-	projectSettings?: ProjectSettings
+	projectSettings: ProjectSettings
 }): Promise<void> {
 	assertValidProjectPath(args.projectPath)
 
