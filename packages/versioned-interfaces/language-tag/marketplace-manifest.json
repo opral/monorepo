@@ -8,8 +8,8 @@
 	"description": {
 		"en": "A library containing BCP-47 language tags types and validators, used by inlang."
 	},
-	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/versioned-interfaces/language-tag/README.md"
+	"pages": {
+		"/": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/versioned-interfaces/language-tag/README.md"
 	},
 	"keywords": [
 		"libraries",

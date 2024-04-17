@@ -13,8 +13,9 @@
 	"description": {
 		"en": "Badge showing missing messages in your codebase. Perfect for your README.md file."
 	},
-	"readme": {
-		"en": "./inlang/source-code/badge/README.md"
+	"pages": {
+		"/": "./inlang/source-code/badge/README.md",
+		"/changelog": "./inlang/source-code/badge/CHANGELOG.md"
 	},
 	"keywords": [
 		"apps",
