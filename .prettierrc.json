@@ -1,5 +1,10 @@
 {
 	"semi": false,
 	"useTabs": true,
+	"trailingComma": "all",
+
+	"XXX flaky line length formatting in vs code (changed range is not enought for the computation)": 1,
+	"rangeStart": 0,
+	"rangeEnd": -1,
 	"printWidth": 100
 }
