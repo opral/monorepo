@@ -1,16 +1,19 @@
 {
-    "semi": false,
-    "useTabs": true,
-    "printWidth": 100,
-    "plugins": [
-        "prettier-plugin-svelte"
-    ],
-    "overrides": [
-        {
-            "files": "*.svelte",
-            "options": {
-                "parser": "svelte"
-            }
-        }
-    ]
+	"semi": false,
+	"useTabs": true,
+	"printWidth": 100,
+	"trailingComma": "all",
+	"plugins": ["prettier-plugin-svelte"],
+	"overrides": [
+		{
+			"files": "*.svelte",
+			"options": {
+				"parser": "svelte"
+			}
+		}
+	],
+
+	"XXX flaky line length formatting in vs code (changed range is not enought for the computation)": 1,
+	"rangeStart": 0,
+	"rangeEnd": -1
 }
