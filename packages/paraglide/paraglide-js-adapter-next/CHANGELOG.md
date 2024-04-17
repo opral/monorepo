@@ -1,5 +1,16 @@
 # @inlang/paraglide-js-adapter-next
 
+## 3.2.0
+
+### Minor Changes
+
+- 0774c1a: Added `paraglide-next init` command for quick project setup
+
+### Patch Changes
+
+- Updated dependencies [0774c1a]
+  - @inlang/paraglide-js@1.7.0
+
 ## 3.1.1
 
 ### Patch Changes
