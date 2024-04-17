@@ -81,9 +81,6 @@ describe.concurrent("paraglide-next init", () => {
 					path.resolve(workingDir, "./test-app")
 				)
 
-				await PNI.wait(10000)
-				console.log(PNI.getStdout(), PNI.getStderr(), PNI.getExitCode())
-
 				await PNI.waitForText("Which languages do you want to support?")
 				await PNI.wait(200)
 				await PNI.writeText("en, de")
@@ -112,40 +109,6 @@ describe.concurrent("paraglide-next init", () => {
 				expect(projectFile).includes('"de"')
 
 				console.info(projectFile)
-				await cleanup()
-				return
-
-				//check that the settings.json file exists
-				const fileContent = await readFile(path.resolve(workingDir, "project.inlang/settings.json"))
-				const settings = JSON.parse(fileContent)
-				expect(settings.languageTags).toEqual(["en", "de"])
-				expect(settings.sourceLanguageTag).toEqual("en")
-
-				//Check that the messages/en.json and messages/de.json files exist
-				expect(await readFile(path.resolve(workingDir, "messages/en.json"))).toBeTruthy()
-				expect(await readFile(path.resolve(workingDir, "messages/de.json"))).toBeTruthy()
-
-				//Check that the compiler ran and generated the files
-				expect(await readFile(path.resolve(workingDir, "src/paraglide/runtime.js"))).toBeTruthy()
-				expect(await readFile(path.resolve(workingDir, "src/paraglide/messages.js"))).toBeTruthy()
-				expect(await readFile(path.resolve(workingDir, "src/paraglide/messages/en.js"))).includes(
-					"export {}"
-				)
-				expect(await readFile(path.resolve(workingDir, "src/paraglide/messages/de.js"))).includes(
-					"export {}"
-				)
-
-				const packageJson = JSON.parse(await readFile(path.resolve(workingDir, "package.json")))
-
-				expect(packageJson.scripts.build).includes("--project ./project.inlang")
-				expect(packageJson.scripts.postinstall).includes("--project ./project.inlang")
-
-				const expectedVersion = child_process
-					.execSync(ParaglideNextLocation + " --version")
-					.toString()
-				expect(packageJson.devDependencies["@inlang/paraglide-js"].trim()).toEqual(
-					expectedVersion.trim()
-				)
 				await cleanup()
 			},
 			{ timeout: 60_000 }
