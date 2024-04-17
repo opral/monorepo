@@ -25,7 +25,7 @@ export const InitCommand = new Command()
 			nodeishFs: nodeFsPromises,
 		})
 
-		const logger = new Logger()
+		const logger = new Logger({ prefix: false, silent: false })
 
 		const ctx0 = await Steps.checkForUncommittedChanges({
 			repo,
@@ -49,14 +49,14 @@ export const InitCommand = new Command()
 		const ctx5 = await createI18nFile(ctx4)
 		const ctx6 = await createMiddlewareFile(ctx5)
 		const ctx7 = await updateNextConfig(ctx6)
+		const ctx8 = await addLanguageProvider(ctx7)
 		try {
-			await Steps.runCompiler(ctx7)
+			await Steps.runCompiler(ctx8)
 		} catch (e) {
 			//silently ignore
 		}
 
-		logger.success(`
-Successfully initialized Paraglide-JS in this NextJS Project.
+		logger.success(`Successfully initialized Paraglide-JS in this NextJS Project.
 
 Learn more about Paraglide and Paraglide-Next at:
 https://inlang.com/m/osslbuzt/paraglide-next-i18n
@@ -259,5 +259,33 @@ https://inlang.com/m/osslbuzt/paraglide-next-i18n
 		await ctx.repo.nodeishFs.writeFile(ctx.nextConfigFile.path, fileContent)
 	}
 
+	return ctx
+}
+
+const addLanguageProvider: CliStep<
+	{
+		repo: Repository
+		logger: Logger
+		srcRoot: string
+	},
+	unknown
+> = async (ctx) => {
+	const layoutFilePath = path.join(ctx.srcRoot, "app/layout.tsx")
+	let layoutFileContent: string
+	try {
+		layoutFileContent = await ctx.repo.nodeishFs.readFile(layoutFilePath, { encoding: "utf-8" })
+	} catch (e) {
+		ctx.logger.warn(
+			"Failed to add the `<LanguageProvider>` to `app/layout.tsx`. You'll need to add it yourself"
+		)
+		return ctx
+	}
+
+	layoutFileContent = `import { LanguageProvider } from "@inlang/paraglide-js-adapter-next"\nimport { languageTag } from "@/paraglide/runtime.js"\n${layoutFileContent}`
+	layoutFileContent = layoutFileContent.replace('lang="en"', `lang={languageTag()}`)
+	layoutFileContent = layoutFileContent.replace("<html", "<LanguageProvider>\n<html")
+	layoutFileContent = layoutFileContent.replace("/html>", "/html>\n</LanguageProvider>")
+
+	await ctx.repo.nodeishFs.writeFile(layoutFilePath, layoutFileContent)
 	return ctx
 }
