@@ -49,15 +49,18 @@ export const InitCommand = new Command()
 		const ctx5 = await createI18nFile(ctx4)
 		const ctx6 = await createMiddlewareFile(ctx5)
 		const ctx7 = await updateNextConfig(ctx6)
-		const ctx8 = await updateNextConfig(ctx7)
-
 		try {
-			await Steps.runCompiler(ctx8)
+			await Steps.runCompiler(ctx7)
 		} catch (e) {
 			//silently ignore
 		}
 
-		logger.success(JSON.stringify({ nextConfigFile: ctx1.nextConfigFile }, undefined, 2))
+		logger.success(`
+Successfully initialized Paraglide-JS in this NextJS Project.
+
+Learn more about Paraglide and the NextJS Adapter at:
+https://inlang.com/m/osslbuzt/paraglide-next-i18n
+`)
 	})
 
 const findAndEnforceRequiredFiles: CliStep<
