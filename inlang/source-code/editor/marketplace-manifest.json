@@ -17,7 +17,8 @@
 	},
 	"pages": {
 		"/": "./inlang/source-code/editor/README.md",
-		"/changelog": "./inlang/source-code/editor/CHANGELOG.md"
+		"/usage": "./inlang/source-code/editor/CHANGELOG.md",
+		"/examples": "./inlang/source-code/editor/CHANGELOG.md"
 	},
 	"keywords": [
 		"editor",

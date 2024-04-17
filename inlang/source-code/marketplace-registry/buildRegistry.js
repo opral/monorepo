@@ -88,19 +88,17 @@ if (privateEnv.DOPPLER_ENVIRONMENT === "production") {
 			if (value.pages) {
 				if (value.pages["/"]) {
 					readme = () => {
-						return typeof value.pages["/"]
+						return value.pages["/"]
 					}
 				} else {
 					throw new Error(`No page at "/" found for ${value.id}`)
 				}
-			} else {
-				if (value.readme) {
-					readme = () => {
-						return typeof value.readme === "object" ? value.readme.en : value.readme
-					}
-				} else {
-					throw new Error(`No readme found for ${value.id}`)
+			} else if (value.readme) {
+				readme = () => {
+					return typeof value.readme === "object" ? value.readme.en : value.readme
 				}
+			} else {
+				throw new Error(`No readme found for ${value.id}`)
 			}
 
 			const text = await (readme().includes("http")
