@@ -1,5 +1,12 @@
 # @inlang/marketplace-registry
 
+## 1.5.7
+
+### Patch Changes
+
+- Updated dependencies [52c1646]
+  - @inlang/marketplace-manifest@1.4.0
+
 ## 1.5.6
 
 ### Patch Changes
