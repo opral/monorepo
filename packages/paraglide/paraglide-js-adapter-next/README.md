@@ -8,22 +8,27 @@
 
 ## Getting Started
 
-Install [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) and the [Paraglide NextJS Adapter](https://inlang.com/m/osslbuzt/paraglide-next-i18n).
+Get started instantly with the Paraglide-Next CLI.
 
 ```bash
-npx @inlang/paraglide-js@latest init
-npm install @inlang/paraglide-js-adapter-next
+npx @inlang/paraglide-js-adapter-next init
 ```
 
-The Paraglide Init CLi will ask you:
-- Which languages you want to support (can be changed)
-- Where to place the generated files (use `./src/paraglide` or `./paraglide`)
+The CLI will ask you which languages you want to support. This can be changed later. 
 
-It will generate:
-- An Inlang Project
-- Translation files for each of your languages
+It will:
+- Create an Inlang Project
+- Create translation files for each of your languages
+- Create a middleware file
+- Create `lib/i18n.ts` file
+- Update your `next.config.js` file to use the Paraglide-Next Plugin.
+- Add the `<LanguageProvider>` wrapper to your `app/layout.tsx` component.
 
-Your messages live in `messages/{lang}.json` files. You can add messages in these files as key-value pairs of the message ID and the translations.
+You can now start your dev-server and visit `/de`, `/ar`, or whatever languages you've set up.
+
+## Adding Messages
+
+Your messages live in `messages/{languageTag}.json` files. You can add messages in these files as key-value pairs of the message ID and the translations.
 
 Use curly braces to add parameters.
 
@@ -40,99 +45,7 @@ Use curly braces to add parameters.
 
 Learn more about the format in the [Inlang Message Format Documentation](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat).
 
-### Step 1. Add the Next-Plugin
-
-Add the Paraglide-Plugin in `next.config.mjs`. This will make sure to rerun the paraglide compiler when needed.
-
-```ts
-// make sure to import from /plugin
-import { paraglide } from "@inlang/paraglide-js-adapter-next/plugin"
-
-export default paraglide({
-	paraglide: {
-		//recommended setup
-		project: "./project.inlang", //the path to the Inlang project
-		outdir: "./src/paraglide", // where you want the generated files to go
-	},
-
-	// ... rest of your next config
-})
-```
-
-### Step 2. Initialize the Adapter
-
-Create a `src/lib/i18n.ts` file
-
-```ts
-// src/lib/i18n.ts
-import { createI18n } from "@inlang/paraglide-js-adapter-next"
-import type { AvailableLanguageTag } from "@/paraglide/runtime.js" //generated file
-
-// All available functions exported. Just use the ones you need
-export const {
-	middleware,
-	Link,
-	useRouter,
-	usePathname,
-	redirect,
-	permanentRedirect,
-	localizePath,
-} = createI18n<AvailableLanguageTag>()
-```
-
-<doc-accordion
-	heading="Can I put this file somewhere else?"
-	text="Sure, you can put it anywhere. Just be aware that you will be importing from this file a lot, so make sure it's somewhere convenient">
-</doc-accordion>
-
-### Step 3. Add the Middleware
-
-In `src/middleware.ts`:
-
-```ts
-export { middleware } from "@/lib/i18n.js"
-```
-
-### Step 4. Add the Language Provider
-
-In `src/app/layout.tsx` add the `<LanguageProvider>` component & set the lang attribute on your html element:
-
-```tsx
-import { LanguageProvider } from "@inlang/paraglide-js-adapter-next"
-import { languageTag } from "@/paraglide/runtime"
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-	return (
-		<LanguageProvider>
-			{/* setting the lang attribute is important! */}
-			<html lang={languageTag()}>
-				<body>{children}</body>
-			</html>
-		</LanguageProvider>
-	)
-}
-```
-
-### Step 5. Use the localized navigation APIs
-
-To get localized `<Link>`s you need to replace the ones from `next/link` with the ones from `@/lib/i18n.js`. Just find & replace the imports.
-
-```diff
-- import Link from "next/link"
-+ import { Link } from "@/lib/i18n" 
-```
-
-The same goes for the other navigation APIs.
-
-```diff
-- import { usePathname, useRouter, redirect, permanentRedirect} from "next/navigation"
-+ import { usePathname, useRouter, redirect, permanentRedirect} from "@/lib/i18n"
-```
-
-### Done!
-
-You have set up localized routing! Try visiting `/de` or whatever language you have configured.
-
+## Using Messages in Code
 Use messages by importing them from `@/paraglide/messages.js`. By convention, we do a wildcard import as `m`.
 
 ```tsx
@@ -150,7 +63,30 @@ export function Home() {
 
 Only messages used in client components are sent to the client. Messages in Server Components don't impact bundle size.
 
-## Usage
+## Localized navigation APIs
+
+While you can now visit `/de/some-page` you still need to add the language-prefix to every single link. Wouldn't it be nice if that happened automatically? 
+
+For this the package provides Localised Navigation APIs. These are exported from `@/lib/i18n.js`.
+
+To get localized `<Link>`s you need to replace the ones from `next/link` with the ones from `@/lib/i18n.js`. Just find & replace the imports.
+
+```diff
+- import Link from "next/link"
++ import { Link } from "@/lib/i18n" 
+
+// This now links to /de/about depending on the current language
+<Link href="/about"> 
+```
+
+You can do the same for the other navigation APIs.
+
+```diff
+- import { usePathname, useRouter, redirect, permanentRedirect} from "next/navigation"
++ import { usePathname, useRouter, redirect, permanentRedirect} from "@/lib/i18n"
+```
+
+## Advanced Usage
 
 ### Translated Metadata
 
