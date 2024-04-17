@@ -186,8 +186,10 @@ function TheActualPage() {
 						</Show>
 
 						<div
-							class={"flex flex-col h-[calc(100vh_-_307px)] grow justify-center items-center min-w-full gap-2 " +
-								(messageCount() >= 0 ? "hidden" : "")}
+							class={
+								"flex flex-col h-[calc(100vh_-_307px)] grow justify-center items-center min-w-full gap-2 " +
+								(messageCount() >= 0 ? "hidden" : "")
+							}
 						>
 							<NoMatchPlaceholder />
 							<p class="text-base font-medium text-left text-on-background">

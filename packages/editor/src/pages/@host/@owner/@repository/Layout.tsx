@@ -54,7 +54,7 @@ export function Layout(props: { children: JSXElement }) {
 		setFilteredIds,
 		languageTags,
 		routeParams,
-		lastPullTime
+		lastPullTime,
 	} = useEditorState()
 
 	const [localStorage, setLocalStorage] = useLocalStorage()
@@ -80,7 +80,7 @@ export function Layout(props: { children: JSXElement }) {
 	const [addLanguageModalOpen, setAddLanguageModalOpen] = createSignal(false)
 	const [addLanguageText, setAddLanguageText] = createSignal("")
 
-	const [filterOptions,] = createSignal<Filter[]>([
+	const [filterOptions] = createSignal<Filter[]>([
 		{
 			name: "Language",
 			icon: <IconTranslate class="w-5 h-5" />,
@@ -100,7 +100,7 @@ export function Layout(props: { children: JSXElement }) {
 			name: "Linting",
 			icon: <WarningIcon />,
 			component: <LintFilter clearFunction={removeFilter("Linting")} />,
-		}
+		},
 	])
 
 	const [selectedFilters, setSelectedFilters] = createSignal<Filter[]>([])
@@ -186,17 +186,20 @@ export function Layout(props: { children: JSXElement }) {
 	const [previousSettings, setPreviousSettings] = createSignal()
 
 	createEffect(on(lastPullTime, () => setPreviousSettings()))
-	createEffect(on(project, () => {
-		// set once after last pull and the project is loaded
-		if (project && !previousSettings()) {
-			setPreviousSettings(project()?.settings())
-			setHasChanges(false)
-		}
-	}))
+	createEffect(
+		on(project, () => {
+			// set once after last pull and the project is loaded
+			if (project && !previousSettings()) {
+				setPreviousSettings(project()?.settings())
+				setHasChanges(false)
+			}
+		})
+	)
 
 	const handleChanges = () =>
 		setHasChanges((prev) => {
-			const hasChanged = JSON.stringify(previousSettings()) !== JSON.stringify(project()?.settings())
+			const hasChanged =
+				JSON.stringify(previousSettings()) !== JSON.stringify(project()?.settings())
 			if (prev !== hasChanged && hasChanged && project() && previousSettings()) {
 				setLocalChanges((prev) => (prev += 1))
 			} else if (prev !== hasChanged && !hasChanged && project() && previousSettings()) {
@@ -208,7 +211,7 @@ export function Layout(props: { children: JSXElement }) {
 	const [runSettingsCloseAnimation, setRunSettingsCloseAnimation] = createSignal(false)
 	const handleClose = () => {
 		setRunSettingsCloseAnimation(true)
-		setTimeout(() => { 
+		setTimeout(() => {
 			setSettingsOpen(false)
 			setRunSettingsCloseAnimation(false)
 		}, 380)
@@ -230,7 +233,7 @@ export function Layout(props: { children: JSXElement }) {
 						prop:size="small"
 						prop:disabled={userIsCollaborator() !== true}
 						onClick={() => setSettingsOpen(!settingsOpen())}
-					>	
+					>
 						{/* @ts-ignore */}
 						<IconSettings slot="prefix" class="w-5 h-5 -ml-0.5" />
 						Settings
@@ -244,11 +247,15 @@ export function Layout(props: { children: JSXElement }) {
 						project()?.installed.messageLintRules()
 					}
 				>
-					<div class={"requires-no-scroll absolute left-0 overflow-y-scroll h-[calc(100vh_-_61px)] w-screen mx-auto z-50 bg-surface-50 "
-						+ (runSettingsCloseAnimation() ? "animate-fadeOutBottom" : "animate-fadeInBottom")}>
+					<div
+						class={
+							"requires-no-scroll absolute left-0 overflow-y-scroll h-[calc(100vh_-_61px)] w-screen mx-auto z-50 bg-surface-50 " +
+							(runSettingsCloseAnimation() ? "animate-fadeOutBottom" : "animate-fadeInBottom")
+						}
+					>
 						<div class="max-w-screen-sm mx-auto pt-12 px-4">
-							<button 
-								class="text-2xl flex items-center hover:link-primary transition-colors duration-150 mb-8" 
+							<button
+								class="text-2xl flex items-center hover:link-primary transition-colors duration-150 mb-8"
 								onClick={() => handleClose()}
 							>
 								<IconBack class="w-6 h-6 -ml-1 mr-1" />
@@ -257,11 +264,13 @@ export function Layout(props: { children: JSXElement }) {
 							<inlang-settings
 								prop:settings={project()!.settings() as ReturnType<InlangProject["settings"]>}
 								prop:installedPlugins={
-									project()?.installed.plugins() as ReturnType<InlangProject["installed"]["plugins"]>
+									project()?.installed.plugins() as ReturnType<
+										InlangProject["installed"]["plugins"]
+									>
 								}
 								prop:installedMessageLintRules={
 									project()?.installed.messageLintRules() as ReturnType<
-									InlangProject["installed"]["messageLintRules"]
+										InlangProject["installed"]["messageLintRules"]
 									>
 								}
 								on:set-settings={(event: CustomEvent) => {
@@ -273,7 +282,8 @@ export function Layout(props: { children: JSXElement }) {
 									} else {
 										throw new Error("Settings can not be set, because project is not defined")
 									}
-								}} />
+								}}
+							/>
 						</div>
 					</div>
 				</Show>
