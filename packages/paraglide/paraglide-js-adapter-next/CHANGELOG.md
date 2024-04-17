@@ -1,5 +1,16 @@
 # @inlang/paraglide-js-adapter-next
 
+## 3.1.1
+
+### Patch Changes
+
+- cee4692: Use index accesses instead of `.at` function for better compatability with legacy browsers
+- Updated dependencies [cee4692]
+- Updated dependencies [4b631aa]
+- Updated dependencies [3c7a87c]
+- Updated dependencies [ab1fe48]
+  - @inlang/paraglide-js@1.6.2
+
 ## 3.1.0
 
 ### Minor Changes

@@ -74,7 +74,7 @@ These functions internally handle the loading and saving of messages according t
 
 ## 3. Working with Lint Rules
 
-[Lint rules](/c/lint-rules) are crucial for maintaining code quality and consistency. In your Inlang app, you can leverage lint rules to ensure that your localization messages adhere to specific standards. For example, let's explore working with the [`snakeCaseId`](https://inlang.com/m/messageLintRule.inlang.snakeCaseId) lint rule.
+[Lint rules](/c/lint-rules) are crucial for maintaining code quality and consistency. In your Inlang app, you can leverage lint rules to ensure that your localization messages adhere to specific standards. For example, let's explore working with the [`snakeCaseId`](/m/gkerinvo/messageLintRule-inlang-snakeCaseId) lint rule.
 
 This lint rule checks whether your message id's are in a snake case format or not.
 
@@ -87,7 +87,7 @@ const reports = await inlang.query.lintReports.get({ where: { messageId: message
 
 ## Publishing your app
 
-If you are ready and want to release what you have built, please [publish your app](https://inlang.com/documentation/publish-to-marketplace) on our [Marketplace](https://inlang.com) – where you can also sell apps in the future.
+If you are ready and want to release what you have built, please [publish your app](/documentation/publish-to-marketplace) on our [Marketplace](https://inlang.com) – where you can also sell apps in the future.
 
 ## Conclusion
 

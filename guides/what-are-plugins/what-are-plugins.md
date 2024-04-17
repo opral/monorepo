@@ -5,8 +5,8 @@ An inlang plugin is a small program that can be added to the inlang project to p
 If you're setting up inlang for your project, you've probably read that you need a plugin that defines a load and save function. These plugins allow the inlang project to access translation storage, which is essential for inlang to work. There are also plugins that define custom APIs that are useful in specific apps. It's important to choose the right plugin to meet your needs.
 
 ### Use Cases
-- `load` & `save`: Let the inlang project access the storage layer (e.g. [message-format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat))
-- `matcher`: Let the ide-extension match the i18n library syntax (e.g. [m-function-matcher](https://inlang.com/m/632iow21/plugin-inlang-mFunctionMatcher))
+- `load` & `save`: Let the inlang project access the storage layer (e.g. [message-format](/m/reootnfj/plugin-inlang-messageFormat))
+- `matcher`: Let the ide-extension match the i18n library syntax (e.g. [m-function-matcher](/m/632iow21/plugin-inlang-mFunctionMatcher))
 - ...
 
 ### Why are plugins great?
