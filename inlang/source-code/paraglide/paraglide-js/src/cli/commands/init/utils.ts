@@ -32,9 +32,9 @@ export function longestCommonPrefix(strA: string, strB: string): string {
 }
 
 /**
- * Get's the common prefix of a set of strings. 
+ * Get's the common prefix of a set of strings.
  * If only one string is passed the prefix will be the empty string
- * 
+ *
  * @example
  * ```ts
  * getCommonPrefix(["foo", "foobar"]) // "foo"

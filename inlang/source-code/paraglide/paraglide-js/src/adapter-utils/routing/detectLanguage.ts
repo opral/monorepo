@@ -8,10 +8,10 @@
  *
  * @example
  * /base/de/ueber-uns -> de
- * 
+ *
  * /base/about -> undefined because it does not explicitly include the language
  * /en/about -> undefined because the path is not in the base
- * 
+ *
  * @returns the language tag if present
  *
  */
