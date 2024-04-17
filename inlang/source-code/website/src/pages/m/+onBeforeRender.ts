@@ -84,7 +84,6 @@ export default async function onBeforeRender(pageContext: PageContext) {
 		console.error("No content available this route.")
 		throw redirect(baseSlug as `/${string}`, 301)
 	}
-	console.log("test", restSlug)
 
 	return {
 		pageContext: {
