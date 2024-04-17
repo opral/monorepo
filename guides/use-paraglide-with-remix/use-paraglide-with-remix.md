@@ -1,6 +1,6 @@
 # Using ParaglideJS with Remix
 
-In this guide you will lean how to add internationalised routing to your Remix App. We will use [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) to manage our messages and the [Remix-paraglideJS](https://github.com/BRIKEV/remix-paraglidejs) for internationalised routing.
+In this guide you will lean how to add internationalised routing to your Remix App. We will use [ParaglideJS](/m/gerre34r/library-inlang-paraglideJs) to manage our messages and the [Remix-paraglideJS](https://github.com/BRIKEV/remix-paraglidejs) for internationalised routing.
 
 Paraglide is a great fit for the Remix App because it uses a compiler to generate tree-shakeable messages. That way your client bundle only includes the messages that are used in client components on any given page.
 
@@ -265,7 +265,7 @@ export default function Index() {
 
 You should now see the message "Remix web example" on your homepage!
 
-> Note: If you are using Visual Studio Code, you should install [Sherlock (VS Code extension)](https://inlang.com/m/r7kp499g/app-inlang-ideExtension). It will give you inline previews of messages and allow you to edit them right in your source code.
+> Note: If you are using Visual Studio Code, you should install [Sherlock (VS Code extension)](/m/r7kp499g/app-inlang-ideExtension). It will give you inline previews of messages and allow you to edit them right in your source code.
 
 ## Adding more languages
 
@@ -336,5 +336,5 @@ You should now have a fully functional multilingual Remix app using ParaglideJS.
 
 You can check out the full source code of this example [here](https://github.com/BRIKEV/remix-paraglidejs).
 
-If you want to learn more about ParaglideJS, check out the [ParaglideJS Documentation](https://inlang.com/m/gerre34r/library-inlang-paraglideJs). If you need help or have some ideas, feel free to reach out to us on [Discord](https://discord.gg/gdMPPWy57R) or open a Discussion on [GitHub](https://github.com/opral/monorepo/discussions).
+If you want to learn more about ParaglideJS, check out the [ParaglideJS Documentation](/m/gerre34r/library-inlang-paraglideJs). If you need help or have some ideas, feel free to reach out to us on [Discord](https://discord.gg/gdMPPWy57R) or open a Discussion on [GitHub](https://github.com/opral/monorepo/discussions).
 
