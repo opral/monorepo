@@ -16,7 +16,11 @@ export const InitCommand = new Command()
 	.name("init")
 	.summary("Initializes Paraglide-JS in this NextJS Project")
 	.action(async () => {
+		console.info("Finding repo root")
+
 		const repoRoot = await findRepoRoot({ nodeishFs: nodeFsPromises, path: process.cwd() })
+
+		console.info("Opening Repo")
 
 		// We are risking that there is no git repo. As long as we only use FS features and no Git features
 		// from the SDK we should be fine.
@@ -27,15 +31,20 @@ export const InitCommand = new Command()
 
 		const logger = new Logger({ prefix: false, silent: false })
 
+		console.info("Checking for Uncomitted Changes")
 		const ctx0 = await Steps.checkForUncommittedChanges({
 			repo,
 			repoRoot: repoRoot?.replace("file://", "") ?? process.cwd(),
 			logger,
 			appId: "library.inlang.paraglideJsAdapterNextJs",
 		})
+		console.info("Checking for Required Files")
 		const ctx1 = await findAndEnforceRequiredFiles(ctx0)
+		console.info("Resolving outdir")
 		const ctx2 = { ...ctx1, outdir: path.resolve(ctx1.srcRoot, "paraglide") }
+		console.info("Initializing inlang project")
 		const ctx3 = await Steps.initializeInlangProject(ctx2)
+		console.info("Updating package.json")
 		const ctx4 = await Steps.updatePackageJson({
 			dependencies: async (deps) => ({
 				...deps,
@@ -46,11 +55,16 @@ export const InitCommand = new Command()
 				"@inlang/paraglide-js": "^0.0.0",
 			}),
 		})(ctx3)
+		console.info("Creating i18n file")
 		const ctx5 = await createI18nFile(ctx4)
+		console.info("Creating middleware file")
 		const ctx6 = await createMiddlewareFile(ctx5)
+		console.info("Editing next config")
 		const ctx7 = await updateNextConfig(ctx6)
+		console.info("Adding language provider")
 		const ctx8 = await addLanguageProvider(ctx7)
 		try {
+			console.info("Running compiler")
 			await Steps.runCompiler(ctx8)
 		} catch (e) {
 			//silently ignore
@@ -208,6 +222,13 @@ const updateNextConfig: CliStep<
 		process.exit(1)
 	}
 
+	if (fileContent.includes("paraglide")) {
+		ctx.logger.warn(
+			"Skipping adding the paraglide plugin to `next.config.js` as it already seems to be added"
+		)
+		return ctx
+	}
+
 	//Add the import
 	const importStatement: string = {
 		esm: 'import { paraglide } from "@inlang/paraglide-js-adapter-next/plugin"',
@@ -277,6 +298,13 @@ const addLanguageProvider: CliStep<
 	} catch (e) {
 		ctx.logger.warn(
 			"Failed to add the `<LanguageProvider>` to `app/layout.tsx`. You'll need to add it yourself"
+		)
+		return ctx
+	}
+
+	if (layoutFileContent.includes("LanguageProvider")) {
+		ctx.logger.warn(
+			"Skipping add ingthe `<LanguageProvider>` to `app/layout.tsx` as it already seems to be added"
 		)
 		return ctx
 	}
