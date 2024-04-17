@@ -2,7 +2,7 @@ import type { Ast, Attribute, ElementNode, TemplateNode } from "../types.js"
 
 export function getElementsFromAst<Name extends string>(
 	ast: Ast,
-	elementName: Name,
+	elementName: Name
 ): ElementNode<Name>[] {
 	const links: ElementNode<Name>[] = []
 
@@ -30,9 +30,9 @@ export function hasSpreadAttribute(element: ElementNode<string>): boolean {
 
 export function getAttributeByName<T extends string>(
 	element: ElementNode<string>,
-	name: T,
+	name: T
 ): Attribute<T> | undefined {
 	return element.attributes.find(
-		(attribute) => attribute.type === "Attribute" && attribute.name === name,
+		(attribute) => attribute.type === "Attribute" && attribute.name === name
 	) as Attribute<T> | undefined
 }

@@ -1,4 +1,5 @@
 {
+	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "plugin.inlang.nextIntl",
 	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/plugins/next-intl/assets/plugin-next-intl-logo.png",
 	"displayName": {
