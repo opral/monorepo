@@ -297,8 +297,27 @@ const addLanguageProvider: CliStep<
 
 	layoutFileContent = `import { LanguageProvider } from "@inlang/paraglide-js-adapter-next"\nimport { languageTag } from "@/paraglide/runtime.js"\n${layoutFileContent}`
 	layoutFileContent = layoutFileContent.replace('lang="en"', `lang={languageTag()}`)
-	layoutFileContent = layoutFileContent.replace("<html", "<LanguageProvider>\n<html")
-	layoutFileContent = layoutFileContent.replace("/html>", "/html>\n</LanguageProvider>")
+
+	//find the "<html" literal & it's indentation
+	const htmlIndex = layoutFileContent.indexOf("<html")
+	if (htmlIndex === -1) {
+		ctx.logger.warn(
+			"Failed to add the `<LanguageProvider>` to `app/layout.tsx`. You'll need to add it yourself"
+		)
+		return ctx
+	}
+
+	const indentationMatch = layoutFileContent.slice(0, htmlIndex).match(/\s+/)
+	const htmlIndentation = indentationMatch?.[indentationMatch.length - 1] || "    "
+
+	layoutFileContent = layoutFileContent.replace(
+		"<html",
+		`<LanguageProvider>\n${htmlIndentation}  <html`
+	)
+	layoutFileContent = layoutFileContent.replace(
+		"/html>",
+		`/html>\n${htmlIndentation}</LanguageProvider>`
+	)
 
 	await ctx.repo.nodeishFs.writeFile(layoutFilePath, layoutFileContent)
 	return ctx
