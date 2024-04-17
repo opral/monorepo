@@ -33,10 +33,12 @@ export const InitCommand = new Command()
 			logger,
 			appId: MARKETPLACE_ID,
 		})
+
 		const ctx1 = await findAndEnforceRequiredFiles(ctx0)
-		const ctx2 = { ...ctx1, outdir: path.resolve(ctx1.srcRoot, "paraglide") }
-		const ctx3 = await Steps.initializeInlangProject(ctx2)
-		const ctx4 = await Steps.updatePackageJson({
+		const ctx2 = await enforceAppRouter(ctx1)
+		const ctx3 = { ...ctx2, outdir: path.resolve(ctx2.srcRoot, "paraglide") }
+		const ctx4 = await Steps.initializeInlangProject(ctx3)
+		const ctx5 = await Steps.updatePackageJson({
 			dependencies: async (deps) => ({
 				...deps,
 				"@inlang/paraglide-js-adapter-next": PARAGLIDE_NEXT_VERSION,
@@ -45,13 +47,13 @@ export const InitCommand = new Command()
 				...deps,
 				"@inlang/paraglide-js": ParaglideCli.version() as string,
 			}),
-		})(ctx3)
-		const ctx5 = await createI18nFile(ctx4)
-		const ctx6 = await createMiddlewareFile(ctx5)
-		const ctx7 = await updateNextConfig(ctx6)
-		const ctx8 = await addLanguageProvider(ctx7)
+		})(ctx4)
+		const ctx6 = await createI18nFile(ctx5)
+		const ctx7 = await createMiddlewareFile(ctx6)
+		const ctx8 = await updateNextConfig(ctx7)
+		const ctx9 = await addLanguageProvider(ctx8)
 		try {
-			await Steps.runCompiler(ctx8)
+			await Steps.runCompiler(ctx9)
 		} catch (e) {
 			//silently ignore
 		}
@@ -62,6 +64,24 @@ Learn more about Paraglide and Paraglide-Next at:
 https://inlang.com/m/osslbuzt/paraglide-next-i18n
 `)
 	})
+
+const enforceAppRouter: CliStep<
+	{ repo: Repository; logger: Logger; srcRoot: string },
+	unknown
+> = async (ctx) => {
+	// check if the src/app folder exists
+	const expectedAppFolderPath = path.join(ctx.srcRoot, "app")
+	try {
+		const stat = await ctx.repo.nodeishFs.stat(expectedAppFolderPath)
+		if (!stat.isDirectory()) throw new Error()
+	} catch {
+		ctx.logger.error(
+			"The paraglide-next init command can only be used in projects using the App router"
+		)
+		process.exit(0)
+	}
+	return ctx
+}
 
 const findAndEnforceRequiredFiles: CliStep<
 	{
