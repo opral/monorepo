@@ -21,7 +21,7 @@ describe.concurrent("paraglide-next init", () => {
 		it(
 			"initializes inside a fresh nextjs project with the app router and src/ dir",
 			async () => {
-				const { spawn, readFile, cleanup, path: workingDir, execute } = await prepareEnvironment()
+				const { spawn, readFile, cleanup, path: workingDir } = await prepareEnvironment()
 
 				console.info("Running create-next-app")
 
@@ -32,51 +32,46 @@ describe.concurrent("paraglide-next init", () => {
 				await CNA.pressKey("arrowRight") //yes
 				await CNA.pressKey("enter")
 
-				console.info("TypeScript")
+				console.info("create-next-app: TypeScript YES")
 
 				await CNA.waitForText("ESLint")
 				await CNA.wait(200)
 				await CNA.pressKey("arrowLeft") //no
 				await CNA.pressKey("enter")
 
-				console.info("ESLint")
+				console.info("create-next-app: ESLint NO")
 
 				await CNA.waitForText("Tailwind CSS")
 				await CNA.wait(200)
 				await CNA.pressKey("arrowLeft") //no
 				await CNA.pressKey("enter")
 
-				console.info("Tailwind CSS")
+				console.info("create-next-app: Tailwind CSS NO")
 
 				await CNA.waitForText("`src/` directory")
 				await CNA.wait(200)
 				await CNA.pressKey("arrowRight") //yes
 				await CNA.pressKey("enter")
 
-				console.info("`src/` directory")
+				console.info("create-next-app: `src/` directory YES")
 
 				await CNA.waitForText("App Router")
 				await CNA.wait(200)
 				await CNA.pressKey("arrowRight") //yes
 				await CNA.pressKey("enter")
 
-				console.info("App Router")
+				console.info("create-next-app: App Router YES")
 
 				await CNA.waitForText("import alias")
 				await CNA.wait(200)
 				await CNA.pressKey("arrowLeft") //no
 				await CNA.pressKey("enter")
 
-				console.info("import alias")
+				console.info("create-next-app: edit import alias NO")
 
 				await CNA.waitForFinish()
 
 				console.info("Finished create-next-app")
-
-				// move into the test app
-				await execute("cd", "test-app")
-
-				console.info("Moved into test-app")
 
 				// Run paraglide-next init
 				process.env.TERM_PROGRAM = "not-vscode"
@@ -85,10 +80,6 @@ describe.concurrent("paraglide-next init", () => {
 					"init",
 					path.resolve(workingDir, "./test-app")
 				)
-
-				console.info("Running paraglide-next init", path.resolve(workingDir, "./test-app"))
-
-				PNI.debug()
 
 				await PNI.wait(10000)
 				console.log(PNI.getStdout(), PNI.getStderr(), PNI.getExitCode())
