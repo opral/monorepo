@@ -5,7 +5,7 @@ import nodeFsPromises from "node:fs/promises"
 import { NodeishFilesystem } from "@lix-js/fs"
 import path from "node:path"
 import { Logger } from "@inlang/paraglide-js/internal"
-import { Steps } from "@inlang/paraglide-js/internal/cli"
+import { Steps, cli as ParaglideCli } from "@inlang/paraglide-js/internal/cli"
 
 type NextConfigFile = {
 	path: string
@@ -43,7 +43,7 @@ export const InitCommand = new Command()
 			}),
 			devDependencies: async (deps) => ({
 				...deps,
-				"@inlang/paraglide-js": "^0.0.0",
+				"@inlang/paraglide-js": ParaglideCli.version() as string,
 			}),
 		})(ctx3)
 		const ctx5 = await createI18nFile(ctx4)
