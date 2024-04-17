@@ -3,11 +3,12 @@ import { registry } from "@inlang/marketplace-registry"
 import { redirect } from "vike/abort"
 import type { PageContext } from "vike/types"
 import fs from "node:fs/promises"
-import { convert } from "@inlang/markdown"
+import { convert, generateTableOfContents } from "@inlang/markdown"
 import type { PageProps } from "./+Page.jsx"
 
 const repositoryRoot = import.meta.url.slice(0, import.meta.url.lastIndexOf("inlang/source-code"))
-const renderedMarkdown = {} as Record<string, string>
+let renderedMarkdown = {} as Record<string, string>
+let tabelOfContents = {} as Record<string, Record<string, string[]>>
 
 export default async function onBeforeRender(pageContext: PageContext) {
 	// check if uid is defined
@@ -44,6 +45,8 @@ export default async function onBeforeRender(pageContext: PageContext) {
 	}
 
 	if (item.pages) {
+		renderedMarkdown = {}
+		tabelOfContents = {}
 		// get content for each page
 		for (const [slug, page] of Object.entries(item.pages)) {
 			if (!page || !fileExists(page)) redirect(baseSlug as `/${string}`, 301)
@@ -52,6 +55,10 @@ export default async function onBeforeRender(pageContext: PageContext) {
 			const markdown = await convert(content)
 
 			renderedMarkdown[slug] = markdown
+
+			await generateTableOfContents(markdown).then((table) => {
+				tabelOfContents[slug] = table
+			})
 		}
 	} else if (item.readme) {
 		// get readme fallback
@@ -84,7 +91,7 @@ export default async function onBeforeRender(pageContext: PageContext) {
 				markdown: renderedMarkdown[restSlug],
 				pages: item.pages,
 				restSlug,
-				tableOfContents: {},
+				tableOfContents: tabelOfContents[restSlug] || {},
 				manifest: item,
 				recommends: [],
 			} as PageProps,
