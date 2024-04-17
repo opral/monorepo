@@ -12,8 +12,9 @@
 	"description": {
 		"en": "A SvelteKit integration for ParaglideJS, providing you with everything you need for i18n routing"
 	},
-	"readme": {
-		"en": "./inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/README.md"
+	"pages": {
+		"/": "./inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/README.md",
+		"/changelog": "./inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/CHANGELOG.md"
 	},
 	"keywords": [
 		"paraglide js",

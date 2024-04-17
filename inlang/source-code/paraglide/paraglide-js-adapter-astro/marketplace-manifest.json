@@ -12,8 +12,9 @@
 	"description": {
 		"en": "An Astro integration for ParaglideJS, providing you with everything you need to internationalize your Astro App"
 	},
-	"readme": {
-		"en": "./inlang/source-code/paraglide/paraglide-js-adapter-astro/README.md"
+	"pages": {
+		"/": "./inlang/source-code/paraglide/paraglide-js-adapter-astro/README.md",
+		"/changelog": "./inlang/source-code/paraglide/paraglide-js-adapter-astro/CHANGELOG.md"
 	},
 	"keywords": [
 		"paraglide js",

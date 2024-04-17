@@ -57,6 +57,7 @@ const scrollToAnchor = (anchor: string, behavior?: ScrollBehavior) => {
 }
 
 export default function Page(props: PageProps) {
+	console.info(JSON.stringify(props.tableOfContents))
 	const [readmore, setReadmore] = createSignal<boolean>(false)
 
 	// mapping translatable types
