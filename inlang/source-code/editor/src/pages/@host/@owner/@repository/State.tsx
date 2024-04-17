@@ -355,7 +355,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					name: args.user.username,
 					email: args.user.email,
 				},
-				message: "Fink 🐦: update translations",
+				message: "chore: update translations with Fink 🐦",
 				include: filesWithUncommittedChanges.map((f) => f[0]),
 			})
 		}

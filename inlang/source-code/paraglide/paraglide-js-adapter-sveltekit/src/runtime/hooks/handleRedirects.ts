@@ -4,14 +4,14 @@ import { getPathInfo } from "../utils/get-path-info.js"
 import { base } from "$app/paths"
 import type { Handle, ParamMatcher } from "@sveltejs/kit"
 import type { Paraglide } from "../runtime.js"
-import type { PathTranslations } from "../config/pathTranslations.js"
+import { type PathDefinitionTranslations } from "@inlang/paraglide-js/internal/adapter-utils"
 
 /**
  * This is a SvelteKit Server hook that rewrites redirects to internal pages to use the correct language.s
  */
 export const handleRedirects: (
 	runtime: Paraglide<any>,
-	translations: PathTranslations<string>,
+	translations: PathDefinitionTranslations<string>,
 	matchers: Record<string, ParamMatcher>
 ) => Handle =
 	(runtime, translations, matchers) =>
