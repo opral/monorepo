@@ -27,7 +27,7 @@
 }
 
 body:has(.requires-no-scroll) {
-  overflow: hidden;
+	overflow: hidden;
 }
 
 inlang-settings {

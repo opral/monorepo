@@ -23,7 +23,7 @@ import {
 	openRepository,
 	createNodeishMemoryFs,
 	type Repository,
-	type LixError
+	type LixError,
 } from "@lix-js/client"
 
 import { publicEnv } from "@inlang/env-variables"
@@ -308,7 +308,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					setLixErrors([])
 
 					// @ts-ignore -- causes reactivity bugs because the sdk uses watch and triggers updates on changes caused by itself
-					newRepo.nodeishFs.watch = () => { }
+					newRepo.nodeishFs.watch = () => {}
 
 					setLastPullTime(new Date())
 					setLocalChanges(0)

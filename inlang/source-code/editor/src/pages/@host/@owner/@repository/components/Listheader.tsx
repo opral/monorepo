@@ -85,7 +85,7 @@ export const ListHeader = () => {
 									prop:content={
 										typeof getLintRule(lintRuleId)?.description === "object"
 											? // @ts-ignore
-											getLintRule(lintRuleId)?.description.en
+											  getLintRule(lintRuleId)?.description.en
 											: getLintRule(lintRuleId)?.description
 									}
 									prop:placement="bottom"
@@ -136,7 +136,7 @@ export const ListHeader = () => {
 											<div class="text-xs text-on-surface-variant font-medium">
 												{typeof getLintRule(lintRuleId)?.displayName === "object"
 													? // @ts-ignore
-													getLintRule(lintRuleId)?.displayName.en
+													  getLintRule(lintRuleId)?.displayName.en
 													: getLintRule(lintRuleId)?.displayName}
 											</div>
 										</div>
