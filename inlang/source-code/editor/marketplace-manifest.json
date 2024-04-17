@@ -16,9 +16,7 @@
 		"en": "Your translation workflow with no-code setup and repository-based operation — the ideal i18n solution for translators."
 	},
 	"pages": {
-		"/": "./inlang/source-code/editor/README.md",
-		"/usage": "./inlang/source-code/editor/CHANGELOG.md",
-		"/examples": "./inlang/source-code/editor/CHANGELOG.md"
+		"/": "./inlang/source-code/editor/README.md"
 	},
 	"keywords": [
 		"editor",
