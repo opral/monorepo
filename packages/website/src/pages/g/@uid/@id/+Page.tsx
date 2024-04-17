@@ -10,7 +10,7 @@ import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
 import EditOutline from "~icons/material-symbols/edit-outline-rounded"
 import { currentPageContext } from "#src/renderer/state.js"
-import { Recommends } from "#src/pages/m/@uid/@id/+Page.jsx"
+import { Recommends } from "#src/pages/m/+Page.jsx"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
