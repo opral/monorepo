@@ -9,7 +9,7 @@
 		"url": "https://github.com/opral/inlang-paraglide-js"
 	},
 	"scripts": {
-		"build": "node ./build.mjs",
+		"build": "SCRIPT=build node ./build.mjs",
 		"clean": "rm -rf dist && rm -rf node_modules",
 		"test": "NODE_ENV=development vitest run && NODE_ENV=production vitest run",
 		"lint": "eslint ./src --fix"
@@ -66,6 +66,7 @@
 		"@rollup/plugin-commonjs": "^25.0.7",
 		"@rollup/plugin-json": "^6.1.0",
 		"@rollup/plugin-node-resolve": "^15.2.3",
+		"@rollup/plugin-replace": "^5.0.5",
 		"@rollup/plugin-typescript": "^11.1.5",
 		"@testing-library/react": "^14.2.1",
 		"@types/node": "^20.12.7",
