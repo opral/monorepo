@@ -155,6 +155,7 @@ export const addCompileStepToPackageJSON: CliStep<
 	unknown
 > = async (ctx) => {
 	const projectPath = "./" + nodePath.relative(process.cwd(), ctx.projectPath)
+	const outdir = "./" + nodePath.relative(process.cwd(), ctx.outdir)
 
 	let shouldExit = false
 
@@ -164,14 +165,14 @@ export const addCompileStepToPackageJSON: CliStep<
 			// this isn't super important, so we won't interrupt the user if it fails
 			if (!scripts.postinstall?.includes("paraglide-js compile")) {
 				scripts.postinstall =
-					`paraglide-js compile --project ${projectPath} --outdir ${ctx.outdir}` +
+					`paraglide-js compile --project ${projectPath} --outdir ${outdir}` +
 					(scripts.postinstall ? " && " + scripts.postinstall : "")
 			}
 
 			if (scripts.build === undefined) {
-				scripts.build = `paraglide-js compile --project ${ctx.projectPath} --outdir ${ctx.outdir}`
+				scripts.build = `paraglide-js compile --project ${projectPath} --outdir ${outdir}`
 			} else if (scripts.build.includes("paraglide-js compile") === false) {
-				scripts.build = `paraglide-js compile --project ${projectPath} --outdir ${ctx.outdir} && ${scripts.build}`
+				scripts.build = `paraglide-js compile --project ${projectPath} --outdir ${outdir} && ${scripts.build}`
 			} else {
 				ctx.logger
 					.warn(`The "build" script in the \`package.json\` already contains a "paraglide-js compile" command.
