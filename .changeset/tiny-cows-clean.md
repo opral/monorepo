@@ -1,0 +1,5 @@
+---
+"@inlang/sdk": minor
+---
+
+createNewProject()
