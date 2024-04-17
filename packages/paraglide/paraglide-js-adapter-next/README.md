@@ -265,22 +265,35 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 ## (Legacy) Setup With the Pages Router
 
-The Pages router already comes with [i18n support out of the box](https://nextjs.org/docs/advanced-features/i18n-routing). Thus, Paraglide doesn't need to provide routing. All the Adapter does in the Pages router is react to the language change.
+The Pages router already comes with [i18n support out of the box](https://nextjs.org/docs/advanced-features/i18n-routing). Thus, Paraglide doesn't need to provide routing. All the Adapter does in the Pages router is react to the language change & run the compiler.
 
-Add an `i18n` object to your `next.config.js` file. In it, specify the locales you want to support and the default locale. Make sure these match the ones in your `project.inlang/settings.json` file.
+In `next.config.js`, add the `paraglide` plugin.
+```js
+const { paraglide } = require("@inlang/paraglide-js-adapter-next/plugin")
+module.exports = paraglide({
+	paraglide: {
+		project: "./project.inlang",
+		outdir: "./src/paraglide",
+	}
+})
+```
+
+Then add an `i18n` object and specify the locales you want to support. Make sure these match the ones in your `project.inlang/settings.json` file.
 
 ```js
-module.exports = {
+module.exports = paraglide({
+	paraglide: {
+		project: "./project.inlang",
+		outdir: "./src/paraglide",
+	},
 	i18n: {
 		locales: ["en", "de"],
 		defaultLocale: "en",
 	},
-}
+})
 ```
 
-> If you are using ESM for your NextJS config, you can also import `availableLanguageTags` and `sourceLanguageTag` from `./src/paraglide/runtime.js` and use them instead of hardcoding the locales.
-
-NextJS will now automatically prefix all routes with the locale. For example, the route `/about` will become `/en/about` for the English locale and `/de/about` for the German locale. Only the default locale won't be prefixed.
+NextJS will automatically prefix all routes with the locale. For example, the route `/about` will become `/en/about` for the English locale and `/de/about` for the German locale. Only the default locale won't be prefixed.
 
 Finally, wrap your `_app.js` file with the `ParaglideJS` component.
 
@@ -296,7 +309,7 @@ export default function App({ Component, pageProps }: AppProps) {
 }
 ```
 
-That's it! You can now use Paraglide's messages in your components.
+You can now use Paraglide's messages in your components.
 
 ```ts
 import * as m from "@/paraglide/messages.js"
@@ -326,8 +339,8 @@ export default function Document() {
 There are some known limitations with this adapter:
 
 - `output: static` isn't supported yet.
-- Evaluating messages in the module scope in server components always renders the source language.
-- Server actions that aren't inside a tsx file will always read the default language unless `setLanguageTag(()=>headers().get("x-language-tag"))` is called at the top of the file.
+- Evaluating messages in the module scope always renders the source language.
+- Server actions that aren't inside a `.tsx` file will always read the default language unless `setLanguageTag(()=>headers().get("x-language-tag"))` is called at the top of the file.
 
 ## Roadmap to 1.0
 
