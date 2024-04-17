@@ -27,35 +27,26 @@ export default async function onBeforeRender(pageContext: PageContext) {
 	// get rest of the slug for in-product navigation
 	const restSlug = pageContext.urlParsed.pathname.replace(`/m/${uid}/${slug}`, "") || "/"
 
+	// get corrected base slug
+	const baseSlug = `/m/${item.uniqueID}/${
+		item.slug ? item.slug.replaceAll(".", "-") : item.id.replaceAll(".", "-")
+	}`
+
 	// check if slug is correct
 	if (item.slug) {
 		if (item.slug !== slug) {
-			throw redirect(
-				`/m/${item.uniqueID}/${
-					item.slug
-						? item.slug.replaceAll(".", "-") + restSlug
-						: item.id.replaceAll(".", "-") + restSlug
-				}`,
-				301
-			)
+			throw redirect((baseSlug + restSlug) as `/${string}`, 301)
 		}
 	} else {
 		if (item.id.replaceAll(".", "-") !== slug) {
-			throw redirect(
-				`/m/${item.uniqueID}/${
-					item.slug
-						? item.slug.replaceAll(".", "-") + restSlug
-						: item.id.replaceAll(".", "-") + restSlug
-				}`,
-				301
-			)
+			throw redirect((baseSlug + restSlug) as `/${string}`, 301)
 		}
 	}
 
 	if (item.pages) {
 		// get content for each page
 		for (const [slug, page] of Object.entries(item.pages)) {
-			if (!page || !fileExists(page)) redirect("/not-found", 301)
+			if (!page || !fileExists(page)) redirect(baseSlug as `/${string}`, 301)
 
 			const content = await getContentString(page)
 			const markdown = await convert(content)
@@ -84,7 +75,7 @@ export default async function onBeforeRender(pageContext: PageContext) {
 	//check if the markdown is available for this route
 	if (renderedMarkdown[restSlug] === undefined) {
 		console.error("No content available this route.")
-		throw redirect("/not-found", 301)
+		throw redirect(baseSlug as `/${string}`, 301)
 	}
 
 	return {
