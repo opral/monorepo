@@ -675,34 +675,6 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)
 
-  inlang/source-code/end-to-end-tests/paraglide-js-adapter-next:
-    dependencies:
-      '@inlang/paraglide-js':
-        specifier: workspace:*
-        version: link:../../paraglide/paraglide-js
-      '@inlang/paraglide-js-adapter-next':
-        specifier: workspace:*
-        version: link:../../paraglide/paraglide-js-adapter-next
-      '@inlang/sdk':
-        specifier: workspace:*
-        version: link:../../sdk
-    devDependencies:
-      '@gmrchk/cli-testing-library':
-        specifier: ^0.1.2
-        version: 0.1.2
-      '@types/node':
-        specifier: ^20.12.3
-        version: 20.12.7
-      eslint:
-        specifier: ^8.57.0
-        version: 8.57.0
-      prettier:
-        specifier: 2.8.3
-        version: 2.8.3
-      vitest:
-        specifier: 0.34.6
-        version: 0.34.6(jsdom@22.1.0)
-
   inlang/source-code/env-variables:
     dependencies:
       '@inlang/result':
