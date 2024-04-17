@@ -9,7 +9,7 @@ import { Steps } from "@inlang/paraglide-js/internal/cli"
 
 type NextConfigFile = {
 	path: string
-	format: "js" | "mjs"
+	type: "cjs" | "esm"
 }
 
 export const InitCommand = new Command()
@@ -48,9 +48,11 @@ export const InitCommand = new Command()
 		})(ctx3)
 		const ctx5 = await createI18nFile(ctx4)
 		const ctx6 = await createMiddlewareFile(ctx5)
+		const ctx7 = await updateNextConfig(ctx6)
+		const ctx8 = await updateNextConfig(ctx7)
 
 		try {
-			await Steps.runCompiler(ctx6)
+			await Steps.runCompiler(ctx8)
 		} catch (e) {
 			//silently ignore
 		}
@@ -113,8 +115,10 @@ async function findNextConfig(
 			const stat = await fs.stat(possibleNextConfigPath)
 			if (!stat.isFile()) continue
 
-			const format = possibleNextConfigPath.endsWith(".mjs") ? "mjs" : "js"
-			return { path: possibleNextConfigPath, format }
+			return {
+				path: possibleNextConfigPath,
+				type: possibleNextConfigPath.endsWith(".mjs") ? "esm" : "cjs",
+			}
 		} catch {
 			continue
 		}
@@ -168,3 +172,75 @@ export { middleware } from "@/lib/i18n"`
 	return ctx
 }
 
+const updateNextConfig: CliStep<
+	{
+		nextConfigFile: NextConfigFile
+		logger: Logger
+		repo: Repository
+		outdir: string
+		projectPath: string
+	},
+	unknown
+> = async (ctx) => {
+	//read the next.config.js file
+	let fileContent: string
+	try {
+		fileContent = await ctx.repo.nodeishFs.readFile(ctx.nextConfigFile.path, { encoding: "utf-8" })
+	} catch (e) {
+		ctx.logger.error("Failed to read next config file at " + ctx.nextConfigFile.path)
+		process.exit(1)
+	}
+
+	//Add the import
+	const importStatement: string = {
+		esm: 'import { paraglide } from "@inlang/paraglide-js-adapter-next/plugin"',
+		cjs: 'const { paraglide } = require("@inlang/paraglide-js-adapter-next/plugin")',
+	}[ctx.nextConfigFile.type]
+
+	fileContent = importStatement + "\n" + fileContent
+
+	const exportRegex = {
+		esm: /export\s+default\s+(?<configIdentifier>[a-zA-Z0-9]+)(?=\s|;)/gm,
+		cjs: /module.exports\s+=\s+(?<configIdentifier>[a-zA-Z0-9]+)(?=\s|;)/gm,
+	}[ctx.nextConfigFile.type]
+
+	const match = exportRegex.exec(fileContent)
+	if (!match) {
+		ctx.logger.warn(
+			`Failed to find the export default statement in next.config.js
+You will have to add the paraglide plugin manually
+
+Learn how to do that in the documentation:
+https://inlang.com/m/osslbuzt/paraglide-next-i18n
+`
+		)
+	} else {
+		const exportDefault = match
+		const startIndex = exportDefault.index
+		const endIndex = startIndex + exportDefault[0].length
+		const configIdentifier = match.groups?.configIdentifier as string
+		const identifierStartIndex = endIndex - configIdentifier.length
+
+		const relativeOutdir = "./" + path.relative(process.cwd(), ctx.outdir)
+		const relativeProjectPath = "./" + path.relative(process.cwd(), ctx.projectPath)
+
+		const wrappedIdentifier = `paraglide({
+	paraglide: {
+		project: "${relativeProjectPath}",
+		outdir: "${relativeOutdir}"
+	},
+	...${configIdentifier}
+})`
+
+		//replace the wrapped identifier with the actual identifier
+		fileContent =
+			fileContent.slice(0, Math.max(0, identifierStartIndex)) +
+			wrappedIdentifier +
+			fileContent.slice(Math.max(0, endIndex))
+
+		ctx.logger.info("Added the paraglide plugin to next.config.js")
+		await ctx.repo.nodeishFs.writeFile(ctx.nextConfigFile.path, fileContent)
+	}
+
+	return ctx
+}
