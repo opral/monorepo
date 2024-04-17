@@ -334,7 +334,7 @@ export class InlangManage extends TwLitElement {
 		if (this.newLanguageTag === "") return
 
 		if (typeof this.user === "undefined" || this.user === "load") return
-		
+
 		this.newLanguageTagLoading = true
 
 		const repo = await openRepository(
