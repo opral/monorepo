@@ -6,3 +6,13 @@ declare module "$paraglide/runtime.js" {
 	export const availableLanguageTags: readonly string[]
 	export const sourceLanguageTag: string
 }
+
+/**
+ * The ID specified in the marketplace manifest
+ */
+declare const MARKETPLACE_ID: string
+
+/**
+ * The Current version of `@inlang/paraglide-js-adapter-next`
+ */
+declare const PARAGLIDE_NEXT_VERSION: string

@@ -1,5 +1,5 @@
-import { AvailableLanguageTag } from "@/paraglide/runtime"
 import { createI18n } from "@inlang/paraglide-js-adapter-next"
+import type { AvailableLanguageTag } from "@/paraglide/runtime"
 import * as m from "@/paraglide/messages"
 
 export const { Link, middleware, useRouter, usePathname, redirect, permanentRedirect, localizePath } =
@@ -12,6 +12,5 @@ export const { Link, middleware, useRouter, usePathname, redirect, permanentRedi
 				"de-CH": "/administrator/[...rest]",
 			},
 		},
-		prefix: "all",
 		exclude: ["/not-translated"], //makes sure that the /not-translated page is not translated
 	})
