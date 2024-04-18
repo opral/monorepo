@@ -7,6 +7,7 @@ import { createLocaliseHref } from "./localiseHref"
 import type { ResolvedI18nConfig } from "./config"
 import { serializeCookie } from "./utils/cookie"
 import { LANG_COOKIE } from "./constants"
+import { rsc } from "rsc-env"
 
 /**
  * Creates a link component that localises the href based on the current language.
@@ -57,6 +58,8 @@ export function createLink<T extends string>(
 			<>
 				<NextLink {...props} href={localisedHref} />
 			</>
+		) : rsc ? (
+			<a {...props} hrefLang={lang} href={addBasePath(localisedHref.toString())} />
 		) : (
 			<a
 				{...props}
