@@ -1,5 +1,11 @@
 # @inlang/paraglide-js
 
+## 1.7.0
+
+### Minor Changes
+
+- 0774c1a: Expose CLI programmatically to enable framework-specific init clis
+
 ## 1.6.2
 
 ### Patch Changes
