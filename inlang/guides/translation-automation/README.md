@@ -2,7 +2,7 @@
 
 ## Translation Automation - with lint and machine translation
 
-A common problem with i18n processes is the presence of manual steps and broken translations. These efforts are continuous instead of being a one-time activity. However, an automation system can help manage this issue. To establish the automation we can use the [CLI](/m/2qj2w8pu/app-inlang-cli).
+A common problem with i18n processes is the presence of manual steps and broken translations. These efforts are continuous instead of being a one-time activity. However, an automation system can help manage this issue. To establish the automation we can use the [CLI](https://inlang.com/m/2qj2w8pu/app-inlang-cli).
 
 ## When does Translation Automation becomes handy?
 
@@ -19,7 +19,7 @@ A common problem with i18n processes is the presence of manual steps and broken 
 
 ## Don't want translations to be machine translated?
 
-Sometimes machine translations don't match your quality standards and you want your translations to be done by humans. In this case, you can use the [Ninja i18n](/m/3gk8n4n4) GitHub action to get lint reports in your pull requests, including links to the relevant messages, and have your team translate the content using the [Fink localization editor](/m/tdozzpar). You can find more information about Ninja i18n [here](/m/3gk8n4n4).
+Sometimes machine translations don't match your quality standards and you want your translations to be done by humans. In this case, you can use the [Ninja i18n](https://inlang.com/m/3gk8n4n4) GitHub action to get lint reports in your pull requests, including links to the relevant messages, and have your team translate the content using the [Fink localization editor](https://inlang.com/m/tdozzpar). You can find more information about Ninja i18n [here](https://inlang.com/m/3gk8n4n4).
 
 ## Hands-on Guide
 
@@ -33,12 +33,12 @@ Because lix is git compatible, you can use the mechanisms of GitHub to build thi
 npx @inlang/cli [command]
 ```
 
-3. Setup [Lint](/m/2qj2w8pu/app-inlang-cli#lint) in CI/CD. You can add this to your test step. 
+3. Setup [Lint](https://inlang.com/m/2qj2w8pu/app-inlang-cli#lint) in CI/CD. You can add this to your test step. 
 ```json
 "test": npx @inlang/cli lint --project <projectPath>
 ```
 
-4. Setup [Machine Translate](/m/2qj2w8pu/app-inlang-cli#machine-translate) in CI/CD. You can add this to your build step. 
+4. Setup [Machine Translate](https://inlang.com/m/2qj2w8pu/app-inlang-cli#machine-translate) in CI/CD. You can add this to your build step. 
 ```json
 "build": npx @inlang/cli machine translate --project <projectPath>
 ```
@@ -52,8 +52,8 @@ npx @inlang/cli [command]
 
 **Add this to you build and test step to:**
 
-- [Machine translate](/m/2qj2w8pu/app-inlang-cli#machine-translate) through build step. We want to shift more quality to en and de, that is why we don't machine translate them. We cnsider the other languages comunity languages. When they have weak translations, the community can open a PR through fink.
-- [Lint](/m/2qj2w8pu/app-inlang-cli#lint) through test step. We let the lint command throw errors when translations are missing. There is not only the `missing message` lint rule. There are differen [lint rules](/c/lint-rules) for different use cases, that can be configured as error or warning.
+- [Machine translate](https://inlang.com/m/2qj2w8pu/app-inlang-cli#machine-translate) through build step. We want to shift more quality to en and de, that is why we don't machine translate them. We cnsider the other languages comunity languages. When they have weak translations, the community can open a PR through fink.
+- [Lint](https://inlang.com/m/2qj2w8pu/app-inlang-cli#lint) through test step. We let the lint command throw errors when translations are missing. There is not only the `missing message` lint rule. There are differen [lint rules](/c/lint-rules) for different use cases, that can be configured as error or warning.
 
 <br>
 <br>

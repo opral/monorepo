@@ -2,7 +2,7 @@
 
 In this guide, we will be creating a simple SvelteKit app with i18n routing, using Paraglide for translations. This should be all you need to get started with Paraglide.
 
-We will be using [Paraglide.js](/m/gerre34r/library-inlang-paraglideJs), the [inlang-message-format](/m/reootnfj/plugin-inlang-messageFormat) and [inlang's IDE Extension](/m/r7kp499g/app-inlang-ideExtension).
+We will be using [Paraglide.js](https://inlang.com/m/gerre34r/library-inlang-paraglideJs), the [inlang-message-format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat) and [inlang's IDE Extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension).
 
 ## 1. Create a SvelteKit app
 
@@ -102,12 +102,12 @@ The init command will have generated `./messages/{lang}.json` files for each lan
 You can add messages in two ways:
 
 1. Manually editing the translation files
-2. Using [Sherlock (VS Code extension)](/m/r7kp499g/app-inlang-ideExtension)
+2. Using [Sherlock (VS Code extension)](https://inlang.com/m/r7kp499g/app-inlang-ideExtension)
 
 ### Add messages through Sherlock (VS Code extension) - recommended
 
 - Install the Sherlock (VS Code extension) from the VS Code marketplace.
-  [See extension on inlang.com](/m/r7kp499g/app-inlang-ideExtension)
+  [See extension on inlang.com](https://inlang.com/m/r7kp499g/app-inlang-ideExtension)
   [vs-code marketplace](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension)
 
 - Reload window (only needed once).
@@ -292,7 +292,7 @@ That's it! If you now reload the page and inspect the HTML, you should see the c
 
 You are now set up with a multi-linguagal SvelteKit app using Paraglide!
 
-The SvelteKit adapter has a few more features that you might want to check out, such as localized paths. Read more about it in the [SvelteKit Adapter Documentation](/m/dxnzrydw/paraglide-sveltekit-i18n).
+The SvelteKit adapter has a few more features that you might want to check out, such as localized paths. Read more about it in the [SvelteKit Adapter Documentation](https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n).
 
 Try it on [StackBlitz](https://stackblitz.com/~/github.com/lorissigrist/paraglide-sveltekit-example)
 
