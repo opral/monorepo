@@ -19,13 +19,12 @@ import IconTranslate from "~icons/material-symbols/translate"
 import IconSettings from "~icons/material-symbols/settings-outline"
 import IconDescription from "~icons/material-symbols/description-outline"
 import IconTag from "~icons/material-symbols/tag"
+import IconBack from "~icons/material-symbols/arrow-back-ios-new"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
-import { showToast } from "#src/interface/components/Toast.jsx"
-import { isValidLanguageTag, type LanguageTag } from "@inlang/sdk"
+import { ProjectSettings, type InlangProject } from "@inlang/sdk"
 import { sortLanguageTags } from "./helper/sortLanguageTags.js"
 import EditorLayout from "#src/interface/editor/EditorLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
-import { setSignInModalOpen } from "#src/services/auth/src/components/SignInDialog.jsx"
 import { useLocalStorage } from "#src/services/local-storage/src/LocalStorageProvider.jsx"
 
 interface Filter {
@@ -39,8 +38,10 @@ export function Layout(props: { children: JSXElement }) {
 	const {
 		refetchRepo,
 		forkStatus,
+		setLocalChanges,
 		userIsCollaborator,
 		project,
+		refetchProject,
 		lixErrors,
 		setTextSearch,
 		filteredMessageLintRules,
@@ -50,9 +51,8 @@ export function Layout(props: { children: JSXElement }) {
 		filteredIds,
 		setFilteredIds,
 		languageTags,
-		currentBranch,
-		activeProject,
 		routeParams,
+		lastPullTime,
 	} = useEditorState()
 
 	const [localStorage, setLocalStorage] = useLocalStorage()
@@ -75,17 +75,56 @@ export function Layout(props: { children: JSXElement }) {
 		}
 	})
 
-	const [addLanguageModalOpen, setAddLanguageModalOpen] = createSignal(false)
-	const [addLanguageText, setAddLanguageText] = createSignal("")
+	// Settings modal related
+	const [settingsOpen, setSettingsOpen] = createSignal(false)
+	// eslint-disable-next-line solid/reactivity
+	const [, setHasChanges] = createSignal(false)
+	const [previousSettings, setPreviousSettings] = createSignal<ProjectSettings | undefined>()
 
-	const [filterOptions, setFilterOptions] = createSignal<Filter[]>([
+	createEffect(on(lastPullTime, () => setPreviousSettings()))
+	createEffect(
+		on(project, () => {
+			// set once after last pull and the project is loaded
+			if (project && !previousSettings()) {
+				setPreviousSettings(project()?.settings())
+				setHasChanges(false)
+			}
+		})
+	)
+
+	const handleChanges = () =>
+		setHasChanges((prev) => {
+			const hasChanged =
+				JSON.stringify(previousSettings()) !== JSON.stringify(project()?.settings())
+			if (prev !== hasChanged && hasChanged && project() && previousSettings()) {
+				setLocalChanges((prev) => (prev += 1))
+			} else if (prev !== hasChanged && !hasChanged && project() && previousSettings()) {
+				setLocalChanges((prev) => (prev -= 1))
+			}
+			// update language tags if they have changed
+			if (previousSettings()?.languageTags !== languageTags()) {
+				setFilteredLanguageTags(languageTags())
+			}
+			return hasChanged
+		})
+
+	const [runSettingsCloseAnimation, setRunSettingsCloseAnimation] = createSignal(false)
+	const handleClose = () => {
+		setRunSettingsCloseAnimation(true)
+		setTimeout(() => {
+			setSettingsOpen(false)
+			setRunSettingsCloseAnimation(false)
+		}, 380)
+	}
+
+	const [filterOptions] = createSignal<Filter[]>([
 		{
 			name: "Language",
 			icon: <IconTranslate class="w-5 h-5" />,
 			component: (
 				<LanguageFilter
 					clearFunction={removeFilter("Language")}
-					setAddLanguageModalOpen={setAddLanguageModalOpen}
+					setSettingsOpen={setSettingsOpen}
 				/>
 			),
 		},
@@ -93,6 +132,11 @@ export function Layout(props: { children: JSXElement }) {
 			name: "Message Ids",
 			icon: <IconTag class="w-5 h-5" />,
 			component: <IdsFilter clearFunction={removeFilter("Message Ids")} />,
+		},
+		{
+			name: "Linting",
+			icon: <WarningIcon />,
+			component: <LintFilter clearFunction={removeFilter("Linting")} />,
 		},
 	])
 
@@ -107,7 +151,7 @@ export function Layout(props: { children: JSXElement }) {
 			(newFilter.name !== "Linting" || project()?.installed.messageLintRules())
 		) {
 			if (newFilter.name === "Language" && filteredLanguageTags().length === 0) {
-				setFilteredLanguageTags(() => project()?.settings()?.languageTags || [])
+				setFilteredLanguageTags(languageTags())
 			}
 			setSelectedFilters([...selectedFilters(), newFilter])
 		}
@@ -132,7 +176,7 @@ export function Layout(props: { children: JSXElement }) {
 			if (project()) {
 				addFilter("Language")
 				if (filteredLanguageTags().length === 0 && project()!.settings())
-					setFilteredLanguageTags(project()!.settings()!.languageTags)
+					setFilteredLanguageTags(languageTags())
 			}
 		})
 	)
@@ -149,80 +193,94 @@ export function Layout(props: { children: JSXElement }) {
 	)
 
 	//add initial lintRule filter
-	createEffect(
-		on(project, () => {
-			// add filter option, if lintRules are installed
-			if (project() && project()?.installed.messageLintRules().length !== 0) {
-				setFilterOptions((prev: Filter[]) => [
-					...prev,
-					{
-						name: "Linting",
-						icon: <WarningIcon />,
-						component: <LintFilter clearFunction={removeFilter("Linting")} />,
-					},
-				])
-			}
-
-			if (lixErrors().length === 0 && filteredMessageLintRules().length > 0) {
-				addFilter("Linting")
-			}
-		})
-	)
-
-	const addLanguageTag = (languageTag: LanguageTag) => {
-		if (languageTags().includes(languageTag)) {
-			showToast({
-				variant: "warning",
-				title: "Language tag already exists",
-				message:
-					"This language tag is already present in this project. Please choose another name.",
-			})
-			return
+	createEffect(() => {
+		if (lixErrors().length === 0 && filteredMessageLintRules().length > 0) {
+			addFilter("Linting")
 		}
-		setFilteredLanguageTags([...filteredLanguageTags(), languageTag])
-		project()?.setSettings({
-			...project()!.settings()!,
-			languageTags: [...project()!.settings()!.languageTags, languageTag],
-		})
-	}
-
-	const settingsLink = () => {
-		if (currentBranch() && activeProject()) {
-			return (
-				(import.meta.env.PROD ? `https://manage.inlang.com/` : `http://localhost:4004/`) +
-				`?repo=${`github.com/${routeParams().owner}/${
-					routeParams().repository
-				}`}&branch=${currentBranch()}&project=${activeProject()}`
-			)
-		} else {
-			return (
-				(import.meta.env.PROD ? `https://manage.inlang.com/` : `http://localhost:4004/`) +
-				`?repo=${`github.com/${routeParams().owner}/${routeParams().repository}`}`
-			)
-		}
-	}
+	})
 
 	return (
 		<EditorLayout>
 			<div class="w-full flex flex-col grow bg-surface-50">
-				<div class="w-full flex items-end justify-between z-20">
-					<div class="flex flex-wrap gap-2 items-center pt-5">
+				<div class="w-full flex items-end justify-between z-20 gap-2 pt-4">
+					<div class="flex flex-wrap gap-2 items-center">
 						<Breadcrumbs />
-						<BranchMenu />
-						<ProjectMenu />
+						<div class="flex gap-2">
+							<BranchMenu />
+							<ProjectMenu />
+						</div>
 					</div>
 					<sl-button
 						slot="trigger"
 						prop:size="small"
-						prop:href={settingsLink()}
-						prop:target="_blank"
+						prop:disabled={userIsCollaborator() !== true}
+						onClick={() => setSettingsOpen(!settingsOpen())}
 					>
 						{/* @ts-ignore */}
 						<IconSettings slot="prefix" class="w-5 h-5 -ml-0.5" />
 						Settings
 					</sl-button>
 				</div>
-				<div class="flex flex-wrap justify-between gap-2 py-4 md:py-5 sticky top-[61px] z-10 bg-surface-50">
+				<Show
+					when={
+						settingsOpen() &&
+						project()?.settings() &&
+						project()?.installed.plugins() &&
+						project()?.installed.messageLintRules()
+					}
+				>
+					<div
+						class={
+							"requires-no-scroll absolute left-0 overflow-y-scroll h-[calc(100vh_-_61px)] w-screen mx-auto z-50 bg-surface-50 " +
+							(runSettingsCloseAnimation() ? "animate-fadeOutBottom" : "animate-fadeInBottom")
+						}
+					>
+						<div class="relative w-full max-w-7xl mx-auto px-4 lg:pt-12">
+							<sl-button
+								class="hidden lg:inline-flex lg:sticky lg:top-4"
+								onClick={() => handleClose()}
+							>
+								{/* @ts-ignore */}
+								<IconBack slot="prefix" />
+								Back
+							</sl-button>
+							<div class="max-w-screen-sm mx-auto">
+								<div class="flex sticky lg:hidden items-center justify-between gap-2 pt-4 pb-8 top-0 z-10 bg-gradient-to-b from-surface-50 from-80% to-transparent to-100%">
+									<h1 class="text-2xl">Settings</h1>
+									<sl-button onClick={() => handleClose()} prop:size="small">
+										{/* @ts-ignore */}
+										<IconClose slot="prefix" />
+									</sl-button>
+								</div>
+								<h1 class="hidden lg:block text-2xl -mt-8 mb-8">Settings</h1>
+								<inlang-settings
+									prop:settings={project()!.settings() as ReturnType<InlangProject["settings"]>}
+									prop:installedPlugins={
+										project()?.installed.plugins() as ReturnType<
+											InlangProject["installed"]["plugins"]
+										>
+									}
+									prop:installedMessageLintRules={
+										project()?.installed.messageLintRules() as ReturnType<
+											InlangProject["installed"]["messageLintRules"]
+										>
+									}
+									on:set-settings={(event: CustomEvent) => {
+										const _project = project()
+										if (_project) {
+											_project.setSettings(event.detail.argument)
+											refetchProject()
+											handleChanges()
+										} else {
+											throw new Error("Settings can not be set, because project is not defined")
+										}
+									}}
+								/>
+							</div>
+						</div>
+					</div>
+				</Show>
+				<div class="flex flex-wrap justify-between gap-2 py-4 sticky top-[61px] z-10 bg-surface-50">
 					<div class="flex flex-wrap z-20 gap-2 items-center">
 						<Show when={project()}>
 							<For each={filterOptions()}>
@@ -247,9 +305,7 @@ export function Layout(props: { children: JSXElement }) {
 									<sl-button
 										prop:size="small"
 										onClick={() => {
-											setFilteredLanguageTags(
-												setFilteredLanguageTags(project()?.settings()?.languageTags || [])
-											)
+											setFilteredLanguageTags(languageTags())
 											setFilteredMessageLintRules([])
 											setSelectedFilters([])
 										}}
@@ -314,70 +370,7 @@ export function Layout(props: { children: JSXElement }) {
 				</div>
 				{props.children}
 			</div>
-			<sl-dialog
-				prop:label="Add language tag"
-				prop:open={addLanguageModalOpen()}
-				on:sl-after-hide={() => setAddLanguageModalOpen(false)}
-			>
-				<p class="text-xs pb-4 -mt-4 pr-8">
-					You can add a language to the ressource, by providing a unique tag. By doing that inlang
-					is creating a new language file and commits it to the local repository instance.
-				</p>
-				<sl-input
-					class="addLanguage p-0 border-0 focus:border-0 focus:outline-0 focus:ring-0"
-					prop:size="small"
-					prop:label="Tag"
-					prop:placeholder={"Add a language tag"}
-					prop:helpText={
-						!(
-							(!isValidLanguageTag(addLanguageText()) && addLanguageText().length > 0) ||
-							project()?.settings().languageTags.includes(addLanguageText())
-						)
-							? "Unique tags for languages (e.g. -> en, de, fr)"
-							: ""
-					}
-					prop:value={addLanguageText()}
-					onPaste={(e) => setAddLanguageText(e.currentTarget.value)}
-					onInput={(e) => setAddLanguageText(e.currentTarget.value)}
-				/>
-				<Show when={!isValidLanguageTag(addLanguageText()) && addLanguageText().length > 0}>
-					<p class="text-xs leading-5 text-danger max-sm:hidden pt-1 pb-0.5">
-						Please enter a valid{" "}
-						<a
-							href={
-								import.meta.env.PROD
-									? "https://inlang.com/documentation/concept/language-tag"
-									: "http://localhost:3000/documentation/concept/language-tag"
-							}
-							target="_blank"
-							class="underline"
-						>
-							BCP-47 language tag
-						</a>{" "}
-						(e.g. en, en-GB)
-					</p>
-				</Show>
-				<Show when={project()?.settings().languageTags.includes(addLanguageText())}>
-					<p class="text-xs leading-5 text-danger max-sm:hidden pt-1 pb-0.5">
-						Language tag "{addLanguageText()}" already exists
-					</p>
-				</Show>
-				<sl-button
-					class="w-full pt-6"
-					prop:size={"small"}
-					prop:variant={"primary"}
-					prop:disabled={
-						!isValidLanguageTag(addLanguageText()) ||
-						project()?.settings().languageTags.includes(addLanguageText())
-					}
-					onClick={() => {
-						addLanguageTag(addLanguageText())
-						setAddLanguageModalOpen(false)
-					}}
-				>
-					Add language
-				</sl-button>
-			</sl-dialog>
+			{/* Fork Status modal */}
 			<sl-dialog
 				prop:label="Fork out of sync"
 				prop:open={forkStatusModalOpen()}
@@ -605,20 +598,27 @@ function ProjectMenu() {
 	)
 }
 
-function LanguageFilter(props: { clearFunction: any; setAddLanguageModalOpen: Setter<boolean> }) {
-	const { project, setFilteredLanguageTags, filteredLanguageTags, userIsCollaborator } =
-		useEditorState()
+function LanguageFilter(props: { clearFunction: any; setSettingsOpen: Setter<boolean> }) {
+	const {
+		setFilteredLanguageTags,
+		filteredLanguageTags,
+		userIsCollaborator,
+		languageTags,
+		sourceLanguageTag,
+	} = useEditorState()
 	const [localStorage] = useLocalStorage()
 
 	onMount(() => {
 		if (filteredLanguageTags().length === 0 || filteredLanguageTags() === undefined) {
-			setFilteredLanguageTags(() => project()?.settings()?.languageTags || [])
+			setFilteredLanguageTags(languageTags())
 		}
 	})
 
 	return (
 		<Show
-			when={project()?.settings() && filteredLanguageTags() && filteredLanguageTags().length > 0}
+			when={
+				languageTags().length !== 0 && filteredLanguageTags() && filteredLanguageTags().length > 0
+			}
 		>
 			<sl-select
 				prop:name="Language Select"
@@ -628,6 +628,12 @@ function LanguageFilter(props: { clearFunction: any; setAddLanguageModalOpen: Se
 				prop:clearable={true}
 				prop:value={filteredLanguageTags()}
 				on:sl-change={(event: any) => {
+					if (event.target.value.includes("add-language")) {
+						props.setSettingsOpen(true)
+						event.target.value = event.target.value.filter(
+							(value: string) => value !== "add-language"
+						)
+					}
 					setFilteredLanguageTags(event.target.value)
 				}}
 				on:sl-clear={() => {
@@ -649,47 +655,16 @@ function LanguageFilter(props: { clearFunction: any; setAddLanguageModalOpen: Se
 
 				<div class="flex px-3 gap-2 text-sm font-medium">
 					<span class="text-left text-outline-variant grow">Select</span>
-					<sl-tooltip
-						prop:content="Add language"
-						prop:placement="bottom"
-						prop:trigger="hover"
-						class="small"
-						style={{ "--show-delay": "1s" }}
-					>
-						<button
-							class="link link-primary opacity-75"
-							onClick={() => {
-								if (!localStorage?.user?.isLoggedIn) {
-									setSignInModalOpen(true)
-								} else if (!userIsCollaborator()) {
-									showToast({
-										variant: "warning",
-										title: "No access to this repo",
-										message: "Use a fork to make changes.",
-									})
-								} else {
-									props.setAddLanguageModalOpen(true)
-								}
-							}}
-						>
-							<IconAdd class="w-5 h-5" />
-						</button>
-					</sl-tooltip>
 					<Link
 						class="cursor-pointer link link-primary opacity-75"
-						onClick={() => setFilteredLanguageTags(() => project()?.settings()?.languageTags || [])}
+						onClick={() => setFilteredLanguageTags(languageTags())}
 					>
 						All
 					</Link>
 					<Link
 						class="cursor-pointer link link-primary opacity-75"
 						// filter all except the source language
-						onClick={() =>
-							setFilteredLanguageTags(
-								// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-								[project()?.settings()?.sourceLanguageTag!]
-							)
-						}
+						onClick={() => setFilteredLanguageTags([sourceLanguageTag()])}
 					>
 						None
 					</Link>
@@ -697,21 +672,16 @@ function LanguageFilter(props: { clearFunction: any; setAddLanguageModalOpen: Se
 				<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
 				<div class="max-h-[300px] overflow-y-auto text-sm">
 					{/* eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain */}
-					<For
-						each={sortLanguageTags(
-							project()?.settings()?.languageTags || [],
-							project()?.settings()?.sourceLanguageTag || "en"
-						)}
-					>
+					<For each={sortLanguageTags(languageTags(), sourceLanguageTag())}>
 						{(language) => (
 							<sl-option
 								prop:value={language}
 								prop:selected={filteredLanguageTags().includes(language)}
-								prop:disabled={language === project()?.settings()?.sourceLanguageTag}
-								class={language === project()?.settings()?.sourceLanguageTag ? "opacity-50" : ""}
+								prop:disabled={language === sourceLanguageTag()}
+								class={language === sourceLanguageTag() ? "opacity-50" : ""}
 							>
 								{language}
-								{language === project()?.settings()?.sourceLanguageTag ? (
+								{language === sourceLanguageTag() ? (
 									<sl-badge prop:variant="neutral" class="relative translate-x-3">
 										<span class="after:content-['ref'] after:text-background" />
 									</sl-badge>
@@ -721,6 +691,11 @@ function LanguageFilter(props: { clearFunction: any; setAddLanguageModalOpen: Se
 							</sl-option>
 						)}
 					</For>
+					<Show when={localStorage?.user?.isLoggedIn && userIsCollaborator()}>
+						<sl-option class="add-language" prop:value="add-language">
+							<IconAdd class="-ml-0.5 mr-3" /> Add a new language
+						</sl-option>
+					</Show>
 				</div>
 			</sl-select>
 		</Show>

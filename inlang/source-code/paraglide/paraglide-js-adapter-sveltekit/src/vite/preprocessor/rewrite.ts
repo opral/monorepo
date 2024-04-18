@@ -73,7 +73,7 @@ export const rewrite = ({
 																								? attrubuteValuesToJSValue(
 																										langAttribute.value,
 																										originalCode
-																								  )
+																									)
 																								: "undefined"
 																						}
                                         )`
@@ -145,7 +145,7 @@ export const rewrite = ({
 																						? attrubuteValuesToJSValue(
 																								langAttribute.value,
 																								originalCode
-																						  )
+																							)
 																						: "undefined"
 																				}
                                     )`,
