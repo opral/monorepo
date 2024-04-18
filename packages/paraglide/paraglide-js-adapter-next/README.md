@@ -11,7 +11,7 @@
 Get started instantly with the Paraglide-Next CLI.
 
 ```bash
-npx @inlang/paraglide-js-adapter-next init
+npx @inlang/paraglide-next init
 npm install
 ```
 
@@ -68,7 +68,7 @@ Only messages used in client components are sent to the client. Messages in Serv
 
 While you can now visit `/de/some-page` you still need to add the language-prefix to every single link. Wouldn't it be nice if that happened automatically? 
 
-For this the package provides Localised Navigation APIs. These are exported from `@/lib/i18n.js`.
+For this, the package provides Localised Navigation APIs. These are exported from `@/lib/i18n.js`.
 
 To get localized `<Link>`s you need to replace the ones from `next/link` with the ones from `@/lib/i18n.js`. Just find & replace the imports.
 
@@ -270,7 +270,7 @@ The Pages router already comes with [i18n support out of the box](https://nextjs
 
 In `next.config.js`, add the `paraglide` plugin.
 ```js
-const { paraglide } = require("@inlang/paraglide-js-adapter-next/plugin")
+const { paraglide } = require("@inlang/paraglide-next/plugin")
 module.exports = paraglide({
 	paraglide: {
 		project: "./project.inlang",
@@ -299,7 +299,7 @@ NextJS will automatically prefix all routes with the locale. For example, the ro
 Finally, wrap your `_app.js` file with the `ParaglideJS` component.
 
 ```jsx
-import { ParaglideJS } from "@inlang/paraglide-js-adapter-next/pages"
+import { ParaglideJS } from "@inlang/paraglide-next/pages"
 
 export default function App({ Component, pageProps }: AppProps) {
 	return (
