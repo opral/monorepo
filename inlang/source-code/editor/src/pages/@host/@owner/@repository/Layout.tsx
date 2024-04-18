@@ -19,9 +19,10 @@ import IconTranslate from "~icons/material-symbols/translate"
 import IconSettings from "~icons/material-symbols/settings-outline"
 import IconDescription from "~icons/material-symbols/description-outline"
 import IconTag from "~icons/material-symbols/tag"
+import IconBack from "~icons/material-symbols/arrow-back-ios-new"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 import { showToast } from "#src/interface/components/Toast.jsx"
-import { isValidLanguageTag, type LanguageTag } from "@inlang/sdk"
+import { ProjectSettings, isValidLanguageTag, type InlangProject, type LanguageTag } from "@inlang/sdk"
 import { sortLanguageTags } from "./helper/sortLanguageTags.js"
 import EditorLayout from "#src/interface/editor/EditorLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
@@ -39,8 +40,10 @@ export function Layout(props: { children: JSXElement }) {
 	const {
 		refetchRepo,
 		forkStatus,
+		setLocalChanges,
 		userIsCollaborator,
 		project,
+		refetchProject,
 		lixErrors,
 		setTextSearch,
 		filteredMessageLintRules,
@@ -50,9 +53,8 @@ export function Layout(props: { children: JSXElement }) {
 		filteredIds,
 		setFilteredIds,
 		languageTags,
-		currentBranch,
-		activeProject,
 		routeParams,
+		lastPullTime,
 	} = useEditorState()
 
 	const [localStorage, setLocalStorage] = useLocalStorage()
@@ -78,7 +80,7 @@ export function Layout(props: { children: JSXElement }) {
 	const [addLanguageModalOpen, setAddLanguageModalOpen] = createSignal(false)
 	const [addLanguageText, setAddLanguageText] = createSignal("")
 
-	const [filterOptions, setFilterOptions] = createSignal<Filter[]>([
+	const [filterOptions] = createSignal<Filter[]>([
 		{
 			name: "Language",
 			icon: <IconTranslate class="w-5 h-5" />,
@@ -93,6 +95,11 @@ export function Layout(props: { children: JSXElement }) {
 			name: "Message Ids",
 			icon: <IconTag class="w-5 h-5" />,
 			component: <IdsFilter clearFunction={removeFilter("Message Ids")} />,
+		},
+		{
+			name: "Linting",
+			icon: <WarningIcon />,
+			component: <LintFilter clearFunction={removeFilter("Linting")} />,
 		},
 	])
 
@@ -149,25 +156,11 @@ export function Layout(props: { children: JSXElement }) {
 	)
 
 	//add initial lintRule filter
-	createEffect(
-		on(project, () => {
-			// add filter option, if lintRules are installed
-			if (project() && project()?.installed.messageLintRules().length !== 0) {
-				setFilterOptions((prev: Filter[]) => [
-					...prev,
-					{
-						name: "Linting",
-						icon: <WarningIcon />,
-						component: <LintFilter clearFunction={removeFilter("Linting")} />,
-					},
-				])
-			}
-
-			if (lixErrors().length === 0 && filteredMessageLintRules().length > 0) {
-				addFilter("Linting")
-			}
-		})
-	)
+	createEffect(() => {
+		if (lixErrors().length === 0 && filteredMessageLintRules().length > 0) {
+			addFilter("Linting")
+		}
+	})
 
 	const addLanguageTag = (languageTag: LanguageTag) => {
 		if (languageTags().includes(languageTag)) {
@@ -186,43 +179,132 @@ export function Layout(props: { children: JSXElement }) {
 		})
 	}
 
-	const settingsLink = () => {
-		if (currentBranch() && activeProject()) {
-			return (
-				(import.meta.env.PROD ? `https://manage.inlang.com/` : `http://localhost:4004/`) +
-				`?repo=${`github.com/${routeParams().owner}/${
-					routeParams().repository
-				}`}&branch=${currentBranch()}&project=${activeProject()}`
-			)
-		} else {
-			return (
-				(import.meta.env.PROD ? `https://manage.inlang.com/` : `http://localhost:4004/`) +
-				`?repo=${`github.com/${routeParams().owner}/${routeParams().repository}`}`
-			)
-		}
+	// Settings modal related
+	const [settingsOpen, setSettingsOpen] = createSignal(false)
+	// eslint-disable-next-line solid/reactivity
+	const [, setHasChanges] = createSignal(false)
+	const [previousSettings, setPreviousSettings] = createSignal<ProjectSettings | undefined>()
+
+	createEffect(on(lastPullTime, () => setPreviousSettings()))
+	createEffect(
+		on(project, () => {
+			// set once after last pull and the project is loaded
+			if (project && !previousSettings()) {
+				setPreviousSettings(project()?.settings())
+				setHasChanges(false)
+			}
+		})
+	)
+
+	const handleChanges = () =>
+		setHasChanges((prev) => {
+			const hasChanged =
+				JSON.stringify(previousSettings()) !== JSON.stringify(project()?.settings())
+			if (prev !== hasChanged && hasChanged && project() && previousSettings()) {
+				setLocalChanges((prev) => (prev += 1))
+			} else if (prev !== hasChanged && !hasChanged && project() && previousSettings()) {
+				setLocalChanges((prev) => (prev -= 1))
+			}
+			// update language tags if they have changed
+			if (previousSettings()?.languageTags !== languageTags()) {
+				setFilteredLanguageTags(languageTags())
+			}
+			return hasChanged
+		})
+
+	const [runSettingsCloseAnimation, setRunSettingsCloseAnimation] = createSignal(false)
+	const handleClose = () => {
+		setRunSettingsCloseAnimation(true)
+		setTimeout(() => {
+			setSettingsOpen(false)
+			setRunSettingsCloseAnimation(false)
+		}, 380)
 	}
 
 	return (
 		<EditorLayout>
 			<div class="w-full flex flex-col grow bg-surface-50">
-				<div class="w-full flex items-end justify-between z-20">
-					<div class="flex flex-wrap gap-2 items-center pt-5">
+				<div class="w-full flex items-end justify-between z-20 gap-2 pt-4">
+					<div class="flex flex-wrap gap-2 items-center">
 						<Breadcrumbs />
-						<BranchMenu />
-						<ProjectMenu />
+						<div class="flex gap-2">
+							<BranchMenu />
+							<ProjectMenu />
+						</div>
 					</div>
 					<sl-button
 						slot="trigger"
 						prop:size="small"
-						prop:href={settingsLink()}
-						prop:target="_blank"
+						prop:disabled={userIsCollaborator() !== true}
+						onClick={() => setSettingsOpen(!settingsOpen())}
 					>
 						{/* @ts-ignore */}
 						<IconSettings slot="prefix" class="w-5 h-5 -ml-0.5" />
 						Settings
 					</sl-button>
 				</div>
-				<div class="flex flex-wrap justify-between gap-2 py-4 md:py-5 sticky top-[61px] z-10 bg-surface-50">
+				<Show
+					when={
+						settingsOpen() &&
+						project()?.settings() &&
+						project()?.installed.plugins() &&
+						project()?.installed.messageLintRules()
+					}
+				>
+					<div
+						class={
+							"requires-no-scroll absolute left-0 overflow-y-scroll h-[calc(100vh_-_61px)] w-screen mx-auto z-50 bg-surface-50 " +
+							(runSettingsCloseAnimation() ? "animate-fadeOutBottom" : "animate-fadeInBottom")
+						}
+					>
+						<div class="relative w-full max-w-7xl mx-auto px-4 lg:pt-12">
+							<sl-button
+								class="hidden lg:inline-flex lg:sticky lg:top-4"
+								onClick={() => handleClose()}
+							>
+								{/* @ts-ignore */}
+								<IconBack slot="prefix" />
+								Back
+							</sl-button>
+							<div class="max-w-screen-sm mx-auto">
+								<div class="flex sticky lg:hidden items-center justify-between gap-2 pt-4 pb-8 top-0 z-10 bg-gradient-to-b from-surface-50 from-80% to-transparent to-100%">
+									<h1 class="text-2xl">Settings</h1>
+									<sl-button onClick={() => handleClose()} prop:size="small">
+										{/* @ts-ignore */}
+										<IconClose slot="prefix" />
+									</sl-button>
+								</div>
+								<h1 class="hidden lg:block text-2xl -mt-8 mb-8">
+									Settings
+								</h1>
+								<inlang-settings
+									prop:settings={project()!.settings() as ReturnType<InlangProject["settings"]>}
+									prop:installedPlugins={
+										project()?.installed.plugins() as ReturnType<
+											InlangProject["installed"]["plugins"]
+										>
+									}
+									prop:installedMessageLintRules={
+										project()?.installed.messageLintRules() as ReturnType<
+											InlangProject["installed"]["messageLintRules"]
+										>
+									}
+									on:set-settings={(event: CustomEvent) => {
+										const _project = project()
+										if (_project) {
+											_project.setSettings(event.detail.argument)
+											refetchProject()
+											handleChanges()
+										} else {
+											throw new Error("Settings can not be set, because project is not defined")
+										}
+									}}
+								/>
+							</div>
+						</div>
+					</div>
+				</Show>
+				<div class="flex flex-wrap justify-between gap-2 py-4 sticky top-[61px] z-10 bg-surface-50">
 					<div class="flex flex-wrap z-20 gap-2 items-center">
 						<Show when={project()}>
 							<For each={filterOptions()}>
@@ -314,6 +396,7 @@ export function Layout(props: { children: JSXElement }) {
 				</div>
 				{props.children}
 			</div>
+			{/* Add language tag modal */}
 			<sl-dialog
 				prop:label="Add language tag"
 				prop:open={addLanguageModalOpen()}
@@ -378,6 +461,7 @@ export function Layout(props: { children: JSXElement }) {
 					Add language
 				</sl-button>
 			</sl-dialog>
+			{/* Fork Status modal */}
 			<sl-dialog
 				prop:label="Fork out of sync"
 				prop:open={forkStatusModalOpen()}
