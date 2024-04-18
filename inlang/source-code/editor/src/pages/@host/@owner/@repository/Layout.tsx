@@ -19,10 +19,10 @@ import IconTranslate from "~icons/material-symbols/translate"
 import IconSettings from "~icons/material-symbols/settings-outline"
 import IconDescription from "~icons/material-symbols/description-outline"
 import IconTag from "~icons/material-symbols/tag"
-import IconBack from "~icons/material-symbols/arrow-back"
+import IconBack from "~icons/material-symbols/arrow-back-ios-new"
 import { WarningIcon } from "./components/Notification/NotificationHint.jsx"
 import { showToast } from "#src/interface/components/Toast.jsx"
-import { isValidLanguageTag, type InlangProject, type LanguageTag } from "@inlang/sdk"
+import { ProjectSettings, isValidLanguageTag, type InlangProject, type LanguageTag } from "@inlang/sdk"
 import { sortLanguageTags } from "./helper/sortLanguageTags.js"
 import EditorLayout from "#src/interface/editor/EditorLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
@@ -183,7 +183,7 @@ export function Layout(props: { children: JSXElement }) {
 	const [settingsOpen, setSettingsOpen] = createSignal(false)
 	// eslint-disable-next-line solid/reactivity
 	const [, setHasChanges] = createSignal(false)
-	const [previousSettings, setPreviousSettings] = createSignal()
+	const [previousSettings, setPreviousSettings] = createSignal<ProjectSettings | undefined>()
 
 	createEffect(on(lastPullTime, () => setPreviousSettings()))
 	createEffect(
@@ -204,6 +204,10 @@ export function Layout(props: { children: JSXElement }) {
 				setLocalChanges((prev) => (prev += 1))
 			} else if (prev !== hasChanged && !hasChanged && project() && previousSettings()) {
 				setLocalChanges((prev) => (prev -= 1))
+			}
+			// update language tags if they have changed
+			if (previousSettings()?.languageTags !== languageTags()) {
+				setFilteredLanguageTags(languageTags())
 			}
 			return hasChanged
 		})
@@ -253,37 +257,50 @@ export function Layout(props: { children: JSXElement }) {
 							(runSettingsCloseAnimation() ? "animate-fadeOutBottom" : "animate-fadeInBottom")
 						}
 					>
-						<div class="max-w-screen-sm mx-auto pt-12 px-4">
-							<button
-								class="text-2xl flex items-center hover:link-primary transition-colors duration-150 mb-8"
+						<div class="relative w-full max-w-7xl mx-auto px-4 lg:pt-12">
+							<sl-button
+								class="hidden lg:inline-flex lg:sticky lg:top-4"
 								onClick={() => handleClose()}
 							>
-								<IconBack class="w-6 h-6 -ml-1 mr-1" />
-								Settings
-							</button>
-							<inlang-settings
-								prop:settings={project()!.settings() as ReturnType<InlangProject["settings"]>}
-								prop:installedPlugins={
-									project()?.installed.plugins() as ReturnType<
-										InlangProject["installed"]["plugins"]
-									>
-								}
-								prop:installedMessageLintRules={
-									project()?.installed.messageLintRules() as ReturnType<
-										InlangProject["installed"]["messageLintRules"]
-									>
-								}
-								on:set-settings={(event: CustomEvent) => {
-									const _project = project()
-									if (_project) {
-										_project.setSettings(event.detail.argument)
-										refetchProject()
-										handleChanges()
-									} else {
-										throw new Error("Settings can not be set, because project is not defined")
+								{/* @ts-ignore */}
+								<IconBack slot="prefix" />
+								Back
+							</sl-button>
+							<div class="max-w-screen-sm mx-auto">
+								<div class="flex sticky lg:hidden items-center justify-between gap-2 pt-4 pb-8 top-0 z-10 bg-gradient-to-b from-surface-50 from-80% to-transparent to-100%">
+									<h1 class="text-2xl">Settings</h1>
+									<sl-button onClick={() => handleClose()} prop:size="small">
+										{/* @ts-ignore */}
+										<IconClose slot="prefix" />
+									</sl-button>
+								</div>
+								<h1 class="hidden lg:block text-2xl -mt-8 mb-8">
+									Settings
+								</h1>
+								<inlang-settings
+									prop:settings={project()!.settings() as ReturnType<InlangProject["settings"]>}
+									prop:installedPlugins={
+										project()?.installed.plugins() as ReturnType<
+											InlangProject["installed"]["plugins"]
+										>
 									}
-								}}
-							/>
+									prop:installedMessageLintRules={
+										project()?.installed.messageLintRules() as ReturnType<
+											InlangProject["installed"]["messageLintRules"]
+										>
+									}
+									on:set-settings={(event: CustomEvent) => {
+										const _project = project()
+										if (_project) {
+											_project.setSettings(event.detail.argument)
+											refetchProject()
+											handleChanges()
+										} else {
+											throw new Error("Settings can not be set, because project is not defined")
+										}
+									}}
+								/>
+							</div>
 						</div>
 					</div>
 				</Show>
