@@ -559,7 +559,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		async (args) => {
 			const value = await args.repo!.forkStatus()
 			if ("error" in value) {
-				setLixErrors([new Error(value.error), ...lixErrors()])
+				// Silently ignore errors:
+				// The branch might only exist in the fork and not in the upstream repository.
 				return { ahead: 0, behind: 0, conflicts: false }
 			} else {
 				return value
