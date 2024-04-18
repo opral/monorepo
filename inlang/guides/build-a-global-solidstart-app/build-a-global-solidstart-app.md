@@ -8,7 +8,7 @@ In this guide, you will learn how to set up ParaglideJS in your existing SolidSt
 ## Getting started
 This guide assumes that you already have a solidstart project set up. If you don't, follow the [official getting started guide](https://start.solidjs.com/getting-started/project-setup).
 
-First, we will need to install [ParaglideJS](/m/gerre34r/library-inlang-paraglideJs), aswell as the official [SolidStart adapter for Paraglide](/m/n860p17j/paraglide-solidstart-i18n).
+First, we will need to install [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs), aswell as the official [SolidStart adapter for Paraglide](https://inlang.com/m/n860p17j/paraglide-solidstart-i18n).
 
 ```bash
 npx @inlang/paraglide-js@lates init
@@ -67,12 +67,12 @@ The default path for translation files are `./messages/{lang}.json`. You can cha
 You can add messages in two ways:
 
 1. Manually editing the translation files
-2. Using [Sherlock (VS Code extension)](/m/r7kp499g/app-inlang-ideExtension)
+2. Using [Sherlock (VS Code extension)](https://inlang.com/m/r7kp499g/app-inlang-ideExtension)
 
 ### Add messages through Sherlock (VS Code extension) - recommended
 
 - Install the Sherlock (VS Code extension) from the VS Code marketplace.
-  [See extension on inlang.com](/m/r7kp499g/app-inlang-ideExtension)
+  [See extension on inlang.com](https://inlang.com/m/r7kp499g/app-inlang-ideExtension)
   [vs-code marketplace](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension)
 
 - Reload window (only needed once).

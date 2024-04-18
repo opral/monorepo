@@ -1,1 +1,1 @@
-export default "/m/@uid/@slug/*"
+export default "/m/@uid/*"
