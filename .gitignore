@@ -370,8 +370,8 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,macos,linux,node,visualstudiocode,intellij
-inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/example/build
-inlang/source-code/paraglide/paraglide-js-adapter-solidstart/example/.solid
+inlang/source-code/paraglide/paraglide-sveltekit/example/build
+inlang/source-code/paraglide/paraglide-solidstart/example/.solid
 *.h.ts.mjs
 **/vite.config.ts.timestamp-*
 **/vite.config.js.timestamp-*
