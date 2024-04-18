@@ -17,7 +17,6 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/env-variables": "workspace:*",
 		"@inlang/telemetry": "workspace:*",
 		"@sentry/node": "^7.47.0",
 		"@sentry/tracing": "^7.47.0",
