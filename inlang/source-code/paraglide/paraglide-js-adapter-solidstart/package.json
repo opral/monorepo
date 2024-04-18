@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/paraglide-js-adapter-solidstart",
+	"name": "@inlang/paraglide-solidstart",
 	"version": "0.0.2",
 	"publishConfig": {
 		"access": "public"
