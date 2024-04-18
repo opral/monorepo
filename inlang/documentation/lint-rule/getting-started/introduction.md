@@ -7,7 +7,7 @@
 
 Lint rules validate messages and other types of content in an inlang project.
 
-For example, the [missing translation lint rule](/m/messageLintRule.inlang.missingTranslation) reports an issue if a message is missing a translation for a specified [language tag](/documentation/concept/language-tag). Inlang applications use lint rules to validate content and report issues to the user.
+For example, the [missing translation lint rule](/m/4cxm3eqi/messageLintRule-inlang-missingTranslation) reports an issue if a message is missing a translation for a specified [language tag](/documentation/concept/language-tag). Inlang applications use lint rules to validate content and report issues to the user.
 
 ## Types of lint rules
 
@@ -15,14 +15,13 @@ For example, the [missing translation lint rule](/m/messageLintRule.inlang.missi
 
 ### Message lint rule
 
-A message lint rule validates a message. For example, the [missing translation lint rule](/m/messageLintRule.inlang.missingTranslation) validates that a message has a translation for a specified [language tag](/documentation/concept/language-tag).
+A message lint rule validates a message. For example, the [missing translation lint rule](/m/4cxm3eqi/messageLintRule-inlang-missingTranslation) validates that a message has a translation for a specified [language tag](/documentation/concept/language-tag).
 
 ![inlang code lints](https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/documentation/sdk/assets/lintrule-codelints.jpg)
 
 ### More soon...
 
 We will support more types of lint rules in the future. If you have an idea for a new lint type, please share it with us on [GitHub](https://github.com/opral/monorepo/discussions).
-
 
 <doc-links>
     <doc-link title="API Introduction" icon="mdi:book-open-page-variant" href="/documentation/lint-rule/api-introduction" description="Read Lint Rule API Reference."></doc-link>

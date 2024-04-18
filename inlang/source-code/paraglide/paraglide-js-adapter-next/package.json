@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/paraglide-js-adapter-next",
-	"version": "3.2.0",
+	"version": "3.3.0",
 	"publishConfig": {
 		"access": "public"
 	},
@@ -9,7 +9,7 @@
 		"url": "https://github.com/opral/inlang-paraglide-js"
 	},
 	"scripts": {
-		"build": "SCRIPT=build node ./build.mjs",
+		"build": "node ./build.mjs",
 		"clean": "rm -rf dist && rm -rf node_modules",
 		"test": "NODE_ENV=development vitest run && NODE_ENV=production vitest run",
 		"lint": "eslint ./src --fix"
@@ -54,7 +54,8 @@
 	"dependencies": {
 		"@inlang/paraglide-js": "workspace:*",
 		"commander": "^12.0.0",
-		"consola": "^3.2.3"
+		"consola": "^3.2.3",
+		"rsc-env": "^0.0.1"
 	},
 	"peerDependencies": {
 		"next": "^13.0.0 || ^14.0.0",
