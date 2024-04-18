@@ -12,6 +12,8 @@ export type {
 	Subscribable,
 } from "./api.js"
 export { type ImportFunction, createImport } from "./resolve-modules/index.js"
+export { createNewProject } from "./createNewProject.js"
+export { defaultProjectSettings } from "./defaultProjectSettings.js"
 export { loadProject } from "./loadProject.js"
 export { listProjects } from "./listProjects.js"
 export { solidAdapter, type InlangProjectWithSolidAdapter } from "./adapter/solidAdapter.js"

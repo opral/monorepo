@@ -7,7 +7,6 @@
 		"forceConsistentCasingInFileNames": true,
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
-		"moduleResolution": "Bundler",
 		"sourceMap": true,
 		"strict": true
 	}

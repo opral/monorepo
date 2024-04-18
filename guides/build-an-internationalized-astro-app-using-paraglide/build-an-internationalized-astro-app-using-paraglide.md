@@ -4,9 +4,9 @@ In this guide, we will be learning how to build an multilingual Astro.
 
 Astro comes with [great internationalization out of the box](https://docs.astro.build/en/recipes/i18n/). It makes it very easy to translate the content of our pages.
 
-For stuff that's shared between pages, such as layouts or components, we still need an i18n library to inject the correct messages. We'll be using [ParaglideJS](/m/gerre34r/library-inlang-paraglideJs). 
+For stuff that's shared between pages, such as layouts or components, we still need an i18n library to inject the correct messages. We'll be using [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs). 
 
-[Paraglide](/m/gerre34r/library-inlang-paraglideJs) offers some unique features that make it a great fit for Astro
+[Paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) offers some unique features that make it a great fit for Astro
 - Only messages that are used on 🏝️Islands are shipped to the client
 - Fully typesafe
 - Tiny runtime (<100bytes on the client)

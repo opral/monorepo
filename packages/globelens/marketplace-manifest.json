@@ -11,8 +11,8 @@
 	"description": {
 		"en": "Check how your pages perform in different markets. GlobeLens is a tool for international SEO analysis."
 	},
-	"readme": {
-		"en": "./inlang/source-code/globelens/README.md"
+	"pages": {
+		"/": "./inlang/source-code/globelens/README.md"
 	},
 	"keywords": ["analysis", "i18n", "apps", "seo", "test", "url", "keyword"],
 	"pricing": "FREE BETA",
