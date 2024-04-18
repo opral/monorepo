@@ -8,7 +8,6 @@ export default function App({ Component, pageProps }: AppProps) {
 	return (
 		<ParaglideJS>
 			<Header />
-			{/** @ts-ignore */}
 			<Component {...pageProps} />
 		</ParaglideJS>
 	)
