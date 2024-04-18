@@ -21,17 +21,19 @@ export default async function onBeforeRender(pageContext: PageContext) {
 	}
 	if (!item) throw redirect("/not-found", 301)
 
-	// check if slug is defined
-	const slug = pageContext.routeParams?.slug
-	if (!slug) throw redirect("/not-found", 301)
-
-	// get rest of the slug for in-product navigation
-	const restSlug = pageContext.urlParsed.pathname.replace(`/m/${uid}/${slug}`, "") || "/"
-
 	// get corrected base slug
 	const baseSlug = `/m/${item.uniqueID}/${
 		item.slug ? item.slug.replaceAll(".", "-") : item.id.replaceAll(".", "-")
 	}`
+
+	// check if slug is defined
+	const slug = pageContext.urlParsed.pathname
+		.split("/")
+		.find((part) => part !== "m" && part !== uid && part.length !== 0)
+	if (!slug) throw redirect(baseSlug as `/${string}`, 301)
+
+	// get rest of the slug for in-product navigation
+	const restSlug = pageContext.urlParsed.pathname.replace(`/m/${uid}/${slug}`, "") || "/"
 
 	// check if slug is correct
 	if (item.slug) {

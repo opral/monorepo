@@ -4,9 +4,9 @@ In this guide, we will be learning how to build an multilingual Astro.
 
 Astro comes with [great internationalization out of the box](https://docs.astro.build/en/recipes/i18n/). It makes it very easy to translate the content of our pages.
 
-For stuff that's shared between pages, such as layouts or components, we still need an i18n library to inject the correct messages. We'll be using [ParaglideJS](/m/gerre34r/library-inlang-paraglideJs). 
+For stuff that's shared between pages, such as layouts or components, we still need an i18n library to inject the correct messages. We'll be using [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs). 
 
-[Paraglide](/m/gerre34r/library-inlang-paraglideJs) offers some unique features that make it a great fit for Astro
+[Paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) offers some unique features that make it a great fit for Astro
 - Only messages that are used on 🏝️Islands are shipped to the client
 - Fully typesafe
 - Tiny runtime (<100bytes on the client)
@@ -55,7 +55,7 @@ Inside `.astro` files, we can access the current language with `Astro.currentLoc
 
 ## Adding ParaglideJS
 
-For translating layouts and components we need an i18n library. Let's install [ParaglideJS](/m/gerre34r/library-inlang-paraglideJs) and the [Paraglide Astro Integration](/m/iljlwzfs/paraglide-astro-i18n).
+For translating layouts and components we need an i18n library. Let's install [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) and the [Paraglide Astro Integration](https://inlang.com/m/iljlwzfs/paraglide-astro-i18n).
 
 ```bash
 npx @inlang/paraglide-js init
@@ -113,7 +113,7 @@ The files contain a key-calue pair of the messageID and the translation.
 }
 ```
 
-If you already have a lot of hardcoded text in your app you should use the [Sherlock VS Code extension](/m/r7kp499g/app-inlang-ideExtension) to extract them automatically.
+If you already have a lot of hardcoded text in your app you should use the [Sherlock VS Code extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) to extract them automatically.
 
 ## Using Messages
 
@@ -141,7 +141,7 @@ In your global Astro layout, add the following:
 
 ## Translating the Page Shell
 
-Now it's really just a matter of going through your app and extracting any hard-coded strings into messages. This is easiest to do with the [Sherlock VSCode extension](/m/r7kp499g/app-inlang-ideExtension).
+Now it's really just a matter of going through your app and extracting any hard-coded strings into messages. This is easiest to do with the [Sherlock VSCode extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension).
 
 Then you just import the messages and use them in your components. 
 
@@ -196,6 +196,6 @@ In components you can access the current language using the `languageTag()` func
 
 ## What's Next?
 
-You can read the [Paraglide](/m/gerre34r/library-inlang-paraglideJs) and [Paraglide-Adapter-Astro](/m/iljlwzfs/paraglide-astro-i18n) documentation to get a more complete understanding of what's possible. You can also check out our [Astro + Paraglide](https://stackblitz.com/~/github.com/LorisSigrist/paraglide-astro-example) example on StackBlitz.
+You can read the [Paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) and [Paraglide-Adapter-Astro](https://inlang.com/m/iljlwzfs/paraglide-astro-i18n) documentation to get a more complete understanding of what's possible. You can also check out our [Astro + Paraglide](https://stackblitz.com/~/github.com/LorisSigrist/paraglide-astro-example) example on StackBlitz.
 
 If you have any suggestions for this guide, please reach out to us on [Discord](https://discord.gg/CNPfhWpcAa), or open an issue on [GitHub](https://www.github.com/opral/inlang-paraglide-js/issues). If you have trouble following, don't hesitate to ask for help. We are happy to help getting you set up.

@@ -1,7 +1,7 @@
 import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import react from "@vitejs/plugin-react"
-import { plugins } from "./build.mjs"
+import { plugins } from "./plugins.mjs"
 
 const __filename = resolve(fileURLToPath(import.meta.url))
 const __dirname = dirname(__filename)
