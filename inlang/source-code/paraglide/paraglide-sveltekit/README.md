@@ -11,7 +11,7 @@
 
 ### 1. Install dependencies
 
-Install [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) and the [ParaglideJS SvelteKit Adapter](https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n).
+Install [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) and [Paraglide-SvelteKit](https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n).
 
 ```bash
 npx @inlang/paraglide-js init
@@ -22,7 +22,7 @@ This will generate a `messages/{lang}.json` file for each of your languages. Thi
 
 ### 2. Add the Vite Plugin 
 
-Add the adapter-plugin to your `vite.config.js` file. This will make sure to rerun the paraglide compiler when needed and add the link preprocessor.
+Add the vite-plugin to your `vite.config.js` file. This will make sure to rerun the paraglide compiler when needed and add the link preprocessor.
 
 ```js
 import { paraglide } from "@inlang/paraglide-sveltekit/vite"
@@ -39,7 +39,7 @@ export default defineConfig({
 })
 ```
 
-### 3. Initialise the Adapter
+### 3. Initialise Paraglide-SvelteKit
 
 Create a `src/lib/i18n.js` file:
 
@@ -51,7 +51,7 @@ import * as runtime from "$lib/paraglide/runtime.js"
 export const i18n = createI18n(runtime);
 ```
 
-`createI18n` will be your one-stop shop for configuring the adapter.
+`createI18n` will be your one-stop shop for configuring i18n routing.
 
 <doc-accordion
 	heading="Does this need to be in src/lib/i18n.js ?"
@@ -169,7 +169,7 @@ export const i18n = createI18n(runtime, {
 
 ### Customizing Link Translation
 
-Links are translated automatically using a preprocessor. This means that you can use the normal `a`-tag and the adapter will translate it for you.
+Links are translated automatically using a preprocessor. You can use the normal `a`-tag and Paraglide-SvelteKit will translate it for you.
 
 ```svelte
 <a href="/about">{m.about()}</a>
@@ -223,7 +223,7 @@ goto(i18n.resolveRoute("/about"))
 Language switchers are tricky because we need to dynamically translate the current URL path, which is itself translated. We need to get the untranslated version of the current path & translate it into the target language.
 
 <doc-accordion
-	heading="Wait, do I thought I don't need wrap my links with the Adapter?"
+	heading="Wait, do I thought I don't need wrap my links with Paraglide-SvelteKit?"
 	text="Language switchers are the one exception to this rule.">
 </doc-accordion>
 
@@ -307,7 +307,7 @@ You can tell a load function to re-run on language changes by calling `depends("
 
 ```ts
 export async function load({ depends }) {
-  // The Adapter automatically calls `invalidate("paraglide:lang")` whenever the langauge changes
+  // Paraglide-SvelteKit automatically calls `invalidate("paraglide:lang")` whenever the langauge changes
   // This tells SvelteKit to re-run this function whenever that happens
   depends("paraglide:lang") 
   return await myLanguageSpecificData();
@@ -340,7 +340,7 @@ The language state get's set when the `<ParaglideJS>` component is mounted. Sinc
 
 ### Issues on Vercel
 
-SvelteKit's `reroute` hook currently doens't play well with Vercel (see [sveltejs/kit#11879](https://github.com/sveltejs/kit/issues/11879)), which means that we need to slightly adapt the adapter setup to make it work when deployed to Vercel.
+SvelteKit's `reroute` hook currently doens't play well with Vercel (see [sveltejs/kit#11879](https://github.com/sveltejs/kit/issues/11879)), which means that we need to slightly adapt the setup to make it work when deployed to Vercel.
 
 1. Remove the `reroute` hook from `src/hooks.js`
 2. Move the routes you want to localize `routes` into a `[[locale]]` folder
@@ -373,7 +373,7 @@ We are working on contributing a fix for [sveltejs/kit#11879](https://github.com
 
 <doc-accordion
 	heading="How can I make my alternate links full urls when prerendering?"
-	text="According to the spec, alternate links should be full urls that include the protocol and origin. By default the adapter can't know which URL your page will be deployed to while prerendering, so it only includes the path in the alternate url, not the origin or protocol. This works, but is suboptimal. You can tell the adapter which url you will be deploying to by setting kit.prerender.origin in your svelte.config.js">
+	text="According to the spec, alternate links should be full urls that include the protocol and origin. By default Paraglide-SvelteKit can't know which URL your page will be deployed to while prerendering, so it only includes the path in the alternate url, not the origin or protocol. This works, but is suboptimal. You can tell Paraglide-SvelteKit which url you will be deploying to by setting kit.prerender.origin in your svelte.config.js">
 </doc-accordion>
 
 <doc-accordion

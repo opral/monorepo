@@ -196,6 +196,6 @@ In components you can access the current language using the `languageTag()` func
 
 ## What's Next?
 
-You can read the [Paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) and [Paraglide-Adapter-Astro](https://inlang.com/m/iljlwzfs/paraglide-astro-i18n) documentation to get a more complete understanding of what's possible. You can also check out our [Astro + Paraglide](https://stackblitz.com/~/github.com/LorisSigrist/paraglide-astro-example) example on StackBlitz.
+You can read the [Paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) and [Paraglide-Astro](https://inlang.com/m/iljlwzfs/paraglide-astro-i18n) documentation to get a more complete understanding of what's possible. You can also check out our [Paraglide-Astro Example](https://stackblitz.com/~/github.com/LorisSigrist/paraglide-astro-example) on StackBlitz.
 
 If you have any suggestions for this guide, please reach out to us on [Discord](https://discord.gg/CNPfhWpcAa), or open an issue on [GitHub](https://www.github.com/opral/inlang-paraglide-js/issues). If you have trouble following, don't hesitate to ask for help. We are happy to help getting you set up.

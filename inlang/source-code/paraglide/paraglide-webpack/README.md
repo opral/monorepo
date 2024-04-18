@@ -1,4 +1,4 @@
-# Paraglide Adapter Webpack
+# Paraglide-Webpack
 
 This package provides a Webpack plugin to make paraglide easier to use.
 

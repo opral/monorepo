@@ -1,4 +1,4 @@
-# Paraglide Adapter Rollup
+# Paraglide-Rollup
 
 This package provides a Rollup plugin to make it easier to use the paraglide-js.
 

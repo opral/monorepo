@@ -96,10 +96,10 @@ export interface I18n<T extends string> {
 }
 
 /**
- * Create an i18n adapter for SolidStart.
+ * Initialize Paraglide-SolidStart
  *
  * @param paraglide The compiled paraglide runtime module. (e.g. "paraglide/runtime.js")
- * @returns An i18n adapter for SolidStart.
+ * @returns An i18n instance
  * @example
  * ```ts
  * import * as paraglide from '../paraglide/runtime.js'

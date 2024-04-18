@@ -1,9 +1,9 @@
-![Dead Simple i18n. Typesafe, Small Footprint, SEO-Friendly and IDE Integration.](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-next/assets/header.png)
+![Dead Simple i18n. Typesafe, Small Footprint, SEO-Friendly and IDE Integration.](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-next/assets/header.png)
 
 <doc-features>
-<doc-feature text-color="#0F172A" color="#E1EFF7" title="Internationalized Routing" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-next/assets/i18n-routing.png"></doc-feature>
-<doc-feature text-color="#0F172A" color="#E1EFF7" title="Tiny Bundle Size" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-next/assets/bundle-size.png"></doc-feature>
-<doc-feature text-color="#0F172A" color="#E1EFF7" title="No route Param needed" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-next/assets/no-param.png"></doc-feature>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="Internationalized Routing" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-next/assets/i18n-routing.png"></doc-feature>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="Tiny Bundle Size" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-next/assets/bundle-size.png"></doc-feature>
+<doc-feature text-color="#0F172A" color="#E1EFF7" title="No route Param needed" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-next/assets/no-param.png"></doc-feature>
 </doc-features>
 
 ## Getting Started
@@ -157,9 +157,9 @@ export const { ... } =
 
 #### How language-detection works
 
-The adapter follows these steps to determine the language.
+Paraglide-Next follows these steps to determine the language.
 
-- First, the adapter will try to determine the language based on the URL.
+- First, it will try to determine the language based on the URL.
 - If that fails, it will look for a `NEXT_LOCALE` cookie.
 - If that isn't available either, it will try to negotiate the language based on the `Accept-Language` header.
 - Finally, it will fall back to the default language.
@@ -237,7 +237,7 @@ This does not include the `basePath`.
 
 ### Alternate Links
 
-Search engines like Google expect you to tell them about translated versions of your pages. The adapter does this by default by adding the `Link` Header to requests.
+Search engines like Google expect you to tell them about translated versions of your pages. Paraglide-Next does this by default by adding the `Link` Header to requests.
 
 You **don't** need to add the translated versions of your site to your sitemap, although it doesn't hurt if you do.
 
@@ -266,7 +266,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 ## (Legacy) Setup With the Pages Router
 
-The Pages router already comes with [i18n support out of the box](https://nextjs.org/docs/advanced-features/i18n-routing). Thus, Paraglide doesn't need to provide routing. All the Adapter does in the Pages router is react to the language change & run the compiler.
+The Pages router already comes with [i18n support out of the box](https://nextjs.org/docs/advanced-features/i18n-routing). Thus, Paraglide doesn't need to provide routing. All Paraglide-Next does in the Pages router is react to the language change & run the compiler.
 
 In `next.config.js`, add the `paraglide` plugin.
 ```js
@@ -337,7 +337,7 @@ export default function Document() {
 
 ## Known Limitations
 
-There are some known limitations with this adapter:
+There are some known limitations with Paraglide-Next.
 
 - `output: static` isn't supported yet.
 - Evaluating messages in module scope always renders the source language.
@@ -351,11 +351,11 @@ There are some known limitations with this adapter:
 
 ## Examples
 
-You can find example projects in [our GitHub repository](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide-js-adapter-next/examples), or try them on StackBlitz:
+You can find example projects in [our GitHub repository](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide-next/examples), or try them on StackBlitz:
 
 <doc-links>
     <doc-link title="App Router Example" icon="simple-icons:stackblitz" href="https://stackblitz.com/~/LorisSigrist/paraglide-next-app-router-example" description="Try out the App router example on StackBlitz"></doc-link>
-    <doc-link title="App Router Example Repository" icon="lucide:github" href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next/examples/app" description="View the source code for the App router Example"></doc-link>
+    <doc-link title="App Router Example Repository" icon="lucide:github" href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-next/examples/app" description="View the source code for the App router Example"></doc-link>
     <doc-link title="Pages Router Example" icon="simple-icons:stackblitz" href="https://stackblitz.com/~/LorisSigrist/paraglide-next-app-router-example" description="Try out the Pages router example on StackBlitz"></doc-link>
-	<doc-link title="App Router Example Repository" icon="lucide:github" href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next/examples/pages" description="View the source code for the Pages router Example"></doc-link>
+	<doc-link title="App Router Example Repository" icon="lucide:github" href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-next/examples/pages" description="View the source code for the Pages router Example"></doc-link>
 </doc-links>

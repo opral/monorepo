@@ -79,7 +79,7 @@ const AstroHeader = () => {
 						href="/m/iljlwzfs/paraglide-astro-i18n"
 						class="w-full bg-background rounded-xl border border-surface-300 relative group hover:border-surface-400 transition-all cursor-pointer"
 					>
-						<h3 class="font-medium text-lg px-8 pb-1 pt-6">Astro Adapter</h3>
+						<h3 class="font-medium text-lg px-8 pb-1 pt-6">Paraglide-Astro</h3>
 						<p class="text-surface-500 px-8 pb-6 text-sm pr-20">
 							An Astro Integration for ParaglideJS
 						</p>

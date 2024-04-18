@@ -8,9 +8,9 @@ This guide assumes that you already have a Next.js project set up with the pages
 
 ## Install ParaglideJS
 
-We will need to install two things. ParaglideJS itself, and the ParaglideJS Adapter for NextJS.
+We will need to install two things. ParaglideJS itself, and Paraglide-Next.
 
-ParaglideJS is the i18n library we will use for string translations. The Adapter makes it easier to integrate Paraglide with NextJS's i18n routing. 
+ParaglideJS is the i18n library we will use for string translations. Paraglide-Next makes it easier to integrate Paraglide with NextJS's i18n routing. 
 
 In your project root, run the following commands and follow the instructions in your terminal.
 
@@ -24,7 +24,7 @@ This will have done a few things:
 - Created an inlang project in your project root
 - Added the required devDependencies to your `package.json`
 - Added the paraglide compiler to your `package.json` build scripts
-- Installed the ParaglideJS Adapter for Next. This will handle setting the Locale automatically
+- Installed the Paraglide-Next which will handle setting the locale
 
 ## Setting up 
 
