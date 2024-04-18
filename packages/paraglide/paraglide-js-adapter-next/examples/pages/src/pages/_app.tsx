@@ -1,6 +1,6 @@
 import React from "react"
 import type { AppProps } from "next/app"
-import { ParaglideJS } from "@inlang/paraglide-js-adapter-next/pages"
+import { ParaglideJS } from "@inlang/paraglide-next/pages"
 import { Header } from "@/lib/Header"
 import "@/lib/styles.css"
 

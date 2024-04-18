@@ -1,4 +1,4 @@
-import { paraglide } from "@inlang/paraglide-js-adapter-next/plugin"
+import { paraglide } from "@inlang/paraglide-next/plugin"
 
 export default paraglide({
 	paraglide: {

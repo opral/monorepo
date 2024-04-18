@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/paraglide-js-adapter-next-example-app",
+	"name": "@inlang/paraglide-next-example-app",
 	"version": "0.2.17",
 	"private": true,
 	"scripts": {
@@ -14,7 +14,7 @@
 		"react-dom": "^18"
 	},
 	"devDependencies": {
-		"@inlang/paraglide-js-adapter-next": "workspace:*",
+		"@inlang/paraglide-next": "workspace:*",
 		"@types/node": "^20",
 		"@types/react": "^18",
 		"@types/react-dom": "^18",

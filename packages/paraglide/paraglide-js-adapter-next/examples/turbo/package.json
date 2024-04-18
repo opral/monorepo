@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/paraglide-js-adapter-next-example-turbo",
+	"name": "@inlang/paraglide-next-example-turbo",
 	"version": "0.1.18",
 	"private": true,
 	"scripts": {
@@ -14,7 +14,7 @@
 		"react-dom": "^18"
 	},
 	"devDependencies": {
-		"@inlang/paraglide-js-adapter-next": "workspace:*",
+		"@inlang/paraglide-next": "workspace:*",
 		"typescript": "^5",
 		"@types/node": "^20",
 		"@types/react": "^18",

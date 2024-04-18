@@ -1,5 +1,5 @@
 import "@/lib/ui/styles.css"
-import { LanguageProvider } from "@inlang/paraglide-js-adapter-next"
+import { LanguageProvider } from "@inlang/paraglide-next"
 import { AvailableLanguageTag, languageTag } from "@/paraglide/runtime"
 import { Header } from "@/lib/ui/Header"
 import * as m from "@/paraglide/messages.js"
