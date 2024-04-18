@@ -1,5 +1,5 @@
 
-# Paraglide Adapter Unplugin
+# Paraglide-Unplugin
 
 This package provides an Unplugin Wrapper around the paraglide-js compiler, making it 
 easier to use with bundler such as Vite, Webpack, Rollup, and RsPack.

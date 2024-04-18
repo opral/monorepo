@@ -2,11 +2,11 @@
 
 **Currently Unmaintained**
 
-# SolidStart Adapter for [Paraglide JS](https://inlang.com/m/gerre34r)
+# Paraglide-SolidStart
 
 ## Example project
 
-Before setting up the adapter in your own project, you can take a look at the [example project](https://github.com/thetarnav/paraglide-solidstart-hackernews) to see how it works.
+Before setting up Paraglide-SolidStart in your own project, you can take a look at the [example project](https://github.com/thetarnav/paraglide-solidstart-hackernews) to see how it works.
 
 ## Getting started
 

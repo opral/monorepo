@@ -1,4 +1,4 @@
-# Paraglide Adapter Vite
+# Paraglide-Vite
 
 This package provides a vite plugin to make it easier to use paraglide-js in any project that uses vite.
 
@@ -16,7 +16,7 @@ this command and following the instructions.
 npx @inlang/paraglide-js init
 ```
 
-Install the vite adapter with
+Install paraglide-vite with
 
 ```bash
 npm install @inlang/paraglide-vite
