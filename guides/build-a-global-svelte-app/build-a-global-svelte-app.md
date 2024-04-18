@@ -298,4 +298,4 @@ Try it on [StackBlitz](https://stackblitz.com/~/github.com/lorissigrist/paraglid
 
 If you have any questions, feel free to ask them in our [Discord](https://discord.gg/CNPfhWpcAa) or open a discussion on [GitHub](https://github.com/opral/monorepo/discussions).
 
-You can reference an example project on [GitHub](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/example).
+You can reference an example project on [GitHub](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-sveltekit/example).
