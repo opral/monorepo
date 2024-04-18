@@ -2895,6 +2895,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: 0.34.6
         version: 0.34.6(vitest@0.34.6)
+      eslint:
+        specifier: ^8.57.0
+        version: 8.57.0
       typescript:
         specifier: 5.2.2
         version: 5.2.2
