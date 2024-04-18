@@ -44,8 +44,12 @@ type Config = NextConfig & {
  * @returns
  */
 export function paraglide(config: Config): NextConfig {
+	const aliasPath = config.paraglide.outdir.endsWith("/")
+		? config.paraglide.outdir + "runtime.js"
+		: config.paraglide.outdir + "/runtime.js"
+
 	addAlias(config, {
-		"$paraglide/runtime.js": config.paraglide.outdir + "/runtime.js",
+		"$paraglide/runtime.js": aliasPath,
 	})
 
 	// Next calls `next.config.js` TWICE. Once in a worker and once in the main process.
