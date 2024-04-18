@@ -2,7 +2,7 @@
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "library.inlang.paraglideJsAdapterSolidStart",
 	"slug": "paraglide-solidstart-i18n",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-solidstart/assets/icon.png",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-solidstart/assets/icon.png",
 	"displayName": {
 		"en": "Paraglide JS Adapter SolidStart"
 	},
@@ -10,8 +10,8 @@
 		"en": "A SolidStart integration for ParaglideJS, providing you with everything you need to take your solid app global."
 	},
 	"pages": {
-		"/": "./inlang/source-code/paraglide/paraglide-js-adapter-solidstart/README.md",
-		"/changelog": "./inlang/source-code/paraglide/paraglide-js-adapter-solidstart/CHANGELOG.md"
+		"/": "./inlang/source-code/paraglide/paraglide-solidstart/README.md",
+		"/changelog": "./inlang/source-code/paraglide/paraglide-solidstart/CHANGELOG.md"
 	},
 	"keywords": [
 		"paraglide js",

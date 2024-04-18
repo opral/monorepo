@@ -20,7 +20,7 @@ export default function Home() {
 					</a>
 				</li>
 				<li>
-					<a href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next/examples/pages">
+					<a href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-next/examples/pages">
 						{m.source_code()}
 					</a>
 				</li>
