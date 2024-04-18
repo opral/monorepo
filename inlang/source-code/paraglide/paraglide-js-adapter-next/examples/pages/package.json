@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/paraglide-js-adapter-next-example-pages",
+	"name": "@inlang/paraglide-next-example-pages",
 	"version": "0.2.19",
 	"private": true,
 	"sideEffects": false,
@@ -10,7 +10,7 @@
 	},
 	"dependencies": {
 		"@inlang/paraglide-js": "workspace:*",
-		"@inlang/paraglide-js-adapter-next": "workspace:*",
+		"@inlang/paraglide-next": "workspace:*",
 		"next": "14.1.2-canary.4",
 		"react": "^18",
 		"react-dom": "^18"
