@@ -7,6 +7,8 @@
  * @property {number} total
  */
 
+
+
 /**
  * @callback ProgressCallback
  * @param {GitProgressEvent} progress
