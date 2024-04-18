@@ -12,6 +12,7 @@ Get started instantly with the Paraglide-Next CLI.
 
 ```bash
 npx @inlang/paraglide-js-adapter-next init
+npm install
 ```
 
 The CLI will ask you which languages you want to support. This can be changed later. 
