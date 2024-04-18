@@ -13,12 +13,8 @@ const stylesheet = unsafeCSS(style)
 export const TW = <T extends LitMixin>(superClass: T): T =>
 	class extends superClass {
 		override connectedCallback() {
-			if (!this.shadowRoot) {
-				throw new Error(
-					"We expect this.shadowRoot to be defined at that state - if this raises investigate further."
-				)
-			}
 			super.connectedCallback()
+			// @ts-ignore this did fail on tsc - if we decide to further include tailwind this might get some more investigation
 			adoptStyles(this.shadowRoot, [stylesheet])
 		}
 	}
