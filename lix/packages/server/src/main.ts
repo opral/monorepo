@@ -23,7 +23,7 @@ app.use(compression())
 
 // setup sentry error tracking
 // must happen before the request handlers
-if (SERVER_SENTRY_DSN !== "") {
+if (isProduction) {
 	Sentry.init({
 		dsn: SERVER_SENTRY_DSN,
 		integrations: [
