@@ -4,10 +4,10 @@
 	"private": true,
 	"scripts": {
 		"dev": "vite",
-		"build": "paraglide-js compile --project ../../../project.inlang && vite build -- --max_old_space_size=1200000",
+		"build": "vite build -- --max_old_space_size=1200000 && tsc --noEmit",
 		"production": "NODE_ENV=production tsx ./src/server/main.ts",
 		"---- TEST ----------------------------------------------------------": "",
-		"test": "paraglide-js compile --project ../../../project.inlang && tsc --noEmit",
+		"test": "paraglide-js compile --project ../../../project.inlang",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
@@ -18,7 +18,6 @@
 	"dependencies": {
 		"@lix-js/client": "workspace:*",
 		"@lix-js/fs": "workspace:*",
-		"@lix-js/server": "workspace:*",
 		"@sentry/browser": "^7.27.0",
 		"@sentry/node": "^7.47.0",
 		"@sentry/tracing": "^7.47.0",

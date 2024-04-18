@@ -1,5 +1,25 @@
 # @inlang/cli
 
+## 2.14.1
+
+### Patch Changes
+
+- Updated dependencies [4941ca4]
+- Updated dependencies [d573ab8]
+  - @lix-js/client@1.2.1
+  - @inlang/sdk@0.33.0
+
+## 2.14.0
+
+### Minor Changes
+
+- bc9875d: sdk multi-project test, MOCK_TRANSLATE_LOCAL for no server testing, inlang machine translate --nobar (-b) hides progressbar
+
+### Patch Changes
+
+- Updated dependencies [bc9875d]
+  - @inlang/sdk@0.32.0
+
 ## 2.13.7
 
 ### Patch Changes

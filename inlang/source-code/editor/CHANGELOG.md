@@ -4,6 +4,19 @@
 
 ### Patch Changes
 
+- Updated dependencies [4941ca4]
+  - @lix-js/client@1.2.1
+
+## null
+
+### Patch Changes
+
+- @lix-js/server@1.1.4
+
+## null
+
+### Patch Changes
+
 - @lix-js/server@1.1.3
 
 ## null

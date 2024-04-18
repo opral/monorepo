@@ -20,7 +20,10 @@ export function useCompiler(options: {
 	watch?: boolean
 }) {
 	try {
-		spawnSync(`npx paraglide-js compile --project ${options.project} --outdir ${options.outdir}`, {
+		const command = `npx paraglide-js compile --project ${options.project} --outdir ${
+			options.outdir
+		}${options.watch ? " --silent" : ""}`
+		spawnSync(command, {
 			cwd: process.cwd(),
 			stdio: "inherit",
 			shell: true,

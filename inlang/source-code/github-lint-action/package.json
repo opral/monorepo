@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/github-lint-action",
 	"description": "This action checks for translation issues within your PRs.",
-	"version": "0.2.18",
+	"version": "0.2.20",
 	"private": true,
 	"publishConfig": {
 		"access": "public"
@@ -25,8 +25,8 @@
 	},
 	"scripts": {
 		"dev": "node ./build.js",
-		"build": "pnpm run format && esbuild src/index.ts --bundle --platform=node --target=node20 --outfile=dist/index.cjs",
-		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage --test-timeout=10000",
+		"build": "pnpm run format && tsc --noEmit && esbuild src/index.ts --bundle --platform=node --target=node20 --outfile=dist/index.cjs",
+		"test": "vitest run --passWithNoTests --coverage --test-timeout=10000",
 		"lint": "eslint ./src --fix",
 		"format": "prettier --write **/*.ts",
 		"clean": "rm -rf ./dist ./node_modules"

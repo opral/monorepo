@@ -1,3 +1,5 @@
+// Vendored in from NextJS
+
 export const basePath: string = process.env.__NEXT_ROUTER_BASEPATH || ""
 
 export function addBasePath(path: string, required?: boolean): string {

@@ -1,5 +1,47 @@
 # @inlang/paraglide-js-adapter-next
 
+## 3.2.0
+
+### Minor Changes
+
+- 0774c1a: Added `paraglide-next init` command for quick project setup
+
+### Patch Changes
+
+- Updated dependencies [0774c1a]
+  - @inlang/paraglide-js@1.7.0
+
+## 3.1.1
+
+### Patch Changes
+
+- cee4692: Use index accesses instead of `.at` function for better compatability with legacy browsers
+- Updated dependencies [cee4692]
+- Updated dependencies [4b631aa]
+- Updated dependencies [3c7a87c]
+- Updated dependencies [ab1fe48]
+  - @inlang/paraglide-js@1.6.2
+
+## 3.1.0
+
+### Minor Changes
+
+- a7e1266: Optional and Rest parameters are now supported on `pathnames`. Use `[...rest]` to create a wildcard segment that matches zero or more segments. Use `[[optionalParam]]` to create an optional segment that matches zero or one segments.
+
+### Patch Changes
+
+- 55b78f8: The compiler no longer double-logs when starting the dev-server
+- Updated dependencies [fa6aa31]
+- Updated dependencies [dee5aa6]
+  - @inlang/paraglide-js@1.6.1
+
+## 3.0.1
+
+### Patch Changes
+
+- Updated dependencies [462325b]
+  - @inlang/paraglide-js@1.6.0
+
 ## 3.0.0
 
 ### Patch Changes

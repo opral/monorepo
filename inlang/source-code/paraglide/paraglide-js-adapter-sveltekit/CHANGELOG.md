@@ -1,5 +1,49 @@
 # @inlang/paraglide-js-adapter-sveltekit
 
+## 0.6.7
+
+### Patch Changes
+
+- Updated dependencies [0774c1a]
+  - @inlang/paraglide-js@1.7.0
+  - @inlang/paraglide-js-adapter-vite@1.2.40
+
+## 0.6.6
+
+### Patch Changes
+
+- cee4692: Use index accesses instead of `.at` function for better compatability with legacy browsers
+- 4b631aa: Update invalid type-declarations
+- Updated dependencies [cee4692]
+- Updated dependencies [4b631aa]
+- Updated dependencies [3c7a87c]
+- Updated dependencies [ab1fe48]
+  - @inlang/paraglide-js@1.6.2
+  - @inlang/paraglide-js-adapter-vite@1.2.39
+
+## 0.6.5
+
+### Patch Changes
+
+- Updated dependencies [fa6aa31]
+- Updated dependencies [dee5aa6]
+  - @inlang/paraglide-js@1.6.1
+  - @inlang/paraglide-js-adapter-vite@1.2.38
+
+## 0.6.4
+
+### Patch Changes
+
+- Updated dependencies [462325b]
+  - @inlang/paraglide-js@1.6.0
+  - @inlang/paraglide-js-adapter-vite@1.2.37
+
+## 0.6.3
+
+### Patch Changes
+
+- @inlang/paraglide-js-adapter-vite@1.2.36
+
 ## 0.6.2
 
 ### Patch Changes

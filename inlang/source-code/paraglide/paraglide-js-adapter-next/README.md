@@ -8,116 +8,45 @@
 
 ## Getting Started
 
-Install [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) and the [Paraglide NextJS Adapter](https://inlang.com/m/osslbuzt/paraglide-next-i18n).
+Get started instantly with the Paraglide-Next CLI.
 
 ```bash
-npx @inlang/paraglide-js@latest init
-npm install @inlang/paraglide-js-adapter-next
+npx @inlang/paraglide-js-adapter-next init
 ```
 
-Your messages live in the generated `messages/{lang}.json` files. Add a message in there to get started.
+The CLI will ask you which languages you want to support. This can be changed later. 
+
+It will:
+- Create an Inlang Project
+- Create translation files for each of your languages
+- Create a middleware file
+- Create `lib/i18n.ts` file
+- Update your `next.config.js` file to use the Paraglide-Next Plugin.
+- Add the `<LanguageProvider>` wrapper to your `app/layout.tsx` component.
+
+You can now start your dev-server and visit `/de`, `/ar`, or whatever languages you've set up.
+
+## Adding Messages
+
+Your messages live in `messages/{languageTag}.json` files. You can add messages in these files as key-value pairs of the message ID and the translations.
+
+Use curly braces to add parameters.
 
 ```json
 // messages/en.json
 {
-	"hello": "Hello {name}"
+	// The $schema key is automatically ignored
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+
+	"hello_world" : "Hello World!",
+	"greetings": "Greetings {name}."
 }
 ```
 
-### Step 1. Add the Next-Plugin
+Learn more about the format in the [Inlang Message Format Documentation](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat).
 
-Add the Paraglide-Plugin in `next.config.mjs`. This will make sure to rerun the paraglide compiler when needed.
-
-```ts
-// make sure to import from /plugin
-import { paraglide } from "@inlang/paraglide-js-adapter-next/plugin"
-
-export default paraglide({
-	paraglide: {
-		//recommended setup
-		project: "./project.inlang", //the path to the Inlang project
-		outdir: "./src/paraglide", // where you want the generated files to go
-	},
-
-	// ... rest of your next config
-})
-```
-
-### Step 2. Initialise the Adapter
-
-Create a `src/lib/i18n.ts` file
-
-```ts
-// src/lib/i18n.ts
-import { createI18n } from "@inlang/paraglide-js-adapter-next"
-import type { AvailableLanguageTag } from "@/paraglide/runtime.js" //generated file
-
-// All available functions exported. Just use the ones you need
-export const {
-	middleware,
-	Link,
-	useRouter,
-	usePathname,
-	redirect,
-	permanentRedirect,
-	localizePath,
-} = createI18n<AvailableLanguageTag>()
-```
-
-<doc-accordion
-	heading="Can I put this file somewhere else?"
-	text="Sure, you can put it anywhere. Just be aware that you will be importing from this file a lot, so make sure it's somewhere convenient">
-</doc-accordion>
-
-### Step 3. Add the Middleware
-
-In `src/middleware.ts`:
-
-```ts
-export { middleware } from "@/lib/i18n.js"
-```
-
-### Step 4. Add the Language Provider
-
-In `src/app/layout.tsx` add the `<LanguageProvider>` component & set the lang attribute on your html element:
-
-```tsx
-import { LanguageProvider } from "@inlang/paraglide-js-adapter-next"
-import { languageTag } from "@/paraglide/runtime"
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-	return (
-		<LanguageProvider>
-			{/* setting the lang attribute is important! */}
-			<html lang={languageTag()}>
-				<body>{children}</body>
-			</html>
-		</LanguageProvider>
-	)
-}
-```
-
-### Step 5. Use the localized navigation APIs
-
-In order to get localised `<Link>`s you need to replace the ones from `next/link` with the ones from `@/lib/i18n.js`. Just find & replace the imports.
-
-```diff
-- import Link from "next/link"
-+ import { Link } from "@/lib/i18n" 
-```
-
-The same goes for the other navigation APIs.
-
-```diff
-- import { usePathname, useRouter, redirect, permanentRedirect} from "next/navigation"
-+ import { usePathname, useRouter, redirect, permanentRedirect} from "@/lib/i18n"
-```
-
-### Done!
-
-You have set up localised routing! Try visiting `/de` or whatever language you have configured.
-
-Use messages by importing them from `@/paraglide/messages.js`. By convention we do a wildcard import as `m`.
+## Using Messages in Code
+Use messages by importing them from `@/paraglide/messages.js`. By convention, we do a wildcard import as `m`.
 
 ```tsx
 import * as m from "@/paraglide/messages.js"
@@ -134,7 +63,30 @@ export function Home() {
 
 Only messages used in client components are sent to the client. Messages in Server Components don't impact bundle size.
 
-## Usage
+## Localized navigation APIs
+
+While you can now visit `/de/some-page` you still need to add the language-prefix to every single link. Wouldn't it be nice if that happened automatically? 
+
+For this the package provides Localised Navigation APIs. These are exported from `@/lib/i18n.js`.
+
+To get localized `<Link>`s you need to replace the ones from `next/link` with the ones from `@/lib/i18n.js`. Just find & replace the imports.
+
+```diff
+- import Link from "next/link"
++ import { Link } from "@/lib/i18n" 
+
+// This now links to /de/about depending on the current language
+<Link href="/about"> 
+```
+
+You can do the same for the other navigation APIs.
+
+```diff
+- import { usePathname, useRouter, redirect, permanentRedirect} from "next/navigation"
++ import { usePathname, useRouter, redirect, permanentRedirect} from "@/lib/i18n"
+```
+
+## Advanced Usage
 
 ### Translated Metadata
 
@@ -151,11 +103,11 @@ export async function generateMetadata() {
 
 > If you were to use `export const metadata` your metadata would always end up in the source language.
 
-### Linking to Pages in other Languages
+### Linking to Pages in Other Languages
 
 If you want a Link to be in a specific language you can use the `locale` prop.
 
-```
+```tsx
 <Link href="/about" locale="de">
 ```
 
@@ -193,7 +145,7 @@ Excluded routes won't be prefixed with the language tag & the middleware will no
 
 #### Changing the default language
 
-By default the default language is the `sourceLanguageTag` defined in `project.inlang/settings.json`. You can change it with the `defaultLanguage` option.
+By default, the default language is the `sourceLanguageTag` defined in `project.inlang/settings.json`. You can change it with the `defaultLanguage` option.
 
 ```ts
 export const { ... } =
@@ -209,27 +161,45 @@ The adapter follows these steps to determine the language.
 - First, the adapter will try to determine the language based on the URL.
 - If that fails, it will look for a `NEXT_LOCALE` cookie.
 - If that isn't available either, it will try to negotiate the language based on the `Accept-Language` header.
-- Finally it will fallback to the default language.
+- Finally, it will fall back to the default language.
 
 If a language has been determined once, it will set the `NEXT_LOCALE` cookie so that future ambiguities don't result in random language switches.
 
 #### Translated Pathnames
 
 You can use different pathnames for each language with the `pathname` option.
+Pathnames should not include a language prefix or the base path.
 
 ```ts
 export const { ... } =
 	createI18n<AvailableLanguageTag>({
 		pathname: {
 			"/about": {
-				de: "/ueber-uns",
-				en: "/about"
+				en: "/about",
+				de: "/ueber-uns"
 			}
 		}
 	})
 ```
+ 
+You can use parameters in pathnames with square brackets. You have to use an identical set of parameters in both the canonical and translated pathnames.
 
-You can also use a message as a pathname
+You can use double-square brackets for optional parameters and the spread operator to make it a match-all parameter.
+
+```ts
+pathname: {
+	"/articles/[slug]": {
+		en: "/articles/[slug]",
+		de: "/artikel/[slug]"
+	},
+	"/admin/[...rest]": {
+		en: "/administration/[...rest]",
+		de: "/admin/[...rest]"
+	},
+}
+```
+
+You can also use a message as a pathname. The translation will be used as the pathname. You can use parameters here too. 
 
 ```json
 // messages/en.json
@@ -253,9 +223,9 @@ export const { ... } =
 
 Be careful when using translated pathnames in combination with `prefix: "never"`. Links may not work if they are shared between people with different languages.
 
-#### Getting a localised Pathname
+#### Getting a localized Pathname
 
-There are situations where you need to know the localised version of a pathname. You can use the `localizePathname` function for that.
+There are situations where you need to know the localized version of a pathname. You can use the `localizePathname` function for that.
 
 ```ts
 import { localizePathname } from "@/lib/i18n"
@@ -264,7 +234,7 @@ localizePathname("/about", "de") // de/ueber-uns
 
 This does not include the `basePath`.
 
-#### SEO
+### Alternate Links
 
 Search engines like Google expect you to tell them about translated versions of your pages. The adapter does this by default by adding the `Link` Header to requests.
 
@@ -291,26 +261,39 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 	//...
 ```
 
-> We discourage using the `Intl.Locale` API for text-direction as that's still poorly supported
+> We discourage using the `Intl.Locale` API for text-direction as it's still poorly supported
 
-## (legacy) Setup With the Pages Router
+## (Legacy) Setup With the Pages Router
 
-The Pages router already comes with [i18n support out of the box](https://nextjs.org/docs/advanced-features/i18n-routing). Thus, Paraglide doesn't need to provide it's own routing. All the Adapter does in the Pages router is react to the language change.
+The Pages router already comes with [i18n support out of the box](https://nextjs.org/docs/advanced-features/i18n-routing). Thus, Paraglide doesn't need to provide routing. All the Adapter does in the Pages router is react to the language change & run the compiler.
 
-Add an `i18n` object to your `next.config.js` file. In it, specify the locales you want to support and the default locale. Make sure these match the ones in your `project.inlang/settings.json` file.
+In `next.config.js`, add the `paraglide` plugin.
+```js
+const { paraglide } = require("@inlang/paraglide-js-adapter-next/plugin")
+module.exports = paraglide({
+	paraglide: {
+		project: "./project.inlang",
+		outdir: "./src/paraglide",
+	}
+})
+```
+
+Then add an `i18n` object and specify the locales you want to support. Make sure these match the ones in your `project.inlang/settings.json` file.
 
 ```js
-module.exports = {
+module.exports = paraglide({
+	paraglide: {
+		project: "./project.inlang",
+		outdir: "./src/paraglide",
+	},
 	i18n: {
 		locales: ["en", "de"],
 		defaultLocale: "en",
 	},
-}
+})
 ```
 
-> If you are using ESM for your NextJS config, you can also import `availableLanguageTags` and `sourceLanguageTag` from `./src/paraglide/runtime.js` and use them instead of hardcoding the locales.
-
-NextJS will now automatically prefix all routes with the locale. For example, the route `/about` will become `/en/about` for the English locale and `/de/about` for the German locale. Only the default locale won't be prefixed.
+NextJS will automatically prefix all routes with the locale. For example, the route `/about` will become `/en/about` for the English locale and `/de/about` for the German locale. Only the default locale won't be prefixed.
 
 Finally, wrap your `_app.js` file with the `ParaglideJS` component.
 
@@ -326,7 +309,7 @@ export default function App({ Component, pageProps }: AppProps) {
 }
 ```
 
-That's it! You can now use Paraglide's messages in your components.
+You can now use Paraglide's messages in your components.
 
 ```ts
 import * as m from "@/paraglide/messages.js"
@@ -353,11 +336,11 @@ export default function Document() {
 
 ## Known Limitations
 
-There are some known limitation with this adapter:
+There are some known limitations with this adapter:
 
 - `output: static` isn't supported yet.
-- Evaluating messages in the module-scope in server components always renders the source language.
-- Server actions that aren't inside a tsx file will always read the default language, unless `setLanguageTag(()=>headers().get("x-language-tag"))` is called at the top of the file.
+- Evaluating messages in the module scope always renders the source language.
+- Server actions that aren't inside a `.tsx` file will always read the default language unless `setLanguageTag(()=>headers().get("x-language-tag"))` is called at the top of the file.
 
 ## Roadmap to 1.0
 
