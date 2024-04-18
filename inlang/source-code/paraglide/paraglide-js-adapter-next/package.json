@@ -9,7 +9,7 @@
 		"url": "https://github.com/opral/inlang-paraglide-js"
 	},
 	"scripts": {
-		"build": "SCRIPT=build node ./build.mjs",
+		"build": "node ./build.mjs",
 		"clean": "rm -rf dist && rm -rf node_modules",
 		"test": "NODE_ENV=development vitest run && NODE_ENV=production vitest run",
 		"lint": "eslint ./src --fix"

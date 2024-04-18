@@ -5,7 +5,7 @@ import pkg from "./package.json"
 import manifest from "./marketplace-manifest.json"
 
 export default defineConfig(({ mode }) => ({
-	plugins: [dts({ insertTypesEntry: true }), tsconfigPaths()],
+	plugins: [dts({ insertTypesEntry: true, ignoreConfigErrors: true }), tsconfigPaths()],
 	build: {
 		lib: {
 			entry: ["src/index.ts", "src/adapter-utils/index.ts", "src/cli/index.ts"],
