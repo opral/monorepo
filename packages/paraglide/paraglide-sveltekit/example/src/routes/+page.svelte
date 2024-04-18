@@ -14,7 +14,7 @@
 		</a>
 	</li>
 	<li>
-		<a href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/example">
+		<a href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglid-sveltekit/example">
 			{m.source_code()}
 		</a>
 	</li>

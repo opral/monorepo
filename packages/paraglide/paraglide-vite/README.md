@@ -42,4 +42,4 @@ Now, the `paraglide` folder at `./src/paraglide` will be automatically updated w
 
 ## Example
 
-You can find an example vite project [here](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-vite/example).
+You can find an example vite project [here](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-vite/example).
