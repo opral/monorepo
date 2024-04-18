@@ -18,7 +18,7 @@ See all available commands [here](#commands).
 2. Create a `settings.json` file to that new dir `project.inlang/settings.json`
 3. Install a plugin that reads and writes your messages from the [inlang marketplace](https://inlang.com/c/plugins)
 ---
-4. **Optional** Install lint rules to find errors in your translations from the [inlang marketplace](https://inlang.com/c/lint-rules)
+4. **Optional** Install [lint rules](https://inlang.com/c/lint-rules) to find errors in your translations from the [inlang marketplace](https://inlang.com/c/lint-rules)
 
 
 # Core features
