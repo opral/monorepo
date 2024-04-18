@@ -7,7 +7,7 @@
 		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-next/assets/og.png"
 	],
 	"displayName": {
-		"en": "Paraglide JS Adapter NextJS"
+		"en": "Paraglide-Next"
 	},
 	"description": {
 		"en": "A NextJS integration for ParaglideJS, providing you with everything you need for i18n routing"

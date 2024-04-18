@@ -7,7 +7,7 @@
 		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-sveltekit/assets/og.png"
 	],
 	"displayName": {
-		"en": "Paraglide JS Adapter SvelteKit"
+		"en": "Paraglide-SvelteKit"
 	},
 	"description": {
 		"en": "A SvelteKit integration for ParaglideJS, providing you with everything you need for i18n routing"
