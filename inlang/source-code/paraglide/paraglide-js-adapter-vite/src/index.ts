@@ -1,7 +1,4 @@
-import {
-	paraglide as unpluginParaglide,
-	type UserConfig,
-} from "@inlang/paraglide-js-adapter-unplugin"
+import { paraglide as unpluginParaglide, type UserConfig } from "@inlang/paraglide-unplugin"
 
 // Vite is notorious for Plugin-TypeErrors between different versions
 // The plugins still work, but the types are not compatible

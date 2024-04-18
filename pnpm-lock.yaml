@@ -1546,7 +1546,7 @@ importers:
 
   inlang/source-code/paraglide/paraglide-js-adapter-rollup:
     dependencies:
-      '@inlang/paraglide-js-adapter-unplugin':
+      '@inlang/paraglide-unplugin':
         specifier: workspace:*
         version: link:../paraglide-js-adapter-unplugin
     devDependencies:
@@ -1731,7 +1731,7 @@ importers:
 
   inlang/source-code/paraglide/paraglide-js-adapter-vite:
     dependencies:
-      '@inlang/paraglide-js-adapter-unplugin':
+      '@inlang/paraglide-unplugin':
         specifier: workspace:*
         version: link:../paraglide-js-adapter-unplugin
     devDependencies:
@@ -1777,7 +1777,7 @@ importers:
 
   inlang/source-code/paraglide/paraglide-js-adapter-webpack:
     dependencies:
-      '@inlang/paraglide-js-adapter-unplugin':
+      '@inlang/paraglide-unplugin':
         specifier: workspace:*
         version: link:../paraglide-js-adapter-unplugin
     devDependencies:
