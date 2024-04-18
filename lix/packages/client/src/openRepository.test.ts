@@ -481,7 +481,12 @@ describe("main workflow", () => {
 		)
 		fromSnapshot(fs, snapshot)
 
-		const firstHash = await repository.getFirstCommitHash()
+		const repo = await openRepository("file://", {
+			nodeishFs: fs,
+			branch: "test-symlink",
+		})
+
+		const firstHash = await repo.getFirstCommitHash()	
 		expect(firstHash).toBe("244e3ce8c3335530ac0cd07e669b964bceb3b787")
 	})
 

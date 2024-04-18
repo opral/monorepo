@@ -14,7 +14,7 @@ import type { MessageIndexFunction } from "@inlang/paraglide-js/internal"
  */
 export function resolvePathTranslations<T extends string>(
 	userTranslations: UserPathTranslations<T>,
-	availableLanguageTags: readonly T[]
+	availableLanguageTags: readonly T[],
 ): PathDefinitionTranslations<T> {
 	const translations: PathDefinitionTranslations<T> = {}
 	for (const path in userTranslations) {
@@ -35,10 +35,10 @@ export function resolvePathTranslations<T extends string>(
 
 function fromMessage<T extends string>(
 	message: MessageIndexFunction<T>,
-	availableLanguageTags: readonly T[]
+	availableLanguageTags: readonly T[],
 ): Record<T, `/${string}`> {
 	const entries = availableLanguageTags.map(
-		(languageTag) => [languageTag, message({}, { languageTag })] as const
+		(languageTag) => [languageTag, message({}, { languageTag })] as const,
 	)
 	return Object.fromEntries(entries) as Record<T, `/${string}`>
 }

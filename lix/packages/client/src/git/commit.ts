@@ -3,13 +3,15 @@ import {
 	TREE,
 	STAGE,
 	writeTree,
-	commit as isoGitCommit,
+	commit as originalIsoGitCommit,
 	type TreeEntry,
 } from "../../vendored/isomorphic-git/index.js"
+import { add } from "./add.js"
+import { remove } from "./remove.js"
 import { getDirname, getBasename } from "@lix-js/fs"
 
 import type { NodeishFilesystem } from "@lix-js/fs"
-import type { Author } from "../api.js"
+import type { RepoContext, RepoState, Author } from "../openRepository.js"
 
 type PartialEntry = {
 	mode: string
@@ -18,7 +20,68 @@ type PartialEntry = {
 	oid: string | undefined
 }
 
-export async function commit({
+export const isoCommit = (
+	ctx: RepoContext,
+	{ author, message }: { author: any; message: string }
+) =>
+	originalIsoGitCommit({
+		fs: ctx.rawFs,
+		dir: ctx.dir,
+		cache: ctx.cache,
+		author: author || ctx.author,
+		message: message,
+	})
+
+export async function commit(
+	ctx: RepoContext,
+	state: RepoState,
+	{
+		author: overrideAuthor,
+		message,
+		include,
+	}: // TODO: exclude,
+	{
+		author?: any
+		message: string
+		include: string[]
+		// exclude: string[]
+	}
+) {
+	if (include) {
+		const additions: string[] = []
+		const deletions: string[] = []
+
+		for (const entry of include) {
+			if (await ctx.rawFs.lstat(entry).catch(() => undefined)) {
+				additions.push(entry)
+			} else {
+				deletions.push(entry)
+			}
+		}
+
+		additions.length && (await add(ctx, additions))
+		deletions.length && (await Promise.all(deletions.map((del) => remove(ctx, del))))
+	} else {
+		// TODO: commit all
+	}
+
+	const commitArgs = {
+		fs: state.nodeishFs,
+		dir: ctx.dir,
+		cache: ctx.cache,
+		author: overrideAuthor || ctx.author,
+		message: message,
+	}
+
+	if (ctx.experimentalFeatures.lixCommit) {
+		console.warn("using experimental commit for this repo.")
+		return doCommit(commitArgs)
+	} else {
+		return originalIsoGitCommit(commitArgs)
+	}
+}
+
+export async function doCommit({
 	cache,
 	fs,
 	dir,
@@ -164,7 +227,7 @@ export async function commit({
 
 	const tree = await createTree("/", fileStates)
 
-	return isoGitCommit({
+	return originalIsoGitCommit({
 		cache,
 		fs,
 		dir,

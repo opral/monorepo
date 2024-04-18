@@ -2888,9 +2888,6 @@ importers:
       sha.js:
         specifier: ^2.4.11
         version: 2.4.11
-      solid-js:
-        specifier: 1.7.11
-        version: 1.7.11
     devDependencies:
       '@vitest/coverage-v8':
         specifier: 0.34.6

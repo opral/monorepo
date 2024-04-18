@@ -1,11 +1,12 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 import isoGit, { _worthWalking } from "../../vendored/isomorphic-git/index.js"
 import { modeToFileType } from "./helpers.js"
+import type { RepoContext, RepoState } from "../openRepository.js"
 
 // TODO: LSTAT is not properly impl. in the memory fs!
 
 const {
-	walk,
+	walk, // _walk expects cache to always exist.
 
 	TREE,
 	WORKDIR,
@@ -63,7 +64,7 @@ function join(...parts: string[]) {
 	return normalizePath(parts.map(normalizePath).join("/"))
 }
 
-type StatusArgs = {
+export type StatusArgs = {
 	fs: NodeishFilesystem
 	/** The [working tree](dir-vs-gitdir.md) directory path */
 	dir: string
@@ -84,7 +85,7 @@ type StatusArgs = {
 	/** Filter the results to only those whose filepath matches a function. */
 	filter?: (filepath: string) => boolean
 	/** (experimental filter option) TODO document */
-	sparseFilter?: (entry: { filename: string; type: "file" | "folder" | "symlink" }) => boolean //
+	sparseFilter?: (entry: { filename: string; type: "file" | "folder" | "symlink" }) => boolean
 	/** an isogit cache object */
 	cache?: object
 	/**
@@ -99,10 +100,26 @@ type StatusArgs = {
 	addHashes?: boolean
 }
 
+export async function statusList(
+	ctx: RepoContext,
+	state: RepoState,
+	statusArg?: Pick<StatusArgs, "filter" | "filepaths" | "includeStatus">
+): ReturnType<typeof _statusList> {
+	return await _statusList({
+		fs: ctx.rawFs,
+		dir: ctx.dir,
+		cache: ctx.cache,
+		sparseFilter: state.sparseFilter,
+		filter: statusArg?.filter,
+		filepaths: statusArg?.filepaths,
+		includeStatus: statusArg?.includeStatus,
+	})
+}
+
 /**
  * Efficiently get the status of multiple files at once.
  */
-export async function statusList({
+export async function _statusList({
 	fs,
 	dir = "/",
 	gitdir = join(dir, ".git"),
