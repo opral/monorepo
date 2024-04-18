@@ -275,6 +275,10 @@ sl-option::part(label) {
 	align-items: center;
 }
 
+sl-option.add-language::part(checked-icon) {
+	display: none;
+}
+
 sl-select::part(tag) {
 	--sl-input-height-small: 26px;
 }
