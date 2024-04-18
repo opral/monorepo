@@ -154,18 +154,18 @@ export type I18nConfig<T extends string> = {
 export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I18nUserConfig<T>) {
 	const translations = resolvePathTranslations(
 		options?.pathnames ?? {},
-		runtime.availableLanguageTags
+		runtime.availableLanguageTags,
 	)
 
 	if (dev) {
 		const issues = validatePathTranslations(
 			translations,
 			runtime.availableLanguageTags,
-			options?.matchers ?? {}
+			options?.matchers ?? {},
 		)
 		if (issues.length) {
 			console.warn(
-				`The following issues were found in your path translations. Make sure to fix them before deploying your app:`
+				`The following issues were found in your path translations. Make sure to fix them before deploying your app:`,
 			)
 			console.table(issues)
 		}
@@ -273,7 +273,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 				canonicalPath,
 				lang,
 				config.translations,
-				config.matchers
+				config.matchers,
 			)
 
 			return serializeRoute({

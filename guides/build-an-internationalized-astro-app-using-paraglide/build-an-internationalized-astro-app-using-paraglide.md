@@ -59,7 +59,7 @@ For translating layouts and components we need an i18n library. Let's install [P
 
 ```bash
 npx @inlang/paraglide-js init
-npm i @inlang/paraglide-js-adapter-astro
+npm i @inlang/paraglide-astro
 ```
 
 This will have genrated all the files needed for Paraglid & added the necessary dependencies.
@@ -67,7 +67,7 @@ This will have genrated all the files needed for Paraglid & added the necessary 
 Then register the Integration in your `astro.config.mjs`:
 
 ```js
-import paraglide from '@inlang/paraglide-js-adapter-astro'
+import paraglide from '@inlang/paraglide-astro'
 
 export default {
   integrations: [

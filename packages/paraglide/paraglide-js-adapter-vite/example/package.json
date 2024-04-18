@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/paraglide-js-adapter-vite-example",
+	"name": "@inlang/paraglide-vite-example",
 	"private": true,
 	"version": "0.0.0",
 	"type": "module",
@@ -10,7 +10,7 @@
 	},
 	"devDependencies": {
 		"@inlang/paraglide-js": "workspace:*",
-		"@inlang/paraglide-js-adapter-vite": "workspace:*",
+		"@inlang/paraglide-vite": "workspace:*",
 		"typescript": "^4.9.3",
 		"vite": "4.5.0"
 	}

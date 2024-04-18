@@ -1,4 +1,4 @@
-import { paraglide } from "@inlang/paraglide-js-adapter-rollup"
+import { paraglide } from "@inlang/paraglide-rollup"
 import alias from "@rollup/plugin-alias"
 import { fileURLToPath } from "node:url"
 

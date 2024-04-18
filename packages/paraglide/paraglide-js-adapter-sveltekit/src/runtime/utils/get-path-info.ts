@@ -34,8 +34,8 @@ export function getPathInfo(path: string, options: ParseOptions): ParseResult {
 	const dataSuffix = pathWithoutBase.endsWith(HTML_DATA_SUFFIX)
 		? HTML_DATA_SUFFIX
 		: pathWithoutBase.endsWith(DATA_SUFFIX)
-		? DATA_SUFFIX
-		: undefined
+			? DATA_SUFFIX
+			: undefined
 
 	if (dataSuffix) {
 		pathWithoutBase = pathWithoutBase.replace(dataSuffix, "")
