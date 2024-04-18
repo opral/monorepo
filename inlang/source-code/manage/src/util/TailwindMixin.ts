@@ -14,7 +14,9 @@ export const TW = <T extends LitMixin>(superClass: T): T =>
 	class extends superClass {
 		override connectedCallback() {
 			if (!this.shadowRoot) {
-				throw new Error('We expect this.shadowRoot to be defined at that state - if this raises investigate further.')
+				throw new Error(
+					"We expect this.shadowRoot to be defined at that state - if this raises investigate further."
+				)
 			}
 			super.connectedCallback()
 			adoptStyles(this.shadowRoot, [stylesheet])
