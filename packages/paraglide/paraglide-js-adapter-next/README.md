@@ -340,7 +340,7 @@ export default function Document() {
 There are some known limitations with this adapter:
 
 - `output: static` isn't supported yet.
-- Evaluating messages in the module scope always renders the source language.
+- Evaluating messages in module scope always renders the source language.
 - Server actions that aren't inside a `.tsx` file will always read the default language unless `setLanguageTag(()=>headers().get("x-language-tag"))` is called at the top of the file.
 
 ## Roadmap to 1.0
@@ -351,9 +351,11 @@ There are some known limitations with this adapter:
 
 ## Examples
 
-You can find example projects on our Github, or try them on StackBlitz:
+You can find example projects in [our GitHub repository](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide-js-adapter-next/examples), or try them on StackBlitz:
 
-- [App Router Example Repository](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next/examples/app)
-- [App Router Example on StackBlitz](https://stackblitz.com/~/LorisSigrist/paraglide-next-app-router-example)
-- [Pages Router Example](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next/examples/pages)
-- [Pages Router Example on StackBlitz](https://stackblitz.com/~/LorisSigrist/paraglide-next-pages-router-example)
+<doc-links>
+    <doc-link title="App Router Example" icon="simple-icons:stackblitz" href="https://stackblitz.com/~/LorisSigrist/paraglide-next-app-router-example" description="Try out the App router example on StackBlitz"></doc-link>
+    <doc-link title="App Router Example Repository" icon="lucide:github" href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next/examples/app" description="View the source code for the App router Example"></doc-link>
+    <doc-link title="Pages Router Example" icon="simple-icons:stackblitz" href="https://stackblitz.com/~/LorisSigrist/paraglide-next-app-router-example" description="Try out the Pages router example on StackBlitz"></doc-link>
+	<doc-link title="App Router Example Repository" icon="lucide:github" href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next/examples/pages" description="View the source code for the Pages router Example"></doc-link>
+</doc-links>
