@@ -2,9 +2,9 @@
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "library.inlang.paraglideJsAdapterNextJs",
 	"slug": "paraglide-next-i18n",
-	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-next/assets/next-logo.svg",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-next/assets/next-logo.svg",
 	"gallery": [
-		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-next/assets/og.png"
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-next/assets/og.png"
 	],
 	"displayName": {
 		"en": "Paraglide JS Adapter NextJS"
@@ -13,8 +13,8 @@
 		"en": "A NextJS integration for ParaglideJS, providing you with everything you need for i18n routing"
 	},
 	"pages": {
-		"/": "./inlang/source-code/paraglide/paraglide-js-adapter-next/README.md",
-		"/changelog": "./inlang/source-code/paraglide/paraglide-js-adapter-next/CHANGELOG.md"
+		"/": "./inlang/source-code/paraglide/paraglide-next/README.md",
+		"/changelog": "./inlang/source-code/paraglide/paraglide-next/CHANGELOG.md"
 	},
 	"keywords": [
 		"paraglide js",
