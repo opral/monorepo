@@ -140,7 +140,7 @@ export const { ... } =
 	})
 ```
 
-Excluded routes won't be prefixed with the language tag & the middleware will not add `Link` headers to them.
+Excluded routes won't be prefixed with the [language tag](https://inlang.com/m/8y8sxj09/library-inlang-languageTag) & the middleware will not add `Link` headers to them.
 
 > Tip: LLMs are really good at writing regexes.
 
