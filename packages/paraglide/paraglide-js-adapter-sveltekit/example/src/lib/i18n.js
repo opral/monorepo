@@ -1,4 +1,4 @@
-import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
+import { createI18n } from "@inlang/paraglide-sveltekit"
 import { match as int } from "../params/int"
 import * as runtime from "$paraglide/runtime.js"
 import * as m from "$paraglide/messages.js"

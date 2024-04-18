@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/paraglide-js-adapter-sveltekit",
+	"name": "@inlang/paraglide-sveltekit",
 	"version": "0.6.7",
 	"type": "module",
 	"main": "./dist/runtime/index.js",

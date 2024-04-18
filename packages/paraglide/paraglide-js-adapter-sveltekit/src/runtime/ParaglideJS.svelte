@@ -31,7 +31,7 @@
 
 	/**
 	 * The routing instance to use.
-	 * You can create one with `createI18n()` from `@inlang/paraglide-js-adapter-sveltekit`.
+	 * You can create one with `createI18n()` from `@inlang/paraglide-sveltekit`.
 	 */
 	export let i18n: I18n<T>
 

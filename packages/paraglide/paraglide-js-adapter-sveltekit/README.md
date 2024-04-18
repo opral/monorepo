@@ -15,7 +15,7 @@ Install [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) 
 
 ```bash
 npx @inlang/paraglide-js init
-npm i -D @inlang/paraglide-js-adapter-sveltekit
+npm i -D @inlang/paraglide-sveltekit
 ```
 
 This will generate a `messages/{lang}.json` file for each of your languages. This is where your translation files live. 
@@ -25,7 +25,7 @@ This will generate a `messages/{lang}.json` file for each of your languages. Thi
 Add the adapter-plugin to your `vite.config.js` file. This will make sure to rerun the paraglide compiler when needed and add the link preprocessor.
 
 ```js
-import { paraglide } from "@inlang/paraglide-js-adapter-sveltekit/vite"
+import { paraglide } from "@inlang/paraglide-sveltekit/vite"
 
 export default defineConfig({
 	plugins: [
@@ -45,7 +45,7 @@ Create a `src/lib/i18n.js` file:
 
 ```js
 // src/lib/i18n.js
-import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
+import { createI18n } from "@inlang/paraglide-sveltekit"
 import * as runtime from "$lib/paraglide/runtime.js"
 
 export const i18n = createI18n(runtime);
@@ -65,7 +65,7 @@ Add the `ParaglideJS` component to your layout and pass it the `i18n` instance.
 ```svelte
 <!-- src/routes/+layout.svelte -->
 <script>
-    import { ParaglideJS } from '@inlang/paraglide-js-adapter-sveltekit'
+    import { ParaglideJS } from '@inlang/paraglide-sveltekit'
 	import { i18n } from '$lib/i18n.js'
 </script>
 
@@ -112,7 +112,7 @@ Visit `/` to see your default language, and `/{lang}` to see other languages. Al
 Exclude routes from being translated with the `exclude` option.
 
 ```js
-import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
+import { createI18n } from "@inlang/paraglide-sveltekit"
 import * as runtime from "$lib/paraglide/runtime.js"
 
 export const i18n = createI18n(runtime, {
@@ -138,7 +138,7 @@ You can have different paths for each language with the `pathnames` option.
 Don't include the language or the [base path](https://kit.svelte.dev/docs/configuration#paths).
 
 ```js
-import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
+import { createI18n } from "@inlang/paraglide-sveltekit"
 import * as runtime from "$lib/paraglide/runtime.js"
 import * as m from "$lib/paraglide/messages.js"
 import { match as int } from "../params/int.js"
@@ -261,7 +261,7 @@ Use this to create a language switcher.
 Paraglide guesses the text direction using the `Intl.Locale` API. This is not supported in all runtimes. Use the `textDirection` option to provide the text direction yourself.
 
 ```js
-import { createI18n } from "@inlang/paraglide-js-adapter-sveltekit"
+import { createI18n } from "@inlang/paraglide-sveltekit"
 import * as runtime from "$lib/paraglide/runtime.js"
 
 export const i18n = createI18n(runtime, {
@@ -326,7 +326,7 @@ The language state get's set when the `<ParaglideJS>` component is mounted. Sinc
 
 ```svelte
 <script>
-    import { ParaglideJS } from '@inlang/paraglide-js-adapter-sveltekit'
+    import { ParaglideJS } from '@inlang/paraglide-sveltekit'
 	import { i18n } from '$lib/i18n.js'
 
 	//using messages here can cause hydration issues

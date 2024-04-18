@@ -1,6 +1,6 @@
 <script>
 	import "$lib/ui/styles.css"
-	import { ParaglideJS } from "@inlang/paraglide-js-adapter-sveltekit"
+	import { ParaglideJS } from "@inlang/paraglide-sveltekit"
 	import { i18n } from "$lib/i18n.js"
 	import Header from "$lib/ui/Header.svelte"
 </script>

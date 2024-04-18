@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/paraglide-js-adapter-sveltekit-example",
+	"name": "@inlang/paraglide-sveltekit-example",
 	"version": "0.1.26",
 	"private": true,
 	"scripts": {
@@ -12,7 +12,7 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
 	},
 	"dependencies": {
-		"@inlang/paraglide-js-adapter-sveltekit": "workspace:*"
+		"@inlang/paraglide-sveltekit": "workspace:*"
 	},
 	"devDependencies": {
 		"@inlang/paraglide-js": "workspace:*",
