@@ -1,4 +1,4 @@
-# @inlang/paraglide-js-adapter-solidstart
+# @inlang/paraglide-solidstart
 
 ## 0.0.2
 
