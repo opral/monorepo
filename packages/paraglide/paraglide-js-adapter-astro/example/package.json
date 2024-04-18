@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/paraglide-js-adapter-astro-example",
+	"name": "@inlang/paraglide-astro-example",
 	"type": "module",
 	"version": "0.1.0",
 	"private": "true",
@@ -27,6 +27,6 @@
 	],
 	"devDependencies": {
 		"@inlang/paraglide-js": "workspace:*",
-		"@inlang/paraglide-js-adapter-astro": "workspace:*"
+		"@inlang/paraglide-astro": "workspace:*"
 	}
 }

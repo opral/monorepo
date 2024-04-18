@@ -1,4 +1,4 @@
-# @inlang/paraglide-js-adapter-next-example-app
+# @inlang/paraglide-next-example-app
 
 ## 0.2.17
 

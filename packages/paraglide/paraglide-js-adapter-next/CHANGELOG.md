@@ -1,4 +1,4 @@
-# @inlang/paraglide-js-adapter-next
+# @inlang/paraglide-next
 
 ## 3.3.0
 

@@ -38,7 +38,7 @@ export function integration(integrationConfig: {
 								//normalizing the path is very important!
 								//otherwise you get duplicate modules on windows
 								//learned that one the hard way (parjs-47)
-								"paraglide-js-adapter-astro:runtime": normalizePath(runtimePath),
+								"virtual:paraglide-astro:runtime": normalizePath(runtimePath),
 							}),
 						],
 					},
@@ -47,7 +47,7 @@ export function integration(integrationConfig: {
 				injectScript(
 					"before-hydration",
 					`
-                    import { isAvailableLanguageTag, setLanguageTag, sourceLanguageTag } from "paraglide-js-adapter-astro:runtime";
+                    import { isAvailableLanguageTag, setLanguageTag, sourceLanguageTag } from "virtual:paraglide-astro:runtime";
 					const htmlLang = document.documentElement.lang;
 					const language = isAvailableLanguageTag(htmlLang) ? htmlLang : sourceLanguageTag;
 					setLanguageTag(language);
