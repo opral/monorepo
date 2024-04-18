@@ -29,11 +29,11 @@ If you now run `npm run build`, you should see the paraglide compiler running al
 ## Setting up the Vite Plugin (optional)
 This step is optional, but recommended. The ParaglideJS vite plugin will automatically compile your messages whenever they change. This means you don't have to run `npm run build` every time you change a message. 
 
-Install it by running `npm install @inlang/paraglide-js-adapter-vite` and add it to your `vite.config.js`:
+Install it by running `npm install @inlang/paraglide-vite` and add it to your `vite.config.js`:
 
 ```js
 import { defineConfig } from 'vite'
-import { paraglide } from '@inlang/paraglide-js-adapter-vite'
+import { paraglide } from '@inlang/paraglide-vite'
 
 export default defineConfig({
   plugins: [

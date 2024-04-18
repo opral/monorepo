@@ -1,4 +1,4 @@
-# @inlang/paraglide-js-adapter-rollup
+# @inlang/paraglide-rollup
 
 ## 1.0.46
 

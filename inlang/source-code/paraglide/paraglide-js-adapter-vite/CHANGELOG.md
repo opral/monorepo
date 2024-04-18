@@ -1,4 +1,4 @@
-# @inlang/paraglide-js-adapter-vite
+# @inlang/paraglide-vite
 
 ## 1.2.40
 

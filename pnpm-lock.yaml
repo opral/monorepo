@@ -562,7 +562,7 @@ importers:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../paraglide/paraglide-js
-      '@inlang/paraglide-js-adapter-vite':
+      '@inlang/paraglide-vite':
         specifier: workspace:*
         version: link:../paraglide/paraglide-js-adapter-vite
       '@inlang/result':
@@ -1334,7 +1334,7 @@ importers:
 
   inlang/source-code/paraglide/paraglide-js-adapter-astro:
     dependencies:
-      '@inlang/paraglide-js-adapter-vite':
+      '@inlang/paraglide-vite':
         specifier: workspace:*
         version: link:../paraglide-js-adapter-vite
       astro:
@@ -1565,7 +1565,7 @@ importers:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../../paraglide-js
-      '@inlang/paraglide-js-adapter-rollup':
+      '@inlang/paraglide-rollup':
         specifier: workspace:*
         version: link:..
       '@rollup/plugin-alias':
@@ -1623,7 +1623,7 @@ importers:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../paraglide-js
-      '@inlang/paraglide-js-adapter-vite':
+      '@inlang/paraglide-vite':
         specifier: workspace:*
         version: link:../paraglide-js-adapter-vite
       '@sveltejs/kit':
@@ -1750,7 +1750,7 @@ importers:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../../paraglide-js
-      '@inlang/paraglide-js-adapter-vite':
+      '@inlang/paraglide-vite':
         specifier: workspace:*
         version: link:..
       typescript:
@@ -1765,7 +1765,7 @@ importers:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../../../paraglide-js
-      '@inlang/paraglide-js-adapter-vite':
+      '@inlang/paraglide-vite':
         specifier: workspace:*
         version: link:../..
       typescript:
@@ -1796,7 +1796,7 @@ importers:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../../paraglide-js
-      '@inlang/paraglide-js-adapter-webpack':
+      '@inlang/paraglide-webpack':
         specifier: workspace:*
         version: link:..
       typescript:
@@ -2771,7 +2771,7 @@ importers:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../paraglide/paraglide-js
-      '@inlang/paraglide-js-adapter-vite':
+      '@inlang/paraglide-vite':
         specifier: workspace:*
         version: link:../paraglide/paraglide-js-adapter-vite
       '@inlang/result':

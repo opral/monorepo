@@ -96,7 +96,7 @@ export const initCommand = new Command()
 				HINT:
 				If you are using ${stackChoice} with paraglide, you will likely also want to use 
 
-				\`@inlang/paraglide-js-adapter-${stackChoice}\`
+				\`@inlang/paraglide-${stackChoice}\`
 
 				Read the documentation at:
 				${ADAPTER_LINKS[stackChoice as keyof typeof ADAPTER_LINKS]}

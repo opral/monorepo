@@ -10,7 +10,7 @@
 
 ```bash
 npx @inlang/paraglide-js init
-npm i @inlang/paraglide-js-adapter-astro
+npm i @inlang/paraglide-astro
 ```
 
 This will generate `messages/{lang}.json` files for each of your languages. That's where your translations live.
@@ -18,7 +18,7 @@ This will generate `messages/{lang}.json` files for each of your languages. That
 Register the Integration in `astro.config.mjs`:
 
 ```js
-import paraglide from "@inlang/paraglide-js-adapter-astro"
+import paraglide from "@inlang/paraglide-astro"
 
 export default {
 	// Use astro's i18n routing for deciding which language to use

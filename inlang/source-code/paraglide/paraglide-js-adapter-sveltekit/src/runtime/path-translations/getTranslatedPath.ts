@@ -9,7 +9,7 @@ export function getTranslatedPath(
 	canonicalPath: string,
 	lang: string,
 	translations: PathDefinitionTranslations,
-	matchers: Record<string, ParamMatcher>
+	matchers: Record<string, ParamMatcher>,
 ) {
 	const match = bestMatch(canonicalPath, Object.keys(translations), matchers)
 	if (!match) return canonicalPath

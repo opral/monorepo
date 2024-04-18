@@ -1,4 +1,4 @@
-# @inlang/paraglide-js-adapter-webpack
+# @inlang/paraglide-webpack
 
 ## 1.0.46
 

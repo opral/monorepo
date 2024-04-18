@@ -1,4 +1,4 @@
-import type { paraglide as vitePluginParaglide } from "@inlang/paraglide-js-adapter-vite"
+import type { paraglide as vitePluginParaglide } from "@inlang/paraglide-vite"
 
 type VitePluginUserConfig = Parameters<typeof vitePluginParaglide>[0]
 

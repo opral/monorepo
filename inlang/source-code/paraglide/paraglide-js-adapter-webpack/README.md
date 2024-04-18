@@ -11,7 +11,7 @@ It automatically runs the compiler when building, so you no longer need the `par
 After having set up paraglide-js, you can add this plugin to your webpack config.
 
 ```js
-import Paraglide from "@inlang/paraglide-js-adapter-webpack"
+import Paraglide from "@inlang/paraglide-webpack"
 
 export default {
 	plugins: [
@@ -32,7 +32,7 @@ Since you will be importing from the `paraglide` folder a lot, it's a good idea 
 In your `webpack.config.js`, add an alias to your `resolve` object:
 
 ```js
-import { paraglide } from "@inlang/paraglide-js-adapter-webpack"
+import { paraglide } from "@inlang/paraglide-webpack"
 import path from "path"
 import { fileURLToPath } from "url"
 

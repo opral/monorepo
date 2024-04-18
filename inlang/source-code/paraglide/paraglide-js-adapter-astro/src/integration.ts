@@ -1,5 +1,5 @@
 import type { AstroIntegration } from "astro"
-import { paraglide } from "@inlang/paraglide-js-adapter-vite"
+import { paraglide } from "@inlang/paraglide-vite"
 import path from "node:path"
 import { alias } from "./alias.js"
 import { fileURLToPath } from "node:url"

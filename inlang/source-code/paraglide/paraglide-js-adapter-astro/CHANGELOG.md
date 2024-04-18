@@ -1,4 +1,4 @@
-# @inlang/paraglide-js-adapter-astro
+# @inlang/paraglide-astro
 
 ## 0.1.30
 

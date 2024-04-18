@@ -1,5 +1,5 @@
 import { defineConfig } from "vite"
-import { paraglide } from "@inlang/paraglide-js-adapter-vite"
+import { paraglide } from "@inlang/paraglide-vite"
 
 export default defineConfig({
 	plugins: [

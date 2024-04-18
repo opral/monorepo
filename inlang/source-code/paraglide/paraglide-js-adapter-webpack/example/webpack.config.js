@@ -1,6 +1,6 @@
 import path from "node:path"
 import { fileURLToPath } from "node:url"
-import { paraglide } from "@inlang/paraglide-js-adapter-webpack"
+import { paraglide } from "@inlang/paraglide-webpack"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 

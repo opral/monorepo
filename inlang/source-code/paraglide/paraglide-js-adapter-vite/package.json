@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/paraglide-js-adapter-vite",
+	"name": "@inlang/paraglide-vite",
 	"version": "1.2.40",
 	"description": "Vite adapter for Paraglide.js",
 	"license": "Apache-2.0",
@@ -41,7 +41,7 @@
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules",
-		"test": "pnpm -r --filter=@inlang/paraglide-js-adapter-vite-test-basic run _build"
+		"test": "pnpm -r --filter=@inlang/paraglide-vite-test-basic run _build"
 	},
 	"dependencies": {
 		"@inlang/paraglide-unplugin": "workspace:*"

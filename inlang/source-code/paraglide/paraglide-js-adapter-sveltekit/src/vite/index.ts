@@ -1,4 +1,4 @@
-import { paraglide as vitePluginParaglide } from "@inlang/paraglide-js-adapter-vite"
+import { paraglide as vitePluginParaglide } from "@inlang/paraglide-vite"
 import { preprocessor, type PreprocessorConfig } from "./preprocessor/index.js"
 import { type UserConfig, type Config, resolveConfig } from "./config.js"
 import type { Plugin } from "vite"
@@ -20,7 +20,7 @@ export function paraglide(userConfig: UserConfig): any {
  */
 function registerPreprocessor(
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	_config: Config
+	_config: Config,
 ): Plugin {
 	const preprocessConfig: PreprocessorConfig = {}
 	return {

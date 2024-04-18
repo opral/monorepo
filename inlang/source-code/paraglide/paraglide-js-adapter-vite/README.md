@@ -19,14 +19,14 @@ npx @inlang/paraglide-js init
 Install the vite adapter with
 
 ```bash
-npm install @inlang/paraglide-js-adapter-vite
+npm install @inlang/paraglide-vite
 ```
 
 and add it to your `vite.config.js`
 
 ```js
 import { defineConfig } from "vite"
-import { paraglide } from "@inlang/paraglide-js-adapter-vite"
+import { paraglide } from "@inlang/paraglide-vite"
 
 export default defineConfig({
   plugins: [

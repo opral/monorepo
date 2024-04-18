@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/paraglide-js-adapter-rollup-example",
+	"name": "@inlang/paraglide-rollup-example",
 	"private": true,
 	"version": "0.0.0",
 	"type": "module",
@@ -9,7 +9,7 @@
 	},
 	"devDependencies": {
 		"@inlang/paraglide-js": "workspace:*",
-		"@inlang/paraglide-js-adapter-rollup": "workspace:*",
+		"@inlang/paraglide-rollup": "workspace:*",
 		"rollup": "3.29.1",
 		"@rollup/plugin-alias": "^5.0.1",
 		"typescript": "^4.9.3"

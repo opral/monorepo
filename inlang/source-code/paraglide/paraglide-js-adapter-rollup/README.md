@@ -12,7 +12,7 @@ After having set up paraglide-js, you can add this plugin to your rollup config.
 
 ```js
 // rollup.config.js
-import { paraglide } from "@inlang/paraglide-js-adapter-rollup"
+import { paraglide } from "@inlang/paraglide-rollup"
 export default {
 	plugins: [
 		paraglide({
@@ -40,7 +40,7 @@ And then add it to your rollup config. This example assumes that you're using ES
 
 ```js
 // rollup.config.js
-import { paraglide } from "@inlang/paraglide-js-adapter-rollup"
+import { paraglide } from "@inlang/paraglide-rollup"
 import alias from "@rollup/plugin-alias"
 import { fileURLToPath } from "url"
 
