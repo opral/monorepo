@@ -1,5 +1,37 @@
 # @inlang/paraglide-js-adapter-next
 
+## 3.3.0
+
+### Minor Changes
+
+- 6c08db1: Add a `silent` option to the paragldie config field in `next.config.js` to silence the paraglide compiler logs.
+
+### Patch Changes
+
+- e5ce0bd: fix: `<Link>` components that specify a `locale` now work in server-components
+
+## 3.2.0
+
+### Minor Changes
+
+- 0774c1a: Added `paraglide-next init` command for quick project setup
+
+### Patch Changes
+
+- Updated dependencies [0774c1a]
+  - @inlang/paraglide-js@1.7.0
+
+## 3.1.1
+
+### Patch Changes
+
+- cee4692: Use index accesses instead of `.at` function for better compatability with legacy browsers
+- Updated dependencies [cee4692]
+- Updated dependencies [4b631aa]
+- Updated dependencies [3c7a87c]
+- Updated dependencies [ab1fe48]
+  - @inlang/paraglide-js@1.6.2
+
 ## 3.1.0
 
 ### Minor Changes

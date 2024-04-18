@@ -1,5 +1,20 @@
 # @inlang/paraglide-js
 
+## 1.7.0
+
+### Minor Changes
+
+- 0774c1a: Expose CLI programmatically to enable framework-specific init clis
+
+## 1.6.2
+
+### Patch Changes
+
+- cee4692: Use index accesses instead of `.at` function for better compatability with legacy browsers
+- 4b631aa: Update invalid type-declarations
+- 3c7a87c: Fixes a race-condition when creating the messages directory during `paraglide-js init`
+- ab1fe48: When initialising and a single project is available, it no longer suggests and empty string as the project path
+
 ## 1.6.1
 
 ### Patch Changes

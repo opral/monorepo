@@ -4,25 +4,50 @@ import { once } from "./utils"
 import { useCompiler } from "./useCompiler"
 
 type ParaglideConfig = {
+	/**
+	 * Where the Inlang Project that defines the languages
+	 * and messages is located.
+	 *
+	 * This should be a relative path starting from the project root.
+	 *
+	 * @example "./project.inlang"
+	 */
 	project: string
+
+	/**
+	 * Where the paraglide output files should be placed. This is usually
+	 * inside a `src/paraglide` folder.
+	 *
+	 * This should be a relative path starting from the project root.
+	 *
+	 * @example "./src/paraglide"
+	 */
 	outdir: string
+
+	/**
+	 * If true, the paraglide compiler will only log errors to the console
+	 *
+	 * @default false
+	 */
+	silent?: boolean
 }
 
 type Config = NextConfig & {
 	paraglide: ParaglideConfig
-	paths?: Record<string, Record<string, string>>
 }
 
 /**
  * Add this to your next.config.js to enable Paraglide.
  * It will register any aliases required by the Adapter,
- * aswell as register the build plugin if you're using webpack.
- *
- * @returns
+ * and register the build plugin if you're using webpack.
  */
 export function paraglide(config: Config): NextConfig {
+	const aliasPath = config.paraglide.outdir.endsWith("/")
+		? config.paraglide.outdir + "runtime.js"
+		: config.paraglide.outdir + "/runtime.js"
+
 	addAlias(config, {
-		"$paraglide/runtime.js": config.paraglide.outdir + "/runtime.js",
+		"$paraglide/runtime.js": aliasPath,
 	})
 
 	// Next calls `next.config.js` TWICE. Once in a worker and once in the main process.
@@ -32,10 +57,11 @@ export function paraglide(config: Config): NextConfig {
 			project: config.paraglide.project,
 			outdir: config.paraglide.outdir,
 			watch: process.env.NODE_ENV === "development",
+			silent: config.paraglide.silent ?? false,
 		})
 	})
 
-	const nextConfig: NextConfig = { ...config }
+	const nextConfig: NextConfig = config
 	delete nextConfig.paraglide
 
 	return nextConfig

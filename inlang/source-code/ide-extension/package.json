@@ -10,7 +10,7 @@
 		"url": "https://github.com/opral/monorepo.git"
 	},
 	"icon": "assets/sherlock-logo.png",
-	"version": "1.39.2",
+	"version": "1.39.3",
 	"engines": {
 		"vscode": "^1.84.2"
 	},
@@ -143,14 +143,14 @@
 	},
 	"scripts": {
 		"check": "tsc --noEmit",
-		"build": "node ./build.js",
+		"build": "tsc --noEmit && node ./build.js",
 		"dev": "DEV=true node ./build.js",
 		"package": "pnpm vsce package --no-dependencies",
 		"publish": "pnpm vsce publish --no-dependencies",
 		"vscode:prepublish": "npm run build",
 		"---- TEST ----------------------------------------------------------": "",
 		"pretest": "node ./build.js",
-		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"test": "vitest run --passWithNoTests --coverage",
 		"test:e2e": "npm run pretest && wdio run ./test/wdio.conf.ts",
 		"---- LINT ----------------------------------------------------------": "",
 		"lint": "eslint ./src --fix",
@@ -162,7 +162,7 @@
 		"@inlang/result": "workspace:*",
 		"@inlang/rpc": "workspace:*",
 		"@inlang/sdk": "workspace:*",
-		"@inlang/settings-component": "^1.0.0",
+		"@inlang/settings-component": "^1.0.2",
 		"@inlang/telemetry": "workspace:*",
 		"@lix-js/client": "workspace:*",
 		"@lix-js/fs": "workspace:*",

@@ -1,9 +1,6 @@
 import { spawn, spawnSync } from "node:child_process"
 
-/**
- * Runs the Paraglide compiler in a child process
- */
-export function useCompiler(options: {
+type CompileOptions = {
 	/**
 	 * CWD relative path to the Inlang project
 	 */
@@ -17,12 +14,20 @@ export function useCompiler(options: {
 	/**
 	 * Whether to watch for file changes and recompile (will spawn long running process)
 	 */
-	watch?: boolean
-}) {
+	watch: boolean
+
+	/**
+	 * If the compiler should be silents
+	 */
+	silent: boolean
+}
+
+/**
+ * Runs the Paraglide compiler in a child process
+ */
+export function useCompiler(options: CompileOptions) {
 	try {
-		const command = `npx paraglide-js compile --project ${options.project} --outdir ${
-			options.outdir
-		}${options.watch ? " --silent" : ""}`
+		const command = getCompileCommand(options)
 		spawnSync(command, {
 			cwd: process.cwd(),
 			stdio: "inherit",
@@ -30,16 +35,37 @@ export function useCompiler(options: {
 		})
 
 		if (options.watch) {
-			spawn(
-				`npx paraglide-js compile --project ${options.project} --outdir ${options.outdir} --watch`,
-				{
-					cwd: process.cwd(),
-					stdio: "inherit",
-					shell: true,
-					detached: false, //make sure the child process is killed when this process is killed
-				}
-			)
+			const command = getWatchCommand(options)
+			spawn(command, {
+				cwd: process.cwd(),
+				stdio: "inherit",
+				shell: true,
+				//make sure the child process is killed when this process is killed
+				detached: false,
+			})
 		}
-		// eslint-disable-next-line no-empty
-	} catch (e) {}
+	} catch (e) {
+		console.error("Failed to spawn the Paraglide compiler process")
+	}
+}
+
+export function getCompileCommand(options: CompileOptions): string {
+	const flags = [
+		"--project " + options.project,
+		"--outdir " + options.outdir,
+		options.watch || options.silent ? "--silent" : "",
+	].filter(Boolean)
+
+	return `npx paraglide-js compile ` + flags.join(" ")
+}
+
+export function getWatchCommand(options: CompileOptions): string {
+	const flags = [
+		"--project " + options.project,
+		"--outdir " + options.outdir,
+		"--watch",
+		options.silent ? "--silent" : "",
+	].filter(Boolean)
+
+	return `npx paraglide-js compile ` + flags.join(" ")
 }
