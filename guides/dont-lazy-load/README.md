@@ -58,4 +58,4 @@ This is most noticeable if you have fewer messages & fewer languages, but it per
 
 An example of the nuclear option in action is [galaxus.ch](https://www.galaxus.ch/). It's a very well-made NextJS site that loads very quickly, not despite loading all languages, but because of it.
 
-This is why we chose _not_ to ship lazy-loading in our i18n library [ParaglideJS](/m/gerre34r/library-inlang-paraglideJs). Instead, we're pursuing ways of statically linking translations in the correct language. If that's not possible we fall back to loading all languages eagerly. 
+This is why we chose _not_ to ship lazy-loading in our i18n library [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs). Instead, we're pursuing ways of statically linking translations in the correct language. If that's not possible we fall back to loading all languages eagerly. 
