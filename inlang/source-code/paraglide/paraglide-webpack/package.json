@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/paraglide-webpack",
 	"version": "1.0.46",
-	"description": "Webpack adapter for Paraglide.js",
+	"description": "Webpack plugin for running the Paraglide i18n compiler",
 	"license": "Apache-2.0",
 	"type": "module",
 	"publishConfig": {

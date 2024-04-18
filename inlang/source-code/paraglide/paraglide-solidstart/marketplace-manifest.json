@@ -4,7 +4,7 @@
 	"slug": "paraglide-solidstart-i18n",
 	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-solidstart/assets/icon.png",
 	"displayName": {
-		"en": "Paraglide JS Adapter SolidStart"
+		"en": "Paraglide-SolidStart"
 	},
 	"description": {
 		"en": "A SolidStart integration for ParaglideJS, providing you with everything you need to take your solid app global."
