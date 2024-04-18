@@ -148,14 +148,14 @@ m.greeting({ name: "John" }) // Hallo John
 
 Messages are **not** reactive, so you will need to re-render your component when the language changes. We will see how to do that in the next step.
 
-## 4. Installing the SvelteKit Adapter
+## 4. Installing `@inlang/paraglide-sveltekit`
 
-Paraglide adapters are framework-specific packages that make it easier to use Paraglide. They provide a few things:
+`@inlang/paraglide-sveltekit` is a SvelteKit specific that make it easier to use Paraglide. It provides a few things:
 - Automatically manage language state
 - i18n routing
 - SEO considerations
 
-Install the SvelteKit adapter:
+Install it with
 
 ```cmd
 npm i @inlang/paraglide-sveltekit
@@ -164,7 +164,7 @@ npm i @inlang/paraglide-sveltekit
 
 ### 4.1 Adding the Vite Plugin
 
-The SvelteKit adapter provides a Vite plugin that automatically compiles your translations. This means that you don't need to call `paraglide-js compile` in your build script.
+Paraglide-Sveltekit provides a Vite plugin that automatically compiles your translations. This means that you don't need to call `paraglide-js compile` in your build script.
 
 ```ts
 import { sveltekit } from "@sveltejs/kit/vite"
@@ -182,9 +182,9 @@ export default defineConfig({
 })
 ```
 
-### 4.2 Initializing the Adapter
+### 4.2 Initializing Paraglide-SvelteKit
 
-To initialize the Adapter, we need to call `createI18n` and pass it the paraglide runtime. We can do this in a new file, for example `./src/lib/i18n.ts`.
+To initialize Paraglide-SvelteKit, we need to call `createI18n` and pass it the paraglide runtime. We can do this in a new file, for example `./src/lib/i18n.ts`.
 
 ```ts
 // ./src/lib/i18n.ts
@@ -194,7 +194,7 @@ import * as runtime from "$paraglide/runtime"
 export const i18n = createI18n(runtime)
 ```
 
-### 4.3 Adding the Adapter Component to your Layout
+### 4.3 Adding the Language Provider to your Layout
 
 To provide the language to your app, add the `ParaglideJS` component to your layout and pass it the `routing` instance.
 
@@ -244,7 +244,7 @@ You will also notice that any internal links, like `<a href="/about">About</a>` 
 
 Language switchers are challenging, because they require us to dynamically translate the path we're currently on. We can do this by first removing the language tag from the path, and then adding it back in the correct language.
 
-The Adapter provides convenient functions for this. `i18n.route(translatedPath)`.
+Paraglide-SvelteKit provides convenient functions for this. `i18n.route(translatedPath)`.
 
 ```svelte
 <script lang="ts">
@@ -262,14 +262,14 @@ The Adapter provides convenient functions for this. `i18n.route(translatedPath)`
 
 ## 6. SEO Considerations
 
-Most SEO considerations are handled automatically by the Adapter.
+Most SEO considerations are handled automatically by Paraglide-SvelteKit.
 
-1. The Adapter will add `rel="alternate"` link tags to your `<head>` for SEO purposes.
-2. The Adapter encourages you to use the `hreflang` attribute on your `<a>` tags.
+1. `rel="alternate"` link tags are automatically added to your `<head>` for SEO purposes.
+2. It encourages you to use the `hreflang` attribute on your `<a>` tags.
 
 The only thing left to do is to set the `lang` attribute on your `<html>` tag. This is important for search engines, and also for screen readers.
 
-Here too the Adapter has you covered. It exposes a `handle` function that you can use to modify the HTML before it is sent to the client. We can use this to set the `lang` attribute.
+Here too Paraglide-SvelteKit has you covered. It exposes a `handle` function that you can use to modify the HTML before it is sent to the client. We can use this to set the `lang` attribute.
 
 First, add an easy-to-find placeholder for the `lang` attribute in `./src/app.html`. By default the hook is looking for `%paraglide.lang%`.
 
@@ -292,7 +292,7 @@ That's it! If you now reload the page and inspect the HTML, you should see the c
 
 You are now set up with a multi-linguagal SvelteKit app using Paraglide!
 
-The SvelteKit adapter has a few more features that you might want to check out, such as localized paths. Read more about it in the [SvelteKit Adapter Documentation](https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n).
+Paraglide-SvelteKit has a few more features that you might want to check out, such as localized paths. Read more about it in the [Paraglide-SvelteKit Documentation](https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n).
 
 Try it on [StackBlitz](https://stackblitz.com/~/github.com/lorissigrist/paraglide-sveltekit-example)
 
