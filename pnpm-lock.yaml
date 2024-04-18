@@ -1578,7 +1578,7 @@ importers:
         specifier: ^4.9.3
         version: 4.9.5
 
-  inlang/source-code/paraglide/paraglide-solidstart:
+  inlang/source-code/paraglide/paraglide-js-adapter-solidstart:
     dependencies:
       '@solidjs/router':
         specifier: ^0.10
@@ -1675,7 +1675,7 @@ importers:
 
   inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/example:
     dependencies:
-      '@inlang/paraglide-js-adapter-sveltekit':
+      '@inlang/paraglide-sveltekit':
         specifier: workspace:*
         version: link:..
     devDependencies:
