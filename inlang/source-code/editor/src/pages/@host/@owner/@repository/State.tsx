@@ -143,9 +143,7 @@ type EditorStateSchema = {
 	 */
 	projectList: Resource<{ projectPath: string }[]>
 
-	doesInlangConfigExist: () => boolean
-
-	sourceLanguageTag: () => LanguageTag | undefined
+	sourceLanguageTag: () => LanguageTag
 
 	languageTags: () => LanguageTag[]
 
@@ -475,19 +473,16 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	)
 
-	// DERIVED when config exists
-	const doesInlangConfigExist = createMemo(() => {
-		return project()?.settings() ? true : false
-	})
-
-	// DERIVED source language tag from inlang config
+	// DERIVED source language tag from project settings
 	const sourceLanguageTag = createMemo(() => {
-		return project()?.settings()?.sourceLanguageTag
+		// If no project or settings are available, an error message is shown
+		// in the editor. The source language tag "en" is not used in this case.
+		return project()?.settings().sourceLanguageTag ?? "en"
 	})
 
-	// DERIVED language tags from inlang config
+	// DERIVED language tags from project settings
 	const languageTags = createMemo(() => {
-		return project()?.settings()?.languageTags ?? []
+		return project()?.settings().languageTags ?? []
 	})
 
 	//the effect should skip tour guide steps if not needed
@@ -677,7 +672,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					project,
 					refetchProject,
 					projectList,
-					doesInlangConfigExist,
 					sourceLanguageTag,
 					languageTags,
 					tourStep,

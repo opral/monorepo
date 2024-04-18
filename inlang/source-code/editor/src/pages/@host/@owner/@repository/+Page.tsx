@@ -45,16 +45,8 @@ export default function Page() {
  * is required to use the useEditorState hook.
  */
 function TheActualPage() {
-	const {
-		repo,
-		currentBranch,
-		project,
-		projectList,
-		routeParams,
-		doesInlangConfigExist,
-		tourStep,
-		lixErrors,
-	} = useEditorState()
+	const { repo, currentBranch, project, projectList, routeParams, tourStep, lixErrors } =
+		useEditorState()
 	const [localStorage, setLocalStorage] = useLocalStorage()
 
 	onMount(() => {
@@ -160,13 +152,11 @@ function TheActualPage() {
 						messagePlural="errors occurred while initializing the project file:"
 					/>
 				</Match>
-				<Match when={!doesInlangConfigExist()}>
+				<Match when={!project()?.settings}>
 					<NoInlangProjectFoundCard />
 				</Match>
 				<Match
-					when={
-						doesInlangConfigExist() && project()?.query.messages.includedMessageIds() !== undefined
-					}
+					when={project()?.settings && project()?.query.messages.includedMessageIds() !== undefined}
 				>
 					<div class="min-h-[calc(100vh_-_200px)]">
 						<ListHeader />

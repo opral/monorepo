@@ -151,7 +151,7 @@ export function Layout(props: { children: JSXElement }) {
 			(newFilter.name !== "Linting" || project()?.installed.messageLintRules())
 		) {
 			if (newFilter.name === "Language" && filteredLanguageTags().length === 0) {
-				setFilteredLanguageTags(() => project()?.settings()?.languageTags || [])
+				setFilteredLanguageTags(languageTags())
 			}
 			setSelectedFilters([...selectedFilters(), newFilter])
 		}
@@ -176,7 +176,7 @@ export function Layout(props: { children: JSXElement }) {
 			if (project()) {
 				addFilter("Language")
 				if (filteredLanguageTags().length === 0 && project()!.settings())
-					setFilteredLanguageTags(project()!.settings()!.languageTags)
+					setFilteredLanguageTags(languageTags())
 			}
 		})
 	)
@@ -252,9 +252,7 @@ export function Layout(props: { children: JSXElement }) {
 										<IconClose slot="prefix" />
 									</sl-button>
 								</div>
-								<h1 class="hidden lg:block text-2xl -mt-8 mb-8">
-									Settings
-								</h1>
+								<h1 class="hidden lg:block text-2xl -mt-8 mb-8">Settings</h1>
 								<inlang-settings
 									prop:settings={project()!.settings() as ReturnType<InlangProject["settings"]>}
 									prop:installedPlugins={
@@ -307,9 +305,7 @@ export function Layout(props: { children: JSXElement }) {
 									<sl-button
 										prop:size="small"
 										onClick={() => {
-											setFilteredLanguageTags(
-												setFilteredLanguageTags(project()?.settings()?.languageTags || [])
-											)
+											setFilteredLanguageTags(languageTags())
 											setFilteredMessageLintRules([])
 											setSelectedFilters([])
 										}}
@@ -603,19 +599,26 @@ function ProjectMenu() {
 }
 
 function LanguageFilter(props: { clearFunction: any; setSettingsOpen: Setter<boolean> }) {
-	const { project, setFilteredLanguageTags, filteredLanguageTags, userIsCollaborator } =
-		useEditorState()
+	const {
+		setFilteredLanguageTags,
+		filteredLanguageTags,
+		userIsCollaborator,
+		languageTags,
+		sourceLanguageTag,
+	} = useEditorState()
 	const [localStorage] = useLocalStorage()
 
 	onMount(() => {
 		if (filteredLanguageTags().length === 0 || filteredLanguageTags() === undefined) {
-			setFilteredLanguageTags(() => project()?.settings()?.languageTags || [])
+			setFilteredLanguageTags(languageTags())
 		}
 	})
 
 	return (
 		<Show
-			when={project()?.settings() && filteredLanguageTags() && filteredLanguageTags().length > 0}
+			when={
+				languageTags().length !== 0 && filteredLanguageTags() && filteredLanguageTags().length > 0
+			}
 		>
 			<sl-select
 				prop:name="Language Select"
@@ -627,7 +630,9 @@ function LanguageFilter(props: { clearFunction: any; setSettingsOpen: Setter<boo
 				on:sl-change={(event: any) => {
 					if (event.target.value.includes("add-language")) {
 						props.setSettingsOpen(true)
-						event.target.value = event.target.value.filter((value: string) => value !== "add-language")
+						event.target.value = event.target.value.filter(
+							(value: string) => value !== "add-language"
+						)
 					}
 					setFilteredLanguageTags(event.target.value)
 				}}
@@ -652,40 +657,31 @@ function LanguageFilter(props: { clearFunction: any; setSettingsOpen: Setter<boo
 					<span class="text-left text-outline-variant grow">Select</span>
 					<Link
 						class="cursor-pointer link link-primary opacity-75"
-						onClick={() => setFilteredLanguageTags(() => project()?.settings()?.languageTags || [])}
+						onClick={() => setFilteredLanguageTags(languageTags())}
 					>
 						All
 					</Link>
 					<Link
 						class="cursor-pointer link link-primary opacity-75"
 						// filter all except the source language
-						onClick={() =>
-							setFilteredLanguageTags(
-								// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-								[project()?.settings()?.sourceLanguageTag!]
-							)
-						}
+						onClick={() => setFilteredLanguageTags([sourceLanguageTag()])}
 					>
 						None
 					</Link>
 				</div>
 				<sl-divider class="mt-2 mb-0 h-[1px] bg-surface-3" />
 				<div class="max-h-[300px] overflow-y-auto text-sm">
-					<For
-						each={sortLanguageTags(
-							project()?.settings()?.languageTags || [],
-							project()?.settings()?.sourceLanguageTag || "en"
-						)}
-					>
+					{/* eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain */}
+					<For each={sortLanguageTags(languageTags(), sourceLanguageTag())}>
 						{(language) => (
 							<sl-option
 								prop:value={language}
 								prop:selected={filteredLanguageTags().includes(language)}
-								prop:disabled={language === project()?.settings()?.sourceLanguageTag}
-								class={language === project()?.settings()?.sourceLanguageTag ? "opacity-50" : ""}
+								prop:disabled={language === sourceLanguageTag()}
+								class={language === sourceLanguageTag() ? "opacity-50" : ""}
 							>
 								{language}
-								{language === project()?.settings()?.sourceLanguageTag ? (
+								{language === sourceLanguageTag() ? (
 									<sl-badge prop:variant="neutral" class="relative translate-x-3">
 										<span class="after:content-['ref'] after:text-background" />
 									</sl-badge>
