@@ -16,6 +16,8 @@
 		"node": ">=18.0.0"
 	},
 	"dependencies": {
+		"@inlang/settings-component": "^1.0.0",
+		"@isomorphic-git/cors-proxy": "^2.7.1",
 		"@lix-js/client": "workspace:*",
 		"@lix-js/fs": "workspace:*",
 		"@sentry/browser": "^7.27.0",
