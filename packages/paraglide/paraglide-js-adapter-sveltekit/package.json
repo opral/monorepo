@@ -15,7 +15,7 @@
 		"test:with-base": "BASE_PATH=/base vitest run --test-timeout 30000 --dir src",
 		"test:without-base": "BASE_PATH=\"\" vitest run --test-timeout 30000 --dir src",
 		"test": "npm run test:with-base && npm run test:without-base",
-		"build": "svelte-package -i src -o dist",
+		"build": "tsc --noEmit && svelte-package -i src -o dist",
 		"dev": "svelte-package -w -i src -o dist",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
