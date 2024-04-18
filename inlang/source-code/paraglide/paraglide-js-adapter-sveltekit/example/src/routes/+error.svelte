@@ -1,7 +1,7 @@
 <script>
 	import { page } from "$app/stores"
 	import { i18n } from "$lib/i18n"
-    import { ParaglideJS } from "@inlang/paraglide-js-adapter-sveltekit"
+    import { ParaglideJS } from "@inlang/paraglide-sveltekit"
 </script>
 
 <ParaglideJS {i18n} languageTag="en">

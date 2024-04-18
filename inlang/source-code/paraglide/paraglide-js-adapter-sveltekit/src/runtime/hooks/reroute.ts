@@ -41,9 +41,8 @@ export const createReroute = <T extends string>({
 
 			return serializedPath
 		} catch (e) {
-			if (dev) {
-				console.error("[@inlang/paraglide-js-adapter-sveltekit] Error thrown during reroute", e)
-			}
+			if (dev) console.error("[@inlang/paraglide-sveltekit] Error thrown during reroute", e)
+
 			return url.pathname
 		}
 	}

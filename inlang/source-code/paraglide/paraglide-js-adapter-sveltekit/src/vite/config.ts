@@ -15,7 +15,7 @@ export interface UserConfig extends VitePluginUserConfig {
 }
 
 /**
- * The full config for paraglide-js-adapter-sveltekit.
+ * The full config for @inlang/paraglide-sveltekit.
  * Any values not provided by the user are filled in with defaults.
  */
 export interface Config extends VitePluginUserConfig {

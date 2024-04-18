@@ -36,7 +36,7 @@ const TRANSLATIONS: TranslationDefinition = {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
 	return {
-		name: "@inlang/paraglide-js-adapter-sveltekit",
+		name: "@inlang/paraglide-sveltekit",
 		markup: ({ filename, content }) => {
 			const NOOP = { code: content }
 
@@ -66,9 +66,9 @@ export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
 			} catch (error) {
 				throw new Error(
 					dedent`
-						[@inlang/paraglide-js-adapter-sveltekit] Failed to parse ${filename}. 
+						[@inlang/paraglide-sveltekit] Failed to parse ${filename}. 
 						This may be because you are using a signifficantly newer version of the "svelte" package. 
-						Try forcing "@inlang/paraglide-js-adapter-sveltekit" to use your version of "svelte" using pnpm overrides`,
+						Try forcing "@inlang/paraglide-sveltekit" to use your version of "svelte" using pnpm overrides`,
 					{ cause: error }
 				)
 			}

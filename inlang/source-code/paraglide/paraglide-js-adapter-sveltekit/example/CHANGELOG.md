@@ -1,4 +1,4 @@
-# @inlang/paraglide-js-adapter-sveltekit-example
+# @inlang/paraglide-sveltekit-example
 
 ## 0.1.26
 

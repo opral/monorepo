@@ -24,7 +24,7 @@ function registerPreprocessor(
 ): Plugin {
 	const preprocessConfig: PreprocessorConfig = {}
 	return {
-		name: "paraglide-js-adapter-sveltekit-register-preprocessor",
+		name: "@inlang/paraglide-sveltekit/vite/register-preprocessor",
 		api: {
 			//The Svelte vite-plugin looks for this and automatically adds it to the preprocess array
 			sveltePreprocess: preprocessor(preprocessConfig),
