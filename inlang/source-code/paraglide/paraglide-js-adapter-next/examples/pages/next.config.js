@@ -1,4 +1,4 @@
-const { paraglide } = require("@inlang/paraglide-js-adapter-next/plugin")
+const { paraglide } = require("@inlang/paraglide-next/plugin")
 
 /** @type {import('next').NextConfig} */
 module.exports = paraglide({

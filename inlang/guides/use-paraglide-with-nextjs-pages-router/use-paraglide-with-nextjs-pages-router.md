@@ -16,7 +16,7 @@ In your project root, run the following commands and follow the instructions in 
 
 ```bash
 npx @inlang/paraglide-js init
-npm install @inlang/paraglide-js-adapter-next
+npm install @inlang/paraglide-next
 ```
 
 This will have done a few things:
@@ -34,7 +34,7 @@ You will need to pass it some config. The location of the Inlang Project & the o
 
 ```js
 // next.config.js
-const { paraglide } = require("@inlang/paraglide-js-adapter-next/plugin")
+const { paraglide } = require("@inlang/paraglide-next/plugin")
 
 module.exports = paraglide({
   paraglide: {
@@ -52,7 +52,7 @@ Still in your `next.config.js`, add the `i18n` object to your config, pass it th
 
 ```js
 // next.config.js
-const { paraglide } = require("@inlang/paraglide-js-adapter-next/plugin")
+const { paraglide } = require("@inlang/paraglide-next/plugin")
 
 module.exports = paraglide({
 	paraglide: {
@@ -71,7 +71,7 @@ Last, let's add the `<ParaglideJS>` component to your `_app.js` file. This will 
 ```jsx
 // _app.js
 import type { AppProps } from "next/app"
-import { ParaglideJS } from "@inlang/paraglide-js-adapter-next/pages"
+import { ParaglideJS } from "@inlang/paraglide-next/pages"
 
 export default function App({ Component, pageProps }: AppProps) {
 	return (

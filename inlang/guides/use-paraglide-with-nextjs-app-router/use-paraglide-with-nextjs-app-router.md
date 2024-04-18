@@ -10,7 +10,7 @@ First, set up a NextJS project using the App Router.
 Then run Paraglide's init CLI & install dependencies
 
 ```bash
-npx @inlang/paraglide-js-adapter-next init
+npx @inlang/paraglide-next init
 npm install
 ```
 

@@ -1,4 +1,4 @@
-# @inlang/paraglide-js-adapter-next-example-turbo
+# @inlang/paraglide-next-example-turbo
 
 ## 0.1.18
 

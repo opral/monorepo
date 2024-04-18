@@ -13,6 +13,6 @@ declare module "$paraglide/runtime.js" {
 declare const MARKETPLACE_ID: string
 
 /**
- * The Current version of `@inlang/paraglide-js-adapter-next`
+ * The Current version of `@inlang/paraglide-next`
  */
 declare const PARAGLIDE_NEXT_VERSION: string

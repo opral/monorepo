@@ -2,7 +2,7 @@ import {
 	isAvailableLanguageTag,
 	setLanguageTag,
 	sourceLanguageTag,
-} from "paraglide-js-adapter-astro:runtime"
+} from "virtual:paraglide-astro:runtime"
 import { type MiddlewareHandler } from "astro"
 
 export const onRequest: MiddlewareHandler = async ({ url, locals, currentLocale }, next) => {

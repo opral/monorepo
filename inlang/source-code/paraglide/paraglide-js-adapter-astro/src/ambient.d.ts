@@ -2,7 +2,7 @@
  * The compiled paraglide runtime module.
  * (e.g. "paraglide/runtime.js")
  */
-declare module "paraglide-js-adapter-astro:runtime" {
+declare module "virtual:paraglide-astro:runtime" {
 	export const setLanguageTag: (language_tag: string | (() => string)) => void
 	export const languageTag: () => string
 	export const onSetLanguageTag: (callback: (language_tag: string) => void) => void
