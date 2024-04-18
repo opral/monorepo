@@ -43,7 +43,7 @@
 		"test": "vitest run --passWithNoTests"
 	},
 	"dependencies": {
-		"@inlang/paraglide-js-adapter-unplugin": "workspace:*"
+		"@inlang/paraglide-unplugin": "workspace:*"
 	},
 	"devDependencies": {
 		"@types/node": "20.9.3",

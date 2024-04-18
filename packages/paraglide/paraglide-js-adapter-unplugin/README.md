@@ -10,14 +10,14 @@ easier to use with bundler such as Vite, Webpack, Rollup, and RsPack.
 It's unlikely that you want to use this package directly. Instead, you should use the version
 specific to your bundler. 
 
-- `@inlang/paraglide-js-adapter-vite`
-- `@inlang/paraglide-js-adapter-webpack`
-- `@inlang/paraglide-js-adapter-rollup`
-- `@inlang/paraglide-js-adapter-esbuild`
+- `@inlang/paraglide-vite`
+- `@inlang/paraglide-webpack`
+- `@inlang/paraglide-rollup`
+- `@inlang/paraglide-esbuild`
 
 If you want to use the experimental RsPack bundler, you can use this package directly.
 
 ```js
-import { paraglide } from "@inlang/paraglide-js-adapter-unplugin";
+import { paraglide } from "@inlang/paraglide-unplugin";
 paraglide.rspack // RsPack Plugin (experimental)
 ```

@@ -1,7 +1,4 @@
-import {
-	paraglide as unpluginParaglide,
-	type UserConfig,
-} from "@inlang/paraglide-js-adapter-unplugin"
+import { paraglide as unpluginParaglide, type UserConfig } from "@inlang/paraglide-unplugin"
 
 export const paraglide: (config: UserConfig) => any = unpluginParaglide.webpack
 

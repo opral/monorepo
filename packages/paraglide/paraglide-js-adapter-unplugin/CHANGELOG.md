@@ -1,4 +1,4 @@
-# @inlang/paraglide-js-adapter-unplugin
+# @inlang/paraglide-unplugin
 
 ## 1.4.29
 
