@@ -151,7 +151,7 @@ export default function Page(props: {
 				return {
 					title: m.marketplace_header_solid_title(),
 					description: m.marketplace_header_solid_description(),
-					icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js-adapter-solidstart/assets/icon.png",
+					icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-solidstart/assets/icon.png",
 					sections: ["apps", "guides", "plugins", "libraries"],
 					coverCard: <GenericHeader />,
 				}
