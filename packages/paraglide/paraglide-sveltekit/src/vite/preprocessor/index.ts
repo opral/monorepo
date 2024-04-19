@@ -75,7 +75,12 @@ export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
 
 			const code = new MagicString(content)
 
-			const passResult = rewrite({ ast, code, originalCode: content, translations: TRANSLATIONS })
+			const passResult = rewrite({
+				ast,
+				code,
+				originalCode: content,
+				translations: TRANSLATIONS,
+			})
 
 			const before = new Set<string>(passResult.scriptAdditions?.before)
 			const after = new Set<string>(passResult.scriptAdditions?.after)

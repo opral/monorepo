@@ -73,7 +73,7 @@
 			canonicalPath,
 			language,
 			i18n.config.translations,
-			i18n.config.matchers,
+			i18n.config.matchers
 		)
 
 		const newPathname = serializeRoute({
@@ -117,7 +117,7 @@
 						availableLanguageTags: i18n.config.runtime.availableLanguageTags,
 						defaultLanguageTag: i18n.config.defaultLanguageTag,
 						prefixDefaultLanguage: i18n.config.prefixDefaultLanguage,
-					},
+					}
 				)}
 
 				{@const href =
