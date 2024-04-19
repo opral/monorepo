@@ -1,12 +1,11 @@
 import { loadProject, type InlangProject } from "@inlang/sdk"
-import { compile } from "../../../compiler/compile.js"
 import nodeFsPromises from "node:fs/promises"
 import { resolve } from "node:path"
 import { Command } from "commander"
-import { writeOutput } from "../../../services/file-handling/write-output.js"
-import { Logger } from "../../../services/logger/index.js"
+import { Logger } from "~/services/logger/index.js"
 import { openRepository, findRepoRoot } from "@lix-js/client"
-import type { NodeishFilesystem } from "@lix-js/fs"
+import { runCompiler } from "~/cli/steps/run-compiler.js"
+import { DEFAULT_OUTDIR } from "~/cli/defaults.js"
 
 export const compileCommand = new Command()
 	.name("compile")
@@ -15,14 +14,13 @@ export const compileCommand = new Command()
 	.requiredOption(
 		"--outdir <path>",
 		'The path to the output directory. Example: "./src/paraglide"',
-		"./src/paraglide"
+		DEFAULT_OUTDIR
 	)
 	.requiredOption("--silent", "Only log errors to the console", false)
 	.requiredOption("--watch", "Watch for changes and recompile.", false)
 	.action(async (options: { silent: boolean; project: string; outdir: string; watch: boolean }) => {
 		const logger = new Logger({ silent: options.silent, prefix: true })
 		const path = resolve(process.cwd(), options.project)
-		const outputDirectory = resolve(process.cwd(), options.outdir)
 
 		logger.info(`Compiling inlang project at "${options.project}".`)
 
@@ -39,12 +37,16 @@ export const compileCommand = new Command()
 			await loadProject({
 				projectPath: path,
 				repo,
-				appId: "library.inlang.paraglideJs",
+				appId: MARKTEPLACE_ID,
 			}),
 			logger
 		)
 
-		await executeCompilation(project, outputDirectory, repo.nodeishFs)
+		await runCompiler({
+			project,
+			repo,
+			outdir: options.outdir,
+		})
 
 		if (options.watch) {
 			process.on("SIGINT", () => {
@@ -60,7 +62,11 @@ export const compileCommand = new Command()
 				if (numChanges === 1) return //don't recompile on the first run
 
 				logger.info("Messages changed. Recompiling...")
-				await executeCompilation(project, outputDirectory, repo.nodeishFs)
+				await runCompiler({
+					project,
+					repo,
+					outdir: options.outdir,
+				})
 			})
 
 			/* eslint-disable no-constant-condition */
@@ -72,23 +78,6 @@ export const compileCommand = new Command()
 
 		logger.info("Successfully compiled the project.")
 	})
-
-/**
- * Reads the messages from the project and compiles them into the output directory.
- */
-async function executeCompilation(
-	project: InlangProject,
-	outputDirectory: string,
-	fs: NodeishFilesystem
-) {
-	const output = await compile({
-		messages: project.query.messages.getAll(),
-		settings: project.settings(),
-		projectId: project.id,
-	})
-
-	await writeOutput(outputDirectory, output, fs)
-}
 
 /**
  * Utility function to exit when the project has errors.
