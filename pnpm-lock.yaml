@@ -2780,9 +2780,6 @@ importers:
       sha.js:
         specifier: ^2.4.11
         version: 2.4.11
-      solid-js:
-        specifier: 1.7.11
-        version: 1.7.11
     devDependencies:
       '@vitest/coverage-v8':
         specifier: 0.34.6
@@ -2817,9 +2814,6 @@ importers:
 
   lix/packages/server:
     dependencies:
-      '@inlang/telemetry':
-        specifier: workspace:*
-        version: link:../../../inlang/source-code/telemetry
       '@sentry/node':
         specifier: ^7.47.0
         version: 7.109.0

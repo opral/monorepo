@@ -87,13 +87,13 @@ function TheActualPage() {
 					</p>
 				}
 			>
-				<Match when={lixErrors().some((err) => err.message.includes("401"))}>
+				<Match when={lixErrors().some((err: any) => err.message.includes("401"))}>
 					<RepositoryDoesNotExistOrNotAuthorizedCard code={401} user={localStorage?.user} />
 				</Match>
 
 				<Match
 					when={lixErrors().some(
-						(err) =>
+						(err: any) =>
 							err.message.includes("404") ||
 							err.message.includes("403") ||
 							err.response?.status === 404 ||
