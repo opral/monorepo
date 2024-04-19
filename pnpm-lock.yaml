@@ -86,7 +86,7 @@ importers:
         version: 1.2.0
       next:
         specifier: ^14.0.0
-        version: 14.1.4(react-dom@18.2.0)(react@18.2.0)
+        version: 14.1.4(@babel/core@7.24.4)(react-dom@18.2.0)(react@18.2.0)
       postcss:
         specifier: 8.4.23
         version: 8.4.23
@@ -568,9 +568,9 @@ importers:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../paraglide/paraglide-js
-      '@inlang/paraglide-js-adapter-vite':
+      '@inlang/paraglide-vite':
         specifier: workspace:*
-        version: link:../paraglide/paraglide-js-adapter-vite
+        version: link:../paraglide/paraglide-vite
       '@inlang/result':
         specifier: workspace:*
         version: link:../result
@@ -1253,6 +1253,52 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)
 
+  inlang/source-code/paraglide/paraglide-astro:
+    dependencies:
+      '@inlang/paraglide-vite':
+        specifier: workspace:*
+        version: link:../paraglide-vite
+      astro:
+        specifier: ^4.0.0
+        version: 4.0.8(typescript@5.2.2)
+
+  inlang/source-code/paraglide/paraglide-astro/example:
+    dependencies:
+      '@astrojs/check':
+        specifier: 0.3.4
+        version: 0.3.4(prettier@2.8.3)(typescript@5.3.3)
+      '@astrojs/mdx':
+        specifier: 2.0.3
+        version: 2.0.3(astro@4.0.8)
+      '@astrojs/node':
+        specifier: ^8.2.0
+        version: 8.2.5(astro@4.0.8)
+      '@astrojs/rss':
+        specifier: 4.0.1
+        version: 4.0.1
+      '@astrojs/sitemap':
+        specifier: 3.0.4
+        version: 3.0.4
+      '@astrojs/svelte':
+        specifier: ^5.0.3
+        version: 5.3.0(astro@4.0.8)(svelte@4.2.12)(typescript@5.3.3)(vite@4.5.2)
+      astro:
+        specifier: 4.0.8
+        version: 4.0.8(typescript@5.3.3)
+      svelte:
+        specifier: ^4.2.9
+        version: 4.2.12
+      typescript:
+        specifier: 5.3.3
+        version: 5.3.3
+    devDependencies:
+      '@inlang/paraglide-astro':
+        specifier: workspace:*
+        version: link:..
+      '@inlang/paraglide-js':
+        specifier: workspace:*
+        version: link:../../paraglide-js
+
   inlang/source-code/paraglide/paraglide-js:
     dependencies:
       '@inlang/detect-json-formatting':
@@ -1338,53 +1384,20 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)
 
-  inlang/source-code/paraglide/paraglide-js-adapter-astro:
+  inlang/source-code/paraglide/paraglide-js/example:
     dependencies:
-      '@inlang/paraglide-js-adapter-vite':
-        specifier: workspace:*
-        version: link:../paraglide-js-adapter-vite
-      astro:
-        specifier: ^4.0.0
-        version: 4.0.8(typescript@5.2.2)
-
-  inlang/source-code/paraglide/paraglide-js-adapter-astro/example:
-    dependencies:
-      '@astrojs/check':
-        specifier: 0.3.4
-        version: 0.3.4(prettier@2.8.3)(typescript@5.3.3)
-      '@astrojs/mdx':
-        specifier: 2.0.3
-        version: 2.0.3(astro@4.0.8)
-      '@astrojs/node':
-        specifier: ^8.2.0
-        version: 8.2.5(astro@4.0.8)
-      '@astrojs/rss':
-        specifier: 4.0.1
-        version: 4.0.1
-      '@astrojs/sitemap':
-        specifier: 3.0.4
-        version: 3.0.4
-      '@astrojs/svelte':
-        specifier: ^5.0.3
-        version: 5.3.0(astro@4.0.8)(svelte@4.2.12)(typescript@5.3.3)(vite@5.2.9)
-      astro:
-        specifier: 4.0.8
-        version: 4.0.8(typescript@5.3.3)
-      svelte:
-        specifier: ^4.2.9
-        version: 4.2.12
-      typescript:
-        specifier: 5.3.3
-        version: 5.3.3
-    devDependencies:
       '@inlang/paraglide-js':
         specifier: workspace:*
-        version: link:../../paraglide-js
-      '@inlang/paraglide-js-adapter-astro':
-        specifier: workspace:*
         version: link:..
+    devDependencies:
+      typescript:
+        specifier: 5.2.2
+        version: 5.2.2
+      vitest:
+        specifier: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
-  inlang/source-code/paraglide/paraglide-js-adapter-next:
+  inlang/source-code/paraglide/paraglide-next:
     dependencies:
       '@inlang/paraglide-js':
         specifier: workspace:*
@@ -1434,7 +1447,7 @@ importers:
         version: 20.12.7
       '@types/react':
         specifier: ^18
-        version: 18.2.75
+        version: 18.2.79
       '@vitejs/plugin-react':
         specifier: ^4.2.1
         version: 4.2.1(vite@4.5.2)
@@ -1457,104 +1470,11 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)
 
-  inlang/source-code/paraglide/paraglide-js-adapter-next/examples/app:
+  inlang/source-code/paraglide/paraglide-rollup:
     dependencies:
-      '@inlang/paraglide-js':
+      '@inlang/paraglide-unplugin':
         specifier: workspace:*
-        version: link:../../../paraglide-js
-      next:
-        specifier: 14.1.2-canary.4
-        version: 14.1.2-canary.4(react-dom@18.2.0)(react@18.2.0)
-      react:
-        specifier: ^18
-        version: 18.2.0
-      react-dom:
-        specifier: ^18
-        version: 18.2.0(react@18.2.0)
-    devDependencies:
-      '@inlang/paraglide-js-adapter-next':
-        specifier: workspace:*
-        version: link:../..
-      '@types/node':
-        specifier: ^20
-        version: 20.12.7
-      '@types/react':
-        specifier: ^18
-        version: 18.2.75
-      '@types/react-dom':
-        specifier: ^18
-        version: 18.2.24
-      typescript:
-        specifier: ^5.3.2
-        version: 5.3.3
-
-  inlang/source-code/paraglide/paraglide-js-adapter-next/examples/pages:
-    dependencies:
-      '@inlang/paraglide-js':
-        specifier: workspace:*
-        version: link:../../../paraglide-js
-      '@inlang/paraglide-js-adapter-next':
-        specifier: workspace:*
-        version: link:../..
-      next:
-        specifier: 14.1.2-canary.4
-        version: 14.1.2-canary.4(react-dom@18.2.0)(react@18.2.0)
-      react:
-        specifier: ^18
-        version: 18.2.0
-      react-dom:
-        specifier: ^18
-        version: 18.2.0(react@18.2.0)
-    devDependencies:
-      '@types/node':
-        specifier: ^20
-        version: 20.12.7
-      '@types/react':
-        specifier: ^18.2.25
-        version: 18.2.75
-      '@types/react-dom':
-        specifier: ^18
-        version: 18.2.24
-      typescript:
-        specifier: ^5.3.2
-        version: 5.3.3
-
-  inlang/source-code/paraglide/paraglide-js-adapter-next/examples/turbo:
-    dependencies:
-      '@inlang/paraglide-js':
-        specifier: workspace:*
-        version: link:../../../paraglide-js
-      next:
-        specifier: ^14.0.0
-        version: 14.1.4(react-dom@18.2.0)(react@18.2.0)
-      react:
-        specifier: ^18
-        version: 18.2.0
-      react-dom:
-        specifier: ^18
-        version: 18.2.0(react@18.2.0)
-    devDependencies:
-      '@inlang/paraglide-js-adapter-next':
-        specifier: workspace:*
-        version: link:../..
-      '@types/node':
-        specifier: ^20
-        version: 20.12.7
-      '@types/react':
-        specifier: ^18
-        version: 18.2.75
-      '@types/react-dom':
-        specifier: ^18
-        version: 18.2.24
-      typescript:
-        specifier: ^5
-        version: 5.3.3
-
-  inlang/source-code/paraglide/paraglide-js-adapter-rollup:
-    dependencies:
-      '@inlang/paraglide-js-adapter-unplugin':
-        specifier: workspace:*
-        version: link:../paraglide-js-adapter-unplugin
+        version: link:../paraglide-unplugin
     devDependencies:
       '@types/node':
         specifier: 20.9.3
@@ -1566,12 +1486,12 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)
 
-  inlang/source-code/paraglide/paraglide-js-adapter-rollup/example:
+  inlang/source-code/paraglide/paraglide-rollup/example:
     devDependencies:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../../paraglide-js
-      '@inlang/paraglide-js-adapter-rollup':
+      '@inlang/paraglide-rollup':
         specifier: workspace:*
         version: link:..
       '@rollup/plugin-alias':
@@ -1584,7 +1504,7 @@ importers:
         specifier: ^4.9.3
         version: 4.9.5
 
-  inlang/source-code/paraglide/paraglide-js-adapter-solidstart:
+  inlang/source-code/paraglide/paraglide-solidstart:
     dependencies:
       '@solidjs/router':
         specifier: ^0.10
@@ -1609,29 +1529,14 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)
 
-  inlang/source-code/paraglide/paraglide-js-adapter-svelte/example:
-    devDependencies:
-      '@inlang/paraglide-js':
-        specifier: workspace:*
-        version: link:../../paraglide-js
-      '@sveltejs/vite-plugin-svelte':
-        specifier: 2.4.2
-        version: 2.4.2(svelte@4.0.5)(vite@4.5.2)
-      svelte:
-        specifier: 4.0.5
-        version: 4.0.5
-      vite:
-        specifier: 4.5.2
-        version: 4.5.2(@types/node@20.9.3)
-
-  inlang/source-code/paraglide/paraglide-js-adapter-sveltekit:
+  inlang/source-code/paraglide/paraglide-sveltekit:
     dependencies:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../paraglide-js
-      '@inlang/paraglide-js-adapter-vite':
+      '@inlang/paraglide-vite':
         specifier: workspace:*
-        version: link:../paraglide-js-adapter-vite
+        version: link:../paraglide-vite
       '@sveltejs/kit':
         specifier: ^2.4.3
         version: 2.5.5(@sveltejs/vite-plugin-svelte@3.0.2)(svelte@4.2.12)(vite@4.5.2)
@@ -1679,9 +1584,9 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)
 
-  inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/example:
+  inlang/source-code/paraglide/paraglide-sveltekit/example:
     dependencies:
-      '@inlang/paraglide-js-adapter-sveltekit':
+      '@inlang/paraglide-sveltekit':
         specifier: workspace:*
         version: link:..
     devDependencies:
@@ -1707,7 +1612,7 @@ importers:
         specifier: 4.5.2
         version: 4.5.2(@types/node@20.9.3)
 
-  inlang/source-code/paraglide/paraglide-js-adapter-unplugin:
+  inlang/source-code/paraglide/paraglide-unplugin:
     dependencies:
       '@inlang/paraglide-js':
         specifier: workspace:*
@@ -1735,11 +1640,11 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)
 
-  inlang/source-code/paraglide/paraglide-js-adapter-vite:
+  inlang/source-code/paraglide/paraglide-vite:
     dependencies:
-      '@inlang/paraglide-js-adapter-unplugin':
+      '@inlang/paraglide-unplugin':
         specifier: workspace:*
-        version: link:../paraglide-js-adapter-unplugin
+        version: link:../paraglide-unplugin
     devDependencies:
       '@types/node':
         specifier: 20.9.3
@@ -1751,12 +1656,12 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)
 
-  inlang/source-code/paraglide/paraglide-js-adapter-vite/example:
+  inlang/source-code/paraglide/paraglide-vite/example:
     devDependencies:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../../paraglide-js
-      '@inlang/paraglide-js-adapter-vite':
+      '@inlang/paraglide-vite':
         specifier: workspace:*
         version: link:..
       typescript:
@@ -1766,26 +1671,11 @@ importers:
         specifier: 4.5.2
         version: 4.5.2(@types/node@20.9.3)
 
-  inlang/source-code/paraglide/paraglide-js-adapter-vite/tests/build:
-    devDependencies:
-      '@inlang/paraglide-js':
-        specifier: workspace:*
-        version: link:../../../paraglide-js
-      '@inlang/paraglide-js-adapter-vite':
-        specifier: workspace:*
-        version: link:../..
-      typescript:
-        specifier: ^4.9.3
-        version: 4.9.5
-      vite:
-        specifier: 4.5.2
-        version: 4.5.2(@types/node@20.9.3)
-
-  inlang/source-code/paraglide/paraglide-js-adapter-webpack:
+  inlang/source-code/paraglide/paraglide-webpack:
     dependencies:
-      '@inlang/paraglide-js-adapter-unplugin':
+      '@inlang/paraglide-unplugin':
         specifier: workspace:*
-        version: link:../paraglide-js-adapter-unplugin
+        version: link:../paraglide-unplugin
     devDependencies:
       '@types/node':
         specifier: 20.9.3
@@ -1797,12 +1687,12 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)
 
-  inlang/source-code/paraglide/paraglide-js-adapter-webpack/example:
+  inlang/source-code/paraglide/paraglide-webpack/example:
     devDependencies:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../../paraglide-js
-      '@inlang/paraglide-js-adapter-webpack':
+      '@inlang/paraglide-webpack':
         specifier: workspace:*
         version: link:..
       typescript:
@@ -1814,19 +1704,6 @@ importers:
       webpack-cli:
         specifier: ^5.1.4
         version: 5.1.4(webpack@5.91.0)
-
-  inlang/source-code/paraglide/paraglide-js/example:
-    dependencies:
-      '@inlang/paraglide-js':
-        specifier: workspace:*
-        version: link:..
-    devDependencies:
-      typescript:
-        specifier: 5.2.2
-        version: 5.2.2
-      vitest:
-        specifier: 0.34.6
-        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/plugins/i18next:
     dependencies:
@@ -2777,9 +2654,9 @@ importers:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../paraglide/paraglide-js
-      '@inlang/paraglide-js-adapter-vite':
+      '@inlang/paraglide-vite':
         specifier: workspace:*
-        version: link:../paraglide/paraglide-js-adapter-vite
+        version: link:../paraglide/paraglide-vite
       '@inlang/result':
         specifier: workspace:*
         version: link:../result
@@ -3262,7 +3139,7 @@ packages:
       zod: 3.22.4
     dev: false
 
-  /@astrojs/svelte@5.3.0(astro@4.0.8)(svelte@4.2.12)(typescript@5.3.3)(vite@5.2.9):
+  /@astrojs/svelte@5.3.0(astro@4.0.8)(svelte@4.2.12)(typescript@5.3.3)(vite@4.5.2):
     resolution: {integrity: sha512-7jKT6uQo6V4XNS4DmlZTlliO4qn9dOTsbRB3PyIzAnbTNqJnDBPY6Hj0X5uhELXSmKkn/o+ncJ46kLtFLqEq8w==}
     engines: {node: '>=18.14.1'}
     peerDependencies:
@@ -3270,7 +3147,7 @@ packages:
       svelte: ^4.0.0 || ^5.0.0-next.90
       typescript: ^5.3.3
     dependencies:
-      '@sveltejs/vite-plugin-svelte': 3.0.2(svelte@4.2.12)(vite@5.2.9)
+      '@sveltejs/vite-plugin-svelte': 3.0.2(svelte@4.2.12)(vite@4.5.2)
       astro: 4.0.8(typescript@5.3.3)
       svelte: 4.2.12
       svelte2tsx: 0.6.27(svelte@4.2.12)(typescript@5.3.3)
@@ -5060,6 +4937,7 @@ packages:
     cpu: [ppc64]
     os: [aix]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/android-arm64@0.17.19:
@@ -5093,6 +4971,7 @@ packages:
     cpu: [arm64]
     os: [android]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/android-arm@0.17.19:
@@ -5126,6 +5005,7 @@ packages:
     cpu: [arm]
     os: [android]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/android-x64@0.17.19:
@@ -5159,6 +5039,7 @@ packages:
     cpu: [x64]
     os: [android]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/darwin-arm64@0.17.19:
@@ -5192,6 +5073,7 @@ packages:
     cpu: [arm64]
     os: [darwin]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/darwin-x64@0.17.19:
@@ -5225,6 +5107,7 @@ packages:
     cpu: [x64]
     os: [darwin]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/freebsd-arm64@0.17.19:
@@ -5258,6 +5141,7 @@ packages:
     cpu: [arm64]
     os: [freebsd]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/freebsd-x64@0.17.19:
@@ -5291,6 +5175,7 @@ packages:
     cpu: [x64]
     os: [freebsd]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/linux-arm64@0.17.19:
@@ -5324,6 +5209,7 @@ packages:
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/linux-arm@0.17.19:
@@ -5357,6 +5243,7 @@ packages:
     cpu: [arm]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/linux-ia32@0.17.19:
@@ -5390,6 +5277,7 @@ packages:
     cpu: [ia32]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/linux-loong64@0.17.19:
@@ -5423,6 +5311,7 @@ packages:
     cpu: [loong64]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/linux-mips64el@0.17.19:
@@ -5456,6 +5345,7 @@ packages:
     cpu: [mips64el]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/linux-ppc64@0.17.19:
@@ -5489,6 +5379,7 @@ packages:
     cpu: [ppc64]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/linux-riscv64@0.17.19:
@@ -5522,6 +5413,7 @@ packages:
     cpu: [riscv64]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/linux-s390x@0.17.19:
@@ -5555,6 +5447,7 @@ packages:
     cpu: [s390x]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/linux-x64@0.17.19:
@@ -5588,6 +5481,7 @@ packages:
     cpu: [x64]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/netbsd-x64@0.17.19:
@@ -5621,6 +5515,7 @@ packages:
     cpu: [x64]
     os: [netbsd]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/openbsd-x64@0.17.19:
@@ -5654,6 +5549,7 @@ packages:
     cpu: [x64]
     os: [openbsd]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/sunos-x64@0.17.19:
@@ -5687,6 +5583,7 @@ packages:
     cpu: [x64]
     os: [sunos]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/win32-arm64@0.17.19:
@@ -5720,6 +5617,7 @@ packages:
     cpu: [arm64]
     os: [win32]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/win32-ia32@0.17.19:
@@ -5753,6 +5651,7 @@ packages:
     cpu: [ia32]
     os: [win32]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/win32-x64@0.17.19:
@@ -5786,6 +5685,7 @@ packages:
     cpu: [x64]
     os: [win32]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@eslint-community/eslint-utils@4.4.0(eslint@8.41.0):
@@ -6418,7 +6318,7 @@ packages:
       react: '>=16'
     dependencies:
       '@types/mdx': 2.0.12
-      '@types/react': 18.2.75
+      '@types/react': 18.2.79
       react: 18.2.0
     dev: true
 
@@ -6494,10 +6394,6 @@ packages:
       urlpattern-polyfill: 8.0.2
     dev: false
 
-  /@next/env@14.1.2-canary.4:
-    resolution: {integrity: sha512-cYyVuYrUrBQlfNtOrIGKZavkSHdnAZO7934JsHi12OUPJlSyAd9Niohi45iH7SOc6/gE3jjoOk2ogt/982yt7w==}
-    dev: false
-
   /@next/env@14.1.4:
     resolution: {integrity: sha512-e7X7bbn3Z6DWnDi75UWn+REgAbLEqxI8Tq2pkFOFAMpWAWApz/YCUhtWMWn410h8Q2fYiYL7Yg5OlxMOCfFjJQ==}
     dev: false
@@ -6520,28 +6416,10 @@ packages:
       glob: 10.3.10
     dev: true
 
-  /@next/swc-darwin-arm64@14.1.2-canary.4:
-    resolution: {integrity: sha512-L1NcvIdOnLE5QwX1GZSzSvnX+PsV1iLnnzLilpWpyBaon5Pzw4bABETRYEHyx4kwVicnIu87i/U5yVe+iXQREw==}
-    engines: {node: '>= 10'}
-    cpu: [arm64]
-    os: [darwin]
-    requiresBuild: true
-    dev: false
-    optional: true
-
   /@next/swc-darwin-arm64@14.1.4:
     resolution: {integrity: sha512-ubmUkbmW65nIAOmoxT1IROZdmmJMmdYvXIe8211send9ZYJu+SqxSnJM4TrPj9wmL6g9Atvj0S/2cFmMSS99jg==}
     engines: {node: '>= 10'}
     cpu: [arm64]
-    os: [darwin]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  /@next/swc-darwin-x64@14.1.2-canary.4:
-    resolution: {integrity: sha512-3+9xaRiQcGX0XF5o9fnAFS/1FieaO83cB40sulnOBLC4ehQ+bogxoy6GRpQng1mAqFawtJ3i0K0VI9K/bTxWMQ==}
-    engines: {node: '>= 10'}
-    cpu: [x64]
     os: [darwin]
     requiresBuild: true
     dev: false
@@ -6556,26 +6434,8 @@ packages:
     dev: false
     optional: true
 
-  /@next/swc-linux-arm64-gnu@14.1.2-canary.4:
-    resolution: {integrity: sha512-y06P05OAty4WiagKjJuYFJImXTIzppVpTIMrU12TxUSA6o7ZxpjPOMPeosZhRLyWvSr2cgS846Uz+o4b91HLvg==}
-    engines: {node: '>= 10'}
-    cpu: [arm64]
-    os: [linux]
-    requiresBuild: true
-    dev: false
-    optional: true
-
   /@next/swc-linux-arm64-gnu@14.1.4:
     resolution: {integrity: sha512-457G0hcLrdYA/u1O2XkRMsDKId5VKe3uKPvrKVOyuARa6nXrdhJOOYU9hkKKyQTMru1B8qEP78IAhf/1XnVqKA==}
-    engines: {node: '>= 10'}
-    cpu: [arm64]
-    os: [linux]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  /@next/swc-linux-arm64-musl@14.1.2-canary.4:
-    resolution: {integrity: sha512-puRw6KRgkHKxXYOG3BaM44FT677gjYHPciSGsjSPMa0FTBsBqwXFtJjW7RVgQUh2XiL0mGxJUFElghGaeqWdIg==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
@@ -6592,26 +6452,8 @@ packages:
     dev: false
     optional: true
 
-  /@next/swc-linux-x64-gnu@14.1.2-canary.4:
-    resolution: {integrity: sha512-ddleCQK4Ewjte2iqiIaUAyIoKNfozFh4sDLzRApOzLmPbJjRESO/wc3O8Aa0YHgOZ6XBW1LSTHemaVXAMq6VzA==}
-    engines: {node: '>= 10'}
-    cpu: [x64]
-    os: [linux]
-    requiresBuild: true
-    dev: false
-    optional: true
-
   /@next/swc-linux-x64-gnu@14.1.4:
     resolution: {integrity: sha512-BapIFZ3ZRnvQ1uWbmqEGJuPT9cgLwvKtxhK/L2t4QYO7l+/DxXuIGjvp1x8rvfa/x1FFSsipERZK70pewbtJtw==}
-    engines: {node: '>= 10'}
-    cpu: [x64]
-    os: [linux]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  /@next/swc-linux-x64-musl@14.1.2-canary.4:
-    resolution: {integrity: sha512-idRZwPHk7s4XeQ0YOlXGbA3aSZ5/sdmnzEg6O7lTwJW5HSb2PKf+LU3rumgVRXIDsPR6LBUdg0G6f0oS4iFShw==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
@@ -6628,15 +6470,6 @@ packages:
     dev: false
     optional: true
 
-  /@next/swc-win32-arm64-msvc@14.1.2-canary.4:
-    resolution: {integrity: sha512-FYITiFgRtzQZ/Ep/40HRYLDyGSsSLQjwixP49SQ5jyS7yETXn9fcukn86H7kK9+VByiRj7byFozzdreOPIxCEw==}
-    engines: {node: '>= 10'}
-    cpu: [arm64]
-    os: [win32]
-    requiresBuild: true
-    dev: false
-    optional: true
-
   /@next/swc-win32-arm64-msvc@14.1.4:
     resolution: {integrity: sha512-xzxF4ErcumXjO2Pvg/wVGrtr9QQJLk3IyQX1ddAC/fi6/5jZCZ9xpuL9Tzc4KPWMFq8GGWFVDMshZOdHGdkvag==}
     engines: {node: '>= 10'}
@@ -6646,28 +6479,10 @@ packages:
     dev: false
     optional: true
 
-  /@next/swc-win32-ia32-msvc@14.1.2-canary.4:
-    resolution: {integrity: sha512-ydqXgSs9K4p4o1dlLAyz+8/ryGBYGhii/uB7VBk6pHo81IFgqLLV0XNVxb23EjrE8Jb3zCLC9YOLjQL9e5bz8A==}
-    engines: {node: '>= 10'}
-    cpu: [ia32]
-    os: [win32]
-    requiresBuild: true
-    dev: false
-    optional: true
-
   /@next/swc-win32-ia32-msvc@14.1.4:
     resolution: {integrity: sha512-WZiz8OdbkpRw6/IU/lredZWKKZopUMhcI2F+XiMAcPja0uZYdMTZQRoQ0WZcvinn9xZAidimE7tN9W5v9Yyfyw==}
     engines: {node: '>= 10'}
     cpu: [ia32]
-    os: [win32]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  /@next/swc-win32-x64-msvc@14.1.2-canary.4:
-    resolution: {integrity: sha512-ZJsOIt2t/Lvqapj4w3DUSFJtGu1jTTp3MB/BByoxp9cyQT8fac3HRqsE4blZq4JtZpWXdCU9dgRTuk0FpUCc7Q==}
-    engines: {node: '>= 10'}
-    cpu: [x64]
     os: [win32]
     requiresBuild: true
     dev: false
@@ -7719,7 +7534,7 @@ packages:
     resolution: {integrity: sha512-m3tl+M8IO8jgiHnk+7LSTFl8axdPXloewi7iGVLdmCwf34XOzEUur0bZVewW4DUbUipFjTS2CXu27+5f/oexBA==}
     peerDependencies:
       '@babel/core': 7.x
-      vite: 2.x || 3.x || 4.x || 5.x
+      vite: 4.5.2
     dependencies:
       '@babel/core': 7.24.4
       '@babel/plugin-transform-react-jsx': 7.23.4(@babel/core@7.24.4)
@@ -7760,7 +7575,7 @@ packages:
     resolution: {integrity: sha512-iForDVJ2M8gQYnm5pHumvTEJjGGc7YNYC0GVKnHFL+GvFfKHfH9Rpq67nUAzNbjuLEpqEOUuQVQajMazWu2ZNQ==}
     peerDependencies:
       preact: ^10.4.0
-      vite: '>=2.0.0'
+      vite: 4.5.2
     dependencies:
       '@babel/core': 7.24.4
       '@prefresh/babel-plugin': 0.5.1
@@ -9565,7 +9380,7 @@ packages:
     peerDependencies:
       '@preact/preset-vite': '*'
       typescript: '>= 4.3.x'
-      vite: ^3.0.0 || ^4.0.0 || ^5.0.0
+      vite: 4.5.2
       vite-plugin-glimmerx: '*'
     peerDependenciesMeta:
       '@preact/preset-vite':
@@ -10074,7 +9889,7 @@ packages:
     requiresBuild: true
     peerDependencies:
       svelte: ^3.54.0 || ^4.0.0-next.0 || ^5.0.0-next.0
-      vite: ^4.0.0
+      vite: 4.5.2
     dependencies:
       '@sveltejs/vite-plugin-svelte': 2.5.3(svelte@3.59.2)(vite@4.5.2)
       '@types/cookie': 0.5.4
@@ -10103,7 +9918,7 @@ packages:
     peerDependencies:
       '@sveltejs/vite-plugin-svelte': ^3.0.0
       svelte: ^4.0.0 || ^5.0.0-next.0
-      vite: ^5.0.3
+      vite: 4.5.2
     dependencies:
       '@sveltejs/vite-plugin-svelte': 3.0.2(svelte@4.2.12)(vite@4.5.2)
       '@types/cookie': 0.6.0
@@ -10138,29 +9953,13 @@ packages:
       - typescript
     dev: true
 
-  /@sveltejs/vite-plugin-svelte-inspector@1.0.4(@sveltejs/vite-plugin-svelte@2.4.2)(svelte@4.0.5)(vite@4.5.2):
-    resolution: {integrity: sha512-zjiuZ3yydBtwpF3bj0kQNV0YXe+iKE545QGZVTaylW3eAzFr+pJ/cwK8lZEaRp4JtaJXhD5DyWAV4AxLh6DgaQ==}
-    engines: {node: ^14.18.0 || >= 16}
-    peerDependencies:
-      '@sveltejs/vite-plugin-svelte': ^2.2.0
-      svelte: ^3.54.0 || ^4.0.0
-      vite: ^4.0.0
-    dependencies:
-      '@sveltejs/vite-plugin-svelte': 2.4.2(svelte@4.0.5)(vite@4.5.2)
-      debug: 4.3.4(supports-color@8.1.1)
-      svelte: 4.0.5
-      vite: 4.5.2(@types/node@20.9.3)
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-
   /@sveltejs/vite-plugin-svelte-inspector@1.0.4(@sveltejs/vite-plugin-svelte@2.5.3)(svelte@3.59.2)(vite@4.5.2):
     resolution: {integrity: sha512-zjiuZ3yydBtwpF3bj0kQNV0YXe+iKE545QGZVTaylW3eAzFr+pJ/cwK8lZEaRp4JtaJXhD5DyWAV4AxLh6DgaQ==}
     engines: {node: ^14.18.0 || >= 16}
     peerDependencies:
       '@sveltejs/vite-plugin-svelte': ^2.2.0
       svelte: ^3.54.0 || ^4.0.0
-      vite: ^4.0.0
+      vite: 4.5.2
     dependencies:
       '@sveltejs/vite-plugin-svelte': 2.5.3(svelte@3.59.2)(vite@4.5.2)
       debug: 4.3.4(supports-color@8.1.1)
@@ -10176,7 +9975,7 @@ packages:
     peerDependencies:
       '@sveltejs/vite-plugin-svelte': ^3.0.0
       svelte: ^4.0.0 || ^5.0.0-next.0
-      vite: ^5.0.0
+      vite: 4.5.2
     dependencies:
       '@sveltejs/vite-plugin-svelte': 3.0.2(svelte@4.2.12)(vite@4.5.2)
       debug: 4.3.4(supports-color@8.1.1)
@@ -10185,48 +9984,12 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /@sveltejs/vite-plugin-svelte-inspector@2.0.0(@sveltejs/vite-plugin-svelte@3.0.2)(svelte@4.2.12)(vite@5.2.9):
-    resolution: {integrity: sha512-gjr9ZFg1BSlIpfZ4PRewigrvYmHWbDrq2uvvPB1AmTWKuM+dI1JXQSUu2pIrYLb/QncyiIGkFDFKTwJ0XqQZZg==}
-    engines: {node: ^18.0.0 || >=20}
-    peerDependencies:
-      '@sveltejs/vite-plugin-svelte': ^3.0.0
-      svelte: ^4.0.0 || ^5.0.0-next.0
-      vite: ^5.0.0
-    dependencies:
-      '@sveltejs/vite-plugin-svelte': 3.0.2(svelte@4.2.12)(vite@5.2.9)
-      debug: 4.3.4(supports-color@8.1.1)
-      svelte: 4.2.12
-      vite: 5.2.9
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
-
-  /@sveltejs/vite-plugin-svelte@2.4.2(svelte@4.0.5)(vite@4.5.2):
-    resolution: {integrity: sha512-ePfcC48ftMKhkT0OFGdOyycYKnnkT6i/buzey+vHRTR/JpQvuPzzhf1PtKqCDQfJRgoPSN2vscXs6gLigx/zGw==}
-    engines: {node: ^14.18.0 || >= 16}
-    peerDependencies:
-      svelte: ^3.54.0 || ^4.0.0
-      vite: ^4.0.0
-    dependencies:
-      '@sveltejs/vite-plugin-svelte-inspector': 1.0.4(@sveltejs/vite-plugin-svelte@2.4.2)(svelte@4.0.5)(vite@4.5.2)
-      debug: 4.3.4(supports-color@8.1.1)
-      deepmerge: 4.3.1
-      kleur: 4.1.5
-      magic-string: 0.30.9
-      svelte: 4.0.5
-      svelte-hmr: 0.15.3(svelte@4.0.5)
-      vite: 4.5.2(@types/node@20.9.3)
-      vitefu: 0.2.5(vite@4.5.2)
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-
   /@sveltejs/vite-plugin-svelte@2.5.3(svelte@3.59.2)(vite@4.5.2):
     resolution: {integrity: sha512-erhNtXxE5/6xGZz/M9eXsmI7Pxa6MS7jyTy06zN3Ck++ldrppOnOlJwHHTsMC7DHDQdgUp4NAc4cDNQ9eGdB/w==}
     engines: {node: ^14.18.0 || >= 16}
     peerDependencies:
       svelte: ^3.54.0 || ^4.0.0 || ^5.0.0-next.0
-      vite: ^4.0.0
+      vite: 4.5.2
     dependencies:
       '@sveltejs/vite-plugin-svelte-inspector': 1.0.4(@sveltejs/vite-plugin-svelte@2.5.3)(svelte@3.59.2)(vite@4.5.2)
       debug: 4.3.4(supports-color@8.1.1)
@@ -10246,7 +10009,7 @@ packages:
     engines: {node: ^18.0.0 || >=20}
     peerDependencies:
       svelte: ^4.0.0 || ^5.0.0-next.0
-      vite: ^5.0.0
+      vite: 4.5.2
     dependencies:
       '@sveltejs/vite-plugin-svelte-inspector': 2.0.0(@sveltejs/vite-plugin-svelte@3.0.2)(svelte@4.2.12)(vite@4.5.2)
       debug: 4.3.4(supports-color@8.1.1)
@@ -10260,40 +10023,9 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /@sveltejs/vite-plugin-svelte@3.0.2(svelte@4.2.12)(vite@5.2.9):
-    resolution: {integrity: sha512-MpmF/cju2HqUls50WyTHQBZUV3ovV/Uk8k66AN2gwHogNAG8wnW8xtZDhzNBsFJJuvmq1qnzA5kE7YfMJNFv2Q==}
-    engines: {node: ^18.0.0 || >=20}
-    peerDependencies:
-      svelte: ^4.0.0 || ^5.0.0-next.0
-      vite: ^5.0.0
-    dependencies:
-      '@sveltejs/vite-plugin-svelte-inspector': 2.0.0(@sveltejs/vite-plugin-svelte@3.0.2)(svelte@4.2.12)(vite@5.2.9)
-      debug: 4.3.4(supports-color@8.1.1)
-      deepmerge: 4.3.1
-      kleur: 4.1.5
-      magic-string: 0.30.9
-      svelte: 4.2.12
-      svelte-hmr: 0.15.3(svelte@4.2.12)
-      vite: 5.2.9
-      vitefu: 0.2.5(vite@5.2.9)
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
-
-  /@swc/counter@0.1.3:
-    resolution: {integrity: sha512-e2BR4lsJkkRlKZ/qCHPw9ZaSxc0MVUd7gtbtaB7aMvHeJVYe8sOB8DBZkP2DtISHGSku9sCK6T6cnY0CtXrOCQ==}
-    dev: false
-
   /@swc/helpers@0.5.2:
     resolution: {integrity: sha512-E4KcWTpoLHqwPHLxidpOqQbcrZVgi0rsmmZXUle1jXmJfuIf/UWpczUJ7MZZ5tlxytgJXyp0w4PGkkeLiuIdZw==}
     dependencies:
-      tslib: 2.6.2
-    dev: false
-
-  /@swc/helpers@0.5.5:
-    resolution: {integrity: sha512-KGYxvIOXcceOAbEk4bi/dVLEK9z8sZ0uBB3Il5b1rhfClSpcX0yfRO0KmTkqR2cnQDymwLB+25ZyMzICg/cm/A==}
-    dependencies:
-      '@swc/counter': 0.1.3
       tslib: 2.6.2
     dev: false
 
@@ -11804,7 +11536,7 @@ packages:
     resolution: {integrity: sha512-oojO9IDc4nCUUi8qIR11KoQm0XFFLIwsRBwHRR4d/88IWghn1y6ckz/bJ8GHDCsYEJee8mDzqtJxh15/cisJNQ==}
     engines: {node: ^14.18.0 || >=16.0.0}
     peerDependencies:
-      vite: ^4.2.0 || ^5.0.0
+      vite: 4.5.2
     dependencies:
       '@babel/core': 7.24.4
       '@babel/plugin-transform-react-jsx-self': 7.24.1(@babel/core@7.24.4)
@@ -11819,7 +11551,7 @@ packages:
   /@vitest/coverage-v8@0.34.6(vitest@0.34.6):
     resolution: {integrity: sha512-fivy/OK2d/EsJFoEoxHFEnNGTg+MmdZBAVK9Ka4qhXR2K3J0DS08vcGVwzDtXSuUMabLv4KtPcpSKkcMXFDViw==}
     peerDependencies:
-      vitest: '>=0.32.0 <1'
+      vitest: 0.34.6
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 0.2.3
@@ -15909,6 +15641,7 @@ packages:
       '@esbuild/win32-arm64': 0.20.2
       '@esbuild/win32-ia32': 0.20.2
       '@esbuild/win32-x64': 0.20.2
+    dev: true
 
   /escalade@3.1.2:
     resolution: {integrity: sha512-ErCHMCae19vR8vQGe50xIsVomy19rg6gFu3+r3jkEO46suLMWBksvVyoGgQV+jOfl84ZSOSlmv6Gxa89PmTGmA==}
@@ -21700,45 +21433,6 @@ packages:
     requiresBuild: true
     dev: true
 
-  /next@14.1.2-canary.4(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-m14IRGvgt2vzkhBOm7lWDEaEWZwqh34gRyZDT72wDGIKcwECDflMT0r30TlqDtdtA4mYxpQSjxNONd1ovOFkKQ==}
-    engines: {node: '>=18.17.0'}
-    hasBin: true
-    peerDependencies:
-      '@opentelemetry/api': ^1.1.0
-      react: ^18.2.0
-      react-dom: ^18.2.0
-      sass: ^1.3.0
-    peerDependenciesMeta:
-      '@opentelemetry/api':
-        optional: true
-      sass:
-        optional: true
-    dependencies:
-      '@next/env': 14.1.2-canary.4
-      '@swc/helpers': 0.5.5
-      busboy: 1.6.0
-      caniuse-lite: 1.0.30001608
-      graceful-fs: 4.2.11
-      postcss: 8.4.31
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      styled-jsx: 5.1.1(react@18.2.0)
-    optionalDependencies:
-      '@next/swc-darwin-arm64': 14.1.2-canary.4
-      '@next/swc-darwin-x64': 14.1.2-canary.4
-      '@next/swc-linux-arm64-gnu': 14.1.2-canary.4
-      '@next/swc-linux-arm64-musl': 14.1.2-canary.4
-      '@next/swc-linux-x64-gnu': 14.1.2-canary.4
-      '@next/swc-linux-x64-musl': 14.1.2-canary.4
-      '@next/swc-win32-arm64-msvc': 14.1.2-canary.4
-      '@next/swc-win32-ia32-msvc': 14.1.2-canary.4
-      '@next/swc-win32-x64-msvc': 14.1.2-canary.4
-    transitivePeerDependencies:
-      - '@babel/core'
-      - babel-plugin-macros
-    dev: false
-
   /next@14.1.4(@babel/core@7.24.4)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-1WTaXeSrUwlz/XcnhGTY7+8eiaFvdet5z9u3V2jb+Ek1vFo0VhHKSAIJvDWfQpttWjnyw14kBeq28TPq7bTeEQ==}
     engines: {node: '>=18.17.0'}
@@ -21763,45 +21457,6 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       styled-jsx: 5.1.1(@babel/core@7.24.4)(react@18.2.0)
-    optionalDependencies:
-      '@next/swc-darwin-arm64': 14.1.4
-      '@next/swc-darwin-x64': 14.1.4
-      '@next/swc-linux-arm64-gnu': 14.1.4
-      '@next/swc-linux-arm64-musl': 14.1.4
-      '@next/swc-linux-x64-gnu': 14.1.4
-      '@next/swc-linux-x64-musl': 14.1.4
-      '@next/swc-win32-arm64-msvc': 14.1.4
-      '@next/swc-win32-ia32-msvc': 14.1.4
-      '@next/swc-win32-x64-msvc': 14.1.4
-    transitivePeerDependencies:
-      - '@babel/core'
-      - babel-plugin-macros
-    dev: false
-
-  /next@14.1.4(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-1WTaXeSrUwlz/XcnhGTY7+8eiaFvdet5z9u3V2jb+Ek1vFo0VhHKSAIJvDWfQpttWjnyw14kBeq28TPq7bTeEQ==}
-    engines: {node: '>=18.17.0'}
-    hasBin: true
-    peerDependencies:
-      '@opentelemetry/api': ^1.1.0
-      react: ^18.2.0
-      react-dom: ^18.2.0
-      sass: ^1.3.0
-    peerDependenciesMeta:
-      '@opentelemetry/api':
-        optional: true
-      sass:
-        optional: true
-    dependencies:
-      '@next/env': 14.1.4
-      '@swc/helpers': 0.5.2
-      busboy: 1.6.0
-      caniuse-lite: 1.0.30001608
-      graceful-fs: 4.2.11
-      postcss: 8.4.31
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      styled-jsx: 5.1.1(react@18.2.0)
     optionalDependencies:
       '@next/swc-darwin-arm64': 14.1.4
       '@next/swc-darwin-x64': 14.1.4
@@ -24310,7 +23965,7 @@ packages:
     dependencies:
       '@types/hast': 3.0.4
       '@types/mdast': 4.0.3
-      mdast-util-to-hast: 13.0.2
+      mdast-util-to-hast: 13.1.0
       unified: 11.0.3
       vfile: 6.0.1
     dev: false
@@ -25732,23 +25387,6 @@ packages:
       react: 18.2.0
     dev: false
 
-  /styled-jsx@5.1.1(react@18.2.0):
-    resolution: {integrity: sha512-pW7uC1l4mBZ8ugbiZrcIsiIvVx1UmTfw7UkC3Um2tmfUq9Bhk8IiyEIPl6F8agHgjzku6j0xQEZbfA5uSgSaCw==}
-    engines: {node: '>= 12.0.0'}
-    peerDependencies:
-      '@babel/core': '*'
-      babel-plugin-macros: '*'
-      react: '>= 16.8.0 || 17.x.x || ^18.0.0-0'
-    peerDependenciesMeta:
-      '@babel/core':
-        optional: true
-      babel-plugin-macros:
-        optional: true
-    dependencies:
-      client-only: 0.0.1
-      react: 18.2.0
-    dev: false
-
   /sucrase@3.35.0:
     resolution: {integrity: sha512-8EbVDiu9iN/nESwxeSxDKe0dunta1GOlHufmSSXxMD2z2/tMZpDMpvXQGsc+ajGo8y2uYUmixaSRUc/QPoQ0GA==}
     engines: {node: '>=16 || 14 >=14.17'}
@@ -25858,15 +25496,6 @@ packages:
       svelte: ^3.19.0 || ^4.0.0
     dependencies:
       svelte: 3.59.2
-    dev: true
-
-  /svelte-hmr@0.15.3(svelte@4.0.5):
-    resolution: {integrity: sha512-41snaPswvSf8TJUhlkoJBekRrABDXDMdpNpT2tfHIv4JuhgvHqLMhEPGtaQn0BmbNSTkuz2Ed20DF2eHw0SmBQ==}
-    engines: {node: ^12.20 || ^14.13.1 || >= 16}
-    peerDependencies:
-      svelte: ^3.19.0 || ^4.0.0
-    dependencies:
-      svelte: 4.0.5
     dev: true
 
   /svelte-hmr@0.15.3(svelte@4.2.12):
@@ -25998,25 +25627,6 @@ packages:
   /svelte@3.59.2:
     resolution: {integrity: sha512-vzSyuGr3eEoAtT/A6bmajosJZIUWySzY2CzB3w2pgPvnkUjGqlDnsNnA0PMO+mMAhuyMul6C2uuZzY6ELSkzyA==}
     engines: {node: '>= 8'}
-    dev: true
-
-  /svelte@4.0.5:
-    resolution: {integrity: sha512-PHKPWP1wiWHBtsE57nCb8xiWB3Ht7/3Kvi3jac0XIxUM2rep8alO7YoAtgWeGD7++tFy46krilOrPW0mG3Dx+A==}
-    engines: {node: '>=16'}
-    dependencies:
-      '@ampproject/remapping': 2.3.0
-      '@jridgewell/sourcemap-codec': 1.4.15
-      '@jridgewell/trace-mapping': 0.3.25
-      acorn: 8.11.3
-      aria-query: 5.3.0
-      axobject-query: 3.2.1
-      code-red: 1.0.4
-      css-tree: 2.3.1
-      estree-walker: 3.0.3
-      is-reference: 3.0.2
-      locate-character: 3.0.0
-      magic-string: 0.30.9
-      periscopic: 3.1.0
     dev: true
 
   /svelte@4.2.12:
@@ -27709,7 +27319,7 @@ packages:
     peerDependencies:
       solid-js: ^1.8.7
       vike: ^0.4.163
-      vite: ^4.4 || ^5.0.2
+      vite: 4.5.2
     dependencies:
       solid-js: 1.7.11
       vike: 0.4.156(vite@4.5.2)
@@ -27726,7 +27336,7 @@ packages:
     hasBin: true
     peerDependencies:
       react-streaming: '>=0.3.5'
-      vite: '>=3.1.0'
+      vite: 4.5.2
     peerDependenciesMeta:
       react-streaming:
         optional: true
@@ -27752,7 +27362,7 @@ packages:
     hasBin: true
     peerDependencies:
       react-streaming: '>=0.3.5'
-      vite: '>=3.1.0'
+      vite: 4.5.2
     peerDependenciesMeta:
       react-streaming:
         optional: true
@@ -27879,7 +27489,7 @@ packages:
     engines: {node: ^14.18.0 || >=16.0.0}
     peerDependencies:
       typescript: '*'
-      vite: '*'
+      vite: 4.5.2
     peerDependenciesMeta:
       vite:
         optional: true
@@ -27904,7 +27514,7 @@ packages:
     engines: {node: '>=14'}
     peerDependencies:
       '@nuxt/kit': '*'
-      vite: ^3.1.0 || ^4.0.0 || ^5.0.0-0
+      vite: 4.5.2
     peerDependenciesMeta:
       '@nuxt/kit':
         optional: true
@@ -27926,7 +27536,7 @@ packages:
   /vite-plugin-node-polyfills@0.16.0(vite@4.5.2):
     resolution: {integrity: sha512-uj1ymOmk7TliMxiivmXokpMY5gVMBpFPSZPLQSCv/LjkJGGKwyLjpbFL64dbYZEdFSUQ3tM7pbrxNh25yvhqOA==}
     peerDependencies:
-      vite: ^2.0.0 || ^3.0.0 || ^4.0.0
+      vite: 4.5.2
     dependencies:
       '@rollup/plugin-inject': 5.0.5(rollup@4.14.3)
       buffer-polyfill: /buffer@6.0.3
@@ -27940,7 +27550,7 @@ packages:
   /vite-plugin-node-polyfills@0.17.0(vite@4.5.2):
     resolution: {integrity: sha512-iPmPn7376e5u6QvoTSJa16hf5Q0DFwHFXJk2uYpsNlmI3JdPms7hWyh55o+OysJ5jo9J5XPhLC9sMOYifwFd1w==}
     peerDependencies:
-      vite: ^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0
+      vite: 4.5.2
     dependencies:
       '@rollup/plugin-inject': 5.0.5(rollup@4.14.3)
       buffer-polyfill: /buffer@6.0.3
@@ -27956,7 +27566,7 @@ packages:
     peerDependencies:
       '@testing-library/jest-dom': ^5.16.6 || ^5.17.0 || ^6.*
       solid-js: ^1.7.2
-      vite: ^3.0.0 || ^4.0.0 || ^5.0.0
+      vite: 4.5.2
     peerDependenciesMeta:
       '@testing-library/jest-dom':
         optional: true
@@ -27978,7 +27588,7 @@ packages:
     peerDependencies:
       '@testing-library/jest-dom': ^5.16.6 || ^5.17.0 || ^6.*
       solid-js: ^1.7.2
-      vite: ^3.0.0 || ^4.0.0 || ^5.0.0
+      vite: 4.5.2
     peerDependenciesMeta:
       '@testing-library/jest-dom':
         optional: true
@@ -27999,7 +27609,7 @@ packages:
     resolution: {integrity: sha512-avp/Jl5zOp/Itfo67xtDB2O61U7idviaIp4mLsjhCa13PjKNasz+IID0jYTyqUp9SFx6/PmBr6v4KgDppqompg==}
     peerDependencies:
       solid-js: ^1.7.2
-      vite: ^3.0.0 || ^4.0.0
+      vite: 4.5.2
     dependencies:
       '@babel/core': 7.24.4
       '@babel/preset-typescript': 7.24.1(@babel/core@7.24.4)
@@ -28018,7 +27628,7 @@ packages:
     resolution: {integrity: sha512-avp/Jl5zOp/Itfo67xtDB2O61U7idviaIp4mLsjhCa13PjKNasz+IID0jYTyqUp9SFx6/PmBr6v4KgDppqompg==}
     peerDependencies:
       solid-js: ^1.7.2
-      vite: ^3.0.0 || ^4.0.0
+      vite: 4.5.2
     dependencies:
       '@babel/core': 7.24.4
       '@babel/preset-typescript': 7.24.1(@babel/core@7.24.4)
@@ -28042,7 +27652,7 @@ packages:
   /vite-tsconfig-paths@4.3.2(typescript@5.2.2)(vite@4.5.2):
     resolution: {integrity: sha512-0Vd/a6po6Q+86rPlntHye7F31zA2URZMbH8M3saAZ/xR9QoGN/L21bxEGfXdWmFdNkqPpRdxFT7nmNe12e9/uA==}
     peerDependencies:
-      vite: '*'
+      vite: 4.5.2
     peerDependenciesMeta:
       vite:
         optional: true
@@ -28161,61 +27771,15 @@ packages:
     optionalDependencies:
       fsevents: 2.3.3
 
-  /vite@5.2.9:
-    resolution: {integrity: sha512-uOQWfuZBlc6Y3W/DTuQ1Sr+oIXWvqljLvS881SVmAj00d5RdgShLcuXWxseWPd4HXwiYBFW/vXHfKFeqj9uQnw==}
-    engines: {node: ^18.0.0 || >=20.0.0}
-    hasBin: true
-    peerDependencies:
-      '@types/node': ^18.0.0 || >=20.0.0
-      less: '*'
-      lightningcss: ^1.21.0
-      sass: '*'
-      stylus: '*'
-      sugarss: '*'
-      terser: ^5.4.0
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
-      less:
-        optional: true
-      lightningcss:
-        optional: true
-      sass:
-        optional: true
-      stylus:
-        optional: true
-      sugarss:
-        optional: true
-      terser:
-        optional: true
-    dependencies:
-      esbuild: 0.20.2
-      postcss: 8.4.38
-      rollup: 4.14.3
-    optionalDependencies:
-      fsevents: 2.3.3
-    dev: false
-
   /vitefu@0.2.5(vite@4.5.2):
     resolution: {integrity: sha512-SgHtMLoqaeeGnd2evZ849ZbACbnwQCIwRH57t18FxcXoZop0uQu0uzlIhJBlF/eWVzuce0sHeqPcDo+evVcg8Q==}
     peerDependencies:
-      vite: ^3.0.0 || ^4.0.0 || ^5.0.0
+      vite: 4.5.2
     peerDependenciesMeta:
       vite:
         optional: true
     dependencies:
       vite: 4.5.2(@types/node@20.5.9)
-
-  /vitefu@0.2.5(vite@5.2.9):
-    resolution: {integrity: sha512-SgHtMLoqaeeGnd2evZ849ZbACbnwQCIwRH57t18FxcXoZop0uQu0uzlIhJBlF/eWVzuce0sHeqPcDo+evVcg8Q==}
-    peerDependencies:
-      vite: ^3.0.0 || ^4.0.0 || ^5.0.0
-    peerDependenciesMeta:
-      vite:
-        optional: true
-    dependencies:
-      vite: 5.2.9
-    dev: false
 
   /vitest@0.34.6(jsdom@22.1.0):
     resolution: {integrity: sha512-+5CALsOvbNKnS+ZHMXtuUC7nL8/7F1F2DnHGjSsszX8zCjWSSviphCb/NuS9Nzf4Q03KyyDRBAXhF/8lffME4Q==}

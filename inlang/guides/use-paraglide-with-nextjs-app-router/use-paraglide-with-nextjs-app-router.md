@@ -1,6 +1,6 @@
 # Using ParaglideJS with Next.js' App Router
 
-In this guide you will lean how to add internationalised routing to your Next.js App that's using the App Router. We will use [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) and the [ParaglideJS NextJS Adapter](https://inlang.com/m/osslbuzt/paraglide-next-i18n) for managing messages and i18n routing.
+In this guide you will lean how to add internationalised routing to your Next.js App that's using the App Router. We will use [Paraglide-Next](https://inlang.com/m/osslbuzt/paraglide-next-i18n) for managing messages and i18n routing.
 
 Paraglide is a great fit for the NextJS App router because it uses a compiler to generate tree-shakeable messages. That way your client bundle only includes the messages that are used in client components on any given page.
 
@@ -10,7 +10,7 @@ First, set up a NextJS project using the App Router.
 Then run Paraglide's init CLI & install dependencies
 
 ```bash
-npx @inlang/paraglide-js-adapter-next init
+npx @inlang/paraglide-next init
 npm install
 ```
 
@@ -63,7 +63,7 @@ Switch languages by navigating to `/en` and `/de`.
 
 We can show a page in a given language by prefixing it with the locale. Eg: `/en/about` and `/de/about`. But adding the prefix to all our `<Link>` components will get tedious quickly.
 
-This is why the adapter provides a custom `<Link>` component that automatically adds the locale to the href (and has a few other superpowers that we will get to later). It's exported from `@/lib/i18n`.
+This is why Paraglide-Next provides a custom `<Link>` component that automatically adds the locale to the href (and has a few other superpowers that we will get to later). It's exported from `@/lib/i18n`.
 
 Replace the `<Link>` imports from `next/link` with the `Link` component from `@/lib/i18n`. This can be done quickly with a find & replace.
 
@@ -171,7 +171,7 @@ You can edit which languages you support in `project.inlang/settings.json`.
 
 You now have a fully functional multilingual NextJS app using ParaglideJS. Wasn't that hard was it?
 
-You can check out the full source code of this example [here](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next/examples/app).
+You can check out the full source code of this example [here](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-next/examples/app).
 
 If you want to learn more about Paraglide, check out the [Paraglide-Next Documentation](https://inlang.com/m/osslbuzt/paraglide-next-i18n). If you need help or have some ideas, feel free to reach out to us on [Discord](https://discord.gg/CNPfhWpcAa) or open a Discussion on [GitHub](https://github.com/opral/monorepo/discussions).
 

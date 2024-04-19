@@ -4,7 +4,7 @@
 	"slug": "paraglide-remix-i18n",
 	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/external-projects/remix-paraglidejs/assets/remix.svg",
 	"displayName": {
-		"en": "Remix-ParaglideJS Adapter"
+		"en": "Remix-ParaglideJS"
 	},
 	"description": {
 		"en": "Remix utils and examples to work with ParaglideJS"
