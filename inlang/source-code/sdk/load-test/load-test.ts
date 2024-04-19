@@ -28,8 +28,12 @@ const mockServer = "http://localhost:3000"
 const cli = `PUBLIC_SERVER_BASE_URL=${mockServer} pnpm inlang`
 const translateCommand = cli + " machine translate -f --project ./project.inlang"
 
-const messageDir = join(__dirname, "locales", "en")
-const messageFile = join(__dirname, "locales", "en", "common.json")
+// const messageDir = join(__dirname, "locales", "en")
+// const messageFile = join(__dirname, "locales", "en", "common.json")
+
+// experimental sdk persistence plugin
+const messageDir = join(__dirname, "project.inlang", "messages")
+const messageFile = join(__dirname, "project.inlang", "messages", "en.json")
 
 export async function runLoadTest(
 	messageCount: number = 1000,
