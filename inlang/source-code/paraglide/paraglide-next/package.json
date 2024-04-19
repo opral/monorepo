@@ -56,6 +56,7 @@
 		"@inlang/paraglide-js": "workspace:*",
 		"commander": "^12.0.0",
 		"consola": "^3.2.3",
+		"qs": "^6.12.1",
 		"rsc-env": "^0.0.1"
 	},
 	"peerDependencies": {
