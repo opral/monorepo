@@ -5,44 +5,67 @@ import type { PageContext } from "vike/types"
 import fs from "node:fs/promises"
 import { convert, generateTableOfContents } from "@inlang/markdown"
 import type { PageProps } from "./+Page.jsx"
+import { getRedirectPath } from "./helper/getRedirectPath.js"
 
 const repositoryRoot = import.meta.url.slice(0, import.meta.url.lastIndexOf("inlang/source-code"))
 let renderedMarkdown = {} as Record<string, string>
 let tabelOfContents = {} as Record<string, Record<string, string[]>>
 
+/*
+ * This function is called before rendering the page.
+ *
+ * @example
+ * /m/sdjfhkj/fink-localization-editor/docs/usage
+ *
+ * uid -> sdjfhkj
+ * currentSlug -> fink-localization-editor
+ * itemPath -> /m/sdjfhkj/fink-localization-editor
+ * pagePath -> /docs/usage
+ *
+ */
 export default async function onBeforeRender(pageContext: PageContext) {
 	// check if uid is defined
 	const uid = pageContext.routeParams?.uid
 	if (!uid) redirect("/not-found", 301)
 
-	// check if item is valid
+	// check if item for uid exists
 	const item = registry.find((item: any) => item.uniqueID === uid) as MarketplaceManifest & {
 		uniqueID: string
 	}
 	if (!item) throw redirect("/not-found", 301)
 
-	// get corrected base slug
-	const baseSlug = `/m/${item.uniqueID}/${
+	// get corrected item slug; replace all dots with dashes; if no slug is defined, use the id
+	const itemPath = `/m/${item.uniqueID}/${
 		item.slug ? item.slug.replaceAll(".", "-") : item.id.replaceAll(".", "-")
 	}`
 
-	// check if slug is defined
-	const slug = pageContext.urlParsed.pathname
+	// get the current slug
+	const currentSlug = pageContext.urlParsed.pathname
 		.split("/")
 		.find((part) => part !== "m" && part !== uid && part.length !== 0)
-	if (!slug) throw redirect(baseSlug as `/${string}`, 301)
+	if (!currentSlug) throw redirect(itemPath as `/${string}`, 301)
 
 	// get rest of the slug for in-product navigation
-	const restSlug = pageContext.urlParsed.pathname.replace(`/m/${uid}/${slug}`, "") || "/"
+	const pagePath = pageContext.urlParsed.pathname.replace(`/m/${uid}/${currentSlug}`, "") || "/"
+
+	//check for redirects
+	if (item.pageRedirects) {
+		for (const [from, to] of Object.entries(item.pageRedirects)) {
+			const newPagePath = getRedirectPath(pagePath, from, to)
+			if (newPagePath) {
+				throw redirect((itemPath + newPagePath) as `/${string}`, 301)
+			}
+		}
+	}
 
 	// check if slug is correct
 	if (item.slug) {
-		if (item.slug !== slug) {
-			throw redirect((baseSlug + restSlug) as `/${string}`, 301)
+		if (item.slug !== currentSlug) {
+			throw redirect((itemPath + pagePath) as `/${string}`, 301)
 		}
 	} else {
-		if (item.id.replaceAll(".", "-") !== slug) {
-			throw redirect((baseSlug + restSlug) as `/${string}`, 301)
+		if (item.id.replaceAll(".", "-") !== currentSlug) {
+			throw redirect((itemPath + pagePath) as `/${string}`, 301)
 		}
 	}
 
@@ -51,7 +74,7 @@ export default async function onBeforeRender(pageContext: PageContext) {
 		tabelOfContents = {}
 		// get content for each page
 		for (const [slug, page] of Object.entries(item.pages)) {
-			if (!page || !fileExists(page)) redirect(baseSlug as `/${string}`, 301)
+			if (!page || !fileExists(page)) redirect(itemPath as `/${string}`, 301)
 
 			const content = await getContentString(page)
 			const markdown = await convert(content)
@@ -82,18 +105,18 @@ export default async function onBeforeRender(pageContext: PageContext) {
 	}
 
 	//check if the markdown is available for this route
-	if (renderedMarkdown[restSlug] === undefined) {
+	if (renderedMarkdown[pagePath] === undefined) {
 		console.error("No content available this route.")
-		throw redirect(baseSlug as `/${string}`, 301)
+		throw redirect(itemPath as `/${string}`, 301)
 	}
 
 	return {
 		pageContext: {
 			pageProps: {
-				markdown: renderedMarkdown[restSlug],
+				markdown: renderedMarkdown[pagePath],
 				pages: item.pages,
-				restSlug,
-				tableOfContents: tabelOfContents[restSlug] || {},
+				pagePath,
+				tableOfContents: tabelOfContents[pagePath] || {},
 				manifest: item,
 				recommends: [],
 			} as PageProps,
