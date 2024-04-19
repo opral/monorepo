@@ -24,7 +24,6 @@ test("roundtrip (saving/loading messages)", async () => {
 
 	const enInitial = JSON.stringify(
 		{
-			$schema: "https://inlang.com/schema/sdk-persistence",
 			first_message: "If this fails I will be sad",
 			second_message: "Let's see if this works",
 		} satisfies StorageSchema,
@@ -34,7 +33,6 @@ test("roundtrip (saving/loading messages)", async () => {
 
 	const deInitial = JSON.stringify(
 		{
-			$schema: "https://inlang.com/schema/sdk-persistence",
 			second_message: "Mal sehen ob das funktioniert",
 		} satisfies StorageSchema,
 		undefined,
@@ -96,7 +94,6 @@ test("keep the json formatting to decrease git diff's and merge conflicts", asyn
 	// double tab indentation
 	const initialFile = JSON.stringify(
 		{
-			$schema: "https://inlang.com/schema/sdk-persistence",
 			hello_world: "hello",
 		} satisfies StorageSchema,
 		undefined,
@@ -119,7 +116,7 @@ test("keep the json formatting to decrease git diff's and merge conflicts", asyn
 
 	const fileAfterRoundtrip = await fs.readFile("./messages/en.json", { encoding: "utf-8" })
 
-	// the file should still tab indentation
+	// the file should still space-2 indentation
 	expect(fileAfterRoundtrip).toStrictEqual(initialFile)
 	expect(Value.Check(StorageSchema, JSON.parse(fileAfterRoundtrip))).toBe(true)
 })
@@ -221,7 +218,6 @@ test("it should add the $schema property to the file if it does not exist", asyn
 
 	const fileAfterSave = await fs.readFile("./messages/en.json", { encoding: "utf-8" })
 	const json = JSON.parse(fileAfterSave) as StorageSchema
-	expect(json.$schema).toBe("https://inlang.com/schema/sdk-persistence")
-	expect(Object.keys(json).length).toBe(2)
+	expect(Object.keys(json).length).toBe(1)
 	expect(Value.Check(StorageSchema, json)).toBe(true)
 })
