@@ -28,21 +28,22 @@
 	"dependencies": {
 		"@lix-js/fs": "workspace:*",
 		"@octokit/types": "12.4.0 ",
-		"octokit": "3.1.2",
-		"solid-js": "1.7.11",
 		"async-lock": "^1.4.1",
 		"clean-git-ref": "^2.0.1",
 		"crc-32": "^1.2.2",
 		"diff3": "^0.0.4",
 		"ignore": "^5.3.1",
+		"octokit": "3.1.2",
 		"pako": "^1.0.11",
 		"pify": "^5.0.0",
-		"sha.js": "^2.4.11"
+		"sha.js": "^2.4.11",
+		"solid-js": "1.7.11"
 	},
 	"license": "Apache-2.0",
 	"devDependencies": {
 		"@vitest/coverage-v8": "1.1.1",
 		"typescript": "5.2.2",
-		"vitest": "1.1.1"
+		"vitest": "1.1.1",
+		"eslint": "^8.57.0"
 	}
 }

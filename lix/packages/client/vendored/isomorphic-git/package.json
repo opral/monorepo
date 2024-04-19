@@ -11,9 +11,6 @@
     "isogit": "./cli.cjs"
   },
   "sideEffects": false,
-  "engines": {
-    "node": "16"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/isomorphic-git/isomorphic-git.git"
