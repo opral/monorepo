@@ -1,4 +1,4 @@
-import { unified } from "unified"
+import { unified, type Plugin } from "unified"
 import remarkParse from "remark-parse"
 import remarkGfm from "remark-gfm"
 import remarkRehype from "remark-rehype"
@@ -10,14 +10,38 @@ import rehypeHighlight from "rehype-highlight"
 import rehypeAutolinkHeadings from "rehype-autolink-headings"
 import rehypeRewrite from "rehype-rewrite"
 import addClasses from "rehype-class-names"
+import remarkFrontmatter from "remark-frontmatter"
+import remarkParseFrontmatter from "remark-parse-frontmatter"
 import { rehypeAccessibleEmojis } from "rehype-accessible-emojis"
 import { preprocess } from "./preprocess.js"
+import { Type } from "@sinclair/typebox"
+import { Value } from "@sinclair/typebox/value"
+
+const customFrontmatterValidation: Plugin<any> = () => (_, file) => {
+	const Frontmatter = Type.Object({
+		title: Type.String(),
+		description: Type.String(),
+	})
+
+	//check only if frontmatter exists
+	if (file.data.frontmatter) {
+		// check if type Frontmatter
+		if (Value.Check(Frontmatter, file.data.frontmatter)) {
+			// type is valid
+		} else {
+			throw new Error("Frontmatter is not valid")
+		}
+	}
+}
 
 /* Converts the markdown with remark and the html with rehype to be suitable for being rendered */
-export async function convert(markdown: string): Promise<string> {
+export async function convert(markdown: string): Promise<{ data: any; html: string }> {
 	const content = await unified()
 		/* @ts-ignore */
 		.use(remarkParse)
+		.use(remarkFrontmatter)
+		.use(remarkParseFrontmatter)
+		.use(customFrontmatterValidation)
 		/* @ts-ignore */
 		.use(remarkGfm)
 		/* @ts-ignore */
@@ -187,6 +211,9 @@ export async function convert(markdown: string): Promise<string> {
 		.use(rehypeStringify)
 		.process(preprocess(markdown))
 
-	return String(`<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark-dimmed.min.css">
-	${content}`)
+	return {
+		data: content.data,
+		html: String(`<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark-dimmed.min.css">
+	${content}`),
+	}
 }

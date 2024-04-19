@@ -72,7 +72,7 @@ export default async function onBeforeRender(pageContext: any) {
 					"utf-8"
 				)
 				const markdown = await convert(text)
-				renderedMarkdown[page.slug] = markdown
+				renderedMarkdown[page.slug] = markdown.html
 			}
 		}
 		//get sdk documentation
@@ -85,7 +85,7 @@ export default async function onBeforeRender(pageContext: any) {
 					"utf-8"
 				)
 				const markdown = await convert(text)
-				renderedMarkdown[page.slug] = markdown
+				renderedMarkdown[page.slug] = markdown.html
 			}
 		}
 		//get plugin documentation
@@ -98,7 +98,7 @@ export default async function onBeforeRender(pageContext: any) {
 					"utf-8"
 				)
 				const markdown = await convert(text)
-				renderedMarkdown[page.slug] = markdown
+				renderedMarkdown[page.slug] = markdown.html
 			}
 		}
 		//get lint rule documentation
@@ -111,7 +111,7 @@ export default async function onBeforeRender(pageContext: any) {
 					"utf-8"
 				)
 				const markdown = await convert(text)
-				renderedMarkdown[page.slug] = markdown
+				renderedMarkdown[page.slug] = markdown.html
 			}
 		}
 	}
