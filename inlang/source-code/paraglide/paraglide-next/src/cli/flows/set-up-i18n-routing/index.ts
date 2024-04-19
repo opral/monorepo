@@ -30,7 +30,7 @@ export const SetUpI18nRoutingFlow: CliStep<
 	return ctx
 }
 
-function replaceNextLinkImports(content: string): string {
+export function replaceNextLinkImports(content: string): string {
 	const regex = /import\s+(?<identifier>\S+)\s+from\s*("|')next\/link("|')/g
 	const match = regex.exec(content)
 	if (!match) return content
@@ -44,7 +44,7 @@ function replaceNextLinkImports(content: string): string {
 	return content.replace(match[0], replacementImport)
 }
 
-function replaceNextNavigationImports(content: string) {
+export function replaceNextNavigationImports(content: string) {
 	//the next/navigation imports will be replaced with the ones from @/lib/i18n
 	const IDENTIFIERS_TO_REPLACE = ["usePathname", "useRouter", "redirect", "permanentRedirect"]
 
