@@ -11,22 +11,31 @@ import rehypeAutolinkHeadings from "rehype-autolink-headings"
 import rehypeRewrite from "rehype-rewrite"
 import addClasses from "rehype-class-names"
 import remarkFrontmatter from "remark-frontmatter"
-import remarkParseFrontmatter from "remark-parse-frontmatter"
 import { rehypeAccessibleEmojis } from "rehype-accessible-emojis"
 import { preprocess } from "./preprocess.js"
 import { Type } from "@sinclair/typebox"
 import { Value } from "@sinclair/typebox/value"
+import yaml from "yaml"
 
-const customFrontmatterValidation: Plugin<any> = () => (_, file) => {
+const customFrontmatterValidation: Plugin<any> = () => (node, file) => {
 	const Frontmatter = Type.Object({
 		title: Type.String(),
 		description: Type.String(),
 	})
 
+	// TODO: make this more robust
+	const frontmatterString =
+		(node as any).children.find((child: any) => child.type === "yaml")?.value || ""
+
+	const frontmatter = yaml.parse(frontmatterString)
+	if (frontmatter !== null) {
+		file.data.frontmatter = frontmatter
+	}
+
 	//check only if frontmatter exists
 	if (file.data.frontmatter) {
 		// check if type Frontmatter
-		if (Value.Check(Frontmatter, file.data.frontmatter)) {
+		if (Value.Check(Frontmatter, frontmatter)) {
 			// type is valid
 		} else {
 			throw new Error("Frontmatter is not valid")
@@ -39,8 +48,7 @@ export async function convert(markdown: string): Promise<{ data: any; html: stri
 	const content = await unified()
 		/* @ts-ignore */
 		.use(remarkParse)
-		.use(remarkFrontmatter)
-		.use(remarkParseFrontmatter)
+		.use(remarkFrontmatter, ["yaml"])
 		.use(customFrontmatterValidation)
 		/* @ts-ignore */
 		.use(remarkGfm)
@@ -212,7 +220,7 @@ export async function convert(markdown: string): Promise<{ data: any; html: stri
 		.process(preprocess(markdown))
 
 	return {
-		data: content.data,
+		data: content.data || {},
 		html: String(`<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark-dimmed.min.css">
 	${content}`),
 	}
