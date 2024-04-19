@@ -11,8 +11,15 @@ import { sortLanguageTags } from "./helper/sortLanguageTags.js"
 import { setMessageCount } from "./+Page.jsx"
 
 export function Message(props: { id: string }) {
-	const { project, filteredLanguageTags, filteredIds, filteredMessageLintRules, textSearch } =
-		useEditorState()
+	const {
+		project,
+		filteredLanguageTags,
+		filteredIds,
+		filteredMessageLintRules,
+		textSearch,
+		languageTags,
+		sourceLanguageTag,
+	} = useEditorState()
 	const [message, setMessage] = createSignal<MessageType>()
 	const [lintReports, setLintReports] = createSignal<readonly MessageLintReport[]>([])
 	const [shouldMessageBeShown, setShouldMessageBeShown] = createSignal(true)
@@ -129,13 +136,7 @@ export function Message(props: { id: string }) {
 				</h3>
 			</div>
 			<div>
-				<For
-					each={sortLanguageTags(
-						project()?.settings()?.languageTags || [],
-						// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-						project()?.settings()?.sourceLanguageTag!
-					)}
-				>
+				<For each={sortLanguageTags(languageTags(), sourceLanguageTag())}>
 					{(languageTag) => {
 						return (
 							<>

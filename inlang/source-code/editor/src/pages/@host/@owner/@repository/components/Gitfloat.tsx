@@ -487,7 +487,7 @@ export const Gitfloat = () => {
 				</TourHintWrapper>
 			</div>
 			<SignInDialog
-				ref={signInDialog!}
+				ref={signInDialog}
 				onClickOnSignInButton={() => {
 					// hide the sign in dialog to increase UX when switching back to this window
 					browserAuth.login()
@@ -513,7 +513,7 @@ export const Gitfloat = () => {
 				}}
 			/>
 			<sl-dialog
-				ref={forkDialog!}
+				ref={forkDialog}
 				on:sl-show={() => setForkModalOpen(true)}
 				on:sl-after-hide={() => setForkModalOpen(false)}
 			>

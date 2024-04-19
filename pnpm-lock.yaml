@@ -393,6 +393,12 @@ importers:
 
   inlang/source-code/editor:
     dependencies:
+      '@inlang/settings-component':
+        specifier: ^1.0.0
+        version: link:../settings-component
+      '@isomorphic-git/cors-proxy':
+        specifier: ^2.7.1
+        version: 2.7.1
       '@lix-js/client':
         specifier: workspace:*
         version: link:../../../lix/packages/client
@@ -562,9 +568,9 @@ importers:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../paraglide/paraglide-js
-      '@inlang/paraglide-js-adapter-vite':
+      '@inlang/paraglide-vite':
         specifier: workspace:*
-        version: link:../paraglide/paraglide-js-adapter-vite
+        version: link:../paraglide/paraglide-vite
       '@inlang/result':
         specifier: workspace:*
         version: link:../result
@@ -1256,6 +1262,52 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)
 
+  inlang/source-code/paraglide/paraglide-astro:
+    dependencies:
+      '@inlang/paraglide-vite':
+        specifier: workspace:*
+        version: link:../paraglide-vite
+      astro:
+        specifier: ^4.0.0
+        version: 4.0.8(typescript@5.2.2)
+
+  inlang/source-code/paraglide/paraglide-astro/example:
+    dependencies:
+      '@astrojs/check':
+        specifier: 0.3.4
+        version: 0.3.4(prettier@2.8.3)(typescript@5.3.3)
+      '@astrojs/mdx':
+        specifier: 2.0.3
+        version: 2.0.3(astro@4.0.8)
+      '@astrojs/node':
+        specifier: ^8.2.0
+        version: 8.2.5(astro@4.0.8)
+      '@astrojs/rss':
+        specifier: 4.0.1
+        version: 4.0.1
+      '@astrojs/sitemap':
+        specifier: 3.0.4
+        version: 3.0.4
+      '@astrojs/svelte':
+        specifier: ^5.0.3
+        version: 5.3.0(astro@4.0.8)(svelte@4.2.12)(typescript@5.3.3)(vite@4.5.2)
+      astro:
+        specifier: 4.0.8
+        version: 4.0.8(typescript@5.3.3)
+      svelte:
+        specifier: ^4.2.9
+        version: 4.2.12
+      typescript:
+        specifier: 5.3.3
+        version: 5.3.3
+    devDependencies:
+      '@inlang/paraglide-astro':
+        specifier: workspace:*
+        version: link:..
+      '@inlang/paraglide-js':
+        specifier: workspace:*
+        version: link:../../paraglide-js
+
   inlang/source-code/paraglide/paraglide-js:
     dependencies:
       '@inlang/detect-json-formatting':
@@ -1341,53 +1393,20 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)
 
-  inlang/source-code/paraglide/paraglide-js-adapter-astro:
+  inlang/source-code/paraglide/paraglide-js/example:
     dependencies:
-      '@inlang/paraglide-js-adapter-vite':
-        specifier: workspace:*
-        version: link:../paraglide-js-adapter-vite
-      astro:
-        specifier: ^4.0.0
-        version: 4.0.8(typescript@5.2.2)
-
-  inlang/source-code/paraglide/paraglide-js-adapter-astro/example:
-    dependencies:
-      '@astrojs/check':
-        specifier: 0.3.4
-        version: 0.3.4(prettier@2.8.3)(typescript@5.3.3)
-      '@astrojs/mdx':
-        specifier: 2.0.3
-        version: 2.0.3(astro@4.0.8)
-      '@astrojs/node':
-        specifier: ^8.2.0
-        version: 8.2.5(astro@4.0.8)
-      '@astrojs/rss':
-        specifier: 4.0.1
-        version: 4.0.1
-      '@astrojs/sitemap':
-        specifier: 3.0.4
-        version: 3.0.4
-      '@astrojs/svelte':
-        specifier: ^5.0.3
-        version: 5.3.0(astro@4.0.8)(svelte@4.2.12)(typescript@5.3.3)(vite@4.5.2)
-      astro:
-        specifier: 4.0.8
-        version: 4.0.8(typescript@5.3.3)
-      svelte:
-        specifier: ^4.2.9
-        version: 4.2.12
-      typescript:
-        specifier: 5.3.3
-        version: 5.3.3
-    devDependencies:
       '@inlang/paraglide-js':
         specifier: workspace:*
-        version: link:../../paraglide-js
-      '@inlang/paraglide-js-adapter-astro':
-        specifier: workspace:*
         version: link:..
+    devDependencies:
+      typescript:
+        specifier: 5.2.2
+        version: 5.2.2
+      vitest:
+        specifier: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
-  inlang/source-code/paraglide/paraglide-js-adapter-next:
+  inlang/source-code/paraglide/paraglide-next:
     dependencies:
       '@inlang/paraglide-js':
         specifier: workspace:*
@@ -1437,7 +1456,7 @@ importers:
         version: 20.12.7
       '@types/react':
         specifier: ^18
-        version: 18.2.75
+        version: 18.2.79
       '@vitejs/plugin-react':
         specifier: ^4.2.1
         version: 4.2.1(vite@4.5.2)
@@ -1460,104 +1479,11 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)
 
-  inlang/source-code/paraglide/paraglide-js-adapter-next/examples/app:
+  inlang/source-code/paraglide/paraglide-rollup:
     dependencies:
-      '@inlang/paraglide-js':
+      '@inlang/paraglide-unplugin':
         specifier: workspace:*
-        version: link:../../../paraglide-js
-      next:
-        specifier: 14.1.2-canary.4
-        version: 14.1.2-canary.4(react-dom@18.2.0)(react@18.2.0)
-      react:
-        specifier: ^18
-        version: 18.2.0
-      react-dom:
-        specifier: ^18
-        version: 18.2.0(react@18.2.0)
-    devDependencies:
-      '@inlang/paraglide-js-adapter-next':
-        specifier: workspace:*
-        version: link:../..
-      '@types/node':
-        specifier: ^20
-        version: 20.12.7
-      '@types/react':
-        specifier: ^18
-        version: 18.2.75
-      '@types/react-dom':
-        specifier: ^18
-        version: 18.2.24
-      typescript:
-        specifier: ^5.3.2
-        version: 5.3.3
-
-  inlang/source-code/paraglide/paraglide-js-adapter-next/examples/pages:
-    dependencies:
-      '@inlang/paraglide-js':
-        specifier: workspace:*
-        version: link:../../../paraglide-js
-      '@inlang/paraglide-js-adapter-next':
-        specifier: workspace:*
-        version: link:../..
-      next:
-        specifier: 14.1.2-canary.4
-        version: 14.1.2-canary.4(react-dom@18.2.0)(react@18.2.0)
-      react:
-        specifier: ^18
-        version: 18.2.0
-      react-dom:
-        specifier: ^18
-        version: 18.2.0(react@18.2.0)
-    devDependencies:
-      '@types/node':
-        specifier: ^20
-        version: 20.12.7
-      '@types/react':
-        specifier: ^18.2.25
-        version: 18.2.75
-      '@types/react-dom':
-        specifier: ^18
-        version: 18.2.24
-      typescript:
-        specifier: ^5.3.2
-        version: 5.3.3
-
-  inlang/source-code/paraglide/paraglide-js-adapter-next/examples/turbo:
-    dependencies:
-      '@inlang/paraglide-js':
-        specifier: workspace:*
-        version: link:../../../paraglide-js
-      next:
-        specifier: ^14.0.0
-        version: 14.1.4(@babel/core@7.24.4)(react-dom@18.2.0)(react@18.2.0)
-      react:
-        specifier: ^18
-        version: 18.2.0
-      react-dom:
-        specifier: ^18
-        version: 18.2.0(react@18.2.0)
-    devDependencies:
-      '@inlang/paraglide-js-adapter-next':
-        specifier: workspace:*
-        version: link:../..
-      '@types/node':
-        specifier: ^20
-        version: 20.12.7
-      '@types/react':
-        specifier: ^18
-        version: 18.2.75
-      '@types/react-dom':
-        specifier: ^18
-        version: 18.2.24
-      typescript:
-        specifier: ^5
-        version: 5.3.3
-
-  inlang/source-code/paraglide/paraglide-js-adapter-rollup:
-    dependencies:
-      '@inlang/paraglide-js-adapter-unplugin':
-        specifier: workspace:*
-        version: link:../paraglide-js-adapter-unplugin
+        version: link:../paraglide-unplugin
     devDependencies:
       '@types/node':
         specifier: 20.9.3
@@ -1569,12 +1495,12 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)
 
-  inlang/source-code/paraglide/paraglide-js-adapter-rollup/example:
+  inlang/source-code/paraglide/paraglide-rollup/example:
     devDependencies:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../../paraglide-js
-      '@inlang/paraglide-js-adapter-rollup':
+      '@inlang/paraglide-rollup':
         specifier: workspace:*
         version: link:..
       '@rollup/plugin-alias':
@@ -1587,7 +1513,7 @@ importers:
         specifier: ^4.9.3
         version: 4.9.5
 
-  inlang/source-code/paraglide/paraglide-js-adapter-solidstart:
+  inlang/source-code/paraglide/paraglide-solidstart:
     dependencies:
       '@solidjs/router':
         specifier: ^0.10
@@ -1612,29 +1538,14 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)
 
-  inlang/source-code/paraglide/paraglide-js-adapter-svelte/example:
-    devDependencies:
-      '@inlang/paraglide-js':
-        specifier: workspace:*
-        version: link:../../paraglide-js
-      '@sveltejs/vite-plugin-svelte':
-        specifier: 2.4.2
-        version: 2.4.2(svelte@4.0.5)(vite@4.5.2)
-      svelte:
-        specifier: 4.0.5
-        version: 4.0.5
-      vite:
-        specifier: 4.5.2
-        version: 4.5.2(@types/node@20.9.3)
-
-  inlang/source-code/paraglide/paraglide-js-adapter-sveltekit:
+  inlang/source-code/paraglide/paraglide-sveltekit:
     dependencies:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../paraglide-js
-      '@inlang/paraglide-js-adapter-vite':
+      '@inlang/paraglide-vite':
         specifier: workspace:*
-        version: link:../paraglide-js-adapter-vite
+        version: link:../paraglide-vite
       '@sveltejs/kit':
         specifier: ^2.4.3
         version: 2.5.5(@sveltejs/vite-plugin-svelte@3.0.2)(svelte@4.2.12)(vite@4.5.2)
@@ -1682,9 +1593,9 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)
 
-  inlang/source-code/paraglide/paraglide-js-adapter-sveltekit/example:
+  inlang/source-code/paraglide/paraglide-sveltekit/example:
     dependencies:
-      '@inlang/paraglide-js-adapter-sveltekit':
+      '@inlang/paraglide-sveltekit':
         specifier: workspace:*
         version: link:..
     devDependencies:
@@ -1710,7 +1621,7 @@ importers:
         specifier: 4.5.2
         version: 4.5.2(@types/node@20.9.3)
 
-  inlang/source-code/paraglide/paraglide-js-adapter-unplugin:
+  inlang/source-code/paraglide/paraglide-unplugin:
     dependencies:
       '@inlang/paraglide-js':
         specifier: workspace:*
@@ -1738,11 +1649,11 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)
 
-  inlang/source-code/paraglide/paraglide-js-adapter-vite:
+  inlang/source-code/paraglide/paraglide-vite:
     dependencies:
-      '@inlang/paraglide-js-adapter-unplugin':
+      '@inlang/paraglide-unplugin':
         specifier: workspace:*
-        version: link:../paraglide-js-adapter-unplugin
+        version: link:../paraglide-unplugin
     devDependencies:
       '@types/node':
         specifier: 20.9.3
@@ -1754,12 +1665,12 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)
 
-  inlang/source-code/paraglide/paraglide-js-adapter-vite/example:
+  inlang/source-code/paraglide/paraglide-vite/example:
     devDependencies:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../../paraglide-js
-      '@inlang/paraglide-js-adapter-vite':
+      '@inlang/paraglide-vite':
         specifier: workspace:*
         version: link:..
       typescript:
@@ -1769,26 +1680,11 @@ importers:
         specifier: 4.5.2
         version: 4.5.2(@types/node@20.9.3)
 
-  inlang/source-code/paraglide/paraglide-js-adapter-vite/tests/build:
-    devDependencies:
-      '@inlang/paraglide-js':
-        specifier: workspace:*
-        version: link:../../../paraglide-js
-      '@inlang/paraglide-js-adapter-vite':
-        specifier: workspace:*
-        version: link:../..
-      typescript:
-        specifier: ^4.9.3
-        version: 4.9.5
-      vite:
-        specifier: 4.5.2
-        version: 4.5.2(@types/node@20.9.3)
-
-  inlang/source-code/paraglide/paraglide-js-adapter-webpack:
+  inlang/source-code/paraglide/paraglide-webpack:
     dependencies:
-      '@inlang/paraglide-js-adapter-unplugin':
+      '@inlang/paraglide-unplugin':
         specifier: workspace:*
-        version: link:../paraglide-js-adapter-unplugin
+        version: link:../paraglide-unplugin
     devDependencies:
       '@types/node':
         specifier: 20.9.3
@@ -1800,12 +1696,12 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)
 
-  inlang/source-code/paraglide/paraglide-js-adapter-webpack/example:
+  inlang/source-code/paraglide/paraglide-webpack/example:
     devDependencies:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../../paraglide-js
-      '@inlang/paraglide-js-adapter-webpack':
+      '@inlang/paraglide-webpack':
         specifier: workspace:*
         version: link:..
       typescript:
@@ -1817,19 +1713,6 @@ importers:
       webpack-cli:
         specifier: ^5.1.4
         version: 5.1.4(webpack@5.91.0)
-
-  inlang/source-code/paraglide/paraglide-js/example:
-    dependencies:
-      '@inlang/paraglide-js':
-        specifier: workspace:*
-        version: link:..
-    devDependencies:
-      typescript:
-        specifier: 5.2.2
-        version: 5.2.2
-      vitest:
-        specifier: 0.34.6
-        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/plugins/i18next:
     dependencies:
@@ -2780,9 +2663,9 @@ importers:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../paraglide/paraglide-js
-      '@inlang/paraglide-js-adapter-vite':
+      '@inlang/paraglide-vite':
         specifier: workspace:*
-        version: link:../paraglide/paraglide-js-adapter-vite
+        version: link:../paraglide/paraglide-vite
       '@inlang/result':
         specifier: workspace:*
         version: link:../result
@@ -2904,6 +2787,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: 0.34.6
         version: 0.34.6(vitest@0.34.6)
+      eslint:
+        specifier: ^8.57.0
+        version: 8.57.0
       typescript:
         specifier: 5.2.2
         version: 5.2.2
@@ -6204,6 +6090,21 @@ packages:
       wrap-ansi: 8.1.0
       wrap-ansi-cjs: /wrap-ansi@7.0.0
 
+  /@isomorphic-git/cors-proxy@2.7.1:
+    resolution: {integrity: sha512-5P4bcOiwCJoYi6lf3pkTtFz6eQWaJsJD3IS75VQBgAoFFfNUlMw5Ufqd/UMFeqy6FJNgGCbuSHdfoKUx+pAlhA==}
+    hasBin: true
+    dependencies:
+      cross-env: 5.2.1
+      daemonize-process: 1.0.9
+      micro: 9.4.1
+      micro-cors: 0.1.1
+      minimisted: 2.0.1
+      node-fetch: 2.7.0
+      tree-kill: 1.2.2
+    transitivePeerDependencies:
+      - encoding
+    dev: false
+
   /@istanbuljs/load-nyc-config@1.1.0:
     resolution: {integrity: sha512-VjeHSlIzpv/NyD3N0YuHfXOPDIixcA1q2ZV98wsMqcYlPmv2n3Yb2lYP9XMElnaFVXg5A7YLTeLu6V84uQDjmQ==}
     engines: {node: '>=8'}
@@ -6426,7 +6327,7 @@ packages:
       react: '>=16'
     dependencies:
       '@types/mdx': 2.0.12
-      '@types/react': 18.2.75
+      '@types/react': 18.2.79
       react: 18.2.0
     dev: true
 
@@ -6502,10 +6403,6 @@ packages:
       urlpattern-polyfill: 8.0.2
     dev: false
 
-  /@next/env@14.1.2-canary.4:
-    resolution: {integrity: sha512-cYyVuYrUrBQlfNtOrIGKZavkSHdnAZO7934JsHi12OUPJlSyAd9Niohi45iH7SOc6/gE3jjoOk2ogt/982yt7w==}
-    dev: false
-
   /@next/env@14.1.4:
     resolution: {integrity: sha512-e7X7bbn3Z6DWnDi75UWn+REgAbLEqxI8Tq2pkFOFAMpWAWApz/YCUhtWMWn410h8Q2fYiYL7Yg5OlxMOCfFjJQ==}
     dev: false
@@ -6528,28 +6425,10 @@ packages:
       glob: 10.3.10
     dev: true
 
-  /@next/swc-darwin-arm64@14.1.2-canary.4:
-    resolution: {integrity: sha512-L1NcvIdOnLE5QwX1GZSzSvnX+PsV1iLnnzLilpWpyBaon5Pzw4bABETRYEHyx4kwVicnIu87i/U5yVe+iXQREw==}
-    engines: {node: '>= 10'}
-    cpu: [arm64]
-    os: [darwin]
-    requiresBuild: true
-    dev: false
-    optional: true
-
   /@next/swc-darwin-arm64@14.1.4:
     resolution: {integrity: sha512-ubmUkbmW65nIAOmoxT1IROZdmmJMmdYvXIe8211send9ZYJu+SqxSnJM4TrPj9wmL6g9Atvj0S/2cFmMSS99jg==}
     engines: {node: '>= 10'}
     cpu: [arm64]
-    os: [darwin]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  /@next/swc-darwin-x64@14.1.2-canary.4:
-    resolution: {integrity: sha512-3+9xaRiQcGX0XF5o9fnAFS/1FieaO83cB40sulnOBLC4ehQ+bogxoy6GRpQng1mAqFawtJ3i0K0VI9K/bTxWMQ==}
-    engines: {node: '>= 10'}
-    cpu: [x64]
     os: [darwin]
     requiresBuild: true
     dev: false
@@ -6564,26 +6443,8 @@ packages:
     dev: false
     optional: true
 
-  /@next/swc-linux-arm64-gnu@14.1.2-canary.4:
-    resolution: {integrity: sha512-y06P05OAty4WiagKjJuYFJImXTIzppVpTIMrU12TxUSA6o7ZxpjPOMPeosZhRLyWvSr2cgS846Uz+o4b91HLvg==}
-    engines: {node: '>= 10'}
-    cpu: [arm64]
-    os: [linux]
-    requiresBuild: true
-    dev: false
-    optional: true
-
   /@next/swc-linux-arm64-gnu@14.1.4:
     resolution: {integrity: sha512-457G0hcLrdYA/u1O2XkRMsDKId5VKe3uKPvrKVOyuARa6nXrdhJOOYU9hkKKyQTMru1B8qEP78IAhf/1XnVqKA==}
-    engines: {node: '>= 10'}
-    cpu: [arm64]
-    os: [linux]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  /@next/swc-linux-arm64-musl@14.1.2-canary.4:
-    resolution: {integrity: sha512-puRw6KRgkHKxXYOG3BaM44FT677gjYHPciSGsjSPMa0FTBsBqwXFtJjW7RVgQUh2XiL0mGxJUFElghGaeqWdIg==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
@@ -6600,26 +6461,8 @@ packages:
     dev: false
     optional: true
 
-  /@next/swc-linux-x64-gnu@14.1.2-canary.4:
-    resolution: {integrity: sha512-ddleCQK4Ewjte2iqiIaUAyIoKNfozFh4sDLzRApOzLmPbJjRESO/wc3O8Aa0YHgOZ6XBW1LSTHemaVXAMq6VzA==}
-    engines: {node: '>= 10'}
-    cpu: [x64]
-    os: [linux]
-    requiresBuild: true
-    dev: false
-    optional: true
-
   /@next/swc-linux-x64-gnu@14.1.4:
     resolution: {integrity: sha512-BapIFZ3ZRnvQ1uWbmqEGJuPT9cgLwvKtxhK/L2t4QYO7l+/DxXuIGjvp1x8rvfa/x1FFSsipERZK70pewbtJtw==}
-    engines: {node: '>= 10'}
-    cpu: [x64]
-    os: [linux]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  /@next/swc-linux-x64-musl@14.1.2-canary.4:
-    resolution: {integrity: sha512-idRZwPHk7s4XeQ0YOlXGbA3aSZ5/sdmnzEg6O7lTwJW5HSb2PKf+LU3rumgVRXIDsPR6LBUdg0G6f0oS4iFShw==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
@@ -6636,15 +6479,6 @@ packages:
     dev: false
     optional: true
 
-  /@next/swc-win32-arm64-msvc@14.1.2-canary.4:
-    resolution: {integrity: sha512-FYITiFgRtzQZ/Ep/40HRYLDyGSsSLQjwixP49SQ5jyS7yETXn9fcukn86H7kK9+VByiRj7byFozzdreOPIxCEw==}
-    engines: {node: '>= 10'}
-    cpu: [arm64]
-    os: [win32]
-    requiresBuild: true
-    dev: false
-    optional: true
-
   /@next/swc-win32-arm64-msvc@14.1.4:
     resolution: {integrity: sha512-xzxF4ErcumXjO2Pvg/wVGrtr9QQJLk3IyQX1ddAC/fi6/5jZCZ9xpuL9Tzc4KPWMFq8GGWFVDMshZOdHGdkvag==}
     engines: {node: '>= 10'}
@@ -6654,28 +6488,10 @@ packages:
     dev: false
     optional: true
 
-  /@next/swc-win32-ia32-msvc@14.1.2-canary.4:
-    resolution: {integrity: sha512-ydqXgSs9K4p4o1dlLAyz+8/ryGBYGhii/uB7VBk6pHo81IFgqLLV0XNVxb23EjrE8Jb3zCLC9YOLjQL9e5bz8A==}
-    engines: {node: '>= 10'}
-    cpu: [ia32]
-    os: [win32]
-    requiresBuild: true
-    dev: false
-    optional: true
-
   /@next/swc-win32-ia32-msvc@14.1.4:
     resolution: {integrity: sha512-WZiz8OdbkpRw6/IU/lredZWKKZopUMhcI2F+XiMAcPja0uZYdMTZQRoQ0WZcvinn9xZAidimE7tN9W5v9Yyfyw==}
     engines: {node: '>= 10'}
     cpu: [ia32]
-    os: [win32]
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  /@next/swc-win32-x64-msvc@14.1.2-canary.4:
-    resolution: {integrity: sha512-ZJsOIt2t/Lvqapj4w3DUSFJtGu1jTTp3MB/BByoxp9cyQT8fac3HRqsE4blZq4JtZpWXdCU9dgRTuk0FpUCc7Q==}
-    engines: {node: '>= 10'}
-    cpu: [x64]
     os: [win32]
     requiresBuild: true
     dev: false
@@ -10150,22 +9966,6 @@ packages:
       - typescript
     dev: true
 
-  /@sveltejs/vite-plugin-svelte-inspector@1.0.4(@sveltejs/vite-plugin-svelte@2.4.2)(svelte@4.0.5)(vite@4.5.2):
-    resolution: {integrity: sha512-zjiuZ3yydBtwpF3bj0kQNV0YXe+iKE545QGZVTaylW3eAzFr+pJ/cwK8lZEaRp4JtaJXhD5DyWAV4AxLh6DgaQ==}
-    engines: {node: ^14.18.0 || >= 16}
-    peerDependencies:
-      '@sveltejs/vite-plugin-svelte': ^2.2.0
-      svelte: ^3.54.0 || ^4.0.0
-      vite: 4.5.2
-    dependencies:
-      '@sveltejs/vite-plugin-svelte': 2.4.2(svelte@4.0.5)(vite@4.5.2)
-      debug: 4.3.4(supports-color@8.1.1)
-      svelte: 4.0.5
-      vite: 4.5.2(@types/node@20.9.3)
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-
   /@sveltejs/vite-plugin-svelte-inspector@1.0.4(@sveltejs/vite-plugin-svelte@2.5.3)(svelte@3.59.2)(vite@4.5.2):
     resolution: {integrity: sha512-zjiuZ3yydBtwpF3bj0kQNV0YXe+iKE545QGZVTaylW3eAzFr+pJ/cwK8lZEaRp4JtaJXhD5DyWAV4AxLh6DgaQ==}
     engines: {node: ^14.18.0 || >= 16}
@@ -10196,26 +9996,6 @@ packages:
       vite: 4.5.2(@types/node@20.9.3)
     transitivePeerDependencies:
       - supports-color
-
-  /@sveltejs/vite-plugin-svelte@2.4.2(svelte@4.0.5)(vite@4.5.2):
-    resolution: {integrity: sha512-ePfcC48ftMKhkT0OFGdOyycYKnnkT6i/buzey+vHRTR/JpQvuPzzhf1PtKqCDQfJRgoPSN2vscXs6gLigx/zGw==}
-    engines: {node: ^14.18.0 || >= 16}
-    peerDependencies:
-      svelte: ^3.54.0 || ^4.0.0
-      vite: 4.5.2
-    dependencies:
-      '@sveltejs/vite-plugin-svelte-inspector': 1.0.4(@sveltejs/vite-plugin-svelte@2.4.2)(svelte@4.0.5)(vite@4.5.2)
-      debug: 4.3.4(supports-color@8.1.1)
-      deepmerge: 4.3.1
-      kleur: 4.1.5
-      magic-string: 0.30.9
-      svelte: 4.0.5
-      svelte-hmr: 0.15.3(svelte@4.0.5)
-      vite: 4.5.2(@types/node@20.9.3)
-      vitefu: 0.2.5(vite@4.5.2)
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
 
   /@sveltejs/vite-plugin-svelte@2.5.3(svelte@3.59.2)(vite@4.5.2):
     resolution: {integrity: sha512-erhNtXxE5/6xGZz/M9eXsmI7Pxa6MS7jyTy06zN3Ck++ldrppOnOlJwHHTsMC7DHDQdgUp4NAc4cDNQ9eGdB/w==}
@@ -10256,20 +10036,9 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /@swc/counter@0.1.3:
-    resolution: {integrity: sha512-e2BR4lsJkkRlKZ/qCHPw9ZaSxc0MVUd7gtbtaB7aMvHeJVYe8sOB8DBZkP2DtISHGSku9sCK6T6cnY0CtXrOCQ==}
-    dev: false
-
   /@swc/helpers@0.5.2:
     resolution: {integrity: sha512-E4KcWTpoLHqwPHLxidpOqQbcrZVgi0rsmmZXUle1jXmJfuIf/UWpczUJ7MZZ5tlxytgJXyp0w4PGkkeLiuIdZw==}
     dependencies:
-      tslib: 2.6.2
-    dev: false
-
-  /@swc/helpers@0.5.5:
-    resolution: {integrity: sha512-KGYxvIOXcceOAbEk4bi/dVLEK9z8sZ0uBB3Il5b1rhfClSpcX0yfRO0KmTkqR2cnQDymwLB+25ZyMzICg/cm/A==}
-    dependencies:
-      '@swc/counter': 0.1.3
       tslib: 2.6.2
     dev: false
 
@@ -12798,6 +12567,10 @@ packages:
       delegates: 1.0.0
       readable-stream: 3.6.2
 
+  /arg@4.1.0:
+    resolution: {integrity: sha512-ZWc51jO3qegGkVh8Hwpv636EkbesNV5ZNQPCtRa+0qytRYPEs9IYT9qITY9buezqUH5uqyzlWLcufrzU2rffdg==}
+    dev: false
+
   /arg@4.1.3:
     resolution: {integrity: sha512-58S9QDqG0Xx27YwPSt9fJxivjYl432YCwfDMfZ+71RAqUrZef7LrKQZ3LHLOwCS4FLNBplP533Zx895SeOCHvA==}
     dev: true
@@ -13840,6 +13613,11 @@ packages:
     resolution: {integrity: sha512-pMhOfFDPiv9t5jjIXkHosWmkSyQbvsgEVNkz0ERHbuLh2T/7j4Mqqpz523Fe8MVY89KC6Sh/QfS2sM+SjgFDcw==}
     engines: {node: '>= 0.8'}
 
+  /bytes@3.1.0:
+    resolution: {integrity: sha512-zauLjrfCG+xvoyaqLoV8bLVXXNGC4JqlxFCutSDWA6fJrTo2ZuvLYTqZ7aHBLZSMOopbzwv8f+wZcVzfVTI2Dg==}
+    engines: {node: '>= 0.8'}
+    dev: false
+
   /bytes@3.1.2:
     resolution: {integrity: sha512-/Nf7TyzTx6S3yRJObOAV7956r8cr2+Oj8AC5dt8wSP3BQAoeX58NoHyCU8P8zGkNXStjTSi6fzO6F0pBdcYbEg==}
     engines: {node: '>= 0.8'}
@@ -14498,6 +14276,11 @@ packages:
     dependencies:
       safe-buffer: 5.2.1
 
+  /content-type@1.0.4:
+    resolution: {integrity: sha512-hIP3EEPs8tB9AT1L+NUqtwOAps4mk2Zob89MWXMHjHWg9milF/j4osnnQLXBCBFBk/tvIG/tUc9mOUJiPBhPXA==}
+    engines: {node: '>= 0.6'}
+    dev: false
+
   /content-type@1.0.5:
     resolution: {integrity: sha512-nTjqfcBFEipKdXCv4YDQWCfmcLZKm81ldF0pAopTvyrFGVbcR6P/VAAd5G7N+0tTr8QqiU0tFadD6FK4NtJwOA==}
     engines: {node: '>= 0.6'}
@@ -14631,6 +14414,14 @@ packages:
     resolution: {integrity: sha512-VQ2MBenTq1fWZUH9DJNGti7kKv6EeAuYr3cLwxUWhIu1baTaXh4Ib5W2CqHVqib4/MqbYGJqiL3Zb8GJZr3l4g==}
     dev: false
 
+  /cross-env@5.2.1:
+    resolution: {integrity: sha512-1yHhtcfAd1r4nwQgknowuUNfIT9E8dOMMspC36g45dN+iD1blloi7xp8X/xAIDnjHWyt1uQ8PHk2fkNaym7soQ==}
+    engines: {node: '>=4.0'}
+    hasBin: true
+    dependencies:
+      cross-spawn: 6.0.5
+    dev: false
+
   /cross-env@7.0.3:
     resolution: {integrity: sha512-+/HKd6EgcQCJGh2PSjZuUitQBQynKor4wrFbRg4DtAgS1aWO+gU52xpH7M9ScGgXSYmAVS9bIJ8EzuaGw0oNAw==}
     engines: {node: '>=10.14', npm: '>=6', yarn: '>=1'}
@@ -14665,7 +14456,6 @@ packages:
       semver: 5.7.2
       shebang-command: 1.2.0
       which: 1.3.1
-    dev: true
 
   /cross-spawn@7.0.3:
     resolution: {integrity: sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==}
@@ -14798,6 +14588,11 @@ packages:
       csv-stringify: 5.6.5
       stream-transform: 2.1.3
     dev: true
+
+  /daemonize-process@1.0.9:
+    resolution: {integrity: sha512-YoB+AmcgHIBDVeyfVWSCV90FNk799zX8Uvn7RJTDCD8Y0EMNbSfIKLG961VgchJme2GHmqpXUuV8Rxe2j2L+bw==}
+    engines: {node: '>=4'}
+    dev: false
 
   /damerau-levenshtein@1.0.8:
     resolution: {integrity: sha512-sdQSFB7+llfUcQHUQO3+B8ERRj0Oa4w9POWMI/puGtuf7gFywGmkaLCElnudfTiKZV+NvHqL0ifzdrI8Ro7ESA==}
@@ -15155,6 +14950,11 @@ packages:
 
   /delegates@1.0.0:
     resolution: {integrity: sha512-bd2L678uiWATM6m5Z1VzNCErI3jiGzt6HGY8OVICs40JQq/HALfbyNJmp0UDakEY4pMMaN0Ly5om/B1VI/+xfQ==}
+
+  /depd@1.1.2:
+    resolution: {integrity: sha512-7emPTl6Dpo6JRXOXjLRxck+FlLRX5847cLKEn00PLAgc3g2hTZZgr+e4c2v6QpSmLeFP3n5yUo7ft6avBK/5jQ==}
+    engines: {node: '>= 0.6'}
+    dev: false
 
   /depd@2.0.0:
     resolution: {integrity: sha512-g7nH6P6dyDioJogAAGprGpCtVImJhpPk/roCzdb3fIh61/s/nPsfR6onyMwkCAR/OlC3yBC0lESvUoQEAssIrw==}
@@ -18388,6 +18188,17 @@ packages:
   /http-cache-semantics@4.1.1:
     resolution: {integrity: sha512-er295DKPVsV82j5kw1Gjt+ADA/XYHsajl82cGNQG2eyoPkvgUhX+nDIyelzhIWbbsXP39EHcI6l5tYs2FYqYXQ==}
 
+  /http-errors@1.7.3:
+    resolution: {integrity: sha512-ZTTX0MWrsQ2ZAhA1cejAwDLycFsd7I7nVtnkT3Ol0aqodaKW+0CTZDQ1uBv5whptCnc8e8HeRRJxRs0kmm/Qfw==}
+    engines: {node: '>= 0.6'}
+    dependencies:
+      depd: 1.1.2
+      inherits: 2.0.4
+      setprototypeof: 1.1.1
+      statuses: 1.5.0
+      toidentifier: 1.0.0
+    dev: false
+
   /http-errors@2.0.0:
     resolution: {integrity: sha512-FtwrG/euBzaEjYeRqOgly7G0qviiXoJWnvEH2Z1plBdXgbyjv34pHTSb9zoeHMyDy33+DWy5Wt9Wo+TURtOYSQ==}
     engines: {node: '>= 0.8'}
@@ -20714,6 +20525,21 @@ packages:
     resolution: {integrity: sha512-iclAHeNqNm68zFtnZ0e+1L2yUIdvzNoauKU4WBA3VvH/vPFieF7qfRlwUZU+DA9P9bPXIS90ulxoUoCH23sV2w==}
     engines: {node: '>= 0.6'}
 
+  /micro-cors@0.1.1:
+    resolution: {integrity: sha512-6WqIahA5sbQR1Gjexp1VuWGFDKbZZleJb/gy1khNGk18a6iN1FdTcr3Q8twaxkV5H94RjxIBjirYbWCehpMBFw==}
+    engines: {node: '>=6'}
+    dev: false
+
+  /micro@9.4.1:
+    resolution: {integrity: sha512-Lpjcbp6Y9GJIfewxDfTmu9eW0rt0MGo+Gs1d3yJLFa7mhErtKkCngGhDbA/O1gqUjEwsHh+jWPg8BJ0Bx4AgFA==}
+    engines: {node: '>= 8.0.0'}
+    hasBin: true
+    dependencies:
+      arg: 4.1.0
+      content-type: 1.0.4
+      raw-body: 2.4.1
+    dev: false
+
   /micromark-core-commonmark@1.1.0:
     resolution: {integrity: sha512-BgHO1aRbolh2hcrzL2d1La37V0Aoz73ymF8rAcKnohLy93titmv62E0gP8Hrx9PKcKrqCZ1BbLGbP3bEhoXYlw==}
     dependencies:
@@ -21445,7 +21271,12 @@ packages:
 
   /minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
-    dev: true
+
+  /minimisted@2.0.1:
+    resolution: {integrity: sha512-1oPjfuLQa2caorJUM8HV8lGgWCc0qqAO1MNv/k05G4qslmsndV/5WdNZrqCiyqiz3wohia2Ij2B7w2Dr7/IyrA==}
+    dependencies:
+      minimist: 1.2.8
+    dev: false
 
   /minipass@3.3.6:
     resolution: {integrity: sha512-DxiNidxSEK+tHG6zOIklvNOwm3hvCrbUrdtzY74U6HKTJxvIDfOUL5W5P2Ghd3DTkhhKPYGqeNUIh5qcM4YBfw==}
@@ -21732,7 +21563,6 @@ packages:
 
   /nice-try@1.0.5:
     resolution: {integrity: sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==}
-    dev: true
 
   /nitropack@2.8.1:
     resolution: {integrity: sha512-pODv2kEEzZSDQR+1UMXbGyNgMedUDq/qUomtiAnQKQvLy52VGlecXO1xDfH3i0kP1yKEcKTnWsx1TAF5gHM7xQ==}
@@ -22817,7 +22647,6 @@ packages:
   /path-key@2.0.1:
     resolution: {integrity: sha512-fEHGKCSmUSDPv4uoj8AlD+joPlq3peND+HRYyxFz4KPw4z926S/b8rIuFs2FYJg3BwsxJf6A9/3eIdLaYC+9Dw==}
     engines: {node: '>=4'}
-    dev: true
 
   /path-key@3.1.1:
     resolution: {integrity: sha512-ojmeN0qd+y0jszEtoY48r0Peq5dwMEkIlCOu6Q5f41lfkswXuKtYrhgoTpLnyIcHm24Uhqx+5Tqm2InSwLhE6Q==}
@@ -23683,6 +23512,16 @@ packages:
     resolution: {integrity: sha512-Hrgsx+orqoygnmhFbKaHE6c296J+HTAQXoxEF6gNupROmmGJRoyzfG3ccAveqCBrwr/2yxQ5BVd/GTl5agOwSg==}
     engines: {node: '>= 0.6'}
 
+  /raw-body@2.4.1:
+    resolution: {integrity: sha512-9WmIKF6mkvA0SLmA2Knm9+qj89e+j1zqgyn8aXGd7+nAduPoqgI9lO57SAZNn/Byzo5P7JhXTyg9PzaJbH73bA==}
+    engines: {node: '>= 0.8'}
+    dependencies:
+      bytes: 3.1.0
+      http-errors: 1.7.3
+      iconv-lite: 0.4.24
+      unpipe: 1.0.0
+    dev: false
+
   /raw-body@2.5.1:
     resolution: {integrity: sha512-qqJBtEyVgS0ZmPGdCFPWJ3FreoqvG4MVQln/kCgF7Olq95IbOp0/BWyMwbdtn4VTvkM8Y7khCQ2Xgk/tcrCXig==}
     engines: {node: '>= 0.8'}
@@ -24235,7 +24074,7 @@ packages:
     dependencies:
       '@types/hast': 3.0.4
       '@types/mdast': 4.0.3
-      mdast-util-to-hast: 13.0.2
+      mdast-util-to-hast: 13.1.0
       unified: 11.0.3
       vfile: 6.0.1
     dev: false
@@ -24718,7 +24557,6 @@ packages:
   /semver@5.7.2:
     resolution: {integrity: sha512-cBznnQ9KjJqU67B52RMC65CMarK2600WFnbkcaiwWq3xy/5haFJlshgnpjovMVJ+Hff49d8GEn0b87C5pDQ10g==}
     hasBin: true
-    dev: true
 
   /semver@6.3.1:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
@@ -24853,6 +24691,10 @@ packages:
   /setimmediate@1.0.5:
     resolution: {integrity: sha512-MATJdZp8sLqDl/68LfQmbP8zKPLQNV6BIZoIgrscFDQ+RsvK/BxeDQOgyxKKoh0y/8h3BqVFnCqQ/gd+reiIXA==}
 
+  /setprototypeof@1.1.1:
+    resolution: {integrity: sha512-JvdAWfbXeIGaZ9cILp38HntZSFSo3mWg6xGcJJsd+d4aRMOqauag1C63dJfDw7OaMYwEbHMOxEZ1lqVRYP2OAw==}
+    dev: false
+
   /setprototypeof@1.2.0:
     resolution: {integrity: sha512-E5LDX7Wrp85Kil5bhZv46j8jOeboKq5JMmYM3gVGdGH8xFpPWXUMsNrlODCrkoxMEeNi/XZIwuRvY4XNwYMJpw==}
 
@@ -24906,7 +24748,6 @@ packages:
     engines: {node: '>=0.10.0'}
     dependencies:
       shebang-regex: 1.0.0
-    dev: true
 
   /shebang-command@2.0.0:
     resolution: {integrity: sha512-kHxr2zZpYtdmrN1qDjrrX/Z1rR1kG8Dx+gkpK1G4eXmvXswmcE1hTWBWYUzlraYw1/yZp6YuDY77YtvbN0dmDA==}
@@ -24917,7 +24758,6 @@ packages:
   /shebang-regex@1.0.0:
     resolution: {integrity: sha512-wpoSFAxys6b2a2wHZ1XpDSgD7N9iVjg29Ph9uV/uaP9Ex/KXlkTZTeddxDPSYQpgvzKLGJke2UU0AzoGCjNIvQ==}
     engines: {node: '>=0.10.0'}
-    dev: true
 
   /shebang-regex@3.0.0:
     resolution: {integrity: sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==}
@@ -25341,6 +25181,11 @@ packages:
 
   /stackframe@1.3.4:
     resolution: {integrity: sha512-oeVtt7eWQS+Na6F//S4kJ2K2VbRlS9D43mAlMyVpVWovy9o+jfgH8O9agzANzaiLjclA0oYzUXEM4PurhSUChw==}
+    dev: false
+
+  /statuses@1.5.0:
+    resolution: {integrity: sha512-OpZ3zP+jT1PI7I8nemJX4AKmAX070ZkYPVWV/AaKTJl+tXCTGyVdC1a4SL8RUQYEwk/f34ZX8UTykN68FwrqAA==}
+    engines: {node: '>= 0.6'}
     dev: false
 
   /statuses@2.0.1:
@@ -25767,15 +25612,6 @@ packages:
       svelte: 3.59.2
     dev: true
 
-  /svelte-hmr@0.15.3(svelte@4.0.5):
-    resolution: {integrity: sha512-41snaPswvSf8TJUhlkoJBekRrABDXDMdpNpT2tfHIv4JuhgvHqLMhEPGtaQn0BmbNSTkuz2Ed20DF2eHw0SmBQ==}
-    engines: {node: ^12.20 || ^14.13.1 || >= 16}
-    peerDependencies:
-      svelte: ^3.19.0 || ^4.0.0
-    dependencies:
-      svelte: 4.0.5
-    dev: true
-
   /svelte-hmr@0.15.3(svelte@4.2.12):
     resolution: {integrity: sha512-41snaPswvSf8TJUhlkoJBekRrABDXDMdpNpT2tfHIv4JuhgvHqLMhEPGtaQn0BmbNSTkuz2Ed20DF2eHw0SmBQ==}
     engines: {node: ^12.20 || ^14.13.1 || >= 16}
@@ -25905,25 +25741,6 @@ packages:
   /svelte@3.59.2:
     resolution: {integrity: sha512-vzSyuGr3eEoAtT/A6bmajosJZIUWySzY2CzB3w2pgPvnkUjGqlDnsNnA0PMO+mMAhuyMul6C2uuZzY6ELSkzyA==}
     engines: {node: '>= 8'}
-    dev: true
-
-  /svelte@4.0.5:
-    resolution: {integrity: sha512-PHKPWP1wiWHBtsE57nCb8xiWB3Ht7/3Kvi3jac0XIxUM2rep8alO7YoAtgWeGD7++tFy46krilOrPW0mG3Dx+A==}
-    engines: {node: '>=16'}
-    dependencies:
-      '@ampproject/remapping': 2.3.0
-      '@jridgewell/sourcemap-codec': 1.4.15
-      '@jridgewell/trace-mapping': 0.3.25
-      acorn: 8.11.3
-      aria-query: 5.3.0
-      axobject-query: 3.2.1
-      code-red: 1.0.4
-      css-tree: 2.3.1
-      estree-walker: 3.0.3
-      is-reference: 3.0.2
-      locate-character: 3.0.0
-      magic-string: 0.30.9
-      periscopic: 3.1.0
     dev: true
 
   /svelte@4.2.12:
@@ -26376,6 +26193,11 @@ packages:
     resolution: {integrity: sha512-kE5wyCQJ40hqUaRVkyQ4z5+4juzYsv/eK+aqD97N62YH0TxFhzJvo22RUQQZdO3YnXAk42ZOfOpjVdy+Z0YokA==}
     dev: true
 
+  /toidentifier@1.0.0:
+    resolution: {integrity: sha512-yaOH/Pk/VEhBWWTlhI+qXxDFXlejDGcQipMlyxda9nthulaxLZUNcUqFxokp0vcYnvteJln5FNQDRrxj3YcbVw==}
+    engines: {node: '>=0.6'}
+    dev: false
+
   /toidentifier@1.0.1:
     resolution: {integrity: sha512-o5sSPKEkg/DIQNmH43V0/uerLrpzVedkUh8tGNvaeXpfpuwjKenlSox/2O/BTlZUtEe+JG7s5YhEz608PlAHRA==}
     engines: {node: '>=0.6'}
@@ -26405,6 +26227,11 @@ packages:
   /traverse@0.3.9:
     resolution: {integrity: sha512-iawgk0hLP3SxGKDfnDJf8wTz4p2qImnyihM5Hh/sGvQ3K37dPi/w8sRhdNIxYA1TwFwc5mDhIJq+O0RsvXBKdQ==}
     dev: true
+
+  /tree-kill@1.2.2:
+    resolution: {integrity: sha512-L0Orpi8qGpRG//Nd+H90vFB+3iHnue1zSSGmNOOCh1GLJ7rUKVwV2HvijphGQS2UmhUZewS9VgvxYIdgr+fG1A==}
+    hasBin: true
+    dev: false
 
   /trim-lines@3.0.1:
     resolution: {integrity: sha512-kRj8B+YHZCc9kQYdWfJB2/oUl9rA99qbowYYBtr4ui4mZyAQ2JpvVBd/6U2YloATfqBhBTSMhTpgBHtU0Mf3Rg==}
@@ -28721,7 +28548,6 @@ packages:
     hasBin: true
     dependencies:
       isexe: 2.0.0
-    dev: true
 
   /which@2.0.2:
     resolution: {integrity: sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==}
