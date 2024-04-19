@@ -16,6 +16,7 @@ export const SetUpI18nRoutingFlow: CliStep<
 	unknown
 > = async (ctx) => {
 	await walk(ctx.repo, ctx.srcRoot, async (path) => {
+		ctx.logger.info("Walking " + path.replace(ctx.srcRoot, "."))
 		if (!FileExtensions.some((ext) => path.endsWith(ext))) return
 		//read the file content
 		const content = await ctx.repo.nodeishFs.readFile(path, { encoding: "utf-8" })
