@@ -44,7 +44,13 @@ export function getPathInfo(path: string, options: ParseOptions): ParseResult {
 	const [maybeLang, ...rest] = pathWithoutBase.split("/").filter(Boolean)
 
 	if (!maybeLang) {
-		return { base, lang: defaultLanguageTag, path: "/", dataSuffix, trailingSlash }
+		return {
+			base,
+			lang: defaultLanguageTag,
+			path: "/",
+			dataSuffix,
+			trailingSlash,
+		}
 	}
 
 	const lang = availableLanguageTags.includes(maybeLang as any) ? maybeLang : defaultLanguageTag
