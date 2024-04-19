@@ -29,6 +29,7 @@ const isProduction = process.env.NODE_ENV === "production"
 export type PageProps = {
 	markdown: Awaited<ReturnType<any>>
 	pages: Record<string, string> | undefined
+	pageData: Record<string, unknown>
 	restSlug: string
 	tableOfContents: Record<string, string[]>
 	manifest: MarketplaceManifest & { uniqueID: string }
@@ -57,7 +58,6 @@ const scrollToAnchor = (anchor: string, behavior?: ScrollBehavior) => {
 }
 
 export default function Page(props: PageProps) {
-	console.info(JSON.stringify(props.tableOfContents))
 	const [readmore, setReadmore] = createSignal<boolean>(false)
 
 	// mapping translatable types
@@ -74,15 +74,34 @@ export default function Page(props: PageProps) {
 	const readme = () =>
 		typeof props.manifest.readme === "object" ? props.manifest.readme.en : props.manifest.readme
 
+	const pageTitle = () => {
+		if (props.pageData?.title && props.manifest) {
+			return `${props.pageData.title} | ${displayName()} | inlang`
+		} else if (props.manifest) {
+			return `${displayName()} ${
+				props.manifest.publisherName === "inlang"
+					? "| inlang"
+					: `from ${props.manifest.publisherName} | inlang`
+			}`
+		} else {
+			return "Product page | inlang"
+		}
+	}
+
+	const metaDescription = () => {
+		if (props.pageData?.description) {
+			return props.pageData.description as string
+		} else if (props.manifest) {
+			return description()
+		} else {
+			return "Here comes an inlang product."
+		}
+	}
+
 	return (
 		<>
-			<Title>{`${props.manifest && displayName()} ${
-				props.manifest &&
-				(props.manifest.publisherName === "inlang"
-					? "| inlang"
-					: `from ${props.manifest.publisherName} | inlang`)
-			}`}</Title>
-			<Meta name="description" content={props.manifest && description()} />
+			<Title>{pageTitle()}</Title>
+			<Meta name="description" content={metaDescription()} />
 			{props.manifest && props.manifest.gallery ? (
 				<Meta name="og:image" content={props.manifest.gallery[0]} />
 			) : (
@@ -104,8 +123,8 @@ export default function Page(props: PageProps) {
 				name="twitter:image:alt"
 				content="inlang's ecosystem helps organizations to go global."
 			/>
-			<Meta name="twitter:title" content={props.manifest && displayName()} />
-			<Meta name="twitter:description" content={props.manifest && description()} />
+			<Meta name="twitter:title" content={pageTitle()} />
+			<Meta name="twitter:description" content={metaDescription()} />
 			<Meta name="twitter:site" content="@inlanghq" />
 			<Meta name="twitter:creator" content="@inlanghq" />
 			<MarketplaceLayout>

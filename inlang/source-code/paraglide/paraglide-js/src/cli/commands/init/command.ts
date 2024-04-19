@@ -22,7 +22,7 @@ const ADAPTER_LINKS = {
 	nextjs: "https://inlang.com/m/osslbuzt/paraglide-next-i18n",
 	astro: "https://inlang.com/m/iljlwzfs/paraglide-astro-i18n",
 	solidstart: "https://inlang.com/m/n860p17j/paraglide-solidstart-i18n",
-	vite: "https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-vite",
+	vite: "https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-vite",
 } as const
 
 export const initCommand = new Command()
@@ -96,7 +96,7 @@ export const initCommand = new Command()
 				HINT:
 				If you are using ${stackChoice} with paraglide, you will likely also want to use 
 
-				\`@inlang/paraglide-js-adapter-${stackChoice}\`
+				\`@inlang/paraglide-${stackChoice}\`
 
 				Read the documentation at:
 				${ADAPTER_LINKS[stackChoice as keyof typeof ADAPTER_LINKS]}

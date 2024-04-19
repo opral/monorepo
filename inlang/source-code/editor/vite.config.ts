@@ -4,7 +4,7 @@ import { ssr as vikePlugin } from "vike/plugin"
 import { fileURLToPath, URL } from "node:url"
 import Icons from "unplugin-icons/vite"
 import { nodePolyfills } from "vite-plugin-node-polyfills"
-import { paraglide } from "@inlang/paraglide-js-adapter-vite"
+import { paraglide } from "@inlang/paraglide-vite"
 
 const isProduction = process.env.NODE_ENV === "production"
 
