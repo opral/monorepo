@@ -37,9 +37,9 @@ type Config = NextConfig & {
 }
 
 /**
- * Add this to your next.config.js to enable Paraglide.
- * It will register any aliases required by the Adapter,
- * and register the build plugin if you're using webpack.
+ * Add this to your next.config.js.
+ * It will register any aliases required by Paraglide-Next,
+ * and register the build plugin.
  */
 export function paraglide(config: Config): NextConfig {
 	const aliasPath = config.paraglide.outdir.endsWith("/")

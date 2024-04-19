@@ -52,7 +52,7 @@ export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
 			) {
 				console.warn(
 					"[paraglide] `<a>` tags in the same file as `<ParaglideJS>` won't be translated.\nConsider moving it into another component.\n" +
-						filename,
+						filename
 				)
 			}
 
@@ -69,7 +69,7 @@ export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
 						[@inlang/paraglide-sveltekit] Failed to parse ${filename}. 
 						This may be because you are using a signifficantly newer version of the "svelte" package. 
 						Try forcing "@inlang/paraglide-sveltekit" to use your version of "svelte" using pnpm overrides`,
-					{ cause: error },
+					{ cause: error }
 				)
 			}
 
@@ -98,7 +98,7 @@ export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
 function modifyScriptTag(
 	ast: Ast,
 	code: MagicString,
-	additions: { before?: Iterable<string>; after?: Iterable<string> },
+	additions: { before?: Iterable<string>; after?: Iterable<string> }
 ) {
 	const before = additions.before ? [...additions.before] : []
 	const after = additions.after ? [...additions.after] : []

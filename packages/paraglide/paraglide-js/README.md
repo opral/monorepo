@@ -22,7 +22,7 @@ Paraglide is framework agnostic, but there are framework-specific libraries avai
     <doc-link title="Paraglide-Astro" icon="devicon-plain:astro" href="/m/iljlwzfs/paraglide-astro-i18n" description="Go to Library"></doc-link>
     <doc-link title="Paraglide-SolidStart" icon="tabler:brand-solidjs" href="/m/n860p17j/paraglide-solidstart-i18n" description="Go to Library"></doc-link>
 	<doc-link title="Paraglide-Remix" icon="simple-icons:remix" href="/m/fnhuwzrx/paraglide-remix-i18n" description="Go to Library"></doc-link>
-	<doc-link title="Or write your own" icon="ph:sparkle-fill" href="#writing-an-adapter" description="Learn How"></doc-link>
+	<doc-link title="Or write your own" icon="ph:sparkle-fill" href="#writing-a-framework-library" description="Learn How"></doc-link>
 </doc-links>
 
 # People Love It
@@ -302,7 +302,7 @@ Paraglide consists of four main parts:
 | **Compiler** | Compiles messages into tree-shakable message functions                                                                       |
 | **Messages** | The compiled tree-shakable message functions                                                                                 |
 | **Runtime**  | A runtime that resolves the [language tag](https://www.inlang.com/m/8y8sxj09/library-inlang-languageTag) of the current user |
-| **Adapter**  | (optional) An adapter that adjusts the runtime for different frameworks                                                      |
+| **Framework Library**  | (optional) A framework library that adjusts the runtime for different frameworks                                                      |
 
 ## Compiler
 
@@ -329,14 +329,16 @@ The compiler loads an Inlang project and compiles the messages into tree-shakabl
 export const hello = (params) => `Hello ${params.name}!`
 ```
 
-# Writing an Adapter
+# Writing a Framework Library
 
-An "Adapter" is a library that integrates with a framework's lifecycle and does two things:
+Paraglide-Framework-Library integrates with a framework's lifecycle. It does two things:
 
 1. Calls `setLanguageTag()` at appropriate times to set the language
 2. Reacts to `onSetLanguageTag()`, usually by navigating or relading the page.
 
-Many popular frameworks already have adapters available, check out the [list of available adapters](#use-it-with-your-favorite-framework).
+Additionally, it may provide convenience features such as localised routing.
+
+Many popular frameworks already have libraries available, check out the [list of available framework libraries](#use-it-with-your-favorite-framework).
 
 If there isn't one for your framework, you can write your own. This example adapts Paraglide to a fictitious full-stack framework.
 
