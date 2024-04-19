@@ -58,3 +58,32 @@ test("should be able to display a comment", async () => {
 	const html = (await convert(markdown)).html
 	expect(html).toContain("<doc-comment")
 })
+
+test("should be able to use frontmatter", async () => {
+	const markdown = `---
+title: test
+description: test
+---
+
+# Hello World
+This is markdown
+	`
+	const result = await convert(markdown)
+	expect(result.html).toContain("<h1")
+	expect(result.data.frontmatter.title).toBeDefined()
+})
+
+test("should throw if frontmatter type is not valid", async () => {
+	const markdown = `---
+title: test
+---
+
+# Hello World
+This is markdown
+	`
+	try {
+		await convert(markdown)
+	} catch (e: any) {
+		expect(e.message).toContain("Frontmatter is not valid")
+	}
+})
