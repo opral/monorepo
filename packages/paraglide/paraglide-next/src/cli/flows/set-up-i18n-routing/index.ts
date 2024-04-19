@@ -54,27 +54,30 @@ function replaceNextNavigationImports(content: string) {
 	if (!match) return content
 	const { identifiersString } = match.groups as { identifiersString: string }
 
-	const identifiers = identifiersString
+	const identifiers: [string, string | undefined][] = identifiersString
 		.split(",")
 		.map((i) => i.trim())
 		.filter(Boolean)
 		.map((part) => {
-			const [id, alias] = part.split(" as ").map((i) => i.trim()) as [string, string | undefined]
-			return { id, alias }
+			return part.split(" as ").map((i) => i.trim()) as [string, string | undefined]
 		})
 
-	const replacedIdentifiers = identifiers.filter((id) => IDENTIFIERS_TO_REPLACE.includes(id.id))
-	const notReplacedIdentifiers = identifiers.filter((id) => !IDENTIFIERS_TO_REPLACE.includes(id.id))
+	const replacedIdentifiers = identifiers.filter((id) =>
+		IDENTIFIERS_TO_REPLACE.includes(id[0] as string)
+	)
+	const notReplacedIdentifiers = identifiers.filter(
+		(id) => !IDENTIFIERS_TO_REPLACE.includes(id[0] as string)
+	)
 	if (replacedIdentifiers.length === 0) return content
 
 	let replacementImport = `import { ${replacedIdentifiers
-		.map(({ id, alias }) => (alias ? `${id} as ${alias}` : id))
+		.map((part) => part.join(" as "))
 		.join(", ")} } from "@/lib/i18n"`
 	if (notReplacedIdentifiers.length > 0) {
 		replacementImport +=
 			"\n" +
 			`import { ${notReplacedIdentifiers
-				.map(({ id, alias }) => (alias ? `${id} as ${alias}` : id))
+				.map((part) => part.join(" as "))
 				.join(", ")} } from "next/navigation"`
 	}
 	return content.replace(match[0], replacementImport)
