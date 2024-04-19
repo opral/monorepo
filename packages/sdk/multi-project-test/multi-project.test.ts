@@ -77,6 +77,24 @@ describe.concurrent(
 			},
 			{ timeout: 20000 }
 		)
+
+		it(
+			"project4 in project4-dir",
+			async () => {
+				await run("pnpm translate4")
+				const result = await fs.readFile(
+					join(__dirname, "project4-dir", "project.inlang", "messages", "de.json"),
+					"utf8"
+				)
+				// note 2-space indentation below
+				expect(result).toEqual(`{
+  "project4_message_key_1": "Mock translate local en to de: Generated message (1)",
+  "project4_message_key_2": "Mock translate local en to de: Generated message (2)",
+  "project4_message_key_3": "Mock translate local en to de: Generated message (3)"
+}`)
+			},
+			{ timeout: 20000 }
+		)
 	},
 	{ timeout: 40000 }
 )
