@@ -56,17 +56,26 @@ function replaceNextNavigationImports(content: string) {
 
 	const identifiers = identifiersString
 		.split(",")
-		.map((id) => id.trim())
+		.map((i) => i.trim())
 		.filter(Boolean)
+		.map((part) => {
+			const [id, alias] = part.split(" as ").map((i) => i.trim()) as [string, string | undefined]
+			return { id, alias }
+		})
 
-	const replacedIdentifiers = identifiers.filter((id) => IDENTIFIERS_TO_REPLACE.includes(id))
-	const notReplacedIdentifiers = identifiers.filter((id) => !IDENTIFIERS_TO_REPLACE.includes(id))
+	const replacedIdentifiers = identifiers.filter((id) => IDENTIFIERS_TO_REPLACE.includes(id.id))
+	const notReplacedIdentifiers = identifiers.filter((id) => !IDENTIFIERS_TO_REPLACE.includes(id.id))
 	if (replacedIdentifiers.length === 0) return content
 
-	let replacementImport = `import { ${replacedIdentifiers.join(", ")} } from "@/lib/i18n"`
+	let replacementImport = `import { ${replacedIdentifiers
+		.map(({ id, alias }) => (alias ? `${id} as ${alias}` : id))
+		.join(", ")} } from "@/lib/i18n"`
 	if (notReplacedIdentifiers.length > 0) {
 		replacementImport +=
-			"\n" + `import { ${notReplacedIdentifiers.join(", ")} } from "next/navigation"`
+			"\n" +
+			`import { ${notReplacedIdentifiers
+				.map(({ id, alias }) => (alias ? `${id} as ${alias}` : id))
+				.join(", ")} } from "next/navigation"`
 	}
 	return content.replace(match[0], replacementImport)
 }
