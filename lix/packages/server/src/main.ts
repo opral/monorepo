@@ -13,10 +13,12 @@ import { getEnvVar } from "./util/getEnv.js"
 const isProduction = process.env.NODE_ENV === "production"
 const SERVER_SENTRY_DSN = getEnvVar(
 	"SERVER_SENTRY_DSN",
-	"DSN for Sentry (on the server)",
-	!isProduction ? "" : undefined
+	{
+		descirption: "DSN for Sentry (on the server)",
+		default: !isProduction ? "" : undefined
+	}
 )
-const SESSION_COOKIE_SECRET = getEnvVar("SESSION_COOKIE_SECRET", "")
+const SESSION_COOKIE_SECRET = getEnvVar("SESSION_COOKIE_SECRET")
 
 const app = express()
 app.use(compression())

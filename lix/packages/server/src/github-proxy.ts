@@ -7,9 +7,9 @@ const PATH = "/github-proxy/"
 
 const allowedAuthUrls = getEnvVar(
 	"PUBLIC_ALLOWED_AUTH_URLS",
-	'List of allowed base urls eg https://inlang.com,https://manage.inlang.com"'
+	{ descirption: 'List of allowed base urls eg https://inlang.com,https://manage.inlang.com"' }
 ).split(",")
-const JWE_SECRET = getEnvVar("JWE_SECRET", "")
+const JWE_SECRET = getEnvVar("JWE_SECRET")
 
 /**
  * Routes for the GitHub service.

@@ -4,19 +4,19 @@ import { Router } from "express"
 
 export const router: Router = Router()
 
-const PUBLIC_LIX_GITHUB_APP_NAME = getEnvVar("PUBLIC_LIX_GITHUB_APP_NAME", "")
+const PUBLIC_LIX_GITHUB_APP_NAME = getEnvVar("PUBLIC_LIX_GITHUB_APP_NAME")
 const installUrl = `https://github.com/apps/${PUBLIC_LIX_GITHUB_APP_NAME}/installations/new`
 
 const PUBLIC_SERVER_BASE_URL = getEnvVar(
 	"PUBLIC_SERVER_BASE_URL",
-	"The base url of the server e.g. https://inlang.com - Must not end with a slash"
+	{ descirption: "The base url of the server e.g. https://inlang.com - Must not end with a slash" }
 )
 const callbackUrl = `${PUBLIC_SERVER_BASE_URL}/services/auth/auth-callback`
 
-const PUBLIC_LIX_GITHUB_APP_CLIENT_ID = getEnvVar("PUBLIC_LIX_GITHUB_APP_CLIENT_ID", "")
-const LIX_GITHUB_APP_CLIENT_SECRET = getEnvVar("LIX_GITHUB_APP_CLIENT_SECRET", "")
-const PUBLIC_ALLOWED_AUTH_URLS = getEnvVar("PUBLIC_ALLOWED_AUTH_URLS", "")
-const JWE_SECRET = getEnvVar("JWE_SECRET", "")
+const PUBLIC_LIX_GITHUB_APP_CLIENT_ID = getEnvVar("PUBLIC_LIX_GITHUB_APP_CLIENT_ID")
+const LIX_GITHUB_APP_CLIENT_SECRET = getEnvVar("LIX_GITHUB_APP_CLIENT_SECRET")
+const PUBLIC_ALLOWED_AUTH_URLS = getEnvVar("PUBLIC_ALLOWED_AUTH_URLS")
+const JWE_SECRET = getEnvVar("JWE_SECRET")
 
 /**
  * OAuth flow from GitHub

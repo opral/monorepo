@@ -16,9 +16,9 @@ import { getEnvVar } from "./util/getEnv.js"
 
 const allowedOrigins = getEnvVar(
 	"PUBLIC_ALLOWED_AUTH_URLS",
-	'List of allowed base urls eg https://inlang.com,https://manage.inlang.com"'
+	{ descirption: 'List of allowed base urls eg https://inlang.com,https://manage.inlang.com"' }
 ).split(",")
-const JWE_SECRET = getEnvVar("JWE_SECRET", "")
+const JWE_SECRET = getEnvVar("JWE_SECRET")
 const production = process.env.NODE_ENV === "production"
 
 const middleware = createMiddleware({
