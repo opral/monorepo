@@ -47,7 +47,7 @@ export default async function onBeforeRender(
 	return {
 		pageContext: {
 			pageProps: {
-				markdown: markdown,
+				markdown: markdown.html,
 				manifest: item,
 				recommends: recommends,
 			} satisfies PageProps,
