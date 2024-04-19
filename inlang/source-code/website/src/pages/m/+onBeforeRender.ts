@@ -59,12 +59,12 @@ export default async function onBeforeRender(pageContext: PageContext) {
 			const content = await getContentString(page)
 			const markdown = await convert(content)
 
-			renderedMarkdown[slug] = markdown.value
+			renderedMarkdown[slug] = markdown.html
 			if (markdown.data?.frontmatter) {
 				pageData[slug] = markdown.data?.frontmatter
 			}
 
-			await generateTableOfContents(markdown.value).then((table) => {
+			await generateTableOfContents(markdown.html).then((table) => {
 				tabelOfContents[slug] = table
 			})
 		}
@@ -78,12 +78,12 @@ export default async function onBeforeRender(pageContext: PageContext) {
 		try {
 			const readmeMarkdown = await convert(await getContentString(readme()!))
 
-			renderedMarkdown["/"] = readmeMarkdown.value
+			renderedMarkdown["/"] = readmeMarkdown.html
 			if (readmeMarkdown.data?.frontmatter) {
 				pageData["/"] = readmeMarkdown.data?.frontmatter
 			}
 
-			await generateTableOfContents(readmeMarkdown.value).then((table) => {
+			await generateTableOfContents(readmeMarkdown.html).then((table) => {
 				tabelOfContents["/"] = table
 			})
 		} catch (error) {

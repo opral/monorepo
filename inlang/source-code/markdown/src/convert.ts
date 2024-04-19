@@ -35,7 +35,7 @@ const customFrontmatterValidation: Plugin<any> = () => (_, file) => {
 }
 
 /* Converts the markdown with remark and the html with rehype to be suitable for being rendered */
-export async function convert(markdown: string): Promise<{ data: any; value: string }> {
+export async function convert(markdown: string): Promise<{ data: any; html: string }> {
 	const content = await unified()
 		/* @ts-ignore */
 		.use(remarkParse)
@@ -213,8 +213,7 @@ export async function convert(markdown: string): Promise<{ data: any; value: str
 
 	return {
 		data: content.data,
-		value:
-			String(`<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark-dimmed.min.css">
+		html: String(`<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark-dimmed.min.css">
 	${content}`),
 	}
 }
