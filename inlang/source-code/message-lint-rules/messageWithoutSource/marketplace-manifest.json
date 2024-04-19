@@ -11,8 +11,9 @@
 	"description": {
 		"en": "Checks for likely outdated messages.  A message with a missing source is usually an indication that the message (id) is no longer used in source code, but messages have not been updated accordingly."
 	},
-	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/message-lint-rules/messageWithoutSource/README.md"
+	"pages": {
+		"/": "./inlang/source-code/message-lint-rules/messageWithoutSource/README.md",
+		"/changelog": "./inlang/source-code/message-lint-rules/messageWithoutSource/CHANGELOG.md"
 	},
 	"keywords": ["message", "lint rule", "source", "missing", "website"],
 	"publisherName": "inlang",

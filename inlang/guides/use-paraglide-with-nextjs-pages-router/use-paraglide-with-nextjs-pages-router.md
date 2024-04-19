@@ -8,15 +8,15 @@ This guide assumes that you already have a Next.js project set up with the pages
 
 ## Install ParaglideJS
 
-We will need to install two things. ParaglideJS itself, and the ParaglideJS Adapter for NextJS.
+We will need to install two things. ParaglideJS itself, and Paraglide-Next.
 
-ParaglideJS is the i18n library we will use for string translations. The Adapter makes it easier to integrate Paraglide with NextJS's i18n routing. 
+ParaglideJS is the i18n library we will use for string translations. Paraglide-Next makes it easier to integrate Paraglide with NextJS's i18n routing. 
 
 In your project root, run the following commands and follow the instructions in your terminal.
 
 ```bash
 npx @inlang/paraglide-js init
-npm install @inlang/paraglide-js-adapter-next
+npm install @inlang/paraglide-next
 ```
 
 This will have done a few things:
@@ -24,7 +24,7 @@ This will have done a few things:
 - Created an inlang project in your project root
 - Added the required devDependencies to your `package.json`
 - Added the paraglide compiler to your `package.json` build scripts
-- Installed the ParaglideJS Adapter for Next. This will handle setting the Locale automatically
+- Installed the Paraglide-Next which will handle setting the locale
 
 ## Setting up 
 
@@ -34,7 +34,7 @@ You will need to pass it some config. The location of the Inlang Project & the o
 
 ```js
 // next.config.js
-const { paraglide } = require("@inlang/paraglide-js-adapter-next/plugin")
+const { paraglide } = require("@inlang/paraglide-next/plugin")
 
 module.exports = paraglide({
   paraglide: {
@@ -52,7 +52,7 @@ Still in your `next.config.js`, add the `i18n` object to your config, pass it th
 
 ```js
 // next.config.js
-const { paraglide } = require("@inlang/paraglide-js-adapter-next/plugin")
+const { paraglide } = require("@inlang/paraglide-next/plugin")
 
 module.exports = paraglide({
 	paraglide: {
@@ -71,7 +71,7 @@ Last, let's add the `<ParaglideJS>` component to your `_app.js` file. This will 
 ```jsx
 // _app.js
 import type { AppProps } from "next/app"
-import { ParaglideJS } from "@inlang/paraglide-js-adapter-next/pages"
+import { ParaglideJS } from "@inlang/paraglide-next/pages"
 
 export default function App({ Component, pageProps }: AppProps) {
 	return (
@@ -219,6 +219,6 @@ You should _always_ switch languages by doing a navigation. This will ensure tha
 
 That's it! You should now have a fully functional multilingual NextJS app using ParaglideJS. Wasn't that hard was it?
 
-You can check out the full source code of this example [here](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-next/examples/pages).
+You can check out the full source code of this example [here](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-next/examples/pages).
 
 If you want to learn more about ParaglideJS, check out the [ParaglideJS Documentation](https://inlang.com/m/gerre34r/library-inlang-paraglideJs). If you need help or have some ideas, feel free to reach out to us on [Discord](https://discord.gg/CNPfhWpcAa) or open a Discussion on [GitHub](https://github.com/opral/monorepo/discussions).

@@ -84,8 +84,21 @@ if (privateEnv.DOPPLER_ENVIRONMENT === "production") {
 		[...manifests.values()].map(async (value) => {
 			const { uniqueID, ...rest } = value
 
-			const readme = () => {
-				return typeof value.readme === "object" ? value.readme.en : value.readme
+			let readme = undefined
+			if (value.pages) {
+				if (value.pages["/"]) {
+					readme = () => {
+						return value.pages["/"]
+					}
+				} else {
+					throw new Error(`No page at "/" found for ${value.id}`)
+				}
+			} else if (value.readme) {
+				readme = () => {
+					return typeof value.readme === "object" ? value.readme.en : value.readme
+				}
+			} else {
+				throw new Error(`No readme found for ${value.id}`)
 			}
 
 			const text = await (readme().includes("http")

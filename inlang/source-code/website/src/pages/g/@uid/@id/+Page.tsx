@@ -10,7 +10,7 @@ import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import Link from "#src/renderer/Link.jsx"
 import EditOutline from "~icons/material-symbols/edit-outline-rounded"
 import { currentPageContext } from "#src/renderer/state.js"
-import { Recommends } from "#src/pages/m/@uid/@id/+Page.jsx"
+import { Recommends } from "#src/pages/m/+Page.jsx"
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -142,14 +142,16 @@ export default function Page(props: PageProps) {
 								</section>
 								<section class="max-w-4xl mx-auto mb-24">
 									<Markdown markdown={props.markdown} />
-									<a
-										class="text-info/80 hover:text-info/100 text-sm font-semibold flex items-center"
-										href={convertLinkToGithub(readme())}
-										target="_blank"
-									>
-										<EditOutline class="inline-block mr-2" />
-										Edit on GitHub
-									</a>
+									<Show when={readme()}>
+										<a
+											class="text-info/80 hover:text-info/100 text-sm font-semibold flex items-center"
+											href={convertLinkToGithub(readme()!)}
+											target="_blank"
+										>
+											<EditOutline class="inline-block mr-2" />
+											Edit on GitHub
+										</a>
+									</Show>
 								</section>
 								<section class="max-w-4xl mx-auto">
 									<h3 class="text-surface-400 text-sm mb-4">Keywords</h3>
