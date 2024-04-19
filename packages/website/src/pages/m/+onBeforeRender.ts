@@ -9,8 +9,13 @@ import type { PageProps } from "./+Page.jsx"
 const repositoryRoot = import.meta.url.slice(0, import.meta.url.lastIndexOf("inlang/source-code"))
 let renderedMarkdown = {} as Record<string, string>
 let tabelOfContents = {} as Record<string, Record<string, string[]>>
+let pageData = {} as Record<string, Record<string, unknown>>
 
 export default async function onBeforeRender(pageContext: PageContext) {
+	renderedMarkdown = {}
+	tabelOfContents = {}
+	pageData = {}
+
 	// check if uid is defined
 	const uid = pageContext.routeParams?.uid
 	if (!uid) redirect("/not-found", 301)
@@ -47,8 +52,6 @@ export default async function onBeforeRender(pageContext: PageContext) {
 	}
 
 	if (item.pages) {
-		renderedMarkdown = {}
-		tabelOfContents = {}
 		// get content for each page
 		for (const [slug, page] of Object.entries(item.pages)) {
 			if (!page || !fileExists(page)) redirect(baseSlug as `/${string}`, 301)
@@ -56,9 +59,12 @@ export default async function onBeforeRender(pageContext: PageContext) {
 			const content = await getContentString(page)
 			const markdown = await convert(content)
 
-			renderedMarkdown[slug] = markdown
+			renderedMarkdown[slug] = markdown.value
+			if (markdown.data?.frontmatter) {
+				pageData[slug] = markdown.data?.frontmatter
+			}
 
-			await generateTableOfContents(markdown).then((table) => {
+			await generateTableOfContents(markdown.value).then((table) => {
 				tabelOfContents[slug] = table
 			})
 		}
@@ -71,7 +77,15 @@ export default async function onBeforeRender(pageContext: PageContext) {
 		// get contant and convert it to markdown
 		try {
 			const readmeMarkdown = await convert(await getContentString(readme()!))
-			renderedMarkdown["/"] = readmeMarkdown
+
+			renderedMarkdown["/"] = readmeMarkdown.value
+			if (readmeMarkdown.data?.frontmatter) {
+				pageData["/"] = readmeMarkdown.data?.frontmatter
+			}
+
+			await generateTableOfContents(readmeMarkdown.value).then((table) => {
+				tabelOfContents["/"] = table
+			})
 		} catch (error) {
 			console.error("Error while accessing the readme file")
 			throw redirect("/not-found", 301)
@@ -92,6 +106,7 @@ export default async function onBeforeRender(pageContext: PageContext) {
 			pageProps: {
 				markdown: renderedMarkdown[restSlug],
 				pages: item.pages,
+				pageData: pageData ? pageData[restSlug] : undefined,
 				restSlug,
 				tableOfContents: tabelOfContents[restSlug] || {},
 				manifest: item,
