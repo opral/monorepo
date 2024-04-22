@@ -56,7 +56,8 @@ export default class InlangSettings extends LitElement {
 				box-sizing: border-box;
 				width: 100%;
 				max-width: 500px;
-				height: 48px;
+				padding-top: 0.5rem;
+				padding-bottom: 0.5rem;
 				margin: 0 auto;
 				display: flex;
 				flex-wrap: wrap;
@@ -69,11 +70,11 @@ export default class InlangSettings extends LitElement {
 				border-radius: 0.5rem;
 				border: 1px solid var(--sl-panel-border-color);
 				filter: drop-shadow(0 4px 3px rgb(0 0 0 / 0.07)) drop-shadow(0 2px 2px rgb(0 0 0 / 0.06));
-			}
-			.hover-bar-text {
 				font-weight: 600;
 				line-height: 1.5;
 				font-size: 14px;
+			}
+			.hover-bar-text {
 				margin: 0;
 			}
 			.test {
@@ -217,8 +218,7 @@ export default class InlangSettings extends LitElement {
 								${value.meta && (value.meta?.displayName as { en: string }).en}
 							</h2>`}
 							${Object.entries(value.schema.properties).map(([property, schema]) => {
-								if (property === "$schema" || property === "modules" || property === "experimental")
-									return undefined
+								if (property === "$schema" || property === "modules") return undefined
 								return key === "internal"
 									? html`
 											<general-input
@@ -289,4 +289,3 @@ declare global {
 		"inlang-settings": InlangSettings
 	}
 }
-

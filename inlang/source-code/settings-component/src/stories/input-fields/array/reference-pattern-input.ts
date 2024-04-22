@@ -37,6 +37,9 @@ export class ReferencePatternInput extends LitElement {
 				display: flex;
 				gap: 4px;
 			}
+			sl-input::part(input) {
+				width: inherit;
+			}
 		`,
 	]
 
@@ -97,7 +100,7 @@ export class ReferencePatternInput extends LitElement {
 				<sl-input
 					class="add-input"
 					size="small"
-					label="Closing pattern (not required)"
+					label="Closing pattern"
 					placeholder="Enter pattern ..."
 					?disabled=${!this.value}
 					value=${this.value ? this.value[1] : ""}
