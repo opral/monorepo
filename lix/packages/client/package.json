@@ -26,7 +26,10 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
+		"eslint": "9.0.0",
+		"prettier": "2.8.3",
 		"@lix-js/fs": "workspace:*",
+		"@lix-js/code-style": "workspace:*",
 		"@octokit/types": "12.4.0 ",
 		"async-lock": "^1.4.1",
 		"clean-git-ref": "^2.0.1",
@@ -40,9 +43,8 @@
 	},
 	"license": "Apache-2.0",
 	"devDependencies": {
-		"@vitest/coverage-v8": "1.1.1",
 		"typescript": "5.2.2",
-		"vitest": "1.1.1",
-		"eslint": "^8.57.0"
+		"@vitest/coverage-v8": "1.1.1",
+		"vitest": "1.1.1"
 	}
 }

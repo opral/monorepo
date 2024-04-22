@@ -1,5 +1,3 @@
-// eslint-disable-next-line no-restricted-imports
-// import type { WatchOptions } from "node:fs"
 /**
  * The filesystem interface.
  *
