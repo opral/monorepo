@@ -9,8 +9,11 @@ lix
 .changeset
 .github
 .gitignore
-.eslintrc.json
 .prettierrc.json
+
+.vscode/settings.json
+.vscode/launch.json
+
 
 ; inlang/source-code/tsconfig.base.json
 ; inlang/source-code/env-variables; 

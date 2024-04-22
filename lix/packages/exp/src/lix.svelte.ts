@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { openRepository } from '@lix-js/client' // '/Users/jan/Dev/inlang/inlang/lix/source-code/client/src/index.ts'
 // rememeber: what if the changes come from the filesystme form other process, only reacting in here does not help there
 const files = new Map()
@@ -13,7 +14,7 @@ export function openRepo (url, { branch, author }) {
     
     repo: null,
     get branches () { // > no need for getter here repo.branches()
-      !branches?.length && repoProm.then(repo => repo.getBranches().then(br => { 
+      !branches?.length && repoProm.then((repo: any)=> repo.getBranches().then(br => { 
         // console.log(br)
         branches = br
       })) // TODO: reactivity: needs to be exposed but only executed when used in ui > revisit samuels proxy requirement!
@@ -35,7 +36,7 @@ export function openRepo (url, { branch, author }) {
         get content () {
           // console.log('reading file ' + path)
           
-          !fileContent?.length && repoProm.then(repo => repo.read(path).then((content) => {
+          !fileContent?.length && repoProm.then((repo: any) => repo.read(path).then((content) => {
             fileContent = content
             setTimeout(updateStatus, 0)
           }))
@@ -44,13 +45,13 @@ export function openRepo (url, { branch, author }) {
         
         set content (val) {
           fileContent = val
-          repoProm.then(repo => repo.write(path, val).then(() => setTimeout(updateStatus, 0)))
+          repoProm.then((repo: any) => repo.write(path, val).then(() => setTimeout(updateStatus, 0)))
         }
       }
     },
 
     pull: async function () {
-      const repo = await repoProm
+      const repo: any = await repoProm
       await repo.pull({
         fastForward: true,
         singleBranch: true,
@@ -59,7 +60,7 @@ export function openRepo (url, { branch, author }) {
     },
 
     push: async function () {
-      const repo = await repoProm
+      const repo: any = await repoProm
       await repo.push()
       await updateStatus()
     },

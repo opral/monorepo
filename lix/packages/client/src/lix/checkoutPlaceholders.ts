@@ -24,7 +24,7 @@ export async function checkOutPlaceholders(ctx: RepoContext, state: RepoState) {
 		cache,
 		gitdir: ".git",
 		trees: [isoGit.TREE({ ref: branchName })],
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 		map: async function (fullpath, [commit]) {
 			if (!commit) {
 				return undefined

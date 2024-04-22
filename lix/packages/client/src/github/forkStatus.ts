@@ -4,16 +4,7 @@ import type { RepoContext, RepoState } from "../openRepository.js"
 import { getMeta } from "../github/getMeta.js"
 
 export async function forkStatus(ctx: RepoContext, state: RepoState) {
-	const {
-		gitUrl,
-		debug,
-		dir,
-		cache,
-		owner,
-		repoName,
-		githubClient,
-		gitProxyUrl,
-	} = ctx
+	const { gitUrl, debug, dir, cache, owner, repoName, githubClient, gitProxyUrl } = ctx
 
 	if (!gitUrl) {
 		throw new Error("Could not find repo url, only github supported for forkStatus at the moment")

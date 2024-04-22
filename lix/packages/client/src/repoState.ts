@@ -131,7 +131,7 @@ export async function repoState(
 			})
 			.then(() => {
 				if (!experimentalFeatures.lazyClone) {
-					return 
+					return
 				}
 				return checkOutPlaceholders(ctx, {
 					branchName: state.branchName,

@@ -59,7 +59,8 @@ export async function pull(
 		// remember we are now leaving lazy mode
 		ctx.experimentalFeatures.lazyClone = false
 
-		true && console.info('checking out "HEAD" after pull')
+		ctx.debug && console.info('checking out "HEAD" after pull')
+
 		await doCheckout({
 			fs: ctx.rawFs,
 			cache: ctx.cache,

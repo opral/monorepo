@@ -477,7 +477,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		return project()?.settings()?.languageTags ?? []
 	})
 
-
 	//the effect should skip tour guide steps if not needed
 	createEffect(() => {
 		if (localStorage?.user === undefined || userIsCollaborator.loading) {

@@ -7,7 +7,7 @@ export async function getBranches(ctx: RepoContext) {
 		throw new Error("Could not find repo url, only github supported for getBranches at the moment")
 	}
 	let serverRefs
-	
+
 	try {
 		serverRefs = await isoGit.listServerRefs({
 			url: ctx.gitUrl,

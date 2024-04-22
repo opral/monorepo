@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest"
 import { openRepository, findRepoRoot } from "./index.ts"
 // @ts-ignore -- ts import not working correctly, TODO: find out why
 import { createNodeishMemoryFs, fromSnapshot } from "@lix-js/fs"
+/* eslint-disable no-restricted-imports */
 import { readFileSync } from "node:fs"
 import { resolve } from "node:path"
 
@@ -486,7 +487,7 @@ describe("main workflow", () => {
 			branch: "test-symlink",
 		})
 
-		const firstHash = await repo.getFirstCommitHash()	
+		const firstHash = await repo.getFirstCommitHash()
 		expect(firstHash).toBe("244e3ce8c3335530ac0cd07e669b964bceb3b787")
 	})
 

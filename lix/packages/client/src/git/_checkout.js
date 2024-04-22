@@ -185,7 +185,7 @@ export async function _checkout({
 					} catch (e) {
 						// @ts-ignore
 						if (e.code === "ENOTEMPTY") {
-							// eslint-disable-next-line no-console, no-undef
+							// eslint-disable-next-line no-console
 							console.log(`Did not delete ${fullpath} because directory is not empty`)
 						} else {
 							throw e
@@ -280,7 +280,7 @@ export async function _checkout({
 								})
 							}
 						} catch (e) {
-							// eslint-disable-next-line no-undef, no-console
+							// eslint-disable-next-line no-console
 							console.log(e)
 						}
 					})
