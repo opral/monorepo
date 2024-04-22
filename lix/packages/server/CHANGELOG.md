@@ -1,5 +1,12 @@
 # @lix-js/server
 
+## 1.1.5
+
+### Patch Changes
+
+- 4941ca4: Moves getAuthClient from @lix-js/server to @lix-js/client and allows to inject ENV vars to make the pagacke independent from the env it runs in
+  - @inlang/telemetry@0.3.23
+
 ## 1.1.4
 
 ### Patch Changes

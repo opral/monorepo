@@ -12,3 +12,8 @@ declare const PACKAGE_VERSION: string
  * These may be used by dependencies
  */
 declare const ENV_DEFINED_IN_BUILD_STEP: Record<string, string>
+
+/**
+ * The id configured in the marketplace manifest
+ */
+declare const MARKTEPLACE_ID: string

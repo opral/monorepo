@@ -23,7 +23,7 @@ import {
 	openRepository,
 	createNodeishMemoryFs,
 	type Repository,
-	type LixError
+	type LixError,
 } from "@lix-js/client"
 
 import { publicEnv } from "@inlang/env-variables"
@@ -136,14 +136,14 @@ type EditorStateSchema = {
 	 */
 	project: Resource<InlangProjectWithSolidAdapter | undefined>
 
+	refetchProject: () => void
+
 	/**
 	 * List of projects in the repository.
 	 */
 	projectList: Resource<{ projectPath: string }[]>
 
-	doesInlangConfigExist: () => boolean
-
-	sourceLanguageTag: () => LanguageTag | undefined
+	sourceLanguageTag: () => LanguageTag
 
 	languageTags: () => LanguageTag[]
 
@@ -309,7 +309,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					newRepo.nodeishFs.watch = () => {}
 
 					setLastPullTime(new Date())
-
+					setLocalChanges(0)
 					// Invalidate the project while we switch branches
 					setProject(undefined)
 					return newRepo
@@ -355,7 +355,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					name: args.user.username,
 					email: args.user.email,
 				},
-				message: "Fink 🐦: update translations",
+				message: "chore: update translations with Fink 🐦",
 				include: filesWithUncommittedChanges.map((f) => f[0]),
 			})
 		}
@@ -443,7 +443,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	})
 
 	// open the inlang project and store it in a resource
-	const [project, { mutate: setProject }] = createResource(
+	const [project, { refetch: refetchProject, mutate: setProject }] = createResource(
 		() => {
 			if (repo() === undefined || activeProject() === undefined) {
 				return false
@@ -473,19 +473,16 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	)
 
-	// DERIVED when config exists
-	const doesInlangConfigExist = createMemo(() => {
-		return project()?.settings() ? true : false
-	})
-
-	// DERIVED source language tag from inlang config
+	// DERIVED source language tag from project settings
 	const sourceLanguageTag = createMemo(() => {
-		return project()?.settings()?.sourceLanguageTag
+		// If no project or settings are available, an error message is shown
+		// in the editor. The source language tag "en" is not used in this case.
+		return project()?.settings().sourceLanguageTag ?? "en"
 	})
 
-	// DERIVED language tags from inlang config
+	// DERIVED language tags from project settings
 	const languageTags = createMemo(() => {
-		return project()?.settings()?.languageTags ?? []
+		return project()?.settings().languageTags ?? []
 	})
 
 	//the effect should skip tour guide steps if not needed
@@ -562,7 +559,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		async (args) => {
 			const value = await args.repo!.forkStatus()
 			if ("error" in value) {
-				setLixErrors([new Error(value.error), ...lixErrors()])
+				// Silently ignore errors:
+				// The branch might only exist in the fork and not in the upstream repository.
 				return { ahead: 0, behind: 0, conflicts: false }
 			} else {
 				return value
@@ -673,8 +671,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					fsChange,
 					setFsChange,
 					project,
+					refetchProject,
 					projectList,
-					doesInlangConfigExist,
 					sourceLanguageTag,
 					languageTags,
 					tourStep,

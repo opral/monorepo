@@ -12,8 +12,13 @@ import type { NextFunction, Request, Response } from "express"
 // @ts-ignore
 import createMiddleware from "./auth/cors-middleware.js"
 import { decryptAccessToken } from "./auth/implementation.js"
-import { privateEnv } from "@inlang/env-variables"
-const allowedOrigins = privateEnv.PUBLIC_ALLOWED_AUTH_URLS?.split(",")
+import { getEnvVar } from "./util/getEnv.js"
+
+const allowedOrigins = getEnvVar(
+	"PUBLIC_ALLOWED_AUTH_URLS",
+	{ descirption: 'List of allowed base urls eg https://inlang.com,https://manage.inlang.com"' }
+).split(",")
+const JWE_SECRET = getEnvVar("JWE_SECRET")
 const production = process.env.NODE_ENV === "production"
 
 const middleware = createMiddleware({
@@ -27,7 +32,7 @@ const middleware = createMiddleware({
 
 			if (encryptedAccessToken) {
 				const decryptedAccessToken = await decryptAccessToken({
-					JWE_SECRET_KEY: privateEnv.JWE_SECRET,
+					JWE_SECRET_KEY: JWE_SECRET,
 					jwe: encryptedAccessToken,
 				})
 

@@ -2,12 +2,13 @@ import { defineConfig } from "vite"
 import dts from "vite-plugin-dts"
 import tsconfigPaths from "vite-tsconfig-paths"
 import pkg from "./package.json"
+import manifest from "./marketplace-manifest.json"
 
 export default defineConfig(({ mode }) => ({
-	plugins: [dts({ insertTypesEntry: true }), tsconfigPaths()],
+	plugins: [dts({ insertTypesEntry: true, ignoreConfigErrors: true }), tsconfigPaths()],
 	build: {
 		lib: {
-			entry: ["src/index.ts", "src/adapter-utils/index.ts"],
+			entry: ["src/index.ts", "src/adapter-utils/index.ts", "src/cli/index.ts"],
 			formats: ["es"],
 		},
 
@@ -17,6 +18,7 @@ export default defineConfig(({ mode }) => ({
 			input: {
 				index: "src/index.ts",
 				"adapter-utils/index": "src/adapter-utils/index.ts",
+				"cli/index": "src/cli/index.ts",
 			},
 			output: {
 				format: "es",
@@ -36,5 +38,6 @@ export default defineConfig(({ mode }) => ({
 		}),
 
 		PACKAGE_VERSION: JSON.stringify(pkg.version),
+		MARKTEPLACE_ID: JSON.stringify(manifest.id),
 	},
 }))

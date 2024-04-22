@@ -57,8 +57,8 @@
 
 **More specific guides:**
 
-- Guide: [Build a Global Svelte App](https://inlang.com/g/2fg8ng94/guide-nilsjacobsen-buildAGlobalSvelteApp)
-- Guide: [Contribute Translations](https://inlang.com/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink)
+- Guide: [Build a Global Svelte App](/g/2fg8ng94/guide-nilsjacobsen-buildAGlobalSvelteApp)
+- Guide: [Contribute Translations](/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink)
 
 ## :bell: Stay up-to-date
 
