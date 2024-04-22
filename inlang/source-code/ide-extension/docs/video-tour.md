@@ -12,7 +12,7 @@ In this video tour, you will learn how to use Sherlock with Visual Studio Code. 
 
 The following video shows a complete tour of Sherlock, including the most useful features and how to use them.
 
-[![Sherlock Video Tour](https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/sherlock-cover-small.png)](https://www.youtube.com/watch?v=3Q9Q6J9Q9Q0)
+[![Sherlock Video Tour](https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/sherlock-cover-small.png)](https://www.youtube.com/watch?v=todo)
 
 ---
 
@@ -22,24 +22,24 @@ The following videos show the main features of Sherlock, which are snippets of t
 
 ### Sherlock Extract (30sec)
 
-[![Sherlock Extract](https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-extract.png)](https://www.youtube.com/watch?v=3Q9Q6J9Q9Q0
+[![Sherlock Extract](https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-extract.png)](https://www.youtube.com/watch?v=todo
 
 ### Sherlock Lint (1min)
 
-[![Sherlock Lint](https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-lint.png)](https://www.youtube.com/watch?v=3Q9Q6J9Q9Q0)
+[![Sherlock Lint](https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-lint.png)](https://www.youtube.com/watch?v=todo)
 
 ### Sherlock Annotations (30sec)
 
-[![Inline Annotations](https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-inline.png)](https://www.youtube.com/watch?v=3Q9Q6J9Q9Q0)
+[![Inline Annotations](https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-inline.png)](https://www.youtube.com/watch?v=todo)
 
 
 ### Sherlock Settings (45sec)
 
-[![Sherlock Settings](https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-settings.png)](https://www.youtube.com/watch?v=3Q9Q6J9Q9Q0)
+[![Sherlock Settings](https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-settings.png)](https://www.youtube.com/watch?v=todo)
 
 ### Error Messages (30sec)
 
-[![Error Messages](https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-errors.png)](https://www.youtube.com/watch?v=3Q9Q6J9Q9Q0)
+[![Error Messages](https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/ide-errors.png)](https://www.youtube.com/watch?v=todo)
 
 
 
