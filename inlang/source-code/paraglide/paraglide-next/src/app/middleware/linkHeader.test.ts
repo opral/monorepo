@@ -8,7 +8,7 @@ describe("generateLinkHeader", () => {
 		const strategy = PrefixStrategy({
 			defaultLanguage: "en",
 			availableLanguageTags: ["en", "de", "fr"],
-			pathnames: {},
+			userPathnames: {},
 			exclude: () => false,
 			prefix: "except-default",
 		})

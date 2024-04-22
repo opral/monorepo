@@ -1,11 +1,16 @@
 import {
 	PathDefinitionTranslations,
+	validatePathTranslations,
 	resolveRoute,
 	bestMatch,
+	prettyPrintPathDefinitionIssues,
+	UserPathDefinitionTranslations,
+	resolveUserPathDefinitions,
 } from "@inlang/paraglide-js/internal/adapter-utils"
 import type { RoutingStragey } from "./interface"
-import type { ResolvedI18nConfig } from "../config"
 import { createPrefixDetection } from "../middleware/detection/prefixDetection"
+import { DEV } from "../env"
+import { rsc } from "rsc-env"
 
 /*
 	Canonical Path = Path without locale (how you write the href)
@@ -14,11 +19,31 @@ import { createPrefixDetection } from "../middleware/detection/prefixDetection"
 
 export function PrefixStrategy<T extends string>({
 	defaultLanguage,
-	pathnames,
+	userPathnames,
 	exclude,
 	prefix,
 	availableLanguageTags,
-}: ResolvedI18nConfig<T>): RoutingStragey<T> {
+}: {
+	exclude: (path: string) => boolean
+	userPathnames: UserPathDefinitionTranslations<T>
+	defaultLanguage: T
+	prefix: "all" | "except-default" | "never"
+	availableLanguageTags: readonly T[]
+}): RoutingStragey<T> {
+	const pathnames = resolveUserPathDefinitions(userPathnames, availableLanguageTags)
+
+	// Make sure the given pathnames are valid during dev
+	// middleware is not rsc so validating there guarantees this will run once
+	if (DEV && !rsc) {
+		const issues = validatePathTranslations(pathnames, availableLanguageTags as T[], {})
+		if (issues.length) {
+			console.warn(
+				"Issues were found with your pathnames. Fix them before deploying:\n\n" +
+					prettyPrintPathDefinitionIssues(issues)
+			)
+		}
+	}
+
 	function getCanonicalPath(localisedPath: string, locale: T): string {
 		let pathWithoutLocale = localisedPath.startsWith(`/${locale}`)
 			? localisedPath.replace(`/${locale}`, "")

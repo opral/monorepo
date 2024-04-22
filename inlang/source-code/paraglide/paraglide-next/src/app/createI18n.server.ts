@@ -31,7 +31,13 @@ export function createI18n<T extends string = string>(userConfig: I18nUserConfig
 		prefix: userConfig.prefix ?? "except-default",
 	}
 
-	const strategy = PrefixStrategy(config)
+	const strategy = PrefixStrategy({
+		availableLanguageTags: config.availableLanguageTags,
+		exclude: config.exclude,
+		defaultLanguage: config.defaultLanguage,
+		userPathnames: userConfig.pathnames || {},
+		prefix: config.prefix,
+	})
 
 	const navigation = createNavigation({
 		languageTag: getLanguage,
