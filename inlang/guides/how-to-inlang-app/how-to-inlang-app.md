@@ -2,7 +2,7 @@
 
 Inlang is a versatile globalization ecosystem that empowers developers to seamlessly integrate language translation capabilities into their applications. This comprehensive guide will walk you through the process of building a general Inlang app with the `@inlang/sdk`. 
 
-We'll cover initializing a project from a repo, creating and updating messages, and working with lint rules.
+We'll cover initializing a project from a repo, creating and updating messages, and working with [lint rules](https://inlang.com/c/lint-rules).
 
 ## 1. Open Repository
 
