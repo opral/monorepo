@@ -10,10 +10,13 @@ import type { NextURL } from "next/dist/server/web/next-url"
 import { createCookieDetection } from "./detection/CookieDetection"
 import { createAcceptLanguageDetection } from "./detection/AcceptLanguageDetection"
 
-export function createMiddleware<T extends string>(
-	config: ResolvedI18nConfig<T>,
+export function createMiddleware<T extends string>({
+	config,
+	strategy,
+}: {
+	config: ResolvedI18nConfig<T>
 	strategy: RoutingStragey<T>
-) {
+}) {
 	/**
 	 * Sets the request headers to resolve the language tag in RSC.
 	 * https://nextjs.org/docs/pages/building-your-application/routing/middleware#setting-headers
