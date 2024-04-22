@@ -1,4 +1,9 @@
-import { availableLanguageTags, isAvailableLanguageTag } from "$paraglide/runtime.js"
+import {
+	availableLanguageTags,
+	isAvailableLanguageTag,
+	languageTag,
+	sourceLanguageTag,
+} from "$paraglide/runtime.js"
 import { addBasePath, basePath } from "./utils/basePath"
 import NextLink from "next/link"
 import React from "react"
@@ -16,15 +21,11 @@ type LocalisedLink<T extends string> = (
  * Creates a link component that localises the href based on the current language.
  * @param languageTag A function that returns the current language tag.
  */
-export function createLink<T extends string>(
-	languageTag: () => T,
-	defaultLanguage: T,
-	strategy: RoutingStragey<T>
-): LocalisedLink<T> {
+export function createLink<T extends string>(strategy: RoutingStragey<T>): LocalisedLink<T> {
 	const localiseHref = createLocaliseHref(strategy)
 
 	return function Link(props) {
-		const currentLanguageTag = languageTag()
+		const currentLanguageTag = languageTag() as T
 
 		if (
 			process.env.NODE_ENV === "development" &&
@@ -37,12 +38,12 @@ export function createLink<T extends string>(
 			)
 
 			console.warn(
-				`Invalid locale prop passed to <Link> component.\nExpected ${availableLanguageTagsString}, but got "${props.locale}".\nFalling back to the default language "${defaultLanguage}". \n\n(This warning will not be shown in production)`
+				`Invalid locale prop passed to <Link> component.\nExpected ${availableLanguageTagsString}, but got "${props.locale}".\nFalling back to the default language "${sourceLanguageTag}". \n\n(This warning will not be shown in production)`
 			)
 		}
 
 		let lang = props.locale || currentLanguageTag
-		if (!isAvailableLanguageTag(lang)) lang = defaultLanguage
+		if (!isAvailableLanguageTag(lang)) lang = sourceLanguageTag as T
 
 		const localisedHref = localiseHref(props.href, lang, "", lang !== currentLanguageTag)
 
