@@ -10,7 +10,7 @@ When it comes to internationalizing your app, avoiding common localization mista
 
 Design your app interface with text expansion and contraction in mind. Use flexible layouts and consider the use of placeholders for dynamic content to accommodate varying text lengths in different languages without compromising the design and functionality of your app.
 
-inlang provides a lot of different lint rules to help you with this. You can find them in the [Rules Category](/c/lint-rules).
+inlang provides a lot of different [lint rules](https://inlang.com/c/lint-rules) to help you with this. You can find them in the [Rules Category](/c/lint-rules).
 
 ### Mistake 2: Ignoring Date, Time, and Number Formats
 
