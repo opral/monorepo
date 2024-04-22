@@ -26,7 +26,7 @@ describe.skipIf(() => process.env.NODE_ENV !== "development")("<Link>", () => {
 			prefix: "except-default",
 		} as const
 
-		const Link = createLink(languageTag, config, PrefixStrategy(config))
+		const Link = createLink(languageTag, sourceLanguageTag, PrefixStrategy(config))
 
 		render(
 			<>
@@ -48,7 +48,7 @@ describe.skipIf(() => process.env.NODE_ENV !== "development")("<Link>", () => {
 		} as const
 
 		//For some reason we can't pass languageTag as a reference directly
-		const Link = createLink(() => languageTag(), config, PrefixStrategy(config))
+		const Link = createLink(() => languageTag(), sourceLanguageTag, PrefixStrategy(config))
 
 		setLanguageTag("de")
 		render(
@@ -73,7 +73,7 @@ describe.skipIf(() => process.env.NODE_ENV !== "development")("<Link>", () => {
 		} as const
 
 		//For some reason we can't pass languageTag as a reference directly
-		const Link = createLink(() => languageTag(), config, PrefixStrategy(config))
+		const Link = createLink(() => languageTag(), sourceLanguageTag, PrefixStrategy(config))
 
 		setLanguageTag("de")
 		render(
@@ -103,7 +103,7 @@ describe.skipIf(() => process.env.NODE_ENV !== "development")("<Link>", () => {
 		} as const
 
 		//For some reason we can't pass languageTag as a reference directly
-		const Link = createLink(() => languageTag(), config, PrefixStrategy(config))
+		const Link = createLink(() => languageTag(), sourceLanguageTag, PrefixStrategy(config))
 
 		setLanguageTag("de")
 		render(

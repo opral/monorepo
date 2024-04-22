@@ -20,7 +20,7 @@ export const createNavigation = <T extends string>({
 }) => {
 	const routing = rsc ? createNoopRouting() : createRouting(languageTag, strategy)
 	const redirects = createRedirects(languageTag, strategy)
-	const Link = createLink(languageTag, config, strategy)
+	const Link = createLink(languageTag, config.defaultLanguage, strategy)
 
 	return {
 		...routing,

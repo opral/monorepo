@@ -3,16 +3,18 @@ export type CookieConfig = {
 	value: string
 	"Max-Age"?: number
 	Path?: string
-	HttpOnly?: boolean
+	/**
+	 * Leave property out if the cookie is not HTTP only
+	 */
+	HttpOnly?: true
 	SameSite?: "strict" | "lax" | "none"
 }
 
-export function serializeCookie(cookieConfig: CookieConfig) {
-	const parts = [`${cookieConfig.name}=${cookieConfig.value}`]
+export function serializeCookie({ name, value, ...rest }: CookieConfig) {
+	const parts = [`${name}=${value}`]
 
-	for (const [key, value] of Object.entries(cookieConfig)) {
-		if (key != "value" && key != "name")
-			typeof value == "boolean" ? parts.push(`${key}`) : parts.push(`${key}=${value}`)
+	for (const [key, value] of Object.entries(rest)) {
+		parts.push(value === true ? key : `${key}=${value}`)
 	}
 
 	return parts.join("; ")

@@ -19,23 +19,23 @@ import { rsc } from "rsc-env"
 
 export function PrefixStrategy<T extends string>({
 	defaultLanguage,
-	userPathnames,
+	pathnames: userPathnames,
 	exclude,
 	prefix,
 	availableLanguageTags,
 }: {
 	exclude: (path: string) => boolean
-	userPathnames: UserPathDefinitionTranslations<T>
+	pathnames: UserPathDefinitionTranslations<T>
 	defaultLanguage: T
 	prefix: "all" | "except-default" | "never"
 	availableLanguageTags: readonly T[]
 }): RoutingStragey<T> {
-	const pathnames = resolveUserPathDefinitions(userPathnames, availableLanguageTags)
+	const resolvedPathnames = resolveUserPathDefinitions(userPathnames, availableLanguageTags)
 
 	// Make sure the given pathnames are valid during dev
 	// middleware is not rsc so validating there guarantees this will run once
 	if (DEV && !rsc) {
-		const issues = validatePathTranslations(pathnames, availableLanguageTags as T[], {})
+		const issues = validatePathTranslations(resolvedPathnames, availableLanguageTags as T[], {})
 		if (issues.length) {
 			console.warn(
 				"Issues were found with your pathnames. Fix them before deploying:\n\n" +
@@ -51,7 +51,9 @@ export function PrefixStrategy<T extends string>({
 
 		pathWithoutLocale ||= "/"
 
-		for (const [canonicalPathDefinition, translationsForPath] of Object.entries(pathnames)) {
+		for (const [canonicalPathDefinition, translationsForPath] of Object.entries(
+			resolvedPathnames
+		)) {
 			if (!(locale in translationsForPath)) continue
 
 			const translatedPathDefinition = translationsForPath[locale]
@@ -90,7 +92,7 @@ export function PrefixStrategy<T extends string>({
 					pathname: canonicalPath,
 				}
 
-			const translatedPath = getTranslatedPath(canonicalPath, targetLanguage, pathnames)
+			const translatedPath = getTranslatedPath(canonicalPath, targetLanguage, resolvedPathnames)
 			const shouldAddPrefix =
 				prefix === "never"
 					? false
