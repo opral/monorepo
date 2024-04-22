@@ -10,12 +10,12 @@ import { LanguageDetector } from "./detection/interface"
  */
 export function resolveLanguage<T extends string>(
 	request: NextRequest,
-	config: ResolvedI18nConfig<T>,
+	defaultLanguage: T,
 	detectors: LanguageDetector<T>[]
 ): T {
 	for (const detector of detectors) {
 		const locale = detector(request)
 		if (locale) return locale
 	}
-	return config.defaultLanguage
+	return defaultLanguage
 }

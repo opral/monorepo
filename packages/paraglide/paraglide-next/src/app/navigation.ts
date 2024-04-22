@@ -1,5 +1,5 @@
 import * as NextNavigation from "next/navigation"
-import { setLanguageTag } from "$paraglide/runtime.js"
+import { languageTag, setLanguageTag } from "$paraglide/runtime.js"
 import { addBasePath, basePath } from "./utils/basePath"
 import { RoutingStragey } from "./routing/interface"
 import { createLocaliseHref } from "./localiseHref"
@@ -7,20 +7,15 @@ import { serializeCookie } from "./utils/cookie"
 import { LANG_COOKIE } from "./constants"
 import { rsc } from "rsc-env"
 import { createLink } from "./Link"
-import { ResolvedI18nConfig } from "./config"
 
 export const createNavigation = <T extends string>({
-	languageTag,
 	strategy,
-	config,
 }: {
-	languageTag: () => T
 	strategy: RoutingStragey<T>
-	config: ResolvedI18nConfig<T>
 }) => {
-	const routing = rsc ? createNoopRouting() : createRouting(languageTag, strategy)
-	const redirects = createRedirects(languageTag, strategy)
-	const Link = createLink(languageTag, config.defaultLanguage, strategy)
+	const routing = rsc ? createNoopRouting() : createRouting(strategy)
+	const redirects = createRedirects(strategy)
+	const Link = createLink(strategy)
 
 	return {
 		...routing,
@@ -29,10 +24,7 @@ export const createNavigation = <T extends string>({
 	}
 }
 
-export const createRouting = <T extends string>(
-	languageTag: () => T,
-	strategy: RoutingStragey<T>
-) => {
+export const createRouting = <T extends string>(strategy: RoutingStragey<T>) => {
 	const localiseHref = createLocaliseHref(strategy)
 
 	type NextUsePathname = (typeof NextNavigation)["usePathname"]
@@ -48,7 +40,7 @@ export const createRouting = <T extends string>(
 	const usePathname: NextUsePathname = (...args) => {
 		const encodedLocalisedPathname = NextNavigation.usePathname(...args)
 		const localisedPathname = decodeURI(encodedLocalisedPathname)
-		return strategy.getCanonicalPath(localisedPathname, languageTag())
+		return strategy.getCanonicalPath(localisedPathname, languageTag() as T)
 	}
 
 	/**
@@ -65,7 +57,7 @@ export const createRouting = <T extends string>(
 		const searchParams = NextNavigation.useSearchParams()
 		const canonicalCurrentPathname = strategy.getCanonicalPath(
 			currentCanonicalPathname,
-			languageTag()
+			languageTag() as T
 		)
 
 		type NavigateOptions = Parameters<(typeof nextRouter)["push"]>[1]
@@ -85,7 +77,7 @@ export const createRouting = <T extends string>(
 			canonicalPath: string,
 			options?: (NavigateOptions & OptionalLanguageOption) | undefined
 		) => {
-			const locale = options?.locale ?? languageTag()
+			const locale = options?.locale ?? (languageTag() as T)
 			const localisedPath = localiseHref(
 				canonicalPath,
 				locale,
@@ -138,7 +130,7 @@ export const createRouting = <T extends string>(
 			canonicalPath: string,
 			options?: (NavigateOptions & OptionalLanguageOption) | undefined
 		) => {
-			const locale = options?.locale ?? languageTag()
+			const locale = options?.locale ?? (languageTag() as T)
 			const localisedPath = localiseHref(
 				canonicalPath,
 				locale,
@@ -163,7 +155,7 @@ export const createRouting = <T extends string>(
 				document.cookie = serializeCookie({
 					...LANG_COOKIE,
 					value: locale,
-					path: basePath,
+					Path: basePath,
 				})
 
 				window.location.reload()
@@ -188,7 +180,7 @@ export const createRouting = <T extends string>(
 		 * ```
 		 */
 		const prefetch = (canonicalPath: string, options: PrefetchOptions & OptionalLanguageOption) => {
-			const locale = options?.locale ?? languageTag()
+			const locale = options?.locale ?? (languageTag() as T)
 			const localisedPath = localiseHref(
 				canonicalPath,
 				locale,
@@ -224,10 +216,7 @@ export function createNoopRouting<T extends string>(): ReturnType<typeof createR
 	}
 }
 
-export function createRedirects<T extends string>(
-	languageTag: () => T,
-	strategy: RoutingStragey<T>
-) {
+export function createRedirects<T extends string>(strategy: RoutingStragey<T>) {
 	const localiseHref = createLocaliseHref(strategy)
 
 	type NextRedirect = (typeof NextNavigation)["redirect"]
@@ -245,7 +234,7 @@ export function createRedirects<T extends string>(
 			throw new Error("The href passed to redirect cannot be relative")
 		}
 
-		args[0] = localiseHref(href, languageTag(), "/", false)
+		args[0] = localiseHref(href, languageTag() as T, "/", false)
 		NextNavigation.redirect(...args)
 	}
 
@@ -263,7 +252,7 @@ export function createRedirects<T extends string>(
 			throw new Error("The href passed to permanentRedirect cannot be relative")
 		}
 
-		args[0] = localiseHref(href, languageTag(), "/", false)
+		args[0] = localiseHref(href, languageTag() as T, "/", false)
 		NextNavigation.permanentRedirect(...args)
 	}
 

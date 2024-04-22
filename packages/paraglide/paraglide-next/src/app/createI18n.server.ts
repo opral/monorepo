@@ -1,5 +1,5 @@
 import { getLanguage } from "./getLanguage.server"
-import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
+import { availableLanguageTags, setLanguageTag, sourceLanguageTag } from "$paraglide/runtime.js"
 import { createNavigation } from "./navigation"
 import { createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
@@ -21,11 +21,15 @@ import { PrefixStrategy } from "./routing/prefixStrategy"
  *
  * export const i18n = createI18n({ ...options })
  * ```
+ *
+ * @deprecated
+ * Use `createMiddleware` and `createNavigation` instead
  */
 export function createI18n<T extends string = string>(userConfig: I18nUserConfig<T> = {}) {
+	setLanguageTag(getLanguage)
+
 	const config: ResolvedI18nConfig<T> = {
 		availableLanguageTags: availableLanguageTags as readonly T[],
-		defaultLanguage: userConfig.defaultLanguage ?? (sourceLanguageTag as T),
 		exclude: createExclude(userConfig.exclude ?? []),
 		pathnames: resolveUserPathDefinitions(userConfig.pathnames ?? {}, availableLanguageTags as T[]),
 		prefix: userConfig.prefix ?? "except-default",
@@ -34,17 +38,15 @@ export function createI18n<T extends string = string>(userConfig: I18nUserConfig
 	const strategy = PrefixStrategy({
 		availableLanguageTags: config.availableLanguageTags,
 		exclude: config.exclude,
-		defaultLanguage: config.defaultLanguage,
+		defaultLanguage: sourceLanguageTag as T,
 		pathnames: userConfig.pathnames || {},
 		prefix: config.prefix,
 	})
 
 	const navigation = createNavigation({
-		languageTag: getLanguage,
 		strategy,
-		config,
 	})
-	const middleware = createMiddleware<T>({ config, strategy })
+	const middleware = createMiddleware<T>({ strategy })
 
 	return {
 		middleware,
