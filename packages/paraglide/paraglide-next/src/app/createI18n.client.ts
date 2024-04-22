@@ -1,7 +1,7 @@
 import { createLink } from "./Link"
 import { getLanguage } from "./getLanguage.client"
 import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
-import { createNavigation, createRedirects } from "./navigation"
+import { createRouting, createRedirects } from "./navigation"
 import { createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
 import { I18nUserConfig, ResolvedI18nConfig } from "./config"
@@ -11,6 +11,7 @@ import {
 	validatePathTranslations,
 } from "@inlang/paraglide-js/internal/adapter-utils"
 import { PrefixStrategy } from "./routing/prefixStrategy"
+import { DEV } from "./env"
 
 export function createI18n<T extends string = string>(userConfig: I18nUserConfig<T> = {}) {
 	const config: ResolvedI18nConfig<T> = {
@@ -21,7 +22,7 @@ export function createI18n<T extends string = string>(userConfig: I18nUserConfig
 		prefix: userConfig.prefix ?? "except-default",
 	}
 
-	if (process.env.NODE_ENV === "development") {
+	if (DEV) {
 		const issues = validatePathTranslations(config.pathnames, availableLanguageTags as T[], {})
 		if (issues.length) {
 			console.warn(
@@ -39,9 +40,9 @@ export function createI18n<T extends string = string>(userConfig: I18nUserConfig
 	 * Automatically localises the href based on the current language.
 	 */
 	const Link = createLink<T>(getLanguage, config, strategy)
-	const { usePathname, useRouter } = createNavigation<T>(getLanguage, strategy)
+	const { usePathname, useRouter } = createRouting<T>(getLanguage, strategy)
 	const { redirect, permanentRedirect } = createRedirects<T>(getLanguage, strategy)
-	const middleware = createMiddleware<T>(config, strategy)
+	const middleware = createMiddleware<T>({ config, strategy })
 
 	return {
 		Link,

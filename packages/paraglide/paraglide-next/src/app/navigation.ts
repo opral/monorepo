@@ -6,7 +6,7 @@ import { createLocaliseHref } from "./localiseHref"
 import { serializeCookie } from "./utils/cookie"
 import { LANG_COOKIE } from "./constants"
 
-export const createNavigation = <T extends string>(
+export const createRouting = <T extends string>(
 	languageTag: () => T,
 	strategy: RoutingStragey<T>
 ) => {
@@ -190,7 +190,7 @@ export const createNavigation = <T extends string>(
  * Implements the same API as NextNavigation, but throws an error when used.
  * Usefull for poisoning the client-side navigation hooks on the server.
  */
-export function createNoopNavigation<T extends string>(): ReturnType<typeof createNavigation<T>> {
+export function createNoopRouting<T extends string>(): ReturnType<typeof createRouting<T>> {
 	return {
 		usePathname: () => {
 			throw new Error("usePathname is not available on the server")

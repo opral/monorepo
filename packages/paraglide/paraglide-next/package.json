@@ -73,6 +73,7 @@
 		"@rollup/plugin-typescript": "^11.1.5",
 		"@testing-library/react": "^14.2.1",
 		"@types/node": "^20.12.7",
+		"@types/qs": "^6.9.15",
 		"@types/react": "^18",
 		"@vitejs/plugin-react": "^4.2.1",
 		"jsdom": "22.1.0",

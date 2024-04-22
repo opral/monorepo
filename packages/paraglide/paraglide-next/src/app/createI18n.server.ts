@@ -1,7 +1,7 @@
 import { createLink } from "./Link"
 import { getLanguage } from "./getLanguage.server"
 import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
-import { createNoopNavigation, createRedirects } from "./navigation"
+import { createNoopRouting, createRedirects } from "./navigation"
 import { createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
 import { resolveUserPathDefinitions } from "@inlang/paraglide-js/internal/adapter-utils"
@@ -40,9 +40,9 @@ export function createI18n<T extends string = string>(userConfig: I18nUserConfig
 	 * Automatically localises the href based on the current language.
 	 */
 	const Link = createLink<T>(getLanguage, config, strategy)
-	const { usePathname, useRouter } = createNoopNavigation<T>()
+	const { usePathname, useRouter } = createNoopRouting<T>()
 	const { redirect, permanentRedirect } = createRedirects<T>(getLanguage, strategy)
-	const middleware = createMiddleware<T>(config, strategy)
+	const middleware = createMiddleware<T>({ config, strategy })
 
 	return {
 		Link,
