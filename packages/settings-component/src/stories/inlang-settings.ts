@@ -69,11 +69,11 @@ export default class InlangSettings extends LitElement {
 				border-radius: 0.5rem;
 				border: 1px solid var(--sl-panel-border-color);
 				filter: drop-shadow(0 4px 3px rgb(0 0 0 / 0.07)) drop-shadow(0 2px 2px rgb(0 0 0 / 0.06));
-			}
-			.hover-bar-text {
 				font-weight: 600;
 				line-height: 1.5;
 				font-size: 14px;
+			}
+			.hover-bar-text {
 				margin: 0;
 			}
 			.test {
