@@ -110,7 +110,7 @@ export const createRouting = <T extends string>(
 				document.cookie = serializeCookie({
 					...LANG_COOKIE,
 					value: locale,
-					path: basePath,
+					Path: basePath,
 				})
 
 				window.location.reload()
