@@ -1,5 +1,12 @@
 # @inlang/paraglide-next
 
+## 0.1.1
+
+### Patch Changes
+
+- 13dbef3: The `init` cli now offers to migrate navigation imports
+  - @inlang/paraglide-js@1.7.0
+
 ## 3.3.0
 
 ### Minor Changes

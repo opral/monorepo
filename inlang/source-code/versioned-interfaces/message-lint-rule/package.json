@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/message-lint-rule",
 	"type": "module",
-	"version": "1.4.5",
+	"version": "1.4.6",
 	"license": "Apache-2.0",
 	"publishConfig": {
 		"access": "public"

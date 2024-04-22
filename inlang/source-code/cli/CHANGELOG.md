@@ -1,5 +1,14 @@
 # @inlang/cli
 
+## 2.14.2
+
+### Patch Changes
+
+- cd9a3e1: add internal links
+- Updated dependencies [7bd98e4]
+  - @lix-js/client@1.3.0
+  - @inlang/sdk@0.33.1
+
 ## 2.14.1
 
 ### Patch Changes
