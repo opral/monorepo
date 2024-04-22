@@ -5,7 +5,7 @@ import { PrefixStrategy } from "./routing/prefixStrategy"
 const strategy = PrefixStrategy<"en" | "de" | "de-CH">({
 	availableLanguageTags: ["en", "de", "de-CH"],
 	defaultLanguage: "en",
-	userPathnames: {
+	pathnames: {
 		"/canonical-translated": {
 			de: "/uebersetzt",
 			"de-CH": "/uebersetzt",

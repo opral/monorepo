@@ -4,7 +4,7 @@ import { PrefixStrategy } from "./prefixStrategy"
 const { getCanonicalPath, getLocalisedUrl: getLocalisedHref } = PrefixStrategy({
 	availableLanguageTags: ["en", "de", "de-CH"],
 	defaultLanguage: "en",
-	userPathnames: {
+	pathnames: {
 		"/canonical-translated": {
 			de: "/uebersetzt",
 			"de-CH": "/uebersetzt",

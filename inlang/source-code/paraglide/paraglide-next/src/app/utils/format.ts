@@ -8,11 +8,8 @@ const slashedProtocols = ["http:", "https:", "ftp:", "gopher:", "file:"] as cons
 export function format(url: UrlObject) {
 	const auth = url.auth ? encodeURIComponent(url.auth).replace(/%3A/i, ":") + "@" : ""
 
-	let protocol = url.protocol || "",
-		pathname = url.pathname || "",
-		hash = url.hash || "",
-		host: string | false = false,
-		query = ""
+	let pathname = url.pathname || ""
+	let host: string | false = false
 
 	if (url.host) {
 		host = auth + url.host
@@ -23,6 +20,7 @@ export function format(url: UrlObject) {
 		}
 	}
 
+	let query = ""
 	if (url.query && typeof url.query === "object" && Object.keys(url.query).length) {
 		query = querystring.stringify(url.query, {
 			arrayFormat: "repeat",
@@ -30,8 +28,7 @@ export function format(url: UrlObject) {
 		})
 	}
 
-	let search = url.search || (query && "?" + query) || ""
-
+	let protocol = url.protocol || ""
 	if (protocol && protocol.slice(-1) !== ":") {
 		protocol += ":"
 	}
@@ -52,17 +49,17 @@ export function format(url: UrlObject) {
 	} else if (!host) {
 		host = ""
 	}
+	pathname = pathname.replace(/[?#]/g, encodeURIComponent)
 
-	if (hash && hash.charAt(0) !== "#") {
+	let hash: string = url.hash || ""
+	if (hash && !hash.startsWith("#")) {
 		hash = "#" + hash
 	}
-	if (search && search.charAt(0) !== "?") {
+
+	let search = url.search || query ? `?${query}` : ""
+	if (search && !search.startsWith("?")) {
 		search = "?" + search
 	}
-
-	pathname = pathname.replace(/[?#]/g, function (match) {
-		return encodeURIComponent(match)
-	})
 	search = search.replace("#", "%23")
 
 	return protocol + host + pathname + search + hash

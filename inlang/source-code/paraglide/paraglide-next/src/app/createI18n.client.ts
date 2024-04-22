@@ -20,7 +20,7 @@ export function createI18n<T extends string = string>(userConfig: I18nUserConfig
 		availableLanguageTags: config.availableLanguageTags,
 		exclude: config.exclude,
 		defaultLanguage: config.defaultLanguage,
-		userPathnames: userConfig.pathnames || {},
+		pathnames: userConfig.pathnames || {},
 		prefix: config.prefix,
 	})
 

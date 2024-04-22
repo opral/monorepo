@@ -4,7 +4,6 @@ import NextLink from "next/link"
 import React from "react"
 import { RoutingStragey } from "./routing/interface"
 import { createLocaliseHref } from "./localiseHref"
-import type { ResolvedI18nConfig } from "./config"
 import { serializeCookie } from "./utils/cookie"
 import { LANG_COOKIE } from "./constants"
 import { rsc } from "rsc-env"
@@ -19,7 +18,7 @@ type LocalisedLink<T extends string> = (
  */
 export function createLink<T extends string>(
 	languageTag: () => T,
-	config: ResolvedI18nConfig<T>,
+	defaultLanguage: T,
 	strategy: RoutingStragey<T>
 ): LocalisedLink<T> {
 	const localiseHref = createLocaliseHref(strategy)
@@ -38,12 +37,12 @@ export function createLink<T extends string>(
 			)
 
 			console.warn(
-				`Invalid locale prop passed to <Link> component.\nExpected ${availableLanguageTagsString}, but got "${props.locale}".\nFalling back to the default language "${config.defaultLanguage}". \n\n(This warning will not be shown in production)`
+				`Invalid locale prop passed to <Link> component.\nExpected ${availableLanguageTagsString}, but got "${props.locale}".\nFalling back to the default language "${defaultLanguage}". \n\n(This warning will not be shown in production)`
 			)
 		}
 
 		let lang = props.locale || currentLanguageTag
-		if (!isAvailableLanguageTag(lang)) lang = config.defaultLanguage
+		if (!isAvailableLanguageTag(lang)) lang = defaultLanguage
 
 		const localisedHref = localiseHref(props.href, lang, "", lang !== currentLanguageTag)
 
@@ -51,7 +50,7 @@ export function createLink<T extends string>(
 			document.cookie = serializeCookie({
 				...LANG_COOKIE,
 				value: newLang,
-				path: basePath,
+				Path: basePath,
 			})
 		}
 
