@@ -1,10 +1,15 @@
 import express, { Router } from "express"
 
 import { decryptAccessToken } from "./auth/implementation.js"
-import { privateEnv } from "@inlang/env-variables"
+import { getEnvVar } from "./util/getEnv.js"
 
 const PATH = "/github-proxy/"
-const allowedAuthUrls = privateEnv.PUBLIC_ALLOWED_AUTH_URLS?.split(",")
+
+const allowedAuthUrls = getEnvVar(
+	"PUBLIC_ALLOWED_AUTH_URLS",
+	{ descirption: 'List of allowed base urls eg https://inlang.com,https://manage.inlang.com"' }
+).split(",")
+const JWE_SECRET = getEnvVar("JWE_SECRET")
 
 /**
  * Routes for the GitHub service.
@@ -24,7 +29,7 @@ router.all(
 			const encryptedAccessToken = request.session?.encryptedAccessToken as string | undefined
 			const decryptedAccessToken = encryptedAccessToken
 				? await decryptAccessToken({
-						JWE_SECRET_KEY: privateEnv.JWE_SECRET,
+						JWE_SECRET_KEY: JWE_SECRET,
 						jwe: encryptedAccessToken,
 				  })
 				: undefined
