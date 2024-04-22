@@ -11,7 +11,8 @@ export function serializeCookie(cookieConfig: CookieConfig) {
 	const parts = [`${cookieConfig.name}=${cookieConfig.value}`]
 
 	for (const [key, value] of Object.entries(cookieConfig)) {
-		if (key != "value" && key != "name") parts.push(`${key}=${value}`)
+		if (key != "value" && key != "name")
+			typeof value == "boolean" ? parts.push(`${key}`) : parts.push(`${key}=${value}`)
 	}
 
 	return parts.join("; ")
