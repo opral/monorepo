@@ -68,6 +68,10 @@ export class GeneralInput extends LitElement {
 						.schema=${this.schema}
 						.handleInlangProjectChange=${this.handleInlangProjectChange}
 						.required=${this.required}
+						.withTitle=${true}
+						.withDescription=${true}
+						.keyPlaceholder=${"Enter key"}
+						.valuePlaceholder=${"Enter value"}
 					></object-input>
 				</div>`
 			} else {

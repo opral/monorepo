@@ -217,8 +217,7 @@ export default class InlangSettings extends LitElement {
 								${value.meta && (value.meta?.displayName as { en: string }).en}
 							</h2>`}
 							${Object.entries(value.schema.properties).map(([property, schema]) => {
-								if (property === "$schema" || property === "modules" || property === "experimental")
-									return undefined
+								if (property === "$schema" || property === "modules") return undefined
 								return key === "internal"
 									? html`
 											<general-input
@@ -289,4 +288,3 @@ declare global {
 		"inlang-settings": InlangSettings
 	}
 }
-

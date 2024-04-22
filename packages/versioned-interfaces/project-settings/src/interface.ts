@@ -92,7 +92,12 @@ const InternalProjectSettings = Type.Object({
 			],
 		})
 	),
-	experimental: Type.Optional(Type.Record(Type.String(), Type.Literal(true))),
+	experimental: Type.Optional(
+		Type.Record(Type.String(), Type.Literal(true), {
+			title: "Experimental settings",
+			description: "Experimental settings that are used for product development.",
+		})
+	),
 })
 
 /**
