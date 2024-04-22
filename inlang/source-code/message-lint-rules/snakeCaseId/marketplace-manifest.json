@@ -11,8 +11,9 @@
 	"description": {
 		"en": "Checks for messages to have a snake case formatted message id (e.g. 'my_message_id')."
 	},
-	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/message-lint-rules/snakeCaseId/README.md"
+	"pages": {
+		"/": "./inlang/source-code/message-lint-rules/snakeCaseId/README.md",
+		"/changelog": "./inlang/source-code/message-lint-rules/snakeCaseId/CHANGELOG.md"
 	},
 	"keywords": ["message", "lint rule", "id", "format", "snake", "case", "website"],
 	"publisherName": "inlang",

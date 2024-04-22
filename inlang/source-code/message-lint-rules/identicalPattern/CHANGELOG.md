@@ -1,5 +1,11 @@
 # @inlang/message-lint-rule-identical-pattern
 
+## 1.5.6
+
+### Patch Changes
+
+- bc00427: fix typo
+
 ## 1.5.5
 
 ### Patch Changes

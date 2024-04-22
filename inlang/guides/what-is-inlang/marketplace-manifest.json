@@ -1,4 +1,5 @@
 {
+	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "guide.niklasbuchfink.whatIsInlang",
 	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/what-is-inlang/question-mark-logo.webp",
 	"displayName": {

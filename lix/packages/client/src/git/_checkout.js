@@ -321,6 +321,7 @@ async function analyze({ fs, cache, onProgress, dir, gitdir, ref, force, filepat
 			// match against base paths
 			// @ts-ignore
 			if (filepaths && !filepaths.some((base) => _worthWalking(fullpath, base))) {
+				// eslint-disable-next-line unicorn/no-null -- return null to skip walking of ignored trees (folders)
 				return null
 			}
 			// Emit progress event

@@ -80,7 +80,7 @@ export type MessageQueryApi = {
 	}
 	includedMessageIds: Subscribable<Message["id"][]>
 	/*
-	 * getAll is depricated do not use it
+	 * getAll is deprecated do not use it
 	 */
 	getAll: Subscribable<Readonly<Message[]>>
 	update: (args: { where: { id: Message["id"] }; data: Partial<Message> }) => boolean

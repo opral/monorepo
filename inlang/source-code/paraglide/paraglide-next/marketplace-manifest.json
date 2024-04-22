@@ -1,0 +1,44 @@
+{
+	"$schema": "https://inlang.com/schema/marketplace-manifest",
+	"id": "library.inlang.paraglideJsAdapterNextJs",
+	"slug": "paraglide-next-i18n",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-next/assets/next-logo.svg",
+	"gallery": [
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-next/assets/og.png"
+	],
+	"displayName": {
+		"en": "Paraglide-Next"
+	},
+	"description": {
+		"en": "A NextJS integration for ParaglideJS, providing you with everything you need for i18n routing"
+	},
+	"pages": {
+		"/": "./inlang/source-code/paraglide/paraglide-next/README.md",
+		"/changelog": "./inlang/source-code/paraglide/paraglide-next/CHANGELOG.md"
+	},
+	"keywords": [
+		"paraglide js",
+		"libraries",
+		"website",
+		"developer",
+		"paraglide",
+		"i18n",
+		"library",
+		"localization",
+		"sdk",
+		"sdk-js",
+		"next",
+		"next-js",
+		"react",
+		"vercel",
+		"vite",
+		"javascript",
+		"typescript",
+		"inlang"
+	],
+	"recommends": ["m/reootnfj", "m/632iow21", "m/r7kp499g", "m/teldgniy"],
+	"publisherName": "inlang",
+	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"license": "Apache-2.0",
+	"pricing": "Free"
+}

@@ -4,10 +4,10 @@
 	"private": true,
 	"scripts": {
 		"dev": "vite",
-		"build": "paraglide-js compile --project ../../../project.inlang && vite build -- --max_old_space_size=1200000",
+		"build": "vite build -- --max_old_space_size=1200000 && tsc --noEmit",
 		"production": "NODE_ENV=production tsx ./src/server/main.ts",
 		"---- TEST ----------------------------------------------------------": "",
-		"test": "paraglide-js compile --project ../../../project.inlang && tsc --noEmit",
+		"test": "paraglide-js compile --project ../../../project.inlang",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
@@ -16,9 +16,10 @@
 		"node": ">=18.0.0"
 	},
 	"dependencies": {
+		"@inlang/settings-component": "^1.0.0",
+		"@isomorphic-git/cors-proxy": "^2.7.1",
 		"@lix-js/client": "workspace:*",
 		"@lix-js/fs": "workspace:*",
-		"@lix-js/server": "workspace:*",
 		"@sentry/browser": "^7.27.0",
 		"@sentry/node": "^7.47.0",
 		"@sentry/tracing": "^7.47.0",
@@ -74,6 +75,7 @@
 		"@inlang/marketplace-manifest": "workspace:*",
 		"@inlang/marketplace-registry": "workspace:*",
 		"@inlang/paraglide-js": "workspace:*",
+		"@inlang/paraglide-vite": "workspace:*",
 		"@inlang/result": "workspace:*",
 		"@inlang/rpc": "workspace:*",
 		"@inlang/sdk": "workspace:*",

@@ -259,7 +259,7 @@ export function PatternEditor(props: {
 		const { rpc } = await import("@inlang/rpc")
 		const translation = await rpc.machineTranslateMessage({
 			message: newMessage,
-			sourceLanguageTag: project()!.settings()!.sourceLanguageTag!,
+			sourceLanguageTag: sourceLanguageTag(),
 			targetLanguageTags: [props.languageTag],
 		})
 
@@ -363,7 +363,7 @@ export function PatternEditor(props: {
 							{props.languageTag}
 						</p>
 					</div>
-					{project()?.settings()?.sourceLanguageTag === props.languageTag && (
+					{sourceLanguageTag() === props.languageTag && (
 						<sl-badge prop:variant="neutral">ref</sl-badge>
 					)}
 				</div>

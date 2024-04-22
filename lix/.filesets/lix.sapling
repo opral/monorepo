@@ -7,10 +7,10 @@ description: This is for focussing on lix, use inlang or fink profiles for runni
 [include]
 lix
 .changeset
-.filesets
 .github
-
 .gitignore
+.eslintrc.json
+.prettierrc.json
 
 ; inlang/source-code/tsconfig.base.json
 ; inlang/source-code/env-variables; 

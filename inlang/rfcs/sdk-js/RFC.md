@@ -1,4 +1,4 @@
-# RFC for `@inlang/sdk-js`
+# RFC for `@inlang/sdk`
 
 This package will provide an SDK on top of inlang for different frameworks and meta-frameworks.
 The RFC is the first draft on how this could look like.

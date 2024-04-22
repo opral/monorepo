@@ -14,8 +14,9 @@
 	"description": {
 		"en": "Visualize, edit & lint translated strings at a glance via Inline Decorations & Hover Support, and extract new strings with a single click."
 	},
-	"readme": {
-		"en": "./inlang/source-code/ide-extension/MARKETPLACE.md"
+	"pages": {
+		"/": "./inlang/source-code/ide-extension/MARKETPLACE.md",
+		"/changelog": "./inlang/source-code/ide-extension/CHANGELOG.md"
 	},
 	"keywords": [
 		"apps",

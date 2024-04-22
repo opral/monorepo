@@ -16,9 +16,12 @@ export interface ProjectViewNode {
 	path: string
 	isSelected: boolean
 	collapsibleState: vscode.TreeItemCollapsibleState
+	context: vscode.ExtensionContext
 }
 
-export function createProjectViewNodes(): ProjectViewNode[] {
+export function createProjectViewNodes(args: {
+	context: vscode.ExtensionContext
+}): ProjectViewNode[] {
 	const projectsInWorkspace = state().projectsInWorkspace
 
 	if (!projectsInWorkspace) {
@@ -34,6 +37,7 @@ export function createProjectViewNodes(): ProjectViewNode[] {
 				path: "",
 				isSelected: false,
 				collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+				context: args.context,
 			} as ProjectViewNode
 		}
 
@@ -45,6 +49,7 @@ export function createProjectViewNodes(): ProjectViewNode[] {
 			path: project.projectPath,
 			isSelected: project.projectPath === state().selectedProjectPath,
 			collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+			context: args.context,
 		} as ProjectViewNode
 	})
 
@@ -62,7 +67,7 @@ export function getTreeItem(args: {
 		iconPath: args.element.isSelected
 			? new vscode.ThemeIcon("pass-filled", new vscode.ThemeColor("sideBar.foreground"))
 			: new vscode.ThemeIcon("circle-large-outline", new vscode.ThemeColor("sideBar.foreground")),
-		contextValue: "projectViewNode",
+		contextValue: args.element.isSelected ? "projectViewNodeSelected" : "projectViewNode",
 		command: {
 			command: "sherlock.openProject",
 			title: "Open File",
@@ -133,11 +138,12 @@ export async function handleTreeSelection(args: {
 export function createTreeDataProvider(args: {
 	nodeishFs: NodeishFilesystem
 	workspaceFolder: vscode.WorkspaceFolder
+	context: vscode.ExtensionContext
 }): vscode.TreeDataProvider<ProjectViewNode> {
 	return {
 		getTreeItem: (element: ProjectViewNode) =>
 			getTreeItem({ element, nodeishFs: args.nodeishFs, workspaceFolder: args.workspaceFolder }),
-		getChildren: () => createProjectViewNodes(),
+		getChildren: () => createProjectViewNodes({ context: args.context }),
 		onDidChangeTreeData: CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.event,
 	}
 }
@@ -150,6 +156,7 @@ export const projectView = async (args: {
 	const treeDataProvider = createTreeDataProvider({
 		nodeishFs: args.nodeishFs,
 		workspaceFolder: args.workspaceFolder,
+		context: args.context,
 	})
 
 	treeDataProvider.getChildren()

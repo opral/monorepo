@@ -1,4 +1,5 @@
 {
+	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "app.lokalise.i18nally",
 	"icon": "https://avatars.githubusercontent.com/u/14294501?s=200&v=4",
 	"gallery": [

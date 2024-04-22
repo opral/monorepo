@@ -1,5 +1,5 @@
 import { normalizePath, type NodeishFilesystem } from "@lix-js/fs"
-import { isAbsolutePath } from "./isAbsolutePath.js"
+import { isAbsolutePath } from "./validateProjectPath.js"
 
 /**
  * Wraps the nodeish filesystem subset with a function that intercepts paths

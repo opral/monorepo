@@ -1,4 +1,5 @@
 {
+	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "plugin.inlang.i18next",
 	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/plugins/i18next/assets/icon.png",
 	"displayName": {
@@ -7,8 +8,9 @@
 	"description": {
 		"en": "A plugin for inlang projects that works with i18next and reads + writes resources."
 	},
-	"readme": {
-		"en": "./inlang/source-code/plugins/i18next/README.md"
+	"pages": {
+		"/": "./inlang/source-code/plugins/i18next/README.md",
+		"/changelog": "./inlang/source-code/plugins/i18next/CHANGELOG.md"
 	},
 	"keywords": [
 		"i18next",

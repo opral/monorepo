@@ -99,12 +99,9 @@ vi.mock("@lix-js/client", () => ({
 	findRepoRoot: vi.fn(),
 }))
 
-beforeEach(() => {
-	// Reset all mocks before each test
-	vi.clearAllMocks()
-})
-
 describe("createProjectViewNodes", () => {
+	const mockContext = {} as vscode.ExtensionContext
+
 	beforeEach(() => {
 		vi.resetAllMocks()
 	})
@@ -123,7 +120,7 @@ describe("createProjectViewNodes", () => {
 			selectedProjectPath: "/path/to/project2",
 		})
 
-		const nodes = createProjectViewNodes()
+		const nodes = createProjectViewNodes({ context: mockContext })
 		expect(nodes.length).toBe(2)
 		expect(nodes[0]?.label).toBe("to/project1")
 		expect(nodes[1]?.isSelected).toBe(true)
@@ -135,7 +132,7 @@ describe("createProjectViewNodes", () => {
 			projectsInWorkspace: [],
 			selectedProjectPath: "/path/to/project2",
 		})
-		const nodes = createProjectViewNodes()
+		const nodes = createProjectViewNodes({ context: mockContext })
 		expect(nodes).toEqual([])
 	})
 
@@ -149,18 +146,21 @@ describe("createProjectViewNodes", () => {
 			],
 			selectedProjectPath: "/path/to/project2",
 		})
-		const nodes = createProjectViewNodes()
+		const nodes = createProjectViewNodes({ context: mockContext })
 		expect(nodes.some((node) => node.label === "")).toBe(true)
 	})
 })
 
 describe("getTreeItem", () => {
+	const mockContext = {} as vscode.ExtensionContext
+
 	it("should return a TreeItem for a given ProjectViewNode", () => {
 		const node: ProjectViewNode = {
 			label: "TestProject",
 			path: "/path/to/testproject",
 			isSelected: true,
 			collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+			context: mockContext,
 		}
 		const workspaceFolder = {
 			uri: {
@@ -179,12 +179,15 @@ describe("getTreeItem", () => {
 })
 
 describe("handleTreeSelection", () => {
+	const mockContext = {} as vscode.ExtensionContext
+
 	it("should handle tree selection and update state", async () => {
 		const selectedNode: ProjectViewNode = {
 			label: "SelectedProject",
 			path: "/path/to/selected",
 			isSelected: true,
 			collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+			context: mockContext,
 		}
 		const nodeishFs = {} as NodeishFilesystem
 		const workspaceFolder = {
@@ -213,6 +216,7 @@ describe("handleTreeSelection", () => {
 			path: "/path/to/selected",
 			isSelected: true,
 			collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+			context: mockContext,
 		}
 		const nodeishFs = {} as NodeishFilesystem
 		const workspaceFolder = {
@@ -236,11 +240,14 @@ describe("handleTreeSelection", () => {
 	})
 
 	it("should handle error when project loading fails", async () => {
+		const mockContext = {} as vscode.ExtensionContext
+
 		const selectedNode: ProjectViewNode = {
 			label: "selected/project.inlang",
 			path: "/path/to/selected/project.inlang",
 			isSelected: true,
 			collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+			context: mockContext,
 		}
 		const nodeishFs = {} as NodeishFilesystem
 		const workspaceFolder = {
@@ -262,6 +269,8 @@ describe("handleTreeSelection", () => {
 })
 
 describe("createTreeDataProvider", () => {
+	const mockContext = {} as vscode.ExtensionContext
+
 	it("should create a TreeDataProvider", () => {
 		const nodeishFs = {} as NodeishFilesystem
 		const workspaceFolder = {
@@ -269,7 +278,11 @@ describe("createTreeDataProvider", () => {
 				fsPath: "/path/to/workspace",
 			},
 		} as vscode.WorkspaceFolder
-		const treeDataProvider = createTreeDataProvider({ nodeishFs, workspaceFolder })
+		const treeDataProvider = createTreeDataProvider({
+			nodeishFs,
+			workspaceFolder,
+			context: mockContext,
+		})
 		expect(treeDataProvider).toBeDefined()
 		expect(treeDataProvider.getTreeItem).toBeInstanceOf(Function)
 		expect(treeDataProvider.getChildren).toBeInstanceOf(Function)

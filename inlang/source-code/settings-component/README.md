@@ -2,14 +2,14 @@
 
 This package provides the settings component for inlang-messages as a shared web-components that can used cross apps.
 
-### Read more
-https://github.com/opral/monorepo/issues/2251
-https://github.com/opral/monorepo/issues/2026
-https://github.com/opral/monorepo/issues/2250
-https://github.com/opral/monorepo/issues/2249
-
 ### Docs
 To open the docs please execute this on the root of the project.
 ```bash
 pnpm --filter @inlang/settings-component run storybook
 ```
+
+### Read more
+https://github.com/opral/monorepo/issues/2251
+https://github.com/opral/monorepo/issues/2026
+https://github.com/opral/monorepo/issues/2250
+https://github.com/opral/monorepo/issues/2249

@@ -1,5 +1,20 @@
 # @inlang/plugin-next-intl
 
+## 1.3.17
+
+### Patch Changes
+
+- Updated dependencies [d573ab8]
+  - @inlang/sdk@0.33.0
+
+## 1.3.16
+
+### Patch Changes
+
+- bc00427: fix typo
+- Updated dependencies [bc9875d]
+  - @inlang/sdk@0.32.0
+
 ## 1.3.15
 
 ### Patch Changes

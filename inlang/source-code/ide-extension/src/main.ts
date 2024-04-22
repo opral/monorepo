@@ -83,10 +83,15 @@ async function main(args: {
 
 		vscode.commands.executeCommand("setContext", "sherlock:hasProjectInWorkspace", true)
 
+		// Recommendation Banner
 		await recommendationBannerView(args)
+		// Project Listings
 		await projectView(args)
+		// Messages
 		await messageView(args)
+		// Errors
 		await errorView(args)
+		// Status Bar
 		await statusBar(args)
 
 		registerExtensionComponents(args)

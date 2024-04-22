@@ -1,5 +1,22 @@
 # @inlang/sdk
 
+## 0.33.0
+
+### Minor Changes
+
+- d573ab8: createNewProject()
+
+### Patch Changes
+
+- Updated dependencies [4941ca4]
+  - @lix-js/client@1.2.1
+
+## 0.32.0
+
+### Minor Changes
+
+- bc9875d: sdk multi-project test, MOCK_TRANSLATE_LOCAL for no server testing, inlang machine translate --nobar (-b) hides progressbar
+
 ## 0.31.0
 
 ### Minor Changes

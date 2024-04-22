@@ -1,4 +1,4 @@
-import { initState } from "@inlang/sdk-js/adapter-sveltekit/server"
+import { initState } from "@inlang/sdk/adapter-sveltekit/server"
 
 export const load = () => {
 	return { "page.server.ts": 1 }

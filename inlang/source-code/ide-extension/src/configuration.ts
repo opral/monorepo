@@ -10,6 +10,7 @@ import { copyErrorCommand } from "./commands/copyError.js"
 import { previewLanguageTagCommand } from "./commands/previewLanguageTagCommand.js"
 import { jumpToPositionCommand } from "./commands/jumpToPosition.js"
 import { machineTranslateMessageCommand } from "./commands/machineTranslate.js"
+import { openSettingsViewCommand } from "./commands/openSettingsView.js"
 
 export const CONFIGURATION = {
 	EVENTS: {
@@ -18,6 +19,7 @@ export const CONFIGURATION = {
 		ON_DID_PROJECT_TREE_VIEW_CHANGE: new EventEmitter<ProjectViewNode | undefined>(),
 		ON_DID_ERROR_TREE_VIEW_CHANGE: new EventEmitter<ErrorNode | undefined>(),
 		ON_DID_PREVIEW_LANGUAGE_TAG_CHANGE: new EventEmitter<string>(),
+		ON_DID_SETTINGS_VIEW_CHANGE: new EventEmitter<void>(),
 	},
 	COMMANDS: {
 		EDIT_MESSAGE: editMessageCommand,
@@ -27,6 +29,7 @@ export const CONFIGURATION = {
 		OPEN_IN_EDITOR: openInEditorCommand,
 		OPEN_PROJECT: openProjectCommand,
 		OPEN_SETTINGS_FILE: openSettingsFileCommand,
+		OPEN_SETTINGS_VIEW: openSettingsViewCommand,
 		COPY_ERROR: copyErrorCommand,
 		MACHINE_TRANSLATE_MESSAGE: machineTranslateMessageCommand,
 	},

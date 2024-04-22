@@ -1,4 +1,4 @@
-import { unified } from "unified"
+import { unified, type Plugin } from "unified"
 import remarkParse from "remark-parse"
 import remarkGfm from "remark-gfm"
 import remarkRehype from "remark-rehype"
@@ -10,14 +10,46 @@ import rehypeHighlight from "rehype-highlight"
 import rehypeAutolinkHeadings from "rehype-autolink-headings"
 import rehypeRewrite from "rehype-rewrite"
 import addClasses from "rehype-class-names"
+import remarkFrontmatter from "remark-frontmatter"
 import { rehypeAccessibleEmojis } from "rehype-accessible-emojis"
 import { preprocess } from "./preprocess.js"
+import { Type } from "@sinclair/typebox"
+import { Value } from "@sinclair/typebox/value"
+import yaml from "yaml"
+
+const customFrontmatterValidation: Plugin<any> = () => (node, file) => {
+	const Frontmatter = Type.Object({
+		title: Type.String(),
+		description: Type.String(),
+	})
+
+	// TODO: make this more robust
+	const frontmatterString =
+		(node as any).children.find((child: any) => child.type === "yaml")?.value || ""
+
+	const frontmatter = yaml.parse(frontmatterString)
+	if (frontmatter !== null) {
+		file.data.frontmatter = frontmatter
+	}
+
+	//check only if frontmatter exists
+	if (file.data.frontmatter) {
+		// check if type Frontmatter
+		if (Value.Check(Frontmatter, frontmatter)) {
+			// type is valid
+		} else {
+			throw new Error("Frontmatter is not valid")
+		}
+	}
+}
 
 /* Converts the markdown with remark and the html with rehype to be suitable for being rendered */
-export async function convert(markdown: string): Promise<string> {
+export async function convert(markdown: string): Promise<{ data: any; html: string }> {
 	const content = await unified()
 		/* @ts-ignore */
 		.use(remarkParse)
+		.use(remarkFrontmatter, ["yaml"])
+		.use(customFrontmatterValidation)
 		/* @ts-ignore */
 		.use(remarkGfm)
 		/* @ts-ignore */
@@ -153,9 +185,11 @@ export async function convert(markdown: string): Promise<string> {
 					node.tagName = "div"
 					node.children = []
 				} else if (
+					// external link with arrow icon
 					node.tagName === "a" &&
 					node.properties.href &&
 					node.properties.href.startsWith("http") &&
+					!node.properties.href.includes("inlang.com") &&
 					node.children[0].tagName !== "img"
 				) {
 					;(node.children = [
@@ -172,6 +206,16 @@ export async function convert(markdown: string): Promise<string> {
 					]),
 						(node.properties.target = "_blank")
 				} else if (
+					// external link to inlang.com (we need that to have working links in github)
+					node.tagName === "a" &&
+					node.properties.href &&
+					node.properties.href.startsWith("http") &&
+					node.properties.href.includes("inlang.com") &&
+					node.children[0].tagName !== "img"
+				) {
+					//node.properties.target = "_blank"
+				} else if (
+					// external link with image (no arrow icon)
 					node.tagName === "a" &&
 					node.properties.href &&
 					node.properties.href.startsWith("http") &&
@@ -187,6 +231,9 @@ export async function convert(markdown: string): Promise<string> {
 		.use(rehypeStringify)
 		.process(preprocess(markdown))
 
-	return String(`<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark-dimmed.min.css">
-	${content}`)
+	return {
+		data: content.data || {},
+		html: String(`<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark-dimmed.min.css">
+	${content}`),
+	}
 }

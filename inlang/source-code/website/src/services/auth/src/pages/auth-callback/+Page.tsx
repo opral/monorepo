@@ -1,9 +1,15 @@
 import { createEffect, createResource, Match, Switch } from "solid-js"
 import MaterialSymbolsCheckCircleRounded from "~icons/material-symbols/check-circle-rounded"
 import MaterialSymbolsArrowBackRounded from "~icons/material-symbols/arrow-back-rounded"
-import { browserAuth } from "@lix-js/server"
+import { getAuthClient } from "@lix-js/client"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
+import { publicEnv } from "@inlang/env-variables"
 
+const browserAuth = getAuthClient({
+	gitHubProxyBaseUrl: publicEnv.PUBLIC_GIT_PROXY_BASE_URL,
+	githubAppName: publicEnv.PUBLIC_LIX_GITHUB_APP_NAME,
+	githubAppClientId: publicEnv.PUBLIC_LIX_GITHUB_APP_CLIENT_ID,
+})
 /**
  * The GitHub web application flow redirects to this page.
  *

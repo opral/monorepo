@@ -5,15 +5,21 @@ import { TwLitElement } from "../common/TwLitElement.js"
 import { z } from "zod"
 import "./InlangUninstall"
 import "./InlangInstall"
-import { createNodeishMemoryFs, openRepository } from "@lix-js/client"
+import { getAuthClient, createNodeishMemoryFs, openRepository } from "@lix-js/client"
 import { listProjects, isValidLanguageTag } from "@inlang/sdk"
 import { publicEnv } from "@inlang/env-variables"
-import { browserAuth, getUser } from "@lix-js/server"
+
 import { tryCatch } from "@inlang/result"
 import { registry } from "@inlang/marketplace-registry"
 import type { MarketplaceManifest } from "../../../versioned-interfaces/marketplace-manifest/dist/interface.js"
 import { posthog } from "posthog-js"
 import { detectJsonFormatting } from "@inlang/detect-json-formatting"
+
+const browserAuth = getAuthClient({
+	gitHubProxyBaseUrl: publicEnv.PUBLIC_GIT_PROXY_BASE_URL,
+	githubAppName: publicEnv.PUBLIC_LIX_GITHUB_APP_NAME,
+	githubAppClientId: publicEnv.PUBLIC_LIX_GITHUB_APP_CLIENT_ID,
+})
 
 type ManifestWithVersion = MarketplaceManifest & { version: string }
 
@@ -73,15 +79,13 @@ export class InlangManage extends TwLitElement {
 	projectDropdown: NodeListOf<Element> | undefined
 
 	async projectHandler() {
-		const repo = await openRepository(
-			`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${this.url.repo}`,
-			{
+		let repo: Repository
+		try {
+			repo = await openRepository(`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${this.url.repo}`, {
 				nodeishFs: createNodeishMemoryFs(),
 				branch: this.url.branch ? this.url.branch : undefined,
-			}
-		)
-
-		if (repo.errors().length > 0) {
+			})
+		} catch (e) {
 			this.projects = "no-access"
 			return
 		}
@@ -230,7 +234,7 @@ export class InlangManage extends TwLitElement {
 
 		this.url.repo && this.projectHandler()
 
-		const user = await getUser().catch(() => {
+		const user = await browserAuth.getUser().catch(() => {
 			this.user = undefined
 		})
 		if (user) {
@@ -261,7 +265,7 @@ export class InlangManage extends TwLitElement {
 	}
 
 	async removeLanguageTag(languageTag: string) {
-		if (typeof this.user === "undefined") return
+		if (typeof this.user === "undefined" || this.user === "load") return
 
 		this.languageTags = this.languageTags?.map((tag) => {
 			if (tag.name === languageTag) {
@@ -301,8 +305,8 @@ export class InlangManage extends TwLitElement {
 
 		await repo.nodeishFs.writeFile(`.${this.url.project}/settings.json`, generatedProject)
 
-		await repo.add({
-			filepath: `${this.url.project?.slice(1)}/settings.json`,
+		const filesWithUncommittedChanges = await repo.statusList({
+			filter: (f: any) => f.endsWith(".json"),
 		})
 
 		await repo.commit({
@@ -311,6 +315,7 @@ export class InlangManage extends TwLitElement {
 				name: this.user.username,
 				email: this.user.email,
 			},
+			include: filesWithUncommittedChanges.map((f) => f[0]),
 		})
 
 		const result = await repo.push()
@@ -328,7 +333,7 @@ export class InlangManage extends TwLitElement {
 	async addLanguageTag() {
 		if (this.newLanguageTag === "") return
 
-		if (typeof this.user === "undefined") return
+		if (typeof this.user === "undefined" || this.user === "load") return
 
 		this.newLanguageTagLoading = true
 
@@ -361,8 +366,8 @@ export class InlangManage extends TwLitElement {
 
 		await repo.nodeishFs.writeFile(`.${this.url.project}/settings.json`, generatedProject)
 
-		await repo.add({
-			filepath: `${this.url.project?.slice(1)}/settings.json`,
+		const filesWithUncommittedChanges = await repo.statusList({
+			filter: (f: any) => f.endsWith(".json"),
 		})
 
 		await repo.commit({
@@ -371,6 +376,7 @@ export class InlangManage extends TwLitElement {
 				name: this.user.username,
 				email: this.user.email,
 			},
+			include: filesWithUncommittedChanges.map((f) => f[0]),
 		})
 
 		const result = await repo.push()
@@ -699,7 +705,7 @@ export class InlangManage extends TwLitElement {
 										To access your projects, please enter the URL of your GitHub repository.
 									</p>
 									<div
-										disabled=${this.url.repo}
+										disabled=${this.url?.repo === undefined}
 										class=${`px-1 gap-2 relative max-w-lg z-10 flex items-center w-full border bg-white rounded-lg transition-all relative ${
 											this.url.repo ? "cursor-not-allowed" : ""
 										} ${
@@ -841,8 +847,7 @@ export class InlangManage extends TwLitElement {
 										</a>
 									</div>
 							  </div>`
-							: this.projects !== "load" &&
-							  this.projects !== "no-access" &&
+							: this.projects !== "no-access" &&
 							  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 							  this.projects!.length === 0
 							? html`<div class="flex flex-col gap-0.5 mt-4">
@@ -868,7 +873,6 @@ export class InlangManage extends TwLitElement {
 									</div>
 							  </div>`
 							: !this.url.project &&
-							  this.projects !== "load" &&
 							  this.projects !== "no-access" &&
 							  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 							  this.projects!.length > 0

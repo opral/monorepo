@@ -41,6 +41,10 @@ import "@shoelace-style/shoelace/dist/components/button-group/button-group.js"
 import "@shoelace-style/shoelace/dist/components/spinner/spinner.js"
 import "@shoelace-style/shoelace/dist/components/select/select.js"
 import "@shoelace-style/shoelace/dist/components/option/option.js"
+// import inlang components
+import "@inlang/settings-component"
+import { setBasePath } from "@shoelace-style/shoelace/dist/utilities/base-path.js"
+setBasePath("./../../node_modules/@shoelace-style/shoelace/dist")
 
 // enable error logging via sentry in production
 if (import.meta.env.PROD) {

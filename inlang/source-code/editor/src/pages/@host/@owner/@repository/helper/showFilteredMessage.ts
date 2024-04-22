@@ -4,7 +4,7 @@ export const showFilteredMessage = (
 	message: Message | undefined,
 	lintReports: readonly MessageLintReport[] | undefined
 ) => {
-	const { filteredMessageLintRules, filteredLanguageTags, filteredIds, textSearch, project } =
+	const { filteredMessageLintRules, filteredLanguageTags, filteredIds, textSearch, languageTags } =
 		useEditorState()
 
 	// Early exit if variants are empty
@@ -13,9 +13,7 @@ export const showFilteredMessage = (
 	}
 
 	const languageTagsSet = new Set(
-		filteredLanguageTags().length === 0
-			? project()?.settings()?.languageTags
-			: filteredLanguageTags()
+		filteredLanguageTags().length === 0 ? languageTags() : filteredLanguageTags()
 	)
 	const lintRulesSet = new Set(filteredMessageLintRules())
 	const searchLower = textSearch().toLowerCase()

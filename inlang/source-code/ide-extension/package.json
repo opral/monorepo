@@ -10,7 +10,7 @@
 		"url": "https://github.com/opral/monorepo.git"
 	},
 	"icon": "assets/sherlock-logo.png",
-	"version": "1.36.8",
+	"version": "1.39.3",
 	"engines": {
 		"vscode": "^1.84.2"
 	},
@@ -87,6 +87,11 @@
 				"icon": "$(go-to-file)"
 			},
 			{
+				"command": "sherlock.openSettingsView",
+				"title": "Open settings view",
+				"icon": "$(settings-gear)"
+			},
+			{
 				"command": "sherlock.copyError",
 				"title": "Copy Error",
 				"icon": "$(copy)"
@@ -95,13 +100,13 @@
 		"menus": {
 			"view/item/context": [
 				{
-					"when": "view == projectView && viewItem == projectViewNode",
-					"command": "sherlock.openProject",
+					"when": "view == projectView",
+					"command": "sherlock.openSettingsFile",
 					"group": "navigation"
 				},
 				{
-					"when": "view == projectView && viewItem == projectViewNode",
-					"command": "sherlock.openSettingsFile",
+					"when": "view == projectView && viewItem == projectViewNodeSelected",
+					"command": "sherlock.openSettingsView",
 					"group": "inline"
 				},
 				{
@@ -138,14 +143,14 @@
 	},
 	"scripts": {
 		"check": "tsc --noEmit",
-		"build": "node ./build.js",
+		"build": "tsc --noEmit && node ./build.js",
 		"dev": "DEV=true node ./build.js",
 		"package": "pnpm vsce package --no-dependencies",
 		"publish": "pnpm vsce publish --no-dependencies",
 		"vscode:prepublish": "npm run build",
 		"---- TEST ----------------------------------------------------------": "",
 		"pretest": "node ./build.js",
-		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"test": "vitest run --passWithNoTests --coverage",
 		"test:e2e": "npm run pretest && wdio run ./test/wdio.conf.ts",
 		"---- LINT ----------------------------------------------------------": "",
 		"lint": "eslint ./src --fix",
@@ -157,11 +162,13 @@
 		"@inlang/result": "workspace:*",
 		"@inlang/rpc": "workspace:*",
 		"@inlang/sdk": "workspace:*",
+		"@inlang/settings-component": "^1.0.2",
 		"@inlang/telemetry": "workspace:*",
 		"@lix-js/client": "workspace:*",
 		"@lix-js/fs": "workspace:*",
 		"@vitest/coverage-v8": "0.34.6",
 		"https-proxy-agent": "7.0.2",
+		"lit-html": "^3.1.2",
 		"require-from-string": "^2.0.2",
 		"throttle-debounce": "^5.0.0",
 		"vitest": "0.34.6"

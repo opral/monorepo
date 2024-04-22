@@ -8,7 +8,10 @@ import { redirect } from "vike/abort"
 
 const repositoryRoot = import.meta.url.slice(0, import.meta.url.lastIndexOf("inlang/source-code"))
 
-export default async function onBeforeRender(pageContext: PageContext) {
+// We don't need the return type so we dont define the return type further - this function is only used by vite internaly
+export default async function onBeforeRender(
+	pageContext: PageContext
+): Promise<{ pageContext: any }> {
 	const item = registry.find(
 		(item: any) => item.uniqueID === pageContext.routeParams.uid
 	) as MarketplaceManifest & { uniqueID: string }
@@ -23,9 +26,11 @@ export default async function onBeforeRender(pageContext: PageContext) {
 		return typeof item.readme === "object" ? item.readme.en : item.readme
 	}
 
-	const text = await (readme().includes("http")
-		? (await fetch(readme())).text()
-		: await fs.readFile(new URL(readme(), repositoryRoot), "utf-8"))
+	if (!readme()) throw redirect("/not-found")
+
+	const text = await (readme()!.includes("http")
+		? (await fetch(readme()!)).text()
+		: await fs.readFile(new URL(readme()!, repositoryRoot), "utf-8"))
 
 	const markdown = await convert(text)
 
@@ -42,7 +47,7 @@ export default async function onBeforeRender(pageContext: PageContext) {
 	return {
 		pageContext: {
 			pageProps: {
-				markdown: markdown,
+				markdown: markdown.html,
 				manifest: item,
 				recommends: recommends,
 			} satisfies PageProps,

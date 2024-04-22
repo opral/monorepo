@@ -14,3 +14,4 @@ packages:
   - 'inlang/source-code/message-lint-rules/*'
   - 'inlang/source-code/versioned-interfaces/*'
   - 'inlang/source-code/sdk/load-test'
+  - 'inlang/source-code/sdk/multi-project-test'

@@ -11,7 +11,6 @@ import type {
 import type { ImportFunction } from "./resolve-modules/index.js"
 import type { InlangModule } from "@inlang/module"
 import {
-	LoadProjectInvalidArgument,
 	ProjectSettingsFileJSONSyntaxError,
 	ProjectSettingsFileNotFoundError,
 	ProjectSettingsInvalidError,
@@ -175,7 +174,7 @@ it("should throw if a project (path) does not have a name", async () => {
 			_import,
 		})
 	)
-	expect(project.error).toBeInstanceOf(LoadProjectInvalidArgument)
+	expect(project?.error?.message).toMatch('Expected a path ending in "{name}.inlang" but received ')
 })
 
 it("should throw if a project path does not end with .inlang", async () => {
@@ -195,7 +194,9 @@ it("should throw if a project path does not end with .inlang", async () => {
 				_import,
 			})
 		)
-		expect(project.error).toBeInstanceOf(LoadProjectInvalidArgument)
+		expect(project.error?.message).toMatch(
+			'Expected a path ending in "{name}.inlang" but received '
+		)
 	}
 })
 
@@ -210,7 +211,7 @@ describe("initialization", () => {
 				_import,
 			})
 		)
-		expect(result.error).toBeInstanceOf(LoadProjectInvalidArgument)
+		expect(result.error?.message).toBe('Expected an absolute path but received "relative/path".')
 		expect(result.data).toBeUndefined()
 	})
 

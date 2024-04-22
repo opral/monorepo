@@ -1,12 +1,16 @@
 import { css } from "lit"
 
+/*
+* This gets into the published component
+*/
+
 export const baseStyling = css`
 	:host {
 		font-family: "Inter", sans-serif;
 
 		/*
-   * Color Primitives
-   */
+		* Color Primitives
+		*/
 
 		/* Gray */
 		--sl-color-gray-50: hsl(0 0% 97.5%);

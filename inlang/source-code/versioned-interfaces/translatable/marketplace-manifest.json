@@ -1,4 +1,5 @@
 {
+	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "library.inlang.translatable",
 	"icon": "https://images.emojiterra.com/google/noto-emoji/unicode-15/color/svg/1f310.svg",
 	"displayName": {
@@ -7,8 +8,8 @@
 	"description": {
 		"en": "This library allows you to add translation logic to your application without having to rewrite large parts."
 	},
-	"readme": {
-		"en": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/versioned-interfaces/translatable/README.md"
+	"pages": {
+		"/": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/versioned-interfaces/translatable/README.md"
 	},
 	"keywords": [
 		"libraries",

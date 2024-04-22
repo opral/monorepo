@@ -1,4 +1,5 @@
 {
+	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "plugin.inlang.nextIntl",
 	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/plugins/next-intl/assets/plugin-next-intl-logo.png",
 	"displayName": {
@@ -7,8 +8,9 @@
 	"description": {
 		"en": "A plugin to make next-intl ecosystem compatible with inlang"
 	},
-	"readme": {
-		"en": "./inlang/source-code/plugins/next-intl/README.md"
+	"pages": {
+		"/": "./inlang/source-code/plugins/next-intl/README.md",
+		"/changelog": "./inlang/source-code/plugins/next-intl/CHANGELOG.md"
 	},
 	"keywords": [
 		"next-intl",

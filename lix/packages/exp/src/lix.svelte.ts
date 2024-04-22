@@ -1,5 +1,4 @@
 import { openRepository } from '@lix-js/client' // '/Users/jan/Dev/inlang/inlang/lix/source-code/client/src/index.ts'
-// import { browserAuth } from '@lix-js/server' // auth client should be part of lix client
 // rememeber: what if the changes come from the filesystme form other process, only reacting in here does not help there
 const files = new Map()
 

@@ -1,4 +1,5 @@
 {
+	"$schema": "https://inlang.com/schema/marketplace-manifest",
 	"id": "library.amannn.nextintl",
 	"icon": "https://emojis.wiki/thumbs/emojis/globe-with-meridians.webp",
 	"gallery": ["https://github.com/amannn/next-intl/blob/main/media/logo.png?raw=true"],

@@ -103,6 +103,13 @@ export function createMessageWebviewProvider(args: {
 				})
 			)
 
+			// when settings view changes, update webview
+			args.context.subscriptions.push(
+				CONFIGURATION.EVENTS.ON_DID_SETTINGS_VIEW_CHANGE.event(() => {
+					updateMessages()
+				})
+			)
+
 			const updateWebviewContent = async () => {
 				const activeEditor = vscode.window.activeTextEditor
 				const fileContent = activeEditor ? activeEditor.document.getText() : ""

@@ -1,4 +1,3 @@
-import type { PrivateEnvVariables } from "@inlang/env-variables"
 import { CompactEncrypt, compactDecrypt, base64url } from "jose"
 
 // enc = encoding
@@ -16,7 +15,7 @@ const alg = "dir"
  */
 export async function encryptAccessToken(args: {
 	accessToken: string
-	JWE_SECRET_KEY: PrivateEnvVariables["JWE_SECRET"]
+	JWE_SECRET_KEY: string
 }): Promise<string> {
 	try {
 		const secret = base64url.decode(args.JWE_SECRET_KEY)
@@ -37,7 +36,7 @@ export async function encryptAccessToken(args: {
  */
 export async function decryptAccessToken(args: {
 	jwe: string
-	JWE_SECRET_KEY: PrivateEnvVariables["JWE_SECRET"]
+	JWE_SECRET_KEY: string
 }): Promise<string> {
 	const { plaintext } = await compactDecrypt(args.jwe, base64url.decode(args.JWE_SECRET_KEY))
 	return new TextDecoder().decode(plaintext)

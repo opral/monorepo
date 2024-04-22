@@ -41,7 +41,7 @@ const getColor = (unformattedColor: string) => chroma(unformattedColor)
 
 const getPalette = (unformattedColor: string) => {
 	const color = getColor(unformattedColor)
-	const colors = chroma.scale(["white", color, "black"]).mode("lrgb")
+	const colors = chroma.scale(["white", color, "black"]).domain([0, 0.6, 1]).mode("lrgb")
 	const palette: Record<number, string> = {}
 
 	// Create 50

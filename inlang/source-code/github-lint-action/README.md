@@ -22,7 +22,23 @@ https://github.com/opral/monorepo/assets/59048346/99049121-11db-4672-a7a8-e0d606
 
 ## Getting Started
 
-Please ensure you have set up an [inlang project](https://inlang.com//documentation/concept/project) with [lint rules](https://inlang.com/c/lint-rules) in your repository.
+**Please make sure that:**
+- you have set up an [inlang project](https://inlang.com//documentation/concept/project) with [lint rules](https://inlang.com/c/lint-rules) in your repository
+- you have activated actions for your repository:
+
+1. On GitHub.com, navigate to the main page of the repository
+2. Click **Actions** tab
+3. Click the button **Enable Actions on this repository**
+
+- actions and workflows are allowed in your repository:
+
+1. On GitHub.com, navigate to the main page of the repository
+2. Click **Settings** tab
+3. Click **Actions** in the left sidebar, then click **General**
+4. Select the desired option (e.g. **Allow all actions and workflows**) under **Actions permissions**
+5. Click **Save** to apply the settings
+
+<br>
 
 Add the following workflow file to your repository in this path `.github/workflows/ninja_i18n.yml`
 

@@ -116,9 +116,10 @@ export class DefaultObjectInput extends LitElement {
 			}
 			this.value[this._inputKey as any] = this._inputValue
 			this.handleInlangProjectChange(this.value, this.property, this.moduleId)
+			this._inputValue = "null"
 			this._inputValue = undefined
+			this._inputKey = "null"
 			this._inputKey = undefined
-			this.requestUpdate()
 		}
 	}
 
@@ -126,26 +127,17 @@ export class DefaultObjectInput extends LitElement {
 		if (this.value) {
 			delete this.value[key]
 			this.handleInlangProjectChange(this.value, this.property, this.moduleId)
+			this._inputValue = "null"
 			this._inputValue = undefined
+			this._inputKey = "null"
 			this._inputKey = undefined
-			this.requestUpdate()
 		}
 	}
 
 	override render() {
 		return html` <div part="property" class="property">
 			<field-header
-				.fieldTitle=${JSON.stringify(() => {
-					if (this.withTitle) {
-						if (this._title) {
-							return this._title
-						} else {
-							return this.property
-						}
-					} else {
-						return undefined
-					}
-				})}
+				.fieldTitle=${this.withTitle ? (this._title ? this._title : this.property) : undefined}
 				.description=${this.withDescription ? this._description : ``}
 				.optional=${this.required ? false : true}
 				exportparts="property-title, property-paragraph"
@@ -227,6 +219,7 @@ export class DefaultObjectInput extends LitElement {
 				>
 				</sl-input>
 				<sl-button
+					exportparts="base:button"
 					size="small"
 					variant="neutral"
 					@click=${() => {

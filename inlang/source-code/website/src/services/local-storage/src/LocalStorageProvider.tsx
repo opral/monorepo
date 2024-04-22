@@ -2,9 +2,15 @@ import { createContext, type JSXElement, onCleanup, onMount, useContext } from "
 import { createStore, reconcile, type SetStoreFunction } from "solid-js/store"
 import { defaultLocalStorage, type LocalStorageSchema } from "./schema.js"
 import { telemetryBrowser } from "@inlang/telemetry"
-import { browserAuth } from "@lix-js/server"
+import { getAuthClient } from "@lix-js/client"
 import { onSignOut } from "#src/services/auth/index.js"
 import { publicEnv } from "@inlang/env-variables"
+
+const browserAuth = getAuthClient({
+	gitHubProxyBaseUrl: publicEnv.PUBLIC_GIT_PROXY_BASE_URL,
+	githubAppName: publicEnv.PUBLIC_LIX_GITHUB_APP_NAME,
+	githubAppClientId: publicEnv.PUBLIC_LIX_GITHUB_APP_CLIENT_ID,
+})
 
 const LocalStorageContext = createContext()
 

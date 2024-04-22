@@ -70,23 +70,23 @@ export const ListHeader = () => {
 			<div class="font-medium text-on-surface">{messageCount() + " Messages"}</div>
 			<div class="flex flex-wrap gap-2">
 				<For each={Object.keys(getLintSummary()) as MessageLintRule["id"][]}>
-					{(lintRule) => (
-						<Show when={getLintSummary()[lintRule] !== 0}>
+					{(lintRuleId) => (
+						<Show when={getLintSummary()[lintRuleId] !== 0}>
 							<TourHintWrapper
 								currentId="missing-translation-rule"
 								position="bottom-right"
 								offset={{ x: 0, y: 40 }}
 								isVisible={
-									lintRule === "messageLintRule.inlang.missingTranslation" &&
+									lintRuleId === "messageLintRule.inlang.missingTranslation" &&
 									tourStep() === "missing-translation-rule"
 								}
 							>
 								<sl-tooltip
 									prop:content={
-										typeof getLintRule(lintRule)?.description === "object"
+										typeof getLintRule(lintRuleId)?.description === "object"
 											? // @ts-ignore
-											  getLintRule(lintRule)?.description.en
-											: getLintRule(lintRule)?.description
+											  getLintRule(lintRuleId)?.description.en
+											: getLintRule(lintRuleId)?.description
 									}
 									prop:placement="bottom"
 									prop:trigger="hover"
@@ -96,19 +96,19 @@ export const ListHeader = () => {
 									<sl-button
 										prop:size="small"
 										class={
-											filteredMessageLintRules()?.includes(lintRule || "")
-												? getLintRule(lintRule)!.level === "warning"
+											filteredMessageLintRules()?.includes(lintRuleId || "")
+												? getLintRule(lintRuleId)!.level === "warning"
 													? "ring-warning/20 ring-1 rounded animate-blendIn"
 													: "ring-danger/20 ring-1 rounded animate-blendIn"
 												: "animate-blendIn"
 										}
 										onClick={() => {
-											if (filteredMessageLintRules().includes(lintRule)) {
+											if (filteredMessageLintRules().includes(lintRuleId)) {
 												setFilteredMessageLintRules(
-													filteredMessageLintRules().filter((id) => id !== lintRule)
+													filteredMessageLintRules().filter((id) => id !== lintRuleId)
 												)
 											} else {
-												setFilteredMessageLintRules([lintRule])
+												setFilteredMessageLintRules([lintRuleId])
 												setTourStep("textfield")
 											}
 										}}
@@ -116,7 +116,7 @@ export const ListHeader = () => {
 										<div
 											class="flex gap-2 items-center h-7"
 											id={
-												lintRule === "messageLintRule.inlang.missingTranslation"
+												lintRuleId === "messageLintRule.inlang.missingTranslation"
 													? "missingTranslation-summary"
 													: "lint-summary"
 											}
@@ -124,20 +124,20 @@ export const ListHeader = () => {
 											<div class="-ml-[4px] h-5 rounded">
 												<div
 													class={
-														getLintRule(lintRule)?.level === "warning"
+														getLintRule(lintRuleId)?.level === "warning"
 															? " text-focus-warning bg-warning/20 h-full px-2 rounded flex items-center justify-center"
 															: "text-focus-danger bg-danger/20 h-full px-2 rounded flex items-center justify-center"
 													}
 												>
-													{getLintSummary()[lintRule]}
+													{getLintSummary()[lintRuleId]}
 												</div>
 											</div>
 
 											<div class="text-xs text-on-surface-variant font-medium">
-												{typeof getLintRule(lintRule)?.displayName === "object"
+												{typeof getLintRule(lintRuleId)?.displayName === "object"
 													? // @ts-ignore
-													  getLintRule(lintRule)?.displayName.en
-													: getLintRule(lintRule)?.displayName}
+													  getLintRule(lintRuleId)?.displayName.en
+													: getLintRule(lintRuleId)?.displayName}
 											</div>
 										</div>
 									</sl-button>

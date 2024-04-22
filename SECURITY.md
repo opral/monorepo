@@ -2,4 +2,4 @@
 
 ## Reporting a Vulnerability
 
-Write `hello@inlang.com` to report a vulnerability. 
+Write `hello@opral.com` to report a vulnerability. 

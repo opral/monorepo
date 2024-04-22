@@ -4,10 +4,10 @@
 	"private": true,
 	"scripts": {
 		"dev": "vite",
-		"build": "node ./scripts/generateSitemap.js && npx @inlang/cli machine translate -f --project ../../../project.inlang --targetLanguageTags fr,it,pt-BR,sk,zh && vite build",
+		"build": "node ./scripts/generateSitemap.js && npx @inlang/cli machine translate -f --project ../../../project.inlang --targetLanguageTags fr,it,pt-BR,sk,zh && vite build && tsc --noEmit",
 		"production": "NODE_ENV=production tsx ./src/server/main.ts ",
 		"---- TEST ----------------------------------------------------------": "",
-		"test": "paraglide-js compile --project ../../../project.inlang && npx @inlang/cli lint --project ../../../project.inlang --languageTags de,en && tsc --noEmit ",
+		"test": "vitest run --passWithNoTests && paraglide-js compile --project ../../../project.inlang && npx @inlang/cli lint --project ../../../project.inlang --languageTags de,en ",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
@@ -18,7 +18,6 @@
 	"dependencies": {
 		"@lix-js/client": "workspace:*",
 		"@lix-js/fs": "workspace:*",
-		"@lix-js/server": "workspace:*",
 		"@sentry/browser": "^7.27.0",
 		"@sentry/node": "^7.47.0",
 		"@sentry/tracing": "^7.47.0",
@@ -64,7 +63,7 @@
 		"@inlang/marketplace-manifest": "workspace:*",
 		"@inlang/marketplace-registry": "workspace:*",
 		"@inlang/paraglide-js": "workspace:*",
-		"@inlang/paraglide-js-adapter-vite": "workspace:*",
+		"@inlang/paraglide-vite": "workspace:*",
 		"@inlang/result": "workspace:*",
 		"@inlang/rpc": "workspace:*",
 		"@inlang/sdk": "workspace:*",
@@ -90,7 +89,7 @@
 		"vike": "0.4.156",
 		"vite": "4.5.0",
 		"vite-plugin-solid": "2.7.0",
-		"vitest": "0.34.3"
+		"vitest": "0.34.6"
 	},
 	"peerDependencies": {
 		"express": "^4.18.2"

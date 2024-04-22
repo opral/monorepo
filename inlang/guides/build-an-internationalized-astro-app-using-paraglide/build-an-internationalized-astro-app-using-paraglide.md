@@ -4,9 +4,9 @@ In this guide, we will be learning how to build an multilingual Astro.
 
 Astro comes with [great internationalization out of the box](https://docs.astro.build/en/recipes/i18n/). It makes it very easy to translate the content of our pages.
 
-For stuff that's shared between pages, such as layouts or components, we still need an i18n library to inject the correct messages. We'll be using [ParaglideJS](/m/gerre34r/library-inlang-paraglideJs). 
+For stuff that's shared between pages, such as layouts or components, we still need an i18n library to inject the correct messages. We'll be using [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs). 
 
-[Paraglide](/m/gerre34r/library-inlang-paraglideJs) offers some unique features that make it a great fit for Astro
+[Paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) offers some unique features that make it a great fit for Astro
 - Only messages that are used on 🏝️Islands are shipped to the client
 - Fully typesafe
 - Tiny runtime (<100bytes on the client)
@@ -59,7 +59,7 @@ For translating layouts and components we need an i18n library. Let's install [P
 
 ```bash
 npx @inlang/paraglide-js init
-npm i @inlang/paraglide-js-adapter-astro
+npm i @inlang/paraglide-astro
 ```
 
 This will have genrated all the files needed for Paraglid & added the necessary dependencies.
@@ -67,7 +67,7 @@ This will have genrated all the files needed for Paraglid & added the necessary 
 Then register the Integration in your `astro.config.mjs`:
 
 ```js
-import paraglide from '@inlang/paraglide-js-adapter-astro'
+import paraglide from '@inlang/paraglide-astro'
 
 export default {
   integrations: [
@@ -196,6 +196,6 @@ In components you can access the current language using the `languageTag()` func
 
 ## What's Next?
 
-You can read the [Paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) and [Paraglide-Adapter-Astro](https://inlang.com/m/iljlwzfs/paraglide-astro-i18n) documentation to get a more complete understanding of what's possible. You can also check out our [Astro + Paraglide](https://stackblitz.com/~/github.com/LorisSigrist/paraglide-astro-example) example on StackBlitz.
+You can read the [Paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) and [Paraglide-Astro](https://inlang.com/m/iljlwzfs/paraglide-astro-i18n) documentation to get a more complete understanding of what's possible. You can also check out our [Paraglide-Astro Example](https://stackblitz.com/~/github.com/LorisSigrist/paraglide-astro-example) on StackBlitz.
 
 If you have any suggestions for this guide, please reach out to us on [Discord](https://discord.gg/CNPfhWpcAa), or open an issue on [GitHub](https://www.github.com/opral/inlang-paraglide-js/issues). If you have trouble following, don't hesitate to ask for help. We are happy to help getting you set up.

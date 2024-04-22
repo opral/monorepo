@@ -1,5 +1,11 @@
 # @inlang/marketplace-manifest
 
+## 1.4.0
+
+### Minor Changes
+
+- 52c1646: Depricated readme, added pages and pageRedirects
+
 ## 1.3.5
 
 ### Patch Changes

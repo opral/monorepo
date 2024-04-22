@@ -144,3 +144,69 @@ test("should fail when slug is not valid", () => {
 	}
 	expect(Value.Check(MarketplaceManifest, guide)).toBe(false)
 })
+
+test("should not fail if a readme is not defined", () => {
+	const guide: MarketplaceManifest = {
+		id: "guide.inlang.example",
+		displayName: { en: "My App" },
+		description: { en: "Hello" },
+		keywords: [],
+		license: "Apache-2.0",
+		publisherName: "inlang",
+	}
+	expect(Value.Check(MarketplaceManifest, guide)).toBe(true)
+})
+
+test("should not fail if pages are defined", () => {
+	const guide: MarketplaceManifest = {
+		id: "guide.inlang.example",
+		displayName: { en: "My App" },
+		description: { en: "Hello" },
+		keywords: [],
+		pages: {
+			"/": "./../pages/index.md",
+			"/docs": "./../pages/documentation.md",
+			"/changelog": "./../pages/changelog.md",
+		},
+		license: "Apache-2.0",
+		publisherName: "inlang",
+	}
+	expect(Value.Check(MarketplaceManifest, guide)).toBe(true)
+})
+
+test("should fail with invalid file path", () => {
+	const guide: MarketplaceManifest = {
+		id: "guide.inlang.example",
+		displayName: { en: "My App" },
+		description: { en: "Hello" },
+		keywords: [],
+		pages: {
+			// @ts-expect-error
+			"/": "index",
+		},
+		license: "Apache-2.0",
+		publisherName: "inlang",
+	}
+	expect(Value.Check(MarketplaceManifest, guide)).toBe(false)
+})
+
+test("should not fail if pageRedirects are defined", () => {
+	const guide: MarketplaceManifest = {
+		id: "guide.inlang.example",
+		displayName: { en: "My App" },
+		description: { en: "Hello" },
+		keywords: [],
+		pages: {
+			"/": "./../pages/index.md",
+			"/docs": "./../pages/documentation.md",
+			"/changelog": "./../pages/changelog.md",
+		},
+		pageRedirects: {
+			"/old": "/new",
+			"/documentation/*": "/docs/*",
+		},
+		license: "Apache-2.0",
+		publisherName: "inlang",
+	}
+	expect(Value.Check(MarketplaceManifest, guide)).toBe(true)
+})

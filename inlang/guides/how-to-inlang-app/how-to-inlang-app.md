@@ -2,7 +2,7 @@
 
 Inlang is a versatile globalization ecosystem that empowers developers to seamlessly integrate language translation capabilities into their applications. This comprehensive guide will walk you through the process of building a general Inlang app with the `@inlang/sdk`. 
 
-We'll cover initializing a project from a repo, creating and updating messages, and working with lint rules.
+We'll cover initializing a project from a repo, creating and updating messages, and working with [lint rules](https://inlang.com/c/lint-rules).
 
 ## 1. Open Repository
 
@@ -70,11 +70,11 @@ const updatedMessageData = /* your updated message data */;
 inlang.query.messages.update({ args: updatedMessageData });
 ```
 
-These functions internally handle the loading and saving of messages according to your defined plugin (e.g., [JSON](/m/ig84ng0o/plugin-inlang-json), [i18next](/m/3i8bor92/plugin-inlang-i18next), [Inlang message format](/m/reootnfj/plugin-inlang-messageFormat)).
+These functions internally handle the loading and saving of messages according to your defined plugin (e.g., [JSON](https://inlang.com/m/ig84ng0o/plugin-inlang-json), [i18next](https://inlang.com/m/3i8bor92/plugin-inlang-i18next), [Inlang message format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat)).
 
 ## 3. Working with Lint Rules
 
-[Lint rules](/c/lint-rules) are crucial for maintaining code quality and consistency. In your Inlang app, you can leverage lint rules to ensure that your localization messages adhere to specific standards. For example, let's explore working with the [`snakeCaseId`](https://inlang.com/m/messageLintRule.inlang.snakeCaseId) lint rule.
+[Lint rules](/c/lint-rules) are crucial for maintaining code quality and consistency. In your Inlang app, you can leverage lint rules to ensure that your localization messages adhere to specific standards. For example, let's explore working with the [`snakeCaseId`](https://inlang.com/m/gkerinvo/messageLintRule-inlang-snakeCaseId) lint rule.
 
 This lint rule checks whether your message id's are in a snake case format or not.
 
@@ -87,7 +87,7 @@ const reports = await inlang.query.lintReports.get({ where: { messageId: message
 
 ## Publishing your app
 
-If you are ready and want to release what you have built, please [publish your app](https://inlang.com/documentation/publish-to-marketplace) on our [Marketplace](https://inlang.com) – where you can also sell apps in the future.
+If you are ready and want to release what you have built, please [publish your app](/documentation/publish-to-marketplace) on our [Marketplace](https://inlang.com) – where you can also sell apps in the future.
 
 ## Conclusion
 

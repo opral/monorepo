@@ -24,7 +24,7 @@ export default async function onBeforeRender(pageContext: any) {
 	}
 
 	const content = await convert(fs.readFileSync(markdownFilePath, "utf-8"))
-	renderedMarkdown[id] = content
+	renderedMarkdown[id] = content.html
 
 	return {
 		pageContext: {

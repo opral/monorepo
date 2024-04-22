@@ -4,7 +4,7 @@ import { contextTooltip } from "./contextTooltip.js"
 import { getStringFromPattern } from "../utilities/messages/query.js"
 import { CONFIGURATION } from "../configuration.js"
 import { resolveEscapedCharacters } from "../utilities/messages/resolveEscapedCharacters.js"
-import { getSetting } from "../utilities/settings/index.js"
+import { getPreviewLanguageTag } from "../utilities/language-tag/getPreviewLanguageTag.js"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
@@ -52,9 +52,9 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 						where: { id: message.messageId },
 					}) ?? state().project.query.messages.getByDefaultAlias(message.messageId)
 
-				const preferredLanguageTag = (await getSetting("previewLanguageTag")) || ""
-				const translationLanguageTag = preferredLanguageTag.length
-					? preferredLanguageTag
+				const previewLanguageTag = await getPreviewLanguageTag()
+				const translationLanguageTag = previewLanguageTag.length
+					? previewLanguageTag
 					: sourceLanguageTag
 
 				const variant = _message?.variants?.find((v) => v.languageTag === translationLanguageTag)
@@ -134,4 +134,5 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 	// update decorations, when message was edited / extracted
 	CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.event(() => updateDecorations())
 	CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.event(() => updateDecorations())
+	CONFIGURATION.EVENTS.ON_DID_PREVIEW_LANGUAGE_TAG_CHANGE.event(() => updateDecorations())
 }

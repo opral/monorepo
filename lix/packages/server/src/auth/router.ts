@@ -1,11 +1,23 @@
-import { privateEnv, publicEnv } from "@inlang/env-variables"
+import { getEnvVar } from "../util/getEnv.js"
 import { encryptAccessToken, exchangeInterimCodeForAccessToken } from "./implementation.js"
 import { Router } from "express"
 
 export const router: Router = Router()
-const githubAppClientId = privateEnv.PUBLIC_LIX_GITHUB_APP_CLIENT_ID
-const installUrl = `https://github.com/apps/${publicEnv.PUBLIC_LIX_GITHUB_APP_NAME}/installations/new`
-const callbackUrl = `${privateEnv.PUBLIC_SERVER_BASE_URL}/services/auth/auth-callback`
+
+const PUBLIC_LIX_GITHUB_APP_NAME = getEnvVar("PUBLIC_LIX_GITHUB_APP_NAME")
+const installUrl = `https://github.com/apps/${PUBLIC_LIX_GITHUB_APP_NAME}/installations/new`
+
+const PUBLIC_SERVER_BASE_URL = getEnvVar(
+	"PUBLIC_SERVER_BASE_URL",
+	{ descirption: "The base url of the server e.g. https://inlang.com - Must not end with a slash" }
+)
+const callbackUrl = `${PUBLIC_SERVER_BASE_URL}/services/auth/auth-callback`
+
+const PUBLIC_LIX_GITHUB_APP_CLIENT_ID = getEnvVar("PUBLIC_LIX_GITHUB_APP_CLIENT_ID")
+const LIX_GITHUB_APP_CLIENT_SECRET = getEnvVar("LIX_GITHUB_APP_CLIENT_SECRET")
+const PUBLIC_ALLOWED_AUTH_URLS = getEnvVar("PUBLIC_ALLOWED_AUTH_URLS")
+const JWE_SECRET = getEnvVar("JWE_SECRET")
+
 /**
  * OAuth flow from GitHub
  *
@@ -13,7 +25,7 @@ const callbackUrl = `${privateEnv.PUBLIC_SERVER_BASE_URL}/services/auth/auth-cal
  * and that the route is set in the GitHub app settings.
  */
 
-const allowedAuthUrls = publicEnv.PUBLIC_ALLOWED_AUTH_URLS.split(",")
+const allowedAuthUrls = PUBLIC_ALLOWED_AUTH_URLS.split(",")
 router.get("/github-auth-callback", async (request, response, next) => {
 	try {
 		// TODO: org installation
@@ -30,8 +42,8 @@ router.get("/github-auth-callback", async (request, response, next) => {
 		const code = request.query.code as string
 		const { access_token } = await exchangeInterimCodeForAccessToken({
 			code,
-			githubAppClientId,
-			githubClientSecret: privateEnv.LIX_GITHUB_APP_CLIENT_SECRET,
+			githubAppClientId: PUBLIC_LIX_GITHUB_APP_CLIENT_ID,
+			githubClientSecret: LIX_GITHUB_APP_CLIENT_SECRET,
 		})
 
 		const { installations } = await (
@@ -46,7 +58,7 @@ router.get("/github-auth-callback", async (request, response, next) => {
 
 		const encryptedAccessToken = await encryptAccessToken({
 			accessToken: access_token,
-			JWE_SECRET_KEY: privateEnv.JWE_SECRET,
+			JWE_SECRET_KEY: JWE_SECRET,
 		})
 
 		// set the session

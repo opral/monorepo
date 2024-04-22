@@ -4,7 +4,7 @@ import { describe, it, expect } from "vitest"
 describe("getStackInfo", () => {
 	it("detects sveltekit", async () => {
 		const SvelteKitPackageJson = JSON.parse(`{
-            "name": "@inlang/paraglide-js-adapter-sveltekit-example",
+            "name": "@inlang/paraglide-sveltekit-example",
             "version": "0.0.1",
             "private": true,
             "scripts": {
@@ -17,7 +17,7 @@ describe("getStackInfo", () => {
             },
             "devDependencies": {
                 "@inlang/paraglide-js": "workspace:*",
-                "@inlang/paraglide-js-adapter-sveltekit": "workspace:*",
+                "@inlang/paraglide-sveltekit": "workspace:*",
                 "@sveltejs/adapter-auto": "^3.0.0",
                 "@sveltejs/adapter-static": "^2.0.3",
                 "@sveltejs/kit": "^2.4.3",

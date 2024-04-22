@@ -11,7 +11,8 @@ const MarketplaceManifestBase = Type.Object({
 	$schema: Type.Optional(Type.Literal("https://inlang.com/schema/marketplace-manifest")),
 	slug: Type.Optional(
 		Type.RegExp(/^[a-z0-9]+(?:-[a-z0-9]+)*$/gm, {
-			description: "The slug which overrides the slug on inlang.com",
+			description:
+				"The slug which overrides the slug on inlang.com. Only lowercase letters and numbers.",
 		})
 	),
 	icon: Type.Optional(Type.String()),
@@ -33,8 +34,31 @@ const MarketplaceManifestBase = Type.Object({
 	publisherName: Type.String(),
 	publisherIcon: Type.Optional(Type.String()),
 	publisherLink: Type.Optional(Type.String()),
-	readme: Translatable(
-		Type.TemplateLiteral("${string}.md", { description: "The path to the readme file." })
+	/**
+	 * @deprecated Use `pages` instead.
+	 */
+	readme: Type.Optional(
+		Translatable(
+			Type.TemplateLiteral("${string}.md", { description: "The path to the readme file." })
+		)
+	),
+	pages: Type.Optional(
+		Type.Record(
+			Type.String(),
+			Type.TemplateLiteral("${string}.md", {
+				description: "The path to the markdown file.",
+			})
+		)
+	),
+	pageRedirects: Type.Optional(
+		Type.Record(
+			Type.String({
+				description: "Old route",
+			}),
+			Type.String({
+				description: "New route",
+			})
+		)
 	),
 	recommends: Type.Optional(
 		Type.Array(
@@ -42,12 +66,10 @@ const MarketplaceManifestBase = Type.Object({
 				Type.TemplateLiteral("m/${string}", {
 					description:
 						"The uniqueIDs, starting with m/[UNIQUEID] of the recommended items with a max amount of 3.",
-					maxLength: 3,
 				}),
 				Type.TemplateLiteral("g/${string}", {
 					description:
 						"The uniqueIDs, starting with g/[UNIQUEID] of the recommended items with a max amount of 3.",
-					maxLength: 3,
 				}),
 			])
 		)

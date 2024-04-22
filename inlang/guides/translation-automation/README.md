@@ -53,7 +53,7 @@ npx @inlang/cli [command]
 **Add this to you build and test step to:**
 
 - [Machine translate](https://inlang.com/m/2qj2w8pu/app-inlang-cli#machine-translate) through build step. We want to shift more quality to en and de, that is why we don't machine translate them. We cnsider the other languages comunity languages. When they have weak translations, the community can open a PR through fink.
-- [Lint](https://inlang.com/m/2qj2w8pu/app-inlang-cli#lint) through test step. We let the lint command throw errors when translations are missing. There is not only the `missing message` lint rule. There are differen [lint rules](https://inlang.com/c/lint-rules) for different use cases, that can be configured as error or warning.
+- [Lint](https://inlang.com/m/2qj2w8pu/app-inlang-cli#lint) through test step. We let the lint command throw errors when translations are missing. There is not only the `missing message` lint rule. There are differen [lint rules](/c/lint-rules) for different use cases, that can be configured as error or warning.
 
 <br>
 <br>

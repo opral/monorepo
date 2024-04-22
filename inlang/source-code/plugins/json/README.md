@@ -116,7 +116,7 @@ The message IDs are sorted in the order in which they appear in the sourceLangua
 
 # Supercharge your i18n workflow by installing the Inlang Visual Studio Code extension (Sherlock)
 
-The plugin can be used with the [IDE extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) to extract keys from your code, display inline annotations, have quality checks with lint rules & more. There are only 2 steps to get started:
+The plugin can be used with the [IDE extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) to extract keys from your code, display inline annotations, have quality checks with [lint rules](https://inlang.com/c/lint-rules) & more. There are only 2 steps to get started:
 
 1. Install: [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension).
 2. Add the correct syntax matcher:

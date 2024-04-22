@@ -170,7 +170,7 @@ export const mockInstalledMessageLintRules = [
 						description: "All items in the array need quotaion marks at the end and beginning",
 						type: "string",
 					},
-					title: "DEPRICATED. Ignore paths",
+					title: "DEPRECATED. Ignore paths",
 					description: "Set a path that should be ignored.",
 				},
 			},

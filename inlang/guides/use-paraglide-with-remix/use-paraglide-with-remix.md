@@ -14,7 +14,7 @@ In your project root, run the following commands and follow the instructions.
 
 ```bash
 npx @inlang/paraglide-js init
-npm i --save remix-paraglidejs @inlang/paraglide-js-adapter-vite
+npm i --save remix-paraglidejs @inlang/paraglide-vite
 ```
 
 This will have done a few things:
@@ -26,7 +26,7 @@ This will have done a few things:
 
 ## Setting Up
 
-In your `vite.config.ts`, import the `@inlang/paraglide-js-adapter-vite` and apply it to your config.
+In your `vite.config.ts`, import `@inlang/paraglide-vite` and apply it to your config.
 
 You will need to pass it some config. The location of the Inlang Project & the output directory that messages should be compiled to. You should stick with the defaults unless you have a reason not to.
 
@@ -36,7 +36,7 @@ import { installGlobals } from "@remix-run/node";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 /* --- INCLUDE THIS --- */
-import { paraglide } from "@inlang/paraglide-js-adapter-vite";
+import { paraglide } from "@inlang/paraglide-vite";
 /* ----------------- */
 
 installGlobals();

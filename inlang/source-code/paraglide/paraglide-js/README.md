@@ -17,12 +17,12 @@ With Paraglide's treeshakeable messages, each page only loads the messages it ac
 Paraglide is framework agnostic, but there are framework-specific libraries available. If there is one for your framework you will want to follow its documentation instead. If there isn't, read on.
 
 <doc-links>
-	<doc-link title="Adapter for NextJS" icon="tabler:brand-nextjs" href="/m/osslbuzt/paraglide-next-i18n" description="Go to Library"></doc-link>
-    <doc-link title="Adapter for SvelteKit" icon="simple-icons:svelte" href="/m/dxnzrydw/paraglide-sveltekit-i18n" description="Go to Library"></doc-link>
-    <doc-link title="Adapter for Astro" icon="devicon-plain:astro" href="/m/iljlwzfs/paraglide-astro-i18n" description="Go to Library"></doc-link>
-    <doc-link title="Adapter for SolidJS" icon="tabler:brand-solidjs" href="/m/n860p17j/paraglide-solidstart-i18n" description="Go to Library"></doc-link>
-	<doc-link title="Adapter for Remix" icon="simple-icons:remix" href="/m/fnhuwzrx/paraglide-remix-i18n" description="Go to Library"></doc-link>
-	<doc-link title="Or write your own" icon="ph:sparkle-fill" href="#writing-an-adapter" description="Learn How"></doc-link>
+	<doc-link title="Paraglide-Next" icon="tabler:brand-nextjs" href="/m/osslbuzt/paraglide-next-i18n" description="Go to Library"></doc-link>
+    <doc-link title="Paraglide-SvelteKit" icon="simple-icons:svelte" href="/m/dxnzrydw/paraglide-sveltekit-i18n" description="Go to Library"></doc-link>
+    <doc-link title="Paraglide-Astro" icon="devicon-plain:astro" href="/m/iljlwzfs/paraglide-astro-i18n" description="Go to Library"></doc-link>
+    <doc-link title="Paraglide-SolidStart" icon="tabler:brand-solidjs" href="/m/n860p17j/paraglide-solidstart-i18n" description="Go to Library"></doc-link>
+	<doc-link title="Paraglide-Remix" icon="simple-icons:remix" href="/m/fnhuwzrx/paraglide-remix-i18n" description="Go to Library"></doc-link>
+	<doc-link title="Or write your own" icon="ph:sparkle-fill" href="#writing-a-framework-library" description="Learn How"></doc-link>
 </doc-links>
 
 # People Love It
@@ -85,7 +85,33 @@ m.hello() // Hello world!
 m.loginHeader({ name: "Samuel" }) // Hello Samuel, please login to continue.
 ```
 
-To choose between messages at runtime create a map of messages and index into it.
+## Working with the Inlang Message Format
+
+Paraglide is part of the highly modular Inlang Ecosystem which supports many different Message Formats. By default, the [Inlang Message Format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat) is used. 
+
+It expects messages to be in `messages/{lang}.json` relative to your repo root.
+
+```json
+//messages/en.json
+{
+	//the $schema key is automatically ignored 
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"hello_world: "Hello World!",
+	"greeting": "Hello {name}!"
+}
+```
+
+The `messages/{lang}.json` file contains a flat map of message IDs and their translations. You can use curly braces to insert `{parameters}` into translations
+
+**Nesting purposely isn't supported and likely won't be**. Nested messages are way harder to interact with from complementary tools like the [Sherlock IDE Extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension), the [Parrot Figma Plugin](https://inlang.com/m/gkrpgoir/app-parrot-figmaPlugin), or the [Fink Localization editor](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor). Intellisense also becomes less helpful since it only shows the messages at the current level, not all messages. Additionally enforcing an organization-style side-steps organization discussions with other contributors. 
+
+### Complex Formatting
+
+The Message Format is still quite young, so advanced formats like plurals, param-formatting, and markup interpolation are currently not supported but are all on our roadmap.
+
+If you need complex formatting, like plurals, dates, currency, or markup interpolation you can achieve them like so:
+
+For a message with multiple cases, aka a _select message_, you can define a message for each case & then use a Map in JS to index into it.
 
 ```ts
 import * as m from "./paraglide/messages.js"
@@ -100,9 +126,46 @@ const season = {
 const msg = season["spring"]() // Hello spring!
 ```
 
+For date & currency formatting use the `.toLocaleString` method on the `Date` or `Number`.
+
+```ts
+import * as m from "./paraglide/messages.js"
+import { languageTag } from "./paraglide/runtime.js"
+
+const todaysDate = new Date();
+m.today_is_the({ 
+	date: todaysDate.toLocaleString(languageTag()) 
+})
+
+const price = 100;
+m.the_price_is({
+	price: price.toLocaleString(languageTag(), {
+		style: "currency",
+		currency: "EUR",
+	})
+})
+```
+
+You can put HTML into the messages. This is useful for links and images. 
+
+```json
+// messages/en.json
+{
+	"you_must_agree_to_the_tos": "You must agree to the <a href='/en/tos'>Terms of Service</a>."
+}
+```
+```json
+// messages/de.json
+{
+	you_must_agree_to_the_tos": "Sie müssen den <a href='/de/agb'>Nutzungsbedingungen</a> zustimmen."
+}
+```
+
+There is currently no way to interpolate full-blown components into the messages. If you require components mid-message you will need to create a one-off component for that bit of text.
+
 ## Setting the language
 
-You can set the [language tag](https://www.inlang.com/m/8y8sxj09/library-inlang-languageTag) by calling `setLanguageTag()`. Any subsequent calls to either `languageTag()` or a message function will use the new language tag.
+You can set the [language tag](https://www.inlang.com/m/8y8sxj09/library-inlang-languageTag) by calling `setLanguageTag()` with the desired language, or a getter function. Any subsequent calls to either `languageTag()` or a message function will use the new language tag.
 
 ```js
 import { setLanguageTag } from "./paraglide/runtime.js"
@@ -111,11 +174,11 @@ import * as m from "./paraglide/messages.js"
 setLanguageTag("de")
 m.hello() // Hallo Welt!
 
-setLanguageTag("en")
+setLanguageTag(()=>document.documentElement.lang /* en */ )
 m.hello() // Hello world!
 ```
 
-The [language tag](https://www.inlang.com/m/8y8sxj09/library-inlang-languageTag) is global, so you need to be careful with it on the server to make sure multiple requests don't interfere with each other.
+The [language tag](https://www.inlang.com/m/8y8sxj09/library-inlang-languageTag) is global, so you need to be careful with it on the server to make sure multiple requests don't interfere with each other. Always use a getter-function that returns the current language tag _for the current request_.
 
 You will need to call `setLanguageTag` on both the server and the client since they run in separate processes.
 
@@ -137,7 +200,7 @@ setLanguageTag("de") // The language changed to de
 setLanguageTag("en") // The language changed to en
 ```
 
-A few things to know about `onSetLanguageTag()`:
+Things to know about `onSetLanguageTag()`:
 
 - You can only register one listener. If you register a second listener it will throw an error.
 - `onSetLanguageTag` shouldn't be used on the server.
@@ -160,10 +223,9 @@ const msg = m.hello({ name: "Samuel" }, { languageTag: "de" }) // Hallo Samuel!
 
 ## Lazy-Loading
 
-Paraglide consciously discourages lazy-loading translations since it seriously hurts
-your Web Vitals. Learn more about why lazy-loading is bad & what to do instead in [our blog post on lazy-loading](https://inlang.com/g/mqlyfa7l/guide-lorissigrist-dontlazyload). 
+Paraglide consciously discourages lazy-loading translations since it causes a render-fetch waterfall which seriously hurts your Web Vitals. Learn more about why lazy-loading is bad & what to do instead in [our blog post on lazy-loading](https://inlang.com/g/mqlyfa7l/guide-lorissigrist-dontlazyload). 
 
-If you want to do it anyway, lazily import the language-specific message files. Be careful with this.
+If you want to do it anyway, lazily import the language-specific message files. 
 
 ```ts
 const lazyGerman = await import("./paraglide/messages/de.js")
@@ -175,9 +237,9 @@ lazyGerman.hello() // Hallo Welt
 If you are using a bundler you should use the corresponding plugin. The plugin will keep your Message Functions up-to-date by compiling whenever your messages change and before building your app.
 
 <doc-links>
-	<doc-link title="Vite Plugin" icon="tabler:brand-vite" href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-vite" description="Go to Github"></doc-link>
-    <doc-link title="Rollup Plugin" icon="file-icons:rollup" href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-rollup" description="Go to Github"></doc-link>
-    <doc-link title="Webpack Plugin" icon="mdi:webpack" href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-js-adapter-webpack" description="Go to Github"></doc-link>
+	<doc-link title="Vite Plugin" icon="tabler:brand-vite" href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-vite" description="Go to Github"></doc-link>
+    <doc-link title="Rollup Plugin" icon="file-icons:rollup" href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-rollup" description="Go to Github"></doc-link>
+    <doc-link title="Webpack Plugin" icon="mdi:webpack" href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-webpack" description="Go to Github"></doc-link>
 </doc-links>
 
 ## Configuration
@@ -203,17 +265,13 @@ If you want your language files to be in a different location you can change the
 
 ```diff
 // project.inlang/settings.json
-"plugin.inlang.messageFormat": {
--	"pathPattern": "./messages/{languageTag}.json"
-+	"pathPattern": "./i18n/{languageTag}.json"
-},
+{
+	"plugin.inlang.messageFormat": {
+-		"pathPattern": "./messages/{languageTag}.json"
++		"pathPattern": "./i18n/{languageTag}.json"
+	}
+}
 ```
-
-### Lint Rules
-
-If you're using the [Sherlock VS Code extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) you might see warnings about certain messages. Perhaps they're duplicates, perhaps they're missing in one language. 
-
-You can configure which lint-rules are active in `./project.inlang/settings.json`. Simply add or remove them from the `modules` array.
 
 # Playground
 
@@ -227,11 +285,11 @@ Find examples of how to use Paraglide on CodeSandbox or in [our GitHub repositor
 
 # Architecture
 
-ParaglideJS leverages a compiler to generate vanilla JavaScript functions from your messages. We call these "message functions".
+Paraglide uses a compiler to generate JS functions from your messages. We call these "message functions". 
 
-Message Functions are fully typed using JSDoc. They are exported individually from the `messages.js` file making them tree-shakable. They aren't reactive, they just return a string.
+Message Functions are fully typed using JSDoc. They are exported individually from the `messages.js` file making them tree-shakable. When called, they return a translated string. Message functions aren't reactive in any way, if you want a translation in another language you will need to re-call them.
 
-This avoids many edge cases associated with reactivity, lazy-loading, and namespacing that other i18n libraries have to work around.
+This design avoids many edge cases with reactivity, lazy-loading, and namespacing that other i18n libraries have to work around.
 
 In addition to the message functions, ParaglideJS also emits a runtime. The runtime is used to set the language tag. It contains less than 50 LOC (lines of code) and is less than 300 bytes minified & gzipped.
 
@@ -244,7 +302,7 @@ Paraglide consists of four main parts:
 | **Compiler** | Compiles messages into tree-shakable message functions                                                                       |
 | **Messages** | The compiled tree-shakable message functions                                                                                 |
 | **Runtime**  | A runtime that resolves the [language tag](https://www.inlang.com/m/8y8sxj09/library-inlang-languageTag) of the current user |
-| **Adapter**  | (optional) An adapter that adjusts the runtime for different frameworks                                                      |
+| **Framework Library**  | (optional) A framework library that adjusts the runtime for different frameworks                                                      |
 
 ## Compiler
 
@@ -271,24 +329,18 @@ The compiler loads an Inlang project and compiles the messages into tree-shakabl
 export const hello = (params) => `Hello ${params.name}!`
 ```
 
-## Messages
+# Writing a Framework Library
 
-By convention, we import the compiled functions with a wildcard import.
-
-```js
-import * as m from "../paraglide/messages.js"
-```
-
-Bundlers like Rollup, Webpack, or Turbopack tree-shake the messages that are not used, so using a wildcard import is perfectly fine.
-
-# Writing an Adapter
-
-An "Adapter" is a library that integrates with a framework's lifecycle and does two things:
+Paraglide-Framework-Library integrates with a framework's lifecycle. It does two things:
 
 1. Calls `setLanguageTag()` at appropriate times to set the language
 2. Reacts to `onSetLanguageTag()`, usually by navigating or relading the page.
 
-This example adapts Paraglide to a fictitious full-stack framework.
+Additionally, it may provide convenience features such as localised routing.
+
+Many popular frameworks already have libraries available, check out the [list of available framework libraries](#use-it-with-your-favorite-framework).
+
+If there isn't one for your framework, you can write your own. This example adapts Paraglide to a fictitious full-stack framework.
 
 ```tsx
 import {
@@ -316,7 +368,7 @@ if (isClient) {
 
 	// When the language changes we want to re-render the page in the new language
 	// Here we just navigate to the new route
-	//
+
 	// Make sure to call `onSetLanguageTag` after `setLanguageTag` to avoid an infinite loop.
 	onSetLanguageTag((newLanguageTag) => {
 		window.location.pathname = `/${newLanguageTag}${window.location.pathname}`
@@ -338,6 +390,8 @@ Of course, we're not done yet! We plan on adding the following features to Parag
 - [ ] Pluralization ([Join the Discussion](https://github.com/opral/monorepo/discussions/2025))
 - [ ] Formatting of numbers and dates ([Join the Discussion](https://github.com/opral/monorepo/discussions/992))
 - [ ] Markup Placeholders ([Join the Discussion](https://github.com/opral/monorepo/discussions/913))
+- [ ] Component Interpolation
+- [ ] Per-Language Splitting without Lazy-Loading 
 - [ ] Even Smaller Output
 
 # Talks
@@ -347,7 +401,7 @@ Of course, we're not done yet! We plan on adding the following features to Parag
 - Web Zurich December 2023
 - [Svelte London January 2024](https://www.youtube.com/watch?v=eswNQiq4T2w&t=646s)
 
-# Tooling
+# Complementary Tooling
 
 Paraglide JS is part of the Inlang ecosystem and integrates nicely with all the other Inlang-compatible tools.
 
