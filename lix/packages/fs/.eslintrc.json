@@ -1,5 +1,4 @@
 {
-	"extends": [],
 	"rules": {
 		"no-restricted-imports": [
 			"error",

@@ -86,7 +86,7 @@ app.use(rpcRouter)
 app.use(
 	"*",
 	createProxyMiddleware({
-		target: "http://[::1]:4001",
+		target: "http://localhost:4001",
 		changeOrigin: true,
 		headers: {
 			Connection: "keep-alive",
