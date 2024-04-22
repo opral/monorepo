@@ -5,6 +5,29 @@ import { RoutingStragey } from "./routing/interface"
 import { createLocaliseHref } from "./localiseHref"
 import { serializeCookie } from "./utils/cookie"
 import { LANG_COOKIE } from "./constants"
+import { rsc } from "rsc-env"
+import { createLink } from "./Link"
+import { ResolvedI18nConfig } from "./config"
+
+export const createNavigation = <T extends string>({
+	languageTag,
+	strategy,
+	config,
+}: {
+	languageTag: () => T
+	strategy: RoutingStragey<T>
+	config: ResolvedI18nConfig<T>
+}) => {
+	const routing = rsc ? createNoopRouting() : createRouting(languageTag, strategy)
+	const redirects = createRedirects(languageTag, strategy)
+	const Link = createLink(languageTag, config, strategy)
+
+	return {
+		...routing,
+		...redirects,
+		Link,
+	}
+}
 
 export const createRouting = <T extends string>(
 	languageTag: () => T,
