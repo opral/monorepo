@@ -1,7 +1,6 @@
-import { createLink } from "./Link"
 import { getLanguage } from "./getLanguage.server"
 import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
-import { createNoopRouting, createRedirects } from "./navigation"
+import { createNavigation } from "./navigation"
 import { createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
 import { resolveUserPathDefinitions } from "@inlang/paraglide-js/internal/adapter-utils"
@@ -34,27 +33,20 @@ export function createI18n<T extends string = string>(userConfig: I18nUserConfig
 
 	const strategy = PrefixStrategy(config)
 
-	/**
-	 * React Component that enables client-side transitions between routes.
-	 *
-	 * Automatically localises the href based on the current language.
-	 */
-	const Link = createLink<T>(getLanguage, config, strategy)
-	const { usePathname, useRouter } = createNoopRouting<T>()
-	const { redirect, permanentRedirect } = createRedirects<T>(getLanguage, strategy)
+	const navigation = createNavigation({
+		languageTag: getLanguage,
+		strategy,
+		config,
+	})
 	const middleware = createMiddleware<T>({ config, strategy })
 
 	return {
-		Link,
-		usePathname,
 		middleware,
 		/** @deprecated - Use getLocalisedHref instead */
 		localizePath: (canonicalPath: string, lang: T) => {
 			return strategy.getLocalisedUrl(canonicalPath, lang, getLanguage() !== lang).pathname
 		},
 		getLocalisedUrl: strategy.getLocalisedUrl,
-		useRouter,
-		redirect,
-		permanentRedirect,
+		...navigation,
 	}
 }

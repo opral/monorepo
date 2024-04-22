@@ -9,6 +9,10 @@ import { serializeCookie } from "./utils/cookie"
 import { LANG_COOKIE } from "./constants"
 import { rsc } from "rsc-env"
 
+type LocalisedLink<T extends string> = (
+	props: Omit<Parameters<typeof import("next/link").default>[0], "locale"> & { locale?: T }
+) => ReturnType<typeof import("next/link").default>
+
 /**
  * Creates a link component that localises the href based on the current language.
  * @param languageTag A function that returns the current language tag.
@@ -17,12 +21,10 @@ export function createLink<T extends string>(
 	languageTag: () => T,
 	config: ResolvedI18nConfig<T>,
 	strategy: RoutingStragey<T>
-) {
+): LocalisedLink<T> {
 	const localiseHref = createLocaliseHref(strategy)
 
-	return function Link(
-		props: Omit<Parameters<typeof NextLink>[0], "locale"> & { locale?: T }
-	): ReturnType<typeof NextLink> {
+	return function Link(props) {
 		const currentLanguageTag = languageTag()
 
 		if (
@@ -43,7 +45,7 @@ export function createLink<T extends string>(
 		let lang = props.locale || currentLanguageTag
 		if (!isAvailableLanguageTag(lang)) lang = config.defaultLanguage
 
-		const localisedHref = localiseHref(props.href, lang)
+		const localisedHref = localiseHref(props.href, lang, "", lang !== currentLanguageTag)
 
 		function updateLangCookie(newLang: T) {
 			document.cookie = serializeCookie({
