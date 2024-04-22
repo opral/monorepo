@@ -49,10 +49,6 @@ export class LanguageTagsInput extends LitElement {
 			sl-tag::part(remove-button):hover {
 				color: var(--sl-input-color);
 			}
-			sl-button::part(base) {
-				background-color: var(--sl-color-neutral-500);
-				color: var(--sl-color-neutral-0);
-			}
 		`,
 	]
 
