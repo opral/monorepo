@@ -10,13 +10,13 @@ When it comes to internationalizing your app, avoiding common localization mista
 
 Design your app interface with text expansion and contraction in mind. Use flexible layouts and consider the use of placeholders for dynamic content to accommodate varying text lengths in different languages without compromising the design and functionality of your app.
 
-inlang provides a lot of different lint rules to help you with this. You can find them in the [Rules Category](/c/lint-rules).
+inlang provides a lot of different [lint rules](https://inlang.com/c/lint-rules) to help you with this. You can find them in the [Rules Category](/c/lint-rules).
 
 ### Mistake 2: Ignoring Date, Time, and Number Formats
 
 Implement locale-specific date, time, and number formats to align with the conventions of your target regions. Utilize libraries or frameworks that support locale-aware formatting to ensure consistency and accuracy across different languages and regions.
 
-The editor inlang offers, Fink, supports variables out of the box. You can use them to format dates, times, and numbers. You can find more information about this on the [Fink Product Page](/m/tdozzpar/app-inlang-finkLocalizationEditor).
+The editor inlang offers, Fink, supports variables out of the box. You can use them to format dates, times, and numbers. You can find more information about this on the [Fink Product Page](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor).
 
 ### Mistake 3: Failing to Test Across Multiple Devices and Platforms
 
@@ -28,7 +28,7 @@ In the GitHub Repo of inlang there is the initiative to implement an i18n checke
 
 Collect user feedback and iterate on your app localization to improve the user experience. Leverage analytics tools to gain insights into user behavior and identify areas for improvement. Consider implementing a feedback mechanism to allow users to report issues and provide suggestions for improvement.
 
-If you're using a product which is built on top of inlang, you can use the [Translation badge generator](/m/zu942ln6/app-inlang-badge) to let users contribute to your translations, which is definitely a continuous improvement.
+If you're using a product which is built on top of inlang, you can use the [Translation badge generator](https://inlang.com/m/zu942ln6/app-inlang-badge) to let users contribute to your translations, which is definitely a continuous improvement.
 
 
 ### Still asking yourself what inlang really is?

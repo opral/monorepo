@@ -8,8 +8,9 @@
 	"description": {
 		"en": "Enables the inlang Visual Studio Code extension (Sherlock) to work with paraglide"
 	},
-	"readme": {
-		"en": "./inlang/source-code/plugins/m-function-matcher/README.md"
+	"pages": {
+		"/": "./inlang/source-code/plugins/m-function-matcher/README.md",
+		"/changelog": "./inlang/source-code/plugins/m-function-matcher/CHANGELOG.md"
 	},
 	"keywords": [
 		"website",

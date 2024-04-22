@@ -75,7 +75,7 @@ const NextjsHeader = () => {
 						class="w-full flex-1 bg-background rounded-xl border border-surface-300 flex flex-col relative group hover:border-surface-400 transition-all cursor-pointer"
 					>
 						<div class="flex-1 flex flex-col justify-end">
-							<h3 class="font-medium text-lg px-8 pb-1">NextJS Adapter</h3>
+							<h3 class="font-medium text-lg px-8 pb-1">Paraglide-Next</h3>
 							<p class="text-surface-500 px-8 pb-6 text-sm pr-20">
 								A NextJS Integration for ParaglideJS.
 							</p>
