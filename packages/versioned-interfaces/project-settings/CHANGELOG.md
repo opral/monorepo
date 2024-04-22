@@ -1,5 +1,11 @@
 # @inlang/project-settings
 
+## 2.4.1
+
+### Patch Changes
+
+- c92bde5: Added description to project settings type & allow experimental field in settings component
+
 ## 2.4.0
 
 ### Minor Changes

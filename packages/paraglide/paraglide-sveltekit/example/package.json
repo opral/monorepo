@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/paraglide-sveltekit-example",
-	"version": "0.1.26",
+	"version": "0.1.27",
 	"private": true,
 	"scripts": {
 		"_dev": "vite dev",
