@@ -394,7 +394,7 @@ importers:
   inlang/source-code/editor:
     dependencies:
       '@inlang/settings-component':
-        specifier: ^1.0.0
+        specifier: ^1.0.3
         version: link:../settings-component
       '@isomorphic-git/cors-proxy':
         specifier: ^2.7.1
@@ -761,7 +761,7 @@ importers:
         specifier: workspace:*
         version: link:../sdk
       '@inlang/settings-component':
-        specifier: ^1.0.2
+        specifier: ^1.0.3
         version: link:../settings-component
       '@inlang/telemetry':
         specifier: workspace:*
@@ -2324,11 +2324,11 @@ importers:
   inlang/source-code/templates/message-lint-rule:
     dependencies:
       '@inlang/sdk':
-        specifier: ^0.33.0
+        specifier: ^0.33.1
         version: link:../../sdk
     devDependencies:
       '@inlang/cli':
-        specifier: ^2.14.1
+        specifier: ^2.14.2
         version: link:../../cli
       typescript:
         specifier: ^5.2.2
