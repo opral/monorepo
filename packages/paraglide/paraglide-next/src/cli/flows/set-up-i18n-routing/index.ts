@@ -2,7 +2,15 @@ import { Repository } from "@lix-js/client"
 import { CliStep } from "../../utils"
 import { Logger } from "@inlang/paraglide-js/internal"
 
-const FileExtensions = [".tsx", ".ts", ".jsx", ".js"]
+const FileExtensions = [".tsx", ".ts", ".jsx", ".js", ".mjs"]
+const SkipPattern = [
+	/^node_modules/,
+	/\.d\.ts$/,
+	/\.d\.tsx$/,
+	/\.d\.js$/,
+	/\.d\.jsx$/,
+	/next\.config/,
+]
 
 export const SetUpI18nRoutingFlow: CliStep<
 	{
@@ -16,8 +24,8 @@ export const SetUpI18nRoutingFlow: CliStep<
 	unknown
 > = async (ctx) => {
 	await walk(ctx.repo, ctx.srcRoot, async (path) => {
-		ctx.logger.info("Walking " + path.replace(ctx.srcRoot, "."))
 		if (!FileExtensions.some((ext) => path.endsWith(ext))) return
+		if (SkipPattern.some((pattern) => pattern.test(path))) return
 		//read the file content
 		const content = await ctx.repo.nodeishFs.readFile(path, { encoding: "utf-8" })
 
