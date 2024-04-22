@@ -1,5 +1,20 @@
 # inlang-vs-code-extension
 
+## 1.39.4
+
+### Patch Changes
+
+- cd9a3e1: add internal links
+- Updated dependencies [c92bde5]
+- Updated dependencies [7bd98e4]
+- Updated dependencies [2508271]
+- Updated dependencies [0b4af82]
+  - @inlang/settings-component@1.0.3
+  - @lix-js/client@1.3.0
+  - @inlang/sdk@0.33.1
+  - @inlang/rpc@0.3.10
+  - @inlang/telemetry@0.3.24
+
 ## 1.39.3
 
 ### Patch Changes

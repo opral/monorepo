@@ -1,5 +1,11 @@
 # @inlang/cross-sell-ninja
 
+## 0.0.7
+
+### Patch Changes
+
+- @inlang/sdk@0.33.1
+
 ## 0.0.6
 
 ### Patch Changes
