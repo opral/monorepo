@@ -56,7 +56,8 @@ export default class InlangSettings extends LitElement {
 				box-sizing: border-box;
 				width: 100%;
 				max-width: 500px;
-				height: 48px;
+				padding-top: 0.5rem;
+				padding-bottom: 0.5rem;
 				margin: 0 auto;
 				display: flex;
 				flex-wrap: wrap;
