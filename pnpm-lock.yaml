@@ -86,7 +86,7 @@ importers:
         version: 1.2.0
       next:
         specifier: ^14.0.0
-        version: 14.1.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        version: 14.1.4(@babel/core@7.24.4)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       postcss:
         specifier: 8.4.23
         version: 8.4.23
@@ -1427,8 +1427,8 @@ importers:
         specifier: ^18 || ^19
         version: 18.2.0
       rsc-env:
-        specifier: ^0.0.1
-        version: 0.0.1
+        specifier: ^0.0.2
+        version: 0.0.2
     devDependencies:
       '@lix-js/client':
         specifier: workspace:*
@@ -8362,8 +8362,8 @@ packages:
     resolution: {integrity: sha512-27HBghJxjiZtIk3Ycvn/4kbJk/1uZuJFfuPEns6LaEvpvG1f0hTea8lilrouyo9mVc2GWdcEZ8OLoGmSADlrCw==}
     engines: {'0': node >= 0.8}
 
-  confbox@0.1.6:
-    resolution: {integrity: sha512-ONc4FUXne/1UBN1EuxvQ5rAjjAbo+N4IxrxWI8bzGHbd1PyrFlI/E3G23/yoJZDFBaFFxPGfI0EOq0fa4dgX7A==}
+  confbox@0.1.7:
+    resolution: {integrity: sha512-uJcB/FKZtBMCJpK8MQji6bJHgu1tixKPxRLeGkNzBoOZzpnZUJm0jm2/sBDWcuBx1dYgxV4JU+g5hmNxCyAmdA==}
 
   confusing-browser-globals@1.0.11:
     resolution: {integrity: sha512-JsPKdmh8ZkmnHxDk55FZ1TqVLvEQTvoByJZRN9jzI0UjxK/QgAmsphz7PGtqgPieQZ/CQcHWXCR7ATDNhGe+YA==}
@@ -10430,8 +10430,8 @@ packages:
     resolution: {integrity: sha512-0KI/607xoxSToH7GjN1FfSbLoU0+btTicjsQSWQlh/hZykN8KpmMf7uYwPW3R+akZ6R/w18ZlXSHBYXiYUPO3g==}
     engines: {node: '>= 0.10'}
 
-  iron-webcrypto@1.1.0:
-    resolution: {integrity: sha512-5vgYsCakNlaQub1orZK5QmNYhwYtcllTkZBp5sfIaCqY93Cf6l+v2rtE+E4TMbcfjxDMCdrO8wmp7+ZvhDECLA==}
+  iron-webcrypto@1.1.1:
+    resolution: {integrity: sha512-5xGwQUWHQSy039rFr+5q/zOmj7GP0Ypzvo34Ep+61bPIhaLduEDp/PvLGlU3awD2mzWUR0weN2vJ1mILydFPEg==}
 
   irregular-plurals@3.5.0:
     resolution: {integrity: sha512-1ANGLZ+Nkv1ptFb2pa8oG8Lem4krflKuX/gINiHJHjJUKaJHk/SXk5x6K3J+39/p0h1RQ2saROclJJ+QLvETCQ==}
@@ -11262,6 +11262,9 @@ packages:
   lz-string@1.5.0:
     resolution: {integrity: sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ==}
     hasBin: true
+
+  magic-string@0.30.10:
+    resolution: {integrity: sha512-iIRwTIf0QKV3UAnYK4PU8uiEc4SRh5jX0mwpIwETPpHdhVM4f53RSwS/vXvN1JhGX+Cs7B8qIq3d6AH49O5fAQ==}
 
   magic-string@0.30.5:
     resolution: {integrity: sha512-7xlpfBaQaP/T6Vh8MO/EqXSW5En6INHEvEXQiuff7Gku0PWjU3uf6w/j9o7O+SpB5fOAkrI5HeoNgwjEO0pFsA==}
@@ -12523,6 +12526,9 @@ packages:
   pkg-types@1.0.3:
     resolution: {integrity: sha512-nN7pYi0AQqJnoLPC9eHFQ8AcyaixBUOwvqc5TDnIKCMEE6I0y8P7OKA7fPexsXGCGxQDl/cmrLAp26LhcwxZ4A==}
 
+  pkg-types@1.1.0:
+    resolution: {integrity: sha512-/RpmvKdxKf8uILTtoOhAgf30wYbP2Qw+L9p3Rvshx1JZVX+XQNZQFjlbmGHEGIm4CkVPlSn+NXmIM8+9oWQaSA==}
+
   playwright-core@1.39.0:
     resolution: {integrity: sha512-+k4pdZgs1qiM+OUkSjx96YiKsXsmb59evFoqv8SKO067qBA+Z2s/dCzJij/ZhdQcs2zlTAgRKfeiiLm8PQ2qvw==}
     engines: {node: '>=16'}
@@ -13313,8 +13319,8 @@ packages:
   rrweb-cssom@0.6.0:
     resolution: {integrity: sha512-APM0Gt1KoXBz0iIkkdB/kfvGOwC4UuJFeG/c+yV7wSc7q96cG/kJ0HiYCnzivD9SB53cLV1MlHFNfOuPaadYSw==}
 
-  rsc-env@0.0.1:
-    resolution: {integrity: sha512-34kQwlfWn7J/vWsV2yVPf8gupoVzH3UsXdoYJ4DpBsDzoVA5HMuiPemPv/TQ6nfB6ifu6RkKMiA05tSFeaQjmw==}
+  rsc-env@0.0.2:
+    resolution: {integrity: sha512-ixLbILtzlGEBl25ATa+jBwdKY6GgoN8XwFho+7ycVpCCJ9ijXlWQB0UnLGGU6aWtL+pTzlcaKI7W0xVQjnL5uA==}
 
   run-applescript@5.0.0:
     resolution: {integrity: sha512-XcT5rBksx1QdIhlFOCtgZkB99ZEouFZ1E2Kc2LHqNW13U3/74YGdkQRmThTwxy4QIyookibDKYZOPqX//6BlAg==}
@@ -15525,6 +15531,9 @@ packages:
 
   zod@3.22.4:
     resolution: {integrity: sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==}
+
+  zod@3.23.0:
+    resolution: {integrity: sha512-OFLT+LTocvabn6q76BTwVB0hExEBS0IduTr3cqZyMqEDbOnYmcU+y0tUAYbND4uwclpBGi4I4UUBGzylWpjLGA==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -22350,7 +22359,7 @@ snapshots:
   c12@1.10.0:
     dependencies:
       chokidar: 3.6.0
-      confbox: 0.1.6
+      confbox: 0.1.7
       defu: 6.1.4
       dotenv: 16.4.5
       giget: 1.2.3
@@ -22359,7 +22368,7 @@ snapshots:
       ohash: 1.1.3
       pathe: 1.1.2
       perfect-debounce: 1.0.0
-      pkg-types: 1.0.3
+      pkg-types: 1.1.0
       rc9: 2.1.2
 
   cac@6.7.14: {}
@@ -22751,7 +22760,7 @@ snapshots:
       readable-stream: 2.3.8
       typedarray: 0.0.6
 
-  confbox@0.1.6: {}
+  confbox@0.1.7: {}
 
   confusing-browser-globals@1.0.11: {}
 
@@ -23330,7 +23339,7 @@ snapshots:
       globrex: 0.1.2
       kleur: 4.1.5
       locate-character: 3.0.0
-      magic-string: 0.30.9
+      magic-string: 0.30.10
       sade: 1.8.1
       tiny-glob: 0.2.9
       ts-api-utils: 1.3.0(typescript@5.0.4)
@@ -25060,7 +25069,7 @@ snapshots:
       cookie-es: 1.1.0
       defu: 6.1.4
       destr: 2.0.3
-      iron-webcrypto: 1.1.0
+      iron-webcrypto: 1.1.1
       ohash: 1.1.3
       radix3: 1.1.2
       ufo: 1.5.3
@@ -25073,7 +25082,7 @@ snapshots:
       crossws: 0.2.4
       defu: 6.1.4
       destr: 2.0.3
-      iron-webcrypto: 1.1.0
+      iron-webcrypto: 1.1.1
       ohash: 1.1.3
       radix3: 1.1.2
       ufo: 1.5.3
@@ -25629,7 +25638,7 @@ snapshots:
 
   ipaddr.js@1.9.1: {}
 
-  iron-webcrypto@1.1.0: {}
+  iron-webcrypto@1.1.1: {}
 
   irregular-plurals@3.5.0: {}
 
@@ -26489,6 +26498,10 @@ snapshots:
   lru-cache@7.18.3: {}
 
   lz-string@1.5.0: {}
+
+  magic-string@0.30.10:
+    dependencies:
+      '@jridgewell/sourcemap-codec': 1.4.15
 
   magic-string@0.30.5:
     dependencies:
@@ -27628,31 +27641,6 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
-  next@14.1.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
-    dependencies:
-      '@next/env': 14.1.4
-      '@swc/helpers': 0.5.2
-      busboy: 1.6.0
-      caniuse-lite: 1.0.30001608
-      graceful-fs: 4.2.11
-      postcss: 8.4.31
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      styled-jsx: 5.1.1(react@18.2.0)
-    optionalDependencies:
-      '@next/swc-darwin-arm64': 14.1.4
-      '@next/swc-darwin-x64': 14.1.4
-      '@next/swc-linux-arm64-gnu': 14.1.4
-      '@next/swc-linux-arm64-musl': 14.1.4
-      '@next/swc-linux-x64-gnu': 14.1.4
-      '@next/swc-linux-x64-musl': 14.1.4
-      '@next/swc-win32-arm64-msvc': 14.1.4
-      '@next/swc-win32-ia32-msvc': 14.1.4
-      '@next/swc-win32-x64-msvc': 14.1.4
-    transitivePeerDependencies:
-      - '@babel/core'
-      - babel-plugin-macros
-
   nice-try@1.0.5: {}
 
   nitropack@2.8.1(xml2js@0.5.0):
@@ -27695,7 +27683,7 @@ snapshots:
       klona: 2.0.6
       knitwork: 1.1.0
       listhen: 1.7.2
-      magic-string: 0.30.9
+      magic-string: 0.30.10
       mime: 3.0.0
       mlly: 1.6.1
       mri: 1.2.0
@@ -27705,7 +27693,7 @@ snapshots:
       openapi-typescript: 6.7.5
       pathe: 1.1.2
       perfect-debounce: 1.0.0
-      pkg-types: 1.0.3
+      pkg-types: 1.1.0
       pretty-bytes: 6.1.1
       radix3: 1.1.2
       rollup: 4.14.3
@@ -28529,6 +28517,12 @@ snapshots:
   pkg-types@1.0.3:
     dependencies:
       jsonc-parser: 3.2.1
+      mlly: 1.6.1
+      pathe: 1.1.2
+
+  pkg-types@1.1.0:
+    dependencies:
+      confbox: 0.1.7
       mlly: 1.6.1
       pathe: 1.1.2
 
@@ -29649,7 +29643,7 @@ snapshots:
 
   rrweb-cssom@0.6.0: {}
 
-  rsc-env@0.0.1: {}
+  rsc-env@0.0.2: {}
 
   run-applescript@5.0.0:
     dependencies:
@@ -30355,11 +30349,6 @@ snapshots:
       react: 18.2.0
     optionalDependencies:
       '@babel/core': 7.24.4
-
-  styled-jsx@5.1.1(react@18.2.0):
-    dependencies:
-      client-only: 0.0.1
-      react: 18.2.0
 
   sucrase@3.35.0:
     dependencies:
@@ -31257,7 +31246,7 @@ snapshots:
     dependencies:
       acorn: 8.11.3
       estree-walker: 3.0.3
-      magic-string: 0.30.9
+      magic-string: 0.30.10
       unplugin: 1.5.1
 
   underscore@1.13.6: {}
@@ -31336,10 +31325,10 @@ snapshots:
       estree-walker: 3.0.3
       fast-glob: 3.3.2
       local-pkg: 0.5.0
-      magic-string: 0.30.9
+      magic-string: 0.30.10
       mlly: 1.6.1
       pathe: 1.1.2
-      pkg-types: 1.0.3
+      pkg-types: 1.1.0
       scule: 1.3.0
       strip-literal: 1.3.0
       unplugin: 1.5.1
@@ -31354,10 +31343,10 @@ snapshots:
       estree-walker: 3.0.3
       fast-glob: 3.3.2
       local-pkg: 0.5.0
-      magic-string: 0.30.9
+      magic-string: 0.30.10
       mlly: 1.6.1
       pathe: 1.1.2
-      pkg-types: 1.0.3
+      pkg-types: 1.1.0
       scule: 1.3.0
       strip-literal: 1.3.0
       unplugin: 1.5.1
@@ -31743,7 +31732,7 @@ snapshots:
       unstorage: 1.10.2
       vite: 4.5.2(@types/node@20.12.7)(terser@5.30.3)
       ws: 8.16.0
-      zod: 3.22.4
+      zod: 3.23.0
     transitivePeerDependencies:
       - '@azure/app-configuration'
       - '@azure/cosmos'
@@ -32823,5 +32812,7 @@ snapshots:
       readable-stream: 4.5.2
 
   zod@3.22.4: {}
+
+  zod@3.23.0: {}
 
   zwitch@2.0.4: {}

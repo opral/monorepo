@@ -1,5 +1,4 @@
 import { NextRequest } from "next/server"
-import { ResolvedI18nConfig } from "../config"
 import { LanguageDetector } from "./detection/interface"
 
 /**
@@ -10,12 +9,12 @@ import { LanguageDetector } from "./detection/interface"
  */
 export function resolveLanguage<T extends string>(
 	request: NextRequest,
-	defaultLanguage: T,
+	fallbackLanguage: T,
 	detectors: LanguageDetector<T>[]
 ): T {
 	for (const detector of detectors) {
 		const locale = detector(request)
 		if (locale) return locale
 	}
-	return defaultLanguage
+	return fallbackLanguage
 }
