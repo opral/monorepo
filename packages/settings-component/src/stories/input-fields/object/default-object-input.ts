@@ -53,6 +53,9 @@ export class DefaultObjectInput extends LitElement {
 			.icon {
 				padding-top: 0.5rem;
 			}
+			sl-input::part(input) {
+				width: inherit;
+			}
 		`,
 	]
 
@@ -137,17 +140,7 @@ export class DefaultObjectInput extends LitElement {
 	override render() {
 		return html` <div part="property" class="property">
 			<field-header
-				.fieldTitle=${JSON.stringify(() => {
-					if (this.withTitle) {
-						if (this._title) {
-							return this._title
-						} else {
-							return this.property
-						}
-					} else {
-						return undefined
-					}
-				})}
+				.fieldTitle=${this.withTitle ? (this._title ? this._title : this.property) : undefined}
 				.description=${this.withDescription ? this._description : ``}
 				.optional=${this.required ? false : true}
 				exportparts="property-title, property-paragraph"
