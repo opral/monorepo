@@ -53,6 +53,9 @@ export class DefaultObjectInput extends LitElement {
 			.icon {
 				padding-top: 0.5rem;
 			}
+			sl-input::part(input) {
+				width: inherit;
+			}
 		`,
 	]
 
