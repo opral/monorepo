@@ -24,7 +24,9 @@ export const SetUpI18nRoutingFlow: CliStep<
 		//replace imports of 'import L from "next/link"' with 'import { Link as L } from "@/lib/i18n"'
 		const newContent = replaceNextNavigationImports(replaceNextLinkImports(content))
 		if (newContent === content) return
-		console.info(`${path}`, newContent)
+
+		//replace the file content
+		await ctx.repo.nodeishFs.writeFile(path, newContent)
 	})
 
 	return ctx

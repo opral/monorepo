@@ -370,7 +370,7 @@ const maybeMigrateI18nRouting: CliStep<
 	unknown
 > = async (ctx) => {
 	const response = await consola.prompt(
-		"Do you want to update your <Link>s for localised routing? (recommended)\n",
+		"Do you want to update your <Link>s for localised routing? (recommended)\nThis will replace any imports from next/link and next/navigation with their localised counterparts",
 		{
 			type: "confirm",
 			initial: true,
