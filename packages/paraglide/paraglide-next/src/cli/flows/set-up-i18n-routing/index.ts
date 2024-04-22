@@ -1,6 +1,7 @@
 import { Repository } from "@lix-js/client"
 import { CliStep } from "../../utils"
 import { Logger } from "@inlang/paraglide-js/internal"
+import nodePath from "node:path"
 
 const FileExtensions = [".tsx", ".ts", ".jsx", ".js", ".mjs"]
 const SkipPattern = [
@@ -96,7 +97,7 @@ export function replaceNextNavigationImports(content: string) {
 async function walk(repo: Repository, path: string, fileCallback: (path: string) => Promise<void>) {
 	const files = await repo.nodeishFs.readdir(path)
 	const promises = files.map(async (file) => {
-		const filePath = path + "/" + file
+		const filePath = nodePath.join(path, file)
 		const stat = await repo.nodeishFs.stat(filePath)
 		if (stat.isDirectory()) {
 			await walk(repo, filePath, fileCallback)
