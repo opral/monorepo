@@ -57,8 +57,8 @@ export function createMiddleware<T extends string>({
 		// Update the locale-cookie
 		if (!localeCookieMatches) {
 			response.cookies.set(LANG_COOKIE.name, locale, {
-				sameSite: LANG_COOKIE.sameSite,
-				maxAge: LANG_COOKIE.maxAge,
+				sameSite: LANG_COOKIE.SameSite,
+				maxAge: LANG_COOKIE["Max-Age"],
 				path: request.nextUrl.basePath || undefined,
 			})
 		}
