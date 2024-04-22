@@ -30,7 +30,10 @@ export function PrefixStrategy<T extends string>({
 	prefix: "all" | "except-default" | "never"
 	availableLanguageTags: readonly T[]
 }): RoutingStragey<T> {
-	const resolvedPathnames = resolveUserPathDefinitions(userPathnames, availableLanguageTags)
+	const resolvedPathnames = /** @__PURE__ */ resolveUserPathDefinitions(
+		userPathnames,
+		availableLanguageTags
+	)
 
 	// Make sure the given pathnames are valid during dev
 	// middleware is not rsc so validating there guarantees this will run once
