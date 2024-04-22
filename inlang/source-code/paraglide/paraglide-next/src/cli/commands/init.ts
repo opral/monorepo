@@ -6,6 +6,8 @@ import { NodeishFilesystem } from "@lix-js/fs"
 import path from "node:path"
 import { Logger } from "@inlang/paraglide-js/internal"
 import { Steps, cli as ParaglideCli } from "@inlang/paraglide-js/internal/cli"
+import consola from "consola"
+import { SetUpI18nRoutingFlow } from "../flows/set-up-i18n-routing"
 
 type NextConfigFile = {
 	path: string
@@ -52,8 +54,9 @@ export const InitCommand = new Command()
 		const ctx7 = await createMiddlewareFile(ctx6)
 		const ctx8 = await updateNextConfig(ctx7)
 		const ctx9 = await addLanguageProvider(ctx8)
+		const ctx10 = await maybeMigrateI18nRouting(ctx9)
 		try {
-			await Steps.runCompiler(ctx9)
+			await Steps.runCompiler(ctx10)
 		} catch (e) {
 			//silently ignore
 		}
@@ -360,4 +363,20 @@ const addLanguageProvider: CliStep<
 
 	await ctx.repo.nodeishFs.writeFile(layoutFilePath, layoutFileContent)
 	return ctx
+}
+
+const maybeMigrateI18nRouting: CliStep<
+	{ repo: Repository; logger: Logger; srcRoot: string },
+	unknown
+> = async (ctx) => {
+	const response = await consola.prompt(
+		"Do you want to update your <Link>s for localised routing? (recommended)\n",
+		{
+			type: "confirm",
+			initial: true,
+		}
+	)
+
+	if (!response) return ctx
+	return await SetUpI18nRoutingFlow(ctx)
 }
