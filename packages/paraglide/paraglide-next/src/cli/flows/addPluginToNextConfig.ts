@@ -5,7 +5,7 @@ import { NextJSProject } from "./scan-next-project"
 import path from "node:path"
 import { Outdir } from "./getOutDir"
 
-export const updateNextConfig: CliStep<
+export const addParaglideNextPluginToNextConfig: CliStep<
 	{
 		logger: Logger
 		repo: Repository

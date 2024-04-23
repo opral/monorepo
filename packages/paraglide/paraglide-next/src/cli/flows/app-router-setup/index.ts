@@ -4,7 +4,7 @@ import { NextJSProject } from "../scan-next-project"
 import { createI18nFile } from "./createI18nFile"
 import { createMiddlewareFile } from "./createMiddlewareFile"
 import { addLanguageProvider } from "./addLanguageProvider"
-import { updateNextConfig } from "../updateNextConfig"
+import { addParaglideNextPluginToNextConfig } from "../addPluginToNextConfig"
 import { maybeMigrateI18nRouting } from "./maybeMigrateI18nRouting"
 import { Logger } from "@inlang/paraglide-js/internal"
 import { Outdir } from "../getOutDir"
@@ -23,7 +23,7 @@ export const appRouterSetup: CliStep<
 	await createI18nFile(ctx)
 	await createMiddlewareFile(ctx)
 	await addLanguageProvider(ctx)
-	await updateNextConfig(ctx)
+	await addParaglideNextPluginToNextConfig(ctx)
 	await maybeMigrateI18nRouting(ctx)
 	return ctx
 }
