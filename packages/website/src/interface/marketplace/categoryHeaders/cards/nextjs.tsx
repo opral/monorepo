@@ -9,9 +9,9 @@ const NextjsHeader = () => {
 	const [isInitialised, setIsInitialised] = createSignal(false)
 
 	onMount(() => {
-		if (!isInitialised()) {
-			const grid = document.getElementById("nextjs-grid")
+		const grid = document.getElementById("nextjs-grid")
 
+		if (!isInitialised()) {
 			const resizeObserver = new ResizeObserver((entries) => {
 				for (const entry of entries) {
 					const newHeight = entry.contentRect.width
@@ -33,7 +33,10 @@ const NextjsHeader = () => {
 	return (
 		<>
 			<div class="w-full h-full relative -mt-[33px] mb-20">
-				<div id="nextjs-grid" class="relative z-20 grid w-full grid-cols-8 md:grid-cols-12">
+				<div
+					id="nextjs-grid"
+					class="relative z-20 grid w-full grid-cols-8 md:grid-cols-12 auto-rows-[106.6px]"
+				>
 					<div class="col-start-2 row-start-7 md:row-start-2 col-span-6 row-span-6 md:row-span-4">
 						<NextBody />
 					</div>
@@ -143,7 +146,7 @@ const NextBody = () => {
 
 	return (
 		<>
-			<div class="bg-surface-50 border md:border-r-0 xl:border-t-0 border-surface-200 w-full h-full p-4 lg:p-12 xl:p-16 flex flex-col justify-between items-center md:items-start">
+			<div class="bg-surface-50 border border-surface-200 w-full h-full p-4 lg:p-12 xl:p-16 flex flex-col justify-between items-center md:items-start">
 				<h2 class="text-surface-900 text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-semibold tracking-tight text-center md:text-start">
 					Best performing i18n
 					<br />
