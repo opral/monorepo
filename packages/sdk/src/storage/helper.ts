@@ -22,7 +22,12 @@ export function getPathFromMessageId(id: string) {
 	return path
 }
 
-export function stringifyMessage(message: Message) {
+/**
+ * Returns a copy of a message object with sorted variants and object keys.
+ * This produces a deterministic result when passed to stringify
+ * independent of the initialization order.
+ */
+export function normalizeMessage(message: Message) {
 	// order keys in message
 	const messageWithSortedKeys: any = {}
 	for (const key of Object.keys(message).sort()) {
@@ -45,11 +50,25 @@ export function stringifyMessage(message: Message) {
 		// order keys in each variant
 		.map((variant: Variant) => {
 			const variantWithSortedKeys: any = {}
-			for (const key of Object.keys(variant).sort()) {
-				variantWithSortedKeys[key] = (variant as any)[key]
+			for (const variantKey of Object.keys(variant).sort()) {
+				if (variantKey === "pattern") {
+					variantWithSortedKeys[variantKey] = (variant as any)["pattern"].map((token: any) => {
+						const tokenWithSortedKey: any = {}
+						for (const tokenKey of Object.keys(token).sort()) {
+							tokenWithSortedKey[tokenKey] = token[tokenKey]
+						}
+						return tokenWithSortedKey
+					})
+				} else {
+					variantWithSortedKeys[variantKey] = (variant as any)[variantKey]
+				}
 			}
 			return variantWithSortedKeys
 		})
 
-	return JSON.stringify(messageWithSortedKeys, undefined, 4)
+	return messageWithSortedKeys as Message
+}
+
+export function stringifyMessage(message: Message) {
+	return JSON.stringify(normalizeMessage(message), undefined, 4)
 }
