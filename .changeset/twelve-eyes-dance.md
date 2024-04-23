@@ -3,4 +3,5 @@
 "@inlang/sdk": minor
 ---
 
-stringifyMessage, normalizeMessage, inlang validate --dump --save
+sdk helper functions stringifyMessage, normalizeMessage
+INLANG_CLI_EXPERIMENTAL inlang validate --dump --save
