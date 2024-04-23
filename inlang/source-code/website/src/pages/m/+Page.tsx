@@ -30,7 +30,7 @@ export type PageProps = {
 	markdown: Awaited<ReturnType<any>>
 	pages: Record<string, string> | undefined
 	pageData: Record<string, unknown>
-	restSlug: string
+	pagePath: string
 	tableOfContents: Record<string, string[]>
 	manifest: MarketplaceManifest & { uniqueID: string }
 	recommends?: MarketplaceManifest[]
@@ -261,17 +261,17 @@ export default function Page(props: PageProps) {
 													{(slug) => (
 														<Link
 															href={`${
-																props.restSlug === "/"
+																props.pagePath === "/"
 																	? `${currentPageContext.urlParsed.pathname}/${
 																			slug.charAt(0) === "/" ? slug.slice(1) : slug
 																	  }`
 																	: `${currentPageContext.urlParsed.pathname.replace(
-																			props.restSlug,
+																			props.pagePath,
 																			slug === "/" ? "" : slug
 																	  )}`
 															}`}
 															class={
-																(props.restSlug === slug
+																(props.pagePath === slug
 																	? "border-hover-primary "
 																	: "border-background/0 ") +
 																" border-b-[2px] pt-[8px] pb-[6px] text-sm bg-transparent group content-box group"
@@ -279,7 +279,7 @@ export default function Page(props: PageProps) {
 														>
 															<div
 																class={
-																	(props.restSlug === slug
+																	(props.pagePath === slug
 																		? "text-surface-900 "
 																		: "text-surface-500 group-hover:bg-surface-100 ") +
 																	" capitalize px-2 py-[6px] flex items-center gap-1.5 rounded-md transition-colors font-medium cursor-pointer w-max"

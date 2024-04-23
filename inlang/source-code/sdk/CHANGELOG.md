@@ -1,5 +1,17 @@
 # @inlang/sdk
 
+## 0.33.1
+
+### Patch Changes
+
+- Updated dependencies [c92bde5]
+- Updated dependencies [7bd98e4]
+  - @inlang/project-settings@2.4.1
+  - @lix-js/client@1.3.0
+  - @inlang/message-lint-rule@1.4.6
+  - @inlang/plugin@2.4.10
+  - @inlang/module@1.2.10
+
 ## 0.33.0
 
 ### Minor Changes

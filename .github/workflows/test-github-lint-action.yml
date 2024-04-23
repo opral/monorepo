@@ -8,8 +8,8 @@ permissions:
   pull-requests: write
 
 jobs:
-  test-action:
-    name: GitHub Actions Test
+  ninja-i18n:
+    name: Ninja i18n - GitHub Lint Action
     runs-on: ubuntu-latest
 
     steps:
@@ -17,24 +17,9 @@ jobs:
         id: checkout
         uses: actions/checkout@v4
 
-      - name: Setup Pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install Dependencies
-        run: pnpm install
-
-      - name: Build
-        run: pnpm --filter @inlang/github-lint-action... build
-
-      - name: Test Local Action
-        id: test-action
-        uses: ./inlang/source-code/github-lint-action
+      - name: Run Ninja i18n
+        id: ninja-i18n
+        uses: opral/ninja-i18n-action@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          

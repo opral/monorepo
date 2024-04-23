@@ -16,7 +16,7 @@ export const telemetryBrowser = new Proxy(posthog, {
 		}
 		return (target as any)[prop]
 	},
-}) as Omit<typeof posthog, "init"> & { init: typeof initWrapper }
+}) as unknown as Omit<typeof posthog, "init"> & { init: typeof initWrapper }
 
 function initWrapper(
 	config?: Parameters<typeof posthog.init>[1],

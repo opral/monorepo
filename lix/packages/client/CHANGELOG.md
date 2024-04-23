@@ -1,5 +1,11 @@
 # @lix-js/client
 
+## 1.3.0
+
+### Minor Changes
+
+- 7bd98e4: lix refactoring
+
 ## 1.2.1
 
 ### Patch Changes

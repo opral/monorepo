@@ -1,5 +1,14 @@
 # @inlang/paraglide-unplugin
 
+## 1.4.30
+
+### Patch Changes
+
+- Updated dependencies [7bd98e4]
+  - @lix-js/client@1.3.0
+  - @inlang/sdk@0.33.1
+  - @inlang/paraglide-js@1.7.0
+
 ## 1.4.29
 
 ### Patch Changes

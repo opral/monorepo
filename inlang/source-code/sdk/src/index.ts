@@ -26,6 +26,7 @@ export {
 	PluginSaveMessagesError,
 } from "./errors.js"
 
+export { stringifyMessage } from "./storage/helper.js"
 export * from "./messages/variant.js"
 export * from "./versionedInterfaces.js"
 export { InlangModule } from "@inlang/module"

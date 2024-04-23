@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/marketplace-registry",
 	"type": "module",
-	"version": "1.5.7",
+	"version": "1.5.8",
 	"private": true,
 	"exports": {
 		".": "./dist/index.js",

@@ -14,9 +14,13 @@ if (typeof version !== "string") {
 }
 
 export const plugins = [
-	typescript({ tsconfig: "./tsconfig.json" }),
+	typescript({
+		tsconfig: "./tsconfig.json",
+	}),
 	cjs(),
-	resolve(),
+	resolve({
+		preferBuiltins: true,
+	}),
 	preserveDirectives(),
 	json(),
 	replace({

@@ -6,7 +6,7 @@
 <doc-feature text-color="#0F172A" color="#E1EFF7" title="No route Param needed" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-next/assets/no-param.png"></doc-feature>
 </doc-features>
 
-## Getting Started
+# Getting Started
 
 Get started instantly with the Paraglide-Next CLI.
 
@@ -87,6 +87,7 @@ You can do the same for the other navigation APIs.
 + import { usePathname, useRouter, redirect, permanentRedirect} from "@/lib/i18n"
 ```
 
+
 ## Advanced Usage
 
 ### Translated Metadata
@@ -144,7 +145,23 @@ Excluded routes won't be prefixed with the language tag & the middleware will no
 
 > Tip: LLMs are really good at writing regexes.
 
-#### Changing the default language
+### Setting the Language in Server Actions
+Use the `initializeLanguage` function at the top of your server-action file to make sure the language is available.
+
+```ts
+// src/app/actions.ts
+"use server";
+import { initializeLanguage } from "@inlang/paraglide-next"
+import { languageTag } from "@/paraglide/runtime"
+
+initializeLanguage() //call it at the top of the file
+
+export async function someAction() {
+	languageTag() // "de"
+}
+```
+
+### Changing the default language
 
 By default, the default language is the `sourceLanguageTag` defined in `project.inlang/settings.json`. You can change it with the `defaultLanguage` option.
 
@@ -155,7 +172,7 @@ export const { ... } =
 	})
 ```
 
-#### How language-detection works
+### How language-detection works
 
 Paraglide-Next follows these steps to determine the language.
 
@@ -166,7 +183,7 @@ Paraglide-Next follows these steps to determine the language.
 
 If a language has been determined once, it will set the `NEXT_LOCALE` cookie so that future ambiguities don't result in random language switches.
 
-#### Translated Pathnames
+### Translated Pathnames
 
 You can use different pathnames for each language with the `pathname` option.
 Pathnames should not include a language prefix or the base path.
@@ -224,7 +241,7 @@ export const { ... } =
 
 Be careful when using translated pathnames in combination with `prefix: "never"`. Links may not work if they are shared between people with different languages.
 
-#### Getting a localized Pathname
+## Getting a localized Pathname
 
 There are situations where you need to know the localized version of a pathname. You can use the `localizePathname` function for that.
 
@@ -341,7 +358,6 @@ There are some known limitations with Paraglide-Next.
 
 - `output: static` isn't supported yet.
 - Evaluating messages in module scope always renders the source language.
-- Server actions that aren't inside a `.tsx` file will always read the default language unless `setLanguageTag(()=>headers().get("x-language-tag"))` is called at the top of the file.
 
 ## Roadmap to 1.0
 
@@ -349,7 +365,7 @@ There are some known limitations with Paraglide-Next.
 - Simplify Setup
 - Cookie & Domain Routing Strategies
 
-## Examples
+# Examples
 
 You can find example projects in [our GitHub repository](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide-next/examples), or try them on StackBlitz:
 
