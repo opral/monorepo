@@ -6,6 +6,14 @@
 <doc-feature text-color="#0F172A" color="#E1EFF7" title="No route Param needed" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-next/assets/no-param.png"></doc-feature>
 </doc-features>
 
+# People Love It
+
+<doc-comments>
+<doc-comment text="Awesome library 🙂 Thanks so much! 1) The docs were simple and straight forward 2) Everything just worked.. no headaches" author="Dimitry" icon="mdi:discord" data-source="https://discord.com/channels/897438559458430986/1083724234142011392/1225658097016766574"></doc-comment>
+<doc-comment text="Thank you for that huge work you have done and still doing!" author="ZerdoX-x" icon="mdi:github"></doc-comment>
+</doc-comments>
+
+
 # Getting Started
 
 Get started instantly with the Paraglide-Next CLI.
@@ -18,14 +26,15 @@ npm install
 The CLI will ask you which languages you want to support. This can be changed later. 
 
 It will:
-- Create an Inlang Project
+- Create an [Inlang Project](https://inlang.com/documentation/concept/project)
 - Create translation files for each of your languages
 - Create a middleware file
 - Create `lib/i18n.ts` file
 - Update your `next.config.js` file to use the Paraglide-Next Plugin.
 - Add the `<LanguageProvider>` wrapper to your `app/layout.tsx` component.
+- Prompt if you want to automatically switch to localised routing
 
-You can now start your dev-server and visit `/de`, `/ar`, or whatever languages you've set up.
+You can now start your development server and visit `/de`, `/ar`, or whatever languages you've set up.
 
 ## Adding Messages
 
