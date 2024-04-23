@@ -195,12 +195,12 @@ ${error?.cause.stack}`
 	.join("\n")}`
 				continue
 			}
-			// Case: setup of project fixed -> no comment
+			// Case: setup of project fixed -> comment with new lint reports
 			if (result.errorsBase.length > 0 && result.errorsHead.length === 0) {
-				console.debug(`#### ✅ Setup of project \`${result.projectPath}\` fixed`)
+				console.debug(`✅ Setup of project \`${result.projectPath}\` fixed`)
 			}
 			// Case: No lint reports found -> no comment
-			if (result.errorsBase.length > 0 || result.errorsHead.length > 0) continue
+			if (result.errorsHead.length > 0) continue
 			if (result.lintSummary.length === 0) continue
 			// Case: Lint reports found -> create comment with lint summary
 			const lintSummary = result.lintSummary
