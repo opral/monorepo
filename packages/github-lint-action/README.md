@@ -1,4 +1,4 @@
-# 🥷 Ninja i18n [<img src="https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/assets/md-badges/inlang.svg" alt="inlang ecosystem compatible badge" align="right" width="243" height="36">](https://inlang.com)
+# 🥷 Ninja i18n [<img src="https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/assets/md-badges/inlang.svg" alt="inlang ecosystem compatible badge" align="right" width="163" height="36">](https://inlang.com)
 
 Automate your i18n workflow and ensure that your i18n files are always up to date with the latest changes in your source code.
 
