@@ -185,9 +185,11 @@ export async function convert(markdown: string): Promise<{ data: any; html: stri
 					node.tagName = "div"
 					node.children = []
 				} else if (
+					// external link with arrow icon
 					node.tagName === "a" &&
 					node.properties.href &&
 					node.properties.href.startsWith("http") &&
+					!node.properties.href.includes("inlang.com") &&
 					node.children[0].tagName !== "img"
 				) {
 					;(node.children = [
@@ -204,6 +206,16 @@ export async function convert(markdown: string): Promise<{ data: any; html: stri
 					]),
 						(node.properties.target = "_blank")
 				} else if (
+					// external link to inlang.com (we need that to have working links in github)
+					node.tagName === "a" &&
+					node.properties.href &&
+					node.properties.href.startsWith("http") &&
+					node.properties.href.includes("inlang.com") &&
+					node.children[0].tagName !== "img"
+				) {
+					//node.properties.target = "_blank"
+				} else if (
+					// external link with image (no arrow icon)
 					node.tagName === "a" &&
 					node.properties.href &&
 					node.properties.href.startsWith("http") &&

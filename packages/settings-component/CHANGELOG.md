@@ -1,5 +1,14 @@
 # @inlang/settings-component
 
+## 1.0.3
+
+### Patch Changes
+
+- c92bde5: Added description to project settings type & allow experimental field in settings component
+- 2508271: Style fix float
+- 0b4af82: Fixed mobile styling for objects
+  - @inlang/sdk@0.33.1
+
 ## 1.0.2
 
 ### Patch Changes

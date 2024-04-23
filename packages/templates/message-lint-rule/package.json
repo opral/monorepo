@@ -12,10 +12,10 @@
 		"test": "tsc --noEmit && vitest run --passWithNoTests"
 	},
 	"dependencies": {
-		"@inlang/sdk": "^0.33.0"
+		"@inlang/sdk": "^0.33.1"
 	},
 	"devDependencies": {
-		"@inlang/cli": "^2.14.1",
+		"@inlang/cli": "^2.14.2",
 		"typescript": "^5.2.2",
 		"vitest": "^0.34.4"
 	}

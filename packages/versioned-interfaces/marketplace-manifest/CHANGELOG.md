@@ -1,5 +1,12 @@
 # @inlang/marketplace-manifest
 
+## 1.4.1
+
+### Patch Changes
+
+- Updated dependencies [c92bde5]
+  - @inlang/project-settings@2.4.1
+
 ## 1.4.0
 
 ### Minor Changes

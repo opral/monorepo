@@ -1,5 +1,12 @@
 # @inlang/plugin-json
 
+## 5.1.28
+
+### Patch Changes
+
+- cd9a3e1: add internal links
+  - @inlang/sdk@0.33.1
+
 ## 5.1.27
 
 ### Patch Changes
