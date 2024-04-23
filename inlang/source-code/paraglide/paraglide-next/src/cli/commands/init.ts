@@ -46,7 +46,7 @@ export const InitCommand = new Command()
 
 		// addRouter Setup
 		const ctx7 =
-			ctx6.nextProject.router == "pages" ? await appRouterSetup(ctx6) : await pagesRouterSetup(ctx6)
+			ctx6.nextProject.router == "pages" ? await pagesRouterSetup(ctx6) : await appRouterSetup(ctx6)
 
 		try {
 			await Steps.runCompiler({ ...ctx7, outdir: ctx7.outdir.path })

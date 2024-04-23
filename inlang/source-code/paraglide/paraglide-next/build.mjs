@@ -81,7 +81,7 @@ await pluginBuild.write({
 })
 
 await cliBuild.write({
-	preserveModules: false,
+	preserveModules: true,
 	format: "esm",
 	entryFileNames: "[name].mjs",
 	dir: "dist",
