@@ -6,13 +6,17 @@ import { projectOption } from "../../utilities/globalFlags.js"
 import fs from "fs-extra"
 import type { Message } from "@inlang/sdk"
 
-export const validate = new Command()
+export let validate = new Command()
 	.command("validate")
 	.description("Validate the inlang project settings file.")
 	.requiredOption(projectOption.flags, projectOption.description)
-	.option("-s, --save", "Force saveMessages by creating and deleting a temporary message", false)
-	.option("-d, --dumpFile <dumpFile>", 'Dump messages into a JSON file. e.g. "messages.json"')
-	.action(validateCommandAction)
+
+if (process.env.INLANG_CLI_EXPERIMENTAL) {
+	validate = validate
+		.option("-s, --save", "Force saveMessages by creating and deleting a temporary message", false)
+		.option("-d, --dumpFile <dumpFile>", 'Dump messages into a JSON file. e.g. "messages.json"')
+}
+validate = validate.action(validateCommandAction)
 
 export async function validateCommandAction(args: { project: string }) {
 	try {
