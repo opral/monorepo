@@ -1,5 +1,5 @@
 import { Repository } from "@lix-js/client"
-import { CliStep } from "../../utils"
+import { CliStep, succeedOrElse } from "../../utils"
 import { Logger } from "@inlang/paraglide-js/internal"
 import { NextJSProject } from "../scan-next-project"
 import path from "node:path"
@@ -19,8 +19,8 @@ export const addParaglideJsComponent: CliStep<
 	)
 
 	let [appFile, documentFile] = await Promise.all([
-		ctx.repo.nodeishFs.readFile(appFilePath, { encoding: "utf-8" }),
-		ctx.repo.nodeishFs.readFile(documentFilePath, { encoding: "utf-8" }),
+		succeedOrElse(ctx.repo.nodeishFs.readFile(appFilePath, { encoding: "utf-8" }), ""),
+		succeedOrElse(ctx.repo.nodeishFs.readFile(documentFilePath, { encoding: "utf-8" }), ""),
 	])
 
 	if (!documentFile.includes("languageTag")) {
