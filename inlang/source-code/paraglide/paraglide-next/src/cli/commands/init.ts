@@ -78,13 +78,14 @@ export const InitCommand = new Command()
 				"@inlang/paraglide-js": ParaglideCli.version() as string,
 			}),
 		})(ctx4)
-		const ctx6 = await createI18nFile(ctx5)
-		const ctx7 = await createMiddlewareFile(ctx6)
-		const ctx8 = await updateNextConfig(ctx7)
-		const ctx9 = await addLanguageProvider(ctx8)
-		const ctx10 = await maybeMigrateI18nRouting(ctx9)
+		const ctx6 = await Steps.maybeChangeTsConfig(ctx5)
+		const ctx7 = await createI18nFile(ctx6)
+		const ctx8 = await createMiddlewareFile(ctx7)
+		const ctx9 = await updateNextConfig(ctx8)
+		const ctx10 = await addLanguageProvider(ctx9)
+		const ctx11 = await maybeMigrateI18nRouting(ctx10)
 		try {
-			await Steps.runCompiler({ ...ctx10, outdir: ctx10.outdir.path })
+			await Steps.runCompiler({ ...ctx11, outdir: ctx11.outdir.path })
 		} catch (e) {
 			//silently ignore
 		}
