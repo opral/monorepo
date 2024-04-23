@@ -31,7 +31,7 @@ export const addParaglideJsComponent: CliStep<
 
 	if (!appFile.includes("ParaglideJS")) {
 		appFile =
-			'import { ParaglideJS } from "@inlang/paraglide-next/pages"' +
+			'import { ParaglideJS } from "@inlang/paraglide-next/pages"\n' +
 			appFile.replace("<Component", "<ParaglideJS><Component")
 
 		if (appFile.includes("</Component>")) {
