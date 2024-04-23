@@ -77,9 +77,35 @@ export default class InlangSettings extends LitElement {
 			.hover-bar-text {
 				margin: 0;
 			}
-			.test {
-				width: 50px;
-				height: 50px;
+			.module-link-container {
+				display: flex;
+				color: var(--sl-input-help-text-color);
+				gap: 6px;
+				padding-top: 0.5rem;
+			}
+			.module-link {
+				margin: 0;
+				font-size: 14px;
+				line-height: 1.5;
+				flex-grow: 1;
+				text-decoration: none;
+				color: var(--sl-input-help-text-color);
+			}
+			.module-link:hover {
+				color: var(--sl-color-primary-600);
+			}
+			.module-type {
+				background-color: var(--sl-input-background-color-disabled);
+				width: fit-content;
+				padding: 0px 6px;
+				border-radius: 2px;
+				font-size: 14px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				color: var(--sl-input-color-disabled);
+				margin: 0;
+				line-height: 1.5;
 			}
 		`,
 	]
@@ -214,9 +240,33 @@ export default class InlangSettings extends LitElement {
 					? html`<div class="module-container" part="module">
 							${value.meta &&
 							(value.meta?.displayName as { en: string }).en &&
-							html`<h2 part="module-title">
-								${value.meta && (value.meta?.displayName as { en: string }).en}
-							</h2>`}
+							html`<div>
+								<h2 part="module-title">
+									${value.meta && (value.meta?.displayName as { en: string }).en}
+								</h2>
+								<div class="module-link-container">
+									<svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+										<path
+											fill="currentColor"
+											d="M11 17H7c-1.383 0-2.562-.488-3.537-1.463C2.488 14.562 2.001 13.383 2 12c0-1.383.487-2.562 1.463-3.537C4.439 7.488 5.618 7 7 7h4v2H7c-.833 0-1.542.292-2.125.875A2.893 2.893 0 004 12c0 .833.292 1.542.875 2.125A2.893 2.893 0 007 15h4v2zm-3-4v-2h8v2H8zm5 4v-2h4c.833 0 1.542-.292 2.125-.875A2.893 2.893 0 0020 12c0-.833-.292-1.542-.875-2.125A2.893 2.893 0 0017 9h-4V7h4c1.383 0 2.563.488 3.538 1.463.975.975 1.463 2.154 1.462 3.537 0 1.383-.488 2.562-1.463 3.538-.975.976-2.154 1.463-3.537 1.462h-4z"
+										></path>
+									</svg>
+									<a
+										target="_blank"
+										href=${`https://inlang.com/search?q=${(
+											value.meta.displayName as { en: string }
+										).en.replaceAll(" ", "-")}`}
+										class="module-link"
+									>
+										${`https://inlang.com/search?q=${(
+											value.meta.displayName as { en: string }
+										).en.replaceAll(" ", "-")}`}
+									</a>
+									<div class="module-type">
+										${value.meta.id.startsWith("plugin") ? "Plugin" : "Lint Rule"}
+									</div>
+								</div>
+							</div>`}
 							${Object.entries(value.schema.properties).map(([property, schema]) => {
 								if (property === "$schema" || property === "modules") return undefined
 								return key === "internal"
