@@ -8,10 +8,15 @@ import { getLanguage } from "./getLanguage.server"
  *
  * @example
  * ```ts
+ * "use server";
  * import { initializeLanguage } from "@inlang/paraglide-next"
- * initializeLanguage()
+ * import { languageTag } from "@/paraglide/runtime"
  *
- * export default async function () {}
+ * initializeLanguage() //call it at the top of the file
+ *
+ * export function someAction() {
+ *   languageTag() // "de"
+ * }
  * ```
  */
 export function initializeLanguage() {
