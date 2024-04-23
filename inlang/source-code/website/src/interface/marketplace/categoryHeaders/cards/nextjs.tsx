@@ -115,8 +115,8 @@ const NextCard = () => {
 				<div class="h-2/3 md:h-1/2 flex flex-col items-center justify-center gap-2 sm:gap-5 pt-4 sm:pt-8">
 					<h3 class="text-slate-900 text-2xl xl:text-3xl font-bold">paraglide-next</h3>
 					<div
-						onClick={() => {
-							copy("npx @inlang/paraglide-next init")
+						onClick={(e) => {
+							copy(e.currentTarget.textContent || "")
 							showToast({
 								title: "Copied to clipboard",
 								variant: "success",
@@ -125,7 +125,9 @@ const NextCard = () => {
 						}}
 						class="text-slate-600 text-sm font-normal font-mono leading-snug bg-surface-200 w-fit px-4 py-2 rounded flex gap-2 cursor-pointer group"
 					>
-						<p>npx @inlang/paraglide-next init</p>
+						<p>
+							npx <span style={{ color: "#357fd3" }}>@inlang/paraglide-next</span> init
+						</p>
 						<ContentCopyIcon class="text-surface-400 group-hover:text-surface-700" />
 					</div>
 				</div>
@@ -170,7 +172,7 @@ const NextBody = () => {
 					</Link>
 					<Link href="/g/wxcebbig/guide-lorissigrist-useParaglideJsWithNextjsAppRouter">
 						<div class="bg-background text-surface-700 border border-surface-300 w-fit h-10 px-6 rounded-full cursor-pointer text-sm ld:text-md flex items-center">
-							App Router Guide
+							Quickstart Guide
 						</div>
 					</Link>
 				</div>
