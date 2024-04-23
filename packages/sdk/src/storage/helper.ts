@@ -22,6 +22,12 @@ export function getPathFromMessageId(id: string) {
 	return path
 }
 
+/**
+ * This function creates a copy of the passed message object and asiges the properties in sorted order.
+ * This produces a deterministic result when the obj is passed to stringify independent from the property initialization of messages properties
+ * @param message Message to stringify sorted
+ * @returns
+ */
 export function stringifyMessage(message: Message) {
 	// order keys in message
 	const messageWithSortedKeys: any = {}
@@ -45,11 +51,22 @@ export function stringifyMessage(message: Message) {
 		// order keys in each variant
 		.map((variant: Variant) => {
 			const variantWithSortedKeys: any = {}
-			for (const key of Object.keys(variant).sort()) {
-				variantWithSortedKeys[key] = (variant as any)[key]
+			for (const variantKey of Object.keys(variant).sort()) {
+				if (variantKey === "pattern") {
+					variantWithSortedKeys[variantKey] = (variant as any)["pattern"].map((token: any) => {
+						const tokenWithSortedKey: any = {}
+						for (const tokenKey of Object.keys(token).sort()) {
+							tokenWithSortedKey[tokenKey] = token[tokenKey]
+						}
+						return tokenWithSortedKey
+					})
+				} else {
+					variantWithSortedKeys[variantKey] = (variant as any)[variantKey]
+				}
 			}
 			return variantWithSortedKeys
 		})
 
-	return JSON.stringify(messageWithSortedKeys, undefined, 4)
+	const result = JSON.stringify(messageWithSortedKeys, undefined, 4)
+	return result
 }
