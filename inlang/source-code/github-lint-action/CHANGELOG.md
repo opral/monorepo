@@ -1,5 +1,11 @@
 # @inlang/github-lint-action
 
+## 0.2.22
+
+### Patch Changes
+
+- 2144228: fix lint report comment after a project has been fixed
+
 ## 0.2.21
 
 ### Patch Changes

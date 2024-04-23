@@ -1,5 +1,11 @@
 # @inlang/paraglide-next
 
+## 0.1.2
+
+### Patch Changes
+
+- 86c9ad9: Add `initializeLanguage` function for setting the language in Server Actions
+
 ## 0.1.1
 
 ### Patch Changes
