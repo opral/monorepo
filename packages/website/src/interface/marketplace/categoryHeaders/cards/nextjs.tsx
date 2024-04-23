@@ -1,6 +1,9 @@
+import { showToast } from "#src/interface/components/Toast.jsx"
 import Link from "#src/renderer/Link.jsx"
 import { For, createSignal, onMount } from "solid-js"
 import CheckIcon from "~icons/material-symbols/check"
+import ContentCopyIcon from "~icons/material-symbols/content-copy-outline"
+import copy from "clipboard-copy"
 
 const NextjsHeader = () => {
 	const [isInitialised, setIsInitialised] = createSignal(false)
@@ -108,8 +111,19 @@ const NextCard = () => {
 				</div>
 				<div class="h-2/3 md:h-1/2 flex flex-col items-center justify-center gap-2 sm:gap-5 pt-4 sm:pt-8">
 					<h3 class="text-slate-900 text-2xl xl:text-3xl font-bold">paraglide-next</h3>
-					<div class="text-slate-600 text-sm font-normal font-mono leading-snug bg-surface-200 w-fit px-4 py-2 rounded">
+					<div
+						onClick={() => {
+							copy("npx @inlang/paraglide-next init")
+							showToast({
+								title: "Copied to clipboard",
+								variant: "success",
+								message: "You have successfully copied the command to your clipboard",
+							})
+						}}
+						class="text-slate-600 text-sm font-normal font-mono leading-snug bg-surface-200 w-fit px-4 py-2 rounded flex gap-2 cursor-pointer group"
+					>
 						<p>npx @inlang/paraglide-next init</p>
+						<ContentCopyIcon class="text-surface-400 group-hover:text-surface-700" />
 					</div>
 				</div>
 			</div>
