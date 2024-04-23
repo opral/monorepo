@@ -5,7 +5,7 @@ function padHex(pad: number, n: number) {
 
 /**
  * Takes a line and addes the line lenght as 4 digit fixed hex value at the beginning…
- *
+ * test
  * @param line a line raw used in a git-upload-pack request like: "want d7e62aef79d771d1771cb44c9e01faa4b7a607fe multi_ack_detailed no-done side-band-64k ofs-delta agent=git/isomorphic-git@1.24.5 filter"
  * @returns the line enriched with the amount of characters hex encoded in the first 4 characters:
  * "want d7e62aef79d771d1771cb44c9e01faa4b7a607fe multi_ack_detailed no-done side-band-64k ofs-delta agent=git/isomorphic-git@1.24.5 filter\n"
