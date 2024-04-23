@@ -3,6 +3,7 @@
 	"about": "Über ois",
 	"home": "Startsiite",
 	"about_path": "/ueber-ois",
+	"hello": "Hoi {name}!",
 
 	"paraglide_and_next_app_router": "ParaglideJS + NextJS App Router",
 	"this_app_was_localised_with_paraglide": "Das isch e NextJS App mit em App Router. Sie isch mit Paraglide-Next lokalisiert worde.",
