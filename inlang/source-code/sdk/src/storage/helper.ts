@@ -23,26 +23,33 @@ export function getPathFromMessageId(id: string) {
 }
 
 export function stringifyMessage(message: Message) {
-	// create a new object do specify key output order
+	// order keys in message
 	const messageWithSortedKeys: any = {}
 	for (const key of Object.keys(message).sort()) {
 		messageWithSortedKeys[key] = (message as any)[key]
 	}
 
-	// lets order variants as well
-	messageWithSortedKeys["variants"] = messageWithSortedKeys["variants"].sort(
-		(variantA: Variant, variantB: Variant) => {
-			// First, compare by language
+	// order variants
+	messageWithSortedKeys["variants"] = messageWithSortedKeys["variants"]
+		.sort((variantA: Variant, variantB: Variant) => {
+			// compare by language
 			const languageComparison = variantA.languageTag.localeCompare(variantB.languageTag)
 
-			// If languages are the same, compare by match
+			// if languages are the same, compare by match
 			if (languageComparison === 0) {
 				return variantA.match.join("-").localeCompare(variantB.match.join("-"))
 			}
 
 			return languageComparison
-		}
-	)
+		})
+		// order keys in each variant
+		.map((variant: Variant) => {
+			const variantWithSortedKeys: any = {}
+			for (const key of Object.keys(variant).sort()) {
+				variantWithSortedKeys[key] = (variant as any)[key]
+			}
+			return variantWithSortedKeys
+		})
 
 	return JSON.stringify(messageWithSortedKeys, undefined, 4)
 }
