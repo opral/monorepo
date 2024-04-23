@@ -27,13 +27,10 @@
 		"compatible",
 		"ecosystem compatible",
 		"astro",
-		"nextjs",
 		"remix",
 		"vue",
 		"angular",
 		"flutter",
-		"solidstart",
-		"svelte",
 		"guides-general",
 		"guides-developer"
 	],
