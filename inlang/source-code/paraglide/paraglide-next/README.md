@@ -358,7 +358,6 @@ There are some known limitations with Paraglide-Next.
 
 - `output: static` isn't supported yet.
 - Evaluating messages in module scope always renders the source language.
-- Server actions that aren't inside a `.tsx` file will always read the default language unless `setLanguageTag(()=>headers().get("x-language-tag"))` is called at the top of the file.
 
 ## Roadmap to 1.0
 
