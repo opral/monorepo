@@ -3,7 +3,7 @@ import type { CliStep } from "../../utils"
 import type { NextJSProject } from "../scan-next-project"
 import type { Logger } from "@inlang/paraglide-js/internal"
 import type { Outdir } from "../getOutDir"
-import type { InlangProject } from "../../../../../../sdk/dist/api"
+import type { InlangProject } from "@inlang/sdk"
 import { addParaglideNextPluginToNextConfig } from "../addPluginToNextConfig"
 import { addI18nToNextConfig } from "./addI18nToNextConfig"
 
