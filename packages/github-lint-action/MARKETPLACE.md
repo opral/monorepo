@@ -67,7 +67,7 @@ Create a pull request with changes to your i18n files and see if the action runs
 
 [Click here to watch a video showing the above steps in GitHub](https://www.loom.com/share/c4d15fefb0854ca4b75a85cdb0d2c7e3)
 
-### Environmental Variables:
+### Environmental Variables
 
 | Name                  | Requirement | Description |
 | --------------------- | ----------- | ----------- |
