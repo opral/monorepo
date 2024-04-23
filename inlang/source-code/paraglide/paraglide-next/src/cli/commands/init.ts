@@ -36,7 +36,7 @@ export const InitCommand = new Command()
 			appId: MARKETPLACE_ID,
 		})
 
-		const ctx1 = await findAndEnforceRequiredFiles(ctx0)
+		const ctx1 = await scanNextJSProject(ctx0)
 		const ctx2 = await enforceAppRouter(ctx1)
 		const ctx3 = { ...ctx2, outdir: path.resolve(ctx2.srcRoot, "paraglide") }
 		const ctx4 = await Steps.initializeInlangProject(ctx3)
@@ -86,7 +86,7 @@ const enforceAppRouter: CliStep<
 	return ctx
 }
 
-const findAndEnforceRequiredFiles: CliStep<
+const scanNextJSProject: CliStep<
 	{
 		repo: Repository
 		logger: Logger
@@ -94,8 +94,12 @@ const findAndEnforceRequiredFiles: CliStep<
 	{
 		/** Absolute Path to the next.config.js or next.config.mjs */
 		nextConfigFile: NextConfigFile
+		/** The absolute path to the package.json file  */
 		packageJsonPath: string
+		/** The absolute path to the src folder (if present), otherwise the current working directory  */
 		srcRoot: string
+		/** If the project uses TypeScript */
+		typescript: boolean
 	}
 > = async (ctx) => {
 	const packageJsonPath = await findPackageJson(ctx.repo.nodeishFs, process.cwd())
@@ -110,6 +114,29 @@ const findAndEnforceRequiredFiles: CliStep<
 		process.exit(1)
 	}
 
+	// try to read tsconfig or JSConfig
+	const tsConfigPath = path.join(process.cwd(), "tsconfig.json")
+	const jsConfigPath = path.join(process.cwd(), "jsconfig.json")
+
+	let typescript = false
+	try {
+		const stat = await ctx.repo.nodeishFs.stat(tsConfigPath)
+		if (stat.isFile()) {
+			typescript = true
+		}
+	} catch {
+		//silently ignore
+	}
+
+	try {
+		const stat = await ctx.repo.nodeishFs.stat(jsConfigPath)
+		if (stat.isFile()) {
+			typescript = false
+		}
+	} catch {
+		//silently ignore
+	}
+
 	// if the ./src directory exists -> srcRoot = ./src
 	// otherwise -> srcRoot  = .
 
@@ -122,7 +149,7 @@ const findAndEnforceRequiredFiles: CliStep<
 		srcRoot = process.cwd()
 	}
 
-	return { ...ctx, srcRoot, nextConfigFile: nextConfigFile, packageJsonPath }
+	return { ...ctx, srcRoot, nextConfigFile: nextConfigFile, packageJsonPath, typescript }
 }
 
 /**
