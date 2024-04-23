@@ -3,7 +3,7 @@ import { CliStep } from "../utils"
 import { Repository } from "@lix-js/client"
 import { NextJSProject } from "./scan-next-project"
 import path from "node:path"
-import type { Outdir } from "../commands/init"
+import { Outdir } from "./getOutDir"
 
 export const updateNextConfig: CliStep<
 	{
