@@ -10,6 +10,7 @@ import {
 } from "@inlang/sdk"
 import checkOptional from "./../helper/checkOptional.js"
 import overridePrimitiveColors from "./../helper/overridePrimitiveColors.js"
+import { registry } from "@inlang/marketplace-registry"
 
 import "./input-fields/general-input.js"
 
@@ -106,6 +107,7 @@ export default class InlangSettings extends LitElement {
 				color: var(--sl-input-color-disabled);
 				margin: 0;
 				line-height: 1.5;
+				flex-grow: 0;
 			}
 		`,
 	]
@@ -236,10 +238,12 @@ export default class InlangSettings extends LitElement {
 	override render() {
 		return html` <div class="container" part="base">
 			${Object.entries(this._settingProperties).map(([key, value]) => {
+				const item = registry.find((item) => item.id === value.meta?.id)
 				return value.schema?.properties && this._newSettings
 					? html`<div class="module-container" part="module">
 							${value.meta &&
 							(value.meta?.displayName as { en: string }).en &&
+							item &&
 							html`<div>
 								<h2 part="module-title">
 									${value.meta && (value.meta?.displayName as { en: string }).en}
@@ -253,14 +257,10 @@ export default class InlangSettings extends LitElement {
 									</svg>
 									<a
 										target="_blank"
-										href=${`https://inlang.com/search?q=${(
-											value.meta.displayName as { en: string }
-										).en.replaceAll(" ", "-")}`}
+										href=${`https://inlang.com/m/${item.uniqueID}/${item.id.replaceAll(".", "-")}`}
 										class="module-link"
 									>
-										${`https://inlang.com/search?q=${(
-											value.meta.displayName as { en: string }
-										).en.replaceAll(" ", "-")}`}
+										${`https://inlang.com/.../${item.id.replaceAll(".", "-")}`}
 									</a>
 									<div class="module-type">
 										${value.meta.id.startsWith("plugin") ? "Plugin" : "Lint Rule"}
