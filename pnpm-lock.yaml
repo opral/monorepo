@@ -2747,9 +2747,6 @@ importers:
 
   lix/packages/client:
     dependencies:
-      '@lix-js/code-style':
-        specifier: workspace:*
-        version: link:../code-style
       '@lix-js/fs':
         specifier: workspace:*
         version: link:../fs
@@ -2790,6 +2787,9 @@ importers:
         specifier: ^2.4.11
         version: 2.4.11
     devDependencies:
+      '@lix-js/code-style':
+        specifier: workspace:*
+        version: link:../code-style
       '@vitest/coverage-v8':
         specifier: 0.34.6
         version: 0.34.6(vitest@0.34.6)
@@ -2844,13 +2844,13 @@ importers:
 
   lix/packages/fs:
     dependencies:
+      '@lix-js/code-style':
+        specifier: workspace:*
+        version: link:../code-style
       typescript:
         specifier: 5.2.2
         version: 5.2.2
     devDependencies:
-      '@lix-js/code-style':
-        specifier: workspace:*
-        version: link:../code-style
       '@types/node':
         specifier: 20.12.7
         version: 20.12.7
