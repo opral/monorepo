@@ -1,6 +1,7 @@
 import {
 	LanguageTag,
 	isValidLanguageTag,
+	createNewProject,
 	listProjects,
 	loadProject,
 	type InlangProject,
@@ -194,12 +195,13 @@ export const createNewProjectFlow = async (ctx: {
 	)
 
 	ctx.logger.info(`Creating a new inlang project in the current working directory.`)
-	await ctx.repo.nodeishFs.mkdir(DEFAULT_PROJECT_PATH, { recursive: true })
-
-	const settingsFilePath = nodePath.resolve(process.cwd(), DEFAULT_PROJECT_PATH, "settings.json")
-	await ctx.repo.nodeishFs.writeFile(settingsFilePath, JSON.stringify(settings, undefined, 2))
 
 	const projectPath = nodePath.resolve(process.cwd(), DEFAULT_PROJECT_PATH)
+	await createNewProject({
+		projectPath,
+		repo: ctx.repo,
+		projectSettings: settings,
+	})
 	const project = await loadProject({
 		projectPath,
 		repo: ctx.repo,
