@@ -2,6 +2,8 @@ import { describe, it, expect, vi } from "vitest"
 import { openRepository } from "../index.ts"
 // @ts-ignore -- ts import not working correctly, TODO: find out why
 import { createNodeishMemoryFs, fromSnapshot, toSnapshot } from "@lix-js/fs"
+
+/* eslint-disable no-restricted-imports */
 import { readFileSync } from "node:fs"
 import { resolve } from "node:path"
 // import { status } from "isomorphic-git"

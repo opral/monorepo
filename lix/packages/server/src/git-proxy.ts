@@ -14,10 +14,9 @@ import createMiddleware from "./auth/cors-middleware.js"
 import { decryptAccessToken } from "./auth/implementation.js"
 import { getEnvVar } from "./util/getEnv.js"
 
-const allowedOrigins = getEnvVar(
-	"PUBLIC_ALLOWED_AUTH_URLS",
-	{ descirption: 'List of allowed base urls eg https://inlang.com,https://manage.inlang.com"' }
-).split(",")
+const allowedOrigins = getEnvVar("PUBLIC_ALLOWED_AUTH_URLS", {
+	descirption: 'List of allowed base urls eg https://inlang.com,https://manage.inlang.com"',
+}).split(",")
 const JWE_SECRET = getEnvVar("JWE_SECRET")
 const production = process.env.NODE_ENV === "production"
 

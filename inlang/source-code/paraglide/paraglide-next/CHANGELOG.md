@@ -1,5 +1,33 @@
 # @inlang/paraglide-next
 
+## 0.1.4
+
+### Patch Changes
+
+- ec7c58e: The `paraglide-next init` command now supports JS setups
+- ec7c58e: The `paraglide-next init` command now supports Pages Router Setups
+  - @inlang/paraglide-js@1.7.1
+
+## 0.1.3
+
+### Patch Changes
+
+- Updated dependencies [4d24188]
+  - @inlang/paraglide-js@1.7.1
+
+## 0.1.2
+
+### Patch Changes
+
+- 86c9ad9: Add `initializeLanguage` function for setting the language in Server Actions
+
+## 0.1.1
+
+### Patch Changes
+
+- 13dbef3: The `init` cli now offers to migrate navigation imports
+  - @inlang/paraglide-js@1.7.0
+
 ## 3.3.0
 
 ### Minor Changes
