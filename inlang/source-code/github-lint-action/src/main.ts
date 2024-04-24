@@ -77,7 +77,7 @@ export async function run(): Promise<void> {
 
 		// Prepare head repo
 		// TODO: Change to the correct directory
-		process.chdir("../../../")
+		process.chdir("../")
 
 		console.log("List directories")
 		const directories = await fs.readdir(process.cwd())
