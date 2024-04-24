@@ -32,6 +32,7 @@ export async function run(): Promise<void> {
 		})
 		const projectListBase = await listProjects(repoBase.nodeishFs, process.cwd())
 		console.log("List projects", projectListBase)
+
 		const results = projectListBase.map((project) => ({
 			projectPath: project.projectPath.replace(process.cwd(), ""),
 			errorsBase: [] as any[],
@@ -80,7 +81,7 @@ export async function run(): Promise<void> {
 
 		// Prepare head repo
 		// TODO: Change to the correct directory
-		process.chdir("../../merge")
+		process.chdir("../merge")
 
 		console.log("List directories")
 		const directories = await fs.readdir(process.cwd())
