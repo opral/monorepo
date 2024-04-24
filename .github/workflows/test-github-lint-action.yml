@@ -10,12 +10,18 @@ permissions:
 jobs:
   test-action:
     name: GitHub Actions Test
+    if: github.event.pull_request.mergeable == true
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout target branch
         id: checkout
         uses: actions/checkout@v4
+
+      - name: Checkout merge
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
 
       - name: Setup Pnpm
         uses: pnpm/action-setup@v2
