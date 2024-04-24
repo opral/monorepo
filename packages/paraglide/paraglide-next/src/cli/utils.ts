@@ -38,3 +38,14 @@ export function pair<Step1 extends CliStep<any, any>, Step2 extends CliStep<CliS
 ): Pair<Step1, Step2> {
 	return async (ctx) => await step2(await step1(ctx))
 }
+
+export async function succeedOrElse<T extends Promise<unknown>, U>(
+	promise: T,
+	orElse: U
+): Promise<T | U> {
+	try {
+		return await promise
+	} catch (err) {
+		return orElse
+	}
+}

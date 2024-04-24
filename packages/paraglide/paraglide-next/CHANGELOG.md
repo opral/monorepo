@@ -1,5 +1,21 @@
 # @inlang/paraglide-next
 
+## 0.1.5
+
+### Patch Changes
+
+- 8902fb5: Calling the paraglide compiler on Windows should no longer error
+- Updated dependencies [6105a50]
+  - @inlang/paraglide-js@1.7.2
+
+## 0.1.4
+
+### Patch Changes
+
+- ec7c58e: The `paraglide-next init` command now supports JS setups
+- ec7c58e: The `paraglide-next init` command now supports Pages Router Setups
+  - @inlang/paraglide-js@1.7.1
+
 ## 0.1.3
 
 ### Patch Changes

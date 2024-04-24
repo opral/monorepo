@@ -1,5 +1,16 @@
 # inlang-vs-code-extension
 
+## 1.39.6
+
+### Patch Changes
+
+- Updated dependencies [9165e64]
+  - @lix-js/client@1.4.0
+  - @inlang/sdk@0.34.1
+  - @inlang/rpc@0.3.12
+  - @inlang/settings-component@1.0.5
+  - @inlang/telemetry@0.3.26
+
 ## 1.39.5
 
 ### Patch Changes
