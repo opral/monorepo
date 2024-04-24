@@ -25,8 +25,11 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.merge_commit_sha }}
           path: merge
+      
+      - name: Move in working directory target
+        run: cd target
 
-      - name: Setup Pnpm
+      - name: Setup Pnpm in target
         uses: pnpm/action-setup@v2
         with:
           version: 8
