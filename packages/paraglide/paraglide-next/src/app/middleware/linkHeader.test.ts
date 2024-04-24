@@ -6,8 +6,6 @@ import { NextRequest } from "next/server"
 describe("generateLinkHeader", () => {
 	it("generates the Link header for a Routing Strategy with only pathnames", () => {
 		const strategy = PrefixStrategy({
-			defaultLanguage: "en",
-			availableLanguageTags: ["en", "de", "fr"],
 			pathnames: {},
 			exclude: () => false,
 			prefix: "except-default",

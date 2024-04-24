@@ -1,5 +1,5 @@
 import { getLanguage } from "./getLanguage.server"
-import { availableLanguageTags, setLanguageTag, sourceLanguageTag } from "$paraglide/runtime.js"
+import { availableLanguageTags, setLanguageTag } from "$paraglide/runtime.js"
 import { createNavigation } from "./navigation"
 import { createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
@@ -29,16 +29,13 @@ export function createI18n<T extends string = string>(userConfig: I18nUserConfig
 	setLanguageTag(getLanguage)
 
 	const config: ResolvedI18nConfig<T> = {
-		availableLanguageTags: availableLanguageTags as readonly T[],
 		exclude: createExclude(userConfig.exclude ?? []),
 		pathnames: resolveUserPathDefinitions(userConfig.pathnames ?? {}, availableLanguageTags as T[]),
 		prefix: userConfig.prefix ?? "except-default",
 	}
 
 	const strategy = PrefixStrategy({
-		availableLanguageTags: config.availableLanguageTags,
 		exclude: config.exclude,
-		defaultLanguage: sourceLanguageTag as T,
 		pathnames: userConfig.pathnames || {},
 		prefix: config.prefix,
 	})

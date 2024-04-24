@@ -11,6 +11,7 @@ import type { RoutingStragey } from "./interface"
 import { createPrefixDetection } from "../middleware/detection/prefixDetection"
 import { DEV } from "../env"
 import { rsc } from "rsc-env"
+import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
 
 /*
 	Canonical Path = Path without locale (how you write the href)
@@ -18,17 +19,13 @@ import { rsc } from "rsc-env"
 */
 
 export function PrefixStrategy<T extends string>({
-	defaultLanguage,
 	pathnames: userPathnames,
 	exclude,
 	prefix,
-	availableLanguageTags,
 }: {
 	exclude: (path: string) => boolean
 	pathnames: UserPathDefinitionTranslations<T>
-	defaultLanguage: T
 	prefix: "all" | "except-default" | "never"
-	availableLanguageTags: readonly T[]
 }): RoutingStragey<T> {
 	const resolvedPathnames = /** @__PURE__ */ resolveUserPathDefinitions(
 		userPathnames,
@@ -100,7 +97,7 @@ export function PrefixStrategy<T extends string>({
 				prefix === "never"
 					? false
 					: prefix === "except-default"
-					? targetLanguage !== defaultLanguage
+					? targetLanguage !== sourceLanguageTag
 					: true
 
 			const localisedPath = shouldAddPrefix
@@ -114,7 +111,7 @@ export function PrefixStrategy<T extends string>({
 
 		resolveLocale(request) {
 			const detect = createPrefixDetection({ availableLanguageTags })
-			return detect(request)
+			return detect(request) as T | undefined
 		},
 	}
 }

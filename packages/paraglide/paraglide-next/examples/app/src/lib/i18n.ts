@@ -6,7 +6,6 @@ import {
 } from "@inlang/paraglide-next"
 import type { AvailableLanguageTag } from "@/paraglide/runtime"
 import * as m from "@/paraglide/messages"
-import * as runtime from "@/paraglide/runtime"
 
 const strategy = PrefixStrategy({
 	exclude: () => false,
@@ -18,8 +17,6 @@ const strategy = PrefixStrategy({
 			"de-CH": "/administrator/[...rest]",
 		},
 	},
-	availableLanguageTags: runtime.availableLanguageTags,
-	defaultLanguage: runtime.sourceLanguageTag,
 	prefix: "except-default",
 })
 
