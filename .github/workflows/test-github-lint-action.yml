@@ -14,17 +14,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout merge
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.merge_commit_sha }}
-          path: merge
-
       - name: Checkout target branch
         id: checkout
         uses: actions/checkout@v4
         with:
           path: target
+
+      - name: Checkout merge
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          path: merge
 
       - name: Setup Pnpm
         uses: pnpm/action-setup@v2
