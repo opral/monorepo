@@ -13,7 +13,40 @@ import type { NextURL } from "next/dist/server/web/next-url"
 import { createCookieDetection } from "./detection/CookieDetection"
 import { createAcceptLanguageDetection } from "./detection/AcceptLanguageDetection"
 
-export function createMiddleware<T extends string>({ strategy }: { strategy: RoutingStragey<T> }) {
+export type MiddlewareOptions<T extends string> = {
+	/**
+	 * The routing strategy used for determining the language and page to render
+	 */
+	strategy: RoutingStragey<T>
+
+	/**
+	 * If a redirect should occur when the detected language does not match the path
+	 *
+	 * @example
+	 * - A request is made to /about.
+	 * - The routing strategy is ambiguous & falls back to language detection
+	 * - Language is set to `de`
+	 * - The localised path would be /de/ueber-uns
+	 * - If redirect is true, the request will be redirected to /de/ueber-uns, otherwise it will stay
+	 *
+	 * @default true
+	 */
+	redirect?: boolean
+}
+
+type OptionalProps<T> = {
+	[K in keyof T]-?: Record<string, never> extends { [P in K]: T[K] } ? K : never
+}[keyof T]
+
+type MaybeMissingOptions<T> = Pick<Required<T>, OptionalProps<T>>
+
+const middlewareOptionDefaults: MaybeMissingOptions<MiddlewareOptions<string>> = {
+	redirect: true,
+}
+
+export function createMiddleware<T extends string>(opt: MiddlewareOptions<T>) {
+	opt = { ...middlewareOptionDefaults, ...opt }
+
 	/**
 	 * Sets the request headers to resolve the language tag in RSC.
 	 * https://nextjs.org/docs/pages/building-your-application/routing/middleware#setting-headers
@@ -21,16 +54,16 @@ export function createMiddleware<T extends string>({ strategy }: { strategy: Rou
 	return function middleware(request: NextRequest) {
 		const localeCookeValue = request.cookies.get(LANG_COOKIE.name)?.value
 		const locale = resolveLanguage(request, sourceLanguageTag, [
-			strategy.resolveLocale,
+			opt.strategy.resolveLocale,
 			createCookieDetection({ availableLanguageTags: availableLanguageTags }),
 			createAcceptLanguageDetection({ availableLanguageTags: availableLanguageTags }),
 		]) as T
 
 		const decodedPathname = decodeURI(request.nextUrl.pathname)
-		const canonicalPath = strategy.getCanonicalPath(decodedPathname, locale)
-		const localisedPathname = strategy.getLocalisedUrl(canonicalPath, locale, false)
+		const canonicalPath = opt.strategy.getCanonicalPath(decodedPathname, locale)
+		const localisedPathname = opt.strategy.getLocalisedUrl(canonicalPath, locale, false)
 
-		const shouldRedirect = localisedPathname.pathname !== decodedPathname
+		const shouldRedirect = opt.redirect && localisedPathname.pathname !== decodedPathname
 
 		const localeCookieMatches =
 			isAvailableLanguageTag(localeCookeValue) && localeCookeValue === locale
@@ -59,7 +92,7 @@ export function createMiddleware<T extends string>({ strategy }: { strategy: Rou
 		}
 
 		if (shouldAddLinkHeader(request)) {
-			const linkHeader = generateLinkHeader(strategy, {
+			const linkHeader = generateLinkHeader(opt.strategy, {
 				availableLanguageTags: availableLanguageTags as T[],
 				canonicalPath,
 				request,
