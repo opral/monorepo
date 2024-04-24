@@ -4,6 +4,13 @@
 
 ### Patch Changes
 
+- Updated dependencies [3c959bc]
+  - @inlang/cli@2.15.2
+
+## null
+
+### Patch Changes
+
 - @inlang/cli@2.15.1
 
 ## null
