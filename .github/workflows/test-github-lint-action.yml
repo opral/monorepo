@@ -20,18 +20,12 @@ jobs:
         with:
           path: target
 
-      - name: Log PR hash
-        run: echo ${{ github.event.pull_request.merge_commit_sha }}
-
       - name: Checkout merge
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.merge_commit_sha }}
           path: merge
 
-      - name: Move into the target directory
-        run: cd target
-        
       - name: Setup Pnpm
         uses: pnpm/action-setup@v2
         with:
@@ -42,8 +36,9 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install Dependencies
+      - name: Install Dependencies in target
         run: pnpm install
+        working-directory: target
 
       - name: Build
         run: pnpm --filter @inlang/github-lint-action... build
