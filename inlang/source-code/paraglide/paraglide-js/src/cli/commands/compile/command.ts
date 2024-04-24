@@ -51,7 +51,6 @@ export const compileCommand = new Command()
 		if (options.watch) {
 			process.on("SIGINT", () => {
 				//start with a new line, since the ^C is on the current line
-				logger.ln().info("Stopping the watcher.")
 				process.exit(0)
 			})
 
