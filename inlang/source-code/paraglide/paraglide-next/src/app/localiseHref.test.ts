@@ -3,8 +3,6 @@ import { createLocaliseHref, isExternal } from "./localiseHref"
 import { PrefixStrategy } from "./routing/prefixStrategy"
 
 const strategy = PrefixStrategy<"en" | "de" | "de-CH">({
-	availableLanguageTags: ["en", "de", "de-CH"],
-	defaultLanguage: "en",
 	pathnames: {
 		"/canonical-translated": {
 			de: "/uebersetzt",
