@@ -9,6 +9,9 @@
 	"description": {
 		"en": "A SolidStart integration for ParaglideJS, providing you with everything you need to take your solid app global."
 	},
+	"gallery": [
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-solidstart/assets/og.png"
+	],
 	"pages": {
 		"/": "./inlang/source-code/paraglide/paraglide-solidstart/README.md",
 		"/changelog": "./inlang/source-code/paraglide/paraglide-solidstart/CHANGELOG.md"
