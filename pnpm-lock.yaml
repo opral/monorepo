@@ -2231,6 +2231,9 @@ importers:
         specifier: ^2.4.2
         version: 2.4.2
     devDependencies:
+      '@inlang/marketplace-registry':
+        specifier: workspace:^
+        version: link:../marketplace-registry
       '@nx/storybook':
         specifier: ^18.0.4
         version: 18.3.3(@types/node@20.12.7)(nx@18.3.3)(typescript@5.3.3)
