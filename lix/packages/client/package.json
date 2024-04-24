@@ -29,7 +29,6 @@
 		"eslint": "9.0.0",
 		"prettier": "2.8.3",
 		"@lix-js/fs": "workspace:*",
-		"@lix-js/code-style": "workspace:*",
 		"@octokit/types": "12.4.0 ",
 		"async-lock": "^1.4.1",
 		"clean-git-ref": "^2.0.1",
@@ -45,6 +44,7 @@
 	"devDependencies": {
 		"typescript": "5.2.2",
 		"@vitest/coverage-v8": "1.1.1",
+		"@lix-js/code-style": "workspace:*",
 		"vitest": "1.1.1"
 	}
 }
