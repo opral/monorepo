@@ -294,11 +294,29 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 > We discourage using the `Intl.Locale` API for text-direction as it's still poorly supported
 
+### Chaining Middleware
+
+You can chain `paraglide-next`'s middleware with your own by calling it inside your own middleware function. You need to pass it the request and use the returned response.
+
+```ts
+// src/middleware.ts
+import { middleware as paraglide } from "@/lib/i18n"
+export default function middleware(request: NextRequest) {
+
+	//do something with the request
+
+	const response = paraglide(request)
+
+	// do something with the response
+	return response
+}
+```
+
 ## (Legacy) Setup With the Pages Router
 
+The `paraglide-next init` command will have set up [Next's built-in i18n routing](https://nextjs.org/docs/advanced-features/i18n-routing). Thus, NextJS will automatically prefix all routes with the locale. 
 
-NextJS will automatically prefix all routes with the locale. For example, the route `/about` will become `/en/about` for the English locale and `/de/about` for the German locale. Only the default locale won't be prefixed.
-
+For example, the route `/about` will become `/en/about` for the English locale and `/de/about` for the German locale. Only the default locale won't be prefixed. 
 
 ## Known Limitations
 
@@ -311,7 +329,7 @@ There are some known limitations with Paraglide-Next.
 
 - Static Export support
 - Simplify Setup
-- Cookie & Domain Routing Strategies
+- More flexible Routing Strategies
 
 # Examples
 
