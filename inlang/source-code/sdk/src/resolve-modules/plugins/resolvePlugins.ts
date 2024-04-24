@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { ResolvePluginsFunction } from "./types.js"
 import { Plugin } from "@inlang/plugin"
-import { plugin as sdkPersistence } from "../../persistence/plugin.js"
+import {
+	loadMessages as sdkLoadMessages,
+	saveMessages as sdkSaveMessages,
+} from "../../persistence/plugin.js"
 import {
 	PluginReturnedInvalidCustomApiError,
 	PluginLoadMessagesFunctionAlreadyDefinedError,
@@ -118,21 +121,17 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 
 	// --- LOADMESSAGE / SAVEMESSAGE NOT DEFINED ---
 
-	if (
-		!experimentalPersistence &&
-		(typeof result.data.loadMessages !== "function" ||
-			typeof result.data.saveMessages !== "function")
+	if (experimentalPersistence) {
+		debug("Override load/save for experimental persistence")
+		// @ts-ignore - type mismatch error
+		result.data.loadMessages = sdkLoadMessages
+		// @ts-ignore - type mismatch error
+		result.data.saveMessages = sdkSaveMessages
+	} else if (
+		typeof result.data.loadMessages !== "function" ||
+		typeof result.data.saveMessages !== "function"
 	) {
 		result.errors.push(new PluginsDoNotProvideLoadOrSaveMessagesError())
-	}
-
-	if (experimentalPersistence) {
-		// @ts-ignore - type mismatch error
-		result.data.loadMessages = sdkPersistence.loadMessages
-		// @ts-ignore - type mismatch error
-		result.data.saveMessages = sdkPersistence.saveMessages
-
-		debug("Override load/save for experimental persistence")
 	}
 
 	return result
