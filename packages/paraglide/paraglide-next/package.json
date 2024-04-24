@@ -63,6 +63,7 @@
 		"react": "^18 || ^19"
 	},
 	"devDependencies": {
+		"@inlang/sdk": "workspace:*",
 		"@lix-js/client": "workspace:*",
 		"@lix-js/fs": "workspace:*",
 		"@rollup/plugin-commonjs": "^25.0.7",
