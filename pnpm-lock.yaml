@@ -394,7 +394,7 @@ importers:
   inlang/source-code/editor:
     dependencies:
       '@inlang/settings-component':
-        specifier: ^1.0.5
+        specifier: ^1.0.6
         version: link:../settings-component
       '@isomorphic-git/cors-proxy':
         specifier: ^2.7.1
@@ -761,7 +761,7 @@ importers:
         specifier: workspace:*
         version: link:../sdk
       '@inlang/settings-component':
-        specifier: ^1.0.5
+        specifier: ^1.0.6
         version: link:../settings-component
       '@inlang/telemetry':
         specifier: workspace:*
