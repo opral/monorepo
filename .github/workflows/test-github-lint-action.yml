@@ -46,6 +46,6 @@ jobs:
 
       - name: Test Local Action
         id: test-action
-        uses: ./inlang/source-code/github-lint-action
+        uses: ./target/inlang/source-code/github-lint-action
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
