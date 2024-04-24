@@ -31,17 +31,7 @@ body:has(.requires-no-scroll) {
 }
 
 inlang-settings {
-	--sl-color-primary-50: var(--sl-color-cyan-50);
-	--sl-color-primary-100: var(--sl-color-cyan-100);
-	--sl-color-primary-200: var(--sl-color-cyan-200);
-	--sl-color-primary-300: var(--sl-color-cyan-300);
-	--sl-color-primary-400: var(--sl-color-cyan-400);
-	--sl-color-primary-500: var(--sl-color-cyan-500);
-	--sl-color-primary-600: var(--sl-color-cyan-600);
-	--sl-color-primary-700: var(--sl-color-cyan-700);
-	--sl-color-primary-800: var(--sl-color-cyan-800);
-	--sl-color-primary-900: var(--sl-color-cyan-900);
-	--sl-color-primary-950: var(--sl-color-cyan-950);
+	--inlang-color-primary: theme(colors.primary);
 
 	--sl-input-background-color-disabled: theme(colors.surface-2);
 	--sl-input-color-disabled: theme(colors.secondary-on-inverted-container);
