@@ -56,7 +56,7 @@ export function getCompileCommand(options: CompileOptions): string {
 		options.watch || options.silent ? "--silent" : "",
 	].filter(Boolean)
 
-	return `npx paraglide-js compile ` + flags.join(" ")
+	return `npx @inlang/paraglide-js compile ` + flags.join(" ")
 }
 
 export function getWatchCommand(options: CompileOptions): string {
@@ -67,5 +67,5 @@ export function getWatchCommand(options: CompileOptions): string {
 		options.silent ? "--silent" : "",
 	].filter(Boolean)
 
-	return `npx paraglide-js compile ` + flags.join(" ")
+	return `npx @inlang/paraglide-js compile ` + flags.join(" ")
 }
