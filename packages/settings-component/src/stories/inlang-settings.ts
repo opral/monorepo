@@ -8,7 +8,7 @@ import {
 	type InstalledPlugin,
 	type InstalledMessageLintRule,
 } from "@inlang/sdk"
-import checkOptional from "./../helper/checkOptional.js"
+import checkRequired from "./../helper/checkRequired.js"
 import overridePrimitiveColors from "./../helper/overridePrimitiveColors.js"
 import { registry } from "@inlang/marketplace-registry"
 
@@ -280,7 +280,7 @@ export default class InlangSettings extends LitElement {
 												)}
 												.schema=${schema}
 												.handleInlangProjectChange=${this.handleInlangProjectChange}
-												.required=${checkOptional(value.schema, property)}
+												.required=${checkRequired(value.schema, property)}
 											></general-input>
 									  `
 									: html`
@@ -294,7 +294,7 @@ export default class InlangSettings extends LitElement {
 												.schema=${schema}
 												.moduleId=${key}
 												.handleInlangProjectChange=${this.handleInlangProjectChange}
-												.required=${checkOptional(value.schema, property)}
+												.required=${checkRequired(value.schema, property)}
 											></general-input>
 									  `
 							})}
