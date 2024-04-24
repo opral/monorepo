@@ -10,7 +10,7 @@ permissions:
 jobs:
   test-action:
     name: GitHub Actions Test
-    if: github.event.pull_request.mergeable_state == 'clean'
+    # if: github.event.pull_request.mergeable_state == 'clean'
     runs-on: ubuntu-latest
 
     steps:
