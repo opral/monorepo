@@ -4,6 +4,7 @@ import { type InlangProject, normalizeMessage } from "@inlang/sdk"
 import { log } from "../../utilities/log.js"
 import { projectOption } from "../../utilities/globalFlags.js"
 import fs from "fs-extra"
+import { resolve } from "node:path"
 import type { Message } from "@inlang/sdk"
 
 export let validate = new Command()
@@ -23,6 +24,7 @@ export async function validateCommandAction(args: { project: string }) {
 		log.info("🔎 Validating the inlang project...")
 		// if `getInlangProject` doesn't throw, the project is valid
 		const project = await getInlangProject({ projectPath: args.project })
+		log.success(`Opened project at ${resolve(process.cwd(), args.project)}`)
 		const options = validate.opts()
 		if (options.save) {
 			const id = "$$$-temporary-message-$$$"
@@ -36,11 +38,12 @@ export async function validateCommandAction(args: { project: string }) {
 			}
 		}
 		if (options.dumpFile) {
+			const dumpFile = resolve(process.cwd(), options.dumpFile)
 			await fs.writeFile(
-				options.dumpFile,
+				dumpFile,
 				JSON.stringify(project.query.messages.getAll().map(normalizeMessage), undefined, 2)
 			)
-			log.success(`Dumped messages JSON to ${options.dumpFile}`)
+			log.success(`Dumped messages JSON to ${dumpFile}`)
 		}
 		log.success("The project is valid!")
 	} catch (error) {

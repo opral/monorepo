@@ -7,7 +7,6 @@
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js"
 	],
 	"experimental": {
-		"aliases": true,
 		"persistence": true
 	}
 }
