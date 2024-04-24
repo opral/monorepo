@@ -11,7 +11,7 @@
 		"vitest": "^1.4.0"
 	},
 	"scripts": {
-		"clean": "rm -rf ./locales/de.json ./project2-dir/locales/de.json  ./project3-dir/locales/de.json ./project3-dir/project.inlang/ ./project3-dir/project.inlang.README.md  ./project4-dir/project.inlang/messages/de.json",
+		"clean": "rm -rf ./locales/de.json ./project2-dir/locales/de.json  ./project3-dir/locales/de.json ./project3-dir/project.inlang/ ./project3-dir/project.inlang.README.md && cp ./project4-dir/messages.json.bak ./project4-dir/project.inlang/messages.json",
 		"translate1": "MOCK_TRANSLATE_LOCAL=true inlang machine translate -n -f --project ./project.inlang",
 		"translate2": "MOCK_TRANSLATE_LOCAL=true inlang machine translate -n -f --project ./project2-dir/project.inlang",
 		"translate3": "MOCK_TRANSLATE_LOCAL=true inlang machine translate -n -f --project ./project3-dir/project.inlang",
