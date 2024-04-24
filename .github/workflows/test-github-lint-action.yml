@@ -26,7 +26,7 @@ jobs:
         with:
           path: target
 
-      - name: Setup Pnpm in target
+      - name: Setup Pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 8
@@ -42,6 +42,7 @@ jobs:
 
       - name: Build
         run: pnpm --filter @inlang/github-lint-action... build
+        working-directory: target
 
       - name: Test Local Action
         id: test-action
