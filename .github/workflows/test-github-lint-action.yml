@@ -40,7 +40,7 @@ jobs:
         run: pnpm install
         working-directory: target
 
-      - name: Build
+      - name: Build in target
         run: pnpm --filter @inlang/github-lint-action... build
         working-directory: target
 
