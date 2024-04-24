@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 0.34.2
+
+### Patch Changes
+
+- 3c959bc: experimental sdk persistence v0
+
 ## 0.34.1
 
 ### Patch Changes
