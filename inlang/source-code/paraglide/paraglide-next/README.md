@@ -139,9 +139,10 @@ function Component() {
 
 ### Excluding certain Routes from Localised Routing
 
-You can exclude certain routes from i18n using the `exclude` option on `createI18n`. You can either pass a string or a regex.
+You can exclude certain routes from i18n using the `exclude` option on `createI18n` in `lib/i18n`. You can either pass a string or a regex.
 
 ```ts
+// src/lib/i18n.js
 export const { ... } =
 	createI18n<AvailableLanguageTag>({
 		 //array of routes to exclude
