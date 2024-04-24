@@ -39,6 +39,9 @@ jobs:
         with:
           node-version: 20
 
+      - name: Move into the target directory
+        run: cd target
+
       - name: Install Dependencies
         run: pnpm install
 

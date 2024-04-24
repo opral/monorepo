@@ -24,8 +24,6 @@ export async function run(): Promise<void> {
 		const { owner, repo } = github.context.repo
 		const prNumber = github.context.payload.pull_request?.number
 
-		// Move into the target repository
-		process.chdir("/target")
 		const repoBase = await openRepository("file://" + process.cwd(), {
 			nodeishFs: fs,
 			branch: github.context.payload.pull_request?.head.ref,
