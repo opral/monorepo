@@ -147,7 +147,7 @@ export async function loadProject(args: {
 				const validatedSettings = parseSettings(settings)
 				if (validatedSettings.experimental?.persistence) {
 					settings["plugin.sdk.persistence"] = {
-						pathPattern: projectPath + "/messages/{languageTag}.json",
+						pathPattern: projectPath + "/messages.json",
 					}
 				}
 				_setSettings(validatedSettings)
