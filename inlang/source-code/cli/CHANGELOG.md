@@ -1,5 +1,13 @@
 # @inlang/cli
 
+## 2.15.2
+
+### Patch Changes
+
+- 3c959bc: experimental sdk persistence v0
+- Updated dependencies [3c959bc]
+  - @inlang/sdk@0.34.2
+
 ## 2.15.1
 
 ### Patch Changes

@@ -4,6 +4,14 @@
 
 ### Patch Changes
 
+- Updated dependencies [3c959bc]
+  - @inlang/cli@2.15.2
+  - @inlang/sdk@0.34.2
+
+## null
+
+### Patch Changes
+
 - Updated dependencies [9165e64]
   - @lix-js/client@1.4.0
   - @inlang/cli@2.15.1
