@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/settings-component",
 	"type": "module",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"publishConfig": {
 		"access": "public"
 	},
@@ -21,6 +21,7 @@
 	"author": "",
 	"license": "ISC",
 	"devDependencies": {
+		"@inlang/marketplace-registry": "workspace:^",
 		"@nx/storybook": "^18.0.4",
 		"@storybook/addon-essentials": "^7.6.16",
 		"@storybook/addon-links": "^7.6.16",

@@ -39,7 +39,8 @@ import { identifyProject } from "./telemetry/groupIdentify.js"
 import type { NodeishStats } from "@lix-js/fs"
 
 import _debug from "debug"
-const debug = _debug("loadProject")
+const debug = _debug("sdk:loadProject")
+const debugLock = _debug("sdk:lockfile")
 
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
@@ -663,7 +664,7 @@ async function loadMessagesViaPlugin(
 
 				// NOTE could use hash instead of the whole object JSON to save memory...
 				if (messageState.messageLoadHash[loadedMessageClone.id] === importedEnecoded) {
-					debug("skipping upsert!")
+					// debug("skipping upsert!")
 					continue
 				}
 
@@ -902,10 +903,10 @@ async function acquireFileLock(
 	}
 
 	try {
-		debug(lockOrigin + " tries to acquire a lockfile Retry Nr.: " + tryCount)
+		debugLock(lockOrigin + " tries to acquire a lockfile Retry Nr.: " + tryCount)
 		await fs.mkdir(lockDirPath)
 		const stats = await fs.stat(lockDirPath)
-		debug(lockOrigin + " acquired a lockfile Retry Nr.: " + tryCount)
+		debugLock(lockOrigin + " acquired a lockfile Retry Nr.: " + tryCount)
 		return stats.mtimeMs
 	} catch (error: any) {
 		if (error.code !== "EEXIST") {
@@ -922,12 +923,14 @@ async function acquireFileLock(
 	} catch (fstatError: any) {
 		if (fstatError.code === "ENOENT") {
 			// lock file seems to be gone :) - lets try again
-			debug(lockOrigin + " tryCount++ lock file seems to be gone :) - lets try again " + tryCount)
+			debugLock(
+				lockOrigin + " tryCount++ lock file seems to be gone :) - lets try again " + tryCount
+			)
 			return acquireFileLock(fs, lockDirPath, lockOrigin, tryCount + 1)
 		}
 		throw fstatError
 	}
-	debug(
+	debugLock(
 		lockOrigin +
 			" tries to acquire a lockfile  - lock currently in use... starting probe phase " +
 			tryCount
@@ -940,7 +943,7 @@ async function acquireFileLock(
 				probeCounts += 1
 				let lockFileStats: undefined | NodeishStats = undefined
 				try {
-					debug(
+					debugLock(
 						lockOrigin + " tries to acquire a lockfile - check if the lock is free now " + tryCount
 					)
 
@@ -948,7 +951,7 @@ async function acquireFileLock(
 					lockFileStats = await fs.stat(lockDirPath)
 				} catch (fstatError: any) {
 					if (fstatError.code === "ENOENT") {
-						debug(
+						debugLock(
 							lockOrigin +
 								" tryCount++ in Promise - tries to acquire a lockfile - lock file seems to be free now - try to acquire " +
 								tryCount
@@ -963,7 +966,7 @@ async function acquireFileLock(
 				if (lockFileStats.mtimeMs === currentLockTime) {
 					if (probeCounts >= nProbes) {
 						// ok maximum lock time ran up (we waitetd nProbes * probeInterval) - we consider the lock to be stale
-						debug(
+						debugLock(
 							lockOrigin +
 								" tries to acquire a lockfile  - lock not free - but stale lets drop it" +
 								tryCount
@@ -979,7 +982,7 @@ async function acquireFileLock(
 							return reject(rmLockError)
 						}
 						try {
-							debug(
+							debugLock(
 								lockOrigin +
 									" tryCount++ same locker - try to acquire again after removing stale lock " +
 									tryCount
@@ -995,7 +998,9 @@ async function acquireFileLock(
 					}
 				} else {
 					try {
-						debug(lockOrigin + " tryCount++ different locker - try to acquire again " + tryCount)
+						debugLock(
+							lockOrigin + " tryCount++ different locker - try to acquire again " + tryCount
+						)
 						const lock = await acquireFileLock(fs, lockDirPath, lockOrigin, tryCount + 1)
 						return resolve(lock)
 					} catch (error) {
@@ -1014,7 +1019,7 @@ async function releaseLock(
 	lockOrigin: string,
 	lockTime: number
 ) {
-	debug(lockOrigin + " releasing the lock ")
+	debugLock(lockOrigin + " releasing the lock ")
 	try {
 		const stats = await fs.stat(lockDirPath)
 		if (stats.mtimeMs === lockTime) {
@@ -1022,13 +1027,13 @@ async function releaseLock(
 			await fs.rmdir(lockDirPath)
 		}
 	} catch (statError: any) {
-		debug(lockOrigin + " couldn't release the lock")
+		debugLock(lockOrigin + " couldn't release the lock")
 		if (statError.code === "ENOENT") {
 			// ok seeks like the log was released by someone else
-			debug(lockOrigin + " WARNING - the lock was released by a different process")
+			debugLock(lockOrigin + " WARNING - the lock was released by a different process")
 			return
 		}
-		debug(statError)
+		debugLock(statError)
 		throw statError
 	}
 }

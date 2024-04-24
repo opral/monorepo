@@ -1,5 +1,12 @@
 # @inlang/sdk
 
+## 0.34.0
+
+### Minor Changes
+
+- 5b8c053: sdk helper functions stringifyMessage, normalizeMessage
+  INLANG_CLI_EXPERIMENTAL inlang validate --dump --save
+
 ## 0.33.1
 
 ### Patch Changes
