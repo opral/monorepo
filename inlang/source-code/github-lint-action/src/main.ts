@@ -24,6 +24,8 @@ export async function run(): Promise<void> {
 		const { owner, repo } = github.context.repo
 		const prNumber = github.context.payload.pull_request?.number
 
+		// Move into the target repository
+		process.chdir("/target")
 		const repoBase = await openRepository("file://" + process.cwd(), {
 			nodeishFs: fs,
 			branch: github.context.payload.pull_request?.head.ref,
@@ -77,7 +79,7 @@ export async function run(): Promise<void> {
 
 		// Prepare head repo
 		// TODO: Change to the correct directory
-		process.chdir("../")
+		process.chdir("../merge")
 
 		console.log("List directories")
 		const directories = await fs.readdir(process.cwd())
