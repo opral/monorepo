@@ -60,7 +60,7 @@ describe.concurrent(
 		)
 
 		// skip pending resolution of https://github.com/opral/lix-sdk/issues/18 (LIX-60)
-		it.skip(
+		it(
 			"project3 in project3-dir",
 			async () => {
 				await run("pnpm translate3")
@@ -74,6 +74,23 @@ describe.concurrent(
 	"project3_message_key_2": "Mock translate local en to de: Generated message (2)",
 	"project3_message_key_3": "Mock translate local en to de: Generated message (3)"
 }`)
+			},
+			{ timeout: 20000 }
+		)
+
+		it(
+			"project4 in project4-dir",
+			async () => {
+				await run("pnpm translate4")
+				const expected = await fs.readFile(
+					join(__dirname, "project4-dir", "messages.json.translated"),
+					"utf8"
+				)
+				const result = await fs.readFile(
+					join(__dirname, "project4-dir", "project.inlang", "messages.json"),
+					"utf8"
+				)
+				expect(result).toEqual(expected)
 			},
 			{ timeout: 20000 }
 		)
