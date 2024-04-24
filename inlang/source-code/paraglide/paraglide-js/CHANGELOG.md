@@ -1,5 +1,11 @@
 # @inlang/paraglide-js
 
+## 1.7.1
+
+### Patch Changes
+
+- 4d24188: `paraglide-js init` now uses the `createNewProject` API from `@inlang/sdk` for creating new projects. This resulits in higher reliability.
+
 ## 1.7.0
 
 ### Minor Changes
