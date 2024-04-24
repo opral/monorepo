@@ -8,7 +8,7 @@ import {
 	resolveUserPathDefinitions,
 } from "@inlang/paraglide-js/internal/adapter-utils"
 import type { RoutingStragey } from "./interface"
-import { createPrefixDetection } from "../middleware/detection/prefixDetection"
+import { usePrefixDetection } from "../middleware/detection/prefixDetection"
 import { DEV } from "../env"
 import { rsc } from "rsc-env"
 import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
@@ -21,16 +21,15 @@ import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
 export function PrefixStrategy<T extends string>({
 	pathnames: userPathnames,
 	exclude,
-	prefix,
+	prefixDefault,
 }: {
-	exclude: (path: string) => boolean
-	pathnames: UserPathDefinitionTranslations<T>
-	prefix: "all" | "except-default" | "never"
+	exclude?: (path: string) => boolean
+	pathnames?: UserPathDefinitionTranslations<T>
+	prefixDefault: "always" | "never"
 }): RoutingStragey<T> {
-	const resolvedPathnames = /** @__PURE__ */ resolveUserPathDefinitions(
-		userPathnames,
-		availableLanguageTags
-	)
+	const resolvedPathnames = /** @__PURE__ */ userPathnames
+		? resolveUserPathDefinitions(userPathnames, availableLanguageTags)
+		: {}
 
 	// Make sure the given pathnames are valid during dev
 	// middleware is not rsc so validating there guarantees this will run once
@@ -87,18 +86,13 @@ export function PrefixStrategy<T extends string>({
 
 	return {
 		getLocalisedUrl(canonicalPath, targetLanguage) {
-			if (exclude(canonicalPath))
+			if (exclude && exclude(canonicalPath))
 				return {
 					pathname: canonicalPath,
 				}
 
 			const translatedPath = getTranslatedPath(canonicalPath, targetLanguage, resolvedPathnames)
-			const shouldAddPrefix =
-				prefix === "never"
-					? false
-					: prefix === "except-default"
-					? targetLanguage !== sourceLanguageTag
-					: true
+			const shouldAddPrefix = targetLanguage !== sourceLanguageTag || prefixDefault === "always"
 
 			const localisedPath = shouldAddPrefix
 				? `/${targetLanguage}${translatedPath == "/" ? "" : translatedPath}`
@@ -110,8 +104,13 @@ export function PrefixStrategy<T extends string>({
 		getCanonicalPath,
 
 		resolveLocale(request) {
-			const detect = createPrefixDetection({ availableLanguageTags })
-			return detect(request) as T | undefined
+			const detect = usePrefixDetection({ availableLanguageTags })
+			const detected = detect(request) as T | undefined
+
+			// If no prefix is detected and prefixDefault is "never" -> use default language
+			// Otherwise leave it ambiguous
+			if (prefixDefault === "never") return detected || (sourceLanguageTag as T)
+			return detected
 		},
 	}
 }

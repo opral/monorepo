@@ -7,8 +7,7 @@ import {
 import type { AvailableLanguageTag } from "@/paraglide/runtime"
 import * as m from "@/paraglide/messages"
 
-const strategy = PrefixStrategy({
-	exclude: () => false,
+const strategy = PrefixStrategy<AvailableLanguageTag>({
 	pathnames: {
 		"/about": m.about_path,
 		"/admin/[...rest]": {
@@ -18,14 +17,15 @@ const strategy = PrefixStrategy({
 		},
 	},
 	prefix: "except-default",
+	exclude: () => false,
 })
 
 export const middleware = createMiddleware({ strategy })
-export const { Link, useRouer, usePathname, redirect, permanentRedirect } = createNavigation({
+export const { Link, useRouter, usePathname, redirect, permanentRedirect } = createNavigation({
 	strategy,
 })
 
-export const { localizePath, localizeUrl } = createI18n<AvailableLanguageTag>({
+export const { localizePath } = createI18n<AvailableLanguageTag>({
 	pathnames: {
 		"/about": m.about_path,
 		"/admin/[...rest]": {
