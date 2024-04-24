@@ -2230,6 +2230,9 @@ importers:
       '@shoelace-style/shoelace':
         specifier: 2.14.0
         version: 2.14.0(@types/react@18.2.79)
+      '@sinclair/typebox':
+        specifier: 0.31.28
+        version: 0.31.28
       chroma-js:
         specifier: ^2.4.2
         version: 2.4.2
@@ -2258,6 +2261,9 @@ importers:
       '@types/chroma-js':
         specifier: ^2.4.4
         version: 2.4.4
+      '@vitest/coverage-v8':
+        specifier: 0.34.6
+        version: 0.34.6(vitest@0.34.6)
       esbuild:
         specifier: ^0.20.0
         version: 0.20.2
@@ -2273,6 +2279,9 @@ importers:
       storybook:
         specifier: ^7.6.16
         version: 7.6.18
+      vitest:
+        specifier: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/telemetry:
     dependencies:
