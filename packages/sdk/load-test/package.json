@@ -18,7 +18,7 @@
 		"tsx": "^4.7.1"
 	},
 	"scripts": {
-		"clean": "rm -rf ./locales ./project.inlang/messages",
+		"clean": "rm -rf ./locales ./project.inlang/messages.json",
 		"translate": "PUBLIC_SERVER_BASE_URL=http://localhost:3000 pnpm inlang machine translate -n -f --project ./project.inlang",
 		"test-lint": "pnpm inlang lint --project ./project.inlang",
 		"test": "pnpm clean && DEBUG=$DEBUG,load-test tsx ./main.ts",

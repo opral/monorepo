@@ -35,7 +35,6 @@ export async function saveMessages(args: {
 	const pathPattern = args.settings[pluginId]?.pathPattern as string
 
 	debug("saveMessages", pathPattern)
-
 	try {
 		await createDirectoryIfNotExits(getDirname(pathPattern), args.nodeishFs)
 		await args.nodeishFs.writeFile(

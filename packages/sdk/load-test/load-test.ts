@@ -1,7 +1,8 @@
 /* eslint-disable no-restricted-imports */
 /* eslint-disable no-console */
 import { findRepoRoot, openRepository } from "@lix-js/client"
-import { loadProject, type Message } from "@inlang/sdk"
+import { loadProject, type Message, normalizeMessage } from "@inlang/sdk"
+import { createMessage } from "../src/test-utilities/createMessage.js"
 import { createSignal, createResource, createEffect } from "../src/reactivity/solid.js"
 
 import { dirname, join } from "node:path"
@@ -31,9 +32,9 @@ const translateCommand = cli + " machine translate -f --project ./project.inlang
 // const messageDir = join(__dirname, "locales", "en")
 // const messageFile = join(__dirname, "locales", "en", "common.json")
 
-// experimental sdk persistence plugin
-const messageDir = join(__dirname, "project.inlang", "messages")
-const messageFile = join(__dirname, "project.inlang", "messages", "en.json")
+// experimental sdk persistence
+const messageDir = join(__dirname, "project.inlang")
+const messageFile = join(__dirname, "project.inlang", "messages.json")
 
 export async function runLoadTest(
 	messageCount: number = 1000,
@@ -125,14 +126,29 @@ export async function runLoadTest(
 	}
 }
 
+// experimental persistence message format
 async function generateMessageFile(messageCount: number) {
 	await exec(`mkdir -p ${messageDir}`)
-	const messages: Record<string, string> = {}
+	const messages: Message[] = []
 	for (let i = 1; i <= messageCount; i++) {
-		messages[`message_key_${i}`] = `Generated message (${i})`
+		messages.push(createMessage(`message_key_${i}`, { en: `Generated message (${i})` }))
 	}
-	await fs.writeFile(messageFile, JSON.stringify(messages, undefined, 2), "utf-8")
+	await fs.writeFile(
+		messageFile,
+		JSON.stringify(messages.map(normalizeMessage), undefined, 2),
+		"utf-8"
+	)
 }
+
+// inlang message format
+// async function generateMessageFile(messageCount: number) {
+// 	await exec(`mkdir -p ${messageDir}`)
+// 	const messages: Record<string, string> = {}
+// 	for (let i = 1; i <= messageCount; i++) {
+// 		messages[`message_key_${i}`] = `Generated message (${i})`
+// 	}
+// 	await fs.writeFile(messageFile, JSON.stringify(messages, undefined, 2), "utf-8")
+// }
 
 async function isMockRpcServerRunning(): Promise<boolean> {
 	try {
