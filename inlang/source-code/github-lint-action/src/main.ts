@@ -44,7 +44,7 @@ export async function run(): Promise<void> {
 			commentContent: "" as string,
 		}))
 
-		// Collect all reports from the base repository
+		// Collect all reports from the target repository
 		for (const result of results) {
 			core.debug(`Checking project: ${result.projectPath}`)
 			const projectTarget = await loadProject({
@@ -76,13 +76,13 @@ export async function run(): Promise<void> {
 		const isFork = headMeta.owner !== baseMeta.owner
 		core.debug(`Is fork: ${isFork}`)
 
-		// Prepare head repo
+		// Prepare merge repo
 		process.chdir("../merge")
 		const repoMerge = await openRepository("file://" + process.cwd(), {
 			nodeishFs: fs,
 		})
 
-		// Check if the head repository has a new project compared to the base repository
+		// Check if the merge repository has a new project compared to the target repository
 		const projectListMerge = await listProjects(repoMerge.nodeishFs, process.cwd())
 		const newProjects = projectListMerge.filter(
 			(project) =>
@@ -110,9 +110,9 @@ export async function run(): Promise<void> {
 			})
 		}
 
-		// Collect all reports from the head repository
+		// Collect all reports from the merge repository
 		for (const result of results) {
-			// Check if project is found in head repo
+			// Check if project is found in merge repo
 			if (
 				projectListMerge.some(
 					(project) => project.projectPath.replace(process.cwd(), "") === result.projectPath
