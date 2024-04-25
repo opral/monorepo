@@ -26,19 +26,19 @@ export async function run(): Promise<void> {
 
 		// Change into the target repository
 		process.chdir("target")
-		const repoBase = await openRepository("file://" + process.cwd(), {
+		const repoTarget = await openRepository("file://" + process.cwd(), {
 			nodeishFs: fs,
 			branch: github.context.payload.pull_request?.head.ref,
 		})
-		const projectListBase = await listProjects(repoBase.nodeishFs, process.cwd())
+		const projectListTarget = await listProjects(repoTarget.nodeishFs, process.cwd())
 
-		const results = projectListBase.map((project) => ({
+		const results = projectListTarget.map((project) => ({
 			projectPath: project.projectPath.replace(process.cwd(), ""),
-			errorsBase: [] as any[],
-			errorsHead: [] as any[],
+			errorsTarget: [] as any[],
+			errorsMerge: [] as any[],
 			installedRules: [] as InstalledMessageLintRule[],
-			reportsBase: [] as MessageLintReport[],
-			reportsHead: [] as MessageLintReport[],
+			reportsTarget: [] as MessageLintReport[],
+			reportsMerge: [] as MessageLintReport[],
 			lintSummary: [] as { id: string; name: string; count: number; level: "warning" | "error" }[],
 			changedIds: [] as string[],
 			commentContent: "" as string,
@@ -47,18 +47,18 @@ export async function run(): Promise<void> {
 		// Collect all reports from the base repository
 		for (const result of results) {
 			core.debug(`Checking project: ${result.projectPath}`)
-			const projectBase = await loadProject({
+			const projectTarget = await loadProject({
 				projectPath: process.cwd() + result.projectPath,
-				repo: repoBase,
+				repo: repoTarget,
 				appId: "app.inlang.ninjaI18nAction",
 			})
-			if (projectBase.errors().length > 0) {
-				if (result) result.errorsBase = projectBase.errors()
+			if (projectTarget.errors().length > 0) {
+				if (result) result.errorsTarget = projectTarget.errors()
 				console.debug("Skip project ", result.projectPath, " in base repo because of errors")
 				continue
 			}
-			result.installedRules.push(...projectBase.installed.messageLintRules())
-			result.reportsBase.push(...(await projectBase.query.messageLintReports.getAll()))
+			result.installedRules.push(...projectTarget.installed.messageLintRules())
+			result.reportsTarget.push(...(await projectTarget.query.messageLintReports.getAll()))
 		}
 
 		// Collect meta data for head and base repository
@@ -78,13 +78,13 @@ export async function run(): Promise<void> {
 
 		// Prepare head repo
 		process.chdir("../merge")
-		const repoHead = await openRepository("file://" + process.cwd(), {
+		const repoMerge = await openRepository("file://" + process.cwd(), {
 			nodeishFs: fs,
 		})
 
 		// Check if the head repository has a new project compared to the base repository
-		const projectListHead = await listProjects(repoHead.nodeishFs, process.cwd())
-		const newProjects = projectListHead.filter(
+		const projectListMerge = await listProjects(repoMerge.nodeishFs, process.cwd())
+		const newProjects = projectListMerge.filter(
 			(project) =>
 				!results.some(
 					(result) => result.projectPath === project.projectPath.replace(process.cwd(), "")
@@ -94,11 +94,11 @@ export async function run(): Promise<void> {
 		for (const project of newProjects) {
 			results.push({
 				projectPath: project.projectPath.replace(process.cwd(), ""),
-				errorsBase: [] as any[],
-				errorsHead: [] as any[],
+				errorsTarget: [] as any[],
+				errorsMerge: [] as any[],
 				installedRules: [] as InstalledMessageLintRule[],
-				reportsBase: [] as MessageLintReport[],
-				reportsHead: [] as MessageLintReport[],
+				reportsTarget: [] as MessageLintReport[],
+				reportsMerge: [] as MessageLintReport[],
 				lintSummary: [] as {
 					id: string
 					name: string
@@ -114,31 +114,31 @@ export async function run(): Promise<void> {
 		for (const result of results) {
 			// Check if project is found in head repo
 			if (
-				projectListHead.some(
+				projectListMerge.some(
 					(project) => project.projectPath.replace(process.cwd(), "") === result.projectPath
 				) === false
 			) {
 				console.debug(`Project ${result.projectPath} not found in head repo`)
 				continue
 			}
-			const projectHead = await loadProject({
+			const projectMerge = await loadProject({
 				projectPath: process.cwd() + result.projectPath,
-				repo: repoHead,
+				repo: repoMerge,
 				appId: "app.inlang.ninjaI18nAction",
 			})
-			if (projectHead.errors().length > 0) {
-				if (result) result.errorsHead = projectHead.errors()
+			if (projectMerge.errors().length > 0) {
+				if (result) result.errorsMerge = projectMerge.errors()
 				console.debug("Skip project ", result.projectPath, " in head repo because of errors")
 				continue
 			}
 			// Extend installedRules with new rules
-			const newInstalledRules = projectHead.installed.messageLintRules()
+			const newInstalledRules = projectMerge.installed.messageLintRules()
 			for (const newRule of newInstalledRules) {
 				if (!result.installedRules.some((rule) => rule.id === newRule.id)) {
 					result.installedRules.push(newRule)
 				}
 			}
-			result?.reportsHead.push(...(await projectHead.query.messageLintReports.getAll()))
+			result?.reportsMerge.push(...(await projectMerge.query.messageLintReports.getAll()))
 		}
 
 		// Workflow should fail
@@ -147,10 +147,10 @@ export async function run(): Promise<void> {
 
 		// Create a lint summary for each project
 		for (const result of results) {
-			if (result.errorsHead.length > 0) continue
+			if (result.errorsMerge.length > 0) continue
 			const LintSummary = createLintSummary(
-				result.reportsHead,
-				result.reportsBase,
+				result.reportsMerge,
+				result.reportsTarget,
 				result.installedRules
 			)
 			if (LintSummary.summary.some((lintSummary) => lintSummary.level === "error")) {
@@ -174,13 +174,13 @@ export async function run(): Promise<void> {
 				}
 			}
 			// Case: New errors in project setup
-			if (result.errorsBase.length === 0 && result.errorsHead.length > 0) {
+			if (result.errorsTarget.length === 0 && result.errorsMerge.length > 0) {
 				console.debug(
 					`❗️ New errors in setup of project \`${result.projectPath}\` found. Set workflow to fail.`
 				)
 				projectWithNewSetupErrors = true
 				result.commentContent = `#### ❗️ New errors in setup of project \`${shortenedProjectPath()}\` found
-${result.errorsHead
+${result.errorsMerge
 	.map((error) => {
 		let errorLog = `<details>
 <summary>${error?.name}</summary>
@@ -200,11 +200,11 @@ ${error?.cause.stack}`
 				continue
 			}
 			// Case: setup of project fixed -> comment with new lint reports
-			if (result.errorsBase.length > 0 && result.errorsHead.length === 0) {
+			if (result.errorsTarget.length > 0 && result.errorsMerge.length === 0) {
 				console.debug(`✅ Setup of project \`${result.projectPath}\` fixed`)
 			}
 			// Case: No lint reports found -> no comment
-			if (result.errorsHead.length > 0) continue
+			if (result.errorsMerge.length > 0) continue
 			if (result.lintSummary.length === 0) continue
 			// Case: Lint reports found -> create comment with lint summary
 			const lintSummary = result.lintSummary
@@ -229,10 +229,10 @@ ${lintSummary
 			result.commentContent = commentContent
 		}
 
-		const commentHeadline = `### 🥷 Ninja i18n – 🛎️ Translations need to be updated`
+		const commentMergeline = `### 🥷 Ninja i18n – 🛎️ Translations need to be updated`
 		const commentResolved = `### 🥷 Ninja i18n – 🎉 Translations have been successfully updated`
 		const commentContent =
-			commentHeadline +
+			commentMergeline +
 			"\n\n" +
 			results
 				.map((result) => result.commentContent)
@@ -256,7 +256,7 @@ ${lintSummary
 		if (existingComment.data.length > 0) {
 			const commentId = existingComment.data.find(
 				(comment) =>
-					(comment.body?.includes(commentHeadline) || comment.body?.includes(commentResolved)) &&
+					(comment.body?.includes(commentMergeline) || comment.body?.includes(commentResolved)) &&
 					comment.user?.login === "github-actions[bot]"
 			)?.id
 			if (commentId) {
@@ -317,14 +317,14 @@ ${lintSummary
 export default run
 
 function createLintSummary(
-	reportsHead: MessageLintReport[],
-	reportsBase: MessageLintReport[],
+	reportsMerge: MessageLintReport[],
+	reportsTarget: MessageLintReport[],
 	installedRules: InstalledMessageLintRule[]
 ) {
 	const summary: { id: string; name: string; count: number; level: "error" | "warning" }[] = []
-	const diffReports = reportsHead.filter(
+	const diffReports = reportsMerge.filter(
 		(report) =>
-			!reportsBase.some(
+			!reportsTarget.some(
 				(baseReport) =>
 					baseReport.ruleId === report.ruleId &&
 					baseReport.languageTag === report.languageTag &&
