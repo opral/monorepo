@@ -153,8 +153,10 @@ export async function run(): Promise<void> {
 				result.reportsBase,
 				result.installedRules
 			)
-			// Check if new lint errors are found
 			if (LintSummary.summary.some((lintSummary) => lintSummary.level === "error")) {
+				console.debug(
+					`❗️ New lint errors found in project ${result.projectPath}. Set workflow to fail.`
+				)
 				projectWithNewLintErrors = true
 			}
 			result.lintSummary = LintSummary.summary
@@ -173,6 +175,9 @@ export async function run(): Promise<void> {
 			}
 			// Case: New errors in project setup
 			if (result.errorsBase.length === 0 && result.errorsHead.length > 0) {
+				console.debug(
+					`❗️ New errors in setup of project \`${result.projectPath}\` found. Set workflow to fail.`
+				)
 				projectWithNewSetupErrors = true
 				result.commentContent = `#### ❗️ New errors in setup of project \`${shortenedProjectPath()}\` found
 ${result.errorsHead
