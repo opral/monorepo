@@ -38,6 +38,8 @@ import { capture } from "./telemetry/capture.js"
 import { identifyProject } from "./telemetry/groupIdentify.js"
 import type { NodeishStats } from "@lix-js/fs"
 
+import type { ResolvedPluginApi } from "./resolve-modules/plugins/types.js"
+
 import _debug from "debug"
 const debug = _debug("sdk:loadProject")
 const debugLock = _debug("sdk:lockfile")
@@ -94,6 +96,7 @@ export async function loadProject(args: {
 	// can't handle errors gracefully.
 
 	assertValidProjectPath(projectPath)
+	debug(projectPath)
 
 	const nodeishFs = createNodeishFsWithAbsolutePaths({
 		projectPath,
@@ -142,6 +145,11 @@ export async function loadProject(args: {
 		const setSettings = (settings: ProjectSettings): Result<void, ProjectSettingsInvalidError> => {
 			try {
 				const validatedSettings = parseSettings(settings)
+				if (validatedSettings.experimental?.persistence) {
+					settings["plugin.sdk.persistence"] = {
+						pathPattern: projectPath + "/messages.json",
+					}
+				}
 				_setSettings(validatedSettings)
 
 				writeSettingsToDisk(validatedSettings)
@@ -200,18 +208,15 @@ export async function loadProject(args: {
 			const _resolvedModules = resolvedModules()
 			if (!_resolvedModules) return
 
-			if (!_resolvedModules.resolvedPluginApi.loadMessages) {
+			const resolvedPluginApi = _resolvedModules.resolvedPluginApi
+
+			if (!resolvedPluginApi.loadMessages) {
 				markInitAsFailed(undefined)
 				return
 			}
 
 			const _settings = settings()
 			if (!_settings) return
-
-			// get plugin finding the plugin that provides loadMessages function
-			const loadMessagePlugin = _resolvedModules.plugins.find(
-				(plugin) => plugin.loadMessages !== undefined
-			)
 
 			// TODO #1844 this watcher needs to get pruned when we have a change in the configs which will trigger this again
 			const fsWithWatcher = createNodeishFsWithWatcher({
@@ -227,7 +232,7 @@ export async function loadProject(args: {
 						messageStates,
 						messagesQuery,
 						settings()!, // NOTE we bang here - we don't expect the settings to become null during the livetime of a project
-						loadMessagePlugin
+						resolvedPluginApi
 					)
 						.catch((e) => setLoadMessagesViaPluginError(new PluginLoadMessagesError({ cause: e })))
 						.then(() => {
@@ -244,7 +249,7 @@ export async function loadProject(args: {
 				messageStates,
 				messagesQuery,
 				_settings,
-				loadMessagePlugin
+				resolvedPluginApi
 			)
 				.then(() => {
 					markInitAsComplete()
@@ -303,17 +308,11 @@ export async function loadProject(args: {
 
 			const _resolvedModules = resolvedModules()
 			if (!_resolvedModules) return
+			const resolvedPluginApi = _resolvedModules.resolvedPluginApi
 
 			const currentMessageIds = new Set(messagesQuery.includedMessageIds())
 			const deletedTrackedMessages = [...trackedMessages].filter(
 				(tracked) => !currentMessageIds.has(tracked[0])
-			)
-
-			const saveMessagesPlugin = _resolvedModules.plugins.find(
-				(plugin) => plugin.saveMessages !== undefined
-			)
-			const loadMessagesPlugin = _resolvedModules.plugins.find(
-				(plugin) => plugin.loadMessages !== undefined
 			)
 
 			for (const messageId of currentMessageIds) {
@@ -334,6 +333,7 @@ export async function loadProject(args: {
 
 							// don't trigger saves or set dirty flags during initial setup
 							if (!initialSetup) {
+								debug("message changed", messageId)
 								messageStates.messageDirtyFlags[message.id] = true
 								saveMessagesViaPlugin(
 									nodeishFs,
@@ -341,8 +341,7 @@ export async function loadProject(args: {
 									messageStates,
 									messagesQuery,
 									settings()!,
-									saveMessagesPlugin,
-									loadMessagesPlugin
+									resolvedPluginApi
 								)
 									.catch((e) =>
 										setSaveMessagesViaPluginError(new PluginSaveMessagesError({ cause: e }))
@@ -379,8 +378,7 @@ export async function loadProject(args: {
 					messageStates,
 					messagesQuery,
 					settings()!,
-					saveMessagesPlugin,
-					loadMessagesPlugin
+					resolvedPluginApi
 				)
 					.catch((e) => setSaveMessagesViaPluginError(new PluginSaveMessagesError({ cause: e })))
 					.then(() => {
@@ -608,7 +606,7 @@ async function loadMessagesViaPlugin(
 	messageState: MessageState,
 	messagesQuery: InlangProject["query"]["messages"],
 	settingsValue: ProjectSettings,
-	loadPlugin: any
+	resolvedPluginApi: ResolvedPluginApi
 ) {
 	const experimentalAliases = !!settingsValue.experimental?.aliases
 
@@ -628,7 +626,7 @@ async function loadMessagesViaPlugin(
 	try {
 		lockTime = await acquireFileLock(fs as NodeishFilesystem, lockDirPath, "loadMessage")
 		const loadedMessages = await makeTrulyAsync(
-			loadPlugin.loadMessages({
+			resolvedPluginApi.loadMessages({
 				settings: settingsValue,
 				nodeishFs: fs,
 			})
@@ -728,7 +726,14 @@ async function loadMessagesViaPlugin(
 		messageState.sheduledLoadMessagesViaPlugin = undefined
 
 		// recall load unawaited to allow stack to pop
-		loadMessagesViaPlugin(fs, lockDirPath, messageState, messagesQuery, settingsValue, loadPlugin)
+		loadMessagesViaPlugin(
+			fs,
+			lockDirPath,
+			messageState,
+			messagesQuery,
+			settingsValue,
+			resolvedPluginApi
+		)
 			.then(() => {
 				// resolve the scheduled load message promise
 				executingScheduledMessages[1]()
@@ -746,8 +751,7 @@ async function saveMessagesViaPlugin(
 	messageState: MessageState,
 	messagesQuery: InlangProject["query"]["messages"],
 	settingsValue: ProjectSettings,
-	savePlugin: any,
-	loadPlugin: any
+	resolvedPluginApi: ResolvedPluginApi
 ): Promise<void> {
 	// queue next save if we have a save ongoing
 	if (messageState.isSaving) {
@@ -809,7 +813,7 @@ async function saveMessagesViaPlugin(
 			messageState.messageDirtyFlags = {}
 
 			// NOTE: this assumes that the plugin will handle message ordering
-			await savePlugin.saveMessages({
+			await resolvedPluginApi.saveMessages({
 				settings: settingsValue,
 				messages: messagesToExport,
 				nodeishFs: fs,
@@ -833,7 +837,7 @@ async function saveMessagesViaPlugin(
 					messageState,
 					messagesQuery,
 					settingsValue,
-					loadPlugin
+					resolvedPluginApi
 				)
 			}
 
@@ -877,8 +881,7 @@ async function saveMessagesViaPlugin(
 			messageState,
 			messagesQuery,
 			settingsValue,
-			savePlugin,
-			loadPlugin
+			resolvedPluginApi
 		)
 			.then(() => {
 				executingSheduledSaveMessages[1]()

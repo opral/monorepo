@@ -1,5 +1,13 @@
 # @inlang/paraglide-next
 
+## 0.1.5
+
+### Patch Changes
+
+- 8902fb5: Calling the paraglide compiler on Windows should no longer error
+- Updated dependencies [6105a50]
+  - @inlang/paraglide-js@1.7.2
+
 ## 0.1.4
 
 ### Patch Changes

@@ -34,7 +34,10 @@ async function generateSitemap() {
 		if (route.path !== "/c" && route.path !== "/g" && route.path !== "/m")
 			if (route.path !== "/editor")
 				for (const locale of locales) {
-					content = `${content}${formatPage(siteURL + locale + route.path, publishDate)}`
+					content = `${content}${formatPage(
+						siteURL + locale + (route.path !== "/" ? route.path : ""),
+						publishDate
+					)}`
 				}
 			else content = `${content}${formatPage(siteURL + route.path, publishDate)}`
 
@@ -51,7 +54,7 @@ async function generateSitemap() {
 									item.uniqueID +
 									"/" +
 									(item.slug ? item.slug.replaceAll(".", "-") : item.id.replaceAll(".", "-")) +
-									restSlug,
+									(restSlug !== "/" ? restSlug : ""),
 								publishDate
 							)}`
 						}
