@@ -39,7 +39,7 @@ export async function run(): Promise<void> {
 			installedRules: [] as InstalledMessageLintRule[],
 			reportsBase: [] as MessageLintReport[],
 			reportsHead: [] as MessageLintReport[],
-			lintSummary: [] as { id: string; name: string; count: number }[],
+			lintSummary: [] as { id: string; name: string; count: number; level: "warning" | "error" }[],
 			changedIds: [] as string[],
 			commentContent: "" as string,
 		}))
@@ -78,10 +78,6 @@ export async function run(): Promise<void> {
 
 		// Prepare head repo
 		process.chdir("../merge")
-		// Log file project.inlang/settings.json
-		// const settings = await fs.readFile("project.inlang/settings.json", "utf-8")
-		// console.log("settings.json:", settings)
-
 		const repoHead = await openRepository("file://" + process.cwd(), {
 			nodeishFs: fs,
 		})
@@ -103,7 +99,12 @@ export async function run(): Promise<void> {
 				installedRules: [] as InstalledMessageLintRule[],
 				reportsBase: [] as MessageLintReport[],
 				reportsHead: [] as MessageLintReport[],
-				lintSummary: [] as { id: string; name: string; count: number }[],
+				lintSummary: [] as {
+					id: string
+					name: string
+					count: number
+					level: "warning" | "error"
+				}[],
 				changedIds: [] as string[],
 				commentContent: "" as string,
 			})
@@ -140,6 +141,10 @@ export async function run(): Promise<void> {
 			result?.reportsHead.push(...(await projectHead.query.messageLintReports.getAll()))
 		}
 
+		// Workflow should fail
+		let projectWithNewSetupErrors = false
+		let projectWithNewLintErrors = false
+
 		// Create a lint summary for each project
 		for (const result of results) {
 			if (result.errorsHead.length > 0) continue
@@ -148,6 +153,10 @@ export async function run(): Promise<void> {
 				result.reportsBase,
 				result.installedRules
 			)
+			// Check if new lint errors are found
+			if (LintSummary.summary.some((lintSummary) => lintSummary.level === "error")) {
+				projectWithNewLintErrors = true
+			}
 			result.lintSummary = LintSummary.summary
 			result.changedIds = LintSummary.changedIds
 		}
@@ -164,6 +173,7 @@ export async function run(): Promise<void> {
 			}
 			// Case: New errors in project setup
 			if (result.errorsBase.length === 0 && result.errorsHead.length > 0) {
+				projectWithNewSetupErrors = true
 				result.commentContent = `#### ❗️ New errors in setup of project \`${shortenedProjectPath()}\` found
 ${result.errorsHead
 	.map((error) => {
@@ -194,13 +204,13 @@ ${error?.cause.stack}`
 			// Case: Lint reports found -> create comment with lint summary
 			const lintSummary = result.lintSummary
 			const commentContent = `#### Project \`${shortenedProjectPath()}\`
-| lint rule | new reports | link |
-|-----------|-------------|------|
+| lint rule | new reports | level | link |
+|-----------|-------------| ------|------|
 ${lintSummary
 	.map(
 		(lintSummary) =>
-			`| ${lintSummary.name} | ${
-				lintSummary.count
+			`| ${lintSummary.name} | ${lintSummary.count}| ${
+				lintSummary.level
 			} | [contribute (via Fink 🐦)](https://fink.inlang.com/github.com/${headMeta.owner}/${
 				headMeta.repo
 			}?branch=${headMeta.branch}&project=${result.projectPath}&lint=${
@@ -283,6 +293,14 @@ ${lintSummary
 			body: commentContent,
 			as: "ninja-i18n",
 		})
+
+		// Fail the workflow if new lint errors or project setup errors exist
+		if (projectWithNewSetupErrors || projectWithNewLintErrors) {
+			const error_message =
+				"New errors found in project setup" +
+				(projectWithNewLintErrors ? " and new lint errors found in project" : "")
+			core.setFailed(error_message)
+		}
 	} catch (error) {
 		// Fail the workflow run if an error occurs
 		if (error instanceof Error) core.setFailed(error)
@@ -296,7 +314,7 @@ function createLintSummary(
 	reportsBase: MessageLintReport[],
 	installedRules: InstalledMessageLintRule[]
 ) {
-	const summary: { id: string; name: string; count: number }[] = []
+	const summary: { id: string; name: string; count: number; level: "error" | "warning" }[] = []
 	const diffReports = reportsHead.filter(
 		(report) =>
 			!reportsBase.some(
@@ -313,8 +331,9 @@ function createLintSummary(
 				? installedRule.displayName.en
 				: installedRule.displayName
 		const count = diffReports.filter((report) => report.ruleId === id).length
+		const level = installedRule.level
 		if (count > 0) {
-			summary.push({ id, name, count: count })
+			summary.push({ id, name, count: count, level })
 		}
 	}
 	const changedIds = diffReports
