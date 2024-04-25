@@ -154,8 +154,8 @@ export async function run(): Promise<void> {
 				result.installedRules
 			)
 			if (result.projectPath === "/project.inlang") {
-				console.log("ReportsTarget: ", result.reportsTarget)
-				console.log("ReportsMerge: ", result.reportsMerge)
+				console.log("ReportsTarget: ", result.reportsTarget.length)
+				console.log("ReportsMerge: ", result.reportsMerge.length)
 				console.log("LintSummary: ", LintSummary.summary)
 			}
 			if (LintSummary.summary.some((lintSummary) => lintSummary.level === "error")) {
