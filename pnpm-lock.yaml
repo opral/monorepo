@@ -394,8 +394,8 @@ importers:
   inlang/source-code/editor:
     dependencies:
       '@inlang/settings-component':
-        specifier: ^1.0.5
-        version: 1.0.5(@types/react@18.2.79)(babel-plugin-macros@2.8.0)
+        specifier: ^1.0.6
+        version: 1.0.6(@types/react@18.2.79)(babel-plugin-macros@2.8.0)
       '@isomorphic-git/cors-proxy':
         specifier: ^2.7.1
         version: 2.7.1
@@ -761,8 +761,8 @@ importers:
         specifier: workspace:*
         version: link:../sdk
       '@inlang/settings-component':
-        specifier: ^1.0.5
-        version: 1.0.5(@types/react@18.2.79)(babel-plugin-macros@2.8.0)
+        specifier: ^1.0.6
+        version: 1.0.6(@types/react@18.2.79)(babel-plugin-macros@2.8.0)
       '@inlang/telemetry':
         specifier: workspace:*
         version: link:../telemetry
@@ -2236,6 +2236,9 @@ importers:
       '@shoelace-style/shoelace':
         specifier: 2.14.0
         version: 2.14.0(@types/react@18.2.79)
+      '@sinclair/typebox':
+        specifier: 0.31.28
+        version: 0.31.28
       chroma-js:
         specifier: ^2.4.2
         version: 2.4.2
@@ -2264,6 +2267,9 @@ importers:
       '@types/chroma-js':
         specifier: ^2.4.4
         version: 2.4.4
+      '@vitest/coverage-v8':
+        specifier: 0.34.6
+        version: 0.34.6(vitest@0.34.6(jsdom@22.1.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.30.4)(webdriverio@8.36.1(typescript@5.4.5)))
       esbuild:
         specifier: ^0.20.0
         version: 0.20.2
@@ -2279,6 +2285,9 @@ importers:
       storybook:
         specifier: ^7.6.16
         version: 7.6.18
+      vitest:
+        specifier: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.30.4)(webdriverio@8.36.1(typescript@5.4.5))
 
   inlang/source-code/telemetry:
     dependencies:
@@ -4752,12 +4761,12 @@ packages:
   '@inlang/result@1.1.0':
     resolution: {integrity: sha512-zLGroi9EUiHuOjUOaglUVTFO7EWdo2OARMJLBO1Q5Ga/xJmSQb6XS1lhqEXBFAjgFarfEMX5YEJWWALogYV3wA==}
 
-  '@inlang/sdk@0.34.1':
-    resolution: {integrity: sha512-emQWPzvUJs+lnLY4Ut9dvvA6R73okz7BMxMKEiYLuJJNWcom8hYJfumgADoaKdBGgbDCW4NIvMYarX87Rc33KA==}
+  '@inlang/sdk@0.34.2':
+    resolution: {integrity: sha512-U4hMeOJgFch3J0w/gBT9Bk61Yuth4jvsry0nwDJaApHRz12B9PXHBX+ByxW96XvQkFm3ANdHjSyIjZiq0RgtEw==}
     engines: {node: '>=18.0.0'}
 
-  '@inlang/settings-component@1.0.5':
-    resolution: {integrity: sha512-q60pDBjsK7/vQgLU0oDa4zuJntx+VIEYKMbZhjzNYnfLROoq4MLRcQ4PFEfDtjniE3cDmNlTIBqg50USI5DpMw==}
+  '@inlang/settings-component@1.0.6':
+    resolution: {integrity: sha512-qzf+5AqgPL70MnC1yvL+6uF7i09xHL27bignUV19PViQzSUR4qW5lDoWnsppMcikHUNVg/dDvGHmzR/zokJ/cg==}
 
   '@inlang/translatable@1.3.1':
     resolution: {integrity: sha512-VAtle21vRpIrB+axtHFrFB0d1HtDaaNj+lV77eZQTJyOWbTFYTVIQJ8WAbyw9eu4F6h6QC2FutLyxjMomxfpcQ==}
@@ -17669,7 +17678,7 @@ snapshots:
 
   '@inlang/result@1.1.0': {}
 
-  '@inlang/sdk@0.34.1(babel-plugin-macros@2.8.0)':
+  '@inlang/sdk@0.34.2(babel-plugin-macros@2.8.0)':
     dependencies:
       '@inlang/json-types': 1.1.0(@sinclair/typebox@0.31.28)
       '@inlang/language-tag': 1.5.1
@@ -17693,11 +17702,12 @@ snapshots:
       - babel-plugin-macros
       - supports-color
 
-  '@inlang/settings-component@1.0.5(@types/react@18.2.79)(babel-plugin-macros@2.8.0)':
+  '@inlang/settings-component@1.0.6(@types/react@18.2.79)(babel-plugin-macros@2.8.0)':
     dependencies:
-      '@inlang/sdk': 0.34.1(babel-plugin-macros@2.8.0)
+      '@inlang/sdk': 0.34.2(babel-plugin-macros@2.8.0)
       '@lit/task': 1.0.0
       '@shoelace-style/shoelace': 2.14.0(@types/react@18.2.79)
+      '@sinclair/typebox': 0.31.28
       chroma-js: 2.4.2
     transitivePeerDependencies:
       - '@types/react'
@@ -18641,6 +18651,21 @@ snapshots:
       yargs: 17.7.1
     optionalDependencies:
       typescript: 5.3.3
+    transitivePeerDependencies:
+      - supports-color
+    optional: true
+
+  '@puppeteer/browsers@1.4.6(typescript@5.4.5)':
+    dependencies:
+      debug: 4.3.4(supports-color@8.1.1)
+      extract-zip: 2.0.1
+      progress: 2.0.3
+      proxy-agent: 6.3.0
+      tar-fs: 3.0.4
+      unbzip2-stream: 1.4.3
+      yargs: 17.7.1
+    optionalDependencies:
+      typescript: 5.4.5
     transitivePeerDependencies:
       - supports-color
     optional: true
@@ -21366,6 +21391,23 @@ snapshots:
       test-exclude: 6.0.0
       v8-to-istanbul: 9.2.0
       vitest: 0.34.6(jsdom@22.1.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.30.4)(webdriverio@8.36.1(typescript@5.3.3))
+    transitivePeerDependencies:
+      - supports-color
+
+  '@vitest/coverage-v8@0.34.6(vitest@0.34.6(jsdom@22.1.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.30.4)(webdriverio@8.36.1(typescript@5.4.5)))':
+    dependencies:
+      '@ampproject/remapping': 2.3.0
+      '@bcoe/v8-coverage': 0.2.3
+      istanbul-lib-coverage: 3.2.2
+      istanbul-lib-report: 3.0.1
+      istanbul-lib-source-maps: 4.0.1
+      istanbul-reports: 3.1.7
+      magic-string: 0.30.10
+      picocolors: 1.0.0
+      std-env: 3.7.0
+      test-exclude: 6.0.0
+      v8-to-istanbul: 9.2.0
+      vitest: 0.34.6(jsdom@22.1.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.30.4)(webdriverio@8.36.1(typescript@5.4.5))
     transitivePeerDependencies:
       - supports-color
 
@@ -29364,6 +29406,23 @@ snapshots:
       - utf-8-validate
     optional: true
 
+  puppeteer-core@20.9.0(typescript@5.4.5):
+    dependencies:
+      '@puppeteer/browsers': 1.4.6(typescript@5.4.5)
+      chromium-bidi: 0.4.16(devtools-protocol@0.0.1147663)
+      cross-fetch: 4.0.0
+      debug: 4.3.4(supports-color@8.1.1)
+      devtools-protocol: 0.0.1147663
+      ws: 8.13.0
+    optionalDependencies:
+      typescript: 5.4.5
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - supports-color
+      - utf-8-validate
+    optional: true
+
   pureimage@0.4.13:
     dependencies:
       jpeg-js: 0.4.4
@@ -32510,6 +32569,46 @@ snapshots:
       - supports-color
       - terser
 
+  vitest@0.34.6(jsdom@22.1.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.30.4)(webdriverio@8.36.1(typescript@5.4.5)):
+    dependencies:
+      '@types/chai': 4.3.14
+      '@types/chai-subset': 1.3.5
+      '@types/node': 20.12.7
+      '@vitest/expect': 0.34.6
+      '@vitest/runner': 0.34.6
+      '@vitest/snapshot': 0.34.6
+      '@vitest/spy': 0.34.6
+      '@vitest/utils': 0.34.6
+      acorn: 8.11.3
+      acorn-walk: 8.3.2
+      cac: 6.7.14
+      chai: 4.4.1
+      debug: 4.3.4(supports-color@8.1.1)
+      local-pkg: 0.4.3
+      magic-string: 0.30.10
+      pathe: 1.1.2
+      picocolors: 1.0.0
+      std-env: 3.7.0
+      strip-literal: 1.3.0
+      tinybench: 2.8.0
+      tinypool: 0.7.0
+      vite: 4.5.2(@types/node@20.12.7)(terser@5.30.4)
+      vite-node: 0.34.6(@types/node@20.12.7)(terser@5.30.4)
+      why-is-node-running: 2.2.2
+    optionalDependencies:
+      jsdom: 22.1.0
+      playwright: 1.39.0
+      safaridriver: 0.1.2
+      webdriverio: 8.36.1(typescript@5.4.5)
+    transitivePeerDependencies:
+      - less
+      - lightningcss
+      - sass
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+
   vm-browserify@1.1.2: {}
 
   void-elements@3.1.0: {}
@@ -32806,6 +32905,40 @@ snapshots:
       lodash.zip: 4.2.0
       minimatch: 9.0.4
       puppeteer-core: 20.9.0(typescript@5.3.3)
+      query-selector-shadow-dom: 1.0.1
+      resq: 1.11.0
+      rgb2hex: 0.2.5
+      serialize-error: 11.0.3
+      webdriver: 8.36.1
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - supports-color
+      - typescript
+      - utf-8-validate
+    optional: true
+
+  webdriverio@8.36.1(typescript@5.4.5):
+    dependencies:
+      '@types/node': 20.12.7
+      '@wdio/config': 8.36.1
+      '@wdio/logger': 8.28.0
+      '@wdio/protocols': 8.32.0
+      '@wdio/repl': 8.24.12
+      '@wdio/types': 8.36.1
+      '@wdio/utils': 8.36.1
+      archiver: 7.0.1
+      aria-query: 5.3.0
+      css-shorthand-properties: 1.1.1
+      css-value: 0.0.1
+      devtools-protocol: 0.0.1282316
+      grapheme-splitter: 1.0.4
+      import-meta-resolve: 4.0.0
+      is-plain-obj: 4.1.0
+      lodash.clonedeep: 4.5.0
+      lodash.zip: 4.2.0
+      minimatch: 9.0.4
+      puppeteer-core: 20.9.0(typescript@5.4.5)
       query-selector-shadow-dom: 1.0.1
       resq: 1.11.0
       rgb2hex: 0.2.5

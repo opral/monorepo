@@ -2,6 +2,19 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
+			"name": "sdk multi-project-test translate4",
+			"type": "node",
+			"request": "launch",
+			"autoAttachChildProcesses": true,
+			"skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+			"program": "${workspaceRoot}/inlang/source-code/cli/bin/run.js",
+			"cwd": "${workspaceFolder}/inlang/source-code/sdk/multi-project-test",
+			"args": ["machine", "translate", "-n", "-f", "--project", "./project4-dir/project.inlang"],
+			"env": { "MOCK_TRANSLATE_LOCAL": "true", "DEBUG": "sdk:*" },
+			"smartStep": true,
+			"console": "integratedTerminal"
+		},
+		{
 			"name": "debug current vitest",
 			"type": "node",
 			"request": "launch",

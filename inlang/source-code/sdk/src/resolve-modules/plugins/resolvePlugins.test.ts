@@ -61,7 +61,7 @@ it("should expose the project settings including the plugin settings", async () 
 		nodeishFs: {} as any,
 	})
 	await resolved.data.loadMessages!({ settings, nodeishFs: {} as any })
-	await resolved.data.saveMessages!({ settings, messages: [] })
+	await resolved.data.saveMessages!({ settings, messages: [], nodeishFs: {} as any })
 })
 
 describe("loadMessages", () => {
