@@ -1,6 +1,12 @@
 import { LanguageTag } from "@inlang/language-tag"
 import { Type, type Static } from "@sinclair/typebox"
 
+export type Literal = Static<typeof Literal>
+export const Literal = Type.Object({
+	type: Type.Literal("literal"),
+	value: Type.String(),
+})
+
 /**
  * A (text) element that is translatable and rendered to the UI.
  */
@@ -16,6 +22,19 @@ export const VariableReference = Type.Object({
 	name: Type.String(),
 })
 
+export type Option = Static<typeof Option>
+export const Option = Type.Object({
+	name: Type.String(),
+	value: Type.Union([Literal, VariableReference]),
+})
+
+export type FunctionAnnotation = Static<typeof FunctionAnnotation>
+export const FunctionAnnotation = Type.Object({
+	type: Type.Literal("function"),
+	name: Type.String(),
+	options: Type.Array(Option),
+})
+
 /**
  * An expression is a reference to a variable or a function.
  *
@@ -23,7 +42,11 @@ export const VariableReference = Type.Object({
  * text value during runtime.
  */
 export type Expression = Static<typeof Expression>
-export const Expression = Type.Union([VariableReference])
+export const Expression = Type.Object({
+	type: Type.Literal("expression"),
+	arg: Type.Union([Literal, VariableReference]),
+	annotation: Type.Optional(FunctionAnnotation),
+})
 
 // export type FunctionReference = {
 // 	type: "function"
@@ -44,7 +67,6 @@ export const Pattern = Type.Array(Type.Union([Text, Expression]))
  */
 export type Variant = Static<typeof Variant>
 export const Variant = Type.Object({
-	languageTag: LanguageTag,
 	/**
 	 * The number of keys in each variant match MUST equal the number of expressions in the selectors.
 	 *
@@ -55,13 +77,43 @@ export const Variant = Type.Object({
 	pattern: Pattern,
 })
 
-export type Message = Static<typeof Message>
-export const Message = Type.Object({
-	id: Type.String(),
-	alias: Type.Record(Type.String(), Type.String()),
+export type InputDeclaration = Static<typeof InputDeclaration>
+export const InputDeclaration = Type.Object({
+	type: Type.Literal("input"),
+	name: Type.String(),
+
+	//TODO make this generic so that only Variable-Ref Expressions are allowed
+	value: Expression,
+})
+
+export type LocalDeclaration = Static<typeof InputDeclaration>
+export const LocalDeclaration = Type.Object({
+	type: Type.Literal("local"),
+	name: Type.String(),
+	value: Expression,
+})
+
+export type Declaration = Static<typeof Declaration>
+export const Declaration = Type.Union([LocalDeclaration, InputDeclaration])
+
+export type Translation = Static<typeof Translation>
+export const Translation = Type.Object({
+	declarations: Type.Array(Declaration),
 	/**
 	 * The order in which the selectors are placed determines the precedence of patterns.
 	 */
 	selectors: Type.Array(Expression),
 	variants: Type.Array(Variant),
+})
+
+export type Message = Static<typeof Message>
+export const Message = Type.Object({
+	id: Type.String(),
+	alias: Type.Record(Type.String(), Type.String()),
+
+	/**
+	 * The canonical order for named inputs
+	 */
+	inputs: Type.Array(Type.String()),
+	translations: Type.Record(LanguageTag, Translation),
 })
