@@ -1,0 +1,36 @@
+{
+	"$schema": "https://inlang.com/schema/marketplace-manifest",
+	"id": "plugin.inlang.icu2MessageFormat",
+	"displayName": {
+		"en": "ICU MessageFormat 2.0"
+	},
+	"description": {
+		"en": "Don't use this"
+	},
+	"pages": {
+		"/": "./inlang/source-code/plugins/icu2-message-format/README.md",
+		"/changelog": "./inlang/source-code/plugins/icu2--message-format/CHANGELOG.md"
+	},
+	"keywords": [
+		"website",
+		"svelte",
+		"react",
+		"nextjs",
+		"vue",
+		"javascript",
+		"storage",
+		"save",
+		"load",
+		"import",
+		"export",
+		"messages",
+		"plugin",
+		"solid",
+		"astro"
+	],
+	"recommends": ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g", "m/gerre34r"],
+	"publisherName": "inlang",
+	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"license": "Apache-2.0",
+	"module": "https://cdn.jsdelivr.net/npm/@inlang/icu2-message-format@latest/dist/index.js"
+}
