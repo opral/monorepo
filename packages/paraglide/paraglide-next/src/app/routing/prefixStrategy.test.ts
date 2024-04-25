@@ -15,7 +15,7 @@ const { getCanonicalPath, getLocalisedUrl: getLocalisedHref } = PrefixStrategy({
 		},
 	},
 	exclude: (path) => path.startsWith("/api/"),
-	prefix: "except-default",
+	prefixDefault: "never",
 })
 
 describe("getCanonicalPath", () => {
