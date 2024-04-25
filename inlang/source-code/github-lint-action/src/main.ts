@@ -303,9 +303,14 @@ ${lintSummary
 		console.log("projectWithNewSetupErrors", projectWithNewSetupErrors)
 		console.log("projectWithNewLintErrors", projectWithNewLintErrors)
 		if (projectWithNewSetupErrors || projectWithNewLintErrors) {
-			const error_message =
-				"New errors found in project setup" +
-				(projectWithNewLintErrors ? " and new lint errors found in project" : "")
+			let error_message = ""
+			if (projectWithNewSetupErrors && projectWithNewLintErrors) {
+				error_message = "New errors found in project setup and new lint errors found in project"
+			} else if (projectWithNewSetupErrors) {
+				error_message = "New errors found in project setup"
+			} else if (projectWithNewLintErrors) {
+				error_message = "New lint errors found in project"
+			}
 			core.setFailed(error_message)
 		}
 	} catch (error) {
