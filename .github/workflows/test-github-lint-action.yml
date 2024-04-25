@@ -18,6 +18,27 @@ jobs:
         with:
           path: target
 
+      - name: log merge_commit_sha
+        run: echo ${{ github.event.pull_request.merge_commit_sha }}
+
+      - name: Wait for PR to be mergeable
+        run: |
+          while :; do
+            MERGEABLE=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.number }}" \
+              | jq '.mergeable')
+            echo "Mergeable status: $MERGEABLE"
+            if [[ "$MERGEABLE" != "null" ]]; then
+              break
+            fi
+            echo "Waiting for PR to become mergeable..."
+            sleep 10
+          done
+
+      - name: log merge_commit_sha
+        run: echo ${{ github.event.pull_request.merge_commit_sha }}
+
       - name: Checkout merge
         uses: actions/checkout@v4
         with:
