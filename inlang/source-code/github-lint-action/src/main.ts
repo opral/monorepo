@@ -153,6 +153,11 @@ export async function run(): Promise<void> {
 				result.reportsTarget,
 				result.installedRules
 			)
+			if (result.projectPath === "/project.inlang") {
+				console.log("ReportsTarget: ", result.reportsTarget)
+				console.log("ReportsMerge: ", result.reportsMerge)
+				console.log("LintSummary: ", LintSummary.summary)
+			}
 			if (LintSummary.summary.some((lintSummary) => lintSummary.level === "error")) {
 				console.debug(
 					`❗️ New lint errors found in project ${result.projectPath}. Set workflow to fail.`
