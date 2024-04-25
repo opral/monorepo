@@ -7,6 +7,7 @@ import { serializeCookie } from "./utils/cookie"
 import { LANG_COOKIE } from "./constants"
 import { rsc } from "rsc-env"
 import { createLink } from "./Link"
+import { DEV } from "./env"
 
 export const createNavigation = <T extends string>({
 	strategy,
@@ -218,10 +219,16 @@ export function createNoopRouting<T extends string>(): ReturnType<typeof createR
 	}
 }
 
-export function createRedirects<T extends string>(strategy: RoutingStragey<T>) {
-	const localiseHref = createLocaliseHref(strategy)
+type NextRedirect = (typeof NextNavigation)["redirect"]
+type PermanentRedirect = (typeof NextNavigation)["permanentRedirect"]
 
-	type NextRedirect = (typeof NextNavigation)["redirect"]
+export function createRedirects<T extends string>(
+	strategy: RoutingStragey<T>
+): {
+	redirect: NextRedirect
+	permanentRedirect: PermanentRedirect
+} {
+	const localiseHref = createLocaliseHref(strategy)
 
 	/**
 	 * When used in a streaming context, this will insert a meta tag to redirect the user to the target page.
@@ -229,18 +236,13 @@ export function createRedirects<T extends string>(strategy: RoutingStragey<T>) {
 	 *
 	 *  @param url the url to redirect to
 	 */
-	const redirect: NextRedirect = (...args): never => {
-		const href = args[0]
-
-		if (process.env.NODE_ENV === "development" && !href.startsWith("/")) {
+	function redirect(url: string, type?: NextNavigation.RedirectType): never {
+		if (DEV && !url.startsWith("/")) {
 			throw new Error("The href passed to redirect cannot be relative")
 		}
 
-		args[0] = localiseHref(href, languageTag() as T, "/", false)
-		NextNavigation.redirect(...args)
+		NextNavigation.redirect(localiseHref(url, languageTag() as T, "/", false), type)
 	}
-
-	type NextPermanentRedirect = (typeof NextNavigation)["permanentRedirect"]
 
 	/**
 	 * When used in a streaming context, this will insert a meta tag to redirect the user to the target page.
@@ -248,14 +250,12 @@ export function createRedirects<T extends string>(strategy: RoutingStragey<T>) {
 	 *
 	 * @param url the url to redirect to
 	 */
-	const permanentRedirect: NextPermanentRedirect = (...args): never => {
-		const href = args[0]
-		if (process.env.NODE_ENV === "development" && !href.startsWith("/")) {
+	function permanentRedirect(url: string, type?: NextNavigation.RedirectType): never {
+		if (DEV && !url.startsWith("/")) {
 			throw new Error("The href passed to permanentRedirect cannot be relative")
 		}
 
-		args[0] = localiseHref(href, languageTag() as T, "/", false)
-		NextNavigation.permanentRedirect(...args)
+		NextNavigation.permanentRedirect(localiseHref(url, languageTag() as T, "/", false), type)
 	}
 
 	return { redirect, permanentRedirect }
