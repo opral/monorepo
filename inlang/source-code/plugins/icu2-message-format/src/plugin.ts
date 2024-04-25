@@ -7,6 +7,7 @@ import type {
 	Pattern,
 	Plugin,
 	Translation,
+	Variant,
 } from "@inlang/sdk"
 import * as MF from "messageformat"
 import { displayName, description } from "../marketplace-manifest.json"
@@ -42,12 +43,12 @@ export const plugin: Plugin<{
 
 		// create message objects for each ID
 		const messages: Message[] = messageIDs.map((messageId) => {
-			const translations: Record<LanguageTag, Translation> = {}
+			const translations: Translation[] = []
 			const inputs: string[] = []
 			for (const [languageTag, messages] of dictionaries) {
 				const message = messages[messageId]
 				if (!message) continue
-				translations[languageTag] = parseICUMessage(message)
+				translations.push(parseICUMessage(languageTag, message))
 			}
 
 			return {
@@ -65,14 +66,14 @@ export const plugin: Plugin<{
 	},
 }
 
-function parseICUMessage(source: string): Translation {
-	const ast = MF.parseCST(source)
-	if (ast.errors) throw new Error(JSON.stringify(ast.errors))
-	const declarations = ast.declarations?.map(toDeclaration) || []
+function parseICUMessage(languageTag: LanguageTag, source: string): Translation {
+	const ast = MF.parseMessage(source)
+	const declarations = ast.declarations.map(toDeclaration)
 
 	switch (ast.type) {
-		case "simple": {
+		case "message": {
 			return {
+				languageTag,
 				declarations,
 				selectors: [],
 				variants: [
@@ -83,20 +84,28 @@ function parseICUMessage(source: string): Translation {
 				],
 			}
 		}
-		case "complex": {
-			break
-		}
 		case "select": {
-			break
+			return {
+				languageTag,
+				declarations,
+				selectors: ast.selectors.map(toExpression),
+				variants: ast.variants.map(toVariant),
+			}
 		}
 	}
 }
 
-function toDeclaration(mfDeclaration: MF.CST.Declaration): Declaration {
+function toVariant(mfVariant: MF.Variant): Variant {
+	return {
+		match: mfVariant.keys.map((key) => (key.type === "literal" ? key.value : "*")),
+		pattern: toPattern(mfVariant.value),
+	}
+}
+
+function toDeclaration(mfDeclaration: MF.Declaration): Declaration {
 	switch (mfDeclaration.type) {
 		case "input":
 		case "local": {
-			if (mfDeclaration.value.type == "junk") throw new Error("Junk value in declaration")
 			return {
 				type: mfDeclaration.type,
 				name: mfDeclaration.name,
@@ -109,16 +118,23 @@ function toDeclaration(mfDeclaration: MF.CST.Declaration): Declaration {
 	}
 }
 
-function toPattern(mfPattern: MF.CST.Pattern): Pattern {
-	return mfPattern.body.map((element) => {
+function toPattern(mfPattern: MF.Pattern): Pattern {
+	return mfPattern.map((element) => {
+		if (typeof element == "string")
+			return {
+				type: "text",
+				value: element,
+			}
+
 		if (element.type === "expression") return toExpression(element)
-		else return element
+		throw new Error("Unknown pattern element type: " + element.type)
 	})
 }
 
-function toExpression(mfExpression: MF.CST.Expression): Expression {
+function toExpression(mfExpression: MF.Expression): Expression {
 	const annotation = mfExpression.annotation
 	const arg = mfExpression.arg
+	if (!arg) throw new Error()
 	return {
 		type: "expression",
 		arg,
@@ -127,8 +143,16 @@ function toExpression(mfExpression: MF.CST.Expression): Expression {
 }
 
 function toAnnotation(
-	mfAnnotation: MF.CST.Junk | MF.CST.FunctionRef | MF.CST.ReservedAnnotation
+	mfAnnotation: MF.FunctionAnnotation | MF.UnsupportedAnnotation
 ): FunctionAnnotation {
 	if (mfAnnotation.type !== "function") throw new Error("Junk annotation")
-	return mfAnnotation
+	return {
+		type: "function",
+		name: mfAnnotation.name,
+		options:
+			mfAnnotation.options?.map((mfOption) => ({
+				name: mfOption.name,
+				value: mfOption.value,
+			})) || [],
+	}
 }

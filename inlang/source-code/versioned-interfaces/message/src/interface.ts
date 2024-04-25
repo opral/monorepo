@@ -18,7 +18,7 @@ export const Text = Type.Object({
 
 export type VariableReference = Static<typeof VariableReference>
 export const VariableReference = Type.Object({
-	type: Type.Literal("VariableReference"),
+	type: Type.Literal("variable"),
 	name: Type.String(),
 })
 
@@ -98,6 +98,7 @@ export const Declaration = Type.Union([LocalDeclaration, InputDeclaration])
 
 export type Translation = Static<typeof Translation>
 export const Translation = Type.Object({
+	languageTag: LanguageTag,
 	declarations: Type.Array(Declaration),
 	/**
 	 * The order in which the selectors are placed determines the precedence of patterns.
@@ -115,5 +116,5 @@ export const Message = Type.Object({
 	 * The canonical order for named inputs
 	 */
 	inputs: Type.Array(Type.String()),
-	translations: Type.Record(LanguageTag, Translation),
+	translations: Type.Array(Translation),
 })
