@@ -4,6 +4,49 @@
 
 ### Patch Changes
 
+- @inlang/plugin-message-format@2.1.1
+- @inlang/website@null
+- @inlang/badge@0.7.18
+- @inlang/rpc@0.3.13
+- @inlang/telemetry@0.3.27
+
+## null
+
+### Patch Changes
+
+- @inlang/badge@0.7.17
+- @inlang/website@null
+- @inlang/plugin-message-format@2.1.1
+- @inlang/rpc@0.3.12
+- @inlang/telemetry@0.3.26
+
+## null
+
+### Patch Changes
+
+- @inlang/website@null
+- @inlang/plugin-message-format@2.1.1
+- @inlang/badge@0.7.16
+- @inlang/rpc@0.3.11
+- @inlang/telemetry@0.3.25
+
+## null
+
+### Patch Changes
+
+- Updated dependencies [c92bde5]
+  - @inlang/project-settings@2.4.1
+  - @inlang/marketplace-manifest@1.4.1
+  - @inlang/badge@0.7.15
+  - @inlang/website@null
+  - @inlang/plugin-message-format@2.1.1
+  - @inlang/rpc@0.3.10
+  - @inlang/telemetry@0.3.24
+
+## null
+
+### Patch Changes
+
 - Updated dependencies [52c1646]
   - @inlang/marketplace-manifest@1.4.0
   - @inlang/website@null

@@ -1,0 +1,83 @@
+[
+  {
+    "alias": {},
+    "id": "project4_message_key_1",
+    "selectors": [],
+    "variants": [
+      {
+        "languageTag": "de",
+        "match": [],
+        "pattern": [
+          {
+            "type": "Text",
+            "value": "Mock translate local en to de: Generated message (1)"
+          }
+        ]
+      },
+      {
+        "languageTag": "en",
+        "match": [],
+        "pattern": [
+          {
+            "type": "Text",
+            "value": "Generated message (1)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "alias": {},
+    "id": "project4_message_key_2",
+    "selectors": [],
+    "variants": [
+      {
+        "languageTag": "de",
+        "match": [],
+        "pattern": [
+          {
+            "type": "Text",
+            "value": "Mock translate local en to de: Generated message (2)"
+          }
+        ]
+      },
+      {
+        "languageTag": "en",
+        "match": [],
+        "pattern": [
+          {
+            "type": "Text",
+            "value": "Generated message (2)"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "alias": {},
+    "id": "project4_message_key_3",
+    "selectors": [],
+    "variants": [
+      {
+        "languageTag": "de",
+        "match": [],
+        "pattern": [
+          {
+            "type": "Text",
+            "value": "Mock translate local en to de: Generated message (3)"
+          }
+        ]
+      },
+      {
+        "languageTag": "en",
+        "match": [],
+        "pattern": [
+          {
+            "type": "Text",
+            "value": "Generated message (3)"
+          }
+        ]
+      }
+    ]
+  }
+]

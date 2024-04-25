@@ -48,7 +48,11 @@ export type ResolvedPluginApi = {
 		settings: ProjectSettings
 		nodeishFs: NodeishFilesystemSubset
 	}) => Promise<Message[]> | Message[]
-	saveMessages: (args: { settings: ProjectSettings; messages: Message[] }) => Promise<void> | void
+	saveMessages: (args: {
+		settings: ProjectSettings
+		messages: Message[]
+		nodeishFs: NodeishFilesystemSubset
+	}) => Promise<void> | void
 	/**
 	 * App specific APIs.
 	 *

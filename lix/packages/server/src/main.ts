@@ -11,13 +11,10 @@ import { router as githubProxy } from "./github-proxy.js"
 import { getEnvVar } from "./util/getEnv.js"
 
 const isProduction = process.env.NODE_ENV === "production"
-const SERVER_SENTRY_DSN = getEnvVar(
-	"SERVER_SENTRY_DSN",
-	{
-		descirption: "DSN for Sentry (on the server)",
-		default: !isProduction ? "" : undefined
-	}
-)
+const SERVER_SENTRY_DSN = getEnvVar("SERVER_SENTRY_DSN", {
+	descirption: "DSN for Sentry (on the server)",
+	default: !isProduction ? "" : undefined,
+})
 const SESSION_COOKIE_SECRET = getEnvVar("SESSION_COOKIE_SECRET")
 
 const app = express()

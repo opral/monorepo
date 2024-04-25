@@ -213,7 +213,9 @@ export async function convert(markdown: string): Promise<{ data: any; html: stri
 					node.properties.href.includes("inlang.com") &&
 					node.children[0].tagName !== "img"
 				) {
-					//node.properties.target = "_blank"
+					node.properties.href = node.properties.href
+						.replace("https://inlang.com", "")
+						.replace("http://inlang.com", "")
 				} else if (
 					// external link with image (no arrow icon)
 					node.tagName === "a" &&

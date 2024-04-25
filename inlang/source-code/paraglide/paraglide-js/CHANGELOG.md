@@ -1,5 +1,17 @@
 # @inlang/paraglide-js
 
+## 1.7.2
+
+### Patch Changes
+
+- 6105a50: No longer log "Exiting the Watcher" when stopping the watching process, as it was causing annoying CMD popups on windows
+
+## 1.7.1
+
+### Patch Changes
+
+- 4d24188: `paraglide-js init` now uses the `createNewProject` API from `@inlang/sdk` for creating new projects. This resulits in higher reliability.
+
 ## 1.7.0
 
 ### Minor Changes

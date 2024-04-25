@@ -1,6 +1,6 @@
 {
 	"name": "@lix-js/client",
-	"version": "1.2.1",
+	"version": "1.4.0",
 	"type": "module",
 	"publishConfig": {
 		"access": "public"
@@ -26,6 +26,8 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
+		"eslint": "9.0.0",
+		"prettier": "2.8.3",
 		"@lix-js/fs": "workspace:*",
 		"@octokit/types": "12.4.0 ",
 		"async-lock": "^1.4.1",
@@ -36,14 +38,13 @@
 		"octokit": "3.1.2",
 		"pako": "^1.0.11",
 		"pify": "^5.0.0",
-		"sha.js": "^2.4.11",
-		"solid-js": "1.7.11"
+		"sha.js": "^2.4.11"
 	},
 	"license": "Apache-2.0",
 	"devDependencies": {
-		"@vitest/coverage-v8": "1.1.1",
 		"typescript": "5.2.2",
-		"vitest": "1.1.1",
-		"eslint": "^8.57.0"
+		"@vitest/coverage-v8": "1.1.1",
+		"@lix-js/code-style": "workspace:*",
+		"vitest": "1.1.1"
 	}
 }
