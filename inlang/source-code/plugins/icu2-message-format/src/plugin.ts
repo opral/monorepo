@@ -69,7 +69,7 @@ export const plugin: Plugin<{
 	},
 }
 
-function parseICUMessage(languageTag: LanguageTag, source: string): Translation {
+export function parseICUMessage(languageTag: LanguageTag, source: string): Translation {
 	const ast = MF.parseMessage(source)
 	const declarations = ast.declarations.map(toDeclaration)
 
