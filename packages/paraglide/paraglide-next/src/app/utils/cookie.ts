@@ -17,6 +17,8 @@ export type CookieConfig = {
 
 /**
  * Returns a cookie string from a cookie config
+ *
+ * Does not perform any value-escaping or sanitization
  */
 export const serializeCookie = ({ name, value, ...rest }: CookieConfig) =>
 	name +

@@ -24,20 +24,20 @@ export function generateLinkHeader<T extends string>(
 	}
 ): string {
 	const alternates: string[] = []
+	const nextUrl = request.nextUrl
 
 	for (const lang of availableLanguageTags) {
 		const localizedUrl = strategy.getLocalisedUrl(canonicalPath, lang, true)
 		localizedUrl.pathname = encodeURI(localizedUrl.pathname || "")
-		localizedUrl.pathname = addPathPrefix(localizedUrl.pathname, request.nextUrl.basePath)
+		localizedUrl.pathname = addPathPrefix(localizedUrl.pathname, nextUrl.basePath)
 
-		localizedUrl.protocol ??= request.nextUrl.protocol
-		localizedUrl.host ??= request.nextUrl.host
-		localizedUrl.hostname ??= request.nextUrl.hostname
-		localizedUrl.port ??= request.nextUrl.port
-		localizedUrl.hash ??= request.nextUrl.hash
-		localizedUrl.search ??= request.nextUrl.search
+		localizedUrl.protocol ??= nextUrl.protocol
+		localizedUrl.host ??= nextUrl.host
+		localizedUrl.hostname ??= nextUrl.hostname
+		localizedUrl.port ??= nextUrl.port
+		localizedUrl.hash ??= nextUrl.hash
+		localizedUrl.search ??= nextUrl.search
 
-		//withBase should be an absolute path, so this should never do relative path resolution
 		const fullHref = format(localizedUrl)
 		alternates.push(`<${fullHref}>; rel="alternate"; hreflang="${lang}"`)
 	}
