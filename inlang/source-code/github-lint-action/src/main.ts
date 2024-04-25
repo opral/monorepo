@@ -300,6 +300,8 @@ ${lintSummary
 		})
 
 		// Fail the workflow if new lint errors or project setup errors exist
+		console.log("projectWithNewSetupErrors", projectWithNewSetupErrors)
+		console.log("projectWithNewLintErrors", projectWithNewLintErrors)
 		if (projectWithNewSetupErrors || projectWithNewLintErrors) {
 			const error_message =
 				"New errors found in project setup" +
