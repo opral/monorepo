@@ -12,7 +12,7 @@ export const Literal = Type.Object({
  */
 export type Text = Static<typeof Text>
 export const Text = Type.Object({
-	type: Type.Literal("Text"),
+	type: Type.Literal("text"),
 	value: Type.String(),
 })
 
