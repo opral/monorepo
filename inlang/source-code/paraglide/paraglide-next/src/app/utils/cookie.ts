@@ -1,3 +1,8 @@
+/**
+ * An object representing a cookie
+ *
+ * For Boolean properties we use `true`/`undefined` instead of `true`/`false`
+ */
 export type CookieConfig = {
 	name: string
 	value: string
@@ -10,12 +15,14 @@ export type CookieConfig = {
 	SameSite?: "strict" | "lax" | "none"
 }
 
-export function serializeCookie({ name, value, ...rest }: CookieConfig) {
-	const parts = [`${name}=${value}`]
-
-	for (const [key, value] of Object.entries(rest)) {
-		parts.push(value === true ? key : `${key}=${value}`)
-	}
-
-	return parts.join("; ")
-}
+/**
+ * Returns a cookie string from a cookie config
+ */
+export const serializeCookie = ({ name, value, ...rest }: CookieConfig) =>
+	name +
+	"=" +
+	value +
+	"; " +
+	Object.entries(rest)
+		.map(([key, value]) => (value === true ? key : key + "=" + value))
+		.join("; ")
