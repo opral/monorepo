@@ -22,20 +22,22 @@ jobs:
         run: echo ${{ github.event.pull_request.merge_commit_sha }}
 
       # You can use Git directly or GET /repos/{owner}/{repo}/git/refs/{ref} for updates to merge Git refs only after performing the previous steps.
-      - name: Get merge commit sha
+      - name: Get merge commit sha and set it as output
         run: |
           curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
             https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }} \
-            | jq -r '.merge_commit_sha' > merge_commit_sha.txt
+            | jq -r '.merge_commit_sha' \
+            > merge_commit_sha
+        id: get-merge-sha
 
       - name: log merge_commit_sha
-        run: cat merge_commit_sha.txt
+        run: echo ${{ steps.get-merge-sha.outputs.merge_commit_sha }}
 
       - name: Checkout merge
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          ref: ${{ steps.get-merge-sha.outputs.merge_commit_sha }}
           path: merge
 
       - name: Setup Pnpm
