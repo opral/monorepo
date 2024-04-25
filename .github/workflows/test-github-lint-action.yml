@@ -1,7 +1,6 @@
 name: Ninja i18n action
 
-on:
-  pull_request_target:
+on: pull_request_target
 
 # explicitly configure permissions, in case your GITHUB_TOKEN workflow permissions are set to read-only in repository settings
 permissions: 
@@ -10,7 +9,6 @@ permissions:
 jobs:
   test-action:
     name: GitHub Actions Test
-    if: github.event.pull_request.mergeable != null
     runs-on: ubuntu-latest
 
     steps:
@@ -19,6 +17,30 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: target
+
+      - name: Wait for the merge commit SHA
+        run: |
+          MERGE_COMMIT_SHA=""
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          REPO_OWNER=${{ github.repository_owner }}
+          REPO_NAME=${{ github.event.repository.name }}
+
+          echo "Waiting for merge commit SHA for PR #${PR_NUMBER}..."
+
+          # Polling GitHub API to get the merge commit SHA
+          while [ -z "$MERGE_COMMIT_SHA" ] || [ "$MERGE_COMMIT_SHA" == "null" ]; do
+            RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/pulls/$PR_NUMBER")
+            MERGE_COMMIT_SHA=$(echo $RESPONSE | jq -r '.merge_commit_sha')
+
+            if [ "$MERGE_COMMIT_SHA" != "null" ]; then
+              echo "Merge commit SHA found: $MERGE_COMMIT_SHA"
+              break
+            else
+              echo "Merge commit SHA not available yet. Waiting 30 seconds..."
+              sleep 30
+            fi
+          done
 
       - name: Checkout merge
         uses: actions/checkout@v4
