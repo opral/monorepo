@@ -18,17 +18,14 @@ jobs:
         with:
           path: target
 
-      - name: log merge_commit_sha
-        run: echo ${{ github.event.pull_request.merge_commit_sha }}
-
-      - name: Get merge commit sha and set it as output
+      - name: Get merge commit sha from PR
         run: |
           curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
             https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }} \
             | jq -r '.merge_commit_sha' \
             > merge_commit_sha
-          echo "::set-output name=merge_commit_sha::$(cat merge_commit_sha)"
+            echo "merge_commit_sha=merge_commit_sha" >> $GITHUB_OUTPUT
         id: get-merge-sha
 
       - name: Checkout merge
