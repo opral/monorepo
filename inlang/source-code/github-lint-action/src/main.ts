@@ -31,7 +31,6 @@ export async function run(): Promise<void> {
 			branch: github.context.payload.pull_request?.head.ref,
 		})
 		const projectListBase = await listProjects(repoBase.nodeishFs, process.cwd())
-		console.log("List projects", projectListBase)
 
 		const results = projectListBase.map((project) => ({
 			projectPath: project.projectPath.replace(process.cwd(), ""),
@@ -67,13 +66,11 @@ export async function run(): Promise<void> {
 			owner: github.context.payload.pull_request?.head.label.split(":")[0],
 			repo: github.context.payload.pull_request?.head.repo.name,
 			branch: github.context.payload.pull_request?.head.label.split(":")[1],
-			link: github.context.payload.pull_request?.head.repo.html_url,
 		}
 		const baseMeta = {
 			owner: github.context.payload.pull_request?.base.label.split(":")[0],
 			repo: repo,
 			branch: github.context.payload.pull_request?.base.label.split(":")[1],
-			link: github.context.payload.pull_request?.base.repo.html_url,
 		}
 
 		const isFork = headMeta.owner !== baseMeta.owner
