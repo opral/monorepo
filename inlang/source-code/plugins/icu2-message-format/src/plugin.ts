@@ -44,11 +44,15 @@ export const plugin: Plugin<{
 		// create message objects for each ID
 		const messages: Message[] = messageIDs.map((messageId) => {
 			const translations: Translation[] = []
+
+			// TODO Populate Inputs
 			const inputs: string[] = []
 			for (const [languageTag, messages] of dictionaries) {
-				const message = messages[messageId]
-				if (!message) continue
-				translations.push(parseICUMessage(languageTag, message))
+				const messageSource = messages[messageId]
+				if (!messageSource) continue
+
+				const message = parseICUMessage(languageTag, messageSource)
+				translations.push(message)
 			}
 
 			return {
