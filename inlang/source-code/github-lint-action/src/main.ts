@@ -80,13 +80,7 @@ export async function run(): Promise<void> {
 		core.debug(`Is fork: ${isFork}`)
 
 		// Prepare head repo
-		// TODO: Change to the correct directory
 		process.chdir("../merge")
-
-		console.log("List directories")
-		const directories = await fs.readdir(process.cwd())
-		console.log(directories)
-
 		const repoHead = await openRepository("file://" + process.cwd(), {
 			nodeishFs: fs,
 		})
