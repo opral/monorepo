@@ -22,7 +22,7 @@ export const serializeCookie = ({ name, value, ...rest }: CookieConfig) =>
 	name +
 	"=" +
 	value +
-	"; " +
+	";" +
 	Object.entries(rest)
 		.map(([key, value]) => (value === true ? key : key + "=" + value))
-		.join("; ")
+		.join(";")
