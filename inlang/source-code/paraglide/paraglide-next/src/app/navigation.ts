@@ -44,6 +44,17 @@ export const createRouting = <T extends string>(strategy: RoutingStragey<T>) => 
 	}
 
 	/**
+	 * Updates the language cookie
+	 */
+	const updateLanguageCookie = (locale: T) => {
+		document.cookie = serializeCookie({
+			...LANG_COOKIE,
+			value: locale,
+			Path: basePath,
+		})
+	}
+
+	/**
 	 * Get wrapped router methods so you can interact with them using canonical paths
 	 * @example
 	 * ```ts
@@ -99,11 +110,7 @@ export const createRouting = <T extends string>(strategy: RoutingStragey<T>) => 
 
 				history.pushState({}, "", destination)
 
-				document.cookie = serializeCookie({
-					...LANG_COOKIE,
-					value: locale,
-					Path: basePath,
-				})
+				updateLanguageCookie(locale)
 
 				window.location.reload()
 				return
@@ -151,12 +158,7 @@ export const createRouting = <T extends string>(strategy: RoutingStragey<T>) => 
 					: addBasePath(localisedPath, true)
 
 				history.replaceState({}, "", destination)
-
-				document.cookie = serializeCookie({
-					...LANG_COOKIE,
-					value: locale,
-					Path: basePath,
-				})
+				updateLanguageCookie(locale)
 
 				window.location.reload()
 				return
@@ -227,7 +229,7 @@ export function createRedirects<T extends string>(strategy: RoutingStragey<T>) {
 	 *
 	 *  @param url the url to redirect to
 	 */
-	const redirect: NextRedirect = (...args) => {
+	const redirect: NextRedirect = (...args): never => {
 		const href = args[0]
 
 		if (process.env.NODE_ENV === "development" && !href.startsWith("/")) {
@@ -246,7 +248,7 @@ export function createRedirects<T extends string>(strategy: RoutingStragey<T>) {
 	 *
 	 * @param url the url to redirect to
 	 */
-	const permanentRedirect: NextPermanentRedirect = (...args) => {
+	const permanentRedirect: NextPermanentRedirect = (...args): never => {
 		const href = args[0]
 		if (process.env.NODE_ENV === "development" && !href.startsWith("/")) {
 			throw new Error("The href passed to permanentRedirect cannot be relative")

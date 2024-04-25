@@ -12,6 +12,7 @@ import { createLocaliseHref } from "./localiseHref"
 import { serializeCookie } from "./utils/cookie"
 import { LANG_COOKIE } from "./constants"
 import { rsc } from "rsc-env"
+import { DEV } from "./env"
 
 type LocalisedLink<T extends string> = (
 	props: Omit<Parameters<typeof import("next/link").default>[0], "locale"> & { locale?: T }
@@ -27,11 +28,7 @@ export function createLink<T extends string>(strategy: RoutingStragey<T>): Local
 	return function Link(props) {
 		const currentLanguageTag = languageTag() as T
 
-		if (
-			process.env.NODE_ENV === "development" &&
-			props.locale &&
-			!isAvailableLanguageTag(props.locale)
-		) {
+		if (DEV && props.locale && !isAvailableLanguageTag(props.locale)) {
 			const disjunctionFormatter = new Intl.ListFormat("en", { style: "long", type: "disjunction" })
 			const availableLanguageTagsString = disjunctionFormatter.format(
 				availableLanguageTags.map((tag) => `"${tag}"`)
@@ -42,10 +39,9 @@ export function createLink<T extends string>(strategy: RoutingStragey<T>): Local
 			)
 		}
 
-		let lang = props.locale || currentLanguageTag
-		if (!isAvailableLanguageTag(lang)) lang = sourceLanguageTag as T
-
-		const localisedHref = localiseHref(props.href, lang, "", lang !== currentLanguageTag)
+		const lang = props.locale || currentLanguageTag || (sourceLanguageTag as T)
+		const isLanguageSwitch = lang !== currentLanguageTag
+		const localisedHref = localiseHref(props.href, lang, "", isLanguageSwitch)
 
 		function updateLangCookie(newLang: T) {
 			document.cookie = serializeCookie({
@@ -56,10 +52,8 @@ export function createLink<T extends string>(strategy: RoutingStragey<T>): Local
 		}
 
 		//If the language changes, we don't want client navigation
-		return lang == currentLanguageTag ? (
-			<>
-				<NextLink {...props} href={localisedHref} />
-			</>
+		return !isLanguageSwitch ? (
+			<NextLink {...props} href={localisedHref} />
 		) : rsc ? (
 			<a {...props} hrefLang={lang} href={addBasePath(localisedHref.toString())} />
 		) : (

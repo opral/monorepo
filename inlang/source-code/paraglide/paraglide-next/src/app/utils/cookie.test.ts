@@ -11,8 +11,6 @@ describe("serializeCookie", () => {
 			Path: "/",
 			SameSite: "strict",
 		}
-		expect(serializeCookie(cookieConfig)).toBe(
-			"foo=bar; Max-Age=60; HttpOnly; Path=/; SameSite=strict"
-		)
+		expect(serializeCookie(cookieConfig)).toBe("foo=bar;Max-Age=60;HttpOnly;Path=/;SameSite=strict")
 	})
 })
