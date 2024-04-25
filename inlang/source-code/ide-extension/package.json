@@ -137,6 +137,45 @@
 				"sherlock.previewLanguageTag": {
 					"type": "string",
 					"default": ""
+				},
+				"sherlock.editorColors": {
+					"type": "object",
+					"properties": {
+						"info": {
+							"type": "object",
+							"properties": {
+								"foreground": {
+									"type": "string",
+									"default": "editorInfo.foreground"
+								},
+								"background": {
+									"type": "string",
+									"default": "editorInfo.background"
+								},
+								"border": {
+									"type": "string",
+									"default": "editorInfo.border"
+								}
+							}
+						},
+						"error": {
+							"type": "object",
+							"properties": {
+								"foreground": {
+									"type": "string",
+									"default": "editorError.foreground"
+								},
+								"background": {
+									"type": "string",
+									"default": "editorError.background"
+								},
+								"border": {
+									"type": "string",
+									"default": "editorError.border"
+								}
+							}
+						}
+					}
 				}
 			}
 		}
