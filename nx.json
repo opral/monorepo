@@ -20,38 +20,23 @@
 	},
 	"targetDefaults": {
 		"production": {
-			"dependsOn": [
-				"^build"
-			],
-			"inputs": [
-				"default",
-				"^default",
-				"publicEnv",
-				"nodeVersion",
-				"platform"
-			],
-			"cache": true
+			"dependsOn": ["^build"],
+			"inputs": ["default", "^default", "publicEnv", "nodeVersion", "platform"]
 		},
 		"build": {
-			"dependsOn": [
-				"^build"
-			],
+			"dependsOn": ["^build"],
 			"inputs": ["default", "^default", "publicEnv", "nodeVersion", "platform"],
 			"cache": true
 		},
 		"dev": {
-			"dependsOn": [
-				"^build"
-			]
+			"dependsOn": ["^build"]
 		},
 		"test": {
 			"dependsOn": ["^build", "publicEnv", "nodeVersion", "platform"],
 			"cache": true
 		},
 		"lint": {
-			"dependsOn": [
-				"format"
-			],
+			"dependsOn": ["format"],
 			"cache": true
 		},
 		"format": {
