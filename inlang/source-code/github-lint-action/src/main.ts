@@ -78,6 +78,10 @@ export async function run(): Promise<void> {
 
 		// Prepare head repo
 		process.chdir("../merge")
+		// Log file project.inlang/settings.json
+		const settings = await fs.readFile("project.inlang/settings.json", "utf-8")
+		console.log("settings.json:", settings)
+
 		const repoHead = await openRepository("file://" + process.cwd(), {
 			nodeishFs: fs,
 		})
