@@ -69,12 +69,14 @@ export function createMiddleware<T extends string>(
 	}
 }
 
-const rewrite = (nextUrl: NextURL, pathname: string, init: RequestInit): NextResponse => {
-	nextUrl.pathname = pathname
-	return NextResponse.rewrite(nextUrl, init)
+const rewrite = (nextUrl: NextURL, pathname: string, init?: RequestInit): NextResponse => {
+	const destination = nextUrl.clone()
+	destination.pathname = pathname
+	return NextResponse.rewrite(destination, init)
 }
 
-const redirect = (nextUrl: NextURL, pathname: string, init: RequestInit): NextResponse => {
-	nextUrl.pathname = pathname
-	return NextResponse.redirect(nextUrl, init)
+const redirect = (nextUrl: NextURL, pathname: string, init?: RequestInit): NextResponse => {
+	const destination = nextUrl.clone()
+	destination.pathname = pathname
+	return NextResponse.redirect(destination, init)
 }
