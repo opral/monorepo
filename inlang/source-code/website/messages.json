@@ -4132,6 +4132,46 @@
 							"value": "Explore inlang stuff"
 						}
 					]
+				},
+				{
+					"languageTag": "fr",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Explorez des trucs en langage"
+						}
+					]
+				},
+				{
+					"languageTag": "it",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Esplora cose in lingua inglese"
+						}
+					]
+				},
+				{
+					"languageTag": "pt-BR",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Explore coisas inlang"
+						}
+					]
+				},
+				{
+					"languageTag": "sk",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Preskúmajte veci v jazyku inlang"
+						}
+					]
 				}
 			],
 			"alias": {
