@@ -333,7 +333,7 @@ There are some known limitations with Paraglide-Next.
 
 # Examples
 
-You can find example projects in [our GitHub repository](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide-next/examples), or try them on StackBlitz:
+You can find example projects in [our GitHub repository](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-next/examples), or try them on StackBlitz:
 
 <doc-links>
     <doc-link title="App Router Example" icon="simple-icons:stackblitz" href="https://stackblitz.com/~/LorisSigrist/paraglide-next-app-router-example" description="Try out the App router example on StackBlitz"></doc-link>
