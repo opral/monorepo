@@ -1,0 +1,51 @@
+import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
+
+export const manifest: MarketplaceManifest = {
+	$schema: "https://inlang.com/schema/marketplace-manifest",
+	id: "library.inlang.paraglideJs",
+	icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/paraglideNoBg.png",
+	gallery: [
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/og.png",
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-1.jpg",
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-2.jpg",
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-3.jpg",
+		"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-4.jpg",
+	],
+	displayName: {
+		en: "Paraglide JS",
+	},
+	description: {
+		en: "Simple, adaptable and tiny i18n library that integrates with any framework",
+	},
+	pages: {
+		"/": "./inlang/source-code/paraglide/paraglide-js/README.md",
+		"/changelog": "./inlang/source-code/paraglide/paraglide-js/CHANGELOG.md",
+	},
+	keywords: [
+		"paraglide js",
+		"libraries",
+		"apps",
+		"website",
+		"developer",
+		"paraglide",
+		"i18n",
+		"library",
+		"localization",
+		"sdk",
+		"sdk-js",
+		"svelte",
+		"react",
+		"nextjs",
+		"remix",
+		"vue",
+		"astro",
+		"javascript",
+		"solid",
+		"typescript",
+	],
+	recommends: ["m/reootnfj", "m/632iow21", "m/r7kp499g", "m/teldgniy"],
+	pricing: "free",
+	publisherName: "inlang",
+	publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+	license: "Apache-2.0",
+}
