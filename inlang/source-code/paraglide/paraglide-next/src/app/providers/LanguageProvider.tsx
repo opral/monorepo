@@ -17,7 +17,7 @@ export default function LanguageProvider(props: { children: React.ReactNode }): 
 			{/* Pass the language tag to the client */}
 			<ClientLanguageProvider language={languageTag()} />
 			{/* Re-render if the language changes */}
-			<React.Fragment key={languageTag()}>{props.children}</React.Fragment>
+			<React.Fragment>{props.children}</React.Fragment>
 		</>
 	)
 }
