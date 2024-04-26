@@ -4114,6 +4114,16 @@
 			"selectors": [],
 			"variants": [
 				{
+					"languageTag": "de",
+					"match": [],
+					"pattern": [
+						{
+							"type": "Text",
+							"value": "Inlang-Sachen erkunden"
+						}
+					]
+				},
+				{
 					"languageTag": "en",
 					"match": [],
 					"pattern": [
