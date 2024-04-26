@@ -27,11 +27,11 @@ jobs:
           echo "merge_commit_sha=${merge_commit_sha}" >> $GITHUB_OUTPUT
         id: get-merge-sha
 
-      - name: Checkout merge
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ steps.get-merge-sha.outputs.merge_commit_sha }}
-          path: merge
+      # - name: Checkout merge
+      #   uses: actions/checkout@v4
+      #   with:
+      #     ref: ${{ steps.get-merge-sha.outputs.merge_commit_sha }}
+      #     path: merge
 
       - name: Setup Pnpm
         uses: pnpm/action-setup@v2
@@ -53,6 +53,6 @@ jobs:
 
       - name: Test Local Action
         id: test-action
-        uses: ./target/inlang/source-code/github-lint-action
+        uses: ./inlang/source-code/github-lint-action
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
