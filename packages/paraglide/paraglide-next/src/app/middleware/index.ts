@@ -26,8 +26,6 @@ export function createMiddleware<T extends string>(
 			isLocaleSwitch: false,
 		})
 
-		const shouldRedirect = localisedPathname !== decodedPathname
-
 		const localeCookieMatches =
 			isAvailableLanguageTag(localeCookeValue) && localeCookeValue === locale
 
@@ -36,10 +34,10 @@ export function createMiddleware<T extends string>(
 		const headers = new Headers(request.headers)
 		headers.set(PARAGLIDE_LANGUAGE_HEADER_NAME, locale)
 
+		const requestInit: RequestInit = { headers }
+
+		const shouldRedirect = localisedPathname !== decodedPathname
 		const rewriteRequired = request.nextUrl.pathname !== canonicalPath
-		const requestInit: RequestInit = {
-			headers,
-		}
 
 		const response: NextResponse = shouldRedirect
 			? redirect(request.nextUrl, localisedPathname, requestInit)
@@ -52,7 +50,7 @@ export function createMiddleware<T extends string>(
 			response.cookies.set(LANG_COOKIE.name, locale, {
 				sameSite: LANG_COOKIE.sameSite,
 				maxAge: LANG_COOKIE.maxAge,
-				path: request.nextUrl.basePath || undefined,
+				path: request.nextUrl.basePath || "/",
 			})
 		}
 
