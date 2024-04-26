@@ -22,8 +22,11 @@ jobs:
           echo "Mergeable status: $mergeable"
           if [[ "$mergeable" != "true" ]]; then
             echo "Pull request is not mergeable. Skipping workflow."
-            exit 78 # Exit with neutral status code to skip the workflow
+            gh run cancel ${{ github.run_id }}
+            gh run watch ${{ github.run_id }}
           fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
       - name: Checkout target branch
         id: checkout
