@@ -324,7 +324,10 @@ ${lintSummary
 		// Fail the workflow run if an error occurs
 		if (error instanceof Error) {
 			// Catch migration error and report prompt to migrate
-			if (error.message.includes("target'. No such file or directory")) {
+			if (
+				error.message.includes("ENOENT: no such file or directory") &&
+				error.message.includes("'target'")
+			) {
 				core.setFailed(
 					"Your workflow file needs to be updated. Please copy the new snippet of the ninja_i18n.yml file from the [README](https://github.com/opral/ninja-i18n-action)."
 				)
