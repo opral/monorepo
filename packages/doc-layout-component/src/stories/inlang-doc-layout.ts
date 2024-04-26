@@ -1,11 +1,15 @@
 import { html, LitElement, css } from "lit"
-import { customElement } from "lit/decorators.js"
+import { customElement, property } from "lit/decorators.js"
 import { baseStyling } from "../styling/base.js"
+import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import overridePrimitiveColors from "./../helper/overridePrimitiveColors.js"
 
 @customElement("inlang-doc-layout")
 export default class InlangDocLayout extends LitElement {
 	static override styles = [baseStyling, css``]
+
+	@property({ type: Object })
+	manifest: MarketplaceManifest = {} as MarketplaceManifest
 
 	override async firstUpdated() {
 		await this.updateComplete
@@ -15,7 +19,10 @@ export default class InlangDocLayout extends LitElement {
 	}
 
 	override render() {
-		return html` <div class="container" part="base">doc-layout-component</div>`
+		return html` <div class="container" part="base">
+			<p>${this.manifest.id}</p>
+			<slot></slot>
+		</div>`
 	}
 }
 
