@@ -34,16 +34,14 @@ export function createMiddleware<T extends string>(
 		const headers = new Headers(request.headers)
 		headers.set(PARAGLIDE_LANGUAGE_HEADER_NAME, locale)
 
-		const requestInit: RequestInit = { headers }
-
 		const shouldRedirect = localisedPathname !== decodedPathname
 		const rewriteRequired = request.nextUrl.pathname !== canonicalPath
 
 		const response: NextResponse = shouldRedirect
-			? redirect(request.nextUrl, localisedPathname, requestInit)
+			? redirect(request.nextUrl, localisedPathname, { headers })
 			: rewriteRequired
-			? rewrite(request.nextUrl, canonicalPath, requestInit)
-			: NextResponse.next(requestInit)
+			? rewrite(request.nextUrl, canonicalPath, { request: { headers } })
+			: NextResponse.next({ request: { headers } })
 
 		// Update the locale-cookie
 		if (!localeCookieMatches) {
@@ -67,7 +65,7 @@ export function createMiddleware<T extends string>(
 	}
 }
 
-const rewrite = (nextUrl: NextURL, pathname: string, init?: RequestInit): NextResponse => {
+const rewrite = (nextUrl: NextURL, pathname: string, init?: object): NextResponse => {
 	const destination = nextUrl.clone()
 	destination.pathname = pathname
 	return NextResponse.rewrite(destination, init)
