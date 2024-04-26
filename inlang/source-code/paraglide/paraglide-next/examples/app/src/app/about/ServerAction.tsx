@@ -6,7 +6,7 @@ export default function ServerActionTester() {
 		<button
 			onClick={async () => {
 				const response = await fetchData()
-				console.log("client response:", response)
+				alert(response)
 			}}
 			type="button"
 		>
