@@ -1,4 +1,3 @@
-// test conflict
 import * as fs from "node:fs/promises"
 import * as core from "@actions/core"
 import * as github from "@actions/github"
@@ -22,8 +21,21 @@ export async function run(): Promise<void> {
 		if (!token) {
 			throw new Error("GITHUB_TOKEN is not set")
 		}
+		// Check if pull request is mergeable using the GitHub API
+		const octokit = github.getOctokit(token)
 		const { owner, repo } = github.context.repo
 		const prNumber = github.context.payload.pull_request?.number
+		const { data } = await octokit.rest.pulls.get({
+			owner,
+			repo,
+			pull_number: prNumber as number,
+		})
+		if (data.mergeable) {
+			console.debug(`Pull Request #${prNumber} is mergeable.`)
+		} else {
+			console.warn(`Pull Request #${prNumber} is not mergeable.`)
+			return
+		}
 
 		// Change into the target repository
 		process.chdir("target")
@@ -245,7 +257,6 @@ ${lintSummary
 				.filter((content) => content.length > 0)
 				.join("\n")
 
-		const octokit = github.getOctokit(token)
 		const issue = await octokit.rest.issues.get({
 			owner,
 			repo,
