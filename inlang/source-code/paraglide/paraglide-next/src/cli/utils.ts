@@ -1,4 +1,4 @@
-import path from "path"
+import path from "node:path"
 
 /**
  * One step in a CLI chain.

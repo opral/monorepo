@@ -1,8 +1,8 @@
+import path from "node:path"
 import { Logger } from "@inlang/paraglide-js/internal"
-import { CliStep } from "../utils"
+import { CliStep, normalizePath } from "../utils"
 import { Repository } from "@lix-js/client"
 import { NextJSProject } from "./scan-next-project"
-import path from "node:path"
 import { Outdir } from "./getOutDir"
 
 export const addParaglideNextPluginToNextConfig: CliStep<
@@ -63,8 +63,10 @@ https://inlang.com/m/osslbuzt/paraglide-next-i18n
 		const configIdentifier = match.groups?.configIdentifier as string
 		const identifierStartIndex = endIndex - configIdentifier.length
 
-		const relativeOutdir = "./" + path.relative(process.cwd(), ctx.outdir.path)
-		const relativeProjectPath = "./" + path.relative(process.cwd(), ctx.projectPath)
+		const posixCWD = normalizePath(process.cwd())
+
+		const relativeOutdir = "./" + path.posix.relative(posixCWD, normalizePath(ctx.outdir.path))
+		const relativeProjectPath = "./" + path.posix.relative(posixCWD, normalizePath(ctx.projectPath))
 
 		const wrappedIdentifier = `paraglide({
 	paraglide: {
