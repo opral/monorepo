@@ -65,15 +65,21 @@ const exampleMessages: Message[] = [
 	{
 		id: "a",
 		alias: {},
-		selectors: [],
-		variants: [
+		inputs: [],
+		translations: [
 			{
 				languageTag: "en",
-				match: [],
-				pattern: [
+				declarations: [],
+				selectors: [],
+				variants: [
 					{
-						type: "Text",
-						value: "test",
+						match: [],
+						pattern: [
+							{
+								type: "text",
+								value: "test",
+							},
+						],
 					},
 				],
 			},
@@ -82,15 +88,21 @@ const exampleMessages: Message[] = [
 	{
 		id: "b",
 		alias: {},
-		selectors: [],
-		variants: [
+		inputs: [],
+		translations: [
 			{
 				languageTag: "en",
-				match: [],
-				pattern: [
+				declarations: [],
+				selectors: [],
+				variants: [
 					{
-						type: "Text",
-						value: "test",
+						match: [],
+						pattern: [
+							{
+								type: "text",
+								value: "test",
+							},
+						],
 					},
 				],
 			},
@@ -104,15 +116,21 @@ const exampleAliasedMessages: Message[] = [
 		alias: {
 			default: "a",
 		},
-		selectors: [],
-		variants: [
+		inputs: [],
+		translations: [
 			{
 				languageTag: "en",
-				match: [],
-				pattern: [
+				declarations: [],
+				selectors: [],
+				variants: [
 					{
-						type: "Text",
-						value: "test",
+						match: [],
+						pattern: [
+							{
+								type: "text",
+								value: "test",
+							},
+						],
 					},
 				],
 			},
@@ -123,15 +141,21 @@ const exampleAliasedMessages: Message[] = [
 		alias: {
 			default: "b",
 		},
-		selectors: [],
-		variants: [
+		inputs: [],
+		translations: [
 			{
 				languageTag: "en",
-				match: [],
-				pattern: [
+				declarations: [],
+				selectors: [],
+				variants: [
 					{
-						type: "Text",
-						value: "test",
+						match: [],
+						pattern: [
+							{
+								type: "text",
+								value: "test",
+							},
+						],
 					},
 				],
 			},
@@ -607,7 +631,7 @@ describe("functionality", () => {
 				description: { en: "Mock plugin description" },
 				displayName: { en: "Mock Plugin" },
 
-				loadMessages: () => [{ id: "some-message", alias: {}, selectors: [], variants: [] }],
+				loadMessages: () => [{ id: "some-message", alias: {}, inputs: [], translations: [] }],
 				saveMessages: () => undefined,
 			}
 			const repo = await mockRepo()
@@ -659,7 +683,7 @@ describe("functionality", () => {
 				description: { en: "Mock plugin description" },
 				displayName: { en: "Mock Plugin" },
 
-				loadMessages: () => [{ id: "some-message", alias: {}, selectors: [], variants: [] }],
+				loadMessages: () => [{ id: "some-message", alias: {}, inputs: [], translations: [] }],
 				saveMessages: () => undefined,
 			}
 			const repo = await mockRepo()
@@ -810,25 +834,37 @@ describe("functionality", () => {
 				data: {
 					id: "a",
 					alias: {},
-					selectors: [],
-					variants: [
+					inputs: [],
+					translations: [
 						{
 							languageTag: "en",
-							match: [],
-							pattern: [
+							declarations: [],
+							selectors: [],
+							variants: [
 								{
-									type: "Text",
-									value: "a en",
+									match: [],
+									pattern: [
+										{
+											type: "text",
+											value: "a en",
+										},
+									],
 								},
 							],
 						},
 						{
 							languageTag: "de",
-							match: [],
-							pattern: [
+							declarations: [],
+							selectors: [],
+							variants: [
 								{
-									type: "Text",
-									value: "a de",
+									match: [],
+									pattern: [
+										{
+											type: "text",
+											value: "a de",
+										},
+									],
 								},
 							],
 						},
@@ -841,25 +877,37 @@ describe("functionality", () => {
 				data: {
 					id: "b",
 					alias: {},
-					selectors: [],
-					variants: [
+					inputs: [],
+					translations: [
 						{
 							languageTag: "en",
-							match: [],
-							pattern: [
+							selectors: [],
+							declarations: [],
+							variants: [
 								{
-									type: "Text",
-									value: "b en",
+									match: [],
+									pattern: [
+										{
+											type: "text",
+											value: "b en",
+										},
+									],
 								},
 							],
 						},
 						{
 							languageTag: "de",
-							match: [],
-							pattern: [
+							selectors: [],
+							declarations: [],
+							variants: [
 								{
-									type: "Text",
-									value: "b de",
+									match: [],
+									pattern: [
+										{
+											type: "text",
+											value: "b de",
+										},
+									],
 								},
 							],
 						},

@@ -38,8 +38,12 @@ export const plugin: Plugin<{
 			})
 		)
 
+		console.log("ICU2 Loading dictionaries", dictionaries)
+
 		// collect all messageIDs across all dictionaries
 		const messageIDs = [...new Set(dictionaries.flatMap(([, messages]) => Object.keys(messages)))]
+
+		console.log("ICU2 Loading messageIDS", messageIDs)
 
 		// create message objects for each ID
 		const messages: Message[] = messageIDs.map((messageId) => {
@@ -51,6 +55,8 @@ export const plugin: Plugin<{
 				})
 				.filter(Boolean) as Translation[]
 
+			console.log("translations for message id", translations, messageId)
+
 			// TODO Populate Inputs
 			const inputs: string[] = []
 
@@ -61,6 +67,7 @@ export const plugin: Plugin<{
 				translations,
 			}
 		})
+		console.log("ICU2 Loaded Messages", messages)
 		return messages
 	},
 	saveMessages: async () => {

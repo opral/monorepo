@@ -1,11 +1,9 @@
-import { Message, Variant } from "../versionedInterfaces.js"
+import { Message } from "../versionedInterfaces.js"
 
 const fileExtension = ".json"
 
 export function getMessageIdFromPath(path: string) {
-	if (!path.endsWith(fileExtension)) {
-		return
-	}
+	if (!path.endsWith(fileExtension)) return
 
 	const cleanedPath = path.replace(/\/$/, "") // This regex matches a trailing slash and replaces it with an empty string
 	const messageFileName = cleanedPath.split("/").join("_") // we split by the first leading namespace or _ separator - make sure slashes don't exit in the id
@@ -28,42 +26,45 @@ export function getPathFromMessageId(id: string) {
  * independent of the initialization order.
  */
 export function normalizeMessage(message: Message) {
-	// order keys in message
-	const messageWithSortedKeys: any = {}
-	for (const key of Object.keys(message).sort()) {
-		messageWithSortedKeys[key] = (message as any)[key]
-	}
+	const messageWithSortedKeys = sortRecord(message)
 
 	// order variants
-	messageWithSortedKeys["variants"] = messageWithSortedKeys["variants"]
-		.sort((variantA: Variant, variantB: Variant) => {
+	messageWithSortedKeys["translations"] = messageWithSortedKeys["translations"]
+		.sort((translationA, translationB) => {
 			// compare by language
-			const languageComparison = variantA.languageTag.localeCompare(variantB.languageTag)
+			const languageComparison = translationA.languageTag.localeCompare(
+				translationB.languageTag,
+				"en"
+			)
 
-			// if languages are the same, compare by match
+			// if languages are the same, compare by selectors
 			if (languageComparison === 0) {
-				return variantA.match.join("-").localeCompare(variantB.match.join("-"))
+				return translationA.selectors
+					.join("-")
+					.localeCompare(translationB.selectors.join("-"), "en")
 			}
 
 			return languageComparison
 		})
-		// order keys in each variant
-		.map((variant: Variant) => {
-			const variantWithSortedKeys: any = {}
-			for (const variantKey of Object.keys(variant).sort()) {
-				if (variantKey === "pattern") {
-					variantWithSortedKeys[variantKey] = (variant as any)["pattern"].map((token: any) => {
-						const tokenWithSortedKey: any = {}
-						for (const tokenKey of Object.keys(token).sort()) {
-							tokenWithSortedKey[tokenKey] = token[tokenKey]
-						}
-						return tokenWithSortedKey
-					})
-				} else {
-					variantWithSortedKeys[variantKey] = (variant as any)[variantKey]
+		// order keys in each translation
+		.map((translation) => {
+			const translationWithSortedKeys = sortRecord(translation)
+
+			//order variants
+			translationWithSortedKeys.variants = translationWithSortedKeys.variants.map((variant) => {
+				const variantWithSortedKeys = sortRecord(variant)
+				variantWithSortedKeys.pattern = variantWithSortedKeys.pattern.map(sortRecord)
+				return variantWithSortedKeys
+			})
+
+			//sort by match
+			translationWithSortedKeys.variants = translationWithSortedKeys.variants.sort(
+				(variantA, variabtB) => {
+					return variantA.match.join("-").localeCompare(variabtB.match.join("-"), "en")
 				}
-			}
-			return variantWithSortedKeys
+			)
+
+			return translationWithSortedKeys
 		})
 
 	return messageWithSortedKeys as Message
@@ -71,4 +72,10 @@ export function normalizeMessage(message: Message) {
 
 export function stringifyMessage(message: Message) {
 	return JSON.stringify(normalizeMessage(message), undefined, 4)
+}
+
+function sortRecord<T extends Record<string, unknown>>(record: T): T {
+	return Object.fromEntries(
+		Object.entries(record).sort(([key1], [key2]) => key1.localeCompare(key2, "en"))
+	) as T
 }

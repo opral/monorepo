@@ -1,0 +1,11 @@
+{
+	"name": "@inlang/icu2-message-format-test",
+	"type": "module",
+	"scripts": {
+		"test": "node ./main.js"
+	},
+	"dependencies": {
+		"@inlang/sdk": "workspace:*",
+		"@lix-js/client": "workspace:*"
+	}
+}

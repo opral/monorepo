@@ -5,51 +5,183 @@ import type { Message } from "@inlang/message"
 
 const unsortedMessageRaw: Message = {
 	alias: {},
-	selectors: [],
+	inputs: [],
 	id: "footer_categories_apps",
-	variants: [
-		{ languageTag: "a", match: ["*", "1"], pattern: [{ type: "Text", value: "2" }] },
-		{ languageTag: "a", match: ["*", "*"], pattern: [{ type: "Text", value: "1" }] },
+	translations: [
 		{
 			languageTag: "a",
-			match: ["1", "*"],
-			pattern: [
-				{ type: "Text", value: "2" },
-				{ type: "Text", value: "2" },
+			selectors: [],
+			declarations: [],
+			variants: [
+				{ match: ["*", "1"], pattern: [{ type: "text", value: "2" }] },
+				{ match: ["*", "*"], pattern: [{ type: "text", value: "1" }] },
+				{
+					match: ["1", "*"],
+					pattern: [
+						{ type: "text", value: "2" },
+						{ type: "text", value: "2" },
+					],
+				},
+				{ match: ["1", "1"], pattern: [{ type: "text", value: "2" }] },
 			],
 		},
-		{ languageTag: "b", match: [], pattern: [{ type: "Text", value: "4" }] },
-		{ languageTag: "a", match: ["1", "1"], pattern: [{ type: "Text", value: "2" }] },
-		{ languageTag: "c", match: [], pattern: [{ value: "5", type: "Text" }] },
-		{ match: [], languageTag: "d", pattern: [{ type: "Text", value: "6" }] },
-		{ languageTag: "e", match: [], pattern: [{ type: "Text", value: "7" }] },
-		{ languageTag: "f", match: [], pattern: [{ type: "Text", value: "8" }] },
-		{ languageTag: "g", match: [], pattern: [{ type: "Text", value: "9" }] },
+		{
+			languageTag: "b",
+			selectors: [],
+			declarations: [],
+			variants: [
+				{
+					match: [],
+					pattern: [{ type: "text", value: "4" }],
+				},
+			],
+		},
+		{
+			languageTag: "c",
+			selectors: [],
+			declarations: [],
+			variants: [
+				{
+					match: [],
+					pattern: [{ type: "text", value: "5" }],
+				},
+			],
+		},
+		{
+			languageTag: "d",
+			selectors: [],
+			declarations: [],
+			variants: [
+				{
+					match: [],
+					pattern: [{ type: "text", value: "6" }],
+				},
+			],
+		},
+		{
+			languageTag: "e",
+			selectors: [],
+			declarations: [],
+			variants: [
+				{
+					match: [],
+					pattern: [{ type: "text", value: "7" }],
+				},
+			],
+		},
+		{
+			languageTag: "f",
+			selectors: [],
+			declarations: [],
+			variants: [
+				{
+					match: [],
+					pattern: [{ type: "text", value: "8" }],
+				},
+			],
+		},
+		{
+			languageTag: "g",
+			selectors: [],
+			declarations: [],
+			variants: [
+				{
+					match: [],
+					pattern: [{ type: "text", value: "9" }],
+				},
+			],
+		},
 	],
 }
 
 const sortedMessageRaw: Message = {
 	alias: {},
 	id: "footer_categories_apps",
-	selectors: [],
-	variants: [
-		{ languageTag: "a", match: ["*", "*"], pattern: [{ type: "Text", value: "1" }] },
-		{ languageTag: "a", match: ["*", "1"], pattern: [{ type: "Text", value: "2" }] },
+	inputs: [],
+	translations: [
 		{
+			declarations: [],
 			languageTag: "a",
-			match: ["1", "*"],
-			pattern: [
-				{ type: "Text", value: "2" },
-				{ type: "Text", value: "2" },
+			selectors: [],
+			variants: [
+				{ match: ["*", "*"], pattern: [{ type: "text", value: "1" }] },
+				{ match: ["*", "1"], pattern: [{ type: "text", value: "2" }] },
+				{
+					match: ["1", "*"],
+					pattern: [
+						{ type: "text", value: "2" },
+						{ type: "text", value: "2" },
+					],
+				},
+				{ match: ["1", "1"], pattern: [{ type: "text", value: "2" }] },
 			],
 		},
-		{ languageTag: "a", match: ["1", "1"], pattern: [{ type: "Text", value: "2" }] },
-		{ languageTag: "b", match: [], pattern: [{ type: "Text", value: "4" }] },
-		{ languageTag: "c", match: [], pattern: [{ type: "Text", value: "5" }] },
-		{ languageTag: "d", match: [], pattern: [{ type: "Text", value: "6" }] },
-		{ languageTag: "e", match: [], pattern: [{ type: "Text", value: "7" }] },
-		{ languageTag: "f", match: [], pattern: [{ type: "Text", value: "8" }] },
-		{ languageTag: "g", match: [], pattern: [{ type: "Text", value: "9" }] },
+		{
+			declarations: [],
+			languageTag: "b",
+			selectors: [],
+			variants: [
+				{
+					match: [],
+					pattern: [{ type: "text", value: "4" }],
+				},
+			],
+		},
+		{
+			declarations: [],
+			languageTag: "c",
+			selectors: [],
+			variants: [
+				{
+					match: [],
+					pattern: [{ type: "text", value: "5" }],
+				},
+			],
+		},
+		{
+			declarations: [],
+			languageTag: "d",
+			selectors: [],
+			variants: [
+				{
+					match: [],
+					pattern: [{ type: "text", value: "6" }],
+				},
+			],
+		},
+		{
+			declarations: [],
+			languageTag: "e",
+			selectors: [],
+			variants: [
+				{
+					match: [],
+					pattern: [{ type: "text", value: "7" }],
+				},
+			],
+		},
+		{
+			declarations: [],
+			languageTag: "f",
+			selectors: [],
+			variants: [
+				{
+					match: [],
+					pattern: [{ type: "text", value: "8" }],
+				},
+			],
+		},
+		{
+			declarations: [],
+			languageTag: "g",
+			selectors: [],
+			variants: [
+				{
+					match: [],
+					pattern: [{ type: "text", value: "9" }],
+				},
+			],
+		},
 	],
 }
 

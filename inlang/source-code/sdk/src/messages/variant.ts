@@ -1,4 +1,4 @@
-import type { LanguageTag, Message, Variant } from "../versionedInterfaces.js"
+import type { LanguageTag, Message, Translation, Variant } from "../versionedInterfaces.js"
 import type { Result } from "@inlang/result"
 import {
 	MessagePatternsForLanguageTagDoNotExistError,
@@ -46,17 +46,33 @@ export function getVariant(
 export function createVariant(
 	message: Message,
 	args: {
+		languageTag: LanguageTag
 		data: Variant
 	}
 ): Result<Message, MessageVariantAlreadyExistsError> {
 	const copy = structuredClone(message)
 
-	// check if variant already exists
-	if (matchVariant(copy, args.data.languageTag, args.data.match)) {
-		return { error: new MessageVariantAlreadyExistsError(message.id, args.data.languageTag) }
+	//find the translation
+	let translation = copy.translations.find((trans) => trans.languageTag === args.languageTag)
+
+	if (!translation) {
+		const newTranslation: Translation = {
+			languageTag: args.languageTag,
+			selectors: [],
+			declarations: [],
+			variants: [],
+		}
+
+		copy.translations.push(newTranslation)
+		translation = newTranslation
 	}
 
-	copy.variants.push({
+	// check if variant already exists
+	if (matchVariant(copy, args.languageTag, args.data.match)) {
+		return { error: new MessageVariantAlreadyExistsError(message.id, args.languageTag) }
+	}
+
+	translation.variants.push({
 		...args.data,
 		match: args.data.match,
 	})
@@ -83,24 +99,24 @@ export function updateVariantPattern(
 ): Result<Message, MessageVariantDoesNotExistError | MessagePatternsForLanguageTagDoNotExistError> {
 	const copy = structuredClone(message)
 
-	const containsLanguageTag = message.variants.some(
-		(variant) => variant.languageTag === args.where.languageTag
+	//find the translation
+	const translation = copy.translations.find(
+		(trans) => trans.languageTag === args.where.languageTag
 	)
-	if (!containsLanguageTag) {
+
+	if (!translation) {
 		return {
 			error: new MessagePatternsForLanguageTagDoNotExistError(message.id, args.where.languageTag),
 		}
 	}
 
 	const variant = matchVariant(copy, args.where.languageTag, args.where.match)
-	if (variant === undefined) {
+	if (!variant) {
 		return { error: new MessageVariantDoesNotExistError(message.id, args.where.languageTag) }
 	}
-	if (variant) {
-		variant.pattern = args.data
-		return { data: copy }
-	}
-	return { error: new MessageVariantDoesNotExistError(message.id, args.where.languageTag) }
+
+	variant.pattern = args.data
+	return { data: copy }
 }
 
 /**
@@ -114,10 +130,12 @@ const matchVariant = (
 	languageTag: LanguageTag,
 	match: Variant["match"]
 ): Variant | undefined => {
-	const languageVariants = message.variants.filter((variant) => variant.languageTag === languageTag)
-	if (languageVariants.length === 0) return undefined
+	const translation = message.translations.find(
+		(translation) => translation.languageTag === languageTag
+	)
+	if (!translation) return undefined
 
-	for (const variant of languageVariants) {
+	for (const variant of translation.variants) {
 		let isMatch = true
 		//check if vaiant is a match
 		if (variant.match.length > 0) {
@@ -128,7 +146,7 @@ const matchVariant = (
 			})
 		}
 
-		if (!message.selectors || !match || match.length !== message.selectors.length) {
+		if (!translation.selectors || !match || match.length !== translation.selectors.length) {
 			isMatch = false
 		}
 
@@ -150,16 +168,19 @@ const matchMostSpecificVariant = (
 	languageTag: LanguageTag,
 	match?: Variant["match"]
 ): Variant | undefined => {
+	const translation = message.translations.find(
+		(translation) => translation.languageTag === languageTag
+	)
+	if (!translation) return undefined
+
 	// resolve preferenceSelectors to match length and order of message selectors
 	const index: Record<string, any> = {}
 
-	for (const variant of message.variants) {
-		if (variant.languageTag !== languageTag) continue
-
+	for (const variant of translation.variants) {
 		let isMatch = true
 
 		// if slector and stored match are not the same throw error
-		if (variant.match.length !== message.selectors.length) {
+		if (variant.match.length !== translation.selectors.length) {
 			return undefined
 		}
 
@@ -191,31 +212,33 @@ const matchMostSpecificVariant = (
 					}
 				}
 			}
-			recursiveAddToIndex(index, 0, message.selectors ? message.selectors.length - 1 : 0, variant)
+			recursiveAddToIndex(
+				index,
+				0,
+				translation.selectors ? translation.selectors.length - 1 : 0,
+				variant
+			)
 		} else if (isMatch && !match) {
 			return variant
 		}
 	}
 
 	// if number of selectors and numver of required match is not the same match catch all
-	if (!message.selectors || !match || match.length !== message.selectors.length) {
+	if (!translation.selectors || !match || match.length !== translation.selectors.length) {
 		const catchAllMatcher: Array<string> = []
-		const selectorCount = message.selectors.length
+		const selectorCount = translation.selectors.length
 		catchAllMatcher.push("*")
 		for (let i = 0; i < selectorCount - 1; i++) {
 			catchAllMatcher.push("*")
 		}
-		return message.variants.find(
-			(v) =>
-				v.languageTag === languageTag && JSON.stringify(v.match) === JSON.stringify(catchAllMatcher)
+		return translation.variants.find(
+			(v) => JSON.stringify(v.match) === JSON.stringify(catchAllMatcher)
 		)
 	}
 
 	// if selector is empty match empty variant match
-	if (message.selectors && message.selectors.length === 0) {
-		return message.variants.find(
-			(v) => v.languageTag === languageTag && JSON.stringify(v.match) === "[]"
-		)
+	if (translation.selectors && translation.selectors.length === 0) {
+		return translation.variants.find((v) => JSON.stringify(v.match) === "[]")
 	}
 
 	//find the most specific variant

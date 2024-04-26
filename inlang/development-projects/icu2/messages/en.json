@@ -1,0 +1,3 @@
+{
+	"complex": ".input {$var :number maximumFractionDigits=0} .match {$var :number maximumFractionDigits=2} 0 {{The selector can apply a different annotation to {$var} for the purposes of selection}} * {{A placeholder in a pattern can apply a different annotation to {$var :number maximumFractionDigits=3}}}"
+}

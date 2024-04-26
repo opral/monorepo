@@ -1,21 +1,34 @@
-import type { Message, Pattern } from "@inlang/message"
+import type { Message, Pattern, Translation } from "@inlang/message"
 
-export const createMessage = (id: string, patterns: Record<string, Pattern | string>) =>
-	({
+export const createMessage = (id: string, patterns: Record<string, Pattern | string>): Message => {
+	return {
 		id,
 		alias: {},
-		selectors: [],
-		variants: Object.entries(patterns).map(([languageTag, patterns]) => ({
-			languageTag,
-			match: [],
-			pattern:
-				typeof patterns === "string"
-					? [
-							{
-								type: "Text",
-								value: patterns,
-							},
-					  ]
-					: patterns,
-		})),
-	} satisfies Message)
+		inputs: [],
+		translations: [
+			...Object.entries(patterns).map(
+				([languageTag, patterns]): Translation => ({
+					languageTag,
+					declarations: [],
+					selectors: [],
+					variants: [
+						typeof patterns === "string"
+							? {
+									match: [],
+									pattern: [
+										{
+											type: "text",
+											value: patterns,
+										},
+									],
+							  }
+							: {
+									match: [],
+									pattern: patterns,
+							  },
+					],
+				})
+			),
+		],
+	}
+}
