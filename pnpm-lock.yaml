@@ -391,6 +391,70 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.30.4)(webdriverio@8.36.1(typescript@5.2.2))
 
+  inlang/source-code/doc-layout-component:
+    dependencies:
+      '@inlang/sdk':
+        specifier: workspace:^
+        version: link:../sdk
+      '@lit/task':
+        specifier: ^1.0.0
+        version: 1.0.0
+      '@shoelace-style/shoelace':
+        specifier: 2.14.0
+        version: 2.14.0(@types/react@18.2.79)
+      '@sinclair/typebox':
+        specifier: 0.31.28
+        version: 0.31.28
+      chroma-js:
+        specifier: ^2.4.2
+        version: 2.4.2
+    devDependencies:
+      '@inlang/marketplace-registry':
+        specifier: workspace:^
+        version: link:../marketplace-registry
+      '@nx/storybook':
+        specifier: ^18.0.4
+        version: 18.3.3(@types/node@20.12.7)(nx@18.3.3)(typescript@5.3.3)
+      '@storybook/addon-essentials':
+        specifier: ^7.6.16
+        version: 7.6.18(@types/react@18.2.79)(react-dom@18.2.0)(react@18.2.0)
+      '@storybook/addon-links':
+        specifier: ^7.6.16
+        version: 7.6.18(react@18.2.0)
+      '@storybook/blocks':
+        specifier: ^7.6.16
+        version: 7.6.18(@types/react@18.2.79)(react-dom@18.2.0)(react@18.2.0)
+      '@storybook/web-components':
+        specifier: ^7.6.16
+        version: 7.6.18(lit@3.1.3)(react-dom@18.2.0)(react@18.2.0)
+      '@storybook/web-components-vite':
+        specifier: ^7.6.16
+        version: 7.6.18(lit@3.1.3)(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.3)(vite@4.5.2)
+      '@types/chroma-js':
+        specifier: ^2.4.4
+        version: 2.4.4
+      '@vitest/coverage-v8':
+        specifier: 0.34.6
+        version: 0.34.6(vitest@0.34.6)
+      esbuild:
+        specifier: ^0.20.0
+        version: 0.20.2
+      lit:
+        specifier: ^3.1.2
+        version: 3.1.3
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
+      storybook:
+        specifier: ^7.6.16
+        version: 7.6.18
+      vitest:
+        specifier: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
+
   inlang/source-code/editor:
     dependencies:
       '@inlang/settings-component':
