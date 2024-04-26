@@ -16,6 +16,7 @@ jobs:
       - name: Check if PR is mergeable
         id: check-mergeable
         run: |
+          echo ${{ github.event.pull_request.mergeable }}
           if [ "${{ github.event.pull_request.mergeable }}" = "false" ]; then
             echo "This PR is not mergeable. Exiting..."
             exit 1
