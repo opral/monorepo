@@ -12,18 +12,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Check if the PR is mergeable via the GitHub API and stop the workflow if it is not
-      - name: Check if PR is mergeable
-        id: check-mergeable
+      - name: Check if pull request is mergeable
+        id: check_mergeable
         run: |
           mergeable=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
             https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }} \
             | jq -r '.mergeable')
-          echo "mergeable=${mergeable}" >> $GITHUB_OUTPUT
-          if [ "$mergeable" = "null" ] || [ "$mergeable" = "false" ]; then
-            echo "PR is not mergeable, stopping workflow"
-            exit 1
+          echo "Mergeable status: $mergeable"
+          if [[ "$mergeable" != "true" ]]; then
+            echo "Pull request is not mergeable. Skipping workflow."
+            exit 78 # Exit with neutral status code to skip the workflow
           fi
         
       - name: Checkout target branch
