@@ -409,6 +409,9 @@ importers:
         specifier: ^2.4.2
         version: 2.4.2
     devDependencies:
+      '@inlang/marketplace-manifest':
+        specifier: workspace:^
+        version: link:../versioned-interfaces/marketplace-manifest
       '@inlang/marketplace-registry':
         specifier: workspace:^
         version: link:../marketplace-registry
