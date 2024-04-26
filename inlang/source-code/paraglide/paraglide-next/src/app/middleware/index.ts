@@ -26,8 +26,6 @@ export function createMiddleware<T extends string>(
 			isLocaleSwitch: false,
 		})
 
-		const shouldRedirect = localisedPathname !== decodedPathname
-
 		const localeCookieMatches =
 			isAvailableLanguageTag(localeCookeValue) && localeCookeValue === locale
 
@@ -36,23 +34,21 @@ export function createMiddleware<T extends string>(
 		const headers = new Headers(request.headers)
 		headers.set(PARAGLIDE_LANGUAGE_HEADER_NAME, locale)
 
+		const shouldRedirect = localisedPathname !== decodedPathname
 		const rewriteRequired = request.nextUrl.pathname !== canonicalPath
-		const requestInit: RequestInit = {
-			headers,
-		}
 
 		const response: NextResponse = shouldRedirect
-			? redirect(request.nextUrl, localisedPathname, requestInit)
+			? redirect(request.nextUrl, localisedPathname, { headers })
 			: rewriteRequired
-			? rewrite(request.nextUrl, canonicalPath, requestInit)
-			: NextResponse.next(requestInit)
+			? rewrite(request.nextUrl, canonicalPath, { request: { headers } })
+			: NextResponse.next({ request: { headers } })
 
 		// Update the locale-cookie
 		if (!localeCookieMatches) {
 			response.cookies.set(LANG_COOKIE.name, locale, {
 				sameSite: LANG_COOKIE.sameSite,
 				maxAge: LANG_COOKIE.maxAge,
-				path: request.nextUrl.basePath || undefined,
+				path: request.nextUrl.basePath || "/",
 			})
 		}
 
@@ -69,12 +65,14 @@ export function createMiddleware<T extends string>(
 	}
 }
 
-const rewrite = (nextUrl: NextURL, pathname: string, init: RequestInit): NextResponse => {
-	nextUrl.pathname = pathname
-	return NextResponse.rewrite(nextUrl, init)
+const rewrite = (nextUrl: NextURL, pathname: string, init?: object): NextResponse => {
+	const destination = nextUrl.clone()
+	destination.pathname = pathname
+	return NextResponse.rewrite(destination, init)
 }
 
-const redirect = (nextUrl: NextURL, pathname: string, init: RequestInit): NextResponse => {
-	nextUrl.pathname = pathname
-	return NextResponse.redirect(nextUrl, init)
+const redirect = (nextUrl: NextURL, pathname: string, init?: RequestInit): NextResponse => {
+	const destination = nextUrl.clone()
+	destination.pathname = pathname
+	return NextResponse.redirect(destination, init)
 }
