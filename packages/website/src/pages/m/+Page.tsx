@@ -142,7 +142,7 @@ export default function Page(props: PageProps) {
 												when={props.manifest.icon}
 												fallback={
 													<div class="w-16 h-16 font-semibold text-3xl rounded-md m-0 object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
-														{displayName()[0]}
+														{displayName()?.[0]}
 													</div>
 												}
 											>
@@ -356,7 +356,7 @@ export default function Page(props: PageProps) {
 																	"w-6 h-6 flex items-center justify-center text-background capitalize font-medium rounded-full m-0 bg-surface-900"
 																}
 															>
-																{props.manifest.publisherName[0]}
+																{props.manifest.publisherName?.[0]}
 															</div>
 														}
 													>
