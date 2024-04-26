@@ -163,11 +163,6 @@ export async function run(): Promise<void> {
 				result.reportsTarget,
 				result.installedRules
 			)
-			if (result.projectPath === "/project.inlang") {
-				console.log("ReportsTarget: ", result.reportsTarget.length)
-				console.log("ReportsMerge: ", result.reportsMerge.length)
-				console.log("LintSummary: ", LintSummary.summary)
-			}
 			if (LintSummary.summary.some((lintSummary) => lintSummary.level === "error")) {
 				console.debug(
 					`❗️ New lint errors found in project ${result.projectPath}. Set workflow to fail.`
@@ -314,8 +309,6 @@ ${lintSummary
 		})
 
 		// Fail the workflow if new lint errors or project setup errors exist
-		console.log("projectWithNewSetupErrors", projectWithNewSetupErrors)
-		console.log("projectWithNewLintErrors", projectWithNewLintErrors)
 		if (projectWithNewSetupErrors || projectWithNewLintErrors) {
 			let error_message = ""
 			if (projectWithNewSetupErrors && projectWithNewLintErrors) {
@@ -329,7 +322,15 @@ ${lintSummary
 		}
 	} catch (error) {
 		// Fail the workflow run if an error occurs
-		if (error instanceof Error) core.setFailed(error)
+		if (error instanceof Error) {
+			// Catch migration error and report prompt to migrate
+			if (error.message.includes("target'. No such file or directory")) {
+				core.setFailed(
+					"Your workflow file needs to be updated. Please copy the new snippet of the ninja_i18n.yml file from the [README](https://github.com/opral/ninja-i18n-action)."
+				)
+			}
+			core.setFailed(error)
+		}
 	}
 }
 
