@@ -9,7 +9,6 @@ permissions:
 jobs:
   test-action:
     name: GitHub Actions Test
-    if: github.event.pull_request.mergeable
     runs-on: ubuntu-latest
 
     steps:
