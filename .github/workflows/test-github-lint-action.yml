@@ -15,8 +15,8 @@ jobs:
       - name: Checkout target branch
         id: checkout
         uses: actions/checkout@v4
-        # with:
-        #   path: target
+        with:
+          path: target
 
       - name: Get merge commit sha from PR
         run: |
@@ -27,11 +27,11 @@ jobs:
           echo "merge_commit_sha=${merge_commit_sha}" >> $GITHUB_OUTPUT
         id: get-merge-sha
 
-      # - name: Checkout merge
-      #   uses: actions/checkout@v4
-      #   with:
-      #     ref: ${{ steps.get-merge-sha.outputs.merge_commit_sha }}
-      #     path: merge
+      - name: Checkout merge
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.get-merge-sha.outputs.merge_commit_sha }}
+          path: merge
 
       - name: Setup Pnpm
         uses: pnpm/action-setup@v2
@@ -45,14 +45,14 @@ jobs:
 
       - name: Install Dependencies in target
         run: pnpm install
-        # working-directory: target
+        working-directory: target
 
       - name: Build in target
         run: pnpm --filter @inlang/github-lint-action... build
-        # working-directory: target
+        working-directory: target
 
       - name: Test Local Action
         id: test-action
-        uses: ./inlang/source-code/github-lint-action
+        uses: ./target/inlang/source-code/github-lint-action
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
