@@ -58,9 +58,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      name: GitHub Actions Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout target branch
         id: checkout
         uses: actions/checkout@v4
+        with:
+          path: target
+
+      - name: Get merge commit sha from PR
+        run: |
+          merge_commit_sha=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }} \
+            | jq -r '.merge_commit_sha')
+          echo "merge_commit_sha=${merge_commit_sha}" >> $GITHUB_OUTPUT
+        id: get-merge-sha
+
+      - name: Checkout merge
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.get-merge-sha.outputs.merge_commit_sha }}
+          path: merge
 
       - name: Run Ninja i18n
         id: ninja-i18n
