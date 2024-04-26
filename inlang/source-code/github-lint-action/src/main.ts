@@ -1,3 +1,4 @@
+// make a merge conflict
 import * as fs from "node:fs/promises"
 import * as core from "@actions/core"
 import * as github from "@actions/github"
