@@ -1,3 +1,5 @@
+import path from "node:path"
+
 /**
  * One step in a CLI chain.
  * Defines which types the context needs to extend and how it extends the context
@@ -48,4 +50,15 @@ export async function succeedOrElse<T extends Promise<unknown>, U>(
 	} catch (err) {
 		return orElse
 	}
+}
+
+const WINDOWS_SLASH_REGEX = /\\/g
+function slash(p: string): string {
+	return p.replace(WINDOWS_SLASH_REGEX, "/")
+}
+
+const isWindows = typeof process !== "undefined" && process.platform === "win32"
+
+export function normalizePath(id: string) {
+	return path.posix.normalize(isWindows ? slash(id) : id)
 }
