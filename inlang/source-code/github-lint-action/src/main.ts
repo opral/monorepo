@@ -329,8 +329,9 @@ ${lintSummary
 				error.message.includes("'target'")
 			) {
 				core.setFailed(
-					"Your workflow file needs to be updated. Please copy the new snippet of the ninja_i18n.yml file from the [README](https://github.com/opral/ninja-i18n-action)."
+					"Your workflow file needs to be updated. Please copy the new snippet of the ninja_i18n.yml file from the README(https://github.com/opral/ninja-i18n-action)."
 				)
+				return
 			}
 			core.setFailed(error)
 		}
