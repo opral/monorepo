@@ -1,10 +1,12 @@
 import path from "node:path"
 import { NextJSProject } from "./scan-next-project"
-import { CliStep } from "../utils"
+import { CliStep, normalizePath } from "../utils"
 
 export type Outdir = {
 	/**
 	 * The absolute path to the outdir
+	 * Will use forward slashes, even on Windows
+	 *
 	 * @example
 	 *   "/Users/---/dev/next-project/src/paraglide"
 	 */
@@ -25,7 +27,7 @@ export const getOutDir: CliStep<{ nextProject: NextJSProject }, { outdir: Outdir
 	ctx
 ) => {
 	const outdir: Outdir = {
-		path: path.resolve(ctx.nextProject.srcRoot, "paraglide"),
+		path: normalizePath(path.resolve(ctx.nextProject.srcRoot, "paraglide")),
 		importAlias: "@/paraglide",
 	}
 	return { ...ctx, outdir }
