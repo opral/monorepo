@@ -5,6 +5,7 @@ import { CliStep } from "../utils"
 export type Outdir = {
 	/**
 	 * The absolute path to the outdir
+	 *
 	 * @example
 	 *   "/Users/---/dev/next-project/src/paraglide"
 	 */
