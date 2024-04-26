@@ -10,24 +10,9 @@ jobs:
   test-action:
     name: GitHub Actions Test
     runs-on: ubuntu-latest
+    if: github.event.pull_request.mergeable
 
     steps:
-      - name: Check if pull request is mergeable
-        id: check_mergeable
-        run: |
-          mergeable=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }} \
-            | jq -r '.mergeable')
-          echo "Mergeable status: $mergeable"
-          if [[ "$mergeable" != "true" ]]; then
-            echo "Pull request is not mergeable. Skipping workflow."
-            gh run cancel ${{ github.run_id }}
-            gh run watch ${{ github.run_id }}
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
       - name: Checkout target branch
         id: checkout
         uses: actions/checkout@v4
