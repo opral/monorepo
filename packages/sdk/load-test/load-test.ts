@@ -7,15 +7,12 @@ import { createSignal, createResource, createEffect } from "../src/reactivity/so
 
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
-import { promisify } from "node:util"
 import { throttle } from "throttle-debounce"
 import childProcess from "node:child_process"
 import fs from "node:fs/promises"
 
 import _debug from "debug"
 const debug = _debug("load-test")
-
-const exec = promisify(childProcess.exec)
 
 const throttleMessageGetAllEvents = 3000
 
@@ -27,13 +24,12 @@ const projectPath = join(__dirname, "project.inlang")
 const mockServer = "http://localhost:3000"
 
 const cli = `PUBLIC_SERVER_BASE_URL=${mockServer} pnpm inlang`
-const translateCommand = cli + " machine translate -f --project ./project.inlang"
+const translateCommand = cli + " machine translate -f -n --project ./project.inlang"
 
 // const messageDir = join(__dirname, "locales", "en")
 // const messageFile = join(__dirname, "locales", "en", "common.json")
 
 // experimental sdk persistence
-const messageDir = join(__dirname, "project.inlang")
 const messageFile = join(__dirname, "project.inlang", "messages.json")
 
 export async function runLoadTest(
@@ -45,7 +41,7 @@ export async function runLoadTest(
 ) {
 	debug("load-test start" + (watchMode ? " - watchMode on, ctrl C to exit" : ""))
 
-	if (translate && !(await isMockRpcServerRunning())) {
+	if (translate && !process.env.MOCK_TRANSLATE_LOCAL && !(await isMockRpcServerRunning())) {
 		console.error(
 			`Please start the mock rpc server with "MOCK_TRANSLATE=true pnpm --filter @inlang/server dev"`
 		)
@@ -114,7 +110,7 @@ export async function runLoadTest(
 
 	if (translate) {
 		debug("translating messages with inlang cli")
-		await exec(translateCommand, { cwd: __dirname })
+		await run(translateCommand)
 	}
 
 	debug("load-test done - " + (watchMode ? "watching for events" : "exiting"))
@@ -128,7 +124,6 @@ export async function runLoadTest(
 
 // experimental persistence message format
 async function generateMessageFile(messageCount: number) {
-	await exec(`mkdir -p ${messageDir}`)
 	const messages: Message[] = []
 	for (let i = 1; i <= messageCount; i++) {
 		messages.push(createMessage(`message_key_${i}`, { en: `Generated message (${i})` }))
@@ -142,7 +137,7 @@ async function generateMessageFile(messageCount: number) {
 
 // inlang message format
 // async function generateMessageFile(messageCount: number) {
-// 	await exec(`mkdir -p ${messageDir}`)
+// 	await run(`mkdir -p ${messageDir}`)
 // 	const messages: Record<string, string> = {}
 // 	for (let i = 1; i <= messageCount; i++) {
 // 		messages[`message_key_${i}`] = `Generated message (${i})`
@@ -181,4 +176,28 @@ function causeString(error: any): string {
 		return JSON.stringify(error.cause)
 	}
 	return ""
+}
+
+// run command in __dirname
+// resolves promise with 0 or rejects promise with error
+// inherits stdio so that vitest shows output
+function run(command: string): Promise<number> {
+	return new Promise((resolve, reject) => {
+		const p = childProcess.spawn(command, {
+			cwd: __dirname,
+			stdio: "inherit",
+			shell: true,
+			detached: false,
+		})
+		p.on("close", (code) => {
+			if (code === 0) {
+				resolve(0)
+			} else {
+				reject(new Error(`${command}: non-zero exit code ${code}`))
+			}
+		})
+		p.on("error", (err) => {
+			reject(err)
+		})
+	})
 }

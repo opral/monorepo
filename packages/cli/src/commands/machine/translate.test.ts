@@ -1,5 +1,5 @@
 import { test, expect } from "vitest"
-import { translateCommandAction } from "./translate.js"
+import { translateCommandAction, hasMissingTranslations } from "./translate.js"
 import { Message, ProjectSettings, loadProject, Plugin, type InlangModule } from "@inlang/sdk"
 import { createMessage } from "@inlang/sdk/test-utilities"
 import { mockRepo } from "@lix-js/client"
@@ -162,3 +162,12 @@ test.runIf(process.env.GOOGLE_TRANSLATE_API_KEY)(
 	},
 	{ timeout: 10000 }
 )
+
+// Only test with valid sourceLanguageTag and targetLanguageTags
+test("hasMissingTranslations", () => {
+	expect(hasMissingTranslations(createMessage("a", { en: "test" }), "en", ["en"])).toBe(false)
+	expect(hasMissingTranslations(createMessage("a", { en: "test" }), "en", ["en", "de"])).toBe(true)
+	expect(
+		hasMissingTranslations(createMessage("a", { en: "test", de: "Test" }), "en", ["en", "de"])
+	).toBe(false)
+})
