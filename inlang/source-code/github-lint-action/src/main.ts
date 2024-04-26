@@ -1,4 +1,3 @@
-// create conflict
 import * as fs from "node:fs/promises"
 import * as core from "@actions/core"
 import * as github from "@actions/github"
@@ -34,7 +33,7 @@ export async function run(): Promise<void> {
 		if (data.mergeable) {
 			console.debug(`Pull Request #${prNumber} is mergeable.`)
 		} else {
-			console.warn(`Pull Request #${prNumber} is not mergeable.`)
+			console.warn(`Pull Request #${prNumber} is not mergeable. Skipping linting.`)
 			return
 		}
 
@@ -86,9 +85,6 @@ export async function run(): Promise<void> {
 			repo: repo,
 			branch: github.context.payload.pull_request?.base.label.split(":")[1],
 		}
-
-		const isFork = headMeta.owner !== baseMeta.owner
-		core.debug(`Is fork: ${isFork}`)
 
 		// Prepare merge repo
 		process.chdir("../merge")
