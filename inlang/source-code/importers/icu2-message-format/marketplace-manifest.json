@@ -1,6 +1,6 @@
 {
 	"$schema": "https://inlang.com/schema/marketplace-manifest",
-	"id": "plugin.inlang.icu2MessageFormat",
+	"id": "importer.inlang.icu2MessageFormat",
 	"displayName": {
 		"en": "ICU MessageFormat 2.0"
 	},

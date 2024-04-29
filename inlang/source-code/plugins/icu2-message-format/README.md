@@ -1,1 +1,0 @@
-# An Experimental Input-Only Plugin for ICU Message Format 2.0

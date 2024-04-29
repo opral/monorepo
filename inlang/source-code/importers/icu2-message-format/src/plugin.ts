@@ -2,17 +2,18 @@ import * as MF from "messageformat"
 import { displayName, description } from "../marketplace-manifest.json"
 import { PluginSettings } from "./settings.js"
 import { AST } from "@inlang/sdk"
+import { Importer } from "../../../versioned-interfaces/importer/dist/interface.js"
 
-export const pluginId = "plugin.inlang.icu2MessageFormat"
+export const pluginId = "importer.inlang.icu2MessageFormat"
 
-export const plugin: Plugin<{
+export const plugin: Importer<{
 	[pluginId]: PluginSettings
 }> = {
 	id: pluginId,
 	displayName,
 	description,
 	settingsSchema: PluginSettings,
-	loadMessages: async ({ settings, nodeishFs }) => {
+	importMessages: async ({ settings, nodeishFs }) => {
 		const pathPattern = settings["plugin.inlang.icu2MessageFormat"].pathPattern
 
 		const dictionaries = await Promise.all(
@@ -32,32 +33,27 @@ export const plugin: Plugin<{
 		const messageIDs = [...new Set(dictionaries.flatMap(([, messages]) => Object.keys(messages)))]
 
 		// create message objects for each ID
-		const messages: Message[] = messageIDs.map((messageId) => {
-			const translations = dictionaries
+		const messageBundles: AST.MessageBundle[] = messageIDs.map((messageId): AST.MessageBundle => {
+			const messages = dictionaries
 				.map(([languageTag, messages]) => {
 					const messageSource = messages[messageId]
 					if (!messageSource) return undefined
 					return parseICUMessage(languageTag, messageSource)
 				})
-				.filter(Boolean) as Translation[]
+				.filter(Boolean) as AST.Message[]
 
 			// TODO Populate Inputs
-			const inputs: string[] = []
+			const inputOrder: string[] = []
 
 			return {
 				id: messageId,
 				alias: {},
-				inputs,
-				translations,
+				inputOrder,
+				messages,
 			}
 		})
 
-		console.log("ICU2 Loaded Messages", JSON.stringify(messages, undefined, 2))
-		return messages
-	},
-	saveMessages: async () => {
-		console.warn("The ICU2 MessageFormat Plugin does not implement saving.")
-		return
+		return messageBundles
 	},
 }
 
@@ -90,14 +86,14 @@ export function parseICUMessage(languageTag: LanguageTag, source: string): Trans
 	}
 }
 
-function toVariant(mfVariant: MF.Variant): Variant {
+function toVariant(mfVariant: MF.Variant): AST.Variant {
 	return {
 		match: mfVariant.keys.map((key) => (key.type === "literal" ? key.value : "*")),
 		pattern: toPattern(mfVariant.value),
 	}
 }
 
-function toDeclaration(mfDeclaration: MF.Declaration): Declaration {
+function toDeclaration(mfDeclaration: MF.Declaration): AST.Declaration {
 	switch (mfDeclaration.type) {
 		case "input":
 		case "local": {
@@ -113,7 +109,7 @@ function toDeclaration(mfDeclaration: MF.Declaration): Declaration {
 	}
 }
 
-function toPattern(mfPattern: MF.Pattern): Pattern {
+function toPattern(mfPattern: MF.Pattern): AST.Pattern {
 	return mfPattern.map((element) => {
 		if (typeof element == "string")
 			return {
@@ -126,7 +122,7 @@ function toPattern(mfPattern: MF.Pattern): Pattern {
 	})
 }
 
-function toExpression(mfExpression: MF.Expression): Expression {
+function toExpression(mfExpression: MF.Expression): AST.Expression {
 	const annotation = mfExpression.annotation
 	const arg = mfExpression.arg
 	if (!arg) throw new Error()
@@ -139,7 +135,7 @@ function toExpression(mfExpression: MF.Expression): Expression {
 
 function toAnnotation(
 	mfAnnotation: MF.FunctionAnnotation | MF.UnsupportedAnnotation
-): FunctionAnnotation {
+): AST.FunctionAnnotation {
 	if (mfAnnotation.type !== "function") throw new Error("Junk annotation")
 	return {
 		type: "function",
