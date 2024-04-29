@@ -221,6 +221,14 @@ Add the following properties to your `settings.json` file to customize annotatio
 }
 ```
 
+### Disable Inline Annotations
+
+You can disable inline annotations by setting the following property to `false` in your `settings.json` file or by using the command `Sherlock: Toggle Inline Annotations`. The default value is `true`.
+
+```json
+"sherlock.inlineAnnotations.enabled": false
+```
+
 #### Troubleshooting
 
 If you are having trouble with the **loading icon** not disappearing, this is a known issue & we are working with Visual Studio Code to fix it. In the meantime, you can right-click the Inlang icon to hide it:
