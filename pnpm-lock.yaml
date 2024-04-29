@@ -2586,6 +2586,9 @@ importers:
 
   inlang/source-code/versioned-interfaces/module:
     dependencies:
+      '@inlang/importer':
+        specifier: workspace:*
+        version: link:../importer
       '@inlang/message-lint-rule':
         specifier: workspace:*
         version: link:../message-lint-rule

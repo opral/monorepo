@@ -23,6 +23,7 @@
 	},
 	"dependencies": {
 		"@inlang/plugin": "workspace:*",
+		"@inlang/importer": "workspace:*",
 		"@inlang/message-lint-rule": "workspace:*"
 	},
 	"peerDependencies": {

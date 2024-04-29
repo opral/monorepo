@@ -1,5 +1,6 @@
 import { MessageLintRule } from "@inlang/message-lint-rule"
 import { Plugin } from "@inlang/plugin"
+import { Importer } from "@inlang/importer"
 import { Type } from "@sinclair/typebox"
 
 /**
@@ -10,7 +11,7 @@ import { Type } from "@sinclair/typebox"
  */
 // not using Static<infer T> here because the type is not inferred correctly
 // due to type overwrites in modules.
-export type InlangModule = { default: Plugin | MessageLintRule }
+export type InlangModule = { default: Plugin | MessageLintRule | Importer }
 export const InlangModule = Type.Object({
-	default: Type.Union([Plugin, MessageLintRule]),
+	default: Type.Union([Plugin, MessageLintRule, Importer]),
 })

@@ -11,6 +11,7 @@
 		"./dist",
 		"./src"
 	],
+	"sideEffects": false,
 	"scripts": {
 		"build": "tsc --build",
 		"dev": "tsc --watch",

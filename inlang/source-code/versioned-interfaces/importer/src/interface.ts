@@ -7,7 +7,7 @@ import {
 } from "@sinclair/typebox"
 import type { NodeishFilesystem } from "@lix-js/fs"
 import type { JSONObject } from "@inlang/json-types"
-import { AST } from "@inlang/sdk"
+import type { AST } from "@inlang/sdk"
 import { Translatable } from "@inlang/translatable"
 import type { ExternalProjectSettings, ProjectSettings } from "@inlang/project-settings"
 
@@ -24,19 +24,7 @@ export type NodeishFilesystemSubset = Pick<
 // ---------------------------- RUNTIME VALIDATION TYPES ---------------------------------------------
 
 /**
- * The plugin API is used to extend inlang's functionality.
- *
- * You can use your own settings by extending the plugin with a generic:
- *
- * ```ts
- * 	type PluginSettings = {
- *  	filePath: string
- * 	}
- *
- * 	const plugin: Plugin<{
- * 		"plugin.your.id": PluginSettings
- * 	}>
- * ```
+ * The import API is used to import messages from external formants
  */
 export type Importer<
 	ExternalSettings extends Record<keyof ExternalProjectSettings, JSONObject> | unknown = unknown
@@ -49,20 +37,6 @@ export type Importer<
 		settings: ProjectSettings & ExternalSettings
 		nodeishFs: NodeishFilesystemSubset
 	}) => Promise<AST.MessageBundle[]>
-
-	/**
-	 * Define app specific APIs.
-	 *
-	 * @example
-	 * addCustomApi: () => ({
-	 * 	 "app.inlang.ide-extension": {
-	 * 	   messageReferenceMatcher: () => {}
-	 * 	 }
-	 *  })
-	 */
-	addCustomApi?: (args: {
-		settings: ProjectSettings & ExternalSettings
-	}) => Record<`app.${string}.${string}`, unknown>
 }
 
 export const Importer = Type.Object({
