@@ -179,6 +179,48 @@ If you want to add lint rules to your experience, you can add them from https://
 - VS Code version 1.84.0 or higher.
 - Node.js version v18 or higher.
 
+## Customization
+
+### Custom preview language
+
+You can customize the preview language in the settings. This is useful if you want to see how your translations look in a specific language. This setting is also available in the bottom status bar.
+
+```json
+"sherlock.previewLanguageTag": "de"
+```
+
+### Custom extension colors
+
+You can customize the colors for inline annotations directly through the VS Code settings JSON file. This feature allows you to set different colors for `info` and `error` states, enhancing the readability and usability of inline annotations.
+
+Add the following properties to your `settings.json` file to customize annotation colors:
+
+```json
+"sherlock.editorColors": {
+	"info": {
+		"foreground": "#color",
+		"background": "rgba(number, number, number, 0.2)", // needs transparency
+		"border": "#color"
+	},
+	"error": {
+		"foreground": "#color",
+		"background": "rgba(number, number, number, 0.2)", // needs transparency
+		"border": "#color"
+	}
+}
+
+// or (for all extensions)
+
+"workbench.colorCustomizations": {
+	"editorError.foreground": "#color",
+	"editorError.background": "#color",
+	"editorError.border": "#color",
+	"editorInfo.foreground": "#color",
+	"editorInfo.background": "#color",
+	"editorInfo.border": "#color"
+}
+```
+
 #### Troubleshooting
 
 If you are having trouble with the **loading icon** not disappearing, this is a known issue & we are working with Visual Studio Code to fix it. In the meantime, you can right-click the Inlang icon to hide it:
