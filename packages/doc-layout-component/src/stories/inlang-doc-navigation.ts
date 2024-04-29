@@ -68,8 +68,8 @@ export default class InlangDocNavigation extends LitElement {
 				font-weight: 600;
 			}
 			.link-indicator {
-				width: 16px;
-				height: 16px;
+				width: 14px;
+				height: 14px;
 				color: var(--sl-color-neutral-400);
 			}
 			sl-avatar {
