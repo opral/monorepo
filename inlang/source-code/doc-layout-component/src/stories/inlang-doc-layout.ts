@@ -4,6 +4,8 @@ import { baseStyling } from "../styling/base.js"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import overridePrimitiveColors from "./../helper/overridePrimitiveColors.js"
 
+import "./inlang-doc-navigation.ts"
+
 import SlDrawer from "@shoelace-style/shoelace/dist/components/drawer/drawer.component.js"
 import SlButton from "@shoelace-style/shoelace/dist/components/button/button.component.js"
 
@@ -24,18 +26,16 @@ export default class InlangDocLayout extends LitElement {
 			.right-column {
 				width: 230px;
 				height: 100%;
-				background-color: var(--sl-color-neutral-50);
 			}
 			.main-column {
 				flex-grow: 1;
+				width: min-content;
 				position: relative;
 				height: 100%;
-				background-color: var(--sl-color-neutral-100);
 			}
 			.left-column {
 				width: 230px;
 				height: 100%;
-				background-color: var(--sl-color-neutral-50);
 			}
 			.open-menu-button {
 				display: none;
@@ -60,7 +60,12 @@ export default class InlangDocLayout extends LitElement {
 	]
 
 	@property({ type: Object })
-	manifest: MarketplaceManifest = {} as MarketplaceManifest
+	manifest: MarketplaceManifest & { uniqueID: string } = {} as MarketplaceManifest & {
+		uniqueID: string
+	}
+
+	@property({ type: Object })
+	currentRoute: string = "/"
 
 	@state()
 	private _drawerIsOpen: boolean = false
@@ -74,7 +79,12 @@ export default class InlangDocLayout extends LitElement {
 
 	override render() {
 		return html`<div class="container" part="base">
-			<div class="left-column">${this.manifest.id}</div>
+			<div class="left-column">
+				<inlang-doc-navigation
+					.manifest=${this.manifest}
+					.currentRoute=${this.currentRoute}
+				></inlang-doc-navigation>
+			</div>
 			<div class="main-column">
 				<div class="open-menu-button">
 					<sl-button @click=${() => (this._drawerIsOpen = true)}>Open</sl-button>
@@ -89,7 +99,7 @@ export default class InlangDocLayout extends LitElement {
 					this._drawerIsOpen = false
 				}}
 			>
-				right
+				<inlang-doc-navigation .manifest=${this.manifest}></inlang-doc-navigation>
 			</sl-drawer>
 		</div>`
 	}
