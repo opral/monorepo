@@ -3,10 +3,10 @@
 	"id": "guide.nilsjacobsen.nextIntlIdeExtension",
 	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/next-intl-with-ide-extension/assets/iconv3.png",
 	"displayName": {
-		"en": "Setting Up next-intl with IDE Extension."
+		"en": "Setting Up next-intl with the Sherlock VS Code extension."
 	},
 	"description": {
-		"en": "I'll walk you through the integration of the next-intl internationalization library with inlang's IDE extension."
+		"en": "I'll walk you through the integration of the next-intl internationalization library with the Sherlock VS Code extension."
 	},
 	"readme": {
 		"en": "./inlang/guides/next-intl-with-ide-extension/README.md"
@@ -30,6 +30,7 @@
 		"ecosystem compatible",
 		"next-intl",
 		"vscode",
+		"sherlock",
 		"ide-extension",
 		"guides-developer"
 	],
