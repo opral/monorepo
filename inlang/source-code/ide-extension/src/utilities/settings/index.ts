@@ -6,6 +6,7 @@ const settingsProperty = [
 	"disableConfigFileCreation",
 	"disableConfigFileDeletion",
 	"previewLanguageTag",
+	"inlineAnnotations.enabled",
 ] as const
 
 type SettingsProperty = (typeof settingsProperty)[number]

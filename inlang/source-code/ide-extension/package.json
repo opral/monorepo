@@ -95,6 +95,10 @@
 				"command": "sherlock.copyError",
 				"title": "Copy Error",
 				"icon": "$(copy)"
+			},
+			{
+				"command": "sherlock.toggleInlineAnnotations",
+				"title": "Sherlock: Toggle Inline Annotations"
 			}
 		],
 		"menus": {
@@ -137,6 +141,10 @@
 				"sherlock.previewLanguageTag": {
 					"type": "string",
 					"default": ""
+				},
+				"sherlock.inlineAnnotations.enabled": {
+					"type": "boolean",
+					"default": true
 				}
 			}
 		}
