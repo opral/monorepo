@@ -46,6 +46,12 @@ export type ResolveModuleFunction = (args: {
 	 * The resolved plugins.
 	 */
 	plugins: Array<Plugin>
+
+	/**
+	 * The resolved importers.
+	 */
+	importers: Array<Importer>
+
 	/**
 	 * The resolved message lint rules.
 	 */

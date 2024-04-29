@@ -16,6 +16,7 @@ import { resolvePlugins } from "./plugins/resolvePlugins.js"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { validatedModuleSettings } from "./validatedModuleSettings.js"
 import type { Importer } from "@inlang/importer"
+import { resolveImporters } from "./importers/resolveImporters.js"
 
 const ModuleCompiler = TypeCompiler.Compile(InlangModule)
 
@@ -112,11 +113,23 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 
 	const resolvedLintRules = resolveMessageLintRules({ messageLintRules: allMessageLintRules })
 
+	const resolvedImporters = await resolveImporters({
+		importers: allImporters,
+		settings: args.settings,
+		nodeishFs: args.nodeishFs,
+	})
+
 	return {
 		meta,
 		messageLintRules: allMessageLintRules,
 		plugins: allPlugins,
+		importers: allImporters,
 		resolvedPluginApi: resolvedPlugins.data,
-		errors: [...moduleErrors, ...resolvedLintRules.errors, ...resolvedPlugins.errors],
+		errors: [
+			...moduleErrors,
+			...resolvedLintRules.errors,
+			...resolvedPlugins.errors,
+			...resolvedImporters.errors,
+		],
 	}
 }
