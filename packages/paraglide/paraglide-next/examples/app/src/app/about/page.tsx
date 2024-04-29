@@ -2,6 +2,7 @@ import { redirect } from "@/lib/i18n"
 import * as m from "@/paraglide/messages.js"
 import { languageTag } from "@/paraglide/runtime"
 import { Metadata } from "next"
+import ServerActionTester from "./ServerAction"
 
 export function generateMetadata(): Metadata {
 	const locale = languageTag()
@@ -38,6 +39,7 @@ export default function About() {
 					sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id
 					est laborum.
 				</p>
+				<ServerActionTester />
 			</main>
 		</>
 	)

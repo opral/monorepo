@@ -1,5 +1,12 @@
 # @inlang/paraglide-next
 
+## 0.1.6
+
+### Patch Changes
+
+- 3d87380: The `init` command now always produces posix paths for the outdir and project path, even on windows
+- 1baa229: Fix server actions not returning during dev
+
 ## 0.1.5
 
 ### Patch Changes
