@@ -17,8 +17,11 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 
 	async function updateDecorations() {
 		const activeTextEditor = vscode.window.activeTextEditor
+		const inlineAnnotationsEnabled = vscode.workspace
+			.getConfiguration()
+			.get<boolean>("sherlock.inlineAnnotations.enabled", true)
 
-		if (!activeTextEditor) {
+		if (!activeTextEditor || !inlineAnnotationsEnabled) {
 			return
 		}
 
