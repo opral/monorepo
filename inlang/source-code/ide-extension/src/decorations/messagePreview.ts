@@ -135,4 +135,14 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 	CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.event(() => updateDecorations())
 	CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.event(() => updateDecorations())
 	CONFIGURATION.EVENTS.ON_DID_PREVIEW_LANGUAGE_TAG_CHANGE.event(() => updateDecorations())
+
+	vscode.workspace.onDidChangeConfiguration(
+		(event) => {
+			if (event.affectsConfiguration("sherlock.inlineAnnotations.enabled")) {
+				updateDecorations()
+			}
+		},
+		undefined,
+		args.context.subscriptions
+	)
 }
