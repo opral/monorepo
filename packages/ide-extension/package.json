@@ -141,6 +141,10 @@
 				"sherlock.previewLanguageTag": {
 					"type": "string",
 					"default": ""
+				},
+				"sherlock.inlineAnnotations.enabled": {
+					"type": "boolean",
+					"default": true
 				}
 			}
 		}
