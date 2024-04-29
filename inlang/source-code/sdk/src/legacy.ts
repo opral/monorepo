@@ -9,11 +9,12 @@ export function toLegacyMessage(bundle: AST.MessageBundle): LegecyFormat.Message
 	const selectorNames = new Set<string>()
 
 	for (const message of bundle.messages) {
-		const legacySelectors = message.selectors.map(toLegacyExpression)
-		for (const legecySelector of legacySelectors) {
-			selectorNames.add(legecySelector.name)
+		// collect all selector names
+		for (const selector of message.selectors.map(toLegacyExpression)) {
+			selectorNames.add(selector.name)
 		}
 
+		// collect all variants
 		for (const variant of message.variants) {
 			variants.push({
 				languageTag: message.locale,
@@ -77,11 +78,32 @@ function toLegacyExpression(expression: AST.Expression): LegecyFormat.Expression
 export function fromLegacyMessaeg(legacyMessage: LegecyFormat.Message): AST.MessageBundle {
 	const languages = dedupe(legacyMessage.variants.map((variant) => variant.languageTag))
 
-	const messages: AST.Message[] = languages.map((language) => {
-		const variants = legacyMessage.variants.filter((variant) => variant.languageTag === language)
+	const messages: AST.Message[] = languages.map((language): AST.Message => {
+		//All variants that will be part of this message
+		const legacyVariants = legacyMessage.variants.filter(
+			(variant) => variant.languageTag === language
+		)
+
+		//find all selector names
+		const selectorNames = new Set<string>()
+		for (const legacySelector of legacyMessage.selectors) {
+			selectorNames.add(legacySelector.name)
+		}
+		const selectors = [...selectorNames].map((name) => ({
+			type: "expression",
+			annotation: undefined,
+			arg: {
+				type: "variable",
+				name: name,
+			},
+		}))
+
+		const declarations: AST.Declaration = []
 
 		return {
 			locale: language,
+			declarations: [],
+			selectors,
 			variants,
 		}
 	})
@@ -96,4 +118,7 @@ export function fromLegacyMessaeg(legacyMessage: LegecyFormat.Message): AST.Mess
 	}
 }
 
+/**
+ * Dedupes an array by converting it to a set and back
+ */
 const dedupe = <T extends Array<unknown>>(arr: T): T => [...new Set(arr)] as T
