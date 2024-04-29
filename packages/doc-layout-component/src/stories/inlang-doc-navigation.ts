@@ -22,23 +22,35 @@ export default class InlangDocNavigation extends LitElement {
 				padding-right: 24px;
 				display: flex;
 				flex-direction: column;
-				gap: 32px;
 				padding-top: 20px;
+				gap: 32px;
 			}
 			.menu-list {
-				margin-left: -10px;
+				margin-left: -12px;
 				padding: 0;
 				background-color: transparent;
 				border: none;
 				display: flex;
 				flex-direction: column;
 			}
-			.menu-item {
+			.menu-namespace {
 				display: flex;
 				align-items: center;
 				height: 34px;
-				padding-left: 16px;
-				padding-right: 16px;
+				padding-left: 12px;
+				padding-right: 12px;
+				color: var(--sl-color-neutral-950);
+				font-size: 14px;
+				text-transform: capitalize;
+				font-weight: 600;
+			}
+			.menu-item {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				height: 34px;
+				padding-left: 12px;
+				padding-right: 12px;
 				border-radius: 6px;
 				background-color: transparent;
 				color: var(--sl-color-neutral-600);
@@ -55,7 +67,11 @@ export default class InlangDocNavigation extends LitElement {
 				color: var(--sl-color-primary-700);
 				font-weight: 600;
 			}
-
+			.link-indicator {
+				width: 14px;
+				height: 14px;
+				color: var(--sl-color-neutral-400);
+			}
 			sl-avatar {
 				--size: 30px;
 			}
@@ -78,6 +94,10 @@ export default class InlangDocNavigation extends LitElement {
 				display: flex;
 				gap: 2px;
 				flex-direction: column;
+			}
+			.space {
+				width: 100%;
+				height: 24px;
 			}
 		`,
 	]
@@ -115,14 +135,47 @@ export default class InlangDocNavigation extends LitElement {
 			</div>
 			${this.manifest.pages
 				? html`<div class=${`menu-list`}>
-						${Object.keys(this.manifest.pages).map((route) => {
-							const navTitle = route.split("/").pop()
+						${Object.entries(this.manifest.pages).map(([key, value]) => {
+							if (typeof value === "string") {
+								const route = key
+								const navTitle = route.split("/").pop()
 
-							return html`<a
-								class=${`menu-item ${this.currentRoute === route && "menu-item-selected"}`}
-								href=${this._basePath + route}
-								>${navTitle ? navTitle.replaceAll("-", " ") : "Introduction"}</a
-							>`
+								return html`<a
+									class=${`menu-item ${this.currentRoute === route && "menu-item-selected"}`}
+									href=${this._basePath + route}
+									>${navTitle ? navTitle.replaceAll("-", " ") : "Introduction"}</a
+								>`
+							} else {
+								return html` <div class="menu-namespace">${key}</div>
+									${Object.entries(value).map(([route, path]) => {
+										const navTitle = route.split("/").pop()
+										const isLink =
+											(path as string).endsWith(".md") || (path as string).endsWith(".html")
+												? false
+												: true
+										return html`<a
+											class=${`menu-item ${this.currentRoute === route && "menu-item-selected"}`}
+											href=${isLink ? path : this._basePath + route}
+											>${navTitle ? navTitle.replaceAll("-", " ") : "Introduction"}
+											${isLink &&
+											html`<div class="link-indicator">
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													width="100%"
+													height="100%"
+													fill="none"
+													viewBox="0 0 16 16"
+												>
+													<path
+														fill="currentColor"
+														d="M15.716 8.433l-5.759 5.784a.96.96 0 01-1.64-.683c0-.256.1-.501.28-.683l4.12-4.136H.96A.958.958 0 010 7.751a.966.966 0 01.96-.964h11.758L8.599 2.648A.968.968 0 019.28 1c.255 0 .5.102.68.283l5.76 5.784a.963.963 0 01.207 1.053.965.965 0 01-.21.313z"
+													/>
+												</svg>
+											</div> `}</a
+										> `
+									})}
+									<div class="space"></div>`
+							}
 						})}
 				  </div>`
 				: ``}
