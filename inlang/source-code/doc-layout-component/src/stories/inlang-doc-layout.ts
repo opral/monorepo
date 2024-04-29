@@ -32,6 +32,12 @@ export default class InlangDocLayout extends LitElement {
 				width: min-content;
 				position: relative;
 				height: 100%;
+				padding: 0 32px;
+			}
+			@media (max-width: 768px) {
+				.main-column {
+					padding: 0;
+				}
 			}
 			.left-column {
 				width: 230px;
@@ -91,9 +97,8 @@ export default class InlangDocLayout extends LitElement {
 				</div>
 				<slot></slot>
 			</div>
-			<div class="right-column">right</div>
+			<div class="right-column"></div>
 			<sl-drawer
-				label="Navigation right"
 				.open=${this._drawerIsOpen}
 				@sl-after-hide=${() => {
 					this._drawerIsOpen = false
