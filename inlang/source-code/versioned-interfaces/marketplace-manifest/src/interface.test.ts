@@ -174,20 +174,26 @@ test("should not fail if pages are defined", () => {
 	expect(Value.Check(MarketplaceManifest, guide)).toBe(true)
 })
 
-test("should fail with invalid file path", () => {
+test("should not fail if pages are defined with namespace", () => {
 	const guide: MarketplaceManifest = {
 		id: "guide.inlang.example",
 		displayName: { en: "My App" },
 		description: { en: "Hello" },
 		keywords: [],
 		pages: {
-			// @ts-expect-error
-			"/": "index",
+			overview: {
+				"/": "./../pages/index.md",
+				"/changelog": "./../pages/changelog.md",
+			},
+			docs: {
+				"/docs/intro": "./../pages/documentation.md",
+				"/docs/usage": "./../pages/documentation.md",
+			},
 		},
 		license: "Apache-2.0",
 		publisherName: "inlang",
 	}
-	expect(Value.Check(MarketplaceManifest, guide)).toBe(false)
+	expect(Value.Check(MarketplaceManifest, guide)).toBe(true)
 })
 
 test("should not fail if pageRedirects are defined", () => {
@@ -204,6 +210,22 @@ test("should not fail if pageRedirects are defined", () => {
 		pageRedirects: {
 			"/old": "/new",
 			"/documentation/*": "/docs/*",
+		},
+		license: "Apache-2.0",
+		publisherName: "inlang",
+	}
+	expect(Value.Check(MarketplaceManifest, guide)).toBe(true)
+})
+
+test("should not fail if page points to link", () => {
+	const guide: MarketplaceManifest = {
+		id: "guide.inlang.example",
+		displayName: { en: "My App" },
+		description: { en: "Hello" },
+		keywords: [],
+		pages: {
+			"/": "./../pages/index.md",
+			"/example": "/g/sdhfsddf/example-guide",
 		},
 		license: "Apache-2.0",
 		publisherName: "inlang",
