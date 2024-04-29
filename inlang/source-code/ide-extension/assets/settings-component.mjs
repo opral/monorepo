@@ -6405,523 +6405,6 @@ var require_value2 = __commonJS({
 	},
 })
 
-// ../../../lix/packages/fs/dist/errors/FilesystemError.js
-var init_FilesystemError = __esm({
-	"../../../lix/packages/fs/dist/errors/FilesystemError.js"() {
-		"use strict"
-	},
-})
-
-// ../../../lix/packages/fs/dist/utilities/helpers.js
-var init_helpers = __esm({
-	"../../../lix/packages/fs/dist/utilities/helpers.js"() {
-		"use strict"
-	},
-})
-
-// ../../../lix/packages/fs/dist/memoryFs.js
-var init_memoryFs = __esm({
-	"../../../lix/packages/fs/dist/memoryFs.js"() {
-		"use strict"
-		init_FilesystemError()
-		init_helpers()
-	},
-})
-
-// ../../../lix/packages/fs/dist/index.js
-var init_dist = __esm({
-	"../../../lix/packages/fs/dist/index.js"() {
-		"use strict"
-		init_memoryFs()
-		init_helpers()
-	},
-})
-
-// ../../../node_modules/.pnpm/ms@2.1.2/node_modules/ms/index.js
-var require_ms = __commonJS({
-	"../../../node_modules/.pnpm/ms@2.1.2/node_modules/ms/index.js"(exports, module) {
-		var s5 = 1e3
-		var m3 = s5 * 60
-		var h3 = m3 * 60
-		var d3 = h3 * 24
-		var w2 = d3 * 7
-		var y3 = d3 * 365.25
-		module.exports = function (val, options) {
-			options = options || {}
-			var type = typeof val
-			if (type === "string" && val.length > 0) {
-				return parse(val)
-			} else if (type === "number" && isFinite(val)) {
-				return options.long ? fmtLong(val) : fmtShort(val)
-			}
-			throw new Error("val is not a non-empty string or a valid number. val=" + JSON.stringify(val))
-		}
-		function parse(str) {
-			str = String(str)
-			if (str.length > 100) {
-				return
-			}
-			var match =
-				/^(-?(?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(
-					str
-				)
-			if (!match) {
-				return
-			}
-			var n6 = parseFloat(match[1])
-			var type = (match[2] || "ms").toLowerCase()
-			switch (type) {
-				case "years":
-				case "year":
-				case "yrs":
-				case "yr":
-				case "y":
-					return n6 * y3
-				case "weeks":
-				case "week":
-				case "w":
-					return n6 * w2
-				case "days":
-				case "day":
-				case "d":
-					return n6 * d3
-				case "hours":
-				case "hour":
-				case "hrs":
-				case "hr":
-				case "h":
-					return n6 * h3
-				case "minutes":
-				case "minute":
-				case "mins":
-				case "min":
-				case "m":
-					return n6 * m3
-				case "seconds":
-				case "second":
-				case "secs":
-				case "sec":
-				case "s":
-					return n6 * s5
-				case "milliseconds":
-				case "millisecond":
-				case "msecs":
-				case "msec":
-				case "ms":
-					return n6
-				default:
-					return void 0
-			}
-		}
-		function fmtShort(ms) {
-			var msAbs = Math.abs(ms)
-			if (msAbs >= d3) {
-				return Math.round(ms / d3) + "d"
-			}
-			if (msAbs >= h3) {
-				return Math.round(ms / h3) + "h"
-			}
-			if (msAbs >= m3) {
-				return Math.round(ms / m3) + "m"
-			}
-			if (msAbs >= s5) {
-				return Math.round(ms / s5) + "s"
-			}
-			return ms + "ms"
-		}
-		function fmtLong(ms) {
-			var msAbs = Math.abs(ms)
-			if (msAbs >= d3) {
-				return plural(ms, msAbs, d3, "day")
-			}
-			if (msAbs >= h3) {
-				return plural(ms, msAbs, h3, "hour")
-			}
-			if (msAbs >= m3) {
-				return plural(ms, msAbs, m3, "minute")
-			}
-			if (msAbs >= s5) {
-				return plural(ms, msAbs, s5, "second")
-			}
-			return ms + " ms"
-		}
-		function plural(ms, msAbs, n6, name) {
-			var isPlural = msAbs >= n6 * 1.5
-			return Math.round(ms / n6) + " " + name + (isPlural ? "s" : "")
-		}
-	},
-})
-
-// ../../../node_modules/.pnpm/debug@4.3.4_supports-color@8.1.1/node_modules/debug/src/common.js
-var require_common = __commonJS({
-	"../../../node_modules/.pnpm/debug@4.3.4_supports-color@8.1.1/node_modules/debug/src/common.js"(
-		exports,
-		module
-	) {
-		function setup(env) {
-			createDebug.debug = createDebug
-			createDebug.default = createDebug
-			createDebug.coerce = coerce
-			createDebug.disable = disable
-			createDebug.enable = enable
-			createDebug.enabled = enabled
-			createDebug.humanize = require_ms()
-			createDebug.destroy = destroy
-			for (const key of Object.keys(env)) {
-				createDebug[key] = env[key]
-			}
-			createDebug.names = []
-			createDebug.skips = []
-			createDebug.formatters = {}
-			function selectColor(namespace) {
-				let hash2 = 0
-				for (let i5 = 0; i5 < namespace.length; i5++) {
-					hash2 = (hash2 << 5) - hash2 + namespace.charCodeAt(i5)
-					hash2 |= 0
-				}
-				return createDebug.colors[Math.abs(hash2) % createDebug.colors.length]
-			}
-			createDebug.selectColor = selectColor
-			function createDebug(namespace) {
-				let prevTime
-				let enableOverride = null
-				let namespacesCache
-				let enabledCache
-				function debug5(...args) {
-					if (!debug5.enabled) {
-						return
-					}
-					const self2 = debug5
-					const curr = Number(/* @__PURE__ */ new Date())
-					const ms = curr - (prevTime || curr)
-					self2.diff = ms
-					self2.prev = prevTime
-					self2.curr = curr
-					prevTime = curr
-					args[0] = createDebug.coerce(args[0])
-					if (typeof args[0] !== "string") {
-						args.unshift("%O")
-					}
-					let index2 = 0
-					args[0] = args[0].replace(/%([a-zA-Z%])/g, (match, format) => {
-						if (match === "%%") {
-							return "%"
-						}
-						index2++
-						const formatter = createDebug.formatters[format]
-						if (typeof formatter === "function") {
-							const val = args[index2]
-							match = formatter.call(self2, val)
-							args.splice(index2, 1)
-							index2--
-						}
-						return match
-					})
-					createDebug.formatArgs.call(self2, args)
-					const logFn = self2.log || createDebug.log
-					logFn.apply(self2, args)
-				}
-				debug5.namespace = namespace
-				debug5.useColors = createDebug.useColors()
-				debug5.color = createDebug.selectColor(namespace)
-				debug5.extend = extend
-				debug5.destroy = createDebug.destroy
-				Object.defineProperty(debug5, "enabled", {
-					enumerable: true,
-					configurable: false,
-					get: () => {
-						if (enableOverride !== null) {
-							return enableOverride
-						}
-						if (namespacesCache !== createDebug.namespaces) {
-							namespacesCache = createDebug.namespaces
-							enabledCache = createDebug.enabled(namespace)
-						}
-						return enabledCache
-					},
-					set: (v2) => {
-						enableOverride = v2
-					},
-				})
-				if (typeof createDebug.init === "function") {
-					createDebug.init(debug5)
-				}
-				return debug5
-			}
-			function extend(namespace, delimiter) {
-				const newDebug = createDebug(
-					this.namespace + (typeof delimiter === "undefined" ? ":" : delimiter) + namespace
-				)
-				newDebug.log = this.log
-				return newDebug
-			}
-			function enable(namespaces) {
-				createDebug.save(namespaces)
-				createDebug.namespaces = namespaces
-				createDebug.names = []
-				createDebug.skips = []
-				let i5
-				const split = (typeof namespaces === "string" ? namespaces : "").split(/[\s,]+/)
-				const len = split.length
-				for (i5 = 0; i5 < len; i5++) {
-					if (!split[i5]) {
-						continue
-					}
-					namespaces = split[i5].replace(/\*/g, ".*?")
-					if (namespaces[0] === "-") {
-						createDebug.skips.push(new RegExp("^" + namespaces.slice(1) + "$"))
-					} else {
-						createDebug.names.push(new RegExp("^" + namespaces + "$"))
-					}
-				}
-			}
-			function disable() {
-				const namespaces = [
-					...createDebug.names.map(toNamespace),
-					...createDebug.skips.map(toNamespace).map((namespace) => "-" + namespace),
-				].join(",")
-				createDebug.enable("")
-				return namespaces
-			}
-			function enabled(name) {
-				if (name.at(-1) === "*") {
-					return true
-				}
-				let i5
-				let len
-				for (i5 = 0, len = createDebug.skips.length; i5 < len; i5++) {
-					if (createDebug.skips[i5].test(name)) {
-						return false
-					}
-				}
-				for (i5 = 0, len = createDebug.names.length; i5 < len; i5++) {
-					if (createDebug.names[i5].test(name)) {
-						return true
-					}
-				}
-				return false
-			}
-			function toNamespace(regexp) {
-				return regexp
-					.toString()
-					.substring(2, regexp.toString().length - 2)
-					.replace(/\.\*\?$/, "*")
-			}
-			function coerce(val) {
-				if (val instanceof Error) {
-					return val.stack || val.message
-				}
-				return val
-			}
-			function destroy() {
-				console.warn(
-					"Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`."
-				)
-			}
-			createDebug.enable(createDebug.load())
-			return createDebug
-		}
-		module.exports = setup
-	},
-})
-
-// ../../../node_modules/.pnpm/debug@4.3.4_supports-color@8.1.1/node_modules/debug/src/browser.js
-var require_browser = __commonJS({
-	"../../../node_modules/.pnpm/debug@4.3.4_supports-color@8.1.1/node_modules/debug/src/browser.js"(
-		exports,
-		module
-	) {
-		exports.formatArgs = formatArgs
-		exports.save = save
-		exports.load = load
-		exports.useColors = useColors
-		exports.storage = localstorage()
-		exports.destroy = /* @__PURE__ */ (() => {
-			let warned = false
-			return () => {
-				if (!warned) {
-					warned = true
-					console.warn(
-						"Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`."
-					)
-				}
-			}
-		})()
-		exports.colors = [
-			"#0000CC",
-			"#0000FF",
-			"#0033CC",
-			"#0033FF",
-			"#0066CC",
-			"#0066FF",
-			"#0099CC",
-			"#0099FF",
-			"#00CC00",
-			"#00CC33",
-			"#00CC66",
-			"#00CC99",
-			"#00CCCC",
-			"#00CCFF",
-			"#3300CC",
-			"#3300FF",
-			"#3333CC",
-			"#3333FF",
-			"#3366CC",
-			"#3366FF",
-			"#3399CC",
-			"#3399FF",
-			"#33CC00",
-			"#33CC33",
-			"#33CC66",
-			"#33CC99",
-			"#33CCCC",
-			"#33CCFF",
-			"#6600CC",
-			"#6600FF",
-			"#6633CC",
-			"#6633FF",
-			"#66CC00",
-			"#66CC33",
-			"#9900CC",
-			"#9900FF",
-			"#9933CC",
-			"#9933FF",
-			"#99CC00",
-			"#99CC33",
-			"#CC0000",
-			"#CC0033",
-			"#CC0066",
-			"#CC0099",
-			"#CC00CC",
-			"#CC00FF",
-			"#CC3300",
-			"#CC3333",
-			"#CC3366",
-			"#CC3399",
-			"#CC33CC",
-			"#CC33FF",
-			"#CC6600",
-			"#CC6633",
-			"#CC9900",
-			"#CC9933",
-			"#CCCC00",
-			"#CCCC33",
-			"#FF0000",
-			"#FF0033",
-			"#FF0066",
-			"#FF0099",
-			"#FF00CC",
-			"#FF00FF",
-			"#FF3300",
-			"#FF3333",
-			"#FF3366",
-			"#FF3399",
-			"#FF33CC",
-			"#FF33FF",
-			"#FF6600",
-			"#FF6633",
-			"#FF9900",
-			"#FF9933",
-			"#FFCC00",
-			"#FFCC33",
-		]
-		function useColors() {
-			if (
-				typeof window !== "undefined" &&
-				window.process &&
-				(window.process.type === "renderer" || window.process.__nwjs)
-			) {
-				return true
-			}
-			if (
-				typeof navigator !== "undefined" &&
-				navigator.userAgent &&
-				navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)
-			) {
-				return false
-			}
-			return (
-				(typeof document !== "undefined" &&
-					document.documentElement &&
-					document.documentElement.style &&
-					document.documentElement.style.WebkitAppearance) || // Is firebug? http://stackoverflow.com/a/398120/376773
-				(typeof window !== "undefined" &&
-					window.console &&
-					(window.console.firebug || (window.console.exception && window.console.table))) || // Is firefox >= v31?
-				// https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
-				(typeof navigator !== "undefined" &&
-					navigator.userAgent &&
-					navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) &&
-					parseInt(RegExp.$1, 10) >= 31) || // Double check webkit in userAgent just in case we are in a worker
-				(typeof navigator !== "undefined" &&
-					navigator.userAgent &&
-					navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/))
-			)
-		}
-		function formatArgs(args) {
-			args[0] =
-				(this.useColors ? "%c" : "") +
-				this.namespace +
-				(this.useColors ? " %c" : " ") +
-				args[0] +
-				(this.useColors ? "%c " : " ") +
-				"+" +
-				module.exports.humanize(this.diff)
-			if (!this.useColors) {
-				return
-			}
-			const c4 = "color: " + this.color
-			args.splice(1, 0, c4, "color: inherit")
-			let index2 = 0
-			let lastC = 0
-			args[0].replace(/%[a-zA-Z%]/g, (match) => {
-				if (match === "%%") {
-					return
-				}
-				index2++
-				if (match === "%c") {
-					lastC = index2
-				}
-			})
-			args.splice(lastC, 0, c4)
-		}
-		exports.log = console.debug || console.log || (() => {})
-		function save(namespaces) {
-			try {
-				if (namespaces) {
-					exports.storage.setItem("debug", namespaces)
-				} else {
-					exports.storage.removeItem("debug")
-				}
-			} catch (error) {}
-		}
-		function load() {
-			let r8
-			try {
-				r8 = exports.storage.getItem("debug")
-			} catch (error) {}
-			if (!r8 && typeof process !== "undefined" && "env" in process) {
-				r8 = process.env.DEBUG
-			}
-			return r8
-		}
-		function localstorage() {
-			try {
-				return localStorage
-			} catch (error) {}
-		}
-		module.exports = require_common()(exports)
-		var { formatters } = module.exports
-		formatters.j = function (v2) {
-			try {
-				return JSON.stringify(v2)
-			} catch (error) {
-				return "[UnexpectedJSONParseError]: " + error.message
-			}
-		}
-	},
-})
-
 // ../../../node_modules/.pnpm/@sinclair+typebox@0.31.28/node_modules/@sinclair/typebox/compiler/compiler.js
 var require_compiler = __commonJS({
 	"../../../node_modules/.pnpm/@sinclair+typebox@0.31.28/node_modules/@sinclair/typebox/compiler/compiler.js"(
@@ -7607,6 +7090,523 @@ var require_compiler2 = __commonJS({
 			},
 		})
 		__exportStar(require_compiler(), exports)
+	},
+})
+
+// ../../../node_modules/.pnpm/ms@2.1.2/node_modules/ms/index.js
+var require_ms = __commonJS({
+	"../../../node_modules/.pnpm/ms@2.1.2/node_modules/ms/index.js"(exports, module) {
+		var s5 = 1e3
+		var m3 = s5 * 60
+		var h3 = m3 * 60
+		var d3 = h3 * 24
+		var w2 = d3 * 7
+		var y3 = d3 * 365.25
+		module.exports = function (val, options) {
+			options = options || {}
+			var type = typeof val
+			if (type === "string" && val.length > 0) {
+				return parse(val)
+			} else if (type === "number" && isFinite(val)) {
+				return options.long ? fmtLong(val) : fmtShort(val)
+			}
+			throw new Error("val is not a non-empty string or a valid number. val=" + JSON.stringify(val))
+		}
+		function parse(str) {
+			str = String(str)
+			if (str.length > 100) {
+				return
+			}
+			var match =
+				/^(-?(?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(
+					str
+				)
+			if (!match) {
+				return
+			}
+			var n6 = parseFloat(match[1])
+			var type = (match[2] || "ms").toLowerCase()
+			switch (type) {
+				case "years":
+				case "year":
+				case "yrs":
+				case "yr":
+				case "y":
+					return n6 * y3
+				case "weeks":
+				case "week":
+				case "w":
+					return n6 * w2
+				case "days":
+				case "day":
+				case "d":
+					return n6 * d3
+				case "hours":
+				case "hour":
+				case "hrs":
+				case "hr":
+				case "h":
+					return n6 * h3
+				case "minutes":
+				case "minute":
+				case "mins":
+				case "min":
+				case "m":
+					return n6 * m3
+				case "seconds":
+				case "second":
+				case "secs":
+				case "sec":
+				case "s":
+					return n6 * s5
+				case "milliseconds":
+				case "millisecond":
+				case "msecs":
+				case "msec":
+				case "ms":
+					return n6
+				default:
+					return void 0
+			}
+		}
+		function fmtShort(ms) {
+			var msAbs = Math.abs(ms)
+			if (msAbs >= d3) {
+				return Math.round(ms / d3) + "d"
+			}
+			if (msAbs >= h3) {
+				return Math.round(ms / h3) + "h"
+			}
+			if (msAbs >= m3) {
+				return Math.round(ms / m3) + "m"
+			}
+			if (msAbs >= s5) {
+				return Math.round(ms / s5) + "s"
+			}
+			return ms + "ms"
+		}
+		function fmtLong(ms) {
+			var msAbs = Math.abs(ms)
+			if (msAbs >= d3) {
+				return plural(ms, msAbs, d3, "day")
+			}
+			if (msAbs >= h3) {
+				return plural(ms, msAbs, h3, "hour")
+			}
+			if (msAbs >= m3) {
+				return plural(ms, msAbs, m3, "minute")
+			}
+			if (msAbs >= s5) {
+				return plural(ms, msAbs, s5, "second")
+			}
+			return ms + " ms"
+		}
+		function plural(ms, msAbs, n6, name) {
+			var isPlural = msAbs >= n6 * 1.5
+			return Math.round(ms / n6) + " " + name + (isPlural ? "s" : "")
+		}
+	},
+})
+
+// ../../../node_modules/.pnpm/debug@4.3.4_supports-color@8.1.1/node_modules/debug/src/common.js
+var require_common = __commonJS({
+	"../../../node_modules/.pnpm/debug@4.3.4_supports-color@8.1.1/node_modules/debug/src/common.js"(
+		exports,
+		module
+	) {
+		function setup(env) {
+			createDebug.debug = createDebug
+			createDebug.default = createDebug
+			createDebug.coerce = coerce
+			createDebug.disable = disable
+			createDebug.enable = enable
+			createDebug.enabled = enabled
+			createDebug.humanize = require_ms()
+			createDebug.destroy = destroy
+			for (const key of Object.keys(env)) {
+				createDebug[key] = env[key]
+			}
+			createDebug.names = []
+			createDebug.skips = []
+			createDebug.formatters = {}
+			function selectColor(namespace) {
+				let hash2 = 0
+				for (let i5 = 0; i5 < namespace.length; i5++) {
+					hash2 = (hash2 << 5) - hash2 + namespace.charCodeAt(i5)
+					hash2 |= 0
+				}
+				return createDebug.colors[Math.abs(hash2) % createDebug.colors.length]
+			}
+			createDebug.selectColor = selectColor
+			function createDebug(namespace) {
+				let prevTime
+				let enableOverride = null
+				let namespacesCache
+				let enabledCache
+				function debug3(...args) {
+					if (!debug3.enabled) {
+						return
+					}
+					const self2 = debug3
+					const curr = Number(/* @__PURE__ */ new Date())
+					const ms = curr - (prevTime || curr)
+					self2.diff = ms
+					self2.prev = prevTime
+					self2.curr = curr
+					prevTime = curr
+					args[0] = createDebug.coerce(args[0])
+					if (typeof args[0] !== "string") {
+						args.unshift("%O")
+					}
+					let index2 = 0
+					args[0] = args[0].replace(/%([a-zA-Z%])/g, (match, format) => {
+						if (match === "%%") {
+							return "%"
+						}
+						index2++
+						const formatter = createDebug.formatters[format]
+						if (typeof formatter === "function") {
+							const val = args[index2]
+							match = formatter.call(self2, val)
+							args.splice(index2, 1)
+							index2--
+						}
+						return match
+					})
+					createDebug.formatArgs.call(self2, args)
+					const logFn = self2.log || createDebug.log
+					logFn.apply(self2, args)
+				}
+				debug3.namespace = namespace
+				debug3.useColors = createDebug.useColors()
+				debug3.color = createDebug.selectColor(namespace)
+				debug3.extend = extend
+				debug3.destroy = createDebug.destroy
+				Object.defineProperty(debug3, "enabled", {
+					enumerable: true,
+					configurable: false,
+					get: () => {
+						if (enableOverride !== null) {
+							return enableOverride
+						}
+						if (namespacesCache !== createDebug.namespaces) {
+							namespacesCache = createDebug.namespaces
+							enabledCache = createDebug.enabled(namespace)
+						}
+						return enabledCache
+					},
+					set: (v2) => {
+						enableOverride = v2
+					},
+				})
+				if (typeof createDebug.init === "function") {
+					createDebug.init(debug3)
+				}
+				return debug3
+			}
+			function extend(namespace, delimiter) {
+				const newDebug = createDebug(
+					this.namespace + (typeof delimiter === "undefined" ? ":" : delimiter) + namespace
+				)
+				newDebug.log = this.log
+				return newDebug
+			}
+			function enable(namespaces) {
+				createDebug.save(namespaces)
+				createDebug.namespaces = namespaces
+				createDebug.names = []
+				createDebug.skips = []
+				let i5
+				const split = (typeof namespaces === "string" ? namespaces : "").split(/[\s,]+/)
+				const len = split.length
+				for (i5 = 0; i5 < len; i5++) {
+					if (!split[i5]) {
+						continue
+					}
+					namespaces = split[i5].replace(/\*/g, ".*?")
+					if (namespaces[0] === "-") {
+						createDebug.skips.push(new RegExp("^" + namespaces.slice(1) + "$"))
+					} else {
+						createDebug.names.push(new RegExp("^" + namespaces + "$"))
+					}
+				}
+			}
+			function disable() {
+				const namespaces = [
+					...createDebug.names.map(toNamespace),
+					...createDebug.skips.map(toNamespace).map((namespace) => "-" + namespace),
+				].join(",")
+				createDebug.enable("")
+				return namespaces
+			}
+			function enabled(name) {
+				if (name.at(-1) === "*") {
+					return true
+				}
+				let i5
+				let len
+				for (i5 = 0, len = createDebug.skips.length; i5 < len; i5++) {
+					if (createDebug.skips[i5].test(name)) {
+						return false
+					}
+				}
+				for (i5 = 0, len = createDebug.names.length; i5 < len; i5++) {
+					if (createDebug.names[i5].test(name)) {
+						return true
+					}
+				}
+				return false
+			}
+			function toNamespace(regexp) {
+				return regexp
+					.toString()
+					.substring(2, regexp.toString().length - 2)
+					.replace(/\.\*\?$/, "*")
+			}
+			function coerce(val) {
+				if (val instanceof Error) {
+					return val.stack || val.message
+				}
+				return val
+			}
+			function destroy() {
+				console.warn(
+					"Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`."
+				)
+			}
+			createDebug.enable(createDebug.load())
+			return createDebug
+		}
+		module.exports = setup
+	},
+})
+
+// ../../../node_modules/.pnpm/debug@4.3.4_supports-color@8.1.1/node_modules/debug/src/browser.js
+var require_browser = __commonJS({
+	"../../../node_modules/.pnpm/debug@4.3.4_supports-color@8.1.1/node_modules/debug/src/browser.js"(
+		exports,
+		module
+	) {
+		exports.formatArgs = formatArgs
+		exports.save = save
+		exports.load = load
+		exports.useColors = useColors
+		exports.storage = localstorage()
+		exports.destroy = /* @__PURE__ */ (() => {
+			let warned = false
+			return () => {
+				if (!warned) {
+					warned = true
+					console.warn(
+						"Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`."
+					)
+				}
+			}
+		})()
+		exports.colors = [
+			"#0000CC",
+			"#0000FF",
+			"#0033CC",
+			"#0033FF",
+			"#0066CC",
+			"#0066FF",
+			"#0099CC",
+			"#0099FF",
+			"#00CC00",
+			"#00CC33",
+			"#00CC66",
+			"#00CC99",
+			"#00CCCC",
+			"#00CCFF",
+			"#3300CC",
+			"#3300FF",
+			"#3333CC",
+			"#3333FF",
+			"#3366CC",
+			"#3366FF",
+			"#3399CC",
+			"#3399FF",
+			"#33CC00",
+			"#33CC33",
+			"#33CC66",
+			"#33CC99",
+			"#33CCCC",
+			"#33CCFF",
+			"#6600CC",
+			"#6600FF",
+			"#6633CC",
+			"#6633FF",
+			"#66CC00",
+			"#66CC33",
+			"#9900CC",
+			"#9900FF",
+			"#9933CC",
+			"#9933FF",
+			"#99CC00",
+			"#99CC33",
+			"#CC0000",
+			"#CC0033",
+			"#CC0066",
+			"#CC0099",
+			"#CC00CC",
+			"#CC00FF",
+			"#CC3300",
+			"#CC3333",
+			"#CC3366",
+			"#CC3399",
+			"#CC33CC",
+			"#CC33FF",
+			"#CC6600",
+			"#CC6633",
+			"#CC9900",
+			"#CC9933",
+			"#CCCC00",
+			"#CCCC33",
+			"#FF0000",
+			"#FF0033",
+			"#FF0066",
+			"#FF0099",
+			"#FF00CC",
+			"#FF00FF",
+			"#FF3300",
+			"#FF3333",
+			"#FF3366",
+			"#FF3399",
+			"#FF33CC",
+			"#FF33FF",
+			"#FF6600",
+			"#FF6633",
+			"#FF9900",
+			"#FF9933",
+			"#FFCC00",
+			"#FFCC33",
+		]
+		function useColors() {
+			if (
+				typeof window !== "undefined" &&
+				window.process &&
+				(window.process.type === "renderer" || window.process.__nwjs)
+			) {
+				return true
+			}
+			if (
+				typeof navigator !== "undefined" &&
+				navigator.userAgent &&
+				navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)
+			) {
+				return false
+			}
+			return (
+				(typeof document !== "undefined" &&
+					document.documentElement &&
+					document.documentElement.style &&
+					document.documentElement.style.WebkitAppearance) || // Is firebug? http://stackoverflow.com/a/398120/376773
+				(typeof window !== "undefined" &&
+					window.console &&
+					(window.console.firebug || (window.console.exception && window.console.table))) || // Is firefox >= v31?
+				// https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
+				(typeof navigator !== "undefined" &&
+					navigator.userAgent &&
+					navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) &&
+					parseInt(RegExp.$1, 10) >= 31) || // Double check webkit in userAgent just in case we are in a worker
+				(typeof navigator !== "undefined" &&
+					navigator.userAgent &&
+					navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/))
+			)
+		}
+		function formatArgs(args) {
+			args[0] =
+				(this.useColors ? "%c" : "") +
+				this.namespace +
+				(this.useColors ? " %c" : " ") +
+				args[0] +
+				(this.useColors ? "%c " : " ") +
+				"+" +
+				module.exports.humanize(this.diff)
+			if (!this.useColors) {
+				return
+			}
+			const c4 = "color: " + this.color
+			args.splice(1, 0, c4, "color: inherit")
+			let index2 = 0
+			let lastC = 0
+			args[0].replace(/%[a-zA-Z%]/g, (match) => {
+				if (match === "%%") {
+					return
+				}
+				index2++
+				if (match === "%c") {
+					lastC = index2
+				}
+			})
+			args.splice(lastC, 0, c4)
+		}
+		exports.log = console.debug || console.log || (() => {})
+		function save(namespaces) {
+			try {
+				if (namespaces) {
+					exports.storage.setItem("debug", namespaces)
+				} else {
+					exports.storage.removeItem("debug")
+				}
+			} catch (error) {}
+		}
+		function load() {
+			let r8
+			try {
+				r8 = exports.storage.getItem("debug")
+			} catch (error) {}
+			if (!r8 && typeof process !== "undefined" && "env" in process) {
+				r8 = process.env.DEBUG
+			}
+			return r8
+		}
+		function localstorage() {
+			try {
+				return localStorage
+			} catch (error) {}
+		}
+		module.exports = require_common()(exports)
+		var { formatters } = module.exports
+		formatters.j = function (v2) {
+			try {
+				return JSON.stringify(v2)
+			} catch (error) {
+				return "[UnexpectedJSONParseError]: " + error.message
+			}
+		}
+	},
+})
+
+// ../../../lix/packages/fs/dist/errors/FilesystemError.js
+var init_FilesystemError = __esm({
+	"../../../lix/packages/fs/dist/errors/FilesystemError.js"() {
+		"use strict"
+	},
+})
+
+// ../../../lix/packages/fs/dist/utilities/helpers.js
+var init_helpers = __esm({
+	"../../../lix/packages/fs/dist/utilities/helpers.js"() {
+		"use strict"
+	},
+})
+
+// ../../../lix/packages/fs/dist/memoryFs.js
+var init_memoryFs = __esm({
+	"../../../lix/packages/fs/dist/memoryFs.js"() {
+		"use strict"
+		init_FilesystemError()
+		init_helpers()
+	},
+})
+
+// ../../../lix/packages/fs/dist/index.js
+var init_dist = __esm({
+	"../../../lix/packages/fs/dist/index.js"() {
+		"use strict"
+		init_memoryFs()
+		init_helpers()
 	},
 })
 
@@ -10778,9 +10778,8 @@ var require_trees = __commonJS({
 			}
 			node = elems
 			do {
-				n6 =
-					s5.heap[1]
-					/*SMALLEST*/
+				n6 = s5.heap[1]
+				/*SMALLEST*/
 				s5.heap[1] = s5.heap[s5.heap_len--]
 				/*SMALLEST*/
 				pqdownheap(
@@ -10789,16 +10788,15 @@ var require_trees = __commonJS({
 					1
 					/*SMALLEST*/
 				)
-				m3 =
-					s5.heap[1]
-					/*SMALLEST*/
+				m3 = s5.heap[1]
+				/*SMALLEST*/
 				s5.heap[--s5.heap_max] = n6
 				s5.heap[--s5.heap_max] = m3
 				tree[node * 2] = tree[n6 * 2] + tree[m3 * 2]
 				s5.depth[node] = (s5.depth[n6] >= s5.depth[m3] ? s5.depth[n6] : s5.depth[m3]) + 1
 				tree[n6 * 2 + 1] = tree[m3 * 2 + 1] = node
 				s5.heap[1] =
-				/*SMALLEST*/
+					/*SMALLEST*/
 					node++
 				pqdownheap(
 					s5,
@@ -10807,9 +10805,8 @@ var require_trees = __commonJS({
 					/*SMALLEST*/
 				)
 			} while (s5.heap_len >= 2)
-			s5.heap[--s5.heap_max] =
-				s5.heap[1]
-				/*SMALLEST*/
+			s5.heap[--s5.heap_max] = s5.heap[1]
+			/*SMALLEST*/
 			gen_bitlen(s5, desc)
 			gen_codes(tree, max_code, s5.bl_count)
 		}
@@ -12141,24 +12138,24 @@ var require_deflate = __commonJS({
 			return s5.pending !== 0 ? Z_OK : Z_STREAM_END
 		}
 		function deflateEnd(strm) {
-			var status3
+			var status2
 			if (!strm || !strm.state) {
 				return Z_STREAM_ERROR
 			}
-			status3 = strm.state.status
+			status2 = strm.state.status
 			if (
-				status3 !== INIT_STATE &&
-				status3 !== EXTRA_STATE &&
-				status3 !== NAME_STATE &&
-				status3 !== COMMENT_STATE &&
-				status3 !== HCRC_STATE &&
-				status3 !== BUSY_STATE &&
-				status3 !== FINISH_STATE
+				status2 !== INIT_STATE &&
+				status2 !== EXTRA_STATE &&
+				status2 !== NAME_STATE &&
+				status2 !== COMMENT_STATE &&
+				status2 !== HCRC_STATE &&
+				status2 !== BUSY_STATE &&
+				status2 !== FINISH_STATE
 			) {
 				return err(strm, Z_STREAM_ERROR)
 			}
 			strm.state = null
-			return status3 === BUSY_STATE ? err(strm, Z_DATA_ERROR) : Z_OK
+			return status2 === BUSY_STATE ? err(strm, Z_DATA_ERROR) : Z_OK
 		}
 		function deflateSetDictionary(strm, dictionary) {
 			var dictLength = dictionary.length
@@ -12449,7 +12446,7 @@ var require_deflate2 = __commonJS({
 			this.chunks = []
 			this.strm = new ZStream()
 			this.strm.avail_out = 0
-			var status3 = zlib_deflate.deflateInit2(
+			var status2 = zlib_deflate.deflateInit2(
 				this.strm,
 				opt.level,
 				opt.method,
@@ -12457,8 +12454,8 @@ var require_deflate2 = __commonJS({
 				opt.memLevel,
 				opt.strategy
 			)
-			if (status3 !== Z_OK) {
-				throw new Error(msg[status3])
+			if (status2 !== Z_OK) {
+				throw new Error(msg[status2])
 			}
 			if (opt.header) {
 				zlib_deflate.deflateSetHeader(this.strm, opt.header)
@@ -12472,9 +12469,9 @@ var require_deflate2 = __commonJS({
 				} else {
 					dict = opt.dictionary
 				}
-				status3 = zlib_deflate.deflateSetDictionary(this.strm, dict)
-				if (status3 !== Z_OK) {
-					throw new Error(msg[status3])
+				status2 = zlib_deflate.deflateSetDictionary(this.strm, dict)
+				if (status2 !== Z_OK) {
+					throw new Error(msg[status2])
 				}
 				this._dict_set = true
 			}
@@ -12482,7 +12479,7 @@ var require_deflate2 = __commonJS({
 		Deflate.prototype.push = function (data, mode) {
 			var strm = this.strm
 			var chunkSize = this.options.chunkSize
-			var status3, _mode
+			var status2, _mode
 			if (this.ended) {
 				return false
 			}
@@ -12502,9 +12499,9 @@ var require_deflate2 = __commonJS({
 					strm.next_out = 0
 					strm.avail_out = chunkSize
 				}
-				status3 = zlib_deflate.deflate(strm, _mode)
-				if (status3 !== Z_STREAM_END && status3 !== Z_OK) {
-					this.onEnd(status3)
+				status2 = zlib_deflate.deflate(strm, _mode)
+				if (status2 !== Z_STREAM_END && status2 !== Z_OK) {
+					this.onEnd(status2)
 					this.ended = true
 					return false
 				}
@@ -12518,12 +12515,12 @@ var require_deflate2 = __commonJS({
 						this.onData(utils.shrinkBuf(strm.output, strm.next_out))
 					}
 				}
-			} while ((strm.avail_in > 0 || strm.avail_out === 0) && status3 !== Z_STREAM_END)
+			} while ((strm.avail_in > 0 || strm.avail_out === 0) && status2 !== Z_STREAM_END)
 			if (_mode === Z_FINISH) {
-				status3 = zlib_deflate.deflateEnd(this.strm)
-				this.onEnd(status3)
+				status2 = zlib_deflate.deflateEnd(this.strm)
+				this.onEnd(status2)
 				this.ended = true
-				return status3 === Z_OK
+				return status2 === Z_OK
 			}
 			if (_mode === Z_SYNC_FLUSH) {
 				this.onEnd(Z_OK)
@@ -12535,8 +12532,8 @@ var require_deflate2 = __commonJS({
 		Deflate.prototype.onData = function (chunk) {
 			this.chunks.push(chunk)
 		}
-		Deflate.prototype.onEnd = function (status3) {
-			if (status3 === Z_OK) {
+		Deflate.prototype.onEnd = function (status2) {
+			if (status2 === Z_OK) {
 				if (this.options.to === "string") {
 					this.result = this.chunks.join("")
 				} else {
@@ -12544,7 +12541,7 @@ var require_deflate2 = __commonJS({
 				}
 			}
 			this.chunks = []
-			this.err = status3
+			this.err = status2
 			this.msg = this.strm.msg
 		}
 		function deflate2(input, options) {
@@ -14364,9 +14361,9 @@ var require_inflate2 = __commonJS({
 			this.chunks = []
 			this.strm = new ZStream()
 			this.strm.avail_out = 0
-			var status3 = zlib_inflate.inflateInit2(this.strm, opt.windowBits)
-			if (status3 !== c4.Z_OK) {
-				throw new Error(msg[status3])
+			var status2 = zlib_inflate.inflateInit2(this.strm, opt.windowBits)
+			if (status2 !== c4.Z_OK) {
+				throw new Error(msg[status2])
 			}
 			this.header = new GZheader()
 			zlib_inflate.inflateGetHeader(this.strm, this.header)
@@ -14377,9 +14374,9 @@ var require_inflate2 = __commonJS({
 					opt.dictionary = new Uint8Array(opt.dictionary)
 				}
 				if (opt.raw) {
-					status3 = zlib_inflate.inflateSetDictionary(this.strm, opt.dictionary)
-					if (status3 !== c4.Z_OK) {
-						throw new Error(msg[status3])
+					status2 = zlib_inflate.inflateSetDictionary(this.strm, opt.dictionary)
+					if (status2 !== c4.Z_OK) {
+						throw new Error(msg[status2])
 					}
 				}
 			}
@@ -14388,7 +14385,7 @@ var require_inflate2 = __commonJS({
 			var strm = this.strm
 			var chunkSize = this.options.chunkSize
 			var dictionary = this.options.dictionary
-			var status3, _mode
+			var status2, _mode
 			var next_out_utf8, tail, utf8str
 			var allowBufError = false
 			if (this.ended) {
@@ -14410,23 +14407,23 @@ var require_inflate2 = __commonJS({
 					strm.next_out = 0
 					strm.avail_out = chunkSize
 				}
-				status3 = zlib_inflate.inflate(strm, c4.Z_NO_FLUSH)
-				if (status3 === c4.Z_NEED_DICT && dictionary) {
-					status3 = zlib_inflate.inflateSetDictionary(this.strm, dictionary)
+				status2 = zlib_inflate.inflate(strm, c4.Z_NO_FLUSH)
+				if (status2 === c4.Z_NEED_DICT && dictionary) {
+					status2 = zlib_inflate.inflateSetDictionary(this.strm, dictionary)
 				}
-				if (status3 === c4.Z_BUF_ERROR && allowBufError === true) {
-					status3 = c4.Z_OK
+				if (status2 === c4.Z_BUF_ERROR && allowBufError === true) {
+					status2 = c4.Z_OK
 					allowBufError = false
 				}
-				if (status3 !== c4.Z_STREAM_END && status3 !== c4.Z_OK) {
-					this.onEnd(status3)
+				if (status2 !== c4.Z_STREAM_END && status2 !== c4.Z_OK) {
+					this.onEnd(status2)
 					this.ended = true
 					return false
 				}
 				if (
 					strm.next_out &&
 					(strm.avail_out === 0 ||
-						status3 === c4.Z_STREAM_END ||
+						status2 === c4.Z_STREAM_END ||
 						(strm.avail_in === 0 && (_mode === c4.Z_FINISH || _mode === c4.Z_SYNC_FLUSH)))
 				) {
 					if (this.options.to === "string") {
@@ -14446,15 +14443,15 @@ var require_inflate2 = __commonJS({
 				if (strm.avail_in === 0 && strm.avail_out === 0) {
 					allowBufError = true
 				}
-			} while ((strm.avail_in > 0 || strm.avail_out === 0) && status3 !== c4.Z_STREAM_END)
-			if (status3 === c4.Z_STREAM_END) {
+			} while ((strm.avail_in > 0 || strm.avail_out === 0) && status2 !== c4.Z_STREAM_END)
+			if (status2 === c4.Z_STREAM_END) {
 				_mode = c4.Z_FINISH
 			}
 			if (_mode === c4.Z_FINISH) {
-				status3 = zlib_inflate.inflateEnd(this.strm)
-				this.onEnd(status3)
+				status2 = zlib_inflate.inflateEnd(this.strm)
+				this.onEnd(status2)
 				this.ended = true
-				return status3 === c4.Z_OK
+				return status2 === c4.Z_OK
 			}
 			if (_mode === c4.Z_SYNC_FLUSH) {
 				this.onEnd(c4.Z_OK)
@@ -14466,8 +14463,8 @@ var require_inflate2 = __commonJS({
 		Inflate.prototype.onData = function (chunk) {
 			this.chunks.push(chunk)
 		}
-		Inflate.prototype.onEnd = function (status3) {
-			if (status3 === c4.Z_OK) {
+		Inflate.prototype.onEnd = function (status2) {
+			if (status2 === c4.Z_OK) {
 				if (this.options.to === "string") {
 					this.result = this.chunks.join("")
 				} else {
@@ -14475,7 +14472,7 @@ var require_inflate2 = __commonJS({
 				}
 			}
 			this.chunks = []
-			this.err = status3
+			this.err = status2
 			this.msg = this.strm.msg
 		}
 		function inflate2(input, options) {
@@ -18083,7 +18080,7 @@ var require_chroma = __commonJS({
 				return new Color$4(code, "hex")
 			}
 			var type = type$p
-			var log3 = Math.log
+			var log2 = Math.log
 			var pow$1 = Math.pow
 			var floor2 = Math.floor
 			var abs$1 = Math.abs
@@ -18150,8 +18147,8 @@ var require_chroma = __commonJS({
 					if (min3 <= 0) {
 						throw new Error("Logarithmic scales are only possible for values > 0")
 					}
-					var min_log = Math.LOG10E * log3(min3)
-					var max_log = Math.LOG10E * log3(max3)
+					var min_log = Math.LOG10E * log2(min3)
+					var max_log = Math.LOG10E * log2(max3)
 					limits2.push(min3)
 					for (var i$12 = 1; i$12 < num3; i$12++) {
 						limits2.push(pow$1(10, min_log + (i$12 / num3) * (max_log - min_log)))
@@ -20386,10 +20383,7 @@ var InternalProjectSettings = import_typebox4.Type.Object({
 		})
 	),
 	experimental: import_typebox4.Type.Optional(
-		import_typebox4.Type.Record(import_typebox4.Type.String(), import_typebox4.Type.Literal(true), {
-			title: "Experimental settings",
-			description: "Experimental settings that are used for product development.",
-		})
+		import_typebox4.Type.Record(import_typebox4.Type.String(), import_typebox4.Type.Literal(true))
 	),
 })
 var ExternalProjectSettings = import_typebox4.Type.Record(
@@ -20673,15 +20667,8 @@ function createDedent(options) {
 	}
 }
 
-// ../sdk/dist/persistence/plugin.js
-init_dist()
-var import_debug = __toESM(require_browser(), 1)
-var debug = (0, import_debug.default)("sdk:persistence")
-
 // ../sdk/dist/resolve-modules/plugins/resolvePlugins.js
 var import_compiler = __toESM(require_compiler2(), 1)
-var import_debug2 = __toESM(require_browser(), 1)
-var debug2 = (0, import_debug2.default)("sdk:resolvePlugins")
 var PluginCompiler = import_compiler.TypeCompiler.Compile(Plugin)
 
 // ../sdk/dist/resolve-modules/resolveModules.js
@@ -20700,8 +20687,8 @@ var import_compiler3 = __toESM(require_compiler2(), 1)
 var $KEYS = Symbol("track-keys")
 
 // ../sdk/dist/createMessageLintReportsQuery.js
-var import_debug3 = __toESM(require_browser(), 1)
-var debug3 = (0, import_debug3.default)("sdk:lintReports")
+var import_debug = __toESM(require_browser(), 1)
+var debug = (0, import_debug.default)("sdk:lintReports")
 
 // ../sdk/dist/createNodeishFsWithAbsolutePaths.js
 init_dist()
@@ -26115,9 +26102,9 @@ async function parseUploadPackResponse(stream) {
 				}
 				unshallows.push(oid)
 			} else if (line.startsWith("ACK")) {
-				const [, oid, status3] = line.split(" ")
-				acks.push({ oid, status: status3 })
-				if (!status3) done = true
+				const [, oid, status2] = line.split(" ")
+				acks.push({ oid, status: status2 })
+				if (!status2) done = true
 			} else if (line.startsWith("NAK")) {
 				nak = true
 				done = true
@@ -28638,14 +28625,14 @@ async function parseReceivePackResponse(packfile) {
 	result.refs = {}
 	for (const line2 of lines) {
 		if (line2.trim() === "") continue
-		const status3 = line2.slice(0, 2)
+		const status2 = line2.slice(0, 2)
 		const refAndMessage = line2.slice(3)
 		let space = refAndMessage.indexOf(" ")
 		if (space === -1) space = refAndMessage.length
 		const ref = refAndMessage.slice(0, space)
 		const error = refAndMessage.slice(space + 1)
 		result.refs[ref] = {
-			ok: status3 === "ok",
+			ok: status2 === "ok",
 			error,
 		}
 	}
@@ -29628,8 +29615,8 @@ async function updateIndex({
 	filepath,
 	oid,
 	mode,
-	add: add3,
-	remove: remove3,
+	add: add2,
+	remove: remove2,
 	force,
 }) {
 	try {
@@ -29637,7 +29624,7 @@ async function updateIndex({
 		assertParameter("gitdir", gitdir)
 		assertParameter("filepath", filepath)
 		const fs = new FileSystem(_fs)
-		if (remove3) {
+		if (remove2) {
 			return await GitIndexManager.acquire({ fs, gitdir, cache }, async function (index2) {
 				let fileStats2
 				if (!force) {
@@ -29667,7 +29654,7 @@ async function updateIndex({
 			}
 		}
 		return await GitIndexManager.acquire({ fs, gitdir, cache }, async function (index2) {
-			if (!add3 && !index2.has({ filepath })) {
+			if (!add2 && !index2.has({ filepath })) {
 				throw new NotFoundError(`file at "${filepath}" in index and "add" not set`)
 			}
 			let stats = {
@@ -30335,7 +30322,6 @@ init_dist()
 // ../../../lix/packages/client/dist/git/status-list.js
 var {
 	walk: walk2,
-	// _walk expects cache to always exist.
 	TREE: TREE2,
 	WORKDIR: WORKDIR2,
 	STAGE: STAGE2,
@@ -30349,19 +30335,18 @@ init_dist()
 init_dist()
 
 // ../sdk/dist/loadProject.js
-var import_debug4 = __toESM(require_browser(), 1)
-var debug4 = (0, import_debug4.default)("sdk:loadProject")
-var debugLock = (0, import_debug4.default)("sdk:lockfile")
+var import_debug2 = __toESM(require_browser(), 1)
+var debug2 = (0, import_debug2.default)("loadProject")
 var settingsCompiler = import_compiler3.TypeCompiler.Compile(ProjectSettings)
 
-// src/helper/checkRequired.ts
-var checkRequired = (schema2, property) => {
+// src/helper/checkOptional.ts
+var checkOptional = (schema2, property) => {
 	if (schema2 && schema2.required && schema2.required.includes(property)) {
 		return true
 	}
 	return false
 }
-var checkRequired_default = checkRequired
+var checkOptional_default = checkOptional
 
 // src/helper/overridePrimitiveColors.ts
 var import_chroma_js = __toESM(require_chroma(), 1)
@@ -30406,1798 +30391,6 @@ var getPalette = (unformattedColor) => {
 	return palette
 }
 var overridePrimitiveColors_default = overridePrimitiveColors
-
-// ../marketplace-registry/dist/registry.js
-var registry = [
-	{
-		uniqueID: "zu942ln6",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "app.inlang.badge",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/badge/assets/images/badge-icon.jpg",
-		gallery: [
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/badge-marketplace-cover.jpg",
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/badge-gallery/badge-gallery-image-1.jpg",
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/badge-gallery/badge-gallery-image-2.jpg",
-		],
-		displayName: {
-			en: "Translation status badge",
-		},
-		description: {
-			en: "Badge showing missing messages in your codebase. Perfect for your README.md file.",
-		},
-		pages: {
-			"/": "./inlang/source-code/badge/README.md",
-			"/changelog": "./inlang/source-code/badge/CHANGELOG.md",
-		},
-		keywords: [
-			"apps",
-			"badge",
-			"markdown",
-			"translation",
-			"status",
-			"lix",
-			"svelte",
-			"nextjs",
-			"astro",
-			"inlang",
-			"solid",
-		],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-		pricing: "Free",
-	},
-	{
-		uniqueID: "2qj2w8pu",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "app.inlang.cli",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/cli/assets/cli-icon.png",
-		gallery: [
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/cli-marketplace-cover.jpg",
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/cli-gallery/cli-gallery-image-1.jpg",
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/cli-gallery/cli-gallery-image-2.jpg",
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/cli-gallery/cli-gallery-image-3.jpg",
-		],
-		displayName: {
-			en: "CLI - Translation Automation",
-		},
-		description: {
-			en: "Command line interface for inlang projects. Many commands and the possibility to do translation automation.",
-		},
-		pages: {
-			"/": "./inlang/source-code/cli/README.md",
-			"/changelog": "./inlang/source-code/cli/CHANGELOG.md",
-		},
-		keywords: [
-			"cli",
-			"commands",
-			"application",
-			"website",
-			"developer",
-			"ai",
-			"ci/cd",
-			"lix",
-			"svelte",
-			"nextjs",
-			"astro",
-			"remix",
-			"inlang",
-			"solid",
-		],
-		pricing: "free",
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-	},
-	{
-		uniqueID: "tdozzpar",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "app.inlang.finkLocalizationEditor",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/new-fink-logo.png",
-		gallery: [
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/editor-marketplace-cover.jpg",
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/editor-gallery/editor-gallery-image-1.jpg",
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/editor-gallery/editor-gallery-image-2.jpg",
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/editor-gallery/editor-gallery-image-3.jpg",
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/editor-gallery/editor-gallery-image-4.jpg",
-		],
-		displayName: {
-			en: "Fink \u2013 Localization Editor",
-		},
-		description: {
-			en: "Your translation workflow with no-code setup and repository-based operation \u2014 the ideal i18n solution for translators.",
-		},
-		pages: {
-			"/": "./inlang/source-code/editor/README.md",
-		},
-		keywords: [
-			"editor",
-			"web",
-			"apps",
-			"website",
-			"translator",
-			"lix",
-			"fink",
-			"inlang",
-			"astro",
-			"remix",
-			"nextjs",
-			"svelte",
-			"solid",
-		],
-		recommends: ["m/3gk8n4n4", "m/gerre34r", "m/reootnfj", "m/4cxm3eqi"],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		website: "https://fink.inlang.com/",
-		license: "Apache-2.0",
-		pricing: "Free Beta",
-	},
-	{
-		uniqueID: "92fst3wd",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "app.inlang.globelens",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/globelens/assets/GlobeLens-logo.png",
-		gallery: [
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/globelens/assets/GlobeLens-01.png",
-		],
-		displayName: {
-			en: "GlobeLens \u2013 i18n SEO Analysis",
-		},
-		description: {
-			en: "Check how your pages perform in different markets. GlobeLens is a tool for international SEO analysis.",
-		},
-		pages: {
-			"/": "./inlang/source-code/globelens/README.md",
-		},
-		keywords: ["analysis", "i18n", "apps", "seo", "test", "url", "keyword"],
-		pricing: "FREE BETA",
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-	},
-	{
-		uniqueID: "r7kp499g",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "app.inlang.ideExtension",
-		gallery: [
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/vscode_extension-marketplace-cover.jpg",
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/vscode_extension-gallery/vscode_extension-gallery-image-1.jpg",
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/vscode_extension-gallery/vscode_extension-gallery-image-2.jpg",
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/vscode_extension-gallery/vscode_extension-gallery-image-3.jpg",
-		],
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/ide-extension/assets/sherlock-logo.png",
-		displayName: {
-			en: "Sherlock - VS Code extension",
-		},
-		description: {
-			en: "Visualize, edit & lint translated strings at a glance via Inline Decorations & Hover Support, and extract new strings with a single click.",
-		},
-		pages: {
-			"/": "./inlang/source-code/ide-extension/MARKETPLACE.md",
-			"/changelog": "./inlang/source-code/ide-extension/CHANGELOG.md",
-		},
-		keywords: [
-			"apps",
-			"website",
-			"developer",
-			"vscode",
-			"ide",
-			"extension",
-			"lix",
-			"Sherlock",
-			"inspector",
-			"svelte",
-			"nextjs",
-			"remix",
-			"astro",
-			"inlang",
-			"solid",
-		],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-		pricing: "Free",
-	},
-	{
-		uniqueID: "3gk8n4n4",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "app.inlang.ninjaI18nAction",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/github-lint-action/assets/ninja-logo.png",
-		gallery: [],
-		displayName: {
-			en: "Ninja i18n - GitHub Lint Action",
-		},
-		description: {
-			en: "This action checks for translation issues within your PRs.",
-		},
-		pages: {
-			"/": "./inlang/source-code/github-lint-action/MARKETPLACE.md",
-			"/changelog": "./inlang/source-code/github-lint-action/CHANGELOG.md",
-		},
-		keywords: [
-			"developer",
-			"ci/cd",
-			"github",
-			"lint",
-			"action",
-			"application",
-			"website",
-			"translation",
-			"localization",
-			"i18n",
-			"inlang",
-		],
-		recommends: ["g/ssryldhd", "g/6ddyhpoi", "m/r7kp499g", "m/tdozzpar"],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		website: "https://github.com/marketplace/actions/ninja-i18n",
-		license: "Apache-2.0",
-		pricing: "Free",
-	},
-	{
-		uniqueID: "0023fsjj",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "app.lokalise.i18nally",
-		icon: "https://avatars.githubusercontent.com/u/14294501?s=200&v=4",
-		gallery: [
-			"https://github.com/lokalise/i18n-ally/blob/main/screenshots/full-logo-new.png?raw=true",
-		],
-		displayName: {
-			en: "i18n ally",
-		},
-		description: {
-			en: "\u{1F30D} All in one i18n extension for VS Code",
-		},
-		readme: {
-			en: "./inlang/external-projects/i18n-ally/README.md",
-		},
-		keywords: [
-			"apps",
-			"i18n-ally",
-			"i18n ally",
-			"vs-code",
-			"ide-extension",
-			"javascript",
-			"developer",
-			"i18n",
-			"external",
-		],
-		recommends: ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g"],
-		pricing: "free",
-		publisherName: "lokalise",
-		publisherIcon: "https://avatars.githubusercontent.com/u/14294501?s=200&v=4",
-		website: "https://marketplace.visualstudio.com/items?itemName=lokalise.i18n-ally",
-		license: "MIT License",
-	},
-	{
-		uniqueID: "gkrpgoir",
-		id: "app.parrot.figmaPlugin",
-		icon: "https://cdn.jsdelivr.net/gh/parrot-global/parrot@main/parrot-logo.svg",
-		gallery: [
-			"https://cdn.jsdelivr.net/gh/parrot-global/parrot@main/cover.png",
-			"https://cdn.jsdelivr.net/gh/parrot-global/parrot@main/layers.png",
-			"https://cdn.jsdelivr.net/gh/parrot-global/parrot@main/messages.png",
-		],
-		displayName: {
-			en: "Parrot \u2013 i18n Figma plugin",
-		},
-		description: {
-			en: "Parrot simplifies the translation management process right within Figma. If you deal with multilingual design projects and want to streamline your translation workflow, this plugin is for you!",
-		},
-		readme: {
-			en: "https://cdn.jsdelivr.net/gh/parrot-global/parrot@latest/README.md",
-		},
-		keywords: ["editor", "web", "figma", "application", "website", "translator", "lix"],
-		publisherName: "Parrot.global",
-		publisherIcon: "https://cdn.jsdelivr.net/gh/parrot-global/parrot@main/parrot-logo.svg",
-		license: "PolyForm Strict License 1.0.0",
-	},
-	{
-		uniqueID: "1153khjh",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "app.tolgee.tolgee-platform",
-		gallery: [
-			"https://user-images.githubusercontent.com/18496315/188632536-3547fd70-755c-4a32-9b1e-fb1afbf84b33.png",
-		],
-		icon: "https://user-images.githubusercontent.com/18496315/188628892-33fcc282-26f1-4035-8105-95952bd93de9.svg",
-		displayName: {
-			en: "Tolgee",
-		},
-		description: {
-			en: "An open-source localization platform developers enjoy to work with.",
-		},
-		readme: {
-			en: "./inlang/external-projects/tolgee/README.md",
-		},
-		keywords: ["apps", "tolgee", "editor", "messages", "translator", "external"],
-		recommends: ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g"],
-		pricing: "start free",
-		publisherName: "tolgee",
-		publisherIcon:
-			"https://user-images.githubusercontent.com/18496315/188628892-33fcc282-26f1-4035-8105-95952bd93de9.svg",
-		license: "Apache-2.0",
-	},
-	{
-		uniqueID: "940fn8mg",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "guide.floriankiem.i18nMistakes",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/i18n-mistakes/assets/computer-icon.jpg",
-		displayName: {
-			en: "Localization Mistakes and How to Avoid Them when Internationalizing (i18n) your App",
-		},
-		description: {
-			en: "This guide will help you avoid common mistakes when localizing your app. It will also help you understand the importance of localization and how to do it right.",
-		},
-		readme: {
-			en: "./inlang/guides/i18n-mistakes/i18n-mistakes.md",
-		},
-		keywords: [
-			"i18n",
-			"mistakes",
-			"error",
-			"not working",
-			"how to",
-			"avoid",
-			"localization",
-			"globalization",
-			"internationalization",
-			"guide",
-			"guides-i18n",
-		],
-		recommends: ["g/38fnf03n", "m/3i8bor92", "g/3go4f04m", "g/6ddyhpoi"],
-		publisherName: "Florian Kiem",
-		publisherIcon: "https://avatars.githubusercontent.com/u/92092993?v=4",
-		license: "Apache-2.0",
-	},
-	{
-		uniqueID: "38fnf03n",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "guide.floriankiem.localizationStrategy",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/localization-strategy/assets/pin-icon.jpg",
-		displayName: {
-			en: "Localization Strategy: Best Practices for SEO and Global Ranking",
-		},
-		description: {
-			en: "Learn how to avoid common pitfalls and implement best practices in app localization with this comprehensive guide. Discover practical tips to enhance your global ranking and ensure a successful localization strategy.",
-		},
-		readme: {
-			en: "./inlang/guides/localization-strategy/localization-strategy.md",
-		},
-		keywords: [
-			"i18n",
-			"localization",
-			"l10n",
-			"strategy",
-			"how to do localization",
-			"how to do i18n",
-			"how to do l10n",
-			"globalization",
-			"internationalization",
-			"guide",
-			"localization guide",
-			"guides-i18n",
-		],
-		recommends: ["g/940fn8mg", "g/3go4f04m", "g/6ddyhpoi"],
-		publisherName: "Florian Kiem",
-		publisherIcon: "https://avatars.githubusercontent.com/u/92092993?v=4",
-		license: "Apache-2.0",
-	},
-	{
-		uniqueID: "94ng94n4",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "guide.inlang.buildOwnApp",
-		displayName: {
-			en: "How to build an inlang app",
-		},
-		description: {
-			en: "This guide gives you an introduction on how to build your own inlang app.",
-		},
-		readme: {
-			en: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/how-to-inlang-app/how-to-inlang-app.md",
-		},
-		keywords: ["app", "build", "applicaton", "website", "guides-general"],
-		publisherName: "Felix H\xE4berle",
-		publisherIcon: "https://avatars.githubusercontent.com/u/34959078?v=4",
-		license: "Apache-2.0",
-	},
-	{
-		uniqueID: "pposhsfh",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "guide.kevinccbsg.useParaglideJsWithRemix",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/external-projects/remix-paraglidejs/assets/remix.svg",
-		displayName: {
-			en: "Use ParaglideJS with Remix",
-		},
-		description: {
-			en: "This guide covers how to integrate ParaglideJS into a Remix project.",
-		},
-		readme: {
-			en: "./inlang/guides/use-paraglide-with-remix/use-paraglide-with-remix.md",
-		},
-		keywords: [
-			"application",
-			"developer",
-			"paraglide",
-			"i18n",
-			"library",
-			"localization",
-			"sdk",
-			"sdk-js",
-			"react",
-			"build",
-			"javascript",
-			"ide",
-			"guide",
-			"remix",
-			"react",
-			"i18n routing",
-			"guides-developer",
-		],
-		recommends: ["m/fnhuwzrx", "m/gerre34r", "m/r7kp499g"],
-		publisherName: "Kevin Mart\xEDnez",
-		publisherIcon: "https://avatars.githubusercontent.com/u/12685053?v=4",
-		publisherLink: "https://github.com/BRIKEV",
-		license: "Apache-2.0",
-	},
-	{
-		uniqueID: "utqgkmzp",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "guide.lorissigrist.buildAGlobalAstroApp",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/build-an-internationalized-astro-app-using-paraglide/icon.svg",
-		displayName: {
-			en: "Build an internationalized Astro App using Paraglide",
-		},
-		description: {
-			en: "Learn how to set up Paraglide in an Astro project.",
-		},
-		readme: {
-			en: "./inlang/guides/build-an-internationalized-astro-app-using-paraglide/build-an-internationalized-astro-app-using-paraglide.md",
-		},
-		keywords: [
-			"libraries",
-			"developer",
-			"paraglide",
-			"i18n",
-			"internationalization",
-			"astro",
-			"astro.build",
-			"library",
-			"localization",
-			"sdk",
-			"sdk-js",
-			"javascript",
-			"typescript",
-			"ide",
-			"guide",
-			"guides-developer",
-		],
-		recommends: ["g/3go4f04m", "g/00162hsd", "g/38fnf03n"],
-		publisherName: "LorisSigrist",
-		publisherIcon: "https://avatars.githubusercontent.com/u/43482866?v=4",
-		publisherLink: "https://github.com/LorisSigrist",
-		license: "Apache-2.0",
-	},
-	{
-		uniqueID: "lubhdyua",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "guide.lorissigrist.buildAGlobalSolidStartApp",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/build-a-global-solidstart-app/icon.png",
-		displayName: {
-			en: "Build a Global SolidStart App",
-		},
-		description: {
-			en: "A complete guide on how to adopt inlang with paraglide.js and message-format-plugin in your SolidStart project.",
-		},
-		readme: {
-			en: "./inlang/guides/build-a-global-solidstart-app/build-a-global-solidstart-app.md",
-		},
-		keywords: [
-			"libraries",
-			"developer",
-			"paraglide",
-			"i18n",
-			"library",
-			"localization",
-			"sdk",
-			"sdk-js",
-			"solid",
-			"solidstart",
-			"javascript",
-			"ide",
-			"guide",
-			"guides-developer",
-		],
-		recommends: ["g/3go4f04m", "g/00162hsd", "g/38fnf03n"],
-		publisherName: "LorisSigrist",
-		publisherIcon: "https://avatars.githubusercontent.com/u/43482866?v=4",
-		publisherLink: "https://github.com/LorisSigrist",
-		license: "Apache-2.0",
-	},
-	{
-		uniqueID: "mqlyfa7l",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "guide.lorissigrist.dontlazyload",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/dont-lazy-load/assets/icon.png",
-		gallery: [
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/dont-lazy-load/assets/thumbnail.png",
-		],
-		displayName: {
-			en: "Don't Lazy-Load Translations",
-		},
-		description: {
-			en: "Lazy-loading translations can seriously hurt your web-vitals. Here is what to do instead.",
-		},
-		readme: {
-			en: "./inlang/guides/dont-lazy-load/README.md",
-		},
-		keywords: [
-			"i18n",
-			"l10n",
-			"developer",
-			"contribute",
-			"localization",
-			"globalization",
-			"internationalization",
-			"guide",
-			"ecosystem",
-			"compatible",
-			"ecosystem compatible",
-			"astro",
-			"remix",
-			"vue",
-			"angular",
-			"flutter",
-			"guides-general",
-			"guides-developer",
-		],
-		recommends: ["m/gerre34r", "g/00162hsd", "g/wxcebbig", "g/uxohikde"],
-		publisherName: "Loris Sigrist",
-		publisherIcon: "https://avatars.githubusercontent.com/u/43482866?v=4",
-		publisherLink: "https://github.com/LorisSigrist",
-		license: "Apache-2.0",
-	},
-	{
-		uniqueID: "wxcebbig",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "guide.lorissigrist.useParaglideJsWithNextjsAppRouter",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/use-paraglide-with-nextjs-app-router/app-router-logo.png",
-		displayName: {
-			en: "Use ParaglideJS with the NextJS App Router",
-		},
-		description: {
-			en: "This guide covers how to integrate ParaglideJS into a NextJS project using the app router. It will cover server & client components, i18n routing and more!",
-		},
-		readme: {
-			en: "./inlang/guides/use-paraglide-with-nextjs-app-router/use-paraglide-with-nextjs-app-router.md",
-		},
-		keywords: [
-			"application",
-			"developer",
-			"paraglide",
-			"i18n",
-			"library",
-			"localization",
-			"sdk",
-			"sdk-js",
-			"react",
-			"build",
-			"javascript",
-			"ide",
-			"guide",
-			"next",
-			"nextjs",
-			"react",
-			"app router",
-			"server components",
-			"server component",
-			"RSC",
-			"client component",
-			"client components",
-			"i18n routing",
-			"guides-developer",
-		],
-		recommends: ["g/uxohikde", "g/2fg8ng94", "g/00162hsd"],
-		publisherName: "Loris Sigrist",
-		publisherIcon: "https://avatars.githubusercontent.com/u/43482866?v=4",
-		publisherLink: "https://github.com/LorisSigrist",
-		license: "Apache-2.0",
-	},
-	{
-		uniqueID: "uxohikde",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "guide.lorissigrist.useParaglideJsWithNextjsPagesRouter",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/use-paraglide-with-nextjs-pages-router/pages-router-logo.png",
-		displayName: {
-			en: "Use ParaglideJS with the NextJS Pages Router",
-		},
-		description: {
-			en: "This guide covers how to integrate ParaglideJS into a NextJS project using the pages router. It will cover i18n routing and SEO Pitfalls and more!",
-		},
-		readme: {
-			en: "./inlang/guides/use-paraglide-with-nextjs-pages-router/use-paraglide-with-nextjs-pages-router.md",
-		},
-		keywords: [
-			"application",
-			"developer",
-			"paraglide",
-			"i18n",
-			"library",
-			"localization",
-			"sdk",
-			"sdk-js",
-			"react",
-			"build",
-			"javascript",
-			"ide",
-			"guide",
-			"next",
-			"nextjs",
-			"react",
-			"pages router",
-			"i18n routing",
-			"guides-developer",
-		],
-		recommends: ["g/wxcebbig", "g/2fg8ng94", "g/00162hsd"],
-		publisherName: "Loris Sigrist",
-		publisherIcon: "https://avatars.githubusercontent.com/u/43482866?v=4",
-		publisherLink: "https://github.com/LorisSigrist",
-		license: "Apache-2.0",
-	},
-	{
-		uniqueID: "3go4f04m",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "guide.niklasbuchfink.whatIsInlang",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/what-is-inlang/question-mark-logo.webp",
-		displayName: {
-			en: "What is inlang?",
-		},
-		description: {
-			en: "Understand general concept of inlang ecosystem and its benefits.",
-		},
-		readme: {
-			en: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/what-is-inlang/what-is-inlang.md",
-		},
-		keywords: [
-			"application",
-			"website",
-			"developer",
-			"translator",
-			"inlang",
-			"getting-started",
-			"i18n",
-			"localization",
-			"guide",
-			"guides-general",
-		],
-		recommends: ["g/00162hsd", "g/6ddyhpoi", "g/38fnf03n"],
-		publisherName: "Niklas Buchfink",
-		publisherIcon: "https://avatars.githubusercontent.com/u/59048346?v=4",
-		license: "Apache-2.0",
-	},
-	{
-		uniqueID: "ssryldhd",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "guide.nilsjacobsen.automationSystem",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/translation-automation/assets/logo.png",
-		displayName: {
-			en: "Translation Automation",
-		},
-		description: {
-			en: "How can you achieve continuous translation?",
-		},
-		readme: {
-			en: "./inlang/guides/translation-automation/README.md",
-		},
-		keywords: [
-			"i18n",
-			"developer",
-			"translator",
-			"designer",
-			"editor",
-			"contribute",
-			"localization",
-			"globalization",
-			"internationalization",
-			"guide",
-			"ecosystem",
-			"compatible",
-			"ecosystem compatible",
-			"automation",
-			"system",
-			"cli",
-			"ci/cd",
-			"build",
-			"test",
-			"svelte",
-			"astro",
-			"guides-change-control",
-		],
-		recommends: ["g/oostafhs", "g/38fnf03n", "g/940fn8mg", "g/3go4f04m"],
-		publisherName: "Nils Jacobsen",
-		publisherIcon: "https://avatars.githubusercontent.com/u/58360188?s=96&v=4",
-		publisherLink: "https://github.com/NilsJacobsen",
-		license: "Apache-2.0",
-	},
-	{
-		uniqueID: "2fg8ng94",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "guide.nilsjacobsen.buildAGlobalSvelteApp",
-		icon: "https://avatars.githubusercontent.com/u/23617963?s=200&v=4",
-		displayName: {
-			en: "Build a Global Svelte App",
-		},
-		description: {
-			en: "A complete guide on how to adopt inlang with paraglide.js and message-format-plugin",
-		},
-		readme: {
-			en: "./inlang/guides/build-a-global-svelte-app/build-a-global-svelte-app.md",
-		},
-		keywords: [
-			"libraries",
-			"developer",
-			"paraglide",
-			"i18n",
-			"library",
-			"localization",
-			"sdk",
-			"sdk-js",
-			"svelte",
-			"javascript",
-			"ide",
-			"guide",
-			"guides-developer",
-		],
-		recommends: ["g/3go4f04m", "g/00162hsd", "g/wxcebbig", "g/uxohikde"],
-		publisherName: "Nils Jacobsen",
-		publisherIcon: "https://avatars.githubusercontent.com/u/58360188?s=96&v=4",
-		publisherLink: "https://github.com/NilsJacobsen",
-		license: "Apache-2.0",
-	},
-	{
-		uniqueID: "6ddyhpoi",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "guide.nilsjacobsen.contributeTranslationsWithFink",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/contribute-translations-with-fink/bird-contribute.png?raw=true",
-		displayName: {
-			en: "Contribute Translations with Fink",
-		},
-		description: {
-			en: "You can create or improve community translations through the Fink i18n editor.",
-		},
-		readme: {
-			en: "./inlang/guides/contribute-translations-with-fink/README.md",
-		},
-		keywords: [
-			"i18n",
-			"fink",
-			"messages",
-			"translations",
-			"editor",
-			"contribute",
-			"localization",
-			"globalization",
-			"internationalization",
-			"guide",
-			"guides-translator",
-		],
-		recommends: ["g/2fg8ng94", "g/00162hsd", "g/wxcebbig", "g/uxohikde"],
-		publisherName: "Nils Jacobsen",
-		publisherIcon: "https://avatars.githubusercontent.com/u/58360188?s=96&v=4",
-		publisherLink: "https://github.com/NilsJacobsen",
-		license: "Apache-2.0",
-	},
-	{
-		uniqueID: "7777asdy",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "guide.nilsjacobsen.ecosystemCompatible",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/ecosystem-compatible/assets/compatible-badge.png",
-		displayName: {
-			en: "inlang ecosystem compatible",
-		},
-		description: {
-			en: "What does this term mean and why is the approach important?",
-		},
-		readme: {
-			en: "./inlang/guides/ecosystem-compatible/README.md",
-		},
-		keywords: [
-			"i18n",
-			"developer",
-			"translator",
-			"designer",
-			"editor",
-			"contribute",
-			"localization",
-			"globalization",
-			"internationalization",
-			"guide",
-			"ecosystem",
-			"compatible",
-			"ecosystem compatible",
-			"astro",
-			"nextjs",
-			"remix",
-			"svelte",
-			"guides-general",
-		],
-		recommends: ["g/2fg8ng94", "g/00162hsd", "g/wxcebbig", "g/uxohikde"],
-		publisherName: "Nils Jacobsen",
-		publisherLink: "https://github.com/NilsJacobsen",
-		publisherIcon: "https://avatars.githubusercontent.com/u/58360188?s=96&v=4",
-		license: "Apache-2.0",
-	},
-	{
-		uniqueID: "hhfueysj",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "guide.nilsjacobsen.nextIntlIdeExtension",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/next-intl-with-ide-extension/assets/iconv3.png",
-		displayName: {
-			en: "Setting Up next-intl with IDE Extension.",
-		},
-		description: {
-			en: "I'll walk you through the integration of the next-intl internationalization library with inlang's IDE extension.",
-		},
-		readme: {
-			en: "./inlang/guides/next-intl-with-ide-extension/README.md",
-		},
-		gallery: [
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/next-intl-with-ide-extension/assets/next-intl-guide.png",
-		],
-		keywords: [
-			"i18n",
-			"developer",
-			"translator",
-			"designer",
-			"editor",
-			"contribute",
-			"localization",
-			"globalization",
-			"internationalization",
-			"guide",
-			"ecosystem",
-			"compatible",
-			"ecosystem compatible",
-			"next-intl",
-			"vscode",
-			"ide-extension",
-			"guides-developer",
-		],
-		recommends: ["g/2fg8ng94", "g/00162hsd", "g/wxcebbig", "g/uxohikde"],
-		publisherName: "Nils Jacobsen",
-		publisherIcon: "https://avatars.githubusercontent.com/u/58360188?s=96&v=4",
-		publisherLink: "https://github.com/NilsJacobsen",
-		license: "Apache-2.0",
-	},
-	{
-		uniqueID: "oostafhs",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "guide.nilsjacobsen.reviewSystem",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/translation-review-system/assets/logo.png",
-		displayName: {
-			en: "Translation Review System",
-		},
-		description: {
-			en: "The aim of this system is to meet specific standards for translations.",
-		},
-		readme: {
-			en: "./inlang/guides/translation-review-system/README.md",
-		},
-		keywords: [
-			"i18n",
-			"developer",
-			"translator",
-			"designer",
-			"editor",
-			"contribute",
-			"localization",
-			"globalization",
-			"internationalization",
-			"guide",
-			"ecosystem",
-			"compatible",
-			"ecosystem compatible",
-			"review",
-			"system",
-			"svelte",
-			"astro",
-			"guides-change-control",
-		],
-		recommends: ["g/ssryldhd", "g/38fnf03n", "g/940fn8mg", "g/3go4f04m"],
-		publisherName: "Nils Jacobsen",
-		publisherIcon: "https://avatars.githubusercontent.com/u/58360188?s=96&v=4",
-		publisherLink: "https://github.com/NilsJacobsen",
-		license: "Apache-2.0",
-	},
-	{
-		uniqueID: "00162hsd",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "guide.nilsjacobsen.whatArePlugins",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/what-are-plugins/electric-plug-logo.webp",
-		displayName: {
-			en: "What are Plugins?",
-		},
-		description: {
-			en: "Discover the benefits of using plugins: freedom and low-cost adoption.",
-		},
-		readme: {
-			en: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/what-are-plugins/what-are-plugins.md",
-		},
-		keywords: [
-			"application",
-			"website",
-			"inlang",
-			"getting-started",
-			"guide",
-			"plugins",
-			"plugin",
-			"svelte",
-			"guides-developer",
-		],
-		recommends: ["g/2fg8ng94", "g/00162hsd", "g/wxcebbig", "g/uxohikde"],
-		publisherName: "Nils Jacobsen",
-		publisherIcon: "https://avatars.githubusercontent.com/u/58360188?s=96&v=4",
-		publisherLink: "https://github.com/NilsJacobsen",
-		license: "Apache-2.0",
-	},
-	{
-		uniqueID: "hheug211",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "library.amannn.nextintl",
-		icon: "https://emojis.wiki/thumbs/emojis/globe-with-meridians.webp",
-		gallery: ["https://github.com/amannn/next-intl/blob/main/media/logo.png?raw=true"],
-		displayName: {
-			en: "next-intl",
-		},
-		description: {
-			en: "Internationalization (i18n) for Next.js that gets out of your way.",
-		},
-		readme: {
-			en: "./inlang/external-projects/next-intl/README.md",
-		},
-		keywords: [
-			"libraries",
-			"next-intl",
-			"nextjs",
-			"next",
-			"react",
-			"developer",
-			"i18n",
-			"external",
-			"inlang",
-			"unlisted",
-		],
-		recommends: ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g"],
-		publisherName: "amannn",
-		publisherIcon: "https://avatars.githubusercontent.com/u/4038316?v=4",
-		website: "https://next-intl-docs.vercel.app",
-		license: "MIT License",
-	},
-	{
-		uniqueID: "fnhuwzrx",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "library.brikev.remix-paraglidejs",
-		slug: "paraglide-remix-i18n",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/external-projects/remix-paraglidejs/assets/remix.svg",
-		displayName: {
-			en: "Remix-ParaglideJS",
-		},
-		description: {
-			en: "Remix utils and examples to work with ParaglideJS",
-		},
-		readme: {
-			en: "https://cdn.jsdelivr.net/gh/BRIKEV/remix-paraglidejs/README.md",
-		},
-		keywords: [
-			"libraries",
-			"remix",
-			"remix-run",
-			"react",
-			"developer",
-			"i18n",
-			"inlang",
-			"community",
-		],
-		recommends: ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g"],
-		publisherName: "BRIKEV",
-		publisherIcon: "https://avatars.githubusercontent.com/u/59850028?v=4",
-		publisherLink: "https://github.com/BRIKEV",
-		website: "https://github.com/BRIKEV/remix-paraglidejs",
-		license: "MIT License",
-		pricing: "Free",
-	},
-	{
-		uniqueID: "kl95463j",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "library.i18next.i18next",
-		icon: "https://avatars.githubusercontent.com/u/8546082?s=200&v=4",
-		gallery: [
-			"https://github.com/i18next/i18next/blob/master/assets/i18next-ecosystem.jpg?raw=true",
-		],
-		displayName: {
-			en: "i18next library",
-		},
-		description: {
-			en: "learn once - translate everywhere",
-		},
-		readme: {
-			en: "./inlang/external-projects/i18next/README.md",
-		},
-		keywords: [
-			"libraries",
-			"i18next",
-			"javascript",
-			"developer",
-			"i18n",
-			"external",
-			"inlang",
-			"unlisted",
-		],
-		recommends: ["m/3i8bor92", "m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g"],
-		publisherName: "i18next",
-		publisherIcon: "https://avatars.githubusercontent.com/u/8546082?s=200&v=4",
-		website: "https://www.i18next.com",
-		license: "MIT License",
-	},
-	{
-		uniqueID: "8y8sxj09",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "library.inlang.languageTag",
-		icon: "https://images.emojiterra.com/google/android-12l/512px/1f4db.png",
-		displayName: {
-			en: "Language Tag",
-		},
-		description: {
-			en: "A library containing BCP-47 language tags types and validators, used by inlang.",
-		},
-		pages: {
-			"/": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/versioned-interfaces/language-tag/README.md",
-		},
-		keywords: [
-			"libraries",
-			"website",
-			"developer",
-			"lang",
-			"language tag",
-			"bcp-47",
-			"validator",
-			"interface",
-			"types",
-			"typescript",
-			"library",
-			"unlisted",
-		],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-	},
-	{
-		uniqueID: "gerre34r",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "library.inlang.paraglideJs",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/paraglideNoBg.png",
-		gallery: [
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-js/assets/og.png",
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-1.jpg",
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-2.jpg",
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-3.jpg",
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/paraglide-gallery/paraglide-gallery-image-4.jpg",
-		],
-		displayName: {
-			en: "Paraglide JS",
-		},
-		description: {
-			en: "Simple, adaptable and tiny i18n library that integrates with any framework",
-		},
-		pages: {
-			"/": "./inlang/source-code/paraglide/paraglide-js/README.md",
-			"/changelog": "./inlang/source-code/paraglide/paraglide-js/CHANGELOG.md",
-		},
-		keywords: [
-			"paraglide js",
-			"libraries",
-			"apps",
-			"website",
-			"developer",
-			"paraglide",
-			"i18n",
-			"library",
-			"localization",
-			"sdk",
-			"sdk-js",
-			"svelte",
-			"react",
-			"nextjs",
-			"remix",
-			"vue",
-			"astro",
-			"javascript",
-			"solid",
-			"typescript",
-		],
-		recommends: ["m/reootnfj", "m/632iow21", "m/r7kp499g", "m/teldgniy"],
-		pricing: "free",
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-	},
-	{
-		uniqueID: "iljlwzfs",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "library.inlang.paraglideJsAdapterAstro",
-		slug: "paraglide-astro-i18n",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-astro/assets/icon.svg",
-		gallery: [
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-astro/assets/og.png",
-		],
-		displayName: {
-			en: "Paraglide-Astro",
-		},
-		description: {
-			en: "An Astro integration for ParaglideJS, providing you with everything you need to internationalize your Astro App",
-		},
-		pages: {
-			"/": "./inlang/source-code/paraglide/paraglide-astro/README.md",
-			"/changelog": "./inlang/source-code/paraglide/paraglide-astro/CHANGELOG.md",
-		},
-		keywords: [
-			"paraglide js",
-			"libraries",
-			"website",
-			"developer",
-			"paraglide",
-			"i18n",
-			"library",
-			"localization",
-			"sdk",
-			"sdk-js",
-			"astro",
-			"astro integration",
-			"islands",
-			"vite",
-			"javascript",
-			"typescript",
-		],
-		recommends: ["m/reootnfj", "m/632iow21", "m/r7kp499g", "m/teldgniy"],
-		pricing: "free",
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-	},
-	{
-		uniqueID: "osslbuzt",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "library.inlang.paraglideJsAdapterNextJs",
-		slug: "paraglide-next-i18n",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-next/assets/next-logo.svg",
-		gallery: [
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-next/assets/og.png",
-		],
-		displayName: {
-			en: "Paraglide-Next",
-		},
-		description: {
-			en: "A NextJS integration for ParaglideJS, providing you with everything you need for i18n routing",
-		},
-		pages: {
-			"/": "./inlang/source-code/paraglide/paraglide-next/README.md",
-			"/changelog": "./inlang/source-code/paraglide/paraglide-next/CHANGELOG.md",
-		},
-		keywords: [
-			"paraglide js",
-			"libraries",
-			"website",
-			"developer",
-			"paraglide",
-			"i18n",
-			"library",
-			"localization",
-			"sdk",
-			"sdk-js",
-			"next",
-			"next-js",
-			"react",
-			"vercel",
-			"vite",
-			"javascript",
-			"typescript",
-			"inlang",
-		],
-		recommends: ["m/reootnfj", "m/632iow21", "m/r7kp499g", "m/teldgniy"],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-		pricing: "Free",
-	},
-	{
-		uniqueID: "n860p17j",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "library.inlang.paraglideJsAdapterSolidStart",
-		slug: "paraglide-solidstart-i18n",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-solidstart/assets/icon.png",
-		displayName: {
-			en: "Paraglide-SolidStart",
-		},
-		description: {
-			en: "A SolidStart integration for ParaglideJS, providing you with everything you need to take your solid app global.",
-		},
-		gallery: [
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-solidstart/assets/og.png",
-		],
-		pages: {
-			"/": "./inlang/source-code/paraglide/paraglide-solidstart/README.md",
-			"/changelog": "./inlang/source-code/paraglide/paraglide-solidstart/CHANGELOG.md",
-		},
-		keywords: [
-			"paraglide js",
-			"libraries",
-			"website",
-			"developer",
-			"paraglide",
-			"i18n",
-			"library",
-			"localization",
-			"sdk",
-			"sdk-js",
-			"solid",
-			"solid-start",
-			"javascript",
-			"typescript",
-		],
-		recommends: ["m/reootnfj", "m/632iow21", "m/r7kp499g", "m/teldgniy"],
-		pricing: "free",
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-	},
-	{
-		uniqueID: "dxnzrydw",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "library.inlang.paraglideJsAdapterSvelteKit",
-		slug: "paraglide-sveltekit-i18n",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-sveltekit/assets/icon.png",
-		gallery: [
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-sveltekit/assets/og.png",
-		],
-		displayName: {
-			en: "Paraglide-SvelteKit",
-		},
-		description: {
-			en: "A SvelteKit integration for ParaglideJS, providing you with everything you need for i18n routing",
-		},
-		pages: {
-			"/": "./inlang/source-code/paraglide/paraglide-sveltekit/README.md",
-			"/changelog": "./inlang/source-code/paraglide/paraglide-sveltekit/CHANGELOG.md",
-		},
-		keywords: [
-			"paraglide js",
-			"libraries",
-			"website",
-			"developer",
-			"paraglide",
-			"i18n",
-			"library",
-			"localization",
-			"sdk",
-			"sdk-js",
-			"svelte",
-			"sveltekit",
-			"vite",
-			"javascript",
-			"typescript",
-			"inlang",
-		],
-		recommends: ["m/reootnfj", "m/632iow21", "m/r7kp499g", "m/teldgniy"],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-		pricing: "Free",
-	},
-	{
-		uniqueID: "ezdlll4o",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "library.inlang.translatable",
-		icon: "https://images.emojiterra.com/google/noto-emoji/unicode-15/color/svg/1f310.svg",
-		displayName: {
-			en: "Translatable",
-		},
-		description: {
-			en: "This library allows you to add translation logic to your application without having to rewrite large parts.",
-		},
-		pages: {
-			"/": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/versioned-interfaces/translatable/README.md",
-		},
-		keywords: [
-			"libraries",
-			"website",
-			"developer",
-			"translatable",
-			"adoptable",
-			"interface",
-			"types",
-			"typescript",
-			"library",
-			"unlisted",
-		],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-	},
-	{
-		uniqueID: "kkfjusgu",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "library.kaisermann.svelte-i18n",
-		icon: "https://avatars.githubusercontent.com/u/23617963?s=200&v=4",
-		gallery: ["https://avatars.githubusercontent.com/u/23617963?s=200&v=4"],
-		displayName: {
-			en: "svelte-i18n",
-		},
-		description: {
-			en: "Internationalization library for Svelte",
-		},
-		readme: {
-			en: "./inlang/external-projects/svelte-i18n/README.md",
-		},
-		keywords: ["libraries", "developer", "i18n", "external", "unlisted"],
-		recommends: ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g", "m/gerre34r"],
-		publisherName: "kaisermann",
-		publisherIcon: "https://avatars.githubusercontent.com/u/12702016?v=4",
-		website: "https://github.com/kaisermann/svelte-i18n",
-		license: "MIT License",
-	},
-	{
-		uniqueID: "29dg63g3",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "library.kazupon.vuei18n",
-		icon: "https://raw.githubusercontent.com/kazupon/vue-i18n/ca513046480ecdb4565072a3b38ec0e2643f43e3/assets/vue-i18n-logo.svg",
-		gallery: [
-			"https://raw.githubusercontent.com/kazupon/vue-i18n/ca513046480ecdb4565072a3b38ec0e2643f43e3/assets/vue-i18n-logo.svg",
-		],
-		displayName: {
-			en: "Vue I18n",
-		},
-		description: {
-			en: "Vue I18n is internationalization plugin for Vue.js",
-		},
-		readme: {
-			en: "./inlang/external-projects/vue-i18n/README.md",
-		},
-		keywords: [
-			"libraries",
-			"vue-i18n",
-			"vue",
-			"javascript",
-			"developer",
-			"i18n",
-			"external",
-			"unlisted",
-		],
-		recommends: ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g", "m/gerre34r"],
-		publisherName: "kazupon",
-		publisherIcon: "https://avatars.githubusercontent.com/u/72989?v=4",
-		website: "https://kazupon.github.io/vue-i18n",
-		license: "MIT License",
-	},
-	{
-		uniqueID: "j8f8f832",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "library.QuiiBz.nextinternational",
-		icon: "https://github.com/QuiiBz/next-international/blob/main/assets/logo-black.png?raw=true",
-		gallery: [
-			"https://github.com/QuiiBz/next-international/blob/main/assets/logo-black.png?raw=true",
-		],
-		displayName: {
-			en: "next-international",
-		},
-		description: {
-			en: "Type-safe internationalization (i18n) for Next.js",
-		},
-		readme: {
-			en: "./inlang/external-projects/next-international/README.md",
-		},
-		keywords: [
-			"libraries",
-			"nextjs",
-			"next",
-			"javascript",
-			"developer",
-			"i18n",
-			"external",
-			"unlisted",
-		],
-		recommends: ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g"],
-		publisherName: "QuiiBz",
-		publisherIcon: "https://avatars.githubusercontent.com/u/43268759?v=4",
-		website: "https://next-international.vercel.app",
-		license: "MIT License",
-	},
-	{
-		uniqueID: "ewkole66",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "messageLintRule.inlang.camelCaseId",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/message-lint-rules/camelCaseId/assets/icon.png",
-		gallery: [
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/camel_case_id-cover.jpg",
-		],
-		displayName: {
-			en: "Camel case id",
-		},
-		description: {
-			en: "Checks for messages to have a camel case formatted message id (e.g. 'myMessage').",
-		},
-		pages: {
-			"/": "./inlang/source-code/message-lint-rules/camelCaseId/README.md",
-			"/changelog": "./inlang/source-code/message-lint-rules/camelCaseId/CHANGELOG.md",
-		},
-		keywords: ["message", "lint rule", "id", "format", "camel", "case", "website"],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-		module:
-			"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-camel-case-id@latest/dist/index.js",
-	},
-	{
-		uniqueID: "y0eo8f66",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "messageLintRule.inlang.emptyPattern",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/message-lint-rules/emptyPattern/assets/icon.png",
-		gallery: [
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/empty_pattern-marketplace-cover.jpg",
-		],
-		displayName: {
-			en: "Empty pattern",
-		},
-		description: {
-			en: "Checks for empty pattern in a language tag. If a message exists in the reference resource but the pattern in a target resource is empty, it is likely that the message has not been translated yet.",
-		},
-		pages: {
-			"/": "./inlang/source-code/message-lint-rules/emptyPattern/README.md",
-			"/changelog": "./inlang/source-code/message-lint-rules/emptyPattern/CHANGELOG.md",
-		},
-		keywords: ["message", "lint rule", "empty pattern", "website"],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-		module:
-			"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js",
-	},
-	{
-		uniqueID: "asvuch18",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "messageLintRule.inlang.identicalPattern",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/message-lint-rules/identicalPattern/assets/icon.png",
-		gallery: [
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/identical_pattern-marketplace-cover.jpg",
-		],
-		displayName: {
-			en: "Identical pattern",
-		},
-		description: {
-			en: "Checks for identical patterns in different languages.  A message with identical wording in multiple languages can indicate that the translations are redundant or can be combined into a single message to reduce translation effort.",
-		},
-		pages: {
-			"/": "./inlang/source-code/message-lint-rules/identicalPattern/README.md",
-			"/changelog": "./inlang/source-code/message-lint-rules/identicalPattern/CHANGELOG.md",
-		},
-		keywords: ["message", "lint rule", "itentical pattern", "website"],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-		module:
-			"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-identical-pattern@latest/dist/index.js",
-	},
-	{
-		uniqueID: "10l6oyv1",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "messageLintRule.inlang.messageWithoutSource",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/message-lint-rules/messageWithoutSource/assets/icon.png",
-		gallery: [
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/without_source-marketplace-cover.jpg",
-		],
-		displayName: {
-			en: "Message without source",
-		},
-		description: {
-			en: "Checks for likely outdated messages.  A message with a missing source is usually an indication that the message (id) is no longer used in source code, but messages have not been updated accordingly.",
-		},
-		pages: {
-			"/": "./inlang/source-code/message-lint-rules/messageWithoutSource/README.md",
-			"/changelog": "./inlang/source-code/message-lint-rules/messageWithoutSource/CHANGELOG.md",
-		},
-		keywords: ["message", "lint rule", "source", "missing", "website"],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-		module:
-			"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-without-source@latest/dist/index.js",
-	},
-	{
-		uniqueID: "4cxm3eqi",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "messageLintRule.inlang.missingTranslation",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/message-lint-rules/missingTranslation/assets/icon.png",
-		gallery: [
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/missing_translation-marketplace-cover.jpg",
-		],
-		displayName: {
-			en: "Missing translation",
-		},
-		description: {
-			en: "Checks for missing variants for a specific languageTag.  If a variant exists for the sourceLanguageTag but is missing for a listed languageTag, it is likely that the message has not been translated for this languageTag yet.",
-		},
-		pages: {
-			"/": "./inlang/source-code/message-lint-rules/missingTranslation/README.md",
-			"/changelog": "./inlang/source-code/message-lint-rules/missingTranslation/CHANGELOG.md",
-		},
-		keywords: ["message", "lint rule", "missing", "website"],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-		module:
-			"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js",
-	},
-	{
-		uniqueID: "gkerinvo",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "messageLintRule.inlang.snakeCaseId",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/message-lint-rules/snakeCaseId/assets/icon.png",
-		gallery: [
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/snake_case_id-cover.jpg",
-		],
-		displayName: {
-			en: "Snake case id",
-		},
-		description: {
-			en: "Checks for messages to have a snake case formatted message id (e.g. 'my_message_id').",
-		},
-		pages: {
-			"/": "./inlang/source-code/message-lint-rules/snakeCaseId/README.md",
-			"/changelog": "./inlang/source-code/message-lint-rules/snakeCaseId/CHANGELOG.md",
-		},
-		keywords: ["message", "lint rule", "id", "format", "snake", "case", "website"],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-		module:
-			"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-snake-case-id@latest/dist/index.js",
-	},
-	{
-		uniqueID: "teldgniy",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "messageLintRule.inlang.validJsIdentifier",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/message-lint-rules/validJsIdentifier/assets/icon.png",
-		gallery: [
-			"https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/valid_js_identifier_id.jpg",
-		],
-		displayName: {
-			en: "Valid JS Identifier",
-		},
-		description: {
-			en: "Make sure that all message IDs are valid JavaScript identifiers.",
-		},
-		pages: {
-			"/": "./inlang/source-code/message-lint-rules/validJsIdentifier/README.md",
-			"/changelog": "./inlang/source-code/message-lint-rules/validJsIdentifier/CHANGELOG.md",
-		},
-		keywords: ["message", "lint rule", "javascript", "paraglide", "website"],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-		module:
-			"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-valid-js-identifier@latest/dist/index.js",
-	},
-	{
-		uniqueID: "3i8bor92",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "plugin.inlang.i18next",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/plugins/i18next/assets/icon.png",
-		displayName: {
-			en: "i18next",
-		},
-		description: {
-			en: "A plugin for inlang projects that works with i18next and reads + writes resources.",
-		},
-		pages: {
-			"/": "./inlang/source-code/plugins/i18next/README.md",
-			"/changelog": "./inlang/source-code/plugins/i18next/CHANGELOG.md",
-		},
-		keywords: [
-			"i18next",
-			"javascript",
-			"react",
-			"nextjs",
-			"website",
-			"load",
-			"save",
-			"import",
-			"export",
-			"messages",
-			"plugin",
-			"svelte",
-			"solid",
-			"astro",
-		],
-		recommends: ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g", "m/gerre34r"],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-		module: "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@latest/dist/index.js",
-	},
-	{
-		uniqueID: "ig84ng0o",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "plugin.inlang.json",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/plugins/json/assets/icon.png",
-		displayName: {
-			en: "JSON translation files",
-		},
-		description: {
-			en: "This plugin enables using JSON files for messages. It is not library specific and can be used with any framework.",
-		},
-		pages: {
-			"/": "./inlang/source-code/plugins/json/README.md",
-			"/changelog": "./inlang/source-code/plugins/json/CHANGELOG.md",
-		},
-		keywords: [
-			"json",
-			"flutter",
-			"generic",
-			"website",
-			"javascript",
-			"load",
-			"save",
-			"import",
-			"export",
-			"messages",
-			"plugin",
-			"svelte",
-			"nextjs",
-			"solid",
-			"astro",
-		],
-		recommends: ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g", "m/gerre34r"],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-		module: "https://cdn.jsdelivr.net/npm/@inlang/plugin-json@latest/dist/index.js",
-	},
-	{
-		uniqueID: "reootnfj",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "plugin.inlang.messageFormat",
-		displayName: {
-			en: "inlang message format",
-		},
-		description: {
-			en: "The simplest storage plugin for inlang.",
-		},
-		pages: {
-			"/": "./inlang/source-code/plugins/inlang-message-format/README.md",
-			"/changelog": "./inlang/source-code/plugins/inlang-message-format/CHANGELOG.md",
-		},
-		keywords: [
-			"website",
-			"svelte",
-			"react",
-			"nextjs",
-			"vue",
-			"javascript",
-			"storage",
-			"save",
-			"load",
-			"import",
-			"export",
-			"messages",
-			"plugin",
-			"solid",
-			"astro",
-		],
-		recommends: ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g", "m/gerre34r"],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-		module: "https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@latest/dist/index.js",
-	},
-	{
-		uniqueID: "632iow21",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "plugin.inlang.mFunctionMatcher",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/plugins/m-function-matcher/assets/m.png",
-		displayName: {
-			en: "m-function-matcher",
-		},
-		description: {
-			en: "Enables the inlang Visual Studio Code extension (Sherlock) to work with paraglide",
-		},
-		pages: {
-			"/": "./inlang/source-code/plugins/m-function-matcher/README.md",
-			"/changelog": "./inlang/source-code/plugins/m-function-matcher/CHANGELOG.md",
-		},
-		keywords: [
-			"website",
-			"vscode",
-			"react",
-			"nextjs",
-			"sveltekit",
-			"svelte",
-			"vue",
-			"plugin",
-			"solid",
-			"astro",
-		],
-		recommends: ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g", "m/gerre34r"],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-		module: "https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js",
-	},
-	{
-		uniqueID: "193hsyds",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "plugin.inlang.nextIntl",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/plugins/next-intl/assets/plugin-next-intl-logo.png",
-		displayName: {
-			en: "next-intl plugin",
-		},
-		description: {
-			en: "A plugin to make next-intl ecosystem compatible with inlang",
-		},
-		pages: {
-			"/": "./inlang/source-code/plugins/next-intl/README.md",
-			"/changelog": "./inlang/source-code/plugins/next-intl/CHANGELOG.md",
-		},
-		keywords: [
-			"next-intl",
-			"javascript",
-			"react",
-			"nextjs",
-			"website",
-			"load",
-			"save",
-			"import",
-			"export",
-			"messages",
-			"plugin",
-		],
-		recommends: ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g", "m/gerre34r"],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-		module: "https://cdn.jsdelivr.net/npm/@inlang/plugin-next-intl@latest/dist/index.js",
-	},
-	{
-		uniqueID: "698iow33",
-		$schema: "https://inlang.com/schema/marketplace-manifest",
-		id: "plugin.inlang.tFunctionMatcher",
-		icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/plugins/t-function-matcher/assets/t.png",
-		displayName: {
-			en: "t-function-matcher",
-		},
-		description: {
-			en: "Enables the inlang Visual Studio Code extension (Sherlock) to work with t-functions",
-		},
-		pages: {
-			"/": "./inlang/source-code/plugins/t-function-matcher/README.md",
-			"/changelog": "./inlang/source-code/plugins/t-function-matcher/CHANGELOG.md",
-		},
-		keywords: [
-			"website",
-			"vscode",
-			"react",
-			"nextjs",
-			"sveltekit",
-			"svelte",
-			"vue",
-			"plugin",
-			"solid",
-			"astro",
-		],
-		recommends: ["m/r7kp499g", "m/3i8bor92"],
-		publisherName: "inlang",
-		publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-		license: "Apache-2.0",
-		module: "https://cdn.jsdelivr.net/npm/@inlang/plugin-t-function-matcher@latest/dist/index.js",
-	},
-]
 
 // src/stories/field-header.ts
 var FieldHeader = class extends s3 {
@@ -32635,6 +30828,10 @@ LanguageTagsInput.styles = [
 			sl-tag::part(remove-button):hover {
 				color: var(--sl-input-color);
 			}
+			sl-button::part(base) {
+				background-color: var(--sl-color-neutral-500);
+				color: var(--sl-color-neutral-0);
+			}
 		`,
 ]
 __decorateClass([n4()], LanguageTagsInput.prototype, "property", 2)
@@ -32739,9 +30936,6 @@ ReferencePatternInput.styles = [
 			.new-line-container {
 				display: flex;
 				gap: 4px;
-			}
-			sl-input::part(input) {
-				width: inherit;
 			}
 		`,
 ]
@@ -32869,7 +31063,17 @@ var DefaultObjectInput = class extends s3 {
 	render() {
 		return x` <div part="property" class="property">
 			<field-header
-				.fieldTitle=${this.withTitle ? (this._title ? this._title : this.property) : void 0}
+				.fieldTitle=${JSON.stringify(() => {
+					if (this.withTitle) {
+						if (this._title) {
+							return this._title
+						} else {
+							return this.property
+						}
+					} else {
+						return void 0
+					}
+				})}
 				.description=${this.withDescription ? this._description : ``}
 				.optional=${this.required ? false : true}
 				exportparts="property-title, property-paragraph"
@@ -33017,9 +31221,6 @@ DefaultObjectInput.styles = [
 			.icon {
 				padding-top: 0.5rem;
 			}
-			sl-input::part(input) {
-				width: inherit;
-			}
 		`,
 ]
 __decorateClass([n4()], DefaultObjectInput.prototype, "property", 2)
@@ -33111,33 +31312,6 @@ var LintRuleLevelObjectInput = class extends s3 {
 												this.handleUpdate(module.id, e11.target.value)
 											}}
 										>
-											${
-												this.value[module.id] === "error"
-													? x`<svg
-														class="level-icon danger"
-														slot="prefix"
-														width="20"
-														height="20"
-														viewBox="0 0 24 24"
-												  >
-														<path
-															fill="currentColor"
-															d="M12 17q.425 0 .713-.288T13 16t-.288-.712T12 15t-.712.288T11 16t.288.713T12 17m0-4q.425 0 .713-.288T13 12V8q0-.425-.288-.712T12 7t-.712.288T11 8v4q0 .425.288.713T12 13m0 9q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m0-8"
-														/>
-												  </svg>`
-													: x`<svg
-														class="level-icon"
-														slot="prefix"
-														width="20"
-														height="20"
-														viewBox="0 0 24 24"
-												  >
-														<path
-															fill="currentColor"
-															d="M12 17q.425 0 .713-.288T13 16t-.288-.712T12 15t-.712.288T11 16t.288.713T12 17m0-4q.425 0 .713-.288T13 12V8q0-.425-.288-.712T12 7t-.712.288T11 8v4q0 .425.288.713T12 13m0 9q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m0-8"
-														/>
-												  </svg>`
-											}
 											${this._valueOptions?.map((option) => {
 												return x`<sl-option
 													exportparts="base:option"
@@ -33198,14 +31372,6 @@ LintRuleLevelObjectInput.styles = [
 			}
 			sl-select::part(base):hover {
 				border: var(--sl-input-placeholder-color);
-			}
-			.level-icon {
-				color: var(--sl-color-neutral-400);
-				margin-top: 1px;
-				margin-right: 6px;
-			}
-			.level-icon.danger {
-				color: var(--sl-color-danger-600);
 			}
 		`,
 ]
@@ -33848,7 +32014,7 @@ function unwatchIcon(icon) {
 	watchedIcons = watchedIcons.filter((el) => el !== icon)
 }
 function getIconLibrary(name) {
-	return registry2.find((lib) => lib.name === name)
+	return registry.find((lib) => lib.name === name)
 }
 
 // ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.QLXRCYS4.js
@@ -40361,39 +38527,18 @@ var InlangSettings = class extends s3 {
 	render() {
 		return x` <div class="container" part="base">
 			${Object.entries(this._settingProperties).map(([key, value]) => {
-				const item = registry.find((item2) => item2.id === value.meta?.id)
 				return value.schema?.properties && this._newSettings
 					? x`<div class="module-container" part="module">
 							${
 								value.meta &&
 								(value.meta?.displayName).en &&
-								item &&
-								x`<div>
-								<h2 part="module-title">
-									${value.meta && (value.meta?.displayName).en}
-								</h2>
-								<div class="module-link-container">
-									<svg width="24" height="24" fill="none" viewBox="0 0 24 24">
-										<path
-											fill="currentColor"
-											d="M11 17H7c-1.383 0-2.562-.488-3.537-1.463C2.488 14.562 2.001 13.383 2 12c0-1.383.487-2.562 1.463-3.537C4.439 7.488 5.618 7 7 7h4v2H7c-.833 0-1.542.292-2.125.875A2.893 2.893 0 004 12c0 .833.292 1.542.875 2.125A2.893 2.893 0 007 15h4v2zm-3-4v-2h8v2H8zm5 4v-2h4c.833 0 1.542-.292 2.125-.875A2.893 2.893 0 0020 12c0-.833-.292-1.542-.875-2.125A2.893 2.893 0 0017 9h-4V7h4c1.383 0 2.563.488 3.538 1.463.975.975 1.463 2.154 1.462 3.537 0 1.383-.488 2.562-1.463 3.538-.975.976-2.154 1.463-3.537 1.462h-4z"
-										></path>
-									</svg>
-									<a
-										target="_blank"
-										href=${`https://inlang.com/m/${item.uniqueID}/${item.id.replaceAll(".", "-")}`}
-										class="module-link"
-									>
-										${`https://inlang.com/.../${item.id.replaceAll(".", "-")}`}
-									</a>
-									<div class="module-type">
-										${value.meta.id.startsWith("plugin") ? "Plugin" : "Lint Rule"}
-									</div>
-								</div>
-							</div>`
+								x`<h2 part="module-title">
+								${value.meta && (value.meta?.displayName).en}
+							</h2>`
 							}
 							${Object.entries(value.schema.properties).map(([property, schema2]) => {
-								if (property === "$schema" || property === "modules") return void 0
+								if (property === "$schema" || property === "modules" || property === "experimental")
+									return void 0
 								return key === "internal"
 									? x`
 											<general-input
@@ -40546,7 +38691,6 @@ __decorateClass([r6()], InlangSettings.prototype, "_newSettings", 2)
 __decorateClass([r6()], InlangSettings.prototype, "_unsavedChanges", 2)
 InlangSettings = __decorateClass([t3("inlang-settings")], InlangSettings)
 export { InlangSettings }
-//! Do not edit this file manually. It is automatically generated based on the contents of the registry.json file.
 /*! Bundled license information:
 
 ieee754/index.js:

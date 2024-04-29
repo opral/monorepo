@@ -12,6 +12,7 @@ const settingsProperty = [
 	"editorColors.error.foreground",
 	"editorColors.error.background",
 	"editorColors.error.border",
+	"inlineAnnotations.enabled",
 ] as const
 
 type SettingsProperty = (typeof settingsProperty)[number]
