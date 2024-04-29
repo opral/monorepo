@@ -1,6 +1,5 @@
 import * as vscode from "vscode"
 import { updateSetting } from "../utilities/settings/index.js"
-import { CONFIGURATION } from "../configuration.js"
 
 export const toggleInlineAnnotationsCommand = {
 	command: "sherlock.toggleInlineAnnotations",
