@@ -1,0 +1,38 @@
+{
+	"name": "@inlang/importer",
+	"type": "module",
+	"version": "0.0.1",
+	"license": "Apache-2.0",
+	"private": "true",
+	"exports": {
+		".": "./dist/index.js"
+	},
+	"files": [
+		"./dist",
+		"./src"
+	],
+	"scripts": {
+		"build": "tsc --build",
+		"dev": "tsc --watch",
+		"test": "tsc --noEmit",
+		"lint": "eslint ./src --fix",
+		"format": "prettier ./src --write",
+		"clean": "rm -rf ./dist ./node_modules"
+	},
+	"dependencies": {
+		"@inlang/json-types": "workspace:*",
+		"@inlang/language-tag": "workspace:*",
+		"@inlang/message": "workspace:*",
+		"@inlang/sdk": "workspace:*",
+		"@inlang/project-settings": "workspace:*",
+		"@inlang/translatable": "workspace:*",
+		"@lix-js/fs": "workspace:*"
+	},
+	"peerDependencies": {
+		"@sinclair/typebox": "^0.31.17"
+	},
+	"devDependencies": {
+		"tsd": "^0.28.1",
+		"typescript": "5.2.2"
+	}
+}

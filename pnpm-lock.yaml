@@ -2474,6 +2474,40 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.30.4)(webdriverio@8.36.1(typescript@5.3.3))
 
+  inlang/source-code/versioned-interfaces/importer:
+    dependencies:
+      '@inlang/json-types':
+        specifier: workspace:*
+        version: link:../../json-types
+      '@inlang/language-tag':
+        specifier: workspace:*
+        version: link:../language-tag
+      '@inlang/message':
+        specifier: workspace:*
+        version: link:../message
+      '@inlang/project-settings':
+        specifier: workspace:*
+        version: link:../project-settings
+      '@inlang/sdk':
+        specifier: workspace:*
+        version: link:../../sdk
+      '@inlang/translatable':
+        specifier: workspace:*
+        version: link:../translatable
+      '@lix-js/fs':
+        specifier: workspace:*
+        version: link:../../../../lix/packages/fs
+      '@sinclair/typebox':
+        specifier: ^0.31.17
+        version: 0.31.28
+    devDependencies:
+      tsd:
+        specifier: ^0.28.1
+        version: 0.28.1
+      typescript:
+        specifier: 5.2.2
+        version: 5.2.2
+
   inlang/source-code/versioned-interfaces/language-tag:
     dependencies:
       '@sinclair/typebox':

@@ -1,17 +1,7 @@
-import type {
-	Declaration,
-	Expression,
-	FunctionAnnotation,
-	LanguageTag,
-	Message,
-	Pattern,
-	Plugin,
-	Translation,
-	Variant,
-} from "@inlang/sdk"
 import * as MF from "messageformat"
 import { displayName, description } from "../marketplace-manifest.json"
 import { PluginSettings } from "./settings.js"
+import { AST } from "@inlang/sdk"
 
 export const pluginId = "plugin.inlang.icu2MessageFormat"
 

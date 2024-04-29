@@ -1,15 +1,15 @@
 import { describe, it, expect } from "vitest"
 // import { parseLixUri, parseOrigin } from "./helpers.js"
-import { normalizeMessage, stringifyMessage } from "./helper.js"
-import type { Message } from "@inlang/message"
+import { normalizeMessageBundle, stringifyMessageBundle } from "./helper.js"
+import { MessageBundle } from "../ast.js"
 
-const unsortedMessageRaw: Message = {
+const unsortedMessageRaw: MessageBundle = {
 	alias: {},
-	inputs: [],
+	inputOrder: [],
 	id: "footer_categories_apps",
-	translations: [
+	messages: [
 		{
-			languageTag: "a",
+			locale: "a",
 			selectors: [],
 			declarations: [],
 			variants: [
@@ -26,7 +26,7 @@ const unsortedMessageRaw: Message = {
 			],
 		},
 		{
-			languageTag: "b",
+			locale: "b",
 			selectors: [],
 			declarations: [],
 			variants: [
@@ -37,7 +37,7 @@ const unsortedMessageRaw: Message = {
 			],
 		},
 		{
-			languageTag: "c",
+			locale: "c",
 			selectors: [],
 			declarations: [],
 			variants: [
@@ -48,7 +48,7 @@ const unsortedMessageRaw: Message = {
 			],
 		},
 		{
-			languageTag: "d",
+			locale: "d",
 			selectors: [],
 			declarations: [],
 			variants: [
@@ -59,7 +59,7 @@ const unsortedMessageRaw: Message = {
 			],
 		},
 		{
-			languageTag: "e",
+			locale: "e",
 			selectors: [],
 			declarations: [],
 			variants: [
@@ -70,7 +70,7 @@ const unsortedMessageRaw: Message = {
 			],
 		},
 		{
-			languageTag: "f",
+			locale: "f",
 			selectors: [],
 			declarations: [],
 			variants: [
@@ -81,7 +81,7 @@ const unsortedMessageRaw: Message = {
 			],
 		},
 		{
-			languageTag: "g",
+			locale: "g",
 			selectors: [],
 			declarations: [],
 			variants: [
@@ -94,14 +94,14 @@ const unsortedMessageRaw: Message = {
 	],
 }
 
-const sortedMessageRaw: Message = {
+const sortedMessageRaw: MessageBundle = {
 	alias: {},
 	id: "footer_categories_apps",
-	inputs: [],
-	translations: [
+	inputOrder: [],
+	messages: [
 		{
 			declarations: [],
-			languageTag: "a",
+			locale: "a",
 			selectors: [],
 			variants: [
 				{ match: ["*", "*"], pattern: [{ type: "text", value: "1" }] },
@@ -118,7 +118,7 @@ const sortedMessageRaw: Message = {
 		},
 		{
 			declarations: [],
-			languageTag: "b",
+			locale: "b",
 			selectors: [],
 			variants: [
 				{
@@ -129,7 +129,7 @@ const sortedMessageRaw: Message = {
 		},
 		{
 			declarations: [],
-			languageTag: "c",
+			locale: "c",
 			selectors: [],
 			variants: [
 				{
@@ -140,7 +140,7 @@ const sortedMessageRaw: Message = {
 		},
 		{
 			declarations: [],
-			languageTag: "d",
+			locale: "d",
 			selectors: [],
 			variants: [
 				{
@@ -151,7 +151,7 @@ const sortedMessageRaw: Message = {
 		},
 		{
 			declarations: [],
-			languageTag: "e",
+			locale: "e",
 			selectors: [],
 			variants: [
 				{
@@ -162,7 +162,7 @@ const sortedMessageRaw: Message = {
 		},
 		{
 			declarations: [],
-			languageTag: "f",
+			locale: "f",
 			selectors: [],
 			variants: [
 				{
@@ -173,7 +173,7 @@ const sortedMessageRaw: Message = {
 		},
 		{
 			declarations: [],
-			languageTag: "g",
+			locale: "g",
 			selectors: [],
 			variants: [
 				{
@@ -207,21 +207,21 @@ describe("normalizeMessage", () => {
 		expect(unsortedMessageRaw).not.toEqual(sortedMessageRaw)
 
 		// test cases are the same after normalization
-		expect(normalizeMessage(unsortedMessageRaw)).toEqual(sortedMessageRaw)
+		expect(normalizeMessageBundle(unsortedMessageRaw)).toEqual(sortedMessageRaw)
 
 		// stringify results are not the same before normalization
 		expect(str(unsortedMessageRaw)).not.toBe(str(sortedMessageRaw))
 
 		// stringify results are the same after normalization
-		expect(str(normalizeMessage(unsortedMessageRaw))).toBe(str(sortedMessageRaw))
-		expect(str2(normalizeMessage(unsortedMessageRaw))).toBe(str2(sortedMessageRaw))
-		expect(str4(normalizeMessage(unsortedMessageRaw))).toBe(str4(sortedMessageRaw))
+		expect(str(normalizeMessageBundle(unsortedMessageRaw))).toBe(str(sortedMessageRaw))
+		expect(str2(normalizeMessageBundle(unsortedMessageRaw))).toBe(str2(sortedMessageRaw))
+		expect(str4(normalizeMessageBundle(unsortedMessageRaw))).toBe(str4(sortedMessageRaw))
 	})
 })
 
 describe("stringifyMessage", () => {
 	it("should normalize and JSON stringify a message with 4 space indentation", () => {
-		expect(stringifyMessage(unsortedMessageRaw)).toBe(str4(sortedMessageRaw))
-		expect(stringifyMessage(sortedMessageRaw)).toBe(str4(sortedMessageRaw))
+		expect(stringifyMessageBundle(unsortedMessageRaw)).toBe(str4(sortedMessageRaw))
+		expect(stringifyMessageBundle(sortedMessageRaw)).toBe(str4(sortedMessageRaw))
 	})
 })

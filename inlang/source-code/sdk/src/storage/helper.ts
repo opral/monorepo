@@ -1,6 +1,18 @@
-import { Message } from "../versionedInterfaces.js"
+import type { AST } from "../index.js"
+import * as LegacyFormat from "@inlang/message"
+import { fromLegacyMessaeg, toLegacyMessage } from "../legacy.js"
 
 const fileExtension = ".json"
+
+export function normalizeMessage(legacyMessage: LegacyFormat.Message) {
+	const bundle = fromLegacyMessaeg(legacyMessage)
+	const normalized = normalizeMessageBundle(bundle)
+	return toLegacyMessage(normalized)
+}
+
+export function stringifyMessage(legacyMessage: LegacyFormat.Message) {
+	return JSON.stringify(normalizeMessage(legacyMessage), undefined, 4)
+}
 
 export function getMessageIdFromPath(path: string) {
 	if (!path.endsWith(fileExtension)) return
@@ -25,17 +37,14 @@ export function getPathFromMessageId(id: string) {
  * This produces a deterministic result when passed to stringify
  * independent of the initialization order.
  */
-export function normalizeMessage(message: Message) {
-	const messageWithSortedKeys = sortRecord(message)
+export function normalizeMessageBundle(messageBundle: AST.MessageBundle) {
+	const messageWithSortedKeys = sortRecord(messageBundle)
 
 	// order variants
-	messageWithSortedKeys["translations"] = messageWithSortedKeys["translations"]
+	messageWithSortedKeys["messages"] = messageWithSortedKeys["messages"]
 		.sort((translationA, translationB) => {
 			// compare by language
-			const languageComparison = translationA.languageTag.localeCompare(
-				translationB.languageTag,
-				"en"
-			)
+			const languageComparison = translationA.locale.localeCompare(translationB.locale, "en")
 
 			// if languages are the same, compare by selectors
 			if (languageComparison === 0) {
@@ -67,11 +76,11 @@ export function normalizeMessage(message: Message) {
 			return translationWithSortedKeys
 		})
 
-	return messageWithSortedKeys as Message
+	return messageWithSortedKeys as AST.MessageBundle
 }
 
-export function stringifyMessage(message: Message) {
-	return JSON.stringify(normalizeMessage(message), undefined, 4)
+export function stringifyMessageBundle(message: AST.MessageBundle) {
+	return JSON.stringify(normalizeMessageBundle(message), undefined, 4)
 }
 
 function sortRecord<T extends Record<string, unknown>>(record: T): T {

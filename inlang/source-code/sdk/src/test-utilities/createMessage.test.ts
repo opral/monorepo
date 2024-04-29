@@ -6,44 +6,53 @@ test("should create a simple message", () => {
 		createMessage("welcome", {
 			de: "Hallo inlang",
 		})
-	).toMatchInlineSnapshot({
-		id: "welcome",
-		alias: {},
-		inputs: [],
-		translations: [
-			{
-				languageTag: "de",
-				selectors: [],
-				declarations: [],
-				variants: [
-					{
-						match: [],
-						pattern: [
-							{
-								type: "text",
-								value: "Hallo inlang",
-							},
-						],
-					},
-				],
-			},
-		],
-	})
+	).toMatchInlineSnapshot(
+		{
+			alias: {},
+			id: "welcome",
+			selectors: [],
+			variants: [
+				{
+					languageTag: "de",
+					match: [],
+					pattern: [
+						{
+							type: "Text",
+							value: "Hallo inlang",
+						},
+					],
+				},
+			],
+		},
+		`
+		{
+		  "alias": {},
+		  "id": "welcome",
+		  "selectors": [],
+		  "variants": [
+		    {
+		      "languageTag": "de",
+		      "match": [],
+		      "pattern": [
+		        {
+		          "type": "Text",
+		          "value": "Hallo inlang",
+		        },
+		      ],
+		    },
+		  ],
+		}
+	`
+	)
 })
 
 test("should create a message with pattern", () => {
 	expect(
 		createMessage("greeting", {
 			en: [
-				{ type: "text", value: "Hi " },
-				{
-					type: "expression",
-					arg: {
-						type: "variable",
-						name: "name",
-					},
-				},
-				{ type: "text", value: '"' },
+				{ type: "Text", value: "Hi " },
+				{ type: "VariableReference", name: "name" },
+				{ type: "Text", value: '"' },
 			],
 		})
 	).toStrictEqual({
@@ -77,7 +86,7 @@ test("should create a message with a pattern", () => {
 	expect(
 		createMessage("welcome", {
 			en: "hello inlang",
-			de: [{ type: "text", value: "Hallo inlang" }],
+			de: [{ type: "Text", value: "Hallo inlang" }],
 		})
 	).toStrictEqual({
 		alias: {},

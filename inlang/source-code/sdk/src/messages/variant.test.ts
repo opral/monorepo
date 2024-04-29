@@ -20,7 +20,7 @@ describe("getVariant", () => {
 		})
 
 		expect(variant?.pattern[0]).toStrictEqual({
-			type: "text",
+			type: "Text",
 			value: "{$hostName} invites {$guestName} to her party.",
 		})
 	})
@@ -44,29 +44,17 @@ describe("getVariant", () => {
 		const mockMessage: Message = {
 			id: "mockMessage",
 			alias: {},
-			inputs: [],
-			translations: [
+			selectors: [],
+			variants: [
 				{
 					languageTag: "en",
-					declarations: [],
-					selectors: [],
-					variants: [
-						{
-							pattern: [{ type: "text", value: "Gender male" }],
-							match: [],
-						},
-					],
+					pattern: [{ type: "Text", value: "Gender male" }],
+					match: [],
 				},
 				{
 					languageTag: "de",
-					declarations: [],
-					selectors: [],
-					variants: [
-						{
-							pattern: [{ type: "text", value: "Veraltete Übersetzung" }],
-							match: [],
-						},
-					],
+					pattern: [{ type: "Text", value: "Veraltete Übersetzung" }],
+					match: [],
 				},
 			],
 		}
@@ -83,29 +71,17 @@ describe("getVariant", () => {
 		const mockMessage: Message = {
 			id: "mockMessage",
 			alias: {},
-			inputs: [],
-			translations: [
+			selectors: [],
+			variants: [
 				{
 					languageTag: "en",
-					declarations: [],
-					selectors: [],
-					variants: [
-						{
-							pattern: [{ type: "text", value: "Gender male" }],
-							match: ["male", "*"],
-						},
-					],
+					pattern: [{ type: "Text", value: "Gender male" }],
+					match: ["male", "*"],
 				},
 				{
 					languageTag: "de",
-					declarations: [],
-					selectors: [],
-					variants: [
-						{
-							pattern: [{ type: "text", value: "Veraltete Übersetzung" }],
-							match: ["*", "*"],
-						},
-					],
+					pattern: [{ type: "Text", value: "Veraltete Übersetzung" }],
+					match: ["*", "*"],
 				},
 			],
 		}
@@ -128,7 +104,7 @@ describe("getVariant", () => {
 			},
 		})
 		expect(variant?.pattern[0]).toStrictEqual({
-			type: "text",
+			type: "Text",
 			value: "{$hostName} does not give a party.",
 		})
 	})
@@ -143,7 +119,7 @@ describe("getVariant", () => {
 			},
 		})
 		expect(variant?.pattern[0]).toStrictEqual({
-			type: "text",
+			type: "Text",
 			value: "{$hostName} invites {$guestName} and {$guestsOther} other people to their party.",
 		})
 	})
@@ -158,7 +134,7 @@ describe("getVariant", () => {
 			},
 		})
 		expect(variant?.pattern[0]).toStrictEqual({
-			type: "text",
+			type: "Text",
 			value: "{$hostName} invites {$guestName} and one other person to their party.",
 		})
 
@@ -169,17 +145,18 @@ describe("getVariant", () => {
 			},
 		})
 		expect(variant2?.pattern[0]).toStrictEqual({
-			type: "text",
+			type: "Text",
 			value: "{$hostName} invites {$guestName} and {$guestsOther} other people to his party.",
 		})
 	})
 
 	test("should return undefined of no variant matches", () => {
 		const mockMessage: Message = getMockMessage()
-		mockMessage.translations = mockMessage.translations.filter((t) => t.languageTag == "en")
-		mockMessage.translations[0]!.variants = mockMessage.translations[0]!.variants.filter(
-			(v) => v.match[0] !== "*" || v.match[1] !== "*"
-		)
+		mockMessage.variants = [
+			...mockMessage.variants!.filter(
+				(v) => v.languageTag === "en" && (v.match[0] !== "*" || v.match[1] !== "*")
+			),
+		]
 
 		const variant = getVariant(mockMessage, {
 			where: {
@@ -423,120 +400,109 @@ const getMockMessage = (): Message => {
 	return {
 		id: "first-message",
 		alias: {},
-		inputs: ["gender", "guestOther", "hostName", "guestName", "guestsOther"],
-		translations: [
+		selectors: [
+			{ type: "VariableReference", name: "gender" },
+			{ type: "VariableReference", name: "guestOther" },
+		],
+		variants: [
 			{
 				languageTag: "en",
-				declarations: [],
-				selectors: [
+				match: ["female", "1"],
+				pattern: [
 					{
-						type: "expression",
-						arg: {
-							type: "variable",
-							name: "gender",
-						},
-					},
-					{
-						type: "expression",
-						arg: {
-							type: "variable",
-							name: "guestOther",
-						},
+						type: "Text",
+						value: "{$hostName} invites {$guestName} to her party.",
 					},
 				],
-				variants: [
+			},
+			{
+				languageTag: "en",
+				match: ["female", "2"],
+				pattern: [
 					{
-						match: ["female", "1"],
-						pattern: [
-							{
-								type: "text",
-								value: "{$hostName} invites {$guestName} to her party.",
-							},
-						],
+						type: "Text",
+						value: "{$hostName} invites {$guestName} and one other person to her party.",
 					},
+				],
+			},
+			{
+				languageTag: "en",
+				match: ["female", "*"],
+				pattern: [
 					{
-						match: ["female", "2"],
-						pattern: [
-							{
-								type: "text",
-								value: "{$hostName} invites {$guestName} and one other person to her party.",
-							},
-						],
+						type: "Text",
+						value: "{$hostName} invites {$guestName} and {$guestsOther} other people to her party.",
 					},
+				],
+			},
+			{
+				languageTag: "en",
+				match: ["male", "1"],
+				pattern: [
 					{
-						match: ["female", "*"],
-						pattern: [
-							{
-								type: "text",
-								value:
-									"{$hostName} invites {$guestName} and {$guestsOther} other people to her party.",
-							},
-						],
+						type: "Text",
+						value: "{$hostName} invites {$guestName} to his party.",
 					},
+				],
+			},
+			{
+				languageTag: "en",
+				match: ["male", "2"],
+				pattern: [
 					{
-						match: ["male", "1"],
-						pattern: [
-							{
-								type: "text",
-								value: "{$hostName} invites {$guestName} to his party.",
-							},
-						],
+						type: "Text",
+						value: "{$hostName} invites {$guestName} and one other person to his party.",
 					},
+				],
+			},
+			{
+				languageTag: "en",
+				match: ["male", "*"],
+				pattern: [
 					{
-						match: ["male", "2"],
-						pattern: [
-							{
-								type: "text",
-								value: "{$hostName} invites {$guestName} and one other person to his party.",
-							},
-						],
+						type: "Text",
+						value: "{$hostName} invites {$guestName} and {$guestsOther} other people to his party.",
 					},
+				],
+			},
+			{
+				languageTag: "en",
+				match: ["*", "0"],
+				pattern: [
 					{
-						match: ["male", "*"],
-						pattern: [
-							{
-								type: "text",
-								value:
-									"{$hostName} invites {$guestName} and {$guestsOther} other people to his party.",
-							},
-						],
+						type: "Text",
+						value: "{$hostName} does not give a party.",
 					},
+				],
+			},
+			{
+				languageTag: "en",
+				match: ["*", "1"],
+				pattern: [
 					{
-						match: ["*", "0"],
-						pattern: [
-							{
-								type: "text",
-								value: "{$hostName} does not give a party.",
-							},
-						],
+						type: "Text",
+						value: "{$hostName} invites {$guestName} to their party.",
 					},
+				],
+			},
+			{
+				languageTag: "en",
+				match: ["*", "2"],
+				pattern: [
 					{
-						match: ["*", "1"],
-						pattern: [
-							{
-								type: "text",
-								value: "{$hostName} invites {$guestName} to their party.",
-							},
-						],
+						type: "Text",
+						value: "{$hostName} invites {$guestName} and one other person to their party.",
 					},
+				],
+			},
+			{
+				languageTag: "en",
+				match: ["*", "*"],
+				pattern: [
 					{
-						match: ["*", "2"],
-						pattern: [
-							{
-								type: "text",
-								value: "{$hostName} invites {$guestName} and one other person to their party.",
-							},
-						],
-					},
-					{
-						match: ["*", "*"],
-						pattern: [
-							{
-								type: "text",
-								value:
-									"{$hostName} invites {$guestName} and {$guestsOther} other people to their party.",
-							},
-						],
+						type: "Text",
+						value:
+							"{$hostName} invites {$guestName} and {$guestsOther} other people to their party.",
 					},
 				],
 			},
