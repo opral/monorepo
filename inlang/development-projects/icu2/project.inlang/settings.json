@@ -1,7 +1,7 @@
 {
 	"$schema": "https://inlang.com/schema/project-settings",
 	"sourceLanguageTag": "en",
-	"languageTags": ["en"],
+	"languageTags": ["en", "de"],
 	"modules": ["./../../source-code/plugins/icu2-message-format/dist/index.js"],
 	"plugin.inlang.icu2MessageFormat": {
 		"pathPattern": "./messages/{languageTag}.json"

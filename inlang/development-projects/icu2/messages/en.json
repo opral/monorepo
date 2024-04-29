@@ -1,4 +1,6 @@
 {
 	"input-local-match": ".input {$var :number maximumFractionDigits=0}\n.local $rounded={$var :number maximumFractionDigits=2}\n.match {$rounded} 0 {{The selector can apply a different annotation to {$var} for the purposes of selection}} * {{A placeholder in a pattern can apply a different annotation to {$var :number maximumFractionDigits=3}}}",
-	"chained_locals": ".input {$number}\n.local $clamped={$number :clamp min=0}\n.local $price={$clamped :curreny currency=EUR}\n.match {$clamped} 0 {{Free}} * {{Price: {$price}}}"
+	"chained_locals": ".input {$number}\n.local $clamped={$number :clamp min=0}\n.local $price={$clamped :curreny currency=EUR}\n.match {$clamped} 0 {{Free}} * {{Price: {$price}}}",
+	"many_cases": ".match {$numLikes :number} {$numShares :number} \n0   0   {{Your item has no likes and has not been shared.}}\n0   one {{Your item has no likes and has been shared {$numShares} time.}}\n0   *   {{Your item has no likes and has been shared {$numShares} times.}}\none 0   {{Your item has {$numLikes} like and has not been shared.}}\none one {{Your item has {$numLikes} like and has been shared {$numShares} time.}}\none *   {{Your item has {$numLikes} like and has been shared {$numShares} times.}}\n*   0   {{Your item has {$numLikes} likes and has not been shared.}}\n*   one {{Your item has {$numLikes} likes and has been shared {$numShares} time.}}\n*   *   {{Your item has {$numLikes} likes and has been shared {$numShares} times.}}",
+	"basic_function": "hello {-4.20 :integer}"
 }
