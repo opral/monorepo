@@ -16,6 +16,7 @@
 	},
 	"pages": {
 		"/": "./inlang/source-code/ide-extension/MARKETPLACE.md",
+		"/video-tour": "./inlang/source-code/ide-extension/docs/video-tour.md",
 		"/changelog": "./inlang/source-code/ide-extension/CHANGELOG.md"
 	},
 	"keywords": [

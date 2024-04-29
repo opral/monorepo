@@ -78,7 +78,7 @@ You can add messages in two ways:
 - Reload window (only needed once).
   `⌘ or Ctrl` + `Shift` + `P` -> Developer: Reload Window. On the bottom it should display for some seconds after relaod: `inlang's extension activated`.
 
-- Select a hard-coded string, for example, on the About page. Mark the string with your cursor and hit `command` + `.` -> Inlang: Extract
+- Select a hard-coded string, for example, on the About page. Mark the string with your cursor and hit `command` + `.` -> Sherlock: Extract
   message. Give the message an ID and hit enter.
 
 - This command extracts the hard-coded string and places it into the source language translation file `en.json` in the `messages` directory.
