@@ -21,8 +21,13 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 			.getConfiguration()
 			.get<boolean>("sherlock.inlineAnnotations.enabled", true)
 
-		if (!activeTextEditor || !inlineAnnotationsEnabled) {
+		if (!activeTextEditor) {
 			return
+		}
+
+		// If inline annotations are disabled, remove all decorations or prevent them from being added
+		if (!inlineAnnotationsEnabled) {
+			return activeTextEditor.setDecorations(messagePreview, [])
 		}
 
 		// TODO: this is a hack to prevent the message preview from showing up in the project.inlang/settings file
