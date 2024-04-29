@@ -5,7 +5,8 @@
 	"scripts": {
 		"_dev": "next dev",
 		"build": "next build",
-		"preview": "next start"
+		"preview": "next start",
+		"clean": "rm -rf ./dist ./node_modules ./src/paraglide ./.next"
 	},
 	"dependencies": {
 		"@inlang/paraglide-js": "workspace:*",

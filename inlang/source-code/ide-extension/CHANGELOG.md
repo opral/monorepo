@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.39.8
+
+### Patch Changes
+
+- b94ab60: fix wrong command name
+
 ## 1.39.7
 
 ### Patch Changes
