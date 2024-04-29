@@ -15,6 +15,7 @@ import type { MessageLintRule } from "@inlang/message-lint-rule"
 import { resolvePlugins } from "./plugins/resolvePlugins.js"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { validatedModuleSettings } from "./validatedModuleSettings.js"
+import type { Importer } from "@inlang/importer"
 
 const ModuleCompiler = TypeCompiler.Compile(InlangModule)
 
@@ -23,6 +24,7 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 	const moduleErrors: Array<ModuleError> = []
 
 	const allPlugins: Array<Plugin> = []
+	const allImporters: Array<Importer> = []
 	const allMessageLintRules: Array<MessageLintRule> = []
 
 	const meta: Awaited<ReturnType<ResolveModuleFunction>>["meta"] = []
@@ -91,6 +93,8 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 			allPlugins.push(importedModule.data.default as Plugin)
 		} else if (importedModule.data.default.id.startsWith("messageLintRule.")) {
 			allMessageLintRules.push(importedModule.data.default as MessageLintRule)
+		} else if (importedModule.data.default.id.startsWith("importer.")) {
+			allImporters.push(importedModule.data.default as Importer)
 		} else {
 			moduleErrors.push(
 				new ModuleError(

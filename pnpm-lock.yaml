@@ -2138,6 +2138,9 @@ importers:
 
   inlang/source-code/sdk:
     dependencies:
+      '@inlang/importer':
+        specifier: workspace:*
+        version: link:../versioned-interfaces/importer
       '@inlang/json-types':
         specifier: workspace:*
         version: link:../json-types

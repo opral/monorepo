@@ -9,6 +9,7 @@ import type {
 import type { ModuleHasNoExportsError, ModuleImportError } from "./errors.js"
 import type { ImportFunction } from "./import.js"
 import type { resolveMessageLintRules } from "./message-lint-rules/resolveMessageLintRules.js"
+import type { Importer } from "@inlang/importer"
 
 /**
  * Function that resolves modules from the config.
@@ -39,7 +40,7 @@ export type ResolveModuleFunction = (args: {
 		/**
 		 * The resolved item id of the module.
 		 */
-		id: Plugin["id"] | MessageLintRule["id"]
+		id: Plugin["id"] | MessageLintRule["id"] | Importer["id"]
 	}>
 	/**
 	 * The resolved plugins.

@@ -40,6 +40,7 @@
 		"@inlang/message-lint-rule": "workspace:*",
 		"@inlang/module": "workspace:*",
 		"@inlang/plugin": "workspace:*",
+		"@inlang/importer": "workspace:*",
 		"@inlang/project-settings": "workspace:*",
 		"@inlang/result": "workspace:*",
 		"@inlang/translatable": "workspace:*",
