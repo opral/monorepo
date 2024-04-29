@@ -1,3 +1,5 @@
+import path from "node:path"
+
 /**
  * One step in a CLI chain.
  * Defines which types the context needs to extend and how it extends the context
@@ -37,4 +39,26 @@ export function pair<Step1 extends CliStep<any, any>, Step2 extends CliStep<CliS
 	step2: Step2
 ): Pair<Step1, Step2> {
 	return async (ctx) => await step2(await step1(ctx))
+}
+
+export async function succeedOrElse<T extends Promise<unknown>, U>(
+	promise: T,
+	orElse: U
+): Promise<T | U> {
+	try {
+		return await promise
+	} catch (err) {
+		return orElse
+	}
+}
+
+const WINDOWS_SLASH_REGEX = /\\/g
+function slash(p: string): string {
+	return p.replace(WINDOWS_SLASH_REGEX, "/")
+}
+
+const isWindows = typeof process !== "undefined" && process.platform === "win32"
+
+export function normalizePath(id: string) {
+	return path.posix.normalize(isWindows ? slash(id) : id)
 }

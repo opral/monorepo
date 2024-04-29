@@ -1,5 +1,17 @@
 # @lix-js/client
 
+## 1.4.0
+
+### Minor Changes
+
+- 9165e64: Bump `@lix-js/code-style` dependency
+
+## 1.3.0
+
+### Minor Changes
+
+- 7bd98e4: lix refactoring
+
 ## 1.2.1
 
 ### Patch Changes

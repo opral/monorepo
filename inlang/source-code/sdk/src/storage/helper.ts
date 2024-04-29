@@ -22,27 +22,53 @@ export function getPathFromMessageId(id: string) {
 	return path
 }
 
-export function stringifyMessage(message: Message) {
-	// create a new object do specify key output order
+/**
+ * Returns a copy of a message object with sorted variants and object keys.
+ * This produces a deterministic result when passed to stringify
+ * independent of the initialization order.
+ */
+export function normalizeMessage(message: Message) {
+	// order keys in message
 	const messageWithSortedKeys: any = {}
 	for (const key of Object.keys(message).sort()) {
 		messageWithSortedKeys[key] = (message as any)[key]
 	}
 
-	// lets order variants as well
-	messageWithSortedKeys["variants"] = messageWithSortedKeys["variants"].sort(
-		(variantA: Variant, variantB: Variant) => {
-			// First, compare by language
+	// order variants
+	messageWithSortedKeys["variants"] = messageWithSortedKeys["variants"]
+		.sort((variantA: Variant, variantB: Variant) => {
+			// compare by language
 			const languageComparison = variantA.languageTag.localeCompare(variantB.languageTag)
 
-			// If languages are the same, compare by match
+			// if languages are the same, compare by match
 			if (languageComparison === 0) {
 				return variantA.match.join("-").localeCompare(variantB.match.join("-"))
 			}
 
 			return languageComparison
-		}
-	)
+		})
+		// order keys in each variant
+		.map((variant: Variant) => {
+			const variantWithSortedKeys: any = {}
+			for (const variantKey of Object.keys(variant).sort()) {
+				if (variantKey === "pattern") {
+					variantWithSortedKeys[variantKey] = (variant as any)["pattern"].map((token: any) => {
+						const tokenWithSortedKey: any = {}
+						for (const tokenKey of Object.keys(token).sort()) {
+							tokenWithSortedKey[tokenKey] = token[tokenKey]
+						}
+						return tokenWithSortedKey
+					})
+				} else {
+					variantWithSortedKeys[variantKey] = (variant as any)[variantKey]
+				}
+			}
+			return variantWithSortedKeys
+		})
 
-	return JSON.stringify(messageWithSortedKeys, undefined, 4)
+	return messageWithSortedKeys as Message
+}
+
+export function stringifyMessage(message: Message) {
+	return JSON.stringify(normalizeMessage(message), undefined, 4)
 }

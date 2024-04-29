@@ -1,5 +1,48 @@
 # @inlang/cli
 
+## 2.15.3
+
+### Patch Changes
+
+- af8a397: Filter inlang machine translate to call rpc only if hasMissingTranslations
+
+## 2.15.2
+
+### Patch Changes
+
+- 3c959bc: experimental sdk persistence v0
+- Updated dependencies [3c959bc]
+  - @inlang/sdk@0.34.2
+
+## 2.15.1
+
+### Patch Changes
+
+- Updated dependencies [9165e64]
+  - @lix-js/client@1.4.0
+  - @inlang/sdk@0.34.1
+
+## 2.15.0
+
+### Minor Changes
+
+- 5b8c053: sdk helper functions stringifyMessage, normalizeMessage
+  INLANG_CLI_EXPERIMENTAL inlang validate --dump --save
+
+### Patch Changes
+
+- Updated dependencies [5b8c053]
+  - @inlang/sdk@0.34.0
+
+## 2.14.2
+
+### Patch Changes
+
+- cd9a3e1: add internal links
+- Updated dependencies [7bd98e4]
+  - @lix-js/client@1.3.0
+  - @inlang/sdk@0.33.1
+
 ## 2.14.1
 
 ### Patch Changes

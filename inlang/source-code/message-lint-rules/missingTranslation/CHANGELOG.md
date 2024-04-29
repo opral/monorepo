@@ -1,5 +1,11 @@
 # @inlang/message-lint-rule-missing-translation
 
+## 1.4.6
+
+### Patch Changes
+
+- @inlang/message-lint-rule@1.4.6
+
 ## 1.4.5
 
 ### Patch Changes

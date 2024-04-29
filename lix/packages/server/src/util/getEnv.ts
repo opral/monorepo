@@ -1,7 +1,7 @@
 import { config } from "dotenv"
 
 // we configure the dotenv with default - which loads the .env file from the execution folder
-config()
+config({ path: ["../../../.env", ".env"] })
 
 export function getEnvVar(
 	varName: string,

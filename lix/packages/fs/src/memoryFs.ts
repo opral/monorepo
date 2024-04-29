@@ -421,9 +421,7 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 					if (queue.length > 0) {
 						yield queue.shift() as FileChangeInfo
 					} else {
-						// eslint-disable-next-line no-await-in-loop
 						await changeEvent
-						// eslint-disable-next-line @typescript-eslint/no-loop-func
 						changeEvent = new Promise((resolve, reject) => {
 							handleNext = resolve
 							rejecteNext = reject
