@@ -36,7 +36,7 @@ jobs:
 
       - name: Run Ninja i18n
         id: ninja-i18n
-        uses: ./inlang/source-code/github-lint-action/internal-testing
+        uses: ./target/inlang/source-code/github-lint-action/internal-testing
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
          
