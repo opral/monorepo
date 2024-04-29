@@ -179,6 +179,16 @@ If you want to add lint rules to your experience, you can add them from https://
 - VS Code version 1.84.0 or higher.
 - Node.js version v18 or higher.
 
+## Customization
+
+### Disable Inline Annotations
+
+You can disable inline annotations by setting the following property to `false` in your `settings.json` file or by using the command `Sherlock: Toggle Inline Annotations`. The default value is `true`.
+
+```json
+"sherlock.inlineAnnotations.enabled": false
+```
+
 #### Troubleshooting
 
 If you are having trouble with the **loading icon** not disappearing, this is a known issue & we are working with Visual Studio Code to fix it. In the meantime, you can right-click the Inlang icon to hide it:
