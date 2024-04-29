@@ -1,5 +1,11 @@
 # @inlang/plugin-json
 
+## 5.1.32
+
+### Patch Changes
+
+- 1abcc3f: update docs
+
 ## 5.1.31
 
 ### Patch Changes

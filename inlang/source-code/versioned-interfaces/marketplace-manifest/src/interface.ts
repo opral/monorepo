@@ -43,12 +43,39 @@ const MarketplaceManifestBase = Type.Object({
 		)
 	),
 	pages: Type.Optional(
-		Type.Record(
-			Type.String(),
-			Type.TemplateLiteral("${string}.md", {
-				description: "The path to the markdown file.",
-			})
-		)
+		Type.Union([
+			Type.Record(
+				Type.String({
+					description: "The route of the page",
+					example: ["/changelog", "/examples", "/license", "/api", "/advanced", "/getting-started"],
+				}),
+				Type.String({
+					description: "The path to the page or link to page.",
+				})
+			),
+			Type.Record(
+				Type.String({
+					description: "Namespace of the page.",
+					examples: ["Documentation", "Examples", "Overview"],
+				}),
+				Type.Record(
+					Type.String({
+						description: "The route of the page",
+						example: [
+							"/changelog",
+							"/examples",
+							"/license",
+							"/api",
+							"/advanced",
+							"/getting-started",
+						],
+					}),
+					Type.String({
+						description: "The path to the page or link to page.",
+					})
+				)
+			),
+		])
 	),
 	pageRedirects: Type.Optional(
 		Type.Record(

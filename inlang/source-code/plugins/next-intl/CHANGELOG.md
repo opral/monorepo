@@ -1,5 +1,11 @@
 # @inlang/plugin-next-intl
 
+## 1.3.22
+
+### Patch Changes
+
+- 1abcc3f: update docs
+
 ## 1.3.21
 
 ### Patch Changes
