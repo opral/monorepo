@@ -1,5 +1,11 @@
 # @inlang/plugin-i18next
 
+## 4.13.31
+
+### Patch Changes
+
+- 1abcc3f: update docs
+
 ## 4.13.30
 
 ### Patch Changes
