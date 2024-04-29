@@ -1,0 +1,10 @@
+name: 'Ninja i18n'
+description: 'Automatic i18n checks, issue reports and correction workflow for your pull requests'
+author: 'opral'
+branding:
+  icon: 'globe'
+  color: 'gray-dark'
+
+runs:
+  using: node20
+  main: index.cjs
