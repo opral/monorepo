@@ -5,7 +5,6 @@ import { updateSetting } from "../utilities/settings/index.js"
 
 vi.mock("vscode", () => {
 	return {
-		...vi.importActual("vscode"),
 		window: {
 			showQuickPick: vi.fn(),
 		},
