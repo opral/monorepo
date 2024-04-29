@@ -95,6 +95,10 @@
 				"command": "sherlock.copyError",
 				"title": "Copy Error",
 				"icon": "$(copy)"
+			},
+			{
+				"command": "sherlock.toggleInlineAnnotations",
+				"title": "Sherlock: Toggle Inline Annotations"
 			}
 		],
 		"menus": {
