@@ -11,14 +11,13 @@ A localization strategy is a company’s overall plan and approach to adapting i
 <doc-figure src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/guides/localization-strategy/assets/strategy.jpg" alt="inlang ecosystem" caption="Localization strategy within the inlang ecosystem"></doc-figure>
 
 In this example, a SaaS tool is making use of inlang's products to localize their website and achieve a successful localization strategy.
-The [IDE Extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) enables translating the content of the web application. Therefore, the developer can connect a wide range of libraries. The most common one in inlang's ecosystem is [Paraglide JS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs), which runs with every popular framework. 
+[Sherlock](https://inlang.comhttps://inlang.com/m/r7kp499g/app-inlang-ideExtension) – a helpful i18n VS Code extension enables translating the content of the web application. Therefore, the developer can connect a wide range of libraries. The most common one in inlang's ecosystem is [Paraglide JS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs), which runs with every popular framework.
 
 The [CLI for automation](https://inlang.com/m/2qj2w8pu/app-inlang-cli) enables the developer to automate the translation process, e.g. with [Machine Translation](https://en.wikipedia.org/wiki/Machine_translation). The CLI can be used in a CI/CD pipeline to automatically translate the content of the web application.
 
 To make sure that the translation is correct, the [Fink - Message Editor](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor) can be used to send the translation to a professional translator. The translator can then use it to translate the content on one single source of truth. The translation is then automatically pushed to the web application.
 
 Furthermore, and of course in a later stage, it is recommended to watch audits and analytics to see how the localization strategy is performing. This can be done with [GlobeLens](https://inlang.com/m/92fst3wd/app-inlang-globelens). Furthermore, at this stage it is not only important that translations are correct, but also that they are optimized for the target market and do not contain any cultural faux pas or other mistakes that could damage the brand image or end in a lawsuit. Herefore, inlang LocalSuits (which is not yet released and just a placeholder) can be used to arrange a legal review of the global content.
-
 
 ## Benefits of a Well-Planned Localization Strategy
 
@@ -37,12 +36,12 @@ The chief benefit of a well-planned localization strategy is that it’ll help y
 1. Learn about the local audience through market research (e.g. [GlobeLens](https://inlang.com/m/92fst3wd/app-inlang-globelens))
 2. Hire local experts to understand the market opportunity
 3. Maximize translation and localization (e.g. [Fink - Message Editor](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor))
-4. Translate your media 
+4. Translate your media
 5. Optimize your website for multilingual SEO (e.g. [Paraglide JS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs))
-6. Understand the competition 
-7. Consider subtle nuances and leverage feedback 
-8. Adapt your brand identity and keep it authentic 
-9. Cater content to each foreign market 
+6. Understand the competition
+7. Consider subtle nuances and leverage feedback
+8. Adapt your brand identity and keep it authentic
+9. Cater content to each foreign market
 10. Localization doesn’t end here – keep going! (e.g. [CLI for automation](https://inlang.com/m/2qj2w8pu/app-inlang-cli))
 
 ## Often asked questions regarding localization
@@ -52,7 +51,6 @@ The chief benefit of a well-planned localization strategy is that it’ll help y
 An example of localization is the adaptation of a software application to the linguistic, cultural, and technical requirements of a specific target market. This can include the translation of the user interface, the use of local date and time formats, and the modification of content to align with the cultural norms and preferences of the target market.
 
 inlang itself is an example of localization. The inlang website is available in multiple languages and the content is adapted to the linguistic, cultural, and technical requirements of the target market: [inlang.com](/)
-
 
 ### What are the benefits of a localization strategy?
 
@@ -67,4 +65,3 @@ The basic concept of localization is the adaptation of a product or content to a
 In conclusion, a successful localization strategy is essential for businesses looking to expand into new markets. By understanding and adapting to the culture of each target market, and going beyond merely [translating](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor) words, businesses can resonate with their new audiences and achieve long-lasting growth. Remember, the aim of a localization strategy is the creation of a product where no customer feels excluded or unable to fully access it owing to language issues or cultural norms.
 
 Searching for a localization solution? [Go to inlang.com](/) and find what you need.
-
