@@ -55,7 +55,7 @@ function toLegacyPattern(pattern: AST.Pattern): LegecyFormat.Pattern {
 			}
 
 			default: {
-				throw new Error(`Unsupported pattern element type: ${element.type}`)
+				throw new Error(`Unsupported pattern element type`)
 			}
 		}
 	})
@@ -77,6 +77,7 @@ function toLegacyExpression(expression: AST.Expression): LegecyFormat.Expression
 
 export function fromLegacyMessaeg(legacyMessage: LegecyFormat.Message): AST.MessageBundle {
 	const languages = dedupe(legacyMessage.variants.map((variant) => variant.languageTag))
+	const inputOrder: string[] = []
 
 	const messages: AST.Message[] = languages.map((language): AST.Message => {
 		//All variants that will be part of this message
@@ -89,7 +90,7 @@ export function fromLegacyMessaeg(legacyMessage: LegecyFormat.Message): AST.Mess
 		for (const legacySelector of legacyMessage.selectors) {
 			selectorNames.add(legacySelector.name)
 		}
-		const selectors = [...selectorNames].map((name) => ({
+		const selectors: AST.Expression[] = [...selectorNames].map((name) => ({
 			type: "expression",
 			annotation: undefined,
 			arg: {
@@ -98,24 +99,78 @@ export function fromLegacyMessaeg(legacyMessage: LegecyFormat.Message): AST.Mess
 			},
 		}))
 
-		const declarations: AST.Declaration = []
+		//The set of variables that need to be defined - Certainly includes the selectors
+		const variableNames = new Set<string>(selectorNames)
+		const variants: AST.Variant[] = []
+		for (const legacyVariant of legacyVariants) {
+			for (const element of legacyVariant.pattern) {
+				if (element.type === "VariableReference") {
+					variableNames.add(element.name)
+				}
+			}
+
+			variants.push({
+				match: legacyVariant.match,
+				pattern: fromLegacyPattern(legacyVariant.pattern),
+			})
+		}
+
+		//Add the inputs to the list of inputs
+		for (const variableName of variableNames) {
+			if (!inputOrder.includes(variableName)) {
+				inputOrder.push(variableName)
+			}
+		}
+
+		//Create an input declaration for each variable and selector we need
+		const declarations: AST.Declaration[] = [...variableNames].map((name) => ({
+			type: "input",
+			name,
+			value: {
+				type: "expression",
+				annotation: undefined,
+				arg: {
+					type: "variable",
+					name,
+				},
+			},
+		}))
 
 		return {
 			locale: language,
-			declarations: [],
+			declarations,
 			selectors,
 			variants,
 		}
 	})
 
-	const inputs: string[] = []
-
 	return {
 		id: legacyMessage.id,
 		alias: legacyMessage.alias,
-		inputOrder: inputs,
+		inputOrder,
 		messages,
 	}
+}
+
+function fromLegacyPattern(pattern: LegecyFormat.Pattern): AST.Pattern {
+	return pattern.map((element) => {
+		switch (element.type) {
+			case "Text": {
+				return {
+					type: "text",
+					value: element.value,
+				}
+			}
+			case "VariableReference":
+				return {
+					type: "expression",
+					arg: {
+						type: "variable",
+						name: element.name,
+					},
+				}
+		}
+	})
 }
 
 /**
