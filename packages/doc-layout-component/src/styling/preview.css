@@ -3,6 +3,7 @@ html {
     height: 100%;
     display: flex;
     justify-content: center;
+    background-color: #F9F9F9;
 }
 body {
     width: 100%;
