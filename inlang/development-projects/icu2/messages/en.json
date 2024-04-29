@@ -1,3 +1,4 @@
 {
-	"complex": ".input {$var :number maximumFractionDigits=0} .match {$var :number maximumFractionDigits=2} 0 {{The selector can apply a different annotation to {$var} for the purposes of selection}} * {{A placeholder in a pattern can apply a different annotation to {$var :number maximumFractionDigits=3}}}"
+	"input-local-match": ".input {$var :number maximumFractionDigits=0}\n.local $rounded={$var :number maximumFractionDigits=2}\n.match {$rounded} 0 {{The selector can apply a different annotation to {$var} for the purposes of selection}} * {{A placeholder in a pattern can apply a different annotation to {$var :number maximumFractionDigits=3}}}",
+	"chained_locals": ".input {$number}\n.local $clamped={$number :clamp min=0}\n.local $price={$clamped :curreny currency=EUR}\n.match {$clamped} 0 {{Free}} * {{Price: {$price}}}"
 }
