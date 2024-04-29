@@ -1,5 +1,57 @@
 # inlang-vs-code-extension
 
+## 1.39.8
+
+### Patch Changes
+
+- b94ab60: fix wrong command name
+
+## 1.39.7
+
+### Patch Changes
+
+- Updated dependencies [3c959bc]
+  - @inlang/sdk@0.34.2
+  - @inlang/rpc@0.3.13
+  - @inlang/settings-component@1.0.6
+  - @inlang/telemetry@0.3.27
+
+## 1.39.6
+
+### Patch Changes
+
+- Updated dependencies [9165e64]
+  - @lix-js/client@1.4.0
+  - @inlang/sdk@0.34.1
+  - @inlang/rpc@0.3.12
+  - @inlang/settings-component@1.0.5
+  - @inlang/telemetry@0.3.26
+
+## 1.39.5
+
+### Patch Changes
+
+- Updated dependencies [5b8c053]
+  - @inlang/sdk@0.34.0
+  - @inlang/rpc@0.3.11
+  - @inlang/settings-component@1.0.4
+  - @inlang/telemetry@0.3.25
+
+## 1.39.4
+
+### Patch Changes
+
+- cd9a3e1: add internal links
+- Updated dependencies [c92bde5]
+- Updated dependencies [7bd98e4]
+- Updated dependencies [2508271]
+- Updated dependencies [0b4af82]
+  - @inlang/settings-component@1.0.3
+  - @lix-js/client@1.3.0
+  - @inlang/sdk@0.33.1
+  - @inlang/rpc@0.3.10
+  - @inlang/telemetry@0.3.24
+
 ## 1.39.3
 
 ### Patch Changes

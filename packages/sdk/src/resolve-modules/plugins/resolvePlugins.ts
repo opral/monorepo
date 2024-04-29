@@ -2,6 +2,10 @@
 import type { ResolvePluginsFunction } from "./types.js"
 import { Plugin } from "@inlang/plugin"
 import {
+	loadMessages as sdkLoadMessages,
+	saveMessages as sdkSaveMessages,
+} from "../../persistence/plugin.js"
+import {
 	PluginReturnedInvalidCustomApiError,
 	PluginLoadMessagesFunctionAlreadyDefinedError,
 	PluginSaveMessagesFunctionAlreadyDefinedError,
@@ -12,6 +16,9 @@ import {
 import { deepmerge } from "deepmerge-ts"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { tryCatch } from "@inlang/result"
+
+import _debug from "debug"
+const debug = _debug("sdk:resolvePlugins")
 
 // @ts-ignore - type mismatch error
 const PluginCompiler = TypeCompiler.Compile(Plugin)
@@ -24,6 +31,11 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 			customApi: {},
 		},
 		errors: [],
+	}
+
+	const experimentalPersistence = !!args.settings.experimental?.persistence
+	if (experimentalPersistence) {
+		debug("Using experimental persistence")
 	}
 
 	for (const plugin of args.plugins) {
@@ -88,19 +100,11 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 		 */
 
 		if (typeof plugin.loadMessages === "function") {
-			result.data.loadMessages = (_args) =>
-				plugin.loadMessages!({
-					..._args,
-					// renoved nodeishFs from args because we need to pass custom wrapped fs that establishes a watcher
-				})
+			result.data.loadMessages = plugin.loadMessages
 		}
 
 		if (typeof plugin.saveMessages === "function") {
-			result.data.saveMessages = (_args) =>
-				plugin.saveMessages!({
-					..._args,
-					nodeishFs: args.nodeishFs,
-				})
+			result.data.saveMessages = plugin.saveMessages
 		}
 
 		if (typeof plugin.addCustomApi === "function") {
@@ -116,7 +120,14 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 	}
 
 	// --- LOADMESSAGE / SAVEMESSAGE NOT DEFINED ---
-	if (
+
+	if (experimentalPersistence) {
+		debug("Override load/save for experimental persistence")
+		// @ts-ignore - type mismatch error
+		result.data.loadMessages = sdkLoadMessages
+		// @ts-ignore - type mismatch error
+		result.data.saveMessages = sdkSaveMessages
+	} else if (
 		typeof result.data.loadMessages !== "function" ||
 		typeof result.data.saveMessages !== "function"
 	) {

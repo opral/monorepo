@@ -37,9 +37,9 @@ const appendCSSProperties = (
 	shadowRoot.appendChild(style)
 }
 
-const getColor = (unformattedColor: string) => chroma(unformattedColor)
+export const getColor = (unformattedColor: string) => chroma(unformattedColor)
 
-const getPalette = (unformattedColor: string) => {
+export const getPalette = (unformattedColor: string) => {
 	const color = getColor(unformattedColor)
 	const colors = chroma.scale(["white", color, "black"]).domain([0, 0.6, 1]).mode("lrgb")
 	const palette: Record<number, string> = {}

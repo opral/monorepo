@@ -62,6 +62,7 @@ export const i18n = createI18n(runtime);
 
 Add the `ParaglideJS` component to your layout and pass it the `i18n` instance.
 
+If you're using Svelte 4 do it like so: 
 ```svelte
 <!-- src/routes/+layout.svelte -->
 <script>
@@ -71,6 +72,22 @@ Add the `ParaglideJS` component to your layout and pass it the `i18n` instance.
 
 <ParaglideJS {i18n}>
     <slot />
+</ParaglideJS>
+```
+
+or if you're using Svelte 5: 
+
+```svelte
+<!-- src/routes/+layout.svelte -->
+<script>
+    import { ParaglideJS } from '@inlang/paraglide-sveltekit'
+	import { i18n } from '$lib/i18n.js'
+
+	const { children } = $props()
+</script>
+
+<ParaglideJS {i18n}>
+	{@render children}
 </ParaglideJS>
 ```
 

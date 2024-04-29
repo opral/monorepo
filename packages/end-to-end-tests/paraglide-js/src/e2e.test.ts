@@ -6,6 +6,16 @@ import type { ProjectSettings } from "@inlang/sdk"
 
 const ParaglideLocation = child_process.execSync("which paraglide-js").toString().trim()
 
+/**
+ * Timeout to wait between a prompt appearing and the user input
+ */
+const PROMPT_TO = 800
+
+/**
+ * Time to wait between answering the last prompt & checking the output files
+ */
+const CLEANUP_TO = 5_000
+
 describe.concurrent("paraglide-js", () => {
 	it("prints it's version when run with --version", () => {
 		const semverRegex = /[0-9]+\.[0-9]+\.[0-9]+/g
@@ -28,25 +38,25 @@ describe.concurrent("paraglide-js", () => {
 				debug()
 
 				await waitForText("Which languages do you want to support?")
-				await wait(200)
+				await wait(PROMPT_TO)
 				await writeText("en, de")
-				await wait(200)
+				await wait(PROMPT_TO)
 				await pressKey("enter")
 
 				await waitForText("Where should the compiled files be placed?")
-				await wait(200)
+				await wait(PROMPT_TO)
 				await pressKey("enter") // use default value of ./src/paraglide
 
 				await waitForText("Are you using Visual Studio Code?")
-				await wait(200)
+				await wait(PROMPT_TO)
 				await writeText("y")
-				await wait(200)
+				await wait(PROMPT_TO)
 				await pressKey("enter")
 
 				await waitForText("Which tech stack are you using?")
-				await wait(200)
+				await wait(PROMPT_TO)
 				await pressKey("enter")
-				await wait(1000)
+				await wait(CLEANUP_TO)
 
 				//check that the settings.json file exists
 				const fileContent = await readFile(path.resolve(workingDir, "project.inlang/settings.json"))
@@ -79,7 +89,7 @@ describe.concurrent("paraglide-js", () => {
 				)
 				await cleanup()
 			},
-			{ timeout: 30_000 }
+			{ timeout: 60_000 }
 		)
 
 		it(
@@ -115,25 +125,25 @@ describe.concurrent("paraglide-js", () => {
 				debug()
 
 				await waitForText("Do you want to use an existing Inlang Project or create a new one?")
-				await wait(500)
+				await wait(PROMPT_TO)
 				await pressKey("arrowDown") //should select the first existing project
-				await wait(500)
+				await wait(PROMPT_TO)
 				await pressKey("enter")
 
 				await waitForText("Where should the compiled files be placed?")
-				await wait(500)
+				await wait(PROMPT_TO)
 				await pressKey("enter") // use default value of ./src/paraglide
 
 				await waitForText("Are you using Visual Studio Code?")
-				await wait(500)
+				await wait(PROMPT_TO)
 				await writeText("y")
-				await wait(500)
+				await wait(PROMPT_TO)
 				await pressKey("enter")
 
 				await waitForText("Which tech stack are you using?")
-				await wait(500)
+				await wait(PROMPT_TO)
 				await pressKey("enter")
-				await wait(1000)
+				await wait(CLEANUP_TO)
 
 				//Check that the compiler ran and generated the files
 				expect(await readFile(path.resolve(workingDir, "src/paraglide/runtime.js"))).toBeTruthy()
@@ -152,7 +162,7 @@ describe.concurrent("paraglide-js", () => {
 
 				await cleanup()
 			},
-			{ timeout: 30_000 }
+			{ timeout: 60_000 }
 		)
 	})
 })
