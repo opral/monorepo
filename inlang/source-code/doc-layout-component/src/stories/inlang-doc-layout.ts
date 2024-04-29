@@ -5,6 +5,7 @@ import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import overridePrimitiveColors from "./../helper/overridePrimitiveColors.js"
 
 import "./inlang-doc-navigation.ts"
+import "./inlang-doc-in-page-navigation.ts"
 
 import SlDrawer from "@shoelace-style/shoelace/dist/components/drawer/drawer.component.js"
 import SlButton from "@shoelace-style/shoelace/dist/components/button/button.component.js"
@@ -32,7 +33,12 @@ export default class InlangDocLayout extends LitElement {
 				width: min-content;
 				position: relative;
 				height: 100%;
-				padding: 0 32px;
+				padding: 0 40px;
+			}
+			@media (max-width: 1280px) {
+				.main-column {
+					padding: 0 20px;
+				}
 			}
 			@media (max-width: 768px) {
 				.main-column {
@@ -97,7 +103,11 @@ export default class InlangDocLayout extends LitElement {
 				</div>
 				<slot></slot>
 			</div>
-			<div class="right-column"></div>
+			<div class="right-column">
+				<inlang-doc-in-page-navigation
+					.contentInHtml=${this.children}
+				></inlang-doc-in-page-navigation>
+			</div>
 			<sl-drawer
 				.open=${this._drawerIsOpen}
 				@sl-after-hide=${() => {
