@@ -1,30 +1,25 @@
-#  What does this plugin do?
+# What does this plugin do?
 
-This plugin is a general purpose plugin to read and write messages of json files. It also determines how translation functions and namespaces are parsed and handled by the IDE extension.
-
+This plugin is a general purpose plugin to read and write messages of json files.
 
 ## Manual Installation
 
 > We recommend using the install button, but if you want to do it manually:
 
 - Add this to the modules in your `project.inlang/settings.json`
-- Change the `sourceLanguageTag` if needed 
+- Change the `sourceLanguageTag` if needed
 - Include existing languagetags in the `languageTags` array
-
 
 ```json
 {
 	"sourceLanguageTag": "en",
-	"languageTags": ["en", "de"], 
-	"modules": [
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-json@latest/dist/index.js"
-  	],
+	"languageTags": ["en", "de"],
+	"modules": ["https://cdn.jsdelivr.net/npm/@inlang/plugin-json@latest/dist/index.js"],
 	"plugin.inlang.json": {
 		"pathPattern": "./resources/{languageTag}.json"
-  	}
+	}
 }
 ```
-
 
 ## Example
 
@@ -116,7 +111,7 @@ The message IDs are sorted in the order in which they appear in the sourceLangua
 
 # Supercharge your i18n workflow by installing the Inlang Visual Studio Code extension (Sherlock)
 
-The plugin can be used with the [IDE extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) to extract keys from your code, display inline annotations, have quality checks with [lint rules](https://inlang.com/c/lint-rules) & more. There are only 2 steps to get started:
+The plugin can be used with [Sherlock - VS Code extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) to extract keys from your code, display inline annotations, have quality checks with [lint rules](https://inlang.com/c/lint-rules) & more. There are only 2 steps to get started:
 
 1. Install: [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension).
 2. Add the correct syntax matcher:
@@ -125,7 +120,7 @@ The plugin can be used with the [IDE extension](https://inlang.com/m/r7kp499g/ap
 3. Optional: Add lint rules: https://inlang.com/c/lint-rules
 4. 🎉 Done!
 
-## Pricing 
+## Pricing
 
 <doc-pricing></doc-pricing>
 
