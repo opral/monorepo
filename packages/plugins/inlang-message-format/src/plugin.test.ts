@@ -164,6 +164,46 @@ test("don't throw if the storage path does not exist. instead, create the file a
 	}
 })
 
+test("throws if json has a trailing comma", async () => {
+	const { plugin } = await import("./plugin.js")
+	const fs = createNodeishMemoryFs()
+
+	const settings = {
+		sourceLanguageTag: "en",
+		languageTags: ["en", "de"],
+		modules: [],
+		[pluginId]: { pathPattern: "./messages/{languageTag}.json" } satisfies PluginSettings,
+	}
+
+	const enInitial = JSON.stringify({
+		$schema: "https://inlang.com/schema/inlang-message-format",
+		first_message: "If this works I will be sad",
+		second_message: "Let's see if this blows up",
+	} satisfies StorageSchema)
+
+	let deInitial = JSON.stringify({
+		$schema: "https://inlang.com/schema/inlang-message-format",
+		second_message: "Mal sehen ob das knallt",
+	} satisfies StorageSchema)
+
+	// inject trailing comma
+	deInitial = deInitial.slice(0, -1) + ",}"
+
+	await fs.mkdir("./messages")
+	await fs.writeFile("./messages/en.json", enInitial)
+	await fs.writeFile("./messages/de.json", deInitial)
+
+	try {
+		await plugin.loadMessages!({
+			settings,
+			nodeishFs: fs,
+		})
+		throw new Error("loadMessages should have thrown")
+	} catch (e) {
+		expect((e as Error).message).not.toBe("loadMessages should have thrown")
+	}
+})
+
 test("recursively creating a directory should not fail if a subpath already exists", async () => {
 	const { plugin } = await import("./plugin.js")
 	const fs = createNodeishMemoryFs()
