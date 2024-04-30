@@ -1,5 +1,11 @@
 # @inlang/plugin-message-format
 
+## 2.2.0
+
+### Minor Changes
+
+- 732430d: Error on messages file json parse failures
+
 ## 2.1.1
 
 ### Patch Changes
