@@ -1,5 +1,17 @@
 # inlang-vs-code-extension
 
+## 1.41.0
+
+### Minor Changes
+
+- 89acef4: add ability to change the inline annotation color
+
+## 1.40.0
+
+### Minor Changes
+
+- 1cfdca2: add ability to disable inline annotations
+
 ## 1.39.8
 
 ### Patch Changes
