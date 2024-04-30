@@ -4,6 +4,13 @@
 
 ### Patch Changes
 
+- Updated dependencies [732430d]
+  - @inlang/plugin-message-format@2.2.0
+
+## null
+
+### Patch Changes
+
 - @inlang/plugin-message-format@2.1.1
 - @inlang/website@null
 - @inlang/badge@0.7.18
