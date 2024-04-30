@@ -6,6 +6,12 @@ const settingsProperty = [
 	"disableConfigFileCreation",
 	"disableConfigFileDeletion",
 	"previewLanguageTag",
+	"editorColors.info.foreground",
+	"editorColors.info.background",
+	"editorColors.info.border",
+	"editorColors.error.foreground",
+	"editorColors.error.background",
+	"editorColors.error.border",
 	"inlineAnnotations.enabled",
 ] as const
 
@@ -23,7 +29,7 @@ export const updateSetting = async (property: SettingsProperty, value: any): Pro
 
 /**
  * Gets a configuration setting value.
- * @param {string} property - The name of the configuration property to get.
+ * @param {string} property - The name of the configuration property to get, supports dot notation.
  * @returns {Promise<any>} - A Promise that resolves to the configuration property value.
  * @throws {Error} - Throws an error if the configuration property is not found.
  *
