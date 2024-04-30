@@ -23,7 +23,7 @@ export async function getInlangProject(args: { projectPath: string }): Promise<I
 			console.error(
 				`Could not find repository root for path ${projectPath}, falling back to direct fs access`
 			)
-			repoRoot = 'file://' + baseDirectory
+			repoRoot = "file://" + baseDirectory
 		}
 		const repo = await openRepository(repoRoot, {
 			nodeishFs: fs,
