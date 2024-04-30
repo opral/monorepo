@@ -24,7 +24,6 @@
 		"@inlang/json-types": "workspace:*",
 		"@inlang/language-tag": "workspace:*",
 		"@inlang/message": "workspace:*",
-		"@inlang/sdk": "workspace:*",
 		"@inlang/project-settings": "workspace:*",
 		"@inlang/translatable": "workspace:*",
 		"@lix-js/fs": "workspace:*"

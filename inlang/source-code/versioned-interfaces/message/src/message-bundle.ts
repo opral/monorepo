@@ -115,6 +115,6 @@ export const MessageBundle = Type.Object({
 	/**
 	 * The canonical order for named inputs
 	 */
-	inputs: Type.Array(Type.String()),
+	inputOrder: Type.Array(Type.String()),
 	messages: Type.Array(Message),
 })

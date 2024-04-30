@@ -26,8 +26,7 @@ export {
 	PluginSaveMessagesError,
 } from "./errors.js"
 
-export { normalizeMessageBundle as normalizeMessage } from "./storage/helper.js"
+export { normalizeMessage, normalizeMessageBundle } from "./storage/helper.js"
 export * from "./messages/variant.js"
 export * from "./versionedInterfaces.js"
 export { InlangModule } from "@inlang/module"
-export * as AST from "./ast.js"

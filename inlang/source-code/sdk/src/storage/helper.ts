@@ -1,11 +1,11 @@
-import type { AST } from "../index.js"
+import type { AST } from "@inlang/message"
 import * as LegacyFormat from "@inlang/message"
-import { fromLegacyMessaeg, toLegacyMessage } from "../legacy.js"
+import { fromLegacyMessage, toLegacyMessage } from "../legacy.js"
 
 const fileExtension = ".json"
 
 export function normalizeMessage(legacyMessage: LegacyFormat.Message) {
-	const bundle = fromLegacyMessaeg(legacyMessage)
+	const bundle = fromLegacyMessage(legacyMessage)
 	const normalized = normalizeMessageBundle(bundle)
 	return toLegacyMessage(normalized)
 }

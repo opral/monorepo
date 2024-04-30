@@ -7,7 +7,7 @@ import {
 } from "@sinclair/typebox"
 import type { NodeishFilesystem } from "@lix-js/fs"
 import type { JSONObject } from "@inlang/json-types"
-import type { AST } from "@inlang/sdk"
+import type { AST } from "@inlang/message"
 import { Translatable } from "@inlang/translatable"
 import type { ExternalProjectSettings, ProjectSettings } from "@inlang/project-settings"
 

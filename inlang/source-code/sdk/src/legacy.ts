@@ -1,4 +1,4 @@
-import * as AST from "./ast.js"
+import { AST } from "@inlang/message"
 import * as LegecyFormat from "@inlang/message"
 
 /**
@@ -75,7 +75,7 @@ function toLegacyExpression(expression: AST.Expression): LegecyFormat.Expression
 	}
 }
 
-export function fromLegacyMessaeg(legacyMessage: LegecyFormat.Message): AST.MessageBundle {
+export function fromLegacyMessage(legacyMessage: LegecyFormat.Message): AST.MessageBundle {
 	const languages = dedupe(legacyMessage.variants.map((variant) => variant.languageTag))
 	const inputOrder: string[] = []
 

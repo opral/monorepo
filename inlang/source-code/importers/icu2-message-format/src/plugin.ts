@@ -1,7 +1,7 @@
 import * as MF from "messageformat"
 import { displayName, description } from "../marketplace-manifest.json"
 import { PluginSettings } from "./settings.js"
-import { AST } from "@inlang/sdk"
+import { AST } from "@inlang/messages"
 import { Importer } from "../../../versioned-interfaces/importer/dist/interface.js"
 
 export const pluginId = "importer.inlang.icu2MessageFormat"

@@ -1,6 +1,6 @@
-import type { AST, Importer, NodeishFilesystemSubset } from "@inlang/importer"
+import type { Importer, NodeishFilesystemSubset } from "@inlang/importer"
 import type { ProjectSettings } from "@inlang/project-settings"
-
+import type { AST } from "@inlang/message"
 /**
  * Function that resolves (imports and initializes) the plugins.
  */
