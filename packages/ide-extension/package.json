@@ -10,7 +10,7 @@
 		"url": "https://github.com/opral/monorepo.git"
 	},
 	"icon": "assets/sherlock-logo.png",
-	"version": "1.39.8",
+	"version": "1.41.0",
 	"engines": {
 		"vscode": "^1.84.2"
 	},
@@ -95,6 +95,10 @@
 				"command": "sherlock.copyError",
 				"title": "Copy Error",
 				"icon": "$(copy)"
+			},
+			{
+				"command": "sherlock.toggleInlineAnnotations",
+				"title": "Sherlock: Toggle Inline Annotations"
 			}
 		],
 		"menus": {
@@ -137,6 +141,49 @@
 				"sherlock.previewLanguageTag": {
 					"type": "string",
 					"default": ""
+				},
+				"sherlock.editorColors": {
+					"type": "object",
+					"properties": {
+						"info": {
+							"type": "object",
+							"properties": {
+								"foreground": {
+									"type": "string",
+									"default": "editorInfo.foreground"
+								},
+								"background": {
+									"type": "string",
+									"default": "editorInfo.background"
+								},
+								"border": {
+									"type": "string",
+									"default": "editorInfo.border"
+								}
+							}
+						},
+						"error": {
+							"type": "object",
+							"properties": {
+								"foreground": {
+									"type": "string",
+									"default": "editorError.foreground"
+								},
+								"background": {
+									"type": "string",
+									"default": "editorError.background"
+								},
+								"border": {
+									"type": "string",
+									"default": "editorError.border"
+								}
+							}
+						}
+					}
+				},
+				"sherlock.inlineAnnotations.enabled": {
+					"type": "boolean",
+					"default": true
 				}
 			}
 		}
