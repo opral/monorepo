@@ -1,5 +1,11 @@
 # @inlang/settings-component
 
+## 1.0.8
+
+### Patch Changes
+
+- 11f44db: Bump version of @inlang/settings-component to fix deps
+
 ## 1.0.7
 
 ### Patch Changes
