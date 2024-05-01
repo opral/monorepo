@@ -1,23 +1,40 @@
-import { vi, it, describe, expect, beforeEach } from "vitest"
+import { vi, it, describe, expect, beforeEach, afterEach } from "vitest"
 import fs from "node:fs/promises"
-import { tmpdir } from "node:os"
-import { join } from "node:path"
+import os from "node:os"
+import { dirname, join, resolve } from "node:path"
+import { fileURLToPath } from "node:url"
 import { ProjectSettings } from "@inlang/sdk"
 import { getInlangProject } from "./getInlangProject.js"
 
-process.cwd = tmpdir
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+
+// mocks
 process.exit = vi.fn()
 console.error = vi.fn()
 
-beforeEach(() => {
+beforeEach(async () => {
 	vi.resetAllMocks()
+	// mock cwd to a unique temp dir
+	// https://nodejs.org/docs/latest-v20.x/api/fs.html#fspromisesmkdtempprefix-options
+	const cwd = await fs.mkdtemp(join(os.tmpdir(), "test-cli-getInlangProject-"))
+	process.cwd = () => cwd
 })
 
+afterEach(async () => {
+	const cwd = process.cwd()
+	// cleanup temp dir carefully
+	if (cwd.startsWith(os.tmpdir())) {
+		await fs.rm(cwd, { recursive: true })
+	}
+})
+
+const pluginPath = resolve(__dirname, "../../../plugins/inlang-message-format/dist/index.js")
+
 const settings = {
-	$schema: "https://inlang.com/schema/project-settings",
 	sourceLanguageTag: "en",
 	languageTags: ["en", "de"],
-	modules: ["https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@latest/dist/index.js"],
+	modules: [pluginPath],
 	"plugin.inlang.messageFormat": {
 		pathPattern: "./locales/{languageTag}.json",
 	},
@@ -27,15 +44,14 @@ describe(
 	"getInlangProject",
 	() => {
 		it("does not error in a project with no git repo", async () => {
-			const projectPath = join(
-				await fs.mkdtemp(join(tmpdir(), "test-getInlangProject")),
-				"project.inlang"
-			)
-			const settingsPath = join(projectPath, "settings.json")
+			// process.cwd() is mocked to a temp dir
+			const projectPath = join(process.cwd(), "project.inlang")
 			await fs.mkdir(projectPath)
+
+			const settingsPath = join(projectPath, "settings.json")
 			await fs.writeFile(settingsPath, JSON.stringify(settings))
 
-			await getInlangProject({ projectPath })
+			await getInlangProject({ projectPath: "project.inlang" })
 
 			expect(process.exit).not.toHaveBeenCalled()
 			expect(console.error).toHaveBeenCalledTimes(1)
