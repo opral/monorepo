@@ -1,5 +1,12 @@
 # @inlang/message-lint-rule
 
+## 1.4.7
+
+### Patch Changes
+
+- Updated dependencies [bc17d0c]
+  - @inlang/project-settings@2.4.2
+
 ## 1.4.6
 
 ### Patch Changes
