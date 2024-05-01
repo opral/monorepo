@@ -1,3 +1,4 @@
+import type { SchemaOptions } from "@sinclair/typebox"
 import type { ValueError } from "@sinclair/typebox/errors"
 
 export class LoadProjectInvalidArgument extends Error {
@@ -11,13 +12,24 @@ export class ProjectSettingsInvalidError extends Error {
 	constructor(options: { errors: ValueError[] }) {
 		// TODO: beatufiy ValueErrors
 		super(
-			`The project settings are invalid:\n\n${options.errors
-				.filter((error) => error.path)
-				.map((error) => `"${error.path}":\n\n${error.message}`)
-				.join("\n")}`
+			`The project settings are invalid:
+${options.errors
+	.filter((error) => error.path)
+	.map(FormatProjectSettingsError)
+	.join("\n")}`
 		)
 		this.name = "ProjectSettingsInvalidError"
 	}
+}
+
+function FormatProjectSettingsError(error: ValueError) {
+	let msg = `${error.message} at ${error.path}`
+	if (error.path.startsWith("/modules/")) {
+		msg += `
+value = "${error.value}"
+- ${error.schema.allOf.map((o: SchemaOptions) => `${o.description ?? ""}`).join("\n- ")}`
+	}
+	return msg
 }
 
 export class ProjectSettingsFileJSONSyntaxError extends Error {
