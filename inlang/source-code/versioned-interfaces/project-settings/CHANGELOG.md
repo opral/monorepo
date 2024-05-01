@@ -1,5 +1,11 @@
 # @inlang/project-settings
 
+## 2.4.2
+
+### Patch Changes
+
+- bc17d0c: Improve error handling for module URLs in project settings
+
 ## 2.4.1
 
 ### Patch Changes

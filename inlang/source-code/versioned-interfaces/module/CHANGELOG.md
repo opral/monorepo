@@ -1,5 +1,12 @@
 # @inlang/module
 
+## 1.2.11
+
+### Patch Changes
+
+- @inlang/message-lint-rule@1.4.7
+- @inlang/plugin@2.4.11
+
 ## 1.2.10
 
 ### Patch Changes
