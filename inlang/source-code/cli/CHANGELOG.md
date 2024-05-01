@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 2.16.0
+
+### Minor Changes
+
+- 35cd140: Fix cli for new projects without git
+
 ## 2.15.3
 
 ### Patch Changes
