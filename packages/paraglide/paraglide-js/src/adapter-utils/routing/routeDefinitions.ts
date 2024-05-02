@@ -6,7 +6,6 @@ export type PathDefinitionTranslations<T extends string = string> = {
 }
 
 type Route = {
-	id: string
 	params: RouteParam[]
 	pattern: RegExp
 }
@@ -119,7 +118,7 @@ export function parseRouteDefinition(id: string): Route {
 						.join("")}/?$`
 			  )
 
-	return { pattern, params, id }
+	return { pattern, params }
 }
 
 export function exec(
