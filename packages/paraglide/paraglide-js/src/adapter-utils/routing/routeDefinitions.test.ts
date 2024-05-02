@@ -200,17 +200,16 @@ describe("match", () => {
 	})
 
 	// Test case from https://github.com/opral/inlang-paraglide-js/issues/100
-	it("prefers matches with non-catchall params", () => {
-		const match = bestMatch(
-			"/properties/custom",
-			["/properties/[...rest]", "/properties/custom"],
-			{}
-		)
-		expect(match).toEqual({
-			id: "/properties/custom",
-			params: {},
-		})
-	})
+	it.each(permute(["/properties/[...rest]", "/properties/custom", "/[...rest]"]))(
+		"prefers matches with non-catchall params",
+		(...routeIds) => {
+			const match = bestMatch("/properties/custom", routeIds, {})
+			expect(match).toEqual({
+				id: "/properties/custom",
+				params: {},
+			})
+		}
+	)
 
 	it("matches optional catchalls", () => {
 		const match = bestMatch("/foo/bar/baz", ["/foo/[[...rest]]"], {})
@@ -242,3 +241,23 @@ describe("match", () => {
 		})
 	})
 })
+
+const permute = <T>(inputArr: T[]): T[][] => {
+	let result: T[][] = []
+
+	const permute = (arr: T[], m: T[] = []) => {
+		if (arr.length === 0) {
+			result.push(m)
+		} else {
+			for (let i = 0; i < arr.length; i++) {
+				let curr = arr.slice()
+				let next = curr.splice(i, 1)
+				permute(curr.slice(), m.concat(next))
+			}
+		}
+	}
+
+	permute(inputArr)
+
+	return result
+}

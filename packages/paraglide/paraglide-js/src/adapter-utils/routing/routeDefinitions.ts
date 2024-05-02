@@ -1,7 +1,14 @@
 //vendored in from sveltekit and adapted
 
+import { sort_routes } from "./sortRoutes.js"
+
 export type PathDefinitionTranslations<T extends string = string> = {
 	[canonicalPath: `/${string}`]: Record<T, `/${string}`>
+}
+
+type Route = {
+	params: RouteParam[]
+	pattern: RegExp
 }
 
 export type RouteParam = {
@@ -21,10 +28,7 @@ const param_pattern = /^(\[)?(\.\.\.)?(\w+)(?:=(\w+))?(\])?$/
 /**
  * Creates the regex pattern, extracts parameter names, and generates types for a route
  */
-export function parseRouteDefinition(id: string): {
-	params: RouteParam[]
-	pattern: RegExp
-} {
+export function parseRouteDefinition(id: string): Route {
 	const params: RouteParam[] = []
 
 	const pattern =
@@ -261,59 +265,22 @@ export function bestMatch(
 	pathDefinitions: string[],
 	matchers: Record<string, ParamMatcher>
 ): { params: Record<string, string>; id: string } | undefined {
-	let bestMatch:
-		| {
-				id: string
-				params: Record<string, string>
-				route: ReturnType<typeof parseRouteDefinition>
-		  }
-		| undefined = undefined
+	const sorted = sort_routes(pathDefinitions)
 
-	for (const pathDefinition of pathDefinitions) {
+	//find the first match
+	for (const pathDefinition of sorted) {
 		const route = parseRouteDefinition(pathDefinition)
 		const match = route.pattern.exec(removeTrailingSlash(canonicalPath))
-
-		//if the path doesn't match the pattern it's not a match
 		if (!match) continue
 
-		//the params are undefined IFF the matchers don't match
 		const params = exec(match, route.params, matchers)
+		//the params are undefined IFF the matchers don't match
 		if (!params) continue
 
-		if (!bestMatch) {
-			bestMatch = { params, route, id: pathDefinition }
-			continue
-		}
-
-		const bestMatchNumParams = Object.keys(bestMatch.route.params).length
-		const currentMatchNumParams = Object.keys(route.params).length
-
-		// the best match requires fewer parameters
-		if (bestMatchNumParams < currentMatchNumParams) {
-			continue
-		}
-
-		//if the current match has fewer parameters, it's a better match
-		if (bestMatchNumParams > currentMatchNumParams) {
-			bestMatch = { params, route, id: pathDefinition }
-			continue
-		}
-
-		// if they're tied, pick the shorter one
-		if (
-			bestMatchNumParams === currentMatchNumParams &&
-			route.pattern.source.length < bestMatch.route.pattern.source.length
-		) {
-			bestMatch = { params, route, id: pathDefinition }
-		}
+		return { params, id: pathDefinition }
 	}
 
-	return bestMatch
-		? {
-				id: bestMatch.id,
-				params: bestMatch.params,
-		  }
-		: undefined
+	return undefined
 }
 
 function removeTrailingSlash(path: string): string {
@@ -327,6 +294,4 @@ function removeTrailingSlash(path: string): string {
  * @param {string} route
  * @returns string[]
  */
-function get_route_segments(route: string) {
-	return route.slice(1).split("/")
-}
+export const get_route_segments = (route: string) => route.slice(1).split("/")
