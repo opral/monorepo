@@ -126,7 +126,7 @@ export function exec(
 	const result: Record<string, string> = {}
 
 	const values = match.slice(1)
-	const values_needing_match = values.filter((value) => value !== undefined)
+	const values_needing_match = values.filter((v) => v !== undefined)
 
 	let buffered = 0
 
@@ -225,25 +225,21 @@ const basic_param_pattern = /\[(\[)?(\.\.\.)?(\w+?)(?:=(\w+))?\]\]?/g
  * ```
  */
 export function resolveRoute(id: string, params: Record<string, string | undefined>): string {
-	const segments = get_route_segments(id)
 	return (
 		"/" +
-		segments
+		get_route_segments(id)
 			.map((segment) =>
 				segment.replace(basic_param_pattern, (_, optional, rest, name) => {
 					const param_value = params[name]
 
 					// This is nested so TS correctly narrows the type
 					if (!param_value) {
-						if (optional) return ""
-						if (rest && param_value !== undefined) return ""
-						throw new Error(`Missing parameter '${name}' in route ${id}`)
+						if (optional || (rest && param_value !== undefined)) return ""
+						else throw new Error(`Missing parameter '${name}' in route ${id}`)
 					}
 
-					if (param_value.startsWith("/") || param_value.endsWith("/"))
-						throw new Error(
-							`Parameter '${name}' in route ${id} cannot start or end with a slash -- this would cause an invalid route like foo//bar`
-						)
+					if (param_value[0] == "/" || param_value.endsWith("/"))
+						throw new Error(`Parameter '${name}' in route ${id} cannot start or end with a slash`)
 					return param_value
 				})
 			)

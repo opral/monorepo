@@ -199,6 +199,19 @@ describe("match", () => {
 		})
 	})
 
+	// Test case from https://github.com/opral/inlang-paraglide-js/issues/100
+	it("prefers matches with non-catchall params", () => {
+		const match = bestMatch(
+			"/properties/custom",
+			["/properties/[...rest]", "/properties/custom"],
+			{}
+		)
+		expect(match).toEqual({
+			id: "/properties/custom",
+			params: {},
+		})
+	})
+
 	it("matches optional catchalls", () => {
 		const match = bestMatch("/foo/bar/baz", ["/foo/[[...rest]]"], {})
 		expect(match).toEqual({
