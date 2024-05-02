@@ -10,6 +10,7 @@ export type RouteParam = {
 	optional: boolean
 	rest: boolean
 	chained: boolean
+	//priority: number
 }
 export type ParamMatcher = (segment: string) => boolean
 

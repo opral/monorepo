@@ -190,7 +190,7 @@ describe("match", () => {
 	})
 
 	it("prefers matches with fewer params", () => {
-		const match = bestMatch("/foo/bar/baz", ["/foo/[id]/baz", "/foo/[id]/[slug]"], {})
+		const match = bestMatch("/foo/bar/baz", ["/foo/[id]/[slug]", "/foo/[id]/baz"], {})
 		expect(match).toEqual({
 			id: "/foo/[id]/baz",
 			params: {
