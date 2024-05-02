@@ -158,38 +158,3 @@ export function createNoopNavigation<T extends string>(): ReturnType<typeof crea
 		},
 	}
 }
-
-export function createRedirects<T extends string>(
-	languageTag: () => T,
-	strategy: RoutingStragey<T>
-) {
-	const localiseHref = createLocaliseHref(strategy)
-
-	type NextRedirect = (typeof NextNavigation)["redirect"]
-
-	/**
-	 * When used in a streaming context, this will insert a meta tag to redirect the user to the target page.
-	 * When used in a custom app route, it will serve a 307/303 to the caller.
-	 *
-	 *  @param url the url to redirect to
-	 */
-	const redirect: NextRedirect = (...args) => {
-		args[0] = localiseHref(args[0], languageTag())
-		NextNavigation.redirect(...args)
-	}
-
-	type NextPermanentRedirect = (typeof NextNavigation)["permanentRedirect"]
-
-	/**
-	 * When used in a streaming context, this will insert a meta tag to redirect the user to the target page.
-	 * When used in a custom app route, it will serve a 308/303 to the caller.
-	 *
-	 * @param url the url to redirect to
-	 */
-	const permanentRedirect: NextPermanentRedirect = (...args) => {
-		args[0] = localiseHref(args[0], languageTag())
-		NextNavigation.permanentRedirect(...args)
-	}
-
-	return { redirect, permanentRedirect }
-}
