@@ -228,18 +228,21 @@ describe("match", () => {
 		expect(match).toBeUndefined()
 	})
 
-	it("Uses params to disambiguate", () => {
-		const match = bestMatch("/foo/bar", ["/foo/[params=bar]", "/foo/[params=foo]"], {
-			foo: (param) => param === "foo",
-			bar: (param) => param === "bar",
-		})
-		expect(match).toEqual({
-			id: "/foo/[params=bar]",
-			params: {
-				params: "bar",
-			},
-		})
-	})
+	it.each(permute(["/foo/[params=bar]", "/foo/[params=foo]"]))(
+		"Uses params to disambiguate",
+		(...routeIds) => {
+			const match = bestMatch("/foo/bar", routeIds, {
+				foo: (param) => param === "foo",
+				bar: (param) => param === "bar",
+			})
+			expect(match).toEqual({
+				id: "/foo/[params=bar]",
+				params: {
+					params: "bar",
+				},
+			})
+		}
+	)
 })
 
 const permute = <T>(inputArr: T[]): T[][] => {
