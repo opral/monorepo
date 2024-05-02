@@ -471,7 +471,7 @@ importers:
     dependencies:
       '@inlang/settings-component':
         specifier: ^1.0.6
-        version: link:../settings-component
+        version: 1.0.8(@types/react@18.2.79)
       '@isomorphic-git/cors-proxy':
         specifier: ^2.7.1
         version: 2.7.1
@@ -838,7 +838,7 @@ importers:
         version: link:../sdk
       '@inlang/settings-component':
         specifier: ^1.0.6
-        version: link:../settings-component
+        version: 1.0.8(@types/react@18.2.79)
       '@inlang/telemetry':
         specifier: workspace:*
         version: link:../telemetry
@@ -951,6 +951,34 @@ importers:
       wdio-vscode-service:
         specifier: ^6.0.0
         version: 6.0.3
+
+  inlang/source-code/importers/icu2-message-format:
+    dependencies:
+      messageformat:
+        specifier: 4.0.0-7
+        version: 4.0.0-7
+    devDependencies:
+      '@inlang/cli':
+        specifier: workspace:*
+        version: link:../../cli
+      '@inlang/detect-json-formatting':
+        specifier: workspace:*
+        version: link:../../detect-json-formatting
+      '@inlang/message':
+        specifier: workspace:*
+        version: link:../../versioned-interfaces/message
+      '@sinclair/typebox':
+        specifier: ^0.31.17
+        version: 0.31.28
+      '@vitest/coverage-v8':
+        specifier: 0.34.6
+        version: 0.34.6(vitest@0.34.6)
+      typescript:
+        specifier: ^5.1.3
+        version: 5.3.3
+      vitest:
+        specifier: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)
 
   inlang/source-code/json-types:
     dependencies:
@@ -2463,9 +2491,6 @@ importers:
       '@inlang/project-settings':
         specifier: workspace:*
         version: link:../project-settings
-      '@inlang/sdk':
-        specifier: workspace:*
-        version: link:../../sdk
       '@inlang/translatable':
         specifier: workspace:*
         version: link:../translatable
@@ -6435,6 +6460,127 @@ packages:
     dev: false
     optional: true
 
+  /@inlang/json-types@1.1.0(@sinclair/typebox@0.31.28):
+    resolution: {integrity: sha512-n6vS6AqETsCFbV4TdBvR/EH57waVXzKsMqeUQ+eH2Q6NUATfKhfLabgNms2A+QV3aedH/hLtb1pRmjl2ykBVZg==}
+    peerDependencies:
+      '@sinclair/typebox': ^0.31.0
+    dependencies:
+      '@sinclair/typebox': 0.31.28
+    dev: false
+
+  /@inlang/language-tag@1.5.1:
+    resolution: {integrity: sha512-+NlYDxDvN5h/TKUmkuQv+Ct1flxaVRousCbek7oFEk3/afZPVLNTJhm+cX2xiOg3tmi2KKrBLfy/V9oUDHj6GQ==}
+    dependencies:
+      '@sinclair/typebox': 0.31.28
+    dev: false
+
+  /@inlang/message-lint-rule@1.4.7(@sinclair/typebox@0.31.28):
+    resolution: {integrity: sha512-FCiFe/H25fqhsIb/YTb0K7eDJqEYzdr6ectF0xG4zARiS7nXz0FHxk2niJrIO8kFkB4mx6tszsgQ0xqD5cHQag==}
+    peerDependencies:
+      '@sinclair/typebox': ^0.31.17
+    dependencies:
+      '@inlang/json-types': 1.1.0(@sinclair/typebox@0.31.28)
+      '@inlang/language-tag': 1.5.1
+      '@inlang/message': 2.1.0(@sinclair/typebox@0.31.28)
+      '@inlang/project-settings': 2.4.2(@sinclair/typebox@0.31.28)
+      '@inlang/translatable': 1.3.1
+      '@sinclair/typebox': 0.31.28
+    dev: false
+
+  /@inlang/message@2.1.0(@sinclair/typebox@0.31.28):
+    resolution: {integrity: sha512-Gr3wiErI7fW4iW11xgZzsJEUTjlZuz02fB/EO+ENTBlSHGyI1kzbCCeNqLr1mnGdQYiOxfuZxY0S4G5C6Pju3Q==}
+    peerDependencies:
+      '@sinclair/typebox': ^0.31.17
+    dependencies:
+      '@inlang/language-tag': 1.5.1
+      '@sinclair/typebox': 0.31.28
+    dev: false
+
+  /@inlang/module@1.2.11(@sinclair/typebox@0.31.28):
+    resolution: {integrity: sha512-0JdRW9cIoHkIRrGOc9Ja6kNRSaO0zg4cehv8J46cG63/zdjmpC1LLaes1K+6c0QSboaiWKbjx5BK42Op6HyqCg==}
+    peerDependencies:
+      '@sinclair/typebox': ^0.31.17
+    dependencies:
+      '@inlang/message-lint-rule': 1.4.7(@sinclair/typebox@0.31.28)
+      '@inlang/plugin': 2.4.11(@sinclair/typebox@0.31.28)
+      '@sinclair/typebox': 0.31.28
+    dev: false
+
+  /@inlang/plugin@2.4.11(@sinclair/typebox@0.31.28):
+    resolution: {integrity: sha512-kn19uAvp81qS18Ha3xCmhzIysAd8wZCeTPffk5gYCOldmudUIZKvQ2P0BF3RuWpyftJb6yae1NxkLwT4QRfIPQ==}
+    peerDependencies:
+      '@sinclair/typebox': ^0.31.17
+    dependencies:
+      '@inlang/json-types': 1.1.0(@sinclair/typebox@0.31.28)
+      '@inlang/language-tag': 1.5.1
+      '@inlang/message': 2.1.0(@sinclair/typebox@0.31.28)
+      '@inlang/project-settings': 2.4.2(@sinclair/typebox@0.31.28)
+      '@inlang/translatable': 1.3.1
+      '@lix-js/fs': 1.0.0
+      '@sinclair/typebox': 0.31.28
+    dev: false
+
+  /@inlang/project-settings@2.4.2(@sinclair/typebox@0.31.28):
+    resolution: {integrity: sha512-Okus2JdwTzNebZHkXCrUH/zIWwqu7kWm/ZQaM6a31oRIEA2JdQJtyNGM8E/KrwGfEuq18U+WV03+tR3tkwsGvA==}
+    peerDependencies:
+      '@sinclair/typebox': ^0.31.17
+    dependencies:
+      '@inlang/json-types': 1.1.0(@sinclair/typebox@0.31.28)
+      '@inlang/language-tag': 1.5.1
+      '@sinclair/typebox': 0.31.28
+    dev: false
+
+  /@inlang/result@1.1.0:
+    resolution: {integrity: sha512-zLGroi9EUiHuOjUOaglUVTFO7EWdo2OARMJLBO1Q5Ga/xJmSQb6XS1lhqEXBFAjgFarfEMX5YEJWWALogYV3wA==}
+    dev: false
+
+  /@inlang/sdk@0.34.3:
+    resolution: {integrity: sha512-ZOux3OGcZRnRHkSW2rWicEuWxGOg1qbODj/D9D9JgofkSr7b3/tOMrc1F2F24u+oIdLthn6W74XfL8N14AGCnQ==}
+    engines: {node: '>=18.0.0'}
+    dependencies:
+      '@inlang/json-types': 1.1.0(@sinclair/typebox@0.31.28)
+      '@inlang/language-tag': 1.5.1
+      '@inlang/message': 2.1.0(@sinclair/typebox@0.31.28)
+      '@inlang/message-lint-rule': 1.4.7(@sinclair/typebox@0.31.28)
+      '@inlang/module': 1.2.11(@sinclair/typebox@0.31.28)
+      '@inlang/plugin': 2.4.11(@sinclair/typebox@0.31.28)
+      '@inlang/project-settings': 2.4.2(@sinclair/typebox@0.31.28)
+      '@inlang/result': 1.1.0
+      '@inlang/translatable': 1.3.1
+      '@lix-js/client': 1.4.0
+      '@lix-js/fs': 1.0.0
+      '@sinclair/typebox': 0.31.28
+      debug: 4.3.4(supports-color@8.1.1)
+      dedent: 1.5.1
+      deepmerge-ts: 5.1.0
+      murmurhash3js: 3.0.1
+      solid-js: 1.6.12
+      throttle-debounce: 5.0.0
+    transitivePeerDependencies:
+      - babel-plugin-macros
+      - supports-color
+    dev: false
+
+  /@inlang/settings-component@1.0.8(@types/react@18.2.79):
+    resolution: {integrity: sha512-MS4+ReHpGV2UrRsuytQEB0iqructZkEcxLNwERip4nGiNXgHGXBIZIABtTAiyjbBXPifrEeu0292iTHwrHwbtg==}
+    dependencies:
+      '@inlang/sdk': 0.34.3
+      '@lit/task': 1.0.0
+      '@shoelace-style/shoelace': 2.14.0(@types/react@18.2.79)
+      '@sinclair/typebox': 0.31.28
+      chroma-js: 2.4.2
+    transitivePeerDependencies:
+      - '@types/react'
+      - babel-plugin-macros
+      - supports-color
+    dev: false
+
+  /@inlang/translatable@1.3.1:
+    resolution: {integrity: sha512-VAtle21vRpIrB+axtHFrFB0d1HtDaaNj+lV77eZQTJyOWbTFYTVIQJ8WAbyw9eu4F6h6QC2FutLyxjMomxfpcQ==}
+    dependencies:
+      '@inlang/language-tag': 1.5.1
+    dev: false
+
   /@isaacs/cliui@8.0.2:
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
     engines: {node: '>=12'}
@@ -6596,6 +6742,30 @@ packages:
     resolution: {integrity: sha512-7jocGBh3yGlo3kKxQggZph2txK4X5GYNWp2FAsmV9u2spzUypwrzRzXe8I72icAb02B00+k2nlvxVcrQB6vyrw==}
     dependencies:
       '@lit/reactive-element': 2.0.4
+    dev: false
+
+  /@lix-js/client@1.4.0:
+    resolution: {integrity: sha512-41mskLNCWPkRHjhQhhJw8J5l+kUaYEAuleKo6NhEzOceTYkAZeM2wxxqTbd+HMzvmJF40AfAK50sYx4tF3dDew==}
+    dependencies:
+      '@lix-js/fs': 1.0.0
+      '@octokit/types': 12.4.0
+      async-lock: 1.4.1
+      clean-git-ref: 2.0.1
+      crc-32: 1.2.2
+      diff3: 0.0.4
+      eslint: 9.0.0
+      ignore: 5.3.1
+      octokit: 3.1.2
+      pako: 1.0.11
+      pify: 5.0.0
+      prettier: 2.8.3
+      sha.js: 2.4.11
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
+  /@lix-js/fs@1.0.0:
+    resolution: {integrity: sha512-B3gnR0B7mOiYePnxh+XNU1OpVvvRYcLJ3MrdqkFVKiXz1fbKKCEMA53Vwhu3ehAMFFDB1Mo9+GVjiY2ssbA/ZQ==}
     dev: false
 
   /@ljharb/through@2.3.13:
@@ -21004,6 +21174,10 @@ packages:
   /merge2@1.4.1:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}
     engines: {node: '>= 8'}
+
+  /messageformat@4.0.0-7:
+    resolution: {integrity: sha512-e7Ev5SNMHQ02dZPlc2blZWum1kB2B3jGQAskO97cZd9H/Eo8BF1GMhigswTNbh/2itpbDqa0jtBz9+VcRgfiQA==}
+    dev: false
 
   /methods@1.1.2:
     resolution: {integrity: sha512-iclAHeNqNm68zFtnZ0e+1L2yUIdvzNoauKU4WBA3VvH/vPFieF7qfRlwUZU+DA9P9bPXIS90ulxoUoCH23sV2w==}

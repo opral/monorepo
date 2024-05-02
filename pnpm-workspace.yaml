@@ -5,6 +5,7 @@ packages:
   - 'inlang/source-code/*'
   - 'inlang/source-code/cross-sell/*'
   - 'inlang/source-code/plugins/*'
+  - 'inlang/source-code/importers/*'
   - 'inlang/source-code/paraglide/*'
   - 'inlang/source-code/end-to-end-tests/*'
   - 'inlang/source-code/paraglide/paraglide-js-adapter-vite/tests/*'

@@ -71,12 +71,7 @@ describe("loadMessages", () => {
 			description: { en: "My plugin description" },
 			displayName: { en: "My plugin" },
 			loadMessages: async () => [
-				{
-					id: "test",
-					alias: {},
-					translations: [],
-					inputs: [],
-				},
+				{ id: "test", alias: {}, expressions: [], selectors: [], variants: [] },
 			],
 		}
 
