@@ -12,6 +12,6 @@ export async function greet(formData: FormData) {
 
 export async function fetchData() {
 	const data = "this is the data"
-	console.log("server response:", data)
+	console.info("server response:", data)
 	return data
 }

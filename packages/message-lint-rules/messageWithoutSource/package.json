@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/message-lint-rule-without-source",
-	"version": "1.4.6",
+	"version": "1.4.7",
 	"type": "module",
 	"exports": {
 		".": "./dist/index.js"

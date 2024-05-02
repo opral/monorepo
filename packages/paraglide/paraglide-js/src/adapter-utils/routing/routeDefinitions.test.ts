@@ -136,17 +136,17 @@ describe("exec", () => {
 	})
 })
 
-describe("match", () => {
-	it("matches a static path", () => {
-		const match = bestMatch("/foo", ["/foo"], {})
+describe("bestMatch", () => {
+	it.each(permute(["/foo", "/bar"]))("matches a static path", (...routeIds) => {
+		const match = bestMatch("/foo", routeIds, {})
 		expect(match).toEqual({
 			id: "/foo",
 			params: {},
 		})
 	})
 
-	it("matches a path with a param", () => {
-		const match = bestMatch("/bar/123", ["/bar/[id]"], {})
+	it.each(permute(["/bar/[id]", "/foo/[id]"]))("matches a path with a param", (...routeIds) => {
+		const match = bestMatch("/bar/123", routeIds, {})
 		expect(match).toEqual({
 			id: "/bar/[id]",
 			params: {
@@ -155,29 +155,30 @@ describe("match", () => {
 		})
 	})
 
-	it("matches a path with multiple params", () => {
-		const match = bestMatch("/foo/bar/baz", ["/foo/[id]/[slug]"], {})
-		expect(match).toEqual({
-			id: "/foo/[id]/[slug]",
-			params: {
-				id: "bar",
-				slug: "baz",
-			},
-		})
-	})
+	it.each(permute(["/foo/[id]/[slug]", "/bar/[id]/[slug]"]))(
+		"matches a path with multiple params",
+		(...routeIds) => {
+			const match = bestMatch("/foo/bar/baz", routeIds, {})
+			expect(match).toEqual({
+				id: "/foo/[id]/[slug]",
+				params: {
+					id: "bar",
+					slug: "baz",
+				},
+			})
+		}
+	)
 
-	it("prefers paths with no params", () => {
-		const match = bestMatch("/foo/bar/baz", ["/foo/[id]/[slug]", "/foo/bar/baz"], {})
-		expect(match).toEqual({
-			id: "/foo/bar/baz",
-			params: {},
-		})
-	})
-
-	it("doesn't match on partial matches", () => {
-		const match = bestMatch("/", ["/admin"], {})
-		expect(match).toBeUndefined()
-	})
+	it.each(permute(["/foo/[id]/[slug]", "/foo/bar/baz"]))(
+		"prefers paths with no params over paths with params",
+		(...routeIds) => {
+			const match = bestMatch("/foo/bar/baz", routeIds, {})
+			expect(match).toEqual({
+				id: "/foo/bar/baz",
+				params: {},
+			})
+		}
+	)
 
 	it("matches a path with a param that's not it's own segment", () => {
 		const match = bestMatch("/foo/bar-123", ["/foo/bar-[id]"], {})
@@ -189,8 +190,13 @@ describe("match", () => {
 		})
 	})
 
+	it("doesn't match on partial matches", () => {
+		const match = bestMatch("/", ["/admin"], {})
+		expect(match).toBeUndefined()
+	})
+
 	it("prefers matches with fewer params", () => {
-		const match = bestMatch("/foo/bar/baz", ["/foo/[id]/baz", "/foo/[id]/[slug]"], {})
+		const match = bestMatch("/foo/bar/baz", ["/foo/[id]/[slug]", "/foo/[id]/baz"], {})
 		expect(match).toEqual({
 			id: "/foo/[id]/baz",
 			params: {
@@ -198,6 +204,18 @@ describe("match", () => {
 			},
 		})
 	})
+
+	// Test case from https://github.com/opral/inlang-paraglide-js/issues/100
+	it.each(permute(["/properties/[...rest]", "/properties/custom", "/[...rest]"]))(
+		"prefers matches with non-catchall params",
+		(...routeIds) => {
+			const match = bestMatch("/properties/custom", routeIds, {})
+			expect(match).toEqual({
+				id: "/properties/custom",
+				params: {},
+			})
+		}
+	)
 
 	it("matches optional catchalls", () => {
 		const match = bestMatch("/foo/bar/baz", ["/foo/[[...rest]]"], {})
@@ -216,16 +234,39 @@ describe("match", () => {
 		expect(match).toBeUndefined()
 	})
 
-	it("Uses params to disambiguate", () => {
-		const match = bestMatch("/foo/bar", ["/foo/[params=bar]", "/foo/[params=foo]"], {
-			foo: (param) => param === "foo",
-			bar: (param) => param === "bar",
-		})
-		expect(match).toEqual({
-			id: "/foo/[params=bar]",
-			params: {
-				params: "bar",
-			},
-		})
-	})
+	it.each(permute(["/foo/[params=bar]", "/foo/[params=foo]"]))(
+		"Uses params to disambiguate",
+		(...routeIds) => {
+			const match = bestMatch("/foo/bar", routeIds, {
+				foo: (param) => param === "foo",
+				bar: (param) => param === "bar",
+			})
+			expect(match).toEqual({
+				id: "/foo/[params=bar]",
+				params: {
+					params: "bar",
+				},
+			})
+		}
+	)
 })
+
+const permute = <T>(inputArr: T[]): T[][] => {
+	const result: T[][] = []
+
+	const permute = (arr: T[], m: T[] = []) => {
+		if (arr.length === 0) {
+			result.push(m)
+		} else {
+			for (let i = 0; i < arr.length; i++) {
+				const curr = [...arr]
+				const next = curr.splice(i, 1)
+				permute(curr, [...m, ...next])
+			}
+		}
+	}
+
+	permute(inputArr)
+
+	return result
+}

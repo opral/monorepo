@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/plugin-next-intl",
-	"version": "1.3.22",
+	"version": "1.3.23",
 	"type": "module",
 	"exports": {
 		".": "./dist/index.js"
