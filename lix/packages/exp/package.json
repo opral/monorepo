@@ -1,5 +1,5 @@
 {
-  "name": "exp-app",
+  "name": "exp",
   "version": "0.0.1",
   "type": "module",
   "scripts": {
@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.533.0",
+    "@gitgraph/js": "^1.4.0",
     "@helia/unixfs": "3.0.2",
     "@lix-js/client": "../client",
     "@lix-js/fs": "../fs",

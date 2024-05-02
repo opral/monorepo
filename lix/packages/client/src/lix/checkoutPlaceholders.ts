@@ -8,7 +8,7 @@ export async function checkOutPlaceholders(ctx: RepoContext, state: RepoState) {
 	const { branchName, checkedOut, sparseFilter } = state
 
 	await doCheckout({
-		fs: rawFs,
+		fs: state.nodeishFs,
 		cache,
 		dir,
 		ref: branchName,
@@ -18,6 +18,7 @@ export async function checkOutPlaceholders(ctx: RepoContext, state: RepoState) {
 	const fs = rawFs
 	const gitignoreFiles: string[] = []
 
+	let rootHash: string | undefined
 	await isoGit.walk({
 		fs,
 		dir,
@@ -29,13 +30,19 @@ export async function checkOutPlaceholders(ctx: RepoContext, state: RepoState) {
 			if (!commit) {
 				return undefined
 			}
+
 			const fileMode = await commit.mode()
+			const oid = await commit.oid()
+
+			if (fullpath === ".") {
+				rootHash = oid
+			}
 
 			const fileType = modeToFileType(fileMode)
 
 			if (fullpath.endsWith(".gitignore")) {
 				gitignoreFiles.push(fullpath)
-				return undefined
+				// return undefined
 			}
 
 			if (
@@ -53,12 +60,12 @@ export async function checkOutPlaceholders(ctx: RepoContext, state: RepoState) {
 			}
 
 			if (fileType === "file" && !checkedOut.has(fullpath)) {
-				await fs._createPlaceholder(fullpath, { mode: fileMode })
+				await fs._createPlaceholder(fullpath, { mode: fileMode, oid, rootHash })
 				return fullpath
 			}
 
 			if (fileType === "symlink" && !checkedOut.has(fullpath)) {
-				await fs._createPlaceholder(fullpath, { mode: fileMode })
+				await fs._createPlaceholder(fullpath, { mode: fileMode, oid, rootHash })
 				return fullpath
 			}
 
@@ -67,16 +74,18 @@ export async function checkOutPlaceholders(ctx: RepoContext, state: RepoState) {
 		},
 	})
 
-	if (gitignoreFiles.length) {
-		await doCheckout({
-			fs: rawFs,
-			dir,
-			cache,
-			ref: branchName,
-			filepaths: gitignoreFiles,
-		})
-		gitignoreFiles.map((file) => checkedOut.add(file))
-	}
+	// if (gitignoreFiles.length) {
+	// 	// await doCheckout({
+	// 	// 	fs: rawFs, // TODO: fix this?
+	// 	// 	dir,
+	// 	// 	cache,
+	// 	// 	ref: branchName,
+	// 	// 	filepaths: gitignoreFiles,
+	// 	// })
+	// 	// gitignoreFiles.map((file) => checkedOut.add(file))
+	// }
 
 	state.pending && (await state.pending)
+
+	return { gitignoreFiles }
 }

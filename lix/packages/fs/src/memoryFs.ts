@@ -18,6 +18,8 @@ export type Snapshot = {
 			gid: number
 			size: number
 			_kind: number
+			_oid?: string
+			_rootHash?: string
 		}
 	}
 }
@@ -138,7 +140,12 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 
 	// initialize the root to an empty dir
 	state.fsMap.set("/", new Set())
-	newStatEntry("/", state.fsStats, 1, 0o755)
+	newStatEntry({
+		path: "/",
+		stats: state.fsStats,
+		kind: 1,
+		modeBits: 0o755,
+	})
 
 	const listeners: Set<(event: FileChangeInfo) => void> = new Set()
 
@@ -164,7 +171,11 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 
 		_createPlaceholder: async function (
 			path: Parameters<NodeishFilesystem["writeFile"]>[0],
-			options?: Parameters<NodeishFilesystem["writeFile"]>[2]
+			options?: {
+				mode: number
+				oid: string
+				rootHash: string
+			}
 		) {
 			path = normalPath(path)
 			const dirName = getDirname(path)
@@ -181,7 +192,16 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 
 			parentDir.add(baseName)
 			const isSymbolicLink = options?.mode === 120000
-			newStatEntry(path, state.fsStats, isSymbolicLink ? 2 : 0, options?.mode ?? 0o644)
+
+			newStatEntry({
+				path,
+				stats: state.fsStats,
+				kind: isSymbolicLink ? 2 : 0,
+				modeBits: options?.mode ?? 0o644,
+				oid: options?.oid,
+				rootHash: options?.rootHash,
+			})
+
 			state.fsMap.set(path, { placeholder: true })
 		},
 
@@ -220,7 +240,14 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			}
 
 			parentDir.add(baseName)
-			newStatEntry(path, state.fsStats, 0, options?.mode ?? 0o644)
+
+			newStatEntry({
+				path,
+				stats: state.fsStats,
+				kind: 0,
+				modeBits: options?.mode ?? 0o644,
+			})
+
 			state.fsMap.set(path, data)
 			for (const listener of listeners) {
 				listener({ eventType: "rename", filename: dirName + baseName })
@@ -279,7 +306,13 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 
 				parentDir.add(baseName)
 
-				newStatEntry(path, state.fsStats, 1, 0o755)
+				newStatEntry({
+					path,
+					stats: state.fsStats,
+					kind: 1,
+					modeBits: 0o755,
+				})
+
 				state.fsMap.set(path, new Set())
 
 				for (const listener of listeners) {
@@ -487,7 +520,14 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			}
 
 			parentDir.add(getBasename(path))
-			newStatEntry(path, state.fsStats, 2, 0o777, target)
+
+			newStatEntry({
+				path,
+				stats: state.fsStats,
+				kind: 2,
+				modeBits: 0o777,
+				target,
+			})
 		},
 
 		unlink: async function (path: Parameters<NodeishFilesystem["unlink"]>[0]) {
@@ -536,13 +576,23 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 	 * 1 = Directory
 	 * 2 = Symlink
 	 */
-	function newStatEntry(
-		path: string,
-		stats: Map<string, NodeishStats>,
-		kind: number,
-		modeBits: number,
+	function newStatEntry({
+		path,
+		stats,
+		kind,
+		modeBits,
+		target,
+		oid,
+		rootHash,
+	}: {
+		path: string
+		stats: Map<string, NodeishStats>
+		kind: number
+		modeBits: number
 		target?: string
-	) {
+		oid?: string
+		rootHash?: string
+	}) {
 		const currentTime: number = Date.now()
 		const _kind = kind
 
@@ -568,6 +618,8 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			isSymbolicLink: () => kind === 2,
 			// symlinkTarget is only for symlinks, and is not normalized
 			symlinkTarget: target,
+			_oid: oid,
+			_rootHash: rootHash,
 			_kind,
 		})
 	}

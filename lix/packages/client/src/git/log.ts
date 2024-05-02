@@ -7,11 +7,11 @@ export async function log(
 ) {
 	return await isoGit.log({
 		fs: ctx.rawFs,
-		depth: cmdArgs.depth,
-		filepath: cmdArgs.filepath,
+		depth: cmdArgs?.depth,
+		filepath: cmdArgs?.filepath,
 		dir: ctx.dir,
-		ref: cmdArgs.ref,
+		ref: cmdArgs?.ref,
 		cache: ctx.cache,
-		since: cmdArgs.since,
+		since: cmdArgs?.since,
 	})
 }

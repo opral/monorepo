@@ -1,10 +1,12 @@
+# develop with docker-compose watch in this folder
+
 version: '3.7'
 name: lix
 services:
   git:
     restart: always
     container_name: git
-    image: git:10
+    image: git:12
     hostname: git
     ports: [ "8000" ]
     labels: [ dev.orbstack.domains=git.local ]
@@ -17,19 +19,49 @@ services:
       dockerfile: Dockerfile
     networks:
       - lix
-    # depends_on:
-    #   - exp
-    # image downgrades user but that seems not to work, see: https://caddy.community/t/basic-docker-compose-setup-failing/6892/7?u=alexander_gabriel
     user: root
     # env_file:
     #   - ./.env
+
+  gitea:
+    labels: [ dev.orbstack.domains=gitea.local ]
+    image: gitea/gitea:1.21.11
+    container_name: gitea
+    hostname: gitea
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+    restart: always
+    networks:
+      - lix
+    volumes:
+      - ./gitea:/data
+      # - /etc/timezone:/etc/timezone:ro - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "3000:3000"
+
+  runner:
+    restart: always
+    container_name: gitea-runner
+    hostname: runner
+    image: gitea/act_runner:nightly
+    environment:
+      CONFIG_FILE: /config.yaml
+      GITEA_INSTANCE_URL: "http://gitea.local:3000"
+      GITEA_RUNNER_REGISTRATION_TOKEN: "pb3VkhEXa03IaQPUFSGPP2nImshQYvr72d1ZYH3Z"
+      GITEA_RUNNER_NAME: "local"
+      GITEA_RUNNER_LABELS: ""
+    volumes:
+      - ./gitea/runner/config.yaml:/config.yaml
+      - ./gitea/runner:/data
+      - /var/run/docker.sock:/var/run/docker.sock
 
   exp:
     restart: always
     container_name: exp
     hostname: exp
     labels: [ dev.orbstack.domains=exp.local ]
-    image: exp:4
+    image: exp:6
     build:
       dockerfile_inline: |
         FROM node:20-slim
@@ -37,15 +69,12 @@ services:
         RUN apt-get install openssl curl libssl-dev -y
         RUN npm -g install pnpm
         COPY --chown=app:app . /workspace
+        RUN chmod +x /workspace/dev.sh
         WORKDIR /workspace
-        RUN pnpm --filter=@lix-js/client --filter=@lix-js/fs --filter=lix-app install 
-        RUN pnpm --filter=@lix-js/client --filter=@lix-js/fs --filter=lix-app build
-        
         # todo: shell aliase
     ports: [ "3334" ]
-    working_dir: /workspace/exp
-    entrypoint: pnpm dev
-    # working_dir: /workspace/exp
+    working_dir: /workspace
+    entrypoint: /bin/bash ./dev.sh
     # entrypoint: /bin/bash
     # stdin_open: true
     # tty: true
@@ -87,5 +116,4 @@ networks:
     driver: bridge
 
 volumes:
-  josh-vol: {}
   pnpm-store: {}

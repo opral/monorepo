@@ -481,7 +481,7 @@ function Breadcrumbs() {
  * The menu to select the branch.
  */
 function BranchMenu() {
-	const { activeBranch, setActiveBranch, branchNames, currentBranch } = useEditorState()
+	const { activeBranch, setActiveBranch, branchNames, currentBranch, repo } = useEditorState()
 	return (
 		<sl-tooltip
 			prop:content="Select branch"
@@ -490,7 +490,10 @@ function BranchMenu() {
 			class="small"
 			style={{ "--show-delay": "1s" }}
 		>
-			<sl-dropdown prop:distance={8}>
+			<sl-dropdown
+				prop:distance={8}
+				// prop:addOpenListeners={() => console.log(repo()?.re fetch branches())}
+			>
 				<sl-button
 					slot="trigger"
 					prop:caret={true}

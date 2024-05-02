@@ -5,51 +5,39 @@
  * @property {string} phase
  * @property {number} loaded
  * @property {number} total
- */
-
-/**
  * @callback ProgressCallback
  * @param {GitProgressEvent} progress
  * @returns {void | Promise<void>}
  */
 
-/**
- * @typedef {Object} GitHttpRequest
- * @property {string} url - The URL to request
- * @property {string} [method='GET'] - The HTTP method to use
- * @property {Object<string, string>} [headers={}] - Headers to include in the HTTP request
- * @property {Object} [agent] - An HTTP or HTTPS agent that manages connections for the HTTP client (Node.js only)
- * @property {AsyncIterableIterator<Uint8Array>} [body] - An async iterator of Uint8Arrays that make up the body of POST requests
- * @property {ProgressCallback} [onProgress] - Reserved for future use (emitting `GitProgressEvent`s)
- * @property {object} [signal] - Reserved for future use (canceling a request)
- */
+interface GitHttpRequest {
+	url: string
+	method?: string
+	headers?: Record<string, string>
+	agent?: object
+	body?: AsyncIterableIterator<Uint8Array>
+	onProgress?: any // Replace 'any' with the actual type  ProgressCallback if available
+	signal?: object
+}
 
-/**
- * @typedef {Object} GitHttpResponse
- * @property {string} url - The final URL that was fetched after any redirects
- * @property {string} [method] - The HTTP method that was used
- * @property {Object<string, string>} [headers] - HTTP response headers
- * @property {AsyncIterableIterator<Uint8Array>} [body] - An async iterator of Uint8Arrays that make up the body of the response
- * @property {number} statusCode - The HTTP status code
- * @property {string} statusMessage - The HTTP status message
- */
+interface GitHttpResponse {
+	url: string
+	method?: string
+	headers?: Record<string, string>
+	body?: AsyncIterableIterator<Uint8Array>
+	statusCode: number
+	statusMessage: string
+}
 
-/**
- * @callback HttpFetch
- * @param {GitHttpRequest} request
- * @returns {Promise<GitHttpResponse>}
- */
+type HttpFetch = (request: GitHttpRequest) => Promise<GitHttpResponse>
 
-/**
- * @typedef {Object} HttpClient
- * @property {HttpFetch} request
- */
-
-// @ts-nocheck
+interface HttpClient {
+	request: HttpFetch
+}
 
 // Convert a value to an Async Iterator
 // This will be easier with async generator functions.
-function fromValue(value) {
+function fromValue(value: any) {
 	let queue = [value]
 	return {
 		next() {
@@ -65,7 +53,7 @@ function fromValue(value) {
 	}
 }
 
-function getIterator(iterable) {
+function getIterator(iterable: any) {
 	if (iterable[Symbol.asyncIterator]) {
 		return iterable[Symbol.asyncIterator]()
 	}
@@ -79,7 +67,7 @@ function getIterator(iterable) {
 }
 
 // Currently 'for await' upsets my linters.
-async function forAwait(iterable, cb) {
+async function forAwait(iterable: any, cb: (arg: any) => void) {
 	const iter = getIterator(iterable)
 	// eslint-disable-next-line no-constant-condition
 	while (true) {
@@ -90,11 +78,11 @@ async function forAwait(iterable, cb) {
 	if (iter.return) iter.return()
 }
 
-async function collect(iterable) {
+async function collect(iterable: any) {
 	let size = 0
-	const buffers = []
+	const buffers: any[] = []
 	// This will be easier once `for await ... of` loops are available.
-	await forAwait(iterable, (value) => {
+	await forAwait(iterable, (value: any) => {
 		buffers.push(value)
 		size += value.byteLength
 	})
@@ -109,7 +97,7 @@ async function collect(iterable) {
 
 // Convert a web ReadableStream (not Node stream!) to an Async Iterator
 // adapted from https://jakearchibald.com/2017/async-iterators-and-generators/
-function fromStream(stream) {
+function fromStream(stream: any) {
 	// Use native async iteration if it's available.
 	if (stream[Symbol.asyncIterator]) return stream
 	const reader = stream.getReader()
@@ -126,34 +114,60 @@ function fromStream(stream) {
 		},
 	}
 }
+type MakeHttpClientArgs = {
+	debug?: boolean
+	description?: string
+	onRes?: ({
+		usedUrl,
+		origUrl,
+		resBody,
+		statusCode,
+		resHeaders,
+	}: {
+		usedUrl: string
+		origUrl: string
+		resBody: Uint8Array
+		statusCode: number
+		resHeaders: Record<string, string>
+	}) => any
+	onReq?: ({ body, url, method }: { body: any; url: string; method: string }) => any
+}
 
-/* eslint-env browser */
-
-/**
- * MakeHttpClient
- *
- * @param { verbose?: boolean, desciption?: string, onReq: ({body: any, url: string }) => {body: any, url: string} }
- * @returns HttpClient
- */
-export function makeHttpClient({ verbose, description, onReq, onRes }) {
-	/**
-	 * HttpClient
-	 *
-	 * @param {GitHttpRequest} request
-	 * @returns {Promise<GitHttpResponse>}
-	 */
-	async function request({ url, method = "GET", headers = {}, body }) {
+const cache = new Map()
+export function makeHttpClient({
+	debug,
+	description,
+	onReq,
+	onRes,
+}: MakeHttpClientArgs): HttpClient {
+	async function request({
+		url,
+		method = "GET",
+		headers = {},
+		body: rawBody,
+	}: GitHttpRequest): Promise<GitHttpResponse> {
 		// onProgress param not used
 		// streaming uploads aren't possible yet in the browser
+		let body = rawBody ? await collect(rawBody) : undefined
 
-		if (body) {
-			body = await collect(body)
-		}
 		const origUrl = url
 		const origMethod = method
 
+		// FIXME: how to do this caching?
+		// if (origMethod === "GET" && cache.has(origUrl)) {
+		// 	const { resHeaders, resBody } = cache.get(origUrl)
+		// 	return {
+		// 		url: origUrl,
+		// 		method: origMethod,
+		// 		statusCode: 200,
+		// 		statusMessage: "OK",
+		// 		body: resBody,
+		// 		headers: resHeaders,
+		// 	}
+		// }
+
 		if (onReq) {
-			const rewritten = await onReq({ body, url })
+			const rewritten = await onReq({ body, url, method })
 
 			method = rewritten?.method || method
 			headers = rewritten?.headers || headers
@@ -164,12 +178,13 @@ export function makeHttpClient({ verbose, description, onReq, onRes }) {
 		const res = await fetch(url, { method, headers, body, credentials: "include" })
 
 		// convert Header object to ordinary JSON
-		let resHeaders = {}
+		let resHeaders: Record<string, string> = {}
+		// @ts-ignore -- headers has entries but ts complains
 		for (const [key, value] of res.headers.entries()) {
 			resHeaders[key] = value
 		}
 
-		if (verbose) {
+		if (debug) {
 			console.warn(`${description} git req:`, origUrl)
 		}
 
@@ -192,9 +207,14 @@ export function makeHttpClient({ verbose, description, onReq, onRes }) {
 
 		if (!resBody) {
 			resBody =
+				// @ts-ignore -- done by isogit, not sure why
 				res.body && res.body.getReader
 					? fromStream(res.body)
 					: [new Uint8Array(await res.arrayBuffer())]
+		}
+
+		if (statusCode === 200 && origMethod === "GET") {
+			cache.set(origUrl, { resHeaders, resBody })
 		}
 
 		return {

@@ -3,7 +3,10 @@ import type { RepoContext, RepoState, Author } from "../openRepository.js"
 import { makeHttpClient } from "../git-http/client.js"
 import { doCheckout } from "./checkout.js"
 import { emptyWorkdir } from "../lix/emptyWorkdir.js"
+import { optimizeReq, optimizeRes } from "../git-http/optimizeReq.js"
+import { checkOutPlaceholders } from "../lix/checkoutPlaceholders.js"
 
+// TODO: i consider pull now bad practice nad deprecated. replace with more specific commands for syncing and updating local state
 export async function pull(
 	ctx: RepoContext,
 	state: RepoState,
@@ -14,13 +17,30 @@ export async function pull(
 	}
 	const pullFs = state.nodeishFs
 
+	const branchName =
+		state.branchName || (await isoGit.currentBranch({ fs: ctx.rawFs, dir: "/" })) || "main"
+
+	const oid = await isoGit.resolveRef({ fs: ctx.rawFs, dir: "/", ref: branchName })
+	const { commit } = await isoGit.readCommit({ fs: ctx.rawFs, dir: "/", oid })
+	const since = new Date(commit.committer.timestamp * 1000)
+
 	const { fetchHead, fetchHeadDescription } = await isoGit.fetch({
-		depth: 5, // TODO: how to handle depth with upstream? reuse logic from fork sync
+		since,
 		fs: pullFs,
 		cache: ctx.cache,
-		http: makeHttpClient({ verbose: ctx.debug, description: "pull" }),
+		http: makeHttpClient({
+			debug: ctx.debug,
+			description: "pull",
+			onReq: ctx.experimentalFeatures.lazyClone
+				? optimizeReq.bind(null, {
+						noneBlobFilter: true,
+						filterRefList: { ref: branchName },
+				  })
+				: undefined,
+			onRes: ctx.experimentalFeatures.lazyClone ? optimizeRes : undefined,
+		}),
 		corsProxy: ctx.gitProxyUrl,
-		ref: state.branchName,
+		ref: branchName,
 		tags: false,
 		dir: ctx.dir,
 		url: ctx.gitUrl,
@@ -37,7 +57,7 @@ export async function pull(
 		fs: pullFs,
 		cache: ctx.cache,
 		dir: ctx.dir,
-		ours: state.branchName,
+		ours: branchName,
 		theirs: fetchHead,
 		fastForward: cmdArgs.fastForward,
 		message: `Merge ${fetchHeadDescription}`,
@@ -50,30 +70,16 @@ export async function pull(
 	})
 
 	if (ctx.experimentalFeatures.lazyClone) {
-		console.warn(
-			"enableExperimentalFeatures.lazyClone is set for this repo but pull not fully implemented. disabling lazy files"
-		)
-
 		await emptyWorkdir(ctx, state)
-
-		// remember we are now leaving lazy mode
-		ctx.experimentalFeatures.lazyClone = false
-
 		ctx.debug && console.info('checking out "HEAD" after pull')
-
-		await doCheckout({
-			fs: ctx.rawFs,
-			cache: ctx.cache,
-			dir: ctx.dir,
-			ref: state.branchName,
-			noCheckout: false,
-		})
+		state.checkedOut.clear()
+		await checkOutPlaceholders(ctx, state)
 	} else {
 		await doCheckout({
 			fs: ctx.rawFs,
 			cache: ctx.cache,
 			dir: ctx.dir,
-			ref: state.branchName,
+			ref: branchName,
 			noCheckout: false,
 		})
 	}
