@@ -112,7 +112,7 @@ export function sort_routes(routes: string[]): string[] {
 					if (a === EMPTY) return -1
 					if (b === EMPTY) return +1
 
-					return sort_static(a!.content, b!.content)
+					return sort_static((a as Part).content, (b as Part).content)
 				}
 			}
 		}
@@ -135,7 +135,8 @@ function split_route_id(id: string) {
 function sort_static(a: string, b: string): -1 | 0 | 1 {
 	if (a === b) return 0
 
-	for (let i = 0; true; i += 1) {
+	let i = 0
+	while (a[i] || b[i]) {
 		const char_a = a[i]
 		const char_b = b[i]
 
@@ -144,5 +145,7 @@ function sort_static(a: string, b: string): -1 | 0 | 1 {
 			if (char_b === undefined) return -1
 			return char_a < char_b ? -1 : +1
 		}
+		i++
 	}
+	return 0
 }
