@@ -5,9 +5,45 @@ import { fromLegacyMessage, toLegacyMessage } from "../legacy.js"
 const fileExtension = ".json"
 
 export function normalizeMessage(legacyMessage: LegacyFormat.Message) {
-	const bundle = fromLegacyMessage(legacyMessage)
-	const normalized = normalizeMessageBundle(bundle)
-	return toLegacyMessage(normalized)
+	// order keys in message
+	const messageWithSortedKeys: any = {}
+	for (const key of Object.keys(legacyMessage).sort()) {
+		messageWithSortedKeys[key] = (legacyMessage as any)[key]
+	}
+
+	// order variants
+	messageWithSortedKeys["variants"] = messageWithSortedKeys["variants"]
+		.sort((variantA: LegacyFormat.Variant, variantB: LegacyFormat.Variant) => {
+			// compare by language
+			const languageComparison = variantA.languageTag.localeCompare(variantB.languageTag)
+
+			// if languages are the same, compare by match
+			if (languageComparison === 0) {
+				return variantA.match.join("-").localeCompare(variantB.match.join("-"))
+			}
+
+			return languageComparison
+		})
+		// order keys in each variant
+		.map((variant: LegacyFormat.Variant) => {
+			const variantWithSortedKeys: any = {}
+			for (const variantKey of Object.keys(variant).sort()) {
+				if (variantKey === "pattern") {
+					variantWithSortedKeys[variantKey] = (variant as any)["pattern"].map((token: any) => {
+						const tokenWithSortedKey: any = {}
+						for (const tokenKey of Object.keys(token).sort()) {
+							tokenWithSortedKey[tokenKey] = token[tokenKey]
+						}
+						return tokenWithSortedKey
+					})
+				} else {
+					variantWithSortedKeys[variantKey] = (variant as any)[variantKey]
+				}
+			}
+			return variantWithSortedKeys
+		})
+
+	return messageWithSortedKeys as LegacyFormat.Message
 }
 
 export function stringifyMessage(legacyMessage: LegacyFormat.Message) {
