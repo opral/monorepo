@@ -1,5 +1,4 @@
 //vendored in from sveltekit and adapted
-
 import { sort_routes } from "./sortRoutes.js"
 
 export type PathDefinitionTranslations<T extends string = string> = {
@@ -7,6 +6,7 @@ export type PathDefinitionTranslations<T extends string = string> = {
 }
 
 type Route = {
+	id: string
 	params: RouteParam[]
 	pattern: RegExp
 }
@@ -17,8 +17,8 @@ export type RouteParam = {
 	optional: boolean
 	rest: boolean
 	chained: boolean
-	//priority: number
 }
+
 export type ParamMatcher = (segment: string) => boolean
 
 //vendored in from @sveltejs/kit utils/routing.js
@@ -119,7 +119,7 @@ export function parseRouteDefinition(id: string): Route {
 						.join("")}/?$`
 			  )
 
-	return { pattern, params }
+	return { pattern, params, id }
 }
 
 export function exec(
