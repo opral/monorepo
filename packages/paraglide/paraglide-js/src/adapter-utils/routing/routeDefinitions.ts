@@ -89,9 +89,7 @@ export function parseRouteDefinition(id: string): Route {
 										// param/matcher name with non-alphanumeric character.
 										const match = /** @type {RegExpExecArray} */ param_pattern.exec(content)
 										if (!match) {
-											throw new Error(
-												`Invalid param: ${content}. Params and matcher names can only have underscores and alphanumeric characters.`
-											)
+											throw new Error(`Invalid param: ${content}`)
 										}
 
 										const [, is_optional, is_rest, name, matcher] = match
