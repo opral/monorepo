@@ -1,7 +1,7 @@
 import { createLink } from "./Link"
 import { getLanguage } from "./getLanguage.server"
 import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
-import { createNoopNavigation } from "./navigation"
+import { createNoopNavigation } from "./navigation.server"
 import { createRedirects } from "./redirect"
 import { createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"

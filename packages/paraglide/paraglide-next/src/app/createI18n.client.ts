@@ -1,7 +1,7 @@
 import { createLink } from "./Link"
 import { getLanguage } from "./getLanguage.client"
 import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
-import { createNavigation } from "./navigation"
+import { createNavigation } from "./navigation.client"
 import { createRedirects } from "./redirect"
 import { createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
