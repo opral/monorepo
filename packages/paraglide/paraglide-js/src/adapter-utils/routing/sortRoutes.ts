@@ -132,7 +132,7 @@ function split_route_id(id: string) {
 /**
  * Sort two strings lexicographically, except `foobar` outranks `foo`
  */
-function sort_static(a: string, b: string) {
+function sort_static(a: string, b: string): -1 | 0 | 1 {
 	if (a === b) return 0
 
 	for (let i = 0; true; i += 1) {
