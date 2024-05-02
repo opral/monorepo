@@ -62694,10 +62694,12 @@ async function run() {
       return;
     }
     process.chdir("target");
+    core.debug(`Changed directory to target`);
     const repoTarget = await openRepository("file://" + process.cwd(), {
       nodeishFs: fs,
       branch: github.context.payload.pull_request?.head.ref
     });
+    core.debug(`Opened target repository`);
     const projectListTarget = await listProjects(repoTarget.nodeishFs, process.cwd());
     const results = projectListTarget.map((project) => ({
       projectPath: project.projectPath.replace(process.cwd(), ""),
@@ -62711,7 +62713,7 @@ async function run() {
       commentContent: ""
     }));
     for (const result of results) {
-      core.debug(`Checking project: ${result.projectPath}`);
+      core.debug(`Checking project: ${result.projectPath} in target repo`);
       const projectTarget = await loadProject({
         projectPath: process.cwd() + result.projectPath,
         repo: repoTarget,
@@ -62724,7 +62726,9 @@ async function run() {
         continue;
       }
       result.installedRules.push(...projectTarget.installed.messageLintRules());
-      result.reportsTarget.push(...await projectTarget.query.messageLintReports.getAll());
+      const messageLintReports = await projectTarget.query.messageLintReports.getAll();
+      result.reportsTarget.push(...messageLintReports);
+      core.debug(`detected lint reports: ${messageLintReports.length}`);
     }
     const headMeta = {
       owner: github.context.payload.pull_request?.head.label.split(":")[0],
@@ -62737,9 +62741,11 @@ async function run() {
       branch: github.context.payload.pull_request?.base.label.split(":")[1]
     };
     process.chdir("../merge");
+    core.debug(`Changed directory to merge`);
     const repoMerge = await openRepository("file://" + process.cwd(), {
       nodeishFs: fs
     });
+    core.debug(`Opened merge repository`);
     const projectListMerge = await listProjects(repoMerge.nodeishFs, process.cwd());
     const newProjects = projectListMerge.filter(
       (project) => !results.some(
@@ -62760,6 +62766,7 @@ async function run() {
       });
     }
     for (const result of results) {
+      core.debug(`Checking project: ${result.projectPath} in merge repo`);
       if (projectListMerge.some(
         (project) => project.projectPath.replace(process.cwd(), "") === result.projectPath
       ) === false) {
@@ -62783,7 +62790,9 @@ async function run() {
           result.installedRules.push(newRule);
         }
       }
-      result?.reportsMerge.push(...await projectMerge.query.messageLintReports.getAll());
+      const messageLintReports = await projectMerge.query.messageLintReports.getAll();
+      result?.reportsMerge.push(...messageLintReports);
+      core.debug(`detected lint reports: ${messageLintReports.length}`);
     }
     let projectWithNewSetupErrors = false;
     let projectWithNewLintErrors = false;
@@ -62887,7 +62896,6 @@ ${lintSummary.map(
             body: commentResolved,
             as: "ninja-i18n"
           });
-          return;
         } else {
           core.debug("Reports have not been fixed, updating comment");
           await octokit.rest.issues.updateComment({
@@ -62898,21 +62906,19 @@ ${lintSummary.map(
             as: "ninja-i18n"
           });
         }
-        return;
       }
-    }
-    if (results.every((result) => result.commentContent.length === 0)) {
+    } else if (results.every((result) => result.commentContent.length === 0)) {
       core.debug("No lint reports found, skipping comment");
-      return;
+    } else {
+      core.debug("Creating a new comment");
+      await octokit.rest.issues.createComment({
+        owner,
+        repo,
+        issue_number: prNumber,
+        body: commentContent,
+        as: "ninja-i18n"
+      });
     }
-    core.debug("Creating a new comment");
-    await octokit.rest.issues.createComment({
-      owner,
-      repo,
-      issue_number: prNumber,
-      body: commentContent,
-      as: "ninja-i18n"
-    });
     if (projectWithNewSetupErrors || projectWithNewLintErrors) {
       let error_message = "";
       if (projectWithNewSetupErrors && projectWithNewLintErrors) {
