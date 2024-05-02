@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/paraglide-sveltekit",
-	"version": "0.6.12",
+	"version": "0.6.13",
 	"type": "module",
 	"main": "./dist/runtime/index.js",
 	"types": "./dist/runtime/index.d.ts",
