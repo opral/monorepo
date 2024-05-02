@@ -252,16 +252,16 @@ describe("bestMatch", () => {
 })
 
 const permute = <T>(inputArr: T[]): T[][] => {
-	let result: T[][] = []
+	const result: T[][] = []
 
 	const permute = (arr: T[], m: T[] = []) => {
 		if (arr.length === 0) {
 			result.push(m)
 		} else {
 			for (let i = 0; i < arr.length; i++) {
-				let curr = arr.slice()
-				let next = curr.splice(i, 1)
-				permute(curr.slice(), m.concat(next))
+				const curr = [...arr]
+				const next = curr.splice(i, 1)
+				permute(curr, [...m, ...next])
 			}
 		}
 	}
