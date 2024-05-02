@@ -1,5 +1,27 @@
 # inlang-vs-code-extension
 
+## 1.41.1
+
+### Patch Changes
+
+- Updated dependencies [bc17d0c]
+  - @inlang/sdk@0.34.3
+  - @inlang/rpc@0.3.14
+  - @inlang/settings-component@1.0.7
+  - @inlang/telemetry@0.3.28
+
+## 1.41.0
+
+### Minor Changes
+
+- 89acef4: add ability to change the inline annotation color
+
+## 1.40.0
+
+### Minor Changes
+
+- 1cfdca2: add ability to disable inline annotations
+
 ## 1.39.8
 
 ### Patch Changes

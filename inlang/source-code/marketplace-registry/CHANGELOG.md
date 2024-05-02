@@ -1,5 +1,11 @@
 # @inlang/marketplace-registry
 
+## 1.5.9
+
+### Patch Changes
+
+- @inlang/marketplace-manifest@1.4.2
+
 ## 1.5.8
 
 ### Patch Changes

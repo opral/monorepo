@@ -53,8 +53,11 @@ export const plugin: Plugin<{
 						result[key] = parseMessage({ key, value: json[key], languageTag: tag })
 					}
 				}
-			} catch {
-				// file does not exist. likely, no translations for the file exist yet.
+			} catch (error) {
+				// ignore if file does not exist => no translations exist yet.
+				if ((error as any)?.code !== "ENOENT") {
+					throw error
+				}
 			}
 		}
 		return Object.values(result)

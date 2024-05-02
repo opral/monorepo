@@ -65,8 +65,7 @@ const InternalProjectSettings = Type.Object({
 			}),
 			Type.String({
 				pattern: "^(?!.*@\\d\\.)[^]*$",
-				description:
-					"The module can only contain a major version number (ComVer, not SemVer). See https://inlang.com/documentation/comver",
+				description: "The module can only contain a major version number.",
 			}),
 		]),
 		{
