@@ -15,7 +15,7 @@ Sherlock stands out in the Inlang ecosystem, not only for its core features but 
 Transitioning to Sherlock involves a few straightforward steps:
 1. **Install Sherlock**: Download and install Sherlock from the VS Code Marketplace.
 2. **Create the Project Directory**: Set up a `project.inlang` directory in your project root to store localization settings and configurations.
-3. **Configure `settings.json`**: In the `project.inlang` directory, create a `settings.json` file. Here’s an example configuration:
+3. **Configure `settings.json`**: In the `project.inlang` directory, create a `project.inlang/settings.json` file. Here’s an example configuration:
    ```json
    {
      "$schema": "https://inlang.com/schema/project-settings",
