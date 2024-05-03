@@ -74,6 +74,7 @@ export async function run(): Promise<void> {
 			}
 			result.installedRules.push(...projectTarget.installed.messageLintRules())
 			const messageLintReports = await projectTarget.query.messageLintReports.getAll()
+			core.debug(`message: ${messageLintReports.length}`)
 			result.reportsTarget.push(...messageLintReports)
 			core.debug(`detected lint reports: ${messageLintReports.length}`)
 		}
@@ -155,6 +156,7 @@ export async function run(): Promise<void> {
 				}
 			}
 			const messageLintReports = await projectMerge.query.messageLintReports.getAll()
+			core.debug(`message: ${messageLintReports.length}`)
 			result?.reportsMerge.push(...messageLintReports)
 			core.debug(`detected lint reports: ${messageLintReports.length}`)
 		}
