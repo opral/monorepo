@@ -31,38 +31,50 @@
 
 <br>
 
+# Quick start
 
-# Let's get started
+<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/sherlock-start.png"/>
 
-## Step 1: Initiate a New Project
+Install the extension and click `Getting Started` in the `Inlang Tab`. 
 
-> Skip this step if you have already created a project.
+### Manual setup
 
-Open Sherlock within Visual Studio Code and click the `Getting Started` button. This will automatically create a new project for you.
+#### 1. Create a `project.inlang/settings.json` in the **root** of your project
 
-## Step 2: Customize Your Project
+You can use the following template when using JSON files as translation files. If not, please look for other [supported resource file types](https://inlang.com/):
 
-After the project is created, you can customize it to fit your specific needs:
-- Click on the settings wheel icon next to your project name in the Sherlock panel to access customization options.
-- Modify your `project.inlang/settings.json` as needed to configure translation settings and add any specific plugins or lint rules.
+```json
+{
+	// official schema ensures that your project file is valid
+	"$schema": "https://inlang.com/schema/project-settings",
+	// the "source" language tag that is used in your project
+	"sourceLanguageTag": "en",
+	// all the language tags you want to support in your project
+	"languageTags": ["en", "de"],
+	"modules": [
+		"https://cdn.jsdelivr.net/npm/@inlang/plugin-json@4/dist/index.js"
+	], // or use another storage module: https://inlang.com/c/plugins (i18next, json, inlang message format)
+	"settings": {}
+}
+```
 
----
+#### 2. Decide on a **syntax matcher**
 
-## Additonal Steps
+You should continue with **installing a syntax matcher**. There are multiple syntax matcher available:
 
-### Storage module
+- m function matcher: https://inlang.com/m/632iow21/plugin-inlang-mFunctionMatcher
+- t function matcher: https://inlang.com/m/698iow33/plugin-inlang-tFunctionMatcher
+- *if you are using next-intl, you need https://inlang.com/m/193hsyds/plugin-inlang-nextIntl*
+- *if you are using the i18next module, everything is already built-in*
 
-Install a plugin that reads and writes your messages from the [inlang marketplace](https://inlang.com/c/plugins) – the standard template uses the inlang message format plugin, but we also have plugins for `i18next` and `JSON` & more.
+#### 3. ✨ Recommended
 
-### Syntax matcher 
+If you want to add lint rules to your experience, you can add them from https://inlang.com/c/lint-rules
 
-Install a syntax matcher/function matcher from the [inlang marketplace](https://inlang.com/c/plugins) – the standard template uses the `m` function matcher, but we also have plugins for `t` function matcher, a `next-intl` matcher and more. 
+#### Requirements:
 
-> The `i18next` module already includes a syntax matcher.
-
-### Lint rules
-
-Install [lint rules](https://inlang.com/c/lint-rules) to find errors in your translations from the [inlang marketplace](https://inlang.com/c/lint-rules)
+- VS Code version 1.84.0 or higher.
+- Node.js version v18 or higher.
 
 # Features
 
