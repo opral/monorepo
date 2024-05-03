@@ -4,7 +4,6 @@ export {
 	bestMatch,
 	resolveRoute,
 	parseRouteDefinition,
-	exec,
 	type PathDefinitionTranslations,
 	type ParamMatcher,
 	type RouteParam,
