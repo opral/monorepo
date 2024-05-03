@@ -48,7 +48,7 @@ export function createI18n<T extends string = string>(userConfig: I18nUserConfig
 	return {
 		middleware,
 		/** @deprecated - Use getLocalisedHref instead */
-		localizePath: (canonicalPath: string, lang: T) => {
+		localizePath: (canonicalPath: `/${string}`, lang: T) => {
 			return strategy.getLocalisedUrl(canonicalPath, lang, getLanguage() !== lang).pathname
 		},
 		getLocalisedUrl: strategy.getLocalisedUrl,
