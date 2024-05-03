@@ -58,14 +58,16 @@ You can use the following template when using JSON files as translation files. I
 }
 ```
 
+> You might need another module if you are using a different resource file type. You can find all available modules [here](https://inlang.com/c/plugins).
+
 #### 2. Decide on a **syntax matcher**
 
 You should continue with **installing a syntax matcher**. There are multiple syntax matcher available:
 
 - m function matcher: https://inlang.com/m/632iow21/plugin-inlang-mFunctionMatcher
 - t function matcher: https://inlang.com/m/698iow33/plugin-inlang-tFunctionMatcher
-- *if you are using next-intl, you need https://inlang.com/m/193hsyds/plugin-inlang-nextIntl*
 - *if you are using the i18next module, everything is already built-in*
+- *if you are using next-intl, you need https://inlang.com/m/193hsyds/plugin-inlang-nextIntl*
 
 #### 3. ✨ Recommended
 
