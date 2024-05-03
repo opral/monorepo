@@ -58810,7 +58810,7 @@ var InternalProjectSettings = import_typebox4.Type.Object({
     }),
     import_typebox4.Type.String({
       pattern: "^(?!.*@\\d\\.)[^]*$",
-      description: "The module can only contain a major version number (ComVer, not SemVer). See https://inlang.com/documentation/comver"
+      description: "The module can only contain a major version number."
     })
   ]), {
     uniqueItems: true,
@@ -59749,13 +59749,19 @@ var import_compiler3 = __toESM(require_compiler2(), 1);
 var ProjectSettingsInvalidError = class extends Error {
   constructor(options) {
     super(`The project settings are invalid:
-
-${options.errors.filter((error) => error.path).map((error) => `"${error.path}":
-
-${error.message}`).join("\n")}`);
+${options.errors.filter((error) => error.path).map(FormatProjectSettingsError).join("\n")}`);
     this.name = "ProjectSettingsInvalidError";
   }
 };
+function FormatProjectSettingsError(error) {
+  let msg = `${error.message} at ${error.path}`;
+  if (error.path.startsWith("/modules/")) {
+    msg += `
+value = "${error.value}"
+- ${error.schema.allOf.map((o) => `${o.description ?? ""}`).join("\n- ")}`;
+  }
+  return msg;
+}
 var ProjectSettingsFileJSONSyntaxError = class extends Error {
   constructor(options) {
     super(`The settings file at "${options.path}" is not a valid JSON file:
@@ -62727,6 +62733,7 @@ async function run() {
       }
       result.installedRules.push(...projectTarget.installed.messageLintRules());
       const messageLintReports = await projectTarget.query.messageLintReports.getAll();
+      core.debug(`message: ${messageLintReports.length}`);
       result.reportsTarget.push(...messageLintReports);
       core.debug(`detected lint reports: ${messageLintReports.length}`);
     }
@@ -62791,6 +62798,7 @@ async function run() {
         }
       }
       const messageLintReports = await projectMerge.query.messageLintReports.getAll();
+      core.debug(`message: ${messageLintReports.length}`);
       result?.reportsMerge.push(...messageLintReports);
       core.debug(`detected lint reports: ${messageLintReports.length}`);
     }
