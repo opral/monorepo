@@ -72,6 +72,55 @@ export function Home() {
 
 Only messages used in client components are sent to the client. Messages in Server Components don't impact bundle size.
 
+## Routing Strategy
+
+You can customize the routing strategy in `src/lib/i18n.ts`. By default, the `PrefixStrategy` is used. 
+
+### Prefix Strategy (default)
+
+Adds a language prefix before the pathname to distinguish between different languages.
+
+- `/de/some-page`
+- `/fr/some-page`
+- `/some-page` Default Language
+
+```ts
+import { PrefixStrategy } from "@inlang/paraglide-next"
+const strategy = PrefixStrategy()
+```
+
+It supports localised pathnames. 
+
+### Domain Strategy
+
+Uses the domain of a request to determine the language. Must use a unique domain for each language.
+
+```ts
+import { DomainStrategy } from "@inlang/paraglide-next"
+import type { AvailableLanguageTag } from "@/paraglide/runtime"
+const strategy = DomainStrategy<AvailableLanguageTag>({
+	domains: {
+		en: "https://example.com",
+		de: "https://example.de",
+		fr: "https://fr.example.com"
+	}
+})
+```
+
+Domains must be unique for each language.
+
+### Detection-only Strategy
+
+Uses the `Accept-Language` header to detect the language on first visit. Any subsequent visits will use the language set in the `NEXT_LOCALE` cookie. Routing is not affected in any way. 
+
+```ts
+import { DetectionStrategy } from "@inlang/paraglide-next"
+const strategy = DetectionStrategy()
+```
+
+> Manual Language switches only work if JS is enabled when using this strategy.
+
+
 ## Localized navigation APIs
 
 > If you're using the pages router this section does not apply to you. You are are using [Next's built-in i18n routing](https://nextjs.org/docs/advanced-features/i18n-routing). 
@@ -157,6 +206,7 @@ Excluded routes won't be prefixed with the language tag & the middleware will no
 
 > Tip: LLMs are really good at writing regexes.
 
+
 ### Setting the Language in Server Actions
 
 Use the `initializeLanguage` function at the top of your server-action file to make sure the language is available.
@@ -173,28 +223,6 @@ export async function someAction() {
 	languageTag() // "de"
 }
 ```
-
-### Changing the default language
-
-By default, the default language is the `sourceLanguageTag` defined in `project.inlang/settings.json`. You can change it with the `defaultLanguage` option.
-
-```ts
-export const { ... } =
-	createI18n<AvailableLanguageTag>({
-		defaultLanguage: "de"
-	})
-```
-
-### How language-detection works
-
-Paraglide-Next follows these steps to determine the language.
-
-- First, it will try to determine the language based on the URL.
-- If that fails, it will look for a `NEXT_LOCALE` cookie.
-- If that isn't available either, it will try to negotiate the language based on the `Accept-Language` header.
-- Finally, it will fall back to the default language.
-
-If a language has been determined once, it will set the `NEXT_LOCALE` cookie so that future ambiguities don't result in random language switches.
 
 ### Translated Pathnames
 
