@@ -2,10 +2,10 @@ import type { RoutingStragey } from "./routing/interface"
 import type { LinkProps } from "next/link"
 import { isExternal as isStringHrefExternal } from "./utils/href"
 
-const getPathname = (href: string, currentPath: string): string => {
+const getPathname = (href: string, currentPath: string): `/${string}` => {
 	const base = new URL(currentPath, "http://n")
 	const resolved = new URL(href, base)
-	return resolved.pathname
+	return resolved.pathname as `/${string}`
 }
 
 export function createLocaliseHref<T extends string>(
@@ -28,7 +28,7 @@ export function createLocaliseHref<T extends string>(
 		//guard against empty pathnames on object hrefs
 		if (typeof canonicalHref === "object" && !canonicalHref.pathname) return canonicalHref
 
-		const canonicalPathname: string =
+		const canonicalPathname =
 			typeof canonicalHref === "object"
 				? getPathname(canonicalHref.pathname ?? "", currentPath)
 				: getPathname(canonicalHref, currentPath)

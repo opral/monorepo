@@ -18,7 +18,7 @@ export function generateLinkHeader<T extends string>(
 		availableLanguageTags,
 		request,
 	}: {
-		canonicalPath: string
+		canonicalPath: `/${string}`
 		availableLanguageTags: readonly T[]
 		request: NextRequest
 	}
@@ -28,8 +28,8 @@ export function generateLinkHeader<T extends string>(
 
 	for (const lang of availableLanguageTags) {
 		const localizedUrl = strategy.getLocalisedUrl(canonicalPath, lang, true)
-		localizedUrl.pathname = encodeURI(localizedUrl.pathname || "")
-		localizedUrl.pathname = addPathPrefix(localizedUrl.pathname, nextUrl.basePath)
+		localizedUrl.pathname = encodeURI(localizedUrl.pathname || "/") as `/${string}`
+		localizedUrl.pathname = addPathPrefix(localizedUrl.pathname, nextUrl.basePath) as `/${string}`
 
 		localizedUrl.protocol ??= nextUrl.protocol
 		localizedUrl.host ??= nextUrl.host
