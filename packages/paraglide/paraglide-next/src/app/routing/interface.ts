@@ -13,7 +13,7 @@ export interface RoutingStragey<T extends string> {
 	 * getCanonicalPath("/en/about", "en") // "/about"
 	 * ```
 	 */
-	getCanonicalPath(localisedPath: string, locale: T): string
+	getCanonicalPath(localisedPath: `/${string}`, locale: T): `/${string}`
 
 	/**
 	 * Returns a localised URL that can be used to navigate to the localised path corresponding to the canonical path.
@@ -25,10 +25,10 @@ export interface RoutingStragey<T extends string> {
 	 * @param basePath - The base path of the application
 	 */
 	getLocalisedUrl(
-		canonicalPath: string,
+		canonicalPath: `/${string}`,
 		targetLocale: T,
 		isLanugageSwitch: boolean
-	): import("url").UrlObject & { pathname: string }
+	): import("url").UrlObject & { pathname: `/${string}` }
 
 	resolveLocale: LanguageDetector<T>
 }
