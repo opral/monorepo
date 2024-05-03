@@ -14,6 +14,7 @@ import { rsc } from "rsc-env"
 import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
 
 /*
+	Lingo:
 	Canonical Path = Path without locale (how you write the href)
 	Localised Path = Path with locale (how the path is visible in the URL bar)
 */
@@ -25,8 +26,8 @@ export function PrefixStrategy<T extends string>({
 }: {
 	exclude?: (path: string) => boolean
 	pathnames?: UserPathDefinitionTranslations<T>
-	prefixDefault: "always" | "never"
-}): RoutingStragey<T> {
+	prefixDefault?: "always" | "never"
+} = {}): RoutingStragey<T> {
 	const resolvedPathnames = /** @__PURE__ */ userPathnames
 		? resolveUserPathDefinitions(userPathnames, availableLanguageTags)
 		: {}
@@ -43,12 +44,10 @@ export function PrefixStrategy<T extends string>({
 		}
 	}
 
-	function getCanonicalPath(localisedPath: string, locale: T): string {
-		let pathWithoutLocale = localisedPath.startsWith(`/${locale}`)
-			? localisedPath.replace(`/${locale}`, "")
+	function getCanonicalPath(localisedPath: `/${string}`, locale: T): `/${string}` {
+		const pathWithoutLocale: `/${string}` = localisedPath.startsWith(`/${locale}`)
+			? ((localisedPath.replace(`/${locale}`, "") || "/") as `/${string}`)
 			: localisedPath
-
-		pathWithoutLocale ||= "/"
 
 		for (const [canonicalPathDefinition, translationsForPath] of Object.entries(
 			resolvedPathnames
@@ -61,17 +60,17 @@ export function PrefixStrategy<T extends string>({
 			const match = bestMatch(pathWithoutLocale, [translatedPathDefinition], {})
 			if (!match) continue
 
-			return resolveRoute(canonicalPathDefinition, match.params)
+			return resolveRoute(canonicalPathDefinition, match.params) as `/${string}`
 		}
 
 		return pathWithoutLocale
 	}
 
 	function getTranslatedPath(
-		canonicalPath: string,
+		canonicalPath: `/${string}`,
 		lang: T,
 		translations: PathDefinitionTranslations<T>
-	) {
+	): `/${string}` {
 		const match = bestMatch(canonicalPath, Object.keys(translations), {})
 		if (!match) return canonicalPath
 
@@ -81,7 +80,7 @@ export function PrefixStrategy<T extends string>({
 		const translatedPath = translationsForPath[lang]
 		if (!translatedPath) return canonicalPath
 
-		return resolveRoute(translatedPath, match.params)
+		return resolveRoute(translatedPath, match.params) as `/${string}`
 	}
 
 	return {
@@ -94,7 +93,7 @@ export function PrefixStrategy<T extends string>({
 			const translatedPath = getTranslatedPath(canonicalPath, targetLanguage, resolvedPathnames)
 			const shouldAddPrefix = targetLanguage !== sourceLanguageTag || prefixDefault === "always"
 
-			const localisedPath = shouldAddPrefix
+			const localisedPath: `/${string}` = shouldAddPrefix
 				? `/${targetLanguage}${translatedPath == "/" ? "" : translatedPath}`
 				: translatedPath
 			return {
