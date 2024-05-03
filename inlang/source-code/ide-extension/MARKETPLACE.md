@@ -33,6 +33,40 @@ You can have multiple projects in your repository. By using the inlang tab, it's
   <doc-feature text-color="#000000" color="#F7FAFC" title="Transparent Errors" image="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/sherlock-errors.png"></doc-feature>
 </doc-features>
 
+
+## Let's get started
+
+### Step 1: Initiate a New Project
+
+> Skip this step if you have already created a project.
+
+Open Sherlock within Visual Studio Code and click the `Getting Started` button. This will automatically create a new project for you.
+
+### Step 2: Customize Your Project
+
+After the project is created, you can customize it to fit your specific needs:
+- Click on the settings wheel icon next to your project name in the Sherlock panel to access customization options.
+- Modify your `project.inlang/settings.json` as needed to configure translation settings and add any specific plugins or lint rules.
+
+---
+
+### Additonal Steps
+
+#### Storage module
+
+Install a plugin that reads and writes your messages from the [inlang marketplace](https://inlang.com/c/plugins) – the standard template uses the inlang message format plugin, but we also have plugins for `i18next` and `JSON` & more.
+
+#### Syntax matcher 
+
+Install a syntax matcher/function matcher from the [inlang marketplace](https://inlang.com/c/plugins) – the standard template uses the `m` function matcher, but we also have plugins for `t` function matcher, a `next-intl` matcher and more. 
+
+> The `i18next` module already includes a syntax matcher.
+
+#### Lint rules
+
+Install [lint rules](https://inlang.com/c/lint-rules) to find errors in your translations from the [inlang marketplace](https://inlang.com/c/lint-rules)
+
+
 ## Usage
 
 Just _highlight/select_ the text you want and hit `cmd .` or `ctrl +` (Quick Fix / Yellow Bulb) to open the **translate dialog** to provide an id for it.
@@ -40,26 +74,6 @@ Just _highlight/select_ the text you want and hit `cmd .` or `ctrl +` (Quick Fix
 Hover over the message to see the tooltip with the translation.
 
 If something isn't working as expected, please join our [Discord](https://discord.gg/CNPfhWpcAa) or [create an issue](https://github.com/opral/monorepo/issues/new/choose). We are happy to help!
-
-
-# Let's get started
-
-1. Add a `project.inlang` folder to your repository
-2. Create a `settings.json` file to that new dir `project.inlang/settings.json`
-3. Install a plugin that reads and writes your messages from the [inlang marketplace](https://inlang.com/c/plugins)
-4. Install a syntax matcher/function matcher from the [inlang marketplace](https://inlang.com/c/plugins)
----
-1. **Optional**: Install [lint rules](https://inlang.com/c/lint-rules) to find errors in your translations from the [inlang marketplace](https://inlang.com/c/lint-rules)
-
-Look at the [example repository](https://github.com/opral/example) and it's [settings.json](https://github.com/opral/example/blob/main/project.inlang/settings.json) for a working example.
-
-
-
-
-#### Requirements:
-
-- VS Code version 1.84.0 or higher.
-- Node.js version v18 or higher.
 
 ## Customization
 
@@ -114,6 +128,11 @@ You can disable inline annotations by setting the following property to `false` 
 ## Support: Join our Discord!
 
 If something isn't working as expected or you have a feature suggestion, please join our [Discord](https://discord.gg/CNPfhWpcAa) or [create an issue](<[https](https://github.com/opral/monorepo/issues/new/choose)>). We are happy to help!
+
+## Requirements:
+
+- VS Code version 1.84.0 or higher.
+- Node.js version v18 or higher.
 
 ## Pricing 
 
