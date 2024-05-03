@@ -70,6 +70,7 @@ You should continue with **installing a syntax matcher**. There are multiple syn
 - *if you are using the i18next module, everything is already built-in*
 - *if you are using next-intl, you need https://inlang.com/m/193hsyds/plugin-inlang-nextIntl*
 
+> You might need another module if you are using a different resource file type. You can find all available modules [here](https://inlang.com/c/plugins).
 
 #### 3. ✨ Recommended
 
