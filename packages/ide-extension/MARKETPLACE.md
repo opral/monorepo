@@ -136,4 +136,4 @@ If something isn't working as expected or you have a feature suggestion, please 
 
 ## Pricing 
 
-<doc-pricing heading="The core features are free for all users." content="While we may introduce enterprise features with associated costs due to API integrations, these enhancements are designed to meet the needs of larger companies. Our commitment remains to provide essential tools for developers, empowering them to address the challenges of international expansion for free."></doc-pricing>
+<doc-pricing ></doc-pricing>

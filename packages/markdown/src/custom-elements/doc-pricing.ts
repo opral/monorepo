@@ -19,10 +19,10 @@ export class DocPricing extends LitElement {
 	`
 
 	@property()
-	heading: string = "Our developer tools and libraries are free."
+	heading: string = "Future enterprise features might cost money"
 
 	@property()
-	content: string = `We will charge for products and services targeting large companies, not dev tools. We see dev tools as a necessity to solve the business problem of expanding internationally and good marketing for us. Developers who love our dev tools will recommend the inlang ecosystem to their employers/companies.`
+	content: string = `But, we have little incentive to monetize individual or small scale usage. We see individual usage as marketing. Users who love this app will recommend it to their employers/companies that we can monetize with enterprise features.`
 
 	override render() {
 		return html`<div class="doc-dev-tool">

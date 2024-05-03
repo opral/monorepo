@@ -1,5 +1,17 @@
 # @inlang/message-lint-rule-camel-case-id
 
+## 1.1.8
+
+### Patch Changes
+
+- 8ac7e9a: update README
+
+## 1.1.7
+
+### Patch Changes
+
+- @inlang/message-lint-rule@1.4.7
+
 ## 1.1.6
 
 ### Patch Changes

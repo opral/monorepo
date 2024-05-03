@@ -1,5 +1,17 @@
 # @inlang/message-lint-rule-without-source
 
+## 1.4.8
+
+### Patch Changes
+
+- 8ac7e9a: update README
+
+## 1.4.7
+
+### Patch Changes
+
+- @inlang/message-lint-rule@1.4.7
+
 ## 1.4.6
 
 ### Patch Changes

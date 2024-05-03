@@ -1,5 +1,16 @@
 # @inlang/sdk
 
+## 0.34.3
+
+### Patch Changes
+
+- bc17d0c: Improve error handling for module URLs in project settings
+- Updated dependencies [bc17d0c]
+  - @inlang/project-settings@2.4.2
+  - @inlang/message-lint-rule@1.4.7
+  - @inlang/plugin@2.4.11
+  - @inlang/module@1.2.11
+
 ## 0.34.2
 
 ### Patch Changes
