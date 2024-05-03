@@ -35,7 +35,7 @@ type PluginSettings = {
 }
 ```
 
-You can add this settings also in the `settings.json`:
+You can add this settings also in the `project.inlang/settings.json`:
 
 ```json
 {
