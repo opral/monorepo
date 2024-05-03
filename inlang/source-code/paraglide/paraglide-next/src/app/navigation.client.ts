@@ -15,14 +15,12 @@ export const createNavigation = <T extends string>(
 ) => {
 	const localiseHref = createLocaliseHref(strategy)
 
-	type NextUsePathname = (typeof NextNavigation)["usePathname"]
-
 	/**
 	 * Get the current **non-localised** pathname. For example usePathname() on /de/dashboard?foo=bar would return "/dashboard"
 	 */
-	const usePathname: NextUsePathname = (...args) => {
-		const encodedLocalisedPathname = NextNavigation.usePathname(...args)
-		const localisedPathname = decodeURI(encodedLocalisedPathname)
+	const usePathname = (): `/${string}` => {
+		const encodedLocalisedPathname = NextNavigation.usePathname()
+		const localisedPathname = decodeURI(encodedLocalisedPathname) as `/${string}`
 		return strategy.getCanonicalPath(localisedPathname, languageTag())
 	}
 
@@ -31,7 +29,7 @@ export const createNavigation = <T extends string>(
 	 */
 	const useRouter = () => {
 		const nextRouter = NextNavigation.useRouter()
-		const localisedCurrentPathname = NextNavigation.usePathname()
+		const localisedCurrentPathname = NextNavigation.usePathname() as `/${string}`
 		const searchParams = NextNavigation.useSearchParams()
 		const canonicalCurrentPathname = strategy.getCanonicalPath(
 			localisedCurrentPathname,
