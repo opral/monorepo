@@ -101,7 +101,7 @@ async function main(args: {
 
 		return
 	} else {
-		await gettingStartedView()
+		await gettingStartedView(args)
 	}
 }
 

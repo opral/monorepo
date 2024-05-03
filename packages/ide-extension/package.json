@@ -1,7 +1,7 @@
 {
 	"name": "vs-code-extension",
 	"private": true,
-	"displayName": "Sherlock – i18n inspector (prev inlang)",
+	"displayName": "Sherlock – i18n inspector",
 	"type": "module",
 	"description": "Visualize, edit & lint translated strings at a glance via Inline Decorations & Hover Support, and extract new strings with a single click.",
 	"publisher": "inlang",
@@ -10,7 +10,7 @@
 		"url": "https://github.com/opral/monorepo.git"
 	},
 	"icon": "assets/sherlock-logo.png",
-	"version": "1.41.1",
+	"version": "1.42.0",
 	"engines": {
 		"vscode": "^1.84.2"
 	},
@@ -230,7 +230,7 @@
 		"@types/throttle-debounce": "^5.0.2",
 		"@types/ungap__structured-clone": "^0.3.3",
 		"@types/vscode": "^1.84.2",
-		"@vscode/vsce": "^2.26.0",
+		"@vscode/vsce": "^2.26.1",
 		"@wdio/cli": "^8.24.6",
 		"@wdio/globals": "^8.24.6",
 		"@wdio/local-runner": "^8.24.6",

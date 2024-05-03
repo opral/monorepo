@@ -1,5 +1,11 @@
 # @inlang/plugin-next-intl
 
+## 1.3.24
+
+### Patch Changes
+
+- f37599b: change README
+
 ## 1.3.23
 
 ### Patch Changes
