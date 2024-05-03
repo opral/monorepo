@@ -7,9 +7,9 @@ import {
 	UserPathDefinitionTranslations,
 	resolveUserPathDefinitions,
 } from "@inlang/paraglide-js/internal/adapter-utils"
-import type { RoutingStrategy } from "./interface"
-import { usePrefixDetection } from "../middleware/detection/prefixDetection"
-import { DEV } from "../env"
+import type { RoutingStrategy } from "../interface"
+import { usePrefixDetection } from "../../middleware/detection/prefixDetection"
+import { DEV } from "../../env"
 import { rsc } from "rsc-env"
 import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
 

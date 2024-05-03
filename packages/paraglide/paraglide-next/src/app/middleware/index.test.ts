@@ -4,7 +4,7 @@ import { PrefixStrategy } from "../index.client"
 import { LANG_COOKIE, PARAGLIDE_LANGUAGE_HEADER_NAME } from "../constants"
 import { NextRequest, NextResponse } from "next/server"
 import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
-import { DomainStrategy } from "../routing-strategy/domainStrategy"
+import { DomainStrategy } from "../routing-strategy/strats/domainStrategy"
 
 describe("Middleware with Prefix", () => {
 	const strategy = PrefixStrategy<"en" | "de">({})
@@ -43,8 +43,8 @@ describe("Middleware with Prefix", () => {
 
 describe("Middleware with Domain Strategy", () => {
 	const domains = {
-		en: "example.com",
-		de: "de.example.com",
+		en: "https://example.com",
+		de: "https://de.example.com",
 	} as const
 
 	const strategy = DomainStrategy<"en" | "de">({ domains })
@@ -53,7 +53,7 @@ describe("Middleware with Domain Strategy", () => {
 	it.each(availableLanguageTags)("Detects the language from the domain", (languageTag) => {
 		const domain = domains[languageTag as keyof typeof domains]
 
-		const request = new NextRequest("https://" + domain + "/some-page")
+		const request = new NextRequest(domain + "/some-page")
 		const response = middleware(request)
 
 		expectNoRewrite(response)

@@ -5,7 +5,7 @@ export const createDomainDetection = <T extends string>(cfg: {
 }): LanguageDetector<T> => {
 	return (request) => {
 		return Object.entries(cfg.domains)
-			.find(([, value]) => value === request.nextUrl.host)
+			.find(([, value]) => (value as string).split("://")[1].split("/")[0] === request.nextUrl.host)
 			?.at(0) as T | undefined
 	}
 }

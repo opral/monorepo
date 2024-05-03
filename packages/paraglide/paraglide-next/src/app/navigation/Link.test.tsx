@@ -8,7 +8,7 @@ import {
 	sourceLanguageTag,
 } from "$paraglide/runtime.js"
 import { createLink } from "./Link"
-import { PrefixStrategy } from "../routing-strategy/prefixStrategy"
+import { PrefixStrategy } from "../routing-strategy/strats/prefixStrategy"
 
 describe.skipIf(() => process.env.NODE_ENV !== "development")("<Link>", () => {
 	beforeEach(() => {

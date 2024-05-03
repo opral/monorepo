@@ -1,2 +1,2 @@
-export { PrefixStrategy } from "./prefixStrategy"
-export { DomainStrategy } from "./domainStrategy"
+export { PrefixStrategy } from "./strats/prefixStrategy"
+export { DomainStrategy } from "./strats/domainStrategy"
