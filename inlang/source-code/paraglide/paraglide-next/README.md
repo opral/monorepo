@@ -13,7 +13,6 @@
 <doc-comment text="Thank you for that huge work you have done and still doing!" author="ZerdoX-x" icon="mdi:github"></doc-comment>
 </doc-comments>
 
-
 # Getting Started
 
 Get started instantly with the Paraglide-Next CLI.
@@ -23,12 +22,13 @@ npx @inlang/paraglide-next init
 npm install
 ```
 
-The CLI will ask you which languages you want to support. This can be changed later. 
+The CLI will ask you which languages you want to support. This can be changed later.
 
 It will:
+
 - Create an [Inlang Project](https://inlang.com/documentation/concept/project)
 - Create translation files for each of your languages
-- Add necessary Provider Components and files 
+- Add necessary Provider Components and files
 - Update your `next.config.js` file to use the Paraglide-Next Plugin.
 - Offer to automatically migrate to the [Localized navigation APIs](#localized-navigation-apis) if you're using the App Router (recommended)
 
@@ -46,7 +46,7 @@ Use curly braces to add parameters.
 	// The $schema key is automatically ignored
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 
-	"hello_world" : "Hello World!",
+	"hello_world": "Hello World!",
 	"greetings": "Greetings {name}."
 }
 ```
@@ -74,7 +74,7 @@ Only messages used in client components are sent to the client. Messages in Serv
 
 ## Routing Strategy
 
-You can customize the routing strategy in `src/lib/i18n.ts`. By default, the `PrefixStrategy` is used. 
+You can customize the routing strategy in `src/lib/i18n.ts`. By default, the `PrefixStrategy` is used.
 
 ### Prefix Strategy (default)
 
@@ -89,23 +89,21 @@ import { PrefixStrategy } from "@inlang/paraglide-next"
 const strategy = PrefixStrategy()
 ```
 
-
 #### Translated Pathnames
 
 The Prefix Strategy supports using different pathnames for each language with the `pathname` option. Pathnames should not include a language prefix or the base path.
 
 ```ts
-export const { ... } =
-	createI18n<AvailableLanguageTag>({
-		pathname: {
-			"/about": {
-				en: "/about",
-				de: "/ueber-uns"
-			}
-		}
-	})
+const strategy = PrefixStrategy<AvailableLanguageTag>({
+	pathname: {
+		"/about": {
+			en: "/about",
+			de: "/ueber-uns",
+		},
+	},
+})
 ```
- 
+
 You can use parameters with square brackets. You have to use an identical set of parameters in both the canonical and translated pathnames.
 
 You can use double-square brackets for optional parameters and the spread operator to make it a match-all parameter.
@@ -123,7 +121,7 @@ pathname: {
 }
 ```
 
-You can also use a message as a pathname. The translation will be used as the pathname. You can use parameters here too. 
+You can also use a message as a pathname. The translation will be used as the pathname. You can use parameters here too.
 
 ```json
 // messages/en.json
@@ -137,13 +135,30 @@ You can also use a message as a pathname. The translation will be used as the pa
 ```
 
 ```ts
-export const { ... } =
-	createI18n<AvailableLanguageTag>({
-		pathname: {
-			"/about": m.about_pathname //pass as reference
-		}
-	})
+const strategy = PrefixStrategy<AvailableLanguageTag>({
+	pathname: {
+		"/about": m.about_pathname, //pass as reference
+	},
+})
 ```
+
+#### Excluding certain Routes from Localised Routing
+
+You can exclude certain routes from i18n using the `exclude` option. You can either pass a string or a regex.
+
+```ts
+const strategy = PrefixStrategy<AvailableLanguageTag>({
+		 //array of routes to exclude
+		exclude: [
+			/^\/api(\/.*)?$/ //excludes all routes starting with /api
+			"/admin" //excludes /admin, but not /admin/anything - globs are not supported
+		],
+})
+```
+
+Excluded routes won't be prefixed with the language tag & the middleware will not add `Link` headers to them.
+
+> Tip: LLMs are really good at writing regexes.
 
 ### Domain Strategy
 
@@ -157,8 +172,8 @@ const strategy = DomainStrategy<AvailableLanguageTag>({
 	domains: {
 		en: "https://example.com",
 		de: "https://example.de",
-		fr: "https://fr.example.com"
-	}
+		fr: "https://fr.example.com",
+	},
 })
 ```
 
@@ -166,7 +181,7 @@ Domains must be unique for each language.
 
 ### Detection-only Strategy
 
-Uses the `Accept-Language` header to detect the language on first visit. Any subsequent visits will use the language set in the `NEXT_LOCALE` cookie. Routing is not affected in any way. 
+Uses the `Accept-Language` header to detect the language on first visit. Any subsequent visits will use the language set in the `NEXT_LOCALE` cookie. Routing is not affected in any way.
 
 ```ts
 import { DetectionStrategy } from "@inlang/paraglide-next"
@@ -177,12 +192,11 @@ const strategy = DetectionStrategy<AvailableLanguageTag>()
 
 > Manual Language switches only work if JS is enabled when using this strategy.
 
-
 ## Localized navigation APIs
 
-> If you're using the pages router this section does not apply to you. You are are using [Next's built-in i18n routing](https://nextjs.org/docs/advanced-features/i18n-routing). 
+> If you're using the pages router this section does not apply to you. You are are using [Next's built-in i18n routing](https://nextjs.org/docs/advanced-features/i18n-routing).
 
-You can now visit `/de/some-page` but you still need to add the language prefix to every single link. Wouldn't it be nice if that happened automatically? 
+You can now visit `/de/some-page` but you still need to add the language prefix to every single link. Wouldn't it be nice if that happened automatically?
 
 For this, Paraglide-Next provides Localised Navigation APIs, exported from `@/lib/i18n.js`.
 
@@ -193,7 +207,7 @@ To get localized `<Link>`s you need to replace the ones from `next/link` with th
 + import { Link } from "@/lib/i18n" 
 
 // This now links to /de/about depending on the current language
-<Link href="/about"> 
+<Link href="/about">
 ```
 
 You can do the same for the other navigation APIs.
@@ -243,34 +257,13 @@ function Component() {
 }
 ```
 
-### Excluding certain Routes from Localised Routing
-
-You can exclude certain routes from i18n using the `exclude` option on `createI18n` in `lib/i18n`. You can either pass a string or a regex.
-
-```ts
-// src/lib/i18n.js
-export const { ... } =
-	createI18n<AvailableLanguageTag>({
-		 //array of routes to exclude
-		exclude: [
-			/^\/api(\/.*)?$/ //excludes all routes starting with /api
-			"/admin" //excludes /admin, but not /admin/anything - globs are not supported
-		],
-	})
-```
-
-Excluded routes won't be prefixed with the language tag & the middleware will not add `Link` headers to them.
-
-> Tip: LLMs are really good at writing regexes.
-
-
 ### Setting the Language in Server Actions
 
 Use the `initializeLanguage` function at the top of your server-action file to make sure the language is available.
 
 ```ts
 // src/app/actions.ts
-"use server";
+"use server"
 import { initializeLanguage } from "@inlang/paraglide-next"
 import { languageTag } from "@/paraglide/runtime"
 
@@ -329,7 +322,6 @@ You can chain `paraglide-next`'s middleware with your own by calling it inside y
 // src/middleware.ts
 import { middleware as paraglide } from "@/lib/i18n"
 export default function middleware(request: NextRequest) {
-
 	//do something with the request
 
 	const response = paraglide(request)
@@ -341,9 +333,9 @@ export default function middleware(request: NextRequest) {
 
 ## (Legacy) Setup With the Pages Router
 
-The `paraglide-next init` command will have set up [Next's built-in i18n routing](https://nextjs.org/docs/advanced-features/i18n-routing). Thus, NextJS will automatically prefix all routes with the locale. 
+The `paraglide-next init` command will have set up [Next's built-in i18n routing](https://nextjs.org/docs/advanced-features/i18n-routing). Thus, NextJS will automatically prefix all routes with the locale.
 
-For example, the route `/about` will become `/en/about` for the English locale and `/de/about` for the German locale. Only the default locale won't be prefixed. 
+For example, the route `/about` will become `/en/about` for the English locale and `/de/about` for the German locale. Only the default locale won't be prefixed.
 
 ## Known Limitations
 
