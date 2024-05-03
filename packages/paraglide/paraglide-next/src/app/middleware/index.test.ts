@@ -33,9 +33,26 @@ describe("Middleware with Prefix & no redirect", () => {
 			expectRewriteDestination(response, "https://example.com/some-page")
 		}
 	)
+})
+
+describe("Middleware Fallbacks", () => {
+	const middleware = createMiddleware({
+		strategy: {
+			resolveLocale() {
+				return undefined //be completely indecicive
+			},
+			getCanonicalPath(path) {
+				return path
+			},
+			getLocalisedUrl(canonicalPath) {
+				return { pathname: canonicalPath }
+			},
+		},
+		redirect: false,
+	})
 
 	it.each(availableLanguageTags)(
-		"doesn't reroute a request from / & uses the Language Cookie to detect the language",
+		"Uses the Language Cookie to detect the language, regardless of Accept-Language header",
 		(languageTag) => {
 			const headers = new Headers()
 			headers.set("Cookie", LANG_COOKIE.name + "=" + languageTag)
@@ -49,7 +66,7 @@ describe("Middleware with Prefix & no redirect", () => {
 	)
 
 	it.each(availableLanguageTags)(
-		"doesn't reroute a request from / & uses the Accept-Language header to detect the language if no cookie is present",
+		"Uses the Accept-Language header to detect the language if no cookie is present",
 		(languageTag) => {
 			const headers = new Headers()
 			headers.set("Accept-Language", languageTag)
@@ -61,6 +78,7 @@ describe("Middleware with Prefix & no redirect", () => {
 		}
 	)
 })
+
 /**
  * Checks if the response sets the header to the given value
  * @param response - A NextResponse
