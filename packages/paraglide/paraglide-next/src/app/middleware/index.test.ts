@@ -1,8 +1,9 @@
 import { describe, it, expect } from "vitest"
 import { createMiddleware } from "./index"
 import { PrefixStrategy } from "../index.client"
-import { PARAGLIDE_LANGUAGE_HEADER_NAME } from "../constants"
+import { LANG_COOKIE, PARAGLIDE_LANGUAGE_HEADER_NAME } from "../constants"
 import { NextRequest, NextResponse } from "next/server"
+import { availableLanguageTags } from "$paraglide/runtime.js"
 
 describe("Middleware with Prefix & no redirect", () => {
 	const strategy = PrefixStrategy()
@@ -11,13 +12,40 @@ describe("Middleware with Prefix & no redirect", () => {
 		redirect: false,
 	})
 
-	it("reroutes a request from /de to / and sets the header", () => {
-		const request = new NextRequest("https://example.com/de")
-		const response = middleware(request)
+	it.each(availableLanguageTags)(
+		"reroutes a request from /%s to / and sets the header",
+		(languageTag) => {
+			const request = new NextRequest("https://example.com/" + languageTag)
+			const response = middleware(request)
 
-		expectHeaderValue(response, PARAGLIDE_LANGUAGE_HEADER_NAME, "de")
-		expectRewriteDestination(response, "https://example.com/")
-	})
+			expectHeaderValue(response, PARAGLIDE_LANGUAGE_HEADER_NAME, languageTag)
+			expectRewriteDestination(response, "https://example.com/")
+		}
+	)
+
+	it.each(availableLanguageTags)(
+		"reroutes a request from /%s/some-page to /some-page and sets the header",
+		(languageTag) => {
+			const request = new NextRequest("https://example.com/" + languageTag + "/some-page")
+			const response = middleware(request)
+
+			expectHeaderValue(response, PARAGLIDE_LANGUAGE_HEADER_NAME, languageTag)
+			expectRewriteDestination(response, "https://example.com/some-page")
+		}
+	)
+
+	it.each(availableLanguageTags)(
+		"doesn't reroute a request from / & uses the Language Cookie to detect the language",
+		(languageTag) => {
+			const headers = new Headers()
+			headers.set("Cookie", LANG_COOKIE.name + "=" + languageTag)
+			const request = new NextRequest("https://example.com/", { headers })
+			const response = middleware(request)
+
+			expectNoRewrite(response)
+			expectHeaderValue(response, PARAGLIDE_LANGUAGE_HEADER_NAME, languageTag)
+		}
+	)
 })
 /**
  * Checks if the response sets the header to the given value
@@ -40,4 +68,18 @@ function expectHeaderValue(response: NextResponse, headerName: string, headerVal
  */
 function expectRewriteDestination(response: NextResponse, destination: string) {
 	expect(response.headers.get("x-middleware-rewrite")).toBe(destination)
+}
+
+/**
+ * Checks that the response doesn't rewrite
+ */
+function expectNoRewrite(response: NextResponse) {
+	expect(response.headers.get("x-middleware-rewrite")).toBeNull()
+}
+
+/**
+ * Checks if the given response redirects to the given destination
+ */
+function expectRedirectTo(response: NextResponse, destination: string) {
+	expect(response.headers.get("x-middleware-redirect")).toBe(destination)
 }
