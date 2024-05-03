@@ -15,7 +15,7 @@ const strategy = PrefixStrategy<"en" | "de" | "de-CH">({
 			en: "/translated/[id]",
 		},
 	},
-	prefix: "except-default",
+	prefixDefault: "never",
 	exclude: (path) => path.startsWith("/api/"),
 })
 

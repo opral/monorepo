@@ -1,7 +1,6 @@
 import { getLanguage } from "./getLanguage.client"
-import { availableLanguageTags, setLanguageTag } from "$paraglide/runtime.js"
+import { availableLanguageTags, languageTag, setLanguageTag } from "$paraglide/runtime.js"
 import { createNavigation } from "./navigation.client"
-import { createRedirects } from "./redirect"
 import { createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
 import { I18nUserConfig, ResolvedI18nConfig } from "./config"
@@ -17,15 +16,13 @@ export function createI18n<T extends string = string>(userConfig: I18nUserConfig
 		prefix: userConfig.prefix ?? "except-default",
 	}
 
-	const strategy = PrefixStrategy({
+	const strategy = PrefixStrategy<T>({
 		exclude: config.exclude,
 		pathnames: userConfig.pathnames || {},
-		prefix: config.prefix,
+		prefixDefault: config.prefix === "except-default" ? "never" : "always",
 	})
 
-	const navigation = createNavigation({
-		strategy,
-	})
+	const navigation = createNavigation(languageTag, strategy)
 	const middleware = createMiddleware<T>({ strategy })
 
 	return {

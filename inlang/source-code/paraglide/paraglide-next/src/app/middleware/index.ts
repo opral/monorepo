@@ -61,9 +61,7 @@ export function createMiddleware<T extends string>(opt: MiddlewareOptions<T>) {
 
 		const decodedPathname = decodeURI(request.nextUrl.pathname)
 		const canonicalPath = opt.strategy.getCanonicalPath(decodedPathname, locale)
-		const localisedPathname = opt.strategy.getLocalisedUrl(canonicalPath, locale, false)
-
-		const shouldRedirect = opt.redirect && localisedPathname.pathname !== decodedPathname
+		const localisedURL = opt.strategy.getLocalisedUrl(canonicalPath, locale, false)
 
 		const localeCookieMatches =
 			isAvailableLanguageTag(localeCookeValue) && localeCookeValue === locale
@@ -71,11 +69,11 @@ export function createMiddleware<T extends string>(opt: MiddlewareOptions<T>) {
 		const headers = new Headers(request.headers)
 		headers.set(PARAGLIDE_LANGUAGE_HEADER_NAME, locale)
 
-		const shouldRedirect = localisedPathname !== decodedPathname
+		const shouldRedirect = opt.redirect && localisedURL.pathname !== decodedPathname
 		const rewriteRequired = request.nextUrl.pathname !== canonicalPath
 
 		const response: NextResponse = shouldRedirect
-			? redirect(request.nextUrl, localisedPathname, { headers })
+			? redirect(request.nextUrl, localisedURL.pathname, { headers })
 			: rewriteRequired
 			? rewrite(request.nextUrl, canonicalPath, { request: { headers } })
 			: NextResponse.next({ request: { headers } })

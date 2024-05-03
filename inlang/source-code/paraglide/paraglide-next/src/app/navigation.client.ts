@@ -5,6 +5,7 @@ import { RoutingStragey } from "./routing/interface"
 import { createLocaliseHref } from "./localiseHref"
 import { serializeCookie } from "./utils/cookie"
 import { LANG_COOKIE } from "./constants"
+import { createRedirects } from "./redirect"
 
 export type LocalisedNavigation<T extends string> = ReturnType<typeof createNavigation<T>>
 
@@ -30,7 +31,7 @@ export const createNavigation = <T extends string>(
 	 */
 	const useRouter = () => {
 		const nextRouter = NextNavigation.useRouter()
-		const localisedCurrentPathname = usePathname()
+		const localisedCurrentPathname = NextNavigation.usePathname()
 		const searchParams = NextNavigation.useSearchParams()
 		const canonicalCurrentPathname = strategy.getCanonicalPath(
 			localisedCurrentPathname,
@@ -46,16 +47,23 @@ export const createNavigation = <T extends string>(
 		 * Navigate to the provided href. Pushes a new history entry.
 		 */
 		const push = (
-			canonicalPath: string,
+			canonicalDestinationPath: `/${string}`,
 			options?: (NavigateOptions & OptionalLanguageOption) | undefined
 		) => {
 			const locale = options?.locale ?? languageTag()
-			const localisedPath = localiseHref(canonicalPath, locale)
+			const isLanguageSwitch = locale !== languageTag()
+
+			const localisedPath = localiseHref(
+				canonicalDestinationPath,
+				locale,
+				canonicalCurrentPathname,
+				isLanguageSwitch
+			)
 
 			// If the current and new canonical paths are the same, but the language is different,
 			// we need to do a native reload to make sure the new language is used
 			if (
-				canonicalCurrentPathname === canonicalPath &&
+				canonicalCurrentPathname === canonicalDestinationPath &&
 				options?.locale &&
 				options.locale !== languageTag()
 			) {
@@ -69,7 +77,7 @@ export const createNavigation = <T extends string>(
 				document.cookie = serializeCookie({
 					...LANG_COOKIE,
 					value: locale,
-					path: basePath,
+					Path: basePath,
 				})
 
 				window.location.reload()
@@ -88,16 +96,22 @@ export const createNavigation = <T extends string>(
 		 * Navigate to the provided href. Replaces the current history entry.
 		 */
 		const replace = (
-			canonicalPath: string,
+			canonicalDestinationPath: `/${string}`,
 			options?: (NavigateOptions & OptionalLanguageOption) | undefined
 		) => {
 			const locale = options?.locale ?? languageTag()
-			const localisedPath = localiseHref(canonicalPath, locale)
+			const isLanguageSwitch = locale !== languageTag()
+			const localisedPath = localiseHref(
+				canonicalDestinationPath,
+				locale,
+				canonicalCurrentPathname,
+				isLanguageSwitch
+			)
 
 			// If the current and new canonical paths are the same, but the language is different,
 			// we need to do a native reload to make sure the new language is used
 			if (
-				canonicalCurrentPathname === canonicalPath &&
+				canonicalCurrentPathname === canonicalDestinationPath &&
 				options?.locale &&
 				options.locale !== languageTag()
 			) {
@@ -111,7 +125,7 @@ export const createNavigation = <T extends string>(
 				document.cookie = serializeCookie({
 					...LANG_COOKIE,
 					value: locale,
-					path: basePath,
+					Path: basePath,
 				})
 
 				window.location.reload()
@@ -129,9 +143,13 @@ export const createNavigation = <T extends string>(
 		/**
 		 * Prefetch the provided href.
 		 */
-		const prefetch = (canonicalPath: string, options: PrefetchOptions & OptionalLanguageOption) => {
+		const prefetch = (
+			canonicalDestinationPath: `/${string}`,
+			options: PrefetchOptions & OptionalLanguageOption
+		) => {
 			const locale = options?.locale ?? languageTag()
-			const localisedPath = localiseHref(canonicalPath, locale)
+			const isLanguageSwitch = locale !== languageTag()
+			const localisedPath = localiseHref(canonicalDestinationPath, locale, "/", isLanguageSwitch)
 			return nextRouter.prefetch(localisedPath, options)
 		}
 
@@ -143,5 +161,5 @@ export const createNavigation = <T extends string>(
 		}
 	}
 
-	return { useRouter, usePathname }
+	return { useRouter, usePathname, ...createRedirects(languageTag, strategy) }
 }
