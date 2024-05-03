@@ -443,6 +443,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			return { newRepo: repo(), activeProject: activeProject() }
 		},
 		async ({ newRepo, activeProject }) => {
+			// wait for the browser to be idle
+			await new Promise((resolve) => requestIdleCallback(resolve))
 			if (newRepo) {
 				const project = solidAdapter(
 					await loadProject({
