@@ -1,4 +1,4 @@
-import type { RoutingStragey } from "./routing/interface"
+import type { RoutingStragey } from "./routing-strategy/interface"
 import type { LinkProps } from "next/link"
 import { isExternal as isStringHrefExternal } from "./utils/href"
 

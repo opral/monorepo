@@ -1,7 +1,11 @@
-export { createI18n } from "./legacy/createI18n.client.js"
-
+// Public APIs
 export { createMiddleware } from "./middleware"
 export { createNavigation } from "./navigation/navigation.client.js"
-
-export { PrefixStrategy } from "./routing/prefixStrategy"
 export { initializeLanguage } from "./initializeLanguage.client.js"
+
+// Routing Strategies
+export { PrefixStrategy } from "./routing-strategy/prefixStrategy"
+export { DomainStrategy } from "./routing-strategy/domainStrategy"
+
+// Legacy
+export { createI18n } from "./legacy/createI18n.client.js"

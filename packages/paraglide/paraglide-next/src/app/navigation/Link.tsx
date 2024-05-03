@@ -7,7 +7,7 @@ import {
 import { addBasePath, basePath } from "../utils/basePath"
 import NextLink from "next/link"
 import React from "react"
-import { RoutingStragey } from "../routing/interface"
+import { RoutingStragey } from "../routing-strategy/interface"
 import { createLocaliseHref } from "../localiseHref"
 import { serializeCookie } from "../utils/cookie"
 import { LANG_COOKIE } from "../constants"

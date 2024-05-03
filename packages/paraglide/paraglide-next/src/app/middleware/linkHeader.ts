@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server"
-import { RoutingStragey } from "../routing/interface"
+import { RoutingStragey } from "../routing-strategy/interface"
 import { addPathPrefix } from "../utils/basePath"
 import { format } from "../utils/format"
 

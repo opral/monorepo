@@ -1,11 +1,11 @@
 import { getLanguage } from "../getLanguage.server"
 import { availableLanguageTags, setLanguageTag } from "$paraglide/runtime.js"
-import { createNoopNavigation } from "../navigation/navigation.server"
+import { createNavigation } from "../navigation/navigation.server"
 import { createExclude } from "../exclude"
 import { createMiddleware } from "../middleware"
 import { resolveUserPathDefinitions } from "@inlang/paraglide-js/internal/adapter-utils"
 import { I18nUserConfig, ResolvedI18nConfig } from "./config"
-import { PrefixStrategy } from "../routing/prefixStrategy"
+import { PrefixStrategy } from "../routing-strategy/prefixStrategy"
 
 /**
  * Creates an i18n instance that manages your internationalization.
@@ -40,7 +40,7 @@ export function createI18n<T extends string = string>(userConfig: I18nUserConfig
 		prefixDefault: config.prefix === "except-default" ? "never" : "always",
 	})
 
-	const navigation = createNoopNavigation({ strategy })
+	const navigation = createNavigation({ strategy })
 	const middleware = createMiddleware<T>({
 		strategy,
 	})
