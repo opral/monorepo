@@ -75,7 +75,7 @@ type EditorStateSchema = {
 	/**
 	 * The branch names of current repo.
 	 */
-	branchNames: Resource<string[] | undefined>
+	branchList: Resource<string[] | undefined>
 	/**
 	 * Additional information about a repository provided by GitHub.
 	 */
@@ -539,7 +539,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			if (
 				repo() &&
 				!isForkSyncDisabled() &&
-				false &&
 				repoMeta &&
 				!("error" in repoMeta) &&
 				repoMeta.isFork
@@ -550,6 +549,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			}
 		},
 		async (args) => {
+			// wait for the browser to be idle
+			await new Promise((resolve) => requestIdleCallback(resolve))
 			const value = await args.repo!.forkStatus()
 			if ("error" in value) {
 				// Silently ignore errors:
@@ -595,8 +596,11 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	)
 
-	const [branchNames] = createResource(
+	const [branchList] = createResource(
 		() => {
+			if (repo() === undefined || githubRepositoryInformation() === undefined) {
+				return false
+			}
 			return { repo: repo() }
 		},
 		async (args) => {
@@ -651,7 +655,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					mergeUpstream,
 					createFork,
 					currentBranch,
-					branchNames,
+					branchList,
 					githubRepositoryInformation,
 					routeParams,
 					searchParams,
