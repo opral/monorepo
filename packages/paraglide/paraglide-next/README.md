@@ -89,7 +89,61 @@ import { PrefixStrategy } from "@inlang/paraglide-next"
 const strategy = PrefixStrategy()
 ```
 
-It supports localised pathnames. 
+
+#### Translated Pathnames
+
+The Prefix Strategy supports using different pathnames for each language with the `pathname` option. Pathnames should not include a language prefix or the base path.
+
+```ts
+export const { ... } =
+	createI18n<AvailableLanguageTag>({
+		pathname: {
+			"/about": {
+				en: "/about",
+				de: "/ueber-uns"
+			}
+		}
+	})
+```
+ 
+You can use parameters with square brackets. You have to use an identical set of parameters in both the canonical and translated pathnames.
+
+You can use double-square brackets for optional parameters and the spread operator to make it a match-all parameter.
+
+```ts
+pathname: {
+	"/articles/[slug]": {
+		en: "/articles/[slug]",
+		de: "/artikel/[slug]"
+	},
+	"/admin/[...rest]": {
+		en: "/administration/[...rest]",
+		de: "/admin/[...rest]"
+	},
+}
+```
+
+You can also use a message as a pathname. The translation will be used as the pathname. You can use parameters here too. 
+
+```json
+// messages/en.json
+{
+	"about_pathname": "/about"
+}
+// messages/de.json
+{
+	"about_pathname": "/ueber-uns"
+}
+```
+
+```ts
+export const { ... } =
+	createI18n<AvailableLanguageTag>({
+		pathname: {
+			"/about": m.about_pathname //pass as reference
+		}
+	})
+```
 
 ### Domain Strategy
 
@@ -98,6 +152,7 @@ Uses the domain of a request to determine the language. Must use a unique domain
 ```ts
 import { DomainStrategy } from "@inlang/paraglide-next"
 import type { AvailableLanguageTag } from "@/paraglide/runtime"
+
 const strategy = DomainStrategy<AvailableLanguageTag>({
 	domains: {
 		en: "https://example.com",
@@ -115,7 +170,9 @@ Uses the `Accept-Language` header to detect the language on first visit. Any sub
 
 ```ts
 import { DetectionStrategy } from "@inlang/paraglide-next"
-const strategy = DetectionStrategy()
+import type { AvailableLanguageTag } from "@/paraglide/runtime"
+
+const strategy = DetectionStrategy<AvailableLanguageTag>()
 ```
 
 > Manual Language switches only work if JS is enabled when using this strategy.
@@ -223,64 +280,6 @@ export async function someAction() {
 	languageTag() // "de"
 }
 ```
-
-### Translated Pathnames
-
-You can use different pathnames for each language with the `pathname` option.
-Pathnames should not include a language prefix or the base path.
-
-```ts
-export const { ... } =
-	createI18n<AvailableLanguageTag>({
-		pathname: {
-			"/about": {
-				en: "/about",
-				de: "/ueber-uns"
-			}
-		}
-	})
-```
- 
-You can use parameters in pathnames with square brackets. You have to use an identical set of parameters in both the canonical and translated pathnames.
-
-You can use double-square brackets for optional parameters and the spread operator to make it a match-all parameter.
-
-```ts
-pathname: {
-	"/articles/[slug]": {
-		en: "/articles/[slug]",
-		de: "/artikel/[slug]"
-	},
-	"/admin/[...rest]": {
-		en: "/administration/[...rest]",
-		de: "/admin/[...rest]"
-	},
-}
-```
-
-You can also use a message as a pathname. The translation will be used as the pathname. You can use parameters here too. 
-
-```json
-// messages/en.json
-{
-	"about_pathname": "/about"
-}
-// messages/de.json
-{
-	"about_pathname": "/ueber-uns"
-}
-```
-
-```ts
-export const { ... } =
-	createI18n<AvailableLanguageTag>({
-		pathname: {
-			"/about": m.about_pathname //pass as reference
-		}
-	})
-```
-
-Be careful when using translated pathnames in combination with `prefix: "never"`. Links may not work if they are shared between people with different languages.
 
 ## Getting a localized Pathname
 
