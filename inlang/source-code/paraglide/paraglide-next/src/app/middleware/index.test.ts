@@ -4,7 +4,7 @@ import { PrefixStrategy } from "../index.client"
 import { LANG_COOKIE, PARAGLIDE_LANGUAGE_HEADER_NAME } from "../constants"
 import { NextRequest, NextResponse } from "next/server"
 import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
-import { DomainStrategy } from "../routing/domainStrategy"
+import { DomainStrategy } from "../routing-strategy/domainStrategy"
 
 describe("Middleware with Prefix", () => {
 	const strategy = PrefixStrategy<"en" | "de">({})

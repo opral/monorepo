@@ -5,7 +5,7 @@ import { createExclude } from "../exclude"
 import { createMiddleware } from "../middleware"
 import { I18nUserConfig, ResolvedI18nConfig } from "./config"
 import { resolveUserPathDefinitions } from "@inlang/paraglide-js/internal/adapter-utils"
-import { PrefixStrategy } from "../routing/prefixStrategy"
+import { PrefixStrategy } from "../routing-strategy/prefixStrategy"
 
 export function createI18n<T extends string = string>(userConfig: I18nUserConfig<T> = {}) {
 	setLanguageTag(getLanguage)
