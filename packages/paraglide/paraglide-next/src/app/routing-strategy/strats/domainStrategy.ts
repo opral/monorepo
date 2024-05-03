@@ -1,4 +1,3 @@
-import { createDomainDetection } from "../../middleware/detection/domainDetection"
 import { RoutingStrategy } from "../interface"
 
 /**
@@ -20,6 +19,15 @@ export function DomainStrategy<T extends string>({
 	 */
 	domains: Record<T, `${"http://" | "https://"}${string}`>
 }): RoutingStrategy<T> {
+	const domainConfig = Object.fromEntries(
+		Object.entries(domains).map(([lang, domain]) => {
+			const [protocol, rest] = (domain as string).split("://")
+			const [hostname] = rest.split("/")
+
+			return [lang, { protocol, hostname }]
+		})
+	) as Record<T, { protocol: string; hostname: string }>
+
 	return {
 		getCanonicalPath(localisedPath) {
 			return localisedPath
@@ -27,8 +35,7 @@ export function DomainStrategy<T extends string>({
 		getLocalisedUrl(canonicalPath, targetLocale, isLanugageSwitch) {
 			if (!isLanugageSwitch) return { pathname: canonicalPath }
 
-			const [protocol, rest] = domains[targetLocale].split("://")
-			const [hostname] = rest.split("/")
+			const { protocol, hostname } = domainConfig[targetLocale]
 			return {
 				protocol: protocol,
 				hostname: hostname,
@@ -36,8 +43,14 @@ export function DomainStrategy<T extends string>({
 			}
 		},
 		resolveLocale(request) {
-			const detect = createDomainDetection({ domains })
-			return detect(request)
+			for (const [lang, { hostname }] of Object.entries(domainConfig) as [
+				T,
+				{ protocol: string; hostname: string }
+			][]) {
+				if (request.nextUrl.hostname === hostname) {
+					return lang as T
+				}
+			}
 		},
 	}
 }
