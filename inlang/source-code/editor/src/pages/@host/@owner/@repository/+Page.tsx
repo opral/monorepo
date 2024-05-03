@@ -149,7 +149,7 @@ function TheActualPage() {
 					<Errors
 						errors={project()?.errors() || []}
 						message="An error occurred while initializing the project file:"
-						messagePlural="errors occurred while initializing the project file:"
+						messagePlural="Errors occurred while initializing the project file:"
 					/>
 				</Match>
 				<Match when={!project()?.settings}>

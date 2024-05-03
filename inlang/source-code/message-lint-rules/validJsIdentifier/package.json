@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/message-lint-rule-valid-js-identifier",
-	"version": "1.0.7",
+	"version": "1.0.8",
 	"type": "module",
 	"exports": {
 		".": "./dist/index.js"

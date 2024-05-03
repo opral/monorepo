@@ -1,13 +1,31 @@
 import * as vscode from "vscode"
 import { CONFIGURATION } from "../../configuration.js"
+import { createNewProjectHandler } from "./createNewProjectHandler.js"
 
-export function createNoProjectsFoundViewProvider(): vscode.WebviewViewProvider {
+export function createNoProjectsFoundViewProvider(args: {
+	workspaceFolder: vscode.WorkspaceFolder
+}): vscode.WebviewViewProvider {
 	return {
 		resolveWebviewView(webviewView: vscode.WebviewView) {
 			webviewView.webview.options = {
-				enableScripts: false,
+				enableScripts: true,
 			}
 			webviewView.webview.html = getNoProjectsFoundHtml()
+			webviewView.webview.onDidReceiveMessage(
+				async (message) => {
+					switch (message.command) {
+						case "createNewProject":
+							await createNewProjectHandler({
+								workspaceFolderPath: args.workspaceFolder.uri.fsPath,
+							})
+							// Refresh projects
+							CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.fire(undefined)
+							break
+					}
+				},
+				undefined,
+				[]
+			)
 		},
 	}
 }
@@ -75,16 +93,26 @@ export function getNoProjectsFoundHtml(): string {
 			<main>
 				<h1>No project found</h1>
 				<span>Please create a project or make sure to have the correct workspace open.</span>
-				<a href="${CONFIGURATION.STRINGS.GETTING_STARTED_URL}"><button>Create Project</button></a>
+				<button onclick="createProject()">Create Project</button>
 				<span style="text-align: center;">Or, see <a href="${CONFIGURATION.STRINGS.DOCS_URL}">documentation</a></span>
 			</main>
+			<script>
+				const vscode = acquireVsCodeApi();
+				function createProject() {
+					vscode.postMessage({
+						command: 'createNewProject'
+					});
+				}
+        	</script>
         </body>
         </html>`
 }
 
-export async function gettingStartedView() {
+export async function gettingStartedView(args: { workspaceFolder: vscode.WorkspaceFolder }) {
 	vscode.window.registerWebviewViewProvider(
 		"gettingStartedView",
-		createNoProjectsFoundViewProvider()
+		createNoProjectsFoundViewProvider({
+			workspaceFolder: args.workspaceFolder,
+		})
 	)
 }

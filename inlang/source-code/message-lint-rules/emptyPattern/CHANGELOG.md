@@ -1,5 +1,11 @@
 # @inlang/message-lint-rule-empty-pattern
 
+## 1.4.8
+
+### Patch Changes
+
+- 8ac7e9a: update README
+
 ## 1.4.7
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.42.0
+
+### Minor Changes
+
+- 30a63b2: update getting started view to one click project creation
+
 ## 1.41.1
 
 ### Patch Changes

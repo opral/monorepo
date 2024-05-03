@@ -886,8 +886,8 @@ importers:
         specifier: ^1.84.2
         version: 1.88.0
       '@vscode/vsce':
-        specifier: ^2.26.0
-        version: 2.26.0
+        specifier: ^2.26.1
+        version: 2.26.1
       '@wdio/cli':
         specifier: ^8.24.6
         version: 8.36.1(typescript@5.3.2)
@@ -7421,8 +7421,8 @@ packages:
     resolution: {integrity: sha512-z3eiChaCQXMqBnk2aHHSEkobmC2VRalFQN0ApOAtydL172zXGxTwGrRtviT5HnUB+Q+G3vtEYFtuQkYqBzYgMA==}
     engines: {node: '>=16'}
 
-  '@vscode/vsce@2.26.0':
-    resolution: {integrity: sha512-v54ltgMzUG8lGY0kAgaOlry57xse1RlWzes9FotfGEx+Fr05KeR8rZicQzEMDmi9QnOgVWHuiEq+xA2HWkAz+Q==}
+  '@vscode/vsce@2.26.1':
+    resolution: {integrity: sha512-QOG6Ht7V93nhwcBxPWcG33UK0qDGEoJdg0xtVeaTN27W6PGdMJUJGTPhB/sNHUIFKwvwzv/zMAHvDgMNXbcwlA==}
     engines: {node: '>= 16'}
     hasBin: true
 
@@ -21697,7 +21697,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vscode/vsce@2.26.0':
+  '@vscode/vsce@2.26.1':
     dependencies:
       '@azure/identity': 4.1.0
       azure-devops-node-api: 12.5.0
@@ -28798,7 +28798,7 @@ snapshots:
 
   ovsx@0.8.4:
     dependencies:
-      '@vscode/vsce': 2.26.0
+      '@vscode/vsce': 2.26.1
       commander: 6.2.1
       follow-redirects: 1.15.4
       is-ci: 2.0.0
