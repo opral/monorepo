@@ -1,8 +1,8 @@
 export { default as LanguageProvider } from "./providers/LanguageProvider.js"
-export { createI18n } from "./createI18n.server.js"
+export { createI18n } from "./legacy/createI18n.server.js"
 
 export { createMiddleware } from "./middleware"
-export { createNoopNavigation as createNavigation } from "./navigation.server"
+export { createNoopNavigation as createNavigation } from "./navigation/navigation.server.js"
 
 export { PrefixStrategy } from "./routing/prefixStrategy"
 

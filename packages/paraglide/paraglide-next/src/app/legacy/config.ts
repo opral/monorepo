@@ -1,4 +1,4 @@
-import type { ExcludeConfig } from "./exclude"
+import type { ExcludeConfig } from "../exclude"
 import type {
 	UserPathDefinitionTranslations,
 	PathDefinitionTranslations,

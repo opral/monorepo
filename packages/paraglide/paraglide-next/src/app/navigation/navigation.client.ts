@@ -1,18 +1,19 @@
 import * as NextNavigation from "next/navigation"
-import { setLanguageTag } from "$paraglide/runtime.js"
-import { addBasePath, basePath } from "./utils/basePath"
-import { RoutingStragey } from "./routing/interface"
-import { createLocaliseHref } from "./localiseHref"
-import { serializeCookie } from "./utils/cookie"
-import { LANG_COOKIE } from "./constants"
+import { languageTag, setLanguageTag } from "$paraglide/runtime.js"
+import { addBasePath, basePath } from "../utils/basePath"
+import { RoutingStragey } from "../routing/interface"
+import { createLocaliseHref } from "../localiseHref"
+import { serializeCookie } from "../utils/cookie"
+import { LANG_COOKIE } from "../constants"
 import { createRedirects } from "./redirect"
 
 export type LocalisedNavigation<T extends string> = ReturnType<typeof createNavigation<T>>
 
-export const createNavigation = <T extends string>(
-	languageTag: () => T,
+export const createNavigation = <T extends string>({
+	strategy,
+}: {
 	strategy: RoutingStragey<T>
-) => {
+}) => {
 	const localiseHref = createLocaliseHref(strategy)
 
 	/**
@@ -21,10 +22,10 @@ export const createNavigation = <T extends string>(
 	const usePathname = (): `/${string}` => {
 		const encodedLocalisedPathname = NextNavigation.usePathname()
 		const localisedPathname = decodeURI(encodedLocalisedPathname) as `/${string}`
-		return strategy.getCanonicalPath(localisedPathname, languageTag())
+		return strategy.getCanonicalPath(localisedPathname, languageTag() as T)
 	}
 
-	/**
+	/**s
 	 * Get the router methods. For example router.push('/dashboard')
 	 */
 	const useRouter = () => {
@@ -33,7 +34,7 @@ export const createNavigation = <T extends string>(
 		const searchParams = NextNavigation.useSearchParams()
 		const canonicalCurrentPathname = strategy.getCanonicalPath(
 			localisedCurrentPathname,
-			languageTag()
+			languageTag() as T
 		)
 
 		type NavigateOptions = Parameters<(typeof nextRouter)["push"]>[1]
@@ -48,7 +49,7 @@ export const createNavigation = <T extends string>(
 			canonicalDestinationPath: `/${string}`,
 			options?: (NavigateOptions & OptionalLanguageOption) | undefined
 		) => {
-			const locale = options?.locale ?? languageTag()
+			const locale = options?.locale ?? (languageTag() as T)
 			const isLanguageSwitch = locale !== languageTag()
 
 			const localisedPath = localiseHref(
@@ -97,7 +98,7 @@ export const createNavigation = <T extends string>(
 			canonicalDestinationPath: `/${string}`,
 			options?: (NavigateOptions & OptionalLanguageOption) | undefined
 		) => {
-			const locale = options?.locale ?? languageTag()
+			const locale = options?.locale ?? (languageTag() as T)
 			const isLanguageSwitch = locale !== languageTag()
 			const localisedPath = localiseHref(
 				canonicalDestinationPath,
@@ -145,7 +146,7 @@ export const createNavigation = <T extends string>(
 			canonicalDestinationPath: `/${string}`,
 			options: PrefetchOptions & OptionalLanguageOption
 		) => {
-			const locale = options?.locale ?? languageTag()
+			const locale = options?.locale ?? (languageTag() as T)
 			const isLanguageSwitch = locale !== languageTag()
 			const localisedPath = localiseHref(canonicalDestinationPath, locale, "/", isLanguageSwitch)
 			return nextRouter.prefetch(localisedPath, options)
