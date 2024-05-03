@@ -8,7 +8,7 @@ describe("generateLinkHeader", () => {
 		const strategy = PrefixStrategy({
 			pathnames: {},
 			exclude: () => false,
-			prefix: "except-default",
+			prefixDefault: "never",
 		})
 
 		const request = new NextRequest("https://example.com/base/some-page")
