@@ -4,15 +4,15 @@ import {
 	languageTag,
 	sourceLanguageTag,
 } from "$paraglide/runtime.js"
-import { addBasePath, basePath } from "./utils/basePath"
+import { addBasePath, basePath } from "../utils/basePath"
 import NextLink from "next/link"
 import React from "react"
-import { RoutingStragey } from "./routing/interface"
-import { createLocaliseHref } from "./localiseHref"
-import { serializeCookie } from "./utils/cookie"
-import { LANG_COOKIE } from "./constants"
+import { RoutingStragey } from "../routing/interface"
+import { createLocaliseHref } from "../localiseHref"
+import { serializeCookie } from "../utils/cookie"
+import { LANG_COOKIE } from "../constants"
 import { rsc } from "rsc-env"
-import { DEV } from "./env"
+import { DEV } from "../env"
 
 type LocalisedLink<T extends string> = (
 	props: Omit<Parameters<typeof import("next/link").default>[0], "locale"> & { locale?: T }

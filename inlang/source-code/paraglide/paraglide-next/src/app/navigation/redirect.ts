@@ -1,9 +1,9 @@
-import { createLocaliseHref } from "./localiseHref"
+import { createLocaliseHref } from "../localiseHref"
 import {
 	redirect as NextRedirect,
 	permanentRedirect as NextPermanentRedirect,
 } from "next/navigation"
-import type { RoutingStragey } from "./routing/interface"
+import type { RoutingStragey } from "../routing/interface"
 
 export function createRedirects<T extends string>(
 	languageTag: () => T,
