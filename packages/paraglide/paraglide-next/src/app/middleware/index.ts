@@ -59,7 +59,7 @@ export function createMiddleware<T extends string>(opt: MiddlewareOptions<T>) {
 			createAcceptLanguageDetection({ availableLanguageTags: availableLanguageTags }),
 		]) as T
 
-		const decodedPathname = decodeURI(request.nextUrl.pathname)
+		const decodedPathname = decodeURI(request.nextUrl.pathname) as `/${string}`
 		const canonicalPath = opt.strategy.getCanonicalPath(decodedPathname, locale)
 		const localisedURL = opt.strategy.getLocalisedUrl(canonicalPath, locale, false)
 
