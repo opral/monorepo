@@ -1,6 +1,7 @@
 import { getLanguage } from "./getLanguage.client"
 import { availableLanguageTags, setLanguageTag } from "$paraglide/runtime.js"
-import { createNavigation } from "./navigation"
+import { createNavigation } from "./navigation.client"
+import { createRedirects } from "./redirect"
 import { createExclude } from "./exclude"
 import { createMiddleware } from "./middleware"
 import { I18nUserConfig, ResolvedI18nConfig } from "./config"

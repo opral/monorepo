@@ -67,7 +67,7 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 			options.sourceLanguageTag || projectConfig.sourceLanguageTag
 		if (!sourceLanguageTag) {
 			log.error(
-				`No source language tag defined. Please define a source language tag in the project.inlang.json file or as an argument with --sourceLanguageTag.`
+				`No source language tag defined. Please define a source language tag in the project settings or as an argument with --sourceLanguageTag.`
 			)
 			return
 		}
@@ -83,7 +83,7 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 			: projectConfig.languageTags
 		if (!targetLanguageTags) {
 			log.error(
-				`No language tags defined. Please define languageTags in the project.inlang.json file or as an argument with --targetLanguageTags.`
+				`No language tags defined. Please define languageTags in the project settings or as an argument with --targetLanguageTags.`
 			)
 			return
 		}
@@ -97,7 +97,9 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 			return
 		}
 
-		const messageIds = args.project.query.messages.includedMessageIds()
+		const messages = args.project.query.messages
+			.getAll()
+			.filter((message) => hasMissingTranslations(message, sourceLanguageTag, targetLanguageTags))
 
 		const bar = options.nobar
 			? undefined
@@ -109,14 +111,13 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 					progessBar.Presets.shades_grey
 			  )
 
-		bar?.start(messageIds.length, 0)
+		bar?.start(messages.length, 0)
 
 		const logs: Array<() => void> = []
 
-		const rpcTranslate = async (id: Message["id"]) => {
-			const toBeTranslatedMessage = args.project.query.messages.get({ where: { id } })!
+		const rpcTranslate = async (toBeTranslatedMessage: Message) => {
 			const logId =
-				`"${id}"` +
+				`"${toBeTranslatedMessage.id}"` +
 				(experimentalAliases ? ` (alias "${toBeTranslatedMessage.alias.default ?? ""}")` : "")
 
 			const { data: translatedMessage, error } = await rpcTranslateAction({
@@ -131,14 +132,17 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 				translatedMessage &&
 				translatedMessage?.variants.length > toBeTranslatedMessage.variants.length
 			) {
-				args.project.query.messages.update({ where: { id: id }, data: translatedMessage! })
+				args.project.query.messages.update({
+					where: { id: translatedMessage.id },
+					data: translatedMessage!,
+				})
 				logs.push(() => log.info(`Machine translated message ${logId}`))
 			}
 			bar?.increment()
 		}
 		// parallelize rpcTranslate calls with a limit of 100 concurrent calls
 		const limit = plimit(100)
-		const promises = messageIds.map((id) => limit(() => rpcTranslate(id)))
+		const promises = messages.map((message) => limit(() => rpcTranslate(message)))
 		await Promise.all(promises)
 
 		bar?.stop()
@@ -153,11 +157,44 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 	}
 }
 
+/**
+ * Returns true if the message has missing translations in any of the target languages.
+ * Assumes valid sourceLanguageTag and targetLanguageTags.
+ */
+export function hasMissingTranslations(
+	message: Message,
+	sourceLanguageTag: string,
+	targetLanguageTags: string[]
+) {
+	// TODO: extract missingTranslation iterator to sdk/src/messages/variant.ts
+	// see also rpc/src/functions/machineTranslateMessage.ts and mockMachineTranslateMessage()
+	for (const targetLanguageTag of targetLanguageTags) {
+		for (const variant of message.variants.filter(
+			(variant) => variant.languageTag === sourceLanguageTag
+		)) {
+			const targetVariant = getVariant(message, {
+				where: {
+					languageTag: targetLanguageTag,
+					match: variant.match,
+				},
+			})
+			if (targetVariant) {
+				continue
+			}
+			// short-circuit if a missing translation is found
+			return true
+		}
+	}
+	return false
+}
+
 async function mockMachineTranslateMessage(args: {
 	message: Message
 	sourceLanguageTag: string
 	targetLanguageTags: string[]
 }): Promise<Result<Message, string>> {
+	// eslint-disable-next-line no-console
+	// console.log("mockMachineTranslateMessage called")
 	const copy = structuredClone(args.message)
 	for (const targetLanguageTag of args.targetLanguageTags) {
 		for (const variant of args.message.variants.filter(
@@ -180,7 +217,7 @@ async function mockMachineTranslateMessage(args: {
 				pattern: [{ type: "Text", value: prefix + q }],
 			})
 			// eslint-disable-next-line no-console
-			console.log("mockMachineTranslateMessage", q, targetLanguageTag)
+			// console.log("mockMachineTranslateMessage translated", q, targetLanguageTag)
 		}
 	}
 	return { data: copy }

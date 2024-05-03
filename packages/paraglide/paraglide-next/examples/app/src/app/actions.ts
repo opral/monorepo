@@ -9,3 +9,9 @@ export async function greet(formData: FormData) {
 	console.info(m.hello({ name }))
 	return m.hello({ name })
 }
+
+export async function fetchData() {
+	const data = "this is the data"
+	console.info("server response:", data)
+	return data
+}

@@ -11,6 +11,7 @@ import { previewLanguageTagCommand } from "./commands/previewLanguageTagCommand.
 import { jumpToPositionCommand } from "./commands/jumpToPosition.js"
 import { machineTranslateMessageCommand } from "./commands/machineTranslate.js"
 import { openSettingsViewCommand } from "./commands/openSettingsView.js"
+import { toggleInlineAnnotationsCommand } from "./commands/toggleInlineAnnotation.js"
 
 export const CONFIGURATION = {
 	EVENTS: {
@@ -32,6 +33,7 @@ export const CONFIGURATION = {
 		OPEN_SETTINGS_VIEW: openSettingsViewCommand,
 		COPY_ERROR: copyErrorCommand,
 		MACHINE_TRANSLATE_MESSAGE: machineTranslateMessageCommand,
+		TOGGLE_INLINE_ANNOTATIONS: toggleInlineAnnotationsCommand,
 	},
 	FILES: {
 		// TODO: remove this hardcoded assumption for multi project support

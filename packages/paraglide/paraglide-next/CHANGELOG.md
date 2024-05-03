@@ -1,5 +1,22 @@
 # @inlang/paraglide-next
 
+## 0.1.7
+
+### Patch Changes
+
+- 419d8b6: Fix issue where the localised routing didn't always use the most specific pathname as outlined in https://kit.svelte.dev/docs/advanced-routing#sorting
+- 41e27b7: The `Link` component now uses `React.forwardRef`. This was a community contribution by [Nurbek](https://github.com/NurbekGithub).
+- 432d158: Fixes a warning about `useRouter` not being available on the server. This would never have caused a crash but the log was annoying.
+- Updated dependencies [32cbe48]
+  - @inlang/paraglide-js@1.7.3
+
+## 0.1.6
+
+### Patch Changes
+
+- 3d87380: The `init` command now always produces posix paths for the outdir and project path, even on windows
+- 1baa229: Fix server actions not returning during dev
+
 ## 0.1.5
 
 ### Patch Changes

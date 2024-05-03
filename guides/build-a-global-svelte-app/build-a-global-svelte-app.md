@@ -2,7 +2,7 @@
 
 In this guide, we will be creating a simple SvelteKit app with i18n routing, using Paraglide for translations. This should be all you need to get started with Paraglide.
 
-We will be using [Paraglide.js](https://inlang.com/m/gerre34r/library-inlang-paraglideJs), the [inlang-message-format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat) and [inlang's IDE Extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension).
+We will be using [Paraglide.js](https://inlang.com/m/gerre34r/library-inlang-paraglideJs), the [inlang-message-format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat) and [Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) – a helpful i18n VS Code extension.
 
 ## 1. Create a SvelteKit app
 
@@ -113,7 +113,7 @@ You can add messages in two ways:
 - Reload window (only needed once).
   `⌘ or Ctrl` + `Shift` + `P` -> Developer: Reload Window. On the bottom it should display for some seconds after relaod: `inlang's extension activated`.
 
-- Select a hard-coded string, for example, on the About page. Mark the string with your cursor and hit `command` + `.` -> Inlang: Extract
+- Select a hard-coded string, for example, on the About page. Mark the string with your cursor and hit `command` + `.` -> Sherlock: Extract
   message. Give the message an ID and hit enter.
 
 - This command extracts the hard-coded string and places it into the source language translation file `en.json` in the `messages` directory.

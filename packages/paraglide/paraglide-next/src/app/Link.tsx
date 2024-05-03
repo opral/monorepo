@@ -25,7 +25,10 @@ type LocalisedLink<T extends string> = (
 export function createLink<T extends string>(strategy: RoutingStragey<T>): LocalisedLink<T> {
 	const localiseHref = createLocaliseHref(strategy)
 
-	return function Link(props) {
+	return React.forwardRef<
+		HTMLAnchorElement,
+		Omit<Parameters<typeof NextLink>[0], "locale"> & { locale?: T }
+	>((props, ref): ReturnType<typeof NextLink> => {
 		const currentLanguageTag = languageTag() as T
 
 		if (DEV && props.locale && !isAvailableLanguageTag(props.locale)) {
@@ -53,16 +56,17 @@ export function createLink<T extends string>(strategy: RoutingStragey<T>): Local
 
 		//If the language changes, we don't want client navigation
 		return !isLanguageSwitch ? (
-			<NextLink {...props} href={localisedHref} />
+			<NextLink {...props} href={localisedHref} ref={ref} />
 		) : rsc ? (
-			<a {...props} hrefLang={lang} href={addBasePath(localisedHref.toString())} />
+			<a {...props} hrefLang={lang} href={addBasePath(localisedHref.toString())} ref={ref} />
 		) : (
 			<a
 				{...props}
 				onClick={() => updateLangCookie(lang)}
 				hrefLang={lang}
 				href={addBasePath(localisedHref.toString())}
+				ref={ref}
 			/>
 		)
-	}
+	})
 }
