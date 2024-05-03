@@ -1,10 +1,15 @@
 import type { LocalisedNavigation } from "./navigation.client"
+import type { RoutingStragey } from "./routing/interface"
+import { createRedirects } from "./redirect"
 
 /**
  * Implements the same API as NextNavigation, but throws an error when used.
  * Usefull for poisoning the client-side navigation hooks on the server.
  */
-export function createNoopNavigation<T extends string>(): LocalisedNavigation<T> {
+export function createNoopNavigation<T extends string>(
+	languageTag: () => T,
+	strategy: RoutingStragey<T>
+): LocalisedNavigation<T> {
 	return {
 		usePathname: () => {
 			throw new Error("usePathname is not available on the server")
@@ -12,5 +17,6 @@ export function createNoopNavigation<T extends string>(): LocalisedNavigation<T>
 		useRouter: () => {
 			throw new Error("useRouter is not available on the server")
 		},
+		...createRedirects(languageTag, strategy),
 	}
 }
