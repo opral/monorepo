@@ -1,0 +1,1 @@
+# @inlang/message-bundle
