@@ -26,11 +26,26 @@ export function PrefixStrategy<T extends string>({
 }: {
 	exclude?: (path: string) => boolean
 	pathnames?: UserPathDefinitionTranslations<T>
+	/**
+	 * If the default language should be included in the URL
+	 *
+	 * @example
+	 * ```txt
+	 * prefixDefault: "always", /en/some/path -> en
+	 * prefixDefault: "always", /some-path -> ?
+	 * prefixDefault: "never", /some-path -> en
+	 * ```
+	 *
+	 * @default "never"
+	 *
+	 */
 	prefixDefault?: "always" | "never"
 } = {}): RoutingStragey<T> {
 	const resolvedPathnames = /** @__PURE__ */ userPathnames
 		? resolveUserPathDefinitions(userPathnames, availableLanguageTags)
 		: {}
+
+	prefixDefault ??= "never"
 
 	// Make sure the given pathnames are valid during dev
 	// middleware is not rsc so validating there guarantees this will run once
