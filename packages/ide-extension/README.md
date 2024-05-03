@@ -32,16 +32,39 @@
 <br>
 
 
-
 # Let's get started
 
-1. Add a `project.inlang` folder to your repository
-2. Create a `settings.json` file to that new dir `project.inlang/settings.json`
-3. Install a plugin that reads and writes your messages from the [inlang marketplace](https://inlang.com/c/plugins)
-4. Install a installing a syntax matcher/function matcher from the [inlang marketplace](https://inlang.com/c/plugins)
----
-1. **Optional**: Install [lint rules](https://inlang.com/c/lint-rules) to find errors in your translations from the [inlang marketplace](https://inlang.com/c/lint-rules)
+## Step 1: Initiate a New Project
 
+> Skip this step if you have already created a project.
+
+Open Sherlock within Visual Studio Code and click the `Getting Started` button. This will automatically create a new project for you.
+
+## Step 2: Customize Your Project
+
+After the project is created, you can customize it to fit your specific needs:
+- Click on the settings wheel icon next to your project name in the Sherlock panel to access customization options.
+- Modify your `project.inlang/settings.json` as needed to configure translation settings and add any specific plugins or lint rules.
+
+---
+
+## Additonal Steps
+
+### Storage module
+
+Install a plugin that reads and writes your messages from the [inlang marketplace](https://inlang.com/c/plugins) – the standard template uses the inlang message format plugin, but we also have plugins for `i18next` and `JSON` & more.
+
+### Syntax matcher 
+
+Install a syntax matcher/function matcher from the [inlang marketplace](https://inlang.com/c/plugins) – the standard template uses the `m` function matcher, but we also have plugins for `t` function matcher, a `next-intl` matcher and more. 
+
+> The `i18next` module already includes a syntax matcher.
+
+### Lint rules
+
+Install [lint rules](https://inlang.com/c/lint-rules) to find errors in your translations from the [inlang marketplace](https://inlang.com/c/lint-rules)
+
+# Features
 
 ## Manage Translations directly from your Code
 
