@@ -1,5 +1,14 @@
 # @inlang/paraglide-sveltekit
 
+## 0.6.14
+
+### Patch Changes
+
+- 419d8b6: Fix issue where the localised routing didn't always use the most specific pathname as outlined in https://kit.svelte.dev/docs/advanced-routing#sorting
+- Updated dependencies [32cbe48]
+  - @inlang/paraglide-js@1.7.3
+  - @inlang/paraglide-vite@1.2.47
+
 ## 0.6.13
 
 ### Patch Changes
