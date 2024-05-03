@@ -3,7 +3,7 @@ import { createMiddleware } from "./index"
 import { PrefixStrategy } from "../index.client"
 import { LANG_COOKIE, PARAGLIDE_LANGUAGE_HEADER_NAME } from "../constants"
 import { NextRequest, NextResponse } from "next/server"
-import { availableLanguageTags } from "$paraglide/runtime.js"
+import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
 
 describe("Middleware with Prefix & no redirect", () => {
 	const strategy = PrefixStrategy()
@@ -39,6 +39,20 @@ describe("Middleware with Prefix & no redirect", () => {
 		(languageTag) => {
 			const headers = new Headers()
 			headers.set("Cookie", LANG_COOKIE.name + "=" + languageTag)
+			headers.set("Accept-Language", sourceLanguageTag) // to make sure the cookie takes precedence
+			const request = new NextRequest("https://example.com/", { headers })
+			const response = middleware(request)
+
+			expectNoRewrite(response)
+			expectHeaderValue(response, PARAGLIDE_LANGUAGE_HEADER_NAME, languageTag)
+		}
+	)
+
+	it.each(availableLanguageTags)(
+		"doesn't reroute a request from / & uses the Accept-Language header to detect the language if no cookie is present",
+		(languageTag) => {
+			const headers = new Headers()
+			headers.set("Accept-Language", languageTag)
 			const request = new NextRequest("https://example.com/", { headers })
 			const response = middleware(request)
 
