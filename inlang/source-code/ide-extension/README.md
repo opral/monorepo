@@ -76,6 +76,8 @@ If you want to add lint rules to your experience, you can add them from https://
 - VS Code version 1.84.0 or higher.
 - Node.js version v18 or higher.
 
+---
+
 # Features
 
 ## Manage Translations directly from your Code
@@ -169,50 +171,6 @@ See translations and edit them directly in your code. No more back-and-forth loo
 </div>
 
 <br>
-
-## Quick start
-
-<img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/sherlock-start.png"/>
-
-Install the extension and click `Getting Started` in the `Inlang Tab`. 
-
-### Manual setup
-
-#### 1. Create a `project.inlang/settings.json` in the **root** of your project
-
-You can use the following template when using JSON files as translation files. If not, please look for other [supported resource file types](https://inlang.com/):
-
-```json
-{
-	// official schema ensures that your project file is valid
-	"$schema": "https://inlang.com/schema/project-settings",
-	// the "source" language tag that is used in your project
-	"sourceLanguageTag": "en",
-	// all the language tags you want to support in your project
-	"languageTags": ["en", "de"],
-	"modules": [
-		"https://cdn.jsdelivr.net/npm/@inlang/plugin-json@4/dist/index.js"
-	], // or use another storage module: https://inlang.com/c/plugins (i18next, json, inlang message format)
-	"settings": {}
-}
-```
-
-#### 2. Decide on a **syntax matcher**
-
-You should continue with **installing a syntax matcher**. There are multiple syntax matcher available:
-
-- m function matcher: https://inlang.com/m/632iow21/plugin-inlang-mFunctionMatcher
-- t function matcher: https://inlang.com/m/698iow33/plugin-inlang-tFunctionMatcher
-- *if you are using the i18next module, everything is already built-in*
-
-#### 3. ✨ Recommended
-
-If you want to add lint rules to your experience, you can add them from https://inlang.com/c/lint-rules
-
-#### Requirements:
-
-- VS Code version 1.84.0 or higher.
-- Node.js version v18 or higher.
 
 ## Customization
 
