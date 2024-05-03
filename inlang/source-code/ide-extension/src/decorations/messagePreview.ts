@@ -5,21 +5,26 @@ import { getStringFromPattern } from "../utilities/messages/query.js"
 import { CONFIGURATION } from "../configuration.js"
 import { resolveEscapedCharacters } from "../utilities/messages/resolveEscapedCharacters.js"
 import { getPreviewLanguageTag } from "../utilities/language-tag/getPreviewLanguageTag.js"
+import { getSetting } from "../utilities/settings/index.js"
 
 const MAXIMUM_PREVIEW_LENGTH = 40
 
 export async function messagePreview(args: { context: vscode.ExtensionContext }) {
-	const messagePreview = vscode.window.createTextEditorDecorationType({
-		after: {
-			margin: "0 0.5rem",
-		},
-	})
+	const messagePreview = vscode.window.createTextEditorDecorationType({})
 
 	async function updateDecorations() {
 		const activeTextEditor = vscode.window.activeTextEditor
+		const inlineAnnotationsEnabled = vscode.workspace
+			.getConfiguration()
+			.get<boolean>("sherlock.inlineAnnotations.enabled", true)
 
 		if (!activeTextEditor) {
 			return
+		}
+
+		// If inline annotations are disabled, remove all decorations or prevent them from being added
+		if (!inlineAnnotationsEnabled) {
+			return activeTextEditor.setDecorations(messagePreview, [])
 		}
 
 		// TODO: this is a hack to prevent the message preview from showing up in the project.inlang/settings file
@@ -37,6 +42,29 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 			// don't show an error message. See issue:
 			// https://github.com/opral/monorepo/issues/927
 			return
+		}
+
+		const editorInfoColors = {
+			foreground: await getSetting("editorColors.info.foreground").catch(
+				() => new vscode.ThemeColor("editorInfo.foreground")
+			),
+			background: await getSetting("editorColors.info.background").catch(
+				() => new vscode.ThemeColor("editorInfo.background")
+			),
+			border: await getSetting("editorColors.info.border").catch(
+				() => new vscode.ThemeColor("editorInfo.border")
+			),
+		}
+		const editorErrorColors = {
+			foreground: await getSetting("editorColors.error.foreground").catch(
+				() => new vscode.ThemeColor("editorError.foreground")
+			),
+			background: await getSetting("editorColors.error.background").catch(
+				() => new vscode.ThemeColor("editorError.background")
+			),
+			border: await getSetting("editorColors.error.border").catch(
+				() => new vscode.ThemeColor("editorError.border")
+			),
 		}
 
 		// Get the message references
@@ -86,18 +114,23 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 					),
 					new vscode.Position(message.position.end.line - 1, message.position.end.character - 1)
 				)
+
 				const decoration: vscode.DecorationOptions = {
 					range,
 					renderOptions: {
 						after: {
+							margin: "0 0.5rem",
 							contentText:
 								truncatedTranslation === "" || truncatedTranslation === undefined
 									? `ERROR: '${message.messageId}' not found in source with language tag '${sourceLanguageTag}'`
-									: translation, // TODO: Fix pattern type to be always defined either/or Text / VariableReference
-							backgroundColor: translation ? "rgb(45 212 191/.15)" : "drgb(244 63 94/.15)",
-							border: translation
-								? "1px solid rgb(45 212 191/.50)"
-								: "1px solid rgb(244 63 94/.50)",
+									: translation,
+							backgroundColor: translation
+								? editorInfoColors.background
+								: editorErrorColors.background,
+							color: translation ? editorInfoColors.foreground : editorErrorColors.foreground,
+							border: `1px solid ${
+								translation ? editorInfoColors.border : editorErrorColors.border
+							}`,
 						},
 					},
 					hoverMessage: contextTooltip(message),
@@ -135,4 +168,14 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 	CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.event(() => updateDecorations())
 	CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.event(() => updateDecorations())
 	CONFIGURATION.EVENTS.ON_DID_PREVIEW_LANGUAGE_TAG_CHANGE.event(() => updateDecorations())
+
+	vscode.workspace.onDidChangeConfiguration(
+		(event) => {
+			if (event.affectsConfiguration("sherlock.inlineAnnotations.enabled")) {
+				updateDecorations()
+			}
+		},
+		undefined,
+		args.context.subscriptions
+	)
 }

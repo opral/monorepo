@@ -16,7 +16,7 @@ export class ExtractMessage implements vscode.CodeActionProvider {
 		if (range.isEmpty) {
 			return
 		}
-		const extractMessageAction = new vscode.CodeAction(`Inlang: Extract Message`)
+		const extractMessageAction = new vscode.CodeAction(`Sherlock: Extract Message`)
 		extractMessageAction.command = CONFIGURATION.COMMANDS.EXTRACT_MESSAGE
 		return [extractMessageAction]
 	}
