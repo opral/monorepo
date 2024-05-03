@@ -14,7 +14,7 @@ Type:
 type MessageLintRuleLevel = "error" | "warning"
 ```
 
-Example in the `settings.json`:
+Example in the `project.inlang/settings.json`:
 ```json
 {
     // other configuration
