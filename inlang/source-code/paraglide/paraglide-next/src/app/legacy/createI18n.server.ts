@@ -5,7 +5,7 @@ import { createExclude } from "../exclude"
 import { createMiddleware } from "../middleware"
 import { resolveUserPathDefinitions } from "@inlang/paraglide-js/internal/adapter-utils"
 import { I18nUserConfig, ResolvedI18nConfig } from "./config"
-import { PrefixStrategy } from "../routing-strategy/prefixStrategy"
+import { PrefixStrategy } from "../routing-strategy/strats/prefixStrategy"
 
 /**
  * Creates an i18n instance that manages your internationalization.

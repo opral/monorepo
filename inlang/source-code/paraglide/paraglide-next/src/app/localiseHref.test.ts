@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest"
 import { createLocaliseHref, isExternal } from "./localiseHref"
-import { PrefixStrategy } from "./routing-strategy/prefixStrategy"
+import { PrefixStrategy } from "./routing-strategy/strats/prefixStrategy"
 
 const strategy = PrefixStrategy<"en" | "de" | "de-CH">({
 	pathnames: {

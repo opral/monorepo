@@ -1,12 +1,12 @@
 import { it, expect, describe } from "vitest"
 import { DomainStrategy } from "./domainStrategy"
-import { format } from "../utils/format"
+import { format } from "../../utils/format"
 
 const { getCanonicalPath, getLocalisedUrl } = DomainStrategy<"en" | "de" | "de-CH">({
 	domains: {
-		en: "example.com",
-		de: "de.example.com",
-		"de-CH": "example.ch",
+		en: "https://example.com",
+		de: "https://de.example.com",
+		"de-CH": "https://example.ch",
 	},
 })
 

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest"
 import { generateLinkHeader } from "./linkHeader"
-import { PrefixStrategy } from "../routing-strategy/prefixStrategy"
+import { PrefixStrategy } from "../routing-strategy/strats/prefixStrategy"
 import { NextRequest } from "next/server"
 
 describe("generateLinkHeader", () => {
