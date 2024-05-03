@@ -1,5 +1,11 @@
 # @inlang/paraglide-js
 
+## 1.7.3
+
+### Patch Changes
+
+- 32cbe48: Improve `bestMatch` reliability
+
 ## 1.7.2
 
 ### Patch Changes

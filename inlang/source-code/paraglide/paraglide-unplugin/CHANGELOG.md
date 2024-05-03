@@ -1,5 +1,12 @@
 # @inlang/paraglide-unplugin
 
+## 1.4.36
+
+### Patch Changes
+
+- Updated dependencies [32cbe48]
+  - @inlang/paraglide-js@1.7.3
+
 ## 1.4.35
 
 ### Patch Changes
