@@ -1,11 +1,11 @@
 import { createDomainDetection } from "../middleware/detection/domainDetection"
-import { RoutingStragey } from "./interface"
+import { RoutingStrategy } from "./interface"
 
 export function DomainStrategy<T extends string>({
 	domains,
 }: {
 	domains: Record<T, string>
-}): RoutingStragey<T> {
+}): RoutingStrategy<T> {
 	return {
 		getCanonicalPath(localisedPath) {
 			return localisedPath

@@ -1,6 +1,6 @@
 import { LanguageDetector } from "../middleware/detection/interface"
 
-export interface RoutingStragey<T extends string> {
+export interface RoutingStrategy<T extends string> {
 	/**
 	 * Returns the canonical route that should be rendered.
 	 *

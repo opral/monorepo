@@ -8,7 +8,7 @@ import { generateLinkHeader, shouldAddLinkHeader } from "./linkHeader"
 import { LANG_COOKIE, PARAGLIDE_LANGUAGE_HEADER_NAME, LINK_HEADER_NAME } from "../constants"
 import { resolveLanguage } from "./resolveLanguage"
 import type { NextRequest } from "next/server"
-import type { RoutingStragey } from "../routing-strategy/interface"
+import type { RoutingStrategy } from "../routing-strategy/interface"
 import type { NextURL } from "next/dist/server/web/next-url"
 import { createCookieDetection } from "./detection/CookieDetection"
 import { createAcceptLanguageDetection } from "./detection/AcceptLanguageDetection"
@@ -17,7 +17,7 @@ export type MiddlewareOptions<T extends string> = {
 	/**
 	 * The routing strategy used for determining the language and page to render
 	 */
-	strategy: RoutingStragey<T>
+	strategy: RoutingStrategy<T>
 
 	/**
 	 * If a redirect should occur when the detected language does not match the path

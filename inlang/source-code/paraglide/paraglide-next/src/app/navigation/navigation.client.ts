@@ -1,7 +1,7 @@
 import * as NextNavigation from "next/navigation"
 import { languageTag, setLanguageTag } from "$paraglide/runtime.js"
 import { addBasePath, basePath } from "../utils/basePath"
-import type { RoutingStragey } from "../routing-strategy/interface"
+import type { RoutingStrategy } from "../routing-strategy/interface"
 import { createLocaliseHref } from "../localiseHref"
 import { serializeCookie } from "../utils/cookie"
 import { LANG_COOKIE } from "../constants"
@@ -13,7 +13,7 @@ export type LocalisedNavigation<T extends string> = ReturnType<typeof createNavi
 export const createNavigation = <T extends string>({
 	strategy,
 }: {
-	strategy: RoutingStragey<T>
+	strategy: RoutingStrategy<T>
 }) => {
 	const localiseHref = createLocaliseHref(strategy)
 

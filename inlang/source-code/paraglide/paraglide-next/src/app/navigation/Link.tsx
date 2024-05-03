@@ -7,7 +7,7 @@ import {
 import { addBasePath, basePath } from "../utils/basePath"
 import NextLink from "next/link"
 import React from "react"
-import { RoutingStragey } from "../routing-strategy/interface"
+import { RoutingStrategy } from "../routing-strategy/interface"
 import { createLocaliseHref } from "../localiseHref"
 import { serializeCookie } from "../utils/cookie"
 import { LANG_COOKIE } from "../constants"
@@ -22,7 +22,7 @@ type LocalisedLink<T extends string> = (
  * Creates a link component that localises the href based on the current language.
  * @param languageTag A function that returns the current language tag.
  */
-export function createLink<T extends string>(strategy: RoutingStragey<T>): LocalisedLink<T> {
+export function createLink<T extends string>(strategy: RoutingStrategy<T>): LocalisedLink<T> {
 	const localiseHref = createLocaliseHref(strategy)
 
 	return React.forwardRef<

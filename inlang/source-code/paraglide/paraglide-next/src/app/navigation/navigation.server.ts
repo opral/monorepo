@@ -1,5 +1,5 @@
 import type { LocalisedNavigation } from "./navigation.client"
-import type { RoutingStragey } from "../routing-strategy/interface"
+import type { RoutingStrategy } from "../routing-strategy/interface"
 import { createRedirects } from "./redirect"
 import { languageTag } from "$paraglide/runtime.js"
 import { createLink } from "./Link"
@@ -11,7 +11,7 @@ import { createLink } from "./Link"
 export function createNavigation<T extends string>({
 	strategy,
 }: {
-	strategy: RoutingStragey<T>
+	strategy: RoutingStrategy<T>
 }): LocalisedNavigation<T> {
 	return {
 		usePathname: () => {

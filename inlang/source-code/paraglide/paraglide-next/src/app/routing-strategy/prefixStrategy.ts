@@ -7,7 +7,7 @@ import {
 	UserPathDefinitionTranslations,
 	resolveUserPathDefinitions,
 } from "@inlang/paraglide-js/internal/adapter-utils"
-import type { RoutingStragey } from "./interface"
+import type { RoutingStrategy } from "./interface"
 import { usePrefixDetection } from "../middleware/detection/prefixDetection"
 import { DEV } from "../env"
 import { rsc } from "rsc-env"
@@ -40,7 +40,7 @@ export function PrefixStrategy<T extends string>({
 	 *
 	 */
 	prefixDefault?: "always" | "never"
-} = {}): RoutingStragey<T> {
+} = {}): RoutingStrategy<T> {
 	const resolvedPathnames = /** @__PURE__ */ userPathnames
 		? resolveUserPathDefinitions(userPathnames, availableLanguageTags)
 		: {}
