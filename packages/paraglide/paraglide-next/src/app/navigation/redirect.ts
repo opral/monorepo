@@ -3,11 +3,11 @@ import {
 	redirect as NextRedirect,
 	permanentRedirect as NextPermanentRedirect,
 } from "next/navigation"
-import type { RoutingStragey } from "../routing-strategy/interface"
+import type { RoutingStrategy } from "../routing-strategy/interface"
 
 export function createRedirects<T extends string>(
 	languageTag: () => T,
-	strategy: RoutingStragey<T>
+	strategy: RoutingStrategy<T>
 ) {
 	const localiseHref = createLocaliseHref(strategy)
 

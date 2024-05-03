@@ -1,4 +1,4 @@
-import type { RoutingStragey } from "./routing-strategy/interface"
+import type { RoutingStrategy } from "./routing-strategy/interface"
 import type { LinkProps } from "next/link"
 import { isExternal as isStringHrefExternal } from "./utils/href"
 
@@ -9,7 +9,7 @@ const getPathname = (href: string, currentPath: string): `/${string}` => {
 }
 
 export function createLocaliseHref<T extends string>(
-	strategy: RoutingStragey<T>
+	strategy: RoutingStrategy<T>
 ): <P extends LinkProps["href"]>(
 	canonicalHref: P,
 	lang: T,

@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server"
-import { RoutingStragey } from "../routing-strategy/interface"
+import { RoutingStrategy } from "../routing-strategy/interface"
 import { addPathPrefix } from "../utils/basePath"
 import { format } from "../utils/format"
 
@@ -12,7 +12,7 @@ export function shouldAddLinkHeader(request: NextRequest) {
  * Generates the Link header for the available language versions of the current page.
  */
 export function generateLinkHeader<T extends string>(
-	strategy: RoutingStragey<T>,
+	strategy: RoutingStrategy<T>,
 	{
 		canonicalPath,
 		availableLanguageTags,
