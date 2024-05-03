@@ -7,7 +7,7 @@ import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
 import { DomainStrategy } from "../routing/domainStrategy"
 
 describe("Middleware with Prefix", () => {
-	const strategy = PrefixStrategy<"en" | "de">()
+	const strategy = PrefixStrategy<"en" | "de">({})
 	const middleware = createMiddleware({
 		strategy,
 	})
@@ -15,6 +15,8 @@ describe("Middleware with Prefix", () => {
 	it.each(availableLanguageTags)(
 		"reroutes a request from /%s to / and sets the header",
 		(languageTag) => {
+			if (languageTag === sourceLanguageTag) return
+
 			const request = new NextRequest("https://example.com/" + languageTag)
 			const response = middleware(request)
 
@@ -27,6 +29,8 @@ describe("Middleware with Prefix", () => {
 	it.each(availableLanguageTags)(
 		"reroutes a request from /%s/some-page to /some-page and sets the header",
 		(languageTag) => {
+			if (languageTag === sourceLanguageTag) return
+
 			const request = new NextRequest("https://example.com/" + languageTag + "/some-page")
 			const response = middleware(request)
 

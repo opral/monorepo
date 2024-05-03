@@ -70,8 +70,8 @@ export function createMiddleware<T extends string>(opt: MiddlewareOptions<T>) {
 		headers.set(PARAGLIDE_LANGUAGE_HEADER_NAME, locale)
 
 		const shouldRedirect = opt.redirect && localisedURL.pathname !== decodedPathname
-		const rewriteRequired = request.nextUrl.pathname !== canonicalPath
 
+		const rewriteRequired = request.nextUrl.pathname !== canonicalPath
 		const response: NextResponse = shouldRedirect
 			? redirect(request.nextUrl, localisedURL.pathname, { headers })
 			: rewriteRequired
