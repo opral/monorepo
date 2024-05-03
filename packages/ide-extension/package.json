@@ -1,7 +1,7 @@
 {
 	"name": "vs-code-extension",
 	"private": true,
-	"displayName": "Sherlock – i18n inspector (prev inlang)",
+	"displayName": "Sherlock – i18n inspector",
 	"type": "module",
 	"description": "Visualize, edit & lint translated strings at a glance via Inline Decorations & Hover Support, and extract new strings with a single click.",
 	"publisher": "inlang",
