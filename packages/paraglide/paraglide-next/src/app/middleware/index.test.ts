@@ -4,12 +4,12 @@ import { PrefixStrategy } from "../index.client"
 import { LANG_COOKIE, PARAGLIDE_LANGUAGE_HEADER_NAME } from "../constants"
 import { NextRequest, NextResponse } from "next/server"
 import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
+import { DomainStrategy } from "../routing/domainStrategy"
 
-describe("Middleware with Prefix & no redirect", () => {
-	const strategy = PrefixStrategy()
+describe("Middleware with Prefix", () => {
+	const strategy = PrefixStrategy<"en" | "de">()
 	const middleware = createMiddleware({
 		strategy,
-		redirect: false,
 	})
 
 	it.each(availableLanguageTags)(
@@ -19,6 +19,7 @@ describe("Middleware with Prefix & no redirect", () => {
 			const response = middleware(request)
 
 			expectHeaderValue(response, PARAGLIDE_LANGUAGE_HEADER_NAME, languageTag)
+			expectCookieValue(response, LANG_COOKIE.name, languageTag)
 			expectRewriteDestination(response, "https://example.com/")
 		}
 	)
@@ -30,9 +31,32 @@ describe("Middleware with Prefix & no redirect", () => {
 			const response = middleware(request)
 
 			expectHeaderValue(response, PARAGLIDE_LANGUAGE_HEADER_NAME, languageTag)
+			expectCookieValue(response, LANG_COOKIE.name, languageTag)
 			expectRewriteDestination(response, "https://example.com/some-page")
 		}
 	)
+})
+
+describe("Middleware with Domain Strategy", () => {
+	const domains = {
+		en: "example.com",
+		de: "de.example.com",
+	} as const
+
+	const strategy = DomainStrategy<"en" | "de">({ domains })
+	const middleware = createMiddleware({ strategy })
+
+	it.each(availableLanguageTags)("Detects the language from the domain", (languageTag) => {
+		const domain = domains[languageTag as keyof typeof domains]
+
+		const request = new NextRequest("https://" + domain + "/some-page")
+		const response = middleware(request)
+
+		expectNoRewrite(response)
+		expectNoRedirect(response)
+		expectCookieValue(response, LANG_COOKIE.name, languageTag)
+		expectHeaderValue(response, PARAGLIDE_LANGUAGE_HEADER_NAME, languageTag)
+	})
 })
 
 describe("Middleware Fallbacks", () => {
@@ -74,6 +98,7 @@ describe("Middleware Fallbacks", () => {
 			const response = middleware(request)
 
 			expectNoRewrite(response)
+			expectCookieValue(response, LANG_COOKIE.name, languageTag)
 			expectHeaderValue(response, PARAGLIDE_LANGUAGE_HEADER_NAME, languageTag)
 		}
 	)
@@ -86,11 +111,21 @@ describe("Middleware Fallbacks", () => {
  * @param headerValue - The value to set it to
  */
 function expectHeaderValue(response: NextResponse, headerName: string, headerValue: string) {
-	// Next Responses set the headers a bit weird
+	const basicHeader = response.headers.get(headerName)
+	if (basicHeader) {
+		expect(basicHeader).toBe(headerValue)
+		return
+	}
+
+	// On Redirect or Reroute Responses the headers are a bit weird
 	// 'x-middleware-override-headers': 'x-language-tag', // lists the headers to overrride
 	// 'x-middleware-request-x-language-tag': 'de' //provides the header
 	expect(response.headers.get("x-middleware-override-headers")).includes(headerName)
 	expect(response.headers.get("x-middleware-request-" + headerName)).toBe(headerValue)
+}
+
+function expectCookieValue(response: NextResponse, cookieName: string, cookieValue: string) {
+	expect(response.cookies.get(cookieName)?.value).toBe(cookieValue)
 }
 
 /**
@@ -114,4 +149,11 @@ function expectNoRewrite(response: NextResponse) {
  */
 function expectRedirectTo(response: NextResponse, destination: string) {
 	expect(response.headers.get("x-middleware-redirect")).toBe(destination)
+}
+
+/**
+ * Checks that the response doesn't redirect
+ */
+function expectNoRedirect(response: NextResponse) {
+	expect(response.headers.get("x-middleware-redirect")).toBeNull()
 }
