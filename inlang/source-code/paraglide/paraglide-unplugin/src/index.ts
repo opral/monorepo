@@ -85,27 +85,6 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 	return {
 		name: PLUGIN_NAME,
 
-		resolveId(id, importer) {
-			if (importer?.startsWith(outputDirTrailing)) {
-				const dirname = path.posix.dirname(importer)
-				const reolvedPath = path.posix.resolve(dirname, id)
-				console.info("resolveId", id, importer, reolvedPath)
-				return reolvedPath
-			}
-			return undefined
-		},
-
-		load(id) {
-			console.info("load", outputDirTrailing, id)
-			//if it starts with the outdir use the paraglideOutput virtual modules instead
-			if (id.startsWith(outputDirTrailing)) {
-				const internal = id.slice(outputDirTrailing.length)
-				return paraglideOutput[internal]
-			}
-
-			return undefined
-		},
-
 		enforce: "pre",
 		async buildStart() {
 			const project = await getProject()
@@ -119,6 +98,29 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 				if (numInvocations === 1) return
 				triggerCompile(messages, project.settings())
 			})
+		},
+
+		vite: {
+			resolveId(id, importer) {
+				if (importer?.startsWith(outputDirTrailing)) {
+					const dirname = path.posix.dirname(importer)
+					const reolvedPath = path.posix.resolve(dirname, id)
+					console.info("resolveId", id, importer, reolvedPath)
+					return reolvedPath
+				}
+				return undefined
+			},
+
+			load(id) {
+				console.info("load", outputDirTrailing, id)
+				//if it starts with the outdir use the paraglideOutput virtual modules instead
+				if (id.startsWith(outputDirTrailing)) {
+					const internal = id.slice(outputDirTrailing.length)
+					return paraglideOutput[internal]
+				}
+
+				return undefined
+			},
 		},
 
 		webpack(compiler) {
