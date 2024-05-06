@@ -89,7 +89,7 @@ describe("create", async () => {
 	})
 
 	it("should return false if message with id already exists", async () => {
-		const query = await awaitableCreateMessageQuery(() => [createMessage("first-message", { en: "Hello World" })]])
+		const query = await awaitableCreateMessageQuery(() => [createMessage("first-message", { en: "Hello World" })])
 		expect(query.get({ where: { id: "first-message" } })).toBeDefined()
 
 		const mockMessage = createMessage("first-message", { en: "Some Text" })
