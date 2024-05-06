@@ -169,10 +169,10 @@ export async function loadProject(args: {
 				}
 			},
 			onLoadMessageResult: (e) => {
-				setLoadMessagesViaPluginError(e);
+				setLoadMessagesViaPluginError(e)
 			},
 			onSaveMessageResult: (e) => {
-				setSaveMessagesViaPluginError(e);
+				setSaveMessagesViaPluginError(e)
 			},
 		})
 
