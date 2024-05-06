@@ -113,6 +113,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 			load(id) {
 				//if it starts with the outdir use the paraglideOutput virtual modules instead
 				if (id.startsWith(outputDirectory)) {
+					console.info("ID in outdir", id)
 					const internal = id.slice(outputDirectory.length + 1).replaceAll("\\", "/")
 					const resolved = paraglideOutput[internal]
 					if (resolved) console.info("Shadowed", internal)
