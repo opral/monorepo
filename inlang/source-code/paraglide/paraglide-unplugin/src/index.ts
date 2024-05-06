@@ -87,6 +87,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 
 		resolveId(id, importer) {
 			console.info("resolveId", id, importer)
+			return undefined
 		},
 
 		load(id) {
