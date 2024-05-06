@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect } from "vitest"
-import { createMessagesQuery as createMessagesQueryOrginal } from "./createMessagesQuery.js"
+import { createMessagesQuery } from "./createMessagesQuery.js"
 import { createEffect, createRoot, createSignal } from "./reactivity/solid.js"
 import { Message, type Text } from "@inlang/message"
 import { createMessage } from "./test-utilities/createMessage.js"
@@ -47,19 +47,21 @@ const awaitableCreateMessageQuery = async (_messages: () => Message[]) => {
 	}
 
 	return new Promise<InlangProject["query"]["messages"]>((res, rej) => {
-		const query = createMessagesQueryOrginal(
-			"",
-			fs,
-			() => settings,
-			() => resolvedModules,
-			(error) => {
+		const query = createMessagesQuery({
+			projectPath: "",
+			nodeishFs: fs,
+			settings: () => settings,
+			resolvedModules: () => resolvedModules,
+			onInitialMessageLoadResult: (error) => {
 				if (error) {
 					rej(error)
 				} else {
 					res(query)
 				}
-			}
-		)
+			},
+			onLoadMessageResult: (e) => {},
+			onSaveMessageResult: (e) => {},
+		})
 	})
 }
 
@@ -116,7 +118,7 @@ describe("get", async () => {
 		const query = await awaitableCreateMessageQuery(() => [
 			createMessage("first-message", { en: "Hello World" }),
 		])
-		expect(query.get({ where: { id: "first-message" } })).toBeUndefined()
+		expect(query.get({ where: { id: "first-message" } })).toBeDefined()
 
 		const mockMessageInit = createMessage("first-message", { en: "Hello World" })
 		query.create({ data: mockMessageInit })
@@ -226,7 +228,7 @@ describe("upsert", async () => {
 		const query = await awaitableCreateMessageQuery(() => [
 			createMessage("first-message", { en: "Hello World" }),
 		])
-		expect(query.get({ where: { id: "first-message" } })).toBeUndefined()
+		expect(query.get({ where: { id: "first-message" } })).toBeDefined()
 
 		const mockMessageInit = createMessage("first-message", { en: "Hello World" })
 		query.create({ data: mockMessageInit })

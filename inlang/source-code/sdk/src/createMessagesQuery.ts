@@ -35,16 +35,27 @@ type MessageState = {
 		| undefined
 }
 
+type createMessagesQueryParameters = {
+	projectPath: string
+	nodeishFs: NodeishFilesystem
+	settings: () => ProjectSettings | undefined
+	resolvedModules: () => Awaited<ReturnType<typeof resolveModules>> | undefined
+	onInitialMessageLoadResult: (e?: Error) => void
+	onLoadMessageResult: (e?: Error) => void
+	onSaveMessageResult: (e?: Error) => void
+}
 /**
  * Creates a reactive query API for messages.
  */
-export function createMessagesQuery(
-	projectPath: string,
-	nodeishFs: NodeishFilesystem,
-	settings: () => ProjectSettings | undefined,
-	resolvedModules: () => Awaited<ReturnType<typeof resolveModules>> | undefined,
-	onInitialMessageLoadResult: (e?: Error | undefined) => void
-): InlangProject["query"]["messages"] {
+export function createMessagesQuery({
+	projectPath,
+	nodeishFs,
+	settings,
+	resolvedModules,
+	onInitialMessageLoadResult,
+	onLoadMessageResult,
+	onSaveMessageResult,
+}: createMessagesQueryParameters): InlangProject["query"]["messages"] {
 	// @ts-expect-error
 	const index = new ReactiveMap<string, Message>()
 
@@ -72,9 +83,9 @@ export function createMessagesQuery(
 	createEffect(() => {
 		// we clear the index independent from the change for
 		index.clear()
+		defaultAliasIndex.clear()
 
-		// TODO Load messages -> use settings to subscribe to signals from the settings
-
+		// Load messages -> use settings to subscribe to signals from the settings
 		const _settings = settings()
 		if (!_settings) return
 
@@ -82,8 +93,13 @@ export function createMessagesQuery(
 		const resolvedPluginApi = resolvedModules()?.resolvedPluginApi
 		if (!resolvedPluginApi) return
 
-		// TODO remove existing fsWatch
-		// TODO #1844 this watcher needs to get pruned when we have a change in the configs which will trigger this again
+		const abortController = new AbortController()
+		// called between executions of effects as well as on disposal
+		onCleanup(() => {
+			// stop listening on fs events
+			abortController.abort()
+		})
+
 		const fsWithWatcher = createNodeishFsWithWatcher({
 			nodeishFs: nodeishFs,
 			// this message is called whenever a file changes that was read earlier by this filesystem
@@ -99,28 +115,15 @@ export function createMessagesQuery(
 					resolvedPluginApi
 				)
 					.catch((e) => {
-						debug.log("loadMessagesViaPlugin failed")
-						debug.log(e)
-						// TODO check how we propagate errors
-						// setLoadMessagesViaPluginError(new PluginLoadMessagesError({ cause: e }))
+						onLoadMessageResult(e)
 					})
 					.then(() => {
-						onInitialMessageLoadResult(undefined)
-						// TODO check how we want to propagate errors - here we would reset it
-						// if (loadMessagesViaPluginError() !== undefined) {
-						// 	setLoadMessagesViaPluginError(undefined)
-						// }
+						onLoadMessageResult()
 					})
 			},
+			abortController,
 		})
 
-		// called between executions of effects as well as on disposal
-		onCleanup(() => {
-			// TODO stop listening on fs events
-			// fsWithWatcher. ...
-		})
-
-		// TODO check how we propagate errors
 		if (!resolvedPluginApi.loadMessages) {
 			onInitialMessageLoadResult(new Error("no loadMessages in resolved Modules found"))
 			return
@@ -134,19 +137,12 @@ export function createMessagesQuery(
 			resolvedPluginApi
 		)
 			.catch((e) => {
-				// TODO propagate initial load error to calling laodProject function
+				// propagate initial load error to calling laodProject function
 				onInitialMessageLoadResult(new PluginLoadMessagesError({ cause: e }))
 			})
 			.then(() => {
 				onInitialMessageLoadResult()
 			})
-		// TODO update alieases
-		// for (const message of structuredClone(messages())) {
-		// 	index.set(message.id, message)
-		// 	if ("default" in message.alias) {
-		// 		defaultAliasIndex.set(message.alias.default, message)
-		// 	}
-		// }
 	})
 
 	const get = (args: Parameters<MessageQueryApi["get"]>[0]) => index.get(args.where.id)
@@ -171,10 +167,17 @@ export function createMessagesQuery(
 			index,
 			_settings, // NOTE we bang here - we don't expect the settings to become null during the livetime of a project
 			resolvedPluginApi
-		).catch((e) => {
-			debug.log("error during saveMessagesViaPlugin")
-			debug.log(e)
-		})
+		)
+			.catch((e) => {
+				debug.log("error during saveMessagesViaPlugin")
+				debug.log(e)
+			})
+			.catch((e) => {
+				onSaveMessageResult(e)
+			})
+			.then(() => {
+				onSaveMessageResult()
+			})
 	}
 
 	return {
@@ -537,7 +540,6 @@ async function saveMessagesViaPlugin(
 	}
 }
 
-// TODO: create global util type
 type MaybePromise<T> = T | Promise<T>
 
 const makeTrulyAsync = <T>(fn: MaybePromise<T>): Promise<T> => (async () => fn)()
