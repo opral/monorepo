@@ -22,7 +22,6 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 
 	const projectPath = path.resolve(process.cwd(), options.project)
 	const outputDirectory = path.resolve(process.cwd(), options.outdir)
-	const outputDirTrailing = outputDirectory.endsWith("/") ? outputDirectory : outputDirectory + "/"
 	const logger = new Logger({ silent: options.silent, prefix: true })
 
 	//Keep track of how many times we've compiled
@@ -103,9 +102,9 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		vite: {
 			resolveId(id, importer) {
 				// resolve relative imports inside the output directory
-				if (importer?.startsWith(outputDirTrailing)) {
-					const dirname = path.posix.dirname(importer)
-					const reolvedPath = path.posix.resolve(dirname, id)
+				if (importer?.startsWith(outputDirectory)) {
+					const dirname = path.dirname(importer)
+					const reolvedPath = path.resolve(dirname, id)
 					return reolvedPath
 				}
 				return undefined
@@ -113,8 +112,8 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 
 			load(id) {
 				//if it starts with the outdir use the paraglideOutput virtual modules instead
-				if (id.startsWith(outputDirTrailing)) {
-					const internal = id.slice(outputDirTrailing.length)
+				if (id.startsWith(outputDirectory)) {
+					const internal = id.slice(outputDirectory.length + 1).replaceAll("\\", "/")
 					const resolved = paraglideOutput[internal]
 					if (resolved) console.info("Shadowed", internal)
 					return resolved
