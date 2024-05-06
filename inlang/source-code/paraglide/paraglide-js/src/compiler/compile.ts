@@ -143,7 +143,9 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 		for (const languageTag of opts.settings.languageTags) {
 			output[`messages/${languageTag}.js`] = [
 				"/* eslint-disable */",
-				...messageIDs.map((id) => `export * from "./${languageTag}/${id}.js"`),
+				...(messageIDs.length === 0
+					? ["export {}"]
+					: messageIDs.map((id) => `export * from "./${languageTag}/${id}.js"`)),
 			].join("\n")
 		}
 	} else {
