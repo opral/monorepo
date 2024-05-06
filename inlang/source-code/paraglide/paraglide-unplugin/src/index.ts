@@ -102,17 +102,16 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 
 		vite: {
 			resolveId(id, importer) {
+				// resolve relative imports inside the output directory
 				if (importer?.startsWith(outputDirTrailing)) {
 					const dirname = path.posix.dirname(importer)
 					const reolvedPath = path.posix.resolve(dirname, id)
-					console.info("resolveId", id, importer, reolvedPath)
 					return reolvedPath
 				}
 				return undefined
 			},
 
 			load(id) {
-				console.info("load", outputDirTrailing, id)
 				//if it starts with the outdir use the paraglideOutput virtual modules instead
 				if (id.startsWith(outputDirTrailing)) {
 					const internal = id.slice(outputDirTrailing.length)
