@@ -98,16 +98,13 @@ const messageFunction = (args: {
 }) => {
 	const hasParams = Object.keys(args.params).length > 0
 
-	return `
-	
-/**
+	return `/**
  * ${paramsType(args.params, false)}
  * @returns {string}
  */
 /* @__NO_SIDE_EFFECTS__ */
 export const ${args.message.id} = (${hasParams ? "params" : ""}) => ${args.compiledPattern}
-${reexportAliases(args.message)}
-`
+${reexportAliases(args.message)}`
 }
 
 function reexportMessage(message: Message, fromLanguageTag: string) {
@@ -127,6 +124,5 @@ function messageIdFallback(message: Message, languageTag: string) {
 */
 /* @__NO_SIDE_EFFECTS__ */
 export const ${message.id} = () => "${escapeForDoubleQuoteString(message.id)}"
-${reexportAliases(message)}
-`
+${reexportAliases(message)}`
 }
