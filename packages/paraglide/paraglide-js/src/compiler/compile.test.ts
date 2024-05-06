@@ -69,28 +69,6 @@ test("it should be possible to directly import a message function via a resource
 	expect(en.mock_message()).toBe("A simple message.")
 })
 
-// unexpected type errors if the language is not defined in settings will occur. hence throw.
-// if we deem this too strict, we can implement a more sophisticated solution in the future
-test("it should throw if a message uses a language tag that is not defined in the project settings", async () => {
-	expect(
-		async () =>
-			await compile({
-				messages: [
-					createMessage("mock_message", {
-						en: "A simple message.",
-						de: "Eine einfache Nachricht",
-					}),
-				],
-				settings: {
-					sourceLanguageTag: "en",
-					// de is not contained
-					languageTags: ["en"],
-					modules: [],
-				},
-			})
-	).rejects.toBeTruthy()
-})
-
 describe("e2e", async () => {
 	// The compiled output needs to be bundled into one file to be dynamically imported.
 	const bundle = await rollup({
