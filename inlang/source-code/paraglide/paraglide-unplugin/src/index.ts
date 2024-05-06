@@ -86,7 +86,11 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		name: PLUGIN_NAME,
 
 		resolveId(id, importer) {
-			console.info("resolveId", id, importer)
+			if (importer?.startsWith(outputDirTrailing)) {
+				const reolvedPath = path.posix.resolve(importer, id)
+				console.info("resolveId", id, importer, reolvedPath)
+				return reolvedPath
+			}
 			return undefined
 		},
 
