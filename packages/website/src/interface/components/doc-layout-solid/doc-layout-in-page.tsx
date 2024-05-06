@@ -99,7 +99,7 @@ const InlangDocInPage = (props: {
 	})
 
 	return (
-		<div class="text-sm pt-8" part="base">
+		<div class="text-sm pt-8">
 			<p class="font-semibold">On this page</p>
 			<div class="flex flex-col mt-2">
 				<For each={headlines()}>
