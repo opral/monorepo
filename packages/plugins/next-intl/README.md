@@ -103,9 +103,6 @@ With version `1.3` it supports also `getTranslations`.
 
 The message IDs are sorted in the order in which they appear in the sourceLanguage file. The nesting or flattening of IDs is detected on a file-by-file basis. If the sourceLanguage file contains nested IDs, the plugin will also create nested IDs in the targetLanguage files. If the sourceLanguage file contains flattened IDs, the plugin will also create flattened IDs in the targetLanguage files.
 
-# Pricing 
-
-<doc-pricing></doc-pricing>
 
 # Contributing
 
