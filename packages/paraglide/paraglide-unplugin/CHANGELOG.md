@@ -1,5 +1,17 @@
 # @inlang/paraglide-unplugin
 
+## 1.5.0
+
+### Minor Changes
+
+- 29d41eb: Use message-module output type in vite
+
+### Patch Changes
+
+- Updated dependencies [21ab0a0]
+- Updated dependencies [21ab0a0]
+  - @inlang/paraglide-js@1.8.0
+
 ## 1.4.36
 
 ### Patch Changes
