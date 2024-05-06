@@ -118,9 +118,9 @@ function reexportMessage(message: Message, fromLanguageTag: string) {
 
 function messageIdFallback(message: Message, languageTag: string) {
 	return `/**
-* Failed to resolve message ${message.id} for languageTag "${languageTag}". 
-* @returns {string}
-*/
+ * Failed to resolve message ${message.id} for languageTag "${languageTag}". 
+ * @returns {string}
+ */
 /* @__NO_SIDE_EFFECTS__ */
 export const ${message.id} = () => "${escapeForDoubleQuoteString(message.id)}"
 ${reexportAliases(message)}`
