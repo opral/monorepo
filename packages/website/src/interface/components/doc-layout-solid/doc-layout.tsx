@@ -45,12 +45,16 @@ const InlangDoclayout = (props: {
 					</div>
 				</div>
 			</div>
-			<div class="hidden xl:block sticky top-[140px] w-[230px] h-full">
-				<InlangDocInPage
-					manifest={props.manifest}
-					contentInHtml={(props.children as HTMLElement).children}
-					currentRoute={props.currentRoute}
-				/>
+			<div class="hidden xl:block sticky top-[140px] w-[230px] h-[calc(100vh_-_107px_-_64px)]">
+				<div class="w-full h-full overflow-y-scroll pb-20">
+					<InlangDocInPage
+						manifest={props.manifest}
+						contentInHtml={(props.children as HTMLElement).children}
+						currentRoute={props.currentRoute}
+					/>
+				</div>
+
+				<div class="absolute h-[60px] w-full bottom-0 bg-gradient-to-t from-surface-50 pointer-events-none"></div>
 			</div>
 			<Show when={isLoaded()}>
 				<sl-drawer
