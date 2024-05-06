@@ -40,35 +40,6 @@ test("the files should include an eslint ignore comment", async () => {
 	}
 })
 
-test("imports in the messages.js index file should use underscores instead of hyphens to avoid invalid JS imports", async () => {
-	expect(output["messages.js"]).toContain("import * as en_US")
-	expect(output["messages.js"]).not.toContain("import * as en-US")
-})
-
-test("it should be possible to directly import a message function via a resource file", async () => {
-	const output = await compile({
-		messages: [
-			createMessage("mock_message", {
-				en: "A simple message.",
-				de: "Eine einfache Nachricht",
-			}),
-		],
-		settings: {
-			sourceLanguageTag: "en",
-			languageTags: ["en", "de"],
-			modules: [],
-		},
-	})
-	const en = await import(
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		`data:application/javascript;base64,${Buffer.from(output["messages/en.js"]!, "utf8").toString(
-			"base64"
-		)}`
-	)
-	expect(en).toBeDefined()
-	expect(en.mock_message()).toBe("A simple message.")
-})
-
 describe("e2e", async () => {
 	// The compiled output needs to be bundled into one file to be dynamically imported.
 	const bundle = await rollup({
@@ -82,6 +53,7 @@ describe("e2e", async () => {
 				"test.js": `
           export * as m from "./paraglide/messages.js"
           export * as runtime from "./paraglide/runtime.js"
+		  export * as en from "./paraglide/messages/en.js"
         `,
 			}),
 		],
@@ -98,6 +70,17 @@ describe("e2e", async () => {
 			).toString("base64")}`
 		)
 		expect(runtime.availableLanguageTags).toContain("en-US")
+	})
+
+	test("it should be possible to directly import a message function via a resource file", async () => {
+		const { en } = await import(
+			`data:application/javascript;base64,${Buffer.from(
+				compiledBundle.output[0].code,
+				"utf8"
+			).toString("base64")}`
+		)
+		expect(en).toBeDefined()
+		expect(en.onlyText()).toBe("A simple message.")
 	})
 
 	test("should set the source language tag as default language tag", async () => {
