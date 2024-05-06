@@ -134,9 +134,6 @@ The [dist](./dist/) directory is used to distribute the plugin directly via CDN 
 
 Read the [jsDelivr documentation](https://www.jsdelivr.com/?docs=gh) on importing from GitHub.
 
-## Pricing 
-
-<doc-pricing></doc-pricing>
 
 ---
 
