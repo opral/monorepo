@@ -148,29 +148,33 @@ export async function loadProject(args: {
 		let settingsValue: ProjectSettings
 		createEffect(() => (settingsValue = settings()!)) // workaround to not run effects twice (e.g. settings change + modules change) (I'm sure there exists a solid way of doing this, but I haven't found it yet)
 
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- TODO pass setLoadMessagesViaPluginError to createMessagessQuery
 		const [loadMessagesViaPluginError, setLoadMessagesViaPluginError] = createSignal<
 			Error | undefined
 		>()
 
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- TODO pass setLoadMessagesViaPluginError to createMessagessQuery
 		const [saveMessagesViaPluginError, setSaveMessagesViaPluginError] = createSignal<
 			Error | undefined
 		>()
 
-		const messagesQuery = createMessagesQuery(
+		const messagesQuery = createMessagesQuery({
 			projectPath,
 			nodeishFs,
 			settings,
 			resolvedModules,
-			(e) => {
+			onInitialMessageLoadResult: (e) => {
 				if (e) {
 					markInitAsFailed(e)
 				} else {
 					markInitAsComplete()
 				}
-			}
-		)
+			},
+			onLoadMessageResult: (e) => {
+				setLoadMessagesViaPluginError(e);
+			},
+			onSaveMessageResult: (e) => {
+				setSaveMessagesViaPluginError(e);
+			},
+		})
 
 		// -- installed items ----------------------------------------------------
 

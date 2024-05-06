@@ -5,25 +5,15 @@
     "selectors": [],
     "variants": [
       {
-        "languageTag": "de",
-        "match": [],
-        "pattern": [
-          {
-            "type": "Text",
-            "value": "Mock translate local en to de: Generated message (1)"
-          }
-        ]
-      },
-      {
-        "languageTag": "en",
-        "match": [],
-        "pattern": [
-          {
-            "type": "Text",
-            "value": "Generated message (1)"
-          }
-        ]
-      }
+				"languageTag": "en",
+				"match": [],
+				"pattern": [
+					{
+						"type": "Text",
+						"value": "Generated message (1)"
+					}
+				]
+			}
     ]
   },
   {
@@ -32,25 +22,15 @@
     "selectors": [],
     "variants": [
       {
-        "languageTag": "de",
-        "match": [],
-        "pattern": [
-          {
-            "type": "Text",
-            "value": "Mock translate local en to de: Generated message (2)"
-          }
-        ]
-      },
-      {
-        "languageTag": "en",
-        "match": [],
-        "pattern": [
-          {
-            "type": "Text",
-            "value": "Generated message (2)"
-          }
-        ]
-      }
+				"languageTag": "en",
+				"match": [],
+				"pattern": [
+					{
+						"type": "Text",
+						"value": "Generated message (2)"
+					}
+				]
+			}
     ]
   },
   {
@@ -59,25 +39,15 @@
     "selectors": [],
     "variants": [
       {
-        "languageTag": "de",
-        "match": [],
-        "pattern": [
-          {
-            "type": "Text",
-            "value": "Mock translate local en to de: Generated message (3)"
-          }
-        ]
-      },
-      {
-        "languageTag": "en",
-        "match": [],
-        "pattern": [
-          {
-            "type": "Text",
-            "value": "Generated message (3)"
-          }
-        ]
-      }
+				"languageTag": "en",
+				"match": [],
+				"pattern": [
+					{
+						"type": "Text",
+						"value": "Generated message (3)"
+					}
+				]
+			}
     ]
   }
 ]
