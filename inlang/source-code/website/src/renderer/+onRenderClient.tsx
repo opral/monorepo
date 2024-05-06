@@ -36,6 +36,7 @@ import "@shoelace-style/shoelace/dist/components/button-group/button-group.js"
 import "@shoelace-style/shoelace/dist/components/spinner/spinner.js"
 import "@shoelace-style/shoelace/dist/components/select/select.js"
 import "@shoelace-style/shoelace/dist/components/option/option.js"
+import "@shoelace-style/shoelace/dist/components/drawer/drawer.js"
 import { publicEnv } from "@inlang/env-variables"
 
 // enable error logging via sentry in production
