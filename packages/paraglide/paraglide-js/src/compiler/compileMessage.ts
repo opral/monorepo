@@ -7,8 +7,21 @@ import { reexportAliases } from "./aliases.js"
 import { messageIndexFunction } from "./messageIndex.js"
 
 type Resource = {
+	/**
+	 * The original message
+	 */
+	source: Message
+	/**
+	 * The parameters needed for this message
+	 */
 	params: Params
+	/**
+	 * The index-message function for this message
+	 */
 	index: string
+	/**
+	 * The message-function for each language
+	 */
 	translations: {
 		[languageTag: string]: string
 	}
@@ -29,7 +42,8 @@ type Resource = {
  */
 export const compileMessage = (
 	message: Message,
-	fallbackMap: Record<LanguageTag, LanguageTag | undefined>
+	fallbackMap: Record<LanguageTag, LanguageTag | undefined>,
+	output: "regular" | "message-modules" = "regular"
 ): Resource => {
 	if (!isValidJSIdentifier(message.id)) {
 		throw new Error(
@@ -59,6 +73,7 @@ export const compileMessage = (
 	}
 
 	const resource: Resource = {
+		source: message,
 		params,
 		index: messageIndexFunction({
 			message,
@@ -79,7 +94,7 @@ export const compileMessage = (
 								compiledPattern,
 						  })
 						: fallbackLanguage
-						? reexportMessage(message, fallbackLanguage)
+						? reexportMessage(message, fallbackLanguage, output)
 						: messageIdFallback(message, languageTag),
 				]
 			})
@@ -106,14 +121,20 @@ export const ${args.message.id} = (${hasParams ? "params" : ""}) => ${args.compi
 ${reexportAliases(args.message)}`
 }
 
-function reexportMessage(message: Message, fromLanguageTag: string) {
+function reexportMessage(
+	message: Message,
+	fromLanguageTag: string,
+	output: "regular" | "message-modules"
+) {
 	const exports: string[] = [message.id]
 
 	if (message.alias["default"] && message.id !== message.alias["default"]) {
 		exports.push(message.alias["default"])
 	}
 
-	return `export { ${exports.join(", ")} } from "./${fromLanguageTag}.js"`
+	const from = output === "message-modules" ? `../${fromLanguageTag}.js` : `./${fromLanguageTag}.js`
+
+	return `export { ${exports.join(", ")} } from "${from}"`
 }
 
 function messageIdFallback(message: Message, languageTag: string) {

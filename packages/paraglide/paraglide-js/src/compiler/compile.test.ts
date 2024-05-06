@@ -23,7 +23,7 @@ test("the files should include a prettierignore file", async () => {
 	expect(output[".prettierignore"]).toContain("*")
 })
 
-test("the files should include a gitignore file", async () => {
+test("the files should include files for each language, even if there are no messages", async () => {
 	const output = await compile({
 		messages: [],
 		settings: { languageTags: ["en", "de"], sourceLanguageTag: "en", modules: [] },

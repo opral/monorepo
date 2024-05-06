@@ -26,7 +26,7 @@ export type CompileOptions = {
 
 const defaultCompileOptions = {
 	projectId: undefined,
-	outputStructure: "regular",
+	outputStructure: "message-modules",
 } satisfies Partial<CompileOptions>
 
 /**
@@ -51,7 +51,9 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 		opts.settings.sourceLanguageTag
 	)
 
-	const compiledMessages = opts.messages.map((message) => compileMessage(message, fallbackMap))
+	const compiledMessages = opts.messages.map((message) =>
+		compileMessage(message, fallbackMap, opts.outputStructure)
+	)
 
 	const pkgJson = await getPackageJson(fs, process.cwd())
 	const stack = getStackInfo(pkgJson)
@@ -97,7 +99,53 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 	}
 
 	if (opts.outputStructure === "message-modules") {
-		output = { ...output }
+		// add all the index files
+		for (const message of compiledMessages) {
+			output[`messages/index/${message.source.id}.js`] = [
+				"/* eslint-disable */",
+				'import { languageTag } from "../../runtime.js"',
+				opts.settings.languageTags
+					.map(
+						(languageTag) =>
+							`import * as ${i(languageTag)} from "../${languageTag}/${message.source.id}.js"`
+					)
+					.join("\n"),
+				"\n",
+				message.index,
+			].join("\n")
+
+			// add all the message files
+			for (const [lang, source] of Object.entries(message.translations)) {
+				output[`messages/${lang}/${message.source.id}.js`] = [
+					"/* eslint-disable */",
+					`/** 
+* This file contains language specific message functions for tree-shaking. 
+* 
+*! WARNING: Only import messages from this file if you want to manually
+*! optimize your bundle. Else, import from the \`messages.js\` file. 
+* 
+* Your bundler will (in the future) automatically replace the index function 
+* with a language specific message function in the build step. 
+*/`,
+					source,
+				].join("\n")
+			}
+		}
+
+		const messageIDs = compiledMessages.map((message) => message.source.id)
+
+		// add the barrel files
+		output["messages.js"] = [
+			"/* eslint-disable */",
+			...messageIDs.map((id) => `export * from "./messages/index/${id}.js"`),
+		].join("\n")
+
+		for (const languageTag of opts.settings.languageTags) {
+			output[`messages/${languageTag}.js`] = [
+				"/* eslint-disable */",
+				...messageIDs.map((id) => `export * from "./${languageTag}/${id}.js"`),
+			].join("\n")
+		}
 	} else {
 		output = {
 			...output,
