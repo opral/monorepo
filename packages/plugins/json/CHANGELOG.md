@@ -1,5 +1,11 @@
 # @inlang/plugin-json
 
+## 5.1.34
+
+### Patch Changes
+
+- c3c5c59: update documentation
+
 ## 5.1.33
 
 ### Patch Changes
