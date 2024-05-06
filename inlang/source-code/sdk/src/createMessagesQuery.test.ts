@@ -59,8 +59,8 @@ const awaitableCreateMessageQuery = async (_messages: () => Message[]) => {
 					res(query)
 				}
 			},
-			onLoadMessageResult: (e) => {},
-			onSaveMessageResult: (e) => {},
+			onLoadMessageResult: () => {},
+			onSaveMessageResult: () => {},
 		})
 	})
 }
