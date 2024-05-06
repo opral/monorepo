@@ -39,10 +39,10 @@ const InlangDocNavigation = (props: {
 
 								return (
 									<Link
-										class={`flex items-center justify-between h-[34px] px-3 text-sm capitalize hover:bg-surface-100  rounded-md ${
+										class={`flex items-center justify-between h-[34px] px-3 text-sm capitalize rounded-md ${
 											props.currentRoute === route
 												? "bg-primary-container/40 text-primary font-medium hover:bg-primary-container/40 hover:text-primary"
-												: "text-surface-600 hover:text-surface-900 font-normal"
+												: "text-surface-600 hover:text-surface-900 hover:bg-surface-100 font-normal"
 										}`}
 										href={basePath() + route}
 									>
@@ -64,10 +64,10 @@ const InlangDocNavigation = (props: {
 														: true
 												return (
 													<Link
-														class={`flex items-center justify-between h-[34px] px-3 text-sm capitalize hover:bg-surface-100  rounded-md ${
+														class={`flex items-center justify-between h-[34px] px-3 text-sm capitalize rounded-md ${
 															props.currentRoute === route
 																? "bg-primary-container/40 text-primary font-medium hover:bg-primary-container/40 hover:text-primary"
-																: "text-surface-500 hover:text-surface-900 font-normal"
+																: "text-surface-500 hover:text-surface-900 hover:bg-surface-100 font-normal"
 														}`}
 														href={isLink ? (path as string) : basePath() + route}
 													>
