@@ -128,9 +128,6 @@ The plugin can be used with [Sherlock - VS Code extension](https://inlang.com/m/
 3. Optional: Add lint rules: https://inlang.com/c/lint-rules
 4. 🎉 Done!
 
-## Pricing
-
-<doc-pricing></doc-pricing>
 
 # Contributing
 
