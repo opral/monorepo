@@ -26,8 +26,9 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 
 	//Keep track of how many times we've compiled
 	let numCompiles = 0
-
 	let previousMessagesHash: string | undefined = undefined
+
+	let paraglideOutput: Record<string, string> = {}
 
 	async function triggerCompile(messages: readonly Message[], settings: ProjectSettings) {
 		const currentMessagesHash = hashMessages(messages ?? [], settings)
@@ -39,8 +40,9 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		}
 
 		logMessageChange()
-		const output = await compile({ messages, settings })
-		await writeOutput(outputDirectory, output, fs)
+		const fsOutput = await compile({ messages, settings })
+		paraglideOutput = await compile({ messages, settings, outputStructure: "message-modules" })
+		await writeOutput(outputDirectory, fsOutput, fs)
 		numCompiles++
 		previousMessagesHash = currentMessagesHash
 	}
@@ -77,8 +79,19 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		return project
 	}
 
+	// if build
+
 	return {
 		name: PLUGIN_NAME,
+
+		load(id) {
+			//if it starts with the outdir use the paraglideOutput virtual modules instead
+			if (id.startsWith(outputDirectory)) {
+				return paraglideOutput[id.slice(outputDirectory.length)]
+			}
+
+			return undefined
+		},
 
 		enforce: "pre",
 		async buildStart() {
