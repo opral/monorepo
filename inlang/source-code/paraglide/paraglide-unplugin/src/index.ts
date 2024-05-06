@@ -22,6 +22,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 
 	const projectPath = path.resolve(process.cwd(), options.project)
 	const outputDirectory = path.resolve(process.cwd(), options.outdir)
+	const outputDirTrailing = outputDirectory.endsWith("/") ? outputDirectory : outputDirectory + "/"
 	const logger = new Logger({ silent: options.silent, prefix: true })
 
 	//Keep track of how many times we've compiled
@@ -86,8 +87,8 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 
 		load(id) {
 			//if it starts with the outdir use the paraglideOutput virtual modules instead
-			if (id.startsWith(outputDirectory)) {
-				const internal = id.slice(outputDirectory.length + 1)
+			if (id.startsWith(outputDirTrailing)) {
+				const internal = id.slice(outputDirTrailing.length)
 				return paraglideOutput[internal]
 			}
 
