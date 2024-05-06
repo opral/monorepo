@@ -8,6 +8,8 @@ import crypto from "node:crypto"
 
 const PLUGIN_NAME = "unplugin-paraglide"
 
+const isWindows = typeof process !== "undefined" && process.platform === "win32"
+
 export type UserConfig = {
 	project: string
 	outdir: string
@@ -22,6 +24,8 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 
 	const projectPath = path.resolve(process.cwd(), options.project)
 	const outputDirectory = path.resolve(process.cwd(), options.outdir)
+	let normalizedOutdir = outputDirectory.replaceAll("\\", "/")
+	if (!normalizedOutdir.endsWith("/")) normalizedOutdir = normalizedOutdir + "/"
 	const logger = new Logger({ silent: options.silent, prefix: true })
 
 	//Keep track of how many times we've compiled
@@ -102,19 +106,30 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		vite: {
 			resolveId(id, importer) {
 				// resolve relative imports inside the output directory
-				if (importer?.startsWith(outputDirectory)) {
-					const dirname = path.dirname(importer)
-					const reolvedPath = path.resolve(dirname, id)
-					return reolvedPath
+				// the importer is alwazs normalized
+				if (importer?.startsWith(normalizedOutdir)) {
+					const dirname = path.dirname(importer).replaceAll("\\", "/")
+					if (id.startsWith(dirname)) return id
+
+					if (isWindows) {
+						const resolvedPath = path
+							.resolve(dirname.replaceAll("/", "\\"), id.replaceAll("/", "\\"))
+							.replaceAll("\\", "/")
+						return resolvedPath
+					}
+
+					const resolvedPath = path.resolve(dirname, id)
+					return resolvedPath
 				}
 				return undefined
 			},
 
 			load(id) {
+				id = id.replaceAll("\\", "/")
 				//if it starts with the outdir use the paraglideOutput virtual modules instead
-				if (id.startsWith(outputDirectory)) {
+				if (id.startsWith(normalizedOutdir)) {
 					console.info("ID in outdir", id)
-					const internal = id.slice(outputDirectory.length + 1).replaceAll("\\", "/")
+					const internal = id.slice(normalizedOutdir.length)
 					const resolved = paraglideOutput[internal]
 					if (resolved) console.info("Shadowed", internal)
 					return resolved
