@@ -5,7 +5,6 @@ import { compile } from "./compile.js"
 import { rollup } from "rollup"
 import virtual from "@rollup/plugin-virtual"
 import terser from "@rollup/plugin-terser"
-import { createMessage } from "@inlang/sdk/test-utilities"
 
 beforeEach(() => {
 	// reset the imports to make sure that the runtime is reloaded
