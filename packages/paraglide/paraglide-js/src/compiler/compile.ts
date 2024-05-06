@@ -26,7 +26,7 @@ export type CompileOptions = {
 
 const defaultCompileOptions = {
 	projectId: undefined,
-	outputStructure: "message-modules",
+	outputStructure: "regular",
 } satisfies Partial<CompileOptions>
 
 /**
