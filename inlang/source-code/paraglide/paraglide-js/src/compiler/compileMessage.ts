@@ -65,26 +65,25 @@ export const compileMessage = (
 			params,
 			availableLanguageTags: Object.keys(fallbackMap),
 		}),
-		translations: {},
-	}
+		translations: Object.fromEntries(
+			Object.entries(fallbackMap).map(([languageTag, fallbackLanguage]) => {
+				const compiledPattern = compiledPatterns[languageTag]
 
-	// loop over all messages
-	for (const [languageTag, fallbackLanguage] of Object.entries(fallbackMap)) {
-		const compiledPattern = compiledPatterns[languageTag]
-
-		//If there is a pattern for the language tag, compile it, otherwise fallback
-		if (compiledPattern) {
-			resource.translations[languageTag] = messageFunction({
-				message,
-				params,
-				languageTag,
-				compiledPattern,
+				return [
+					languageTag,
+					compiledPattern
+						? messageFunction({
+								message,
+								params,
+								languageTag,
+								compiledPattern,
+						  })
+						: fallbackLanguage
+						? reexportMessage(message, fallbackLanguage)
+						: messageIdFallback(message, languageTag),
+				]
 			})
-		} else {
-			resource.translations[languageTag] = fallbackLanguage
-				? reexportMessage(message, fallbackLanguage)
-				: messageIdFallback(message, languageTag)
-		}
+		),
 	}
 
 	return resource
