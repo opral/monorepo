@@ -87,7 +87,8 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		load(id) {
 			//if it starts with the outdir use the paraglideOutput virtual modules instead
 			if (id.startsWith(outputDirectory)) {
-				return paraglideOutput[id.slice(outputDirectory.length)]
+				const internal = id.slice(outputDirectory.length + 1)
+				return paraglideOutput[internal]
 			}
 
 			return undefined
