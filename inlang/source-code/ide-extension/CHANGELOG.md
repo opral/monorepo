@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.42.7
+
+### Patch Changes
+
+- 08d47f0: publish script update after local test
+
 ## 1.42.6
 
 ### Patch Changes
