@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.42.2
+
+### Patch Changes
+
+- b347253: update auto publishing for open vsx
+
 ## 1.42.1
 
 ### Patch Changes
