@@ -1,20 +1,20 @@
 import chroma from "chroma-js"
 
 const overridePrimitiveColors = () => {
-	const inlangMessage = document.querySelector("inlang-message")
-	if (!inlangMessage) return undefined
+	const inlangMessageBundle = document.querySelector("inlang-message-bundle")
+	if (!inlangMessageBundle) return undefined
 
 	const primitives = ["primary", "success", "warning", "danger", "neutral"]
 
 	for (const primitive of primitives) {
 		const unformattedColor = window
-			.getComputedStyle(inlangMessage)
+			.getComputedStyle(inlangMessageBundle)
 			.getPropertyValue(`--inlang-color-${primitive}`)
 			.trim()
 
 		if (unformattedColor !== "") {
 			const colorShades = getPalette(unformattedColor)
-			appendCSSProperties(colorShades, primitive, inlangMessage)
+			appendCSSProperties(colorShades, primitive, inlangMessageBundle)
 		}
 	}
 }
