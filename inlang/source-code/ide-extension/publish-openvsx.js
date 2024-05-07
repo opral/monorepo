@@ -1,7 +1,7 @@
 /* eslint-disable */
 
 import { execSync } from "node:child_process"
-import { path, dirname } from "node:path"
+import path, { dirname } from "node:path"
 import { fileURLToPath, URL } from "node:url"
 import packageJson from "./package.json" assert { type: "json" }
 
@@ -17,7 +17,7 @@ const vsixFilePath = path.join(__dirname, vsixFileName)
 const token = process.env.OPEN_VSX_TOKEN
 
 try {
-	const command = `npx ovsx publish "${vsixFilePath}" -p ${token} --namespace inlang`
+	const command = `npx ovsx publish "${vsixFilePath}" -p ${token}`
 	console.log(`Executing: ${command}`)
 	execSync(command, { stdio: "inherit" })
 	console.log(`Successfully published ${vsixFileName} to Open VSX Registry.`)
