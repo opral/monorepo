@@ -25,7 +25,7 @@ export class DocCopy extends LitElement {
 			this.copied = true
 			// copy to clipboard from the next parent element the innerText
 			navigator.clipboard.writeText(this.parentElement?.innerText ?? "")
-			telemetryBrowser.capture("copy_markdown_element", {
+			telemetryBrowser.capture("WEBSITE copy markdown element", {
 				$el_text: this.parentElement?.innerText,
 			})
 
