@@ -1,10 +1,10 @@
 import { html, LitElement, css } from "lit"
 import { customElement } from "lit/decorators.js"
 import { baseStyling } from "../styling/base.js"
-import overridePrimitiveColors from "./../helper/overridePrimitiveColors.js"
+import overridePrimitiveColors from "../helper/overridePrimitiveColors.js"
 
-@customElement("inlang-message")
-export default class InlangMessage extends LitElement {
+@customElement("inlang-message-bundle")
+export default class InlangMessageBundle extends LitElement {
 	static override styles = [baseStyling, css``]
 
 	override async firstUpdated() {
@@ -15,13 +15,13 @@ export default class InlangMessage extends LitElement {
 	}
 
 	override render() {
-		return html`<div class="container" part="base">Message</div>`
+		return html`<div class="container" part="base">Message Bundle</div>`
 	}
 }
 
 // add types
 declare global {
 	interface HTMLElementTagNameMap {
-		"inlang-message": InlangMessage
+		"inlang-message-bundle": InlangMessageBundle
 	}
 }
