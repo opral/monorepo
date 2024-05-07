@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { createMiddleware } from "./index"
+import { Middleware } from "./index"
 import { PrefixStrategy } from "../index.client"
 import { LANG_COOKIE, PARAGLIDE_LANGUAGE_HEADER_NAME } from "../constants"
 import { NextRequest, NextResponse } from "next/server"
@@ -8,7 +8,7 @@ import { DomainStrategy } from "../routing-strategy/strats/domainStrategy"
 
 describe("Middleware with Prefix", () => {
 	const strategy = PrefixStrategy<"en" | "de">({})
-	const middleware = createMiddleware({
+	const middleware = Middleware({
 		strategy,
 	})
 
@@ -48,7 +48,7 @@ describe("Middleware with Domain Strategy", () => {
 	} as const
 
 	const strategy = DomainStrategy<"en" | "de">({ domains })
-	const middleware = createMiddleware({ strategy })
+	const middleware = Middleware({ strategy })
 
 	it.each(availableLanguageTags)("Detects the language from the domain", (languageTag) => {
 		const domain = domains[languageTag as keyof typeof domains]
@@ -64,7 +64,7 @@ describe("Middleware with Domain Strategy", () => {
 })
 
 describe("Middleware Fallbacks", () => {
-	const middleware = createMiddleware({
+	const middleware = Middleware({
 		strategy: {
 			resolveLocale() {
 				return undefined //be completely indecicive

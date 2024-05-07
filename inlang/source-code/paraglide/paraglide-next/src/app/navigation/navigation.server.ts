@@ -8,7 +8,7 @@ import { createLink } from "./Link"
  * Implements the same API as NextNavigation, but throws an error when used.
  * Usefull for poisoning the client-side navigation hooks on the server.
  */
-export function createNavigation<T extends string>({
+export function Navigation<T extends string>({
 	strategy,
 }: {
 	strategy: RoutingStrategy<T>

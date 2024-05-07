@@ -44,7 +44,7 @@ const middlewareOptionDefaults: MaybeMissingOptions<MiddlewareOptions<string>> =
 	redirect: true,
 }
 
-export function createMiddleware<T extends string>(opt: MiddlewareOptions<T>) {
+export function Middleware<T extends string>(opt: MiddlewareOptions<T>) {
 	opt = { ...middlewareOptionDefaults, ...opt }
 
 	/**

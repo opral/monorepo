@@ -1,8 +1,8 @@
-import { createMiddleware, PrefixStrategy, createNavigation } from "@inlang/paraglide-next"
+import { Navigation, Middleware, PrefixStrategy } from "@inlang/paraglide-next"
 import type { AvailableLanguageTag } from "@/paraglide/runtime"
 import * as m from "@/paraglide/messages"
 
-export const routingStrategy = PrefixStrategy<AvailableLanguageTag>({
+export const strategy = PrefixStrategy<AvailableLanguageTag>({
 	pathnames: {
 		"/about": m.about_path,
 		"/admin/[...rest]": {
@@ -15,7 +15,7 @@ export const routingStrategy = PrefixStrategy<AvailableLanguageTag>({
 	exclude: () => false,
 })
 
-export const middleware = createMiddleware({ strategy: routingStrategy })
-export const { Link, useRouter, usePathname, redirect, permanentRedirect } = createNavigation({
-	strategy: routingStrategy,
+export const middleware = Middleware({ strategy })
+export const { Link, useRouter, usePathname, redirect, permanentRedirect } = Navigation({
+	strategy,
 })
