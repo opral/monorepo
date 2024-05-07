@@ -72,39 +72,6 @@ export function Home() {
 
 Only messages used in client components are sent to the client. Messages in Server Components don't impact bundle size.
 
-## Routing Strategy
-
-You can customize the routing strategy in `src/lib/i18n.ts`. By default, the `PrefixStrategy` is used.
-
-## Localized navigation APIs
-
-> If you're using the pages router this section does not apply to you. You are are using [Next's built-in i18n routing](https://nextjs.org/docs/advanced-features/i18n-routing).
-
-Localized Routing is provided by the `Navigation` constructor. 
-
-Visit `/de/some-page` but you still need to add the language prefix to every single link. Wouldn't it be nice if that happened automatically?
-
-For this, Paraglide-Next provides Localised Navigation APIs, exported from `@/lib/i18n.js`.
-
-To get localized `<Link>`s you need to replace the ones from `next/link` with the ones from `@/lib/i18n.js`. Just find & replace the imports.
-
-```diff
-- import Link from "next/link"
-+ import { Link } from "@/lib/i18n" 
-
-// This now links to /de/about depending on the current language
-<Link href="/about">
-```
-
-You can do the same for the other navigation APIs.
-
-```diff
-- import { usePathname, useRouter, redirect, permanentRedirect} from "next/navigation"
-+ import { usePathname, useRouter, redirect, permanentRedirect} from "@/lib/i18n"
-```
-
-If you opted in to Localised Navigation during the `init` command this import replacement will have happened automatically.
-
 ## Advanced Usage
 
 ### Translated Metadata
