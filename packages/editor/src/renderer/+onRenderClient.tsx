@@ -13,6 +13,9 @@ import { publicEnv } from "@inlang/env-variables"
 posthog.init(publicEnv.PUBLIC_POSTHOG_TOKEN ?? "", {
 	api_host: import.meta.env.PROD ? "https://tm.inlang.com" : "http://localhost:4005",
 	capture_performance: false,
+	autocapture: {
+		capture_copied_text: true,
+	},
 })
 
 // import the css
