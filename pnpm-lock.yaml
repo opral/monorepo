@@ -1130,7 +1130,7 @@ importers:
         specifier: 5.2.2
         version: 5.2.2
 
-  inlang/source-code/message-component:
+  inlang/source-code/message-bundle-component:
     dependencies:
       '@inlang/sdk':
         specifier: workspace:^
