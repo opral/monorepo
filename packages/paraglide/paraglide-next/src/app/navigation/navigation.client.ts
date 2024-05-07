@@ -8,13 +8,9 @@ import { LANG_COOKIE } from "../constants"
 import { createRedirects } from "./redirect"
 import { createLink } from "./Link"
 
-export type LocalisedNavigation<T extends string> = ReturnType<typeof createNavigation<T>>
+export type LocalisedNavigation<T extends string> = ReturnType<typeof Navigation<T>>
 
-export const createNavigation = <T extends string>({
-	strategy,
-}: {
-	strategy: RoutingStrategy<T>
-}) => {
+export const Navigation = <T extends string>({ strategy }: { strategy: RoutingStrategy<T> }) => {
 	const localiseHref = createLocaliseHref(strategy)
 
 	/**

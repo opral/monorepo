@@ -1,8 +1,8 @@
 import { getLanguage } from "../getLanguage.client"
 import { availableLanguageTags, setLanguageTag } from "$paraglide/runtime.js"
-import { createNavigation } from "../navigation/navigation.client"
+import { Navigation } from "../navigation/navigation.client"
 import { createExclude } from "../exclude"
-import { createMiddleware } from "../middleware"
+import { Middleware } from "../middleware"
 import { I18nUserConfig, ResolvedI18nConfig } from "./config"
 import { resolveUserPathDefinitions } from "@inlang/paraglide-js/internal/adapter-utils"
 import { PrefixStrategy } from "../routing-strategy/strats/prefixStrategy"
@@ -22,8 +22,8 @@ export function createI18n<T extends string = string>(userConfig: I18nUserConfig
 		prefixDefault: config.prefix === "except-default" ? "never" : "always",
 	})
 
-	const navigation = createNavigation({ strategy })
-	const middleware = createMiddleware<T>({ strategy })
+	const navigation = Navigation<T>({ strategy })
+	const middleware = Middleware<T>({ strategy })
 
 	return {
 		localizePath: (canonicalPath: `/${string}`, lang: T) => {

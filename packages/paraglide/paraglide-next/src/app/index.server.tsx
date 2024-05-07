@@ -1,8 +1,8 @@
 export { default as LanguageProvider } from "./providers/LanguageProvider.js"
 
 // Public APIs
-export { createMiddleware } from "./middleware"
-export { createNavigation } from "./navigation/navigation.server.js"
+export { Middleware } from "./middleware"
+export { Navigation } from "./navigation/navigation.server.js"
 export { initializeLanguage } from "./initializeLanguage.server.js"
 
 // Routing Strategies
