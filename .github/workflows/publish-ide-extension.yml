@@ -56,3 +56,10 @@ jobs:
         working-directory: ./inlang/source-code/ide-extension
         env:
           VSCE_TOKEN: ${{secrets.VSCODE_MARKETPLACE_TOKEN}}
+          
+      - name: Publish to Open VSX Registry
+        run: pnpm --filter vs-code-extension run publish:open-vsx
+        working-directory: ./inlang/source-code/ide-extension
+        env:
+          OPEN_VSX_TOKEN: ${{ secrets.OPEN_VSX_TOKEN }}
+        
