@@ -1,7 +1,8 @@
 /* eslint-disable */
 
 import { execSync } from "node:child_process"
-import path from "node:path"
+import { path, dirname } from "node:path"
+import { fileURLToPath, URL } from "node:url"
 import packageJson from "./package.json" assert { type: "json" }
 
 // Ensure environment variables are checked properly
@@ -9,6 +10,7 @@ if (!process.env.OPEN_VSX_TOKEN) {
 	throw new Error("OPEN_VSX_TOKEN is not defined.")
 }
 
+const __dirname = dirname(fileURLToPath(import.meta.url))
 const version = packageJson.version
 const vsixFileName = `vs-code-extension-${version}.vsix`
 const vsixFilePath = path.join(__dirname, vsixFileName)
