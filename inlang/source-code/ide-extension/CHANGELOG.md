@@ -1,5 +1,37 @@
 # inlang-vs-code-extension
 
+## 1.42.5
+
+### Patch Changes
+
+- 9b740ef: update publishing script
+- Updated dependencies [8805b80]
+  - @inlang/telemetry@0.3.29
+
+## 1.42.4
+
+### Patch Changes
+
+- 1ccc4cd: update publishing script
+
+## 1.42.3
+
+### Patch Changes
+
+- 8fa9f40: update MARKETPLACE structure
+
+## 1.42.2
+
+### Patch Changes
+
+- b347253: update auto publishing for open vsx
+
+## 1.42.1
+
+### Patch Changes
+
+- dec4bf1: fix settings component
+
 ## 1.42.0
 
 ### Minor Changes
