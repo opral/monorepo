@@ -8,6 +8,8 @@ import crypto from "node:crypto"
 
 const PLUGIN_NAME = "unplugin-paraglide"
 
+const isWindows = typeof process !== "undefined" && process.platform === "win32"
+
 export type UserConfig = {
 	project: string
 	outdir: string
@@ -22,12 +24,15 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 
 	const projectPath = path.resolve(process.cwd(), options.project)
 	const outputDirectory = path.resolve(process.cwd(), options.outdir)
+	let normalizedOutdir = outputDirectory.replaceAll("\\", "/")
+	if (!normalizedOutdir.endsWith("/")) normalizedOutdir = normalizedOutdir + "/"
 	const logger = new Logger({ silent: options.silent, prefix: true })
 
 	//Keep track of how many times we've compiled
 	let numCompiles = 0
-
 	let previousMessagesHash: string | undefined = undefined
+
+	let paraglideOutput: Record<string, string> = {}
 
 	async function triggerCompile(messages: readonly Message[], settings: ProjectSettings) {
 		const currentMessagesHash = hashMessages(messages ?? [], settings)
@@ -39,8 +44,9 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		}
 
 		logMessageChange()
-		const output = await compile({ messages, settings })
-		await writeOutput(outputDirectory, output, fs)
+		const fsOutput = await compile({ messages, settings })
+		paraglideOutput = await compile({ messages, settings, outputStructure: "message-modules" })
+		await writeOutput(outputDirectory, fsOutput, fs)
 		numCompiles++
 		previousMessagesHash = currentMessagesHash
 	}
@@ -77,6 +83,8 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		return project
 	}
 
+	// if build
+
 	return {
 		name: PLUGIN_NAME,
 
@@ -93,6 +101,40 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 				if (numInvocations === 1) return
 				triggerCompile(messages, project.settings())
 			})
+		},
+
+		vite: {
+			resolveId(id, importer) {
+				// resolve relative imports inside the output directory
+				// the importer is alwazs normalized
+				if (importer?.startsWith(normalizedOutdir)) {
+					const dirname = path.dirname(importer).replaceAll("\\", "/")
+					if (id.startsWith(dirname)) return id
+
+					if (isWindows) {
+						const resolvedPath = path
+							.resolve(dirname.replaceAll("/", "\\"), id.replaceAll("/", "\\"))
+							.replaceAll("\\", "/")
+						return resolvedPath
+					}
+
+					const resolvedPath = path.resolve(dirname, id)
+					return resolvedPath
+				}
+				return undefined
+			},
+
+			load(id) {
+				id = id.replaceAll("\\", "/")
+				//if it starts with the outdir use the paraglideOutput virtual modules instead
+				if (id.startsWith(normalizedOutdir)) {
+					const internal = id.slice(normalizedOutdir.length)
+					const resolved = paraglideOutput[internal]
+					return resolved
+				}
+
+				return undefined
+			},
 		},
 
 		webpack(compiler) {

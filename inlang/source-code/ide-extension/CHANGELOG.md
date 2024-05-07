@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.42.1
+
+### Patch Changes
+
+- dec4bf1: fix settings component
+
 ## 1.42.0
 
 ### Minor Changes

@@ -62,7 +62,9 @@ To use our plugin, you need to provide a path to the directory where your langua
 ### Without namespaces
 
 ```json
-"pathPattern": "./resources/{languageTag}.json"
+"plugin.inlang.json": {
+	"pathPattern": "./resources/{languageTag}.json"
+}
 ```
 
 ### With namespaces
@@ -70,9 +72,11 @@ To use our plugin, you need to provide a path to the directory where your langua
 > Does not get created by 'npx @inlang/cli config init'
 
 ```json
-"pathPattern": {
-	"website": "./resources/{languageTag}/website.json",
-	"app": "./resources/{languageTag}/app.json"
+"plugin.inlang.json": {
+	"pathPattern": {
+		"website": "./resources/{languageTag}/website.json",
+		"app": "./resources/{languageTag}/app.json"
+	}
 }
 ```
 
@@ -83,7 +87,9 @@ Defines the pattern for variable references. The default is how [i18next](https:
 default:
 
 ```json
-"variableReferencePattern": ["{", "}"]
+"plugin.inlang.json": {
+	"variableReferencePattern": ["{", "}"]
+}
 ```
 
 **Common use cases**
@@ -102,7 +108,9 @@ default:
 An array of strings that are used to ignore certain files. The strings are matched against the file path. If the file path contains the string, the file is ignored.
 
 ```json
-"ignore": ["node_modules", "dist"]
+"plugin.inlang.json": {
+	"ignore": ["node_modules", "dist"]
+}
 ```
 
 # Expected behavior
@@ -120,9 +128,6 @@ The plugin can be used with [Sherlock - VS Code extension](https://inlang.com/m/
 3. Optional: Add lint rules: https://inlang.com/c/lint-rules
 4. 🎉 Done!
 
-## Pricing
-
-<doc-pricing></doc-pricing>
 
 # Contributing
 
