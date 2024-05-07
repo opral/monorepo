@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.42.3
+
+### Patch Changes
+
+- 8fa9f40: update MARKETPLACE structure
+
 ## 1.42.2
 
 ### Patch Changes
