@@ -2,7 +2,7 @@
 
 import { execSync } from "node:child_process"
 import path from "node:path"
-import packageJson from "../package.json"
+import packageJson from "./package.json"
 
 // Ensure environment variables are checked properly
 if (!process.env.OPEN_VSX_TOKEN) {
