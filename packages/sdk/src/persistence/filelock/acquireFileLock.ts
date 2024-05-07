@@ -1,6 +1,7 @@
 import { type NodeishFilesystem } from "@lix-js/fs"
 import type { NodeishStats } from "@lix-js/fs"
-import { debugLock } from "../../loadProject.js"
+import _debug from "debug"
+const debug = _debug("sdk:acquireFileLock")
 
 const maxRetries = 10
 const nProbes = 50
@@ -16,10 +17,10 @@ export async function acquireFileLock(
 	}
 
 	try {
-		debugLock(lockOrigin + " tries to acquire a lockfile Retry Nr.: " + tryCount)
+		debug(lockOrigin + " tries to acquire a lockfile Retry Nr.: " + tryCount)
 		await fs.mkdir(lockDirPath)
 		const stats = await fs.stat(lockDirPath)
-		debugLock(lockOrigin + " acquired a lockfile Retry Nr.: " + tryCount)
+		debug(lockOrigin + " acquired a lockfile Retry Nr.: " + tryCount)
 		return stats.mtimeMs
 	} catch (error: any) {
 		if (error.code !== "EEXIST") {
@@ -36,14 +37,12 @@ export async function acquireFileLock(
 	} catch (fstatError: any) {
 		if (fstatError.code === "ENOENT") {
 			// lock file seems to be gone :) - lets try again
-			debugLock(
-				lockOrigin + " tryCount++ lock file seems to be gone :) - lets try again " + tryCount
-			)
+			debug(lockOrigin + " tryCount++ lock file seems to be gone :) - lets try again " + tryCount)
 			return acquireFileLock(fs, lockDirPath, lockOrigin, tryCount + 1)
 		}
 		throw fstatError
 	}
-	debugLock(
+	debug(
 		lockOrigin +
 			" tries to acquire a lockfile  - lock currently in use... starting probe phase " +
 			tryCount
@@ -56,7 +55,7 @@ export async function acquireFileLock(
 				probeCounts += 1
 				let lockFileStats: undefined | NodeishStats = undefined
 				try {
-					debugLock(
+					debug(
 						lockOrigin + " tries to acquire a lockfile - check if the lock is free now " + tryCount
 					)
 
@@ -64,7 +63,7 @@ export async function acquireFileLock(
 					lockFileStats = await fs.stat(lockDirPath)
 				} catch (fstatError: any) {
 					if (fstatError.code === "ENOENT") {
-						debugLock(
+						debug(
 							lockOrigin +
 								" tryCount++ in Promise - tries to acquire a lockfile - lock file seems to be free now - try to acquire " +
 								tryCount
@@ -79,7 +78,7 @@ export async function acquireFileLock(
 				if (lockFileStats.mtimeMs === currentLockTime) {
 					if (probeCounts >= nProbes) {
 						// ok maximum lock time ran up (we waitetd nProbes * probeInterval) - we consider the lock to be stale
-						debugLock(
+						debug(
 							lockOrigin +
 								" tries to acquire a lockfile  - lock not free - but stale lets drop it" +
 								tryCount
@@ -95,7 +94,7 @@ export async function acquireFileLock(
 							return reject(rmLockError)
 						}
 						try {
-							debugLock(
+							debug(
 								lockOrigin +
 									" tryCount++ same locker - try to acquire again after removing stale lock " +
 									tryCount
@@ -111,9 +110,7 @@ export async function acquireFileLock(
 					}
 				} else {
 					try {
-						debugLock(
-							lockOrigin + " tryCount++ different locker - try to acquire again " + tryCount
-						)
+						debug(lockOrigin + " tryCount++ different locker - try to acquire again " + tryCount)
 						const lock = await acquireFileLock(fs, lockDirPath, lockOrigin, tryCount + 1)
 						return resolve(lock)
 					} catch (error) {
