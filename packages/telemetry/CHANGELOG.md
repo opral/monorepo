@@ -1,5 +1,11 @@
 # @inlang/telemetry
 
+## 0.3.29
+
+### Patch Changes
+
+- 8805b80: Add capture events to the copy component
+
 ## 0.3.28
 
 ### Patch Changes

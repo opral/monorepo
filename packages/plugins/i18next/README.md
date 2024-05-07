@@ -42,16 +42,20 @@ To use our plugin, you need to provide a path to the directory where your langua
 ### pathPattern without namespaces
 
 ```json
-"pathPattern": "./resources/{languageTag}.json"
+"plugin.inlang.i18next": {
+	"pathPattern": "./resources/{languageTag}.json"
+}
 ```
 
 ### pathPattern with namespaces
 
 
 ```json
-"pathPattern": {
-	"common": "./resources/{languageTag}/common.json",
-	"vital": "./resources/{languageTag}/vital.json"
+"plugin.inlang.i18next": {
+	"pathPattern": {
+		"common": "./resources/{languageTag}/common.json",
+		"vital": "./resources/{languageTag}/vital.json"
+	}
 }
 ```
 
@@ -65,7 +69,9 @@ Defines the pattern for variable references. The default is how [i18next](https:
 default:
 
 ```json
-"variableReferencePattern": ["{{", "}}"]
+"plugin.inlang.i18next": {
+	"variableReferencePattern": ["{{", "}}"]
+}
 ```
 
 ## `sourceLanguageFilePath`
@@ -75,15 +81,19 @@ This setting is optional and should only be used if the file name of your source
 ### Without namespaces
 
 ```json
-"sourceLanguageFilePath": "./resources/main.json"
+"plugin.inlang.i18next": {
+	"sourceLanguageFilePath": "./resources/main.json"
+}
 ```
 
 ### With namespaces
 
 ```json
-"sourceLanguageFilePath": {
-	"common": "./resources/main/common.json",
-	"vital": "./resources/main/vital.json"
+"plugin.inlang.i18next": {
+	"sourceLanguageFilePath": {
+		"common": "./resources/main/common.json",
+		"vital": "./resources/main/vital.json"
+	}
 }
 ```
 
@@ -124,9 +134,6 @@ The [dist](./dist/) directory is used to distribute the plugin directly via CDN 
 
 Read the [jsDelivr documentation](https://www.jsdelivr.com/?docs=gh) on importing from GitHub.
 
-## Pricing 
-
-<doc-pricing></doc-pricing>
 
 ---
 

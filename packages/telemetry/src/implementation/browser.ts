@@ -38,6 +38,9 @@ function initWrapper(
 				process.env.NODE_ENV === "production" ? "https://tm.inlang.com" : "http://localhost:4005",
 			capture_performance: false,
 			...config,
+			autocapture: {
+				capture_copied_text: true,
+			},
 		},
 		name
 	)
