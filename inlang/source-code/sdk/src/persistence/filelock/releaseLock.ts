@@ -1,5 +1,6 @@
 import { type NodeishFilesystem } from "@lix-js/fs"
-import { debugLock } from "../../loadProject.js"
+import _debug from "debug"
+const debug = _debug("sdk:releaseLock")
 
 export async function releaseLock(
 	fs: NodeishFilesystem,
@@ -7,7 +8,7 @@ export async function releaseLock(
 	lockOrigin: string,
 	lockTime: number
 ) {
-	debugLock(lockOrigin + " releasing the lock ")
+	debug(lockOrigin + " releasing the lock ")
 	try {
 		const stats = await fs.stat(lockDirPath)
 		if (stats.mtimeMs === lockTime) {
@@ -15,13 +16,13 @@ export async function releaseLock(
 			await fs.rmdir(lockDirPath)
 		}
 	} catch (statError: any) {
-		debugLock(lockOrigin + " couldn't release the lock")
+		debug(lockOrigin + " couldn't release the lock")
 		if (statError.code === "ENOENT") {
 			// ok seeks like the log was released by someone else
-			debugLock(lockOrigin + " WARNING - the lock was released by a different process")
+			debug(lockOrigin + " WARNING - the lock was released by a different process")
 			return
 		}
-		debugLock(statError)
+		debug(statError)
 		throw statError
 	}
 }

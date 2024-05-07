@@ -15,7 +15,7 @@ import type { ProjectSettings } from "@inlang/project-settings"
 import { releaseLock } from "./persistence/filelock/releaseLock.js"
 import { PluginLoadMessagesError, PluginSaveMessagesError } from "./errors.js"
 import { humanIdHash } from "./storage/human-id/human-readable-id.js"
-const debug = _debug("sdk:loadProject")
+const debug = _debug("sdk:createMessagesQuery")
 
 type MessageState = {
 	messageDirtyFlags: {
