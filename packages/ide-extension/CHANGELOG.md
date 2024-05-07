@@ -1,5 +1,13 @@
 # inlang-vs-code-extension
 
+## 1.42.5
+
+### Patch Changes
+
+- 9b740ef: update publishing script
+- Updated dependencies [8805b80]
+  - @inlang/telemetry@0.3.29
+
 ## 1.42.4
 
 ### Patch Changes

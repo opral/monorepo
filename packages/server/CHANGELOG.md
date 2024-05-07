@@ -4,6 +4,14 @@
 
 ### Patch Changes
 
+- Updated dependencies [8805b80]
+  - @inlang/telemetry@0.3.29
+  - @inlang/website@null
+
+## null
+
+### Patch Changes
+
 - Updated dependencies [bc17d0c]
   - @inlang/project-settings@2.4.2
   - @inlang/marketplace-manifest@1.4.2
