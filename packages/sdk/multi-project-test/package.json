@@ -11,7 +11,7 @@
 		"vitest": "^1.4.0"
 	},
 	"scripts": {
-		"clean": "rm -rf ./locales/de.json ./project2-dir/locales/de.json  ./project3-dir/locales/de.json ./project3-dir/project.inlang/ ./project3-dir/project.inlang.README.md && cp ./project4-dir/messages.json.bak ./project4-dir/project.inlang/messages.json",
+		"clean": "rm -rf ./locales/de.json ./project2-dir/locales/de.json  ./project3-dir/locales/de.json ./project3-dir/project.inlang/ ./project3-dir/project.inlang.README.md ./project4-dir/project.inlang/messages.json",
 		"translate1": "MOCK_TRANSLATE_LOCAL=true inlang machine translate -n -f --project ./project.inlang",
 		"translate2": "MOCK_TRANSLATE_LOCAL=true inlang machine translate -n -f --project ./project2-dir/project.inlang",
 		"translate3": "MOCK_TRANSLATE_LOCAL=true inlang machine translate -n -f --project ./project3-dir/project.inlang",
@@ -20,7 +20,7 @@
 		"lint2": "pnpm inlang lint --project ./project2-dir/project.inlang",
 		"lint3": "pnpm inlang lint --project ./project3-dir/project.inlang",
 		"lint4": "pnpm inlang lint --project ./project4-dir/project.inlang",
-		"test": "pnpm clean && vitest --reporter=tap-flat run && pnpm clean"
+		"test": "pnpm clean && vitest --reporter=tap-flat run"
 	},
 	"prettier": {
 		"semi": false,
