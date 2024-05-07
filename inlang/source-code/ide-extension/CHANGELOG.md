@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.42.6
+
+### Patch Changes
+
+- 93a9a17: update publish script
+
 ## 1.42.5
 
 ### Patch Changes
