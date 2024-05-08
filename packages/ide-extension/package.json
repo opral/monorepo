@@ -10,7 +10,7 @@
 		"url": "https://github.com/opral/monorepo.git"
 	},
 	"icon": "assets/sherlock-logo.png",
-	"version": "1.42.5",
+	"version": "1.42.8",
 	"engines": {
 		"vscode": "^1.84.2"
 	},
@@ -210,7 +210,7 @@
 		"@inlang/result": "workspace:*",
 		"@inlang/rpc": "workspace:*",
 		"@inlang/sdk": "workspace:*",
-		"@inlang/settings-component": "^1.0.6",
+		"@inlang/settings-component": "^1.0.8",
 		"@inlang/telemetry": "workspace:*",
 		"@lix-js/client": "workspace:*",
 		"@lix-js/fs": "workspace:*",

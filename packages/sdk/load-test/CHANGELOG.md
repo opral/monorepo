@@ -4,6 +4,14 @@
 
 ### Patch Changes
 
+- Updated dependencies [2a90116]
+  - @inlang/sdk@0.34.4
+  - @inlang/cli@2.16.2
+
+## null
+
+### Patch Changes
+
 - Updated dependencies [bc17d0c]
   - @inlang/sdk@0.34.3
   - @inlang/cli@2.16.1

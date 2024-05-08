@@ -20,5 +20,6 @@ import { getLanguage } from "./getLanguage.server"
  * ```
  */
 export function initializeLanguage() {
+	//for some reason we can't pass the function as a reference directly
 	setLanguageTag(() => getLanguage())
 }

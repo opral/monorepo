@@ -306,7 +306,11 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					setProject(undefined)
 					return newRepo
 				} catch (e) {
-					if (e instanceof Error && e.name === "NotFoundError" && e.message === `Could not find ${activeBranch()}.`) {
+					if (
+						e instanceof Error &&
+						e.name === "NotFoundError" &&
+						e.message === `Could not find ${activeBranch()}.`
+					) {
 						// redirect to default branch (e.g. main) if branch not found
 						setActiveBranch(undefined)
 						setSearchParams({ key: "branch", value: "" })
