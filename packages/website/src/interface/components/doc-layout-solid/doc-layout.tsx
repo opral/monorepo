@@ -31,8 +31,10 @@ const InlangDoclayout = (props: {
 
 	return (
 		<div class="flex w-full h-full">
-			<div class="hidden sm:block sticky top-[140px] w-[230px] h-full">
-				<InlangDocNavigation manifest={props.manifest} currentRoute={props.currentRoute} />
+			<div class="hidden sm:block sticky top-[107px] w-[230px] h-[calc(100vh_-_107px)]">
+				<div class="w-full h-full overflow-y-scroll pb-8 pr-4 pl-3 -ml-3">
+					<InlangDocNavigation manifest={props.manifest} currentRoute={props.currentRoute} />
+				</div>
 			</div>
 			<div class="flex-1 w-min overflow-hidden h-full px-0 sm:px-5 xl:px-10">
 				{props.children}
@@ -45,16 +47,14 @@ const InlangDoclayout = (props: {
 					</div>
 				</div>
 			</div>
-			<div class="hidden xl:block sticky top-[140px] w-[230px] h-[calc(100vh_-_107px_-_64px)]">
-				<div class="w-full h-full overflow-y-scroll pb-20">
+			<div class="hidden xl:block sticky top-[107px] w-[230px] h-[calc(100vh_-_107px)]">
+				<div class="w-full h-full overflow-y-scroll pb-8 pr-4">
 					<InlangDocInPage
 						manifest={props.manifest}
 						contentInHtml={(props.children as HTMLElement).children}
 						currentRoute={props.currentRoute}
 					/>
 				</div>
-
-				<div class="absolute h-[60px] w-full bottom-0 bg-gradient-to-t from-surface-50 pointer-events-none"></div>
 			</div>
 			<Show when={isLoaded()}>
 				<sl-drawer
