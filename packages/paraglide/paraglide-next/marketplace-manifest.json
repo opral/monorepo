@@ -26,7 +26,7 @@
 			"/seo": "./inlang/source-code/paraglide/paraglide-next/docs/advanced/seo.md",
 			"/usage-on-the-server": "./inlang/source-code/paraglide/paraglide-next/docs/advanced/server.md"
 		},
-		"": {
+		"Appendix": {
 			"/roadmap": "./inlang/source-code/paraglide/paraglide-next/docs/roadmap.md",
 			"/changelog": "./inlang/source-code/paraglide/paraglide-next/CHANGELOG.md"
 		}
