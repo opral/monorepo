@@ -22,7 +22,13 @@ export const rewrite = ({
 	originalCode: string
 	translations: TranslationDefinition
 }) => {
-	if (hasAlreadyBeenRewritten(originalCode)) return
+	if (hasAlreadyBeenRewritten(originalCode))
+		return {
+			scriptAdditions: {
+				before: [],
+				after: [],
+			},
+		}
 
 	const svelteElements = getElementsFromAst(ast, "svelte:element")
 
