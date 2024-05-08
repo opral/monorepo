@@ -1,10 +1,31 @@
-# @inlang/message-bundle
+# sdk/v2 MessageBundle types
 
 A message bundle is a collection of ICU Messages (Message Format 2).
-
 A bundle has a id (or aliases) which can be used the refer to a message from code.
-
 Each message in the bundle targets a different locale.
+
+### Usage
+
+```ts
+import type { Message, MessageBundle } from '@inlang/sdk/v2'
+
+const myMessageBundle: MessageBundle = {
+  // to be filled in
+}
+```
+
+In case of type name conflicts with existing Message type
+
+```ts
+import type * as V2 from '@inlang/sdk/v2'
+
+const myMessageBundle: V2.MessageBundle = {
+  // to be filled in
+}
+```
+
+
+### New types
 
 ```ts
 export type Message = Static<typeof Message>
