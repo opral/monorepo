@@ -7,7 +7,8 @@ import node from "@astrojs/node"
 
 // https://astro.build/config
 export default defineConfig({
-	site: "https://example.com",
+	//configure this to your domain name
+	site: "https://acme.com",
 	i18n: {
 		defaultLocale: "en",
 		locales: [
