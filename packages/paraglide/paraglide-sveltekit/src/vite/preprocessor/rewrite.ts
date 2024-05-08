@@ -1,11 +1,10 @@
-import { NO_TRANSLATE_ATTRIBUTE, PARAGLIDE_CONTEXT_KEY } from "../../constants.js"
+import { NO_TRANSLATE_ATTRIBUTE } from "../../constants.js"
 import type { TranslationDefinition } from "./index.js"
 import { getAttributeByName, getElementsFromAst } from "./utils/ast.js"
 import { attrubuteValuesToJSValue } from "./utils/attributes-to-values.js"
 import { identifier } from "./utils/identifier.js"
 import { uneval } from "devalue"
 import * as c from "./utils/codegen.js"
-import dedent from "dedent"
 import type { Ast, Attribute, ElementNode, SpreadAttribute } from "./types.js"
 import type MagicString from "magic-string"
 
@@ -165,7 +164,6 @@ export const rewrite = ({
 		}
 	}
 
-
 	const before = [
 		`import { getTranslationFunctions as ${i(
 			"getTranslationFunctions"
@@ -183,7 +181,6 @@ export const rewrite = ({
 			after,
 		},
 	}
-
 }
 
 function getAttributesObject(
@@ -235,5 +232,5 @@ function hasSpreadAttribute(element: ElementNode<string>): boolean {
  * @param originalCode
  */
 function hasAlreadyBeenRewritten(originalCode: string): boolean {
-	return originalCode.includes(i("getContext"))
+	return originalCode.includes(i("getTranslationFunctions"))
 }
