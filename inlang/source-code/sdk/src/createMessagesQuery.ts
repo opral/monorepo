@@ -119,6 +119,7 @@ export function createMessagesQuery({
 					messageLockDirPath,
 					messageStates,
 					index,
+					delegate,
 					_settings, // NOTE we bang here - we don't expect the settings to become null during the livetime of a project
 					resolvedPluginApi
 				)
@@ -141,6 +142,7 @@ export function createMessagesQuery({
 			messageLockDirPath,
 			messageStates,
 			index,
+			delegate,
 			_settings, // NOTE we bang here - we don't expect the settings to become null during the livetime of a project
 			resolvedPluginApi
 		)
@@ -174,6 +176,7 @@ export function createMessagesQuery({
 			messageLockDirPath,
 			messageStates,
 			index,
+			delegate,
 			_settings, // NOTE we bang here - we don't expect the settings to become null during the livetime of a project
 			resolvedPluginApi
 		)
@@ -287,6 +290,7 @@ async function loadMessagesViaPlugin(
 	lockDirPath: string,
 	messageState: MessageState,
 	messages: Map<string, Message>,
+	delegate: MessageQueryDelegate | undefined,
 	settingsValue: ProjectSettings,
 	resolvedPluginApi: ResolvedPluginApi
 ) {
@@ -355,6 +359,7 @@ async function loadMessagesViaPlugin(
 				messages.set(loadedMessageClone.id, loadedMessageClone)
 				// NOTE could use hash instead of the whole object JSON to save memory...
 				messageState.messageLoadHash[loadedMessageClone.id] = importedEnecoded
+				delegate?.onMessageUpdate(loadedMessageClone.id, loadedMessageClone)
 			} else {
 				// message with the given alias does not exist so far
 				loadedMessageClone.alias = {} as any
@@ -381,6 +386,7 @@ async function loadMessagesViaPlugin(
 				// we don't have to check - done before hand if (messages.has(loadedMessageClone.id)) return false
 				messages.set(loadedMessageClone.id, loadedMessageClone)
 				messageState.messageLoadHash[loadedMessageClone.id] = importedEnecoded
+				delegate?.onMessageUpdate(loadedMessageClone.id, loadedMessageClone)
 			}
 		}
 		await releaseLock(fs as NodeishFilesystem, lockDirPath, "loadMessage", lockTime)
@@ -404,7 +410,15 @@ async function loadMessagesViaPlugin(
 		messageState.sheduledLoadMessagesViaPlugin = undefined
 
 		// recall load unawaited to allow stack to pop
-		loadMessagesViaPlugin(fs, lockDirPath, messageState, messages, settingsValue, resolvedPluginApi)
+		loadMessagesViaPlugin(
+			fs,
+			lockDirPath,
+			messageState,
+			messages,
+			delegate,
+			settingsValue,
+			resolvedPluginApi
+		)
 			.then(() => {
 				// resolve the scheduled load message promise
 				executingScheduledMessages.resolve()
@@ -421,6 +435,7 @@ async function saveMessagesViaPlugin(
 	lockDirPath: string,
 	messageState: MessageState,
 	messages: Map<string, Message>,
+	delegate: MessageQueryDelegate | undefined,
 	settingsValue: ProjectSettings,
 	resolvedPluginApi: ResolvedPluginApi
 ): Promise<void> {
@@ -507,6 +522,7 @@ async function saveMessagesViaPlugin(
 					lockDirPath,
 					messageState,
 					messages,
+					delegate,
 					settingsValue,
 					resolvedPluginApi
 				)
@@ -546,7 +562,15 @@ async function saveMessagesViaPlugin(
 		const executingSheduledSaveMessages = messageState.sheduledSaveMessages
 		messageState.sheduledSaveMessages = undefined
 
-		saveMessagesViaPlugin(fs, lockDirPath, messageState, messages, settingsValue, resolvedPluginApi)
+		saveMessagesViaPlugin(
+			fs,
+			lockDirPath,
+			messageState,
+			messages,
+			delegate,
+			settingsValue,
+			resolvedPluginApi
+		)
 			.then(() => {
 				executingSheduledSaveMessages.resolve()
 			})
