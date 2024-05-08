@@ -7,6 +7,7 @@ import { compile, writeOutput, Logger } from "@inlang/paraglide-js/internal"
 import crypto from "node:crypto"
 
 const PLUGIN_NAME = "unplugin-paraglide"
+const VITE_BUILD_PLUGIN_NAME = "unplugin-paraglide-vite-virtual-message-modules"
 
 const isWindows = typeof process !== "undefined" && process.platform === "win32"
 
@@ -32,7 +33,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 	let numCompiles = 0
 	let previousMessagesHash: string | undefined = undefined
 
-	let paraglideOutput: Record<string, string> = {}
+	let messageModuleOutput: Record<string, string> = {}
 
 	async function triggerCompile(messages: readonly Message[], settings: ProjectSettings) {
 		const currentMessagesHash = hashMessages(messages ?? [], settings)
@@ -44,8 +45,8 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		}
 
 		logMessageChange()
-		const fsOutput = await compile({ messages, settings })
-		paraglideOutput = await compile({ messages, settings, outputStructure: "message-modules" })
+		const fsOutput = await compile({ messages, settings, outputStructure: "regular" })
+		messageModuleOutput = await compile({ messages, settings, outputStructure: "message-modules" })
 		await writeOutput(outputDirectory, fsOutput, fs)
 		numCompiles++
 		previousMessagesHash = currentMessagesHash
@@ -85,68 +86,73 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 
 	// if build
 
-	return {
-		name: PLUGIN_NAME,
+	return [
+		{
+			name: PLUGIN_NAME,
 
-		enforce: "pre",
-		async buildStart() {
-			const project = await getProject()
+			enforce: "pre",
+			async buildStart() {
+				const project = await getProject()
 
-			//Always fully compile once on build start
-			await triggerCompile(project.query.messages.getAll(), project.settings())
+				//Always fully compile once on build start
+				await triggerCompile(project.query.messages.getAll(), project.settings())
 
-			let numInvocations = 0
-			project.query.messages.getAll.subscribe((messages) => {
-				numInvocations++
-				if (numInvocations === 1) return
-				triggerCompile(messages, project.settings())
-			})
+				let numInvocations = 0
+				project.query.messages.getAll.subscribe((messages) => {
+					numInvocations++
+					if (numInvocations === 1) return
+					triggerCompile(messages, project.settings())
+				})
+			},
+
+			webpack(compiler) {
+				//we need the compiler to run before the build so that the message-modules will be present
+				//In the other bundlers `buildStart` already runs before the build. In webpack it's a race condition
+				compiler.hooks.beforeRun.tapPromise(PLUGIN_NAME, async () => {
+					const project = await getProject()
+					await triggerCompile(project.query.messages.getAll(), project.settings())
+					console.info(`Compiled Messages into ${options.outdir}`)
+				})
+			},
 		},
+		{
+			name: VITE_BUILD_PLUGIN_NAME,
+			vite: {
+				apply: "build",
+				resolveId(id, importer) {
+					// resolve relative imports inside the output directory
+					// the importer is alwazs normalized
+					if (importer?.startsWith(normalizedOutdir)) {
+						const dirname = path.dirname(importer).replaceAll("\\", "/")
+						if (id.startsWith(dirname)) return id
 
-		vite: {
-			resolveId(id, importer) {
-				// resolve relative imports inside the output directory
-				// the importer is alwazs normalized
-				if (importer?.startsWith(normalizedOutdir)) {
-					const dirname = path.dirname(importer).replaceAll("\\", "/")
-					if (id.startsWith(dirname)) return id
+						if (isWindows) {
+							const resolvedPath = path
+								.resolve(dirname.replaceAll("/", "\\"), id.replaceAll("/", "\\"))
+								.replaceAll("\\", "/")
+							return resolvedPath
+						}
 
-					if (isWindows) {
-						const resolvedPath = path
-							.resolve(dirname.replaceAll("/", "\\"), id.replaceAll("/", "\\"))
-							.replaceAll("\\", "/")
+						const resolvedPath = path.resolve(dirname, id)
 						return resolvedPath
 					}
+					return undefined
+				},
 
-					const resolvedPath = path.resolve(dirname, id)
-					return resolvedPath
-				}
-				return undefined
-			},
+				load(id) {
+					id = id.replaceAll("\\", "/")
+					//if it starts with the outdir use the paraglideOutput virtual modules instead
+					if (id.startsWith(normalizedOutdir)) {
+						const internal = id.slice(normalizedOutdir.length)
+						const resolved = messageModuleOutput[internal]
+						return resolved
+					}
 
-			load(id) {
-				id = id.replaceAll("\\", "/")
-				//if it starts with the outdir use the paraglideOutput virtual modules instead
-				if (id.startsWith(normalizedOutdir)) {
-					const internal = id.slice(normalizedOutdir.length)
-					const resolved = paraglideOutput[internal]
-					return resolved
-				}
-
-				return undefined
+					return undefined
+				},
 			},
 		},
-
-		webpack(compiler) {
-			//we need the compiler to run before the build so that the message-modules will be present
-			//In the other bundlers `buildStart` already runs before the build. In webpack it's a race condition
-			compiler.hooks.beforeRun.tapPromise(PLUGIN_NAME, async () => {
-				const project = await getProject()
-				await triggerCompile(project.query.messages.getAll(), project.settings())
-				console.info(`Compiled Messages into ${options.outdir}`)
-			})
-		},
-	}
+	]
 })
 
 function hashMessages(messages: readonly Message[], settings: ProjectSettings): string {
