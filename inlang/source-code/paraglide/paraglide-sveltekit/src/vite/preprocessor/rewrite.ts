@@ -172,8 +172,9 @@ export const rewrite = ({
 		)} } from '@inlang/paraglide-sveltekit/internal';`,
 	]
 	const after: string[] = [
-		`const ${i("translationFunctions")} = ${i("getTranslationFunctions")}();
-		const [ ${i("translateAttribute")}, ${i("handle_attributes")} ] = ${i("translationFunctions")};`,
+		`const ${i("translationFunctions")} = ${i("getTranslationFunctions")}();\nconst [ ${i(
+			"translateAttribute"
+		)}, ${i("handle_attributes")} ] = ${i("translationFunctions")};`,
 	]
 
 	return {
