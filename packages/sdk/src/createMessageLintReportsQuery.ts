@@ -73,10 +73,6 @@ export function createMessageLintReportsQuery(
 			}
 		},
 		onMessageCreate: (messageId: string, message: Message) => {
-			// TODO check if the message store is fully loaded
-			if (!rulesArray) {
-				return
-			}
 			lintMessage(message, messages)
 		},
 		onMessageUpdate: (messageId: string, message: Message) => {
