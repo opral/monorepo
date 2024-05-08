@@ -461,7 +461,7 @@ importers:
   inlang/source-code/editor:
     dependencies:
       '@inlang/settings-component':
-        specifier: ^1.0.8
+        specifier: workspace:*
         version: link:../settings-component
       '@isomorphic-git/cors-proxy':
         specifier: ^2.7.1
