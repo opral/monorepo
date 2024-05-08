@@ -15,7 +15,7 @@ function sleep(ms: number) {
 }
 
 /**
- * Creates a reactive query API for messages.
+ * Creates a ~~reactive~~ query API for lint reports.
  */
 export function createMessageLintReportsQuery(
 	messagesQuery: MessageQueryApi,
@@ -42,6 +42,8 @@ export function createMessageLintReportsQuery(
 		if (!rulesArray) {
 			return
 		}
+
+		// TODO unhandled promise rejection (as before the refactor) but won't tackle this in this pr
 		lintSingleMessage({
 			rules: rulesArray,
 			settings: settingsObject(),
@@ -58,16 +60,16 @@ export function createMessageLintReportsQuery(
 	const messages = messagesQuery.getAll() as Message[]
 	// load report for all messages once
 	for (const message of messages) {
+		// NOTE: this potentually creates thousands of promisses we could create a promise that batches linting
 		lintMessage(message, messages)
 	}
 
 	const messageQueryChangeDelegate: MessageQueryDelegate = {
 		onCleanup: () => {
-			// TODO cancel all running lint rules
-			// TODO clear reaports map
+			// NOTE: we could cancel all running lint rules - but results get overritten anyway
+			index.clear()
 		},
 		onLoaded: (messages: Message[]) => {
-			// TODO queue a lintSingleMessage for each message
 			for (const message of messages) {
 				lintMessage(message, messages)
 			}
@@ -87,7 +89,7 @@ export function createMessageLintReportsQuery(
 
 	return {
 		getAll: async () => {
-			// TODO reintroduce reactivity here
+			// TODO reintroduce reactivity here - wont be the bottleneck
 			await sleep(0) // evaluate on next tick to allow for out-of-order effects
 			return structuredClone(
 				[...index.values()].flat().length === 0 ? [] : [...index.values()].flat()
