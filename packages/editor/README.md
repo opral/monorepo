@@ -7,7 +7,7 @@
 # Edit translations with version control in a visual editor.
 
 Fink enables translators to edit translations in a visual editor and submit them to your repository. It is a client-side application that pulls the translations from your repository into the browser and commits changes back to it. Contributors can easily submit translations by creating forks and pull requests within the editor.
-<br />v
+<br />
 <br />
 
 Used by
