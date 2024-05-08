@@ -5,13 +5,13 @@
 -->
 <script lang="ts" generics="T extends string">
 	import type { I18n } from "./adapter.js"
+	import { page } from "$app/stores"
+	import { browser } from "$app/environment"
 	import { normaliseBase } from "./utils/normaliseBase.js"
 	import { getPathInfo } from "./utils/get-path-info.js"
 	import { getHrefBetween } from "./utils/diff-urls.js"
 	import { serializeRoute } from "./utils/serialize-path.js"
-	import { page } from "$app/stores"
-	import { browser } from "$app/environment"
-	import { LANGUAGE_CHANGE_INVALIDATION_KEY, PARAGLIDE_CONTEXT_KEY } from "../constants.js"
+	import { LANGUAGE_CHANGE_INVALIDATION_KEY } from "../constants.js"
 	import { base as maybe_relative_base } from "$app/paths"
 	import { isExternal } from "./utils/external.js"
 	import { getTranslatedPath } from "./path-translations/getTranslatedPath.js"
