@@ -1,8 +1,9 @@
 import { it, expect, describe } from "vitest"
 import { DomainStrategy } from "./domainStrategy"
 import { format } from "../../utils/format"
+import { NextRequest } from "next/server"
 
-const { getCanonicalPath, getLocalisedUrl } = DomainStrategy<"en" | "de" | "de-CH">({
+const { getCanonicalPath, getLocalisedUrl, resolveLocale } = DomainStrategy<"en" | "de" | "de-CH">({
 	domains: {
 		en: "https://example.com",
 		de: "https://de.example.com",
@@ -31,5 +32,16 @@ describe("getLocalisedUrl", () => {
 		expect(format(getLocalisedUrl("/some/path", "de-CH", true))).toEqual(
 			"https://example.ch/some/path"
 		)
+	})
+})
+
+describe("resolveLocale", () => {
+	it("resolves the locale based on the domain", () => {
+		const request_en = new NextRequest("https://example.com/some-page")
+		const request_de = new NextRequest("https://de.example.com/some-page")
+		const request_de_ch = new NextRequest("https://example.ch/some-page")
+		expect(resolveLocale(request_en)).toBe("en")
+		expect(resolveLocale(request_de)).toBe("de")
+		expect(resolveLocale(request_de_ch)).toBe("de-CH")
 	})
 })
