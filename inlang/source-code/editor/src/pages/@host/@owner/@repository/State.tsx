@@ -75,6 +75,10 @@ type EditorStateSchema = {
 	/**
 	 * The branch names of current repo.
 	 */
+	setBranchListEnabled: Setter<boolean>
+	/**
+	 * Trigger the branch list to be fetched.
+	 */
 	branchList: Resource<string[] | undefined>
 	/**
 	 * Additional information about a repository provided by GitHub.
@@ -596,9 +600,10 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	)
 
+	const [branchListEnabled, setBranchListEnabled] = createSignal(false)
 	const [branchList] = createResource(
 		() => {
-			if (repo() === undefined || githubRepositoryInformation() === undefined) {
+			if (repo() === undefined || githubRepositoryInformation() === undefined || !branchListEnabled()) {
 				return false
 			}
 			return { repo: repo() }
@@ -655,6 +660,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					mergeUpstream,
 					createFork,
 					currentBranch,
+					setBranchListEnabled,
 					branchList,
 					githubRepositoryInformation,
 					routeParams,
