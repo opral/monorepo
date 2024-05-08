@@ -165,49 +165,16 @@ export const rewrite = ({
 		}
 	}
 
-	const before = [`import { getContext as ${i("getContext")} } from 'svelte';`]
-	const after: string[] = []
 
-	after.push(
-		dedent`
-            const ${i("context")} = ${i("getContext")}('${PARAGLIDE_CONTEXT_KEY}');
-        
-            /**
-             * @param {string} value
-             * @param {string | undefined} lang_value
-             */
-            function ${i("translateAttribute")}(value, lang_value) {
-				if(typeof value !== "string") return value;
-                if(!${i("context")}) return value;
-                return ${i("context")}.translateHref(value, lang_value);
-            }
-
-            /**
-             * @typedef {{ attribute_name: string, lang_attribute_name?: string }} AttributeTranslation
-             */
-
-            /**
-             * Takes in an object of attributes, and an object of attribute translations
-             * & applies the translations to the attributes
-             * 
-             * @param {Record<string, any>} attrs
-             * @param {AttributeTranslation[]} attribute_translations
-             */
-            function ${i("handle_attributes")}(attrs, attribute_translations) {
-                //If the element has the ${NO_TRANSLATE_ATTRIBUTE} attribute, don't translate it
-                if(attrs[${c.str(NO_TRANSLATE_ATTRIBUTE)}] === true) return attrs;
-
-                for (const { attribute_name, lang_attribute_name } of attribute_translations){
-                    if(attribute_name in attrs) {
-                        const attr = attrs[attribute_name];
-                        const lang_attr = lang_attribute_name ? attrs[lang_attribute_name] : undefined;
-                        attrs[attribute_name] = ${i("translateAttribute")}(attr, lang_attr);
-                    }
-                }
-
-                return attrs;
-            }`
-	)
+	const before = [
+		`import { getTranslationFunctions as ${i(
+			"getTranslationFunctions"
+		)} } from '@inlang/paraglide-sveltekit/internal';`,
+	]
+	const after: string[] = [
+		`const ${i("translationFunctions")} = ${i("getTranslationFunctions")}();
+		const [ ${i("translateAttribute")}, ${i("handle_attributes")} ] = ${i("translationFunctions")};`,
+	]
 
 	return {
 		scriptAdditions: {
@@ -215,6 +182,7 @@ export const rewrite = ({
 			after,
 		},
 	}
+
 }
 
 function getAttributesObject(
