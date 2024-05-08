@@ -11,7 +11,3 @@ If it wasn't set up already the `paraglide-next init` command will have set it u
 It will also have added the `<ParaglideJS>` component to your root layout which makes the language available to all messages. 
 
 Apart from that we just need the regular Paraglide-JS Setup. Create an Inlang project an add messages in `messages/{languageTag}.json`. This should also have been done by the CLI.
-
-## Limitations
-
-The 

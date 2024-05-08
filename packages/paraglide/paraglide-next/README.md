@@ -74,42 +74,6 @@ Only messages used in client components are sent to the client. Messages in Serv
 
 ## Advanced Usage
 
-### Translated Metadata
-
-To return different metadata for each language, we will need to use `generateMetadata`.
-
-```ts
-export async function generateMetadata() {
-	return {
-		title: m.home_metadata_title(),
-		description: m.home_metadata_description(),
-	}
-}
-```
-
-> If you were to use `export const metadata` your metadata would always end up in the source language.
-
-### Linking to Pages in Specific Languages
-
-If you want a Link to be in a specific language you can use the `locale` prop.
-
-```tsx
-<Link href="/about" locale="de">
-```
-
-This is convenient for constructing language switchers.
-
-If you are using `router.push` to navigate you can pass `locale` as an option.
-
-```ts
-function Component() {
-	const router = useRouter()
-	return (
-		<button onClick={() => router.push("/about", { locale: "de" })}>Go to German About page</button>
-	)
-}
-```
-
 ### Setting the Language in Server Actions
 
 Use the `initializeLanguage` function at the top of your server-action file to make sure the language is available.
@@ -126,23 +90,6 @@ export async function someAction() {
 	languageTag() // "de"
 }
 ```
-
-## Manually Getting a localized Pathname
-
-There are situations where you need to know the localized version of a pathname. You can use the `localizePathname` function for that.
-
-```ts
-import { localizePathname } from "@/lib/i18n"
-localizePathname("/about", "de") // de/ueber-uns
-```
-
-This does not include the `basePath`.
-
-### Alternate Links
-
-Search engines like Google expect you to tell them about translated versions of your pages. Paraglide-Next does this by default by adding the `Link` Header to requests.
-
-You **don't** need to add the translated versions of your site to your sitemap, although it doesn't hurt if you do.
 
 ### Right-to-Left Support
 
@@ -183,12 +130,6 @@ export default function middleware(request: NextRequest) {
 	return response
 }
 ```
-
-## Roadmap to 1.0
-
-- Static Export support
-- Simplify Setup
-- More flexible Routing Strategies
 
 # Examples
 
