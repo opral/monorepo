@@ -146,17 +146,14 @@ export const rewrite = ({
 						attribute_name,
 						c.ternary(
 							c.eq(thisValue, c.str(element_name)),
-							`${i("translateAttribute")}(
-                                        ${attrubuteValuesToJSValue(attribute.value, originalCode)},
-                                        ${
-																					langAttribute
-																						? attrubuteValuesToJSValue(
-																								langAttribute.value,
-																								originalCode
-																						  )
-																						: "undefined"
-																				}
-                                    )`,
+							`${i("translateAttribute")}(${attrubuteValuesToJSValue(
+								attribute.value,
+								originalCode
+							)},${
+								langAttribute
+									? attrubuteValuesToJSValue(langAttribute.value, originalCode)
+									: "undefined"
+							})`,
 							attrubuteValuesToJSValue(attribute.value, originalCode)
 						)
 					)
