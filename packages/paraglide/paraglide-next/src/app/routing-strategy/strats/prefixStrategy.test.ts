@@ -1,10 +1,7 @@
 import { it, expect, describe } from "vitest"
 import { PrefixStrategy } from "./prefixStrategy"
-import { NextRequest } from "next/server"
 
-const { resolveLanguage, getCanonicalPath, getLocalisedPath } = PrefixStrategy({
-	availableLanguageTags: ["en", "de", "de-CH"],
-	defaultLanguage: "en",
+const { getCanonicalPath, getLocalisedUrl: getLocalisedHref } = PrefixStrategy({
 	pathnames: {
 		"/canonical-translated": {
 			de: "/uebersetzt",
@@ -18,19 +15,7 @@ const { resolveLanguage, getCanonicalPath, getLocalisedPath } = PrefixStrategy({
 		},
 	},
 	exclude: (path) => path.startsWith("/api/"),
-	prefix: "except-default",
-})
-
-describe("resolveLanguage", () => {
-	it("returns the locale if there is one", () => {
-		expect(resolveLanguage(new NextRequest("https://example.com/de/some/path"))).toBe("de")
-		expect(resolveLanguage(new NextRequest("https://example.com/en/some/path"))).toBe("en")
-		expect(resolveLanguage(new NextRequest("https://example.com/de-CH/some/path"))).toBe("de-CH")
-	})
-
-	it("returns the default language if there is no locale", () => {
-		expect(resolveLanguage(new NextRequest("https://example.com/some/path"))).toBe("en")
-	})
+	prefixDefault: "never",
 })
 
 describe("getCanonicalPath", () => {
@@ -66,46 +51,46 @@ describe("getCanonicalPath", () => {
 
 describe("getLocalisedPath", () => {
 	it("adds a language prefix if there isn't one", () => {
-		expect(getLocalisedPath("/", "de", { isLocaleSwitch: false })).toBe("/de")
-		expect(getLocalisedPath("/", "de-CH", { isLocaleSwitch: false })).toBe("/de-CH")
-		expect(getLocalisedPath("/", "en", { isLocaleSwitch: false })).toBe("/")
-		expect(getLocalisedPath("/some/path", "de", { isLocaleSwitch: false })).toBe("/de/some/path")
-		expect(getLocalisedPath("/some/path", "de-CH", { isLocaleSwitch: false })).toBe(
-			"/de-CH/some/path"
-		)
+		expect(getLocalisedHref("/some/path", "de", false)).toEqual({ pathname: "/de/some/path" })
+		expect(getLocalisedHref("/some/path", "de-CH", false)).toEqual({
+			pathname: "/de-CH/some/path",
+		})
+		expect(getLocalisedHref("/", "de", false)).toEqual({ pathname: "/de" })
+		expect(getLocalisedHref("/", "de-CH", false)).toEqual({ pathname: "/de-CH" })
+		expect(getLocalisedHref("/", "en", false)).toEqual({ pathname: "/" })
 	})
 
 	it("does not add a language prefix if the new locale is the source language tag", () => {
-		expect(getLocalisedPath("/some/path", "en", { isLocaleSwitch: false })).toBe("/some/path")
+		expect(getLocalisedHref("/some/path", "en", false)).toEqual({ pathname: "/some/path" })
 	})
 
 	it("does not localise excluded paths", () => {
-		expect(getLocalisedPath("/api/some/path", "de", { isLocaleSwitch: false })).toBe(
-			"/api/some/path"
-		)
+		expect(getLocalisedHref("/api/some/path", "de", false)).toEqual({
+			pathname: "/api/some/path",
+		})
 	})
 
 	it("get's translated paths", () => {
-		expect(getLocalisedPath("/canonical-translated", "de", { isLocaleSwitch: false })).toBe(
-			"/de/uebersetzt"
-		)
-		expect(getLocalisedPath("/canonical-translated", "en", { isLocaleSwitch: false })).toBe(
-			"/translated"
-		)
-		expect(getLocalisedPath("/canonical-translated", "de-CH", { isLocaleSwitch: false })).toBe(
-			"/de-CH/uebersetzt"
-		)
+		expect(getLocalisedHref("/canonical-translated", "de", false)).toEqual({
+			pathname: "/de/uebersetzt",
+		})
+		expect(getLocalisedHref("/canonical-translated", "en", false)).toEqual({
+			pathname: "/translated",
+		})
+		expect(getLocalisedHref("/canonical-translated", "de-CH", false)).toEqual({
+			pathname: "/de-CH/uebersetzt",
+		})
 	})
 
 	it("get's translated paths with params", () => {
-		expect(getLocalisedPath("/canonical-translated/1", "de", { isLocaleSwitch: false })).toBe(
-			"/de/uebersetzt/1"
-		)
-		expect(getLocalisedPath("/canonical-translated/1", "en", { isLocaleSwitch: false })).toBe(
-			"/translated/1"
-		)
-		expect(getLocalisedPath("/canonical-translated/1", "de-CH", { isLocaleSwitch: false })).toBe(
-			"/de-CH/uebersetzt/1"
-		)
+		expect(getLocalisedHref("/canonical-translated/1", "de", false)).toEqual({
+			pathname: "/de/uebersetzt/1",
+		})
+		expect(getLocalisedHref("/canonical-translated/1", "en", false)).toEqual({
+			pathname: "/translated/1",
+		})
+		expect(getLocalisedHref("/canonical-translated/1", "de-CH", false)).toEqual({
+			pathname: "/de-CH/uebersetzt/1",
+		})
 	})
 })

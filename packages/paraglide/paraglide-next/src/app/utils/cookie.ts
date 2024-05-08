@@ -1,26 +1,30 @@
+/**
+ * An object representing a cookie
+ *
+ * For Boolean properties we use `true`/`undefined` instead of `true`/`false`
+ */
 export type CookieConfig = {
 	name: string
 	value: string
-	maxAge?: number
-	path?: string
-	httpOnly?: boolean
-	sameSite?: "strict" | "lax" | "none"
+	"Max-Age"?: number
+	Path?: string
+	/**
+	 * Leave property out if the cookie is not HTTP only
+	 */
+	HttpOnly?: true
+	SameSite?: "strict" | "lax" | "none"
 }
 
-export function serializeCookie(cookieConfig: CookieConfig) {
-	const parts = []
-	parts.push(`${cookieConfig.name}=${cookieConfig.value}`)
-	if (cookieConfig.maxAge) {
-		parts.push(`Max-Age=${cookieConfig.maxAge}`)
-	}
-	if (cookieConfig.httpOnly) {
-		parts.push("HttpOnly")
-	}
-	if (cookieConfig.path) {
-		parts.push(`Path=${cookieConfig.path}`)
-	}
-	if (cookieConfig.sameSite) {
-		parts.push(`SameSite=${cookieConfig.sameSite}`)
-	}
-	return parts.join("; ")
-}
+/**
+ * Returns a cookie string from a cookie config
+ *
+ * Does not perform any value-escaping or sanitization
+ */
+export const serializeCookie = ({ name, value, ...rest }: CookieConfig) =>
+	name +
+	"=" +
+	value +
+	";" +
+	Object.entries(rest)
+		.map(([key, value]) => (value === true ? key : key + "=" + value))
+		.join(";")
