@@ -33,7 +33,6 @@ import { identifyProject } from "./telemetry/groupIdentify.js"
 import _debug from "debug"
 const debug = _debug("sdk:loadProject")
 
-
 const settingsCompiler = TypeCompiler.Compile(ProjectSettings)
 
 /**
