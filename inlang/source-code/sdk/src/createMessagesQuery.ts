@@ -2,7 +2,7 @@ import type { Message } from "@inlang/message"
 import { ReactiveMap } from "./reactivity/map.js"
 import { createEffect } from "./reactivity/solid.js"
 import { createSubscribable } from "./loadProject.js"
-import type { InlangProject, MessageQueryApi } from "./api.js"
+import type { InlangProject, MessageQueryApi, MessageQueryDelegate } from "./api.js"
 import type { ResolvedPluginApi } from "./resolve-modules/plugins/types.js"
 import type { resolveModules } from "./resolve-modules/resolveModules.js"
 import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
@@ -62,6 +62,13 @@ export function createMessagesQuery({
 	// filepath for the lock folder
 	const messageLockDirPath = projectPath + "/messagelock"
 
+	// TODO check if we should use a weak ref instead
+	let delegate: MessageQueryDelegate | undefined = undefined
+
+	const setDelegate = (newDelegate: MessageQueryDelegate) => {
+		delegate = newDelegate
+	}
+
 	// Map default alias to message
 	// Assumes that aliases are only created and deleted, not updated
 	// TODO #2346 - handle updates to aliases
@@ -98,6 +105,7 @@ export function createMessagesQuery({
 		onCleanup(() => {
 			// stop listening on fs events
 			abortController.abort()
+			delegate?.onCleanup()
 		})
 
 		const fsWithWatcher = createNodeishFsWithWatcher({
@@ -142,6 +150,7 @@ export function createMessagesQuery({
 			})
 			.then(() => {
 				onInitialMessageLoadResult()
+				delegate?.onLoaded([...index.values()])
 			})
 	})
 
@@ -181,6 +190,7 @@ export function createMessagesQuery({
 	}
 
 	return {
+		setDelegate,
 		create: ({ data }): boolean => {
 			if (index.has(data.id)) return false
 			index.set(data.id, data)
@@ -189,6 +199,7 @@ export function createMessagesQuery({
 			}
 
 			messageStates.messageDirtyFlags[data.id] = true
+			delegate?.onMessageCreate(data.id, index.get(data.id))
 			scheduleSave()
 			return true
 		},
@@ -215,6 +226,7 @@ export function createMessagesQuery({
 			if (message === undefined) return false
 			index.set(where.id, { ...message, ...data })
 			messageStates.messageDirtyFlags[where.id] = true
+			delegate?.onMessageCreate(where.id, index.get(data.id))
 			scheduleSave()
 			return true
 		},
@@ -225,10 +237,13 @@ export function createMessagesQuery({
 				if ("default" in data.alias) {
 					defaultAliasIndex.set(data.alias.default, data)
 				}
+				messageStates.messageDirtyFlags[where.id] = true
+				delegate?.onMessageCreate(data.id, index.get(data.id))
 			} else {
 				index.set(where.id, { ...message, ...data })
+				messageStates.messageDirtyFlags[where.id] = true
+				delegate?.onMessageUpdate(data.id, index.get(data.id))
 			}
-			messageStates.messageDirtyFlags[where.id] = true
 			scheduleSave()
 			return true
 		},
@@ -240,6 +255,7 @@ export function createMessagesQuery({
 			}
 			index.delete(where.id)
 			messageStates.messageDirtyFlags[where.id] = true
+			delegate?.onMessageDelete(where.id)
 			scheduleSave()
 			return true
 		},
