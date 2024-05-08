@@ -151,9 +151,11 @@ function expectNoRewrite(response: NextResponse) {
 /**
  * Checks if the given response redirects to the given destination
  */
+/*
 function expectRedirectTo(response: NextResponse, destination: string) {
 	expect(response.headers.get("x-middleware-redirect")).toBe(destination)
 }
+*/
 
 /**
  * Checks that the response doesn't redirect
