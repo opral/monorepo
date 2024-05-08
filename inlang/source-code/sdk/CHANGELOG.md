@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 0.34.4
+
+### Patch Changes
+
+- 2a90116: Refactors Message query to do persistence
+
 ## 0.34.3
 
 ### Patch Changes

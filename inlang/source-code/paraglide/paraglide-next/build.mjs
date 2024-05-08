@@ -67,14 +67,12 @@ await app_build.write({
 })
 
 await pages_build.write({
-	preserveModules: false,
 	format: "cjs",
 	entryFileNames: "[name].js",
 	dir: "dist",
 })
 
 await pluginBuild.write({
-	preserveModules: false,
 	format: "cjs",
 	entryFileNames: "[name].cjs",
 	dir: "dist",

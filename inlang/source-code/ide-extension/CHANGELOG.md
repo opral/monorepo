@@ -1,5 +1,27 @@
 # inlang-vs-code-extension
 
+## 1.42.8
+
+### Patch Changes
+
+- Updated dependencies [2a90116]
+  - @inlang/sdk@0.34.4
+  - @inlang/rpc@0.3.15
+  - @inlang/settings-component@1.0.9
+  - @inlang/telemetry@0.3.30
+
+## 1.42.7
+
+### Patch Changes
+
+- 08d47f0: publish script update after local test
+
+## 1.42.6
+
+### Patch Changes
+
+- 93a9a17: update publish script
+
 ## 1.42.5
 
 ### Patch Changes
