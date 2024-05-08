@@ -1,5 +1,11 @@
 # @inlang/paraglide-unplugin
 
+## 1.6.0
+
+### Minor Changes
+
+- ca7895c: No longer apply message-module virtual modules during dev, only during build
+
 ## 1.5.1
 
 ### Patch Changes
