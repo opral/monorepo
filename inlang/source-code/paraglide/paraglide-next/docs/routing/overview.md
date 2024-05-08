@@ -41,3 +41,45 @@ import { Link } from "@/lib/i18n"
     {m.home_title()}
 </Link>
 ```
+
+### Linking to Pages in Specific Languages
+
+If you want a Link to be in a specific language you can use the `locale` prop.
+
+```tsx
+<Link href="/about" locale="de">
+```
+
+This is convenient for constructing language switchers.
+
+If you are using `router.push` to navigate you can pass `locale` as an option.
+
+```ts
+function Component() {
+	const router = useRouter()
+	return (
+		<button onClick={() => router.push("/about", { locale: "de" })}>Go to German About page</button>
+	)
+}
+```
+
+
+## Manually Routing
+
+There are situations where you need to manually get a localized URL. You can do this by calling the `getLocalisedUrl` method on your Routing Strategy. This will return an UrlObject.
+
+```ts
+import { strategy } from "@/lib/i18n"
+
+const { parhname } = strategy.getLocalisedUrl(
+    // the pathname you want to localise
+    "/about", 
+
+    //the language you want to localise to
+    "de"
+
+    // If the URL is in a different language than the current
+    // Setting this is never harmful but may result in longer URLs
+    true 
+)
+```

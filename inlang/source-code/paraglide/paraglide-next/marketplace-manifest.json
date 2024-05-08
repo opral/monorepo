@@ -23,7 +23,11 @@
 			"/prefix-strategy": "./inlang/source-code/paraglide/paraglide-next/docs/routing/prefix-strategy.md",
 			"/other-strategies": "./inlang/source-code/paraglide/paraglide-next/docs/routing/other-strategies.md"
 		},
+		"Advanced Usage": {
+			"/seo": "./inlang/source-code/paraglide/paraglide-next/docs/advanced/seo.md"
+		},
 		"": {
+			"/roadmap": "./inlang/source-code/paraglide/paraglide-next/docs/roadmap.md",
 			"/changelog": "./inlang/source-code/paraglide/paraglide-next/CHANGELOG.md"
 		}
 	},
