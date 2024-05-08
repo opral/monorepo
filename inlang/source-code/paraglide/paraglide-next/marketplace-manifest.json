@@ -15,7 +15,6 @@
 	"pages": {
 		"Setup": {
 			"/": "./inlang/source-code/paraglide/paraglide-next/README.md",
-			"/app-rounter": "./inlang/source-code/paraglide/paraglide-next/docs/app-router.md",
 			"/pages-rounter": "./inlang/source-code/paraglide/paraglide-next/docs/pages-router.md"
 		},
 		"Localised Routing": {
@@ -24,7 +23,8 @@
 			"/other-strategies": "./inlang/source-code/paraglide/paraglide-next/docs/routing/other-strategies.md"
 		},
 		"Advanced Usage": {
-			"/seo": "./inlang/source-code/paraglide/paraglide-next/docs/advanced/seo.md"
+			"/seo": "./inlang/source-code/paraglide/paraglide-next/docs/advanced/seo.md",
+			"/usage-on-the-server": "./inlang/source-code/paraglide/paraglide-next/docs/advanced/server.md"
 		},
 		"": {
 			"/roadmap": "./inlang/source-code/paraglide/paraglide-next/docs/roadmap.md",
