@@ -9,11 +9,6 @@ import type { ProjectSettings } from "@inlang/project-settings"
 import type { resolveModules } from "./resolve-modules/index.js"
 import type { MessageLintReport, Message } from "./versionedInterfaces.js"
 import { lintSingleMessage } from "./lint/index.js"
-import { createRoot, createEffect } from "./reactivity/solid.js"
-
-import { throttle } from "throttle-debounce"
-import _debug from "debug"
-const debug = _debug("sdk:lintReports")
 
 function sleep(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms))
@@ -59,8 +54,7 @@ export function createMessageLintReportsQuery(
 			}
 		})
 	}
-	
-	
+
 	const messages = messagesQuery.getAll() as Message[]
 	// load report for all messages once
 	for (const message of messages) {
