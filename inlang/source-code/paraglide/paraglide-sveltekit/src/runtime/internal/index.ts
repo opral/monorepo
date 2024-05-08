@@ -24,7 +24,7 @@ export function getTranslationFunctions() {
 	 * Takes in an object of attributes, and an object of attribute translations
 	 * & applies the translations to the attributes
 	 */
-	function handle_attributes(
+	function handleAttributes(
 		attrs: Record<string, unknown>,
 		attribute_translations: AttributeTranslation[]
 	) {
@@ -46,8 +46,7 @@ export function getTranslationFunctions() {
 		return attrs
 	}
 
-	return {
-		handle_attributes,
-		translateAttribute,
-	}
+	// we use a tuple instead of an object because the names need to be mangled on the other side
+	// also this minifies better
+	return [translateAttribute, handleAttributes]
 }
