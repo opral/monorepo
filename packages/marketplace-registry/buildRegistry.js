@@ -91,7 +91,19 @@ if (privateEnv.DOPPLER_ENVIRONMENT === "production") {
 						return value.pages["/"]
 					}
 				} else {
-					throw new Error(`No page at "/" found for ${value.id}`)
+					if (
+						Object.values(value.pages).some(
+							(namespace) => typeof namespace === "object" && namespace["/"]
+						)
+					) {
+						readme = () => {
+							return Object.values(value.pages).find(
+								(namespace) => typeof namespace === "object" && namespace["/"]
+							)["/"]
+						}
+					} else {
+						throw new Error(`No page at "/" found for ${value.id}`)
+					}
 				}
 			} else if (value.readme) {
 				readme = () => {
