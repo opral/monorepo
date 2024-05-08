@@ -54,7 +54,7 @@ const InlangDocInPage = (props: {
 		const element = document.getElementById(anchor)
 		if (element && window) {
 			window.scrollTo({
-				top: element.offsetTop - 128,
+				top: element.offsetTop - 148,
 				behavior: behavior ?? "instant",
 			})
 		}
