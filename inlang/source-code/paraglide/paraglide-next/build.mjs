@@ -60,6 +60,7 @@ const cliBuild = await rollup({
 })
 
 await app_build.write({
+	preserveModules: true,
 	format: "es",
 	entryFileNames: "[name].js",
 	dir: "dist",
