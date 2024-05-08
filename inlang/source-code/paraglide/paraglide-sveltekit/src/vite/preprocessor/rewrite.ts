@@ -22,6 +22,8 @@ export const rewrite = ({
 	originalCode: string
 	translations: TranslationDefinition
 }) => {
+	if (hasAlreadyBeenRewritten(originalCode)) return
+
 	const svelteElements = getElementsFromAst(ast, "svelte:element")
 
 	for (const [element_name, attribute_translations] of Object.entries(translations)) {
@@ -73,7 +75,7 @@ export const rewrite = ({
 																								? attrubuteValuesToJSValue(
 																										langAttribute.value,
 																										originalCode
-																									)
+																								  )
 																								: "undefined"
 																						}
                                         )`
@@ -145,7 +147,7 @@ export const rewrite = ({
 																						? attrubuteValuesToJSValue(
 																								langAttribute.value,
 																								originalCode
-																							)
+																						  )
 																						: "undefined"
 																				}
                                     )`,
@@ -160,10 +162,8 @@ export const rewrite = ({
 		}
 	}
 
-	const before: string[] = []
+	const before = [`import { getContext as ${i("getContext")} } from 'svelte';`]
 	const after: string[] = []
-
-	before.push(`import { getContext as ${i("getContext")} } from 'svelte';`)
 
 	after.push(
 		dedent`
@@ -256,4 +256,12 @@ function getAttributesObject(
 
 function hasSpreadAttribute(element: ElementNode<string>): boolean {
 	return element.attributes.some((attribute) => attribute.type === "Spread")
+}
+
+/**
+ * Protection measure to make sure we don't rewrite the same code twice
+ * @param originalCode
+ */
+function hasAlreadyBeenRewritten(originalCode: string): boolean {
+	return originalCode.includes(i("getContext"))
 }
