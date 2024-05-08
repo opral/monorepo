@@ -88,10 +88,10 @@ export default function Page(props: PageProps) {
 			<Meta name="twitter:creator" content="@inlanghq" />
 			<MarketplaceLayout>
 				<Show when={props.markdown && props.manifest}>
-					<div class="w-full h-full pt-8">
+					<div class="w-full h-full">
 						<InlangDoclayout manifest={props.manifest} currentRoute={props.pagePath}>
 							{/* eslint-disable-next-line solid/no-innerhtml */}
-							<article class="w-full" innerHTML={props.markdown} />
+							<article class="w-full mt-12" innerHTML={props.markdown} />
 						</InlangDoclayout>
 						<div class="mt-20">
 							<GetHelp text="Do you have questions?" />
