@@ -1,5 +1,11 @@
 # next-js-testapp
 
+## 0.1.11
+
+### Patch Changes
+
+- @inlang/cli@2.16.3
+
 ## 0.1.10
 
 ### Patch Changes
