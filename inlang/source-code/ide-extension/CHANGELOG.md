@@ -1,5 +1,16 @@
 # inlang-vs-code-extension
 
+## 1.42.9
+
+### Patch Changes
+
+- 05af646: Use workspace:\* for settings-component
+- Updated dependencies [b9eccb7]
+  - @inlang/sdk@0.34.5
+  - @inlang/rpc@0.3.16
+  - @inlang/settings-component@1.0.11
+  - @inlang/telemetry@0.3.31
+
 ## 1.42.8
 
 ### Patch Changes
