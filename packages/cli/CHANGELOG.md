@@ -1,5 +1,12 @@
 # @inlang/cli
 
+## 2.16.3
+
+### Patch Changes
+
+- Updated dependencies [b9eccb7]
+  - @inlang/sdk@0.34.5
+
 ## 2.16.2
 
 ### Patch Changes
