@@ -461,8 +461,8 @@ importers:
   inlang/source-code/editor:
     dependencies:
       '@inlang/settings-component':
-        specifier: ^1.0.8
-        version: 1.0.8(@types/react@18.2.79)(babel-plugin-macros@2.8.0)
+        specifier: workspace:*
+        version: link:../settings-component
       '@isomorphic-git/cors-proxy':
         specifier: ^2.7.1
         version: 2.7.1
