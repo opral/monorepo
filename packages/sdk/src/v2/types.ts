@@ -86,15 +86,22 @@ export const InputDeclaration = Type.Object({
 	value: Expression,
 })
 
-export type LocalDeclaration = Static<typeof InputDeclaration>
-export const LocalDeclaration = Type.Object({
-	type: Type.Literal("local"),
-	name: Type.String(),
-	value: Expression,
-})
+// local declarations are not supported.
+// Will only add when required. See discussion:
+// https://github.com/opral/monorepo/pull/2700#discussion_r1591070701
+//
+// export type LocalDeclaration = Static<typeof InputDeclaration>
+// export const LocalDeclaration = Type.Object({
+// 	type: Type.Literal("local"),
+// 	name: Type.String(),
+// 	value: Expression,
+// })
+//
+// export type Declaration = Static<typeof Declaration>
+// export const Declaration = Type.Union([LocalDeclaration, InputDeclaration])
 
 export type Declaration = Static<typeof Declaration>
-export const Declaration = Type.Union([LocalDeclaration, InputDeclaration])
+export const Declaration = Type.Union([InputDeclaration])
 
 export type Message = Static<typeof Message>
 export const Message = Type.Object({
