@@ -54,7 +54,7 @@ const InlangDocInPage = (props: {
 		const element = document.getElementById(anchor)
 		if (element && window) {
 			window.scrollTo({
-				top: element.offsetTop - 128,
+				top: element.offsetTop - 148,
 				behavior: behavior ?? "instant",
 			})
 		}
@@ -99,7 +99,7 @@ const InlangDocInPage = (props: {
 	})
 
 	return (
-		<div class="text-sm pt-8">
+		<div class="text-sm pt-12">
 			<p class="font-semibold">On this page</p>
 			<div class="flex flex-col mt-2">
 				<For each={headlines()}>
@@ -110,7 +110,7 @@ const InlangDocInPage = (props: {
 									onClick={() => {
 										scrollToAnchor(headline.anchor, "smooth")
 									}}
-									class={`text-surface-600 cursor-pointer text-sm py-[5px] ml-0 hover:text-primary`}
+									class={`text-surface-600 cursor-pointer text-sm py-[8px] ml-0 hover:text-primary`}
 								>
 									{headline.element.textContent?.replaceAll("#", "")}
 								</div>
@@ -148,12 +148,12 @@ const InlangDocInPage = (props: {
 			<div class="w-full h-[1px] bg-surface-200 my-4" />
 			<Show when={headlines() && headlines()![0]}>
 				<div
-					class="flex items-center gap-[6px] text-surface-600 cursor-pointer"
+					class="hover:text-primary flex items-center gap-[6px] text-surface-600 cursor-pointer"
 					onClick={() => {
 						scrollToAnchor(headlines()![0]!.anchor, "smooth")
 					}}
 				>
-					<p class="text-surface-600 text-sm py-[5px] hover:text-primary">Scroll to top</p>
+					<p class="text-sm py-[5px]">Scroll to top</p>
 					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24">
 						<path
 							fill="currentColor"

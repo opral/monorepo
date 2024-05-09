@@ -23,7 +23,7 @@ const InlangDocNavigation = (props: {
 	}
 
 	return (
-		<div class="pr-6 flex flex-col pt-5 gap-8">
+		<div class="flex flex-col pt-12 gap-8">
 			<div class="flex flex-col gap-[2px]">
 				<img class="w-[36px] h-[36px] mb-3" src={props.manifest.icon} />
 				<p class="font-semibold m-0">{displayName()}</p>
