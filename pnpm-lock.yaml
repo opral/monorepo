@@ -2564,19 +2564,6 @@ importers:
         specifier: 5.2.2
         version: 5.2.2
 
-  inlang/source-code/versioned-interfaces/message-bundle:
-    dependencies:
-      '@inlang/language-tag':
-        specifier: workspace:*
-        version: link:../language-tag
-      '@sinclair/typebox':
-        specifier: ^0.31.17
-        version: 0.31.28
-    devDependencies:
-      typescript:
-        specifier: 5.2.2
-        version: 5.2.2
-
   inlang/source-code/versioned-interfaces/message-lint-rule:
     dependencies:
       '@inlang/json-types':
