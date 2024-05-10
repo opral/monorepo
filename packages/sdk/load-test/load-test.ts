@@ -26,11 +26,7 @@ const mockServer = "http://localhost:3000"
 const cli = `PUBLIC_SERVER_BASE_URL=${mockServer} pnpm inlang`
 const translateCommand = cli + " machine translate -f -n --project ./project.inlang"
 
-// const messageDir = join(__dirname, "locales", "en")
-// const messageFile = join(__dirname, "locales", "en", "common.json")
-
-// experimental sdk persistence
-const messageFile = join(__dirname, "project.inlang", "messages.json")
+const isExperimentalPersistence = await checkExperimentalPersistence()
 
 export async function runLoadTest(
 	messageCount: number = 1000,
@@ -39,8 +35,11 @@ export async function runLoadTest(
 	subscribeToLintReports: boolean = false,
 	watchMode: boolean = false
 ) {
-	debug("load-test start" + (watchMode ? " - watchMode on, ctrl C to exit" : ""))
-
+	debug(
+		"load-test start" +
+			(watchMode ? " - watchMode on, ctrl C to exit" : "") +
+			(isExperimentalPersistence ? " - using experimental persistence" : "")
+	)
 	if (translate && !process.env.MOCK_TRANSLATE_LOCAL && !(await isMockRpcServerRunning())) {
 		console.error(
 			`Please start the mock rpc server with "MOCK_TRANSLATE=true pnpm --filter @inlang/server dev"`
@@ -123,27 +122,40 @@ export async function runLoadTest(
 }
 
 // experimental persistence message format
-async function generateMessageFile(messageCount: number) {
-	const messages: Message[] = []
-	for (let i = 1; i <= messageCount; i++) {
-		messages.push(createMessage(`message_key_${i}`, { en: `Generated message (${i})` }))
-	}
-	await fs.writeFile(
-		messageFile,
-		JSON.stringify(messages.map(normalizeMessage), undefined, 2),
-		"utf-8"
-	)
-}
+// async function generateMessageFile(messageCount: number) {
 
 // inlang message format
-// async function generateMessageFile(messageCount: number) {
-// 	await run(`mkdir -p ${messageDir}`)
-// 	const messages: Record<string, string> = {}
-// 	for (let i = 1; i <= messageCount; i++) {
-// 		messages[`message_key_${i}`] = `Generated message (${i})`
-// 	}
-// 	await fs.writeFile(messageFile, JSON.stringify(messages, undefined, 2), "utf-8")
-// }
+async function generateMessageFile(messageCount: number) {
+	if (isExperimentalPersistence) {
+		const messageFile = join(__dirname, "project.inlang", "messages.json")
+
+		const messages: Message[] = []
+		for (let i = 1; i <= messageCount; i++) {
+			messages.push(createMessage(`message_key_${i}`, { en: `Generated message (${i})` }))
+		}
+		await fs.writeFile(
+			messageFile,
+			JSON.stringify(messages.map(normalizeMessage), undefined, 2),
+			"utf-8"
+		)
+	} else {
+		const messageDir = join(__dirname, "locales", "en")
+		const messageFile = join(__dirname, "locales", "en", "common.json")
+
+		await run(`mkdir -p ${messageDir}`)
+		const messages: Record<string, string> = {}
+		for (let i = 1; i <= messageCount; i++) {
+			messages[`message_key_${i}`] = `Generated message (${i})`
+		}
+		await fs.writeFile(messageFile, JSON.stringify(messages, undefined, 2), "utf-8")
+	}
+}
+
+async function checkExperimentalPersistence() {
+	const settingsFile = join(__dirname, "project.inlang", "settings.json")
+	const settings = JSON.parse(await fs.readFile(settingsFile, "utf-8"))
+	return !!settings.experimental?.persistence
+}
 
 async function isMockRpcServerRunning(): Promise<boolean> {
 	try {
