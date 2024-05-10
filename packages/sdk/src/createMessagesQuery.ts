@@ -17,6 +17,10 @@ import { PluginLoadMessagesError, PluginSaveMessagesError } from "./errors.js"
 import { humanIdHash } from "./storage/human-id/human-readable-id.js"
 const debug = _debug("sdk:createMessagesQuery")
 
+function sleep(ms: number) {
+	return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
 type MessageState = {
 	messageDirtyFlags: {
 		[messageId: string]: boolean
@@ -272,6 +276,8 @@ export function createMessagesQuery({
 // - saving a message in two different languages would lead to a write in de.json first
 // - This will leads to a load of the messages and since en.json has not been saved yet the english variant in the message would get overritten with the old state again
 
+const maxMessagesPerTick = 500
+
 /**
  * Messsage that loads messages from a plugin - this method synchronizes with the saveMessage funciton.
  * If a save is in progress loading will wait until saving is done. If another load kicks in during this load it will queue the
@@ -318,6 +324,8 @@ async function loadMessagesViaPlugin(
 			})
 		)
 
+		let loadedMessageCount = 0
+
 		for (const loadedMessage of loadedMessages) {
 			const loadedMessageClone = structuredClone(loadedMessage)
 
@@ -360,6 +368,7 @@ async function loadMessagesViaPlugin(
 				// NOTE could use hash instead of the whole object JSON to save memory...
 				messageState.messageLoadHash[loadedMessageClone.id] = importedEnecoded
 				delegate?.onMessageUpdate(loadedMessageClone.id, loadedMessageClone)
+				loadedMessageCount++
 			} else {
 				// message with the given alias does not exist so far
 				loadedMessageClone.alias = {} as any
@@ -387,6 +396,14 @@ async function loadMessagesViaPlugin(
 				messages.set(loadedMessageClone.id, loadedMessageClone)
 				messageState.messageLoadHash[loadedMessageClone.id] = importedEnecoded
 				delegate?.onMessageUpdate(loadedMessageClone.id, loadedMessageClone)
+				loadedMessageCount++
+			}
+			if (loadedMessageCount > maxMessagesPerTick) {
+				// move loading of the next messages to the next ticks to allow solid to cleanup resources
+				// solid needs some time to settle and clean up
+				// https://github.com/solidjs-community/solid-primitives/blob/9ca76a47ffa2172770e075a90695cf933da0ff48/packages/trigger/src/index.ts#L64
+				await sleep(0)
+				loadedMessageCount = 0
 			}
 		}
 		await releaseLock(fs as NodeishFilesystem, lockDirPath, "loadMessage", lockTime)
