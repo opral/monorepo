@@ -1,4 +1,4 @@
-import { openInEditorCommand } from "./commands/openInEditor.js"
+import { openInFinkCommand } from "./commands/openInFink.js"
 import { extractMessageCommand } from "./commands/extractMessage.js"
 import { editMessageCommand } from "./commands/editMessage.js"
 import { EventEmitter } from "vscode"
@@ -27,7 +27,7 @@ export const CONFIGURATION = {
 		EXTRACT_MESSAGE: extractMessageCommand,
 		SET_PREVIEW_LANGUAGETAG: previewLanguageTagCommand,
 		JUMP_TO_POSITION: jumpToPositionCommand,
-		OPEN_IN_EDITOR: openInEditorCommand,
+		OPEN_IN_EDITOR: openInFinkCommand,
 		OPEN_PROJECT: openProjectCommand,
 		OPEN_SETTINGS_FILE: openSettingsFileCommand,
 		OPEN_SETTINGS_VIEW: openSettingsViewCommand,
