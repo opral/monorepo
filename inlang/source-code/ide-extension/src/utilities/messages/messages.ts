@@ -236,7 +236,7 @@ export function createMessageHtml(args: {
 
 	const positionHtml = encodeURIComponent(JSON.stringify(args.position))
 	const jumpCommand = `jumpToPosition('${args.message.id}', '${positionHtml}');event.stopPropagation();`
-	const openCommand = `openInEditor('${args.message.id}', '${relativeProjectPathFromWorkspace}');event.stopPropagation();`
+	const openCommand = `openInFink('${args.message.id}', '${relativeProjectPathFromWorkspace}');event.stopPropagation();`
 
 	return `
 	<div class="tree-item">
@@ -446,10 +446,10 @@ export function getHtml(args: {
 					});
 				}
 			
-				function openInEditor(messageId, selectedProjectPath) {
+				function openInFink(messageId, selectedProjectPath) {
 					vscode.postMessage({
 						command: 'executeCommand',
-						commandName: 'sherlock.openInEditor',
+						commandName: 'sherlock.openInFink',
 						commandArgs: { messageId, selectedProjectPath },
 					});
 				}
