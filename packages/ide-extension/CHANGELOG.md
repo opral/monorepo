@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.42.10
+
+### Patch Changes
+
+- 955733d: release latest README changes
+
 ## 1.42.9
 
 ### Patch Changes
