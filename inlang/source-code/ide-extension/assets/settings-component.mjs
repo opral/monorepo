@@ -5075,11 +5075,11 @@ var require_common = __commonJS({
         let enableOverride = null;
         let namespacesCache;
         let enabledCache;
-        function debug5(...args) {
-          if (!debug5.enabled) {
+        function debug8(...args) {
+          if (!debug8.enabled) {
             return;
           }
-          const self2 = debug5;
+          const self2 = debug8;
           const curr = Number(/* @__PURE__ */ new Date());
           const ms = curr - (prevTime || curr);
           self2.diff = ms;
@@ -5109,12 +5109,12 @@ var require_common = __commonJS({
           const logFn = self2.log || createDebug.log;
           logFn.apply(self2, args);
         }
-        debug5.namespace = namespace;
-        debug5.useColors = createDebug.useColors();
-        debug5.color = createDebug.selectColor(namespace);
-        debug5.extend = extend;
-        debug5.destroy = createDebug.destroy;
-        Object.defineProperty(debug5, "enabled", {
+        debug8.namespace = namespace;
+        debug8.useColors = createDebug.useColors();
+        debug8.color = createDebug.selectColor(namespace);
+        debug8.extend = extend;
+        debug8.destroy = createDebug.destroy;
+        Object.defineProperty(debug8, "enabled", {
           enumerable: true,
           configurable: false,
           get: () => {
@@ -5132,9 +5132,9 @@ var require_common = __commonJS({
           }
         });
         if (typeof createDebug.init === "function") {
-          createDebug.init(debug5);
+          createDebug.init(debug8);
         }
-        return debug5;
+        return debug8;
       }
       function extend(namespace, delimiter) {
         const newDebug = createDebug(this.namespace + (typeof delimiter === "undefined" ? ":" : delimiter) + namespace);
@@ -18058,7 +18058,7 @@ var InlangModule = import_typebox9.Type.Object({
 // ../sdk/dist/resolve-modules/message-lint-rules/resolveMessageLintRules.js
 var import_value = __toESM(require_value2(), 1);
 
-// ../../../node_modules/.pnpm/dedent@1.5.1/node_modules/dedent/dist/dedent.mjs
+// ../../../node_modules/.pnpm/dedent@1.5.1_babel-plugin-macros@2.8.0/node_modules/dedent/dist/dedent.mjs
 function ownKeys(object, enumerableOnly) {
   var keys = Object.keys(object);
   if (Object.getOwnPropertySymbols) {
@@ -18172,18 +18172,34 @@ var import_compiler3 = __toESM(require_compiler2(), 1);
 // ../sdk/dist/reactivity/map.js
 var $KEYS = Symbol("track-keys");
 
-// ../sdk/dist/createMessageLintReportsQuery.js
+// ../sdk/dist/persistence/filelock/acquireFileLock.js
+init_dist();
 var import_debug3 = __toESM(require_browser(), 1);
-var debug3 = (0, import_debug3.default)("sdk:lintReports");
+var debug3 = (0, import_debug3.default)("sdk:acquireFileLock");
+
+// ../sdk/dist/createMessagesQuery.js
+var import_debug5 = __toESM(require_browser(), 1);
+
+// ../sdk/dist/persistence/filelock/releaseLock.js
+init_dist();
+var import_debug4 = __toESM(require_browser(), 1);
+var debug4 = (0, import_debug4.default)("sdk:releaseLock");
+
+// ../sdk/dist/storage/human-id/human-readable-id.js
+var import_murmurhash3js = __toESM(require_murmurhash3js(), 1);
+
+// ../sdk/dist/createMessagesQuery.js
+var debug5 = (0, import_debug5.default)("sdk:createMessagesQuery");
+
+// ../sdk/dist/createMessageLintReportsQuery.js
+var import_debug6 = __toESM(require_browser(), 1);
+var debug6 = (0, import_debug6.default)("sdk:lintReports");
 
 // ../sdk/dist/createNodeishFsWithAbsolutePaths.js
 init_dist();
 
 // ../sdk/dist/loadProject.js
 init_dist();
-
-// ../sdk/dist/storage/human-id/human-readable-id.js
-var import_murmurhash3js = __toESM(require_murmurhash3js(), 1);
 
 // ../../../lix/packages/client/vendored/isomorphic-git/index.js
 var import_async_lock = __toESM(require_async_lock(), 1);
@@ -28272,9 +28288,8 @@ init_dist();
 init_dist();
 
 // ../sdk/dist/loadProject.js
-var import_debug4 = __toESM(require_browser(), 1);
-var debug4 = (0, import_debug4.default)("sdk:loadProject");
-var debugLock = (0, import_debug4.default)("sdk:lockfile");
+var import_debug7 = __toESM(require_browser(), 1);
+var debug7 = (0, import_debug7.default)("sdk:loadProject");
 var settingsCompiler = import_compiler3.TypeCompiler.Compile(ProjectSettings);
 
 // src/helper/checkRequired.ts
@@ -28445,7 +28460,7 @@ var registry = [
     publisherName: "inlang",
     publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
     website: "https://fink.inlang.com/",
-    license: "Apache-2.0",
+    license: "PolyForm Noncommercial License 1.0.0",
     pricing: "Free Beta"
   },
   {
@@ -28512,7 +28527,7 @@ var registry = [
     ],
     publisherName: "inlang",
     publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-    license: "Apache-2.0",
+    license: "PolyForm Noncommercial License 1.0.0",
     pricing: "Free"
   },
   {
@@ -29496,8 +29511,23 @@ var registry = [
       en: "A NextJS integration for ParaglideJS, providing you with everything you need for i18n routing"
     },
     pages: {
-      "/": "./inlang/source-code/paraglide/paraglide-next/README.md",
-      "/changelog": "./inlang/source-code/paraglide/paraglide-next/CHANGELOG.md"
+      Setup: {
+        "/": "./inlang/source-code/paraglide/paraglide-next/README.md",
+        "/pages-rounter": "./inlang/source-code/paraglide/paraglide-next/docs/pages-router.md"
+      },
+      "Localised Routing": {
+        "/overview": "./inlang/source-code/paraglide/paraglide-next/docs/routing/overview.md",
+        "/prefix-strategy": "./inlang/source-code/paraglide/paraglide-next/docs/routing/prefix-strategy.md",
+        "/other-strategies": "./inlang/source-code/paraglide/paraglide-next/docs/routing/other-strategies.md"
+      },
+      "Advanced Usage": {
+        "/seo": "./inlang/source-code/paraglide/paraglide-next/docs/advanced/seo.md",
+        "/usage-on-the-server": "./inlang/source-code/paraglide/paraglide-next/docs/advanced/server.md"
+      },
+      Appendix: {
+        "/roadmap": "./inlang/source-code/paraglide/paraglide-next/docs/roadmap.md",
+        "/changelog": "./inlang/source-code/paraglide/paraglide-next/CHANGELOG.md"
+      }
     },
     keywords: [
       "paraglide js",
