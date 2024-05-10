@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 0.34.5
+
+### Patch Changes
+
+- b9eccb7: Add @inlang/sdk/v2 types for MessageBundle
+
 ## 0.34.4
 
 ### Patch Changes
