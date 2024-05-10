@@ -31,7 +31,15 @@ it("should apply on a component with <svelte:element> and spread operator", () =
 	</p>
 	`
 
-	expect(shouldApply(code, {})).toBe(true)
+	expect(
+		shouldApply(code, {
+			a: [
+				{
+					attribute_name: "href",
+				},
+			],
+		})
+	).toBe(true)
 })
 
 it("should apply on a component that matches the translation", () => {
