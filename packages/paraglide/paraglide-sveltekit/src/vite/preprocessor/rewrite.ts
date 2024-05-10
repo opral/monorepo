@@ -1,11 +1,10 @@
-import { NO_TRANSLATE_ATTRIBUTE, PARAGLIDE_CONTEXT_KEY } from "../../constants.js"
+import { NO_TRANSLATE_ATTRIBUTE } from "../../constants.js"
 import type { TranslationDefinition } from "./index.js"
 import { getAttributeByName, getElementsFromAst } from "./utils/ast.js"
 import { attrubuteValuesToJSValue } from "./utils/attributes-to-values.js"
 import { identifier } from "./utils/identifier.js"
 import { uneval } from "devalue"
 import * as c from "./utils/codegen.js"
-import dedent from "dedent"
 import type { Ast, Attribute, ElementNode, SpreadAttribute } from "./types.js"
 import type MagicString from "magic-string"
 
@@ -22,6 +21,14 @@ export const rewrite = ({
 	originalCode: string
 	translations: TranslationDefinition
 }) => {
+	if (hasAlreadyBeenRewritten(originalCode))
+		return {
+			scriptAdditions: {
+				before: [],
+				after: [],
+			},
+		}
+
 	const svelteElements = getElementsFromAst(ast, "svelte:element")
 
 	for (const [element_name, attribute_translations] of Object.entries(translations)) {
@@ -73,7 +80,7 @@ export const rewrite = ({
 																								? attrubuteValuesToJSValue(
 																										langAttribute.value,
 																										originalCode
-																									)
+																								  )
 																								: "undefined"
 																						}
                                         )`
@@ -138,17 +145,14 @@ export const rewrite = ({
 						attribute_name,
 						c.ternary(
 							c.eq(thisValue, c.str(element_name)),
-							`${i("translateAttribute")}(
-                                        ${attrubuteValuesToJSValue(attribute.value, originalCode)},
-                                        ${
-																					langAttribute
-																						? attrubuteValuesToJSValue(
-																								langAttribute.value,
-																								originalCode
-																							)
-																						: "undefined"
-																				}
-                                    )`,
+							`${i("translateAttribute")}(${attrubuteValuesToJSValue(
+								attribute.value,
+								originalCode
+							)},${
+								langAttribute
+									? attrubuteValuesToJSValue(langAttribute.value, originalCode)
+									: "undefined"
+							})`,
 							attrubuteValuesToJSValue(attribute.value, originalCode)
 						)
 					)
@@ -160,51 +164,16 @@ export const rewrite = ({
 		}
 	}
 
-	const before: string[] = []
-	const after: string[] = []
-
-	before.push(`import { getContext as ${i("getContext")} } from 'svelte';`)
-
-	after.push(
-		dedent`
-            const ${i("context")} = ${i("getContext")}('${PARAGLIDE_CONTEXT_KEY}');
-        
-            /**
-             * @param {string} value
-             * @param {string | undefined} lang_value
-             */
-            function ${i("translateAttribute")}(value, lang_value) {
-				if(typeof value !== "string") return value;
-                if(!${i("context")}) return value;
-                return ${i("context")}.translateHref(value, lang_value);
-            }
-
-            /**
-             * @typedef {{ attribute_name: string, lang_attribute_name?: string }} AttributeTranslation
-             */
-
-            /**
-             * Takes in an object of attributes, and an object of attribute translations
-             * & applies the translations to the attributes
-             * 
-             * @param {Record<string, any>} attrs
-             * @param {AttributeTranslation[]} attribute_translations
-             */
-            function ${i("handle_attributes")}(attrs, attribute_translations) {
-                //If the element has the ${NO_TRANSLATE_ATTRIBUTE} attribute, don't translate it
-                if(attrs[${c.str(NO_TRANSLATE_ATTRIBUTE)}] === true) return attrs;
-
-                for (const { attribute_name, lang_attribute_name } of attribute_translations){
-                    if(attribute_name in attrs) {
-                        const attr = attrs[attribute_name];
-                        const lang_attr = lang_attribute_name ? attrs[lang_attribute_name] : undefined;
-                        attrs[attribute_name] = ${i("translateAttribute")}(attr, lang_attr);
-                    }
-                }
-
-                return attrs;
-            }`
-	)
+	const before = [
+		`import { getTranslationFunctions as ${i(
+			"getTranslationFunctions"
+		)} } from '@inlang/paraglide-sveltekit/internal';`,
+	]
+	const after: string[] = [
+		`const ${i("translationFunctions")} = ${i("getTranslationFunctions")}();\nconst [ ${i(
+			"translateAttribute"
+		)}, ${i("handle_attributes")} ] = ${i("translationFunctions")};`,
+	]
 
 	return {
 		scriptAdditions: {
@@ -256,4 +225,12 @@ function getAttributesObject(
 
 function hasSpreadAttribute(element: ElementNode<string>): boolean {
 	return element.attributes.some((attribute) => attribute.type === "Spread")
+}
+
+/**
+ * Protection measure to make sure we don't rewrite the same code twice
+ * @param originalCode
+ */
+function hasAlreadyBeenRewritten(originalCode: string): boolean {
+	return originalCode.includes(i("getTranslationFunctions"))
 }
