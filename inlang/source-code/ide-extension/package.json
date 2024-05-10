@@ -16,12 +16,14 @@
 	},
 	"keywords": [
 		"i18n",
+		"l10n",
 		"localization",
+		"globalization",
 		"translate",
-    		"i18n",
     		"i18next",
 		"next-intl",
-		"paraglidejs"
+		"paraglidejs",
+		"nextjs"
 	],
 	"categories": [
 		"Other",
