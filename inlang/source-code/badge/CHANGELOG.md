@@ -1,5 +1,12 @@
 # @inlang/badge
 
+## 0.7.22
+
+### Patch Changes
+
+- Updated dependencies [f38536e]
+  - @inlang/sdk@0.34.6
+
 ## 0.7.21
 
 ### Patch Changes
