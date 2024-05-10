@@ -5,8 +5,8 @@ import { CONFIGURATION } from "../configuration.js"
 import { getGitOrigin } from "../utilities/settings/getGitOrigin.js"
 import { getCurrentBranch } from "../utilities/settings/getCurrentBranch.js"
 
-export const openInEditorCommand = {
-	command: "sherlock.openInEditor",
+export const openInFinkCommand = {
+	command: "sherlock.openInFink",
 	title: "Sherlock: Open in Fink",
 	register: commands.registerCommand,
 	callback: async function (args: {
