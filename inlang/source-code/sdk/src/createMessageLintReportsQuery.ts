@@ -89,14 +89,12 @@ export function createMessageLintReportsQuery(
 
 	return {
 		getAll: async () => {
-			// TODO reintroduce reactivity here - wont be the bottleneck
 			await sleep(0) // evaluate on next tick to allow for out-of-order effects
 			return structuredClone(
 				[...index.values()].flat().length === 0 ? [] : [...index.values()].flat()
 			)
 		},
 		get: async (args: Parameters<MessageLintReportsQueryApi["get"]>[0]) => {
-			// TODO reintroduce reactivity here
 			await sleep(0) // evaluate on next tick to allow for out-of-order effects
 			return structuredClone(index.get(args.where.messageId) ?? [])
 		},

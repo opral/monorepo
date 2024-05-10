@@ -66,7 +66,6 @@ export function createMessagesQuery({
 	// filepath for the lock folder
 	const messageLockDirPath = projectPath + "/messagelock"
 
-	// TODO check if we should use a weak ref instead
 	let delegate: MessageQueryDelegate | undefined = undefined
 
 	const setDelegate = (newDelegate: MessageQueryDelegate) => {
