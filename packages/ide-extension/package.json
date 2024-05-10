@@ -17,9 +17,11 @@
 	"keywords": [
 		"i18n",
 		"localization",
-		"translation",
-		"inspector",
-		"Sherlock"
+		"translate",
+    		"i18n",
+    		"i18next",
+		"next-intl",
+		"paraglidejs"
 	],
 	"categories": [
 		"Other",
