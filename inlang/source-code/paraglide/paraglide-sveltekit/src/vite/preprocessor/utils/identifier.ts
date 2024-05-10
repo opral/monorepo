@@ -8,4 +8,4 @@ import { toJSIdentifier } from "./escape.js"
  * @returns A unique identifier for the given original name
  */
 export const identifier = (context: string) => (original_name: string) =>
-	toJSIdentifier(`pArAgLiDe_${context}_${original_name}`)
+	toJSIdentifier(`paraglide_sveltekit_${context}_${original_name}`)
