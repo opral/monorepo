@@ -3,19 +3,24 @@ import { telemetry } from "../services/telemetry/implementation.js"
 import type { Message } from "@inlang/sdk"
 import { CONFIGURATION } from "../configuration.js"
 import { getGitOrigin } from "../utilities/settings/getGitOrigin.js"
+import { getCurrentBranch } from "../utilities/settings/getCurrentBranch.js"
 
 export const openInEditorCommand = {
 	command: "sherlock.openInEditor",
-	title: "Sherlock: Open in Editor",
+	title: "Sherlock: Open in Fink",
 	register: commands.registerCommand,
-	callback: async function (args: { messageId: Message["id"]; selectedProjectPath: string }) {
-		// TODO: Probably the origin should be configurable via the config.
+	callback: async function (args: {
+		messageId: Message["id"]
+		selectedProjectPath: string
+		branch: string
+	}) {
 		const origin = (await getGitOrigin())?.replaceAll(".git", "")
+		const branch = (await getCurrentBranch()) || "main"
 		const uri = args.messageId
 			? `${CONFIGURATION.STRINGS.EDITOR_BASE_URL}${origin}?project=${encodeURIComponent(
 					args.selectedProjectPath
-			  )}&id=${encodeURIComponent(args.messageId)}`
-			: `${CONFIGURATION.STRINGS.EDITOR_BASE_URL}${origin}`
+			  )}&branch=${encodeURIComponent(branch)}&id=${encodeURIComponent(args.messageId)}`
+			: `${CONFIGURATION.STRINGS.EDITOR_BASE_URL}${origin}?branch=${encodeURIComponent(branch)}`
 
 		env.openExternal(Uri.parse(uri))
 
