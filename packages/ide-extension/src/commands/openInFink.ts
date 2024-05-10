@@ -12,10 +12,10 @@ export const openInFinkCommand = {
 		// TODO: Probably the origin should be configurable via the config.
 		const origin = (await getGitOrigin())?.replaceAll(".git", "")
 		const uri = args.messageId
-			? `${CONFIGURATION.STRINGS.EDITOR_BASE_URL}${origin}?project=${encodeURIComponent(
+			? `${CONFIGURATION.STRINGS.FINK_BASE_URL}${origin}?project=${encodeURIComponent(
 					args.selectedProjectPath
 			  )}&id=${encodeURIComponent(args.messageId)}`
-			: `${CONFIGURATION.STRINGS.EDITOR_BASE_URL}${origin}`
+			: `${CONFIGURATION.STRINGS.FINK_BASE_URL}${origin}`
 
 		env.openExternal(Uri.parse(uri))
 
