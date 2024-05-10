@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 0.34.7
+
+### Patch Changes
+
+- 5209b81: improve load-test for experimental persistence
+
 ## 0.34.6
 
 ### Patch Changes
