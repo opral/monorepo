@@ -4,8 +4,8 @@ import type { Message } from "@inlang/sdk"
 import { CONFIGURATION } from "../configuration.js"
 import { getGitOrigin } from "../utilities/settings/getGitOrigin.js"
 
-export const openInEditorCommand = {
-	command: "sherlock.openInEditor",
+export const openInFinkCommand = {
+	command: "sherlock.openInFink",
 	title: "Sherlock: Open in Editor",
 	register: commands.registerCommand,
 	callback: async function (args: { messageId: Message["id"]; selectedProjectPath: string }) {
