@@ -1,4 +1,4 @@
-import { openInEditorCommand } from "./commands/openInEditor.js"
+import { openInFinkCommand } from "./commands/openInFink.js"
 import { extractMessageCommand } from "./commands/extractMessage.js"
 import { editMessageCommand } from "./commands/editMessage.js"
 import { EventEmitter } from "vscode"
@@ -27,7 +27,7 @@ export const CONFIGURATION = {
 		EXTRACT_MESSAGE: extractMessageCommand,
 		SET_PREVIEW_LANGUAGETAG: previewLanguageTagCommand,
 		JUMP_TO_POSITION: jumpToPositionCommand,
-		OPEN_IN_EDITOR: openInEditorCommand,
+		OPEN_IN_FINK: openInFinkCommand,
 		OPEN_PROJECT: openProjectCommand,
 		OPEN_SETTINGS_FILE: openSettingsFileCommand,
 		OPEN_SETTINGS_VIEW: openSettingsViewCommand,
@@ -42,7 +42,7 @@ export const CONFIGURATION = {
 	},
 	STRINGS: {
 		MISSING_TRANSLATION_MESSAGE: "[missing]",
-		EDITOR_BASE_URL: "https://fink.inlang.com/",
+		FINK_BASE_URL: "https://fink.inlang.com/",
 		GETTING_STARTED_URL: "https://inlang.com/m/r7kp499g/app-inlang-ideExtension",
 		DOCS_URL: "https://inlang.com/m/r7kp499g/app-inlang-ideExtension",
 		APP_ID: "app.inlang.ideExtension",
