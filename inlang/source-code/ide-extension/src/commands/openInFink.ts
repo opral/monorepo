@@ -9,11 +9,7 @@ export const openInFinkCommand = {
 	command: "sherlock.openInFink",
 	title: "Sherlock: Open in Fink",
 	register: commands.registerCommand,
-	callback: async function (args: {
-		messageId: Message["id"]
-		selectedProjectPath: string
-		branch: string
-	}) {
+	callback: async function (args: { messageId: Message["id"]; selectedProjectPath: string }) {
 		const origin = (await getGitOrigin())?.replaceAll(".git", "")
 		const branch = (await getCurrentBranch()) || "main"
 		const uri = args.messageId
