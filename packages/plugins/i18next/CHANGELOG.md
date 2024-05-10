@@ -1,5 +1,12 @@
 # @inlang/plugin-i18next
 
+## 4.13.37
+
+### Patch Changes
+
+- Updated dependencies [5209b81]
+  - @inlang/sdk@0.34.7
+
 ## 4.13.36
 
 ### Patch Changes

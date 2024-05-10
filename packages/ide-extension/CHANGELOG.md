@@ -1,5 +1,15 @@
 # inlang-vs-code-extension
 
+## 1.42.12
+
+### Patch Changes
+
+- Updated dependencies [5209b81]
+  - @inlang/sdk@0.34.7
+  - @inlang/rpc@0.3.18
+  - @inlang/settings-component@1.0.13
+  - @inlang/telemetry@0.3.33
+
 ## 1.42.11
 
 ### Patch Changes
