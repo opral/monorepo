@@ -4,6 +4,12 @@
 
 ### Patch Changes
 
+- @inlang/cli@2.16.4
+
+## null
+
+### Patch Changes
+
 - @inlang/cli@2.16.3
 
 ## null
