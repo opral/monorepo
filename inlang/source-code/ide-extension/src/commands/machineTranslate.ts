@@ -18,6 +18,12 @@ export const machineTranslateMessageCommand = {
 		sourceLanguageTag: LanguageTag
 		targetLanguageTags: LanguageTag[]
 	}) {
+		console.log("machineTranslateMessageCommand", {
+			messageId,
+			sourceLanguageTag,
+			targetLanguageTags,
+		})
+
 		// Get the message from the state
 		const message = state().project.query.messages.get({ where: { id: messageId } })
 		if (!message) {
