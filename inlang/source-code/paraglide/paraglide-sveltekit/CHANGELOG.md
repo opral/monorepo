@@ -1,5 +1,11 @@
 # @inlang/paraglide-sveltekit
 
+## 0.6.19
+
+### Patch Changes
+
+- 1e5320e: Protect against the preprocessor being applied twice
+
 ## 0.6.18
 
 ### Patch Changes
