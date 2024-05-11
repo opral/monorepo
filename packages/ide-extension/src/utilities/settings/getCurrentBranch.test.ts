@@ -15,21 +15,6 @@ const ciTestRepo: Snapshot = JSON.parse(
 
 loadSnapshot(nodeishFs, ciTestRepo)
 
-vi.mock("@lix-js/client", () => {
-	return {
-		findRepoRoot: vi.fn((args) => (args.nodeishFs.exists(".git") ? args.path : undefined)),
-		openRepository: vi.fn(() => ({
-			getCurrentBranch: () => Promise.resolve("main"),
-		})),
-	}
-})
-
-vi.mock("vscode", () => ({
-	workspace: {
-		workspaceFolders: [{ uri: { fsPath: "src" } }],
-	},
-}))
-
 describe("getCurrentBranch", () => {
 	it("should return the current git branch when the repository root is found", async () => {
 		const branch = await _getCurrentBranch({ fs: nodeishFs, workspaceRoot: "src" })
@@ -38,7 +23,7 @@ describe("getCurrentBranch", () => {
 
 	it("should return undefined when no repository root is found", async () => {
 		// Correctly handle the case where the repository root is not found
-		vi.mocked(findRepoRoot).mockResolvedValueOnce(undefined)
+		await nodeishFs.rm(".git", { recursive: true })
 		const branch = await _getCurrentBranch({ fs: nodeishFs, workspaceRoot: "src" })
 		expect(branch).toBeUndefined()
 	})
