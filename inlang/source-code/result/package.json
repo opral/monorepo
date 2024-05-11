@@ -23,8 +23,8 @@
 	"license": "Apache-2.0",
 	"devDependencies": {
 		"tsd": "0.29.0",
-		"@vitest/coverage-v8": "0.34.3",
+		"@vitest/coverage-v8": "^1.6.0",
 		"typescript": "5.2.2",
-		"vitest": "0.34.3"
+		"vitest": "^1.6.0"
 	}
 }

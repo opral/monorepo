@@ -8,7 +8,7 @@
 	},
 	"devDependencies": {
 		"@types/node": "^20.12.6",
-		"vitest": "^1.4.0"
+		"vitest": "^1.6.0"
 	},
 	"scripts": {
 		"clean": "rm -rf ./locales/de.json ./project2-dir/locales/de.json  ./project3-dir/locales/de.json ./project3-dir/project.inlang/ ./project3-dir/project.inlang.README.md ./project4-dir/project.inlang/messages.json",

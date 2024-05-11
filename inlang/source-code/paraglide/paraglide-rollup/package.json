@@ -46,6 +46,6 @@
 	"devDependencies": {
 		"@types/node": "20.9.3",
 		"typescript": "5.2.2",
-		"vitest": "0.34.3"
+		"vitest": "^1.6.0"
 	}
 }

@@ -58,11 +58,11 @@
 		"@types/debug": "^4.1.12",
 		"@types/murmurhash3js": "^3.0.7",
 		"@types/throttle-debounce": "5.0.0",
-		"@vitest/coverage-v8": "^0.33.0",
+		"@vitest/coverage-v8": "^1.6.0",
 		"jsdom": "22.1.0",
 		"patch-package": "6.5.1",
 		"tsd": "^0.25.0",
 		"typescript": "5.2.2",
-		"vitest": "^0.33.0"
+		"vitest": "^1.6.0"
 	}
 }

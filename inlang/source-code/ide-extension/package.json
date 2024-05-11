@@ -218,12 +218,12 @@
 		"@inlang/telemetry": "workspace:*",
 		"@lix-js/client": "workspace:*",
 		"@lix-js/fs": "workspace:*",
-		"@vitest/coverage-v8": "0.34.6",
+		"@vitest/coverage-v8": "^1.6.0",
 		"https-proxy-agent": "7.0.2",
 		"lit-html": "^3.1.2",
 		"require-from-string": "^2.0.2",
 		"throttle-debounce": "^5.0.0",
-		"vitest": "0.34.6"
+		"vitest": "^1.6.0"
 	},
 	"devDependencies": {
 		"@sentry/node": "^7.99.0",

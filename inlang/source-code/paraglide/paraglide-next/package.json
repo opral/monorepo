@@ -82,6 +82,6 @@
 		"rollup-plugin-peer-deps-external": "^2.2.4",
 		"rollup-preserve-directives": "^1.1.0",
 		"typescript": "^5.3.3",
-		"vitest": "0.34.6"
+		"vitest": "^1.6.0"
 	}
 }
