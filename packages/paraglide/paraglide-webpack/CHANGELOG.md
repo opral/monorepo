@@ -1,5 +1,17 @@
 # @inlang/paraglide-webpack
 
+## 1.0.59
+
+### Patch Changes
+
+- @inlang/paraglide-unplugin@1.6.3
+
+## 1.0.58
+
+### Patch Changes
+
+- @inlang/paraglide-unplugin@1.6.2
+
 ## 1.0.57
 
 ### Patch Changes
