@@ -81,6 +81,14 @@ export type Subscribable<Value> = {
 	subscribe: (callback: (value: Value) => void) => void
 }
 
+export type MessageQueryDelegate = {
+	onMessageCreate: (messageId: string, message: Message) => void
+	onMessageUpdate: (messageId: string, message: Message) => void
+	onMessageDelete: (messageId: string) => void
+	onLoaded: (messages: Message[]) => void
+	onCleanup: () => void
+}
+
 export type MessageQueryApi = {
 	create: (args: { data: Message }) => boolean
 	get: ((args: { where: { id: Message["id"] } }) => Readonly<Message>) & {
@@ -101,6 +109,7 @@ export type MessageQueryApi = {
 	update: (args: { where: { id: Message["id"] }; data: Partial<Message> }) => boolean
 	upsert: (args: { where: { id: Message["id"] }; data: Message }) => void
 	delete: (args: { where: { id: Message["id"] } }) => boolean
+	setDelegate: (delegate: MessageQueryDelegate) => void
 }
 
 export type MessageLintReportsQueryApi = {

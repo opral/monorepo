@@ -1,5 +1,24 @@
 # @inlang/paraglide-sveltekit-example
 
+## 0.1.40
+
+### Patch Changes
+
+- @inlang/paraglide-sveltekit@0.6.21
+
+## 0.1.39
+
+### Patch Changes
+
+- @inlang/paraglide-sveltekit@0.6.20
+
+## 0.1.38
+
+### Patch Changes
+
+- Updated dependencies [1e5320e]
+  - @inlang/paraglide-sveltekit@0.6.19
+
 ## 0.1.37
 
 ### Patch Changes
