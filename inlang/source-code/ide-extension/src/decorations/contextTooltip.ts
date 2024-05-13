@@ -11,20 +11,32 @@ type ContextTableRow = {
 	language: LanguageTag
 	message: string
 	editCommand?: Uri
-	openInEditorCommand?: Uri
+	openInFinkCommand?: Uri
+	machineTranslateCommand?: Uri
 }
 
 function renderTranslationRow(row: ContextTableRow) {
-	const editCommandLink = row.editCommand ? `<a href="${row.editCommand}">$(edit)</a>` : ""
-	const openInEditorLink = row.openInEditorCommand
-		? `<a href="${row.openInEditorCommand}">$(link-external)</a>`
+	const openInFinkLink = row.openInFinkCommand
+		? `<a href="${row.openInFinkCommand}">$(link-external)</a>`
 		: ""
+
+	// Decide between machine translate and edit command based on the message
+	let actionCommandLink
+	if (row.message === MISSING_TRANSLATION_MESSAGE) {
+		actionCommandLink = row.machineTranslateCommand
+			? `<a href="${row.machineTranslateCommand}" title="Translate message with Inlang AI">$(sparkle)</a>`
+			: ""
+	} else {
+		actionCommandLink = row.editCommand ? `<a href="${row.editCommand}">$(edit)</a>` : ""
+	}
+
 	const messageListing = `<td><strong>${escapeHtml(
 		row.language
 	)}&nbsp;</strong></td><td>${escapeHtml(row.message)}</td>`
-	const editCommandCell = editCommandLink ? `<td>&nbsp;&nbsp;${editCommandLink}</td>` : ""
-	const openInEditorCell = openInEditorLink ? `<td>&nbsp;${openInEditorLink}</td>` : ""
-	return `<tr>${messageListing}${editCommandCell}${openInEditorCell}</tr>`
+	const actionCommandCell = actionCommandLink ? `<td>&nbsp;&nbsp;${actionCommandLink}</td>` : ""
+	const openInFinkCell = openInFinkLink ? `<td>&nbsp;${openInFinkLink}</td>` : ""
+
+	return `<tr>${messageListing}${actionCommandCell}${openInFinkCell}</tr>`
 }
 
 export function contextTooltip(
@@ -64,18 +76,29 @@ export function contextTooltip(
 		)
 
 		const editCommand = Uri.parse(INTERPOLATE.COMMAND_URI("EDIT_MESSAGE", args))
-		const openInEditorCommand = Uri.parse(INTERPOLATE.COMMAND_URI("OPEN_IN_EDITOR", args))
+		const machineTranslateCommand = Uri.parse(
+			INTERPOLATE.COMMAND_URI(
+				"MACHINE_TRANSLATE_MESSAGE",
+				JSON.stringify({
+					messageId: referenceMessage.messageId,
+					sourceLanguageTag: state().project.settings()?.sourceLanguageTag,
+					targetLanguageTags: [languageTag],
+				})
+			)
+		)
+		const openInFinkCommand = Uri.parse(INTERPOLATE.COMMAND_URI("OPEN_IN_FINK", args))
 
 		return {
 			language: languageTag,
 			message: m,
 			editCommand,
-			openInEditorCommand,
+			openInFinkCommand,
+			machineTranslateCommand,
 		}
 	})
 
 	const contextTable = `<table>${contextTableRows.map(renderTranslationRow).join("")}</table>`
-	const tooltip = new MarkdownString(contextTable)
+	const tooltip = new MarkdownString(contextTable, true)
 
 	tooltip.supportHtml = true
 	tooltip.isTrusted = true

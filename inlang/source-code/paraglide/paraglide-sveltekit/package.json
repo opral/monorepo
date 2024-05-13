@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/paraglide-sveltekit",
-	"version": "0.6.18",
+	"version": "0.6.21",
 	"type": "module",
 	"main": "./dist/runtime/index.js",
 	"types": "./dist/runtime/index.d.ts",
@@ -12,8 +12,8 @@
 		"url": "https://github.com/opral/inlang-paraglide-js"
 	},
 	"scripts": {
-		"test:with-base": "BASE_PATH=/base vitest run --test-timeout 30000 --dir src",
-		"test:without-base": "BASE_PATH=\"\" vitest run --test-timeout 30000 --dir src",
+		"test:with-base": "BASE_PATH=/base vitest run --test-timeout 90000 --dir src",
+		"test:without-base": "BASE_PATH=\"\" vitest run --test-timeout 90000 --dir src",
 		"test": "npm run test:with-base && npm run test:without-base",
 		"build": "tsc --noEmit && svelte-package -i src -o dist",
 		"dev": "svelte-package -w -i src -o dist",

@@ -1,5 +1,38 @@
 # inlang-vs-code-extension
 
+## 1.43.0
+
+### Minor Changes
+
+- 5220b0e: add machine translations to context menu + improve visual recognition
+- 1fb1e77: Update openInEditor command title and add branch parameter
+
+## 1.42.12
+
+### Patch Changes
+
+- Updated dependencies [5209b81]
+  - @inlang/sdk@0.34.7
+  - @inlang/rpc@0.3.18
+  - @inlang/settings-component@1.0.13
+  - @inlang/telemetry@0.3.33
+
+## 1.42.11
+
+### Patch Changes
+
+- Updated dependencies [f38536e]
+  - @inlang/sdk@0.34.6
+  - @inlang/rpc@0.3.17
+  - @inlang/settings-component@1.0.12
+  - @inlang/telemetry@0.3.32
+
+## 1.42.10
+
+### Patch Changes
+
+- 955733d: release latest README changes
+
 ## 1.42.9
 
 ### Patch Changes

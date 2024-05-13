@@ -86,7 +86,7 @@ export default function Page(props: PageProps) {
 			<Meta name="twitter:description" content={metaDescription()} />
 			<Meta name="twitter:site" content="@inlanghq" />
 			<Meta name="twitter:creator" content="@inlanghq" />
-			<MarketplaceLayout>
+			<MarketplaceLayout manifest={props.manifest}>
 				<Show when={props.markdown && props.manifest}>
 					<div class="w-full h-full">
 						<InlangDoclayout manifest={props.manifest} currentRoute={props.pagePath}>
