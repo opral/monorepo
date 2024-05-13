@@ -16,20 +16,10 @@ type ContextTableRow = {
 }
 
 function renderTranslationRow(row: ContextTableRow) {
-	const openInFinkLink = row.openInFinkCommand
-		? `<a href="${row.openInFinkCommand}">$(link-external)</a>`
+	const editCommandLink = row.editCommand ? `<a href="${row.editCommand}">$(edit)</a>` : ""
+	const openInEditorLink = row.openInEditorCommand
+		? `<a href="${row.openInEditorCommand}">$(link-external)</a>`
 		: ""
-
-	// Decide between machine translate and edit command based on the message
-	let actionCommandLink
-	if (row.message === MISSING_TRANSLATION_MESSAGE) {
-		actionCommandLink = row.machineTranslateCommand
-			? `<a href="${row.machineTranslateCommand}" title="Translate message with Inlang AI">$(sparkle)</a>`
-			: ""
-	} else {
-		actionCommandLink = row.editCommand ? `<a href="${row.editCommand}">$(edit)</a>` : ""
-	}
-
 	const messageListing = `<td><strong>${escapeHtml(
 		row.language
 	)}&nbsp;</strong></td><td>${escapeHtml(row.message)}</td>`
