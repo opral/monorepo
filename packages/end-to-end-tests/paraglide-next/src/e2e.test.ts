@@ -28,7 +28,7 @@ describe.concurrent("paraglide-next", () => {
 
 	describe("init", () => {
 		it("app-src-ts", async () => {
-			const { readFile, ls, path: workingDir, cleanup, spawn } = await prepareEnvironment()
+			const { readFile, path: workingDir, cleanup, spawn } = await prepareEnvironment()
 
 			const template = path.resolve(__dirname, "../templates/app-src-ts")
 
