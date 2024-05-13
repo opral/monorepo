@@ -9,7 +9,7 @@ import type {
 	Variant,
 } from "@inlang/sdk/v2"
 import { createRuntime } from "./runtime.js"
-import { REGISTRY } from "./registry.js"
+import { REGISTRY_JS_FILE, registry } from "./registry.js"
 
 export type CompileOptions = {
 	messageBundles: Readonly<MessageBundle[]>
@@ -110,7 +110,7 @@ ${settings.languageTags.map((lang) => `\t\t"${lang}": ${lang}.${bundle.id}`).joi
 	].join("\n")
 
 	files["runtime.js"] = createRuntime(settings)
-	files["registry.js"] = REGISTRY
+	files["registry.js"] = REGISTRY_JS_FILE
 
 	return files
 }
@@ -267,11 +267,27 @@ function compileExpression(expression: Expression): string {
 		return arg
 	}
 
-	// throw if options are present for now
-	if (expression.annotation.options.length) throw new Error("Options are not supported yet")
+	const func = registry[expression.annotation.name]
+	if (!func) throw new Error("Unknown function: " + expression.annotation.name)
 
-	// return a call to the function
-	return "registry." + expression.annotation.name + "(" + arg + ")"
+	const hasOptions = expression.annotation.options.length > 0
+
+	if (!hasOptions) return `registry.${expression.annotation.name}(${arg})`
+
+	const expectedOptions = Object.keys(func.signature.options)
+	for (const option of expression.annotation.options) {
+		if (!expectedOptions.includes(option.name)) throw new Error("Unknown option: " + option)
+	}
+
+	const options = `{ ${expression.annotation.options
+		.map((opt) => {
+			const value =
+				opt.value.type === "literal" ? '"' + opt.value.value + '"' : "inputs." + opt.value.name
+			return `"${opt.name}" : ${value}`
+		})
+		.join(",\n")} }`
+
+	return `registry.${expression.annotation.name}(${arg}, ${options})`
 }
 
 function isInputDeclaration(declaration: Declaration): declaration is InputDeclaration {
