@@ -42,7 +42,7 @@ describe("openInFinkCommand", () => {
 		expect(env.openExternal).toHaveBeenCalledWith(
 			Uri.parse(
 				`${
-					CONFIGURATION.STRINGS.EDITOR_BASE_URL
+					CONFIGURATION.STRINGS.FINK_BASE_URL
 				}https://github.com/user/repo?project=${encodeURIComponent(
 					mockArgs.selectedProjectPath
 				)}&id=${encodeURIComponent(mockArgs.messageId)}`
@@ -57,7 +57,7 @@ describe("openInFinkCommand", () => {
 		await openInFinkCommand.callback(mockArgs)
 
 		expect(env.openExternal).toHaveBeenCalledWith(
-			Uri.parse(`${CONFIGURATION.STRINGS.EDITOR_BASE_URL}`)
+			Uri.parse(`${CONFIGURATION.STRINGS.FINK_BASE_URL}`)
 		)
 	})
 })
