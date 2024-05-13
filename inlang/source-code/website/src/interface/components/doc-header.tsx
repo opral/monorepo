@@ -3,7 +3,7 @@ import Link from "#src/renderer/Link.jsx"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded"
 import { Chip } from "./Chip.jsx"
-import { colorForTypeOf, typeOfIdToTitle } from "../marketplace/helper/utilities.js"
+import { typeOfIdToTitle } from "../marketplace/helper/utilities.js"
 
 const DocHeader = (props: { manifest: MarketplaceManifest }) => {
 	const displayName = () =>
@@ -19,7 +19,7 @@ const DocHeader = (props: { manifest: MarketplaceManifest }) => {
 					<h2 class="font-semibold m-0">{displayName()}</h2>
 					<Chip
 						text={typeOfIdToTitle(props.manifest.id)}
-						color={colorForTypeOf(props.manifest.id)}
+						color={"#475569"}
 						customClasses="text-xs"
 					/>
 				</div>
