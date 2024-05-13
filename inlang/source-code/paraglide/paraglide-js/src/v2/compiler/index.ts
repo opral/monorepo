@@ -1,4 +1,4 @@
-import type { ProjectSettings } from "@inlang/sdk"
+import { lookup, type ProjectSettings } from "@inlang/sdk"
 import type {
 	MessageBundle,
 	Message,
@@ -25,6 +25,8 @@ export function compileBundle({
 	messageBundles,
 	settings,
 }: CompileOptions): Record<string, string> {
+	const fallbackLanguages = getFallbackMap(settings.languageTags, settings.sourceLanguageTag)
+
 	const compiledBundles = messageBundles.map((bundle) => {
 		const messages = bundle.messages.map((message) =>
 			compileMessage({ message, bundleId: bundle.id })
@@ -73,7 +75,10 @@ export function compileBundle({
 			...compiledBundles.map((bundle) => {
 				const message = bundle.messages.find((message) => message.locale === locale)
 				if (message) return message.source
-				else return "" //TODO language fallback
+
+				const fallbackLanguage = fallbackLanguages[locale]
+				if (!fallbackLanguage) return `export const ${bundle.id} = () => "${bundle.id}"`
+				else return `export { ${bundle.id} } from './${fallbackLanguage}.js'`
 			}),
 
 			// aliases
@@ -283,4 +288,18 @@ function compareVariants(variantA: Variant, variantB: Variant): -1 | 0 | 1 {
 	}
 
 	return 0
+}
+
+function getFallbackMap(languageTags: string[], sourceLanguageTag: string) {
+	return Object.fromEntries(
+		languageTags.map((lang) => {
+			const fallbackLanguage = lookup(lang, {
+				languageTags: languageTags.filter((t) => t !== lang),
+				defaultLanguageTag: sourceLanguageTag,
+			})
+
+			if (lang === fallbackLanguage) return [lang, undefined]
+			else return [lang, fallbackLanguage]
+		})
+	)
 }
