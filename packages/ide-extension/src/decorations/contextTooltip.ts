@@ -24,7 +24,7 @@ function renderTranslationRow(row: ContextTableRow) {
 	let actionCommandLink
 	if (row.message === MISSING_TRANSLATION_MESSAGE) {
 		actionCommandLink = row.machineTranslateCommand
-			? `<a href="${row.machineTranslateCommand}" title="AI translate">$(sparkle)</a>`
+			? `<a href="${row.machineTranslateCommand}" title="Translate message with Inlang AI">$(sparkle)</a>`
 			: ""
 	} else {
 		actionCommandLink = row.editCommand ? `<a href="${row.editCommand}">$(edit)</a>` : ""
