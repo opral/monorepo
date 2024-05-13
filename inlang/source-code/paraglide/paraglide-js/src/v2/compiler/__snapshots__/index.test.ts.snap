@@ -1,0 +1,21 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`v2 - compileMessage > input with annotation and selectors 1`] = `
+"export const hello_name = (inputs) => {
+    input.name = registry.plural(inputs.name)
+	const selector_0 = inputs.name
+
+    if(true) return \`Hello \${inputs.name}\`
+}"
+`;
+
+exports[`v2 - compileMessage > input with annotation, no selectors 1`] = `
+"export const hello_name = (inputs) => {
+    inputs.name = registry.plural(inputs.name)
+    return \`Hello \${inputs.name}\`
+}"
+`;
+
+exports[`v2 - compileMessage > no inputs, no selectors 1`] = `"export const hello_world = () => \`Hello world\`"`;
+
+exports[`v2 - compileMessage > simple input, no selectors 1`] = `"export const hello_name = (inputs) => \`Hello \${inputs.name}\`"`;
