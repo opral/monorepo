@@ -127,6 +127,7 @@ export async function runLoadTest(
 // inlang message format
 async function generateMessageFile(messageCount: number) {
 	if (isExperimentalPersistence) {
+		const tempFile = join(__dirname, "project.inlang", "temp.json")
 		const messageFile = join(__dirname, "project.inlang", "messages.json")
 
 		const messages: Message[] = []
@@ -134,10 +135,13 @@ async function generateMessageFile(messageCount: number) {
 			messages.push(createMessage(`message_key_${i}`, { en: `Generated message (${i})` }))
 		}
 		await fs.writeFile(
-			messageFile,
+			tempFile,
 			JSON.stringify(messages.map(normalizeMessage), undefined, 2),
 			"utf-8"
 		)
+		// overwrites existing messageFile
+		// https://nodejs.org/docs/v20.12.1/api/fs.html#fsrenameoldpath-newpath-callback
+		await fs.rename(tempFile, messageFile)
 	} else {
 		const messageDir = join(__dirname, "locales", "en")
 		const messageFile = join(__dirname, "locales", "en", "common.json")
