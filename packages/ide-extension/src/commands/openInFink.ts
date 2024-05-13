@@ -13,10 +13,10 @@ export const openInFinkCommand = {
 		const origin = (await getGitOrigin())?.replaceAll(".git", "")
 		const branch = (await getCurrentBranch()) || "main"
 		const uri = args.messageId
-			? `${CONFIGURATION.STRINGS.EDITOR_BASE_URL}${origin}?project=${encodeURIComponent(
+			? `${CONFIGURATION.STRINGS.FINK_BASE_URL}${origin}?project=${encodeURIComponent(
 					args.selectedProjectPath
 			  )}&branch=${encodeURIComponent(branch)}&id=${encodeURIComponent(args.messageId)}`
-			: `${CONFIGURATION.STRINGS.EDITOR_BASE_URL}${origin}?branch=${encodeURIComponent(branch)}`
+			: `${CONFIGURATION.STRINGS.FINK_BASE_URL}${origin}?branch=${encodeURIComponent(branch)}`
 
 		env.openExternal(Uri.parse(uri))
 
