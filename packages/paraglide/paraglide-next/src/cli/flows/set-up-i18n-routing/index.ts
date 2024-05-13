@@ -2,6 +2,7 @@ import { Repository } from "@lix-js/client"
 import { CliStep } from "../../utils"
 import { Logger } from "@inlang/paraglide-js/internal"
 import { globIterate } from "glob"
+import nodePath from "node:path"
 
 export const SetUpI18nRoutingFlow: CliStep<
 	{
@@ -14,7 +15,7 @@ export const SetUpI18nRoutingFlow: CliStep<
 	},
 	unknown
 > = async (ctx) => {
-	for await (const path of globIterate("**/*.{ts,tsx,js,jsx,mjs}", {
+	for await (const relativePath of globIterate("**/*.{ts,tsx,js,jsx,mjs}", {
 		cwd: ctx.srcRoot,
 		posix: true,
 		ignore: [
@@ -26,8 +27,8 @@ export const SetUpI18nRoutingFlow: CliStep<
 			"**/*.d.tsx",
 			"**/next.config.*",
 		],
-		fs: ctx.repo.nodeishFs,
 	})) {
+		const path = nodePath.join(ctx.srcRoot, relativePath)
 		const content = await ctx.repo.nodeishFs.readFile(path, { encoding: "utf-8" })
 		const newContent = replaceNextNavigationImports(replaceNextLinkImports(content))
 		if (newContent === content) continue
