@@ -30,7 +30,11 @@ name: Ninja i18n action
 on: pull_request_target
 
 # explicitly configure permissions, in case your GITHUB_TOKEN workflow permissions are set to read-only in repository settings
-permissions: write-all
+permissions:
+  actions: write       # Necessary to cancel workflow executions
+  issues: read         # Necessary to read issue comments
+  pull-requests: write # Necessary to comment on PRs
+  contents: read       # Necessary to access the repo content
 
 jobs:
   ninja-i18n:
@@ -82,5 +86,6 @@ Please make sure that:
     3. Click **Actions** in the left sidebar, then click **General**
     4. Select the desired option (e.g. **Allow all actions and workflows**) under **Actions permissions**
     5. Click **Save** to apply the settings
+- if the action never reports, please make sure that the pathPattern of your plugin in the project settings is a relative path (starting with "./")
 
 <br>
