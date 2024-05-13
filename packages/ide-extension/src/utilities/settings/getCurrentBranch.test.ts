@@ -1,9 +1,8 @@
-import { describe, it, expect, vi } from "vitest"
+import { describe, it, expect } from "vitest"
 import { createNodeishMemoryFs, fromSnapshot as loadSnapshot, type Snapshot } from "@lix-js/fs"
 import { readFileSync } from "node:fs"
 import { resolve } from "node:path"
 import { _getCurrentBranch } from "./_getCurrentBranch.js"
-import { findRepoRoot } from "@lix-js/client"
 
 const nodeishFs = createNodeishMemoryFs()
 
