@@ -1,12 +1,11 @@
 # inlang sdk load-test
 package for volume testing
 
-- The test starts by opening an inlang project with just one english message.
-- It generates additional engish messages, overwriting either ./locales/en/common.json
+- The test starts by generating engish messages in ./locales/en/common.json
   or ./project.inlang/messages.json (depending on experimental.persistence)
-- It can "mock-translate" those into 37 preconfigured languages using the inlang cli.
-- Lint-rule plugins are configured in the project settings but lint reports are not subscribed, unless requested.
-- The test uses the i18next message storage plugin (undless experimental.persistence is set)
+- It then calls loadProject() and subscribes to events.
+- It mock-translates into 36 languages using the inlang cli.
+- It uses the i18next message storage plugin (unless experimental.persistence is set)
 - To allow additional testing on the generated project e.g. with the ide-extension, the test calls `pnpm clean` when it starts, but not after it runs.
 
 ```
