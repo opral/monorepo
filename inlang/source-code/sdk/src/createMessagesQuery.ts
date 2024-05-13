@@ -2,7 +2,7 @@ import type { Message } from "@inlang/message"
 import { ReactiveMap } from "./reactivity/map.js"
 import { createEffect } from "./reactivity/solid.js"
 import { createSubscribable } from "./loadProject.js"
-import type { InlangProject, MessageQueryApi } from "./api.js"
+import type { InlangProject, MessageQueryApi, MessageQueryDelegate } from "./api.js"
 import type { ResolvedPluginApi } from "./resolve-modules/plugins/types.js"
 import type { resolveModules } from "./resolve-modules/resolveModules.js"
 import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
@@ -16,6 +16,10 @@ import { releaseLock } from "./persistence/filelock/releaseLock.js"
 import { PluginLoadMessagesError, PluginSaveMessagesError } from "./errors.js"
 import { humanIdHash } from "./storage/human-id/human-readable-id.js"
 const debug = _debug("sdk:createMessagesQuery")
+
+function sleep(ms: number) {
+	return new Promise((resolve) => setTimeout(resolve, ms))
+}
 
 type MessageState = {
 	messageDirtyFlags: {
@@ -62,6 +66,12 @@ export function createMessagesQuery({
 	// filepath for the lock folder
 	const messageLockDirPath = projectPath + "/messagelock"
 
+	let delegate: MessageQueryDelegate | undefined = undefined
+
+	const setDelegate = (newDelegate: MessageQueryDelegate) => {
+		delegate = newDelegate
+	}
+
 	// Map default alias to message
 	// Assumes that aliases are only created and deleted, not updated
 	// TODO #2346 - handle updates to aliases
@@ -98,6 +108,7 @@ export function createMessagesQuery({
 		onCleanup(() => {
 			// stop listening on fs events
 			abortController.abort()
+			delegate?.onCleanup()
 		})
 
 		const fsWithWatcher = createNodeishFsWithWatcher({
@@ -111,6 +122,7 @@ export function createMessagesQuery({
 					messageLockDirPath,
 					messageStates,
 					index,
+					delegate,
 					_settings, // NOTE we bang here - we don't expect the settings to become null during the livetime of a project
 					resolvedPluginApi
 				)
@@ -133,6 +145,7 @@ export function createMessagesQuery({
 			messageLockDirPath,
 			messageStates,
 			index,
+			delegate,
 			_settings, // NOTE we bang here - we don't expect the settings to become null during the livetime of a project
 			resolvedPluginApi
 		)
@@ -142,6 +155,7 @@ export function createMessagesQuery({
 			})
 			.then(() => {
 				onInitialMessageLoadResult()
+				delegate?.onLoaded([...index.values()])
 			})
 	})
 
@@ -165,6 +179,7 @@ export function createMessagesQuery({
 			messageLockDirPath,
 			messageStates,
 			index,
+			delegate,
 			_settings, // NOTE we bang here - we don't expect the settings to become null during the livetime of a project
 			resolvedPluginApi
 		)
@@ -181,6 +196,7 @@ export function createMessagesQuery({
 	}
 
 	return {
+		setDelegate,
 		create: ({ data }): boolean => {
 			if (index.has(data.id)) return false
 			index.set(data.id, data)
@@ -189,6 +205,7 @@ export function createMessagesQuery({
 			}
 
 			messageStates.messageDirtyFlags[data.id] = true
+			delegate?.onMessageCreate(data.id, index.get(data.id))
 			scheduleSave()
 			return true
 		},
@@ -215,6 +232,7 @@ export function createMessagesQuery({
 			if (message === undefined) return false
 			index.set(where.id, { ...message, ...data })
 			messageStates.messageDirtyFlags[where.id] = true
+			delegate?.onMessageCreate(where.id, index.get(data.id))
 			scheduleSave()
 			return true
 		},
@@ -225,10 +243,13 @@ export function createMessagesQuery({
 				if ("default" in data.alias) {
 					defaultAliasIndex.set(data.alias.default, data)
 				}
+				messageStates.messageDirtyFlags[where.id] = true
+				delegate?.onMessageCreate(data.id, index.get(data.id))
 			} else {
 				index.set(where.id, { ...message, ...data })
+				messageStates.messageDirtyFlags[where.id] = true
+				delegate?.onMessageUpdate(data.id, index.get(data.id))
 			}
-			messageStates.messageDirtyFlags[where.id] = true
 			scheduleSave()
 			return true
 		},
@@ -240,6 +261,7 @@ export function createMessagesQuery({
 			}
 			index.delete(where.id)
 			messageStates.messageDirtyFlags[where.id] = true
+			delegate?.onMessageDelete(where.id)
 			scheduleSave()
 			return true
 		},
@@ -252,6 +274,8 @@ export function createMessagesQuery({
 // - json plugin exports into separate file per language.
 // - saving a message in two different languages would lead to a write in de.json first
 // - This will leads to a load of the messages and since en.json has not been saved yet the english variant in the message would get overritten with the old state again
+
+const maxMessagesPerTick = 500
 
 /**
  * Messsage that loads messages from a plugin - this method synchronizes with the saveMessage funciton.
@@ -271,6 +295,7 @@ async function loadMessagesViaPlugin(
 	lockDirPath: string,
 	messageState: MessageState,
 	messages: Map<string, Message>,
+	delegate: MessageQueryDelegate | undefined,
 	settingsValue: ProjectSettings,
 	resolvedPluginApi: ResolvedPluginApi
 ) {
@@ -297,6 +322,8 @@ async function loadMessagesViaPlugin(
 				nodeishFs: fs,
 			})
 		)
+
+		let loadedMessageCount = 0
 
 		for (const loadedMessage of loadedMessages) {
 			const loadedMessageClone = structuredClone(loadedMessage)
@@ -339,6 +366,8 @@ async function loadMessagesViaPlugin(
 				messages.set(loadedMessageClone.id, loadedMessageClone)
 				// NOTE could use hash instead of the whole object JSON to save memory...
 				messageState.messageLoadHash[loadedMessageClone.id] = importedEnecoded
+				delegate?.onMessageUpdate(loadedMessageClone.id, loadedMessageClone)
+				loadedMessageCount++
 			} else {
 				// message with the given alias does not exist so far
 				loadedMessageClone.alias = {} as any
@@ -365,6 +394,15 @@ async function loadMessagesViaPlugin(
 				// we don't have to check - done before hand if (messages.has(loadedMessageClone.id)) return false
 				messages.set(loadedMessageClone.id, loadedMessageClone)
 				messageState.messageLoadHash[loadedMessageClone.id] = importedEnecoded
+				delegate?.onMessageUpdate(loadedMessageClone.id, loadedMessageClone)
+				loadedMessageCount++
+			}
+			if (loadedMessageCount > maxMessagesPerTick) {
+				// move loading of the next messages to the next ticks to allow solid to cleanup resources
+				// solid needs some time to settle and clean up
+				// https://github.com/solidjs-community/solid-primitives/blob/9ca76a47ffa2172770e075a90695cf933da0ff48/packages/trigger/src/index.ts#L64
+				await sleep(0)
+				loadedMessageCount = 0
 			}
 		}
 		await releaseLock(fs as NodeishFilesystem, lockDirPath, "loadMessage", lockTime)
@@ -388,7 +426,15 @@ async function loadMessagesViaPlugin(
 		messageState.sheduledLoadMessagesViaPlugin = undefined
 
 		// recall load unawaited to allow stack to pop
-		loadMessagesViaPlugin(fs, lockDirPath, messageState, messages, settingsValue, resolvedPluginApi)
+		loadMessagesViaPlugin(
+			fs,
+			lockDirPath,
+			messageState,
+			messages,
+			delegate,
+			settingsValue,
+			resolvedPluginApi
+		)
 			.then(() => {
 				// resolve the scheduled load message promise
 				executingScheduledMessages.resolve()
@@ -405,6 +451,7 @@ async function saveMessagesViaPlugin(
 	lockDirPath: string,
 	messageState: MessageState,
 	messages: Map<string, Message>,
+	delegate: MessageQueryDelegate | undefined,
 	settingsValue: ProjectSettings,
 	resolvedPluginApi: ResolvedPluginApi
 ): Promise<void> {
@@ -491,6 +538,7 @@ async function saveMessagesViaPlugin(
 					lockDirPath,
 					messageState,
 					messages,
+					delegate,
 					settingsValue,
 					resolvedPluginApi
 				)
@@ -530,7 +578,15 @@ async function saveMessagesViaPlugin(
 		const executingSheduledSaveMessages = messageState.sheduledSaveMessages
 		messageState.sheduledSaveMessages = undefined
 
-		saveMessagesViaPlugin(fs, lockDirPath, messageState, messages, settingsValue, resolvedPluginApi)
+		saveMessagesViaPlugin(
+			fs,
+			lockDirPath,
+			messageState,
+			messages,
+			delegate,
+			settingsValue,
+			resolvedPluginApi
+		)
 			.then(() => {
 				executingSheduledSaveMessages.resolve()
 			})
