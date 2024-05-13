@@ -3,8 +3,6 @@ import { CliStep } from "../../utils"
 import { Logger } from "@inlang/paraglide-js/internal"
 import { globIterate } from "glob"
 
-const FileExtensions = [".tsx", ".ts", ".jsx", ".js", ".mjs"]
-
 export const SetUpI18nRoutingFlow: CliStep<
 	{
 		repo: Repository
@@ -30,8 +28,6 @@ export const SetUpI18nRoutingFlow: CliStep<
 		],
 		fs: ctx.repo.nodeishFs,
 	})) {
-		if (!FileExtensions.some((ext) => path.endsWith(ext))) continue
-
 		const content = await ctx.repo.nodeishFs.readFile(path, { encoding: "utf-8" })
 		const newContent = replaceNextNavigationImports(replaceNextLinkImports(content))
 		if (newContent === content) continue
