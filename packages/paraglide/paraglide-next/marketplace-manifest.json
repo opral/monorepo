@@ -15,7 +15,7 @@
 	"pages": {
 		"Setup": {
 			"/": "./inlang/source-code/paraglide/paraglide-next/README.md",
-			"/pages-rounter": "./inlang/source-code/paraglide/paraglide-next/docs/pages-router.md"
+			"/pages-router": "./inlang/source-code/paraglide/paraglide-next/docs/pages-router.md"
 		},
 		"Localised Routing": {
 			"/overview": "./inlang/source-code/paraglide/paraglide-next/docs/routing/overview.md",
