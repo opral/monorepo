@@ -28,6 +28,7 @@ export const SetUpI18nRoutingFlow: CliStep<
 			"**/*.d.tsx",
 			"**/next.config.*",
 		],
+		fs: ctx.repo.nodeishFs,
 	})) {
 		if (!FileExtensions.some((ext) => path.endsWith(ext))) continue
 
