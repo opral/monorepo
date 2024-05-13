@@ -26,7 +26,7 @@ describe.concurrent("paraglide-next", () => {
 		expect(semverRegex.test(stdout)).toBe(true)
 	})
 
-	describe.concurrent("init", () => {
+	describe("init", () => {
 		test("app-src-ts", async () => {
 			const { readFile, path: workingDir, cleanup, spawn } = await prepareEnvironment()
 
@@ -51,15 +51,11 @@ describe.concurrent("paraglide-next", () => {
 			await wait(PROMPT_TO)
 			await pressKey("enter")
 
-			console.info("Languages set up")
-
 			await waitForText("Do you want to update your <Link>s for localised routing?")
 			await wait(PROMPT_TO)
 			await pressKey("enter") //yes, set up i18n routing
 
 			await wait(CLEANUP_TO)
-
-			console.info("Localised Routing set up")
 
 			// read next.config.js
 			const nextConfig = await readFile(path.resolve(workingDir, "next.config.mjs"))
@@ -80,7 +76,6 @@ describe.concurrent("paraglide-next", () => {
 			// expect the routing to have been updated
 			const page = await readFile(path.resolve(workingDir, "src/app/page.tsx"))
 			expect(page).toBeTruthy()
-			console.info("Page", page)
 			expect(page).includes('import { Link } from "@/lib/i18n"')
 
 			await cleanup()
