@@ -9,15 +9,15 @@ import type { NodeishFilesystem } from "@lix-js/fs"
 export const createNodeishFsWithWatcher = (args: {
 	nodeishFs: NodeishFilesystem
 	updateMessages: () => void
+	abortController: AbortController
 }): NodeishFilesystem => {
 	const pathList: string[] = []
 
 	const makeWatcher = (path: string) => {
-		const abortController = new AbortController()
 		;(async () => {
 			try {
 				const watcher = args.nodeishFs.watch(path, {
-					signal: abortController.signal,
+					signal: args.abortController.signal,
 					persistent: false,
 				})
 				if (watcher) {

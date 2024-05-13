@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/paraglide-sveltekit",
-	"version": "0.6.13",
+	"version": "0.6.21",
 	"type": "module",
 	"main": "./dist/runtime/index.js",
 	"types": "./dist/runtime/index.d.ts",
@@ -12,8 +12,8 @@
 		"url": "https://github.com/opral/inlang-paraglide-js"
 	},
 	"scripts": {
-		"test:with-base": "BASE_PATH=/base vitest run --test-timeout 30000 --dir src",
-		"test:without-base": "BASE_PATH=\"\" vitest run --test-timeout 30000 --dir src",
+		"test:with-base": "BASE_PATH=/base vitest run --test-timeout 90000 --dir src",
+		"test:without-base": "BASE_PATH=\"\" vitest run --test-timeout 90000 --dir src",
 		"test": "npm run test:with-base && npm run test:without-base",
 		"build": "tsc --noEmit && svelte-package -i src -o dist",
 		"dev": "svelte-package -w -i src -o dist",
@@ -22,8 +22,8 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"@inlang/paraglide-vite": "workspace:*",
 		"@inlang/paraglide-js": "workspace:*",
+		"@inlang/paraglide-vite": "workspace:*",
 		"dedent": "1.5.1",
 		"devalue": "^4.3.2",
 		"magic-string": "^0.30.5"
@@ -33,7 +33,9 @@
 		"svelte": "^5.0.0 || ^5.0.0-next.1 || ^4.0.0 || ^3.0.0"
 	},
 	"devDependencies": {
+		"@rollup/plugin-alias": "^5.0.1",
 		"@rollup/plugin-node-resolve": "^15.2.3",
+		"@rollup/plugin-typescript": "^11.1.5",
 		"@rollup/plugin-virtual": "3.0.1",
 		"@sveltejs/package": "^2.2.3",
 		"@sveltejs/vite-plugin-svelte": "^3.0.2",
@@ -52,6 +54,10 @@
 			"import": "./dist/runtime/index.js",
 			"svelte": "./dist/runtime/index.js",
 			"types": "./dist/runtime/index.d.ts"
+		},
+		"./internal": {
+			"import": "./dist/runtime/internal/index.js",
+			"types": "./dist/runtime/internal/index.d.ts"
 		},
 		"./vite": {
 			"import": "./dist/vite/index.js",

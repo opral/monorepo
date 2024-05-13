@@ -4,6 +4,24 @@
 
 ### Patch Changes
 
+- @inlang/settings-component@1.0.13
+
+## null
+
+### Patch Changes
+
+- @inlang/settings-component@1.0.12
+
+## null
+
+### Patch Changes
+
+- @inlang/settings-component@1.0.11
+
+## null
+
+### Patch Changes
+
 - Updated dependencies [9165e64]
   - @lix-js/client@1.4.0
   - @inlang/settings-component@1.0.5

@@ -30,6 +30,14 @@ export function Header() {
 				<Link aria-current={pathname == "/about" ? "page" : undefined} href="/about">
 					{m.about()}
 				</Link>
+
+				<Link href="/" locale="de">
+					German Homepage
+				</Link>
+
+				<Link href="/" locale="en">
+					German Homepage
+				</Link>
 			</nav>
 			<div>{nextPathname}</div>
 

@@ -1,5 +1,11 @@
 ## 1.0.0
 
+## 1.0.8
+
+### Patch Changes
+
+- 8ac7e9a: update README
+
 ## 1.0.7
 
 ### Patch Changes

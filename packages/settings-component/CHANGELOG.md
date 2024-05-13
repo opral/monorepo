@@ -1,5 +1,39 @@
 # @inlang/settings-component
 
+## 1.0.13
+
+### Patch Changes
+
+- Updated dependencies [5209b81]
+  - @inlang/sdk@0.34.7
+
+## 1.0.12
+
+### Patch Changes
+
+- Updated dependencies [f38536e]
+  - @inlang/sdk@0.34.6
+
+## 1.0.11
+
+### Patch Changes
+
+- Updated dependencies [b9eccb7]
+  - @inlang/sdk@0.34.5
+
+## 1.0.10
+
+### Patch Changes
+
+- 37438b9: fix main deps by bumping version of settings-component
+
+## 1.0.9
+
+### Patch Changes
+
+- Updated dependencies [2a90116]
+  - @inlang/sdk@0.34.4
+
 ## 1.0.8
 
 ### Patch Changes

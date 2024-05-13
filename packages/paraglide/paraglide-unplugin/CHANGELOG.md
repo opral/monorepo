@@ -1,5 +1,62 @@
 # @inlang/paraglide-unplugin
 
+## 1.6.3
+
+### Patch Changes
+
+- Updated dependencies [5209b81]
+  - @inlang/sdk@0.34.7
+  - @inlang/paraglide-js@1.8.0
+
+## 1.6.2
+
+### Patch Changes
+
+- Updated dependencies [f38536e]
+  - @inlang/sdk@0.34.6
+  - @inlang/paraglide-js@1.8.0
+
+## 1.6.1
+
+### Patch Changes
+
+- Updated dependencies [b9eccb7]
+  - @inlang/sdk@0.34.5
+  - @inlang/paraglide-js@1.8.0
+
+## 1.6.0
+
+### Minor Changes
+
+- ca7895c: No longer apply message-module virtual modules during dev, only during build
+
+## 1.5.1
+
+### Patch Changes
+
+- Updated dependencies [2a90116]
+  - @inlang/sdk@0.34.4
+  - @inlang/paraglide-js@1.8.0
+
+## 1.5.0
+
+### Minor Changes
+
+- 29d41eb: Use message-module output type in vite
+
+### Patch Changes
+
+- Updated dependencies [21ab0a0]
+- Updated dependencies [21ab0a0]
+  - @inlang/paraglide-js@1.8.0
+
+## 1.4.36
+
+### Patch Changes
+
+- Updated dependencies [32cbe48]
+  - @inlang/paraglide-js@1.7.3
+
 ## 1.4.35
 
 ### Patch Changes

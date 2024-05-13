@@ -22,5 +22,10 @@ export const maybeMigrateI18nRouting: CliStep<
 	)
 
 	if (!response) return ctx
-	return await SetUpI18nRoutingFlow({ ...ctx, srcRoot: ctx.nextProject.srcRoot })
+	try {
+		return await SetUpI18nRoutingFlow({ ...ctx, srcRoot: ctx.nextProject.srcRoot })
+	} catch (e) {
+		ctx.logger.error("Failed to set up i18n routing. You'll have to do it manually")
+		return ctx
+	}
 }

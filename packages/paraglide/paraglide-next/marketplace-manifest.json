@@ -13,8 +13,23 @@
 		"en": "A NextJS integration for ParaglideJS, providing you with everything you need for i18n routing"
 	},
 	"pages": {
-		"/": "./inlang/source-code/paraglide/paraglide-next/README.md",
-		"/changelog": "./inlang/source-code/paraglide/paraglide-next/CHANGELOG.md"
+		"Setup": {
+			"/": "./inlang/source-code/paraglide/paraglide-next/README.md",
+			"/pages-router": "./inlang/source-code/paraglide/paraglide-next/docs/pages-router.md"
+		},
+		"Localised Routing": {
+			"/overview": "./inlang/source-code/paraglide/paraglide-next/docs/routing/overview.md",
+			"/prefix-strategy": "./inlang/source-code/paraglide/paraglide-next/docs/routing/prefix-strategy.md",
+			"/other-strategies": "./inlang/source-code/paraglide/paraglide-next/docs/routing/other-strategies.md"
+		},
+		"Advanced Usage": {
+			"/seo": "./inlang/source-code/paraglide/paraglide-next/docs/advanced/seo.md",
+			"/usage-on-the-server": "./inlang/source-code/paraglide/paraglide-next/docs/advanced/server.md"
+		},
+		"Appendix": {
+			"/roadmap": "./inlang/source-code/paraglide/paraglide-next/docs/roadmap.md",
+			"/changelog": "./inlang/source-code/paraglide/paraglide-next/CHANGELOG.md"
+		}
 	},
 	"keywords": [
 		"paraglide js",

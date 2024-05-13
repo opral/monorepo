@@ -1,17 +1,8 @@
 import { Repository } from "@lix-js/client"
 import { CliStep } from "../../utils"
 import { Logger } from "@inlang/paraglide-js/internal"
+import { globIterate } from "glob"
 import nodePath from "node:path"
-
-const FileExtensions = [".tsx", ".ts", ".jsx", ".js", ".mjs"]
-const SkipPattern = [
-	/^node_modules/,
-	/\.d\.ts$/,
-	/\.d\.tsx$/,
-	/\.d\.js$/,
-	/\.d\.jsx$/,
-	/next\.config/,
-]
 
 export const SetUpI18nRoutingFlow: CliStep<
 	{
@@ -24,19 +15,27 @@ export const SetUpI18nRoutingFlow: CliStep<
 	},
 	unknown
 > = async (ctx) => {
-	await walk(ctx.repo, ctx.srcRoot, async (path) => {
-		if (!FileExtensions.some((ext) => path.endsWith(ext))) return
-		if (SkipPattern.some((pattern) => pattern.test(path))) return
-		//read the file content
+	for await (const relativePath of globIterate("**/*.{ts,tsx,js,jsx,mjs}", {
+		cwd: ctx.srcRoot,
+		posix: true,
+		ignore: [
+			"**/node_modules/**",
+			"**/.next/**",
+			"**/dist/**",
+			"**/build/**",
+			"**/*.d.ts",
+			"**/*.d.tsx",
+			"**/next.config.*",
+		],
+	})) {
+		const path = nodePath.join(ctx.srcRoot, relativePath)
 		const content = await ctx.repo.nodeishFs.readFile(path, { encoding: "utf-8" })
-
-		//replace imports of 'import L from "next/link"' with 'import { Link as L } from "@/lib/i18n"'
 		const newContent = replaceNextNavigationImports(replaceNextLinkImports(content))
-		if (newContent === content) return
+		if (newContent === content) continue
 
 		//replace the file content
 		await ctx.repo.nodeishFs.writeFile(path, newContent)
-	})
+	}
 
 	return ctx
 }
@@ -92,18 +91,4 @@ export function replaceNextNavigationImports(content: string) {
 				.join(", ")} } from "next/navigation"`
 	}
 	return content.replace(match[0], replacementImport)
-}
-
-async function walk(repo: Repository, path: string, fileCallback: (path: string) => Promise<void>) {
-	const files = await repo.nodeishFs.readdir(path)
-	const promises = files.map(async (file) => {
-		const filePath = nodePath.join(path, file)
-		const stat = await repo.nodeishFs.stat(filePath)
-		if (stat.isDirectory()) {
-			await walk(repo, filePath, fileCallback)
-		} else {
-			await fileCallback(filePath)
-		}
-	})
-	await Promise.all(promises)
 }

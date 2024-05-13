@@ -81,6 +81,14 @@ describe.concurrent(
 		it(
 			"project4 in project4-dir",
 			async () => {
+				const before = await fs.readFile(
+					join(__dirname, "project4-dir", "messages.json.bak"),
+					"utf8"
+				)
+				await fs.writeFile(
+					join(__dirname, "project4-dir", "project.inlang", "messages.json"),
+					before
+				)
 				await run("pnpm translate4")
 				const expected = await fs.readFile(
 					join(__dirname, "project4-dir", "messages.json.translated"),

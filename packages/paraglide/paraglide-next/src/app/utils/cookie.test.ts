@@ -6,13 +6,11 @@ describe("serializeCookie", () => {
 		const cookieConfig: CookieConfig = {
 			name: "foo",
 			value: "bar",
-			maxAge: 60,
-			httpOnly: true,
-			path: "/",
-			sameSite: "strict",
+			"Max-Age": 60,
+			HttpOnly: true,
+			Path: "/",
+			SameSite: "strict",
 		}
-		expect(serializeCookie(cookieConfig)).toBe(
-			"foo=bar; Max-Age=60; HttpOnly; Path=/; SameSite=strict"
-		)
+		expect(serializeCookie(cookieConfig)).toBe("foo=bar;Max-Age=60;HttpOnly;Path=/;SameSite=strict")
 	})
 })

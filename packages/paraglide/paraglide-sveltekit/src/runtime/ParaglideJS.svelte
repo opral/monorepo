@@ -4,21 +4,21 @@
 	It also adds `<link rel="alternate">` tags to the head of your page
 -->
 <script lang="ts" generics="T extends string">
+	import type { I18n } from "./adapter.js"
+	import { page } from "$app/stores"
+	import { browser } from "$app/environment"
 	import { normaliseBase } from "./utils/normaliseBase.js"
 	import { getPathInfo } from "./utils/get-path-info.js"
 	import { getHrefBetween } from "./utils/diff-urls.js"
 	import { serializeRoute } from "./utils/serialize-path.js"
-	import { page } from "$app/stores"
-	import { browser } from "$app/environment"
-	import { setContext } from "svelte"
-	import { LANGUAGE_CHANGE_INVALIDATION_KEY, PARAGLIDE_CONTEXT_KEY } from "../constants.js"
+	import { LANGUAGE_CHANGE_INVALIDATION_KEY } from "../constants.js"
 	import { base as maybe_relative_base } from "$app/paths"
 	import { isExternal } from "./utils/external.js"
 	import { getTranslatedPath } from "./path-translations/getTranslatedPath.js"
 	import { translatePath } from "./path-translations/translatePath.js"
-	import type { I18n } from "./adapter.js"
 	import { get } from "svelte/store"
 	import { invalidate } from "$app/navigation"
+	import { setParaglideContext } from "./internal/context.js"
 
 	// The base path may be relative during SSR.
 	// To make sure it is absolute, we need to resolve it against the current page URL.
@@ -53,13 +53,10 @@
 		const from = new URL(get(page).url)
 		const original_to = new URL(href, new URL(from))
 
-		if (isExternal(original_to, from, absoluteBase)) {
-			return href
-		}
-
-		if (i18n.config.exclude(original_to.pathname)) {
-			return href
-		}
+		if (
+			isExternal(original_to, from, absoluteBase) ||
+			i18n.config.exclude(original_to.pathname)
+		) return href
 
 		const language = hreflang ?? lang
 
@@ -93,7 +90,7 @@
 		return getHrefBetween(from, to)
 	}
 
-	setContext(PARAGLIDE_CONTEXT_KEY, { translateHref })
+	setParaglideContext({ translateHref })
 
 	// In svelte 5 the #key block will re-render the second the key changes,
 	// not after the all the updates in the Component are done.

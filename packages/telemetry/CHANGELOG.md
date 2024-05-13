@@ -1,5 +1,39 @@
 # @inlang/telemetry
 
+## 0.3.33
+
+### Patch Changes
+
+- Updated dependencies [5209b81]
+  - @inlang/sdk@0.34.7
+
+## 0.3.32
+
+### Patch Changes
+
+- Updated dependencies [f38536e]
+  - @inlang/sdk@0.34.6
+
+## 0.3.31
+
+### Patch Changes
+
+- Updated dependencies [b9eccb7]
+  - @inlang/sdk@0.34.5
+
+## 0.3.30
+
+### Patch Changes
+
+- Updated dependencies [2a90116]
+  - @inlang/sdk@0.34.4
+
+## 0.3.29
+
+### Patch Changes
+
+- 8805b80: Add capture events to the copy component
+
 ## 0.3.28
 
 ### Patch Changes

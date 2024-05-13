@@ -1,5 +1,11 @@
 # @inlang/manage
 
+## 0.4.2
+
+### Patch Changes
+
+- 8805b80: Add capture events to the copy component
+
 ## 0.4.1
 
 ### Patch Changes

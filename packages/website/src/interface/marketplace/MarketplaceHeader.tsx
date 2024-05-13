@@ -11,7 +11,7 @@ import { LanguagePicker } from "#src/pages/index/LanguagePicker.jsx"
 import { Banner } from "../components/Banner.jsx"
 import { languageTag } from "#src/paraglide/runtime.js"
 
-const MarketplaceHeader = () => {
+const MarketplaceHeader = (props: { withBorder: boolean }) => {
 	const socialMediaLinks = [
 		{
 			name: "X",
@@ -41,7 +41,11 @@ const MarketplaceHeader = () => {
 					href="https://fink.inlang.com/github.com/opral/monorepo"
 				/>
 			</Show>
-			<header class="sticky top-0 w-full z-[9999] sm:bg-background border-b border-surface-200 md:px-4">
+			<header
+				class={`sticky top-0 w-full z-[9999] sm:bg-background border-surface-200 md:px-4 ${
+					props.withBorder && "border-b"
+				}`}
+			>
 				<div
 					class={
 						"max-w-7xl mx-auto flex justify-between items-center relative sm:static mb-0 gap-3 px-4 md:px-0 bg-background"
