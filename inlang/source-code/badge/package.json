@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/badge",
 	"type": "module",
-	"version": "0.7.19",
+	"version": "0.7.23",
 	"private": true,
 	"exports": {
 		".": "./dist/index.js",

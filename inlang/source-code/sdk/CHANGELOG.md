@@ -1,5 +1,29 @@
 # @inlang/sdk
 
+## 0.34.7
+
+### Patch Changes
+
+- 5209b81: improve load-test for experimental persistence
+
+## 0.34.6
+
+### Patch Changes
+
+- f38536e: Adds delegate pattern for MessagesQuery<->LintReportQuery communication
+
+## 0.34.5
+
+### Patch Changes
+
+- b9eccb7: Add @inlang/sdk/v2 types for MessageBundle
+
+## 0.34.4
+
+### Patch Changes
+
+- 2a90116: Refactors Message query to do persistence
+
 ## 0.34.3
 
 ### Patch Changes

@@ -74,22 +74,42 @@ export default async function onBeforeRender(pageContext: PageContext) {
 		}
 	}
 
+	//flatten pages
+	const flattenPages = (pages: Record<string, string> | Record<string, Record<string, string>>) => {
+		const flatPages: Record<string, string> = {}
+		for (const [key, value] of Object.entries(pages)) {
+			if (typeof value === "string") {
+				flatPages[key] = value
+			} else {
+				for (const [subKey, subValue] of Object.entries(value)) {
+					// @ts-ignore
+					flatPages[subKey] = subValue
+				}
+			}
+		}
+		return flatPages
+	}
+
 	if (item.pages) {
 		// get content for each page
-		for (const [slug, page] of Object.entries(item.pages)) {
+		for (const [slug, page] of Object.entries(flattenPages(item.pages))) {
 			if (!page || !fileExists(page)) redirect(itemPath as `/${string}`, 301)
 
-			const content = await getContentString(page)
-			const markdown = await convert(content)
+			try {
+				const content = await getContentString(page)
+				const markdown = await convert(content)
 
-			renderedMarkdown[slug] = markdown.html
-			if (markdown.data?.frontmatter) {
-				pageData[slug] = markdown.data?.frontmatter
+				renderedMarkdown[slug] = markdown.html
+				if (markdown.data?.frontmatter) {
+					pageData[slug] = markdown.data?.frontmatter
+				}
+
+				await generateTableOfContents(markdown.html).then((table) => {
+					tabelOfContents[slug] = table
+				})
+			} catch (error) {
+				// pages do not getting prerendered because they are link
 			}
-
-			await generateTableOfContents(markdown.html).then((table) => {
-				tabelOfContents[slug] = table
-			})
 		}
 	} else if (item.readme) {
 		// get readme fallback
@@ -124,6 +144,16 @@ export default async function onBeforeRender(pageContext: PageContext) {
 		throw redirect(itemPath as `/${string}`, 301)
 	}
 
+	const recommends = item.recommends
+		? registry.filter((i: any) => {
+				for (const recommend of item.recommends!) {
+					if (recommend.replace("m/", "") === i.uniqueID) return true
+					if (recommend.replace("g/", "") === i.uniqueID) return true
+				}
+				return false
+		  })
+		: undefined
+
 	return {
 		pageContext: {
 			pageProps: {
@@ -133,7 +163,7 @@ export default async function onBeforeRender(pageContext: PageContext) {
 				pagePath,
 				tableOfContents: tabelOfContents[pagePath] || {},
 				manifest: item,
-				recommends: [],
+				recommends,
 			} as PageProps,
 		},
 	}

@@ -10,6 +10,7 @@ import type {
 	MessageLintReport,
 } from "./versionedInterfaces.js"
 import type { ResolvedPluginApi } from "./resolve-modules/plugins/types.js"
+import type * as V2 from "./v2/types.js"
 
 export type InstalledPlugin = {
 	id: Plugin["id"]
@@ -55,6 +56,20 @@ export type InlangProject = {
 		messages: MessageQueryApi
 		messageLintReports: MessageLintReportsQueryApi
 	}
+	// WIP V2 message apis
+	// use with project settings: experimental.persistence = true
+	messageBundles?: Query<V2.MessageBundle>
+	messages?: Query<V2.Message>
+	variants?: Query<V2.Variant>
+}
+
+/**
+ * WIP template for async V2 crud interfaces
+ * E.g. `project.messageBundles.get({ id: "..." })`
+ **/
+interface Query<T> {
+	get: (args: unknown) => Promise<T>
+	getAll: () => Promise<T[]>
 }
 
 // const x = {} as InlangProject
@@ -64,6 +79,14 @@ export type InlangProject = {
 export type Subscribable<Value> = {
 	(): Value
 	subscribe: (callback: (value: Value) => void) => void
+}
+
+export type MessageQueryDelegate = {
+	onMessageCreate: (messageId: string, message: Message) => void
+	onMessageUpdate: (messageId: string, message: Message) => void
+	onMessageDelete: (messageId: string) => void
+	onLoaded: (messages: Message[]) => void
+	onCleanup: () => void
 }
 
 export type MessageQueryApi = {
@@ -86,6 +109,7 @@ export type MessageQueryApi = {
 	update: (args: { where: { id: Message["id"] }; data: Partial<Message> }) => boolean
 	upsert: (args: { where: { id: Message["id"] }; data: Message }) => void
 	delete: (args: { where: { id: Message["id"] } }) => boolean
+	setDelegate: (delegate: MessageQueryDelegate) => void
 }
 
 export type MessageLintReportsQueryApi = {

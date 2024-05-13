@@ -1,5 +1,6 @@
 import { sveltekit } from "@sveltejs/kit/vite"
 import { paraglide } from "@inlang/paraglide-sveltekit/vite"
+import { visualizer } from "rollup-plugin-visualizer"
 import { defineConfig } from "vite"
 
 export default defineConfig({
@@ -9,5 +10,9 @@ export default defineConfig({
 			outdir: "./src/paraglide",
 		}),
 		sveltekit(),
+		visualizer({
+			filename: "stats.html",
+			emitFile: true,
+		}),
 	],
 })

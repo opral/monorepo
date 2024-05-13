@@ -1,7 +1,7 @@
 {
 	"name": "vs-code-extension",
 	"private": true,
-	"displayName": "Sherlock – i18n inspector (prev inlang)",
+	"displayName": "Sherlock – inspector for i18n, translations, localization, l10n, i18next, i18n ally alternative",
 	"type": "module",
 	"description": "Visualize, edit & lint translated strings at a glance via Inline Decorations & Hover Support, and extract new strings with a single click.",
 	"publisher": "inlang",
@@ -10,16 +10,20 @@
 		"url": "https://github.com/opral/monorepo.git"
 	},
 	"icon": "assets/sherlock-logo.png",
-	"version": "1.41.1",
+	"version": "1.43.0",
 	"engines": {
 		"vscode": "^1.84.2"
 	},
 	"keywords": [
 		"i18n",
+		"l10n",
 		"localization",
-		"translation",
-		"inspector",
-		"Sherlock"
+		"globalization",
+		"translate",
+		"i18next",
+		"next-intl",
+		"paraglidejs",
+		"nextjs"
 	],
 	"categories": [
 		"Other",
@@ -194,6 +198,7 @@
 		"dev": "DEV=true node ./build.js",
 		"package": "pnpm vsce package --no-dependencies",
 		"publish": "pnpm vsce publish --no-dependencies",
+		"publish:open-vsx": "node publish-openvsx.js",
 		"vscode:prepublish": "npm run build",
 		"---- TEST ----------------------------------------------------------": "",
 		"pretest": "node ./build.js",
@@ -209,7 +214,7 @@
 		"@inlang/result": "workspace:*",
 		"@inlang/rpc": "workspace:*",
 		"@inlang/sdk": "workspace:*",
-		"@inlang/settings-component": "^1.0.6",
+		"@inlang/settings-component": "workspace:*",
 		"@inlang/telemetry": "workspace:*",
 		"@lix-js/client": "workspace:*",
 		"@lix-js/fs": "workspace:*",
@@ -230,7 +235,7 @@
 		"@types/throttle-debounce": "^5.0.2",
 		"@types/ungap__structured-clone": "^0.3.3",
 		"@types/vscode": "^1.84.2",
-		"@vscode/vsce": "^2.26.0",
+		"@vscode/vsce": "^2.26.1",
 		"@wdio/cli": "^8.24.6",
 		"@wdio/globals": "^8.24.6",
 		"@wdio/local-runner": "^8.24.6",
@@ -244,7 +249,7 @@
 		"fs-extra": "^11.2.0",
 		"mocha": "^10.2.0",
 		"node-fetch": "^3.3.2",
-		"ovsx": "^0.8.3",
+		"ovsx": "^0.8.4",
 		"posthog-node": "^3.1.2",
 		"ts-node": "^10.9.1",
 		"typescript": "5.3.2",

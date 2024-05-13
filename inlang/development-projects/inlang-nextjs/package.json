@@ -1,6 +1,6 @@
 {
 	"name": "next-js-testapp",
-	"version": "0.1.9",
+	"version": "0.1.13",
 	"private": true,
 	"scripts": {
 		"dev": "next dev",

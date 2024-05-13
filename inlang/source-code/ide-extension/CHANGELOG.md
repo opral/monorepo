@@ -1,5 +1,109 @@
 # inlang-vs-code-extension
 
+## 1.43.0
+
+### Minor Changes
+
+- 5220b0e: add machine translations to context menu + improve visual recognition
+- 1fb1e77: Update openInEditor command title and add branch parameter
+
+## 1.42.12
+
+### Patch Changes
+
+- Updated dependencies [5209b81]
+  - @inlang/sdk@0.34.7
+  - @inlang/rpc@0.3.18
+  - @inlang/settings-component@1.0.13
+  - @inlang/telemetry@0.3.33
+
+## 1.42.11
+
+### Patch Changes
+
+- Updated dependencies [f38536e]
+  - @inlang/sdk@0.34.6
+  - @inlang/rpc@0.3.17
+  - @inlang/settings-component@1.0.12
+  - @inlang/telemetry@0.3.32
+
+## 1.42.10
+
+### Patch Changes
+
+- 955733d: release latest README changes
+
+## 1.42.9
+
+### Patch Changes
+
+- 05af646: Use workspace:\* for settings-component
+- Updated dependencies [b9eccb7]
+  - @inlang/sdk@0.34.5
+  - @inlang/rpc@0.3.16
+  - @inlang/settings-component@1.0.11
+  - @inlang/telemetry@0.3.31
+
+## 1.42.8
+
+### Patch Changes
+
+- Updated dependencies [2a90116]
+  - @inlang/sdk@0.34.4
+  - @inlang/rpc@0.3.15
+  - @inlang/settings-component@1.0.9
+  - @inlang/telemetry@0.3.30
+
+## 1.42.7
+
+### Patch Changes
+
+- 08d47f0: publish script update after local test
+
+## 1.42.6
+
+### Patch Changes
+
+- 93a9a17: update publish script
+
+## 1.42.5
+
+### Patch Changes
+
+- 9b740ef: update publishing script
+- Updated dependencies [8805b80]
+  - @inlang/telemetry@0.3.29
+
+## 1.42.4
+
+### Patch Changes
+
+- 1ccc4cd: update publishing script
+
+## 1.42.3
+
+### Patch Changes
+
+- 8fa9f40: update MARKETPLACE structure
+
+## 1.42.2
+
+### Patch Changes
+
+- b347253: update auto publishing for open vsx
+
+## 1.42.1
+
+### Patch Changes
+
+- dec4bf1: fix settings component
+
+## 1.42.0
+
+### Minor Changes
+
+- 30a63b2: update getting started view to one click project creation
+
 ## 1.41.1
 
 ### Patch Changes

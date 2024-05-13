@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/paraglide-next",
 	"description": "The easiest way to do i18n in NextJS",
-	"version": "0.1.6",
+	"version": "0.2.0",
 	"publishConfig": {
 		"access": "public"
 	},
@@ -56,7 +56,9 @@
 		"@inlang/paraglide-js": "workspace:*",
 		"commander": "^12.0.0",
 		"consola": "^3.2.3",
-		"rsc-env": "^0.0.1"
+		"glob": "^10.3.15",
+		"qs": "^6.12.1",
+		"rsc-env": "^0.0.2"
 	},
 	"peerDependencies": {
 		"next": "^13.0.0 || ^14.0.0",
@@ -73,6 +75,7 @@
 		"@rollup/plugin-typescript": "^11.1.5",
 		"@testing-library/react": "^14.2.1",
 		"@types/node": "^20.12.7",
+		"@types/qs": "^6.9.15",
 		"@types/react": "^18",
 		"@vitejs/plugin-react": "^4.2.1",
 		"jsdom": "22.1.0",

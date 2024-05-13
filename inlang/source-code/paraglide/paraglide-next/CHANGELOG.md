@@ -1,5 +1,35 @@
 # @inlang/paraglide-next
 
+## 0.2.0
+
+### Minor Changes
+
+- e1ce7fa: A major overhaul to the way routing is done. This update introduces the concept of a `RoutingStrategy`, which allows you to implement any arbitrary routing strategy ontop of `paraglide-next`'s primitives.
+
+  Alongside this we add the `Navigation` and `Middleware` APIs, which take advantage of the new RoutingStrategy interface.
+
+  While this is a major change to how the library is used, the old `createI18n` API is still available & works the same. Thus this is not marked as a major change.
+
+  The legacy `createI18n` API will be removed in the next major release.
+
+## 0.1.8
+
+### Patch Changes
+
+- Updated dependencies [21ab0a0]
+- Updated dependencies [21ab0a0]
+  - @inlang/paraglide-js@1.8.0
+
+## 0.1.7
+
+### Patch Changes
+
+- 419d8b6: Fix issue where the localised routing didn't always use the most specific pathname as outlined in https://kit.svelte.dev/docs/advanced-routing#sorting
+- 41e27b7: The `Link` component now uses `React.forwardRef`. This was a community contribution by [Nurbek](https://github.com/NurbekGithub).
+- 432d158: Fixes a warning about `useRouter` not being available on the server. This would never have caused a crash but the log was annoying.
+- Updated dependencies [32cbe48]
+  - @inlang/paraglide-js@1.7.3
+
 ## 0.1.6
 
 ### Patch Changes

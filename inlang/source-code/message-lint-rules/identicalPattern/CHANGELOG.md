@@ -1,5 +1,11 @@
 # @inlang/message-lint-rule-identical-pattern
 
+## 1.5.9
+
+### Patch Changes
+
+- 8ac7e9a: update README
+
 ## 1.5.8
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/plugin-i18next",
-	"version": "4.13.32",
+	"version": "4.13.37",
 	"type": "module",
 	"exports": {
 		".": "./dist/index.js"

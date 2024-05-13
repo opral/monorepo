@@ -1,5 +1,47 @@
 # @inlang/paraglide-astro
 
+## 0.1.13
+
+### Patch Changes
+
+- @inlang/paraglide-vite@1.2.53
+
+## 0.1.12
+
+### Patch Changes
+
+- @inlang/paraglide-vite@1.2.52
+
+## 0.1.11
+
+### Patch Changes
+
+- @inlang/paraglide-vite@1.2.51
+
+## 0.1.10
+
+### Patch Changes
+
+- @inlang/paraglide-vite@1.2.50
+
+## 0.1.9
+
+### Patch Changes
+
+- @inlang/paraglide-vite@1.2.49
+
+## 0.1.8
+
+### Patch Changes
+
+- @inlang/paraglide-vite@1.2.48
+
+## 0.1.7
+
+### Patch Changes
+
+- @inlang/paraglide-vite@1.2.47
+
 ## 0.1.6
 
 ### Patch Changes

@@ -1,5 +1,21 @@
 # @inlang/paraglide-js
 
+## 1.8.0
+
+### Minor Changes
+
+- 21ab0a0: Add an output mode where each message is it's own file. This enables treeshaking in less capable bundlers. Currently this is only available via the programmatic API.
+
+### Patch Changes
+
+- 21ab0a0: performance improvements
+
+## 1.7.3
+
+### Patch Changes
+
+- 32cbe48: Improve `bestMatch` reliability
+
 ## 1.7.2
 
 ### Patch Changes

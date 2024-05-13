@@ -306,6 +306,16 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					setProject(undefined)
 					return newRepo
 				} catch (e) {
+					if (
+						e instanceof Error &&
+						e.name === "NotFoundError" &&
+						e.message === `Could not find ${activeBranch()}.`
+					) {
+						// redirect to default branch (e.g. main) if branch not found
+						setActiveBranch(undefined)
+						setSearchParams({ key: "branch", value: "" })
+						return
+					}
 					setLixErrors([e as Error])
 					return
 				}
@@ -443,6 +453,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			return { newRepo: repo(), activeProject: activeProject() }
 		},
 		async ({ newRepo, activeProject }) => {
+			// wait for the browser to be idle
+			await new Promise((resolve) => requestIdleCallback(resolve))
 			if (newRepo) {
 				const project = solidAdapter(
 					await loadProject({

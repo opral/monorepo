@@ -6,7 +6,7 @@
 <doc-feature text-color="#0F172A" color="#E1EFF7" title="Only ships messages used on islands" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/paraglide/paraglide-astro/assets/islands-only.png"></doc-feature>
 </doc-features>
 
-## Installation
+# Gettting Started 
 
 ```bash
 npx @inlang/paraglide-js init
@@ -37,9 +37,25 @@ export default {
 }
 ```
 
-## Usage
+## Passing the Language to the Client
 
-### Adding & using messages
+To save bundle size the integration doesn't ship language detection code to the client. Instead, it will read the `lang` attribute on the `<html>` tag. Make sure it is set correctly.
+
+```astro
+//src/layouts/default.astro
+---
+import { languageTag } from "../paraglide/runtime";
+---
+
+<!doctype html>
+<html lang={languageTag()} dir={Astro.locals.paraglide.dir}>
+    <slot />
+</html>
+```
+
+# Usage
+
+## Adding & using messages
 
 Messages live in `messages/{lang}.json` files. Add a message to get started
 
@@ -69,11 +85,11 @@ import * as m from "../paraglide/messages.js";
 <h1>{m.hello({ name: "Samuel" })}</h1>
 ```
 
-Vite is able to tree-shake the messages. Only messages that are used on an Island will be included in the client bundle. This drastically reduces the bundle size & requires no extra work from you.
+Vite can tree-shake the messages with no extra work from you. Only messages that are used on an Island will be included in the client bundle.
 
-### Which language get's used
+## Understanding Language Detection
 
-The integration detects the language from the URL. Simply place your page in a folder named for the language (or the `path` of the language) & all messages will be in that language.
+Paraglide-Astro relies on [`astro:i18n`](https://docs.astro.build/en/guides/internationalization/)'s language detection. Place your page in a folder named for the language (or the `path` of the language) & all messages will be in that language.
 
 ```filesystem
 src
@@ -117,23 +133,60 @@ import { languageTag } from "$paraglide/runtime";
 
 You can also access the current language and text-direction via `Astro.locals.paraglide.lang` and `Astro.locals.paraglide.dir` respectively.
 
-### Adding Alternate Links
+## Linking between pages
 
-For SEO reasons, you should add alternate links to your page's head that point to all translations of the current page. Also include the _current_ page.
+Because pages in different languages often have different slugs there is no way to automatically generate links in all languages. You will need to define a custom function.
+
+```ts
+import type { AvailableLanguageTag } from "./paraglide/runtime.js"
+
+type AbsolutePathname = `/${string}`
+
+const pathnames : Record<AbsolutePathname, 
+	Record<AvailableLanguageTag, AbsolutePathname>
+> = {
+	"/about": {
+		en: "/about",
+		de: "/de/ueber-uns",
+	}
+}
+
+// src/linking.ts
+export function localizePathname(
+	pathname: AbsolutePathname, 
+	locale: AvailableLanguageTag
+) {
+	if(pathnames[pathname]) {
+		return pathnames[pathname][locale]
+	}
+	return pathname
+}
+```
+
+Then use this function on your links
+
+```tsx
+<a href={localizePathname("/about", languageTag())}>{m.about()}</a>
+```
+
+## Adding Alternate Links
+
+For SEO reasons, you should add alternate links to your page's head that point to all translations of the current page. Include the _current_ page. Make sure these are full HREFs, including the protocol and origin, not just the path.
 
 ```html
 <head>
-	<link rel="alternate" hreflang="en" href="/en/about" />
-	<link rel="alternate" hreflang="de" href="/de/ueber-uns" />
+	<link rel="alternate" hreflang="en" href="https://acme.com/en/about" />
+	<link rel="alternate" hreflang="de" href="https://acme.com/de/ueber-uns" />
 </head>
 ```
 
 Since only you know which pages correspond to each other this can't reliably be done automatically. Add these links manually.
 
-## Roadmap
+# Roadmap
 
 - Improved Server-Rendering support
+- Automatic Link-Map generation
 
-## Playground
+# Playground
 
 Check out an example Astro project with Paraglide integration on [StackBlitz](https://stackblitz.com/~/github.com/LorisSigrist/paraglide-astro-example)

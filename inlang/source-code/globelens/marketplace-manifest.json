@@ -14,7 +14,7 @@
 	"pages": {
 		"/": "./inlang/source-code/globelens/README.md"
 	},
-	"keywords": ["analysis", "i18n", "apps", "seo", "test", "url", "keyword"],
+	"keywords": ["analysis", "i18n", "apps", "seo", "test", "url", "keyword", "inlang"],
 	"pricing": "FREE BETA",
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
