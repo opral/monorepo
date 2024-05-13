@@ -49,12 +49,19 @@ const InlangDoclayout = (props: {
 	return (
 		<div class="flex w-full h-full">
 			<div class="hidden sm:block sticky top-[164px] w-[230px] h-[calc(100vh_-_164px)]">
-				<div class="w-full h-full overflow-y-scroll pb-8 pr-4 pl-3 -ml-3">
+				<div class="w-full h-full overflow-y-scroll pb-8 pl-3 -ml-3">
 					<InlangDocNavigation manifest={props.manifest} currentRoute={props.currentRoute} />
 				</div>
 			</div>
 			<div class="flex-1 w-min overflow-hidden h-full px-0 sm:px-5 xl:px-10 min-h-screen">
 				{props.children}
+				<div class="block xl:hidden w-full">
+					<InlangDocMeta
+						manifest={props.manifest}
+						contentInHtml={(props.children as HTMLElement).children}
+						currentRoute={props.currentRoute}
+					/>
+				</div>
 				<div
 					class="fixed bottom-[24px] right-[24px] sm:hidden"
 					onClick={() => setDrawerIsOpen(true)}
