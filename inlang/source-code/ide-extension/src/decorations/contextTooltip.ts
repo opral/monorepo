@@ -23,10 +23,8 @@ function renderTranslationRow(row: ContextTableRow) {
 	// Decide between machine translate and edit command based on the message
 	let actionCommandLink
 	if (row.message === MISSING_TRANSLATION_MESSAGE) {
-		console.log("row", row)
-
 		actionCommandLink = row.machineTranslateCommand
-			? `<a href="${row.machineTranslateCommand}" title="AI translate">$(cloud-download)</a>`
+			? `<a href="${row.machineTranslateCommand}" title="AI translate">$(sparkle)</a>`
 			: ""
 	} else {
 		actionCommandLink = row.editCommand ? `<a href="${row.editCommand}">$(edit)</a>` : ""
@@ -100,7 +98,7 @@ export function contextTooltip(
 	})
 
 	const contextTable = `<table>${contextTableRows.map(renderTranslationRow).join("")}</table>`
-	const tooltip = new MarkdownString(contextTable)
+	const tooltip = new MarkdownString(contextTable, true)
 
 	tooltip.supportHtml = true
 	tooltip.isTrusted = true
