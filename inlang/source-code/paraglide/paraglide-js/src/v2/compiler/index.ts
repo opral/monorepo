@@ -88,15 +88,19 @@ export function compileBundle({
 
 	//generate an index file for all messages
 	files["messages.js"] = [
-		"import { languageTag } from '../runtime.js'",
+		"import { languageTag } from './runtime.js'",
 		...settings.languageTags.map(
 			(locale) => `import * as ${locale} from './messages/${locale}.js'`
 		),
 		"",
 		...compiledBundles.map((bundle) => {
-			;`export const ${bundle.id} = {
-				
-			}`
+			const hasInputs = Object.keys(bundle.params).length !== 0
+
+			return `export ${bundle.id} = (${hasInputs ? "inputs" : ""}, options) => {
+    return {
+${settings.languageTags.map((lang) => `\t\t"${lang}": ${lang}.${bundle.id}`).join(",\n")}
+	}[options.languageTag || languageTag()](${hasInputs ? "inputs" : ""})
+}`
 		}),
 	].join("\n")
 
