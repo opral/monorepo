@@ -3,7 +3,15 @@ import { shouldApply } from "./precheck"
 import ParaglideJSComponentCode from "../../runtime/ParaglideJS.svelte?raw"
 
 it("should not apply on the ParaglideJS component", () => {
-	expect(shouldApply(ParaglideJSComponentCode, {})).toBe(false)
+	expect(
+		shouldApply(ParaglideJSComponentCode, {
+			a: [
+				{
+					attribute_name: "href",
+				},
+			],
+		})
+	).toBe(false)
 })
 
 it("should apply on a component with <svelte:element>", () => {

@@ -52,7 +52,7 @@ export function Middleware<T extends string>(opt: MiddlewareOptions<T>) {
 	 * https://nextjs.org/docs/pages/building-your-application/routing/middleware#setting-headers
 	 */
 	return function middleware(request: NextRequest) {
-		const localeCookeValue = request.cookies.get(LANG_COOKIE.name)?.value
+		const localeCookieValue = request.cookies.get(LANG_COOKIE.name)?.value
 		const locale = resolveLanguage(request, sourceLanguageTag, [
 			opt.strategy.resolveLocale,
 			createCookieDetection({ availableLanguageTags: availableLanguageTags }),
@@ -64,7 +64,7 @@ export function Middleware<T extends string>(opt: MiddlewareOptions<T>) {
 		const localisedURL = opt.strategy.getLocalisedUrl(canonicalPath, locale, false)
 
 		const localeCookieMatches =
-			isAvailableLanguageTag(localeCookeValue) && localeCookeValue === locale
+			isAvailableLanguageTag(localeCookieValue) && localeCookieValue === locale
 
 		const headers = new Headers(request.headers)
 		headers.set(PARAGLIDE_LANGUAGE_HEADER_NAME, locale)
