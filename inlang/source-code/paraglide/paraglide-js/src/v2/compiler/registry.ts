@@ -17,13 +17,10 @@ export type Registry = {
 }
 
 export const registry: Registry = {
-	integer: {
+	plural: {
 		signature: {
 			input: "number",
-			options: {
-				select: '"plural" | "ordinal" | "exact"',
-				notation: '"standard" | "scientific" | "engineering" | "compact"',
-			},
+			options: {},
 		},
 	},
 }
