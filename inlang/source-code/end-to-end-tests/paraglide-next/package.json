@@ -1,0 +1,24 @@
+{
+	"name": "@inlang/paraglide-next-e2e",
+	"version": "0.0.1",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "vitest --passWithNoTests",
+		"test": "vitest run --passWithNoTests",
+		"lint": "eslint ./src --fix",
+		"format": "prettier ./src --write",
+		"clean": "rm -rf ./.tmp ./node_modules"
+	},
+	"dependencies": {
+		"@inlang/paraglide-next": "workspace:*",
+		"@inlang/sdk": "workspace:*"
+	},
+	"devDependencies": {
+		"@gmrchk/cli-testing-library": "^0.1.2",
+		"@types/node": "^20.12.3",
+		"eslint": "^8.57.0",
+		"prettier": "2.8.3",
+		"vitest": "0.34.6"
+	}
+}

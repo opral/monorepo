@@ -86,7 +86,7 @@ importers:
         version: 1.2.1
       next:
         specifier: ^14.0.0
-        version: 14.2.2(@playwright/test@1.39.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        version: 14.2.2(@babel/core@7.24.4)(@playwright/test@1.39.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       postcss:
         specifier: 8.4.23
         version: 8.4.23
@@ -728,6 +728,31 @@ importers:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../../paraglide/paraglide-js
+      '@inlang/sdk':
+        specifier: workspace:*
+        version: link:../../sdk
+    devDependencies:
+      '@gmrchk/cli-testing-library':
+        specifier: ^0.1.2
+        version: 0.1.2
+      '@types/node':
+        specifier: ^20.12.3
+        version: 20.12.7
+      eslint:
+        specifier: ^8.57.0
+        version: 8.57.0
+      prettier:
+        specifier: 2.8.3
+        version: 2.8.3
+      vitest:
+        specifier: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.30.4)(webdriverio@8.36.1(typescript@5.3.3))
+
+  inlang/source-code/end-to-end-tests/paraglide-next:
+    dependencies:
+      '@inlang/paraglide-next':
+        specifier: workspace:*
+        version: link:../../paraglide/paraglide-next
       '@inlang/sdk':
         specifier: workspace:*
         version: link:../../sdk
@@ -1559,7 +1584,7 @@ importers:
         version: 10.3.15
       next:
         specifier: ^13.0.0 || ^14.0.0
-        version: 14.2.2(@babel/core@7.24.4)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        version: 14.2.2(@babel/core@7.24.4)(@playwright/test@1.39.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       qs:
         specifier: ^6.12.1
         version: 6.12.1
@@ -28083,7 +28108,7 @@ snapshots:
 
   netmask@2.0.2: {}
 
-  next@14.2.2(@babel/core@7.24.4)(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+  next@14.2.2(@babel/core@7.24.4)(@playwright/test@1.39.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       '@next/env': 14.2.2
       '@swc/helpers': 0.5.5
@@ -28094,31 +28119,6 @@ snapshots:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       styled-jsx: 5.1.1(@babel/core@7.24.4)(react@18.2.0)
-    optionalDependencies:
-      '@next/swc-darwin-arm64': 14.2.2
-      '@next/swc-darwin-x64': 14.2.2
-      '@next/swc-linux-arm64-gnu': 14.2.2
-      '@next/swc-linux-arm64-musl': 14.2.2
-      '@next/swc-linux-x64-gnu': 14.2.2
-      '@next/swc-linux-x64-musl': 14.2.2
-      '@next/swc-win32-arm64-msvc': 14.2.2
-      '@next/swc-win32-ia32-msvc': 14.2.2
-      '@next/swc-win32-x64-msvc': 14.2.2
-    transitivePeerDependencies:
-      - '@babel/core'
-      - babel-plugin-macros
-
-  next@14.2.2(@playwright/test@1.39.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
-    dependencies:
-      '@next/env': 14.2.2
-      '@swc/helpers': 0.5.5
-      busboy: 1.6.0
-      caniuse-lite: 1.0.30001612
-      graceful-fs: 4.2.11
-      postcss: 8.4.31
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      styled-jsx: 5.1.1(react@18.2.0)
     optionalDependencies:
       '@next/swc-darwin-arm64': 14.2.2
       '@next/swc-darwin-x64': 14.2.2
@@ -30817,11 +30817,6 @@ snapshots:
       react: 18.2.0
     optionalDependencies:
       '@babel/core': 7.24.4
-
-  styled-jsx@5.1.1(react@18.2.0):
-    dependencies:
-      client-only: 0.0.1
-      react: 18.2.0
 
   sucrase@3.35.0:
     dependencies:
