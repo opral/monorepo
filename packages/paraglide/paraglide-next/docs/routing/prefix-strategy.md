@@ -75,18 +75,12 @@ const strategy = PrefixStrategy<AvailableLanguageTag>({
 
 ## Excluding certain Routes from Localised Routing
 
-You can exclude certain routes from i18n using the `exclude` option. You can either pass a string or a regex.
+You can exclude certain routes from i18n using the `exclude` option. Pass it a function that returns `true/false` depending on whether the given pathname should be excluded
 
 ```ts
 const strategy = PrefixStrategy<AvailableLanguageTag>({
-		 //array of routes to exclude
-		exclude: [
-			/^\/api(\/.*)?$/ //excludes all routes starting with /api
-			"/admin" //excludes /admin, but not /admin/anything - globs are not supported
-		],
+		exclude: (pathname) => pathname == "/api" || pathname.startsWith("/api/"),
 })
 ```
 
 Excluded routes won't be prefixed with the language tag & the middleware will not add `Link` headers to them.
-
-> Tip: LLMs are really good at writing regexes.
