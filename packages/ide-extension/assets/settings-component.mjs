@@ -5075,11 +5075,11 @@ var require_common = __commonJS({
         let enableOverride = null;
         let namespacesCache;
         let enabledCache;
-        function debug8(...args) {
-          if (!debug8.enabled) {
+        function debug7(...args) {
+          if (!debug7.enabled) {
             return;
           }
-          const self2 = debug8;
+          const self2 = debug7;
           const curr = Number(/* @__PURE__ */ new Date());
           const ms = curr - (prevTime || curr);
           self2.diff = ms;
@@ -5109,12 +5109,12 @@ var require_common = __commonJS({
           const logFn = self2.log || createDebug.log;
           logFn.apply(self2, args);
         }
-        debug8.namespace = namespace;
-        debug8.useColors = createDebug.useColors();
-        debug8.color = createDebug.selectColor(namespace);
-        debug8.extend = extend;
-        debug8.destroy = createDebug.destroy;
-        Object.defineProperty(debug8, "enabled", {
+        debug7.namespace = namespace;
+        debug7.useColors = createDebug.useColors();
+        debug7.color = createDebug.selectColor(namespace);
+        debug7.extend = extend;
+        debug7.destroy = createDebug.destroy;
+        Object.defineProperty(debug7, "enabled", {
           enumerable: true,
           configurable: false,
           get: () => {
@@ -5132,9 +5132,9 @@ var require_common = __commonJS({
           }
         });
         if (typeof createDebug.init === "function") {
-          createDebug.init(debug8);
+          createDebug.init(debug7);
         }
-        return debug8;
+        return debug7;
       }
       function extend(namespace, delimiter) {
         const newDebug = createDebug(this.namespace + (typeof delimiter === "undefined" ? ":" : delimiter) + namespace);
@@ -18058,7 +18058,7 @@ var InlangModule = import_typebox9.Type.Object({
 // ../sdk/dist/resolve-modules/message-lint-rules/resolveMessageLintRules.js
 var import_value = __toESM(require_value2(), 1);
 
-// ../../../node_modules/.pnpm/dedent@1.5.1_babel-plugin-macros@2.8.0/node_modules/dedent/dist/dedent.mjs
+// ../../../node_modules/.pnpm/dedent@1.5.1/node_modules/dedent/dist/dedent.mjs
 function ownKeys(object, enumerableOnly) {
   var keys = Object.keys(object);
   if (Object.getOwnPropertySymbols) {
@@ -18174,22 +18174,14 @@ var $KEYS = Symbol("track-keys");
 
 // ../sdk/dist/persistence/filelock/acquireFileLock.js
 init_dist();
-// ../sdk/dist/persistence/filelock/acquireFileLock.js
-init_dist();
 var import_debug3 = __toESM(require_browser(), 1);
 var debug3 = (0, import_debug3.default)("sdk:acquireFileLock");
-var debug3 = (0, import_debug3.default)("sdk:acquireFileLock");
 
 // ../sdk/dist/createMessagesQuery.js
 var import_debug5 = __toESM(require_browser(), 1);
-// ../sdk/dist/createMessagesQuery.js
-var import_debug5 = __toESM(require_browser(), 1);
 
-// ../sdk/dist/persistence/filelock/releaseLock.js
 // ../sdk/dist/persistence/filelock/releaseLock.js
 init_dist();
-var import_debug4 = __toESM(require_browser(), 1);
-var debug4 = (0, import_debug4.default)("sdk:releaseLock");
 var import_debug4 = __toESM(require_browser(), 1);
 var debug4 = (0, import_debug4.default)("sdk:releaseLock");
 
@@ -18198,10 +18190,6 @@ var import_murmurhash3js = __toESM(require_murmurhash3js(), 1);
 
 // ../sdk/dist/createMessagesQuery.js
 var debug5 = (0, import_debug5.default)("sdk:createMessagesQuery");
-
-// ../sdk/dist/createMessageLintReportsQuery.js
-var import_debug6 = __toESM(require_browser(), 1);
-var debug6 = (0, import_debug6.default)("sdk:lintReports");
 
 // ../sdk/dist/createNodeishFsWithAbsolutePaths.js
 init_dist();
@@ -28296,8 +28284,8 @@ init_dist();
 init_dist();
 
 // ../sdk/dist/loadProject.js
-var import_debug7 = __toESM(require_browser(), 1);
-var debug7 = (0, import_debug7.default)("sdk:loadProject");
+var import_debug6 = __toESM(require_browser(), 1);
+var debug6 = (0, import_debug6.default)("sdk:loadProject");
 var settingsCompiler = import_compiler3.TypeCompiler.Compile(ProjectSettings);
 
 // src/helper/checkRequired.ts
@@ -28469,7 +28457,6 @@ var registry = [
     publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
     website: "https://fink.inlang.com/",
     license: "PolyForm Noncommercial License 1.0.0",
-    license: "PolyForm Noncommercial License 1.0.0",
     pricing: "Free Beta"
   },
   {
@@ -28536,7 +28523,6 @@ var registry = [
     ],
     publisherName: "inlang",
     publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
-    license: "PolyForm Noncommercial License 1.0.0",
     license: "PolyForm Noncommercial License 1.0.0",
     pricing: "Free"
   },
@@ -29521,23 +29507,6 @@ var registry = [
       en: "A NextJS integration for ParaglideJS, providing you with everything you need for i18n routing"
     },
     pages: {
-      Setup: {
-        "/": "./inlang/source-code/paraglide/paraglide-next/README.md",
-        "/pages-rounter": "./inlang/source-code/paraglide/paraglide-next/docs/pages-router.md"
-      },
-      "Localised Routing": {
-        "/overview": "./inlang/source-code/paraglide/paraglide-next/docs/routing/overview.md",
-        "/prefix-strategy": "./inlang/source-code/paraglide/paraglide-next/docs/routing/prefix-strategy.md",
-        "/other-strategies": "./inlang/source-code/paraglide/paraglide-next/docs/routing/other-strategies.md"
-      },
-      "Advanced Usage": {
-        "/seo": "./inlang/source-code/paraglide/paraglide-next/docs/advanced/seo.md",
-        "/usage-on-the-server": "./inlang/source-code/paraglide/paraglide-next/docs/advanced/server.md"
-      },
-      Appendix: {
-        "/roadmap": "./inlang/source-code/paraglide/paraglide-next/docs/roadmap.md",
-        "/changelog": "./inlang/source-code/paraglide/paraglide-next/CHANGELOG.md"
-      }
       Setup: {
         "/": "./inlang/source-code/paraglide/paraglide-next/README.md",
         "/pages-rounter": "./inlang/source-code/paraglide/paraglide-next/docs/pages-router.md"
