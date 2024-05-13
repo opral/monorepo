@@ -6,6 +6,7 @@ import type {
 	Declaration,
 	Pattern,
 	Expression,
+	Variant,
 } from "@inlang/sdk/v2"
 
 export type CompileOptions = {
@@ -63,7 +64,6 @@ export function compileMessage({
 		if (variant.match.length !== 0)
 			throw new Error(`A variant on a message with no selectors must not have a match`)
 
-		//TODO apply functions to inputs
 		const source = inputsWithAnnotation.length
 			? `export const ${bundleId} = (inputs) => {
 ${inputsWithAnnotation
@@ -84,7 +84,7 @@ ${inputsWithAnnotation
 		}
 	}
 
-	if (hasSelectors) {
+	{
 		//enforce that the variants are valid
 		let hasCatchall = false
 		for (const variant of message.variants) {
@@ -92,11 +92,13 @@ ${inputsWithAnnotation
 				throw new Error(
 					`Variant has ${variant.match.length} selectors, but message has ${message.selectors.length} selectors`
 				)
-			if (variant.match.every((match) => match === "*")) hasCatchall = true
-		}
 
+			hasCatchall ||= variant.match.every((match) => match === "*")
+		}
 		if (!hasCatchall) throw new Error("Message must have a catch-all variant")
 	}
+
+	const variants = [...message.variants].sort(compareVariants)
 
 	const lines: string[] = [
 		`export const ${bundleId} = (${hasInputs ? "inputs" : ""}) => {`,
@@ -110,8 +112,7 @@ ${inputsWithAnnotation
 		}),
 		"",
 
-		//TODO sort variants by specificity - most specific first
-		...message.variants.map((variant) => {
+		...variants.map((variant) => {
 			//serialize a condition
 			const condition = variant.match
 				.map((match, idx) => (match === "*" ? "true" : `selector_${idx} === "${match}"`))
@@ -174,4 +175,16 @@ function compileExpression(expression: Expression): string {
 
 function isInputDeclaration(declaration: Declaration): declaration is InputDeclaration {
 	return declaration.type === "input"
+}
+
+function compareVariants(variantA: Variant, variantB: Variant): -1 | 0 | 1 {
+	for (let i = 0; i < variantA.match.length; i++) {
+		const matchA = variantA.match[i]
+		const matchB = variantB.match[i]
+
+		if (matchA === "*") return 1
+		if (matchB === "*") return -1
+	}
+
+	return 0
 }

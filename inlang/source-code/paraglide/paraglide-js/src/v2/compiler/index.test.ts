@@ -146,6 +146,15 @@ describe("v2 - compileMessage", () => {
 						},
 					],
 				},
+				{
+					match: ["world"],
+					pattern: [
+						{
+							type: "text",
+							value: "Hello World!",
+						},
+					],
+				},
 			],
 		}
 
