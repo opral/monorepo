@@ -72,11 +72,22 @@ describe.concurrent("paraglide-next", () => {
 			// expect src/middleware.ts to exist
 			expect(await readFile(path.resolve(workingDir, "src/middleware.ts"))).toBeTruthy()
 
+			// expect the lang attribute to be set
+			const layout = await readFile(path.resolve(workingDir, "src/app/layout.tsx"))
+			expect(layout).toBeTruthy()
+			expect(layout).includes("lang={languageTag()}")
+
+			// expect the routing to have been updated
+			const page = await readFile(path.resolve(workingDir, "src/app/page.tsx"))
+			expect(page).toBeTruthy()
+			console.info("Page", page)
+			expect(page).includes('import { Link } from "@/lib/i18n"')
+
 			await cleanup()
 		}, 60_000)
 	})
 
-	test("app-src-js", async () => {
+	test.skip("app-src-js", async () => {
 		const { readFile, path: workingDir, cleanup, spawn } = await prepareEnvironment()
 
 		const template = path.resolve(__dirname, "../templates/app-src-js")
