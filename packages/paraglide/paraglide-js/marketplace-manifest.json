@@ -39,7 +39,8 @@
 		"astro",
 		"javascript",
 		"solid",
-		"typescript"
+		"typescript",
+		"inlang"
 	],
 	"recommends": ["m/reootnfj", "m/632iow21", "m/r7kp499g", "m/teldgniy"],
 	"pricing": "free",
