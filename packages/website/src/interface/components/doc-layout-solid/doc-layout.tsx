@@ -2,7 +2,8 @@ import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import { Show, createEffect, createSignal, onMount, type JSXElement } from "solid-js"
 import MenuIcon from "~icons/material-symbols/menu"
 import InlangDocNavigation from "./doc-layout-nav.jsx"
-import InlangDocInPage from "./doc-layout-in-page.jsx"
+import { currentPageContext } from "#src/renderer/state.js"
+import InlangDocMeta from "./doc-layout-meta.jsx"
 
 const InlangDoclayout = (props: {
 	children: JSXElement
@@ -15,6 +16,8 @@ const InlangDoclayout = (props: {
 	createEffect(() => {
 		// remove header element when drawer is open
 		const header: HTMLCollectionOf<HTMLElement> = document.getElementsByTagName("header")
+		const productHeader: HTMLCollectionOf<Element> =
+			document.getElementsByClassName("product-header")
 
 		if (header[0] && drawerIsOpen()) {
 			// @ts-ignore
@@ -23,20 +26,34 @@ const InlangDoclayout = (props: {
 			// @ts-ignore
 			header[0].style = "z-index: 1000"
 		}
+
+		if (productHeader[0] && drawerIsOpen()) {
+			// @ts-ignore
+			productHeader[0].style = "z-index: 1"
+		} else if (productHeader[0]) {
+			// @ts-ignore
+			productHeader[0].style = "z-index: 1000"
+		}
 	})
 
 	onMount(() => {
 		setIsLoaded(true)
 	})
 
+	createEffect(() => {
+		if (currentPageContext?.urlParsed) {
+			setDrawerIsOpen(false)
+		}
+	})
+
 	return (
 		<div class="flex w-full h-full">
-			<div class="hidden sm:block sticky top-[107px] w-[230px] h-[calc(100vh_-_107px)]">
+			<div class="hidden sm:block sticky top-[164px] w-[230px] h-[calc(100vh_-_164px)]">
 				<div class="w-full h-full overflow-y-scroll pb-8 pr-4 pl-3 -ml-3">
 					<InlangDocNavigation manifest={props.manifest} currentRoute={props.currentRoute} />
 				</div>
 			</div>
-			<div class="flex-1 w-min overflow-hidden h-full px-0 sm:px-5 xl:px-10">
+			<div class="flex-1 w-min overflow-hidden h-full px-0 sm:px-5 xl:px-10 min-h-screen">
 				{props.children}
 				<div
 					class="fixed bottom-[24px] right-[24px] sm:hidden"
@@ -47,9 +64,9 @@ const InlangDoclayout = (props: {
 					</div>
 				</div>
 			</div>
-			<div class="hidden xl:block sticky top-[107px] w-[230px] h-[calc(100vh_-_107px)]">
+			<div class="hidden xl:block sticky top-[164px] w-[230px] h-[calc(100vh_-_164px)]">
 				<div class="w-full h-full overflow-y-scroll pb-8 pr-4">
-					<InlangDocInPage
+					<InlangDocMeta
 						manifest={props.manifest}
 						contentInHtml={(props.children as HTMLElement).children}
 						currentRoute={props.currentRoute}
