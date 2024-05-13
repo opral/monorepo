@@ -1,5 +1,4 @@
 import { openInFinkCommand } from "./commands/openInFink.js"
-import { openInFinkCommand } from "./commands/openInFink.js"
 import { extractMessageCommand } from "./commands/extractMessage.js"
 import { editMessageCommand } from "./commands/editMessage.js"
 import { EventEmitter } from "vscode"
