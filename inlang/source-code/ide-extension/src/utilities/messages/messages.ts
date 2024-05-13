@@ -307,7 +307,7 @@ export function getTranslationsTableHtml(args: {
 				${
 					m === CONFIGURATION.STRINGS.MISSING_TRANSLATION_MESSAGE
 						? `
-				<button title="AI translate" onclick="${machineTranslateCommand}"><span class="codicon codicon-sparkle"></span></button>`
+				<button title="Translate message with Inlang AI" onclick="${machineTranslateCommand}"><span class="codicon codicon-sparkle"></span></button>`
 						: `<button title="Edit" onclick="${editCommand}"><span class="codicon codicon-edit"></span></button>`
 				}
 				</span>
