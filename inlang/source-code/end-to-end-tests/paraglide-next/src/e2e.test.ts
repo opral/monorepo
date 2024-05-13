@@ -82,7 +82,7 @@ describe.concurrent("paraglide-next", () => {
 		}, 60_000)
 	})
 
-	test.skip("app-src-js", async () => {
+	test("app-src-js", async () => {
 		const { readFile, path: workingDir, cleanup, spawn } = await prepareEnvironment()
 
 		const template = path.resolve(__dirname, "../templates/app-src-js")
