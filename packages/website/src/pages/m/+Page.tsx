@@ -91,11 +91,16 @@ export default function Page(props: PageProps) {
 					<div class="w-full h-full">
 						<InlangDoclayout manifest={props.manifest} currentRoute={props.pagePath}>
 							{/* eslint-disable-next-line solid/no-innerhtml */}
-							<article class="w-full mt-12" innerHTML={props.markdown} />
+							<article class="w-full my-12" innerHTML={props.markdown} />
 						</InlangDoclayout>
 						<div class="mt-20">
 							<GetHelp text="Do you have questions?" />
 						</div>
+						<Show when={props.recommends && props.recommends.length > 0}>
+							<div class="my-12">
+								<Recommends recommends={props.recommends!} />
+							</div>
+						</Show>
 					</div>
 				</Show>
 			</MarketplaceLayout>
@@ -106,7 +111,7 @@ export default function Page(props: PageProps) {
 export function Recommends(props: { recommends: MarketplaceManifest[] }) {
 	return (
 		<>
-			<h3 class="font-semibold mb-4">Recommended:</h3>
+			<h3 class="font-semibold mb-4">Recommended</h3>
 			<div class="flex items-center gap-4 md:flex-row flex-col">
 				<For each={props.recommends}>
 					{/* @ts-ignore */}
