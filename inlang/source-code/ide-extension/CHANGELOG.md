@@ -1,5 +1,12 @@
 # inlang-vs-code-extension
 
+## 1.43.0
+
+### Minor Changes
+
+- 5220b0e: add machine translations to context menu + improve visual recognition
+- 1fb1e77: Update openInEditor command title and add branch parameter
+
 ## 1.42.12
 
 ### Patch Changes
