@@ -182,8 +182,8 @@ function compareVariants(variantA: Variant, variantB: Variant): -1 | 0 | 1 {
 		const matchA = variantA.match[i]
 		const matchB = variantB.match[i]
 
-		if (matchA === "*") return 1
-		if (matchB === "*") return -1
+		if (matchA === "*" && matchB !== "*") return 1
+		if (matchB === "*" && matchA !== "*") return -1
 	}
 
 	return 0
