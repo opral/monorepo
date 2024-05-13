@@ -553,8 +553,10 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			}
 		},
 		async (args) => {
+			await new Promise((resolve) => setTimeout(resolve, 7000))
 			// wait for the browser to be idle
 			await new Promise((resolve) => requestIdleCallback(resolve))
+			console.log("fetching forkStatus")
 			const value = await args.repo!.forkStatus()
 			if ("error" in value) {
 				// Silently ignore errors:
@@ -609,6 +611,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			return { repo: repo() }
 		},
 		async (args) => {
+			console.log("fetching branchList")
 			return await args.repo?.getBranches()
 		}
 	)
