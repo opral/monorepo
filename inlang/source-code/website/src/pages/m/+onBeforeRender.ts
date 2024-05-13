@@ -144,6 +144,16 @@ export default async function onBeforeRender(pageContext: PageContext) {
 		throw redirect(itemPath as `/${string}`, 301)
 	}
 
+	const recommends = item.recommends
+		? registry.filter((i: any) => {
+				for (const recommend of item.recommends!) {
+					if (recommend.replace("m/", "") === i.uniqueID) return true
+					if (recommend.replace("g/", "") === i.uniqueID) return true
+				}
+				return false
+		  })
+		: undefined
+
 	return {
 		pageContext: {
 			pageProps: {
@@ -153,7 +163,7 @@ export default async function onBeforeRender(pageContext: PageContext) {
 				pagePath,
 				tableOfContents: tabelOfContents[pagePath] || {},
 				manifest: item,
-				recommends: [],
+				recommends,
 			} as PageProps,
 		},
 	}
