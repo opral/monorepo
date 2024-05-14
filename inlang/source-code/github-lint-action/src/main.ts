@@ -279,9 +279,9 @@ ${lintSummary
 					comment.user?.login === "github-actions[bot]"
 			)?.id
 			if (commentId) {
-				core.debug("Updating existing comment")
+				console.debug("Updating existing comment")
 				if (results.every((result) => result.commentContent.length === 0)) {
-					core.debug("Reports have been fixed, updating comment and removing it")
+					console.debug("Reports have been fixed, updating comment and removing it")
 					await octokit.rest.issues.updateComment({
 						owner,
 						repo,
@@ -290,7 +290,7 @@ ${lintSummary
 						as: "ninja-i18n",
 					})
 				} else {
-					core.debug("Reports have not been fixed, updating comment")
+					console.debug("Reports have not been fixed, updating comment")
 					await octokit.rest.issues.updateComment({
 						owner,
 						repo,
@@ -301,9 +301,9 @@ ${lintSummary
 				}
 			}
 		} else if (results.every((result) => result.commentContent.length === 0)) {
-			core.debug("No lint reports found, skipping comment")
+			console.debug("No lint reports found, skipping comment")
 		} else {
-			core.debug("Creating a new comment")
+			console.debug("Creating a new comment")
 			await octokit.rest.issues.createComment({
 				owner,
 				repo,
