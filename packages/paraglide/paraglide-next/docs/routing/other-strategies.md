@@ -57,7 +57,7 @@ const MyStrategy: RoutingStrategy<AvailableLanguageTag> = {
 	 * @example /de/ueber-uns + de -> /about
 	 * 
 	 */
-	getCanonicalPath(localisedPath: `/${string}`, locale: T): `/${string}`
+	getCanonicalPath(localisedPath: `/${string}`, locale: AvailableLanguageTag): `/${string}`
 
 
 	/**
@@ -68,7 +68,7 @@ const MyStrategy: RoutingStrategy<AvailableLanguageTag> = {
 	 * 
 	 * @example /about + de -> /de/ueber-uns
 	 */
-	getLocalisedUrl(canonicalPath: `/${string}`, targetLocale: T, isLanugageSwitch: boolean)
+	getLocalisedUrl(canonicalPath: `/${string}`, targetLocale: AvailableLanguageTag, isLanugageSwitch: boolean)
 		: import("url").UrlObject
 }
 ```
