@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 0.34.9
+
+### Patch Changes
+
+- a958d91: Minor debug logging improvements
+
 ## 0.34.8
 
 ### Patch Changes
