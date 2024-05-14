@@ -1,12 +1,5 @@
-import type { ProjectSettings } from "@inlang/sdk"
+/* eslint-disable */
 
-/**
- * Returns the code for the `runtime.js` module
- */
-export function createRuntime(
-	opts: Pick<ProjectSettings, "languageTags" | "sourceLanguageTag">
-): string {
-	return `/* eslint-disable */
 /** @type {((tag: AvailableLanguageTag) => void) | undefined} */ 
 let _onSetLanguageTag
 
@@ -19,7 +12,7 @@ let _onSetLanguageTag
  *     return
  *   }
  */
-export const sourceLanguageTag = "${opts.sourceLanguageTag}"
+export const sourceLanguageTag = "{{sourceLanguageTag}}"
 
 /**
  * The project's available language tags.
@@ -29,7 +22,7 @@ export const sourceLanguageTag = "${opts.sourceLanguageTag}"
  *     throw new Error("Language tag not available")
  *   }
  */
-export const availableLanguageTags = /** @type {const} */ (${JSON.stringify(opts.languageTags)})
+export const availableLanguageTags = /** @type {const} */ ({{languageTags}})
 
 /**
  * Get the current language tag.
@@ -84,14 +77,14 @@ function enforceLanguageTag(unsafeLanguageTag) {
     return () => {
         const tag = unsafeLanguageTag()
         if(!isAvailableLanguageTag(tag)) {
-            throw new Error(\`languageTag() didn't return a valid language tag. Check your setLanguageTag call\`)
+            throw new Error(`languageTag() didn't return a valid language tag. Check your setLanguageTag call`)
         }
         return tag
     }
 }
 
 /**
- * Set the \`onSetLanguageTag()\` callback function.
+ * Set the `onSetLanguageTag()` callback function.
  *
  * The function can be used to trigger client-side side-effects such as 
  * making a new request to the server with the updated language tag, 
@@ -101,16 +94,16 @@ function enforceLanguageTag(unsafeLanguageTag) {
  *   Triggering a side-effect is only useful on the client because a server-side
  *   environment doesn't need to re-render the UI. 
  *     
- * - The \`onSetLanguageTag()\` callback can only be defined once to avoid unexpected behavior.
+ * - The `onSetLanguageTag()` callback can only be defined once to avoid unexpected behavior.
  * 
  * @example
  *   // if you use inlang paraglide on the server, make sure 
- *   // to not call \`onSetLanguageTag()\` on the server
+ *   // to not call `onSetLanguageTag()` on the server
  *   if (isServer === false) {
  *     onSetLanguageTag((tag) => {
  *       // (for example) make a new request to the 
  *       // server with the updated language tag
- *       window.location.href = \`/\${tag}/\${window.location.pathname}\`
+ *       window.location.href = `/${tag}/${window.location.pathname}`
  *     })
  *   }
  *
@@ -146,5 +139,4 @@ export function isAvailableLanguageTag(thing) {
  *   setLanguageTag(request.languageTag as AvailableLanguageTag)
  * 
  * @typedef {typeof availableLanguageTags[number]} AvailableLanguageTag
- */`
-}
+ */

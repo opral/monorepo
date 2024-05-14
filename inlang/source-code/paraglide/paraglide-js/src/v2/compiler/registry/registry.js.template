@@ -1,0 +1,17 @@
+/* eslint-disable */
+
+/**
+ * @typedef {import("./runtime.js").AvailableLanguageTag} AvailableLanguageTag
+ */
+
+/**
+ * Plural selection and formatting
+ * 
+ * @param {number} value
+ * @param {AvailableLanguageTag} languageTag
+ * @param {any} opts
+ * 
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/PluralRules/PluralRules
+ */
+export const plural = (value, languageTag, opts) => new Intl.PluralRules(languageTag, opts).select(value)
+

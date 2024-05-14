@@ -8,8 +8,9 @@ import type {
 	Expression,
 	Variant,
 } from "@inlang/sdk/v2"
-import { createRuntime } from "./runtime.js"
-import { REGISTRY_JS_FILE, registry } from "./registry.js"
+import { createRuntime } from "./runtime/index.js"
+import { registry } from "./registry/registry.js"
+import REGISTRY_JS_FILE from "./registry/registry.js.template?raw"
 
 export type CompileOptions = {
 	messageBundles: Readonly<MessageBundle[]>
@@ -32,18 +33,18 @@ export function compileBundle({
 			compileMessage({ message, bundleId: bundle.id })
 		)
 
-		// loop over the params of each message & merge them
-		// if two messaegs have the same param but with different types throw an error
-		const paramNames = new Set<string>(messages.flatMap((m) => Object.keys(m.params)))
+		// loop over the inputs of each message & merge them
+		// if two messaegs have the same input but with different types throw an error
+		const inputNames = new Set<string>(messages.flatMap((m) => Object.keys(m.inputs)))
 
-		const params = Object.fromEntries(
-			[...paramNames].map((name) => {
+		const inputs = Object.fromEntries(
+			[...inputNames].map((name) => {
 				let type: string | undefined = undefined
 				for (const message of messages) {
-					const paramType = message.params[name]
-					if (!paramType) continue
-					if (type === undefined) type = paramType
-					else if (paramType !== type)
+					const inputType = message.inputs[name]
+					if (!inputType) continue
+					if (type === undefined) type = inputType
+					else if (inputType !== type)
 						throw new Error(`A parameter must have the same type across all languages`)
 				}
 
@@ -56,7 +57,7 @@ export function compileBundle({
 		return {
 			id: bundle.id,
 			messages,
-			params,
+			params: inputs,
 		}
 	})
 
@@ -122,9 +123,9 @@ type CompiledMessage = {
 	locale: string
 
 	/**
-	 * The parameter-types of the message
+	 * The input-types of the message
 	 */
-	params: Record<string, string>
+	inputs: Record<string, string>
 
 	/**
 	 * The source-code for the message function
@@ -180,7 +181,7 @@ ${inputsWithAnnotation
 
 		return {
 			source,
-			params,
+			inputs: params,
 			locale: message.locale,
 		}
 	}
@@ -215,11 +216,16 @@ ${inputsWithAnnotation
 
 		...variants.map((variant) => {
 			//serialize a condition
-			const condition = variant.match
-				.map((match, idx) => (match === "*" ? "true" : `selector_${idx} === "${match}"`))
-				.join(" && ")
+			const condition =
+				variant.match
+					.map((match, idx) => (match === "*" ? "true" : `selector_${idx} === "${match}"`))
+					.filter((cond) => cond !== "true") //remove catchalls
+					.join(" && ") || "true" //fallback to just true if all selectors are catchalls
 
-			return `    if(${condition}) return ${compilePattern(variant.pattern)}`
+			//only add an if-statemetn if the condition isn't guaranteed to be true
+			return condition === "true"
+				? `\treturn ${compilePattern(variant.pattern)}`
+				: `\tif(${condition}) return ${compilePattern(variant.pattern)}`
 		}),
 		"}",
 	]
@@ -228,7 +234,7 @@ ${inputsWithAnnotation
 
 	return {
 		source,
-		params,
+		inputs: params,
 		locale: message.locale,
 	}
 }
