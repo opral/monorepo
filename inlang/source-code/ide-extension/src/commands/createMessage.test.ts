@@ -149,7 +149,7 @@ describe("createMessageCommand", () => {
 		})
 		expect(CONFIGURATION.EVENTS.ON_DID_CREATE_MESSAGE.fire).toHaveBeenCalled()
 		expect(telemetry.capture).toHaveBeenCalledWith({
-			event: "IDE-EXTENSION command executed",
+			event: "IDE-EXTENSION command executed: Create Message",
 		})
 		expect(msg).toHaveBeenCalledWith("Message created.")
 	})
