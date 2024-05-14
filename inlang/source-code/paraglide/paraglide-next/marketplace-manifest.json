@@ -27,6 +27,7 @@
 			"/usage-on-the-server": "./inlang/source-code/paraglide/paraglide-next/docs/advanced/server.md"
 		},
 		"Appendix": {
+			"/manual-setup": "./inlang/source-code/paraglide/paraglide-next/docs/manual-setup.md",
 			"/roadmap": "./inlang/source-code/paraglide/paraglide-next/docs/roadmap.md",
 			"/changelog": "./inlang/source-code/paraglide/paraglide-next/CHANGELOG.md"
 		}
