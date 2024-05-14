@@ -6,11 +6,6 @@ import { defaultProjectSettings } from "./defaultProjectSettings.js"
 /**
  * Creates a new project in the given directory.
  * The directory must be an absolute path, must not exist, and must end with {name}.inlang
- * Uses defaultProjectSettings unless projectSettings are provided.
- *
- * @param projectPath - Absolute path to the [name].inlang directory
- * @param repo - An instance of a lix repo as returned by `openRepository`
- * @param projectSettings - Optional project settings to use for the new project.
  */
 export async function createNewProject(args: {
 	projectPath: string

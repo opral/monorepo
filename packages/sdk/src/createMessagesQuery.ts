@@ -15,7 +15,7 @@ import type { ProjectSettings } from "@inlang/project-settings"
 import { releaseLock } from "./persistence/filelock/releaseLock.js"
 import { PluginLoadMessagesError, PluginSaveMessagesError } from "./errors.js"
 import { humanIdHash } from "./storage/human-id/human-readable-id.js"
-const debug = _debug("sdk:createMessagesQuery")
+const debug = _debug("sdk:messages")
 
 function sleep(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms))
