@@ -1,5 +1,11 @@
 # @inlang/github-lint-action
 
+## 0.3.1
+
+### Patch Changes
+
+- 49cec88: Debug logs for comment creation
+
 ## 0.3.0
 
 ### Minor Changes
