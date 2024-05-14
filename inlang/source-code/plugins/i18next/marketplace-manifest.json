@@ -30,6 +30,7 @@
 	],
 	"recommends": ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g", "m/gerre34r"],
 	"publisherName": "inlang",
+	"website": "https://manage.inlang.com/install?module=plugin.inlang.i18next",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
 	"license": "Apache-2.0",
 	"module": "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@latest/dist/index.js"
