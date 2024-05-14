@@ -13,7 +13,7 @@ export const extractMessageCommand = {
 	command: "sherlock.extractMessage",
 	title: "Sherlock: Extract Message",
 	register: commands.registerTextEditorCommand,
-	callback: async function (textEditor: TextEditor) {
+	callback: async function (textEditor: TextEditor | undefined) {
 		const ideExtension = state().project.customApi()["app.inlang.ideExtension"]
 		const sourceLanguageTag = state().project.settings().sourceLanguageTag
 
@@ -38,6 +38,18 @@ export const extractMessageCommand = {
 				"warn",
 				"notification"
 			)
+		}
+
+		if (textEditor === undefined) {
+			return msg(
+				"No active text editor found. Please open a file in the editor to extract a message.",
+				"warn",
+				"notification"
+			)
+		}
+
+		if (textEditor.selection.isEmpty) {
+			return msg("Please select a text to extract in your text editor.", "warn", "notification")
 		}
 
 		const messageId = await window.showInputBox({
@@ -113,7 +125,7 @@ export const extractMessageCommand = {
 		CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.fire()
 
 		telemetry.capture({
-			event: "IDE-EXTENSION command executed",
+			event: "IDE-EXTENSION command executed: Extract Message",
 		})
 		return msg("Message extracted.")
 	},

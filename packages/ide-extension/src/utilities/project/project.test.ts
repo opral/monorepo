@@ -74,6 +74,9 @@ vi.mock("../../configuration.js", () => ({
 			ON_DID_EDIT_MESSAGE: {
 				fire: vi.fn(),
 			},
+			ON_DID_CREATE_MESSAGE: {
+				fire: vi.fn(),
+			},
 			ON_DID_EXTRACT_MESSAGE: {
 				fire: vi.fn(),
 			},
