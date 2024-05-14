@@ -35,7 +35,9 @@
 
 <img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/sherlock-start.png"/>
 
-Install the extension and click `Getting Started` in the `Inlang Tab`. 
+Install the extension and click `Getting Started` in the `Sherlock Tab`.
+
+> You need a git repository to use the Sherlock extension, as it leverages git functionality (the inlang ecosystem is built on git).
 
 ### Manual setup
 
@@ -130,7 +132,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 
 <br>
 
-## Inlang Tab - Transparent & Fast
+## Sherlock tab - Transparent & Fast
 
 <div>
 	<div class="flex-container">
@@ -139,7 +141,7 @@ See translations and edit them directly in your code. No more back-and-forth loo
 		</div>
 		<div class="flex-item">
 			<p class="bold">📦 Monorepo support</p>
-			<p>You can have multiple projects in your repository. The inlang tab makes it easy to switch from one to another.</p>
+			<p>You can have multiple projects in your repository. The Sherlock tab makes it easy to switch from one to another.</p>
 		</div>
 	</div>
 </div>
