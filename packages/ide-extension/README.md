@@ -2,6 +2,8 @@
 
 # Sherlock – i18n inspector for Visual Studio Code
 
+Visualize, edit, and lint translated strings effortlessly using Inline Decorations & Hover Support. Extract new strings with a simple click, making localization tasks more intuitive and efficient.
+
 <div>
 	<p>
 		<br>
