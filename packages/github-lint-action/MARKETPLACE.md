@@ -31,9 +31,8 @@ on: pull_request_target
 
 # explicitly configure permissions, in case your GITHUB_TOKEN workflow permissions are set to read-only in repository settings
 permissions:
-  actions: write       # Necessary to cancel workflow executions
-  issues: read         # Necessary to read issue comments
   pull-requests: write # Necessary to comment on PRs
+  issues: read         # Necessary to read issue comments
   contents: read       # Necessary to access the repo content
 
 jobs:
