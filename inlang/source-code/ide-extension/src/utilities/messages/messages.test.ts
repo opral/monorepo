@@ -37,6 +37,7 @@ vi.mock("../../configuration.js", () => ({
 	CONFIGURATION: {
 		EVENTS: {
 			ON_DID_EXTRACT_MESSAGE: { event: vi.fn() },
+			ON_DID_CREATE_MESSAGE: { event: vi.fn() },
 			ON_DID_EDIT_MESSAGE: { event: vi.fn() },
 			ON_DID_PROJECT_TREE_VIEW_CHANGE: { event: vi.fn() },
 		},
