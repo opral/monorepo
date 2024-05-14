@@ -24,6 +24,14 @@
 			"/changelog": "./inlang/source-code/paraglide/paraglide-js/CHANGELOG.md"
 		},
 
+		"Framework Libraries": {
+			"NextJS": "/m/osslbuzt/paraglide-next-i18n",
+			"SvelteKit": "/m/dxnzrydw/paraglide-sveltekit-i18n",
+			"Astro": "/m/iljlwzfs/paraglide-astro-i18n",
+			"SolidStart": "/m/n860p17j/paraglide-solidstart-i18n",
+			"Remix": "/m/fnhuwzrx/paraglide-remix-i18n"
+		},
+
 		"Tooling": {
 			"VsCode Extension": "/m/r7kp499g/app-inlang-ideExtension",
 			"Machine Translation": "/m/2qj2w8pu/app-inlang-cli",
