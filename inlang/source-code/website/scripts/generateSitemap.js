@@ -60,18 +60,26 @@ async function generateSitemap() {
 									publishDate
 								)}`
 							} else {
-								for (const restSlug of Object.keys(value)) {
-									content = `${content}${formatPage(
-										siteURL +
-											// locale +
-											route.path +
-											"/" +
-											item.uniqueID +
-											"/" +
-											(item.slug ? item.slug.replaceAll(".", "-") : item.id.replaceAll(".", "-")) +
-											restSlug,
-										publishDate
-									)}`
+								for (const [restSlug, path] of Object.entries(value)) {
+									if (
+										!path.startsWith("http") &&
+										!path.startsWith("https") &&
+										!path.startsWith("/")
+									) {
+										content = `${content}${formatPage(
+											siteURL +
+												// locale +
+												route.path +
+												"/" +
+												item.uniqueID +
+												"/" +
+												(item.slug
+													? item.slug.replaceAll(".", "-")
+													: item.id.replaceAll(".", "-")) +
+												(restSlug !== "/" ? restSlug : ""),
+											publishDate
+										)}`
+									}
 								}
 							}
 						}
