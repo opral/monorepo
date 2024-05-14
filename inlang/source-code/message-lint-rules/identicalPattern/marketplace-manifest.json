@@ -18,7 +18,7 @@
 	"keywords": ["message", "lint rule", "itentical pattern", "website"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"website": "https://manage.inlang.com/install?module=messageLintRule.inlang.identicalPattern",
 	"license": "Apache-2.0",
 	"module": "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-identical-pattern@latest/dist/index.js"
 }
-  

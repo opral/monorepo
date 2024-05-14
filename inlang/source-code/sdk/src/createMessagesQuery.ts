@@ -103,14 +103,6 @@ export function createMessagesQuery({
 		const resolvedPluginApi = resolvedModules()?.resolvedPluginApi
 		if (!resolvedPluginApi) return
 
-		const abortController = new AbortController()
-		// called between executions of effects as well as on disposal
-		onCleanup(() => {
-			// stop listening on fs events
-			abortController.abort()
-			delegate?.onCleanup()
-		})
-
 		const fsWithWatcher = createNodeishFsWithWatcher({
 			nodeishFs: nodeishFs,
 			// this message is called whenever a file changes that was read earlier by this filesystem
@@ -133,7 +125,13 @@ export function createMessagesQuery({
 						onLoadMessageResult()
 					})
 			},
-			abortController,
+		})
+
+		// called between executions of effects as well as on disposal
+		onCleanup(() => {
+			// stop listening on fs events
+			fsWithWatcher.stopWatching()
+			delegate?.onCleanup()
 		})
 
 		if (!resolvedPluginApi.loadMessages) {

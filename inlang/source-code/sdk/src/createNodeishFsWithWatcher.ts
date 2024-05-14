@@ -9,15 +9,27 @@ import type { NodeishFilesystem } from "@lix-js/fs"
 export const createNodeishFsWithWatcher = (args: {
 	nodeishFs: NodeishFilesystem
 	updateMessages: () => void
-	abortController: AbortController
-}): NodeishFilesystem => {
+}): NodeishFilesystem & {
+	stopWatching: () => void
+} => {
 	const pathList: string[] = []
+	let abortControllers: AbortController[] = []
+
+	const stopWatching = () => {
+		for (const ac of abortControllers) {
+			ac.abort()
+		}
+		// release references
+		abortControllers = [];
+	}
 
 	const makeWatcher = (path: string) => {
 		;(async () => {
 			try {
+				const ac = new AbortController()
+				abortControllers.push(ac)
 				const watcher = args.nodeishFs.watch(path, {
-					signal: args.abortController.signal,
+					signal: ac.signal,
 					persistent: false,
 				})
 				if (watcher) {
@@ -57,5 +69,6 @@ export const createNodeishFsWithWatcher = (args: {
 		writeFile: args.nodeishFs.writeFile,
 		watch: args.nodeishFs.watch,
 		stat: args.nodeishFs.stat,
+		stopWatching,
 	}
 }
