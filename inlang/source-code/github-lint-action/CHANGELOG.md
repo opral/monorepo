@@ -1,5 +1,16 @@
 # @inlang/github-lint-action
 
+## 0.3.0
+
+### Minor Changes
+
+- 8e3da4b: Improved error detection by comparing the target before and after merge
+
+### Patch Changes
+
+- Updated dependencies [10dbd02]
+  - @inlang/sdk@0.34.8
+
 ## 0.2.30
 
 ### Patch Changes
