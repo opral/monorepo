@@ -116,6 +116,7 @@ export async function handleTreeSelection(args: {
 
 		// Update decorations
 		CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire(undefined)
+		CONFIGURATION.EVENTS.ON_DID_CREATE_MESSAGE.fire(undefined)
 		CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.fire(undefined)
 		// Refresh the entire tree to reflect selection changes
 		CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.fire(undefined)
