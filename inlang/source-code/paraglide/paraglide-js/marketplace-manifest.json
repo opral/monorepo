@@ -19,7 +19,6 @@
 		"": {
 			"/": "./inlang/source-code/paraglide/paraglide-js/docs/why-paraglide.md",
 			"/usage": "./inlang/source-code/paraglide/paraglide-js/README.md",
-			"/framework-libraries": "./inlang/source-code/paraglide/paraglide-js/docs/framework-libraries.md",
 			"/architecture": "./inlang/source-code/paraglide/paraglide-js/docs/architecture.md",
 			"/changelog": "./inlang/source-code/paraglide/paraglide-js/CHANGELOG.md"
 		},
@@ -29,7 +28,8 @@
 			"SvelteKit": "/m/dxnzrydw/paraglide-sveltekit-i18n",
 			"Astro": "/m/iljlwzfs/paraglide-astro-i18n",
 			"SolidStart": "/m/n860p17j/paraglide-solidstart-i18n",
-			"Remix": "/m/fnhuwzrx/paraglide-remix-i18n"
+			"Remix": "/m/fnhuwzrx/paraglide-remix-i18n",
+			"Build your own": "./inlang/source-code/paraglide/paraglide-js/docs/custom-framework-library.md"
 		},
 
 		"Tooling": {
