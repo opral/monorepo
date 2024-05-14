@@ -18,6 +18,7 @@
 	"keywords": ["message", "lint rule", "javascript", "paraglide", "website"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"website": "https://manage.inlang.com/install?module=messageLintRule.inlang.validJsIdentifier",
 	"license": "Apache-2.0",
 	"module": "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-valid-js-identifier@latest/dist/index.js"
 }
