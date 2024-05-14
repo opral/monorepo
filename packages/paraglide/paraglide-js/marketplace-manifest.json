@@ -16,8 +16,19 @@
 		"en": "Simple, adaptable and tiny i18n library that integrates with any framework"
 	},
 	"pages": {
-		"/": "./inlang/source-code/paraglide/paraglide-js/README.md",
-		"/changelog": "./inlang/source-code/paraglide/paraglide-js/CHANGELOG.md"
+		"": {
+			"/": "./inlang/source-code/paraglide/paraglide-js/docs/why-paraglide.md",
+			"/usage": "./inlang/source-code/paraglide/paraglide-js/README.md",
+			"/framework-libraries": "./inlang/source-code/paraglide/paraglide-js/docs/framework-libraries.md",
+			"/architecture": "./inlang/source-code/paraglide/paraglide-js/docs/architecture.md",
+			"/changelog": "./inlang/source-code/paraglide/paraglide-js/CHANGELOG.md"
+		},
+
+		"Tooling": {
+			"VsCode Extension": "/m/r7kp499g/app-inlang-ideExtension",
+			"Machine Translation": "/m/2qj2w8pu/app-inlang-cli",
+			"Translation Editor": "/m/tdozzpar/app-inlang-finkLocalizationEditor"
+		}
 	},
 	"keywords": [
 		"paraglide js",
