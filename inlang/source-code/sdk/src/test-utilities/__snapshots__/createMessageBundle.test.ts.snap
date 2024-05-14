@@ -1,0 +1,108 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`createMessageBundle > creates a bundle with messages and an alias 1`] = `
+{
+  "alias": {
+    "default": "hello_world",
+  },
+  "id": "happy_elephant",
+  "messages": [
+    {
+      "declarations": [
+        {
+          "name": "name",
+          "type": "input",
+          "value": {
+            "annotation": undefined,
+            "arg": {
+              "name": "name",
+              "type": "variable",
+            },
+            "type": "expression",
+          },
+        },
+      ],
+      "locale": "en",
+      "selectors": [],
+      "variants": [
+        {
+          "match": [],
+          "pattern": [
+            {
+              "type": "text",
+              "value": "Hello ",
+            },
+            {
+              "annotation": undefined,
+              "arg": {
+                "name": "name",
+                "type": "variable",
+              },
+              "type": "expression",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      "declarations": [
+        {
+          "name": "name",
+          "type": "input",
+          "value": {
+            "annotation": undefined,
+            "arg": {
+              "name": "name",
+              "type": "variable",
+            },
+            "type": "expression",
+          },
+        },
+      ],
+      "locale": "de",
+      "selectors": [
+        {
+          "annotation": undefined,
+          "arg": {
+            "name": "name",
+            "type": "variable",
+          },
+          "type": "expression",
+        },
+      ],
+      "variants": [
+        {
+          "match": [
+            "World",
+          ],
+          "pattern": [
+            {
+              "type": "text",
+              "value": "Hallo Welt",
+            },
+          ],
+        },
+        {
+          "match": [
+            "*",
+          ],
+          "pattern": [
+            {
+              "type": "text",
+              "value": "Hallo ",
+            },
+            {
+              "annotation": undefined,
+              "arg": {
+                "name": "name",
+                "type": "variable",
+              },
+              "type": "expression",
+            },
+          ],
+        },
+      ],
+    },
+  ],
+}
+`;
