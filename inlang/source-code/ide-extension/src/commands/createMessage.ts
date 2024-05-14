@@ -69,7 +69,7 @@ export const createMessageCommand = {
 		CONFIGURATION.EVENTS.ON_DID_CREATE_MESSAGE.fire()
 
 		telemetry.capture({
-			event: "IDE-EXTENSION command executed",
+			event: "IDE-EXTENSION command executed: Create Message",
 		})
 		return msg("Message created.")
 	},
