@@ -77,6 +77,7 @@ export async function convert(markdown: string): Promise<{ data: any; html: stri
 				"doc-pricing",
 				"doc-important",
 				"doc-video",
+				"doc-hero",
 				...(defaultSchema.tagNames ?? []),
 			],
 			attributes: {
@@ -93,6 +94,16 @@ export async function convert(markdown: string): Promise<{ data: any; html: stri
 				"doc-important": ["title", "description"],
 				"doc-pricing": ["heading", "content"],
 				"doc-video": ["src", "type"],
+				"doc-hero": [
+					"title",
+					"description",
+					"primary-text",
+					"primary-link",
+					"secondary-text",
+					"secondary-link",
+					"tag",
+					"companies",
+				],
 				...defaultSchema.attributes,
 			},
 		})

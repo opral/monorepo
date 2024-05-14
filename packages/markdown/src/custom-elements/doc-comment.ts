@@ -12,13 +12,14 @@ export class DocComment extends LitElement {
 		.comment-wrapper {
 			background-color: #e3e8ed;
 			border-radius: 0.5rem;
-			padding: 1rem 0.6rem;
+			padding: 1rem 1rem;
 			margin: 0;
 			font-weight: 500;
-			line-height: 1.2em;
-			color: #0f172a;
+			line-height: 1.4em;
+			font-size: 14px;
+			color: #475569;
 			position: relative;
-			max-width: 400px;
+			max-width: 300px;
 		}
 
 		/* A little rectangle make it look like a speech bubble */

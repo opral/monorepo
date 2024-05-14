@@ -16,7 +16,14 @@
 		"en": "Your translation workflow with no-code setup and repository-based operation — the ideal i18n solution for translators."
 	},
 	"pages": {
-		"/": "./inlang/source-code/editor/README.md"
+		"Overview": {
+			"/": "./inlang/source-code/editor/README.md",
+			"/get-started": "./inlang/source-code/editor/docs/get-started.md"
+		},
+		"Guides": {
+			"Usage": "/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink",
+			"What is inlang?": "/g/7777asdy/guide-nilsjacobsen-ecosystemCompatible"
+		}
 	},
 	"keywords": [
 		"editor",
