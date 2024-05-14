@@ -5,7 +5,7 @@ In general you can use messages and the `languageTag()` function on the server w
 There are a few things to be aware of:
 - Messages are just functions. Make sure they are called somewhere that's evaluated for every request. 
 
-### Setting the Language in Server Actions
+### Using the Language in Server Actions
 
 Use the `initializeLanguage` function at the top of your server-action file to make sure the language is available.
 
@@ -20,6 +20,10 @@ initializeLanguage() //call it at the top of the file
 export async function someAction() {
 	languageTag() // "de"
 }
+
+export async function someOtherAction() {
+	languageTag() // "de"
+}
 ```
 
 ## Chaining Middleware
@@ -31,11 +35,9 @@ Just call Paraglide-Next's middleware inside your own middleware function. Pass 
 ```ts
 // src/middleware.ts
 import { middleware as paraglide } from "@/lib/i18n"
-export default function middleware(request: NextRequest) {
+export function middleware(request: NextRequest) {
 	//do something with the request
-
 	const response = paraglide(request)
-
 	// do something with the response
 	return response
 }

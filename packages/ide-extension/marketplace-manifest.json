@@ -38,6 +38,7 @@
 	],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"website": "https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension",
 	"license": "PolyForm Noncommercial License 1.0.0",
 	"pricing": "Free"
 }

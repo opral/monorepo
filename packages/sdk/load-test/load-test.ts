@@ -52,7 +52,9 @@ export async function runLoadTest(
 		process.exit(0)
 	})
 
-	await generateMessageFile(1)
+	debug(`generating ${messageCount} messages`)
+	// this is called before loadProject() to avoid reading partially written JSON
+	await generateMessageFile(messageCount)
 
 	debug("opening repo and loading project")
 	const repoRoot = await findRepoRoot({ nodeishFs: fs, path: __dirname })
@@ -104,9 +106,6 @@ export async function runLoadTest(
 		})
 	}
 
-	debug(`generating ${messageCount} messages`)
-	await generateMessageFile(messageCount)
-
 	if (translate) {
 		debug("translating messages with inlang cli")
 		await run(translateCommand)
@@ -121,10 +120,6 @@ export async function runLoadTest(
 	}
 }
 
-// experimental persistence message format
-// async function generateMessageFile(messageCount: number) {
-
-// inlang message format
 async function generateMessageFile(messageCount: number) {
 	if (isExperimentalPersistence) {
 		const messageFile = join(__dirname, "project.inlang", "messages.json")
