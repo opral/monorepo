@@ -167,6 +167,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 	// update decorations, when message was edited / extracted
 	CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.event(() => updateDecorations())
 	CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.event(() => updateDecorations())
+	CONFIGURATION.EVENTS.ON_DID_CREATE_MESSAGE.event(() => updateDecorations())
 	CONFIGURATION.EVENTS.ON_DID_PREVIEW_LANGUAGE_TAG_CHANGE.event(() => updateDecorations())
 
 	vscode.workspace.onDidChangeConfiguration(
