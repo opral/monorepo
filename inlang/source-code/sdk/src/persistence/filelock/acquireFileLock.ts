@@ -1,7 +1,7 @@
 import { type NodeishFilesystem } from "@lix-js/fs"
 import type { NodeishStats } from "@lix-js/fs"
 import _debug from "debug"
-const debug = _debug("sdk:acquireFileLock")
+const debug = _debug("sdk:fileLock")
 
 const maxRetries = 10
 const nProbes = 50
@@ -13,7 +13,9 @@ export async function acquireFileLock(
 	tryCount: number = 0
 ): Promise<number> {
 	if (tryCount > maxRetries) {
-		throw new Error(lockOrigin + " exceeded maximum Retries (5) to acquire lockfile " + tryCount)
+		throw new Error(
+			`${lockOrigin} exceeded maximum retries (${maxRetries}) to acquire lockfile ${tryCount}`
+		)
 	}
 
 	try {
