@@ -1,5 +1,4 @@
 import { Show } from "solid-js"
-import Link from "#src/renderer/Link.jsx"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded"
 import MaterialSymbolsDownloading from "~icons/material-symbols/downloading"
@@ -25,7 +24,7 @@ const DocHeader = (props: { manifest: MarketplaceManifest }) => {
 					/>
 				</div>
 				<Show when={props.manifest.website}>
-					<Link href={props.manifest.website}>
+					<a href={props.manifest.website}>
 						<div class="h-8 flex text-[14px] items-center justify-center bg-surface-700 hover:bg-surface-900 text-surface-50 rounded-md">
 							<p class="hidden sm:block pl-4">
 								{props.manifest.id.includes("plugin.") ||
@@ -43,7 +42,7 @@ const DocHeader = (props: { manifest: MarketplaceManifest }) => {
 								<MaterialSymbolsDownloading class="ml-2 mr-3 w-5 h-5" />
 							</Show>
 						</div>
-					</Link>
+					</a>
 				</Show>
 			</div>
 		</div>
