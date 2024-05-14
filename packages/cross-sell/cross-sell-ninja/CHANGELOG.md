@@ -1,5 +1,13 @@
 # @inlang/cross-sell-ninja
 
+## 0.0.16
+
+### Patch Changes
+
+- 8e3da4b: Improved error detection by comparing the target before and after merge
+- Updated dependencies [10dbd02]
+  - @inlang/sdk@0.34.8
+
 ## 0.0.15
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @inlang/paraglide-next
 
+## 0.2.1
+
+### Patch Changes
+
+- 1ddcd3a: Use a better globbing library to avoid opening too many files at once
+- 17c3e8a: Make the generated `middleware.ts` file more legible
+  - @inlang/paraglide-js@1.8.0
+
 ## 0.2.0
 
 ### Minor Changes
