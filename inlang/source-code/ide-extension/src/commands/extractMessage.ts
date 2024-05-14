@@ -125,7 +125,7 @@ export const extractMessageCommand = {
 		CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.fire()
 
 		telemetry.capture({
-			event: "IDE-EXTENSION command executed",
+			event: "IDE-EXTENSION command executed: Extract Message",
 		})
 		return msg("Message extracted.")
 	},
