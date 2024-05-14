@@ -8,7 +8,6 @@ import {
 	type MessageLintReport,
 	listProjects,
 } from "@inlang/sdk"
-import { exec } from "node:child_process"
 
 /**
  * The main function for the action.
@@ -22,41 +21,62 @@ export async function run(): Promise<void> {
 		if (!token) {
 			throw new Error("GITHUB_TOKEN is not set")
 		}
+		// Check if pull request is mergeable using the GitHub API
+		const octokit = github.getOctokit(token)
 		const { owner, repo } = github.context.repo
 		const prNumber = github.context.payload.pull_request?.number
+		const { data } = await octokit.rest.pulls.get({
+			owner,
+			repo,
+			pull_number: prNumber as number,
+		})
+		if (data.mergeable) {
+			console.debug(`Pull Request #${prNumber} is mergeable.`)
+		} else {
+			console.warn(`Pull Request #${prNumber} is not mergeable. Skipping linting.`)
+			return
+		}
 
-		const repoBase = await openRepository("file://" + process.cwd(), {
+		// Change into the target repository
+		process.chdir("target")
+		core.debug(`Changed directory to target`)
+		const repoTarget = await openRepository("file://" + process.cwd(), {
 			nodeishFs: fs,
 			branch: github.context.payload.pull_request?.head.ref,
 		})
-		const projectListBase = await listProjects(repoBase.nodeishFs, process.cwd())
-		const results = projectListBase.map((project) => ({
+		core.debug(`Opened target repository`)
+		const projectListTarget = await listProjects(repoTarget.nodeishFs, process.cwd())
+
+		const results = projectListTarget.map((project) => ({
 			projectPath: project.projectPath.replace(process.cwd(), ""),
-			errorsBase: [] as any[],
-			errorsHead: [] as any[],
+			errorsTarget: [] as any[],
+			errorsMerge: [] as any[],
 			installedRules: [] as InstalledMessageLintRule[],
-			reportsBase: [] as MessageLintReport[],
-			reportsHead: [] as MessageLintReport[],
-			lintSummary: [] as { id: string; name: string; count: number }[],
+			reportsTarget: [] as MessageLintReport[],
+			reportsMerge: [] as MessageLintReport[],
+			lintSummary: [] as { id: string; name: string; count: number; level: "warning" | "error" }[],
 			changedIds: [] as string[],
 			commentContent: "" as string,
 		}))
 
-		// Collect all reports from the base repository
+		// Collect all reports from the target repository
 		for (const result of results) {
-			core.debug(`Checking project: ${result.projectPath}`)
-			const projectBase = await loadProject({
+			core.debug(`Checking project: ${result.projectPath} in target repo`)
+			const projectTarget = await loadProject({
 				projectPath: process.cwd() + result.projectPath,
-				repo: repoBase,
+				repo: repoTarget,
 				appId: "app.inlang.ninjaI18nAction",
 			})
-			if (projectBase.errors().length > 0) {
-				if (result) result.errorsBase = projectBase.errors()
+			if (projectTarget.errors().length > 0) {
+				if (result) result.errorsTarget = projectTarget.errors()
 				console.debug("Skip project ", result.projectPath, " in base repo because of errors")
 				continue
 			}
-			result.installedRules.push(...projectBase.installed.messageLintRules())
-			result.reportsBase.push(...(await projectBase.query.messageLintReports.getAll()))
+			result.installedRules.push(...projectTarget.installed.messageLintRules())
+			const messageLintReports = await projectTarget.query.messageLintReports.getAll()
+			core.debug(`message: ${messageLintReports.length}`)
+			result.reportsTarget.push(...messageLintReports)
+			core.debug(`detected lint reports: ${messageLintReports.length}`)
 		}
 
 		// Collect meta data for head and base repository
@@ -64,42 +84,24 @@ export async function run(): Promise<void> {
 			owner: github.context.payload.pull_request?.head.label.split(":")[0],
 			repo: github.context.payload.pull_request?.head.repo.name,
 			branch: github.context.payload.pull_request?.head.label.split(":")[1],
-			link: github.context.payload.pull_request?.head.repo.html_url,
 		}
 		const baseMeta = {
 			owner: github.context.payload.pull_request?.base.label.split(":")[0],
 			repo: repo,
 			branch: github.context.payload.pull_request?.base.label.split(":")[1],
-			link: github.context.payload.pull_request?.base.repo.html_url,
 		}
 
-		const isFork = headMeta.owner !== baseMeta.owner
-		core.debug(`Is fork: ${isFork}`)
+		// Prepare merge repo
+		process.chdir("../merge")
+		core.debug(`Changed directory to merge`)
+		const repoMerge = await openRepository("file://" + process.cwd(), {
+			nodeishFs: fs,
+		})
+		core.debug(`Opened merge repository`)
 
-		// Prepare head repo
-		let repoHead
-		if (isFork) {
-			core.debug("Fork detected, cloning head repository")
-			process.chdir("../../../")
-			await cloneRepository(headMeta)
-			process.chdir(headMeta.repo)
-			repoHead = await openRepository("file://" + process.cwd(), {
-				nodeishFs: fs,
-			})
-		} else {
-			core.debug("Fork not detected, fetching and checking out head repository")
-			await fetchBranch(headMeta.branch)
-			await checkoutBranch(headMeta.branch)
-			await pull()
-			repoHead = await openRepository("file://" + process.cwd(), {
-				nodeishFs: fs,
-				branch: headMeta.branch,
-			})
-		}
-
-		// Check if the head repository has a new project compared to the base repository
-		const projectListHead = await listProjects(repoHead.nodeishFs, process.cwd())
-		const newProjects = projectListHead.filter(
+		// Check if the merge repository has a new project compared to the target repository
+		const projectListMerge = await listProjects(repoMerge.nodeishFs, process.cwd())
+		const newProjects = projectListMerge.filter(
 			(project) =>
 				!results.some(
 					(result) => result.projectPath === project.projectPath.replace(process.cwd(), "")
@@ -109,56 +111,74 @@ export async function run(): Promise<void> {
 		for (const project of newProjects) {
 			results.push({
 				projectPath: project.projectPath.replace(process.cwd(), ""),
-				errorsBase: [] as any[],
-				errorsHead: [] as any[],
+				errorsTarget: [] as any[],
+				errorsMerge: [] as any[],
 				installedRules: [] as InstalledMessageLintRule[],
-				reportsBase: [] as MessageLintReport[],
-				reportsHead: [] as MessageLintReport[],
-				lintSummary: [] as { id: string; name: string; count: number }[],
+				reportsTarget: [] as MessageLintReport[],
+				reportsMerge: [] as MessageLintReport[],
+				lintSummary: [] as {
+					id: string
+					name: string
+					count: number
+					level: "warning" | "error"
+				}[],
 				changedIds: [] as string[],
 				commentContent: "" as string,
 			})
 		}
 
-		// Collect all reports from the head repository
+		// Collect all reports from the merge repository
 		for (const result of results) {
-			// Check if project is found in head repo
+			core.debug(`Checking project: ${result.projectPath} in merge repo`)
 			if (
-				projectListHead.some(
+				projectListMerge.some(
 					(project) => project.projectPath.replace(process.cwd(), "") === result.projectPath
 				) === false
 			) {
 				console.debug(`Project ${result.projectPath} not found in head repo`)
 				continue
 			}
-			const projectHead = await loadProject({
+			const projectMerge = await loadProject({
 				projectPath: process.cwd() + result.projectPath,
-				repo: repoHead,
+				repo: repoMerge,
 				appId: "app.inlang.ninjaI18nAction",
 			})
-			if (projectHead.errors().length > 0) {
-				if (result) result.errorsHead = projectHead.errors()
+			if (projectMerge.errors().length > 0) {
+				if (result) result.errorsMerge = projectMerge.errors()
 				console.debug("Skip project ", result.projectPath, " in head repo because of errors")
 				continue
 			}
 			// Extend installedRules with new rules
-			const newInstalledRules = projectHead.installed.messageLintRules()
+			const newInstalledRules = projectMerge.installed.messageLintRules()
 			for (const newRule of newInstalledRules) {
 				if (!result.installedRules.some((rule) => rule.id === newRule.id)) {
 					result.installedRules.push(newRule)
 				}
 			}
-			result?.reportsHead.push(...(await projectHead.query.messageLintReports.getAll()))
+			const messageLintReports = await projectMerge.query.messageLintReports.getAll()
+			core.debug(`message: ${messageLintReports.length}`)
+			result?.reportsMerge.push(...messageLintReports)
+			core.debug(`detected lint reports: ${messageLintReports.length}`)
 		}
+
+		// Workflow should fail
+		let projectWithNewSetupErrors = false
+		let projectWithNewLintErrors = false
 
 		// Create a lint summary for each project
 		for (const result of results) {
-			if (result.errorsHead.length > 0) continue
+			if (result.errorsMerge.length > 0) continue
 			const LintSummary = createLintSummary(
-				result.reportsHead,
-				result.reportsBase,
+				result.reportsMerge,
+				result.reportsTarget,
 				result.installedRules
 			)
+			if (LintSummary.summary.some((lintSummary) => lintSummary.level === "error")) {
+				console.debug(
+					`❗️ New lint errors found in project ${result.projectPath}. Set workflow to fail.`
+				)
+				projectWithNewLintErrors = true
+			}
 			result.lintSummary = LintSummary.summary
 			result.changedIds = LintSummary.changedIds
 		}
@@ -174,9 +194,13 @@ export async function run(): Promise<void> {
 				}
 			}
 			// Case: New errors in project setup
-			if (result.errorsBase.length === 0 && result.errorsHead.length > 0) {
+			if (result.errorsTarget.length === 0 && result.errorsMerge.length > 0) {
+				console.debug(
+					`❗️ New errors in setup of project \`${result.projectPath}\` found. Set workflow to fail.`
+				)
+				projectWithNewSetupErrors = true
 				result.commentContent = `#### ❗️ New errors in setup of project \`${shortenedProjectPath()}\` found
-${result.errorsHead
+${result.errorsMerge
 	.map((error) => {
 		let errorLog = `<details>
 <summary>${error?.name}</summary>
@@ -196,22 +220,22 @@ ${error?.cause.stack}`
 				continue
 			}
 			// Case: setup of project fixed -> comment with new lint reports
-			if (result.errorsBase.length > 0 && result.errorsHead.length === 0) {
+			if (result.errorsTarget.length > 0 && result.errorsMerge.length === 0) {
 				console.debug(`✅ Setup of project \`${result.projectPath}\` fixed`)
 			}
 			// Case: No lint reports found -> no comment
-			if (result.errorsHead.length > 0) continue
+			if (result.errorsMerge.length > 0) continue
 			if (result.lintSummary.length === 0) continue
 			// Case: Lint reports found -> create comment with lint summary
 			const lintSummary = result.lintSummary
 			const commentContent = `#### Project \`${shortenedProjectPath()}\`
-| lint rule | new reports | link |
-|-----------|-------------|------|
+| lint rule | new reports | level | link |
+|-----------|-------------| ------|------|
 ${lintSummary
 	.map(
 		(lintSummary) =>
-			`| ${lintSummary.name} | ${
-				lintSummary.count
+			`| ${lintSummary.name} | ${lintSummary.count}| ${
+				lintSummary.level
 			} | [contribute (via Fink 🐦)](https://fink.inlang.com/github.com/${headMeta.owner}/${
 				headMeta.repo
 			}?branch=${headMeta.branch}&project=${result.projectPath}&lint=${
@@ -225,17 +249,16 @@ ${lintSummary
 			result.commentContent = commentContent
 		}
 
-		const commentHeadline = `### 🥷 Ninja i18n – 🛎️ Translations need to be updated`
+		const commentMergeline = `### 🥷 Ninja i18n – 🛎️ Translations need to be updated`
 		const commentResolved = `### 🥷 Ninja i18n – 🎉 Translations have been successfully updated`
 		const commentContent =
-			commentHeadline +
+			commentMergeline +
 			"\n\n" +
 			results
 				.map((result) => result.commentContent)
 				.filter((content) => content.length > 0)
 				.join("\n")
 
-		const octokit = github.getOctokit(token)
 		const issue = await octokit.rest.issues.get({
 			owner,
 			repo,
@@ -252,7 +275,7 @@ ${lintSummary
 		if (existingComment.data.length > 0) {
 			const commentId = existingComment.data.find(
 				(comment) =>
-					(comment.body?.includes(commentHeadline) || comment.body?.includes(commentResolved)) &&
+					(comment.body?.includes(commentMergeline) || comment.body?.includes(commentResolved)) &&
 					comment.user?.login === "github-actions[bot]"
 			)?.id
 			if (commentId) {
@@ -266,7 +289,6 @@ ${lintSummary
 						body: commentResolved,
 						as: "ninja-i18n",
 					})
-					return
 				} else {
 					core.debug("Reports have not been fixed, updating comment")
 					await octokit.rest.issues.updateComment({
@@ -277,40 +299,51 @@ ${lintSummary
 						as: "ninja-i18n",
 					})
 				}
-				return
 			}
-		}
-
-		if (results.every((result) => result.commentContent.length === 0)) {
+		} else if (results.every((result) => result.commentContent.length === 0)) {
 			core.debug("No lint reports found, skipping comment")
-			return
+		} else {
+			core.debug("Creating a new comment")
+			await octokit.rest.issues.createComment({
+				owner,
+				repo,
+				issue_number: prNumber as number,
+				body: commentContent,
+				as: "ninja-i18n",
+			})
 		}
 
-		core.debug("Creating a new comment")
-		await octokit.rest.issues.createComment({
-			owner,
-			repo,
-			issue_number: prNumber as number,
-			body: commentContent,
-			as: "ninja-i18n",
-		})
+		// Fail the workflow if new lint errors or project setup errors exist
+		if (projectWithNewSetupErrors || projectWithNewLintErrors) {
+			let error_message = ""
+			if (projectWithNewSetupErrors && projectWithNewLintErrors) {
+				error_message = "New errors found in project setup and new lint errors found in project"
+			} else if (projectWithNewSetupErrors) {
+				error_message = "New errors found in project setup"
+			} else if (projectWithNewLintErrors) {
+				error_message = "New lint errors found in project"
+			}
+			core.setFailed(error_message)
+		}
 	} catch (error) {
 		// Fail the workflow run if an error occurs
-		if (error instanceof Error) core.setFailed(error)
+		if (error instanceof Error) {
+			core.setFailed(error)
+		}
 	}
 }
 
 export default run
 
 function createLintSummary(
-	reportsHead: MessageLintReport[],
-	reportsBase: MessageLintReport[],
+	reportsMerge: MessageLintReport[],
+	reportsTarget: MessageLintReport[],
 	installedRules: InstalledMessageLintRule[]
 ) {
-	const summary: { id: string; name: string; count: number }[] = []
-	const diffReports = reportsHead.filter(
+	const summary: { id: string; name: string; count: number; level: "error" | "warning" }[] = []
+	const diffReports = reportsMerge.filter(
 		(report) =>
-			!reportsBase.some(
+			!reportsTarget.some(
 				(baseReport) =>
 					baseReport.ruleId === report.ruleId &&
 					baseReport.languageTag === report.languageTag &&
@@ -324,8 +357,9 @@ function createLintSummary(
 				? installedRule.displayName.en
 				: installedRule.displayName
 		const count = diffReports.filter((report) => report.ruleId === id).length
+		const level = installedRule.level
 		if (count > 0) {
-			summary.push({ id, name, count: count })
+			summary.push({ id, name, count: count, level })
 		}
 	}
 	const changedIds = diffReports
@@ -333,78 +367,4 @@ function createLintSummary(
 		.filter((value, index, self) => self.indexOf(value) === index)
 
 	return { summary, changedIds }
-}
-
-// All functions below will be replaced by the @lix-js/client package in the future
-
-// Function to checkout a branch
-async function checkoutBranch(branchName: string) {
-	return new Promise<void>((resolve, reject) => {
-		// Execute the git command to checkout the branch
-		exec(`git checkout ${branchName}`, { cwd: process.cwd() }, (error, stdout, stderr) => {
-			if (error) {
-				console.error(`Error executing command: ${error}`)
-				reject(error)
-				return
-			}
-			core.debug(`stdout: ${stdout}`)
-			core.debug(`stderr: ${stderr}`)
-			resolve()
-		})
-	})
-}
-
-// Function to fetch the branches
-async function fetchBranch(branchName: string) {
-	return new Promise<void>((resolve, reject) => {
-		// Execute the git command to fetch the branch
-		exec(`git fetch origin ${branchName}`, { cwd: process.cwd() }, (error, stdout, stderr) => {
-			if (error) {
-				console.error(`Error executing command: ${error}`)
-				reject(error)
-				return
-			}
-			core.debug(`stdout: ${stdout}`)
-			core.debug(`stderr: ${stderr}`)
-			resolve()
-		})
-	})
-}
-
-// Funtion to pull latest changes
-async function pull() {
-	return new Promise<void>((resolve, reject) => {
-		// Execute the git command to pull the latest changes
-		exec(`git pull`, { cwd: process.cwd() }, (error, stdout, stderr) => {
-			if (error) {
-				console.error(`Error executing command: ${error}`)
-				reject(error)
-				return
-			}
-			core.debug(`stdout: ${stdout}`)
-			core.debug(`stderr: ${stderr}`)
-			resolve()
-		})
-	})
-}
-
-// Function to clone the head repository
-async function cloneRepository(repoData: { link: string; branch: string }) {
-	return new Promise<void>((resolve, reject) => {
-		// Execute the git command to clone the head repository
-		exec(
-			`git clone -b ${repoData.branch} --single-branch --depth 1 ${repoData.link}`, // Clone only the latest commit
-			{ cwd: process.cwd() },
-			(error, stdout, stderr) => {
-				if (error) {
-					console.error(`Error executing command: ${error}`)
-					reject(error)
-					return
-				}
-				core.debug(`stdout: ${stdout}`)
-				core.debug(`stderr: ${stderr}`)
-				resolve()
-			}
-		)
-	})
 }
