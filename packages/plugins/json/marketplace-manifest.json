@@ -32,6 +32,7 @@
 	"recommends": ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g", "m/gerre34r"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"website": "https://manage.inlang.com/install?module=plugin.inlang.json",
 	"license": "Apache-2.0",
 	"module": "https://cdn.jsdelivr.net/npm/@inlang/plugin-json@latest/dist/index.js"
 }

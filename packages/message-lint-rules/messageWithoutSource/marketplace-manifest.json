@@ -18,7 +18,7 @@
 	"keywords": ["message", "lint rule", "source", "missing", "website"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"website": "https://manage.inlang.com/install?module=messageLintRule.inlang.messageWithoutSource",
 	"license": "Apache-2.0",
 	"module": "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-without-source@latest/dist/index.js"
 }
-  
