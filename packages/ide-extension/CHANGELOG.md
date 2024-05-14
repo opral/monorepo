@@ -501,7 +501,7 @@
 
 ### Minor Changes
 
-- f2b4e23e5: add inlang tab
+- f2b4e23e5: add Sherlock tab
 
 ### Patch Changes
 
