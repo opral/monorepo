@@ -1,5 +1,6 @@
 import { openInFinkCommand } from "./commands/openInFink.js"
 import { extractMessageCommand } from "./commands/extractMessage.js"
+import { createMessageCommand } from "./commands/createMessage.js"
 import { editMessageCommand } from "./commands/editMessage.js"
 import { EventEmitter } from "vscode"
 import { openProjectCommand } from "./commands/openProject.js"
@@ -15,6 +16,7 @@ import { toggleInlineAnnotationsCommand } from "./commands/toggleInlineAnnotatio
 
 export const CONFIGURATION = {
 	EVENTS: {
+		ON_DID_CREATE_MESSAGE: new EventEmitter<void>(),
 		ON_DID_EDIT_MESSAGE: new EventEmitter<void>(),
 		ON_DID_EXTRACT_MESSAGE: new EventEmitter<void>(),
 		ON_DID_PROJECT_TREE_VIEW_CHANGE: new EventEmitter<ProjectViewNode | undefined>(),
@@ -23,6 +25,7 @@ export const CONFIGURATION = {
 		ON_DID_SETTINGS_VIEW_CHANGE: new EventEmitter<void>(),
 	},
 	COMMANDS: {
+		CREATE_MESSAGE: createMessageCommand,
 		EDIT_MESSAGE: editMessageCommand,
 		EXTRACT_MESSAGE: extractMessageCommand,
 		SET_PREVIEW_LANGUAGETAG: previewLanguageTagCommand,
