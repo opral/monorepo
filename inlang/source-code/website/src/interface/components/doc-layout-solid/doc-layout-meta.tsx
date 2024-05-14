@@ -1,8 +1,11 @@
 import Link from "#src/renderer/Link.jsx"
 import { currentPageContext } from "#src/renderer/state.js"
 import type { MarketplaceManifest } from "@inlang/marketplace-manifest"
-import { Show, createEffect, createSignal, onMount } from "solid-js"
+import { Show, createEffect, createSignal, onMount, For } from "solid-js"
 import MaterialSymbolsWarningOutlineRounded from "~icons/material-symbols/warning-outline-rounded"
+import { Chip } from "../Chip.jsx"
+import { getGithubLink } from "#src/pages/m/helper/getGithubLink.js"
+import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded"
 
 type Headlines = { level: "H1" | "H2" | "H3"; anchor: string; element: Element }[]
 
@@ -12,6 +15,7 @@ const InlangDocMeta = (props: {
 	currentRoute: string
 }) => {
 	const [headlines, setHeadlines] = createSignal<Headlines>([])
+	const [githubLink, setGithubLink] = createSignal<string | undefined>(undefined)
 
 	const replaceChars = (str: string) => {
 		return str
@@ -74,6 +78,10 @@ const InlangDocMeta = (props: {
 				setHeadlines(findHeadlineElements(props.contentInHtml))
 			})
 		}
+	})
+
+	createEffect(() => {
+		setGithubLink(getGithubLink(props.manifest, props.currentRoute))
 	})
 
 	onMount(async () => {
@@ -202,8 +210,36 @@ const InlangDocMeta = (props: {
 					<p class="flex-1">{props.manifest.pricing}</p>
 				</div>
 			</Show>
+			<div class="w-full h-[1px] bg-surface-200 my-4" />
+
+			<div>
+				<p class="text-surface-400 uppercase text-[12px] pb-3">Keywords</p>
+				<div class="flex flex-wrap gap-2 items-center">
+					<For each={props?.manifest?.keywords}>
+						{(keyword) => (
+							<Link
+								class="transition-opacity hover:opacity-80 cursor-pointer"
+								href={"/search?q=" + keyword}
+							>
+								<Chip text={keyword} color={"#475569"} />
+							</Link>
+						)}
+					</For>
+				</div>
+			</div>
 
 			<div class="w-full h-[1px] bg-surface-200 my-4" />
+			<Show when={githubLink()}>
+				<a
+					href={githubLink()}
+					target="_blank"
+					class={`hover:text-primary flex items-center gap-[6px] text-surface-600 cursor-pointer`}
+				>
+					<p class="text-sm py-[5px]">Edit this page on Github</p>
+					<MaterialSymbolsArrowOutwardRounded />
+				</a>
+			</Show>
+
 			<Show when={headlines() && headlines()![0]}>
 				<div
 					class={`hover:text-primary flex items-center gap-[6px] text-surface-600 cursor-pointer`}
