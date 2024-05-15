@@ -1,5 +1,11 @@
 # @inlang/paraglide-next
 
+## 0.2.2
+
+### Patch Changes
+
+- 95a34bd: Fix href types on `useRouter`
+
 ## 0.2.1
 
 ### Patch Changes
