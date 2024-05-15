@@ -7,7 +7,7 @@ import type { ResolvedPluginApi } from "./resolve-modules/plugins/types.js"
 import type { resolveModules } from "./resolve-modules/resolveModules.js"
 import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
 import type { NodeishFilesystem } from "@lix-js/fs"
-import { onCleanup } from "solid-js"
+import { onCleanup, untrack } from "solid-js"
 import { stringifyMessage } from "./storage/helper.js"
 import { acquireFileLock } from "./persistence/filelock/acquireFileLock.js"
 import _debug from "debug"
@@ -62,14 +62,18 @@ export function createMessagesQuery({
 }: createMessagesQueryParameters): InlangProject["query"]["messages"] {
 	// @ts-expect-error
 	const index = new ReactiveMap<string, Message>()
+	let loaded = false
 
 	// filepath for the lock folder
 	const messageLockDirPath = projectPath + "/messagelock"
 
 	let delegate: MessageQueryDelegate | undefined = undefined
 
-	const setDelegate = (newDelegate: MessageQueryDelegate) => {
+	const setDelegate = (newDelegate: MessageQueryDelegate | undefined, onLoad: boolean) => {
 		delegate = newDelegate
+		if (newDelegate && loaded && onLoad) {
+			newDelegate.onLoaded([...index.values()] as Message[])
+		}
 	}
 
 	// Map default alias to message
@@ -94,6 +98,7 @@ export function createMessagesQuery({
 		// we clear the index independent from the change for
 		index.clear()
 		defaultAliasIndex.clear()
+		loaded = false
 
 		// Load messages -> use settings to subscribe to signals from the settings
 		const _settings = settings()
@@ -156,6 +161,7 @@ export function createMessagesQuery({
 			.then(() => {
 				onInitialMessageLoadResult()
 				delegate?.onLoaded([...index.values()])
+				loaded = true
 			})
 	})
 
@@ -232,7 +238,7 @@ export function createMessagesQuery({
 			if (message === undefined) return false
 			index.set(where.id, { ...message, ...data })
 			messageStates.messageDirtyFlags[where.id] = true
-			delegate?.onMessageCreate(where.id, index.get(data.id))
+			delegate?.onMessageUpdate(where.id, index.get(data.id))
 			scheduleSave()
 			return true
 		},

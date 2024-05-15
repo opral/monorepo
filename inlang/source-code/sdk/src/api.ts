@@ -109,12 +109,19 @@ export type MessageQueryApi = {
 	update: (args: { where: { id: Message["id"] }; data: Partial<Message> }) => boolean
 	upsert: (args: { where: { id: Message["id"] }; data: Message }) => void
 	delete: (args: { where: { id: Message["id"] } }) => boolean
-	setDelegate: (delegate: MessageQueryDelegate) => void
+	setDelegate: (delegate: MessageQueryDelegate | undefined, callOnLoad: boolean) => void
 }
 
 export type MessageLintReportsQueryApi = {
-	getAll: () => Promise<MessageLintReport[]>
-	get: (args: {
+	getAll: Subscribable<MessageLintReport[]> & {
+		settled: () => Promise<MessageLintReport[]>
+	}
+	get: ((args: {
 		where: { messageId: MessageLintReport["messageId"] }
-	}) => Promise<Readonly<MessageLintReport[]>>
+	}) => Readonly<MessageLintReport[]>) & {
+		subscribe: (
+			args: { where: { messageId: MessageLintReport["messageId"] } },
+			callback: (MessageLintRules: Readonly<MessageLintReport[]>) => void
+		) => void
+	}
 }

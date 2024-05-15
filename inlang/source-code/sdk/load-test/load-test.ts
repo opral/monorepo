@@ -93,16 +93,15 @@ export async function runLoadTest(
 	}
 
 	if (subscribeToLintReports) {
-		debug("subscribing to messageLintReports.getAll")
-		let countLintReportsGetAllEvents = 1
+		debug("subscribing to lintReports.getAll")
+		let lintEvents = 0
+		const logLintEvent = throttle(throttleEventLogs, (reports: any) => {
+			debug(`lint reports changed event: ${lintEvents}, length: ${reports.length}`)
+		})
+		project.query.messageLintReports.getAll.subscribe((reports) => {
+			lintEvents++
+			logLintEvent(reports)
 
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const [lintReports] = createResource(messages, async () => {
-			const reports = await project.query.messageLintReports.getAll()
-			debug(
-				`lintReports getAll event: ${countLintReportsGetAllEvents++}, length: ${reports.length}`
-			)
-			return reports
 		})
 	}
 

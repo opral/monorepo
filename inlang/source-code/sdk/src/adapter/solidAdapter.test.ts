@@ -363,6 +363,46 @@ describe("messages", () => {
 })
 
 describe("lint", () => {
+	it("should react to changes in config", async () => {
+		await createRoot(async () => {
+			const repo = await mockRepo()
+			const fs = repo.nodeishFs
+			await fs.mkdir("/user/project.inlang", { recursive: true })
+			await fs.writeFile("/user/project.inlang/settings.json", JSON.stringify(config))
+			const project = solidAdapter(
+				await loadProject({
+					projectPath: "/user/project.inlang",
+					repo,
+					_import: $import,
+				}),
+				{ from }
+			)
+
+			let counter = 0
+			createEffect(() => {
+				project.query.messageLintReports.getAll()
+				counter += 1
+			})
+
+			await new Promise((resolve) => setTimeout(resolve, 510))
+
+			const currentSettings = project.settings()!
+			const newConfig = { ...currentSettings, languageTags: ["en", "de"] }
+			project.setSettings(newConfig)
+
+			expect(counter).toBe(1)
+			expect(project.query.messageLintReports.getAll()).toEqual([])
+
+			await new Promise((resolve) => setTimeout(resolve, 510))
+
+			const newConfig2 = { ...project.settings()!, languageTags: ["en", "de", "fr"] }
+			project.setSettings(newConfig2)
+
+			expect(counter).toBe(9)
+			expect(project.query.messageLintReports.getAll()).toEqual([])
+		})
+	})
+
 	it.todo("should react to changes to packages")
 	it.todo("should react to changes to modules")
 
@@ -381,35 +421,29 @@ describe("lint", () => {
 				{ from }
 			)
 
-			const [messages, setMessages] = createSignal<readonly Message[]>()
-
-			let counter = 0
-
+			let counter = -1 // -1 to start counting after the initial effect
 			createEffect(() => {
-				setMessages(project.query.messages.getAll())
-			})
-
-			const [lintReports] = createResource(messages, async () => {
-				const reports = await project.query.messageLintReports.getAll()
+				project.query.messageLintReports.getAll()
 				counter += 1
-				return reports
 			})
+			expect(counter).toBe(0)
 
-			await sleep(10)
-			expect(counter).toBe(1)
-			expect(lintReports()).toStrictEqual([])
-
-			project.query.messages.update({
-				where: { id: "a" },
-				data: {
-					...exampleMessages[0],
-					variants: [{ languageTag: "en", match: [], pattern: [{ type: "Text", value: "new" }] }],
-				},
-			})
-
-			await sleep(10)
+			await new Promise((resolve) => setTimeout(resolve, 510))
+			// 2 -> one lint rule updated per message
 			expect(counter).toBe(2)
-			expect(lintReports()).toStrictEqual([])
+
+			project.query.messages.update({
+				where: { id: "a" },
+				data: {
+					...exampleMessages[0],
+					variants: [{ languageTag: "en", match: [], pattern: [{ type: "Text", value: "new" }] }],
+				},
+			})
+			await new Promise((resolve) => setTimeout(resolve, 510))
+
+			// 2 -> previous two messages + one lintreport updated because of message update
+			expect(counter).toBe(3)
+			expect(project.query.messageLintReports.getAll()).toEqual([])
 
 			project.query.messages.update({
 				where: { id: "a" },
@@ -419,9 +453,11 @@ describe("lint", () => {
 				},
 			})
 
-			await sleep(10)
-			expect(counter).toBe(3)
-			expect(lintReports()).toStrictEqual([])
+			await new Promise((resolve) => setTimeout(resolve, 510))
+
+			// 4 -> previous 3 + one lint rulereport for updated message
+			expect(counter).toBe(4)
+			expect(project.query.messageLintReports.getAll()).toEqual([])
 		})
-	})
+	}, 1000000000)
 })

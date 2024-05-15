@@ -1,10 +1,7 @@
 import type { MessageLintReport, Message } from "@inlang/sdk"
 import { useEditorState } from "../State.jsx"
-export const showFilteredMessage = (
-	message: Message | undefined,
-	lintReports: readonly MessageLintReport[] | undefined
-) => {
-	const { filteredMessageLintRules, filteredLanguageTags, filteredIds, textSearch, languageTags } =
+export const showFilteredMessage = (message: Message | undefined) => {
+	const { filteredMessageLintRules, filteredLanguageTags, filteredIds, textSearch, project } =
 		useEditorState()
 
 	// Early exit if variants are empty
@@ -13,7 +10,9 @@ export const showFilteredMessage = (
 	}
 
 	const languageTagsSet = new Set(
-		filteredLanguageTags().length === 0 ? languageTags() : filteredLanguageTags()
+		filteredLanguageTags().length === 0
+			? project()?.settings()?.languageTags
+			: filteredLanguageTags()
 	)
 	const lintRulesSet = new Set(filteredMessageLintRules())
 	const searchLower = textSearch().toLowerCase()
@@ -62,10 +61,12 @@ export const showFilteredMessage = (
 	const filteredByLintRules =
 		lintRulesSet.size === 0 ||
 		(message !== undefined &&
-			lintReports?.some(
-				(report: MessageLintReport) =>
-					lintRulesSet.has(report.ruleId) && languageTagsSet.has(report.languageTag)
-			))
+			project()!
+				.query.messageLintReports.get({ where: { messageId: message.id } })
+				?.some(
+					(report: MessageLintReport) =>
+						lintRulesSet.has(report.ruleId) && languageTagsSet.has(report.languageTag)
+				))
 			? filteredBySearch
 			: false
 
