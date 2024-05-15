@@ -378,19 +378,32 @@ describe("lint", () => {
 				{ from }
 			)
 
-			let counter = 0
+			// set counter to -1 since creating effect will execute once
+			let counter = -1
 			createEffect(() => {
 				project.query.messageLintReports.getAll()
 				counter += 1
 			})
 
+			expect(counter).toBe(0)
+
+			// wait for all int reports beeing executed
 			await new Promise((resolve) => setTimeout(resolve, 510))
+
+			// 2 because we have two messages and one lint rule per message
+			expect(counter).toBe(2)
 
 			const currentSettings = project.settings()!
 			const newConfig = { ...currentSettings, languageTags: ["en", "de"] }
 			project.setSettings(newConfig)
 
-			expect(counter).toBe(1)
+			// set settings trigges synchronous -> +1
+			expect(counter).toBe(3)
+
+			await new Promise((resolve) => setTimeout(resolve, 510))
+
+			// 7 = 3 + 1 (effect->settings) +  1 (effect->Resolved Plugin) + 
+			expect(counter).toBe(5)
 			expect(project.query.messageLintReports.getAll()).toEqual([])
 
 			await new Promise((resolve) => setTimeout(resolve, 510))
