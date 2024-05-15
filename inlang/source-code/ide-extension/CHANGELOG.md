@@ -1,5 +1,31 @@
 # inlang-vs-code-extension
 
+## 1.44.1
+
+### Patch Changes
+
+- Updated dependencies [a958d91]
+  - @inlang/sdk@0.34.9
+  - @inlang/rpc@0.3.20
+  - @inlang/settings-component@1.0.15
+  - @inlang/telemetry@0.3.35
+
+## 1.44.0
+
+### Minor Changes
+
+- b8dbc58: add commands to command palette
+
+### Patch Changes
+
+- 6bb1b60: improve docs & README
+- d1a2286: improve missing repository error message
+- Updated dependencies [10dbd02]
+  - @inlang/sdk@0.34.8
+  - @inlang/rpc@0.3.19
+  - @inlang/settings-component@1.0.14
+  - @inlang/telemetry@0.3.34
+
 ## 1.43.0
 
 ### Minor Changes
@@ -501,7 +527,7 @@
 
 ### Minor Changes
 
-- f2b4e23e5: add inlang tab
+- f2b4e23e5: add Sherlock tab
 
 ### Patch Changes
 

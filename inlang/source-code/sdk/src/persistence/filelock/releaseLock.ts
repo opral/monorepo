@@ -1,6 +1,6 @@
 import { type NodeishFilesystem } from "@lix-js/fs"
 import _debug from "debug"
-const debug = _debug("sdk:releaseLock")
+const debug = _debug("sdk:fileLock")
 
 export async function releaseLock(
 	fs: NodeishFilesystem,

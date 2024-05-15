@@ -24,6 +24,12 @@ export async function createNewProjectHandler(args: { workspaceFolderPath: strin
 
 		const repo = await openRepository(workspaceFolderUri, { nodeishFs })
 
+		if (!repo) {
+			vscode.window.showErrorMessage(
+				"Failed to open repository. Please make sure you have a valid git repository. You can create a new git repository by running 'git init' in the workspace folder."
+			)
+		}
+
 		// Use the default project settings
 		const projectSettings = defaultProjectSettings
 

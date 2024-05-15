@@ -15,7 +15,7 @@ import type { ProjectSettings } from "@inlang/project-settings"
 import { releaseLock } from "./persistence/filelock/releaseLock.js"
 import { PluginLoadMessagesError, PluginSaveMessagesError } from "./errors.js"
 import { humanIdHash } from "./storage/human-id/human-readable-id.js"
-const debug = _debug("sdk:createMessagesQuery")
+const debug = _debug("sdk:messages")
 
 function sleep(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms))
@@ -103,14 +103,6 @@ export function createMessagesQuery({
 		const resolvedPluginApi = resolvedModules()?.resolvedPluginApi
 		if (!resolvedPluginApi) return
 
-		const abortController = new AbortController()
-		// called between executions of effects as well as on disposal
-		onCleanup(() => {
-			// stop listening on fs events
-			abortController.abort()
-			delegate?.onCleanup()
-		})
-
 		const fsWithWatcher = createNodeishFsWithWatcher({
 			nodeishFs: nodeishFs,
 			// this message is called whenever a file changes that was read earlier by this filesystem
@@ -133,7 +125,13 @@ export function createMessagesQuery({
 						onLoadMessageResult()
 					})
 			},
-			abortController,
+		})
+
+		// called between executions of effects as well as on disposal
+		onCleanup(() => {
+			// stop listening on fs events
+			fsWithWatcher.stopWatching()
+			delegate?.onCleanup()
 		})
 
 		if (!resolvedPluginApi.loadMessages) {

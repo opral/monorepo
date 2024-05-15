@@ -1,5 +1,29 @@
 # @inlang/github-lint-action
 
+## 0.3.2
+
+### Patch Changes
+
+- Updated dependencies [a958d91]
+  - @inlang/sdk@0.34.9
+
+## 0.3.1
+
+### Patch Changes
+
+- 49cec88: Debug logs for comment creation
+
+## 0.3.0
+
+### Minor Changes
+
+- 8e3da4b: Improved error detection by comparing the target before and after merge
+
+### Patch Changes
+
+- Updated dependencies [10dbd02]
+  - @inlang/sdk@0.34.8
+
 ## 0.2.30
 
 ### Patch Changes

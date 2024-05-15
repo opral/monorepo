@@ -1,5 +1,17 @@
 # @inlang/sdk
 
+## 0.34.9
+
+### Patch Changes
+
+- a958d91: Minor debug logging improvements
+
+## 0.34.8
+
+### Patch Changes
+
+- 10dbd02: createNodeishFsWithWatcher keeps track of its abortController and provides a stopWatching method instead of incjecting an abortController
+
 ## 0.34.7
 
 ### Patch Changes

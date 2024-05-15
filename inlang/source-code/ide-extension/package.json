@@ -10,7 +10,7 @@
 		"url": "https://github.com/opral/monorepo.git"
 	},
 	"icon": "assets/sherlock-logo.png",
-	"version": "1.43.0",
+	"version": "1.44.1",
 	"engines": {
 		"vscode": "^1.84.2"
 	},
@@ -103,6 +103,14 @@
 			{
 				"command": "sherlock.toggleInlineAnnotations",
 				"title": "Sherlock: Toggle Inline Annotations"
+			},
+			{
+				"command": "sherlock.extractMessage",
+				"title": "Sherlock: Extract Message"
+			},
+			{
+				"command": "sherlock.createMessage",
+				"title": "Sherlock: Create Message"
 			}
 		],
 		"menus": {

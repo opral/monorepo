@@ -18,6 +18,7 @@
 	"keywords": ["message", "lint rule", "id", "format", "snake", "case", "website"],
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"website": "https://manage.inlang.com/install?module=messageLintRule.inlang.snakeCaseId",
 	"license": "Apache-2.0",
 	"module": "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-snake-case-id@latest/dist/index.js"
 }

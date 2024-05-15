@@ -27,12 +27,13 @@ Add the following workflow file to the `main` branch of your repository in this 
 ```yml
 name: Ninja i18n action
 
-on:
-  pull_request_target:
+on: pull_request_target
 
 # explicitly configure permissions, in case your GITHUB_TOKEN workflow permissions are set to read-only in repository settings
-permissions: 
-  pull-requests: write
+permissions:
+  pull-requests: write # Necessary to comment on PRs
+  issues: read         # Necessary to read issue comments
+  contents: read       # Necessary to access the repo content
 
 jobs:
   ninja-i18n:
@@ -40,17 +41,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        id: checkout
-        uses: actions/checkout@v4
-
       - name: Run Ninja i18n
-        id: ninja-i18n
         # @main ensures that the latest version of the action is used
         uses: opral/ninja-i18n-action@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
 ```
 
 **Note:** Commit the workflow file to the `main` branch of your repository before testing.
@@ -88,3 +83,4 @@ Please make sure that:
     3. Click **Actions** in the left sidebar, then click **General**
     4. Select the desired option (e.g. **Allow all actions and workflows**) under **Actions permissions**
     5. Click **Save** to apply the settings
+4. if the action never reports, please make sure that the pathPattern of your plugin in the project settings is a relative path (starting with "./")

@@ -77,12 +77,13 @@ export async function add(args: { fs: NodeishFilesystem }): Promise<void> {
 	const ninjaI18nWorkflowYaml = `
 name: Ninja i18n action
 
-on:
-  pull_request_target:
+on: pull_request_target
 
 # explicitly configure permissions, in case your GITHUB_TOKEN workflow permissions are set to read-only in repository settings
-permissions: 
-  pull-requests: write
+permissions:
+	pull-requests: write # Necessary to comment on PRs
+	issues: read         # Necessary to read issue comments
+	contents: read       # Necessary to access the repo content
 
 jobs:
   ninja-i18n:
@@ -90,12 +91,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        id: checkout
-        uses: actions/checkout@v4
-
       - name: Run Ninja i18n
-        id: ninja-i18n
+				# @main ensures that the latest version of the action is used
         uses: opral/ninja-i18n-action@main
         env:
           GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
