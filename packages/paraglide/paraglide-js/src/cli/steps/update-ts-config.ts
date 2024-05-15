@@ -90,7 +90,7 @@ export const maybeChangeTsConfigModuleResolution: CliStep<
 	}
 	const file = await ctx.repo.nodeishFs.readFile("./tsconfig.json", { encoding: "utf-8" })
 	// tsconfig allows comments ... FML
-	const tsconfig = JSON5.parse(file)
+	let tsconfig = JSON5.parse(file)
 
 	let parentTsConfig: any | undefined
 
@@ -139,8 +139,16 @@ export const maybeChangeTsConfigModuleResolution: CliStep<
 			)
 			return ctx
 		}
+
+		// don't re-ask the question if there is an `extends` present in the tsconfig
+		// just trust that it's correct.
+		if (tsconfig.extends) {
+			isValid = true
+			return ctx
+		}
+
 		const file = await ctx.repo.nodeishFs.readFile("./tsconfig.json", { encoding: "utf-8" })
-		const tsconfig = JSON5.parse(file)
+		tsconfig = JSON5.parse(file)
 		if (
 			tsconfig?.compilerOptions?.moduleResolution &&
 			tsconfig.compilerOptions.moduleResolution.toLowerCase() === "bundler"
