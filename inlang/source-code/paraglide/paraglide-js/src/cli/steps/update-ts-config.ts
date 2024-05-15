@@ -56,7 +56,7 @@ export const maybeChangeTsConfigAllowJs: CliStep<
 
 		// don't re-ask the question if there is an `extends` present in the tsconfig
 		// just trust that it's correct.
-		if (tsconfig.extends !== undefined) {
+		if (tsconfig.extends) {
 			isValid = true
 			return ctx
 		}
@@ -119,7 +119,7 @@ export const maybeChangeTsConfigModuleResolution: CliStep<
 	}
 
 	ctx.logger.info(
-		`You need to set the \`compilerOptions.moduleResolution\` to "Bundler" in the \`tsconfig.json\` file:
+		`The \`compilerOptions.moduleResolution\` options must be set to "Bundler" in the \`tsconfig.json\` file:
 
 \`{
  "compilerOptions": {
@@ -129,13 +129,10 @@ export const maybeChangeTsConfigModuleResolution: CliStep<
 	)
 	let isValid = false
 	while (isValid === false) {
-		const response = await prompt(
-			`Did you set the \`compilerOptions.moduleResolution\` to "Bundler"?`,
-			{
-				type: "confirm",
-				initial: true,
-			}
-		)
+		const response = await prompt(`Is \`compilerOptions.moduleResolution\` set to "Bundler"?`, {
+			type: "confirm",
+			initial: true,
+		})
 		if (response === false) {
 			ctx.logger.warn(
 				"Continuing without adjusting the tsconfig.json. This may lead to type errors."
