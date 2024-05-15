@@ -14,19 +14,20 @@
 	},
 	"pages": {
 		"Setup": {
-			"/": "./inlang/source-code/paraglide/paraglide-next/README.md",
-			"/pages-router": "./inlang/source-code/paraglide/paraglide-next/docs/pages-router.md"
+			"/": "./inlang/source-code/paraglide/paraglide-next/docs/why-paraglide-next.md",
+			"/get-started": "./inlang/source-code/paraglide/paraglide-next/README.md"
 		},
 		"Localised Routing": {
-			"/overview": "./inlang/source-code/paraglide/paraglide-next/docs/routing/overview.md",
-			"/prefix-strategy": "./inlang/source-code/paraglide/paraglide-next/docs/routing/prefix-strategy.md",
-			"/other-strategies": "./inlang/source-code/paraglide/paraglide-next/docs/routing/other-strategies.md"
+			"/localized-routing/overview": "./inlang/source-code/paraglide/paraglide-next/docs/routing/overview.md",
+			"/localized-routing/prefix-strategy": "./inlang/source-code/paraglide/paraglide-next/docs/routing/prefix-strategy.md",
+			"/localized-routing/other-strategies": "./inlang/source-code/paraglide/paraglide-next/docs/routing/other-strategies.md"
 		},
 		"Advanced Usage": {
-			"/seo": "./inlang/source-code/paraglide/paraglide-next/docs/advanced/seo.md",
-			"/usage-on-the-server": "./inlang/source-code/paraglide/paraglide-next/docs/advanced/server.md"
+			"/advanced/seo": "./inlang/source-code/paraglide/paraglide-next/docs/advanced/seo.md",
+			"/advanced/usage-on-the-server": "./inlang/source-code/paraglide/paraglide-next/docs/advanced/server.md"
 		},
 		"Appendix": {
+			"/pages-router": "./inlang/source-code/paraglide/paraglide-next/docs/pages-router.md",
 			"/manual-setup": "./inlang/source-code/paraglide/paraglide-next/docs/manual-setup.md",
 			"/roadmap": "./inlang/source-code/paraglide/paraglide-next/docs/roadmap.md",
 			"/changelog": "./inlang/source-code/paraglide/paraglide-next/CHANGELOG.md"
