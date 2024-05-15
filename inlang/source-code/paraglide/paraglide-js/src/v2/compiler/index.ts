@@ -11,6 +11,7 @@ import type {
 import { createRuntime } from "./runtime/index.js"
 import { registry } from "./registry/registry.js"
 import REGISTRY_JS_FILE from "./registry/registry.js.template?raw"
+import { getInputTypeConstraints } from "./types.js"
 
 export type CompileOptions = {
 	messageBundles: Readonly<MessageBundle[]>
@@ -39,25 +40,24 @@ export function compileBundle({
 
 		const inputs = Object.fromEntries(
 			[...inputNames].map((name) => {
-				let type: string | undefined = undefined
+				const typeConstraints = new Set<string>()
 				for (const message of messages) {
-					const inputType = message.inputs[name]
-					if (!inputType) continue
-					if (type === undefined) type = inputType
-					else if (inputType !== type)
-						throw new Error(`A parameter must have the same type across all languages`)
+					const inputTypeConstraints = message.inputs[name]
+					if (!inputTypeConstraints) continue
+					for (const type of inputTypeConstraints) typeConstraints.add(type)
 				}
 
 				//this condition should never trigger - Just for typesafety
-				if (!type) throw new Error(`A parameter must have a type in at least one language`)
-				return [name, type]
+				if (typeConstraints.size === 0)
+					throw new Error(`A parameter must have a type in at least one language`)
+				return [name, typeConstraints]
 			})
 		)
 
 		return {
 			id: bundle.id,
 			messages,
-			params: inputs,
+			inputs,
 		}
 	})
 
@@ -100,7 +100,7 @@ export function compileBundle({
 		),
 		"",
 		...compiledBundles.map((bundle) => {
-			const hasInputs = Object.keys(bundle.params).length !== 0
+			const hasInputs = Object.keys(bundle.inputs).length !== 0
 
 			return `export ${bundle.id} = (${hasInputs ? "inputs" : ""}, options) => {
     return {
@@ -125,7 +125,7 @@ type CompiledMessage = {
 	/**
 	 * The input-types of the message
 	 */
-	inputs: Record<string, string>
+	inputs: Record<string, Set<string>>
 
 	/**
 	 * The source-code for the message function
@@ -151,11 +151,7 @@ export function compileMessage({
 		throw new Error("Only input declarations are supported for now")
 	}
 
-	const params = Object.fromEntries(
-		inputDeclarations.map((decl) => {
-			return [decl.name, "NonNullable<unknown>"]
-		})
-	)
+	const inputs = getInputTypeConstraints(message, registry)
 
 	const hasInputs = Boolean(inputDeclarations.length)
 	const hasSelectors = Boolean(message.selectors.length)
@@ -181,7 +177,7 @@ ${inputsWithAnnotation
 
 		return {
 			source,
-			inputs: params,
+			inputs,
 			locale: message.locale,
 		}
 	}
@@ -234,7 +230,7 @@ ${inputsWithAnnotation
 
 	return {
 		source,
-		inputs: params,
+		inputs: inputs,
 		locale: message.locale,
 	}
 }
