@@ -1,5 +1,13 @@
 import { describe, it, expect } from "vitest"
-import { createRoot, createSignal, createEffect, createMemo, createResource } from "./solid.js"
+import {
+	createRoot,
+	createSignal,
+	createEffect,
+	createMemo,
+	createResource,
+	untrack,
+} from "./solid.js"
+import { ReactiveMap } from "./map.js"
 
 function sleep(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms))
@@ -172,5 +180,50 @@ describe("solid", () => {
 		set(1000)
 		expect(count).toBe(3)
 		expect(memo()).toBe("memo = 2000")
+	})
+})
+
+describe("solid", () => {
+	it("solid reactive map allows to use untrack", () => {
+		// @ts-expect-error -- ReactiveMap seem to have problems type arguments here
+		const reactiveMap = new ReactiveMap<string, any>()
+		const [plainSignal, setPlainSignal] = createSignal(0)
+
+		let shouldTriggerOnBoth = -1
+		createEffect(() => {
+			shouldTriggerOnBoth++
+			reactiveMap.values()
+			plainSignal()
+		})
+
+		let shouldTriggerOnReactiveMapOnly = -1
+		createEffect(() => {
+			shouldTriggerOnReactiveMapOnly++
+			reactiveMap.values()
+			untrack(() => plainSignal())
+		})
+
+		let shouldTriggerOnPlainSignalOnly = -1
+		createEffect(() => {
+			shouldTriggerOnPlainSignalOnly++
+			untrack(() => reactiveMap.values())
+			plainSignal()
+		})
+
+		expect(shouldTriggerOnBoth).toBe(0)
+		expect(shouldTriggerOnReactiveMapOnly).toBe(0)
+		expect(shouldTriggerOnPlainSignalOnly).toBe(0)
+
+		setPlainSignal(1)
+
+		expect(shouldTriggerOnBoth).toBe(1)
+		expect(shouldTriggerOnReactiveMapOnly).toBe(0)
+		expect(shouldTriggerOnPlainSignalOnly).toBe(1)
+
+		reactiveMap.set("a", "a")
+
+		expect(shouldTriggerOnBoth).toBe(2)
+		expect(shouldTriggerOnReactiveMapOnly).toBe(1)
+		expect(shouldTriggerOnPlainSignalOnly).toBe(1)
 	})
 })
