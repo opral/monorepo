@@ -14,7 +14,7 @@ export const maybeAddNinja: CliStep<
 	unknown
 > = async (ctx) => {
 	const response = await prompt(
-		"Do you want to add the 🥷 Ninja 🥷 Github Action for linting translations in CI?" +
+		"Do you want to add the 🥷 Ninja Github Action for linting translations in CI?" +
 			"\n\n" +
 			"https://inlang.com/m/3gk8n4n4/app-inlang-ninjaI18nAction",
 		{
@@ -29,10 +29,10 @@ export const maybeAddNinja: CliStep<
 		if (!(await Ninja.isAdopted({ fs: ctx.repo.nodeishFs }))) {
 			await Ninja.add({ fs: ctx.repo.nodeishFs })
 
-			ctx.logger.success("Added the 🥷 Ninja 🥷 Github Action for linting translations")
+			ctx.logger.success("Added the 🥷 Ninja Github Action for linting translations")
 		}
 	} catch (error) {
-		ctx.logger.error("Failed to add the 🥷 Ninja 🥷 Github Action. Please open an issue")
+		ctx.logger.error("Failed to add the 🥷 Ninja Github Action. Please open an issue")
 	}
 
 	return ctx
