@@ -13,8 +13,20 @@
 		"en": "A SvelteKit integration for ParaglideJS, providing you with everything you need for i18n routing"
 	},
 	"pages": {
-		"/": "./inlang/source-code/paraglide/paraglide-sveltekit/README.md",
-		"/changelog": "./inlang/source-code/paraglide/paraglide-sveltekit/CHANGELOG.md"
+		"": {
+			"/": "./inlang/source-code/paraglide/paraglide-sveltekit/docs/why-paraglide.md",
+			"/getting-started": "./inlang/source-code/paraglide/paraglide-sveltekit/README.md",
+			"/localised-routing": "./inlang/source-code/paraglide/paraglide-sveltekit/docs/localised-routing.md",
+			"/advanced-usage": "./inlang/source-code/paraglide/paraglide-sveltekit/docs/advanced-usage.md",
+			"/serverside-usage": "./inlang/source-code/paraglide/paraglide-sveltekit/docs/serverside-usage.md"
+		},
+
+		"Appendix": {
+			"/faq": "./inlang/source-code/paraglide/paraglide-sveltekit/docs/faq.md",
+			"/roadmap": "./inlang/source-code/paraglide/paraglide-sveltekit/docs/roadmap.md",
+			"/changelog": "./inlang/source-code/paraglide/paraglide-sveltekit/CHANGELOG.md",
+			"StackBlitz": "https://stackblitz.com/~/github.com/lorissigrist/paraglide-sveltekit-example"
+		}
 	},
 	"keywords": [
 		"paraglide js",
