@@ -43,7 +43,7 @@ export const Navigation = <T extends string>({ strategy }: { strategy: RoutingSt
 		 * Navigate to the provided href. Pushes a new history entry.
 		 */
 		const push = (
-			canonicalDestinationPath: `/${string}`,
+			canonicalDestinationPath: string,
 			options?: (NavigateOptions & OptionalLanguageOption) | undefined
 		) => {
 			const locale = options?.locale ?? (languageTag() as T)
@@ -92,7 +92,7 @@ export const Navigation = <T extends string>({ strategy }: { strategy: RoutingSt
 		 * Navigate to the provided href. Replaces the current history entry.
 		 */
 		const replace = (
-			canonicalDestinationPath: `/${string}`,
+			canonicalDestinationPath: string,
 			options?: (NavigateOptions & OptionalLanguageOption) | undefined
 		) => {
 			const locale = options?.locale ?? (languageTag() as T)
@@ -140,7 +140,7 @@ export const Navigation = <T extends string>({ strategy }: { strategy: RoutingSt
 		 * Prefetch the provided href.
 		 */
 		const prefetch = (
-			canonicalDestinationPath: `/${string}`,
+			canonicalDestinationPath: string,
 			options: PrefetchOptions & OptionalLanguageOption
 		) => {
 			const locale = options?.locale ?? (languageTag() as T)
