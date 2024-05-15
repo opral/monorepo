@@ -14,4 +14,4 @@
 </doc-comments>
 
 
-> Get started with the [Documentation](get-started)
+> Get started with the [Documentation](/m/osslbuzt/paraglide-next-i18n/get-started)
