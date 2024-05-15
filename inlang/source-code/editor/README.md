@@ -1,18 +1,9 @@
-![editor banner image](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/editor/assets/editor-header.png)
+<doc-hero 
+  title="Edit translations with version control in a visual editor." description="Fink enables translators to edit translations in a visual editor and submit them to your repository. It is a client-side application that pulls the translations from your repository into the browser and commits changes back to it. Contributors can easily submit translations by creating forks and pull requests within the editor." primary-text="Open Fink" primary-link="https://fink.inlang.com" secondary-text="Guide" secondary-link="https://inlang.com/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink" tag="Best app for translators" companies='["https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/appflowy-logo.svg","https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/osmosis-logo.svg","https://www.remnote.com/assets/homepage/images/logoText.svg"]'>
+  
+</doc-hero>
 
-
-## Try out Fink
-[Open Fink](https://fink.inlang.com/)
-
-# Edit translations with version control in a visual editor.
-
-Fink enables translators to edit translations in a visual editor and submit them to your repository. It is a client-side application that pulls the translations from your repository into the browser and commits changes back to it. Contributors can easily submit translations by creating forks and pull requests within the editor.
-<br />
-<br />
-
-Used by
-
-<doc-proof organisations="osmosis, appflowy, remnote"></doc-proof>
+![editor banner image](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/editor/assets/fink-image.png)
 
 # Why use Fink?
 <doc-features>
@@ -33,24 +24,6 @@ Used by
 
 <br />
 <br />
-
-# Let's get started
-
-1. Add a `project.inlang` folder to your repository
-2. Create a `settings.json` file to that new dir `project.inlang/settings.json`
-3. Install a plugin that reads and writes your messages from the [inlang marketplace](https://inlang.com/c/plugins)
----
-4. **Optional** Install [lint rules]((https://inlang.com/c/lint-rules) to find errors in your translations from the [inlang marketplace](https://inlang.com/c/lint-rules)
-
-Look at the [example repository](https://github.com/opral/example) and it's [settings.json](https://github.com/opral/example/blob/main/project.inlang/settings.json) for a working example.
-
-## Example
-
-This is how the editor could look like for your project:
-
-<doc-links>
-    <doc-link title="Open inlang example" icon="icon-park-outline:editor" href="/editor/github.com/opral/example" description="inlang example repository in the editor"></doc-link>
-</doc-links>
 
 # How to contribute translations
 

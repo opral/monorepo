@@ -28,6 +28,7 @@ describe("previewLanguageTagCommand", () => {
 		vi.mock("../configuration.js", () => ({
 			CONFIGURATION: {
 				EVENTS: {
+					ON_DID_CREATE_MESSAGE: { fire: vi.fn() },
 					ON_DID_EDIT_MESSAGE: { fire: vi.fn() },
 					ON_DID_EXTRACT_MESSAGE: { fire: vi.fn() },
 					ON_DID_PREVIEW_LANGUAGE_TAG_CHANGE: { fire: vi.fn() },
@@ -58,6 +59,7 @@ describe("previewLanguageTagCommand", () => {
 		})
 		expect(settings.updateSetting).toHaveBeenCalledWith("previewLanguageTag", "en")
 		expect(CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire).toHaveBeenCalledTimes(1)
+		expect(CONFIGURATION.EVENTS.ON_DID_CREATE_MESSAGE.fire).toHaveBeenCalledTimes(1)
 		expect(CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.fire).toHaveBeenCalledTimes(1)
 		expect(CONFIGURATION.EVENTS.ON_DID_PREVIEW_LANGUAGE_TAG_CHANGE.fire).toHaveBeenCalledTimes(1)
 	})
@@ -69,6 +71,7 @@ describe("previewLanguageTagCommand", () => {
 
 		expect(settings.updateSetting).not.toHaveBeenCalled()
 		expect(CONFIGURATION.EVENTS.ON_DID_EDIT_MESSAGE.fire).not.toHaveBeenCalled()
+		expect(CONFIGURATION.EVENTS.ON_DID_CREATE_MESSAGE.fire).not.toHaveBeenCalled()
 		expect(CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.fire).not.toHaveBeenCalled()
 		expect(CONFIGURATION.EVENTS.ON_DID_PREVIEW_LANGUAGE_TAG_CHANGE.fire).not.toHaveBeenCalled()
 	})

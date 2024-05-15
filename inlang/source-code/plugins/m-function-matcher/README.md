@@ -21,3 +21,13 @@ The plugin will automatically extract messages from your code and show them inli
 
 > There might be a delay before the messages appear in the editor. This is because the plugin needs to be downloaded first. If you want to make sure that everything is setup correctly, reload your workspace.
 
+### Manual installation
+
+```diff
+// project.inlang/settings.json
+{
+  "modules" : [
++    "https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js"
+  ]
+}
+```

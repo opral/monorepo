@@ -6,14 +6,11 @@ describe("watcher", () => {
 	it("should trigger the update function when file changes", async () => {
 		let counter = 0
 
-		const abortController = new AbortController()
-
 		const fs = createNodeishFsWithWatcher({
 			nodeishFs: createNodeishMemoryFs(),
 			updateMessages: () => {
 				counter++
 			},
-			abortController,
 		})
 
 		// establish watcher
@@ -41,7 +38,7 @@ describe("watcher", () => {
 		//check if update function was called
 		expect(counter).toBe(2)
 
-		abortController.abort()
+		fs.stopWatching()
 
 		// change file
 		await fs.writeFile("file.txt", "b")

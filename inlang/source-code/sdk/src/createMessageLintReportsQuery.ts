@@ -9,12 +9,20 @@ import type { ProjectSettings } from "@inlang/project-settings"
 import type { resolveModules } from "./resolve-modules/index.js"
 import type { MessageLintReport, Message } from "./versionedInterfaces.js"
 import { lintSingleMessage } from "./lint/index.js"
+
 import { ReactiveMap } from "./reactivity/map.js"
 import { createMemo, onCleanup, untrack, batch } from "./reactivity/solid.js"
 import { createSubscribable } from "./loadProject.js"
 
+import _debug from "debug"
+const debug = _debug("sdk:lintReports")
+
 /**
- * Creates a ~~reactive~~ query API for lint reports.
+ * Creates a non-reactive async query API for lint reports.
+ * e.g. used in editor/.../Listheader.tsx
+ *
+ * TODO MESDK-50: reactivity should be restored in future
+ * See https://github.com/opral/monorepo/pull/2378 for why this design.
  */
 export function createMessageLintReportsQuery(
 	messagesQuery: MessageQueryApi,
