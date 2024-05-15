@@ -150,7 +150,7 @@ export function createMessagesQuery({
 			messageLockDirPath,
 			messageStates,
 			index,
-			delegate,
+			undefined /* delegate - we don't pass it here since we will call onLoaded instead */,
 			_settings, // NOTE we bang here - we don't expect the settings to become null during the livetime of a project
 			resolvedPluginApi
 		)

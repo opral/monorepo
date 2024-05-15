@@ -10,12 +10,8 @@ import type { resolveModules } from "./resolve-modules/index.js"
 import type { MessageLintReport, Message } from "./versionedInterfaces.js"
 import { lintSingleMessage } from "./lint/index.js"
 import { ReactiveMap } from "./reactivity/map.js"
-import { createEffect, createMemo, onCleanup, untrack } from "./reactivity/solid.js"
+import { createMemo, onCleanup, untrack, batch } from "./reactivity/solid.js"
 import { createSubscribable } from "./loadProject.js"
-
-function sleep(ms: number) {
-	return new Promise((resolve) => setTimeout(resolve, ms))
-}
 
 /**
  * Creates a ~~reactive~~ query API for lint reports.
@@ -31,7 +27,7 @@ export function createMessageLintReportsQuery(
 
 	let settledReports = Promise.resolve()
 
-	// triggered whenever settings or resolved modules change
+	// triggered whenever settings or resolved modules changes
 	createMemo(() => {
 		// we clear the index independent from the change for
 		index.clear()
@@ -68,7 +64,10 @@ export function createMessageLintReportsQuery(
 					messages: messages,
 					message: message,
 				}).then((report) => {
-					if (report.errors.length === 0 && index.get(message.id) !== report.data) {
+					const currentReports = index.get(message.id)
+
+					// we only update the report if it differs from the known one - to not trigger reactivity
+					if (report.errors.length === 0 && !reportsEqual(currentReports, report.data)) {
 						// console.log("lintSingleMessage", messageId, report.data.length)
 						index.set(message.id, report.data)
 					}
@@ -86,11 +85,13 @@ export function createMessageLintReportsQuery(
 				// for (const message of messages) {
 				// 	lintMessage(message, messages)
 				// }
-				for (const message of messages) {
-					// NOTE: this potentually creates thousands of promisses we could create a promise that batches linting
-					// NOTE: this produces a lot of signals - we could batch the
-					sheduleLintMessage(message, messages)
-				}
+				batch(() => {
+					for (const message of messages) {
+						// NOTE: this potentually creates thousands of promisses we could create a promise that batches linting
+						// NOTE: this produces a lot of signals - we could batch the
+						sheduleLintMessage(message, messages)
+					}
+				})
 			},
 			onMessageCreate: (messageId: string, message: Message) => {
 				// TODO unhandled promise rejection (as before the refactor) but won't tackle this in this pr
@@ -138,19 +139,47 @@ export function createMessageLintReportsQuery(
 	}
 }
 
-const createAwaitable = () => {
-	let resolve: () => void
-	let reject: () => void
-
-	const promise = new Promise<void>((res, rej) => {
-		resolve = res
-		reject = rej
-	})
-
-	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- those properties get set by new Promise, TS can't know this
-	return { promise, resolve: resolve!, reject: reject! } as unknown as {
-		promise: Promise<void>
-		resolve: () => void
-		reject: (e: unknown) => void
+function reportsEqual(
+	reportsA: MessageLintReport[] | undefined,
+	reportsB: MessageLintReport[] | undefined
+) {
+	if (reportsA === undefined && reportsB === undefined) {
+		return true
+	} else if (reportsA === undefined || reportsB === undefined) {
+		return false
 	}
+
+	if (reportsA.length !== reportsB.length) {
+		return false
+	}
+
+	for (const [i, element] of reportsA.entries()) {
+		if (element?.languageTag !== reportsB[i]?.languageTag) {
+			return false
+		}
+
+		if (element?.level !== reportsB[i]?.level) {
+			return false
+		}
+
+		if (element?.ruleId !== reportsB[i]?.ruleId) {
+			return false
+		}
+
+		if (typeof element?.body !== typeof reportsB[i]?.body) {
+			return false
+		}
+
+		if (typeof element?.body === "string") {
+			if (reportsB[i]?.body !== reportsB[i]?.body) {
+				return false
+			}
+		} else {
+			// TODO XXX check how to deal with translatable body...
+			if (JSON.stringify(element?.body) !== JSON.stringify(element?.body)) {
+				return false
+			}
+		}
+	}
+	return true
 }
