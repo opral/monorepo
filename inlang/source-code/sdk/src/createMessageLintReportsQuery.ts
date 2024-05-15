@@ -101,17 +101,18 @@ export function createMessageLintReportsQuery(
 					}
 				})
 			},
-			onMessageCreate: (messageId: string, message: Message) => {
+			onMessageCreate: (messageId: string, message: Message, messages: Message[]) => {
 				// TODO unhandled promise rejection (as before the refactor) but won't tackle this in this pr
-				// FIX allMessages here - this should be passed into the delegate!
-				sheduleLintMessage(message, [])
+				// TODO reevaluate all lint's - if lints have inter message dependencies
+				sheduleLintMessage(message, messages)
 			},
-			onMessageUpdate: (messageId: string, message: Message) => {
+			onMessageUpdate: (messageId: string, message: Message, messages: Message[]) => {
 				// TODO unhandled promise rejection (as before the refactor) but won't tackle this in this pr
-				// FIX allMessages here - this should be passed into the delegate!
-				sheduleLintMessage(message, [])
+				// TODO reevaluate all lint's - if lints have inter message dependencies
+				sheduleLintMessage(message, messages)
 			},
-			onMessageDelete: (messageId: string) => {
+			onMessageDelete: (messageId: string, _messages: Message[]) => {
+				// TODO reevaluate all lint's - if lints have inter message dependencies
 				index.delete(messageId)
 			},
 		}

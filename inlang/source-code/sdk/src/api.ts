@@ -82,9 +82,9 @@ export type Subscribable<Value> = {
 }
 
 export type MessageQueryDelegate = {
-	onMessageCreate: (messageId: string, message: Message) => void
-	onMessageUpdate: (messageId: string, message: Message) => void
-	onMessageDelete: (messageId: string) => void
+	onMessageCreate: (messageId: string, message: Message, messages: Message[]) => void
+	onMessageUpdate: (messageId: string, message: Message, messages: Message[]) => void
+	onMessageDelete: (messageId: string, messages: Message[]) => void
 	onLoaded: (messages: Message[]) => void
 	onCleanup: () => void
 }
