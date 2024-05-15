@@ -1,5 +1,6 @@
 import type * as AST from "@inlang/sdk/v2"
 import type { Registry } from "./registry/registry.js"
+import { isExpression, isVariableReference, isInputDeclaration } from "./ast-utils.js"
 
 /**
  * Analyzes a message & returns the type constraints for each input
@@ -12,16 +13,12 @@ export function getInputTypeConstraints(
 	const expressions = new Set<AST.Expression>([
 		...message.declarations.map((decl) => decl.value),
 		...message.selectors,
-		...message.variants.flatMap((variant) =>
-			variant.pattern.filter((el): el is AST.Expression => el.type === "expression")
-		),
+		...message.variants.flatMap((variant) => variant.pattern.filter(isExpression)),
 	])
 
 	// initialite type constraint map with all inputs
 	const inputTypes = Object.fromEntries(
-		message.declarations
-			.filter((decl) => decl.type === "input")
-			.map((decl) => [decl.name, new Set<string>()])
+		message.declarations.filter(isInputDeclaration).map((decl) => [decl.name, new Set<string>()])
 	)
 
 	// loop over all expressions & collect type constraints
@@ -31,7 +28,7 @@ export function getInputTypeConstraints(
 
 		// get type-contraints for inputs that are used as options
 		for (const options of expression.annotation.options) {
-			if (options.value.type !== "variable") continue
+			if (!isVariableReference(options.value)) continue
 
 			// If the variable is an input -> add type-contraint
 			const typeConstraints = inputTypes[options.value.name]
@@ -43,7 +40,7 @@ export function getInputTypeConstraints(
 		}
 
 		// get type-contraints for inputs that are used as arguments
-		if (expression.arg.type === "variable") {
+		if (isVariableReference(expression.arg)) {
 			// If the variable is an input -> add type-contraint
 			const typeConstraints = inputTypes[expression.arg.name]
 			const typeConstraint = registry[expression.annotation.name]?.signature.input

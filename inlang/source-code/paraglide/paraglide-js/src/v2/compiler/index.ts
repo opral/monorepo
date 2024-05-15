@@ -1,18 +1,11 @@
 import { lookup, type ProjectSettings } from "@inlang/sdk"
-import type {
-	MessageBundle,
-	Message,
-	InputDeclaration,
-	Declaration,
-	Pattern,
-	Expression,
-	Variant,
-} from "@inlang/sdk/v2"
+import type { MessageBundle, Message, Pattern, Expression, Variant } from "@inlang/sdk/v2"
 import { createRuntime } from "./runtime/index.js"
 import { registry } from "./registry/registry.js"
 import REGISTRY_JS_FILE from "./registry/registry.js.template?raw"
 import { getInputTypeConstraints } from "./types.js"
 import { generateJSDoc } from "./codegen.js"
+import { isInputDeclaration, isLiteral, isText, isVariableReference } from "./ast-utils.js"
 
 export type CompileOptions = {
 	messageBundles: Readonly<MessageBundle[]>
@@ -172,7 +165,8 @@ export function compileMessage({
 								.join(",\n")}\n}`,
 						},
 					},
-					returns: { type: "string", description: "The stringified message" },
+					returns: { type: "string" },
+					noSideEffects: true,
 				}),
 		  ]
 		: []
@@ -266,13 +260,8 @@ function compilePattern(pattern: Pattern): string {
 		"`" +
 		pattern
 			.map((el) => {
-				switch (el.type) {
-					case "text":
-						return el.value
-					case "expression": {
-						return "${" + compileExpression(el) + "}"
-					}
-				}
+				if (isText(el)) return el.value
+				else return "${" + compileExpression(el) + "}"
 			})
 			.join("") +
 		"`"
@@ -280,16 +269,13 @@ function compilePattern(pattern: Pattern): string {
 }
 
 function compileExpression(expression: Expression): string {
-	const arg =
-		expression.arg.type === "variable"
-			? "inputs." + expression.arg.name
-			: expression.arg.type === "literal"
-			? '"' + expression.arg.value + '"'
-			: "undefined" //should never match but just in case
+	const arg = isVariableReference(expression.arg)
+		? "inputs." + expression.arg.name
+		: isLiteral(expression.arg)
+		? '"' + expression.arg.value + '"'
+		: "undefined" //should never match but just in case
 
-	if (!expression.annotation) {
-		return arg
-	}
+	if (!expression.annotation) return arg
 
 	const func = registry[expression.annotation.name]
 	if (!func) throw new Error("Unknown function: " + expression.annotation.name)
@@ -305,17 +291,12 @@ function compileExpression(expression: Expression): string {
 
 	const options = `{ ${expression.annotation.options
 		.map((opt) => {
-			const value =
-				opt.value.type === "literal" ? '"' + opt.value.value + '"' : "inputs." + opt.value.name
+			const value = isLiteral(opt.value) ? `"${opt.value.value}"` : `inputs.${opt.value.name}`
 			return `"${opt.name}" : ${value}`
 		})
 		.join(",\n")} }`
 
 	return `registry.${expression.annotation.name}(${arg}, ${options})`
-}
-
-function isInputDeclaration(declaration: Declaration): declaration is InputDeclaration {
-	return declaration.type === "input"
 }
 
 function compareVariants(variantA: Variant, variantB: Variant): -1 | 0 | 1 {

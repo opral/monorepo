@@ -10,6 +10,13 @@ export function generateJSDoc(docs: {
 		type?: string
 		description?: string
 	}
+
+	/**
+	 * The "@see" declaration. Usually a link
+	 */
+	see?: string
+
+	noSideEffects?: boolean
 }): string {
 	const sections: (string | undefined)[] = [
 		docs.description,
@@ -29,6 +36,9 @@ export function generateJSDoc(docs: {
 					.filter(Boolean)
 					.join(" ")
 			: undefined,
+		docs.see ? `@see ${docs.see}` : undefined,
+
+		docs.noSideEffects ? "@__NO_SIDE_EFFECTS__" : undefined,
 	].filter(Boolean)
 
 	const body = sections.join("\n\n")

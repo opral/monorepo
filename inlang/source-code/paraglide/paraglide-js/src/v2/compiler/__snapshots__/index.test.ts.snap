@@ -6,7 +6,9 @@ exports[`v2 - compileMessage > input with annotation and selectors 1`] = `
  * 	name: number
  * 	}} inputs
  * 
- * @returns {string} The stringified message
+ * @returns {string}
+ * 
+ * @__NO_SIDE_EFFECTS__
  */
 export const hello_name = (inputs) => {
     input.name = registry.plural(inputs.name)
@@ -23,7 +25,9 @@ exports[`v2 - compileMessage > input with annotation, no selectors 1`] = `
  * 	name: number
  * 	}} inputs
  * 
- * @returns {string} The stringified message
+ * @returns {string}
+ * 
+ * @__NO_SIDE_EFFECTS__
  */
 export const hello_name = (inputs) => {
     inputs.name = registry.plural(inputs.name)
@@ -42,8 +46,9 @@ exports[`v2 - compileMessage > simple input, no selectors 1`] = `
  * 	name: NonNullable<unknown>
  * 	}} inputs
  * 
- * @returns {string} The stringified message
+ * @returns {string}
+ * 
+ * @__NO_SIDE_EFFECTS__
  */
 export const hello_name = (inputs) => \`Hello \${inputs.name}\`"
 `;
-
