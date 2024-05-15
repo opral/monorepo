@@ -12,11 +12,6 @@ export type Registry = {
 			options: {
 				[name: string]: string
 			}
-
-			/**
-			 * The output type of the function
-			 */
-			output: string
 		}
 	}
 }
@@ -29,7 +24,6 @@ export const registry: Registry = {
 				localeMatcher: '"lookup" | "best-fit"',
 				type: '"cardinal" | "ordinal"',
 			},
-			output: '"zero" | "one" | "two" | "few" | "many" | "other"',
 		},
 	},
 }

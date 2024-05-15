@@ -64,7 +64,6 @@ describe("getInputTypeConstraints", () => {
 				signature: {
 					input: "number",
 					options: {},
-					output: '"zero" | "one" | "two" | "few" | "many" | "other"',
 				},
 			},
 		}

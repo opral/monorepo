@@ -12,6 +12,7 @@ import { createRuntime } from "./runtime/index.js"
 import { registry } from "./registry/registry.js"
 import REGISTRY_JS_FILE from "./registry/registry.js.template?raw"
 import { getInputTypeConstraints } from "./types.js"
+import { generateJSDoc } from "./codegen.js"
 
 export type CompileOptions = {
 	messageBundles: Readonly<MessageBundle[]>
@@ -156,6 +157,26 @@ export function compileMessage({
 	const hasInputs = Boolean(inputDeclarations.length)
 	const hasSelectors = Boolean(message.selectors.length)
 
+	const jsdoc: string[] = hasInputs
+		? [
+				generateJSDoc({
+					params: {
+						inputs: {
+							type: `{\n${Object.entries(inputs)
+								.map(([name, constraints]) => {
+									const type = constraints.size
+										? [...constraints].join(" & ")
+										: "NonNullable<unknown>"
+									return `${name}: ${type}`
+								})
+								.join(",\n")}\n}`,
+						},
+					},
+					returns: { type: "string", description: "The stringified message" },
+				}),
+		  ]
+		: []
+
 	if (!hasSelectors) {
 		const variant = message.variants[0]
 		if (!variant) throw new Error(`A message must have at least one variant`)
@@ -163,7 +184,7 @@ export function compileMessage({
 			throw new Error(`A variant on a message with no selectors must not have a match`)
 
 		const source = inputsWithAnnotation.length
-			? `export const ${bundleId} = (inputs) => {
+			? `${jsdoc}\nexport const ${bundleId} = (inputs) => {
 ${inputsWithAnnotation
 	.map((input) => {
 		return `    inputs.${input.name} = ${compileExpression(input.value)}`
@@ -171,7 +192,7 @@ ${inputsWithAnnotation
 	.join("\n")}
     return ${compilePattern(variant.pattern)}
 }`
-			: `export const ${bundleId} = (${hasInputs ? "inputs" : ""}) => ${compilePattern(
+			: `${jsdoc}\nexport const ${bundleId} = (${hasInputs ? "inputs" : ""}) => ${compilePattern(
 					variant.pattern
 			  )}`
 
@@ -199,6 +220,7 @@ ${inputsWithAnnotation
 	const variants = [...message.variants].sort(compareVariants)
 
 	const lines: string[] = [
+		...jsdoc,
 		`export const ${bundleId} = (${hasInputs ? "inputs" : ""}) => {`,
 
 		...inputsWithAnnotation.map((input) => {
