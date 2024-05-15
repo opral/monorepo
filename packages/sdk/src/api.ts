@@ -65,7 +65,7 @@ export type InlangProject = {
 
 /**
  * WIP template for async V2 crud interfaces
- * E.g. `project.messageBundles.get({ id: "..." })`
+ * E.g. `await project.messageBundles.get({ id: "..." })`
  **/
 interface Query<T> {
 	get: (args: unknown) => Promise<T>

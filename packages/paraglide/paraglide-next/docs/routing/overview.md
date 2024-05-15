@@ -9,7 +9,7 @@ It's an interface for providing a two-way mapping between
 Most of the time you will not be writing your own Routing Strategy & instead be using a prebuilt one.
 
 - [Prefix Strategy (default)](prefix-strategy)
-- [Domain Strategy](domain-strategy)
+- [Domain Strategy](other-strategies#domain-strategy)
 
 ## Localised Navigation APIs
 

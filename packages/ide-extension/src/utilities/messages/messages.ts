@@ -83,6 +83,13 @@ export function createMessageWebviewProvider(args: {
 			)
 			args.context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(updateMessages))
 
+			// if message was created, update webview
+			args.context.subscriptions.push(
+				CONFIGURATION.EVENTS.ON_DID_CREATE_MESSAGE.event(() => {
+					updateMessages()
+				})
+			)
+
 			// if message was extracted, update webview
 			args.context.subscriptions.push(
 				CONFIGURATION.EVENTS.ON_DID_EXTRACT_MESSAGE.event(() => {

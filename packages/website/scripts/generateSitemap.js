@@ -45,18 +45,43 @@ async function generateSitemap() {
 			for (const item of registry) {
 				if (!item.id.startsWith("guide.")) {
 					if (item.pages) {
-						for (const restSlug of Object.keys(item.pages)) {
-							content = `${content}${formatPage(
-								siteURL +
-									// locale +
-									route.path +
-									"/" +
-									item.uniqueID +
-									"/" +
-									(item.slug ? item.slug.replaceAll(".", "-") : item.id.replaceAll(".", "-")) +
-									(restSlug !== "/" ? restSlug : ""),
-								publishDate
-							)}`
+						for (const [key, value] of Object.entries(item.pages)) {
+							if (typeof value === "string") {
+								const restSlug = key
+								content = `${content}${formatPage(
+									siteURL +
+										// locale +
+										route.path +
+										"/" +
+										item.uniqueID +
+										"/" +
+										(item.slug ? item.slug.replaceAll(".", "-") : item.id.replaceAll(".", "-")) +
+										(restSlug !== "/" ? restSlug : ""),
+									publishDate
+								)}`
+							} else {
+								for (const [restSlug, path] of Object.entries(value)) {
+									if (
+										!path.startsWith("http") &&
+										!path.startsWith("https") &&
+										!path.startsWith("/")
+									) {
+										content = `${content}${formatPage(
+											siteURL +
+												// locale +
+												route.path +
+												"/" +
+												item.uniqueID +
+												"/" +
+												(item.slug
+													? item.slug.replaceAll(".", "-")
+													: item.id.replaceAll(".", "-")) +
+												(restSlug !== "/" ? restSlug : ""),
+											publishDate
+										)}`
+									}
+								}
+							}
 						}
 					} else {
 						content = `${content}${formatPage(

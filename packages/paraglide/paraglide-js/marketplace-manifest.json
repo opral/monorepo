@@ -16,8 +16,27 @@
 		"en": "Simple, adaptable and tiny i18n library that integrates with any framework"
 	},
 	"pages": {
-		"/": "./inlang/source-code/paraglide/paraglide-js/README.md",
-		"/changelog": "./inlang/source-code/paraglide/paraglide-js/CHANGELOG.md"
+		"": {
+			"/": "./inlang/source-code/paraglide/paraglide-js/docs/why-paraglide.md",
+			"/usage": "./inlang/source-code/paraglide/paraglide-js/README.md",
+			"/architecture": "./inlang/source-code/paraglide/paraglide-js/docs/architecture.md",
+			"/changelog": "./inlang/source-code/paraglide/paraglide-js/CHANGELOG.md"
+		},
+
+		"Framework Libraries": {
+			"NextJS": "/m/osslbuzt/paraglide-next-i18n",
+			"SvelteKit": "/m/dxnzrydw/paraglide-sveltekit-i18n",
+			"Astro": "/m/iljlwzfs/paraglide-astro-i18n",
+			"SolidStart": "/m/n860p17j/paraglide-solidstart-i18n",
+			"Remix": "/m/fnhuwzrx/paraglide-remix-i18n",
+			"Build your own": "./inlang/source-code/paraglide/paraglide-js/docs/custom-framework-library.md"
+		},
+
+		"Tooling": {
+			"VsCode Extension": "/m/r7kp499g/app-inlang-ideExtension",
+			"Machine Translation": "/m/2qj2w8pu/app-inlang-cli",
+			"Translation Editor": "/m/tdozzpar/app-inlang-finkLocalizationEditor"
+		}
 	},
 	"keywords": [
 		"paraglide js",
