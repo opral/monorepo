@@ -73,4 +73,5 @@ You can find example projects in [our GitHub repository](https://github.com/opra
 <doc-comments>
 <doc-comment text="Awesome library 🙂 Thanks so much! 1) The docs were simple and straight forward 2) Everything just worked.. no headaches" author="Dimitry" icon="mdi:discord" data-source="https://discord.com/channels/897438559458430986/1083724234142011392/1225658097016766574"></doc-comment>
 <doc-comment text="Thank you for that huge work you have done and still doing!" author="ZerdoX-x" icon="mdi:github"></doc-comment>
+<doc-comment text="It works like a charm. intellisense, autotranslate, server/client side. Just great!" author="Majora" icon="mdi:discord" data-source="https://discord.com/channels/897438559458430986/1239930048870613032/1239976956645212402"></doc-comment>
 </doc-comments>
