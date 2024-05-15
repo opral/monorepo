@@ -209,7 +209,7 @@ export function createMessagesQuery({
 			}
 
 			messageStates.messageDirtyFlags[data.id] = true
-			delegate?.onMessageCreate(data.id, index.get(data.id))
+			delegate?.onMessageCreate(data.id, index.get(data.id), [...index.values()])
 			scheduleSave()
 			return true
 		},
@@ -236,7 +236,7 @@ export function createMessagesQuery({
 			if (message === undefined) return false
 			index.set(where.id, { ...message, ...data })
 			messageStates.messageDirtyFlags[where.id] = true
-			delegate?.onMessageUpdate(where.id, index.get(data.id))
+			delegate?.onMessageUpdate(where.id, index.get(data.id), [...index.values()])
 			scheduleSave()
 			return true
 		},
@@ -248,11 +248,11 @@ export function createMessagesQuery({
 					defaultAliasIndex.set(data.alias.default, data)
 				}
 				messageStates.messageDirtyFlags[where.id] = true
-				delegate?.onMessageCreate(data.id, index.get(data.id))
+				delegate?.onMessageCreate(data.id, index.get(data.id), [...index.values()])
 			} else {
 				index.set(where.id, { ...message, ...data })
 				messageStates.messageDirtyFlags[where.id] = true
-				delegate?.onMessageUpdate(data.id, index.get(data.id))
+				delegate?.onMessageUpdate(data.id, index.get(data.id), [...index.values()])
 			}
 			scheduleSave()
 			return true
@@ -265,7 +265,7 @@ export function createMessagesQuery({
 			}
 			index.delete(where.id)
 			messageStates.messageDirtyFlags[where.id] = true
-			delegate?.onMessageDelete(where.id)
+			delegate?.onMessageDelete(where.id, [...index.values()])
 			scheduleSave()
 			return true
 		},
@@ -370,7 +370,7 @@ async function loadMessagesViaPlugin(
 				messages.set(loadedMessageClone.id, loadedMessageClone)
 				// NOTE could use hash instead of the whole object JSON to save memory...
 				messageState.messageLoadHash[loadedMessageClone.id] = importedEnecoded
-				delegate?.onMessageUpdate(loadedMessageClone.id, loadedMessageClone)
+				delegate?.onMessageUpdate(loadedMessageClone.id, loadedMessageClone, [...messages.values()])
 				loadedMessageCount++
 			} else {
 				// message with the given alias does not exist so far
@@ -398,7 +398,7 @@ async function loadMessagesViaPlugin(
 				// we don't have to check - done before hand if (messages.has(loadedMessageClone.id)) return false
 				messages.set(loadedMessageClone.id, loadedMessageClone)
 				messageState.messageLoadHash[loadedMessageClone.id] = importedEnecoded
-				delegate?.onMessageUpdate(loadedMessageClone.id, loadedMessageClone)
+				delegate?.onMessageUpdate(loadedMessageClone.id, loadedMessageClone, [...messages.values()])
 				loadedMessageCount++
 			}
 			if (loadedMessageCount > maxMessagesPerTick) {
