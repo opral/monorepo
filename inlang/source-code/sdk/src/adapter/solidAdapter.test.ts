@@ -170,8 +170,8 @@ describe("installed", () => {
 		// TODO: how can we await `setConfig` correctly
 		await new Promise((resolve) => setTimeout(resolve, 0))
 
-		expect(counterPlugins).toBe(2) // 2 times because effect creation + set
-		expect(counterLint).toBe(2) // 2 times because effect creation + set
+		expect(counterPlugins).toBe(3) // 3 times because effect creation + setSettings, setResolvedModules
+		expect(counterLint).toBe(3) // 3 times because effect creation + setSettings, setResolvedModules
 	})
 })
 
@@ -219,7 +219,7 @@ describe("messages", () => {
 			{ from }
 		)
 
-		let effectOnMessagesCounter = 0
+		let effectOnMessagesCounter = -1
 		createEffect(() => {
 			project.query.messages.getAll()
 			effectOnMessagesCounter += 1
@@ -232,7 +232,7 @@ describe("messages", () => {
 		// TODO: how can we await `setConfig` correctly
 		await new Promise((resolve) => setTimeout(resolve, 510))
 
-		expect(effectOnMessagesCounter).toBe(7) // 7 = initial effect, setSetting, loadMessage (2x - one per message), setResolvedPlugins, loadMessages (2x - one per message)
+		expect(effectOnMessagesCounter).toBe(3) // 3 = setSetting, loadMessage (2x - one per message)
 		expect(Object.values(project.query.messages.getAll()).length).toBe(2)
 	})
 
@@ -402,7 +402,7 @@ describe("lint", () => {
 
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
-			// 7 = 3 + 1 (effect->settings) +  1 (effect->Resolved Plugin) + 
+			// 7 = 3 + 1 (effect->settings) +  1 (effect->Resolved Plugin) +
 			expect(counter).toBe(5)
 			expect(project.query.messageLintReports.getAll()).toEqual([])
 
@@ -411,7 +411,13 @@ describe("lint", () => {
 			const newConfig2 = { ...project.settings()!, languageTags: ["en", "de", "fr"] }
 			project.setSettings(newConfig2)
 
-			expect(counter).toBe(9)
+			// set settings trigges synchronous -> +1
+			expect(counter).toBe(6)
+
+			await new Promise((resolve) => setTimeout(resolve, 510))
+
+			// previous 8 -> +2 new lint reports (lint rules have been resetted by the settings signal)
+			expect(counter).toBe(8)
 			expect(project.query.messageLintReports.getAll()).toEqual([])
 		})
 	})
@@ -454,8 +460,8 @@ describe("lint", () => {
 			})
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
-			// 2 -> previous two messages + one lintreport updated because of message update
-			expect(counter).toBe(3)
+			// 2 -> previous two messages + 0 - report results are the same - no effect
+			expect(counter).toBe(2)
 			expect(project.query.messageLintReports.getAll()).toEqual([])
 
 			project.query.messages.update({
@@ -468,9 +474,9 @@ describe("lint", () => {
 
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
-			// 4 -> previous 3 + one lint rulereport for updated message
-			expect(counter).toBe(4)
+			// 2 -> the updated message does not update the lint rules - result is the same
+			expect(counter).toBe(2)
 			expect(project.query.messageLintReports.getAll()).toEqual([])
 		})
-	}, 1000000000)
+	})
 })
