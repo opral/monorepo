@@ -1,3 +1,5 @@
+// this is a JS file to avoid transpiling in tests
+
 export const PARAGLIDE_CONTEXT_KEY = "$paraglide-sveltekit:context"
 export const NO_TRANSLATE_ATTRIBUTE = "data-no-translate"
 

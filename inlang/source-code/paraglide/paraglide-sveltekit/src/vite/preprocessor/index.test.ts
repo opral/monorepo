@@ -6,7 +6,6 @@ import { compile } from "svelte/compiler"
 import { PARAGLIDE_CONTEXT_KEY } from "../../constants"
 import { rollup } from "rollup"
 import virtual from "@rollup/plugin-virtual"
-import ts from "@rollup/plugin-typescript"
 import alias from "@rollup/plugin-alias"
 import { nodeResolve } from "@rollup/plugin-node-resolve"
 import path from "node:path"
@@ -373,12 +372,11 @@ async function renderComponent(svelteCode: string) {
 				"src/Component.svelte": compiledComponent.js.code,
 			}),
 			nodeResolve(),
-			ts(),
 			alias({
 				entries: {
 					"@inlang/paraglide-sveltekit/internal": path.resolve(
 						__dirname,
-						"../../runtime/internal/index.ts"
+						"../../runtime/internal/index.js"
 					),
 				},
 			}),
