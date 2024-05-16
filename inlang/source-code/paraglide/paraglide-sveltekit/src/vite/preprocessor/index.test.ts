@@ -317,6 +317,18 @@ describe.concurrent(
 				'"<a href=\\"/rewritten/de\\" hreflang=\\"de\\">content</a>"'
 			)
 		})
+
+		it("rewrites hrefs in svelte 5 components", async ({ expect }) => {
+			const code = `
+				{#snippet myLink(href)}
+				<a href={href}>content</a>
+				{/snippet}
+				
+				{@render myLink("/test")}
+				`
+			const html = await renderComponent(code)
+			expect(html).toMatchInlineSnapshot('"<a href=\\"/rewritten\\">content</a>"')
+		})
 	},
 	{ timeout: 60_000 }
 )
