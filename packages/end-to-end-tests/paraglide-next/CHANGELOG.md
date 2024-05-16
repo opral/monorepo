@@ -1,5 +1,11 @@
 # @inlang/paraglide-next-e2e
 
+## 0.0.5
+
+### Patch Changes
+
+- @inlang/paraglide-next@0.2.3
+
 ## 0.0.4
 
 ### Patch Changes
