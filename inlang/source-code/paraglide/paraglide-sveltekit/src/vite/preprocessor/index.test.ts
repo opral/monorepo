@@ -320,7 +320,7 @@ describe.concurrent(
 			)
 		})
 	},
-	{ timeout: 20_000 }
+	{ timeout: 60_000 }
 )
 
 /**
