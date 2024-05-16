@@ -1,8 +1,7 @@
-import type { parse } from "svelte/compiler"
+import type { LegacyRoot } from "svelte/compiler"
 import type { BaseDirective } from "svelte/types/compiler/interfaces"
 
-export type Ast = ReturnType<typeof parse>
-export type TemplateNode = Ast["html"]
+export type TemplateNode = LegacyRoot["html"]
 
 export type ElementNode<Name extends stirng> = {
 	start: number
@@ -13,7 +12,7 @@ export type ElementNode<Name extends stirng> = {
 	? {
 			name: "svelte:element"
 			tag: string | Expression
-		}
+	  }
 	: { name: Name })
 
 type Expression = {
