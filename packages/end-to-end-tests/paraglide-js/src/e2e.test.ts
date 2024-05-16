@@ -53,6 +53,12 @@ describe.concurrent("paraglide-js", () => {
 				await wait(PROMPT_TO)
 				await pressKey("enter")
 
+				await waitForText("Github Action")
+				await wait(PROMPT_TO)
+				await writeText("y")
+				await wait(PROMPT_TO)
+				await pressKey("enter")
+
 				await waitForText("Which tech stack are you using?")
 				await wait(PROMPT_TO)
 				await pressKey("enter")
