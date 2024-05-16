@@ -8,16 +8,23 @@ export function getElementsFromAst<Name extends string>(
 	const links: ElementNode<Name>[] = []
 
 	function walk(templateNode: TemplateNode) {
-		if (templateNode.type === "Element" && templateNode.name === elementName) {
+		if (
+			templateNode.type === "Element" &&
+			"name" in templateNode &&
+			templateNode.name === elementName
+		) {
 			links.push(templateNode as ElementNode<Name>)
 		}
 
-		for (const child of templateNode.children || []) {
+		for (const child of "children" in templateNode ? templateNode.children : []) {
 			walk(child)
 		}
 
+		// @ts-ignore
 		if (templateNode.else) walk(templateNode.else)
+		// @ts-ignore
 		if (templateNode.then) walk(templateNode.then)
+		// @ts-ignore
 		if (templateNode.catch) walk(templateNode.catch)
 	}
 
