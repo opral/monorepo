@@ -3,7 +3,6 @@ import { render as ssr } from "svelte/server"
 import { CompileOptions, preprocess } from "svelte/compiler"
 import { preprocessor as createPreprocessor } from "./index"
 import { compile } from "svelte/compiler"
-import { PARAGLIDE_CONTEXT_KEY } from "../../constants"
 import { rollup } from "rollup"
 import virtual from "@rollup/plugin-virtual"
 import alias from "@rollup/plugin-alias"
@@ -330,10 +329,11 @@ describe.concurrent(
 async function renderComponent(svelteCode: string) {
 	const EntrySvelteCode = `
     <script>
+		import { setParaglideContext } from "@inlang/paraglide-sveltekit/internal" 
         import Component from './Component.svelte'
         import { setContext } from 'svelte';
 
-        setContext('${PARAGLIDE_CONTEXT_KEY}', {
+        setParaglideContext({
             translateHref: (href, lang) => {
                 let value = '/rewritten'
                 if(lang) value += '/' + lang
