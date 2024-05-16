@@ -8,41 +8,46 @@ import {
 	Expression,
 } from "./types.js"
 
-export function createMessageBundle(
-	id: string,
-	localeText: Record<LanguageTag, string>,
-	options?: {
-		alias?: MessageBundle["alias"]
-		variableReferencePattern?: string[]
-	}
-): MessageBundle {
-	const messages = Object.keys(localeText).map((locale) =>
-		createMessage(locale, (localeText as any)[locale], {
-			variableReferencePattern: options?.variableReferencePattern,
-		})
-	)
+/**
+ * create v2 MessageBundle
+ * @example createMessageBundle({
+ * 	 id: "greeting",
+ *   messages: [
+ * 		 createMessage({locale: "en", pattern: "Hello {name}!"})
+ * 		 createMessage({locale: "de", pattern: "Hallo {name}!"})
+ *   ]
+ * })
+ */
+export function createMessageBundle(args: {
+	id: string
+	messages: Message[]
+	alias?: MessageBundle["alias"]
+}): MessageBundle {
 	return {
-		id: id,
-		alias: options?.alias ?? {},
-		messages,
+		id: args.id,
+		alias: args.alias ?? {},
+		messages: args.messages,
 	}
 }
 
-export function createMessage(
-	locale: LanguageTag,
-	text: string,
-	options?: {
-		variableReferencePattern?: string[]
-	}
-): Message {
-	const pattern: Pattern = options?.variableReferencePattern
-		? parsePattern(text, options.variableReferencePattern)
-		: [toTextElement(text)]
+/**
+ * create v2 Messsage AST with either text or pattern
+ * @example createMessage({locale: "en", pattern: "Hello {name}!"})
+ */
+export function createMessage(args: {
+	locale: LanguageTag
+	text?: string
+	pattern?: string
+	variableReferencePattern?: string[]
+}): Message {
+	const patternAst: Pattern = args.pattern
+		? parsePattern(args.pattern, ["{", "}"])
+		: [toTextElement(args.text ?? "")]
 	return {
-		locale: locale,
-		declarations: inferInputDeclarations(pattern),
+		locale: args.locale,
+		declarations: inferInputDeclarations(patternAst),
 		selectors: [],
-		variants: [{ match: [], pattern }],
+		variants: [{ match: [], pattern: patternAst }],
 	}
 }
 
