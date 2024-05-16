@@ -2,8 +2,6 @@
 import { describe, it, expect } from "vitest"
 import type { ImportFunction } from "../resolve-modules/index.js"
 import {
-	createResource,
-	createSignal,
 	createEffect,
 	from,
 	createRoot,
@@ -18,10 +16,6 @@ import type {
 	MessageLintRule,
 	Text,
 } from "../versionedInterfaces.js"
-
-function sleep(ms: number) {
-	return new Promise((resolve) => setTimeout(resolve, ms))
-}
 
 // ------------------------------------------------------------------------------------------------
 

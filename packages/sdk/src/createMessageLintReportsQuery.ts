@@ -73,7 +73,7 @@ export function createMessageLintReportsQuery(
 					message: message,
 				}).then((report) => {
 					const currentReports = index.get(message.id)
-
+					debug("lintSingleMessage", message.id, report.data.length)
 					// we only update the report if it differs from the known one - to not trigger reactivity
 					if (report.errors.length === 0 && !reportsEqual(currentReports, report.data)) {
 						// console.log("lintSingleMessage", messageId, report.data.length)
@@ -102,17 +102,17 @@ export function createMessageLintReportsQuery(
 				})
 			},
 			onMessageCreate: (messageId: string, message: Message, messages: Message[]) => {
-				// TODO unhandled promise rejection (as before the refactor) but won't tackle this in this pr
-				// TODO reevaluate all lint's - if lints have inter message dependencies
+				// NOTE: unhandled promise rejection (as before the refactor) but won't tackle this in this pr
+				// TODO MESDK-105 reevaluate all lint's instead of those for the messsage that where created
 				sheduleLintMessage(message, messages)
 			},
 			onMessageUpdate: (messageId: string, message: Message, messages: Message[]) => {
-				// TODO unhandled promise rejection (as before the refactor) but won't tackle this in this pr
-				// TODO reevaluate all lint's - if lints have inter message dependencies
+				// NOTE: unhandled promise rejection (as before the refactor) but won't tackle this in this pr
+				// TODO MESDK-105 reevaluate all lint's instead of those for the messsage that changed
 				sheduleLintMessage(message, messages)
 			},
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars -- TODO MESDK-105 we gonna need the mesage Property for evaluation
 			onMessageDelete: (messageId: string, _messages: Message[]) => {
-				// TODO reevaluate all lint's - if lints have inter message dependencies
 				index.delete(messageId)
 			},
 		}
@@ -123,13 +123,14 @@ export function createMessageLintReportsQuery(
 	})
 
 	const get = (args: Parameters<MessageLintReportsQueryApi["get"]>[0]) => {
+		debug("get", args.where.messageId)
 		return structuredClone(index.get(args.where.messageId))
 	}
 
 	const getAll = () => {
-		return structuredClone(
-			[...index.values()].flat().length === 0 ? [] : [...index.values()].flat()
-		) as MessageLintReport[]
+		const flatValues = [...index.values()].flat()
+		debug("getAll", flatValues.length)
+		return structuredClone(flatValues.length === 0 ? [] : flatValues) as MessageLintReport[]
 	}
 
 	return {
@@ -184,7 +185,7 @@ function reportsEqual(
 				return false
 			}
 		} else {
-			// TODO XXX check how to deal with translatable body...
+			// NOTE: this was the fastest way to check if both bodies are equal - we can optimize that later if needed
 			if (JSON.stringify(element?.body) !== JSON.stringify(element?.body)) {
 				return false
 			}

@@ -14,7 +14,7 @@ export function Message(props: { id: string }) {
 	const { project, filteredLanguageTags, filteredIds, filteredMessageLintRules, textSearch } =
 		useEditorState()
 	const [message, setMessage] = createSignal<MessageType>()
-	const [lintReports, setLintReports] = createSignal<Readonly<MessageLintReport[]>>([])
+	const [lintReports, setLintReports] = createSignal<readonly MessageLintReport[]>([])
 	const [shouldMessageBeShown, setShouldMessageBeShown] = createSignal(true)
 	// const [blockChangeMessageIsFocused, setBlockChangeMessageIsFocused]  = createSignal<Date>(new Date())
 
