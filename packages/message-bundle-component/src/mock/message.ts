@@ -26,7 +26,7 @@ export const mockMessageBundle: MessageBundle = {
 					type: "expression",
 					arg: {
 						type: "variable",
-						name: "count",
+						name: "count: plural",
 					},
 				},
 			],
@@ -80,14 +80,14 @@ export const mockMessageBundle: MessageBundle = {
 					type: "expression",
 					arg: {
 						type: "variable",
-						name: "count",
+						name: "count: plural",
 					},
 				},
 				{
 					type: "expression",
 					arg: {
 						type: "variable",
-						name: "bool",
+						name: "formal: bool",
 					},
 				},
 			],
