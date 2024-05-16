@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest"
+import { describe, it } from "vitest"
 import { render as ssr } from "svelte/server"
 import { CompileOptions, preprocess } from "svelte/compiler"
 import { preprocessor as createPreprocessor } from "./index"
@@ -21,24 +21,28 @@ const preprocessor = createPreprocessor({})
 describe.concurrent(
 	"preprocessor",
 	() => {
-		it("leaves non-translatable attributes alone", async () => {
+		it("leaves non-translatable attributes alone", async ({ expect }) => {
 			const hardcodedElementCode = `<a href="/test" data-no-translate>Test</a>`
 			const dynamicElementCode = `<svelte:element this="a" href="/test" data-no-translate>Test</svelte:element>`
 
 			const hardcodedElementHtml = await renderComponent(hardcodedElementCode)
 			const dynamicElementHtml = await renderComponent(dynamicElementCode)
 
-			expect(hardcodedElementHtml).toBe(`<a href="/test" data-no-translate="">Test</a>`)
-			expect(dynamicElementHtml).toBe(`<a  href="/test" data-no-translate="">Test</a>`)
+			expect(hardcodedElementHtml).toMatchInlineSnapshot(
+				'"<a href=\\"/test\\" data-no-translate=\\"\\">Test</a>"'
+			)
+			expect(dynamicElementHtml).toMatchInlineSnapshot(
+				'"<a  href=\\"/test\\" data-no-translate=\\"\\">Test</a>"'
+			)
 		})
 
-		it("translates hardcoded href attributes", async () => {
+		it("translates hardcoded href attributes", async ({ expect }) => {
 			const code = `<a href="/test">Test</a>`
 			const html = await renderComponent(code)
-			expect(html).toBe(`<a href="/rewritten">Test</a>`)
+			expect(html).toMatchInlineSnapshot(`"<a href=\\"/rewritten\\">Test</a>"`)
 		})
 
-		it("translates parameterized href attributes", async () => {
+		it("translates parameterized href attributes", async ({ expect }) => {
 			const code = `
         <script>
             const href = "/test"
@@ -46,10 +50,10 @@ describe.concurrent(
         <a href={href}>Test</a>`
 
 			const html = await renderComponent(code)
-			expect(html).toBe(`<a href="/rewritten">Test</a>`)
+			expect(html).toMatchInlineSnapshot(`"<a href=\\"/rewritten\\">Test</a>"`)
 		})
 
-		it("translates links inside {#if} blocks", async () => {
+		it("translates links inside {#if} blocks", async ({ expect }) => {
 			const code = `
         <script>
             const href = "/test"
@@ -61,10 +65,10 @@ describe.concurrent(
 		`
 
 			const html = await renderComponent(code)
-			expect(html).toBe(`<a href="/rewritten">Test</a>`)
+			expect(html).toMatchInlineSnapshot('"<a href=\\"/rewritten\\">Test</a>"')
 		})
 
-		it("translates links inside {:else} blocks", async () => {
+		it("translates links inside {:else} blocks", async ({ expect }) => {
 			const ifCode = `
 		{#if false}
 			<span>If</span>
@@ -95,12 +99,12 @@ describe.concurrent(
 			const eachHtml = await renderComponent(eachCode)
 			const elseIfHtml = await renderComponent(elseIfCode)
 
-			expect(ifHtml).toBe(`<a href="/rewritten">Test</a>`)
-			expect(eachHtml).toBe(`<a href="/rewritten">Test</a>`)
-			expect(elseIfHtml).toBe(`<a href="/rewritten">Test</a>`)
+			expect(ifHtml).toMatchInlineSnapshot('"<a href=\\"/rewritten\\">Test</a>"')
+			expect(eachHtml).toMatchInlineSnapshot('"<a href=\\"/rewritten\\">Test</a>"')
+			expect(elseIfHtml).toMatchInlineSnapshot('"<a href=\\"/rewritten\\">Test</a>"')
 		})
 
-		it("translates links inside {:then} and {:catch} blocks", async () => {
+		it("translates links inside {:then} and {:catch} blocks", async ({ expect }) => {
 			const code = `
 		<script>
 			const promise = "not a promise -> resolves instantly"
@@ -111,10 +115,10 @@ describe.concurrent(
 		`
 
 			const html = await renderComponent(code)
-			expect(html).toBe(`<a href="/rewritten">Test</a>`)
+			expect(html).toMatchInlineSnapshot('"<a href=\\"/rewritten\\">Test</a>"')
 		})
 
-		it("translates shorthand href attributes", async () => {
+		it("translates shorthand href attributes", async ({ expect }) => {
 			const code = `
         <script>
             const href = "/test"
@@ -122,17 +126,19 @@ describe.concurrent(
         <a {href}>content</a>`
 
 			const html = await renderComponent(code)
-			expect(html).toBe(`<a href="/rewritten">content</a>`)
+			expect(html).toMatchInlineSnapshot('"<a href=\\"/rewritten\\">content</a>"')
 		})
 
-		it("uses the hreflang attribute", async () => {
+		it("uses the hreflang attribute", async ({ expect }) => {
 			const code = `<a href="/test" hreflang="de" >content</a>`
 
 			const html = await renderComponent(code)
-			expect(html).toBe(`<a href="/rewritten/de" hreflang="de">content</a>`)
+			expect(html).toMatchInlineSnapshot(
+				'"<a href=\\"/rewritten/de\\" hreflang=\\"de\\">content</a>"'
+			)
 		})
 
-		it("uses the hreflang attribute with shorthand", async () => {
+		it("uses the hreflang attribute with shorthand", async ({ expect }) => {
 			const code = `
         <script>
             const lang = "de"
@@ -140,10 +146,12 @@ describe.concurrent(
         <a href="/test" hreflang={lang} >content</a>`
 
 			const html = await renderComponent(code)
-			expect(html).toBe(`<a href="/rewritten/de" hreflang="de">content</a>`)
+			expect(html).toMatchInlineSnapshot(
+				'"<a href=\\"/rewritten/de\\" hreflang=\\"de\\">content</a>"'
+			)
 		})
 
-		it("translates the spread operator - no hreflang", async () => {
+		it("translates the spread operator - no hreflang", async ({ expect }) => {
 			const code = `
         <script>
             const props = { href: "/test" }
@@ -151,10 +159,10 @@ describe.concurrent(
         <a {...props} >content</a>`
 
 			const html = await renderComponent(code)
-			expect(html).toBe(`<a href="/rewritten">content</a>`)
+			expect(html).toMatchInlineSnapshot('"<a href=\\"/rewritten\\">content</a>"')
 		})
 
-		it("translates the spread operator - with hreflang", async () => {
+		it("translates the spread operator - with hreflang", async ({ expect }) => {
 			const code = `
         <script>
             const props = { href: "/test", hreflang: "de" }
@@ -162,10 +170,12 @@ describe.concurrent(
         <a {...props} >content</a>`
 
 			const html = await renderComponent(code)
-			expect(html).toBe(`<a href="/rewritten/de" hreflang="de">content</a>`)
+			expect(html).toMatchInlineSnapshot(
+				'"<a href=\\"/rewritten/de\\" hreflang=\\"de\\">content</a>"'
+			)
 		})
 
-		it("translates <svelte:element> tags if they are links", async () => {
+		it("translates <svelte:element> tags if they are links", async ({ expect }) => {
 			const hardcoded = `<svelte:element this="a" href="/test" hreflang="de" >content</svelte:element>`
 			const parameterized = `<script>
 			const as = "a"
@@ -175,11 +185,15 @@ describe.concurrent(
 			const hardcodedHtml = await renderComponent(hardcoded)
 			const parameterizedHtml = await renderComponent(parameterized)
 
-			expect(hardcodedHtml).toBe(`<a  href="/rewritten/de" hreflang="de">content</a>`)
-			expect(parameterizedHtml).toBe(`<a  href="/rewritten/de" hreflang="de"></a>`)
+			expect(hardcodedHtml).toMatchInlineSnapshot(
+				'"<a  href=\\"/rewritten/de\\" hreflang=\\"de\\">content</a>"'
+			)
+			expect(parameterizedHtml).toMatchInlineSnapshot(
+				'"<a  href=\\"/rewritten/de\\" hreflang=\\"de\\"></a>"'
+			)
 		})
 
-		it("handles the spread operator on <svelte:element> tags", async () => {
+		it("handles the spread operator on <svelte:element> tags", async ({ expect }) => {
 			const formCode = `
 		<script>
 			//Hreflang doens't do anything on forms, but it's a good test case
@@ -196,11 +210,15 @@ describe.concurrent(
 			const formHtml = await renderComponent(formCode)
 			const linkHtml = await renderComponent(linkCode)
 
-			expect(formHtml).toBe(`<form  action="/rewritten" hreflang="de"></form>`)
-			expect(linkHtml).toBe(`<a  href="/rewritten/de" hreflang="de">content</a>`)
+			expect(formHtml).toMatchInlineSnapshot(
+				'"<form  action=\\"/rewritten\\" hreflang=\\"de\\"></form>"'
+			)
+			expect(linkHtml).toMatchInlineSnapshot(
+				'"<a  href=\\"/rewritten/de\\" hreflang=\\"de\\">content</a>"'
+			)
 		})
 
-		it("ignore  the href value if it isn't a string", async () => {
+		it("ignore  the href value if it isn't a string", async ({ expect }) => {
 			const attributeCode = `
 		<script>
 		  let href = undefined
@@ -225,26 +243,26 @@ describe.concurrent(
 		<a {...{href}} >content</a>
 		`
 
-			expect(await renderComponent(attributeCode)).toBe(`<a>content</a>`)
-			expect(await renderComponent(shorthandCode)).toBe(`<a>content</a>`)
-			expect(await renderComponent(spreadCode)).toBe(`<a>content</a>`)
+			expect(await renderComponent(attributeCode)).toMatchInlineSnapshot('"<a>content</a>"')
+			expect(await renderComponent(shorthandCode)).toMatchInlineSnapshot('"<a>content</a>"')
+			expect(await renderComponent(spreadCode)).toMatchInlineSnapshot('"<a>content</a>"')
 		})
 
-		it("translates the action attribute of forms", async () => {
+		it("translates the action attribute of forms", async ({ expect }) => {
 			const code = `<form action="/test" ></form>`
 
 			const html = await renderComponent(code)
-			expect(html).toBe(`<form action="/rewritten"></form>`)
+			expect(html).toMatchInlineSnapshot('"<form action=\\"/rewritten\\"></form>"')
 		})
 
-		it("translates the formaction attribute of buttons", async () => {
+		it("translates the formaction attribute of buttons", async ({ expect }) => {
 			const code = `<button formaction="/test" ></button>`
 
 			const html = await renderComponent(code)
-			expect(html).toBe(`<button formaction="/rewritten"></button>`)
+			expect(html).toMatchInlineSnapshot('"<button formaction=\\"/rewritten\\"></button>"')
 		})
 
-		it("translates the spread operator - with external hreflang", async () => {
+		it("translates the spread operator - with external hreflang", async ({ expect }) => {
 			const code = `
         <script>
             const props = { href: "/test" }
@@ -252,10 +270,12 @@ describe.concurrent(
         <a {...props} hreflang="de" >content</a>`
 
 			const html = await renderComponent(code)
-			expect(html).toBe(`<a href="/rewritten/de" hreflang="de">content</a>`)
+			expect(html).toMatchInlineSnapshot(
+				'"<a href=\\"/rewritten/de\\" hreflang=\\"de\\">content</a>"'
+			)
 		})
 
-		it("handles conflicting hreflang values (last one wins)", async () => {
+		it("handles conflicting hreflang values (last one wins)", async ({ expect }) => {
 			const code = `
         <script>
             const props_1 = { href: "/test", hreflang: "en" }
@@ -264,10 +284,12 @@ describe.concurrent(
         <a {...props_1} hreflang="fr" {...props_2} >content</a>`
 
 			const html = await renderComponent(code)
-			expect(html).toBe(`<a href="/rewritten/de" hreflang="de">content</a>`)
+			expect(html).toMatchInlineSnapshot(
+				'"<a href=\\"/rewritten/de\\" hreflang=\\"de\\">content</a>"'
+			)
 		})
 
-		it("handles a language switcher", async () => {
+		it("handles a language switcher", async ({ expect }) => {
 			const code = `
         <script>
             const availableLanguageTags = ["de", "en"]
@@ -280,12 +302,12 @@ describe.concurrent(
 		`
 
 			const html = await renderComponent(code)
-			expect(html).toBe(
-				`<a href="/rewritten/de" hreflang="de">de</a><a href="/rewritten/en" hreflang="en">en</a>`
+			expect(html).toMatchInlineSnapshot(
+				'"<a href=\\"/rewritten/de\\" hreflang=\\"de\\">de</a><a href=\\"/rewritten/en\\" hreflang=\\"en\\">en</a>"'
 			)
 		})
 
-		it("handles stores as hrefs", async () => {
+		it("handles stores as hrefs", async ({ expect }) => {
 			const code = `
         <script>
             import { readable } from 'svelte/store';
@@ -293,7 +315,9 @@ describe.concurrent(
         </script>
         <a href={$href} hreflang="de">content</a>`
 			const html = await renderComponent(code)
-			expect(html).toBe(`<a href="/rewritten/de" hreflang="de">content</a>`)
+			expect(html).toMatchInlineSnapshot(
+				'"<a href=\\"/rewritten/de\\" hreflang=\\"de\\">content</a>"'
+			)
 		})
 	},
 	{ timeout: 20_000 }
