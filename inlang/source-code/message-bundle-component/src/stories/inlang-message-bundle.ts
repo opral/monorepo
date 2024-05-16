@@ -8,6 +8,7 @@ import type { MessageBundle, Message, Variant } from "@inlang/sdk/v2" // Import 
 export default class InlangMessageBundle extends LitElement {
 	@property({ type: Object })
 	messageBundle: MessageBundle | undefined
+	messageBundleLintReports: any[] = []
 
 	static override styles = [
 		baseStyling,
@@ -164,15 +165,6 @@ export default class InlangMessageBundle extends LitElement {
 		overridePrimitiveColors()
 	}
 
-	private closeSelectorModal() {
-		this.showSelectorModal = false
-	}
-
-	private saveSelector() {
-		// Implement saving logic here
-		this.closeSelectorModal()
-	}
-
 	override render() {
 		return html`
 			<div class="header">
@@ -186,6 +178,7 @@ export default class InlangMessageBundle extends LitElement {
 	}
 
 	private renderVariantsTable(message: Message) {
+		// @ts-ignore
 		const selectors = message.selectors.map((selector) => selector.arg.name)
 		return html`
 			<div class="variant-table">
@@ -221,33 +214,29 @@ export default class InlangMessageBundle extends LitElement {
 		return html`
 			<tr>
 				${matches.map((match) => html`<td>${match}</td>`)}
-				<td>${variant.pattern.map((p) => p.value).join(" ")}</td>
 				<td>
-					<button class="delete-button" @click="${() => this.deleteVariant(index)}">🗑️</button>
+					${variant.pattern
+						.map((p) => {
+							if ("value" in p) {
+								return p.value
+							}
+							return ""
+						})
+						.join(" ")}
+				</td>
+				<td>
+					<button
+						class="delete-button"
+						@click="${() => {
+							// eslint-disable-next-line no-console
+							console.log("delete variant", index)
+						}}"
+					>
+						🗑️
+					</button>
 				</td>
 			</tr>
 		`
-	}
-
-	private addVariant(locale: string) {
-		const messageIndex = this.messageBundle?.messages.findIndex((msg) => msg.locale === locale)
-		if (messageIndex !== undefined && messageIndex !== -1) {
-			const newVariant: Variant = {
-				match: [""],
-				pattern: [{ type: "text", value: "" }],
-			}
-			this.messageBundle?.messages[messageIndex]?.variants.push(newVariant)
-			this.requestUpdate()
-		}
-	}
-
-	private deleteVariant(index: number) {
-		for (const message of this.messageBundle?.messages) {
-			if (message.variants[index]) {
-				message.variants.splice(index, 1)
-			}
-		}
-		this.requestUpdate()
 	}
 }
 
