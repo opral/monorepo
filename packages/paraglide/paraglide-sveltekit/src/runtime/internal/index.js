@@ -1,7 +1,26 @@
 // this is a JS file to avoid transpiling in tests
-
-import { getParaglideContext } from "./context.js"
 import { NO_TRANSLATE_ATTRIBUTE } from "../../constants.js"
+import { getContext, setContext } from "svelte"
+
+const PARAGLIDE_CONTEXT_KEY = {}
+
+/**
+ * @typedef {{ translateHref: (href: string, hreflang?: string) => string }} ParaglideContext
+ */
+
+/**
+ * @private
+ */
+export const getParaglideContext = () => {
+	return /** @type { ParaglideContext | undefined}*/ (getContext(PARAGLIDE_CONTEXT_KEY))
+}
+/**
+ * @param {ParaglideContext} context
+ * @private
+ */
+export const setParaglideContext = (context) => {
+	setContext(PARAGLIDE_CONTEXT_KEY, context)
+}
 
 /**
  * Returns the functions necessary to translate a link component
