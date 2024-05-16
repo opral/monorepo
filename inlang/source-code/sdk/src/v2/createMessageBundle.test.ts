@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest"
 import { createMessageBundle, createMessage } from "./createMessageBundle.js"
-import { MessageBundle } from "../v2/types.js"
+import { MessageBundle } from "./types.js"
 import { Value } from "@sinclair/typebox/value"
 
 describe("createMessageBundle", () => {
