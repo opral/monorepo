@@ -58,6 +58,7 @@
 	},
 	"devDependencies": {
 		"@inlang/cross-sell-sherlock": "workspace:*",
+		"@inlang/cross-sell-ninja": "workspace:*",
 		"@inlang/env-variables": "workspace:*",
 		"@inlang/language-tag": "workspace:*",
 		"@inlang/plugin-message-format": "workspace:*",
