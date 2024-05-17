@@ -47,6 +47,19 @@ function updateLayoutFile(content: string): string {
 
 	if (scriptStart !== -1 && scriptEnd !== -1) {
 		// if there is a script present, add the imports to it
+
+		//find the first '>' after scriptStart
+		const scriptEntry = content.slice(scriptStart, scriptEnd).indexOf(">")
+		if (scriptEntry === -1) {
+			return content // give up
+		}
+
+		const before = content.slice(0, scriptEntry)
+		const after = content.slice(scriptEntry)
+		content =
+			before +
+			"\nimport { ParaglideJS } from '@inlang/paraglide-sveltekit'\nimport { i18n } from '$lib/i18n'\n" +
+			after
 	} else {
 		// if there isn't a script present, add one with the imports
 		content =
@@ -62,11 +75,13 @@ function updateLayoutFile(content: string): string {
 	if (styleStart !== -1 && styleStart > scriptStart) {
 		content = content + "\n</ParaglideJS>"
 	} else {
-		const before = content.slice(0, Math.max(0, scriptStart))
-		const after = content.slice(Math.max(0, scriptEnd))
-
-		content = before + "\n</ParaglideJS>\n" + after
+		content = insert(content, "\n</ParaglideJS>\n", scriptEnd)
 	}
 
 	return content
+}
+
+
+function insert(original: string, toInsert: string, index: number): string {
+	return original.slice(0, index) + toInsert + original.slice(index)
 }
