@@ -37,6 +37,8 @@ export const addParaglideSvelteKitVitePlugin: CliStep<
 			after
 
 		await ctx.repo.nodeishFs.writeFile(ctx.viteConfigPath, newFileContent)
+
+        ctx.logger.success("Added @inlang/paraglide-sveltekit/vite vite-plugin to vite config")
 	} catch (e) {
 		ctx.logger.error(
 			`Failed to add @inlang/paraglide-sveltekit/vite vite-plugin to ${ctx.viteConfigPath}.`
