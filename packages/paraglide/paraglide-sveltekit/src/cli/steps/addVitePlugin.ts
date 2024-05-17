@@ -15,6 +15,11 @@ export const addParaglideSvelteKitVitePlugin: CliStep<
 			encoding: "utf-8",
 		})
 
+		if (fileContent.includes("@inlang/paraglide-sveltekit/vite")) {
+			console.warn("@inlang/paraglide-sveltekit/vite vite-plugin already added - Skipping step")
+			return ctx
+		}
+
 		const PLUGINS_REGEX = /plugins\s*:\s*\[/g
 		const match = PLUGINS_REGEX.exec(fileContent)
 
@@ -38,7 +43,7 @@ export const addParaglideSvelteKitVitePlugin: CliStep<
 
 		await ctx.repo.nodeishFs.writeFile(ctx.viteConfigPath, newFileContent)
 
-        ctx.logger.success("Added @inlang/paraglide-sveltekit/vite vite-plugin to vite config")
+		ctx.logger.success("Added @inlang/paraglide-sveltekit/vite vite-plugin to vite config")
 	} catch (e) {
 		ctx.logger.error(
 			`Failed to add @inlang/paraglide-sveltekit/vite vite-plugin to ${ctx.viteConfigPath}.`
