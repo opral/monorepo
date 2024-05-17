@@ -36,7 +36,6 @@ jobs:
 
       - name: Fetch package versions
         run: pnpm m ls --depth -1 --json > pnpm-output.json
-        working-directory: ./inlang/source-code/editor # Set the working directory to where the file should be created
 
       - name: Update version.json file
         run: |
@@ -45,7 +44,6 @@ jobs:
           COMMIT_HASH=$(git rev-parse HEAD)
           jq --arg inlang_version "$INLANG_VERSION" --arg lix_version "$LIX_VERSION" --arg commit_hash "$COMMIT_HASH" \
             '.["@inlang/sdk"] = $inlang_version | .["@lix-js/client"] = $lix_version | .["commit-hash"] = $commit_hash' version.json > temp.json && mv temp.json version.json
-        working-directory: ./inlang/source-code/editor
 
       - name: Commit and push changes
         run: |
