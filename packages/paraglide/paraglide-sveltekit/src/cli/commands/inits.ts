@@ -3,7 +3,7 @@ import nodeishFs from "node:fs/promises"
 import { Command } from "commander"
 import { Logger } from "@inlang/paraglide-js/internal"
 import { Steps, cli as ParaglideCli } from "@inlang/paraglide-js/internal/cli"
-import path from "node:path"
+import { scanSvelteKitProject } from "../steps/scanSvelteKitProject.js"
 
 export const initCommand = new Command()
 	.name("init")
@@ -20,17 +20,16 @@ export const initCommand = new Command()
 
 		const logger = new Logger({ prefix: false, silent: false })
 
-		const packageJsonPath = path.resolve(process.cwd(), "package.json")
-
 		const ctx0 = {
 			repo,
 			logger,
 			repoRoot: repoRoot?.replace("file://", "") ?? process.cwd(),
-			packageJsonPath,
 			appId: "library.inlang.paraglideSvelteKit",
 		}
-		const ctx1 = await Steps.initializeInlangProject(ctx0)
-		const ctx2 = await Steps.updatePackageJson({
+
+		const ctx1 = await scanSvelteKitProject(ctx0)
+		const ctx2 = await Steps.initializeInlangProject(ctx1)
+		const ctx3 = await Steps.updatePackageJson({
 			dependencies: async (deps) => ({
 				...deps,
 				"@inlang/paraglide-next": "0.0.7",
@@ -39,12 +38,12 @@ export const initCommand = new Command()
 				...deps,
 				"@inlang/paraglide-js": ParaglideCli.version() as string,
 			}),
-		})(ctx1)
+		})(ctx2)
 
-		const ctx3 = await Steps.maybeChangeTsConfig(ctx2)
+		const ctx4 = await Steps.maybeChangeTsConfig(ctx3)
 
 		try {
-			await Steps.runCompiler({ ...ctx3, outdir: "./src/lib/paraglide" })
+			await Steps.runCompiler({ ...ctx4, outdir: "./src/lib/paraglide" })
 		} catch (e) {
 			//silently ignore
 		}
