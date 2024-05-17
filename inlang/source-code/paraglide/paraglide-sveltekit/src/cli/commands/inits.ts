@@ -8,6 +8,7 @@ import { addParaglideSvelteKitVitePlugin } from "../steps/addVitePlugin.js"
 import { addI18nFile } from "../steps/addI18nFile.js"
 import { addParaglideJSComponent } from "../steps/addParaglideJSComponent.js"
 import { editAppHtmlFile } from "../steps/editAppHtmlFile.js"
+import { addRerouteHook } from "../steps/addRerouteFile.js"
 
 export const initCommand = new Command()
 	.name("init")
@@ -49,9 +50,10 @@ export const initCommand = new Command()
 		const ctx6 = await addI18nFile(ctx5)
 		const ctx7 = await addParaglideJSComponent(ctx6)
 		const ctx8 = await editAppHtmlFile(ctx7)
+		const ctx9 = await addRerouteHook(ctx8)
 
 		try {
-			await Steps.runCompiler({ ...ctx8, outdir: "./src/lib/paraglide" })
+			await Steps.runCompiler({ ...ctx9, outdir: "./src/lib/paraglide" })
 		} catch (e) {
 			//silently ignore
 		}

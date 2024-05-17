@@ -1,3 +1,4 @@
+import type { Repository } from "@lix-js/client"
 import path from "node:path"
 
 /**
@@ -61,4 +62,28 @@ const isWindows = typeof process !== "undefined" && process.platform === "win32"
 
 export function normalizePath(id: string) {
 	return path.posix.normalize(isWindows ? slash(id) : id)
+}
+
+export async function findFile(args: {
+	candidates: string[]
+	base: string
+	fs: Repository["nodeishFs"]
+}): Promise<string | undefined> {
+	const promises = args.candidates
+		.map((c) => path.resolve(args.base, c))
+		.map(async (candidate) => ({
+			exists: await fileExists(args.fs, candidate),
+			path: candidate,
+		}))
+	const results = await Promise.all(promises)
+	return results.find((result) => result.exists)?.path
+}
+
+export async function fileExists(fs: Repository["nodeishFs"], path: string): Promise<boolean> {
+	try {
+		const stat = await fs.stat(path)
+		return stat.isFile()
+	} catch {
+		return false
+	}
 }
