@@ -4,6 +4,7 @@ import { Command } from "commander"
 import { Logger } from "@inlang/paraglide-js/internal"
 import { Steps, cli as ParaglideCli } from "@inlang/paraglide-js/internal/cli"
 import { scanSvelteKitProject } from "../steps/scanSvelteKitProject.js"
+import { addParaglideSvelteKitVitePlugin } from "../steps/addVitePlugin.js"
 
 export const initCommand = new Command()
 	.name("init")
@@ -40,10 +41,11 @@ export const initCommand = new Command()
 			}),
 		})(ctx2)
 
-		const ctx4 = await Steps.maybeChangeTsConfig(ctx3)
+		const ctx4 = await addParaglideSvelteKitVitePlugin(ctx3)
+		const ctx5 = await Steps.maybeChangeTsConfig(ctx4)
 
 		try {
-			await Steps.runCompiler({ ...ctx4, outdir: "./src/lib/paraglide" })
+			await Steps.runCompiler({ ...ctx5, outdir: "./src/lib/paraglide" })
 		} catch (e) {
 			//silently ignore
 		}
