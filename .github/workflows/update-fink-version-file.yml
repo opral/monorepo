@@ -6,11 +6,6 @@ on:
       - "main"
     paths:
       - "inlang/source-code/editor/*"
-  pull_request:
-    branches:
-      - "main"
-    paths:
-      - "inlang/source-code/editor/*"
 
 jobs:
   update-fink-version:
@@ -51,14 +46,4 @@ jobs:
           git config --local user.name "inlang-bot"
           git add ./inlang/source-code/editor/version.json
           git commit -m "Update package versions and commit hash"
-          # Fetch and rebase if it's a pull request event
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            PR_BRANCH=$(jq -r '.pull_request.base.ref' "$GITHUB_EVENT_PATH")
-            git fetch origin "$PR_BRANCH"
-            git rebase origin/"$PR_BRANCH"
-            git push origin HEAD:"$PR_BRANCH"
-          else
-            git push origin HEAD:main
-          fi
-        env:
-          GITHUB_EVENT_PATH: ${{ github.event_path }}
+          git push
