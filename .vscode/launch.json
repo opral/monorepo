@@ -15,6 +15,19 @@
 			"console": "integratedTerminal"
 		},
 		{
+			"name": "sdk load-test",
+			"type": "node",
+			"request": "launch",
+			"autoAttachChildProcesses": true,
+			"skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+			"program": "${workspaceRoot}/inlang/source-code/sdk/load-test/node_modules/tsx/dist/cli.mjs",
+			"cwd": "${workspaceFolder}/inlang/source-code/sdk/load-test",
+			"args": ["./main.ts", "10", "1", "1", "1"],
+			"env": { "MOCK_TRANSLATE_LOCAL": "true", "DEBUG": "sdk:*" },
+			"smartStep": true,
+			"console": "integratedTerminal"
+		},
+		{
 			"name": "debug current vitest",
 			"type": "node",
 			"request": "launch",
