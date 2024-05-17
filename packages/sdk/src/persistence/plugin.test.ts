@@ -1,15 +1,29 @@
 import { test, expect } from "vitest"
-import { createMessage, createNodeishMemoryFs } from "../test-utilities/index.js"
-import { normalizeMessage } from "../storage/helper.js"
+import { createNodeishMemoryFs } from "../test-utilities/index.js"
+import type { MessageBundle } from "../v2/types.js"
+import {
+	createMessageBundle,
+	createMessage,
+	normalizeMessageBundle,
+} from "../v2/createMessageBundle.js"
 import { pluginId } from "./plugin.js"
 
-const mockMessages = [
-	createMessage("first_message", {
-		en: "If this fails I will be sad",
+const mockMessages: MessageBundle[] = [
+	createMessageBundle({
+		id: "first_message",
+		messages: [
+			createMessage({
+				locale: "en",
+				text: "If this fails I will be sad",
+			}),
+		],
 	}),
-	createMessage("second_message", {
-		en: "Let's see if this works",
-		de: "Mal sehen ob das funktioniert",
+	createMessageBundle({
+		id: "second_message",
+		messages: [
+			createMessage({ locale: "en", text: "Let's see if this works" }),
+			createMessage({ locale: "de", text: "Mal sehen ob das funktioniert" }),
+		],
 	}),
 ]
 
@@ -22,7 +36,7 @@ test("roundtrip (saving/loading messages)", async () => {
 	const fs = createNodeishMemoryFs()
 	const projectDir = "/test/project.inlang"
 	const pathPattern = projectDir + "/messages.json"
-	const persistedMessages = JSON.stringify(mockMessages.map(normalizeMessage), undefined, 2)
+	const persistedMessages = JSON.stringify(mockMessages.map(normalizeMessageBundle), undefined, 2)
 
 	const settings = {
 		sourceLanguageTag: "en",

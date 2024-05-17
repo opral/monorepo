@@ -1,8 +1,16 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-restricted-imports */
-/* eslint-disable no-console */
+
 import { findRepoRoot, openRepository } from "@lix-js/client"
-import { loadProject, type Message, normalizeMessage } from "@inlang/sdk"
-import { createMessage } from "../src/test-utilities/createMessage.js"
+import { loadProject } from "@inlang/sdk"
+
+import {
+	createMessage,
+	createMessageBundle,
+	normalizeMessageBundle,
+} from "../src/v2/createMessageBundle.js"
+import { MessageBundle } from "../src/v2/types.js"
+
 import { createSignal, createResource, createEffect } from "../src/reactivity/solid.js"
 
 import { dirname, join } from "node:path"
@@ -26,8 +34,6 @@ const mockServer = "http://localhost:3000"
 const cli = `PUBLIC_SERVER_BASE_URL=${mockServer} pnpm inlang`
 const translateCommand = cli + " machine translate -f -n --project ./project.inlang"
 
-const isExperimentalPersistence = await checkExperimentalPersistence()
-
 export async function runLoadTest(
 	messageCount: number = 1000,
 	translate: boolean = true,
@@ -35,10 +41,12 @@ export async function runLoadTest(
 	subscribeToLintReports: boolean = false,
 	watchMode: boolean = false
 ) {
+	// experimental persistence uses v2 types
+	const isV2 = await checkExperimentalPersistence()
 	debug(
 		"load-test start" +
 			(watchMode ? " - watchMode on, ctrl C to exit" : "") +
-			(isExperimentalPersistence ? " - using experimental persistence" : "")
+			(isV2 ? " - using experimental persistence" : "")
 	)
 	if (translate && !process.env.MOCK_TRANSLATE_LOCAL && !(await isMockRpcServerRunning())) {
 		console.error(
@@ -54,8 +62,9 @@ export async function runLoadTest(
 
 	debug(`generating ${messageCount} messages`)
 	// this is called before loadProject() to avoid reading partially written JSON
-	await generateMessageFile(messageCount)
+	await generateMessageFile(isV2, messageCount)
 
+	/*
 	debug("opening repo and loading project")
 	const repoRoot = await findRepoRoot({ nodeishFs: fs, path: __dirname })
 	if (!repoRoot) {
@@ -118,19 +127,25 @@ export async function runLoadTest(
 			setTimeout(resolve, 1000 * 60 * 60 * 24)
 		})
 	}
+*/
 }
 
-async function generateMessageFile(messageCount: number) {
-	if (isExperimentalPersistence) {
+async function generateMessageFile(isV2: boolean, messageCount: number) {
+	if (isV2) {
 		const messageFile = join(__dirname, "project.inlang", "messages.json")
 
-		const messages: Message[] = []
+		const messages: MessageBundle[] = []
 		for (let i = 1; i <= messageCount; i++) {
-			messages.push(createMessage(`message_key_${i}`, { en: `Generated message (${i})` }))
+			messages.push(
+				createMessageBundle({
+					id: `message_key_${i}`,
+					messages: [createMessage({ locale: "en", text: `Generated message (${i})` })],
+				})
+			)
 		}
 		await fs.writeFile(
 			messageFile,
-			JSON.stringify(messages.map(normalizeMessage), undefined, 2),
+			JSON.stringify(messages.map(normalizeMessageBundle), undefined, 2),
 			"utf-8"
 		)
 	} else {
