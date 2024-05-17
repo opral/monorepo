@@ -14,10 +14,10 @@ describe("createMessageBundle", () => {
 		} satisfies MessageBundle)
 	})
 
-	it("creates a bundle with a single text message", () => {
+	it("creates a bundle with a single text-only message", () => {
 		const bundle: unknown = createMessageBundle({
 			id: "hello_world",
-			messages: [createMessage({ locale: "en", text: "Hello, World!" })],
+			messages: [createMessage({ locale: "en", text: "Hello World!" })],
 		})
 		expect(Value.Check(MessageBundle, bundle)).toBe(true)
 		expect(bundle).toEqual({
@@ -34,7 +34,7 @@ describe("createMessageBundle", () => {
 							pattern: [
 								{
 									type: "text",
-									value: "Hello, World!",
+									value: "Hello World!",
 								},
 							],
 						},
@@ -44,12 +44,12 @@ describe("createMessageBundle", () => {
 		} satisfies MessageBundle)
 	})
 
-	it("creates a bundle with multiple pattern messages", () => {
+	it("creates a bundle with multiple text-only messages", () => {
 		const bundle: unknown = createMessageBundle({
 			id: "hello_world_2",
 			messages: [
-				createMessage({ locale: "en", pattern: "Hello, {name}!" }),
-				createMessage({ locale: "de", pattern: "Hallo, {name}!" }),
+				createMessage({ locale: "en", text: "Hello World!" }),
+				createMessage({ locale: "de", text: "Hallo Welt!" }),
 			],
 		})
 		expect(Value.Check(MessageBundle, bundle)).toBe(true)
@@ -59,19 +59,7 @@ describe("createMessageBundle", () => {
 			messages: [
 				{
 					locale: "en",
-					declarations: [
-						{
-							type: "input",
-							name: "name",
-							value: {
-								type: "expression",
-								arg: {
-									type: "variable",
-									name: "name",
-								},
-							},
-						},
-					],
+					declarations: [],
 					selectors: [],
 					variants: [
 						{
@@ -79,18 +67,7 @@ describe("createMessageBundle", () => {
 							pattern: [
 								{
 									type: "text",
-									value: "Hello, ",
-								},
-								{
-									type: "expression",
-									arg: {
-										type: "variable",
-										name: "name",
-									},
-								},
-								{
-									type: "text",
-									value: "!",
+									value: "Hello World!",
 								},
 							],
 						},
@@ -98,19 +75,7 @@ describe("createMessageBundle", () => {
 				},
 				{
 					locale: "de",
-					declarations: [
-						{
-							type: "input",
-							name: "name",
-							value: {
-								type: "expression",
-								arg: {
-									type: "variable",
-									name: "name",
-								},
-							},
-						},
-					],
+					declarations: [],
 					selectors: [],
 					variants: [
 						{
@@ -118,18 +83,7 @@ describe("createMessageBundle", () => {
 							pattern: [
 								{
 									type: "text",
-									value: "Hallo, ",
-								},
-								{
-									type: "expression",
-									arg: {
-										type: "variable",
-										name: "name",
-									},
-								},
-								{
-									type: "text",
-									value: "!",
+									value: "Hallo Welt!",
 								},
 							],
 						},
