@@ -1,5 +1,18 @@
 # @inlang/paraglide-sveltekit
 
+## 0.7.0
+
+### Minor Changes
+
+- 3e9b863: Use Svelte 5 compiler in the preprocessor for rewriting links
+
+### Patch Changes
+
+- Updated dependencies [eb941fe]
+- Updated dependencies [9566348]
+  - @inlang/paraglide-js@1.9.0
+  - @inlang/paraglide-vite@1.2.56
+
 ## 0.6.23
 
 ### Patch Changes
