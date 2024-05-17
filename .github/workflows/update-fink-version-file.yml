@@ -51,7 +51,6 @@ jobs:
           git config --local user.name "inlang-bot"
           git add ./inlang/source-code/editor/version.json
           git commit -m "Update package versions and commit hash"
-          # Check if it's a pull request event
           # Fetch and rebase if it's a pull request event
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             PR_BRANCH=$(jq -r '.pull_request.base.ref' "$GITHUB_EVENT_PATH")
