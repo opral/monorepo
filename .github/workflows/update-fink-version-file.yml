@@ -39,10 +39,11 @@ jobs:
 
       - name: Update version.json file
         run: |
-          INLANG_VERSION=$(cat pnpm-output.json | jq -r '.packages[] | select(.name == "@inlang/sdk") | .version')
-          LIX_VERSION=$(cat pnpm-output.json | jq -r '.packages[] | select(.name == "@lix-js/client") | .version')
+          INLANG_VERSION=$(jq -r '.[] | select(.name == "@inlang/sdk") | .version' pnpm-output.json)
+          LIX_VERSION=$(jq -r '.[] | select(.name == "@lix-js/client") | .version' pnpm-output.json)
           COMMIT_HASH=$(git rev-parse HEAD)
-          jq '.["@inlang/sdk"] = $inlang_version | .["@lix-js/client"] = $lix_version | .["commit-hash"] = $commit_hash' --arg inlang_version "$INLANG_VERSION" --arg lix_version "$LIX_VERSION" --arg commit_hash "$COMMIT_HASH" version.json > temp.json && mv temp.json version.json
+          jq --arg inlang_version "$INLANG_VERSION" --arg lix_version "$LIX_VERSION" --arg commit_hash "$COMMIT_HASH" \
+            '.["@inlang/sdk"] = $inlang_version | .["@lix-js/client"] = $lix_version | .["commit-hash"] = $commit_hash' version.json > temp.json && mv temp.json version.json
 
       - name: Commit and push changes
         run: |
