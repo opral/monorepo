@@ -1,6 +1,5 @@
 import type { Repository } from "@lix-js/client"
-import type { CliStep } from "../utils.js"
-import path from "node:path"
+import { findFile, type CliStep } from "../utils.js"
 import type { Logger } from "@inlang/paraglide-js/internal"
 
 export const scanSvelteKitProject: CliStep<
@@ -65,29 +64,5 @@ export const scanSvelteKitProject: CliStep<
 		viteConfigPath,
 		svelteConfigPath,
 		typescript,
-	}
-}
-
-async function findFile(args: {
-	candidates: string[]
-	base: string
-	fs: Repository["nodeishFs"]
-}): Promise<string | undefined> {
-	const promises = args.candidates
-		.map((c) => path.resolve(args.base, c))
-		.map(async (candidate) => ({
-			exists: await fileExists(args.fs, candidate),
-			path: candidate,
-		}))
-	const results = await Promise.all(promises)
-	return results.find((result) => result.exists)?.path
-}
-
-async function fileExists(fs: Repository["nodeishFs"], path: string): Promise<boolean> {
-	try {
-		const stat = await fs.stat(path)
-		return stat.isFile()
-	} catch {
-		return false
 	}
 }
