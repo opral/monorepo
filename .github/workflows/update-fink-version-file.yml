@@ -1,4 +1,4 @@
-name: Update Fink Version File
+name: Update Fink version file
 
 on:
   push:
@@ -14,7 +14,7 @@ on:
 
 jobs:
   update-fink-version:
-    name: Update Fink Version File
+    name: Update Fink version file
     runs-on: ubuntu-latest
 
     steps:
@@ -51,4 +51,15 @@ jobs:
           git config --local user.name "inlang-bot"
           git add ./inlang/source-code/editor/version.json
           git commit -m "Update package versions and commit hash"
-          git push
+          # Check if it's a pull request event
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            # Fetch the name of the branch the pull request is targeting
+            PR_BRANCH=$(jq -r '.pull_request.base.ref' "$GITHUB_EVENT_PATH")
+            # Push the changes to the target branch
+            git push origin HEAD:"$PR_BRANCH"
+          else
+            # Push the changes to the main branch
+            git push origin HEAD:main
+          fi
+        env:
+          GITHUB_EVENT_PATH: ${{ github.event_path }}
