@@ -1,4 +1,4 @@
-name: Update Fink version file
+name: Update Fink Version File
 
 on:
   push:
@@ -6,15 +6,10 @@ on:
       - "main"
     paths:
       - "inlang/source-code/editor/*"
-  pull_request:
-    branches:
-      - "main"
-    paths:
-      - "inlang/source-code/editor/*"
-
+      
 jobs:
   update-fink-version:
-    name: Update Fink version file
+    name: Update Fink Version File
     runs-on: ubuntu-latest
 
     steps:
