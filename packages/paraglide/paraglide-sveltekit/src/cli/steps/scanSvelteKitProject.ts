@@ -9,6 +9,7 @@ export const scanSvelteKitProject: CliStep<
 		packageJsonPath: string
 		viteConfigPath: string
 		svelteConfigPath: string
+		typescript: boolean
 	}
 > = async (ctx) => {
 	const packageJsonPath = await findFile({
@@ -28,6 +29,14 @@ export const scanSvelteKitProject: CliStep<
 		candidates: ["./vite.config.js", "./vite.config.mjs", "./vite.config.ts"],
 		fs: ctx.repo.nodeishFs,
 	})
+
+	const tsconfigPath = await findFile({
+		base: process.cwd(),
+		candidates: ["./tsconfig.json"],
+		fs: ctx.repo.nodeishFs,
+	})
+
+	const typescript = tsconfigPath !== undefined
 
 	if (!packageJsonPath) {
 		ctx.logger.error(
@@ -55,6 +64,7 @@ export const scanSvelteKitProject: CliStep<
 		packageJsonPath,
 		viteConfigPath,
 		svelteConfigPath,
+		typescript,
 	}
 }
 
