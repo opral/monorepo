@@ -49,6 +49,6 @@ jobs:
         run: |
           git config --local user.email "hello@inlang.com"
           git config --local user.name "inlang-bot"
-          git add version.json
+          git add ./inlang/source-code/editor/version.json
           git commit -m "Update package versions and commit hash"
           git push
