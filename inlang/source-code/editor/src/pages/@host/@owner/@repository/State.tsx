@@ -503,13 +503,13 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			} else {
 				setTimeout(() => {
 					const element = document.getElementById("missingTranslation-summary")
-					element !== null ? setTourStep("missing-translation-rule") : setTourStep("textfield")
+					element !== null && !filteredMessageLintRules().includes("messageLintRule.inlang.missingTranslation") ? setTourStep("missing-translation-rule") : setTourStep("textfield")
 				}, 100)
 			}
 		} else if (tourStep() === "missing-translation-rule" && project()) {
 			setTimeout(() => {
 				const element = document.getElementById("missingTranslation-summary")
-				element !== null ? setTourStep("missing-translation-rule") : setTourStep("textfield")
+				element !== null && !filteredMessageLintRules().includes("messageLintRule.inlang.missingTranslation") ? setTourStep("missing-translation-rule") : setTourStep("textfield")
 			}, 100)
 		}
 	})
@@ -540,6 +540,40 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	)
 
+	/**
+	* createResource is not reacting to changes like: "false","Null", or "undefined".
+	* Hence, a string needs to be passed to the fetch of the resource.
+	*/
+	const [userIsCollaborator] = createResource(
+		() => {
+			// do not fetch if no owner or repository is given
+			// can happen if the user navigated away from the editor
+			// setIsCollaborator(repoMeta?.permissions.push)
+			if (
+				currentPageContext.routeParams.owner === undefined ||
+				currentPageContext.routeParams.repository === undefined
+			) {
+				return false
+			}
+			return {
+				user: localStorage?.user?.isLoggedIn ?? "not logged in",
+				routeParams: currentPageContext.routeParams as EditorRouteParams,
+				repoMeta: githubRepositoryInformation(),
+			}
+		},
+		(args) => {
+			// user is not logged in, see the returned object above
+			if (
+				typeof args.repoMeta === "undefined" ||
+				typeof args.user === "string" ||
+				"error" in args.repoMeta
+			) {
+				return false
+			}
+			return args.repoMeta?.permissions?.push || false
+		}
+	)
+
 	const isForkSyncDisabled = () =>
 		localStorage.disableForkSyncWarning?.some(
 			(repo) => repo.owner === routeParams().owner && repo.repository === routeParams().repository
@@ -549,6 +583,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		() => {
 			const repoMeta = githubRepositoryInformation()
 			if (
+				userIsCollaborator() &&
 				repo() &&
 				!isForkSyncDisabled() &&
 				repoMeta &&
@@ -615,39 +650,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	)
 
-	/**
-	 * createResource is not reacting to changes like: "false","Null", or "undefined".
-	 * Hence, a string needs to be passed to the fetch of the resource.
-	 */
-	const [userIsCollaborator] = createResource(
-		() => {
-			// do not fetch if no owner or repository is given
-			// can happen if the user navigated away from the editor
-			// setIsCollaborator(repoMeta?.permissions.push)
-			if (
-				currentPageContext.routeParams.owner === undefined ||
-				currentPageContext.routeParams.repository === undefined
-			) {
-				return false
-			}
-			return {
-				user: localStorage?.user?.isLoggedIn ?? "not logged in",
-				routeParams: currentPageContext.routeParams as EditorRouteParams,
-				repoMeta: githubRepositoryInformation(),
-			}
-		},
-		(args) => {
-			// user is not logged in, see the returned object above
-			if (
-				typeof args.repoMeta === "undefined" ||
-				typeof args.user === "string" ||
-				"error" in args.repoMeta
-			) {
-				return false
-			}
-			return args.repoMeta?.permissions?.push || false
-		}
-	)
 
 	return (
 		<EditorStateContext.Provider
