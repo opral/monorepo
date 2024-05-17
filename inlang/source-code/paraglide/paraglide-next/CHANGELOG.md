@@ -1,5 +1,19 @@
 # @inlang/paraglide-next
 
+## 0.2.3
+
+### Patch Changes
+
+- Updated dependencies [eb941fe]
+- Updated dependencies [9566348]
+  - @inlang/paraglide-js@1.9.0
+
+## 0.2.2
+
+### Patch Changes
+
+- 95a34bd: Fix href types on `useRouter`
+
 ## 0.2.1
 
 ### Patch Changes

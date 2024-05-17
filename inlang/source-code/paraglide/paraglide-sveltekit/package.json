@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/paraglide-sveltekit",
-	"version": "0.6.23",
+	"version": "0.7.0",
 	"type": "module",
 	"main": "./dist/runtime/index.js",
 	"types": "./dist/runtime/index.d.ts",
@@ -26,16 +26,15 @@
 		"@inlang/paraglide-vite": "workspace:*",
 		"dedent": "1.5.1",
 		"devalue": "^4.3.2",
-		"magic-string": "^0.30.5"
+		"magic-string": "^0.30.5",
+		"svelte": "^5.0.0 || ^5.0.0-next.1 || ^5.0.0-rc.1"
 	},
 	"peerDependencies": {
-		"@sveltejs/kit": "^2.4.3",
-		"svelte": "^5.0.0 || ^5.0.0-next.1 || ^4.0.0 || ^3.0.0"
+		"@sveltejs/kit": "^2.4.3"
 	},
 	"devDependencies": {
 		"@rollup/plugin-alias": "^5.0.1",
 		"@rollup/plugin-node-resolve": "^15.2.3",
-		"@rollup/plugin-typescript": "^11.1.5",
 		"@rollup/plugin-virtual": "3.0.1",
 		"@sveltejs/package": "^2.2.3",
 		"@sveltejs/vite-plugin-svelte": "^3.0.2",
@@ -44,6 +43,7 @@
 		"rollup-plugin-svelte": "^7.1.6",
 		"typescript": "^5.3.2",
 		"vite": "^5.0.4",
+		"vite-plugin-svelte": "^3.0.1",
 		"vitest": "^1.0.0"
 	},
 	"files": [

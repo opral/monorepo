@@ -1,4 +1,4 @@
-export const PARAGLIDE_CONTEXT_KEY = "$paraglide-sveltekit:context"
+// this is a JS file to avoid transpiling in tests
 export const NO_TRANSLATE_ATTRIBUTE = "data-no-translate"
 
 /** The path suffix SvelteKit adds on Data requests */

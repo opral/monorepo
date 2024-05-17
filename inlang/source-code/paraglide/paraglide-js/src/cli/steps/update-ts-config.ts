@@ -25,7 +25,7 @@ export const maybeChangeTsConfigAllowJs: CliStep<
 	}
 	const file = await ctx.repo.nodeishFs.readFile("./tsconfig.json", { encoding: "utf-8" })
 	// tsconfig allows comments ... FML
-	const tsconfig = JSON5.parse(file)
+	let tsconfig = JSON5.parse(file)
 
 	if (tsconfig.compilerOptions?.allowJs === true) {
 		// all clear, allowJs is already set to true
@@ -33,7 +33,7 @@ export const maybeChangeTsConfigAllowJs: CliStep<
 	}
 
 	ctx.logger.info(
-		`You need to set the \`compilerOptions.allowJs\` to \`true\` in the \`tsconfig.json\` file:
+		`The option \`compilerOptions.allowJs\` needs to be set to \`true\` in the \`tsconfig.json\` file:
 
 \`{
   "compilerOptions": {
@@ -43,7 +43,7 @@ export const maybeChangeTsConfigAllowJs: CliStep<
 	)
 	let isValid = false
 	while (isValid === false) {
-		const response = await prompt(`Did you set the \`compilerOptions.allowJs\` to \`true\`?`, {
+		const response = await prompt(`Is \`compilerOptions.allowJs\` set to \`true\`?`, {
 			type: "confirm",
 			initial: true,
 		})
@@ -53,14 +53,22 @@ export const maybeChangeTsConfigAllowJs: CliStep<
 			)
 			return ctx
 		}
+
+		// don't re-ask the question if there is an `extends` present in the tsconfig
+		// just trust that it's correct.
+		if (tsconfig.extends) {
+			isValid = true
+			return ctx
+		}
+
 		const file = await ctx.repo.nodeishFs.readFile("./tsconfig.json", { encoding: "utf-8" })
-		const tsconfig = JSON5.parse(file)
+		tsconfig = JSON5.parse(file)
 		if (tsconfig?.compilerOptions?.allowJs === true) {
 			isValid = true
 			return ctx
 		} else {
 			ctx.logger.error(
-				"The compiler options have not been adjusted. Please set the `compilerOptions.allowJs` to `true`."
+				"The compiler options has not been adjusted. Please sets `compilerOptions.allowJs` to `true`."
 			)
 		}
 	}
@@ -82,7 +90,7 @@ export const maybeChangeTsConfigModuleResolution: CliStep<
 	}
 	const file = await ctx.repo.nodeishFs.readFile("./tsconfig.json", { encoding: "utf-8" })
 	// tsconfig allows comments ... FML
-	const tsconfig = JSON5.parse(file)
+	let tsconfig = JSON5.parse(file)
 
 	let parentTsConfig: any | undefined
 
@@ -111,7 +119,7 @@ export const maybeChangeTsConfigModuleResolution: CliStep<
 	}
 
 	ctx.logger.info(
-		`You need to set the \`compilerOptions.moduleResolution\` to "Bundler" in the \`tsconfig.json\` file:
+		`The \`compilerOptions.moduleResolution\` options must be set to "Bundler" in the \`tsconfig.json\` file:
 
 \`{
  "compilerOptions": {
@@ -121,21 +129,26 @@ export const maybeChangeTsConfigModuleResolution: CliStep<
 	)
 	let isValid = false
 	while (isValid === false) {
-		const response = await prompt(
-			`Did you set the \`compilerOptions.moduleResolution\` to "Bundler"?`,
-			{
-				type: "confirm",
-				initial: true,
-			}
-		)
+		const response = await prompt(`Is \`compilerOptions.moduleResolution\` set to "Bundler"?`, {
+			type: "confirm",
+			initial: true,
+		})
 		if (response === false) {
 			ctx.logger.warn(
 				"Continuing without adjusting the tsconfig.json. This may lead to type errors."
 			)
 			return ctx
 		}
+
+		// don't re-ask the question if there is an `extends` present in the tsconfig
+		// just trust that it's correct.
+		if (tsconfig.extends) {
+			isValid = true
+			return ctx
+		}
+
 		const file = await ctx.repo.nodeishFs.readFile("./tsconfig.json", { encoding: "utf-8" })
-		const tsconfig = JSON5.parse(file)
+		tsconfig = JSON5.parse(file)
 		if (
 			tsconfig?.compilerOptions?.moduleResolution &&
 			tsconfig.compilerOptions.moduleResolution.toLowerCase() === "bundler"
