@@ -323,6 +323,8 @@ async function loadMessagesViaPlugin(
 
 		let loadedMessageCount = 0
 
+		const deletedMessages = new Set(messages.keys())
+
 		for (const loadedMessage of loadedMessages) {
 			const loadedMessageClone = structuredClone(loadedMessage)
 
@@ -338,6 +340,8 @@ async function loadMessagesViaPlugin(
 				// - this could be the case if one edits the aliase manualy
 				throw new Error("more than one message with the same id or alias found ")
 			} else if (currentMessages.length === 1) {
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- length has checked beforhand
+				deletedMessages.delete(currentMessages[0]!.id)
 				// update message in place - leave message id and alias untouched
 				loadedMessageClone.alias = {} as any
 
@@ -403,6 +407,18 @@ async function loadMessagesViaPlugin(
 				loadedMessageCount = 0
 			}
 		}
+
+		loadedMessageCount = 0
+		for (const deletedMessageId of deletedMessages) {
+			messages.delete(deletedMessageId)
+			delegate?.onMessageDelete(deletedMessageId)
+			loadedMessageCount++
+			if (loadedMessageCount > maxMessagesPerTick) {
+				await sleep(0)
+				loadedMessageCount = 0
+			}
+		}
+
 		await releaseLock(fs as NodeishFilesystem, lockDirPath, "loadMessage", lockTime)
 		lockTime = undefined
 
