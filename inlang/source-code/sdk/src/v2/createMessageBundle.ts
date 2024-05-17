@@ -41,3 +41,8 @@ function toTextElement(text: string): Text {
 		value: text,
 	}
 }
+
+// TODO: implement normalization with sorted keys, and sorted messages (by locale)
+export function normalizeMessageBundle(messageBundle: MessageBundle): MessageBundle {
+	return messageBundle
+}

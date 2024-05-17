@@ -1,6 +1,7 @@
-import type { ProjectSettings, Message } from "@inlang/sdk"
+import type { ProjectSettings } from "@inlang/sdk"
+import type { MessageBundle } from "../v2/types.js"
+import { normalizeMessageBundle } from "../v2/createMessageBundle.js"
 import { getDirname, type NodeishFilesystem } from "@lix-js/fs"
-import { normalizeMessage } from "../storage/helper.js"
 
 import _debug from "debug"
 const debug = _debug("sdk:persistence")
@@ -11,7 +12,7 @@ export async function loadMessages(args: {
 	settings: ProjectSettings
 	nodeishFs: NodeishFilesystem
 }) {
-	let result: Message[] = []
+	let result: MessageBundle[] = []
 	const pathPattern = args.settings[pluginId]?.pathPattern as string
 
 	debug("loadMessages", pathPattern)
@@ -30,7 +31,7 @@ export async function loadMessages(args: {
 export async function saveMessages(args: {
 	settings: ProjectSettings
 	nodeishFs: NodeishFilesystem
-	messages: Message[]
+	messages: MessageBundle[]
 }) {
 	const pathPattern = args.settings[pluginId]?.pathPattern as string
 
@@ -40,7 +41,7 @@ export async function saveMessages(args: {
 		await args.nodeishFs.writeFile(
 			pathPattern,
 			// 2 spaces indentation
-			JSON.stringify(args.messages.map(normalizeMessage), undefined, 2)
+			JSON.stringify(args.messages.map(normalizeMessageBundle), undefined, 2)
 		)
 	} catch (error) {
 		debug("saveMessages", error)
