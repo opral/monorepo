@@ -1726,6 +1726,9 @@ importers:
       '@sveltejs/kit':
         specifier: ^2.4.3
         version: 2.5.7(@sveltejs/vite-plugin-svelte@3.1.0(svelte@5.0.0-next.135)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4)))(svelte@5.0.0-next.135)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))
+      commander:
+        specifier: ^12.0.0
+        version: 12.0.0
       dedent:
         specifier: 1.5.1
         version: 1.5.1(babel-plugin-macros@2.8.0)
