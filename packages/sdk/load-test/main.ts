@@ -3,7 +3,7 @@ import { runLoadTest } from "./load-test.js"
 
 const usage = `
 USAGE:
-	pnpm test messageCount [translate] [subscribeToMessages] [subscribeToLintReports] [watchMode]
+	pnpm load-test messageCount [translate] [subscribeToMessages] [subscribeToLintReports] [watchMode]
 e.g.
   pnpm load-test 300
   pnpm load-test 100 1 1 0
