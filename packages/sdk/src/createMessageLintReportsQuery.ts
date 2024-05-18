@@ -33,7 +33,12 @@ export function createMessageLintReportsQuery(
 	// @ts-expect-error Reactive map seems to have a problem with Type aliases here
 	const index = new ReactiveMap<MessageLintReport["messageId"], MessageLintReport[]>()
 
+	debug("resetting settledReports")
 	let settledReports = Promise.resolve()
+
+	let currentBatchEnd: undefined | (() => Promise<void>) = undefined // TODO update wit last scheduled report
+
+	const updatedReports: { [messageId: string]: MessageLintReport[] } = {}
 
 	// triggered whenever settings or resolved modules changes
 	createMemo(() => {
@@ -65,22 +70,39 @@ export function createMessageLintReportsQuery(
 		}
 
 		const sheduleLintMessage = (message: Message, messages: Message[]) => {
-			settledReports = settledReports.then(() => {
-				return lintSingleMessage({
-					rules: rulesArray,
-					settings: settingsObject(),
-					messages: messages,
-					message: message,
-				}).then((report) => {
-					const currentReports = index.get(message.id)
-					debug("lintSingleMessage", message.id, report.data.length)
+			debug("shedule Lint for message:", message.id)
+
+			const updateOutstandingReportsOnLast = async () => {
+				debug("finished queue - trigger reactivity", message.id)
+				for (const [id, reports] of Object.entries(updatedReports)) {
+					const currentReports = index.get(id)
 					// we only update the report if it differs from the known one - to not trigger reactivity
-					if (report.errors.length === 0 && !reportsEqual(currentReports, report.data)) {
+					if (!reportsEqual(currentReports, reports)) {
 						// console.log("lintSingleMessage", messageId, report.data.length)
-						index.set(message.id, report.data)
+						index.set(message.id, reports)
 					}
-				})
+				}
+			}
+
+			currentBatchEnd = updateOutstandingReportsOnLast
+
+			const scheduledLint = lintSingleMessage({
+				rules: rulesArray,
+				settings: settingsObject(),
+				messages: messages,
+				message: message,
+			}).then((reportsResult) => {
+				if (reportsResult.errors.length === 0) {
+					updatedReports[message.id] = reportsResult.data
+				}
+
+				if (currentBatchEnd !== updateOutstandingReportsOnLast) {
+					return
+				}
+
+				return updateOutstandingReportsOnLast()
 			})
+			settledReports = settledReports.then(() => scheduledLint)
 		}
 
 		// setup delegate of message query
@@ -93,7 +115,9 @@ export function createMessageLintReportsQuery(
 				// for (const message of messages) {
 				// 	lintMessage(message, messages)
 				// }
+				debug("sheduluing Lint for all messages - on load")
 				batch(() => {
+					debug("sheduluing Lint for all messages - subsquencial call?")
 					for (const message of messages) {
 						// NOTE: this potentually creates thousands of promisses we could create a promise that batches linting
 						// NOTE: this produces a lot of signals - we could batch the
@@ -104,11 +128,13 @@ export function createMessageLintReportsQuery(
 			onMessageCreate: (messageId: string, message: Message, messages: Message[]) => {
 				// NOTE: unhandled promise rejection (as before the refactor) but won't tackle this in this pr
 				// TODO MESDK-105 reevaluate all lint's instead of those for the messsage that where created
+				debug("shedule Lint for message - onMessageCreate", message.id)
 				sheduleLintMessage(message, messages)
 			},
 			onMessageUpdate: (messageId: string, message: Message, messages: Message[]) => {
 				// NOTE: unhandled promise rejection (as before the refactor) but won't tackle this in this pr
 				// TODO MESDK-105 reevaluate all lint's instead of those for the messsage that changed
+				debug("shedule Lint for message - onMessageUpdate", message.id)
 				sheduleLintMessage(message, messages)
 			},
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars -- TODO MESDK-105 we gonna need the mesage Property for evaluation
