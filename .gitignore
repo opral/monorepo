@@ -375,3 +375,7 @@ inlang/source-code/paraglide/paraglide-solidstart/example/.solid
 *.h.ts.mjs
 **/vite.config.ts.timestamp-*
 **/vite.config.js.timestamp-*
+
+
+# gitea test instance data
+lix/packages/gitea
