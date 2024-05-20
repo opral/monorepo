@@ -36,7 +36,7 @@ export function createMessageLintReportsQuery(
 	debug("resetting settledReports")
 	let settledReports = Promise.resolve()
 
-	let currentBatchEnd: undefined | (() => Promise<void>) = undefined // TODO update wit last scheduled report
+	let currentBatchEnd: undefined | (() => Promise<void>) = undefined
 
 	const updatedReports: { [messageId: string]: MessageLintReport[] } = {}
 
@@ -73,15 +73,22 @@ export function createMessageLintReportsQuery(
 			debug("shedule Lint for message:", message.id)
 
 			const updateOutstandingReportsOnLast = async () => {
-				debug("finished queue - trigger reactivity", message.id)
-				for (const [id, reports] of Object.entries(updatedReports)) {
-					const currentReports = index.get(id)
-					// we only update the report if it differs from the known one - to not trigger reactivity
-					if (!reportsEqual(currentReports, reports)) {
-						// console.log("lintSingleMessage", messageId, report.data.length)
-						index.set(message.id, reports)
-					}
+				if (currentBatchEnd !== updateOutstandingReportsOnLast) {
+					debug("skip triggering reactivy", message.id)
+					return
 				}
+				debug("finished queue - trigger reactivity", message.id)
+
+				batch(() => {
+					for (const [id, reports] of Object.entries(updatedReports)) {
+						const currentReports = index.get(id)
+						// we only update the report if it differs from the known one - to not trigger reactivity
+						if (!reportsEqual(currentReports, reports)) {
+							debug("lint reports for message: ", id, " now n:", reports.length)
+							index.set(id, reports)
+						}
+					}
+				})
 			}
 
 			currentBatchEnd = updateOutstandingReportsOnLast
@@ -93,11 +100,8 @@ export function createMessageLintReportsQuery(
 				message: message,
 			}).then((reportsResult) => {
 				if (reportsResult.errors.length === 0) {
+					debug("lint reports for message: ", message.id, "n:", reportsResult.data.length)
 					updatedReports[message.id] = reportsResult.data
-				}
-
-				if (currentBatchEnd !== updateOutstandingReportsOnLast) {
-					return
 				}
 
 				return updateOutstandingReportsOnLast()
