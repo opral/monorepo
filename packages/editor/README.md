@@ -31,7 +31,7 @@
 
 # Pricing 
  
-<doc-pricing heading="Fink has and will have a free tier." content="In the future, we will likely monetize features that bring value to larger (enterprise) projects. If you have a small project, don't worry about paying for fink."></doc-pricing>
+<doc-pricing></doc-pricing>
 
 # Login via GitHub
 
