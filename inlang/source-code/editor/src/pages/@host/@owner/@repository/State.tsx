@@ -51,7 +51,7 @@ type EditorStateSchema = {
 	 * Fork status of the repository.
 	 */
 
-	forkStatus: () => { ahead: number; behind: number; conflicts: boolean }
+	forkStatus: () => { ahead: number; behind: number; conflicts: Record<string, any> | undefined }
 	/**
 	 * Refetch the fork status.
 	 */
@@ -75,7 +75,11 @@ type EditorStateSchema = {
 	/**
 	 * The branch names of current repo.
 	 */
-	branchNames: Resource<string[] | undefined>
+	setBranchListEnabled: Setter<boolean>
+	/**
+	 * Trigger the branch list to be fetched.
+	 */
+	branchList: Resource<string[] | undefined>
 	/**
 	 * Additional information about a repository provided by GitHub.
 	 */
@@ -503,13 +507,19 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			} else {
 				setTimeout(() => {
 					const element = document.getElementById("missingTranslation-summary")
-					element !== null && !filteredMessageLintRules().includes("messageLintRule.inlang.missingTranslation") ? setTourStep("missing-translation-rule") : setTourStep("textfield")
+					element !== null &&
+					!filteredMessageLintRules().includes("messageLintRule.inlang.missingTranslation")
+						? setTourStep("missing-translation-rule")
+						: setTourStep("textfield")
 				}, 100)
 			}
 		} else if (tourStep() === "missing-translation-rule" && project()) {
 			setTimeout(() => {
 				const element = document.getElementById("missingTranslation-summary")
-				element !== null && !filteredMessageLintRules().includes("messageLintRule.inlang.missingTranslation") ? setTourStep("missing-translation-rule") : setTourStep("textfield")
+				element !== null &&
+				!filteredMessageLintRules().includes("messageLintRule.inlang.missingTranslation")
+					? setTourStep("missing-translation-rule")
+					: setTourStep("textfield")
 			}, 100)
 		}
 	})
@@ -541,9 +551,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	)
 
 	/**
-	* createResource is not reacting to changes like: "false","Null", or "undefined".
-	* Hence, a string needs to be passed to the fetch of the resource.
-	*/
+	 * createResource is not reacting to changes like: "false","Null", or "undefined".
+	 * Hence, a string needs to be passed to the fetch of the resource.
+	 */
 	const [userIsCollaborator] = createResource(
 		() => {
 			// do not fetch if no owner or repository is given
@@ -596,16 +606,22 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			}
 		},
 		async (args) => {
+			await new Promise((resolve) => setTimeout(resolve, 10000))
+			// wait for the browser to be idle
+			await new Promise((resolve) => requestIdleCallback(resolve))
+
+			console.info("fetching forkStatus")
+
 			const value = await args.repo!.forkStatus()
 			if ("error" in value) {
 				// Silently ignore errors:
 				// The branch might only exist in the fork and not in the upstream repository.
-				return { ahead: 0, behind: 0, conflicts: false }
+				return { ahead: 0, behind: 0, conflicts: undefined }
 			} else {
 				return value
 			}
 		},
-		{ initialValue: { ahead: 0, behind: 0, conflicts: false } }
+		{ initialValue: { ahead: 0, behind: 0, conflicts: undefined } }
 	)
 
 	const [previousLoginStatus, setPreviousLoginStatus] = createSignal(localStorage?.user?.isLoggedIn)
@@ -641,15 +657,23 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	)
 
-	const [branchNames] = createResource(
+	const [branchListEnabled, setBranchListEnabled] = createSignal(false)
+	const [branchList] = createResource(
 		() => {
+			if (
+				repo() === undefined ||
+				githubRepositoryInformation() === undefined ||
+				!branchListEnabled()
+			) {
+				return false
+			}
 			return { repo: repo() }
 		},
 		async (args) => {
+			console.info("fetching branchList")
 			return await args.repo?.getBranches()
 		}
 	)
-
 
 	return (
 		<EditorStateContext.Provider
@@ -664,7 +688,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					mergeUpstream,
 					createFork,
 					currentBranch,
-					branchNames,
+					setBranchListEnabled,
+					branchList,
 					githubRepositoryInformation,
 					routeParams,
 					searchParams,

@@ -98,7 +98,7 @@ export async function repoContext(
 		args.experimentalFeatures ||
 		(isWhitelistedRepo ? { lazyClone: freshClone, lixCommit: true } : {})
 
-	const useLazyFS = experimentalFeatures?.lazyClone && args.nodeishFs?._createPlaceholder
+	const useLazyFS = experimentalFeatures?.lazyClone && rawFs?._createPlaceholder
 
 	const cache = useLazyFS ? {} : undefined
 

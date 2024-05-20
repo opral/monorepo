@@ -53,10 +53,8 @@
 		const from = new URL(get(page).url)
 		const original_to = new URL(href, new URL(from))
 
-		if (
-			isExternal(original_to, from, absoluteBase) ||
-			i18n.config.exclude(original_to.pathname)
-		) return href
+		if (isExternal(original_to, from, absoluteBase) || i18n.config.exclude(original_to.pathname))
+			return href
 
 		const language = hreflang ?? lang
 

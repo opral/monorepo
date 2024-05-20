@@ -13,7 +13,7 @@ export function openRepo (url, { branch, author }) {
     folders: [], // >> files()
     
     fetchRefs: async function () {
-      return branches?.length < 2 && repoProm.then((repo)=> repo.getBranches().then(br => { 
+      return branches?.length < 2 && repoProm.then((repo)=> repo.getBranches().then(br => {
         branches = br
       })) // TODO: reactivity: needs to be exposed but only executed when used in ui > revisit samuels proxy requirement!
     },
@@ -36,25 +36,33 @@ export function openRepo (url, { branch, author }) {
         },
         
         get content () {
-          // console.log('reading file ' + path)
-          
-          !fileContent?.length && repoProm.then((repo: any) => repo.read(path).then((content) => {
-            console.log('exp get content', path )
-            fileContent = content
-            setTimeout(updateStatus, 0)
-          }))
+          if (!fileContent?.length) {
+            repoProm.then((repo) => {
+              repo.read(path).then(async (content) => {
+                console.log('exp get content', path )
+                fileContent = content
+                
+                setTimeout(() => updateStatus([path, 'unmodified']), 0)
+                
+                for await (const change of repo.nodeishFs.watch(path)) {
+                  await repo.read(path).then(newContent => fileContent = newContent).catch(() => {})
+                  // console.log(change, fileContent)
+                }
+              })
+            })
+          } 
           return fileContent
         },
         
         set content (val) {
           fileContent = val
-          repoProm.then((repo: any) => repo.write(path, val).then(() => setTimeout(updateStatus, 0)))
+          repoProm.then((repo) => repo.write(path, val).then(() => setTimeout(updateStatus, 0)))
         }
       }
     },
 
     pull: async function () {
-      const repo: any = await repoProm
+      const repo = await repoProm
       await repo.pull({
         fastForward: true,
         singleBranch: true,
@@ -63,8 +71,14 @@ export function openRepo (url, { branch, author }) {
     },
 
     push: async function () {
-      const repo: any = await repoProm
+      console.time('repoAvail')
+      const repo = await repoProm
+      console.timeEnd('repoAvail')
+
+      console.time('push')
       await repo.push()
+      console.timeEnd('push')
+
       await updateStatus()
     },
 
@@ -82,17 +96,20 @@ export function openRepo (url, { branch, author }) {
         .filter(([name, txt]) => txt !== 'unmodified' && !state.exclude.includes(name))
         .map(([name]) => name)
 
-      console.log('commit', { includedFiles })
+      console.time('commit', { includedFiles })
       await state.repo.commit({ message, include: includedFiles })
+      console.timeEnd('commit')
 
-      // await state.repo.push().catch(console.error)
       await updateStatus().then(() => (state.exclude = []))
+
+      await state.repo.push().catch(console.error)
+      await updateStatus()
 
       // message = `Changes on ${currentBranch} started ${new Date().toUTCString()}`
     }
   })
 
-  console.time('lix')
+  console.time('openRepo')
   openRepository(url, {
     debug: false,
     experimentalFeatures: {
@@ -106,61 +123,69 @@ export function openRepo (url, { branch, author }) {
     author, // TODO: check with git config
     // sparseFilter: ({ filename, type }) => type === 'folder' || filename.endsWith('.md')
   }).then(async (newRepo) => {
+    // @ts-ignore
+    window.repo = state.repo
     state.repo = newRepo
     repoAvailable(newRepo)
 
-    // @ts-ignore
-    window.repo = state.repo
-
     state.currentBranch = await state.repo.getCurrentBranch()
     console.log('currentBranch', state.currentBranch)
-    state.commits = await state.repo.log()
-
-    // content = await repo.files.read('/README.md')
-    // console.log('listing files')
-    const folderList = await state.repo.listDir('/')
-    
-    // console.log({ folderList })
-    
-    state.folders = await Promise.all(
-      (folderList).map(async (name) => ({
-        name,
-        type: (await state.repo.nodeishFs.stat('/' + name)).isDirectory() ? '📂' : '📄'
-      }))
-    )
+    console.timeEnd('openRepo')
 
     updateStatus()
-
-    console.timeEnd('lix')
   })
 
-  async function updateStatus() {
+  async function updateStatus(addStatus) {
     if (!state.repo) {
       return
     }
-    console.log('exp status list')
-    state.status = await state.repo.statusList({ includeStatus: ['materialized'] })
+    if (addStatus) {
+      state.status.push(addStatus)
+    } else {
+      console.time('statusList')
+      state.status = await state.repo.statusList({ includeStatus: ['materialized'] })
+      console.timeEnd('statusList')
+      // Console.log(await repo.log({ filepath: '.npmrc' }))
 
-    // Console.log(await repo.log({ filepath: '.npmrc' }))
+      // console.time('double log')
+      const originCommits = (await state.repo.log({ ref: 'origin/' + state.currentBranch, depth: 15 })).reduce((agg, com) => {
+        agg[com.oid] = true
+        return agg
+      }, {})
 
-    let newUnpushed = 0
-    const originCommits = (await state.repo.log({ ref: 'origin/' + state.currentBranch })).reduce((agg, com) => {
-      agg[com.oid] = true
-      return agg
-    }, {})
+      let newUnpushed = 0
+      // ...await state.repo.log({  ref: 'refs/remotes/origin/' + state.currentBranch, depth: 5})
+      let foundOrigng= false
+      let currentCommitOid
+      state.commits = ([...await state.repo.log({ depth: 15 })]).map((com) => {
+        if (!currentCommitOid) {
+          currentCommitOid = com.oid
+          com.current = true
+        }
+        if (originCommits[com.oid]) {
+          if (!foundOrigng) {
+            foundOrigng = true
+            com.origin = true
+          }
+        } else {
+          newUnpushed++
+        }
+        return com
+      })
+      // console.timeEnd('double log')
+      state.unpushed = newUnpushed
 
-    state.commits = (await state.repo.log()).map((com) => {
-      if (originCommits[com.oid]) {
-        com.origin = true
-      } else {
-        newUnpushed++
-      }
-      return com
-    })
-
-    state.unpushed = newUnpushed
+      // console.time('folders')
+      const folderList = (await state.repo.listDir('/')).sort()
+      state.folders = await Promise.all(
+        (folderList).map(async (name) => ({
+          name,
+          type: (await state.repo.nodeishFs.stat('/' + name)).isDirectory() ? '📂' : '📄'
+        }))
+      )
+      // console.timeEnd('folders')
+    }
   }
-
 
   return state
 }

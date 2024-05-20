@@ -5133,7 +5133,7 @@ async function addToIndex({
  *
  * @returns {Promise<string>} Resolves successfully with the SHA-1 object id of the newly created commit.
  */
-async function _commit({
+async function _commit ({
   fs,
   cache,
   onSign,

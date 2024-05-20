@@ -7,7 +7,7 @@ export const push = async (ctx: RepoContext, state: RepoState) => {
 		throw new Error("Could not find repo url, only github supported for push at the moment")
 	}
 	return await isoGit.push({
-		fs: state.nodeishFs,
+		fs: ctx.rawFs,
 		url: ctx.gitUrl,
 		cache: ctx.cache,
 		corsProxy: ctx.gitProxyUrl,
