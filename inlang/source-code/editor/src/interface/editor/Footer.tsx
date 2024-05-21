@@ -68,10 +68,10 @@ const Footer = () => {
 	return (
 		<footer class="bg-background border-t border-surface-200 py-4 px-4 overflow-visible">
 			<div class="max-w-7xl mx-auto flex justify-between gap-4 xl:px-4 h-6">
-				<div class="flex items-center justify-between">
+				<div class="flex items-center justify-between w-24">
 					<p class="text-sm text-surface-500">© {new Date().getFullYear().toString()} Opral</p>
 				</div>
-				<div class="flex gap-4 mr-[67.21px]">
+				<div class="flex gap-4">
 					<For each={socialMediaLinks}>
 						{(link) => (
 							<Link
@@ -85,7 +85,7 @@ const Footer = () => {
 						)}
 					</For>
 				</div>
-				<div class="relative">
+				<div class="flex items-center justify-end w-24">
 					<sl-dropdown prop:distance={8}>
 						<button slot="trigger" class="text-sm text-surface-500">
 							{version["commit-hash"].slice(0, 7)}
