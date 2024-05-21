@@ -20,7 +20,9 @@ function updateVersionFile() {
 	const packages = JSON.parse(pnpmOutput)
 	const inlangVersion = packages.find((pkg) => pkg.name === "@inlang/sdk").version
 	const lixVersion = packages.find((pkg) => pkg.name === "@lix-js/client").version
-	const commitHash = execCommand("git rev-parse HEAD").trim()
+	// if working directory is not clean set commit hash to "dev"
+	const gitStatus = execCommand("git status --porcelain")
+	const commitHash = gitStatus ? "dev" : execCommand("git rev-parse HEAD").trim()
 
 	// Read the current version.json
 	const versionFilePath = "./version.json"
