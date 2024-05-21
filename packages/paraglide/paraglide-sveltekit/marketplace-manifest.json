@@ -24,7 +24,7 @@
 		"Appendix": {
 			"/faq": "./inlang/source-code/paraglide/paraglide-sveltekit/docs/faq.md",
 			"/manual-setup": "./inlang/source-code/paraglide/paraglide-sveltekit/docs/manual-setup.md",
-			"/roadmap": "./inlang/source-code/paraglide/paraglide-sveltekit/docs/roadmap.md",
+			"/roadmap-and-caveats": "./inlang/source-code/paraglide/paraglide-sveltekit/docs/roadmap.md",
 			"/changelog": "./inlang/source-code/paraglide/paraglide-sveltekit/CHANGELOG.md",
 			"StackBlitz": "https://stackblitz.com/~/github.com/lorissigrist/paraglide-sveltekit-example"
 		}
