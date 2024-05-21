@@ -76,4 +76,31 @@ describe("updateLayoutFile", () => {
 				</ParaglideJS>"
 			`)
 	})
+
+
+    it("should upate a typescript script", () => {
+			const code = `
+        <script lang="ts">
+            const a : number = 5;
+        </script>
+        
+        <p><slot/></p>
+        `
+
+			expect(updateLayoutFile(code)).toMatchInlineSnapshot(`
+				"
+				        <script lang=\\"ts\\">
+					import { ParaglideJS } from '@inlang/paraglide-sveltekit'
+					import { i18n } from '$lib/i18n'
+
+				            const a : number = 5;
+				        </script>
+				<ParaglideJS {i18n}>
+
+				        
+				        <p><slot/></p>
+				        
+				</ParaglideJS>"
+			`)
+		})
 })
