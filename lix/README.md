@@ -104,8 +104,8 @@ Apps that revolve around changes are prime use cases to be built on lix. Having 
 
 ## Community & Support
 
-**[🚩 Issues](https://github.com/opral/monorepo/issues)** - Bugs end errors you encounter using inlang.
+**[🚩 Issues](https://github.com/opral/monorepo/issues)** - Bugs end errors you encounter.
 
-**[💬 Discussions](https://github.com/opral/monorepo/discussions)** - Get help, ask questions, request features, and discuss inlang.
+**[💬 Discussions](https://github.com/opral/monorepo/discussions)** - Get help, ask questions, or request features.
 
 **[🗣️ Discord](https://discord.gg/CNPfhWpcAa)** - Hanging out with the community.
