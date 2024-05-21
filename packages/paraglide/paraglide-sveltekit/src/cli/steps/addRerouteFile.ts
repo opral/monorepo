@@ -3,6 +3,12 @@ import { findFile, type CliStep } from "../utils.js"
 import type { Logger } from "@inlang/paraglide-js/internal"
 import path from "node:path"
 
+const BOILERPLATE = `// file initialized by the Paraglide-SvelteKit CLI - Feel free to edit it
+import { i18n } from "$lib/i18n"
+
+export const reroute = i18n.reroute()
+`
+
 export const addRerouteHook: CliStep<
 	{ repo: Repository; logger: Logger; typescript: boolean },
 	unknown
@@ -20,12 +26,7 @@ export const addRerouteHook: CliStep<
 			"./src/hooks" + (ctx.typescript ? ".ts" : ".js")
 		)
 
-		const boilerplate = `// file initialized by the Paraglide-SvelteKit CLI - Feel free to edit it
-import { i18n } from "$lib/i18n"
-
-export const reroute = i18n.reroute()
-`
-		await ctx.repo.nodeishFs.writeFile(hooksFilePath, boilerplate)
+		await ctx.repo.nodeishFs.writeFile(hooksFilePath, BOILERPLATE)
 		ctx.logger.success("Added reroute hook")
 	} else {
 		ctx.logger.warn(
