@@ -55,4 +55,25 @@ describe("updateLayoutFile", () => {
 			</ParaglideJS><style>a { color: inherit; }</style>"
 		`)
 	})
+
+    it("should update a layout file that already contains a slot", () => {
+			const code = `<p>
+    <slot/> 
+</p>
+        `
+
+			expect(updateLayoutFile(code)).toMatchInlineSnapshot(`
+				"<script>
+					import { ParaglideJS } from '@inlang/paraglide-sveltekit'
+					import { i18n } from '$lib/i18n'
+				</script>
+				<ParaglideJS {i18n}>
+
+				<p>
+				    <slot/> 
+				</p>
+				        
+				</ParaglideJS>"
+			`)
+		})
 })
