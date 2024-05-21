@@ -1083,6 +1083,23 @@ describe("functionality", () => {
 				],
 			}
 
+			const newMessage = {
+				id: "test2",
+				selectors: [],
+				variants: [
+					{
+						match: [],
+						languageTag: "en",
+						pattern: [
+							{
+								type: "Text",
+								value: "test",
+							},
+						],
+					},
+				],
+			}
+
 			await fs.writeFile("./messages.json", JSON.stringify(messages))
 
 			const getMessages = async (customFs: NodeishFilesystemSubset) => {
@@ -1121,9 +1138,11 @@ describe("functionality", () => {
 			})
 
 			let counter = 0
+			let messageCount = 0
 
-			project.query.messages.getAll.subscribe(() => {
+			project.query.messages.getAll.subscribe((messages) => {
 				counter = counter + 1
+				messageCount = messages.length
 			})
 
 			// subscribe fires once
@@ -1135,6 +1154,7 @@ describe("functionality", () => {
 
 			// we didn't change the message we write into message.json - shouldn't change the messages
 			expect(counter).toBe(1)
+			expect(messageCount).toBe(1)
 
 			// saving the file without changing should trigger a change
 			messages.data[0]!.variants[0]!.pattern[0]!.value = "changed"
@@ -1142,14 +1162,32 @@ describe("functionality", () => {
 			await new Promise((resolve) => setTimeout(resolve, 200)) // file event will lock a file and be handled sequentially - give it time to pickup the change
 
 			expect(counter).toBe(2)
+			expect(messageCount).toBe(1)
 
 			messages.data[0]!.variants[0]!.pattern[0]!.value = "changed3"
 
-			// change file
+			// change file - update message
 			await fs.writeFile("./messages.json", JSON.stringify(messages))
 			await new Promise((resolve) => setTimeout(resolve, 200)) // file event will lock a file and be handled sequentially - give it time to pickup the change
 
 			expect(counter).toBe(3)
+			expect(messageCount).toBe(1)
+
+			// change file - add a message
+			messages.data.push(newMessage)
+			await fs.writeFile("./messages.json", JSON.stringify(messages))
+			await new Promise((resolve) => setTimeout(resolve, 200)) // file event will lock a file and be handled sequentially - give it time to pickup the change
+
+			expect(counter).toBe(4)
+			expect(messageCount).toBe(2)
+
+			// change file - remove a message
+			messages.data.pop()
+			await fs.writeFile("./messages.json", JSON.stringify(messages))
+			await new Promise((resolve) => setTimeout(resolve, 200)) // file event will lock a file and be handled sequentially - give it time to pickup the change
+
+			expect(counter).toBe(5)
+			expect(messageCount).toBe(1)
 		})
 	})
 })
