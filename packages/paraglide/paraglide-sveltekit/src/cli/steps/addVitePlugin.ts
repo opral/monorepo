@@ -44,12 +44,12 @@ type UpdateResult =
 	| {
 			ok: true
 			updated: string
-			reason: undefined
+			reason?: undefined
 	  }
 	| {
 			ok: false
 			reason: string
-			updated: undefined
+			updated?: undefined
 	  }
 
 /**
@@ -69,7 +69,6 @@ export function maybeUpdateViteConfig(config: string): UpdateResult {
 	if (!match) {
 		return {
 			ok: false,
-			updated: undefined,
 			reason: "Could not find the plugins array",
 		}
 	}
@@ -87,6 +86,5 @@ export function maybeUpdateViteConfig(config: string): UpdateResult {
 	return {
 		ok: true,
 		updated: updatedConfig,
-		reason: undefined,
 	}
 }
