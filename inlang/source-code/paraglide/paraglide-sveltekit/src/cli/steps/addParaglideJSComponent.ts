@@ -41,46 +41,57 @@ export const addParaglideJSComponent: CliStep<
 }
 
 // assumption: The <script> element is at the top (if present) and the <style> at the bottom (if present)
-function updateLayoutFile(content: string): string {
-	const scriptStart = content.indexOf("<script")
-	const scriptEnd = content.indexOf("</script>")
+export function updateLayoutFile(code: string): string {
+	// add the imports
+	code = addImportsToScript(
+		code,
+		"\timport { ParaglideJS } from '@inlang/paraglide-sveltekit'\n\timport { i18n } from '$lib/i18n'"
+	)
 
-	if (scriptStart !== -1 && scriptEnd !== -1) {
-		// if there is a script present, add the imports to it
+	code = addParaglideJSComponentToContent(code)
 
-		//find the first '>' after scriptStart
-		const scriptEntry = content.slice(scriptStart, scriptEnd).indexOf(">")
-		if (scriptEntry === -1) {
-			return content // give up
-		}
-
-		const before = content.slice(0, scriptEntry)
-		const after = content.slice(scriptEntry)
-		content =
-			before +
-			"\nimport { ParaglideJS } from '@inlang/paraglide-sveltekit'\nimport { i18n } from '$lib/i18n'\n" +
-			after
-	} else {
-		// if there isn't a script present, add one with the imports
-		content =
-			`<script>
-    import { ParaglideJS } from "@inlang/paraglide-sveltekit"
-    import { i18n } from "$lib/i18n"
-</script>
-
-<ParaglideJS {i18n}>\n` + content
-	}
-
-	const styleStart = content.indexOf("<style")
-	if (styleStart !== -1 && styleStart > scriptStart) {
-		content = content + "\n</ParaglideJS>"
-	} else {
-		content = insert(content, "\n</ParaglideJS>\n", scriptEnd)
-	}
-
-	return content
+	return code
 }
 
+// updates the script tag if present - Adds it if not
+function addImportsToScript(code: string, imports: string): string {
+	const scriptStart = code.indexOf("<script")
+
+	//first ">" after scriptStart
+	const scriptEntry = code.indexOf(">", scriptStart)
+
+	// if both are found -> there is a script
+	if (scriptStart !== -1 && scriptEntry !== -1) {
+		// insert import statements at the top of the script
+		code = insert(code, "\n" + imports + "\n", scriptEntry + 1)
+	} else {
+		// prepend a script with the imports
+		code = "<script>\n" + imports + "\n</script>\n" + code
+	}
+
+	return code
+}
+
+function addParaglideJSComponentToContent(code: string): string {
+	// find the start & the end of the content portion of the code
+	const scriptEnd = code.indexOf("</script>")
+	const styleStart = code.indexOf("<style")
+	const contentStart = scriptEnd === -1 ? 0 : scriptEnd + "</script>".length
+	const contentEnd = styleStart === -1 ? code.length : styleStart
+
+	let content = code.slice(contentStart, contentEnd)
+
+	const hasSlot = content.includes("<slot")
+
+	content =
+		`\n<ParaglideJS {i18n}>\n` +
+		content +
+		(hasSlot ? "\n</ParaglideJS>" : "\n<slot/>\n</ParaglideJS>")
+
+	code = code.slice(0, contentStart) + content + code.slice(contentEnd)
+
+	return code
+}
 
 function insert(original: string, toInsert: string, index: number): string {
 	return original.slice(0, index) + toInsert + original.slice(index)
