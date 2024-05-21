@@ -99,7 +99,7 @@ Apps that revolve around changes are prime use cases to be built on lix. Having 
 
 1. Built lix for [inlang](https://github.com/opral/monorepo/tree/main/inlang) (to derive the requirements and get adoption)
 2. Built a lix hosting platform 
-3. Open lix for third party developers
+3. Open lix for third-party developers
 
 
 ## Community & Support
