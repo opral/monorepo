@@ -47,6 +47,7 @@ const LixSection = () => {
 	return (
 		<div id="lix" class="pt-12 md:pt-20 flex flex-col items-center pb-20">
 			<p class="bg-background px-4 py-1.5 rounded-full text-sm font-medium w-fit border shadow border-surface-300">
+				{/* TODO: link to https://github.com/opral/monorepo/tree/main/lix */}
 				{m.home_lix_tag()}
 			</p>
 			<h2 class="font-bold text-2xl md:text-4xl text-surface-900 text-center mt-5">
