@@ -1,11 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect } from "vitest"
 import type { ImportFunction } from "../resolve-modules/index.js"
-import {
-	createEffect,
-	from,
-	createRoot,
-} from "../reactivity/solid.js"
+import { createEffect, from, createRoot } from "../reactivity/solid.js"
 import { solidAdapter } from "./solidAdapter.js"
 import { loadProject } from "../loadProject.js"
 import { mockRepo } from "@lix-js/client"
@@ -384,20 +380,20 @@ describe("lint", () => {
 			// wait for all int reports beeing executed
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
-			// 2 because we have two messages and one lint rule per message
-			expect(counter).toBe(2)
+			// 1 because we batch the two lint rules
+			expect(counter).toBe(1)
 
 			const currentSettings = project.settings()!
 			const newConfig = { ...currentSettings, languageTags: ["en", "de"] }
 			project.setSettings(newConfig)
 
 			// set settings trigges synchronous -> +1
-			expect(counter).toBe(3)
+			expect(counter).toBe(2)
 
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
-			// 7 = 3 + 1 (effect->settings) +  1 (effect->Resolved Plugin) +
-			expect(counter).toBe(5)
+			// 4 = 2 + batched(1 (effect->settings) and  1 (effect->Resolved Plugin))
+			expect(counter).toBe(3)
 			expect(project.query.messageLintReports.getAll()).toEqual([])
 
 			await new Promise((resolve) => setTimeout(resolve, 510))
@@ -406,12 +402,12 @@ describe("lint", () => {
 			project.setSettings(newConfig2)
 
 			// set settings trigges synchronous -> +1
-			expect(counter).toBe(6)
+			expect(counter).toBe(4)
 
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
-			// previous 8 -> +2 new lint reports (lint rules have been resetted by the settings signal)
-			expect(counter).toBe(8)
+			// 5 -> 4 + 1 new lint report batch
+			expect(counter).toBe(5)
 			expect(project.query.messageLintReports.getAll()).toEqual([])
 		})
 	})
@@ -442,8 +438,8 @@ describe("lint", () => {
 			expect(counter).toBe(0)
 
 			await new Promise((resolve) => setTimeout(resolve, 510))
-			// 2 -> one lint rule updated per message
-			expect(counter).toBe(2)
+			// 1 -> lint rules are batched - we expect one signal on getAll
+			expect(counter).toBe(1)
 
 			project.query.messages.update({
 				where: { id: "a" },
@@ -454,8 +450,8 @@ describe("lint", () => {
 			})
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
-			// 2 -> previous two messages + 0 - report results are the same - no effect
-			expect(counter).toBe(2)
+			// 1 -> previous two messages + 0 - report results are the same - no effect
+			expect(counter).toBe(1)
 			expect(project.query.messageLintReports.getAll()).toEqual([])
 
 			project.query.messages.update({
@@ -469,7 +465,7 @@ describe("lint", () => {
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
 			// 2 -> the updated message does not update the lint rules - result is the same
-			expect(counter).toBe(2)
+			expect(counter).toBe(1)
 			expect(project.query.messageLintReports.getAll()).toEqual([])
 		})
 	})
