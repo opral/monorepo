@@ -375,3 +375,6 @@ inlang/source-code/paraglide/paraglide-solidstart/example/.solid
 *.h.ts.mjs
 **/vite.config.ts.timestamp-*
 **/vite.config.js.timestamp-*
+
+# Fink version.json
+inlang/source-code/editor/version.json
