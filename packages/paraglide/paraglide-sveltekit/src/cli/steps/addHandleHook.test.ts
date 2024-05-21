@@ -7,7 +7,7 @@ describe("updateServerHooks", () => {
 		const result = updateServerHooks(code)
 		expect(result.ok).toBe(true)
 		expect(result.updated).toMatchInlineSnapshot(`
-			"import { i18n } from '$lib/i18n'
+			"import { i18n } from '${"$"}lib/i18n'
 			import { sequence } from '@sveltejs/kit/hooks'
 			export const handleErrorpermalink = () => console.log(\\"damn\\")
 
@@ -21,7 +21,7 @@ export const handleErrorpermalink = () => console.log("damn")`
 		const result = updateServerHooks(code)
 		expect(result.ok).toBe(true)
 		expect(result.updated).toMatchInlineSnapshot(`
-			"import { i18n } from '$lib/i18n'
+			"import { i18n } from '${"$"}lib/i18n'
 			import { sequence } from '@sveltejs/kit/hooks'
 			export const handleErrorpermalink = () => console.log(\\"damn\\")
 

@@ -10,6 +10,7 @@ import { addParaglideJSComponent } from "../steps/addParaglideJSComponent.js"
 import { editAppHtmlFile } from "../steps/editAppHtmlFile.js"
 import { addRerouteHook } from "../steps/addRerouteFile.js"
 import { addHandleHook } from "../steps/addHandleHook.js"
+import { VERSION } from "../version.js"
 
 export const initCommand = new Command()
 	.name("init")
@@ -38,7 +39,7 @@ export const initCommand = new Command()
 		const ctx3 = await Steps.updatePackageJson({
 			dependencies: async (deps) => ({
 				...deps,
-				"@inlang/paraglide-sveltekit": "0.7.0",
+				"@inlang/paraglide-sveltekit": VERSION,
 			}),
 			devDependencies: async (deps) => ({
 				...deps,
