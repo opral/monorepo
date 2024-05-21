@@ -341,6 +341,18 @@ describe.concurrent(
 			const html = await renderComponent(code)
 			expect(html).toMatchInlineSnapshot('"<a href=\\"/rewritten\\">test</a>"')
 		})
+
+		it("handles rune with shorthand", async ({ expect }) => {
+			const code = `
+        <script>
+            const href = $state("/test")
+        </script>
+		<a {href}>test</a>
+		`
+
+			const html = await renderComponent(code)
+			expect(html).toMatchInlineSnapshot('"<a href=\\"/rewritten\\">test</a>"')
+		})
 	},
 	{ timeout: 60_000 }
 )
