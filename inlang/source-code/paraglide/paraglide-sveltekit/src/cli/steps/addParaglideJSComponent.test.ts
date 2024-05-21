@@ -56,13 +56,13 @@ describe("updateLayoutFile", () => {
 		`)
 	})
 
-    it("should update a layout file that already contains a slot", () => {
-			const code = `<p>
+	it("should update a layout file that already contains a slot", () => {
+		const code = `<p>
     <slot/> 
 </p>
         `
 
-			expect(updateLayoutFile(code)).toMatchInlineSnapshot(`
+		expect(updateLayoutFile(code)).toMatchInlineSnapshot(`
 				"<script>
 					import { ParaglideJS } from '@inlang/paraglide-sveltekit'
 					import { i18n } from '$lib/i18n'
@@ -75,5 +75,5 @@ describe("updateLayoutFile", () => {
 				        
 				</ParaglideJS>"
 			`)
-		})
+	})
 })
