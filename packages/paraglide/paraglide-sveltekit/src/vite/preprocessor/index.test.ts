@@ -318,7 +318,7 @@ describe.concurrent(
 			)
 		})
 
-		it("rewrites hrefs in svelte 5 components", async ({ expect }) => {
+		it("rewrites hrefs in components with snippets", async ({ expect }) => {
 			const code = `
 				{#snippet myLink(href)}
 				<a href={href}>content</a>
@@ -328,6 +328,30 @@ describe.concurrent(
 				`
 			const html = await renderComponent(code)
 			expect(html).toMatchInlineSnapshot('"<a href=\\"/rewritten\\">content</a>"')
+		})
+
+		it("handles rune syntax", async ({ expect }) => {
+			const code = `
+        <script>
+            const href = $state("/test")
+        </script>
+		<a href={href}>test</a>
+		`
+
+			const html = await renderComponent(code)
+			expect(html).toMatchInlineSnapshot('"<a href=\\"/rewritten\\">test</a>"')
+		})
+
+		it("handles rune with shorthand", async ({ expect }) => {
+			const code = `
+        <script>
+            const href = $state("/test")
+        </script>
+		<a {href}>test</a>
+		`
+
+			const html = await renderComponent(code)
+			expect(html).toMatchInlineSnapshot('"<a href=\\"/rewritten\\">test</a>"')
 		})
 	},
 	{ timeout: 60_000 }
