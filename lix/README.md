@@ -1,4 +1,11 @@
-# Lix
+<p>
+  <a href='https://twitter.com/lixCCS' target="_blank">𝕏 Twitter</a>
+  ·
+  <a href='https://discord.gg/gdMPPWy57R' target="_blank">💬 Discord</a>
+</p>
+
+# Lix 
+
 
 Lix is a change control system that runs in the browser and an SDK to build web apps.  
 
