@@ -2,10 +2,6 @@
 import type { ResolvePluginsFunction } from "./types.js"
 import { Plugin } from "@inlang/plugin"
 import {
-	loadMessages as sdkLoadMessages,
-	saveMessages as sdkSaveMessages,
-} from "../../persistence/plugin.js"
-import {
 	PluginReturnedInvalidCustomApiError,
 	PluginLoadMessagesFunctionAlreadyDefinedError,
 	PluginSaveMessagesFunctionAlreadyDefinedError,
@@ -16,9 +12,6 @@ import {
 import { deepmerge } from "deepmerge-ts"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { tryCatch } from "@inlang/result"
-
-import _debug from "debug"
-const debug = _debug("sdk:resolvePlugins")
 
 // @ts-ignore - type mismatch error
 const PluginCompiler = TypeCompiler.Compile(Plugin)
@@ -31,11 +24,6 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 			customApi: {},
 		},
 		errors: [],
-	}
-
-	const experimentalPersistence = !!args.settings.experimental?.persistence
-	if (experimentalPersistence) {
-		debug("Using experimental persistence")
 	}
 
 	for (const plugin of args.plugins) {
@@ -121,13 +109,7 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 
 	// --- LOADMESSAGE / SAVEMESSAGE NOT DEFINED ---
 
-	if (experimentalPersistence) {
-		debug("Override load/save for experimental persistence")
-		// @ts-ignore - type mismatch error
-		result.data.loadMessages = sdkLoadMessages
-		// @ts-ignore - type mismatch error
-		result.data.saveMessages = sdkSaveMessages
-	} else if (
+	if (
 		typeof result.data.loadMessages !== "function" ||
 		typeof result.data.saveMessages !== "function"
 	) {

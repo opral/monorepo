@@ -78,7 +78,8 @@ describe.concurrent(
 			{ timeout: 20000 }
 		)
 
-		it(
+		// skip pending new v2 persistence with translation.
+		it.skip(
 			"project4 in project4-dir",
 			async () => {
 				const before = await fs.readFile(
