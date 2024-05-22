@@ -54,7 +54,7 @@
 		"dist"
 	],
 	"bin": {
-		"paraglide-sveltekit": "./bin/run.mjs"
+		"paraglide-sveltekit": "./bin/run.js"
 	},
 	"exports": {
 		".": {
