@@ -30,6 +30,9 @@ import { maybeCreateFirstProjectId } from "./migrations/maybeCreateFirstProjectI
 import { capture } from "./telemetry/capture.js"
 import { identifyProject } from "./telemetry/groupIdentify.js"
 
+import { stubMessagesQuery, stubMessageLintReportsQuery } from "./v2/stubQueryApi.js"
+import { openStore } from "./persistence/store.js"
+
 import _debug from "debug"
 const debug = _debug("sdk:loadProject")
 
@@ -83,6 +86,8 @@ export async function loadProject(args: {
 		// -- settings ------------------------------------------------------------
 
 		const [settings, _setSettings] = createSignal<ProjectSettings>()
+		let v2Persistence = false
+
 		createEffect(() => {
 			// TODO:
 			// if (projectId) {
@@ -106,11 +111,7 @@ export async function loadProject(args: {
 		const setSettings = (settings: ProjectSettings): Result<void, ProjectSettingsInvalidError> => {
 			try {
 				const validatedSettings = parseSettings(settings)
-				if (validatedSettings.experimental?.persistence) {
-					settings["plugin.sdk.persistence"] = {
-						pathPattern: projectPath + "/messages.json",
-					}
-				}
+				v2Persistence = !!validatedSettings.experimental?.persistence
 				_setSettings(validatedSettings)
 
 				writeSettingsToDisk(validatedSettings)
@@ -155,25 +156,30 @@ export async function loadProject(args: {
 			Error | undefined
 		>()
 
-		const messagesQuery = createMessagesQuery({
-			projectPath,
-			nodeishFs,
-			settings,
-			resolvedModules,
-			onInitialMessageLoadResult: (e) => {
-				if (e) {
-					markInitAsFailed(e)
-				} else {
-					markInitAsComplete()
-				}
-			},
-			onLoadMessageResult: (e) => {
-				setLoadMessagesViaPluginError(e)
-			},
-			onSaveMessageResult: (e) => {
-				setSaveMessagesViaPluginError(e)
-			},
-		})
+		const messagesQuery = v2Persistence
+			? stubMessagesQuery
+			: createMessagesQuery({
+					projectPath,
+					nodeishFs,
+					settings,
+					resolvedModules,
+					onInitialMessageLoadResult: (e) => {
+						if (e) {
+							markInitAsFailed(e)
+						} else {
+							markInitAsComplete()
+						}
+					},
+					onLoadMessageResult: (e) => {
+						setLoadMessagesViaPluginError(e)
+					},
+					onSaveMessageResult: (e) => {
+						setSaveMessagesViaPluginError(e)
+					},
+			  })
+
+		// throws if v2 store cannot be opened
+		const storeApi = v2Persistence ? await openStore({ projectPath, nodeishFs }) : undefined
 
 		// -- installed items ----------------------------------------------------
 
@@ -212,12 +218,14 @@ export async function loadProject(args: {
 
 		const initializeError: Error | undefined = await initialized.catch((error) => error)
 
-		const lintReportsQuery = createMessageLintReportsQuery(
-			messagesQuery,
-			settings as () => ProjectSettings,
-			installedMessageLintRules,
-			resolvedModules
-		)
+		const lintReportsQuery = v2Persistence
+			? stubMessageLintReportsQuery
+			: createMessageLintReportsQuery(
+					messagesQuery,
+					settings as () => ProjectSettings,
+					installedMessageLintRules,
+					resolvedModules
+			  )
 
 		/**
 		 * Utility to escape reactive tracking and avoid multiple calls to
@@ -245,6 +253,7 @@ export async function loadProject(args: {
 					settings: settings(),
 					installedPluginIds: installedPlugins().map((p) => p.id),
 					installedMessageLintRuleIds: installedMessageLintRules().map((r) => r.id),
+					// TODO: fix for v2Persistence
 					numberOfMessages: messagesQuery.includedMessageIds().length,
 				},
 			})
@@ -271,6 +280,7 @@ export async function loadProject(args: {
 				messages: messagesQuery,
 				messageLintReports: lintReportsQuery,
 			},
+			store: storeApi,
 		} satisfies InlangProject
 	})
 }

@@ -6,7 +6,6 @@ import {
 	createMessage,
 	normalizeMessageBundle,
 } from "../v2/createMessageBundle.js"
-import { pluginId } from "./plugin.js"
 
 const mockMessages: MessageBundle[] = [
 	createMessageBundle({
@@ -32,41 +31,34 @@ const mockMessages: MessageBundle[] = [
 //   - messages can be saved
 //   - after loading and saving messages, the state is the same as before (roundtrip)
 test("roundtrip (saving/loading messages)", async () => {
-	const { loadMessages, saveMessages } = await import("./plugin.js")
+	const { loadAll, saveAll } = await import("./store.js")
 	const fs = createNodeishMemoryFs()
 	const projectDir = "/test/project.inlang"
-	const pathPattern = projectDir + "/messages.json"
+	const filePath = projectDir + "/messages.json"
 	const persistedMessages = JSON.stringify(mockMessages.map(normalizeMessageBundle), undefined, 2)
 
-	const settings = {
-		sourceLanguageTag: "en",
-		languageTags: ["en", "de"],
-		modules: [],
-		[pluginId]: { pathPattern },
-	}
-
 	await fs.mkdir(projectDir, { recursive: true })
-	await fs.writeFile(pathPattern, persistedMessages)
+	await fs.writeFile(filePath, persistedMessages)
 
-	const firstMessageLoad = await loadMessages({
-		settings,
+	const firstMessageLoad = await loadAll({
+		filePath,
 		nodeishFs: fs,
 	})
 
 	expect(firstMessageLoad).toStrictEqual(mockMessages)
 
-	await saveMessages({
-		settings,
+	await saveAll({
+		filePath,
 		nodeishFs: fs,
 		messages: firstMessageLoad,
 	})
 
-	const afterRoundtrip = await fs.readFile(pathPattern, { encoding: "utf-8" })
+	const afterRoundtrip = await fs.readFile(filePath, { encoding: "utf-8" })
 
 	expect(afterRoundtrip).toStrictEqual(persistedMessages)
 
-	const messagesAfterRoundtrip = await loadMessages({
-		settings,
+	const messagesAfterRoundtrip = await loadAll({
+		filePath,
 		nodeishFs: fs,
 	})
 
