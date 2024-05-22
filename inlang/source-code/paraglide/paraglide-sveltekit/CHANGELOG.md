@@ -1,5 +1,11 @@
 # @inlang/paraglide-sveltekit
 
+## 0.8.1
+
+### Patch Changes
+
+- fbac297: Fix `bin` field in `package.json`
+
 ## 0.8.0
 
 ### Minor Changes
