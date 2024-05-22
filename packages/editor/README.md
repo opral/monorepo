@@ -15,9 +15,8 @@
 
 ## Works alongside your i18n library
 
-<doc-features>
-  <doc-feature text-color="#0F172A" color="#E1EFF7" title="and other JSON-based i18n libraries" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/supported-libraries.webp"></doc-feature>
-</doc-features>
+![logos of ParaglideJS, next-intl and i18next](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/supported-libraries.webp)
+and other JSON-based i18n libraries
 
 ## What users say
 
