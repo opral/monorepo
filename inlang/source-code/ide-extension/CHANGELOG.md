@@ -1,5 +1,17 @@
 # inlang-vs-code-extension
 
+## 1.44.2
+
+### Patch Changes
+
+- a27b7a4: This reintroduces reactivity to lint reports - see https://github.com/opral/monorepo/pull/2792 for more details
+- Updated dependencies [d27a983]
+- Updated dependencies [a27b7a4]
+  - @inlang/sdk@0.34.10
+  - @inlang/rpc@0.3.21
+  - @inlang/settings-component@1.0.16
+  - @inlang/telemetry@0.3.36
+
 ## 1.44.1
 
 ### Patch Changes

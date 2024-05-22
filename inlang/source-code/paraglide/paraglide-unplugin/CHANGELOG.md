@@ -1,5 +1,15 @@
 # @inlang/paraglide-unplugin
 
+## 1.6.7
+
+### Patch Changes
+
+- Updated dependencies [d27a983]
+- Updated dependencies [b8573fa]
+- Updated dependencies [a27b7a4]
+  - @inlang/sdk@0.34.10
+  - @inlang/paraglide-js@1.9.1
+
 ## 1.6.6
 
 ### Patch Changes
