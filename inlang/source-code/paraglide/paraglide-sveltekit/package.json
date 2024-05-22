@@ -25,6 +25,8 @@
 	"dependencies": {
 		"@inlang/paraglide-js": "workspace:*",
 		"@inlang/paraglide-vite": "workspace:*",
+		"@lix-js/client": "workspace:*",
+		"commander": "^12.0.0",
 		"dedent": "1.5.1",
 		"devalue": "^4.3.2",
 		"magic-string": "^0.30.5",
@@ -39,6 +41,7 @@
 		"@rollup/plugin-virtual": "3.0.1",
 		"@sveltejs/package": "^2.2.3",
 		"@sveltejs/vite-plugin-svelte": "^3.0.2",
+		"@types/node": "^20.12.12",
 		"prettier-plugin-svelte": "^3.1.2",
 		"rollup": "3.29.1",
 		"rollup-plugin-svelte": "^7.1.6",
@@ -50,6 +53,9 @@
 	"files": [
 		"dist"
 	],
+	"bin": {
+		"paraglide-sveltekit": "./bin/run.mjs"
+	},
 	"exports": {
 		".": {
 			"import": "./dist/runtime/index.js",
