@@ -54,9 +54,11 @@ export const initCommand = new Command()
 		const ctx8 = await editAppHtmlFile(ctx7)
 		const ctx9 = await addRerouteHook(ctx8)
 		const ctx10 = await addHandleHook(ctx9)
+		const ctx11 = await Steps.maybeAddSherlock(ctx10)
+		const crx12 = await Steps.maybeAddNinja(ctx11)
 
 		try {
-			await Steps.runCompiler({ ...ctx10, outdir: "./src/lib/paraglide" })
+			await Steps.runCompiler({ ...crx12, outdir: "./src/lib/paraglide" })
 		} catch (e) {
 			//silently ignore
 		}
