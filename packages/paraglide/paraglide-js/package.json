@@ -42,7 +42,6 @@
 	],
 	"scripts": {
 		"dev": "vite build --mode development --watch",
-		"dev:build": "npm run check && vite build --mode development",
 		"build": "npm run check && vite build --mode production",
 		"test": "vitest run --coverage ./src/**/*",
 		"lint": "eslint ./src --fix",
