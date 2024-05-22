@@ -42,6 +42,7 @@ export function createMessageWebviewProvider(args: {
 					return
 				}
 
+				// TODO XXX discuss https://github.com/opral/monorepo/commit/ea473bcfb0c25751e454d0cbdd976aae043abf38#diff-d70c61d977625ed10ef52c85005752b7c647b2663317340f46087c1330d2c479 with  felix and reset to ea473bc
 				// Subscribe to messages just once for a project
 				// Assumes that subscriptions will be gc'ed when projects are switched
 				// TODO: set isLoading while switching projects

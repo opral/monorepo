@@ -1,13 +1,12 @@
 import type { Message } from "@inlang/message"
 import { ReactiveMap } from "./reactivity/map.js"
-import { createEffect } from "./reactivity/solid.js"
+import { createEffect, onCleanup } from "./reactivity/solid.js"
 import { createSubscribable } from "./loadProject.js"
 import type { InlangProject, MessageQueryApi, MessageQueryDelegate } from "./api.js"
 import type { ResolvedPluginApi } from "./resolve-modules/plugins/types.js"
 import type { resolveModules } from "./resolve-modules/resolveModules.js"
 import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
 import type { NodeishFilesystem } from "@lix-js/fs"
-import { onCleanup } from "solid-js"
 import { stringifyMessage } from "./storage/helper.js"
 import { acquireFileLock } from "./persistence/filelock/acquireFileLock.js"
 import _debug from "debug"
@@ -62,14 +61,18 @@ export function createMessagesQuery({
 }: createMessagesQueryParameters): InlangProject["query"]["messages"] {
 	// @ts-expect-error
 	const index = new ReactiveMap<string, Message>()
+	let loaded = false
 
 	// filepath for the lock folder
 	const messageLockDirPath = projectPath + "/messagelock"
 
 	let delegate: MessageQueryDelegate | undefined = undefined
 
-	const setDelegate = (newDelegate: MessageQueryDelegate) => {
+	const setDelegate = (newDelegate: MessageQueryDelegate | undefined, onLoad: boolean) => {
 		delegate = newDelegate
+		if (newDelegate && loaded && onLoad) {
+			newDelegate.onLoaded([...index.values()] as Message[])
+		}
 	}
 
 	// Map default alias to message
@@ -94,6 +97,7 @@ export function createMessagesQuery({
 		// we clear the index independent from the change for
 		index.clear()
 		defaultAliasIndex.clear()
+		loaded = false
 
 		// Load messages -> use settings to subscribe to signals from the settings
 		const _settings = settings()
@@ -143,7 +147,7 @@ export function createMessagesQuery({
 			messageLockDirPath,
 			messageStates,
 			index,
-			delegate,
+			undefined /* delegate - we don't pass it here since we will call onLoaded instead */,
 			_settings, // NOTE we bang here - we don't expect the settings to become null during the livetime of a project
 			resolvedPluginApi
 		)
@@ -154,6 +158,7 @@ export function createMessagesQuery({
 			.then(() => {
 				onInitialMessageLoadResult()
 				delegate?.onLoaded([...index.values()])
+				loaded = true
 			})
 	})
 
@@ -203,7 +208,7 @@ export function createMessagesQuery({
 			}
 
 			messageStates.messageDirtyFlags[data.id] = true
-			delegate?.onMessageCreate(data.id, index.get(data.id))
+			delegate?.onMessageCreate(data.id, index.get(data.id), [...index.values()])
 			scheduleSave()
 			return true
 		},
@@ -230,7 +235,7 @@ export function createMessagesQuery({
 			if (message === undefined) return false
 			index.set(where.id, { ...message, ...data })
 			messageStates.messageDirtyFlags[where.id] = true
-			delegate?.onMessageCreate(where.id, index.get(data.id))
+			delegate?.onMessageUpdate(where.id, index.get(data.id), [...index.values()])
 			scheduleSave()
 			return true
 		},
@@ -242,11 +247,11 @@ export function createMessagesQuery({
 					defaultAliasIndex.set(data.alias.default, data)
 				}
 				messageStates.messageDirtyFlags[where.id] = true
-				delegate?.onMessageCreate(data.id, index.get(data.id))
+				delegate?.onMessageCreate(data.id, index.get(data.id), [...index.values()])
 			} else {
 				index.set(where.id, { ...message, ...data })
 				messageStates.messageDirtyFlags[where.id] = true
-				delegate?.onMessageUpdate(data.id, index.get(data.id))
+				delegate?.onMessageUpdate(data.id, index.get(data.id), [...index.values()])
 			}
 			scheduleSave()
 			return true
@@ -259,7 +264,7 @@ export function createMessagesQuery({
 			}
 			index.delete(where.id)
 			messageStates.messageDirtyFlags[where.id] = true
-			delegate?.onMessageDelete(where.id)
+			delegate?.onMessageDelete(where.id, [...index.values()])
 			scheduleSave()
 			return true
 		},
@@ -323,6 +328,8 @@ async function loadMessagesViaPlugin(
 
 		let loadedMessageCount = 0
 
+		const deletedMessages = new Set(messages.keys())
+
 		for (const loadedMessage of loadedMessages) {
 			const loadedMessageClone = structuredClone(loadedMessage)
 
@@ -338,6 +345,8 @@ async function loadMessagesViaPlugin(
 				// - this could be the case if one edits the aliase manualy
 				throw new Error("more than one message with the same id or alias found ")
 			} else if (currentMessages.length === 1) {
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- length has checked beforhand
+				deletedMessages.delete(currentMessages[0]!.id)
 				// update message in place - leave message id and alias untouched
 				loadedMessageClone.alias = {} as any
 
@@ -364,7 +373,7 @@ async function loadMessagesViaPlugin(
 				messages.set(loadedMessageClone.id, loadedMessageClone)
 				// NOTE could use hash instead of the whole object JSON to save memory...
 				messageState.messageLoadHash[loadedMessageClone.id] = importedEnecoded
-				delegate?.onMessageUpdate(loadedMessageClone.id, loadedMessageClone)
+				delegate?.onMessageUpdate(loadedMessageClone.id, loadedMessageClone, [...messages.values()])
 				loadedMessageCount++
 			} else {
 				// message with the given alias does not exist so far
@@ -392,7 +401,7 @@ async function loadMessagesViaPlugin(
 				// we don't have to check - done before hand if (messages.has(loadedMessageClone.id)) return false
 				messages.set(loadedMessageClone.id, loadedMessageClone)
 				messageState.messageLoadHash[loadedMessageClone.id] = importedEnecoded
-				delegate?.onMessageUpdate(loadedMessageClone.id, loadedMessageClone)
+				delegate?.onMessageUpdate(loadedMessageClone.id, loadedMessageClone, [...messages.values()])
 				loadedMessageCount++
 			}
 			if (loadedMessageCount > maxMessagesPerTick) {
@@ -403,6 +412,18 @@ async function loadMessagesViaPlugin(
 				loadedMessageCount = 0
 			}
 		}
+
+		loadedMessageCount = 0
+		for (const deletedMessageId of deletedMessages) {
+			messages.delete(deletedMessageId)
+			delegate?.onMessageDelete(deletedMessageId, [...messages.values()])
+			loadedMessageCount++
+			if (loadedMessageCount > maxMessagesPerTick) {
+				await sleep(0)
+				loadedMessageCount = 0
+			}
+		}
+
 		await releaseLock(fs as NodeishFilesystem, lockDirPath, "loadMessage", lockTime)
 		lockTime = undefined
 

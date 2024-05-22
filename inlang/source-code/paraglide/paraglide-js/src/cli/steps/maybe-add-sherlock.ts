@@ -4,6 +4,7 @@ import type { Repository } from "@lix-js/client"
 import type { CliStep } from "../utils.js"
 import type { InlangProject } from "@inlang/sdk"
 import * as Sherlock from "@inlang/cross-sell-sherlock"
+import { telemetry } from "~/services/telemetry/implementation.js"
 
 export const maybeAddSherlock: CliStep<
 	{
@@ -38,7 +39,7 @@ export const maybeAddSherlock: CliStep<
 	try {
 		if (!(await Sherlock.isAdopted({ fs: ctx.repo.nodeishFs }))) {
 			await Sherlock.add({ fs: ctx.repo.nodeishFs })
-
+			telemetry.capture({ event: "PARAGLIDE JS init added Sherlock" })
 			ctx.logger.success(
 				"Added the inlang Visual Studio Code extension (Sherlock) to the workspace recommendations."
 			)

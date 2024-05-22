@@ -1,5 +1,14 @@
 # @inlang/cli
 
+## 2.16.8
+
+### Patch Changes
+
+- a27b7a4: This reintroduces reactivity to lint reports - see https://github.com/opral/monorepo/pull/2792 for more details
+- Updated dependencies [d27a983]
+- Updated dependencies [a27b7a4]
+  - @inlang/sdk@0.34.10
+
 ## 2.16.7
 
 ### Patch Changes

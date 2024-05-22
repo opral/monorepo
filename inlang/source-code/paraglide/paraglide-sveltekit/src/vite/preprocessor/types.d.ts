@@ -12,7 +12,7 @@ export type ElementNode<Name extends stirng> = {
 	? {
 			name: "svelte:element"
 			tag: string | Expression
-	  }
+		}
 	: { name: Name })
 
 type Expression = {

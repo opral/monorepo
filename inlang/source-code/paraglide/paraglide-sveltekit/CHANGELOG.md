@@ -1,5 +1,38 @@
 # @inlang/paraglide-sveltekit
 
+## 0.8.1
+
+### Patch Changes
+
+- fbac297: Fix `bin` field in `package.json`
+
+## 0.8.0
+
+### Minor Changes
+
+- 0bf4d74: Added an `@inlang/paraglide-sveltekit init` command to automatically add `paraglide-sveltekit` to your project
+
+### Patch Changes
+
+- 75cf8fd: Prompt about adding the VsCode extension and Github Action during `paraglide-sveltekit init`
+- a27b7a4: This reintroduces reactivity to lint reports - see https://github.com/opral/monorepo/pull/2792 for more details
+- Updated dependencies [b8573fa]
+  - @inlang/paraglide-js@1.9.1
+  - @inlang/paraglide-vite@1.2.57
+
+## 0.7.0
+
+### Minor Changes
+
+- 3e9b863: Use Svelte 5 compiler in the preprocessor for rewriting links
+
+### Patch Changes
+
+- Updated dependencies [eb941fe]
+- Updated dependencies [9566348]
+  - @inlang/paraglide-js@1.9.0
+  - @inlang/paraglide-vite@1.2.56
+
 ## 0.6.23
 
 ### Patch Changes

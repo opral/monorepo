@@ -39,7 +39,7 @@ export const solidAdapter = (
 			},
 			messageLintReports: {
 				get: project.query.messageLintReports.get,
-				getAll: project.query.messageLintReports.getAll,
+				getAll: convert(project.query.messageLintReports.getAll),
 			},
 		},
 	} satisfies InlangProjectWithSolidAdapter

@@ -10,10 +10,10 @@ package for volume testing
 
 ```
 USAGE:
-  pnpm test messageCount [translate] [subscribeToMessages] [subscribeToLintReports] [watchMode]
+  pnpm load-test messageCount [translate] [subscribeToMessages] [subscribeToLintReports] [watchMode]
 e.g.
-  pnpm test 300
-  pnpm test 100 1 1 0
+  pnpm load-test 300
+  pnpm load-test 100 1 1 0
 
 Defaults: translate: 1, subscribeToMessages: 1, subscribeToLintReports: 0, watchMode: 0
 ```
@@ -22,7 +22,7 @@ Defaults: translate: 1, subscribeToMessages: 1, subscribeToLintReports: 0, watch
 `export DEBUG=sdk:acquireFileLock,sdk:releaseLock,sdk:lintReports,sdk:loadProject`
 
 ### to translate from separate process
-1. Run pnpm test with translate:0, watchMode:1 E.g. `pnpm test 100 0 1 1 1`
+1. Run pnpm load-test with translate:0, watchMode:1 E.g. `pnpm load-test 100 0 1 1 1`
 2. In another terminal, run `pnpm translate`
 
 ### to toggle experimental persistence
