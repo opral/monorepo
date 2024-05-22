@@ -1,6 +1,6 @@
 import { findRepoRoot, openRepository } from "@lix-js/client"
 import { Command } from "commander"
-import nodeFsPromises from "node:fs/promises"
+import nodeishFs from "node:fs/promises"
 import { Logger } from "@inlang/paraglide-js/internal"
 import { Steps, cli as ParaglideCli } from "@inlang/paraglide-js/internal/cli"
 import { scanNextJSProject } from "../flows/scan-next-project"
@@ -12,13 +12,13 @@ export const InitCommand = new Command()
 	.name("init")
 	.summary("Initializes Paraglide-JS in this NextJS Project")
 	.action(async () => {
-		const repoRoot = await findRepoRoot({ nodeishFs: nodeFsPromises, path: process.cwd() })
+		const repoRoot = await findRepoRoot({ nodeishFs, path: process.cwd() })
 
 		// We are risking that there is no git repo. As long as we only use FS features and no Git features
 		// from the SDK we should be fine.
 		// Basic operations like `loadProject` should always work without a repo since it's used in CI.
 		const repo = await openRepository(repoRoot ?? "file://" + process.cwd(), {
-			nodeishFs: nodeFsPromises,
+			nodeishFs,
 		})
 
 		const logger = new Logger({ prefix: false, silent: false })
