@@ -10,7 +10,7 @@ import { addParaglideJSComponent } from "../steps/addParaglideJSComponent.js"
 import { editAppHtmlFile } from "../steps/editAppHtmlFile.js"
 import { addRerouteHook } from "../steps/addRerouteFile.js"
 import { addHandleHook } from "../steps/addHandleHook.js"
-import { VERSION } from "../version.js"
+import { PARAGLIDE_SVELTEKIT_VERSION, PARAGLIDE_SVELTEKIT_MARKETPLACE_ID } from "../../meta.js"
 
 export const initCommand = new Command()
 	.name("init")
@@ -31,7 +31,7 @@ export const initCommand = new Command()
 			repo,
 			logger,
 			repoRoot: repoRoot?.replace("file://", "") ?? process.cwd(),
-			appId: "library.inlang.paraglideSvelteKit",
+			appId: PARAGLIDE_SVELTEKIT_MARKETPLACE_ID,
 		}
 
 		const ctx1 = await scanSvelteKitProject(ctx0)
@@ -39,7 +39,7 @@ export const initCommand = new Command()
 		const ctx3 = await Steps.updatePackageJson({
 			dependencies: async (deps) => ({
 				...deps,
-				"@inlang/paraglide-sveltekit": VERSION,
+				"@inlang/paraglide-sveltekit": PARAGLIDE_SVELTEKIT_VERSION,
 			}),
 			devDependencies: async (deps) => ({
 				...deps,
@@ -54,9 +54,11 @@ export const initCommand = new Command()
 		const ctx8 = await editAppHtmlFile(ctx7)
 		const ctx9 = await addRerouteHook(ctx8)
 		const ctx10 = await addHandleHook(ctx9)
+		const ctx11 = await Steps.maybeAddSherlock(ctx10)
+		const crx12 = await Steps.maybeAddNinja(ctx11)
 
 		try {
-			await Steps.runCompiler({ ...ctx10, outdir: "./src/lib/paraglide" })
+			await Steps.runCompiler({ ...crx12, outdir: "./src/lib/paraglide" })
 		} catch (e) {
 			//silently ignore
 		}

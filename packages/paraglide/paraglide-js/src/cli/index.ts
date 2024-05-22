@@ -7,7 +7,7 @@ export const cli = new Command()
 	.addCommand(compileCommand)
 	.addCommand(initCommand)
 	.showHelpAfterError()
-	.version(PACKAGE_VERSION)
+	.version(PARJS_PACKAGE_VERSION)
 
 export * as Utils from "./utils.js"
 export * as Defaults from "./defaults.js"
