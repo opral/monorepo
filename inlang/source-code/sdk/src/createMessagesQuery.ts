@@ -416,7 +416,7 @@ async function loadMessagesViaPlugin(
 		loadedMessageCount = 0
 		for (const deletedMessageId of deletedMessages) {
 			messages.delete(deletedMessageId)
-			delegate?.onMessageDelete(deletedMessageId)
+			delegate?.onMessageDelete(deletedMessageId, [...messages.values()])
 			loadedMessageCount++
 			if (loadedMessageCount > maxMessagesPerTick) {
 				await sleep(0)
