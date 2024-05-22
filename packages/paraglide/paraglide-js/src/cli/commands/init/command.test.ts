@@ -135,7 +135,7 @@ describe("addParaglideJsToDependencies()", () => {
 		const packageJson = JSON.parse(
 			(await fs.readFile("/package.json", { encoding: "utf-8" })) as string
 		)
-		expect(packageJson.devDependencies["@inlang/paraglide-js"]).toBe(PACKAGE_VERSION)
+		expect(packageJson.devDependencies["@inlang/paraglide-js"]).toBe(PARJS_PACKAGE_VERSION)
 	})
 })
 

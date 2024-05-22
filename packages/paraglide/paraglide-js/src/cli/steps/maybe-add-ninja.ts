@@ -4,6 +4,7 @@ import type { CliStep } from "../utils.js"
 import type { InlangProject } from "@inlang/sdk"
 import * as Ninja from "@inlang/cross-sell-ninja"
 import { prompt } from "~/cli/utils.js"
+import { telemetry } from "~/services/telemetry/implementation.js"
 
 export const maybeAddNinja: CliStep<
 	{
@@ -28,7 +29,7 @@ export const maybeAddNinja: CliStep<
 	try {
 		if (!(await Ninja.isAdopted({ fs: ctx.repo.nodeishFs }))) {
 			await Ninja.add({ fs: ctx.repo.nodeishFs })
-
+			telemetry.capture({ event: "PARAGLIDE JS init added Ninja" })
 			ctx.logger.success("Added the 🥷 Ninja Github Action for linting translations")
 		}
 	} catch (error) {

@@ -19,10 +19,11 @@ export class DocPricing extends LitElement {
 	`
 
 	@property()
-	heading: string = "Future enterprise features might cost money"
+	heading: string =
+		"Individual and small scale usage stays free. Future enterprise features might cost money."
 
 	@property()
-	content: string = `But, we have little incentive to monetize individual or small scale usage. We see individual usage as marketing. Users who love this app will recommend it to their employers/companies that we can monetize with enterprise features.`
+	content: string = `We have little incentive to monetize individual or small scale usage but we do plan to make money. Monetization will come from larger companies. Hence, we see individual usage as marketing. Users who love this app will recommend it to their larger employers/companies that we can monetize.`
 
 	override render() {
 		return html`<div class="doc-dev-tool">
