@@ -1,5 +1,5 @@
 import { useEditorState } from "../State.jsx"
-import { For, Show, createSignal, createEffect, createMemo, createResource } from "solid-js"
+import { For, Show, createMemo } from "solid-js"
 import { TourHintWrapper } from "./Notification/TourHintWrapper.jsx"
 import IconAdd from "~icons/material-symbols/add"
 import { type InstalledMessageLintRule, type MessageLintRule } from "@inlang/sdk"
@@ -16,28 +16,13 @@ export const ListHeader = () => {
 		tourStep,
 	} = useEditorState()
 
-	const [getMessages, setMessages] = createSignal()
-
-	createEffect(() => {
-		if (!project.loading) {
-			const messages = project()!.query.messages.getAll()
-			setMessages(messages)
-		}
-	})
-
-	// createResource re-fetches lintReports via async api whenever messages change
-	const [lintReports] = createResource(getMessages, async () => {
-		const reports = await project()!.query.messageLintReports.getAll()
-		return reports
-	})
-
 	const getLintSummary = createMemo(() => {
 		const summary = new Map<string, number>() // Use a Map with explicit types for better performance
 		const filteredRules = new Set<string>(filteredMessageLintRules())
 		const filteredTags = new Set<string>(filteredLanguageTags())
 		const filteredIdsValue = filteredIds()
 
-		for (const report of lintReports() || []) {
+		for (const report of project()?.query.messageLintReports.getAll() || []) {
 			const ruleId = report.ruleId
 			const languageTag = report.languageTag
 			const messageId = report.messageId
@@ -70,23 +55,23 @@ export const ListHeader = () => {
 			<div class="font-medium text-on-surface">{messageCount() + " Messages"}</div>
 			<div class="flex flex-wrap gap-2">
 				<For each={Object.keys(getLintSummary()) as MessageLintRule["id"][]}>
-					{(lintRuleId) => (
-						<Show when={getLintSummary()[lintRuleId] !== 0}>
+					{(lintRule) => (
+						<Show when={getLintSummary()[lintRule] !== 0}>
 							<TourHintWrapper
 								currentId="missing-translation-rule"
 								position="bottom-right"
 								offset={{ x: 0, y: 40 }}
 								isVisible={
-									lintRuleId === "messageLintRule.inlang.missingTranslation" &&
+									lintRule === "messageLintRule.inlang.missingTranslation" &&
 									tourStep() === "missing-translation-rule"
 								}
 							>
 								<sl-tooltip
 									prop:content={
-										typeof getLintRule(lintRuleId)?.description === "object"
+										typeof getLintRule(lintRule)?.description === "object"
 											? // @ts-ignore
-											  getLintRule(lintRuleId)?.description.en
-											: getLintRule(lintRuleId)?.description
+											  getLintRule(lintRule)?.description.en
+											: getLintRule(lintRule)?.description
 									}
 									prop:placement="bottom"
 									prop:trigger="hover"
@@ -96,19 +81,19 @@ export const ListHeader = () => {
 									<sl-button
 										prop:size="small"
 										class={
-											filteredMessageLintRules()?.includes(lintRuleId || "")
-												? getLintRule(lintRuleId)!.level === "warning"
+											filteredMessageLintRules()?.includes(lintRule || "")
+												? getLintRule(lintRule)!.level === "warning"
 													? "ring-warning/20 ring-1 rounded animate-blendIn"
 													: "ring-danger/20 ring-1 rounded animate-blendIn"
 												: "animate-blendIn"
 										}
 										onClick={() => {
-											if (filteredMessageLintRules().includes(lintRuleId)) {
+											if (filteredMessageLintRules().includes(lintRule)) {
 												setFilteredMessageLintRules(
-													filteredMessageLintRules().filter((id) => id !== lintRuleId)
+													filteredMessageLintRules().filter((id) => id !== lintRule)
 												)
 											} else {
-												setFilteredMessageLintRules([lintRuleId])
+												setFilteredMessageLintRules([lintRule])
 												setTourStep("textfield")
 											}
 										}}
@@ -116,7 +101,7 @@ export const ListHeader = () => {
 										<div
 											class="flex gap-2 items-center h-7"
 											id={
-												lintRuleId === "messageLintRule.inlang.missingTranslation"
+												lintRule === "messageLintRule.inlang.missingTranslation"
 													? "missingTranslation-summary"
 													: "lint-summary"
 											}
@@ -124,20 +109,20 @@ export const ListHeader = () => {
 											<div class="-ml-[4px] h-5 rounded">
 												<div
 													class={
-														getLintRule(lintRuleId)?.level === "warning"
+														getLintRule(lintRule)?.level === "warning"
 															? " text-focus-warning bg-warning/20 h-full px-2 rounded flex items-center justify-center"
 															: "text-focus-danger bg-danger/20 h-full px-2 rounded flex items-center justify-center"
 													}
 												>
-													{getLintSummary()[lintRuleId]}
+													{getLintSummary()[lintRule]}
 												</div>
 											</div>
 
 											<div class="text-xs text-on-surface-variant font-medium">
-												{typeof getLintRule(lintRuleId)?.displayName === "object"
+												{typeof getLintRule(lintRule)?.displayName === "object"
 													? // @ts-ignore
-													  getLintRule(lintRuleId)?.displayName.en
-													: getLintRule(lintRuleId)?.displayName}
+													  getLintRule(lintRule)?.displayName.en
+													: getLintRule(lintRule)?.displayName}
 											</div>
 										</div>
 									</sl-button>
