@@ -51,7 +51,7 @@ export const initCommand = new Command()
 			logger,
 			repo,
 			repoRoot: repoRoot?.replace("file://", "") ?? process.cwd(),
-			appId: MARKTEPLACE_ID,
+			appId: PARJS_MARKTEPLACE_ID,
 		} as const
 
 		const ctx1 = await checkForUncommittedChanges(ctx)
@@ -125,7 +125,7 @@ export const addParaglideJsToDevDependencies: CliStep<
 	const ctx1 = await updatePackageJson({
 		devDependencies: async (devDeps) => ({
 			...devDeps,
-			"@inlang/paraglide-js": PACKAGE_VERSION,
+			"@inlang/paraglide-js": PARJS_PACKAGE_VERSION,
 		}),
 	})(ctx)
 	ctx.logger.success("Added @inlang/paraglide-js to the devDependencies in package.json.")

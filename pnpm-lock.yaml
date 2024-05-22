@@ -1497,9 +1497,6 @@ importers:
       '@inlang/cross-sell-sherlock':
         specifier: workspace:*
         version: link:../../cross-sell/cross-sell-sherlock
-      '@inlang/env-variables':
-        specifier: workspace:*
-        version: link:../../env-variables
       '@inlang/language-tag':
         specifier: workspace:*
         version: link:../../versioned-interfaces/language-tag
@@ -1509,9 +1506,6 @@ importers:
       '@inlang/sdk':
         specifier: workspace:*
         version: link:../../sdk
-      '@inlang/telemetry':
-        specifier: workspace:*
-        version: link:../../telemetry
       '@lix-js/client':
         specifier: workspace:*
         version: link:../../../../lix/packages/client
