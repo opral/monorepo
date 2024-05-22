@@ -1,5 +1,13 @@
 # @inlang/paraglide-next
 
+## 0.2.4
+
+### Patch Changes
+
+- 170fa74: Prompt about adding Sherlock and Ninja during `paraglide-next init`
+- Updated dependencies [b8573fa]
+  - @inlang/paraglide-js@1.9.1
+
 ## 0.2.3
 
 ### Patch Changes
