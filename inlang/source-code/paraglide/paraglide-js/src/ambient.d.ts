@@ -4,16 +4,14 @@
  * This value is inlined by vite during build to avoid having to read the package.json
  * at runtime
  */
-declare const PACKAGE_VERSION: string
+declare const PARJS_PACKAGE_VERSION: string
 
 /**
- * Additional Environment Variables defined in the build step
- *
- * These may be used by dependencies
+ * The PUBLIC_POSTHOG_TOKEN defined in the build step
  */
-declare const ENV_DEFINED_IN_BUILD_STEP: Record<string, string>
+declare const PARJS_POSTHOG_TOKEN: string
 
 /**
  * The id configured in the marketplace manifest
  */
-declare const MARKTEPLACE_ID: string
+declare const PARJS_MARKTEPLACE_ID: string

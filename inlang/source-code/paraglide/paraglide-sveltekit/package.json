@@ -14,11 +14,12 @@
 	"scripts": {
 		"test:with-base": "BASE_PATH=/base vitest run --test-timeout 90000 --dir src",
 		"test:without-base": "BASE_PATH=\"\" vitest run --test-timeout 90000 --dir src",
-		"test": "npm run test:with-base && npm run test:without-base",
-		"build": "tsc --noEmit && svelte-package -i src -o dist",
-		"dev": "svelte-package -w -i src -o dist",
+		"test": "npm run generate-meta && npm run test:with-base && npm run test:without-base",
+		"build": "tsc --noEmit && npm run generate-meta && svelte-package -i src -o dist",
+		"dev": "npm run generate-meta && svelte-package -w -i src -o dist",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
+		"generate-meta": "node scripts/generate_meta.js",
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {

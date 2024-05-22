@@ -48,8 +48,11 @@ export const InitCommand = new Command()
 		const ctx7 =
 			ctx6.nextProject.router == "pages" ? await pagesRouterSetup(ctx6) : await appRouterSetup(ctx6)
 
+		const ctx8 = await Steps.maybeAddSherlock(ctx7)
+		const ctx9 = await Steps.maybeAddNinja(ctx8)
+
 		try {
-			await Steps.runCompiler({ ...ctx7, outdir: ctx7.outdir.path })
+			await Steps.runCompiler({ ...ctx9, outdir: ctx9.outdir.path })
 		} catch (e) {
 			//silently ignore
 		}
