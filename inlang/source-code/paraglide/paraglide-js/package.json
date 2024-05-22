@@ -42,12 +42,13 @@
 	],
 	"scripts": {
 		"dev": "vite build --mode development --watch",
-		"dev:build": "tsc --noEmit --emitDeclarationOnly false && vite build --mode development",
-		"build": "tsc --noEmit --emitDeclarationOnly false && vite build --mode production",
+		"dev:build": "npm run check && vite build --mode development",
+		"build": "npm run check && vite build --mode production",
 		"test": "vitest run --coverage ./src/**/*",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
-		"clean": "rm -rf ./dist ./node_modules"
+		"clean": "rm -rf ./dist ./node_modules",
+		"check": "tsc --noEmit --emitDeclarationOnly false"
 	},
 	"dependencies": {
 		"@inlang/detect-json-formatting": "workspace:*",
