@@ -12,6 +12,7 @@ import { currentPageContext } from "./state.js"
 import type { JSXElement } from "solid-js"
 import type { LanguageTag } from "@inlang/sdk"
 import Link from "./Link.jsx"
+import { WarningIcon } from "#src/pages/@host/@owner/@repository/components/Notification/NotificationHint.jsx"
 
 export type RootProps = Accessor<{
 	pageContext: PageContextRenderer
@@ -70,13 +71,15 @@ function ParaglideJsProvider(props: { children: JSXElement }) {
 }
 
 function ErrorMessage(props: { error: Error }) {
+	const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+
 	createEffect(() => {
 		console.error("ERROR in renderer", props.error)
 	})
 	return (
 		<>
-			<p class="text-danger text-lg font-medium">ERROR DURING RENDERING</p>
-			<p class="text-danger">
+			<p class="text-danger text-lg font-medium m-2">ERROR DURING RENDERING</p>
+			<p class="text-danger m-2">
 				Check the console for more information and please{" "}
 				<Link
 					class="link text-primary"
@@ -89,6 +92,12 @@ function ErrorMessage(props: { error: Error }) {
 			<p class="bg-danger-container text-on-danger-container rounded p-2 mt-4">
 				{props.error?.toString()}
 			</p>
+			{isSafari && (
+				<div class="flex font-mono p-4 bg-surface-800 text-background rounded-md text-sm mt-6 mx-2 w-fit">
+					<WarningIcon />
+					<span class="ml-2">Safari is not supported, please use a different browser.</span>
+				</div>
+			)}
 		</>
 	)
 }

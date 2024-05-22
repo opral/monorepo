@@ -3,8 +3,8 @@
 	"type": "module",
 	"private": true,
 	"scripts": {
-		"dev": "vite",
-		"build": "vite build -- --max_old_space_size=1200000 && tsc --noEmit",
+		"dev": "node ./scripts/updateVersion.js && vite",
+		"build": "node ./scripts/updateVersion.js && vite build -- --max_old_space_size=1200000 && tsc --noEmit",
 		"production": "NODE_ENV=production tsx ./src/server/main.ts",
 		"---- TEST ----------------------------------------------------------": "",
 		"test": "paraglide-js compile --project ../../../project.inlang",

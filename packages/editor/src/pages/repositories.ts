@@ -10,11 +10,11 @@ export const repositories: Repositories = [
 		repository: "example",
 		description: "Example repository that showcases inlang.",
 	},
-	{
-		owner: "calcom",
-		repository: "cal.com",
-		description: "Scheduling infrastructure for absolutely everyone.",
-	},
+	// {
+	// 	owner: "calcom",
+	// 	repository: "cal.com",
+	// 	description: "Scheduling infrastructure for absolutely everyone.",
+	// },
 	{
 		owner: "hiddify",
 		repository: "hiddify-next",
@@ -43,53 +43,9 @@ export const repositories: Repositories = [
 		description: "Web interface for Osmosis Zone",
 	},
 	{
-		owner: "LAION-AI",
-		repository: "Open-Assistant",
-		description:
-			"OpenAssistant is a chat-based assistant that understands tasks, can interact with third-party systems, and retrieve information dynamically to do so.",
-	},
-	{
-		owner: "jazzband",
-		repository: "djangorestframework-simplejwt",
-		description: "A JSON Web Token authentication plugin for the Django REST Framework.",
-	},
-	{
 		owner: "flornkm",
 		repository: "florians-site",
 		description: "Personal Website of Florian Kiem.",
-	},
-	{
-		owner: "hecker",
-		repository: "hecker.vc",
-		description: "Personal Website of Jan Hecker.",
-	},
-	{
-		owner: "allinurl",
-		repository: "goaccess",
-		description: "GoAccess is a real-time web log analyzer and interactive viewer",
-	},
-	{
-		owner: "knadh",
-		repository: "listmonk",
-		description:
-			"High performance, self-hosted, newsletter and mailing list manager with a modern dashboard. Single binary app.",
-	},
-	{
-		owner: "humbertogontijo",
-		repository: "homeassistant-roborock",
-		description:
-			"Roborock integration for Home Assistant. This integration uses your devices from the Roborock App.",
-	},
-	{
-		owner: "blakeblackshear",
-		repository: "frigate-hass-integration",
-		description: "Frigate integration for Home Assistant",
-	},
-	{
-		owner: "erskingardner",
-		repository: "nostr-how",
-		description:
-			"Nostr is a simple, open protocol that enables truly censorship-resistant and global value-for-value publishing on the web.",
 	},
 	{
 		owner: "dermotduffy",
