@@ -1,8 +1,9 @@
-import { publicEnv } from "@inlang/env-variables"
 import { PostHog } from "posthog-node"
 import type { TelemetryEvents } from "./events.js"
 
-const posthog = new PostHog(publicEnv.PUBLIC_POSTHOG_TOKEN ?? "placeholder", {
+const posthogToken = PARJS_POSTHOG_TOKEN
+
+const posthog = new PostHog(posthogToken, {
 	host: "https://eu.posthog.com",
 	// Events are not captured if not immediately flushed.
 	//
@@ -19,18 +20,9 @@ const posthog = new PostHog(publicEnv.PUBLIC_POSTHOG_TOKEN ?? "placeholder", {
  * Auto injects the git origin url.
  */
 export const telemetry = new Proxy(posthog, {
-	get(target, prop) {
-		// If the env variable is set, use the PostHog SDK. Otherwise, use a proxy that
-		// returns a no-op function.
-
-		if (!publicEnv.PUBLIC_POSTHOG_TOKEN) {
-			return () => undefined
-		}
-		// Auto inject the git origin url and user id.
-		else if (prop === "capture") {
-			return capture
-		}
-		return (target as any)[prop]
+	get(target, prop: keyof PostHog) {
+		if (prop === "capture") return capture
+		return target[prop]
 	},
 }) as unknown as Omit<PostHog, "capture"> & { capture: typeof capture }
 
@@ -38,19 +30,12 @@ export const telemetry = new Proxy(posthog, {
  * Wrapper to auto inject the git origin url and user id.
  */
 function capture(args: CaptureEventArguments, projectId?: string) {
-	if (!publicEnv.PUBLIC_POSTHOG_TOKEN) {
-		return
-	}
+	if (!posthogToken) return //if there is no posthog token defined, that's ok
 
 	const data: Parameters<PostHog["capture"]>[0] = {
 		...args,
 		distinctId: "unknown",
-	}
-
-	if (projectId) {
-		data.groups = {
-			project: projectId,
-		}
+		groups: projectId ? { project: projectId } : {},
 	}
 
 	return posthog.capture(data)

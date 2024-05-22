@@ -42,6 +42,7 @@
 	],
 	"scripts": {
 		"dev": "vite build --mode development --watch",
+		"dev:build": "tsc --noEmit --emitDeclarationOnly false && vite build --mode development",
 		"build": "tsc --noEmit --emitDeclarationOnly false && vite build --mode production",
 		"test": "vitest run --coverage ./src/**/*",
 		"lint": "eslint ./src --fix",
@@ -59,11 +60,9 @@
 	"devDependencies": {
 		"@inlang/cross-sell-sherlock": "workspace:*",
 		"@inlang/cross-sell-ninja": "workspace:*",
-		"@inlang/env-variables": "workspace:*",
 		"@inlang/language-tag": "workspace:*",
 		"@inlang/plugin-message-format": "workspace:*",
 		"@inlang/sdk": "workspace:*",
-		"@inlang/telemetry": "workspace:*",
 		"@lix-js/client": "workspace:*",
 		"@lix-js/fs": "workspace:*",
 		"@rollup/plugin-terser": "0.4.3",
