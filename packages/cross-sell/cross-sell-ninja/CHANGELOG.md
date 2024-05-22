@@ -1,5 +1,11 @@
 # @inlang/cross-sell-ninja
 
+## 0.0.19
+
+### Patch Changes
+
+- 45bac9a: fix mixed indentation
+
 ## 0.0.18
 
 ### Patch Changes
