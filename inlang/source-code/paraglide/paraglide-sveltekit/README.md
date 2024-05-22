@@ -51,3 +51,11 @@ You can use messages in code by importing them from `$lib/paraglide/messages.js`
 
 Only messages used on the current page are sent to the client. Any messages that aren't used on the current page will be tree-shaken out.
 
+## Switching Languages
+
+The language is determined based on the URL. If the first segment of the URL is a language tag, that language will be used. If no language tag is present, the default language will be used.
+
+- `/about` - English
+- `/de/about` - German
+
+There is no need to add a `[locale]` route parameter for this, the `reroute` hook already reroutes paths with languages to the correct pages.
