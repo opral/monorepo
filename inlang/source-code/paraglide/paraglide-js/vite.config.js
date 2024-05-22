@@ -9,7 +9,14 @@ export default defineConfig(({ mode }) => {
 	const pToken = process.env.PUBLIC_POSTHOG_TOKEN
 	if (mode === "production" && (!pToken || typeof pToken !== "string")) {
 		throw new Error(
-			"Missing env variable PUBLIC_POSTHOG_TOKEN - If you are just developing use `npm run dev:build` instead"
+			"Missing env variable PUBLIC_POSTHOG_TOKEN - If you are just developing use `npm run dev:build` instead" +
+				"\n" +
+				"Available variables: " +
+				"\n" +
+				// eslint-disable-next-line no-undef
+				Object.keys(process.env)
+					.filter((key) => key.startsWith("PUBLIC_"))
+					.join("\n")
 		)
 	}
 
