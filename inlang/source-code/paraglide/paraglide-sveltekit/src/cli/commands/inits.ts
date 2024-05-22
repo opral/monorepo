@@ -10,7 +10,7 @@ import { addParaglideJSComponent } from "../steps/addParaglideJSComponent.js"
 import { editAppHtmlFile } from "../steps/editAppHtmlFile.js"
 import { addRerouteHook } from "../steps/addRerouteFile.js"
 import { addHandleHook } from "../steps/addHandleHook.js"
-import { VERSION } from "../version.js"
+import { PARAGLIDE_SVELTEKIT_VERSION, PARAGLIDE_SVELTEKIT_MARKETPLACE_ID } from "../../meta.js"
 
 export const initCommand = new Command()
 	.name("init")
@@ -31,7 +31,7 @@ export const initCommand = new Command()
 			repo,
 			logger,
 			repoRoot: repoRoot?.replace("file://", "") ?? process.cwd(),
-			appId: "library.inlang.paraglideSvelteKit",
+			appId: PARAGLIDE_SVELTEKIT_MARKETPLACE_ID,
 		}
 
 		const ctx1 = await scanSvelteKitProject(ctx0)
@@ -39,7 +39,7 @@ export const initCommand = new Command()
 		const ctx3 = await Steps.updatePackageJson({
 			dependencies: async (deps) => ({
 				...deps,
-				"@inlang/paraglide-sveltekit": VERSION,
+				"@inlang/paraglide-sveltekit": PARAGLIDE_SVELTEKIT_VERSION,
 			}),
 			devDependencies: async (deps) => ({
 				...deps,
