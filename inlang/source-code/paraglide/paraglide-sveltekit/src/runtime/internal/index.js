@@ -1,5 +1,26 @@
-import { getParaglideContext } from "./context.js"
+// this is a JS file to avoid transpiling in tests
 import { NO_TRANSLATE_ATTRIBUTE } from "../../constants.js"
+import { getContext, setContext } from "svelte"
+
+const PARAGLIDE_CONTEXT_KEY = {}
+
+/**
+ * @typedef {{ translateHref: (href: string, hreflang?: string) => string }} ParaglideContext
+ */
+
+/**
+ * @private
+ */
+export const getParaglideContext = () => {
+	return /** @type { ParaglideContext | undefined}*/ (getContext(PARAGLIDE_CONTEXT_KEY))
+}
+/**
+ * @param {ParaglideContext} context
+ * @private
+ */
+export const setParaglideContext = (context) => {
+	setContext(PARAGLIDE_CONTEXT_KEY, context)
+}
 
 /**
  * Returns the functions necessary to translate a link component
@@ -9,25 +30,32 @@ import { NO_TRANSLATE_ATTRIBUTE } from "../../constants.js"
 export function getTranslationFunctions() {
 	const ctx = getParaglideContext()
 
-	function translateAttribute(value: unknown, lang_value: string | undefined) {
+	/**
+	 * @param {unknown} value
+	 * @param { string | undefined} lang_value
+	 * @returns
+	 */
+	function translateAttribute(value, lang_value) {
 		if (typeof value !== "string") return value
 		if (!ctx) return value
 		return ctx.translateHref(value, lang_value)
 	}
 
-	type AttributeTranslation = {
-		attribute_name: string
-		lang_attribute_name?: string
-	}
+	/**
+	 * @typedef {{
+	 *	attribute_name: string
+	 *	lang_attribute_name?: string
+	 *}} AttributeTranslation
+	 */
 
 	/**
 	 * Takes in an object of attributes, and an object of attribute translations
 	 * & applies the translations to the attributes
+	 *
+	 * @param {Record<string, unknown>} attrs
+	 * @param {AttributeTranslation[]} attribute_translations
 	 */
-	function handleAttributes(
-		attrs: Record<string, unknown>,
-		attribute_translations: AttributeTranslation[]
-	) {
+	function handleAttributes(attrs, attribute_translations) {
 		//If the element has the ${NO_TRANSLATE_ATTRIBUTE} attribute, don't translate it
 		if (attrs[NO_TRANSLATE_ATTRIBUTE] === true) return attrs
 
