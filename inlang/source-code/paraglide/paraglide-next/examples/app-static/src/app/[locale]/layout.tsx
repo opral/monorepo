@@ -1,14 +1,12 @@
 import "@/lib/ui/styles.css"
-import {
-	AvailableLanguageTag,
-	availableLanguageTags,
-	languageTag,
-	setLanguageTag,
-	sourceLanguageTag,
-} from "@/paraglide/runtime"
+import { AvailableLanguageTag, availableLanguageTags, languageTag } from "@/paraglide/runtime"
 import { Header } from "@/lib/ui/Header"
 import * as m from "@/paraglide/messages.js"
 import type { Metadata } from "next"
+import { initializeLocaleCache, makeLocaleAvailable } from "@/lib/localeCache"
+import { ClientProvider } from "@/lib/ClientProvider"
+
+makeLocaleAvailable()
 
 export function generateMetadata(): Metadata {
 	const locale = languageTag()
@@ -26,12 +24,6 @@ export async function generateStaticParams() {
 	return availableLanguageTags.map((locale) => ({ locale }))
 }
 
-const direction: Record<AvailableLanguageTag, "ltr" | "rtl"> = {
-	en: "ltr",
-	"de-CH": "ltr",
-	de: "ltr",
-}
-
 export default function RootLayout({
 	children,
 	params,
@@ -39,15 +31,17 @@ export default function RootLayout({
 	children: React.ReactNode
 	params: { locale: AvailableLanguageTag }
 }) {
-	console.log("locale", params.locale)
-	setLanguageTag(params.locale || sourceLanguageTag)
+	initializeLocaleCache(params.locale)
 
 	return (
-		<html lang={languageTag()} dir={direction[languageTag()]}>
-			<body>
-				<Header />
-				<main className="container">{children}</main>
-			</body>
-		</html>
+		<>
+			<ClientProvider languageTag={params.locale} />
+			<html lang={languageTag()}>
+				<body>
+					<Header />
+					<main className="container">{children}</main>
+				</body>
+			</html>
+		</>
 	)
 }
