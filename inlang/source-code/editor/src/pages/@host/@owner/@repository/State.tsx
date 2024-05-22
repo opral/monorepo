@@ -503,13 +503,19 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			} else {
 				setTimeout(() => {
 					const element = document.getElementById("missingTranslation-summary")
-					element !== null && !filteredMessageLintRules().includes("messageLintRule.inlang.missingTranslation") ? setTourStep("missing-translation-rule") : setTourStep("textfield")
+					element !== null &&
+					!filteredMessageLintRules().includes("messageLintRule.inlang.missingTranslation")
+						? setTourStep("missing-translation-rule")
+						: setTourStep("textfield")
 				}, 100)
 			}
 		} else if (tourStep() === "missing-translation-rule" && project()) {
 			setTimeout(() => {
 				const element = document.getElementById("missingTranslation-summary")
-				element !== null && !filteredMessageLintRules().includes("messageLintRule.inlang.missingTranslation") ? setTourStep("missing-translation-rule") : setTourStep("textfield")
+				element !== null &&
+				!filteredMessageLintRules().includes("messageLintRule.inlang.missingTranslation")
+					? setTourStep("missing-translation-rule")
+					: setTourStep("textfield")
 			}, 100)
 		}
 	})

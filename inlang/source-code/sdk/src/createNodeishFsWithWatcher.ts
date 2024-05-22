@@ -20,7 +20,7 @@ export const createNodeishFsWithWatcher = (args: {
 			ac.abort()
 		}
 		// release references
-		abortControllers = [];
+		abortControllers = []
 	}
 
 	const makeWatcher = (path: string) => {

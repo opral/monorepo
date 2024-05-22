@@ -29,7 +29,7 @@ export async function lintCommandAction(args: { project: InlangProject; logger: 
 
 		const languageTags: LanguageTag[] = options.languageTags ? options.languageTags.split(",") : []
 
-		let reports = await args.project.query.messageLintReports.getAll()
+		let reports = await args.project.query.messageLintReports.getAll.settled()
 
 		if (reports.length === 0) {
 			args.logger.success("Linting successful.")

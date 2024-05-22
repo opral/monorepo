@@ -635,8 +635,10 @@ describe("functionality", () => {
 
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
-			expect(await project.query.messageLintReports.getAll()).toHaveLength(1)
-			expect((await project.query.messageLintReports.getAll())?.[0]?.ruleId).toBe(_mockLintRule.id)
+			expect(await project.query.messageLintReports.getAll.settled()).toHaveLength(1)
+			expect((await project.query.messageLintReports.getAll.settled())?.[0]?.ruleId).toBe(
+				_mockLintRule.id
+			)
 			expect(project.installed.messageLintRules()).toHaveLength(1)
 		})
 
@@ -1014,25 +1016,6 @@ describe("functionality", () => {
 	})
 
 	describe("lint", () => {
-		it.todo("should throw if lint reports are not initialized yet", async () => {
-			const repo = await mockRepo()
-			const fs = repo.nodeishFs
-			await fs.mkdir("/user/project", { recursive: true })
-			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
-			const project = await loadProject({
-				projectPath: "/user/project/project.inlang.json",
-				repo,
-				_import,
-			})
-			// TODO: test with real lint rules
-			try {
-				const r = await project.query.messageLintReports.getAll()
-				expect(r).toEqual(undefined)
-				throw new Error("Should not reach this")
-			} catch (e) {
-				expect((e as Error).message).toBe("lint not initialized yet")
-			}
-		})
 		it("should return the message lint reports", async () => {
 			const settings: ProjectSettings = {
 				sourceLanguageTag: "en",
@@ -1051,7 +1034,7 @@ describe("functionality", () => {
 				}),
 			})
 			// TODO: test with real lint rules
-			const r = await project.query.messageLintReports.getAll()
+			const r = await project.query.messageLintReports.getAll.settled()
 			expect(r).toEqual([])
 		})
 	})

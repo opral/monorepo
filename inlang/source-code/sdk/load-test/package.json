@@ -21,7 +21,8 @@
 		"clean": "rm -rf ./locales ./project.inlang/messages.json",
 		"translate": "MOCK_TRANSLATE_LOCAL=1 PUBLIC_SERVER_BASE_URL=http://localhost:3000 pnpm inlang machine translate -n -f --project ./project.inlang",
 		"test-lint": "pnpm inlang lint --project ./project.inlang",
-		"test": "pnpm clean && MOCK_TRANSLATE_LOCAL=1 DEBUG=$DEBUG,load-test tsx ./main.ts",
+		"load-test": "pnpm clean && MOCK_TRANSLATE_LOCAL=1 DEBUG=$DEBUG,load-test tsx ./main.ts",
+		"test": "tsc --noEmit && pnpm load-test 1000 1 1 1",
 		"inspect": "pnpm clean && MOCK_TRANSLATE_LOCAL=1 DEBUG=$DEBUG,load-test tsx --inspect-brk ./main.ts"
 	},
 	"prettier": {
