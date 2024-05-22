@@ -6,19 +6,7 @@ import manifest from "./marketplace-manifest.json"
 
 export default defineConfig(({ mode }) => {
 	// eslint-disable-next-line no-undef
-	const pToken = process.env.PUBLIC_POSTHOG_TOKEN
-	if (mode === "production" && (!pToken || typeof pToken !== "string")) {
-		throw new Error(
-			"Missing env variable PUBLIC_POSTHOG_TOKEN - If you are just developing use `npm run dev:build` instead" +
-				"\n" +
-				"Available variables: " +
-				"\n" +
-				// eslint-disable-next-line no-undef
-				Object.keys(process.env)
-					.filter((key) => key.startsWith("PUBLIC_"))
-					.join("\n")
-		)
-	}
+	const pToken = process.env.PUBLIC_POSTHOG_TOKEN ?? "placeholder"
 
 	return {
 		plugins: [dts({ insertTypesEntry: true, ignoreConfigErrors: true }), tsconfigPaths()],
