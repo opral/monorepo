@@ -1,6 +1,5 @@
 import "@/lib/ui/styles.css"
 import { AvailableLanguageTag, availableLanguageTags, languageTag } from "@/paraglide/runtime"
-import { Header } from "@/lib/ui/Header"
 import * as m from "@/paraglide/messages.js"
 import type { Metadata } from "next"
 import { initializeLocaleCache, makeLocaleAvailable } from "@/lib/localeCache"
@@ -38,7 +37,6 @@ export default function RootLayout({
 			<ClientProvider languageTag={params.locale} />
 			<html lang={languageTag()}>
 				<body>
-					<Header />
 					<main className="container">{children}</main>
 				</body>
 			</html>
