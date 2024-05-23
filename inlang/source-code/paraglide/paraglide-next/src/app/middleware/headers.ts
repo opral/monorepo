@@ -2,27 +2,27 @@ import type { NextRequest } from "next/server"
 import { RoutingStrategy } from "../routing-strategy/interface"
 import { addPathPrefix } from "../utils/basePath"
 import { format } from "../utils/format"
-
-export function shouldAddLinkHeader(request: NextRequest) {
-	const acceptHeader = request.headers.get("accept")
-	return acceptHeader?.includes("text/html")
-}
+import { LINK_HEADER_NAME } from "../constants"
 
 /**
- * Generates the Link header for the available language versions of the current page.
+ * Adds SEO headers
  */
-export function generateLinkHeader<T extends string>(
-	strategy: RoutingStrategy<T>,
+export function addSeoHeaders<T extends string>(
+	headers: Headers,
 	{
 		canonicalPath,
 		availableLanguageTags,
 		request,
+		strategy,
 	}: {
 		canonicalPath: `/${string}`
 		availableLanguageTags: readonly T[]
 		request: NextRequest
+		strategy: RoutingStrategy<T>
 	}
-): string {
+) {
+	if (!shouldAddSeoHeaders(request, availableLanguageTags)) return
+
 	const alternates: string[] = []
 	const nextUrl = request.nextUrl
 
@@ -42,5 +42,12 @@ export function generateLinkHeader<T extends string>(
 		alternates.push(`<${fullHref}>; rel="alternate"; hreflang="${lang}"`)
 	}
 
-	return alternates.join(", ")
+	const linkHeader = alternates.join(", ")
+	headers.set(LINK_HEADER_NAME, linkHeader)
+}
+
+function shouldAddSeoHeaders(request: NextRequest, availableLanguageTags: readonly string[]) {
+	if (availableLanguageTags.length <= 1) return false
+	const acceptHeader = request.headers.get("accept")
+	return acceptHeader?.includes("text/html")
 }
