@@ -7,7 +7,6 @@ services:
     container_name: git
     image: git:12
     hostname: git
-    # ports: [ "8000" ]
     labels: [ dev.orbstack.domains=git.local ]
     entrypoint: /start.sh
     # stdin_open: true
@@ -16,9 +15,8 @@ services:
     build:
       context: ./server/git-test-server
       dockerfile: Dockerfile
-    networks:
-      - lix
     user: root
+    network_mode: "host"
     # env_file:
     #   - ./.env
 
@@ -31,19 +29,17 @@ services:
       - USER_UID=1000
       - USER_GID=1000
     restart: always
-    networks:
-      - lix
+    network_mode: "host"
     volumes:
       - ./gitea:/data
       # - /etc/timezone:/etc/timezone:ro - /etc/localtime:/etc/localtime:ro
-    # ports:
-    #   - "3000:3000"
 
   runner:
     restart: always
     container_name: gitea-runner
     hostname: runner
     image: gitea/act_runner:nightly
+    network_mode: "host"
     environment:
       CONFIG_FILE: /config.yaml
       GITEA_INSTANCE_URL: "http://gitea.local:3000"
@@ -63,7 +59,7 @@ services:
     image: exp:6
     build:
       dockerfile_inline: |
-        FROM node:20-slim
+        FROM node:20
         RUN apt upgrade && apt update
         RUN apt-get install openssl curl libssl-dev -y
         RUN npm -g install pnpm
@@ -71,14 +67,12 @@ services:
         RUN chmod +x /workspace/dev.sh
         WORKDIR /workspace
         # todo: shell aliase
-    # ports: [ "3334" ]
+    network_mode: "host"
     working_dir: /workspace
     entrypoint: /bin/bash ./dev.sh
     # entrypoint: /bin/bash
     # stdin_open: true
     # tty: true
-    networks:
-      - lix
     develop:
       watch:
         - action: sync
@@ -109,10 +103,6 @@ services:
   #     JOSH_EXTRA_OPTS: "--require-auth"
   #   volumes:
   #     - josh-vol:/data/git
-
-networks:
-  lix:
-    driver: bridge
 
 volumes:
   pnpm-store: {}
