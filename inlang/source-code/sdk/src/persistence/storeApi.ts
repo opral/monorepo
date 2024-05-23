@@ -10,5 +10,7 @@ export type StoreApi = {
  **/
 export interface Query<T> {
 	get: (args: { id: string }) => Promise<T | undefined>
+	set: (args: { data: T }) => Promise<void>
+	delete: (args: { id: string }) => Promise<void>
 	getAll: () => Promise<T[]>
 }

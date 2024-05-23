@@ -11,27 +11,38 @@ export async function openStore(args: {
 	nodeishFs: NodeishFilesystem
 }): Promise<StoreApi> {
 	const filePath = args.projectPath + "/messages.json"
-
-	const index: Map<string, MessageBundle> = new Map()
-
-	const messages = await loadAll({ filePath, nodeishFs: args.nodeishFs })
-	for (const message of messages) {
-		index.set(message.id, message)
-	}
+	const nodeishFs = args.nodeishFs
+	const index = await load()
 
 	return {
 		messageBundles: {
 			get: async (args: { id: string }) => {
 				return index.get(args.id)
 			},
+			set: async (args: { data: MessageBundle }) => {
+				index.set(args.data.id, args.data)
+				await save()
+			},
+			delete: async (args: { id: string }) => {
+				index.delete(args.id)
+				await save()
+			},
 			getAll: async () => {
 				return [...index.values()]
 			},
 		},
 	}
+
+	async function load() {
+		const messages = await readJSON({ filePath, nodeishFs: nodeishFs })
+		return new Map<string, MessageBundle>(messages.map((message) => [message.id, message]))
+	}
+	async function save() {
+		await writeJSON({ filePath, nodeishFs: nodeishFs, messages: [...index.values()] })
+	}
 }
 
-export async function loadAll(args: { filePath: string; nodeishFs: NodeishFilesystem }) {
+export async function readJSON(args: { filePath: string; nodeishFs: NodeishFilesystem }) {
 	let result: MessageBundle[] = []
 
 	debug("loadAll", args.filePath)
@@ -47,7 +58,7 @@ export async function loadAll(args: { filePath: string; nodeishFs: NodeishFilesy
 	return result
 }
 
-export async function saveAll(args: {
+export async function writeJSON(args: {
 	filePath: string
 	nodeishFs: NodeishFilesystem
 	messages: MessageBundle[]
