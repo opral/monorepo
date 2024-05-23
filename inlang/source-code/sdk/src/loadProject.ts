@@ -4,6 +4,8 @@ import type {
 	InstalledMessageLintRule,
 	InstalledPlugin,
 	Subscribable,
+	MessageQueryApi,
+	MessageLintReportsQueryApi,
 } from "./api.js"
 import { type ImportFunction, resolveModules } from "./resolve-modules/index.js"
 import { TypeCompiler, ValueErrorType } from "@sinclair/typebox/compiler"
@@ -31,6 +33,7 @@ import { capture } from "./telemetry/capture.js"
 import { identifyProject } from "./telemetry/groupIdentify.js"
 
 import { stubMessagesQuery, stubMessageLintReportsQuery } from "./v2/stubQueryApi.js"
+import type { StoreApi } from "./persistence/storeApi.js"
 import { openStore } from "./persistence/store.js"
 
 import _debug from "debug"
@@ -148,45 +151,11 @@ export async function loadProject(args: {
 				.catch((err) => markInitAsFailed(err))
 		})
 
-		// -- messages ----------------------------------------------------------
+		// -- installed items ----------------------------------------------------
 
 		let settingsValue: ProjectSettings
-		createEffect(() => (settingsValue = settings()!)) // workaround to not run effects twice (e.g. settings change + modules change) (I'm sure there exists a solid way of doing this, but I haven't found it yet)
-
-		const [loadMessagesViaPluginError, setLoadMessagesViaPluginError] = createSignal<
-			Error | undefined
-		>()
-
-		const [saveMessagesViaPluginError, setSaveMessagesViaPluginError] = createSignal<
-			Error | undefined
-		>()
-
-		const messagesQuery = v2Persistence
-			? stubMessagesQuery
-			: createMessagesQuery({
-					projectPath,
-					nodeishFs,
-					settings,
-					resolvedModules,
-					onInitialMessageLoadResult: (e) => {
-						if (e) {
-							markInitAsFailed(e)
-						} else {
-							markInitAsComplete()
-						}
-					},
-					onLoadMessageResult: (e) => {
-						setLoadMessagesViaPluginError(e)
-					},
-					onSaveMessageResult: (e) => {
-						setSaveMessagesViaPluginError(e)
-					},
-			  })
-
-		// throws if v2 store cannot be opened
-		const storeApi = v2Persistence ? await openStore({ projectPath, nodeishFs }) : undefined
-
-		// -- installed items ----------------------------------------------------
+		// workaround to not run effects twice (e.g. settings change + modules change) (I'm sure there exists a solid way of doing this, but I haven't found it yet)
+		createEffect(() => (settingsValue = settings()!))
 
 		const installedMessageLintRules = () => {
 			if (!resolvedModules()) return []
@@ -219,18 +188,61 @@ export async function loadProject(args: {
 			})) satisfies Array<InstalledPlugin>
 		}
 
+		// -- messages ----------------------------------------------------------
+
+		const [loadMessagesViaPluginError, setLoadMessagesViaPluginError] = createSignal<
+			Error | undefined
+		>()
+
+		const [saveMessagesViaPluginError, setSaveMessagesViaPluginError] = createSignal<
+			Error | undefined
+		>()
+
+		let messagesQuery: MessageQueryApi
+		let lintReportsQuery: MessageLintReportsQueryApi
+		let store: StoreApi | undefined
+
+		if (v2Persistence) {
+			// Open store and stub out existing query apis.
+			// Client code which is not aware of new persistence will not see messages.
+			// TODO: consider adapting query apis to the new store api instead of stubbing.
+			store = await openStore({ projectPath, nodeishFs })
+			messagesQuery = stubMessagesQuery
+			lintReportsQuery = stubMessageLintReportsQuery
+		} else {
+			messagesQuery = createMessagesQuery({
+				projectPath,
+				nodeishFs,
+				settings,
+				resolvedModules,
+				onInitialMessageLoadResult: (e) => {
+					if (e) {
+						markInitAsFailed(e)
+					} else {
+						markInitAsComplete()
+					}
+				},
+				onLoadMessageResult: (e) => {
+					setLoadMessagesViaPluginError(e)
+				},
+				onSaveMessageResult: (e) => {
+					setSaveMessagesViaPluginError(e)
+				},
+			})
+
+			lintReportsQuery = createMessageLintReportsQuery(
+				messagesQuery,
+				settings as () => ProjectSettings,
+				installedMessageLintRules,
+				resolvedModules
+			)
+
+			store = undefined
+		}
+
 		// -- app ---------------------------------------------------------------
 
 		const initializeError: Error | undefined = await initialized.catch((error) => error)
-
-		const lintReportsQuery = v2Persistence
-			? stubMessageLintReportsQuery
-			: createMessageLintReportsQuery(
-					messagesQuery,
-					settings as () => ProjectSettings,
-					installedMessageLintRules,
-					resolvedModules
-			  )
 
 		/**
 		 * Utility to escape reactive tracking and avoid multiple calls to
@@ -285,7 +297,7 @@ export async function loadProject(args: {
 				messages: messagesQuery,
 				messageLintReports: lintReportsQuery,
 			},
-			store: storeApi,
+			store,
 		} satisfies InlangProject
 	})
 }
