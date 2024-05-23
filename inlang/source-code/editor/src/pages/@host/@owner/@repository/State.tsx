@@ -444,6 +444,19 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	})
 
+	// polyfill requestIdleCallback for Safari browser
+	const requestIdleCallback = window.requestIdleCallback || function (callback: any) {
+		const start = Date.now()
+		return setTimeout(function () {
+			callback({
+				didTimeout: false,
+				timeRemaining: function () {
+					return Math.max(0, 50 - (Date.now() - start))
+				}
+			});
+		}, 1)
+	}
+
 	// open the inlang project and store it in a resource
 	const [project, { refetch: refetchProject, mutate: setProject }] = createResource(
 		() => {
@@ -503,13 +516,19 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			} else {
 				setTimeout(() => {
 					const element = document.getElementById("missingTranslation-summary")
-					element !== null && !filteredMessageLintRules().includes("messageLintRule.inlang.missingTranslation") ? setTourStep("missing-translation-rule") : setTourStep("textfield")
+					element !== null &&
+					!filteredMessageLintRules().includes("messageLintRule.inlang.missingTranslation")
+						? setTourStep("missing-translation-rule")
+						: setTourStep("textfield")
 				}, 100)
 			}
 		} else if (tourStep() === "missing-translation-rule" && project()) {
 			setTimeout(() => {
 				const element = document.getElementById("missingTranslation-summary")
-				element !== null && !filteredMessageLintRules().includes("messageLintRule.inlang.missingTranslation") ? setTourStep("missing-translation-rule") : setTourStep("textfield")
+				element !== null &&
+				!filteredMessageLintRules().includes("messageLintRule.inlang.missingTranslation")
+					? setTourStep("missing-translation-rule")
+					: setTourStep("textfield")
 			}, 100)
 		}
 	})

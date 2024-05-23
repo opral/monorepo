@@ -4,6 +4,7 @@ import {
 	createRoot as _createRoot,
 	createEffect as _createEffect,
 	createResource as _createResource,
+	untrack as _untrack,
 	observable as _observable,
 	batch as _batch,
 	from as _from,
@@ -23,6 +24,7 @@ const from = _from as typeof import("solid-js")["from"]
 const batch = _batch as typeof import("solid-js")["batch"]
 const getListener = _getListener as typeof import("solid-js")["getListener"]
 const onCleanup = _onCleanup as typeof import("solid-js")["onCleanup"]
+const untrack = _untrack as typeof import("solid-js")["untrack"]
 
 export {
 	createSignal,
@@ -35,5 +37,6 @@ export {
 	batch,
 	getListener,
 	onCleanup,
+	untrack,
 	DEV,
 }

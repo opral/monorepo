@@ -32,16 +32,13 @@ export async function linterDiagnostics(args: { context: vscode.ExtensionContext
 					}) ?? state().project.query.messages.getByDefaultAlias(message.messageId)
 
 				if (_message) {
-					state().project.query.messages.get.subscribe(
+					state().project.query.messageLintReports.get.subscribe(
 						{
 							where: {
-								id: _message.id,
+								messageId: _message.id,
 							},
 						},
-						async () => {
-							const reports = await state().project.query.messageLintReports.get({
-								where: { messageId: _message.id },
-							})
+						(reports) => {
 							const diagnostics: vscode.Diagnostic[] = []
 
 							if (!reports) {

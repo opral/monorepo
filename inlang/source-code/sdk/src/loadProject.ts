@@ -12,7 +12,7 @@ import {
 	ProjectSettingsFileNotFoundError,
 	ProjectSettingsInvalidError,
 } from "./errors.js"
-import { createRoot, createSignal, createEffect } from "./reactivity/solid.js"
+import { createRoot, createSignal, createEffect, batch } from "./reactivity/solid.js"
 import { createMessagesQuery } from "./createMessagesQuery.js"
 import { createMessageLintReportsQuery } from "./createMessageLintReportsQuery.js"
 import { ProjectSettings, type NodeishFilesystemSubset } from "./versionedInterfaces.js"
@@ -112,7 +112,12 @@ export async function loadProject(args: {
 			try {
 				const validatedSettings = parseSettings(settings)
 				v2Persistence = !!validatedSettings.experimental?.persistence
-				_setSettings(validatedSettings)
+
+				batch(() => {
+					// reset the resolved modules first - since they are no longer valid at that point
+					setResolvedModules(undefined)
+					_setSettings(validatedSettings)
+				})
 
 				writeSettingsToDisk(validatedSettings)
 				return { data: undefined }

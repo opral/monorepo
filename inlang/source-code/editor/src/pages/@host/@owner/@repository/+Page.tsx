@@ -45,8 +45,16 @@ export default function Page() {
  * is required to use the useEditorState hook.
  */
 function TheActualPage() {
-	const { repo, currentBranch, project, projectList, routeParams, tourStep, lixErrors, languageTags } =
-		useEditorState()
+	const {
+		repo,
+		currentBranch,
+		project,
+		projectList,
+		routeParams,
+		tourStep,
+		lixErrors,
+		languageTags,
+	} = useEditorState()
 	const [localStorage, setLocalStorage] = useLocalStorage()
 
 	onMount(() => {
@@ -165,12 +173,16 @@ function TheActualPage() {
 								currentId="textfield"
 								position="bottom-left"
 								offset={{ x: 110, y: 144 }}
-								isVisible={tourStep() === "textfield" && messageCount() !== 0 && languageTags().length > 1}
-							><></></TourHintWrapper>
-								<For each={project()!.query.messages.includedMessageIds()}>
-									{(id) => {
-										return <Message id={id} />
-									}}
+								isVisible={
+									tourStep() === "textfield" && messageCount() !== 0 && languageTags().length > 1
+								}
+							>
+								<></>
+							</TourHintWrapper>
+							<For each={project()!.query.messages.includedMessageIds()}>
+								{(id) => {
+									return <Message id={id} />
+								}}
 							</For>
 						</Show>
 
