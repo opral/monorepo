@@ -6,6 +6,7 @@ import {
 	createMessage,
 	normalizeMessageBundle,
 } from "../v2/createMessageBundle.js"
+import { openStore, readJSON, writeJSON } from "./store.js"
 
 const mockMessages: MessageBundle[] = [
 	createMessageBundle({
@@ -26,41 +27,73 @@ const mockMessages: MessageBundle[] = [
 	}),
 ]
 
-// the test ensures:
-//   - messages can be loaded
-//   - messages can be saved
-//   - after loading and saving messages, the state is the same as before (roundtrip)
-test("roundtrip (saving/loading messages)", async () => {
-	const { loadAll, saveAll } = await import("./store.js")
-	const fs = createNodeishMemoryFs()
-	const projectDir = "/test/project.inlang"
-	const filePath = projectDir + "/messages.json"
+test("roundtrip readJSON/writeJSON", async () => {
+	const nodeishFs = createNodeishMemoryFs()
+	const projectPath = "/test/project.inlang"
+	const filePath = projectPath + "/messages.json"
 	const persistedMessages = JSON.stringify(mockMessages.map(normalizeMessageBundle), undefined, 2)
 
-	await fs.mkdir(projectDir, { recursive: true })
-	await fs.writeFile(filePath, persistedMessages)
+	await nodeishFs.mkdir(projectPath, { recursive: true })
+	await nodeishFs.writeFile(filePath, persistedMessages)
 
-	const firstMessageLoad = await loadAll({
+	const firstMessageLoad = await readJSON({
 		filePath,
-		nodeishFs: fs,
+		nodeishFs: nodeishFs,
 	})
 
 	expect(firstMessageLoad).toStrictEqual(mockMessages)
 
-	await saveAll({
+	await writeJSON({
 		filePath,
-		nodeishFs: fs,
+		nodeishFs,
 		messages: firstMessageLoad,
 	})
 
-	const afterRoundtrip = await fs.readFile(filePath, { encoding: "utf-8" })
+	const afterRoundtrip = await nodeishFs.readFile(filePath, { encoding: "utf-8" })
 
 	expect(afterRoundtrip).toStrictEqual(persistedMessages)
 
-	const messagesAfterRoundtrip = await loadAll({
+	const messagesAfterRoundtrip = await readJSON({
 		filePath,
-		nodeishFs: fs,
+		nodeishFs,
 	})
 
 	expect(messagesAfterRoundtrip).toStrictEqual(firstMessageLoad)
+})
+
+test("openStore does minimal CRUD on messageBundles", async () => {
+	const nodeishFs = createNodeishMemoryFs()
+	const projectPath = "/test/project.inlang"
+	const filePath = projectPath + "/messages.json"
+	const persistedMessages = JSON.stringify(mockMessages.map(normalizeMessageBundle), undefined, 2)
+
+	await nodeishFs.mkdir(projectPath, { recursive: true })
+	await nodeishFs.writeFile(filePath, persistedMessages)
+
+	const store = await openStore({ projectPath, nodeishFs })
+
+	const messages = await store.messageBundles.getAll()
+	expect(messages).toStrictEqual(mockMessages)
+
+	const firstMessageBundle = await store.messageBundles.get({ id: "first_message" })
+	expect(firstMessageBundle).toStrictEqual(mockMessages[0])
+
+	const modifedMessageBundle = structuredClone(firstMessageBundle) as MessageBundle
+	const newMessage = createMessage({ locale: "de", text: "Wenn dies schiefläuft, bin ich sauer" })
+	modifedMessageBundle.messages.push(newMessage)
+	await store.messageBundles.set({ data: modifedMessageBundle })
+
+	const setMessageBundle = await store.messageBundles.get({ id: "first_message" })
+	expect(setMessageBundle).toStrictEqual(modifedMessageBundle)
+
+	const messagesAfterRoundtrip = await readJSON({
+		filePath,
+		nodeishFs,
+	})
+	const expected = [setMessageBundle, ...mockMessages.slice(1)]
+	expect(messagesAfterRoundtrip).toStrictEqual(expected)
+
+	await store.messageBundles.delete({ id: "first_message" })
+	const messagesAfterDelete = await store.messageBundles.getAll()
+	expect(messagesAfterDelete).toStrictEqual(mockMessages.slice(1))
 })
