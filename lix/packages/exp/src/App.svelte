@@ -9,7 +9,7 @@
 
   const host = 'https://git.local'
   const repos = {
-    gitserver: 'https://ignored.domain/direct/git.local/opral/example.git',
+    gitserver: 'https://ignored.domain/direct/git.local/jan/example.git',
     test: host + '/git/localhost:8089/janfjohannes/ci-test-repo.git',
     'cal.com': 'https://ignored.domain/direct/git.local/jan/cal.com'
   }
@@ -364,7 +364,7 @@
     box-sizing: border-box;
     padding: 38px;
     padding-left: 55px;
-    width: 355px;
+    width: 381px;
     background: hsl(218 19% 4% / 1);
     border: 1px solid #323232;
   }
