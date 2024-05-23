@@ -121,6 +121,7 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 		// remove listener
 		if (typeof window !== "undefined") {
 			window.removeEventListener("message", onPostMessage)
+			window.removeEventListener("storage", onStorageSetByOtherWindow)
 		}
 	})
 
@@ -144,6 +145,8 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 			setOriginStore(reconcile(JSON.parse(event.newValue)))
 		}
 	}
+
+	window.addEventListener("storage", onStorageSetByOtherWindow)
 
 	return (
 		<LocalStorageContext.Provider value={[store, setStore]}>

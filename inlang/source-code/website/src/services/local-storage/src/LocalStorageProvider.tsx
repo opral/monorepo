@@ -56,8 +56,6 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 
 	/** custom setStore to trigger localStorage.setItem on change */
 	const setStore: typeof setOriginStore = (...args: any) => {
-		// @ts-ignore
-		setOriginStore(...args)
 		// write to local storage
 		localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(store))
 
@@ -71,6 +69,8 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 				referrer
 			)
 		}
+		// @ts-ignore
+		setOriginStore(...args)
 	}
 
 	// read from local storage on mount
@@ -121,6 +121,7 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 		// remove listener
 		if (typeof window !== "undefined") {
 			window.removeEventListener("message", onPostMessage)
+			window.removeEventListener("storage", onStorageSetByOtherWindow)
 		}
 	})
 
@@ -145,6 +146,8 @@ export function LocalStorageProvider(props: { children: JSXElement }) {
 			setOriginStore(reconcile(JSON.parse(event.newValue)))
 		}
 	}
+
+	window.addEventListener("storage", onStorageSetByOtherWindow)
 
 	return (
 		<LocalStorageContext.Provider value={[store, setStore]}>
