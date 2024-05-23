@@ -29,6 +29,7 @@ export function format(url: UrlObject) {
 	} else if (url.hostname) {
 		host =
 			auth +
+			//escape ipv6 addresses with brackets
 			(!url.hostname.includes(":") ? url.hostname : `[${url.hostname}]`) +
 			(url.host ? `:${url.port}` : "")
 	}
