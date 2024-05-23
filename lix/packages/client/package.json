@@ -33,7 +33,7 @@
 		"async-lock": "^1.4.1",
 		"clean-git-ref": "^2.0.1",
 		"crc-32": "^1.2.2",
-		"diff3": "^0.0.4",
+		"diff3": "./vendored/diff3",
 		"ignore": "^5.3.1",
 		"octokit": "3.1.2",
 		"pako": "^1.0.11",
