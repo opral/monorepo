@@ -1,5 +1,12 @@
 # @inlang/sdk
 
+## 0.34.10
+
+### Patch Changes
+
+- d27a983: fixes reactivity for deleted messages
+- a27b7a4: This reintroduces reactivity to lint reports - see https://github.com/opral/monorepo/pull/2792 for more details
+
 ## 0.34.9
 
 ### Patch Changes

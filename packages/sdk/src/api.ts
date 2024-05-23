@@ -71,9 +71,9 @@ export type Subscribable<Value> = {
 }
 
 export type MessageQueryDelegate = {
-	onMessageCreate: (messageId: string, message: Message) => void
-	onMessageUpdate: (messageId: string, message: Message) => void
-	onMessageDelete: (messageId: string) => void
+	onMessageCreate: (messageId: string, message: Message, messages: Message[]) => void
+	onMessageUpdate: (messageId: string, message: Message, messages: Message[]) => void
+	onMessageDelete: (messageId: string, messages: Message[]) => void
 	onLoaded: (messages: Message[]) => void
 	onCleanup: () => void
 }
@@ -98,12 +98,19 @@ export type MessageQueryApi = {
 	update: (args: { where: { id: Message["id"] }; data: Partial<Message> }) => boolean
 	upsert: (args: { where: { id: Message["id"] }; data: Message }) => void
 	delete: (args: { where: { id: Message["id"] } }) => boolean
-	setDelegate: (delegate: MessageQueryDelegate) => void
+	setDelegate: (delegate: MessageQueryDelegate | undefined, callOnLoad: boolean) => void
 }
 
 export type MessageLintReportsQueryApi = {
-	getAll: () => Promise<MessageLintReport[]>
-	get: (args: {
+	getAll: Subscribable<MessageLintReport[]> & {
+		settled: () => Promise<MessageLintReport[]>
+	}
+	get: ((args: {
 		where: { messageId: MessageLintReport["messageId"] }
-	}) => Promise<Readonly<MessageLintReport[]>>
+	}) => Readonly<MessageLintReport[]>) & {
+		subscribe: (
+			args: { where: { messageId: MessageLintReport["messageId"] } },
+			callback: (MessageLintRules: Readonly<MessageLintReport[]>) => void
+		) => void
+	}
 }

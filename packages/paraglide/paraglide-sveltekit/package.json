@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/paraglide-sveltekit",
-	"version": "0.7.0",
+	"version": "0.8.1",
 	"type": "module",
 	"main": "./dist/runtime/index.js",
 	"types": "./dist/runtime/index.d.ts",
@@ -54,7 +54,7 @@
 		"dist"
 	],
 	"bin": {
-		"paraglide-sveltekit": "./bin/run.mjs"
+		"paraglide-sveltekit": "./bin/run.js"
 	},
 	"exports": {
 		".": {

@@ -11,7 +11,7 @@ import {
 } from "../src/v2/createMessageBundle.js"
 import { MessageBundle } from "../src/v2/types.js"
 
-import { createSignal, createResource, createEffect } from "../src/reactivity/solid.js"
+import { createEffect } from "../src/reactivity/solid.js"
 
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -23,6 +23,7 @@ import _debug from "debug"
 const debug = _debug("load-test")
 
 const throttleMessageGetAllEvents = 3000
+const throttleLintEvents = 3000
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -81,8 +82,6 @@ export async function runLoadTest(
 		}
 	})
 
-	const [messages, setMessages] = createSignal<readonly Message[]>()
-
 	if (subscribeToMessages) {
 		debug("subscribing to messages.getAll")
 		let countMessagesGetAllEvents = 0
@@ -91,7 +90,6 @@ export async function runLoadTest(
 			throttleMessageGetAllEvents,
 			(messages: readonly Message[]) => {
 				debug(`messages getAll event: ${countMessagesGetAllEvents}, length: ${messages.length}`)
-				setMessages(messages)
 			}
 		)
 
@@ -102,16 +100,14 @@ export async function runLoadTest(
 	}
 
 	if (subscribeToLintReports) {
-		debug("subscribing to messageLintReports.getAll")
-		let countLintReportsGetAllEvents = 1
-
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const [lintReports] = createResource(messages, async () => {
-			const reports = await project.query.messageLintReports.getAll()
-			debug(
-				`lintReports getAll event: ${countLintReportsGetAllEvents++}, length: ${reports.length}`
-			)
-			return reports
+		debug("subscribing to lintReports.getAll")
+		let lintEvents = 0
+		const logLintEvent = throttle(throttleLintEvents, (reports: any) => {
+			debug(`lint reports changed event: ${lintEvents}, length: ${reports.length}`)
+		})
+		project.query.messageLintReports.getAll.subscribe((reports) => {
+			lintEvents++
+			logLintEvent(reports)
 		})
 	}
 

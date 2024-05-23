@@ -22,13 +22,22 @@ export const stubMessagesQuery: MessageQueryApi = {
 }
 
 export const stubMessageLintReportsQuery: MessageLintReportsQueryApi = {
-	get: async () => [],
-	getAll: async () => [],
+	// @ts-expect-error
+	get: subscribable(() => []),
+	// @ts-expect-error
+	getAll: settleable(subscribable(() => [])),
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 function subscribable(fn: Function) {
 	return Object.assign(fn, {
 		subscribe: () => {},
+	})
+}
+
+// eslint-disable-next-line @typescript-eslint/ban-types
+function settleable(fn: Function) {
+	return Object.assign(fn, {
+		settled: async () => {},
 	})
 }
