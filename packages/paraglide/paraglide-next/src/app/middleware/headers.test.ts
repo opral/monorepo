@@ -1,9 +1,10 @@
 import { describe, it, expect } from "vitest"
-import { generateLinkHeader } from "./linkHeader"
+import { addSeoHeaders } from "./headers"
 import { PrefixStrategy } from "../routing-strategy/strats/prefixStrategy"
 import { NextRequest } from "next/server"
+import { LINK_HEADER_NAME } from "../constants"
 
-describe("generateLinkHeader", () => {
+describe("addSeoHeaders", () => {
 	it("generates the Link header for a Routing Strategy with only pathnames", () => {
 		const strategy = PrefixStrategy({
 			pathnames: {},
@@ -13,13 +14,17 @@ describe("generateLinkHeader", () => {
 
 		const request = new NextRequest("https://example.com/base/some-page")
 		request.nextUrl.basePath = "/base"
+		request.headers.set("accept", "text/html")
 
-		const linkHeader = generateLinkHeader(strategy, {
+		const headers = new Headers()
+		addSeoHeaders(headers, {
 			canonicalPath: "/",
 			availableLanguageTags: ["en", "de", "fr"],
 			request,
+			strategy,
 		})
 
+		const linkHeader = headers.get(LINK_HEADER_NAME)
 		expect(linkHeader).includes('<https://example.com/base/de>; rel="alternate"; hreflang="de"')
 		expect(linkHeader).includes('<https://example.com/base/fr>; rel="alternate"; hreflang="fr"')
 		expect(linkHeader).includes('<https://example.com/base/>; rel="alternate"; hreflang="en"')
