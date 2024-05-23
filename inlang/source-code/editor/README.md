@@ -5,15 +5,22 @@
 
 ![editor banner image](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/editor/assets/fink-image.png)
 
-# Why use Fink?
+## Why use Fink?
+
 <doc-features>
   <doc-feature text-color="#0F172A" color="#E1EFF7" title="Edit messages visually" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/editor01.png"></doc-feature>
   <doc-feature text-color="#0F172A" color="#E1EFF7" title="Collaborate using version control" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/editor02.png"></doc-feature>
   <doc-feature text-color="#0F172A" color="#E1EFF7" title="Ensure quality with lint rules" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/editor03.png"></doc-feature>
 </doc-features>
 
-<br />
-<br />
+## Works alongside your i18n library
+
+![logos of ParaglideJS, next-intl and i18next](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/supported-libraries.webp)
+and other JSON-based i18n libraries.
+
+Just pick a [plugin](/c/plugins) that fits your library. You can find a full table in the [getting started](/m/tdozzpar/app-inlang-finkLocalizationEditor/get-started) guide.
+
+## What users say
 
 <doc-comments>
 <doc-comment text="The web editor is very well-made! ↹-compatible, fast auto-translate, nice working UI, all good!" author="WarningImHack3r" icon="mdi:github"></doc-comment>
@@ -25,14 +32,14 @@
 <br />
 <br />
 
-# How to contribute translations
+## How to contribute translations
 
 [![Fink Guide Ad](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/assets/marketplace/editor-guide-image.jpg) Read in-depth guide](https://inlang.com/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink)
 
-# Pricing 
+## Pricing 
  
 <doc-pricing></doc-pricing>
 
-# Login via GitHub
+## Login via GitHub
 
 If your repository can't be accessed anonymously, you can login via GitHub. The editor will ask you to login if it can't access your repository.
