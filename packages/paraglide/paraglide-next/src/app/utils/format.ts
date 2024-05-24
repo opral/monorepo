@@ -1,6 +1,6 @@
 // polyfill for node:url's format as it is not available in Next-production mode
 import type { UrlObject } from "node:url"
-import querystring from "qs"
+import { stringify as stringifyQS } from "qs"
 
 // for which values of "protocol" slashes should be added
 // also add slashes for an empty protocol
@@ -40,7 +40,7 @@ export function format(url: UrlObject) {
 
 	let query = ""
 	if (url.query && typeof url.query === "object" && Object.keys(url.query).length) {
-		query = querystring.stringify(url.query, {
+		query = stringifyQS(url.query, {
 			arrayFormat: "repeat",
 			addQueryPrefix: false,
 		})
