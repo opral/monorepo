@@ -86,7 +86,7 @@ importers:
         version: 1.2.1
       next:
         specifier: ^14.0.0
-        version: 14.2.2(@babel/core@7.24.4)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        version: 14.2.2(@babel/core@7.24.4)(@playwright/test@1.39.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       postcss:
         specifier: 8.4.23
         version: 8.4.23
@@ -135,7 +135,7 @@ importers:
         version: 3.59.2
       svelte-check:
         specifier: ^3.6.9
-        version: 3.6.9(@babel/core@7.24.4)(postcss-load-config@4.0.2(postcss@8.4.38))(postcss@8.4.38)(svelte@3.59.2)
+        version: 3.6.9(@babel/core@7.24.4)(postcss-load-config@4.0.2(postcss@8.4.38)(ts-node@10.9.2(@types/node@20.12.12)(typescript@5.3.3)))(postcss@8.4.38)(svelte@3.59.2)
       typescript:
         specifier: ^5.0.4
         version: 5.3.3
@@ -432,7 +432,7 @@ importers:
         version: 7.6.18(lit@3.1.3)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@storybook/web-components-vite':
         specifier: ^7.6.16
-        version: 7.6.18(@preact/preset-vite@2.8.2(@babel/core@7.24.4)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4)))(lit@3.1.3)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))
+        version: 7.6.18(@preact/preset-vite@2.8.2(@babel/core@7.24.4)(preact@10.20.2)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4)))(lit@3.1.3)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))
       '@types/chroma-js':
         specifier: ^2.4.4
         version: 2.4.4
@@ -504,28 +504,28 @@ importers:
         version: 2.0.3(@tiptap/pm@2.0.3)
       '@tiptap/extension-document':
         specifier: 2.0.3
-        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
+        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
       '@tiptap/extension-floating-menu':
         specifier: 2.0.3
-        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
+        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
       '@tiptap/extension-hard-break':
         specifier: 2.0.3
-        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
+        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
       '@tiptap/extension-history':
         specifier: 2.0.3
-        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
+        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
       '@tiptap/extension-mention':
         specifier: 2.0.3
-        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))(@tiptap/suggestion@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
+        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))(@tiptap/suggestion@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
       '@tiptap/extension-paragraph':
         specifier: 2.0.3
-        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
+        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
       '@tiptap/extension-placeholder':
         specifier: 2.0.3
-        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
+        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
       '@tiptap/extension-text':
         specifier: 2.0.3
-        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
+        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
       '@tiptap/pm':
         specifier: 2.0.3
         version: 2.0.3(@tiptap/core@2.0.3)
@@ -534,7 +534,7 @@ importers:
         version: 2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
       '@tiptap/suggestion':
         specifier: 2.0.3
-        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
+        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
       '@types/flat':
         specifier: ^5.0.2
         version: 5.0.5
@@ -588,7 +588,7 @@ importers:
         version: 1.3.15
       solid-tiptap:
         specifier: ^0.6.0
-        version: 0.6.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))(solid-js@1.8.17)
+        version: 0.6.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))(solid-js@1.8.17)
       throttle-debounce:
         specifier: ^5.0.0
         version: 5.0.0
@@ -712,7 +712,7 @@ importers:
         version: 4.5.2(@types/node@20.5.9)(terser@5.30.4)
       vite-plugin-node-polyfills:
         specifier: 0.17.0
-        version: 0.17.0(rollup@4.16.4)(vite@4.5.2(@types/node@20.5.9)(terser@5.30.4))
+        version: 0.17.0(rollup@3.29.1)(vite@4.5.2(@types/node@20.5.9)(terser@5.30.4))
       vite-plugin-solid:
         specifier: 2.7.0
         version: 2.7.0(solid-js@1.8.17)(vite@4.5.2(@types/node@20.5.9)(terser@5.30.4))
@@ -746,7 +746,7 @@ importers:
         version: 2.8.3
       vitest:
         specifier: 0.34.6
-        version: 0.34.6(jsdom@22.1.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.30.4)(webdriverio@8.36.1(typescript@5.2.2))
+        version: 0.34.6(jsdom@22.1.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.30.4)(webdriverio@8.36.1(typescript@5.3.3))
 
   inlang/source-code/end-to-end-tests/paraglide-next:
     dependencies:
@@ -771,7 +771,7 @@ importers:
         version: 2.8.3
       vitest:
         specifier: 0.34.6
-        version: 0.34.6(jsdom@22.1.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.30.4)(webdriverio@8.36.1(typescript@5.2.2))
+        version: 0.34.6(jsdom@22.1.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.30.4)(webdriverio@8.36.1(typescript@5.3.3))
 
   inlang/source-code/env-variables:
     dependencies:
@@ -1006,7 +1006,7 @@ importers:
         version: 4.7.2
       vite-plugin-node-polyfills:
         specifier: 0.16.0
-        version: 0.16.0(rollup@4.16.4)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))
+        version: 0.16.0(rollup@3.29.1)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))
       zod:
         specifier: ^3.22.4
         version: 3.23.4
@@ -1199,7 +1199,7 @@ importers:
         version: 7.6.18(lit@3.1.3)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@storybook/web-components-vite':
         specifier: ^7.6.16
-        version: 7.6.18(@preact/preset-vite@2.8.2(@babel/core@7.24.4)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4)))(lit@3.1.3)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))
+        version: 7.6.18(@preact/preset-vite@2.8.2(@babel/core@7.24.4)(preact@10.20.2)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4)))(lit@3.1.3)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))
       '@types/chroma-js':
         specifier: ^2.4.4
         version: 2.4.4
@@ -1431,13 +1431,13 @@ importers:
         version: link:../paraglide-vite
       astro:
         specifier: ^4.0.0
-        version: 4.0.8(@types/node@20.12.12)(terser@5.30.4)(typescript@5.4.5)
+        version: 4.0.8(@types/node@20.12.12)(terser@5.30.4)(typescript@5.3.3)
 
   inlang/source-code/paraglide/paraglide-astro/example:
     dependencies:
       '@astrojs/check':
         specifier: 0.3.4
-        version: 0.3.4(prettier@3.2.5)(typescript@5.3.3)
+        version: 0.3.4(prettier@2.8.3)(typescript@5.3.3)
       '@astrojs/mdx':
         specifier: 2.0.3
         version: 2.0.3(astro@4.0.8(@types/node@20.12.12)(terser@5.30.4)(typescript@5.3.3))
@@ -1483,7 +1483,7 @@ importers:
         version: 3.2.3
       dedent:
         specifier: 1.5.1
-        version: 1.5.1
+        version: 1.5.1(babel-plugin-macros@2.8.0)
       json5:
         specifier: 2.2.3
         version: 2.2.3
@@ -1580,8 +1580,8 @@ importers:
         specifier: ^10.3.15
         version: 10.3.15
       next:
-        specifier: ^13.0.0 || ^14.0.0
-        version: 14.2.2(@babel/core@7.24.4)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^13.0.0 || ^14.0.0 || ^15.0.0
+        version: 14.2.2(@babel/core@7.24.4)(@playwright/test@1.39.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       qs:
         specifier: ^6.12.1
         version: 6.12.1
@@ -1691,7 +1691,7 @@ importers:
         version: 0.10.10(solid-js@1.8.17)
       '@solidjs/start':
         specifier: ^0.4
-        version: 0.4.11(rollup@4.16.4)(solid-js@1.8.17)(vinxi@0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@4.16.4)(terser@5.30.4))(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))
+        version: 0.4.11(rollup@3.29.1)(solid-js@1.8.17)(vinxi@0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@3.29.1)(terser@5.30.4)(xml2js@0.5.0))(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))
       solid-js:
         specifier: ^1.8
         version: 1.8.17
@@ -1728,7 +1728,7 @@ importers:
         version: 12.0.0
       dedent:
         specifier: 1.5.1
-        version: 1.5.1
+        version: 1.5.1(babel-plugin-macros@2.8.0)
       devalue:
         specifier: ^4.3.2
         version: 4.3.3
@@ -1799,13 +1799,13 @@ importers:
         version: 3.1.0(svelte@4.2.15)(vite@4.5.2(@types/node@20.12.12)(terser@5.30.4))
       rollup-plugin-visualizer:
         specifier: ^5.12.0
-        version: 5.12.0(rollup@4.16.4)
+        version: 5.12.0(rollup@3.29.1)
       svelte:
         specifier: ^4.2.7
         version: 4.2.15
       svelte-check:
         specifier: ^3.6.9
-        version: 3.6.9(@babel/core@7.24.4)(postcss-load-config@4.0.2(postcss@8.4.38))(postcss@8.4.38)(svelte@4.2.15)
+        version: 3.6.9(@babel/core@7.24.4)(postcss-load-config@4.0.2(postcss@8.4.38)(ts-node@10.9.2(@types/node@20.12.12)(typescript@5.3.3)))(postcss@8.4.38)(svelte@4.2.15)
       vite:
         specifier: 4.5.2
         version: 4.5.2(@types/node@20.12.12)(terser@5.30.4)
@@ -2261,7 +2261,7 @@ importers:
         version: 4.3.4(supports-color@8.1.1)
       dedent:
         specifier: 1.5.1
-        version: 1.5.1
+        version: 1.5.1(babel-plugin-macros@2.8.0)
       deepmerge-ts:
         specifier: ^5.1.0
         version: 5.1.0
@@ -2348,7 +2348,7 @@ importers:
         version: 20.12.7
       vitest:
         specifier: 0.34.6
-        version: 0.34.6(jsdom@22.1.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.30.4)(webdriverio@8.36.1(typescript@5.2.2))
+        version: 0.34.6(jsdom@22.1.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.30.4)(webdriverio@8.36.1(typescript@5.3.3))
 
   inlang/source-code/server:
     dependencies:
@@ -2443,7 +2443,7 @@ importers:
         version: 7.6.18(lit@3.1.3)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@storybook/web-components-vite':
         specifier: ^7.6.16
-        version: 7.6.18(@preact/preset-vite@2.8.2(@babel/core@7.24.4)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4)))(lit@3.1.3)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))
+        version: 7.6.18(@preact/preset-vite@2.8.2(@babel/core@7.24.4)(preact@10.20.2)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4)))(lit@3.1.3)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))
       '@types/chroma-js':
         specifier: ^2.4.4
         version: 2.4.4
@@ -15992,9 +15992,9 @@ snapshots:
 
   '@antfu/utils@0.7.7': {}
 
-  '@astrojs/check@0.3.4(prettier@3.2.5)(typescript@5.3.3)':
+  '@astrojs/check@0.3.4(prettier@2.8.3)(typescript@5.3.3)':
     dependencies:
-      '@astrojs/language-server': 2.8.4(prettier@3.2.5)(typescript@5.3.3)
+      '@astrojs/language-server': 2.8.4(prettier@2.8.3)(typescript@5.3.3)
       chokidar: 3.6.0
       fast-glob: 3.3.2
       kleur: 4.1.5
@@ -16008,7 +16008,7 @@ snapshots:
 
   '@astrojs/internal-helpers@0.2.1': {}
 
-  '@astrojs/language-server@2.8.4(prettier@3.2.5)(typescript@5.3.3)':
+  '@astrojs/language-server@2.8.4(prettier@2.8.3)(typescript@5.3.3)':
     dependencies:
       '@astrojs/compiler': 2.7.1
       '@jridgewell/sourcemap-codec': 1.4.15
@@ -16021,13 +16021,13 @@ snapshots:
       volar-service-css: 0.0.34(@volar/language-service@2.1.6)
       volar-service-emmet: 0.0.34(@volar/language-service@2.1.6)
       volar-service-html: 0.0.34(@volar/language-service@2.1.6)
-      volar-service-prettier: 0.0.34(@volar/language-service@2.1.6)(prettier@3.2.5)
+      volar-service-prettier: 0.0.34(@volar/language-service@2.1.6)(prettier@2.8.3)
       volar-service-typescript: 0.0.34(@volar/language-service@2.1.6)
       volar-service-typescript-twoslash-queries: 0.0.34(@volar/language-service@2.1.6)
       vscode-html-languageservice: 5.2.0
       vscode-uri: 3.0.8
     optionalDependencies:
-      prettier: 3.2.5
+      prettier: 2.8.3
     transitivePeerDependencies:
       - typescript
 
@@ -19157,6 +19157,14 @@ snapshots:
     optionalDependencies:
       rollup: 4.16.4
 
+  '@rollup/plugin-inject@5.0.5(rollup@3.29.1)':
+    dependencies:
+      '@rollup/pluginutils': 5.1.0(rollup@3.29.1)
+      estree-walker: 2.0.2
+      magic-string: 0.30.10
+    optionalDependencies:
+      rollup: 3.29.1
+
   '@rollup/plugin-inject@5.0.5(rollup@4.16.4)':
     dependencies:
       '@rollup/pluginutils': 5.1.0(rollup@4.16.4)
@@ -19588,11 +19596,11 @@ snapshots:
     dependencies:
       solid-js: 1.8.17
 
-  '@solidjs/start@0.4.11(rollup@4.16.4)(solid-js@1.8.17)(vinxi@0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@4.16.4)(terser@5.30.4))(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))':
+  '@solidjs/start@0.4.11(rollup@3.29.1)(solid-js@1.8.17)(vinxi@0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@3.29.1)(terser@5.30.4)(xml2js@0.5.0))(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))':
     dependencies:
-      '@vinxi/plugin-directives': 0.1.3(vinxi@0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@4.16.4)(terser@5.30.4))
-      '@vinxi/server-components': 0.1.3(vinxi@0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@4.16.4)(terser@5.30.4))
-      '@vinxi/server-functions': 0.1.4(vinxi@0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@4.16.4)(terser@5.30.4))
+      '@vinxi/plugin-directives': 0.1.3(vinxi@0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@3.29.1)(terser@5.30.4)(xml2js@0.5.0))
+      '@vinxi/server-components': 0.1.3(vinxi@0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@3.29.1)(terser@5.30.4)(xml2js@0.5.0))
+      '@vinxi/server-functions': 0.1.4(vinxi@0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@3.29.1)(terser@5.30.4)(xml2js@0.5.0))
       defu: 6.1.4
       error-stack-parser: 2.1.4
       html-to-image: 1.11.11
@@ -19601,7 +19609,7 @@ snapshots:
       shikiji: 0.9.19
       source-map-js: 1.2.0
       terracotta: 1.0.5(solid-js@1.8.17)
-      vite-plugin-inspect: 0.7.42(rollup@4.16.4)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))
+      vite-plugin-inspect: 0.7.42(rollup@3.29.1)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))
       vite-plugin-solid: 2.10.2(solid-js@1.8.17)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))
     transitivePeerDependencies:
       - '@nuxt/kit'
@@ -19776,7 +19784,7 @@ snapshots:
       - encoding
       - supports-color
 
-  '@storybook/builder-vite@7.6.18(@preact/preset-vite@2.8.2(@babel/core@7.24.4)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4)))(typescript@5.4.5)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))':
+  '@storybook/builder-vite@7.6.18(@preact/preset-vite@2.8.2(@babel/core@7.24.4)(preact@10.20.2)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4)))(typescript@5.4.5)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))':
     dependencies:
       '@storybook/channels': 7.6.18
       '@storybook/client-logger': 7.6.18
@@ -20121,9 +20129,9 @@ snapshots:
       '@types/express': 4.17.21
       file-system-cache: 2.3.0
 
-  '@storybook/web-components-vite@7.6.18(@preact/preset-vite@2.8.2(@babel/core@7.24.4)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4)))(lit@3.1.3)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))':
+  '@storybook/web-components-vite@7.6.18(@preact/preset-vite@2.8.2(@babel/core@7.24.4)(preact@10.20.2)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4)))(lit@3.1.3)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))':
     dependencies:
-      '@storybook/builder-vite': 7.6.18(@preact/preset-vite@2.8.2(@babel/core@7.24.4)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4)))(typescript@5.4.5)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))
+      '@storybook/builder-vite': 7.6.18(@preact/preset-vite@2.8.2(@babel/core@7.24.4)(preact@10.20.2)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4)))(typescript@5.4.5)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))
       '@storybook/core-server': 7.6.18
       '@storybook/node-logger': 7.6.18
       '@storybook/web-components': 7.6.18(lit@3.1.3)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -20381,97 +20389,97 @@ snapshots:
     dependencies:
       '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
 
-  '@tiptap/extension-blockquote@2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
+  '@tiptap/extension-blockquote@2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
 
-  '@tiptap/extension-bold@2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
+  '@tiptap/extension-bold@2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
 
-  '@tiptap/extension-bullet-list@2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
+  '@tiptap/extension-bullet-list@2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
 
-  '@tiptap/extension-code-block@2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
-    dependencies:
-      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
-      '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
-
-  '@tiptap/extension-code@2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
-    dependencies:
-      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
-
-  '@tiptap/extension-document@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
-    dependencies:
-      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
-
-  '@tiptap/extension-dropcursor@2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
+  '@tiptap/extension-code-block@2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
       '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
 
-  '@tiptap/extension-floating-menu@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
+  '@tiptap/extension-code@2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))':
+    dependencies:
+      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
+
+  '@tiptap/extension-document@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))':
+    dependencies:
+      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
+
+  '@tiptap/extension-dropcursor@2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
+    dependencies:
+      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
+      '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
+
+  '@tiptap/extension-floating-menu@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
       '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
       tippy.js: 6.3.7
 
-  '@tiptap/extension-gapcursor@2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
+  '@tiptap/extension-gapcursor@2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
       '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
 
-  '@tiptap/extension-hard-break@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
+  '@tiptap/extension-hard-break@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
 
-  '@tiptap/extension-heading@2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
+  '@tiptap/extension-heading@2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
 
-  '@tiptap/extension-history@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
-    dependencies:
-      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
-      '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
-
-  '@tiptap/extension-horizontal-rule@2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
+  '@tiptap/extension-history@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
       '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
 
-  '@tiptap/extension-italic@2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
-    dependencies:
-      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
-
-  '@tiptap/extension-list-item@2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
-    dependencies:
-      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
-
-  '@tiptap/extension-mention@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))(@tiptap/suggestion@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
-    dependencies:
-      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
-      '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
-      '@tiptap/suggestion': 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
-
-  '@tiptap/extension-ordered-list@2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
-    dependencies:
-      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
-
-  '@tiptap/extension-paragraph@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
-    dependencies:
-      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
-
-  '@tiptap/extension-placeholder@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
+  '@tiptap/extension-horizontal-rule@2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
       '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
 
-  '@tiptap/extension-strike@2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
+  '@tiptap/extension-italic@2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
 
-  '@tiptap/extension-text@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
+  '@tiptap/extension-list-item@2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))':
+    dependencies:
+      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
+
+  '@tiptap/extension-mention@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))(@tiptap/suggestion@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
+    dependencies:
+      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
+      '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
+      '@tiptap/suggestion': 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
+
+  '@tiptap/extension-ordered-list@2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))':
+    dependencies:
+      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
+
+  '@tiptap/extension-paragraph@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))':
+    dependencies:
+      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
+
+  '@tiptap/extension-placeholder@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
+    dependencies:
+      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
+      '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
+
+  '@tiptap/extension-strike@2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))':
+    dependencies:
+      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
+
+  '@tiptap/extension-text@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
 
@@ -20500,28 +20508,28 @@ snapshots:
   '@tiptap/starter-kit@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
-      '@tiptap/extension-blockquote': 2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
-      '@tiptap/extension-bold': 2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
-      '@tiptap/extension-bullet-list': 2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
-      '@tiptap/extension-code': 2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
-      '@tiptap/extension-code-block': 2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
-      '@tiptap/extension-document': 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
-      '@tiptap/extension-dropcursor': 2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
-      '@tiptap/extension-gapcursor': 2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
-      '@tiptap/extension-hard-break': 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
-      '@tiptap/extension-heading': 2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
-      '@tiptap/extension-history': 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
-      '@tiptap/extension-horizontal-rule': 2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
-      '@tiptap/extension-italic': 2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
-      '@tiptap/extension-list-item': 2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
-      '@tiptap/extension-ordered-list': 2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
-      '@tiptap/extension-paragraph': 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
-      '@tiptap/extension-strike': 2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
-      '@tiptap/extension-text': 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
+      '@tiptap/extension-blockquote': 2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
+      '@tiptap/extension-bold': 2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
+      '@tiptap/extension-bullet-list': 2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
+      '@tiptap/extension-code': 2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
+      '@tiptap/extension-code-block': 2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
+      '@tiptap/extension-document': 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
+      '@tiptap/extension-dropcursor': 2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
+      '@tiptap/extension-gapcursor': 2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
+      '@tiptap/extension-hard-break': 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
+      '@tiptap/extension-heading': 2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
+      '@tiptap/extension-history': 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
+      '@tiptap/extension-horizontal-rule': 2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
+      '@tiptap/extension-italic': 2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
+      '@tiptap/extension-list-item': 2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
+      '@tiptap/extension-ordered-list': 2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
+      '@tiptap/extension-paragraph': 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
+      '@tiptap/extension-strike': 2.3.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
+      '@tiptap/extension-text': 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
     transitivePeerDependencies:
       - '@tiptap/pm'
 
-  '@tiptap/suggestion@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
+  '@tiptap/suggestion@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
       '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
@@ -21355,13 +21363,13 @@ snapshots:
       - encoding
       - supports-color
 
-  '@vinxi/devtools@0.1.1(@babel/core@7.24.4)(preact@10.20.2)(rollup@4.16.4)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))':
+  '@vinxi/devtools@0.1.1(@babel/core@7.24.4)(preact@10.20.2)(rollup@3.29.1)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))':
     dependencies:
       '@preact/preset-vite': 2.8.2(@babel/core@7.24.4)(preact@10.20.2)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))
       '@solidjs/router': 0.8.4(solid-js@1.8.17)
       birpc: 0.2.17
       solid-js: 1.8.17
-      vite-plugin-inspect: 0.7.42(rollup@4.16.4)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))
+      vite-plugin-inspect: 0.7.42(rollup@3.29.1)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))
       vite-plugin-solid: 2.7.0(solid-js@1.8.17)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))
       ws: 8.16.0
     transitivePeerDependencies:
@@ -21396,7 +21404,7 @@ snapshots:
     transitivePeerDependencies:
       - uWebSockets.js
 
-  '@vinxi/plugin-directives@0.1.3(vinxi@0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@4.16.4)(terser@5.30.4))':
+  '@vinxi/plugin-directives@0.1.3(vinxi@0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@3.29.1)(terser@5.30.4)(xml2js@0.5.0))':
     dependencies:
       '@babel/parser': 7.24.4
       acorn: 8.11.3
@@ -21407,29 +21415,29 @@ snapshots:
       magicast: 0.2.11
       recast: 0.23.6
       tslib: 2.6.2
-      vinxi: 0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@4.16.4)(terser@5.30.4)
+      vinxi: 0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@3.29.1)(terser@5.30.4)(xml2js@0.5.0)
 
-  '@vinxi/server-components@0.1.3(vinxi@0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@4.16.4)(terser@5.30.4))':
+  '@vinxi/server-components@0.1.3(vinxi@0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@3.29.1)(terser@5.30.4)(xml2js@0.5.0))':
     dependencies:
-      '@vinxi/plugin-directives': 0.1.3(vinxi@0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@4.16.4)(terser@5.30.4))
+      '@vinxi/plugin-directives': 0.1.3(vinxi@0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@3.29.1)(terser@5.30.4)(xml2js@0.5.0))
       acorn: 8.11.3
       acorn-loose: 8.4.0
       acorn-typescript: 1.4.13(acorn@8.11.3)
       astring: 1.8.6
       magicast: 0.2.11
       recast: 0.23.6
-      vinxi: 0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@4.16.4)(terser@5.30.4)
+      vinxi: 0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@3.29.1)(terser@5.30.4)(xml2js@0.5.0)
 
-  '@vinxi/server-functions@0.1.4(vinxi@0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@4.16.4)(terser@5.30.4))':
+  '@vinxi/server-functions@0.1.4(vinxi@0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@3.29.1)(terser@5.30.4)(xml2js@0.5.0))':
     dependencies:
-      '@vinxi/plugin-directives': 0.1.3(vinxi@0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@4.16.4)(terser@5.30.4))
+      '@vinxi/plugin-directives': 0.1.3(vinxi@0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@3.29.1)(terser@5.30.4)(xml2js@0.5.0))
       acorn: 8.11.3
       acorn-loose: 8.4.0
       acorn-typescript: 1.4.13(acorn@8.11.3)
       astring: 1.8.6
       magicast: 0.2.11
       recast: 0.23.6
-      vinxi: 0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@4.16.4)(terser@5.30.4)
+      vinxi: 0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@3.29.1)(terser@5.30.4)(xml2js@0.5.0)
 
   '@vitejs/plugin-react@4.2.1(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))':
     dependencies:
@@ -22369,82 +22377,6 @@ snapshots:
       string-width: 7.1.0
       strip-ansi: 7.1.0
       tsconfck: 3.0.3(typescript@5.3.3)
-      unist-util-visit: 5.0.0
-      vfile: 6.0.1
-      vite: 4.5.2(@types/node@20.12.12)(terser@5.30.4)
-      vitefu: 0.2.5(vite@4.5.2(@types/node@20.12.12)(terser@5.30.4))
-      which-pm: 2.1.1
-      yargs-parser: 21.1.1
-      zod: 3.23.4
-    optionalDependencies:
-      sharp: 0.33.3
-    transitivePeerDependencies:
-      - '@types/node'
-      - less
-      - lightningcss
-      - sass
-      - stylus
-      - sugarss
-      - supports-color
-      - terser
-      - typescript
-
-  astro@4.0.8(@types/node@20.12.12)(terser@5.30.4)(typescript@5.4.5):
-    dependencies:
-      '@astrojs/compiler': 2.7.1
-      '@astrojs/internal-helpers': 0.2.1
-      '@astrojs/markdown-remark': 4.0.1
-      '@astrojs/telemetry': 3.0.4
-      '@babel/core': 7.24.4
-      '@babel/generator': 7.24.4
-      '@babel/parser': 7.24.4
-      '@babel/plugin-transform-react-jsx': 7.23.4(@babel/core@7.24.4)
-      '@babel/traverse': 7.24.1
-      '@babel/types': 7.24.0
-      '@types/babel__core': 7.20.5
-      acorn: 8.11.3
-      boxen: 7.1.1
-      chokidar: 3.6.0
-      ci-info: 4.0.0
-      clsx: 2.1.1
-      common-ancestor-path: 1.0.1
-      cookie: 0.6.0
-      debug: 4.3.4(supports-color@8.1.1)
-      deterministic-object-hash: 2.0.2
-      devalue: 4.3.3
-      diff: 5.2.0
-      dlv: 1.1.3
-      dset: 3.1.3
-      es-module-lexer: 1.5.0
-      esbuild: 0.19.12
-      estree-walker: 3.0.3
-      execa: 8.0.1
-      fast-glob: 3.3.2
-      flattie: 1.1.1
-      github-slugger: 2.0.0
-      gray-matter: 4.0.3
-      html-escaper: 3.0.3
-      http-cache-semantics: 4.1.1
-      js-yaml: 4.1.0
-      kleur: 4.1.5
-      magic-string: 0.30.10
-      mdast-util-to-hast: 13.0.2
-      mime: 3.0.0
-      ora: 7.0.1
-      p-limit: 5.0.0
-      p-queue: 8.0.1
-      path-to-regexp: 6.2.2
-      preferred-pm: 3.1.3
-      probe-image-size: 7.2.3
-      prompts: 2.4.2
-      rehype: 13.0.1
-      resolve: 1.22.8
-      semver: 7.6.0
-      server-destroy: 1.0.1
-      shikiji: 0.6.13
-      string-width: 7.1.0
-      strip-ansi: 7.1.0
-      tsconfck: 3.0.3(typescript@5.4.5)
       unist-util-visit: 5.0.0
       vfile: 6.0.1
       vite: 4.5.2(@types/node@20.12.12)(terser@5.30.4)
@@ -23663,7 +23595,9 @@ snapshots:
 
   dedent-js@1.0.1: {}
 
-  dedent@1.5.1: {}
+  dedent@1.5.1(babel-plugin-macros@2.8.0):
+    optionalDependencies:
+      babel-plugin-macros: 2.8.0
 
   deep-eql@4.1.3:
     dependencies:
@@ -24422,6 +24356,16 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  eslint-module-utils@2.8.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.2.2))(eslint-import-resolver-node@0.3.9)(eslint@8.41.0):
+    dependencies:
+      debug: 3.2.7
+    optionalDependencies:
+      '@typescript-eslint/parser': 6.21.0(eslint@8.57.0)(typescript@5.2.2)
+      eslint: 8.41.0
+      eslint-import-resolver-node: 0.3.9
+    transitivePeerDependencies:
+      - supports-color
+
   eslint-plugin-etc@2.0.2(eslint@8.57.0)(typescript@5.0.3):
     dependencies:
       '@phenomnomnominal/tsquery': 4.2.0(typescript@5.0.3)
@@ -24470,7 +24414,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.41.0
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.8.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1)(eslint@8.41.0))(eslint@8.41.0)
+      eslint-module-utils: 2.8.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.2.2))(eslint-import-resolver-node@0.3.9)(eslint@8.41.0)
       hasown: 2.0.2
       is-core-module: 2.13.1
       is-glob: 4.0.3
@@ -28270,7 +28214,7 @@ snapshots:
 
   netmask@2.0.2: {}
 
-  next@14.2.2(@babel/core@7.24.4)(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+  next@14.2.2(@babel/core@7.24.4)(@playwright/test@1.39.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       '@next/env': 14.2.2
       '@swc/helpers': 0.5.5
@@ -28291,13 +28235,14 @@ snapshots:
       '@next/swc-win32-arm64-msvc': 14.2.2
       '@next/swc-win32-ia32-msvc': 14.2.2
       '@next/swc-win32-x64-msvc': 14.2.2
+      '@playwright/test': 1.39.0
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
 
   nice-try@1.0.5: {}
 
-  nitropack@2.8.1(@azure/identity@4.1.0):
+  nitropack@2.8.1(@azure/identity@4.1.0)(xml2js@0.5.0):
     dependencies:
       '@cloudflare/kv-asset-handler': 0.3.1
       '@netlify/functions': 2.6.0
@@ -28363,6 +28308,8 @@ snapshots:
       unenv: 1.9.0
       unimport: 3.7.1(rollup@4.16.4)
       unstorage: 1.10.2(@azure/identity@4.1.0)
+    optionalDependencies:
+      xml2js: 0.5.0
     transitivePeerDependencies:
       - '@azure/app-configuration'
       - '@azure/cosmos'
@@ -29161,6 +29108,15 @@ snapshots:
     dependencies:
       camelcase-css: 2.0.1
       postcss: 8.4.38
+
+  postcss-load-config@4.0.2(postcss@8.4.38)(ts-node@10.9.2(@types/node@20.12.12)(typescript@5.3.3)):
+    dependencies:
+      lilconfig: 3.1.1
+      yaml: 2.4.1
+    optionalDependencies:
+      postcss: 8.4.38
+      ts-node: 10.9.2(@types/node@20.12.12)(typescript@5.3.3)
+    optional: true
 
   postcss-load-config@4.0.2(postcss@8.4.38)(ts-node@10.9.2(@types/node@20.12.7)(typescript@5.0.4)):
     dependencies:
@@ -30217,6 +30173,15 @@ snapshots:
       rollup: 3.29.1
       svelte: 5.0.0-next.135
 
+  rollup-plugin-visualizer@5.12.0(rollup@3.29.1):
+    dependencies:
+      open: 8.4.2
+      picomatch: 2.3.1
+      source-map: 0.7.4
+      yargs: 17.7.2
+    optionalDependencies:
+      rollup: 3.29.1
+
   rollup-plugin-visualizer@5.12.0(rollup@4.16.4):
     dependencies:
       open: 8.4.2
@@ -30672,17 +30637,17 @@ snapshots:
       keen-slider: 6.8.6
       solid-js: 1.8.17
 
-  solid-tiptap@0.6.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))(solid-js@1.8.17):
-    dependencies:
-      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
-      '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
-      solid-js: 1.8.17
-
   solid-tiptap@0.6.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))(solid-js@1.7.11):
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
       '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
       solid-js: 1.7.11
+
+  solid-tiptap@0.6.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))(solid-js@1.8.17):
+    dependencies:
+      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
+      '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
+      solid-js: 1.8.17
 
   solid-use@0.8.0(solid-js@1.8.17):
     dependencies:
@@ -31006,7 +30971,7 @@ snapshots:
 
   supports-preserve-symlinks-flag@1.0.0: {}
 
-  svelte-check@3.6.9(@babel/core@7.24.4)(postcss-load-config@4.0.2(postcss@8.4.38))(postcss@8.4.38)(svelte@3.59.2):
+  svelte-check@3.6.9(@babel/core@7.24.4)(postcss-load-config@4.0.2(postcss@8.4.38)(ts-node@10.9.2(@types/node@20.12.12)(typescript@5.3.3)))(postcss@8.4.38)(svelte@3.59.2):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
       chokidar: 3.6.0
@@ -31015,7 +30980,7 @@ snapshots:
       picocolors: 1.0.0
       sade: 1.8.1
       svelte: 3.59.2
-      svelte-preprocess: 5.1.4(@babel/core@7.24.4)(postcss-load-config@4.0.2(postcss@8.4.38))(postcss@8.4.38)(svelte@3.59.2)(typescript@5.3.3)
+      svelte-preprocess: 5.1.4(@babel/core@7.24.4)(postcss-load-config@4.0.2(postcss@8.4.38)(ts-node@10.9.2(@types/node@20.12.12)(typescript@5.3.3)))(postcss@8.4.38)(svelte@3.59.2)(typescript@5.3.3)
       typescript: 5.3.3
     transitivePeerDependencies:
       - '@babel/core'
@@ -31028,7 +30993,7 @@ snapshots:
       - stylus
       - sugarss
 
-  svelte-check@3.6.9(@babel/core@7.24.4)(postcss-load-config@4.0.2(postcss@8.4.38))(postcss@8.4.38)(svelte@4.2.15):
+  svelte-check@3.6.9(@babel/core@7.24.4)(postcss-load-config@4.0.2(postcss@8.4.38)(ts-node@10.9.2(@types/node@20.12.12)(typescript@5.3.3)))(postcss@8.4.38)(svelte@4.2.15):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
       chokidar: 3.6.0
@@ -31037,7 +31002,7 @@ snapshots:
       picocolors: 1.0.0
       sade: 1.8.1
       svelte: 4.2.15
-      svelte-preprocess: 5.1.4(@babel/core@7.24.4)(postcss-load-config@4.0.2(postcss@8.4.38))(postcss@8.4.38)(svelte@4.2.15)(typescript@5.3.3)
+      svelte-preprocess: 5.1.4(@babel/core@7.24.4)(postcss-load-config@4.0.2(postcss@8.4.38)(ts-node@10.9.2(@types/node@20.12.12)(typescript@5.3.3)))(postcss@8.4.38)(svelte@4.2.15)(typescript@5.3.3)
       typescript: 5.3.3
     transitivePeerDependencies:
       - '@babel/core'
@@ -31066,7 +31031,7 @@ snapshots:
     dependencies:
       svelte: 5.0.0-next.135
 
-  svelte-preprocess@5.1.4(@babel/core@7.24.4)(postcss-load-config@4.0.2(postcss@8.4.38))(postcss@8.4.38)(svelte@3.59.2)(typescript@5.3.3):
+  svelte-preprocess@5.1.4(@babel/core@7.24.4)(postcss-load-config@4.0.2(postcss@8.4.38)(ts-node@10.9.2(@types/node@20.12.12)(typescript@5.3.3)))(postcss@8.4.38)(svelte@3.59.2)(typescript@5.3.3):
     dependencies:
       '@types/pug': 2.0.10
       detect-indent: 6.1.0
@@ -31077,10 +31042,10 @@ snapshots:
     optionalDependencies:
       '@babel/core': 7.24.4
       postcss: 8.4.38
-      postcss-load-config: 4.0.2(postcss@8.4.38)(ts-node@10.9.2(@types/node@20.12.7)(typescript@5.3.2))
+      postcss-load-config: 4.0.2(postcss@8.4.38)(ts-node@10.9.2(@types/node@20.12.12)(typescript@5.3.3))
       typescript: 5.3.3
 
-  svelte-preprocess@5.1.4(@babel/core@7.24.4)(postcss-load-config@4.0.2(postcss@8.4.38))(postcss@8.4.38)(svelte@4.2.15)(typescript@5.3.3):
+  svelte-preprocess@5.1.4(@babel/core@7.24.4)(postcss-load-config@4.0.2(postcss@8.4.38)(ts-node@10.9.2(@types/node@20.12.12)(typescript@5.3.3)))(postcss@8.4.38)(svelte@4.2.15)(typescript@5.3.3):
     dependencies:
       '@types/pug': 2.0.10
       detect-indent: 6.1.0
@@ -31091,7 +31056,7 @@ snapshots:
     optionalDependencies:
       '@babel/core': 7.24.4
       postcss: 8.4.38
-      postcss-load-config: 4.0.2(postcss@8.4.38)(ts-node@10.9.2(@types/node@20.12.7)(typescript@5.3.2))
+      postcss-load-config: 4.0.2(postcss@8.4.38)(ts-node@10.9.2(@types/node@20.12.12)(typescript@5.3.3))
       typescript: 5.3.3
 
   svelte2tsx@0.6.27(svelte@4.2.15)(typescript@5.3.3):
@@ -31550,6 +31515,25 @@ snapshots:
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
 
+  ts-node@10.9.2(@types/node@20.12.12)(typescript@5.3.3):
+    dependencies:
+      '@cspotcode/source-map-support': 0.8.1
+      '@tsconfig/node10': 1.0.11
+      '@tsconfig/node12': 1.0.11
+      '@tsconfig/node14': 1.0.3
+      '@tsconfig/node16': 1.0.4
+      '@types/node': 20.12.12
+      acorn: 8.11.3
+      acorn-walk: 8.3.2
+      arg: 4.1.3
+      create-require: 1.1.1
+      diff: 4.0.2
+      make-error: 1.3.6
+      typescript: 5.3.3
+      v8-compile-cache-lib: 3.0.1
+      yn: 3.1.1
+    optional: true
+
   ts-node@10.9.2(@types/node@20.12.7)(typescript@5.0.4):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
@@ -31632,10 +31616,6 @@ snapshots:
   tsconfck@3.0.3(typescript@5.3.3):
     optionalDependencies:
       typescript: 5.3.3
-
-  tsconfck@3.0.3(typescript@5.4.5):
-    optionalDependencies:
-      typescript: 5.4.5
 
   tsconfig-paths@3.15.0:
     dependencies:
@@ -31971,6 +31951,24 @@ snapshots:
       is-plain-obj: 4.1.0
       trough: 2.2.0
       vfile: 6.0.1
+
+  unimport@3.7.1(rollup@3.29.1):
+    dependencies:
+      '@rollup/pluginutils': 5.1.0(rollup@3.29.1)
+      acorn: 8.11.3
+      escape-string-regexp: 5.0.0
+      estree-walker: 3.0.3
+      fast-glob: 3.3.2
+      local-pkg: 0.5.0
+      magic-string: 0.30.10
+      mlly: 1.6.1
+      pathe: 1.1.2
+      pkg-types: 1.1.0
+      scule: 1.3.0
+      strip-literal: 1.3.0
+      unplugin: 1.5.1
+    transitivePeerDependencies:
+      - rollup
 
   unimport@3.7.1(rollup@4.16.4):
     dependencies:
@@ -32325,7 +32323,7 @@ snapshots:
       source-map-support: 0.5.21
       vite: 4.5.2(@types/node@20.5.9)(terser@5.30.4)
 
-  vinxi@0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@4.16.4)(terser@5.30.4):
+  vinxi@0.1.10(@azure/identity@4.1.0)(@types/node@20.12.7)(preact@10.20.2)(rollup@3.29.1)(terser@5.30.4)(xml2js@0.5.0):
     dependencies:
       '@babel/core': 7.24.4
       '@babel/plugin-syntax-jsx': 7.24.1(@babel/core@7.24.4)
@@ -32333,7 +32331,7 @@ snapshots:
       '@types/micromatch': 4.0.7
       '@types/serve-static': 1.15.7
       '@types/ws': 8.5.10
-      '@vinxi/devtools': 0.1.1(@babel/core@7.24.4)(preact@10.20.2)(rollup@4.16.4)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))
+      '@vinxi/devtools': 0.1.1(@babel/core@7.24.4)(preact@10.20.2)(rollup@3.29.1)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4))
       '@vinxi/listhen': 1.5.6
       boxen: 7.1.1
       c12: 1.10.0
@@ -32353,21 +32351,21 @@ snapshots:
       http-proxy: 1.18.1
       micromatch: 4.0.5
       mri: 1.2.0
-      nitropack: 2.8.1(@azure/identity@4.1.0)
+      nitropack: 2.8.1(@azure/identity@4.1.0)(xml2js@0.5.0)
       node-fetch-native: 1.6.4
       path-to-regexp: 6.2.2
       pathe: 1.1.2
       perfect-debounce: 1.0.0
       radix3: 1.1.2
       resolve: 1.22.8
-      rollup-plugin-visualizer: 5.12.0(rollup@4.16.4)
+      rollup-plugin-visualizer: 5.12.0(rollup@3.29.1)
       serve-placeholder: 2.0.1
       serve-static: 1.15.0
       ufo: 1.5.3
       uncrypto: 0.1.3
       unctx: 2.3.1
       unenv: 1.9.0
-      unimport: 3.7.1(rollup@4.16.4)
+      unimport: 3.7.1(rollup@3.29.1)
       unstorage: 1.10.2(@azure/identity@4.1.0)
       vite: 4.5.2(@types/node@20.12.7)(terser@5.30.4)
       ws: 8.16.0
@@ -32439,10 +32437,10 @@ snapshots:
       - rollup
       - supports-color
 
-  vite-plugin-inspect@0.7.42(rollup@4.16.4)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4)):
+  vite-plugin-inspect@0.7.42(rollup@3.29.1)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4)):
     dependencies:
       '@antfu/utils': 0.7.7
-      '@rollup/pluginutils': 5.1.0(rollup@4.16.4)
+      '@rollup/pluginutils': 5.1.0(rollup@3.29.1)
       debug: 4.3.4(supports-color@8.1.1)
       error-stack-parser-es: 0.1.1
       fs-extra: 11.2.0
@@ -32454,9 +32452,9 @@ snapshots:
       - rollup
       - supports-color
 
-  vite-plugin-node-polyfills@0.16.0(rollup@4.16.4)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4)):
+  vite-plugin-node-polyfills@0.16.0(rollup@3.29.1)(vite@4.5.2(@types/node@20.12.7)(terser@5.30.4)):
     dependencies:
-      '@rollup/plugin-inject': 5.0.5(rollup@4.16.4)
+      '@rollup/plugin-inject': 5.0.5(rollup@3.29.1)
       buffer-polyfill: buffer@6.0.3
       node-stdlib-browser: 1.2.0
       process: 0.11.10
@@ -32464,9 +32462,9 @@ snapshots:
     transitivePeerDependencies:
       - rollup
 
-  vite-plugin-node-polyfills@0.17.0(rollup@4.16.4)(vite@4.5.2(@types/node@20.5.9)(terser@5.30.4)):
+  vite-plugin-node-polyfills@0.17.0(rollup@3.29.1)(vite@4.5.2(@types/node@20.5.9)(terser@5.30.4)):
     dependencies:
-      '@rollup/plugin-inject': 5.0.5(rollup@4.16.4)
+      '@rollup/plugin-inject': 5.0.5(rollup@3.29.1)
       buffer-polyfill: buffer@6.0.3
       node-stdlib-browser: 1.2.0
       process: 0.11.10
@@ -32845,12 +32843,12 @@ snapshots:
     optionalDependencies:
       '@volar/language-service': 2.1.6
 
-  volar-service-prettier@0.0.34(@volar/language-service@2.1.6)(prettier@3.2.5):
+  volar-service-prettier@0.0.34(@volar/language-service@2.1.6)(prettier@2.8.3):
     dependencies:
       vscode-uri: 3.0.8
     optionalDependencies:
       '@volar/language-service': 2.1.6
-      prettier: 3.2.5
+      prettier: 2.8.3
 
   volar-service-typescript-twoslash-queries@0.0.34(@volar/language-service@2.1.6):
     optionalDependencies:
