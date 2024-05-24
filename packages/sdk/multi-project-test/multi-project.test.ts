@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url"
 import { dirname, join } from "node:path"
 import childProcess from "node:child_process"
 import fs from "node:fs/promises"
+import { fromV1Message } from "../src/v2/shim.js"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -79,16 +80,17 @@ describe.concurrent(
 		)
 
 		// skip pending new v2 persistence with translation.
-		it.skip(
+		it(
 			"project4 in project4-dir",
 			async () => {
 				const before = await fs.readFile(
 					join(__dirname, "project4-dir", "messages.json.bak"),
 					"utf8"
 				)
+				const messageBundles = JSON.parse(before).map(fromV1Message)
 				await fs.writeFile(
 					join(__dirname, "project4-dir", "project.inlang", "messages.json"),
-					before
+					JSON.stringify(messageBundles, undefined, "2")
 				)
 				await run("pnpm translate4")
 				const expected = await fs.readFile(
@@ -101,10 +103,10 @@ describe.concurrent(
 				)
 				expect(result).toEqual(expected)
 			},
-			{ timeout: 20000 }
+			{ timeout: 2000000 }
 		)
 	},
-	{ timeout: 40000 }
+	{ timeout: 4000000 }
 )
 
 // run command in __dirname

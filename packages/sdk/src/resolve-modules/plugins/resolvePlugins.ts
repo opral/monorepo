@@ -13,6 +13,9 @@ import { deepmerge } from "deepmerge-ts"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { tryCatch } from "@inlang/result"
 
+import _debug from "debug"
+const debug = _debug("sdk:resolvePlugins")
+
 // @ts-ignore - type mismatch error
 const PluginCompiler = TypeCompiler.Compile(Plugin)
 
@@ -24,6 +27,11 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 			customApi: {},
 		},
 		errors: [],
+	}
+
+	const experimentalPersistence = !!args.settings.experimental?.persistence
+	if (experimentalPersistence) {
+		debug("Using experimental persistence")
 	}
 
 	for (const plugin of args.plugins) {
@@ -110,8 +118,9 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 	// --- LOADMESSAGE / SAVEMESSAGE NOT DEFINED ---
 
 	if (
-		typeof result.data.loadMessages !== "function" ||
-		typeof result.data.saveMessages !== "function"
+		!experimentalPersistence &&
+		(typeof result.data.loadMessages !== "function" ||
+			typeof result.data.saveMessages !== "function")
 	) {
 		result.errors.push(new PluginsDoNotProvideLoadOrSaveMessagesError())
 	}
