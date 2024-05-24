@@ -11,8 +11,8 @@ export async function releaseLock(
 	debug(lockOrigin + " releasing the lock ")
 	try {
 		const stats = await fs.stat(lockDirPath)
+		// I believe this check associates the lock with the aquirer
 		if (stats.mtimeMs === lockTime) {
-			// this can be corrupt as welll since the last getStat and the current a modification could have occured :-/
 			await fs.rmdir(lockDirPath)
 		}
 	} catch (statError: any) {

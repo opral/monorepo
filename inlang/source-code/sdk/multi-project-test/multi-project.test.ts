@@ -3,7 +3,6 @@ import { fileURLToPath } from "node:url"
 import { dirname, join } from "node:path"
 import childProcess from "node:child_process"
 import fs from "node:fs/promises"
-import { fromV1Message } from "../src/v2/shim.js"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)

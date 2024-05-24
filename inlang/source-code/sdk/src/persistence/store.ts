@@ -1,6 +1,8 @@
 import type { MessageBundle } from "../v2/types.js"
 import { normalizeMessageBundle } from "../v2/createMessageBundle.js"
 import { getDirname, type NodeishFilesystem } from "@lix-js/fs"
+import { acquireFileLock } from "./filelock/acquireFileLock.js"
+import { releaseLock } from "./filelock/releaseLock.js"
 import type { StoreApi } from "./storeApi.js"
 
 import _debug from "debug"
@@ -10,8 +12,12 @@ export async function openStore(args: {
 	projectPath: string
 	nodeishFs: NodeishFilesystem
 }): Promise<StoreApi> {
-	const filePath = args.projectPath + "/messages.json"
 	const nodeishFs = args.nodeishFs
+	const filePath = args.projectPath + "/messages.json"
+	const lockDirPath = args.projectPath + "/messagelock"
+
+	// the index holds the in-memory state
+	// TODO: reload when file changes on disk
 	const index = await load()
 
 	return {
@@ -33,12 +39,19 @@ export async function openStore(args: {
 		},
 	}
 
+	// load and save messages from file system atomically
+	// using a lock file to prevent partial reads and writes
 	async function load() {
+		const lockTime = await acquireFileLock(nodeishFs, lockDirPath, "load")
 		const messages = await readJSON({ filePath, nodeishFs: nodeishFs })
-		return new Map<string, MessageBundle>(messages.map((message) => [message.id, message]))
+		const index = new Map<string, MessageBundle>(messages.map((message) => [message.id, message]))
+		await releaseLock(nodeishFs, lockDirPath, "load", lockTime)
+		return index
 	}
 	async function save() {
+		const lockTime = await acquireFileLock(nodeishFs, lockDirPath, "save")
 		await writeJSON({ filePath, nodeishFs: nodeishFs, messages: [...index.values()] })
+		await releaseLock(nodeishFs, lockDirPath, "load", lockTime)
 	}
 }
 

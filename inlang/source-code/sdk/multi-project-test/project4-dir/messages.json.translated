@@ -94,10 +94,9 @@
             ]
           }
         ]
-      }
-    ]
-  }
-]      "locale": "de",
+      },
+      {
+        "locale": "de",
         "declarations": [],
         "selectors": [],
         "variants": [
