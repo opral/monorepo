@@ -1,94 +1,36 @@
 # Build a global [SvelteKit](https://kit.svelte.dev) app
 
-In this guide, we will be creating a simple SvelteKit app with i18n routing, using Paraglide for translations. This should be all you need to get started with Paraglide.
+In this guide, we will be creating a simple SvelteKit app with localised routing, using Paraglide for translations.
 
-We will be using [Paraglide.js](https://inlang.com/m/gerre34r/library-inlang-paraglideJs), the [inlang-message-format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat) and [Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) – a helpful i18n VS Code extension.
+We will be using [Paraglide-Sveltekit](https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n) i18n library and the [Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) VS Code extension.
+
+Paraglide-SvelteKit is a great choice for SvelteKit. It's fully typesafe and comes with localised routing and link translations out of the box.
 
 ## 1. Create a SvelteKit app
 
 Set up a SvelteKit app as you normally would. If you need help, check out the [SvelteKit documentation](https://kit.svelte.dev/docs/creating-a-project).
 
-```cmd
+```bash
 npm create svelte@latest my-app
 cd my-app
+```
+
+## 2. Initialize Paraglide-SvelteKit
+
+Run the following command in your project root to initialize Paraglide-SvelteKit.
+
+```bash
+npx @inlang/paraglide-sveltekit init
 npm install
-npm run dev
-git init
 ```
 
-## 2. Initialize Paraglide
-
-We recommend that you initialize Paraglide using the CLI. This will make sure all files are in the right place, and that the correct dependencies are installed.
-
-In the root of your project, run:
-
-```cmd
-npx @inlang/paraglide-js@latest init
-```
-
-The CLI might ask you some questions depending on your environment. Answer them thoroughly & follow the instructions.
-
-```cmd
-npx @inlang/paraglide-js@latest init
-
-✔ Successfully created a new inlang project.
-✔ Added @inlang/paraglide-js to the dependencies in package.json.
-✔ Successfully added the compile command to the build step in package.json.
-
- ╭──────────────────────────────────────────────────────────────────────────────────────╮
- │                                                                                      │
- │  inlang Paraglide-JS has been set up sucessfully.                                    │
- │                                                                                      │
- │  1. Run your install command (npm i, yarn install, etc)                              │
- │  2. Run the build script (npm run build, or similar.)                                │
- │  3. Done :) Happy paragliding 🪂                                                     │
- │                                                                                      │
- │   For questions and feedback, visit https://github.com/opral/monorepo/discussions.  │
- │                                                                                      │
- │                                                                                      │
- ╰──────────────────────────────────────────────────────────────────────────────────────╯
-```
-
-### Definining an Alias
-
-Paraglide will put the translations in the `./src/paraglide` folder, as specified in the `vite.config.ts` file. Since we will be importing from there a lot, adding an alias is a good idea.
-
-Luckily, SvelteKit makes this super easy. It has a dedicated `alias` option in the `kit` object in `svelte.config.js`.
-
-```js
-import adapter from "@sveltejs/adapter-auto"
-import { vitePreprocess } from "@sveltejs/kit/vite"
-
-/** @type {import('@sveltejs/kit').Config} */
-const config = {
-	preprocess: vitePreprocess(),
-
-	kit: {
-		adapter: adapter(),
-
-		alias: {
-			//You can call this whatever you want
-			$paraglide: "./src/paraglide",
-		},
-	},
-}
-
-export default config
-```
-
-With the alias, we can import the translations like this:
-
-```ts
-import * as m from "$paraglide/messages"
-```
-
-Neat right?
+The CLI will ask you which languages you intend to support. Don't worry, this can be changed later.
 
 ## 3. Adding and Using Messages
 
 ### Adding Messages
 
-The init command will have generated `./messages/{lang}.json` files for each language. This is where your messages live. The Files contain a Key-Value pair of the message ID and the message itself.
+The init command will have generated `./messages/{lang}.json` files for each language. This is where your messages live. The files contain a key-value pair of the message-key and the message itself.
 
 ```json
 // messages/en.json
@@ -102,28 +44,22 @@ The init command will have generated `./messages/{lang}.json` files for each lan
 You can add messages in two ways:
 
 1. Manually editing the translation files
-2. Using [Sherlock (VS Code extension)](https://inlang.com/m/r7kp499g/app-inlang-ideExtension)
+2. Using the [Sherlock (VS Code extension)](https://inlang.com/m/r7kp499g/app-inlang-ideExtension)
 
-### Add messages through Sherlock (VS Code extension) - recommended
+### Add messages through Sherlock (recommended)
 
-- Install the Sherlock (VS Code extension) from the VS Code marketplace.
-  [See extension on inlang.com](https://inlang.com/m/r7kp499g/app-inlang-ideExtension)
-  [vs-code marketplace](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension)
+First, install the  Sherlock VS Code extension from the [vs-code marketplace](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension).
 
-- Reload window (only needed once).
-  `⌘ or Ctrl` + `Shift` + `P` -> Developer: Reload Window. On the bottom it should display for some seconds after relaod: `inlang's extension activated`.
+Once you have the extension installed, select a hard-coded string with your cursor, hit `⌘ + .` and use the `Sherlock: Extract` action. Give the message an ID and hit enter.
 
-- Select a hard-coded string, for example, on the About page. Mark the string with your cursor and hit `command` + `.` -> Sherlock: Extract
-  message. Give the message an ID and hit enter.
-
-- This command extracts the hard-coded string and places it into the source language translation file `en.json` in the `messages` directory.
+This extracts the hard-coded string and places it into the translation file of the default language. No need to even look at the file! 
 
 ### Using Messages in Code
 
-You can import messages into your code like this:
+Import messages from `$lib/paraglide/messages`. By convention we do a wildcard import as `m`.
 
 ```ts
-import * as m from "$paraglide/messages"
+import * as m from "$lib/paraglide/messages"
 
 m.hello_world() // Hello World
 m.greeting({ name: "John" }) // Hello John
@@ -131,171 +67,62 @@ m.greeting({ name: "John" }) // Hello John
 
 Each message is a function that returns the message in the current language. If the message requires parameters, typescript will enforce that you pass them in.
 
-You can change which language is currently active by using the `setLanguageTag` function exported from `$paraglide/runtime`.
+### 4. Localised Routing
 
-```ts
-import * as m from "$paraglide/messages"
-import { setLanguageTag } from "$paraglide/runtime"
+Paraglide-SvelteKit uses the URL to determine which language to use. If the first part of the path is a language, that langauge will be used. Otherwise the default language will be used.
 
-setLanguageTag("en")
-m.hello_world() // Hello World
-m.greeting({ name: "John" }) // Hello John
+- `/about` → english (default language)
+- `/de/about` → german
 
-setLanguageTag("de")
-m.hello_world() // Hallo Welt
-m.greeting({ name: "John" }) // Hallo John
-```
+Creating a route for eacht language & updating all your links to include the language tag is tedious. For this reason Paraglide-SvelteKit comes with localised routing out of the box. 
 
-Messages are **not** reactive, so you will need to re-render your component when the language changes. We will see how to do that in the next step.
-
-## 4. Installing `@inlang/paraglide-sveltekit`
-
-`@inlang/paraglide-sveltekit` is a SvelteKit specific that make it easier to use Paraglide. It provides a few things:
-- Automatically manage language state
-- i18n routing
-- SEO considerations
-
-Install it with
-
-```cmd
-npm i @inlang/paraglide-sveltekit
-```
-
-
-### 4.1 Adding the Vite Plugin
-
-Paraglide-Sveltekit provides a Vite plugin that automatically compiles your translations. This means that you don't need to call `paraglide-js compile` in your build script.
-
-```ts
-import { sveltekit } from "@sveltejs/kit/vite"
-import { paraglide } from "@inlang/paraglide-sveltekit/vite"
-import { defineConfig } from "vite"
-
-export default defineConfig({
-	plugins: [
-		sveltekit(),
-		paraglide({
-			project: "./project.inlang",
-			outdir: "./src/paraglide",
-		}),
-	],
-})
-```
-
-### 4.2 Initializing Paraglide-SvelteKit
-
-To initialize Paraglide-SvelteKit, we need to call `createI18n` and pass it the paraglide runtime. We can do this in a new file, for example `./src/lib/i18n.ts`.
-
-```ts
-// ./src/lib/i18n.ts
-import { createI18n } from "@inlang/paraglide-sveltekit"
-import * as runtime from "$paraglide/runtime"
-
-export const i18n = createI18n(runtime)
-```
-
-### 4.3 Adding the Language Provider to your Layout
-
-To provide the language to your app, add the `ParaglideJS` component to your layout and pass it the `routing` instance.
+Requests to `/de/about` will render the page at `src/routes/about/+page.svelte` by default. You don't need to add a `[locale]` parameter. Additionally, internal links like `<a href="/about">About</a>` are automatically rewritten to include the current language. 
 
 ```svelte
-<!-- src/routes/+layout.svelte -->
-<script>
-	import { ParaglideJS } from '@inlang/paraglide-sveltekit'
-	import { i18n } from '$lib/i18n'
-</script>
+<a href="/about">About</a>
 
-<ParaglideJS {i18n}>
-	<slot />
-</ParaglideJS>
+<!-- will render as -->
+<a href="/de/about">Über uns</a> 
+<!-- if current language is German -->
 ```
 
-This component will do a few things for you:
-1. It will set the current language based on the URL.
-2. It will re-render your app when the language changes.
-3. It will rewrite any links inside your app to include the language tag. (eg rewrite `/about` to `/en/about`)
-4. It will add the `rel="alternate"` link tags to your `<head>` for SEO purposes.
-
-
-### 4.4 Adding the Hooks
-
-The last thing you need is to set up the `reroute` hook in `src/hooks.js`. Again, the `i18n` instance has you covered.
-
-```ts
-// ./src/hooks.js
-import { i18n } from "$lib/i18n"
-export const reroute = i18n.reroute()
-```
-
-> This requires SvelteKit Version 2.3 or higher. Please upgrade if you are using an older version.
-
-
-### 4.5 Try it out
-
-You should now have i18n routing set up in your App. Try it out by navigating to `/en` and `/de` (or whatever languages you have set up). Navigating to `/` should give you the default language.
-
-You will also notice that any internal links, like `<a href="/about">About</a>` will be rewritten to include the current language tag. You can change which language a link points to by setting the `hreflang` attribute. 
+You can specify which language a link points to by setting the `hreflang` attribute. 
 
 ```svelte
 <a href="/about" hreflang="de">Über uns</a>
+<!-- will render as -->
+<a href="/de/about" hreflang="de">Über uns</a> 
+<!-- regardless of the current language -->
 ```
+
+This makes localised routing much less of a pain.
 
 ## 5. Adding a language switcher
 
-Language switchers are challenging, because they require us to dynamically translate the path we're currently on. We can do this by first removing the language tag from the path, and then adding it back in the correct language.
+Language switchers are challenging, because they require us to dynamically translate the path we're currently on. We can do this by first removing the language tag from the current path, and then adding it back in the correct language.
 
 Paraglide-SvelteKit provides convenient functions for this. `i18n.route(translatedPath)`.
 
 ```svelte
 <script lang="ts">
-  import { availableLanguageTags } from "$paraglide/runtime";
+  import { availableLanguageTags } from "$lib/paraglide/runtime";
   import { page } from "$app/stores";
   import { i18n } from "$lib/i18n.js";
+
+  $: currentPathWithoutLanguage = i18n.route($page.url.pathname)
 </script>
 
 {#each availableLanguageTags as lang}
   <a 
-  	href={i18n.route($page.url.pathname)} 
+  	href={currentPathWithoutLanguage} 
 	hreflang={lang}>Change language to {lang}</a>
 {/each}
 ```
 
-## 6. SEO Considerations
-
-Most SEO considerations are handled automatically by Paraglide-SvelteKit.
-
-1. `rel="alternate"` link tags are automatically added to your `<head>` for SEO purposes.
-2. It encourages you to use the `hreflang` attribute on your `<a>` tags.
-
-The only thing left to do is to set the `lang` attribute on your `<html>` tag. This is important for search engines, and also for screen readers.
-
-Here too Paraglide-SvelteKit has you covered. It exposes a `handle` function that you can use to modify the HTML before it is sent to the client. We can use this to set the `lang` attribute.
-
-First, add an easy-to-find placeholder for the `lang` attribute in `./src/app.html`. By default the hook is looking for `%paraglide.lang%`.
-
-```html
-<!-- ./src/app.html -->
-<html lang="%paraglide.lang%" dir="%paraglide.dir%"></html>
-```
-
-Then in `hooks.server.ts`, register the `handle` function.
-
-```ts
-// ./src/hooks.server.ts
-import { i18n } from "$lib/i18n";
-export const handle = i18n.handle();
-```
-
-That's it! If you now reload the page and inspect the HTML, you should see the correct `lang` attribute.
-
 ## What's next?
-
-You are now set up with a multi-linguagal SvelteKit app using Paraglide!
 
 Paraglide-SvelteKit has a few more features that you might want to check out, such as localized paths. Read more about it in the [Paraglide-SvelteKit Documentation](https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n).
 
-Try it on [StackBlitz](https://stackblitz.com/~/github.com/lorissigrist/paraglide-sveltekit-example)
+Checkout the example GitHub](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-sveltekit/example) or on [StackBlitz](https://stackblitz.com/~/github.com/lorissigrist/paraglide-sveltekit-example)
 
 If you have any questions, feel free to ask them in our [Discord](https://discord.gg/CNPfhWpcAa) or open a discussion on [GitHub](https://github.com/opral/monorepo/discussions).
-
-You can reference an example project on [GitHub](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-sveltekit/example).
