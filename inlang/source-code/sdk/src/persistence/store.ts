@@ -86,13 +86,16 @@ export async function writeJSON(args: {
 		)
 	} catch (error) {
 		debug("saveMessages", error)
+		throw error
 	}
 }
 
 async function createDirectoryIfNotExits(path: string, nodeishFs: NodeishFilesystem) {
 	try {
 		await nodeishFs.mkdir(path, { recursive: true })
-	} catch {
-		// assume that the directory already exists
+	} catch (error: any) {
+		if (error.code !== "EEXIST") {
+			throw error
+		}
 	}
 }

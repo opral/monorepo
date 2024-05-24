@@ -101,10 +101,10 @@ describe.concurrent(
 				)
 				expect(result).toEqual(expected)
 			},
-			{ timeout: 2000000 }
+			{ timeout: 20000 }
 		)
 	},
-	{ timeout: 4000000 }
+	{ timeout: 40000 }
 )
 
 // run command in __dirname
