@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-imports */
 
 import { findRepoRoot, openRepository } from "@lix-js/client"
-import { loadProject } from "@inlang/sdk"
+import { loadProject, type Message } from "@inlang/sdk"
 
 import {
 	createMessage,
@@ -65,7 +65,6 @@ export async function runLoadTest(
 	// this is called before loadProject() to avoid reading partially written JSON
 	await generateMessageFile(isV2, messageCount)
 
-	/*
 	debug("opening repo and loading project")
 	const repoRoot = await findRepoRoot({ nodeishFs: fs, path: __dirname })
 	if (!repoRoot) {
@@ -82,7 +81,7 @@ export async function runLoadTest(
 		}
 	})
 
-	if (subscribeToMessages) {
+	if (subscribeToMessages && !isV2) {
 		debug("subscribing to messages.getAll")
 		let countMessagesGetAllEvents = 0
 
@@ -99,7 +98,7 @@ export async function runLoadTest(
 		})
 	}
 
-	if (subscribeToLintReports) {
+	if (subscribeToLintReports && !isV2) {
 		debug("subscribing to lintReports.getAll")
 		let lintEvents = 0
 		const logLintEvent = throttle(throttleLintEvents, (reports: any) => {
@@ -109,6 +108,12 @@ export async function runLoadTest(
 			lintEvents++
 			logLintEvent(reports)
 		})
+	}
+
+	if (isV2) {
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		const bundles = await project.store!.messageBundles.getAll()
+		debug(`loaded ${bundles.length} v2 MessageBundles`)
 	}
 
 	if (translate) {
@@ -123,7 +128,6 @@ export async function runLoadTest(
 			setTimeout(resolve, 1000 * 60 * 60 * 24)
 		})
 	}
-*/
 }
 
 async function generateMessageFile(isV2: boolean, messageCount: number) {

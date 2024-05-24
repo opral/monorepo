@@ -86,6 +86,7 @@ export async function loadProject(args: {
 		)
 
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
+		const [loadedSettings, markSettingsAsLoaded, markSettingsAsFailed] = createAwaitable()
 		// -- settings ------------------------------------------------------------
 
 		const [settings, _setSettings] = createSignal<ProjectSettings>()
@@ -100,9 +101,13 @@ export async function loadProject(args: {
 			// }
 
 			loadSettings({ settingsFilePath: projectPath + "/settings.json", nodeishFs })
-				.then((settings) => setSettings(settings))
+				.then((settings) => {
+					setSettings(settings)
+					markSettingsAsLoaded()
+				})
 				.catch((err) => {
 					markInitAsFailed(err)
+					markSettingsAsFailed(err)
 				})
 		})
 		// TODO: create FS watcher and update settings on change
@@ -202,13 +207,18 @@ export async function loadProject(args: {
 		let lintReportsQuery: MessageLintReportsQueryApi
 		let store: StoreApi | undefined
 
+		// wait for seetings to load v2Persistence flag
+		await loadedSettings
+
 		if (v2Persistence) {
-			// Open store and stub out existing query apis.
-			// Client code which is not aware of new persistence will not see messages.
-			// TODO: consider adapting query apis to the new store api instead of stubbing.
-			store = await openStore({ projectPath, nodeishFs })
 			messagesQuery = stubMessagesQuery
 			lintReportsQuery = stubMessageLintReportsQuery
+			try {
+				store = await openStore({ projectPath, nodeishFs })
+				markInitAsComplete()
+			} catch (e) {
+				markInitAsFailed(e)
+			}
 		} else {
 			messagesQuery = createMessagesQuery({
 				projectPath,

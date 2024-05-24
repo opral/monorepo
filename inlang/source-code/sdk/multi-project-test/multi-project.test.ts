@@ -87,10 +87,9 @@ describe.concurrent(
 					join(__dirname, "project4-dir", "messages.json.bak"),
 					"utf8"
 				)
-				const messageBundles = JSON.parse(before).map(fromV1Message)
 				await fs.writeFile(
 					join(__dirname, "project4-dir", "project.inlang", "messages.json"),
-					JSON.stringify(messageBundles, undefined, "2")
+					before
 				)
 				await run("pnpm translate4")
 				const expected = await fs.readFile(

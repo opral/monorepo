@@ -1,12 +1,5 @@
-# inlang sdk load-test
-package for volume testing
-
-- The test starts by generating engish messages in ./locales/en/common.json
-  or ./project.inlang/messages.json (depending on experimental.persistence)
-- It then calls loadProject() and subscribes to events.
-- It mock-translates into 36 languages using the inlang cli.
-- It uses the i18next message storage plugin (unless experimental.persistence is set)
-- To allow additional testing on the generated project e.g. with the ide-extension, the test calls `pnpm clean` when it starts, but not after it runs.
+# package @inlang/sdk-load-test
+The default `test` script runs a load-test with 1000 messages and translation enabled. For more messsages and different load-test options, use the `load-test` script.
 
 ```
 USAGE:
@@ -18,8 +11,17 @@ e.g.
 Defaults: translate: 1, subscribeToMessages: 1, subscribeToLintReports: 0, watchMode: 0
 ```
 
+### what it does
+- The test starts by generating engish messages in ./locales/en/common.json
+  or ./project.inlang/messages.json (depending on experimental.persistence)
+- It then calls loadProject() and subscribes to events.
+- It mock-translates into 36 languages using the inlang cli.
+- It uses the i18next message storage plugin (unless experimental.persistence is set)
+- To allow additional testing on the generated project e.g. with the ide-extension, the test calls `pnpm clean` when it starts, but not after it runs.
+
 ### to configure additional debug logging
-`export DEBUG=sdk:acquireFileLock,sdk:releaseLock,sdk:lintReports,sdk:loadProject`
+`export DEBUG=sdk:*` for wildcard (most verbose) logging and to see more specific options.
+e.g. `export DEBUG=sdk:lockFile`
 
 ### to translate from separate process
 1. Run pnpm load-test with translate:0, watchMode:1 E.g. `pnpm load-test 100 0 1 1 1`
