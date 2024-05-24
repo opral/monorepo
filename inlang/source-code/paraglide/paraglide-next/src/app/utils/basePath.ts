@@ -15,7 +15,7 @@ export function addPathPrefix(path: string, prefix?: string) {
 	return `${prefix}${pathname}${query}${hash}`
 }
 
-export function parsePath(path: string) {
+function parsePath(path: string) {
 	const hashIndex = path.indexOf("#")
 	const queryIndex = path.indexOf("?")
 	const hasQuery = queryIndex > -1 && (hashIndex < 0 || queryIndex < hashIndex)
