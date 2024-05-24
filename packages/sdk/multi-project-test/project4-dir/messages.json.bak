@@ -1,50 +1,65 @@
 [
   {
-    "alias": {},
     "id": "project4_message_key_1",
-    "selectors": [],
-    "variants": [
+    "alias": {},
+    "messages": [
       {
-        "languageTag": "en",
-        "match": [],
-        "pattern": [
+        "locale": "en",
+        "declarations": [],
+        "selectors": [],
+        "variants": [
           {
-            "type": "Text",
-            "value": "Generated message (1)"
+            "match": [],
+            "pattern": [
+              {
+                "type": "text",
+                "value": "Generated message (1)"
+              }
+            ]
           }
         ]
       }
     ]
   },
   {
-    "alias": {},
     "id": "project4_message_key_2",
-    "selectors": [],
-    "variants": [
+    "alias": {},
+    "messages": [
       {
-        "languageTag": "en",
-        "match": [],
-        "pattern": [
+        "locale": "en",
+        "declarations": [],
+        "selectors": [],
+        "variants": [
           {
-            "type": "Text",
-            "value": "Generated message (2)"
+            "match": [],
+            "pattern": [
+              {
+                "type": "text",
+                "value": "Generated message (2)"
+              }
+            ]
           }
         ]
       }
     ]
   },
   {
-    "alias": {},
     "id": "project4_message_key_3",
-    "selectors": [],
-    "variants": [
+    "alias": {},
+    "messages": [
       {
-        "languageTag": "en",
-        "match": [],
-        "pattern": [
+        "locale": "en",
+        "declarations": [],
+        "selectors": [],
+        "variants": [
           {
-            "type": "Text",
-            "value": "Generated message (3)"
+            "match": [],
+            "pattern": [
+              {
+                "type": "text",
+                "value": "Generated message (3)"
+              }
+            ]
           }
         ]
       }
