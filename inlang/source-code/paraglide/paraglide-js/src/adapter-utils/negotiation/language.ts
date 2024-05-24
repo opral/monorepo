@@ -201,17 +201,17 @@ function getHighestLanguagePriority<T extends string>(
 
 /**
  * Calculates the priority of an available language relative to an acceptable language
- * @param language A language that is available in the project
+ * @param languageTag A language that is available in the project
  * @param spec A parsed language from the Accept-Language header
  * @param index The index of the available language
  * @returns The priority of the language
  */
 function calculatePriority<T extends string>(
-	language: T,
+	languageTag: T,
 	spec: LanguageSpec,
 	index: number
 ): LanguagePriority<T> | undefined {
-	const parsed = parseLanguage(language, 0)
+	const parsed = parseLanguage(languageTag, 0)
 	if (!parsed) return undefined
 
 	let specificity = 0b000
@@ -225,12 +225,10 @@ function calculatePriority<T extends string>(
 
 	// if there is no specificity at all _and_ we're not considering a wildcard
 	// then we bail
-	if (specificity === 0 && spec.full !== "*") {
-		return undefined
-	}
+	if (specificity === 0 && spec.full !== "*") return undefined
 
 	return {
-		languageTag: language,
+		languageTag,
 		index,
 		order: spec.index,
 		quality: spec.quality,
