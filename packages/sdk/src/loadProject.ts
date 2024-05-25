@@ -208,8 +208,9 @@ export async function loadProject(args: {
 		let store: StoreApi | undefined
 
 		// wait for seetings to load v2Persistence flag
-		// .catch avoids throwing here if the awaitable is rejected.
-		const loadSettingsError: Error | undefined = await loadedSettings.catch((error) => error)
+		// .catch avoids throwing here if the awaitable is rejected
+		// error is recorded via markInitAsFailed so no need to capture it again
+		await loadedSettings.catch(() => {})
 
 		if (v2Persistence) {
 			messagesQuery = stubMessagesQuery
@@ -294,7 +295,6 @@ export async function loadProject(args: {
 				messageLintRules: createSubscribable(() => installedMessageLintRules()),
 			},
 			errors: createSubscribable(() => [
-				...(loadSettingsError ? [loadSettingsError] : []),
 				...(initializeError ? [initializeError] : []),
 				...(resolvedModules() ? resolvedModules()!.errors : []),
 				...(loadMessagesViaPluginError() ? [loadMessagesViaPluginError()!] : []),
