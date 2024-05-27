@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.44.5
+
+### Patch Changes
+
+- 522bd61: add check for number to m function matcher & update vs code settings component
+
 ## 1.44.4
 
 ### Patch Changes
