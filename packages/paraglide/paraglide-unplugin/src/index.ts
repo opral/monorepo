@@ -39,7 +39,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 	let numCompiles = 0
 	let previousMessagesHash: string | undefined = undefined
 
-	let messageModuleOutput: Record<string, string> = {}
+	let virtualModuleOutput: Record<string, string> = {}
 
 	async function triggerCompile(messages: readonly Message[], settings: ProjectSettings) {
 		const currentMessagesHash = hashMessages(messages ?? [], settings)
@@ -51,11 +51,18 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		}
 
 		logMessageChange()
-		const fsOutput = await compile({ messages, settings, outputStructure: "regular" })
-		messageModuleOutput = await compile({ messages, settings, outputStructure: "message-modules" })
+		previousMessagesHash = currentMessagesHash
+
+		const [regularOutput, messageModulesOutput] = await Promise.all([
+			compile({ messages, settings, outputStructure: "regular" }),
+			compile({ messages, settings, outputStructure: "message-modules" }),
+		])
+
+		virtualModuleOutput = messageModulesOutput
+		const fsOutput = regularOutput
+
 		await writeOutput(outputDirectory, fsOutput, fs)
 		numCompiles++
-		previousMessagesHash = currentMessagesHash
 	}
 
 	function logMessageChange() {
@@ -150,7 +157,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 					//if it starts with the outdir use the paraglideOutput virtual modules instead
 					if (id.startsWith(normalizedOutdir)) {
 						const internal = id.slice(normalizedOutdir.length)
-						const resolved = messageModuleOutput[internal]
+						const resolved = virtualModuleOutput[internal]
 						return resolved
 					}
 
