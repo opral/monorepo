@@ -1,0 +1,32 @@
+{
+  "name": "diff3",
+  "version": "0.0.4",
+  "description": "A diff3 engine for nodejs, converted to mdoule by lix and fixed 1 line in onp.js",
+  "main": "diff3.js",
+  "type": "module",
+  "exports": {
+    ".": "./diff3.js",
+    "./onp.js": "./onp.js"
+  },
+  "files": [
+    "diff3.js",
+    "onp.js"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/axosoft/diff3.git"
+  },
+  "keywords": [
+    "diff3",
+    "diff"
+  ],
+  "author": "Tyler Wanek & Jacob Watson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/axosoft/diff3/issues"
+  },
+  "homepage": "https://github.com/axosoft/diff3#readme"
+}

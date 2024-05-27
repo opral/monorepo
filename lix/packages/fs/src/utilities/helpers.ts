@@ -64,27 +64,36 @@ export function normalizePath(path: string, stripTrailing?: boolean): string {
  * path begins and ends with '/'
  * FIXME: unify with utilities/normalizePath!
  */
+const dots = /(\/|^)(\.\/)+/g
+const slashes = /\/+/g
+const upreference = /(?<!\.\.)[^/]+\/\.\.\//
 export function normalPath(path: string): string {
-	const dots = /(\/|^)(\.\/)+/g
-	const slashes = /\/+/g
+	// const origPath = path
+	// FIXME: move to simple logic liek this:
+	// const newPath =
+	// 	path === "" || path === "/" || path === "." || path === "//."
+	// 		? "/"
+	// 		: `/${path
+	// 				.split("/")
+	// 				.filter((elem) => elem !== "")
+	// 				.join("/")}/`
+	// return newPath
 
-	const upreference = /(?<!\.\.)[^/]+\/\.\.\//
-
+	// all THIS is super slow and not needed:
 	// Append '/' to the beginning and end
 	path = `/${path}/`
-
 	// Handle the edge case where a path begins with '/..'
 	path = path.replace(/^\/\.\./, "")
-
 	// Remove extraneous '.' and '/'
 	path = path.replace(dots, "/").replace(slashes, "/")
-
 	// Resolve relative paths if they exist
 	let match
 	while ((match = path.match(upreference)?.[0])) {
 		path = path.replace(match, "")
 	}
-
+	// if (newPath !== path) {
+	// 	console.log({ in: origPath, out: path, newPath })
+	// }
 	return path
 }
 

@@ -378,3 +378,6 @@ inlang/source-code/paraglide/paraglide-solidstart/example/.solid
 
 # Fink version.json
 inlang/source-code/editor/version.json
+
+# gitea test instance data
+lix/packages/gitea

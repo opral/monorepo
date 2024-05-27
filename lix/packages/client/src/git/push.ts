@@ -1,13 +1,13 @@
 import isoGit from "../../vendored/isomorphic-git/index.js"
-import type { RepoContext, RepoState } from "../openRepository.js"
+import type { RepoContext } from "../openRepository.js"
 import { makeHttpClient } from "../git-http/client.js"
 
-export const push = async (ctx: RepoContext, state: RepoState) => {
+export const push = async (ctx: RepoContext) => {
 	if (!ctx.gitUrl) {
 		throw new Error("Could not find repo url, only github supported for push at the moment")
 	}
 	return await isoGit.push({
-		fs: state.nodeishFs,
+		fs: ctx.rawFs,
 		url: ctx.gitUrl,
 		cache: ctx.cache,
 		corsProxy: ctx.gitProxyUrl,
