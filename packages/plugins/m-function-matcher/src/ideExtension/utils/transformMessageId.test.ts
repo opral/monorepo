@@ -28,4 +28,10 @@ describe("transformMessageId function", () => {
 		expect(transformMessageId("HelloWorld")).toEqual("HelloWorld")
 		expect(transformMessageId("HELLO_WORLD")).toEqual("HELLO_WORLD")
 	})
+
+	it("should prepend an underscore if the transformed ID starts with a number", () => {
+		expect(transformMessageId("1 helloWorld")).toEqual("_1_helloWorld")
+		expect(transformMessageId("1HelloWorld")).toEqual("_1HelloWorld")
+		expect(transformMessageId("12345.5 HELLO_WORLD")).toEqual("_12345_5_HELLO_WORLD")
+	})
 })

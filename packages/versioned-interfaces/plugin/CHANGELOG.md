@@ -1,5 +1,12 @@
 # @inlang/plugin
 
+## 2.4.12
+
+### Patch Changes
+
+- Updated dependencies [00ad046]
+  - @lix-js/fs@2.0.0
+
 ## 2.4.11
 
 ### Patch Changes

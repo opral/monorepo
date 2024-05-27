@@ -492,7 +492,9 @@ export class InlangManage extends TwLitElement {
 							: typeof this.user === "undefined"
 							? html`<button
 									@click=${async () => {
-										await browserAuth.login()
+										await browserAuth.login({
+											redirect: window.location.origin + "/auth/auth-callback",
+										})
 										window.location.reload()
 									}}
 									target="_blank"
@@ -782,7 +784,9 @@ export class InlangManage extends TwLitElement {
 										</p>
 										<button
 											@click=${async () => {
-												await browserAuth.login()
+												await browserAuth.login({
+													redirect: window.location.origin + "/auth/auth-callback",
+												})
 												window.location.reload()
 											}}
 											target="_blank"

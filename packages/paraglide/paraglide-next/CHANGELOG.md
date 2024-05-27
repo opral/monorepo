@@ -1,5 +1,20 @@
 # @inlang/paraglide-next
 
+## 0.3.0
+
+### Minor Changes
+
+- 68023fc: Add NextJS 15 to supported Next versions
+
+### Patch Changes
+
+- 4e45ab2: Improved HTTP Header SEO
+
+  `Link` headers are now only generated if the hrefs are unique for each language.
+  `Vary` headers are now generated if the hrefs aren't sufficient to determine the language.
+
+  - @inlang/paraglide-js@1.9.1
+
 ## 0.2.4
 
 ### Patch Changes

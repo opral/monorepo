@@ -1,5 +1,22 @@
 # @inlang/cli
 
+## 2.16.10
+
+### Patch Changes
+
+- Updated dependencies [00ad046]
+- Updated dependencies [00ad046]
+  - @lix-js/fs@2.0.0
+  - @lix-js/client@2.0.0
+  - @inlang/sdk@0.35.1
+
+## 2.16.9
+
+### Patch Changes
+
+- Updated dependencies [ae47203]
+  - @inlang/sdk@0.35.0
+
 ## 2.16.8
 
 ### Patch Changes
