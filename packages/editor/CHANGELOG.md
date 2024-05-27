@@ -4,6 +4,16 @@
 
 ### Patch Changes
 
+- Updated dependencies [00ad046]
+- Updated dependencies [00ad046]
+  - @lix-js/fs@2.0.0
+  - @lix-js/client@2.0.0
+  - @inlang/settings-component@1.0.18
+
+## null
+
+### Patch Changes
+
 - @inlang/settings-component@1.0.17
 
 ## null

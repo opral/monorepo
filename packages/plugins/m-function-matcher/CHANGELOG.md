@@ -1,5 +1,12 @@
 # @inlang/plugin-m-function-matcher
 
+## 0.9.22
+
+### Patch Changes
+
+- @inlang/sdk@0.35.1
+- @inlang/plugin@2.4.12
+
 ## 0.9.21
 
 ### Patch Changes
