@@ -18,7 +18,7 @@
 	"pages": {
 		"Overview": {
 			"/": "./inlang/source-code/editor/README.md",
-			"/get-started": "./inlang/source-code/editor/docs/get-started.md"
+			"/supported-i18n-libraries": "./inlang/source-code/editor/docs/supported-i18n-libraries.md"
 		},
 		"Guides": {
 			"Usage": "/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink",
