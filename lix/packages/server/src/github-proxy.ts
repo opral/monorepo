@@ -68,6 +68,7 @@ router.all(
 
 			response.set("Access-Control-Allow-Credentials", "true")
 			response.set("Access-Control-Allow-Headers", "x-github-api-version, user-agent, content-type")
+			response.set("Access-Control-Max-Age", "86400")
 
 			if (targetUrl.endsWith("/user/emails") && res.status === 401 && decryptedAccessToken) {
 				response.statusMessage = "token_invalid"
