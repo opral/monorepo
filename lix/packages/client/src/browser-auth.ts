@@ -17,9 +17,11 @@ export function getAuthClient({
 		 * Read https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps#1-request-a-users-github-identity
 		 * works only in browsers for now, but other methods should be supported in future
 		 */
-		async login() {
+		async login({ redirect } = { redirect: "" }) {
 			const loginWindow = window.open(
-				`https://github.com/login/oauth/authorize?client_id=${githubAppClientId}`, // &redirect_uri=${
+				`https://github.com/login/oauth/authorize?client_id=${githubAppClientId}${
+					redirect ? "&state=" + encodeURI(redirect) : ""
+				}`,
 				"_blank"
 			)
 

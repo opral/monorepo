@@ -13,13 +13,6 @@
   <doc-feature text-color="#0F172A" color="#E1EFF7" title="Ensure quality with lint rules" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/editor03.png"></doc-feature>
 </doc-features>
 
-## Works alongside your i18n library
-
-![logos of ParaglideJS, next-intl and i18next](https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/editor/assets/supported-libraries.webp)
-and other JSON-based i18n libraries.
-
-Just pick a [plugin](/c/plugins) that fits your library. You can find a full table in the [getting started](/m/tdozzpar/app-inlang-finkLocalizationEditor/get-started) guide.
-
 ## What users say
 
 <doc-comments>

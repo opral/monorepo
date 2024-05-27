@@ -1,5 +1,34 @@
 # inlang-vs-code-extension
 
+## 1.44.5
+
+### Patch Changes
+
+- 522bd61: add check for number to m function matcher & update vs code settings component
+
+## 1.44.4
+
+### Patch Changes
+
+- Updated dependencies [00ad046]
+- Updated dependencies [00ad046]
+  - @lix-js/fs@2.0.0
+  - @lix-js/client@2.0.0
+  - @inlang/sdk@0.35.1
+  - @inlang/rpc@0.3.23
+  - @inlang/settings-component@1.0.18
+  - @inlang/telemetry@0.3.38
+
+## 1.44.3
+
+### Patch Changes
+
+- Updated dependencies [ae47203]
+  - @inlang/sdk@0.35.0
+  - @inlang/rpc@0.3.22
+  - @inlang/settings-component@1.0.17
+  - @inlang/telemetry@0.3.37
+
 ## 1.44.2
 
 ### Patch Changes

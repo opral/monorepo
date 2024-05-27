@@ -1,5 +1,22 @@
 # @inlang/plugin-i18next
 
+## 4.14.0
+
+### Minor Changes
+
+- c64f346: increase batching to 50 for i18n plugin
+
+### Patch Changes
+
+- @inlang/sdk@0.35.1
+
+## 4.13.41
+
+### Patch Changes
+
+- Updated dependencies [ae47203]
+  - @inlang/sdk@0.35.0
+
 ## 4.13.40
 
 ### Patch Changes

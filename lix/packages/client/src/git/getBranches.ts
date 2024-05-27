@@ -13,7 +13,7 @@ export async function getBranches(ctx: RepoContext) {
 			url: ctx.gitUrl,
 			corsProxy: ctx.gitProxyUrl,
 			prefix: "refs/heads",
-			http: makeHttpClient({ verbose: ctx.debug, description: "getBranches" }),
+			http: makeHttpClient({ debug: ctx.debug, description: "getBranches" }),
 		})
 	} catch (_error) {
 		return undefined
