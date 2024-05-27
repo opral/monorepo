@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 0.35.0
+
+### Minor Changes
+
+- ae47203: improve: remove valid js identifer from default lint rules
+
 ## 0.34.10
 
 ### Patch Changes
