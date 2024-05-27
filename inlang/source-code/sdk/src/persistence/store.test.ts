@@ -86,6 +86,8 @@ test("openStore does minimal CRUD on messageBundles", async () => {
 	const setMessageBundle = await store.messageBundles.get({ id: "first_message" })
 	expect(setMessageBundle).toStrictEqual(modifedMessageBundle)
 
+	// wait for throttled save to complete
+	await sleep(1000)
 	const messagesAfterRoundtrip = await readJSON({
 		filePath,
 		nodeishFs,
@@ -97,3 +99,7 @@ test("openStore does minimal CRUD on messageBundles", async () => {
 	const messagesAfterDelete = await store.messageBundles.getAll()
 	expect(messagesAfterDelete).toStrictEqual(mockMessages.slice(1))
 })
+
+function sleep(ms: number) {
+	return new Promise((resolve) => setTimeout(resolve, ms))
+}

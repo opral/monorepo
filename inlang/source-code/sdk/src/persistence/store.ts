@@ -3,6 +3,7 @@ import { normalizeMessageBundle } from "../v2/createMessageBundle.js"
 import { getDirname, type NodeishFilesystem } from "@lix-js/fs"
 import { acquireFileLock } from "./filelock/acquireFileLock.js"
 import { releaseLock } from "./filelock/releaseLock.js"
+import { throttle } from "throttle-debounce"
 import type { StoreApi } from "./storeApi.js"
 
 import _debug from "debug"
@@ -16,6 +17,9 @@ export async function openStore(args: {
 	const filePath = args.projectPath + "/messages.json"
 	const lockDirPath = args.projectPath + "/messagelock"
 
+	// save to disk at most once per second
+	const throttledSave = throttle(1000, save)
+
 	// the index holds the in-memory state
 	// TODO: reload when file changes on disk
 	const index = await load()
@@ -27,11 +31,11 @@ export async function openStore(args: {
 			},
 			set: async (args: { data: MessageBundle }) => {
 				index.set(args.data.id, args.data)
-				await save()
+				await throttledSave()
 			},
 			delete: async (args: { id: string }) => {
 				index.delete(args.id)
-				await save()
+				await throttledSave()
 			},
 			getAll: async () => {
 				return [...index.values()]
