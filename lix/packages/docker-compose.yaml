@@ -1,6 +1,5 @@
 # develop with docker-compose watch in this folder
 
-version: '3.7'
 name: lix
 services:
   git:
@@ -8,7 +7,7 @@ services:
     container_name: git
     image: git:12
     hostname: git
-    ports: [ "8000" ]
+    # ports: [ "8000" ]
     labels: [ dev.orbstack.domains=git.local ]
     entrypoint: /start.sh
     # stdin_open: true
@@ -37,8 +36,8 @@ services:
     volumes:
       - ./gitea:/data
       # - /etc/timezone:/etc/timezone:ro - /etc/localtime:/etc/localtime:ro
-    ports:
-      - "3000:3000"
+    # ports:
+    #   - "3000:3000"
 
   runner:
     restart: always
@@ -72,7 +71,7 @@ services:
         RUN chmod +x /workspace/dev.sh
         WORKDIR /workspace
         # todo: shell aliase
-    ports: [ "3334" ]
+    # ports: [ "3334" ]
     working_dir: /workspace
     entrypoint: /bin/bash ./dev.sh
     # entrypoint: /bin/bash

@@ -45,6 +45,7 @@ type StatusText =
 	| "*undeleted"
 	// fallback for permutations without existing isogit named status
 	| "unknown"
+	| "ignored"
 
 type StatusList = [string, StatusText][]
 
@@ -65,6 +66,7 @@ function join(...parts: string[]) {
 }
 
 export type StatusArgs = {
+	ensureFirstBatch: () => Promise<void>
 	fs: NodeishFilesystem
 	/** The [working tree](dir-vs-gitdir.md) directory path */
 	dir: string
@@ -107,6 +109,7 @@ export async function statusList(
 ): ReturnType<typeof _statusList> {
 	return await _statusList({
 		fs: ctx.rawFs,
+		ensureFirstBatch: state.ensureFirstBatch,
 		dir: ctx.dir,
 		cache: ctx.cache,
 		sparseFilter: state.sparseFilter,
@@ -121,6 +124,7 @@ export async function statusList(
  */
 export async function _statusList({
 	fs,
+	ensureFirstBatch,
 	dir = "/",
 	gitdir = join(dir, ".git"),
 	ref = "HEAD",
@@ -132,7 +136,11 @@ export async function _statusList({
 	addHashes = false,
 }: StatusArgs): Promise<StatusList> {
 	try {
-		return await walk({
+		// this call will materialzie all gitignore files that are queued on lazy cloning
+		await ensureFirstBatch()
+
+		const ignoredRes: any[] = []
+		const walkRes = await walk({
 			fs,
 			cache,
 			dir,
@@ -153,11 +161,12 @@ export async function _statusList({
 					if (ignored) {
 						// "ignored" file ignored by a .gitignore rule, will not be shown unless explicitly asked for
 						if (includeStatus.includes("ignored") || filepaths.includes(filepath)) {
-							return [
+							// we have to add ignored results but need to stop iterating into ignored folders...
+							ignoredRes.push([
 								filepath,
 								"ignored",
 								{ headOid: undefined, workdirOid: "ignored", stageOid: undefined },
-							]
+							])
 						}
 
 						// eslint-disable-next-line unicorn/no-null -- return null to skip walking of ignored trees (folders) - compare (1)
@@ -391,6 +400,8 @@ export async function _statusList({
 				return [filepath, "unknown", entry]
 			},
 		})
+
+		return [...walkRes, ...ignoredRes]
 	} catch (err) {
 		// @ts-ignore
 		err.caller = "lix.status"

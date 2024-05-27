@@ -11,4 +11,5 @@ export default [
 	"janfjohannes/cal.com",
 
 	"niklasbuchfink/appflowy",
+	"jldec/load-test",
 ]

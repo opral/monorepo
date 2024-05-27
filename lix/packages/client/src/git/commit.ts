@@ -6,6 +6,7 @@ import {
 	commit as originalIsoGitCommit,
 	type TreeEntry,
 } from "../../vendored/isomorphic-git/index.js"
+
 import { add } from "./add.js"
 import { remove } from "./remove.js"
 import { getDirname, getBasename } from "@lix-js/fs"
@@ -59,8 +60,8 @@ export async function commit(
 			}
 		}
 
-		additions.length && (await add(ctx, additions))
-		deletions.length && (await Promise.all(deletions.map((del) => remove(ctx, del))))
+		additions.length && (await add(ctx, state, additions))
+		deletions.length && (await Promise.all(deletions.map((del) => remove(ctx, state, del))))
 	} else {
 		// TODO: commit all
 	}
@@ -135,7 +136,6 @@ export async function doCommit({
 				})
 			}
 		}
-
 		return await writeTree({ fs, dir, tree: entries })
 	}
 
