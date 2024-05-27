@@ -25,7 +25,7 @@ export default function Page() {
 
 	createEffect(() => {
 		if (localStorage.user?.isLoggedIn && localStorage.user?.username) {
-			window.close()
+			setTimeout(() => window.close(), 100)
 		}
 	})
 
