@@ -1,5 +1,11 @@
 # @lix-js/fs
 
+## 2.0.0
+
+### Major Changes
+
+- 00ad046: lazy loading support and improvements to placeholders
+
 ## 1.0.0
 
 ### Major Changes
