@@ -1,14 +1,12 @@
 "use client"
 import * as m from "@/paraglide/messages.js"
-import { Link, usePathname, useRouter } from "@/lib/i18n"
+import { Link, usePathname } from "@/lib/i18n"
 import { usePathname as useNextPathname } from "next/navigation"
 import { SelectLanguage } from "./SelectLanguage"
 
 export function Header() {
 	const nextPathname = useNextPathname()
 	const pathname = usePathname()
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const router = useRouter()
 
 	return (
 		<header

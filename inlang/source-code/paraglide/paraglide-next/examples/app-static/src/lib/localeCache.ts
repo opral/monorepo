@@ -28,7 +28,7 @@ export function makeLocaleAvailable() {
 	setLanguageTag(() => {
 		const cachedLanguageTag = localeCache().languageTag
 		if (isAvailableLanguageTag(cachedLanguageTag)) return cachedLanguageTag
-		console.warn("Falling back to source language tag")
+		console.warn("Falling back to source language tag - Make sure to call initializeLocaleCache")
 		return sourceLanguageTag
 	})
 }

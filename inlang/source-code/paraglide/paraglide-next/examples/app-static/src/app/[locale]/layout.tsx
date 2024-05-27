@@ -8,7 +8,17 @@ import { Header } from "@/lib/ui/Header"
 
 makeLocaleAvailable()
 
-export function generateMetadata(): Metadata {
+export function generateMetadata(...args: any[]): Metadata {
+	const stuff = Object.getOwnPropertySymbols(args[1])
+		.map((symbol) => args[1][symbol])
+		.filter((thing) => typeof thing === "object")
+		.filter((thing) => "urlPathname" in thing)
+		.at(0)
+
+	//current pathname, rendered per page
+	const urlPathname: string = stuff.urlPathname
+
+	console.info("generateMetadata", urlPathname)
 	const locale = languageTag()
 	return {
 		title: m.paraglide_and_next_app_router(),
@@ -16,6 +26,9 @@ export function generateMetadata(): Metadata {
 		icons: "/favicon.png",
 		openGraph: {
 			locale,
+		},
+		alternates: {
+			languages: Object.fromEntries(availableLanguageTags.map((lang) => [lang, urlPathname])),
 		},
 	}
 }
