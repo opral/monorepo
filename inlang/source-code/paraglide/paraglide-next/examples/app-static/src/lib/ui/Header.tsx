@@ -2,6 +2,7 @@
 import * as m from "@/paraglide/messages.js"
 import { Link, usePathname, useRouter } from "@/lib/i18n"
 import { usePathname as useNextPathname } from "next/navigation"
+import { SelectLanguage } from "./SelectLanguage"
 
 export function Header() {
 	const nextPathname = useNextPathname()
@@ -41,6 +42,8 @@ export function Header() {
 				</Link>
 			</nav>
 			<div>{nextPathname}</div>
+
+			<SelectLanguage />
 		</header>
 	)
 }
