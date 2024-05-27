@@ -7,15 +7,12 @@ export const router: Router = Router()
 const PUBLIC_LIX_GITHUB_APP_NAME = getEnvVar("PUBLIC_LIX_GITHUB_APP_NAME")
 const installUrl = `https://github.com/apps/${PUBLIC_LIX_GITHUB_APP_NAME}/installations/new`
 
-const PUBLIC_SERVER_BASE_URL = getEnvVar("PUBLIC_SERVER_BASE_URL", {
-	descirption: "The base url of the server e.g. https://inlang.com - Must not end with a slash",
-})
-const callbackUrl = `${PUBLIC_SERVER_BASE_URL}/services/auth/auth-callback`
-
 const PUBLIC_LIX_GITHUB_APP_CLIENT_ID = getEnvVar("PUBLIC_LIX_GITHUB_APP_CLIENT_ID")
 const LIX_GITHUB_APP_CLIENT_SECRET = getEnvVar("LIX_GITHUB_APP_CLIENT_SECRET")
 const PUBLIC_ALLOWED_AUTH_URLS = getEnvVar("PUBLIC_ALLOWED_AUTH_URLS")
 const JWE_SECRET = getEnvVar("JWE_SECRET")
+
+const allowedAuthUrls = PUBLIC_ALLOWED_AUTH_URLS.split(",")
 
 /**
  * OAuth flow from GitHub
@@ -24,8 +21,14 @@ const JWE_SECRET = getEnvVar("JWE_SECRET")
  * and that the route is set in the GitHub app settings.
  */
 
-const allowedAuthUrls = PUBLIC_ALLOWED_AUTH_URLS.split(",")
 router.get("/github-auth-callback", async (request, response, next) => {
+	const callbackUrl = decodeURI((request.query["state"] as string) || "") as string
+
+	const callBackOrigin = new URL(callbackUrl).origin
+	if (!allowedAuthUrls.includes(callBackOrigin)) {
+		return next(new Error("Origin not allowed"))
+	}
+
 	try {
 		// TODO: org installation
 		// TODO: test harness
@@ -44,33 +47,42 @@ router.get("/github-auth-callback", async (request, response, next) => {
 			githubAppClientId: PUBLIC_LIX_GITHUB_APP_CLIENT_ID,
 			githubClientSecret: LIX_GITHUB_APP_CLIENT_SECRET,
 		})
-
-		const { installations } = await (
-			await fetch(`https://api.github.com/user/installations`, {
-				headers: {
-					Accept: "application/vnd.github+json",
-					"X-GitHub-Api-Version": "2022-11-28",
-					authorization: `Bearer ${access_token}`,
-				},
-			})
-		).json()
-
 		const encryptedAccessToken = await encryptAccessToken({
 			accessToken: access_token,
 			JWE_SECRET_KEY: JWE_SECRET,
 		})
-
 		// set the session
 		request.session = {
 			encryptedAccessToken,
 		}
 
-		// we currently do not support org installations, we only look at user installations for now in case someone accidentally installs the app as org
+		const [{ installations }, user] = await Promise.all([
+			fetch(`https://api.github.com/user/installations`, {
+				headers: {
+					Accept: "application/vnd.github+json",
+					"X-GitHub-Api-Version": "2022-11-28",
+					authorization: `Bearer ${access_token}`,
+				},
+			}).then((response) => response.json()),
+			fetch(`https://api.github.com/user`, {
+				headers: {
+					Accept: "application/vnd.github+json",
+					"X-GitHub-Api-Version": "2022-11-28",
+					authorization: `Bearer ${access_token}`,
+				},
+			}).then((response) => response.json()),
+		])
+
+		// we currently do not support org installations, we only look at user installations for now in case someone accidentally installs the app as org,
+		// we also see installations of everyone in our organization who isntalled the same app as user, so we need to filter out only our own!
 		if (
-			installations.filter((installation: any) => installation.target_type === "User").length === 0
+			installations.filter(
+				(installation: any) =>
+					installation.target_type === "User" && user.id === installation.account?.id
+			).length === 0
 		) {
 			// if app not installed, redirect via the install permissions url
-			response.redirect(installUrl)
+			response.redirect(installUrl + "?state=" + encodeURIComponent(callbackUrl))
 		} else {
 			response.redirect(callbackUrl)
 		}

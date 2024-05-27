@@ -490,7 +490,7 @@ export const Gitfloat = () => {
 				ref={signInDialog}
 				onClickOnSignInButton={() => {
 					// hide the sign in dialog to increase UX when switching back to this window
-					browserAuth.login()
+					browserAuth.login({ redirect: window.location.origin + "/auth/auth-callback" })
 					signInDialog?.hide()
 					setSignInModalOpen(false)
 				}}

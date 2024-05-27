@@ -142,6 +142,8 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 
 	const listeners: Set<(event: FileChangeInfo) => void> = new Set()
 
+	// MISSING: exists and reddir with recursive option
+
 	async function stat(path: Parameters<NodeishFilesystem["stat"]>[0]): Promise<NodeishStats> {
 		path = normalPath(path)
 		const stats: NodeishStats | undefined = state.fsStats.get(path)
