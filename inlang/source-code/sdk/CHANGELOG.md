@@ -1,5 +1,16 @@
 # @inlang/sdk
 
+## 0.35.1
+
+### Patch Changes
+
+- Updated dependencies [00ad046]
+- Updated dependencies [00ad046]
+  - @lix-js/fs@2.0.0
+  - @lix-js/client@2.0.0
+  - @inlang/plugin@2.4.12
+  - @inlang/module@1.2.12
+
 ## 0.35.0
 
 ### Minor Changes

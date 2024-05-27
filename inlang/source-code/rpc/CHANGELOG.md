@@ -1,5 +1,11 @@
 # @inlang/rpc
 
+## 0.3.23
+
+### Patch Changes
+
+- @inlang/sdk@0.35.1
+
 ## 0.3.22
 
 ### Patch Changes

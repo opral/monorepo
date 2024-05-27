@@ -1,7 +1,7 @@
 {
 	"name": "@lix-js/server",
 	"type": "module",
-	"version": "1.1.5",
+	"version": "1.2.0",
 	"private": true,
 	"files": [
 		"./dist",

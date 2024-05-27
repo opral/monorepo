@@ -1,5 +1,16 @@
 # @lix-js/client
 
+## 2.0.0
+
+### Major Changes
+
+- 00ad046: lazy loading support
+
+### Patch Changes
+
+- Updated dependencies [00ad046]
+  - @lix-js/fs@2.0.0
+
 ## 1.4.0
 
 ### Minor Changes
