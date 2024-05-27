@@ -6,18 +6,20 @@ const files = new Map()
 export function openRepo (url, { branch, author }) {
   let repoAvailable
   const repoProm = new Promise((resolve) => {repoAvailable = resolve})
-  let branches = $state([])
+  let branches = $state([branch])
 
   // move this to component ! as $state(openRepo...)?
   const state = $state({
     folders: [], // >> files()
     
-    repo: null,
-    get branches () { // > no need for getter here repo.branches()
-      !branches?.length && repoProm.then((repo: any)=> repo.getBranches().then(br => { 
-        // console.log(br)
+    fetchRefs: async function () {
+      return branches?.length < 2 && repoProm.then((repo)=> repo.getBranches().then(br => { 
         branches = br
       })) // TODO: reactivity: needs to be exposed but only executed when used in ui > revisit samuels proxy requirement!
+    },
+
+    repo: null,
+    get branches () { // > no need for getter here repo.branches()
       return branches
     },
     currentBranch: '',
@@ -37,6 +39,7 @@ export function openRepo (url, { branch, author }) {
           // console.log('reading file ' + path)
           
           !fileContent?.length && repoProm.then((repo: any) => repo.read(path).then((content) => {
+            console.log('exp get content', path )
             fileContent = content
             setTimeout(updateStatus, 0)
           }))
@@ -81,8 +84,10 @@ export function openRepo (url, { branch, author }) {
 
       console.log('commit', { includedFiles })
       await state.repo.commit({ message, include: includedFiles })
-      await state.repo.push().catch(console.error)
+
+      // await state.repo.push().catch(console.error)
       await updateStatus().then(() => (state.exclude = []))
+
       // message = `Changes on ${currentBranch} started ${new Date().toUTCString()}`
     }
   })
@@ -96,7 +101,7 @@ export function openRepo (url, { branch, author }) {
       lixCommit: true
     },
     // nodeishFs: createNodeishMemoryFs(),
-    // auth: browserAuth,
+    // auth: browserAuth
     branch,
     author, // TODO: check with git config
     // sparseFilter: ({ filename, type }) => type === 'folder' || filename.endsWith('.md')
@@ -133,6 +138,7 @@ export function openRepo (url, { branch, author }) {
     if (!state.repo) {
       return
     }
+    console.log('exp status list')
     state.status = await state.repo.statusList({ includeStatus: ['materialized'] })
 
     // Console.log(await repo.log({ filepath: '.npmrc' }))

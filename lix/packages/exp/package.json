@@ -1,5 +1,5 @@
 {
-  "name": "exp-app",
+  "name": "exp",
   "version": "0.0.1",
   "type": "module",
   "scripts": {
@@ -9,16 +9,17 @@
     "_check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "3.0.2",
-    "@tsconfig/svelte": "5.0.2",
+    "@sveltejs/vite-plugin-svelte": "3.1.0",
+    "@tsconfig/svelte": "5.0.4",
     "svelte": "5.0.0-next.80",
     "svelte-check": "3.6.0",
     "tslib": "2.6.2",
     "typescript": "5.2.2",
-    "vite": "5.1.1"
+    "vite": "5.2.11"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.533.0",
+    "@gitgraph/js": "^1.4.0",
     "@helia/unixfs": "3.0.2",
     "@lix-js/client": "../client",
     "@lix-js/fs": "../fs",

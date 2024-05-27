@@ -1,0 +1,1 @@
+pnpm --filter=@lix-js/client --filter=@lix-js/fs --filter=exp install && pnpm --parallel --filter=@lix-js/client --filter=@lix-js/fs --filter=exp dev
