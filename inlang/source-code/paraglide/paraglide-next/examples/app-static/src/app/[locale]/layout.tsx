@@ -5,21 +5,24 @@ import type { Metadata } from "next"
 import { initializeLocaleCache, makeLocaleAvailable } from "@/lib/localeCache"
 import { ClientProvider } from "@/lib/ClientProvider"
 import { Header } from "@/lib/ui/Header"
+import { strategy } from "@/lib/i18n"
+import { UrlObject, format, parse } from "node:url"
 
 makeLocaleAvailable()
 
-export function generateMetadata(...args: any[]): Metadata {
-	const stuff = Object.getOwnPropertySymbols(args[1])
-		.map((symbol) => args[1][symbol])
+export function generateMetadata(props: never, parent: any): Metadata {
+	const stuff = Object.getOwnPropertySymbols(parent)
+		.map((symbol) => parent[symbol])
 		.filter((thing) => typeof thing === "object")
 		.filter((thing) => "urlPathname" in thing)
 		.at(0)
 
-	//current pathname, rendered per page
-	const urlPathname: string = stuff.urlPathname
-
-	console.info("generateMetadata", urlPathname)
 	const locale = languageTag()
+
+	//current pathname, rendered per page
+	const localisedPathname = new URL(stuff.urlPathname, "https://n.com").pathname as `/${string}`
+	const canonicalPathname = strategy.getCanonicalPath(localisedPathname, locale)
+
 	return {
 		title: m.paraglide_and_next_app_router(),
 		description: m.this_app_was_localised_with_paraglide(),
@@ -28,7 +31,16 @@ export function generateMetadata(...args: any[]): Metadata {
 			locale,
 		},
 		alternates: {
-			languages: Object.fromEntries(availableLanguageTags.map((lang) => [lang, urlPathname])),
+			languages: Object.fromEntries(
+				availableLanguageTags.map((lang) => {
+					const localisedUrl = strategy.getLocalisedUrl(canonicalPathname, lang, true)
+					const baseUrl: UrlObject = parse("https://example.com")
+					const url = { ...baseUrl, ...localisedUrl }
+					const href = format(url)
+
+					return [lang, href]
+				})
+			),
 		},
 	}
 }
