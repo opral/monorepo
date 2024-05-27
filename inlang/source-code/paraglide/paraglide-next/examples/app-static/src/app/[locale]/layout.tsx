@@ -1,7 +1,7 @@
 import "@/lib/ui/styles.css"
 import { AvailableLanguageTag, availableLanguageTags, languageTag } from "@/paraglide/runtime"
 import * as m from "@/paraglide/messages.js"
-import type { Metadata } from "next"
+import type { Metadata, ResolvingMetadata } from "next"
 import { initializeLocaleCache, makeLocaleAvailable } from "@/lib/localeCache"
 import { ClientProvider } from "@/lib/ClientProvider"
 import { Header } from "@/lib/ui/Header"
@@ -11,8 +11,25 @@ import { UrlObject, format, parse } from "node:url"
 makeLocaleAvailable()
 
 export function generateMetadata(props: never, parent: any): Metadata {
+	const locale = languageTag()
+	return {
+		title: m.paraglide_and_next_app_router(),
+		description: m.this_app_was_localised_with_paraglide(),
+		icons: "/favicon.png",
+		openGraph: {
+			locale,
+		},
+		alternates: {
+			languages: generateAlternateLanguages(parent),
+		},
+	}
+}
+
+function generateAlternateLanguages(
+	parent: ResolvingMetadata
+): Record<AvailableLanguageTag, string> {
 	const stuff = Object.getOwnPropertySymbols(parent)
-		.map((symbol) => parent[symbol])
+		.map((symbol) => (parent as any)[symbol])
 		.filter((thing) => typeof thing === "object")
 		.filter((thing) => "urlPathname" in thing)
 		.at(0)
@@ -23,26 +40,16 @@ export function generateMetadata(props: never, parent: any): Metadata {
 	const localisedPathname = new URL(stuff.urlPathname, "https://n.com").pathname as `/${string}`
 	const canonicalPathname = strategy.getCanonicalPath(localisedPathname, locale)
 
-	return {
-		title: m.paraglide_and_next_app_router(),
-		description: m.this_app_was_localised_with_paraglide(),
-		icons: "/favicon.png",
-		openGraph: {
-			locale,
-		},
-		alternates: {
-			languages: Object.fromEntries(
-				availableLanguageTags.map((lang) => {
-					const localisedUrl = strategy.getLocalisedUrl(canonicalPathname, lang, true)
-					const baseUrl: UrlObject = parse("https://example.com")
-					const url = { ...baseUrl, ...localisedUrl }
-					const href = format(url)
+	return Object.fromEntries(
+		availableLanguageTags.map((lang) => {
+			const localisedUrl = strategy.getLocalisedUrl(canonicalPathname, lang, true)
+			const baseUrl: UrlObject = parse("https://example.com")
+			const url = { ...baseUrl, ...localisedUrl }
+			const href = format(url)
 
-					return [lang, href]
-				})
-			),
-		},
-	}
+			return [lang, href]
+		})
+	) as Record<AvailableLanguageTag, string>
 }
 
 export async function generateStaticParams() {
