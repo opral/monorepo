@@ -1,5 +1,15 @@
 # @inlang/paraglide-unplugin
 
+## 1.6.8
+
+### Patch Changes
+
+- 904c3a1: Reduced false negatives for message-state hashes. This should reduce the number of redundant recompilations
+- e0b2c2c: Better hashing to avoid unnecessary recompilations
+- Updated dependencies [ae47203]
+  - @inlang/sdk@0.35.0
+  - @inlang/paraglide-js@1.9.1
+
 ## 1.6.7
 
 ### Patch Changes
