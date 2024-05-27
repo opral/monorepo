@@ -33,7 +33,7 @@ const projectPath = join(__dirname, "project.inlang")
 const mockServer = "http://localhost:3000"
 
 const cli = `PUBLIC_SERVER_BASE_URL=${mockServer} pnpm inlang`
-const translateCommand = cli + " machine translate -f -n --project ./project.inlang"
+const translateCommand = cli + " machine translate -f -q -n --project ./project.inlang"
 
 export async function runLoadTest(
 	messageCount: number = 1000,

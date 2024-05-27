@@ -19,6 +19,7 @@ export const translate = new Command()
 	.command("translate")
 	.requiredOption(projectOption.flags, projectOption.description)
 	.option("-f, --force", "Force machine translation and skip the confirmation prompt.", false)
+	.option("-q, --quiet", "don't log every tranlation.", false)
 	.option("--sourceLanguageTag <source>", "Source language tag for translation.")
 	.option(
 		"--targetLanguageTags <targets...>",
@@ -146,7 +147,9 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 						data: translatedMessage!,
 					})
 				}
-				logs.push(() => log.info(`Machine translated message ${logId}`))
+				if (!options.quiet) {
+					logs.push(() => log.info(`Machine translated message ${logId}`))
+				}
 			}
 			bar?.increment()
 		}
