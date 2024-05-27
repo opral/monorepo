@@ -28,7 +28,6 @@ export const Navigation = <T extends string>({ strategy }: { strategy: RoutingSt
 	const useRouter = () => {
 		const nextRouter = NextNavigation.useRouter()
 		const localisedCurrentPathname = NextNavigation.usePathname() as `/${string}`
-		const searchParams = NextNavigation.useSearchParams()
 		const canonicalCurrentPathname = strategy.getCanonicalPath(
 			localisedCurrentPathname,
 			languageTag() as T
@@ -63,11 +62,8 @@ export const Navigation = <T extends string>({ strategy }: { strategy: RoutingSt
 				options?.locale &&
 				options.locale !== languageTag()
 			) {
-				let destination = addBasePath(localisedPath, true)
-				const searchParamString = searchParams.toString()
-				if (searchParamString) {
-					destination += `?${searchParamString}`
-				}
+				//make sure to keep the search params
+				const destination = addBasePath(localisedPath, true) + window.location.search
 				history.pushState({}, "", destination)
 
 				document.cookie = serializeCookie({
@@ -111,11 +107,8 @@ export const Navigation = <T extends string>({ strategy }: { strategy: RoutingSt
 				options?.locale &&
 				options.locale !== languageTag()
 			) {
-				let destination = addBasePath(localisedPath, true)
-				const searchParamString = searchParams.toString()
-				if (searchParamString) {
-					destination += `?${searchParamString}`
-				}
+				//make sure to keep the search params
+				const destination = addBasePath(localisedPath, true) + window.location.search
 				history.replaceState({}, "", destination)
 
 				document.cookie = serializeCookie({
