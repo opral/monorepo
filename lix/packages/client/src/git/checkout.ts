@@ -1,5 +1,5 @@
 import { _FileSystem, _assertParameter, _join } from "../../vendored/isomorphic-git/index.js"
-import { _checkout } from "./_checkout.js"
+import { __checkout } from "./__checkout.js"
 import type { RepoContext, RepoState } from "../openRepository.js"
 
 export async function checkout(ctx: RepoContext, state: RepoState, { branch }: { branch: string }) {
@@ -11,7 +11,7 @@ export async function checkout(ctx: RepoContext, state: RepoState, { branch }: {
 		)
 	}
 
-	return await doCheckout({
+	return await _checkout({
 		fs: ctx.rawFs,
 		cache: ctx.cache,
 		dir: ctx.dir,
@@ -72,7 +72,7 @@ export async function checkout(ctx: RepoContext, state: RepoState, { branch }: {
  * })
  * console.log('done')
  */
-export async function doCheckout({
+export async function _checkout({
 	fs,
 	onProgress,
 	dir,
@@ -93,7 +93,7 @@ export async function doCheckout({
 		_assertParameter("gitdir", gitdir)
 
 		const ref = _ref || "HEAD"
-		return await _checkout({
+		return await __checkout({
 			fs: new _FileSystem(fs),
 			cache,
 			onProgress,

@@ -1,9 +1,10 @@
 import isoGit from "../../vendored/isomorphic-git/index.js"
 import { makeHttpClient } from "../git-http/client.js"
-import type { RepoContext, RepoState } from "../openRepository.js"
+import type { RepoContext } from "../openRepository.js"
+import { optimizeReq, optimizeRes } from "../git-http/optimizeReq.js"
 import { getMeta } from "../github/getMeta.js"
 
-export async function forkStatus(ctx: RepoContext, state: RepoState) {
+export async function forkStatus(ctx: RepoContext) {
 	const { gitUrl, debug, dir, cache, owner, repoName, githubClient, gitProxyUrl } = ctx
 
 	if (!gitUrl) {
@@ -24,10 +25,8 @@ export async function forkStatus(ctx: RepoContext, state: RepoState) {
 		return { error: "repo is not a fork" }
 	}
 
-	const forkFs = state.nodeishFs
-
 	const useBranchName = await isoGit.currentBranch({
-		fs: forkFs,
+		fs: ctx.rawFs,
 		dir,
 		fullname: false,
 	})
@@ -40,7 +39,7 @@ export async function forkStatus(ctx: RepoContext, state: RepoState) {
 		dir,
 		remote: "upstream",
 		url: "https://" + parent.url,
-		fs: forkFs,
+		fs: ctx.rawFs,
 	})
 
 	try {
@@ -51,27 +50,38 @@ export async function forkStatus(ctx: RepoContext, state: RepoState) {
 			cache,
 			ref: useBranchName,
 			remote: "upstream",
-			http: makeHttpClient({ debug, description: "forkStatus" }),
-			fs: forkFs,
+			http: makeHttpClient({
+				debug,
+				description: "forkStatus",
+				onReq: ctx.experimentalFeatures.lazyClone
+					? optimizeReq.bind(null, {
+							noBlobs: true,
+							addRefs: [useBranchName || "HEAD"],
+					  })
+					: undefined,
+				onRes: ctx.experimentalFeatures.lazyClone ? optimizeRes : undefined,
+			}),
+			tags: false,
+			fs: ctx.rawFs,
 		})
 	} catch (err) {
 		return { error: err }
 	}
 
 	const currentUpstreamCommit = await isoGit.resolveRef({
-		fs: forkFs,
+		fs: ctx.rawFs,
 		dir: "/",
 		ref: "upstream/" + useBranchName,
 	})
 
 	const currentOriginCommit = await isoGit.resolveRef({
-		fs: forkFs,
+		fs: ctx.rawFs,
 		dir: "/",
 		ref: useBranchName,
 	})
 
 	if (currentUpstreamCommit === currentOriginCommit) {
-		return { ahead: 0, behind: 0, conflicts: false }
+		return { ahead: 0, behind: 0, conflicts: undefined }
 	}
 
 	const compare = await githubClient
@@ -89,35 +99,38 @@ export async function forkStatus(ctx: RepoContext, state: RepoState) {
 		return { error: compare.error || "could not diff repos on github" }
 	}
 
+	const ahead: number = compare.data.ahead_by
+	const behind: number = compare.data.behind_by
+
 	// fetch from forks upstream
 	await isoGit.fetch({
-		depth: compare.data.behind_by + 1,
+		depth: behind + 1,
 		remote: "upstream",
-		cache: cache,
+		cache,
 		singleBranch: true,
 		dir,
 		ref: useBranchName,
 		http: makeHttpClient({ debug, description: "forkStatus" }),
-		fs: forkFs,
+		fs: ctx.rawFs,
 	})
 
 	// fetch from fors remote
 	await isoGit.fetch({
-		depth: compare.data.ahead_by + 1,
-		cache: cache,
+		depth: ahead + 1,
+		cache,
 		singleBranch: true,
 		ref: useBranchName,
 		dir,
 		http: makeHttpClient({ debug, description: "forkStatus" }),
 		corsProxy: gitProxyUrl,
-		fs: forkFs,
+		fs: ctx.rawFs,
 	})
 
 	// finally try to merge the changes from upstream
-	let conflicts = false
+	let conflicts: { data: string[]; code: string } | undefined
 	try {
 		await isoGit.merge({
-			fs: forkFs,
+			fs: ctx.rawFs,
 			cache,
 			author: { name: "lix" },
 			dir,
@@ -127,8 +140,12 @@ export async function forkStatus(ctx: RepoContext, state: RepoState) {
 			noUpdateBranch: true,
 			abortOnConflict: true,
 		})
-	} catch (err) {
-		conflicts = true
+	} catch (err: any) {
+		conflicts = {
+			data: err.data,
+			code: err.code,
+		}
+		console.warn(conflicts)
 	}
-	return { ahead: compare.data.ahead_by, behind: compare.data.behind_by, conflicts }
+	return { ahead, behind, conflicts }
 }

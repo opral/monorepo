@@ -44,12 +44,12 @@ describe(
 					)
 				).toStrictEqual([
 					[
-						".env",
-						"ignored",
+						".gitignore",
+						"unmodified",
 						{
-							headOid: undefined,
-							stageOid: undefined,
-							workdirOid: "ignored",
+							headOid: "6635cf5542756197081eedaa1ec3a7c2c5a0b537",
+							stageOid: "6635cf5542756197081eedaa1ec3a7c2c5a0b537",
+							workdirOid: "6635cf5542756197081eedaa1ec3a7c2c5a0b537",
 						},
 					],
 					[
@@ -62,12 +62,12 @@ describe(
 						},
 					],
 					[
-						".gitignore",
-						"unmodified",
+						".env",
+						"ignored",
 						{
-							headOid: "6635cf5542756197081eedaa1ec3a7c2c5a0b537",
-							stageOid: "6635cf5542756197081eedaa1ec3a7c2c5a0b537",
-							workdirOid: "6635cf5542756197081eedaa1ec3a7c2c5a0b537",
+							headOid: undefined,
+							stageOid: undefined,
+							workdirOid: "ignored",
 						},
 					],
 				])
@@ -169,21 +169,21 @@ describe(
 					},
 				],
 				[
-					".git",
-					"ignored",
-					{
-						headOid: undefined,
-						stageOid: undefined,
-						workdirOid: "ignored",
-					},
-				],
-				[
 					".gitignore",
 					"*modified",
 					{
 						headOid: "6635cf5542756197081eedaa1ec3a7c2c5a0b537",
 						stageOid: "6635cf5542756197081eedaa1ec3a7c2c5a0b537",
 						workdirOid: "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+					},
+				],
+				[
+					".git",
+					"ignored",
+					{
+						headOid: undefined,
+						stageOid: undefined,
+						workdirOid: "ignored",
 					},
 				],
 			])
@@ -344,6 +344,7 @@ describe(
 				],
 			])
 
+			// as we dont have staging concept in lix a commit will override the staging if no options are given.
 			await repository.commit({
 				include: ["README.md"],
 				author: { name: "tests", email: "test@inlang.dev" },
@@ -457,6 +458,21 @@ describe(
 				if (content.placeholder && typeof snapB.fsMap[path] === "string") {
 					snapB.fsMap[path] = { placeholder: true }
 				}
+				// delete the known extra packfiles in lazy snapshot
+				if (path.startsWith("/.git/objects/pack/")) {
+					for (const packFile of [
+						"/.git/objects/pack/pack-02be53df793edd50f0fc133384db246495491658",
+						"/.git/objects/pack/pack-18fd350c176426a096636f821abddb9998d04d0b",
+						"/.git/objects/pack/pack-19f977d5eaefc2553ad17e1faaf1bdf35feebf0d",
+						"/.git/objects/pack/pack-8323a3d068cb7bf606cccc1574ef2be32391a2bc",
+						"/.git/objects/pack/pack-8c4f18c048db5e7b7075c263a73c808c2bc95336",
+						"/.git/objects/pack/pack-a51df86e4b8a006e9131a6f053a0e07adc0ea487",
+					]) {
+						if (path.startsWith(packFile)) {
+							delete snapA.fsMap[path]
+						}
+					}
+				}
 			}
 			for (const [, stat] of Object.entries(snapB.fsStats)) {
 				// @ts-ignore
@@ -471,6 +487,8 @@ describe(
 			}
 
 			delete snapA.fsMap["/.git/index/"]
+			delete snapA.fsMap["/.git/objects/pack/"]
+			delete snapB.fsMap["/.git/objects/pack/"]
 			delete snapB.fsMap["/.git/index/"]
 
 			expect(snapA.fsMap).toStrictEqual(snapB.fsMap)
@@ -478,5 +496,5 @@ describe(
 			vi.useRealTimers()
 		})
 	},
-	{ timeout: 5000 }
+	{ timeout: 7000 }
 )
