@@ -15,6 +15,7 @@ import {
 import { createExclude, type ExcludeConfig } from "./exclude.js"
 import { guessTextDirMap } from "./utils/text-dir.js"
 import {
+	prettyPrintPathDefinitionIssues,
 	resolveUserPathDefinitions,
 	validatePathTranslations,
 	type PathDefinitionTranslations,
@@ -166,12 +167,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 			runtime.availableLanguageTags,
 			options?.matchers ?? {}
 		)
-		if (issues.length) {
-			console.warn(
-				`The following issues were found in your path translations. Make sure to fix them before deploying your app:`
-			)
-			console.table(issues)
-		}
+		if (issues.length) prettyPrintPathDefinitionIssues(issues)
 	}
 
 	const excludeConfig = options?.exclude ?? []
