@@ -1,5 +1,11 @@
 # @lix-js/client
 
+## 2.2.0
+
+### Minor Changes
+
+- 3b2e0a6: try again to fix peed dep issue
+
 ## 2.1.0
 
 ### Minor Changes
