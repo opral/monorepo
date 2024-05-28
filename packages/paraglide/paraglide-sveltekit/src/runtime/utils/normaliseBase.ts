@@ -9,7 +9,8 @@ export function normaliseBase(baseValue: string, currentUrl: URL): string {
 
 	if (!baseValue.startsWith("/")) {
 		const absoluteBase = new URL(baseValue, currentUrl).pathname
-		return absoluteBase
+		return absoluteBase === "/" ? "" : absoluteBase
 	}
+
 	return baseValue
 }
