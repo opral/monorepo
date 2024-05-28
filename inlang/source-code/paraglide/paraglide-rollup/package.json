@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/paraglide-rollup",
-	"version": "1.0.67",
+	"version": "1.0.68",
 	"description": "Rollup Plugin for running the Paraglide i18n compiler",
 	"license": "Apache-2.0",
 	"type": "module",
