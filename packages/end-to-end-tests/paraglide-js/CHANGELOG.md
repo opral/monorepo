@@ -1,5 +1,12 @@
 # @inlang/paraglide-js-e2e
 
+## 0.0.30
+
+### Patch Changes
+
+- @inlang/paraglide-js@1.9.1
+- @inlang/sdk@0.35.4
+
 ## 0.0.29
 
 ### Patch Changes

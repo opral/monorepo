@@ -1,5 +1,13 @@
 # @inlang/github-lint-action
 
+## 0.3.8
+
+### Patch Changes
+
+- Updated dependencies [3b2e0a6]
+  - @lix-js/client@2.2.0
+  - @inlang/sdk@0.35.4
+
 ## 0.3.7
 
 ### Patch Changes
