@@ -19,15 +19,16 @@ export const createReroute = <T extends string>({
 	return ({ url }) => {
 		try {
 			const {
-				languageTag: lang,
+				languageTag: langInPath,
 				path: translatedPath,
 				dataSuffix,
 				trailingSlash,
 			} = getPathInfo(url.pathname, {
 				normalizedBase: base,
 				availableLanguageTags: runtime.availableLanguageTags,
-				defaultLanguageTag,
 			})
+
+			const lang = langInPath || defaultLanguageTag
 
 			const canonicalPath = getCanonicalPath(translatedPath, lang, translations, matchers)
 
