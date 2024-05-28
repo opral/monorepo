@@ -9,6 +9,7 @@ export type StoreApi = {
  * E.g. `await project.messageBundles.get({ id: "..." })`
  **/
 export interface Query<T> {
+	reload: () => Promise<void>
 	get: (args: { id: string }) => Promise<T | undefined>
 	set: (args: { data: T }) => Promise<void>
 	delete: (args: { id: string }) => Promise<void>

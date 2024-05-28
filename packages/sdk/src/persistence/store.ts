@@ -18,14 +18,18 @@ export async function openStore(args: {
 	const lockDirPath = args.projectPath + "/messagelock"
 
 	// save to disk at most once per second
-	const throttledSave = throttle(1000, save)
+	const throttledSave = throttle(500, save)
 
 	// the index holds the in-memory state
 	// TODO: reload when file changes on disk
-	const index = await load()
+	let index = await load()
 
 	return {
 		messageBundles: {
+			reload: async () => {
+				index.clear()
+				index = await load()
+			},
 			get: async (args: { id: string }) => {
 				return index.get(args.id)
 			},
