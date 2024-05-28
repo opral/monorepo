@@ -43,9 +43,8 @@ export function createLocaliseHref<T extends string>(
 /**
  * Returns true if the href explicitly includes the origin, even if it's the current origin
  */
-export function isExternal(href: UrlObject | string) {
-	return typeof href === "object"
+export const isExternal = (href: UrlObject | string) =>
+	typeof href === "object"
 		? //Make sure none of the telltales for external links are set
 		  Boolean(href.protocol || href.auth || href.port || href.hostname || href.host)
 		: isStringHrefExternal(href)
-}

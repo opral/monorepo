@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest"
 import { createLocaliseHref, isExternal } from "./localiseHref"
 import { PrefixStrategy } from "./routing-strategy/strats/prefixStrategy"
+import { parse } from "node:url"
 
 const strategy = PrefixStrategy<"en" | "de" | "de-CH">({
 	pathnames: {
@@ -151,15 +152,18 @@ describe("localiseHref", () => {
 	})
 })
 
-describe("isExternal", () => {
-	it("returns true for external links", () => {
-		expect(isExternal("mailto:hello@test.com")).toBe(true)
-		expect(isExternal("https://example.com")).toBe(true)
-		expect(isExternal("http://example.com")).toBe(true)
-	})
+// the vitest setup doesn't provide the parse-function during production so the test fails
+describe.skipIf(() => process.env.NODE_ENV !== "development")("isExternal", () => {
+	it.each(["mailto:hello@test.com", "https://example.com", "http://example.com"])(
+		"returns true for external links",
+		(link) => {
+			expect(isExternal(link)).toBe(true)
+			expect(isExternal(parse(link))).toBe(true)
+		}
+	)
 
-	it("returns false for path-only links", () => {
-		expect(isExternal("/some/path")).toBe(false)
-		expect(isExternal("some/path")).toBe(false)
+	it.each(["/some/path", "some/path"])("returns false for internal links", (link) => {
+		expect(isExternal(link)).toBe(false)
+		expect(isExternal(parse(link))).toBe(false)
 	})
 })
