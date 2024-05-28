@@ -61,7 +61,7 @@ export const createHandle = <T extends string>(
 		const { lang } = getPathInfo(event.url.pathname, {
 			availableLanguageTags: i18n.runtime.availableLanguageTags,
 			defaultLanguageTag: i18n.defaultLanguageTag,
-			base,
+			normalizedBase: base,
 		})
 
 		const langCookie = event.cookies.get(LANG_COOKIE_NAME)

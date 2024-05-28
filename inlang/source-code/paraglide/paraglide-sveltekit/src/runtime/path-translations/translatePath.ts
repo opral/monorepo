@@ -1,4 +1,5 @@
 import { getPathInfo } from "../utils/get-path-info.js"
+import type { NormalizedBase } from "../utils/normaliseBase.js"
 import { serializeRoute } from "../utils/serialize-path.js"
 import { getCanonicalPath } from "./getCanonicalPath.js"
 import { getTranslatedPath } from "./getTranslatedPath.js"
@@ -14,7 +15,7 @@ export function translatePath(
 	translations: PathDefinitionTranslations,
 	matchers: Record<string, ParamMatcher>,
 	opts: {
-		base: string
+		normalizedBase: NormalizedBase
 		availableLanguageTags: readonly string[]
 		defaultLanguageTag: string
 		prefixDefaultLanguage: "always" | "never"
@@ -26,7 +27,7 @@ export function translatePath(
 		dataSuffix,
 		trailingSlash,
 	} = getPathInfo(path, {
-		base: opts.base,
+		normalizedBase: opts.normalizedBase,
 		availableLanguageTags: opts.availableLanguageTags,
 		defaultLanguageTag: opts.defaultLanguageTag,
 	})
@@ -41,7 +42,7 @@ export function translatePath(
 
 	return serializeRoute({
 		path: translatedPathTarget,
-		base: opts.base,
+		base: opts.normalizedBase,
 		dataSuffix,
 		includeLanguage: true,
 		lang: targetLanguage,
