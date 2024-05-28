@@ -5,6 +5,14 @@ export function normalize(path: string) {
 	return "/" + path.split("/").filter(Boolean).join("/")
 }
 
+/**
+ * Join path segments
+ * 
+ * @example
+ * ```ts
+ * resolve(["some","sub/page"]) === "/some/sub/page"
+ * ```
+ */
 export const resolve = (...segments: string[]) =>
 	segments
 		.map(normalize)
