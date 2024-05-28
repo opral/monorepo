@@ -4,6 +4,15 @@
 
 ### Patch Changes
 
+- Updated dependencies [3896fe6]
+  - @inlang/cli@2.17.0
+  - @inlang/sdk@0.35.2
+  - @lix-js/client@2.0.1
+
+## null
+
+### Patch Changes
+
 - Updated dependencies [00ad046]
   - @lix-js/client@2.0.0
   - @inlang/cli@2.16.10

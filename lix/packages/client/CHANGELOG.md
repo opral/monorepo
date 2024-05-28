@@ -1,5 +1,12 @@
 # @lix-js/client
 
+## 2.0.1
+
+### Patch Changes
+
+- Updated dependencies [4a25124]
+  - @lix-js/fs@2.1.0
+
 ## 2.0.0
 
 ### Major Changes
