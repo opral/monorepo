@@ -38,7 +38,7 @@ describe("parsePath", () => {
 			path: canonicalPath,
 			trailingSlash,
 		} = getPathInfo("/", {
-			normalizedBase: "/",
+			normalizedBase: "",
 			availableLanguageTags: ["en", "de"],
 		})
 
@@ -72,7 +72,7 @@ describe("parsePath", () => {
 
 	it("identifies data-requests as data requests", () => {
 		const { dataSuffix } = getPathInfo("/foo/bar/__data.json", {
-			normalizedBase: "/",
+			normalizedBase: "",
 			availableLanguageTags: ["en"],
 		})
 		expect(dataSuffix).toBe("__data.json")
@@ -80,7 +80,7 @@ describe("parsePath", () => {
 
 	it("identifies data-requests as html data requests", () => {
 		const { dataSuffix, path } = getPathInfo("/foo/bar/.html__data.json", {
-			normalizedBase: "/",
+			normalizedBase: "",
 			availableLanguageTags: ["en"],
 		})
 		expect(dataSuffix).toBe(".html__data.json")
@@ -89,7 +89,7 @@ describe("parsePath", () => {
 
 	it("doesn't identify non-data-requests as data requests", () => {
 		const { dataSuffix, path } = getPathInfo("/foo/bar", {
-			normalizedBase: "/",
+			normalizedBase: "",
 			availableLanguageTags: ["en"],
 		})
 		expect(dataSuffix).toBeUndefined()
@@ -98,7 +98,7 @@ describe("parsePath", () => {
 
 	it("returns the correct trailing slash", () => {
 		const { trailingSlash } = getPathInfo("/foo/bar/", {
-			normalizedBase: "/",
+			normalizedBase: "",
 			availableLanguageTags: ["en"],
 		})
 
