@@ -44,8 +44,11 @@
 	$: if (browser) document.documentElement.lang = lang
 	$: if (browser) document.documentElement.dir = i18n.config.textDirection[lang] ?? "ltr"
 
+	// count the number of language changes. 
 	let numberOfLanugageChanges = 0
 	$: if (lang) numberOfLanugageChanges += 1
+
+	// on all but the first language change, invalidate language-dependent data
 	$: if (browser && lang && numberOfLanugageChanges > 1)
 		invalidate(LANGUAGE_CHANGE_INVALIDATION_KEY)
 
@@ -56,7 +59,7 @@
 		if (isExternal(original_to, from, absoluteBase) || i18n.config.exclude(original_to.pathname))
 			return href
 
-		const language = hreflang ?? lang
+		const targetLanguage = hreflang ?? lang
 
 		const { path: canonicalPath, trailingSlash } = getPathInfo(original_to.pathname, {
 			normalizedBase: absoluteBase,
@@ -66,14 +69,14 @@
 
 		const translatedPath = getTranslatedPath(
 			canonicalPath,
-			language,
+			targetLanguage,
 			i18n.config.translations,
 			i18n.config.matchers
 		)
 
 		const newPathname = serializeRoute({
 			base: absoluteBase,
-			lang: language,
+			lang: targetLanguage,
 			path: translatedPath,
 			dataSuffix: undefined,
 			includeLanguage: true,
