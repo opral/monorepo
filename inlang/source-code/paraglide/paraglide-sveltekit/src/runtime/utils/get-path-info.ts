@@ -3,14 +3,14 @@ import { DATA_SUFFIX, HTML_DATA_SUFFIX } from "../../constants.js"
 import { safeDecode } from "./safe-decode.js"
 import * as Path from "./path.js"
 
-type ParseOptions = {
+type ParseOptions<T extends string> = {
 	normalizedBase: NormalizedBase
-	availableLanguageTags: readonly string[]
-	defaultLanguageTag: string
+	availableLanguageTags: readonly T[]
+	defaultLanguageTag: T
 }
 
-type ParseResult = {
-	lang: string
+type ParseResult<T extends string> = {
+	lang: T
 	path: string
 	trailingSlash: boolean
 	dataSuffix: string | undefined
@@ -21,12 +21,14 @@ type ParseResult = {
  * @param path
  * @param base
  */
-export function getPathInfo(path: string, options: ParseOptions): ParseResult {
+export function getPathInfo<T extends string>(
+	path: string,
+	options: ParseOptions<T>
+): ParseResult<T> {
 	const decodedPath = safeDecode(path)
 	const trailingSlash = decodedPath.endsWith("/") && decodedPath !== "/"
 
 	const normalizedPath = Path.normalize(decodedPath)
-
 	const pathWithoutBase = removeBase(normalizedPath, options.normalizedBase)
 
 	const dataSuffix = pathWithoutBase.endsWith(HTML_DATA_SUFFIX)
@@ -50,18 +52,19 @@ export function getPathInfo(path: string, options: ParseOptions): ParseResult {
 		}
 	}
 
-	const lang = options.availableLanguageTags.includes(maybeLang as any)
-		? maybeLang
-		: options.defaultLanguageTag
-	const pathSegment = options.availableLanguageTags.includes(maybeLang as any)
+	const isAvailableLanguageTag = options.availableLanguageTags.includes(maybeLang as any)
+
+	const detectedLanguage = isAvailableLanguageTag ? (maybeLang as T) : options.defaultLanguageTag
+
+	const pathSegment = isAvailableLanguageTag
 		? Path.normalize(rest.join("/"))
 		: Path.normalize(pathWithoutDataSuffix)
 
 	return {
-		lang,
 		path: pathSegment,
 		dataSuffix,
 		trailingSlash,
+		lang: detectedLanguage,
 	}
 }
 
