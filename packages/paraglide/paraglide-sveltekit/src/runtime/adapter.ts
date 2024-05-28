@@ -8,7 +8,10 @@ import { getTranslatedPath } from "./path-translations/getTranslatedPath.js"
 import { serializeRoute } from "./utils/serialize-path.js"
 import { getCanonicalPath } from "./path-translations/getCanonicalPath.js"
 import { getPathInfo } from "./utils/get-path-info.js"
-import { normaliseBase as canonicalNormaliseBase } from "./utils/normaliseBase.js"
+import {
+	normaliseBase as canonicalNormaliseBase,
+	type NormalizedBase,
+} from "./utils/normaliseBase.js"
 import { createExclude, type ExcludeConfig } from "./exclude.js"
 import { guessTextDirMap } from "./utils/text-dir.js"
 import { resolvePathTranslations } from "./config/resolvePathTranslations.js"
@@ -259,7 +262,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 			const normalisedBase = normaliseBase(base)
 
 			const { trailingSlash, dataSuffix } = getPathInfo(path, {
-				base: normalisedBase,
+				normalizedBase: normalisedBase,
 				availableLanguageTags: runtime.availableLanguageTags,
 				defaultLanguageTag: runtime.sourceLanguageTag,
 			})
@@ -310,7 +313,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 			const normalizedBase = normaliseBase(base)
 
 			const { path, lang, trailingSlash, dataSuffix } = getPathInfo(translatedPath, {
-				base: normalizedBase,
+				normalizedBase: normalizedBase,
 				availableLanguageTags: config.runtime.availableLanguageTags,
 				defaultLanguageTag: config.defaultLanguageTag,
 			})
@@ -328,9 +331,9 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 	}
 }
 
-function normaliseBase(base: string) {
+function normaliseBase(base: string): NormalizedBase {
 	if (base === "") return ""
-	if (base.startsWith("/")) return base
+	if (base.startsWith("/")) return base as `/${string}`
 
 	// this should only be reachable during component initialization
 	// We can detect this, because base is only ever a relative path during component initialization
