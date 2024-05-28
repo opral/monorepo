@@ -1,5 +1,4 @@
 import * as Path from "./path.js"
-import { DATA_SUFFIX } from "../../constants.js"
 
 /**
  * Serializes a path with the given options. Does **NOT** include the language.
@@ -18,7 +17,7 @@ export function serializeRoute(opts: SerializePathOptions): string {
 
 	parts.push(opts.path)
 
-	if (opts.dataSuffix) parts.push(DATA_SUFFIX)
+	if (opts.dataSuffix) parts.push(opts.dataSuffix)
 
 	const resolvedPath = Path.resolve(...parts)
 	if (opts.trailingSlash && !opts.dataSuffix && resolvedPath !== "/") {

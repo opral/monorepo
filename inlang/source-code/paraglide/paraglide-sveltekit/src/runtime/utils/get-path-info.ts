@@ -1,7 +1,10 @@
 import type { NormalizedBase } from "./normaliseBase.js"
-import { DATA_SUFFIX, HTML_DATA_SUFFIX } from "../../constants.js"
 import { safeDecode } from "./safe-decode.js"
 import * as Path from "./path.js"
+
+/** The path suffix SvelteKit adds on Data requests */
+const DATA_SUFFIX = "__data.json"
+const HTML_DATA_SUFFIX = ".html__data.json"
 
 type ParseOptions<T extends string> = {
 	normalizedBase: NormalizedBase
@@ -28,8 +31,7 @@ export function getPathInfo<T extends string>(
 	const decodedPath = safeDecode(path)
 	const trailingSlash = decodedPath.endsWith("/") && decodedPath !== "/"
 
-	const normalizedPath = Path.normalize(decodedPath)
-	const pathWithoutBase = removeBase(normalizedPath, options.normalizedBase)
+	const pathWithoutBase = removeBase(decodedPath, options.normalizedBase)
 
 	const dataSuffix = pathWithoutBase.endsWith(HTML_DATA_SUFFIX)
 		? HTML_DATA_SUFFIX
@@ -37,9 +39,8 @@ export function getPathInfo<T extends string>(
 		? DATA_SUFFIX
 		: undefined
 
-	const pathWithoutDataSuffix = dataSuffix
-		? pathWithoutBase.replace(dataSuffix, "")
-		: pathWithoutBase
+	const pathWithoutDataSuffix =
+		(dataSuffix ? pathWithoutBase.replace(dataSuffix, "") : pathWithoutBase) || "/"
 
 	const [maybeLang, ...rest] = pathWithoutDataSuffix.split("/").filter(Boolean)
 
@@ -56,9 +57,9 @@ export function getPathInfo<T extends string>(
 
 	const detectedLanguage = isAvailableLanguageTag ? (maybeLang as T) : options.defaultLanguageTag
 
-	const pathSegment = isAvailableLanguageTag
-		? Path.normalize(rest.join("/"))
-		: Path.normalize(pathWithoutDataSuffix)
+	const pathSegment = Path.normalize(
+		isAvailableLanguageTag ? rest.join("/") : pathWithoutDataSuffix
+	)
 
 	return {
 		path: pathSegment,
@@ -68,6 +69,7 @@ export function getPathInfo<T extends string>(
 	}
 }
 
-function removeBase(path: string, normalizedBase: NormalizedBase): string {
-	return path.replace(normalizedBase, "")
+function removeBase(absolutePath: string, normalizedBase: NormalizedBase): string {
+	const withoutBase = absolutePath.replace(normalizedBase, "")
+	return withoutBase.startsWith("/") ? withoutBase : `/${withoutBase}`
 }
