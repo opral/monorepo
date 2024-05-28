@@ -11,7 +11,7 @@ var pako = _interopDefault(require('pako'));
 var pify = _interopDefault(require('pify'));
 var ignore = _interopDefault(require('ignore'));
 var cleanGitRef = _interopDefault(require('clean-git-ref'));
-var diff3Merge = _interopDefault(require('diff3'));
+var diff3Merge = _interopDefault(require('../diff3/diff3.js'));
 
 /**
  * @typedef {Object} GitProgressEvent

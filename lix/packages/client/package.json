@@ -26,25 +26,21 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
-		"eslint": "9.0.0",
-		"prettier": "2.8.3",
 		"@lix-js/fs": "workspace:*",
-		"@octokit/types": "12.4.0 ",
-		"async-lock": "^1.4.1",
-		"clean-git-ref": "^2.0.1",
-		"crc-32": "^1.2.2",
-		"diff3": "./vendored/diff3",
-		"ignore": "^5.3.1",
+		"async-lock": "1.4.1",
+		"clean-git-ref": "2.0.1",
+		"crc-32": "1.2.2",
+		"ignore": "5.3.1",
 		"octokit": "3.1.2",
-		"pako": "^1.0.11",
-		"pify": "^5.0.0",
-		"sha.js": "^2.4.11"
+		"pako": "1.0.11",
+		"pify": "5.0.0",
+		"sha.js": "2.4.11"
 	},
-	"bundledDependencies": [
-		"diff3"
-	],
 	"license": "Apache-2.0",
 	"devDependencies": {
+		"@octokit/types": "12.4.0 ",
+		"eslint": "9.0.0",
+		"prettier": "2.8.3",
 		"typescript": "5.2.2",
 		"@vitest/coverage-v8": "1.1.1",
 		"@lix-js/code-style": "workspace:*",

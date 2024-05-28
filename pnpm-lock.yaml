@@ -2951,49 +2951,46 @@ importers:
       '@lix-js/fs':
         specifier: workspace:*
         version: link:../fs
-      '@octokit/types':
-        specifier: '12.4.0 '
-        version: 12.4.0
       async-lock:
-        specifier: ^1.4.1
+        specifier: 1.4.1
         version: 1.4.1
       clean-git-ref:
-        specifier: ^2.0.1
+        specifier: 2.0.1
         version: 2.0.1
       crc-32:
-        specifier: ^1.2.2
+        specifier: 1.2.2
         version: 1.2.2
-      diff3:
-        specifier: ./vendored/diff3
-        version: link:vendored/diff3
-      eslint:
-        specifier: 9.0.0
-        version: 9.0.0
       ignore:
-        specifier: ^5.3.1
+        specifier: 5.3.1
         version: 5.3.1
       octokit:
         specifier: 3.1.2
         version: 3.1.2
       pako:
-        specifier: ^1.0.11
+        specifier: 1.0.11
         version: 1.0.11
       pify:
-        specifier: ^5.0.0
+        specifier: 5.0.0
         version: 5.0.0
-      prettier:
-        specifier: 2.8.3
-        version: 2.8.3
       sha.js:
-        specifier: ^2.4.11
+        specifier: 2.4.11
         version: 2.4.11
     devDependencies:
       '@lix-js/code-style':
         specifier: workspace:*
         version: link:../code-style
+      '@octokit/types':
+        specifier: '12.4.0 '
+        version: 12.4.0
       '@vitest/coverage-v8':
         specifier: 0.34.6
         version: 0.34.6(vitest@0.34.6(jsdom@22.1.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.0)(webdriverio@8.36.1(typescript@5.2.2)))
+      eslint:
+        specifier: 9.0.0
+        version: 9.0.0
+      prettier:
+        specifier: 2.8.3
+        version: 2.8.3
       typescript:
         specifier: 5.2.2
         version: 5.2.2
