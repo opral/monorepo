@@ -46,6 +46,25 @@ describe("getCanonicalPath", () => {
 		expect(canonicalPath).toBe("/foo")
 	})
 
+	it("preserves the trailing slash", () => {
+		const canonicalPath = getCanonicalPath(
+			"/bar/",
+			"en",
+			{
+				"/foo": {
+					en: "/bar",
+					de: "/baz",
+				},
+				"/bar": {
+					en: "/foo",
+					de: "/baz",
+				},
+			},
+			{}
+		)
+		expect(canonicalPath).toBe("/foo/")
+	})
+
 	it("returns the canonical path in case of a match", () => {
 		const canonicalPath = getCanonicalPath(
 			"/bar/123",

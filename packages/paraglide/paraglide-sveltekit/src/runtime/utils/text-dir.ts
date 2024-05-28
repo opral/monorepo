@@ -3,7 +3,7 @@ const LTR = "ltr"
 
 type TextDirection = "rtl" | "ltr"
 
-export function guessTextDir(lang: string): TextDirection {
+export function guessTextDir<T extends string = string>(lang: T): TextDirection {
 	// this is super unreliable across browsers, so we expect errors
 	try {
 		const locale = new Intl.Locale(lang)
