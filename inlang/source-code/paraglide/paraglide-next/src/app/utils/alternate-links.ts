@@ -1,8 +1,7 @@
 import { availableLanguageTags, languageTag } from "$paraglide/runtime.js"
 import { ResolvingMetadata } from "next"
 import { RoutingStrategy } from "../index.client"
-// eslint-disable-next-line unicorn/prefer-node-protocol
-import { type UrlObject, format, parse } from "url"
+import { format } from "./format"
 
 /**
  * Generates the metadata NextJS needs to generate the `<link rel="alternate"` headers.
@@ -58,16 +57,13 @@ export function generateAlternateLinks<T extends string>({
 	const locale = languageTag() as T
 
 	//current pathname, rendered per page
-	const localisedPathname = new URL(routeData.urlPathname, "https://n.com").pathname as `/${string}`
+	const localisedPathname = new URL(routeData.urlPathname, "http://n.com").pathname as `/${string}`
 	const canonicalPathname = strategy.getCanonicalPath(localisedPathname, locale)
 
 	return Object.fromEntries(
 		(availableLanguageTags as readonly T[]).map((lang) => {
 			const localisedUrl = strategy.getLocalisedUrl(canonicalPathname, lang, true)
-			const baseUrl: UrlObject = parse(base)
-			const url = { ...baseUrl, ...localisedUrl }
-			const href = format(url)
-
+			const href = new URL(format(localisedUrl), base).href
 			return [lang, href]
 		})
 	)
