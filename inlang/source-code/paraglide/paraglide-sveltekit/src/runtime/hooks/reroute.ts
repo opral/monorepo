@@ -19,7 +19,7 @@ export const createReroute = <T extends string>({
 	return ({ url }) => {
 		try {
 			const {
-				lang,
+				languageTag: lang,
 				path: translatedPath,
 				dataSuffix,
 				trailingSlash,

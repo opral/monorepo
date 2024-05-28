@@ -7,8 +7,5 @@ export function createExclude(excludeConfig: ExcludeConfig): (path: string) => b
 		typeof exclude === "string" ? (path) => path === exclude : (path) => exclude.test(path)
 	)
 
-	return (path) => {
-		path = normalize(path)
-		return checks.some((check) => check(path))
-	}
+	return (path) => checks.some((check) => check(normalize(path)))
 }

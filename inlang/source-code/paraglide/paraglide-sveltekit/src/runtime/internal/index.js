@@ -56,8 +56,7 @@ export function getTranslationFunctions() {
 	 * @param {AttributeTranslation[]} attribute_translations
 	 */
 	function handleAttributes(attrs, attribute_translations) {
-		//If the element has the ${NO_TRANSLATE_ATTRIBUTE} attribute, don't translate it
-		if (attrs[NO_TRANSLATE_ATTRIBUTE] === true) return attrs
+		if (attrs[NO_TRANSLATE_ATTRIBUTE]) return attrs
 
 		for (const { attribute_name, lang_attribute_name } of attribute_translations) {
 			if (attribute_name in attrs) {
