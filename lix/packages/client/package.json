@@ -40,6 +40,9 @@
 		"pify": "^5.0.0",
 		"sha.js": "^2.4.11"
 	},
+	"bundledDependencies": [
+		"diff3"
+	],
 	"license": "Apache-2.0",
 	"devDependencies": {
 		"typescript": "5.2.2",
