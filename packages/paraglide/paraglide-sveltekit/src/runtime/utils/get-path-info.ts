@@ -3,17 +3,15 @@ import { safeDecode } from "./safe-decode.js"
 import * as Path from "./path.js"
 
 /** The path suffix SvelteKit adds on Data requests */
-const DATA_SUFFIX = "__data.json"
-const HTML_DATA_SUFFIX = ".html__data.json"
+const KNOWN_SUFFIXES = [".html__data.json", "__data.json"]
 
 type ParseOptions<T extends string> = {
 	normalizedBase: NormalizedBase
 	availableLanguageTags: readonly T[]
-	defaultLanguageTag: T
 }
 
 type ParseResult<T extends string> = {
-	lang: T
+	languageTag: T | undefined
 	path: string
 	trailingSlash: boolean
 	dataSuffix: string | undefined
@@ -33,29 +31,16 @@ export function getPathInfo<T extends string>(
 
 	const pathWithoutBase = removeBase(decodedPath, options.normalizedBase)
 
-	const dataSuffix = pathWithoutBase.endsWith(HTML_DATA_SUFFIX)
-		? HTML_DATA_SUFFIX
-		: pathWithoutBase.endsWith(DATA_SUFFIX)
-		? DATA_SUFFIX
-		: undefined
+	const dataSuffix = KNOWN_SUFFIXES.find((suffix) => pathWithoutBase.endsWith(suffix))
 
 	const pathWithoutDataSuffix =
 		(dataSuffix ? pathWithoutBase.replace(dataSuffix, "") : pathWithoutBase) || "/"
 
 	const [maybeLang, ...rest] = pathWithoutDataSuffix.split("/").filter(Boolean)
 
-	if (!maybeLang) {
-		return {
-			lang: options.defaultLanguageTag,
-			path: "/",
-			dataSuffix,
-			trailingSlash,
-		}
-	}
-
 	const isAvailableLanguageTag = options.availableLanguageTags.includes(maybeLang as any)
 
-	const detectedLanguage = isAvailableLanguageTag ? (maybeLang as T) : options.defaultLanguageTag
+	const detectedLanguage = isAvailableLanguageTag ? (maybeLang as T) : undefined
 
 	const pathSegment = Path.normalize(
 		isAvailableLanguageTag ? rest.join("/") : pathWithoutDataSuffix
@@ -65,7 +50,7 @@ export function getPathInfo<T extends string>(
 		path: pathSegment,
 		dataSuffix,
 		trailingSlash,
-		lang: detectedLanguage,
+		languageTag: detectedLanguage,
 	}
 }
 

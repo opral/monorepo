@@ -58,9 +58,8 @@ export const createHandle = <T extends string>(
 	const dirPlaceholder = options.textDirectionPlaceholder ?? "%paraglide.textDirection%"
 
 	return ({ resolve, event }) => {
-		const { lang } = getPathInfo(event.url.pathname, {
+		const { languageTag: langFromUrl } = getPathInfo(event.url.pathname, {
 			availableLanguageTags: i18n.runtime.availableLanguageTags,
-			defaultLanguageTag: i18n.defaultLanguageTag,
 			normalizedBase: base,
 		})
 
@@ -73,6 +72,7 @@ export const createHandle = <T extends string>(
 		)
 		const negotiatedLanguage = negotiatedLanguagePreferences[0]
 
+		const lang = langFromUrl ?? cookieLang ?? negotiatedLanguage ?? i18n.defaultLanguageTag
 		const textDirection = i18n.textDirection[lang as T] ?? "ltr"
 
 		event.locals.paraglide = {

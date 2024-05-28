@@ -23,7 +23,7 @@ export function translatePath(
 ) {
 	const {
 		path: targetedPathSource,
-		lang,
+		languageTag: lang,
 		dataSuffix,
 		trailingSlash,
 	} = getPathInfo(path, {

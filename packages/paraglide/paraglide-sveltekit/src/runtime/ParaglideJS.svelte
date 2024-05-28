@@ -64,7 +64,6 @@
 		const { path: canonicalPath, trailingSlash } = getPathInfo(original_to.pathname, {
 			normalizedBase: absoluteBase,
 			availableLanguageTags: i18n.config.runtime.availableLanguageTags,
-			defaultLanguageTag: i18n.config.defaultLanguageTag,
 		})
 
 		const translatedPath = getTranslatedPath(

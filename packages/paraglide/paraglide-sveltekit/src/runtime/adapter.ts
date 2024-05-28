@@ -264,7 +264,6 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 			const { trailingSlash, dataSuffix } = getPathInfo(path, {
 				normalizedBase: normalisedBase,
 				availableLanguageTags: runtime.availableLanguageTags,
-				defaultLanguageTag: runtime.sourceLanguageTag,
 			})
 
 			lang = lang ?? runtime.languageTag()
@@ -312,13 +311,24 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		route(translatedPath: string) {
 			const normalizedBase = normaliseBase(base)
 
-			const { path, lang, trailingSlash, dataSuffix } = getPathInfo(translatedPath, {
+			const {
+				path,
+				languageTag: lang,
+				trailingSlash,
+				dataSuffix,
+			} = getPathInfo(translatedPath, {
 				normalizedBase,
 				availableLanguageTags: config.runtime.availableLanguageTags,
-				defaultLanguageTag: config.defaultLanguageTag,
 			})
 
-			const canonicalPath = getCanonicalPath(path, lang, config.translations, config.matchers)
+			const languageTag = lang || config.defaultLanguageTag
+
+			const canonicalPath = getCanonicalPath(
+				path,
+				languageTag,
+				config.translations,
+				config.matchers
+			)
 
 			return serializeRoute({
 				path: canonicalPath,
