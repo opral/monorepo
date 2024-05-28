@@ -313,7 +313,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 			const normalizedBase = normaliseBase(base)
 
 			const { path, lang, trailingSlash, dataSuffix } = getPathInfo(translatedPath, {
-				normalizedBase: normalizedBase,
+				normalizedBase,
 				availableLanguageTags: config.runtime.availableLanguageTags,
 				defaultLanguageTag: config.defaultLanguageTag,
 			})
