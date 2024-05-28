@@ -12,7 +12,7 @@ const DocHeader = (props: { manifest: MarketplaceManifest }) => {
 			: props.manifest.displayName
 
 	return (
-		<div class="product-header w-full px-4 h-14 bg-surface-100 border-b border-t border-surface-200 sticky top-[128px] sm:top-[106px] z-[9999]">
+		<div class="product-header w-full px-4 h-14 bg-surface-100 border-b border-t border-surface-200 sticky top-[128px] sm:top-[106px] z-50">
 			<div class="max-w-7xl mx-auto flex justify-between items-center h-full">
 				<div class="flex gap-4 items-center">
 					<img class="w-7 h-7" src={props.manifest.icon} alt="product icon" />
