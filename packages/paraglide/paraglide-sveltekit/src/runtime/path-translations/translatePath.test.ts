@@ -10,7 +10,7 @@ describe("translatePath", () => {
 			{},
 			{},
 			{
-				base,
+				normalizedBase: base,
 				availableLanguageTags: ["de", "en"],
 				defaultLanguageTag: "en",
 				prefixDefaultLanguage: "never",
@@ -27,7 +27,7 @@ describe("translatePath", () => {
 			{},
 			{},
 			{
-				base,
+				normalizedBase: base,
 				availableLanguageTags: ["de", "en"],
 				defaultLanguageTag: "en",
 				prefixDefaultLanguage: "never",
@@ -44,7 +44,7 @@ describe("translatePath", () => {
 			{},
 			{},
 			{
-				base,
+				normalizedBase: base,
 				availableLanguageTags: ["de", "en"],
 				defaultLanguageTag: "en",
 				prefixDefaultLanguage: "never",
@@ -61,7 +61,7 @@ describe("translatePath", () => {
 			{},
 			{},
 			{
-				base,
+				normalizedBase: base,
 				availableLanguageTags: ["de", "en"],
 				defaultLanguageTag: "en",
 				prefixDefaultLanguage: "never",

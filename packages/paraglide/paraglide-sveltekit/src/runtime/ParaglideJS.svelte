@@ -59,7 +59,7 @@
 		const language = hreflang ?? lang
 
 		const { path: canonicalPath, trailingSlash } = getPathInfo(original_to.pathname, {
-			base: absoluteBase,
+			normalizedBase: absoluteBase,
 			availableLanguageTags: i18n.config.runtime.availableLanguageTags,
 			defaultLanguageTag: i18n.config.defaultLanguageTag,
 		})
@@ -108,7 +108,7 @@
 					i18n.config.translations,
 					i18n.config.matchers,
 					{
-						base: absoluteBase,
+						normalizedBase: absoluteBase,
 						availableLanguageTags: i18n.config.runtime.availableLanguageTags,
 						defaultLanguageTag: i18n.config.defaultLanguageTag,
 						prefixDefaultLanguage: i18n.config.prefixDefaultLanguage,

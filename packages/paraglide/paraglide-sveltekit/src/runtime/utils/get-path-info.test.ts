@@ -5,11 +5,11 @@ describe("parsePath", () => {
 	it("correctly identifies the segments (with base path)", () => {
 		const {
 			lang,
-			base,
+			normalizedBase: base,
 			path: canonicalPath,
 			trailingSlash,
 		} = getPathInfo("/base/de/foo/bar", {
-			base: "/base",
+			normalizedBase: "/base",
 			availableLanguageTags: ["en", "de"],
 			defaultLanguageTag: "en",
 		})
@@ -23,17 +23,15 @@ describe("parsePath", () => {
 	it("correctly identifies the segments (without base path)", () => {
 		const {
 			lang,
-			base,
 			path: canonicalPath,
 			trailingSlash,
 		} = getPathInfo("/de/foo/bar", {
-			base: "",
+			normalizedBase: "",
 			availableLanguageTags: ["en", "de"],
 			defaultLanguageTag: "en",
 		})
 
 		expect(lang).toBe("de")
-		expect(base).toBe("/")
 		expect(canonicalPath).toBe("/foo/bar")
 		expect(trailingSlash).toBe(false)
 	})
@@ -41,17 +39,15 @@ describe("parsePath", () => {
 	it("deals with empty inputs", () => {
 		const {
 			lang,
-			base,
 			path: canonicalPath,
 			trailingSlash,
 		} = getPathInfo("/", {
-			base: "/",
+			normalizedBase: "/",
 			availableLanguageTags: ["en", "de"],
 			defaultLanguageTag: "en",
 		})
 
 		expect(lang).toBe("en")
-		expect(base).toBe("/")
 		expect(canonicalPath).toBe("/")
 		expect(trailingSlash).toBe(false)
 	})
@@ -59,11 +55,11 @@ describe("parsePath", () => {
 	it("deals with an input that is just the base inputs", () => {
 		const {
 			lang,
-			base,
+			normalizedBase: base,
 			path: canonicalPath,
 			trailingSlash,
 		} = getPathInfo("/base", {
-			base: "/base",
+			normalizedBase: "/base",
 			availableLanguageTags: ["en", "de"],
 			defaultLanguageTag: "en",
 		})
@@ -76,7 +72,7 @@ describe("parsePath", () => {
 
 	it("falls backt to the default language if no language segment is present", () => {
 		const { lang } = getPathInfo("/base/path", {
-			base: "/base",
+			normalizedBase: "/base",
 			availableLanguageTags: ["de", "en", "fr"],
 			defaultLanguageTag: "en",
 		})
@@ -85,7 +81,7 @@ describe("parsePath", () => {
 
 	it("identifies data-requests as data requests", () => {
 		const { dataSuffix } = getPathInfo("/foo/bar/__data.json", {
-			base: "/",
+			normalizedBase: "/",
 			availableLanguageTags: ["en"],
 			defaultLanguageTag: "en",
 		})
@@ -94,7 +90,7 @@ describe("parsePath", () => {
 
 	it("identifies data-requests as html data requests", () => {
 		const { dataSuffix, path } = getPathInfo("/foo/bar/.html__data.json", {
-			base: "/",
+			normalizedBase: "/",
 			availableLanguageTags: ["en"],
 			defaultLanguageTag: "en",
 		})
@@ -104,7 +100,7 @@ describe("parsePath", () => {
 
 	it("doesn't identify non-data-requests as data requests", () => {
 		const { dataSuffix, path } = getPathInfo("/foo/bar", {
-			base: "/",
+			normalizedBase: "/",
 			availableLanguageTags: ["en"],
 			defaultLanguageTag: "en",
 		})
@@ -114,7 +110,7 @@ describe("parsePath", () => {
 
 	it("returns the correct trailing slash", () => {
 		const { trailingSlash } = getPathInfo("/foo/bar/", {
-			base: "/",
+			normalizedBase: "/",
 			availableLanguageTags: ["en"],
 			defaultLanguageTag: "en",
 		})
