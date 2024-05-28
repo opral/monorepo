@@ -1,5 +1,11 @@
 # @lix-js/client
 
+## 2.1.0
+
+### Minor Changes
+
+- 548bc9e: fix missing package venderoed dep configuration 2
+
 ## 2.0.1
 
 ### Patch Changes

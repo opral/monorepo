@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/github-lint-action",
 	"description": "This action checks for translation issues within your PRs.",
-	"version": "0.3.6",
+	"version": "0.3.7",
 	"private": true,
 	"publishConfig": {
 		"access": "public"
