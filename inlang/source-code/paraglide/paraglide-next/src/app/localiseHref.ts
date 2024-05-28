@@ -1,11 +1,10 @@
 import type { RoutingStrategy } from "./routing-strategy/interface"
 import type { LinkProps } from "next/link"
 import { isExternal as isStringHrefExternal } from "./utils/href"
+import { UrlObject } from "node:url"
 
 const getPathname = (href: string, currentPath: string): `/${string}` => {
-	const base = new URL(currentPath, "http://n")
-	const resolved = new URL(href, base)
-	return resolved.pathname as `/${string}`
+	return new URL(href, new URL(currentPath, "http://n")).pathname as `/${string}`
 }
 
 export function createLocaliseHref<T extends string>(
@@ -44,7 +43,7 @@ export function createLocaliseHref<T extends string>(
 /**
  * Returns true if the href explicitly includes the origin, even if it's the current origin
  */
-export function isExternal(href: LinkProps["href"]) {
+export function isExternal(href: UrlObject | string) {
 	return typeof href === "object"
 		? //Make sure none of the telltales for external links are set
 		  Boolean(href.protocol || href.auth || href.port || href.hostname || href.host)
