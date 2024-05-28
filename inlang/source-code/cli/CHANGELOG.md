@@ -1,5 +1,11 @@
 # @inlang/cli
 
+## 2.17.0
+
+### Minor Changes
+
+- 3896fe6: fix: move dependencies to dev dependencies to avoid "unpublished dependency" issues
+
 ## 2.16.10
 
 ### Patch Changes

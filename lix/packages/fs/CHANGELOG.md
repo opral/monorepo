@@ -1,5 +1,11 @@
 # @lix-js/fs
 
+## 2.1.0
+
+### Minor Changes
+
+- 4a25124: fix wrong code style import
+
 ## 2.0.0
 
 ### Major Changes

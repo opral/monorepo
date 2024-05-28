@@ -1,5 +1,11 @@
 # @inlang/settings-component
 
+## 0.0.12
+
+### Patch Changes
+
+- @inlang/sdk@0.35.2
+
 ## 0.0.11
 
 ### Patch Changes
