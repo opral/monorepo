@@ -1,7 +1,8 @@
 import { availableLanguageTags, languageTag } from "$paraglide/runtime.js"
 import { ResolvingMetadata } from "next"
 import { RoutingStrategy } from "../index.client"
-import { UrlObject, format, parse } from "node:url"
+// eslint-disable-next-line unicorn/prefer-node-protocol
+import { type UrlObject, format, parse } from "url"
 
 /**
  * Generates the metadata NextJS needs to generate the `<link rel="alternate"` headers.
