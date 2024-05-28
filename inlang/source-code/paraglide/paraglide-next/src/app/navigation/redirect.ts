@@ -17,9 +17,9 @@ export function createRedirects<T extends string>(
 	 *
 	 *  @param url the url to redirect to
 	 */
-	const redirect: typeof NextRedirect = (...args) => {
-		args[0] = localiseHref(args[0], languageTag(), "/", false)
-		NextRedirect(...args)
+	const redirect: typeof NextRedirect = (href, ...other) => {
+		href = localiseHref(href, languageTag(), "/", false)
+		NextRedirect(href, ...other)
 	}
 
 	/**
@@ -28,9 +28,9 @@ export function createRedirects<T extends string>(
 	 *
 	 * @param url the url to redirect to
 	 */
-	const permanentRedirect: typeof NextPermanentRedirect = (...args) => {
-		args[0] = localiseHref(args[0], languageTag(), "/", false)
-		NextPermanentRedirect(...args)
+	const permanentRedirect: typeof NextPermanentRedirect = (href, ...other) => {
+		href = localiseHref(href, languageTag(), "/", false)
+		NextPermanentRedirect(href, ...other)
 	}
 
 	return { redirect, permanentRedirect }
