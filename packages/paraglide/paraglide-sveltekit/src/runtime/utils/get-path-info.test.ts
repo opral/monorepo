@@ -5,7 +5,6 @@ describe("parsePath", () => {
 	it("correctly identifies the segments (with base path)", () => {
 		const {
 			lang,
-			normalizedBase: base,
 			path: canonicalPath,
 			trailingSlash,
 		} = getPathInfo("/base/de/foo/bar", {
@@ -15,7 +14,6 @@ describe("parsePath", () => {
 		})
 
 		expect(lang).toBe("de")
-		expect(base).toBe("/base")
 		expect(canonicalPath).toBe("/foo/bar")
 		expect(trailingSlash).toBe(false)
 	})
@@ -55,7 +53,6 @@ describe("parsePath", () => {
 	it("deals with an input that is just the base inputs", () => {
 		const {
 			lang,
-			normalizedBase: base,
 			path: canonicalPath,
 			trailingSlash,
 		} = getPathInfo("/base", {
@@ -65,7 +62,6 @@ describe("parsePath", () => {
 		})
 
 		expect(lang).toBe("en")
-		expect(base).toBe("/base")
 		expect(canonicalPath).toBe("/")
 		expect(trailingSlash).toBe(false)
 	})

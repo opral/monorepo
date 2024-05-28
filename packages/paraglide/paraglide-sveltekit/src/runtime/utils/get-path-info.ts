@@ -10,7 +10,6 @@ type ParseOptions = {
 }
 
 type ParseResult = {
-	normalizedBase: NormalizedBase
 	lang: string
 	path: string
 	trailingSlash: boolean
@@ -44,7 +43,6 @@ export function getPathInfo(path: string, options: ParseOptions): ParseResult {
 
 	if (!maybeLang) {
 		return {
-			normalizedBase: options.normalizedBase,
 			lang: options.defaultLanguageTag,
 			path: "/",
 			dataSuffix,
@@ -60,7 +58,6 @@ export function getPathInfo(path: string, options: ParseOptions): ParseResult {
 		: Path.normalize(pathWithoutDataSuffix)
 
 	return {
-		normalizedBase: options.normalizedBase,
 		lang,
 		path: pathSegment,
 		dataSuffix,
