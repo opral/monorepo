@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-imports */
 
 import { findRepoRoot, openRepository } from "@lix-js/client"
-import { loadProject, type Message } from "@inlang/sdk"
+import { loadProject, type InlangProject, type Message } from "@inlang/sdk"
 
 import {
 	createMessage,
@@ -111,14 +111,17 @@ export async function runLoadTest(
 	}
 
 	if (isV2) {
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		const bundles = await project.store!.messageBundles.getAll()
-		debug(`loaded ${bundles.length} v2 MessageBundles`)
+		await summarize("loaded", project)
 	}
 
 	if (translate) {
 		debug("translating messages with inlang cli")
 		await run(translateCommand)
+	}
+
+	if (isV2) {
+		await project.store?.messageBundles.reload()
+		await summarize("translated", project)
 	}
 
 	debug("load-test done - " + (watchMode ? "watching for events" : "exiting"))
@@ -128,6 +131,18 @@ export async function runLoadTest(
 			setTimeout(resolve, 1000 * 60 * 60 * 24)
 		})
 	}
+}
+
+async function summarize(action: string, project: InlangProject) {
+	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+	const bundles = await project.store!.messageBundles.getAll()
+	let bundleCount = 0
+	let messageCount = 0
+	bundles.map((bundle) => {
+		bundleCount++
+		messageCount += bundle.messages.length
+	})
+	debug(`${action}: ${bundleCount} bundles, ${messageCount / bundleCount} messages/bundle`)
 }
 
 async function generateMessageFile(isV2: boolean, messageCount: number) {
