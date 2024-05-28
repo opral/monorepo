@@ -23,14 +23,15 @@ export function translatePath(
 ) {
 	const {
 		path: targetedPathSource,
-		languageTag: lang,
+		languageTag: langInPath,
 		dataSuffix,
 		trailingSlash,
 	} = getPathInfo(path, {
 		normalizedBase: opts.normalizedBase,
 		availableLanguageTags: opts.availableLanguageTags,
-		defaultLanguageTag: opts.defaultLanguageTag,
 	})
+
+	const lang = langInPath || opts.defaultLanguageTag
 
 	const canonicalPath = getCanonicalPath(targetedPathSource, lang, translations, matchers)
 	const translatedPathTarget = getTranslatedPath(

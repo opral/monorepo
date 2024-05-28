@@ -42,7 +42,7 @@ describe("parsePath", () => {
 			availableLanguageTags: ["en", "de"],
 		})
 
-		expect(lang).toBe("en")
+		expect(lang).toBeUndefined()
 		expect(canonicalPath).toBe("/")
 		expect(trailingSlash).toBe(false)
 	})
@@ -57,17 +57,17 @@ describe("parsePath", () => {
 			availableLanguageTags: ["en", "de"],
 		})
 
-		expect(lang).toBe("en")
+		expect(lang).toBeUndefined()
 		expect(canonicalPath).toBe("/")
 		expect(trailingSlash).toBe(false)
 	})
 
-	it("falls backt to the default language if no language segment is present", () => {
+	it("returns undefined for the language if no language segment is present", () => {
 		const { languageTag: lang } = getPathInfo("/base/path", {
 			normalizedBase: "/base",
 			availableLanguageTags: ["de", "en", "fr"],
 		})
-		expect(lang).toBe("en")
+		expect(lang).toBeUndefined()
 	})
 
 	it("identifies data-requests as data requests", () => {
