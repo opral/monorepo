@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server"
 import { RoutingStrategy } from "../routing-strategy/interface"
 import { addPathPrefix } from "../utils/basePath"
 import { format } from "../utils/format"
+import { UrlObject } from "node:url"
 
 /**
  * Adds SEO headers
@@ -30,14 +31,9 @@ export function addSeoHeaders<T extends string>(
 			localizedUrl.pathname = encodeURI(localizedUrl.pathname || "/") as `/${string}`
 			localizedUrl.pathname = addPathPrefix(localizedUrl.pathname, nextUrl.basePath) as `/${string}`
 
-			localizedUrl.protocol ??= nextUrl.protocol
-			localizedUrl.host ??= nextUrl.host
-			localizedUrl.hostname ??= nextUrl.hostname
-			localizedUrl.port ??= nextUrl.port
-			localizedUrl.hash ??= nextUrl.hash
-			localizedUrl.search ??= nextUrl.search
+			const full: UrlObject = { ...nextUrl, ...localizedUrl }
 
-			const fullHref = format(localizedUrl)
+			const fullHref = format(full)
 			return [lang, fullHref]
 		})
 	) as Record<T, string>

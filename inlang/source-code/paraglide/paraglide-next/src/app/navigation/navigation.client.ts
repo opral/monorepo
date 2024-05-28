@@ -1,7 +1,10 @@
-import * as NextNavigation from "next/navigation"
+import type { RoutingStrategy } from "../routing-strategy/interface"
+import {
+	usePathname as useNextNavigationPathname,
+	useRouter as useNextNavigationRouter,
+} from "next/navigation"
 import { languageTag, setLanguageTag } from "$paraglide/runtime.js"
 import { addBasePath, basePath } from "../utils/basePath"
-import type { RoutingStrategy } from "../routing-strategy/interface"
 import { localizeHref } from "../localiseHref"
 import { serializeCookie } from "../utils/cookie"
 import { LANG_COOKIE } from "../constants"
@@ -15,7 +18,7 @@ export const Navigation = <T extends string>({ strategy }: { strategy: RoutingSt
 	 * Get the current **non-localised** pathname. For example usePathname() on /de/dashboard?foo=bar would return "/dashboard"
 	 */
 	const usePathname = (): `/${string}` => {
-		const encodedLocalisedPathname = NextNavigation.usePathname()
+		const encodedLocalisedPathname = useNextNavigationPathname()
 		const localisedPathname = decodeURI(encodedLocalisedPathname) as `/${string}`
 		return strategy.getCanonicalPath(localisedPathname, languageTag() as T)
 	}
@@ -24,8 +27,8 @@ export const Navigation = <T extends string>({ strategy }: { strategy: RoutingSt
 	 * Get the router methods. For example router.push('/dashboard')
 	 */
 	const useRouter = () => {
-		const nextRouter = NextNavigation.useRouter()
-		const localisedCurrentPathname = NextNavigation.usePathname() as `/${string}`
+		const nextRouter = useNextNavigationRouter()
+		const localisedCurrentPathname = useNextNavigationPathname() as `/${string}`
 		const canonicalCurrentPathname = strategy.getCanonicalPath(
 			localisedCurrentPathname,
 			languageTag() as T
