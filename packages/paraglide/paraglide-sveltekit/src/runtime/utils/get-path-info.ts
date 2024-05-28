@@ -1,4 +1,5 @@
 import { DATA_SUFFIX, HTML_DATA_SUFFIX } from "../../constants.js"
+import type { NormalizedBase } from "./normaliseBase.js"
 import * as Path from "./path.js"
 import { safeDecode } from "./safe-decode.js"
 
@@ -22,30 +23,30 @@ type ParseResult = {
  * @param base
  */
 export function getPathInfo(path: string, options: ParseOptions): ParseResult {
-	path = safeDecode(path)
-	const trailingSlash = path.endsWith("/") && path !== "/"
+	const decodedPath = safeDecode(path)
+	const trailingSlash = decodedPath.endsWith("/") && decodedPath !== "/"
 
-	path = Path.normalize(path)
-	const base = Path.normalize(options.base)
+	const normalizedPath = Path.normalize(decodedPath)
+	const normalizedBase = Path.normalize(options.base)
 	const { availableLanguageTags, defaultLanguageTag } = options
 
-	let pathWithoutBase = path.replace(base, "/")
+	const pathWithoutBase = removeBase(normalizedPath, normalizedBase)
 
 	const dataSuffix = pathWithoutBase.endsWith(HTML_DATA_SUFFIX)
 		? HTML_DATA_SUFFIX
 		: pathWithoutBase.endsWith(DATA_SUFFIX)
-			? DATA_SUFFIX
-			: undefined
+		? DATA_SUFFIX
+		: undefined
 
-	if (dataSuffix) {
-		pathWithoutBase = pathWithoutBase.replace(dataSuffix, "")
-	}
+	const pathWithoutDataSuffix = dataSuffix
+		? pathWithoutBase.replace(dataSuffix, "")
+		: pathWithoutBase
 
-	const [maybeLang, ...rest] = pathWithoutBase.split("/").filter(Boolean)
+	const [maybeLang, ...rest] = pathWithoutDataSuffix.split("/").filter(Boolean)
 
 	if (!maybeLang) {
 		return {
-			base,
+			base: normalizedBase,
 			lang: defaultLanguageTag,
 			path: "/",
 			dataSuffix,
@@ -56,7 +57,11 @@ export function getPathInfo(path: string, options: ParseOptions): ParseResult {
 	const lang = availableLanguageTags.includes(maybeLang as any) ? maybeLang : defaultLanguageTag
 	const pathSegment = availableLanguageTags.includes(maybeLang as any)
 		? Path.normalize(rest.join("/"))
-		: Path.normalize(pathWithoutBase)
+		: Path.normalize(pathWithoutDataSuffix)
 
-	return { base, lang, path: pathSegment, dataSuffix, trailingSlash }
+	return { base: normalizedBase, lang, path: pathSegment, dataSuffix, trailingSlash }
+}
+
+function removeBase(path: string, normalizedBase: NormalizedBase): string {
+	return path.replace(normalizedBase, "")
 }
