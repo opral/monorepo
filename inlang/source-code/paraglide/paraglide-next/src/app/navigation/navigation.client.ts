@@ -2,7 +2,7 @@ import * as NextNavigation from "next/navigation"
 import { languageTag, setLanguageTag } from "$paraglide/runtime.js"
 import { addBasePath, basePath } from "../utils/basePath"
 import type { RoutingStrategy } from "../routing-strategy/interface"
-import { createLocaliseHref } from "../localiseHref"
+import { localizeHref } from "../localiseHref"
 import { serializeCookie } from "../utils/cookie"
 import { LANG_COOKIE } from "../constants"
 import { createRedirects } from "./redirect"
@@ -11,8 +11,6 @@ import { createLink } from "./Link"
 export type LocalisedNavigation<T extends string> = ReturnType<typeof Navigation<T>>
 
 export const Navigation = <T extends string>({ strategy }: { strategy: RoutingStrategy<T> }) => {
-	const localiseHref = createLocaliseHref(strategy)
-
 	/**
 	 * Get the current **non-localised** pathname. For example usePathname() on /de/dashboard?foo=bar would return "/dashboard"
 	 */
@@ -48,7 +46,8 @@ export const Navigation = <T extends string>({ strategy }: { strategy: RoutingSt
 			const locale = options?.locale ?? (languageTag() as T)
 			const isLanguageSwitch = locale !== languageTag()
 
-			const localisedPath = localiseHref(
+			const localisedPath = localizeHref(
+				strategy,
 				canonicalDestinationPath,
 				locale,
 				canonicalCurrentPathname,
@@ -93,7 +92,8 @@ export const Navigation = <T extends string>({ strategy }: { strategy: RoutingSt
 		) => {
 			const locale = options?.locale ?? (languageTag() as T)
 			const isLanguageSwitch = locale !== languageTag()
-			const localisedPath = localiseHref(
+			const localisedPath = localizeHref(
+				strategy,
 				canonicalDestinationPath,
 				locale,
 				canonicalCurrentPathname,
@@ -138,7 +138,13 @@ export const Navigation = <T extends string>({ strategy }: { strategy: RoutingSt
 		) => {
 			const locale = options?.locale ?? (languageTag() as T)
 			const isLanguageSwitch = locale !== languageTag()
-			const localisedPath = localiseHref(canonicalDestinationPath, locale, "/", isLanguageSwitch)
+			const localisedPath = localizeHref(
+				strategy,
+				canonicalDestinationPath,
+				locale,
+				"/",
+				isLanguageSwitch
+			)
 			return nextRouter.prefetch(localisedPath, options)
 		}
 

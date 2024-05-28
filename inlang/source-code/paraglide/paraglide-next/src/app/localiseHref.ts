@@ -6,37 +6,29 @@ const getPathname = (href: string, currentPath: string): `/${string}` => {
 	return new URL(href, new URL(currentPath, "http://n")).pathname as `/${string}`
 }
 
-export function createLocaliseHref<T extends string>(
-	strategy: RoutingStrategy<T>
-): <P extends LinkProps["href"]>(
+export const localizeHref = <T extends string, P extends LinkProps["href"]>(
+	strategy: RoutingStrategy<T>,
 	canonicalHref: P,
 	lang: T,
 	currentPath: string,
 	isLanugageSwitch: boolean
-) => P {
-	return <P extends LinkProps["href"]>(
-		canonicalHref: P,
-		lang: T,
-		currentPath: string,
-		isLanugageSwitch: boolean
-	): P => {
-		//don't translate external links
-		if (isExternal(canonicalHref)) return canonicalHref
+): P => {
+	//don't translate external links
+	if (isExternal(canonicalHref)) return canonicalHref
 
-		//guard against empty pathnames on object hrefs
-		if (typeof canonicalHref === "object" && !canonicalHref.pathname) return canonicalHref
+	//guard against empty pathnames on object hrefs
+	if (typeof canonicalHref === "object" && !canonicalHref.pathname) return canonicalHref
 
-		const canonicalPathname =
-			typeof canonicalHref === "object"
-				? getPathname(canonicalHref.pathname ?? "", currentPath)
-				: getPathname(canonicalHref, currentPath)
+	const canonicalPathname =
+		typeof canonicalHref === "object"
+			? getPathname(canonicalHref.pathname ?? "", currentPath)
+			: getPathname(canonicalHref, currentPath)
 
-		const translatedUrl = strategy.getLocalisedUrl(canonicalPathname, lang, isLanugageSwitch)
+	const translatedUrl = strategy.getLocalisedUrl(canonicalPathname, lang, isLanugageSwitch)
 
-		return typeof canonicalHref === "object"
-			? ({ ...canonicalHref, ...translatedUrl } as P)
-			: (canonicalHref.replace(canonicalPathname, translatedUrl.pathname) as P)
-	}
+	return typeof canonicalHref === "object"
+		? ({ ...canonicalHref, ...translatedUrl } as P)
+		: (canonicalHref.replace(canonicalPathname, translatedUrl.pathname) as P)
 }
 
 /**

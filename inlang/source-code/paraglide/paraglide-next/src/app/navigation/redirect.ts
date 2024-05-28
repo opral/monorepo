@@ -1,4 +1,4 @@
-import { createLocaliseHref } from "../localiseHref"
+import { localizeHref } from "../localiseHref"
 import {
 	redirect as NextRedirect,
 	permanentRedirect as NextPermanentRedirect,
@@ -9,8 +9,6 @@ export function createRedirects<T extends string>(
 	languageTag: () => T,
 	strategy: RoutingStrategy<T>
 ) {
-	const localiseHref = createLocaliseHref(strategy)
-
 	/**
 	 * When used in a streaming context, this will insert a meta tag to redirect the user to the target page.
 	 * When used in a custom app route, it will serve a 307/303 to the caller.
@@ -18,7 +16,7 @@ export function createRedirects<T extends string>(
 	 *  @param url the url to redirect to
 	 */
 	const redirect: typeof NextRedirect = (href, ...other) => {
-		href = localiseHref(href, languageTag(), "/", false)
+		href = localizeHref(strategy, href, languageTag(), "/", false)
 		NextRedirect(href, ...other)
 	}
 
@@ -29,7 +27,7 @@ export function createRedirects<T extends string>(
 	 * @param url the url to redirect to
 	 */
 	const permanentRedirect: typeof NextPermanentRedirect = (href, ...other) => {
-		href = localiseHref(href, languageTag(), "/", false)
+		href = localizeHref(strategy, href, languageTag(), "/", false)
 		NextPermanentRedirect(href, ...other)
 	}
 

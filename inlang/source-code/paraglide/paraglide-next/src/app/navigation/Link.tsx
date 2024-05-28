@@ -8,7 +8,7 @@ import { addBasePath, basePath } from "../utils/basePath"
 import NextLink from "next/link"
 import React from "react"
 import { RoutingStrategy } from "../routing-strategy/interface"
-import { createLocaliseHref } from "../localiseHref"
+import { localizeHref } from "../localiseHref"
 import { serializeCookie } from "../utils/cookie"
 import { LANG_COOKIE } from "../constants"
 import { rsc } from "rsc-env"
@@ -23,8 +23,6 @@ type LocalisedLink<T extends string> = (
  * @param languageTag A function that returns the current language tag.
  */
 export function createLink<T extends string>(strategy: RoutingStrategy<T>): LocalisedLink<T> {
-	const localiseHref = createLocaliseHref(strategy)
-
 	return React.forwardRef<
 		HTMLAnchorElement,
 		Omit<Parameters<typeof NextLink>[0], "locale"> & { locale?: T }
@@ -44,7 +42,7 @@ export function createLink<T extends string>(strategy: RoutingStrategy<T>): Loca
 
 		const lang = props.locale || currentLanguageTag || (sourceLanguageTag as T)
 		const isLanguageSwitch = lang !== currentLanguageTag
-		const localisedHref = localiseHref(props.href, lang, "", isLanguageSwitch)
+		const localisedHref = localizeHref(strategy, props.href, lang, "", isLanguageSwitch)
 
 		function updateLangCookie(newLang: T) {
 			document.cookie = serializeCookie({
