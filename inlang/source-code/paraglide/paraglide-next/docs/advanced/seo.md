@@ -27,7 +27,7 @@ You **don't** need to add the translated versions of your site to your sitemap, 
 
 ## Right-to-Left Support
 
-Just define a map of all languages to their text-direction & index into it.
+Define a map of all languages to their text-direction & index into it.
 
 ```tsx
 // src/app/layout.tsx

@@ -25,6 +25,7 @@
 		"Advanced Usage": {
 			"/advanced/seo": "./inlang/source-code/paraglide/paraglide-next/docs/advanced/seo.md",
 			"/advanced/usage-on-the-server": "./inlang/source-code/paraglide/paraglide-next/docs/advanced/server.md"
+			"/static-rendering": "./inlang/source-code/paraglide/paraglide-next/docs/advanced/static-rendering.md"
 		},
 		"Appendix": {
 			"/pages-router": "./inlang/source-code/paraglide/paraglide-next/docs/pages-router.md",
