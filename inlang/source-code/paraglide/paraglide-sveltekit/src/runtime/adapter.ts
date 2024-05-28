@@ -14,8 +14,8 @@ import {
 } from "./utils/normaliseBase.js"
 import { createExclude, type ExcludeConfig } from "./exclude.js"
 import { guessTextDirMap } from "./utils/text-dir.js"
-import { resolvePathTranslations } from "./config/resolvePathTranslations.js"
 import {
+	resolveUserPathDefinitions,
 	validatePathTranslations,
 	type PathDefinitionTranslations,
 } from "@inlang/paraglide-js/internal/adapter-utils"
@@ -155,7 +155,7 @@ export type I18nConfig<T extends string> = {
  * ```
  */
 export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I18nUserConfig<T>) {
-	const translations = resolvePathTranslations(
+	const translations = resolveUserPathDefinitions(
 		options?.pathnames ?? {},
 		runtime.availableLanguageTags
 	)
