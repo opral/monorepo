@@ -1,8 +1,11 @@
 import type { Handle } from "@sveltejs/kit"
-import { getPathInfo } from "../utils/get-path-info.js"
-import { base } from "$app/paths"
 import type { I18nConfig } from "../adapter.js"
+import { getPathInfo } from "../utils/get-path-info.js"
+import { negotiateLanguagePreferences } from "@inlang/paraglide-js/internal/adapter-utils"
+import { base } from "$app/paths"
 import { dev } from "$app/environment"
+
+const LANG_COOKIE_NAME = "paraglide:lang"
 
 /**
  * The default lang attribute string that's in SvelteKit's `src/app.html` file.
@@ -61,12 +64,27 @@ export const createHandle = <T extends string>(
 			base,
 		})
 
+		const langCookie = event.cookies.get(LANG_COOKIE_NAME)
+		const cookieLang = i18n.runtime.isAvailableLanguageTag(langCookie) ? langCookie : undefined
+
+		const negotiatedLanguagePreferences = negotiateLanguagePreferences(
+			event.request.headers.get("accept-language"),
+			i18n.runtime.availableLanguageTags
+		)
+		const negotiatedLanguage = negotiatedLanguagePreferences[0]
+
 		const textDirection = i18n.textDirection[lang as T] ?? "ltr"
 
 		event.locals.paraglide = {
 			lang,
 			textDirection,
 		}
+
+		event.cookies.set(LANG_COOKIE_NAME, lang, {
+			maxAge: 31557600, //Math.round(60 * 60 * 24 * 365.25) = 1 year,
+			sameSite: "lax",
+			path: base,
+		})
 
 		return resolve(event, {
 			transformPageChunk({ html, done }) {
@@ -79,11 +97,15 @@ export const createHandle = <T extends string>(
 					html.includes(SVELTEKIT_DEFAULT_LANG_ATTRIBUTE)
 				) {
 					console.warn(
-						"It seems like you haven't replaced the `lang` attribute in your `src/app.html` file. \n" +
-							`Please replace the \`lang\` attribute with the correct placeholder:"\n\n` +
-							` - <html ${SVELTEKIT_DEFAULT_LANG_ATTRIBUTE}>\n` +
-							` + <html lang="${langPlaceholder}" dir="${dirPlaceholder}">` +
-							`\n\nThis message will not be shown in production.`
+						[
+							"It seems like you haven't replaced the `lang` attribute in your `src/app.html` file.",
+							"Please replace the `lang` attribute with the correct placeholder:",
+							"",
+							` - <html ${SVELTEKIT_DEFAULT_LANG_ATTRIBUTE}>`,
+							` + <html lang="${langPlaceholder}" dir="${dirPlaceholder}">`,
+							"",
+							"This message will not be shown in production.",
+						].join("\n")
 					)
 				}
 
