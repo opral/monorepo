@@ -1,5 +1,11 @@
 # @inlang/paraglide-astro
 
+## 0.1.21
+
+### Patch Changes
+
+- @inlang/paraglide-vite@1.2.61
+
 ## 0.1.20
 
 ### Patch Changes
