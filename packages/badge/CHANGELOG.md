@@ -1,5 +1,12 @@
 # @inlang/badge
 
+## 0.7.29
+
+### Patch Changes
+
+- @inlang/sdk@0.35.2
+- @lix-js/client@2.0.1
+
 ## 0.7.28
 
 ### Patch Changes

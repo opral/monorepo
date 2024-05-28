@@ -1,5 +1,13 @@
 # @inlang/cross-sell-ninja
 
+## 0.0.22
+
+### Patch Changes
+
+- Updated dependencies [4a25124]
+  - @lix-js/fs@2.1.0
+  - @inlang/sdk@0.35.2
+
 ## 0.0.21
 
 ### Patch Changes
