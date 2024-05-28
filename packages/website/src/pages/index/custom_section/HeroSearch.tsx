@@ -92,18 +92,32 @@ function addLinksToText(text: string) {
 			for (const match of matches) {
 				const index: number = match.index || 0
 				elements.push(text.slice(lastIndex, index))
-				elements.push(
-					<a
-						href={url}
-						class="font-semibold text-surface-900 hover:opacity-70 underline underline-offset-2"
-						onClick={(e) => {
-							e.preventDefault()
-							scrollToAnchor(url!.split("#")[1]!, "smooth")
-						}}
-					>
-						{phrase}
-					</a>
-				)
+
+				if (url?.includes("https://inlang.com") || url?.includes("http://localhost:3000")) {
+					elements.push(
+						<a
+							href={url}
+							class="font-semibold text-surface-900 hover:opacity-70 underline underline-offset-2"
+							onClick={(e) => {
+								e.preventDefault()
+								scrollToAnchor(url!.split("#")[1]!, "smooth")
+							}}
+						>
+							{phrase}
+						</a>
+					)
+				} else {
+					elements.push(
+						<a
+							href={url}
+							target="_blank"
+							class="font-semibold text-surface-900 hover:opacity-70 underline underline-offset-2"
+						>
+							{phrase}
+						</a>
+					)
+				}
+
 				lastIndex = index + match[0].length
 			}
 		}
