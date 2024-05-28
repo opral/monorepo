@@ -1,7 +1,6 @@
 import type { RoutingStrategy } from "./routing-strategy/interface"
 import type { LinkProps } from "next/link"
-import { isExternal as isStringHrefExternal } from "./utils/href"
-import { UrlObject } from "node:url"
+import type { UrlObject } from "node:url"
 
 const getPathname = (href: string, currentPath: string): `/${string}` => {
 	return new URL(href, new URL(currentPath, "http://n")).pathname as `/${string}`
@@ -48,3 +47,10 @@ export const isExternal = (href: UrlObject | string) =>
 		? //Make sure none of the telltales for external links are set
 		  Boolean(href.protocol || href.auth || href.port || href.hostname || href.host)
 		: isStringHrefExternal(href)
+
+const isStringHrefExternal = (href: string): boolean =>
+	// If the href starts with a url scheme
+	// see: https://datatracker.ietf.org/doc/html/rfc3986#section-3.1
+	/^[a-z][a-z0-9+\-.]*:/i.test(href) ||
+	//If the href starts with // it's a protocol relative url -> must include the host -> external
+	/^\/\//.test(href)

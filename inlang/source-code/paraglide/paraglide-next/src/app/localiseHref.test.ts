@@ -162,8 +162,11 @@ describe.skipIf(() => process.env.NODE_ENV !== "development")("isExternal", () =
 		}
 	)
 
-	it.each(["/some/path", "some/path"])("returns false for internal links", (link) => {
-		expect(isExternal(link)).toBe(false)
-		expect(isExternal(parse(link))).toBe(false)
-	})
+	it.each(["/some/path", "some/path", "#hash", "?foo=bar"])(
+		"returns false for internal links",
+		(link) => {
+			expect(isExternal(link)).toBe(false)
+			expect(isExternal(parse(link))).toBe(false)
+		}
+	)
 })
