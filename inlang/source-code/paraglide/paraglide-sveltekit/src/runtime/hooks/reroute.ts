@@ -12,7 +12,6 @@ export const createReroute = <T extends string>(strategy: RoutingStrategy<T>): R
 	return ({ url }) => {
 		try {
 			const [localisedPath, dataSuffix] = parseRoute(url.pathname as `/${string}`, base)
-
 			const lang = strategy.getLanguageFromLocalisedPath(localisedPath)
 			const canonicalPath = strategy.getCanonicalPath(localisedPath, lang)
 

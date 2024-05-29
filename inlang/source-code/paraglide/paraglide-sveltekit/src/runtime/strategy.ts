@@ -40,12 +40,13 @@ export function PrefixStrategy<T extends string>(
 	}
 
 	function getCanonicalPath(localisedPath: string, languageTag: T): string {
-		const trailingSlash = localisedPath.endsWith("/") && localisedPath !== "/"
-		localisedPath = trailingSlash ? localisedPath.slice(0, -1) : localisedPath
-
+		const trailingSlahsBefore = localisedPath.endsWith("/") && localisedPath !== "/"
 		if (languageTag !== defaultLanguageTag) {
 			localisedPath = localisedPath.replace(`/${languageTag}`, "") || "/"
 		}
+
+		const trailingSlash = trailingSlahsBefore
+		localisedPath = trailingSlash ? localisedPath.slice(0, -1) : localisedPath
 
 		let canonicalPath = turnIntoCanonicalPath(localisedPath, languageTag, translations, matchers)
 
