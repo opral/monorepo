@@ -1,5 +1,21 @@
 # @inlang/paraglide-js
 
+## 1.9.1
+
+### Patch Changes
+
+- b8573fa: Improved error-reporting
+
+## 1.9.0
+
+### Minor Changes
+
+- eb941fe: Prompt about adding the [Ninja](https://inlang.com/m/3gk8n4n4/app-inlang-ninjaI18nAction) Github Action for translation-linting during `paraglide-js init`. Also exposes it over the internal API.
+
+### Patch Changes
+
+- 9566348: Better handling of `tsconfig` files that `extends` another config.
+
 ## 1.8.0
 
 ### Minor Changes

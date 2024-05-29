@@ -28,7 +28,7 @@ export async function onSignOut(args: { setLocalStorage: SetStoreFunction<LocalS
 	}
 
 	// sign out on the client by setting the user to undefined
-	args.setLocalStorage("user", undefined)
+	args.setLocalStorage("user", { isLoggedIn: false })
 	// https://posthog.com/docs/integrate/client/js#reset-after-logout
 	telemetryBrowser.reset()
 }

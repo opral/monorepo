@@ -81,9 +81,9 @@ on: pull_request_target
 
 # explicitly configure permissions, in case your GITHUB_TOKEN workflow permissions are set to read-only in repository settings
 permissions:
-	pull-requests: write # Necessary to comment on PRs
-	issues: read         # Necessary to read issue comments
-	contents: read       # Necessary to access the repo content
+  pull-requests: write # Necessary to comment on PRs
+  issues: read         # Necessary to read issue comments
+  contents: read       # Necessary to access the repo content
 
 jobs:
   ninja-i18n:
@@ -92,7 +92,7 @@ jobs:
 
     steps:
       - name: Run Ninja i18n
-				# @main ensures that the latest version of the action is used
+        # @main ensures that the latest version of the action is used
         uses: opral/ninja-i18n-action@main
         env:
           GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}

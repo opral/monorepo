@@ -1,5 +1,11 @@
 import { createUnplugin } from "unplugin"
-import { Message, ProjectSettings, loadProject, type InlangProject } from "@inlang/sdk"
+import {
+	Message,
+	ProjectSettings,
+	loadProject,
+	type InlangProject,
+	normalizeMessage,
+} from "@inlang/sdk"
 import { openRepository, findRepoRoot } from "@lix-js/client"
 import path from "node:path"
 import fs from "node:fs/promises"
@@ -33,7 +39,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 	let numCompiles = 0
 	let previousMessagesHash: string | undefined = undefined
 
-	let messageModuleOutput: Record<string, string> = {}
+	let virtualModuleOutput: Record<string, string> = {}
 
 	async function triggerCompile(messages: readonly Message[], settings: ProjectSettings) {
 		const currentMessagesHash = hashMessages(messages ?? [], settings)
@@ -45,11 +51,18 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		}
 
 		logMessageChange()
-		const fsOutput = await compile({ messages, settings, outputStructure: "regular" })
-		messageModuleOutput = await compile({ messages, settings, outputStructure: "message-modules" })
+		previousMessagesHash = currentMessagesHash
+
+		const [regularOutput, messageModulesOutput] = await Promise.all([
+			compile({ messages, settings, outputStructure: "regular" }),
+			compile({ messages, settings, outputStructure: "message-modules" }),
+		])
+
+		virtualModuleOutput = messageModulesOutput
+		const fsOutput = regularOutput
+
 		await writeOutput(outputDirectory, fsOutput, fs)
 		numCompiles++
-		previousMessagesHash = currentMessagesHash
 	}
 
 	function logMessageChange() {
@@ -144,7 +157,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 					//if it starts with the outdir use the paraglideOutput virtual modules instead
 					if (id.startsWith(normalizedOutdir)) {
 						const internal = id.slice(normalizedOutdir.length)
-						const resolved = messageModuleOutput[internal]
+						const resolved = virtualModuleOutput[internal]
 						return resolved
 					}
 
@@ -155,11 +168,15 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 	]
 })
 
-function hashMessages(messages: readonly Message[], settings: ProjectSettings): string {
+export function hashMessages(messages: readonly Message[], settings: ProjectSettings): string {
+	const normalizedMessages = messages
+		.map(normalizeMessage)
+		.sort((a, b) => a.id.localeCompare(b.id, "en"))
+
 	try {
 		const hash = crypto.createHash("sha256")
-		hash.update(JSON.stringify(messages) || "")
-		hash.update(JSON.stringify(settings) || "")
+		hash.update(JSON.stringify(normalizedMessages))
+		hash.update(JSON.stringify(settings))
 		return hash.digest("hex")
 	} catch (e) {
 		return crypto.randomUUID()

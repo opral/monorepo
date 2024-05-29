@@ -51,7 +51,7 @@ type EditorStateSchema = {
 	 * Fork status of the repository.
 	 */
 
-	forkStatus: () => { ahead: number; behind: number; conflicts: boolean }
+	forkStatus: () => { ahead: number; behind: number; conflicts: Record<string, any> | undefined }
 	/**
 	 * Refetch the fork status.
 	 */
@@ -75,7 +75,11 @@ type EditorStateSchema = {
 	/**
 	 * The branch names of current repo.
 	 */
-	branchNames: Resource<string[] | undefined>
+	setBranchListEnabled: Setter<boolean>
+	/**
+	 * Trigger the branch list to be fetched.
+	 */
+	branchList: Resource<string[] | undefined>
 	/**
 	 * Additional information about a repository provided by GitHub.
 	 */
@@ -444,6 +448,19 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	})
 
+	// polyfill requestIdleCallback for Safari browser
+	const requestIdleCallback = window.requestIdleCallback || function (callback: any) {
+		const start = Date.now()
+		return setTimeout(function () {
+			callback({
+				didTimeout: false,
+				timeRemaining: function () {
+					return Math.max(0, 50 - (Date.now() - start))
+				}
+			});
+		}, 1)
+	}
+
 	// open the inlang project and store it in a resource
 	const [project, { refetch: refetchProject, mutate: setProject }] = createResource(
 		() => {
@@ -503,13 +520,19 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			} else {
 				setTimeout(() => {
 					const element = document.getElementById("missingTranslation-summary")
-					element !== null ? setTourStep("missing-translation-rule") : setTourStep("textfield")
+					element !== null &&
+					!filteredMessageLintRules().includes("messageLintRule.inlang.missingTranslation")
+						? setTourStep("missing-translation-rule")
+						: setTourStep("textfield")
 				}, 100)
 			}
 		} else if (tourStep() === "missing-translation-rule" && project()) {
 			setTimeout(() => {
 				const element = document.getElementById("missingTranslation-summary")
-				element !== null ? setTourStep("missing-translation-rule") : setTourStep("textfield")
+				element !== null &&
+				!filteredMessageLintRules().includes("messageLintRule.inlang.missingTranslation")
+					? setTourStep("missing-translation-rule")
+					: setTourStep("textfield")
 			}, 100)
 		}
 	})
@@ -537,81 +560,6 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 				setLixErrors([repoMeta.error, ...lixErrors()])
 			}
 			return repoMeta
-		}
-	)
-
-	const isForkSyncDisabled = () =>
-		localStorage.disableForkSyncWarning?.some(
-			(repo) => repo.owner === routeParams().owner && repo.repository === routeParams().repository
-		)
-
-	const [forkStatus, { refetch: refetchForkStatus, mutate: mutateForkStatus }] = createResource(
-		() => {
-			const repoMeta = githubRepositoryInformation()
-			if (
-				repo() &&
-				!isForkSyncDisabled() &&
-				repoMeta &&
-				!("error" in repoMeta) &&
-				repoMeta.isFork
-			) {
-				return { repo: repo() }
-			} else {
-				return false
-			}
-		},
-		async (args) => {
-			const value = await args.repo!.forkStatus()
-			if ("error" in value) {
-				// Silently ignore errors:
-				// The branch might only exist in the fork and not in the upstream repository.
-				return { ahead: 0, behind: 0, conflicts: false }
-			} else {
-				return value
-			}
-		},
-		{ initialValue: { ahead: 0, behind: 0, conflicts: false } }
-	)
-
-	const [previousLoginStatus, setPreviousLoginStatus] = createSignal(localStorage?.user?.isLoggedIn)
-	createEffect(
-		on(
-			() => localStorage.user?.isLoggedIn,
-			() => {
-				const isLoggedIn = localStorage?.user?.isLoggedIn
-				if (previousLoginStatus() === false && isLoggedIn) {
-					if (!repo.loading && repo() === undefined) {
-						// Refetch private repo after login
-						refetchRepo()
-					} else if (!githubRepositoryInformation.loading) {
-						// Refetch public repo info after login
-						refetchRepoInfo()
-					}
-				}
-				setPreviousLoginStatus(isLoggedIn)
-			}
-		)
-	)
-
-	const [currentBranch] = createResource(
-		() => {
-			if (repo() === undefined) {
-				return {}
-			} else {
-				return { repo: repo() }
-			}
-		},
-		async (args) => {
-			return await args.repo?.getCurrentBranch()
-		}
-	)
-
-	const [branchNames] = createResource(
-		() => {
-			return { repo: repo() }
-		},
-		async (args) => {
-			return await args.repo?.getBranches()
 		}
 	)
 
@@ -649,6 +597,97 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	)
 
+	const isForkSyncDisabled = () =>
+		localStorage.disableForkSyncWarning?.some(
+			(repo) => repo.owner === routeParams().owner && repo.repository === routeParams().repository
+		)
+
+	const [forkStatus, { refetch: refetchForkStatus, mutate: mutateForkStatus }] = createResource(
+		() => {
+			const repoMeta = githubRepositoryInformation()
+			if (
+				userIsCollaborator() &&
+				repo() &&
+				!isForkSyncDisabled() &&
+				repoMeta &&
+				!("error" in repoMeta) &&
+				repoMeta.isFork
+			) {
+				return { repo: repo() }
+			} else {
+				return false
+			}
+		},
+		async (args) => {
+			await new Promise((resolve) => setTimeout(resolve, 10000))
+			// wait for the browser to be idle
+			await new Promise((resolve) => requestIdleCallback(resolve))
+
+			console.info("fetching forkStatus")
+
+			const value = await args.repo!.forkStatus()
+			if ("error" in value) {
+				// Silently ignore errors:
+				// The branch might only exist in the fork and not in the upstream repository.
+				return { ahead: 0, behind: 0, conflicts: undefined }
+			} else {
+				return value
+			}
+		},
+		{ initialValue: { ahead: 0, behind: 0, conflicts: undefined } }
+	)
+
+	const [previousLoginStatus, setPreviousLoginStatus] = createSignal(localStorage?.user?.isLoggedIn)
+	createEffect(
+		on(
+			() => localStorage.user?.isLoggedIn,
+			() => {
+				const isLoggedIn = localStorage?.user?.isLoggedIn
+				if (previousLoginStatus() === false && isLoggedIn) {
+					if (!repo.loading && repo() === undefined) {
+						// Refetch private repo after login
+						refetchRepo()
+					} else if (!githubRepositoryInformation.loading) {
+						// Refetch public repo info after login
+						refetchRepoInfo()
+					}
+				}
+				setPreviousLoginStatus(isLoggedIn)
+			}
+		)
+	)
+
+	const [currentBranch] = createResource(
+		() => {
+			if (repo() === undefined) {
+				return {}
+			} else {
+				return { repo: repo() }
+			}
+		},
+		async (args) => {
+			return await args.repo?.getCurrentBranch()
+		}
+	)
+
+	const [branchListEnabled, setBranchListEnabled] = createSignal(false)
+	const [branchList] = createResource(
+		() => {
+			if (
+				repo() === undefined ||
+				githubRepositoryInformation() === undefined ||
+				!branchListEnabled()
+			) {
+				return false
+			}
+			return { repo: repo() }
+		},
+		async (args) => {
+			console.info("fetching branchList")
+			return await args.repo?.getBranches()
+		}
+	)
+
 	return (
 		<EditorStateContext.Provider
 			value={
@@ -662,7 +701,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					mergeUpstream,
 					createFork,
 					currentBranch,
-					branchNames,
+					setBranchListEnabled,
+					branchList,
 					githubRepositoryInformation,
 					routeParams,
 					searchParams,

@@ -5,18 +5,19 @@ import { attrubuteValuesToJSValue } from "./utils/attributes-to-values.js"
 import { identifier } from "./utils/identifier.js"
 import { uneval } from "devalue"
 import * as c from "./utils/codegen.js"
-import type { Ast, Attribute, ElementNode, SpreadAttribute } from "./types.js"
+import type { Attribute, ElementNode, SpreadAttribute } from "./types.js"
 import type MagicString from "magic-string"
+import type { LegacyRoot } from "svelte/compiler"
 
 const i = identifier(`translate_attribute_pass`)
 
 export const rewrite = ({
-	ast,
+	root: ast,
 	code,
 	originalCode,
 	translations,
 }: {
-	ast: Ast
+	root: LegacyRoot
 	code: MagicString
 	originalCode: string
 	translations: TranslationDefinition
@@ -80,7 +81,7 @@ export const rewrite = ({
 																								? attrubuteValuesToJSValue(
 																										langAttribute.value,
 																										originalCode
-																								  )
+																									)
 																								: "undefined"
 																						}
                                         )`

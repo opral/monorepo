@@ -278,7 +278,11 @@ const runFsTestSuite = async (
 
 		await fs.writeFile(`${placeholderPath}/file`, "")
 
-		await fs._createPlaceholder(placeholderPath + "/test")
+		await fs._createPlaceholder(placeholderPath + "/test", {
+			mode: "0o644",
+			rootHash: "asdf",
+			oid: "asdf",
+		})
 
 		expect(fs._isPlaceholder(placeholderPath + "/test")).toBe(true)
 		expect(fs._isPlaceholder(placeholderPath + "/noexists")).toBe(false)

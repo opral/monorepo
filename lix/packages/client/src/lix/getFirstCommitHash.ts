@@ -20,7 +20,7 @@ export async function getFirstCommitHash(ctx: RepoContext) {
 				singleBranch: true,
 				dir: ctx.dir,
 				depth: 2147483647, // the magic number for all commits
-				http: makeHttpClient({ verbose: ctx.debug, description: "getFirstCommitHash" }),
+				http: makeHttpClient({ debug: ctx.debug, description: "getFirstCommitHash" }),
 				corsProxy: ctx.gitProxyUrl,
 				fs: getFirstCommitFs,
 			})

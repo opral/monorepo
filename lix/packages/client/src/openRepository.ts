@@ -81,7 +81,7 @@ export async function openRepository(
 		commit: commit.bind(undefined, ctx, state),
 		status: status.bind(undefined, ctx, state),
 		statusList: statusList.bind(undefined, ctx, state),
-		forkStatus: forkStatus.bind(undefined, ctx, state),
+		forkStatus: forkStatus.bind(undefined, ctx),
 		getMeta: getMeta.bind(undefined, ctx),
 		listRemotes: listRemotes.bind(undefined, ctx, state),
 		log: log.bind(undefined, ctx),
@@ -92,7 +92,7 @@ export async function openRepository(
 		checkout: checkout.bind(undefined, ctx, state),
 		createFork: createFork.bind(undefined, ctx),
 		mergeUpstream: mergeUpstream.bind(undefined, ctx),
-		push: push.bind(undefined, ctx, state),
+		push: push.bind(undefined, ctx),
 		pull: pull.bind(undefined, ctx, state),
 
 		...(ctx.experimentalFeatures.lixFs ? lixFs(state.nodeishFs) : {}),
@@ -100,8 +100,8 @@ export async function openRepository(
 		// only exposed for testing
 		_emptyWorkdir: emptyWorkdir.bind(undefined, ctx, state),
 		_checkOutPlaceholders: checkOutPlaceholders.bind(undefined, ctx, state),
-		_add: add.bind(undefined, ctx),
-		_remove: remove.bind(undefined, ctx),
+		_add: add.bind(undefined, ctx, state),
+		_remove: remove.bind(undefined, ctx, state),
 		_isoCommit: isoCommit.bind(undefined, ctx),
 	}
 }

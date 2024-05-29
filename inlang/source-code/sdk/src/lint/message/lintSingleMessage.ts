@@ -50,5 +50,8 @@ export const lintSingleMessage = async (args: {
 
 	await Promise.all(promises)
 
-	return { data: reports, errors }
+	// we sort the reports by rule id to allow us to easyly compare both
+	const sortedReports = reports.sort((r1, r2) => r1.ruleId.localeCompare(r2.ruleId))
+
+	return { data: sortedReports, errors }
 }

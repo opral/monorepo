@@ -5,7 +5,7 @@ import pako from 'pako';
 import pify from 'pify';
 import ignore from 'ignore';
 import cleanGitRef from 'clean-git-ref';
-import diff3Merge from 'diff3';
+import diff3Merge from '../diff3/diff3.js';
 
 /**
  * @typedef {Object} GitProgressEvent
@@ -5133,7 +5133,7 @@ async function addToIndex({
  *
  * @returns {Promise<string>} Resolves successfully with the SHA-1 object id of the newly created commit.
  */
-async function _commit({
+async function _commit ({
   fs,
   cache,
   onSign,

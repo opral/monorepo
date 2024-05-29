@@ -1,13 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect } from "vitest"
 import type { ImportFunction } from "../resolve-modules/index.js"
-import {
-	createResource,
-	createSignal,
-	createEffect,
-	from,
-	createRoot,
-} from "../reactivity/solid.js"
+import { createEffect, from, createRoot } from "../reactivity/solid.js"
 import { solidAdapter } from "./solidAdapter.js"
 import { loadProject } from "../loadProject.js"
 import { mockRepo } from "@lix-js/client"
@@ -18,10 +12,6 @@ import type {
 	MessageLintRule,
 	Text,
 } from "../versionedInterfaces.js"
-
-function sleep(ms: number) {
-	return new Promise((resolve) => setTimeout(resolve, ms))
-}
 
 // ------------------------------------------------------------------------------------------------
 
@@ -170,8 +160,8 @@ describe("installed", () => {
 		// TODO: how can we await `setConfig` correctly
 		await new Promise((resolve) => setTimeout(resolve, 0))
 
-		expect(counterPlugins).toBe(2) // 2 times because effect creation + set
-		expect(counterLint).toBe(2) // 2 times because effect creation + set
+		expect(counterPlugins).toBe(3) // 3 times because effect creation + setSettings, setResolvedModules
+		expect(counterLint).toBe(3) // 3 times because effect creation + setSettings, setResolvedModules
 	})
 })
 
@@ -219,7 +209,7 @@ describe("messages", () => {
 			{ from }
 		)
 
-		let effectOnMessagesCounter = 0
+		let effectOnMessagesCounter = -1
 		createEffect(() => {
 			project.query.messages.getAll()
 			effectOnMessagesCounter += 1
@@ -232,7 +222,7 @@ describe("messages", () => {
 		// TODO: how can we await `setConfig` correctly
 		await new Promise((resolve) => setTimeout(resolve, 510))
 
-		expect(effectOnMessagesCounter).toBe(7) // 7 = initial effect, setSetting, loadMessage (2x - one per message), setResolvedPlugins, loadMessages (2x - one per message)
+		expect(effectOnMessagesCounter).toBe(3) // 3 = setSetting, loadMessage (2x - one per message)
 		expect(Object.values(project.query.messages.getAll()).length).toBe(2)
 	})
 
@@ -363,6 +353,65 @@ describe("messages", () => {
 })
 
 describe("lint", () => {
+	it("should react to changes in config", async () => {
+		await createRoot(async () => {
+			const repo = await mockRepo()
+			const fs = repo.nodeishFs
+			await fs.mkdir("/user/project.inlang", { recursive: true })
+			await fs.writeFile("/user/project.inlang/settings.json", JSON.stringify(config))
+			const project = solidAdapter(
+				await loadProject({
+					projectPath: "/user/project.inlang",
+					repo,
+					_import: $import,
+				}),
+				{ from }
+			)
+
+			// set counter to -1 since creating effect will execute once
+			let counter = -1
+			createEffect(() => {
+				project.query.messageLintReports.getAll()
+				counter += 1
+			})
+
+			expect(counter).toBe(0)
+
+			// wait for all int reports beeing executed
+			await new Promise((resolve) => setTimeout(resolve, 510))
+
+			// 1 because we batch the two lint rules
+			expect(counter).toBe(1)
+
+			const currentSettings = project.settings()!
+			const newConfig = { ...currentSettings, languageTags: ["en", "de"] }
+			project.setSettings(newConfig)
+
+			// set settings trigges synchronous -> +1
+			expect(counter).toBe(2)
+
+			await new Promise((resolve) => setTimeout(resolve, 510))
+
+			// 4 = 2 + batched(1 (effect->settings) and  1 (effect->Resolved Plugin))
+			expect(counter).toBe(3)
+			expect(project.query.messageLintReports.getAll()).toEqual([])
+
+			await new Promise((resolve) => setTimeout(resolve, 510))
+
+			const newConfig2 = { ...project.settings()!, languageTags: ["en", "de", "fr"] }
+			project.setSettings(newConfig2)
+
+			// set settings trigges synchronous -> +1
+			expect(counter).toBe(4)
+
+			await new Promise((resolve) => setTimeout(resolve, 510))
+
+			// 5 -> 4 + 1 new lint report batch
+			expect(counter).toBe(5)
+			expect(project.query.messageLintReports.getAll()).toEqual([])
+		})
+	})
+
 	it.todo("should react to changes to packages")
 	it.todo("should react to changes to modules")
 
@@ -381,23 +430,29 @@ describe("lint", () => {
 				{ from }
 			)
 
-			const [messages, setMessages] = createSignal<readonly Message[]>()
-
-			let counter = 0
-
+			let counter = -1 // -1 to start counting after the initial effect
 			createEffect(() => {
-				setMessages(project.query.messages.getAll())
-			})
-
-			const [lintReports] = createResource(messages, async () => {
-				const reports = await project.query.messageLintReports.getAll()
+				project.query.messageLintReports.getAll()
 				counter += 1
-				return reports
 			})
+			expect(counter).toBe(0)
 
-			await sleep(10)
+			await new Promise((resolve) => setTimeout(resolve, 510))
+			// 1 -> lint rules are batched - we expect one signal on getAll
 			expect(counter).toBe(1)
-			expect(lintReports()).toStrictEqual([])
+
+			project.query.messages.update({
+				where: { id: "a" },
+				data: {
+					...exampleMessages[0],
+					variants: [{ languageTag: "en", match: [], pattern: [{ type: "Text", value: "new" }] }],
+				},
+			})
+			await new Promise((resolve) => setTimeout(resolve, 510))
+
+			// 1 -> previous two messages + 0 - report results are the same - no effect
+			expect(counter).toBe(1)
+			expect(project.query.messageLintReports.getAll()).toEqual([])
 
 			project.query.messages.update({
 				where: { id: "a" },
@@ -407,21 +462,11 @@ describe("lint", () => {
 				},
 			})
 
-			await sleep(10)
-			expect(counter).toBe(2)
-			expect(lintReports()).toStrictEqual([])
+			await new Promise((resolve) => setTimeout(resolve, 510))
 
-			project.query.messages.update({
-				where: { id: "a" },
-				data: {
-					...exampleMessages[0],
-					variants: [{ languageTag: "en", match: [], pattern: [{ type: "Text", value: "new" }] }],
-				},
-			})
-
-			await sleep(10)
-			expect(counter).toBe(3)
-			expect(lintReports()).toStrictEqual([])
+			// 2 -> the updated message does not update the lint rules - result is the same
+			expect(counter).toBe(1)
+			expect(project.query.messageLintReports.getAll()).toEqual([])
 		})
 	})
 })
