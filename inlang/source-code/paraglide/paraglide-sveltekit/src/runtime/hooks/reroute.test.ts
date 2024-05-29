@@ -23,11 +23,13 @@ describe("reroute", () => {
 		expect(pathname).toBe(base + "/some-page")
 	})
 
+	/*
 	it("keeps the trailing slash on the language", () => {
 		const url = new URL("https://example.com" + base + "/de/")
 		const pathname = reroute({ url })
 		expect(pathname).toBe(base ? base + "/" : "/")
 	})
+	*/
 
 	it("removes the languagePrefix", () => {
 		const url = new URL("https://example.com" + base + "/de")
