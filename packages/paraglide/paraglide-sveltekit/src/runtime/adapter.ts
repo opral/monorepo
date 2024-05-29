@@ -154,10 +154,9 @@ export type I18nConfig<T extends string> = {
  * ```
  */
 export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I18nUserConfig<T>) {
-	const translations = resolveUserPathDefinitions(
-		options?.pathnames ?? {},
-		runtime.availableLanguageTags
-	)
+	const translations = options?.pathnames
+		? resolveUserPathDefinitions(options.pathnames, runtime.availableLanguageTags)
+		: {}
 
 	if (dev) {
 		const issues = validatePathTranslations(
@@ -188,7 +187,8 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		runtime.availableLanguageTags,
 		defaultLanguageTag,
 		config.translations,
-		config.matchers
+		config.matchers,
+		config.prefixDefaultLanguage
 	)
 
 	// We don't want the translations to be mutable
