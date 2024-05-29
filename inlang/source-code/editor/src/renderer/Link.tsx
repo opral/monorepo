@@ -1,4 +1,4 @@
-import { languageTag, sourceLanguageTag } from "#src/paraglide/runtime.js"
+import { languageTag, sourceLanguageTag } from "./../../../website/src/paraglide/runtime.js"
 
 const Link = (props: { href?: string; [key: string]: any }) => {
 	let modifiedHref = props.href
