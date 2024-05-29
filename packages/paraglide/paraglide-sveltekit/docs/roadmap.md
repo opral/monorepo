@@ -1,9 +1,7 @@
 # Roadmap & Caveats
 
 - Translated parameters
-- More routing flexibility
-	- Domain Based routing
-	- Language Detection & Redirects
+- Domain Based routing
 - Fix the Caveats
 
 # Caveats
