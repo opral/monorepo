@@ -1,4 +1,4 @@
-import { For, Match, Switch, onMount, Show, createSignal, createEffect, on, createResource } from "solid-js"
+import { For, Match, Switch, onMount, Show, createSignal, createEffect, on } from "solid-js"
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded"
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded"
 import IconClose from "~icons/material-symbols/close"
@@ -93,10 +93,6 @@ function TheActualPage() {
 			setMessageCount(0)
 		})
 	)
-
-	createEffect(() => {
-		console.log("ninjaIsAdopted", ninjaIsAdopted())
-	})
 
 	return (
 		<>
