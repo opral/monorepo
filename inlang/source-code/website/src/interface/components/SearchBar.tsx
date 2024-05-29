@@ -2,7 +2,7 @@ import IconSearch from "~icons/material-symbols/search-rounded"
 import { currentPageContext } from "#src/renderer/state.js"
 import { createSignal } from "solid-js"
 import { navigate } from "vike/client/router"
-import * as m from "../../paraglide/messages.js"
+import * as m from "#src/paraglide/messages.js"
 
 // Make search input available to other components so it can get cleared
 export const [searchInput, setSearchInput] = createSignal<string>("")
