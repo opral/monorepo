@@ -59,7 +59,7 @@
 		const targetLanguage = hreflang ?? lang
 		const [localisedPath, dataSuffix]  = parseRoute(original_to.pathname as `/${string}`, absoluteBase)
 
-		const original_lang = i18n.strategy.getLanguageFromLocalisedPath(localisedPath)
+		const original_lang = i18n.strategy.getLanguageFromLocalisedPath(localisedPath) || i18n.config.defaultLanguageTag
 		const canonicalPath = i18n.strategy.getCanonicalPath(localisedPath, original_lang)
 		const translatedPath = i18n.strategy.getLocalisedPath(canonicalPath, targetLanguage)
 
