@@ -1,15 +1,17 @@
 import type * as V2 from "../v2/types.js"
 
+/**
+ * WIP async V2 store interface
+ * E.g. `await project.store.messageBundles.get({ id: "..." })`
+ **/
 export type StoreApi = {
-	messageBundles: Query<V2.MessageBundle>
+	messageBundles: Store<V2.MessageBundle>
 }
 
-/**
- * WIP template for async V2 crud interfaces
- * E.g. `await project.messageBundles.get({ id: "..." })`
- **/
-export interface Query<T> {
+export interface Store<T> {
+	// TODO: remove reload when fs.watch can trigger auto-invalidation
 	reload: () => Promise<void>
+
 	get: (args: { id: string }) => Promise<T | undefined>
 	set: (args: { data: T }) => Promise<void>
 	delete: (args: { id: string }) => Promise<void>
