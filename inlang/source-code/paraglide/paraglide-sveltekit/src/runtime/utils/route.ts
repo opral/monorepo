@@ -6,10 +6,11 @@ export type AbsolutePath = `/${string}`
 /**
  * Takes a path and removes the base & data suffix
  *
+ * @param fullPath The path to parse, including base & data suffix. Should be absolute
  * @returns A tuple of the path and the data suffix
  */
 export function parseRoute(
-	fullPath: AbsolutePath,
+	fullPath: string,
 	normalizedBase: NormalizedBase
 ): [AbsolutePath, DataSuffix | undefined] {
 	const decodedPath = safeDecode(fullPath) as AbsolutePath
