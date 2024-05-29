@@ -73,18 +73,33 @@ export const createHandle = <T extends string>(
 		const negotiatedLanguage = negotiatedLanguagePreferences[0]
 
 		const lang = langFromUrl ?? cookieLang ?? negotiatedLanguage ?? i18n.defaultLanguageTag
+
+		if (lang !== langFromUrl) {
+			// redirect to the correct language
+			const localisedPathname = strategy.getLocalisedPath(localisedPath, lang)
+			const destination = new URL(localisedPathname, event.url).href
+			return new Response(undefined, {
+				status: 302,
+				headers: {
+					Location: destination,
+				},
+			})
+		}
+
+		if (lang !== cookieLang) {
+			event.cookies.set(LANG_COOKIE_NAME, lang, {
+				maxAge: 31557600, //Math.round(60 * 60 * 24 * 365.25) = 1 year,
+				sameSite: "lax",
+				path: base || "/",
+			})
+		}
+
 		const textDirection = i18n.textDirection[lang as T] ?? "ltr"
 
 		event.locals.paraglide = {
 			lang,
 			textDirection,
 		}
-
-		event.cookies.set(LANG_COOKIE_NAME, lang, {
-			maxAge: 31557600, //Math.round(60 * 60 * 24 * 365.25) = 1 year,
-			sameSite: "lax",
-			path: base,
-		})
 
 		return resolve(event, {
 			transformPageChunk({ html, done }) {
