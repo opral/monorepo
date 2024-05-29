@@ -1,6 +1,6 @@
 import type { Message } from "@inlang/message"
 import { ReactiveMap } from "./reactivity/map.js"
-import { createEffect, onCleanup } from "./reactivity/solid.js"
+import { createEffect, onCleanup, batch } from "./reactivity/solid.js"
 import { createSubscribable } from "./loadProject.js"
 import type { InlangProject, MessageQueryApi, MessageQueryDelegate } from "./api.js"
 import type { ResolvedPluginApi } from "./resolve-modules/plugins/types.js"
@@ -15,10 +15,6 @@ import { releaseLock } from "./persistence/filelock/releaseLock.js"
 import { PluginLoadMessagesError, PluginSaveMessagesError } from "./errors.js"
 import { humanIdHash } from "./storage/human-id/human-readable-id.js"
 const debug = _debug("sdk:messages")
-
-function sleep(ms: number) {
-	return new Promise((resolve) => setTimeout(resolve, ms))
-}
 
 type MessageState = {
 	messageDirtyFlags: {
@@ -278,8 +274,6 @@ export function createMessagesQuery({
 // - saving a message in two different languages would lead to a write in de.json first
 // - This will leads to a load of the messages and since en.json has not been saved yet the english variant in the message would get overritten with the old state again
 
-const maxMessagesPerTick = 500
-
 /**
  * Messsage that loads messages from a plugin - this method synchronizes with the saveMessage funciton.
  * If a save is in progress loading will wait until saving is done. If another load kicks in during this load it will queue the
@@ -326,104 +320,91 @@ async function loadMessagesViaPlugin(
 			})
 		)
 
-		let loadedMessageCount = 0
-
 		const deletedMessages = new Set(messages.keys())
+		batch(() => {
+			for (const loadedMessage of loadedMessages) {
+				const loadedMessageClone = structuredClone(loadedMessage)
 
-		for (const loadedMessage of loadedMessages) {
-			const loadedMessageClone = structuredClone(loadedMessage)
+				const currentMessages = [...messages.values()]
+					// TODO #1585 here we match using the id to support legacy load message plugins - after we introduced import / export methods we will use importedMessage.alias
+					.filter(
+						(message: any) =>
+							(experimentalAliases ? message.alias["default"] : message.id) === loadedMessage.id
+					)
 
-			const currentMessages = [...messages.values()]
-				// TODO #1585 here we match using the id to support legacy load message plugins - after we introduced import / export methods we will use importedMessage.alias
-				.filter(
-					(message: any) =>
-						(experimentalAliases ? message.alias["default"] : message.id) === loadedMessage.id
-				)
-
-			if (currentMessages.length > 1) {
-				// NOTE: if we happen to find two messages witht the sam alias we throw for now
-				// - this could be the case if one edits the aliase manualy
-				throw new Error("more than one message with the same id or alias found ")
-			} else if (currentMessages.length === 1) {
-				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- length has checked beforhand
-				deletedMessages.delete(currentMessages[0]!.id)
-				// update message in place - leave message id and alias untouched
-				loadedMessageClone.alias = {} as any
-
-				// TODO #1585 we have to map the id of the importedMessage to the alias and fill the id property with the id of the existing message - change when import mesage provides importedMessage.alias
-				if (experimentalAliases) {
-					loadedMessageClone.alias["default"] = loadedMessageClone.id
+				if (currentMessages.length > 1) {
+					// NOTE: if we happen to find two messages witht the sam alias we throw for now
+					// - this could be the case if one edits the aliase manualy
+					throw new Error("more than one message with the same id or alias found ")
+				} else if (currentMessages.length === 1) {
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- length has checked beforhand
-					loadedMessageClone.id = currentMessages[0]!.id
+					deletedMessages.delete(currentMessages[0]!.id)
+					// update message in place - leave message id and alias untouched
+					loadedMessageClone.alias = {} as any
+
+					// TODO #1585 we have to map the id of the importedMessage to the alias and fill the id property with the id of the existing message - change when import mesage provides importedMessage.alias
+					if (experimentalAliases) {
+						loadedMessageClone.alias["default"] = loadedMessageClone.id
+						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- length has checked beforhand
+						loadedMessageClone.id = currentMessages[0]!.id
+					}
+
+					// NOTE stringifyMessage encodes messages independent from key order!
+					const importedEnecoded = stringifyMessage(loadedMessageClone)
+
+					// NOTE could use hash instead of the whole object JSON to save memory...
+					if (messageState.messageLoadHash[loadedMessageClone.id] === importedEnecoded) {
+						// debug("skipping upsert!")
+						continue
+					}
+
+					// This logic is preventing cycles - could also be handled if update api had a parameter for who triggered update
+					// e.g. when FS was updated, we don't need to write back to FS
+					// update is synchronous, so update effect will be triggered immediately
+					// NOTE: this might trigger a save before we have the chance to delete - but since save is async and waits for the lock acquired by this method - its save to set the flags afterwards
+					messages.set(loadedMessageClone.id, loadedMessageClone)
+					// NOTE could use hash instead of the whole object JSON to save memory...
+					messageState.messageLoadHash[loadedMessageClone.id] = importedEnecoded
+					delegate?.onMessageUpdate(loadedMessageClone.id, loadedMessageClone, [
+						...messages.values(),
+					])
+				} else {
+					// message with the given alias does not exist so far
+					loadedMessageClone.alias = {} as any
+					// TODO #1585 we have to map the id of the importedMessage to the alias - change when import mesage provides importedMessage.alias
+					if (experimentalAliases) {
+						loadedMessageClone.alias["default"] = loadedMessageClone.id
+
+						let currentOffset = 0
+						let messsageId: string | undefined
+						do {
+							messsageId = humanIdHash(loadedMessageClone.id, currentOffset)
+							if (messages.get(messsageId)) {
+								currentOffset += 1
+								messsageId = undefined
+							}
+						} while (messsageId === undefined)
+
+						// create a humanId based on a hash of the alias
+						loadedMessageClone.id = messsageId
+					}
+
+					const importedEnecoded = stringifyMessage(loadedMessageClone)
+
+					// we don't have to check - done before hand if (messages.has(loadedMessageClone.id)) return false
+					messages.set(loadedMessageClone.id, loadedMessageClone)
+					messageState.messageLoadHash[loadedMessageClone.id] = importedEnecoded
+					delegate?.onMessageUpdate(loadedMessageClone.id, loadedMessageClone, [
+						...messages.values(),
+					])
 				}
-
-				// NOTE stringifyMessage encodes messages independent from key order!
-				const importedEnecoded = stringifyMessage(loadedMessageClone)
-
-				// NOTE could use hash instead of the whole object JSON to save memory...
-				if (messageState.messageLoadHash[loadedMessageClone.id] === importedEnecoded) {
-					// debug("skipping upsert!")
-					continue
-				}
-
-				// This logic is preventing cycles - could also be handled if update api had a parameter for who triggered update
-				// e.g. when FS was updated, we don't need to write back to FS
-				// update is synchronous, so update effect will be triggered immediately
-				// NOTE: this might trigger a save before we have the chance to delete - but since save is async and waits for the lock acquired by this method - its save to set the flags afterwards
-				messages.set(loadedMessageClone.id, loadedMessageClone)
-				// NOTE could use hash instead of the whole object JSON to save memory...
-				messageState.messageLoadHash[loadedMessageClone.id] = importedEnecoded
-				delegate?.onMessageUpdate(loadedMessageClone.id, loadedMessageClone, [...messages.values()])
-				loadedMessageCount++
-			} else {
-				// message with the given alias does not exist so far
-				loadedMessageClone.alias = {} as any
-				// TODO #1585 we have to map the id of the importedMessage to the alias - change when import mesage provides importedMessage.alias
-				if (experimentalAliases) {
-					loadedMessageClone.alias["default"] = loadedMessageClone.id
-
-					let currentOffset = 0
-					let messsageId: string | undefined
-					do {
-						messsageId = humanIdHash(loadedMessageClone.id, currentOffset)
-						if (messages.get(messsageId)) {
-							currentOffset += 1
-							messsageId = undefined
-						}
-					} while (messsageId === undefined)
-
-					// create a humanId based on a hash of the alias
-					loadedMessageClone.id = messsageId
-				}
-
-				const importedEnecoded = stringifyMessage(loadedMessageClone)
-
-				// we don't have to check - done before hand if (messages.has(loadedMessageClone.id)) return false
-				messages.set(loadedMessageClone.id, loadedMessageClone)
-				messageState.messageLoadHash[loadedMessageClone.id] = importedEnecoded
-				delegate?.onMessageUpdate(loadedMessageClone.id, loadedMessageClone, [...messages.values()])
-				loadedMessageCount++
 			}
-			if (loadedMessageCount > maxMessagesPerTick) {
-				// move loading of the next messages to the next ticks to allow solid to cleanup resources
-				// solid needs some time to settle and clean up
-				// https://github.com/solidjs-community/solid-primitives/blob/9ca76a47ffa2172770e075a90695cf933da0ff48/packages/trigger/src/index.ts#L64
-				await sleep(0)
-				loadedMessageCount = 0
-			}
-		}
 
-		loadedMessageCount = 0
-		for (const deletedMessageId of deletedMessages) {
-			messages.delete(deletedMessageId)
-			delegate?.onMessageDelete(deletedMessageId, [...messages.values()])
-			loadedMessageCount++
-			if (loadedMessageCount > maxMessagesPerTick) {
-				await sleep(0)
-				loadedMessageCount = 0
+			for (const deletedMessageId of deletedMessages) {
+				messages.delete(deletedMessageId)
+				delegate?.onMessageDelete(deletedMessageId, [...messages.values()])
 			}
-		}
-
+		})
 		await releaseLock(fs as NodeishFilesystem, lockDirPath, "loadMessage", lockTime)
 		lockTime = undefined
 
