@@ -37,6 +37,7 @@ import {
 import { posthog as telemetryBrowser } from "posthog-js"
 import type { Result } from "@inlang/result"
 import { id } from "../../../../../marketplace-manifest.json"
+import * as Ninja from "@inlang/cross-sell-ninja"
 
 type EditorStateSchema = {
 	/**
@@ -143,6 +144,10 @@ type EditorStateSchema = {
 	sourceLanguageTag: () => LanguageTag
 
 	languageTags: () => LanguageTag[]
+
+	isNinjaRecommendationDisabled: () => boolean
+	ninjaIsAdopted: Resource<boolean>
+	ninjaAdd: () => void
 
 	tourStep: () => TourStepId
 	setTourStep: Setter<TourStepId>
@@ -506,6 +511,37 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		return project()?.settings()?.languageTags ?? []
 	})
 
+	const isNinjaRecommendationDisabled = () =>
+		localStorage.disableNinjaRecommendation?.some(
+			(repo) => repo.owner === routeParams().owner && repo.repository === routeParams().repository
+		)
+
+	const [ninjaIsAdopted, { refetch: refetchNinjaIsAdopted }] = createResource(
+		() => {
+			if (repo() === undefined || isNinjaRecommendationDisabled()) {
+				return undefined
+			}
+			return { fs: repo()!.nodeishFs }
+		},
+		async ({ fs }) => {
+			// wait for the browser to be idle
+			await new Promise((resolve) => requestIdleCallback(resolve))
+			return await Ninja.isAdopted({ fs })
+		}
+	)
+
+	async function ninjaAdd() {
+		try {
+			if (!ninjaIsAdopted() && repo()) {
+				await Ninja.add({ fs: repo()!.nodeishFs })
+				refetchNinjaIsAdopted(true)
+				telemetryBrowser.capture("Fink added Ninja")
+			}
+		} catch (error) {
+			console.error("Failed to add the Ninja Github Action. Please open an issue")
+		}
+	}
+
 	//the effect should skip tour guide steps if not needed
 	createEffect(() => {
 		if (localStorage?.user === undefined || userIsCollaborator.loading) {
@@ -719,6 +755,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					projectList,
 					sourceLanguageTag,
 					languageTags,
+					isNinjaRecommendationDisabled,
+					ninjaIsAdopted,
+					ninjaAdd,
 					tourStep,
 					setTourStep,
 					filteredLanguageTags,

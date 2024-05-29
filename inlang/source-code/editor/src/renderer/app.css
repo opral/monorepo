@@ -314,6 +314,18 @@ sl-button.on-inverted::part(base):hover {
 	border-color: var(--sl-color-neutral-300);
 }
 
+sl-button.on-tip::part(base) {
+	background-color: theme(colors.on-inverted-surface);
+	color: #3590ED;
+	transition: opacity 0.15s;
+}
+
+sl-button.on-tip::part(base):hover {
+	background-color: theme(colors.on-primary) !important;
+	color: theme(colors.primary);
+	border-color: var(--sl-color-neutral-300);
+}
+
 sl-menu {
 	width: 320px;
 	border: solid var(--sl-panel-border-width) var(--sl-panel-border-color);

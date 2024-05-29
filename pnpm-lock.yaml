@@ -614,6 +614,9 @@ importers:
       '@inlang/cli':
         specifier: workspace:*
         version: link:../cli
+      '@inlang/cross-sell-ninja':
+        specifier: workspace:*
+        version: link:../cross-sell/cross-sell-ninja
       '@inlang/design-system':
         specifier: workspace:*
         version: link:../design-system
