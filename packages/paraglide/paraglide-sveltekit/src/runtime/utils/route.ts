@@ -31,7 +31,7 @@ export function serializeRoute(
 	normalizedBase: NormalizedBase,
 	dataSuffix: DataSuffix | undefined
 ): string {
-	return normalizedBase + path + (dataSuffix ?? "")
+	return [normalizedBase, path, dataSuffix ?? ""].filter((s) => s !== "/").join("") || "/"
 }
 
 /**
