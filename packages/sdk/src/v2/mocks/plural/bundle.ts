@@ -1,6 +1,6 @@
 import type { MessageBundle } from "../../types.js"
 
-export const bundle: MessageBundle = {
+export const mockBundle: MessageBundle = {
 	id: "mock_bundle_human_id",
 	alias: {
 		default: "mock_bundle_alias",
