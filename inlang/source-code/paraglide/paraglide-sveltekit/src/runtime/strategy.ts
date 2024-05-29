@@ -11,12 +11,16 @@ export function PrefixStrategy<T extends string>(
 	availableLanguageTags: readonly T[],
 	defaultLanguageTag: T,
 	translations: PathDefinitionTranslations,
-	matchers: Record<string, ParamMatcher>
+	matchers: Record<string, ParamMatcher>,
+	prefixDefaultLanguage: "always" | "never"
 ) {
 	function getLanguageFromLocalisedPath(localisedPath: string): T {
 		const segments = localisedPath.split("/")
 		const maybeLang = segments[1]
-		if (availableLanguageTags.includes(maybeLang as any) && maybeLang !== defaultLanguageTag) {
+		if (
+			availableLanguageTags.includes(maybeLang as any) &&
+			(prefixDefaultLanguage === "always" || maybeLang !== defaultLanguageTag)
+		) {
 			return maybeLang as T
 		}
 		return defaultLanguageTag
@@ -32,7 +36,7 @@ export function PrefixStrategy<T extends string>(
 			translatedPath = `${translatedPath}/`
 		}
 
-		if (languageTag !== defaultLanguageTag) {
+		if (prefixDefaultLanguage === "always" || languageTag !== defaultLanguageTag) {
 			translatedPath = `/${languageTag}${translatedPath}`
 		}
 
@@ -41,7 +45,7 @@ export function PrefixStrategy<T extends string>(
 
 	function getCanonicalPath(localisedPath: string, languageTag: T): string {
 		const trailingSlahsBefore = localisedPath.endsWith("/") && localisedPath !== "/"
-		if (languageTag !== defaultLanguageTag) {
+		if (prefixDefaultLanguage === "always" || languageTag !== defaultLanguageTag) {
 			localisedPath = localisedPath.replace(`/${languageTag}`, "") || "/"
 		}
 
