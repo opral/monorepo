@@ -1,3 +1,9 @@
+---
+title: "Getting Started"
+description: "Learn how to install the ParaglideJS i18n library in your project"
+---
+[![Inlang-ecosystem compatibility badge](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/assets/md-badges/inlang.svg)](https://inlang.com)
+
 # Getting started
 
 To use Paraglide standalone without a framework, run the following command:
