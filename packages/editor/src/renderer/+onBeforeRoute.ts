@@ -1,5 +1,8 @@
 import type { LanguageTag } from "@inlang/sdk"
-import { sourceLanguageTag, availableLanguageTags } from "#src/paraglide/runtime.js"
+import {
+	sourceLanguageTag,
+	availableLanguageTags,
+} from "./../../../website/src/paraglide/runtime.js"
 import type { PageContext } from "vike/types"
 
 export default function onBeforeRoute(pageContext: PageContext) {

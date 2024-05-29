@@ -1,4 +1,7 @@
-import { sourceLanguageTag, availableLanguageTags } from "#src/paraglide/runtime.js"
+import {
+	sourceLanguageTag,
+	availableLanguageTags,
+} from "./../../../website/src/paraglide/runtime.js"
 
 export default function onPrerenderStart(prerenderContext: any) {
 	const pageContexts = []

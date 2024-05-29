@@ -7,7 +7,7 @@ import {
 	onSetLanguageTag,
 	setLanguageTag,
 	sourceLanguageTag,
-} from "#src/paraglide/runtime.js"
+} from "./../../../website/src/paraglide/runtime.js"
 import { currentPageContext } from "./state.js"
 import type { JSXElement } from "solid-js"
 import type { LanguageTag } from "@inlang/sdk"
