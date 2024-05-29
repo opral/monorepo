@@ -1,5 +1,23 @@
 # @inlang/telemetry
 
+## 0.3.41
+
+### Patch Changes
+
+- @inlang/sdk@0.35.4
+
+## 0.3.40
+
+### Patch Changes
+
+- @inlang/sdk@0.35.3
+
+## 0.3.39
+
+### Patch Changes
+
+- @inlang/sdk@0.35.2
+
 ## 0.3.38
 
 ### Patch Changes
