@@ -12,10 +12,20 @@ const DocHeader = (props: { manifest: MarketplaceManifest }) => {
 			: props.manifest.displayName
 
 	return (
-		<div class="product-header w-full px-4 h-14 bg-surface-100 border-b border-t border-surface-200 sticky top-[128px] sm:top-[106px] z-[9999]">
+		<div class="product-header w-full px-4 h-14 bg-surface-100 border-b border-t border-surface-200 sticky top-[128px] sm:top-[106px] z-50">
 			<div class="max-w-7xl mx-auto flex justify-between items-center h-full">
 				<div class="flex gap-4 items-center">
-					<img class="w-7 h-7" src={props.manifest.icon} alt="product icon" />
+					<Show
+						when={props.manifest.icon}
+						fallback={
+							<div class="w-7 h-7 font-semibold line-clamp-2 text-sm rounded-md m-0 shadow-lg object-cover object-center flex items-center justify-center bg-gradient-to-t from-surface-800 to-surface-600 text-background">
+								{displayName().split(" ")[0]![0]}
+							</div>
+						}
+					>
+						<img class="w-7 h-7" src={props.manifest.icon} alt="product icon" />
+					</Show>
+
 					<h2 class="font-semibold m-0">{displayName()}</h2>
 					<Chip
 						text={typeOfIdToTitle(props.manifest.id)}
