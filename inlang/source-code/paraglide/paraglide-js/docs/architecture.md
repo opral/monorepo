@@ -1,4 +1,7 @@
-
+---
+title: Architecture
+description: "Paraglide isn't like other i18n libraries. It uses a compiler to generate translations. Learn more about it here."
+---
 # Architecture
 
 Paraglide uses a compiler to generate JS functions from your messages. We call these "message functions". 
