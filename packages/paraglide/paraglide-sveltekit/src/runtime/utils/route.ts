@@ -1,5 +1,4 @@
 import type { NormalizedBase } from "./normaliseBase.js"
-import { safeDecode } from "./safe-decode.js"
 
 export type DataSuffix = `/${string}`
 export type AbsolutePath = `/${string}`
@@ -62,5 +61,13 @@ function removeDataSuffix(absolutePath: AbsolutePath): [AbsolutePath, DataSuffix
 		return [(absolutePath.slice(0, -dataSuffix.length) || "/") as AbsolutePath, dataSuffix]
 	} else {
 		return [absolutePath, undefined]
+	}
+}
+
+function safeDecode(maybeEncoded: string): string {
+	try {
+		return decodeURI(maybeEncoded)
+	} catch {
+		return maybeEncoded
 	}
 }
