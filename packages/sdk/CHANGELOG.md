@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 0.35.5
+
+### Patch Changes
+
+- 64e30ee: introduces solid batching for loadViaPlugin
+
 ## 0.35.4
 
 ### Patch Changes

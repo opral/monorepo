@@ -1,5 +1,12 @@
 # @inlang/rpc
 
+## 0.3.27
+
+### Patch Changes
+
+- Updated dependencies [64e30ee]
+  - @inlang/sdk@0.35.5
+
 ## 0.3.26
 
 ### Patch Changes
