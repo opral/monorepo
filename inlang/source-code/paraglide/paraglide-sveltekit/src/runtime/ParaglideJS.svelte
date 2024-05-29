@@ -98,7 +98,7 @@
 					$page.url.host === "sveltekit-prerender" ? targetPath : new URL(targetPath, new URL($page.url)).href}
 
 				<!-- Should be a fully qualified href, including protocol -->
-				<link rel="alternate" hreflang={lang} {href} />
+				<link rel="alternate" hreflang={targetLang} {href} />
 			{/each}
 		{/if}
 	{/if}
