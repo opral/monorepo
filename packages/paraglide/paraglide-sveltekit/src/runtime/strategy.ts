@@ -33,7 +33,7 @@ export function PrefixStrategy<T extends string>(
 		let translatedPath = turnIntoTranslatedPath(canonicalPath, languageTag, translations, matchers)
 
 		if (trailingSlash) {
-			translatedPath = `${translatedPath}/`
+			translatedPath += "/"
 		}
 
 		if (prefixDefaultLanguage === "always" || languageTag !== defaultLanguageTag) {
@@ -55,7 +55,7 @@ export function PrefixStrategy<T extends string>(
 		let canonicalPath = turnIntoCanonicalPath(localisedPath, languageTag, translations, matchers)
 
 		if (trailingSlash) {
-			canonicalPath = `${canonicalPath}/`
+			canonicalPath += "/"
 		}
 
 		return canonicalPath
