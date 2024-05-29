@@ -14,7 +14,7 @@ export function PrefixStrategy<T extends string>(
 	matchers: Record<string, ParamMatcher>,
 	prefixDefaultLanguage: "always" | "never"
 ) {
-	function getLanguageFromLocalisedPath(localisedPath: string): T {
+	function getLanguageFromLocalisedPath(localisedPath: string): T | undefined {
 		const segments = localisedPath.split("/")
 		const maybeLang = segments[1]
 		if (
@@ -23,7 +23,9 @@ export function PrefixStrategy<T extends string>(
 		) {
 			return maybeLang as T
 		}
-		return defaultLanguageTag
+
+		if (prefixDefaultLanguage === "never") return defaultLanguageTag
+		else return undefined
 	}
 
 	function getLocalisedPath(canonicalPath: string, languageTag: T): string {
