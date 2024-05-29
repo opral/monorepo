@@ -1,6 +1,6 @@
-import type { MessageBundle } from "@inlang/sdk/v2"
+import type { MessageBundle } from "../../types.js"
 
-export const mockMessageBundle: MessageBundle = {
+export const multipleMatcherBundle: MessageBundle = {
 	id: "mock-bundle-human-id",
 	alias: {
 		default: "mock-bundle-alias",
