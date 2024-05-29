@@ -11,7 +11,8 @@ describe("PrefixStrategy", () => {
 				de: "/ueber-uns",
 			},
 		},
-		{}
+		{},
+		"never"
 	)
 
 	it("detects the language", () => {

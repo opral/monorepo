@@ -13,6 +13,7 @@ export const createReroute = <T extends string>(strategy: RoutingStrategy<T>): R
 		try {
 			const [localisedPath, dataSuffix] = parseRoute(url.pathname as `/${string}`, base)
 			const lang = strategy.getLanguageFromLocalisedPath(localisedPath)
+			if (!lang) return url.pathname
 			const canonicalPath = strategy.getCanonicalPath(localisedPath, lang)
 
 			return serializeRoute(canonicalPath, base, dataSuffix)
