@@ -77,11 +77,10 @@ export const createHandle = <T extends string>(
 		if (lang !== langFromUrl) {
 			// redirect to the correct language
 			const localisedPathname = strategy.getLocalisedPath(localisedPath, lang)
-			const destination = new URL(localisedPathname, event.url).href
 			return new Response(undefined, {
 				status: 302,
 				headers: {
-					Location: destination,
+					Location: localisedPathname,
 				},
 			})
 		}
