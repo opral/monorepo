@@ -1,6 +1,8 @@
-import { For, Match, Switch, onMount, Show, createSignal, createEffect, on } from "solid-js"
+import { For, Match, Switch, onMount, Show, createSignal, createEffect, on, createResource } from "solid-js"
 import MaterialSymbolsUnknownDocumentOutlineRounded from "~icons/material-symbols/unknown-document-outline-rounded"
 import MaterialSymbolsArrowOutwardRounded from "~icons/material-symbols/arrow-outward-rounded"
+import IconClose from "~icons/material-symbols/close"
+import IconLightbulb from "~icons/material-symbols/lightbulb-outline"
 import { EditorStateProvider, useEditorState } from "./State.jsx"
 import NoMatchPlaceholder from "./components/NoMatchPlaceholder.jsx"
 import { ListHeader } from "./components/Listheader.jsx"
@@ -54,6 +56,12 @@ function TheActualPage() {
 		tourStep,
 		lixErrors,
 		languageTags,
+		userIsCollaborator,
+		isNinjaRecommendationDisabled,
+		ninjaIsAdopted,
+		ninjaAdd,
+		filteredMessageLintRules,
+		setLocalChanges
 	} = useEditorState()
 	const [localStorage, setLocalStorage] = useLocalStorage()
 
@@ -85,6 +93,10 @@ function TheActualPage() {
 			setMessageCount(0)
 		})
 	)
+
+	createEffect(() => {
+		console.log("ninjaIsAdopted", ninjaIsAdopted())
+	})
 
 	return (
 		<>
@@ -168,6 +180,49 @@ function TheActualPage() {
 				>
 					<div class="min-h-[calc(100vh_-_200px)]">
 						<ListHeader />
+						<Show when={ninjaIsAdopted() === false && filteredMessageLintRules().length !== 0 && userIsCollaborator() && !isNinjaRecommendationDisabled()}>
+							<div class="flex w-full gap-2 items-center self-stretch flex-grow-0 flex-shrink-0 sm:h-11 relative px-4 py-1 transition-all border-x border-[#DFE2E4] bg-gradient-to-r from-[#8FB0EE] via-[#0BB5D4] to-[#3590ED] animate-fadeInTop">
+								<p class="flex flex-wrap text-sm font-medium text-background">
+									<IconLightbulb class="w-5 h-5 mr-1" />
+									<span class="font-bold mr-1">Tip:</span>
+									<span class="mr-1">Add the</span>
+									<a
+										class="underline hover:text-background/80 transition-colors duration-150"
+										href={
+											import.meta.env.PROD
+												? "https://inlang.com/m/3gk8n4n4/app-inlang-ninjaI18nAction"
+												: "http://localhost:3000/m/3gk8n4n4/app-inlang-ninjaI18nAction"
+										}
+										target="_blank"
+									>Ninja Github Action</a>
+									<span class="ml-1">to see new i18n issues in pull requests.</span>
+								</p>
+								<div class="flex flex-wrap-reverse flex-grow items-center justify-end sm:gap-2">
+									<sl-button
+										prop:size="small"
+										onClick={() => {
+											ninjaAdd()
+											setLocalChanges((prev) => (prev += 1))
+										}}
+										class={"on-tip"}
+									>
+										Add Ninja
+									</sl-button>
+									<button
+										onClick={() => {
+											setLocalStorage("disableNinjaRecommendation",
+												(prev) => [
+													...prev,
+													{ owner: routeParams().owner, repository: routeParams().repository },
+												])
+										}}
+										class="rounded w-8 h-8 flex justify-center items-center hover:bg-background/10 hover:text-background text-background/80"
+									>
+										<IconClose class="w-6 h-6" />
+									</button>
+								</div>
+							</div>
+						</Show>
 						<Show when={window}>
 							<TourHintWrapper
 								currentId="textfield"
