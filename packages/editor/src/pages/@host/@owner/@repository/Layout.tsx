@@ -42,14 +42,12 @@ export function Layout(props: { children: JSXElement }) {
 		userIsCollaborator,
 		project,
 		refetchProject,
-		lixErrors,
 		setTextSearch,
 		filteredMessageLintRules,
 		setFilteredMessageLintRules,
 		filteredLanguageTags,
 		setFilteredLanguageTags,
 		filteredIds,
-		setFilteredIds,
 		languageTags,
 		routeParams,
 		lastPullTime,
@@ -157,7 +155,7 @@ export function Layout(props: { children: JSXElement }) {
 		}
 	}
 
-	//add linting rule to filter
+	//add linting rule to filter options
 	createEffect(
 		on(
 			filteredMessageLintRules,
@@ -170,34 +168,22 @@ export function Layout(props: { children: JSXElement }) {
 		)
 	)
 
-	//add initial language filter
+	//add initial filter
 	createEffect(
 		on(project, () => {
 			if (project()) {
 				addFilter("Language")
 				if (filteredLanguageTags().length === 0 && project()!.settings())
 					setFilteredLanguageTags(languageTags())
+				if (filteredIds().length > 0) {
+					addFilter("Message Ids")
+				}
+				if (filteredMessageLintRules().length > 0) {
+					addFilter("Linting")
+				}
 			}
 		})
 	)
-
-	//add initial language filter
-	createEffect(
-		on(project, () => {
-			if (project() && filteredIds().length > 0) {
-				addFilter("Message Ids")
-				if (filteredLanguageTags().length === 0 && project()!.settings())
-					setFilteredIds(project()!.query.messages.includedMessageIds())
-			}
-		})
-	)
-
-	//add initial lintRule filter
-	createEffect(() => {
-		if (lixErrors().length === 0 && filteredMessageLintRules().length > 0) {
-			addFilter("Linting")
-		}
-	})
 
 	return (
 		<EditorLayout>
@@ -481,7 +467,8 @@ function Breadcrumbs() {
  * The menu to select the branch.
  */
 function BranchMenu() {
-	const { activeBranch, setActiveBranch, branchNames, currentBranch } = useEditorState()
+	const { activeBranch, setActiveBranch, setBranchListEnabled, branchList, currentBranch } =
+		useEditorState()
 	return (
 		<sl-tooltip
 			prop:content="Select branch"
@@ -490,12 +477,15 @@ function BranchMenu() {
 			class="small"
 			style={{ "--show-delay": "1s" }}
 		>
-			<sl-dropdown prop:distance={8}>
+			<sl-dropdown prop:distance={8} on:sl-show={() => setBranchListEnabled(true)}>
 				<sl-button
 					slot="trigger"
 					prop:caret={true}
 					prop:size="small"
-					prop:loading={currentBranch() !== activeBranch() && activeBranch() !== undefined}
+					prop:loading={
+						(currentBranch() !== activeBranch() && activeBranch() !== undefined) ||
+						(branchList.loading && !branchList())
+					}
 				>
 					<div slot="prefix">
 						{/* branch icon from github */}
@@ -511,15 +501,25 @@ function BranchMenu() {
 				</sl-button>
 
 				<sl-menu class="w-48 min-w-fit">
-					<For each={branchNames()}>
-						{(branch) => (
-							<div onClick={() => setActiveBranch(branch)}>
-								<sl-menu-item prop:type="checkbox" prop:checked={currentBranch() === branch}>
-									{branch}
-								</sl-menu-item>
-							</div>
-						)}
-					</For>
+					<Show
+						when={branchList()}
+						fallback={<sl-menu-item prop:disabled={true}>Loading...</sl-menu-item>}
+					>
+						<For each={branchList()}>
+							{(branch) => (
+								<div
+									onClick={() => {
+										setActiveBranch(branch)
+										setBranchListEnabled(false) // prevent refetching after selecting branch
+									}}
+								>
+									<sl-menu-item prop:type="checkbox" prop:checked={currentBranch() === branch}>
+										{branch}
+									</sl-menu-item>
+								</div>
+							)}
+						</For>
+					</Show>
 				</sl-menu>
 			</sl-dropdown>
 		</sl-tooltip>

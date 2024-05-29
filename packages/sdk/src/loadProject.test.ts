@@ -635,8 +635,10 @@ describe("functionality", () => {
 
 			await new Promise((resolve) => setTimeout(resolve, 510))
 
-			expect(await project.query.messageLintReports.getAll()).toHaveLength(1)
-			expect((await project.query.messageLintReports.getAll())?.[0]?.ruleId).toBe(_mockLintRule.id)
+			expect(await project.query.messageLintReports.getAll.settled()).toHaveLength(1)
+			expect((await project.query.messageLintReports.getAll.settled())?.[0]?.ruleId).toBe(
+				_mockLintRule.id
+			)
 			expect(project.installed.messageLintRules()).toHaveLength(1)
 		})
 
@@ -1014,25 +1016,6 @@ describe("functionality", () => {
 	})
 
 	describe("lint", () => {
-		it.todo("should throw if lint reports are not initialized yet", async () => {
-			const repo = await mockRepo()
-			const fs = repo.nodeishFs
-			await fs.mkdir("/user/project", { recursive: true })
-			await fs.writeFile("/user/project/project.inlang.json", JSON.stringify(settings))
-			const project = await loadProject({
-				projectPath: "/user/project/project.inlang.json",
-				repo,
-				_import,
-			})
-			// TODO: test with real lint rules
-			try {
-				const r = await project.query.messageLintReports.getAll()
-				expect(r).toEqual(undefined)
-				throw new Error("Should not reach this")
-			} catch (e) {
-				expect((e as Error).message).toBe("lint not initialized yet")
-			}
-		})
 		it("should return the message lint reports", async () => {
 			const settings: ProjectSettings = {
 				sourceLanguageTag: "en",
@@ -1051,7 +1034,7 @@ describe("functionality", () => {
 				}),
 			})
 			// TODO: test with real lint rules
-			const r = await project.query.messageLintReports.getAll()
+			const r = await project.query.messageLintReports.getAll.settled()
 			expect(r).toEqual([])
 		})
 	})
@@ -1077,6 +1060,23 @@ describe("functionality", () => {
 										value: "test",
 									},
 								],
+							},
+						],
+					},
+				],
+			}
+
+			const newMessage = {
+				id: "test2",
+				selectors: [],
+				variants: [
+					{
+						match: [],
+						languageTag: "en",
+						pattern: [
+							{
+								type: "Text",
+								value: "test",
 							},
 						],
 					},
@@ -1121,9 +1121,11 @@ describe("functionality", () => {
 			})
 
 			let counter = 0
+			let messageCount = 0
 
-			project.query.messages.getAll.subscribe(() => {
+			project.query.messages.getAll.subscribe((messages) => {
 				counter = counter + 1
+				messageCount = messages.length
 			})
 
 			// subscribe fires once
@@ -1135,6 +1137,7 @@ describe("functionality", () => {
 
 			// we didn't change the message we write into message.json - shouldn't change the messages
 			expect(counter).toBe(1)
+			expect(messageCount).toBe(1)
 
 			// saving the file without changing should trigger a change
 			messages.data[0]!.variants[0]!.pattern[0]!.value = "changed"
@@ -1142,14 +1145,32 @@ describe("functionality", () => {
 			await new Promise((resolve) => setTimeout(resolve, 200)) // file event will lock a file and be handled sequentially - give it time to pickup the change
 
 			expect(counter).toBe(2)
+			expect(messageCount).toBe(1)
 
 			messages.data[0]!.variants[0]!.pattern[0]!.value = "changed3"
 
-			// change file
+			// change file - update message
 			await fs.writeFile("./messages.json", JSON.stringify(messages))
 			await new Promise((resolve) => setTimeout(resolve, 200)) // file event will lock a file and be handled sequentially - give it time to pickup the change
 
 			expect(counter).toBe(3)
+			expect(messageCount).toBe(1)
+
+			// change file - add a message
+			messages.data.push(newMessage)
+			await fs.writeFile("./messages.json", JSON.stringify(messages))
+			await new Promise((resolve) => setTimeout(resolve, 200)) // file event will lock a file and be handled sequentially - give it time to pickup the change
+
+			expect(counter).toBe(4)
+			expect(messageCount).toBe(2)
+
+			// change file - remove a message
+			messages.data.pop()
+			await fs.writeFile("./messages.json", JSON.stringify(messages))
+			await new Promise((resolve) => setTimeout(resolve, 200)) // file event will lock a file and be handled sequentially - give it time to pickup the change
+
+			expect(counter).toBe(5)
+			expect(messageCount).toBe(1)
 		})
 	})
 })

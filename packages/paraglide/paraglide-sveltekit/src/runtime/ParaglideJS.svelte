@@ -18,7 +18,7 @@
 	import { translatePath } from "./path-translations/translatePath.js"
 	import { get } from "svelte/store"
 	import { invalidate } from "$app/navigation"
-	import { setParaglideContext } from "./internal/context.js"
+	import { setParaglideContext } from "./internal/index.js"
 
 	// The base path may be relative during SSR.
 	// To make sure it is absolute, we need to resolve it against the current page URL.
@@ -53,10 +53,8 @@
 		const from = new URL(get(page).url)
 		const original_to = new URL(href, new URL(from))
 
-		if (
-			isExternal(original_to, from, absoluteBase) ||
-			i18n.config.exclude(original_to.pathname)
-		) return href
+		if (isExternal(original_to, from, absoluteBase) || i18n.config.exclude(original_to.pathname))
+			return href
 
 		const language = hreflang ?? lang
 

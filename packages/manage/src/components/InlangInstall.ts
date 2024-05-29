@@ -335,7 +335,9 @@ export class InlangInstall extends TwLitElement {
 								class=${"bg-slate-800 text-white text-center py-2 rounded-md font-medium hover:bg-slate-900 transition-colors " +
 								(!this.module ? "cursor-not-allowed" : "")}
 								@click=${async () => {
-									await browserAuth.login()
+									await browserAuth.login({
+										redirect: window.location.origin + "/auth/auth-callback",
+									})
 									window.location.reload()
 								}}
 							>

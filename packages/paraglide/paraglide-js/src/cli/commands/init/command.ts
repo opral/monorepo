@@ -16,6 +16,7 @@ import { promptForOutdir } from "~/cli/steps/prompt-for-outdir.js"
 import { updatePackageJson } from "~/cli/steps/update-package-json.js"
 import { runCompiler } from "~/cli/steps/run-compiler.js"
 import type { CliStep } from "../../utils.js"
+import { maybeAddNinja } from "~/cli/steps.js"
 
 const ADAPTER_LINKS = {
 	sveltekit: "https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n",
@@ -50,7 +51,7 @@ export const initCommand = new Command()
 			logger,
 			repo,
 			repoRoot: repoRoot?.replace("file://", "") ?? process.cwd(),
-			appId: MARKTEPLACE_ID,
+			appId: PARJS_MARKTEPLACE_ID,
 		} as const
 
 		const ctx1 = await checkForUncommittedChanges(ctx)
@@ -64,9 +65,10 @@ export const initCommand = new Command()
 		telemetry.capture({ event: "PARAGLIDE-JS init added compile commands" })
 		const ctx7 = await maybeChangeTsConfig(ctx6)
 		const ctx8 = await maybeAddSherlock(ctx7)
+		const ctx9 = await maybeAddNinja(ctx8)
 
 		try {
-			await runCompiler(ctx8)
+			await runCompiler(ctx9)
 			ctx.logger.success("Run paraglide compiler")
 		} catch (e) {
 			ctx.logger.warn(
@@ -76,7 +78,7 @@ export const initCommand = new Command()
 
 		telemetry.capture({ event: "PARAGLIDE-JS init finished" })
 
-		const absoluteSettingsPath = nodePath.resolve(ctx8.projectPath, "settings.json")
+		const absoluteSettingsPath = nodePath.resolve(ctx9.projectPath, "settings.json")
 		const relativeSettingsFilePath = absoluteSettingsPath.replace(process.cwd(), ".")
 
 		let successMessage = dedent`inlang Paraglide-JS has been set up sucessfully.
@@ -123,7 +125,7 @@ export const addParaglideJsToDevDependencies: CliStep<
 	const ctx1 = await updatePackageJson({
 		devDependencies: async (devDeps) => ({
 			...devDeps,
-			"@inlang/paraglide-js": PACKAGE_VERSION,
+			"@inlang/paraglide-js": PARJS_PACKAGE_VERSION,
 		}),
 	})(ctx)
 	ctx.logger.success("Added @inlang/paraglide-js to the devDependencies in package.json.")

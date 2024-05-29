@@ -53,7 +53,7 @@ export const badge = async (urlQuery: string, projectQuery?: string) => {
 
 		const settings = project.settings()
 
-		const reports = await project.query.messageLintReports.getAll()
+		const reports = await project.query.messageLintReports.getAll.settled()
 
 		const { percentage, errors, warnings, numberOfMissingVariants } = calculateSummary({
 			reports: reports,

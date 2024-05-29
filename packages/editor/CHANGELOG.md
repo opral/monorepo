@@ -4,6 +4,53 @@
 
 ### Patch Changes
 
+- Updated dependencies [3b2e0a6]
+  - @lix-js/client@2.2.0
+  - @inlang/settings-component@1.0.21
+
+## null
+
+### Patch Changes
+
+- Updated dependencies [548bc9e]
+  - @lix-js/client@2.1.0
+  - @inlang/settings-component@1.0.20
+
+## null
+
+### Patch Changes
+
+- Updated dependencies [4a25124]
+  - @lix-js/fs@2.1.0
+  - @lix-js/client@2.0.1
+  - @inlang/settings-component@1.0.19
+
+## null
+
+### Patch Changes
+
+- Updated dependencies [00ad046]
+- Updated dependencies [00ad046]
+  - @lix-js/fs@2.0.0
+  - @lix-js/client@2.0.0
+  - @inlang/settings-component@1.0.18
+
+## null
+
+### Patch Changes
+
+- @inlang/settings-component@1.0.17
+
+## null
+
+### Patch Changes
+
+- @inlang/settings-component@1.0.16
+
+## null
+
+### Patch Changes
+
 - @inlang/settings-component@1.0.15
 
 ## null

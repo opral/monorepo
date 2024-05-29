@@ -4,6 +4,39 @@
 
 ### Patch Changes
 
+- Updated dependencies [2806698]
+  - @inlang/cli@2.18.0
+
+## null
+
+### Patch Changes
+
+- Updated dependencies [3896fe6]
+  - @inlang/cli@2.17.0
+
+## null
+
+### Patch Changes
+
+- @inlang/cli@2.16.10
+
+## null
+
+### Patch Changes
+
+- @inlang/cli@2.16.9
+
+## null
+
+### Patch Changes
+
+- Updated dependencies [a27b7a4]
+  - @inlang/cli@2.16.8
+
+## null
+
+### Patch Changes
+
 - @inlang/cli@2.16.7
 
 ## null

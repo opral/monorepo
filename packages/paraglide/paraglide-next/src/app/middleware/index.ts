@@ -4,8 +4,8 @@ import {
 	isAvailableLanguageTag,
 	sourceLanguageTag,
 } from "$paraglide/runtime.js"
-import { generateLinkHeader, shouldAddLinkHeader } from "./linkHeader"
-import { LANG_COOKIE, PARAGLIDE_LANGUAGE_HEADER_NAME, LINK_HEADER_NAME } from "../constants"
+import { addSeoHeaders } from "./headers"
+import { LANG_COOKIE, PARAGLIDE_LANGUAGE_HEADER_NAME } from "../constants"
 import { resolveLanguage } from "./resolveLanguage"
 import type { NextRequest } from "next/server"
 import type { RoutingStrategy } from "../routing-strategy/interface"
@@ -87,14 +87,12 @@ export function Middleware<T extends string>(opt: MiddlewareOptions<T>) {
 			})
 		}
 
-		if (shouldAddLinkHeader(request)) {
-			const linkHeader = generateLinkHeader(opt.strategy, {
-				availableLanguageTags: availableLanguageTags as T[],
-				canonicalPath,
-				request,
-			})
-			response.headers.set(LINK_HEADER_NAME, linkHeader)
-		}
+		addSeoHeaders(response.headers, {
+			availableLanguageTags: availableLanguageTags as T[],
+			canonicalPath,
+			request,
+			strategy: opt.strategy,
+		})
 
 		return response
 	}
