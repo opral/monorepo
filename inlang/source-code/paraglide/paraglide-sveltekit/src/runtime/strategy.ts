@@ -23,15 +23,9 @@ export function PrefixStrategy<T extends string>(
 	}
 
 	function getLocalisedPath(canonicalPath: string, languageTag: T): string {
-		const trailingSlash = canonicalPath.endsWith("/")
+		const trailingSlash = canonicalPath.endsWith("/") && canonicalPath !== "/"
 		canonicalPath = trailingSlash ? canonicalPath.slice(0, -1) : canonicalPath
 
-		//if it's not the default language, remove it from the URL
-		if (languageTag !== defaultLanguageTag) {
-			canonicalPath = canonicalPath.replace(`/${languageTag}`, "")
-		}
-
-		// TODO find the best match
 		let translatedPath = turnIntoTranslatedPath(canonicalPath, languageTag, translations, matchers)
 
 		if (trailingSlash) {
@@ -39,15 +33,19 @@ export function PrefixStrategy<T extends string>(
 		}
 
 		if (languageTag !== defaultLanguageTag) {
-			translatedPath = `${languageTag}/${translatedPath}`
+			translatedPath = `/${languageTag}${translatedPath}`
 		}
 
 		return translatedPath
 	}
 
 	function getCanonicalPath(localisedPath: string, languageTag: T): string {
-		const trailingSlash = localisedPath.endsWith("/")
+		const trailingSlash = localisedPath.endsWith("/") && localisedPath !== "/"
 		localisedPath = trailingSlash ? localisedPath.slice(0, -1) : localisedPath
+
+		if (languageTag !== defaultLanguageTag) {
+			localisedPath = localisedPath.replace(`/${languageTag}`, "") || "/"
+		}
 
 		let canonicalPath = turnIntoCanonicalPath(localisedPath, languageTag, translations, matchers)
 
