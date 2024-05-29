@@ -64,7 +64,8 @@
 		const translatedPath = i18n.strategy.getLocalisedPath(canonicalPath, targetLanguage)
 
 
-		const to = new URL(original_to)
+		const to = new URL(original_to);
+
 		to.pathname =  serializeRoute(
 			translatedPath,
 			absoluteBase,
@@ -88,7 +89,7 @@
 		<!-- If there is more than one language, add alternate links -->
 		{#if i18n.config.runtime.availableLanguageTags.length >= 1}
 			{#each i18n.config.runtime.availableLanguageTags as targetLang}
-				{@const [localisedPath, dataSuffix] = parseRoute($page.url.pathname as `/${string}`, absoluteBase)}
+				{@const localisedPath = parseRoute($page.url.pathname, absoluteBase)[0]}
 				
 				{@const canonicalPath = i18n.strategy.getCanonicalPath(localisedPath, lang)}
 				{@const targetPath = i18n.strategy.getLocalisedPath(canonicalPath, targetLang)}
