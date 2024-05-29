@@ -1,4 +1,4 @@
-import { LanguageTag, MessageBundle, Message, Text, Variant } from "./types.js"
+import { LanguageTag, MessageBundle, Message, Text } from "./types.js"
 
 /**
  * create v2 MessageBundle
@@ -44,17 +44,4 @@ export function toTextElement(text: string): Text {
 		type: "text",
 		value: text,
 	}
-}
-
-/**
- * add a variant to a message (mutates the bundle)
- * @example addVariantToMessage(message, variant)
- */
-export function upsertVariantOfMessage(message: Message, variant: Variant): void {
-	message.variants = message.variants.filter((v) => !isEqualMatcher(v, variant))
-	message.variants.push(variant)
-}
-
-function isEqualMatcher(a: Variant, b: Variant): boolean {
-	return JSON.stringify(a.match) === JSON.stringify(b.match)
 }

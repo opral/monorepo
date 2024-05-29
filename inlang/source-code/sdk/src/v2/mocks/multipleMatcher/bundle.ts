@@ -115,7 +115,18 @@ export const multipleMatcherBundle: MessageBundle = {
 					pattern: [
 						{
 							type: "text",
-							value: "Zeigen Sie bitte Ihre {count} Nachrichten.",
+							value: "Zeigen Sie bitte Ihre {count} ",
+						},
+						{
+							type: "expression",
+							arg: {
+								type: "variable",
+								name: "count",
+							},
+						},
+						{
+							type: "text",
+							value: " Nachrichten.",
 						},
 					],
 				},
@@ -124,7 +135,18 @@ export const multipleMatcherBundle: MessageBundle = {
 					pattern: [
 						{
 							type: "text",
-							value: "Zeigen Deine {count} Nachrichten.",
+							value: "Zeigen Deine ",
+						},
+						{
+							type: "expression",
+							arg: {
+								type: "variable",
+								name: "count",
+							},
+						},
+						{
+							type: "text",
+							value: " Nachrichten.",
 						},
 					],
 				},
@@ -132,8 +154,15 @@ export const multipleMatcherBundle: MessageBundle = {
 					match: ["many", "*"],
 					pattern: [
 						{
+							type: "expression",
+							arg: {
+								type: "variable",
+								name: "count",
+							},
+						},
+						{
 							type: "text",
-							value: "{count} Nachrichten zeigen.",
+							value: " Nachrichten zeigen.",
 						},
 					],
 				},
@@ -142,7 +171,14 @@ export const multipleMatcherBundle: MessageBundle = {
 					pattern: [
 						{
 							type: "text",
-							value: "Zeige {count}",
+							value: "Zeige ",
+						},
+						{
+							type: "expression",
+							arg: {
+								type: "variable",
+								name: "count",
+							},
 						},
 					],
 				},
