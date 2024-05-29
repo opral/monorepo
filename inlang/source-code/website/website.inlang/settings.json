@@ -12,7 +12,7 @@
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js"
 	],
 	"plugin.inlang.messageFormat": {
-		"pathPattern": "./inlang/source-code/website/messages/{languageTag}.json"
+		"pathPattern": "./messages/{languageTag}.json"
 	},
 	"messageLintRuleLevels": {
 		"messageLintRule.inlang.missingTranslation": "error",
