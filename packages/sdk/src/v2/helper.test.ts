@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest"
-import { createMessageBundle, createMessage } from "./createMessageBundle.js"
+import {
+	createMessageBundle,
+	createMessage,
+	toTextElement,
+	upsertVariantOfMessage,
+} from "./helper.js"
 import { MessageBundle } from "./types.js"
 import { Value } from "@sinclair/typebox/value"
 
@@ -91,5 +96,39 @@ describe("createMessageBundle", () => {
 				},
 			],
 		} satisfies MessageBundle)
+	})
+})
+
+describe("upsertVariantOfMessage", () => {
+	it("adds a new variant to a message", () => {
+		const message = createMessage({
+			locale: "en",
+			text: "You have something in your inbox!",
+			match: ["*"],
+		})
+		const variant = {
+			match: ["one"],
+			pattern: [toTextElement("You have a new notification!")],
+		}
+		upsertVariantOfMessage(message, variant)
+		expect(message.variants.length).toBe(2)
+	})
+
+	it("updates an existing variant in a message", () => {
+		const message = createMessage({
+			locale: "en",
+			text: "You have something in your inbox!",
+			match: ["*"],
+		})
+		const variant = {
+			match: ["*"],
+			pattern: [toTextElement("New notifications!")],
+		}
+		upsertVariantOfMessage(message, variant)
+		expect(message.variants.length).toBe(1)
+		expect(message.variants[0]?.pattern[0]).toEqual({
+			type: "text",
+			value: "New notifications!",
+		})
 	})
 })
