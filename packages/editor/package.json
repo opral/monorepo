@@ -7,7 +7,6 @@
 		"build": "node ./scripts/updateVersion.js && vite build -- --max_old_space_size=1200000 && tsc --noEmit",
 		"production": "NODE_ENV=production tsx ./src/server/main.ts",
 		"---- TEST ----------------------------------------------------------": "",
-		"test": "paraglide-js compile --project ./../website/website.inlang",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
