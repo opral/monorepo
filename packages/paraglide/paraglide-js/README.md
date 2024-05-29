@@ -1,3 +1,8 @@
+---
+title: "Getting Started"
+description: "Learn how to install the ParaglideJS i18n library in your project"
+---
+
 # Getting started
 
 To use Paraglide standalone without a framework, run the following command:
