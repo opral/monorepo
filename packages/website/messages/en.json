@@ -197,5 +197,6 @@
 	"newsletter_success": "Thank you for subscribing!",
 	"newsletter_title": "Newsletter",
 	"newsletter_unsubscribed_description": "We're sad to see you go. If you have any feedback, please let us know on our",
-	"newsletter_unsubscribed_title": "You're unsubscribed"
+	"newsletter_unsubscribed_title": "You're unsubscribed",
+	"home_lix_button_text": "Read more about Lix"
 }
