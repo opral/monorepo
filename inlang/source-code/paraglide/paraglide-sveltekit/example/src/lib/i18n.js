@@ -16,6 +16,7 @@ export const i18n = createI18n(runtime, {
 		},
 	},
 	matchers: { int },
+	prefixDefaultLanguage: "always",
 	exclude: ["/base/not-translated"],
 	textDirection: {
 		en: "ltr",

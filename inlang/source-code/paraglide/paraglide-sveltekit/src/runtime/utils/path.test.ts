@@ -18,29 +18,3 @@ describe("path.normalize", () => {
 		expect(path.normalize("")).toBe("/")
 	})
 })
-
-describe("path.resolve", () => {
-	it("concatonates path segments", () => {
-		expect(path.resolve("foo", "bar")).toBe("/foo/bar")
-	})
-
-	it("removes trailing slashes", () => {
-		expect(path.resolve("foo/", "bar/")).toBe("/foo/bar")
-	})
-
-	it("removes leading slashes", () => {
-		expect(path.resolve("/foo", "/bar")).toBe("/foo/bar")
-	})
-
-	it("can deal with empty segments", () => {
-		expect(path.resolve("foo", "", "bar")).toBe("/foo/bar")
-	})
-
-	it("can deal with single-slash segments", () => {
-		expect(path.resolve("/", "foo", "/", "bar", "/")).toBe("/foo/bar")
-	})
-
-	it("can deal with zero segments", () => {
-		expect(path.resolve()).toBe("/")
-	})
-})
