@@ -1,9 +1,10 @@
 import type { Handle } from "@sveltejs/kit"
 import type { I18nConfig } from "../adapter.js"
-import { getPathInfo } from "../utils/get-path-info.js"
+import { parseRoute } from "../utils/route.js"
 import { negotiateLanguagePreferences } from "@inlang/paraglide-js/internal/adapter-utils"
 import { base } from "$app/paths"
 import { dev } from "$app/environment"
+import type { RoutingStrategy } from "../strategy.js"
 
 const LANG_COOKIE_NAME = "paraglide:lang"
 
@@ -51,6 +52,7 @@ export type HandleOptions = {
 }
 
 export const createHandle = <T extends string>(
+	strategy: RoutingStrategy<T>,
 	i18n: I18nConfig<T>,
 	options: HandleOptions
 ): Handle => {
@@ -58,10 +60,8 @@ export const createHandle = <T extends string>(
 	const dirPlaceholder = options.textDirectionPlaceholder ?? "%paraglide.textDirection%"
 
 	return ({ resolve, event }) => {
-		const { languageTag: langFromUrl } = getPathInfo(event.url.pathname, {
-			availableLanguageTags: i18n.runtime.availableLanguageTags,
-			normalizedBase: base,
-		})
+		const [localisedPath] = parseRoute(event.url.pathname as `/${string}`, base)
+		const langFromUrl = strategy.getLanguageFromLocalisedPath(localisedPath)
 
 		const langCookie = event.cookies.get(LANG_COOKIE_NAME)
 		const cookieLang = i18n.runtime.isAvailableLanguageTag(langCookie) ? langCookie : undefined
