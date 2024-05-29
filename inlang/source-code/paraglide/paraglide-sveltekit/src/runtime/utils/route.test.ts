@@ -38,6 +38,11 @@ describe("parsePath", () => {
 		const [path] = parseRoute("/base/foo/bar/", "/base")
 		expect(path).toBe("/foo/bar/")
 	})
+
+	it("decodes encoded url segments", () => {
+		const [path] = parseRoute("/%20", "")
+		expect(path).toBe("/ ")
+	})
 })
 
 describe("serializeRoute", () => {
