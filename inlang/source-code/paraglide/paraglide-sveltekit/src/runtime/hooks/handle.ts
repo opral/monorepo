@@ -5,6 +5,7 @@ import { negotiateLanguagePreferences } from "@inlang/paraglide-js/internal/adap
 import { base } from "$app/paths"
 import { dev } from "$app/environment"
 import type { RoutingStrategy } from "../strategy.js"
+import type { ParaglideLocals } from "../locals.js"
 
 const LANG_COOKIE_NAME = "paraglide:lang"
 
@@ -95,10 +96,14 @@ export const createHandle = <T extends string>(
 
 		const textDirection = i18n.textDirection[lang as T] ?? "ltr"
 
-		event.locals.paraglide = {
+		const paraglideLocals: ParaglideLocals<T> = {
 			lang,
 			textDirection,
 		}
+
+		// @ts-expect-error
+		// The user needs to have the ParaglideLocals type in their app.d.ts file
+		event.locals.paraglide = paraglideLocals
 
 		return resolve(event, {
 			transformPageChunk({ html, done }) {
@@ -129,14 +134,3 @@ export const createHandle = <T extends string>(
 	}
 }
 
-declare global {
-	// eslint-disable-next-line @typescript-eslint/no-namespace
-	namespace App {
-		interface Locals {
-			paraglide: {
-				lang: string
-				textDirection: "ltr" | "rtl"
-			}
-		}
-	}
-}
