@@ -90,11 +90,13 @@ export async function writeJSON(args: {
 	debug("saveall", args.filePath)
 	try {
 		await createDirectoryIfNotExits(getDirname(args.filePath), args.nodeishFs)
-		await args.nodeishFs.writeFile(
-			args.filePath,
-			// 2 spaces indentation
-			JSON.stringify(args.messages.map(normalizeMessageBundle), undefined, 2)
-		)
+		const output = JSON.stringify(args.messages.map(normalizeMessageBundle))
+			// inject newlines between messages and bundles to improve git conflict resolution
+			.replace(/"\}\]\}\]\}\]\},\{"id":"/g, '"}]}]}\n\n\n\n]},\n\n\n\n{"id":"')
+			.replace(/"\}\]\}\]\}\]\}]/, '"}]}]}\n\n\n\n]}]')
+			.replace(/"messages":\[\{"locale":"/g, '"messages":[\n\n\n\n{"locale":"')
+			.replace(/\}\]\}\]\},\{"locale":"/g, '}]}]}\n\n\n\n,\n\n\n\n{"locale":"')
+		await args.nodeishFs.writeFile(args.filePath, output)
 	} catch (error) {
 		debug("saveMessages", error)
 		throw error
