@@ -1,14 +1,37 @@
 import type { Repository } from "@lix-js/client"
 import type { Logger } from "@inlang/paraglide-js/internal"
-import type { CliStep } from "../utils.js"
+import { findFile, type CliStep } from "../utils.js"
 
-export const updateAppTypes: CliStep<
+export const addTypesForLocals: CliStep<
 	{
 		repo: Repository
 		logger: Logger
 	},
 	unknown
 > = async (ctx) => {
+	const appDTsFilePath = await findFile({
+		base: process.cwd(),
+		candidates: ["./src/app.d.ts"],
+		fs: ctx.repo.nodeishFs,
+	})
+
+	if (!appDTsFilePath) {
+		ctx.logger.warn("Could not find the app.d.ts file. Please add it manually.")
+		return ctx
+	}
+
+	const content = await ctx.repo.nodeishFs.readFile(appDTsFilePath, { encoding: "utf-8" })
+	const result = updateAppDTsFile(content)
+	if (result.ok) {
+		await ctx.repo.nodeishFs.writeFile(appDTsFilePath, result.updated)
+
+		ctx.logger.success("Added Language Provider to src/routes/+layout.svelte")
+	} else {
+		ctx.logger.warn(
+			"Failed to add the ParaglideLocals type to the app.d.ts file. Please add it manually."
+		)
+	}
+
 	return ctx
 }
 
