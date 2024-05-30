@@ -20,16 +20,14 @@ export {}`
 		expect(result.ok).toBe(true)
 		expect(result.updated).toMatchInlineSnapshot(`
 			"import type { AvailableLanguageTag } from \\"$lib/paraglide/runtime\\"
+			import type { ParaglideLocals } from \\"@inlang/paraglide-sveltekit\\"
 			// See https://kit.svelte.dev/docs/types#app
 			// for information about these interfaces
 			declare global {
 				namespace App {
 					// interface Error {}
 					 interface Locals {
-			    paraglide: {
-			        lang: AvailableLanguageTag,
-			        textDirection: 'ltr' | 'rtl'
-			    },
+			    paraglide: ParaglideLocals<AvailableLanguageTag>,
 			}
 					// interface PageData {}
 					// interface Platform {}

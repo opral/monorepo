@@ -29,11 +29,15 @@ type UpdateResult =
  */
 export function updateAppDTsFile(code: string): UpdateResult {
 	// add the type import
-	if (code.includes("AvailableLanguageTag")) {
+	if (code.includes("AvailableLanguageTag") || code.includes("ParaglideLocals")) {
 		return { ok: false, reason: "Paraglide types already present" }
 	}
 
-	code = 'import type { AvailableLanguageTag } from "$lib/paraglide/runtime"\n' + code
+	code = [
+		'import type { AvailableLanguageTag } from "$lib/paraglide/runtime"',
+		'import type { ParaglideLocals } from "@inlang/paraglide-sveltekit"',
+		code,
+	].join("\n")
 
 	const LocalsInterfaceRegex = /interface\s+Locals\s*\{/g
 	const match = LocalsInterfaceRegex.exec(code)
@@ -50,9 +54,7 @@ export function updateAppDTsFile(code: string): UpdateResult {
 	beforeLines[beforeLines.length - 1] = beforeLines.at(-1)?.replace("//", "") || ""
 
 	code =
-		beforeLines.join("\n") +
-		"\n    paraglide: {\n        lang: AvailableLanguageTag,\n        textDirection: 'ltr' | 'rtl'\n    },\n" +
-		after
+		beforeLines.join("\n") + "\n    paraglide: ParaglideLocals<AvailableLanguageTag>,\n" + after
 
 	return {
 		ok: true,
