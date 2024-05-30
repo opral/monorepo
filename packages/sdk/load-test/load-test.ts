@@ -117,11 +117,10 @@ export async function runLoadTest(
 	if (translate) {
 		debug("translating messages with inlang cli")
 		await run(translateCommand)
-	}
-
-	if (isV2) {
-		await project.store?.messageBundles.reload()
-		await summarize("translated", project)
+		if (isV2) {
+			await project.store?.messageBundles.reload()
+			await summarize("translated", project)
+		}
 	}
 
 	debug("load-test done - " + (watchMode ? "watching for events" : "exiting"))
