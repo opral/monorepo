@@ -12,19 +12,22 @@ export function batchedIO(
 	releaseLock: (lock: number) => Promise<void>,
 	save: () => Promise<void>
 ): (id: string) => Promise<string> {
+	// 3-state machine
 	let state: "idle" | "acquiring" | "saving" = "idle"
 
+	// Hold requests while acquiring, resolve after saving
+	// TODO: rejectQueued if save throws (maybe?)
 	type Queued = {
 		id: string
 		resolve: (value: string) => void
 		reject: (reason: any) => void
 	}
-
-	// todo: rejectQueued if save throws
 	const queue: Queued[] = []
 
+	// initialize nextBatch lazily, reset after saving
 	let nextBatch: ((id: string) => Promise<string>) | undefined = undefined
 
+	// batched save function
 	return async (id: string) => {
 		if (state === "idle") {
 			state = "acquiring"
@@ -33,19 +36,18 @@ export function batchedIO(
 			await save()
 			await releaseLock(lock)
 			resolveQueued()
+			nextBatch = undefined
 			state = "idle"
 			return id
-		}
-
-		if (state === "acquiring") {
+		} else if (state === "acquiring") {
 			return new Promise<string>((resolve, reject) => {
 				queue.push({ id, resolve, reject })
 			})
+		} else {
+			// state === "saving"
+			nextBatch = nextBatch ?? batchedIO(acquireLock, releaseLock, save)
+			return await nextBatch(id)
 		}
-
-		// state === "saving"
-		nextBatch = nextBatch ?? batchedIO(acquireLock, releaseLock, save)
-		return await nextBatch(id)
 	}
 
 	function resolveQueued() {
@@ -54,6 +56,5 @@ export function batchedIO(
 			resolve(id)
 		}
 		queue.length = 0
-		nextBatch = undefined
 	}
 }
