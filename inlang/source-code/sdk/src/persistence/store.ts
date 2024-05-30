@@ -3,7 +3,7 @@ import { normalizeMessageBundle } from "../v2/createMessageBundle.js"
 import { getDirname, type NodeishFilesystem } from "@lix-js/fs"
 import { acquireFileLock } from "./filelock/acquireFileLock.js"
 import { releaseLock } from "./filelock/releaseLock.js"
-import { throttle } from "throttle-debounce"
+import { batchedIO } from "./batchedIO.js"
 import type { StoreApi } from "./storeApi.js"
 
 import _debug from "debug"
@@ -17,12 +17,11 @@ export async function openStore(args: {
 	const filePath = args.projectPath + "/messages.json"
 	const lockDirPath = args.projectPath + "/messagelock"
 
-	// save to disk at most once per second
-	const throttledSave = throttle(500, save)
-
 	// the index holds the in-memory state
 	// TODO: reload when file changes on disk
 	let index = await load()
+
+	const batchedSave = batchedIO(acquireSaveLock, releaseSaveLock, save)
 
 	return {
 		messageBundles: {
@@ -35,11 +34,11 @@ export async function openStore(args: {
 			},
 			set: async (args: { data: MessageBundle }) => {
 				index.set(args.data.id, args.data)
-				await throttledSave()
+				await batchedSave(args.data.id)
 			},
 			delete: async (args: { id: string }) => {
 				index.delete(args.id)
-				await throttledSave()
+				await batchedSave(args.id)
 			},
 			getAll: async () => {
 				return [...index.values()]
@@ -56,10 +55,14 @@ export async function openStore(args: {
 		await releaseLock(nodeishFs, lockDirPath, "load", lockTime)
 		return index
 	}
+	async function acquireSaveLock() {
+		return await acquireFileLock(nodeishFs, lockDirPath, "save")
+	}
+	async function releaseSaveLock(lock: number) {
+		return await releaseLock(nodeishFs, lockDirPath, "save", lock)
+	}
 	async function save() {
-		const lockTime = await acquireFileLock(nodeishFs, lockDirPath, "save")
 		await writeJSON({ filePath, nodeishFs: nodeishFs, messages: [...index.values()] })
-		await releaseLock(nodeishFs, lockDirPath, "load", lockTime)
 	}
 }
 
