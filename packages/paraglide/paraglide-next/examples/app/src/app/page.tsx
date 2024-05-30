@@ -1,6 +1,8 @@
+import { sharedData } from "@/lib/data/shared"
 import * as m from "@/paraglide/messages.js"
 
 export default function Home() {
+	console.info("sharedData.locale server", sharedData.locale)
 	return (
 		<>
 			<h1>{m.paraglide_and_next_app_router()}</h1>
