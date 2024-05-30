@@ -154,7 +154,7 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 			bar?.increment()
 		}
 		// parallelize rpcTranslate calls with a limit of 100 concurrent calls
-		const limit = plimit(100)
+		const limit = plimit(process.env.MOCK_TRANSLATE_LOCAL ? 100000 : 100)
 		const promises = filteredMessages.map((message) => limit(() => rpcTranslate(message)))
 		await Promise.all(promises)
 
@@ -233,5 +233,6 @@ async function mockMachineTranslateMessage(args: {
 			// console.log("mockMachineTranslateMessage translated", q, targetLanguageTag)
 		}
 	}
+	await new Promise((resolve) => setTimeout(resolve, 100))
 	return { data: copy }
 }
