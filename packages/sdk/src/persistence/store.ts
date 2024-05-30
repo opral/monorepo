@@ -1,5 +1,5 @@
 import type { MessageBundle } from "../v2/types.js"
-import { normalizeMessageBundle } from "../v2/createMessageBundle.js"
+import { addSlots, removeSlots, injectJSONNewlines } from "../v2/createMessageBundle.js"
 import { getDirname, type NodeishFilesystem } from "@lix-js/fs"
 import { acquireFileLock } from "./filelock/acquireFileLock.js"
 import { releaseLock } from "./filelock/releaseLock.js"
@@ -12,6 +12,7 @@ const debug = _debug("sdk:store")
 export async function openStore(args: {
 	projectPath: string
 	nodeishFs: NodeishFilesystem
+	locales: string[]
 }): Promise<StoreApi> {
 	const nodeishFs = args.nodeishFs
 	const filePath = args.projectPath + "/messages.json"
@@ -62,7 +63,12 @@ export async function openStore(args: {
 		return await releaseLock(nodeishFs, lockDirPath, "save", lock)
 	}
 	async function save() {
-		await writeJSON({ filePath, nodeishFs: nodeishFs, messages: [...index.values()] })
+		await writeJSON({
+			filePath,
+			nodeishFs: nodeishFs,
+			messages: [...index.values()],
+			locales: args.locales,
+		})
 	}
 }
 
@@ -79,23 +85,21 @@ export async function readJSON(args: { filePath: string; nodeishFs: NodeishFiles
 			throw error
 		}
 	}
-	return result
+	return result.map(removeSlots)
 }
 
 export async function writeJSON(args: {
 	filePath: string
 	nodeishFs: NodeishFilesystem
 	messages: MessageBundle[]
+	locales: string[]
 }) {
 	debug("saveall", args.filePath)
 	try {
 		await createDirectoryIfNotExits(getDirname(args.filePath), args.nodeishFs)
-		const output = JSON.stringify(args.messages.map(normalizeMessageBundle))
-			// inject newlines between messages and bundles to improve git conflict resolution
-			.replace(/"\}\]\}\]\}\]\},\{"id":"/g, '"}]}]}\n\n\n\n]},\n\n\n\n{"id":"')
-			.replace(/"\}\]\}\]\}\]\}]/, '"}]}]}\n\n\n\n]}]')
-			.replace(/"messages":\[\{"locale":"/g, '"messages":[\n\n\n\n{"locale":"')
-			.replace(/\}\]\}\]\},\{"locale":"/g, '}]}]}\n\n\n\n,\n\n\n\n{"locale":"')
+		const output = injectJSONNewlines(
+			JSON.stringify(args.messages.map((bundle) => addSlots(bundle, args.locales)))
+		)
 		await args.nodeishFs.writeFile(args.filePath, output)
 	} catch (error) {
 		debug("saveMessages", error)
