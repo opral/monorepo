@@ -1,5 +1,18 @@
 # @inlang/paraglide-sveltekit
 
+## 0.9.0
+
+### Minor Changes
+
+- 76e7f20: Add the `ParaglideLocals` interface for properly typing paraglide's locals. It should be added in `app.d.ts` under `Locals.paraglide`. The `init` CLI will do this automatically
+- 8db2224: Previously, if the default language was available on the root `/`, then it would still be available under `/[lang]`. This was never intended & no longer the case.
+
+  If you still want this behavior set the `prefixDefaultLanguage` to `"always"` in your `i18n` config.
+
+### Patch Changes
+
+- 6319391: Fix: Excluded routes now use the default language instead of incorrecly attempting to detect the language form the URL
+
 ## 0.8.7
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # @inlang/paraglide-next
 
+## 0.3.1
+
+### Patch Changes
+
+- e621901: Add a better error message when trying to use messages/languageTag inside top-level variables.
+- 60d3d5e: fix langauge switches when escaped characters are used in the URL
+
 ## 0.3.0
 
 ### Minor Changes
