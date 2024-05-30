@@ -8,26 +8,15 @@ export const multipleMatcherBundle: MessageBundle = {
 	messages: [
 		{
 			locale: "en",
-			declarations: [
-				{
-					type: "input",
-					name: "username",
-					value: {
-						type: "expression",
-						arg: {
-							type: "variable",
-							name: "username",
-						},
-					},
-				},
-			],
+			declarations: [],
 			selectors: [
 				{
 					type: "expression",
 					arg: {
 						type: "variable",
-						name: "count: plural",
+						name: "count",
 					},
+					annotation: { type: "function", name: "plural", options: [] },
 				},
 			],
 			variants: [
@@ -36,7 +25,18 @@ export const multipleMatcherBundle: MessageBundle = {
 					pattern: [
 						{
 							type: "text",
-							value: "Show {count} message.",
+							value: "Show ",
+						},
+						{
+							type: "expression",
+							arg: {
+								type: "variable",
+								name: "count",
+							},
+						},
+						{
+							type: "text",
+							value: " message.",
 						},
 					],
 				},
@@ -45,7 +45,18 @@ export const multipleMatcherBundle: MessageBundle = {
 					pattern: [
 						{
 							type: "text",
-							value: "Show {count} messages.",
+							value: "Show ",
+						},
+						{
+							type: "expression",
+							arg: {
+								type: "variable",
+								name: "count",
+							},
+						},
+						{
+							type: "text",
+							value: " messages.",
 						},
 					],
 				},
@@ -54,7 +65,14 @@ export const multipleMatcherBundle: MessageBundle = {
 					pattern: [
 						{
 							type: "text",
-							value: "Show {count}",
+							value: "Show ",
+						},
+						{
+							type: "expression",
+							arg: {
+								type: "variable",
+								name: "count",
+							},
 						},
 					],
 				},
@@ -62,33 +80,23 @@ export const multipleMatcherBundle: MessageBundle = {
 		},
 		{
 			locale: "de",
-			declarations: [
-				{
-					type: "input",
-					name: "username",
-					value: {
-						type: "expression",
-						arg: {
-							type: "variable",
-							name: "username",
-						},
-					},
-				},
-			],
+			declarations: [],
 			selectors: [
 				{
 					type: "expression",
 					arg: {
 						type: "variable",
-						name: "count: plural",
+						name: "count",
 					},
+					annotation: { type: "function", name: "plural", options: [] },
 				},
 				{
 					type: "expression",
 					arg: {
 						type: "variable",
-						name: "formal: bool",
+						name: "formal",
 					},
+					annotation: { type: "function", name: "bool", options: [] },
 				},
 			],
 			variants: [
@@ -115,7 +123,7 @@ export const multipleMatcherBundle: MessageBundle = {
 					pattern: [
 						{
 							type: "text",
-							value: "Zeigen Sie bitte Ihre {count} ",
+							value: "Zeigen Sie bitte Ihre ",
 						},
 						{
 							type: "expression",
