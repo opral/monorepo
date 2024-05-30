@@ -4,9 +4,12 @@ import type { MessageBundle } from "../v2/types.js"
 import {
 	createMessageBundle,
 	createMessage,
-	normalizeMessageBundle,
+	injectJSONNewlines,
+	addSlots,
 } from "../v2/createMessageBundle.js"
 import { openStore, readJSON, writeJSON } from "./store.js"
+
+const locales = ["en", "de"]
 
 const mockMessages: MessageBundle[] = [
 	createMessageBundle({
@@ -27,13 +30,13 @@ const mockMessages: MessageBundle[] = [
 	}),
 ]
 
-// skio while working on newline injection in writeJSON
-// TODO: remove .skip
-test.skip("roundtrip readJSON/writeJSON", async () => {
+test("roundtrip readJSON/writeJSON", async () => {
 	const nodeishFs = createNodeishMemoryFs()
 	const projectPath = "/test/project.inlang"
 	const filePath = projectPath + "/messages.json"
-	const persistedMessages = JSON.stringify(mockMessages.map(normalizeMessageBundle), undefined, 2)
+	const persistedMessages = injectJSONNewlines(
+		JSON.stringify(mockMessages.map((bundle) => addSlots(bundle, locales)))
+	)
 
 	await nodeishFs.mkdir(projectPath, { recursive: true })
 	await nodeishFs.writeFile(filePath, persistedMessages)
@@ -49,6 +52,7 @@ test.skip("roundtrip readJSON/writeJSON", async () => {
 		filePath,
 		nodeishFs,
 		messages: firstMessageLoad,
+		locales,
 	})
 
 	const afterRoundtrip = await nodeishFs.readFile(filePath, { encoding: "utf-8" })
@@ -67,12 +71,12 @@ test("openStore does minimal CRUD on messageBundles", async () => {
 	const nodeishFs = createNodeishMemoryFs()
 	const projectPath = "/test/project.inlang"
 	const filePath = projectPath + "/messages.json"
-	const persistedMessages = JSON.stringify(mockMessages.map(normalizeMessageBundle), undefined, 2)
+	const persistedMessages = JSON.stringify(mockMessages)
 
 	await nodeishFs.mkdir(projectPath, { recursive: true })
 	await nodeishFs.writeFile(filePath, persistedMessages)
 
-	const store = await openStore({ projectPath, nodeishFs })
+	const store = await openStore({ projectPath, nodeishFs, locales })
 
 	const messages = await store.messageBundles.getAll()
 	expect(messages).toStrictEqual(mockMessages)
@@ -88,8 +92,8 @@ test("openStore does minimal CRUD on messageBundles", async () => {
 	const setMessageBundle = await store.messageBundles.get({ id: "first_message" })
 	expect(setMessageBundle).toStrictEqual(modifedMessageBundle)
 
-	// wait for throttled save to complete
-	await sleep(1000)
+	// no need to sleep here
+	// with batchedIO, the set should await until the write is done
 	const messagesAfterRoundtrip = await readJSON({
 		filePath,
 		nodeishFs,
@@ -101,7 +105,3 @@ test("openStore does minimal CRUD on messageBundles", async () => {
 	const messagesAfterDelete = await store.messageBundles.getAll()
 	expect(messagesAfterDelete).toStrictEqual(mockMessages.slice(1))
 })
-
-function sleep(ms: number) {
-	return new Promise((resolve) => setTimeout(resolve, ms))
-}

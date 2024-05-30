@@ -2,12 +2,13 @@
 /* eslint-disable no-restricted-imports */
 
 import { findRepoRoot, openRepository } from "@lix-js/client"
-import { loadProject, type InlangProject, type Message } from "@inlang/sdk"
+import { loadProject, type InlangProject, type Message, type ProjectSettings } from "@inlang/sdk"
 
 import {
 	createMessage,
 	createMessageBundle,
-	normalizeMessageBundle,
+	addSlots,
+	injectJSONNewlines,
 } from "../src/v2/createMessageBundle.js"
 import { MessageBundle } from "../src/v2/types.js"
 
@@ -42,8 +43,10 @@ export async function runLoadTest(
 	subscribeToLintReports: boolean = false,
 	watchMode: boolean = false
 ) {
+	const settings = await getSettings()
 	// experimental persistence uses v2 types
-	const isV2 = await checkExperimentalPersistence()
+	const isV2 = !!settings.experimental?.persistence
+	const locales = settings.languageTags
 	debug(
 		"load-test start" +
 			(watchMode ? " - watchMode on, ctrl C to exit" : "") +
@@ -63,7 +66,7 @@ export async function runLoadTest(
 
 	debug(`generating ${messageCount} messages`)
 	// this is called before loadProject() to avoid reading partially written JSON
-	await generateMessageFile(isV2, messageCount)
+	await generateMessageFile(isV2, messageCount, locales)
 
 	debug("opening repo and loading project")
 	const repoRoot = await findRepoRoot({ nodeishFs: fs, path: __dirname })
@@ -144,7 +147,7 @@ async function summarize(action: string, project: InlangProject) {
 	debug(`${action}: ${bundleCount} bundles, ${messageCount / bundleCount} messages/bundle`)
 }
 
-async function generateMessageFile(isV2: boolean, messageCount: number) {
+async function generateMessageFile(isV2: boolean, messageCount: number, locales: string[]) {
 	if (isV2) {
 		const messageFile = join(__dirname, "project.inlang", "messages.json")
 
@@ -157,11 +160,10 @@ async function generateMessageFile(isV2: boolean, messageCount: number) {
 				})
 			)
 		}
-		await fs.writeFile(
-			messageFile,
-			JSON.stringify(messages.map(normalizeMessageBundle), undefined, 2),
-			"utf-8"
+		const output = injectJSONNewlines(
+			JSON.stringify(messages.map((bundle) => addSlots(bundle, locales)))
 		)
+		await fs.writeFile(messageFile, output, "utf-8")
 	} else {
 		const messageDir = join(__dirname, "locales", "en")
 		const messageFile = join(__dirname, "locales", "en", "common.json")
@@ -175,10 +177,10 @@ async function generateMessageFile(isV2: boolean, messageCount: number) {
 	}
 }
 
-async function checkExperimentalPersistence() {
+async function getSettings() {
 	const settingsFile = join(__dirname, "project.inlang", "settings.json")
 	const settings = JSON.parse(await fs.readFile(settingsFile, "utf-8"))
-	return !!settings.experimental?.persistence
+	return settings as ProjectSettings
 }
 
 async function isMockRpcServerRunning(): Promise<boolean> {

@@ -91,6 +91,7 @@ export async function loadProject(args: {
 
 		const [settings, _setSettings] = createSignal<ProjectSettings>()
 		let v2Persistence = false
+		let locales: string[] = []
 
 		createEffect(() => {
 			// TODO:
@@ -120,6 +121,7 @@ export async function loadProject(args: {
 			try {
 				const validatedSettings = parseSettings(settings)
 				v2Persistence = !!validatedSettings.experimental?.persistence
+				locales = validatedSettings.languageTags
 
 				batch(() => {
 					// reset the resolved modules first - since they are no longer valid at that point
@@ -216,7 +218,7 @@ export async function loadProject(args: {
 			messagesQuery = stubMessagesQuery
 			lintReportsQuery = stubMessageLintReportsQuery
 			try {
-				store = await openStore({ projectPath, nodeishFs })
+				store = await openStore({ projectPath, nodeishFs, locales })
 				markInitAsComplete()
 			} catch (e) {
 				markInitAsFailed(e)
