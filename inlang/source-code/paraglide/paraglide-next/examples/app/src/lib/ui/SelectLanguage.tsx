@@ -1,6 +1,8 @@
 "use client"
 import { availableLanguageTags, AvailableLanguageTag, languageTag } from "@/paraglide/runtime"
 import { usePathname, useRouter } from "@/lib/i18n"
+import { sharedData } from "../data/shared"
+import { headers } from "next/headers"
 
 export function SelectLanguage() {
 	const pathname = usePathname()
@@ -11,6 +13,8 @@ export function SelectLanguage() {
 		de: "🇩🇪 Deutsch",
 		"de-CH": "🇨🇭 Schweizerdeutsch",
 	}
+
+	console.info("sharedData.locale client", sharedData.locale)
 
 	return (
 		<select
