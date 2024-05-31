@@ -153,6 +153,28 @@ it("should work on a production JSX example", async () => {
 	expect(matches[2]?.messageId).toBe("421.message")
 })
 
+it("should add the defined namespace by useTranslations/getTranslaton hook", async () => {
+	const sourceCode = `
+		import { getTranslations } from "next-intl/server";
+
+		export const C1 = async () => {
+			const t = await getTranslations("/cart");
+			return t("empty.title");
+		};
+		export const C2 = async () => {
+			const t = await getTranslations("/product");
+			return t("page.imagesTitle");
+		};
+	`
+	const settings: PluginSettings = {
+		pathPattern: "./{language}.json",
+	}
+	const matches = parse(sourceCode, settings)
+	expect(matches).toHaveLength(2)
+	expect(matches[0]?.messageId).toBe("/cart.empty.title")
+	expect(matches[1]?.messageId).toBe("/product.page.imagesTitle")
+})
+
 it("should add the defined namespace by useTranslations hook", async () => {
 	const sourceCode = `
 		const { t } = useTranslations("login");
