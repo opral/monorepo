@@ -7,12 +7,11 @@ description: Learn how the localised routing works in Paraglide-SvelteKit, how t
 
 ### Translated Paths
 
+You can have different paths for each language with the `pathnames` option. Don't include the language or the [base path](https://kit.svelte.dev/docs/configuration#paths).
+
 - `/about` for English (default language)
 - `/de/uber-uns` for German
 - `/fr/a-propos` for French
-
-You can have different paths for each language with the `pathnames` option. 
-Don't include the language or the [base path](https://kit.svelte.dev/docs/configuration#paths).
 
 ```js
 import { createI18n } from "@inlang/paraglide-sveltekit"
@@ -35,7 +34,7 @@ export const i18n = createI18n(runtime, {
 			de: "/benutzer/[id=int]/[...rest]",
 			fr: "/utilisateur/[id=int]/[...rest]",
 		},
-		// Instead of a map, you can also pass a message-function
+		// Instead of a map, you can also pass a message-function reference
 		"/admin" : m.admin_path
 	}
 
@@ -81,7 +80,6 @@ export const i18n = createI18n(runtime, {
 	defaultLanguageTag: "de",
 })
 ```
-
 
 ## Automatic Link Localisation
 
@@ -174,3 +172,23 @@ Use this to create a language switcher.
 	</a>
 {/each}
 ```
+
+## Default Language Handling	
+
+By default all languages except the default language are available under `/[lang]`, wheras the default language is available at the root `/`.	
+
+If you also want the default language to have a language prefix set `prefixDefaultLanguage: "always"`	
+
+## Language Negotiation	
+
+If you navigate to a route where the language is not obvious from the URL, Paraglide-Sveltekit will perform language negotiation.	
+
+For example, navigating to `/` when `prefixDefaultLanguage: "always"` is set would trigger language negotiation.	
+
+Negotiation works in these steps:	
+1. Try to get the language from the URL	
+2. Read the `paraglide:lang` cookie to restore the language from a previous session	
+3. Negotiate based on the `accept-language` header	
+4. Use the default language	
+
+After negotiation you will be redirected to the path with the language in the URL.
