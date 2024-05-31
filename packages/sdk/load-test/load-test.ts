@@ -9,7 +9,7 @@ import {
 	createMessageBundle,
 	addSlots,
 	injectJSONNewlines,
-} from "../src/v2/createMessageBundle.js"
+} from "../src/v2/helper.js"
 import { MessageBundle } from "../src/v2/types.js"
 
 import { createEffect } from "../src/reactivity/solid.js"

@@ -1,5 +1,5 @@
 import type { MessageBundle } from "../v2/types.js"
-import { addSlots, removeSlots, injectJSONNewlines } from "../v2/createMessageBundle.js"
+import { addSlots, removeSlots, injectJSONNewlines } from "../v2/helper.js"
 import { getDirname, type NodeishFilesystem } from "@lix-js/fs"
 import { acquireFileLock } from "./filelock/acquireFileLock.js"
 import { releaseLock } from "./filelock/releaseLock.js"
