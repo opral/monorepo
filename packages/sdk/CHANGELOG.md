@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 0.35.6
+
+### Patch Changes
+
+- 9d2aa1a: v2 message bundle persistence - initial store implementation
+
 ## 0.35.5
 
 ### Patch Changes
