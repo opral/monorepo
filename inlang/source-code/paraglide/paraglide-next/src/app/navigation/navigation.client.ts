@@ -27,8 +27,7 @@ export const Navigation = <T extends string>({ strategy }: { strategy: RoutingSt
 	 * Get the router methods. For example router.push('/dashboard')
 	 */
 	const useRouter = () => {
-		const nextRouter = NextNavigation.useRouter()
-		const searchParams = NextNavigation.useSearchParams()
+		const nextRouter = useNextNavigationRouter()
 		const canonicalCurrentPathname = usePathname()
 
 		type NavigateOptions = Parameters<(typeof nextRouter)["push"]>[1]
