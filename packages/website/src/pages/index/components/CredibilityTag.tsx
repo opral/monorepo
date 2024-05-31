@@ -1,13 +1,18 @@
-const CredibilityTag = (props: { projectCount: number }) => {
+import * as m from "#src/paraglide/messages.js"
+
+const CredibilityTag = (props: { projectCount: string }) => {
 	return (
 		<div class="flex items-center gap-3 mt-8 bg-background pr-4 pl-1.5 py-1 rounded-full text-sm font-medium w-fit border shadow border-surface-300 text-surface-600">
 			<div class="flex justify-center items-center w-8 h-8 bg-surface-100 rounded-full">
 				<TrophyIcon />
 			</div>
-			<p>
-				Used in more than{" "}
-				<span class="font-bold text-surface-900">{` ${props.projectCount} `}</span> projects
-			</p>
+			<p
+				// eslint-disable-next-line solid/no-innerhtml
+				innerHTML={markNumberAsBold(
+					m.home_credibility_tag_text({ count: props.projectCount }),
+					props.projectCount
+				)}
+			/>
 		</div>
 	)
 }
@@ -23,4 +28,15 @@ function TrophyIcon() {
 			/>
 		</svg>
 	)
+}
+
+function markNumberAsBold(completeString: string, number: string) {
+	if (number && typeof number === "number") {
+		return completeString.replace(
+			number,
+			`<span class="font-bold text-surface-900">${number}</span>`
+		)
+	} else {
+		return completeString
+	}
 }
