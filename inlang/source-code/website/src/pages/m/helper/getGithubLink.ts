@@ -32,6 +32,9 @@ export const getGithubLink = (manifest: MarketplaceManifest, currentRoute: strin
 			const rest = link.replace("https://cdn.jsdelivr.net/gh/", "").split("/").slice(2).join("/")
 
 			return `https://github.com/${owner}/${repo}/blob/main/${rest}`
+		} else if (link?.includes("https://cdn.jsdelivr.net/npm/")) {
+			// with npm link it is likey not a public repo
+			return undefined
 		}
 	}
 
