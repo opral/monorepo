@@ -1,8 +1,13 @@
+---
+title: Localised Routing
+description: Learn how the localised routing works in Paraglide-SvelteKit, how to use translated pathnames and how to do language negotiation.
+---
+
 # Localised Routing
 
 ### Translated Paths
 
-- `/en/about` for English
+- `/about` for English (default language)
 - `/de/uber-uns` for German
 - `/fr/a-propos` for French
 
@@ -38,6 +43,45 @@ export const i18n = createI18n(runtime, {
 	matchers: { int	}
 })
 ```
+
+By default the default language is located on your base path. Usually `/`. Unlike the other languages it does not have a language prefix. 
+
+This reflects the default `prefixDefaultLanugage: "never"` behavior.
+
+If you want to also have a prefix for the default language, use the `prefixDefaultLanugage: "always"` option.
+
+```ts
+export const i18n = createI18n(runtime, {
+	prefixDefaultLanguage: "always",
+})
+```
+
+This does make it ambigous which language should be used on `/` so language negotiation will kick in.
+
+### Language Negotiation
+
+Whenever the language cannot be determined from the URL alone the language negotiation is triggered. This happens in the following steps:
+
+1. Check if the `paraglide:lang` cookie is set from previous visits, if so, use it
+2. Negotiate the language from the `Accept-Language` header
+3. Use the default language
+
+After language negotiation you will be redirected to include the language in the URL.
+
+### Changing the default Language
+
+Usually your default language is the same as the `sourceLanguageTag` of your Inlang Project, but it doesn't have to be.
+
+You can change it by passing a `defaultLanguageTag` option to `createI18n`
+
+```ts
+// sourceLanguageTag = "en"
+
+export const i18n = createI18n(runtime, {
+	defaultLanguageTag: "de",
+})
+```
+
 
 ## Automatic Link Localisation
 
