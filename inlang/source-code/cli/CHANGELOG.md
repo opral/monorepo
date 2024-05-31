@@ -1,5 +1,27 @@
 # @inlang/cli
 
+## 2.18.0
+
+### Minor Changes
+
+- 2806698: force release cli, as it was missing from the changeset targets for some reason
+
+## 2.17.0
+
+### Minor Changes
+
+- 3896fe6: fix: move dependencies to dev dependencies to avoid "unpublished dependency" issues
+
+## 2.16.10
+
+### Patch Changes
+
+- Updated dependencies [00ad046]
+- Updated dependencies [00ad046]
+  - @lix-js/fs@2.0.0
+  - @lix-js/client@2.0.0
+  - @inlang/sdk@0.35.1
+
 ## 2.16.9
 
 ### Patch Changes

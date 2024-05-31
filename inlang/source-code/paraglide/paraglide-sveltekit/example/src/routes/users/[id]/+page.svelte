@@ -1,7 +1,7 @@
 <script>
 	import { page } from "$app/stores"
     import { base, resolveRoute } from "$app/paths"
-    import * as m from "$paraglide/messages.js"
+    import * as m from "$lib/paraglide/messages.js"
 
     const totalUsers = 10;
 

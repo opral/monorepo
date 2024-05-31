@@ -34,7 +34,8 @@
 		"kkfjusgu": "./inlang/external-projects/svelte-i18n/marketplace-manifest.json",
 		"92fst3wd": "./inlang/source-code/globelens/marketplace-manifest.json",
 		"193hsyds": "./inlang/source-code/plugins/next-intl/marketplace-manifest.json",
-		"fnhuwzrx": "./inlang/external-projects/remix-paraglidejs/marketplace-manifest.json"
+		"fnhuwzrx": "./inlang/external-projects/remix-paraglidejs/marketplace-manifest.json",
+		"neh2d6w7": "https://cdn.jsdelivr.net/npm/inlang-plugin-xcstrings@latest/marketplace-manifest.json"
 	},
 	"g": {
 		"mqlyfa7l": "./inlang/guides/dont-lazy-load/marketplace-manifest.json",

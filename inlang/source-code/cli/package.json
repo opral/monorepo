@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/cli",
-	"version": "2.16.9",
+	"version": "2.18.0",
 	"private": false,
 	"publishConfig": {
 		"access": "public"
@@ -59,18 +59,18 @@
 		"typescript": "5.2.2",
 		"vitest": "0.34.3",
 		"@inlang/telemetry": "workspace:*",
-		"@inlang/rpc": "workspace:*"
-	},
-	"license": "Apache-2.0",
-	"__comment__": "the esbuild-wasm dependency must be a regular dependency to be resolved by the host system. otherwise, esbuild throws errors",
-	"dependencies": {
-		"esbuild-wasm": "^0.19.2",
-		"fs-extra": "11.1.1",
-		"p-limit": "^5.0.0",
+		"@inlang/rpc": "workspace:*",
 		"@inlang/language-tag": "workspace:*",
 		"@inlang/result": "workspace:*",
 		"@inlang/sdk": "workspace:*",
 		"@lix-js/fs": "workspace:*",
-		"@lix-js/client": "workspace:*"
+		"@lix-js/client": "workspace:*",
+		"fs-extra": "11.1.1",
+		"p-limit": "^5.0.0"
+	},
+	"license": "Apache-2.0",
+	"__comment__": "the esbuild-wasm dependency must be a regular dependency to be resolved by the host system. otherwise, esbuild throws errors",
+	"dependencies": {
+		"esbuild-wasm": "^0.19.2"
 	}
 }

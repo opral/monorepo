@@ -1,5 +1,11 @@
 # @lix-js/server
 
+## 1.2.0
+
+### Minor Changes
+
+- 00ad046: add sgnal handling for mem dump
+
 ## 1.1.5
 
 ### Patch Changes

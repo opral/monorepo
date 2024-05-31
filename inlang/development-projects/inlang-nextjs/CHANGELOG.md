@@ -1,5 +1,25 @@
 # next-js-testapp
 
+## 0.1.20
+
+### Patch Changes
+
+- Updated dependencies [2806698]
+  - @inlang/cli@2.18.0
+
+## 0.1.19
+
+### Patch Changes
+
+- Updated dependencies [3896fe6]
+  - @inlang/cli@2.17.0
+
+## 0.1.18
+
+### Patch Changes
+
+- @inlang/cli@2.16.10
+
 ## 0.1.17
 
 ### Patch Changes

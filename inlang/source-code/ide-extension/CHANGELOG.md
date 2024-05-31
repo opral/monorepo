@@ -1,5 +1,68 @@
 # inlang-vs-code-extension
 
+## 1.44.9
+
+### Patch Changes
+
+- Updated dependencies [64e30ee]
+  - @inlang/sdk@0.35.5
+  - @inlang/rpc@0.3.27
+  - @inlang/settings-component@1.0.22
+  - @inlang/telemetry@0.3.42
+
+## 1.44.8
+
+### Patch Changes
+
+- Updated dependencies [3b2e0a6]
+  - @lix-js/client@2.2.0
+  - @inlang/sdk@0.35.4
+  - @inlang/rpc@0.3.26
+  - @inlang/settings-component@1.0.21
+  - @inlang/telemetry@0.3.41
+
+## 1.44.7
+
+### Patch Changes
+
+- Updated dependencies [548bc9e]
+  - @lix-js/client@2.1.0
+  - @inlang/sdk@0.35.3
+  - @inlang/rpc@0.3.25
+  - @inlang/settings-component@1.0.20
+  - @inlang/telemetry@0.3.40
+
+## 1.44.6
+
+### Patch Changes
+
+- Updated dependencies [4a25124]
+  - @lix-js/fs@2.1.0
+  - @inlang/sdk@0.35.2
+  - @lix-js/client@2.0.1
+  - @inlang/rpc@0.3.24
+  - @inlang/settings-component@1.0.19
+  - @inlang/telemetry@0.3.39
+
+## 1.44.5
+
+### Patch Changes
+
+- 522bd61: add check for number to m function matcher & update vs code settings component
+
+## 1.44.4
+
+### Patch Changes
+
+- Updated dependencies [00ad046]
+- Updated dependencies [00ad046]
+  - @lix-js/fs@2.0.0
+  - @lix-js/client@2.0.0
+  - @inlang/sdk@0.35.1
+  - @inlang/rpc@0.3.23
+  - @inlang/settings-component@1.0.18
+  - @inlang/telemetry@0.3.38
+
 ## 1.44.3
 
 ### Patch Changes

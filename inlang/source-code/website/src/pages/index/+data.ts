@@ -7,51 +7,70 @@ async function data() {
 	try {
 		// prettier-ignore
 		const raw = JSON.stringify({
-			refresh: true,
-			query: {
-				kind: "InsightVizNode",
-				source: {
-					kind: "TrendsQuery",
-					properties: {
-						type: "AND",
-						values: [
-							{
-								type: "AND",
-								values: [
-									{
-										key: "numberOfMessages",
-										type: "event",
-										value: "10",
-										operator: "gt",
-									},
-								],
-							},
-						],
-					},
-					filterTestAccounts: true,
-					dateRange: {
-						date_to: null,
-						date_from: "-30d",
-					},
-					series: [
-						{
-							kind: "EventsNode",
-							event: "SDK loaded project",
-							name: "SDK loaded project",
-							custom_name: "Entire Ecosystem",
-							math: "unique_group",
-							math_group_type_index: 1,
-						},
-					],
-					interval: "month",
-					trendsFilter: {
-						showLegend: false,
-						display: "ActionsLineGraph",
-						showValuesOnSeries: true,
-					},
+			"refresh": true,
+			"query": {
+				"kind": "InsightVizNode",
+				"source": {
+				"kind": "TrendsQuery",
+				"properties": {
+					"type": "AND",
+					"values": [
+					{
+						"type": "AND",
+						"values": []
+					}
+					]
 				},
-				full: true,
-			},
+				"filterTestAccounts": true,
+				"dateRange": {
+					"date_to": null,
+					"date_from": "-180d"
+				},
+				"series": [
+					{
+					"kind": "EventsNode",
+					"event": "IDE-EXTENSION activated",
+					"name": "IDE-EXTENSION activated",
+					"custom_name": "Entire ecosystem",
+					"math": "dau"
+					},
+					{
+					"kind": "EventsNode",
+					"event": "EDITOR clicked in field",
+					"name": "EDITOR clicked in field",
+					"math": "dau"
+					},
+					{
+					"kind": "EventsNode",
+					"event": "SDK loaded project",
+					"name": "SDK loaded project",
+					"properties": [
+						{
+						"key": "appId",
+						"type": "event",
+						"value": [
+							"library.inlang.paraglideJs"
+						],
+						"operator": "exact"
+						}
+					],
+					"math": "unique_group",
+					"math_group_type_index": 1
+					}
+				],
+				"interval": "month",
+				"breakdownFilter": {
+					"breakdown_group_type_index": 1
+				},
+				"trendsFilter": {
+					"showLegend": false,
+					"formula": "A + B + C",
+					"display": "ActionsLineGraphCumulative",
+					"showValuesOnSeries": true
+				}
+				},
+				"full": true
+			}
 		})
 
 		const response = await fetch(
@@ -68,16 +87,20 @@ async function data() {
 			}
 		)
 		const json = await response.json()
-		const number =
-			json.results[0].data[0] > json.results[0].data[1]
-				? json.results[0].data[0]
-				: json.results[0].data[1]
-		return {
-			projectCount: JSON.stringify(number),
+		const number = json.results[0].data.at(-1)
+
+		if (number) {
+			return {
+				projectCount: number,
+			}
+		} else {
+			return {
+				projectCount: "10000+",
+			}
 		}
 	} catch (error) {
 		return {
-			projectCount: "500+",
+			projectCount: "10000+",
 		}
 	}
 }

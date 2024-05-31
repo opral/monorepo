@@ -4,6 +4,56 @@
 
 ### Patch Changes
 
+- @inlang/badge@0.7.32
+- @inlang/plugin-message-format@2.2.0
+- @inlang/rpc@0.3.27
+- @inlang/telemetry@0.3.42
+- @inlang/website@null
+
+## null
+
+### Patch Changes
+
+- @inlang/badge@0.7.31
+- @inlang/website@null
+- @inlang/plugin-message-format@2.2.0
+- @inlang/rpc@0.3.26
+- @inlang/telemetry@0.3.41
+
+## null
+
+### Patch Changes
+
+- @inlang/badge@0.7.30
+- @inlang/website@null
+- @inlang/plugin-message-format@2.2.0
+- @inlang/rpc@0.3.25
+- @inlang/telemetry@0.3.40
+
+## null
+
+### Patch Changes
+
+- @inlang/website@null
+- @inlang/plugin-message-format@2.2.0
+- @inlang/badge@0.7.29
+- @inlang/rpc@0.3.24
+- @inlang/telemetry@0.3.39
+
+## null
+
+### Patch Changes
+
+- @inlang/website@null
+- @inlang/badge@0.7.28
+- @inlang/plugin-message-format@2.2.0
+- @inlang/rpc@0.3.23
+- @inlang/telemetry@0.3.38
+
+## null
+
+### Patch Changes
+
 - @inlang/badge@0.7.27
 - @inlang/plugin-message-format@2.2.0
 - @inlang/rpc@0.3.22

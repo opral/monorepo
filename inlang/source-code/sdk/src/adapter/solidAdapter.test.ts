@@ -222,7 +222,7 @@ describe("messages", () => {
 		// TODO: how can we await `setConfig` correctly
 		await new Promise((resolve) => setTimeout(resolve, 510))
 
-		expect(effectOnMessagesCounter).toBe(3) // 3 = setSetting, loadMessage (2x - one per message)
+		expect(effectOnMessagesCounter).toBe(2) // 2 = setSetting (clearing the message index), subsequencial loadMessage call
 		expect(Object.values(project.query.messages.getAll()).length).toBe(2)
 	})
 

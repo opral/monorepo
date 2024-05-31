@@ -6,19 +6,17 @@
 <script lang="ts" generics="T extends string">
 	import type { I18n } from "./adapter.js"
 	import { page } from "$app/stores"
-	import { browser } from "$app/environment"
+	import { browser, dev } from "$app/environment"
 	import { normaliseBase } from "./utils/normaliseBase.js"
-	import { getPathInfo } from "./utils/get-path-info.js"
+	import { parseRoute, serializeRoute } from "./utils/route.js"
 	import { getHrefBetween } from "./utils/diff-urls.js"
-	import { serializeRoute } from "./utils/serialize-path.js"
 	import { LANGUAGE_CHANGE_INVALIDATION_KEY } from "../constants.js"
 	import { base as maybe_relative_base } from "$app/paths"
 	import { isExternal } from "./utils/external.js"
-	import { getTranslatedPath } from "./path-translations/getTranslatedPath.js"
-	import { translatePath } from "./path-translations/translatePath.js"
 	import { get } from "svelte/store"
 	import { invalidate } from "$app/navigation"
 	import { setParaglideContext } from "./internal/index.js"
+	import AlternateLinks from "./AlternateLinks.svelte"
 
 	// The base path may be relative during SSR.
 	// To make sure it is absolute, we need to resolve it against the current page URL.
@@ -44,48 +42,39 @@
 	$: if (browser) document.documentElement.lang = lang
 	$: if (browser) document.documentElement.dir = i18n.config.textDirection[lang] ?? "ltr"
 
+	// count the number of language changes. 
 	let numberOfLanugageChanges = 0
 	$: if (lang) numberOfLanugageChanges += 1
+
+	// on all but the first language change, invalidate language-dependent data
 	$: if (browser && lang && numberOfLanugageChanges > 1)
 		invalidate(LANGUAGE_CHANGE_INVALIDATION_KEY)
 
-	function translateHref(href: string, hreflang: string | undefined): string {
-		const from = new URL(get(page).url)
-		const original_to = new URL(href, new URL(from))
+	function translateHref(href: string, hreflang: T | undefined): string {
+		try {
+			const from = new URL(get(page).url)
+			const original_to = new URL(href, new URL(from))
 
-		if (isExternal(original_to, from, absoluteBase) || i18n.config.exclude(original_to.pathname))
+			if (isExternal(original_to, from, absoluteBase) || i18n.config.exclude(original_to.pathname))
+				return href
+
+			const targetLanguage = hreflang ?? lang
+			const [canonicalPath, dataSuffix] = parseRoute(original_to.pathname, absoluteBase)
+			const translatedPath = i18n.strategy.getLocalisedPath(canonicalPath, targetLanguage)
+
+			const to = new URL(original_to);
+
+			to.pathname =  serializeRoute(
+				translatedPath,
+				absoluteBase,
+				dataSuffix
+			)
+
+			return getHrefBetween(from, to)
+		} catch (error) {
+			if(dev) console.warn(`[paraglide-sveltekit] Failed to translate the link "${href}"`)
 			return href
-
-		const language = hreflang ?? lang
-
-		const { path: canonicalPath, trailingSlash } = getPathInfo(original_to.pathname, {
-			base: absoluteBase,
-			availableLanguageTags: i18n.config.runtime.availableLanguageTags,
-			defaultLanguageTag: i18n.config.defaultLanguageTag,
-		})
-
-		const translatedPath = getTranslatedPath(
-			canonicalPath,
-			language,
-			i18n.config.translations,
-			i18n.config.matchers
-		)
-
-		const newPathname = serializeRoute({
-			base: absoluteBase,
-			lang: language,
-			path: translatedPath,
-			dataSuffix: undefined,
-			includeLanguage: true,
-			trailingSlash,
-			defaultLanguageTag: i18n.config.defaultLanguageTag,
-			prefixDefaultLanguage: i18n.config.prefixDefaultLanguage,
-		})
-
-		const to = new URL(original_to)
-		to.pathname = newPathname
-
-		return getHrefBetween(from, to)
+		}
 	}
 
 	setParaglideContext({ translateHref })
@@ -99,29 +88,11 @@
 
 <svelte:head>
 	{#if i18n.config.seo.noAlternateLinks !== true && !i18n.config.exclude($page.url.pathname)}
-		<!-- If there is more than one language, add alternate links -->
-		{#if i18n.config.runtime.availableLanguageTags.length >= 1}
-			{#each i18n.config.runtime.availableLanguageTags as lang}
-				{@const path = translatePath(
-					$page.url.pathname,
-					lang,
-					i18n.config.translations,
-					i18n.config.matchers,
-					{
-						base: absoluteBase,
-						availableLanguageTags: i18n.config.runtime.availableLanguageTags,
-						defaultLanguageTag: i18n.config.defaultLanguageTag,
-						prefixDefaultLanguage: i18n.config.prefixDefaultLanguage,
-					}
-				)}
-
-				{@const href =
-					$page.url.host === "sveltekit-prerender" ? path : new URL(path, new URL($page.url)).href}
-
-				<!-- Should be a fully qualified href, including protocol -->
-				<link rel="alternate" hreflang={lang} {href} />
-			{/each}
-		{/if}
+		<AlternateLinks
+			availableLanguageTags={i18n.config.runtime.availableLanguageTags}
+			strategy={i18n.strategy}
+			currentLang={lang}
+		/>
 	{/if}
 </svelte:head>
 
