@@ -1,3 +1,8 @@
+---
+title: Localised Routing
+description: Learn how the localised routing works in Paraglide-SvelteKit, how to use translated pathnames and how to do language negotiation.
+---
+
 # Localised Routing
 
 ### Translated Paths
