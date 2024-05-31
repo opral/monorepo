@@ -1,12 +1,7 @@
 import { test, expect } from "vitest"
 import { createNodeishMemoryFs } from "../test-utilities/index.js"
 import type { MessageBundle } from "../v2/types.js"
-import {
-	createMessageBundle,
-	createMessage,
-	injectJSONNewlines,
-	addSlots,
-} from "../v2/createMessageBundle.js"
+import { createMessageBundle, createMessage, injectJSONNewlines, addSlots } from "../v2/helper.js"
 import { openStore, readJSON, writeJSON } from "./store.js"
 
 const locales = ["en", "de"]
