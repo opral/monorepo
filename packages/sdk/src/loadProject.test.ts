@@ -279,6 +279,7 @@ describe("initialization", () => {
 	})
 
 	// TODO: fix this test
+	// https://github.com/opral/inlang-message-sdk/issues/76
 	// it doesn't work because failure to open the settings file doesn't throw
 	// errors are returned in project.errors()
 	it("should resolve from a windows path", async () => {

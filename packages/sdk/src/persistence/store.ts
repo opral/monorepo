@@ -20,6 +20,7 @@ export async function openStore(args: {
 
 	// the index holds the in-memory state
 	// TODO: reload when file changes on disk
+	// https://github.com/opral/inlang-message-sdk/issues/80
 	let index = await load()
 
 	const batchedSave = batchedIO(acquireSaveLock, releaseSaveLock, save)
