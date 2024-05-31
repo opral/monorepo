@@ -72,12 +72,19 @@ async function data() {
 			json.results[0].data[0] > json.results[0].data[1]
 				? json.results[0].data[0]
 				: json.results[0].data[1]
-		return {
-			projectCount: JSON.stringify(number),
+
+		if (number) {
+			return {
+				projectCount: JSON.stringify(number),
+			}
+		} else {
+			return {
+				projectCount: "1000+",
+			}
 		}
 	} catch (error) {
 		return {
-			projectCount: "500+",
+			projectCount: "1000+",
 		}
 	}
 }

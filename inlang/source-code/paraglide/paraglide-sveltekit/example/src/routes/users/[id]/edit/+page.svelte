@@ -1,6 +1,6 @@
 <script>
 	import { page } from "$app/stores"
-    import * as m from "$paraglide/messages.js"
+    import * as m from "$lib/paraglide/messages.js"
 
     $: userId = Number.parseFloat($page.params.id);
 </script>

@@ -1,7 +1,7 @@
 <script>
 	import LanguageSwitcher from "./LanguageSwitcher.svelte"
     import { page } from "$app/stores";
-    import * as m from "$paraglide/messages.js"
+    import * as m from "$lib/paraglide/messages.js"
 </script>
 <header>
     <nav>

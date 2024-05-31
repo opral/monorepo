@@ -4,21 +4,23 @@ import { base } from "$app/paths"
 import { page } from "$app/stores"
 import { get } from "svelte/store"
 import { browser, dev } from "$app/environment"
-import { getTranslatedPath } from "./path-translations/getTranslatedPath.js"
-import { serializeRoute } from "./utils/serialize-path.js"
-import { getCanonicalPath } from "./path-translations/getCanonicalPath.js"
-import { getPathInfo } from "./utils/get-path-info.js"
-import { normaliseBase as canonicalNormaliseBase } from "./utils/normaliseBase.js"
+import { parseRoute, serializeRoute } from "./utils/route.js"
+import {
+	normaliseBase as canonicalNormaliseBase,
+	type NormalizedBase,
+} from "./utils/normaliseBase.js"
 import { createExclude, type ExcludeConfig } from "./exclude.js"
 import { guessTextDirMap } from "./utils/text-dir.js"
-import { resolvePathTranslations } from "./config/resolvePathTranslations.js"
 import {
+	prettyPrintPathDefinitionIssues,
+	resolveUserPathDefinitions,
 	validatePathTranslations,
 	type PathDefinitionTranslations,
 } from "@inlang/paraglide-js/internal/adapter-utils"
 import type { ParamMatcher } from "@sveltejs/kit"
 import type { UserPathTranslations } from "./config/pathTranslations.js"
 import type { Paraglide } from "./runtime.js"
+import { PrefixStrategy } from "./strategy.js"
 
 export type I18nUserConfig<T extends string> = {
 	/**
@@ -152,10 +154,9 @@ export type I18nConfig<T extends string> = {
  * ```
  */
 export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I18nUserConfig<T>) {
-	const translations = resolvePathTranslations(
-		options?.pathnames ?? {},
-		runtime.availableLanguageTags
-	)
+	const translations = options?.pathnames
+		? resolveUserPathDefinitions(options.pathnames, runtime.availableLanguageTags)
+		: {}
 
 	if (dev) {
 		const issues = validatePathTranslations(
@@ -163,29 +164,32 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 			runtime.availableLanguageTags,
 			options?.matchers ?? {}
 		)
-		if (issues.length) {
-			console.warn(
-				`The following issues were found in your path translations. Make sure to fix them before deploying your app:`
-			)
-			console.table(issues)
-		}
+		if (issues.length) prettyPrintPathDefinitionIssues(issues)
 	}
 
 	const excludeConfig = options?.exclude ?? []
 	const defaultLanguageTag = options?.defaultLanguageTag ?? runtime.sourceLanguageTag
 
 	const config: I18nConfig<T> = {
+		defaultLanguageTag,
 		runtime,
 		translations,
 		matchers: options?.matchers ?? {},
 		exclude: createExclude(excludeConfig),
-		defaultLanguageTag,
 		prefixDefaultLanguage: options?.prefixDefaultLanguage ?? "never",
 		textDirection: options?.textDirection ?? guessTextDirMap(runtime.availableLanguageTags),
 		seo: {
 			noAlternateLinks: options?.seo?.noAlternateLinks ?? false,
 		},
 	}
+
+	const strategy = PrefixStrategy(
+		runtime.availableLanguageTags,
+		defaultLanguageTag,
+		config.translations,
+		config.matchers,
+		config.prefixDefaultLanguage
+	)
 
 	// We don't want the translations to be mutable
 	Object.freeze(translations)
@@ -198,6 +202,13 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		config,
 
 		/**
+		 * The routing strategy that's being used.
+		 *
+		 * @private Not part of the public API, may change in non-major versions
+		 */
+		strategy,
+
+		/**
 		 * Returns a `reroute` hook that applies the path translations to the paths.
 		 * Register it in your `src/hooks.js` file to enable path translations.
 		 *
@@ -208,7 +219,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		 * export const reroute = i18n.reroute()
 		 * ```
 		 */
-		reroute: () => createReroute(config),
+		reroute: () => createReroute(strategy),
 
 		/**
 		 * Returns a `handle` hook that set's the correct `lang` attribute
@@ -219,7 +230,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		handle: (options: HandleOptions = {}) => {
 			if (!browser) {
 				//We only want this on the server
-				return createHandle(config, options)
+				return createHandle(strategy, config, options)
 			}
 			throw new Error(dev ? "`i18n.handle` hook should only be used on the server." : "")
 		},
@@ -231,11 +242,8 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		 * @returns
 		 */
 		getLanguageFromUrl(url: URL): T {
-			const pathWithLanguage = url.pathname.slice(normaliseBase(base).length)
-			const lang = pathWithLanguage.split("/").find(Boolean)
-
-			if (runtime.isAvailableLanguageTag(lang)) return lang
-			return defaultLanguageTag
+			if (config.exclude(url.pathname)) return config.defaultLanguageTag
+			return strategy.getLanguageFromLocalisedPath(url.pathname) || config.defaultLanguageTag
 		},
 
 		/**
@@ -256,36 +264,14 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		resolveRoute(path: string, lang: T | undefined = undefined) {
 			if (config.exclude(path)) return path
 
-			const normalisedBase = normaliseBase(base)
-
-			const { trailingSlash, dataSuffix } = getPathInfo(path, {
-				base: normalisedBase,
-				availableLanguageTags: runtime.availableLanguageTags,
-				defaultLanguageTag: runtime.sourceLanguageTag,
-			})
+			const normalizedBase = normaliseBase(base)
+			const [canonicalPath, dataSuffix] = parseRoute(path as `/${string}`, normalizedBase)
 
 			lang = lang ?? runtime.languageTag()
+			if (!path.startsWith(normalizedBase)) return path
 
-			if (!path.startsWith(normalisedBase)) return path
-
-			const canonicalPath = path.slice(normalisedBase.length)
-			const translatedPath = getTranslatedPath(
-				canonicalPath,
-				lang,
-				config.translations,
-				config.matchers
-			)
-
-			return serializeRoute({
-				path: translatedPath,
-				lang,
-				base: normalisedBase,
-				dataSuffix,
-				includeLanguage: true,
-				defaultLanguageTag,
-				prefixDefaultLanguage: config.prefixDefaultLanguage,
-				trailingSlash,
-			})
+			const localisedPath = strategy.getLocalisedPath(canonicalPath, lang)
+			return serializeRoute(localisedPath, normalizedBase, dataSuffix)
 		},
 
 		/**
@@ -309,28 +295,20 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		route(translatedPath: string) {
 			const normalizedBase = normaliseBase(base)
 
-			const { path, lang, trailingSlash, dataSuffix } = getPathInfo(translatedPath, {
-				base: normalizedBase,
-				availableLanguageTags: config.runtime.availableLanguageTags,
-				defaultLanguageTag: config.defaultLanguageTag,
-			})
+			const [localisedPath, dataSuffix] = parseRoute(translatedPath as `/${string}`, normalizedBase)
 
-			const canonicalPath = getCanonicalPath(path, lang, config.translations, config.matchers)
+			const lang = strategy.getLanguageFromLocalisedPath(localisedPath)
+			const languageTag = lang || config.defaultLanguageTag
+			const canonicalPath = strategy.getCanonicalPath(localisedPath, languageTag)
 
-			return serializeRoute({
-				path: canonicalPath,
-				base: normalizedBase,
-				trailingSlash,
-				dataSuffix,
-				includeLanguage: false,
-			})
+			return serializeRoute(canonicalPath, normalizedBase, dataSuffix)
 		},
 	}
 }
 
-function normaliseBase(base: string) {
+function normaliseBase(base: string): NormalizedBase {
 	if (base === "") return ""
-	if (base.startsWith("/")) return base
+	if (base.startsWith("/")) return base as `/${string}`
 
 	// this should only be reachable during component initialization
 	// We can detect this, because base is only ever a relative path during component initialization

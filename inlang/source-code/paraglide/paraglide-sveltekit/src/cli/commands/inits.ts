@@ -11,6 +11,7 @@ import { editAppHtmlFile } from "../steps/editAppHtmlFile.js"
 import { addRerouteHook } from "../steps/addRerouteFile.js"
 import { addHandleHook } from "../steps/addHandleHook.js"
 import { PARAGLIDE_SVELTEKIT_VERSION, PARAGLIDE_SVELTEKIT_MARKETPLACE_ID } from "../../meta.js"
+import { addTypesForLocals } from "../steps/updateAppTypes.js"
 
 export const initCommand = new Command()
 	.name("init")
@@ -54,11 +55,12 @@ export const initCommand = new Command()
 		const ctx8 = await editAppHtmlFile(ctx7)
 		const ctx9 = await addRerouteHook(ctx8)
 		const ctx10 = await addHandleHook(ctx9)
-		const ctx11 = await Steps.maybeAddSherlock(ctx10)
-		const crx12 = await Steps.maybeAddNinja(ctx11)
+		const ctx11 = await addTypesForLocals(ctx10)
+		const crx12 = await Steps.maybeAddSherlock(ctx11)
+		const crx13 = await Steps.maybeAddNinja(crx12)
 
 		try {
-			await Steps.runCompiler({ ...crx12, outdir: "./src/lib/paraglide" })
+			await Steps.runCompiler({ ...crx13, outdir: "./src/lib/paraglide" })
 		} catch (e) {
 			//silently ignore
 		}
