@@ -172,23 +172,3 @@ Use this to create a language switcher.
 	</a>
 {/each}
 ```
-
-## Default Language Handling	
-
-By default all languages except the default language are available under `/[lang]`, wheras the default language is available at the root `/`.	
-
-If you also want the default language to have a language prefix set `prefixDefaultLanguage: "always"`	
-
-## Language Negotiation	
-
-If you navigate to a route where the language is not obvious from the URL, Paraglide-Sveltekit will perform language negotiation.	
-
-For example, navigating to `/` when `prefixDefaultLanguage: "always"` is set would trigger language negotiation.	
-
-Negotiation works in these steps:	
-1. Try to get the language from the URL	
-2. Read the `paraglide:lang` cookie to restore the language from a previous session	
-3. Negotiate based on the `accept-language` header	
-4. Use the default language	
-
-After negotiation you will be redirected to the path with the language in the URL.
