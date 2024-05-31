@@ -17,7 +17,6 @@ export function generateMetadata(): Metadata {
 	}
 }
 
-
 const direction: Record<AvailableLanguageTag, "ltr" | "rtl"> = {
 	en: "ltr",
 	"de-CH": "ltr",
