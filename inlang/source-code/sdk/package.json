@@ -16,7 +16,8 @@
 		"./test-utilities": "./dist/test-utilities/index.js",
 		"./lint": "./dist/lint/index.js",
 		"./messages": "./dist/messages/index.js",
-		"./v2": "./dist/v2/index.js"
+		"./v2": "./dist/v2/index.js",
+		"./v2-mocks": "./dist/v2/mocks/index.js"
 	},
 	"files": [
 		"./dist",
