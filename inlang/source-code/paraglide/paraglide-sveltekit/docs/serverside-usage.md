@@ -1,6 +1,6 @@
 # Usage on the server
 
-In general you don't need to write different code on the client vs. the server. But there are a few things to be aware of.
+The code you write on the server will usually be the exact same you would write on the client, but there are a few small things to be aware of.
 
 ## Avoiding Cross-Talk
 
