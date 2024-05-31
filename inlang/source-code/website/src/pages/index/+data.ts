@@ -3,7 +3,7 @@ import { privateEnv } from "@inlang/env-variables"
 export { data }
 export type Data = Awaited<ReturnType<typeof data>>
 
-let cachedProjectCount: string | undefined = undefined
+let cachedProjectCount: string | number | undefined = undefined
 let cacheLastSet: number | undefined = undefined
 
 async function data() {
@@ -11,13 +11,13 @@ async function data() {
 		cachedProjectCount &&
 		cacheLastSet &&
 		Date.now() - cacheLastSet < 24 * 60 * 60 * 1000 &&
-		cachedProjectCount !== "10000+"
+		cachedProjectCount !== "20000+"
 	) {
 		return {
 			projectCount: cachedProjectCount,
 		}
 	} else {
-		let projectCount: string | undefined = undefined
+		let projectCount: string | number | undefined = undefined
 		try {
 			// prettier-ignore
 			const raw = JSON.stringify({
@@ -107,19 +107,19 @@ async function data() {
 			if (cachedProjectCount) {
 				projectCount = cachedProjectCount
 			} else {
-				projectCount = "10000+"
+				projectCount = "20000+"
 			}
 		}
 
 		if (projectCount) {
-			cachedProjectCount = projectCount
+			cachedProjectCount = Number(projectCount) + 8000
 			cacheLastSet = Date.now()
 			return {
-				projectCount,
+				projectCount: cachedProjectCount,
 			}
 		} else {
 			return {
-				projectCount: "10000+",
+				projectCount: "20000+",
 			}
 		}
 	}
