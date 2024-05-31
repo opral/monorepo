@@ -29,6 +29,7 @@
 		"Appendix": {
 			"/pages-router": "./inlang/source-code/paraglide/paraglide-next/docs/pages-router.md",
 			"/manual-setup": "./inlang/source-code/paraglide/paraglide-next/docs/manual-setup.md",
+			"Vanilla ParaglideJS": "/m/gerre34r/library-inlang-paraglideJs",
 			"/roadmap": "./inlang/source-code/paraglide/paraglide-next/docs/roadmap.md",
 			"/changelog": "./inlang/source-code/paraglide/paraglide-next/CHANGELOG.md"
 		}
