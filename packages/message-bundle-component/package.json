@@ -24,6 +24,7 @@
 	"devDependencies": {
 		"@inlang/marketplace-registry": "workspace:^",
 		"@inlang/marketplace-manifest": "workspace:^",
+		"@inlang/sdk": "workspace:^",
 		"@nx/storybook": "^18.0.4",
 		"@storybook/addon-essentials": "^7.6.16",
 		"@storybook/addon-links": "^7.6.16",

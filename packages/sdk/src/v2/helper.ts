@@ -33,16 +33,20 @@ export function createMessageBundle(args: {
  * create v2 Messsage AST with text-only pattern
  * @example createMessage({locale: "en", text: "Hello world"})
  */
-export function createMessage(args: { locale: LanguageTag; text: string }): Message {
+export function createMessage(args: {
+	locale: LanguageTag
+	text: string
+	match?: Array<string>
+}): Message {
 	return {
 		locale: args.locale,
 		declarations: [],
 		selectors: [],
-		variants: [{ match: [], pattern: [toTextElement(args.text ?? "")] }],
+		variants: [{ match: args.match ? args.match : [], pattern: [toTextElement(args.text ?? "")] }],
 	}
 }
 
-function toTextElement(text: string): Text {
+export function toTextElement(text: string): Text {
 	return {
 		type: "text",
 		value: text,
