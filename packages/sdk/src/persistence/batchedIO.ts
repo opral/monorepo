@@ -2,10 +2,13 @@ import _debug from "debug"
 const debug = _debug("sdk:batchedIO")
 
 /**
- * Converts async save() into batched async save()
- * Batches saves while waiting to acquire a lock.
- * Resolves queued requests after the batched save completes.
- * Recursively batches requests during current save into the next batch.
+ * State machine to convert async save() into batched async save()
+ * states = idle -> acquiring -> saving -> idle
+ * idle = nothing queued, ready to acquire lock.
+ * aquiring = waiting to acquire a lock: requests go into the queue.
+ * saving = lock is acquired, save has begun: new requests go into the next batch.
+ * The next batch should not acquire the lock while current save is in progress.
+ * Queued requests are only resolved when the save completes.
  */
 export function batchedIO(
 	acquireLock: () => Promise<number>,
