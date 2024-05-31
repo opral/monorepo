@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest"
+import { sleep, delay } from "../test-utilities/sleep.js"
 import {
 	createRoot,
 	createSignal,
@@ -8,14 +9,6 @@ import {
 	untrack,
 } from "./solid.js"
 import { ReactiveMap } from "./map.js"
-
-function sleep(ms: number) {
-	return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
-function delay(v: unknown, ms: number) {
-	return new Promise((resolve) => setTimeout(() => resolve(v), ms))
-}
 
 describe("vitest", () => {
 	it("waits for the result of an async function", async () => {

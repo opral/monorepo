@@ -278,11 +278,15 @@ describe("initialization", () => {
 		expect(result.data).toBeDefined()
 	})
 
+	// TODO: fix this test
+	// https://github.com/opral/inlang-message-sdk/issues/76
+	// it doesn't work because failure to open the settings file doesn't throw
+	// errors are returned in project.errors()
 	it("should resolve from a windows path", async () => {
 		const repo = await mockRepo()
 		const fs = repo.nodeishFs
-		fs.mkdir("C:\\Users\\user\\project.inlang", { recursive: true })
-		fs.writeFile("C:\\Users\\user\\project.inlang\\settings.json", JSON.stringify(settings))
+		await fs.mkdir("C:\\Users\\user\\project.inlang", { recursive: true })
+		await fs.writeFile("C:\\Users\\user\\project.inlang\\settings.json", JSON.stringify(settings))
 
 		const result = await tryCatch(() =>
 			loadProject({
