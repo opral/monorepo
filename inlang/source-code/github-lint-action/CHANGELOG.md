@@ -1,5 +1,12 @@
 # @inlang/github-lint-action
 
+## 0.3.10
+
+### Patch Changes
+
+- Updated dependencies [9d2aa1a]
+  - @inlang/sdk@0.35.6
+
 ## 0.3.9
 
 ### Patch Changes
