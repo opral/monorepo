@@ -21,7 +21,7 @@ Excluded routes will:
 
 Make sure excluded pages are still wrapped in the `<ParaglideJS>` so that outgoing links are still translated. 
 
-## Overriding Text direction
+## Text direction
 
 Paraglide guesses the text direction using the `Intl.Locale` API. This is not supported in all runtimes. Use the `textDirection` option to provide the text direction yourself.
 

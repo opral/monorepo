@@ -68,6 +68,21 @@ Whenever the language cannot be determined from the URL alone the language negot
 
 After language negotiation you will be redirected to include the language in the URL.
 
+### Changing the default Language
+
+Usually your default language is the same as the `sourceLanguageTag` of your Inlang Project, but it doesn't have to be.
+
+You can change it by passing a `defaultLanguageTag` option to `createI18n`
+
+```ts
+// sourceLanguageTag = "en"
+
+export const i18n = createI18n(runtime, {
+	defaultLanguageTag: "de",
+})
+```
+
+
 ## Automatic Link Localisation
 
 `Paraglide-Sveltekit` automatically translates links on your components using a preprocessor. This affects:

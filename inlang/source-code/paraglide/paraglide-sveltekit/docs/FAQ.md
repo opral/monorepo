@@ -1,24 +1,9 @@
 ## FAQ
 
 <doc-accordion
-	heading="Can I also prefix the default language?"
-	text="Yes, you can also include the default language in the URL by passing prefixDefaultLanguage: 'always' to createI18n.">
-</doc-accordion>
-
-<doc-accordion
-	heading="Can I change default language?"
-	text="Yes, using the 'defaultLanguage' option on 'createI18n'.">
-</doc-accordion>
-
-<doc-accordion
 	heading="Do I have to have the language in the URL?"
 	text="Using the right options you can get the language from anywhere, but the main benefit of using this library is the i18n routing. If you don't plan on using that you might be
 	better off using ParaglideJS directly.">
-</doc-accordion>
-
-<doc-accordion
-	heading="'Can't find module $paraglide/runtime.js' - What do I do?"
-	text="This likely means that you haven't registered the $paraglide alias for src/paraglide in svelte.config.js. Try adding that. Check the example if you're stuck">
 </doc-accordion>
 
 <doc-accordion
