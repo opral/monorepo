@@ -93,6 +93,9 @@ export async function loadProject(args: {
 		let v2Persistence = false
 		let locales: string[] = []
 
+		// This effect currently has no signals
+		// TODO: replace createEffect with await loadSettings
+		// https://github.com/opral/inlang-message-sdk/issues/77
 		createEffect(() => {
 			// TODO:
 			// if (projectId) {
@@ -112,6 +115,7 @@ export async function loadProject(args: {
 				})
 		})
 		// TODO: create FS watcher and update settings on change
+		// https://github.com/opral/inlang-message-sdk/issues/35
 
 		const writeSettingsToDisk = skipFirst((settings: ProjectSettings) =>
 			_writeSettingsToDisk({ nodeishFs, settings, projectPath })
@@ -285,6 +289,7 @@ export async function loadProject(args: {
 					installedPluginIds: installedPlugins().map((p) => p.id),
 					installedMessageLintRuleIds: installedMessageLintRules().map((r) => r.id),
 					// TODO: fix for v2Persistence
+					// https://github.com/opral/inlang-message-sdk/issues/78
 					numberOfMessages: messagesQuery.includedMessageIds().length,
 				},
 			})

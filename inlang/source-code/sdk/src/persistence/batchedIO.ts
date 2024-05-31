@@ -20,6 +20,7 @@ export function batchedIO(
 
 	// Hold requests while acquiring, resolve after saving
 	// TODO: rejectQueued if save throws (maybe?)
+	// https://github.com/opral/inlang-message-sdk/issues/79
 	type Queued = {
 		id: string
 		resolve: (value: string) => void
