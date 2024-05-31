@@ -1,9 +1,8 @@
-
-### Usage on the server
+# Usage on the server
 
 In general you don't need to write different code on the client vs. the server. But there are a few things to be aware of.
 
-#### Avoiding Cross-Talk
+## Avoiding Cross-Talk
 
 SvelteKit does two kinds of work on the server: _Loading_ and _Rendering_. 
 
@@ -25,7 +24,7 @@ export async function load({ locals }) {
 
 During rendering there is no danger of crosstalk. You can safely use messages and the `langaugeTag()` function. 
 
-#### Re-Loading Language-Dependent data
+## Re-Loading Language-Dependent data
 
 You can tell a load function to re-run on language changes by calling `depends("paraglide:lang")`.
 
