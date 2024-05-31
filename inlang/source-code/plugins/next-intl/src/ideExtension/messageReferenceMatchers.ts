@@ -2,7 +2,7 @@
 import Parsimmon from "parsimmon"
 import type { PluginSettings } from "../settings.js"
 
-const createParser = (settings: PluginSettings, defaultNS: string | undefined) => {
+const createParser = (settings: PluginSettings, namespaces: Record<number, string>) => {
 	return Parsimmon.createLanguage({
 		entry: (r) => {
 			return Parsimmon.alt(r.FunctionCall!, Parsimmon.any)
@@ -47,9 +47,18 @@ const createParser = (settings: PluginSettings, defaultNS: string | undefined) =
 				Parsimmon.regex(/[^)]*/), // ignore the rest of the function call
 				Parsimmon.string(")"), // end with a closing parenthesis
 				(_, __, ___, start, messageId, end) => {
-					// -- handle namespaces --
-					if (defaultNS) {
-						messageId = `${defaultNS}.${messageId}`
+					// Find the most recent namespace defined before this message id
+					const nearestNamespace = Object.keys(namespaces)
+						.map(Number)
+						.filter((index) => index <= start.offset)
+						.sort((a, b) => b - a)[0]
+
+					if (nearestNamespace) {
+						const namespace = namespaces[nearestNamespace]
+
+						if (namespace && nearestNamespace) {
+							messageId = `${namespace}.${messageId}`
+						}
 					}
 
 					return {
@@ -147,7 +156,7 @@ const createNamespaceParser = () => {
 				Parsimmon.index, // end position of the message id
 				Parsimmon.regex(/[^)]*/), // ignore the rest of the function call
 				Parsimmon.string(")"), // end with a closing parenthesis
-				(_, __, ___, ____, insideString) => {
+				(_, __, ___, start, insideString, end) => {
 					let namespace = undefined
 
 					if (insideString.type === "string") {
@@ -155,28 +164,30 @@ const createNamespaceParser = () => {
 					} else if (insideString && insideString.value.namespace) {
 						namespace = insideString.value.namespace
 					}
-					return { ns: namespace }
+					return { ns: namespace, start: start.offset, end: end.offset }
 				}
 			)
 		},
 	})
 }
 
-function parseNameSpaces(settings: PluginSettings, sourceCode: string) {
+function parseNameSpaces(sourceCode: string) {
 	const namespaceParser = createNamespaceParser()
 	const namespaces = namespaceParser.entry!.tryParse(sourceCode)
-	if (namespaces.length > 0) {
-		return namespaces[0].ns
-	} else {
-		return undefined
+	const namespaceMap: Record<number, string> = {}
+	for (const nsObj of namespaces) {
+		if (nsObj.ns) {
+			namespaceMap[nsObj.start] = nsObj.ns
+		}
 	}
+	return namespaceMap
 }
 
 // Parse the expression
 export function parse(sourceCode: string, settings: PluginSettings) {
 	try {
-		const namespace: undefined | string = parseNameSpaces(settings, sourceCode)
-		const parser = createParser(settings, namespace)
+		const namespaces: Record<number, string> = parseNameSpaces(sourceCode)
+		const parser = createParser(settings, namespaces)
 		const result = parser.entry!.tryParse(sourceCode)
 		return result
 	} catch (error) {
