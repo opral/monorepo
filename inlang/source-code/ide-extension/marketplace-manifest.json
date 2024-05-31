@@ -15,9 +15,18 @@
 		"en": "Visualize, edit & lint translated strings at a glance via Inline Decorations & Hover Support, and extract new strings with a single click."
 	},
 	"pages": {
-		"/": "./inlang/source-code/ide-extension/MARKETPLACE.md",
-		"/video-tour": "./inlang/source-code/ide-extension/docs/video-tour.md",
-		"/changelog": "./inlang/source-code/ide-extension/CHANGELOG.md"
+		"": {
+			"/": "./inlang/source-code/ide-extension/MARKETPLACE.md"
+		},
+		"Getting Started": {
+			"/quick-start": "./inlang/source-code/ide-extension/docs/quick-start.md",
+			"/customization": "./inlang/source-code/ide-extension/docs/customization.md",
+			"/supported-i18n-libraries": "./inlang/source-code/ide-extension/docs/supported-i18n-libraries.md",
+			"/video-tour": "./inlang/source-code/ide-extension/docs/video-tour.md"
+		},
+		"Appendix": {
+			"/changelog": "./inlang/source-code/ide-extension/CHANGELOG.md"
+		}
 	},
 	"keywords": [
 		"apps",

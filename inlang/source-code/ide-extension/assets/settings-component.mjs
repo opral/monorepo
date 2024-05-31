@@ -6717,7 +6717,7 @@ var require_base64_js = __commonJS({
 // ../../../node_modules/.pnpm/ieee754@1.2.1/node_modules/ieee754/index.js
 var require_ieee754 = __commonJS({
   "../../../node_modules/.pnpm/ieee754@1.2.1/node_modules/ieee754/index.js"(exports) {
-    exports.read = function(buffer, offset2, isLE, mLen, nBytes) {
+    exports.read = function(buffer, offset3, isLE, mLen, nBytes) {
       var e11, m3;
       var eLen = nBytes * 8 - mLen - 1;
       var eMax = (1 << eLen) - 1;
@@ -6725,17 +6725,17 @@ var require_ieee754 = __commonJS({
       var nBits = -7;
       var i5 = isLE ? nBytes - 1 : 0;
       var d3 = isLE ? -1 : 1;
-      var s5 = buffer[offset2 + i5];
+      var s5 = buffer[offset3 + i5];
       i5 += d3;
       e11 = s5 & (1 << -nBits) - 1;
       s5 >>= -nBits;
       nBits += eLen;
-      for (; nBits > 0; e11 = e11 * 256 + buffer[offset2 + i5], i5 += d3, nBits -= 8) {
+      for (; nBits > 0; e11 = e11 * 256 + buffer[offset3 + i5], i5 += d3, nBits -= 8) {
       }
       m3 = e11 & (1 << -nBits) - 1;
       e11 >>= -nBits;
       nBits += mLen;
-      for (; nBits > 0; m3 = m3 * 256 + buffer[offset2 + i5], i5 += d3, nBits -= 8) {
+      for (; nBits > 0; m3 = m3 * 256 + buffer[offset3 + i5], i5 += d3, nBits -= 8) {
       }
       if (e11 === 0) {
         e11 = 1 - eBias;
@@ -6747,7 +6747,7 @@ var require_ieee754 = __commonJS({
       }
       return (s5 ? -1 : 1) * m3 * Math.pow(2, e11 - mLen);
     };
-    exports.write = function(buffer, value, offset2, isLE, mLen, nBytes) {
+    exports.write = function(buffer, value, offset3, isLE, mLen, nBytes) {
       var e11, m3, c4;
       var eLen = nBytes * 8 - mLen - 1;
       var eMax = (1 << eLen) - 1;
@@ -6786,13 +6786,13 @@ var require_ieee754 = __commonJS({
           e11 = 0;
         }
       }
-      for (; mLen >= 8; buffer[offset2 + i5] = m3 & 255, i5 += d3, m3 /= 256, mLen -= 8) {
+      for (; mLen >= 8; buffer[offset3 + i5] = m3 & 255, i5 += d3, m3 /= 256, mLen -= 8) {
       }
       e11 = e11 << mLen | m3;
       eLen += mLen;
-      for (; eLen > 0; buffer[offset2 + i5] = e11 & 255, i5 += d3, e11 /= 256, eLen -= 8) {
+      for (; eLen > 0; buffer[offset3 + i5] = e11 & 255, i5 += d3, e11 /= 256, eLen -= 8) {
       }
-      buffer[offset2 + i5 - d3] |= s5 * 128;
+      buffer[offset3 + i5 - d3] |= s5 * 128;
     };
   }
 });
@@ -7435,9 +7435,9 @@ var require_buffer = __commonJS({
     Buffer2.prototype.lastIndexOf = function lastIndexOf(val, byteOffset, encoding) {
       return bidirectionalIndexOf(this, val, byteOffset, encoding, false);
     };
-    function hexWrite(buf, string, offset2, length) {
-      offset2 = Number(offset2) || 0;
-      var remaining = buf.length - offset2;
+    function hexWrite(buf, string, offset3, length) {
+      offset3 = Number(offset3) || 0;
+      var remaining = buf.length - offset3;
       if (!length) {
         length = remaining;
       } else {
@@ -7454,33 +7454,33 @@ var require_buffer = __commonJS({
         var parsed = parseInt(string.substr(i5 * 2, 2), 16);
         if (numberIsNaN(parsed))
           return i5;
-        buf[offset2 + i5] = parsed;
+        buf[offset3 + i5] = parsed;
       }
       return i5;
     }
-    function utf8Write(buf, string, offset2, length) {
-      return blitBuffer(utf8ToBytes(string, buf.length - offset2), buf, offset2, length);
+    function utf8Write(buf, string, offset3, length) {
+      return blitBuffer(utf8ToBytes(string, buf.length - offset3), buf, offset3, length);
     }
-    function asciiWrite(buf, string, offset2, length) {
-      return blitBuffer(asciiToBytes(string), buf, offset2, length);
+    function asciiWrite(buf, string, offset3, length) {
+      return blitBuffer(asciiToBytes(string), buf, offset3, length);
     }
-    function base64Write(buf, string, offset2, length) {
-      return blitBuffer(base64ToBytes(string), buf, offset2, length);
+    function base64Write(buf, string, offset3, length) {
+      return blitBuffer(base64ToBytes(string), buf, offset3, length);
     }
-    function ucs2Write(buf, string, offset2, length) {
-      return blitBuffer(utf16leToBytes(string, buf.length - offset2), buf, offset2, length);
+    function ucs2Write(buf, string, offset3, length) {
+      return blitBuffer(utf16leToBytes(string, buf.length - offset3), buf, offset3, length);
     }
-    Buffer2.prototype.write = function write(string, offset2, length, encoding) {
-      if (offset2 === void 0) {
+    Buffer2.prototype.write = function write(string, offset3, length, encoding) {
+      if (offset3 === void 0) {
         encoding = "utf8";
         length = this.length;
-        offset2 = 0;
-      } else if (length === void 0 && typeof offset2 === "string") {
-        encoding = offset2;
+        offset3 = 0;
+      } else if (length === void 0 && typeof offset3 === "string") {
+        encoding = offset3;
         length = this.length;
-        offset2 = 0;
-      } else if (isFinite(offset2)) {
-        offset2 = offset2 >>> 0;
+        offset3 = 0;
+      } else if (isFinite(offset3)) {
+        offset3 = offset3 >>> 0;
         if (isFinite(length)) {
           length = length >>> 0;
           if (encoding === void 0)
@@ -7494,10 +7494,10 @@ var require_buffer = __commonJS({
           "Buffer.write(string, encoding, offset[, length]) is no longer supported"
         );
       }
-      var remaining = this.length - offset2;
+      var remaining = this.length - offset3;
       if (length === void 0 || length > remaining)
         length = remaining;
-      if (string.length > 0 && (length < 0 || offset2 < 0) || offset2 > this.length) {
+      if (string.length > 0 && (length < 0 || offset3 < 0) || offset3 > this.length) {
         throw new RangeError("Attempt to write outside buffer bounds");
       }
       if (!encoding)
@@ -7506,21 +7506,21 @@ var require_buffer = __commonJS({
       for (; ; ) {
         switch (encoding) {
           case "hex":
-            return hexWrite(this, string, offset2, length);
+            return hexWrite(this, string, offset3, length);
           case "utf8":
           case "utf-8":
-            return utf8Write(this, string, offset2, length);
+            return utf8Write(this, string, offset3, length);
           case "ascii":
           case "latin1":
           case "binary":
-            return asciiWrite(this, string, offset2, length);
+            return asciiWrite(this, string, offset3, length);
           case "base64":
-            return base64Write(this, string, offset2, length);
+            return base64Write(this, string, offset3, length);
           case "ucs2":
           case "ucs-2":
           case "utf16le":
           case "utf-16le":
-            return ucs2Write(this, string, offset2, length);
+            return ucs2Write(this, string, offset3, length);
           default:
             if (loweredCase)
               throw new TypeError("Unknown encoding: " + encoding);
@@ -7678,371 +7678,371 @@ var require_buffer = __commonJS({
       Object.setPrototypeOf(newBuf, Buffer2.prototype);
       return newBuf;
     };
-    function checkOffset(offset2, ext, length) {
-      if (offset2 % 1 !== 0 || offset2 < 0)
+    function checkOffset(offset3, ext, length) {
+      if (offset3 % 1 !== 0 || offset3 < 0)
         throw new RangeError("offset is not uint");
-      if (offset2 + ext > length)
+      if (offset3 + ext > length)
         throw new RangeError("Trying to access beyond buffer length");
     }
-    Buffer2.prototype.readUintLE = Buffer2.prototype.readUIntLE = function readUIntLE(offset2, byteLength2, noAssert) {
-      offset2 = offset2 >>> 0;
+    Buffer2.prototype.readUintLE = Buffer2.prototype.readUIntLE = function readUIntLE(offset3, byteLength2, noAssert) {
+      offset3 = offset3 >>> 0;
       byteLength2 = byteLength2 >>> 0;
       if (!noAssert)
-        checkOffset(offset2, byteLength2, this.length);
-      var val = this[offset2];
+        checkOffset(offset3, byteLength2, this.length);
+      var val = this[offset3];
       var mul = 1;
       var i5 = 0;
       while (++i5 < byteLength2 && (mul *= 256)) {
-        val += this[offset2 + i5] * mul;
+        val += this[offset3 + i5] * mul;
       }
       return val;
     };
-    Buffer2.prototype.readUintBE = Buffer2.prototype.readUIntBE = function readUIntBE(offset2, byteLength2, noAssert) {
-      offset2 = offset2 >>> 0;
+    Buffer2.prototype.readUintBE = Buffer2.prototype.readUIntBE = function readUIntBE(offset3, byteLength2, noAssert) {
+      offset3 = offset3 >>> 0;
       byteLength2 = byteLength2 >>> 0;
       if (!noAssert) {
-        checkOffset(offset2, byteLength2, this.length);
+        checkOffset(offset3, byteLength2, this.length);
       }
-      var val = this[offset2 + --byteLength2];
+      var val = this[offset3 + --byteLength2];
       var mul = 1;
       while (byteLength2 > 0 && (mul *= 256)) {
-        val += this[offset2 + --byteLength2] * mul;
+        val += this[offset3 + --byteLength2] * mul;
       }
       return val;
     };
-    Buffer2.prototype.readUint8 = Buffer2.prototype.readUInt8 = function readUInt8(offset2, noAssert) {
-      offset2 = offset2 >>> 0;
+    Buffer2.prototype.readUint8 = Buffer2.prototype.readUInt8 = function readUInt8(offset3, noAssert) {
+      offset3 = offset3 >>> 0;
       if (!noAssert)
-        checkOffset(offset2, 1, this.length);
-      return this[offset2];
+        checkOffset(offset3, 1, this.length);
+      return this[offset3];
     };
-    Buffer2.prototype.readUint16LE = Buffer2.prototype.readUInt16LE = function readUInt16LE(offset2, noAssert) {
-      offset2 = offset2 >>> 0;
+    Buffer2.prototype.readUint16LE = Buffer2.prototype.readUInt16LE = function readUInt16LE(offset3, noAssert) {
+      offset3 = offset3 >>> 0;
       if (!noAssert)
-        checkOffset(offset2, 2, this.length);
-      return this[offset2] | this[offset2 + 1] << 8;
+        checkOffset(offset3, 2, this.length);
+      return this[offset3] | this[offset3 + 1] << 8;
     };
-    Buffer2.prototype.readUint16BE = Buffer2.prototype.readUInt16BE = function readUInt16BE(offset2, noAssert) {
-      offset2 = offset2 >>> 0;
+    Buffer2.prototype.readUint16BE = Buffer2.prototype.readUInt16BE = function readUInt16BE(offset3, noAssert) {
+      offset3 = offset3 >>> 0;
       if (!noAssert)
-        checkOffset(offset2, 2, this.length);
-      return this[offset2] << 8 | this[offset2 + 1];
+        checkOffset(offset3, 2, this.length);
+      return this[offset3] << 8 | this[offset3 + 1];
     };
-    Buffer2.prototype.readUint32LE = Buffer2.prototype.readUInt32LE = function readUInt32LE(offset2, noAssert) {
-      offset2 = offset2 >>> 0;
+    Buffer2.prototype.readUint32LE = Buffer2.prototype.readUInt32LE = function readUInt32LE(offset3, noAssert) {
+      offset3 = offset3 >>> 0;
       if (!noAssert)
-        checkOffset(offset2, 4, this.length);
-      return (this[offset2] | this[offset2 + 1] << 8 | this[offset2 + 2] << 16) + this[offset2 + 3] * 16777216;
+        checkOffset(offset3, 4, this.length);
+      return (this[offset3] | this[offset3 + 1] << 8 | this[offset3 + 2] << 16) + this[offset3 + 3] * 16777216;
     };
-    Buffer2.prototype.readUint32BE = Buffer2.prototype.readUInt32BE = function readUInt32BE(offset2, noAssert) {
-      offset2 = offset2 >>> 0;
+    Buffer2.prototype.readUint32BE = Buffer2.prototype.readUInt32BE = function readUInt32BE(offset3, noAssert) {
+      offset3 = offset3 >>> 0;
       if (!noAssert)
-        checkOffset(offset2, 4, this.length);
-      return this[offset2] * 16777216 + (this[offset2 + 1] << 16 | this[offset2 + 2] << 8 | this[offset2 + 3]);
+        checkOffset(offset3, 4, this.length);
+      return this[offset3] * 16777216 + (this[offset3 + 1] << 16 | this[offset3 + 2] << 8 | this[offset3 + 3]);
     };
-    Buffer2.prototype.readIntLE = function readIntLE(offset2, byteLength2, noAssert) {
-      offset2 = offset2 >>> 0;
+    Buffer2.prototype.readIntLE = function readIntLE(offset3, byteLength2, noAssert) {
+      offset3 = offset3 >>> 0;
       byteLength2 = byteLength2 >>> 0;
       if (!noAssert)
-        checkOffset(offset2, byteLength2, this.length);
-      var val = this[offset2];
+        checkOffset(offset3, byteLength2, this.length);
+      var val = this[offset3];
       var mul = 1;
       var i5 = 0;
       while (++i5 < byteLength2 && (mul *= 256)) {
-        val += this[offset2 + i5] * mul;
+        val += this[offset3 + i5] * mul;
       }
       mul *= 128;
       if (val >= mul)
         val -= Math.pow(2, 8 * byteLength2);
       return val;
     };
-    Buffer2.prototype.readIntBE = function readIntBE(offset2, byteLength2, noAssert) {
-      offset2 = offset2 >>> 0;
+    Buffer2.prototype.readIntBE = function readIntBE(offset3, byteLength2, noAssert) {
+      offset3 = offset3 >>> 0;
       byteLength2 = byteLength2 >>> 0;
       if (!noAssert)
-        checkOffset(offset2, byteLength2, this.length);
+        checkOffset(offset3, byteLength2, this.length);
       var i5 = byteLength2;
       var mul = 1;
-      var val = this[offset2 + --i5];
+      var val = this[offset3 + --i5];
       while (i5 > 0 && (mul *= 256)) {
-        val += this[offset2 + --i5] * mul;
+        val += this[offset3 + --i5] * mul;
       }
       mul *= 128;
       if (val >= mul)
         val -= Math.pow(2, 8 * byteLength2);
       return val;
     };
-    Buffer2.prototype.readInt8 = function readInt8(offset2, noAssert) {
-      offset2 = offset2 >>> 0;
+    Buffer2.prototype.readInt8 = function readInt8(offset3, noAssert) {
+      offset3 = offset3 >>> 0;
       if (!noAssert)
-        checkOffset(offset2, 1, this.length);
-      if (!(this[offset2] & 128))
-        return this[offset2];
-      return (255 - this[offset2] + 1) * -1;
+        checkOffset(offset3, 1, this.length);
+      if (!(this[offset3] & 128))
+        return this[offset3];
+      return (255 - this[offset3] + 1) * -1;
     };
-    Buffer2.prototype.readInt16LE = function readInt16LE(offset2, noAssert) {
-      offset2 = offset2 >>> 0;
+    Buffer2.prototype.readInt16LE = function readInt16LE(offset3, noAssert) {
+      offset3 = offset3 >>> 0;
       if (!noAssert)
-        checkOffset(offset2, 2, this.length);
-      var val = this[offset2] | this[offset2 + 1] << 8;
+        checkOffset(offset3, 2, this.length);
+      var val = this[offset3] | this[offset3 + 1] << 8;
       return val & 32768 ? val | 4294901760 : val;
     };
-    Buffer2.prototype.readInt16BE = function readInt16BE(offset2, noAssert) {
-      offset2 = offset2 >>> 0;
+    Buffer2.prototype.readInt16BE = function readInt16BE(offset3, noAssert) {
+      offset3 = offset3 >>> 0;
       if (!noAssert)
-        checkOffset(offset2, 2, this.length);
-      var val = this[offset2 + 1] | this[offset2] << 8;
+        checkOffset(offset3, 2, this.length);
+      var val = this[offset3 + 1] | this[offset3] << 8;
       return val & 32768 ? val | 4294901760 : val;
     };
-    Buffer2.prototype.readInt32LE = function readInt32LE(offset2, noAssert) {
-      offset2 = offset2 >>> 0;
+    Buffer2.prototype.readInt32LE = function readInt32LE(offset3, noAssert) {
+      offset3 = offset3 >>> 0;
       if (!noAssert)
-        checkOffset(offset2, 4, this.length);
-      return this[offset2] | this[offset2 + 1] << 8 | this[offset2 + 2] << 16 | this[offset2 + 3] << 24;
+        checkOffset(offset3, 4, this.length);
+      return this[offset3] | this[offset3 + 1] << 8 | this[offset3 + 2] << 16 | this[offset3 + 3] << 24;
     };
-    Buffer2.prototype.readInt32BE = function readInt32BE(offset2, noAssert) {
-      offset2 = offset2 >>> 0;
+    Buffer2.prototype.readInt32BE = function readInt32BE(offset3, noAssert) {
+      offset3 = offset3 >>> 0;
       if (!noAssert)
-        checkOffset(offset2, 4, this.length);
-      return this[offset2] << 24 | this[offset2 + 1] << 16 | this[offset2 + 2] << 8 | this[offset2 + 3];
+        checkOffset(offset3, 4, this.length);
+      return this[offset3] << 24 | this[offset3 + 1] << 16 | this[offset3 + 2] << 8 | this[offset3 + 3];
     };
-    Buffer2.prototype.readFloatLE = function readFloatLE(offset2, noAssert) {
-      offset2 = offset2 >>> 0;
+    Buffer2.prototype.readFloatLE = function readFloatLE(offset3, noAssert) {
+      offset3 = offset3 >>> 0;
       if (!noAssert)
-        checkOffset(offset2, 4, this.length);
-      return ieee754.read(this, offset2, true, 23, 4);
+        checkOffset(offset3, 4, this.length);
+      return ieee754.read(this, offset3, true, 23, 4);
     };
-    Buffer2.prototype.readFloatBE = function readFloatBE(offset2, noAssert) {
-      offset2 = offset2 >>> 0;
+    Buffer2.prototype.readFloatBE = function readFloatBE(offset3, noAssert) {
+      offset3 = offset3 >>> 0;
       if (!noAssert)
-        checkOffset(offset2, 4, this.length);
-      return ieee754.read(this, offset2, false, 23, 4);
+        checkOffset(offset3, 4, this.length);
+      return ieee754.read(this, offset3, false, 23, 4);
     };
-    Buffer2.prototype.readDoubleLE = function readDoubleLE(offset2, noAssert) {
-      offset2 = offset2 >>> 0;
+    Buffer2.prototype.readDoubleLE = function readDoubleLE(offset3, noAssert) {
+      offset3 = offset3 >>> 0;
       if (!noAssert)
-        checkOffset(offset2, 8, this.length);
-      return ieee754.read(this, offset2, true, 52, 8);
+        checkOffset(offset3, 8, this.length);
+      return ieee754.read(this, offset3, true, 52, 8);
     };
-    Buffer2.prototype.readDoubleBE = function readDoubleBE(offset2, noAssert) {
-      offset2 = offset2 >>> 0;
+    Buffer2.prototype.readDoubleBE = function readDoubleBE(offset3, noAssert) {
+      offset3 = offset3 >>> 0;
       if (!noAssert)
-        checkOffset(offset2, 8, this.length);
-      return ieee754.read(this, offset2, false, 52, 8);
+        checkOffset(offset3, 8, this.length);
+      return ieee754.read(this, offset3, false, 52, 8);
     };
-    function checkInt(buf, value, offset2, ext, max2, min2) {
+    function checkInt(buf, value, offset3, ext, max2, min2) {
       if (!Buffer2.isBuffer(buf))
         throw new TypeError('"buffer" argument must be a Buffer instance');
       if (value > max2 || value < min2)
         throw new RangeError('"value" argument is out of bounds');
-      if (offset2 + ext > buf.length)
+      if (offset3 + ext > buf.length)
         throw new RangeError("Index out of range");
     }
-    Buffer2.prototype.writeUintLE = Buffer2.prototype.writeUIntLE = function writeUIntLE(value, offset2, byteLength2, noAssert) {
+    Buffer2.prototype.writeUintLE = Buffer2.prototype.writeUIntLE = function writeUIntLE(value, offset3, byteLength2, noAssert) {
       value = +value;
-      offset2 = offset2 >>> 0;
+      offset3 = offset3 >>> 0;
       byteLength2 = byteLength2 >>> 0;
       if (!noAssert) {
         var maxBytes = Math.pow(2, 8 * byteLength2) - 1;
-        checkInt(this, value, offset2, byteLength2, maxBytes, 0);
+        checkInt(this, value, offset3, byteLength2, maxBytes, 0);
       }
       var mul = 1;
       var i5 = 0;
-      this[offset2] = value & 255;
+      this[offset3] = value & 255;
       while (++i5 < byteLength2 && (mul *= 256)) {
-        this[offset2 + i5] = value / mul & 255;
+        this[offset3 + i5] = value / mul & 255;
       }
-      return offset2 + byteLength2;
+      return offset3 + byteLength2;
     };
-    Buffer2.prototype.writeUintBE = Buffer2.prototype.writeUIntBE = function writeUIntBE(value, offset2, byteLength2, noAssert) {
+    Buffer2.prototype.writeUintBE = Buffer2.prototype.writeUIntBE = function writeUIntBE(value, offset3, byteLength2, noAssert) {
       value = +value;
-      offset2 = offset2 >>> 0;
+      offset3 = offset3 >>> 0;
       byteLength2 = byteLength2 >>> 0;
       if (!noAssert) {
         var maxBytes = Math.pow(2, 8 * byteLength2) - 1;
-        checkInt(this, value, offset2, byteLength2, maxBytes, 0);
+        checkInt(this, value, offset3, byteLength2, maxBytes, 0);
       }
       var i5 = byteLength2 - 1;
       var mul = 1;
-      this[offset2 + i5] = value & 255;
+      this[offset3 + i5] = value & 255;
       while (--i5 >= 0 && (mul *= 256)) {
-        this[offset2 + i5] = value / mul & 255;
+        this[offset3 + i5] = value / mul & 255;
       }
-      return offset2 + byteLength2;
+      return offset3 + byteLength2;
     };
-    Buffer2.prototype.writeUint8 = Buffer2.prototype.writeUInt8 = function writeUInt8(value, offset2, noAssert) {
+    Buffer2.prototype.writeUint8 = Buffer2.prototype.writeUInt8 = function writeUInt8(value, offset3, noAssert) {
       value = +value;
-      offset2 = offset2 >>> 0;
+      offset3 = offset3 >>> 0;
       if (!noAssert)
-        checkInt(this, value, offset2, 1, 255, 0);
-      this[offset2] = value & 255;
-      return offset2 + 1;
+        checkInt(this, value, offset3, 1, 255, 0);
+      this[offset3] = value & 255;
+      return offset3 + 1;
     };
-    Buffer2.prototype.writeUint16LE = Buffer2.prototype.writeUInt16LE = function writeUInt16LE(value, offset2, noAssert) {
+    Buffer2.prototype.writeUint16LE = Buffer2.prototype.writeUInt16LE = function writeUInt16LE(value, offset3, noAssert) {
       value = +value;
-      offset2 = offset2 >>> 0;
+      offset3 = offset3 >>> 0;
       if (!noAssert)
-        checkInt(this, value, offset2, 2, 65535, 0);
-      this[offset2] = value & 255;
-      this[offset2 + 1] = value >>> 8;
-      return offset2 + 2;
+        checkInt(this, value, offset3, 2, 65535, 0);
+      this[offset3] = value & 255;
+      this[offset3 + 1] = value >>> 8;
+      return offset3 + 2;
     };
-    Buffer2.prototype.writeUint16BE = Buffer2.prototype.writeUInt16BE = function writeUInt16BE(value, offset2, noAssert) {
+    Buffer2.prototype.writeUint16BE = Buffer2.prototype.writeUInt16BE = function writeUInt16BE(value, offset3, noAssert) {
       value = +value;
-      offset2 = offset2 >>> 0;
+      offset3 = offset3 >>> 0;
       if (!noAssert)
-        checkInt(this, value, offset2, 2, 65535, 0);
-      this[offset2] = value >>> 8;
-      this[offset2 + 1] = value & 255;
-      return offset2 + 2;
+        checkInt(this, value, offset3, 2, 65535, 0);
+      this[offset3] = value >>> 8;
+      this[offset3 + 1] = value & 255;
+      return offset3 + 2;
     };
-    Buffer2.prototype.writeUint32LE = Buffer2.prototype.writeUInt32LE = function writeUInt32LE(value, offset2, noAssert) {
+    Buffer2.prototype.writeUint32LE = Buffer2.prototype.writeUInt32LE = function writeUInt32LE(value, offset3, noAssert) {
       value = +value;
-      offset2 = offset2 >>> 0;
+      offset3 = offset3 >>> 0;
       if (!noAssert)
-        checkInt(this, value, offset2, 4, 4294967295, 0);
-      this[offset2 + 3] = value >>> 24;
-      this[offset2 + 2] = value >>> 16;
-      this[offset2 + 1] = value >>> 8;
-      this[offset2] = value & 255;
-      return offset2 + 4;
+        checkInt(this, value, offset3, 4, 4294967295, 0);
+      this[offset3 + 3] = value >>> 24;
+      this[offset3 + 2] = value >>> 16;
+      this[offset3 + 1] = value >>> 8;
+      this[offset3] = value & 255;
+      return offset3 + 4;
     };
-    Buffer2.prototype.writeUint32BE = Buffer2.prototype.writeUInt32BE = function writeUInt32BE(value, offset2, noAssert) {
+    Buffer2.prototype.writeUint32BE = Buffer2.prototype.writeUInt32BE = function writeUInt32BE(value, offset3, noAssert) {
       value = +value;
-      offset2 = offset2 >>> 0;
+      offset3 = offset3 >>> 0;
       if (!noAssert)
-        checkInt(this, value, offset2, 4, 4294967295, 0);
-      this[offset2] = value >>> 24;
-      this[offset2 + 1] = value >>> 16;
-      this[offset2 + 2] = value >>> 8;
-      this[offset2 + 3] = value & 255;
-      return offset2 + 4;
+        checkInt(this, value, offset3, 4, 4294967295, 0);
+      this[offset3] = value >>> 24;
+      this[offset3 + 1] = value >>> 16;
+      this[offset3 + 2] = value >>> 8;
+      this[offset3 + 3] = value & 255;
+      return offset3 + 4;
     };
-    Buffer2.prototype.writeIntLE = function writeIntLE(value, offset2, byteLength2, noAssert) {
+    Buffer2.prototype.writeIntLE = function writeIntLE(value, offset3, byteLength2, noAssert) {
       value = +value;
-      offset2 = offset2 >>> 0;
+      offset3 = offset3 >>> 0;
       if (!noAssert) {
         var limit = Math.pow(2, 8 * byteLength2 - 1);
-        checkInt(this, value, offset2, byteLength2, limit - 1, -limit);
+        checkInt(this, value, offset3, byteLength2, limit - 1, -limit);
       }
       var i5 = 0;
       var mul = 1;
       var sub = 0;
-      this[offset2] = value & 255;
+      this[offset3] = value & 255;
       while (++i5 < byteLength2 && (mul *= 256)) {
-        if (value < 0 && sub === 0 && this[offset2 + i5 - 1] !== 0) {
+        if (value < 0 && sub === 0 && this[offset3 + i5 - 1] !== 0) {
           sub = 1;
         }
-        this[offset2 + i5] = (value / mul >> 0) - sub & 255;
+        this[offset3 + i5] = (value / mul >> 0) - sub & 255;
       }
-      return offset2 + byteLength2;
+      return offset3 + byteLength2;
     };
-    Buffer2.prototype.writeIntBE = function writeIntBE(value, offset2, byteLength2, noAssert) {
+    Buffer2.prototype.writeIntBE = function writeIntBE(value, offset3, byteLength2, noAssert) {
       value = +value;
-      offset2 = offset2 >>> 0;
+      offset3 = offset3 >>> 0;
       if (!noAssert) {
         var limit = Math.pow(2, 8 * byteLength2 - 1);
-        checkInt(this, value, offset2, byteLength2, limit - 1, -limit);
+        checkInt(this, value, offset3, byteLength2, limit - 1, -limit);
       }
       var i5 = byteLength2 - 1;
       var mul = 1;
       var sub = 0;
-      this[offset2 + i5] = value & 255;
+      this[offset3 + i5] = value & 255;
       while (--i5 >= 0 && (mul *= 256)) {
-        if (value < 0 && sub === 0 && this[offset2 + i5 + 1] !== 0) {
+        if (value < 0 && sub === 0 && this[offset3 + i5 + 1] !== 0) {
           sub = 1;
         }
-        this[offset2 + i5] = (value / mul >> 0) - sub & 255;
+        this[offset3 + i5] = (value / mul >> 0) - sub & 255;
       }
-      return offset2 + byteLength2;
+      return offset3 + byteLength2;
     };
-    Buffer2.prototype.writeInt8 = function writeInt8(value, offset2, noAssert) {
+    Buffer2.prototype.writeInt8 = function writeInt8(value, offset3, noAssert) {
       value = +value;
-      offset2 = offset2 >>> 0;
+      offset3 = offset3 >>> 0;
       if (!noAssert)
-        checkInt(this, value, offset2, 1, 127, -128);
+        checkInt(this, value, offset3, 1, 127, -128);
       if (value < 0)
         value = 255 + value + 1;
-      this[offset2] = value & 255;
-      return offset2 + 1;
+      this[offset3] = value & 255;
+      return offset3 + 1;
     };
-    Buffer2.prototype.writeInt16LE = function writeInt16LE(value, offset2, noAssert) {
+    Buffer2.prototype.writeInt16LE = function writeInt16LE(value, offset3, noAssert) {
       value = +value;
-      offset2 = offset2 >>> 0;
+      offset3 = offset3 >>> 0;
       if (!noAssert)
-        checkInt(this, value, offset2, 2, 32767, -32768);
-      this[offset2] = value & 255;
-      this[offset2 + 1] = value >>> 8;
-      return offset2 + 2;
+        checkInt(this, value, offset3, 2, 32767, -32768);
+      this[offset3] = value & 255;
+      this[offset3 + 1] = value >>> 8;
+      return offset3 + 2;
     };
-    Buffer2.prototype.writeInt16BE = function writeInt16BE(value, offset2, noAssert) {
+    Buffer2.prototype.writeInt16BE = function writeInt16BE(value, offset3, noAssert) {
       value = +value;
-      offset2 = offset2 >>> 0;
+      offset3 = offset3 >>> 0;
       if (!noAssert)
-        checkInt(this, value, offset2, 2, 32767, -32768);
-      this[offset2] = value >>> 8;
-      this[offset2 + 1] = value & 255;
-      return offset2 + 2;
+        checkInt(this, value, offset3, 2, 32767, -32768);
+      this[offset3] = value >>> 8;
+      this[offset3 + 1] = value & 255;
+      return offset3 + 2;
     };
-    Buffer2.prototype.writeInt32LE = function writeInt32LE(value, offset2, noAssert) {
+    Buffer2.prototype.writeInt32LE = function writeInt32LE(value, offset3, noAssert) {
       value = +value;
-      offset2 = offset2 >>> 0;
+      offset3 = offset3 >>> 0;
       if (!noAssert)
-        checkInt(this, value, offset2, 4, 2147483647, -2147483648);
-      this[offset2] = value & 255;
-      this[offset2 + 1] = value >>> 8;
-      this[offset2 + 2] = value >>> 16;
-      this[offset2 + 3] = value >>> 24;
-      return offset2 + 4;
+        checkInt(this, value, offset3, 4, 2147483647, -2147483648);
+      this[offset3] = value & 255;
+      this[offset3 + 1] = value >>> 8;
+      this[offset3 + 2] = value >>> 16;
+      this[offset3 + 3] = value >>> 24;
+      return offset3 + 4;
     };
-    Buffer2.prototype.writeInt32BE = function writeInt32BE(value, offset2, noAssert) {
+    Buffer2.prototype.writeInt32BE = function writeInt32BE(value, offset3, noAssert) {
       value = +value;
-      offset2 = offset2 >>> 0;
+      offset3 = offset3 >>> 0;
       if (!noAssert)
-        checkInt(this, value, offset2, 4, 2147483647, -2147483648);
+        checkInt(this, value, offset3, 4, 2147483647, -2147483648);
       if (value < 0)
         value = 4294967295 + value + 1;
-      this[offset2] = value >>> 24;
-      this[offset2 + 1] = value >>> 16;
-      this[offset2 + 2] = value >>> 8;
-      this[offset2 + 3] = value & 255;
-      return offset2 + 4;
+      this[offset3] = value >>> 24;
+      this[offset3 + 1] = value >>> 16;
+      this[offset3 + 2] = value >>> 8;
+      this[offset3 + 3] = value & 255;
+      return offset3 + 4;
     };
-    function checkIEEE754(buf, value, offset2, ext, max2, min2) {
-      if (offset2 + ext > buf.length)
+    function checkIEEE754(buf, value, offset3, ext, max2, min2) {
+      if (offset3 + ext > buf.length)
         throw new RangeError("Index out of range");
-      if (offset2 < 0)
+      if (offset3 < 0)
         throw new RangeError("Index out of range");
     }
-    function writeFloat(buf, value, offset2, littleEndian, noAssert) {
+    function writeFloat(buf, value, offset3, littleEndian, noAssert) {
       value = +value;
-      offset2 = offset2 >>> 0;
+      offset3 = offset3 >>> 0;
       if (!noAssert) {
-        checkIEEE754(buf, value, offset2, 4, 34028234663852886e22, -34028234663852886e22);
+        checkIEEE754(buf, value, offset3, 4, 34028234663852886e22, -34028234663852886e22);
       }
-      ieee754.write(buf, value, offset2, littleEndian, 23, 4);
-      return offset2 + 4;
+      ieee754.write(buf, value, offset3, littleEndian, 23, 4);
+      return offset3 + 4;
     }
-    Buffer2.prototype.writeFloatLE = function writeFloatLE(value, offset2, noAssert) {
-      return writeFloat(this, value, offset2, true, noAssert);
+    Buffer2.prototype.writeFloatLE = function writeFloatLE(value, offset3, noAssert) {
+      return writeFloat(this, value, offset3, true, noAssert);
     };
-    Buffer2.prototype.writeFloatBE = function writeFloatBE(value, offset2, noAssert) {
-      return writeFloat(this, value, offset2, false, noAssert);
+    Buffer2.prototype.writeFloatBE = function writeFloatBE(value, offset3, noAssert) {
+      return writeFloat(this, value, offset3, false, noAssert);
     };
-    function writeDouble(buf, value, offset2, littleEndian, noAssert) {
+    function writeDouble(buf, value, offset3, littleEndian, noAssert) {
       value = +value;
-      offset2 = offset2 >>> 0;
+      offset3 = offset3 >>> 0;
       if (!noAssert) {
-        checkIEEE754(buf, value, offset2, 8, 17976931348623157e292, -17976931348623157e292);
+        checkIEEE754(buf, value, offset3, 8, 17976931348623157e292, -17976931348623157e292);
       }
-      ieee754.write(buf, value, offset2, littleEndian, 52, 8);
-      return offset2 + 8;
+      ieee754.write(buf, value, offset3, littleEndian, 52, 8);
+      return offset3 + 8;
     }
-    Buffer2.prototype.writeDoubleLE = function writeDoubleLE(value, offset2, noAssert) {
-      return writeDouble(this, value, offset2, true, noAssert);
+    Buffer2.prototype.writeDoubleLE = function writeDoubleLE(value, offset3, noAssert) {
+      return writeDouble(this, value, offset3, true, noAssert);
     };
-    Buffer2.prototype.writeDoubleBE = function writeDoubleBE(value, offset2, noAssert) {
-      return writeDouble(this, value, offset2, false, noAssert);
+    Buffer2.prototype.writeDoubleBE = function writeDoubleBE(value, offset3, noAssert) {
+      return writeDouble(this, value, offset3, false, noAssert);
     };
     Buffer2.prototype.copy = function copy(target, targetStart, start, end) {
       if (!Buffer2.isBuffer(target))
@@ -8242,11 +8242,11 @@ var require_buffer = __commonJS({
     function base64ToBytes(str) {
       return base64.toByteArray(base64clean(str));
     }
-    function blitBuffer(src, dst, offset2, length) {
+    function blitBuffer(src, dst, offset3, length) {
       for (var i5 = 0; i5 < length; ++i5) {
-        if (i5 + offset2 >= dst.length || i5 >= src.length)
+        if (i5 + offset3 >= dst.length || i5 >= src.length)
           break;
-        dst[i5 + offset2] = src[i5];
+        dst[i5 + offset3] = src[i5];
       }
       return i5;
     }
@@ -8347,14 +8347,14 @@ var require_hash2 = __commonJS({
       var blockSize = this._blockSize;
       var length = data.length;
       var accum = this._len;
-      for (var offset2 = 0; offset2 < length; ) {
+      for (var offset3 = 0; offset3 < length; ) {
         var assigned = accum % blockSize;
-        var remainder = Math.min(length - offset2, blockSize - assigned);
+        var remainder = Math.min(length - offset3, blockSize - assigned);
         for (var i5 = 0; i5 < remainder; i5++) {
-          block[assigned + i5] = data[offset2 + i5];
+          block[assigned + i5] = data[offset3 + i5];
         }
         accum += remainder;
-        offset2 += remainder;
+        offset3 += remainder;
         if (accum % blockSize === 0) {
           this._update(block);
         }
@@ -13290,7 +13290,7 @@ var require_lib2 = __commonJS({
 
 // ../../../lix/packages/client/vendored/diff3/onp.js
 function onp_default(a_, b_) {
-  var a4 = a_, b3 = b_, m3 = a4.length, n6 = b3.length, reverse = false, offset2 = m3 + 1, path = [], pathposi = [];
+  var a4 = a_, b3 = b_, m3 = a4.length, n6 = b3.length, reverse = false, offset3 = m3 + 1, path = [], pathposi = [];
   var tmp1, tmp2;
   var init2 = function() {
     if (m3 >= n6) {
@@ -13301,7 +13301,7 @@ function onp_default(a_, b_) {
       m3 = n6;
       n6 = tmp2;
       reverse = true;
-      offset2 = m3 + 1;
+      offset3 = m3 + 1;
     }
   };
   var P2 = function(startX, startY, endX, endY, r8) {
@@ -13316,9 +13316,9 @@ function onp_default(a_, b_) {
   var snake = function(k2, p3, pp) {
     var r8, x2, y3, startX, startY;
     if (p3 > pp) {
-      r8 = path[k2 - 1 + offset2];
+      r8 = path[k2 - 1 + offset3];
     } else {
-      r8 = path[k2 + 1 + offset2];
+      r8 = path[k2 + 1 + offset3];
     }
     startY = y3 = Math.max(p3, pp);
     startX = x2 = y3 - k2;
@@ -13327,9 +13327,9 @@ function onp_default(a_, b_) {
       ++y3;
     }
     if (startX == x2 && startY == y3) {
-      path[k2 + offset2] = r8;
+      path[k2 + offset3] = r8;
     } else {
-      path[k2 + offset2] = pathposi.length;
+      path[k2 + offset3] = pathposi.length;
       pathposi[pathposi.length] = new P2(startX, startY, x2, y3, r8);
     }
     return y3;
@@ -13349,14 +13349,14 @@ function onp_default(a_, b_) {
       do {
         ++p3;
         for (k2 = -p3; k2 <= delta - 1; ++k2) {
-          fp[k2 + offset2] = snake(k2, fp[k2 - 1 + offset2] + 1, fp[k2 + 1 + offset2]);
+          fp[k2 + offset3] = snake(k2, fp[k2 - 1 + offset3] + 1, fp[k2 + 1 + offset3]);
         }
         for (k2 = delta + p3; k2 >= delta + 1; --k2) {
-          fp[k2 + offset2] = snake(k2, fp[k2 - 1 + offset2] + 1, fp[k2 + 1 + offset2]);
+          fp[k2 + offset3] = snake(k2, fp[k2 - 1 + offset3] + 1, fp[k2 + 1 + offset3]);
         }
-        fp[delta + offset2] = snake(delta, fp[delta - 1 + offset2] + 1, fp[delta + 1 + offset2]);
-      } while (fp[delta + offset2] !== n6);
-      r8 = path[delta + offset2];
+        fp[delta + offset3] = snake(delta, fp[delta - 1 + offset3] + 1, fp[delta + 1 + offset3]);
+      } while (fp[delta + offset3] !== n6);
+      r8 = path[delta + offset3];
       lastStartX = m3;
       lastStartY = n6;
       result = [];
@@ -13940,11 +13940,11 @@ function readOp(reader, source) {
   const OFFS = 15;
   const SIZE = 112;
   if (byte & COPY) {
-    const offset2 = readCompactLE(reader, byte & OFFS, 4);
+    const offset3 = readCompactLE(reader, byte & OFFS, 4);
     let size3 = readCompactLE(reader, (byte & SIZE) >> 4, 3);
     if (size3 === 0)
       size3 = 65536;
-    return source.slice(offset2, offset2 + size3);
+    return source.slice(offset3, offset3 + size3);
   } else {
     return reader.slice(byte);
   }
@@ -13996,7 +13996,7 @@ async function listpack(stream, onData) {
   if (numObjects < 1)
     return;
   while (!reader.eof() && numObjects--) {
-    const offset2 = reader.tell();
+    const offset3 = reader.tell();
     const { type, length, ofs, reference } = await parseHeader(reader);
     const inflator = new import_pako.default.Inflate();
     while (!inflator.result) {
@@ -14020,7 +14020,7 @@ async function listpack(stream, onData) {
           data: inflator.result,
           type,
           num: numObjects,
-          offset: offset2,
+          offset: offset3,
           end,
           reference,
           ofs
@@ -14256,18 +14256,18 @@ function normalizeNewlines(str) {
   return str;
 }
 function parseAuthor(author) {
-  const [, name, email, timestamp, offset2] = author.match(
+  const [, name, email, timestamp, offset3] = author.match(
     /^(.*) <(.*)> (.*) (.*)$/
   );
   return {
     name,
     email,
     timestamp: Number(timestamp),
-    timezoneOffset: parseTimezoneOffset(offset2)
+    timezoneOffset: parseTimezoneOffset(offset3)
   };
 }
-function parseTimezoneOffset(offset2) {
-  let [, sign, hours, minutes] = offset2.match(/(\+|-)(\d\d)(\d\d)/);
+function parseTimezoneOffset(offset3) {
+  let [, sign, hours, minutes] = offset3.match(/(\+|-)(\d\d)(\d\d)/);
   minutes = (sign === "+" ? 1 : -1) * (Number(hours) * 60 + Number(minutes));
   return negateExceptForZero$1(minutes);
 }
@@ -21685,7 +21685,7 @@ var init_isomorphic_git = __esm({
         const offsets = /* @__PURE__ */ new Map();
         let totalObjectCount = null;
         let lastPercent = null;
-        await listpack([pack], async ({ data, type, reference, offset: offset2, num: num2 }) => {
+        await listpack([pack], async ({ data, type, reference, offset: offset3, num: num2 }) => {
           if (totalObjectCount === null)
             totalObjectCount = num2;
           const percent = Math.floor(
@@ -21703,19 +21703,19 @@ var init_isomorphic_git = __esm({
           lastPercent = percent;
           type = listpackTypes[type];
           if (["commit", "tree", "blob", "tag"].includes(type)) {
-            offsetToObject[offset2] = {
+            offsetToObject[offset3] = {
               type,
-              offset: offset2
+              offset: offset3
             };
           } else if (type === "ofs-delta") {
-            offsetToObject[offset2] = {
+            offsetToObject[offset3] = {
               type,
-              offset: offset2
+              offset: offset3
             };
           } else if (type === "ref-delta") {
-            offsetToObject[offset2] = {
+            offsetToObject[offset3] = {
               type,
-              offset: offset2
+              offset: offset3
             };
           }
         });
@@ -21738,8 +21738,8 @@ var init_isomorphic_git = __esm({
         lastPercent = null;
         let count = 0;
         const objectsByDepth = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-        for (let offset2 in offsetToObject) {
-          offset2 = Number(offset2);
+        for (let offset3 in offsetToObject) {
+          offset3 = Number(offset3);
           const percent = Math.floor(count * 100 / totalObjectCount);
           if (percent !== lastPercent) {
             if (onProgress) {
@@ -21752,18 +21752,18 @@ var init_isomorphic_git = __esm({
           }
           count++;
           lastPercent = percent;
-          const o9 = offsetToObject[offset2];
+          const o9 = offsetToObject[offset3];
           if (o9.oid)
             continue;
           try {
             p3.readDepth = 0;
             p3.externalReadDepth = 0;
-            const { type, object } = await p3.readSlice({ start: offset2 });
+            const { type, object } = await p3.readSlice({ start: offset3 });
             objectsByDepth[p3.readDepth] += 1;
             const oid = await shasum(GitObject.wrap({ type, object }));
             o9.oid = oid;
             hashes.push(oid);
-            offsets.set(oid, offset2);
+            offsets.set(oid, offset3);
             crcs[oid] = o9.crc;
           } catch (err) {
             continue;
@@ -21862,8 +21862,8 @@ var init_isomorphic_git = __esm({
         let base = null;
         let object = null;
         if (type === "ofs_delta") {
-          const offset2 = decodeVarInt(reader);
-          const baseOffset = start - offset2;
+          const offset3 = decodeVarInt(reader);
+          const baseOffset = start - offset3;
           ({ object: base, type } = await this.readSlice({ start: baseOffset }));
         }
         if (type === "ref_delta") {
@@ -28448,7 +28448,7 @@ var registry = [
     pages: {
       Overview: {
         "/": "./inlang/source-code/editor/README.md",
-        "/get-started": "./inlang/source-code/editor/docs/get-started.md"
+        "/supported-i18n-libraries": "./inlang/source-code/editor/docs/supported-i18n-libraries.md"
       },
       Guides: {
         Usage: "/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink",
@@ -28519,6 +28519,7 @@ var registry = [
     },
     pages: {
       "/": "./inlang/source-code/ide-extension/MARKETPLACE.md",
+      "/supported-i18n-libraries": "./inlang/source-code/ide-extension/docs/supported-i18n-libraries.md",
       "/video-tour": "./inlang/source-code/ide-extension/docs/video-tour.md",
       "/changelog": "./inlang/source-code/ide-extension/CHANGELOG.md"
     },
@@ -29980,6 +29981,27 @@ var registry = [
     website: "https://manage.inlang.com/install?module=messageLintRule.inlang.validJsIdentifier",
     license: "Apache-2.0",
     module: "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-valid-js-identifier@latest/dist/index.js"
+  },
+  {
+    uniqueID: "neh2d6w7",
+    $schema: "https://inlang.com/schema/marketplace-manifest",
+    displayName: {
+      en: "Xcode String Catalogs"
+    },
+    publisherIcon: "https://hechenbros.com/favicon.png",
+    id: "plugin.hechenbros.xcstrings",
+    description: {
+      en: "An inlang plugin to handle Xcode String Catalogs"
+    },
+    keywords: ["inlang", "plugin", "xcstrings", "xcode", "translation", "ios", "mac"],
+    license: "MIT",
+    module: "https://cdn.jsdelivr.net/npm/inlang-plugin-xcstrings@latest/out/index.js",
+    readme: "https://cdn.jsdelivr.net/npm/inlang-plugin-xcstrings@latest/README.md",
+    pages: {
+      "/": "https://cdn.jsdelivr.net/npm/inlang-plugin-xcstrings@latest/README.md",
+      "/changelog": "https://cdn.jsdelivr.net/npm/inlang-plugin-xcstrings@latest/CHANGELOG.md"
+    },
+    publisherName: "Hechenbros"
   },
   {
     uniqueID: "3i8bor92",
@@ -31674,7 +31696,7 @@ GeneralInput = __decorateClass([
   t3("general-input")
 ], GeneralInput);
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.V2OL7VMD.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.V2OL7VMD.js
 var tag_styles_default = i`
   :host {
     display: inline-block;
@@ -31790,7 +31812,7 @@ var tag_styles_default = i`
   }
 `;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.6I2T3DLI.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.6I2T3DLI.js
 var icon_button_styles_default = i`
   :host {
     display: inline-block;
@@ -31840,7 +31862,7 @@ var icon_button_styles_default = i`
   }
 `;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.3Y6SB6QS.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.3Y6SB6QS.js
 var basePath = "";
 function setBasePath(path) {
   basePath = path;
@@ -31865,14 +31887,14 @@ function getBasePath(subpath = "") {
   return basePath.replace(/\/$/, "") + (subpath ? `/${subpath.replace(/^\//, "")}` : ``);
 }
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.P7ZG6EMR.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.P7ZG6EMR.js
 var library = {
   name: "default",
   resolver: (name) => getBasePath(`assets/icons/${name}.svg`)
 };
 var library_default_default = library;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.3TFKS637.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.3TFKS637.js
 var icons = {
   caret: `
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -31996,7 +32018,7 @@ var systemLibrary = {
 };
 var library_system_default = systemLibrary;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.ZL53POKZ.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.ZL53POKZ.js
 var registry2 = [library_default_default, library_system_default];
 var watchedIcons = [];
 function watchIcon(icon) {
@@ -32009,7 +32031,7 @@ function getIconLibrary(name) {
   return registry2.find((lib) => lib.name === name);
 }
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.QLXRCYS4.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.QLXRCYS4.js
 var icon_styles_default = i`
   :host {
     display: inline-block;
@@ -32025,7 +32047,7 @@ var icon_styles_default = i`
   }
 `;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.IFDWM6P4.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.IFDWM6P4.js
 var __defProp2 = Object.defineProperty;
 var __defProps = Object.defineProperties;
 var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
@@ -32056,7 +32078,7 @@ var __decorateClass2 = (decorators, target, key, kind) => {
   return result;
 };
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.2FB5TK5H.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.2FB5TK5H.js
 function watch(propertyName, options) {
   const resolvedOptions = __spreadValues({
     waitUntilFirstUpdate: false
@@ -32082,7 +32104,7 @@ function watch(propertyName, options) {
   };
 }
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.TUVJKY7S.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.TUVJKY7S.js
 var component_styles_default = i`
   :host {
     box-sizing: border-box;
@@ -32099,7 +32121,7 @@ var component_styles_default = i`
   }
 `;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.RVOOE4AQ.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.RVOOE4AQ.js
 var ShoelaceElement = class extends s3 {
   constructor() {
     super();
@@ -32157,7 +32179,7 @@ var f3 = (o9) => void 0 === o9.strings;
 var u3 = {};
 var m2 = (o9, t7 = u3) => o9._$AH = t7;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.7YG67M3U.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.7YG67M3U.js
 var CACHEABLE_ERROR = Symbol();
 var RETRYABLE_ERROR = Symbol();
 var parser;
@@ -32389,7 +32411,7 @@ var u4 = l3(b2);
 // ../../../node_modules/.pnpm/lit-html@3.1.3/node_modules/lit-html/directives/if-defined.js
 var o6 = (o9) => o9 ?? T;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.7XLSSP47.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.7XLSSP47.js
 var SlIconButton = class extends ShoelaceElement {
   constructor() {
     super(...arguments);
@@ -32592,7 +32614,7 @@ var LocalizeController = class {
   }
 };
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.MAS2SHYD.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.MAS2SHYD.js
 var translation = {
   $code: "en",
   $name: "English",
@@ -32629,12 +32651,12 @@ var translation = {
 registerTranslation(translation);
 var en_default = translation;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.WLV3FVBR.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.WLV3FVBR.js
 var LocalizeController2 = class extends LocalizeController {
 };
 registerTranslation(en_default);
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.7J6CPMBU.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.7J6CPMBU.js
 var SlTag = class extends ShoelaceElement {
   constructor() {
     super(...arguments);
@@ -32702,7 +32724,7 @@ __decorateClass2([
   n4({ type: Boolean })
 ], SlTag.prototype, "removable", 2);
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.AN6YZWTU.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.AN6YZWTU.js
 var select_styles_default = i`
   :host {
     display: block;
@@ -33029,7 +33051,7 @@ var select_styles_default = i`
   }
 `;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.RK73WSZS.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.RK73WSZS.js
 function getOffset(element, parent) {
   return {
     top: Math.round(element.getBoundingClientRect().top - parent.getBoundingClientRect().top),
@@ -33037,9 +33059,9 @@ function getOffset(element, parent) {
   };
 }
 function scrollIntoView(element, container, direction = "vertical", behavior = "smooth") {
-  const offset2 = getOffset(element, container);
-  const offsetTop = offset2.top + container.scrollTop;
-  const offsetLeft = offset2.left + container.scrollLeft;
+  const offset3 = getOffset(element, container);
+  const offsetTop = offset3.top + container.scrollTop;
+  const offsetLeft = offset3.left + container.scrollLeft;
   const minX = container.scrollLeft;
   const maxX = container.scrollLeft + container.offsetWidth;
   const minY = container.scrollTop;
@@ -33060,7 +33082,7 @@ function scrollIntoView(element, container, direction = "vertical", behavior = "
   }
 }
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.SI4ACBFK.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.SI4ACBFK.js
 var form_control_styles_default = i`
   .form-control .form-control__label {
     display: none;
@@ -33119,7 +33141,7 @@ var form_control_styles_default = i`
   }
 `;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.GI7VDIWX.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.GI7VDIWX.js
 var defaultValue = (propertyName = "value") => (proto, key) => {
   const ctor = proto.constructor;
   const attributeChangedCallback = ctor.prototype.attributeChangedCallback;
@@ -33139,7 +33161,7 @@ var defaultValue = (propertyName = "value") => (proto, key) => {
   };
 };
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.3KSWVBQ5.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.3KSWVBQ5.js
 var popup_styles_default = i`
   :host {
     --arrow-color: var(--sl-color-neutral-1000);
@@ -33200,7 +33222,7 @@ var popup_styles_default = i`
   }
 `;
 
-// ../../../node_modules/.pnpm/@floating-ui+utils@0.2.1/node_modules/@floating-ui/utils/dist/floating-ui.utils.mjs
+// ../../../node_modules/.pnpm/@floating-ui+utils@0.2.2/node_modules/@floating-ui/utils/dist/floating-ui.utils.mjs
 var min = Math.min;
 var max = Math.max;
 var round = Math.round;
@@ -33313,16 +33335,25 @@ function getPaddingObject(padding) {
   };
 }
 function rectToClientRect(rect) {
+  const {
+    x: x2,
+    y: y3,
+    width,
+    height
+  } = rect;
   return {
-    ...rect,
-    top: rect.y,
-    left: rect.x,
-    right: rect.x + rect.width,
-    bottom: rect.y + rect.height
+    width,
+    height,
+    top: y3,
+    left: x2,
+    right: x2 + width,
+    bottom: y3 + height,
+    x: x2,
+    y: y3
   };
 }
 
-// ../../../node_modules/.pnpm/@floating-ui+core@1.6.0/node_modules/@floating-ui/core/dist/floating-ui.core.mjs
+// ../../../node_modules/.pnpm/@floating-ui+core@1.6.1/node_modules/@floating-ui/core/dist/floating-ui.core.mjs
 function computeCoordsFromPlacement(_ref, placement, rtl) {
   let {
     reference,
@@ -33491,9 +33522,10 @@ async function detectOverflow(state, options) {
     strategy
   }));
   const rect = elementContext === "floating" ? {
-    ...rects.floating,
     x: x2,
-    y: y3
+    y: y3,
+    width: rects.floating.width,
+    height: rects.floating.height
   } : rects.reference;
   const offsetParent = await (platform2.getOffsetParent == null ? void 0 : platform2.getOffsetParent(elements.floating));
   const offsetScale = await (platform2.isElement == null ? void 0 : platform2.isElement(offsetParent)) ? await (platform2.getScale == null ? void 0 : platform2.getScale(offsetParent)) || {
@@ -33562,14 +33594,14 @@ var arrow = (options) => ({
     const min$1 = minPadding;
     const max2 = clientSize - arrowDimensions[length] - maxPadding;
     const center = clientSize / 2 - arrowDimensions[length] / 2 + centerToReference;
-    const offset2 = clamp(min$1, center, max2);
-    const shouldAddOffset = !middlewareData.arrow && getAlignment(placement) != null && center !== offset2 && rects.reference[length] / 2 - (center < min$1 ? minPadding : maxPadding) - arrowDimensions[length] / 2 < 0;
+    const offset3 = clamp(min$1, center, max2);
+    const shouldAddOffset = !middlewareData.arrow && getAlignment(placement) != null && center !== offset3 && rects.reference[length] / 2 - (center < min$1 ? minPadding : maxPadding) - arrowDimensions[length] / 2 < 0;
     const alignmentOffset = shouldAddOffset ? center < min$1 ? center - min$1 : center - max2 : 0;
     return {
       [axis]: coords[axis] + alignmentOffset,
       data: {
-        [axis]: offset2,
-        centerOffset: center - offset2 - alignmentOffset,
+        [axis]: offset3,
+        centerOffset: center - offset3 - alignmentOffset,
         ...shouldAddOffset && {
           alignmentOffset
         }
@@ -33885,7 +33917,7 @@ var size = function(options) {
   };
 };
 
-// ../../../node_modules/.pnpm/@floating-ui+utils@0.2.1/node_modules/@floating-ui/utils/dist/floating-ui.utils.dom.mjs
+// ../../../node_modules/.pnpm/@floating-ui+utils@0.2.2/node_modules/@floating-ui/utils/dist/floating-ui.utils.dom.mjs
 function getNodeName(node) {
   if (isNode(node)) {
     return (node.nodeName || "").toLowerCase();
@@ -33937,9 +33969,8 @@ function getContainingBlock(element) {
   while (isHTMLElement(currentNode) && !isLastTraversableNode(currentNode)) {
     if (isContainingBlock(currentNode)) {
       return currentNode;
-    } else {
-      currentNode = getParentNode(currentNode);
     }
+    currentNode = getParentNode(currentNode);
   }
   return null;
 }
@@ -34006,7 +34037,7 @@ function getOverflowAncestors(node, list, traverseIframes) {
   return list.concat(scrollableAncestor, getOverflowAncestors(scrollableAncestor, [], traverseIframes));
 }
 
-// ../../../node_modules/.pnpm/@floating-ui+dom@1.6.3/node_modules/@floating-ui/dom/dist/floating-ui.dom.mjs
+// ../../../node_modules/.pnpm/@floating-ui+dom@1.6.5/node_modules/@floating-ui/dom/dist/floating-ui.dom.mjs
 function getCssDimensions(element) {
   const css = getComputedStyle2(element);
   let width = parseFloat(css.width) || 0;
@@ -34125,10 +34156,10 @@ function getBoundingClientRect(element, includeScale, isFixedStrategy, offsetPar
   });
 }
 var topLayerSelectors = [":popover-open", ":modal"];
-function isTopLayer(floating) {
+function isTopLayer(element) {
   return topLayerSelectors.some((selector) => {
     try {
-      return floating.matches(selector);
+      return element.matches(selector);
     } catch (e11) {
       return false;
     }
@@ -34294,7 +34325,7 @@ function getClippingRect(_ref) {
     rootBoundary,
     strategy
   } = _ref;
-  const elementClippingAncestors = boundary === "clippingAncestors" ? getClippingElementAncestors(element, this._c) : [].concat(boundary);
+  const elementClippingAncestors = boundary === "clippingAncestors" ? isTopLayer(element) ? [] : getClippingElementAncestors(element, this._c) : [].concat(boundary);
   const clippingAncestors = [...elementClippingAncestors, rootBoundary];
   const firstClippingAncestor = clippingAncestors[0];
   const clippingRect = clippingAncestors.reduce((accRect, clippingAncestor) => {
@@ -34353,6 +34384,9 @@ function getRectRelativeToOffsetParent(element, offsetParent, strategy) {
     height: rect.height
   };
 }
+function isStaticPositioned(element) {
+  return getComputedStyle2(element).position === "static";
+}
 function getTrueOffsetParent(element, polyfill) {
   if (!isHTMLElement(element) || getComputedStyle2(element).position === "fixed") {
     return null;
@@ -34363,28 +34397,40 @@ function getTrueOffsetParent(element, polyfill) {
   return element.offsetParent;
 }
 function getOffsetParent(element, polyfill) {
-  const window2 = getWindow(element);
-  if (!isHTMLElement(element) || isTopLayer(element)) {
-    return window2;
+  const win = getWindow(element);
+  if (isTopLayer(element)) {
+    return win;
+  }
+  if (!isHTMLElement(element)) {
+    let svgOffsetParent = getParentNode(element);
+    while (svgOffsetParent && !isLastTraversableNode(svgOffsetParent)) {
+      if (isElement(svgOffsetParent) && !isStaticPositioned(svgOffsetParent)) {
+        return svgOffsetParent;
+      }
+      svgOffsetParent = getParentNode(svgOffsetParent);
+    }
+    return win;
   }
   let offsetParent = getTrueOffsetParent(element, polyfill);
-  while (offsetParent && isTableElement(offsetParent) && getComputedStyle2(offsetParent).position === "static") {
+  while (offsetParent && isTableElement(offsetParent) && isStaticPositioned(offsetParent)) {
     offsetParent = getTrueOffsetParent(offsetParent, polyfill);
   }
-  if (offsetParent && (getNodeName(offsetParent) === "html" || getNodeName(offsetParent) === "body" && getComputedStyle2(offsetParent).position === "static" && !isContainingBlock(offsetParent))) {
-    return window2;
+  if (offsetParent && isLastTraversableNode(offsetParent) && isStaticPositioned(offsetParent) && !isContainingBlock(offsetParent)) {
+    return win;
   }
-  return offsetParent || getContainingBlock(element) || window2;
+  return offsetParent || getContainingBlock(element) || win;
 }
 var getElementRects = async function(data) {
   const getOffsetParentFn = this.getOffsetParent || getOffsetParent;
   const getDimensionsFn = this.getDimensions;
+  const floatingDimensions = await getDimensionsFn(data.floating);
   return {
     reference: getRectRelativeToOffsetParent(data.reference, await getOffsetParentFn(data.floating), data.strategy),
     floating: {
       x: 0,
       y: 0,
-      ...await getDimensionsFn(data.floating)
+      width: floatingDimensions.width,
+      height: floatingDimensions.height
     }
   };
 };
@@ -34452,7 +34498,7 @@ function observeMove(element, onMove) {
         if (!ratio) {
           timeoutId = setTimeout(() => {
             refresh(false, 1e-7);
-          }, 100);
+          }, 1e3);
         } else {
           refresh(false, ratio);
         }
@@ -34541,6 +34587,7 @@ function autoUpdate(reference, floating, update2, options) {
     }
   };
 }
+var offset2 = offset;
 var shift2 = shift;
 var flip2 = flip;
 var size2 = size;
@@ -34586,7 +34633,7 @@ function r7(t7) {
   return null;
 }
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.JLIBGQ2M.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.JLIBGQ2M.js
 function isVirtualElement(e11) {
   return e11 !== null && typeof e11 === "object" && "getBoundingClientRect" in e11;
 }
@@ -34746,7 +34793,7 @@ var SlPopup = class extends ShoelaceElement {
     }
     const middleware = [
       // The offset middleware goes first
-      offset({ mainAxis: this.distance, crossAxis: this.skidding })
+      offset2({ mainAxis: this.distance, crossAxis: this.skidding })
     ];
     if (this.sync) {
       middleware.push(
@@ -34976,7 +35023,7 @@ __decorateClass2([
   n4({ attribute: "hover-bridge", type: Boolean })
 ], SlPopup.prototype, "hoverBridge", 2);
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.DL5222VR.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.DL5222VR.js
 var formCollections = /* @__PURE__ */ new WeakMap();
 var reportValidityOverloads = /* @__PURE__ */ new WeakMap();
 var checkValidityOverloads = /* @__PURE__ */ new WeakMap();
@@ -35267,7 +35314,7 @@ var customErrorValidityState = Object.freeze(__spreadProps(__spreadValues({}, va
   customError: true
 }));
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.DHU6MIVB.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.DHU6MIVB.js
 var defaultAnimationRegistry = /* @__PURE__ */ new Map();
 var customAnimationRegistry = /* @__PURE__ */ new WeakMap();
 function ensureAnimation(animation) {
@@ -35300,7 +35347,7 @@ function getAnimation(el, animationName, options) {
   };
 }
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.B4BZKR24.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.B4BZKR24.js
 function waitForEvent(el, eventName) {
   return new Promise((resolve) => {
     function done(event) {
@@ -35313,7 +35360,7 @@ function waitForEvent(el, eventName) {
   });
 }
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.LHI6QEL2.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.LHI6QEL2.js
 function animateTo(el, keyframes, options) {
   return new Promise((resolve) => {
     if ((options == null ? void 0 : options.duration) === Infinity) {
@@ -35341,7 +35388,7 @@ function stopAnimations(el) {
   );
 }
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.NYIIDP5N.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.NYIIDP5N.js
 var HasSlotController = class {
   constructor(host, ...slotNames) {
     this.slotNames = [];
@@ -35409,7 +35456,7 @@ var e10 = class extends i4 {
 e10.directiveName = "unsafeHTML", e10.resultType = 1;
 var o8 = e7(e10);
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.44XN5ATB.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.44XN5ATB.js
 var SlSelect = class extends ShoelaceElement {
   constructor() {
     super(...arguments);
@@ -36121,7 +36168,7 @@ setDefaultAnimation("select.hide", {
   options: { duration: 100, easing: "ease" }
 });
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.FXXKMG2P.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.FXXKMG2P.js
 var option_styles_default = i`
   :host {
     display: block;
@@ -36208,7 +36255,7 @@ var option_styles_default = i`
   }
 `;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.KWDN2DUL.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.KWDN2DUL.js
 var SlOption = class extends ShoelaceElement {
   constructor() {
     super(...arguments);
@@ -36324,7 +36371,7 @@ __decorateClass2([
   watch("value")
 ], SlOption.prototype, "handleValueChange", 1);
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.OZYH3LSG.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.OZYH3LSG.js
 var input_styles_default = i`
   :host {
     display: block;
@@ -36648,7 +36695,7 @@ var l4 = e7(class extends i4 {
   }
 });
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.54TJVTKO.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.54TJVTKO.js
 var SlInput = class extends ShoelaceElement {
   constructor() {
     super(...arguments);
@@ -37097,7 +37144,7 @@ __decorateClass2([
   watch("value", { waitUntilFirstUpdate: true })
 ], SlInput.prototype, "handleValueChange", 1);
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.7DUCI5S4.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.7DUCI5S4.js
 var spinner_styles_default = i`
   :host {
     --track-width: 2px;
@@ -37157,7 +37204,7 @@ var spinner_styles_default = i`
   }
 `;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.TY4GUJRD.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.TY4GUJRD.js
 var SlSpinner = class extends ShoelaceElement {
   constructor() {
     super(...arguments);
@@ -37174,7 +37221,7 @@ var SlSpinner = class extends ShoelaceElement {
 };
 SlSpinner.styles = [component_styles_default, spinner_styles_default];
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.QPYT3OK4.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.QPYT3OK4.js
 var button_styles_default = i`
   :host {
     display: inline-block;
@@ -37770,7 +37817,7 @@ var button_styles_default = i`
   }
 `;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.64QWL6LI.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.64QWL6LI.js
 var SlButton = class extends ShoelaceElement {
   constructor() {
     super(...arguments);
@@ -38024,7 +38071,7 @@ __decorateClass2([
   watch("disabled", { waitUntilFirstUpdate: true })
 ], SlButton.prototype, "handleDisabledChange", 1);
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.W7K6OMDR.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.W7K6OMDR.js
 var checkbox_styles_default = i`
   :host {
     display: inline-block;
@@ -38144,7 +38191,7 @@ var checkbox_styles_default = i`
   }
 `;
 
-// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.2.79/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.FHOQLXTU.js
+// ../../../node_modules/.pnpm/@shoelace-style+shoelace@2.14.0_@types+react@18.3.1/node_modules/@shoelace-style/shoelace/dist/chunks/chunk.FHOQLXTU.js
 var SlCheckbox = class extends ShoelaceElement {
   constructor() {
     super(...arguments);
