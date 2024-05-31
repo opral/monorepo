@@ -5,7 +5,7 @@ import CredibilityTag from "../components/CredibilityTag.jsx"
 
 const isProduction = process.env.NODE_ENV === "production"
 
-const HeroSearch = (props: { projectCount: number }) => {
+const HeroSearch = (props: { projectCount: string }) => {
 	const [open, setOpen] = createSignal(false)
 
 	return (
