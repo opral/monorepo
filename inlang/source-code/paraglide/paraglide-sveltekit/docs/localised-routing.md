@@ -45,9 +45,9 @@ export const i18n = createI18n(runtime, {
 
 By default the default language is located on your base path. Usually `/`. Unlike the other languages it does not have a language prefix. 
 
-This reflects the default `prefixDefaultLanugage: "never"` behavior.
+This reflects the default `prefixDefaultLanguage: "never"` behavior.
 
-If you want to also have a prefix for the default language, use the `prefixDefaultLanugage: "always"` option.
+If you want to also have a prefix for the default language, use the `prefixDefaultLanguage: "always"` option.
 
 ```ts
 export const i18n = createI18n(runtime, {
