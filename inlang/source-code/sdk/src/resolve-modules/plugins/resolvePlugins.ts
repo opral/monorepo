@@ -2,10 +2,6 @@
 import type { ResolvePluginsFunction } from "./types.js"
 import { Plugin } from "@inlang/plugin"
 import {
-	loadMessages as sdkLoadMessages,
-	saveMessages as sdkSaveMessages,
-} from "../../persistence/plugin.js"
-import {
 	PluginReturnedInvalidCustomApiError,
 	PluginLoadMessagesFunctionAlreadyDefinedError,
 	PluginSaveMessagesFunctionAlreadyDefinedError,
@@ -121,15 +117,10 @@ export const resolvePlugins: ResolvePluginsFunction = async (args) => {
 
 	// --- LOADMESSAGE / SAVEMESSAGE NOT DEFINED ---
 
-	if (experimentalPersistence) {
-		debug("Override load/save for experimental persistence")
-		// @ts-ignore - type mismatch error
-		result.data.loadMessages = sdkLoadMessages
-		// @ts-ignore - type mismatch error
-		result.data.saveMessages = sdkSaveMessages
-	} else if (
-		typeof result.data.loadMessages !== "function" ||
-		typeof result.data.saveMessages !== "function"
+	if (
+		!experimentalPersistence &&
+		(typeof result.data.loadMessages !== "function" ||
+			typeof result.data.saveMessages !== "function")
 	) {
 		result.errors.push(new PluginsDoNotProvideLoadOrSaveMessagesError())
 	}
