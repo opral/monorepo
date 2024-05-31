@@ -29,7 +29,7 @@
 			"Astro": "/m/iljlwzfs/paraglide-astro-i18n",
 			"SolidStart": "/m/n860p17j/paraglide-solidstart-i18n",
 			"Remix": "/m/fnhuwzrx/paraglide-remix-i18n",
-			"Build your own": "./inlang/source-code/paraglide/paraglide-js/docs/custom-framework-library.md"
+			"/framework-libraries/build-your-own": "./inlang/source-code/paraglide/paraglide-js/docs/custom-framework-library.md"
 		},
 
 		"Tooling": {
