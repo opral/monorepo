@@ -94,6 +94,13 @@ function TheActualPage() {
 		})
 	)
 
+	const selectedLintRuleName = () => {
+		const lintRule = project()?.installed.messageLintRules().find((lintRule) => lintRule.id === filteredMessageLintRules()[0])
+		return typeof lintRule?.displayName === "object"
+			? lintRule?.displayName.en
+			: lintRule?.displayName
+	}
+
 	return (
 		<>
 			<Switch
@@ -177,32 +184,36 @@ function TheActualPage() {
 					<div class="min-h-[calc(100vh_-_200px)]">
 						<ListHeader />
 						<Show when={ninjaIsAdopted() === false && filteredMessageLintRules().length !== 0 && userIsCollaborator() && !isNinjaRecommendationDisabled()}>
-							<div class="flex w-full gap-2 items-center self-stretch flex-grow-0 flex-shrink-0 sm:h-11 relative px-4 py-1 transition-all border-x border-[#DFE2E4] bg-gradient-to-r from-[#8FB0EE] via-[#0BB5D4] to-[#3590ED] animate-fadeInTop">
-								<p class="flex flex-wrap text-sm font-medium text-background">
-									<IconLightbulb class="w-5 h-5 mr-1" />
-									<span class="font-bold mr-1">Tip:</span>
-									<span class="mr-1">Add the</span>
+							<div class="flex flex-col sm:flex-row justify-start items-start w-full gap-2 px-4 py-1.5 transition-all border-x border-[#DFE2E4] bg-inverted-surface animate-fadeInTop">
+								<div class="flex flex-wrap text-sm font-medium text-background/80">
+									<div class="flex justify-start items-start py-[5px] text-background">
+										<IconLightbulb class="w-5 h-5 mr-1" />
+										<span class="font-bold">Tip:</span>
+									</div>
+								</div>
+								<p class="my-auto sm:py-[5px] sm:items-center text-sm text-background/80">
+									Get warned about {selectedLintRuleName()} in pull requests by adding the
 									<a
-										class="underline hover:text-background/80 transition-colors duration-150"
+										class="ml-1 underline text-background/80 hover:text-background transition-colors duration-150"
 										href={
 											import.meta.env.PROD
 												? "https://inlang.com/m/3gk8n4n4/app-inlang-ninjaI18nAction"
 												: "http://localhost:3000/m/3gk8n4n4/app-inlang-ninjaI18nAction"
 										}
 										target="_blank"
-									>Ninja Github Action</a>
-									<span class="ml-1">to see new i18n issues in pull requests.</span>
+									>Ninja GitHub action</a>
+									.
 								</p>
-								<div class="flex flex-wrap-reverse flex-grow items-center justify-end sm:gap-2">
+								<div class="w-full sm:w-[212px] h-8 flex sm:flex-grow justify-end items-center gap-2">
 									<sl-button
 										prop:size="small"
 										onClick={() => {
 											ninjaAdd()
 											setLocalChanges((prev) => (prev += 1))
 										}}
-										class={"on-tip"}
+										class={"on-inverted"}
 									>
-										Add Ninja
+										Add Ninja GitHub action
 									</sl-button>
 									<button
 										onClick={() => {
@@ -212,9 +223,9 @@ function TheActualPage() {
 													{ owner: routeParams().owner, repository: routeParams().repository },
 												])
 										}}
-										class="rounded w-8 h-8 flex justify-center items-center hover:bg-background/10 hover:text-background text-background/80"
+										class="rounded w-[30px] h-[30px] flex justify-center items-center hover:bg-background/10 hover:text-background text-background/80"
 									>
-										<IconClose class="w-6 h-6" />
+										<IconClose class="w-5 h-5" />
 									</button>
 								</div>
 							</div>
