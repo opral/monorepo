@@ -231,7 +231,20 @@ it("should add the defined namespaces by getTranslations hook with namespace obj
 	expect(matches[0]?.messageId).toBe("Metadata.button.a")
 })
 
-it("should add the defined namespaces by getTranslations hook with namespace object variation two", async () => {
+it("should add the defined namespaces by getTranslations hook with namespace object variation 2", async () => {
+	const sourceCode = `
+		const { t } = await getTranslations({namespace: "Metadata", locale: props.params.locale});
+		<p>{t("button.a")}</p>
+	`
+	const settings: PluginSettings = {
+		pathPattern: "./{language}.json",
+	}
+	const matches = parse(sourceCode, settings)
+	expect(matches).toHaveLength(1)
+	expect(matches[0]?.messageId).toBe("Metadata.button.a")
+})
+
+it("should add the defined namespaces by getTranslations hook with namespace object variation 3", async () => {
 	const sourceCode = `
 		const { t } = await getTranslations({namespace: "Metadata"});
 		<p>{t("button.a")}</p>
