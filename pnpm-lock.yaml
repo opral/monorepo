@@ -632,12 +632,6 @@ importers:
       '@inlang/marketplace-registry':
         specifier: workspace:*
         version: link:../marketplace-registry
-      '@inlang/paraglide-js':
-        specifier: workspace:*
-        version: link:../paraglide/paraglide-js
-      '@inlang/paraglide-vite':
-        specifier: workspace:*
-        version: link:../paraglide/paraglide-vite
       '@inlang/result':
         specifier: workspace:*
         version: link:../result
