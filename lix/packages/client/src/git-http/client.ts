@@ -116,6 +116,7 @@ async function collect(iterable: any) {
 // }
 type MakeHttpClientArgs = {
 	debug?: boolean
+	noCache?: boolean
 	description?: string
 	onRes?: ({
 		usedUrl,
@@ -138,6 +139,7 @@ type MakeHttpClientArgs = {
 let cache: Map<string, any> | undefined = new Map()
 let cacheDisabler: any
 export function makeHttpClient({
+	noCache,
 	debug,
 	description,
 	onReq,
@@ -156,7 +158,7 @@ export function makeHttpClient({
 		const origUrl = url
 		const origMethod = method
 
-		if (cache && origMethod === "GET" && cache.has(origUrl)) {
+		if (!noCache && cache && origMethod === "GET" && cache.has(origUrl)) {
 			const { resHeaders, resBody } = cache.get(origUrl)
 			return {
 				url: origUrl,
@@ -221,7 +223,7 @@ export function makeHttpClient({
 			// res.body && res.body.getReader ? fromStream(res.body) : [uint8Array]
 		}
 
-		if (cache && statusCode === 200 && origMethod === "GET") {
+		if (!noCache && cache && statusCode === 200 && origMethod === "GET") {
 			if (!cacheDisabler) {
 				cacheDisabler = setTimeout(() => {
 					cache?.clear()
