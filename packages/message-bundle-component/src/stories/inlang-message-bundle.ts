@@ -13,6 +13,21 @@ export default class InlangMessageBundle extends LitElement {
 	@property({ type: Object })
 	messageBundle: MessageBundle | undefined
 
+	dispatchOnSetSettings(messageBundle: MessageBundle) {
+		const onChangeMessageBundle = new CustomEvent("change-message-bundle", {
+			detail: {
+				argument: messageBundle,
+			},
+		})
+		this.dispatchEvent(onChangeMessageBundle)
+	}
+
+	_triggerSave = () => {
+		if (this.messageBundle) {
+			this.dispatchOnSetSettings(this.messageBundle)
+		}
+	}
+
 	override async firstUpdated() {
 		await this.updateComplete
 		// override primitive colors to match the design system
@@ -37,19 +52,7 @@ export default class InlangMessageBundle extends LitElement {
 			>
 				Add test variant
 			</div>
-			<div
-				@click=${() => {
-					// upsert variant
-					upsertVariant({
-						message: this.messageBundle!.messages[0]!,
-						variant: { match: ["other"], pattern: [{ type: "text", value: "Show me a lot." }] },
-					})
-					this.requestUpdate()
-				}}
-			>
-				Update test variant
-			</div>
-			<div @click=${() => console.log(this.messageBundle)}>Log message bundle</div>
+			<div @click=${() => console.info(this.messageBundle)}>Log message bundle</div>
 			<div class="container">
 				${this.messageBundle?.messages.map((message) => this.renderVariantsTable(message))}
 			</div>
@@ -119,7 +122,7 @@ export default class InlangMessageBundle extends LitElement {
 									],
 								},
 							})
-							this.requestUpdate()
+							this._triggerSave()
 						}}
 					>
 						Save
