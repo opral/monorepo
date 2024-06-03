@@ -20,7 +20,7 @@ export function format(url: UrlObject): string {
 		? auth +
 		  //escape ipv6 addresses with brackets
 		  (!url.hostname.includes(":") ? url.hostname : `[${url.hostname}]`) +
-		  (url.host ? `:${url.port}` : "")
+		  (url.port ? `:${url.port}` : "")
 		: undefined
 
 	let pathname = url.pathname || ""
