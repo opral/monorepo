@@ -38,7 +38,7 @@ Learn more about the format in the [Inlang Message Format Documentation](https:/
 
 ## Using messages in Code
 
-You can use messages in code by importing them from `$lib/paraglide/messages.js`. By convention a wildcard import is used.
+You can use messages in code by importing them from `$lib/paraglide/messages.js`. By convention, a wildcard import is used.
 
 ```svelte
 <script>

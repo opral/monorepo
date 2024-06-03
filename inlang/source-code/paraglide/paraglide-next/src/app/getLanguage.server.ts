@@ -1,7 +1,7 @@
 import { cache } from "react"
 import { getLanugageFromRequest } from "./middleware/getLanguageFromRequest"
 
-const cached = cache<() => { languageTag: string }>(() => ({
+const cached = cache(() => ({
 	languageTag: getLanugageFromRequest(),
 }))
 
