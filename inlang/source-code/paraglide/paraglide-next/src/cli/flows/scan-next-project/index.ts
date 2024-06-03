@@ -1,6 +1,6 @@
 import { Logger } from "@inlang/paraglide-js/internal"
 import { Repository } from "@lix-js/client"
-import { CliStep, folderExists } from "../../utils"
+import { CliStep, folderExists, fileExists } from "../../utils"
 import { NodeishFilesystem } from "@lix-js/fs"
 import path from "node:path"
 import consola from "consola"
@@ -47,73 +47,41 @@ export const scanNextJSProject: CliStep<
 	const tsConfigPath = path.join(process.cwd(), "tsconfig.json")
 	const jsConfigPath = path.join(process.cwd(), "jsconfig.json")
 
-	let typescript = false
-	try {
-		const stat = await ctx.repo.nodeishFs.stat(tsConfigPath)
-		if (stat.isFile()) {
-			typescript = true
-		}
-	} catch {
-		//silently ignore
-	}
+	const [tsConfigExists, jsConfigExists] = await Promise.all([
+		fileExists(ctx.repo.nodeishFs, tsConfigPath),
+		fileExists(ctx.repo.nodeishFs, jsConfigPath),
+	])
 
-	try {
-		const stat = await ctx.repo.nodeishFs.stat(jsConfigPath)
-		if (stat.isFile()) {
-			typescript = false
-		}
-	} catch {
-		//silently ignore
-	}
+	const typescript = tsConfigExists && !jsConfigExists
 
 	// if the ./src directory exists -> srcRoot = ./src
-	// otherwise -> srcRoot  = .
-
-	let srcRoot
-	try {
-		const stat = await ctx.repo.nodeishFs.stat(path.resolve(process.cwd(), "src"))
-		if (!stat.isDirectory()) throw Error()
-		srcRoot = path.resolve(process.cwd(), "src")
-	} catch {
-		srcRoot = process.cwd()
-	}
-
-	let router: "app" | "pages" | undefined = undefined
+	const srcRoot = (await folderExists(ctx.repo.nodeishFs, path.resolve(process.cwd(), "src")))
+		? path.resolve(process.cwd(), "src")
+		: process.cwd()
 
 	const [appFolderExists, pagesFolderExists] = await Promise.all([
 		folderExists(ctx.repo.nodeishFs, path.join(srcRoot, "app")),
 		folderExists(ctx.repo.nodeishFs, path.join(srcRoot, "pages")),
 	])
 
-	if (appFolderExists && !pagesFolderExists) {
-		// clearly app router
-		router = "app"
-	} else if (!appFolderExists && pagesFolderExists) {
-		// clearly pages router
-		router = "pages"
-	} else {
-		//neither or both -> ask
-		const selection = await promptSelection("Which Router are you using?", {
-			initial: "app",
-			options: [
-				{
-					label: "App Router",
-					value: "app",
-				},
-				{
-					label: "Pages Router",
-					value: "pages",
-				},
-			],
-		})
-
-		if (!selection) {
-			ctx.logger.error("Failed to determine the router being used")
-			process.exit(1)
-		}
-
-		router = selection
-	}
+	const router =
+		appFolderExists && !pagesFolderExists
+			? "app"
+			: !appFolderExists && pagesFolderExists
+			? "pages"
+			: await promptSelection("Which Router are you using?", {
+					initial: "app",
+					options: [
+						{
+							label: "App Router",
+							value: "app",
+						},
+						{
+							label: "Pages Router",
+							value: "pages",
+						},
+					],
+			  })
 
 	if (!router) {
 		ctx.logger.error(
@@ -147,16 +115,11 @@ async function findNextConfig(
 	)
 
 	for (const possibleNextConfigPath of possibleNextConfigPaths) {
-		try {
-			const stat = await fs.stat(possibleNextConfigPath)
-			if (!stat.isFile()) continue
-
+		if (await fileExists(fs, possibleNextConfigPath)) {
 			return {
 				path: possibleNextConfigPath,
 				type: possibleNextConfigPath.endsWith(".mjs") ? "esm" : "cjs",
 			}
-		} catch {
-			continue
 		}
 	}
 
@@ -168,15 +131,9 @@ async function findNextConfig(
  */
 async function findPackageJson(fs: NodeishFilesystem, cwd: string): Promise<string | undefined> {
 	const potentialPackageJsonPath = path.resolve(cwd, "package.json")
-	try {
-		const stat = await fs.stat(potentialPackageJsonPath)
-		if (!stat.isFile()) {
-			return undefined
-		}
-		return potentialPackageJsonPath
-	} catch {
-		return undefined
-	}
+	const packageJsonExists = await fileExists(fs, potentialPackageJsonPath)
+
+	return packageJsonExists ? potentialPackageJsonPath : undefined
 }
 
 export const promptSelection = async <T extends string>(

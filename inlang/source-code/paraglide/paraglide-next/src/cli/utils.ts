@@ -72,3 +72,12 @@ export async function folderExists(fs: NodeishFilesystem, path: string): Promise
 		return false
 	}
 }
+
+export async function fileExists(fs: NodeishFilesystem, path: string): Promise<boolean> {
+	try {
+		const stat = await fs.stat(path)
+		return stat.isFile()
+	} catch {
+		return false
+	}
+}
