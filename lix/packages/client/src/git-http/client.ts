@@ -196,7 +196,7 @@ export function makeHttpClient({
 
 		const uint8Array = res.body && new Uint8Array(await res.arrayBuffer())
 
-		if (debug && uint8Array) {
+		if (debug && statusCode === 200 && uint8Array) {
 			const { inflatePackResponse } = await import("../git/debug/packfile.js")
 			console.info(await inflatePackResponse(uint8Array).catch((err: any) => err))
 		}
