@@ -4,7 +4,6 @@ import { ssr as vikePlugin } from "vike/plugin"
 import { fileURLToPath, URL } from "node:url"
 import Icons from "unplugin-icons/vite"
 import { nodePolyfills } from "vite-plugin-node-polyfills"
-import { paraglide } from "@inlang/paraglide-vite"
 
 const isProduction = process.env.NODE_ENV === "production"
 
@@ -31,11 +30,6 @@ export default defineConfig({
 		// are installed indicated in the package.json @iconify-json/* packages.
 		// use those sites to search for icons.
 		Icons({ compiler: "solid" }),
-		// markdownHotModuleReload(),
-		paraglide({
-			project: "../../../project.inlang",
-			outdir: "./src/paraglide",
-		}),
 	],
 	resolve: {
 		alias: {

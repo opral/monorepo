@@ -1,5 +1,37 @@
 # @inlang/settings-component
 
+## 0.0.16
+
+### Patch Changes
+
+- Updated dependencies [9d2aa1a]
+  - @inlang/sdk@0.35.6
+
+## 0.0.15
+
+### Patch Changes
+
+- Updated dependencies [64e30ee]
+  - @inlang/sdk@0.35.5
+
+## 0.0.14
+
+### Patch Changes
+
+- @inlang/sdk@0.35.4
+
+## 0.0.13
+
+### Patch Changes
+
+- @inlang/sdk@0.35.3
+
+## 0.0.12
+
+### Patch Changes
+
+- @inlang/sdk@0.35.2
+
 ## 0.0.11
 
 ### Patch Changes

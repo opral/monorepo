@@ -1,7 +1,7 @@
 import { createI18n } from "@inlang/paraglide-sveltekit"
 import { match as int } from "../params/int"
-import * as runtime from "$paraglide/runtime.js"
-import * as m from "$paraglide/messages.js"
+import * as runtime from "$lib/paraglide/runtime.js"
+import * as m from "$lib/paraglide/messages.js"
 
 export const i18n = createI18n(runtime, {
 	pathnames: {
@@ -16,6 +16,7 @@ export const i18n = createI18n(runtime, {
 		},
 	},
 	matchers: { int },
+	prefixDefaultLanguage: "always",
 	exclude: ["/base/not-translated"],
 	textDirection: {
 		en: "ltr",

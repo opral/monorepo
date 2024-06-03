@@ -1,48 +1,24 @@
-import { getPathInfo } from "../utils/get-path-info.js"
+import { parseRoute, serializeRoute } from "../utils/route.js"
 import { base } from "$app/paths"
-import { serializeRoute } from "../utils/serialize-path.js"
-import { getCanonicalPath } from "../path-translations/getCanonicalPath.js"
-import type { Reroute } from "@sveltejs/kit"
-import type { I18nConfig } from "../adapter.js"
 import { dev } from "$app/environment"
+import type { RoutingStrategy } from "../strategy.js"
+import type { Reroute } from "@sveltejs/kit"
 
 /**
  * Returns a reroute function that applies the given translations to the paths
  * @param translations
  */
-export const createReroute = <T extends string>({
-	defaultLanguageTag,
-	runtime,
-	translations,
-	matchers,
-}: I18nConfig<T>): Reroute => {
+export const createReroute = <T extends string>(strategy: RoutingStrategy<T>): Reroute => {
 	return ({ url }) => {
 		try {
-			const {
-				lang,
-				path: translatedPath,
-				dataSuffix,
-				trailingSlash,
-			} = getPathInfo(url.pathname, {
-				base,
-				availableLanguageTags: runtime.availableLanguageTags,
-				defaultLanguageTag,
-			})
+			const [localisedPath, dataSuffix] = parseRoute(url.pathname as `/${string}`, base)
+			const lang = strategy.getLanguageFromLocalisedPath(localisedPath)
+			if (!lang) return url.pathname
+			const canonicalPath = strategy.getCanonicalPath(localisedPath, lang)
 
-			const canonicalPath = getCanonicalPath(translatedPath, lang, translations, matchers)
-
-			const serializedPath = serializeRoute({
-				path: canonicalPath,
-				base,
-				dataSuffix,
-				trailingSlash,
-				includeLanguage: false,
-			})
-
-			return serializedPath
+			return serializeRoute(canonicalPath, base, dataSuffix)
 		} catch (e) {
 			if (dev) console.error("[@inlang/paraglide-sveltekit] Error thrown during reroute", e)
-
 			return url.pathname
 		}
 	}

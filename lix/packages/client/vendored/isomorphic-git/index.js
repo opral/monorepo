@@ -5,7 +5,7 @@ import pako from 'pako';
 import pify from 'pify';
 import ignore from 'ignore';
 import cleanGitRef from 'clean-git-ref';
-import diff3Merge from 'diff3';
+import diff3Merge from '../diff3/diff3.js';
 
 /**
  * @typedef {Object} GitProgressEvent

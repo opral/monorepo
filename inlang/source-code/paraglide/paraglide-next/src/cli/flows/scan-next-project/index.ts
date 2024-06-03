@@ -1,8 +1,9 @@
 import { Logger } from "@inlang/paraglide-js/internal"
 import { Repository } from "@lix-js/client"
-import { CliStep } from "../../utils"
+import { CliStep, folderExists, fileExists } from "../../utils"
 import { NodeishFilesystem } from "@lix-js/fs"
 import path from "node:path"
+import consola from "consola"
 
 type NextConfigFile = {
 	path: string
@@ -42,60 +43,41 @@ export const scanNextJSProject: CliStep<
 		process.exit(1)
 	}
 
-	// try to read tsconfig or JSConfig
-	const tsConfigPath = path.join(process.cwd(), "tsconfig.json")
-	const jsConfigPath = path.join(process.cwd(), "jsconfig.json")
+	const [tsConfigExists, jsConfigExists] = await Promise.all([
+		fileExists(ctx.repo.nodeishFs, path.join(process.cwd(), "tsconfig.json")),
+		fileExists(ctx.repo.nodeishFs, path.join(process.cwd(), "jsconfig.json")),
+	])
 
-	let typescript = false
-	try {
-		const stat = await ctx.repo.nodeishFs.stat(tsConfigPath)
-		if (stat.isFile()) {
-			typescript = true
-		}
-	} catch {
-		//silently ignore
-	}
-
-	try {
-		const stat = await ctx.repo.nodeishFs.stat(jsConfigPath)
-		if (stat.isFile()) {
-			typescript = false
-		}
-	} catch {
-		//silently ignore
-	}
+	const typescript = tsConfigExists && !jsConfigExists
 
 	// if the ./src directory exists -> srcRoot = ./src
-	// otherwise -> srcRoot  = .
+	const srcRoot = (await folderExists(ctx.repo.nodeishFs, path.resolve(process.cwd(), "src")))
+		? path.resolve(process.cwd(), "src")
+		: process.cwd()
 
-	let srcRoot
-	try {
-		const stat = await ctx.repo.nodeishFs.stat(path.resolve(process.cwd(), "src"))
-		if (!stat.isDirectory()) throw Error()
-		srcRoot = path.resolve(process.cwd(), "src")
-	} catch {
-		srcRoot = process.cwd()
-	}
+	const [appFolderExists, pagesFolderExists] = await Promise.all([
+		folderExists(ctx.repo.nodeishFs, path.join(srcRoot, "app")),
+		folderExists(ctx.repo.nodeishFs, path.join(srcRoot, "pages")),
+	])
 
-	let router: "app" | "pages" | undefined = undefined
-	const expectedAppFolderPath = path.join(srcRoot, "app")
-	const expectedPagesFolderPath = path.join(srcRoot, "pages")
-
-	try {
-		const stat = await ctx.repo.nodeishFs.stat(expectedPagesFolderPath)
-		if (!stat.isDirectory()) throw new Error()
-		router = "pages"
-	} catch {
-		//silently ignore
-	}
-
-	try {
-		const stat = await ctx.repo.nodeishFs.stat(expectedAppFolderPath)
-		if (!stat.isDirectory()) throw new Error()
-		router = "app"
-	} catch {
-		//silently ignore
-	}
+	const router =
+		appFolderExists && !pagesFolderExists
+			? "app"
+			: !appFolderExists && pagesFolderExists
+			? "pages"
+			: await promptSelection("Which Router are you using?", {
+					initial: "app",
+					options: [
+						{
+							label: "App Router",
+							value: "app",
+						},
+						{
+							label: "Pages Router",
+							value: "pages",
+						},
+					],
+			  })
 
 	if (!router) {
 		ctx.logger.error(
@@ -129,16 +111,11 @@ async function findNextConfig(
 	)
 
 	for (const possibleNextConfigPath of possibleNextConfigPaths) {
-		try {
-			const stat = await fs.stat(possibleNextConfigPath)
-			if (!stat.isFile()) continue
-
+		if (await fileExists(fs, possibleNextConfigPath)) {
 			return {
 				path: possibleNextConfigPath,
 				type: possibleNextConfigPath.endsWith(".mjs") ? "esm" : "cjs",
 			}
-		} catch {
-			continue
 		}
 	}
 
@@ -150,13 +127,25 @@ async function findNextConfig(
  */
 async function findPackageJson(fs: NodeishFilesystem, cwd: string): Promise<string | undefined> {
 	const potentialPackageJsonPath = path.resolve(cwd, "package.json")
-	try {
-		const stat = await fs.stat(potentialPackageJsonPath)
-		if (!stat.isFile()) {
-			return undefined
-		}
-		return potentialPackageJsonPath
-	} catch {
-		return undefined
+	const packageJsonExists = await fileExists(fs, potentialPackageJsonPath)
+
+	return packageJsonExists ? potentialPackageJsonPath : undefined
+}
+
+export const promptSelection = async <T extends string>(
+	message: string,
+	options: { initial?: T; options: { label: string; value: T }[] } = { options: [] }
+): Promise<T> => {
+	return prompt(message, { type: "select", ...options }) as unknown as Promise<T>
+}
+
+/**
+ * Wrapper to exit the process if the user presses CTRL+C.
+ */
+export const prompt: typeof consola.prompt = async (message, options) => {
+	const response = await consola.prompt(message, options)
+	if (response?.toString() === "Symbol(clack:cancel)") {
+		process.exit(0)
 	}
+	return response
 }

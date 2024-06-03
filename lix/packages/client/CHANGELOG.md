@@ -1,5 +1,24 @@
 # @lix-js/client
 
+## 2.2.0
+
+### Minor Changes
+
+- 3b2e0a6: try again to fix peed dep issue
+
+## 2.1.0
+
+### Minor Changes
+
+- 548bc9e: fix missing package venderoed dep configuration 2
+
+## 2.0.1
+
+### Patch Changes
+
+- Updated dependencies [4a25124]
+  - @lix-js/fs@2.1.0
+
 ## 2.0.0
 
 ### Major Changes

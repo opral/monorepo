@@ -1,3 +1,4 @@
+[![Inlang-ecosystem compatibility badge](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/assets/md-badges/inlang.svg)](https://inlang.com)
 
 ## Getting Started
 
@@ -36,9 +37,11 @@ Use curly braces to add parameters.
 
 Learn more about the format in the [Inlang Message Format Documentation](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat).
 
+Note: _All_ messages you use in your project must be added to these files. It is not possible to dynamically add more messages at runtime.
+
 ## Using messages in Code
 
-You can use messages in code by importing them from `$lib/paraglide/messages.js`. By convention a wildcard import is used.
+The Paraglide compiler will generate a `src/lib/paraglide/messages.js` file that contains your messages. Import messages from there. By convention, a wildcard import is used.
 
 ```svelte
 <script>
@@ -51,11 +54,18 @@ You can use messages in code by importing them from `$lib/paraglide/messages.js`
 
 Only messages used on the current page are sent to the client. Any messages that aren't used on the current page will be tree-shaken out.
 
-## Switching Languages
+## Language detection 
 
 The language is determined based on the URL. If the first segment of the URL is a language tag, that language will be used. If no language tag is present, the default language will be used.
 
 - `/about` - English
 - `/de/about` - German
 
-There is no need to add a `[locale]` route parameter for this, the `reroute` hook already reroutes paths with languages to the correct pages.
+The `reroute` hook in `src/hooks.js` (added automatically) automatically rewrites requests that include the language in the URL to the correct page. There is **no need** to modify your routes to add a `[locale]` segment.
+
+```fs
+src/
+  routes/
+	+layout.svelte
+	+page.svelte
+```

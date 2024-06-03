@@ -111,6 +111,26 @@ To set the `lang` and `dir` attributes on your `<html>` tag add placeholders in 
 <html lang="%paraglide.lang%" dir="%paraglide.textDirection%"> 
 ```
 
+### 6. Add Types for `event.locals.paraglide`
+
+In `src/app.d.ts`
+
+```ts
+import type { AvailableLanguageTag } from "$lib/paraglide/runtime"
+import type { ParaglideLocals } from "@inlang/paraglide-sveltekit"
+
+declare global {
+	namespace App {
+		interface Locals {
+			paraglide: ParaglideLocals<AvailableLanguageTag>
+		}
+		// ...
+	}
+}
+
+export {}
+```
+
 ## Go try it out!
 
 Visit `/` to see your default language, and `/{lang}` to see other languages. All links should be translated automatically.

@@ -4,6 +4,56 @@
 
 ### Patch Changes
 
+- Updated dependencies [9d2aa1a]
+  - @inlang/cli@2.18.1
+  - @inlang/sdk@0.35.6
+
+## null
+
+### Patch Changes
+
+- Updated dependencies [64e30ee]
+  - @inlang/sdk@0.35.5
+  - @inlang/cli@2.18.0
+
+## null
+
+### Patch Changes
+
+- Updated dependencies [2806698]
+  - @inlang/cli@2.18.0
+
+## null
+
+### Patch Changes
+
+- Updated dependencies [3b2e0a6]
+  - @lix-js/client@2.2.0
+  - @inlang/cli@2.17.0
+  - @inlang/sdk@0.35.4
+
+## null
+
+### Patch Changes
+
+- Updated dependencies [548bc9e]
+  - @lix-js/client@2.1.0
+  - @inlang/cli@2.17.0
+  - @inlang/sdk@0.35.3
+
+## null
+
+### Patch Changes
+
+- Updated dependencies [3896fe6]
+  - @inlang/cli@2.17.0
+  - @inlang/sdk@0.35.2
+  - @lix-js/client@2.0.1
+
+## null
+
+### Patch Changes
+
 - Updated dependencies [00ad046]
   - @lix-js/client@2.0.0
   - @inlang/cli@2.16.10

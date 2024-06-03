@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/plugin",
 	"type": "module",
-	"version": "2.4.12",
+	"version": "2.4.13",
 	"license": "Apache-2.0",
 	"publishConfig": {
 		"access": "public"
