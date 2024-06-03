@@ -17,6 +17,7 @@
 	import { invalidate } from "$app/navigation"
 	import { setParaglideContext } from "./internal/index.js"
 	import AlternateLinks from "./AlternateLinks.svelte"
+	import { createLangCookie } from "./utils/cookie.js"
 
 	// The base path may be relative during SSR.
 	// To make sure it is absolute, we need to resolve it against the current page URL.
@@ -84,6 +85,7 @@
 	// We need to make sure that changing the key happens last.
 	// See https://github.com/sveltejs/svelte/issues/10597
 	$: langKey = lang
+	$: if(browser) document.cookie = createLangCookie(lang, absoluteBase)
 </script>
 
 <svelte:head>
