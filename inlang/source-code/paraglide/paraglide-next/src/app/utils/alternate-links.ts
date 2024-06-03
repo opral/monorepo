@@ -43,6 +43,24 @@ export function generateAlternateLinks<T extends string>({
 	 */
 	resolvingMetadata: ResolvingMetadata
 }): Record<string, string> {
+	const pathname = illegallyGetPathname(parent)
+	if (!pathname) return {}
+	const locale = languageTag() as T
+
+	//current pathname, rendered per page
+	const localisedPathname = new URL(pathname, "http://n.com").pathname as `/${string}`
+	const canonicalPathname = strategy.getCanonicalPath(localisedPathname, locale)
+
+	return Object.fromEntries(
+		(availableLanguageTags as readonly T[]).map((lang) => {
+			const localisedUrl = strategy.getLocalisedUrl(canonicalPathname, lang, true)
+			const href = new URL(format(localisedUrl), base).href
+			return [lang, href]
+		})
+	)
+}
+
+function illegallyGetPathname(parent: ResolvingMetadata): string | undefined {
 	type NextInternalRouteData = {
 		urlPathname: string
 	}
@@ -53,18 +71,6 @@ export function generateAlternateLinks<T extends string>({
 		.filter((thing): thing is NextInternalRouteData => "urlPathname" in thing)
 		.at(0)
 
-	if (!routeData) return {}
-	const locale = languageTag() as T
-
-	//current pathname, rendered per page
-	const localisedPathname = new URL(routeData.urlPathname, "http://n.com").pathname as `/${string}`
-	const canonicalPathname = strategy.getCanonicalPath(localisedPathname, locale)
-
-	return Object.fromEntries(
-		(availableLanguageTags as readonly T[]).map((lang) => {
-			const localisedUrl = strategy.getLocalisedUrl(canonicalPathname, lang, true)
-			const href = new URL(format(localisedUrl), base).href
-			return [lang, href]
-		})
-	)
+	if (!routeData) return undefined
+	else return routeData.urlPathname
 }
