@@ -1,8 +1,9 @@
 import { Logger } from "@inlang/paraglide-js/internal"
 import { Repository } from "@lix-js/client"
-import { CliStep } from "../../utils"
+import { CliStep, folderExists } from "../../utils"
 import { NodeishFilesystem } from "@lix-js/fs"
 import path from "node:path"
+import consola from "consola"
 
 type NextConfigFile = {
 	path: string
@@ -78,23 +79,40 @@ export const scanNextJSProject: CliStep<
 	}
 
 	let router: "app" | "pages" | undefined = undefined
-	const expectedAppFolderPath = path.join(srcRoot, "app")
-	const expectedPagesFolderPath = path.join(srcRoot, "pages")
 
-	try {
-		const stat = await ctx.repo.nodeishFs.stat(expectedPagesFolderPath)
-		if (!stat.isDirectory()) throw new Error()
-		router = "pages"
-	} catch {
-		//silently ignore
-	}
+	const [appFolderExists, pagesFolderExists] = await Promise.all([
+		folderExists(ctx.repo.nodeishFs, path.join(srcRoot, "app")),
+		folderExists(ctx.repo.nodeishFs, path.join(srcRoot, "pages")),
+	])
 
-	try {
-		const stat = await ctx.repo.nodeishFs.stat(expectedAppFolderPath)
-		if (!stat.isDirectory()) throw new Error()
+	if (appFolderExists && !pagesFolderExists) {
+		// clearly app router
 		router = "app"
-	} catch {
-		//silently ignore
+	} else if (!appFolderExists && pagesFolderExists) {
+		// clearly pages router
+		router = "pages"
+	} else {
+		//neither or both -> ask
+		const selection = await promptSelection("Which Router are you using?", {
+			initial: "app",
+			options: [
+				{
+					label: "App Router",
+					value: "app",
+				},
+				{
+					label: "Pages Router",
+					value: "pages",
+				},
+			],
+		})
+
+		if (!selection) {
+			ctx.logger.error("Failed to determine the router being used")
+			process.exit(1)
+		}
+
+		router = selection
 	}
 
 	if (!router) {
@@ -159,4 +177,22 @@ async function findPackageJson(fs: NodeishFilesystem, cwd: string): Promise<stri
 	} catch {
 		return undefined
 	}
+}
+
+export const promptSelection = async <T extends string>(
+	message: string,
+	options: { initial?: T; options: { label: string; value: T }[] } = { options: [] }
+): Promise<T> => {
+	return prompt(message, { type: "select", ...options }) as unknown as Promise<T>
+}
+
+/**
+ * Wrapper to exit the process if the user presses CTRL+C.
+ */
+export const prompt: typeof consola.prompt = async (message, options) => {
+	const response = await consola.prompt(message, options)
+	if (response?.toString() === "Symbol(clack:cancel)") {
+		process.exit(0)
+	}
+	return response
 }
