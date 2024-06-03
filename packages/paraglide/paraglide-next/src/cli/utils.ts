@@ -1,3 +1,4 @@
+import { NodeishFilesystem } from "@lix-js/fs"
 import path from "node:path"
 
 /**
@@ -61,4 +62,13 @@ const isWindows = typeof process !== "undefined" && process.platform === "win32"
 
 export function normalizePath(id: string) {
 	return path.posix.normalize(isWindows ? slash(id) : id)
+}
+
+export async function folderExists(fs: NodeishFilesystem, path: string): Promise<boolean> {
+	try {
+		const stat = await fs.stat(path)
+		return stat.isDirectory()
+	} catch {
+		return false
+	}
 }
