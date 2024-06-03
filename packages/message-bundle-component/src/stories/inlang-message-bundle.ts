@@ -40,74 +40,58 @@ export default class InlangMessageBundle extends LitElement {
 				<span># ${this.messageBundle?.id}</span>
 				<span class="alias">@${this.messageBundle?.alias.default}</span>
 			</div>
-			<div
-				@click=${() => {
-					// upsert variant
-					upsertVariant({
-						message: this.messageBundle!.messages[0]!,
-						variant: { match: ["other"], pattern: [{ type: "text", value: "Hello World!" }] },
-					})
-					this.requestUpdate()
-				}}
-			>
-				Add test variant
-			</div>
-			<div @click=${() => console.info(this.messageBundle)}>Log message bundle</div>
-			<div class="container">
-				${this.messageBundle?.messages.map((message) => this.renderVariantsTable(message))}
+			<div class="messages-container">
+				${this.messageBundle?.messages.map((message) => this._renderMessage(message))}
 			</div>
 		`
 	}
 
-	private renderVariantsTable(message: Message) {
-		// @ts-ignore
-		const selectors = message.selectors.map((selector) => selector.arg.name)
+	private _renderMessage(message: Message) {
 		return html`
-			<div class="variant-table">
-				<div class="lang">
+			<div class="message">
+				<div class="language-container">
 					<span>${message.locale}</span>
 				</div>
-				<table>
-					<thead>
-						<tr>
-							${selectors.map((selector) => html`<th>${selector}</th>`)}
-							<th>Pattern</th>
-							<th>Actions</th>
-						</tr>
-					</thead>
-					<tbody>
-						${message.variants.map((variant, index) =>
-							this.renderVariantRow(variant, index, selectors, message)
-						)}
-					</tbody>
-					<tfooter>
-						<td colspan="${selectors.length + 2}">Add Variant</td>
-					</tfooter>
-				</table>
+				<div class="message-body">
+					${message.selectors.length > 0
+						? html`<div class="selector-container">
+								${message.selectors.map(
+									// @ts-ignore
+									(selector) => html`<div class="selector">${selector.arg.name}</div>`
+								)}
+						  </div>`
+						: ``}
+					<div class="variants-container">
+						${message.variants.map((variant) => this._renderVariant(variant, message))}
+					</div>
+				</div>
 			</div>
 		`
 	}
 
-	private renderVariantRow(variant: Variant, index: number, selectors: string[], message: Message) {
+	private _renderVariant(variant: Variant, message: Message) {
+		// @ts-ignore
+		const selectors = message.selectors.map((selector) => selector.arg.name)
 		const matches = selectors.map((selector) => {
 			const matchIndex = selectors.indexOf(selector)
 			return variant.match[matchIndex] || ""
 		})
 		return html`
-			<tr>
-				${matches.map((match) => html`<td>${match}</td>`)}
-				<td>
-					<input
-						type="text"
-						value=${variant.pattern
-							.map((p) => {
-								if ("value" in p) {
-									return p.value
-								}
-								return ""
-							})
-							.join(" ")}
-					/>
+			<div class="variant">
+				${matches.map((match) => html`<div class="match">${match}</div>`)}
+				<input
+					class="pattern"
+					type="text"
+					value=${variant.pattern
+						.map((p) => {
+							if ("value" in p) {
+								return p.value
+							}
+							return ""
+						})
+						.join(" ")}
+				/>
+				<div class="actions">
 					<div
 						@click=${(e: Event) => {
 							const target = e.target as HTMLInputElement
@@ -117,8 +101,11 @@ export default class InlangMessageBundle extends LitElement {
 								variant: {
 									match: variant.match,
 									pattern: [
-										// @ts-ignore
-										{ type: "text", value: target!.previousSibling!.previousSibling!.value },
+										{
+											type: "text",
+											// @ts-ignore - just for prototyping
+											value: target!.parentElement!.previousSibling!.previousSibling!.value,
+										},
 									],
 								},
 							})
@@ -127,19 +114,8 @@ export default class InlangMessageBundle extends LitElement {
 					>
 						Save
 					</div>
-				</td>
-				<td>
-					<button
-						class="delete-button"
-						@click="${() => {
-							// eslint-disable-next-line no-console
-							console.log("delete variant", index)
-						}}"
-					>
-						🗑️
-					</button>
-				</td>
-			</tr>
+				</div>
+			</div>
 		`
 	}
 }
