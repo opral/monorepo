@@ -68,6 +68,7 @@ export const messageBundleStyling = css`
 		height: auto;
 	}
 	.variant {
+		position: relative;
 		min-height: 44px;
 		width: 100%;
 		display: flex;
@@ -86,15 +87,25 @@ export const messageBundleStyling = css`
 	}
 	.pattern {
 		flex: 1;
-		border: none;
 		background-color: none;
-		min-height: 20px;
-		padding: 12px;
+		height: 44px;
+	}
+	.pattern::part(base) {
+		border: none;
+		border-radius: 0;
+		min-height: 44px;
+	}
+	.pattern::part(input) {
+		min-height: 44px;
 	}
 	.actions {
-		padding: 12px;
+		position: absolute;
+		top: 0;
+		right: 0;
+		height: 44px;
 		display: flex;
+		align-items: center;
 		gap: 10px;
-		background-color: #fff;
+		padding-right: 12px;
 	}
 `

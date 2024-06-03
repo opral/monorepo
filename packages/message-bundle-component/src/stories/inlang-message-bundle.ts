@@ -6,6 +6,13 @@ import type { MessageBundle, Message, Variant } from "@inlang/sdk/v2" // Import 
 import { messageBundleStyling } from "./inlang-message-bundle.styles.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
 
+import SlInput from "@shoelace-style/shoelace/dist/components/input/input.component.js"
+import SlButton from "@shoelace-style/shoelace/dist/components/button/button.component.js"
+
+// in case an app defines it's own set of shoelace components, prevent double registering
+if (!customElements.get("sl-input")) customElements.define("sl-input", SlInput)
+if (!customElements.get("sl-button")) customElements.define("sl-button", SlButton)
+
 @customElement("inlang-message-bundle")
 export default class InlangMessageBundle extends LitElement {
 	static override styles = [baseStyling, messageBundleStyling]
@@ -79,9 +86,9 @@ export default class InlangMessageBundle extends LitElement {
 		return html`
 			<div class="variant">
 				${matches.map((match) => html`<div class="match">${match}</div>`)}
-				<input
+				<sl-input
 					class="pattern"
-					type="text"
+					size="small"
 					value=${variant.pattern
 						.map((p) => {
 							if ("value" in p) {
@@ -90,9 +97,10 @@ export default class InlangMessageBundle extends LitElement {
 							return ""
 						})
 						.join(" ")}
-				/>
+				></sl-input>
 				<div class="actions">
-					<div
+					<sl-button
+						size="small"
 						@click=${(e: Event) => {
 							const target = e.target as HTMLInputElement
 							// upsert variant
@@ -111,9 +119,8 @@ export default class InlangMessageBundle extends LitElement {
 							})
 							this._triggerSave()
 						}}
+						>Save</sl-button
 					>
-						Save
-					</div>
 				</div>
 			</div>
 		`
