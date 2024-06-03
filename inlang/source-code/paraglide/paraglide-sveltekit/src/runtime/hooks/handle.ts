@@ -1,13 +1,12 @@
-import type { Handle } from "@sveltejs/kit"
-import type { I18nConfig } from "../adapter.js"
 import { parseRoute } from "../utils/route.js"
 import { negotiateLanguagePreferences } from "@inlang/paraglide-js/internal/adapter-utils"
 import { base } from "$app/paths"
 import { dev } from "$app/environment"
+import { LANG_COOKIE_NAME } from "../../constants.js"
+import type { Handle } from "@sveltejs/kit"
+import type { I18nConfig } from "../adapter.js"
 import type { RoutingStrategy } from "../strategy.js"
 import type { ParaglideLocals } from "../locals.js"
-
-const LANG_COOKIE_NAME = "paraglide:lang"
 
 /**
  * The default lang attribute string that's in SvelteKit's `src/app.html` file.
@@ -133,4 +132,3 @@ export const createHandle = <T extends string>(
 		})
 	}
 }
-
