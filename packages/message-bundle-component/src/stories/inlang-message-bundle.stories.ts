@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/web-components"
 import { html } from "lit"
 import { multipleMatcherBundle } from "@inlang/sdk/v2-mocks"
 import { simplifyBundle } from "../helper/simplifyBundle.js"
+import type { MessageBundle } from "@inlang/sdk/v2"
 
 const meta: Meta = {
 	component: "inlang-message-bundle",
@@ -16,6 +17,8 @@ export default meta
 export const Props: StoryObj = {
 	render: () =>
 		html`<inlang-message-bundle
-			messageBundle=${JSON.stringify(simplifiedBundle)}
+			.messageBundle=${simplifiedBundle}
+			@change-message-bundle=${(messageBundle: MessageBundle) =>
+				console.info("changeMessageBundle", messageBundle)}
 		></inlang-message-bundle> `,
 }
