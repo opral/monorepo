@@ -6,8 +6,7 @@ import {
 import { languageTag, setLanguageTag } from "$paraglide/runtime.js"
 import { addBasePath, basePath } from "../utils/basePath"
 import { localizeHref } from "../localiseHref"
-import { serializeCookie } from "../utils/cookie"
-import { LANG_COOKIE } from "../constants"
+import { languageCookie } from "../utils/cookie"
 import { createRedirects } from "./redirect"
 import { createLink } from "./Link"
 
@@ -60,12 +59,7 @@ export const Navigation = <T extends string>({ strategy }: { strategy: RoutingSt
 				const destination = addBasePath(localisedPath, true) + window.location.search
 				history.pushState({}, "", destination)
 
-				document.cookie = serializeCookie({
-					...LANG_COOKIE,
-					value: locale,
-					Path: basePath ?? "/",
-				})
-
+				document.cookie = languageCookie(locale, basePath ?? "/")
 				window.location.reload()
 				return
 			}
@@ -102,11 +96,7 @@ export const Navigation = <T extends string>({ strategy }: { strategy: RoutingSt
 				const destination = addBasePath(localisedPath, true) + window.location.search
 				history.replaceState({}, "", destination)
 
-				document.cookie = serializeCookie({
-					...LANG_COOKIE,
-					value: locale,
-					Path: basePath ?? "/",
-				})
+				document.cookie = document.cookie = languageCookie(locale, basePath ?? "/")
 
 				window.location.reload()
 				return

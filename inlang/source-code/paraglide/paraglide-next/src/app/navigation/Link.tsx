@@ -9,8 +9,7 @@ import NextLink from "next/link"
 import React from "react"
 import { RoutingStrategy } from "../routing-strategy/interface"
 import { localizeHref } from "../localiseHref"
-import { serializeCookie } from "../utils/cookie"
-import { LANG_COOKIE } from "../constants"
+import { languageCookie } from "../utils/cookie"
 import { rsc } from "rsc-env"
 import { DEV } from "../env"
 
@@ -45,11 +44,7 @@ export function createLink<T extends string>(strategy: RoutingStrategy<T>): Loca
 		const localisedHref = localizeHref(strategy, props.href, lang, "", isLanguageSwitch)
 
 		function updateLangCookie(newLang: T) {
-			document.cookie = serializeCookie({
-				...LANG_COOKIE,
-				value: newLang,
-				Path: basePath,
-			})
+			document.cookie = languageCookie(newLang, basePath)
 		}
 
 		//If the language changes, we don't want client navigation

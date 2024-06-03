@@ -5,7 +5,7 @@ import {
 	sourceLanguageTag,
 } from "$paraglide/runtime.js"
 import { addSeoHeaders } from "./headers"
-import { LANG_COOKIE, PARAGLIDE_LANGUAGE_HEADER_NAME } from "../constants"
+import { LANG_COOKIE_NAME, PARAGLIDE_LANGUAGE_HEADER_NAME } from "../constants"
 import { resolveLanguage } from "./resolveLanguage"
 import type { NextRequest } from "next/server"
 import type { RoutingStrategy } from "../routing-strategy/interface"
@@ -52,7 +52,7 @@ export function Middleware<T extends string>(opt: MiddlewareOptions<T>) {
 	 * https://nextjs.org/docs/pages/building-your-application/routing/middleware#setting-headers
 	 */
 	return function middleware(request: NextRequest) {
-		const localeCookieValue = request.cookies.get(LANG_COOKIE.name)?.value
+		const localeCookieValue = request.cookies.get(LANG_COOKIE_NAME)?.value
 		const locale = resolveLanguage(request, sourceLanguageTag, [
 			opt.strategy.resolveLocale,
 			createCookieDetection({ availableLanguageTags: availableLanguageTags }),
@@ -80,9 +80,9 @@ export function Middleware<T extends string>(opt: MiddlewareOptions<T>) {
 
 		// Update the locale-cookie
 		if (!localeCookieMatches) {
-			response.cookies.set(LANG_COOKIE.name, locale, {
-				sameSite: LANG_COOKIE.SameSite,
-				maxAge: LANG_COOKIE["Max-Age"],
+			response.cookies.set(LANG_COOKIE_NAME, locale, {
+				sameSite: "lax",
+				maxAge: 31557600,
 				path: request.nextUrl.basePath || "/",
 			})
 		}
