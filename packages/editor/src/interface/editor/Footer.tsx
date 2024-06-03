@@ -94,7 +94,11 @@ const Footer = () => {
 							<span class="font-medium mb-2">Deployed version</span>
 							<div class="flex justify-between">
 								<span>Commit hash: {""}</span>
-								<a href={`https://github.com/opral/monorepo/commit/${version["commit-hash"]}`} target="_blank" class="text-primary">
+								<a
+									href={`https://github.com/opral/monorepo/commit/${version["commit-hash"]}`}
+									target="_blank"
+									class="text-primary"
+								>
 									{version["commit-hash"].slice(0, 7)}
 								</a>
 							</div>
