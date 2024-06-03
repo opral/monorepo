@@ -4,14 +4,14 @@ import { baseStyling } from "../styling/base.js"
 import overridePrimitiveColors from "../helper/overridePrimitiveColors.js"
 import type { MessageBundle, Message, Variant } from "@inlang/sdk/v2" // Import the types
 import { messageBundleStyling } from "./inlang-message-bundle.styles.js"
+import upsertVariant from "../helper/crud/variant/upsert.js"
 
 @customElement("inlang-message-bundle")
 export default class InlangMessageBundle extends LitElement {
+	static override styles = [baseStyling, messageBundleStyling]
+
 	@property({ type: Object })
 	messageBundle: MessageBundle | undefined
-	messageBundleLintReports: any[] = []
-
-	static override styles = [baseStyling, messageBundleStyling]
 
 	override async firstUpdated() {
 		await this.updateComplete
@@ -25,6 +25,31 @@ export default class InlangMessageBundle extends LitElement {
 				<span># ${this.messageBundle?.id}</span>
 				<span class="alias">@${this.messageBundle?.alias.default}</span>
 			</div>
+			<div
+				@click=${() => {
+					// upsert variant
+					upsertVariant({
+						message: this.messageBundle!.messages[0]!,
+						variant: { match: ["other"], pattern: [{ type: "text", value: "Hello World!" }] },
+					})
+					this.requestUpdate()
+				}}
+			>
+				Add test variant
+			</div>
+			<div
+				@click=${() => {
+					// upsert variant
+					upsertVariant({
+						message: this.messageBundle!.messages[0]!,
+						variant: { match: ["other"], pattern: [{ type: "text", value: "Show me a lot." }] },
+					})
+					this.requestUpdate()
+				}}
+			>
+				Update test variant
+			</div>
+			<div @click=${() => console.log(this.messageBundle)}>Log message bundle</div>
 			<div class="container">
 				${this.messageBundle?.messages.map((message) => this.renderVariantsTable(message))}
 			</div>
