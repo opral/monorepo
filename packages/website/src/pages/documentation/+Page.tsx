@@ -101,7 +101,10 @@ export default function Page(props: PageProps) {
 			/>
 			<Meta name="og:image" content={ogPath()} />
 			<Meta name="twitter:card" content="summary_large_image" />
-			<Meta name="twitter:image" content={ogPath()} />
+			<Meta
+				name="twitter:image"
+				content="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/source-code/website/public/opengraph/inlang-documentation-image.jpg"
+			/>
 			<Meta
 				name="twitter:image:alt"
 				content="inlang's ecosystem helps organizations to go global."
@@ -109,7 +112,11 @@ export default function Page(props: PageProps) {
 			<Meta
 				name="twitter:title"
 				content={`${
-					findPageBySlug(currentPageContext.urlParsed.pathname)?.title
+					findPageBySlug(
+						currentPageContext.urlParsed.pathname
+							.replace("/" + languageTag(), "")
+							.replace("/documentation/", "")
+					)?.title
 				} | inlang SDK Documentation`}
 			/>
 			<Meta

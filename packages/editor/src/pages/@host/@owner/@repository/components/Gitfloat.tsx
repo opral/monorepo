@@ -193,7 +193,8 @@ export const Gitfloat = () => {
 			sucess: pushResult.error === undefined,
 		})
 
-		if (pushResult.error?.data?.statusCode === 403) {
+		// @ts-expect-error – unknown type error for cause
+		if (pushResult.error?.cause?.data.statusCode === 403) {
 			pushPermissionDialog.show()
 			return
 		}

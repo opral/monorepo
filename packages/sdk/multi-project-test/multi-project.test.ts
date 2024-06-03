@@ -78,6 +78,7 @@ describe.concurrent(
 			{ timeout: 20000 }
 		)
 
+		// skip pending new v2 persistence with translation.
 		it(
 			"project4 in project4-dir",
 			async () => {

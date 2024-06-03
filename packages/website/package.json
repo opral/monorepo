@@ -4,10 +4,10 @@
 	"private": true,
 	"scripts": {
 		"dev": "vite",
-		"build": "node ./scripts/generateSitemap.js && npx @inlang/cli machine translate -f --project ../../../project.inlang --targetLanguageTags fr,it,pt-BR,sk,zh && vite build && tsc --noEmit",
+		"build": "node ./scripts/generateSitemap.js && paraglide-js compile --project ./website.inlang && npx @inlang/cli machine translate -f --project ./website.inlang --targetLanguageTags fr,it,pt-BR,sk,zh && vite build && tsc --noEmit",
 		"production": "NODE_ENV=production tsx ./src/server/main.ts ",
 		"---- TEST ----------------------------------------------------------": "",
-		"test": "vitest run --passWithNoTests && paraglide-js compile --project ../../../project.inlang && npx @inlang/cli lint --project ../../../project.inlang --languageTags de,en ",
+		"test": "vitest run --passWithNoTests && paraglide-js compile --project ./website.inlang && npx @inlang/cli lint --project ./website.inlang --languageTags de,en ",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"

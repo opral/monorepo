@@ -4,6 +4,8 @@ import type {
 	InstalledMessageLintRule,
 	InstalledPlugin,
 	Subscribable,
+	MessageQueryApi,
+	MessageLintReportsQueryApi,
 } from "./api.js"
 import { type ImportFunction, resolveModules } from "./resolve-modules/index.js"
 import { TypeCompiler, ValueErrorType } from "@sinclair/typebox/compiler"
@@ -29,6 +31,10 @@ import { maybeCreateFirstProjectId } from "./migrations/maybeCreateFirstProjectI
 
 import { capture } from "./telemetry/capture.js"
 import { identifyProject } from "./telemetry/groupIdentify.js"
+
+import { stubMessagesQuery, stubMessageLintReportsQuery } from "./v2/stubQueryApi.js"
+import type { StoreApi } from "./persistence/storeApi.js"
+import { openStore } from "./persistence/store.js"
 
 import _debug from "debug"
 const debug = _debug("sdk:loadProject")
@@ -80,9 +86,16 @@ export async function loadProject(args: {
 		)
 
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
+		const [loadedSettings, markSettingsAsLoaded, markSettingsAsFailed] = createAwaitable()
 		// -- settings ------------------------------------------------------------
 
 		const [settings, _setSettings] = createSignal<ProjectSettings>()
+		let v2Persistence = false
+		let locales: string[] = []
+
+		// This effect currently has no signals
+		// TODO: replace createEffect with await loadSettings
+		// https://github.com/opral/inlang-message-sdk/issues/77
 		createEffect(() => {
 			// TODO:
 			// if (projectId) {
@@ -92,12 +105,17 @@ export async function loadProject(args: {
 			// }
 
 			loadSettings({ settingsFilePath: projectPath + "/settings.json", nodeishFs })
-				.then((settings) => setSettings(settings))
+				.then((settings) => {
+					setSettings(settings)
+					markSettingsAsLoaded()
+				})
 				.catch((err) => {
 					markInitAsFailed(err)
+					markSettingsAsFailed(err)
 				})
 		})
 		// TODO: create FS watcher and update settings on change
+		// https://github.com/opral/inlang-message-sdk/issues/35
 
 		const writeSettingsToDisk = skipFirst((settings: ProjectSettings) =>
 			_writeSettingsToDisk({ nodeishFs, settings, projectPath })
@@ -106,11 +124,8 @@ export async function loadProject(args: {
 		const setSettings = (settings: ProjectSettings): Result<void, ProjectSettingsInvalidError> => {
 			try {
 				const validatedSettings = parseSettings(settings)
-				if (validatedSettings.experimental?.persistence) {
-					settings["plugin.sdk.persistence"] = {
-						pathPattern: projectPath + "/messages.json",
-					}
-				}
+				v2Persistence = !!validatedSettings.experimental?.persistence
+				locales = validatedSettings.languageTags
 
 				batch(() => {
 					// reset the resolved modules first - since they are no longer valid at that point
@@ -147,40 +162,11 @@ export async function loadProject(args: {
 				.catch((err) => markInitAsFailed(err))
 		})
 
-		// -- messages ----------------------------------------------------------
+		// -- installed items ----------------------------------------------------
 
 		let settingsValue: ProjectSettings
-		createEffect(() => (settingsValue = settings()!)) // workaround to not run effects twice (e.g. settings change + modules change) (I'm sure there exists a solid way of doing this, but I haven't found it yet)
-
-		const [loadMessagesViaPluginError, setLoadMessagesViaPluginError] = createSignal<
-			Error | undefined
-		>()
-
-		const [saveMessagesViaPluginError, setSaveMessagesViaPluginError] = createSignal<
-			Error | undefined
-		>()
-
-		const messagesQuery = createMessagesQuery({
-			projectPath,
-			nodeishFs,
-			settings,
-			resolvedModules,
-			onInitialMessageLoadResult: (e) => {
-				if (e) {
-					markInitAsFailed(e)
-				} else {
-					markInitAsComplete()
-				}
-			},
-			onLoadMessageResult: (e) => {
-				setLoadMessagesViaPluginError(e)
-			},
-			onSaveMessageResult: (e) => {
-				setSaveMessagesViaPluginError(e)
-			},
-		})
-
-		// -- installed items ----------------------------------------------------
+		// workaround to not run effects twice (e.g. settings change + modules change) (I'm sure there exists a solid way of doing this, but I haven't found it yet)
+		createEffect(() => (settingsValue = settings()!))
 
 		const installedMessageLintRules = () => {
 			if (!resolvedModules()) return []
@@ -213,16 +199,68 @@ export async function loadProject(args: {
 			})) satisfies Array<InstalledPlugin>
 		}
 
+		// -- messages ----------------------------------------------------------
+
+		const [loadMessagesViaPluginError, setLoadMessagesViaPluginError] = createSignal<
+			Error | undefined
+		>()
+
+		const [saveMessagesViaPluginError, setSaveMessagesViaPluginError] = createSignal<
+			Error | undefined
+		>()
+
+		let messagesQuery: MessageQueryApi
+		let lintReportsQuery: MessageLintReportsQueryApi
+		let store: StoreApi | undefined
+
+		// wait for seetings to load v2Persistence flag
+		// .catch avoids throwing here if the awaitable is rejected
+		// error is recorded via markInitAsFailed so no need to capture it again
+		await loadedSettings.catch(() => {})
+
+		if (v2Persistence) {
+			messagesQuery = stubMessagesQuery
+			lintReportsQuery = stubMessageLintReportsQuery
+			try {
+				store = await openStore({ projectPath, nodeishFs, locales })
+				markInitAsComplete()
+			} catch (e) {
+				markInitAsFailed(e)
+			}
+		} else {
+			messagesQuery = createMessagesQuery({
+				projectPath,
+				nodeishFs,
+				settings,
+				resolvedModules,
+				onInitialMessageLoadResult: (e) => {
+					if (e) {
+						markInitAsFailed(e)
+					} else {
+						markInitAsComplete()
+					}
+				},
+				onLoadMessageResult: (e) => {
+					setLoadMessagesViaPluginError(e)
+				},
+				onSaveMessageResult: (e) => {
+					setSaveMessagesViaPluginError(e)
+				},
+			})
+
+			lintReportsQuery = createMessageLintReportsQuery(
+				messagesQuery,
+				settings as () => ProjectSettings,
+				installedMessageLintRules,
+				resolvedModules
+			)
+
+			store = undefined
+		}
+
 		// -- app ---------------------------------------------------------------
 
 		const initializeError: Error | undefined = await initialized.catch((error) => error)
-
-		const lintReportsQuery = createMessageLintReportsQuery(
-			messagesQuery,
-			settings as () => ProjectSettings,
-			installedMessageLintRules,
-			resolvedModules
-		)
 
 		/**
 		 * Utility to escape reactive tracking and avoid multiple calls to
@@ -250,6 +288,8 @@ export async function loadProject(args: {
 					settings: settings(),
 					installedPluginIds: installedPlugins().map((p) => p.id),
 					installedMessageLintRuleIds: installedMessageLintRules().map((r) => r.id),
+					// TODO: fix for v2Persistence
+					// https://github.com/opral/inlang-message-sdk/issues/78
 					numberOfMessages: messagesQuery.includedMessageIds().length,
 				},
 			})
@@ -276,6 +316,7 @@ export async function loadProject(args: {
 				messages: messagesQuery,
 				messageLintReports: lintReportsQuery,
 			},
+			store,
 		} satisfies InlangProject
 	})
 }

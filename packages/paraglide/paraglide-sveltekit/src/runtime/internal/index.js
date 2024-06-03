@@ -5,17 +5,20 @@ import { getContext, setContext } from "svelte"
 const PARAGLIDE_CONTEXT_KEY = {}
 
 /**
- * @typedef {{ translateHref: (href: string, hreflang?: string) => string }} ParaglideContext
+ * @template {string} T
+ * @typedef {{ translateHref: (href: string, hreflang?: T) => string }} ParaglideContext
  */
 
 /**
+ * @template {string} T
  * @private
  */
 export const getParaglideContext = () => {
-	return /** @type { ParaglideContext | undefined}*/ (getContext(PARAGLIDE_CONTEXT_KEY))
+	return /** @type { ParaglideContext<T> | undefined}*/ (getContext(PARAGLIDE_CONTEXT_KEY))
 }
 /**
- * @param {ParaglideContext} context
+ * @template {string} T
+ * @param {ParaglideContext<T>} context
  * @private
  */
 export const setParaglideContext = (context) => {
@@ -56,8 +59,7 @@ export function getTranslationFunctions() {
 	 * @param {AttributeTranslation[]} attribute_translations
 	 */
 	function handleAttributes(attrs, attribute_translations) {
-		//If the element has the ${NO_TRANSLATE_ATTRIBUTE} attribute, don't translate it
-		if (attrs[NO_TRANSLATE_ATTRIBUTE] === true) return attrs
+		if (attrs[NO_TRANSLATE_ATTRIBUTE]) return attrs
 
 		for (const { attribute_name, lang_attribute_name } of attribute_translations) {
 			if (attribute_name in attrs) {

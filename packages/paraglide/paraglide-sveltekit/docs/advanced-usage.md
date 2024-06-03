@@ -21,7 +21,7 @@ Excluded routes will:
 
 Make sure excluded pages are still wrapped in the `<ParaglideJS>` so that outgoing links are still translated. 
 
-## Overriding Text direction
+## Text direction
 
 Paraglide guesses the text direction using the `Intl.Locale` API. This is not supported in all runtimes. Use the `textDirection` option to provide the text direction yourself.
 
@@ -41,3 +41,23 @@ export const i18n = createI18n(runtime, {
 
 On the server you can access the current language and text direction on `event.locals.paraglide`. 
 On the client, you can call `languageTag()` exported `./paraglide/runtime.js`.  
+
+## Full URLs in `<link rel="alternate">` tags
+
+According to the spec, alternate links for pages must be full URLs. Do this by setting the `prerender.origin` option in your svelte.config.js.
+
+```ts
+// svelte.config.js
+
+/** @type {import('@sveltejs/kit').Config} */
+const config = {
+	kit: {
+		// ...
+		prerender: {
+			origin: "https://example.com",
+		},
+	},
+}
+
+export default config
+```
