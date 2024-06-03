@@ -49,7 +49,5 @@
 	"plugin.inlang.i18next": {
 		"pathPattern": "./locales/{languageTag}/common.json"
 	},
-	"experimental": {
-		"persistence": true
-	}
+	"experimental": { "persistence": true }
 }

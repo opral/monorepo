@@ -1,5 +1,19 @@
 # @inlang/paraglide-sveltekit
 
+## 0.9.2
+
+### Patch Changes
+
+- @inlang/paraglide-js@1.9.1
+- @inlang/paraglide-vite@1.2.64
+
+## 0.9.1
+
+### Patch Changes
+
+- f0192d2: Invalid `href`s in your app no longer cause errors to be thrown in `<ParaglideJS>`. During development a warning is logged.
+- 255fd41: The link preprocessor no longer crashes when encountering a file with a syntax error. Insetad it will log a warning & noop. Reporting the error is delegated to the main svelte parser.
+
 ## 0.9.0
 
 ### Minor Changes

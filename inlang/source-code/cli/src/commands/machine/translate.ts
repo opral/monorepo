@@ -9,6 +9,7 @@ import { projectOption } from "../../utilities/globalFlags.js"
 import progessBar from "cli-progress"
 import plimit from "p-limit"
 import type { Result } from "@inlang/result"
+import { toV1Message, fromV1Message } from "@inlang/sdk/v2"
 
 const rpcTranslateAction = process.env.MOCK_TRANSLATE_LOCAL
 	? mockMachineTranslateMessage
@@ -18,6 +19,7 @@ export const translate = new Command()
 	.command("translate")
 	.requiredOption(projectOption.flags, projectOption.description)
 	.option("-f, --force", "Force machine translation and skip the confirmation prompt.", false)
+	.option("-q, --quiet", "don't log every tranlation.", false)
 	.option("--sourceLanguageTag <source>", "Source language tag for translation.")
 	.option(
 		"--targetLanguageTags <targets...>",
@@ -60,6 +62,7 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 			return
 		}
 		const experimentalAliases = args.project.settings().experimental?.aliases
+		const v2Persistence = args.project.settings().experimental?.persistence
 
 		const allLanguageTags = [...projectConfig.languageTags, projectConfig.sourceLanguageTag]
 
@@ -97,9 +100,13 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 			return
 		}
 
-		const messages = args.project.query.messages
-			.getAll()
-			.filter((message) => hasMissingTranslations(message, sourceLanguageTag, targetLanguageTags))
+		const allMessages = v2Persistence
+			? (await args.project.store!.messageBundles.getAll()).map(toV1Message)
+			: args.project.query.messages.getAll()
+
+		const filteredMessages = allMessages.filter((message) =>
+			hasMissingTranslations(message, sourceLanguageTag, targetLanguageTags)
+		)
 
 		const bar = options.nobar
 			? undefined
@@ -111,7 +118,7 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 					progessBar.Presets.shades_grey
 			  )
 
-		bar?.start(messages.length, 0)
+		bar?.start(filteredMessages.length, 0)
 
 		const logs: Array<() => void> = []
 
@@ -132,17 +139,23 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 				translatedMessage &&
 				translatedMessage?.variants.length > toBeTranslatedMessage.variants.length
 			) {
-				args.project.query.messages.update({
-					where: { id: translatedMessage.id },
-					data: translatedMessage!,
-				})
-				logs.push(() => log.info(`Machine translated message ${logId}`))
+				if (v2Persistence) {
+					await args.project.store!.messageBundles.set({ data: fromV1Message(translatedMessage) })
+				} else {
+					args.project.query.messages.update({
+						where: { id: translatedMessage.id },
+						data: translatedMessage!,
+					})
+				}
+				if (!options.quiet) {
+					logs.push(() => log.info(`Machine translated message ${logId}`))
+				}
 			}
 			bar?.increment()
 		}
 		// parallelize rpcTranslate calls with a limit of 100 concurrent calls
-		const limit = plimit(100)
-		const promises = messages.map((message) => limit(() => rpcTranslate(message)))
+		const limit = plimit(process.env.MOCK_TRANSLATE_LOCAL ? 100000 : 100)
+		const promises = filteredMessages.map((message) => limit(() => rpcTranslate(message)))
 		await Promise.all(promises)
 
 		bar?.stop()
@@ -220,5 +233,6 @@ async function mockMachineTranslateMessage(args: {
 			// console.log("mockMachineTranslateMessage translated", q, targetLanguageTag)
 		}
 	}
+	await new Promise((resolve) => setTimeout(resolve, 100))
 	return { data: copy }
 }

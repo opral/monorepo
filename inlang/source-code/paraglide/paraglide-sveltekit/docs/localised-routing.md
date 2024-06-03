@@ -1,13 +1,17 @@
+---
+title: Localised Routing
+description: Learn how the localised routing works in Paraglide-SvelteKit, how to use translated pathnames and how to do language negotiation.
+---
+
 # Localised Routing
 
 ### Translated Paths
 
-- `/en/about` for English
+You can have different paths for each language with the `pathnames` option. Don't include the language or the [base path](https://kit.svelte.dev/docs/configuration#paths).
+
+- `/about` for English (default language)
 - `/de/uber-uns` for German
 - `/fr/a-propos` for French
-
-You can have different paths for each language with the `pathnames` option. 
-Don't include the language or the [base path](https://kit.svelte.dev/docs/configuration#paths).
 
 ```js
 import { createI18n } from "@inlang/paraglide-sveltekit"
@@ -30,12 +34,50 @@ export const i18n = createI18n(runtime, {
 			de: "/benutzer/[id=int]/[...rest]",
 			fr: "/utilisateur/[id=int]/[...rest]",
 		},
-		// Instead of a map, you can also pass a message-function
+		// Instead of a map, you can also pass a message-function reference
 		"/admin" : m.admin_path
 	}
 
 	// If you're using matchers in the pathnames, you need to pass them
 	matchers: { int	}
+})
+```
+
+By default the default language is located on your base path. Usually `/`. Unlike the other languages it does not have a language prefix. 
+
+This reflects the default `prefixDefaultLanguage: "never"` behavior.
+
+If you want to also have a prefix for the default language, use the `prefixDefaultLanguage: "always"` option.
+
+```ts
+export const i18n = createI18n(runtime, {
+	prefixDefaultLanguage: "always",
+})
+```
+
+This does make it ambigous which language should be used on `/` so language negotiation will kick in.
+
+### Language Negotiation
+
+Whenever the language cannot be determined from the URL alone the language negotiation is triggered. This happens in the following steps:
+
+1. Check if the `paraglide:lang` cookie is set from previous visits, if so, use it
+2. Negotiate the language from the `Accept-Language` header
+3. Use the default language
+
+After language negotiation you will be redirected to include the language in the URL.
+
+### Changing the default Language
+
+Usually your default language is the same as the `sourceLanguageTag` of your Inlang Project, but it doesn't have to be.
+
+You can change it by passing a `defaultLanguageTag` option to `createI18n`
+
+```ts
+// sourceLanguageTag = "en"
+
+export const i18n = createI18n(runtime, {
+	defaultLanguageTag: "de",
 })
 ```
 

@@ -10,7 +10,7 @@ import type {
 	MessageLintReport,
 } from "./versionedInterfaces.js"
 import type { ResolvedPluginApi } from "./resolve-modules/plugins/types.js"
-import type * as V2 from "./v2/types.js"
+import type { StoreApi } from "./persistence/storeApi.js"
 
 export type InstalledPlugin = {
 	id: Plugin["id"]
@@ -58,18 +58,7 @@ export type InlangProject = {
 	}
 	// WIP V2 message apis
 	// use with project settings: experimental.persistence = true
-	messageBundles?: Query<V2.MessageBundle>
-	messages?: Query<V2.Message>
-	variants?: Query<V2.Variant>
-}
-
-/**
- * WIP template for async V2 crud interfaces
- * E.g. `await project.messageBundles.get({ id: "..." })`
- **/
-interface Query<T> {
-	get: (args: unknown) => Promise<T>
-	getAll: () => Promise<T[]>
+	store?: StoreApi
 }
 
 // const x = {} as InlangProject
