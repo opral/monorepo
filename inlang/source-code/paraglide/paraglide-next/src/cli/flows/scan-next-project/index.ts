@@ -43,13 +43,9 @@ export const scanNextJSProject: CliStep<
 		process.exit(1)
 	}
 
-	// try to read tsconfig or JSConfig
-	const tsConfigPath = path.join(process.cwd(), "tsconfig.json")
-	const jsConfigPath = path.join(process.cwd(), "jsconfig.json")
-
 	const [tsConfigExists, jsConfigExists] = await Promise.all([
-		fileExists(ctx.repo.nodeishFs, tsConfigPath),
-		fileExists(ctx.repo.nodeishFs, jsConfigPath),
+		fileExists(ctx.repo.nodeishFs, path.join(process.cwd(), "tsconfig.json")),
+		fileExists(ctx.repo.nodeishFs, path.join(process.cwd(), "jsconfig.json")),
 	])
 
 	const typescript = tsConfigExists && !jsConfigExists
