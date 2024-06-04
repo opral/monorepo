@@ -1,150 +1,71 @@
+[![Inlang-ecosystem compatibility badge](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/assets/md-badges/inlang.svg)](https://inlang.com)
 
 ## Getting Started
 
-### 1. Install dependencies
-
-Install [ParaglideJS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) and [Paraglide-SvelteKit](https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n).
+Get started instantly with the Paraglide-SvelteKit CLI.
 
 ```bash
-npx @inlang/paraglide-js init
-npm i -D @inlang/paraglide-sveltekit
+npx @inlang/paraglide-sveltekit init
+npm install
 ```
 
-This will generate a `messages/{lang}.json` file for each of your languages. This is where your translation files live. 
+The CLI will ask you which languages you want to support. This can be changed later.
 
-### 2. Add the Vite Plugin 
+- Create an [Inlang Project](https://inlang.com/documentation/concept/project)
+- Create translation files for each of your languages
+- Add necessary Provider Components and files
+- Update your `vite.config.js` file to use the Paraglide-SvelteKit Plugin.
 
-Add the vite-plugin to your `vite.config.js` file. This will make sure to rerun the paraglide compiler when needed and add the link preprocessor.
+You can now start your development server and visit `/de`, `/ar`, or whatever languages you've set up.
 
-```js
-import { paraglide } from "@inlang/paraglide-sveltekit/vite"
+## Creating Messages
 
-export default defineConfig({
-	plugins: [
-		paraglide({
-			//recommended
-			project: "./project.inlang",
-			outdir: "./src/lib/paraglide",
-		}),
-		sveltekit(),
-	],
-})
+Your messages live in `messages/{languageTag}.json` files. You can add messages in these files as key-value pairs of the message ID and the translations.
+
+Use curly braces to add parameters.
+
+```json
+// messages/en.json
+{
+	// The $schema key is automatically ignored
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+
+	"hello_world": "Hello World!",
+	"greetings": "Greetings {name}."
+}
 ```
 
-### 3. Initialise Paraglide-SvelteKit
+Learn more about the format in the [Inlang Message Format Documentation](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat).
 
-Create a `src/lib/i18n.js` file:
+Note: _All_ messages you use in your project must be added to these files. It is not possible to dynamically add more messages at runtime.
 
-```js
-// src/lib/i18n.js
-import { createI18n } from "@inlang/paraglide-sveltekit"
-import * as runtime from "$lib/paraglide/runtime.js"
+## Using messages in Code
 
-export const i18n = createI18n(runtime);
-```
-
-`createI18n` will be your one-stop shop for configuring i18n routing.
-
-<doc-accordion
-	heading="Does this need to be in src/lib/i18n.js ?"
-	text="No. You can place this file anywhere. Be aware that you will be importing from here a lot, so make sure it's somewhere convenient.">
-</doc-accordion>
-
-### 4. Add the Language Provider to your Layout
-
-Add the `ParaglideJS` component to your layout and pass it the `i18n` instance.
-
-If you're using Svelte 4 do it like so: 
-```svelte
-<!-- src/routes/+layout.svelte -->
-<script>
-    import { ParaglideJS } from '@inlang/paraglide-sveltekit'
-	import { i18n } from '$lib/i18n.js'
-</script>
-
-<ParaglideJS {i18n}>
-    <slot />
-</ParaglideJS>
-```
-
-or if you're using Svelte 5: 
-
-```svelte
-<!-- src/routes/+layout.svelte -->
-<script>
-    import { ParaglideJS } from '@inlang/paraglide-sveltekit'
-	import { i18n } from '$lib/i18n.js'
-
-	const { children } = $props()
-</script>
-
-<ParaglideJS {i18n}>
-	{@render children}
-</ParaglideJS>
-```
-
-### 5. Add the Hooks
-
-In your `src/hooks.js` file, use the `i18n` instance to add the `reroute` hook:
-
-```js
-import { i18n } from '$lib/i18n.js'
-export const reroute = i18n.reroute()
-```
-
-> The reroute hook was added in SvelteKit 2.3.0
-
-In `src/hooks.server.js` add the handle hook. 
-
-```js
-// src/hooks.server.js
-import { i18n } from '$lib/i18n.js'
-export const handle = i18n.handle()
-```
-
-This will make the language and text-direction on `event.locals.paraglide`.
-To set the `lang` and `dir` attributes on your `<html>` tag add placeholders in `src/app.html`. These placeholders will be replaced by the `handle` hook.
-
-```html
-<!-- src/app.html -->
-<html lang="%paraglide.lang%" dir="%paraglide.textDirection%"> 
-```
-
-## Go try it out!
-
-Visit `/` to see your default language, and `/{lang}` to see other languages. All links should be translated automatically.
-
-
-## Caveats
-
-1. Links in the same Layout Component as `<ParagldieJS>` will not be translated. This will also log a warning in development.
-2. Messages are not reactive. Don't use them in server-side module scope.
-3. Side effects triggered by `data` will run on language changes even if the data didn't change. If the data is language-dependent the side effect will run twice. 
-
-### Using messages in `+layout.svelte`
-
-The language state get's set when the `<ParaglideJS>` component is mounted. Since you usually place it inside `+layout.svelte` using messages in the layout's `<script>` can cause issues.
+The Paraglide compiler will generate a `src/lib/paraglide/messages.js` file that contains your messages. Import messages from there. By convention, a wildcard import is used.
 
 ```svelte
 <script>
-    import { ParaglideJS } from '@inlang/paraglide-sveltekit'
-	import { i18n } from '$lib/i18n.js'
-
-	//using messages here can cause hydration issues
+	import * as m from '$lib/paraglide/messages.js'
 </script>
 
-<ParaglideJS {i18n}>
-	<!-- Using messages here is fine -->
-    <slot />
-</ParaglideJS>
+<h1>{m.homepage_title()}</h1>
+<p>{m.homepage_subtitle({ some: "param" })}</p>
 ```
 
-### Issues on Vercel
+Only messages used on the current page are sent to the client. Any messages that aren't used on the current page will be tree-shaken out.
 
-SvelteKit's `reroute` hook currently doens't play well with Vercel (see [sveltejs/kit#11879](https://github.com/sveltejs/kit/issues/11879)), which means that we need to slightly adapt the setup to make it work when deployed to Vercel.
+## Language detection 
 
-1. Remove the `reroute` hook from `src/hooks.js`
-2. Move the routes you want to localize `routes` into a `[[locale]]` folder
-3. Don't use translated `pathnames`
+The language is determined based on the URL. If the first segment of the URL is a language tag, that language will be used. If no language tag is present, the default language will be used.
 
-We are working on contributing a fix for [sveltejs/kit#11879](https://github.com/sveltejs/kit/issues/11879), so this workaround will hopefully not be needed much longer.
+- `/about` - English
+- `/de/about` - German
+
+The `reroute` hook in `src/hooks.js` (added automatically) automatically rewrites requests that include the language in the URL to the correct page. There is **no need** to modify your routes to add a `[locale]` segment.
+
+```fs
+src/
+  routes/
+	+layout.svelte
+	+page.svelte
+```

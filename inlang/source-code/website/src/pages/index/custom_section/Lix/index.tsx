@@ -1,6 +1,7 @@
 import { Show, type JSXElement } from "solid-js"
 import LixCard from "./Card.jsx"
 import * as m from "#src/paraglide/messages.js"
+import { Button } from "../../components/Button.jsx"
 
 const LixSection = () => {
 	const data: Array<{
@@ -47,12 +48,20 @@ const LixSection = () => {
 	return (
 		<div id="lix" class="pt-12 md:pt-20 flex flex-col items-center pb-20">
 			<p class="bg-background px-4 py-1.5 rounded-full text-sm font-medium w-fit border shadow border-surface-300">
+				{/* TODO: link to https://github.com/opral/monorepo/tree/main/lix */}
 				{m.home_lix_tag()}
 			</p>
 			<h2 class="font-bold text-2xl md:text-4xl text-surface-900 text-center mt-5">
 				{m.home_lix_title()}
 			</h2>
 			<p class="text-center text-lg max-w-[600px] text-surface-500 pt-5">{m.home_lix_desc()}</p>
+			<Button
+				class="w-fit rounded-lg mt-5"
+				type="secondary"
+				href="https://github.com/opral/monorepo/tree/main/lix"
+			>
+				{m.home_lix_button_text()}
+			</Button>
 			<div class="w-full flex justify-center">
 				<img
 					class="lg:hidden pt-12 pb-4 max-w-[500px] w-full"

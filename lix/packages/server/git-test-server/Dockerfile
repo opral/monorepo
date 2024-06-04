@@ -7,7 +7,6 @@ RUN cd /home/git/opral && git clone --bare https://github.com/opral/ci-test-repo
 RUN cd /home/git/janfjohannes && git clone --bare https://github.com/janfjohannes/cal.com.git
 RUN cd /home/git/opral && git clone --bare http://github.com/opral/isomorphic-git.git
 
-
 RUN echo '[http]  \n receivepack = true \n' >> /home/git/janfjohannes/cal.com.git/config
 RUN echo '[http]  \n receivepack = true \n' >> /home/git/opral/example.git/config
 RUN echo '[http]  \n receivepack = true \n' >> /home/git/opral/ci-test-repo.git/config

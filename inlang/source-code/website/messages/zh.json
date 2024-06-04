@@ -54,7 +54,7 @@
 	"home_guides_title": "找到正确的指南",
 	"home_inlang_button": "什么是英朗？",
 	"home_inlang_cta": "探索 inlang 应用",
-	"home_inlang_description": "inlang 为每个用例提供定制的本地化产品。只需要一项设置，所有这些都由存储库中受变更控制的单一事实来源提供支持。",
+	"home_inlang_description": "Inlang 是一个可互操作的 lix 应用生态系统，可解决软件全球化的各个用例。一次设置，多个应用，可逐步采用。 ",
 	"home_inlang_search_button": "搜索",
 	"home_inlang_search_placeholder": "搜索生态系统...",
 	"home_inlang_search_popular": "受欢迎的",
@@ -107,7 +107,7 @@
 	"home_popular_products_title": "热门应用程序",
 	"home_stack_title": "你的堆栈",
 	"inlang_global_description": "快速找到全球化 (i18n) 您的应用程序的最佳解决方案。 inlang 帮助您拓展新市场并获取新客户。",
-	"inlang_global_title": "inlang Marketplace - 走向全球的生态系统",
+	"inlang_global_title": "inlang - 走向全球的生态系统",
 	"inlang_twitter_title": "inlang的生态系统帮助组织走向全球。",
 	"marketplace_application_header_generic_button": "开始使用",
 	"marketplace_application_header_generic_description": "有关使您的项目为 inlang 生态系统做好准备所需的最低步骤的一般指南。",
@@ -197,5 +197,7 @@
 	"newsletter_success": "感谢你的订阅！",
 	"newsletter_title": "订阅邮件",
 	"newsletter_unsubscribed_description": "我们很舍不得你离开。如果你有任何反馈意见，请在我们的",
-	"newsletter_unsubscribed_title": "你已退订"
+	"newsletter_unsubscribed_title": "你已退订",
+	"home_lix_button_text": "阅读有关 Lix 的更多信息",
+	"home_credibility_tag_text": "深受{count}开发人员、设计师和翻译人员的信赖"
 }

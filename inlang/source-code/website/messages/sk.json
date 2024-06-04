@@ -54,7 +54,7 @@
 	"home_guides_title": "Nájdite tých správnych sprievodcov",
 	"home_inlang_button": "čo je inlang?",
 	"home_inlang_cta": "Preskúmajte aplikácie inlang",
-	"home_inlang_description": "inlang ponúka prispôsobené lokalizačné produkty pre každý prípad použitia. Potrebné je len jedno nastavenie, všetko poháňané jediným zdrojom pravdy vo vašom úložisku pod kontrolou zmien.",
+	"home_inlang_description": "Inlang je ekosystém interoperabilných aplikácií lix, ktoré riešia každý prípad použitia v súvislosti s globalizáciou softvéru. Jedno nastavenie, viacero aplikácií, postupne prispôsobiteľné. ",
 	"home_inlang_search_button": "Vyhľadávanie",
 	"home_inlang_search_placeholder": "Hľadajte v ekosystéme...",
 	"home_inlang_search_popular": "Populárne",
@@ -107,7 +107,7 @@
 	"home_popular_products_title": "Populárne aplikácie",
 	"home_stack_title": "Váš zásobník",
 	"inlang_global_description": "Rýchlo nájdite najlepšie riešenie na globalizáciu (i18n) vašej aplikácie. inlang vám pomôže expandovať na nové trhy a získať nových zákazníkov.",
-	"inlang_global_title": "inlang Marketplace – Ekosystém, ktorý sa má stať globálnym",
+	"inlang_global_title": "inlang – Ekosystém, ktorý sa má stať globálnym",
 	"inlang_twitter_title": "Ekosystém inlang pomáha organizáciám dostať sa do sveta.",
 	"marketplace_application_header_generic_button": "Začať",
 	"marketplace_application_header_generic_description": "Všeobecný sprievodca minimálnymi krokmi potrebnými na to, aby bol váš projekt pripravený na ekosystém inlang.",
@@ -197,5 +197,7 @@
 	"newsletter_success": "Ďakujeme, že ste sa prihlásili na odber!",
 	"newsletter_title": "Newsletter",
 	"newsletter_unsubscribed_description": "Je nám ľúto, že odchádzate. Ak máte nejakú spätnú väzbu, dajte nám vedieť na našej",
-	"newsletter_unsubscribed_title": "Ste odhlásený z odberu"
+	"newsletter_unsubscribed_title": "Ste odhlásený z odberu",
+	"home_lix_button_text": "Prečítajte si viac o Lix",
+	"home_credibility_tag_text": "Dôveryhodné od {count} vývojárov, dizajnérov a prekladateľov"
 }

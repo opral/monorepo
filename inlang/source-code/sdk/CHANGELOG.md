@@ -1,5 +1,65 @@
 # @inlang/sdk
 
+## 0.35.6
+
+### Patch Changes
+
+- 9d2aa1a: v2 message bundle persistence - initial store implementation
+
+## 0.35.5
+
+### Patch Changes
+
+- 64e30ee: introduces solid batching for loadViaPlugin
+
+## 0.35.4
+
+### Patch Changes
+
+- Updated dependencies [3b2e0a6]
+  - @lix-js/client@2.2.0
+
+## 0.35.3
+
+### Patch Changes
+
+- Updated dependencies [548bc9e]
+  - @lix-js/client@2.1.0
+
+## 0.35.2
+
+### Patch Changes
+
+- Updated dependencies [4a25124]
+  - @lix-js/fs@2.1.0
+  - @inlang/plugin@2.4.13
+  - @lix-js/client@2.0.1
+  - @inlang/module@1.2.13
+
+## 0.35.1
+
+### Patch Changes
+
+- Updated dependencies [00ad046]
+- Updated dependencies [00ad046]
+  - @lix-js/fs@2.0.0
+  - @lix-js/client@2.0.0
+  - @inlang/plugin@2.4.12
+  - @inlang/module@1.2.12
+
+## 0.35.0
+
+### Minor Changes
+
+- ae47203: improve: remove valid js identifer from default lint rules
+
+## 0.34.10
+
+### Patch Changes
+
+- d27a983: fixes reactivity for deleted messages
+- a27b7a4: This reintroduces reactivity to lint reports - see https://github.com/opral/monorepo/pull/2792 for more details
+
 ## 0.34.9
 
 ### Patch Changes

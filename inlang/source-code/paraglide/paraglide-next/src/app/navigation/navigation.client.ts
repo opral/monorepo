@@ -27,12 +27,8 @@ export const Navigation = <T extends string>({ strategy }: { strategy: RoutingSt
 	 */
 	const useRouter = () => {
 		const nextRouter = NextNavigation.useRouter()
-		const localisedCurrentPathname = NextNavigation.usePathname() as `/${string}`
 		const searchParams = NextNavigation.useSearchParams()
-		const canonicalCurrentPathname = strategy.getCanonicalPath(
-			localisedCurrentPathname,
-			languageTag() as T
-		)
+		const canonicalCurrentPathname = usePathname()
 
 		type NavigateOptions = Parameters<(typeof nextRouter)["push"]>[1]
 		type PrefetchOptions = Parameters<(typeof nextRouter)["prefetch"]>[1]
@@ -58,11 +54,7 @@ export const Navigation = <T extends string>({ strategy }: { strategy: RoutingSt
 
 			// If the current and new canonical paths are the same, but the language is different,
 			// we need to do a native reload to make sure the new language is used
-			if (
-				canonicalCurrentPathname === canonicalDestinationPath &&
-				options?.locale &&
-				options.locale !== languageTag()
-			) {
+			if (canonicalCurrentPathname === canonicalDestinationPath && isLanguageSwitch) {
 				let destination = addBasePath(localisedPath, true)
 				const searchParamString = searchParams.toString()
 				if (searchParamString) {
@@ -73,7 +65,7 @@ export const Navigation = <T extends string>({ strategy }: { strategy: RoutingSt
 				document.cookie = serializeCookie({
 					...LANG_COOKIE,
 					value: locale,
-					Path: basePath,
+					Path: basePath ?? "/",
 				})
 
 				window.location.reload()
@@ -106,11 +98,7 @@ export const Navigation = <T extends string>({ strategy }: { strategy: RoutingSt
 
 			// If the current and new canonical paths are the same, but the language is different,
 			// we need to do a native reload to make sure the new language is used
-			if (
-				canonicalCurrentPathname === canonicalDestinationPath &&
-				options?.locale &&
-				options.locale !== languageTag()
-			) {
+			if (canonicalCurrentPathname === canonicalDestinationPath && isLanguageSwitch) {
 				let destination = addBasePath(localisedPath, true)
 				const searchParamString = searchParams.toString()
 				if (searchParamString) {
@@ -121,7 +109,7 @@ export const Navigation = <T extends string>({ strategy }: { strategy: RoutingSt
 				document.cookie = serializeCookie({
 					...LANG_COOKIE,
 					value: locale,
-					Path: basePath,
+					Path: basePath ?? "/",
 				})
 
 				window.location.reload()

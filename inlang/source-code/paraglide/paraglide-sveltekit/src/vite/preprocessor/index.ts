@@ -2,7 +2,6 @@ import { parse, type PreprocessorGroup, type LegacyRoot } from "svelte/compiler"
 import MagicString from "magic-string"
 import { shouldApply } from "./precheck.js"
 import { rewrite } from "./rewrite.js"
-import dedent from "dedent"
 
 export type PreprocessorConfig = Record<string, never>
 
@@ -63,13 +62,12 @@ export function preprocessor(_config: PreprocessorConfig): PreprocessorGroup {
 			try {
 				root = parse(content)
 			} catch (error) {
-				throw new Error(
-					dedent`
-						[@inlang/paraglide-sveltekit] Failed to parse ${filename}. 
-						This may be because you are using a signifficantly newer version of the "svelte" package. 
-						Try forcing "@inlang/paraglide-sveltekit" to use your version of "svelte" using pnpm overrides`,
-					{ cause: error }
+				console.error(
+					`[@inlang/paraglide-sveltekit] Failed to parse ${filename}. Link translations were NOT applied.`,
+					error
 				)
+
+				return NOOP
 			}
 
 			const code = new MagicString(content)

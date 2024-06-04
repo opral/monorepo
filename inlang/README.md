@@ -1,13 +1,11 @@
 <p align="center">
   <a href="https://github.com/opral/monorepo">  </a>
 
-  <img src="https://github.com/opral/monorepo/blob/main/inlang/assets/logo_rounded.png?raw=true" alt="inlang icon" width="120px">
+  <img src="https://github.com/opral/monorepo/blob/main/inlang/assets/logo_rounded.png?raw=true" alt="inlang icon" width="90px">
   
   <h2 align="center">
-    Effortless globalization (i18n, l10n) for your app
+    An ecosystem to globalize software (i18n, localize)
   </h2>
-  
-  <p align="center">powered by <a href="https://github.com/opral/monorepo/tree/main/lix" target="_blank">lix</p>
 
   <p align="center">
     <br>
@@ -18,56 +16,50 @@
     <a href='https://discord.gg/gdMPPWy57R' target="_blank">💙 Discord</a>
     ·
     <a href='https://twitter.com/inlangHQ' target="_blank">𝕏 Twitter</a>
-    ·
-    <a href='https://github.com/orgs/opral/projects/39' target="_blank">🗺️ Roadmap</a>
   </p>
 </p>
 
 <br>
 
 <p align="center">
-<a href='https://www.youtube.com/watch?v=mB2-Ze-SjXE' target="_blank">
-	<img src="https://img.youtube.com/vi/mB2-Ze-SjXE/mqdefault.jpg" alt="inlang in 100 seconds"
+<a href='https://youtu.be/E_GwxxKbkMo' target="_blank">
+	<img src="./assets/what-is-inlang.png" alt="inlang in 100 seconds">
 </a>
 </p>
 
-<br>
 
-<!-- BODY -->
 
-## Table of Contents
+## What is inlang?
 
-- [Table of Contents](#table-of-contents)
-- [🌐 About inlang](#-about-inlang)
-- [:bell: Stay up-to-date](#bell-stay-up-to-date)
-- [:balloon: Contributing](#balloon-contributing)
+Inlang is an ecosystem of interoperable [lix apps](https://github.com/opral/monorepo/tree/main/lix) to globalize software. 
 
-## 🌐 About inlang
+Every app in the inlang ecosystem shares the same review, automation, and collaboration layer, making cross-team collaboration possible. No syncing, hand-offs, or automation barriers. 
 
-**inlang is a whole ecosystem** of building blocks for your globalization (internationalization / i18n) efforts with the goal of helping companies enter new markets in no time. For example:
+![globalization of software is a cross team effort](./assets/inlang-problem-explainer.png)
+![inlang pipeline](./assets/inlang-pipeline.png)
 
-- use [inlang Paraglide.js](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) to have a fully translated, typesafe & fast app in minutes
-- use the [inlang Visual Studio Code extension (Sherlock)](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) to translate your app right in the editor
-- use the [inlang Fink](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor) to translate your app in the browser & invite collaborators to help you
-- use the [inlang CLI](https://inlang.com/m/2qj2w8pu/app-inlang-cli) to lint your messsages with lint rules or machine translate them & have quality control in CI/CD
+#### Example apps
+
+- [Paraglide.js](https://inlang.com/m/gerre34r/library-inlang-paraglideJs) to have a fully translated, typesafe & fast app in minutes
+- [Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) to translate your app right in the editor
+- [Fink](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor) to translate your app in the browser & invite collaborators to help you
+- [Parrot](https://inlang.com/m/gkrpgoir/app-parrot-figmaPlugin) see translations directly in Figma
+- [inlang CLI](https://inlang.com/m/2qj2w8pu/app-inlang-cli) to lint your messsages with lint rules or machine translate them & have quality control in CI/CD
 - *build your own app / plugin / lint rule* with the [inlang SDK](https://inlang.com/documentation)
 - ...
 
-**Go to [inlang.com](https://inlang.com) to see all extensions to the inlang ecosystem.**
 
-**More specific guides:**
+## Why inlang?
 
-- Guide: [Build a Global Svelte App](/g/2fg8ng94/guide-nilsjacobsen-buildAGlobalSvelteApp)
-- Guide: [Contribute Translations](/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink)
+Globalizing software is a cross-team effort that involves ensuring compliance, adapting the design, handling different currencies, managing translations, writing different marketing copy, etc.
 
-## :bell: Stay up-to-date
+Existing point solutions such as apps to manage translations (Lokalise, Weglot, Smartling), apps to manage design copy (ditto, translator), or i18n libraries for developers (next-intl, i18next) don’t have interop between each other. 
 
-Follow us on [Twitter](https://twitter.com/inlangHQ) or join our [Discord](https://discord.gg/CNPfhWpcAa) server. 
-
-We also regularly send out a newsletter with updates and tips & tricks. You can subscribe to it [here](https://inlang.com/newsletter).
+The lack of interop of existing solutions leads every app and team to have its own collaboration layer, review system, and automation capabilities. Cross-team collaboration and automation, which are required to globalize software, are difficult to impossible. 
 
 
-## :balloon: Contributing
+
+## Contributing
 
 There are many ways you can contribute to inlang! Here are a few options:
 

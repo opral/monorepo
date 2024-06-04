@@ -54,7 +54,7 @@
 	"home_guides_title": "Find the right guides",
 	"home_inlang_button": "What is inlang?",
 	"home_inlang_cta": "Explore inlang apps",
-	"home_inlang_description": "inlang offers tailored localization apps for each use case. Just one setup needed, all powered by a single source of truth in your repository under change control.",
+	"home_inlang_description": "Inlang is an ecosystem of interoperable lix apps that solve use cases around software globalization. One setup, multiple apps, incrementally adoptable. ",
 	"home_inlang_search_button": "Search",
 	"home_inlang_search_placeholder": "Search the ecosystem ...",
 	"home_inlang_search_popular": "Popular",
@@ -107,7 +107,7 @@
 	"home_popular_products_title": "Popular apps",
 	"home_stack_title": "Your Stack",
 	"inlang_global_description": "Quickly find the best solution to globalize (i18n) your app. inlang helps you to expand to new markets and acquire new customers.",
-	"inlang_global_title": "inlang Marketplace - The ecosystem to go global",
+	"inlang_global_title": "inlang - The ecosystem to go global",
 	"inlang_twitter_title": "inlang's ecosystem helps organizations to go global.",
 	"marketplace_application_header_generic_button": "Get started",
 	"marketplace_application_header_generic_description": "A general guide on the minimum steps required to make your project ready for the ecosystem of inlang.",
@@ -197,5 +197,7 @@
 	"newsletter_success": "Thank you for subscribing!",
 	"newsletter_title": "Newsletter",
 	"newsletter_unsubscribed_description": "We're sad to see you go. If you have any feedback, please let us know on our",
-	"newsletter_unsubscribed_title": "You're unsubscribed"
+	"newsletter_unsubscribed_title": "You're unsubscribed",
+	"home_lix_button_text": "Read more about Lix",
+	"home_credibility_tag_text": "Used by {count} devs, designers and translators"
 }

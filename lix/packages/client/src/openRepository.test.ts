@@ -47,7 +47,6 @@ describe("main workflow", () => {
 
 		expect(repoUrl).toBe("file:///")
 
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test fails if repoUrl is null
 		const repository: Awaited<ReturnType<typeof openRepository>> = await openRepository(repoUrl!, {
 			nodeishFs: fs,
 			branch: "test-symlink",
@@ -74,7 +73,6 @@ describe("main workflow", () => {
 
 		expect(repoUrl).toBe("file:///test/toast")
 
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test fails if repoUrl is null
 		const repository: Awaited<ReturnType<typeof openRepository>> = await openRepository(repoUrl!, {
 			nodeishFs: fs,
 			branch: "test-symlink",
@@ -119,7 +117,7 @@ describe("main workflow", () => {
 	})
 
 	it("can open repo with lazy clone/checkout", async () => {
-		const lazyRepo = await openRepository("https://github.com/inlang/ci-test-repo", {
+		const lazyRepo = await openRepository("https://github.com/opral/ci-test-repo", {
 			branch: "test-symlink",
 			nodeishFs: createNodeishMemoryFs(),
 			experimentalFeatures: { lazyClone: true, lixCommit: true },
@@ -323,7 +321,6 @@ describe("main workflow", () => {
 
 		expect(repoUrl).toBe("file:///")
 
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test fails if repoUrl is null
 		const repository: Awaited<ReturnType<typeof openRepository>> = await openRepository(repoUrl!, {
 			nodeishFs: fs,
 			branch: "test-symlink",
@@ -358,6 +355,7 @@ describe("main workflow", () => {
 		await repo.nodeishFs.rm("/static/test1")
 
 		await repo._emptyWorkdir()
+
 		await repo._checkOutPlaceholders()
 
 		await repo.nodeishFs.mkdir("/static/test/nested/deep/deeper", { recursive: true })
@@ -373,15 +371,6 @@ describe("main workflow", () => {
 		)
 
 		expect(status).toStrictEqual([
-			[
-				".git",
-				"ignored",
-				{
-					headOid: undefined,
-					stageOid: undefined,
-					workdirOid: "ignored",
-				},
-			],
 			[
 				".gitignore",
 				"unmodified",
@@ -401,42 +390,6 @@ describe("main workflow", () => {
 				},
 			],
 			[
-				"static/test/nested/deep",
-				"ignored",
-				{
-					headOid: undefined,
-					stageOid: undefined,
-					workdirOid: "ignored",
-				},
-			],
-			[
-				"static/test/nested/deep/deeper",
-				"ignored",
-				{
-					headOid: undefined,
-					stageOid: undefined,
-					workdirOid: "ignored",
-				},
-			],
-			[
-				"static/test/nested/deep/deeper/test3",
-				"ignored",
-				{
-					headOid: undefined,
-					stageOid: undefined,
-					workdirOid: "ignored",
-				},
-			],
-			[
-				"static/test/nested/deep/test1",
-				"ignored",
-				{
-					headOid: undefined,
-					stageOid: undefined,
-					workdirOid: "ignored",
-				},
-			],
-			[
 				"static/test/nested/test2",
 				"*untracked",
 				{
@@ -452,6 +405,24 @@ describe("main workflow", () => {
 					headOid: undefined,
 					stageOid: undefined,
 					workdirOid: "42",
+				},
+			],
+			[
+				".git",
+				"ignored",
+				{
+					headOid: undefined,
+					stageOid: undefined,
+					workdirOid: "ignored",
+				},
+			],
+			[
+				"static/test/nested/deep",
+				"ignored",
+				{
+					headOid: undefined,
+					stageOid: undefined,
+					workdirOid: "ignored",
 				},
 			],
 		])

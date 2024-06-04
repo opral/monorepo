@@ -54,7 +54,7 @@
 	"home_guides_title": "Guides",
 	"home_inlang_button": "Qu'est-ce qu'Inlang ?",
 	"home_inlang_cta": "Explorez les applications Inlang",
-	"home_inlang_description": "inlang propose des produits de localisation sur mesure pour chaque cas d'utilisation. Une seule configuration est nécessaire, le tout alimenté par une source unique de vérité dans votre référentiel sous contrôle des modifications.",
+	"home_inlang_description": "Inlang est un écosystème d'applications Lix interopérables qui résolvent chaque cas d'utilisation autour de la mondialisation des logiciels. Une configuration, plusieurs applications, adoptables progressivement. ",
 	"home_inlang_search_button": "Rechercher",
 	"home_inlang_search_placeholder": "Rechercher dans l'écosystème...",
 	"home_inlang_search_popular": "Populaire",
@@ -107,7 +107,7 @@
 	"home_popular_products_title": "Applications populaires",
 	"home_stack_title": "Votre Pile",
 	"inlang_global_description": "Trouvez rapidement la meilleure solution pour mondialiser (i18n) votre application. inlang vous aide à vous développer sur de nouveaux marchés et à acquérir de nouveaux clients.",
-	"inlang_global_title": "inlang Marketplace - L'écosystème pour se mondialiser",
+	"inlang_global_title": "inlang - L'écosystème pour se mondialiser",
 	"inlang_twitter_title": "L'écosystème d'inlang aide les organisations à se mondialiser.",
 	"marketplace_application_header_generic_button": "Commencer",
 	"marketplace_application_header_generic_description": "Un guide général sur les étapes minimales requises pour préparer votre projet à l'écosystème d'inlang.",
@@ -197,5 +197,7 @@
 	"newsletter_success": "Merci de vous être abonné !",
 	"newsletter_title": "Newsletter",
 	"newsletter_unsubscribed_description": "Nous sommes tristes de vous voir partir. Si vous avez des commentaires, veuillez nous en informer sur notre",
-	"newsletter_unsubscribed_title": "Vous êtes désabonné"
+	"newsletter_unsubscribed_title": "Vous êtes désabonné",
+	"home_lix_button_text": "En savoir plus sur Lix",
+	"home_credibility_tag_text": "Approuvé par les développeurs, concepteurs et traducteurs {count}"
 }

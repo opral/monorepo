@@ -1,5 +1,76 @@
 # @inlang/paraglide-unplugin
 
+## 1.6.14
+
+### Patch Changes
+
+- Updated dependencies [9d2aa1a]
+  - @inlang/sdk@0.35.6
+  - @inlang/paraglide-js@1.9.1
+
+## 1.6.13
+
+### Patch Changes
+
+- Updated dependencies [64e30ee]
+  - @inlang/sdk@0.35.5
+  - @inlang/paraglide-js@1.9.1
+
+## 1.6.12
+
+### Patch Changes
+
+- Updated dependencies [3b2e0a6]
+  - @lix-js/client@2.2.0
+  - @inlang/paraglide-js@1.9.1
+  - @inlang/sdk@0.35.4
+
+## 1.6.11
+
+### Patch Changes
+
+- Updated dependencies [548bc9e]
+  - @lix-js/client@2.1.0
+  - @inlang/paraglide-js@1.9.1
+  - @inlang/sdk@0.35.3
+
+## 1.6.10
+
+### Patch Changes
+
+- @inlang/paraglide-js@1.9.1
+- @inlang/sdk@0.35.2
+- @lix-js/client@2.0.1
+
+## 1.6.9
+
+### Patch Changes
+
+- Updated dependencies [00ad046]
+  - @lix-js/client@2.0.0
+  - @inlang/paraglide-js@1.9.1
+  - @inlang/sdk@0.35.1
+
+## 1.6.8
+
+### Patch Changes
+
+- 904c3a1: Reduced false negatives for message-state hashes. This should reduce the number of redundant recompilations
+- e0b2c2c: Better hashing to avoid unnecessary recompilations
+- Updated dependencies [ae47203]
+  - @inlang/sdk@0.35.0
+  - @inlang/paraglide-js@1.9.1
+
+## 1.6.7
+
+### Patch Changes
+
+- Updated dependencies [d27a983]
+- Updated dependencies [b8573fa]
+- Updated dependencies [a27b7a4]
+  - @inlang/sdk@0.34.10
+  - @inlang/paraglide-js@1.9.1
+
 ## 1.6.6
 
 ### Patch Changes

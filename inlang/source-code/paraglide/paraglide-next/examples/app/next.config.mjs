@@ -7,4 +7,5 @@ export default paraglide({
 	},
 
 	basePath: "/base",
+	output: "standalone",
 })

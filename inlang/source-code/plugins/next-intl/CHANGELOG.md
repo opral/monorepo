@@ -1,5 +1,65 @@
 # @inlang/plugin-next-intl
 
+## 1.3.39
+
+### Patch Changes
+
+- Updated dependencies [9d2aa1a]
+  - @inlang/sdk@0.35.6
+
+## 1.3.38
+
+### Patch Changes
+
+- 6a37426: support more flexible hooks argument passing
+- c780d2f: improve namespace parser to catch hooks sequentially
+
+## 1.3.37
+
+### Patch Changes
+
+- Updated dependencies [64e30ee]
+  - @inlang/sdk@0.35.5
+
+## 1.3.36
+
+### Patch Changes
+
+- @inlang/sdk@0.35.4
+
+## 1.3.35
+
+### Patch Changes
+
+- @inlang/sdk@0.35.3
+
+## 1.3.34
+
+### Patch Changes
+
+- @inlang/sdk@0.35.2
+
+## 1.3.33
+
+### Patch Changes
+
+- @inlang/sdk@0.35.1
+
+## 1.3.32
+
+### Patch Changes
+
+- Updated dependencies [ae47203]
+  - @inlang/sdk@0.35.0
+
+## 1.3.31
+
+### Patch Changes
+
+- Updated dependencies [d27a983]
+- Updated dependencies [a27b7a4]
+  - @inlang/sdk@0.34.10
+
 ## 1.3.30
 
 ### Patch Changes

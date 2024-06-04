@@ -1,5 +1,17 @@
 # @inlang/module
 
+## 1.2.13
+
+### Patch Changes
+
+- @inlang/plugin@2.4.13
+
+## 1.2.12
+
+### Patch Changes
+
+- @inlang/plugin@2.4.12
+
 ## 1.2.11
 
 ### Patch Changes

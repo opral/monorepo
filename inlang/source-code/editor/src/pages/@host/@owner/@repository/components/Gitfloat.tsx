@@ -193,7 +193,8 @@ export const Gitfloat = () => {
 			sucess: pushResult.error === undefined,
 		})
 
-		if (pushResult.error?.data?.statusCode === 403) {
+		// @ts-expect-error – unknown type error for cause
+		if (pushResult.error?.cause?.data.statusCode === 403) {
 			pushPermissionDialog.show()
 			return
 		}
@@ -490,7 +491,7 @@ export const Gitfloat = () => {
 				ref={signInDialog}
 				onClickOnSignInButton={() => {
 					// hide the sign in dialog to increase UX when switching back to this window
-					browserAuth.login()
+					browserAuth.login({ redirect: window.location.origin + "/auth/auth-callback" })
 					signInDialog?.hide()
 					setSignInModalOpen(false)
 				}}

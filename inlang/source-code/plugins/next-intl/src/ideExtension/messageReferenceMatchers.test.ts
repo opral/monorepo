@@ -153,6 +153,28 @@ it("should work on a production JSX example", async () => {
 	expect(matches[2]?.messageId).toBe("421.message")
 })
 
+it("should add the defined namespace by useTranslations/getTranslaton hook", async () => {
+	const sourceCode = `
+		import { getTranslations } from "next-intl/server";
+
+		export const C1 = async () => {
+			const t = await getTranslations("/cart");
+			return t("empty.title");
+		};
+		export const C2 = async () => {
+			const t = await getTranslations("/product");
+			return t("page.imagesTitle");
+		};
+	`
+	const settings: PluginSettings = {
+		pathPattern: "./{language}.json",
+	}
+	const matches = parse(sourceCode, settings)
+	expect(matches).toHaveLength(2)
+	expect(matches[0]?.messageId).toBe("/cart.empty.title")
+	expect(matches[1]?.messageId).toBe("/product.page.imagesTitle")
+})
+
 it("should add the defined namespace by useTranslations hook", async () => {
 	const sourceCode = `
 		const { t } = useTranslations("login");
@@ -231,7 +253,20 @@ it("should add the defined namespaces by getTranslations hook with namespace obj
 	expect(matches[0]?.messageId).toBe("Metadata.button.a")
 })
 
-it("should add the defined namespaces by getTranslations hook with namespace object variation two", async () => {
+it("should add the defined namespaces by getTranslations hook with namespace object variation 2", async () => {
+	const sourceCode = `
+		const { t } = await getTranslations({namespace: "Metadata", locale: props.params.locale});
+		<p>{t("button.a")}</p>
+	`
+	const settings: PluginSettings = {
+		pathPattern: "./{language}.json",
+	}
+	const matches = parse(sourceCode, settings)
+	expect(matches).toHaveLength(1)
+	expect(matches[0]?.messageId).toBe("Metadata.button.a")
+})
+
+it("should add the defined namespaces by getTranslations hook with namespace object variation 3", async () => {
 	const sourceCode = `
 		const { t } = await getTranslations({namespace: "Metadata"});
 		<p>{t("button.a")}</p>

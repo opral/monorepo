@@ -3,7 +3,7 @@ import { publicEnv } from "@inlang/env-variables"
 
 import HCaptcha from "solid-hcaptcha"
 import { Show } from "solid-js"
-import * as m from "../../paraglide/messages.js"
+import * as m from "#src/paraglide/messages.js"
 
 export default function Captcha(props: {
 	captchaResponse: () => HCaptchaExecuteResponse | null

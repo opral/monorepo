@@ -21,7 +21,7 @@ describe.concurrent(
 	() => {
 		it("leaves non-translatable attributes alone", async ({ expect }) => {
 			const hardcodedElementCode = `<a href="/test" data-no-translate>Test</a>`
-			const dynamicElementCode = `<svelte:element this="a" href="/test" data-no-translate>Test</svelte:element>`
+			const dynamicElementCode = `<svelte:element this={"a"} href="/test" data-no-translate>Test</svelte:element>`
 
 			const hardcodedElementHtml = await renderComponent(hardcodedElementCode)
 			const dynamicElementHtml = await renderComponent(dynamicElementCode)
@@ -174,7 +174,7 @@ describe.concurrent(
 		})
 
 		it("translates <svelte:element> tags if they are links", async ({ expect }) => {
-			const hardcoded = `<svelte:element this="a" href="/test" hreflang="de" >content</svelte:element>`
+			const hardcoded = `<svelte:element this={"a"} href="/test" hreflang="de" >content</svelte:element>`
 			const parameterized = `<script>
 			const as = "a"
 		</script>
@@ -197,13 +197,13 @@ describe.concurrent(
 			//Hreflang doens't do anything on forms, but it's a good test case
 			const props = { action: "/test", hreflang: "de" }
 		</script>
-		<svelte:element this="form" {...props} />`
+		<svelte:element this={"form"} {...props} />`
 
 			const linkCode = `
 		<script>
 			const props = { href: "/test", hreflang:  "de"	 }
 		</script>
-		<svelte:element this="a" {...props} >content</svelte:element>`
+		<svelte:element this={"a"} {...props} >content</svelte:element>`
 
 			const formHtml = await renderComponent(formCode)
 			const linkHtml = await renderComponent(linkCode)
@@ -318,7 +318,7 @@ describe.concurrent(
 			)
 		})
 
-		it("rewrites hrefs in svelte 5 components", async ({ expect }) => {
+		it("rewrites hrefs in components with snippets", async ({ expect }) => {
 			const code = `
 				{#snippet myLink(href)}
 				<a href={href}>content</a>
@@ -328,6 +328,30 @@ describe.concurrent(
 				`
 			const html = await renderComponent(code)
 			expect(html).toMatchInlineSnapshot('"<a href=\\"/rewritten\\">content</a>"')
+		})
+
+		it("handles rune syntax", async ({ expect }) => {
+			const code = `
+        <script>
+            const href = $state("/test")
+        </script>
+		<a href={href}>test</a>
+		`
+
+			const html = await renderComponent(code)
+			expect(html).toMatchInlineSnapshot('"<a href=\\"/rewritten\\">test</a>"')
+		})
+
+		it("handles rune with shorthand", async ({ expect }) => {
+			const code = `
+        <script>
+            const href = $state("/test")
+        </script>
+		<a {href}>test</a>
+		`
+
+			const html = await renderComponent(code)
+			expect(html).toMatchInlineSnapshot('"<a href=\\"/rewritten\\">test</a>"')
 		})
 	},
 	{ timeout: 60_000 }

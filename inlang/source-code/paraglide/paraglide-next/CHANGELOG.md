@@ -1,5 +1,35 @@
 # @inlang/paraglide-next
 
+## 0.3.1
+
+### Patch Changes
+
+- e621901: Add a better error message when trying to use messages/languageTag inside top-level variables.
+- 60d3d5e: fix langauge switches when escaped characters are used in the URL
+
+## 0.3.0
+
+### Minor Changes
+
+- 68023fc: Add NextJS 15 to supported Next versions
+
+### Patch Changes
+
+- 4e45ab2: Improved HTTP Header SEO
+
+  `Link` headers are now only generated if the hrefs are unique for each language.
+  `Vary` headers are now generated if the hrefs aren't sufficient to determine the language.
+
+  - @inlang/paraglide-js@1.9.1
+
+## 0.2.4
+
+### Patch Changes
+
+- 170fa74: Prompt about adding Sherlock and Ninja during `paraglide-next init`
+- Updated dependencies [b8573fa]
+  - @inlang/paraglide-js@1.9.1
+
 ## 0.2.3
 
 ### Patch Changes

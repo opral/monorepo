@@ -37,7 +37,7 @@ export const compileCommand = new Command()
 			await loadProject({
 				projectPath: path,
 				repo,
-				appId: MARKTEPLACE_ID,
+				appId: PARJS_MARKTEPLACE_ID,
 			}),
 			logger
 		)

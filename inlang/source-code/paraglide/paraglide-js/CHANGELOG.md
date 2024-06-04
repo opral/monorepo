@@ -1,5 +1,11 @@
 # @inlang/paraglide-js
 
+## 1.9.1
+
+### Patch Changes
+
+- b8573fa: Improved error-reporting
+
 ## 1.9.0
 
 ### Minor Changes

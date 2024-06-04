@@ -1,5 +1,66 @@
 # @inlang/plugin-m-function-matcher
 
+## 0.9.28
+
+### Patch Changes
+
+- Updated dependencies [9d2aa1a]
+  - @inlang/sdk@0.35.6
+
+## 0.9.27
+
+### Patch Changes
+
+- Updated dependencies [64e30ee]
+  - @inlang/sdk@0.35.5
+
+## 0.9.26
+
+### Patch Changes
+
+- @inlang/sdk@0.35.4
+
+## 0.9.25
+
+### Patch Changes
+
+- @inlang/sdk@0.35.3
+
+## 0.9.24
+
+### Patch Changes
+
+- @inlang/sdk@0.35.2
+- @inlang/plugin@2.4.13
+
+## 0.9.23
+
+### Patch Changes
+
+- 522bd61: add check for number to m function matcher & update vs code settings component
+
+## 0.9.22
+
+### Patch Changes
+
+- @inlang/sdk@0.35.1
+- @inlang/plugin@2.4.12
+
+## 0.9.21
+
+### Patch Changes
+
+- Updated dependencies [ae47203]
+  - @inlang/sdk@0.35.0
+
+## 0.9.20
+
+### Patch Changes
+
+- Updated dependencies [d27a983]
+- Updated dependencies [a27b7a4]
+  - @inlang/sdk@0.34.10
+
 ## 0.9.19
 
 ### Patch Changes
