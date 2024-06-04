@@ -38,6 +38,6 @@ function subscribable(fn: Function) {
 // eslint-disable-next-line @typescript-eslint/ban-types
 function settleable(fn: Function) {
 	return Object.assign(fn, {
-		settled: async () => {},
+		settled: async () => [],
 	})
 }
