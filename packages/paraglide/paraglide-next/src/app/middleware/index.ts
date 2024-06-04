@@ -48,22 +48,31 @@ export function Middleware<T extends string>(opt: MiddlewareOptions<T>) {
 	opt = { ...middlewareOptionDefaults, ...opt }
 
 	/**
-	 * Middleware for handling language detection, redirects and language cookies
+	 * Detects the language that should be used for the request
 	 *
-	 * https://nextjs.org/docs/pages/building-your-application/routing/middleware#setting-headers
+	 * @param request
+	 * @returns
 	 */
-	return function middleware(request: NextRequest) {
-		const localeCookieValue = request.cookies.get(LANG_COOKIE.name)?.value
-		const locale = resolveLanguage(request, sourceLanguageTag, [
+	function detectLanguage(request: NextRequest): T {
+		return resolveLanguage(request, sourceLanguageTag, [
 			opt.strategy.resolveLocale,
 			createCookieDetection({ availableLanguageTags: availableLanguageTags }),
 			createAcceptLanguageDetection({ availableLanguageTags: availableLanguageTags }),
 		]) as T
+	}
 
+	/**
+	 * Creates an appropriate routing response
+	 *
+	 * @param request - The request to respond to
+	 * @param locale - The detected language
+	 */
+	function getResponse(request: NextRequest, locale: T): NextResponse {
 		const decodedPathname = decodeURI(request.nextUrl.pathname) as `/${string}`
 		const canonicalPath = opt.strategy.getCanonicalPath(decodedPathname, locale)
 		const localisedURL = opt.strategy.getLocalisedUrl(canonicalPath, locale, false)
 
+		const localeCookieValue = request.cookies.get(LANG_COOKIE.name)?.value
 		const localeCookieMatches =
 			isAvailableLanguageTag(localeCookieValue) && localeCookieValue === locale
 
@@ -97,6 +106,20 @@ export function Middleware<T extends string>(opt: MiddlewareOptions<T>) {
 
 		return response
 	}
+
+	/**
+	 * Middleware for handling language detection, redirects and language cookies
+	 *
+	 * https://nextjs.org/docs/pages/building-your-application/routing/middleware#setting-headers
+	 */
+	function middleware(request: NextRequest) {
+		const locale = detectLanguage(request)
+		return getResponse(request, locale)
+	}
+
+	middleware.detectLanguage = detectLanguage
+	middleware.getResponse = getResponse
+	return middleware
 }
 
 const rewrite = (nextUrl: NextURL, pathname: string, init?: object): NextResponse => {
