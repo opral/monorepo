@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/settings-component",
 	"type": "module",
-	"version": "1.0.23",
+	"version": "1.0.24",
 	"publishConfig": {
 		"access": "public"
 	},
