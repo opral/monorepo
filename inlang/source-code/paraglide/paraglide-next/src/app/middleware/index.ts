@@ -47,6 +47,10 @@ const middlewareOptionDefaults: MaybeMissingOptions<MiddlewareOptions<string>> =
 export function Middleware<T extends string>(opt: MiddlewareOptions<T>) {
 	opt = { ...middlewareOptionDefaults, ...opt }
 
+	const cookieDetection = createCookieDetection({ availableLanguageTags: availableLanguageTags })
+	const acceptLanguageDetection = createAcceptLanguageDetection({
+		availableLanguageTags: availableLanguageTags,
+	})
 	/**
 	 * Detects the language that should be used for the request
 	 *
@@ -56,8 +60,8 @@ export function Middleware<T extends string>(opt: MiddlewareOptions<T>) {
 	function detectLanguage(request: NextRequest): T {
 		return resolveLanguage(request, sourceLanguageTag, [
 			opt.strategy.resolveLocale,
-			createCookieDetection({ availableLanguageTags: availableLanguageTags }),
-			createAcceptLanguageDetection({ availableLanguageTags: availableLanguageTags }),
+			cookieDetection,
+			acceptLanguageDetection,
 		]) as T
 	}
 
