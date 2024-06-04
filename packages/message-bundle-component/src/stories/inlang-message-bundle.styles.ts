@@ -67,45 +67,4 @@ export const messageBundleStyling = css`
 		flex-direction: column;
 		height: auto;
 	}
-	.variant {
-		position: relative;
-		min-height: 44px;
-		width: 100%;
-		display: flex;
-		align-items: center;
-		border-top: 1px solid var(--sl-color-neutral-300);
-	}
-	.variant:first-child {
-		border-top: none;
-	}
-	.match {
-		padding: 12px;
-		height: 44px;
-		width: 80px;
-		background-color: var(--sl-color-neutral-100);
-		border-right: 1px solid var(--sl-color-neutral-300);
-	}
-	.pattern {
-		flex: 1;
-		background-color: none;
-		height: 44px;
-	}
-	.pattern::part(base) {
-		border: none;
-		border-radius: 0;
-		min-height: 44px;
-	}
-	.pattern::part(input) {
-		min-height: 44px;
-	}
-	.actions {
-		position: absolute;
-		top: 0;
-		right: 0;
-		height: 44px;
-		display: flex;
-		align-items: center;
-		gap: 10px;
-		padding-right: 12px;
-	}
 `
