@@ -97,13 +97,6 @@ function TheActualPage() {
 		})
 	)
 
-	const selectedLintRuleName = () => {
-		const lintRule = project()?.installed.messageLintRules().find((lintRule) => lintRule.id === filteredMessageLintRules()[0])
-		return typeof lintRule?.displayName === "object"
-			? lintRule?.displayName.en
-			: lintRule?.displayName
-	}
-
 	return (
 		<>
 			<Switch
@@ -204,7 +197,7 @@ function TheActualPage() {
 										</div>
 									</div>
 									<p class="my-auto sm:py-[5px] sm:items-center text-sm text-background/80">
-										Get warned about {selectedLintRuleName()} in pull requests by adding the
+										Get warned about lint reports in pull requests by adding the
 										<a
 											class="ml-1 underline text-background/80 hover:text-background transition-colors duration-150"
 											href={
