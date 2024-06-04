@@ -7,16 +7,22 @@ import upsertVariant from "../helper/crud/variant/upsert.js"
 export default class InlangVariant extends LitElement {
 	static override styles = [
 		css`
+			div {
+				box-sizing: border-box;
+				font-size: 13px;
+			}
+			:host {
+				border-top: 1px solid var(--sl-color-neutral-300);
+			}
+			:host(:first-child) {
+				border-top: none;
+			}
 			.variant {
 				position: relative;
 				min-height: 44px;
 				width: 100%;
 				display: flex;
 				align-items: center;
-				border-top: 1px solid var(--sl-color-neutral-300);
-			}
-			.variant:first-child {
-				border-top: none;
 			}
 			.match {
 				padding: 12px;
@@ -72,7 +78,7 @@ export default class InlangVariant extends LitElement {
 		// @ts-ignore - just for prototyping
 		return this._selectors.map((selector) => {
 			const matchIndex = this._selectors ? this._selectors.indexOf(selector) : undefined
-			return this.variant && matchIndex ? this.variant.match[matchIndex] : ""
+			return this.variant && typeof matchIndex === "number" ? this.variant.match[matchIndex] : ""
 		})
 	}
 
@@ -122,7 +128,7 @@ export default class InlangVariant extends LitElement {
 					>Save</sl-button
 				>
 			</div>
-		</div>`
+		</div> `
 	}
 }
 
