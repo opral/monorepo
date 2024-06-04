@@ -7,11 +7,11 @@ import {
 import { addSeoHeaders } from "./headers"
 import { LANG_COOKIE, PARAGLIDE_LANGUAGE_HEADER_NAME } from "../constants"
 import { resolveLanguage } from "./resolveLanguage"
+import { createCookieDetection } from "./detection/CookieDetection"
+import { createAcceptLanguageDetection } from "./detection/AcceptLanguageDetection"
 import type { NextRequest } from "next/server"
 import type { RoutingStrategy } from "../routing-strategy/interface"
 import type { NextURL } from "next/dist/server/web/next-url"
-import { createCookieDetection } from "./detection/CookieDetection"
-import { createAcceptLanguageDetection } from "./detection/AcceptLanguageDetection"
 
 export type MiddlewareOptions<T extends string> = {
 	/**
