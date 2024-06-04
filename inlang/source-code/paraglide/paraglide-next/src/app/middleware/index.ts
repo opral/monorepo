@@ -48,7 +48,8 @@ export function Middleware<T extends string>(opt: MiddlewareOptions<T>) {
 	opt = { ...middlewareOptionDefaults, ...opt }
 
 	/**
-	 * Sets the request headers to resolve the language tag in RSC.
+	 * Middleware for handling language detection, redirects and language cookies
+	 *
 	 * https://nextjs.org/docs/pages/building-your-application/routing/middleware#setting-headers
 	 */
 	return function middleware(request: NextRequest) {
