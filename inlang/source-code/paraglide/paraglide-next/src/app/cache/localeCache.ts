@@ -14,7 +14,7 @@ export const localeCache = cache<() => { current: string | undefined }>(() => ({
 /**
  * Call this function on before using `languageTag()`
  */
-export function initializeLocaleCache(languageTag: string) {
+export function setLocaleCache(languageTag: string) {
 	if (!isAvailableLanguageTag(languageTag)) {
 		if (DEV) console.warn("Invalid language tag:", languageTag)
 	} else {
@@ -22,7 +22,7 @@ export function initializeLocaleCache(languageTag: string) {
 	}
 }
 
-export function getLanguageFromCache() {
+export function getLocaleCache() {
 	const cachedLanguageTag = localeCache().current
 	if (isAvailableLanguageTag(cachedLanguageTag)) return cachedLanguageTag
 	if (DEV) console.warn("Falling back to source language tag")

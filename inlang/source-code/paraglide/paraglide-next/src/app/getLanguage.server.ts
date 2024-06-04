@@ -1,8 +1,8 @@
 import { cache } from "react"
-import { getLanugageFromRequest } from "./middleware/getLanguageFromRequest"
+import { getLanguageFromRequest } from "./middleware/getLanguageFromRequest"
 
 const cached = cache(() => ({
-	languageTag: getLanugageFromRequest(),
+	languageTag: getLanguageFromRequest(),
 }))
 
 /**

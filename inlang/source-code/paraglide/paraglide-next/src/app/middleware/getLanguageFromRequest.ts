@@ -5,7 +5,7 @@ import { isAvailableLanguageTag, sourceLanguageTag } from "$paraglide/runtime.js
 /**
  * Returns the language that was used for this request
  */
-export function getLanugageFromRequest() {
+export function getLanguageFromRequest() {
 	try {
 		const langHeader = headers().get(PARAGLIDE_LANGUAGE_HEADER_NAME)
 		return isAvailableLanguageTag(langHeader) ? langHeader : sourceLanguageTag
