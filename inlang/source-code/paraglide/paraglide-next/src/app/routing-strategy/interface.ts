@@ -27,7 +27,7 @@ export interface RoutingStrategy<T extends string> {
 	getLocalisedUrl(
 		canonicalPath: `/${string}`,
 		targetLocale: T,
-		isLanugageSwitch: boolean
+		isLanguageSwitch: boolean
 	): import("url").UrlObject & { pathname: `/${string}` }
 
 	resolveLocale: LanguageDetector<T>
