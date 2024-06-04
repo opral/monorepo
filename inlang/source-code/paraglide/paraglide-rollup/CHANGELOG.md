@@ -1,5 +1,12 @@
 # @inlang/paraglide-rollup
 
+## 1.0.72
+
+### Patch Changes
+
+- Updated dependencies [c02ea3a]
+  - @inlang/paraglide-unplugin@1.7.0
+
 ## 1.0.71
 
 ### Patch Changes
