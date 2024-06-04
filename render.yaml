@@ -1,4 +1,4 @@
-previewsEnabled: true
+previewsEnabled: false
 
 # cost control for preview deployments.
 # if no activity for 3 days, the preview deployment will be deleted.
