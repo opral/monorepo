@@ -1,5 +1,12 @@
 # @inlang/paraglide-next
 
+## 0.3.2
+
+### Patch Changes
+
+- db8b7dc: `init` command now prompts which router is being used if it cannot automatically determined from the File-System
+  - @inlang/paraglide-js@1.9.1
+
 ## 0.3.1
 
 ### Patch Changes

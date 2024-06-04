@@ -1,5 +1,13 @@
 # @inlang/paraglide-sveltekit
 
+## 0.9.3
+
+### Patch Changes
+
+- def2d4e: fix: Also update the `paraglide:lang` cookie on the client to allow for better language negotiation
+  - @inlang/paraglide-js@1.9.1
+  - @inlang/paraglide-vite@1.2.65
+
 ## 0.9.2
 
 ### Patch Changes
