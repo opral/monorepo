@@ -45,11 +45,6 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		const currentMessagesHash = hashMessages(messages ?? [], settings)
 		if (currentMessagesHash === previousMessagesHash) return
 
-		if (messages.length === 0) {
-			logger.warn(`No messages found - Skipping compilation into ${options.outdir}`)
-			return
-		}
-
 		logMessageChange()
 		previousMessagesHash = currentMessagesHash
 
@@ -106,9 +101,19 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 			enforce: "pre",
 			async buildStart() {
 				const project = await getProject()
+				const initialMessages = project.query.messages.getAll()
+				await triggerCompile(initialMessages, project.settings())
 
-				//Always fully compile once on build start
-				await triggerCompile(project.query.messages.getAll(), project.settings())
+				project.errors.subscribe((errors) => {
+					if (errors.length === 0) return
+					for (const error of errors) {
+						if (error instanceof Error) {
+							logger.error(error.message) // hide the stack trace
+						} else {
+							logger.error(error)
+						}
+					}
+				})
 
 				let numInvocations = 0
 				project.query.messages.getAll.subscribe((messages) => {
