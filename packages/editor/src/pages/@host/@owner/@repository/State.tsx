@@ -373,7 +373,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		try {
 			const push = await loadedRepo.push().catch((error) => ({ error }))
 			if (push?.error) {
-				return { error: new PushException("Failed to push", { cause: push.error }) }
+				return { error: new PushException("Failed to push.", { cause: push.error }) }
 			}
 			await loadedRepo.pull({
 				author: {
@@ -389,7 +389,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			args.setLastPullTime(time)
 			return { data: true }
 		} catch (error) {
-			return { error: (error as PushException) ?? "Unknown error" }
+			return { error: new PushException("Failed to push.", { cause: error }) }
 		}
 	}
 
