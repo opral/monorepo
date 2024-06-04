@@ -1,5 +1,6 @@
+import type { UrlObject } from "node:url"
 import type { NextRequest } from "next/server"
-import { RoutingStrategy } from "../routing-strategy/interface"
+import type { RoutingStrategy } from "../routing-strategy/interface"
 import { addPathPrefix } from "../utils/basePath"
 import { format } from "../utils/format"
 
@@ -27,18 +28,17 @@ export function addSeoHeaders<T extends string>(
 	const alternateLinks = Object.fromEntries(
 		availableLanguageTags.map((lang) => {
 			const localizedUrl = strategy.getLocalisedUrl(canonicalPath, lang, true)
-			localizedUrl.pathname = encodeURI(localizedUrl.pathname || "/") as `/${string}`
-			localizedUrl.pathname = addPathPrefix(localizedUrl.pathname, nextUrl.basePath) as `/${string}`
+			localizedUrl.pathname = addPathPrefix(
+				encodeURI(localizedUrl.pathname || "/"),
+				nextUrl.basePath
+			) as `/${string}`
 
-			localizedUrl.protocol ??= nextUrl.protocol
-			localizedUrl.host ??= nextUrl.host
-			localizedUrl.hostname ??= nextUrl.hostname
-			localizedUrl.port ??= nextUrl.port
-			localizedUrl.hash ??= nextUrl.hash
-			localizedUrl.search ??= nextUrl.search
+			const destination: UrlObject = {
+				...localizedUrl,
+				...nextUrl,
+			}
 
-			const fullHref = format(localizedUrl)
-			return [lang, fullHref]
+			return [lang, format(destination)]
 		})
 	) as Record<T, string>
 
@@ -51,11 +51,9 @@ export function addSeoHeaders<T extends string>(
 			.map(([lang, href]) => `<${href}>; rel="alternate"; hreflang="${lang}"`)
 			.join(", ")
 		headers.set("Link", linkHeader)
-		return
 	} else {
 		// Vary based on cookies and accept header
 		headers.set("Vary", "Cookie, Accept-Language")
-		return
 	}
 }
 
