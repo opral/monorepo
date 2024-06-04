@@ -47,10 +47,8 @@ const middlewareOptionDefaults: MaybeMissingOptions<MiddlewareOptions<string>> =
 export function Middleware<T extends string>(opt: MiddlewareOptions<T>) {
 	opt = { ...middlewareOptionDefaults, ...opt }
 
-	const cookieDetection = createCookieDetection({ availableLanguageTags: availableLanguageTags })
-	const acceptLanguageDetection = createAcceptLanguageDetection({
-		availableLanguageTags: availableLanguageTags,
-	})
+	const cookieDetection = createCookieDetection({ availableLanguageTags })
+	const acceptLanguageDetection = createAcceptLanguageDetection({ availableLanguageTags })
 	/**
 	 * Detects the language that should be used for the request
 	 *
