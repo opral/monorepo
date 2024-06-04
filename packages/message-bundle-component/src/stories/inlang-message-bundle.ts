@@ -2,9 +2,10 @@ import { html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
 import { baseStyling } from "../styling/base.js"
 import overridePrimitiveColors from "../helper/overridePrimitiveColors.js"
-import type { MessageBundle, Message, Variant } from "@inlang/sdk/v2" // Import the types
+import type { MessageBundle, Message } from "@inlang/sdk/v2" // Import the types
 import { messageBundleStyling } from "./inlang-message-bundle.styles.js"
-import upsertVariant from "../helper/crud/variant/upsert.js"
+
+import "./inlang-variant.js"
 
 import SlInput from "@shoelace-style/shoelace/dist/components/input/input.component.js"
 import SlButton from "@shoelace-style/shoelace/dist/components/button/button.component.js"
@@ -69,58 +70,15 @@ export default class InlangMessageBundle extends LitElement {
 						  </div>`
 						: ``}
 					<div class="variants-container">
-						${message.variants.map((variant) => this._renderVariant(variant, message))}
+						${message.variants.map(
+							(variant) =>
+								html`<inlang-variant
+									.variant=${variant}
+									.message=${message}
+									.triggerSave=${this._triggerSave}
+								></inlang-variant>`
+						)}
 					</div>
-				</div>
-			</div>
-		`
-	}
-
-	private _renderVariant(variant: Variant, message: Message) {
-		// @ts-ignore
-		const selectors = message.selectors.map((selector) => selector.arg.name)
-		const matches = selectors.map((selector) => {
-			const matchIndex = selectors.indexOf(selector)
-			return variant.match[matchIndex] || ""
-		})
-		return html`
-			<div class="variant">
-				${matches.map((match) => html`<div class="match">${match}</div>`)}
-				<sl-input
-					class="pattern"
-					size="small"
-					value=${variant.pattern
-						.map((p) => {
-							if ("value" in p) {
-								return p.value
-							}
-							return ""
-						})
-						.join(" ")}
-				></sl-input>
-				<div class="actions">
-					<sl-button
-						size="small"
-						@click=${(e: Event) => {
-							const target = e.target as HTMLInputElement
-							// upsert variant
-							upsertVariant({
-								message: message,
-								variant: {
-									match: variant.match,
-									pattern: [
-										{
-											type: "text",
-											// @ts-ignore - just for prototyping
-											value: target!.parentElement!.previousSibling!.previousSibling!.value,
-										},
-									],
-								},
-							})
-							this._triggerSave()
-						}}
-						>Save</sl-button
-					>
 				</div>
 			</div>
 		`
