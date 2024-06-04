@@ -20,6 +20,10 @@ export type LocalStorageSchema = {
 		owner: string
 		repository: string
 	}>
+	disableNinjaRecommendation: Array<{
+		owner: string
+		repository: string
+	}>
 	isFirstUse: boolean
 	recentProjects: RecentProjectType[]
 }
@@ -38,5 +42,6 @@ export const defaultLocalStorage: LocalStorageSchema = {
 	showMachineTranslationWarning: true,
 	isFirstUse: true,
 	disableForkSyncWarning: [],
+	disableNinjaRecommendation: [],
 	recentProjects: [],
 }
