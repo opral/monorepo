@@ -23,6 +23,7 @@ export const messageBundleStyling = css`
 		margin-bottom: 16px;
 	}
 	.message {
+		position: relative;
 		display: flex;
 		min-height: 44px;
 		width: 100%;
@@ -44,12 +45,17 @@ export const messageBundleStyling = css`
 		display: flex;
 		flex-direction: column;
 	}
-	.selector-container {
+	.message-header {
 		width: 100%;
 		min-height: 44px;
 		display: flex;
+		justify-content: space-between;
 		background-color: var(--sl-color-neutral-100);
 		border-bottom: 1px solid var(--sl-color-neutral-300);
+	}
+	.selector-container {
+		min-height: 44px;
+		display: flex;
 	}
 	.selector {
 		height: 44px;
@@ -59,6 +65,12 @@ export const messageBundleStyling = css`
 		padding: 12px;
 		border-right: 1px solid var(--sl-color-neutral-300);
 		font-weight: 600;
+	}
+	.message-actions {
+		height: 44px;
+		display: flex;
+		align-items: center;
+		padding: 12px;
 	}
 	.variants-container {
 		width: 100%;

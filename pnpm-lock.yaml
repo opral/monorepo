@@ -1176,6 +1176,9 @@ importers:
       '@inlang/marketplace-registry':
         specifier: workspace:^
         version: link:../marketplace-registry
+      '@inlang/message-lint-rule':
+        specifier: workspace:^
+        version: link:../versioned-interfaces/message-lint-rule
       '@nx/storybook':
         specifier: ^18.0.4
         version: 18.3.4(@babel/traverse@7.24.5)(@types/node@20.12.12)(js-yaml@4.1.0)(nx@18.3.4)(typescript@5.4.5)

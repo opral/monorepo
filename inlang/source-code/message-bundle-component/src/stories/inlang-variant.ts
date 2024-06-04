@@ -2,6 +2,9 @@ import type { Variant, Message } from "@inlang/sdk/v2"
 import { LitElement, css, html } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
+import type { MessageLintReport } from "@inlang/message-lint-rule"
+
+import "./inlang-lint-report-tip.js"
 
 @customElement("inlang-variant")
 export default class InlangVariant extends LitElement {
@@ -62,6 +65,9 @@ export default class InlangVariant extends LitElement {
 
 	@property()
 	variant: Variant | undefined
+
+	@property()
+	lintReports: MessageLintReport[] | undefined
 
 	@property()
 	triggerSave: () => void = () => {}
@@ -127,6 +133,12 @@ export default class InlangVariant extends LitElement {
 					}}
 					>Save</sl-button
 				>
+				${this.lintReports &&
+				this.lintReports.length > 0 &&
+				this.message?.selectors &&
+				this.message.selectors.length === 0
+					? html`<inlang-lint-report-tip .lintReports=${this.lintReports}></inlang-lint-report-tip>`
+					: ``}
 			</div>
 		</div> `
 	}
