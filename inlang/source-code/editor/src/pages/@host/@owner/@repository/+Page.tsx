@@ -17,6 +17,7 @@ import { getAuthClient } from "@lix-js/client"
 import { currentPageContext } from "#src/renderer/state.js"
 import { replaceMetaInfo } from "./helper/ReplaceMetaInfo.js"
 import { publicEnv } from "@inlang/env-variables"
+import { posthog as telemetryBrowser } from "posthog-js"
 
 const browserAuth = getAuthClient({
 	gitHubProxyBaseUrl: publicEnv.PUBLIC_GIT_PROXY_BASE_URL,
@@ -25,6 +26,9 @@ const browserAuth = getAuthClient({
 })
 
 export const [messageCount, setMessageCount] = createSignal(0)
+// only used to trigger a commit, push and pull for adding ninja
+export const [triggerAddNinja, setTriggerAddNinja] = createSignal(false)
+export const [showToolTip, setShowToolTip] = createSignal(false)
 
 export default function Page() {
 	onMount(() => {
@@ -59,9 +63,8 @@ function TheActualPage() {
 		userIsCollaborator,
 		isNinjaRecommendationDisabled,
 		ninjaIsAdopted,
-		ninjaAdd,
 		filteredMessageLintRules,
-		setLocalChanges
+		localChanges
 	} = useEditorState()
 	const [localStorage, setLocalStorage] = useLocalStorage()
 
@@ -184,49 +187,60 @@ function TheActualPage() {
 					<div class="min-h-[calc(100vh_-_200px)]">
 						<ListHeader />
 						<Show when={ninjaIsAdopted() === false && filteredMessageLintRules().length !== 0 && userIsCollaborator() && !isNinjaRecommendationDisabled()}>
-							<div class="flex flex-col sm:flex-row justify-start items-start w-full gap-2 px-4 py-1.5 transition-all border-x border-[#DFE2E4] bg-inverted-surface animate-fadeInTop">
-								<div class="flex flex-wrap text-sm font-medium text-background/80">
-									<div class="flex justify-start items-start py-[5px] text-background">
-										<IconLightbulb class="w-5 h-5 mr-1" />
-										<span class="font-bold">Tip:</span>
+							<div class="relative">
+								<div class={"relative z-10 "
+									+ (localChanges() !== 0 && showToolTip() ? "block" : "hidden")
+								}>
+									<div class="rounded absolute bg-inverted-surface text-background text-sm px-2 py-1 -top-10 right-[54px] animate-blendIn">
+										Push changes before adding Ninja action
+										<div class="text-inverted-surface before:content-['▲'] h-2 flex items-center justify-center -scale-100 absolute right-[74px] -bottom-2" />
 									</div>
 								</div>
-								<p class="my-auto sm:py-[5px] sm:items-center text-sm text-background/80">
-									Get warned about {selectedLintRuleName()} in pull requests by adding the
-									<a
-										class="ml-1 underline text-background/80 hover:text-background transition-colors duration-150"
-										href={
-											import.meta.env.PROD
-												? "https://inlang.com/m/3gk8n4n4/app-inlang-ninjaI18nAction"
-												: "http://localhost:3000/m/3gk8n4n4/app-inlang-ninjaI18nAction"
-										}
-										target="_blank"
-									>Ninja GitHub action</a>
-									.
-								</p>
-								<div class="w-full sm:w-[212px] h-8 flex sm:flex-grow justify-end items-center gap-2">
-									<sl-button
-										prop:size="small"
-										onClick={() => {
-											ninjaAdd()
-											setLocalChanges((prev) => (prev += 1))
-										}}
-										class={"on-inverted"}
-									>
-										Add Ninja GitHub action
-									</sl-button>
-									<button
-										onClick={() => {
-											setLocalStorage("disableNinjaRecommendation",
-												(prev) => [
-													...prev,
-													{ owner: routeParams().owner, repository: routeParams().repository },
-												])
-										}}
-										class="rounded w-[30px] h-[30px] flex justify-center items-center hover:bg-background/10 hover:text-background text-background/80"
-									>
-										<IconClose class="w-5 h-5" />
-									</button>
+								<div class="flex flex-col sm:flex-row justify-start items-start w-full gap-2 px-4 py-1.5 border-x border-[#DFE2E4] bg-inverted-surface z-20 animate-blendIn">
+									<div class="flex flex-wrap text-sm font-medium text-background/80">
+										<div class="flex justify-start items-start py-[5px] text-background">
+											<IconLightbulb class="w-5 h-5 mr-1" />
+											<span class="font-bold">Tip:</span>
+										</div>
+									</div>
+									<p class="my-auto sm:py-[5px] sm:items-center text-sm text-background/80">
+										Get warned about {selectedLintRuleName()} in pull requests by adding the
+										<a
+											class="ml-1 underline text-background/80 hover:text-background transition-colors duration-150"
+											href={
+												import.meta.env.PROD
+													? "https://inlang.com/m/3gk8n4n4/app-inlang-ninjaI18nAction"
+													: "http://localhost:3000/m/3gk8n4n4/app-inlang-ninjaI18nAction"
+											}
+											target="_blank"
+										>Ninja GitHub action</a>
+										.
+									</p>
+									<div class="w-full sm:w-[212px] h-8 flex sm:flex-grow justify-end items-center gap-2">
+										<sl-button
+											prop:size="small"
+											prop:disabled={localChanges() !== 0}
+											onMouseEnter={() => setShowToolTip(true)}
+											onMouseLeave={() => setShowToolTip(false)}
+											onClick={() => setTriggerAddNinja(true)}
+											class={"on-inverted"}
+										>
+											Add Ninja GitHub action
+										</sl-button>
+										<button
+											onClick={() => {
+												setLocalStorage("disableNinjaRecommendation",
+													(prev) => [
+														...prev,
+														{ owner: routeParams().owner, repository: routeParams().repository },
+													])
+												telemetryBrowser.capture("EDITOR user rejected Ninja")
+											}}
+											class="rounded w-[30px] h-[30px] flex justify-center items-center hover:bg-background/10 hover:text-background text-background/80"
+										>
+											<IconClose class="w-5 h-5" />
+										</button>
+									</div>
 								</div>
 							</div>
 						</Show>

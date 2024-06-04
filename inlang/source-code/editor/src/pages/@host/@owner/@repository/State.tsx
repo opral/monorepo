@@ -64,6 +64,7 @@ type EditorStateSchema = {
 
 	pushChanges: (args: {
 		user: LocalStorageSchema["user"]
+		commitMessage: string
 		setFsChange: (date: Date) => void
 		setLastPullTime: (date: Date) => void
 	}) => Promise<Result<true, PushException>>
@@ -147,7 +148,7 @@ type EditorStateSchema = {
 
 	isNinjaRecommendationDisabled: () => boolean
 	ninjaIsAdopted: Resource<boolean>
-	ninjaAdd: () => void
+	addNinja: (triggerPushChanges: (message: string) => Promise<(() => void) | undefined>) => Promise<void>
 
 	tourStep: () => TourStepId
 	setTourStep: Setter<TourStepId>
@@ -336,6 +337,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	async function pushChanges(args: {
 		user: LocalStorageSchema["user"]
+		commitMessage: string
 		setFsChange: (date: Date) => void
 		setLastPullTime: (date: Date) => void
 	}): Promise<Result<true, PushException>> {
@@ -366,7 +368,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					name: args.user.username,
 					email: args.user.email,
 				},
-				message: "chore: update translations with Fink 🐦",
+				message: args.commitMessage,
 				include: filesWithUncommittedChanges.map((f) => f[0]),
 			})
 		}
@@ -532,12 +534,13 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	)
 
-	async function ninjaAdd() {
+	async function addNinja(triggerPushChanges: (message: string) => Promise<(() => void) | undefined> | undefined) {
 		try {
 			if (!ninjaIsAdopted() && repo()) {
 				await Ninja.add({ fs: repo()!.nodeishFs })
-				refetchNinjaIsAdopted(true)
-				telemetryBrowser.capture("Fink added Ninja")
+				refetchNinjaIsAdopted()
+				// commit, push and pull
+				await triggerPushChanges("feat: add Ninja GitHub action 🥷")
 			}
 		} catch (error) {
 			console.error("Failed to add the Ninja Github Action. Please open an issue")
@@ -759,7 +762,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					languageTags,
 					isNinjaRecommendationDisabled,
 					ninjaIsAdopted,
-					ninjaAdd,
+					addNinja,
 					tourStep,
 					setTourStep,
 					filteredLanguageTags,
