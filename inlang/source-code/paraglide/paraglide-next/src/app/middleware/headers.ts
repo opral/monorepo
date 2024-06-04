@@ -23,21 +23,18 @@ export function addSeoHeaders<T extends string>(
 ) {
 	if (!isPageRequest(request)) return
 	if (availableLanguageTags.length <= 1) return
-	const nextUrl = request.nextUrl
 
+	const nextUrl = request.nextUrl
 	const alternateLinks = Object.fromEntries(
 		availableLanguageTags.map((lang) => {
 			const localizedUrl = strategy.getLocalisedUrl(canonicalPath, lang, true)
-			localizedUrl.pathname = addPathPrefix(
-				encodeURI(localizedUrl.pathname || "/"),
-				nextUrl.basePath
-			) as `/${string}`
 
 			const destination: UrlObject = {
 				...localizedUrl,
 				...nextUrl,
 			}
 
+			destination.pathname = addPathPrefix(encodeURI(destination.pathname || "/"), nextUrl.basePath)
 			return [lang, format(destination)]
 		})
 	) as Record<T, string>
