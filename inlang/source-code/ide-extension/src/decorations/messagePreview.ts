@@ -22,11 +22,6 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 			return
 		}
 
-		// If inline annotations are disabled, remove all decorations or prevent them from being added
-		if (!inlineAnnotationsEnabled) {
-			return activeTextEditor.setDecorations(messagePreview, [])
-		}
-
 		// TODO: this is a hack to prevent the message preview from showing up in the project.inlang/settings file
 		if (activeTextEditor.document.fileName.includes("project.inlang")) {
 			return activeTextEditor.setDecorations(messagePreview, [])
@@ -117,22 +112,24 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 
 				const decoration: vscode.DecorationOptions = {
 					range,
-					renderOptions: {
-						after: {
-							margin: "0 0.5rem",
-							contentText:
-								truncatedTranslation === "" || truncatedTranslation === undefined
-									? `ERROR: '${message.messageId}' not found in source with language tag '${sourceLanguageTag}'`
-									: translation,
-							backgroundColor: translation
-								? editorInfoColors.background
-								: editorErrorColors.background,
-							color: translation ? editorInfoColors.foreground : editorErrorColors.foreground,
-							border: `1px solid ${
-								translation ? editorInfoColors.border : editorErrorColors.border
-							}`,
-						},
-					},
+					renderOptions: inlineAnnotationsEnabled
+						? {
+								after: {
+									margin: "0 0.5rem",
+									contentText:
+										truncatedTranslation === "" || truncatedTranslation === undefined
+											? `ERROR: '${message.messageId}' not found in source with language tag '${sourceLanguageTag}'`
+											: translation,
+									backgroundColor: translation
+										? editorInfoColors.background
+										: editorErrorColors.background,
+									color: translation ? editorInfoColors.foreground : editorErrorColors.foreground,
+									border: `1px solid ${
+										translation ? editorInfoColors.border : editorErrorColors.border
+									}`,
+								},
+						  }
+						: undefined,
 					hoverMessage: contextTooltip(message),
 				}
 				return decoration
