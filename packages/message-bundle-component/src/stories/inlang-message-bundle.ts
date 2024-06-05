@@ -2,9 +2,19 @@ import { html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
 import { baseStyling } from "../styling/base.js"
 import overridePrimitiveColors from "../helper/overridePrimitiveColors.js"
-import type { MessageBundle, Message, Variant } from "@inlang/sdk/v2" // Import the types
+import type { MessageBundle, Message } from "@inlang/sdk/v2" // Import the types
 import { messageBundleStyling } from "./inlang-message-bundle.styles.js"
-import upsertVariant from "../helper/crud/variant/upsert.js"
+
+import "./inlang-variant.js"
+import "./inlang-lint-report-tip.js"
+
+import SlInput from "@shoelace-style/shoelace/dist/components/input/input.component.js"
+import SlButton from "@shoelace-style/shoelace/dist/components/button/button.component.js"
+import type { MessageLintReport } from "@inlang/sdk"
+
+// in case an app defines it's own set of shoelace components, prevent double registering
+if (!customElements.get("sl-input")) customElements.define("sl-input", SlInput)
+if (!customElements.get("sl-button")) customElements.define("sl-button", SlButton)
 
 @customElement("inlang-message-bundle")
 export default class InlangMessageBundle extends LitElement {
@@ -12,6 +22,9 @@ export default class InlangMessageBundle extends LitElement {
 
 	@property({ type: Object })
 	messageBundle: MessageBundle | undefined
+
+	@property({ type: Object })
+	lintReports: MessageLintReport[] | undefined
 
 	dispatchOnSetSettings(messageBundle: MessageBundle) {
 		const onChangeMessageBundle = new CustomEvent("change-message-bundle", {
@@ -41,12 +54,17 @@ export default class InlangMessageBundle extends LitElement {
 				<span class="alias">@${this.messageBundle?.alias.default}</span>
 			</div>
 			<div class="messages-container">
-				${this.messageBundle?.messages.map((message) => this._renderMessage(message))}
+				${this.messageBundle?.messages.map((message) =>
+					this._renderMessage(
+						message,
+						this.lintReports?.filter((report) => report.languageTag === message.locale)
+					)
+				)}
 			</div>
 		`
 	}
 
-	private _renderMessage(message: Message) {
+	private _renderMessage(message: Message, messageLintReports?: MessageLintReport[]) {
 		return html`
 			<div class="message">
 				<div class="language-container">
@@ -54,65 +72,32 @@ export default class InlangMessageBundle extends LitElement {
 				</div>
 				<div class="message-body">
 					${message.selectors.length > 0
-						? html`<div class="selector-container">
-								${message.selectors.map(
-									// @ts-ignore
-									(selector) => html`<div class="selector">${selector.arg.name}</div>`
-								)}
+						? html`<div class="message-header">
+								<div class="selector-container">
+									${message.selectors.map(
+										// @ts-ignore
+										(selector) => html`<div class="selector">${selector.arg.name}</div>`
+									)}
+								</div>
+								<div class="message-actions">
+									${messageLintReports && messageLintReports.length > 0
+										? html`<inlang-lint-report-tip
+												.lintReports=${messageLintReports}
+										  ></inlang-lint-report-tip>`
+										: ``}
+								</div>
 						  </div>`
 						: ``}
 					<div class="variants-container">
-						${message.variants.map((variant) => this._renderVariant(variant, message))}
-					</div>
-				</div>
-			</div>
-		`
-	}
-
-	private _renderVariant(variant: Variant, message: Message) {
-		// @ts-ignore
-		const selectors = message.selectors.map((selector) => selector.arg.name)
-		const matches = selectors.map((selector) => {
-			const matchIndex = selectors.indexOf(selector)
-			return variant.match[matchIndex] || ""
-		})
-		return html`
-			<div class="variant">
-				${matches.map((match) => html`<div class="match">${match}</div>`)}
-				<input
-					class="pattern"
-					type="text"
-					value=${variant.pattern
-						.map((p) => {
-							if ("value" in p) {
-								return p.value
-							}
-							return ""
-						})
-						.join(" ")}
-				/>
-				<div class="actions">
-					<div
-						@click=${(e: Event) => {
-							const target = e.target as HTMLInputElement
-							// upsert variant
-							upsertVariant({
-								message: message,
-								variant: {
-									match: variant.match,
-									pattern: [
-										{
-											type: "text",
-											// @ts-ignore - just for prototyping
-											value: target!.parentElement!.previousSibling!.previousSibling!.value,
-										},
-									],
-								},
-							})
-							this._triggerSave()
-						}}
-					>
-						Save
+						${message.variants.map(
+							(variant) =>
+								html`<inlang-variant
+									.variant=${variant}
+									.message=${message}
+									.triggerSave=${this._triggerSave}
+									.lintReports=${messageLintReports}
+								></inlang-variant>`
+						)}
 					</div>
 				</div>
 			</div>

@@ -14,10 +14,13 @@ const GitHubActionJob = Type.Object({
 	steps: Type.Array(GitHubActionStep),
 })
 
-const GitHubActionEvent = Type.Object({
-	pull_request_target: Type.Optional(Type.Any()),
-	// Define other events as necessary, ensuring correct property names
-})
+const GitHubActionEvent = Type.Union([
+	Type.Literal("pull_request_target"),
+	Type.Object({
+		pull_request_target: Type.Optional(Type.Any()),
+		// Define other events as necessary, ensuring correct property names
+	}),
+])
 
 export const GitHubActionsWorkflow = Type.Object({
 	name: Type.String(),
@@ -30,19 +33,12 @@ export const GitHubActionsWorkflow = Type.Object({
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const ninjaI18nWorkflow: Static<typeof GitHubActionsWorkflow> = {
 	name: "Ninja i18n action",
-	on: {
-		pull_request_target: {},
-	},
+	on: "pull_request_target",
 	jobs: {
 		"ninja-i18n": {
 			name: "Ninja i18n - GitHub Lint Action",
 			"runs-on": "ubuntu-latest",
 			steps: [
-				{
-					name: "Checkout",
-					id: "checkout",
-					uses: "actions/checkout@v4",
-				},
 				{
 					name: "Run Ninja i18n",
 					id: "ninja-i18n",
