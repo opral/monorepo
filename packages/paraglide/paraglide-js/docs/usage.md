@@ -1,6 +1,24 @@
 # Usage
 
-## Working with Messages
+## Working with the Inlang Message Format
+
+Paraglide is part of the highly modular Inlang Ecosystem which supports many different Message Formats. By default, the [Inlang Message Format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat) is used. 
+
+It expects messages to be in `messages/{lang}.json` relative to your repo root.
+
+```json
+//messages/en.json
+{
+	//the $schema key is automatically ignored 
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"hello_world: "Hello World!",
+	"greeting": "Hello {name}!"
+}
+```
+
+The `messages/{lang}.json` file contains a flat map of message IDs and their translations. You can use curly braces to insert `{parameters}` into translations
+
+**Nesting purposely isn't supported and likely won't be**. Nested messages are way harder to interact with from complementary tools like the [Sherlock IDE Extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension), the [Parrot Figma Plugin](https://inlang.com/m/gkrpgoir/app-parrot-figmaPlugin), or the [Fink Localization editor](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor). Intellisense also becomes less helpful since it only shows the messages at the current level, not all messages. Additionally enforcing an organization-style side-steps organization discussions with other contributors. 
 
 ## Using messages in Code
 
