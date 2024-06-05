@@ -614,6 +614,9 @@ importers:
       '@inlang/cli':
         specifier: workspace:*
         version: link:../cli
+      '@inlang/cross-sell-ninja':
+        specifier: workspace:*
+        version: link:../cross-sell/cross-sell-ninja
       '@inlang/design-system':
         specifier: workspace:*
         version: link:../design-system
@@ -632,12 +635,6 @@ importers:
       '@inlang/marketplace-registry':
         specifier: workspace:*
         version: link:../marketplace-registry
-      '@inlang/paraglide-js':
-        specifier: workspace:*
-        version: link:../paraglide/paraglide-js
-      '@inlang/paraglide-vite':
-        specifier: workspace:*
-        version: link:../paraglide/paraglide-vite
       '@inlang/result':
         specifier: workspace:*
         version: link:../result
@@ -1182,6 +1179,9 @@ importers:
       '@inlang/marketplace-registry':
         specifier: workspace:^
         version: link:../marketplace-registry
+      '@inlang/message-lint-rule':
+        specifier: workspace:^
+        version: link:../versioned-interfaces/message-lint-rule
       '@nx/storybook':
         specifier: ^18.0.4
         version: 18.3.4(@babel/traverse@7.24.5)(@types/node@20.12.12)(js-yaml@4.1.0)(nx@18.3.4)(typescript@5.4.5)

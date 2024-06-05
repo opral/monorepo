@@ -11,6 +11,7 @@ const PUBLIC_LIX_GITHUB_APP_CLIENT_ID = getEnvVar("PUBLIC_LIX_GITHUB_APP_CLIENT_
 const LIX_GITHUB_APP_CLIENT_SECRET = getEnvVar("LIX_GITHUB_APP_CLIENT_SECRET")
 const PUBLIC_ALLOWED_AUTH_URLS = getEnvVar("PUBLIC_ALLOWED_AUTH_URLS")
 const JWE_SECRET = getEnvVar("JWE_SECRET")
+const PUBLIC_SERVER_BASE_URL = getEnvVar("PUBLIC_SERVER_BASE_URL")
 
 const allowedAuthUrls = PUBLIC_ALLOWED_AUTH_URLS.split(",")
 
@@ -22,7 +23,13 @@ const allowedAuthUrls = PUBLIC_ALLOWED_AUTH_URLS.split(",")
  */
 
 router.get("/github-auth-callback", async (request, response, next) => {
-	const callbackUrl = decodeURI((request.query["state"] as string) || "") as string
+	const state = request.query["state"]
+	let callbackUrl = ""
+	if (!state) {
+		callbackUrl = PUBLIC_SERVER_BASE_URL + "/auth/auth-callback"
+	} else {
+		callbackUrl = decodeURI(state as string) as string
+	}
 
 	const callBackOrigin = new URL(callbackUrl).origin
 	if (!allowedAuthUrls.includes(callBackOrigin)) {

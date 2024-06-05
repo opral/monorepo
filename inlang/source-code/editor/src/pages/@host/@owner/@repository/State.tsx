@@ -37,6 +37,7 @@ import {
 import { posthog as telemetryBrowser } from "posthog-js"
 import type { Result } from "@inlang/result"
 import { id } from "../../../../../marketplace-manifest.json"
+import * as Ninja from "@inlang/cross-sell-ninja"
 
 type EditorStateSchema = {
 	/**
@@ -63,6 +64,7 @@ type EditorStateSchema = {
 
 	pushChanges: (args: {
 		user: LocalStorageSchema["user"]
+		commitMessage: string
 		setFsChange: (date: Date) => void
 		setLastPullTime: (date: Date) => void
 	}) => Promise<Result<true, PushException>>
@@ -143,6 +145,10 @@ type EditorStateSchema = {
 	sourceLanguageTag: () => LanguageTag
 
 	languageTags: () => LanguageTag[]
+
+	isNinjaRecommendationDisabled: () => boolean
+	ninjaIsAdopted: Resource<boolean>
+	addNinja: (triggerPushChanges: (message: string) => Promise<(() => void) | undefined>) => Promise<void>
 
 	tourStep: () => TourStepId
 	setTourStep: Setter<TourStepId>
@@ -331,6 +337,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 
 	async function pushChanges(args: {
 		user: LocalStorageSchema["user"]
+		commitMessage: string
 		setFsChange: (date: Date) => void
 		setLastPullTime: (date: Date) => void
 	}): Promise<Result<true, PushException>> {
@@ -361,7 +368,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					name: args.user.username,
 					email: args.user.email,
 				},
-				message: "chore: update translations with Fink 🐦",
+				message: args.commitMessage,
 				include: filesWithUncommittedChanges.map((f) => f[0]),
 			})
 		}
@@ -449,17 +456,19 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	})
 
 	// polyfill requestIdleCallback for Safari browser
-	const requestIdleCallback = window.requestIdleCallback || function (callback: any) {
-		const start = Date.now()
-		return setTimeout(function () {
-			callback({
-				didTimeout: false,
-				timeRemaining: function () {
-					return Math.max(0, 50 - (Date.now() - start))
-				}
-			});
-		}, 1)
-	}
+	const requestIdleCallback =
+		window.requestIdleCallback ||
+		function (callback: any) {
+			const start = Date.now()
+			return setTimeout(function () {
+				callback({
+					didTimeout: false,
+					timeRemaining: function () {
+						return Math.max(0, 50 - (Date.now() - start))
+					},
+				})
+			}, 1)
+		}
 
 	// open the inlang project and store it in a resource
 	const [project, { refetch: refetchProject, mutate: setProject }] = createResource(
@@ -505,6 +514,38 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 	const languageTags = createMemo(() => {
 		return project()?.settings()?.languageTags ?? []
 	})
+
+	const isNinjaRecommendationDisabled = () =>
+		localStorage.disableNinjaRecommendation?.some(
+			(repo) => repo.owner === routeParams().owner && repo.repository === routeParams().repository
+		)
+
+	const [ninjaIsAdopted, { refetch: refetchNinjaIsAdopted }] = createResource(
+		() => {
+			if (repo() === undefined || isNinjaRecommendationDisabled()) {
+				return undefined
+			}
+			return { fs: repo()!.nodeishFs }
+		},
+		async ({ fs }) => {
+			// wait for the browser to be idle
+			await new Promise((resolve) => requestIdleCallback(resolve))
+			return await Ninja.isAdopted({ fs })
+		}
+	)
+
+	async function addNinja(triggerPushChanges: (message: string) => Promise<(() => void) | undefined> | undefined) {
+		try {
+			if (!ninjaIsAdopted() && repo()) {
+				await Ninja.add({ fs: repo()!.nodeishFs })
+				refetchNinjaIsAdopted()
+				// commit, push and pull
+				await triggerPushChanges("feat: add Ninja GitHub action 🥷")
+			}
+		} catch (error) {
+			console.error("Failed to add the Ninja Github Action. Please open an issue")
+		}
+	}
 
 	//the effect should skip tour guide steps if not needed
 	createEffect(() => {
@@ -719,6 +760,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					projectList,
 					sourceLanguageTag,
 					languageTags,
+					isNinjaRecommendationDisabled,
+					ninjaIsAdopted,
+					addNinja,
 					tourStep,
 					setTourStep,
 					filteredLanguageTags,

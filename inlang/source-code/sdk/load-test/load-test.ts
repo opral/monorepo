@@ -1,8 +1,17 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-restricted-imports */
-/* eslint-disable no-console */
+
 import { findRepoRoot, openRepository } from "@lix-js/client"
-import { loadProject, type Message, normalizeMessage } from "@inlang/sdk"
-import { createMessage } from "../src/test-utilities/createMessage.js"
+import { loadProject, type InlangProject, type Message, type ProjectSettings } from "@inlang/sdk"
+
+import {
+	createMessage,
+	createMessageBundle,
+	addSlots,
+	injectJSONNewlines,
+} from "../src/v2/helper.js"
+import { MessageBundle } from "../src/v2/types.js"
+
 import { createEffect } from "../src/reactivity/solid.js"
 
 import { dirname, join } from "node:path"
@@ -25,9 +34,7 @@ const projectPath = join(__dirname, "project.inlang")
 const mockServer = "http://localhost:3000"
 
 const cli = `PUBLIC_SERVER_BASE_URL=${mockServer} pnpm inlang`
-const translateCommand = cli + " machine translate -f -n --project ./project.inlang"
-
-const isExperimentalPersistence = await checkExperimentalPersistence()
+const translateCommand = cli + " machine translate -f -q -n --project ./project.inlang"
 
 export async function runLoadTest(
 	messageCount: number = 1000,
@@ -36,10 +43,14 @@ export async function runLoadTest(
 	subscribeToLintReports: boolean = false,
 	watchMode: boolean = false
 ) {
+	const settings = await getSettings()
+	// experimental persistence uses v2 types
+	const isV2 = !!settings.experimental?.persistence
+	const locales = settings.languageTags
 	debug(
 		"load-test start" +
 			(watchMode ? " - watchMode on, ctrl C to exit" : "") +
-			(isExperimentalPersistence ? " - using experimental persistence" : "")
+			(isV2 ? " - using experimental persistence" : "")
 	)
 	if (translate && !process.env.MOCK_TRANSLATE_LOCAL && !(await isMockRpcServerRunning())) {
 		console.error(
@@ -55,7 +66,7 @@ export async function runLoadTest(
 
 	debug(`generating ${messageCount} messages`)
 	// this is called before loadProject() to avoid reading partially written JSON
-	await generateMessageFile(messageCount)
+	await generateMessageFile(isV2, messageCount, locales)
 
 	debug("opening repo and loading project")
 	const repoRoot = await findRepoRoot({ nodeishFs: fs, path: __dirname })
@@ -73,7 +84,7 @@ export async function runLoadTest(
 		}
 	})
 
-	if (subscribeToMessages) {
+	if (subscribeToMessages && !isV2) {
 		debug("subscribing to messages.getAll")
 		let countMessagesGetAllEvents = 0
 
@@ -90,7 +101,7 @@ export async function runLoadTest(
 		})
 	}
 
-	if (subscribeToLintReports) {
+	if (subscribeToLintReports && !isV2) {
 		debug("subscribing to lintReports.getAll")
 		let lintEvents = 0
 		const logLintEvent = throttle(throttleLintEvents, (reports: any) => {
@@ -102,9 +113,17 @@ export async function runLoadTest(
 		})
 	}
 
+	if (isV2) {
+		await summarize("loaded", project)
+	}
+
 	if (translate) {
 		debug("translating messages with inlang cli")
 		await run(translateCommand)
+		if (isV2) {
+			await project.store?.messageBundles.reload()
+			await summarize("translated", project)
+		}
 	}
 
 	debug("load-test done - " + (watchMode ? "watching for events" : "exiting"))
@@ -116,19 +135,35 @@ export async function runLoadTest(
 	}
 }
 
-async function generateMessageFile(messageCount: number) {
-	if (isExperimentalPersistence) {
+async function summarize(action: string, project: InlangProject) {
+	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+	const bundles = await project.store!.messageBundles.getAll()
+	let bundleCount = 0
+	let messageCount = 0
+	bundles.map((bundle) => {
+		bundleCount++
+		messageCount += bundle.messages.length
+	})
+	debug(`${action}: ${bundleCount} bundles, ${messageCount / bundleCount} messages/bundle`)
+}
+
+async function generateMessageFile(isV2: boolean, messageCount: number, locales: string[]) {
+	if (isV2) {
 		const messageFile = join(__dirname, "project.inlang", "messages.json")
 
-		const messages: Message[] = []
+		const messages: MessageBundle[] = []
 		for (let i = 1; i <= messageCount; i++) {
-			messages.push(createMessage(`message_key_${i}`, { en: `Generated message (${i})` }))
+			messages.push(
+				createMessageBundle({
+					id: `message_key_${i}`,
+					messages: [createMessage({ locale: "en", text: `Generated message (${i})` })],
+				})
+			)
 		}
-		await fs.writeFile(
-			messageFile,
-			JSON.stringify(messages.map(normalizeMessage), undefined, 2),
-			"utf-8"
+		const output = injectJSONNewlines(
+			JSON.stringify(messages.map((bundle) => addSlots(bundle, locales)))
 		)
+		await fs.writeFile(messageFile, output, "utf-8")
 	} else {
 		const messageDir = join(__dirname, "locales", "en")
 		const messageFile = join(__dirname, "locales", "en", "common.json")
@@ -142,10 +177,10 @@ async function generateMessageFile(messageCount: number) {
 	}
 }
 
-async function checkExperimentalPersistence() {
+async function getSettings() {
 	const settingsFile = join(__dirname, "project.inlang", "settings.json")
 	const settings = JSON.parse(await fs.readFile(settingsFile, "utf-8"))
-	return !!settings.experimental?.persistence
+	return settings as ProjectSettings
 }
 
 async function isMockRpcServerRunning(): Promise<boolean> {

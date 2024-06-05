@@ -4,6 +4,18 @@
 
 ### Patch Changes
 
+- @inlang/settings-component@1.0.24
+
+## null
+
+### Patch Changes
+
+- @inlang/settings-component@1.0.23
+
+## null
+
+### Patch Changes
+
 - @inlang/settings-component@1.0.22
 
 ## null
