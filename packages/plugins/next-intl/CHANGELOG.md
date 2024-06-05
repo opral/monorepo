@@ -1,5 +1,11 @@
 # @inlang/plugin-next-intl
 
+## 1.3.41
+
+### Patch Changes
+
+- 2b36271: add changeset
+
 ## 1.3.40
 
 ### Patch Changes
