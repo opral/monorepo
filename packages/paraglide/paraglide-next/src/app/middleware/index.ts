@@ -6,7 +6,6 @@ import {
 } from "$paraglide/runtime.js"
 import { addSeoHeaders } from "./headers"
 import { LANG_COOKIE, PARAGLIDE_LANGUAGE_HEADER_NAME } from "../constants"
-import { resolveLanguage } from "./resolveLanguage"
 import { createCookieDetection } from "./detection/CookieDetection"
 import { createAcceptLanguageDetection } from "./detection/AcceptLanguageDetection"
 import type { NextRequest } from "next/server"
@@ -47,24 +46,33 @@ const middlewareOptionDefaults: MaybeMissingOptions<MiddlewareOptions<string>> =
 export function Middleware<T extends string>(opt: MiddlewareOptions<T>) {
 	opt = { ...middlewareOptionDefaults, ...opt }
 
-	const cookieDetection = createCookieDetection({ availableLanguageTags })
-	const acceptLanguageDetection = createAcceptLanguageDetection({ availableLanguageTags })
+	const cookieDetection = createCookieDetection<T>({
+		availableLanguageTags: availableLanguageTags as readonly T[],
+	})
+	const acceptLanguageDetection = createAcceptLanguageDetection<T>({
+		availableLanguageTags: availableLanguageTags as readonly T[],
+	})
+
+	const languageDetectors = [opt.strategy.resolveLocale, cookieDetection, acceptLanguageDetection]
+
 	/**
-	 * Detects the language that should be used for the request
+	 * Detects the language that should be used for the request based on the
+	 * routing strategy and language negotiation.
 	 *
 	 * @param request
 	 * @returns
 	 */
 	function detectLanguage(request: NextRequest): T {
-		return resolveLanguage(request, sourceLanguageTag, [
-			opt.strategy.resolveLocale,
-			cookieDetection,
-			acceptLanguageDetection,
-		]) as T
+		for (const detector of languageDetectors) {
+			const locale = detector(request)
+			if (locale) return locale
+		}
+		return sourceLanguageTag as T
 	}
 
 	/**
-	 * Creates an appropriate routing response
+	 * Creates an appropriate routing response for the given request
+	 * and language.
 	 *
 	 * @param request - The request to respond to
 	 * @param locale - The detected language
