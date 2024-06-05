@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { createMessageBundle, createMessage } from "./createMessageBundle.js"
+import { createMessageBundle, createMessage } from "./helper.js"
 import { MessageBundle } from "./types.js"
 import { Value } from "@sinclair/typebox/value"
 

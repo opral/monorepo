@@ -1,5 +1,17 @@
 # @inlang/sdk
 
+## 0.35.7
+
+### Patch Changes
+
+- 2a5645c: fix undefined lintreports for Ninja (MESDK-130)
+
+## 0.35.6
+
+### Patch Changes
+
+- 9d2aa1a: v2 message bundle persistence - initial store implementation
+
 ## 0.35.5
 
 ### Patch Changes

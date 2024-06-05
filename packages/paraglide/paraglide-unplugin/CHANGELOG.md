@@ -1,5 +1,31 @@
 # @inlang/paraglide-unplugin
 
+## 1.7.0
+
+### Minor Changes
+
+- c02ea3a: Better logging of errors that are thrown from the Inlang SDK. This should make errors more easily debuggable
+
+### Patch Changes
+
+- @inlang/paraglide-js@1.9.1
+
+## 1.6.15
+
+### Patch Changes
+
+- Updated dependencies [2a5645c]
+  - @inlang/sdk@0.35.7
+  - @inlang/paraglide-js@1.9.1
+
+## 1.6.14
+
+### Patch Changes
+
+- Updated dependencies [9d2aa1a]
+  - @inlang/sdk@0.35.6
+  - @inlang/paraglide-js@1.9.1
+
 ## 1.6.13
 
 ### Patch Changes

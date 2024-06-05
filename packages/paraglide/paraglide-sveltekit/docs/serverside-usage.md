@@ -1,9 +1,8 @@
+# Usage on the server
 
-### Usage on the server
+The code you write on the server will usually be the exact same you would write on the client, but there are a few small things to be aware of.
 
-In general you don't need to write different code on the client vs. the server. But there are a few things to be aware of.
-
-#### Avoiding Cross-Talk
+## Avoiding Cross-Talk
 
 SvelteKit does two kinds of work on the server: _Loading_ and _Rendering_. 
 
@@ -15,6 +14,7 @@ Loading is asynchronous & rendering is synchronous.
 During the asynchronous loading, there is danger of crosstalk. If you aren't careful it's possible for one request to override the language of another request. You can avoid this by explicitly specifying which language a message should be in.
 
 ```ts
+// src/routes/+page.server.js
 import * as m from "$lib/paraglide/messages.js"
 
 export async function load({ locals }) {
@@ -25,11 +25,12 @@ export async function load({ locals }) {
 
 During rendering there is no danger of crosstalk. You can safely use messages and the `langaugeTag()` function. 
 
-#### Re-Loading Language-Dependent data
+## Re-Loading Language-Dependent data
 
 You can tell a load function to re-run on language changes by calling `depends("paraglide:lang")`.
 
 ```ts
+// src/routes/+page.server.js
 export async function load({ depends }) {
   // Paraglide-SvelteKit automatically calls `invalidate("paraglide:lang")` whenever the langauge changes
   // This tells SvelteKit to re-run this function whenever that happens

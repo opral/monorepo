@@ -21,16 +21,19 @@ export async function acquireFileLock(
 	try {
 		debug(lockOrigin + " tries to acquire a lockfile Retry Nr.: " + tryCount)
 		await fs.mkdir(lockDirPath)
-		const stats = await fs.stat(lockDirPath)
+		// NOTE: fs.stat does not need to be atomic since mkdir would crash atomically - if we are here its save to consider the lock held by this process
+		const stats = await fs.stat(lockDirPath) 
 		debug(lockOrigin + " acquired a lockfile Retry Nr.: " + tryCount)
+
 		return stats.mtimeMs
 	} catch (error: any) {
 		if (error.code !== "EEXIST") {
-			// we only expect the error that the file exists already (locked by other process)
+		// NOTE in case we have an EEXIST - this is an expected error: the folder existed - another process already acquired the lock. Rethrow all other errors
 			throw error
 		}
 	}
 
+	// land here if the lockDirPath already exists => lock is held by other process
 	let currentLockTime: number
 
 	try {

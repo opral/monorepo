@@ -24,7 +24,7 @@ const InlangDoclayout = (props: {
 			header[0].style = "z-index: 1"
 		} else if (header[0]) {
 			// @ts-ignore
-			header[0].style = "z-index: 1000"
+			header[0].style = "z-index: 50"
 		}
 
 		if (productHeader[0] && drawerIsOpen()) {
@@ -32,7 +32,7 @@ const InlangDoclayout = (props: {
 			productHeader[0].style = "z-index: 1"
 		} else if (productHeader[0]) {
 			// @ts-ignore
-			productHeader[0].style = "z-index: 1000"
+			productHeader[0].style = "z-index: 40"
 		}
 	})
 

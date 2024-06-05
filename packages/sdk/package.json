@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/sdk",
 	"type": "module",
-	"version": "0.35.5",
+	"version": "0.35.7",
 	"license": "Apache-2.0",
 	"publishConfig": {
 		"access": "public"
@@ -16,7 +16,8 @@
 		"./test-utilities": "./dist/test-utilities/index.js",
 		"./lint": "./dist/lint/index.js",
 		"./messages": "./dist/messages/index.js",
-		"./v2": "./dist/v2/index.js"
+		"./v2": "./dist/v2/index.js",
+		"./v2-mocks": "./dist/v2/mocks/index.js"
 	},
 	"files": [
 		"./dist",

@@ -86,7 +86,7 @@ export function Message(props: { id: string }) {
 				["animate-fadeInBottom"]: !shouldMessageBeShown(),
 			}}
 		>
-			<div class="flex w-full gap-2 items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-4 bg-surface-2 border-x border-b-0 border-surface-2">
+			<div class="flex w-full gap-2 items-center self-stretch flex-grow-0 flex-shrink-0 h-11 relative px-4 bg-surface-2 border-x border-b-0 border-[#DFE2E4]">
 				<h3
 					slot="summary"
 					class="flex-grow-0 flex-shrink-0 max-w-[calc(100%_-_38px)] text-[13px] font-medium text-left text-on-surface before:text-on-surface truncate"

@@ -1,5 +1,25 @@
 # @inlang/cross-sell-ninja
 
+## 0.0.28
+
+### Patch Changes
+
+- 0b5349b: change type to apply for new workflow file
+
+## 0.0.27
+
+### Patch Changes
+
+- Updated dependencies [2a5645c]
+  - @inlang/sdk@0.35.7
+
+## 0.0.26
+
+### Patch Changes
+
+- Updated dependencies [9d2aa1a]
+  - @inlang/sdk@0.35.6
+
 ## 0.0.25
 
 ### Patch Changes

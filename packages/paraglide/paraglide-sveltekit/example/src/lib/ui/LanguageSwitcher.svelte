@@ -11,7 +11,7 @@
     function switchToLanguage(newLanguage) {
         const canonicalPath = i18n.route(get(page).url.pathname)
         const localisedPath = i18n.resolveRoute(canonicalPath, newLanguage)
-        goto(localisedPath)
+        goto( localisedPath)
     }
 
     /**
