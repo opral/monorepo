@@ -5,6 +5,7 @@ import upsertVariant from "../helper/crud/variant/upsert.js"
 import type { MessageLintReport } from "@inlang/message-lint-rule"
 
 import "./inlang-lint-report-tip.js"
+import "./inlang-selector-configurator.js"
 
 @customElement("inlang-variant")
 export default class InlangVariant extends LitElement {
@@ -57,6 +58,31 @@ export default class InlangVariant extends LitElement {
 				gap: 10px;
 				padding-right: 12px;
 			}
+			.add-selector {
+				height: 30px;
+				padding-right: 8px;
+				padding-left: 6px;
+				display: flex;
+				gap: 4px;
+				align-items: center;
+				justify-content: center;
+				color: var(--sl-color-neutral-600);
+				border-radius: 4px;
+				border: 1px solid var(--sl-color-neutral-300);
+				background-color: var(--sl-color-neutral-0);
+				cursor: pointer;
+				font-size: 13px;
+			}
+			.add-selector:hover {
+				color: var(--sl-color-neutral-900);
+				background-color: var(--sl-color-neutral-200);
+				border: 1px solid var(--sl-color-neutral-400);
+			}
+			sl-button::part(base):hover {
+				color: var(--sl-color-neutral-900);
+				background-color: var(--sl-color-neutral-100);
+				border: 1px solid var(--sl-color-neutral-400);
+			}
 		`,
 	]
 
@@ -65,6 +91,9 @@ export default class InlangVariant extends LitElement {
 
 	@property()
 	variant: Variant | undefined
+
+	@property()
+	inputs: string[] | undefined
 
 	@property()
 	lintReports: MessageLintReport[] | undefined
@@ -101,6 +130,8 @@ export default class InlangVariant extends LitElement {
 							.map((p) => {
 								if ("value" in p) {
 									return p.value
+								} else if (p.type === "expression" && p.arg.type === "variable") {
+									return p.arg.name
 								}
 								return ""
 							})
@@ -133,6 +164,24 @@ export default class InlangVariant extends LitElement {
 					}}
 					>Save</sl-button
 				>
+				${this.message?.selectors && this.message.selectors.length === 0
+					? html`<inlang-selector-configurator .inputs=${this.inputs} .message=${this.message}>
+							<sl-tooltip content="Add Selector to message"
+								><div class="add-selector">
+									<svg
+										viewBox="0 0 24 24"
+										width="18"
+										height="18"
+										slot="prefix"
+										class="w-5 h-5 -mx-1"
+									>
+										<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path>
+									</svg>
+									Selector
+								</div>
+							</sl-tooltip>
+					  </inlang-selector-configurator>`
+					: ``}
 				${this.lintReports &&
 				this.lintReports.length > 0 &&
 				this.message?.selectors &&
