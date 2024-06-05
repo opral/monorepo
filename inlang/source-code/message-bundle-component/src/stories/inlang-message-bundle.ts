@@ -2,19 +2,23 @@ import { html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
 import { baseStyling } from "../styling/base.js"
 import overridePrimitiveColors from "../helper/overridePrimitiveColors.js"
-import type { MessageBundle, Message } from "@inlang/sdk/v2" // Import the types
+import type { MessageBundle, Message, LanguageTag } from "@inlang/sdk/v2" // Import the types
 import { messageBundleStyling } from "./inlang-message-bundle.styles.js"
 
 import "./inlang-variant.js"
 import "./inlang-lint-report-tip.js"
+import "./inlang-selector-configurator.js"
 
 import SlInput from "@shoelace-style/shoelace/dist/components/input/input.component.js"
 import SlButton from "@shoelace-style/shoelace/dist/components/button/button.component.js"
-import type { MessageLintReport } from "@inlang/sdk"
+import SlTooltip from "@shoelace-style/shoelace/dist/components/tooltip/tooltip.component.js"
+import type { MessageLintReport, ProjectSettings } from "@inlang/sdk"
+import { getInputs } from "../helper/crud/input/get.js"
 
 // in case an app defines it's own set of shoelace components, prevent double registering
 if (!customElements.get("sl-input")) customElements.define("sl-input", SlInput)
 if (!customElements.get("sl-button")) customElements.define("sl-button", SlButton)
+if (!customElements.get("sl-tooltip")) customElements.define("sl-tooltip", SlTooltip)
 
 @customElement("inlang-message-bundle")
 export default class InlangMessageBundle extends LitElement {
@@ -22,6 +26,9 @@ export default class InlangMessageBundle extends LitElement {
 
 	@property({ type: Object })
 	messageBundle: MessageBundle | undefined
+
+	@property({ type: Object })
+	settings: ProjectSettings | undefined
 
 	@property({ type: Object })
 	lintReports: MessageLintReport[] | undefined
@@ -45,6 +52,17 @@ export default class InlangMessageBundle extends LitElement {
 		await this.updateComplete
 		// override primitive colors to match the design system
 		overridePrimitiveColors()
+	}
+
+	private _refLanguageTag = (): LanguageTag | undefined => {
+		return this.settings?.sourceLanguageTag
+	}
+
+	private _fakeInputs = (): string[] | undefined => {
+		const _refLanguageTag = this._refLanguageTag()
+		return _refLanguageTag && this.messageBundle
+			? getInputs({ messageBundle: this.messageBundle })
+			: undefined
 	}
 
 	override render() {
@@ -78,6 +96,23 @@ export default class InlangMessageBundle extends LitElement {
 										// @ts-ignore
 										(selector) => html`<div class="selector">${selector.arg.name}</div>`
 									)}
+									<div class="add-selector-container">
+										<inlang-selector-configurator .inputs=${this._fakeInputs()} .message=${message}>
+											<sl-tooltip content="Add Selector to message"
+												><div class="add-selector">
+													<svg
+														viewBox="0 0 24 24"
+														width="18"
+														height="18"
+														slot="prefix"
+														class="w-5 h-5 -mx-1"
+													>
+														<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path>
+													</svg>
+												</div>
+											</sl-tooltip>
+										</inlang-selector-configurator>
+									</div>
 								</div>
 								<div class="message-actions">
 									${messageLintReports && messageLintReports.length > 0
@@ -94,6 +129,7 @@ export default class InlangMessageBundle extends LitElement {
 								html`<inlang-variant
 									.variant=${variant}
 									.message=${message}
+									.inputs=${this._fakeInputs()}
 									.triggerSave=${this._triggerSave}
 									.lintReports=${messageLintReports}
 								></inlang-variant>`
