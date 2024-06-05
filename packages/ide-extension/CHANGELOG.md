@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.44.12
+
+### Patch Changes
+
+- e318e7b: fix turning off inline previews also turns off hover for messages
+
 ## 1.44.11
 
 ### Patch Changes
