@@ -53,10 +53,16 @@
 
 	function translateHref(href: string, hreflang: T | undefined): string {
 		try {
-			const from = new URL(get(page).url)
-			const original_to = new URL(href, new URL(from))
+			const localisedCurrentUrl = new URL(get(page).url)
+			const [localisedCurrentPath, suffix] = parseRoute(localisedCurrentUrl.pathname, absoluteBase)
+			const canonicalCurrentPath = i18n.strategy.getCanonicalPath(localisedCurrentPath, lang)
 
-			if (isExternal(original_to, from, absoluteBase) || i18n.config.exclude(original_to.pathname))
+			const canonicalCurrentUrl = new URL(localisedCurrentUrl)
+			canonicalCurrentUrl.pathname = serializeRoute(canonicalCurrentPath, absoluteBase, suffix)
+
+			const original_to = new URL(href, new URL(canonicalCurrentUrl))
+ 
+			if (isExternal(original_to, localisedCurrentUrl, absoluteBase) || i18n.config.exclude(original_to.pathname))
 				return href
 
 			const targetLanguage = hreflang ?? lang
@@ -71,7 +77,7 @@
 				dataSuffix
 			)
 
-			return getHrefBetween(from, to)
+			return getHrefBetween(localisedCurrentUrl, to)
 		} catch (error) {
 			if(dev) console.warn(`[paraglide-sveltekit] Failed to translate the link "${href}"`)
 			return href
