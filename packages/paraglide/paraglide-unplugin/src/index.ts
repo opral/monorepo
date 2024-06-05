@@ -46,7 +46,7 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 		if (currentMessagesHash === previousMessagesHash) return
 
 		if (messages.length === 0) {
-			logger.warn(`No messages found - Skipping compilation into ${options.outdir}`)
+			logger.warn("No messages found - Skipping compilation")
 			return
 		}
 
@@ -107,8 +107,20 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 			async buildStart() {
 				const project = await getProject()
 
-				//Always fully compile once on build start
-				await triggerCompile(project.query.messages.getAll(), project.settings())
+				const initialMessages = project.query.messages.getAll()
+				const settings = project.settings()
+				await triggerCompile(initialMessages, settings)
+
+				project.errors.subscribe((errors) => {
+					if (errors.length === 0) return
+					for (const error of errors) {
+						if (error instanceof Error) {
+							logger.error(error.message) // hide the stack trace
+						} else {
+							logger.error(error)
+						}
+					}
+				})
 
 				let numInvocations = 0
 				project.query.messages.getAll.subscribe((messages) => {

@@ -1,5 +1,11 @@
 # @inlang/cross-sell-ninja
 
+## 0.0.28
+
+### Patch Changes
+
+- 0b5349b: change type to apply for new workflow file
+
 ## 0.0.27
 
 ### Patch Changes
