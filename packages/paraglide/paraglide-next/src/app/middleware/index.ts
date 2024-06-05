@@ -6,12 +6,11 @@ import {
 } from "$paraglide/runtime.js"
 import { addSeoHeaders } from "./headers"
 import { LANG_COOKIE, PARAGLIDE_LANGUAGE_HEADER_NAME } from "../constants"
-import { resolveLanguage } from "./resolveLanguage"
+import { createCookieDetection } from "./detection/CookieDetection"
+import { createAcceptLanguageDetection } from "./detection/AcceptLanguageDetection"
 import type { NextRequest } from "next/server"
 import type { RoutingStrategy } from "../routing-strategy/interface"
 import type { NextURL } from "next/dist/server/web/next-url"
-import { createCookieDetection } from "./detection/CookieDetection"
-import { createAcceptLanguageDetection } from "./detection/AcceptLanguageDetection"
 
 export type MiddlewareOptions<T extends string> = {
 	/**
@@ -47,22 +46,43 @@ const middlewareOptionDefaults: MaybeMissingOptions<MiddlewareOptions<string>> =
 export function Middleware<T extends string>(opt: MiddlewareOptions<T>) {
 	opt = { ...middlewareOptionDefaults, ...opt }
 
-	/**
-	 * Sets the request headers to resolve the language tag in RSC.
-	 * https://nextjs.org/docs/pages/building-your-application/routing/middleware#setting-headers
-	 */
-	return function middleware(request: NextRequest) {
-		const localeCookieValue = request.cookies.get(LANG_COOKIE.name)?.value
-		const locale = resolveLanguage(request, sourceLanguageTag, [
-			opt.strategy.resolveLocale,
-			createCookieDetection({ availableLanguageTags: availableLanguageTags }),
-			createAcceptLanguageDetection({ availableLanguageTags: availableLanguageTags }),
-		]) as T
+	const cookieDetection = createCookieDetection<T>({
+		availableLanguageTags: availableLanguageTags as readonly T[],
+	})
+	const acceptLanguageDetection = createAcceptLanguageDetection<T>({
+		availableLanguageTags: availableLanguageTags as readonly T[],
+	})
 
+	const languageDetectors = [opt.strategy.resolveLocale, cookieDetection, acceptLanguageDetection]
+
+	/**
+	 * Detects the language that should be used for the request based on the
+	 * routing strategy and language negotiation.
+	 *
+	 * @param request
+	 * @returns
+	 */
+	function detectLanguage(request: NextRequest): T {
+		for (const detector of languageDetectors) {
+			const locale = detector(request)
+			if (locale) return locale
+		}
+		return sourceLanguageTag as T
+	}
+
+	/**
+	 * Creates an appropriate routing response for the given request
+	 * and language.
+	 *
+	 * @param request - The request to respond to
+	 * @param locale - The detected language
+	 */
+	function getResponse(request: NextRequest, locale: T): NextResponse {
 		const decodedPathname = decodeURI(request.nextUrl.pathname) as `/${string}`
 		const canonicalPath = opt.strategy.getCanonicalPath(decodedPathname, locale)
 		const localisedURL = opt.strategy.getLocalisedUrl(canonicalPath, locale, false)
 
+		const localeCookieValue = request.cookies.get(LANG_COOKIE.name)?.value
 		const localeCookieMatches =
 			isAvailableLanguageTag(localeCookieValue) && localeCookieValue === locale
 
@@ -96,6 +116,20 @@ export function Middleware<T extends string>(opt: MiddlewareOptions<T>) {
 
 		return response
 	}
+
+	/**
+	 * Middleware for handling language detection, redirects and language cookies
+	 *
+	 * https://nextjs.org/docs/pages/building-your-application/routing/middleware#setting-headers
+	 */
+	function middleware(request: NextRequest) {
+		const locale = detectLanguage(request)
+		return getResponse(request, locale)
+	}
+
+	middleware.detectLanguage = detectLanguage
+	middleware.getResponse = getResponse
+	return middleware
 }
 
 const rewrite = (nextUrl: NextURL, pathname: string, init?: object): NextResponse => {
