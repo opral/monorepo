@@ -39,7 +39,7 @@ Make sure to re-run the paraglide compiler after editing your messages.
 npx @inlang/paraglide-js compile --project ./project.inlang --outdir ./src/paraglide
 ```
 
-If you are using a Bundler use one of the [Bundler Plugins](#usage-with-a-bundler) to recompile automatically.
+If you are using a Bundler use one of the [Bundler Plugins](usage#usage-with-a-bundler) to recompile automatically.
 
 ## Using Messages in Code
 
@@ -52,16 +52,6 @@ import { setLanguageTag } from "./paraglide/runtime.js"
 m.hello() // Hello world!
 m.loginHeader({ name: "Samuel" }) // Hello Samuel, please login to continue.
 ```
-
-## Usage with a Bundler
-
-If you are using a bundler you should use the corresponding plugin. The plugin will keep your Message Functions up-to-date by compiling whenever your messages change and before building your app.
-
-<doc-links>
-	<doc-link title="Vite Plugin" icon="tabler:brand-vite" href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-vite" description="Go to Github"></doc-link>
-    <doc-link title="Rollup Plugin" icon="file-icons:rollup" href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-rollup" description="Go to Github"></doc-link>
-    <doc-link title="Webpack Plugin" icon="mdi:webpack" href="https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-webpack" description="Go to Github"></doc-link>
-</doc-links>
 
 # Playground
 
