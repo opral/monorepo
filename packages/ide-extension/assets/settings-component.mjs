@@ -655,13 +655,13 @@ var require_typebox = __commonJS({
         return ValueGuard.IsArray(value) ? ArrayType(value) : ValueGuard.IsDate(value) ? DateType(value) : ValueGuard.IsUint8Array(value) ? Uint8ArrayType(value) : ValueGuard.IsObject(value) ? ObjectType(value) : value;
       }
       function Rest(schemas) {
-        return schemas.map((schema2) => Type10(schema2));
+        return schemas.map((schema2) => Type11(schema2));
       }
       TypeClone2.Rest = Rest;
-      function Type10(schema2, options = {}) {
+      function Type11(schema2, options = {}) {
         return { ...Visit(schema2), ...options };
       }
-      TypeClone2.Type = Type10;
+      TypeClone2.Type = Type11;
     })(TypeClone || (exports.TypeClone = TypeClone = {}));
     var IndexedAccessor;
     (function(IndexedAccessor2) {
@@ -809,8 +809,8 @@ var require_typebox = __commonJS({
       KeyResolver2.ResolveKeys = ResolveKeys;
       function ResolvePattern(schema2) {
         const keys = ResolveKeys(schema2, { includePatterns: true });
-        const pattern2 = keys.map((key) => `(${UnwrapPattern(key)})`);
-        return `^(${pattern2.join("|")})$`;
+        const pattern3 = keys.map((key) => `(${UnwrapPattern(key)})`);
+        return `^(${pattern3.join("|")})$`;
       }
       KeyResolver2.ResolvePattern = ResolvePattern;
     })(KeyResolver || (exports.KeyResolver = KeyResolver = {}));
@@ -880,70 +880,70 @@ var require_typebox = __commonJS({
     exports.TemplateLiteralParserError = TemplateLiteralParserError;
     var TemplateLiteralParser;
     (function(TemplateLiteralParser2) {
-      function IsNonEscaped(pattern2, index2, char) {
-        return pattern2[index2] === char && pattern2.charCodeAt(index2 - 1) !== 92;
+      function IsNonEscaped(pattern3, index2, char) {
+        return pattern3[index2] === char && pattern3.charCodeAt(index2 - 1) !== 92;
       }
-      function IsOpenParen(pattern2, index2) {
-        return IsNonEscaped(pattern2, index2, "(");
+      function IsOpenParen(pattern3, index2) {
+        return IsNonEscaped(pattern3, index2, "(");
       }
-      function IsCloseParen(pattern2, index2) {
-        return IsNonEscaped(pattern2, index2, ")");
+      function IsCloseParen(pattern3, index2) {
+        return IsNonEscaped(pattern3, index2, ")");
       }
-      function IsSeparator(pattern2, index2) {
-        return IsNonEscaped(pattern2, index2, "|");
+      function IsSeparator(pattern3, index2) {
+        return IsNonEscaped(pattern3, index2, "|");
       }
-      function IsGroup(pattern2) {
-        if (!(IsOpenParen(pattern2, 0) && IsCloseParen(pattern2, pattern2.length - 1)))
+      function IsGroup(pattern3) {
+        if (!(IsOpenParen(pattern3, 0) && IsCloseParen(pattern3, pattern3.length - 1)))
           return false;
         let count = 0;
-        for (let index2 = 0; index2 < pattern2.length; index2++) {
-          if (IsOpenParen(pattern2, index2))
+        for (let index2 = 0; index2 < pattern3.length; index2++) {
+          if (IsOpenParen(pattern3, index2))
             count += 1;
-          if (IsCloseParen(pattern2, index2))
+          if (IsCloseParen(pattern3, index2))
             count -= 1;
-          if (count === 0 && index2 !== pattern2.length - 1)
+          if (count === 0 && index2 !== pattern3.length - 1)
             return false;
         }
         return true;
       }
-      function InGroup(pattern2) {
-        return pattern2.slice(1, pattern2.length - 1);
+      function InGroup(pattern3) {
+        return pattern3.slice(1, pattern3.length - 1);
       }
-      function IsPrecedenceOr(pattern2) {
+      function IsPrecedenceOr(pattern3) {
         let count = 0;
-        for (let index2 = 0; index2 < pattern2.length; index2++) {
-          if (IsOpenParen(pattern2, index2))
+        for (let index2 = 0; index2 < pattern3.length; index2++) {
+          if (IsOpenParen(pattern3, index2))
             count += 1;
-          if (IsCloseParen(pattern2, index2))
+          if (IsCloseParen(pattern3, index2))
             count -= 1;
-          if (IsSeparator(pattern2, index2) && count === 0)
+          if (IsSeparator(pattern3, index2) && count === 0)
             return true;
         }
         return false;
       }
-      function IsPrecedenceAnd(pattern2) {
-        for (let index2 = 0; index2 < pattern2.length; index2++) {
-          if (IsOpenParen(pattern2, index2))
+      function IsPrecedenceAnd(pattern3) {
+        for (let index2 = 0; index2 < pattern3.length; index2++) {
+          if (IsOpenParen(pattern3, index2))
             return true;
         }
         return false;
       }
-      function Or(pattern2) {
+      function Or(pattern3) {
         let [count, start] = [0, 0];
         const expressions = [];
-        for (let index2 = 0; index2 < pattern2.length; index2++) {
-          if (IsOpenParen(pattern2, index2))
+        for (let index2 = 0; index2 < pattern3.length; index2++) {
+          if (IsOpenParen(pattern3, index2))
             count += 1;
-          if (IsCloseParen(pattern2, index2))
+          if (IsCloseParen(pattern3, index2))
             count -= 1;
-          if (IsSeparator(pattern2, index2) && count === 0) {
-            const range2 = pattern2.slice(start, index2);
+          if (IsSeparator(pattern3, index2) && count === 0) {
+            const range2 = pattern3.slice(start, index2);
             if (range2.length > 0)
               expressions.push(Parse(range2));
             start = index2 + 1;
           }
         }
-        const range = pattern2.slice(start);
+        const range = pattern3.slice(start);
         if (range.length > 0)
           expressions.push(Parse(range));
         if (expressions.length === 0)
@@ -952,7 +952,7 @@ var require_typebox = __commonJS({
           return expressions[0];
         return { type: "or", expr: expressions };
       }
-      function And(pattern2) {
+      function And(pattern3) {
         function Group(value, index2) {
           if (!IsOpenParen(value, index2))
             throw new TemplateLiteralParserError(`TemplateLiteralParser: Index must point to open parens`);
@@ -967,23 +967,23 @@ var require_typebox = __commonJS({
           }
           throw new TemplateLiteralParserError(`TemplateLiteralParser: Unclosed group parens in expression`);
         }
-        function Range(pattern3, index2) {
-          for (let scan = index2; scan < pattern3.length; scan++) {
-            if (IsOpenParen(pattern3, scan))
+        function Range(pattern4, index2) {
+          for (let scan = index2; scan < pattern4.length; scan++) {
+            if (IsOpenParen(pattern4, scan))
               return [index2, scan];
           }
-          return [index2, pattern3.length];
+          return [index2, pattern4.length];
         }
         const expressions = [];
-        for (let index2 = 0; index2 < pattern2.length; index2++) {
-          if (IsOpenParen(pattern2, index2)) {
-            const [start, end] = Group(pattern2, index2);
-            const range = pattern2.slice(start, end + 1);
+        for (let index2 = 0; index2 < pattern3.length; index2++) {
+          if (IsOpenParen(pattern3, index2)) {
+            const [start, end] = Group(pattern3, index2);
+            const range = pattern3.slice(start, end + 1);
             expressions.push(Parse(range));
             index2 = end;
           } else {
-            const [start, end] = Range(pattern2, index2);
-            const range = pattern2.slice(start, end);
+            const [start, end] = Range(pattern3, index2);
+            const range = pattern3.slice(start, end);
             if (range.length > 0)
               expressions.push(Parse(range));
             index2 = end - 1;
@@ -991,12 +991,12 @@ var require_typebox = __commonJS({
         }
         return expressions.length === 0 ? { type: "const", const: "" } : expressions.length === 1 ? expressions[0] : { type: "and", expr: expressions };
       }
-      function Parse(pattern2) {
-        return IsGroup(pattern2) ? Parse(InGroup(pattern2)) : IsPrecedenceOr(pattern2) ? Or(pattern2) : IsPrecedenceAnd(pattern2) ? And(pattern2) : { type: "const", const: pattern2 };
+      function Parse(pattern3) {
+        return IsGroup(pattern3) ? Parse(InGroup(pattern3)) : IsPrecedenceOr(pattern3) ? Or(pattern3) : IsPrecedenceAnd(pattern3) ? And(pattern3) : { type: "const", const: pattern3 };
       }
       TemplateLiteralParser2.Parse = Parse;
-      function ParseExact(pattern2) {
-        return Parse(pattern2.slice(1, pattern2.length - 1));
+      function ParseExact(pattern3) {
+        return Parse(pattern3.slice(1, pattern3.length - 1));
       }
       TemplateLiteralParser2.ParseExact = ParseExact;
     })(TemplateLiteralParser || (exports.TemplateLiteralParser = TemplateLiteralParser = {}));
@@ -1256,8 +1256,8 @@ var require_typebox = __commonJS({
       /** `[Json]` Creates a KeyOf type */
       KeyOf(schema2, options = {}) {
         return TypeGuard.TRecord(schema2) ? (() => {
-          const pattern2 = Object.getOwnPropertyNames(schema2.patternProperties)[0];
-          return pattern2 === exports.PatternNumberExact ? this.Number(options) : pattern2 === exports.PatternStringExact ? this.String(options) : this.Throw("Unable to resolve key type from Record key pattern");
+          const pattern3 = Object.getOwnPropertyNames(schema2.patternProperties)[0];
+          return pattern3 === exports.PatternNumberExact ? this.Number(options) : pattern3 === exports.PatternStringExact ? this.String(options) : this.Throw("Unable to resolve key type from Record key pattern");
         })() : TypeGuard.TTuple(schema2) ? (() => {
           const items = ValueGuard.IsUndefined(schema2.items) ? [] : schema2.items;
           const literals = items.map((_2, index2) => exports.Type.Literal(index2.toString()));
@@ -1367,8 +1367,8 @@ var require_typebox = __commonJS({
         })() : TypeGuard.TInteger(key) || TypeGuard.TNumber(key) ? (() => {
           return this.Create({ ...options, [exports.Kind]: "Record", type: "object", patternProperties: { [exports.PatternNumberExact]: TypeClone.Type(schema2) } });
         })() : TypeGuard.TString(key) ? (() => {
-          const pattern2 = ValueGuard.IsUndefined(key.pattern) ? exports.PatternStringExact : key.pattern;
-          return this.Create({ ...options, [exports.Kind]: "Record", type: "object", patternProperties: { [pattern2]: TypeClone.Type(schema2) } });
+          const pattern3 = ValueGuard.IsUndefined(key.pattern) ? exports.PatternStringExact : key.pattern;
+          return this.Create({ ...options, [exports.Kind]: "Record", type: "object", patternProperties: { [pattern3]: TypeClone.Type(schema2) } });
         })() : this.Never();
       }
       /** `[Json]` Creates a Recursive type */
@@ -1410,8 +1410,8 @@ var require_typebox = __commonJS({
       }
       /** `[Json]` Creates a TemplateLiteral type */
       TemplateLiteral(unresolved, options = {}) {
-        const pattern2 = ValueGuard.IsString(unresolved) ? TemplateLiteralPattern.Create(TemplateLiteralDslParser.Parse(unresolved)) : TemplateLiteralPattern.Create(unresolved);
-        return this.Create({ ...options, [exports.Kind]: "TemplateLiteral", type: "string", pattern: pattern2 });
+        const pattern3 = ValueGuard.IsString(unresolved) ? TemplateLiteralPattern.Create(TemplateLiteralDslParser.Parse(unresolved)) : TemplateLiteralPattern.Create(unresolved);
+        return this.Create({ ...options, [exports.Kind]: "TemplateLiteral", type: "string", pattern: pattern3 });
       }
       /** `[Json]` Creates a Transform type */
       Transform(schema2) {
@@ -1507,8 +1507,8 @@ var require_typebox = __commonJS({
       }
       /** `[Extended]` Creates a String type */
       RegExp(unresolved, options = {}) {
-        const pattern2 = ValueGuard.IsString(unresolved) ? unresolved : unresolved.source;
-        return this.Create({ ...options, [exports.Kind]: "String", type: "string", pattern: pattern2 });
+        const pattern3 = ValueGuard.IsString(unresolved) ? unresolved : unresolved.source;
+        return this.Create({ ...options, [exports.Kind]: "String", type: "string", pattern: pattern3 });
       }
       /**
        * @deprecated Use `Type.RegExp`
@@ -1655,13 +1655,13 @@ var require_system = __commonJS({
     exports.TypeSystemDuplicateFormat = TypeSystemDuplicateFormat;
     var TypeSystem;
     (function(TypeSystem2) {
-      function Type10(kind, check) {
+      function Type11(kind, check) {
         if (Types.TypeRegistry.Has(kind))
           throw new TypeSystemDuplicateTypeKind(kind);
         Types.TypeRegistry.Set(kind, check);
         return (options = {}) => Types.Type.Unsafe({ ...options, [Types.Kind]: kind });
       }
-      TypeSystem2.Type = Type10;
+      TypeSystem2.Type = Type11;
       function Format(format, check) {
         if (Types.FormatRegistry.Has(format))
           throw new TypeSystemDuplicateFormat(format);
@@ -4458,8 +4458,8 @@ var require_transform = __commonJS({
         return Types.TypeGuard.TTransform(schema2) || Visit(schema2.item, references);
       }
       function TRecord(schema2, references) {
-        const pattern2 = Object.getOwnPropertyNames(schema2.patternProperties)[0];
-        const property = schema2.patternProperties[pattern2];
+        const pattern3 = Object.getOwnPropertyNames(schema2.patternProperties)[0];
+        const property = schema2.patternProperties[pattern3];
         return Types.TypeGuard.TTransform(schema2) || Visit(property, references) || Types.TypeGuard.TSchema(schema2.additionalProperties) && Types.TypeGuard.TTransform(schema2.additionalProperties);
       }
       function TRef(schema2, references) {
@@ -4577,10 +4577,10 @@ var require_transform = __commonJS({
       function TRecord(schema2, references, value) {
         if (!(0, guard_1.IsPlainObject)(value))
           return Default(schema2, value);
-        const pattern2 = Object.getOwnPropertyNames(schema2.patternProperties)[0];
-        const knownKeys = new RegExp(pattern2);
+        const pattern3 = Object.getOwnPropertyNames(schema2.patternProperties)[0];
+        const knownKeys = new RegExp(pattern3);
         const knownProperties = Object.getOwnPropertyNames(value).reduce((value2, key) => {
-          return knownKeys.test(key) ? { ...value2, [key]: Visit(schema2.patternProperties[pattern2], references, value2[key]) } : value2;
+          return knownKeys.test(key) ? { ...value2, [key]: Visit(schema2.patternProperties[pattern3], references, value2[key]) } : value2;
         }, value);
         if (!Types.TypeGuard.TSchema(schema2.additionalProperties)) {
           return Default(schema2, knownProperties);
@@ -4699,10 +4699,10 @@ var require_transform = __commonJS({
         const defaulted = Default(schema2, value);
         if (!(0, guard_1.IsPlainObject)(value))
           return defaulted;
-        const pattern2 = Object.getOwnPropertyNames(schema2.patternProperties)[0];
-        const knownKeys = new RegExp(pattern2);
+        const pattern3 = Object.getOwnPropertyNames(schema2.patternProperties)[0];
+        const knownKeys = new RegExp(pattern3);
         const knownProperties = Object.getOwnPropertyNames(value).reduce((value2, key) => {
-          return knownKeys.test(key) ? { ...value2, [key]: Visit(schema2.patternProperties[pattern2], references, value2[key]) } : value2;
+          return knownKeys.test(key) ? { ...value2, [key]: Visit(schema2.patternProperties[pattern3], references, value2[key]) } : value2;
         }, defaulted);
         if (!Types.TypeGuard.TSchema(schema2.additionalProperties)) {
           return Default(schema2, knownProperties);
@@ -4892,486 +4892,6 @@ var require_value2 = __commonJS({
     Object.defineProperty(exports, "Value", { enumerable: true, get: function() {
       return value_1.Value;
     } });
-  }
-});
-
-// ../../../lix/packages/fs/dist/errors/FilesystemError.js
-var init_FilesystemError = __esm({
-  "../../../lix/packages/fs/dist/errors/FilesystemError.js"() {
-    "use strict";
-  }
-});
-
-// ../../../lix/packages/fs/dist/utilities/helpers.js
-var init_helpers = __esm({
-  "../../../lix/packages/fs/dist/utilities/helpers.js"() {
-    "use strict";
-  }
-});
-
-// ../../../lix/packages/fs/dist/memoryFs.js
-var init_memoryFs = __esm({
-  "../../../lix/packages/fs/dist/memoryFs.js"() {
-    "use strict";
-    init_FilesystemError();
-    init_helpers();
-  }
-});
-
-// ../../../lix/packages/fs/dist/index.js
-var init_dist = __esm({
-  "../../../lix/packages/fs/dist/index.js"() {
-    "use strict";
-    init_memoryFs();
-    init_helpers();
-  }
-});
-
-// ../../../node_modules/.pnpm/ms@2.1.2/node_modules/ms/index.js
-var require_ms = __commonJS({
-  "../../../node_modules/.pnpm/ms@2.1.2/node_modules/ms/index.js"(exports, module) {
-    var s5 = 1e3;
-    var m3 = s5 * 60;
-    var h3 = m3 * 60;
-    var d3 = h3 * 24;
-    var w2 = d3 * 7;
-    var y3 = d3 * 365.25;
-    module.exports = function(val, options) {
-      options = options || {};
-      var type = typeof val;
-      if (type === "string" && val.length > 0) {
-        return parse(val);
-      } else if (type === "number" && isFinite(val)) {
-        return options.long ? fmtLong(val) : fmtShort(val);
-      }
-      throw new Error(
-        "val is not a non-empty string or a valid number. val=" + JSON.stringify(val)
-      );
-    };
-    function parse(str) {
-      str = String(str);
-      if (str.length > 100) {
-        return;
-      }
-      var match = /^(-?(?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(
-        str
-      );
-      if (!match) {
-        return;
-      }
-      var n6 = parseFloat(match[1]);
-      var type = (match[2] || "ms").toLowerCase();
-      switch (type) {
-        case "years":
-        case "year":
-        case "yrs":
-        case "yr":
-        case "y":
-          return n6 * y3;
-        case "weeks":
-        case "week":
-        case "w":
-          return n6 * w2;
-        case "days":
-        case "day":
-        case "d":
-          return n6 * d3;
-        case "hours":
-        case "hour":
-        case "hrs":
-        case "hr":
-        case "h":
-          return n6 * h3;
-        case "minutes":
-        case "minute":
-        case "mins":
-        case "min":
-        case "m":
-          return n6 * m3;
-        case "seconds":
-        case "second":
-        case "secs":
-        case "sec":
-        case "s":
-          return n6 * s5;
-        case "milliseconds":
-        case "millisecond":
-        case "msecs":
-        case "msec":
-        case "ms":
-          return n6;
-        default:
-          return void 0;
-      }
-    }
-    function fmtShort(ms) {
-      var msAbs = Math.abs(ms);
-      if (msAbs >= d3) {
-        return Math.round(ms / d3) + "d";
-      }
-      if (msAbs >= h3) {
-        return Math.round(ms / h3) + "h";
-      }
-      if (msAbs >= m3) {
-        return Math.round(ms / m3) + "m";
-      }
-      if (msAbs >= s5) {
-        return Math.round(ms / s5) + "s";
-      }
-      return ms + "ms";
-    }
-    function fmtLong(ms) {
-      var msAbs = Math.abs(ms);
-      if (msAbs >= d3) {
-        return plural(ms, msAbs, d3, "day");
-      }
-      if (msAbs >= h3) {
-        return plural(ms, msAbs, h3, "hour");
-      }
-      if (msAbs >= m3) {
-        return plural(ms, msAbs, m3, "minute");
-      }
-      if (msAbs >= s5) {
-        return plural(ms, msAbs, s5, "second");
-      }
-      return ms + " ms";
-    }
-    function plural(ms, msAbs, n6, name) {
-      var isPlural = msAbs >= n6 * 1.5;
-      return Math.round(ms / n6) + " " + name + (isPlural ? "s" : "");
-    }
-  }
-});
-
-// ../../../node_modules/.pnpm/debug@4.3.4_supports-color@8.1.1/node_modules/debug/src/common.js
-var require_common = __commonJS({
-  "../../../node_modules/.pnpm/debug@4.3.4_supports-color@8.1.1/node_modules/debug/src/common.js"(exports, module) {
-    function setup(env) {
-      createDebug.debug = createDebug;
-      createDebug.default = createDebug;
-      createDebug.coerce = coerce;
-      createDebug.disable = disable;
-      createDebug.enable = enable;
-      createDebug.enabled = enabled;
-      createDebug.humanize = require_ms();
-      createDebug.destroy = destroy;
-      Object.keys(env).forEach((key) => {
-        createDebug[key] = env[key];
-      });
-      createDebug.names = [];
-      createDebug.skips = [];
-      createDebug.formatters = {};
-      function selectColor(namespace) {
-        let hash2 = 0;
-        for (let i5 = 0; i5 < namespace.length; i5++) {
-          hash2 = (hash2 << 5) - hash2 + namespace.charCodeAt(i5);
-          hash2 |= 0;
-        }
-        return createDebug.colors[Math.abs(hash2) % createDebug.colors.length];
-      }
-      createDebug.selectColor = selectColor;
-      function createDebug(namespace) {
-        let prevTime;
-        let enableOverride = null;
-        let namespacesCache;
-        let enabledCache;
-        function debug8(...args) {
-          if (!debug8.enabled) {
-            return;
-          }
-          const self2 = debug8;
-          const curr = Number(/* @__PURE__ */ new Date());
-          const ms = curr - (prevTime || curr);
-          self2.diff = ms;
-          self2.prev = prevTime;
-          self2.curr = curr;
-          prevTime = curr;
-          args[0] = createDebug.coerce(args[0]);
-          if (typeof args[0] !== "string") {
-            args.unshift("%O");
-          }
-          let index2 = 0;
-          args[0] = args[0].replace(/%([a-zA-Z%])/g, (match, format) => {
-            if (match === "%%") {
-              return "%";
-            }
-            index2++;
-            const formatter = createDebug.formatters[format];
-            if (typeof formatter === "function") {
-              const val = args[index2];
-              match = formatter.call(self2, val);
-              args.splice(index2, 1);
-              index2--;
-            }
-            return match;
-          });
-          createDebug.formatArgs.call(self2, args);
-          const logFn = self2.log || createDebug.log;
-          logFn.apply(self2, args);
-        }
-        debug8.namespace = namespace;
-        debug8.useColors = createDebug.useColors();
-        debug8.color = createDebug.selectColor(namespace);
-        debug8.extend = extend;
-        debug8.destroy = createDebug.destroy;
-        Object.defineProperty(debug8, "enabled", {
-          enumerable: true,
-          configurable: false,
-          get: () => {
-            if (enableOverride !== null) {
-              return enableOverride;
-            }
-            if (namespacesCache !== createDebug.namespaces) {
-              namespacesCache = createDebug.namespaces;
-              enabledCache = createDebug.enabled(namespace);
-            }
-            return enabledCache;
-          },
-          set: (v2) => {
-            enableOverride = v2;
-          }
-        });
-        if (typeof createDebug.init === "function") {
-          createDebug.init(debug8);
-        }
-        return debug8;
-      }
-      function extend(namespace, delimiter) {
-        const newDebug = createDebug(this.namespace + (typeof delimiter === "undefined" ? ":" : delimiter) + namespace);
-        newDebug.log = this.log;
-        return newDebug;
-      }
-      function enable(namespaces) {
-        createDebug.save(namespaces);
-        createDebug.namespaces = namespaces;
-        createDebug.names = [];
-        createDebug.skips = [];
-        let i5;
-        const split = (typeof namespaces === "string" ? namespaces : "").split(/[\s,]+/);
-        const len = split.length;
-        for (i5 = 0; i5 < len; i5++) {
-          if (!split[i5]) {
-            continue;
-          }
-          namespaces = split[i5].replace(/\*/g, ".*?");
-          if (namespaces[0] === "-") {
-            createDebug.skips.push(new RegExp("^" + namespaces.slice(1) + "$"));
-          } else {
-            createDebug.names.push(new RegExp("^" + namespaces + "$"));
-          }
-        }
-      }
-      function disable() {
-        const namespaces = [
-          ...createDebug.names.map(toNamespace),
-          ...createDebug.skips.map(toNamespace).map((namespace) => "-" + namespace)
-        ].join(",");
-        createDebug.enable("");
-        return namespaces;
-      }
-      function enabled(name) {
-        if (name[name.length - 1] === "*") {
-          return true;
-        }
-        let i5;
-        let len;
-        for (i5 = 0, len = createDebug.skips.length; i5 < len; i5++) {
-          if (createDebug.skips[i5].test(name)) {
-            return false;
-          }
-        }
-        for (i5 = 0, len = createDebug.names.length; i5 < len; i5++) {
-          if (createDebug.names[i5].test(name)) {
-            return true;
-          }
-        }
-        return false;
-      }
-      function toNamespace(regexp) {
-        return regexp.toString().substring(2, regexp.toString().length - 2).replace(/\.\*\?$/, "*");
-      }
-      function coerce(val) {
-        if (val instanceof Error) {
-          return val.stack || val.message;
-        }
-        return val;
-      }
-      function destroy() {
-        console.warn("Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.");
-      }
-      createDebug.enable(createDebug.load());
-      return createDebug;
-    }
-    module.exports = setup;
-  }
-});
-
-// ../../../node_modules/.pnpm/debug@4.3.4_supports-color@8.1.1/node_modules/debug/src/browser.js
-var require_browser = __commonJS({
-  "../../../node_modules/.pnpm/debug@4.3.4_supports-color@8.1.1/node_modules/debug/src/browser.js"(exports, module) {
-    exports.formatArgs = formatArgs;
-    exports.save = save;
-    exports.load = load;
-    exports.useColors = useColors;
-    exports.storage = localstorage();
-    exports.destroy = /* @__PURE__ */ (() => {
-      let warned = false;
-      return () => {
-        if (!warned) {
-          warned = true;
-          console.warn("Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.");
-        }
-      };
-    })();
-    exports.colors = [
-      "#0000CC",
-      "#0000FF",
-      "#0033CC",
-      "#0033FF",
-      "#0066CC",
-      "#0066FF",
-      "#0099CC",
-      "#0099FF",
-      "#00CC00",
-      "#00CC33",
-      "#00CC66",
-      "#00CC99",
-      "#00CCCC",
-      "#00CCFF",
-      "#3300CC",
-      "#3300FF",
-      "#3333CC",
-      "#3333FF",
-      "#3366CC",
-      "#3366FF",
-      "#3399CC",
-      "#3399FF",
-      "#33CC00",
-      "#33CC33",
-      "#33CC66",
-      "#33CC99",
-      "#33CCCC",
-      "#33CCFF",
-      "#6600CC",
-      "#6600FF",
-      "#6633CC",
-      "#6633FF",
-      "#66CC00",
-      "#66CC33",
-      "#9900CC",
-      "#9900FF",
-      "#9933CC",
-      "#9933FF",
-      "#99CC00",
-      "#99CC33",
-      "#CC0000",
-      "#CC0033",
-      "#CC0066",
-      "#CC0099",
-      "#CC00CC",
-      "#CC00FF",
-      "#CC3300",
-      "#CC3333",
-      "#CC3366",
-      "#CC3399",
-      "#CC33CC",
-      "#CC33FF",
-      "#CC6600",
-      "#CC6633",
-      "#CC9900",
-      "#CC9933",
-      "#CCCC00",
-      "#CCCC33",
-      "#FF0000",
-      "#FF0033",
-      "#FF0066",
-      "#FF0099",
-      "#FF00CC",
-      "#FF00FF",
-      "#FF3300",
-      "#FF3333",
-      "#FF3366",
-      "#FF3399",
-      "#FF33CC",
-      "#FF33FF",
-      "#FF6600",
-      "#FF6633",
-      "#FF9900",
-      "#FF9933",
-      "#FFCC00",
-      "#FFCC33"
-    ];
-    function useColors() {
-      if (typeof window !== "undefined" && window.process && (window.process.type === "renderer" || window.process.__nwjs)) {
-        return true;
-      }
-      if (typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)) {
-        return false;
-      }
-      return typeof document !== "undefined" && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance || // Is firebug? http://stackoverflow.com/a/398120/376773
-      typeof window !== "undefined" && window.console && (window.console.firebug || window.console.exception && window.console.table) || // Is firefox >= v31?
-      // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
-      typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31 || // Double check webkit in userAgent just in case we are in a worker
-      typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/);
-    }
-    function formatArgs(args) {
-      args[0] = (this.useColors ? "%c" : "") + this.namespace + (this.useColors ? " %c" : " ") + args[0] + (this.useColors ? "%c " : " ") + "+" + module.exports.humanize(this.diff);
-      if (!this.useColors) {
-        return;
-      }
-      const c4 = "color: " + this.color;
-      args.splice(1, 0, c4, "color: inherit");
-      let index2 = 0;
-      let lastC = 0;
-      args[0].replace(/%[a-zA-Z%]/g, (match) => {
-        if (match === "%%") {
-          return;
-        }
-        index2++;
-        if (match === "%c") {
-          lastC = index2;
-        }
-      });
-      args.splice(lastC, 0, c4);
-    }
-    exports.log = console.debug || console.log || (() => {
-    });
-    function save(namespaces) {
-      try {
-        if (namespaces) {
-          exports.storage.setItem("debug", namespaces);
-        } else {
-          exports.storage.removeItem("debug");
-        }
-      } catch (error) {
-      }
-    }
-    function load() {
-      let r8;
-      try {
-        r8 = exports.storage.getItem("debug");
-      } catch (error) {
-      }
-      if (!r8 && typeof process !== "undefined" && "env" in process) {
-        r8 = process.env.DEBUG;
-      }
-      return r8;
-    }
-    function localstorage() {
-      try {
-        return localStorage;
-      } catch (error) {
-      }
-    }
-    module.exports = require_common()(exports);
-    var { formatters } = module.exports;
-    formatters.j = function(v2) {
-      try {
-        return JSON.stringify(v2);
-      } catch (error) {
-        return "[UnexpectedJSONParseError]: " + error.message;
-      }
-    };
   }
 });
 
@@ -5974,6 +5494,486 @@ var require_compiler2 = __commonJS({
       return index_1.ValueErrorIterator;
     } });
     __exportStar(require_compiler(), exports);
+  }
+});
+
+// ../../../node_modules/.pnpm/ms@2.1.2/node_modules/ms/index.js
+var require_ms = __commonJS({
+  "../../../node_modules/.pnpm/ms@2.1.2/node_modules/ms/index.js"(exports, module) {
+    var s5 = 1e3;
+    var m3 = s5 * 60;
+    var h3 = m3 * 60;
+    var d3 = h3 * 24;
+    var w2 = d3 * 7;
+    var y3 = d3 * 365.25;
+    module.exports = function(val, options) {
+      options = options || {};
+      var type = typeof val;
+      if (type === "string" && val.length > 0) {
+        return parse(val);
+      } else if (type === "number" && isFinite(val)) {
+        return options.long ? fmtLong(val) : fmtShort(val);
+      }
+      throw new Error(
+        "val is not a non-empty string or a valid number. val=" + JSON.stringify(val)
+      );
+    };
+    function parse(str) {
+      str = String(str);
+      if (str.length > 100) {
+        return;
+      }
+      var match = /^(-?(?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(
+        str
+      );
+      if (!match) {
+        return;
+      }
+      var n6 = parseFloat(match[1]);
+      var type = (match[2] || "ms").toLowerCase();
+      switch (type) {
+        case "years":
+        case "year":
+        case "yrs":
+        case "yr":
+        case "y":
+          return n6 * y3;
+        case "weeks":
+        case "week":
+        case "w":
+          return n6 * w2;
+        case "days":
+        case "day":
+        case "d":
+          return n6 * d3;
+        case "hours":
+        case "hour":
+        case "hrs":
+        case "hr":
+        case "h":
+          return n6 * h3;
+        case "minutes":
+        case "minute":
+        case "mins":
+        case "min":
+        case "m":
+          return n6 * m3;
+        case "seconds":
+        case "second":
+        case "secs":
+        case "sec":
+        case "s":
+          return n6 * s5;
+        case "milliseconds":
+        case "millisecond":
+        case "msecs":
+        case "msec":
+        case "ms":
+          return n6;
+        default:
+          return void 0;
+      }
+    }
+    function fmtShort(ms) {
+      var msAbs = Math.abs(ms);
+      if (msAbs >= d3) {
+        return Math.round(ms / d3) + "d";
+      }
+      if (msAbs >= h3) {
+        return Math.round(ms / h3) + "h";
+      }
+      if (msAbs >= m3) {
+        return Math.round(ms / m3) + "m";
+      }
+      if (msAbs >= s5) {
+        return Math.round(ms / s5) + "s";
+      }
+      return ms + "ms";
+    }
+    function fmtLong(ms) {
+      var msAbs = Math.abs(ms);
+      if (msAbs >= d3) {
+        return plural(ms, msAbs, d3, "day");
+      }
+      if (msAbs >= h3) {
+        return plural(ms, msAbs, h3, "hour");
+      }
+      if (msAbs >= m3) {
+        return plural(ms, msAbs, m3, "minute");
+      }
+      if (msAbs >= s5) {
+        return plural(ms, msAbs, s5, "second");
+      }
+      return ms + " ms";
+    }
+    function plural(ms, msAbs, n6, name) {
+      var isPlural = msAbs >= n6 * 1.5;
+      return Math.round(ms / n6) + " " + name + (isPlural ? "s" : "");
+    }
+  }
+});
+
+// ../../../node_modules/.pnpm/debug@4.3.4_supports-color@8.1.1/node_modules/debug/src/common.js
+var require_common = __commonJS({
+  "../../../node_modules/.pnpm/debug@4.3.4_supports-color@8.1.1/node_modules/debug/src/common.js"(exports, module) {
+    function setup(env) {
+      createDebug.debug = createDebug;
+      createDebug.default = createDebug;
+      createDebug.coerce = coerce;
+      createDebug.disable = disable;
+      createDebug.enable = enable;
+      createDebug.enabled = enabled;
+      createDebug.humanize = require_ms();
+      createDebug.destroy = destroy;
+      Object.keys(env).forEach((key) => {
+        createDebug[key] = env[key];
+      });
+      createDebug.names = [];
+      createDebug.skips = [];
+      createDebug.formatters = {};
+      function selectColor(namespace) {
+        let hash2 = 0;
+        for (let i5 = 0; i5 < namespace.length; i5++) {
+          hash2 = (hash2 << 5) - hash2 + namespace.charCodeAt(i5);
+          hash2 |= 0;
+        }
+        return createDebug.colors[Math.abs(hash2) % createDebug.colors.length];
+      }
+      createDebug.selectColor = selectColor;
+      function createDebug(namespace) {
+        let prevTime;
+        let enableOverride = null;
+        let namespacesCache;
+        let enabledCache;
+        function debug9(...args) {
+          if (!debug9.enabled) {
+            return;
+          }
+          const self2 = debug9;
+          const curr = Number(/* @__PURE__ */ new Date());
+          const ms = curr - (prevTime || curr);
+          self2.diff = ms;
+          self2.prev = prevTime;
+          self2.curr = curr;
+          prevTime = curr;
+          args[0] = createDebug.coerce(args[0]);
+          if (typeof args[0] !== "string") {
+            args.unshift("%O");
+          }
+          let index2 = 0;
+          args[0] = args[0].replace(/%([a-zA-Z%])/g, (match, format) => {
+            if (match === "%%") {
+              return "%";
+            }
+            index2++;
+            const formatter = createDebug.formatters[format];
+            if (typeof formatter === "function") {
+              const val = args[index2];
+              match = formatter.call(self2, val);
+              args.splice(index2, 1);
+              index2--;
+            }
+            return match;
+          });
+          createDebug.formatArgs.call(self2, args);
+          const logFn = self2.log || createDebug.log;
+          logFn.apply(self2, args);
+        }
+        debug9.namespace = namespace;
+        debug9.useColors = createDebug.useColors();
+        debug9.color = createDebug.selectColor(namespace);
+        debug9.extend = extend;
+        debug9.destroy = createDebug.destroy;
+        Object.defineProperty(debug9, "enabled", {
+          enumerable: true,
+          configurable: false,
+          get: () => {
+            if (enableOverride !== null) {
+              return enableOverride;
+            }
+            if (namespacesCache !== createDebug.namespaces) {
+              namespacesCache = createDebug.namespaces;
+              enabledCache = createDebug.enabled(namespace);
+            }
+            return enabledCache;
+          },
+          set: (v2) => {
+            enableOverride = v2;
+          }
+        });
+        if (typeof createDebug.init === "function") {
+          createDebug.init(debug9);
+        }
+        return debug9;
+      }
+      function extend(namespace, delimiter) {
+        const newDebug = createDebug(this.namespace + (typeof delimiter === "undefined" ? ":" : delimiter) + namespace);
+        newDebug.log = this.log;
+        return newDebug;
+      }
+      function enable(namespaces) {
+        createDebug.save(namespaces);
+        createDebug.namespaces = namespaces;
+        createDebug.names = [];
+        createDebug.skips = [];
+        let i5;
+        const split = (typeof namespaces === "string" ? namespaces : "").split(/[\s,]+/);
+        const len = split.length;
+        for (i5 = 0; i5 < len; i5++) {
+          if (!split[i5]) {
+            continue;
+          }
+          namespaces = split[i5].replace(/\*/g, ".*?");
+          if (namespaces[0] === "-") {
+            createDebug.skips.push(new RegExp("^" + namespaces.slice(1) + "$"));
+          } else {
+            createDebug.names.push(new RegExp("^" + namespaces + "$"));
+          }
+        }
+      }
+      function disable() {
+        const namespaces = [
+          ...createDebug.names.map(toNamespace),
+          ...createDebug.skips.map(toNamespace).map((namespace) => "-" + namespace)
+        ].join(",");
+        createDebug.enable("");
+        return namespaces;
+      }
+      function enabled(name) {
+        if (name[name.length - 1] === "*") {
+          return true;
+        }
+        let i5;
+        let len;
+        for (i5 = 0, len = createDebug.skips.length; i5 < len; i5++) {
+          if (createDebug.skips[i5].test(name)) {
+            return false;
+          }
+        }
+        for (i5 = 0, len = createDebug.names.length; i5 < len; i5++) {
+          if (createDebug.names[i5].test(name)) {
+            return true;
+          }
+        }
+        return false;
+      }
+      function toNamespace(regexp) {
+        return regexp.toString().substring(2, regexp.toString().length - 2).replace(/\.\*\?$/, "*");
+      }
+      function coerce(val) {
+        if (val instanceof Error) {
+          return val.stack || val.message;
+        }
+        return val;
+      }
+      function destroy() {
+        console.warn("Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.");
+      }
+      createDebug.enable(createDebug.load());
+      return createDebug;
+    }
+    module.exports = setup;
+  }
+});
+
+// ../../../node_modules/.pnpm/debug@4.3.4_supports-color@8.1.1/node_modules/debug/src/browser.js
+var require_browser = __commonJS({
+  "../../../node_modules/.pnpm/debug@4.3.4_supports-color@8.1.1/node_modules/debug/src/browser.js"(exports, module) {
+    exports.formatArgs = formatArgs;
+    exports.save = save;
+    exports.load = load;
+    exports.useColors = useColors;
+    exports.storage = localstorage();
+    exports.destroy = /* @__PURE__ */ (() => {
+      let warned = false;
+      return () => {
+        if (!warned) {
+          warned = true;
+          console.warn("Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.");
+        }
+      };
+    })();
+    exports.colors = [
+      "#0000CC",
+      "#0000FF",
+      "#0033CC",
+      "#0033FF",
+      "#0066CC",
+      "#0066FF",
+      "#0099CC",
+      "#0099FF",
+      "#00CC00",
+      "#00CC33",
+      "#00CC66",
+      "#00CC99",
+      "#00CCCC",
+      "#00CCFF",
+      "#3300CC",
+      "#3300FF",
+      "#3333CC",
+      "#3333FF",
+      "#3366CC",
+      "#3366FF",
+      "#3399CC",
+      "#3399FF",
+      "#33CC00",
+      "#33CC33",
+      "#33CC66",
+      "#33CC99",
+      "#33CCCC",
+      "#33CCFF",
+      "#6600CC",
+      "#6600FF",
+      "#6633CC",
+      "#6633FF",
+      "#66CC00",
+      "#66CC33",
+      "#9900CC",
+      "#9900FF",
+      "#9933CC",
+      "#9933FF",
+      "#99CC00",
+      "#99CC33",
+      "#CC0000",
+      "#CC0033",
+      "#CC0066",
+      "#CC0099",
+      "#CC00CC",
+      "#CC00FF",
+      "#CC3300",
+      "#CC3333",
+      "#CC3366",
+      "#CC3399",
+      "#CC33CC",
+      "#CC33FF",
+      "#CC6600",
+      "#CC6633",
+      "#CC9900",
+      "#CC9933",
+      "#CCCC00",
+      "#CCCC33",
+      "#FF0000",
+      "#FF0033",
+      "#FF0066",
+      "#FF0099",
+      "#FF00CC",
+      "#FF00FF",
+      "#FF3300",
+      "#FF3333",
+      "#FF3366",
+      "#FF3399",
+      "#FF33CC",
+      "#FF33FF",
+      "#FF6600",
+      "#FF6633",
+      "#FF9900",
+      "#FF9933",
+      "#FFCC00",
+      "#FFCC33"
+    ];
+    function useColors() {
+      if (typeof window !== "undefined" && window.process && (window.process.type === "renderer" || window.process.__nwjs)) {
+        return true;
+      }
+      if (typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)) {
+        return false;
+      }
+      return typeof document !== "undefined" && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance || // Is firebug? http://stackoverflow.com/a/398120/376773
+      typeof window !== "undefined" && window.console && (window.console.firebug || window.console.exception && window.console.table) || // Is firefox >= v31?
+      // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
+      typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31 || // Double check webkit in userAgent just in case we are in a worker
+      typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/);
+    }
+    function formatArgs(args) {
+      args[0] = (this.useColors ? "%c" : "") + this.namespace + (this.useColors ? " %c" : " ") + args[0] + (this.useColors ? "%c " : " ") + "+" + module.exports.humanize(this.diff);
+      if (!this.useColors) {
+        return;
+      }
+      const c4 = "color: " + this.color;
+      args.splice(1, 0, c4, "color: inherit");
+      let index2 = 0;
+      let lastC = 0;
+      args[0].replace(/%[a-zA-Z%]/g, (match) => {
+        if (match === "%%") {
+          return;
+        }
+        index2++;
+        if (match === "%c") {
+          lastC = index2;
+        }
+      });
+      args.splice(lastC, 0, c4);
+    }
+    exports.log = console.debug || console.log || (() => {
+    });
+    function save(namespaces) {
+      try {
+        if (namespaces) {
+          exports.storage.setItem("debug", namespaces);
+        } else {
+          exports.storage.removeItem("debug");
+        }
+      } catch (error) {
+      }
+    }
+    function load() {
+      let r8;
+      try {
+        r8 = exports.storage.getItem("debug");
+      } catch (error) {
+      }
+      if (!r8 && typeof process !== "undefined" && "env" in process) {
+        r8 = process.env.DEBUG;
+      }
+      return r8;
+    }
+    function localstorage() {
+      try {
+        return localStorage;
+      } catch (error) {
+      }
+    }
+    module.exports = require_common()(exports);
+    var { formatters } = module.exports;
+    formatters.j = function(v2) {
+      try {
+        return JSON.stringify(v2);
+      } catch (error) {
+        return "[UnexpectedJSONParseError]: " + error.message;
+      }
+    };
+  }
+});
+
+// ../../../lix/packages/fs/dist/errors/FilesystemError.js
+var init_FilesystemError = __esm({
+  "../../../lix/packages/fs/dist/errors/FilesystemError.js"() {
+    "use strict";
+  }
+});
+
+// ../../../lix/packages/fs/dist/utilities/helpers.js
+var init_helpers = __esm({
+  "../../../lix/packages/fs/dist/utilities/helpers.js"() {
+    "use strict";
+  }
+});
+
+// ../../../lix/packages/fs/dist/memoryFs.js
+var init_memoryFs = __esm({
+  "../../../lix/packages/fs/dist/memoryFs.js"() {
+    "use strict";
+    init_FilesystemError();
+    init_helpers();
+  }
+});
+
+// ../../../lix/packages/fs/dist/index.js
+var init_dist = __esm({
+  "../../../lix/packages/fs/dist/index.js"() {
+    "use strict";
+    init_memoryFs();
+    init_helpers();
   }
 });
 
@@ -12834,7 +12834,7 @@ var require_pify = __commonJS({
         if (key in cached) {
           return cached[key];
         }
-        const match = (pattern2) => typeof pattern2 === "string" || typeof key === "symbol" ? key === pattern2 : pattern2.test(key);
+        const match = (pattern3) => typeof pattern3 === "string" || typeof key === "symbol" ? key === pattern3 : pattern3.test(key);
         const desc = Reflect.getOwnPropertyDescriptor(target, key);
         const writableOrConfigurableOwn = desc === void 0 || desc.writable || desc.configurable;
         const included = options.include ? options.include.some(match) : !options.exclude.some(match);
@@ -13057,40 +13057,40 @@ var require_ignore = __commonJS({
       ]
     ];
     var regexCache = /* @__PURE__ */ Object.create(null);
-    var makeRegex = (pattern2, ignoreCase) => {
-      let source = regexCache[pattern2];
+    var makeRegex = (pattern3, ignoreCase) => {
+      let source = regexCache[pattern3];
       if (!source) {
         source = REPLACERS.reduce(
-          (prev, current) => prev.replace(current[0], current[1].bind(pattern2)),
-          pattern2
+          (prev, current) => prev.replace(current[0], current[1].bind(pattern3)),
+          pattern3
         );
-        regexCache[pattern2] = source;
+        regexCache[pattern3] = source;
       }
       return ignoreCase ? new RegExp(source, "i") : new RegExp(source);
     };
     var isString = (subject) => typeof subject === "string";
-    var checkPattern = (pattern2) => pattern2 && isString(pattern2) && !REGEX_TEST_BLANK_LINE.test(pattern2) && !REGEX_INVALID_TRAILING_BACKSLASH.test(pattern2) && pattern2.indexOf("#") !== 0;
-    var splitPattern = (pattern2) => pattern2.split(REGEX_SPLITALL_CRLF);
+    var checkPattern = (pattern3) => pattern3 && isString(pattern3) && !REGEX_TEST_BLANK_LINE.test(pattern3) && !REGEX_INVALID_TRAILING_BACKSLASH.test(pattern3) && pattern3.indexOf("#") !== 0;
+    var splitPattern = (pattern3) => pattern3.split(REGEX_SPLITALL_CRLF);
     var IgnoreRule = class {
-      constructor(origin, pattern2, negative, regex) {
+      constructor(origin, pattern3, negative, regex) {
         this.origin = origin;
-        this.pattern = pattern2;
+        this.pattern = pattern3;
         this.negative = negative;
         this.regex = regex;
       }
     };
-    var createRule = (pattern2, ignoreCase) => {
-      const origin = pattern2;
+    var createRule = (pattern3, ignoreCase) => {
+      const origin = pattern3;
       let negative = false;
-      if (pattern2.indexOf("!") === 0) {
+      if (pattern3.indexOf("!") === 0) {
         negative = true;
-        pattern2 = pattern2.substr(1);
+        pattern3 = pattern3.substr(1);
       }
-      pattern2 = pattern2.replace(REGEX_REPLACE_LEADING_EXCAPED_EXCLAMATION, "!").replace(REGEX_REPLACE_LEADING_EXCAPED_HASH, "#");
-      const regex = makeRegex(pattern2, ignoreCase);
+      pattern3 = pattern3.replace(REGEX_REPLACE_LEADING_EXCAPED_EXCLAMATION, "!").replace(REGEX_REPLACE_LEADING_EXCAPED_HASH, "#");
+      const regex = makeRegex(pattern3, ignoreCase);
       return new IgnoreRule(
         origin,
-        pattern2,
+        pattern3,
         negative,
         regex
       );
@@ -13136,23 +13136,23 @@ var require_ignore = __commonJS({
         this._ignoreCache = /* @__PURE__ */ Object.create(null);
         this._testCache = /* @__PURE__ */ Object.create(null);
       }
-      _addPattern(pattern2) {
-        if (pattern2 && pattern2[KEY_IGNORE]) {
-          this._rules = this._rules.concat(pattern2._rules);
+      _addPattern(pattern3) {
+        if (pattern3 && pattern3[KEY_IGNORE]) {
+          this._rules = this._rules.concat(pattern3._rules);
           this._added = true;
           return;
         }
-        if (checkPattern(pattern2)) {
-          const rule = createRule(pattern2, this._ignoreCase);
+        if (checkPattern(pattern3)) {
+          const rule = createRule(pattern3, this._ignoreCase);
           this._added = true;
           this._rules.push(rule);
         }
       }
       // @param {Array<string> | string | Ignore} pattern
-      add(pattern2) {
+      add(pattern3) {
         this._added = false;
         makeArray(
-          isString(pattern2) ? splitPattern(pattern2) : pattern2
+          isString(pattern3) ? splitPattern(pattern3) : pattern3
         ).forEach(this._addPattern, this);
         if (this._added) {
           this._initCache();
@@ -13160,8 +13160,8 @@ var require_ignore = __commonJS({
         return this;
       }
       // legacy
-      addPattern(pattern2) {
-        return this.add(pattern2);
+      addPattern(pattern3) {
+        return this.add(pattern3);
       }
       //          |           ignored : unignored
       // negative |   0:0   |   0:1   |   1:0   |   1:1
@@ -28219,15 +28219,10 @@ function createDedent(options) {
   }
 }
 
-// ../sdk/dist/persistence/plugin.js
-init_dist();
-var import_debug = __toESM(require_browser(), 1);
-var debug = (0, import_debug.default)("sdk:persistence");
-
 // ../sdk/dist/resolve-modules/plugins/resolvePlugins.js
 var import_compiler = __toESM(require_compiler2(), 1);
-var import_debug2 = __toESM(require_browser(), 1);
-var debug2 = (0, import_debug2.default)("sdk:resolvePlugins");
+var import_debug = __toESM(require_browser(), 1);
+var debug = (0, import_debug.default)("sdk:resolvePlugins");
 var PluginCompiler = import_compiler.TypeCompiler.Compile(Plugin);
 
 // ../sdk/dist/resolve-modules/resolveModules.js
@@ -28247,26 +28242,26 @@ var $KEYS = Symbol("track-keys");
 
 // ../sdk/dist/persistence/filelock/acquireFileLock.js
 init_dist();
-var import_debug3 = __toESM(require_browser(), 1);
-var debug3 = (0, import_debug3.default)("sdk:fileLock");
+var import_debug2 = __toESM(require_browser(), 1);
+var debug2 = (0, import_debug2.default)("sdk:fileLock");
 
 // ../sdk/dist/createMessagesQuery.js
-var import_debug5 = __toESM(require_browser(), 1);
+var import_debug4 = __toESM(require_browser(), 1);
 
 // ../sdk/dist/persistence/filelock/releaseLock.js
 init_dist();
-var import_debug4 = __toESM(require_browser(), 1);
-var debug4 = (0, import_debug4.default)("sdk:fileLock");
+var import_debug3 = __toESM(require_browser(), 1);
+var debug3 = (0, import_debug3.default)("sdk:fileLock");
 
 // ../sdk/dist/storage/human-id/human-readable-id.js
 var import_murmurhash3js = __toESM(require_murmurhash3js(), 1);
 
 // ../sdk/dist/createMessagesQuery.js
-var debug5 = (0, import_debug5.default)("sdk:messages");
+var debug4 = (0, import_debug4.default)("sdk:messages");
 
 // ../sdk/dist/createMessageLintReportsQuery.js
-var import_debug6 = __toESM(require_browser(), 1);
-var debug6 = (0, import_debug6.default)("sdk:lintReports");
+var import_debug5 = __toESM(require_browser(), 1);
+var debug5 = (0, import_debug5.default)("sdk:lintReports");
 
 // ../sdk/dist/createNodeishFsWithAbsolutePaths.js
 init_dist();
@@ -28294,9 +28289,132 @@ init_dist();
 // ../../../lix/packages/client/dist/mockRepo.js
 init_dist();
 
-// ../sdk/dist/loadProject.js
+// ../sdk/dist/v2/stubQueryApi.js
+var stubMessagesQuery = {
+  create: () => false,
+  // @ts-expect-error
+  get: subscribable(() => void 0),
+  // @ts-expect-error
+  getByDefaultAlias: subscribable(() => void 0),
+  // @ts-expect-error
+  includedMessageIds: subscribable(() => []),
+  // @ts-expect-error
+  getAll: subscribable(() => []),
+  update: () => false,
+  upsert: () => {
+  },
+  delete: () => false,
+  setDelegate: () => {
+  }
+};
+var stubMessageLintReportsQuery = {
+  // @ts-expect-error
+  get: subscribable(() => []),
+  // @ts-expect-error
+  getAll: settleable(subscribable(() => []))
+};
+function subscribable(fn) {
+  return Object.assign(fn, {
+    subscribe: () => {
+    }
+  });
+}
+function settleable(fn) {
+  return Object.assign(fn, {
+    settled: async () => []
+  });
+}
+
+// ../sdk/dist/v2/types.js
+var import_typebox10 = __toESM(require_typebox(), 1);
+var pattern2 = "^((?<grandfathered>(en-GB-oed|i-ami|i-bnn|i-default|i-enochian|i-hak|i-klingon|i-lux|i-mingo|i-navajo|i-pwn|i-tao|i-tay|i-tsu|sgn-BE-FR|sgn-BE-NL|sgn-CH-DE)|(art-lojban|cel-gaulish|no-bok|no-nyn|zh-guoyu|zh-hakka|zh-min|zh-min-nan|zh-xiang))|((?<language>([A-Za-z]{2,3}(-(?<extlang>[A-Za-z]{3}(-[A-Za-z]{3}){0,2}))?))(-(?<script>[A-Za-z]{4}))?(-(?<region>[A-Za-z]{2}|[0-9]{3}))?(-(?<variant>[A-Za-z0-9]{5,8}|[0-9][A-Za-z0-9]{3}))*))$";
+var LanguageTag2 = import_typebox10.Type.String({
+  pattern: pattern2,
+  description: "The language tag must be a valid IETF BCP 47 language tag.",
+  examples: ["en", "de", "en-US", "zh-Hans", "es-419"]
+});
+var Literal = import_typebox10.Type.Object({
+  type: import_typebox10.Type.Literal("literal"),
+  value: import_typebox10.Type.String()
+});
+var Text2 = import_typebox10.Type.Object({
+  type: import_typebox10.Type.Literal("text"),
+  value: import_typebox10.Type.String()
+});
+var VariableReference2 = import_typebox10.Type.Object({
+  type: import_typebox10.Type.Literal("variable"),
+  name: import_typebox10.Type.String()
+});
+var Option = import_typebox10.Type.Object({
+  name: import_typebox10.Type.String(),
+  value: import_typebox10.Type.Union([Literal, VariableReference2])
+});
+var FunctionAnnotation = import_typebox10.Type.Object({
+  type: import_typebox10.Type.Literal("function"),
+  name: import_typebox10.Type.String(),
+  options: import_typebox10.Type.Array(Option)
+});
+var Expression2 = import_typebox10.Type.Object({
+  type: import_typebox10.Type.Literal("expression"),
+  arg: import_typebox10.Type.Union([Literal, VariableReference2]),
+  annotation: import_typebox10.Type.Optional(FunctionAnnotation)
+});
+var Pattern2 = import_typebox10.Type.Array(import_typebox10.Type.Union([Text2, Expression2]));
+var Variant2 = import_typebox10.Type.Object({
+  /**
+   * The number of keys in each variant match MUST equal the number of expressions in the selectors.
+   *
+   * Inspired by: https://github.com/unicode-org/message-format-wg/blob/main/spec/formatting.md#pattern-selection
+   */
+  // a match can always only be string-based because a string is what is rendered to the UI
+  match: import_typebox10.Type.Array(import_typebox10.Type.String()),
+  pattern: Pattern2
+});
+var InputDeclaration = import_typebox10.Type.Object({
+  type: import_typebox10.Type.Literal("input"),
+  name: import_typebox10.Type.String(),
+  //TODO make this generic so that only Variable-Ref Expressions are allowed
+  value: Expression2
+});
+var Declaration = import_typebox10.Type.Union([InputDeclaration]);
+var Message2 = import_typebox10.Type.Object({
+  locale: LanguageTag2,
+  declarations: import_typebox10.Type.Array(Declaration),
+  /**
+   * The order in which the selectors are placed determines the precedence of patterns.
+   */
+  selectors: import_typebox10.Type.Array(Expression2),
+  variants: import_typebox10.Type.Array(Variant2)
+});
+var MessageBundle = import_typebox10.Type.Object({
+  id: import_typebox10.Type.String(),
+  alias: import_typebox10.Type.Record(import_typebox10.Type.String(), import_typebox10.Type.String()),
+  messages: import_typebox10.Type.Array(Message2)
+});
+var MessageSlot = import_typebox10.Type.Object({
+  locale: LanguageTag2,
+  slot: import_typebox10.Type.Literal(true)
+});
+var MessageBundleWithSlots = import_typebox10.Type.Object({
+  id: import_typebox10.Type.String(),
+  alias: import_typebox10.Type.Record(import_typebox10.Type.String(), import_typebox10.Type.String()),
+  messages: import_typebox10.Type.Array(import_typebox10.Type.Union([Message2, MessageSlot]))
+});
+
+// ../sdk/dist/persistence/store.js
+init_dist();
+
+// ../sdk/dist/persistence/batchedIO.js
+var import_debug6 = __toESM(require_browser(), 1);
+var debug6 = (0, import_debug6.default)("sdk:batchedIO");
+
+// ../sdk/dist/persistence/store.js
 var import_debug7 = __toESM(require_browser(), 1);
-var debug7 = (0, import_debug7.default)("sdk:loadProject");
+var debug7 = (0, import_debug7.default)("sdk:store");
+
+// ../sdk/dist/loadProject.js
+var import_debug8 = __toESM(require_browser(), 1);
+var debug8 = (0, import_debug8.default)("sdk:loadProject");
 var settingsCompiler = import_compiler3.TypeCompiler.Compile(ProjectSettings);
 
 // src/helper/checkRequired.ts
