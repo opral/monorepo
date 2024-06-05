@@ -66,6 +66,31 @@ export const messageBundleStyling = css`
 		border-right: 1px solid var(--sl-color-neutral-300);
 		font-weight: 600;
 	}
+	.add-selector-container {
+		height: 44px;
+		width: 44px;
+		display: flex;
+		align-items: center;
+		padding: 12px;
+	}
+	.add-selector {
+		height: 28px;
+		width: 28px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: var(--sl-color-neutral-600);
+		border-radius: 4px;
+		border: 1px solid var(--sl-color-neutral-300);
+		background-color: var(--sl-color-neutral-0);
+		cursor: pointer;
+		font-size: 13px;
+	}
+	.add-selector:hover {
+		color: var(--sl-color-neutral-900);
+		background-color: var(--sl-color-neutral-200);
+		border: 1px solid var(--sl-color-neutral-400);
+	}
 	.message-actions {
 		height: 44px;
 		display: flex;
