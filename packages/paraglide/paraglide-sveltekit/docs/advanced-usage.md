@@ -5,6 +5,7 @@
 Exclude routes from being translated with the `exclude` option.
 
 ```js
+// src/lib/i18n.js
 import { createI18n } from "@inlang/paraglide-sveltekit"
 import * as runtime from "$lib/paraglide/runtime.js"
 
@@ -26,6 +27,7 @@ Make sure excluded pages are still wrapped in the `<ParaglideJS>` so that outgoi
 Paraglide guesses the text direction using the `Intl.Locale` API. This is not supported in all runtimes. Use the `textDirection` option to provide the text direction yourself.
 
 ```js
+// src/lib/i18n.js
 import { createI18n } from "@inlang/paraglide-sveltekit"
 import * as runtime from "$lib/paraglide/runtime.js"
 
