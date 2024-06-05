@@ -1,0 +1,27 @@
+{
+	"name": "@inlang/slotfile-test",
+	"private": true,
+	"type": "module",
+	"license": "Apache-2.0",
+	"dependencies": {
+		"@inlang/cli": "workspace:*",
+		"@inlang/sdk": "workspace:*"
+	},
+	"devDependencies": {
+		"@types/debug": "^4.1.12",
+		"@types/node": "^20.11.20",
+		"@types/throttle-debounce": "5.0.0",
+		"tsx": "^4.7.1"
+	},
+	"scripts": {
+		"run": "tsx ./main.ts",
+		"test": "tsc --noEmit && pnpm load-test 1000 1 1 1",
+		"inspect": "pnpm clean && MOCK_TRANSLATE_LOCAL=1 DEBUG=$DEBUG,load-test tsx --inspect-brk ./main.ts"
+	},
+	"prettier": {
+		"semi": false,
+		"useTabs": true,
+		"printWidth": 100
+	},
+	"version": null
+}
