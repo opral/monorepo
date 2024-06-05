@@ -18,7 +18,8 @@
 	"pages": {
 		"": {
 			"/": "./inlang/source-code/paraglide/paraglide-js/docs/why-paraglide.md",
-			"/usage": "./inlang/source-code/paraglide/paraglide-js/README.md",
+			"/getting-started": "./inlang/source-code/paraglide/paraglide-js/README.md",
+			"/usage": "./inlang/source-code/paraglide/paraglide-js/docs/usage.md",
 			"/architecture": "./inlang/source-code/paraglide/paraglide-js/docs/architecture.md",
 			"/changelog": "./inlang/source-code/paraglide/paraglide-js/CHANGELOG.md"
 		},
