@@ -89,9 +89,6 @@ export function negotiateLanguagePreferences<T extends string = string>(
 	accept: string | undefined | null,
 	availableLanguageTags: readonly T[]
 ): T[] {
-	// No langauges are available -> nothing to negotiate
-	if (availableLanguageTags.length === 0) return []
-
 	// No accept-language header -> default to * as per RFC 2616 sec 14.4
 	accept ||= "*"
 
@@ -106,19 +103,17 @@ export function negotiateLanguagePreferences<T extends string = string>(
 	// sorted list of accepted languages
 	return priorities
 		.filter((prio) => prio.quality > 0) //filter out all languages that didn't match any of the headers whatsoever
-		.sort(comparePriorities) //sort them by their priority
+		.sort(bySpecificity)
+		.sort(byQuality)
 		.map((priority) => priority.languageTag)
 }
 
 function parseAcceptLanguageHeader(acceptLanguage: string): LanguageSpec[] {
-	const acceptableLanguageDefinitions = acceptLanguage.split(",")
-
-	const specs = acceptableLanguageDefinitions
+	return acceptLanguage
+		.split(",")
 		.map((dfn) => dfn.trim())
 		.map((dfn, index) => parseLanguage(dfn, index))
 		.filter((maybeSpec): maybeSpec is LanguageSpec => Boolean(maybeSpec)) //filter out malformed entries
-
-	return specs
 }
 
 /**
@@ -129,12 +124,12 @@ function parseAcceptLanguageHeader(acceptLanguage: string): LanguageSpec[] {
  * parseLanguage("en-GB;q=0.8", 6) //{ prefix: "en", suffix: "GB", full: "en-GB", quality: 0.8, index: 6 }
  * ```
  *
- * @param str The string to parse
+ * @param languageTag The string to parse
  * @param index The index of the language in the Accept-Language header
  */
-function parseLanguage(str: string, index: number): LanguageSpec | undefined {
+function parseLanguage(languageTag: string, index: number): LanguageSpec | undefined {
 	const LANGUAGE_REGEXP = /^\s*([^\s\-;]+)(?:-([^\s;]+))?\s*(?:;(.*))?$/
-	const match = LANGUAGE_REGEXP.exec(str)
+	const match = LANGUAGE_REGEXP.exec(languageTag)
 
 	//Bail if the string is malformed
 	if (!match) return undefined
@@ -142,7 +137,7 @@ function parseLanguage(str: string, index: number): LanguageSpec | undefined {
 	const [, prefix, suffix, qualityMatch] = match
 
 	//shoud never happen given that the regex forces it to be there
-	if (!prefix) throw new Error(`Invalid language tag: ${str}`)
+	if (!prefix) throw new Error(`Invalid language tag: ${languageTag}`)
 
 	const full = suffix ? `${prefix}-${suffix}` : prefix
 
@@ -150,7 +145,7 @@ function parseLanguage(str: string, index: number): LanguageSpec | undefined {
 	 * If the language specifies a quality, parse it, otherwise default to 1
 	 * as per RFC 2616
 	 */
-	const quality = qualityMatch ? parseQuality(qualityMatch) ?? 1 : 1
+	const quality = parseQuality(qualityMatch ?? "") ?? 1
 
 	return {
 		prefix,
@@ -162,12 +157,11 @@ function parseLanguage(str: string, index: number): LanguageSpec | undefined {
 }
 
 function parseQuality(qualityMatch: string): number | undefined {
-	const params = qualityMatch.split(";")
-	for (const param of params) {
-		const [key, value] = param.split("=")
-		if (key === "q" && value) return parseFloat(value)
-	}
-	return undefined
+	return qualityMatch
+		.split(";")
+		.map((param) => param.split("="))
+		.filter((p): p is ["q", string] => p[0] == "q" && !!p[1]) //filter out everything that's malformed or not a quality
+		.map(([, value]) => parseFloat(value))[0] //parse the quality value & return the first one
 }
 
 /**
@@ -178,7 +172,7 @@ function getHighestLanguagePriority<T extends string>(
 	/**
 	 * A language tag that's available in the project
 	 */
-	availableLanguageTag: T,
+	languageTag: T,
 
 	/**
 	 * The langauges from the Accept-Language header
@@ -190,28 +184,16 @@ function getHighestLanguagePriority<T extends string>(
 	 */
 	index: number
 ): LanguagePriority<T> {
-	// The spec that matches the best
-	// starts out as a default priority that will be overwritten by basically anything
-	let highestPriority: LanguagePriority<T> = {
-		languageTag: availableLanguageTag,
+	const priorities = acceptableLanguages
+		.map((spec) => calculatePriority(languageTag, spec, index))
+		.filter((prio): prio is LanguagePriority<T> => Boolean(prio))
+
+	const highestPriority = priorities.sort(bySpecificity)[0] || {
+		languageTag,
 		index: 0,
 		order: -1,
 		quality: 0,
 		specificity: 0,
-	}
-
-	for (const acceptableLanguage of acceptableLanguages) {
-		const priority = calculatePriority(availableLanguageTag, acceptableLanguage, index)
-		if (!priority) continue
-
-		if (
-			//compare the calculated priority to the highest priority ignoring quality.
-			(highestPriority.specificity - priority.specificity ||
-				highestPriority.quality - priority.quality ||
-				highestPriority.order - priority.order) < 0
-		) {
-			highestPriority = priority
-		}
 	}
 
 	return highestPriority
@@ -219,36 +201,34 @@ function getHighestLanguagePriority<T extends string>(
 
 /**
  * Calculates the priority of an available language relative to an acceptable language
- * @param language A language that is available in the project
+ * @param languageTag A language that is available in the project
  * @param spec A parsed language from the Accept-Language header
  * @param index The index of the available language
  * @returns The priority of the language
  */
 function calculatePriority<T extends string>(
-	language: T,
+	languageTag: T,
 	spec: LanguageSpec,
 	index: number
 ): LanguagePriority<T> | undefined {
-	const parsed = parseLanguage(language, 0)
+	const parsed = parseLanguage(languageTag, 0)
 	if (!parsed) return undefined
 
 	let specificity = 0b000
 	if (spec.full.toLowerCase() === parsed.full.toLowerCase()) {
-		specificity |= 0b100
+		specificity = 0b100
 	} else if (spec.prefix.toLowerCase() === parsed.full.toLowerCase()) {
-		specificity |= 0b010
+		specificity = 0b010
 	} else if (spec.full.toLowerCase() === parsed.prefix.toLowerCase()) {
-		specificity |= 0b001
+		specificity = 0b001
 	}
 
 	// if there is no specificity at all _and_ we're not considering a wildcard
 	// then we bail
-	if (specificity === 0 && spec.full !== "*") {
-		return undefined
-	}
+	if (specificity === 0 && spec.full !== "*") return undefined
 
 	return {
-		languageTag: language,
+		languageTag,
 		index,
 		order: spec.index,
 		quality: spec.quality,
@@ -256,12 +236,7 @@ function calculatePriority<T extends string>(
 	}
 }
 
-function comparePriorities(a: LanguagePriority, b: LanguagePriority) {
-	return (
-		b.quality - a.quality ||
-		b.specificity - a.specificity ||
-		a.order - b.order ||
-		a.index - b.index ||
-		0
-	)
-}
+const byQuality = (a: LanguagePriority, b: LanguagePriority) => b.quality - a.quality
+
+const bySpecificity = (a: LanguagePriority, b: LanguagePriority) =>
+	b.specificity - a.specificity || a.order - b.order || a.index - b.index

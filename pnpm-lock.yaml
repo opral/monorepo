@@ -1684,6 +1684,40 @@ importers:
         specifier: ^5.3.2
         version: 5.3.3
 
+  inlang/source-code/paraglide/paraglide-next/examples/app-static:
+    dependencies:
+      '@inlang/paraglide-next':
+        specifier: workspace:*
+        version: link:../..
+      consola:
+        specifier: ^3.2.3
+        version: 3.2.3
+      next:
+        specifier: ^14.1.3
+        version: 14.1.3(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react:
+        specifier: ^18
+        version: 18.2.0
+      react-dom:
+        specifier: ^18
+        version: 18.2.0(react@18.2.0)
+    devDependencies:
+      '@inlang/paraglide-js':
+        specifier: workspace:*
+        version: link:../../../paraglide-js
+      '@types/node':
+        specifier: ^20
+        version: 20.12.12
+      '@types/react':
+        specifier: ^18
+        version: 18.3.1
+      '@types/react-dom':
+        specifier: ^18
+        version: 18.3.0
+      typescript:
+        specifier: ^5.3.2
+        version: 5.3.3
+
   inlang/source-code/paraglide/paraglide-next/examples/pages:
     dependencies:
       '@inlang/paraglide-next':
@@ -1713,37 +1747,6 @@ importers:
         version: 18.3.0
       typescript:
         specifier: ^5.3.2
-        version: 5.3.3
-
-  inlang/source-code/paraglide/paraglide-next/examples/turbo:
-    dependencies:
-      '@inlang/paraglide-js':
-        specifier: workspace:*
-        version: link:../../../paraglide-js
-      next:
-        specifier: ^14.0.0
-        version: 14.1.3(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      react:
-        specifier: ^18
-        version: 18.2.0
-      react-dom:
-        specifier: ^18
-        version: 18.2.0(react@18.2.0)
-    devDependencies:
-      '@inlang/paraglide-next':
-        specifier: workspace:*
-        version: link:../..
-      '@types/node':
-        specifier: ^20
-        version: 20.12.12
-      '@types/react':
-        specifier: ^18
-        version: 18.3.1
-      '@types/react-dom':
-        specifier: ^18
-        version: 18.3.0
-      typescript:
-        specifier: ^5
         version: 5.3.3
 
   inlang/source-code/paraglide/paraglide-rollup:

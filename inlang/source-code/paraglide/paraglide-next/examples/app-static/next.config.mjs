@@ -5,5 +5,5 @@ export default paraglide({
 		project: "./project.inlang",
 		outdir: "./src/paraglide",
 	},
-	output: "standalone",
+	output: "export",
 })

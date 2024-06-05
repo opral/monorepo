@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest"
 import { Middleware } from "./index"
 import { PrefixStrategy } from "../index.client"
-import { LANG_COOKIE, PARAGLIDE_LANGUAGE_HEADER_NAME } from "../constants"
+import { LANG_COOKIE_NAME, PARAGLIDE_LANGUAGE_HEADER_NAME } from "../constants"
 import { NextRequest, NextResponse } from "next/server"
 import { availableLanguageTags, sourceLanguageTag } from "$paraglide/runtime.js"
 import { DomainStrategy } from "../routing-strategy/strats/domainStrategy"
@@ -21,7 +21,7 @@ describe("Middleware with Prefix", () => {
 			const response = middleware(request)
 
 			expectHeaderValue(response, PARAGLIDE_LANGUAGE_HEADER_NAME, languageTag)
-			expectCookieValue(response, LANG_COOKIE.name, languageTag)
+			expectCookieValue(response, LANG_COOKIE_NAME, languageTag)
 			expectRewriteDestination(response, "https://example.com/")
 		}
 	)
@@ -35,7 +35,7 @@ describe("Middleware with Prefix", () => {
 			const response = middleware(request)
 
 			expectHeaderValue(response, PARAGLIDE_LANGUAGE_HEADER_NAME, languageTag)
-			expectCookieValue(response, LANG_COOKIE.name, languageTag)
+			expectCookieValue(response, LANG_COOKIE_NAME, languageTag)
 			expectRewriteDestination(response, "https://example.com/some-page")
 		}
 	)
@@ -58,7 +58,7 @@ describe("Middleware with Domain Strategy", () => {
 
 		expectNoRewrite(response)
 		expectNoRedirect(response)
-		expectCookieValue(response, LANG_COOKIE.name, languageTag)
+		expectCookieValue(response, LANG_COOKIE_NAME, languageTag)
 		expectHeaderValue(response, PARAGLIDE_LANGUAGE_HEADER_NAME, languageTag)
 	})
 })
@@ -83,7 +83,7 @@ describe("Middleware Fallbacks", () => {
 		"Uses the Language Cookie to detect the language, regardless of Accept-Language header",
 		(languageTag) => {
 			const headers = new Headers()
-			headers.set("Cookie", LANG_COOKIE.name + "=" + languageTag)
+			headers.set("Cookie", LANG_COOKIE_NAME + "=" + languageTag)
 			headers.set("Accept-Language", sourceLanguageTag) // to make sure the cookie takes precedence
 			const request = new NextRequest("https://example.com/", { headers })
 			const response = middleware(request)
@@ -102,7 +102,7 @@ describe("Middleware Fallbacks", () => {
 			const response = middleware(request)
 
 			expectNoRewrite(response)
-			expectCookieValue(response, LANG_COOKIE.name, languageTag)
+			expectCookieValue(response, LANG_COOKIE_NAME, languageTag)
 			expectHeaderValue(response, PARAGLIDE_LANGUAGE_HEADER_NAME, languageTag)
 		}
 	)

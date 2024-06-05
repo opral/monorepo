@@ -54,7 +54,7 @@ The Paraglide compiler will generate a `src/lib/paraglide/messages.js` file that
 
 Only messages used on the current page are sent to the client. Any messages that aren't used on the current page will be tree-shaken out.
 
-## Language detection 
+## Language detection
 
 The language is determined based on the URL. If the first segment of the URL is a language tag, that language will be used. If no language tag is present, the default language will be used.
 

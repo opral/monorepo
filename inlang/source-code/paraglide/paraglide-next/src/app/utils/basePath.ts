@@ -1,4 +1,5 @@
 // Vendored in from NextJS
+import { UrlObject } from "node:url"
 
 export const basePath = (process.env.__NEXT_ROUTER_BASEPATH || "") as "" | `/${string}`
 
@@ -15,7 +16,7 @@ export function addPathPrefix(path: string, prefix?: string) {
 	return `${prefix}${pathname}${query}${hash}`
 }
 
-function parsePath(path: string) {
+function parsePath(path: string): UrlObject {
 	const hashIndex = path.indexOf("#")
 	const queryIndex = path.indexOf("?")
 	const hasQuery = queryIndex > -1 && (hashIndex < 0 || queryIndex < hashIndex)
