@@ -25,7 +25,7 @@ const mockLintReports: MessageLintReport[] = [
 const mockSettings: ProjectSettings = {
 	$schema: "https://inlang.com/schema/project-settings",
 	sourceLanguageTag: "en",
-	languageTags: ["en", "es", "fr", "pt-br", "ru", "zh-cn"],
+	languageTags: ["en", "de", "nl"],
 	messageLintRuleLevels: {
 		"messageLintRule.inlang.identicalPattern": "error",
 	},
