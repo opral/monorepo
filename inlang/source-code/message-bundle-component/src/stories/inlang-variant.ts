@@ -119,14 +119,14 @@ export default class InlangVariant extends LitElement {
 
 	override render() {
 		return html`<div class="variant">
-			${this._matches
+			${this.variant && this._matches
 				? this._matches.map((match) => html`<div class="match">${match}</div>`)
 				: undefined}
-			${this.variant
-				? html`<sl-input
-						class="pattern"
-						size="small"
-						value=${this.variant.pattern
+			<sl-input
+				class="pattern"
+				size="small"
+				value=${this.variant
+					? this.variant.pattern
 							.map((p) => {
 								if ("value" in p) {
 									return p.value
@@ -135,12 +135,12 @@ export default class InlangVariant extends LitElement {
 								}
 								return ""
 							})
-							.join(" ")}
-						@input=${(e: Event) => {
-							this._pattern = (e.target as HTMLInputElement).value
-						}}
-				  ></sl-input>`
-				: ``}
+							.join(" ")
+					: ""}
+				@input=${(e: Event) => {
+					this._pattern = (e.target as HTMLInputElement).value
+				}}
+			></sl-input>
 			<div class="actions">
 				<sl-button
 					size="small"
@@ -160,6 +160,9 @@ export default class InlangVariant extends LitElement {
 								},
 							})
 							this.triggerSave()
+						} else {
+							// new message
+							console.info("TODO create new message")
 						}
 					}}
 					>Save</sl-button

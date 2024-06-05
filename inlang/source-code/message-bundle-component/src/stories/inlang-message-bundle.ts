@@ -58,6 +58,10 @@ export default class InlangMessageBundle extends LitElement {
 		return this.settings?.sourceLanguageTag
 	}
 
+	private _languageTags = (): LanguageTag[] | undefined => {
+		return this.settings?.languageTags
+	}
+
 	private _fakeInputs = (): string[] | undefined => {
 		const _refLanguageTag = this._refLanguageTag()
 		return _refLanguageTag && this.messageBundle
@@ -72,24 +76,34 @@ export default class InlangMessageBundle extends LitElement {
 				<span class="alias">@${this.messageBundle?.alias.default}</span>
 			</div>
 			<div class="messages-container">
-				${this.messageBundle?.messages.map((message) =>
-					this._renderMessage(
-						message,
-						this.lintReports?.filter((report) => report.languageTag === message.locale)
+				${this._languageTags() &&
+				this._languageTags()?.map((languageTag) => {
+					const message = this.messageBundle?.messages.find(
+						(message) => message.locale === languageTag
 					)
-				)}
+
+					return this._renderMessage(
+						languageTag,
+						message,
+						this.lintReports?.filter((report) => report.languageTag === languageTag)
+					)
+				})}
 			</div>
 		`
 	}
 
-	private _renderMessage(message: Message, messageLintReports?: MessageLintReport[]) {
+	private _renderMessage(
+		languageTag: LanguageTag,
+		message?: Message,
+		messageLintReports?: MessageLintReport[]
+	) {
 		return html`
 			<div class="message">
 				<div class="language-container">
-					<span>${message.locale}</span>
+					<span>${languageTag}</span>
 				</div>
 				<div class="message-body">
-					${message.selectors.length > 0
+					${message && message.selectors.length > 0
 						? html`<div class="message-header">
 								<div class="selector-container">
 									${message.selectors.map(
@@ -124,16 +138,23 @@ export default class InlangMessageBundle extends LitElement {
 						  </div>`
 						: ``}
 					<div class="variants-container">
-						${message.variants.map(
-							(variant) =>
-								html`<inlang-variant
-									.variant=${variant}
+						${message
+							? message.variants.map(
+									(variant) =>
+										html`<inlang-variant
+											.variant=${variant}
+											.message=${message}
+											.inputs=${this._fakeInputs()}
+											.triggerSave=${this._triggerSave}
+											.lintReports=${messageLintReports}
+										></inlang-variant>`
+							  )
+							: html`<inlang-variant
 									.message=${message}
 									.inputs=${this._fakeInputs()}
 									.triggerSave=${this._triggerSave}
 									.lintReports=${messageLintReports}
-								></inlang-variant>`
-						)}
+							  ></inlang-variant>`}
 					</div>
 				</div>
 			</div>
