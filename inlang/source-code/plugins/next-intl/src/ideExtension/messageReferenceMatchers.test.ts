@@ -278,3 +278,16 @@ it("should add the defined namespaces by getTranslations hook with namespace obj
 	expect(matches).toHaveLength(1)
 	expect(matches[0]?.messageId).toBe("Metadata.button.a")
 })
+
+it("should add the defined namespace by useTranslations hook", async () => {
+	const sourceCode = `
+		const { t } = useTranslations('DirectoryPage');
+		<p>{t('title')}</p>
+	`
+	const settings: PluginSettings = {
+		pathPattern: "./{language}.json",
+	}
+	const matches = parse(sourceCode, settings)
+	expect(matches).toHaveLength(1)
+	expect(matches[0]?.messageId).toBe("DirectoryPage.title")
+})
