@@ -42,3 +42,18 @@ export function middleware(request: NextRequest) {
 	return response
 }
 ```
+
+## Using the language in Middleware
+
+In some cases you may need to access the language of a request inside the middleware itself. For this the `middleware` function provides a `detectLanguage` function.
+
+```ts
+// src/middleware.ts
+import { middleware as paraglideMiddleware } from "@/lib/i18n"
+export function middleware(request: NextRequest) {
+	const lang = paraglideMiddleware.detectLanguage(request)
+	//do something with the language...
+	// still use the paraglide middleware
+	return paraglideMiddleware(request)
+}
+```
