@@ -18,6 +18,7 @@ This will generate a `messages/{lang}.json` file for each of your languages. Thi
 Add the vite-plugin to your `vite.config.js` file. This will make sure to rerun the paraglide compiler when needed and add the link preprocessor.
 
 ```js
+// vite.config.js
 import { paraglide } from "@inlang/paraglide-sveltekit/vite"
 
 export default defineConfig({
@@ -89,6 +90,7 @@ or if you're using Svelte 5:
 In your `src/hooks.js` file, use the `i18n` instance to add the `reroute` hook:
 
 ```js
+// src/hooks.js
 import { i18n } from '$lib/i18n.js'
 export const reroute = i18n.reroute()
 ```
@@ -116,6 +118,7 @@ To set the `lang` and `dir` attributes on your `<html>` tag add placeholders in 
 In `src/app.d.ts`
 
 ```ts
+// src/app.d.ts
 import type { AvailableLanguageTag } from "$lib/paraglide/runtime"
 import type { ParaglideLocals } from "@inlang/paraglide-sveltekit"
 

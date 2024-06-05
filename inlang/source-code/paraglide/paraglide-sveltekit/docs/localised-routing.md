@@ -14,6 +14,7 @@ You can have different paths for each language with the `pathnames` option. Don'
 - `/fr/a-propos` for French
 
 ```js
+// src/lib/i18n.js
 import { createI18n } from "@inlang/paraglide-sveltekit"
 import * as runtime from "$lib/paraglide/runtime.js"
 import * as m from "$lib/paraglide/messages.js"
@@ -50,6 +51,7 @@ This reflects the default `prefixDefaultLanguage: "never"` behavior.
 If you want to also have a prefix for the default language, use the `prefixDefaultLanguage: "always"` option.
 
 ```ts
+// src/lib/i18n.js
 export const i18n = createI18n(runtime, {
 	prefixDefaultLanguage: "always",
 })
@@ -74,8 +76,9 @@ Usually your default language is the same as the `sourceLanguageTag` of your Inl
 You can change it by passing a `defaultLanguageTag` option to `createI18n`
 
 ```ts
-// sourceLanguageTag = "en"
+// src/lib/i18n.js
 
+// sourceLanguageTag = "en"
 export const i18n = createI18n(runtime, {
 	defaultLanguageTag: "de",
 })

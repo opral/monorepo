@@ -14,6 +14,7 @@ Loading is asynchronous & rendering is synchronous.
 During the asynchronous loading, there is danger of crosstalk. If you aren't careful it's possible for one request to override the language of another request. You can avoid this by explicitly specifying which language a message should be in.
 
 ```ts
+// src/routes/+page.server.js
 import * as m from "$lib/paraglide/messages.js"
 
 export async function load({ locals }) {
@@ -29,6 +30,7 @@ During rendering there is no danger of crosstalk. You can safely use messages an
 You can tell a load function to re-run on language changes by calling `depends("paraglide:lang")`.
 
 ```ts
+// src/routes/+page.server.js
 export async function load({ depends }) {
   // Paraglide-SvelteKit automatically calls `invalidate("paraglide:lang")` whenever the langauge changes
   // This tells SvelteKit to re-run this function whenever that happens
