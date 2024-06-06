@@ -8,7 +8,6 @@ export const isProduction = process.env.NODE_ENV === "production"
 const app = express()
 
 // ----------------- ROUTES ----------------------
-
 app.use(
 	"*",
 	createProxyMiddleware({
@@ -16,6 +15,9 @@ app.use(
 		changeOrigin: true,
 		onProxyReq: (req) => {
 			req.path
+		},
+		onProxyRes: (proxyRes) => {
+			proxyRes.headers["Access-Control-Allow-Origin"] = "null"
 		},
 	})
 )
