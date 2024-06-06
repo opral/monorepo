@@ -48,6 +48,13 @@ export default class InlangMessageBundle extends LitElement {
 		}
 	}
 
+	_addMessage = (message: Message) => {
+		if (this.messageBundle) {
+			this.messageBundle.messages.push(message)
+			this.requestUpdate()
+		}
+	}
+
 	override async firstUpdated() {
 		await this.updateComplete
 		// override primitive colors to match the design system
@@ -146,6 +153,8 @@ export default class InlangMessageBundle extends LitElement {
 											.message=${message}
 											.inputs=${this._fakeInputs()}
 											.triggerSave=${this._triggerSave}
+											.addMessage=${this._addMessage}
+											.languageTag=${languageTag}
 											.lintReports=${messageLintReports}
 										></inlang-variant>`
 							  )
@@ -153,6 +162,8 @@ export default class InlangMessageBundle extends LitElement {
 									.message=${message}
 									.inputs=${this._fakeInputs()}
 									.triggerSave=${this._triggerSave}
+									.addMessage=${this._addMessage}
+									.languageTag=${languageTag}
 									.lintReports=${messageLintReports}
 							  ></inlang-variant>`}
 					</div>
