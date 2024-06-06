@@ -37,6 +37,30 @@ export function makeGithubClient({ gitHubProxyUrl }: { gitHubProxyUrl?: string }
 				return { error: newError }
 			})
 
+	type getAvailableReposType = (
+		installation_id: number
+	) => Promise<{ repositories: Record<string, any>[] } | { error: Error }>
+	const getAvailableRepos: getAvailableReposType = async (installation_id: number) =>
+		await githubClient
+			.request(`GET /user/installations/{installation_id}/repositories`, {
+				installation_id,
+			})
+			.then(({ data }: { data: { repositories: any[] } }) => data)
+			.catch((newError: Error) => {
+				return { error: newError }
+			})
+
+	type getInstallationsType = () => Promise<
+		{ installations: Record<string, any>[] } | { error: Error }
+	>
+	const getInstallations: getInstallationsType = async () =>
+		await githubClient
+			.request("GET /user/installations")
+			.then(({ data }: { data: { installations: any[] } }) => data)
+			.catch((newError: Error) => {
+				return { error: newError }
+			})
+
 	type createForkType = (arg: { owner: string; repo: string }) => Promise<Record<string, any>>
 	const createFork: createForkType = githubClient.rest.repos.createFork
 
@@ -79,6 +103,8 @@ export function makeGithubClient({ gitHubProxyUrl }: { gitHubProxyUrl?: string }
 	}
 
 	return {
+		getInstallations,
+		getAvailableRepos,
 		getRepo,
 		createFork,
 		mergeUpstream,
