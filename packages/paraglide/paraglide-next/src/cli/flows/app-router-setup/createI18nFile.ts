@@ -1,12 +1,14 @@
 import type { Repository } from "@lix-js/client"
 import type { CliStep } from "../../utils"
 import type { NextJSProject } from "../scan-next-project"
+import type { RoutingStrategy } from "./promptRoutingStrategy"
 import path from "node:path"
 
 export const createI18nFile: CliStep<
 	{
 		repo: Repository
 		nextProject: NextJSProject
+		routingStrategy: RoutingStrategy
 	},
 	unknown
 > = async (ctx) => {
@@ -33,7 +35,7 @@ import { PrefixStrategy, Navigation, Middleware } from "@inlang/paraglide-next"
  *     import("@/paraglide/runtime").AvailableLanguageTag
  * >} 
  */
-const strategy = PrefixStrategy<AvailableLanguageTag>({ prefixDefault: "never" });
+const strategy = PrefixStrategy({ prefixDefault: "never" });
 
 export const middleware = Middleware({ strategy });
 export const { Link, useRouter, usePathname, redirect, permanentRedirect } = Navigation({ strategy });
