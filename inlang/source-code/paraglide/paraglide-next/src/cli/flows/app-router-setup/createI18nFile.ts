@@ -23,9 +23,11 @@ import type { AvailableLanguageTag } from "@/paraglide/runtime"
 
 const strategy = ${
 		ctx.routingStrategy.type === "cookie"
-			? `PrefixStrategy<AvailableLanguageTag>({ prefixDefault: "never" })`
+			? `DetectionStrategy<AvailableLanguageTag>()`
 			: ctx.routingStrategy.type === "domain"
-			? `PrefixStrategy<AvailableLanguageTag>({ prefixDefault: "never" })`
+			? `DomainStrategy<AvailableLanguageTag>({ domains: ${JSON.stringify(
+					ctx.routingStrategy.domains
+			  )} })`
 			: `PrefixStrategy<AvailableLanguageTag>({ prefixDefault: "never" })`
 	};
 
@@ -38,7 +40,7 @@ import { PrefixStrategy, Navigation, Middleware } from "@inlang/paraglide-next"
 
 /** 
  * @type {import("@inlang/paraglide-next").${
-		{ prefix: "PrefixStrategy", cookie: "PrefixStrategy", domain: "PrefixStrategy" }[
+		{ prefix: "PrefixStrategy", cookie: "DetectionStrategy", domain: "DomainStrategy" }[
 			ctx.routingStrategy.type
 		]
  }<
@@ -47,9 +49,9 @@ import { PrefixStrategy, Navigation, Middleware } from "@inlang/paraglide-next"
  */
 const strategy = ${
 		ctx.routingStrategy.type === "cookie"
-			? `PrefixStrategy({ prefixDefault: "never" })`
+			? `DetectionStrategy()`
 			: ctx.routingStrategy.type === "domain"
-			? `PrefixStrategy({ prefixDefault: "never" })`
+			? `DomainStrategy({ domains: ${JSON.stringify(ctx.routingStrategy.domains)} })`
 			: `PrefixStrategy({ prefixDefault: "never" })`
 	};
 
