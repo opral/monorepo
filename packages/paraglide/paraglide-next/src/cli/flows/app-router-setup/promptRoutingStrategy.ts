@@ -43,7 +43,7 @@ export const promptRoutingStrategy: CliStep<
 
 			const domains: Record<string, URL> = {}
 			for (const languageTag of languageTags) {
-				const domain = await promptDomainForLanguage(languageTag)
+				const domain = await promptDomainForLanguage(languageTag, ctx.logger)
 				domains[languageTag] = domain
 			}
 
@@ -52,15 +52,21 @@ export const promptRoutingStrategy: CliStep<
 	}
 }
 
-async function promptDomainForLanguage(languageTag: string): Promise<URL> {
-	const response = await prompt(`Which domain do you want to use for ${languageTag}?`, {
+async function promptDomainForLanguage(languageTag: string, logger: Logger): Promise<URL> {
+	const response = await prompt(`Which domain do you want to use for "${languageTag}"?`, {
 		type: "text",
 		placeholder: `https://${languageTag}.example.com`,
 	})
 
 	if (URL.canParse(response)) {
-		return new URL(response)
+		const url = new URL(response)
+		if (!url.protocol.startsWith("https:")) {
+			logger.warn(`Domains should use either the 'http' or 'https' protocol`)
+		} else {
+			return url
+		}
 	}
 
-	return await promptDomainForLanguage(languageTag)
+	logger.warn("Please enter a valid domain, including the protocol. Example: https://example.com")
+	return await promptDomainForLanguage(languageTag, logger)
 }
