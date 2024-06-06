@@ -1,0 +1,33 @@
+name: Deployment on version change
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [closed]
+
+jobs:
+  changeset:
+    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'changeset-release/main') == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check for changes in inlang/source-code/editor/package.json
+        id: check_changes
+        run: |
+          echo "CHANGES=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep 'inlang/source-code/editor/package.json')"
+          if [ -z "$CHANGES" ]; then
+            echo "No changes in inlang/source-code/editor/package.json"
+            echo "changes=false" >> $GITHUB_ENV
+          else
+            echo "Changes in inlang/source-code/editor/package.json"
+            echo "changes=true" >> $GITHUB_ENV
+
+      - name: Trigger redeploy
+        if: env.changes == 'true'
+        run: |
+          echo "Triggering redeploy via deploy hook"
+          curl -X POST ${{ secrets.FINK_DEPLOY_HOOK_URL }}
