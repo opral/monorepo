@@ -1,4 +1,4 @@
-import type { Variant, Message } from "@inlang/sdk/v2"
+import { type Variant, type Message, createMessage, type LanguageTag } from "@inlang/sdk/v2"
 import { LitElement, css, html } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
@@ -90,6 +90,9 @@ export default class InlangVariant extends LitElement {
 	message: Message | undefined
 
 	@property()
+	languageTag: LanguageTag | undefined
+
+	@property()
 	variant: Variant | undefined
 
 	@property()
@@ -99,10 +102,39 @@ export default class InlangVariant extends LitElement {
 	lintReports: MessageLintReport[] | undefined
 
 	@property()
+	addMessage: (newMessage: Message) => void = () => {}
+
+	@property()
 	triggerSave: () => void = () => {}
 
 	@state()
 	private _pattern: string | undefined = undefined
+
+	_save = () => {
+		if (this.message && this.variant && this._pattern) {
+			// upsert variant
+			upsertVariant({
+				message: this.message,
+				variant: {
+					match: this.variant.match,
+					pattern: [
+						{
+							type: "text",
+							value: this._pattern,
+						},
+					],
+				},
+			})
+			this.triggerSave()
+		} else {
+			// new message
+			if (this.languageTag && this._pattern) {
+				//TODO: only text pattern supported
+				this.addMessage(createMessage({ locale: this.languageTag, text: this._pattern }))
+				this.triggerSave()
+			}
+		}
+	}
 
 	private get _selectors(): string[] | undefined {
 		// @ts-ignore - just for prototyping
@@ -118,6 +150,7 @@ export default class InlangVariant extends LitElement {
 	}
 
 	override render() {
+		//console.log(this.message)
 		return html`<div class="variant">
 			${this.variant && this._matches
 				? this._matches.map((match) => html`<div class="match">${match}</div>`)
@@ -142,31 +175,7 @@ export default class InlangVariant extends LitElement {
 				}}
 			></sl-input>
 			<div class="actions">
-				<sl-button
-					size="small"
-					@click=${() => {
-						if (this.message && this.variant && this._pattern) {
-							// upsert variant
-							upsertVariant({
-								message: this.message,
-								variant: {
-									match: this.variant.match,
-									pattern: [
-										{
-											type: "text",
-											value: this._pattern,
-										},
-									],
-								},
-							})
-							this.triggerSave()
-						} else {
-							// new message
-							console.info("TODO create new message")
-						}
-					}}
-					>Save</sl-button
-				>
+				<sl-button size="small" @click=${() => this._save()}>Save</sl-button>
 				${this.message?.selectors && this.message.selectors.length === 0
 					? html`<inlang-selector-configurator .inputs=${this.inputs} .message=${this.message}>
 							<sl-tooltip content="Add Selector to message"
