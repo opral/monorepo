@@ -225,11 +225,13 @@ export const Gitfloat = () => {
 		}
 	}
 
-	createEffect(on(triggerAddNinja, () => {
-		if (triggerAddNinja() === true) {
-			addNinja(triggerPushChanges)
-		}
-	}))
+	createEffect(
+		on(triggerAddNinja, () => {
+			if (triggerAddNinja() === true) {
+				addNinja(triggerPushChanges)
+			}
+		})
+	)
 
 	const pullrequestUrl = () => {
 		const repoInfo = githubRepositoryInformation()
@@ -314,13 +316,13 @@ export const Gitfloat = () => {
 
 	// prevent user from making to changes when not logged in
 	createEffect(() => {
-		if (gitState() === "login" && localChanges() > 2) setSignInModalOpen(true)
+		if (gitState() === "login" && localChanges() >= 1) setSignInModalOpen(true)
 	})
 
 	const debouncedForkModalState = debounce(2000, () => {
 		if (gitState() === "hasChanges") {
 			setForkModalOpen(false)
-		} else if (gitState() === "fork" && localChanges() > 2) {
+		} else if (gitState() === "fork" && localChanges() >= 1) {
 			setForkModalOpen(true)
 		}
 	})
