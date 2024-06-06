@@ -21,7 +21,13 @@ export const createI18nFile: CliStep<
 import { PrefixStrategy, Navigation, Middleware } from "@inlang/paraglide-next"
 import type { AvailableLanguageTag } from "@/paraglide/runtime"
 
-const strategy = PrefixStrategy<AvailableLanguageTag>({ prefixDefault: "never" });
+const strategy = ${
+		ctx.routingStrategy.type === "cookie"
+			? `PrefixStrategy<AvailableLanguageTag>({ prefixDefault: "never" })`
+			: ctx.routingStrategy.type === "domain"
+			? `PrefixStrategy<AvailableLanguageTag>({ prefixDefault: "never" })`
+			: `PrefixStrategy<AvailableLanguageTag>({ prefixDefault: "never" })`
+	};
 
 export const middleware = Middleware({ strategy });
 export const { Link, useRouter, usePathname, redirect, permanentRedirect } = Navigation({ strategy });
@@ -31,11 +37,21 @@ export const { Link, useRouter, usePathname, redirect, permanentRedirect } = Nav
 import { PrefixStrategy, Navigation, Middleware } from "@inlang/paraglide-next"
 
 /** 
- * @type {import("@inlang/paraglide-next").PrefixStrategy<
+ * @type {import("@inlang/paraglide-next").${
+		{ prefix: "PrefixStrategy", cookie: "PrefixStrategy", domain: "PrefixStrategy" }[
+			ctx.routingStrategy.type
+		]
+ }<
  *     import("@/paraglide/runtime").AvailableLanguageTag
  * >} 
  */
-const strategy = PrefixStrategy({ prefixDefault: "never" });
+const strategy = ${
+		ctx.routingStrategy.type === "cookie"
+			? `PrefixStrategy({ prefixDefault: "never" })`
+			: ctx.routingStrategy.type === "domain"
+			? `PrefixStrategy({ prefixDefault: "never" })`
+			: `PrefixStrategy({ prefixDefault: "never" })`
+	};
 
 export const middleware = Middleware({ strategy });
 export const { Link, useRouter, usePathname, redirect, permanentRedirect } = Navigation({ strategy });
