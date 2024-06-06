@@ -55,6 +55,7 @@ function TheActualPage() {
 		repo,
 		currentBranch,
 		project,
+		activeProject,
 		projectList,
 		routeParams,
 		tourStep,
@@ -64,7 +65,7 @@ function TheActualPage() {
 		isNinjaRecommendationDisabled,
 		ninjaIsAdopted,
 		filteredMessageLintRules,
-		localChanges
+		localChanges,
 	} = useEditorState()
 	const [localStorage, setLocalStorage] = useLocalStorage()
 
@@ -84,6 +85,7 @@ function TheActualPage() {
 				repository: routeParams().repository,
 				description: "",
 				lastOpened: new Date().getTime(),
+				project: activeProject() ?? "",
 			}
 			recentProjects.push(newProject)
 
@@ -179,7 +181,14 @@ function TheActualPage() {
 				>
 					<div class="min-h-[calc(100vh_-_200px)]">
 						<ListHeader />
-						<Show when={ninjaIsAdopted() === false && filteredMessageLintRules().length !== 0 && userIsCollaborator() && !isNinjaRecommendationDisabled()}>
+						<Show
+							when={
+								ninjaIsAdopted() === false &&
+								filteredMessageLintRules().length !== 0 &&
+								userIsCollaborator() &&
+								!isNinjaRecommendationDisabled()
+							}
+						>
 							<div class="flex flex-col sm:flex-row justify-start items-start w-full gap-2 px-4 py-1.5 border-x border-[#DFE2E4] bg-inverted-surface z-20 animate-blendIn">
 								<div class="flex flex-wrap text-sm font-medium text-background/80">
 									<div class="flex justify-start items-start py-[5px] text-background">
@@ -197,7 +206,9 @@ function TheActualPage() {
 												: "http://localhost:3000/m/3gk8n4n4/app-inlang-ninjaI18nAction"
 										}
 										target="_blank"
-									>Ninja GitHub action</a>
+									>
+										Ninja GitHub action
+									</a>
 									.
 								</p>
 								<div class="w-full sm:w-[212px] h-8 flex sm:flex-grow justify-end items-center gap-2">
@@ -221,11 +232,10 @@ function TheActualPage() {
 									</sl-tooltip>
 									<button
 										onClick={() => {
-											setLocalStorage("disableNinjaRecommendation",
-												(prev) => [
-													...prev,
-													{ owner: routeParams().owner, repository: routeParams().repository },
-												])
+											setLocalStorage("disableNinjaRecommendation", (prev) => [
+												...prev,
+												{ owner: routeParams().owner, repository: routeParams().repository },
+											])
 											telemetryBrowser.capture("EDITOR user rejected Ninja")
 										}}
 										class="rounded w-[30px] h-[30px] flex justify-center items-center hover:bg-background/10 hover:text-background text-background/80"

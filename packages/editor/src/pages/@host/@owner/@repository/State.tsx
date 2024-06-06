@@ -148,7 +148,9 @@ type EditorStateSchema = {
 
 	isNinjaRecommendationDisabled: () => boolean
 	ninjaIsAdopted: Resource<boolean>
-	addNinja: (triggerPushChanges: (message: string) => Promise<(() => void) | undefined>) => Promise<void>
+	addNinja: (
+		triggerPushChanges: (message: string) => Promise<(() => void) | undefined>
+	) => Promise<void>
 
 	tourStep: () => TourStepId
 	setTourStep: Setter<TourStepId>
@@ -266,7 +268,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		setSearchParams({ key: "ref", value: refLink() })
 	})
 
-	const [localStorage] = useLocalStorage() ?? []
+	const [localStorage, setLocalStorage] = useLocalStorage()
 
 	// get lix errors
 	const [lixErrors, setLixErrors] = createSignal<Error[]>([])
@@ -423,24 +425,32 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		},
 		async (args) => {
 			if (args.repo?.nodeishFs === undefined) return []
-			const projects = await listProjects(args.repo?.nodeishFs, "/")
+			const projectList = await listProjects(args.repo?.nodeishFs, "/")
+			const previousProject = localStorage.recentProjects.find(
+				(project) =>
+					project.repository === routeParams().repository && project.owner === routeParams().owner
+			)?.project
 
 			if (
 				searchParams().project &&
-				projects.some((project: any) => project.projectPath === searchParams().project)
+				projectList.some((project: any) => project.projectPath === searchParams().project)
 			) {
 				setActiveProject(searchParams().project)
-			} else if (projects.length === 1) {
-				setActiveProject(projects[0]?.projectPath)
+			} else if (projectList.length === 1) {
+				setActiveProject(projectList[0]?.projectPath)
 			} else if (
-				projects.length > 1 &&
-				projects.some((project: any) => project.projectPath === "/project.inlang")
+				previousProject && projectList.some((project) => project.projectPath === previousProject)
+			) {
+				setActiveProject(previousProject)
+			} else if (
+				projectList.length > 1 &&
+				projectList.some((project: any) => project.projectPath === "/project.inlang")
 			) {
 				setActiveProject("/project.inlang")
 			} else {
-				setActiveProject(projects[0]?.projectPath)
+				setActiveProject(projectList[0]?.projectPath)
 			}
-			return projects
+			return projectList
 		}
 	)
 
@@ -448,12 +458,22 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		params.get("project") || undefined
 	)
 
-	createEffect(() => {
+	createEffect(on(activeProject, () => {
 		const projectPath = activeProject()
 		if (projectPath) {
 			setSearchParams({ key: "project", value: projectPath })
+			// update project of recentProject in local storage
+			setLocalStorage({
+				recentProjects: localStorage.recentProjects.map((project) => {
+					if (project.repository === routeParams().repository && project.owner === routeParams().owner) {
+						return { ...project, project: projectPath }
+					} else {
+						return project
+					}
+				}),
+			})
 		}
-	})
+	}))
 
 	// polyfill requestIdleCallback for Safari browser
 	const requestIdleCallback =
@@ -534,7 +554,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		}
 	)
 
-	async function addNinja(triggerPushChanges: (message: string) => Promise<(() => void) | undefined> | undefined) {
+	async function addNinja(
+		triggerPushChanges: (message: string) => Promise<(() => void) | undefined> | undefined
+	) {
 		try {
 			if (!ninjaIsAdopted() && repo()) {
 				await Ninja.add({ fs: repo()!.nodeishFs })
