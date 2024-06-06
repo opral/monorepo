@@ -51,6 +51,11 @@ describe.concurrent("paraglide-next", () => {
 			await wait(PROMPT_TO)
 			await pressKey("enter")
 
+			await waitForText("Which routing strategy do you want to use?")
+			await wait(PROMPT_TO)
+			// Prefix strategy
+			await pressKey("enter")
+
 			await waitForText("Do you want to update your <Link>s for localised routing?")
 			await wait(PROMPT_TO)
 			await pressKey("enter") //yes, set up i18n routing
@@ -104,6 +109,13 @@ describe.concurrent("paraglide-next", () => {
 		await pressKey("enter")
 
 		console.info("Languages set up")
+
+		await waitForText("Which routing strategy do you want to use?")
+		await wait(PROMPT_TO)
+		// Prefix strategy
+		await pressKey("enter")
+
+		console.info("Routing strategy set up")
 
 		await waitForText("Do you want to update your <Link>s for localised routing?")
 		await wait(PROMPT_TO)
