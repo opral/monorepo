@@ -1,4 +1,5 @@
 import { NodeishFilesystem } from "@lix-js/fs"
+import consola from "consola"
 import path from "node:path"
 
 /**
@@ -80,4 +81,22 @@ export async function fileExists(fs: NodeishFilesystem, path: string): Promise<b
 	} catch {
 		return false
 	}
+}
+
+export const promptSelection = async <T extends string>(
+	message: string,
+	options: { initial?: T; options: { label: string; value: T }[] } = { options: [] }
+): Promise<T> => {
+	return prompt(message, { type: "select", ...options }) as unknown as Promise<T>
+}
+
+/**
+ * Wrapper to exit the process if the user presses CTRL+C.
+ */
+export const prompt: typeof consola.prompt = async (message, options) => {
+	const response = await consola.prompt(message, options)
+	if (response?.toString() === "Symbol(clack:cancel)") {
+		process.exit(0)
+	}
+	return response
 }

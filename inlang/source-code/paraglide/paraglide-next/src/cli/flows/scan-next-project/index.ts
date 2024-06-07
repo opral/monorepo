@@ -1,9 +1,8 @@
 import { Logger } from "@inlang/paraglide-js/internal"
 import { Repository } from "@lix-js/client"
-import { CliStep, folderExists, fileExists } from "../../utils"
+import { CliStep, folderExists, fileExists, promptSelection } from "../../utils"
 import { NodeishFilesystem } from "@lix-js/fs"
 import path from "node:path"
-import consola from "consola"
 
 type NextConfigFile = {
 	path: string
@@ -130,22 +129,4 @@ async function findPackageJson(fs: NodeishFilesystem, cwd: string): Promise<stri
 	const packageJsonExists = await fileExists(fs, potentialPackageJsonPath)
 
 	return packageJsonExists ? potentialPackageJsonPath : undefined
-}
-
-export const promptSelection = async <T extends string>(
-	message: string,
-	options: { initial?: T; options: { label: string; value: T }[] } = { options: [] }
-): Promise<T> => {
-	return prompt(message, { type: "select", ...options }) as unknown as Promise<T>
-}
-
-/**
- * Wrapper to exit the process if the user presses CTRL+C.
- */
-export const prompt: typeof consola.prompt = async (message, options) => {
-	const response = await consola.prompt(message, options)
-	if (response?.toString() === "Symbol(clack:cancel)") {
-		process.exit(0)
-	}
-	return response
 }
