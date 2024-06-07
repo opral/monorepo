@@ -90,6 +90,7 @@ export const createHandle = <T extends string>(
 				maxAge: 31557600, //Math.round(60 * 60 * 24 * 365.25) = 1 year,
 				sameSite: "lax",
 				path: base || "/",
+				httpOnly: false,
 			})
 		}
 
