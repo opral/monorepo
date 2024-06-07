@@ -1,5 +1,12 @@
 # @inlang/paraglide-sveltekit
 
+## 0.9.6
+
+### Patch Changes
+
+- 1ea7b14: Explicitly mark `paraglide:lang` cookie as _not_ `HttpOnly`.
+  - @inlang/paraglide-js@1.9.1
+
 ## 0.9.5
 
 ### Patch Changes

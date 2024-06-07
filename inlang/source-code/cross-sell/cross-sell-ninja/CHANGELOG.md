@@ -1,5 +1,11 @@
 # @inlang/cross-sell-ninja
 
+## 0.0.29
+
+### Patch Changes
+
+- fce3d96: Fix yaml parse error stopping workflow checks, that resulted in uncorrect results
+
 ## 0.0.28
 
 ### Patch Changes
