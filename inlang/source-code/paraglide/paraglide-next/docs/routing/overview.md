@@ -71,7 +71,7 @@ There are situations where you need to manually get a localized URL. You can do 
 ```ts
 import { strategy } from "@/lib/i18n"
 
-const { parhname } = strategy.getLocalisedUrl(
+const { pathname } = strategy.getLocalisedUrl(
     // the pathname you want to localise
     "/about", 
 
