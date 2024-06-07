@@ -16,6 +16,7 @@ const GitHubActionJob = Type.Object({
 
 const GitHubActionEvent = Type.Union([
 	Type.Literal("pull_request_target"),
+	Type.Array(Type.Literal("pull_request_target")),
 	Type.Object({
 		pull_request_target: Type.Optional(Type.Any()),
 		// Define other events as necessary, ensuring correct property names
