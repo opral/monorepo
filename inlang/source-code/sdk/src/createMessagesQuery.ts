@@ -179,8 +179,8 @@ export function createMessagesQuery({
 			nodeishFs,
 			messageLockDirPath,
 			messageStates,
-			defaultAliasIndex,
 			index,
+			defaultAliasIndex,
 			delegate,
 			_settings, // NOTE we bang here - we don't expect the settings to become null during the livetime of a project
 			resolvedPluginApi
@@ -252,6 +252,7 @@ export function createMessagesQuery({
 				delegate?.onMessageCreate(data.id, index.get(data.id), [...index.values()])
 			} else {
 				index.set(where.id, { ...message, ...data })
+				defaultAliasIndex.set(data.alias.default, { ...message, ...data })
 				messageStates.messageDirtyFlags[where.id] = true
 				delegate?.onMessageUpdate(data.id, index.get(data.id), [...index.values()])
 			}
