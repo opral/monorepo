@@ -1,157 +1,13 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 import _debug from "debug"
+import { SlotEntry } from "./types/SlotEntry.js"
+import { hash } from "./utill/hash.js"
+import { stringifySlotFile } from "./utill/stringifySlotFile.js"
+import { parseSlotFile } from "./utill/parseSlotFile.js"
+import { SlotFileStates } from "./types/SlotFileStates.js"
+import { SlotFile } from "./types/SlotFile.js"
+import { HasId } from "./types/HasId.js"
 const debug = _debug("sdk:slotfile")
-
-let nodeCrypto: any = undefined
-
-if (typeof crypto === "undefined" && typeof process !== "undefined" && process?.versions?.node) {
-	nodeCrypto = await import("node:crypto")
-}
-
-/**
- * sync env independet implementation of  sha-256 hash function
- * @param inputStr string to create a hash for
- * @returns a 20 byte hex based hash created using sha-256
- */
-export function hash(inputStr: string) {
-	// @ts-ignore
-	if (
-		typeof nodeCrypto !== "undefined" &&
-		typeof process !== "undefined" &&
-		process?.versions?.node
-	) {
-		const hash = nodeCrypto.createHash("sha256", "")
-		hash.update(inputStr)
-		// @ts-ignore
-		return hash.digest("hex")
-	} else if (typeof crypto !== "undefined") {
-		const utf8 = new TextEncoder().encode(inputStr)
-		return crypto.subtle.digest("SHA-256", utf8).then((hashBuffer) => {
-			const hashArray = [...new Uint8Array(hashBuffer)]
-			const hashHex = hashArray.map((bytes) => bytes.toString(16).padStart(2, "0")).join("")
-			return hashHex
-		})
-	}
-
-	throw new Error("Could not find crypto features in runtime")
-}
-
-// NOTE: we coult be more general for primary key field (see: https://github.com/pubkey/rxdb/blob/3bdfd66d1da5ccf9afe371b6665770f11e67908f/src/types/rx-schema.d.ts#L106) but enougth for the POC
-type HasId = {
-	id: string
-}
-
-export type SlotEntry<DocType extends HasId> = {
-	hash: string
-	// a normalized object
-	data: DocType
-	index: number
-	_deleted: boolean
-	_writingFlag?: boolean
-}
-
-export type SlotEntryStates<DocType extends HasId> = {
-	remoteState: SlotEntry<DocType> | undefined
-	conflictState: SlotEntry<DocType> | undefined
-	headState: SlotEntry<DocType> | undefined
-	workingCopyState: SlotEntry<DocType> | undefined
-	memoryOriginState: SlotEntry<DocType> | undefined
-	memoryState: SlotEntry<DocType>
-}
-
-/**
- * conflict types:
- * remoteState != workingCopyState - git merge conflict
- * workingCopyState != memoryState - parallel edit on local fs (heighest prio?)
- *
- * how to solve a conflict? Set a resolution hash?
- *
- * if you call update it updates the memory state always, its returned persistence promise will raise an error with the conflicting states
- * if the write/push read operation raises a conflict - it will set the record into conflicting state (with all three states available in the conflict property)
- * a conflict can be solved by calling resolve(hash) where hash is one of the states of the records
- */
-
-type SlotFile<DocType extends HasId> = {
-	exists: boolean
-	contentHash: string | undefined
-	recordSlots: (SlotEntry<DocType> | null)[]
-}
-
-export type SlotFileStates<DocType extends HasId> = {
-	// collection: string,
-	slotFileName: string
-	// if the remote state of the file would conflict - it contains the conflicting state
-	// remoteState: ( SlotEntry<DocType> | null )[] | undefined
-	// // if current head is conflicting it contains the conflicting state of the file
-	// conflictingState: ( SlotEntry<DocType> | null )[] | undefined
-	// // the state of the head commit state of the current branch
-	// headState: ( SlotEntry<DocType> | null )[] | undefined
-	workingCopyStateFlag: "loaded" | "loadrequested" | "loading"
-	conflictingWorkingFile: SlotFile<DocType> | undefined
-	memoryOriginState: SlotFile<DocType>
-	changedRecords: (SlotEntry<DocType> | null)[]
-}
-
-// Hash slot selection algorithm:
-// For a storage the number of slots need to be defiend at the beginning.
-// this value defines the number of slots per slot file.
-//
-// To reach a good distribution over slots possible values are
-// - like 16 256 4096 65536 ...
-//
-// For this example we use 256 - so a slot file contains
-//
-// given a hash from a stringified json object:
-// 4ce286da8574e34c76d23769fd1b2c6c532e1cbc4ffde58204f9fa3e37cc76f8
-// ^^^															^^^
-// 4096 Slots -> 3 characters
-
-// extract slot index by the last n characters
-// check if the slot is free in one of the available slot files (in alphabetic order)
-// -> if a free slot is found, use it
-// -> find the first free file name by going from left to right
-// if non of the available slot files has a slot free on the slot index
-// -
-
-function stringifySlotFile<DocType extends HasId>(slotFile: SlotFile<DocType>, slotCount: number) {
-	let slotFileContent = "[\n"
-	for (let currentSlot = 0; currentSlot < slotCount; currentSlot += 1) {
-		const slotfileEntry = slotFile.recordSlots[currentSlot]
-		if (!slotfileEntry) {
-			slotFileContent += "null,"
-		} else {
-			const soltFileEntryString = JSON.stringify(slotfileEntry.data)
-			const slotFileEntyHash = hash(soltFileEntryString)
-
-			slotFileContent +=
-				'{"hash":"' +
-				slotFileEntyHash +
-				'", "data": ' +
-				soltFileEntryString +
-				', "_deleted": ' +
-				slotfileEntry._deleted +
-				"},"
-		}
-
-		slotFileContent += "\n\n\n\n"
-	}
-	slotFileContent += "null]"
-	return slotFileContent
-}
-
-function parseSlotFile(slotFileContent: string) {
-	const slotFileContentParsed = JSON.parse(slotFileContent)
-
-	// remove leading comma element
-	slotFileContentParsed.splice(-1)
-
-	for (const [slotIndex, recordOnSlot] of slotFileContentParsed.entries()) {
-		if (recordOnSlot) {
-			recordOnSlot.index = slotIndex
-		}
-	}
-	return slotFileContentParsed
-}
 
 /**
  *
@@ -837,7 +693,6 @@ export default function createSlotStorage<DocType extends HasId>(
 			changeCallback("record-change")
 			return saveChangesToWorkingCopy()
 		},
-
 		findDocumentsById: (docIds: string[], withDeleted: boolean): Promise<DocType[]> => {
 			const matchingDocuments: DocType[] = []
 
