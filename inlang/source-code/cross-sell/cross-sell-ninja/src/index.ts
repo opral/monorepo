@@ -51,8 +51,6 @@ export async function isAdopted(args: { fs: NodeishFilesystem }): Promise<boolea
 					}
 				} else {
 					// Ignore invalid YAML files
-					console.error("Failed to parse YAML", [...Value.Errors(GitHubActionsWorkflow, workflow)])
-					return false // Malformed YAML should result in a negative check
 				}
 			}
 		}
