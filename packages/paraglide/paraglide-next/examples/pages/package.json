@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/paraglide-next-example-pages",
-	"version": "0.2.21",
+	"version": "0.2.22",
 	"private": true,
 	"sideEffects": false,
 	"scripts": {

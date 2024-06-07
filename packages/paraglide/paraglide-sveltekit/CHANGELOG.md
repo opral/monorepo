@@ -1,5 +1,11 @@
 # @inlang/paraglide-sveltekit
 
+## 0.9.5
+
+### Patch Changes
+
+- 08a1e3f: Fix translation of hrefs that don't include a path. This is especially important with form actions.
+
 ## 0.9.4
 
 ### Patch Changes
