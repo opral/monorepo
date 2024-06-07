@@ -59,7 +59,7 @@ export const messageBundleStyling = css`
 	}
 	.selector {
 		height: 44px;
-		width: 80px;
+		width: 120px;
 		display: flex;
 		align-items: center;
 		padding: 12px;

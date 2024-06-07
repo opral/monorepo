@@ -55,6 +55,10 @@ export default class InlangMessageBundle extends LitElement {
 		}
 	}
 
+	_triggerRefresh = () => {
+		this.requestUpdate()
+	}
+
 	override async firstUpdated() {
 		await this.updateComplete
 		// override primitive colors to match the design system
@@ -118,7 +122,11 @@ export default class InlangMessageBundle extends LitElement {
 										(selector) => html`<div class="selector">${selector.arg.name}</div>`
 									)}
 									<div class="add-selector-container">
-										<inlang-selector-configurator .inputs=${this._fakeInputs()} .message=${message}>
+										<inlang-selector-configurator
+											.inputs=${this._fakeInputs()}
+											.message=${message}
+											.triggerMessageBundleRefresh=${this._triggerRefresh}
+										>
 											<sl-tooltip content="Add Selector to message"
 												><div class="add-selector">
 													<svg
@@ -153,6 +161,7 @@ export default class InlangMessageBundle extends LitElement {
 											.message=${message}
 											.inputs=${this._fakeInputs()}
 											.triggerSave=${this._triggerSave}
+											.triggerMessageBundleRefresh=${this._triggerRefresh}
 											.addMessage=${this._addMessage}
 											.languageTag=${languageTag}
 											.lintReports=${messageLintReports}
@@ -163,6 +172,7 @@ export default class InlangMessageBundle extends LitElement {
 									.inputs=${this._fakeInputs()}
 									.triggerSave=${this._triggerSave}
 									.addMessage=${this._addMessage}
+									.triggerMessageBundleRefresh=${this._triggerRefresh}
 									.languageTag=${languageTag}
 									.lintReports=${messageLintReports}
 							  ></inlang-variant>`}
