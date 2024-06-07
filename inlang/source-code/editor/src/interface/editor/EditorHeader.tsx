@@ -1,8 +1,11 @@
-import { For, Show } from "solid-js"
+import { For, Show, createEffect, createSignal } from "solid-js"
 import UserDropdown from "./UserDropdown.jsx"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 import { Button } from "../components/Button.jsx"
 import { getFinkResourcesLinks } from "./Footer.jsx"
+import type SlDropdown from "@shoelace-style/shoelace/dist/components/dropdown/dropdown.js"
+
+export const [helpMenuIsOpen, setHelpMenuIsOpen] = createSignal(false)
 
 function EditorHeader() {
 	const [localStorage] = useLocalStorage()
@@ -10,6 +13,15 @@ function EditorHeader() {
 		if (!localStorage) return undefined
 		return localStorage.user
 	}
+
+	let helpMenu: SlDropdown | undefined
+	createEffect(() => {
+		if (helpMenuIsOpen()) {
+			helpMenu?.show()
+		} else {
+			helpMenu?.hide()
+		}
+	})
 
 	return (
 		<>
@@ -65,7 +77,12 @@ function EditorHeader() {
 									>
 										Find Lint Rules
 									</Button>
-									<sl-dropdown prop:placement="bottom-end" class="peer">
+									<sl-dropdown
+										ref={helpMenu}
+										on:sl-after-hide={() => setHelpMenuIsOpen(false)}
+										prop:placement="bottom-end"
+										class="peer"
+									>
 										<button
 											slot="trigger"
 											class="flex pointer-events-auto justify-center items-center h-10 relative gap-2 rounded-md flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer transition-all duration-200 text-surface-700 hover:text-primary"

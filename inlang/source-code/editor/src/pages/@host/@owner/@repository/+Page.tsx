@@ -18,6 +18,7 @@ import { currentPageContext } from "#src/renderer/state.js"
 import { replaceMetaInfo } from "./helper/ReplaceMetaInfo.js"
 import { publicEnv } from "@inlang/env-variables"
 import { posthog as telemetryBrowser } from "posthog-js"
+import { setHelpMenuIsOpen } from "#src/interface/editor/EditorHeader.jsx"
 
 const browserAuth = getAuthClient({
 	gitHubProxyBaseUrl: publicEnv.PUBLIC_GIT_PROXY_BASE_URL,
@@ -99,6 +100,8 @@ function TheActualPage() {
 		})
 	)
 
+	const userIsLoggedIn = () => localStorage?.user?.isLoggedIn ?? false
+
 	return (
 		<>
 			<Switch
@@ -109,7 +112,7 @@ function TheActualPage() {
 				}
 			>
 				<Match when={lixErrors().some((err: any) => err.message.includes("401"))}>
-					<RepositoryDoesNotExistOrNotAuthorizedCard code={401} user={localStorage?.user} />
+					<RepositoryDoesNotExistOrNotAuthorizedCard code={401} userIsLoggedIn={userIsLoggedIn()} />
 				</Match>
 
 				<Match
@@ -121,7 +124,7 @@ function TheActualPage() {
 							err.response?.status === 403
 					)}
 				>
-					<RepositoryDoesNotExistOrNotAuthorizedCard code={404} user={localStorage?.user} />
+					<RepositoryDoesNotExistOrNotAuthorizedCard code={404} userIsLoggedIn={userIsLoggedIn()} />
 				</Match>
 
 				<Match when={lixErrors().length > 0}>
@@ -311,18 +314,32 @@ function NoInlangProjectFoundCard() {
 	)
 }
 
-function RepositoryDoesNotExistOrNotAuthorizedCard(args: { code: number; user: any }) {
+function RepositoryDoesNotExistOrNotAuthorizedCard(args: {
+	code: number
+	userIsLoggedIn: boolean
+}) {
 	return (
 		<div class="min-h-[calc(100vh_-_307px)] flex grow items-center justify-center">
 			<div class="bg-background border border-outline p-12 rounded-xl flex flex-col max-w-lg animate-fadeInBottom">
 				<h2 class="font-semibold pt-12">Cannot access the repository</h2>
 
 				<ul class="pt-8 list-disc pl-4">
-					{args.user?.isloggedIn ? (
-						<li class="pt-2">
-							If this is a <span class="font-bold">private repository</span> you need need to add it
-							to the github app permissions by clicking the button below
-						</li>
+					{args.userIsLoggedIn ? (
+						<>
+							<li class="pt-2">
+								If this is a <span class="font-bold">private repository</span> you need need to add
+								it to the GitHub app permissions by clicking the button below
+							</li>
+							<li class="pt-2">
+								If you are <span class="font-bold">not a owner</span> of the repository, ask the
+								owner to:
+								<ul class="list-disc pl-4">
+									<li>install the inlang GitHub app</li>
+									<li>add the repository to the app permissions</li>
+									<li>add you as a collaborator</li>
+								</ul>
+							</li>
+						</>
 					) : (
 						<li class="pt-2">
 							If this is a <span class="font-bold">private repository</span> you need to sign in at
@@ -335,11 +352,7 @@ function RepositoryDoesNotExistOrNotAuthorizedCard(args: { code: number; user: a
 					</li>
 				</ul>
 
-				<Link
-					class="self-end pt-5"
-					href="https://github.com/opral/monorepo/discussions/categories/help-questions-answers"
-					target="_blank"
-				>
+				<Link class="self-end pt-5" onClick={() => setHelpMenuIsOpen(true)}>
 					<sl-button prop:variant="text">
 						I need help
 						{/* @ts-ignore */}
@@ -347,7 +360,7 @@ function RepositoryDoesNotExistOrNotAuthorizedCard(args: { code: number; user: a
 					</sl-button>
 				</Link>
 
-				{args.user?.isloggedIn ? (
+				{args.userIsLoggedIn ? (
 					<sl-button
 						class="on-inverted self-end pt-5"
 						onClick={async () => {
@@ -355,7 +368,7 @@ function RepositoryDoesNotExistOrNotAuthorizedCard(args: { code: number; user: a
 							location.reload()
 						}}
 					>
-						Add github app permissions{" "}
+						Add GitHub app permissions{" "}
 						<div slot="suffix">
 							<svg viewBox="0 0 32 32" width="1.2em" height="1.2em">
 								<path
