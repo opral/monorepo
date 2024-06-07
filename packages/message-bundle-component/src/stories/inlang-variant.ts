@@ -31,7 +31,7 @@ export default class InlangVariant extends LitElement {
 			.match {
 				padding: 12px;
 				height: 44px;
-				width: 80px;
+				width: 120px;
 				background-color: var(--sl-color-neutral-100);
 				border-right: 1px solid var(--sl-color-neutral-300);
 			}
@@ -105,6 +105,9 @@ export default class InlangVariant extends LitElement {
 	addMessage: (newMessage: Message) => void = () => {}
 
 	@property()
+	triggerMessageBundleRefresh: () => void = () => {}
+
+	@property()
 	triggerSave: () => void = () => {}
 
 	@state()
@@ -150,7 +153,6 @@ export default class InlangVariant extends LitElement {
 	}
 
 	override render() {
-		//console.log(this.message)
 		return html`<div class="variant">
 			${this.variant && this._matches
 				? this._matches.map((match) => html`<div class="match">${match}</div>`)
@@ -177,7 +179,11 @@ export default class InlangVariant extends LitElement {
 			<div class="actions">
 				<sl-button size="small" @click=${() => this._save()}>Save</sl-button>
 				${this.message?.selectors && this.message.selectors.length === 0
-					? html`<inlang-selector-configurator .inputs=${this.inputs} .message=${this.message}>
+					? html`<inlang-selector-configurator
+							.inputs=${this.inputs}
+							.message=${this.message}
+							.triggerMessageBundleRefresh=${this.triggerMessageBundleRefresh}
+					  >
 							<sl-tooltip content="Add Selector to message"
 								><div class="add-selector">
 									<svg

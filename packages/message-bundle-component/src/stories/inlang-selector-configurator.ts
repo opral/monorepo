@@ -1,5 +1,5 @@
 import { LitElement, css, html } from "lit"
-import { customElement, property } from "lit/decorators.js"
+import { customElement, property, state } from "lit/decorators.js"
 
 import SlDropdown from "@shoelace-style/shoelace/dist/components/dropdown/dropdown.component.js"
 import SlButton from "@shoelace-style/shoelace/dist/components/button/button.component.js"
@@ -7,6 +7,8 @@ import SlSelect from "@shoelace-style/shoelace/dist/components/select/select.com
 import SlOption from "@shoelace-style/shoelace/dist/components/option/option.component.js"
 import SlTag from "@shoelace-style/shoelace/dist/components/tag/tag.component.js"
 import type { Message } from "@inlang/sdk/v2"
+import { addSelector } from "../helper/crud/selector/add.js"
+import upsertVariant from "../helper/crud/variant/upsert.js"
 
 // in case an app defines it's own set of shoelace components, prevent double registering
 if (!customElements.get("sl-dropdown")) customElements.define("sl-dropdown", SlDropdown)
@@ -58,6 +60,12 @@ export default class InlangSelectorConfigurator extends LitElement {
 				gap: 4px;
 				flex-wrap: wrap;
 			}
+			.actions {
+				width: 100%;
+				display: flex;
+				flex-direction: column;
+				gap: 4px;
+			}
 		`,
 	]
 
@@ -67,10 +75,73 @@ export default class InlangSelectorConfigurator extends LitElement {
 	@property()
 	message: Message | undefined
 
-	private _getPluralCategories = () => {
+	@property()
+	triggerMessageBundleRefresh: () => void = () => {}
+
+	@state()
+	private _input: string | undefined
+
+	private _getPluralCategories = (): string[] | undefined => {
 		return this.message?.locale
 			? new Intl.PluralRules(this.message?.locale).resolvedOptions().pluralCategories
 			: undefined
+	}
+
+	private _handleAddSelector = (noVariants: boolean) => {
+		if (this.message && this._input) {
+			// get variant matchers arrays
+			const _variants = structuredClone(this.message.variants)
+			const _variantMatcherArrays = _variants.map((variant) => variant.match)
+
+			// add selector
+			addSelector({
+				message: this.message,
+				selector: {
+					type: "expression",
+					arg: {
+						type: "variable",
+						name: this._input,
+					},
+					annotation: {
+						type: "function",
+						name: "plural",
+						options: [],
+					},
+				},
+			})
+
+			// add plural options if present
+			// TODO: for now always present
+			if (!noVariants) {
+				const _categories = this._getPluralCategories()
+				if (_categories) {
+					for (const variantMatcherArray of _variantMatcherArrays) {
+						for (const category of _categories) {
+							upsertVariant({
+								message: this.message,
+								variant: {
+									// combine the matches that are already present with the new category -> like a matrix
+									match: [...variantMatcherArray, category],
+									pattern: [
+										{
+											type: "text",
+											value: "",
+										},
+									],
+								},
+							})
+						}
+					}
+				}
+			}
+
+			this.triggerMessageBundleRefresh()
+		}
+	}
+
+	override async firstUpdated() {
+		await this.updateComplete
+		this._input = this.inputs && this.inputs[0]
 	}
 
 	override render() {
@@ -80,7 +151,19 @@ export default class InlangSelectorConfigurator extends LitElement {
 					<slot></slot>
 				</div>
 				<div class="dropdown-container">
-					<sl-select label="Input" size="small" value=${this.inputs && this.inputs[0]}>
+					<sl-select
+						@sl-change=${(e: CustomEvent) => {
+							const inputElement = e.target as HTMLInputElement
+							this._input = inputElement.value
+						}}
+						@sl-show=${(e: CustomEvent) => {
+							const inputElement = e.target as HTMLInputElement
+							this._input = inputElement.value
+						}}
+						label="Input"
+						size="small"
+						value=${this.inputs && this.inputs[0]}
+					>
 						${this.inputs &&
 						this.inputs.map((inputs) => {
 							return html`<sl-option value=${inputs}>${inputs}</sl-option>`
@@ -97,7 +180,23 @@ export default class InlangSelectorConfigurator extends LitElement {
 							})}
 						</div>
 					</div>
-					<sl-button size="small" variant="primary">Add selector</sl-button>
+					<div class="actions">
+						<sl-button
+							@click=${() => {
+								this._handleAddSelector(true)
+							}}
+							size="small"
+							variant="primary"
+							>Add selector</sl-button
+						>
+						<sl-button
+							@click=${() => {
+								this._handleAddSelector(false)
+							}}
+							size="small"
+							>Add selector with default variants</sl-button
+						>
+					</div>
 				</div>
 			</sl-dropdown>
 		`
