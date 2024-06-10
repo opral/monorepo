@@ -346,6 +346,23 @@ describe("Paraglide Message Parser", () => {
 		])
 	})
 
+	it("should match a message in human readble id", () => {
+		const sourceCode = `
+		import * as m from "../../i18n-generated/messages";
+		m.penguin_purple_shoe_window();
+		`
+		const result = parse(sourceCode)
+		expect(result).toEqual([
+			{
+				messageId: "penguin_purple_shoe_window",
+				position: {
+					start: { line: 3, character: 5 },
+					end: { line: 3, character: 18 },
+				},
+			},
+		])
+	})
+
 	it("should match if m is defined before the reference to paraglide", () => {
 		const sourceCode = `
 		m.helloWorld();
