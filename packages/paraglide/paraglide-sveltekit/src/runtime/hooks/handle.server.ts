@@ -1,5 +1,4 @@
 import { parseRoute } from "../utils/route.js"
-import { localeAsyncLocalStorage } from "../context.server.js"
 import { negotiateLanguagePreferences } from "@inlang/paraglide-js/internal/adapter-utils"
 import { base } from "$app/paths"
 import { dev } from "$app/environment"
@@ -8,6 +7,7 @@ import type { Handle } from "@sveltejs/kit"
 import type { I18nConfig } from "../adapter.server.js"
 import type { RoutingStrategy } from "../strategy.js"
 import type { ParaglideLocals } from "../locals.js"
+import { AsyncLocalStorage } from "node:async_hooks"
 
 /**
  * The default lang attribute string that's in SvelteKit's `src/app.html` file.
@@ -57,14 +57,10 @@ export const createHandle = <T extends string>(
 	i18n: I18nConfig<T>,
 	options: HandleOptions
 ): Handle => {
+	const localeAsyncLocalStorage = new AsyncLocalStorage<T>()
+
 	i18n.runtime.setLanguageTag(() => {
-		try {
-			const value = localeAsyncLocalStorage.getStore()
-			return i18n.runtime.isAvailableLanguageTag(value) ? value : i18n.defaultLanguageTag
-		} catch (e) {
-			// in case localeAsyncLocalStorage is not available for some reason
-			return i18n.defaultLanguageTag
-		}
+		return localeAsyncLocalStorage.getStore() ?? i18n.defaultLanguageTag
 	})
 
 	const langPlaceholder = options.langPlaceholder ?? "%paraglide.lang%"
