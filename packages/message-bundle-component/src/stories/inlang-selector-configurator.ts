@@ -6,7 +6,7 @@ import SlButton from "@shoelace-style/shoelace/dist/components/button/button.com
 import SlSelect from "@shoelace-style/shoelace/dist/components/select/select.component.js"
 import SlOption from "@shoelace-style/shoelace/dist/components/option/option.component.js"
 import SlTag from "@shoelace-style/shoelace/dist/components/tag/tag.component.js"
-import type { Message } from "@inlang/sdk/v2"
+import { createMessage, type LanguageTag, type Message } from "@inlang/sdk/v2"
 import { addSelector } from "../helper/crud/selector/add.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
 
@@ -73,69 +73,126 @@ export default class InlangSelectorConfigurator extends LitElement {
 	inputs: string[] | undefined
 
 	@property()
-	message: Message | undefined
+	message?: Message | undefined
+
+	@property()
+	languageTag: LanguageTag | undefined
 
 	@property()
 	triggerMessageBundleRefresh: () => void = () => {}
+
+	@property()
+	addMessage: (newMessage: Message) => void = () => {}
 
 	@state()
 	private _input: string | undefined
 
 	private _getPluralCategories = (): string[] | undefined => {
-		return this.message?.locale
-			? new Intl.PluralRules(this.message?.locale).resolvedOptions().pluralCategories
+		return this.languageTag
+			? new Intl.PluralRules(this.languageTag).resolvedOptions().pluralCategories
 			: undefined
 	}
 
-	private _handleAddSelector = (noVariants: boolean) => {
-		if (this.message && this._input) {
-			// get variant matchers arrays
-			const _variants = structuredClone(this.message.variants)
-			const _variantMatcherArrays = _variants.map((variant) => variant.match)
+	private _handleAddSelector = (addVariants: boolean) => {
+		if (this._input) {
+			if (!this.message && this.languageTag) {
+				// create selector in not present message
+				const newMessage = createMessage({ locale: this.languageTag, text: "" })
 
-			// add selector
-			addSelector({
-				message: this.message,
-				selector: {
-					type: "expression",
-					arg: {
-						type: "variable",
-						name: this._input,
+				// add selector
+				addSelector({
+					message: newMessage,
+					selector: {
+						type: "expression",
+						arg: {
+							type: "variable",
+							name: this._input,
+						},
+						annotation: {
+							type: "function",
+							name: "plural",
+							options: [],
+						},
 					},
-					annotation: {
-						type: "function",
-						name: "plural",
-						options: [],
-					},
-				},
-			})
+				})
 
-			// add plural options if present
-			// TODO: for now always present
-			if (!noVariants) {
-				const _categories = this._getPluralCategories()
-				if (_categories) {
-					for (const variantMatcherArray of _variantMatcherArrays) {
-						for (const category of _categories) {
-							upsertVariant({
-								message: this.message,
-								variant: {
-									// combine the matches that are already present with the new category -> like a matrix
-									match: [...variantMatcherArray, category],
-									pattern: [
-										{
-											type: "text",
-											value: "",
-										},
-									],
-								},
-							})
-						}
-					}
+				if (addVariants) {
+					this._addVariants({ message: newMessage, variantMatcherArrays: [] })
+				}
+
+				this.addMessage(newMessage)
+			} else if (this.message) {
+				// get variant matchers arrays
+				const _variants = structuredClone(this.message ? this.message.variants : [])
+				const _variantMatcherArrays = _variants.map((variant) => variant.match)
+
+				// add selector
+				addSelector({
+					message: this.message,
+					selector: {
+						type: "expression",
+						arg: {
+							type: "variable",
+							name: this._input,
+						},
+						annotation: {
+							type: "function",
+							name: "plural",
+							options: [],
+						},
+					},
+				})
+
+				// add plural options if present
+				// TODO: for now always present
+				if (addVariants) {
+					this._addVariants({ message: this.message, variantMatcherArrays: _variantMatcherArrays })
 				}
 			}
 
 			this.triggerMessageBundleRefresh()
+		}
+	}
+
+	private _addVariants = (props: { message: Message; variantMatcherArrays: string[][] }) => {
+		const _categories = this._getPluralCategories()
+
+		if (_categories) {
+			if (props.variantMatcherArrays && props.variantMatcherArrays.length > 0) {
+				for (const variantMatcherArray of props.variantMatcherArrays) {
+					for (const category of _categories) {
+						upsertVariant({
+							message: props.message,
+							variant: {
+								// combine the matches that are already present with the new category -> like a matrix
+								match: [...variantMatcherArray, category],
+								pattern: [
+									{
+										type: "text",
+										value: "",
+									},
+								],
+							},
+						})
+					}
+				}
+			} else {
+				for (const category of _categories) {
+					upsertVariant({
+						message: props.message,
+						variant: {
+							// combine the matches that are already present with the new category -> like a matrix
+							match: [category],
+							pattern: [
+								{
+									type: "text",
+									value: "",
+								},
+							],
+						},
+					})
+				}
+			}
 		}
 	}
 
@@ -183,7 +240,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 					<div class="actions">
 						<sl-button
 							@click=${() => {
-								this._handleAddSelector(true)
+								this._handleAddSelector(false)
 							}}
 							size="small"
 							variant="primary"
@@ -191,7 +248,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 						>
 						<sl-button
 							@click=${() => {
-								this._handleAddSelector(false)
+								this._handleAddSelector(true)
 							}}
 							size="small"
 							>Add selector with default variants</sl-button
