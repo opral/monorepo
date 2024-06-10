@@ -6,10 +6,15 @@ on:
 
 jobs:
   changeset:
-    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'changeset-release/main') == true
+    # if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'changeset-release/main') == true
     runs-on: ubuntu-latest
 
     steps:
+      - name: log 
+        run: |
+          echo {{ github.event.pull_request.merged }}
+          echo {{ github.event.pull_request.labels.*.name }}
+
       - name: Check for changes in inlang/source-code/editor/package.json
         id: check_changes
         run: |
