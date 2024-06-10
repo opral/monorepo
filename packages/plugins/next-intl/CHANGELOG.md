@@ -1,5 +1,12 @@
 # @inlang/plugin-next-intl
 
+## 1.3.43
+
+### Patch Changes
+
+- 04e804b: add human readble id tests to plugins
+- aa91877: add more extract options
+
 ## 1.3.42
 
 ### Patch Changes

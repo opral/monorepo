@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.44.14
+
+### Patch Changes
+
+- f472213: remove migrateSettingsFromInlangToSherlock because its no longer needed
+
 ## 1.44.13
 
 ### Patch Changes
