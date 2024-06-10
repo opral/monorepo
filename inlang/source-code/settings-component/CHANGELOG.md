@@ -1,5 +1,12 @@
 # @inlang/settings-component
 
+## 1.0.25
+
+### Patch Changes
+
+- Updated dependencies [da7c207]
+  - @inlang/sdk@0.35.8
+
 ## 1.0.24
 
 ### Patch Changes
