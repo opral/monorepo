@@ -15,6 +15,8 @@ import { AsyncLocalStorage } from "node:async_hooks"
  */
 const SVELTEKIT_DEFAULT_LANG_ATTRIBUTE = 'lang="en"'
 
+const localeAsyncLocalStorage = new AsyncLocalStorage<string>()
+
 export type HandleOptions = {
 	/**
 	 * Which placeholder to find and replace with the language tag.
@@ -57,10 +59,9 @@ export const createHandle = <T extends string>(
 	i18n: I18nConfig<T>,
 	options: HandleOptions
 ): Handle => {
-	const localeAsyncLocalStorage = new AsyncLocalStorage<T>()
-
 	i18n.runtime.setLanguageTag(() => {
-		return localeAsyncLocalStorage.getStore() ?? i18n.defaultLanguageTag
+		const val = localeAsyncLocalStorage.getStore()
+		return i18n.runtime.isAvailableLanguageTag(val) ? val : i18n.defaultLanguageTag
 	})
 
 	const langPlaceholder = options.langPlaceholder ?? "%paraglide.lang%"
@@ -81,7 +82,7 @@ export const createHandle = <T extends string>(
 
 		const lang = langFromUrl ?? cookieLang ?? negotiatedLanguage ?? i18n.defaultLanguageTag
 
-		if (lang !== langFromUrl) {
+		if (lang !== langFromUrl && !i18n.exclude(localisedPath)) {
 			// redirect to the correct language
 			const localisedPathname = strategy.getLocalisedPath(localisedPath, lang)
 			return new Response(undefined, {
