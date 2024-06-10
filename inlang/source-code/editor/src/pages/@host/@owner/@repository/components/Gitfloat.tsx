@@ -77,13 +77,14 @@ export const Gitfloat = () => {
 		} else if (localStorage?.user?.isLoggedIn === false) {
 			return "login"
 		} else if (
-			typeof repoInfo === "undefined" ||
-			userIsCollaborator.loading ||
-			!projectList() ||
-			isForking()
+			(typeof repoInfo === "undefined" ||
+				userIsCollaborator.loading ||
+				!projectList() ||
+				isForking()) &&
+			lixErrors().length === 0 // stop endless loading when errors are present
 		) {
 			return "loading"
-		} else if (userIsCollaborator() === false) {
+		} else if (userIsCollaborator() === false && repoInfo?.allowForking === true) {
 			return "fork"
 		} else if (
 			hasPushedChanges() &&
@@ -106,6 +107,7 @@ export const Gitfloat = () => {
 	let signInDialog: SlDialog | undefined
 	let forkPermissionDialog: SlDialog | undefined
 	let pushPermissionDialog: SlDialog | undefined
+	const [requestPermission, setRequestPermission] = createSignal(false)
 	let forkDialog: SlDialog | undefined
 	const [forkModalOpen, setForkModalOpen] = createSignal(false)
 
@@ -120,6 +122,19 @@ export const Gitfloat = () => {
 			forkDialog?.show()
 		} else {
 			forkDialog?.hide()
+		}
+	})
+
+	createEffect(() => {
+		const repoInfo = githubRepositoryInformation()
+		// Show push permission dialog if user is collaborator can't push or update permissions
+		if (
+			userIsCollaborator() === true &&
+			repoInfo?.isInstalled === false &&
+			repoInfo?.permissions?.admin === false
+		) {
+			setRequestPermission(true)
+			pushPermissionDialog?.show()
 		}
 	})
 
@@ -530,6 +545,7 @@ export const Gitfloat = () => {
 					browserAuth.addPermissions()
 					pushPermissionDialog?.hide()
 				}}
+				requestPermission={requestPermission()}
 			/>
 			<sl-dialog
 				ref={forkDialog}
