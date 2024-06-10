@@ -9,6 +9,7 @@ const config = {
 		prerender: {
 			//Needed for correctly prerendering <link rel="alternate" hreflang="x" href="y">
 			origin: "https://example.com",
+			entries: ["*", "/de"],
 		},
 	},
 
