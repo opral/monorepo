@@ -39,7 +39,7 @@
 	 */
 	$: autodetectedLanguage = i18n.getLanguageFromUrl($page.url)
 	$: lang = languageTag ?? autodetectedLanguage
-	$: i18n.config.runtime.setLanguageTag(lang)
+	$: if (browser) i18n.config.runtime.setLanguageTag(lang)
 	$: if (browser) document.documentElement.lang = lang
 	$: if (browser) document.documentElement.dir = i18n.config.textDirection[lang] ?? "ltr"
 
