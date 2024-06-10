@@ -1,5 +1,5 @@
 {
-  "commit-hash": "a05932e75008cd71b1d2ab9a5819ee655f6b8009",
-  "@inlang/sdk": "0.35.6",
+  "commit-hash": "0f274fa7139b32e2cb233a96f33d5f8bf123158d",
+  "@inlang/sdk": "0.35.8",
   "@lix-js/client": "2.2.0"
 }
