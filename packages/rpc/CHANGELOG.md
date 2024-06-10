@@ -1,5 +1,12 @@
 # @inlang/rpc
 
+## 0.3.30
+
+### Patch Changes
+
+- Updated dependencies [da7c207]
+  - @inlang/sdk@0.35.8
+
 ## 0.3.29
 
 ### Patch Changes
