@@ -223,6 +223,8 @@
 		"@inlang/rpc": "workspace:*",
 		"@inlang/sdk": "workspace:*",
 		"@inlang/settings-component": "workspace:*",
+		"@inlang/cross-sell-ninja": "workspace:*",
+		"@inlang/cross-sell-sherlock": "workspace:*",
 		"@inlang/telemetry": "workspace:*",
 		"@lix-js/client": "workspace:*",
 		"@lix-js/fs": "workspace:*",
