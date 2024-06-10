@@ -126,15 +126,17 @@ setLanguageTag(() => document.documentElement.lang /* en */)
 m.hello() // Hello world!
 ```
 
-The [language tag](https://www.inlang.com/m/8y8sxj09/library-inlang-languageTag) is global, so you need to be careful with it on the server to make sure multiple requests don't interfere with each other. Always use a getter-function that returns the current language tag _for the current request_.
+`setLanguageTag` needs to be called both on the server and the client since they run in separate processes.
 
-You will need to call `setLanguageTag` on both the server and the client since they run in separate processes.
+The [language tag](https://www.inlang.com/m/8y8sxj09/library-inlang-languageTag) is a global function. This means that on the server it is _shared_ accross requests. In order to avoid the langauge from one request being overwritten by another request you need to use _getter function_ that returns the language for the _current request_. A good way to implement this is using [`AsyncLocalStorage`](https://nodejs.org/api/async_context.html).
+
+If you are using a Framework library like `Paraglide-Next` or `Paraglide-SvelteKit` you do not need to call `setLanguageTag` manually.
 
 ### Reacting to language changes
 
 Messages aren't reactive, so you will need to trigger a re-render when the language changes. You can register a callback using `onSetLanguageTag()`. It is called whenever the [language tag](https://www.inlang.com/m/8y8sxj09/library-inlang-languageTag) changes.
 
-If you are using a [framework-specific library](#use-it-with-your-favorite-framework) this is done for you.
+If you are using a framework library this happens automatically.
 
 ```js
 import { setLanguageTag, onSetLanguageTag } from "./paraglide/runtime.js"
