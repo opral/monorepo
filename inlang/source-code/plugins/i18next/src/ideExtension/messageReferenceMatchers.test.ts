@@ -55,6 +55,19 @@ it(`should detect single quotes t('id')`, async () => {
 	expect(matches[0]?.position.end.character).toBe(26)
 })
 
+it(`should detect human readable id t("penguin_purple_shoe_window")`, async () => {
+	const sourceCode = `
+	const x = t("penguin_purple_shoe_window")
+	`
+	const settings: PluginSettings = {
+		pathPattern: "./{language}.json",
+	}
+	const matches = parse(sourceCode, settings)
+	expect(matches[0]?.messageId).toBe("penguin_purple_shoe_window")
+	expect(matches[0]?.position.start.character).toBe(14)
+	expect(matches[0]?.position.end.character).toBe(42)
+})
+
 it(`should detect JSX <p>{t('id')}</p>`, async () => {
 	// using the t function in markup
 	const sourceCode = `

@@ -1,5 +1,17 @@
 # @inlang/paraglide-sveltekit
 
+## 0.10.2
+
+### Patch Changes
+
+- b5d4a4c: fix regression with `exclude` option
+
+## 0.10.1
+
+### Patch Changes
+
+- ecef103: fix how `AsyncLocalStorage` is handled accross requests
+
 ## 0.10.0
 
 ### Minor Changes

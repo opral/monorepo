@@ -1,5 +1,11 @@
 # @inlang/plugin-i18next
 
+## 4.14.8
+
+### Patch Changes
+
+- 04e804b: add human readble id tests to plugins
+
 ## 4.14.7
 
 ### Patch Changes
