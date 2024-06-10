@@ -1,5 +1,25 @@
 # @inlang/plugin-t-function-matcher
 
+## 0.6.30
+
+### Patch Changes
+
+- Updated dependencies [da7c207]
+  - @inlang/sdk@0.35.8
+
+## 0.6.29
+
+### Patch Changes
+
+- f711787: fix t-function matcher extract message should offer no-brace version
+
+## 0.6.28
+
+### Patch Changes
+
+- Updated dependencies [2a5645c]
+  - @inlang/sdk@0.35.7
+
 ## 0.6.27
 
 ### Patch Changes

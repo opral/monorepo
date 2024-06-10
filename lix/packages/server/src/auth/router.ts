@@ -63,6 +63,8 @@ router.get("/github-auth-callback", async (request, response, next) => {
 			encryptedAccessToken,
 		}
 
+		// TODO: investigate auto handling with PUT /user/installations/{installation_id}/repositories/{repository_id}
+
 		const [{ installations }, user] = await Promise.all([
 			fetch(`https://api.github.com/user/installations`, {
 				headers: {
@@ -80,7 +82,9 @@ router.get("/github-auth-callback", async (request, response, next) => {
 			}).then((response) => response.json()),
 		])
 
-		// we currently do not support org installations, we only look at user installations for now in case someone accidentally installs the app as org,
+		// console.log(JSON.stringify(user, null, 2))
+		// console.log(JSON.stringify(installations, null, 2))
+
 		// we also see installations of everyone in our organization who isntalled the same app as user, so we need to filter out only our own!
 		if (
 			installations.filter(

@@ -8,6 +8,8 @@ import { addParaglideNextPluginToNextConfig } from "../addPluginToNextConfig"
 import { maybeMigrateI18nRouting } from "./maybeMigrateI18nRouting"
 import { Logger } from "@inlang/paraglide-js/internal"
 import { Outdir } from "../getOutDir"
+import { promptRoutingStrategy } from "./promptRoutingStrategy"
+import { InlangProject } from "@inlang/sdk"
 
 export const appRouterSetup: CliStep<
 	{
@@ -15,15 +17,17 @@ export const appRouterSetup: CliStep<
 		logger: Logger
 		outdir: Outdir
 		projectPath: string
+		project: InlangProject
 		nextProject: NextJSProject
 	},
 	unknown
 > = async (ctx) => {
 	ctx.logger.info("Setting up Paraglide-Next for the App Router")
-	await createI18nFile(ctx)
-	await createMiddlewareFile(ctx)
-	await addLanguageProvider(ctx)
-	await addParaglideNextPluginToNextConfig(ctx)
-	await maybeMigrateI18nRouting(ctx)
-	return ctx
+	const ctx1 = await promptRoutingStrategy(ctx)
+	await createI18nFile(ctx1)
+	await createMiddlewareFile(ctx1)
+	await addLanguageProvider(ctx1)
+	await addParaglideNextPluginToNextConfig(ctx1)
+	await maybeMigrateI18nRouting(ctx1)
+	return ctx1
 }

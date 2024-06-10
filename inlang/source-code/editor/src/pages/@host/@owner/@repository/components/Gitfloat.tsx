@@ -23,6 +23,7 @@ import { WarningIcon } from "./Notification/NotificationHint.jsx"
 import IconArrowDownward from "~icons/material-symbols/arrow-downward-alt"
 import { debounce } from "throttle-debounce"
 import { publicEnv } from "@inlang/env-variables"
+import { triggerAddNinja } from "../+Page.jsx"
 
 const browserAuth = getAuthClient({
 	gitHubProxyBaseUrl: publicEnv.PUBLIC_GIT_PROXY_BASE_URL,
@@ -42,6 +43,7 @@ export const Gitfloat = () => {
 		githubRepositoryInformation,
 		currentBranch,
 		pushChanges,
+		addNinja,
 		mergeUpstream,
 		localChanges,
 		setLocalChanges,
@@ -160,7 +162,7 @@ export const Gitfloat = () => {
 		}
 	}
 
-	async function triggerPushChanges() {
+	async function triggerPushChanges(message: string) {
 		if (!localStorage?.user?.isLoggedIn) {
 			return showToast({
 				title: "Failed to push changes",
@@ -181,6 +183,7 @@ export const Gitfloat = () => {
 
 		const pushResult = await pushChanges({
 			user: localStorage.user,
+			commitMessage: message,
 			setFsChange,
 			setLastPullTime,
 		})
@@ -194,7 +197,7 @@ export const Gitfloat = () => {
 		})
 
 		// @ts-expect-error – unknown type error for cause
-		if (pushResult.error?.cause?.data.statusCode === 403) {
+		if (pushResult.error?.cause?.data?.statusCode === 403) {
 			pushPermissionDialog.show()
 			return
 		}
@@ -208,12 +211,27 @@ export const Gitfloat = () => {
 		} else {
 			setLocalChanges(0)
 			setHasPushedChanges(true)
+			if (message.includes("Ninja")) {
+				telemetryBrowser.capture("EDITOR user added Ninja")
+				return showToast({
+					title: "Ninja GitHub action has been added",
+					variant: "success",
+				})
+			}
 			return showToast({
 				title: "Changes have been pushed",
 				variant: "success",
 			})
 		}
 	}
+
+	createEffect(
+		on(triggerAddNinja, () => {
+			if (triggerAddNinja() === true) {
+				addNinja(triggerPushChanges)
+			}
+		})
+	)
 
 	const pullrequestUrl = () => {
 		const repoInfo = githubRepositoryInformation()
@@ -276,7 +294,7 @@ export const Gitfloat = () => {
 			text: "changes",
 			buttontext: "Push",
 			icon: IconPush,
-			onClick: triggerPushChanges,
+			onClick: () => triggerPushChanges("chore: update translations with Fink 🐦"),
 		},
 		pullrequest: {
 			text: "",
@@ -298,13 +316,13 @@ export const Gitfloat = () => {
 
 	// prevent user from making to changes when not logged in
 	createEffect(() => {
-		if (gitState() === "login" && localChanges() > 2) setSignInModalOpen(true)
+		if (gitState() === "login" && localChanges() >= 1) setSignInModalOpen(true)
 	})
 
 	const debouncedForkModalState = debounce(2000, () => {
 		if (gitState() === "hasChanges") {
 			setForkModalOpen(false)
-		} else if (gitState() === "fork" && localChanges() > 2) {
+		} else if (gitState() === "fork" && localChanges() >= 1) {
 			setForkModalOpen(true)
 		}
 	})

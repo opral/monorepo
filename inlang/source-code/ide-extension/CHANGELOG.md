@@ -1,5 +1,31 @@
 # inlang-vs-code-extension
 
+## 1.44.13
+
+### Patch Changes
+
+- Updated dependencies [da7c207]
+  - @inlang/sdk@0.35.8
+  - @inlang/rpc@0.3.30
+  - @inlang/settings-component@1.0.25
+  - @inlang/telemetry@0.3.45
+
+## 1.44.12
+
+### Patch Changes
+
+- e318e7b: fix turning off inline previews also turns off hover for messages
+
+## 1.44.11
+
+### Patch Changes
+
+- Updated dependencies [2a5645c]
+  - @inlang/sdk@0.35.7
+  - @inlang/rpc@0.3.29
+  - @inlang/settings-component@1.0.24
+  - @inlang/telemetry@0.3.44
+
 ## 1.44.10
 
 ### Patch Changes
