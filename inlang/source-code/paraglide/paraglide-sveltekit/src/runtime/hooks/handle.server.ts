@@ -4,9 +4,10 @@ import { base } from "$app/paths"
 import { dev } from "$app/environment"
 import { LANG_COOKIE_NAME } from "../../constants.js"
 import type { Handle } from "@sveltejs/kit"
-import type { I18nConfig } from "../adapter.js"
+import type { I18nConfig } from "../adapter.server.js"
 import type { RoutingStrategy } from "../strategy.js"
 import type { ParaglideLocals } from "../locals.js"
+import { AsyncLocalStorage } from "node:async_hooks"
 
 /**
  * The default lang attribute string that's in SvelteKit's `src/app.html` file.
@@ -56,6 +57,12 @@ export const createHandle = <T extends string>(
 	i18n: I18nConfig<T>,
 	options: HandleOptions
 ): Handle => {
+	const localeAsyncLocalStorage = new AsyncLocalStorage<T>()
+
+	i18n.runtime.setLanguageTag(() => {
+		return localeAsyncLocalStorage.getStore() ?? i18n.defaultLanguageTag
+	})
+
 	const langPlaceholder = options.langPlaceholder ?? "%paraglide.lang%"
 	const dirPlaceholder = options.textDirectionPlaceholder ?? "%paraglide.textDirection%"
 
@@ -105,31 +112,33 @@ export const createHandle = <T extends string>(
 		// The user needs to have the ParaglideLocals type in their app.d.ts file
 		event.locals.paraglide = paraglideLocals
 
-		return resolve(event, {
-			transformPageChunk({ html, done }) {
-				if (!done) return html
+		return localeAsyncLocalStorage.run(paraglideLocals.lang, async () => {
+			return await resolve(event, {
+				transformPageChunk({ html, done }) {
+					if (!done) return html
 
-				// in dev mode, check if the lang attribute hasn't been replaced
-				if (
-					dev &&
-					!html.includes(langPlaceholder) &&
-					html.includes(SVELTEKIT_DEFAULT_LANG_ATTRIBUTE)
-				) {
-					console.warn(
-						[
-							"It seems like you haven't replaced the `lang` attribute in your `src/app.html` file.",
-							"Please replace the `lang` attribute with the correct placeholder:",
-							"",
-							` - <html ${SVELTEKIT_DEFAULT_LANG_ATTRIBUTE}>`,
-							` + <html lang="${langPlaceholder}" dir="${dirPlaceholder}">`,
-							"",
-							"This message will not be shown in production.",
-						].join("\n")
-					)
-				}
+					// in dev mode, check if the lang attribute hasn't been replaced
+					if (
+						dev &&
+						!html.includes(langPlaceholder) &&
+						html.includes(SVELTEKIT_DEFAULT_LANG_ATTRIBUTE)
+					) {
+						console.warn(
+							[
+								"It seems like you haven't replaced the `lang` attribute in your `src/app.html` file.",
+								"Please replace the `lang` attribute with the correct placeholder:",
+								"",
+								` - <html ${SVELTEKIT_DEFAULT_LANG_ATTRIBUTE}>`,
+								` + <html lang="${langPlaceholder}" dir="${dirPlaceholder}">`,
+								"",
+								"This message will not be shown in production.",
+							].join("\n")
+						)
+					}
 
-				return html.replace(langPlaceholder, lang).replace(dirPlaceholder, textDirection)
-			},
+					return html.replace(langPlaceholder, lang).replace(dirPlaceholder, textDirection)
+				},
+			})
 		})
 	}
 }
