@@ -12,8 +12,8 @@ jobs:
     steps:
       - name: log 
         run: |
-          echo {{ github.event.pull_request.merged }}
-          echo {{ github.event.pull_request.labels.*.name }}
+          echo ${{ github.event.pull_request.merged }}
+          echo ${{ github.event.pull_request.labels.*.name }}
 
       - name: Check for changes in inlang/source-code/editor/package.json
         id: check_changes
