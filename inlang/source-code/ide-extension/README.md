@@ -24,11 +24,11 @@ Visualize, edit, and lint translated strings effortlessly using Inline Decoratio
 <br>
 <br>
 
-✅ Streamline the i18n translation process. 
+✅  Streamline the i18n translation process. 
 
-✅ Visualize, edit, and lint translations.
+✅  Visualize, edit, and lint translations.
 
-✅ Extract new translations with a simple click.
+✅  Extract new translations with a simple click.
 
 
 <br>
