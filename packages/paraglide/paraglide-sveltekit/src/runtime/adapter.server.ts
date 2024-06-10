@@ -3,7 +3,7 @@ import { createReroute } from "./hooks/reroute.js"
 import { base } from "$app/paths"
 import { page } from "$app/stores"
 import { get } from "svelte/store"
-import { browser, dev } from "$app/environment"
+import { dev } from "$app/environment"
 import { parseRoute, serializeRoute } from "./utils/route.js"
 import {
 	normaliseBase as canonicalNormaliseBase,

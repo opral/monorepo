@@ -5,7 +5,7 @@ import { base } from "$app/paths"
 import { dev } from "$app/environment"
 import { LANG_COOKIE_NAME } from "../../constants.js"
 import type { Handle } from "@sveltejs/kit"
-import type { I18nConfig } from "../adapter.js"
+import type { I18nConfig } from "../adapter.server.js"
 import type { RoutingStrategy } from "../strategy.js"
 import type { ParaglideLocals } from "../locals.js"
 

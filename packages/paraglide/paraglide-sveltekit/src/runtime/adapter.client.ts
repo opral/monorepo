@@ -8,7 +8,7 @@ import {
 	normaliseBase as canonicalNormaliseBase,
 	type NormalizedBase,
 } from "./utils/normaliseBase.js"
-import { createExclude, type ExcludeConfig } from "./exclude.js"
+import { createExclude } from "./exclude.js"
 import { guessTextDirMap } from "./utils/text-dir.js"
 import {
 	prettyPrintPathDefinitionIssues,
@@ -17,108 +17,9 @@ import {
 	type PathDefinitionTranslations,
 } from "@inlang/paraglide-js/internal/adapter-utils"
 import type { ParamMatcher } from "@sveltejs/kit"
-import type { UserPathTranslations } from "./config/pathTranslations.js"
 import type { Paraglide } from "./runtime.js"
 import { PrefixStrategy } from "./strategy.js"
-
-export type I18nUserConfig<T extends string> = {
-	/**
-	 * The default languageTag to use if no locale is specified.
-	 * By default the sourceLanguageTag from the Paraglide runtime is used.
-	 *
-	 * @default runtime.sourceLanguageTag
-	 */
-	defaultLanguageTag?: T
-
-	/**
-	 * The translations for pathnames.
-	 * They should **not** include the base path or the language tag.
-	 *
-	 * You can include parameters in the pathnames by using square brackets.
-	 * If you are using a parameter, you must include it in all translations.
-	 *
-	 * If you are using translated pathnames, make sure you have the `i18n.reroute()` hook registered in your `src/hooks.js` file.
-	 *
-	 * @example
-	 * ```ts
-	 * pathnames: {
-	 *   "/about": {
-	 *     de: "/ueber-uns",
-	 *     en: "/about",
-	 *     fr: "/a-propos",
-	 *   },
-	 *   "/users/[slug]": {
-	 *      en: "/users/[slug]",
-	 *      // parameters don't have to be their own path-segment
-	 *      de: "/benutzer-[slug]",
-	 *      // parameters don't have to be in the same position
-	 *      fr: "/[slug]/utilisateurs",
-	 *    },
-	 * }
-	 * ```
-	 */
-	pathnames?: UserPathTranslations<T>
-
-	/**
-	 * The matchers for parameters in the pathnames.
-	 * You only need to provide these if you are using the parameter-matchers in the pathnames.
-	 */
-	matchers?: Record<string, ParamMatcher>
-
-	/**
-	 * A list of paths to exclude from translation. You can use strings or regular expressions.
-	 *
-	 * Any path that matches one of the strings or regular expressions will not be translated,
-	 * meaning that it won't get the language tag in the path, any links to it won't be translated,
-	 * and no alternate links will be generated for it.
-	 *
-	 * @default []
-	 *
-	 * @example
-	 * ```ts
-	 * exclude: ["/base/admin", /^\/base\/admin\/.* /]
-	 * ```
-	 */
-	exclude?: ExcludeConfig
-
-	/**
-	 * Whether to prefix the language tag to the path even if it's the default language.
-	 *
-	 * - If set to `"always"`, the language tag will always be included in the path. (eg `/base/en/about`)
-	 * - If set to `"never"`, the default language will not have a language tag in the path. (eg `/base/about`)
-	 *
-	 * @default "never"
-	 */
-	prefixDefaultLanguage?: "always" | "never"
-
-	/**
-	 * The associated text-direction for each language. It's recommended to set this to avoid
-	 * any direction-detection differences between different browsers.
-	 *
-	 * @default Guesses the direction based on the language tag using `Intl.Locale`
-	 *
-	 * @example
-	 * ```ts
-	 * dir: {
-	 *  en: "ltr",
-	 *  de: "ltr",
-	 *  ar: "rtl",
-	 * }
-	 * ```
-	 */
-	textDirection?: Record<T, "ltr" | "rtl">
-
-	/**
-	 * SEO related options.
-	 */
-	seo?: {
-		/**
-		 * Whether to generate alternate links for each page & language and add them to the head.
-		 * @default true
-		 */
-		noAlternateLinks?: boolean
-	}
-}
+import type { I18nUserConfig } from "./adapter.server.js"
 
 /**
  * The _resolved_ configuration for the i18n instance.
@@ -309,5 +210,3 @@ function normaliseBase(base: string): NormalizedBase {
 	// We can detect this, because base is only ever a relative path during component initialization
 	return canonicalNormaliseBase(base, new URL(get(page).url))
 }
-
-export type I18n<T extends string> = ReturnType<typeof createI18n<T>>
