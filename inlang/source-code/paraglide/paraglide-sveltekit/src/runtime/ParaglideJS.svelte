@@ -4,7 +4,7 @@
 	It also adds `<link rel="alternate">` tags to the head of your page
 -->
 <script lang="ts" generics="T extends string">
-	import type { I18n } from "./adapter.js"
+	import type { I18n } from "./adapter.server.js"
 	import { page } from "$app/stores"
 	import { browser, dev } from "$app/environment"
 	import { normaliseBase } from "./utils/normaliseBase.js"
