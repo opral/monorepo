@@ -357,7 +357,7 @@ describe("Paraglide Message Parser", () => {
 				messageId: "penguin_purple_shoe_window",
 				position: {
 					start: { line: 3, character: 5 },
-					end: { line: 3, character: 18 },
+					end: { line: 3, character: 33 },
 				},
 			},
 		])
