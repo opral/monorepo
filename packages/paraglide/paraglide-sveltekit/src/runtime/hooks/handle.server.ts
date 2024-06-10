@@ -93,7 +93,7 @@ export const createHandle = <T extends string>(
 			})
 		}
 
-		if (lang !== cookieLang) {
+		if (lang !== cookieLang && !i18n.exclude(event.url.pathname)) {
 			event.cookies.set(LANG_COOKIE_NAME, lang, {
 				maxAge: 31557600, //Math.round(60 * 60 * 24 * 365.25) = 1 year,
 				sameSite: "lax",
