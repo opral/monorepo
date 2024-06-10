@@ -1,8 +1,6 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
+import { describe, it, expect, vi, beforeEach } from "vitest"
 import * as vscode from "vscode"
-import * as fs from "node:fs"
 import {
-	isInWorkspaceRecommendation,
 	isDisabledRecommendation,
 	recommendationBannerView,
 	createRecommendationBanner,
@@ -11,6 +9,7 @@ import {
 } from "./recommendation.js"
 import { getSetting, updateSetting } from "../settings/index.js"
 import { getGitOrigin } from "../settings/getGitOrigin.js"
+import { createNodeishMemoryFs } from "@lix-js/fs"
 
 vi.mock("vscode", () => ({
 	resolveWebviewView: vi.fn(),
@@ -35,47 +34,6 @@ vi.mock("../settings/index.js", () => ({
 	getSetting: vi.fn(),
 	updateSetting: vi.fn(),
 }))
-
-describe("isInWorkspaceRecommendation", () => {
-	const fakeWorkspaceFolder: vscode.WorkspaceFolder = {
-		uri: { fsPath: "/path/to/workspace" } as vscode.Uri,
-		name: "test-workspace",
-		index: 0,
-	}
-
-	beforeEach(() => {
-		// Reset all mocks before each test
-		vi.resetAllMocks()
-	})
-
-	afterEach(() => {
-		vi.restoreAllMocks()
-	})
-
-	it("should return true if inlang.vs-code-extension is in workspace recommendations", async () => {
-		vi.mocked(fs.existsSync).mockReturnValue(true)
-		vi.mocked(fs.readFileSync).mockReturnValue(
-			JSON.stringify({
-				recommendations: ["inlang.vs-code-extension"],
-			})
-		)
-
-		const result = await isInWorkspaceRecommendation({ workspaceFolder: fakeWorkspaceFolder })
-		expect(result).toBe(true)
-	})
-
-	it("should return false if inlang.vs-code-extension is not in workspace recommendations", async () => {
-		vi.mocked(fs.existsSync).mockReturnValue(true)
-		vi.mocked(fs.readFileSync).mockReturnValue(
-			JSON.stringify({
-				recommendations: ["some-other-extension"],
-			})
-		)
-
-		const result = await isInWorkspaceRecommendation({ workspaceFolder: fakeWorkspaceFolder })
-		expect(result).toBe(false)
-	})
-})
 
 describe("isDisabledRecommendation", () => {
 	beforeEach(() => {
@@ -124,6 +82,7 @@ describe("recommendationBannerView", () => {
 
 	it("should register a webview view provider", async () => {
 		const args = {
+			nodeishFs: createNodeishMemoryFs(),
 			workspaceFolder: {
 				uri: { fsPath: "/path/to/workspace" } as vscode.Uri,
 				name: "test-workspace",
@@ -148,7 +107,10 @@ describe("createRecommendationBanner", () => {
 	}
 
 	it("should return an object with a resolveWebviewView function", () => {
-		const result = createRecommendationBanner({ workspaceFolder: fakeWorkspaceFolder })
+		const result = createRecommendationBanner({
+			fs: createNodeishMemoryFs(),
+			workspaceFolder: fakeWorkspaceFolder,
+		})
 		expect(typeof result.resolveWebviewView).toBe("function")
 	})
 })
@@ -161,7 +123,10 @@ describe("createRecommendationBanner", () => {
 	}
 
 	it("should return an object with a resolveWebviewView function", () => {
-		const result = createRecommendationBanner({ workspaceFolder: fakeWorkspaceFolder })
+		const result = createRecommendationBanner({
+			fs: createNodeishMemoryFs(),
+			workspaceFolder: fakeWorkspaceFolder,
+		})
 		expect(typeof result.resolveWebviewView).toBe("function")
 	})
 })
