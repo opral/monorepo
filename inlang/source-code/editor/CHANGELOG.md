@@ -1,5 +1,11 @@
 # @inlang/editor
 
+## 0.2.0
+
+### Minor Changes
+
+- 74dfb97: init versioning
+
 ## null
 
 ### Patch Changes
