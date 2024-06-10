@@ -1,5 +1,11 @@
 # @inlang/paraglide-sveltekit
 
+## 0.10.1
+
+### Patch Changes
+
+- ecef103: fix how `AsyncLocalStorage` is handled accross requests
+
 ## 0.10.0
 
 ### Minor Changes
