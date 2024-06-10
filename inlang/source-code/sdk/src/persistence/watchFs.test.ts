@@ -7,6 +7,7 @@ import { watchFs } from "./watchFs.js"
 import fs from "node:fs/promises"
 import os from "node:os"
 import { join } from "node:path"
+import process from "node:process"
 
 // temp dir for node fs tests
 const tmpdir = join(os.tmpdir(), "test-sdk-watchFs")
@@ -37,62 +38,82 @@ async function testEnvironments() {
 	]
 }
 
-describe.each(await testEnvironments())("watchFs $envName", async ({ nodeishFs, baseDir }) => {
-	const waitForWatch = 100
-	it(
-		"emits events when files are touched",
-		async () => {
-			await nodeishFs.mkdir(baseDir, { recursive: true })
+describe.each(await testEnvironments())(
+	"watchFs $envName",
+	async ({ envName, nodeishFs, baseDir }) => {
+		const waitForWatch = 100
+		const isMemory = envName === "memory"
 
-			const observer = {
-				next: vi.fn(),
-				error: vi.fn(),
-				complete: vi.fn(),
-			} satisfies Observer<string>
+		// Only memoryFs has consistent event counts across OS flavors
+		// so we only check for additional watch events, not for exact counts
+		// And memoryFs watch seems to prefer forward slashes (not using join)
+		// TODO: normalize paths for memoryFs
 
-			const observable = watchFs({ nodeishFs, baseDir })
-			const subscription = observable.subscribe(observer)
+		const filename1 = "message.json"
+		const filepath = isMemory ? baseDir + "/" + filename1 : join(baseDir, filename1)
+		const dirname = "subdir"
+		const dirpath = isMemory ? baseDir + "/" + dirname : join(baseDir, dirname)
+		const filename2 = "foo.bar"
+		const dirfilepath = isMemory ? dirpath + "/" + filename2 : join(dirpath, filename2)
+		const dirfilename = isMemory ? dirname + "/" + filename2 : join(dirname, filename2)
 
-			await nodeishFs.writeFile(baseDir + "/messages.json", "{}")
-			await sleep(waitForWatch)
+		it(
+			"emits events when files are touched",
+			async () => {
+				await nodeishFs.mkdir(baseDir, { recursive: true })
 
-			expect(observer.next).toHaveBeenCalledTimes(1)
-			expect(observer.next).toHaveBeenCalledWith("messages.json")
+				const observer = {
+					next: vi.fn(),
+					error: vi.fn(),
+					complete: vi.fn(),
+				} satisfies Observer<string>
 
-			await nodeishFs.rm(baseDir + "/messages.json")
-			await sleep(waitForWatch)
+				const observable = watchFs({ nodeishFs, baseDir })
+				const subscription = observable.subscribe(observer)
 
-			expect(observer.next).toHaveBeenCalledTimes(2)
-			expect(observer.next).toHaveBeenCalledWith("messages.json")
+				let lastCallCount = observer.next.mock.calls.length
 
-			await nodeishFs.mkdir(baseDir + "/subdir", { recursive: true })
-			await sleep(waitForWatch)
+				async function checkForMoreCalls() {
+					await sleep(waitForWatch)
+					expect(observer.next.mock.calls.length).toBeGreaterThan(lastCallCount)
+					lastCallCount = observer.next.mock.calls.length
+				}
 
-			expect(observer.next).toHaveBeenCalledTimes(3)
-			expect(observer.next).toHaveBeenCalledWith("subdir")
+				async function checkForNoMoreCalls() {
+					await sleep(waitForWatch)
+					expect(observer.next).toHaveBeenCalledTimes(lastCallCount)
+					expect(observer.error).not.toHaveBeenCalled()
+				}
 
-			await nodeishFs.writeFile(baseDir + "/subdir/foo.bar", "{}")
-			await sleep(waitForWatch)
+				await nodeishFs.writeFile(filepath, "{}")
+				await checkForMoreCalls()
+				expect(observer.next).toHaveBeenCalledWith(filename1)
 
-			expect(observer.next).toHaveBeenCalledTimes(4)
-			expect(observer.next).toHaveBeenCalledWith("subdir/foo.bar")
+				await nodeishFs.rm(filepath)
+				await checkForMoreCalls()
+				expect(observer.next).toHaveBeenCalledWith(filename1)
 
-			// should complete without more events
-			subscription.unsubscribe()
-			await sleep(waitForWatch)
+				await nodeishFs.mkdir(dirpath, { recursive: true })
+				await checkForMoreCalls()
+				expect(observer.next).toHaveBeenCalledWith(dirname)
 
-			expect(observer.next).toHaveBeenCalledTimes(4)
-			expect(observer.error).not.toHaveBeenCalled()
-			expect(observer.complete).toHaveBeenCalledTimes(1)
+				// node versions <20 do not support recursive watch
+				// https://github.com/nodejs/node/pull/45098#issuecomment-1891612491
+				if (isMemory || parseInt(process.version.slice(1, 3)) >= 20) {
+					await nodeishFs.writeFile(dirfilepath, "{}")
+					await checkForMoreCalls()
+					expect(observer.next).toHaveBeenCalledWith(dirfilename)
+				}
 
-			// should not emit any more events
-			await nodeishFs.writeFile(baseDir + "/messages.json", "{}")
-			await sleep(waitForWatch)
+				expect(observer.complete).not.toHaveBeenCalled()
+				subscription.unsubscribe()
+				await checkForNoMoreCalls()
+				expect(observer.complete).toHaveBeenCalledTimes(1)
 
-			expect(observer.next).toHaveBeenCalledTimes(4)
-			expect(observer.error).not.toHaveBeenCalled()
-			expect(observer.complete).toHaveBeenCalledTimes(1)
-		},
-		{ timeout: 5000 }
-	)
-})
+				await nodeishFs.writeFile(filepath, "{}")
+				await checkForNoMoreCalls()
+			},
+			{ timeout: 5000 }
+		)
+	}
+)
