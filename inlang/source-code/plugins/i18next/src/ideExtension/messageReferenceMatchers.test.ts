@@ -55,6 +55,17 @@ it(`should detect single quotes t('id')`, async () => {
 	expect(matches[0]?.position.end.character).toBe(26)
 })
 
+it(`should detect t("happy_pinky_elephant")`, async () => {
+	const sourceCode = `
+	const x = t("happy_pinky_elephant")
+	`
+	const settings: PluginSettings = {
+		pathPattern: "./{language}.json",
+	}
+	const matches = parse(sourceCode, settings)
+	expect(matches[0]?.messageId).toBe("happy_pinky_elephant")
+})
+
 it(`should detect JSX <p>{t('id')}</p>`, async () => {
 	// using the t function in markup
 	const sourceCode = `
