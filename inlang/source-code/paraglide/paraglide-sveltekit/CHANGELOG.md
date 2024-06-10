@@ -1,5 +1,16 @@
 # @inlang/paraglide-sveltekit
 
+## 0.10.0
+
+### Minor Changes
+
+- 928742b: Make `languageTag()` and message functions available in server-side load function.
+
+  This eliminates the need for
+
+  - `event.locals.paraglide.lang` anywhere.
+  - Manually passing the language tag to message functions that are used in load functions / actions.
+
 ## 0.9.7
 
 ### Patch Changes
