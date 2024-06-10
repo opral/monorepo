@@ -1,5 +1,11 @@
 # @inlang/editor
 
+## 0.2.1
+
+### Patch Changes
+
+- c82cf88: Test trigger
+
 ## 0.2.0
 
 ### Minor Changes
