@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto"
-import { getSetting, migrateSettingsFromInlangToSherlock, updateSetting } from "./index.js"
+import { getSetting, updateSetting } from "./index.js"
 
 /**
  * Returns the user ID. If it doesn't exist yet, it will be generated and persisted.
@@ -10,9 +10,7 @@ import { getSetting, migrateSettingsFromInlangToSherlock, updateSetting } from "
  * console.info(userId) // 123e4567-e89b-12d3-a456-426614174000
  */
 export async function getUserId() {
-	// TODO: remove this migrate settings from inlang to sherlock after 01 April 2024
-	await migrateSettingsFromInlangToSherlock()
-
+	// Get the user ID
 	const persistedId = await getPersistedId()
 
 	if (!persistedId) {
