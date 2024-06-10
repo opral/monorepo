@@ -12,11 +12,11 @@ export const messageBundleStyling = css`
 	.header {
 		font-weight: 600;
 		background-color: var(--sl-color-neutral-300);
-		padding: 10px;
+		padding: 12px;
 		display: flex;
-		justify-content: flex-start;
-		align-items: baseline;
+		align-items: center;
 		gap: 10px;
+		min-height: 44px;
 	}
 	.messages-container {
 		width: 100%;

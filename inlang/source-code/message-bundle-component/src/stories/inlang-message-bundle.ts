@@ -125,7 +125,9 @@ export default class InlangMessageBundle extends LitElement {
 										<inlang-selector-configurator
 											.inputs=${this._fakeInputs()}
 											.message=${message}
+											.languageTag=${languageTag}
 											.triggerMessageBundleRefresh=${this._triggerRefresh}
+											.addMessage=${this._addMessage}
 										>
 											<sl-tooltip content="Add Selector to message"
 												><div class="add-selector">
