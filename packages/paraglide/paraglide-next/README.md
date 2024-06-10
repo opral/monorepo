@@ -59,6 +59,20 @@ export function Home() {
 
 Only messages used in client components are sent to the client. Messages in Server Components don't impact bundle size.
 
+## Using the Language in Code
+
+You can get the current language by calling the `languageTag()` function.
+
+```tsx
+import { languageTag } from "@/paraglide/runtime"
+
+export function Home() {
+	return <h1>{languageTag()}</h1>
+}
+```
+
+This is scoped to the current request, it's safe to use in server-components. 
+
 # Examples
 
 You can find example projects in [our GitHub repository](https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-next/examples), or try them on StackBlitz:
