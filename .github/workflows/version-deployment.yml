@@ -18,7 +18,7 @@ jobs:
       - name: Check for changes in inlang/source-code/editor/package.json
         id: check_changes
         run: |
-          echo "CHANGES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | grep 'inlang/source-code/editor/package.json')"
+          echo "CHANGES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | sed -n '/inlang\/source-code\/editor\/package.json/p')"
           if [ -n "$CHANGES" ]; then
             echo "Changes in inlang/source-code/editor/package.json"
             echo "changes=true" >> $GITHUB_ENV
