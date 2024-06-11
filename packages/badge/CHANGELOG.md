@@ -1,5 +1,12 @@
 # @inlang/badge
 
+## 0.7.35
+
+### Patch Changes
+
+- Updated dependencies [da7c207]
+  - @inlang/sdk@0.35.8
+
 ## 0.7.34
 
 ### Patch Changes

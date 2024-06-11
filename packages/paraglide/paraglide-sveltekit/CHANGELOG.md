@@ -1,5 +1,42 @@
 # @inlang/paraglide-sveltekit
 
+## 0.10.2
+
+### Patch Changes
+
+- b5d4a4c: fix regression with `exclude` option
+
+## 0.10.1
+
+### Patch Changes
+
+- ecef103: fix how `AsyncLocalStorage` is handled accross requests
+
+## 0.10.0
+
+### Minor Changes
+
+- 928742b: Make `languageTag()` and message functions available in server-side load function.
+
+  This eliminates the need for
+
+  - `event.locals.paraglide.lang` anywhere.
+  - Manually passing the language tag to message functions that are used in load functions / actions.
+
+## 0.9.7
+
+### Patch Changes
+
+- @inlang/paraglide-js@1.9.1
+- @inlang/paraglide-vite@1.2.67
+
+## 0.9.6
+
+### Patch Changes
+
+- 1ea7b14: Explicitly mark `paraglide:lang` cookie as _not_ `HttpOnly`.
+  - @inlang/paraglide-js@1.9.1
+
 ## 0.9.5
 
 ### Patch Changes
