@@ -16,13 +16,14 @@ jobs:
       - name: Check for changes in inlang/source-code/editor/package.json
         id: check_changes
         run: |
-          echo "CHANGES=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep 'inlang/source-code/editor/package.json')"
-          if [ -z "$CHANGES" ]; then
-            echo "No changes in inlang/source-code/editor/package.json"
-            echo "changes=false" >> $GITHUB_ENV
-          else
+          echo "CHANGES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | grep 'inlang/source-code/editor/package.json')"
+          if [ -n "$CHANGES" ]; then
             echo "Changes in inlang/source-code/editor/package.json"
             echo "changes=true" >> $GITHUB_ENV
+          else
+            echo "No changes in inlang/source-code/editor/package.json"
+            echo "changes=false" >> $GITHUB_ENV
+      
 
       - name: Trigger redeploy
         if: env.changes == 'true'
