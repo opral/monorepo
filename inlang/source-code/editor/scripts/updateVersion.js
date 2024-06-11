@@ -18,6 +18,7 @@ function updateVersionFile() {
 	if (!pnpmOutput) return
 
 	const packages = JSON.parse(pnpmOutput)
+	const editorVersion = packages.find((pkg) => pkg.name === "@inlang/editor").version
 	const inlangVersion = packages.find((pkg) => pkg.name === "@inlang/sdk").version
 	const lixVersion = packages.find((pkg) => pkg.name === "@lix-js/client").version
 	// if working directory is not clean set commit hash to "dev"
@@ -31,9 +32,10 @@ function updateVersionFile() {
 		fs.writeFileSync(
 			versionFilePath,
 			`{
+				"@inlang/editor": "",
+				"commit-hash": ""
 				"@inlang/sdk": "",
 				"@lix-js/client": "",
-				"commit-hash": ""
 			}
 			`
 		)
@@ -41,9 +43,10 @@ function updateVersionFile() {
 	const versionFile = JSON.parse(fs.readFileSync(versionFilePath))
 
 	// Update version.json file
+	versionFile["@inlang/editor"] = editorVersion
+	versionFile["commit-hash"] = commitHash
 	versionFile["@inlang/sdk"] = inlangVersion
 	versionFile["@lix-js/client"] = lixVersion
-	versionFile["commit-hash"] = commitHash
 
 	// Write the updated version.json
 	fs.writeFileSync(versionFilePath, JSON.stringify(versionFile, undefined, 2))
