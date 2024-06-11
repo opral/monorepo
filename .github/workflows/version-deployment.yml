@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: '2' # Fetches the last two commits
   
       - name: Check for changes in inlang/source-code/editor/package.json
         id: check_changes
@@ -23,7 +25,6 @@ jobs:
           else
             echo "No changes in inlang/source-code/editor/package.json"
             echo "changes=false" >> $GITHUB_ENV
-      
 
       - name: Trigger redeploy
         if: env.changes == 'true'
