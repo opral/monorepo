@@ -6,29 +6,22 @@ on:
 
 jobs:
   changeset:
-    # if: github.event.pull_request.merged == true && github.event.pull_request.head.label.split(":")[1] == 'changeset-release/main'
+    if: github.event.pull_request.merged == true && github.event.pull_request.head.label.split(':')[1] == 'changeset-release/main'
     runs-on: ubuntu-latest
 
     steps:
       - name: log
         run: |
           echo ${{ github.event.pull_request.merged }}
-          echo ${{ github.event.pull_request.head.label.split(":")[1] }} == 'changeset-release/main'
+          echo ${{ github.event.pull_request.head.label.split(':')[1] }} == 'changeset-release/main'
 
+      - name: Checkout repository
+        uses: actions/checkout@v4
+  
       - name: Check for changes in inlang/source-code/editor/package.json
         id: check_changes
         run: |
-          PR_NUMBER=${{ github.event.pull_request.number }}
-          REPO_OWNER=${{ github.repository_owner }}
-          REPO_NAME=${{ github.event.repository.name }}
-          API_URL="https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/pulls/$PR_NUMBER/files"
-          AUTH_HEADER="Authorization: token ${{ secrets.GITHUB_TOKEN }}"
-
-          # Fetch the list of files changed in the pull request
-          RESPONSE=$(curl -s -H "$AUTH_HEADER" "$API_URL")
-
-          # Check if the specific file is in the list of changed files
-          echo "CHANGES=$(echo $RESPONSE | jq -r '.[] | select(.filename == "inlang/source-code/editor/package.json")')"
+          echo "CHANGES=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep 'inlang/source-code/editor/package.json')"
           if [ -z "$CHANGES" ]; then
             echo "No changes in inlang/source-code/editor/package.json"
             echo "changes=false" >> $GITHUB_ENV
