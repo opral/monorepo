@@ -28131,7 +28131,7 @@ var InlangModule = import_typebox9.Type.Object({
 // ../sdk/dist/resolve-modules/message-lint-rules/resolveMessageLintRules.js
 var import_value = __toESM(require_value2(), 1);
 
-// ../../../node_modules/.pnpm/dedent@1.5.1_babel-plugin-macros@2.8.0/node_modules/dedent/dist/dedent.mjs
+// ../../../node_modules/.pnpm/dedent@1.5.1/node_modules/dedent/dist/dedent.mjs
 function ownKeys(object, enumerableOnly) {
   var keys = Object.keys(object);
   if (Object.getOwnPropertySymbols) {
@@ -28636,10 +28636,18 @@ var registry = [
       en: "Visualize, edit & lint translated strings at a glance via Inline Decorations & Hover Support, and extract new strings with a single click."
     },
     pages: {
-      "/": "./inlang/source-code/ide-extension/MARKETPLACE.md",
-      "/supported-i18n-libraries": "./inlang/source-code/ide-extension/docs/supported-i18n-libraries.md",
-      "/video-tour": "./inlang/source-code/ide-extension/docs/video-tour.md",
-      "/changelog": "./inlang/source-code/ide-extension/CHANGELOG.md"
+      "": {
+        "/": "./inlang/source-code/ide-extension/MARKETPLACE.md"
+      },
+      "Getting Started": {
+        "/quick-start": "./inlang/source-code/ide-extension/docs/quick-start.md",
+        "/customization": "./inlang/source-code/ide-extension/docs/customization.md",
+        "/supported-i18n-libraries": "./inlang/source-code/ide-extension/docs/supported-i18n-libraries.md",
+        "/video-tour": "./inlang/source-code/ide-extension/docs/video-tour.md"
+      },
+      Appendix: {
+        "/changelog": "./inlang/source-code/ide-extension/CHANGELOG.md"
+      }
     },
     keywords: [
       "apps",
@@ -29557,7 +29565,8 @@ var registry = [
     pages: {
       "": {
         "/": "./inlang/source-code/paraglide/paraglide-js/docs/why-paraglide.md",
-        "/usage": "./inlang/source-code/paraglide/paraglide-js/README.md",
+        "/getting-started": "./inlang/source-code/paraglide/paraglide-js/README.md",
+        "/usage": "./inlang/source-code/paraglide/paraglide-js/docs/usage.md",
         "/architecture": "./inlang/source-code/paraglide/paraglide-js/docs/architecture.md",
         "/changelog": "./inlang/source-code/paraglide/paraglide-js/CHANGELOG.md"
       },
@@ -29567,7 +29576,7 @@ var registry = [
         Astro: "/m/iljlwzfs/paraglide-astro-i18n",
         SolidStart: "/m/n860p17j/paraglide-solidstart-i18n",
         Remix: "/m/fnhuwzrx/paraglide-remix-i18n",
-        "Build your own": "./inlang/source-code/paraglide/paraglide-js/docs/custom-framework-library.md"
+        "/framework-libraries/build-your-own": "./inlang/source-code/paraglide/paraglide-js/docs/custom-framework-library.md"
       },
       Tooling: {
         "VsCode Extension": "/m/r7kp499g/app-inlang-ideExtension",
@@ -29680,6 +29689,7 @@ var registry = [
       Appendix: {
         "/pages-router": "./inlang/source-code/paraglide/paraglide-next/docs/pages-router.md",
         "/manual-setup": "./inlang/source-code/paraglide/paraglide-next/docs/manual-setup.md",
+        "Vanilla ParaglideJS": "/m/gerre34r/library-inlang-paraglideJs",
         "/roadmap": "./inlang/source-code/paraglide/paraglide-next/docs/roadmap.md",
         "/changelog": "./inlang/source-code/paraglide/paraglide-next/CHANGELOG.md"
       }
@@ -29776,7 +29786,6 @@ var registry = [
         "/serverside-usage": "./inlang/source-code/paraglide/paraglide-sveltekit/docs/serverside-usage.md"
       },
       Appendix: {
-        "/faq": "./inlang/source-code/paraglide/paraglide-sveltekit/docs/faq.md",
         "/manual-setup": "./inlang/source-code/paraglide/paraglide-sveltekit/docs/manual-setup.md",
         "/roadmap-and-caveats": "./inlang/source-code/paraglide/paraglide-sveltekit/docs/roadmap.md",
         "/changelog": "./inlang/source-code/paraglide/paraglide-sveltekit/CHANGELOG.md",
@@ -30107,6 +30116,7 @@ var registry = [
       en: "Xcode String Catalogs"
     },
     publisherIcon: "https://hechenbros.com/favicon.png",
+    publisherLink: "https://hechenbros.com",
     id: "plugin.hechenbros.xcstrings",
     description: {
       en: "An inlang plugin to handle Xcode String Catalogs"
