@@ -5,20 +5,30 @@ const OPTIONAL = 0b001
 const REST = 0b010
 const REQUIRED = 0b100
 
-type Part = {
-	type: typeof STATIC | typeof REQUIRED | typeof OPTIONAL | typeof REST
+type Part = [
+	/**
+	 * type of part
+	 */
+	typeof STATIC | typeof REQUIRED | typeof OPTIONAL | typeof REST,
 
 	/**
+	 * content
 	 * The text-value of the segment
 	 * If this is not static this includes the brackets
 	 */
-	content: string
+	string,
 
 	/**
-	 * If this parameter includes a matcher
+	 * matched
+	 *
+	 * If this parameter includes a matcher.
 	 */
-	matched: boolean
-}
+	boolean
+]
+
+const PART_TYPE = 0
+const PART_CONTENT = 1
+const PART_MATCHED = 2
 
 export function sort_routes(routes: string[]): string[] {
 	const get_parts = cached(split)
@@ -43,39 +53,39 @@ export function sort_routes(routes: string[]): string[] {
 				// it alternates between dynamic and static
 				// (i.e. [foo][bar] is disallowed)
 
-				const dynamic = a?.type || b?.type // type = 0 if STATIC, undefined if not present
+				const dynamic = a?.[PART_TYPE] || b?.[PART_TYPE] // type = 0 if STATIC, undefined if not present
 
 				if (dynamic) {
 					if (!a) return -1
 					if (!b) return +1
 
 					// Handle [...rest]
-					const next_a = segment_a[j + 1]?.content || segments_a[i + 1]?.[0]?.content
-					const next_b = segment_b[j + 1]?.content || segments_b[i + 1]?.[0]?.content
+					const next_a = segment_a[j + 1]?.[PART_CONTENT] || segments_a[i + 1]?.[0]?.[PART_CONTENT]
+					const next_b = segment_b[j + 1]?.[PART_CONTENT] || segments_b[i + 1]?.[0]?.[PART_CONTENT]
 
 					const both_have_next = next_a && next_b
 					const only_a_has_next = next_a && !next_b
 					const only_b_has_next = !next_a && next_b
 
-					if ((a.type && b.type) === REST) {
+					if ((a[PART_TYPE] && b[PART_TYPE]) === REST) {
 						if (both_have_next) continue // tied
 						if (only_a_has_next) return -1
 						if (only_b_has_next) return +1
 					}
 
-					if (a.type === REST) return only_a_has_next ? -1 : +1
-					if (b.type === REST) return only_b_has_next ? +1 : -1
+					if (a[PART_TYPE] === REST) return only_a_has_next ? -1 : +1
+					if (b[PART_TYPE] === REST) return only_b_has_next ? +1 : -1
 
 					// handle REQUIRED and OPTIONAL
 
 					// part with matcher outranks one without
-					if (a.matched !== b.matched) return (-1) ** +a.matched
-					if (a.type !== b.type) {
+					if (a[PART_MATCHED] !== b[PART_MATCHED]) return (-1) ** +a[PART_MATCHED]
+					if (a[PART_TYPE] !== b[PART_TYPE]) {
 						// Comparing between `[required]` and `[[optional]]`
-						return (-1) ** +(a.type > b.type)
+						return (-1) ** +(a[PART_TYPE] > b[PART_TYPE])
 					}
-				} else if (a?.content !== b?.content) {
-					return sort_static((a as Part).content, (b as Part).content)
+				} else if (a?.[PART_CONTENT] !== b?.[PART_CONTENT]) {
+					return sort_static((a as Part)[PART_CONTENT], (b as Part)[PART_CONTENT])
 				}
 			}
 		}
@@ -103,11 +113,7 @@ function split(id: string) {
 	while (i <= id.length) {
 		const start = id.indexOf("[", i)
 		const entirelyStatic = start === -1
-		parts.push({
-			type: STATIC,
-			content: id.slice(i, entirelyStatic ? undefined : start),
-			matched: false,
-		})
+		parts.push([STATIC, id.slice(i, entirelyStatic ? undefined : start), false])
 		if (entirelyStatic) break
 
 		const type = id[start + 1] === "[" ? OPTIONAL : id[start + 1] === "." ? REST : REQUIRED
@@ -117,11 +123,7 @@ function split(id: string) {
 
 		const content = id.slice(start, (i = endBracketIdx + endBrackets.length))
 
-		parts.push({
-			type,
-			content,
-			matched: content.includes("="),
-		})
+		parts.push([type, content, content.includes("=")])
 	}
 
 	return parts
@@ -141,10 +143,10 @@ function sort_static(a: string, b: string): -1 | 0 | 1 {
 	if (a === b) return 0 // this check prevents an infinite loop
 
 	// move the cursor to the first non-equal character, or to the end of the shorter string
-	let c = 0
-	while (a[c] === b[c]) c++
+	let idx = 0
+	while (a[idx] === b[idx]) idx++
 
 	// if one of the strings is shorter than the other, the longer one wins
 	// otherwise compare the first differing char
-	return !a[c] ? +1 : !b[c] ? -1 : (a[c] as string) < (b[c] as string) ? -1 : +1
+	return !a[idx] ? +1 : !b[idx] ? -1 : (a[idx] as string) < (b[idx] as string) ? -1 : +1
 }
