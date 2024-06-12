@@ -1,5 +1,6 @@
 {
 	"name": "@inlang/editor",
+	"version": "0.0.0",
 	"type": "module",
 	"private": true,
 	"scripts": {
@@ -106,6 +107,5 @@
 	"peerDependencies": {
 		"express": "^4.18.2"
 	},
-	"license": "Apache-2.0",
-	"version": null
+	"license": "Apache-2.0"
 }
