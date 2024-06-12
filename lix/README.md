@@ -6,6 +6,7 @@
 
 # Lix 
 
+### Try out [Example App(Fink)](https://lorissigrist.github.io/merge-berlin-lix-demo/)
 
 Lix is a change control system that runs in the browser and an SDK to build web apps.  
 
