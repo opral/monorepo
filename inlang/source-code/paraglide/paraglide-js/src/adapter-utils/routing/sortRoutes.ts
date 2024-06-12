@@ -7,7 +7,16 @@ const REQUIRED = 0b100
 
 type Part = {
 	type: typeof STATIC | typeof REQUIRED | typeof OPTIONAL | typeof REST
+
+	/**
+	 * The text-value of the segment
+	 * If this is not static this includes the brackets
+	 */
 	content: string
+
+	/**
+	 * If this parameter includes a matcher
+	 */
 	matched: boolean
 }
 
@@ -40,37 +49,30 @@ export function sort_routes(routes: string[]): string[] {
 					if (!a) return -1
 					if (!b) return +1
 
-					// get the next static chunk, so we can handle [...rest] edge cases
-					const next_a = (segment_a[j + 1]?.content || segments_a[i + 1]?.[0]?.content) as string
-					const next_b = (segment_b[j + 1]?.content || segments_b[i + 1]?.[0]?.content) as string
+					// Handle [...rest]
+					const next_a = segment_a[j + 1]?.content || segments_a[i + 1]?.[0]?.content
+					const next_b = segment_b[j + 1]?.content || segments_b[i + 1]?.[0]?.content
 
-					// `[...rest]/x` outranks `[...rest]`
-					if (a.type && b.type === REST) {
-						if (next_a && next_b) continue
-						if (next_a) return -1
-						if (next_b) return +1
+					const both_have_next = next_a && next_b
+					const only_a_has_next = next_a && !next_b
+					const only_b_has_next = !next_a && next_b
+
+					if ((a.type && b.type) === REST) {
+						if (both_have_next) continue // tied
+						if (only_a_has_next) return -1
+						if (only_b_has_next) return +1
 					}
 
-					// `[...rest]/x` outranks `[required]` or `[required]/[required]`
-					// but not `[required]/x`
-					if (a.type === REST) {
-						return next_a && !next_b ? -1 : +1
-					}
+					if (a.type === REST) return only_a_has_next ? -1 : +1
+					if (b.type === REST) return only_b_has_next ? +1 : -1
 
-					if (b.type === REST) {
-						return next_b && !next_a ? +1 : -1
-					}
+					// handle REQUIRED and OPTIONAL
 
 					// part with matcher outranks one without
-					if (a.matched !== b.matched) {
-						return a.matched ? -1 : +1
-					}
-
+					if (a.matched !== b.matched) return (-1) ** +a.matched
 					if (a.type !== b.type) {
-						// `[...rest]` has already been accounted for, so here
-						// we're comparing between `[required]` and `[[optional]]`
-						if (a.type === REQUIRED) return -1
-						if (b.type === REQUIRED) return +1
+						// Comparing between `[required]` and `[[optional]]`
+						return (-1) ** +(a.type > b.type)
 					}
 				} else if (a?.content !== b?.content) {
 					return sort_static((a as Part).content, (b as Part).content)
