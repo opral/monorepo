@@ -285,10 +285,7 @@ function removeTrailingSlash(path: string): string {
 }
 
 /**
- * Splits a route id into its segments, removing segments that
- * don't affect the path (i.e. groups). The root route is represented by `/`
- * and will be returned as `['']`.
  * @param {string} route
  * @returns string[]
  */
-export const get_route_segments = (route: string) => route.slice(1).split("/")
+const get_route_segments = (route: string) => route.slice(1).split("/")
