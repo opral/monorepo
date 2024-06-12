@@ -743,7 +743,7 @@ function LintFilter(props: { clearFunction: any }) {
 				</Show>
 			</div>
 			<button slot="clear-icon" class="p-0.5">
-				<IconClose class="w-4 h-4" />
+				<IconClose width={20} height={20} />
 			</button>
 
 			<div class="flex px-3 gap-2 text-sm font-medium">
@@ -838,7 +838,7 @@ function IdsFilter(props: { clearFunction: any }) {
 							props.clearFunction
 						}}
 					>
-						<IconClose />
+						<IconClose width={20} height={20} />
 					</button>
 				</Show>
 			</div>
