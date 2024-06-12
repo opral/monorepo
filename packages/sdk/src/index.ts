@@ -26,6 +26,7 @@ export {
 	PluginSaveMessagesError,
 } from "./errors.js"
 
+export { randomHumanId } from "./storage/human-id/human-readable-id.js"
 export { normalizeMessage } from "./storage/helper.js"
 export * from "./messages/variant.js"
 export * from "./versionedInterfaces.js"
