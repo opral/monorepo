@@ -33,9 +33,9 @@ function updateVersionFile() {
 			versionFilePath,
 			`{
 				"@inlang/editor": "",
-				"commit-hash": ""
+				"commit-hash": "",
 				"@inlang/sdk": "",
-				"@lix-js/client": "",
+				"@lix-js/client": ""
 			}
 			`
 		)
