@@ -28,20 +28,13 @@ export function detectLanguageFromPath<T extends string>({
 }): T | undefined {
 	base ??= ""
 	if (base === "/") base = ""
-
-	if (!path.startsWith(base)) {
-		return undefined
-	}
-
+	if (!path.startsWith(base)) return undefined
 	const pathWithoutBase = path.replace(base, "")
 
 	const maybeLang = pathWithoutBase.split("/")[1]
 	if (!maybeLang) return undefined
 
-	for (const lang of availableLanguageTags) {
-		if (lang.toLowerCase() === maybeLang.toLowerCase()) {
-			return lang
-		}
-	}
-	return undefined
+	return availableLanguageTags.map(lower).includes(lower(maybeLang)) ? (maybeLang as T) : undefined
 }
+
+const lower = (s: string) => s.toLowerCase()

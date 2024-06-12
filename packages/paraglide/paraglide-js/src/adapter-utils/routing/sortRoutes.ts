@@ -1,12 +1,19 @@
 import { get_route_segments } from "./routeDefinitions.js"
 
+// param type flags
+// we use contsants instead of enums for better minification
+const STATIC = 0
+const OPTIONAL = 1
+const REST = 2
+const REQUIRED = 3
+
 type Part = {
-	type: "static" | "required" | "optional" | "rest"
+	type: typeof STATIC | typeof REQUIRED | typeof OPTIONAL | typeof REST
 	content: string
 	matched: boolean
 }
 
-const EMPTY = { type: "static", content: "", matched: false } satisfies Part
+const EMPTY = { type: STATIC, content: "", matched: false } satisfies Part
 
 export function sort_routes(routes: string[]): string[] {
 	const segment_cache = new Map<string, Part[]>()
@@ -18,14 +25,14 @@ export function sort_routes(routes: string[]): string[] {
 		while (i <= id.length) {
 			const start = id.indexOf("[", i)
 			if (start === -1) {
-				parts.push({ type: "static", content: id.slice(i), matched: false })
+				parts.push({ type: STATIC, content: id.slice(i), matched: false })
 				break
 			}
 
-			parts.push({ type: "static", content: id.slice(i, start), matched: false })
+			parts.push({ type: STATIC, content: id.slice(i, start), matched: false })
 
-			const type = id[start + 1] === "[" ? "optional" : id[start + 1] === "." ? "rest" : "required"
-			const delimiter = type === "optional" ? "]]" : "]"
+			const type = id[start + 1] === "[" ? OPTIONAL : id[start + 1] === "." ? REST : REQUIRED
+			const delimiter = type === OPTIONAL ? "]]" : "]"
 			const end = id.indexOf(delimiter, start)
 
 			if (end === -1) {
@@ -80,7 +87,7 @@ export function sort_routes(routes: string[]): string[] {
 					const next_b = (segment_b[j + 1]?.content || segments_b[i + 1]?.[0]?.content) as string
 
 					// `[...rest]/x` outranks `[...rest]`
-					if (a.type === "rest" && b.type === "rest") {
+					if (a.type === REST && b.type === REST) {
 						if (next_a && next_b) continue
 						if (next_a) return -1
 						if (next_b) return +1
@@ -88,11 +95,11 @@ export function sort_routes(routes: string[]): string[] {
 
 					// `[...rest]/x` outranks `[required]` or `[required]/[required]`
 					// but not `[required]/x`
-					if (a.type === "rest") {
+					if (a.type === REST) {
 						return next_a && !next_b ? -1 : +1
 					}
 
-					if (b.type === "rest") {
+					if (b.type === REST) {
 						return next_b && !next_a ? +1 : -1
 					}
 
@@ -104,8 +111,8 @@ export function sort_routes(routes: string[]): string[] {
 					if (a.type !== b.type) {
 						// `[...rest]` has already been accounted for, so here
 						// we're comparing between `[required]` and `[[optional]]`
-						if (a.type === "required") return -1
-						if (b.type === "required") return +1
+						if (a.type === REQUIRED) return -1
+						if (b.type === REQUIRED) return +1
 					}
 				} else if (a?.content !== b?.content) {
 					// shallower path outranks deeper path
