@@ -1,12 +1,10 @@
-# RxDB in Vite Typescript Demo
+# Slot storage, git, RxDB in Vite Typescript Demo
 
-![](./screenshot.jpg)
-
-This is a quick note-taking app that demonstrates how to use RxDB within a Vite Vanilla Typescript app.
+This is a quick crud app that showcases the slot file with query capabilities of rxdb
 
 # Try it out
-1. clone the whole [RxDB-repo](https://github.com/pubkey/rxdb)
-2. go to this folder `(examples/vite-vanilla-ts)`
-3. run `npm install` or `yarn install`
-4. run `npm run dev` or `yarn dev`
-5. Open [http://localhost:5173/](http://localhost:5173/)
+1. replace the github token in src/storage/db.ts
+2. create a repo you have access to and and set the repo url in src/storage/db.ts
+3. run `pnpm install` 
+4. run `pnpm run proxy` to start the cors proxy localy
+5. run `pnpm run dev` to start the app
