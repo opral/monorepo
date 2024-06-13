@@ -7,6 +7,7 @@ const debug = _debug("sdk:watchFs")
 // see lix/packages/fs/src/NodeishFilesystemApi.ts
 // https://github.com/nodejs/node/issues/7420
 export type fsChangePath = string
+export type watchFsState = "subscribed" | "unsubscribed"
 
 /**
  * returns an observable that emits relative paths as they change below a base directory
@@ -17,24 +18,40 @@ export function watchFs(args: {
 	nodeishFs: NodeishFilesystem
 	baseDir: string
 }): Observable<fsChangePath> {
-	return {
+	const observable: Observable<string> = {
+		["@@observable"]: () => observable,
 		subscribe(observer: Observer<fsChangePath>): Subscription {
+			debug(args.baseDir, "subscribe")
+			let state: watchFsState = "unsubscribed"
 			const abortController = new AbortController()
 
 			startWatching()
-				.then(() => observer.complete())
+				.then(() => {
+					observer.complete()
+					debug(args.baseDir, "complete")
+					state = "unsubscribed"
+				})
 				.catch((err) => {
 					if (err.name === "AbortError") {
-						debug(args.baseDir, "complete")
-						observer.complete()
+						if (state === "subscribed") {
+							observer.complete()
+							debug(args.baseDir, "complete")
+							state = "unsubscribed"
+						}
 					} else {
-						observer.error(err)
-						debug(args.baseDir, "error", err)
+						if (state === "subscribed") {
+							observer.error(err)
+						}
+						debug(args.baseDir, `error (${state})`, err)
+						state = "unsubscribed"
 					}
 				})
 
 			return {
 				unsubscribe() {
+					debug(args.baseDir, "unsubscribe")
+					state = "unsubscribed"
+					// don't trigger a complete after unsubscribe (TODO: check if this is correct)
 					abortController.abort()
 				},
 			}
@@ -44,8 +61,12 @@ export function watchFs(args: {
 					recursive: true,
 					signal: abortController.signal,
 				})
+				state = "subscribed"
 				for await (const event of watcher) {
-					if (event.filename) {
+					// @ts-expect-error
+					if (state === "unsubscribed") {
+						break
+					} else if (event.filename) {
 						debug(args.baseDir, "=>", event.filename)
 						observer.next(event.filename)
 					}
@@ -53,4 +74,5 @@ export function watchFs(args: {
 			}
 		},
 	}
+	return observable
 }

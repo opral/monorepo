@@ -11,6 +11,7 @@
  */
 
 export interface Observable<T> {
+	["@@observable"](): Observable<T>
 	subscribe(observer: Observer<T>): Subscription
 }
 
