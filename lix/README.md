@@ -1,3 +1,5 @@
+### Try out [Example App(Fink)](https://fink.inlang.com/github.com/LorisSigrist/merge-berlin-lix-demo)
+
 <p>
   <a href='https://twitter.com/lixCCS' target="_blank">𝕏 Twitter</a>
   ·
@@ -5,8 +7,6 @@
 </p>
 
 # Lix 
-
-### Try out [Example App(Fink)](https://fink.inlang.com/github.com/LorisSigrist/merge-berlin-lix-demo)
 
 Lix is a change control system that runs in the browser and an SDK to build web apps.  
 
