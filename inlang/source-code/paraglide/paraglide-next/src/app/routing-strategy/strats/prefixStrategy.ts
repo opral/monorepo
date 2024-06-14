@@ -23,6 +23,7 @@ export function PrefixStrategy<T extends string>({
 	pathnames: userPathnames,
 	exclude,
 	prefixDefault,
+	prefixes,
 }: {
 	exclude?: (path: string) => boolean
 	pathnames?: UserPathDefinitionTranslations<T>
@@ -40,10 +41,20 @@ export function PrefixStrategy<T extends string>({
 	 *
 	 */
 	prefixDefault?: "always" | "never"
+
+	/**
+	 * Custom language prefixes
+	 */
+	prefixes?: Record<T, string>
 } = {}): RoutingStrategy<T> {
 	const resolvedPathnames = /** @__PURE__ */ userPathnames
 		? resolveUserPathDefinitions(userPathnames, availableLanguageTags)
 		: {}
+
+	const resolvedPrefixes: Record<T, string> = {
+		...Object.fromEntries(availableLanguageTags.map((lang) => [lang, "/" + lang])),
+		...prefixes,
+	}
 
 	prefixDefault ??= "never"
 
