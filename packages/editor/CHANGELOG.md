@@ -1,5 +1,11 @@
 # @inlang/editor
 
+## 0.1.2
+
+### Patch Changes
+
+- @inlang/settings-component@1.0.26
+
 ## 0.1.1
 
 ### Patch Changes

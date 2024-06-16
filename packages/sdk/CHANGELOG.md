@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 0.35.9
+
+### Patch Changes
+
+- 8e9fc0f: Expose randomHumanId()
+
 ## 0.35.8
 
 ### Patch Changes
