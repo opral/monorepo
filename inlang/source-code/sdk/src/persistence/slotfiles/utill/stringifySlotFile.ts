@@ -2,7 +2,6 @@ import { hash } from "./hash.js"
 import type { HasId } from "../types/HasId.js"
 import type { SlotFile } from "../types/SlotFile.js"
 
-
 export async function stringifySlotFile<DocType extends HasId>(
 	slotFile: SlotFile<DocType>,
 	slotCount: number
@@ -17,7 +16,14 @@ export async function stringifySlotFile<DocType extends HasId>(
 			const soltFileEntryString = JSON.stringify(slotfileEntry.data)
 			const slotFileEntyHash = await hash(soltFileEntryString)
 
-			const dataString = '{"hash":"' + slotFileEntyHash + '", "data": ' + soltFileEntryString + "},"
+			const dataString =
+				'{"idHash":"' +
+				slotfileEntry.idHash +
+				'", "hash":"' +
+				slotFileEntyHash +
+				'", "data": ' +
+				soltFileEntryString +
+				"},"
 
 			const conflict = slotfileEntry.mergeConflict
 			if (conflict) {
@@ -36,7 +42,13 @@ export async function stringifySlotFile<DocType extends HasId>(
 				slotFileContent += conflict.conflictMarkerSeparator + "\n"
 
 				const wrappedConflictDataString =
-					'{"hash":"' + conflictHash + '", "data": ' + conflictDataString + "},"
+					'{"idHash":"' +
+					slotfileEntry.idHash +
+					'", "hash":"' +
+					conflictHash +
+					'", "data": ' +
+					conflictDataString +
+					"},"
 
 				slotFileContent += wrappedConflictDataString + "\n"
 

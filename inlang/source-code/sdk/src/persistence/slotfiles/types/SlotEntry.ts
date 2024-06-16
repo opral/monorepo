@@ -5,6 +5,10 @@ export type SlotEntry<DocType extends HasId> = {
 	hash: string
 	// a normalized object
 	data: DocType
+	localConflict?: {
+		data: DocType
+		hash: string
+	}
 	mergeConflict?: {
 		conflictMarkerStart: string
 		conflictMarkerSeparator: string
@@ -14,7 +18,7 @@ export type SlotEntry<DocType extends HasId> = {
 		data: DocType
 		hash: string
 	}
-	slotEntryIdHash: string
+	idHash: string
 	index: number
 	// NOTE: TBD deletion should be dealt with on application level i think?
 	// _deleted: boolean

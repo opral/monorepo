@@ -7,10 +7,10 @@ function addIdHash<DocType extends HasId>(
 ) {
 	const hashResult = hashFn(recordToAddIdHash.data.id)
 	if (typeof hashResult === "string") {
-		recordToAddIdHash.slotEntryIdHash = hashResult
+		recordToAddIdHash.idHash = hashResult
 		return Promise.resolve()
 	}
-	return hashResult.then((hash) => (recordToAddIdHash.slotEntryIdHash = hash))
+	return hashResult.then((hash) => (recordToAddIdHash.idHash = hash))
 }
 
 /**
@@ -93,8 +93,8 @@ export async function parseSlotFile<DocType extends HasId>(
 				slotEntryHash: recordOnSlot.theirs.hash + recordOnSlot.mine.hash,
 				data: recordOnSlot.mine.data,
 				hash: recordOnSlot.mine.hash,
+				idHash: recordOnSlot.mine.idHash,
 				index: slotIndex,
-				slotEntryIdHash: "addedAsynchronous",
 
 				mergeConflict: {
 					// add metadata to be able to json stringify again
@@ -105,6 +105,7 @@ export async function parseSlotFile<DocType extends HasId>(
 					theirsInfo: recordOnSlot.pullCommit,
 					hash: recordOnSlot.theirs.hash,
 					data: recordOnSlot.theirs.data,
+					idHash: recordOnSlot.theirs.idHash,
 				},
 			}
 
@@ -112,13 +113,12 @@ export async function parseSlotFile<DocType extends HasId>(
 			// - is there a case where one of each can be null??
 			slotfileEntries.push(conflictingSlotEntry)
 
-			hashPromises.push(addIdHash(conflictingSlotEntry, idHashFn))
+			// hashPromises.push(addIdHash(conflictingSlotEntry, idHashFn))
 		} else {
 			// data hash and slotEntry hash are the same in case there is no conflict
 			recordOnSlot.slotEntryHash = recordOnSlot.hash
 			recordOnSlot.index = slotIndex
-			recordOnSlot.slotEntryIdHash = "addedAsynchronous"
-			hashPromises.push(addIdHash(recordOnSlot, idHashFn))
+			//hashPromises.push(addIdHash(recordOnSlot, idHashFn))
 			slotfileEntries.push(recordOnSlot)
 		}
 	}
