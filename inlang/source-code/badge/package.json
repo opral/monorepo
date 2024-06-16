@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/badge",
-	"version": "0.7.34",
+	"version": "0.7.35",
 	"type": "module",
 	"private": true,
 	"exports": {
