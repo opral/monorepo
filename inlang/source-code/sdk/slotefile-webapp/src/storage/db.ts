@@ -22,7 +22,23 @@ const repoUrl = "https://github.com/martin-lysk/db-records"
 const dir = "/"
 
 // path to the folder where the slotfiles for the collection will be stored
-const collectionDir = dir + "slots3/"
+const collectionDir = dir + "slots13/"
+
+const createAwaitable = () => {
+	let resolve: () => void
+	let reject: () => void
+
+	const promise = new Promise<void>((res, rej) => {
+		resolve = res
+		reject = rej
+	})
+
+	return [promise, resolve!, reject!] as [
+		awaitable: Promise<void>,
+		resolve: () => void,
+		reject: (e: unknown) => void
+	]
+}
 
 const _create = async (fs: any) => {
 	await git.clone({
@@ -40,6 +56,7 @@ const _create = async (fs: any) => {
 	const storage = createSlotStorage<HeroDocType>(
 		// use 65536 slots per slot file
 		16 * 16 * 16 * 16,
+		3,
 		// delegate that allows to hook into change events in slot storage
 		(eventType, upsertedSlotentries) => {
 			// the event is invoked whenever the file storage detects changes on records (this can happen when the file change during pull or when a document is written)
@@ -139,18 +156,40 @@ const _create = async (fs: any) => {
 			 * Push handler
 			 */
 			async handler(docs) {
-				for (const doc of docs) {
-					const upsertedDocument = doc.newDocumentState as unknown as HeroDocType
-					const existingDocument = storage.findDocumentsById([upsertedDocument.id!])
-					if (existingDocument.length === 0) {
-						await storage.insert(upsertedDocument)
-					} else {
-						await storage.update(upsertedDocument)
+				try {
+					console.log("PUSH with n documents:" + docs.length)
+					await storage.save()
+					for (const doc of docs) {
+						const upsertedDocument = doc.newDocumentState as unknown as HeroDocType
+						const existingDocument = await storage.findDocumentsById([upsertedDocument.id!])
+						if (existingDocument.length === 0) {
+							await storage.insert(upsertedDocument, false)
+						} else {
+							await storage.update(upsertedDocument, false)
+						}
 					}
-				}
+					await storage.save()
 
-				// for the Demo we commit on every document change
-				await commitChanges()
+					// const docStates: any = []
+					// for (const doc of docs) {
+					// 	docStates.push(doc.newDocumentState as unknown as HeroDocType)
+					// }
+					// // for (const doc of docs) {
+					// setTimeout(() => {
+					// 	pullStream$.next({
+					// 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- event api sucks atm - we know that we can expect slot entries in records-change event
+					// 		documents: docStates,
+					// 		// NOTE: we don't need to reconnect a collection at the moment - any checkpoint should work
+					// 		checkpoint: Date.now(),
+					// 	})
+					// }, 0)
+					// // }
+
+					// for the Demo we commit on every document change
+					await commitChanges()
+				} catch (e) {
+					console.error(e)
+				}
 
 				return []
 			},
@@ -179,7 +218,8 @@ const _create = async (fs: any) => {
 			async handler(lastCheckpoint, batchSize) {
 				let changedDocuments = [] as any[]
 				if (!lastCheckpoint) {
-					changedDocuments = storage.readAll()
+					changedDocuments = await storage.readAll()
+					console.log("initial load of documents: " + changedDocuments.length)
 				}
 
 				const documentsToRespnse = changedDocuments.map((se) => se.data)
@@ -256,7 +296,19 @@ const _create = async (fs: any) => {
 		await storage.loadSlotFilesFromWorkingCopy(true)
 	}
 
+	let ongoingCommit = undefined as any
+
 	const commitChanges = async () => {
+		if (ongoingCommit) {
+			console.log("scheduling next commit")
+			await ongoingCommit.then(commitChanges)
+			return
+		}
+
+		const awaitable = createAwaitable()
+		ongoingCommit = awaitable[0]
+		const done = awaitable[1]
+
 		const FILE = 0,
 			WORKDIR = 2,
 			STAGE = 3
@@ -297,6 +349,8 @@ const _create = async (fs: any) => {
 		} catch (e) {
 			console.log(e)
 		}
+		ongoingCommit = undefined
+		done()
 	}
 
 	return { database, fs, pullChangesAndReloadSlots, pushChangesAndReloadSlots }

@@ -20,6 +20,10 @@ export type SlotEntry<DocType extends HasId> = {
 	_writingFlag?: boolean
 }
 
+export type TransientSlotEntry<DocType extends HasId> = SlotEntry<DocType> & {
+	slotEntryIdHash: string
+}
+
 /**
 reuse for conflict cases?
 export type SlotEntryStates<DocType extends HasId> = {

@@ -14,6 +14,8 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
       <input id="heroName" placeholder="Hero Name" />
 	  <input id="heroAge" placeholder="Hero Age" />
       <button id="btnSave">Save</button>
+	  <button id="btnAdd100">Add 100 random</button>
+	  <button id="btnAdd1000">Add 1000 random</button>
       </section>
       <section>
 	  <h2>List</h2>
@@ -62,6 +64,8 @@ setupHeroEditor({
 	heroNameElement: document.querySelector<HTMLInputElement>("#heroName")!,
 	heroIdElement: document.querySelector<HTMLInputElement>("#heroId")!,
 	saveElement: document.querySelector<HTMLButtonElement>("#btnSave")!,
+	add100Element: document.querySelector<HTMLButtonElement>("#btnAdd100")!,
+	add1000Element: document.querySelector<HTMLButtonElement>("#btnAdd1000")!,
 })
 
 await setupHeroList({
