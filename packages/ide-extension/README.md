@@ -228,6 +228,14 @@ You can disable inline annotations by setting the following property to `false` 
 "sherlock.inlineAnnotations.enabled": false
 ```
 
+### Disable Auto Human ID Generation
+
+You can disable the automatic generation of human IDs by setting the following property to `false` in your VS Code `settings.json` file. The default value is `true`.
+
+```json
+"sherlock.extract.autoHumanId": false
+```
+
 #### Troubleshooting
 
 If you are having trouble with the **loading icon** not disappearing, this is a known issue & we are working with Visual Studio Code to fix it. In the meantime, you can right-click the Inlang icon to hide it:
