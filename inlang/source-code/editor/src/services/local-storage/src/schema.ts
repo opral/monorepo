@@ -33,6 +33,7 @@ export type RecentProjectType = {
 	repository: string
 	description: string
 	lastOpened: number
+	project: string
 }
 
 /**

@@ -1,9 +1,9 @@
-import { createHandle, type HandleOptions } from "./hooks/handle.js"
+import { createHandle, type HandleOptions } from "./hooks/handle.server.js"
 import { createReroute } from "./hooks/reroute.js"
 import { base } from "$app/paths"
 import { page } from "$app/stores"
 import { get } from "svelte/store"
-import { browser, dev } from "$app/environment"
+import { dev } from "$app/environment"
 import { parseRoute, serializeRoute } from "./utils/route.js"
 import {
 	normaliseBase as canonicalNormaliseBase,
@@ -228,11 +228,7 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		 * SERVER ONLY
 		 */
 		handle: (options: HandleOptions = {}) => {
-			if (!browser) {
-				//We only want this on the server
-				return createHandle(strategy, config, options)
-			}
-			throw new Error(dev ? "`i18n.handle` hook should only be used on the server." : "")
+			return createHandle(strategy, config, options)
 		},
 
 		/**

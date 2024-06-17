@@ -1,14 +1,16 @@
+import { languageTag } from "$lib/paraglide/runtime"
+
 export const prerender = true
 export const trailingSlash = "always"
 
 /**
  * @type { import("./$types").LayoutServerLoad}
  */
-export function load({ locals, depends }) {
+export function load({ depends }) {
 	// This tells SvelteKit to re-run this load function when the language changes
 	depends("paraglide:lang")
 
 	return {
-		serverLang: `The language on the server is ${locals.paraglide.lang}`,
+		serverLang: `The language on the server is ${languageTag()}`,
 	}
 }

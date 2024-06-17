@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { createI18n } from "./adapter"
+import { createI18n } from "./adapter.server"
 import { base } from "$app/paths"
 //@ts-ignore
 import * as runtime from "$paraglide/runtime.js"

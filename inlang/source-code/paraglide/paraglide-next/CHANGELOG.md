@@ -1,5 +1,18 @@
 # @inlang/paraglide-next
 
+## 0.4.1
+
+### Patch Changes
+
+- 1dafba0: The `init` CLI will now prompt you for your preferred routing strategy
+  - @inlang/paraglide-js@1.9.1
+
+## 0.4.0
+
+### Minor Changes
+
+- 0afbe0e: The middleware now allows you to detect the language using `middleware.detectLanguage(request)`. This can be useful if you need to access the language inside the middleware itself.
+
 ## 0.3.2
 
 ### Patch Changes

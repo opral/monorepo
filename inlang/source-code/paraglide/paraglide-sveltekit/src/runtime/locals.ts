@@ -17,6 +17,14 @@
  * ```
  */
 export type ParaglideLocals<T extends string> = {
+	/**
+	 * The language that's being used for the current request.
+	 * @deprecated As of `v0.10` you can just call `languageTag()` on the server
+	 */
 	lang: T
+
+	/**
+	 * The text-direction present on the `<html>` tag
+	 */
 	textDirection: "ltr" | "rtl"
 }
