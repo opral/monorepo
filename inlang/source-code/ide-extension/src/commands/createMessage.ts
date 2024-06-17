@@ -33,12 +33,11 @@ export const createMessageCommand = {
 		}
 
 		// create random message id as default value
-		const randomHumanID = randomHumanId()
 		const autoHumanId = await getSetting("extract.autoHumanId").catch(() => true)
 
 		const messageId = await window.showInputBox({
 			title: "Enter the ID:",
-			value: autoHumanId ? randomHumanID : "",
+			value: autoHumanId ? randomHumanId() : "",
 			prompt:
 				autoHumanId &&
 				"Tip: It's best practice to use random names for your messages. Read this [guide](https://inlang.com/documentation/concept/message#idhuman-readable) for more information.",
