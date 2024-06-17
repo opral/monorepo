@@ -186,7 +186,11 @@ it("should return an error if a moduleSettings are invalid", async () => {
 	})
 
 	// Call the function
-	const resolved = await resolveModules({ settings, _import, nodeishFs: {} as any })
+	const resolved = await resolveModules({
+		settings,
+		_import,
+		nodeishFs: {} as any,
+	})
 
 	// Assert results
 	expect(resolved.errors[0]).toBeInstanceOf(ModuleSettingsAreInvalidError)

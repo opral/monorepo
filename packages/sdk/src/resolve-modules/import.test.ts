@@ -26,7 +26,8 @@ describe("$import", async () => {
 		`
 	)
 
-	const _import = createImport({
+	const _import = createImport("/project.inlang", {
+		writeFile: fs.writeFile,
 		readFile: fs.readFile,
 	})
 

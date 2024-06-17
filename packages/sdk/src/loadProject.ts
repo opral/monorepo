@@ -158,7 +158,12 @@ export async function loadProject(args: {
 			const _settings = settings()
 			if (!_settings) return
 
-			resolveModules({ settings: _settings, nodeishFs, _import: args._import })
+			resolveModules({
+				settings: _settings,
+				nodeishFs,
+				_import: args._import,
+				projectPath,
+			})
 				.then((resolvedModules) => {
 					setResolvedModules(resolvedModules)
 				})
