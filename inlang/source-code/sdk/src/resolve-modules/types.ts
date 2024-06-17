@@ -16,6 +16,7 @@ import type { resolveMessageLintRules } from "./message-lint-rules/resolveMessag
  * Pass a custom `_import` function to override the default import function.
  */
 export type ResolveModuleFunction = (args: {
+	projectPath: string
 	settings: ProjectSettings
 	nodeishFs: NodeishFilesystemSubset
 	_import?: ImportFunction
