@@ -10,7 +10,7 @@
 		"url": "https://github.com/opral/monorepo.git"
 	},
 	"icon": "assets/sherlock-logo.png",
-	"version": "1.44.15",
+	"version": "1.45.0",
 	"engines": {
 		"vscode": "^1.84.2"
 	},
@@ -188,6 +188,20 @@
 								"border": {
 									"type": "string",
 									"default": "editorError.border"
+								}
+							}
+						}
+					}
+				},
+				"sherlock.extract": {
+					"type": "object",
+					"properties": {
+						"autoHumanId": {
+							"type": "object",
+							"properties": {
+								"enabled": {
+									"type": "boolean",
+									"default": true
 								}
 							}
 						}
