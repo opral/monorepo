@@ -5,6 +5,7 @@ import IconSearch from "~icons/material-symbols/search"
 interface SearchInputProps {
 	placeholder: string
 	handleChange: (value: string) => void
+	class?: string
 }
 
 export const SearchInput = (props: SearchInputProps) => {
@@ -14,24 +15,23 @@ export const SearchInput = (props: SearchInputProps) => {
 	createEffect(() => props.handleChange(textValue()))
 
 	return (
-		<div>
-			<sl-input
-				style={{
-					padding: "0px",
-					border: "none",
-					"--tw-ring-color": "#06B6D4",
-					"border-radius": "4px",
-				}}
-				prop:placeholder={props.placeholder}
-				prop:size={"small"}
-				prop:value={textValue()}
-				onInput={(e) => setTextValue(e.currentTarget.value)}
-			>
-				<div slot={"suffix"}>
-					<IconSearch class="w-5 h-5 -mr-1 text-outline-variant" />
-				</div>
-			</sl-input>
-		</div>
+		<sl-input
+			style={{
+				padding: "0px",
+				border: "none",
+				"--tw-ring-color": "#06B6D4",
+				"border-radius": "4px",
+			}}
+			prop:placeholder={props.placeholder}
+			prop:size={"small"}
+			prop:value={textValue()}
+			onInput={(e) => setTextValue(e.currentTarget.value)}
+			class={props.class}
+		>
+			<div slot={"suffix"}>
+				<IconSearch class="w-5 h-5 -mr-1 text-outline-variant" />
+			</div>
+		</sl-input>
 	)
 }
 
