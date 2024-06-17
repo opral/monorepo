@@ -9,7 +9,7 @@ import { getRedirectPath } from "./helper/getRedirectPath.js"
 
 const repositoryRoot = import.meta.url.slice(0, import.meta.url.lastIndexOf("inlang/source-code"))
 let renderedMarkdown = {} as Record<string, string>
-let tabelOfContents = {} as Record<string, Record<string, string[]>>
+//let tabelOfContents = {} as Record<string, Record<string, string[]>>
 let pageData = {} as Record<string, Record<string, unknown>>
 
 /*
@@ -26,7 +26,7 @@ let pageData = {} as Record<string, Record<string, unknown>>
  */
 export default async function onBeforeRender(pageContext: PageContext) {
 	renderedMarkdown = {}
-	tabelOfContents = {}
+	//tabelOfContents = {}
 	pageData = {}
 
 	// check if uid is defined
@@ -48,7 +48,7 @@ export default async function onBeforeRender(pageContext: PageContext) {
 	const currentSlug = pageContext.urlParsed.pathname
 		.split("/")
 		.find((part) => part !== "m" && part !== uid && part.length !== 0)
-	if (!currentSlug) throw redirect(itemPath as `/${string}`, 301)
+	if (!currentSlug) throw (console.info("1"), redirect(itemPath as `/${string}`, 301))
 
 	// get rest of the slug for in-product navigation
 	const pagePath = pageContext.urlParsed.pathname.replace(`/m/${uid}/${currentSlug}`, "") || "/"
@@ -58,7 +58,7 @@ export default async function onBeforeRender(pageContext: PageContext) {
 		for (const [from, to] of Object.entries(item.pageRedirects)) {
 			const newPagePath = getRedirectPath(pagePath, from, to)
 			if (newPagePath) {
-				throw redirect((itemPath + newPagePath) as `/${string}`, 301)
+				throw (console.info("2"), redirect((itemPath + newPagePath) as `/${string}`, 301))
 			}
 		}
 	}
@@ -66,11 +66,11 @@ export default async function onBeforeRender(pageContext: PageContext) {
 	// check if slug is correct
 	if (item.slug) {
 		if (item.slug !== currentSlug) {
-			throw redirect((itemPath + pagePath) as `/${string}`, 301)
+			throw (console.info("3"), redirect((itemPath + pagePath) as `/${string}`, 301))
 		}
 	} else {
 		if (item.id.replaceAll(".", "-") !== currentSlug) {
-			throw redirect((itemPath + pagePath) as `/${string}`, 301)
+			throw (console.info("4"), redirect((itemPath + pagePath) as `/${string}`, 301))
 		}
 	}
 
@@ -104,9 +104,9 @@ export default async function onBeforeRender(pageContext: PageContext) {
 					pageData[slug] = markdown.data?.frontmatter
 				}
 
-				await generateTableOfContents(markdown.html).then((table) => {
-					tabelOfContents[slug] = table
-				})
+				// await generateTableOfContents(markdown.html).then((table) => {
+				// 	tabelOfContents[slug] = table
+				// })
 			} catch (error) {
 				// pages do not getting prerendered because they are link
 			}
@@ -126,9 +126,9 @@ export default async function onBeforeRender(pageContext: PageContext) {
 				pageData["/"] = readmeMarkdown.data?.frontmatter
 			}
 
-			await generateTableOfContents(readmeMarkdown.html).then((table) => {
-				tabelOfContents["/"] = table
-			})
+			// await generateTableOfContents(readmeMarkdown.html).then((table) => {
+			// 	tabelOfContents["/"] = table
+			// })
 		} catch (error) {
 			console.error("Error while accessing the readme file")
 			throw redirect("/not-found", 301)
@@ -141,7 +141,11 @@ export default async function onBeforeRender(pageContext: PageContext) {
 	//check if the markdown is available for this route
 	if (renderedMarkdown[pagePath] === undefined) {
 		console.error("No content available this route.")
-		throw redirect(itemPath as `/${string}`, 301)
+		if (pagePath !== "/") {
+			throw (console.info("5"), redirect(itemPath as `/${string}`, 301))
+		} else {
+			throw (console.info("6"), redirect("/not-found", 301))
+		}
 	}
 
 	const recommends = item.recommends
@@ -161,7 +165,7 @@ export default async function onBeforeRender(pageContext: PageContext) {
 				pages: item.pages,
 				pageData: pageData ? pageData[pagePath] : undefined,
 				pagePath,
-				tableOfContents: tabelOfContents[pagePath] || {},
+				tableOfContents: {},
 				manifest: item,
 				recommends,
 			} as PageProps,
