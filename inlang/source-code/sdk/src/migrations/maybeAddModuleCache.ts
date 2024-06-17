@@ -9,6 +9,9 @@ export async function maybeAddModuleCache(args: {
 }): Promise<void> {
 	if (args.repo === undefined) return
 
+	const projectExists = await directoryExists(args.projectPath, args.repo.nodeishFs)
+	if (!projectExists) return
+
 	// This is how paths are handled in the other migrations.
 	// Is this reliable on windows?
 	const gitignorePath = args.projectPath + "/.gitignore"
