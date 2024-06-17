@@ -1,12 +1,14 @@
 import type { Repository } from "@lix-js/client"
 import type { CliStep } from "../../utils"
 import type { NextJSProject } from "../scan-next-project"
+import type { RoutingStrategy } from "./promptRoutingStrategy"
 import path from "node:path"
 
 export const createI18nFile: CliStep<
 	{
 		repo: Repository
 		nextProject: NextJSProject
+		routingStrategy: RoutingStrategy
 	},
 	unknown
 > = async (ctx) => {
@@ -19,7 +21,15 @@ export const createI18nFile: CliStep<
 import { PrefixStrategy, Navigation, Middleware } from "@inlang/paraglide-next"
 import type { AvailableLanguageTag } from "@/paraglide/runtime"
 
-const strategy = PrefixStrategy<AvailableLanguageTag>({ prefixDefault: "never" });
+const strategy = ${
+		ctx.routingStrategy.type === "cookie"
+			? `DetectionStrategy<AvailableLanguageTag>()`
+			: ctx.routingStrategy.type === "domain"
+			? `DomainStrategy<AvailableLanguageTag>({ domains: ${JSON.stringify(
+					ctx.routingStrategy.domains
+			  )} })`
+			: `PrefixStrategy<AvailableLanguageTag>({ prefixDefault: "never" })`
+	};
 
 export const middleware = Middleware({ strategy });
 export const { Link, useRouter, usePathname, redirect, permanentRedirect } = Navigation({ strategy });
@@ -29,11 +39,21 @@ export const { Link, useRouter, usePathname, redirect, permanentRedirect } = Nav
 import { PrefixStrategy, Navigation, Middleware } from "@inlang/paraglide-next"
 
 /** 
- * @type {import("@inlang/paraglide-next").PrefixStrategy<
+ * @type {import("@inlang/paraglide-next").${
+		{ prefix: "PrefixStrategy", cookie: "DetectionStrategy", domain: "DomainStrategy" }[
+			ctx.routingStrategy.type
+		]
+ }<
  *     import("@/paraglide/runtime").AvailableLanguageTag
  * >} 
  */
-const strategy = PrefixStrategy<AvailableLanguageTag>({ prefixDefault: "never" });
+const strategy = ${
+		ctx.routingStrategy.type === "cookie"
+			? `DetectionStrategy()`
+			: ctx.routingStrategy.type === "domain"
+			? `DomainStrategy({ domains: ${JSON.stringify(ctx.routingStrategy.domains)} })`
+			: `PrefixStrategy({ prefixDefault: "never" })`
+	};
 
 export const middleware = Middleware({ strategy });
 export const { Link, useRouter, usePathname, redirect, permanentRedirect } = Navigation({ strategy });

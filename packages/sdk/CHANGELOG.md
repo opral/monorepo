@@ -1,5 +1,17 @@
 # @inlang/sdk
 
+## 0.35.9
+
+### Patch Changes
+
+- 8e9fc0f: Expose randomHumanId()
+
+## 0.35.8
+
+### Patch Changes
+
+- da7c207: fixes reactive alias by id map - to support experimental aliases flag again
+
 ## 0.35.7
 
 ### Patch Changes

@@ -1,5 +1,25 @@
 # @inlang/plugin-m-function-matcher
 
+## 0.9.32
+
+### Patch Changes
+
+- Updated dependencies [8e9fc0f]
+  - @inlang/sdk@0.35.9
+
+## 0.9.31
+
+### Patch Changes
+
+- 04e804b: add human readble id tests to plugins
+
+## 0.9.30
+
+### Patch Changes
+
+- Updated dependencies [da7c207]
+  - @inlang/sdk@0.35.8
+
 ## 0.9.29
 
 ### Patch Changes

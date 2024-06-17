@@ -1,5 +1,29 @@
 # @inlang/editor
 
+## 0.1.2
+
+### Patch Changes
+
+- @inlang/settings-component@1.0.26
+
+## 0.1.1
+
+### Patch Changes
+
+- b776572: update example repos
+
+## 0.1.0
+
+### Minor Changes
+
+- c3211c6: init versioning
+
+## null
+
+### Patch Changes
+
+- @inlang/settings-component@1.0.25
+
 ## null
 
 ### Patch Changes

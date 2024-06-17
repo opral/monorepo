@@ -1,5 +1,31 @@
 # inlang-vs-code-extension
 
+## 1.44.15
+
+### Patch Changes
+
+- Updated dependencies [8e9fc0f]
+  - @inlang/sdk@0.35.9
+  - @inlang/rpc@0.3.31
+  - @inlang/settings-component@1.0.26
+  - @inlang/telemetry@0.3.46
+
+## 1.44.14
+
+### Patch Changes
+
+- f472213: remove migrateSettingsFromInlangToSherlock because its no longer needed
+
+## 1.44.13
+
+### Patch Changes
+
+- Updated dependencies [da7c207]
+  - @inlang/sdk@0.35.8
+  - @inlang/rpc@0.3.30
+  - @inlang/settings-component@1.0.25
+  - @inlang/telemetry@0.3.45
+
 ## 1.44.12
 
 ### Patch Changes

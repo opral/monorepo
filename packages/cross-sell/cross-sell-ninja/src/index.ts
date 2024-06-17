@@ -36,23 +36,17 @@ export async function isAdopted(args: { fs: NodeishFilesystem }): Promise<boolea
 			} else if (item.endsWith(".yml") || item.endsWith(".yaml")) {
 				const fileContents = await args.fs.readFile(itemPath, { encoding: "utf-8" })
 				const workflow = yaml.load(fileContents) as Static<typeof GitHubActionsWorkflow>
-				if (Value.Check(GitHubActionsWorkflow, workflow)) {
-					if (workflow && workflow.jobs) {
-						for (const jobKey in workflow.jobs) {
-							const job = workflow.jobs[jobKey]
-							if (job && job.steps) {
-								for (const step of job.steps) {
-									if (step.uses && step.uses.includes("opral/ninja-i18n-action")) {
-										return true // Found the action
-									}
+				if (Value.Check(GitHubActionsWorkflow, workflow) && workflow && workflow.jobs) {
+					for (const jobKey in workflow.jobs) {
+						const job = workflow.jobs[jobKey]
+						if (job && job.steps) {
+							for (const step of job.steps) {
+								if (step.uses && step.uses.includes("opral/ninja-i18n-action")) {
+									return true // Found the action
 								}
 							}
 						}
 					}
-				} else {
-					// Ignore invalid YAML files
-					console.error("Failed to parse YAML", [...Value.Errors(GitHubActionsWorkflow, workflow)])
-					return false // Malformed YAML should result in a negative check
 				}
 			}
 		}
