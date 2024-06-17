@@ -12,6 +12,7 @@ const settingsProperty = [
 	"editorColors.error.foreground",
 	"editorColors.error.background",
 	"editorColors.error.border",
+	"extract.autoHumanId",
 	"inlineAnnotations.enabled",
 ] as const
 
