@@ -6,6 +6,11 @@
  */
 export const repositories: Repositories = [
 	{
+		owner: "LorisSigrist",
+		repository: "merge-berlin-lix-demo",
+		description: "Experience lix in your browser",
+	},
+	{
 		owner: "opral",
 		repository: "example",
 		description: "Example repository that showcases inlang.",
