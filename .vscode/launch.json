@@ -48,8 +48,13 @@
 				"--extensionDevelopmentPath=${workspaceFolder}/inlang/source-code/ide-extension",
 				// change this path to specify what folder should be opened upon running this configuration
 				"${workspaceFolder}/inlang/development-projects/inlang-nextjs"
+			],
+			"sourceMaps": true,
+			"outFiles": [
+				"${workspaceFolder}/**/*.js",
+				"${workspaceFolder}/**/*.ts",
+				"!**/node_modules/**"
 			]
-			// "outFiles": []
 		},
 		{
 			"name": "debug vs-code-extension e2e",

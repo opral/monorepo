@@ -20,6 +20,28 @@ export const pluralBundle: MessageBundle = {
 						},
 					},
 				},
+				{
+					type: "input",
+					name: "count",
+					value: {
+						type: "expression",
+						arg: {
+							type: "variable",
+							name: "count",
+						},
+					},
+				},
+				{
+					type: "input",
+					name: "projectCount",
+					value: {
+						type: "expression",
+						arg: {
+							type: "variable",
+							name: "projectCount",
+						},
+					},
+				},
 			],
 			selectors: [
 				{

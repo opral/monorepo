@@ -115,7 +115,8 @@ const createNamespaceParser = () => {
 		},
 
 		stringParser: () => {
-			return Parsimmon.lookahead(Parsimmon.noneOf("{")).then(
+			return Parsimmon.alt(
+				Parsimmon.regexp(/'([^']*)'/, 1).map((str) => ({ type: "string", value: str })),
 				Parsimmon.regexp(/"([^"]*)"/, 1).map((str) => ({ type: "string", value: str }))
 			)
 		},

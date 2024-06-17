@@ -1,5 +1,70 @@
 # inlang-vs-code-extension
 
+## 1.45.0
+
+### Minor Changes
+
+- 9e2125b: default human ids in sherlock
+
+## 1.44.16
+
+### Patch Changes
+
+- fadd94d: project selection focus on name instead of paths
+
+## 1.44.15
+
+### Patch Changes
+
+- Updated dependencies [8e9fc0f]
+  - @inlang/sdk@0.35.9
+  - @inlang/rpc@0.3.31
+  - @inlang/settings-component@1.0.26
+  - @inlang/telemetry@0.3.46
+
+## 1.44.14
+
+### Patch Changes
+
+- f472213: remove migrateSettingsFromInlangToSherlock because its no longer needed
+
+## 1.44.13
+
+### Patch Changes
+
+- Updated dependencies [da7c207]
+  - @inlang/sdk@0.35.8
+  - @inlang/rpc@0.3.30
+  - @inlang/settings-component@1.0.25
+  - @inlang/telemetry@0.3.45
+
+## 1.44.12
+
+### Patch Changes
+
+- e318e7b: fix turning off inline previews also turns off hover for messages
+
+## 1.44.11
+
+### Patch Changes
+
+- Updated dependencies [2a5645c]
+  - @inlang/sdk@0.35.7
+  - @inlang/rpc@0.3.29
+  - @inlang/settings-component@1.0.24
+  - @inlang/telemetry@0.3.44
+
+## 1.44.10
+
+### Patch Changes
+
+- d88613e: update docs with supported libraries
+- Updated dependencies [9d2aa1a]
+  - @inlang/sdk@0.35.6
+  - @inlang/rpc@0.3.28
+  - @inlang/settings-component@1.0.23
+  - @inlang/telemetry@0.3.43
+
 ## 1.44.9
 
 ### Patch Changes

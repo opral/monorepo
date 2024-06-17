@@ -1,5 +1,46 @@
 # @inlang/plugin-next-intl
 
+## 1.3.44
+
+### Patch Changes
+
+- Updated dependencies [8e9fc0f]
+  - @inlang/sdk@0.35.9
+
+## 1.3.43
+
+### Patch Changes
+
+- 04e804b: add human readble id tests to plugins
+- aa91877: add more extract options
+
+## 1.3.42
+
+### Patch Changes
+
+- Updated dependencies [da7c207]
+  - @inlang/sdk@0.35.8
+
+## 1.3.41
+
+### Patch Changes
+
+- 2b36271: add changeset
+
+## 1.3.40
+
+### Patch Changes
+
+- Updated dependencies [2a5645c]
+  - @inlang/sdk@0.35.7
+
+## 1.3.39
+
+### Patch Changes
+
+- Updated dependencies [9d2aa1a]
+  - @inlang/sdk@0.35.6
+
 ## 1.3.38
 
 ### Patch Changes

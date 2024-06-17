@@ -1,3 +1,5 @@
+import { NodeishFilesystem } from "@lix-js/fs"
+import consola from "consola"
 import path from "node:path"
 
 /**
@@ -61,4 +63,40 @@ const isWindows = typeof process !== "undefined" && process.platform === "win32"
 
 export function normalizePath(id: string) {
 	return path.posix.normalize(isWindows ? slash(id) : id)
+}
+
+export async function folderExists(fs: NodeishFilesystem, path: string): Promise<boolean> {
+	try {
+		const stat = await fs.stat(path)
+		return stat.isDirectory()
+	} catch {
+		return false
+	}
+}
+
+export async function fileExists(fs: NodeishFilesystem, path: string): Promise<boolean> {
+	try {
+		const stat = await fs.stat(path)
+		return stat.isFile()
+	} catch {
+		return false
+	}
+}
+
+export const promptSelection = async <T extends string>(
+	message: string,
+	options: { initial?: T; options: { label: string; value: T }[] } = { options: [] }
+): Promise<T> => {
+	return prompt(message, { type: "select", ...options }) as unknown as Promise<T>
+}
+
+/**
+ * Wrapper to exit the process if the user presses CTRL+C.
+ */
+export const prompt: typeof consola.prompt = async (message, options) => {
+	const response = await consola.prompt(message, options)
+	if (response?.toString() === "Symbol(clack:cancel)") {
+		process.exit(0)
+	}
+	return response
 }

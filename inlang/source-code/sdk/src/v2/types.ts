@@ -140,3 +140,20 @@ export const MessageBundle = Type.Object({
 	alias: Type.Record(Type.String(), Type.String()),
 	messages: Type.Array(Message),
 })
+
+/**
+ * A MessageSlot is a placeholder for a message with a locale.
+ * This is useful to avoid merge conflicts when translations are added.
+ */
+export type MessageSlot = Static<typeof MessageSlot>
+export const MessageSlot = Type.Object({
+	locale: LanguageTag,
+	slot: Type.Literal(true),
+})
+
+export type MessageBundleWithSlots = Static<typeof MessageBundleWithSlots>
+export const MessageBundleWithSlots = Type.Object({
+	id: Type.String(),
+	alias: Type.Record(Type.String(), Type.String()),
+	messages: Type.Array(Type.Union([Message, MessageSlot])),
+})

@@ -14,6 +14,7 @@ You can have different paths for each language with the `pathnames` option. Don'
 - `/fr/a-propos` for French
 
 ```js
+// src/lib/i18n.js
 import { createI18n } from "@inlang/paraglide-sveltekit"
 import * as runtime from "$lib/paraglide/runtime.js"
 import * as m from "$lib/paraglide/messages.js"
@@ -45,11 +46,12 @@ export const i18n = createI18n(runtime, {
 
 By default the default language is located on your base path. Usually `/`. Unlike the other languages it does not have a language prefix. 
 
-This reflects the default `prefixDefaultLanugage: "never"` behavior.
+This reflects the default `prefixDefaultLanguage: "never"` behavior.
 
-If you want to also have a prefix for the default language, use the `prefixDefaultLanugage: "always"` option.
+If you want to also have a prefix for the default language, use the `prefixDefaultLanguage: "always"` option.
 
 ```ts
+// src/lib/i18n.js
 export const i18n = createI18n(runtime, {
 	prefixDefaultLanguage: "always",
 })
@@ -74,8 +76,9 @@ Usually your default language is the same as the `sourceLanguageTag` of your Inl
 You can change it by passing a `defaultLanguageTag` option to `createI18n`
 
 ```ts
-// sourceLanguageTag = "en"
+// src/lib/i18n.js
 
+// sourceLanguageTag = "en"
 export const i18n = createI18n(runtime, {
 	defaultLanguageTag: "de",
 })
@@ -172,3 +175,19 @@ Use this to create a language switcher.
 	</a>
 {/each}
 ```
+
+## Re-Loading Language-Dependent data
+
+If you have a `load` function that returns data that depends on the language you can tell it to re-run on language changes by calling `depends("paraglide:lang")`.
+
+```ts
+// src/routes/+page.server.js
+export async function load({ depends }) {
+  // Paraglide-SvelteKit automatically calls `invalidate("paraglide:lang")` whenever the langauge changes
+  // This tells SvelteKit to re-run this function whenever that happens
+  depends("paraglide:lang") 
+  return await myLanguageSpecificData();
+}
+```
+
+Paraglide-SvelteKit automatically calls `invalidate("paraglide:lang")` when the language changes.

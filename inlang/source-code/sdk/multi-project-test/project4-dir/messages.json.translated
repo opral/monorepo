@@ -1,83 +1,37 @@
 [
-  {
-    "alias": {},
-    "id": "project4_message_key_1",
-    "selectors": [],
-    "variants": [
-      {
-        "languageTag": "de",
-        "match": [],
-        "pattern": [
-          {
-            "type": "Text",
-            "value": "Mock translate local en to de: Generated message (1)"
-          }
-        ]
-      },
-      {
-        "languageTag": "en",
-        "match": [],
-        "pattern": [
-          {
-            "type": "Text",
-            "value": "Generated message (1)"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "alias": {},
-    "id": "project4_message_key_2",
-    "selectors": [],
-    "variants": [
-      {
-        "languageTag": "de",
-        "match": [],
-        "pattern": [
-          {
-            "type": "Text",
-            "value": "Mock translate local en to de: Generated message (2)"
-          }
-        ]
-      },
-      {
-        "languageTag": "en",
-        "match": [],
-        "pattern": [
-          {
-            "type": "Text",
-            "value": "Generated message (2)"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "alias": {},
-    "id": "project4_message_key_3",
-    "selectors": [],
-    "variants": [
-      {
-        "languageTag": "de",
-        "match": [],
-        "pattern": [
-          {
-            "type": "Text",
-            "value": "Mock translate local en to de: Generated message (3)"
-          }
-        ]
-      },
-      {
-        "languageTag": "en",
-        "match": [],
-        "pattern": [
-          {
-            "type": "Text",
-            "value": "Generated message (3)"
-          }
-        ]
-      }
-    ]
-  }
-]
+
+
+
+{"id":"project4_message_key_1","alias":{},"messages":[
+
+
+
+{"locale":"en","declarations":[],"selectors":[],"variants":[{"match":[],"pattern":[{"type":"text","value":"Generated message (1)"}]}]},
+
+
+
+{"locale":"de","declarations":[],"selectors":[],"variants":[{"match":[],"pattern":[{"type":"text","value":"Mock translate local en to de: Generated message (1)"}]}]}]},
+
+
+
+{"id":"project4_message_key_2","alias":{},"messages":[
+
+
+
+{"locale":"en","declarations":[],"selectors":[],"variants":[{"match":[],"pattern":[{"type":"text","value":"Generated message (2)"}]}]},
+
+
+
+{"locale":"de","declarations":[],"selectors":[],"variants":[{"match":[],"pattern":[{"type":"text","value":"Mock translate local en to de: Generated message (2)"}]}]}]},
+
+
+
+{"id":"project4_message_key_3","alias":{},"messages":[
+
+
+
+{"locale":"en","declarations":[],"selectors":[],"variants":[{"match":[],"pattern":[{"type":"text","value":"Generated message (3)"}]}]},
+
+
+
+{"locale":"de","declarations":[],"selectors":[],"variants":[{"match":[],"pattern":[{"type":"text","value":"Mock translate local en to de: Generated message (3)"}]}]}]}]

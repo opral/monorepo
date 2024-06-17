@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/paraglide-sveltekit",
-	"version": "0.9.1",
+	"version": "0.10.3",
 	"type": "module",
 	"main": "./dist/runtime/index.js",
 	"types": "./dist/runtime/index.d.ts",
@@ -58,9 +58,9 @@
 	},
 	"exports": {
 		".": {
-			"import": "./dist/runtime/index.js",
-			"svelte": "./dist/runtime/index.js",
-			"types": "./dist/runtime/index.d.ts"
+			"types": "./dist/runtime/index.server.d.ts",
+			"browser": "./dist/runtime/index.client.js",
+			"default": "./dist/runtime/index.server.js"
 		},
 		"./internal": {
 			"import": "./dist/runtime/internal/index.js",

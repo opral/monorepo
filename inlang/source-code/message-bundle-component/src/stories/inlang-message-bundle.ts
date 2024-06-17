@@ -2,16 +2,63 @@ import { html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
 import { baseStyling } from "../styling/base.js"
 import overridePrimitiveColors from "../helper/overridePrimitiveColors.js"
-import type { MessageBundle, Message, Variant } from "@inlang/sdk/v2" // Import the types
+import type { MessageBundle, Message, LanguageTag } from "@inlang/sdk/v2" // Import the types
 import { messageBundleStyling } from "./inlang-message-bundle.styles.js"
+import upsertVariant from "../helper/crud/variant/upsert.js"
+
+import "./inlang-variant.js"
+import "./inlang-lint-report-tip.js"
+import "./inlang-selector-configurator.js"
+
+import SlInput from "@shoelace-style/shoelace/dist/components/input/input.component.js"
+import SlButton from "@shoelace-style/shoelace/dist/components/button/button.component.js"
+import SlTooltip from "@shoelace-style/shoelace/dist/components/tooltip/tooltip.component.js"
+import type { MessageLintReport, ProjectSettings } from "@inlang/sdk"
+import { getInputs } from "../helper/crud/input/get.js"
+
+// in case an app defines it's own set of shoelace components, prevent double registering
+if (!customElements.get("sl-input")) customElements.define("sl-input", SlInput)
+if (!customElements.get("sl-button")) customElements.define("sl-button", SlButton)
+if (!customElements.get("sl-tooltip")) customElements.define("sl-tooltip", SlTooltip)
 
 @customElement("inlang-message-bundle")
 export default class InlangMessageBundle extends LitElement {
+	static override styles = [baseStyling, messageBundleStyling]
+
 	@property({ type: Object })
 	messageBundle: MessageBundle | undefined
-	messageBundleLintReports: any[] = []
 
-	static override styles = [baseStyling, messageBundleStyling]
+	@property({ type: Object })
+	settings: ProjectSettings | undefined
+
+	@property({ type: Object })
+	lintReports: MessageLintReport[] | undefined
+
+	dispatchOnSetSettings(messageBundle: MessageBundle) {
+		const onChangeMessageBundle = new CustomEvent("change-message-bundle", {
+			detail: {
+				argument: messageBundle,
+			},
+		})
+		this.dispatchEvent(onChangeMessageBundle)
+	}
+
+	_triggerSave = () => {
+		if (this.messageBundle) {
+			this.dispatchOnSetSettings(this.messageBundle)
+		}
+	}
+
+	_addMessage = (message: Message) => {
+		if (this.messageBundle) {
+			this.messageBundle.messages.push(message)
+			this.requestUpdate()
+		}
+	}
+
+	_triggerRefresh = () => {
+		this.requestUpdate()
+	}
 
 	override async firstUpdated() {
 		await this.updateComplete
@@ -19,77 +66,158 @@ export default class InlangMessageBundle extends LitElement {
 		overridePrimitiveColors()
 	}
 
+	private _refLanguageTag = (): LanguageTag | undefined => {
+		return this.settings?.sourceLanguageTag
+	}
+
+	private _languageTags = (): LanguageTag[] | undefined => {
+		return this.settings?.languageTags
+	}
+
+	private _fakeInputs = (): string[] | undefined => {
+		const _refLanguageTag = this._refLanguageTag()
+		return _refLanguageTag && this.messageBundle
+			? getInputs({ messageBundle: this.messageBundle })
+			: undefined
+	}
+
 	override render() {
 		return html`
-			<div class="header">
+			<div class=${`header`}>
 				<span># ${this.messageBundle?.id}</span>
 				<span class="alias">@${this.messageBundle?.alias.default}</span>
 			</div>
-			<div class="container">
-				${this.messageBundle?.messages.map((message) => this.renderVariantsTable(message))}
+			<div class="messages-container">
+				${this._languageTags() &&
+				this._languageTags()?.map((languageTag) => {
+					const message = this.messageBundle?.messages.find(
+						(message) => message.locale === languageTag
+					)
+
+					return this._renderMessage(
+						languageTag,
+						message,
+						this.lintReports?.filter((report) => report.languageTag === languageTag)
+					)
+				})}
 			</div>
 		`
 	}
 
-	private renderVariantsTable(message: Message) {
-		// @ts-ignore
-		const selectors = message.selectors.map((selector) => selector.arg.name)
+	private _renderMessage(
+		languageTag: LanguageTag,
+		message?: Message,
+		messageLintReports?: MessageLintReport[]
+	) {
 		return html`
-			<div class="variant-table">
-				<div class="lang">
-					<span>${message.locale}</span>
+			<div class="message">
+				<div class="language-container">
+					<span>${languageTag}</span>
 				</div>
-				<table>
-					<thead>
-						<tr>
-							${selectors.map((selector) => html`<th>${selector}</th>`)}
-							<th>Pattern</th>
-							<th>Actions</th>
-						</tr>
-					</thead>
-					<tbody>
-						${message.variants.map((variant, index) =>
-							this.renderVariantRow(variant, index, selectors)
-						)}
-					</tbody>
-					<tfooter>
-						<td colspan="${selectors.length + 2}">Add Variant</td>
-					</tfooter>
-				</table>
+				<div class="message-body">
+					${message && message.selectors.length > 0
+						? html`<div
+								class=${`message-header` +
+								` ` +
+								(message.variants && message.variants.length === 0 ? `no-bottom-border` : ``)}
+						  >
+								<div class="selector-container">
+									${message.selectors.map(
+										// @ts-ignore
+										(selector) => html`<div class="selector">${selector.arg.name}</div>`
+									)}
+									<div class="add-selector-container">
+										<inlang-selector-configurator
+											.inputs=${this._fakeInputs()}
+											.message=${message}
+											.languageTag=${languageTag}
+											.triggerMessageBundleRefresh=${this._triggerRefresh}
+											.addMessage=${this._addMessage}
+										>
+											<sl-tooltip content="Add Selector to message"
+												><div class="add-selector">
+													<svg
+														viewBox="0 0 24 24"
+														width="18"
+														height="18"
+														slot="prefix"
+														class="w-5 h-5 -mx-1"
+													>
+														<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path>
+													</svg>
+												</div>
+											</sl-tooltip>
+										</inlang-selector-configurator>
+									</div>
+								</div>
+								<div class="message-actions">
+									${messageLintReports && messageLintReports.length > 0
+										? html`<inlang-lint-report-tip
+												.lintReports=${messageLintReports}
+										  ></inlang-lint-report-tip>`
+										: ``}
+								</div>
+						  </div>`
+						: ``}
+					<div class="variants-container">
+						${message
+							? message.variants.map(
+									(variant) =>
+										html`<inlang-variant
+											.variant=${variant}
+											.message=${message}
+											.inputs=${this._fakeInputs()}
+											.triggerSave=${this._triggerSave}
+											.triggerMessageBundleRefresh=${this._triggerRefresh}
+											.addMessage=${this._addMessage}
+											.languageTag=${languageTag}
+											.lintReports=${messageLintReports}
+										></inlang-variant>`
+							  )
+							: html`<inlang-variant
+									.message=${message}
+									.inputs=${this._fakeInputs()}
+									.triggerSave=${this._triggerSave}
+									.addMessage=${this._addMessage}
+									.triggerMessageBundleRefresh=${this._triggerRefresh}
+									.languageTag=${languageTag}
+									.lintReports=${messageLintReports}
+							  ></inlang-variant>`}
+						${message?.selectors && message.selectors.length > 0
+							? html`<p
+									@click=${() => {
+										upsertVariant({
+											message: message,
+											variant: {
+												// combine the matches that are already present with the new category -> like a matrix
+												match: message.selectors.map(() => "null"),
+												pattern: [
+													{
+														type: "text",
+														value: "",
+													},
+												],
+											},
+										})
+										this._triggerRefresh()
+									}}
+									class="new-variant"
+							  >
+									<svg
+										viewBox="0 0 24 24"
+										width="18"
+										height="18"
+										slot="prefix"
+										class="w-5 h-5 -mx-1"
+									>
+										<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path>
+									</svg>
+									New variant
+							  </p>`
+							: ``}
+					</div>
+				</div>
 			</div>
-		`
-	}
-
-	private renderVariantRow(variant: Variant, index: number, selectors: string[]) {
-		const matches = selectors.map((selector) => {
-			const matchIndex = selectors.indexOf(selector)
-			return variant.match[matchIndex] || ""
-		})
-		return html`
-			<tr>
-				${matches.map((match) => html`<td>${match}</td>`)}
-				<td>
-					${variant.pattern
-						.map((p) => {
-							if ("value" in p) {
-								return p.value
-							}
-							return ""
-						})
-						.join(" ")}
-				</td>
-				<td>
-					<button
-						class="delete-button"
-						@click="${() => {
-							// eslint-disable-next-line no-console
-							console.log("delete variant", index)
-						}}"
-					>
-						🗑️
-					</button>
-				</td>
-			</tr>
 		`
 	}
 }
