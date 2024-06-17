@@ -1,5 +1,11 @@
 # @inlang/editor
 
+## 0.1.3
+
+### Patch Changes
+
+- 9886cfa: show project names instead of paths
+
 ## 0.1.2
 
 ### Patch Changes
