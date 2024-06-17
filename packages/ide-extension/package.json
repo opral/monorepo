@@ -197,8 +197,13 @@
 					"type": "object",
 					"properties": {
 						"autoHumanId": {
-							"type": "boolean",
-							"default": true
+							"type": "object",
+							"properties": {
+								"enabled": {
+									"type": "boolean",
+									"default": true
+								}
+							}
 						}
 					}
 				},
