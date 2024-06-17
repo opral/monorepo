@@ -2,8 +2,9 @@ import { state } from "../utilities/state.js"
 import { msg } from "../utilities/messages/msg.js"
 import { commands, window } from "vscode"
 import { telemetry } from "../services/telemetry/index.js"
-import type { Message } from "@inlang/sdk"
+import { randomHumanId, type Message } from "@inlang/sdk"
 import { CONFIGURATION } from "../configuration.js"
+import { getSetting } from "../utilities/settings/index.js"
 
 /**
  * Helps the user to create messages by prompting for the message content.
@@ -31,8 +32,16 @@ export const createMessageCommand = {
 			return
 		}
 
+		// create random message id as default value
+		const randomHumanID = randomHumanId()
+		const autoHumanId = await getSetting("extract.autoHumanId").catch(() => true)
+
 		const messageId = await window.showInputBox({
 			title: "Enter the ID:",
+			value: autoHumanId ? randomHumanID : "",
+			prompt:
+				autoHumanId &&
+				"Tip: It's best practice to use random names for your messages. Read this [guide](https://inlang.com/documentation/concept/message#idhuman-readable) for more information.",
 		})
 		if (messageId === undefined) {
 			return
