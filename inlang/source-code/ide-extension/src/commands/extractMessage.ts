@@ -54,7 +54,7 @@ export const extractMessageCommand = {
 		}
 
 		// create random message id as default value
-		const autoHumanId = await getSetting("extract.autoHumanId").catch(() => true)
+		const autoHumanId = await getSetting("extract.autoHumanId.enabled").catch(() => true)
 
 		const messageId = await window.showInputBox({
 			title: "Enter the ID:",
