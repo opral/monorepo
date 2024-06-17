@@ -104,6 +104,11 @@ vi.mock("@lix-js/client", () => ({
 
 describe("createProjectViewNodes", () => {
 	const mockContext = {} as vscode.ExtensionContext
+	const mockWorkspaceFolder = {
+		uri: {
+			fsPath: "/path/to/workspace",
+		},
+	} as vscode.WorkspaceFolder
 
 	beforeEach(() => {
 		vi.resetAllMocks()
@@ -123,9 +128,12 @@ describe("createProjectViewNodes", () => {
 			selectedProjectPath: "/path/to/project2",
 		})
 
-		const nodes = createProjectViewNodes({ context: mockContext })
+		const nodes = createProjectViewNodes({
+			context: mockContext,
+			workspaceFolder: mockWorkspaceFolder,
+		})
 		expect(nodes.length).toBe(2)
-		expect(nodes[0]?.label).toBe("to/project1")
+		expect(nodes[0]?.label).toBe("project1")
 		expect(nodes[1]?.isSelected).toBe(true)
 	})
 
@@ -135,7 +143,10 @@ describe("createProjectViewNodes", () => {
 			projectsInWorkspace: [],
 			selectedProjectPath: "/path/to/project2",
 		})
-		const nodes = createProjectViewNodes({ context: mockContext })
+		const nodes = createProjectViewNodes({
+			context: mockContext,
+			workspaceFolder: mockWorkspaceFolder,
+		})
 		expect(nodes).toEqual([])
 	})
 
@@ -149,7 +160,10 @@ describe("createProjectViewNodes", () => {
 			],
 			selectedProjectPath: "/path/to/project2",
 		})
-		const nodes = createProjectViewNodes({ context: mockContext })
+		const nodes = createProjectViewNodes({
+			context: mockContext,
+			workspaceFolder: mockWorkspaceFolder,
+		})
 		expect(nodes.some((node) => node.label === "")).toBe(true)
 	})
 })
@@ -159,8 +173,9 @@ describe("getTreeItem", () => {
 
 	it("should return a TreeItem for a given ProjectViewNode", () => {
 		const node: ProjectViewNode = {
-			label: "TestProject",
+			label: "testProject",
 			path: "/path/to/testproject",
+			relativePath: "./path/to/testproject",
 			isSelected: true,
 			collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
 			context: mockContext,
@@ -175,7 +190,8 @@ describe("getTreeItem", () => {
 			nodeishFs: {} as NodeishFilesystem,
 			workspaceFolder,
 		})
-		expect(treeItem.label).toBe("TestProject")
+		expect(treeItem.label).toBe("testProject")
+		expect(treeItem.description).toBe("./path/to/testproject")
 		expect(treeItem.tooltip).toBe("/path/to/testproject")
 		expect(treeItem.iconPath).toBeInstanceOf(vscode.ThemeIcon)
 	})
@@ -188,6 +204,7 @@ describe("handleTreeSelection", () => {
 		const selectedNode: ProjectViewNode = {
 			label: "SelectedProject",
 			path: "/path/to/selected",
+			relativePath: "./path/to/selected",
 			isSelected: true,
 			collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
 			context: mockContext,
@@ -217,6 +234,7 @@ describe("handleTreeSelection", () => {
 		const selectedNode: ProjectViewNode = {
 			label: "SelectedProject",
 			path: "/path/to/selected",
+			relativePath: "./path/to/selected",
 			isSelected: true,
 			collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
 			context: mockContext,
@@ -248,6 +266,7 @@ describe("handleTreeSelection", () => {
 		const selectedNode: ProjectViewNode = {
 			label: "selected/project.inlang",
 			path: "/path/to/selected/project.inlang",
+			relativePath: "./path/to/selected/project.inlang",
 			isSelected: true,
 			collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
 			context: mockContext,
