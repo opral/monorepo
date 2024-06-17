@@ -42,7 +42,8 @@ describe("upsertVariant", () => {
 		})
 
 		expect(bundle.messages[0]?.variants).toHaveLength(2)
-		expect(bundle.messages[0]?.variants[1]?.pattern).toStrictEqual([
+		// it's 0 because it's sorted alphabetically
+		expect(bundle.messages[0]?.variants[0]?.pattern).toStrictEqual([
 			{ type: "text", value: "Hello Universe" },
 		])
 	})
