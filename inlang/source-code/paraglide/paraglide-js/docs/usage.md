@@ -2,14 +2,14 @@
 
 ## Working with the Inlang Message Format
 
-Paraglide is part of the highly modular Inlang Ecosystem which supports many different Message Formats. By default, the [Inlang Message Format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat) is used. 
+Paraglide is part of the highly modular Inlang Ecosystem which supports many different Message Formats. By default, the [Inlang Message Format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat) is used.
 
 It expects messages to be in `messages/{lang}.json` relative to your repo root.
 
 ```json
 //messages/en.json
 {
-	//the $schema key is automatically ignored 
+	//the $schema key is automatically ignored
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"hello_world: "Hello World!",
 	"greeting": "Hello {name}!"
@@ -18,7 +18,7 @@ It expects messages to be in `messages/{lang}.json` relative to your repo root.
 
 The `messages/{lang}.json` file contains a flat map of message IDs and their translations. You can use curly braces to insert `{parameters}` into translations
 
-**Nesting purposely isn't supported and likely won't be**. Nested messages are way harder to interact with from complementary tools like the [Sherlock IDE Extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension), the [Parrot Figma Plugin](https://inlang.com/m/gkrpgoir/app-parrot-figmaPlugin), or the [Fink Localization editor](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor). Intellisense also becomes less helpful since it only shows the messages at the current level, not all messages. Additionally enforcing an organization-style side-steps organization discussions with other contributors. 
+**Nesting purposely isn't supported and likely won't be**. Nested messages are way harder to interact with from complementary tools like the [Sherlock IDE Extension](https://inlang.com/m/r7kp499g/app-inlang-ideExtension), the [Parrot Figma Plugin](https://inlang.com/m/gkrpgoir/app-parrot-figmaPlugin), or the [Fink Localization editor](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor). Intellisense also becomes less helpful since it only shows the messages at the current level, not all messages. Additionally enforcing an organization-style side-steps organization discussions with other contributors.
 
 ## Using messages in Code
 
@@ -49,21 +49,21 @@ For date & currency formatting use the `.toLocaleString` method on the `Date` or
 import * as m from "./paraglide/messages.js"
 import { languageTag } from "./paraglide/runtime.js"
 
-const todaysDate = new Date();
-m.today_is_the({ 
-	date: todaysDate.toLocaleString(languageTag()) 
+const todaysDate = new Date()
+m.today_is_the({
+	date: todaysDate.toLocaleString(languageTag()),
 })
 
-const price = 100;
+const price = 100
 m.the_price_is({
 	price: price.toLocaleString(languageTag(), {
 		style: "currency",
 		currency: "EUR",
-	})
+	}),
 })
 ```
 
-You can put HTML into the messages. This is useful for links and images. 
+You can put HTML into the messages. This is useful for links and images.
 
 ```json
 // messages/en.json
@@ -71,6 +71,7 @@ You can put HTML into the messages. This is useful for links and images.
 	"you_must_agree_to_the_tos": "You must agree to the <a href='/en/tos'>Terms of Service</a>."
 }
 ```
+
 ```json
 // messages/de.json
 {
@@ -79,7 +80,6 @@ You can put HTML into the messages. This is useful for links and images.
 ```
 
 There is currently no way to interpolate framework components into messages. If you require components mid-message you will need to create a one-off component for that bit of text.
-
 
 ## Getting a message in a specific language
 
@@ -99,15 +99,14 @@ const msg = m.hello({ name: "Samuel" }, { languageTag: "de" }) // Hallo Samuel!
 
 ### Lazy-Loading
 
-Paraglide discourages lazy-loading translations since it causes a render-fetch waterfall which hurts Web Vitals. Learn more about why lazy-loading is bad & what to do instead in [our blog post on lazy-loading](https://inlang.com/g/mqlyfa7l/guide-lorissigrist-dontlazyload). 
+Paraglide discourages lazy-loading translations since it causes a render-fetch waterfall which hurts Web Vitals. Learn more about why lazy-loading is bad & what to do instead in [our blog post on lazy-loading](https://inlang.com/g/mqlyfa7l/guide-lorissigrist-dontlazyload).
 
-If you want to do it anyway, lazily import the language-specific message files. 
+If you want to do it anyway, lazily import the language-specific message files.
 
 ```ts
 const lazyGerman = await import("./paraglide/messages/de.js")
 lazyGerman.hello() // Hallo Welt
 ```
-
 
 ## Language Management
 
@@ -129,6 +128,44 @@ m.hello() // Hello world!
 `setLanguageTag` needs to be called both on the server and the client since they run in separate processes.
 
 The [language tag](https://www.inlang.com/m/8y8sxj09/library-inlang-languageTag) is a global function. This means that on the server it is _shared_ accross requests. In order to avoid the langauge from one request being overwritten by another request you need to use _getter function_ that returns the language for the _current request_. A good way to implement this is using [`AsyncLocalStorage`](https://nodejs.org/api/async_context.html).
+
+**⛔️ Bad Example**:
+
+```ts
+import { setLanguageTag, sourceLanguageTag } from "./paraglide/runtime.js"
+
+export function onRequest(request, next) {
+	const langForReq = detectLanguage(request) 
+	
+	// ⛔️ DONT DO THIS
+	// ⛔️ If multiple requests are handled concurretntly 
+	// ⛔️ later ones will override the language for earlier ones
+	setLanguageTag(langForReq)
+
+	return langStorage(langForReq, async () => await next())
+}
+```
+
+**✅ Good Example**:
+
+```ts
+import { setLanguageTag, sourceLanguageTag } from "./paraglide/runtime.js"
+import { AsyncLocalStorage } from "node:async_hooks"
+
+const langStorage = new AsyncLocalStorage()
+
+// ✅ DO THIS
+// ✅ when `languageTag` is called inside a route handler 
+// ✅ this function will return the language for the current request
+setLanguageTag(() => {
+	return langStorage.getValue() ?? sourceLanguageTag 
+})
+
+export function onRequest(request, next) {
+	const langForReq = detectLanguage(request)
+	return langStorage(langForReq, async () => await next())
+}
+```
 
 If you are using a Framework library like `Paraglide-Next` or `Paraglide-SvelteKit` you do not need to call `setLanguageTag` manually.
 

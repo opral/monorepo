@@ -47,7 +47,6 @@ After running the compiler import the messages with `import * as m from "./parag
 
 ```js
 import * as m from "./paraglide/messages.js"
-import { setLanguageTag } from "./paraglide/runtime.js"
 
 m.hello() // Hello world!
 m.loginHeader({ name: "Samuel" }) // Hello Samuel, please login to continue.
