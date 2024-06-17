@@ -9,6 +9,11 @@ import "./inlang-lint-report-tip.js"
 import "./inlang-selector-configurator.js"
 import variantIsCatchAll from "../helper/crud/variant/isCatchAll.js"
 
+import SlTag from "@shoelace-style/shoelace/dist/components/tag/tag.component.js"
+
+// in case an app defines it's own set of shoelace components, prevent double registering
+if (!customElements.get("sl-tag")) customElements.define("sl-tag", SlTag)
+
 @customElement("inlang-variant")
 export default class InlangVariant extends LitElement {
 	static override styles = [
@@ -31,11 +36,17 @@ export default class InlangVariant extends LitElement {
 				align-items: center;
 			}
 			.match {
-				padding: 12px;
+				padding-left: 12px;
 				height: 44px;
 				width: 120px;
-				background-color: var(--sl-color-neutral-100);
+				background-color: var(--sl-color-neutral-0);
 				border-right: 1px solid var(--sl-color-neutral-300);
+				cursor: pointer;
+				display: flex;
+				align-items: center;
+			}
+			.match:hover {
+				background-color: var(--sl-color-neutral-50);
 			}
 			.pattern {
 				flex: 1;
@@ -49,6 +60,10 @@ export default class InlangVariant extends LitElement {
 			}
 			.pattern::part(input) {
 				min-height: 44px;
+			}
+			.pattern::part(input)::placeholder {
+				color: var(--sl-color-neutral-400);
+				font-size: 13px;
 			}
 			.actions {
 				position: absolute;
@@ -123,6 +138,9 @@ export default class InlangVariant extends LitElement {
 	@state()
 	private _pattern: string | undefined = undefined
 
+	@state()
+	private _isActive: boolean = false
+
 	_save = () => {
 		if (this.message && this.variant && this._pattern) {
 			// upsert variant
@@ -177,12 +195,17 @@ export default class InlangVariant extends LitElement {
 	override render() {
 		return html`<div class="variant">
 			${this.variant && this._matches
-				? this._matches.map((match) => html`<div class="match">${match}</div>`)
+				? this._matches.map(
+						(match) =>
+							html`<div class="match">
+								<sl-tag size="small" variant="neutral">${match}</sl-tag>
+							</div>`
+				  )
 				: undefined}
 			<sl-input
 				class="pattern"
 				size="small"
-				placeholder="Enter pattern"
+				placeholder="Enter pattern ..."
 				value=${this.variant
 					? this.variant.pattern
 							.map((p) => {

@@ -82,7 +82,7 @@ export default class InlangMessageBundle extends LitElement {
 
 	override render() {
 		return html`
-			<div class="header">
+			<div class=${`header`}>
 				<span># ${this.messageBundle?.id}</span>
 				<span class="alias">@${this.messageBundle?.alias.default}</span>
 			</div>
@@ -115,7 +115,11 @@ export default class InlangMessageBundle extends LitElement {
 				</div>
 				<div class="message-body">
 					${message && message.selectors.length > 0
-						? html`<div class="message-header">
+						? html`<div
+								class=${`message-header` +
+								` ` +
+								(message.variants && message.variants.length === 0 ? `no-bottom-border` : ``)}
+						  >
 								<div class="selector-container">
 									${message.selectors.map(
 										// @ts-ignore
@@ -178,6 +182,19 @@ export default class InlangMessageBundle extends LitElement {
 									.languageTag=${languageTag}
 									.lintReports=${messageLintReports}
 							  ></inlang-variant>`}
+						${message?.selectors && message.selectors.length > 0
+							? html`<p class="new-variant">
+									<svg
+										viewBox="0 0 24 24"
+										width="18"
+										height="18"
+										slot="prefix"
+										class="w-5 h-5 -mx-1"
+									>
+										<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path></svg
+									></svg>New variant
+							  </p>`
+							: ``}
 					</div>
 				</div>
 			</div>
