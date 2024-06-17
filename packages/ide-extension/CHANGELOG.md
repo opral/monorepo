@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.44.16
+
+### Patch Changes
+
+- fadd94d: project selection focus on name instead of paths
+
 ## 1.44.15
 
 ### Patch Changes
