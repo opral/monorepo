@@ -151,9 +151,8 @@ export function exec(
 			continue
 		}
 
-		if (param.matcher && !matchers[param.matcher]) {
-			return undefined
-		}
+		// if there is a matcher it must match
+		if (param.matcher && !matchers[param.matcher]) return undefined
 
 		const matcher: ParamMatcher = matchers[param.matcher] ?? (() => true)
 
@@ -194,6 +193,9 @@ export function exec(
 	return result
 }
 
+/**
+ * Excapes a string for use in a regex
+ */
 function escape(str: string) {
 	return (
 		str
@@ -270,25 +272,19 @@ export function bestMatch(
 		const match = route.pattern.exec(removeTrailingSlash(canonicalPath))
 		if (!match) continue
 
-		const params = exec(match, route.params, matchers)
 		//the params are undefined IFF the matchers don't match
-		if (!params) continue
-
-		return { params, id: pathDefinition }
+		const params = exec(match, route.params, matchers)
+		if (params) return { params, id: pathDefinition }
 	}
 
 	return undefined
 }
 
-function removeTrailingSlash(path: string): string {
-	return path.endsWith("/") ? path.slice(0, -1) : path
-}
+const removeTrailingSlash = (path: string): string =>
+	path.endsWith("/") ? path.slice(0, -1) : path
 
 /**
- * Splits a route id into its segments, removing segments that
- * don't affect the path (i.e. groups). The root route is represented by `/`
- * and will be returned as `['']`.
  * @param {string} route
  * @returns string[]
  */
-export const get_route_segments = (route: string) => route.slice(1).split("/")
+const get_route_segments = (route: string) => route.slice(1).split("/")
