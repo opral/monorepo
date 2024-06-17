@@ -4,6 +4,7 @@ import { baseStyling } from "../styling/base.js"
 import overridePrimitiveColors from "../helper/overridePrimitiveColors.js"
 import type { MessageBundle, Message, LanguageTag } from "@inlang/sdk/v2" // Import the types
 import { messageBundleStyling } from "./inlang-message-bundle.styles.js"
+import upsertVariant from "../helper/crud/variant/upsert.js"
 
 import "./inlang-variant.js"
 import "./inlang-lint-report-tip.js"
@@ -183,7 +184,22 @@ export default class InlangMessageBundle extends LitElement {
 									.lintReports=${messageLintReports}
 							  ></inlang-variant>`}
 						${message?.selectors && message.selectors.length > 0
-							? html`<p class="new-variant">
+							? html`<p @click=${() => {
+									upsertVariant({
+										message: message,
+										variant: {
+											// combine the matches that are already present with the new category -> like a matrix
+											match: message.selectors.map(() => "*"),
+											pattern: [
+												{
+													type: "text",
+													value: "",
+												},
+											],
+										},
+									})
+									this._triggerRefresh()
+							  }} class="new-variant">
 									<svg
 										viewBox="0 0 24 24"
 										width="18"
