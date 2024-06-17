@@ -5,6 +5,7 @@ import { telemetry } from "../services/telemetry/index.js"
 import { CONFIGURATION } from "../configuration.js"
 import { isQuoted, stripQuotes } from "../utilities/messages/isQuoted.js"
 import { Message, randomHumanId } from "@inlang/sdk"
+import { getSetting } from "../utilities/settings/index.js"
 
 /**
  * Helps the user to extract messages from the active text editor.
@@ -53,12 +54,13 @@ export const extractMessageCommand = {
 		}
 
 		// create random message id as default value
-		const randomHumanID = randomHumanId()
+		const autoHumanId = await getSetting("extract.autoHumanId").catch(() => true)
 
 		const messageId = await window.showInputBox({
 			title: "Enter the ID:",
-			value: randomHumanID,
+			value: autoHumanId ? randomHumanId() : "",
 			prompt:
+				autoHumanId &&
 				"Tip: It's best practice to use random names for your messages. Read this [guide](https://inlang.com/documentation/concept/message#idhuman-readable) for more information.",
 		})
 		if (messageId === undefined) {
