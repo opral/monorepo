@@ -2,10 +2,17 @@ import { type Variant, type Message, createMessage, type LanguageTag } from "@in
 import { LitElement, css, html } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
+import deleteVariant from "../helper/crud/variant/delete.js"
 import type { MessageLintReport } from "@inlang/message-lint-rule"
 
 import "./inlang-lint-report-tip.js"
 import "./inlang-selector-configurator.js"
+import variantIsCatchAll from "../helper/crud/variant/isCatchAll.js"
+
+import SlTag from "@shoelace-style/shoelace/dist/components/tag/tag.component.js"
+
+// in case an app defines it's own set of shoelace components, prevent double registering
+if (!customElements.get("sl-tag")) customElements.define("sl-tag", SlTag)
 
 @customElement("inlang-variant")
 export default class InlangVariant extends LitElement {
@@ -29,11 +36,17 @@ export default class InlangVariant extends LitElement {
 				align-items: center;
 			}
 			.match {
-				padding: 12px;
+				padding-left: 12px;
 				height: 44px;
-				width: 80px;
-				background-color: var(--sl-color-neutral-100);
+				width: 120px;
+				background-color: var(--sl-color-neutral-0);
 				border-right: 1px solid var(--sl-color-neutral-300);
+				cursor: pointer;
+				display: flex;
+				align-items: center;
+			}
+			.match:hover {
+				background-color: var(--sl-color-neutral-50);
 			}
 			.pattern {
 				flex: 1;
@@ -48,6 +61,10 @@ export default class InlangVariant extends LitElement {
 			.pattern::part(input) {
 				min-height: 44px;
 			}
+			.pattern::part(input)::placeholder {
+				color: var(--sl-color-neutral-400);
+				font-size: 13px;
+			}
 			.actions {
 				position: absolute;
 				top: 0;
@@ -55,7 +72,7 @@ export default class InlangVariant extends LitElement {
 				height: 44px;
 				display: flex;
 				align-items: center;
-				gap: 10px;
+				gap: 6px;
 				padding-right: 12px;
 			}
 			.add-selector {
@@ -78,10 +95,18 @@ export default class InlangVariant extends LitElement {
 				background-color: var(--sl-color-neutral-200);
 				border: 1px solid var(--sl-color-neutral-400);
 			}
+			.hide-when-not-active {
+				display: none;
+				align-items: center;
+				gap: 6px;
+			}
 			sl-button::part(base):hover {
 				color: var(--sl-color-neutral-900);
 				background-color: var(--sl-color-neutral-100);
 				border: 1px solid var(--sl-color-neutral-400);
+			}
+			.variant:hover .hide-when-not-active {
+				display: flex;
 			}
 		`,
 	]
@@ -105,10 +130,16 @@ export default class InlangVariant extends LitElement {
 	addMessage: (newMessage: Message) => void = () => {}
 
 	@property()
+	triggerMessageBundleRefresh: () => void = () => {}
+
+	@property()
 	triggerSave: () => void = () => {}
 
 	@state()
 	private _pattern: string | undefined = undefined
+
+	@state()
+	private _isActive: boolean = false
 
 	_save = () => {
 		if (this.message && this.variant && this._pattern) {
@@ -136,6 +167,18 @@ export default class InlangVariant extends LitElement {
 		}
 	}
 
+	_delete = () => {
+		if (this.message && this.variant) {
+			// upsert variant
+			deleteVariant({
+				message: this.message,
+				variant: this.variant,
+			})
+			this.triggerSave()
+			this.triggerMessageBundleRefresh()
+		}
+	}
+
 	private get _selectors(): string[] | undefined {
 		// @ts-ignore - just for prototyping
 		return this.message ? this.message.selectors.map((selector) => selector.arg.name) : undefined
@@ -150,14 +193,19 @@ export default class InlangVariant extends LitElement {
 	}
 
 	override render() {
-		//console.log(this.message)
 		return html`<div class="variant">
 			${this.variant && this._matches
-				? this._matches.map((match) => html`<div class="match">${match}</div>`)
+				? this._matches.map(
+						(match) =>
+							html`<div class="match">
+								<sl-tag size="small" variant="neutral">${match}</sl-tag>
+							</div>`
+				  )
 				: undefined}
 			<sl-input
 				class="pattern"
 				size="small"
+				placeholder="Enter pattern ..."
 				value=${this.variant
 					? this.variant.pattern
 							.map((p) => {
@@ -175,25 +223,36 @@ export default class InlangVariant extends LitElement {
 				}}
 			></sl-input>
 			<div class="actions">
-				<sl-button size="small" @click=${() => this._save()}>Save</sl-button>
-				${this.message?.selectors && this.message.selectors.length === 0
-					? html`<inlang-selector-configurator .inputs=${this.inputs} .message=${this.message}>
-							<sl-tooltip content="Add Selector to message"
-								><div class="add-selector">
-									<svg
-										viewBox="0 0 24 24"
-										width="18"
-										height="18"
-										slot="prefix"
-										class="w-5 h-5 -mx-1"
-									>
-										<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path>
-									</svg>
-									Selector
-								</div>
-							</sl-tooltip>
-					  </inlang-selector-configurator>`
-					: ``}
+				<div class="hide-when-not-active">
+					<sl-button size="small" @click=${() => this._save()}>Save</sl-button>
+					${this.message?.selectors.length === 0 || !this.message?.selectors
+						? html`<inlang-selector-configurator
+								.inputs=${this.inputs}
+								.message=${this.message}
+								.languageTag=${this.languageTag}
+								.triggerMessageBundleRefresh=${this.triggerMessageBundleRefresh}
+								.addMessage=${this.addMessage}
+						  >
+								<sl-tooltip content="Add Selector to message"
+									><div class="add-selector">
+										<svg
+											viewBox="0 0 24 24"
+											width="18"
+											height="18"
+											slot="prefix"
+											class="w-5 h-5 -mx-1"
+										>
+											<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path>
+										</svg>
+										Selector
+									</div>
+								</sl-tooltip>
+						  </inlang-selector-configurator>`
+						: ``}
+					${this.message && this.variant && !variantIsCatchAll({ variant: this.variant })
+						? html`<sl-button size="small" @click=${() => this._delete()}>Delete</sl-button>`
+						: ``}
+				</div>
 				${this.lintReports &&
 				this.lintReports.length > 0 &&
 				this.message?.selectors &&
