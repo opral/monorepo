@@ -75,7 +75,7 @@ async function readModulefromDisk(
  * @throws {ModuleImportError}
  */
 async function readModuleFromCDN(uri: string): Promise<string> {
-	if (!URL.canParse(uri))
+	if (!isValidUrl(uri))
 		throw new ModuleImportError({ module: uri, cause: new Error("Malformed URL") })
 
 	const result = await tryCatch(async () => await fetch(uri))
@@ -105,12 +105,29 @@ async function readModuleFromCDN(uri: string): Promise<string> {
 
 	// if there is no content-type header, assume it's a JavaScript module & hope for the best
 	const contentType = response.headers.get("content-type")?.toLowerCase()
-	if (contentType && !JS_CONTENT_TYPES.some((knownType) => knownType == contentType)) {
+	if (contentType && !JS_CONTENT_TYPES.some((knownType) => contentType.includes(knownType))) {
 		throw new ModuleImportError({
 			module: uri,
-			cause: new Error("Server did not respond with a JavaScript module"),
+			cause: new Error(`Server responded with ${contentType} insetad of a JavaScript module`),
 		})
 	}
 
 	return await response.text()
+}
+
+function isValidUrl(url: string) {
+	// This dance is necessary to both support a fallback in case URL.canParse
+	// is not present (like in vitest), and also appease typescript
+	const URLConstructor = URL
+	if ("canParse" in URL) {
+		return URL.canParse(url)
+	}
+
+	try {
+		new URLConstructor(url)
+		return true
+	} catch (e) {
+		console.warn(`Invalid URL: ${url}`)
+		return false
+	}
 }

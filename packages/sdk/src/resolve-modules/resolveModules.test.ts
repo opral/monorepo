@@ -22,6 +22,7 @@ it("should return an error if a plugin cannot be imported", async () => {
 	}
 
 	const resolved = await resolveModules({
+		projectPath: "/project.inlang",
 		settings,
 		nodeishFs: {} as any,
 		_import: () => {
@@ -78,7 +79,12 @@ it("should resolve plugins and message lint rules successfully", async () => {
 	}
 
 	// Call the function
-	const resolved = await resolveModules({ settings, _import, nodeishFs: {} as any })
+	const resolved = await resolveModules({
+		projectPath: "/project.inlang",
+		settings,
+		_import,
+		nodeishFs: {} as any,
+	})
 
 	// Assert results
 	expect(resolved.errors).toHaveLength(0)
@@ -105,7 +111,12 @@ it("should return an error if a module cannot be imported", async () => {
 	}
 
 	// Call the function
-	const resolved = await resolveModules({ settings, _import, nodeishFs: {} as any })
+	const resolved = await resolveModules({
+		projectPath: "/project.inlang",
+		settings,
+		_import,
+		nodeishFs: {} as any,
+	})
 
 	// Assert results
 	expect(resolved.errors[0]).toBeInstanceOf(ModuleImportError)
@@ -121,7 +132,12 @@ it("should return an error if a module does not export anything", async () => {
 	const _import = async () => ({})
 
 	// Call the function
-	const resolved = await resolveModules({ settings, _import, nodeishFs: {} as any })
+	const resolved = await resolveModules({
+		projectPath: "/project.inlang",
+		settings,
+		_import,
+		nodeishFs: {} as any,
+	})
 
 	// Assert results
 	expect(resolved.errors[0]).toBeInstanceOf(ModuleHasNoExportsError)
@@ -142,7 +158,12 @@ it("should return an error if a module exports an invalid plugin or lint rule", 
 			},
 		} satisfies InlangModule)
 
-	const resolved = await resolveModules({ settings, _import, nodeishFs: {} as any })
+	const resolved = await resolveModules({
+		projectPath: "/project.inlang",
+		settings,
+		_import,
+		nodeishFs: {} as any,
+	})
 	expect(resolved.errors[0]).toBeInstanceOf(ModuleExportIsInvalidError)
 })
 
@@ -159,7 +180,12 @@ it("should handle other unhandled errors during plugin resolution", async () => 
 	}
 
 	// Call the function
-	const resolved = await resolveModules({ settings, _import, nodeishFs: {} as any })
+	const resolved = await resolveModules({
+		projectPath: "/project.inlang",
+		settings,
+		_import,
+		nodeishFs: {} as any,
+	})
 
 	// Assert results
 	expect(resolved.errors[0]).toBeInstanceOf(ModuleError)
@@ -187,6 +213,7 @@ it("should return an error if a moduleSettings are invalid", async () => {
 
 	// Call the function
 	const resolved = await resolveModules({
+		projectPath: "/project.inlang",
 		settings,
 		_import,
 		nodeishFs: {} as any,
