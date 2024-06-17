@@ -129,20 +129,24 @@ m.hello() // Hello world!
 
 The [language tag](https://www.inlang.com/m/8y8sxj09/library-inlang-languageTag) is a global function. This means that on the server it is _shared_ accross requests. In order to avoid the langauge from one request being overwritten by another request you need to use _getter function_ that returns the language for the _current request_. A good way to implement this is using [`AsyncLocalStorage`](https://nodejs.org/api/async_context.html).
 
-**Bad** Example:
+**⛔️ Bad Example**:
 
 ```ts
 import { setLanguageTag, sourceLanguageTag } from "./paraglide/runtime.js"
 
 export function onRequest(request, next) {
 	const langForReq = detectLanguage(request) 
-	//BAD: if multiple requests are handled concurretntly they will interfere
+	
+	// ⛔️ DONT DO THIS
+	// ⛔️ If multiple requests are handled concurretntly 
+	// ⛔️ later ones will override the language for earlier ones
 	setLanguageTag(langForReq)
+
 	return langStorage(langForReq, async () => await next())
 }
 ```
 
-**Good Example**:
+**✅ Good Example**:
 
 ```ts
 import { setLanguageTag, sourceLanguageTag } from "./paraglide/runtime.js"
@@ -150,8 +154,9 @@ import { AsyncLocalStorage } from "node:async_hooks"
 
 const langStorage = new AsyncLocalStorage()
 
-// GOOD: when `languageTag` is called inside a route handler 
-// this will return the language for the _current_ request
+// ✅ DO THIS
+// ✅ when `languageTag` is called inside a route handler 
+// ✅ this function will return the language for the current request
 setLanguageTag(() => {
 	return langStorage.getValue() ?? sourceLanguageTag 
 })
