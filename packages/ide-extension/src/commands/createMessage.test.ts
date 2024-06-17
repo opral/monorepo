@@ -98,7 +98,7 @@ describe("createMessageCommand", () => {
 		await createMessageCommand.callback()
 
 		expect(window.showInputBox).toHaveBeenCalledWith({
-			title: "Enter the ID:",
+			title: "Enter the message content:",
 		})
 		expect(msg).not.toHaveBeenCalled()
 	})
