@@ -43,7 +43,7 @@ async function writeModuleToCache(
 }
 
 /**
- * Implements the "stale-while-revalidate" caching strategy.
+ * Implements a "Network-First" caching strategy.
  */
 export function withCache(
 	moduleLoader: (uri: string) => Promise<string>,
@@ -51,12 +51,17 @@ export function withCache(
 	nodeishFs: Pick<NodeishFilesystemSubset, "readFile" | "writeFile">
 ): (uri: string) => Promise<string> {
 	return async (uri: string) => {
-		const cacheResult = await readModuleFromCache(uri, projectPath, nodeishFs.readFile)
-		if (!cacheResult.error) return cacheResult.data
-		else console.error(cacheResult.error)
+		const cachePromise = readModuleFromCache(uri, projectPath, nodeishFs.readFile)
+		const networkResult = await tryCatch(async () => await moduleLoader(uri))
 
-		const moduleAsText = await moduleLoader(uri)
-		await writeModuleToCache(uri, moduleAsText, projectPath, nodeishFs.writeFile)
-		return moduleAsText
+		if (networkResult.error) {
+			const cacheResult = await cachePromise
+			if (!cacheResult.error) return cacheResult.data
+			else throw networkResult.error
+		} else {
+			const moduleAsText = networkResult.data
+			await writeModuleToCache(uri, moduleAsText, projectPath, nodeishFs.writeFile)
+			return moduleAsText
+		}
 	}
 }
