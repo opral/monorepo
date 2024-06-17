@@ -3,7 +3,7 @@ import { registry } from "@inlang/marketplace-registry"
 import { redirect } from "vike/abort"
 import type { PageContext } from "vike/types"
 import fs from "node:fs/promises"
-import { convert, generateTableOfContents } from "@inlang/markdown"
+import { convert } from "@inlang/markdown"
 import type { PageProps } from "./+Page.jsx"
 import { getRedirectPath } from "./helper/getRedirectPath.js"
 
