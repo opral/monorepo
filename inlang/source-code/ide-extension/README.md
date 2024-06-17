@@ -236,6 +236,10 @@ You can disable the automatic generation of human IDs by setting the following p
 "sherlock.extract.autoHumanId.enabled": false
 ```
 
+> [!NOTE]  
+> Tip: It's best practice to use random names for your messages. Read this [guide](https://inlang.com/documentation/concept/message#idhuman-readable) for more information.
+
+
 #### Troubleshooting
 
 If you are having trouble with the **loading icon** not disappearing, this is a known issue & we are working with Visual Studio Code to fix it. In the meantime, you can right-click the Inlang icon to hide it:
