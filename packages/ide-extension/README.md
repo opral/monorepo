@@ -233,7 +233,7 @@ You can disable inline annotations by setting the following property to `false` 
 You can disable the automatic generation of human IDs by setting the following property to `false` in your VS Code `settings.json` file. The default value is `true`.
 
 ```json
-"sherlock.extract.autoHumanId": false
+"sherlock.extract.autoHumanId.enabled": false
 ```
 
 #### Troubleshooting
