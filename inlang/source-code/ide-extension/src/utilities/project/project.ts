@@ -42,11 +42,12 @@ export function createProjectViewNodes(args: {
 		}
 
 		const projectPath = typeof project.projectPath === "string" ? project.projectPath : ""
-		const projectName = projectPath.split("/").slice(-2).join("/")
+		const projectName = projectPath.split("/").slice(-1).join("/").replace(".inlang", "")
 
 		return {
 			label: projectName,
 			path: project.projectPath,
+			relativePath: projectPath,
 			isSelected: project.projectPath === state().selectedProjectPath,
 			collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
 			context: args.context,
@@ -61,9 +62,16 @@ export function getTreeItem(args: {
 	nodeishFs: NodeishFilesystem
 	workspaceFolder: vscode.WorkspaceFolder
 }): vscode.TreeItem {
+	// Remove any directory ending with .inlang from the path
+	const cleanedPath = args.element.path.replace(/\/[^/]*\.inlang/g, "")
+	// Normalize and make path relative to the workspace
+	const relativePath =
+		"./" + normalizePath(cleanedPath.replace(args.workspaceFolder.uri.fsPath, "./"))
+
 	return {
 		label: args.element.label,
 		tooltip: args.element.path,
+		description: relativePath,
 		iconPath: args.element.isSelected
 			? new vscode.ThemeIcon("pass-filled", new vscode.ThemeColor("sideBar.foreground"))
 			: new vscode.ThemeIcon("circle-large-outline", new vscode.ThemeColor("sideBar.foreground")),
