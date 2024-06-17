@@ -96,5 +96,21 @@ async function readModuleFromCDN(uri: string): Promise<string> {
 		})
 	}
 
+	const JS_CONTENT_TYPES = [
+		"application/javascript",
+		"text/javascript",
+		"application/x-javascript",
+		"text/x-javascript",
+	]
+
+	// if there is no content-type header, assume it's a JavaScript module & hope for the best
+	const contentType = response.headers.get("content-type")?.toLowerCase()
+	if (contentType && !JS_CONTENT_TYPES.some((knownType) => knownType == contentType)) {
+		throw new ModuleImportError({
+			module: uri,
+			cause: new Error("Server did not respond with a JavaScript module"),
+		})
+	}
+
 	return await response.text()
 }

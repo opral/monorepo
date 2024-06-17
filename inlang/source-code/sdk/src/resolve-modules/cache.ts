@@ -42,15 +42,18 @@ async function writeModuleToCache(
 	await writeFile(filePath, moduleContent)
 }
 
+/**
+ * Implements the "stale-while-revalidate" caching strategy.
+ */
 export function withCache(
 	moduleLoader: (uri: string) => Promise<string>,
 	projectPath: string,
 	nodeishFs: Pick<NodeishFilesystemSubset, "readFile" | "writeFile">
 ): (uri: string) => Promise<string> {
 	return async (uri: string) => {
-		const result = await readModuleFromCache(uri, projectPath, nodeishFs.readFile)
-		if (!result.error) return result.data
-		else console.error(result.error)
+		const cacheResult = await readModuleFromCache(uri, projectPath, nodeishFs.readFile)
+		if (!cacheResult.error) return cacheResult.data
+		else console.error(cacheResult.error)
 
 		const moduleAsText = await moduleLoader(uri)
 		await writeModuleToCache(uri, moduleAsText, projectPath, nodeishFs.writeFile)
