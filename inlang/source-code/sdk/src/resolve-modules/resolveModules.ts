@@ -26,7 +26,7 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 	const meta: Awaited<ReturnType<ResolveModuleFunction>>["meta"] = []
 	const moduleErrors: Array<ModuleError> = []
 
-	for (const module of args.settings.modules) {
+	async function resolveModule(module: string) {
 		const importedModule = await tryCatch<InlangModule>(() => _import(module))
 
 		// -- FAILED TO IMPORT --
@@ -37,7 +37,7 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 					cause: importedModule.error as Error,
 				})
 			)
-			continue
+			return
 		}
 
 		// -- MODULE DOES NOT EXPORT ANYTHING --
@@ -47,7 +47,7 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 					module: module,
 				})
 			)
-			continue
+			return
 		}
 
 		// -- CHECK IF MODULE IS SYNTACTIALLY VALID
@@ -61,7 +61,7 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 				})
 			)
 
-			continue
+			return
 		}
 
 		// -- VALIDATE MODULE SETTINGS
@@ -72,7 +72,7 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 		})
 		if (result !== "isValid") {
 			moduleErrors.push(new ModuleSettingsAreInvalidError({ module: module, errors: result }))
-			continue
+			return
 		}
 
 		meta.push({
@@ -93,6 +93,8 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 			)
 		}
 	}
+
+	await Promise.all(args.settings.modules.map(resolveModule))
 	const resolvedPlugins = await resolvePlugins({
 		plugins: allPlugins,
 		settings: args.settings,
