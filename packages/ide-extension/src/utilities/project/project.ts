@@ -65,7 +65,8 @@ export function getTreeItem(args: {
 	// Remove any directory ending with .inlang from the path
 	const cleanedPath = args.element.path.replace(/\/[^/]*\.inlang/g, "")
 	// Normalize and make path relative to the workspace
-	const relativePath = normalizePath(cleanedPath.replace(args.workspaceFolder.uri.fsPath, "./"))
+	const relativePath =
+		"./" + normalizePath(cleanedPath.replace(args.workspaceFolder.uri.fsPath, "./"))
 
 	return {
 		label: args.element.label,
