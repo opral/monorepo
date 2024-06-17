@@ -193,6 +193,20 @@
 						}
 					}
 				},
+				"sherlock.extract": {
+					"type": "object",
+					"properties": {
+						"autoHumanId": {
+							"type": "object",
+							"properties": {
+								"enabled": {
+									"type": "boolean",
+									"default": true
+								}
+							}
+						}
+					}
+				},
 				"sherlock.inlineAnnotations.enabled": {
 					"type": "boolean",
 					"default": true
