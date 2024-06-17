@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.45.0
+
+### Minor Changes
+
+- 9e2125b: default human ids in sherlock
+
 ## 1.44.16
 
 ### Patch Changes
