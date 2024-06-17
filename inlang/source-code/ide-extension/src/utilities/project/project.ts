@@ -14,6 +14,7 @@ let projectViewNodes: ProjectViewNode[] = []
 export interface ProjectViewNode {
 	label: string
 	path: string
+	relativePath: string
 	isSelected: boolean
 	collapsibleState: vscode.TreeItemCollapsibleState
 	context: vscode.ExtensionContext
@@ -21,6 +22,7 @@ export interface ProjectViewNode {
 
 export function createProjectViewNodes(args: {
 	context: vscode.ExtensionContext
+	workspaceFolder: vscode.WorkspaceFolder
 }): ProjectViewNode[] {
 	const projectsInWorkspace = state().projectsInWorkspace
 
@@ -43,11 +45,14 @@ export function createProjectViewNodes(args: {
 
 		const projectPath = typeof project.projectPath === "string" ? project.projectPath : ""
 		const projectName = projectPath.split("/").slice(-1).join("/").replace(".inlang", "")
+		const cleanedPath = projectPath.replace(/\/[^/]*\.inlang/g, "")
+		const relativePath =
+			"./" + normalizePath(cleanedPath.replace(args.workspaceFolder.uri.fsPath, "./"))
 
 		return {
 			label: projectName,
 			path: project.projectPath,
-			relativePath: projectPath,
+			relativePath: relativePath,
 			isSelected: project.projectPath === state().selectedProjectPath,
 			collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
 			context: args.context,
@@ -62,16 +67,10 @@ export function getTreeItem(args: {
 	nodeishFs: NodeishFilesystem
 	workspaceFolder: vscode.WorkspaceFolder
 }): vscode.TreeItem {
-	// Remove any directory ending with .inlang from the path
-	const cleanedPath = args.element.path.replace(/\/[^/]*\.inlang/g, "")
-	// Normalize and make path relative to the workspace
-	const relativePath =
-		"./" + normalizePath(cleanedPath.replace(args.workspaceFolder.uri.fsPath, "./"))
-
 	return {
 		label: args.element.label,
 		tooltip: args.element.path,
-		description: relativePath,
+		description: args.element.relativePath,
 		iconPath: args.element.isSelected
 			? new vscode.ThemeIcon("pass-filled", new vscode.ThemeColor("sideBar.foreground"))
 			: new vscode.ThemeIcon("circle-large-outline", new vscode.ThemeColor("sideBar.foreground")),
@@ -152,7 +151,8 @@ export function createTreeDataProvider(args: {
 	return {
 		getTreeItem: (element: ProjectViewNode) =>
 			getTreeItem({ element, nodeishFs: args.nodeishFs, workspaceFolder: args.workspaceFolder }),
-		getChildren: () => createProjectViewNodes({ context: args.context }),
+		getChildren: () =>
+			createProjectViewNodes({ context: args.context, workspaceFolder: args.workspaceFolder }),
 		onDidChangeTreeData: CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.event,
 	}
 }
