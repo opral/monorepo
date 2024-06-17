@@ -64,9 +64,11 @@ const _create = async (fs: any) => {
 				// whenever we have a change we put the documents into the pull stream
 				pullStream$.next({
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- event api sucks atm - we know that we can expect slot entries in records-change event
-					documents: upsertedSlotentries!.map((r) => r.data)!,
+					documents: storage.findDocumentsById(upsertedSlotentries!).map((r) => r.data)!,
 					// NOTE: we don't need to reconnect a collection at the moment - any checkpoint should work
-					checkpoint: Date.now(),
+					checkpoint: {
+						now: Date.now(),
+					},
 				})
 			}
 		}
@@ -244,7 +246,9 @@ const _create = async (fs: any) => {
 					 * On the next call to the pull handler,
 					 * this checkpoint will be passed as 'lastCheckpoint'
 					 */
-					checkpoint: Date.now(),
+					checkpoint: {
+						now: Date.now(),
+					},
 					/*documentsFromRemote.length === 0
 							? lastCheckpoint
 							: {
@@ -269,6 +273,8 @@ const _create = async (fs: any) => {
 			stream$: pullStream$.asObservable(),
 		},
 	})
+
+	await replicationState.awaitInitialReplication()
 
 	const pullChangesAndReloadSlots = async () => {
 		await pull({

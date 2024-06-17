@@ -1,6 +1,18 @@
 import type { HasId } from "../types/HasId.js"
 import type { SlotEntry } from "../types/SlotEntry.js"
 
+function addIdHash<DocType extends HasId>(
+	recordToAddIdHash: SlotEntry<DocType>,
+	hashFn: (id: string) => Promise<string> | string
+) {
+	const hashResult = hashFn(recordToAddIdHash.data.id)
+	if (typeof hashResult === "string") {
+		recordToAddIdHash.slotEntryIdHash = hashResult
+		return Promise.resolve()
+	}
+	return hashResult.then((hash) => (recordToAddIdHash.slotEntryIdHash = hash))
+}
+
 /**
  * Parses a string into an array of SlotEntries
  * It tries to parse it via JSON.parse in case of a conflict this approach will fail since conflict markers produce a non valid json.
@@ -32,7 +44,10 @@ import type { SlotEntry } from "../types/SlotEntry.js"
  * @param slotFileContent
  * @returns
  */
-export function parseSlotFile<DocType extends HasId>(slotFileContent: string) {
+export async function parseSlotFile<DocType extends HasId>(
+	slotFileContent: string,
+	idHashFn: (id: string) => Promise<string> | string
+) {
 	let slotFileContentParsed: undefined | any
 	const slotfileEntries = [] as (SlotEntry<DocType> | null)[]
 
@@ -63,6 +78,8 @@ export function parseSlotFile<DocType extends HasId>(slotFileContent: string) {
 	// remove leading comma element
 	slotFileContentParsed.splice(-1)
 
+	const hashPromises = [] as Promise<any>[]
+
 	for (const [slotIndex, recordOnSlot] of slotFileContentParsed.entries()) {
 		if (recordOnSlot === 0) {
 			slotfileEntries.push(null)
@@ -70,15 +87,14 @@ export function parseSlotFile<DocType extends HasId>(slotFileContent: string) {
 		}
 
 		if (recordOnSlot.__conflict) {
-			// NOTE: we only expect a conflict if both slots cary a value!
-			// - is there a case where one of each can be null??
-			slotfileEntries.push({
+			const conflictingSlotEntry = {
 				// we don't need to compute a new hash -> combination of mine and there allows us to check
 				// if the file has changed with respect to this record
 				slotEntryHash: recordOnSlot.theirs.hash + recordOnSlot.mine.hash,
 				data: recordOnSlot.mine.data,
 				hash: recordOnSlot.mine.hash,
 				index: slotIndex,
+				slotEntryIdHash: "addedAsynchronous",
 
 				mergeConflict: {
 					// add metadata to be able to json stringify again
@@ -90,13 +106,24 @@ export function parseSlotFile<DocType extends HasId>(slotFileContent: string) {
 					hash: recordOnSlot.theirs.hash,
 					data: recordOnSlot.theirs.data,
 				},
-			})
+			}
+
+			// NOTE: we only expect a conflict if both slots cary a value!
+			// - is there a case where one of each can be null??
+			slotfileEntries.push(conflictingSlotEntry)
+
+			hashPromises.push(addIdHash(conflictingSlotEntry, idHashFn))
 		} else {
 			// data hash and slotEntry hash are the same in case there is no conflict
 			recordOnSlot.slotEntryHash = recordOnSlot.hash
 			recordOnSlot.index = slotIndex
+			recordOnSlot.slotEntryIdHash = "addedAsynchronous"
+			hashPromises.push(addIdHash(recordOnSlot, idHashFn))
 			slotfileEntries.push(recordOnSlot)
 		}
 	}
+
+	// NOTE: we await promise all instead of awaiting in a loop here to speed up parse
+	await Promise.all(hashPromises)
 	return slotfileEntries
 }

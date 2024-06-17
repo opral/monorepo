@@ -1,5 +1,5 @@
 import { test, expect, describe, it } from "vitest"
-import createSlotStorage from "./createSlotStorage.js"
+import createSlotStorage from "./createSlotStorage.1.js"
 import fs from "node:fs/promises"
 
 type DocumentExample = {
@@ -72,8 +72,7 @@ describe("Disconnected slot storage", () => {
 				recursive: true,
 			})
 		} catch (e) {}
-		const slotStorage = createSlotStorage<DocumentExample>((event) => {
-		})
+		const slotStorage = createSlotStorage<DocumentExample>((event) => {})
 
 		const insertedDocument: DocumentExample = {
 			id: "1",
@@ -95,16 +94,13 @@ describe("Disconnected slot storage", () => {
 				recursive: true,
 			})
 		} catch (e) {}
-		const slotStorage1 = createSlotStorage<DocumentExample>((event) => {
-			
-		})
+		const slotStorage1 = createSlotStorage<DocumentExample>((event) => {})
 
-		const slotStorage2 = createSlotStorage<DocumentExample>((event) => {
-		})
+		const slotStorage2 = createSlotStorage<DocumentExample>((event) => {})
 
 		await slotStorage1.connect(fs, path)
 		await slotStorage2.connect(fs, path)
-		
+
 		const insertedDocument: DocumentExample = {
 			id: "1",
 			content: "first document",

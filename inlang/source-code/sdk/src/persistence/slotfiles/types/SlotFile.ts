@@ -1,4 +1,4 @@
-import { type SlotEntry, type TransientSlotEntry } from "./SlotEntry.js"
+import { type SlotEntry } from "./SlotEntry.js"
 import { type HasId } from "./HasId.js"
 
 /**
@@ -18,12 +18,3 @@ export type SlotFile<DocType extends HasId> = {
 	contentHash: string | undefined
 	recordSlots: (SlotEntry<DocType> | null)[]
 }
-
-
-
-export type TransientSlotFile<DocType extends HasId> = {
-	exists: boolean
-	contentHash: string | undefined
-	recordSlots: (TransientSlotEntry<DocType> | null)[]
-}
-

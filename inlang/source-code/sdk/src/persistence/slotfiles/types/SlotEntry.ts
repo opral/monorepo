@@ -14,14 +14,11 @@ export type SlotEntry<DocType extends HasId> = {
 		data: DocType
 		hash: string
 	}
+	slotEntryIdHash: string
 	index: number
 	// NOTE: TBD deletion should be dealt with on application level i think?
 	// _deleted: boolean
 	_writingFlag?: boolean
-}
-
-export type TransientSlotEntry<DocType extends HasId> = SlotEntry<DocType> & {
-	slotEntryIdHash: string
 }
 
 /**

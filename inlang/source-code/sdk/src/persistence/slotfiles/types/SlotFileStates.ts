@@ -11,7 +11,7 @@ export type SlotFileStates<DocType extends HasId> = {
 	// conflictingState: ( SlotEntry<DocType> | null )[] | undefined
 	// // the state of the head commit state of the current branch
 	// headState: ( SlotEntry<DocType> | null )[] | undefined
-	workingCopyStateFlag: "loaded" | "loadrequested" | "loading"
+	stateFlag: "loaded" | "loadrequested" | "loading"
 	fsSlotFileState: SlotFile<DocType> | undefined
 	memorySlotFileState: SlotFile<DocType>
 	changedRecords: (SlotEntry<DocType> | null)[]
