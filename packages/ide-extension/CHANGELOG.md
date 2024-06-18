@@ -1,5 +1,33 @@
 # inlang-vs-code-extension
 
+## 1.45.0
+
+### Minor Changes
+
+- 9e2125b: default human ids in sherlock
+
+## 1.44.16
+
+### Patch Changes
+
+- fadd94d: project selection focus on name instead of paths
+
+## 1.44.15
+
+### Patch Changes
+
+- Updated dependencies [8e9fc0f]
+  - @inlang/sdk@0.35.9
+  - @inlang/rpc@0.3.31
+  - @inlang/settings-component@1.0.26
+  - @inlang/telemetry@0.3.46
+
+## 1.44.14
+
+### Patch Changes
+
+- f472213: remove migrateSettingsFromInlangToSherlock because its no longer needed
+
 ## 1.44.13
 
 ### Patch Changes

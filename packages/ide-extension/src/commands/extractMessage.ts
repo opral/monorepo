@@ -2,9 +2,10 @@ import { state } from "../utilities/state.js"
 import { msg } from "../utilities/messages/msg.js"
 import { commands, type TextEditor, window } from "vscode"
 import { telemetry } from "../services/telemetry/index.js"
-import type { Message } from "@inlang/sdk"
 import { CONFIGURATION } from "../configuration.js"
 import { isQuoted, stripQuotes } from "../utilities/messages/isQuoted.js"
+import { Message, randomHumanId } from "@inlang/sdk"
+import { getSetting } from "../utilities/settings/index.js"
 
 /**
  * Helps the user to extract messages from the active text editor.
@@ -52,8 +53,15 @@ export const extractMessageCommand = {
 			return msg("Please select a text to extract in your text editor.", "warn", "notification")
 		}
 
+		// create random message id as default value
+		const autoHumanId = await getSetting("extract.autoHumanId.enabled").catch(() => true)
+
 		const messageId = await window.showInputBox({
 			title: "Enter the ID:",
+			value: autoHumanId ? randomHumanId() : "",
+			prompt:
+				autoHumanId &&
+				"Tip: It's best practice to use random names for your messages. Read this [guide](https://inlang.com/documentation/concept/message#idhuman-readable) for more information.",
 		})
 		if (messageId === undefined) {
 			return

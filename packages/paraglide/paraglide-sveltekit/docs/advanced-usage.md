@@ -39,11 +39,6 @@ export const i18n = createI18n(runtime, {
 })
 ```
 
-## Accessing `lang` and `textDirection` 
-
-On the server you can access the current language and text direction on `event.locals.paraglide`. 
-On the client, you can call `languageTag()` exported `./paraglide/runtime.js`.  
-
 ## Full URLs in `<link rel="alternate">` tags
 
 According to the spec, alternate links for pages must be full URLs. Do this by setting the `prerender.origin` option in your svelte.config.js.

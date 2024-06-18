@@ -175,3 +175,19 @@ Use this to create a language switcher.
 	</a>
 {/each}
 ```
+
+## Re-Loading Language-Dependent data
+
+If you have a `load` function that returns data that depends on the language you can tell it to re-run on language changes by calling `depends("paraglide:lang")`.
+
+```ts
+// src/routes/+page.server.js
+export async function load({ depends }) {
+  // Paraglide-SvelteKit automatically calls `invalidate("paraglide:lang")` whenever the langauge changes
+  // This tells SvelteKit to re-run this function whenever that happens
+  depends("paraglide:lang") 
+  return await myLanguageSpecificData();
+}
+```
+
+Paraglide-SvelteKit automatically calls `invalidate("paraglide:lang")` when the language changes.

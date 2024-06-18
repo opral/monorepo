@@ -36,7 +36,7 @@ export default async function onRenderHtml(pageContext: PageContextRenderer): Pr
 			<meta name="description" content="${dangerouslySkipEscape(metaInfo.description)}" />
 			<meta name="og:image" content="/images/fink-social-image.jpg" />
 			<meta charset="UTF-8" />
-			<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+			<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 		<!-- theme-color means the background color of the iOS status bar -->
 			<meta name="theme-color" content="#000000" />
 		<!-- START import inter font -->

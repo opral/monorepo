@@ -439,7 +439,8 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			} else if (projectList.length === 1) {
 				setActiveProject(projectList[0]?.projectPath)
 			} else if (
-				previousProject && projectList.some((project) => project.projectPath === previousProject)
+				previousProject &&
+				projectList.some((project) => project.projectPath === previousProject)
 			) {
 				setActiveProject(previousProject)
 			} else if (
@@ -458,22 +459,27 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		params.get("project") || undefined
 	)
 
-	createEffect(on(activeProject, () => {
-		const projectPath = activeProject()
-		if (projectPath) {
-			setSearchParams({ key: "project", value: projectPath })
-			// update project of recentProject in local storage
-			setLocalStorage({
-				recentProjects: localStorage.recentProjects.map((project) => {
-					if (project.repository === routeParams().repository && project.owner === routeParams().owner) {
-						return { ...project, project: projectPath }
-					} else {
-						return project
-					}
-				}),
-			})
-		}
-	}))
+	createEffect(
+		on(activeProject, () => {
+			const projectPath = activeProject()
+			if (projectPath) {
+				setSearchParams({ key: "project", value: projectPath })
+				// update project of recentProject in local storage
+				setLocalStorage({
+					recentProjects: localStorage.recentProjects.map((project) => {
+						if (
+							project.repository === routeParams().repository &&
+							project.owner === routeParams().owner
+						) {
+							return { ...project, project: projectPath }
+						} else {
+							return project
+						}
+					}),
+				})
+			}
+		})
+	)
 
 	// polyfill requestIdleCallback for Safari browser
 	const requestIdleCallback =
