@@ -15,10 +15,10 @@ export async function maybeAddModuleCache(args: {
 	// This is how paths are handled in the other migrations.
 	// Is this reliable on windows?
 	const gitignorePath = args.projectPath + "/.gitignore"
-	const cachePath = args.projectPath + "/cache"
+	const moduleCache = args.projectPath + "/cache/modules/"
 
 	const gitignoreExists = await fileExists(gitignorePath, args.repo.nodeishFs)
-	const cacheExists = await directoryExists(cachePath, args.repo.nodeishFs)
+	const moduleCacheExists = await directoryExists(moduleCache, args.repo.nodeishFs)
 
 	if (gitignoreExists) {
 		// non-destructively add any missing ignores
@@ -31,8 +31,8 @@ export async function maybeAddModuleCache(args: {
 		await args.repo.nodeishFs.writeFile(gitignorePath, EXPECTED_IGNORES.join("\n"))
 	}
 
-	if (!cacheExists) {
-		await args.repo.nodeishFs.mkdir(cachePath, { recursive: true })
+	if (!moduleCacheExists) {
+		await args.repo.nodeishFs.mkdir(moduleCache, { recursive: true })
 	}
 }
 
