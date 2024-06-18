@@ -18,9 +18,12 @@ export async function createNewProject(args: {
 	if (await pathExists(args.projectPath, nodeishFs)) {
 		throw new Error(`projectPath already exists, received "${args.projectPath}"`)
 	}
-	await nodeishFs.mkdir(args.projectPath, { recursive: true })
-
 	const settingsText = JSON.stringify(args.projectSettings ?? defaultProjectSettings, undefined, 2)
 
-	await nodeishFs.writeFile(`${args.projectPath}/settings.json`, settingsText)
+	await nodeishFs.mkdir(args.projectPath, { recursive: true })
+	await Promise.all([
+		nodeishFs.writeFile(`${args.projectPath}/settings.json`, settingsText),
+		nodeishFs.writeFile(`${args.projectPath}/.gitignore`, "cache"),
+		nodeishFs.mkdir(`${args.projectPath}/cache/modules`, { recursive: true }),
+	])
 }
