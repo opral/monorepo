@@ -1,11 +1,16 @@
-import { loadProject, type InlangProject } from "@inlang/sdk"
+import { loadProject } from "@inlang/sdk"
+import { Command } from "commander"
 import nodeFsPromises from "node:fs/promises"
 import { resolve } from "node:path"
-import { Command } from "commander"
 import { Logger } from "~/services/logger/index.js"
 import { openRepository, findRepoRoot } from "@lix-js/client"
 import { runCompiler } from "~/cli/steps/run-compiler.js"
 import { DEFAULT_OUTDIR } from "~/cli/defaults.js"
+
+interface ModuleError extends Error {
+	name: string
+	module: string
+}
 
 export const compileCommand = new Command()
 	.name("compile")
@@ -33,14 +38,43 @@ export const compileCommand = new Command()
 			logger.warn(`Could not find repository root for path ${path}`)
 		}
 
-		const project = exitIfErrors(
-			await loadProject({
-				projectPath: path,
-				repo,
-				appId: PARJS_MARKTEPLACE_ID,
-			}),
-			logger
-		)
+		const project = await loadProject({
+			projectPath: path,
+			repo,
+			appId: PARJS_MARKTEPLACE_ID,
+		})
+
+		if (project.errors().length > 0) {
+			const isModuleError = (error: Error): error is ModuleError =>
+				error instanceof Error &&
+				"name" in error &&
+				error.name.includes("Module") &&
+				"module" in error
+
+			const [moduleErrors, otherErrors] = split(project.errors() as Error[], isModuleError)
+
+			const isFatalModuleError = (error: ModuleError): error is ModuleError =>
+				error.module.includes("plugin")
+			const [fatalModuleErrors, nonFatalModuleErrors] = split(moduleErrors, isFatalModuleError)
+
+			const fatalErrors = [...fatalModuleErrors, ...otherErrors]
+			const nonFatalErrors = [...nonFatalModuleErrors]
+
+			if (fatalErrors.length > 0) {
+				logger.error(`The project has fatal errors:`)
+				for (const error of [...fatalErrors, ...nonFatalErrors]) {
+					logger.error(error)
+				}
+				process.exit(1)
+			}
+
+			if (nonFatalErrors.length > 0) {
+				logger.warn(`The project has warnings:`)
+				for (const error of nonFatalErrors) {
+					logger.warn(error)
+				}
+			}
+		}
 
 		await runCompiler({
 			project,
@@ -79,15 +113,17 @@ export const compileCommand = new Command()
 	})
 
 /**
- * Utility function to exit when the project has errors.
+ * Splits an array into two arrays based on the predicate
  */
-const exitIfErrors = (project: InlangProject, logger: Logger) => {
-	if (project.errors().length > 0) {
-		logger.warn(`The project has errors:`)
-		for (const error of project.errors()) {
-			logger.error(error)
+function split<T, U extends T>(array: T[], predicate: (value: T) => value is U): [U[], T[]] {
+	const result: U[] = []
+	const rest: T[] = []
+	for (const item of array) {
+		if (predicate(item)) {
+			result.push(item)
+		} else {
+			rest.push(item)
 		}
-		process.exit(1)
 	}
-	return project
+	return [result, rest]
 }
