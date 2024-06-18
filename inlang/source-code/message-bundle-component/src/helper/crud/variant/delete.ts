@@ -1,11 +1,8 @@
 import type { Message, Variant } from "@inlang/sdk/v2"
 
 const deleteVariant = (props: { message: Message; variant: Variant }) => {
-	const uniqueMatch = props.variant.match
 	// index from array where the variant is located
-	const index = props.message.variants.findIndex(
-		(variant) => JSON.stringify(variant.match) === JSON.stringify(uniqueMatch)
-	)
+	const index = props.message.variants.findIndex((variant) => variant.id === props.variant.id)
 
 	if (index > -1) {
 		// Delete existing variant

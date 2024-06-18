@@ -30,6 +30,10 @@ export const HeroSchemaLiteral = {
 		updatedAt: {
 			type: "number",
 		},
+		mergeConflict: {
+			type: "object",
+			properties: {} as any,
+		},
 	},
 	required: ["id", "name", "createdAt", "updatedAt"],
 } as const

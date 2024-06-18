@@ -55,8 +55,7 @@ const debug = _debug("sdk:slotfile")
 export default function createSlotStorage<DocType extends HasId>(
 	// shard property add an optional
 	slotsPerFile: number,
-	fileNameCharacters: number,
-	changeCallback: (eventName: string, records?: string[]) => void
+	fileNameCharacters: number
 ) {
 	// property to use to test for identity of an object within a collection
 	// NOTE: use schema primary key like in https://github.com/pubkey/rxdb/blob/3bdfd66d1da5ccf9afe371b6665770f11e67908f/src/types/rx-schema.d.ts#L106
@@ -88,6 +87,8 @@ export default function createSlotStorage<DocType extends HasId>(
 			return computedHash
 		})()
 	}
+
+	let changeCallback: (eventName: string, records?: string[]) => void = (e, r) => {}
 
 	const slotEntryStates = new Map<string, SlotEntry<DocType>>()
 
@@ -1030,5 +1031,8 @@ export default function createSlotStorage<DocType extends HasId>(
 			return matchingSlotEntries
 		},
 		resolveMergeConflict() {},
+		setCallback(callback: (eventName: string, records?: string[]) => void) {
+			changeCallback = callback
+		}
 	}
 }

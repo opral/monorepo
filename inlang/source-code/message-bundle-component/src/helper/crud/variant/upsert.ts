@@ -9,10 +9,7 @@ import { getNewVariantPosition } from "./sort.js"
  */
 
 const upsertVariant = (props: { message: Message; variant: Variant }) => {
-	const uniqueMatch = props.variant.match
-	const existingVariant = props.message.variants.find(
-		(variant) => JSON.stringify(variant.match) === JSON.stringify(uniqueMatch)
-	)
+	const existingVariant = props.message.variants.find((variant) => variant.id === props.variant.id)
 
 	if (existingVariant) {
 		// Update existing variant

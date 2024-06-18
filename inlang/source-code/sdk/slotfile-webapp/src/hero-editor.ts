@@ -1,6 +1,9 @@
-import { storage } from "./storage/db"
+import { storage } from "./storage/db-messagebundle"
 import { randomHumanId } from "../../src/storage/human-id/human-readable-id.js"
 import { HeroDocType } from "./storage/schema"
+import { pluralBundle } from "../../src/v2/mocks"
+import { createMessage, createMessageBundle } from "../../src/v2"
+import { MessageBundleRxType } from "./storage/schema-messagebundle"
 
 export function setupHeroEditor({
 	heroNameElement,
@@ -28,41 +31,38 @@ export function setupHeroEditor({
 	const upsertHero = async (id: string, name: string, age: number) => {
 		const db$ = (await storage).database
 		if (id === "") {
-			await db$.heroes
-				.insert({
-					id: randomHumanId(),
-					name,
-					age,
-					createdAt: new Date().getTime(),
-					updatedAt: new Date().getTime(),
-				})
-				.then(resetForm)
-		} else {
-			await db$.heroes
-				.upsert({
-					id,
-					name,
-					age,
-					updatedAt: new Date().getTime(),
-				})
-				.then(resetForm)
+			const newMessage = createMessage({
+				locale: "de",
+				text: "new",
+			})
+
+			const messageBundle = createMessageBundle({
+				alias: {},
+				messages: [newMessage],
+			})
+
+			await db$.messageBundles.insert(pluralBundle as any).then(resetForm)
 		}
 	}
 
 	const insertNHeros = async (n: number) => {
-		const herosToInsert = [] as HeroDocType[]
+		const messagesToAdd = [] as MessageBundleRxType[]
 		for (let i = 0; i < n; i++) {
-			herosToInsert.push({
-				id: randomHumanId(),
-				name: randomHumanId(),
-				age: Math.random(),
-				createdAt: Date.now(),
-				updatedAt: Date.now(),
+			const newMessage = createMessage({
+				locale: "de",
+				text: "new",
 			})
+
+			const messageBundle = createMessageBundle({
+				alias: {},
+				messages: [newMessage],
+			})
+			messagesToAdd.push(messageBundle as unknown as MessageBundleRxType)
 		}
 		const db$ = (await storage).database
-		console.time("inserting " + n + " herors")
-		await db$.collections.heroes.bulkInsert(herosToInsert)
+		console.time("inserting " + n + " messages")
+
+		await db$.collections.messageBundles.bulkInsert(messagesToAdd)
 		console.timeEnd("inserting " + n + " herors")
 	}
 

@@ -45,9 +45,8 @@ export function createProjectViewNodes(args: {
 
 		const projectPath = typeof project.projectPath === "string" ? project.projectPath : ""
 		const projectName = projectPath.split("/").slice(-1).join("/").replace(".inlang", "")
-		const cleanedPath = projectPath.replace(/\/[^/]*\.inlang/g, "")
 		const relativePath =
-			"./" + normalizePath(cleanedPath.replace(args.workspaceFolder.uri.fsPath, "./"))
+			"./" + normalizePath(projectPath.replace(args.workspaceFolder.uri.fsPath, "./"))
 
 		return {
 			label: projectName,

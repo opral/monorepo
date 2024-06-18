@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { createMessageBundle, createMessage } from "./helper.js"
+import { createMessageBundle, createMessage, createVariant } from "./helper.js"
 import { MessageBundle } from "./types.js"
 import { Value } from "@sinclair/typebox/value"
 
@@ -25,11 +25,13 @@ describe("createMessageBundle", () => {
 			alias: {},
 			messages: [
 				{
+					id: expect.any(String),
 					locale: "en",
 					declarations: [],
 					selectors: [],
 					variants: [
 						{
+							id: expect.any(String),
 							match: [],
 							pattern: [
 								{
@@ -58,11 +60,13 @@ describe("createMessageBundle", () => {
 			alias: {},
 			messages: [
 				{
+					id: expect.any(String),
 					locale: "en",
 					declarations: [],
 					selectors: [],
 					variants: [
 						{
+							id: expect.any(String),
 							match: [],
 							pattern: [
 								{
@@ -74,11 +78,13 @@ describe("createMessageBundle", () => {
 					],
 				},
 				{
+					id: expect.any(String),
 					locale: "de",
 					declarations: [],
 					selectors: [],
 					variants: [
 						{
+							id: expect.any(String),
 							match: [],
 							pattern: [
 								{
@@ -91,5 +97,21 @@ describe("createMessageBundle", () => {
 				},
 			],
 		} satisfies MessageBundle)
+	})
+})
+
+describe("createVariant", () => {
+	it("creates a variant with a text-only pattern", () => {
+		const variant = createVariant({ text: "Hello World!" })
+		expect(variant).toEqual({
+			id: expect.any(String),
+			match: [],
+			pattern: [
+				{
+					type: "text",
+					value: "Hello World!",
+				},
+			],
+		})
 	})
 })
