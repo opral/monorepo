@@ -8,11 +8,6 @@ import { runCompiler } from "~/cli/steps/run-compiler.js"
 import { DEFAULT_OUTDIR } from "~/cli/defaults.js"
 import { classifyProjectErrors } from "~/services/error-handling.js"
 
-interface ModuleError extends Error {
-	name: string
-	module: string
-}
-
 export const compileCommand = new Command()
 	.name("compile")
 	.summary("Compiles inlang Paraglide-JS.")
