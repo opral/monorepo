@@ -6,6 +6,7 @@ import { Logger } from "~/services/logger/index.js"
 import { openRepository, findRepoRoot } from "@lix-js/client"
 import { runCompiler } from "~/cli/steps/run-compiler.js"
 import { DEFAULT_OUTDIR } from "~/cli/defaults.js"
+import { classifyProjectErrors } from "~/services/error-handling.js"
 
 interface ModuleError extends Error {
 	name: string
@@ -45,21 +46,7 @@ export const compileCommand = new Command()
 		})
 
 		if (project.errors().length > 0) {
-			const isModuleError = (error: Error): error is ModuleError =>
-				error instanceof Error &&
-				"name" in error &&
-				error.name.includes("Module") &&
-				"module" in error
-
-			const [moduleErrors, otherErrors] = split(project.errors() as Error[], isModuleError)
-
-			const isFatalModuleError = (error: ModuleError): error is ModuleError =>
-				error.module.includes("plugin")
-			const [fatalModuleErrors, nonFatalModuleErrors] = split(moduleErrors, isFatalModuleError)
-
-			const fatalErrors = [...fatalModuleErrors, ...otherErrors]
-			const nonFatalErrors = [...nonFatalModuleErrors]
-
+			const { nonFatalErrors, fatalErrors } = classifyProjectErrors(project.errors())
 			if (fatalErrors.length > 0) {
 				logger.error(`The project has fatal errors:`)
 				for (const error of [...fatalErrors, ...nonFatalErrors]) {
@@ -111,19 +98,3 @@ export const compileCommand = new Command()
 
 		logger.info("Successfully compiled the project.")
 	})
-
-/**
- * Splits an array into two arrays based on the predicate
- */
-function split<T, U extends T>(array: T[], predicate: (value: T) => value is U): [U[], T[]] {
-	const result: U[] = []
-	const rest: T[] = []
-	for (const item of array) {
-		if (predicate(item)) {
-			result.push(item)
-		} else {
-			rest.push(item)
-		}
-	}
-	return [result, rest]
-}
