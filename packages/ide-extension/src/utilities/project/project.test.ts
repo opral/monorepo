@@ -175,7 +175,7 @@ describe("getTreeItem", () => {
 		const node: ProjectViewNode = {
 			label: "testProject",
 			path: "/path/to/testproject",
-			relativePath: "./path/to/testproject",
+			relativePath: "./path/to/testproject.inlang",
 			isSelected: true,
 			collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
 			context: mockContext,
@@ -191,7 +191,7 @@ describe("getTreeItem", () => {
 			workspaceFolder,
 		})
 		expect(treeItem.label).toBe("testProject")
-		expect(treeItem.description).toBe("./path/to/testproject")
+		expect(treeItem.description).toBe("./path/to/testproject.inlang")
 		expect(treeItem.tooltip).toBe("/path/to/testproject")
 		expect(treeItem.iconPath).toBeInstanceOf(vscode.ThemeIcon)
 	})
