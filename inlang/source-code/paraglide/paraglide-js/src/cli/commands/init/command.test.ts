@@ -334,6 +334,7 @@ describe("existingProjectFlow()", () => {
 	test("if the user selects to proceed with the existing project and the project has no errors, the function should return the project", async () => {
 		const fs = mockFiles({
 			"/project.inlang/settings.json": JSON.stringify(getNewProjectTemplate()),
+			"/project.inlang/.gitignore": "cache",
 		})
 		const repo = await openRepository("file://", { nodeishFs: fs })
 
@@ -358,6 +359,8 @@ describe("existingProjectFlow()", () => {
 		const fs = mockFiles({
 			"/project.inlang/settings.json": JSON.stringify(project2),
 			"/folder/project.inlang/settings.json": JSON.stringify(project1),
+			"/project.inlang/.gitignore": "cache",
+			"/folder/project.inlang/.gitignore": "cache",
 		})
 		const repo = await openRepository("file://", { nodeishFs: fs })
 
@@ -378,6 +381,7 @@ describe("existingProjectFlow()", () => {
 	test("if the user selects a new project, the newProjectFlow() should be executed", async () => {
 		const fs = mockFiles({
 			"/folder/project.inlang/settings.json": JSON.stringify(getNewProjectTemplate()),
+			"/folder/project.inlang/.gitignore": "cache",
 		})
 		const repo = await openRepository("file://", { nodeishFs: fs })
 
@@ -398,6 +402,7 @@ describe("existingProjectFlow()", () => {
 	test("it should exit if the existing project contains errors", async () => {
 		const fs = mockFiles({
 			"/project.inlang/settings.json": `BROKEN PROJECT FILE`,
+			"/project.inlang/.gitignore": "cache",
 		})
 		const repo = await openRepository("file://", { nodeishFs: fs })
 
@@ -417,6 +422,7 @@ describe("maybeAddSherlock", () => {
 	test("it should add the Visual Studio Code extension (Sherlock) if the user uses vscode", async () => {
 		const fs = mockFiles({
 			"/folder/project.inlang/settings.json": JSON.stringify(getNewProjectTemplate()),
+			"/folder/project.inlang/.gitignore": "cache",
 		})
 
 		process.cwd = () => "/folder"
@@ -448,6 +454,7 @@ describe("maybeAddSherlock", () => {
 	test("it should not add the Visual Studio Code extension (Sherlock) if the user doesn't use vscode", async () => {
 		const fs = mockFiles({
 			"/project.inlang/settings.json": JSON.stringify(getNewProjectTemplate()),
+			"/project.inlang/.gitignore": "cache",
 		})
 		const repo = await openRepository("file://", { nodeishFs: fs })
 		const project = await loadProject({
@@ -461,7 +468,9 @@ describe("maybeAddSherlock", () => {
 		])
 		await maybeAddSherlock({ project, logger, repo })
 		expect(consola.prompt).toHaveBeenCalledOnce()
-		expect(fs.writeFile).not.toHaveBeenCalled()
+		await expect(
+			async () => await fs.readFile("/.vscode/extensions.json", { encoding: "utf-8" })
+		).rejects.toThrow()
 	})
 
 	test("it should install the m function matcher if not installed", async () => {
