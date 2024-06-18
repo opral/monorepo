@@ -80,7 +80,7 @@ describe("createNewProject", () => {
 		await createNewProject({ projectPath, repo, projectSettings: defaultProjectSettings })
 
 		const project = await loadProject({ projectPath, repo })
-		expect(project.errors().length).toBe(0)
+		expect(project.errors()).toEqual([])
 	})
 
 	it("should create messages inside the project directory", async () => {
@@ -88,7 +88,7 @@ describe("createNewProject", () => {
 		const projectPath = "/test/project.inlang"
 		await createNewProject({ projectPath, repo, projectSettings: defaultProjectSettings })
 		const project = await loadProject({ projectPath, repo })
-		expect(project.errors().length).toBe(0)
+		expect(project.errors()).toEqual([])
 
 		const testMessage = createMessage("test", { en: "test message" })
 		project.query.messages.create({ data: testMessage })

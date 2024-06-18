@@ -12,11 +12,11 @@ export const messageBundleStyling = css`
 	.header {
 		font-weight: 600;
 		background-color: var(--sl-color-neutral-300);
-		padding: 10px;
+		padding: 12px;
 		display: flex;
-		justify-content: flex-start;
-		align-items: baseline;
+		align-items: center;
 		gap: 10px;
+		min-height: 44px;
 	}
 	.messages-container {
 		width: 100%;
@@ -53,13 +53,16 @@ export const messageBundleStyling = css`
 		background-color: var(--sl-color-neutral-100);
 		border-bottom: 1px solid var(--sl-color-neutral-300);
 	}
+	.no-bottom-border {
+		border-bottom: none;
+	}
 	.selector-container {
 		min-height: 44px;
 		display: flex;
 	}
 	.selector {
 		height: 44px;
-		width: 80px;
+		width: 120px;
 		display: flex;
 		align-items: center;
 		padding: 12px;
@@ -103,5 +106,24 @@ export const messageBundleStyling = css`
 		display: flex;
 		flex-direction: column;
 		height: auto;
+	}
+	.new-variant {
+		box-sizing: border-box;
+		min-height: 44px;
+		width: 100%;
+		display: flex;
+		gap: 4px;
+		align-items: center;
+		padding-left: 12px;
+		margin: 0;
+		background-color: var(--sl-color-neutral-0);
+		color: var(--sl-color-neutral-400);
+		border-top: 1px solid var(--sl-color-neutral-300);
+		cursor: pointer;
+		transitions: all 0.5s;
+	}
+	.new-variant:hover {
+		background-color: var(--sl-color-neutral-50);
+		color: var(--sl-color-neutral-700);
 	}
 `

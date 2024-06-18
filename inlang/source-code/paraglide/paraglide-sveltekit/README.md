@@ -54,6 +54,20 @@ The Paraglide compiler will generate a `src/lib/paraglide/messages.js` file that
 
 Only messages used on the current page are sent to the client. Any messages that aren't used on the current page will be tree-shaken out.
 
+## Accessing Language in Code
+
+You can access the current language with the `languageTag()` function. 
+
+```svelte
+<script>
+	import { languageTag } from '$lib/paraglide/runtime.js'
+</script>
+
+<h1>{languageTag()}</h1>
+```
+
+On the server `languageTag()` is scoped to the current request, there is no danger of multiple requests interfering. `languageTag()` can safely be called in server-load functions and form actions.
+
 ## Language detection 
 
 The language is determined based on the URL. If the first segment of the URL is a language tag, that language will be used. If no language tag is present, the default language will be used.

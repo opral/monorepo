@@ -90,6 +90,17 @@ it("should detect combined message.attribute ids", async () => {
 	expect(matches[0]?.messageId).toBe("some-message.with-attribute")
 })
 
+it(`should detect human readable id t("penguin_purple_shoe_window")`, async () => {
+	const sourceCode = `
+	const x = t("penguin_purple_shoe_window")
+	`
+
+	const matches = parse(sourceCode)
+	expect(matches[0]?.messageId).toBe("penguin_purple_shoe_window")
+	expect(matches[0]?.position.start.character).toBe(14)
+	expect(matches[0]?.position.end.character).toBe(42)
+})
+
 it("should work on a production JSX example", async () => {
 	const sourceCode = `
 		import NextPage from "next";
