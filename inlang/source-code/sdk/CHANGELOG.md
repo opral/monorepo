@@ -1,5 +1,15 @@
 # @inlang/sdk
 
+## 0.36.0
+
+### Minor Changes
+
+- 8ec7b34: Modules are now cached locally using a "Network first" cache. This enables offline development
+
+### Patch Changes
+
+- 05f9282: Expose `ModuleError`s, enabling more fine-grained error-handling in Apps.
+
 ## 0.35.9
 
 ### Patch Changes

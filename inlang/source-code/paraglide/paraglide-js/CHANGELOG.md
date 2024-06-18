@@ -1,5 +1,11 @@
 # @inlang/paraglide-js
 
+## 1.10.0
+
+### Minor Changes
+
+- 33662e6: Gracefully handle errors in the Inlang Project. Only crash on errors that are fatal to paraglide specifically
+
 ## 1.9.1
 
 ### Patch Changes
