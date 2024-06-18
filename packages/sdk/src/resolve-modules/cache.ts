@@ -2,10 +2,15 @@ import type { NodeishFilesystemSubset } from "@inlang/plugin"
 import { type Result, tryCatch } from "@inlang/result"
 
 function escape(url: string) {
-	// collect the bytes of the UTF-8 representation & hex encode
+	// collect the bytes of the UTF-8 representation
 	const bytes = new TextEncoder().encode(url)
-	const escaped = [...bytes].map((byte) => byte.toString(16).padStart(2, "0")).join("")
-	return escaped
+
+	// 32-bit FNV1a hash to make the file-names shorter
+	// https://en.wikipedia.org/wiki/FNV-1a
+	const hash = bytes.reduce((hash, byte) => (hash * 0x01000193) ^ byte, 0x811c9dc5)
+
+	const encoded = Math.abs(hash).toString(36).padStart(8, "0")
+	return encoded
 }
 
 async function readModuleFromCache(
