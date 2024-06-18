@@ -9,11 +9,13 @@ import { LitElement, css, html } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
 import deleteVariant from "../helper/crud/variant/delete.js"
+import { getNewVariantPosition } from "../helper/crud/variant/sort.js"
 import type { MessageLintReport } from "@inlang/message-lint-rule"
 
 import "./inlang-lint-report-tip.js"
 import "./inlang-selector-configurator.js"
 import variantIsCatchAll from "../helper/crud/variant/isCatchAll.js"
+import updateMatch from "../helper/crud/variant/updateMatch.js"
 
 import SlTag from "@shoelace-style/shoelace/dist/components/tag/tag.component.js"
 
@@ -42,17 +44,18 @@ export default class InlangVariant extends LitElement {
 				align-items: center;
 			}
 			.match {
-				padding-left: 12px;
 				height: 44px;
 				width: 120px;
-				background-color: var(--sl-color-neutral-0);
+				background-color: none;
 				border-right: 1px solid var(--sl-color-neutral-300);
-				cursor: pointer;
-				display: flex;
-				align-items: center;
 			}
-			.match:hover {
-				background-color: var(--sl-color-neutral-50);
+			.match::part(base) {
+				border: none;
+				border-radius: 0;
+				min-height: 44px;
+			}
+			.match::part(input) {
+				min-height: 44px;
 			}
 			.pattern {
 				flex: 1;
@@ -180,6 +183,44 @@ export default class InlangVariant extends LitElement {
 		}
 	}
 
+	_updateMatch = (matchIndex: number, value: string) => {
+		//TODO improve this function
+		if (this.variant && this.message) {
+			this._pattern =
+				this.variant?.pattern
+					.map((p) => {
+						if ("value" in p) {
+							return p.value
+						} else if (p.type === "expression" && p.arg.type === "variable") {
+							return p.arg.name
+						}
+						return ""
+					})
+					.join(" ") || ""
+			updateMatch({
+				variant: this.variant,
+				matchIndex: matchIndex,
+				value,
+			})
+			const variant = structuredClone(this.variant)
+			//get index of this.varinat in message and delete it
+			const deleteIndex = this.message.variants.indexOf(this.variant)
+			this.message.variants.splice(deleteIndex, 1)
+
+			//get sort index of new variant
+			const newpos = getNewVariantPosition({
+				variants: this.message.variants,
+				newVariant: variant,
+			})
+
+			//insert variant at new position
+			this.message.variants.splice(newpos, 0, variant)
+
+			this._save()
+			this.triggerMessageBundleRefresh()
+		}
+	}
+
 	private get _selectors(): string[] | undefined {
 		// @ts-ignore - just for prototyping
 		return this.message ? this.message.selectors.map((selector) => selector.arg.name) : undefined
@@ -197,10 +238,17 @@ export default class InlangVariant extends LitElement {
 		return html`<div class="variant">
 			${this.variant && this._matches
 				? this._matches.map(
-						(match) =>
-							html`<div class="match">
-								<sl-tag size="small" variant="neutral">${match}</sl-tag>
-							</div>`
+						(match, index) =>
+							html`
+								<sl-input
+									class="match"
+									size="small"
+									value=${match}
+									@sl-blur=${(e: Event) => {
+										this._updateMatch(index, (e.target as HTMLInputElement).value)
+									}}
+								></sl-input>
+							`
 				  )
 				: undefined}
 			<sl-input
@@ -222,10 +270,14 @@ export default class InlangVariant extends LitElement {
 				@input=${(e: Event) => {
 					this._pattern = (e.target as HTMLInputElement).value
 				}}
+				@sl-blur=${(e: Event) => {
+					this._pattern = (e.target as HTMLInputElement).value
+					this._save()
+				}}
 			></sl-input>
 			<div class="actions">
 				<div class="hide-when-not-active">
-					<sl-button size="small" @click=${() => this._save()}>Save</sl-button>
+					<!-- <sl-button size="small" @click=${() => this._save()}>Save</sl-button> -->
 					${this.message?.selectors.length === 0 || !this.message?.selectors
 						? html`<inlang-selector-configurator
 								.inputs=${this.inputs}

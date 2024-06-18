@@ -6,6 +6,9 @@ import { createImport } from "./import.js"
 
 describe("$import", async () => {
 	const fs = createNodeishMemoryFs()
+
+	await fs.mkdir("./project.inlang/cache/modules", { recursive: true })
+
 	await fs.writeFile(
 		"./mock-module.js",
 		`
@@ -26,7 +29,8 @@ describe("$import", async () => {
 		`
 	)
 
-	const _import = createImport({
+	const _import = createImport("/project.inlang", {
+		writeFile: fs.writeFile,
 		readFile: fs.readFile,
 	})
 

@@ -23,11 +23,13 @@ import { migrateIfOutdated } from "@inlang/project-settings/migration"
 import { createNodeishFsWithAbsolutePaths } from "./createNodeishFsWithAbsolutePaths.js"
 import { normalizePath } from "@lix-js/fs"
 import { assertValidProjectPath } from "./validateProjectPath.js"
+
+// Migrations
 import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
+import { maybeCreateFirstProjectId } from "./migrations/maybeCreateFirstProjectId.js"
+import { maybeAddModuleCache } from "./migrations/maybeAddModuleCache.js"
 
 import type { Repository } from "@lix-js/client"
-
-import { maybeCreateFirstProjectId } from "./migrations/maybeCreateFirstProjectId.js"
 
 import { capture } from "./telemetry/capture.js"
 import { identifyProject } from "./telemetry/groupIdentify.js"
@@ -74,6 +76,7 @@ export async function loadProject(args: {
 
 	await maybeMigrateToDirectory({ nodeishFs, projectPath })
 	await maybeCreateFirstProjectId({ projectPath, repo: args.repo })
+	await maybeAddModuleCache({ projectPath, repo: args.repo })
 
 	// -- load project ------------------------------------------------------
 
@@ -155,7 +158,12 @@ export async function loadProject(args: {
 			const _settings = settings()
 			if (!_settings) return
 
-			resolveModules({ settings: _settings, nodeishFs, _import: args._import })
+			resolveModules({
+				settings: _settings,
+				nodeishFs,
+				_import: args._import,
+				projectPath,
+			})
 				.then((resolvedModules) => {
 					setResolvedModules(resolvedModules)
 				})
