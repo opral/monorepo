@@ -14,7 +14,7 @@ async function readModuleFromCache(
 	readFile: NodeishFilesystemSubset["readFile"]
 ): Promise<Result<string, Error>> {
 	const moduleHash = escape(moduleURI)
-	const filePath = projectPath + `/cache/modules/${moduleHash}.js`
+	const filePath = projectPath + `/cache/modules/${moduleHash}`
 
 	return await tryCatch(async () => await readFile(filePath, { encoding: "utf-8" }))
 }
@@ -26,7 +26,7 @@ async function writeModuleToCache(
 	writeFile: NodeishFilesystemSubset["writeFile"]
 ): Promise<void> {
 	const moduleHash = escape(moduleURI)
-	const filePath = projectPath + `/cache/modules/${moduleHash}.js`
+	const filePath = projectPath + `/cache/modules/${moduleHash}`
 	await writeFile(filePath, moduleContent)
 }
 
