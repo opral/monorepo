@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import "./style.css"
-import { setupHeroEditor } from "./hero-editor"
 import { setupMessageBundleList } from "./messageBundleList"
 import { db, storage } from "./storage/db-messagebundle"
-import { mockSetting } from "./mock/settings"
 import { pluralBundle } from "./../../src/v2/mocks"
 import { createMessage, createMessageBundle, type MessageBundle } from "./../../src/v2"
 
