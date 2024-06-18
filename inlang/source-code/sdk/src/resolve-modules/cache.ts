@@ -5,12 +5,14 @@ function escape(url: string) {
 	// collect the bytes of the UTF-8 representation
 	const bytes = new TextEncoder().encode(url)
 
-	// 32-bit FNV1a hash to make the file-names shorter
+	// 64-bit FNV1a hash to make the file-names shorter
 	// https://en.wikipedia.org/wiki/FNV-1a
-	const hash = bytes.reduce((hash, byte) => (hash * 0x01000193) ^ byte, 0x811c9dc5)
+	const hash = bytes.reduce(
+		(hash, byte) => BigInt.asUintN(64, (hash ^ BigInt(byte)) * 1_099_511_628_211n),
+		14_695_981_039_346_656_037n
+	)
 
-	const encoded = Math.abs(hash).toString(36).padStart(8, "0")
-	return encoded
+	return hash.toString(36)
 }
 
 async function readModuleFromCache(
