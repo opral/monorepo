@@ -9,7 +9,7 @@ import {
 import { openRepository, findRepoRoot } from "@lix-js/client"
 import path from "node:path"
 import fs from "node:fs/promises"
-import { compile, writeOutput, Logger } from "@inlang/paraglide-js/internal"
+import { compile, writeOutput, Logger, classifyProjectErrors } from "@inlang/paraglide-js/internal"
 import crypto from "node:crypto"
 
 const PLUGIN_NAME = "unplugin-paraglide"
@@ -113,7 +113,13 @@ export const paraglide = createUnplugin((config: UserConfig) => {
 
 				project.errors.subscribe((errors) => {
 					if (errors.length === 0) return
-					for (const error of errors) {
+
+					const { fatalErrors, nonFatalErrors } = classifyProjectErrors(errors)
+					for (const error of nonFatalErrors) {
+						logger.warn(error.message)
+					}
+
+					for (const error of fatalErrors) {
 						if (error instanceof Error) {
 							logger.error(error.message) // hide the stack trace
 						} else {
