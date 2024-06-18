@@ -3,6 +3,11 @@ import "./style.css"
 import { setupHeroEditor } from "./hero-editor"
 import { setupHeroList } from "./hero-list"
 import { db, storage } from "./storage/db"
+import { mockSetting } from "./mock/settings"
+import { pluralBundle } from "./../../src/v2/mocks"
+import { type MessageBundle } from "./../../src/v2"
+
+import "@inlang/message-bundle-component"
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 <div>
@@ -41,7 +46,28 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
       </section>
        
      </div>
+	 <h2>Message Component</h2>
+	 <div id="bundle-container"></div>
 </div>`
+
+const loadBundles = () => {
+	// add the message bundle component
+	const bundleContainer = document.getElementById("bundle-container")
+	const bundleElement: any = document.createElement("inlang-message-bundle")
+
+	bundleElement.settings = mockSetting
+	bundleElement.messageBundle = pluralBundle
+	bundleElement.addEventListener(
+		"change-message-bundle",
+		(messageBundle: { detail: { argument: MessageBundle } }) => {
+			console.log(messageBundle.detail.argument)
+		}
+	)
+
+	bundleContainer!.appendChild(bundleElement)
+}
+
+loadBundles()
 
 document.querySelector<HTMLButtonElement>("#pull")!.onclick = async (el) => {
 	el.disabled = true

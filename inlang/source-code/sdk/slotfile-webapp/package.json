@@ -27,6 +27,8 @@
 		"@esbuild-plugins/node-modules-polyfill": "^0.2.2",
 		"@isomorphic-git/cors-proxy": "^2.7.1",
 		"@lix-js/client": "^2.2.0",
+		"@inlang/message-bundle-component": "workspace:*",
+		"@inlang/sdk": "workspace:^",
 		"buffer": "^6.0.3",
 		"express": "^4.19.2",
 		"isomorphic-git": "^1.25.10",
