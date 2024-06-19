@@ -2,6 +2,7 @@
 export { Middleware } from "./middleware"
 export { Navigation } from "./navigation/navigation.client.js"
 export { initializeLanguage } from "./initializeLanguage.client.js"
+export { generateAlternateLinks } from "./alternateLinks.js"
 
 // Routing Strategies
 export * from "./routing-strategy/strategies"
