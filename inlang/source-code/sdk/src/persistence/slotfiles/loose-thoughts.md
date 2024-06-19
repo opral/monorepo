@@ -1,4 +1,4 @@
- // Hash slot selection algorithm:
+// Hash slot selection algorithm:
 // For a storage the number of slots need to be defiend at the beginning.
 // this value defines the number of slots per slot file.
 //
@@ -9,7 +9,7 @@
 //
 // given a hash from a stringified json object:
 // 4ce286da8574e34c76d23769fd1b2c6c532e1cbc4ffde58204f9fa3e37cc76f8
-// ^^^															^^^
+// ^^^ ^^^
 // 4096 Slots -> 3 characters
 // extract slot index by the last n characters
 // check if the slot is free in one of the available slot files (in alphabetic order)

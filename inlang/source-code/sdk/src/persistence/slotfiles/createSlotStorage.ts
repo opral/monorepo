@@ -73,22 +73,7 @@ export default function createSlotStorage<DocType extends HasId>(
 	// records that have been inserted but not picked up for persistence yet
 	const transientSlotEntries = new Map<string, SlotEntry<DocType>>()
 
-	const hashCache = new Map<string, string>()
-
-	const computeIdHashCached = (id: string) => {
-		const previoslyComputedHash = hashCache.get(id)
-		if (previoslyComputedHash) {
-			return previoslyComputedHash
-		}
-
-		return (async () => {
-			const computedHash = await hash(id)
-			hashCache.set(id, computedHash)
-			return computedHash
-		})()
-	}
-
-	let changeCallback: (eventName: string, records?: string[]) => void = (e, r) => {}
+	let changeCallback: (eventName: string, records?: string[]) => void = () => {}
 
 	const slotEntryStates = new Map<string, SlotEntry<DocType>>()
 
@@ -231,7 +216,7 @@ export default function createSlotStorage<DocType extends HasId>(
 			return undefined
 		}
 
-		const slotFileContentParsed = await parseSlotFile<DocType>(slotFileContent, computeIdHashCached)
+		const slotFileContentParsed = await parseSlotFile<DocType>(slotFileContent)
 
 		const freshSlotfile: SlotFile<DocType> = {
 			contentHash: slotFileContentHash,
@@ -412,6 +397,7 @@ export default function createSlotStorage<DocType extends HasId>(
 			reject = rej
 		})
 
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		return [promise, resolve!, reject!] as [
 			awaitable: Promise<void>,
 			resolve: () => void,
@@ -435,7 +421,7 @@ export default function createSlotStorage<DocType extends HasId>(
 
 		// TODO get lock - so we don't expect further dirty flags comming up
 		debug("saveChangesToWorkingCopy - reloadDirtySlotFiles")
-		const loadResult = await loadSlotFilesFromFs()
+		await loadSlotFilesFromFs()
 
 		const changedIds = new Set<string>()
 
@@ -746,11 +732,7 @@ export default function createSlotStorage<DocType extends HasId>(
 		return undefined
 	}
 
-	const updateSlotEntryStates = (
-		slotEntryId: string,
-		slotEntryIndex: number,
-		idHash: string
-	) => {
+	const updateSlotEntryStates = (slotEntryId: string, slotEntryIndex: number, idHash: string) => {
 		const recordSlotfile = getSlotFileByRecordId(slotEntryId)
 
 		const slotIndex = slotEntryIndex
@@ -1033,6 +1015,6 @@ export default function createSlotStorage<DocType extends HasId>(
 		resolveMergeConflict() {},
 		setCallback(callback: (eventName: string, records?: string[]) => void) {
 			changeCallback = callback
-		}
+		},
 	}
 }

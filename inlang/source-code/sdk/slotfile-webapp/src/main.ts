@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import "./style.css"
-import { setupMessageBundleList } from "./messageBundleList"
-import { db, storage } from "./storage/db-messagebundle"
-import { pluralBundle } from "./../../src/v2/mocks"
-import { createMessage, createMessageBundle, type MessageBundle } from "./../../src/v2"
+import { setupMessageBundleList } from "./messageBundleList.js"
+import { storage } from "./storage/db-messagebundle.js"
+import { pluralBundle } from "./../../src/v2/mocks/index.js"
+import { createMessage, createMessageBundle } from "./../../src/v2/helper.js"
 
 import "@inlang/message-bundle-component"
-import { MessageBundleRxType } from "./storage/schema-messagebundle"
-import { randomHumanId } from "../../src/storage/human-id/human-readable-id"
+import { MessageBundleRxType } from "./storage/schema-messagebundle.js"
+import { randomHumanId } from "../../src/storage/human-id/human-readable-id.js"
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 <div>
@@ -33,8 +33,8 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 </div>`
 
 document.querySelector<HTMLButtonElement>("#pull")!.onclick = async (el) => {
+	// @ts-expect-error
 	el.disabled = true
-	console.log("pulling latest state")
 	const s = await storage
 	await s.pullChangesAndReloadSlots()
 	document.querySelector<HTMLButtonElement>("#pull")!.disabled = false
@@ -42,7 +42,6 @@ document.querySelector<HTMLButtonElement>("#pull")!.onclick = async (el) => {
 
 document.querySelector<HTMLButtonElement>("#push")!.onclick = async function () {
 	;(this as HTMLButtonElement).disabled = true
-	console.log("push local state")
 	const s = await storage
 	await s.pushChangesAndReloadSlots()
 	;(this as HTMLButtonElement).disabled = false
@@ -50,7 +49,6 @@ document.querySelector<HTMLButtonElement>("#push")!.onclick = async function () 
 
 document.querySelector<HTMLButtonElement>("#commit")!.onclick = async function () {
 	;(this as HTMLButtonElement).disabled = true
-	console.log("commit local state")
 	const s = await storage
 	await s.commitChanges()
 	;(this as HTMLButtonElement).disabled = false

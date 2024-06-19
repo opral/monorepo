@@ -1,7 +1,9 @@
-import createSlotStorage from "../../../src/persistence/slotfiles/createSlotStorage"
-import { Message, MessageBundle } from "../../../src/v2/types"
-import { MessageBundleRxType } from "./schema-messagebundle"
+import { RxReplicationPullStreamItem } from "rxdb"
+import createSlotStorage from "../../../src/persistence/slotfiles/createSlotStorage.js"
+import { Message, MessageBundle } from "../../../src/v2/types.js"
+import { MessageBundleRxType } from "./schema-messagebundle.js"
 import _debug from "debug"
+import { Subject } from "rxjs"
 
 const debug = _debug("rxdb-adapter")
 type MessageUpdate = {
@@ -150,7 +152,8 @@ export function createRxDbAdapter(
 	})
 
 	return {
-		pullHandler: async (lastCheckpoint: any, batchSize: number) => {
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		pullHandler: async (lastCheckpoint: any, _batchSize: number) => {
 			debug("pullHandler called")
 			let changedDocuments = [] as any[]
 			if (!lastCheckpoint) {

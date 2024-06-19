@@ -18,9 +18,7 @@ function sleep(ms: number) {
 
 describe("Disconnected slot storage", () => {
 	it("insert should lead to a transient record", async () => {
-		const slotStorage = createSlotStorage<DocumentExample>(16, 3, (event) => {
-			console.log(event)
-		})
+		const slotStorage = createSlotStorage<DocumentExample>(16, 3)
 
 		const insertedDocument: DocumentExample = {
 			id: "1",
@@ -49,9 +47,7 @@ describe("Disconnected slot storage", () => {
 	})
 
 	it("update on a non existing record should throw", async () => {
-		const slotStorage = createSlotStorage<DocumentExample>(16, 3, () => {
-			console.log("test")
-		})
+		const slotStorage = createSlotStorage<DocumentExample>(16, 3)
 
 		const nonExistingRecord: DocumentExample = {
 			id: "1",
@@ -72,7 +68,7 @@ describe("Disconnected slot storage", () => {
 				recursive: true,
 			})
 		} catch (e) {}
-		const slotStorage = createSlotStorage<DocumentExample>(16, 3, (event) => {})
+		const slotStorage = createSlotStorage<DocumentExample>(16, 3)
 
 		const insertedDocument: DocumentExample = {
 			id: "1",
@@ -94,13 +90,9 @@ describe("Disconnected slot storage", () => {
 				recursive: true,
 			})
 		} catch (e) {}
-		const slotStorage1 = createSlotStorage<DocumentExample>(16, 3, (event) => {
-			console.log("storage1 " + event)
-		})
+		const slotStorage1 = createSlotStorage<DocumentExample>(16, 3)
 
-		const slotStorage2 = createSlotStorage<DocumentExample>(16, 3, (event) => {
-			console.log("storage1 " + event)
-		})
+		const slotStorage2 = createSlotStorage<DocumentExample>(16, 3)
 
 		await slotStorage1.connect(fs, path)
 		await slotStorage2.connect(fs, path)

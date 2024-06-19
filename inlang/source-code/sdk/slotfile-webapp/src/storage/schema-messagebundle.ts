@@ -1,4 +1,4 @@
-import { MessageBundle } from "../../../src/v2/types"
+import { MessageBundle } from "../../../src/v2/types.js"
 import {
 	toTypedRxJsonSchema,
 	type ExtractDocumentTypeFromTypedRxJsonSchema,
