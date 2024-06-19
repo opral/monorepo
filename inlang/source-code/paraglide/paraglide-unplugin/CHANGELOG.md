@@ -1,5 +1,19 @@
 # @inlang/paraglide-unplugin
 
+## 1.8.0
+
+### Minor Changes
+
+- e1281d7: Only warn about non-fatal errors insetad of erroring
+
+### Patch Changes
+
+- Updated dependencies [8ec7b34]
+- Updated dependencies [05f9282]
+- Updated dependencies [33662e6]
+  - @inlang/sdk@0.36.0
+  - @inlang/paraglide-js@1.10.0
+
 ## 1.7.2
 
 ### Patch Changes

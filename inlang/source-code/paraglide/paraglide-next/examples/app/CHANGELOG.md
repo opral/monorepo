@@ -1,5 +1,11 @@
 # @inlang/paraglide-next-example-app
 
+## 0.2.22
+
+### Patch Changes
+
+- @inlang/paraglide-next@0.4.2
+
 ## 0.2.21
 
 ### Patch Changes

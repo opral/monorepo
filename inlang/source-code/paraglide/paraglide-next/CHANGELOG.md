@@ -1,5 +1,12 @@
 # @inlang/paraglide-next
 
+## 0.4.2
+
+### Patch Changes
+
+- Updated dependencies [33662e6]
+  - @inlang/paraglide-js@1.10.0
+
 ## 0.4.1
 
 ### Patch Changes
