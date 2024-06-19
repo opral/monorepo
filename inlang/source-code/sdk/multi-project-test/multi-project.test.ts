@@ -91,15 +91,128 @@ describe.concurrent(
 					before
 				)
 				await run("pnpm translate4")
-				const expected = await fs.readFile(
-					join(__dirname, "project4-dir", "messages.json.translated"),
-					"utf8"
-				)
 				const result = await fs.readFile(
 					join(__dirname, "project4-dir", "project.inlang", "messages.json"),
 					"utf8"
 				)
-				expect(result).toEqual(expected)
+				expect(JSON.parse(result)).toEqual([
+					{
+						id: "project4_message_key_1",
+						alias: {},
+						messages: [
+							{
+								id: expect.any(String),
+								locale: "en",
+								declarations: [],
+								selectors: [],
+								variants: [
+									{
+										id: expect.any(String),
+										match: [],
+										pattern: [{ type: "text", value: "Generated message (1)" }],
+									},
+								],
+							},
+
+							{
+								id: expect.any(String),
+								locale: "de",
+								declarations: [],
+								selectors: [],
+								variants: [
+									{
+										id: expect.any(String),
+										match: [],
+										pattern: [
+											{
+												type: "text",
+												value: "Mock translate local en to de: Generated message (1)",
+											},
+										],
+									},
+								],
+							},
+						],
+					},
+
+					{
+						id: "project4_message_key_2",
+						alias: {},
+						messages: [
+							{
+								id: expect.any(String),
+								locale: "en",
+								declarations: [],
+								selectors: [],
+								variants: [
+									{
+										id: expect.any(String),
+										match: [],
+										pattern: [{ type: "text", value: "Generated message (2)" }],
+									},
+								],
+							},
+
+							{
+								id: expect.any(String),
+								locale: "de",
+								declarations: [],
+								selectors: [],
+								variants: [
+									{
+										id: expect.any(String),
+										match: [],
+										pattern: [
+											{
+												type: "text",
+												value: "Mock translate local en to de: Generated message (2)",
+											},
+										],
+									},
+								],
+							},
+						],
+					},
+
+					{
+						id: "project4_message_key_3",
+						alias: {},
+						messages: [
+							{
+								id: expect.any(String),
+								locale: "en",
+								declarations: [],
+								selectors: [],
+								variants: [
+									{
+										id: expect.any(String),
+										match: [],
+										pattern: [{ type: "text", value: "Generated message (3)" }],
+									},
+								],
+							},
+
+							{
+								id: expect.any(String),
+								locale: "de",
+								declarations: [],
+								selectors: [],
+								variants: [
+									{
+										id: expect.any(String),
+										match: [],
+										pattern: [
+											{
+												type: "text",
+												value: "Mock translate local en to de: Generated message (3)",
+											},
+										],
+									},
+								],
+							},
+						],
+					},
+				])
 			},
 			{ timeout: 20000 }
 		)

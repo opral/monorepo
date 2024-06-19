@@ -1,10 +1,13 @@
 /**
  * Convert between v1 Message and v2 MessageBundle formats.
+ * NOTE: V2.Message and V2.Variant ids are not preserved - new random ids are generated.
+ *
  * Code adapted from https://github.com/opral/monorepo/pull/2655 legacy.ts
  */
 
 import * as V2 from "./types.js"
 import * as V1 from "@inlang/message"
+import { randomId } from "./randomId.js"
 
 /**
  * @throws If the message cannot be represented in the v1 format
@@ -112,6 +115,7 @@ export function fromV1Message(v1Message: V1.Message): V2.MessageBundle {
 			}
 
 			variants.push({
+				id: randomId(),
 				match: v1Variant.match,
 				pattern: fromV1Pattern(v1Variant.pattern),
 			})
@@ -132,6 +136,7 @@ export function fromV1Message(v1Message: V1.Message): V2.MessageBundle {
 		}))
 
 		return {
+			id: randomId(),
 			locale: language,
 			declarations,
 			selectors,

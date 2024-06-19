@@ -7,6 +7,7 @@ export const multipleMatcherBundle: MessageBundle = {
 	},
 	messages: [
 		{
+			id: "mock_message_id_en",
 			locale: "en",
 			declarations: [],
 			selectors: [
@@ -21,6 +22,7 @@ export const multipleMatcherBundle: MessageBundle = {
 			],
 			variants: [
 				{
+					id: "mock_variant_id_en_one",
 					match: ["one"],
 					pattern: [
 						{
@@ -41,6 +43,7 @@ export const multipleMatcherBundle: MessageBundle = {
 					],
 				},
 				{
+					id: "mock_variant_id_en_many",
 					match: ["many"],
 					pattern: [
 						{
@@ -61,6 +64,7 @@ export const multipleMatcherBundle: MessageBundle = {
 					],
 				},
 				{
+					id: "mock_variant_id_en_default",
 					match: ["*"],
 					pattern: [
 						{
@@ -79,6 +83,7 @@ export const multipleMatcherBundle: MessageBundle = {
 			],
 		},
 		{
+			id: "mock_message_id_de",
 			locale: "de",
 			declarations: [],
 			selectors: [
@@ -101,6 +106,7 @@ export const multipleMatcherBundle: MessageBundle = {
 			],
 			variants: [
 				{
+					id: "mock_variant_id_de_one_formal",
 					match: ["one", "formal"],
 					pattern: [
 						{
@@ -110,6 +116,7 @@ export const multipleMatcherBundle: MessageBundle = {
 					],
 				},
 				{
+					id: "mock_variant_id_de_one_informal",
 					match: ["one", "informal"],
 					pattern: [
 						{
@@ -119,6 +126,7 @@ export const multipleMatcherBundle: MessageBundle = {
 					],
 				},
 				{
+					id: "mock_variant_id_de_many_formal",
 					match: ["many", "formal"],
 					pattern: [
 						{
@@ -139,6 +147,7 @@ export const multipleMatcherBundle: MessageBundle = {
 					],
 				},
 				{
+					id: "mock_variant_id_de_many_informal",
 					match: ["many", "informal"],
 					pattern: [
 						{
@@ -159,6 +168,7 @@ export const multipleMatcherBundle: MessageBundle = {
 					],
 				},
 				{
+					id: "mock_variant_id_de_many_default",
 					match: ["many", "*"],
 					pattern: [
 						{
@@ -175,6 +185,7 @@ export const multipleMatcherBundle: MessageBundle = {
 					],
 				},
 				{
+					id: "mock_variant_id_de_default",
 					match: ["*"],
 					pattern: [
 						{

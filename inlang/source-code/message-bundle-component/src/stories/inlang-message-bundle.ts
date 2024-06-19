@@ -2,7 +2,7 @@ import { html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
 import { baseStyling } from "../styling/base.js"
 import overridePrimitiveColors from "../helper/overridePrimitiveColors.js"
-import type { MessageBundle, Message, LanguageTag } from "@inlang/sdk/v2" // Import the types
+import { type MessageBundle, type Message, type LanguageTag, createVariant } from "@inlang/sdk/v2" // Import the types
 import { messageBundleStyling } from "./inlang-message-bundle.styles.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
 
@@ -188,16 +188,10 @@ export default class InlangMessageBundle extends LitElement {
 									@click=${() => {
 										upsertVariant({
 											message: message,
-											variant: {
+											variant: createVariant({
 												// combine the matches that are already present with the new category -> like a matrix
 												match: message.selectors.map(() => "null"),
-												pattern: [
-													{
-														type: "text",
-														value: "",
-													},
-												],
-											},
+											}),
 										})
 										this._triggerRefresh()
 									}}
