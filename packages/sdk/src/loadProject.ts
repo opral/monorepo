@@ -107,13 +107,9 @@ export async function loadProject(args: {
 		// 	})
 		// }
 
-		const writeSettingsToDisk = skipFirst((settings: ProjectSettings) =>
-			_writeSettingsToDisk({ nodeishFs, settings, projectPath })
-		)
-
 		const setSettings = (
 			newSettings: ProjectSettings
-		): Result<void, ProjectSettingsInvalidError> => {
+		): Result<ProjectSettings, ProjectSettingsInvalidError> => {
 			try {
 				const validatedSettings = parseSettings(newSettings)
 				v2Persistence = !!validatedSettings.experimental?.persistence
@@ -125,8 +121,7 @@ export async function loadProject(args: {
 					_setSettings(validatedSettings)
 				})
 
-				writeSettingsToDisk(validatedSettings)
-				return { data: undefined }
+				return { data: validatedSettings }
 			} catch (error: unknown) {
 				if (error instanceof ProjectSettingsInvalidError) {
 					return { error }
@@ -161,7 +156,7 @@ export async function loadProject(args: {
 				const newSettings = readSettingsResult.data
 
 				if (JSON.stringify(newSettings) !== JSON.stringify(settings())) {
-					setSettings(newSettings) //TODO don't write a second time
+					setSettings(newSettings)
 				}
 			},
 		})
@@ -348,7 +343,11 @@ export async function loadProject(args: {
 				//...(lintErrors() ?? []),
 			]),
 			settings: createSubscribable(() => settings() as ProjectSettings),
-			setSettings,
+			setSettings: (newSettings: ProjectSettings): Result<void, ProjectSettingsInvalidError> => {
+				const result = setSettings(newSettings)
+				if (!result.error) writeSettingsToDisk({ nodeishFs, settings: result.data, projectPath })
+				return result.error ? result : { data: undefined }
+			},
 			customApi: createSubscribable(() => resolvedModules()?.resolvedPluginApi.customApi || {}),
 			query: {
 				messages: messagesQuery,
@@ -419,7 +418,7 @@ const parseSettings = (settings: unknown) => {
 	return withMigration
 }
 
-const _writeSettingsToDisk = async (args: {
+const writeSettingsToDisk = async (args: {
 	projectPath: string
 	nodeishFs: NodeishFilesystemSubset
 	settings: ProjectSettings
@@ -455,18 +454,6 @@ const createAwaitable = () => {
 		resolve: () => void,
 		reject: (e: unknown) => void
 	]
-}
-
-// Skip initial call, eg. to skip setup of a createEffect
-function skipFirst(func: (args: any) => any) {
-	let initial = false
-	return function (...args: any) {
-		if (initial) {
-			// @ts-ignore
-			return func.apply(this, args)
-		}
-		initial = true
-	}
 }
 
 export function createSubscribable<T>(signal: () => T): Subscribable<T> {
