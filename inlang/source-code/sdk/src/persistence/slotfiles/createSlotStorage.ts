@@ -53,10 +53,12 @@ const debug = _debug("sdk:slotfile")
  * @returns
  */
 export default function createSlotStorage<DocType extends HasId>(
+	name: string,
 	// shard property add an optional
 	slotsPerFile: number,
 	fileNameCharacters: number
 ) {
+	const storageName = name
 	// property to use to test for identity of an object within a collection
 	// NOTE: use schema primary key like in https://github.com/pubkey/rxdb/blob/3bdfd66d1da5ccf9afe371b6665770f11e67908f/src/types/rx-schema.d.ts#L106
 	const idProperty = "id"
@@ -372,16 +374,21 @@ export default function createSlotStorage<DocType extends HasId>(
 		if (
 			loadResults.created.length > 0 ||
 			loadResults.updated.length > 0 ||
-			loadResults.updated.length > 0
+			loadResults.conflicting.length > 0
 		) {
 			changeCallback("record-change")
 		}
 
-		const ids = new Set([...loadResults.created, ...loadResults.updated, ...loadResults.updated])
+		const ids = new Set([
+			...loadResults.created,
+			...loadResults.updated,
+			...loadResults.conflicting,
+		])
 
 		if (ids.size > 0) {
 			changeCallback("records-change", [...ids.values()])
 		}
+		_internal.lastLoad = loadResults
 
 		return loadResults
 	}
@@ -866,20 +873,25 @@ export default function createSlotStorage<DocType extends HasId>(
 		return matchingDocuments
 	}
 
+	const _internal = {
+		fileNamesToSlotfileStates,
+		transientSlotEntries,
+		connectedFs,
+		storageName,
+		lastLoad: {},
+	}
+
 	return {
 		/**
 		 * internal properties used for debug purpose (checking internal states during tests)
 		 */
-		_internal: {
-			fileNamesToSlotfileStates,
-			transientSlotEntries,
-		},
+		_internal,
 		connect: async (fs: NodeishFilesystem, path: string) => {
 			if (connectedFs || abortController) {
 				throw new Error("Connected already!")
 			}
 
-			fs.mkdir(path, { recursive: true })
+			await fs.mkdir(path, { recursive: true })
 
 			connectedFs = {
 				fs,
@@ -887,6 +899,8 @@ export default function createSlotStorage<DocType extends HasId>(
 			}
 
 			startWatchingSlotfileChanges()
+
+			await await loadSlotFilesFromFs(true)
 
 			// save and load all slot files from disc
 			await saveChangesToDisk()

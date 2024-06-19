@@ -58,12 +58,14 @@ const _create = async (fs: any) => {
 	// create a slot storage that informs rxdb via pullStream about changes in records
 	//const pullStream$ = new Subject<RxReplicationPullStreamItem<any, any>>()
 	const bundleStorage = createSlotStorage<MessageBundle>(
+		"bundle-storage",
 		// use 65536 slots per slot file
 		16 * 16 * 16 * 16,
 		3
 	)
 
 	const messageStorage = createSlotStorage<Message>(
+		"message-storage",
 		// use 65536 slots per slot file
 		16 * 16 * 16 * 16,
 		3

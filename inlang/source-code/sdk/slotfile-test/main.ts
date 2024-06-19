@@ -21,7 +21,7 @@ const rl = readline.createInterface({
 	output: process.stdout,
 })
 
-const handleChanges = (eventName: string) => {
+const handleChanges = () => {
 	// if (!connected) return
 	// if (eventName === "record-change") {
 	// 	console.log("Database changed - current objects:")
@@ -57,18 +57,19 @@ const handleChanges = (eventName: string) => {
 	// console.table(storage._fileNamesToSlotfileStates)
 }
 
-const storage = createSlotStorage<SampleDoc>(16 * 16 * 16 * 16, handleChanges)
-let connected = false
+const storage = createSlotStorage<SampleDoc>("cli-storage", 16 * 16 * 16 * 16, 4)
+storage.setCallback(handleChanges)
+
 console.log("Connecting to file system....")
 
 await storage.connect(fs, filePath)
-connected = true
+
 console.log("....Connecting to file system done")
 console.log("Enter a command in the format: list | create <content> | update <id> <content>")
 
-const list = () => {
+const list = async () => {
 	console.table(
-		storage.readAll().map((record) => ({
+		(await storage.readAll()).map((record) => ({
 			id: record.data.id,
 			data: record.data,
 			conflict: record.mergeConflict?.data,
@@ -76,7 +77,7 @@ const list = () => {
 	)
 }
 
-rl.on("line", (input: string) => {
+rl.on("line", async (input: string) => {
 	const [action, id, ...contentArr] = input.split(" ")
 
 	if (action === "create") {
@@ -91,7 +92,7 @@ rl.on("line", (input: string) => {
 	} else if (action === "update") {
 		if (id) {
 			const content = contentArr.join(" ")
-			const existingDoc = storage.readAll().find((doc) => doc.data.id === id)
+			const existingDoc = (await storage.readAll()).find((doc) => doc.data.id === id)
 			if (!existingDoc) {
 				console.log('document with id "' + id + '" doesnt exist')
 				return

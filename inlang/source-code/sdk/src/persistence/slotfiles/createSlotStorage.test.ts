@@ -18,7 +18,7 @@ function sleep(ms: number) {
 
 describe("Disconnected slot storage", () => {
 	it("insert should lead to a transient record", async () => {
-		const slotStorage = createSlotStorage<DocumentExample>(16, 3)
+		const slotStorage = createSlotStorage<DocumentExample>("storage-1", 16, 3)
 
 		const insertedDocument: DocumentExample = {
 			id: "1",
@@ -48,7 +48,7 @@ describe("Disconnected slot storage", () => {
 	})
 
 	it("update on a non existing record should throw", async () => {
-		const slotStorage = createSlotStorage<DocumentExample>(16, 3)
+		const slotStorage = createSlotStorage<DocumentExample>("storage-2", 16, 3)
 
 		const nonExistingRecord: DocumentExample = {
 			id: "1",
@@ -71,7 +71,7 @@ describe("Disconnected slot storage", () => {
 		} catch (e) {
 			/* empty */
 		}
-		const slotStorage = createSlotStorage<DocumentExample>(16, 3)
+		const slotStorage = createSlotStorage<DocumentExample>("storage-3", 16, 3)
 
 		const insertedDocument: DocumentExample = {
 			id: "1",
@@ -93,11 +93,12 @@ describe("Disconnected slot storage", () => {
 				recursive: true,
 			})
 		} catch (e) {
+			console.log(e)
 			/* empty */
 		}
-		const slotStorage1 = createSlotStorage<DocumentExample>(16, 3)
+		const slotStorage1 = createSlotStorage<DocumentExample>("storage-4", 16, 3)
 
-		const slotStorage2 = createSlotStorage<DocumentExample>(16, 3)
+		const slotStorage2 = createSlotStorage<DocumentExample>("storage-5", 16, 3)
 
 		await slotStorage1.connect(fs, path)
 		await slotStorage2.connect(fs, path)
@@ -111,10 +112,13 @@ describe("Disconnected slot storage", () => {
 		await slotStorage1.save()
 		expect(slotStorage1._internal.transientSlotEntries.size).eq(0)
 
-		// let the file event reach slotStorage2
-		await sleep(3000)
+		// force reload to avoid waiting for fs event
+		await slotStorage2.loadSlotFilesFromWorkingCopy(true)
 
-		// expect(await slotStorage2.readAll()).deep(await slotStorage1.readAll())
+		const currentDocumentsStorage1 = await slotStorage1.readAll()
+		const currentDocumentsStorage2 = await slotStorage2.readAll()
+
+		expect(currentDocumentsStorage1).deep.eq(currentDocumentsStorage2)
 		slotStorage2.disconnect()
 
 		const updateInSlot1 = structuredClone(insertedDocument)
@@ -127,6 +131,7 @@ describe("Disconnected slot storage", () => {
 
 		await slotStorage2.connect(fs, path)
 		const conflictingRecord = slotStorage2.findDocumentsById([insertedDocument.id])[0]
+
 		expect(conflictingRecord?.localConflict).not.eq(undefined)
-	}, 2000000)
+	}, 200000)
 })
