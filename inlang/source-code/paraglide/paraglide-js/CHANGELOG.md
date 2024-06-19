@@ -1,5 +1,11 @@
 # @inlang/paraglide-js
 
+## 1.10.1
+
+### Patch Changes
+
+- c5d145d: use types from SDK for error handling
+
 ## 1.10.0
 
 ### Minor Changes
