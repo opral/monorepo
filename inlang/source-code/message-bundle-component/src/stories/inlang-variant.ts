@@ -43,6 +43,11 @@ export default class InlangVariant extends LitElement {
 				width: 120px;
 				background-color: none;
 				border-right: 1px solid var(--sl-color-neutral-300);
+				position: relative;
+				z-index: 0;
+			}
+			.match:focus-within {
+				z-index: 1;
 			}
 			.match::part(base) {
 				border: none;
@@ -56,6 +61,11 @@ export default class InlangVariant extends LitElement {
 				flex: 1;
 				background-color: none;
 				height: 44px;
+				position: relative;
+				z-index: 0;
+			}
+			.pattern:focus-within {
+				z-index: 1;
 			}
 			.pattern::part(base) {
 				border: none;
@@ -103,6 +113,7 @@ export default class InlangVariant extends LitElement {
 				display: none;
 				align-items: center;
 				gap: 6px;
+				z-index: 2;
 			}
 			sl-button::part(base):hover {
 				color: var(--sl-color-neutral-900);
