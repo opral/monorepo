@@ -28131,7 +28131,7 @@ var InlangModule = import_typebox9.Type.Object({
 // ../sdk/dist/resolve-modules/message-lint-rules/resolveMessageLintRules.js
 var import_value = __toESM(require_value2(), 1);
 
-// ../../../node_modules/.pnpm/dedent@1.5.1/node_modules/dedent/dist/dedent.mjs
+// ../../../node_modules/.pnpm/dedent@1.5.1_babel-plugin-macros@2.8.0/node_modules/dedent/dist/dedent.mjs
 function ownKeys(object, enumerableOnly) {
   var keys = Object.keys(object);
   if (Object.getOwnPropertySymbols) {
