@@ -210,6 +210,20 @@
 				"sherlock.inlineAnnotations.enabled": {
 					"type": "boolean",
 					"default": true
+				},
+				"sherlock.appRecommendations": {
+					"type": "object",
+					"properties": {
+						"ninja": {
+							"type": "object",
+							"properties": {
+								"enabled": {
+									"type": "boolean",
+									"default": true
+								}
+							}
+						}
+					}
 				}
 			}
 		}
