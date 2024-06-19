@@ -407,7 +407,7 @@ export default function createSlotStorage<DocType extends HasId>(
 
 	const saveChangesToDisk = async () => {
 		if (ongoingSave) {
-			console.log("scheduling next save")
+			debug("scheduling next save")
 			return await ongoingSave.then(saveChangesToDisk)
 		}
 
@@ -554,7 +554,7 @@ export default function createSlotStorage<DocType extends HasId>(
 								changedIds.add(transientSlotEntry.data.id)
 							} else {
 								outstandingChange = true
-								console.log("outst:" + JSON.stringify(transientSlotEntry))
+								debug("outst:" + JSON.stringify(transientSlotEntry))
 							}
 						}
 					}
@@ -572,7 +572,7 @@ export default function createSlotStorage<DocType extends HasId>(
 							changedIds.add(changedSlotEntry.data.id)
 						} else {
 							outstandingChange = true
-							console.log("outst:" + JSON.stringify(changedSlotEntry))
+							debug("outst:" + JSON.stringify(changedSlotEntry))
 						}
 					}
 				}
@@ -752,7 +752,6 @@ export default function createSlotStorage<DocType extends HasId>(
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- one of them must exist otherwise the record does not exist
 		const currentState = changedRecord ? changedRecord : recordOriginState!
 
-		console.log("YDEEEAS")
 		const localConflict = recordConflictingWithCurrentWorkingFile
 			? deepFreeze({
 					data: recordConflictingWithCurrentWorkingFile.data,

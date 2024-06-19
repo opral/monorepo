@@ -1,4 +1,4 @@
-import { test, expect, describe, it } from "vitest"
+import { expect, describe, it } from "vitest"
 import createSlotStorage from "./createSlotStorage.js"
 import fs from "node:fs/promises"
 
@@ -32,6 +32,7 @@ describe("Disconnected slot storage", () => {
 		const docs1 = await slotStorage.findDocumentsById([insertedDocument.id])
 		expect(docs1.length).eq(1)
 		// expect(Object.isFrozen(docs1[0])).eq(true, "Records returned by slotStorage should be frozen")
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- we check the length before
 		expect(docs1[0]!.data.content).eq(insertedDocument.content)
 
 		const updateDocument = structuredClone(insertedDocument)
@@ -67,7 +68,9 @@ describe("Disconnected slot storage", () => {
 			await fs.rmdir(path, {
 				recursive: true,
 			})
-		} catch (e) {}
+		} catch (e) {
+			/* empty */
+		}
 		const slotStorage = createSlotStorage<DocumentExample>(16, 3)
 
 		const insertedDocument: DocumentExample = {
@@ -89,7 +92,9 @@ describe("Disconnected slot storage", () => {
 			await fs.rmdir(path, {
 				recursive: true,
 			})
-		} catch (e) {}
+		} catch (e) {
+			/* empty */
+		}
 		const slotStorage1 = createSlotStorage<DocumentExample>(16, 3)
 
 		const slotStorage2 = createSlotStorage<DocumentExample>(16, 3)
