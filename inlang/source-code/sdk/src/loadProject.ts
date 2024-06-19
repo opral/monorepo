@@ -134,13 +134,6 @@ export async function loadProject(args: {
 			}
 		}
 
-		// This effect currently has no signals
-		// TODO: replace createEffect with await loadSettings
-		// https://github.com/opral/inlang-message-sdk/issues/77
-
-		// TODO: create FS watcher and update settings on change
-		// https://github.com/opral/inlang-message-sdk/issues/35
-
 		const nodeishFsWithWatchersForSettings = createNodeishFsWithWatcher({
 			nodeishFs: nodeishFs,
 			onChange: async () => {
