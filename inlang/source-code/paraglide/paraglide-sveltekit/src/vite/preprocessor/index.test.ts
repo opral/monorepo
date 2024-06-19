@@ -407,7 +407,6 @@ async function renderComponent(svelteCode: string) {
 				"src/Entry.svelte": compiledEntry.js.code,
 				"src/Component.svelte": compiledComponent.js.code,
 			}),
-			nodeResolve(),
 			alias({
 				entries: {
 					"@inlang/paraglide-sveltekit/internal": path.resolve(
@@ -416,7 +415,12 @@ async function renderComponent(svelteCode: string) {
 					),
 				},
 			}),
+			nodeResolve(),
 		],
+		onwarn: (w) => {
+			if (w.message.includes("Circular dependency")) return
+			console.warn(w)
+		},
 	})
 
 	const compiledBundle = await bundle.generate({ format: "esm" })
