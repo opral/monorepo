@@ -6,7 +6,7 @@ import * as m from "@/paraglide/messages.js"
 import type { Metadata, ResolvingMetadata } from "next"
 import { strategy } from "@/lib/i18n"
 
-export function generateMetadata(_, parent: ResolvingMetadata): Metadata {
+export function generateMetadata(_: unknown, parent: ResolvingMetadata): Metadata {
 	const locale = languageTag()
 	return {
 		title: m.paraglide_and_next_app_router(),
