@@ -1,6 +1,8 @@
 export let nodeCrypto: any = undefined
 
+// @ts-ignore
 if (typeof crypto === "undefined" && typeof process !== "undefined" && process?.versions?.node) {
+	// @ts-ignore
 	nodeCrypto = await import("node:crypto")
 }
 /**
@@ -12,8 +14,11 @@ if (typeof crypto === "undefined" && typeof process !== "undefined" && process?.
 export function hash(inputStr: string): Promise<string> {
 	// @ts-ignore
 	if (
+		// @ts-ignore
 		typeof nodeCrypto !== "undefined" &&
+		// @ts-ignore
 		typeof process !== "undefined" &&
+		// @ts-ignore
 		process?.versions?.node
 	) {
 		return (async () => {

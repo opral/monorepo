@@ -1,18 +1,6 @@
 import type { HasId } from "../types/HasId.js"
 import type { SlotEntry } from "../types/SlotEntry.js"
 
-function addIdHash<DocType extends HasId>(
-	recordToAddIdHash: SlotEntry<DocType>,
-	hashFn: (id: string) => Promise<string> | string
-) {
-	const hashResult = hashFn(recordToAddIdHash.data.id)
-	if (typeof hashResult === "string") {
-		recordToAddIdHash.idHash = hashResult
-		return Promise.resolve()
-	}
-	return hashResult.then((hash) => (recordToAddIdHash.idHash = hash))
-}
-
 /**
  * Parses a string into an array of SlotEntries
  * It tries to parse it via JSON.parse in case of a conflict this approach will fail since conflict markers produce a non valid json.
@@ -44,10 +32,7 @@ function addIdHash<DocType extends HasId>(
  * @param slotFileContent
  * @returns
  */
-export async function parseSlotFile<DocType extends HasId>(
-	slotFileContent: string,
-	idHashFn: (id: string) => Promise<string> | string
-) {
+export async function parseSlotFile<DocType extends HasId>(slotFileContent: string) {
 	let slotFileContentParsed: undefined | any
 	const slotfileEntries = [] as (SlotEntry<DocType> | null)[]
 

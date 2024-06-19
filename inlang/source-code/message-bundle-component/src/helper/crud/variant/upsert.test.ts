@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { createMessage, createMessageBundle } from "@inlang/sdk/v2"
 import { describe, expect, it } from "vitest"
 import upsertVariant from "./upsert.js"
@@ -16,7 +17,11 @@ describe("upsertVariant", () => {
 
 		upsertVariant({
 			message: bundle.messages[0]!,
-			variant: { match: ["*"], pattern: [{ type: "text", value: "Hello Universe" }] },
+			variant: {
+				id: "test_upsertVariant_id",
+				match: ["*"],
+				pattern: [{ type: "text", value: "Hello Universe" }],
+			},
 		})
 
 		expect(bundle.messages[0]?.variants).toHaveLength(1)
@@ -38,7 +43,11 @@ describe("upsertVariant", () => {
 
 		upsertVariant({
 			message: bundle.messages[0]!,
-			variant: { match: ["one"], pattern: [{ type: "text", value: "Hello Universe" }] },
+			variant: {
+				id: "test_upsertVariant_id",
+				match: ["one"],
+				pattern: [{ type: "text", value: "Hello Universe" }],
+			},
 		})
 
 		expect(bundle.messages[0]?.variants).toHaveLength(2)

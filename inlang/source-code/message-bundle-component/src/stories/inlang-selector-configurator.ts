@@ -6,7 +6,7 @@ import SlButton from "@shoelace-style/shoelace/dist/components/button/button.com
 import SlSelect from "@shoelace-style/shoelace/dist/components/select/select.component.js"
 import SlOption from "@shoelace-style/shoelace/dist/components/option/option.component.js"
 import SlTag from "@shoelace-style/shoelace/dist/components/tag/tag.component.js"
-import { createMessage, type LanguageTag, type Message } from "@inlang/sdk/v2"
+import { createMessage, createVariant, type LanguageTag, type Message } from "@inlang/sdk/v2"
 import { addSelector } from "../helper/crud/selector/add.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
 
@@ -163,16 +163,10 @@ export default class InlangSelectorConfigurator extends LitElement {
 					for (const category of _categories) {
 						upsertVariant({
 							message: props.message,
-							variant: {
+							variant: createVariant({
 								// combine the matches that are already present with the new category -> like a matrix
 								match: [...variantMatcherArray, category],
-								pattern: [
-									{
-										type: "text",
-										value: "",
-									},
-								],
-							},
+							}),
 						})
 					}
 				}
@@ -180,16 +174,10 @@ export default class InlangSelectorConfigurator extends LitElement {
 				for (const category of _categories) {
 					upsertVariant({
 						message: props.message,
-						variant: {
+						variant: createVariant({
 							// combine the matches that are already present with the new category -> like a matrix
 							match: [category],
-							pattern: [
-								{
-									type: "text",
-									value: "",
-								},
-							],
-						},
+						}),
 					})
 				}
 			}

@@ -11,18 +11,21 @@ import { Subject } from "rxjs"
 import git, { pull, add, commit, push, statusMatrix } from "isomorphic-git"
 const fs = createNodeishMemoryFs()
 
-import { HeroDocType, HeroSchema, MyDatabaseCollections } from "./schema.js"
+import { MessageBundleRx, MyBundleCollections } from "./schema-messagebundle.js"
+import { Message, MessageBundle } from "../../../src/v2/types.js"
+import { createRxDbAdapter } from "./rxdbadapter.js"
 
 addRxPlugin(RxDBQueryBuilderPlugin)
 
 // NOTE: All those properties are hardcoded for now - dont get crazy ;-) #POC
 const gittoken = "YOUR_GITHUB_TOKEN_HERE"
 const corsProxy = "http://localhost:9998" // cors Proxy expected to run - start it via pnpm run proxy
-const repoUrl = "https://github.com/martin-lysk/db-records"
+const repoUrl = "https://github.com/martin-lysk/message-bundle-storage"
 const dir = "/"
 
 // path to the folder where the slotfiles for the collection will be stored
-const collectionDir = dir + "slots13/"
+const bundleCollectionDir = dir + "messageBundle/"
+const messageCollectionDir = dir + "messages/"
 
 const createAwaitable = () => {
 	let resolve: () => void
@@ -50,35 +53,28 @@ const _create = async (fs: any) => {
 		singleBranch: true,
 		depth: 1,
 	})
+	const pullStream$ = new Subject<RxReplicationPullStreamItem<any, any>>()
 
 	// create a slot storage that informs rxdb via pullStream about changes in records
-	const pullStream$ = new Subject<RxReplicationPullStreamItem<any, any>>()
-	const storage = createSlotStorage<HeroDocType>(
+	//const pullStream$ = new Subject<RxReplicationPullStreamItem<any, any>>()
+	const bundleStorage = createSlotStorage<MessageBundle>(
 		// use 65536 slots per slot file
 		16 * 16 * 16 * 16,
-		3,
-		// delegate that allows to hook into change events in slot storage
-		(eventType, upsertedSlotentries) => {
-			// the event is invoked whenever the file storage detects changes on records (this can happen when the file change during pull or when a document is written)
-			if (eventType === "records-change") {
-				// whenever we have a change we put the documents into the pull stream
-				pullStream$.next({
-					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- event api sucks atm - we know that we can expect slot entries in records-change event
-					documents: storage.findDocumentsById(upsertedSlotentries!).map((r) => r.data)!,
-					// NOTE: we don't need to reconnect a collection at the moment - any checkpoint should work
-					checkpoint: {
-						now: Date.now(),
-					},
-				})
-			}
-		}
+		3
+	)
+
+	const messageStorage = createSlotStorage<Message>(
+		// use 65536 slots per slot file
+		16 * 16 * 16 * 16,
+		3
 	)
 
 	// connect the storage with the collection dir (will read all slot files and load all documents into memory)
-	await storage.connect(fs, collectionDir)
+	await bundleStorage.connect(fs, bundleCollectionDir)
+	await messageStorage.connect(fs, messageCollectionDir)
 
 	// rxdb with memory storage configured
-	const database = await createRxDatabase<MyDatabaseCollections>({
+	const database = await createRxDatabase<MyBundleCollections>({
 		name: "rxdbdemo",
 		storage: getRxStorageMemory(),
 		password: "foooooobaaaaar",
@@ -88,22 +84,24 @@ const _create = async (fs: any) => {
 	})
 
 	// add the hero collection
-	const collection = await database.addCollections({ heroes: { schema: HeroSchema } })
+	const collection = await database.addCollections({ messageBundles: { schema: MessageBundleRx } })
+
+	const messageBundleStorageAdapter = createRxDbAdapter(bundleStorage, messageStorage, pullStream$)
 
 	// now setup the replication for the hero collection - i kept comments from https://rxdb.info/replication.html
 	// important code sits in:
 	// push - called when documents are updated in rxDb and upsers docs in slot storage
 	// pull - only used initially to load all records from slots to rx db (this POC - does not implement the disconnect/reconnect state - may be usefull for branch switches)
 	// streams$ - the observable we pipe changes within slotstorage to rxDB - when we pull and files change
-	const replicationState = await replicateRxCollection({
-		collection: collection.heroes,
+	const replicationState = replicateRxCollection({
+		collection: collection.messageBundles,
 		/**
 		 * An id for the replication to identify it
 		 * and so that RxDB is able to resume the replication on app reload.
 		 * If you replicate with a remote server, it is recommended to put the
 		 * server url into the replicationIdentifier.
 		 */
-		replicationIdentifier: "my-rest-replication-to-https://example.com/api/sync",
+		replicationIdentifier: "my-rest-replication-to-https://example.com/api/syncs",
 		/**
 		 * By default it will do an ongoing realtime replication.
 		 * By settings live: false the replication will run once until the local state
@@ -157,49 +155,12 @@ const _create = async (fs: any) => {
 			/**
 			 * Push handler
 			 */
-			async handler(docs) {
-				try {
-					console.log("PUSH with n documents:" + docs.length)
-					await storage.save()
-					for (const doc of docs) {
-						const upsertedDocument = doc.newDocumentState as unknown as HeroDocType
-						const existingDocument = await storage.findDocumentsById([upsertedDocument.id!])
-						if (existingDocument.length === 0) {
-							await storage.insert(upsertedDocument, false)
-						} else {
-							await storage.update(upsertedDocument, false)
-						}
-					}
-					await storage.save()
-
-					// const docStates: any = []
-					// for (const doc of docs) {
-					// 	docStates.push(doc.newDocumentState as unknown as HeroDocType)
-					// }
-					// // for (const doc of docs) {
-					// setTimeout(() => {
-					// 	pullStream$.next({
-					// 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- event api sucks atm - we know that we can expect slot entries in records-change event
-					// 		documents: docStates,
-					// 		// NOTE: we don't need to reconnect a collection at the moment - any checkpoint should work
-					// 		checkpoint: Date.now(),
-					// 	})
-					// }, 0)
-					// // }
-
-					// for the Demo we commit on every document change
-					await commitChanges()
-				} catch (e) {
-					console.error(e)
-				}
-
-				return []
-			},
+			handler: messageBundleStorageAdapter.pushHandler,
 			/**
 			 * Batch size, optional
 			 * Defines how many documents will be given to the push handler at once.
 			 */
-			// batchSize: 5,
+			// batchSize: 0,
 			/**
 			 * Modifies all documents before they are given to the push handler.
 			 * Can be used to swap out a custom deleted flag instead of the '_deleted' field.
@@ -217,46 +178,7 @@ const _create = async (fs: any) => {
 			/**
 			 * Pull handler
 			 */
-			async handler(lastCheckpoint, batchSize) {
-				let changedDocuments = [] as any[]
-				if (!lastCheckpoint) {
-					changedDocuments = await storage.readAll()
-					console.log("initial load of documents: " + changedDocuments.length)
-				}
-
-				const documentsToRespnse = changedDocuments.map((se) => se.data)
-				// const minTimestamp = lastCheckpoint ? lastCheckpoint.updatedAt : 0
-				// /**
-				//  * In this example we replicate with a remote REST server
-				//  */
-				// const response = await fetch(
-				// 	`https://example.com/api/sync/?minUpdatedAt=${minTimestamp}&limit=${batchSize}`
-				// )
-				// const documentsFromRemote = await response.json()
-				return {
-					/**
-					 * Contains the pulled documents from the remote.
-					 * Not that if documentsFromRemote.length < batchSize,
-					 * then RxDB assumes that there are no more un-replicated documents
-					 * on the backend, so the replication will switch to 'Event observation' mode.
-					 */
-					documents: documentsToRespnse,
-					/**
-					 * The last checkpoint of the returned documents.
-					 * On the next call to the pull handler,
-					 * this checkpoint will be passed as 'lastCheckpoint'
-					 */
-					checkpoint: {
-						now: Date.now(),
-					},
-					/*documentsFromRemote.length === 0
-							? lastCheckpoint
-							: {
-									id: lastOfArray(documentsFromRemote).id,
-									updatedAt: lastOfArray(documentsFromRemote).updatedAt,
-							  },*/
-				}
-			},
+			handler: messageBundleStorageAdapter.pullHandler,
 			// batchSize: 10,
 			/**
 			 * Modifies all documents after they have been pulled
@@ -286,11 +208,11 @@ const _create = async (fs: any) => {
 				name: "Meeee",
 			},
 		})
-		await storage.loadSlotFilesFromWorkingCopy(true)
+		await bundleStorage.loadSlotFilesFromWorkingCopy(true)
+		await messageStorage.loadSlotFilesFromWorkingCopy(true)
 	}
 
 	const pushChangesAndReloadSlots = async () => {
-		console.log("pushing:")
 		await push({
 			fs,
 			http,
@@ -299,14 +221,14 @@ const _create = async (fs: any) => {
 				return { username: gittoken }
 			},
 		})
-		await storage.loadSlotFilesFromWorkingCopy(true)
+		await bundleStorage.loadSlotFilesFromWorkingCopy(true)
+		await messageStorage.loadSlotFilesFromWorkingCopy(true)
 	}
 
 	let ongoingCommit = undefined as any
 
 	const commitChanges = async () => {
 		if (ongoingCommit) {
-			console.log("scheduling next commit")
 			await ongoingCommit.then(commitChanges)
 			return
 		}
@@ -328,13 +250,9 @@ const _create = async (fs: any) => {
 			.map((row) => row[FILE])
 
 		if (filenames.length == 0) {
-			console.log("No files changed...")
-
 			return
 		}
 
-		console.log("files adding:")
-		console.log(filenames)
 		await add({
 			dir: dir,
 			fs: fs,
@@ -342,7 +260,6 @@ const _create = async (fs: any) => {
 		})
 
 		try {
-			console.log("commiting:")
 			await commit({
 				dir: dir,
 				fs: fs,
@@ -353,13 +270,14 @@ const _create = async (fs: any) => {
 				},
 			})
 		} catch (e) {
+			// eslint-disable-next-line no-console
 			console.log(e)
 		}
 		ongoingCommit = undefined
 		done()
 	}
 
-	return { database, fs, pullChangesAndReloadSlots, pushChangesAndReloadSlots }
+	return { database, fs, pullChangesAndReloadSlots, pushChangesAndReloadSlots, commitChanges }
 }
 
 export const storage = _create(fs)
