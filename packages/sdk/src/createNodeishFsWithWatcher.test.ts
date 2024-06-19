@@ -8,7 +8,7 @@ describe("watcher", () => {
 
 		const fs = createNodeishFsWithWatcher({
 			nodeishFs: createNodeishMemoryFs(),
-			updateMessages: () => {
+			onChange: () => {
 				counter++
 			},
 		})

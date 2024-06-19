@@ -8,67 +8,75 @@ import type { NodeishFilesystem } from "@lix-js/fs"
  */
 export const createNodeishFsWithWatcher = (args: {
 	nodeishFs: NodeishFilesystem
-	updateMessages: () => void
+	onChange: () => void
 }): NodeishFilesystem & {
 	stopWatching: () => void
 } => {
-	const pathList: string[] = []
-	let abortControllers: AbortController[] = []
+	const pathList = new Set<string>()
+	const abortControllers = new Set<AbortController>()
 
 	const stopWatching = () => {
 		for (const ac of abortControllers) {
 			ac.abort()
+			abortControllers.delete(ac) // release reference
 		}
-		// release references
-		abortControllers = []
 	}
 
-	const makeWatcher = (path: string) => {
-		;(async () => {
-			try {
-				const ac = new AbortController()
-				abortControllers.push(ac)
-				const watcher = args.nodeishFs.watch(path, {
-					signal: ac.signal,
-					persistent: false,
-				})
-				if (watcher) {
-					//eslint-disable-next-line @typescript-eslint/no-unused-vars
-					for await (const event of watcher) {
-						args.updateMessages()
-					}
+	const makeWatcher = async (path: string) => {
+		try {
+			const ac = new AbortController()
+			abortControllers.add(ac)
+			const watcher = args.nodeishFs.watch(path, {
+				signal: ac.signal,
+				recursive: true,
+				persistent: false,
+			})
+			if (watcher) {
+				//eslint-disable-next-line @typescript-eslint/no-unused-vars
+				for await (const event of watcher) {
+					// whenever the watcher changes we need to update the messages
+					args.onChange()
 				}
-			} catch (err: any) {
-				if (err.name === "AbortError") return
-				// https://github.com/opral/monorepo/issues/1647
-				// the file does not exist (yet)
-				// this is not testable beacause the fs.watch api differs
-				// from node and lix. lenghty
-				else if (err.code === "ENOENT") return
-				throw err
 			}
-		})()
+		} catch (err: any) {
+			if (err.name === "AbortError") return
+			// https://github.com/opral/monorepo/issues/1647
+			// the file does not exist (yet)
+			// this is not testable beacause the fs.watch api differs
+			// from node and lix. lenghty
+			else if (err.code === "ENOENT") return
+			throw err
+		}
 	}
 
-	const readFileAndExtractPath = (path: string, options: { encoding: "utf-8" | "binary" }) => {
-		if (!pathList.includes(path)) {
-			makeWatcher(path)
-			pathList.push(path)
+	/**
+	 * Creates watchers on-the-fly for any file or directory that is not yet watched.
+	 */
+	const watched = <T extends any[], R>(
+		fn: (path: string, ...rest: T) => R
+	): ((path: string, ...rest: T) => R) => {
+		return (path: string, ...rest: T): R => {
+			if (!pathList.has(path)) {
+				makeWatcher(path)
+				pathList.add(path)
+			}
+			return fn(path, ...rest)
 		}
-		return args.nodeishFs.readFile(path, options)
 	}
 
 	return {
+		...args.nodeishFs,
+		/**
+		 * Reads the file and automatically adds it to the list of watched files.
+		 * Any changes to the file will trigger a message update.
+		 */
 		// @ts-expect-error
-		readFile: (path: string, options: { encoding: "utf-8" | "binary" }) =>
-			readFileAndExtractPath(path, options),
-		rm: args.nodeishFs.rm,
-		readdir: args.nodeishFs.readdir,
-		mkdir: args.nodeishFs.mkdir,
-		rmdir: (args.nodeishFs as any).rmdir,
-		writeFile: args.nodeishFs.writeFile,
-		watch: args.nodeishFs.watch,
-		stat: args.nodeishFs.stat,
+		readFile: watched(args.nodeishFs.readFile),
+		/**
+		 * Reads the directory and automatically adds it to the list of watched files.
+		 * Any changes to the directory will trigger a message update.
+		 */
+		readdir: watched(args.nodeishFs.readdir),
 		stopWatching,
 	}
 }
