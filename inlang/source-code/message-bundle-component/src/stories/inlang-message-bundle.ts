@@ -87,8 +87,21 @@ export default class InlangMessageBundle extends LitElement {
 	override render() {
 		return html`
 			<div class=${`header`}>
-				<span># ${this.messageBundle?.id}</span>
-				<span class="alias">@${this.messageBundle?.alias?.default}</span>
+				<div class="header-left">
+					<span># ${this.messageBundle?.id}</span>
+					<span class="alias">@ ${this.messageBundle?.alias?.default}</span>
+				</div>
+				${this._fakeInputs() && this._fakeInputs()!.length > 0
+					? html`<div class="inputs-wrapper">
+							Inputs:
+							<div class="inputs">
+								${this._fakeInputs()?.map((input) => html`<sl-tag size="small">${input}</sl-tag>`)}
+							</div>
+					  </div>`
+					: html`<div class="inputs-wrapper">
+							No inputs
+							<div></div>
+					  </div>`}
 			</div>
 			<div class="messages-container">
 				${this._locales() &&

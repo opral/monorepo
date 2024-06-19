@@ -10,13 +10,34 @@ export const messageBundleStyling = css`
 		font-size: 13px;
 	}
 	.header {
-		font-weight: 600;
+		display: flex;
+		justify-content: space-between;
 		background-color: var(--sl-color-neutral-300);
-		padding: 12px;
+		padding: 0 12px;
+		min-height: 44px;
+	}
+	.header-left {
+		font-weight: 600;
 		display: flex;
 		align-items: center;
-		gap: 10px;
+		gap: 16px;
 		min-height: 44px;
+	}
+	.inputs-wrapper {
+		display: flex;
+		align-items: center;
+		min-height: 44px;
+		gap: 8px;
+		color: var(--sl-color-neutral-600);
+	}
+	.inputs {
+		display: flex;
+		align-items: center;
+		min-height: 44px;
+	}
+	.alias {
+		font-weight: 400;
+		color: var(--sl-color-neutral-600);
 	}
 	.messages-container {
 		width: 100%;
@@ -68,7 +89,7 @@ export const messageBundleStyling = css`
 		align-items: center;
 		padding: 12px;
 		border-right: 1px solid var(--sl-color-neutral-300);
-		font-weight: 600;
+		font-weight: 500;
 	}
 	.add-selector-container {
 		height: 44px;
