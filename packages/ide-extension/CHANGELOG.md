@@ -1,5 +1,17 @@
 # inlang-vs-code-extension
 
+## 1.45.1
+
+### Patch Changes
+
+- da3963a: adjust path in project tab
+- Updated dependencies [8ec7b34]
+- Updated dependencies [05f9282]
+  - @inlang/sdk@0.36.0
+  - @inlang/rpc@0.3.32
+  - @inlang/settings-component@1.0.27
+  - @inlang/telemetry@0.3.47
+
 ## 1.45.0
 
 ### Minor Changes
