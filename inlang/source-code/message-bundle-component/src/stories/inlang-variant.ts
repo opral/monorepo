@@ -119,7 +119,7 @@ export default class InlangVariant extends LitElement {
 	message: Message | undefined
 
 	@property()
-	languageTag: LanguageTag | undefined
+	locale: LanguageTag | undefined
 
 	@property()
 	variant: Variant | undefined
@@ -163,11 +163,11 @@ export default class InlangVariant extends LitElement {
 					  }),
 			})
 			this.triggerSave()
-		} else if (this.languageTag && this._pattern) {
+		} else if (this.locale && this._pattern) {
 			// new message
 
 			//TODO: only text pattern supported
-			this.addMessage(createMessage({ locale: this.languageTag, text: this._pattern }))
+			this.addMessage(createMessage({ locale: this.locale, text: this._pattern }))
 			this.triggerSave()
 		}
 	}
@@ -293,7 +293,7 @@ export default class InlangVariant extends LitElement {
 						? html`<inlang-selector-configurator
 								.inputs=${this.inputs}
 								.message=${this.message}
-								.languageTag=${this.languageTag}
+								.locale=${this.locale}
 								.triggerMessageBundleRefresh=${this.triggerMessageBundleRefresh}
 								.addMessage=${this.addMessage}
 						  >

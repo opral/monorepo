@@ -69,16 +69,16 @@ export default class InlangMessageBundle extends LitElement {
 		overridePrimitiveColors()
 	}
 
-	private _refLanguageTag = (): LanguageTag | undefined => {
+	private _refLocale = (): LanguageTag | undefined => {
 		return this.settings?.sourceLanguageTag
 	}
 
-	private _languageTags = (): LanguageTag[] | undefined => {
+	private _locales = (): LanguageTag[] | undefined => {
 		return this.settings?.languageTags
 	}
 
 	private _fakeInputs = (): string[] | undefined => {
-		const _refLanguageTag = this._refLanguageTag()
+		const _refLanguageTag = this._refLocale()
 		return _refLanguageTag && this.messageBundle
 			? getInputs({ messageBundle: this.messageBundle })
 			: undefined
@@ -91,16 +91,14 @@ export default class InlangMessageBundle extends LitElement {
 				<span class="alias">@${this.messageBundle?.alias?.default}</span>
 			</div>
 			<div class="messages-container">
-				${this._languageTags() &&
-				this._languageTags()?.map((languageTag) => {
-					const message = this.messageBundle?.messages.find(
-						(message) => message.locale === languageTag
-					)
+				${this._locales() &&
+				this._locales()?.map((locale) => {
+					const message = this.messageBundle?.messages.find((message) => message.locale === locale)
 
 					return this._renderMessage(
-						languageTag,
+						locale,
 						message,
-						this.lintReports?.filter((report) => report.languageTag === languageTag)
+						this.lintReports?.filter((report) => report.languageTag === locale)
 					)
 				})}
 			</div>
@@ -108,15 +106,15 @@ export default class InlangMessageBundle extends LitElement {
 	}
 
 	private _renderMessage(
-		languageTag: LanguageTag,
+		locale: LanguageTag,
 		message?: Message,
 		messageLintReports?: MessageLintReport[]
 	) {
 		return html`
 			<div class="message">
 				<div class="language-container">
-					<span>${languageTag}</span>
-					${this.settings?.sourceLanguageTag === languageTag
+					<span>${locale}</span>
+					${this._refLocale() === locale
 						? html`<sl-tag size="small" variant="neutral">ref</sl-tag>`
 						: ``}
 				</div>
@@ -136,7 +134,7 @@ export default class InlangMessageBundle extends LitElement {
 										<inlang-selector-configurator
 											.inputs=${this._fakeInputs()}
 											.message=${message}
-											.languageTag=${languageTag}
+											.locale=${locale}
 											.triggerMessageBundleRefresh=${this._triggerRefresh}
 											.addMessage=${this._addMessage}
 										>
@@ -176,7 +174,7 @@ export default class InlangMessageBundle extends LitElement {
 											.triggerSave=${this._triggerSave}
 											.triggerMessageBundleRefresh=${this._triggerRefresh}
 											.addMessage=${this._addMessage}
-											.languageTag=${languageTag}
+											.locale=${locale}
 											.lintReports=${messageLintReports}
 										></inlang-variant>`
 							  )
@@ -186,7 +184,7 @@ export default class InlangMessageBundle extends LitElement {
 									.triggerSave=${this._triggerSave}
 									.addMessage=${this._addMessage}
 									.triggerMessageBundleRefresh=${this._triggerRefresh}
-									.languageTag=${languageTag}
+									.locale=${locale}
 									.lintReports=${messageLintReports}
 							  ></inlang-variant>`}
 						${message?.selectors && message.selectors.length > 0
