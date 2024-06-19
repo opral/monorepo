@@ -1,18 +1,10 @@
-import type { InlangProject } from "@inlang/sdk"
-
-interface ModuleError extends Error {
-	name: string
-	module: string
-}
+import { type InlangProject, ModuleError } from "@inlang/sdk"
 
 export function classifyProjectErrors(errors: ReturnType<InlangProject["errors"]>) {
-	const isModuleError = (error: Error): error is ModuleError =>
-		error instanceof Error && "name" in error && error.name.includes("Module") && "module" in error
-
+	const isModuleError = (err: Error): err is ModuleError => err instanceof ModuleError
 	const [moduleErrors, otherErrors] = split(errors as Error[], isModuleError)
 
-	const isFatalModuleError = (error: ModuleError): error is ModuleError =>
-		error.module.includes("plugin")
+	const isFatalModuleError = (err: ModuleError): err is ModuleError => err.module.includes("plugin")
 	const [fatalModuleErrors, nonFatalModuleErrors] = split(moduleErrors, isFatalModuleError)
 
 	const fatalErrors = [...fatalModuleErrors, ...otherErrors]
@@ -24,15 +16,9 @@ export function classifyProjectErrors(errors: ReturnType<InlangProject["errors"]
 /**
  * Splits an array into two arrays based on the predicate
  */
-function split<T, U extends T>(array: T[], predicate: (value: T) => value is U): [U[], T[]] {
-	const result: U[] = []
-	const rest: T[] = []
-	for (const item of array) {
-		if (predicate(item)) {
-			result.push(item)
-		} else {
-			rest.push(item)
-		}
-	}
+export function split<T, U extends T>(array: T[], predicate: (value: T) => value is U): [U[], T[]] {
+	const mask = array.map(predicate)
+	const result = array.filter((_, index) => mask[index]) as U[]
+	const rest = array.filter((_, index) => !mask[index]) as T[]
 	return [result, rest]
 }
