@@ -21,6 +21,7 @@ import { ProjectSettings, type NodeishFilesystemSubset } from "./versionedInterf
 import { tryCatch, type Result } from "@inlang/result"
 import { migrateIfOutdated } from "@inlang/project-settings/migration"
 import { createNodeishFsWithAbsolutePaths } from "./createNodeishFsWithAbsolutePaths.js"
+import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
 import { normalizePath } from "@lix-js/fs"
 import { assertValidProjectPath } from "./validateProjectPath.js"
 
@@ -90,33 +91,22 @@ export async function loadProject(args: {
 
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
 		const [loadedSettings, markSettingsAsLoaded, markSettingsAsFailed] = createAwaitable()
+
+		const [resolvedModules, setResolvedModules] =
+			createSignal<Awaited<ReturnType<typeof resolveModules>>>()
 		// -- settings ------------------------------------------------------------
 
 		const [settings, _setSettings] = createSignal<ProjectSettings>()
 		let v2Persistence = false
 		let locales: string[] = []
 
-		// This effect currently has no signals
-		// TODO: replace createEffect with await loadSettings
-		// https://github.com/opral/inlang-message-sdk/issues/77
-		createEffect(() => {
-			// TODO:
-			// if (projectId) {
-			// 	telemetryBrowser.group("project", projectId, {
-			// 		name: projectId,
-			// 	})
-			// }
+		// TODO:
+		// if (projectId) {
+		// 	telemetryBrowser.group("project", projectId, {
+		// 		name: projectId,
+		// 	})
+		// }
 
-			loadSettings({ settingsFilePath: projectPath + "/settings.json", nodeishFs })
-				.then((settings) => {
-					setSettings(settings)
-					markSettingsAsLoaded()
-				})
-				.catch((err) => {
-					markInitAsFailed(err)
-					markSettingsAsFailed(err)
-				})
-		})
 		// TODO: create FS watcher and update settings on change
 		// https://github.com/opral/inlang-message-sdk/issues/35
 
@@ -124,9 +114,11 @@ export async function loadProject(args: {
 			_writeSettingsToDisk({ nodeishFs, settings, projectPath })
 		)
 
-		const setSettings = (settings: ProjectSettings): Result<void, ProjectSettingsInvalidError> => {
+		const setSettings = (
+			newSettings: ProjectSettings
+		): Result<void, ProjectSettingsInvalidError> => {
 			try {
-				const validatedSettings = parseSettings(settings)
+				const validatedSettings = parseSettings(newSettings)
 				v2Persistence = !!validatedSettings.experimental?.persistence
 				locales = validatedSettings.languageTags
 
@@ -144,15 +136,41 @@ export async function loadProject(args: {
 				}
 
 				throw new Error(
-					"Unhandled error in setSettings. This is an internal bug. Please file an issue."
+					"Unhandled error in setSettings. This is an internal bug. Please file an issue.",
+					{ cause: error }
 				)
 			}
 		}
 
-		// -- resolvedModules -----------------------------------------------------------
+		// This effect currently has no signals
+		// TODO: replace createEffect with await loadSettings
+		// https://github.com/opral/inlang-message-sdk/issues/77
 
-		const [resolvedModules, setResolvedModules] =
-			createSignal<Awaited<ReturnType<typeof resolveModules>>>()
+		const nodeishFsWithWatchersForSettings = createNodeishFsWithWatcher({
+			nodeishFs: nodeishFs,
+			onChange: () => {
+				//todo read file only if the change wasn't triggered by `setSettings`
+				console.warn("[sdk debug] Settings file changed")
+			},
+		})
+
+		const settingsResult = await tryCatch(
+			async () =>
+				await loadSettings({
+					settingsFilePath: projectPath + "/settings.json",
+					nodeishFs: nodeishFsWithWatchersForSettings,
+				})
+		)
+
+		if (settingsResult.error) {
+			markInitAsFailed(settingsResult.error)
+			markSettingsAsFailed(settingsResult.error)
+		} else {
+			setSettings(settingsResult.data)
+			markSettingsAsLoaded()
+		}
+
+		// -- resolvedModules -----------------------------------------------------------
 
 		createEffect(() => {
 			const _settings = settings()
@@ -355,6 +373,9 @@ const loadSettings = async (args: {
 	return parseSettings(json.data)
 }
 
+/**
+ * @throws If the settings are not valid
+ */
 const parseSettings = (settings: unknown) => {
 	const withMigration = migrateIfOutdated(settings as any)
 	if (settingsCompiler.Check(withMigration) === false) {
@@ -391,21 +412,19 @@ const _writeSettingsToDisk = async (args: {
 	nodeishFs: NodeishFilesystemSubset
 	settings: ProjectSettings
 }) => {
-	const { data: serializedSettings, error: serializeSettingsError } = tryCatch(() =>
+	const serializeResult = tryCatch(() =>
 		// TODO: this will probably not match the original formatting
 		JSON.stringify(args.settings, undefined, 2)
 	)
-	if (serializeSettingsError) {
-		throw serializeSettingsError
-	}
+	if (serializeResult.error) throw serializeResult.error
+	const serializedSettings = serializeResult.data
 
-	const { error: writeSettingsError } = await tryCatch(async () =>
-		args.nodeishFs.writeFile(args.projectPath + "/settings.json", serializedSettings)
+	const writeResult = await tryCatch(
+		async () =>
+			await args.nodeishFs.writeFile(args.projectPath + "/settings.json", serializedSettings)
 	)
 
-	if (writeSettingsError) {
-		throw writeSettingsError
-	}
+	if (writeResult.error) throw writeResult.error
 }
 
 // ------------------------------------------------------------------------------------------------
