@@ -17,11 +17,6 @@ import "./inlang-selector-configurator.js"
 import variantIsCatchAll from "../helper/crud/variant/isCatchAll.js"
 import updateMatch from "../helper/crud/variant/updateMatch.js"
 
-import SlTag from "@shoelace-style/shoelace/dist/components/tag/tag.component.js"
-
-// in case an app defines it's own set of shoelace components, prevent double registering
-if (!customElements.get("sl-tag")) customElements.define("sl-tag", SlTag)
-
 @customElement("inlang-variant")
 export default class InlangVariant extends LitElement {
 	static override styles = [

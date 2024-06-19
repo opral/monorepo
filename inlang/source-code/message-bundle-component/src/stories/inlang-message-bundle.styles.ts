@@ -34,6 +34,7 @@ export const messageBundleStyling = css`
 		border-top: 1px solid var(--sl-color-neutral-300);
 	}
 	.language-container {
+		font-weight: 500;
 		width: 80px;
 		min-height: 44px;
 		padding: 12px;
@@ -125,5 +126,10 @@ export const messageBundleStyling = css`
 	.new-variant:hover {
 		background-color: var(--sl-color-neutral-50);
 		color: var(--sl-color-neutral-700);
+	}
+	sl-tag::part(base) {
+		background-color: var(--sl-color-neutral-600);
+		color: var(--sl-color-neutral-50);
+		padding: 0 6px;
 	}
 `

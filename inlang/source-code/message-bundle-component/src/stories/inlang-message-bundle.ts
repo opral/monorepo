@@ -10,6 +10,7 @@ import "./inlang-variant.js"
 import "./inlang-lint-report-tip.js"
 import "./inlang-selector-configurator.js"
 
+import SlTag from "@shoelace-style/shoelace/dist/components/tag/tag.component.js"
 import SlInput from "@shoelace-style/shoelace/dist/components/input/input.component.js"
 import SlButton from "@shoelace-style/shoelace/dist/components/button/button.component.js"
 import SlTooltip from "@shoelace-style/shoelace/dist/components/tooltip/tooltip.component.js"
@@ -17,6 +18,7 @@ import type { MessageLintReport, ProjectSettings } from "@inlang/sdk"
 import { getInputs } from "../helper/crud/input/get.js"
 
 // in case an app defines it's own set of shoelace components, prevent double registering
+if (!customElements.get("sl-tag")) customElements.define("sl-tag", SlTag)
 if (!customElements.get("sl-input")) customElements.define("sl-input", SlInput)
 if (!customElements.get("sl-button")) customElements.define("sl-button", SlButton)
 if (!customElements.get("sl-tooltip")) customElements.define("sl-tooltip", SlTooltip)
@@ -114,6 +116,9 @@ export default class InlangMessageBundle extends LitElement {
 			<div class="message">
 				<div class="language-container">
 					<span>${languageTag}</span>
+					${this.settings?.sourceLanguageTag === languageTag
+						? html`<sl-tag size="small" variant="neutral">ref</sl-tag>`
+						: ``}
 				</div>
 				<div class="message-body">
 					${message && message.selectors.length > 0
