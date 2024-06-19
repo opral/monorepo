@@ -25,7 +25,6 @@ let pageData = {} as Record<string, unknown> | undefined
  *
  */
 export default async function onBeforeRender(pageContext: PageContext) {
-	console.log("start")
 	renderedMarkdown = undefined
 	//tabelOfContents = {}
 	pageData = undefined
@@ -96,7 +95,6 @@ export default async function onBeforeRender(pageContext: PageContext) {
 		for (const [slug, page] of Object.entries(flattenPages(item.pages))) {
 			if (!page || !fileExists(page)) redirect(itemPath as `/${string}`, 301)
 
-			console.log("convert", slug, pagePath)
 			if (slug === pagePath) {
 				try {
 					const content = await getContentString(page)
@@ -118,7 +116,6 @@ export default async function onBeforeRender(pageContext: PageContext) {
 		}
 
 		// get contant and convert it to markdown
-		console.log("convert")
 		try {
 			const readmeMarkdown = await convert(await getContentString(readme()!))
 
@@ -155,7 +152,6 @@ export default async function onBeforeRender(pageContext: PageContext) {
 		  })
 		: undefined
 
-	console.log("end")
 	return {
 		pageContext: {
 			pageProps: {
