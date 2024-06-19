@@ -6,7 +6,7 @@ import { stringify as stringifyQS } from "qs"
 // also add slashes for an empty protocol
 const slashedProtocols: readonly string[] = ["http:", "https:", "ftp:", "gopher:", "file:", ""]
 
-export function format(url: UrlObject) {
+export function format(url: UrlObject): string {
 	const protocol = url.protocol
 		? url.protocol.endsWith(":")
 			? url.protocol
@@ -20,7 +20,7 @@ export function format(url: UrlObject) {
 		? auth +
 		  //escape ipv6 addresses with brackets
 		  (!url.hostname.includes(":") ? url.hostname : `[${url.hostname}]`) +
-		  (url.host ? `:${url.port}` : "")
+		  (url.port ? `:${url.port}` : "")
 		: undefined
 
 	let pathname = url.pathname || ""
