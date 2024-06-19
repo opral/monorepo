@@ -151,24 +151,29 @@ export default class InlangVariant extends LitElement {
 	private _isActive: boolean = false
 
 	_save = () => {
-		if (this.message && this.variant && this._pattern) {
+		if (this.message && this.variant) {
 			// upsert variant
 			upsertVariant({
 				message: this.message,
-				variant: createVariant({
-					id: this.variant.id,
-					match: this.variant.match,
-					text: this._pattern,
-				}),
+				variant: this._pattern
+					? createVariant({
+							id: this.variant.id,
+							match: this.variant.match,
+							text: this._pattern,
+					  })
+					: createVariant({
+							id: this.variant.id,
+							match: this.variant.match,
+							text: undefined,
+					  }),
 			})
 			this.triggerSave()
-		} else {
+		} else if (this.languageTag && this._pattern) {
 			// new message
-			if (this.languageTag && this._pattern) {
-				//TODO: only text pattern supported
-				this.addMessage(createMessage({ locale: this.languageTag, text: this._pattern }))
-				this.triggerSave()
-			}
+
+			//TODO: only text pattern supported
+			this.addMessage(createMessage({ locale: this.languageTag, text: this._pattern }))
+			this.triggerSave()
 		}
 	}
 
@@ -182,6 +187,19 @@ export default class InlangVariant extends LitElement {
 			this.triggerSave()
 			this.triggerMessageBundleRefresh()
 		}
+	}
+
+	@state()
+	private _isDelaying: boolean = false
+
+	_delayedSave = () => {
+		if (this._isDelaying) return
+
+		this._isDelaying = true
+		setTimeout(() => {
+			this._save()
+			this._isDelaying = false
+		}, 1000)
 	}
 
 	_updateMatch = (matchIndex: number, value: string) => {
@@ -270,10 +288,7 @@ export default class InlangVariant extends LitElement {
 					: ""}
 				@input=${(e: Event) => {
 					this._pattern = (e.target as HTMLInputElement).value
-				}}
-				@sl-blur=${(e: Event) => {
-					this._pattern = (e.target as HTMLInputElement).value
-					this._save()
+					this._delayedSave()
 				}}
 			></sl-input>
 			<div class="actions">

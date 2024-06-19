@@ -194,6 +194,7 @@ export default class InlangMessageBundle extends LitElement {
 												match: message.selectors.map(() => "null"),
 											}),
 										})
+										this._triggerSave()
 										this._triggerRefresh()
 									}}
 									class="new-variant"
