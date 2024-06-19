@@ -8,9 +8,9 @@ import type { PageProps } from "./+Page.jsx"
 import { getRedirectPath } from "./helper/getRedirectPath.js"
 
 const repositoryRoot = import.meta.url.slice(0, import.meta.url.lastIndexOf("inlang/source-code"))
-let renderedMarkdown = {} as Record<string, string>
+let renderedMarkdown = {} as string | undefined
 //let tabelOfContents = {} as Record<string, Record<string, string[]>>
-let pageData = {} as Record<string, Record<string, unknown>>
+let pageData = {} as Record<string, unknown> | undefined
 
 /*
  * This function is called before rendering the page.
@@ -25,9 +25,10 @@ let pageData = {} as Record<string, Record<string, unknown>>
  *
  */
 export default async function onBeforeRender(pageContext: PageContext) {
-	renderedMarkdown = {}
+	console.log("start")
+	renderedMarkdown = undefined
 	//tabelOfContents = {}
-	pageData = {}
+	pageData = undefined
 
 	// check if uid is defined
 	const uid = pageContext.routeParams?.uid
@@ -95,20 +96,19 @@ export default async function onBeforeRender(pageContext: PageContext) {
 		for (const [slug, page] of Object.entries(flattenPages(item.pages))) {
 			if (!page || !fileExists(page)) redirect(itemPath as `/${string}`, 301)
 
-			try {
-				const content = await getContentString(page)
-				const markdown = await convert(content)
+			console.log("convert", slug, pagePath)
+			if (slug === pagePath) {
+				try {
+					const content = await getContentString(page)
+					const markdown = await convert(content)
 
-				renderedMarkdown[slug] = markdown.html
-				if (markdown.data?.frontmatter) {
-					pageData[slug] = markdown.data?.frontmatter
+					renderedMarkdown = markdown.html
+					if (markdown.data?.frontmatter) {
+						pageData = markdown.data?.frontmatter
+					}
+				} catch (error) {
+					// pages do not getting prerendered because they are link
 				}
-
-				// await generateTableOfContents(markdown.html).then((table) => {
-				// 	tabelOfContents[slug] = table
-				// })
-			} catch (error) {
-				// pages do not getting prerendered because they are link
 			}
 		}
 	} else if (item.readme) {
@@ -118,17 +118,14 @@ export default async function onBeforeRender(pageContext: PageContext) {
 		}
 
 		// get contant and convert it to markdown
+		console.log("convert")
 		try {
 			const readmeMarkdown = await convert(await getContentString(readme()!))
 
-			renderedMarkdown["/"] = readmeMarkdown.html
+			renderedMarkdown = readmeMarkdown.html
 			if (readmeMarkdown.data?.frontmatter) {
-				pageData["/"] = readmeMarkdown.data?.frontmatter
+				pageData = readmeMarkdown.data?.frontmatter
 			}
-
-			// await generateTableOfContents(readmeMarkdown.html).then((table) => {
-			// 	tabelOfContents["/"] = table
-			// })
 		} catch (error) {
 			console.error("Error while accessing the readme file")
 			throw redirect("/not-found", 301)
@@ -139,7 +136,7 @@ export default async function onBeforeRender(pageContext: PageContext) {
 	}
 
 	//check if the markdown is available for this route
-	if (renderedMarkdown[pagePath] === undefined) {
+	if (renderedMarkdown === undefined) {
 		console.error("No content available this route.")
 		if (pagePath !== "/") {
 			throw (console.info("5"), redirect(itemPath as `/${string}`, 301))
@@ -158,12 +155,13 @@ export default async function onBeforeRender(pageContext: PageContext) {
 		  })
 		: undefined
 
+	console.log("end")
 	return {
 		pageContext: {
 			pageProps: {
-				markdown: renderedMarkdown[pagePath],
+				markdown: renderedMarkdown,
 				pages: item.pages,
-				pageData: pageData ? pageData[pagePath] : undefined,
+				pageData: pageData,
 				pagePath,
 				tableOfContents: {},
 				manifest: item,
