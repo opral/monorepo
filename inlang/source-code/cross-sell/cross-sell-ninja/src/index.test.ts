@@ -180,6 +180,15 @@ describe("GitHub Actions Workflow Adoption Checks", () => {
 		await expect(isAdopted({ fs: fsMock })).resolves.toBe(false)
 	})
 
+	it("creates the workflow directory if it does not exist", async () => {
+		// @ts-expect-error
+		fsMock.stat.mockRejectedValue(new Error("File not found"))
+
+		await add({ fs: fsMock })
+
+		expect(fsMock.mkdir).toHaveBeenCalledWith(".github/workflows", { recursive: true })
+	})
+
 	it("handles filesystem errors gracefully in isAdopted function", async () => {
 		// @ts-expect-error
 		fsMock.stat.mockRejectedValue(new Error("Filesystem error"))
