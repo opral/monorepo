@@ -107,9 +107,6 @@ export async function loadProject(args: {
 		// 	})
 		// }
 
-		// TODO: create FS watcher and update settings on change
-		// https://github.com/opral/inlang-message-sdk/issues/35
-
 		const writeSettingsToDisk = skipFirst((settings: ProjectSettings) =>
 			_writeSettingsToDisk({ nodeishFs, settings, projectPath })
 		)
@@ -146,11 +143,26 @@ export async function loadProject(args: {
 		// TODO: replace createEffect with await loadSettings
 		// https://github.com/opral/inlang-message-sdk/issues/77
 
+		// TODO: create FS watcher and update settings on change
+		// https://github.com/opral/inlang-message-sdk/issues/35
+
 		const nodeishFsWithWatchersForSettings = createNodeishFsWithWatcher({
 			nodeishFs: nodeishFs,
-			onChange: () => {
-				//todo read file only if the change wasn't triggered by `setSettings`
-				console.warn("[sdk debug] Settings file changed")
+			onChange: async () => {
+				const readSettingsResult = await tryCatch(
+					async () =>
+						await loadSettings({
+							settingsFilePath: projectPath + "/settings.json",
+							nodeishFs: nodeishFs,
+						})
+				)
+
+				if (readSettingsResult.error) return
+				const newSettings = readSettingsResult.data
+
+				if (JSON.stringify(newSettings) !== JSON.stringify(settings())) {
+					setSettings(newSettings) //TODO don't write a second time
+				}
 			},
 		})
 
