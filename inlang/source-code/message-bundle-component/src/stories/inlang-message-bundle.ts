@@ -31,7 +31,7 @@ export default class InlangMessageBundle extends LitElement {
 	@property({ type: Object })
 	settings: ProjectSettings | undefined
 
-	@property({ type: Object })
+	@property({ type: Array })
 	lintReports: MessageLintReport[] | undefined
 
 	dispatchOnSetSettings(messageBundle: MessageBundle) {
@@ -85,7 +85,7 @@ export default class InlangMessageBundle extends LitElement {
 		return html`
 			<div class=${`header`}>
 				<span># ${this.messageBundle?.id}</span>
-				<span class="alias">@${this.messageBundle?.alias.default}</span>
+				<span class="alias">@${this.messageBundle?.alias?.default}</span>
 			</div>
 			<div class="messages-container">
 				${this._languageTags() &&
