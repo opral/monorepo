@@ -42,13 +42,13 @@ const debug = _debug("sdk:slotfile")
  * -> a copied of the current record is added to changedRecords of the slotFile object with the changes applied
  * -> OR if the record is a transient record the transient record is replaced with  the updated state
  * 2. a (batched) or explicit call to save() picks up the transient object
- * TODO continue desciption
+ * TODO continue description
  *
  * A record can get created in memory
  *  from a higher stage Records can com If you create an object it would be stored in memory as a
  * transient record.
  *
- * @param fs nodeFs to use for persistence // TODO replace with lix for conflict resolution
+ * @param fs nodeFs to use for persistence
  * @param path base path to store each collection in
  * @returns
  */

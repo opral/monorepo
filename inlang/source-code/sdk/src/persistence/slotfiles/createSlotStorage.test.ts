@@ -7,10 +7,6 @@ type DocumentExample = {
 	content: string
 }
 
-function sleep(ms: number) {
-	return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
 // TODO write test if new file gets created on collison
 // TODO test that inserting the same item fails on memory
 // TODO test that inserting the same item (id) fails between processes
@@ -93,7 +89,7 @@ describe("Disconnected slot storage", () => {
 				recursive: true,
 			})
 		} catch (e) {
-			console.log(e)
+			// console.log(e)
 			/* empty */
 		}
 		const slotStorage1 = createSlotStorage<DocumentExample>("storage-4", 16, 3)
