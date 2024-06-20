@@ -30,11 +30,22 @@ async function writeModuleToCache(
 	moduleURI: string,
 	moduleContent: string,
 	projectPath: string,
-	writeFile: NodeishFilesystemSubset["writeFile"]
+	writeFile: NodeishFilesystemSubset["writeFile"],
+	mkdir: NodeishFilesystemSubset["mkdir"]
 ): Promise<void> {
 	const moduleHash = escape(moduleURI)
 	const filePath = projectPath + `/cache/modules/${moduleHash}`
-	await writeFile(filePath, moduleContent)
+
+	try {
+		await writeFile(filePath, moduleContent)
+	} catch (e) {
+		// if ENONET -> likely means the parent directory does not exist yet
+		if (!(e instanceof Error) || !e.message.includes("ENONET")) return
+
+		// create the parent directory & retry
+		await mkdir(projectPath + `/cache/modules`, { recursive: true })
+		await writeFile(filePath, moduleContent)
+	}
 }
 
 /**
@@ -43,7 +54,7 @@ async function writeModuleToCache(
 export function withCache(
 	moduleLoader: (uri: string) => Promise<string>,
 	projectPath: string,
-	nodeishFs: Pick<NodeishFilesystemSubset, "readFile" | "writeFile">
+	nodeishFs: Pick<NodeishFilesystemSubset, "readFile" | "writeFile" | "mkdir">
 ): (uri: string) => Promise<string> {
 	return async (uri: string) => {
 		const cachePromise = readModuleFromCache(uri, projectPath, nodeishFs.readFile)
@@ -55,7 +66,7 @@ export function withCache(
 			else throw networkResult.error
 		} else {
 			const moduleAsText = networkResult.data
-			await writeModuleToCache(uri, moduleAsText, projectPath, nodeishFs.writeFile)
+			await writeModuleToCache(uri, moduleAsText, projectPath, nodeishFs.writeFile, nodeishFs.mkdir)
 			return moduleAsText
 		}
 	}

@@ -32,6 +32,7 @@ describe("$import", async () => {
 	const _import = createImport("/project.inlang", {
 		writeFile: fs.writeFile,
 		readFile: fs.readFile,
+		mkdir: fs.mkdir,
 	})
 
 	it("should import a module from a local path", async () => {
