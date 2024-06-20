@@ -23,7 +23,7 @@ export type ImportFunction = (uri: string) => Promise<any>
  */
 export function createImport(
 	projectPath: string,
-	nodeishFs: Pick<NodeishFilesystemSubset, "readFile" | "writeFile">
+	nodeishFs: Pick<NodeishFilesystemSubset, "readFile" | "writeFile" | "mkdir">
 ) {
 	return (uri: string) => $import(uri, projectPath, nodeishFs)
 }
@@ -31,7 +31,7 @@ export function createImport(
 async function $import(
 	uri: string,
 	projectPath: string,
-	nodeishFs: Pick<NodeishFilesystemSubset, "readFile" | "writeFile">
+	nodeishFs: Pick<NodeishFilesystemSubset, "readFile" | "writeFile" | "mkdir">
 ): Promise<any> {
 	const moduleAsText = uri.startsWith("http")
 		? await withCache(readModuleFromCDN, projectPath, nodeishFs)(uri)
