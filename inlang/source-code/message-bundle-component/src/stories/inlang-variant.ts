@@ -14,7 +14,6 @@ import type { MessageLintReport } from "@inlang/message-lint-rule"
 
 import "./inlang-lint-report-tip.js"
 import "./inlang-selector-configurator.js"
-import variantIsCatchAll from "../helper/crud/variant/isCatchAll.js"
 import updateMatch from "../helper/crud/variant/updateMatch.js"
 
 @customElement("inlang-variant")
@@ -307,7 +306,8 @@ export default class InlangVariant extends LitElement {
 			<div class="actions">
 				<div class="hide-when-not-active">
 					<!-- <sl-button size="small" @click=${() => this._save()}>Save</sl-button> -->
-					${this.message?.selectors.length === 0 || !this.message?.selectors
+					${(this.message?.selectors.length === 0 && this.message?.variants.length <= 1) ||
+					!this.message?.selectors
 						? html`<inlang-selector-configurator
 								.inputs=${this.inputs}
 								.message=${this.message}
@@ -331,7 +331,7 @@ export default class InlangVariant extends LitElement {
 								</sl-tooltip>
 						  </inlang-selector-configurator>`
 						: ``}
-					${this.message && this.variant && !variantIsCatchAll({ variant: this.variant })
+					${this.message && this.variant
 						? html`<sl-button size="small" @click=${() => this._delete()}
 								><svg
 									xmlns="http://www.w3.org/2000/svg"

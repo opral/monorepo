@@ -5,6 +5,7 @@ import overridePrimitiveColors from "../helper/overridePrimitiveColors.js"
 import { type MessageBundle, type Message, type LanguageTag, createVariant } from "@inlang/sdk/v2" // Import the types
 import { messageBundleStyling } from "./inlang-message-bundle.styles.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
+import { deleteSelector } from "../helper/crud/selector/delete.js"
 
 import "./inlang-variant.js"
 import "./inlang-lint-report-tip.js"
@@ -150,7 +151,8 @@ export default class InlangMessageBundle extends LitElement {
 						: ``}
 				</div>
 				<div class="message-body">
-					${message && message.selectors.length > 0
+					${(message && message.selectors.length > 0) ||
+					(message && message.variants.length > 1 && message.selectors.length === 0)
 						? html`<div
 								class=${`message-header` +
 								` ` +
@@ -158,7 +160,7 @@ export default class InlangMessageBundle extends LitElement {
 						  >
 								<div class="selector-container">
 									${message.selectors.map(
-										(selector) => html`<sl-dropdown>
+										(selector, index) => html`<sl-dropdown>
 											<div class="selector" slot="trigger">
 												${
 													// @ts-ignore
@@ -166,7 +168,13 @@ export default class InlangMessageBundle extends LitElement {
 												}
 											</div>
 											<sl-menu>
-												<sl-menu-item value="cut"
+												<sl-menu-item
+													value="delete"
+													@click=${() => {
+														deleteSelector({ message, index })
+														this._triggerSave()
+														this._triggerRefresh()
+													}}
 													><svg
 														xmlns="http://www.w3.org/2000/svg"
 														width="18px"
@@ -223,7 +231,7 @@ export default class InlangMessageBundle extends LitElement {
 						  </div>`
 						: ``}
 					<div class="variants-container">
-						${message
+						${message && message.variants && message.variants.length > 0
 							? message.variants.map(
 									(variant) =>
 										html`<inlang-variant
@@ -237,7 +245,8 @@ export default class InlangMessageBundle extends LitElement {
 											.lintReports=${messageLintReports}
 										></inlang-variant>`
 							  )
-							: html`<inlang-variant
+							: message?.selectors.length === 0
+							? html`<inlang-variant
 									.message=${message}
 									.inputs=${this._fakeInputs()}
 									.triggerSave=${this._triggerSave}
@@ -245,7 +254,8 @@ export default class InlangMessageBundle extends LitElement {
 									.triggerMessageBundleRefresh=${this._triggerRefresh}
 									.locale=${locale}
 									.lintReports=${messageLintReports}
-							  ></inlang-variant>`}
+							  ></inlang-variant>`
+							: ``}
 						${message?.selectors && message.selectors.length > 0
 							? html`<p
 									@click=${() => {
