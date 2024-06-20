@@ -95,12 +95,23 @@ export default class InlangMessageBundle extends LitElement {
 					? html`<div class="inputs-wrapper">
 							Inputs:
 							<div class="inputs">
-								${this._fakeInputs()?.map((input) => html`<sl-tag size="small">${input}</sl-tag>`)}
+								${this._fakeInputs()?.map(
+									(input) => html`<sl-tag variant="neutral" size="small">${input}</sl-tag>`
+								)}
 							</div>
 					  </div>`
 					: html`<div class="inputs-wrapper">
-							No inputs
-							<div></div>
+							<sl-button class="add-input" variant="text" size="small">
+								<svg
+									viewBox="0 0 24 24"
+									width="18"
+									height="18"
+									slot="prefix"
+									style="margin-right: -2px"
+								>
+									<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path></svg
+								>Input</sl-button
+							>
 					  </div>`}
 			</div>
 			<div class="messages-container">

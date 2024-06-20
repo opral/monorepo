@@ -34,6 +34,14 @@ export const messageBundleStyling = css`
 		display: flex;
 		align-items: center;
 		min-height: 44px;
+		gap: 1px;
+	}
+	.add-input::part(base) {
+		color: var(--sl-color-neutral-600);
+	}
+	.add-input::part(base):hover {
+		color: var(--sl-color-neutral-950);
+		border: 1px solid var(--sl-color-neutral-400);
 	}
 	.alias {
 		font-weight: 400;
