@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.46.0
+
+### Minor Changes
+
+- 07c572c: update deps
+
 ## 1.45.2
 
 ### Patch Changes
