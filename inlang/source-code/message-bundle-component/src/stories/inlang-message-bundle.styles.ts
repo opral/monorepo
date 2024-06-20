@@ -100,6 +100,17 @@ export const messageBundleStyling = css`
 		padding: 12px;
 		border-right: 1px solid var(--sl-color-neutral-300);
 		font-weight: 500;
+		cursor: pointer;
+	}
+	sl-menu-item::part(label) {
+		font-size: 14px;
+		padding-left: 12px;
+	}
+	sl-menu-item::part(checked-icon) {
+		display: none;
+	}
+	.selector:hover {
+		background-color: var(--sl-color-neutral-200);
 	}
 	.add-selector-container {
 		height: 44px;
