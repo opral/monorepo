@@ -24,7 +24,6 @@ import { type Snapshot } from "@lix-js/fs"
 import { readFileSync } from "node:fs"
 // eslint-disable-next-line no-restricted-imports -- test
 import { resolve } from "node:path"
-import { createNodeishFsWithAbsolutePaths } from "./createNodeishFsWithAbsolutePaths.js"
 
 // ------------------------------------------------------------------------------------------------
 
