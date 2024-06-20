@@ -87,6 +87,7 @@ export const Pattern = Type.Array(Type.Union([Text, Expression]))
  */
 export type Variant = Static<typeof Variant>
 export const Variant = Type.Object({
+	id: Type.String(),
 	/**
 	 * The number of keys in each variant match MUST equal the number of expressions in the selectors.
 	 *
@@ -125,6 +126,7 @@ export const Declaration = Type.Union([InputDeclaration])
 
 export type Message = Static<typeof Message>
 export const Message = Type.Object({
+	id: Type.String(),
 	locale: LanguageTag,
 	declarations: Type.Array(Declaration),
 	/**
@@ -136,7 +138,7 @@ export const Message = Type.Object({
 
 export type MessageBundle = Static<typeof MessageBundle>
 export const MessageBundle = Type.Object({
-	id: Type.String(),
+	id: Type.String({ maxLength: 100 }),
 	alias: Type.Record(Type.String(), Type.String()),
 	messages: Type.Array(Message),
 })

@@ -536,7 +536,14 @@ function ProjectMenu() {
 	const shortenProjectPath = (projectPath: string) => {
 		const projectPathArray = projectPath.split("/")
 		if (projectPathArray.length > 3) {
-			return ".../" + projectPathArray.at(-3) + "/" + projectPathArray.at(-2) + "/" + projectPathArray.at(-1)
+			return (
+				".../" +
+				projectPathArray.at(-3) +
+				"/" +
+				projectPathArray.at(-2) +
+				"/" +
+				projectPathArray.at(-1)
+			)
 		} else {
 			return "." + projectPath
 		}

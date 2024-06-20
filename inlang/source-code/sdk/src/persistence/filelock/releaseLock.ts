@@ -13,7 +13,7 @@ export async function releaseLock(
 		const stats = await fs.stat(lockDirPath)
 		// I believe this check associates the lock with the aquirer
 		if (stats.mtimeMs === lockTime) {
-		// NOTE: since we have to use a timeout for stale detection (uTimes is not exposed via mermoryfs) the check for the locktime is not sufficient and can fail in rare cases when another process accuires a lock that was identifiert as tale between call to fs.state and rmDir
+			// NOTE: since we have to use a timeout for stale detection (uTimes is not exposed via mermoryfs) the check for the locktime is not sufficient and can fail in rare cases when another process accuires a lock that was identifiert as tale between call to fs.state and rmDir
 			await fs.rmdir(lockDirPath)
 		}
 	} catch (statError: any) {

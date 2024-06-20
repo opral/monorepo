@@ -10,13 +10,42 @@ export const messageBundleStyling = css`
 		font-size: 13px;
 	}
 	.header {
-		font-weight: 600;
+		display: flex;
+		justify-content: space-between;
 		background-color: var(--sl-color-neutral-300);
-		padding: 12px;
+		padding: 0 12px;
+		min-height: 44px;
+	}
+	.header-left {
+		font-weight: 600;
 		display: flex;
 		align-items: center;
-		gap: 10px;
+		gap: 16px;
 		min-height: 44px;
+	}
+	.inputs-wrapper {
+		display: flex;
+		align-items: center;
+		min-height: 44px;
+		gap: 8px;
+		color: var(--sl-color-neutral-600);
+	}
+	.inputs {
+		display: flex;
+		align-items: center;
+		min-height: 44px;
+		gap: 1px;
+	}
+	.add-input::part(base) {
+		color: var(--sl-color-neutral-600);
+	}
+	.add-input::part(base):hover {
+		color: var(--sl-color-neutral-950);
+		border: 1px solid var(--sl-color-neutral-400);
+	}
+	.alias {
+		font-weight: 400;
+		color: var(--sl-color-neutral-600);
 	}
 	.messages-container {
 		width: 100%;
@@ -34,9 +63,12 @@ export const messageBundleStyling = css`
 		border-top: 1px solid var(--sl-color-neutral-300);
 	}
 	.language-container {
+		font-weight: 500;
 		width: 80px;
 		min-height: 44px;
-		padding: 12px;
+		padding-top: 12px;
+		padding-left: 12px;
+		padding-right: 12px;
 		background-color: var(--sl-color-neutral-100);
 		border-right: 1px solid var(--sl-color-neutral-300);
 	}
@@ -67,7 +99,18 @@ export const messageBundleStyling = css`
 		align-items: center;
 		padding: 12px;
 		border-right: 1px solid var(--sl-color-neutral-300);
-		font-weight: 600;
+		font-weight: 500;
+		cursor: pointer;
+	}
+	sl-menu-item::part(label) {
+		font-size: 14px;
+		padding-left: 12px;
+	}
+	sl-menu-item::part(checked-icon) {
+		display: none;
+	}
+	.selector:hover {
+		background-color: var(--sl-color-neutral-200);
 	}
 	.add-selector-container {
 		height: 44px;
@@ -125,5 +168,10 @@ export const messageBundleStyling = css`
 	.new-variant:hover {
 		background-color: var(--sl-color-neutral-50);
 		color: var(--sl-color-neutral-700);
+	}
+	sl-tag::part(base) {
+		background-color: var(--sl-color-neutral-600);
+		color: var(--sl-color-neutral-50);
+		padding: 0 6px;
 	}
 `

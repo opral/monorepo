@@ -1,0 +1,42 @@
+/**
+ * Default TypeScript config for the inlang project.
+ *
+ * The goal of this config is strict ESM compilation across the inlang project.
+ * See https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c#how-can-i-make-my-typescript-project-output-esm
+ */
+{
+	"compilerOptions": {
+		// Set the compiler to ESM (node16)
+		"module": "Node16",
+		// Resolve modules with ESM (node16)
+		"moduleResolution": "Node16",
+		// To provide backwards compatibility, Node.js allows you to import most CommonJS packages with a default import. This flag tells TypeScript that it's okay to use import on CommonJS modules.
+		"allowSyntheticDefaultImports": true,
+		// ESM doesn't support JSON modules yet.
+		"resolveJsonModule": false,
+		// Create type declaration files (otherwise no typesafety for the importing module)
+		"declaration": true,
+		// Strict type checking
+		"strict": true,
+		// forcing consistens casing in files is a life saver (different environments deal with file casing differently)
+		"forceConsistentCasingInFileNames": true,
+		// Don't check imported libraries for type errors.
+		// The imported libraries might have different settings/whatever.
+		"skipLibCheck": true,
+		"skipDefaultLibCheck": true,
+		// Lint JS files
+		"checkJs": true,
+		// Distingish between type imports and code imports.
+		"verbatimModuleSyntax": true,
+		// tremendous helper to avoid hard to debug bugs.
+		// see https://github.com/opral/monorepo/issues/157
+		"noUncheckedIndexedAccess": true,
+		// enables better DX https://twitter.com/kuizinas/status/1636641120477384705?s=20
+		"declarationMap": true,
+		"noImplicitAny": true,
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitOverride": true,
+		"allowUnreachableCode": false
+	}
+}

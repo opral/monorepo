@@ -6,7 +6,7 @@ import SlButton from "@shoelace-style/shoelace/dist/components/button/button.com
 import SlSelect from "@shoelace-style/shoelace/dist/components/select/select.component.js"
 import SlOption from "@shoelace-style/shoelace/dist/components/option/option.component.js"
 import SlTag from "@shoelace-style/shoelace/dist/components/tag/tag.component.js"
-import { createMessage, type LanguageTag, type Message } from "@inlang/sdk/v2"
+import { createMessage, createVariant, type LanguageTag, type Message } from "@inlang/sdk/v2"
 import { addSelector } from "../helper/crud/selector/add.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
 
@@ -76,7 +76,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 	message?: Message | undefined
 
 	@property()
-	languageTag: LanguageTag | undefined
+	locale: LanguageTag | undefined
 
 	@property()
 	triggerMessageBundleRefresh: () => void = () => {}
@@ -88,16 +88,16 @@ export default class InlangSelectorConfigurator extends LitElement {
 	private _input: string | undefined
 
 	private _getPluralCategories = (): string[] | undefined => {
-		return this.languageTag
-			? new Intl.PluralRules(this.languageTag).resolvedOptions().pluralCategories
+		return this.locale
+			? new Intl.PluralRules(this.locale).resolvedOptions().pluralCategories
 			: undefined
 	}
 
 	private _handleAddSelector = (addVariants: boolean) => {
 		if (this._input) {
-			if (!this.message && this.languageTag) {
+			if (!this.message && this.locale) {
 				// create selector in not present message
-				const newMessage = createMessage({ locale: this.languageTag, text: "" })
+				const newMessage = createMessage({ locale: this.locale, text: "" })
 
 				// add selector
 				addSelector({
@@ -163,16 +163,10 @@ export default class InlangSelectorConfigurator extends LitElement {
 					for (const category of _categories) {
 						upsertVariant({
 							message: props.message,
-							variant: {
+							variant: createVariant({
 								// combine the matches that are already present with the new category -> like a matrix
 								match: [...variantMatcherArray, category],
-								pattern: [
-									{
-										type: "text",
-										value: "",
-									},
-								],
-							},
+							}),
 						})
 					}
 				}
@@ -180,16 +174,10 @@ export default class InlangSelectorConfigurator extends LitElement {
 				for (const category of _categories) {
 					upsertVariant({
 						message: props.message,
-						variant: {
+						variant: createVariant({
 							// combine the matches that are already present with the new category -> like a matrix
 							match: [category],
-							pattern: [
-								{
-									type: "text",
-									value: "",
-								},
-							],
-						},
+						}),
 					})
 				}
 			}

@@ -7,6 +7,7 @@ export const pluralBundle: MessageBundle = {
 	},
 	messages: [
 		{
+			id: "mock_message_id_de",
 			locale: "de",
 			declarations: [
 				{
@@ -59,6 +60,7 @@ export const pluralBundle: MessageBundle = {
 			],
 			variants: [
 				{
+					id: "mock_variant_id_de_zero",
 					match: ["zero"],
 					pattern: [
 						{
@@ -68,6 +70,7 @@ export const pluralBundle: MessageBundle = {
 					],
 				},
 				{
+					id: "mock_variant_id_de_one",
 					match: ["one"],
 					pattern: [
 						{
@@ -77,6 +80,7 @@ export const pluralBundle: MessageBundle = {
 					],
 				},
 				{
+					id: "mock_variant_id_de_other",
 					match: ["other"],
 					pattern: [
 						{
@@ -95,6 +99,7 @@ export const pluralBundle: MessageBundle = {
 			],
 		},
 		{
+			id: "mock_message_id_en",
 			locale: "en",
 			declarations: [
 				{
@@ -125,6 +130,7 @@ export const pluralBundle: MessageBundle = {
 			],
 			variants: [
 				{
+					id: "mock_variant_id_en_zero",
 					match: ["zero"],
 					pattern: [
 						{
@@ -134,6 +140,7 @@ export const pluralBundle: MessageBundle = {
 					],
 				},
 				{
+					id: "mock_variant_id_en_one",
 					match: ["one"],
 					pattern: [
 						{
@@ -143,6 +150,7 @@ export const pluralBundle: MessageBundle = {
 					],
 				},
 				{
+					id: "mock_variant_id_en_other",
 					match: ["other"],
 					pattern: [
 						{
