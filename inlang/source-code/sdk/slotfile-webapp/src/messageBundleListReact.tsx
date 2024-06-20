@@ -6,6 +6,7 @@ import { InlangMessageBundle } from "@inlang/message-bundle-component"
 import { mockSetting } from "./mock/settings.js"
 import { MessageBundle } from "../../src/v2/types.js"
 
+
 export const MessageBundleComponent = createComponent({
 	tagName: "inlang-message-bundle",
 	elementClass: InlangMessageBundle,
@@ -17,7 +18,7 @@ export const MessageBundleComponent = createComponent({
 
 export function MessageBundleList() {
 	const [bundles, setBundles] = useState([] as MessageBundleRxType[])
-	const [db, setDb] = useState<an>()
+	const [db, setDb] = useState<any>()
 
 	useEffect(() => {
 		let query = undefined as any

@@ -946,6 +946,8 @@ export default function createSlotStorage<DocType extends HasId>(
 			}
 
 			transientSlotEntries.set(documentId, newSlotEntry)
+
+			updateSlotEntryStates(documentId, slotIndex, entryIdHash)
 			changeCallback("record-change")
 			changeCallback("records-change", [documentId])
 			// TODO trigger save
@@ -1000,6 +1002,7 @@ export default function createSlotStorage<DocType extends HasId>(
 				transientSlotEntries.set(documentId, updatedSlotEntry)
 			}
 
+			updateSlotEntryStates(documentId, existingSlotEntry.index, entryIdHash)
 			changeCallback("records-change", [documentId])
 			if (connectedFs && saveToDisk) {
 				return saveChangesToDisk()
