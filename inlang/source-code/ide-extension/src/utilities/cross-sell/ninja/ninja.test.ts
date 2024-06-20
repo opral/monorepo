@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from "vitest"
 import * as vscode from "vscode"
-import { isAdopted, add } from "@inlang/cross-sell-ninja"
+import { shouldRecommend, add } from "@inlang/cross-sell-ninja"
 import type { NodeishFilesystem } from "@lix-js/fs"
 import { getSetting, updateSetting } from "../../settings/index.js"
 import { crossSellNinja } from "./ninja.js"
@@ -12,7 +12,7 @@ vi.mock("vscode", () => ({
 }))
 
 vi.mock("@inlang/cross-sell-ninja", () => ({
-	isAdopted: vi.fn(),
+	shouldRecommend: vi.fn(),
 	add: vi.fn(),
 }))
 
@@ -34,30 +34,30 @@ describe("crossSellNinja", () => {
 		await crossSellNinja({ fs: mockFs })
 
 		expect(getSetting).toHaveBeenCalledWith("appRecommendations.ninja.enabled")
-		expect(isAdopted).not.toHaveBeenCalled()
+		expect(shouldRecommend).not.toHaveBeenCalled()
 		expect(vscode.window.showInformationMessage).not.toHaveBeenCalled()
 	})
 
 	it("should return early if Ninja GitHub Action is already adopted", async () => {
 		;(getSetting as Mock).mockResolvedValue(true)
-		;(isAdopted as Mock).mockResolvedValue(true)
+		;(shouldRecommend as Mock).mockResolvedValue(true)
 
 		await crossSellNinja({ fs: mockFs })
 
 		expect(getSetting).toHaveBeenCalledWith("appRecommendations.ninja.enabled")
-		expect(isAdopted).toHaveBeenCalledWith({ fs: mockFs })
+		expect(shouldRecommend).toHaveBeenCalledWith({ fs: mockFs })
 		expect(vscode.window.showInformationMessage).not.toHaveBeenCalled()
 	})
 
 	it("should show prompt if recommendation is enabled and Ninja is not adopted", async () => {
 		;(getSetting as Mock).mockResolvedValue(true)
-		;(isAdopted as Mock).mockResolvedValue(false)
+		;(shouldRecommend as Mock).mockResolvedValue(false)
 		;(vscode.window.showInformationMessage as Mock).mockResolvedValue("Yes")
 
 		await crossSellNinja({ fs: mockFs })
 
 		expect(getSetting).toHaveBeenCalledWith("appRecommendations.ninja.enabled")
-		expect(isAdopted).toHaveBeenCalledWith({ fs: mockFs })
+		expect(shouldRecommend).toHaveBeenCalledWith({ fs: mockFs })
 		expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(
 			"Do you want to add the 🥷 [Ninja Github Action](https://inlang.com/m/3gk8n4n4/app-inlang-ninjaI18nAction) for linting translations in CI?",
 			"Yes",
@@ -67,7 +67,7 @@ describe("crossSellNinja", () => {
 
 	it('should add Ninja GitHub Action if user selects "Yes"', async () => {
 		;(getSetting as Mock).mockResolvedValue(true)
-		;(isAdopted as Mock).mockResolvedValue(false)
+		;(shouldRecommend as Mock).mockResolvedValue(false)
 		;(vscode.window.showInformationMessage as Mock).mockResolvedValue("Yes")
 
 		await crossSellNinja({ fs: mockFs })
@@ -77,7 +77,7 @@ describe("crossSellNinja", () => {
 
 	it('should update setting if user selects "Dont ask again"', async () => {
 		;(getSetting as Mock).mockResolvedValue(true)
-		;(isAdopted as Mock).mockResolvedValue(false)
+		;(shouldRecommend as Mock).mockResolvedValue(false)
 		;(vscode.window.showInformationMessage as Mock).mockResolvedValue("Don't ask again")
 
 		await crossSellNinja({ fs: mockFs })

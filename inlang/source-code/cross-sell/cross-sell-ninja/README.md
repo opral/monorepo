@@ -17,7 +17,7 @@ Add this package to your `dependencies` in `package.json` & install it using `pn
 
 This module exports two main asynchronous functions:
 
-### `isAdopted(fs: NodeishFilesystem): Promise<boolean>`
+### `shouldRecommend(fs: NodeishFilesystem): Promise<boolean>`
 
 Verifies if the Ninja i18n GitHub Action is adopted within the GitHub workflow files of your project.
 
@@ -40,11 +40,11 @@ Adds the Ninja i18n GitHub Action workflow to the repository's `.github/workflow
 ## Example
 
 ```typescript
-import { isAdopted, add } from '@inlang/cross-sell-ninja';
+import { shouldRecommend, add } from '@inlang/cross-sell-ninja';
 import { NodeishFilesystem } from '@lix-js/fs';
 
 async function ensureNinjaAdoption(fs: NodeishFilesystem) {
-  const isWorkflowAdopted = await isAdopted(fs);
+  const isWorkflowAdopted = await shouldRecommend(fs);
 
   if (!isWorkflowAdopted) {
     // Optionally prompt for user confirmation
