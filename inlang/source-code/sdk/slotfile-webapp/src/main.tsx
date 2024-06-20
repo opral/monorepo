@@ -1,9 +1,13 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import "./style.css"
+import { createRoot } from "react-dom/client"
+
+import { MessageBundleList } from "./messageBundleListReact.js"
+
 import { setupMessageBundleList } from "./messageBundleList.js"
 import { storage } from "./storage/db-messagebundle.js"
-import { pluralBundle } from "./../../src/v2/mocks/index.js"
-import { createMessage, createMessageBundle } from "./../../src/v2/helper.js"
+import { pluralBundle } from "../../src/v2/mocks/index.js"
+import { createMessage, createMessageBundle } from "../../src/v2/helper.js"
 
 import "@inlang/message-bundle-component"
 import { MessageBundleRxType } from "./storage/schema-messagebundle.js"
@@ -27,10 +31,14 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 	  
 	  <div id="messageList"></div>
       </section>
-       
+       <div id="root"></div>
      </div>
 	 
 </div>`
+
+const domNode = document.getElementById("root")
+const root = createRoot(domNode)
+root.render(<MessageBundleList />)
 
 document.querySelector<HTMLButtonElement>("#pull")!.onclick = async (el) => {
 	// @ts-expect-error
@@ -95,10 +103,4 @@ document.querySelector<HTMLButtonElement>("#btnAdd100")!.addEventListener("click
 
 document.querySelector<HTMLButtonElement>("#btnAdd1000")!.addEventListener("click", () => {
 	insertNHeros(1000)
-})
-
-await setupMessageBundleList({
-	messageListContainer: document.querySelector<HTMLTableElement>("#messageList")!,
-	nameFilterInput: document.querySelector<HTMLInputElement>("#nameFilter")!,
-	ageFilterInput: document.querySelector<HTMLInputElement>("#ageFilter")!,
 })
