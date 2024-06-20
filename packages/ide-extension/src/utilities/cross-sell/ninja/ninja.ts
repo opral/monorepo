@@ -1,4 +1,4 @@
-import { isAdopted, add } from "@inlang/cross-sell-ninja"
+import { shouldRecommend, add } from "@inlang/cross-sell-ninja"
 import type { NodeishFilesystem } from "@lix-js/fs"
 import * as vscode from "vscode"
 import { getSetting, updateSetting } from "../../settings/index.js"
@@ -6,7 +6,7 @@ import { getSetting, updateSetting } from "../../settings/index.js"
 export const crossSellNinja = async (args: { fs: NodeishFilesystem }): Promise<void> => {
 	if (
 		!(await getSetting("appRecommendations.ninja.enabled").catch(() => true)) ||
-		(await isAdopted({ fs: args.fs }))
+		(await shouldRecommend({ fs: args.fs }))
 	) {
 		return
 	}
