@@ -88,6 +88,7 @@ export default class InlangVariant extends LitElement {
 				align-items: center;
 				gap: 6px;
 				padding-right: 12px;
+				z-index: 3;
 			}
 			.add-selector {
 				height: 30px;

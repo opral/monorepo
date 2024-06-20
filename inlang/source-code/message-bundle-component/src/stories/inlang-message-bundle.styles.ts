@@ -58,7 +58,9 @@ export const messageBundleStyling = css`
 		font-weight: 500;
 		width: 80px;
 		min-height: 44px;
-		padding: 12px;
+		padding-top: 12px;
+		padding-left: 12px;
+		padding-right: 12px;
 		background-color: var(--sl-color-neutral-100);
 		border-right: 1px solid var(--sl-color-neutral-300);
 	}
