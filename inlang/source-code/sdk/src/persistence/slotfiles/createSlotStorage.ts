@@ -42,21 +42,23 @@ const debug = _debug("sdk:slotfile")
  * -> a copied of the current record is added to changedRecords of the slotFile object with the changes applied
  * -> OR if the record is a transient record the transient record is replaced with  the updated state
  * 2. a (batched) or explicit call to save() picks up the transient object
- * TODO continue desciption
+ * TODO continue description
  *
  * A record can get created in memory
  *  from a higher stage Records can com If you create an object it would be stored in memory as a
  * transient record.
  *
- * @param fs nodeFs to use for persistence // TODO replace with lix for conflict resolution
+ * @param fs nodeFs to use for persistence
  * @param path base path to store each collection in
  * @returns
  */
 export default function createSlotStorage<DocType extends HasId>(
+	name: string,
 	// shard property add an optional
 	slotsPerFile: number,
 	fileNameCharacters: number
 ) {
+	const storageName = name
 	// property to use to test for identity of an object within a collection
 	// NOTE: use schema primary key like in https://github.com/pubkey/rxdb/blob/3bdfd66d1da5ccf9afe371b6665770f11e67908f/src/types/rx-schema.d.ts#L106
 	const idProperty = "id"
@@ -372,16 +374,21 @@ export default function createSlotStorage<DocType extends HasId>(
 		if (
 			loadResults.created.length > 0 ||
 			loadResults.updated.length > 0 ||
-			loadResults.updated.length > 0
+			loadResults.conflicting.length > 0
 		) {
 			changeCallback("record-change")
 		}
 
-		const ids = new Set([...loadResults.created, ...loadResults.updated, ...loadResults.updated])
+		const ids = new Set([
+			...loadResults.created,
+			...loadResults.updated,
+			...loadResults.conflicting,
+		])
 
 		if (ids.size > 0) {
 			changeCallback("records-change", [...ids.values()])
 		}
+		_internal.lastLoad = loadResults
 
 		return loadResults
 	}
@@ -407,7 +414,7 @@ export default function createSlotStorage<DocType extends HasId>(
 
 	const saveChangesToDisk = async () => {
 		if (ongoingSave) {
-			console.log("scheduling next save")
+			debug("scheduling next save")
 			return await ongoingSave.then(saveChangesToDisk)
 		}
 
@@ -554,7 +561,7 @@ export default function createSlotStorage<DocType extends HasId>(
 								changedIds.add(transientSlotEntry.data.id)
 							} else {
 								outstandingChange = true
-								console.log("outst:" + JSON.stringify(transientSlotEntry))
+								debug("outst:" + JSON.stringify(transientSlotEntry))
 							}
 						}
 					}
@@ -572,7 +579,7 @@ export default function createSlotStorage<DocType extends HasId>(
 							changedIds.add(changedSlotEntry.data.id)
 						} else {
 							outstandingChange = true
-							console.log("outst:" + JSON.stringify(changedSlotEntry))
+							debug("outst:" + JSON.stringify(changedSlotEntry))
 						}
 					}
 				}
@@ -752,7 +759,6 @@ export default function createSlotStorage<DocType extends HasId>(
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- one of them must exist otherwise the record does not exist
 		const currentState = changedRecord ? changedRecord : recordOriginState!
 
-		console.log("YDEEEAS")
 		const localConflict = recordConflictingWithCurrentWorkingFile
 			? deepFreeze({
 					data: recordConflictingWithCurrentWorkingFile.data,
@@ -867,20 +873,25 @@ export default function createSlotStorage<DocType extends HasId>(
 		return matchingDocuments
 	}
 
+	const _internal = {
+		fileNamesToSlotfileStates,
+		transientSlotEntries,
+		connectedFs,
+		storageName,
+		lastLoad: {},
+	}
+
 	return {
 		/**
 		 * internal properties used for debug purpose (checking internal states during tests)
 		 */
-		_internal: {
-			fileNamesToSlotfileStates,
-			transientSlotEntries,
-		},
+		_internal,
 		connect: async (fs: NodeishFilesystem, path: string) => {
 			if (connectedFs || abortController) {
 				throw new Error("Connected already!")
 			}
 
-			fs.mkdir(path, { recursive: true })
+			await fs.mkdir(path, { recursive: true })
 
 			connectedFs = {
 				fs,
@@ -888,6 +899,8 @@ export default function createSlotStorage<DocType extends HasId>(
 			}
 
 			startWatchingSlotfileChanges()
+
+			await await loadSlotFilesFromFs(true)
 
 			// save and load all slot files from disc
 			await saveChangesToDisk()

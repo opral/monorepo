@@ -67,6 +67,7 @@ export async function parseSlotFile<DocType extends HasId>(slotFileContent: stri
 
 	for (const [slotIndex, recordOnSlot] of slotFileContentParsed.entries()) {
 		if (recordOnSlot === 0) {
+			// eslint-disable-next-line unicorn/no-null -- we use null markers in slot file - undefined wont work
 			slotfileEntries.push(null)
 			continue
 		}
