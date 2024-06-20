@@ -7,7 +7,9 @@ describe("updateAppHTMLFile", () => {
 		const result = updateAppHTMLFile(html)
 
 		expect(result.ok).toBe(true)
-		expect(result.updated).toMatchInlineSnapshot('"<html lang=\\"%paraglide.lang%\\" dir=\\"%paraglide.textDirection%\\"></html>"')
+		expect(result.updated).toMatchInlineSnapshot(
+			'"<html lang=\\"%paraglide.lang%\\" dir=\\"%paraglide.textDirection%\\"></html>"'
+		)
 	})
 
 	it("updates doesn't re-add the dir attribute if already present", () => {

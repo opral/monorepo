@@ -43,7 +43,7 @@
 	$: if (browser) document.documentElement.lang = lang
 	$: if (browser) document.documentElement.dir = i18n.config.textDirection[lang] ?? "ltr"
 
-	// count the number of language changes. 
+	// count the number of language changes.
 	let numberOfLanugageChanges = 0
 	$: if (lang) numberOfLanugageChanges += 1
 
@@ -61,25 +61,24 @@
 			canonicalCurrentUrl.pathname = serializeRoute(canonicalCurrentPath, absoluteBase, suffix)
 
 			const original_to = new URL(href, new URL(canonicalCurrentUrl))
- 
-			if (isExternal(original_to, localisedCurrentUrl, absoluteBase) || i18n.config.exclude(original_to.pathname))
+
+			if (
+				isExternal(original_to, localisedCurrentUrl, absoluteBase) ||
+				i18n.config.exclude(original_to.pathname)
+			)
 				return href
 
 			const targetLanguage = hreflang ?? lang
 			const [canonicalPath, dataSuffix] = parseRoute(original_to.pathname, absoluteBase)
 			const translatedPath = i18n.strategy.getLocalisedPath(canonicalPath, targetLanguage)
 
-			const to = new URL(original_to);
+			const to = new URL(original_to)
 
-			to.pathname =  serializeRoute(
-				translatedPath,
-				absoluteBase,
-				dataSuffix
-			)
+			to.pathname = serializeRoute(translatedPath, absoluteBase, dataSuffix)
 
 			return getHrefBetween(localisedCurrentUrl, to)
 		} catch (error) {
-			if(dev) console.warn(`[paraglide-sveltekit] Failed to translate the link "${href}"`)
+			if (dev) console.warn(`[paraglide-sveltekit] Failed to translate the link "${href}"`)
 			return href
 		}
 	}
@@ -91,7 +90,7 @@
 	// We need to make sure that changing the key happens last.
 	// See https://github.com/sveltejs/svelte/issues/10597
 	$: langKey = lang
-	$: if(browser) document.cookie = createLangCookie(lang, absoluteBase)
+	$: if (browser) document.cookie = createLangCookie(lang, absoluteBase)
 </script>
 
 <svelte:head>
