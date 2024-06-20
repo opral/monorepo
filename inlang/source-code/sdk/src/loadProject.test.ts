@@ -24,6 +24,7 @@ import { type Snapshot } from "@lix-js/fs"
 import { readFileSync } from "node:fs"
 // eslint-disable-next-line no-restricted-imports -- test
 import { resolve } from "node:path"
+import { createNodeishFsWithAbsolutePaths } from "./createNodeishFsWithAbsolutePaths.js"
 
 // ------------------------------------------------------------------------------------------------
 
@@ -278,7 +279,7 @@ describe("initialization", () => {
 		expect(result.data).toBeDefined()
 	})
 
-	it("should resolve from a windows path", async () => {
+	it.skipIf(() => process.platform !== "win32")("should resolve from a windows path", async () => {
 		const repo = await mockRepo()
 		const fs = repo.nodeishFs
 		await fs.mkdir("C:\\Users\\user\\project.inlang", { recursive: true })
