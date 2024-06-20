@@ -32,7 +32,7 @@ export async function createNewProject(args: {
 /**
  * Returns true if the path exists (file or directory), false otherwise.
  */
-export async function directoryExists(filePath: string, nodeishFs: NodeishFilesystem) {
+async function directoryExists(filePath: string, nodeishFs: NodeishFilesystem) {
 	try {
 		const stat = await nodeishFs.stat(filePath)
 		return stat.isDirectory()
