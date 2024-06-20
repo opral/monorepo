@@ -37,7 +37,7 @@ async function directoryExists(filePath: string, nodeishFs: NodeishFilesystem) {
 		const stat = await nodeishFs.stat(filePath)
 		return stat.isDirectory()
 	} catch (error: any) {
-		if (error && error.code === "ENOENT") {
+		if (error && "code" in error && error.code === "ENOENT") {
 			return false
 		} else {
 			throw new Error(`Failed to check if path exists: ${error}`, { cause: error })
