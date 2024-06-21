@@ -4,7 +4,6 @@ import { createRoot } from "react-dom/client"
 
 import { MessageBundleList } from "./messageBundleListReact.js"
 
-import { setupMessageBundleList } from "./messageBundleList.js"
 import { storage } from "./storage/db-messagebundle.js"
 import { pluralBundle } from "../../src/v2/mocks/index.js"
 import { createMessage, createMessageBundle } from "../../src/v2/helper.js"
@@ -37,6 +36,7 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 </div>`
 
 const domNode = document.getElementById("root")
+// @ts-ignore
 const root = createRoot(domNode)
 root.render(<MessageBundleList />)
 

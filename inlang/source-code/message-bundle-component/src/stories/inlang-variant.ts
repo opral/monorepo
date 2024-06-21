@@ -115,18 +115,24 @@ export default class InlangVariant extends LitElement {
 				background-color: var(--sl-color-neutral-200);
 				border: 1px solid var(--sl-color-neutral-400);
 			}
-			.hide-when-not-active {
-				display: none;
-				align-items: center;
-				gap: 6px;
-				z-index: 2;
-			}
 			sl-button::part(base):hover {
 				color: var(--sl-color-neutral-900);
 				background-color: var(--sl-color-neutral-100);
 				border: 1px solid var(--sl-color-neutral-400);
 			}
-			.variant:hover .hide-when-not-active {
+			.dynamic-actions {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+				z-index: 2;
+			}
+			.hide-dynamic-actions {
+				display: none;
+			}
+			.variant:hover .dynamic-actions {
+				display: flex;
+			}
+			.dropdown-open.dynamic-actions {
 				display: flex;
 			}
 		`,
@@ -265,7 +271,29 @@ export default class InlangVariant extends LitElement {
 		})
 	}
 
+	override async firstUpdated() {
+		await this.updateComplete
+		// override primitive colors to match the design system
+		const selectorConfigurator = this.shadowRoot?.querySelector("inlang-selector-configurator")
+		const dropdown = selectorConfigurator!.shadowRoot?.querySelector("sl-dropdown")
+		if (dropdown) {
+			dropdown.addEventListener("sl-show", (e) => {
+				if (e.target === dropdown) {
+					//set parent class dropdown-open
+					selectorConfigurator?.parentElement?.classList.add("dropdown-open")
+				}
+			})
+			dropdown.addEventListener("sl-hide", (e) => {
+				if (e.target === dropdown) {
+					//remove parent class dropdown-open
+					selectorConfigurator?.parentElement?.classList.remove("dropdown-open")
+				}
+			})
+		}
+	}
+
 	override render() {
+		//get html of dropdown -> fix the folling line
 		return html`<div class="variant">
 			${this.variant && this._matches
 				? this._matches.map(
@@ -304,7 +332,7 @@ export default class InlangVariant extends LitElement {
 				}}
 			></sl-input>
 			<div class="actions">
-				<div class="hide-when-not-active">
+				<div class="dynamic-actions hide-dynamic-actions">
 					<!-- <sl-button size="small" @click=${() => this._save()}>Save</sl-button> -->
 					${(this.message?.selectors.length === 0 && this.message?.variants.length <= 1) ||
 					!this.message?.selectors

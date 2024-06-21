@@ -17,7 +17,7 @@ export const MessageBundleComponent = createComponent({
 
 export function MessageBundleList() {
 	const [bundles, setBundles] = useState([] as MessageBundleRxType[])
-	const [db, setDb] = useState<an>()
+	const [db, setDb] = useState<any>()
 
 	useEffect(() => {
 		let query = undefined as any
