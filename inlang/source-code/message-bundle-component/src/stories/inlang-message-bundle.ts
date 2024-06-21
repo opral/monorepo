@@ -245,7 +245,7 @@ export default class InlangMessageBundle extends LitElement {
 											.lintReports=${messageLintReports}
 										></inlang-variant>`
 							  )
-							: message?.selectors.length === 0
+							: message?.selectors.length === 0 || !message
 							? html`<inlang-variant
 									.message=${message}
 									.inputs=${this._fakeInputs()}

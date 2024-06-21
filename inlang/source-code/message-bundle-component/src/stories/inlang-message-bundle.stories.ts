@@ -25,7 +25,7 @@ const mockLintReports: MessageLintReport[] = [
 const mockSettings: ProjectSettings = {
 	$schema: "https://inlang.com/schema/project-settings",
 	sourceLanguageTag: "en",
-	languageTags: ["en", "de", "nl", "ru"],
+	languageTags: ["en", "de"],
 	messageLintRuleLevels: {
 		"messageLintRule.inlang.identicalPattern": "error",
 	},
@@ -78,8 +78,31 @@ export const Props: StoryObj = {
 const bundleWithoutSelectors: MessageBundle = {
 	id: "message-bundle-id",
 	messages: [
-		createMessage({ locale: "en", text: "Hello World!" }),
-		createMessage({ locale: "de", text: "Hallo Welt!" }),
+		{
+			id: "message-id",
+			locale: "en",
+			selectors: [],
+			declarations: [
+				{
+					type: "input",
+					name: "count",
+					value: {
+						type: "expression",
+						arg: {
+							type: "variable",
+							name: "count",
+						},
+					},
+				},
+			],
+			variants: [
+				{
+					id: "variant-id",
+					match: [],
+					pattern: [{ type: "text", value: "Hello World" }],
+				},
+			],
+		},
 	],
 	alias: {
 		default: "alias",
@@ -91,7 +114,6 @@ export const Simple: StoryObj = {
 		html`<inlang-message-bundle
 			.messageBundle=${bundleWithoutSelectors}
 			.settings=${mockSettings}
-			.lintReports=${mockLintReports}
 			@change-message-bundle=${(messageBundle: MessageBundle) =>
 				console.info("changeMessageBundle", messageBundle)}
 		></inlang-message-bundle> `,
