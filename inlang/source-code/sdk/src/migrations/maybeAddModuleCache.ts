@@ -33,7 +33,10 @@ export async function maybeAddModuleCache(args: {
 		try {
 			await args.repo.nodeishFs.writeFile(gitignorePath, EXPECTED_IGNORES.join("\n"))
 		} catch (e) {
-			throw new Error("[migrate:module-cache] Failed to create .gitignore", { cause: e })
+			// @ts-ignore
+			if (e.code && e.code !== "EISDIR" && e.code !== "EEXIST") {
+				throw new Error("[migrate:module-cache] Failed to create .gitignore", { cause: e })
+			}
 		}
 	}
 
