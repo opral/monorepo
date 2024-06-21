@@ -39,7 +39,9 @@ async function writeModuleToCache(
 	if (writeFileResult.error) {
 		const dirPath = projectPath + `/cache/modules`
 		const createDirResult = await tryCatch(() => mkdir(dirPath, { recursive: true }))
-		if (createDirResult.error)
+
+		// @ts-ignore - If the directory exists we can ignore this error
+		if (createDirResult.error && createDirResult.error.code !== "EEXIST")
 			throw new Error("[sdk:module-cacke] failed to create cache-directory. Path: " + dirPath, {
 				cause: createDirResult.error,
 			})
