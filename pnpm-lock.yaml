@@ -292,70 +292,6 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.0)(webdriverio@8.36.1(typescript@5.2.2))
 
-  inlang/source-code/cross-sell/cross-sell-ninja:
-    dependencies:
-      '@inlang/sdk':
-        specifier: workspace:*
-        version: link:../../sdk
-      '@lix-js/fs':
-        specifier: workspace:*
-        version: link:../../../../lix/packages/fs
-      '@sinclair/typebox':
-        specifier: ^0.31.17
-        version: 0.31.28
-      js-yaml:
-        specifier: ^4.1.0
-        version: 4.1.0
-    devDependencies:
-      '@types/js-yaml':
-        specifier: ^4.0.9
-        version: 4.0.9
-      '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(jsdom@22.1.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.0)(webdriverio@8.36.1(typescript@5.3.3)))
-      patch-package:
-        specifier: 6.5.1
-        version: 6.5.1
-      typescript:
-        specifier: ^5.1.3
-        version: 5.3.3
-      vitest:
-        specifier: 0.34.6
-        version: 0.34.6(jsdom@22.1.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.0)(webdriverio@8.36.1(typescript@5.3.3))
-
-  inlang/source-code/cross-sell/cross-sell-sherlock:
-    devDependencies:
-      '@inlang/sdk':
-        specifier: workspace:*
-        version: link:../../sdk
-      '@lix-js/fs':
-        specifier: workspace:*
-        version: link:../../../../lix/packages/fs
-      '@sinclair/typebox':
-        specifier: ^0.31.17
-        version: 0.31.28
-      '@types/vscode':
-        specifier: ^1.84.2
-        version: 1.89.0
-      '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(jsdom@22.1.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.0)(webdriverio@8.36.1(typescript@5.3.3)))
-      comment-json:
-        specifier: ^4.2.3
-        version: 4.2.3
-      memfs:
-        specifier: 4.6.0
-        version: 4.6.0(quill-delta@5.1.0)(rxjs@7.8.1)(tslib@2.6.2)
-      patch-package:
-        specifier: 6.5.1
-        version: 6.5.1
-      typescript:
-        specifier: ^5.1.3
-        version: 5.3.3
-      vitest:
-        specifier: 0.34.6
-        version: 0.34.6(jsdom@22.1.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.0)(webdriverio@8.36.1(typescript@5.3.3))
-
   inlang/source-code/design-system:
     dependencies:
       '@ctrl/tinycolor':
@@ -614,9 +550,6 @@ importers:
       '@inlang/cli':
         specifier: workspace:*
         version: link:../cli
-      '@inlang/cross-sell-ninja':
-        specifier: workspace:*
-        version: link:../cross-sell/cross-sell-ninja
       '@inlang/design-system':
         specifier: workspace:*
         version: link:../design-system
@@ -635,6 +568,9 @@ importers:
       '@inlang/marketplace-registry':
         specifier: workspace:*
         version: link:../marketplace-registry
+      '@inlang/recommend-ninja':
+        specifier: workspace:*
+        version: link:../recommendations/recommend-ninja
       '@inlang/result':
         specifier: workspace:*
         version: link:../result
@@ -840,12 +776,12 @@ importers:
 
   inlang/source-code/ide-extension:
     dependencies:
-      '@inlang/cross-sell-ninja':
+      '@inlang/recommend-ninja':
         specifier: workspace:*
-        version: link:../cross-sell/cross-sell-ninja
-      '@inlang/cross-sell-sherlock':
+        version: link:../recommendations/recommend-ninja
+      '@inlang/recommend-sherlock':
         specifier: workspace:*
-        version: link:../cross-sell/cross-sell-sherlock
+        version: link:../recommendations/recommend-sherlock
       '@inlang/result':
         specifier: workspace:*
         version: link:../result
@@ -1497,18 +1433,18 @@ importers:
         specifier: 3.1.3
         version: 3.1.3
     devDependencies:
-      '@inlang/cross-sell-ninja':
-        specifier: workspace:*
-        version: link:../../cross-sell/cross-sell-ninja
-      '@inlang/cross-sell-sherlock':
-        specifier: workspace:*
-        version: link:../../cross-sell/cross-sell-sherlock
       '@inlang/language-tag':
         specifier: workspace:*
         version: link:../../versioned-interfaces/language-tag
       '@inlang/plugin-message-format':
         specifier: workspace:*
         version: link:../../plugins/inlang-message-format
+      '@inlang/recommend-ninja':
+        specifier: workspace:*
+        version: link:../../recommendations/recommend-ninja
+      '@inlang/recommend-sherlock':
+        specifier: workspace:*
+        version: link:../../recommendations/recommend-sherlock
       '@inlang/sdk':
         specifier: workspace:*
         version: link:../../sdk
@@ -2258,6 +2194,70 @@ importers:
       parsimmon:
         specifier: ^1.18.1
         version: 1.18.1
+      patch-package:
+        specifier: 6.5.1
+        version: 6.5.1
+      typescript:
+        specifier: ^5.1.3
+        version: 5.3.3
+      vitest:
+        specifier: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.0)(webdriverio@8.36.1(typescript@5.3.3))
+
+  inlang/source-code/recommendations/recommend-ninja:
+    dependencies:
+      '@inlang/sdk':
+        specifier: workspace:*
+        version: link:../../sdk
+      '@lix-js/fs':
+        specifier: workspace:*
+        version: link:../../../../lix/packages/fs
+      '@sinclair/typebox':
+        specifier: ^0.31.17
+        version: 0.31.28
+      js-yaml:
+        specifier: ^4.1.0
+        version: 4.1.0
+    devDependencies:
+      '@types/js-yaml':
+        specifier: ^4.0.9
+        version: 4.0.9
+      '@vitest/coverage-v8':
+        specifier: 0.34.6
+        version: 0.34.6(vitest@0.34.6(jsdom@22.1.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.0)(webdriverio@8.36.1(typescript@5.3.3)))
+      patch-package:
+        specifier: 6.5.1
+        version: 6.5.1
+      typescript:
+        specifier: ^5.1.3
+        version: 5.3.3
+      vitest:
+        specifier: 0.34.6
+        version: 0.34.6(jsdom@22.1.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.0)(webdriverio@8.36.1(typescript@5.3.3))
+
+  inlang/source-code/recommendations/recommend-sherlock:
+    devDependencies:
+      '@inlang/sdk':
+        specifier: workspace:*
+        version: link:../../sdk
+      '@lix-js/fs':
+        specifier: workspace:*
+        version: link:../../../../lix/packages/fs
+      '@sinclair/typebox':
+        specifier: ^0.31.17
+        version: 0.31.28
+      '@types/vscode':
+        specifier: ^1.84.2
+        version: 1.89.0
+      '@vitest/coverage-v8':
+        specifier: 0.34.6
+        version: 0.34.6(vitest@0.34.6(jsdom@22.1.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.0)(webdriverio@8.36.1(typescript@5.3.3)))
+      comment-json:
+        specifier: ^4.2.3
+        version: 4.2.3
+      memfs:
+        specifier: 4.6.0
+        version: 4.6.0(quill-delta@5.1.0)(rxjs@7.8.1)(tslib@2.6.2)
       patch-package:
         specifier: 6.5.1
         version: 6.5.1
@@ -13997,6 +13997,7 @@ packages:
 
   rimraf@2.6.3:
     resolution: {integrity: sha512-mwqeW5XsA2qAejG46gYdENaxXjx9onRNCfn7L0duuP4hCuTIi/QO7PDK07KJfp1d+izWPrzEJDcSqBa0OZQriA==}
+    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
 
   rimraf@2.7.1:
