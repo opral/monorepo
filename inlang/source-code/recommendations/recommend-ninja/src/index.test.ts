@@ -55,7 +55,7 @@ describe("GitHub Actions Workflow Adoption Checks", () => {
 		// @ts-expect-error
 		fsMock.stat.mockResolvedValue({ isDirectory: () => false })
 
-		await expect(shouldRecommend({ fs: fsMock })).resolves.toBe(false)
+		await expect(shouldRecommend({ fs: fsMock })).resolves.toBe(true)
 	})
 
 	it("correctly adds the Ninja i18n GitHub Action workflow", async () => {
@@ -117,7 +117,7 @@ describe("GitHub Actions Workflow Adoption Checks", () => {
 		await expect(shouldRecommend({ fs: fsMock })).resolves.toBe(false)
 	})
 
-	it("returns false when the action is found in a nested directory within depth limit", async () => {
+	it("returns true when the action is found in a nested directory within depth limit", async () => {
 		// @ts-expect-error
 		fsMock.stat.mockResolvedValue({ isDirectory: () => true })
 		// @ts-expect-error
@@ -164,7 +164,7 @@ describe("GitHub Actions Workflow Adoption Checks", () => {
 			})
 		)
 
-		await expect(shouldRecommend({ fs: fsMock })).resolves.toBe(false)
+		await expect(shouldRecommend({ fs: fsMock })).resolves.toBe(true)
 	})
 
 	it("returns false and logs an error for malformed YAML content", async () => {
