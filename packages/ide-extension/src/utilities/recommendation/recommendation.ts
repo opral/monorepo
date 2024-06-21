@@ -2,7 +2,8 @@ import * as vscode from "vscode"
 import { telemetry } from "../../services/telemetry/implementation.js"
 import { getGitOrigin } from "../settings/getGitOrigin.js"
 import { getSetting, updateSetting } from "../settings/index.js"
-import * as Sherlock from "@inlang/cross-sell-sherlock"
+import * as Sherlock from "@inlang/recommend-sherlock"
+import * as Ninja from "@inlang/recommend-ninja"
 import type { NodeishFilesystem } from "@lix-js/fs"
 
 export const isDisabledRecommendation = async (): Promise<boolean> => {
@@ -23,14 +24,14 @@ export function createRecommendationBanner(args: {
 	fs: NodeishFilesystem
 }) {
 	return {
-		resolveWebviewView(webviewView: vscode.WebviewView) {
+		async resolveWebviewView(webviewView: vscode.WebviewView) {
 			webviewView.webview.options = {
 				enableScripts: true,
 			}
 
 			webviewView.webview.onDidReceiveMessage(async (message) => {
 				switch (message.command) {
-					case "addRecommendation":
+					case "addSherlockToWorkspace":
 						if (args.workspaceFolder) {
 							Sherlock.add({
 								fs: args.fs,
@@ -45,13 +46,10 @@ export function createRecommendationBanner(args: {
 							)
 						}
 						break
-					case "rejectRecommendation":
-						// persist the user's choice in a workspace setting
-						await updateDisabledRecommendation()
-
-						// Hide the banner
-						vscode.commands.executeCommand("setContext", "sherlock:showRecommendationBanner", false)
-						break
+					case "addNinjaGithubAction":
+						if (await Ninja.shouldRecommend({ fs: args.fs })) {
+							Ninja.add({ fs: args.fs })
+						}
 				}
 
 				// Track the outcome
@@ -62,17 +60,30 @@ export function createRecommendationBanner(args: {
 				})
 			})
 
-			webviewView.webview.html = getRecommendationBannerHtml({ webview: webviewView.webview })
+			webviewView.webview.html = await getRecommendationBannerHtml({
+				webview: webviewView.webview,
+				fs: args.fs,
+			})
 		},
 	}
 }
 
-export function getRecommendationBannerHtml(args: { webview: vscode.Webview }): string {
+export async function getRecommendationBannerHtml(args: {
+	webview: vscode.Webview
+	fs: NodeishFilesystem
+}): Promise<string> {
+	const shouldRecommendNinja = await Ninja.shouldRecommend({ fs: args.fs })
+	const shouldRecommendSherlock = await Sherlock.shouldRecommend({ fs: args.fs })
+
 	return `<!DOCTYPE html>
         <html lang="en">
         <head>
             <meta charset="UTF-8">
-            <meta http-equiv="Content-Security-Policy" content="default-src 'none'; font-src ${args.webview.cspSource}; style-src ${args.webview.cspSource} 'unsafe-inline'; script-src ${args.webview.cspSource} 'unsafe-inline';">
+            <meta http-equiv="Content-Security-Policy" content="default-src 'none'; font-src ${
+							args.webview.cspSource
+						}; style-src ${args.webview.cspSource} 'unsafe-inline'; script-src ${
+		args.webview.cspSource
+	} 'unsafe-inline';">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Recommendation</title>
 			<style>
@@ -139,23 +150,35 @@ export function getRecommendationBannerHtml(args: { webview: vscode.Webview }): 
         </head>
         <body>
             <main>
-                <!--<span>Add the extension to be recommended for other users of your current workspace.</span>-->
-
-                <button id="addRecommendation">Add to workspace recommendation</button>
-                <!--<a id="rejectRecommendation" class="link"><span style="text-align: center;">Reject</a></span></a>-->
-            </main>
+				${
+					shouldRecommendSherlock
+						? `// Add Sherlock to workspace recommendation
+                <span>Add the extension to be recommended for other users of your current workspace.</span>
+                <button id="addSherlockToWorkspace">Add to workspace recommendation</button>
+						`
+						: ``
+				}
+				${
+					shouldRecommendNinja
+						? `// Add Ninja Github Action Button
+				<span>Add Ninja Github Action to lint translations in CI</span>
+				<button id="addNinjaGithubAction">Add Ninja Github Action</button>
+						`
+						: ``
+				}
+			</main>
             <script>
                 const vscode = acquireVsCodeApi();
-                document.getElementById('addRecommendation').addEventListener('click', () => {
+                document.getElementById('addSherlockToWorkspace').addEventListener('click', () => {
                     vscode.postMessage({
-                        command: 'addRecommendation'
+                        command: 'addSherlockToWorkspace'
                     });
                 });
-                document.getElementById('rejectRecommendation').addEventListener('click', () => {
-                    vscode.postMessage({
-                        command: 'rejectRecommendation'
-                    });
-                });
+				document.getElementById('addNinjaGithubAction').addEventListener('click', () => {
+					vscode.postMessage({
+						command: 'addNinjaGithubAction'
+					});
+				});
             </script>
         </body>
         </html>`
@@ -165,18 +188,6 @@ export async function recommendationBannerView(args: {
 	workspaceFolder: vscode.WorkspaceFolder
 	nodeishFs: NodeishFilesystem
 }) {
-	if (
-		(await isDisabledRecommendation()) ||
-		(await Sherlock.isAdopted({
-			fs: args.nodeishFs,
-			workingDirectory: args.workspaceFolder.uri.fsPath,
-		}))
-	) {
-		return
-	} else {
-		vscode.commands.executeCommand("setContext", "sherlock:showRecommendationBanner", true)
-	}
-
 	vscode.window.registerWebviewViewProvider(
 		"recommendationBanner",
 		createRecommendationBanner({
