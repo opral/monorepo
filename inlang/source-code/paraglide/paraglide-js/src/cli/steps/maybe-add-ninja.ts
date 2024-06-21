@@ -2,7 +2,7 @@ import type { Logger } from "~/services/logger/index.js"
 import type { Repository } from "@lix-js/client"
 import type { CliStep } from "../utils.js"
 import type { InlangProject } from "@inlang/sdk"
-import * as Ninja from "@inlang/cross-sell-ninja"
+import * as Ninja from "@inlang/recommend-ninja"
 import { prompt } from "~/cli/utils.js"
 import { telemetry } from "~/services/telemetry/implementation.js"
 
