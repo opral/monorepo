@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 0.36.2
+
+### Patch Changes
+
+- 2fc5feb: Better error-messages for cache-related issues
+
 ## 0.36.1
 
 ### Patch Changes
