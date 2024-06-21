@@ -37,7 +37,7 @@ import {
 import { posthog as telemetryBrowser } from "posthog-js"
 import type { Result } from "@inlang/result"
 import { id } from "../../../../../marketplace-manifest.json"
-import * as Ninja from "@inlang/cross-sell-ninja"
+import * as Ninja from "@inlang/recommend-ninja"
 
 type EditorStateSchema = {
 	/**
