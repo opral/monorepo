@@ -3,6 +3,7 @@
 	"compilerOptions": {
 		"module": "ES2022",
 		"moduleResolution": "Bundler",
+		"isolatedModules": true,
 		"declaration": true,
 		"allowJs": true,
 		"checkJs": true,
@@ -10,5 +11,4 @@
 		"strict": true,
 		"lib": ["ESNext", "DOM"]
 	}
-
 }
