@@ -51,6 +51,9 @@ export const createNodeishFsWithWatcher = (args: {
 
 	/**
 	 * Creates watchers on-the-fly for any file or directory that is not yet watched.
+	 *
+	 * We do this instead of recursively watching the entire project because fs.watch does not support
+	 * recursive watching on linux in node 18. Once node 18 support is dropped this can be drastically simplified.
 	 */
 	const watched = <T extends any[], R>(
 		fn: (path: string, ...rest: T) => R
