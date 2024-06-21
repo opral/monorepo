@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 0.36.1
+
+### Patch Changes
+
+- 1077e06: fix crash if `cache/modules` directory gets deleted
+
 ## 0.36.0
 
 ### Minor Changes
