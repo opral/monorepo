@@ -82,7 +82,7 @@
 		"rollup": "3.29.1",
 		"rollup-plugin-peer-deps-external": "^2.2.4",
 		"rollup-preserve-directives": "^1.1.0",
-		"typescript": "^5.3.3",
+		"typescript": "^5.5.2",
 		"vitest": "0.34.6"
 	}
 }

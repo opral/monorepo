@@ -63,7 +63,7 @@
 		"jsdom": "22.1.0",
 		"patch-package": "6.5.1",
 		"tsd": "^0.25.0",
-		"typescript": "5.2.2",
+		"typescript": "^5.5.2",
 		"vitest": "^0.33.0"
 	}
 }
