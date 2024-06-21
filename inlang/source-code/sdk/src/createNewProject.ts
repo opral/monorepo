@@ -1,6 +1,7 @@
 import type { Repository } from "@lix-js/client"
+import type { NodeishFilesystem } from "@lix-js/fs"
 import { ProjectSettings } from "@inlang/project-settings"
-import { assertValidProjectPath, pathExists } from "./validateProjectPath.js"
+import { assertValidProjectPath } from "./validateProjectPath.js"
 import { defaultProjectSettings } from "./defaultProjectSettings.js"
 
 /**
@@ -15,7 +16,7 @@ export async function createNewProject(args: {
 	assertValidProjectPath(args.projectPath)
 
 	const nodeishFs = args.repo.nodeishFs
-	if (await pathExists(args.projectPath, nodeishFs)) {
+	if (await directoryExists(args.projectPath, nodeishFs)) {
 		throw new Error(`projectPath already exists, received "${args.projectPath}"`)
 	}
 	const settingsText = JSON.stringify(args.projectSettings ?? defaultProjectSettings, undefined, 2)
@@ -26,4 +27,20 @@ export async function createNewProject(args: {
 		nodeishFs.writeFile(`${args.projectPath}/.gitignore`, "cache"),
 		nodeishFs.mkdir(`${args.projectPath}/cache/modules`, { recursive: true }),
 	])
+}
+
+/**
+ * Returns true if the path exists (file or directory), false otherwise.
+ */
+async function directoryExists(filePath: string, nodeishFs: NodeishFilesystem) {
+	try {
+		const stat = await nodeishFs.stat(filePath)
+		return stat.isDirectory()
+	} catch (error: any) {
+		if (error && "code" in error && error.code === "ENOENT") {
+			return false
+		} else {
+			throw new Error(`Failed to check if path exists: ${error}`, { cause: error })
+		}
+	}
 }
