@@ -72,7 +72,17 @@ export function withCache(
 			else throw loaderResult.error
 		} else {
 			const moduleAsText = loaderResult.data
-			await writeModuleToCache(uri, moduleAsText, projectPath, nodeishFs.writeFile, nodeishFs.mkdir)
+			try {
+				await writeModuleToCache(
+					uri,
+					moduleAsText,
+					projectPath,
+					nodeishFs.writeFile,
+					nodeishFs.mkdir
+				)
+			} catch (error) {
+				// TODO trigger a warning
+			}
 			return moduleAsText
 		}
 	}
