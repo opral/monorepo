@@ -20,17 +20,32 @@ export async function maybeAddModuleCache(args: {
 
 	if (gitignoreExists) {
 		// non-destructively add any missing ignores
-		const gitignore = await args.repo.nodeishFs.readFile(gitignorePath, { encoding: "utf-8" })
-		const missingIgnores = EXPECTED_IGNORES.filter((ignore) => !gitignore.includes(ignore))
-		if (missingIgnores.length > 0) {
-			await args.repo.nodeishFs.appendFile(gitignorePath, "\n" + missingIgnores.join("\n"))
+		try {
+			const gitignore = await args.repo.nodeishFs.readFile(gitignorePath, { encoding: "utf-8" })
+			const missingIgnores = EXPECTED_IGNORES.filter((ignore) => !gitignore.includes(ignore))
+			if (missingIgnores.length > 0) {
+				await args.repo.nodeishFs.appendFile(gitignorePath, "\n" + missingIgnores.join("\n"))
+			}
+		} catch (error) {
+			throw new Error("[migrate:module-cache] Failed to update .gitignore", { cause: error })
 		}
 	} else {
-		await args.repo.nodeishFs.writeFile(gitignorePath, EXPECTED_IGNORES.join("\n"))
+		try {
+			await args.repo.nodeishFs.writeFile(gitignorePath, EXPECTED_IGNORES.join("\n"))
+		} catch (e) {
+			// @ts-ignore
+			if (e.code && e.code !== "EISDIR" && e.code !== "EEXIST") {
+				throw new Error("[migrate:module-cache] Failed to create .gitignore", { cause: e })
+			}
+		}
 	}
 
 	if (!moduleCacheExists) {
-		await args.repo.nodeishFs.mkdir(moduleCache, { recursive: true })
+		try {
+			await args.repo.nodeishFs.mkdir(moduleCache, { recursive: true })
+		} catch (e) {
+			throw new Error("[migrate:module-cache] Failed to create cache directory", { cause: e })
+		}
 	}
 }
 
