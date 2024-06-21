@@ -106,6 +106,10 @@ export default class InlangMessageBundle extends LitElement {
 								${this._fakeInputs()?.map(
 									(input) => html`<sl-tag variant="neutral" size="small">${input}</sl-tag>`
 								)}
+								<sl-tag variant="neutral" size="small" class="add-input-tag"
+									><svg viewBox="0 0 24 24" width="18" height="18" style="margin: 0 -2px">
+										<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path></svg
+								></sl-tag>
 							</div>
 					  </div>`
 					: html`<div class="inputs-wrapper">

@@ -34,12 +34,22 @@ export const messageBundleStyling = css`
 		display: flex;
 		align-items: center;
 		min-height: 44px;
-		gap: 1px;
+		gap: 2px;
 	}
 	.add-input::part(base) {
 		color: var(--sl-color-neutral-600);
 	}
 	.add-input::part(base):hover {
+		color: var(--sl-color-neutral-950);
+		border: 1px solid var(--sl-color-neutral-400);
+	}
+	.add-input-tag::part(base) {
+		color: var(--sl-color-neutral-600);
+		background-color: transparent;
+		border: 1px solid transparent;
+		cursor: pointer;
+	}
+	.add-input-tag::part(base):hover {
 		color: var(--sl-color-neutral-950);
 		border: 1px solid var(--sl-color-neutral-400);
 	}
@@ -173,5 +183,6 @@ export const messageBundleStyling = css`
 		background-color: var(--sl-color-neutral-600);
 		color: var(--sl-color-neutral-50);
 		padding: 0 6px;
+		border: none;
 	}
 `
