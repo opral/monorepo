@@ -30,28 +30,38 @@ describe("GitHub Actions Workflow Adoption Checks", () => {
 		// @ts-expect-error
 		fsMock.readdir.mockResolvedValue(["ninja_i18n.yml"])
 		// @ts-expect-error
-		fsMock.readFile.mockResolvedValue(
-			yaml.dump({
-				name: "Ninja i18n action",
-				on: "pull_request_target",
-				jobs: {
-					"ninja-i18n": {
-						name: "Ninja i18n - GitHub Lint Action",
-						"runs-on": "ubuntu-latest",
-						steps: [
-							{
-								name: "Run Ninja i18n",
-								id: "ninja-i18n",
-								uses: "opral/ninja-i18n-action@main",
-								env: {
-									GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}",
-								},
+		fsMock.readFile.mockImplementation((path) => {
+			if (path === ".github/workflows/ninja_i18n.yml") {
+				return Promise.resolve(
+					yaml.dump({
+						name: "Ninja i18n action",
+						on: "pull_request_target",
+						jobs: {
+							"ninja-i18n": {
+								name: "Ninja i18n - GitHub Lint Action",
+								"runs-on": "ubuntu-latest",
+								steps: [
+									{
+										name: "Run Ninja i18n",
+										id: "ninja-i18n",
+										uses: "opral/ninja-i18n-action@main",
+										env: {
+											GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}",
+										},
+									},
+								],
 							},
-						],
-					},
-				},
-			})
-		)
+						},
+					})
+				)
+			} else if (path === ".git/config") {
+				return Promise.resolve(`
+[remote "origin"]
+	url = https://github.com/owner/repo
+				`)
+			}
+			return Promise.reject(new Error("File not found"))
+		})
 		// @ts-expect-error
 		fsMock.stat.mockResolvedValue({ isDirectory: () => false })
 
@@ -153,6 +163,11 @@ describe("GitHub Actions Workflow Adoption Checks", () => {
 						},
 					})
 				)
+			} else if (path === ".git/config") {
+				return Promise.resolve(`
+[remote "origin"]
+	url = https://github.com/owner/repo
+				`)
 			}
 			return Promise.reject(new Error("File not found"))
 		})

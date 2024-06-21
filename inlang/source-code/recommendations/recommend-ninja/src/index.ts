@@ -24,8 +24,10 @@ export async function shouldRecommend(args: { fs: NodeishFilesystem }): Promise<
 		const remoteOriginUrl = match ? match[1] : undefined
 		// Check if the URL is a GitHub URL
 		if (!remoteOriginUrl || !remoteOriginUrl.includes("github.com")) {
+			console.log("Repository is not hosted on GitHub ❌")
 			return false
 		}
+		console.log("GitHub repository detected ✅")
 	} catch (error) {
 		console.error("Error reading the .git/config file:", error)
 		return false
@@ -74,6 +76,7 @@ export async function shouldRecommend(args: { fs: NodeishFilesystem }): Promise<
 		// Not found at this level or any deeper level
 		return false
 	}
+	console.log("Check 2:", await searchWorkflowFiles(".github/workflows"))
 
 	// Start the search from the workflow directory
 	return await searchWorkflowFiles(".github/workflows")
