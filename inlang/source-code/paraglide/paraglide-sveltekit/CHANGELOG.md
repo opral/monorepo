@@ -1,5 +1,13 @@
 # @inlang/paraglide-sveltekit
 
+## 0.10.6
+
+### Patch Changes
+
+- bcd894f: `init` command now generates the `src/lib` directory if it does not exist. Previously it would just crash
+  - @inlang/paraglide-js@1.10.1
+  - @inlang/paraglide-vite@1.2.71
+
 ## 0.10.5
 
 ### Patch Changes
