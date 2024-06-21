@@ -1,5 +1,12 @@
 # @inlang/settings-component
 
+## 1.0.29
+
+### Patch Changes
+
+- Updated dependencies [2fc5feb]
+  - @inlang/sdk@0.36.2
+
 ## 1.0.28
 
 ### Patch Changes
