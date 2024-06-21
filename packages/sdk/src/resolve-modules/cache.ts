@@ -2,7 +2,6 @@ import type { NodeishFilesystemSubset } from "@inlang/plugin"
 import { type Result, tryCatch } from "@inlang/result"
 
 function escape(url: string) {
-	// collect the bytes of the UTF-8 representation
 	const bytes = new TextEncoder().encode(url)
 
 	// 64-bit FNV1a hash to make the file-names shorter
@@ -36,15 +35,20 @@ async function writeModuleToCache(
 	const moduleHash = escape(moduleURI)
 	const filePath = projectPath + `/cache/modules/${moduleHash}`
 
-	try {
-		await writeFile(filePath, moduleContent)
-	} catch (e) {
-		// if ENONET -> likely means the parent directory does not exist yet
-		if (!(e instanceof Error) || !e.message.includes("ENONET")) return
+	const writeFileResult = await tryCatch(() => writeFile(filePath, moduleContent))
+	if (writeFileResult.error) {
+		const dirPath = projectPath + `/cache/modules`
+		const createDirResult = await tryCatch(() => mkdir(dirPath, { recursive: true }))
+		if (createDirResult.error)
+			throw new Error("[sdk:module-cacke] failed to create cache-directory. Path: " + dirPath, {
+				cause: createDirResult.error,
+			})
 
-		// create the parent directory & retry
-		await mkdir(projectPath + `/cache/modules`, { recursive: true })
-		await writeFile(filePath, moduleContent)
+		const writeFileResult = await tryCatch(() => writeFile(filePath, moduleContent))
+		if (writeFileResult.error)
+			throw new Error("[sdk:module-cacke] failed to write cache-file. Path: " + filePath, {
+				cause: writeFileResult.error,
+			})
 	}
 }
 
@@ -58,14 +62,14 @@ export function withCache(
 ): (uri: string) => Promise<string> {
 	return async (uri: string) => {
 		const cachePromise = readModuleFromCache(uri, projectPath, nodeishFs.readFile)
-		const networkResult = await tryCatch(async () => await moduleLoader(uri))
+		const loaderResult = await tryCatch(async () => await moduleLoader(uri))
 
-		if (networkResult.error) {
+		if (loaderResult.error) {
 			const cacheResult = await cachePromise
 			if (!cacheResult.error) return cacheResult.data
-			else throw networkResult.error
+			else throw loaderResult.error
 		} else {
-			const moduleAsText = networkResult.data
+			const moduleAsText = loaderResult.data
 			await writeModuleToCache(uri, moduleAsText, projectPath, nodeishFs.writeFile, nodeishFs.mkdir)
 			return moduleAsText
 		}
