@@ -9,7 +9,7 @@ import {
 } from "./recommendation.js"
 import { getSetting, updateSetting } from "../settings/index.js"
 import { getGitOrigin } from "../settings/getGitOrigin.js"
-import { createNodeishMemoryFs } from "@lix-js/fs"
+import { createNodeishMemoryFs, type NodeishFilesystem } from "@lix-js/fs"
 
 vi.mock("vscode", () => ({
 	resolveWebviewView: vi.fn(),
@@ -136,11 +136,12 @@ describe("getRecommendationBannerHtml", () => {
 		vi.resetAllMocks()
 	})
 
-	it("should return html", () => {
+	it("should return html", async () => {
 		const args = {
 			webview: {} as vscode.Webview,
+			fs: {} as NodeishFilesystem,
 		}
-		const result = getRecommendationBannerHtml(args)
+		const result = await getRecommendationBannerHtml(args)
 		expect(result).toContain(`<html lang="en">`)
 	})
 })
