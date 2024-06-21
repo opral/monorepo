@@ -1,4 +1,4 @@
-import { shouldRecommend, add } from "@inlang/cross-sell-ninja"
+import { shouldRecommend, add } from "@inlang/recommend-ninja"
 import type { NodeishFilesystem } from "@lix-js/fs"
 import * as vscode from "vscode"
 import { getSetting, updateSetting } from "../../settings/index.js"

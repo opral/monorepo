@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from "vitest"
 import * as vscode from "vscode"
-import { shouldRecommend, add } from "@inlang/cross-sell-ninja"
+import { shouldRecommend, add } from "@inlang/recommend-ninja"
 import type { NodeishFilesystem } from "@lix-js/fs"
 import { getSetting, updateSetting } from "../../settings/index.js"
 import { crossSellNinja } from "./ninja.js"
@@ -11,7 +11,7 @@ vi.mock("vscode", () => ({
 	},
 }))
 
-vi.mock("@inlang/cross-sell-ninja", () => ({
+vi.mock("@inlang/recommend-ninja", () => ({
 	shouldRecommend: vi.fn(),
 	add: vi.fn(),
 }))
