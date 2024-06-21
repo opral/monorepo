@@ -7,7 +7,7 @@ import { openRepository } from "@lix-js/client"
 import { findRepoRoot } from "@lix-js/client"
 import { setState, state } from "../state.js"
 import { _import } from "../import/_import.js"
-import * as Sherlock from "@inlang/cross-sell-sherlock"
+import * as Sherlock from "@inlang/recommend-sherlock"
 
 let projectViewNodes: ProjectViewNode[] = []
 
@@ -128,7 +128,7 @@ export async function handleTreeSelection(args: {
 		CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.fire(undefined)
 		CONFIGURATION.EVENTS.ON_DID_ERROR_TREE_VIEW_CHANGE.fire(undefined)
 
-		const isInWorkspaceRecommendation = await Sherlock.isAdopted({
+		const isInWorkspaceRecommendation = await Sherlock.shouldRecommend({
 			fs: args.nodeishFs,
 			workingDirectory: normalizePath(args.workspaceFolder.uri.fsPath),
 		})
