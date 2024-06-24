@@ -59,6 +59,18 @@ describe("createFileSystemMapper", () => {
 		)
 	})
 
+	it("should map rm correctly", async () => {
+		const fs = createFileSystemMapper(normalizedBase, mockFs)
+		const testPath = "/test/path"
+
+		await fs.rm(testPath, { recursive: true })
+
+		expect(mockFs.rm).toHaveBeenCalledWith(
+			testPath.startsWith(normalizedBase) ? testPath : _path.resolve(normalizedBase, testPath),
+			{ recursive: true }
+		)
+	})
+
 	it("should map rmdir correctly", async () => {
 		const fs = createFileSystemMapper(normalizedBase, mockFs)
 		const testPath = "/test/path"
@@ -109,10 +121,11 @@ describe("createFileSystemMapper", () => {
 		const fs = createFileSystemMapper(normalizedBase, mockFs)
 		const testPath = "/test/path"
 
-		await fs.mkdir(testPath)
+		await fs.mkdir(testPath, { recursive: true })
 
 		expect(mockFs.mkdir).toHaveBeenCalledWith(
-			testPath.startsWith(normalizedBase) ? testPath : _path.resolve(normalizedBase, testPath)
+			testPath.startsWith(normalizedBase) ? testPath : _path.resolve(normalizedBase, testPath),
+			{ recursive: true }
 		)
 	})
 
