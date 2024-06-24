@@ -25,7 +25,7 @@ const mockLintReports: MessageLintReport[] = [
 const mockSettings: ProjectSettings = {
 	$schema: "https://inlang.com/schema/project-settings",
 	sourceLanguageTag: "en",
-	languageTags: ["en", "de"],
+	languageTags: ["en", "de", "ru"],
 	messageLintRuleLevels: {
 		"messageLintRule.inlang.identicalPattern": "error",
 	},
@@ -82,24 +82,12 @@ const bundleWithoutSelectors: MessageBundle = {
 			id: "message-id",
 			locale: "en",
 			selectors: [],
-			declarations: [
-				{
-					type: "input",
-					name: "count",
-					value: {
-						type: "expression",
-						arg: {
-							type: "variable",
-							name: "count",
-						},
-					},
-				},
-			],
+			declarations: [],
 			variants: [
 				{
 					id: "variant-id",
 					match: [],
-					pattern: [{ type: "text", value: "Hello World" }],
+					pattern: [{ type: "text", value: "{count} new messages" }],
 				},
 			],
 		},

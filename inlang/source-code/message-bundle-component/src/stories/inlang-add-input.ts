@@ -4,6 +4,7 @@ import { customElement, property, state } from "lit/decorators.js"
 import SlDropdown from "@shoelace-style/shoelace/dist/components/dropdown/dropdown.component.js"
 import SlButton from "@shoelace-style/shoelace/dist/components/button/button.component.js"
 import SlInput from "@shoelace-style/shoelace/dist/components/input/input.component.js"
+import { add } from "../../../../../lix/packages/client/vendored/isomorphic-git/index.js"
 
 // in case an app defines it's own set of shoelace components, prevent double registering
 if (!customElements.get("sl-dropdown")) customElements.define("sl-dropdown", SlDropdown)
@@ -69,6 +70,9 @@ export default class InlangAddInput extends LitElement {
 		`,
 	]
 
+	@property()
+	addInput: (inputName: string) => void = () => {}
+
 	@state()
 	private _newInput: string | undefined
 
@@ -79,14 +83,28 @@ export default class InlangAddInput extends LitElement {
 
 	override render() {
 		return html`
-			<sl-dropdown distance="-4" class="dropdown">
+			<sl-dropdown
+				distance="-4"
+				class="dropdown"
+				@sl-show=${(e: CustomEvent) => {
+					const dropdown = this.shadowRoot?.querySelector("sl-dropdown")
+					if (dropdown) {
+						if (e.target === dropdown) {
+							const input: SlInput | undefined | null = this.shadowRoot?.querySelector("sl-input")
+							setTimeout(() => {
+								if (input) input.focus()
+							})
+						}
+					}
+				}}
+			>
 				<div slot="trigger" class="button-wrapper">
 					<slot></slot>
 				</div>
 				<div class="dropdown-container">
 					<div class="dropdown-item">
 						<div class="dropdown-header">
-							<p class="dropdown-title">Input name</p>
+							<p class="dropdown-title">Add input</p>
 						</div>
 						<sl-input
 							size="small"
@@ -95,6 +113,27 @@ export default class InlangAddInput extends LitElement {
 							@input=${(e: Event) => {
 								this._newInput = (e.target as HTMLInputElement).value
 							}}
+							@keydown=${(e: KeyboardEvent) => {
+								if (e.key === "Enter") {
+									if (this._newInput && this._newInput.trim() !== "") {
+										this.addInput(this._newInput)
+									}
+									this._newInput = ""
+									const dropdown = this.shadowRoot?.querySelector(".dropdown") as SlDropdown
+									dropdown.hide()
+								}
+							}}
+							><svg
+								slot="suffix"
+								xmlns="http://www.w3.org/2000/svg"
+								width="20"
+								height="20"
+								viewBox="0 0 24 24"
+							>
+								<path
+									fill="currentColor"
+									d="M19 6a1 1 0 0 0-1 1v4a1 1 0 0 1-1 1H7.41l1.3-1.29a1 1 0 0 0-1.42-1.42l-3 3a1 1 0 0 0-.21.33a1 1 0 0 0 0 .76a1 1 0 0 0 .21.33l3 3a1 1 0 0 0 1.42 0a1 1 0 0 0 0-1.42L7.41 14H17a3 3 0 0 0 3-3V7a1 1 0 0 0-1-1"
+								/></svg
 						></sl-input>
 					</div>
 					<div class="help-text">
@@ -110,16 +149,6 @@ export default class InlangAddInput extends LitElement {
 							/>
 						</svg>
 						<p>As soon as added this input can be used in all messages of the bundle.</p>
-					</div>
-					<div class="actions">
-						<sl-button
-							@click=${() => {
-								console.log("Add input")
-							}}
-							size="small"
-							variant="primary"
-							>Add input</sl-button
-						>
 					</div>
 				</div>
 			</sl-dropdown>

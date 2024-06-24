@@ -22,6 +22,7 @@ import SlMenuItem from "@shoelace-style/shoelace/dist/components/menu-item/menu-
 
 import type { MessageLintReport, ProjectSettings } from "@inlang/sdk"
 import { getInputs } from "../helper/crud/input/get.js"
+import { createInput } from "../helper/crud/input/create.js"
 
 // in case an app defines it's own set of shoelace components, prevent double registering
 if (!customElements.get("sl-tag")) customElements.define("sl-tag", SlTag)
@@ -68,6 +69,14 @@ export default class InlangMessageBundle extends LitElement {
 		}
 	}
 
+	_addInput = (name: string) => {
+		if (this.messageBundle) {
+			createInput({ messageBundle: this.messageBundle, inputName: name })
+		}
+		this._triggerSave()
+		this._triggerRefresh()
+	}
+
 	_triggerRefresh = () => {
 		this.requestUpdate()
 	}
@@ -107,7 +116,7 @@ export default class InlangMessageBundle extends LitElement {
 								${this._fakeInputs()?.map(
 									(input) => html`<sl-tag variant="neutral" size="small">${input}</sl-tag>`
 								)}
-								<inlang-add-input>
+								<inlang-add-input .addInput=${this._addInput}>
 									<sl-tooltip content="Add input to message bundle">
 										<sl-tag variant="neutral" size="small" class="add-input-tag"
 											><svg viewBox="0 0 24 24" width="18" height="18" style="margin: 0 -2px">
@@ -118,7 +127,7 @@ export default class InlangMessageBundle extends LitElement {
 							</div>
 					  </div>`
 					: html`<div class="inputs-wrapper">
-							<inlang-add-input>
+							<inlang-add-input .addInput=${this._addInput}>
 								<sl-tooltip content="Add input to message bundle">
 									<sl-button class="add-input" variant="text" size="small">
 										<svg

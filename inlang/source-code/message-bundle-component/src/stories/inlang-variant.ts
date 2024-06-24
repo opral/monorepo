@@ -275,7 +275,7 @@ export default class InlangVariant extends LitElement {
 		await this.updateComplete
 		// override primitive colors to match the design system
 		const selectorConfigurator = this.shadowRoot?.querySelector("inlang-selector-configurator")
-		const dropdown = selectorConfigurator!.shadowRoot?.querySelector("sl-dropdown")
+		const dropdown = selectorConfigurator?.shadowRoot?.querySelector("sl-dropdown")
 		if (dropdown) {
 			dropdown.addEventListener("sl-show", (e) => {
 				if (e.target === dropdown) {
