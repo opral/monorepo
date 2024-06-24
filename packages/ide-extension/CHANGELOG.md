@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.47.0
+
+### Minor Changes
+
+- 58c66d8: fix `missing enabledApiProposal` bug
+
 ## 1.46.1
 
 ### Patch Changes
