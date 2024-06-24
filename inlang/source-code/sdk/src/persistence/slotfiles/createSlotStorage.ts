@@ -81,7 +81,7 @@ export default function createSlotStorage<DocType extends HasId>(
 
 	let connectedFs:
 		| {
-				fs: NodeishFilesystem
+				fs: Pick<NodeishFilesystem, "readFile" | "readdir" | "watch" | "writeFile">
 				path: string
 		  }
 		| undefined
