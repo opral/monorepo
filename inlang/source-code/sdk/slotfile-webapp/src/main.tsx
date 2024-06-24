@@ -36,7 +36,7 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 </div>`
 
 const domNode = document.getElementById("root")
-const root = createRoot(domNode)
+const root = createRoot(domNode!)
 root.render(<MessageBundleList />)
 
 document.querySelector<HTMLButtonElement>("#pull")!.onclick = async (el) => {
@@ -89,7 +89,7 @@ const insertNHeros = async (n: number) => {
 
 	console.time("inserting " + n + " messages")
 
-	await db$.collections.messageBundles.bulkInsert(messagesToAdd)
+	await (await storage).inlangProject.messageBundleCollection.bulkInsert(messagesToAdd)
 	console.timeEnd("inserting " + n + " herors")
 }
 
