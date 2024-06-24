@@ -182,16 +182,18 @@ export async function getRecommendationBannerHtml(args: {
         </head>
         <body>
             <main>
+			
 			<div class="container">
 			${
 				shouldRecommendSherlock || shouldRecommendNinja || isAdoptedSherlock || isAdoptedNinja
-					? `				${
-							shouldRecommendSherlock
-								? `<div class="item active" id="addSherlockToWorkspace"><span class="codicon codicon-add"></span><span>Add Sherlock to this VS Code workspace</span></div>`
-								: isAdoptedSherlock
-								? `<div class="item"><span class="codicon codicon-pass-filled"></span><span>Sherlock is recommended in this VS Code workspace.</span></div>`
-								: ``
-					  }
+					? `<span>To improve your i18n workflow:</span>
+					${
+						shouldRecommendSherlock
+							? `<div class="item active" id="addSherlockToWorkspace"><span class="codicon codicon-add"></span><span>Add Sherlock to this VS Code workspace</span></div>`
+							: isAdoptedSherlock
+							? `<div class="item"><span class="codicon codicon-pass-filled"></span><span>Sherlock is recommended in this VS Code workspace.</span></div>`
+							: ``
+					}
 				${
 					shouldRecommendNinja
 						? `<div class="item active" id="addNinjaGithubAction"><span class="codicon codicon-add"></span><span>Add Ninja Github Action workflow to this repository</span></div>`
