@@ -49,7 +49,7 @@ type StatusText =
 
 type StatusList = [string, StatusText][]
 
-function normalizePath(path: string) {
+function isoNormalizePath(path: string) {
 	return path
 		.replace(/\/\.\//g, "/") // Replace '/./' with '/'
 		.replace(/\/{2,}/g, "/") // Replace consecutive '/'
@@ -62,7 +62,7 @@ function normalizePath(path: string) {
 }
 
 function join(...parts: string[]) {
-	return normalizePath(parts.map(normalizePath).join("/"))
+	return isoNormalizePath(parts.map(isoNormalizePath).join("/"))
 }
 
 export type StatusArgs = {

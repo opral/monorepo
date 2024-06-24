@@ -1,11 +1,12 @@
-import { loadProject, type InlangProject } from "@inlang/sdk"
+import { loadProject } from "@inlang/sdk"
+import { Command } from "commander"
 import nodeFsPromises from "node:fs/promises"
 import { resolve } from "node:path"
-import { Command } from "commander"
 import { Logger } from "~/services/logger/index.js"
 import { openRepository, findRepoRoot } from "@lix-js/client"
 import { runCompiler } from "~/cli/steps/run-compiler.js"
 import { DEFAULT_OUTDIR } from "~/cli/defaults.js"
+import { classifyProjectErrors } from "~/services/error-handling.js"
 
 export const compileCommand = new Command()
 	.name("compile")
@@ -33,14 +34,29 @@ export const compileCommand = new Command()
 			logger.warn(`Could not find repository root for path ${path}`)
 		}
 
-		const project = exitIfErrors(
-			await loadProject({
-				projectPath: path,
-				repo,
-				appId: PARJS_MARKTEPLACE_ID,
-			}),
-			logger
-		)
+		const project = await loadProject({
+			projectPath: path,
+			repo,
+			appId: PARJS_MARKTEPLACE_ID,
+		})
+
+		if (project.errors().length > 0) {
+			const { nonFatalErrors, fatalErrors } = classifyProjectErrors(project.errors())
+			if (fatalErrors.length > 0) {
+				logger.error(`The project has fatal errors:`)
+				for (const error of [...fatalErrors, ...nonFatalErrors]) {
+					logger.error(error)
+				}
+				process.exit(1)
+			}
+
+			if (nonFatalErrors.length > 0) {
+				logger.warn(`The project has warnings:`)
+				for (const error of nonFatalErrors) {
+					logger.warn(error)
+				}
+			}
+		}
 
 		await runCompiler({
 			project,
@@ -77,17 +93,3 @@ export const compileCommand = new Command()
 
 		logger.info("Successfully compiled the project.")
 	})
-
-/**
- * Utility function to exit when the project has errors.
- */
-const exitIfErrors = (project: InlangProject, logger: Logger) => {
-	if (project.errors().length > 0) {
-		logger.warn(`The project has errors:`)
-		for (const error of project.errors()) {
-			logger.error(error)
-		}
-		process.exit(1)
-	}
-	return project
-}
