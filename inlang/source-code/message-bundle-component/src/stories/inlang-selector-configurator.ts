@@ -212,8 +212,6 @@ export default class InlangSelectorConfigurator extends LitElement {
 					},
 				})
 
-				// add plural options if present
-				// TODO: for now always present
 				this._addVariants({
 					message: this.message,
 					variantMatcherArrays: _variantMatcherArrays,
@@ -230,10 +228,11 @@ export default class InlangSelectorConfigurator extends LitElement {
 		variantMatcherArrays: string[][]
 		newMatchers: string[]
 	}) => {
-		if (props.newMatchers) {
+		const newMatchers = props.newMatchers.filter((category) => category !== "*")
+		if (newMatchers) {
 			if (props.variantMatcherArrays && props.variantMatcherArrays.length > 0) {
 				for (const variantMatcherArray of props.variantMatcherArrays) {
-					for (const category of props.newMatchers) {
+					for (const category of newMatchers) {
 						upsertVariant({
 							message: props.message,
 							variant: createVariant({
@@ -244,7 +243,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 					}
 				}
 			} else {
-				for (const category of props.newMatchers) {
+				for (const category of newMatchers) {
 					upsertVariant({
 						message: props.message,
 						variant: createVariant({
@@ -417,7 +416,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 								<sl-button
 									@click=${() => {
 										if (this._matchers) {
-											this._handleAddSelector(this._matchers.filter((match) => match !== "*"))
+											this._handleAddSelector(this._matchers)
 										} else {
 											console.info("No matchers present")
 										}

@@ -114,11 +114,12 @@ export default class InlangMessageBundle extends LitElement {
 							Inputs:
 							<div class="inputs">
 								${this._fakeInputs()?.map(
-									(input) => html`<sl-tag variant="neutral" size="small">${input}</sl-tag>`
+									(input) =>
+										html`<sl-tag class="input-tag" variant="neutral" size="small">${input}</sl-tag>`
 								)}
 								<inlang-add-input .addInput=${this._addInput}>
 									<sl-tooltip content="Add input to message bundle">
-										<sl-tag variant="neutral" size="small" class="add-input-tag"
+										<sl-tag class="input-tag" variant="neutral" size="small" class="add-input-tag"
 											><svg viewBox="0 0 24 24" width="18" height="18" style="margin: 0 -2px">
 												<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path></svg
 										></sl-tag>
@@ -129,18 +130,11 @@ export default class InlangMessageBundle extends LitElement {
 					: html`<div class="inputs-wrapper">
 							<inlang-add-input .addInput=${this._addInput}>
 								<sl-tooltip content="Add input to message bundle">
-									<sl-button class="add-input" variant="text" size="small">
-										<svg
-											viewBox="0 0 24 24"
-											width="18"
-											height="18"
-											slot="prefix"
-											style="margin-right: -2px"
-										>
-											<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path>
-										</svg>
-										Input
-									</sl-button>
+									<sl-tag class="input-tag" variant="neutral" size="small" class="add-input-tag"
+										><svg viewBox="0 0 24 24" width="18" height="18" style="margin-right: 2px">
+											<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path></svg
+										>Input</sl-tag
+									>
 								</sl-tooltip>
 							</inlang-add-input>
 					  </div>`}
@@ -170,7 +164,7 @@ export default class InlangMessageBundle extends LitElement {
 				<div class="language-container">
 					<span>${locale}</span>
 					${this._refLocale() === locale
-						? html`<sl-tag size="small" variant="neutral">ref</sl-tag>`
+						? html`<sl-tag class="ref-tag" size="small" variant="neutral">ref</sl-tag>`
 						: ``}
 				</div>
 				<div class="message-body">

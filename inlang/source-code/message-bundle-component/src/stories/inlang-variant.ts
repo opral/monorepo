@@ -169,26 +169,39 @@ export default class InlangVariant extends LitElement {
 	private _isActive: boolean = false
 
 	_save = () => {
-		if (this.message && this.variant) {
+		if (this.message) {
 			// upsert variant
-			upsertVariant({
-				message: this.message,
-				variant: this._pattern
-					? createVariant({
-							id: this.variant.id,
-							match: this.variant.match,
-							text: this._pattern,
-					  })
-					: createVariant({
-							id: this.variant.id,
-							match: this.variant.match,
-							text: undefined,
-					  }),
-			})
+			if (this.variant) {
+				upsertVariant({
+					message: this.message,
+					variant: this._pattern
+						? createVariant({
+								id: this.variant.id,
+								match: this.variant.match,
+								text: this._pattern,
+						  })
+						: createVariant({
+								id: this.variant.id,
+								match: this.variant.match,
+								text: undefined,
+						  }),
+				})
+			} else {
+				upsertVariant({
+					message: this.message,
+					variant: this._pattern
+						? createVariant({
+								text: this._pattern,
+						  })
+						: createVariant({
+								text: undefined,
+						  }),
+				})
+			}
+
 			this.triggerSave()
 		} else if (this.locale && this._pattern) {
 			// new message
-
 			//TODO: only text pattern supported
 			this.addMessage(createMessage({ locale: this.locale, text: this._pattern }))
 			this.triggerSave()
@@ -265,9 +278,8 @@ export default class InlangVariant extends LitElement {
 
 	private get _matches(): string[] | undefined {
 		// @ts-ignore - just for prototyping
-		return this._selectors.map((selector) => {
-			const matchIndex = this._selectors ? this._selectors.indexOf(selector) : undefined
-			return this.variant && typeof matchIndex === "number" ? this.variant.match[matchIndex] : ""
+		return this._selectors.map((_, index) => {
+			return this.variant && this.variant.match[index]
 		})
 	}
 
@@ -296,19 +308,18 @@ export default class InlangVariant extends LitElement {
 		//get html of dropdown -> fix the folling line
 		return html`<div class="variant">
 			${this.variant && this._matches
-				? this._matches.map(
-						(match, index) =>
-							html`
-								<sl-input
-									class="match"
-									size="small"
-									value=${match}
-									@sl-blur=${(e: Event) => {
-										this._updateMatch(index, (e.target as HTMLInputElement).value)
-									}}
-								></sl-input>
-							`
-				  )
+				? this._matches.map((match, index) => {
+						return html`
+							<sl-input
+								class="match"
+								size="small"
+								value=${match}
+								@sl-blur=${(e: Event) => {
+									this._updateMatch(index, (e.target as HTMLInputElement).value)
+								}}
+							></sl-input>
+						`
+				  })
 				: undefined}
 			<sl-input
 				class="pattern"

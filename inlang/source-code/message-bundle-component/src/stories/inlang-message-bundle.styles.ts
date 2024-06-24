@@ -34,24 +34,40 @@ export const messageBundleStyling = css`
 		display: flex;
 		align-items: center;
 		min-height: 44px;
-		gap: 3px;
+		gap: 2px;
+	}
+	.input-tag::part(base) {
+		height: 28px;
+		padding: 8px !important;
+		background-color: var(--sl-color-neutral-0);
+		color: var(--sl-color-neutral-600);
+		border: 1px solid var(--sl-color-neutral-400);
+		font-weight: 500;
+		cursor: pointer;
+	}
+	.input-tag::part(base):hover {
+		background-color: var(--sl-color-neutral-200);
+		color: var(--sl-color-neutral-950);
 	}
 	.add-input::part(base) {
 		color: var(--sl-color-neutral-600);
+		border: 1px solid var(--sl-color-neutral-400);
+		background-color: var(--sl-color-neutral-0);
 	}
 	.add-input::part(base):hover {
 		color: var(--sl-color-neutral-950);
-		border: 1px solid var(--sl-color-neutral-400);
+		background-color: var(--sl-color-neutral-200);
 	}
 	.add-input-tag::part(base) {
 		color: var(--sl-color-neutral-600);
-		background-color: transparent;
-		border: 1px solid transparent;
+		border: 1px solid var(--sl-color-neutral-400);
+		background-color: var(--sl-color-neutral-0);
 		cursor: pointer;
 	}
 	.add-input-tag::part(base):hover {
 		color: var(--sl-color-neutral-950);
 		border: 1px solid var(--sl-color-neutral-400);
+		background-color: var(--sl-color-neutral-200);
 	}
 	.alias {
 		font-weight: 400;
@@ -179,10 +195,10 @@ export const messageBundleStyling = css`
 		background-color: var(--sl-color-neutral-50);
 		color: var(--sl-color-neutral-700);
 	}
-	sl-tag::part(base) {
+	.ref-tag::part(base) {
 		background-color: var(--sl-color-neutral-600);
 		color: var(--sl-color-neutral-50);
-		padding: 0 6px;
 		border: none;
+		height: 22px;
 	}
 `
