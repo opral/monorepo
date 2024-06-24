@@ -101,7 +101,7 @@ export function PrefixStrategy<T extends string>({
 
 	function getCanonicalPath(localisedPath: `/${string}`, locale: T): `/${string}` {
 		// get the prefix for this language
-		const prefix = resolvedPrefixes[locale]
+		const prefix = resolvedPrefixes[locale] ?? locale
 
 		const pathWithoutLocale: `/${string}` = localisedPath.startsWith(`/${prefix}`)
 			? ((localisedPath.replace(`/${prefix}`, "") || "/") as `/${string}`)
@@ -151,7 +151,7 @@ export function PrefixStrategy<T extends string>({
 			const translatedPath = getTranslatedPath(canonicalPath, targetLanguage, resolvedPathnames)
 			const shouldAddPrefix = targetLanguage !== sourceLanguageTag || prefixDefault === "always"
 
-			const prefix = resolvedPrefixes[targetLanguage]
+			const prefix = resolvedPrefixes[targetLanguage] ?? targetLanguage
 
 			const localisedPath: `/${string}` = shouldAddPrefix
 				? `/${prefix}${translatedPath == "/" ? "" : translatedPath}`
