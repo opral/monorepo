@@ -9,8 +9,6 @@ import { migrateIfOutdated } from "@inlang/project-settings/migration"
 import { TypeCompiler, ValueErrorType } from "@sinclair/typebox/compiler"
 import { ProjectSettings2 } from "./types/project-settings.js"
 
-const settingsCompiler = TypeCompiler.Compile(ProjectSettings2)
-
 export async function loadSettings(args: {
 	settingsFilePath: string
 	nodeishFs: NodeishFilesystemSubset
@@ -36,6 +34,7 @@ export async function loadSettings(args: {
 }
 
 const parseSettings = (settings: unknown) => {
+	const settingsCompiler = TypeCompiler.Compile(ProjectSettings2)
 	const withMigration = migrateIfOutdated(settings as any)
 	if (settingsCompiler.Check(withMigration) === false) {
 		const typeErrors = [...settingsCompiler.Errors(settings)]
