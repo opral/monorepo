@@ -17,6 +17,7 @@ describe("createFileSystemMapper", () => {
 			stat: vi.fn(),
 			watch: vi.fn(),
 			lstat: vi.fn(),
+			rm: vi.fn(),
 			rmdir: vi.fn(),
 			unlink: vi.fn(),
 			readlink: vi.fn(),
