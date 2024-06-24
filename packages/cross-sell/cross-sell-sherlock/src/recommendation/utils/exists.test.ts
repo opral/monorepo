@@ -45,8 +45,10 @@ const mockFiles = (files: memfs.NestedDirectoryJSON) => {
 			// @ts-ignore - memfs has the same interface as node:fs/promises
 			vi.spyOn(_memfs.promises, prop).mockImplementation(lixFs[prop])
 		} else {
-			// @ts-ignore - memfs has the same interface as node:fs/promises
-			vi.spyOn(_memfs.promises, prop)
+			if (prop in _memfs.promises) {
+				// @ts-ignore - memfs has the same interface as node:fs/promises
+				vi.spyOn(_memfs.promises, prop)
+			}
 		}
 	}
 	return _memfs.promises as NodeishFilesystem

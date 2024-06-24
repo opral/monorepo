@@ -107,7 +107,7 @@ export function createMessagesQuery({
 			nodeishFs: nodeishFs,
 			// this message is called whenever a file changes that was read earlier by this filesystem
 			// - the plugin loads messages -> reads the file messages.json -> start watching on messages.json -> updateMessages
-			updateMessages: () => {
+			onChange: () => {
 				// reload
 				loadMessagesViaPlugin(
 					fsWithWatcher,

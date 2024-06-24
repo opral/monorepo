@@ -9,32 +9,27 @@ import {
 } from "./errors.js"
 import { tryCatch } from "@inlang/result"
 import { resolveMessageLintRules } from "./message-lint-rules/resolveMessageLintRules.js"
-import type { Plugin } from "@inlang/plugin"
 import { createImport } from "./import.js"
-import type { MessageLintRule } from "@inlang/message-lint-rule"
 import { resolvePlugins } from "./plugins/resolvePlugins.js"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { validatedModuleSettings } from "./validatedModuleSettings.js"
+import type { Plugin } from "@inlang/plugin"
+import type { MessageLintRule } from "@inlang/message-lint-rule"
 
 const ModuleCompiler = TypeCompiler.Compile(InlangModule)
 
 export const resolveModules: ResolveModuleFunction = async (args) => {
-	const _import = args._import ?? createImport({ readFile: args.nodeishFs.readFile })
-	const moduleErrors: Array<ModuleError> = []
+	const _import = args._import ?? createImport(args.projectPath, args.nodeishFs)
 
 	const allPlugins: Array<Plugin> = []
 	const allMessageLintRules: Array<MessageLintRule> = []
-
 	const meta: Awaited<ReturnType<ResolveModuleFunction>>["meta"] = []
+	const moduleErrors: Array<ModuleError> = []
 
-	for (const module of args.settings.modules) {
-		/**
-		 * -------------- BEGIN SETUP --------------
-		 */
-
+	async function resolveModule(module: string) {
 		const importedModule = await tryCatch<InlangModule>(() => _import(module))
-		// -- IMPORT MODULE --
 
+		// -- FAILED TO IMPORT --
 		if (importedModule.error) {
 			moduleErrors.push(
 				new ModuleImportError({
@@ -42,22 +37,20 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 					cause: importedModule.error as Error,
 				})
 			)
-			continue
+			return
 		}
 
 		// -- MODULE DOES NOT EXPORT ANYTHING --
-
 		if (importedModule.data?.default === undefined) {
 			moduleErrors.push(
 				new ModuleHasNoExportsError({
 					module: module,
 				})
 			)
-			continue
+			return
 		}
 
 		// -- CHECK IF MODULE IS SYNTACTIALLY VALID
-
 		const isValidModule = ModuleCompiler.Check(importedModule.data)
 		if (isValidModule === false) {
 			const errors = [...ModuleCompiler.Errors(importedModule.data)]
@@ -68,7 +61,7 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 				})
 			)
 
-			continue
+			return
 		}
 
 		// -- VALIDATE MODULE SETTINGS
@@ -79,7 +72,7 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 		})
 		if (result !== "isValid") {
 			moduleErrors.push(new ModuleSettingsAreInvalidError({ module: module, errors: result }))
-			continue
+			return
 		}
 
 		meta.push({
@@ -100,6 +93,8 @@ export const resolveModules: ResolveModuleFunction = async (args) => {
 			)
 		}
 	}
+
+	await Promise.all(args.settings.modules.map(resolveModule))
 	const resolvedPlugins = await resolvePlugins({
 		plugins: allPlugins,
 		settings: args.settings,
