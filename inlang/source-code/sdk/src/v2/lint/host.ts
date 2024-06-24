@@ -1,23 +1,17 @@
-import type { MessageFromWorker, MessageToWorker } from "./worker-interface.js"
+import * as Comlink from "comlink"
+import type { Linter } from "./worker.js"
+import type { NodeishFilesystemSubset } from "@inlang/plugin"
 
-export function createLintReportQuery(lintRules: string[]) {
-	const worker = new Worker(new URL("./worker.js", import.meta.url), { type: "module" })
+export async function createLintReportQuery(
+	lintRules: string[],
+	fs: Pick<NodeishFilesystemSubset, "readFile" | "writeFile">
+) {
+	const linter = Comlink.wrap<Linter>(new Worker("./worker.js", { type: "module" }))
 
-	const initMessage: Extract<MessageToWorker, { type: "init" }> = {
-		type: "init",
-		lintRules,
-	}
-
-	worker.postMessage(initMessage)
-	worker.addEventListener("message", (e: MessageEvent<MessageFromWorker>) => {
-		switch (e.data.type) {
-			case "rpc-request:readFile": {
-				console.log(e.data)
-				break
-			}
-			default: {
-				throw new Error(`unknown message: ${e.data}`)
-			}
-		}
-	})
+	const fsProxy = Comlink.proxy(fs)
+	await linter.init(lintRules, fsProxy)
 }
+
+await createLintReportQuery(["some-lint-rule", "another-lint-rule"], {
+	readFile: async () => "some content",
+})

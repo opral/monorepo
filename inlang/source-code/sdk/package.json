@@ -48,6 +48,7 @@
 		"@lix-js/client": "workspace:*",
 		"@lix-js/fs": "workspace:*",
 		"@sinclair/typebox": "^0.31.17",
+		"comlink": "^4.4.1",
 		"debug": "^4.3.4",
 		"dedent": "1.5.1",
 		"deepmerge-ts": "^5.1.0",
