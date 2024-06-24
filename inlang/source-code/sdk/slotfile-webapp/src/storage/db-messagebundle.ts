@@ -1,4 +1,4 @@
-import { createRxDatabase, addRxPlugin, RxReplicationPullStreamItem } from "rxdb"
+import { createRxDatabase, addRxPlugin, RxReplicationPullStreamItem, RxCollection } from "rxdb"
 import { RxDBQueryBuilderPlugin } from "rxdb/plugins/query-builder"
 import { getRxStorageMemory } from "rxdb/plugins/storage-memory"
 import { replicateRxCollection } from "rxdb/plugins/replication"
@@ -11,7 +11,6 @@ import { Subject } from "rxjs"
 import git, { pull, add, commit, push, statusMatrix } from "isomorphic-git"
 const fs = createNodeishMemoryFs()
 
-import { MessageBundleRx, MyBundleCollections } from "./schema-messagebundle.js"
 import { Message, MessageBundle } from "../../../src/v2/types.js"
 import { createRxDbAdapter } from "./rxdbadapter.js"
 
@@ -75,8 +74,12 @@ const _create = async (fs: any) => {
 	await bundleStorage.connect(fs, bundleCollectionDir)
 	await messageStorage.connect(fs, messageCollectionDir)
 
+	type MessageSDKCollections = {
+		messageBundles: RxCollection<MessageBundle>
+	}
+
 	// rxdb with memory storage configured
-	const database = await createRxDatabase<MyBundleCollections>({
+	const database = await createRxDatabase<MessageSDKCollections>({
 		name: "rxdbdemo",
 		storage: getRxStorageMemory(),
 		password: "foooooobaaaaar",
@@ -86,7 +89,12 @@ const _create = async (fs: any) => {
 	})
 
 	// add the hero collection
-	const collection = await database.addCollections({ messageBundles: { schema: MessageBundleRx } })
+	const collection = await database.addCollections({
+		messageBundles: {
+			schema: MessageBundle as any as typeof MessageBundle &
+				Readonly<{ version: number; primaryKey: string; additionalProperties: false | undefined }>,
+		},
+	})
 
 	const messageBundleStorageAdapter = createRxDbAdapter(bundleStorage, messageStorage, pullStream$)
 

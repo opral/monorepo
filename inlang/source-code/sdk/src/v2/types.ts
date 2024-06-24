@@ -127,6 +127,8 @@ export const Declaration = Type.Union([InputDeclaration])
 export type Message = Static<typeof Message>
 export const Message = Type.Object({
 	id: Type.String(),
+	// TODO SDK2 we only need/have the property for records comming from slot storage - not used by the apps...
+	bundleId: Type.ReadonlyOptional(Type.String()),
 	locale: LanguageTag,
 	declarations: Type.Array(Declaration),
 	/**
@@ -137,11 +139,23 @@ export const Message = Type.Object({
 })
 
 export type MessageBundle = Static<typeof MessageBundle>
-export const MessageBundle = Type.Object({
-	id: Type.String({ maxLength: 100 }),
-	alias: Type.Record(Type.String(), Type.String()),
-	messages: Type.Array(Message),
-})
+export const MessageBundle = Type.Object(
+	{
+		id: Type.String({ maxLength: 100 }),
+		alias: Type.Record(Type.String(), Type.String()),
+
+		// TODO SDK2 check how we get ignor inforation persisted for lints (messageBundle, message, variant)
+		// ignoredLings:  Type.Array(Type.String()),
+		messages: Type.Array(Message),
+		// TODO SDK2 - linting: consider lint reports via bundle directly
+		// TODO SDK2 - linting: add lint settings for bundles as first class properties to the bundle
+		// lintReports: Type.Array(MessageLintReport)
+	},
+	{
+		version: 0,
+		primaryKey: "id",
+	}
+)
 
 /**
  * A MessageSlot is a placeholder for a message with a locale.

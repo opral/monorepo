@@ -1,6 +1,6 @@
 import { MessageBundle } from "../../src/v2/types.js"
 import { storage } from "./storage/db-messagebundle.js"
-import { MessageBundleRxType } from "./storage/schema-messagebundle.js"
+
 import { mockSetting } from "./mock/settings.js"
 
 export async function setupMessageBundleList({
@@ -13,7 +13,7 @@ export async function setupMessageBundleList({
 	const getHeroesList = async () => {
 		const db$ = (await storage).database
 
-		const renderTable = (messageBundles: MessageBundleRxType[]) => {
+		const renderTable = (messageBundles: MessageBundle[]) => {
 			// console.log("rendering table with " + messageBundles.length)
 			messageListContainer.innerHTML = ""
 			for (const messageBundleRx of messageBundles) {

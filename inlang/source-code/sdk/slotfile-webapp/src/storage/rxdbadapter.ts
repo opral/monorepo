@@ -1,7 +1,6 @@
 import { RxReplicationPullStreamItem } from "rxdb"
 import createSlotStorage from "../../../src/persistence/slotfiles/createSlotStorage.js"
 import { Message, MessageBundle } from "../../../src/v2/types.js"
-import { MessageBundleRxType } from "./schema-messagebundle.js"
 import _debug from "debug"
 import { Subject } from "rxjs"
 
@@ -12,11 +11,11 @@ type MessageUpdate = {
 }
 
 function compareMessages(
-	upsertedDocument: MessageBundleRxType,
-	previousState: MessageBundleRxType
+	upsertedDocument: MessageBundle,
+	previousState: MessageBundle
 ): MessageUpdate[] {
 	const updates: MessageUpdate[] = []
-	const previousMessagesMap: Map<string, any> = new Map()
+	const previousMessagesMap: Map<string, Message> = new Map()
 
 	// Create a map of previous messages for quick lookup
 	for (const message of previousState.messages) {
@@ -27,14 +26,14 @@ function compareMessages(
 
 	// Iterate through the upserted document messages
 	for (const message of upsertedDocument.messages) {
-		const previousMessage = previousMessagesMap.get(message.id!)
+		const previousMessage = previousMessagesMap.get(message.id)
 		if (previousMessage) {
 			if (JSON.stringify(message) !== JSON.stringify(previousMessage)) {
 				// TODO fix schema handling
 				updates.push({ action: "update", message: message as unknown as Message })
 			}
 			// Remove from the map to keep track of processed messages
-			previousMessagesMap.delete(message.id!)
+			previousMessagesMap.delete(message.id)
 		} else {
 			updates.push({ action: "insert", message: message as unknown as Message })
 		}
@@ -53,11 +52,11 @@ export function createRxDbAdapter(
 	messageStorage: ReturnType<typeof createSlotStorage<Message>>,
 	pullStream$: Subject<RxReplicationPullStreamItem<any, any>>
 ) {
-	let loadedMessageBundles = new Map<string, MessageBundleRxType>()
+	let loadedMessageBundles = new Map<string, MessageBundle>()
 
 	const loadAllBundles = async () => {
 		debug("loadAllBundles")
-		const loadedBundles = new Map<string, MessageBundleRxType>()
+		const loadedBundles = new Map<string, MessageBundle>()
 		const bundles = await bundleStorage.readAll()
 		for (const bundle of bundles) {
 			loadedBundles.set(bundle.data.id, {
@@ -71,12 +70,11 @@ export function createRxDbAdapter(
 		for (const message of messages) {
 			const loadBundle = loadedBundles.get((message.data as any).bundleId)
 			if (!loadBundle) {
-				console.warn("message without bundle found!" + (message.data as any).bundleId)
+				console.warn("message without bundle found!" + (message.data).bundleId)
 				continue
 			}
 
-			// TODO fix schmema
-			loadBundle.messages!.push(message.data as any)
+			loadBundle.messages.push(message.data)
 		}
 
 		debug("loadAllBundles - " + [...loadedBundles.keys()].length + " budles loaded")
@@ -92,8 +90,8 @@ export function createRxDbAdapter(
 			const loaded = loadedMessageBundles.get(bundleRecord.data.id)
 			if (loaded) {
 				const loadedBundle = structuredClone(loaded)
-				loadedBundle!.alias = bundleRecord.data.alias
-				loadedMessageBundles.set(bundleRecord.data.id, loadedBundle!)
+				loadedBundle.alias = bundleRecord.data.alias
+				loadedMessageBundles.set(bundleRecord.data.id, loadedBundle)
 
 				debug("bundle callback - streaming bundle to rxdb " + bundleRecord.data.id)
 				pullStream$.next({
@@ -134,7 +132,7 @@ export function createRxDbAdapter(
 					loadedBundle.messages.push(messageRecord.data as any)
 				}
 
-				loadedMessageBundles.set((messageRecord.data as any).bundleId, loadedBundle!)
+				loadedMessageBundles.set((messageRecord.data as any).bundleId, loadedBundle)
 
 				debug("message callback - streaming bundle to rxdb " + (messageRecord.data as any).bundleId)
 				pullStream$.next({
@@ -209,14 +207,14 @@ export function createRxDbAdapter(
 			await messageStorage.save()
 
 			for (const doc of documentStates) {
-				const upsertedMessageBundle = doc.newDocumentState as unknown as MessageBundleRxType
-				const previousStateMessageBundle = doc.assumedMasterState as unknown as MessageBundleRxType
+				const upsertedMessageBundle = doc.newDocumentState as unknown as MessageBundle
+				const previousStateMessageBundle = doc.assumedMasterState as unknown as MessageBundle
 
 				if (!previousStateMessageBundle) {
 					debug("pushHandler called - whole new bundle!")
 					// XXX we clear the message array to not introduce a new type here:
 					const insertedMessageBundle = structuredClone(upsertedMessageBundle)
-					const messagesToInsert = insertedMessageBundle.messages!
+					const messagesToInsert = insertedMessageBundle.messages
 					insertedMessageBundle.messages = []
 					// insert Messages, insert Message Bundle
 					bundleStorage.insert(insertedMessageBundle as unknown as MessageBundle)
@@ -226,7 +224,7 @@ export function createRxDbAdapter(
 						persistedMessage.bundleId = insertedMessageBundle.id
 						messageStorage.insert(messageToInsert as unknown as Message)
 					}
-					loadedMessageBundles.set(upsertedMessageBundle.id!, upsertedMessageBundle)
+					loadedMessageBundles.set(upsertedMessageBundle.id, upsertedMessageBundle)
 				} else {
 					debug("pushHandler called")
 					const messageUpdates = compareMessages(upsertedMessageBundle, previousStateMessageBundle)

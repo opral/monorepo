@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react"
 import { storage } from "./storage/db-messagebundle.js"
-import { MessageBundleRxType } from "./storage/schema-messagebundle.js"
 import { createComponent } from "@lit/react"
 import { InlangMessageBundle } from "@inlang/message-bundle-component"
 import { mockSetting } from "./mock/settings.js"
 import { MessageBundle } from "../../src/v2/types.js"
-
 
 export const MessageBundleComponent = createComponent({
 	tagName: "inlang-message-bundle",
@@ -17,7 +15,7 @@ export const MessageBundleComponent = createComponent({
 })
 
 export function MessageBundleList() {
-	const [bundles, setBundles] = useState([] as MessageBundleRxType[])
+	const [bundles, setBundles] = useState([] as MessageBundle[])
 	const [db, setDb] = useState<any>()
 
 	useEffect(() => {
@@ -39,7 +37,7 @@ export function MessageBundleList() {
 
 	const onBundleChange = (messageBundle: { detail: { argument: MessageBundle } }) => {
 		// eslint-disable-next-line no-console
-		db?.messageBundles.upsert(messageBundle.detail.argument as any)
+		db?.messageBundles.upsert(messageBundle.detail.argument)
 	}
 
 	return (
