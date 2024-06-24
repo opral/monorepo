@@ -3,7 +3,7 @@ import { storage } from "./storage/db-messagebundle.js"
 import { createComponent } from "@lit/react"
 import { InlangMessageBundle } from "@inlang/message-bundle-component"
 import { mockSetting } from "./mock/settings.js"
-import { MessageBundle } from "../../src/v2/types.js"
+import { MessageBundle } from "../../src/v2/types/message-bundle.js"
 
 export const MessageBundleComponent = createComponent({
 	tagName: "inlang-message-bundle",

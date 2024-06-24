@@ -52,6 +52,8 @@
 		"dedent": "1.5.1",
 		"deepmerge-ts": "^5.1.0",
 		"murmurhash3js": "^3.0.1",
+		"rxdb": "^15.24.0",
+		"rxjs": "7.8.1",
 		"solid-js": "1.6.12",
 		"throttle-debounce": "^5.0.0",
 		"uuid": "^10.0.0"

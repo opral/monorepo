@@ -6,7 +6,7 @@ import type { MessageBundle } from "./message-bundle.js"
 import { LanguageTag } from "./language-tag.js"
 import {
 	ExternalProjectSettings,
-	ProjectSettings,
+	ProjectSettings2,
 	_MessageLintRuleId,
 	_MessageLintRuleLevel,
 } from "./project-settings.js"
@@ -24,7 +24,7 @@ export const LintConfig = Type.Object({
 	messageId: Type.Optional(Type.String()),
 	messageLocale: Type.Optional(LanguageTag),
 	variantId: Type.Optional(Type.String()),
-	level: MessageLintLevel
+	level: MessageLintLevel,
 })
 
 /**
@@ -64,7 +64,7 @@ export type MessageBundleLintRule<
 
 	run: (args: {
 		messageBundle: MessageBundle
-		settings: ProjectSettings & ExternalSettings
+		settings: ProjectSettings2 & ExternalSettings
 		report: (args: Omit<LintReport, "ruleId" | "level">) => void
 	}) => MaybePromise<void>
 }

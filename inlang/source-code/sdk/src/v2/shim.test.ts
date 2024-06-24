@@ -1,5 +1,5 @@
 import { test, expect } from "vitest"
-import * as V2 from "./types.js"
+import * as V2 from "./types/index.js"
 import * as V1 from "@inlang/message"
 import { createMessageBundle, createMessage } from "./helper.js"
 import { toV1Message, fromV1Message } from "./shim.js"

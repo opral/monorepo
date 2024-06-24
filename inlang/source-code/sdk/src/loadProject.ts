@@ -35,8 +35,6 @@ import { capture } from "./telemetry/capture.js"
 import { identifyProject } from "./telemetry/groupIdentify.js"
 
 import { stubMessagesQuery, stubMessageLintReportsQuery } from "./v2/stubQueryApi.js"
-import type { StoreApi } from "./persistence/storeApi.js"
-import { openStore } from "./persistence/store.js"
 
 import _debug from "debug"
 const debug = _debug("sdk:loadProject")
@@ -219,7 +217,6 @@ export async function loadProject(args: {
 
 		let messagesQuery: MessageQueryApi
 		let lintReportsQuery: MessageLintReportsQueryApi
-		let store: StoreApi | undefined
 
 		// wait for seetings to load v2Persistence flag
 		// .catch avoids throwing here if the awaitable is rejected
@@ -230,7 +227,7 @@ export async function loadProject(args: {
 			messagesQuery = stubMessagesQuery
 			lintReportsQuery = stubMessageLintReportsQuery
 			try {
-				store = await openStore({ projectPath, nodeishFs, locales })
+				// TODO SDK2 loadProject2 ?
 				markInitAsComplete()
 			} catch (e) {
 				markInitAsFailed(e)
@@ -262,8 +259,6 @@ export async function loadProject(args: {
 				installedMessageLintRules,
 				resolvedModules
 			)
-
-			store = undefined
 		}
 
 		// -- app ---------------------------------------------------------------
@@ -324,7 +319,6 @@ export async function loadProject(args: {
 				messages: messagesQuery,
 				messageLintReports: lintReportsQuery,
 			},
-			store,
 		} satisfies InlangProject
 	})
 }

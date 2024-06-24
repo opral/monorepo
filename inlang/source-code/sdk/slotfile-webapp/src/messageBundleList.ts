@@ -1,4 +1,4 @@
-import { MessageBundle } from "../../src/v2/types.js"
+import { MessageBundle } from "../../src/v2/types/message-bundle.js"
 import { storage } from "./storage/db-messagebundle.js"
 
 import { mockSetting } from "./mock/settings.js"

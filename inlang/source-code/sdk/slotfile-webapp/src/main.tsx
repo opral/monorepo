@@ -4,13 +4,12 @@ import { createRoot } from "react-dom/client"
 
 import { MessageBundleList } from "./messageBundleListReact.js"
 
-import { setupMessageBundleList } from "./messageBundleList.js"
 import { storage } from "./storage/db-messagebundle.js"
 import { pluralBundle } from "../../src/v2/mocks/index.js"
 import { createMessage, createMessageBundle } from "../../src/v2/helper.js"
 
 import "@inlang/message-bundle-component"
-import { MessageBundleRxType } from "./storage/schema-messagebundle.js"
+import { MessageBundle } from "../../src/v2/types/message-bundle.js"
 import { randomHumanId } from "../../src/storage/human-id/human-readable-id.js"
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
@@ -63,7 +62,7 @@ document.querySelector<HTMLButtonElement>("#commit")!.onclick = async function (
 }
 
 const insertNHeros = async (n: number) => {
-	const messagesToAdd = [] as MessageBundleRxType[]
+	const messagesToAdd = [] as MessageBundle[]
 	for (let i = 0; i < n; i++) {
 		const newMessage = createMessage({
 			locale: "de",
@@ -74,7 +73,7 @@ const insertNHeros = async (n: number) => {
 			alias: {},
 			messages: [newMessage],
 		})
-		messagesToAdd.push(messageBundle as unknown as MessageBundleRxType)
+		messagesToAdd.push(messageBundle)
 	}
 
 	const db$ = (await storage).database

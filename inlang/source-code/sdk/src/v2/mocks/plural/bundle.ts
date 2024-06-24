@@ -1,4 +1,4 @@
-import type { MessageBundle } from "../../types.js"
+import type { MessageBundle } from "../../types/index.js"
 
 export const pluralBundle: MessageBundle = {
 	id: "mock_bundle_human_id",

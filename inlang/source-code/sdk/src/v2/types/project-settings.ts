@@ -2,6 +2,8 @@ import type { JSONObject } from "@inlang/json-types"
 
 import { type Static, type TLiteral, type TTemplateLiteral, Type } from "@sinclair/typebox"
 import { LanguageTag } from "./language-tag.js"
+import type { MessageBundleLintRule, MessageLintLevel } from "./lint.js"
+import type { Plugin } from "./plugin.js"
 
 /**
  * ---------------- Specific Language Tag field meta information ----------------
@@ -126,5 +128,29 @@ export const ExternalProjectSettings = Type.Record(
 	{ description: "Settings defined by apps, plugins, etc." }
 )
 
-export type ProjectSettings = Static<typeof ProjectSettings>
-export const ProjectSettings = Type.Intersect([InternalProjectSettings, ExternalProjectSettings])
+export type ProjectSettings2 = Static<typeof ProjectSettings2>
+export const ProjectSettings2 = Type.Intersect([InternalProjectSettings, ExternalProjectSettings])
+
+export type InstalledPlugin = {
+	id: Plugin["id"]
+	displayName: Plugin["displayName"]
+	description: Plugin["description"]
+	/**
+	 * The module which the plugin is installed from.
+	 */
+	module: string
+	settingsSchema: Plugin["settingsSchema"]
+	// disabled: boolean
+}
+
+export type InstalledMessageLintRule = {
+	id: MessageBundleLintRule["id"]
+	displayName: MessageBundleLintRule["displayName"]
+	description: MessageBundleLintRule["description"]
+	/**
+	 * The module which the lint rule is installed from.
+	 */
+	module: string
+	level: MessageLintLevel
+	settingsSchema: MessageBundleLintRule["settingsSchema"]
+}

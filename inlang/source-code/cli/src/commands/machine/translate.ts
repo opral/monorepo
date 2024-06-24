@@ -100,9 +100,11 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 			return
 		}
 
-		const allMessages = v2Persistence
-			? (await args.project.store!.messageBundles.getAll()).map(toV1Message)
-			: args.project.query.messages.getAll()
+		if (v2Persistence) {
+			throw new Error("not implemented vor v2 Persistence")
+			// allMessages = (await args.project.store!.messageBundles.getAll()).map(toV1Message)
+		}
+		const allMessages = args.project.query.messages.getAll()
 
 		const filteredMessages = allMessages.filter((message) =>
 			hasMissingTranslations(message, sourceLanguageTag, targetLanguageTags)
@@ -140,7 +142,8 @@ export async function translateCommandAction(args: { project: InlangProject }) {
 				translatedMessage?.variants.length > toBeTranslatedMessage.variants.length
 			) {
 				if (v2Persistence) {
-					await args.project.store!.messageBundles.set({ data: fromV1Message(translatedMessage) })
+					throw new Error("not implemented vor v2 Persistence")
+					// await args.project.store!.messageBundles.set({ data: fromV1Message(translatedMessage) })
 				} else {
 					args.project.query.messages.update({
 						where: { id: translatedMessage.id },

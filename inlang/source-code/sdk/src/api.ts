@@ -10,7 +10,6 @@ import type {
 	MessageLintReport,
 } from "./versionedInterfaces.js"
 import type { ResolvedPluginApi } from "./resolve-modules/plugins/types.js"
-import type { StoreApi } from "./persistence/storeApi.js"
 
 export type InstalledPlugin = {
 	id: Plugin["id"]
@@ -56,9 +55,6 @@ export type InlangProject = {
 		messages: MessageQueryApi
 		messageLintReports: MessageLintReportsQueryApi
 	}
-	// WIP V2 message apis
-	// use with project settings: experimental.persistence = true
-	store?: StoreApi
 }
 
 // const x = {} as InlangProject

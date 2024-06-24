@@ -2,7 +2,7 @@
 
 import { describe, it, expect } from "vitest"
 import { pluralBundle } from "./bundle.js"
-import { MessageBundle } from "../../types.js"
+import { MessageBundle } from "../../types/index.js"
 import { Value } from "@sinclair/typebox/value"
 
 describe("mock plural messageBundle", () => {
