@@ -6,6 +6,7 @@ import {
 	overrideWants,
 	encodePackLine,
 	addNoProgress,
+	addTreeNoneFilter,
 } from "./helpers.js"
 
 /***
@@ -15,6 +16,7 @@ import {
 export async function optimizeReq(
 	gitConfig: {
 		noBlobs?: boolean
+		noTrees?: boolean
 
 		addRefs?: string[]
 
@@ -31,6 +33,9 @@ export async function optimizeReq(
 		body?: any
 	}
 ) {
+	// ref: HEAD
+	// noTree, noBlob, depth: 1, ref: /refs/head/, ref: refs:/pull/, ref: refs:/tags/, since: -2 months
+
 	// Optimize refs requests, GET info/refs?service=git-upload-pack is a request to get the refs but does not support filtering, we rewrite this to a post upload pack v2 request that allows filetering refs how we want
 	// FIXME: document url + method api, how to get tree for commit just filter file blobs
 	// "http://localhost:3001/git-proxy//github.com/inlang/example/info/refs?service=git-upload-pack"
@@ -53,14 +58,13 @@ export async function optimizeReq(
 			}
 		}
 
-
-		// This will add the HEAD symref to the response. compare https://git-scm.com/docs/protocol-v2#_ls_refs we need this since we replace the info/refs?service=git-upload-pack get request 
+		// This will add the HEAD symref to the response. compare https://git-scm.com/docs/protocol-v2#_ls_refs we need this since we replace the info/refs?service=git-upload-pack get request
 		// that doesn't support filtering with git-upload-pack post request. The response of the get request expects HEAD beeing part of the response - compare
-		// monorepo/lix/packages/client/src/git-http/optimizeReq.ts Line 157 in 4472182: if (line.includes("HEAD symref-target")) { 
+		// monorepo/lix/packages/client/src/git-http/optimizeReq.ts Line 157 in 4472182: if (line.includes("HEAD symref-target")) {
 		// so we always add symrefs and the allowed prefix head viaref-prefix head to the request
 		lines.push(encodePackLine("ref-prefix HEAD"))
 		lines.push(encodePackLine("symrefs"))
-		
+
 		// empty line for empty symrefs
 		lines.push(encodePackLine(""))
 
@@ -85,6 +89,9 @@ export async function optimizeReq(
 		// We modify the raw lines without encoding, we encode them later at once
 		if (gitConfig.noBlobs) {
 			rawLines = addBlobNoneFilter(rawLines)
+		}
+		if (gitConfig.noTrees) {
+			rawLines = addTreeNoneFilter(rawLines)
 		}
 
 		if (gitConfig.overrideHaves) {

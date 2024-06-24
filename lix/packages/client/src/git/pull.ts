@@ -17,7 +17,7 @@ export async function pull(
 	}
 
 	const branchName =
-		state.branchName || (await isoGit.currentBranch({ fs: ctx.rawFs, dir: "/" })) || "HEAD"
+		state.ref || (await isoGit.currentBranch({ fs: ctx.rawFs, dir: "/" })) || "HEAD"
 
 	const oid = await isoGit.resolveRef({
 		fs: ctx.rawFs,

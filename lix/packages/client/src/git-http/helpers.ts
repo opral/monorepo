@@ -207,6 +207,36 @@ export function addBlobNoneFilter(lines: string[]) {
 
 	return updatedLines
 }
+export function addTreeNoneFilter(lines: string[]) {
+	let filterCapabilityAdded = false
+	let filterAdded = false
+
+	const updatedLines = []
+	const flushLine = ""
+
+	for (let line of lines) {
+		// finds the first wants line - and append the filter capability and adds "filter" after last wants line - this is capability declaration is needed for filter=blob:none to work
+		// see: https://git-scm.com/docs/protocol-capabilities#_filter
+		if (line.startsWith("want") && !filterCapabilityAdded) {
+			line = line.slice(0, Math.max(0, line.length - 1)) + " filter\n"
+			filterCapabilityAdded = true
+		}
+
+		// insert the filter tree:none before the deepen since or the deepen not if both not exist before the flush...
+		// see: https://git-scm.com/docs/git-rev-list#Documentation/git-rev-list.txt---filterltfilter-specgt
+		if (
+			!filterAdded &&
+			(line.startsWith("deepen-since") || line.startsWith("deepen-not") || line === flushLine)
+		) {
+			updatedLines.push("filter tree:0\n")
+			filterAdded = true
+		}
+
+		updatedLines.push(line)
+	}
+
+	return updatedLines
+}
 
 /**
  * Helper method taking lines about to be sent to git-upload-pack and replaceses the haves part with the overrides provided

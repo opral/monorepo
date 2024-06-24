@@ -281,12 +281,24 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			path = normalizePath(path, { trailingSlash: "always", leadingSlash: "always" })
 			const file: Inode | undefined = state.fsMap.get(path)
 
-			if (file instanceof Set) throw new FilesystemError("EISDIR", path, "readFile")
-			if (file === undefined) throw new FilesystemError("ENOENT", path, "readFile")
-			if ("placeholder" in file) throw new FilesystemError("EPLACEHOLDER", path, "readFile")
-			if (!(options?.encoding || typeof options === "string")) return file
+			if (file instanceof Set) {
+				throw new FilesystemError("EISDIR", path, "readFile")
+			}
+			if (file === undefined) {
+				throw new FilesystemError("ENOENT", path, "readFile")
+			}
+			if ("placeholder" in file) {
+				throw new FilesystemError("EPLACEHOLDER", path, "readFile")
+			}
+			if (!(options?.encoding || typeof options === "string")) {
+				return file
+			}
 
-			return decoder.decode(file)
+			if (options?.encoding === "binary") {
+				return file
+			} else {
+				return decoder.decode(file)
+			}
 		},
 
 		readdir: async function (path: Parameters<NodeishFilesystem["readdir"]>[0]) {
@@ -411,20 +423,34 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			const watchName = getBasename(path)
 			const watchDir = getDirname(path)
 			const watchPath = watchName === "/" ? watchDir : watchDir + watchName
+			const watchPathWithTrailing = normalizePath(watchPath, {
+				trailingSlash: "always",
+			})
 
 			// @ts-ignore
 			if (options?.persistent || options?.encoding) {
 				throw new Error("Some watch opptions not implemented, only 'recursive' allowed")
 			}
 
-			const queue: FileChangeInfo[] = []
+			// 	rejecteNext?: (err: Error) => void
+			// 	return new Promise((resolve, reject) => {
 
-			let handleNext: (arg: any) => void
-			let rejecteNext: (err: Error) => void
-			let changeEvent: Promise<Error | undefined> = new Promise((resolve, reject) => {
-				handleNext = resolve
-				rejecteNext = reject
-			})
+			let values: Promise<[FileChangeInfo | Error, boolean]>[] = []
+			let resolve: ([val, done]: [FileChangeInfo | Error, boolean]) => void
+			values.push(
+				new Promise((r) => {
+					resolve = r
+				})
+			)
+			const handleNext = (val: FileChangeInfo | Error, done: boolean = false) => {
+				resolve([val, done])
+
+				values.push(
+					new Promise((r) => {
+						resolve = r
+					})
+				)
+			}
 
 			const listener = ({ eventType, filename }: FileChangeInfo) => {
 				const event: FileChangeInfo = {
@@ -440,16 +466,13 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 
 				if (event.filename === watchPath) {
 					event.filename = changeName
-					queue.push(event)
-					setTimeout(() => handleNext(undefined), 0)
-				} else if (changeDir === `${watchPath}/`) {
-					event.filename = event.filename.replace(`${watchPath}/`, "") || changeName
-					queue.push(event)
-					setTimeout(() => handleNext(undefined), 0)
-				} else if (options?.recursive && event.filename.startsWith(watchPath)) {
-					event.filename = event.filename.replace(`${watchPath}/`, "") || changeName
-					queue.push(event)
-					setTimeout(() => handleNext(undefined), 0)
+					handleNext(event)
+				} else if (changeDir === watchPathWithTrailing) {
+					event.filename = event.filename.replace(watchPathWithTrailing, "") || changeName
+					handleNext(event)
+				} else if (options?.recursive && event.filename.startsWith(watchPathWithTrailing)) {
+					event.filename = event.filename.replace(watchPathWithTrailing, "") || changeName
+					handleNext(event)
 				}
 			}
 
@@ -462,8 +485,9 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 						listeners.delete(listener)
 						try {
 							options.signal?.throwIfAborted()
+							handleNext({} as Error, true)
 						} catch (err) {
-							rejecteNext(err as Error)
+							handleNext(err as Error, true)
 						}
 					},
 					{ once: true }
@@ -471,17 +495,14 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			}
 
 			// inline async definition like "return (async function* () {" are not supported by the figma api
+			options?.recursive && console.log("iterator")
 			const asyncIterator = async function* () {
-				while (!options?.signal?.aborted) {
-					if (queue.length > 0) {
-						yield queue.shift() as FileChangeInfo
-					} else {
-						await changeEvent
-						changeEvent = new Promise((resolve, reject) => {
-							handleNext = resolve
-							rejecteNext = reject
-						})
-					}
+				let val
+				// !options?.signal?.aborted
+				for (let i = 0, done = false; !done; i++) {
+					;[val, done] = await values[i]
+					delete values[i]
+					yield val
 				}
 			}
 
@@ -556,6 +577,10 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 				modeBits: 0o777,
 				target: rawTarget,
 			})
+
+			for (const listener of listeners) {
+				listener({ eventType: "change", filename: path })
+			}
 		},
 
 		unlink: async function (path: Parameters<NodeishFilesystem["unlink"]>[0]) {
@@ -578,6 +603,10 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			parentDir.delete(getBasename(path))
 			state.fsStats.delete(path)
 			state.fsMap.delete(path)
+
+			for (const listener of listeners) {
+				listener({ eventType: "change", filename: path })
+			}
 		},
 		readlink: async function (path: Parameters<NodeishFilesystem["readlink"]>[0]) {
 			path = normalizePath(path, { trailingSlash: "always", leadingSlash: "always" })

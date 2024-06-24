@@ -2,20 +2,18 @@ import { _FileSystem, _assertParameter, _join } from "../../vendored/isomorphic-
 import { __checkout } from "./__checkout.js"
 import type { RepoContext, RepoState } from "../openRepository.js"
 
-export async function checkout(ctx: RepoContext, state: RepoState, { branch }: { branch: string }) {
-	state.branchName = branch
-
-	if (ctx.useLazyFS) {
-		throw new Error(
-			"not implemented for lazy lix mode yet, use openRepo with different branch instead"
-		)
-	}
+export async function checkout(
+	ctx: RepoContext,
+	state: RepoState,
+	{ ref, lazy }: { ref: string; lazy?: boolean }
+) {
+	state.ref = ref
 
 	return await _checkout({
-		fs: ctx.rawFs,
+		fs: lazy ? state.nodeishFs : ctx.rawFs,
 		cache: ctx.cache,
 		dir: ctx.dir,
-		ref: state.branchName,
+		ref: state.ref,
 	})
 }
 
@@ -87,30 +85,21 @@ export async function _checkout({
 	track = true,
 	cache = {},
 }: any) {
-	try {
-		_assertParameter("fs", fs)
-		_assertParameter("dir", dir)
-		_assertParameter("gitdir", gitdir)
+	const ref = _ref || "HEAD"
 
-		const ref = _ref || "HEAD"
-		return await __checkout({
-			fs: new _FileSystem(fs),
-			cache,
-			onProgress,
-			dir,
-			gitdir,
-			remote,
-			ref,
-			filepaths,
-			noCheckout,
-			noUpdateHead,
-			dryRun,
-			force,
-			track,
-		})
-	} catch (err) {
-		// @ts-ignore
-		err.caller = "git.checkout"
-		throw err
-	}
+	return await __checkout({
+		fs: new _FileSystem(fs),
+		cache,
+		onProgress,
+		dir,
+		gitdir,
+		remote,
+		ref,
+		filepaths,
+		noCheckout,
+		noUpdateHead,
+		dryRun,
+		force,
+		track,
+	})
 }

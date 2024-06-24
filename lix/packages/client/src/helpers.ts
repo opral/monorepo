@@ -15,6 +15,67 @@ type Args = {
 	}) => any
 }
 
+const rtf = new Intl.RelativeTimeFormat("en", {
+	localeMatcher: "best fit",
+	numeric: "always",
+	style: "narrow",
+})
+
+export function formatTime(time: number, now = Date.now() / 1000) {
+	const delta = Math.abs(time - now)
+
+	const values = [
+		delta / 31536000, // years
+		(delta / 2592000) % 12, // months
+		(delta / 604800) % 4, // weeks
+		delta / 86400, // days
+		(delta / 3600) % 24, // hours
+		(delta / 60) % 60, // minutes
+		delta % 60, // seconds
+	]
+	const units = ["year", "month", "week", "day", "hour", "minute", "second"]
+
+	for (let i = 0; i < values.length; i++) {
+		// @ts-ignore
+		if (values[i] >= 1) {
+			// @ts-expect-error
+			return rtf.format(-values[i].toFixed(0), units[i])
+		}
+	}
+
+	return "now"
+}
+
+// call first call immediately, always stays locked for delay time, if blocked calls: calls again after delay time, never misses a call that happens during lock, but requires indempotent functions (only does one call for all invocations during lock time)
+export function throttle(fn: (...args: unknown[]) => unknown, delay: number = 1000) {
+	let trailing = false
+	let locked = false
+
+	const throttled = async function (...args: unknown[]) {
+		if (locked) {
+			trailing = true
+			return
+		}
+
+		locked = true
+		const result = await fn(...args)
+
+		setTimeout(() => {
+			if (trailing) {
+				locked = false
+				trailing = false
+				throttled(...args)
+			} else {
+				locked = false
+			}
+		}, delay)
+
+		return result
+	}
+
+	return throttled
+}
+
 export const withProxy = ({
 	nodeishFs,
 	verbose = false,

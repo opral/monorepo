@@ -4,17 +4,18 @@ import type { RepoContext, RepoState } from "../openRepository.js"
 export async function readNote(
 	ctx: RepoContext,
 	state: RepoState,
-    cmdArgs: {
-        oid: string
+	cmdArgs: {
+		oid: string
+		ref?: string
 	}
 ) {
 	const res = await isoGit.readNote({
 		oid: cmdArgs.oid,
 		fs: state.nodeishFs,
 		cache: ctx.cache,
-		// ref: ref, // The notes ref to look under
+		ref: cmdArgs.ref, // The notes ref to look under
 		dir: ctx.dir,
 	})
 
-    return res
+	return res
 }

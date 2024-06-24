@@ -13,7 +13,7 @@ export type RepoState = Awaited<ReturnType<typeof repoState>>
 export async function repoState(
 	ctx: RepoContext,
 	args: {
-		branch?: string
+		ref?: string
 		sparseFilter?: (entry: { filename: string; type: "file" | "folder" | "symlink" }) => boolean
 	}
 ) {
@@ -44,28 +44,26 @@ export async function repoState(
 		pending: Promise<void | { error: Error }> | undefined
 		nodeishFs: NodeishFilesystem
 		checkedOut: Set<string>
-		branchName: string | undefined
-		currentRef: string
-		defaultBranch: string
+		ref: string | undefined
+		// currentCommit: string
+		// baseBranch: string
+		// defaultBranch: string
 		sparseFilter: typeof args.sparseFilter
 	} = {
 		ensureFirstBatch,
 		pending: undefined,
 		nodeishFs,
 		checkedOut: new Set(),
-		branchName: args.branch,
-		currentRef: "HEAD",
-		defaultBranch: "refs/remotes/origin/HEAD",
+		ref: args.ref,
+		// currentCommit: "",
+		// baseBranch: "",
+		// defaultBranch: "refs/remotes/origin/HEAD",
 		sparseFilter: args.sparseFilter,
 	}
 
-	// todo: discussion: use functions or repo state for these:?!
-	// state currentRef
 	// state baseBranch default to global base branch, other branch if on detached head on other banrch
-	// state defaultBranch
 
-	// to get main base branch ref refs/remotes/origin/HEAD
-	// Bail commit/ push on errors that are relevant or unknown
+	// TODO: Bail commit/ push on errors that are relevant or unknown
 
 	async function ensureFirstBatch(args?: { preload?: string[] }) {
 		if (!useLazyFS) {
@@ -168,7 +166,7 @@ export async function repoState(
 							description: "lazy fetch",
 							onReq: optimizeReq.bind(null, {
 								noBlobs: false,
-								addRefs: [state.branchName || "HEAD"],
+								addRefs: [state.ref || "HEAD"],
 								overrideWants: toFetch,
 							}),
 							onRes: optimizeRes,
@@ -197,7 +195,7 @@ export async function repoState(
 				fs: rawFs,
 				dir,
 				cache,
-				ref: state.branchName,
+				ref: state.ref,
 				filepaths: allBatchFiles,
 			}).catch((error: any) => {
 				console.error({ error, allBatchFiles })
@@ -233,7 +231,7 @@ export async function repoState(
 					onReq: experimentalFeatures.lazyClone
 						? optimizeReq.bind(null, {
 								noBlobs: true,
-								addRefs: [state.branchName || "HEAD"],
+								addRefs: [state.ref || "HEAD"],
 						  })
 						: undefined,
 					onRes: experimentalFeatures.lazyClone ? optimizeRes : undefined,
@@ -244,7 +242,7 @@ export async function repoState(
 				url: gitUrl,
 				singleBranch: false, // if we clone with single branch true we will not get the defatult branch set in isogit
 				noCheckout: experimentalFeatures.lazyClone,
-				ref: state.branchName,
+				ref: state.ref,
 
 				// TODO: use only first and last commit in lazy clone? (we need first commit for repo id)
 				depth: 1,
@@ -274,7 +272,7 @@ export async function repoState(
 				const { gitignoreFiles } = await checkOutPlaceholders(
 					ctx,
 					{
-						branchName: state.branchName,
+						ref: state.ref,
 						checkedOut: state.checkedOut,
 						sparseFilter: state.sparseFilter,
 						ensureFirstBatch,
@@ -397,7 +395,7 @@ export async function repoState(
 								description: "lazy fetch",
 								onReq: optimizeReq.bind(null, {
 									noBlobs: false,
-									addRefs: [state.branchName || "HEAD"],
+									addRefs: [state.ref || "HEAD"],
 									// we don't need to override the haves any more since adding the capabilities
 									// allow-tip-sha1-in-want allow-reachable-sha1-in-want to the request enable us to request objects explicetly
 									overrideWants: [oid],
