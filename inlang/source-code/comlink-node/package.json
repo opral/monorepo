@@ -1,0 +1,23 @@
+{
+	"name": "comlink-node",
+	"description": "A utility package for isomorphic node & web workers with comlink",
+	"type": "module",
+	"author": "Loris Sigrist",
+	"version": "0.0.1",
+	"sideEffects": false,
+	"exports": {
+		".": {
+			"types": "./types.d.ts",
+			"node": "./node.js",
+			"import": "./not-node.js"
+		},
+		"./worker": {
+			"types": "./worker/types.d.ts",
+			"node": "./worker/node.js",
+			"import": "./worker/not-node.js"
+		}
+	},
+	"dependencies": {
+		"comlink": "^4.4.1"
+	}
+}

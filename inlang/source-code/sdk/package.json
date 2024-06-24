@@ -45,6 +45,7 @@
 		"@inlang/project-settings": "workspace:*",
 		"@inlang/result": "workspace:*",
 		"@inlang/translatable": "workspace:*",
+		"comlink-node": "workspace:*",
 		"@lix-js/client": "workspace:*",
 		"@lix-js/fs": "workspace:*",
 		"@sinclair/typebox": "^0.31.17",

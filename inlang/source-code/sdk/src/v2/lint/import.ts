@@ -1,6 +1,7 @@
 import dedent from "dedent"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
 import { tryCatch } from "@inlang/result"
+import { withReadOnlyCache } from "../../resolve-modules/cache.js"
 import { ModuleImportError } from "../../resolve-modules/errors.js"
 
 /**
@@ -33,7 +34,7 @@ async function $import(
 	nodeishFs: Pick<NodeishFilesystemSubset, "readFile">
 ): Promise<any> {
 	const moduleAsText = uri.startsWith("http")
-		? await readModuleFromCDN(uri)
+		? await withReadOnlyCache(readModuleFromCDN, projectPath, nodeishFs)(uri)
 		: await readModulefromDisk(uri, nodeishFs.readFile)
 
 	const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(moduleAsText)

@@ -3,8 +3,7 @@ import * as Comlink from "comlink"
 import { createImport } from "./import.js"
 import { tryCatch } from "@inlang/result"
 import type { InlangModule } from "@inlang/module"
-//@ts-ignore
-import { default as nodeAdapter } from "comlink/dist/esm/node-adapter.mjs"
+import { endpoint } from "comlink-node/worker"
 
 export async function createLinter(
 	projectPath: string,
@@ -22,8 +21,4 @@ export async function createLinter(
 	return {}
 }
 
-const isNode = !("Worker" in globalThis)
-const endpoint = isNode
-	? nodeAdapter((await import(/* @vite-ignore */ "node:worker_threads"))["parentPort"])
-	: undefined
 Comlink.expose(createLinter, endpoint)
