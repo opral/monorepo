@@ -23,7 +23,6 @@ export async function inflatePackResponse(packResonseBody: Uint8Array) {
 	// shallows - the commits that do have parents, but not in the shallow repo and therefore grafts are introduced pretending that these commits have no parents.(?)
 	// https://git-scm.com/docs/shallow
 	// unshallows - TODO check mechanism here
-	// @ts-expect-error - TODO how to make Buffer available to TS?
 	const packfile = Buffer.from(await _collect(bodyResponse.packfile))
 	const packfileSha = packfile.slice(-20).toString("hex")
 

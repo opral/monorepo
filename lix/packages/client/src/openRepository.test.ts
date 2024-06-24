@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest"
+// @ts-ignore
 import { openRepository, findRepoRoot } from "./index.ts"
 // @ts-ignore -- ts import not working correctly, TODO: find out why
 import { createNodeishMemoryFs, fromSnapshot } from "@lix-js/fs"
@@ -20,7 +21,7 @@ describe("main workflow", () => {
 			repository = await openRepository("https://github.com/inlang/does-not-exist", {
 				nodeishFs: createNodeishMemoryFs(),
 			})
-		} catch (e) {
+		} catch (e: any) {
 			expect(e.code).toBe("HttpError")
 		}
 	})
@@ -349,7 +350,7 @@ describe("main workflow", () => {
 		await repo.nodeishFs.writeFile("/static/test1", "file content\n")
 		try {
 			await repo._emptyWorkdir()
-		} catch (err) {
+		} catch (err: any) {
 			expect(err.message).toBe("could not empty the workdir, uncommitted changes")
 		}
 		await repo.nodeishFs.rm("/static/test1")
