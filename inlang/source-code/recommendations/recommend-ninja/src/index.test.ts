@@ -3,6 +3,58 @@ import * as yaml from "js-yaml"
 import { add, shouldRecommend } from "./index.js"
 import type { NodeishFilesystem } from "@lix-js/fs"
 
+const githubConfig = `
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+
+[remote "origin"]
+	url = git@github.com:username/repository.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+
+[branch "main"]
+	remote = origin
+	merge = refs/heads/main
+	`
+
+const gitlabConfig = `
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+
+[remote "origin"]
+	url = git@gitlab.com:username/repository.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+
+[branch "main"]
+	remote = origin
+	merge = refs/heads/main
+	`
+const ninjaI18nYaml = yaml.dump({
+	name: "Ninja i18n action",
+	on: "pull_request_target",
+	jobs: {
+		"ninja-i18n": {
+			name: "Ninja i18n - GitHub Lint Action",
+			"runs-on": "ubuntu-latest",
+			steps: [
+				{
+					name: "Run Ninja i18n",
+					id: "ninja-i18n",
+					uses: "opral/ninja-i18n-action@main",
+					env: {
+						GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}",
+					},
+				},
+			],
+		},
+	},
+})
+
 vi.mock("js-yaml", async () => {
 	const actual = (await vi.importActual("js-yaml")) as any
 	return {
@@ -19,7 +71,15 @@ describe("GitHub Actions Workflow Adoption Checks", () => {
 		fsMock = {
 			readdir: vi.fn(),
 			// @ts-expect-error
-			readFile: vi.fn(),
+			readFile: vi.fn((path) => {
+				if (path === ".github/workflows/ninja_i18n.yml") {
+					return Promise.resolve(ninjaI18nYaml)
+				} else if (path === ".git/config") {
+					return Promise.resolve(githubConfig)
+				} else {
+					return Promise.reject(new Error("File not found"))
+				}
+			}),
 			stat: vi.fn(),
 			writeFile: vi.fn(),
 			mkdir: vi.fn(),
@@ -29,39 +89,6 @@ describe("GitHub Actions Workflow Adoption Checks", () => {
 	it("detects adoption of Ninja i18n GitHub Action", async () => {
 		// @ts-expect-error
 		fsMock.readdir.mockResolvedValue(["ninja_i18n.yml"])
-		// @ts-expect-error
-		fsMock.readFile.mockImplementation((path) => {
-			if (path === ".github/workflows/ninja_i18n.yml") {
-				return Promise.resolve(
-					yaml.dump({
-						name: "Ninja i18n action",
-						on: "pull_request_target",
-						jobs: {
-							"ninja-i18n": {
-								name: "Ninja i18n - GitHub Lint Action",
-								"runs-on": "ubuntu-latest",
-								steps: [
-									{
-										name: "Run Ninja i18n",
-										id: "ninja-i18n",
-										uses: "opral/ninja-i18n-action@main",
-										env: {
-											GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}",
-										},
-									},
-								],
-							},
-						},
-					})
-				)
-			} else if (path === ".git/config") {
-				return Promise.resolve(`
-[remote "origin"]
-	url = https://github.com/owner/repo
-				`)
-			}
-			return Promise.reject(new Error("File not found"))
-		})
 		// @ts-expect-error
 		fsMock.stat.mockResolvedValue({ isDirectory: () => false })
 
@@ -79,6 +106,21 @@ describe("GitHub Actions Workflow Adoption Checks", () => {
 		const writtenContent = fsMock.writeFile.mock.calls[0][1]
 		expect(writtenContent).toContain("name: Ninja i18n action")
 		expect(writtenContent).toContain("uses: opral/ninja-i18n-action@main")
+	})
+
+	it("returns false if the repo is not hosted on GitHub", async () => {
+		// @ts-expect-error
+		fsMock.readFile.mockImplementation((path) => {
+			if (path === ".github/workflows/ninja_i18n.yml") {
+				return Promise.resolve(ninjaI18nYaml)
+			} else if (path === ".git/config") {
+				return Promise.resolve(gitlabConfig)
+			} else {
+				return Promise.reject(new Error("File not found"))
+			}
+		})
+
+		await expect(shouldRecommend({ fs: fsMock })).resolves.toBe(false)
 	})
 
 	it("does not find the action in deep nested directories beyond level 3", async () => {
@@ -141,35 +183,12 @@ describe("GitHub Actions Workflow Adoption Checks", () => {
 		// @ts-expect-error
 		fsMock.readFile.mockImplementation((path) => {
 			if (path === ".github/workflows/level1/level2/ninja_i18n.yml") {
-				return Promise.resolve(
-					yaml.dump({
-						name: "Ninja i18n action",
-						on: "pull_request_target",
-						jobs: {
-							"ninja-i18n": {
-								name: "Ninja i18n - GitHub Lint Action",
-								"runs-on": "ubuntu-latest",
-								steps: [
-									{
-										name: "Run Ninja i18n",
-										id: "ninja-i18n",
-										uses: "opral/ninja-i18n-action@main",
-										env: {
-											GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}",
-										},
-									},
-								],
-							},
-						},
-					})
-				)
+				return Promise.resolve(ninjaI18nYaml)
 			} else if (path === ".git/config") {
-				return Promise.resolve(`
-[remote "origin"]
-	url = https://github.com/owner/repo
-				`)
+				return Promise.resolve(githubConfig)
+			} else {
+				return Promise.reject(new Error("File not found"))
 			}
-			return Promise.reject(new Error("File not found"))
 		})
 
 		// @ts-expect-error
@@ -211,13 +230,6 @@ describe("GitHub Actions Workflow Adoption Checks", () => {
 		await add({ fs: fsMock })
 
 		expect(fsMock.mkdir).toHaveBeenCalledWith(".github/workflows", { recursive: true })
-	})
-
-	it("handles filesystem errors gracefully in shouldRecommend function", async () => {
-		// @ts-expect-error
-		fsMock.stat.mockRejectedValue(new Error("Filesystem error"))
-
-		await expect(shouldRecommend({ fs: fsMock })).resolves.toBe(false)
 	})
 
 	it("handles errors when creating the workflow directory in add function", async () => {
