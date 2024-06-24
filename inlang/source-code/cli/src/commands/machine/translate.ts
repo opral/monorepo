@@ -9,7 +9,6 @@ import { projectOption } from "../../utilities/globalFlags.js"
 import progessBar from "cli-progress"
 import plimit from "p-limit"
 import type { Result } from "@inlang/result"
-import { toV1Message, fromV1Message } from "@inlang/sdk/v2"
 
 const rpcTranslateAction = process.env.MOCK_TRANSLATE_LOCAL
 	? mockMachineTranslateMessage

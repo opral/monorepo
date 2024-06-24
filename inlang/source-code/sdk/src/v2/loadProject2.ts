@@ -103,6 +103,6 @@ export async function loadProject(args: {
 		internal: {
 			bundleStorage,
 			messageStorage,
-		}
+		},
 	}
 }

@@ -6,7 +6,7 @@ import {
 	ProjectSettingsInvalidError,
 } from "../errors.js"
 import { migrateIfOutdated } from "@inlang/project-settings/migration"
-import { TypeCompiler, ValueErrorType } from "@sinclair/typebox/compiler"
+import { ValueErrorType } from "@sinclair/typebox/compiler"
 import { ProjectSettings2 } from "./types/project-settings.js"
 
 export async function loadSettings(args: {

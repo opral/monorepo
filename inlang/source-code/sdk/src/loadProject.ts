@@ -96,7 +96,6 @@ export async function loadProject(args: {
 
 		const [settings, _setSettings] = createSignal<ProjectSettings>()
 		let v2Persistence = false
-		let locales: string[] = []
 
 		// TODO:
 		// if (projectId) {
@@ -111,7 +110,6 @@ export async function loadProject(args: {
 			try {
 				const validatedSettings = parseSettings(newSettings)
 				v2Persistence = !!validatedSettings.experimental?.persistence
-				locales = validatedSettings.languageTags
 
 				batch(() => {
 					// reset the resolved modules first - since they are no longer valid at that point

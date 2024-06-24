@@ -118,7 +118,6 @@ export const Message = Type.Object({
 	variants: Type.Array(Variant),
 })
 
-
 export type MessageBundle = Static<typeof MessageBundle>
 export const MessageBundle = Type.Object(
 	{
