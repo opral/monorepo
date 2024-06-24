@@ -1,8 +1,6 @@
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
 import * as Comlink from "comlink"
 import { createImport } from "./import.js"
-import { tryCatch } from "@inlang/result"
-import type { InlangModule } from "@inlang/module"
 import { endpoint } from "comlink-node/worker"
 import type { ProjectSettings } from "@inlang/project-settings"
 import createSlotStorage from "../../persistence/slotfiles/createSlotStorage.js"
