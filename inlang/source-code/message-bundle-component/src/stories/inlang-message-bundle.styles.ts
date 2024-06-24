@@ -34,7 +34,7 @@ export const messageBundleStyling = css`
 		display: flex;
 		align-items: center;
 		min-height: 44px;
-		gap: 2px;
+		gap: 3px;
 	}
 	.add-input::part(base) {
 		color: var(--sl-color-neutral-600);

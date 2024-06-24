@@ -10,6 +10,7 @@ import { deleteSelector } from "../helper/crud/selector/delete.js"
 import "./inlang-variant.js"
 import "./inlang-lint-report-tip.js"
 import "./inlang-selector-configurator.js"
+import "./inlang-add-input.js"
 
 import SlTag from "@shoelace-style/shoelace/dist/components/tag/tag.component.js"
 import SlInput from "@shoelace-style/shoelace/dist/components/input/input.component.js"
@@ -106,24 +107,33 @@ export default class InlangMessageBundle extends LitElement {
 								${this._fakeInputs()?.map(
 									(input) => html`<sl-tag variant="neutral" size="small">${input}</sl-tag>`
 								)}
-								<sl-tag variant="neutral" size="small" class="add-input-tag"
-									><svg viewBox="0 0 24 24" width="18" height="18" style="margin: 0 -2px">
-										<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path></svg
-								></sl-tag>
+								<inlang-add-input>
+									<sl-tooltip content="Add input to message bundle">
+										<sl-tag variant="neutral" size="small" class="add-input-tag"
+											><svg viewBox="0 0 24 24" width="18" height="18" style="margin: 0 -2px">
+												<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path></svg
+										></sl-tag>
+									</sl-tooltip>
+								</inlang-add-input>
 							</div>
 					  </div>`
 					: html`<div class="inputs-wrapper">
-							<sl-button class="add-input" variant="text" size="small">
-								<svg
-									viewBox="0 0 24 24"
-									width="18"
-									height="18"
-									slot="prefix"
-									style="margin-right: -2px"
-								>
-									<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path></svg
-								>Input</sl-button
-							>
+							<inlang-add-input>
+								<sl-tooltip content="Add input to message bundle">
+									<sl-button class="add-input" variant="text" size="small">
+										<svg
+											viewBox="0 0 24 24"
+											width="18"
+											height="18"
+											slot="prefix"
+											style="margin-right: -2px"
+										>
+											<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path>
+										</svg>
+										Input
+									</sl-button>
+								</sl-tooltip>
+							</inlang-add-input>
 					  </div>`}
 			</div>
 			<div class="messages-container">
