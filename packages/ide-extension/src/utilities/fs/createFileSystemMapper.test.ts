@@ -17,6 +17,7 @@ describe("createFileSystemMapper", () => {
 			stat: vi.fn(),
 			watch: vi.fn(),
 			lstat: vi.fn(),
+			rm: vi.fn(),
 			rmdir: vi.fn(),
 			unlink: vi.fn(),
 			readlink: vi.fn(),
@@ -32,7 +33,8 @@ describe("createFileSystemMapper", () => {
 
 		expect(mockFs.writeFile).toHaveBeenCalledWith(
 			testPath.startsWith(normalizedBase) ? testPath : _path.resolve(normalizedBase, testPath),
-			"test content"
+			"test content",
+			undefined
 		)
 	})
 
@@ -56,6 +58,18 @@ describe("createFileSystemMapper", () => {
 
 		expect(mockFs.readdir).toHaveBeenCalledWith(
 			testPath.startsWith(normalizedBase) ? testPath : _path.resolve(normalizedBase, testPath)
+		)
+	})
+
+	it("should map rm correctly", async () => {
+		const fs = createFileSystemMapper(normalizedBase, mockFs)
+		const testPath = "/test/path"
+
+		await fs.rm(testPath, { recursive: true })
+
+		expect(mockFs.rm).toHaveBeenCalledWith(
+			testPath.startsWith(normalizedBase) ? testPath : _path.resolve(normalizedBase, testPath),
+			{ recursive: true }
 		)
 	})
 
@@ -109,10 +123,11 @@ describe("createFileSystemMapper", () => {
 		const fs = createFileSystemMapper(normalizedBase, mockFs)
 		const testPath = "/test/path"
 
-		await fs.mkdir(testPath)
+		await fs.mkdir(testPath, { recursive: true })
 
 		expect(mockFs.mkdir).toHaveBeenCalledWith(
-			testPath.startsWith(normalizedBase) ? testPath : _path.resolve(normalizedBase, testPath)
+			testPath.startsWith(normalizedBase) ? testPath : _path.resolve(normalizedBase, testPath),
+			{ recursive: true }
 		)
 	})
 
