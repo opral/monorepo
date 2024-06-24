@@ -4,6 +4,11 @@ import { createImport } from "./import.js"
 import { tryCatch } from "@inlang/result"
 import type { InlangModule } from "@inlang/module"
 import { endpoint } from "comlink-node/worker"
+import type { ProjectSettings } from "@inlang/project-settings"
+import createSlotStorage from "../../persistence/slotfiles/createSlotStorage.js"
+import type { MessageBundle } from "../types.js"
+import type { NodeishFilesystem } from "@lix-js/fs"
+import type { MessageLintReport, MessageLintRule } from "@inlang/message-lint-rule"
 
 export async function createLinter(
 	projectPath: string,
@@ -13,12 +18,32 @@ export async function createLinter(
 	console.info(lintRules)
 	const _import = createImport(projectPath, fs)
 
-	for (const module of lintRules) {
-		const importedModule = await tryCatch<InlangModule>(() => _import(module))
-		console.info(importedModule)
-	}
+	const resolvedLintRules: MessageLintRule[] = await Promise.all(
+		lintRules.map(async (uri) => {
+			const module = await _import(uri)
+			return module.default as MessageLintRule
+		})
+	)
 
-	return {}
+	const fullFs = new Proxy(fs as NodeishFilesystem, {
+		get(target, prop) {
+			if (prop in target) {
+				return target[prop]
+			} else {
+				throw new Error("nope")
+			}
+		},
+	})
+
+	const messageSlotStorage = createSlotStorage<MessageBundle>("message", 12, 12)
+	await messageSlotStorage.connect(fullFs, projectPath)
+
+	return {
+		lint: async (settings: ProjectSettings): Promise<MessageLintReport[]> => {
+			// read from slot-storage
+			const messageBundles = await messageSlotStorage.readAll()
+		},
+	}
 }
 
 Comlink.expose(createLinter, endpoint)
