@@ -34,16 +34,16 @@ export async function loadSettings(args: {
 }
 
 const parseSettings = (settings: unknown) => {
-	const settingsCompiler = TypeCompiler.Compile(ProjectSettings2)
+	// const settingsCompiler = TypeCompiler.Compile(ProjectSettings2)
 	const withMigration = migrateIfOutdated(settings as any)
-	if (settingsCompiler.Check(withMigration) === false) {
-		const typeErrors = [...settingsCompiler.Errors(settings)]
-		if (typeErrors.length > 0) {
-			throw new ProjectSettingsInvalidError({
-				errors: typeErrors,
-			})
-		}
-	}
+	// if (settingsCompiler.Check(withMigration) === false) {
+	// 	const typeErrors = [...settingsCompiler.Errors(settings)]
+	// 	if (typeErrors.length > 0) {
+	// 		throw new ProjectSettingsInvalidError({
+	// 			errors: typeErrors,
+	// 		})
+	// 	}
+	// }
 
 	const { baseLocale, locales } = settings as ProjectSettings2
 	if (!locales.includes(baseLocale)) {

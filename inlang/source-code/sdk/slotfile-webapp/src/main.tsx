@@ -76,14 +76,14 @@ const insertNHeros = async (n: number) => {
 		messagesToAdd.push(messageBundle)
 	}
 
-	const db$ = (await storage).database
+	const messageBundles = (await storage).inlangProject.messageBundleCollection
 	if (n === 1) {
 		const temp = structuredClone(pluralBundle)
 		temp.id = randomHumanId()
 		temp.messages[0].id = randomHumanId()
 		temp.messages[1].id = randomHumanId()
 
-		await db$.messageBundles.insert(temp as any)
+		await messageBundles.insert(temp as any)
 		return
 	}
 

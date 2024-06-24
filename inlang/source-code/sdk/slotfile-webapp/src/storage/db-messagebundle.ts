@@ -1,9 +1,8 @@
 import { addRxPlugin } from "rxdb"
 import { RxDBQueryBuilderPlugin } from "rxdb/plugins/query-builder"
 import { createNodeishMemoryFs } from "@lix-js/client"
-import { loadProject2  } from "@inlang/sdk/v2"
+import { loadProject, create, createNewProject } from "@inlang/sdk/v2"
 import http from "isomorphic-git/http/web"
-
 
 // NOTE: I use isomorphic git because i went crazy with cors :-/ was faster to spin up a iso proxy
 import git, { pull, add, commit, push, statusMatrix } from "isomorphic-git"
@@ -17,10 +16,6 @@ const gittoken = "YOUR_GITHUB_TOKEN_HERE"
 const corsProxy = "http://localhost:9998" // cors Proxy expected to run - start it via pnpm run proxy
 const repoUrl = "https://github.com/martin-lysk/message-bundle-storage"
 const dir = "/"
-
-// path to the folder where the slotfiles for the collection will be stored
-const bundleCollectionDir = dir + "messageBundle/"
-const messageCollectionDir = dir + "messages/"
 
 const createAwaitable = () => {
 	let resolve: () => void
@@ -48,8 +43,26 @@ const _create = async (fs: any) => {
 		singleBranch: true,
 		depth: 1,
 	})
-	
-	loacProject2
+
+	// we don't use any of the repo funciton for now
+	const repo = {
+		nodeishFs: fs,
+		getFirstCommitHash: () => "dummy_first_hash",
+	} as any
+
+	try {
+		await createNewProject({
+			projectPath: "/testproject.inlang",
+			repo: repo,
+		})
+	} catch (e) {
+		console.warn("existed already")
+	}
+
+	const inlangProject = await loadProject({
+		projectPath: "/testproject.inlang",
+		repo: repo,
+	})
 
 	const pullChangesAndReloadSlots = async () => {
 		await pull({
@@ -61,8 +74,8 @@ const _create = async (fs: any) => {
 				name: "Meeee",
 			},
 		})
-		await bundleStorage.loadSlotFilesFromWorkingCopy(true)
-		await messageStorage.loadSlotFilesFromWorkingCopy(true)
+		await inlangProject.internal.bundleStorage.loadSlotFilesFromWorkingCopy(true)
+		await inlangProject.internal.messageStorage.loadSlotFilesFromWorkingCopy(true)
 	}
 
 	const pushChangesAndReloadSlots = async () => {
@@ -74,8 +87,8 @@ const _create = async (fs: any) => {
 				return { username: gittoken }
 			},
 		})
-		await bundleStorage.loadSlotFilesFromWorkingCopy(true)
-		await messageStorage.loadSlotFilesFromWorkingCopy(true)
+		await inlangProject.internal.bundleStorage.loadSlotFilesFromWorkingCopy(true)
+		await inlangProject.internal.messageStorage.loadSlotFilesFromWorkingCopy(true)
 	}
 
 	let ongoingCommit = undefined as any
@@ -130,7 +143,7 @@ const _create = async (fs: any) => {
 		done()
 	}
 
-	return { database, fs, pullChangesAndReloadSlots, pushChangesAndReloadSlots, commitChanges }
+	return { inlangProject, fs, pullChangesAndReloadSlots, pushChangesAndReloadSlots, commitChanges }
 }
 
 export const storage = _create(fs)

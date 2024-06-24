@@ -3,11 +3,13 @@ import type { Subscribable } from "rxjs"
 import type {
 	InstalledMessageLintRule,
 	LintReport,
+	Message,
 	MessageBundle,
 	ProjectSettings2,
 } from "./index.js"
 import * as RuntimeError from "./errors.js"
 import type { RxCollection } from "rxdb"
+import type createSlotStorage from "../../persistence/slotfiles/createSlotStorage.js"
 
 export type InlangProject2 = {
 	/**#
@@ -31,4 +33,9 @@ export type InlangProject2 = {
 
 	messageBundleCollection: RxCollection<MessageBundle>
 	// lintReportCollection: RxCollection<LintReport>
+
+    internal: {
+        bundleStorage: ReturnType<typeof createSlotStorage<MessageBundle>>,
+        messageStorage: ReturnType<typeof createSlotStorage<Message>>,
+    }
 }

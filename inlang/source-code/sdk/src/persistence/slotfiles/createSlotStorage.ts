@@ -900,7 +900,7 @@ export default function createSlotStorage<DocType extends HasId>(
 
 			startWatchingSlotfileChanges()
 
-			await await loadSlotFilesFromFs(true)
+			await loadSlotFilesFromFs(true)
 
 			// save and load all slot files from disc
 			await saveChangesToDisk()
@@ -947,7 +947,6 @@ export default function createSlotStorage<DocType extends HasId>(
 
 			transientSlotEntries.set(documentId, newSlotEntry)
 
-			updateSlotEntryStates(documentId, slotIndex, entryIdHash)
 			changeCallback("record-change")
 			changeCallback("records-change", [documentId])
 			// TODO trigger save

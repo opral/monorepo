@@ -16,14 +16,14 @@ export const MessageBundleComponent = createComponent({
 
 export function MessageBundleList() {
 	const [bundles, setBundles] = useState([] as MessageBundle[])
-	const [db, setDb] = useState<any>()
+	const [messageBundleCollection, setMessageBundleCollection] = useState<any>()
 
 	useEffect(() => {
 		let query = undefined as any
 		;(async () => {
-			const db$ = (await storage).database
-			setDb(db$)
-			query = db$.messageBundles
+			const mc = (await storage).inlangProject.messageBundleCollection
+			setMessageBundleCollection(mc)
+			query = mc
 				.find()
 				//.sort({ updatedAt: "desc" })
 				.$.subscribe((bundles) => {
@@ -37,7 +37,7 @@ export function MessageBundleList() {
 
 	const onBundleChange = (messageBundle: { detail: { argument: MessageBundle } }) => {
 		// eslint-disable-next-line no-console
-		db?.messageBundles.upsert(messageBundle.detail.argument)
+		messageBundleCollection?.upsert(messageBundle.detail.argument)
 	}
 
 	return (

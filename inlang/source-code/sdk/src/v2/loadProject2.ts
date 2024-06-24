@@ -49,7 +49,7 @@ export async function loadProject(args: {
 	await maybeAddModuleCache({ projectPath, repo: args.repo })
 	await maybeCreateFirstProjectId({ projectPath, repo: args.repo })
 
-	// no need to catch sine we created the project ID with "maybeCreateFirstProjectId" earlier
+	// no need to catch since we created the project ID with "maybeCreateFirstProjectId" earlier
 	const projectId = await nodeishFs.readFile(projectIdPath, { encoding: "utf-8" })
 
 	const projectSettings$ = new Subject<ProjectSettings2>()
@@ -100,5 +100,9 @@ export async function loadProject(args: {
 		id: projectId,
 		settings: projectSettings$,
 		messageBundleCollection: database.collections.messageBundles,
+		internal: {
+			bundleStorage,
+			messageStorage,
+		}
 	}
 }
