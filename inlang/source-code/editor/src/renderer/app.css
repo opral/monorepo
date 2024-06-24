@@ -214,7 +214,7 @@ sl-select::part(combobox):hover {
 	background-color: theme(colors.surface-1);
 }
 
-sl-select::part(expand-icon) {
+sl-select.filter::part(expand-icon) {
 	display: none;
 }
 
@@ -323,6 +323,10 @@ sl-menu {
 		0 8px 10px -6px var(--tw-shadow-color);
 	box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000),
 		var(--tw-shadow);
+}
+
+sl-menu-item::part(base) {
+	width: 100%;
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {

@@ -278,26 +278,19 @@ describe("initialization", () => {
 		expect(result.data).toBeDefined()
 	})
 
-	// TODO: fix this test
-	// https://github.com/opral/inlang-message-sdk/issues/76
-	// it doesn't work because failure to open the settings file doesn't throw
-	// errors are returned in project.errors()
-	it("should resolve from a windows path", async () => {
+	it.skipIf(() => process.platform !== "win32")("should resolve from a windows path", async () => {
 		const repo = await mockRepo()
 		const fs = repo.nodeishFs
 		await fs.mkdir("C:\\Users\\user\\project.inlang", { recursive: true })
 		await fs.writeFile("C:\\Users\\user\\project.inlang\\settings.json", JSON.stringify(settings))
 
-		const result = await tryCatch(() =>
-			loadProject({
-				projectPath: "C:\\Users\\user\\project.inlang",
-				repo,
-				_import,
-			})
-		)
+		const project = await loadProject({
+			projectPath: "C:\\Users\\user\\project.inlang",
+			repo,
+			_import,
+		})
 
-		expect(result.error).toBeUndefined()
-		expect(result.data).toBeDefined()
+		expect(project.errors()).toEqual([])
 	})
 
 	describe("settings", () => {
@@ -362,9 +355,9 @@ describe("initialization", () => {
 		it("should not re-write the settings to disk when initializing", async () => {
 			const repo = await mockRepo()
 			const fs = repo.nodeishFs
-			const settingsWithDeifferentFormatting = JSON.stringify(settings, undefined, 4)
+			const settingsWithDifferentFormatting = JSON.stringify(settings, undefined, 4)
 			await fs.mkdir("/user/project.inlang", { recursive: true })
-			await fs.writeFile("/user/project.inlang/settings.json", settingsWithDeifferentFormatting)
+			await fs.writeFile("/user/project.inlang/settings.json", settingsWithDifferentFormatting)
 
 			const project = await loadProject({
 				projectPath: "/user/project.inlang",
@@ -375,7 +368,7 @@ describe("initialization", () => {
 			const settingsOnDisk = await fs.readFile("/user/project.inlang/settings.json", {
 				encoding: "utf-8",
 			})
-			expect(settingsOnDisk).toBe(settingsWithDeifferentFormatting)
+			expect(settingsOnDisk).toBe(settingsWithDifferentFormatting)
 
 			project.setSettings(project.settings())
 			// TODO: how can we await `setsettings` correctly
@@ -384,7 +377,7 @@ describe("initialization", () => {
 			const newsettingsOnDisk = await fs.readFile("/user/project.inlang/settings.json", {
 				encoding: "utf-8",
 			})
-			expect(newsettingsOnDisk).not.toBe(settingsWithDeifferentFormatting)
+			expect(newsettingsOnDisk).not.toBe(settingsWithDifferentFormatting)
 		})
 	})
 

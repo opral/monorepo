@@ -21,13 +21,16 @@ import { ProjectSettings, type NodeishFilesystemSubset } from "./versionedInterf
 import { tryCatch, type Result } from "@inlang/result"
 import { migrateIfOutdated } from "@inlang/project-settings/migration"
 import { createNodeishFsWithAbsolutePaths } from "./createNodeishFsWithAbsolutePaths.js"
+import { createNodeishFsWithWatcher } from "./createNodeishFsWithWatcher.js"
 import { normalizePath } from "@lix-js/fs"
 import { assertValidProjectPath } from "./validateProjectPath.js"
+
+// Migrations
 import { maybeMigrateToDirectory } from "./migrations/migrateToDirectory.js"
+import { maybeCreateFirstProjectId } from "./migrations/maybeCreateFirstProjectId.js"
+import { maybeAddModuleCache } from "./migrations/maybeAddModuleCache.js"
 
 import type { Repository } from "@lix-js/client"
-
-import { maybeCreateFirstProjectId } from "./migrations/maybeCreateFirstProjectId.js"
 
 import { capture } from "./telemetry/capture.js"
 import { identifyProject } from "./telemetry/groupIdentify.js"
@@ -74,6 +77,7 @@ export async function loadProject(args: {
 
 	await maybeMigrateToDirectory({ nodeishFs, projectPath })
 	await maybeCreateFirstProjectId({ projectPath, repo: args.repo })
+	await maybeAddModuleCache({ projectPath, repo: args.repo })
 
 	// -- load project ------------------------------------------------------
 
@@ -87,43 +91,27 @@ export async function loadProject(args: {
 
 		const [initialized, markInitAsComplete, markInitAsFailed] = createAwaitable()
 		const [loadedSettings, markSettingsAsLoaded, markSettingsAsFailed] = createAwaitable()
+
+		const [resolvedModules, setResolvedModules] =
+			createSignal<Awaited<ReturnType<typeof resolveModules>>>()
 		// -- settings ------------------------------------------------------------
 
 		const [settings, _setSettings] = createSignal<ProjectSettings>()
 		let v2Persistence = false
 		let locales: string[] = []
 
-		// This effect currently has no signals
-		// TODO: replace createEffect with await loadSettings
-		// https://github.com/opral/inlang-message-sdk/issues/77
-		createEffect(() => {
-			// TODO:
-			// if (projectId) {
-			// 	telemetryBrowser.group("project", projectId, {
-			// 		name: projectId,
-			// 	})
-			// }
+		// TODO:
+		// if (projectId) {
+		// 	telemetryBrowser.group("project", projectId, {
+		// 		name: projectId,
+		// 	})
+		// }
 
-			loadSettings({ settingsFilePath: projectPath + "/settings.json", nodeishFs })
-				.then((settings) => {
-					setSettings(settings)
-					markSettingsAsLoaded()
-				})
-				.catch((err) => {
-					markInitAsFailed(err)
-					markSettingsAsFailed(err)
-				})
-		})
-		// TODO: create FS watcher and update settings on change
-		// https://github.com/opral/inlang-message-sdk/issues/35
-
-		const writeSettingsToDisk = skipFirst((settings: ProjectSettings) =>
-			_writeSettingsToDisk({ nodeishFs, settings, projectPath })
-		)
-
-		const setSettings = (settings: ProjectSettings): Result<void, ProjectSettingsInvalidError> => {
+		const setSettings = (
+			newSettings: ProjectSettings
+		): Result<ProjectSettings, ProjectSettingsInvalidError> => {
 			try {
-				const validatedSettings = parseSettings(settings)
+				const validatedSettings = parseSettings(newSettings)
 				v2Persistence = !!validatedSettings.experimental?.persistence
 				locales = validatedSettings.languageTags
 
@@ -133,29 +121,67 @@ export async function loadProject(args: {
 					_setSettings(validatedSettings)
 				})
 
-				writeSettingsToDisk(validatedSettings)
-				return { data: undefined }
+				return { data: validatedSettings }
 			} catch (error: unknown) {
 				if (error instanceof ProjectSettingsInvalidError) {
 					return { error }
 				}
 
 				throw new Error(
-					"Unhandled error in setSettings. This is an internal bug. Please file an issue."
+					"Unhandled error in setSettings. This is an internal bug. Please file an issue.",
+					{ cause: error }
 				)
 			}
 		}
 
-		// -- resolvedModules -----------------------------------------------------------
+		const nodeishFsWithWatchersForSettings = createNodeishFsWithWatcher({
+			nodeishFs: nodeishFs,
+			onChange: async () => {
+				const readSettingsResult = await tryCatch(
+					async () =>
+						await loadSettings({
+							settingsFilePath: projectPath + "/settings.json",
+							nodeishFs: nodeishFs,
+						})
+				)
 
-		const [resolvedModules, setResolvedModules] =
-			createSignal<Awaited<ReturnType<typeof resolveModules>>>()
+				if (readSettingsResult.error) return
+				const newSettings = readSettingsResult.data
+
+				if (JSON.stringify(newSettings) !== JSON.stringify(settings())) {
+					setSettings(newSettings)
+				}
+			},
+		})
+
+		const settingsResult = await tryCatch(
+			async () =>
+				await loadSettings({
+					settingsFilePath: projectPath + "/settings.json",
+					nodeishFs: nodeishFsWithWatchersForSettings,
+				})
+		)
+
+		if (settingsResult.error) {
+			markInitAsFailed(settingsResult.error)
+			markSettingsAsFailed(settingsResult.error)
+		} else {
+			setSettings(settingsResult.data)
+			markSettingsAsLoaded()
+		}
+
+		// -- resolvedModules -----------------------------------------------------------
 
 		createEffect(() => {
 			const _settings = settings()
 			if (!_settings) return
 
-			resolveModules({ settings: _settings, nodeishFs, _import: args._import })
+			resolveModules({
+				settings: _settings,
+				nodeishFs,
+				_import: args._import,
+				projectPath,
+			})
 				.then((resolvedModules) => {
 					setResolvedModules(resolvedModules)
 				})
@@ -310,7 +336,11 @@ export async function loadProject(args: {
 				//...(lintErrors() ?? []),
 			]),
 			settings: createSubscribable(() => settings() as ProjectSettings),
-			setSettings,
+			setSettings: (newSettings: ProjectSettings): Result<void, ProjectSettingsInvalidError> => {
+				const result = setSettings(newSettings)
+				if (!result.error) writeSettingsToDisk({ nodeishFs, settings: result.data, projectPath })
+				return result.error ? result : { data: undefined }
+			},
 			customApi: createSubscribable(() => resolvedModules()?.resolvedPluginApi.customApi || {}),
 			query: {
 				messages: messagesQuery,
@@ -347,6 +377,9 @@ const loadSettings = async (args: {
 	return parseSettings(json.data)
 }
 
+/**
+ * @throws If the settings are not valid
+ */
 const parseSettings = (settings: unknown) => {
 	const withMigration = migrateIfOutdated(settings as any)
 	if (settingsCompiler.Check(withMigration) === false) {
@@ -378,26 +411,24 @@ const parseSettings = (settings: unknown) => {
 	return withMigration
 }
 
-const _writeSettingsToDisk = async (args: {
+const writeSettingsToDisk = async (args: {
 	projectPath: string
 	nodeishFs: NodeishFilesystemSubset
 	settings: ProjectSettings
 }) => {
-	const { data: serializedSettings, error: serializeSettingsError } = tryCatch(() =>
+	const serializeResult = tryCatch(() =>
 		// TODO: this will probably not match the original formatting
 		JSON.stringify(args.settings, undefined, 2)
 	)
-	if (serializeSettingsError) {
-		throw serializeSettingsError
-	}
+	if (serializeResult.error) throw serializeResult.error
+	const serializedSettings = serializeResult.data
 
-	const { error: writeSettingsError } = await tryCatch(async () =>
-		args.nodeishFs.writeFile(args.projectPath + "/settings.json", serializedSettings)
+	const writeResult = await tryCatch(
+		async () =>
+			await args.nodeishFs.writeFile(args.projectPath + "/settings.json", serializedSettings)
 	)
 
-	if (writeSettingsError) {
-		throw writeSettingsError
-	}
+	if (writeResult.error) throw writeResult.error
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -416,18 +447,6 @@ const createAwaitable = () => {
 		resolve: () => void,
 		reject: (e: unknown) => void
 	]
-}
-
-// Skip initial call, eg. to skip setup of a createEffect
-function skipFirst(func: (args: any) => any) {
-	let initial = false
-	return function (...args: any) {
-		if (initial) {
-			// @ts-ignore
-			return func.apply(this, args)
-		}
-		initial = true
-	}
 }
 
 export function createSubscribable<T>(signal: () => T): Subscribable<T> {
