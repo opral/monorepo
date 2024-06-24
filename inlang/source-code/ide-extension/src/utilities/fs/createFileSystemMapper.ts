@@ -11,31 +11,66 @@ export function createFileSystemMapper(base: string, fs: NodeishFilesystem): Nod
 	// Prevent path issue on non Unix based system normalizing the <base> before using it
 	const normalizedBase = normalizePath(base)
 
-	/**
-	 * Returns a function that normalizes it's first argument (the path) and calls the original function
-	 */
-	const normalized = <T extends any[], R>(
-		fn: (path: string, ...rest: T) => R
-	): ((path: string, ...rest: T) => R) => {
-		return (path: string, ...rest: T): R => {
-			return fn(
-				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path)),
-				...rest
-			)
-		}
-	}
-
 	return {
 		// @ts-expect-error
-		readFile: normalized(fs.readFile),
-		writeFile: normalized(fs.writeFile),
-		mkdir: normalized(fs.mkdir),
-		rmdir: normalized(fs.rmdir),
-		unlink: normalized(fs.unlink),
-		readdir: normalized(fs.readdir),
-		readlink: normalized(fs.readlink),
-
-		// this is the only one where the wrapper does not work since there are two args ;)
+		readFile: async (
+			path: Parameters<NodeishFilesystem["readFile"]>[0],
+			options: Parameters<NodeishFilesystem["readFile"]>[1]
+		): Promise<string | Uint8Array> => {
+			return fs.readFile(
+				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path)),
+				options
+			)
+		},
+		writeFile: async (
+			path: Parameters<NodeishFilesystem["writeFile"]>[0],
+			data: Parameters<NodeishFilesystem["writeFile"]>[1],
+			options: Parameters<NodeishFilesystem["writeFile"]>[2]
+		) => {
+			return fs.writeFile(
+				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path)),
+				data,
+				options
+			)
+		},
+		mkdir: async (
+			path: Parameters<NodeishFilesystem["mkdir"]>[0],
+			options: Parameters<NodeishFilesystem["mkdir"]>[1]
+		) => {
+			return fs.mkdir(
+				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path)),
+				options
+			)
+		},
+		rmdir: async (path: Parameters<NodeishFilesystem["rmdir"]>[0]) => {
+			return fs.rmdir(
+				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path))
+			)
+		},
+		rm: async (
+			path: Parameters<NodeishFilesystem["rm"]>[0],
+			options: Parameters<NodeishFilesystem["rm"]>[1]
+		) => {
+			return fs.rm(
+				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path)),
+				options
+			)
+		},
+		unlink: async (path: Parameters<NodeishFilesystem["unlink"]>[0]) => {
+			return fs.unlink(
+				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path))
+			)
+		},
+		readdir: async (path: Parameters<NodeishFilesystem["readdir"]>[0]) => {
+			return fs.readdir(
+				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path))
+			)
+		},
+		readlink: async (path: Parameters<NodeishFilesystem["readlink"]>[0]) => {
+			return fs.readlink(
+				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path))
+			)
+		},
 		symlink: async (
 			path: Parameters<NodeishFilesystem["symlink"]>[0],
 			target: Parameters<NodeishFilesystem["symlink"]>[1]
@@ -47,8 +82,24 @@ export function createFileSystemMapper(base: string, fs: NodeishFilesystem): Nod
 				)
 			)
 		},
-		stat: normalized(fs.stat),
-		watch: normalized(fs.watch),
-		lstat: normalized(fs.lstat),
+		stat: async (path: Parameters<NodeishFilesystem["stat"]>[0]) => {
+			return fs.stat(
+				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path))
+			)
+		},
+		watch: (
+			path: Parameters<NodeishFilesystem["watch"]>[0],
+			options: Parameters<NodeishFilesystem["watch"]>[1]
+		) => {
+			return fs.watch(
+				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path)),
+				options
+			)
+		},
+		lstat: async (path: Parameters<NodeishFilesystem["lstat"]>[0]) => {
+			return fs.lstat(
+				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path))
+			)
+		},
 	}
 }
