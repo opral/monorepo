@@ -20,6 +20,26 @@ import * as runtime from "${"$"}lib/paraglide/runtime.js"
 export const i18n = createI18n(runtime)
 `
 
-	await ctx.repo.nodeishFs.writeFile(filePath, boilerplate)
+	const libDirExists = await directoryExists(path.dirname(filePath), ctx.repo.nodeishFs)
+	if (!libDirExists) {
+		await ctx.repo.nodeishFs.mkdir(path.dirname(filePath), { recursive: true })
+	}
+
+	try {
+		await ctx.repo.nodeishFs.writeFile(filePath, boilerplate)
+		ctx.logger.success("Added i18n file")
+	} catch (error) {
+		ctx.logger.error("Failed to add i18n file at src/lib/i18n.js")
+	}
+
 	return ctx
+}
+
+async function directoryExists(path: string, fs: Repository["nodeishFs"]) {
+	try {
+		const stat = await fs.stat(path)
+		return stat.isDirectory()
+	} catch {
+		return false
+	}
 }

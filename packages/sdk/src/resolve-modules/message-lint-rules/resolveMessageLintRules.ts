@@ -12,6 +12,7 @@ export const resolveMessageLintRules = (args: { messageLintRules: Array<MessageL
 			const errors = [...Value.Errors(MessageLintRule, rule)]
 			result.errors.push(
 				new MessageLintRuleIsInvalidError({
+					// @ts-ignore
 					id: rule.id,
 					errors,
 				})

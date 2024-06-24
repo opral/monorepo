@@ -1,5 +1,28 @@
 # inlang-vs-code-extension
 
+## 1.47.0
+
+### Minor Changes
+
+- 58c66d8: fix `missing enabledApiProposal` bug
+
+## 1.46.1
+
+### Patch Changes
+
+- de0b0d3: fix crash associated with Inlang SDK caching
+- Updated dependencies [2fc5feb]
+  - @inlang/sdk@0.36.2
+  - @inlang/rpc@0.3.34
+  - @inlang/settings-component@1.0.29
+  - @inlang/telemetry@0.3.49
+
+## 1.46.0
+
+### Minor Changes
+
+- 07c572c: update deps
+
 ## 1.45.2
 
 ### Patch Changes

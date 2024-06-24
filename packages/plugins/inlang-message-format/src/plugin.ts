@@ -22,6 +22,7 @@ export const plugin: Plugin<{
 	settingsSchema: PluginSettings,
 	loadMessages: async ({ settings, nodeishFs }) => {
 		await maybeMigrateToV2({ settings, nodeishFs })
+		// TODO - Call fs.readDir to automatically add the directory to the watchlist
 
 		const result: Record<string, Message> = {}
 
