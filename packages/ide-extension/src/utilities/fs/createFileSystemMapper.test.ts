@@ -32,7 +32,8 @@ describe("createFileSystemMapper", () => {
 
 		expect(mockFs.writeFile).toHaveBeenCalledWith(
 			testPath.startsWith(normalizedBase) ? testPath : _path.resolve(normalizedBase, testPath),
-			"test content"
+			"test content",
+			undefined
 		)
 	})
 
