@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/paraglide-vite",
-	"version": "1.2.70",
+	"version": "1.2.71",
 	"description": "Vite plugin for running the Paraglide i18n compiler",
 	"license": "Apache-2.0",
 	"type": "module",
@@ -48,7 +48,7 @@
 	},
 	"devDependencies": {
 		"@types/node": "20.9.3",
-		"typescript": "5.2.2",
+		"typescript": "^5.5.2",
 		"vitest": "0.34.3"
 	}
 }

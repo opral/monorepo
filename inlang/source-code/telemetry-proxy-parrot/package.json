@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/telemetry-proxy",
+	"name": "@inlang/telemetry-proxy-parrot",
 	"type": "module",
 	"private": true,
 	"scripts": {
