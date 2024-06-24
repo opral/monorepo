@@ -20,6 +20,7 @@ services:
         - inlang/source-code/website/**
         - inlang/source-code/markdown/**
         - inlang/source-code/marketplace-registry/**
+        - '**/*.md'
     domains:
       - inlang.com
 
@@ -50,7 +51,7 @@ services:
     branch: main
     buildCommand: pnpm install && pnpm run build --projects=@inlang/badge
     startCommand: pnpm --filter @inlang/badge run production
-    autoDeploy: true
+    autoDeploy: false
     envVars:
       - fromGroup: production
     buildFilter:
@@ -67,7 +68,7 @@ services:
     pullRequestPreviewsEnabled: false
     buildCommand: pnpm install && pnpm run build # TODO: --projects=@inlang/editor
     startCommand: pnpm --filter @inlang/editor production
-    autoDeploy: true
+    autoDeploy: false
     envVars:
       - fromGroup: production
     buildFilter:
@@ -84,7 +85,7 @@ services:
     pullRequestPreviewsEnabled: false
     buildCommand: pnpm install && pnpm run build
     startCommand: pnpm --filter @inlang/manage production
-    autoDeploy: true
+    autoDeploy: false
     envVars:
       - fromGroup: production
     buildFilter:
@@ -103,3 +104,35 @@ services:
         - opral/source-code/website/**
     domains:
       - opral.com
+
+  - name: telemetry-proxy
+    type: web
+    runtime: node
+    region: frankfurt
+    plan: starter
+    branch: main
+    pullRequestPreviewsEnabled: false
+    buildCommand: pnpm install && pnpm run --filter @inlang/telemetry-proxy build
+    startCommand: pnpm run --filter @inlang/telemetry-proxy production
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - inlang/source-code/telemetry-proxy/**
+      domains:
+        - tm.inlang.com
+
+  - name: telemetry-proxy-parrot
+    type: web
+    runtime: node
+    region: frankfurt
+    plan: starter
+    branch: main
+    pullRequestPreviewsEnabled: false
+    buildCommand: pnpm install && pnpm run --filter @inlang/telemetry-proxy-parrot build
+    startCommand: pnpm run --filter @inlang/telemetry-proxy-parrot production
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - inlang/source-code/telemetry-proxy-parrot/**
+      domains:
+        - telemetry.inlang.com
