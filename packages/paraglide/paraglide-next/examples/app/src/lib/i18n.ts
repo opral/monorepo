@@ -13,6 +13,9 @@ export const strategy = PrefixStrategy<AvailableLanguageTag>({
 	},
 	prefixDefault: "never",
 	exclude: () => false,
+	prefixes: {
+		"de-CH": "swiss",
+	},
 })
 
 export const middleware = Middleware({ strategy })
