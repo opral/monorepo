@@ -67,8 +67,8 @@ export async function repoContext(
 			.catch(() => [])
 		const origin = remotes.find(({ remote }) => remote === "origin")?.url || ""
 
-		if (origin.startsWith("git@githubClient.com:")) {
-			url = origin.replace("git@githubClient.com:", "https://githubClient.com/")
+		if (origin.startsWith("git@github.com:")) {
+			url = origin.replace("git@github.com:", "https://github.com/")
 		} else {
 			url = origin
 		}
@@ -127,7 +127,7 @@ export async function repoContext(
 	const githubClient = makeGithubClient({ gitHubProxyUrl })
 
 	// TODO: support for url scheme to use local repo already in the fs
-	const gitUrl = repoName ? `https://${repoHost}/${owner}/${repoName}` : ""
+	const gitUrl = repoName ? `${protocol}//${repoHost}/${owner}/${repoName}` : ""
 
 	if (!gitUrl && debug) {
 		console.warn(

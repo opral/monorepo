@@ -386,7 +386,8 @@ export async function repoState(
 					gitdir: ".git",
 				}).then((existsLocaly) => {
 					if (!existsLocaly) {
-						console.warn("missing oid!! in git object store interceptor: ", oid)
+						debug && console.info("missing oid!! in git object store interceptor: ", oid)
+
 						return isoGit.fetch({
 							cache,
 							fs: rawFs,
