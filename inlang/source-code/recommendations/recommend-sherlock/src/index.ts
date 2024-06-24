@@ -9,13 +9,27 @@ import {
  * @param {Object} args - The arguments object.
  * @param {NodeishFilesystem} args.fs - The filesystem to use for operations.
  * @param {string} [args.workingDirectory] - The working directory path. Defaults to the current directory.
- * @returns {Promise<boolean>} - A promise that resolves to true if the project is adopted, otherwise false.
+ * @returns {Promise<boolean>} - A promise that resolves to false if the project is adopted, otherwise true.
  */
 export async function shouldRecommend(args: {
 	fs: NodeishFilesystem
 	workingDirectory?: string
 }): Promise<boolean> {
-	return isInWorkspaceRecommendation(args.fs, args.workingDirectory)
+	return !(await isInWorkspaceRecommendation(args.fs, args.workingDirectory))
+}
+
+/**
+ * Checks if the Sherlock app is adopted within the workspace recommendations.
+ * @param {Object} args - The arguments object.
+ * @param {NodeishFilesystem} args.fs - The filesystem to use for operations.
+ * @param {string} [args.workingDirectory] - The working directory path. Defaults to the current directory.
+ * @returns {Promise<boolean>} - A promise that resolves to false if the project is adopted, otherwise true.
+ */
+export async function isAdopted(args: {
+	fs: NodeishFilesystem
+	workingDirectory?: string
+}): Promise<boolean> {
+	return await isInWorkspaceRecommendation(args.fs, args.workingDirectory)
 }
 
 /**
