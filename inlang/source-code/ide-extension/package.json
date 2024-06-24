@@ -72,7 +72,7 @@
 					"group": "sherlock@4"
 				},
 				{
-					"when": "sherlock:showRecommendationBanner && sherlock:hasProjectInWorkspace",
+					"when": "sherlock:hasProjectInWorkspace",
 					"id": "recommendationBanner",
 					"name": "Recommendation",
 					"type": "webview",
