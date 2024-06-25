@@ -41,9 +41,10 @@ export const MessageLintLevel = _MessageLintRuleLevel
 /**
  * Lint configuration for a given bundle/message/variant
  */
-export const LintConfig = Type.Object({
+export const LintConfig = Type.Object({ // TODO SDK2 Rename to LintSettings
 	id: Type.Optional(Type.String({ description: "id of the lint config entry" })),
 	ruleId: _MessageBundleLintRuleId,
+	// TODO disable this for now - to only reach feature parity for now - this is purly experimental
 	bundleId: Type.Optional(Type.String()),
 	messageId: Type.Optional(Type.String()),
 	messageLocale: Type.Optional(LanguageTag),
@@ -57,9 +58,11 @@ export type LintConfig = Static<typeof LintConfig>
  */
 export type LintReport = {
 	ruleId: MessageBundleLintRule["id"]
+	// TODO SDK2 check if we should provide a lint target 
+	
 	messageBundleId: string // TODO replace with reference to message
-	messageId: string
-	variantId: string
+	messageId: string | undefined
+	variantId: string | undefined
 	locale: LanguageTag
 	// TODO add matcher expression somehow - we want to deactivate lints on a message for a nonexisting variant...
 	level: MessageLintLevel

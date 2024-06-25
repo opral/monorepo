@@ -9,6 +9,7 @@ import type { Plugin2 } from "./plugin.js"
  * ---------------- Specific Language Tag field meta information ----------------
  */
 
+// TODO SDK2 naming?
 const BaseLocale = LanguageTag
 BaseLocale.title = "Source language tag"
 BaseLocale.description =
@@ -81,7 +82,7 @@ export const ExternalProjectSettings = Type.Record(
 			.map((key) => key.replaceAll(".", "\\."))
 			.join("|")})$`,
 		description:
-			"The key must be conform to `{type:app|plugin|messageLintRule}.{namespace:string}.{id:string}`.",
+			"The key must be conform to `{type:app|plugin|messageBundleLintRule}.{namespace:string}.{id:string}`.",
 		examples: ["plugin.publisher.sqlite", "messageBundleLintRule.inlang.missingTranslation"],
 	}) as unknown as TTemplateLiteral<
 		[TLiteral<`${"app" | "plugin" | "library" | "messageBundleLintRule"}.${string}.${string}`>]

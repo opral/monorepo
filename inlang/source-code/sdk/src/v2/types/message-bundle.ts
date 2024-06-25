@@ -121,6 +121,7 @@ export const Message = Type.Object({
 export type MessageBundle = Static<typeof MessageBundle>
 export const MessageBundle = Type.Object(
 	{
+		// TODO SDK2 id format validation?
 		id: Type.String({ maxLength: 100 }),
 		alias: Type.Record(Type.String(), Type.String()),
 
