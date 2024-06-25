@@ -2,7 +2,6 @@ export type { NodeishFilesystem, NodeishStats } from "./NodeishFilesystemApi.js"
 export { createNodeishMemoryFs, toSnapshot, fromSnapshot, type Snapshot } from "./memoryFs.js"
 export {
 	normalizePath,
-	normalPath, // FIXME: unify with normalizePath
 	getBasename,
 	getDirname,
 	assertIsAbsolutePath,

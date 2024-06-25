@@ -25,6 +25,6 @@ app.use(
 
 // ----------------- START SERVER -----------------
 
-const port = process.env.PORT ?? 4006
+const port = 4006
 app.listen(port)
 console.info(`Server running at http://localhost:${port}/`)

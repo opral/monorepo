@@ -60,7 +60,7 @@ describe("parseOrigin", () => {
 				},
 			],
 		})
-		expect(result.includes(mockSigningKey)).toBe(false)
+		expect(result?.includes(mockSigningKey)).toBe(false)
 	})
 
 	it("should match different origin patterns to one unambigious identifier", () => {

@@ -38,7 +38,7 @@ services:
       - fromGroup: production
     buildFilter:
       paths:
-        - lix/source-code/server/**
+        - lix/packages/server/**
     domains:
       - git.inlang.com
 
