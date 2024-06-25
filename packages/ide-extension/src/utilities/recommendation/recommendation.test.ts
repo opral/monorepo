@@ -13,9 +13,26 @@ vi.mock("vscode", () => ({
 		createWebviewPanel: vi.fn(),
 		registerWebviewViewProvider: vi.fn(),
 	},
-	WebviewView: class {},
+	WebviewView: class {
+		webview = {
+			asWebviewUri: (uri: vscode.Uri) => uri.toString(),
+			options: {},
+			html: "",
+			onDidReceiveMessage: vi.fn(),
+			postMessage: vi.fn(),
+			cspSource: "",
+		}
+	},
 	commands: {
 		executeCommand: vi.fn(),
+	},
+	EventEmitter: class {
+		on = vi.fn()
+		fire = vi.fn()
+	},
+	Uri: {
+		file: vi.fn(),
+		joinPath: vi.fn((...args: string[]) => args.join("/")),
 	},
 }))
 vi.mock("node:path", () => ({
@@ -86,15 +103,28 @@ describe("createRecommendationBanner", () => {
 })
 
 describe("getRecommendationBannerHtml", () => {
+	const fakeWorkspaceFolder: vscode.WorkspaceFolder = {
+		uri: { fsPath: "/path/to/workspace" } as vscode.Uri,
+		name: "test-workspace",
+		index: 0,
+	}
+
 	beforeEach(() => {
 		vi.resetAllMocks()
 	})
 
 	it("should return html", async () => {
 		const args = {
-			webview: {} as vscode.Webview,
+			webview: {
+				asWebviewUri: (uri: vscode.Uri) => (uri ? uri.toString() : ""),
+				options: {},
+				html: "",
+				onDidReceiveMessage: vi.fn(),
+				postMessage: vi.fn(),
+				cspSource: "self",
+			} as unknown as vscode.Webview,
 			fs: {} as NodeishFilesystem,
-			workspaceFolder: {} as vscode.WorkspaceFolder,
+			workspaceFolder: fakeWorkspaceFolder,
 			context: {} as vscode.ExtensionContext,
 		}
 		const result = await getRecommendationViewHtml(args)
