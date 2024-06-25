@@ -10,8 +10,6 @@ import type { Message, MessageBundle } from "../types/message-bundle.js"
 import type { ProjectSettings2 } from "../types/project-settings.js"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
 
-import testLintRule from "../../v2-lint-rule/index.js"
-
 import _debug from "debug"
 import { createRxDbAdapter } from "../rxdbadapter.js"
 const debug = _debug("sdk-v2:lint-report-worker")
@@ -45,6 +43,14 @@ export async function createLinter(
 			return module.default
 		})
 	)
+
+	const invalidModuleErrors = modules
+		.filter((module) => !MessageBundleLintRuleCompiler.Check(module))
+		.flatMap((module) => [...MessageBundleLintRuleCompiler.Errors(module)])
+
+	if (invalidModuleErrors.length > 0) {
+		console.error("invalidModuleErrors", invalidModuleErrors)
+	}
 
 	const resolvedLintRules = modules.filter((module): module is MessageBundleLintRule =>
 		MessageBundleLintRuleCompiler.Check(module)

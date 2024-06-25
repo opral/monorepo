@@ -101,6 +101,7 @@ async function readModuleFromCDN(uri: string): Promise<string> {
 	const JS_CONTENT_TYPES = [
 		"application/javascript",
 		"text/javascript",
+		"text/plain", //TODO remove this - only for githubusercontent
 		"application/x-javascript",
 		"text/x-javascript",
 	]
