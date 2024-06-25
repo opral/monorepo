@@ -9,7 +9,6 @@ import type { SlotFile } from "./types/SlotFile.js"
 import type { HasId } from "./types/HasId.js"
 import { deepFreeze } from "./utill/deepFreeze.js"
 import { sortNamesByDistance } from "./utill/sortNamesByDistance.js"
-const debug = _debug("sdk:slotfile")
 
 /**
  *
@@ -58,6 +57,7 @@ export default function createSlotStorage<DocType extends HasId>(
 	slotsPerFile: number,
 	fileNameCharacters: number
 ) {
+	const debug = _debug("sdk:slotfile:" + name)
 	const storageName = name
 	// property to use to test for identity of an object within a collection
 	// NOTE: use schema primary key like in https://github.com/pubkey/rxdb/blob/3bdfd66d1da5ccf9afe371b6665770f11e67908f/src/types/rx-schema.d.ts#L106
@@ -75,7 +75,11 @@ export default function createSlotStorage<DocType extends HasId>(
 	// records that have been inserted and not persisted
 	const transientSlotEntries = new Map<string, SlotEntry<DocType>>()
 
-	let changeCallback: (eventName: string, records?: string[]) => void = () => {}
+	let changeCallback: (
+		source: "api" | "fs",
+		eventName: string,
+		records?: string[]
+	) => void = () => {}
 
 	const slotEntryStates = new Map<string, SlotEntry<DocType>>()
 
@@ -376,7 +380,7 @@ export default function createSlotStorage<DocType extends HasId>(
 			loadResults.updated.length > 0 ||
 			loadResults.conflicting.length > 0
 		) {
-			changeCallback("record-change")
+			changeCallback("fs", "record-change")
 		}
 
 		const ids = new Set([
@@ -386,7 +390,7 @@ export default function createSlotStorage<DocType extends HasId>(
 		])
 
 		if (ids.size > 0) {
-			changeCallback("records-change", [...ids.values()])
+			changeCallback("fs", "records-change", [...ids.values()])
 		}
 		_internal.lastLoad = loadResults
 
@@ -474,6 +478,12 @@ export default function createSlotStorage<DocType extends HasId>(
 				continue
 			}
 
+			debug(
+				"saveChangesToWorkingCopy - CHANGES" +
+					connectedFs.path +
+					knownSlotFileStates.slotFileName +
+					".slot"
+			)
 			const conflictingSlotFile = knownSlotFileStates.fsSlotFileState
 			const memorySlotFile = structuredClone(knownSlotFileStates.memorySlotFileState)
 
@@ -620,6 +630,7 @@ export default function createSlotStorage<DocType extends HasId>(
 			)
 
 			// apply every non conflicting in memory state to the working copy
+			debug("saveChangesToWorkingCopy - write transient slotfiles - " + fileName)
 			await connectedFs.fs.writeFile(
 				connectedFs.path + fileName + ".slot",
 				memoryStateSlotfileContent
@@ -646,10 +657,10 @@ export default function createSlotStorage<DocType extends HasId>(
 					)
 				}
 			}
-			changeCallback("slots-changed")
+			changeCallback("api", "slots-changed")
 		}
 		if (changedIds.size > 0) {
-			changeCallback("records-change", [...changedIds.values()])
+			changeCallback("api", "records-change", [...changedIds.values()])
 		}
 		ongoingSave = undefined
 		done()
@@ -937,9 +948,9 @@ export default function createSlotStorage<DocType extends HasId>(
 
 			transientSlotEntries.set(documentId, newSlotEntry)
 
-			changeCallback("record-change")
-			changeCallback("records-change", [documentId])
-			
+			changeCallback("api", "record-change")
+			changeCallback("api", "records-change", [documentId])
+
 			if (connectedFs && saveToDisk) {
 				// TODO should we always return a promis even if we are not connected?
 				// should we return a save method that can be called explicetly?
@@ -947,8 +958,8 @@ export default function createSlotStorage<DocType extends HasId>(
 			}
 		},
 		update: async (document: DocType, saveToDisk = true) => {
-			
 			debug("UPDATE")
+
 			const documentId = document[idProperty]
 			const existingSlotEntry = getSlotEntryById(documentId)
 
@@ -989,7 +1000,8 @@ export default function createSlotStorage<DocType extends HasId>(
 			}
 
 			updateSlotEntryStates(documentId, existingSlotEntry.index, entryIdHash)
-			changeCallback("records-change", [documentId])
+
+			changeCallback("api", "records-change", [documentId])
 			if (connectedFs && saveToDisk) {
 				return saveChangesToDisk()
 			}
@@ -1015,7 +1027,7 @@ export default function createSlotStorage<DocType extends HasId>(
 			return matchingSlotEntries
 		},
 		resolveMergeConflict() {},
-		setCallback(callback: (eventName: string, records?: string[]) => void) {
+		setCallback(callback: (source: "api" | "fs", eventName: string, records?: string[]) => void) {
 			changeCallback = callback
 		},
 	}

@@ -9,12 +9,16 @@ import { loadSettings } from "./settings.js"
 import type { InlangProject2 } from "./types/project.js"
 import { MessageBundle, ProjectSettings2, type Message } from "./types/index.js"
 import createSlotStorage from "../persistence/slotfiles/createSlotStorage.js"
-import { createRxDbAdapter, startReplication } from "./rxdbadapter.js"
+
 import { createRxDatabase, type RxCollection } from "rxdb"
 import { getRxStorageMemory } from "rxdb/plugins/storage-memory"
 import { BehaviorSubject } from "rxjs"
 import { resolveModules } from "./resolveModules2.js"
 import { createLintWorker } from "./lint/host.js"
+import {
+	createMessageBundleSlotAdapter,
+	startReplication,
+} from "./createMessageBundleSlotAdapter.js"
 
 /**
  * @param projectPath - Absolute path to the inlang settings file.
@@ -108,18 +112,28 @@ export async function loadProject(args: {
 	await bundleStorage.connect(nodeishFs, messageBundlesPath)
 	await messageStorage.connect(nodeishFs, messagesPath)
 
-	const adapter = createRxDbAdapter(bundleStorage, messageStorage)
-	await startReplication(database.collections.messageBundles, adapter).awaitInitialReplication()
 	const linter = await createLintWorker(projectPath, projectSettings.modules, nodeishFs)
 
-	// linter.lint(projectSettings)
+	const adapter = createMessageBundleSlotAdapter(
+		bundleStorage,
+		messageStorage,
+		async (source, bundle) => {
+			if (source === "adapter") {
+				const lintresults = await linter.lint(projectSettings)
+				console.log(lintresults)
+			}
+		}
+	)
+	await startReplication(database.collections.messageBundles, adapter).awaitInitialReplication()
 
-	adapter.pullStream$.subscribe({
-		next: async () => {
-			const lintresults = await linter.lint(projectSettings)
-			console.log(lintresults)
-		},
-	})
+	// // linter.lint(projectSettings)
+
+	// adapter.pullStream$.subscribe({
+	// 	next: async () => {
+
+	// 		console.log(lintresults)
+	// 	},
+	// })
 
 	return {
 		id: projectId,

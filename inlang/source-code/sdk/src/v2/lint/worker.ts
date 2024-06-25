@@ -11,7 +11,7 @@ import type { ProjectSettings2 } from "../types/project-settings.js"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
 
 import _debug from "debug"
-import { createRxDbAdapter } from "../rxdbadapter.js"
+import { createMessageBundleSlotAdapter } from "../createMessageBundleSlotAdapter.js"
 const debug = _debug("sdk-v2:lint-report-worker")
 
 const MessageBundleLintRuleCompiler = TypeCompiler.Compile(MessageBundleLintRule)
@@ -76,14 +76,14 @@ export async function createLinter(
 			)
 			await messageStorage.connect(fs as NodeishFilesystem, messagesPath, false)
 
-			const rxDbAdapter = createRxDbAdapter(bundleStorage, messageStorage)
+			const rxDbAdapter = createMessageBundleSlotAdapter(bundleStorage, messageStorage, () => {})
 
-			const messageBundles = await rxDbAdapter.pullHandler(0, -1)
+			const messageBundles = await rxDbAdapter.getAllMessageBundles()
 
 			const reports: LintReport[] = []
 			const promises: Promise<any>[] = []
 
-			for (const messageBundle of messageBundles.documents as MessageBundle[]) {
+			for (const messageBundle of messageBundles as MessageBundle[]) {
 				for (const lintRule of resolvedLintRules) {
 					const promise = lintRule.run({
 						messageBundle: messageBundle,
