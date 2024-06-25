@@ -2,6 +2,7 @@ import * as Comlink from "comlink"
 import type { createLinter as createLinterType } from "./worker.js"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
 import { WorkerPrototype, adapter } from "comlink-node"
+import type { ProjectSettings } from "@inlang/project-settings"
 
 export async function createLintReportQuery(
 	projectPath: string,
@@ -14,16 +15,5 @@ export async function createLintReportQuery(
 
 	const fsProxy = Comlink.proxy(fs)
 	const linter = await createLinter(projectPath, lintRules, fsProxy)
+	await linter.lint({} as ProjectSettings)
 }
-
-await createLintReportQuery(
-	"/somewhere",
-	["https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js"],
-	{
-		// @ts-ignore
-		readFile: async (path) => {
-			console.log("reading", path)
-			throw new Error()
-		},
-	}
-)

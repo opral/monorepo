@@ -8,6 +8,8 @@ import type { MessageBundle } from "../types.js"
 import type { NodeishFilesystem } from "@lix-js/fs"
 import type { MessageLintReport, MessageLintRule } from "@inlang/message-lint-rule"
 
+const bundleCollectionDir = "/messageBundle/"
+
 export async function createLinter(
 	projectPath: string,
 	lintRules: string[],
@@ -23,23 +25,27 @@ export async function createLinter(
 		})
 	)
 
+	console.info(resolvedLintRules)
+
 	const fullFs = new Proxy(fs as NodeishFilesystem, {
 		get(target, prop) {
 			if (prop in target) {
-				return target[prop]
+				return target[prop as keyof NodeishFilesystem]
 			} else {
 				throw new Error("nope")
 			}
 		},
 	})
 
-	const messageSlotStorage = createSlotStorage<MessageBundle>("message", 12, 12)
-	await messageSlotStorage.connect(fullFs, projectPath)
+	const bundleStorage = createSlotStorage<MessageBundle>("bundle-storage", 16 * 16 * 16 * 16, 3)
+	await bundleStorage.connect(fullFs, projectPath + bundleCollectionDir)
 
 	return {
 		lint: async (settings: ProjectSettings): Promise<MessageLintReport[]> => {
-			// read from slot-storage
-			const messageBundles = await messageSlotStorage.readAll()
+			console.info(settings)
+			const messageBundles = await bundleStorage.readAll()
+			console.info("messageBundles", messageBundles)
+			return []
 		},
 	}
 }
