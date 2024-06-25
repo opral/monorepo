@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import * as yaml from "js-yaml"
-import { add, shouldRecommend } from "./index.js"
+import { add, shouldRecommend, isAdopted } from "./index.js"
 import type { NodeishFilesystem } from "@lix-js/fs"
 
 const githubConfig = `
@@ -17,7 +17,7 @@ const githubConfig = `
 [branch "main"]
 	remote = origin
 	merge = refs/heads/main
-	`
+`
 
 const gitlabConfig = `
 [core]
@@ -33,7 +33,7 @@ const gitlabConfig = `
 [branch "main"]
 	remote = origin
 	merge = refs/heads/main
-	`
+`
 const ninjaI18nYaml = yaml.dump({
 	name: "Ninja i18n action",
 	on: "pull_request_target",
@@ -92,7 +92,7 @@ describe("GitHub Actions Workflow Adoption Checks", () => {
 		// @ts-expect-error
 		fsMock.stat.mockResolvedValue({ isDirectory: () => false })
 
-		await expect(shouldRecommend({ fs: fsMock })).resolves.toBe(true)
+		await expect(shouldRecommend({ fs: fsMock })).resolves.toBe(false)
 	})
 
 	it("correctly adds the Ninja i18n GitHub Action workflow", async () => {
@@ -124,7 +124,6 @@ describe("GitHub Actions Workflow Adoption Checks", () => {
 	})
 
 	it("does not find the action in deep nested directories beyond level 3", async () => {
-		// Simulate deep directory structure
 		// @ts-expect-error
 		fsMock.stat.mockResolvedValue({ isDirectory: () => true })
 		// @ts-expect-error
@@ -141,13 +140,12 @@ describe("GitHub Actions Workflow Adoption Checks", () => {
 			})
 		)
 
-		await expect(shouldRecommend({ fs: fsMock })).resolves.toBe(false)
+		await expect(isAdopted({ fs: fsMock })).resolves.toBe(false)
 	})
 
 	it("does not search beyond a depth of 3", async () => {
 		// @ts-expect-error
 		fsMock.readdir.mockImplementation((path) => {
-			// Implement logic to simulate depth, based on the path argument
 			if (path.endsWith("level3")) return Promise.resolve(["tooDeepDirectory"])
 			return Promise.resolve(["level1"])
 		})
@@ -158,8 +156,7 @@ describe("GitHub Actions Workflow Adoption Checks", () => {
 			})
 		)
 
-		await expect(shouldRecommend({ fs: fsMock })).resolves.toBe(false)
-		// Ensure readdir was called the correct number of times to validate depth control
+		await expect(isAdopted({ fs: fsMock })).resolves.toBe(false)
 	})
 
 	it("returns false if checking directory existence throws an error", async () => {
@@ -198,7 +195,7 @@ describe("GitHub Actions Workflow Adoption Checks", () => {
 			})
 		)
 
-		await expect(shouldRecommend({ fs: fsMock })).resolves.toBe(true)
+		await expect(shouldRecommend({ fs: fsMock })).resolves.toBe(false)
 	})
 
 	it("returns false and logs an error for malformed YAML content", async () => {
@@ -223,15 +220,6 @@ describe("GitHub Actions Workflow Adoption Checks", () => {
 		expect(fsMock.mkdir).toHaveBeenCalledWith(".github/workflows", { recursive: true })
 	})
 
-	it("creates the workflow directory if it does not exist", async () => {
-		// @ts-expect-error
-		fsMock.stat.mockRejectedValue(new Error("File not found"))
-
-		await add({ fs: fsMock })
-
-		expect(fsMock.mkdir).toHaveBeenCalledWith(".github/workflows", { recursive: true })
-	})
-
 	it("handles errors when creating the workflow directory in add function", async () => {
 		// @ts-expect-error
 		fsMock.stat.mockResolvedValue({ isDirectory: () => false })
@@ -239,5 +227,23 @@ describe("GitHub Actions Workflow Adoption Checks", () => {
 		fsMock.mkdir.mockRejectedValue(new Error("Filesystem error"))
 
 		await expect(add({ fs: fsMock })).rejects.toThrow("Filesystem error")
+	})
+
+	it("should detect adoption of Ninja i18n GitHub Action using isAdopted", async () => {
+		// @ts-expect-error
+		fsMock.readdir.mockResolvedValue(["ninja_i18n.yml"])
+		// @ts-expect-error
+		fsMock.stat.mockResolvedValue({ isDirectory: () => false })
+
+		await expect(isAdopted({ fs: fsMock })).resolves.toBe(true)
+	})
+
+	it("should handle the case when action is not adopted using isAdopted", async () => {
+		// @ts-expect-error
+		fsMock.readdir.mockResolvedValue([])
+		// @ts-expect-error
+		fsMock.stat.mockResolvedValue({ isDirectory: () => false })
+
+		await expect(isAdopted({ fs: fsMock })).resolves.toBe(false)
 	})
 })
