@@ -1,6 +1,7 @@
 import { createImport } from "./import.js"
 import { endpoint } from "comlink-node/worker"
 import { populateLevel } from "./populateLintLevel.js"
+import { TypeCompiler } from "@sinclair/typebox/compiler"
 import createSlotStorage from "../../persistence/slotfiles/createSlotStorage.js"
 import * as Comlink from "comlink"
 import type { NodeishFilesystem } from "@lix-js/fs"
@@ -8,7 +9,9 @@ import { MessageBundleLintRule, type LintConfig, type LintReport } from "../type
 import type { MessageBundle } from "../types/message-bundle.js"
 import type { ProjectSettings2 } from "../types/project-settings.js"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
-import { TypeCompiler } from "@sinclair/typebox/compiler"
+
+import _debug from "debug"
+const debug = _debug("sdk-v2:lint-report-worker")
 
 const MessageBundleLintRuleCompiler = TypeCompiler.Compile(MessageBundleLintRule)
 
@@ -27,14 +30,14 @@ const bundleCollectionDir = "/messageBundle/"
 
 export async function createLinter(
 	projectPath: string,
-	lintRules: string[],
+	moduleURIs: string[],
 	fs: Pick<NodeishFilesystemSubset, "readFile">
 ) {
-	console.info(lintRules)
+	debug("creating linter")
 	const _import = createImport(projectPath, fs)
 
 	const modules: unknown[] = await Promise.all(
-		lintRules.map(async (uri) => {
+		moduleURIs.map(async (uri) => {
 			const module = await _import(uri)
 			return module.default
 		})
@@ -43,7 +46,6 @@ export async function createLinter(
 	const resolvedLintRules = modules.filter((module): module is MessageBundleLintRule =>
 		MessageBundleLintRuleCompiler.Check(module)
 	)
-	console.info(resolvedLintRules)
 
 	const fullFs = new Proxy(fs as NodeishFilesystem, {
 		get(target, prop) {
@@ -60,13 +62,12 @@ export async function createLinter(
 
 	return {
 		lint: async (settings: ProjectSettings2): Promise<LintReport[]> => {
-			console.info(settings)
+			debug("lint triggered")
 			const messageBundles = await bundleStorage.readAll()
 
 			const reports: LintReport[] = []
 			const promises: Promise<any>[] = []
 
-			// generate lint reports
 			for (const messageBundle of messageBundles) {
 				for (const lintRule of resolvedLintRules) {
 					const promise = lintRule.run({
@@ -83,6 +84,8 @@ export async function createLinter(
 			}
 
 			await Promise.all(promises)
+
+			debug("lint completed")
 			return reports
 		},
 	}
