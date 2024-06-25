@@ -8,7 +8,6 @@ import http from "isomorphic-git/http/web"
 import git, { pull, add, commit, push, statusMatrix } from "isomorphic-git"
 const fs = createNodeishMemoryFs()
 
-
 addRxPlugin(RxDBQueryBuilderPlugin)
 
 // NOTE: All those properties are hardcoded for now - dont get crazy ;-) #POC
@@ -52,7 +51,7 @@ const _create = async (fs: any) => {
 
 	try {
 		await createNewProject({
-			projectPath: "/testproject.inlang",
+			projectPath: "/testproject2.inlang",
 			repo: repo,
 		})
 	} catch (e) {
@@ -60,7 +59,7 @@ const _create = async (fs: any) => {
 	}
 
 	const inlangProject = await loadProject({
-		projectPath: "/testproject.inlang",
+		projectPath: "/testproject2.inlang",
 		repo: repo,
 	})
 
