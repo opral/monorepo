@@ -10,6 +10,35 @@ import { GitHubActionsWorkflow } from "./types.js"
  * @param {NodeishFilesystem} args.fs - The filesystem to use for operations.
  * @returns {Promise<boolean>} - A promise that resolves to true if the action is adopted, otherwise false.
  */
+export async function shouldRecommend(args: { fs: NodeishFilesystem }): Promise<boolean> {
+	try {
+		// Check if the .git/config file exists
+		await args.fs.stat(".git/config")
+
+		// Read the .git/config file
+		const configData = await args.fs.readFile(".git/config", { encoding: "utf-8" })
+		const match = configData.match(/url = (.+)/)
+		const remoteOriginUrl = match ? match[1] : undefined
+
+		// Check if the URL is a GitHub URL
+		const isNinjaAdopted = await isAdopted({ fs: args.fs })
+		if (remoteOriginUrl && remoteOriginUrl.includes("github.com") && !isNinjaAdopted) {
+			return true
+		} else {
+			return false
+		}
+	} catch (error) {
+		// Fail silently and return false for any error
+		return false
+	}
+}
+
+/**
+ *
+ * @param {Object} args - The arguments object.
+ * @param {NodeishFilesystem} args.fs - The filesystem to use for operations.
+ * @returns {Promise<boolean>} - A promise that resolves to true if the action is adopted, otherwise false.
+ */
 export async function isAdopted(args: { fs: NodeishFilesystem }): Promise<boolean> {
 	// Helper function for recursive search
 	async function searchWorkflowFiles(directoryPath: string, depth: number = 0): Promise<boolean> {

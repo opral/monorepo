@@ -2,7 +2,7 @@ import type { Logger } from "~/services/logger/index.js"
 import type { Repository } from "@lix-js/client"
 import type { CliStep } from "../utils.js"
 import type { InlangProject } from "@inlang/sdk"
-import * as Ninja from "@inlang/cross-sell-ninja"
+import * as Ninja from "@inlang/recommend-ninja"
 import { prompt } from "~/cli/utils.js"
 import { telemetry } from "~/services/telemetry/implementation.js"
 
@@ -27,7 +27,7 @@ export const maybeAddNinja: CliStep<
 	if (response !== true) return ctx
 
 	try {
-		if (!(await Ninja.isAdopted({ fs: ctx.repo.nodeishFs }))) {
+		if (!(await Ninja.shouldRecommend({ fs: ctx.repo.nodeishFs }))) {
 			await Ninja.add({ fs: ctx.repo.nodeishFs })
 			telemetry.capture({ event: "PARAGLIDE JS init added Ninja" })
 			ctx.logger.success("Added the 🥷 Ninja Github Action for linting translations")

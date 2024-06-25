@@ -18,17 +18,16 @@ Visualize, edit, and lint translated strings effortlessly using Inline Decoratio
 	<br />
 </div>
 
-
 <img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/sherlock-cover-small.png"/>
 
 <br>
 <br>
 
-✅ Streamline the i18n translation process. 
+✅  Streamline the i18n translation process. 
 
-✅ Visualize, edit, and lint translations.
+✅  Visualize, edit, and lint translations.
 
-✅ Extract new translations with a simple click.
+✅  Extract new translations with a simple click.
 
 
 <br>

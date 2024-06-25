@@ -10,14 +10,14 @@
 Put this one into your `dependencies` in `package.json` & install it with `pnpm install`:
 
 ```bash
-"@inlang/cross-sell-sherlock": "workspace:*"
+"@inlang/recommend-sherlock": "workspace:*"
 ```
 
 ## Usage
 
 The module exports two main asynchronous functions:
 
-### `isAdopted(fs: NodeishFilesystem, workingDirectory?: string): Promise<boolean>`
+### `shouldRecommend(fs: NodeishFilesystem, workingDirectory?: string): Promise<boolean>`
 
 Checks whether the `inlang.vs-code-extension` is recommended in the workspace.
 
@@ -42,11 +42,11 @@ Adds the `inlang.vs-code-extension` recommendation to the workspace if it's not 
 ## Example
 
 ```typescript
-import { isAdopted, add } from '@inlang/cross-sell-sherlock';
+import { shouldRecommend, add } from '@inlang/recommend-sherlock';
 import { NodeishFilesystem } from '@lix-js/fs';
 
 async function addSherlock(fs: NodeishFilesystem) {
-  const isExtensionAdopted = await isAdopted(fs);
+  const isExtensionAdopted = await shouldRecommend(fs);
 
   if (!isExtensionAdopted) {
     // prompt for user confirmation

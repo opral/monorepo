@@ -1,4 +1,4 @@
-# @inlang/cross-sell-sherlock
+# @inlang/recommend-sherlock
 
 ## 0.0.4
 
