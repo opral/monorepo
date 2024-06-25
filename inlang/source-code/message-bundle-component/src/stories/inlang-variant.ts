@@ -9,7 +9,6 @@ import { LitElement, css, html } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
 import deleteVariant from "../helper/crud/variant/delete.js"
-import { getNewVariantPosition } from "../helper/crud/variant/sort.js"
 import type { MessageLintReport } from "@inlang/message-lint-rule"
 
 import "./inlang-lint-report-tip.js"
@@ -255,19 +254,12 @@ export default class InlangVariant extends LitElement {
 				matchIndex: matchIndex,
 				value,
 			})
-			const variant = structuredClone(this.variant)
-			//get index of this.varinat in message and delete it
-			const deleteIndex = this.message.variants.indexOf(this.variant)
-			this.message.variants.splice(deleteIndex, 1)
+			const variantID = this.variant.id
 
-			//get sort index of new variant
-			const newpos = getNewVariantPosition({
-				variants: this.message.variants,
-				newVariant: variant,
-			})
-
-			//insert variant at new position
-			this.message.variants.splice(newpos, 0, variant)
+			const changedVariant = this.message.variants.find((v) => v.id === variantID)
+			if (changedVariant) {
+				changedVariant.match[matchIndex] = value
+			}
 
 			this._save()
 			this.triggerMessageBundleRefresh()
@@ -314,11 +306,17 @@ export default class InlangVariant extends LitElement {
 				? this._matches.map((match, index) => {
 						return html`
 							<sl-input
+								id="${this.message!.id}-${this.variant!.id}-${match}"
 								class="match"
 								size="small"
 								value=${match}
 								@sl-blur=${(e: Event) => {
-									this._updateMatch(index, (e.target as HTMLInputElement).value)
+									const element = this.shadowRoot?.getElementById(
+										`${this.message!.id}-${this.variant!.id}-${match}`
+									)
+									if (element && e.target === element) {
+										this._updateMatch(index, (e.target as HTMLInputElement).value)
+									}
 								}}
 							></sl-input>
 						`

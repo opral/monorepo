@@ -372,7 +372,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 										this._input = inputElement.value
 									}}
 									size="small"
-									value=${this._input || this.inputs[0]}
+									value=${this._input || this.inputs?.[0]}
 							  >
 									${this.inputs &&
 									this.inputs.map((inputs) => {

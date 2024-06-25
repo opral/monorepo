@@ -196,6 +196,12 @@ export const messageBundleStyling = css`
 		display: flex;
 		align-items: center;
 		padding: 12px;
+		gap: 8px;
+	}
+	.message-actions-button::part(base):hover {
+		background-color: var(--sl-color-neutral-200);
+		color: var(--sl-color-neutral-900);
+		border: 1px solid var(--sl-color-neutral-400);
 	}
 	.variants-container {
 		width: 100%;

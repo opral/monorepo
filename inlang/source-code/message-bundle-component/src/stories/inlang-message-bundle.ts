@@ -1,8 +1,14 @@
 import { html, LitElement } from "lit"
-import { customElement, property } from "lit/decorators.js"
+import { customElement, property, state } from "lit/decorators.js"
 import { baseStyling } from "../styling/base.js"
 import overridePrimitiveColors from "../helper/overridePrimitiveColors.js"
-import { type MessageBundle, type Message, type LanguageTag, createVariant } from "@inlang/sdk/v2" // Import the types
+import {
+	type MessageBundle,
+	type Message,
+	type LanguageTag,
+	createVariant,
+	type Variant,
+} from "@inlang/sdk/v2" // Import the types
 import { messageBundleStyling } from "./inlang-message-bundle.styles.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
 import { deleteSelector } from "../helper/crud/selector/delete.js"
@@ -23,6 +29,7 @@ import SlMenuItem from "@shoelace-style/shoelace/dist/components/menu-item/menu-
 import type { MessageLintReport, ProjectSettings } from "@inlang/sdk"
 import { getInputs } from "../helper/crud/input/get.js"
 import { createInput } from "../helper/crud/input/create.js"
+import sortAllVariants from "../helper/crud/variant/sortAll.js"
 
 // in case an app defines it's own set of shoelace components, prevent double registering
 if (!customElements.get("sl-tag")) customElements.define("sl-tag", SlTag)
@@ -80,6 +87,9 @@ export default class InlangMessageBundle extends LitElement {
 	_triggerRefresh = () => {
 		this.requestUpdate()
 	}
+
+	@state()
+	private _freshlyAddedVariants: string[] = []
 
 	override async firstUpdated() {
 		await this.updateComplete
@@ -315,6 +325,43 @@ export default class InlangMessageBundle extends LitElement {
 									</div>
 								</div>
 								<div class="message-actions">
+									${this._freshlyAddedVariants.filter((id) =>
+										message.variants.map((variant) => variant.id).includes(id)
+									).length > 0
+										? html`<sl-button
+												class="message-actions-button"
+												size="small"
+												@click=${() => {
+													this._freshlyAddedVariants = this._freshlyAddedVariants.filter(
+														(id) => !message.variants.map((variant) => variant.id).includes(id)
+													)
+													this.requestUpdate()
+												}}
+												><svg
+													slot="prefix"
+													width="18"
+													height="18"
+													viewBox="0 0 20 20"
+													style="margin-right: -2px; opacity: 0.7"
+												>
+													<g fill="currentColor" fill-rule="evenodd" clip-rule="evenodd">
+														<path
+															d="M10.293 7.707a1 1 0 0 1 0-1.414l3-3a1 1 0 1 1 1.414 1.414l-3 3a1 1 0 0 1-1.414 0"
+														/>
+														<path
+															d="M17.707 7.707a1 1 0 0 1-1.414 0l-3-3a1 1 0 0 1 1.414-1.414l3 3a1 1 0 0 1 0 1.414"
+														/>
+														<path
+															d="M14 5a1 1 0 0 1 1 1v8a1 1 0 1 1-2 0V6a1 1 0 0 1 1-1m-4.293 7.293a1 1 0 0 1 0 1.414l-3 3a1 1 0 0 1-1.414-1.414l3-3a1 1 0 0 1 1.414 0"
+														/>
+														<path
+															d="M2.293 12.293a1 1 0 0 1 1.414 0l3 3a1 1 0 1 1-1.414 1.414l-3-3a1 1 0 0 1 0-1.414"
+														/>
+														<path d="M6 15a1 1 0 0 1-1-1V6a1 1 0 1 1 2 0v8a1 1 0 0 1-1 1" />
+													</g></svg
+												>Sort</sl-button
+										  >`
+										: ``}
 									${messageLintReports && messageLintReports.length > 0
 										? html`<inlang-lint-report-tip
 												.lintReports=${messageLintReports}
@@ -325,20 +372,22 @@ export default class InlangMessageBundle extends LitElement {
 						: ``}
 					<div class="variants-container">
 						${message && message.variants && message.variants.length > 0
-							? message.variants.map(
-									(variant) =>
-										html`<inlang-variant
-											.variant=${variant}
-											.message=${message}
-											.inputs=${this._fakeInputs()}
-											.triggerSave=${this._triggerSave}
-											.triggerMessageBundleRefresh=${this._triggerRefresh}
-											.addMessage=${this._addMessage}
-											.addInput=${this._addInput}
-											.locale=${locale}
-											.lintReports=${messageLintReports}
-										></inlang-variant>`
-							  )
+							? sortAllVariants({
+									variants: message.variants,
+									ignoreVariantIds: this._freshlyAddedVariants,
+							  }).map((variant) => {
+									return html`<inlang-variant
+										.variant=${variant}
+										.message=${message}
+										.inputs=${this._fakeInputs()}
+										.triggerSave=${this._triggerSave}
+										.triggerMessageBundleRefresh=${this._triggerRefresh}
+										.addMessage=${this._addMessage}
+										.addInput=${this._addInput}
+										.locale=${locale}
+										.lintReports=${messageLintReports}
+									></inlang-variant>`
+							  })
 							: message?.selectors.length === 0 || !message
 							? html`<inlang-variant
 									.message=${message}
@@ -354,13 +403,15 @@ export default class InlangMessageBundle extends LitElement {
 						${message?.selectors && message.selectors.length > 0
 							? html`<p
 									@click=${() => {
+										const variant = createVariant({
+											// combine the matches that are already present with the new category -> like a matrix
+											match: message.selectors.map(() => "null"),
+										})
 										upsertVariant({
 											message: message,
-											variant: createVariant({
-												// combine the matches that are already present with the new category -> like a matrix
-												match: message.selectors.map(() => "null"),
-											}),
+											variant: variant,
 										})
+										this._freshlyAddedVariants.push(variant.id)
 										this._triggerSave()
 										this._triggerRefresh()
 									}}
