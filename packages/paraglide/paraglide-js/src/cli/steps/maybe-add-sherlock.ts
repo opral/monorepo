@@ -37,7 +37,7 @@ export const maybeAddSherlock: CliStep<
 	}
 
 	try {
-		if (!(await Sherlock.shouldRecommend({ fs: ctx.repo.nodeishFs }))) {
+		if (!(await Sherlock.isAdopted({ fs: ctx.repo.nodeishFs }))) {
 			await Sherlock.add({ fs: ctx.repo.nodeishFs })
 			telemetry.capture({ event: "PARAGLIDE JS init added Sherlock" })
 			ctx.logger.success(
