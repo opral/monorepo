@@ -1,5 +1,13 @@
 # @inlang/paraglide-js
 
+## 1.11.0
+
+### Minor Changes
+
+- e37eabf: - renamed packages `@inlang/cross-sell-X` to `@inlang/recommend-X` be more descriptive
+  - refactor recommendation view in Sherlock VS Code extension
+  - introduce new `shouldRecommend` function to `@inlang/recommend-sherlock` & `@inlang/recommend-ninja`
+
 ## 1.10.1
 
 ### Patch Changes
