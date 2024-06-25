@@ -2,7 +2,7 @@
  * @type {import("../v2/types/lint.js").MessageBundleLintRule}
  */
 const lintRule = {
-	id: "messageBundleLintRule.inlang-dev.missing-languages",
+	id: "messageBundleLintRule.inlangdev.missingLanguages",
 	displayName: "Missing Languages",
 	description: "Detects missing languages",
 	run: ({ settings, report, messageBundle }) => {
