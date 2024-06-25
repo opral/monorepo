@@ -55,12 +55,12 @@ services:
     branch: main
     buildCommand: pnpm install && pnpm run build --projects=@inlang/badge
     startCommand: pnpm --filter @inlang/badge run production
-    autoDeploy: false
+    autoDeploy: true
     envVars:
       - fromGroup: production
     buildFilter:
       paths:
-        - inlang/source-code/badge/**
+        - inlang/source-code/badge/CHANGELOG.md
     domains:
       - badge.inlang.com
 
@@ -72,14 +72,14 @@ services:
     pullRequestPreviewsEnabled: false
     buildCommand: pnpm install && pnpm run --filter @inlang/editor... build
     startCommand: pnpm --filter @inlang/editor production
-    autoDeploy: false
+    autoDeploy: true
     envVars:
       - fromGroup: production
       - key: PORT
         value: 4003
     buildFilter:
       paths:
-        - inlang/source-code/editor/**
+        - inlang/source-code/editor/CHANGELOG.md
     domains:
       - fink.inlang.com
 
@@ -91,14 +91,14 @@ services:
     pullRequestPreviewsEnabled: false
     buildCommand: pnpm install && pnpm run build
     startCommand: pnpm --filter @inlang/manage production
-    autoDeploy: false
+    autoDeploy: true
     envVars:
       - fromGroup: production
       - key: PORT
         value: 4004
     buildFilter:
       paths:
-        - inlang/source-code/manage/**
+        - inlang/source-code/manage/CHANGELOG.md
     domains:
       - manage.inlang.com
 
