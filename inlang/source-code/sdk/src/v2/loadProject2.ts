@@ -110,10 +110,9 @@ export async function loadProject(args: {
 
 	const adapter = createRxDbAdapter(bundleStorage, messageStorage)
 	await startReplication(database.collections.messageBundles, adapter).awaitInitialReplication()
-
 	const linter = await createLintWorker(projectPath, projectSettings.modules, nodeishFs)
 
-	linter.lint(projectSettings)
+	// linter.lint(projectSettings)
 
 	adapter.pullStream$.subscribe({
 		next: async () => {

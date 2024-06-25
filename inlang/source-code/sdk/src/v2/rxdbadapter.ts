@@ -219,12 +219,12 @@ export function createRxDbAdapter(
 					const messagesToInsert = insertedMessageBundle.messages
 					insertedMessageBundle.messages = []
 					// insert Messages, insert Message Bundle
-					bundleStorage.insert(insertedMessageBundle as unknown as MessageBundle)
+					bundleStorage.insert(insertedMessageBundle as unknown as MessageBundle, false)
 					// add to loadedMessagebundle
 					for (const messageToInsert of messagesToInsert) {
 						const persistedMessage = messageToInsert as any
 						persistedMessage.bundleId = insertedMessageBundle.id
-						messageStorage.insert(messageToInsert as unknown as Message)
+						messageStorage.insert(messageToInsert as unknown as Message, false)
 					}
 					loadedMessageBundles.set(upsertedMessageBundle.id, upsertedMessageBundle)
 				} else {
@@ -237,7 +237,7 @@ export function createRxDbAdapter(
 					previousMessageBundle.messages = []
 
 					if (JSON.stringify(updatedMessageBundle) !== JSON.stringify(previousMessageBundle)) {
-						bundleStorage.update(updatedMessageBundle as unknown as MessageBundle)
+						bundleStorage.update(updatedMessageBundle as unknown as MessageBundle, false)
 						debug("pushHandler called - bundle updated...")
 					}
 					for (const messageUpdate of messageUpdates) {
@@ -245,12 +245,12 @@ export function createRxDbAdapter(
 							debug("pushHandler called - message inserted...")
 							const persistedMessage = messageUpdate.message as any
 							persistedMessage.bundleId = updatedMessageBundle.id
-							messageStorage.insert(persistedMessage)
+							messageStorage.insert(persistedMessage, false)
 						} else if (messageUpdate.action === "update") {
 							debug("pushHandler called - message updated...")
 							const persistedMessage = messageUpdate.message as any
 							persistedMessage.bundleId = updatedMessageBundle.id
-							messageStorage.update(persistedMessage)
+							messageStorage.update(persistedMessage, false)
 						}
 					}
 				}

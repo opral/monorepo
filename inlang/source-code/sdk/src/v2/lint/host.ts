@@ -13,7 +13,7 @@ export async function createLintWorker(
 	fs: Pick<NodeishFilesystemSubset, "readFile" | "readdir" | "mkdir">
 ) {
 	const createLinter = Comlink.wrap<typeof createLinterType>(
-		adapter(new Worker(new URL("./worker.ts", import.meta.url), { type: "module" }))
+		adapter(new Worker(new URL("./worker.js", import.meta.url), { type: "module" }))
 	)
 
 	debug("started lint-worker")
