@@ -61,7 +61,7 @@ export async function loadProject(args: {
 	// @ts-ignore
 	projectSettings.sourceLanguageTag = projectSettings.baseLocale
 
-	const projectSettings$ = new BehaviorSubject<ProjectSettings2>(projectSettings)
+	const projectSettings$ = new BehaviorSubject(projectSettings)
 
 	const modules = await resolveModules({
 		settings: projectSettings,
@@ -69,7 +69,7 @@ export async function loadProject(args: {
 		_import: args._import,
 		projectPath,
 	})
-	const modules$ = new BehaviorSubject<Awaited<ReturnType<typeof resolveModules>>>(modules)
+	const modules$ = new BehaviorSubject(modules)
 
 	const bundleStorage = createSlotStorage<MessageBundle>(
 		"bundle-storage",
