@@ -81,7 +81,7 @@ export default function createSlotStorage<DocType extends HasId>(
 
 	let connectedFs:
 		| {
-				fs: NodeishFilesystem
+				fs: Pick<NodeishFilesystem, "readFile" | "readdir" | "watch" | "writeFile">
 				path: string
 		  }
 		| undefined
@@ -886,7 +886,7 @@ export default function createSlotStorage<DocType extends HasId>(
 		 * internal properties used for debug purpose (checking internal states during tests)
 		 */
 		_internal,
-		connect: async (fs: NodeishFilesystem, path: string) => {
+		connect: async (fs: NodeishFilesystem, path: string, watch: boolean = true) => {
 			if (connectedFs || abortController) {
 				throw new Error("Connected already!")
 			}
@@ -898,7 +898,9 @@ export default function createSlotStorage<DocType extends HasId>(
 				path,
 			}
 
-			startWatchingSlotfileChanges()
+			if (watch) {
+				startWatchingSlotfileChanges()
+			}
 
 			await loadSlotFilesFromFs(true)
 

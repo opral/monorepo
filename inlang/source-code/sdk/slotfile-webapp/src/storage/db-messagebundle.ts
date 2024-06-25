@@ -1,11 +1,13 @@
 import { addRxPlugin } from "rxdb"
 import { RxDBQueryBuilderPlugin } from "rxdb/plugins/query-builder"
 import { createNodeishMemoryFs } from "@lix-js/client"
-import { loadProject, createNewProject } from "@inlang/sdk/v2"
+import { loadProject } from "../../../src/v2/loadProject2.js"
+import { createNewProject } from "../../../dist/createNewProject.js"
 import http from "isomorphic-git/http/web"
 
 // NOTE: I use isomorphic git because i went crazy with cors :-/ was faster to spin up a iso proxy
 import git, { pull, add, commit, push, statusMatrix } from "isomorphic-git"
+import { defaultProjectSettings } from "../../../dist/defaultProjectSettings.js"
 const fs = createNodeishMemoryFs()
 
 addRxPlugin(RxDBQueryBuilderPlugin)
@@ -17,15 +19,15 @@ const repoUrl = "https://github.com/martin-lysk/message-bundle-storage"
 const dir = "/"
 
 const createAwaitable = () => {
-	let resolve: () => void
-	let reject: () => void
+	let resolve: () => void = () => {}
+	let reject: () => void = () => {}
 
 	const promise = new Promise<void>((res, rej) => {
 		resolve = res
 		reject = rej
 	})
 
-	return [promise, resolve!, reject!] as [
+	return [promise, resolve, reject] as [
 		awaitable: Promise<void>,
 		resolve: () => void,
 		reject: (e: unknown) => void
@@ -49,17 +51,20 @@ const _create = async (fs: any) => {
 		getFirstCommitHash: () => "dummy_first_hash",
 	} as any
 
+	const projectPath = "/testproject2.inlang"
+
 	try {
 		await createNewProject({
-			projectPath: "/testproject2.inlang",
+			projectPath,
 			repo: repo,
+			projectSettings: defaultProjectSettings,
 		})
 	} catch (e) {
 		console.warn("existed already")
 	}
 
 	const inlangProject = await loadProject({
-		projectPath: "/testproject2.inlang",
+		projectPath,
 		repo: repo,
 	})
 
@@ -142,7 +147,14 @@ const _create = async (fs: any) => {
 		done()
 	}
 
-	return { inlangProject, fs, pullChangesAndReloadSlots, pushChangesAndReloadSlots, commitChanges }
+	return {
+		inlangProject,
+		projectPath,
+		fs,
+		pullChangesAndReloadSlots,
+		pushChangesAndReloadSlots,
+		commitChanges,
+	}
 }
 
 export const storage = _create(fs)
