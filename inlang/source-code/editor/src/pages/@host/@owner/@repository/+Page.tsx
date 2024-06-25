@@ -183,7 +183,7 @@ function TheActualPage() {
 						<ListHeader />
 						<Show
 							when={
-								shouldRecommendNinja() === false &&
+								shouldRecommendNinja() === true &&
 								filteredMessageLintRules().length !== 0 &&
 								userIsCollaborator() &&
 								!isNinjaRecommendationDisabled()
