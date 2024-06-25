@@ -7,7 +7,7 @@ import type { ProjectSettings2 } from "./types/index.js"
 export const defaultProjectSettings = {
 	$schema: "https://inlang.com/schema/project-settings",
 	baseLocale: "en",
-	locales: ["en"],
+	locales: ["en", "de"],
 	modules: [
 		// for instant gratification, we're adding common rules
 		// "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js",
@@ -21,4 +21,5 @@ export const defaultProjectSettings = {
 	"plugin.inlang.messageFormat": {
 		pathPattern: "./messages/{languageTag}.json",
 	},
+	lintConfig: [{ ruleId: "messageBundleLintRule.test.TODO", level: "warning" }],
 } satisfies ProjectSettings2

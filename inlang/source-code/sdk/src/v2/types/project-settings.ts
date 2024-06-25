@@ -2,7 +2,7 @@ import type { JSONObject } from "@inlang/json-types"
 
 import { type Static, type TLiteral, type TTemplateLiteral, Type } from "@sinclair/typebox"
 import { LanguageTag } from "./language-tag.js"
-import type { MessageBundleLintRule, MessageLintLevel } from "./lint.js"
+import { LintConfig, type MessageBundleLintRule, type MessageLintLevel } from "./lint.js"
 import type { Plugin2 } from "./plugin.js"
 
 /**
@@ -13,29 +13,6 @@ const BaseLocale = LanguageTag
 BaseLocale.title = "Source language tag"
 BaseLocale.description =
 	"Set the reference language for your project. It needs to be a valid BCP-47 language tag."
-
-/**
- * ---------------- AVOIDING CIRCULAR DEPENDENCIES ----------------
- *
- * The types beneath belong to other packages that depent on project settings
- * and must therefore be declared here to avoid circular dependencies.
- *
- */
-// TODO check if we need to add properties to lints like missing-pattern-de or missing-pattern-en or
-export const _MessageLintRuleId = Type.String({
-	description: "The key must be conform to `messageLintRule.{namespace}.{id}` pattern.",
-	examples: [
-		"messageLintRule.namespace.patternInvalid",
-		"messageLintRule.namespace.missingTranslation",
-	],
-	pattern: "^messageLintRule\\.([a-z][a-zA-Z0-9]*)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)$",
-}) as unknown as TTemplateLiteral<[TLiteral<`messageLintRule.${string}.${string}`>]>
-
-export const _MessageLintRuleLevel = Type.Union([
-	Type.Literal("error"),
-	Type.Literal("warning"),
-	Type.Literal("off"),
-])
 
 const InternalProjectSettings = Type.Object({
 	$schema: Type.Optional(Type.Literal("https://inlang.com/schema/project-settings")),
@@ -82,19 +59,7 @@ const InternalProjectSettings = Type.Object({
 			],
 		}
 	),
-	messageLintRuleLevels: Type.Optional(
-		Type.Record(_MessageLintRuleId, _MessageLintRuleLevel, {
-			title: "Levels for lint rules",
-			description:
-				"Adjust the lint rule levels in your project to choose between 'warning' and 'error'. If set to 'error', you can configure a CI process to prevent merging with existing reports. (When you want to configure your lint rules visit inlang.com/c/lint-rules)",
-			examples: [
-				{
-					"messageLintRule.inlang.missingTranslation": "error",
-					"messageLintRule.inlang.patternInvalid": "warning",
-				},
-			],
-		})
-	),
+	lintConfig: Type.Array(LintConfig),
 	experimental: Type.Optional(
 		Type.Record(Type.String(), Type.Literal(true), {
 			title: "Experimental settings",
@@ -110,16 +75,16 @@ export type ExternalProjectSettings = Static<typeof ExternalProjectSettings>
 export const ExternalProjectSettings = Type.Record(
 	Type.String({
 		// pattern includes ProjectSettings keys
-		pattern: `^((messageLintRule|plugin|app|library)\\.([a-z][a-zA-Z0-9]*)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)|\\$schema|${Object.keys(
+		pattern: `^((messageBundleLintRule|plugin|app|library)\\.([a-z][a-zA-Z0-9]*)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)|\\$schema|${Object.keys(
 			InternalProjectSettings.properties
 		)
 			.map((key) => key.replaceAll(".", "\\."))
 			.join("|")})$`,
 		description:
 			"The key must be conform to `{type:app|plugin|messageLintRule}.{namespace:string}.{id:string}`.",
-		examples: ["plugin.publisher.sqlite", "messageLintRule.inlang.missingTranslation"],
+		examples: ["plugin.publisher.sqlite", "messageBundleLintRule.inlang.missingTranslation"],
 	}) as unknown as TTemplateLiteral<
-		[TLiteral<`${"app" | "plugin" | "library" | "messageLintRule"}.${string}.${string}`>]
+		[TLiteral<`${"app" | "plugin" | "library" | "messageBundleLintRule"}.${string}.${string}`>]
 	>,
 	// Using JSON (array and object) as a workaround to make the
 	// intersection between `InternalSettings`, which contains an array,

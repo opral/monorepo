@@ -1,15 +1,39 @@
 import { Translatable } from "@inlang/translatable"
-import { Type, type Static, type TObject } from "@sinclair/typebox"
+import {
+	Type,
+	type Static,
+	type TLiteral,
+	type TObject,
+	type TTemplateLiteral,
+} from "@sinclair/typebox"
 import type { JSONObject } from "@inlang/json-types"
 
 import type { MessageBundle } from "./message-bundle.js"
 import { LanguageTag } from "./language-tag.js"
-import {
-	ExternalProjectSettings,
-	ProjectSettings2,
-	_MessageLintRuleId,
-	_MessageLintRuleLevel,
-} from "./project-settings.js"
+import type { ExternalProjectSettings, ProjectSettings2 } from "./project-settings.js"
+
+/**
+ * ---------------- AVOIDING CIRCULAR DEPENDENCIES ----------------
+ *
+ * The types beneath belong to other packages that depent on project settings
+ * and must therefore be declared here to avoid circular dependencies.
+ *
+ */
+// TODO check if we need to add properties to lints like missing-pattern-de or missing-pattern-en or
+export const _MessageBundleLintRuleId = Type.String({
+	description: "The key must be conform to `messageBundleLintRule.{namespace}.{id}` pattern.",
+	examples: [
+		"messageBundleLintRule.namespace.patternInvalid",
+		"messageBundleLintRule.namespace.missingTranslation",
+	],
+	pattern: "^messageBundleLintRule\\.([a-z][a-zA-Z0-9]*)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)$",
+}) as unknown as TTemplateLiteral<[TLiteral<`messageBundleLintRule.${string}.${string}`>]>
+
+export const _MessageLintRuleLevel = Type.Union([
+	Type.Literal("error"),
+	Type.Literal("warning"),
+	Type.Literal("off"),
+])
 
 export type MessageLintLevel = Static<typeof MessageLintLevel>
 export const MessageLintLevel = _MessageLintRuleLevel
@@ -18,14 +42,15 @@ export const MessageLintLevel = _MessageLintRuleLevel
  * Lint configuration for a given bundle/message/variant
  */
 export const LintConfig = Type.Object({
-	id: Type.String({ description: "id of the lint config entry" }),
-	ruleId: _MessageLintRuleId,
+	id: Type.Optional(Type.String({ description: "id of the lint config entry" })),
+	ruleId: _MessageBundleLintRuleId,
 	bundleId: Type.Optional(Type.String()),
 	messageId: Type.Optional(Type.String()),
 	messageLocale: Type.Optional(LanguageTag),
 	variantId: Type.Optional(Type.String()),
 	level: MessageLintLevel,
 })
+export type LintConfig = Static<typeof LintConfig>
 
 /**
  * The basis of a lint report (required to contruct a lint report union type)
@@ -69,7 +94,7 @@ export type MessageBundleLintRule<
 	}) => MaybePromise<void>
 }
 export const MessageBundleLintRule = Type.Object({
-	id: _MessageLintRuleId,
+	id: _MessageBundleLintRuleId,
 	displayName: Translatable(Type.String()),
 	description: Translatable(Type.String()),
 	/**

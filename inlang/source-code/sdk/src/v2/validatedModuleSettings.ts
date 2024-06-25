@@ -1,7 +1,6 @@
-
 import type { TSchema } from "@sinclair/typebox"
 import { Value, type ValueError } from "@sinclair/typebox/value"
-import type { InlangModule } from "../index.js"
+import type { InlangModule } from "./types/module.js"
 
 export const validatedModuleSettings = (args: {
 	settingsSchema: InlangModule["default"]["settingsSchema"]
