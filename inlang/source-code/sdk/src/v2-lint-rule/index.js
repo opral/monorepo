@@ -2,18 +2,21 @@
  * @type {import("../v2/types/lint.js").MessageBundleLintRule}
  */
 const lintRule = {
-	id: "messageLintRule.inlang-dev.missing-languages",
+	id: "messageBundleLintRule.inlang-dev.missing-languages",
 	displayName: "Missing Languages",
 	description: "Detects missing languages",
 	run: ({ settings, report, messageBundle }) => {
-		const expectedLanguageTags = new Set(settings.languageTags)
+		const expectedLanguageTags = new Set(settings.locales)
 		const presentLanguages = new Set(messageBundle.messages.map((msg) => msg.locale))
 
 		const missingLanguageTags = exclude(expectedLanguageTags, presentLanguages)
 		for (const missingLanguageTag of missingLanguageTags) {
 			report({
-				languageTag: missingLanguageTag,
+				locale: missingLanguageTag,
 				body: `Missing language tag '${missingLanguageTag}'.`,
+				messageId: "", // TODO SDK2 fix type to allow undefined
+				variantId: "",
+				messageBundleId: messageBundle.id,
 			})
 		}
 	},

@@ -12,8 +12,9 @@ import createSlotStorage from "../persistence/slotfiles/createSlotStorage.js"
 import { createRxDbAdapter, startReplication } from "./rxdbadapter.js"
 import { createRxDatabase, type RxCollection } from "rxdb"
 import { getRxStorageMemory } from "rxdb/plugins/storage-memory"
-import { BehaviorSubject, Subject } from "rxjs"
+import { BehaviorSubject } from "rxjs"
 import { resolveModules } from "./resolveModules2.js"
+import { createLintWorker } from "../../src/v2/lint/host.js"
 
 /**
  * @param projectPath - Absolute path to the inlang settings file.
@@ -59,7 +60,7 @@ export async function loadProject(args: {
 	projectSettings.languageTags = projectSettings.locales
 	// @ts-ignore
 	projectSettings.sourceLanguageTag = projectSettings.baseLocale
-	
+
 	const projectSettings$ = new BehaviorSubject<ProjectSettings2>(projectSettings)
 
 	const modules = await resolveModules({
@@ -109,6 +110,17 @@ export async function loadProject(args: {
 
 	const adapter = createRxDbAdapter(bundleStorage, messageStorage)
 	await startReplication(database.collections.messageBundles, adapter).awaitInitialReplication()
+
+	const linter = await createLintWorker(projectPath, projectSettings.modules, nodeishFs)
+
+	linter.lint(projectSettings)
+
+	adapter.pullStream$.subscribe({
+		next: async () => {
+			const lintresults = await linter.lint(projectSettings)
+			console.log(lintresults)
+		},
+	})
 
 	return {
 		id: projectId,

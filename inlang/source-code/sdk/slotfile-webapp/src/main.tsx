@@ -12,7 +12,6 @@ import "@inlang/message-bundle-component"
 import { MessageBundle } from "../../src/v2/types/message-bundle.js"
 import { randomHumanId } from "../../src/storage/human-id/human-readable-id.js"
 
-import { createLintWorker } from "../../src/v2/lint/host.js"
 import { ProjectSettings2 } from "../../src/v2/types/project-settings.js"
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
@@ -64,14 +63,18 @@ document.querySelector<HTMLButtonElement>("#commit")!.onclick = async function (
 	;(this as HTMLButtonElement).disabled = false
 }
 
+// TODO trigger lints when a messageBundle change is detected by adapter
+// TODO extract messageBundle<->Message join from adapter to make it availebl in linter
+// TODO trigger slotfile reload o
+
 storage.then(async (storage) => {
-	console.log("storage", storage)
-	const linter = await createLintWorker(storage.projectPath, [], storage.fs)
-	console.log("linter", linter)
-	const reports = await linter.lint({
-		locales: ["en", "de", "fr"],
-	} as ProjectSettings2)
-	console.log("reports host", reports)
+	// console.log("storage", storage)
+	// const linter = await createLintWorker(storage.projectPath, [], storage.fs)
+	// console.log("linter", linter)
+	// const reports = await linter.lint({
+	// 	locales: ["en", "de", "fr"],
+	// } as ProjectSettings2)
+	// console.log("reports host", reports)
 })
 
 const insertNHeros = async (n: number) => {

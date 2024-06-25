@@ -167,7 +167,7 @@ export function createRxDbAdapter(
 				)
 			}
 
-			const documentsToRespnse = changedDocuments.map((se) => se)
+			const documentsToRespnse = changedDocuments.map((se) => se) as MessageBundle[]
 			debug("pullHandler called - returning " + documentsToRespnse.length)
 			// const minTimestamp = lastCheckpoint ? lastCheckpoint.updatedAt : 0
 			// /**

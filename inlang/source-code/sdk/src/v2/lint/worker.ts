@@ -6,13 +6,14 @@ import { MessageBundleLintRule, type LintConfig, type LintReport } from "../type
 import createSlotStorage from "../../persistence/slotfiles/createSlotStorage.js"
 import * as Comlink from "comlink"
 import type { NodeishFilesystem } from "@lix-js/fs"
-import type { MessageBundle } from "../types/message-bundle.js"
+import type { Message, MessageBundle } from "../types/message-bundle.js"
 import type { ProjectSettings2 } from "../types/project-settings.js"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
 
 import testLintRule from "../../v2-lint-rule/index.js"
 
 import _debug from "debug"
+import { createRxDbAdapter } from "../rxdbadapter.js"
 const debug = _debug("sdk-v2:lint-report-worker")
 
 const MessageBundleLintRuleCompiler = TypeCompiler.Compile(MessageBundleLintRule)
@@ -20,7 +21,7 @@ const MessageBundleLintRuleCompiler = TypeCompiler.Compile(MessageBundleLintRule
 const lintConfigs: LintConfig[] = [
 	{
 		id: "1234",
-		ruleId: "messageLintRule.inlang.emptyPattern",
+		ruleId: "messageBundleLintRule.inlang.emptyPattern",
 		messageId: undefined,
 		bundleId: undefined,
 		variantId: undefined,
@@ -56,15 +57,35 @@ export async function createLinter(
 
 	return Comlink.proxy({
 		lint: async (settings: ProjectSettings2): Promise<LintReport[]> => {
-			const messageBundles = await bundleStorage.readAll()
+			// TODO dedbulicate path config
+			const messageBundlesPath = projectPath + "/messagebundles/"
+			const messagesPath = projectPath + "/messages/"
+
+			const bundleStorage = createSlotStorage<MessageBundle>(
+				"bundle-storage-linter",
+				16 * 16 * 16 * 16,
+				3
+			)
+			await bundleStorage.connect(fs as NodeishFilesystem, messageBundlesPath, false)
+
+			const messageStorage = createSlotStorage<Message>(
+				"message-storage-linter",
+				16 * 16 * 16 * 16,
+				3
+			)
+			await messageStorage.connect(fs as NodeishFilesystem, messagesPath, false)
+
+			const rxDbAdapter = createRxDbAdapter(bundleStorage, messageStorage)
+
+			const messageBundles = await rxDbAdapter.pullHandler(0, -1)
 
 			const reports: LintReport[] = []
 			const promises: Promise<any>[] = []
 
-			for (const messageBundle of messageBundles) {
+			for (const messageBundle of messageBundles.documents as MessageBundle[]) {
 				for (const lintRule of resolvedLintRules) {
 					const promise = lintRule.run({
-						messageBundle: messageBundle.data,
+						messageBundle: messageBundle,
 						settings,
 						report: (report) => {
 							const reportWithRule = { ...report, ruleId: lintRule.id }

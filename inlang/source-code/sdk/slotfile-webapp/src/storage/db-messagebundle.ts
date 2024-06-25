@@ -1,8 +1,8 @@
 import { addRxPlugin } from "rxdb"
 import { RxDBQueryBuilderPlugin } from "rxdb/plugins/query-builder"
 import { createNodeishMemoryFs } from "@lix-js/client"
-import { loadProject } from "../../../src/v2/loadProject2.js"
-import { createNewProject } from "../../../dist/createNewProject.js"
+import { loadProject } from "@inlang/sdk/v2"
+import { createNewProject } from "@inlang/sdk"
 import http from "isomorphic-git/http/web"
 
 // NOTE: I use isomorphic git because i went crazy with cors :-/ was faster to spin up a iso proxy
