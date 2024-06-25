@@ -1,20 +1,20 @@
-import type { NodeishFilesystemSubset } from "@inlang/plugin"
-import * as Comlink from "comlink"
 import { createImport } from "./import.js"
 import { endpoint } from "comlink-node/worker"
+import { populateLevel } from "./populateLintLevel.js"
 import createSlotStorage from "../../persistence/slotfiles/createSlotStorage.js"
+import * as Comlink from "comlink"
 import type { NodeishFilesystem } from "@lix-js/fs"
 import type { MessageBundleLintRule, LintConfig, LintReport } from "../types/lint.js"
 import type { MessageBundle } from "../types/message-bundle.js"
-import { populateLevel } from "./populateLintLevel.js"
 import type { ProjectSettings2 } from "../types/project-settings.js"
+import type { NodeishFilesystemSubset } from "@inlang/plugin"
 
 const lintConfigs: LintConfig[] = [
 	{
 		id: "1234",
+		ruleId: "messageLintRule.inlang.emptyPattern",
 		messageId: undefined,
 		bundleId: undefined,
-		ruleId: "messageLintRule.inlang.emptyPattern",
 		variantId: undefined,
 		level: "error",
 	},

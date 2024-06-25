@@ -9,7 +9,7 @@ import type { LintConfig, LintReport } from "../types/lint.js"
  */
 export function populateLevel(
 	report: Omit<LintReport, "level">,
-	lintReportConfigs: LintConfig[]
+	lintReportConfigs: Iterable<LintConfig>
 ): LintReport {
 	// for now we assume that reports are sorted by priority
 	for (const config of lintReportConfigs) {
