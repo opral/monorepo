@@ -56,11 +56,6 @@ export async function createLinter(
 		MessageBundleLintRuleCompiler.Check(module)
 	)
 
-	const bundleStorage = createSlotStorage<MessageBundle>("bundle-storage", 16 * 16 * 16 * 16, 3)
-	await bundleStorage.connect(fs as NodeishFilesystem, bundleCollectionDir, false)
-	const messageBundles = await bundleStorage.readAll()
-	console.info("messageBundles", messageBundles)
-
 	return Comlink.proxy({
 		lint: async (settings: ProjectSettings2): Promise<LintReport[]> => {
 			// TODO dedbulicate path config

@@ -7,7 +7,9 @@ const lintRule = {
 	description: "Detects missing languages",
 	run: ({ settings, report, messageBundle }) => {
 		const expectedLanguageTags = new Set(settings.locales)
-		const presentLanguages = new Set(messageBundle.messages.map((msg) => msg.locale))
+		const presentLanguages = new Set(
+			messageBundle.messages.filter((msg) => msg.variants.length > 0).map((msg) => msg.locale)
+		)
 
 		const missingLanguageTags = exclude(expectedLanguageTags, presentLanguages)
 		for (const missingLanguageTag of missingLanguageTags) {
