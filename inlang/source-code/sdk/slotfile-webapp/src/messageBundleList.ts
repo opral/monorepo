@@ -10,8 +10,10 @@ export async function setupMessageBundleList({
 	nameFilterInput: HTMLInputElement
 	ageFilterInput: HTMLInputElement
 }) {
+	const stuff = await storage
+
 	const getHeroesList = async () => {
-		const messageBundleCollection = (await storage).inlangProject.messageBundleCollection
+		const messageBundleCollection = stuff.inlangProject.messageBundleCollection
 		const renderTable = (messageBundles: MessageBundle[]) => {
 			// console.log("rendering table with " + messageBundles.length)
 			messageListContainer.innerHTML = ""
