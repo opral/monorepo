@@ -5,7 +5,7 @@
  * Code adapted from https://github.com/opral/monorepo/pull/2655 legacy.ts
  */
 
-import * as V2 from "./types.js"
+import * as V2 from "./types/index.js"
 import * as V1 from "@inlang/message"
 import { randomId } from "./randomId.js"
 

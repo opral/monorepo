@@ -27,8 +27,7 @@ function EditorHeader() {
 									version="1.0"
 									viewBox="0 0 256.000000 256.000000"
 									preserveAspectRatio="xMidYMid meet"
-									width="2rem"
-									height="2rem"
+									class="w-8 h-8"
 								>
 									<metadata>Created by potrace 1.14, written by Peter Selinger 2001-2017</metadata>
 									<g

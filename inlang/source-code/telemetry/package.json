@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/telemetry",
 	"type": "module",
-	"version": "0.3.46",
+	"version": "0.3.49",
 	"private": true,
 	"exports": {
 		".": "./dist/index.js",
@@ -23,7 +23,7 @@
 	"devDependencies": {
 		"@types/express": "4.17.17",
 		"@vitest/coverage-v8": "0.34.3",
-		"typescript": "5.2.2",
+		"typescript": "^5.5.2",
 		"vitest": "0.34.3"
 	},
 	"peerDependencies": {

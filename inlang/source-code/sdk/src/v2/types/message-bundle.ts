@@ -1,25 +1,5 @@
 import { Type, type Static } from "@sinclair/typebox"
-
-/**
- * Follows the IETF BCP 47 language tag schema.
- *
- * @see https://www.ietf.org/rfc/bcp/bcp47.txt
- * @see https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
- */
-export type LanguageTag = Static<typeof LanguageTag>
-/**
- * Follows the IETF BCP 47 language tag schema with modifications.
- * @see REAMDE.md file for more information on the validation.
- */
-
-export const pattern =
-	"^((?<grandfathered>(en-GB-oed|i-ami|i-bnn|i-default|i-enochian|i-hak|i-klingon|i-lux|i-mingo|i-navajo|i-pwn|i-tao|i-tay|i-tsu|sgn-BE-FR|sgn-BE-NL|sgn-CH-DE)|(art-lojban|cel-gaulish|no-bok|no-nyn|zh-guoyu|zh-hakka|zh-min|zh-min-nan|zh-xiang))|((?<language>([A-Za-z]{2,3}(-(?<extlang>[A-Za-z]{3}(-[A-Za-z]{3}){0,2}))?))(-(?<script>[A-Za-z]{4}))?(-(?<region>[A-Za-z]{2}|[0-9]{3}))?(-(?<variant>[A-Za-z0-9]{5,8}|[0-9][A-Za-z0-9]{3}))*))$"
-
-export const LanguageTag = Type.String({
-	pattern: pattern,
-	description: "The language tag must be a valid IETF BCP 47 language tag.",
-	examples: ["en", "de", "en-US", "zh-Hans", "es-419"],
-})
+import { LanguageTag } from "./language-tag.js"
 
 export type Literal = Static<typeof Literal>
 export const Literal = Type.Object({
@@ -127,6 +107,8 @@ export const Declaration = Type.Union([InputDeclaration])
 export type Message = Static<typeof Message>
 export const Message = Type.Object({
 	id: Type.String(),
+	// TODO SDK2 we only need/have the property for records comming from slot storage - not used by the apps...
+	bundleId: Type.ReadonlyOptional(Type.String()),
 	locale: LanguageTag,
 	declarations: Type.Array(Declaration),
 	/**
@@ -137,25 +119,20 @@ export const Message = Type.Object({
 })
 
 export type MessageBundle = Static<typeof MessageBundle>
-export const MessageBundle = Type.Object({
-	id: Type.String({ maxLength: 100 }),
-	alias: Type.Record(Type.String(), Type.String()),
-	messages: Type.Array(Message),
-})
+export const MessageBundle = Type.Object(
+	{
+		id: Type.String({ maxLength: 100 }),
+		alias: Type.Record(Type.String(), Type.String()),
 
-/**
- * A MessageSlot is a placeholder for a message with a locale.
- * This is useful to avoid merge conflicts when translations are added.
- */
-export type MessageSlot = Static<typeof MessageSlot>
-export const MessageSlot = Type.Object({
-	locale: LanguageTag,
-	slot: Type.Literal(true),
-})
-
-export type MessageBundleWithSlots = Static<typeof MessageBundleWithSlots>
-export const MessageBundleWithSlots = Type.Object({
-	id: Type.String(),
-	alias: Type.Record(Type.String(), Type.String()),
-	messages: Type.Array(Type.Union([Message, MessageSlot])),
-})
+		// TODO SDK2 check how we get ignor inforation persisted for lints (messageBundle, message, variant)
+		// ignoredLings:  Type.Array(Type.String()),
+		messages: Type.Array(Message),
+		// TODO SDK2 - linting: consider lint reports via bundle directly
+		// TODO SDK2 - linting: add lint settings for bundles as first class properties to the bundle
+		// lintReports: Type.Array(MessageLintReport)
+	},
+	{
+		version: 0,
+		primaryKey: "id",
+	}
+)

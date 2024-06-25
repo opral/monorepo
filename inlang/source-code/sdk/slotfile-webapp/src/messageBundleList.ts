@@ -1,6 +1,6 @@
-import { MessageBundle } from "../../src/v2/types.js"
+import { MessageBundle } from "../../src/v2/types/message-bundle.js"
 import { storage } from "./storage/db-messagebundle.js"
-import { MessageBundleRxType } from "./storage/schema-messagebundle.js"
+
 import { mockSetting } from "./mock/settings.js"
 
 export async function setupMessageBundleList({
@@ -11,9 +11,8 @@ export async function setupMessageBundleList({
 	ageFilterInput: HTMLInputElement
 }) {
 	const getHeroesList = async () => {
-		const db$ = (await storage).database
-
-		const renderTable = (messageBundles: MessageBundleRxType[]) => {
+		const messageBundleCollection = (await storage).inlangProject.messageBundleCollection
+		const renderTable = (messageBundles: MessageBundle[]) => {
 			// console.log("rendering table with " + messageBundles.length)
 			messageListContainer.innerHTML = ""
 			for (const messageBundleRx of messageBundles) {
@@ -47,7 +46,7 @@ export async function setupMessageBundleList({
 				selector.age = { $gt: ageFilter }
 			}
 
-			queryObservable = db$.messageBundles
+			queryObservable = messageBundleCollection
 				.find({
 					selector: selector,
 				})
@@ -70,7 +69,7 @@ export async function setupMessageBundleList({
 			"change-message-bundle",
 			(messageBundle: { detail: { argument: MessageBundle } }) => {
 				// eslint-disable-next-line no-console
-				db$.messageBundles.upsert(messageBundle.detail.argument as any)
+				messageBundleCollection.upsert(messageBundle.detail.argument as any)
 			}
 		)
 	}

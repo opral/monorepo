@@ -2,7 +2,7 @@
 	"extends": "../tsconfig.base.json",
 	"include": ["src/**/*"],
 	"extensionsToTreatAsEsm": [".ts", ".tsx", ".mts", ".js", ".mjs"],
-	"exclude": ["dist/", "**/*.test.ts", "coverage/"],
+	"exclude": ["dist/", "coverage/"],
 	"compilerOptions": {
 		"allowImportingTsExtensions": false,
 		"emitDeclarationOnly": false,

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from "vitest"
+// @ts-ignore
 import { openRepository } from "../index.ts"
 // @ts-ignore -- ts import not working correctly, TODO: find out why
 import { createNodeishMemoryFs, fromSnapshot, toSnapshot } from "@lix-js/fs"
@@ -12,7 +13,7 @@ import { resolve } from "node:path"
 describe(
 	"status api tests",
 	async () => {
-		async function doTest({ useLazy }) {
+		async function doTest({ useLazy }: { useLazy: boolean }) {
 			const fs = createNodeishMemoryFs()
 
 			const snapshot = JSON.parse(
@@ -219,7 +220,7 @@ describe(
 			// })
 
 			// it("*deleted and deleted status", async () => {
-			await repository.nodeishFs.readFile("./svelte.config.js", fileContent)
+			await repository.nodeishFs.readFile("./svelte.config.js")
 			await repository.nodeishFs.rm("./svelte.config.js")
 
 			expect(await repository.statusList()).toStrictEqual([
@@ -449,6 +450,10 @@ describe(
 					delete stat.symlinkTarget
 				}
 				// @ts-ignore
+				stat._oid = "ignored"
+				// @ts-ignore
+				stat._rootHash = "ignored"
+				// @ts-ignore
 				stat.mtimeMs = -1
 				// @ts-ignore
 				stat.ctimeMs = -1
@@ -481,6 +486,10 @@ describe(
 					delete stat.symlinkTarget
 				}
 				// @ts-ignore
+				stat._oid = "ignored"
+				// @ts-ignore
+				stat._rootHash = "ignored"
+				// @ts-ignore
 				stat.mtimeMs = -1
 				// @ts-ignore
 				stat.ctimeMs = -1
@@ -492,7 +501,7 @@ describe(
 			delete snapB.fsMap["/.git/index/"]
 
 			expect(snapA.fsMap).toStrictEqual(snapB.fsMap)
-			expect(snapA.statusMap).toStrictEqual(snapB.statusMap)
+			expect(snapA.fsStats).toStrictEqual(snapB.fsStats)
 			vi.useRealTimers()
 		})
 	},

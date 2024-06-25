@@ -1,9 +1,10 @@
-import { RxReplicationPullStreamItem } from "rxdb"
-import createSlotStorage from "../../../src/persistence/slotfiles/createSlotStorage.js"
-import { Message, MessageBundle } from "../../../src/v2/types.js"
-import { MessageBundleRxType } from "./schema-messagebundle.js"
+import type { RxCollection, RxReplicationPullStreamItem } from "rxdb"
+
 import _debug from "debug"
 import { Subject } from "rxjs"
+import type { Message, MessageBundle } from "./types/message-bundle.js"
+import type createSlotStorage from "../persistence/slotfiles/createSlotStorage.js"
+import { replicateRxCollection } from "rxdb/plugins/replication"
 
 const debug = _debug("rxdb-adapter")
 type MessageUpdate = {
@@ -12,11 +13,11 @@ type MessageUpdate = {
 }
 
 function compareMessages(
-	upsertedDocument: MessageBundleRxType,
-	previousState: MessageBundleRxType
+	upsertedDocument: MessageBundle,
+	previousState: MessageBundle
 ): MessageUpdate[] {
 	const updates: MessageUpdate[] = []
-	const previousMessagesMap: Map<string, any> = new Map()
+	const previousMessagesMap: Map<string, Message> = new Map()
 
 	// Create a map of previous messages for quick lookup
 	for (const message of previousState.messages) {
@@ -27,14 +28,14 @@ function compareMessages(
 
 	// Iterate through the upserted document messages
 	for (const message of upsertedDocument.messages) {
-		const previousMessage = previousMessagesMap.get(message.id!)
+		const previousMessage = previousMessagesMap.get(message.id)
 		if (previousMessage) {
 			if (JSON.stringify(message) !== JSON.stringify(previousMessage)) {
 				// TODO fix schema handling
 				updates.push({ action: "update", message: message as unknown as Message })
 			}
 			// Remove from the map to keep track of processed messages
-			previousMessagesMap.delete(message.id!)
+			previousMessagesMap.delete(message.id)
 		} else {
 			updates.push({ action: "insert", message: message as unknown as Message })
 		}
@@ -50,14 +51,14 @@ function compareMessages(
 
 export function createRxDbAdapter(
 	bundleStorage: ReturnType<typeof createSlotStorage<MessageBundle>>,
-	messageStorage: ReturnType<typeof createSlotStorage<Message>>,
-	pullStream$: Subject<RxReplicationPullStreamItem<any, any>>
+	messageStorage: ReturnType<typeof createSlotStorage<Message>>
 ) {
-	let loadedMessageBundles = new Map<string, MessageBundleRxType>()
+	const pullStream$ = new Subject<RxReplicationPullStreamItem<any, any>>()
+	let loadedMessageBundles = new Map<string, MessageBundle>()
 
 	const loadAllBundles = async () => {
 		debug("loadAllBundles")
-		const loadedBundles = new Map<string, MessageBundleRxType>()
+		const loadedBundles = new Map<string, MessageBundle>()
 		const bundles = await bundleStorage.readAll()
 		for (const bundle of bundles) {
 			loadedBundles.set(bundle.data.id, {
@@ -71,12 +72,11 @@ export function createRxDbAdapter(
 		for (const message of messages) {
 			const loadBundle = loadedBundles.get((message.data as any).bundleId)
 			if (!loadBundle) {
-				console.warn("message without bundle found!" + (message.data as any).bundleId)
+				console.warn("message without bundle found!" + message.data.bundleId)
 				continue
 			}
 
-			// TODO fix schmema
-			loadBundle.messages!.push(message.data as any)
+			loadBundle.messages.push(message.data)
 		}
 
 		debug("loadAllBundles - " + [...loadedBundles.keys()].length + " budles loaded")
@@ -92,8 +92,8 @@ export function createRxDbAdapter(
 			const loaded = loadedMessageBundles.get(bundleRecord.data.id)
 			if (loaded) {
 				const loadedBundle = structuredClone(loaded)
-				loadedBundle!.alias = bundleRecord.data.alias
-				loadedMessageBundles.set(bundleRecord.data.id, loadedBundle!)
+				loadedBundle.alias = bundleRecord.data.alias
+				loadedMessageBundles.set(bundleRecord.data.id, loadedBundle)
 
 				debug("bundle callback - streaming bundle to rxdb " + bundleRecord.data.id)
 				pullStream$.next({
@@ -134,7 +134,7 @@ export function createRxDbAdapter(
 					loadedBundle.messages.push(messageRecord.data as any)
 				}
 
-				loadedMessageBundles.set((messageRecord.data as any).bundleId, loadedBundle!)
+				loadedMessageBundles.set((messageRecord.data as any).bundleId, loadedBundle)
 
 				debug("message callback - streaming bundle to rxdb " + (messageRecord.data as any).bundleId)
 				pullStream$.next({
@@ -209,14 +209,14 @@ export function createRxDbAdapter(
 			await messageStorage.save()
 
 			for (const doc of documentStates) {
-				const upsertedMessageBundle = doc.newDocumentState as unknown as MessageBundleRxType
-				const previousStateMessageBundle = doc.assumedMasterState as unknown as MessageBundleRxType
+				const upsertedMessageBundle = doc.newDocumentState as unknown as MessageBundle
+				const previousStateMessageBundle = doc.assumedMasterState as unknown as MessageBundle
 
 				if (!previousStateMessageBundle) {
 					debug("pushHandler called - whole new bundle!")
 					// XXX we clear the message array to not introduce a new type here:
 					const insertedMessageBundle = structuredClone(upsertedMessageBundle)
-					const messagesToInsert = insertedMessageBundle.messages!
+					const messagesToInsert = insertedMessageBundle.messages
 					insertedMessageBundle.messages = []
 					// insert Messages, insert Message Bundle
 					bundleStorage.insert(insertedMessageBundle as unknown as MessageBundle)
@@ -226,7 +226,7 @@ export function createRxDbAdapter(
 						persistedMessage.bundleId = insertedMessageBundle.id
 						messageStorage.insert(messageToInsert as unknown as Message)
 					}
-					loadedMessageBundles.set(upsertedMessageBundle.id!, upsertedMessageBundle)
+					loadedMessageBundles.set(upsertedMessageBundle.id, upsertedMessageBundle)
 				} else {
 					debug("pushHandler called")
 					const messageUpdates = compareMessages(upsertedMessageBundle, previousStateMessageBundle)
@@ -262,5 +262,114 @@ export function createRxDbAdapter(
 
 			return []
 		},
+		pullStream$,
 	}
+}
+
+export function startReplication(
+	messageBundleCollection: RxCollection,
+	adapter: ReturnType<typeof createRxDbAdapter>
+) {
+	return replicateRxCollection({
+		collection: messageBundleCollection,
+		/**
+		 * An id for the replication to identify it
+		 * and so that RxDB is able to resume the replication on app reload.
+		 * If you replicate with a remote server, it is recommended to put the
+		 * server url into the replicationIdentifier.
+		 */
+		replicationIdentifier: "my-rest-replication-to-https://example.com/api/syncs",
+		/**
+		 * By default it will do an ongoing realtime replication.
+		 * By settings live: false the replication will run once until the local state
+		 * is in sync with the remote state, then it will cancel itself.
+		 * (optional), default is true.
+		 */
+		live: true,
+		/**
+		 * Time in milliseconds after when a failed backend request
+		 * has to be retried.
+		 * This time will be skipped if a offline->online switch is detected
+		 * via navigator.onLine
+		 * (optional), default is 5 seconds.
+		 */
+		retryTime: 5 * 1000,
+		/**
+		 * When multiInstance is true, like when you use RxDB in multiple browser tabs,
+		 * the replication should always run in only one of the open browser tabs.
+		 * If waitForLeadership is true, it will wait until the current instance is leader.
+		 * If waitForLeadership is false, it will start replicating, even if it is not leader.
+		 * [default=true]
+		 */
+		waitForLeadership: false,
+		/**
+		 * If this is set to false,
+		 * the replication will not start automatically
+		 * but will wait for replicationState.start() being called.
+		 * (optional), default is true
+		 */
+		autoStart: true,
+
+		/**
+		 * Custom deleted field, the boolean property of the document data that
+		 * marks a document as being deleted.
+		 * If your backend uses a different fieldname then '_deleted', set the fieldname here.
+		 * RxDB will still store the documents internally with '_deleted', setting this field
+		 * only maps the data on the data layer.
+		 *
+		 * If a custom deleted field contains a non-boolean value, the deleted state
+		 * of the documents depends on if the value is truthy or not. So instead of providing a boolean * * deleted value, you could also work with using a 'deletedAt' timestamp instead.
+		 *
+		 * [default='_deleted']
+		 */
+		deletedField: "deleted",
+
+		/**
+		 * Optional,
+		 * only needed when you want to replicate local changes to the remote instance.
+		 */
+		push: {
+			/**
+			 * Push handler
+			 */
+			handler: adapter.pushHandler,
+			/**
+			 * Batch size, optional
+			 * Defines how many documents will be given to the push handler at once.
+			 */
+			// batchSize: 0,
+			/**
+			 * Modifies all documents before they are given to the push handler.
+			 * Can be used to swap out a custom deleted flag instead of the '_deleted' field.
+			 * If the push modifier return null, the document will be skipped and not send to the remote.
+			 * Notice that the modifier can be called multiple times and should not contain any side effects.
+			 * (optional)
+			 */
+			modifier: (d) => d,
+		},
+		/**
+		 * Optional,
+		 * only needed when you want to replicate remote changes to the local state.
+		 */
+		pull: {
+			/**
+			 * Pull handler
+			 */
+			handler: adapter.pullHandler,
+			// batchSize: 10,
+			/**
+			 * Modifies all documents after they have been pulled
+			 * but before they are used by RxDB.
+			 * Notice that the modifier can be called multiple times and should not contain any side effects.
+			 * (optional)
+			 */
+			modifier: (d) => d,
+			/**
+			 * Stream of the backend document writes.
+			 * See below.
+			 * You only need a stream$ when you have set live=true
+			 */
+			stream$: adapter.pullStream$.asObservable(),
+		},
+	})
 }

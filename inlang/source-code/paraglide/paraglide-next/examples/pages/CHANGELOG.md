@@ -1,5 +1,24 @@
 # @inlang/paraglide-next-example-pages
 
+## 0.2.26
+
+### Patch Changes
+
+- Updated dependencies [94f365b]
+  - @inlang/paraglide-next@0.4.4
+
+## 0.2.25
+
+### Patch Changes
+
+- @inlang/paraglide-next@0.4.3
+
+## 0.2.24
+
+### Patch Changes
+
+- @inlang/paraglide-next@0.4.2
+
 ## 0.2.23
 
 ### Patch Changes

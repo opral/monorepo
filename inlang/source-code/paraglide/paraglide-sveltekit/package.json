@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/paraglide-sveltekit",
-	"version": "0.10.3",
+	"version": "0.10.6",
 	"type": "module",
 	"main": "./dist/runtime/index.js",
 	"types": "./dist/runtime/index.d.ts",
@@ -45,7 +45,7 @@
 		"prettier-plugin-svelte": "^3.1.2",
 		"rollup": "3.29.1",
 		"rollup-plugin-svelte": "^7.1.6",
-		"typescript": "^5.3.2",
+		"typescript": "^5.5.2",
 		"vite": "^5.0.4",
 		"vite-plugin-svelte": "^3.0.1",
 		"vitest": "^1.0.0"

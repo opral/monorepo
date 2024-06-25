@@ -1,5 +1,27 @@
 # @inlang/sdk
 
+## 0.36.2
+
+### Patch Changes
+
+- 2fc5feb: Better error-messages for cache-related issues
+
+## 0.36.1
+
+### Patch Changes
+
+- 1077e06: fix crash if `cache/modules` directory gets deleted
+
+## 0.36.0
+
+### Minor Changes
+
+- 8ec7b34: Modules are now cached locally using a "Network first" cache. This enables offline development
+
+### Patch Changes
+
+- 05f9282: Expose `ModuleError`s, enabling more fine-grained error-handling in Apps.
+
 ## 0.35.9
 
 ### Patch Changes

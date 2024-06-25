@@ -2,7 +2,6 @@ import type { NodeishFilesystemSubset } from "@inlang/plugin"
 import { type Result, tryCatch } from "@inlang/result"
 
 function escape(url: string) {
-	// collect the bytes of the UTF-8 representation
 	const bytes = new TextEncoder().encode(url)
 
 	// 64-bit FNV1a hash to make the file-names shorter
@@ -30,11 +29,29 @@ async function writeModuleToCache(
 	moduleURI: string,
 	moduleContent: string,
 	projectPath: string,
-	writeFile: NodeishFilesystemSubset["writeFile"]
+	writeFile: NodeishFilesystemSubset["writeFile"],
+	mkdir: NodeishFilesystemSubset["mkdir"]
 ): Promise<void> {
 	const moduleHash = escape(moduleURI)
 	const filePath = projectPath + `/cache/modules/${moduleHash}`
-	await writeFile(filePath, moduleContent)
+
+	const writeFileResult = await tryCatch(() => writeFile(filePath, moduleContent))
+	if (writeFileResult.error) {
+		const dirPath = projectPath + `/cache/modules`
+		const createDirResult = await tryCatch(() => mkdir(dirPath, { recursive: true }))
+
+		// @ts-ignore - If the directory exists we can ignore this error
+		if (createDirResult.error && createDirResult.error.code !== "EEXIST")
+			throw new Error("[sdk:module-cacke] failed to create cache-directory. Path: " + dirPath, {
+				cause: createDirResult.error,
+			})
+
+		const writeFileResult = await tryCatch(() => writeFile(filePath, moduleContent))
+		if (writeFileResult.error)
+			throw new Error("[sdk:module-cacke] failed to write cache-file. Path: " + filePath, {
+				cause: writeFileResult.error,
+			})
+	}
 }
 
 /**
@@ -43,19 +60,29 @@ async function writeModuleToCache(
 export function withCache(
 	moduleLoader: (uri: string) => Promise<string>,
 	projectPath: string,
-	nodeishFs: Pick<NodeishFilesystemSubset, "readFile" | "writeFile">
+	nodeishFs: Pick<NodeishFilesystemSubset, "readFile" | "writeFile" | "mkdir">
 ): (uri: string) => Promise<string> {
 	return async (uri: string) => {
 		const cachePromise = readModuleFromCache(uri, projectPath, nodeishFs.readFile)
-		const networkResult = await tryCatch(async () => await moduleLoader(uri))
+		const loaderResult = await tryCatch(async () => await moduleLoader(uri))
 
-		if (networkResult.error) {
+		if (loaderResult.error) {
 			const cacheResult = await cachePromise
 			if (!cacheResult.error) return cacheResult.data
-			else throw networkResult.error
+			else throw loaderResult.error
 		} else {
-			const moduleAsText = networkResult.data
-			await writeModuleToCache(uri, moduleAsText, projectPath, nodeishFs.writeFile)
+			const moduleAsText = loaderResult.data
+			try {
+				await writeModuleToCache(
+					uri,
+					moduleAsText,
+					projectPath,
+					nodeishFs.writeFile,
+					nodeishFs.mkdir
+				)
+			} catch (error) {
+				// TODO trigger a warning
+			}
 			return moduleAsText
 		}
 	}
