@@ -2,7 +2,7 @@ import * as Comlink from "comlink"
 import type { createLinter as createLinterType } from "./worker.js"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
 import { WorkerPrototype, adapter } from "comlink-node"
-import type { ProjectSettings } from "@inlang/project-settings"
+import type { ProjectSettings2 } from "../types/project-settings.js"
 
 export async function createLintReportQuery(
 	projectPath: string,
@@ -15,5 +15,5 @@ export async function createLintReportQuery(
 
 	const fsProxy = Comlink.proxy(fs)
 	const linter = await createLinter(projectPath, lintRules, fsProxy)
-	await linter.lint({} as ProjectSettings)
+	await linter.lint({} as ProjectSettings2)
 }

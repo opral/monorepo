@@ -26,6 +26,7 @@ export const LintConfig = Type.Object({
 	variantId: Type.Optional(Type.String()),
 	level: MessageLintLevel,
 })
+export type LintConfig = Static<typeof LintConfig>
 
 /**
  * The basis of a lint report (required to contruct a lint report union type)
