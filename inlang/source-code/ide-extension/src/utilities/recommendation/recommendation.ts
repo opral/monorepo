@@ -46,7 +46,7 @@ export function createRecommendationView(args: {
 				}
 			})
 
-			webviewView.webview.html = await getRecommendationBannerHtml({
+			webviewView.webview.html = await getRecommendationViewHtml({
 				webview: webviewView.webview,
 				workspaceFolder: args.workspaceFolder,
 				context: args.context,
@@ -55,7 +55,7 @@ export function createRecommendationView(args: {
 
 			// Listen for updates
 			CONFIGURATION.EVENTS.ON_DID_RECOMMENDATION_VIEW_CHANGE.event(async () => {
-				webviewView.webview.html = await getRecommendationBannerHtml({
+				webviewView.webview.html = await getRecommendationViewHtml({
 					webview: webviewView.webview,
 					workspaceFolder: args.workspaceFolder,
 					context: args.context,
@@ -66,7 +66,7 @@ export function createRecommendationView(args: {
 	}
 }
 
-export async function getRecommendationBannerHtml(args: {
+export async function getRecommendationViewHtml(args: {
 	webview: vscode.Webview
 	workspaceFolder: vscode.WorkspaceFolder
 	context: vscode.ExtensionContext
