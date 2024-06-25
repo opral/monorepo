@@ -1,3 +1,5 @@
-export type * from "./types.js"
+export type * from "./types/index.js"
 export * from "./helper.js"
 export * from "./shim.js"
+export * from "./loadProject2.js"
+export * from "./createNewProject.js"

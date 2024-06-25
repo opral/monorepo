@@ -87,3 +87,20 @@ export function withCache(
 		}
 	}
 }
+
+/**
+ * Implements a "Cache-First" strategy that does not update the cache.
+ */
+export function withReadOnlyCache(
+	moduleLoader: (uri: string) => Promise<string>,
+	projectPath: string,
+	nodeishFs: Pick<NodeishFilesystemSubset, "readFile">
+): (uri: string) => Promise<string> {
+	return async (uri: string) => {
+		const cacheResult = await readModuleFromCache(uri, projectPath, nodeishFs.readFile)
+		if (!cacheResult.error) return cacheResult.data
+		const networkResult = await tryCatch(async () => await moduleLoader(uri))
+		if (networkResult.error) throw networkResult.error
+		return networkResult.data
+	}
+}

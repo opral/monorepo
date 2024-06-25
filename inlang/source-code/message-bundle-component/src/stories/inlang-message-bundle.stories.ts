@@ -107,3 +107,14 @@ export const WithSelectors: StoryObj = {
 				console.info("changeMessageBundle", messageBundle)}
 		></inlang-message-bundle> `,
 }
+
+export const Stringified: StoryObj = {
+	render: () =>
+		html`<inlang-message-bundle
+			messageBundle=${JSON.stringify(pluralBundle)}
+			settings=${JSON.stringify(mockSettings)}
+			lintReports=${"[]"}
+			@change-message-bundle=${(messageBundle: MessageBundle) =>
+				console.info("changeMessageBundle", messageBundle)}
+		></inlang-message-bundle> `,
+}

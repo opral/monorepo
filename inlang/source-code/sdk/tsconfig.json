@@ -7,6 +7,8 @@
 		"lib": ["ESNext", "DOM"],
 		"types": [],
 		"outDir": "./dist",
-		"rootDir": "./src"
+		"rootDir": "./src",
+		"declaration": true,
+		"sourceMap": true
 	}
 }

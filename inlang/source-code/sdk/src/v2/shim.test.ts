@@ -1,5 +1,5 @@
 import { test, expect } from "vitest"
-import * as V2 from "./types.js"
+import * as V2 from "./types/index.js"
 import * as V1 from "@inlang/message"
 import { createMessageBundle, createMessage } from "./helper.js"
 import { toV1Message, fromV1Message } from "./shim.js"
@@ -50,7 +50,48 @@ test("toV1Message and fromV1Message", () => {
 	const v2MessageBundle: unknown = fromV1Message(v1Message as V1.Message)
 	expect(Value.Check(V2.MessageBundle, v2MessageBundle)).toBe(true)
 
-	expect(v2MessageBundle).toEqual(bundle)
+	expect(v2MessageBundle).toEqual({
+		id: "hello_world",
+		alias: {},
+		messages: [
+			{
+				id: expect.any(String),
+				locale: "en",
+				declarations: [],
+				selectors: [],
+				variants: [
+					{
+						id: expect.any(String),
+						match: [],
+						pattern: [
+							{
+								type: "text",
+								value: "Hello World!",
+							},
+						],
+					},
+				],
+			},
+			{
+				id: expect.any(String),
+				locale: "de",
+				declarations: [],
+				selectors: [],
+				variants: [
+					{
+						id: expect.any(String),
+						match: [],
+						pattern: [
+							{
+								type: "text",
+								value: "Hallo Welt!",
+							},
+						],
+					},
+				],
+			},
+		],
+	})
 })
 
 test.todo("with variable references", () => {})

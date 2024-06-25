@@ -1,5 +1,5 @@
 {
-	"name": "@inlang/sdk-multi-project-test",
+	"name": "sdk-multi-project-test",
 	"private": true,
 	"type": "module",
 	"license": "Apache-2.0",

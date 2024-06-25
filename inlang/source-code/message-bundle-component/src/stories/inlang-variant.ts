@@ -1,4 +1,10 @@
-import { type Variant, type Message, createMessage, type LanguageTag } from "@inlang/sdk/v2"
+import {
+	type Variant,
+	type Message,
+	createMessage,
+	createVariant,
+	type LanguageTag,
+} from "@inlang/sdk/v2"
 import { LitElement, css, html } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
@@ -149,15 +155,11 @@ export default class InlangVariant extends LitElement {
 			// upsert variant
 			upsertVariant({
 				message: this.message,
-				variant: {
+				variant: createVariant({
+					id: this.variant.id,
 					match: this.variant.match,
-					pattern: [
-						{
-							type: "text",
-							value: this._pattern,
-						},
-					],
-				},
+					text: this._pattern,
+				}),
 			})
 			this.triggerSave()
 		} else {
