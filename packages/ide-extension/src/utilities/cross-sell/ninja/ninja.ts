@@ -3,7 +3,7 @@ import type { NodeishFilesystem } from "@lix-js/fs"
 import * as vscode from "vscode"
 import { getSetting, updateSetting } from "../../settings/index.js"
 
-export const crossSellNinja = async (args: { fs: NodeishFilesystem }): Promise<void> => {
+export const recommendNinja = async (args: { fs: NodeishFilesystem }): Promise<void> => {
 	if (
 		!(await getSetting("appRecommendations.ninja.enabled").catch(() => true)) ||
 		!(await shouldRecommend({ fs: args.fs }))
