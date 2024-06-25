@@ -11,7 +11,7 @@ services:
     region: frankfurt
     plan: standard
     buildCommand: pnpm install && pnpm run build --projects=@inlang/website
-    startCommand: pnpm run production
+    startCommand: pnpm production # configured in root package.json
     autoDeploy: true
     envVars:
       - key: PORT
