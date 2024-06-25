@@ -159,8 +159,14 @@ export default class InlangMessageBundle extends LitElement {
 								</inlang-add-input>
 						  </div>`}
 					<div class="separator"></div>
-					<sl-tooltip content="Edit message bundle">
-						<sl-button class="header-button" variant="text" size="small" class="add-input-tag"
+
+					<sl-dropdown>
+						<sl-button
+							class="header-button"
+							variant="text"
+							size="small"
+							class="add-input-tag"
+							slot="trigger"
 							><svg
 								xmlns="http://www.w3.org/2000/svg"
 								width="18"
@@ -173,7 +179,39 @@ export default class InlangMessageBundle extends LitElement {
 									d="M7 12a2 2 0 1 1-4 0a2 2 0 0 1 4 0m7 0a2 2 0 1 1-4 0a2 2 0 0 1 4 0m7 0a2 2 0 1 1-4 0a2 2 0 0 1 4 0"
 								/></svg
 						></sl-button>
-					</sl-tooltip>
+						<sl-menu>
+							<sl-menu-item value="alias"
+								><svg
+									slot="prefix"
+									xmlns="http://www.w3.org/2000/svg"
+									width="18"
+									height="18"
+									viewBox="0 0 24 24"
+									style="margin-right: -3px; margin-left: 12px; margin-top: -2px opacity: 0.7"
+								>
+									<path
+										fill="currentColor"
+										d="m16.828 1.416l5.755 5.755L7.755 22H2v-5.756zm0 8.681l2.927-2.926l-2.927-2.927l-2.926 2.927zm-4.34-1.512L4 17.074V20h2.926l8.488-8.488z"
+									/></svg
+								>Edit alias</sl-menu-item
+							>
+							<sl-menu-item value="alias"
+								><svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="20"
+									height="20"
+									style="margin-right: -3px; margin-left: 12px; margin-top: -2px; opacity: 0.7"
+									slot="prefix"
+									viewBox="0 0 24 24"
+								>
+									<path
+										fill="currentColor"
+										d="M11 17H7q-2.075 0-3.537-1.463T2 12t1.463-3.537T7 7h4v2H7q-1.25 0-2.125.875T4 12t.875 2.125T7 15h4zm-3-4v-2h8v2zm5 4v-2h4q1.25 0 2.125-.875T20 12t-.875-2.125T17 9h-4V7h4q2.075 0 3.538 1.463T22 12t-1.463 3.538T17 17z"
+									/></svg
+								>Share link</sl-menu-item
+							>
+						</sl-menu>
+					</sl-dropdown>
 				</div>
 			</div>
 			<div class="messages-container">
@@ -258,6 +296,7 @@ export default class InlangMessageBundle extends LitElement {
 											.locale=${locale}
 											.triggerMessageBundleRefresh=${this._triggerRefresh}
 											.addMessage=${this._addMessage}
+											.addInput=${this._addInput}
 										>
 											<sl-tooltip content="Add Selector to message"
 												><div class="add-selector">
@@ -295,6 +334,7 @@ export default class InlangMessageBundle extends LitElement {
 											.triggerSave=${this._triggerSave}
 											.triggerMessageBundleRefresh=${this._triggerRefresh}
 											.addMessage=${this._addMessage}
+											.addInput=${this._addInput}
 											.locale=${locale}
 											.lintReports=${messageLintReports}
 										></inlang-variant>`
@@ -305,6 +345,7 @@ export default class InlangMessageBundle extends LitElement {
 									.inputs=${this._fakeInputs()}
 									.triggerSave=${this._triggerSave}
 									.addMessage=${this._addMessage}
+									.addInput=${this._addInput}
 									.triggerMessageBundleRefresh=${this._triggerRefresh}
 									.locale=${locale}
 									.lintReports=${messageLintReports}
