@@ -1,7 +1,7 @@
 import * as Comlink from "comlink"
 import type { createLinter as createLinterType } from "./worker.js"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
-import { WorkerPrototype, adapter } from "comlink-node"
+import { WorkerPrototype as Worker, adapter } from "comlink-node"
 import type { ProjectSettings2 } from "../types/project-settings.js"
 
 import _debug from "debug"
@@ -10,10 +10,10 @@ const debug = _debug("sdk-v2:lintReports")
 export async function createLintWorker(
 	projectPath: string,
 	modules: string[],
-	fs: Pick<NodeishFilesystemSubset, "readFile">
+	fs: Pick<NodeishFilesystemSubset, "readFile" | "readdir" | "mkdir">
 ) {
 	const createLinter = Comlink.wrap<typeof createLinterType>(
-		adapter(new WorkerPrototype(new URL("./worker.js", import.meta.url), { type: "module" }))
+		adapter(new Worker(new URL("./worker.ts", import.meta.url), { type: "module" }))
 	)
 
 	debug("started lint-worker")
@@ -24,12 +24,6 @@ export async function createLintWorker(
 	debug("created linter in lint-worker")
 
 	return {
-		/**
-		 * Causes the linter to read the message-bundles from disk & run the lint-rules
-		 * @param settings
-		 */
-		lint: async (settings: ProjectSettings2) => {
-			await linter.lint(settings)
-		},
+		lint: (settings: ProjectSettings2) => linter.lint(settings),
 	}
 }

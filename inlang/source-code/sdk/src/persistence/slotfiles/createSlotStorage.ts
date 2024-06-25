@@ -898,7 +898,7 @@ export default function createSlotStorage<DocType extends HasId>(
 				path,
 			}
 
-			startWatchingSlotfileChanges()
+			// startWatchingSlotfileChanges()
 
 			await loadSlotFilesFromFs(true)
 

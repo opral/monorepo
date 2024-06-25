@@ -2,13 +2,15 @@ import { createImport } from "./import.js"
 import { endpoint } from "comlink-node/worker"
 import { populateLevel } from "./populateLintLevel.js"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
+import { MessageBundleLintRule, type LintConfig, type LintReport } from "../types/lint.js"
 import createSlotStorage from "../../persistence/slotfiles/createSlotStorage.js"
 import * as Comlink from "comlink"
 import type { NodeishFilesystem } from "@lix-js/fs"
-import { MessageBundleLintRule, type LintConfig, type LintReport } from "../types/lint.js"
 import type { MessageBundle } from "../types/message-bundle.js"
 import type { ProjectSettings2 } from "../types/project-settings.js"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
+
+import testLintRule from "../../v2-lint-rule/index.js"
 
 import _debug from "debug"
 const debug = _debug("sdk-v2:lint-report-worker")
@@ -31,7 +33,7 @@ const bundleCollectionDir = "/messageBundle/"
 export async function createLinter(
 	projectPath: string,
 	moduleURIs: string[],
-	fs: Pick<NodeishFilesystemSubset, "readFile">
+	fs: Pick<NodeishFilesystemSubset, "readFile" | "readdir" | "mkdir">
 ) {
 	debug("creating linter")
 	const _import = createImport(projectPath, fs)
@@ -47,22 +49,13 @@ export async function createLinter(
 		MessageBundleLintRuleCompiler.Check(module)
 	)
 
-	const fullFs = new Proxy(fs as NodeishFilesystem, {
-		get(target, prop) {
-			if (prop in target) {
-				return target[prop as keyof NodeishFilesystem]
-			} else {
-				throw new Error("nope")
-			}
-		},
-	})
-
 	const bundleStorage = createSlotStorage<MessageBundle>("bundle-storage", 16 * 16 * 16 * 16, 3)
-	await bundleStorage.connect(fullFs, projectPath + bundleCollectionDir)
+	await bundleStorage.connect(fs as NodeishFilesystem, bundleCollectionDir)
+	const messageBundles = await bundleStorage.readAll()
+	console.info("messageBundles", messageBundles)
 
-	return {
+	return Comlink.proxy({
 		lint: async (settings: ProjectSettings2): Promise<LintReport[]> => {
-			debug("lint triggered")
 			const messageBundles = await bundleStorage.readAll()
 
 			const reports: LintReport[] = []
@@ -85,10 +78,10 @@ export async function createLinter(
 
 			await Promise.all(promises)
 
-			debug("lint completed")
+			console.info("lint reports worker", reports)
 			return reports
 		},
-	}
+	})
 }
 
 Comlink.expose(createLinter, endpoint)
