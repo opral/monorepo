@@ -9,6 +9,7 @@ export const defaultProjectSettings = {
 	baseLocale: "en",
 	locales: ["en", "de"],
 	modules: [
+		"https://raw.githubusercontent.com/opral/monorepo/141f212bd02019b4636e52bf4f1efdd6c976bdb8/inlang/source-code/sdk/src/v2-lint-rule/index.js",
 		// for instant gratification, we're adding common rules
 		// "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js",
 		// "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js",
