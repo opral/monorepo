@@ -10,7 +10,16 @@ import type { Message } from "@inlang/message"
 import type { JSONObject } from "@inlang/json-types"
 import type { CustomApiInlangIdeExtension } from "./customApis/app.inlang.ideExtension.js"
 import { Translatable } from "@inlang/translatable"
-import type { ExternalProjectSettings, ProjectSettings } from "@inlang/project-settings"
+import type { ProjectSettings2, ExternalProjectSettings } from "./project-settings.js"
+import type {
+	PluginHasInvalidIdError,
+	PluginHasInvalidSchemaError,
+	PluginLoadMessagesFunctionAlreadyDefinedError,
+	PluginReturnedInvalidCustomApiError,
+	PluginSaveMessagesFunctionAlreadyDefinedError,
+	PluginsDoNotProvideLoadOrSaveMessagesError,
+} from "./plugin-errors.js"
+import type { ImportFunction } from "../../resolve-modules/import.js"
 
 /**
  * The filesystem is a subset of project lisa's nodeish filesystem.
@@ -39,10 +48,10 @@ export type NodeishFilesystemSubset = Pick<
  * 	}>
  * ```
  */
-export type Plugin<
+export type Plugin2<
 	ExternalSettings extends Record<keyof ExternalProjectSettings, JSONObject> | unknown = unknown
 > = Omit<
-	Static<typeof Plugin>,
+	Static<typeof Plugin2>,
 	"loadMessages" | "saveMessages" | "addCustomApi" | "settingsSchema"
 > & {
 	settingsSchema?: TObject
@@ -50,12 +59,12 @@ export type Plugin<
 	 * Load messages.
 	 */
 	loadMessages?: (args: {
-		settings: ProjectSettings & ExternalSettings
+		settings: ProjectSettings2 & ExternalSettings
 		nodeishFs: NodeishFilesystemSubset
 	}) => Promise<Message[]> | Message[]
 	saveMessages?: (args: {
 		messages: Message[]
-		settings: ProjectSettings & ExternalSettings
+		settings: ProjectSettings2 & ExternalSettings
 		nodeishFs: NodeishFilesystemSubset
 	}) => Promise<void> | void
 	/**
@@ -69,13 +78,13 @@ export type Plugin<
 	 *  })
 	 */
 	addCustomApi?: (args: {
-		settings: ProjectSettings & ExternalSettings
+		settings: ProjectSettings2 & ExternalSettings
 	}) =>
 		| Record<`app.${string}.${string}`, unknown>
 		| { "app.inlang.ideExtension": CustomApiInlangIdeExtension }
 }
 
-export const Plugin = Type.Object({
+export const Plugin2 = Type.Object({
 	id: Type.String({
 		pattern: "^plugin\\.([a-z][a-zA-Z0-9]*)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)$",
 		examples: ["plugin.namespace.id"],
@@ -96,3 +105,57 @@ export const Plugin = Type.Object({
 	detectedLanguageTags: Type.Optional(Type.Any()),
 	addCustomApi: Type.Optional(Type.Any()),
 })
+
+/**
+ * Function that resolves (imports and initializes) the plugins.
+ */
+export type ResolvePlugins2Function = (args: {
+	plugins: Array<Plugin2>
+	settings: ProjectSettings2
+	nodeishFs: NodeishFilesystemSubset
+}) => Promise<{
+	data: ResolvedPlugin2Api
+	errors: Array<
+		| PluginReturnedInvalidCustomApiError
+		| PluginLoadMessagesFunctionAlreadyDefinedError
+		| PluginSaveMessagesFunctionAlreadyDefinedError
+		| PluginHasInvalidIdError
+		| PluginHasInvalidSchemaError
+		| PluginsDoNotProvideLoadOrSaveMessagesError
+	>
+}>
+
+/**
+ * The API after resolving the plugins.
+ */
+export type ResolvedPlugin2Api = {
+	loadMessages: (args: {
+		settings: ProjectSettings2
+		nodeishFs: NodeishFilesystemSubset
+	}) => Promise<Message[]> | Message[]
+	saveMessages: (args: {
+		settings: ProjectSettings2
+		messages: Message[]
+		nodeishFs: NodeishFilesystemSubset
+	}) => Promise<void> | void
+	/**
+	 * App specific APIs.
+	 *
+	 * @example
+	 *  // define
+	 *  customApi: ({ settings }) => ({
+	 * 	 "app.inlang.ide-extension": {
+	 * 	   messageReferenceMatcher: () => {
+	 * 		 // use settings
+	 * 		 settings.pathPattern
+	 * 		return
+	 * 	   }
+	 * 	 }
+	 *  })
+	 *  // use
+	 *  customApi['app.inlang.ide-extension'].messageReferenceMatcher()
+	 */
+	customApi: Record<`app.${string}.${string}` | `library.${string}.${string}`, unknown> & {
+		"app.inlang.ideExtension"?: CustomApiInlangIdeExtension
+	}
+}

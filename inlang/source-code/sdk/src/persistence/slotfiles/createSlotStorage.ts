@@ -40,7 +40,7 @@ const debug = _debug("sdk:slotfile")
  *
  * 1. a record gets updated
  * -> a copied of the current record is added to changedRecords of the slotFile object with the changes applied
- * -> OR if the record is a transient record the transient record is replaced with  the updated state
+ * -> OR if the record is a transient record the transient record is replaced with the updated state
  * 2. a (batched) or explicit call to save() picks up the transient object
  * TODO continue description
  *
@@ -69,10 +69,10 @@ export default function createSlotStorage<DocType extends HasId>(
 
 	const idToSlotFileName = new Map<string, string>()
 
-	// appended or update in sert
+	// appended or update insert
 	const fileNamesToSlotfileStates = new Map<string, SlotFileStates<DocType>>()
 
-	// records that have been inserted but not picked up for persistence yet
+	// records that have been inserted and not persisted
 	const transientSlotEntries = new Map<string, SlotEntry<DocType>>()
 
 	let changeCallback: (eventName: string, records?: string[]) => void = () => {}
@@ -93,8 +93,8 @@ export default function createSlotStorage<DocType extends HasId>(
 	/**
 	 *
 	 * Merges the updated Slotfile into the current Slotfile
-	 * - integrates records present in local changes that do not conflict
-	 * - keeps conflicting records (has local changes and updated in updatedSlotfileState) untouched
+	 * - integrates records present in local changes that do not conflict with current disc state
+	 * - keeps localy conflicting records (those having local changes and updated in updatedSlotfileState) untouched
 	 *
 	 * @param currentSlotFileState
 	 * @param freshSlotFileState
@@ -924,18 +924,6 @@ export default function createSlotStorage<DocType extends HasId>(
 			const objectHash = await hash(stringifiedObject)
 			const { slotIndex, entryIdHash } = await extractInfoFromId(document.id)
 
-			// the last n characters of the hash represent the insert positon
-
-			// const slotIndex = parseInt(entryIdHash.slice(-slotCharacters), 16)
-			// console.log(
-			// 	"SLOT INDEX FOR INSERT RECORD:" +
-			// 		slotIndex +
-			// 		" hash " +
-			// 		objectHash +
-			// 		" characters " +
-			// 		fileNameCharacters
-			// )
-
 			const newSlotEntry: SlotEntry<DocType> = {
 				// the hash of the object will not stay stable over the livetime of the record - the index does
 				index: slotIndex,
@@ -949,10 +937,7 @@ export default function createSlotStorage<DocType extends HasId>(
 
 			changeCallback("record-change")
 			changeCallback("records-change", [documentId])
-			// TODO trigger save
-
-			// TODO trigger add event
-			// TODO return promise that can be awaited - to ensure operation landed on disc
+			
 			if (connectedFs && saveToDisk) {
 				// TODO should we always return a promis even if we are not connected?
 				// should we return a save method that can be called explicetly?
@@ -960,7 +945,7 @@ export default function createSlotStorage<DocType extends HasId>(
 			}
 		},
 		update: async (document: DocType, saveToDisk = true) => {
-			// TODO check phantoms
+			
 			debug("UPDATE")
 			const documentId = document[idProperty]
 			const existingSlotEntry = getSlotEntryById(documentId)

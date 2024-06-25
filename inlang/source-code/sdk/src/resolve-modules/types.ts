@@ -1,4 +1,3 @@
-import type { ProjectSettings } from "@inlang/project-settings"
 import type { MessageLintRule } from "@inlang/message-lint-rule"
 import type { Plugin } from "@inlang/plugin"
 import type {
@@ -9,6 +8,8 @@ import type {
 import type { ModuleHasNoExportsError, ModuleImportError } from "./errors.js"
 import type { ImportFunction } from "./import.js"
 import type { resolveMessageLintRules } from "./message-lint-rules/resolveMessageLintRules.js"
+import type { ProjectSettings2 } from "../v2/index.js"
+import type { ProjectSettings } from "@inlang/project-settings"
 
 /**
  * Function that resolves modules from the config.

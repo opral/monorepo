@@ -12,7 +12,8 @@ import createSlotStorage from "../persistence/slotfiles/createSlotStorage.js"
 import { createRxDbAdapter, startReplication } from "./rxdbadapter.js"
 import { createRxDatabase, type RxCollection } from "rxdb"
 import { getRxStorageMemory } from "rxdb/plugins/storage-memory"
-import { Subject } from "rxjs"
+import { BehaviorSubject, Subject } from "rxjs"
+import { resolveModules } from "./resolveModules2.js"
 
 /**
  * @param projectPath - Absolute path to the inlang settings file.
@@ -52,9 +53,22 @@ export async function loadProject(args: {
 	// no need to catch since we created the project ID with "maybeCreateFirstProjectId" earlier
 	const projectId = await nodeishFs.readFile(projectIdPath, { encoding: "utf-8" })
 
-	const projectSettings$ = new Subject<ProjectSettings2>()
 	const projectSettings = await loadSettings({ settingsFilePath, nodeishFs })
-	projectSettings$.next(projectSettings)
+
+	// @ts-ignore
+	projectSettings.languageTags = projectSettings.locales
+	// @ts-ignore
+	projectSettings.sourceLanguageTag = projectSettings.baseLocale
+	
+	const projectSettings$ = new BehaviorSubject<ProjectSettings2>(projectSettings)
+
+	const modules = await resolveModules({
+		settings: projectSettings,
+		nodeishFs,
+		_import: args._import,
+		projectPath,
+	})
+	const modules$ = new BehaviorSubject<Awaited<ReturnType<typeof resolveModules>>>(modules)
 
 	const bundleStorage = createSlotStorage<MessageBundle>(
 		"bundle-storage",

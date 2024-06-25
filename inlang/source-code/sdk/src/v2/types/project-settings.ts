@@ -3,7 +3,7 @@ import type { JSONObject } from "@inlang/json-types"
 import { type Static, type TLiteral, type TTemplateLiteral, Type } from "@sinclair/typebox"
 import { LanguageTag } from "./language-tag.js"
 import type { MessageBundleLintRule, MessageLintLevel } from "./lint.js"
-import type { Plugin } from "./plugin.js"
+import type { Plugin2 } from "./plugin.js"
 
 /**
  * ---------------- Specific Language Tag field meta information ----------------
@@ -132,14 +132,14 @@ export type ProjectSettings2 = Static<typeof ProjectSettings2>
 export const ProjectSettings2 = Type.Intersect([InternalProjectSettings, ExternalProjectSettings])
 
 export type InstalledPlugin = {
-	id: Plugin["id"]
-	displayName: Plugin["displayName"]
-	description: Plugin["description"]
+	id: Plugin2["id"]
+	displayName: Plugin2["displayName"]
+	description: Plugin2["description"]
 	/**
 	 * The module which the plugin is installed from.
 	 */
 	module: string
-	settingsSchema: Plugin["settingsSchema"]
+	settingsSchema: Plugin2["settingsSchema"]
 	// disabled: boolean
 }
 
