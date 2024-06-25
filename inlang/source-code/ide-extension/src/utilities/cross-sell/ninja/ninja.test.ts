@@ -3,7 +3,7 @@ import * as vscode from "vscode"
 import { shouldRecommend, add } from "@inlang/recommend-ninja"
 import type { NodeishFilesystem } from "@lix-js/fs"
 import { getSetting, updateSetting } from "../../settings/index.js"
-import { crossSellNinja } from "./ninja.js"
+import { recommendNinja } from "./ninja.js"
 
 vi.mock("vscode", () => ({
 	window: {
@@ -31,7 +31,7 @@ describe("crossSellNinja", () => {
 	it("should return early if ninja recommendation is disabled", async () => {
 		;(getSetting as Mock).mockResolvedValue(false)
 
-		await crossSellNinja({ fs: mockFs })
+		await recommendNinja({ fs: mockFs })
 
 		expect(getSetting).toHaveBeenCalledWith("appRecommendations.ninja.enabled")
 		expect(shouldRecommend).not.toHaveBeenCalled()
@@ -42,7 +42,7 @@ describe("crossSellNinja", () => {
 		;(getSetting as Mock).mockResolvedValue(true)
 		;(shouldRecommend as Mock).mockResolvedValue(true)
 
-		await crossSellNinja({ fs: mockFs })
+		await recommendNinja({ fs: mockFs })
 
 		expect(getSetting).toHaveBeenCalledWith("appRecommendations.ninja.enabled")
 		expect(shouldRecommend).toHaveBeenCalledWith({ fs: mockFs })
@@ -54,7 +54,7 @@ describe("crossSellNinja", () => {
 		;(shouldRecommend as Mock).mockResolvedValue(false)
 		;(vscode.window.showInformationMessage as Mock).mockResolvedValue("Yes")
 
-		await crossSellNinja({ fs: mockFs })
+		await recommendNinja({ fs: mockFs })
 
 		expect(getSetting).toHaveBeenCalledWith("appRecommendations.ninja.enabled")
 		expect(shouldRecommend).toHaveBeenCalledWith({ fs: mockFs })
@@ -70,7 +70,7 @@ describe("crossSellNinja", () => {
 		;(shouldRecommend as Mock).mockResolvedValue(false)
 		;(vscode.window.showInformationMessage as Mock).mockResolvedValue("Yes")
 
-		await crossSellNinja({ fs: mockFs })
+		await recommendNinja({ fs: mockFs })
 
 		expect(add).toHaveBeenCalledWith({ fs: mockFs })
 	})
@@ -80,7 +80,7 @@ describe("crossSellNinja", () => {
 		;(shouldRecommend as Mock).mockResolvedValue(false)
 		;(vscode.window.showInformationMessage as Mock).mockResolvedValue("Don't ask again")
 
-		await crossSellNinja({ fs: mockFs })
+		await recommendNinja({ fs: mockFs })
 
 		expect(updateSetting).toHaveBeenCalledWith("appRecommendations.ninja.enabled", false)
 	})
