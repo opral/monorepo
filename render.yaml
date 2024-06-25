@@ -23,6 +23,8 @@ services:
         - inlang/source-code/markdown/**
         - inlang/source-code/marketplace-registry/**
         - '**/*.md'
+      ignoredPaths:
+        - '**/CHANGELOG.md'
     domains:
       - inlang.com
 
