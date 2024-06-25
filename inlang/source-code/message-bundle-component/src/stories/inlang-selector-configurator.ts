@@ -124,6 +124,9 @@ export default class InlangSelectorConfigurator extends LitElement {
 				flex-direction: column;
 				gap: 4px;
 			}
+			sl-input::part(base) {
+				font-size: 13px;
+			}
 		`,
 	]
 
