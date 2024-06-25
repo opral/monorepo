@@ -1,5 +1,5 @@
 import { createImport } from "./import.js"
-import { endpoint } from "@inlang/sdk/internal/isomorphic-comlink/worker"
+import { endpoint } from "comlink-node/worker"
 import { populateLevel } from "./populateLintLevel.js"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { MessageBundleLintRule, type LintConfig, type LintReport } from "../types/lint.js"

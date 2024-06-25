@@ -1,7 +1,7 @@
 import * as Comlink from "comlink"
 import type { createLinter as createLinterType } from "./worker.js"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
-import { WorkerPrototype as Worker, adapter } from "@inlang/sdk/internal/isomorphic-comlink"
+import { WorkerPrototype as Worker, adapter } from "comlink-node"
 import type { ProjectSettings2 } from "../types/project-settings.js"
 
 import _debug from "debug"

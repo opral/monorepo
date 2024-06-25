@@ -7,7 +7,7 @@ import http from "isomorphic-git/http/web"
 
 // NOTE: I use isomorphic git because i went crazy with cors :-/ was faster to spin up a iso proxy
 import git, { pull, add, commit, push, statusMatrix } from "isomorphic-git"
-import { defaultProjectSettings } from "../../../dist/defaultProjectSettings.js"
+import { defaultProjectSettings } from "../../../dist/v2/defaultProjectSettings.js"
 const fs = createNodeishMemoryFs()
 
 addRxPlugin(RxDBQueryBuilderPlugin)
@@ -51,7 +51,7 @@ const _create = async (fs: any) => {
 		getFirstCommitHash: () => "dummy_first_hash",
 	} as any
 
-	const projectPath = "/testproject2.inlang"
+	const projectPath = "/testproject3.inlang"
 
 	try {
 		await createNewProject({

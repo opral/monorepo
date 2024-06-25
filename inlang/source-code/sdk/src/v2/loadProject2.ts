@@ -14,7 +14,7 @@ import { createRxDatabase, type RxCollection } from "rxdb"
 import { getRxStorageMemory } from "rxdb/plugins/storage-memory"
 import { BehaviorSubject } from "rxjs"
 import { resolveModules } from "./resolveModules2.js"
-import { createLintWorker } from "../../src/v2/lint/host.js"
+import { createLintWorker } from "./lint/host.js"
 
 /**
  * @param projectPath - Absolute path to the inlang settings file.

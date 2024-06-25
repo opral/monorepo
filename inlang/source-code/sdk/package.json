@@ -17,17 +17,7 @@
 		"./lint": "./dist/lint/index.js",
 		"./messages": "./dist/messages/index.js",
 		"./v2": "./dist/v2/index.js",
-		"./v2-mocks": "./dist/v2/mocks/index.js",
-		"./internal/isomorphic-comlink": {
-			"types": "./src/internal/isomorphic-comlink/types.d.ts",
-			"node": "./src/internal/isomorphic-comlink/node.js",
-			"import": "./src/internal/isomorphic-comlink/not-node.js"
-		},
-		"./internal/isomorphic-comlink/worker": {
-			"types": "./src/internal/isomorphic-comlink/worker/types.d.ts",
-			"node": "./src/internal/isomorphic-comlink/worker/node.js",
-			"import": "./src/internal/isomorphic-comlink/worker/not-node.js"
-		}
+		"./v2-mocks": "./dist/v2/mocks/index.js"
 	},
 	"files": [
 		"./dist",
@@ -46,6 +36,7 @@
 		"node": ">=18.0.0"
 	},
 	"dependencies": {
+		"comlink-node": "workspace:*",
 		"@inlang/json-types": "workspace:*",
 		"@inlang/language-tag": "workspace:*",
 		"@inlang/message": "workspace:*",
