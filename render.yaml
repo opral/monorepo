@@ -14,6 +14,8 @@ services:
     startCommand: pnpm run production --projects=@inlang/website
     autoDeploy: true
     envVars:
+      - key: PORT
+        value: 3000 # @inlang/server
       - fromGroup: production
     buildFilter:
       paths:
@@ -36,6 +38,8 @@ services:
     startCommand: pnpm --filter @lix-js/server production
     autoDeploy: true
     envVars:
+      - key: PORT
+        value: 3001
       - fromGroup: production
     buildFilter:
       paths:
@@ -71,6 +75,8 @@ services:
     autoDeploy: false
     envVars:
       - fromGroup: production
+      - key: PORT
+        value: 4003
     buildFilter:
       paths:
         - inlang/source-code/editor/**
@@ -88,6 +94,8 @@ services:
     autoDeploy: false
     envVars:
       - fromGroup: production
+      - key: PORT
+        value: 4004
     buildFilter:
       paths:
         - inlang/source-code/manage/**
@@ -115,11 +123,14 @@ services:
     buildCommand: pnpm install && pnpm run --filter @inlang/telemetry-proxy build
     startCommand: pnpm run --filter @inlang/telemetry-proxy production
     autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 4005
     buildFilter:
       paths:
         - inlang/source-code/telemetry-proxy/**
-      domains:
-        - tm.inlang.com
+    domains:
+      - tm.inlang.com
 
   - name: telemetry-proxy-parrot
     type: web
@@ -131,8 +142,11 @@ services:
     buildCommand: pnpm install && pnpm run --filter @inlang/telemetry-proxy-parrot build
     startCommand: pnpm run --filter @inlang/telemetry-proxy-parrot production
     autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 4006
     buildFilter:
       paths:
         - inlang/source-code/telemetry-proxy-parrot/**
-      domains:
-        - telemetry.inlang.com
+    domains:
+      - telemetry.inlang.com
