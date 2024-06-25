@@ -1,10 +1,10 @@
 ---
-"@inlang/recommend-sherlock": patch
-"@inlang/recommend-ninja": patch
-"@inlang/paraglide-js": patch
-"vs-code-extension": patch
+"@inlang/recommend-sherlock": minor
+"@inlang/recommend-ninja": minor
+"@inlang/paraglide-js": minor
+"vs-code-extension": minor
 ---
 
-- renamed packages to be more descriptive
+- renamed packages `@inlang/cross-sell-X` to `@inlang/recommend-X` be more descriptive
 - refactor recommendation view to Sherlock VS Code extension
 - introduce new `shouldRecommend` function to `@inlang/recommend-sherlock` & `@inlang/recommend-ninja` 
