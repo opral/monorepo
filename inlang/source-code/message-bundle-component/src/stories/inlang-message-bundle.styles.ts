@@ -23,6 +23,19 @@ export const messageBundleStyling = css`
 		gap: 16px;
 		min-height: 44px;
 	}
+	.header-right {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		min-height: 44px;
+	}
+	.separator {
+		height: 20px;
+		width: 1px;
+		background-color: var(--sl-color-neutral-400);
+		opacity: 0.7;
+		border-radius: 1px;
+	}
 	.inputs-wrapper {
 		display: flex;
 		align-items: center;
@@ -60,14 +73,29 @@ export const messageBundleStyling = css`
 	}
 	.add-input-tag::part(base) {
 		color: var(--sl-color-neutral-600);
-		border: 1px solid var(--sl-color-neutral-400);
-		background-color: var(--sl-color-neutral-0);
+		border: none;
+		background-color: transparent;
 		cursor: pointer;
+		height: 28px;
 	}
 	.add-input-tag::part(base):hover {
 		color: var(--sl-color-neutral-950);
-		border: 1px solid var(--sl-color-neutral-400);
 		background-color: var(--sl-color-neutral-200);
+	}
+	.header-button::part(base) {
+		color: var(--sl-color-neutral-600);
+		border: none;
+		background-color: transparent;
+		cursor: pointer;
+		height: 28px;
+	}
+	.header-button::part(base):hover {
+		color: var(--sl-color-neutral-950);
+		background-color: var(--sl-color-neutral-200);
+	}
+	.header-button::part(label) {
+		paddding-right: 4px;
+		padding-top: 1px;
 	}
 	.alias {
 		font-weight: 400;

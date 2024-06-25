@@ -109,35 +109,72 @@ export default class InlangMessageBundle extends LitElement {
 					<span># ${this.messageBundle?.id}</span>
 					<span class="alias">@ ${this.messageBundle?.alias?.default}</span>
 				</div>
-				${this._fakeInputs() && this._fakeInputs()!.length > 0
-					? html`<div class="inputs-wrapper">
-							Inputs:
-							<div class="inputs">
-								${this._fakeInputs()?.map(
-									(input) =>
-										html`<sl-tag class="input-tag" variant="neutral" size="small">${input}</sl-tag>`
-								)}
+				<div class="header-right">
+					${this._fakeInputs() && this._fakeInputs()!.length > 0
+						? html`<div class="inputs-wrapper">
+								Inputs:
+								<div class="inputs">
+									${this._fakeInputs()?.map(
+										(input) =>
+											html`<sl-tag class="input-tag" variant="neutral" size="small"
+												>${input}</sl-tag
+											>`
+									)}
+									<inlang-add-input .addInput=${this._addInput}>
+										<sl-tooltip content="Add input to message bundle">
+											<sl-tag
+												class="add-input-tag"
+												variant="neutral"
+												size="small"
+												class="add-input-tag"
+												><svg viewBox="0 0 24 24" width="18" height="18" style="margin: 0 -2px">
+													<path
+														fill="currentColor"
+														d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"
+													></path></svg
+											></sl-tag>
+										</sl-tooltip>
+									</inlang-add-input>
+								</div>
+						  </div>`
+						: html`<div class="inputs-wrapper">
 								<inlang-add-input .addInput=${this._addInput}>
 									<sl-tooltip content="Add input to message bundle">
-										<sl-tag class="input-tag" variant="neutral" size="small" class="add-input-tag"
-											><svg viewBox="0 0 24 24" width="18" height="18" style="margin: 0 -2px">
+										<sl-button
+											class="header-button"
+											variant="text"
+											size="small"
+											class="add-input-tag"
+											><svg
+												viewBox="0 0 24 24"
+												width="18"
+												height="18"
+												style="margin-right: -2px"
+												slot="prefix"
+											>
 												<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path></svg
-										></sl-tag>
+											>Input</sl-button
+										>
 									</sl-tooltip>
 								</inlang-add-input>
-							</div>
-					  </div>`
-					: html`<div class="inputs-wrapper">
-							<inlang-add-input .addInput=${this._addInput}>
-								<sl-tooltip content="Add input to message bundle">
-									<sl-tag class="input-tag" variant="neutral" size="small" class="add-input-tag"
-										><svg viewBox="0 0 24 24" width="18" height="18" style="margin-right: 2px">
-											<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path></svg
-										>Input</sl-tag
-									>
-								</sl-tooltip>
-							</inlang-add-input>
-					  </div>`}
+						  </div>`}
+					<div class="separator"></div>
+					<sl-tooltip content="Edit message bundle">
+						<sl-button class="header-button" variant="text" size="small" class="add-input-tag"
+							><svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="18"
+								height="18"
+								viewBox="0 0 24 24"
+								slot="prefix"
+							>
+								<path
+									fill="currentColor"
+									d="M7 12a2 2 0 1 1-4 0a2 2 0 0 1 4 0m7 0a2 2 0 1 1-4 0a2 2 0 0 1 4 0m7 0a2 2 0 1 1-4 0a2 2 0 0 1 4 0"
+								/></svg
+						></sl-button>
+					</sl-tooltip>
+				</div>
 			</div>
 			<div class="messages-container">
 				${this._locales() &&
