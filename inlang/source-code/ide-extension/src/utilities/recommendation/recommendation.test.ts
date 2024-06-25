@@ -1,14 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import * as vscode from "vscode"
 import {
-	isDisabledRecommendation,
 	recommendationBannerView,
-	createRecommendationBanner,
-	getRecommendationBannerHtml,
-	updateDisabledRecommendation,
+	createRecommendationView,
+	getRecommendationViewHtml,
 } from "./recommendation.js"
-import { getSetting, updateSetting } from "../settings/index.js"
-import { getGitOrigin } from "../settings/getGitOrigin.js"
 import { createNodeishMemoryFs, type NodeishFilesystem } from "@lix-js/fs"
 
 vi.mock("vscode", () => ({
@@ -29,51 +25,6 @@ vi.mock("node:fs", () => ({
 	existsSync: vi.fn(),
 	readFileSync: vi.fn(),
 }))
-vi.mock("../settings/getGitOrigin.js", () => ({ getGitOrigin: vi.fn() }))
-vi.mock("../settings/index.js", () => ({
-	getSetting: vi.fn(),
-	updateSetting: vi.fn(),
-}))
-
-describe("isDisabledRecommendation", () => {
-	beforeEach(() => {
-		vi.resetAllMocks()
-	})
-
-	it("should return true if recommendation is disabled", async () => {
-		vi.mocked(getSetting).mockResolvedValue(["some-git-origin"])
-		vi.mocked(getGitOrigin).mockResolvedValue("some-git-origin")
-
-		const result = await isDisabledRecommendation()
-		expect(result).toBe(true)
-	})
-
-	it("should return false if recommendation is not disabled", async () => {
-		vi.mocked(getSetting).mockResolvedValue(["other-git-origin"])
-		vi.mocked(getGitOrigin).mockResolvedValue("some-git-origin")
-
-		const result = await isDisabledRecommendation()
-		expect(result).toBe(false)
-	})
-})
-
-describe("updateDisabledRecommendation", () => {
-	beforeEach(() => {
-		vi.resetAllMocks()
-	})
-
-	it("should update the disabled recommendation setting", async () => {
-		vi.mocked(getSetting).mockResolvedValue(["other-git-origin"])
-		vi.mocked(getGitOrigin).mockResolvedValue("some-git-origin")
-
-		await updateDisabledRecommendation()
-
-		expect(updateSetting).toHaveBeenCalledWith("disableRecommendation", [
-			"other-git-origin",
-			"some-git-origin",
-		])
-	})
-})
 
 describe("recommendationBannerView", () => {
 	beforeEach(() => {
@@ -88,6 +39,7 @@ describe("recommendationBannerView", () => {
 				name: "test-workspace",
 				index: 0,
 			},
+			context: {} as vscode.ExtensionContext,
 		}
 
 		await recommendationBannerView(args)
@@ -107,9 +59,10 @@ describe("createRecommendationBanner", () => {
 	}
 
 	it("should return an object with a resolveWebviewView function", () => {
-		const result = createRecommendationBanner({
+		const result = createRecommendationView({
 			fs: createNodeishMemoryFs(),
 			workspaceFolder: fakeWorkspaceFolder,
+			context: {} as vscode.ExtensionContext,
 		})
 		expect(typeof result.resolveWebviewView).toBe("function")
 	})
@@ -123,9 +76,10 @@ describe("createRecommendationBanner", () => {
 	}
 
 	it("should return an object with a resolveWebviewView function", () => {
-		const result = createRecommendationBanner({
+		const result = createRecommendationView({
 			fs: createNodeishMemoryFs(),
 			workspaceFolder: fakeWorkspaceFolder,
+			context: {} as vscode.ExtensionContext,
 		})
 		expect(typeof result.resolveWebviewView).toBe("function")
 	})
@@ -140,8 +94,10 @@ describe("getRecommendationBannerHtml", () => {
 		const args = {
 			webview: {} as vscode.Webview,
 			fs: {} as NodeishFilesystem,
+			workspaceFolder: {} as vscode.WorkspaceFolder,
+			context: {} as vscode.ExtensionContext,
 		}
-		const result = await getRecommendationBannerHtml(args)
+		const result = await getRecommendationViewHtml(args)
 		expect(result).toContain(`<html lang="en">`)
 	})
 })
