@@ -21,7 +21,7 @@ vi.mock("../../settings/index.js", () => ({
 	updateSetting: vi.fn(),
 }))
 
-describe("crossSellNinja", () => {
+describe("recommendNinja", () => {
 	const mockFs = {} as NodeishFilesystem
 
 	beforeEach(() => {
@@ -40,7 +40,7 @@ describe("crossSellNinja", () => {
 
 	it("should return early if Ninja GitHub Action is already adopted", async () => {
 		;(getSetting as Mock).mockResolvedValue(true)
-		;(shouldRecommend as Mock).mockResolvedValue(true)
+		;(shouldRecommend as Mock).mockResolvedValue(false)
 
 		await recommendNinja({ fs: mockFs })
 
@@ -51,7 +51,7 @@ describe("crossSellNinja", () => {
 
 	it("should show prompt if recommendation is enabled and Ninja is not adopted", async () => {
 		;(getSetting as Mock).mockResolvedValue(true)
-		;(shouldRecommend as Mock).mockResolvedValue(false)
+		;(shouldRecommend as Mock).mockResolvedValue(true)
 		;(vscode.window.showInformationMessage as Mock).mockResolvedValue("Yes")
 
 		await recommendNinja({ fs: mockFs })
@@ -61,13 +61,13 @@ describe("crossSellNinja", () => {
 		expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(
 			"Do you want to add the 🥷 [Ninja Github Action](https://inlang.com/m/3gk8n4n4/app-inlang-ninjaI18nAction) for linting translations in CI?",
 			"Yes",
-			"Don't ask again"
+			"Do not ask again"
 		)
 	})
 
 	it('should add Ninja GitHub Action if user selects "Yes"', async () => {
 		;(getSetting as Mock).mockResolvedValue(true)
-		;(shouldRecommend as Mock).mockResolvedValue(false)
+		;(shouldRecommend as Mock).mockResolvedValue(true)
 		;(vscode.window.showInformationMessage as Mock).mockResolvedValue("Yes")
 
 		await recommendNinja({ fs: mockFs })
@@ -77,8 +77,8 @@ describe("crossSellNinja", () => {
 
 	it('should update setting if user selects "Dont ask again"', async () => {
 		;(getSetting as Mock).mockResolvedValue(true)
-		;(shouldRecommend as Mock).mockResolvedValue(false)
-		;(vscode.window.showInformationMessage as Mock).mockResolvedValue("Don't ask again")
+		;(shouldRecommend as Mock).mockResolvedValue(true)
+		;(vscode.window.showInformationMessage as Mock).mockResolvedValue("Do not ask again")
 
 		await recommendNinja({ fs: mockFs })
 
