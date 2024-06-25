@@ -564,7 +564,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		triggerPushChanges: (message: string) => Promise<(() => void) | undefined> | undefined
 	) {
 		try {
-			if (!shouldRecommendNinja() && repo()) {
+			if (shouldRecommendNinja() && repo()) {
 				await Ninja.add({ fs: repo()!.nodeishFs })
 				refetchShouldRecommendNinja()
 				// commit, push and pull
