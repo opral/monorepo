@@ -1,4 +1,4 @@
-# Cross-sell Ninja 🥷 package
+# Ninja 🥷 recommendation package
 
 ## Features
 
