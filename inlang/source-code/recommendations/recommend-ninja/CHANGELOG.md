@@ -1,4 +1,4 @@
-# @inlang/cross-sell-ninja
+# @inlang/recommend-ninja
 
 ## 0.0.34
 
@@ -233,5 +233,5 @@
 
 ### Patch Changes
 
-- 3f02485: create @inlang/cross-sell-ninja
+- 3f02485: create @inlang/recommend-ninja
   - @inlang/sdk@0.28.3
