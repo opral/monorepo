@@ -1,7 +1,7 @@
 import * as vscode from "vscode"
 import { state } from "../utilities/state.js"
 import type { MessageLintReport } from "@inlang/sdk"
-import { crossSellNinja } from "../utilities/cross-sell/ninja/ninja.js"
+import { recommendNinja } from "../utilities/cross-sell/ninja/ninja.js"
 import type { NodeishFilesystem } from "@lix-js/fs"
 
 export async function linterDiagnostics(args: {
@@ -89,7 +89,7 @@ export async function linterDiagnostics(args: {
 							)
 
 							if (diagnostics.length > 0) {
-								crossSellNinja({ fs: args.nodeishFs })
+								recommendNinja({ fs: args.nodeishFs })
 							}
 						}
 					)
