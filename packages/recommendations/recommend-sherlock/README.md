@@ -1,4 +1,4 @@
-# Cross-sell Sherlock package
+# Sherlock 🕵️‍♂️ recommendation package
 
 ## Features
 
