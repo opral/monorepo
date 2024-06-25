@@ -4,10 +4,13 @@ import { populateLevel } from "./populateLintLevel.js"
 import createSlotStorage from "../../persistence/slotfiles/createSlotStorage.js"
 import * as Comlink from "comlink"
 import type { NodeishFilesystem } from "@lix-js/fs"
-import type { MessageBundleLintRule, LintConfig, LintReport } from "../types/lint.js"
+import { MessageBundleLintRule, type LintConfig, type LintReport } from "../types/lint.js"
 import type { MessageBundle } from "../types/message-bundle.js"
 import type { ProjectSettings2 } from "../types/project-settings.js"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
+import { TypeCompiler } from "@sinclair/typebox/compiler"
+
+const MessageBundleLintRuleCompiler = TypeCompiler.Compile(MessageBundleLintRule)
 
 const lintConfigs: LintConfig[] = [
 	{
@@ -30,14 +33,16 @@ export async function createLinter(
 	console.info(lintRules)
 	const _import = createImport(projectPath, fs)
 
-	// TODO use resolveModules
-	const resolvedLintRules: MessageBundleLintRule[] = await Promise.all(
+	const modules: unknown[] = await Promise.all(
 		lintRules.map(async (uri) => {
 			const module = await _import(uri)
-			return module.default as MessageBundleLintRule
+			return module.default
 		})
 	)
 
+	const resolvedLintRules = modules.filter((module): module is MessageBundleLintRule =>
+		MessageBundleLintRuleCompiler.Check(module)
+	)
 	console.info(resolvedLintRules)
 
 	const fullFs = new Proxy(fs as NodeishFilesystem, {
