@@ -31,8 +31,9 @@ const lintRule = {
 function exclude(set, exclude) {
 	const newSet = new Set(set)
 	for (const value of set) {
-		if (exclude.has(value)) continue
-		newSet.add(value)
+		if (exclude.has(value)) {
+			newSet.delete(value)
+		}
 	}
 	return newSet
 }
