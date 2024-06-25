@@ -1,5 +1,19 @@
 # @inlang/recommend-ninja
 
+## 0.1.0
+
+### Minor Changes
+
+- e37eabf: - renamed packages `@inlang/cross-sell-X` to `@inlang/recommend-X` be more descriptive
+  - refactor recommendation view in Sherlock VS Code extension
+  - introduce new `shouldRecommend` function to `@inlang/recommend-sherlock` & `@inlang/recommend-ninja`
+
+### Patch Changes
+
+- Updated dependencies [e8d74b9]
+  - @lix-js/fs@2.2.0
+  - @inlang/sdk@0.36.3
+
 ## 0.0.34
 
 ### Patch Changes

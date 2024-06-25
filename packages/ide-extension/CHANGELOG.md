@@ -1,5 +1,26 @@
 # inlang-vs-code-extension
 
+## 1.48.0
+
+### Minor Changes
+
+- e37eabf: - renamed packages `@inlang/cross-sell-X` to `@inlang/recommend-X` be more descriptive
+  - refactor recommendation view in Sherlock VS Code extension
+  - introduce new `shouldRecommend` function to `@inlang/recommend-sherlock` & `@inlang/recommend-ninja`
+
+### Patch Changes
+
+- Updated dependencies [e37eabf]
+- Updated dependencies [e8d74b9]
+  - @inlang/recommend-sherlock@0.1.0
+  - @inlang/recommend-ninja@0.1.0
+  - @lix-js/fs@2.2.0
+  - @inlang/sdk@0.36.3
+  - @lix-js/client@2.2.1
+  - @inlang/rpc@0.3.35
+  - @inlang/settings-component@1.0.30
+  - @inlang/telemetry@0.3.50
+
 ## 1.47.0
 
 ### Minor Changes
