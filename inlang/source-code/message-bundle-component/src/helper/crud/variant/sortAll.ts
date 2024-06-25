@@ -27,6 +27,7 @@ const compareValues = (
 		if (a.match[index]! > b.match[index]!) return -1
 	}
 	if (a.match.length === index + 1) return 0
+	if (index > 10) return 0
 	return compareValues(a, b, index + 1, ignoreVariantIds)
 }
 
