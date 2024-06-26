@@ -73,6 +73,8 @@ export async function loadProject(args: {
 		_import,
 	})
 
+	console.info("resolvedModules", modules)
+
 	const modules$ = new BehaviorSubject(modules)
 
 	const bundleStorage = createSlotStorage<MessageBundle>(

@@ -1,17 +1,17 @@
+import { createMessageBundleSlotAdapter } from "../createMessageBundleSlotAdapter.js"
 import { createImport } from "./import.js"
 import { endpoint } from "comlink-node/worker"
 import { populateLevel } from "./populateLintLevel.js"
-import type { LintConfig, LintReport } from "../types/lint.js"
+import { resolveModules } from "../resolveModules2.js"
 import createSlotStorage from "../../persistence/slotfiles/createSlotStorage.js"
 import * as Comlink from "comlink"
-import { resolveModules } from "../resolveModules2.js"
 import type { NodeishFilesystem } from "@lix-js/fs"
 import type { Message, MessageBundle } from "../types/message-bundle.js"
 import type { ProjectSettings2 } from "../types/project-settings.js"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
+import type { LintConfig, LintReport } from "../types/lint.js"
 
 import _debug from "debug"
-import { createMessageBundleSlotAdapter } from "../createMessageBundleSlotAdapter.js"
 const debug = _debug("sdk-v2:lint-report-worker")
 
 const lintConfigs: LintConfig[] = [

@@ -80,7 +80,7 @@ export const resolveModules: ResolveModule2Function = async (args) => {
 
 		if (importedModule.data.default.id.startsWith("plugin.")) {
 			allPlugins.push(importedModule.data.default as Plugin2)
-		} else if (importedModule.data.default.id.startsWith("messageLintRule.")) {
+		} else if (importedModule.data.default.id.startsWith("messageBundleLintRule.")) {
 			allMessageLintRules.push(importedModule.data.default as MessageBundleLintRule)
 		} else {
 			moduleErrors.push(
