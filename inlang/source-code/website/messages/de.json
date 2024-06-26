@@ -1,6 +1,5 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"footer_categories_apps": "Apps",
 	"footer_categories_libraries": "Libraries",
 	"footer_categories_lintrules": "Lint Regeln",
 	"footer_categories_lix": "Lix",
