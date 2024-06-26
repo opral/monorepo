@@ -8,14 +8,14 @@ import http from "isomorphic-git/http/web"
 // NOTE: I use isomorphic git because i went crazy with cors :-/ was faster to spin up a iso proxy
 import git, { pull, add, commit, push, statusMatrix } from "isomorphic-git"
 import { defaultProjectSettings } from "../../../dist/v2/defaultProjectSettings.js"
-const fs = createNodeishMemoryFs()
+
 
 addRxPlugin(RxDBQueryBuilderPlugin)
 
 // NOTE: All those properties are hardcoded for now - dont get crazy ;-) #POC
 const gittoken = "YOUR_GITHUB_TOKEN_HERE"
 const corsProxy = "http://localhost:9998" // cors Proxy expected to run - start it via pnpm run proxy
-const repoUrl = "https://github.com/martin-lysk/message-bundle-storage"
+
 const dir = "/"
 
 const createAwaitable = () => {
@@ -34,13 +34,19 @@ const createAwaitable = () => {
 	]
 }
 
-const _create = async (fs: any) => {
+export const openProject = async (
+	gittoken: string,
+	githubRepo: string,
+	projectPath: string
+) => {
+	const fs = createNodeishMemoryFs()
+
 	await git.clone({
 		fs: fs,
 		http,
 		dir: dir,
 		corsProxy: corsProxy,
-		url: repoUrl,
+		url: githubRepo,
 		singleBranch: true,
 		depth: 1,
 	})
@@ -51,13 +57,11 @@ const _create = async (fs: any) => {
 		getFirstCommitHash: () => "dummy_first_hash",
 	} as any
 
-	const projectPath = "/testproject3.inlang"
-
 	try {
 		await createNewProject({
 			projectPath,
 			repo: repo,
-			projectSettings: defaultProjectSettings,
+			projectSettings: defaultProjectSettings as any,
 		})
 	} catch (e) {
 		console.warn("existed already")
@@ -156,5 +160,3 @@ const _create = async (fs: any) => {
 		commitChanges,
 	}
 }
-
-export const storage = _create(fs)
