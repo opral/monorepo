@@ -10,7 +10,7 @@ services:
     runtime: node
     region: frankfurt
     plan: standard
-    buildCommand: pnpm install && NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm run build --projects=@inlang/website
+    buildCommand: pnpm install && pnpm run build --projects=@inlang/website
     startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm production # configured in root package.json
     autoDeploy: true
     envVars:
@@ -37,7 +37,7 @@ services:
     # This disables branch previews for the git-proxy
     branch: main
     buildCommand: pnpm install && pnpm run build
-    startCommand: pnpm --filter @lix-js/server production
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @lix-js/server production
     autoDeploy: true
     envVars:
       - key: PORT
@@ -56,7 +56,7 @@ services:
     plan: standard
     branch: main
     buildCommand: pnpm install && pnpm run build --projects=@inlang/badge
-    startCommand: pnpm --filter @inlang/badge run production
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @inlang/badge run production
     autoDeploy: true
     envVars:
       - fromGroup: production
@@ -73,7 +73,7 @@ services:
     plan: standard
     pullRequestPreviewsEnabled: false
     buildCommand: pnpm install && pnpm run --filter @inlang/editor... build
-    startCommand: pnpm --filter @inlang/editor production
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @inlang/editor production
     autoDeploy: true
     envVars:
       - fromGroup: production
@@ -92,7 +92,7 @@ services:
     plan: standard
     pullRequestPreviewsEnabled: false
     buildCommand: pnpm install && pnpm run build
-    startCommand: pnpm --filter @inlang/manage production
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @inlang/manage production
     autoDeploy: true
     envVars:
       - fromGroup: production
@@ -123,7 +123,7 @@ services:
     branch: main
     pullRequestPreviewsEnabled: false
     buildCommand: pnpm install && pnpm run --filter @inlang/telemetry-proxy build
-    startCommand: pnpm run --filter @inlang/telemetry-proxy production
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm run --filter @inlang/telemetry-proxy production
     autoDeploy: true
     envVars:
       - key: PORT
@@ -142,7 +142,7 @@ services:
     branch: main
     pullRequestPreviewsEnabled: false
     buildCommand: pnpm install && pnpm run --filter @inlang/telemetry-proxy-parrot build
-    startCommand: pnpm run --filter @inlang/telemetry-proxy-parrot production
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm run --filter @inlang/telemetry-proxy-parrot production
     autoDeploy: true
     envVars:
       - key: PORT
