@@ -28,7 +28,7 @@ beforeEach(() => {
 	})
 })
 
-test("it should exit if the project has errors", async () => {
+test("it should exit if the project has a fatal error", async () => {
 	mockFs({
 		"/project.inlang/settings.json": JSON.stringify({
 			// invalid source language tag

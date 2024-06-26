@@ -1,7 +1,3 @@
----
-title: "Getting Started"
-description: "Learn how to install the ParaglideJS i18n library in your project"
----
 [![Inlang-ecosystem compatibility badge](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/assets/md-badges/inlang.svg)](https://inlang.com)
 
 # Getting started
@@ -47,7 +43,6 @@ After running the compiler import the messages with `import * as m from "./parag
 
 ```js
 import * as m from "./paraglide/messages.js"
-import { setLanguageTag } from "./paraglide/runtime.js"
 
 m.hello() // Hello world!
 m.loginHeader({ name: "Samuel" }) // Hello Samuel, please login to continue.

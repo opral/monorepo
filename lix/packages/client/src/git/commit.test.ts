@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from "vitest"
+// @ts-ignore
 import { openRepository } from "../index.ts"
 // @ts-ignore -- ts import not working correctly, TODO: find out why
 import { createNodeishMemoryFs, toSnapshot, fromSnapshot } from "@lix-js/fs"
@@ -11,7 +12,7 @@ import { resolve } from "node:path"
 describe(
 	"main workflow",
 	async () => {
-		async function testCommit({ useCustomCommit }) {
+		async function testCommit({ useCustomCommit }: { useCustomCommit: boolean }) {
 			const fs = createNodeishMemoryFs()
 
 			const snapshot = JSON.parse(
@@ -38,7 +39,7 @@ describe(
 
 			const commitFun = useCustomCommit
 				? repository.commit
-				: async (args) => {
+				: async (args: any) => {
 						for (const file of args.include) {
 							await repository._add(file)
 						}

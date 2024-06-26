@@ -25,7 +25,15 @@ export {
 	PluginLoadMessagesError,
 	PluginSaveMessagesError,
 } from "./errors.js"
+export {
+	ModuleError,
+	ModuleHasNoExportsError,
+	ModuleImportError,
+	ModuleExportIsInvalidError,
+	ModuleSettingsAreInvalidError,
+} from "./resolve-modules/errors.js"
 
+export { randomHumanId } from "./storage/human-id/human-readable-id.js"
 export { normalizeMessage } from "./storage/helper.js"
 export * from "./messages/variant.js"
 export * from "./versionedInterfaces.js"

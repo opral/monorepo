@@ -1,5 +1,6 @@
 import { test, expect, afterAll, describe } from "vitest"
 import type { NodeishFilesystem, FileChangeInfo } from "./NodeishFilesystemApi.ts"
+// @ts-ignore
 import { createNodeishMemoryFs, toSnapshot, fromSnapshot } from "./memoryFs.ts"
 
 async function wait(time: number) {

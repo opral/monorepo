@@ -15,7 +15,7 @@
 		"@inlang/sdk": "workspace:*",
 		"@inlang/cli": "workspace:*",
 		"@lix-js/client": "workspace:*",
-		"typescript": "^5.2.2",
+		"typescript": "^5.5.2",
 		"vitest": "^0.34.4"
 	}
 }

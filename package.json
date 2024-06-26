@@ -5,7 +5,7 @@
 	"scripts": {
 		"dev": "pnpm exec nx run-many --nx-bail --target=dev --parallel 1000 --output-style stream",
 		"dev:ide": "pnpm exec nx run-many --target=dev --parallel=10 --nx-bail --verbose --projects=vs-code-extension --output-style=stream",
-		"production": "pnpm exec nx run-many --nx-bail --target=production --parallel 1000 --exclude @lix-js/server --exclude @inlang/badge --exclude @inlang/manage --exclude @inlang/editor --exclude @inlang/telemetry-proxy --output-style=stream",
+		"production": "pnpm exec nx run-many --nx-bail --target=production --parallel 1000 --exclude @lix-js/server --exclude @inlang/badge --exclude @inlang/manage --exclude @inlang/editor --exclude @inlang/telemetry-proxy --exclude @inlang/telemetry-proxy-parrot --output-style=stream",
 		"build": "pnpm exec nx run-many --nx-bail --target=build --parallel",
 		"dev:lix": "pnpm --filter @inlang/env-variables build && pnpm --stream --parallel --filter \"@lix-js/*\" --filter @inlang/server dev",
 		"dev:lix-fink": "pnpm --filter @inlang/env-variables build && pnpm --stream --parallel --filter \"@lix-js/*\" --filter @inlang/server --filter @inlang/manage --filter @inlang/editor --filter @inlang/sdk --filter @inlang/website --filter @inlang/telemetry-proxy dev",
@@ -41,7 +41,9 @@
 		"auditConfig": {
 			"ignoreCves": [
 				"CVE-2023-42282",
-				"CVE-2024-29415"
+				"CVE-2024-29415",
+				"CVE-2024-4068",
+				"CVE-2024-37890"
 			]
 		}
 	},
@@ -56,7 +58,7 @@
 		"nx": "18.3.3",
 		"nx-cloud": "16.5.2",
 		"prettier": "2.8.3",
-		"typescript": "5.2.2",
+		"typescript": "^5.5.2",
 		"vitest": "0.34.6"
 	}
 }

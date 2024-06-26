@@ -37,7 +37,7 @@ import {
 import { posthog as telemetryBrowser } from "posthog-js"
 import type { Result } from "@inlang/result"
 import { id } from "../../../../../marketplace-manifest.json"
-import * as Ninja from "@inlang/cross-sell-ninja"
+import * as Ninja from "@inlang/recommend-ninja"
 
 type EditorStateSchema = {
 	/**
@@ -147,8 +147,10 @@ type EditorStateSchema = {
 	languageTags: () => LanguageTag[]
 
 	isNinjaRecommendationDisabled: () => boolean
-	ninjaIsAdopted: Resource<boolean>
-	addNinja: (triggerPushChanges: (message: string) => Promise<(() => void) | undefined>) => Promise<void>
+	shouldRecommendNinja: Resource<boolean>
+	addNinja: (
+		triggerPushChanges: (message: string) => Promise<(() => void) | undefined>
+	) => Promise<void>
 
 	tourStep: () => TourStepId
 	setTourStep: Setter<TourStepId>
@@ -266,7 +268,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		setSearchParams({ key: "ref", value: refLink() })
 	})
 
-	const [localStorage] = useLocalStorage() ?? []
+	const [localStorage, setLocalStorage] = useLocalStorage()
 
 	// get lix errors
 	const [lixErrors, setLixErrors] = createSignal<Error[]>([])
@@ -380,7 +382,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		try {
 			const push = await loadedRepo.push().catch((error) => ({ error }))
 			if (push?.error) {
-				return { error: new PushException("Failed to push", { cause: push.error }) }
+				return { error: new PushException("Failed to push.", { cause: push.error }) }
 			}
 			await loadedRepo.pull({
 				author: {
@@ -396,7 +398,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			args.setLastPullTime(time)
 			return { data: true }
 		} catch (error) {
-			return { error: (error as PushException) ?? "Unknown error" }
+			return { error: new PushException("Failed to push.", { cause: error }) }
 		}
 	}
 
@@ -423,24 +425,33 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		},
 		async (args) => {
 			if (args.repo?.nodeishFs === undefined) return []
-			const projects = await listProjects(args.repo?.nodeishFs, "/")
+			const projectList = await listProjects(args.repo?.nodeishFs, "/")
+			const previousProject = localStorage.recentProjects.find(
+				(project) =>
+					project.repository === routeParams().repository && project.owner === routeParams().owner
+			)?.project
 
 			if (
 				searchParams().project &&
-				projects.some((project: any) => project.projectPath === searchParams().project)
+				projectList.some((project: any) => project.projectPath === searchParams().project)
 			) {
 				setActiveProject(searchParams().project)
-			} else if (projects.length === 1) {
-				setActiveProject(projects[0]?.projectPath)
+			} else if (projectList.length === 1) {
+				setActiveProject(projectList[0]?.projectPath)
 			} else if (
-				projects.length > 1 &&
-				projects.some((project: any) => project.projectPath === "/project.inlang")
+				previousProject &&
+				projectList.some((project) => project.projectPath === previousProject)
+			) {
+				setActiveProject(previousProject)
+			} else if (
+				projectList.length > 1 &&
+				projectList.some((project: any) => project.projectPath === "/project.inlang")
 			) {
 				setActiveProject("/project.inlang")
 			} else {
-				setActiveProject(projects[0]?.projectPath)
+				setActiveProject(projectList[0]?.projectPath)
 			}
-			return projects
+			return projectList
 		}
 	)
 
@@ -448,12 +459,27 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		params.get("project") || undefined
 	)
 
-	createEffect(() => {
-		const projectPath = activeProject()
-		if (projectPath) {
-			setSearchParams({ key: "project", value: projectPath })
-		}
-	})
+	createEffect(
+		on(activeProject, () => {
+			const projectPath = activeProject()
+			if (projectPath) {
+				setSearchParams({ key: "project", value: projectPath })
+				// update project of recentProject in local storage
+				setLocalStorage({
+					recentProjects: localStorage.recentProjects.map((project) => {
+						if (
+							project.repository === routeParams().repository &&
+							project.owner === routeParams().owner
+						) {
+							return { ...project, project: projectPath }
+						} else {
+							return project
+						}
+					}),
+				})
+			}
+		})
+	)
 
 	// polyfill requestIdleCallback for Safari browser
 	const requestIdleCallback =
@@ -520,7 +546,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			(repo) => repo.owner === routeParams().owner && repo.repository === routeParams().repository
 		)
 
-	const [ninjaIsAdopted, { refetch: refetchNinjaIsAdopted }] = createResource(
+	const [shouldRecommendNinja, { refetch: refetchShouldRecommendNinja }] = createResource(
 		() => {
 			if (repo() === undefined || isNinjaRecommendationDisabled()) {
 				return undefined
@@ -530,15 +556,17 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		async ({ fs }) => {
 			// wait for the browser to be idle
 			await new Promise((resolve) => requestIdleCallback(resolve))
-			return await Ninja.isAdopted({ fs })
+			return await Ninja.shouldRecommend({ fs })
 		}
 	)
 
-	async function addNinja(triggerPushChanges: (message: string) => Promise<(() => void) | undefined> | undefined) {
+	async function addNinja(
+		triggerPushChanges: (message: string) => Promise<(() => void) | undefined> | undefined
+	) {
 		try {
-			if (!ninjaIsAdopted() && repo()) {
+			if (shouldRecommendNinja() && repo()) {
 				await Ninja.add({ fs: repo()!.nodeishFs })
-				refetchNinjaIsAdopted()
+				refetchShouldRecommendNinja()
 				// commit, push and pull
 				await triggerPushChanges("feat: add Ninja GitHub action 🥷")
 			}
@@ -761,7 +789,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					sourceLanguageTag,
 					languageTags,
 					isNinjaRecommendationDisabled,
-					ninjaIsAdopted,
+					shouldRecommendNinja,
 					addNinja,
 					tourStep,
 					setTourStep,

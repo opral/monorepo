@@ -107,13 +107,14 @@ export function createMessagesQuery({
 			nodeishFs: nodeishFs,
 			// this message is called whenever a file changes that was read earlier by this filesystem
 			// - the plugin loads messages -> reads the file messages.json -> start watching on messages.json -> updateMessages
-			updateMessages: () => {
+			onChange: () => {
 				// reload
 				loadMessagesViaPlugin(
 					fsWithWatcher,
 					messageLockDirPath,
 					messageStates,
 					index,
+					defaultAliasIndex,
 					delegate,
 					_settings, // NOTE we bang here - we don't expect the settings to become null during the livetime of a project
 					resolvedPluginApi
@@ -143,6 +144,7 @@ export function createMessagesQuery({
 			messageLockDirPath,
 			messageStates,
 			index,
+			defaultAliasIndex,
 			undefined /* delegate - we don't pass it here since we will call onLoaded instead */,
 			_settings, // NOTE we bang here - we don't expect the settings to become null during the livetime of a project
 			resolvedPluginApi
@@ -178,6 +180,7 @@ export function createMessagesQuery({
 			messageLockDirPath,
 			messageStates,
 			index,
+			defaultAliasIndex,
 			delegate,
 			_settings, // NOTE we bang here - we don't expect the settings to become null during the livetime of a project
 			resolvedPluginApi
@@ -230,6 +233,9 @@ export function createMessagesQuery({
 			const message = index.get(where.id)
 			if (message === undefined) return false
 			index.set(where.id, { ...message, ...data })
+			if (data.alias && "default" in data.alias) {
+				defaultAliasIndex.set(data.alias.default, data)
+			}
 			messageStates.messageDirtyFlags[where.id] = true
 			delegate?.onMessageUpdate(where.id, index.get(data.id), [...index.values()])
 			scheduleSave()
@@ -246,6 +252,7 @@ export function createMessagesQuery({
 				delegate?.onMessageCreate(data.id, index.get(data.id), [...index.values()])
 			} else {
 				index.set(where.id, { ...message, ...data })
+				defaultAliasIndex.set(data.alias.default, { ...message, ...data })
 				messageStates.messageDirtyFlags[where.id] = true
 				delegate?.onMessageUpdate(data.id, index.get(data.id), [...index.values()])
 			}
@@ -292,6 +299,7 @@ async function loadMessagesViaPlugin(
 	lockDirPath: string,
 	messageState: MessageState,
 	messages: Map<string, Message>,
+	aliaseToMessageMap: Map<string, Message>,
 	delegate: MessageQueryDelegate | undefined,
 	settingsValue: ProjectSettings,
 	resolvedPluginApi: ResolvedPluginApi
@@ -363,6 +371,9 @@ async function loadMessagesViaPlugin(
 					// update is synchronous, so update effect will be triggered immediately
 					// NOTE: this might trigger a save before we have the chance to delete - but since save is async and waits for the lock acquired by this method - its save to set the flags afterwards
 					messages.set(loadedMessageClone.id, loadedMessageClone)
+					if (loadedMessageClone.alias["default"]) {
+						aliaseToMessageMap.set(loadedMessageClone.alias["default"], loadedMessageClone)
+					}
 					// NOTE could use hash instead of the whole object JSON to save memory...
 					messageState.messageLoadHash[loadedMessageClone.id] = importedEnecoded
 					delegate?.onMessageUpdate(loadedMessageClone.id, loadedMessageClone, [
@@ -387,12 +398,14 @@ async function loadMessagesViaPlugin(
 
 						// create a humanId based on a hash of the alias
 						loadedMessageClone.id = messsageId
+						aliaseToMessageMap.set(loadedMessageClone.alias["default"], loadedMessageClone)
 					}
 
 					const importedEnecoded = stringifyMessage(loadedMessageClone)
 
 					// we don't have to check - done before hand if (messages.has(loadedMessageClone.id)) return false
 					messages.set(loadedMessageClone.id, loadedMessageClone)
+
 					messageState.messageLoadHash[loadedMessageClone.id] = importedEnecoded
 					delegate?.onMessageUpdate(loadedMessageClone.id, loadedMessageClone, [
 						...messages.values(),
@@ -431,6 +444,7 @@ async function loadMessagesViaPlugin(
 			lockDirPath,
 			messageState,
 			messages,
+			aliaseToMessageMap,
 			delegate,
 			settingsValue,
 			resolvedPluginApi
@@ -451,6 +465,7 @@ async function saveMessagesViaPlugin(
 	lockDirPath: string,
 	messageState: MessageState,
 	messages: Map<string, Message>,
+	aliaseToMessageMap: Map<string, Message>,
 	delegate: MessageQueryDelegate | undefined,
 	settingsValue: ProjectSettings,
 	resolvedPluginApi: ResolvedPluginApi
@@ -538,6 +553,7 @@ async function saveMessagesViaPlugin(
 					lockDirPath,
 					messageState,
 					messages,
+					aliaseToMessageMap,
 					delegate,
 					settingsValue,
 					resolvedPluginApi
@@ -583,6 +599,7 @@ async function saveMessagesViaPlugin(
 			lockDirPath,
 			messageState,
 			messages,
+			aliaseToMessageMap,
 			delegate,
 			settingsValue,
 			resolvedPluginApi

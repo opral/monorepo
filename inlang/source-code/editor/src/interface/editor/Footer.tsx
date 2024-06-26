@@ -88,12 +88,15 @@ const Footer = () => {
 				<div class="flex items-center justify-end w-24">
 					<sl-dropdown prop:distance={8}>
 						<button slot="trigger" class="text-sm text-surface-500">
-							{version["commit-hash"].slice(0, 7)}
+							v{version["@inlang/editor"]}
 						</button>
 						<sl-menu class="flex flex-col px-4 py-3 text-sm w-60">
-							<span class="font-medium mb-2">Deployed version</span>
+							<div class="flex justify-between font-medium mb-2">
+								<span>Deployed version:</span>
+								<span>{version["@inlang/editor"]}</span>
+							</div>
 							<div class="flex justify-between">
-								<span>Commit hash: {""}</span>
+								<span>Commit hash:</span>
 								<a
 									href={`https://github.com/opral/monorepo/commit/${version["commit-hash"]}`}
 									target="_blank"

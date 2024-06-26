@@ -1,5 +1,53 @@
 # @inlang/plugin-i18next
 
+## 4.14.13
+
+### Patch Changes
+
+- @inlang/sdk@0.36.3
+
+## 4.14.12
+
+### Patch Changes
+
+- Updated dependencies [2fc5feb]
+  - @inlang/sdk@0.36.2
+
+## 4.14.11
+
+### Patch Changes
+
+- Updated dependencies [1077e06]
+  - @inlang/sdk@0.36.1
+
+## 4.14.10
+
+### Patch Changes
+
+- Updated dependencies [8ec7b34]
+- Updated dependencies [05f9282]
+  - @inlang/sdk@0.36.0
+
+## 4.14.9
+
+### Patch Changes
+
+- Updated dependencies [8e9fc0f]
+  - @inlang/sdk@0.35.9
+
+## 4.14.8
+
+### Patch Changes
+
+- 04e804b: add human readble id tests to plugins
+
+## 4.14.7
+
+### Patch Changes
+
+- Updated dependencies [da7c207]
+  - @inlang/sdk@0.35.8
+
 ## 4.14.6
 
 ### Patch Changes

@@ -1,5 +1,49 @@
 # @inlang/sdk
 
+## 0.36.3
+
+### Patch Changes
+
+- Updated dependencies [e8d74b9]
+  - @lix-js/fs@2.2.0
+  - @inlang/plugin@2.4.14
+  - @lix-js/client@2.2.1
+  - @inlang/module@1.2.14
+
+## 0.36.2
+
+### Patch Changes
+
+- 2fc5feb: Better error-messages for cache-related issues
+
+## 0.36.1
+
+### Patch Changes
+
+- 1077e06: fix crash if `cache/modules` directory gets deleted
+
+## 0.36.0
+
+### Minor Changes
+
+- 8ec7b34: Modules are now cached locally using a "Network first" cache. This enables offline development
+
+### Patch Changes
+
+- 05f9282: Expose `ModuleError`s, enabling more fine-grained error-handling in Apps.
+
+## 0.35.9
+
+### Patch Changes
+
+- 8e9fc0f: Expose randomHumanId()
+
+## 0.35.8
+
+### Patch Changes
+
+- da7c207: fixes reactive alias by id map - to support experimental aliases flag again
+
 ## 0.35.7
 
 ### Patch Changes
