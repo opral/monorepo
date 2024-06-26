@@ -4,12 +4,12 @@ import {
 	createMessage,
 	createVariant,
 	type LanguageTag,
+	type LintReport,
 } from "@inlang/sdk/v2"
 import { LitElement, css, html } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
 import deleteVariant from "../helper/crud/variant/delete.js"
-import type { MessageLintReport } from "@inlang/message-lint-rule"
 
 import "./inlang-lint-report-tip.js"
 import "./inlang-selector-configurator.js"
@@ -150,7 +150,7 @@ export default class InlangVariant extends LitElement {
 	inputs: string[] | undefined
 
 	@property()
-	lintReports: MessageLintReport[] | undefined
+	lintReports: LintReport[] | undefined
 
 	@property()
 	addMessage: (newMessage: Message) => void = () => {}

@@ -8,6 +8,8 @@ import {
 	type LanguageTag,
 	createVariant,
 	type Variant,
+	type LintReport,
+	type ProjectSettings2,
 } from "@inlang/sdk/v2" // Import the types
 import { messageBundleStyling } from "./inlang-message-bundle.styles.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
@@ -26,7 +28,6 @@ import SlDropdown from "@shoelace-style/shoelace/dist/components/dropdown/dropdo
 import SlMenu from "@shoelace-style/shoelace/dist/components/menu/menu.component.js"
 import SlMenuItem from "@shoelace-style/shoelace/dist/components/menu-item/menu-item.component.js"
 
-import type { MessageLintReport, ProjectSettings } from "@inlang/sdk"
 import { getInputs } from "../helper/crud/input/get.js"
 import { createInput } from "../helper/crud/input/create.js"
 import sortAllVariants from "../helper/crud/variant/sortAll.js"
@@ -48,10 +49,10 @@ export default class InlangMessageBundle extends LitElement {
 	messageBundle: MessageBundle | undefined
 
 	@property({ type: Object })
-	settings: ProjectSettings | undefined
+	settings: ProjectSettings2 | undefined
 
 	@property({ type: Array })
-	lintReports: MessageLintReport[] | undefined
+	lintReports: LintReport[] | undefined
 
 	dispatchOnSetSettings(messageBundle: MessageBundle) {
 		const onChangeMessageBundle = new CustomEvent("change-message-bundle", {
@@ -98,11 +99,11 @@ export default class InlangMessageBundle extends LitElement {
 	}
 
 	private _refLocale = (): LanguageTag | undefined => {
-		return this.settings?.sourceLanguageTag
+		return this.settings?.baseLocale
 	}
 
 	private _locales = (): LanguageTag[] | undefined => {
-		return this.settings?.languageTags
+		return this.settings?.locales
 	}
 
 	private _fakeInputs = (): string[] | undefined => {
@@ -232,18 +233,14 @@ export default class InlangMessageBundle extends LitElement {
 					return this._renderMessage(
 						locale,
 						message,
-						this.lintReports?.filter((report) => report.languageTag === locale)
+						this.lintReports?.filter((report) => report.locale === locale || report.messageId === message?.id)
 					)
 				})}
 			</div>
 		`
 	}
 
-	private _renderMessage(
-		locale: LanguageTag,
-		message?: Message,
-		messageLintReports?: MessageLintReport[]
-	) {
+	private _renderMessage(locale: LanguageTag, message?: Message, lintReports?: LintReport[]) {
 		return html`
 			<div class="message">
 				<div class="language-container">
@@ -325,9 +322,9 @@ export default class InlangMessageBundle extends LitElement {
 									</div>
 								</div>
 								<div class="message-actions">
-									${this._freshlyAddedVariants.filter((id) =>
+									${this._freshlyAddedVariants.some((id) =>
 										message.variants.map((variant) => variant.id).includes(id)
-									).length > 0
+									)
 										? html`<sl-button
 												class="message-actions-button"
 												size="small"
@@ -362,9 +359,9 @@ export default class InlangMessageBundle extends LitElement {
 												>Sort</sl-button
 										  >`
 										: ``}
-									${messageLintReports && messageLintReports.length > 0
+									${lintReports && lintReports.length > 0
 										? html`<inlang-lint-report-tip
-												.lintReports=${messageLintReports}
+												.lintReports=${lintReports}
 										  ></inlang-lint-report-tip>`
 										: ``}
 								</div>
@@ -385,7 +382,7 @@ export default class InlangMessageBundle extends LitElement {
 										.addMessage=${this._addMessage}
 										.addInput=${this._addInput}
 										.locale=${locale}
-										.lintReports=${messageLintReports}
+										.lintReports=${lintReports}
 									></inlang-variant>`
 							  })
 							: message?.selectors.length === 0 || !message
@@ -397,7 +394,7 @@ export default class InlangMessageBundle extends LitElement {
 									.addInput=${this._addInput}
 									.triggerMessageBundleRefresh=${this._triggerRefresh}
 									.locale=${locale}
-									.lintReports=${messageLintReports}
+									.lintReports=${lintReports}
 							  ></inlang-variant>`
 							: ``}
 						${message?.selectors && message.selectors.length > 0

@@ -7,7 +7,7 @@ import { createNodeishFsWithAbsolutePaths } from "../createNodeishFsWithAbsolute
 import { maybeCreateFirstProjectId } from "../migrations/maybeCreateFirstProjectId.js"
 import { loadSettings } from "./settings.js"
 import type { InlangProject2 } from "./types/project.js"
-import { MessageBundle, ProjectSettings2, type Message } from "./types/index.js"
+import { MessageBundle, ProjectSettings2, type LintReport, type Message } from "./types/index.js"
 import createSlotStorage from "../persistence/slotfiles/createSlotStorage.js"
 
 import { createRxDatabase, type RxCollection } from "rxdb"
@@ -114,12 +114,14 @@ export async function loadProject(args: {
 
 	const linter = await createLintWorker(projectPath, projectSettings.modules, nodeishFs)
 
+	const lintReports$ = new BehaviorSubject<LintReport[]>([])
 	const adapter = createMessageBundleSlotAdapter(
 		bundleStorage,
 		messageStorage,
 		async (source, bundle) => {
 			if (source === "adapter") {
 				const lintresults = await linter.lint(projectSettings)
+				lintReports$.next(lintresults)
 				console.log(lintresults)
 			}
 		}
@@ -135,10 +137,13 @@ export async function loadProject(args: {
 	// 	},
 	// })
 
+	
+
 	return {
 		id: projectId,
 		settings: projectSettings$,
 		messageBundleCollection: database.collections.messageBundles,
+		lintReports$,
 		internal: {
 			bundleStorage,
 			messageStorage,

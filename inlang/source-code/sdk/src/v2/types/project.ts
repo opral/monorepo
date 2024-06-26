@@ -1,5 +1,5 @@
 import type { Subscribable } from "rxjs"
-import type { Message, MessageBundle, ProjectSettings2 } from "./index.js"
+import type { LintReport, Message, MessageBundle, ProjectSettings2 } from "./index.js"
 import type { RxCollection } from "rxdb"
 import type createSlotStorage from "../../persistence/slotfiles/createSlotStorage.js"
 
@@ -25,6 +25,7 @@ export type InlangProject2 = {
 
 	messageBundleCollection: RxCollection<MessageBundle>
 	// lintReportCollection: RxCollection<LintReport>
+	lintReports$: Subscribable<LintReport[]>
 
 	internal: {
 		bundleStorage: ReturnType<typeof createSlotStorage<MessageBundle>>

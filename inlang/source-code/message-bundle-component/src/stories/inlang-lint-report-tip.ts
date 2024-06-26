@@ -3,6 +3,7 @@ import { customElement, property } from "lit/decorators.js"
 import type { MessageLintReport } from "@inlang/message-lint-rule"
 
 import SlToolTip from "@shoelace-style/shoelace/dist/components/tooltip/tooltip.component.js"
+import type { LintReport } from "@inlang/sdk/v2"
 
 // in case an app defines it's own set of shoelace components, prevent double registering
 if (!customElements.get("sl-tooltip")) customElements.define("sl-tooltip", SlToolTip)
@@ -27,7 +28,7 @@ export default class InlangLintReportTip extends LitElement {
 	]
 
 	@property()
-	lintReports: MessageLintReport[] | undefined
+	lintReports: LintReport[] | undefined
 
 	override render() {
 		return html`<sl-tooltip content=${JSON.stringify(this.lintReports)}>
