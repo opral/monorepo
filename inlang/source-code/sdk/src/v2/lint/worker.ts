@@ -44,6 +44,16 @@ export async function createLinter(
 	console.info("worker-resolvedModules", resolvedModules)
 	console.info("worker-customApi", customApi)
 
+	const translator:
+		| {
+				translate: (args: {
+					messageBundle: MessageBundle
+					sourceLanguageTag: string
+					targetLanguageTags: string
+				}) => any
+		  }
+		| undefined = resolvedModules.resolvedPluginApi.customApi["app.app.machineTranslate"]
+
 	return Comlink.proxy({
 		lint: async (settings: ProjectSettings2): Promise<LintReport[]> => {
 			// TODO dedbulicate path config
@@ -90,6 +100,39 @@ export async function createLinter(
 
 			console.info("lint reports worker", reports)
 			return reports
+		},
+
+		fix: async (report: LintReport) => {
+			// get the affected message-bundle
+			const messageBundlesPath = projectPath + "/messagebundles/"
+			const messagesPath = projectPath + "/messages/"
+
+			const bundleStorage = createSlotStorage<MessageBundle>(
+				"bundle-storage-linter",
+				16 * 16 * 16 * 16,
+				3
+			)
+			await bundleStorage.connect(fs as NodeishFilesystem, messageBundlesPath, false)
+
+			const messageStorage = createSlotStorage<Message>(
+				"message-storage-linter",
+				16 * 16 * 16 * 16,
+				3
+			)
+			await messageStorage.connect(fs as NodeishFilesystem, messagesPath, false)
+			const rxDbAdapter = createMessageBundleSlotAdapter(bundleStorage, messageStorage, () => {})
+			const messageBundles = await rxDbAdapter.getAllMessageBundles()
+
+			const messageBundle = messageBundles.find((bundle) => bundle.id === report.messageBundleId)
+			if (!messageBundle) throw new Error(`messageBundle ${report.messageBundleId} not found`)
+
+			const translated = await translator?.translate({
+				messageBundle,
+				sourceLanguageTag: settings.baseLocale,
+				targetLanguageTags: report.locale,
+			})
+
+			return translated
 		},
 	})
 }
