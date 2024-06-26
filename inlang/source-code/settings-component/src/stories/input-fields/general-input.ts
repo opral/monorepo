@@ -32,7 +32,6 @@ export class GeneralInput extends LitElement {
 	handleInlangProjectChange: (value: string, key: string, moduleId?: string) => void = () => {}
 
 	override render() {
-		console.log(this.schema.type)
 		if (this.schema.type) {
 			if (this.schema.type === "string") {
 				return html` <div>

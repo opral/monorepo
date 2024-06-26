@@ -59,6 +59,24 @@ export class ArrayInput extends LitElement {
 					.required=${this.required}
 				></reference-pattern-input>
 			`
+		} else if (this.property === "lintConfig") {
+			// TODO: come up with custom lint config component
+			return html`
+				<default-array-input
+					exportparts="property, property-title, property-paragraph"
+					.property=${this.property}
+					.moduleId=${this.moduleId}
+					.value=${this.value.map((item) => JSON.stringify(item))}
+					.schema=${this.schema}
+					.handleInlangProjectChange=${(value: string[], property: string, moduleId: string) =>
+						this.handleInlangProjectChange(
+							value.map((item) => JSON.parse(item)),
+							property,
+							moduleId
+						)}
+					.required=${this.required}
+				></default-array-input>
+			`
 		} else {
 			return html`
 				<default-array-input
