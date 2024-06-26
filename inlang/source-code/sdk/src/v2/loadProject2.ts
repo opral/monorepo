@@ -150,5 +150,6 @@ export async function loadProject(args: {
 			bundleStorage,
 			messageStorage,
 		},
+		fixLint: linter.fix,
 	}
 }

@@ -1,3 +1,6 @@
+import { rpc } from "@inlang/rpc"
+import { toV1Message, fromV1Message } from "../shim.js"
+
 /**
  * @type {import("../types/plugin.js").Plugin2}
  */
@@ -14,7 +17,8 @@ const translatorPlugin = {
 				 * @param {any} param0
 				 * @returns
 				 */
-				translate: ({ messageBundle, sourceLanguageTag, targetLanguageTags }) => {
+				translate: async ({ messageBundle, sourceLanguageTag, targetLanguageTags }) => {
+					const asMessage = toV1Message(messageBundle)
 					console.info(
 						`Machine translating ${
 							messageBundle.id
@@ -22,8 +26,19 @@ const translatorPlugin = {
 							", "
 						)}`
 					)
+					const translationResult = await rpc.machineTranslateMessage({
+						message: asMessage,
+						sourceLanguageTag,
+						targetLanguageTags,
+					})
 
-					return messageBundle
+					console.log("translationResult", translationResult)
+
+					if (translationResult.error || !translationResult.data)
+						throw new Error(translationResult.error)
+
+					const translatedBundle = fromV1Message(translationResult.data)
+					return translatedBundle
 				},
 			},
 		}

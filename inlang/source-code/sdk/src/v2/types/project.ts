@@ -31,4 +31,6 @@ export type InlangProject2 = {
 		bundleStorage: ReturnType<typeof createSlotStorage<MessageBundle>>
 		messageStorage: ReturnType<typeof createSlotStorage<Message>>
 	}
+
+	fixLint: (lintReport: LintReport) => Promise<any>
 }

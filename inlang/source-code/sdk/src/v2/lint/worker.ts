@@ -1,5 +1,5 @@
 import { createMessageBundleSlotAdapter } from "../createMessageBundleSlotAdapter.js"
-import { createImport } from "./import.js"
+// import { createImport } from "./import.j
 import { endpoint } from "comlink-node/worker"
 import { populateLevel } from "./populateLintLevel.js"
 import { resolveModules } from "../resolveModules2.js"
@@ -52,7 +52,7 @@ export async function createLinter(
 					targetLanguageTags: string
 				}) => any
 		  }
-		| undefined = resolvedModules.resolvedPluginApi.customApi["app.app.machineTranslate"]
+		| undefined = resolvedModules.resolvedPluginApi.customApi["app.app.machineTranslate"] as any
 
 	return Comlink.proxy({
 		lint: async (settings: ProjectSettings2): Promise<LintReport[]> => {

@@ -25,5 +25,6 @@ export async function createLintWorker(
 
 	return {
 		lint: (settings: ProjectSettings2) => linter.lint(settings),
+		fix: linter.fix,
 	}
 }
