@@ -22,5 +22,8 @@ export const defaultProjectSettings = {
 	"plugin.inlang.messageFormat": {
 		pathPattern: "./messages/{languageTag}.json",
 	},
-	lintConfig: [{ ruleId: "messageBundleLintRule.test.TODO", level: "warning" }],
+	lintConfig: [
+		{ ruleId: "messageBundleLintRule.test.MissingPattern", level: "warning", messageLocale: de }
+		{ ruleId: "messageBundleLintRule.test.TODO", level: "warning" }
+	],
 } satisfies ProjectSettings2

@@ -7,7 +7,7 @@ import { createNodeishFsWithAbsolutePaths } from "../createNodeishFsWithAbsolute
 import { maybeCreateFirstProjectId } from "../migrations/maybeCreateFirstProjectId.js"
 import { loadSettings } from "./settings.js"
 import type { InlangProject2 } from "./types/project.js"
-import { MessageBundle, ProjectSettings2, type LintReport, type Message } from "./types/index.js"
+import { MessageBundle, type LintReport, type Message } from "./types/index.js"
 import createSlotStorage from "../persistence/slotfiles/createSlotStorage.js"
 
 import { createRxDatabase, type RxCollection } from "rxdb"
@@ -21,6 +21,13 @@ import {
 } from "./createMessageBundleSlotAdapter.js"
 
 /**
+ * 
+ * Lifecycle of load Project:
+ * 
+ * init - the async function has not yet returned
+ * installing dependencies - 
+ * 
+ * 
  * @param projectPath - Absolute path to the inlang settings file.
  * @param repo - An instance of a lix repo as returned by `openRepository`.
  * @param _import - Use `_import` to pass a custom import function for testing,
@@ -137,12 +144,14 @@ export async function loadProject(args: {
 	// 	},
 	// })
 
-	
-
 	return {
 		id: projectId,
 		settings: projectSettings$,
 		messageBundleCollection: database.collections.messageBundles,
+		installed: {
+			lintRules: [],
+			plugins: [],
+		},
 		lintReports$,
 		internal: {
 			bundleStorage,

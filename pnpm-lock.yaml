@@ -510,28 +510,28 @@ importers:
         version: 2.0.3(@tiptap/pm@2.0.3)
       '@tiptap/extension-document':
         specifier: 2.0.3
-        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
+        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
       '@tiptap/extension-floating-menu':
         specifier: 2.0.3
-        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
+        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
       '@tiptap/extension-hard-break':
         specifier: 2.0.3
-        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
+        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
       '@tiptap/extension-history':
         specifier: 2.0.3
-        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
+        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
       '@tiptap/extension-mention':
         specifier: 2.0.3
-        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))(@tiptap/suggestion@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
+        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))(@tiptap/suggestion@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
       '@tiptap/extension-paragraph':
         specifier: 2.0.3
-        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
+        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
       '@tiptap/extension-placeholder':
         specifier: 2.0.3
-        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
+        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
       '@tiptap/extension-text':
         specifier: 2.0.3
-        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
+        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
       '@tiptap/pm':
         specifier: 2.0.3
         version: 2.0.3(@tiptap/core@2.0.3)
@@ -540,7 +540,7 @@ importers:
         version: 2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
       '@tiptap/suggestion':
         specifier: 2.0.3
-        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
+        version: 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
       '@types/flat':
         specifier: ^5.0.2
         version: 5.0.5
@@ -594,7 +594,7 @@ importers:
         version: 1.3.15
       solid-tiptap:
         specifier: ^0.6.0
-        version: 0.6.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))(solid-js@1.8.17)
+        version: 0.6.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))(solid-js@1.8.17)
       throttle-debounce:
         specifier: ^5.0.0
         version: 5.0.0
@@ -1205,7 +1205,7 @@ importers:
         version: 7.6.19(lit@3.1.3)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@storybook/web-components-vite':
         specifier: ^7.6.16
-        version: 7.6.19(@preact/preset-vite@2.8.2(@babel/core@7.24.5)(vite@4.5.2(@types/node@20.12.12)(terser@5.31.0)))(lit@3.1.3)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.5.2)(vite@4.5.2(@types/node@20.12.12)(terser@5.31.0))
+        version: 7.6.19(@preact/preset-vite@2.8.2(vite@4.5.2(@types/node@20.12.12)(terser@5.31.0)))(lit@3.1.3)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.5.2)(vite@4.5.2(@types/node@20.12.12)(terser@5.31.0))
       '@types/chroma-js':
         specifier: ^2.4.4
         version: 2.4.4
@@ -1793,7 +1793,7 @@ importers:
         version: 0.10.10(solid-js@1.8.17)
       '@solidjs/start':
         specifier: ^0.4
-        version: 0.4.11(rollup@4.17.2)(solid-js@1.8.17)(vinxi@0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(preact@10.21.0)(rollup@4.17.2)(terser@5.31.0))(vite@4.5.2(@types/node@20.12.7)(terser@5.31.0))
+        version: 0.4.11(rollup@4.17.2)(solid-js@1.8.17)(vinxi@0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(rollup@4.17.2)(terser@5.31.0))(vite@4.5.2(@types/node@20.12.7)(terser@5.31.0))
       solid-js:
         specifier: ^1.8
         version: 1.8.17
@@ -2502,6 +2502,9 @@ importers:
       '@inlang/sdk':
         specifier: workspace:*
         version: link:..
+      '@inlang/settings-component':
+        specifier: workspace:*
+        version: link:../../settings-component
       '@isomorphic-git/cors-proxy':
         specifier: ^2.7.1
         version: 2.7.1
@@ -2675,7 +2678,7 @@ importers:
         version: 7.6.19(lit@3.1.3)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@storybook/web-components-vite':
         specifier: ^7.6.16
-        version: 7.6.19(@preact/preset-vite@2.8.2(@babel/core@7.24.5)(vite@4.5.2(@types/node@20.12.12)(terser@5.31.0)))(lit@3.1.3)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.5.2)(vite@4.5.2(@types/node@20.12.12)(terser@5.31.0))
+        version: 7.6.19(@preact/preset-vite@2.8.2(vite@4.5.2(@types/node@20.12.12)(terser@5.31.0)))(lit@3.1.3)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.5.2)(vite@4.5.2(@types/node@20.12.12)(terser@5.31.0))
       '@types/chroma-js':
         specifier: ^2.4.4
         version: 2.4.4
@@ -21320,26 +21323,6 @@ snapshots:
 
   '@popperjs/core@2.11.8': {}
 
-  '@preact/preset-vite@2.8.2(@babel/core@7.24.5)(preact@10.21.0)(vite@4.5.2(@types/node@20.12.7)(terser@5.31.0))':
-    dependencies:
-      '@babel/core': 7.24.5
-      '@babel/plugin-transform-react-jsx': 7.24.7(@babel/core@7.24.5)
-      '@babel/plugin-transform-react-jsx-development': 7.24.7(@babel/core@7.24.5)
-      '@prefresh/vite': 2.4.5(preact@10.21.0)(vite@4.5.2(@types/node@20.12.7)(terser@5.31.0))
-      '@rollup/pluginutils': 4.2.1
-      babel-plugin-transform-hook-names: 1.0.2(@babel/core@7.24.5)
-      debug: 4.3.4(supports-color@8.1.1)
-      kolorist: 1.8.0
-      magic-string: 0.30.5
-      node-html-parser: 6.1.13
-      resolve: 1.22.8
-      source-map: 0.7.4
-      stack-trace: 1.0.0-pre2
-      vite: 4.5.2(@types/node@20.12.7)(terser@5.31.0)
-    transitivePeerDependencies:
-      - preact
-      - supports-color
-
   '@preact/preset-vite@2.8.2(@babel/core@7.24.5)(vite@4.5.2(@types/node@20.12.12)(terser@5.31.0))':
     dependencies:
       '@babel/core': 7.24.5
@@ -21361,37 +21344,74 @@ snapshots:
       - supports-color
     optional: true
 
-  '@prefresh/babel-plugin@0.5.1': {}
-
-  '@prefresh/core@1.5.2(preact@10.21.0)':
-    dependencies:
-      preact: 10.21.0
-
-  '@prefresh/utils@1.2.0': {}
-
-  '@prefresh/vite@2.4.5(preact@10.21.0)(vite@4.5.2(@types/node@20.12.7)(terser@5.31.0))':
+  '@preact/preset-vite@2.8.2(@babel/core@7.24.5)(vite@4.5.2(@types/node@20.12.7)(terser@5.31.0))':
     dependencies:
       '@babel/core': 7.24.5
-      '@prefresh/babel-plugin': 0.5.1
-      '@prefresh/core': 1.5.2(preact@10.21.0)
-      '@prefresh/utils': 1.2.0
+      '@babel/plugin-transform-react-jsx': 7.24.7(@babel/core@7.24.5)
+      '@babel/plugin-transform-react-jsx-development': 7.24.7(@babel/core@7.24.5)
+      '@prefresh/vite': 2.4.5(vite@4.5.2(@types/node@20.12.7)(terser@5.31.0))
       '@rollup/pluginutils': 4.2.1
-      preact: 10.21.0
+      babel-plugin-transform-hook-names: 1.0.2(@babel/core@7.24.5)
+      debug: 4.3.4(supports-color@8.1.1)
+      kolorist: 1.8.0
+      magic-string: 0.30.5
+      node-html-parser: 6.1.13
+      resolve: 1.22.8
+      source-map: 0.7.4
+      stack-trace: 1.0.0-pre2
       vite: 4.5.2(@types/node@20.12.7)(terser@5.31.0)
     transitivePeerDependencies:
+      - preact
       - supports-color
+
+  '@preact/preset-vite@2.8.2(vite@4.5.2(@types/node@20.12.12)(terser@5.31.0))':
+    dependencies:
+      '@babel/plugin-transform-react-jsx': 7.24.7(@babel/core@7.24.5)
+      '@babel/plugin-transform-react-jsx-development': 7.24.7(@babel/core@7.24.5)
+      '@prefresh/vite': 2.4.5(vite@4.5.2(@types/node@20.12.12)(terser@5.31.0))
+      '@rollup/pluginutils': 4.2.1
+      babel-plugin-transform-hook-names: 1.0.2(@babel/core@7.24.5)
+      debug: 4.3.4(supports-color@8.1.1)
+      kolorist: 1.8.0
+      magic-string: 0.30.5
+      node-html-parser: 6.1.13
+      resolve: 1.22.8
+      source-map: 0.7.4
+      stack-trace: 1.0.0-pre2
+      vite: 4.5.2(@types/node@20.12.12)(terser@5.31.0)
+    transitivePeerDependencies:
+      - preact
+      - supports-color
+    optional: true
+
+  '@prefresh/babel-plugin@0.5.1': {}
+
+  '@prefresh/core@1.5.2': {}
+
+  '@prefresh/utils@1.2.0': {}
 
   '@prefresh/vite@2.4.5(vite@4.5.2(@types/node@20.12.12)(terser@5.31.0))':
     dependencies:
       '@babel/core': 7.24.5
       '@prefresh/babel-plugin': 0.5.1
-      '@prefresh/core': 1.5.2(preact@10.21.0)
+      '@prefresh/core': 1.5.2
       '@prefresh/utils': 1.2.0
       '@rollup/pluginutils': 4.2.1
       vite: 4.5.2(@types/node@20.12.12)(terser@5.31.0)
     transitivePeerDependencies:
       - supports-color
     optional: true
+
+  '@prefresh/vite@2.4.5(vite@4.5.2(@types/node@20.12.7)(terser@5.31.0))':
+    dependencies:
+      '@babel/core': 7.24.5
+      '@prefresh/babel-plugin': 0.5.1
+      '@prefresh/core': 1.5.2
+      '@prefresh/utils': 1.2.0
+      '@rollup/pluginutils': 4.2.1
+      vite: 4.5.2(@types/node@20.12.7)(terser@5.31.0)
+    transitivePeerDependencies:
+      - supports-color
 
   '@promptbook/utils@0.48.0-1':
     dependencies:
@@ -22324,11 +22344,11 @@ snapshots:
     dependencies:
       solid-js: 1.8.17
 
-  '@solidjs/start@0.4.11(rollup@4.17.2)(solid-js@1.8.17)(vinxi@0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(preact@10.21.0)(rollup@4.17.2)(terser@5.31.0))(vite@4.5.2(@types/node@20.12.7)(terser@5.31.0))':
+  '@solidjs/start@0.4.11(rollup@4.17.2)(solid-js@1.8.17)(vinxi@0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(rollup@4.17.2)(terser@5.31.0))(vite@4.5.2(@types/node@20.12.7)(terser@5.31.0))':
     dependencies:
-      '@vinxi/plugin-directives': 0.1.3(vinxi@0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(preact@10.21.0)(rollup@4.17.2)(terser@5.31.0))
-      '@vinxi/server-components': 0.1.3(vinxi@0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(preact@10.21.0)(rollup@4.17.2)(terser@5.31.0))
-      '@vinxi/server-functions': 0.1.4(vinxi@0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(preact@10.21.0)(rollup@4.17.2)(terser@5.31.0))
+      '@vinxi/plugin-directives': 0.1.3(vinxi@0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(rollup@4.17.2)(terser@5.31.0))
+      '@vinxi/server-components': 0.1.3(vinxi@0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(rollup@4.17.2)(terser@5.31.0))
+      '@vinxi/server-functions': 0.1.4(vinxi@0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(rollup@4.17.2)(terser@5.31.0))
       defu: 6.1.4
       error-stack-parser: 2.1.4
       html-to-image: 1.11.11
@@ -22533,6 +22553,32 @@ snapshots:
       vite: 4.5.2(@types/node@20.12.12)(terser@5.31.0)
     optionalDependencies:
       '@preact/preset-vite': 2.8.2(@babel/core@7.24.5)(vite@4.5.2(@types/node@20.12.12)(terser@5.31.0))
+      typescript: 5.5.2
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
+
+  '@storybook/builder-vite@7.6.19(@preact/preset-vite@2.8.2(vite@4.5.2(@types/node@20.12.12)(terser@5.31.0)))(typescript@5.5.2)(vite@4.5.2(@types/node@20.12.12)(terser@5.31.0))':
+    dependencies:
+      '@storybook/channels': 7.6.19
+      '@storybook/client-logger': 7.6.19
+      '@storybook/core-common': 7.6.19
+      '@storybook/csf-plugin': 7.6.19
+      '@storybook/node-logger': 7.6.19
+      '@storybook/preview': 7.6.19
+      '@storybook/preview-api': 7.6.19
+      '@storybook/types': 7.6.19
+      '@types/find-cache-dir': 3.2.1
+      browser-assert: 1.2.1
+      es-module-lexer: 0.9.3
+      express: 4.19.2
+      find-cache-dir: 3.3.2
+      fs-extra: 11.2.0
+      magic-string: 0.30.10
+      rollup: 3.29.1
+      vite: 4.5.2(@types/node@20.12.12)(terser@5.31.0)
+    optionalDependencies:
+      '@preact/preset-vite': 2.8.2(vite@4.5.2(@types/node@20.12.12)(terser@5.31.0))
       typescript: 5.5.2
     transitivePeerDependencies:
       - encoding
@@ -22877,6 +22923,26 @@ snapshots:
       - vite
       - vite-plugin-glimmerx
 
+  '@storybook/web-components-vite@7.6.19(@preact/preset-vite@2.8.2(vite@4.5.2(@types/node@20.12.12)(terser@5.31.0)))(lit@3.1.3)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.5.2)(vite@4.5.2(@types/node@20.12.12)(terser@5.31.0))':
+    dependencies:
+      '@storybook/builder-vite': 7.6.19(@preact/preset-vite@2.8.2(vite@4.5.2(@types/node@20.12.12)(terser@5.31.0)))(typescript@5.5.2)(vite@4.5.2(@types/node@20.12.12)(terser@5.31.0))
+      '@storybook/core-server': 7.6.19
+      '@storybook/node-logger': 7.6.19
+      '@storybook/web-components': 7.6.19(lit@3.1.3)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      magic-string: 0.30.10
+    transitivePeerDependencies:
+      - '@preact/preset-vite'
+      - bufferutil
+      - encoding
+      - lit
+      - react
+      - react-dom
+      - supports-color
+      - typescript
+      - utf-8-validate
+      - vite
+      - vite-plugin-glimmerx
+
   '@storybook/web-components@7.6.19(lit@3.1.3)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@storybook/client-logger': 7.6.19
@@ -23197,97 +23263,97 @@ snapshots:
     dependencies:
       '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
 
-  '@tiptap/extension-blockquote@2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
+  '@tiptap/extension-blockquote@2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
 
-  '@tiptap/extension-bold@2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
+  '@tiptap/extension-bold@2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
 
-  '@tiptap/extension-bullet-list@2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
+  '@tiptap/extension-bullet-list@2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
 
-  '@tiptap/extension-code-block@2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
-    dependencies:
-      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
-      '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
-
-  '@tiptap/extension-code@2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
-    dependencies:
-      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
-
-  '@tiptap/extension-document@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
-    dependencies:
-      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
-
-  '@tiptap/extension-dropcursor@2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
+  '@tiptap/extension-code-block@2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
       '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
 
-  '@tiptap/extension-floating-menu@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
+  '@tiptap/extension-code@2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))':
+    dependencies:
+      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
+
+  '@tiptap/extension-document@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))':
+    dependencies:
+      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
+
+  '@tiptap/extension-dropcursor@2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
+    dependencies:
+      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
+      '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
+
+  '@tiptap/extension-floating-menu@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
       '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
       tippy.js: 6.3.7
 
-  '@tiptap/extension-gapcursor@2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
+  '@tiptap/extension-gapcursor@2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
       '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
 
-  '@tiptap/extension-hard-break@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
+  '@tiptap/extension-hard-break@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
 
-  '@tiptap/extension-heading@2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
+  '@tiptap/extension-heading@2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
 
-  '@tiptap/extension-history@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
-    dependencies:
-      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
-      '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
-
-  '@tiptap/extension-horizontal-rule@2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
+  '@tiptap/extension-history@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
       '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
 
-  '@tiptap/extension-italic@2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
-    dependencies:
-      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
-
-  '@tiptap/extension-list-item@2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
-    dependencies:
-      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
-
-  '@tiptap/extension-mention@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))(@tiptap/suggestion@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
-    dependencies:
-      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
-      '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
-      '@tiptap/suggestion': 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
-
-  '@tiptap/extension-ordered-list@2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
-    dependencies:
-      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
-
-  '@tiptap/extension-paragraph@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
-    dependencies:
-      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
-
-  '@tiptap/extension-placeholder@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
+  '@tiptap/extension-horizontal-rule@2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
       '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
 
-  '@tiptap/extension-strike@2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
+  '@tiptap/extension-italic@2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
 
-  '@tiptap/extension-text@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
+  '@tiptap/extension-list-item@2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))':
+    dependencies:
+      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
+
+  '@tiptap/extension-mention@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))(@tiptap/suggestion@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))':
+    dependencies:
+      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
+      '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
+      '@tiptap/suggestion': 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
+
+  '@tiptap/extension-ordered-list@2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))':
+    dependencies:
+      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
+
+  '@tiptap/extension-paragraph@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))':
+    dependencies:
+      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
+
+  '@tiptap/extension-placeholder@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
+    dependencies:
+      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
+      '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
+
+  '@tiptap/extension-strike@2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))':
+    dependencies:
+      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
+
+  '@tiptap/extension-text@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
 
@@ -23316,28 +23382,28 @@ snapshots:
   '@tiptap/starter-kit@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
-      '@tiptap/extension-blockquote': 2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
-      '@tiptap/extension-bold': 2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
-      '@tiptap/extension-bullet-list': 2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
-      '@tiptap/extension-code': 2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
-      '@tiptap/extension-code-block': 2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
-      '@tiptap/extension-document': 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
-      '@tiptap/extension-dropcursor': 2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
-      '@tiptap/extension-gapcursor': 2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
-      '@tiptap/extension-hard-break': 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
-      '@tiptap/extension-heading': 2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
-      '@tiptap/extension-history': 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
-      '@tiptap/extension-horizontal-rule': 2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
-      '@tiptap/extension-italic': 2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
-      '@tiptap/extension-list-item': 2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
-      '@tiptap/extension-ordered-list': 2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
-      '@tiptap/extension-paragraph': 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
-      '@tiptap/extension-strike': 2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
-      '@tiptap/extension-text': 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))
+      '@tiptap/extension-blockquote': 2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
+      '@tiptap/extension-bold': 2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
+      '@tiptap/extension-bullet-list': 2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
+      '@tiptap/extension-code': 2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
+      '@tiptap/extension-code-block': 2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
+      '@tiptap/extension-document': 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
+      '@tiptap/extension-dropcursor': 2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
+      '@tiptap/extension-gapcursor': 2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
+      '@tiptap/extension-hard-break': 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
+      '@tiptap/extension-heading': 2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
+      '@tiptap/extension-history': 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
+      '@tiptap/extension-horizontal-rule': 2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))
+      '@tiptap/extension-italic': 2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
+      '@tiptap/extension-list-item': 2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
+      '@tiptap/extension-ordered-list': 2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
+      '@tiptap/extension-paragraph': 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
+      '@tiptap/extension-strike': 2.3.1(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
+      '@tiptap/extension-text': 2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))
     transitivePeerDependencies:
       - '@tiptap/pm'
 
-  '@tiptap/suggestion@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
+  '@tiptap/suggestion@2.0.3(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))':
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
       '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
@@ -23774,17 +23840,17 @@ snapshots:
   '@typescript-eslint/eslint-plugin@5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.3.2)':
     dependencies:
       '@eslint-community/regexpp': 4.10.0
-      '@typescript-eslint/parser': 5.56.0(eslint@8.57.0)(typescript@5.3.2)
+      '@typescript-eslint/parser': 5.56.0(eslint@8.57.0)(typescript@5.0.3)
       '@typescript-eslint/scope-manager': 5.56.0
-      '@typescript-eslint/type-utils': 5.56.0(eslint@8.57.0)(typescript@5.3.2)
-      '@typescript-eslint/utils': 5.56.0(eslint@8.57.0)(typescript@5.3.2)
+      '@typescript-eslint/type-utils': 5.56.0(eslint@8.57.0)(typescript@5.0.3)
+      '@typescript-eslint/utils': 5.56.0(eslint@8.57.0)(typescript@5.0.3)
       debug: 4.3.4(supports-color@8.1.1)
       eslint: 8.57.0
       grapheme-splitter: 1.0.4
       ignore: 5.3.1
       natural-compare-lite: 1.4.0
       semver: 7.6.0
-      tsutils: 3.21.0(typescript@5.3.2)
+      tsutils: 3.21.0(typescript@5.0.3)
     optionalDependencies:
       typescript: 5.3.2
     transitivePeerDependencies:
@@ -23858,15 +23924,15 @@ snapshots:
       - supports-color
       - typescript
 
-  '@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2)':
+  '@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.0.3)':
     dependencies:
       '@typescript-eslint/scope-manager': 5.56.0
       '@typescript-eslint/types': 5.56.0
-      '@typescript-eslint/typescript-estree': 5.56.0(typescript@5.3.2)
+      '@typescript-eslint/typescript-estree': 5.56.0(typescript@5.0.3)
       debug: 4.3.4(supports-color@8.1.1)
       eslint: 8.57.0
     optionalDependencies:
-      typescript: 5.3.2
+      typescript: 5.0.3
     transitivePeerDependencies:
       - supports-color
 
@@ -23942,15 +24008,15 @@ snapshots:
       '@typescript-eslint/types': 7.7.0
       '@typescript-eslint/visitor-keys': 7.7.0
 
-  '@typescript-eslint/type-utils@5.56.0(eslint@8.57.0)(typescript@5.3.2)':
+  '@typescript-eslint/type-utils@5.56.0(eslint@8.57.0)(typescript@5.0.3)':
     dependencies:
-      '@typescript-eslint/typescript-estree': 5.56.0(typescript@5.3.2)
-      '@typescript-eslint/utils': 5.56.0(eslint@8.57.0)(typescript@5.3.2)
+      '@typescript-eslint/typescript-estree': 5.56.0(typescript@5.0.3)
+      '@typescript-eslint/utils': 5.56.0(eslint@8.57.0)(typescript@5.0.3)
       debug: 4.3.4(supports-color@8.1.1)
       eslint: 8.57.0
-      tsutils: 3.21.0(typescript@5.3.2)
+      tsutils: 3.21.0(typescript@5.0.3)
     optionalDependencies:
-      typescript: 5.3.2
+      typescript: 5.0.3
     transitivePeerDependencies:
       - supports-color
 
@@ -23998,7 +24064,7 @@ snapshots:
 
   '@typescript-eslint/types@7.7.0': {}
 
-  '@typescript-eslint/typescript-estree@5.56.0(typescript@5.3.2)':
+  '@typescript-eslint/typescript-estree@5.56.0(typescript@5.0.3)':
     dependencies:
       '@typescript-eslint/types': 5.56.0
       '@typescript-eslint/visitor-keys': 5.56.0
@@ -24006,9 +24072,9 @@ snapshots:
       globby: 11.1.0
       is-glob: 4.0.3
       semver: 7.6.0
-      tsutils: 3.21.0(typescript@5.3.2)
+      tsutils: 3.21.0(typescript@5.0.3)
     optionalDependencies:
-      typescript: 5.3.2
+      typescript: 5.0.3
     transitivePeerDependencies:
       - supports-color
 
@@ -24086,14 +24152,14 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/utils@5.56.0(eslint@8.57.0)(typescript@5.3.2)':
+  '@typescript-eslint/utils@5.56.0(eslint@8.57.0)(typescript@5.0.3)':
     dependencies:
       '@eslint-community/eslint-utils': 4.4.0(eslint@8.57.0)
       '@types/json-schema': 7.0.15
       '@types/semver': 7.5.8
       '@typescript-eslint/scope-manager': 5.56.0
       '@typescript-eslint/types': 5.56.0
-      '@typescript-eslint/typescript-estree': 5.56.0(typescript@5.3.2)
+      '@typescript-eslint/typescript-estree': 5.56.0(typescript@5.0.3)
       eslint: 8.57.0
       eslint-scope: 5.1.1
       semver: 7.6.0
@@ -24228,9 +24294,9 @@ snapshots:
       - encoding
       - supports-color
 
-  '@vinxi/devtools@0.1.1(@babel/core@7.24.5)(preact@10.21.0)(rollup@4.17.2)(vite@4.5.2(@types/node@20.12.7)(terser@5.31.0))':
+  '@vinxi/devtools@0.1.1(@babel/core@7.24.5)(rollup@4.17.2)(vite@4.5.2(@types/node@20.12.7)(terser@5.31.0))':
     dependencies:
-      '@preact/preset-vite': 2.8.2(@babel/core@7.24.5)(preact@10.21.0)(vite@4.5.2(@types/node@20.12.7)(terser@5.31.0))
+      '@preact/preset-vite': 2.8.2(@babel/core@7.24.5)(vite@4.5.2(@types/node@20.12.7)(terser@5.31.0))
       '@solidjs/router': 0.8.4(solid-js@1.8.17)
       birpc: 0.2.17
       solid-js: 1.8.17
@@ -24269,7 +24335,7 @@ snapshots:
     transitivePeerDependencies:
       - uWebSockets.js
 
-  '@vinxi/plugin-directives@0.1.3(vinxi@0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(preact@10.21.0)(rollup@4.17.2)(terser@5.31.0))':
+  '@vinxi/plugin-directives@0.1.3(vinxi@0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(rollup@4.17.2)(terser@5.31.0))':
     dependencies:
       '@babel/parser': 7.24.5
       acorn: 8.11.3
@@ -24280,29 +24346,29 @@ snapshots:
       magicast: 0.2.11
       recast: 0.23.6
       tslib: 2.6.2
-      vinxi: 0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(preact@10.21.0)(rollup@4.17.2)(terser@5.31.0)
+      vinxi: 0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(rollup@4.17.2)(terser@5.31.0)
 
-  '@vinxi/server-components@0.1.3(vinxi@0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(preact@10.21.0)(rollup@4.17.2)(terser@5.31.0))':
+  '@vinxi/server-components@0.1.3(vinxi@0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(rollup@4.17.2)(terser@5.31.0))':
     dependencies:
-      '@vinxi/plugin-directives': 0.1.3(vinxi@0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(preact@10.21.0)(rollup@4.17.2)(terser@5.31.0))
+      '@vinxi/plugin-directives': 0.1.3(vinxi@0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(rollup@4.17.2)(terser@5.31.0))
       acorn: 8.11.3
       acorn-loose: 8.4.0
       acorn-typescript: 1.4.13(acorn@8.11.3)
       astring: 1.8.6
       magicast: 0.2.11
       recast: 0.23.6
-      vinxi: 0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(preact@10.21.0)(rollup@4.17.2)(terser@5.31.0)
+      vinxi: 0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(rollup@4.17.2)(terser@5.31.0)
 
-  '@vinxi/server-functions@0.1.4(vinxi@0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(preact@10.21.0)(rollup@4.17.2)(terser@5.31.0))':
+  '@vinxi/server-functions@0.1.4(vinxi@0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(rollup@4.17.2)(terser@5.31.0))':
     dependencies:
-      '@vinxi/plugin-directives': 0.1.3(vinxi@0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(preact@10.21.0)(rollup@4.17.2)(terser@5.31.0))
+      '@vinxi/plugin-directives': 0.1.3(vinxi@0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(rollup@4.17.2)(terser@5.31.0))
       acorn: 8.11.3
       acorn-loose: 8.4.0
       acorn-typescript: 1.4.13(acorn@8.11.3)
       astring: 1.8.6
       magicast: 0.2.11
       recast: 0.23.6
-      vinxi: 0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(preact@10.21.0)(rollup@4.17.2)(terser@5.31.0)
+      vinxi: 0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(rollup@4.17.2)(terser@5.31.0)
 
   '@vitejs/plugin-react@4.2.1(vite@4.5.2(@types/node@20.12.7)(terser@5.31.0))':
     dependencies:
@@ -27224,7 +27290,7 @@ snapshots:
       '@babel/preset-react': 7.18.6(@babel/core@7.21.4)
       '@next/eslint-plugin-next': 13.2.4
       '@typescript-eslint/eslint-plugin': 5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.3.2)
-      '@typescript-eslint/parser': 5.56.0(eslint@8.57.0)(typescript@5.3.2)
+      '@typescript-eslint/parser': 5.56.0(eslint@8.57.0)(typescript@5.0.3)
       confusing-browser-globals: 1.0.11
       eslint: 8.57.0
       eslint-config-prettier: 8.8.0(eslint@8.57.0)
@@ -27232,8 +27298,8 @@ snapshots:
       eslint-import-resolver-node: 0.3.7
       eslint-import-resolver-typescript: 3.5.4(eslint-plugin-import@2.27.5)(eslint@8.57.0)
       eslint-plugin-etc: 2.0.2(eslint@8.57.0)(typescript@5.0.3)
-      eslint-plugin-import: 2.27.5(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.0.3))(eslint-import-resolver-typescript@3.5.4)(eslint@8.57.0)
-      eslint-plugin-jest: 27.2.1(@typescript-eslint/eslint-plugin@5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.0.3))(eslint@8.57.0)(typescript@5.0.3))(eslint@8.57.0)(typescript@5.0.3)
+      eslint-plugin-import: 2.27.5(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint-import-resolver-typescript@3.5.4)(eslint@8.57.0)
+      eslint-plugin-jest: 27.2.1(@typescript-eslint/eslint-plugin@5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.0.3))(eslint@8.57.0)(typescript@5.0.3)
       eslint-plugin-jest-dom: 4.0.3(eslint@8.57.0)
       eslint-plugin-jest-formatting: 3.1.0(eslint@8.57.0)
       eslint-plugin-jsx-a11y: 6.7.1(eslint@8.57.0)
@@ -27262,8 +27328,8 @@ snapshots:
       '@typescript-eslint/parser': 6.21.0(eslint@8.41.0)(typescript@5.0.4)
       eslint: 8.41.0
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1)(eslint@8.41.0)
-      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.2))(eslint@8.41.0)
+      eslint-import-resolver-typescript: 3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.2))(eslint@8.41.0))(eslint@8.41.0)
+      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.2))(eslint@8.41.0))(eslint@8.41.0))(eslint@8.41.0)
       eslint-plugin-jsx-a11y: 6.8.0(eslint@8.41.0)
       eslint-plugin-react: 7.34.1(eslint@8.41.0)
       eslint-plugin-react-hooks: 4.6.2(eslint@8.41.0)
@@ -27289,7 +27355,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/experimental-utils': 5.62.0(eslint@8.57.0)(typescript@5.0.3)
       eslint: 8.57.0
-      tsutils: 3.21.0(typescript@5.3.2)
+      tsutils: 3.21.0(typescript@5.0.3)
       tsutils-etc: 1.4.2(tsutils@3.21.0(typescript@5.0.3))(typescript@5.0.3)
       typescript: 5.0.3
     transitivePeerDependencies:
@@ -27333,7 +27399,7 @@ snapshots:
       debug: 4.3.4(supports-color@8.1.1)
       enhanced-resolve: 5.16.0
       eslint: 8.57.0
-      eslint-plugin-import: 2.27.5(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.0.3))(eslint-import-resolver-typescript@3.5.4)(eslint@8.57.0)
+      eslint-plugin-import: 2.27.5(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint-import-resolver-typescript@3.5.4)(eslint@8.57.0)
       get-tsconfig: 4.7.4
       globby: 13.2.2
       is-core-module: 2.13.1
@@ -27342,13 +27408,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1)(eslint@8.41.0):
+  eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.2))(eslint@8.41.0))(eslint@8.41.0):
     dependencies:
       debug: 4.3.4(supports-color@8.1.1)
       enhanced-resolve: 5.16.0
       eslint: 8.41.0
-      eslint-module-utils: 2.8.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1)(eslint@8.41.0))(eslint@8.41.0)
-      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.2))(eslint@8.41.0)
+      eslint-module-utils: 2.8.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.2))(eslint@8.41.0))(eslint@8.41.0))(eslint@8.41.0)
+      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.2))(eslint@8.41.0))(eslint@8.41.0))(eslint@8.41.0)
       fast-glob: 3.3.2
       get-tsconfig: 4.7.4
       is-core-module: 2.13.1
@@ -27359,25 +27425,25 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-module-utils@2.8.1(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.0.3))(eslint-import-resolver-node@0.3.7)(eslint-import-resolver-typescript@3.5.4(eslint-plugin-import@2.27.5)(eslint@8.57.0))(eslint@8.57.0):
+  eslint-module-utils@2.8.1(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint-import-resolver-node@0.3.7)(eslint-import-resolver-typescript@3.5.4(eslint-plugin-import@2.27.5)(eslint@8.57.0))(eslint@8.57.0):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
-      '@typescript-eslint/parser': 5.56.0(eslint@8.57.0)(typescript@5.3.2)
+      '@typescript-eslint/parser': 5.56.0(eslint@8.57.0)(typescript@5.0.3)
       eslint: 8.57.0
       eslint-import-resolver-node: 0.3.7
       eslint-import-resolver-typescript: 3.5.4(eslint-plugin-import@2.27.5)(eslint@8.57.0)
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.8.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1)(eslint@8.41.0))(eslint@8.41.0):
+  eslint-module-utils@2.8.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.2))(eslint@8.41.0))(eslint@8.41.0))(eslint@8.41.0):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
       '@typescript-eslint/parser': 6.21.0(eslint@8.41.0)(typescript@5.0.4)
       eslint: 8.41.0
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1)(eslint@8.41.0)
+      eslint-import-resolver-typescript: 3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.2))(eslint@8.41.0))(eslint@8.41.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -27394,7 +27460,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.27.5(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.0.3))(eslint-import-resolver-typescript@3.5.4)(eslint@8.57.0):
+  eslint-plugin-import@2.27.5(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint-import-resolver-typescript@3.5.4)(eslint@8.57.0):
     dependencies:
       array-includes: 3.1.8
       array.prototype.flat: 1.3.2
@@ -27403,7 +27469,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.0
       eslint-import-resolver-node: 0.3.7
-      eslint-module-utils: 2.8.1(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.0.3))(eslint-import-resolver-node@0.3.7)(eslint-import-resolver-typescript@3.5.4(eslint-plugin-import@2.27.5)(eslint@8.57.0))(eslint@8.57.0)
+      eslint-module-utils: 2.8.1(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint-import-resolver-node@0.3.7)(eslint-import-resolver-typescript@3.5.4(eslint-plugin-import@2.27.5)(eslint@8.57.0))(eslint@8.57.0)
       has: 1.0.4
       is-core-module: 2.13.1
       is-glob: 4.0.3
@@ -27413,13 +27479,13 @@ snapshots:
       semver: 6.3.1
       tsconfig-paths: 3.15.0
     optionalDependencies:
-      '@typescript-eslint/parser': 5.56.0(eslint@8.57.0)(typescript@5.3.2)
+      '@typescript-eslint/parser': 5.56.0(eslint@8.57.0)(typescript@5.0.3)
     transitivePeerDependencies:
       - eslint-import-resolver-typescript
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.2))(eslint@8.41.0):
+  eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.2))(eslint@8.41.0))(eslint@8.41.0))(eslint@8.41.0):
     dependencies:
       array-includes: 3.1.8
       array.prototype.findlastindex: 1.2.5
@@ -27429,7 +27495,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.41.0
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.8.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1)(eslint@8.41.0))(eslint@8.41.0)
+      eslint-module-utils: 2.8.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.2))(eslint@8.41.0))(eslint@8.41.0))(eslint@8.41.0)
       hasown: 2.0.2
       is-core-module: 2.13.1
       is-glob: 4.0.3
@@ -27440,7 +27506,7 @@ snapshots:
       semver: 6.3.1
       tsconfig-paths: 3.15.0
     optionalDependencies:
-      '@typescript-eslint/parser': 6.21.0(eslint@8.57.0)(typescript@5.5.2)
+      '@typescript-eslint/parser': 6.21.0(eslint@8.41.0)(typescript@5.0.4)
     transitivePeerDependencies:
       - eslint-import-resolver-typescript
       - eslint-import-resolver-webpack
@@ -27457,7 +27523,7 @@ snapshots:
     dependencies:
       eslint: 8.57.0
 
-  eslint-plugin-jest@27.2.1(@typescript-eslint/eslint-plugin@5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.0.3))(eslint@8.57.0)(typescript@5.0.3))(eslint@8.57.0)(typescript@5.0.3):
+  eslint-plugin-jest@27.2.1(@typescript-eslint/eslint-plugin@5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.0.3))(eslint@8.57.0)(typescript@5.0.3):
     dependencies:
       '@typescript-eslint/utils': 5.62.0(eslint@8.57.0)(typescript@5.0.3)
       eslint: 8.57.0
@@ -34341,17 +34407,17 @@ snapshots:
       keen-slider: 6.8.6
       solid-js: 1.8.17
 
-  solid-tiptap@0.6.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3(@tiptap/core@2.0.3)))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))(solid-js@1.8.17):
-    dependencies:
-      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
-      '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
-      solid-js: 1.8.17
-
   solid-tiptap@0.6.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))(solid-js@1.7.11):
     dependencies:
       '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
       '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
       solid-js: 1.7.11
+
+  solid-tiptap@0.6.0(@tiptap/core@2.0.3(@tiptap/pm@2.0.3))(@tiptap/pm@2.0.3(@tiptap/core@2.0.3))(solid-js@1.8.17):
+    dependencies:
+      '@tiptap/core': 2.0.3(@tiptap/pm@2.0.3)
+      '@tiptap/pm': 2.0.3(@tiptap/core@2.0.3)
+      solid-js: 1.8.17
 
   solid-use@0.8.0(solid-js@1.8.17):
     dependencies:
@@ -35690,7 +35756,7 @@ snapshots:
   tsutils-etc@1.4.2(tsutils@3.21.0(typescript@5.0.3))(typescript@5.0.3):
     dependencies:
       '@types/yargs': 17.0.32
-      tsutils: 3.21.0(typescript@5.3.2)
+      tsutils: 3.21.0(typescript@5.0.3)
       typescript: 5.0.3
       yargs: 17.7.2
 
@@ -35698,11 +35764,6 @@ snapshots:
     dependencies:
       tslib: 1.14.1
       typescript: 5.0.3
-
-  tsutils@3.21.0(typescript@5.3.2):
-    dependencies:
-      tslib: 1.14.1
-      typescript: 5.3.2
 
   tsx@3.12.7:
     dependencies:
@@ -36325,7 +36386,7 @@ snapshots:
       source-map-support: 0.5.21
       vite: 4.5.2(@types/node@20.5.9)(terser@5.31.0)
 
-  vinxi@0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(preact@10.21.0)(rollup@4.17.2)(terser@5.31.0):
+  vinxi@0.1.10(@azure/identity@4.2.0)(@opentelemetry/api@1.8.0)(@types/node@20.12.7)(rollup@4.17.2)(terser@5.31.0):
     dependencies:
       '@babel/core': 7.24.5
       '@babel/plugin-syntax-jsx': 7.24.7(@babel/core@7.24.5)
@@ -36333,7 +36394,7 @@ snapshots:
       '@types/micromatch': 4.0.7
       '@types/serve-static': 1.15.7
       '@types/ws': 8.5.10
-      '@vinxi/devtools': 0.1.1(@babel/core@7.24.5)(preact@10.21.0)(rollup@4.17.2)(vite@4.5.2(@types/node@20.12.7)(terser@5.31.0))
+      '@vinxi/devtools': 0.1.1(@babel/core@7.24.5)(rollup@4.17.2)(vite@4.5.2(@types/node@20.12.7)(terser@5.31.0))
       '@vinxi/listhen': 1.5.6
       boxen: 7.1.1
       c12: 1.10.0
