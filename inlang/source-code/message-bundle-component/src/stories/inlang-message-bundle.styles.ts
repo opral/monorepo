@@ -10,13 +10,96 @@ export const messageBundleStyling = css`
 		font-size: 13px;
 	}
 	.header {
-		font-weight: 600;
+		display: flex;
+		justify-content: space-between;
 		background-color: var(--sl-color-neutral-300);
-		padding: 12px;
+		padding: 0 12px;
+		min-height: 44px;
+	}
+	.header-left {
+		font-weight: 600;
 		display: flex;
 		align-items: center;
-		gap: 10px;
+		gap: 16px;
 		min-height: 44px;
+	}
+	.header-right {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		min-height: 44px;
+	}
+	.separator {
+		height: 20px;
+		width: 1px;
+		background-color: var(--sl-color-neutral-400);
+		opacity: 0.7;
+		border-radius: 1px;
+	}
+	.inputs-wrapper {
+		display: flex;
+		align-items: center;
+		min-height: 44px;
+		gap: 8px;
+		color: var(--sl-color-neutral-600);
+	}
+	.inputs {
+		display: flex;
+		align-items: center;
+		min-height: 44px;
+		gap: 2px;
+	}
+	.input-tag::part(base) {
+		height: 28px;
+		padding: 8px !important;
+		background-color: var(--sl-color-neutral-0);
+		color: var(--sl-color-neutral-600);
+		border: 1px solid var(--sl-color-neutral-400);
+		font-weight: 500;
+		cursor: pointer;
+	}
+	.input-tag::part(base):hover {
+		background-color: var(--sl-color-neutral-200);
+		color: var(--sl-color-neutral-950);
+	}
+	.add-input::part(base) {
+		color: var(--sl-color-neutral-600);
+		border: 1px solid var(--sl-color-neutral-400);
+		background-color: var(--sl-color-neutral-0);
+	}
+	.add-input::part(base):hover {
+		color: var(--sl-color-neutral-950);
+		background-color: var(--sl-color-neutral-200);
+	}
+	.add-input-tag::part(base) {
+		color: var(--sl-color-neutral-600);
+		border: none;
+		background-color: transparent;
+		cursor: pointer;
+		height: 28px;
+	}
+	.add-input-tag::part(base):hover {
+		color: var(--sl-color-neutral-950);
+		background-color: var(--sl-color-neutral-200);
+	}
+	.header-button::part(base) {
+		color: var(--sl-color-neutral-600);
+		border: none;
+		background-color: transparent;
+		cursor: pointer;
+		height: 28px;
+	}
+	.header-button::part(base):hover {
+		color: var(--sl-color-neutral-950);
+		background-color: var(--sl-color-neutral-200);
+	}
+	.header-button::part(label) {
+		paddding-right: 4px;
+		padding-top: 1px;
+	}
+	.alias {
+		font-weight: 400;
+		color: var(--sl-color-neutral-600);
 	}
 	.messages-container {
 		width: 100%;
@@ -34,9 +117,12 @@ export const messageBundleStyling = css`
 		border-top: 1px solid var(--sl-color-neutral-300);
 	}
 	.language-container {
+		font-weight: 500;
 		width: 80px;
 		min-height: 44px;
-		padding: 12px;
+		padding-top: 12px;
+		padding-left: 12px;
+		padding-right: 12px;
 		background-color: var(--sl-color-neutral-100);
 		border-right: 1px solid var(--sl-color-neutral-300);
 	}
@@ -67,7 +153,18 @@ export const messageBundleStyling = css`
 		align-items: center;
 		padding: 12px;
 		border-right: 1px solid var(--sl-color-neutral-300);
-		font-weight: 600;
+		font-weight: 500;
+		cursor: pointer;
+	}
+	sl-menu-item::part(label) {
+		font-size: 14px;
+		padding-left: 12px;
+	}
+	sl-menu-item::part(checked-icon) {
+		display: none;
+	}
+	.selector:hover {
+		background-color: var(--sl-color-neutral-200);
 	}
 	.add-selector-container {
 		height: 44px;
@@ -99,6 +196,12 @@ export const messageBundleStyling = css`
 		display: flex;
 		align-items: center;
 		padding: 12px;
+		gap: 8px;
+	}
+	.message-actions-button::part(base):hover {
+		background-color: var(--sl-color-neutral-200);
+		color: var(--sl-color-neutral-900);
+		border: 1px solid var(--sl-color-neutral-400);
 	}
 	.variants-container {
 		width: 100%;
@@ -125,5 +228,11 @@ export const messageBundleStyling = css`
 	.new-variant:hover {
 		background-color: var(--sl-color-neutral-50);
 		color: var(--sl-color-neutral-700);
+	}
+	.ref-tag::part(base) {
+		background-color: var(--sl-color-neutral-600);
+		color: var(--sl-color-neutral-50);
+		border: none;
+		height: 22px;
 	}
 `

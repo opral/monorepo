@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { createMessage, createMessageBundle } from "@inlang/sdk/v2"
+import { createMessage, createMessageBundle, createVariant } from "@inlang/sdk/v2"
 import { describe, expect, it } from "vitest"
 import upsertVariant from "./upsert.js"
 
@@ -7,7 +7,17 @@ describe("upsertVariant", () => {
 	it("Should update existing variant", () => {
 		const bundle = createMessageBundle({
 			id: "bundle-id",
-			messages: [createMessage({ locale: "en", text: "Hello World", match: ["*"] })],
+			messages: [
+				{
+					id: "test_message_id",
+					locale: "en",
+					declarations: [],
+					selectors: [],
+					variants: [
+						createVariant({ id: "test_upsertVariant_id", match: ["*"], text: "Hello World" }),
+					],
+				},
+			],
 		})
 
 		expect(bundle.messages).toHaveLength(1)
@@ -52,7 +62,7 @@ describe("upsertVariant", () => {
 
 		expect(bundle.messages[0]?.variants).toHaveLength(2)
 		// it's 0 because it's sorted alphabetically
-		expect(bundle.messages[0]?.variants[0]?.pattern).toStrictEqual([
+		expect(bundle.messages[0]?.variants[1]?.pattern).toStrictEqual([
 			{ type: "text", value: "Hello Universe" },
 		])
 	})

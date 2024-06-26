@@ -1,5 +1,4 @@
 import type { Message, Variant } from "@inlang/sdk/v2"
-import { getNewVariantPosition } from "./sort.js"
 
 /**
  * Upsert a variant into a message. If a variant with the same match already exists, it will be updated, otherwise a new variant will be added.
@@ -15,21 +14,9 @@ const upsertVariant = (props: { message: Message; variant: Variant }) => {
 		// Update existing variant
 		existingVariant.pattern = props.variant.pattern
 	} else {
-		// Add new variant
-		const newpos = getNewVariantPosition({
-			variants: props.message.variants,
-			newVariant: props.variant,
-		})
-		insertItemAtIndex(props.message.variants, newpos, props.variant)
+		// Insert new variant
+		props.message.variants.push(props.variant)
 	}
 }
 
 export default upsertVariant
-
-function insertItemAtIndex(variants: Variant[], index: number, newVariant: Variant) {
-	if (variants.length === 0) {
-		variants.push(newVariant)
-	} else {
-		variants.splice(index, 0, newVariant)
-	}
-}
