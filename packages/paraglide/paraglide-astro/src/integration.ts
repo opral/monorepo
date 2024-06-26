@@ -3,7 +3,7 @@ import { paraglide } from "@inlang/paraglide-vite"
 import path from "node:path"
 import { alias } from "./alias.js"
 import { fileURLToPath } from "node:url"
-import { normalizePath } from "./utilts.js"
+import { nodeNormalizePath } from "./utilts.js"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -38,7 +38,7 @@ export function integration(integrationConfig: {
 								//normalizing the path is very important!
 								//otherwise you get duplicate modules on windows
 								//learned that one the hard way (parjs-47)
-								"virtual:paraglide-astro:runtime": normalizePath(runtimePath),
+								"virtual:paraglide-astro:runtime": nodeNormalizePath(runtimePath),
 							}),
 						],
 					},

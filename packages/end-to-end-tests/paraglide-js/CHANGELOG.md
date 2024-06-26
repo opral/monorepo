@@ -1,5 +1,56 @@
 # @inlang/paraglide-js-e2e
 
+## 0.0.39
+
+### Patch Changes
+
+- Updated dependencies [e37eabf]
+  - @inlang/paraglide-js@1.11.0
+  - @inlang/sdk@0.36.3
+
+## 0.0.38
+
+### Patch Changes
+
+- Updated dependencies [2fc5feb]
+  - @inlang/sdk@0.36.2
+  - @inlang/paraglide-js@1.10.1
+
+## 0.0.37
+
+### Patch Changes
+
+- Updated dependencies [c5d145d]
+- Updated dependencies [1077e06]
+  - @inlang/paraglide-js@1.10.1
+  - @inlang/sdk@0.36.1
+
+## 0.0.36
+
+### Patch Changes
+
+- Updated dependencies [8ec7b34]
+- Updated dependencies [05f9282]
+- Updated dependencies [33662e6]
+  - @inlang/sdk@0.36.0
+  - @inlang/paraglide-js@1.10.0
+
+## 0.0.35
+
+### Patch Changes
+
+- Updated dependencies [8e9fc0f]
+  - @inlang/sdk@0.35.9
+  - @inlang/paraglide-js@1.9.1
+
+## 0.0.34
+
+### Patch Changes
+
+- Updated dependencies [da7c207]
+  - @inlang/sdk@0.35.8
+  - @inlang/paraglide-js@1.9.1
+
 ## 0.0.33
 
 ### Patch Changes

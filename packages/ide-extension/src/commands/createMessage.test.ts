@@ -5,6 +5,8 @@ import { msg } from "../utilities/messages/msg.js"
 import { window } from "vscode"
 import { telemetry } from "../services/telemetry/index.js"
 import { CONFIGURATION } from "../configuration.js"
+import { getSetting } from "../utilities/settings/index.js"
+import { randomHumanId } from "@inlang/sdk"
 
 vi.mock("vscode", () => ({
 	commands: {
@@ -40,6 +42,14 @@ vi.mock("../configuration", () => ({
 	},
 }))
 
+vi.mock("../utilities/settings/index", () => ({
+	getSetting: vi.fn(),
+}))
+
+vi.mock("@inlang/sdk", () => ({
+	randomHumanId: vi.fn(() => "randomHumanId123"),
+}))
+
 describe("createMessageCommand", () => {
 	const mockState = {
 		project: {
@@ -57,6 +67,9 @@ describe("createMessageCommand", () => {
 		vi.resetAllMocks()
 		// @ts-expect-error
 		state.mockReturnValue(mockState)
+
+		// Mock getSetting only for this test
+		vi.mocked(getSetting).mockResolvedValueOnce(true)
 	})
 
 	afterEach(() => {
@@ -98,7 +111,7 @@ describe("createMessageCommand", () => {
 		await createMessageCommand.callback()
 
 		expect(window.showInputBox).toHaveBeenCalledWith({
-			title: "Enter the ID:",
+			title: "Enter the message content:",
 		})
 		expect(msg).not.toHaveBeenCalled()
 	})
@@ -152,5 +165,38 @@ describe("createMessageCommand", () => {
 			event: "IDE-EXTENSION command executed: Create Message",
 		})
 		expect(msg).toHaveBeenCalledWith("Message created.")
+	})
+
+	it("should use randomHumanId as default messageId if autoHumanId is true", async () => {
+		mockState.project.settings.mockReturnValueOnce({ sourceLanguageTag: "en" })
+		// @ts-expect-error
+		window.showInputBox.mockResolvedValueOnce("Message content")
+		// @ts-expect-error
+		getSetting.mockResolvedValueOnce(true)
+		// @ts-expect-error
+		window.showInputBox.mockResolvedValueOnce("randomHumanId123")
+
+		await createMessageCommand.callback()
+
+		expect(randomHumanId).toHaveBeenCalled()
+		expect(window.showInputBox).toHaveBeenCalledWith({
+			title: "Enter the message content:",
+		})
+	})
+
+	it("should not use randomHumanId as default messageId if autoHumanId is false", async () => {
+		mockState.project.settings.mockReturnValueOnce({ sourceLanguageTag: "en" })
+		// @ts-expect-error
+		window.showInputBox.mockResolvedValueOnce("Message content")
+		// @ts-expect-error
+		getSetting.mockResolvedValueOnce(false)
+		// @ts-expect-error
+		window.showInputBox.mockResolvedValueOnce("")
+
+		await createMessageCommand.callback()
+
+		expect(window.showInputBox).toHaveBeenCalledWith({
+			title: "Enter the message content:",
+		})
 	})
 })

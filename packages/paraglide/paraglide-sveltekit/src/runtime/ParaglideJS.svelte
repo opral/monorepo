@@ -4,7 +4,7 @@
 	It also adds `<link rel="alternate">` tags to the head of your page
 -->
 <script lang="ts" generics="T extends string">
-	import type { I18n } from "./adapter.js"
+	import type { I18n } from "./adapter.server.js"
 	import { page } from "$app/stores"
 	import { browser, dev } from "$app/environment"
 	import { normaliseBase } from "./utils/normaliseBase.js"
@@ -34,16 +34,12 @@
 	 */
 	export let i18n: I18n<T>
 
-	/**
-	 * The language tag that was autodetected from the URL.
-	 */
-	$: autodetectedLanguage = i18n.getLanguageFromUrl($page.url)
-	$: lang = languageTag ?? autodetectedLanguage
-	$: i18n.config.runtime.setLanguageTag(lang)
+	$: lang = languageTag ?? i18n.getLanguageFromUrl($page.url)
+	$: if (browser) i18n.config.runtime.setLanguageTag(lang)
 	$: if (browser) document.documentElement.lang = lang
 	$: if (browser) document.documentElement.dir = i18n.config.textDirection[lang] ?? "ltr"
 
-	// count the number of language changes. 
+	// count the number of language changes.
 	let numberOfLanugageChanges = 0
 	$: if (lang) numberOfLanugageChanges += 1
 
@@ -53,27 +49,32 @@
 
 	function translateHref(href: string, hreflang: T | undefined): string {
 		try {
-			const from = new URL(get(page).url)
-			const original_to = new URL(href, new URL(from))
+			const localisedCurrentUrl = new URL(get(page).url)
+			const [localisedCurrentPath, suffix] = parseRoute(localisedCurrentUrl.pathname, absoluteBase)
+			const canonicalCurrentPath = i18n.strategy.getCanonicalPath(localisedCurrentPath, lang)
 
-			if (isExternal(original_to, from, absoluteBase) || i18n.config.exclude(original_to.pathname))
+			const canonicalCurrentUrl = new URL(localisedCurrentUrl)
+			canonicalCurrentUrl.pathname = serializeRoute(canonicalCurrentPath, absoluteBase, suffix)
+
+			const original_to = new URL(href, new URL(canonicalCurrentUrl))
+
+			if (
+				isExternal(original_to, localisedCurrentUrl, absoluteBase) ||
+				i18n.config.exclude(original_to.pathname)
+			)
 				return href
 
 			const targetLanguage = hreflang ?? lang
 			const [canonicalPath, dataSuffix] = parseRoute(original_to.pathname, absoluteBase)
 			const translatedPath = i18n.strategy.getLocalisedPath(canonicalPath, targetLanguage)
 
-			const to = new URL(original_to);
+			const to = new URL(original_to)
 
-			to.pathname =  serializeRoute(
-				translatedPath,
-				absoluteBase,
-				dataSuffix
-			)
+			to.pathname = serializeRoute(translatedPath, absoluteBase, dataSuffix)
 
-			return getHrefBetween(from, to)
+			return getHrefBetween(localisedCurrentUrl, to)
 		} catch (error) {
-			if(dev) console.warn(`[paraglide-sveltekit] Failed to translate the link "${href}"`)
+			if (dev) console.warn(`[paraglide-sveltekit] Failed to translate the link "${href}"`)
 			return href
 		}
 	}
@@ -85,7 +86,7 @@
 	// We need to make sure that changing the key happens last.
 	// See https://github.com/sveltejs/svelte/issues/10597
 	$: langKey = lang
-	$: if(browser) document.cookie = createLangCookie(lang, absoluteBase)
+	$: if (browser) document.cookie = createLangCookie(lang, absoluteBase)
 </script>
 
 <svelte:head>

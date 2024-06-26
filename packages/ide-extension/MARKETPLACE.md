@@ -1,5 +1,7 @@
 # 🕵️‍♂️ i18n inspector for VS Code
 
+[![Inlang-ecosystem compatibility badge](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/assets/md-badges/inlang.svg)](https://inlang.com)
+
 Inspect i18n within VS Code with powerful tools designed to streamline the translation process. Visualize, edit, and lint translated strings effortlessly using Inline Decorations & Hover Support. Extract new strings with a simple click, making localization tasks more intuitive and efficient.
 
 Find the [source code on GitHub](https://github.com/opral/monorepo/tree/main/inlang/source-code/ide-extension).

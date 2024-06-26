@@ -41,8 +41,8 @@ The badge will now automatically update itself. Your contributors can now see th
 
 # Example
 
-This is how the badge could look like in your README, it is from the official inlang repository:
+This is how the badge could look like in your README, it is from the inlang example repository:
 
 <br />
 
-![inlang status badge](https://inlang.com/badge?url=github.com/opral/monorepo)
+![inlang status badge](https://badge.inlang.com/?url=github.com/opral/example)

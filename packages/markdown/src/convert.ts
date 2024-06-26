@@ -140,7 +140,7 @@ export async function convert(markdown: string): Promise<{ data: any; html: stri
 		.use(rehypeAutolinkHeadings, {
 			behavior: "wrap",
 			properties: {
-				onclick: `event.preventDefault(); window.scrollTo({top: document.getElementById(event.target.hash.substring(1)).offsetTop - 96, behavior: "smooth"}); window.history.pushState(null, null, event.target.hash);`,
+				onclick: `event.preventDefault(); event.target.hash && document.getElementById(event.target.hash.substring(1)) && window.scrollTo({top: document.getElementById(event.target.hash.substring(1)).offsetTop - 200, behavior: "smooth"}); window.history.pushState(null, null, event.target.hash);`,
 			},
 		})
 		/* @ts-ignore */

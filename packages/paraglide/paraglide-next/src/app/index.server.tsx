@@ -4,6 +4,7 @@ export { default as LanguageProvider } from "./providers/LanguageProvider.js"
 export { Middleware } from "./middleware"
 export { Navigation } from "./navigation/navigation.server.js"
 export { initializeLanguage } from "./initializeLanguage.server.js"
+export { generateAlternateLinks } from "./alternateLinks.js"
 
 // Routing Strategies
 export * from "./routing-strategy/strategies"

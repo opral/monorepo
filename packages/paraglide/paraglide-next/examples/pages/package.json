@@ -1,6 +1,6 @@
 {
 	"name": "@inlang/paraglide-next-example-pages",
-	"version": "0.2.21",
+	"version": "0.2.27",
 	"private": true,
 	"sideEffects": false,
 	"scripts": {
@@ -19,7 +19,7 @@
 		"@types/node": "^20",
 		"@types/react": "^18.2.25",
 		"@types/react-dom": "^18",
-		"typescript": "^5.3.2"
+		"typescript": "^5.5.2"
 	},
 	"files": [
 		"*",

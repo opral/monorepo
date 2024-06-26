@@ -1,5 +1,60 @@
 # @inlang/plugin-t-function-matcher
 
+## 0.6.36
+
+### Patch Changes
+
+- @inlang/sdk@0.36.3
+- @inlang/plugin@2.4.14
+
+## 0.6.35
+
+### Patch Changes
+
+- Updated dependencies [2fc5feb]
+  - @inlang/sdk@0.36.2
+
+## 0.6.34
+
+### Patch Changes
+
+- Updated dependencies [1077e06]
+  - @inlang/sdk@0.36.1
+
+## 0.6.33
+
+### Patch Changes
+
+- Updated dependencies [8ec7b34]
+- Updated dependencies [05f9282]
+  - @inlang/sdk@0.36.0
+
+## 0.6.32
+
+### Patch Changes
+
+- Updated dependencies [8e9fc0f]
+  - @inlang/sdk@0.35.9
+
+## 0.6.31
+
+### Patch Changes
+
+- 04e804b: add human readble id tests to plugins
+
+## 0.6.30
+
+### Patch Changes
+
+- Updated dependencies [da7c207]
+  - @inlang/sdk@0.35.8
+
+## 0.6.29
+
+### Patch Changes
+
+- f711787: fix t-function matcher extract message should offer no-brace version
+
 ## 0.6.28
 
 ### Patch Changes

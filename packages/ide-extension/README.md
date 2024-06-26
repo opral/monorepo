@@ -18,17 +18,16 @@ Visualize, edit, and lint translated strings effortlessly using Inline Decoratio
 	<br />
 </div>
 
-
 <img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/sherlock-cover-small.png"/>
 
 <br>
 <br>
 
-✅ Streamline the i18n translation process. 
+✅  Streamline the i18n translation process. 
 
-✅ Visualize, edit, and lint translations.
+✅  Visualize, edit, and lint translations.
 
-✅ Extract new translations with a simple click.
+✅  Extract new translations with a simple click.
 
 
 <br>
@@ -227,6 +226,18 @@ You can disable inline annotations by setting the following property to `false` 
 ```json
 "sherlock.inlineAnnotations.enabled": false
 ```
+
+### Disable Auto Human ID Generation
+
+You can disable the automatic generation of human IDs by setting the following property to `false` in your VS Code `settings.json` file. The default value is `true`.
+
+```json
+"sherlock.extract.autoHumanId.enabled": false
+```
+
+> [!NOTE]  
+> Tip: It's best practice to use random names for your messages. Read this [guide](https://inlang.com/documentation/concept/message#idhuman-readable) for more information.
+
 
 #### Troubleshooting
 

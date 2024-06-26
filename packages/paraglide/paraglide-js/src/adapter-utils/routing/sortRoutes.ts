@@ -1,151 +1,152 @@
-import { get_route_segments } from "./routeDefinitions.js"
+// param type flags
+// we use contsants instead of enums for better minification
+const STATIC = 0b000
+const OPTIONAL = 0b001
+const REST = 0b010
+const REQUIRED = 0b100
 
-type Part = {
-	type: "static" | "required" | "optional" | "rest"
-	content: string
-	matched: boolean
-}
+type Part = [
+	/**
+	 * type of part
+	 */
+	typeof STATIC | typeof REQUIRED | typeof OPTIONAL | typeof REST,
 
-const EMPTY = { type: "static", content: "", matched: false } satisfies Part
+	/**
+	 * content
+	 * The text-value of the segment
+	 * If this is not static this includes the brackets
+	 */
+	string,
+
+	/**
+	 * matched
+	 *
+	 * If this parameter includes a matcher.
+	 */
+	boolean
+]
+
+const PART_TYPE = 0
+const PART_CONTENT = 1
+const PART_MATCHED = 2
 
 export function sort_routes(routes: string[]): string[] {
-	const segment_cache = new Map<string, Part[]>()
-
-	function split(id: string) {
-		const parts: Part[] = []
-
-		let i = 0
-		while (i <= id.length) {
-			const start = id.indexOf("[", i)
-			if (start === -1) {
-				parts.push({ type: "static", content: id.slice(i), matched: false })
-				break
-			}
-
-			parts.push({ type: "static", content: id.slice(i, start), matched: false })
-
-			const type = id[start + 1] === "[" ? "optional" : id[start + 1] === "." ? "rest" : "required"
-			const delimiter = type === "optional" ? "]]" : "]"
-			const end = id.indexOf(delimiter, start)
-
-			if (end === -1) {
-				throw new Error(`Invalid route ID ${id}`)
-			}
-
-			const content = id.slice(start, (i = end + delimiter.length))
-
-			parts.push({
-				type,
-				content,
-				matched: content.includes("="),
-			})
-		}
-
-		return parts
-	}
-
-	function get_parts(segment: string) {
-		if (!segment_cache.has(segment)) {
-			segment_cache.set(segment, split(segment))
-		}
-
-		return segment_cache.get(segment)
-	}
+	const get_parts = cached(split)
 
 	return routes.sort((route_a, route_b) => {
 		const segments_a = split_route_id(route_a).map(get_parts)
 		const segments_b = split_route_id(route_b).map(get_parts)
 
 		for (let i = 0; i < Math.max(segments_a.length, segments_b.length); i += 1) {
-			const segment_a = segments_a[i] ?? [EMPTY]
-			const segment_b = segments_b[i] ?? [EMPTY]
+			const segment_a = segments_a[i]
+			const segment_b = segments_b[i]
+
+			if (!segment_a) return -1
+			if (!segment_b) return +1
 
 			for (let j = 0; j < Math.max(segment_a.length, segment_b.length); j += 1) {
 				const a = segment_a[j]
 				const b = segment_b[j]
 
 				// first part of each segment is always static
-				// (though it may be the empty string), then
+				// (though it may be an empty string), then
 				// it alternates between dynamic and static
 				// (i.e. [foo][bar] is disallowed)
 
-				const dynamic = !!(j % 2) //is odd
+				const dynamic = a?.[PART_TYPE] || b?.[PART_TYPE] // type = 0 if STATIC, undefined if not present
 
 				if (dynamic) {
 					if (!a) return -1
 					if (!b) return +1
 
-					// get the next static chunk, so we can handle [...rest] edge cases
-					const next_a = (segment_a[j + 1]?.content || segments_a[i + 1]?.[0]?.content) as string
-					const next_b = (segment_b[j + 1]?.content || segments_b[i + 1]?.[0]?.content) as string
+					// Handle [...rest]
+					const next_a = segment_a[j + 1]?.[PART_CONTENT] || segments_a[i + 1]?.[0]?.[PART_CONTENT]
+					const next_b = segment_b[j + 1]?.[PART_CONTENT] || segments_b[i + 1]?.[0]?.[PART_CONTENT]
 
-					// `[...rest]/x` outranks `[...rest]`
-					if (a.type === "rest" && b.type === "rest") {
-						if (next_a && next_b) continue
-						if (next_a) return -1
-						if (next_b) return +1
+					const both_have_next = next_a && next_b
+					const only_a_has_next = next_a && !next_b
+					const only_b_has_next = !next_a && next_b
+
+					if ((a[PART_TYPE] && b[PART_TYPE]) === REST) {
+						if (both_have_next) continue // tied
+						if (only_a_has_next) return -1
+						if (only_b_has_next) return +1
 					}
 
-					// `[...rest]/x` outranks `[required]` or `[required]/[required]`
-					// but not `[required]/x`
-					if (a.type === "rest") {
-						return next_a && !next_b ? -1 : +1
-					}
+					if (a[PART_TYPE] === REST) return only_a_has_next ? -1 : +1
+					if (b[PART_TYPE] === REST) return only_b_has_next ? +1 : -1
 
-					if (b.type === "rest") {
-						return next_b && !next_a ? +1 : -1
-					}
+					// handle REQUIRED and OPTIONAL
 
 					// part with matcher outranks one without
-					if (a.matched !== b.matched) {
-						return a.matched ? -1 : +1
+					if (a[PART_MATCHED] !== b[PART_MATCHED]) return (-1) ** +a[PART_MATCHED]
+					if (a[PART_TYPE] !== b[PART_TYPE]) {
+						// Comparing between `[required]` and `[[optional]]`
+						return (-1) ** +(a[PART_TYPE] > b[PART_TYPE])
 					}
-
-					if (a.type !== b.type) {
-						// `[...rest]` has already been accounted for, so here
-						// we're comparing between `[required]` and `[[optional]]`
-						if (a.type === "required") return -1
-						if (b.type === "required") return +1
-					}
-				} else if (a?.content !== b?.content) {
-					// shallower path outranks deeper path
-					if (a === EMPTY) return -1
-					if (b === EMPTY) return +1
-
-					return sort_static((a as Part).content, (b as Part).content)
+				} else if (a?.[PART_CONTENT] !== b?.[PART_CONTENT]) {
+					return sort_static((a as Part)[PART_CONTENT], (b as Part)[PART_CONTENT])
 				}
 			}
 		}
 
+		// in case of tie, sort alphabetically
 		return route_a < route_b ? +1 : -1
 	})
 }
 
-function split_route_id(id: string) {
-	return get_route_segments(
-		id
-			// remove all [[optional]] parts unless they're at the very end
-			.replace(/\[\[[^\]]+\]\](?!$)/g, "")
-	).filter(Boolean)
+/**
+ * Returns a version of the function with a cache.
+ */
+function cached<T extends (arg: any) => any>(fn: T): T {
+	const cache = new Map()
+	return ((arg: Parameters<T>) => {
+		if (!cache.has(arg)) cache.set(arg, fn(arg))
+		return cache.get(arg)
+	}) as T
 }
 
-/**
- * Sort two strings lexicographically, except `foobar` outranks `foo`
- */
-function sort_static(a: string, b: string): -1 | 0 | 1 {
-	if (a === b) return 0
+function split(id: string) {
+	const parts: Part[] = []
 
 	let i = 0
-	while (a[i] || b[i]) {
-		const char_a = a[i]
-		const char_b = b[i]
+	while (i <= id.length) {
+		const start = id.indexOf("[", i)
+		const entirelyStatic = start === -1
+		parts.push([STATIC, id.slice(i, entirelyStatic ? undefined : start), false])
+		if (entirelyStatic) break
 
-		if (char_a !== char_b) {
-			if (char_a === undefined) return +1
-			if (char_b === undefined) return -1
-			return char_a < char_b ? -1 : +1
-		}
-		i++
+		const type = id[start + 1] === "[" ? OPTIONAL : id[start + 1] === "." ? REST : REQUIRED
+		const endBrackets = type === OPTIONAL ? "]]" : "]"
+		const endBracketIdx = id.indexOf(endBrackets, start)
+		if (endBracketIdx === -1) throw new Error(`Invalid route definition ${id}`)
+
+		const content = id.slice(start, (i = endBracketIdx + endBrackets.length))
+
+		parts.push([type, content, content.includes("=")])
 	}
-	return 0
+
+	return parts
+}
+
+const split_route_id = (id: string) =>
+	id
+		// remove all [[optional]] parts unless they're at the very end
+		.replace(/\[\[[^\]]+\]\](?!$)/g, "")
+		.split("/")
+		.filter(Boolean)
+
+/**
+ * Compares two strings lexicographically, except that the longer one wins.
+ */
+function sort_static(a: string, b: string): -1 | 0 | 1 {
+	if (a === b) return 0 // this check prevents an infinite loop
+
+	// move the cursor to the first non-equal character, or to the end of the shorter string
+	let idx = 0
+	while (a[idx] === b[idx]) idx++
+
+	// if one of the strings is shorter than the other, the longer one wins
+	// otherwise compare the first differing char
+	return !a[idx] ? +1 : !b[idx] ? -1 : (a[idx] as string) < (b[idx] as string) ? -1 : +1
 }

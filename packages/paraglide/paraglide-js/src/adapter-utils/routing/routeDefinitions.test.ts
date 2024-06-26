@@ -4,12 +4,17 @@ import { exec, parseRouteDefinition, bestMatch } from "./routeDefinitions.js"
 // we're testing known-good vendored in code here, but the test are still helpful to understand the logic
 
 describe("parse_route_id", () => {
-	it("should parse a route id", () => {
-		expect(parseRouteDefinition("/foo/bar")).toEqual({
+	it("should parse a static route id", () => {
+		const parsed = parseRouteDefinition("/foo/bar")
+		expect(parsed).toEqual({
 			params: [],
 			pattern: /^\/foo\/bar\/?$/,
 		})
 
+		expect(parsed.pattern.exec("/foo/bar")).toBeTruthy()
+		expect(parsed.pattern.exec("/not/match")).toBeFalsy()
+	})
+	it("should parse a route id", () => {
 		expect(parseRouteDefinition("/[lang]/test")).toEqual({
 			params: [
 				{

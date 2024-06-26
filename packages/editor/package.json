@@ -1,5 +1,6 @@
 {
 	"name": "@inlang/editor",
+	"version": "0.1.7",
 	"type": "module",
 	"private": true,
 	"scripts": {
@@ -67,7 +68,7 @@
 		"@iconify-json/cib": "^1.1.2",
 		"@iconify-json/material-symbols": "^1.1.26",
 		"@inlang/cli": "workspace:*",
-		"@inlang/cross-sell-ninja": "workspace:*",
+		"@inlang/recommend-ninja": "workspace:*",
 		"@inlang/design-system": "workspace:*",
 		"@inlang/detect-json-formatting": "workspace:*",
 		"@inlang/env-variables": "workspace:*",
@@ -106,6 +107,5 @@
 	"peerDependencies": {
 		"express": "^4.18.2"
 	},
-	"license": "Apache-2.0",
-	"version": null
+	"license": "Apache-2.0"
 }

@@ -1,11 +1,11 @@
-import type { NodeishFilesystem } from "@lix-js/fs"
-
 /**
  * validate that a project path is absolute and ends with {name}.inlang.
  *
  * @throws if the path is not valid.
  */
-export function assertValidProjectPath(projectPath: string) {
+export function assertValidProjectPath(
+	projectPath: string
+): asserts projectPath is `${string}.inlang` {
 	if (!isAbsolutePath(projectPath)) {
 		throw new Error(`Expected an absolute path but received "${projectPath}".`)
 	}
@@ -20,7 +20,7 @@ export function assertValidProjectPath(projectPath: string) {
  * tests whether a path ends with {name}.inlang
  * (does not remove trailing slash)
  */
-export function isInlangProjectPath(path: string) {
+export function isInlangProjectPath(path: string): path is `${string}.inlang` {
 	return /[^\\/]+\.inlang$/.test(path)
 }
 
@@ -35,24 +35,4 @@ export function isAbsolutePath(path: string) {
 	// const matchPosixAndWindowsAbsolutePaths =
 	// 	/^(?:[A-Za-z]:\\(?:[^\\]+\\)*[^\\]+|[A-Za-z]:\/(?:[^/]+\/)*[^/]+|\/(?:[^/]+\/)*[^/]+)$/
 	// return matchPosixAndWindowsAbsolutePaths.test(path)
-}
-
-/**
- * Returns true if the path exists (file or directory), false otherwise.
- *
- */
-export async function pathExists(filePath: string, nodeishFs: NodeishFilesystem) {
-	// from paraglide-js/src/services/file-handling/exists.ts
-	// TODO: add fs.exists to @lix-js/fs
-	try {
-		await nodeishFs.stat(filePath)
-		return true
-	} catch (error) {
-		//@ts-ignore
-		if (error.code === "ENOENT") {
-			return false
-		} else {
-			throw new Error(`Failed to check if path exists: ${error}`, { cause: error })
-		}
-	}
 }
