@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 1.48.1
+
+### Patch Changes
+
+- 7ef2fba: improve recommendation behavior
+
 ## 1.48.0
 
 ### Minor Changes
