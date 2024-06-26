@@ -2,6 +2,7 @@ import { shouldRecommend, add } from "@inlang/recommend-ninja"
 import type { NodeishFilesystem } from "@lix-js/fs"
 import * as vscode from "vscode"
 import { getSetting, updateSetting } from "../../settings/index.js"
+import { telemetry } from "../../../services/telemetry/implementation.js"
 
 export const recommendNinja = async (args: { fs: NodeishFilesystem }): Promise<void> => {
 	if (
@@ -19,7 +20,17 @@ export const recommendNinja = async (args: { fs: NodeishFilesystem }): Promise<v
 
 	if (response === "Yes") {
 		await add({ fs: args.fs })
+
+		telemetry.capture({
+			event: "IDE-EXTENSION recommendation: add Ninja Github Action workflow to repository",
+			properties: { outcome: "Accepted" },
+		})
 	} else if (response === "Do not ask again") {
 		await updateSetting("appRecommendations.ninja.enabled", false)
+
+		telemetry.capture({
+			event: "IDE-EXTENSION recommendation: add Ninja Github Action workflow to repository",
+			properties: { outcome: "Declined" },
+		})
 	}
 }
