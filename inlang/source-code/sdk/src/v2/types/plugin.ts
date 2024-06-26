@@ -19,7 +19,6 @@ import type {
 	PluginSaveMessagesFunctionAlreadyDefinedError,
 	PluginsDoNotProvideLoadOrSaveMessagesError,
 } from "./plugin-errors.js"
-import type { ImportFunction } from "../../resolve-modules/import.js"
 
 /**
  * The filesystem is a subset of project lisa's nodeish filesystem.
@@ -112,7 +111,6 @@ export const Plugin2 = Type.Object({
 export type ResolvePlugins2Function = (args: {
 	plugins: Array<Plugin2>
 	settings: ProjectSettings2
-	nodeishFs: NodeishFilesystemSubset
 }) => Promise<{
 	data: ResolvedPlugin2Api
 	errors: Array<

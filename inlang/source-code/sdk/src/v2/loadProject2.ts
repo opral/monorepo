@@ -1,5 +1,5 @@
 import type { Repository } from "@lix-js/client"
-import type { ImportFunction } from "../resolve-modules/import.js"
+import { type ImportFunction, createImport } from "../resolve-modules/import.js"
 import { assertValidProjectPath } from "../validateProjectPath.js"
 import { normalizePath } from "@lix-js/fs"
 import { maybeAddModuleCache } from "../migrations/maybeAddModuleCache.js"
@@ -7,7 +7,7 @@ import { createNodeishFsWithAbsolutePaths } from "../createNodeishFsWithAbsolute
 import { maybeCreateFirstProjectId } from "../migrations/maybeCreateFirstProjectId.js"
 import { loadSettings } from "./settings.js"
 import type { InlangProject2 } from "./types/project.js"
-import { MessageBundle, ProjectSettings2, type LintReport, type Message } from "./types/index.js"
+import { MessageBundle, type LintReport, type Message } from "./types/index.js"
 import createSlotStorage from "../persistence/slotfiles/createSlotStorage.js"
 
 import { createRxDatabase, type RxCollection } from "rxdb"
@@ -67,12 +67,12 @@ export async function loadProject(args: {
 
 	const projectSettings$ = new BehaviorSubject(projectSettings)
 
+	const _import = createImport(projectPath, nodeishFs)
 	const modules = await resolveModules({
 		settings: projectSettings,
-		nodeishFs,
-		_import: args._import,
-		projectPath,
+		_import,
 	})
+
 	const modules$ = new BehaviorSubject(modules)
 
 	const bundleStorage = createSlotStorage<MessageBundle>(
@@ -112,7 +112,7 @@ export async function loadProject(args: {
 	await bundleStorage.connect(nodeishFs, messageBundlesPath)
 	await messageStorage.connect(nodeishFs, messagesPath)
 
-	const linter = await createLintWorker(projectPath, projectSettings.modules, nodeishFs)
+	const linter = await createLintWorker(projectPath, projectSettings, nodeishFs)
 
 	const lintReports$ = new BehaviorSubject<LintReport[]>([])
 	const adapter = createMessageBundleSlotAdapter(
@@ -136,8 +136,6 @@ export async function loadProject(args: {
 	// 		console.log(lintresults)
 	// 	},
 	// })
-
-	
 
 	return {
 		id: projectId,

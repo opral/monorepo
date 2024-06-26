@@ -1,10 +1,10 @@
 import { createImport } from "./import.js"
 import { endpoint } from "comlink-node/worker"
 import { populateLevel } from "./populateLintLevel.js"
-import { TypeCompiler } from "@sinclair/typebox/compiler"
-import { MessageBundleLintRule, type LintConfig, type LintReport } from "../types/lint.js"
+import type { LintConfig, LintReport } from "../types/lint.js"
 import createSlotStorage from "../../persistence/slotfiles/createSlotStorage.js"
 import * as Comlink from "comlink"
+import { resolveModules } from "../resolveModules2.js"
 import type { NodeishFilesystem } from "@lix-js/fs"
 import type { Message, MessageBundle } from "../types/message-bundle.js"
 import type { ProjectSettings2 } from "../types/project-settings.js"
@@ -13,8 +13,6 @@ import type { NodeishFilesystemSubset } from "@inlang/plugin"
 import _debug from "debug"
 import { createMessageBundleSlotAdapter } from "../createMessageBundleSlotAdapter.js"
 const debug = _debug("sdk-v2:lint-report-worker")
-
-const MessageBundleLintRuleCompiler = TypeCompiler.Compile(MessageBundleLintRule)
 
 const lintConfigs: LintConfig[] = [
 	{
@@ -27,34 +25,20 @@ const lintConfigs: LintConfig[] = [
 	},
 ]
 
-const bundleCollectionDir = "/messageBundle/"
-
 export async function createLinter(
 	projectPath: string,
-	moduleURIs: string[],
+	settings: ProjectSettings2,
 	fs: Pick<NodeishFilesystemSubset, "readFile" | "readdir" | "mkdir">
 ) {
 	debug("creating linter")
 	const _import = createImport(projectPath, fs)
 
-	const modules: unknown[] = await Promise.all(
-		moduleURIs.map(async (uri) => {
-			const module = await _import(uri)
-			return module.default
-		})
-	)
+	const resolvedModules = await resolveModules({
+		settings,
+		_import,
+	})
 
-	const invalidModuleErrors = modules
-		.filter((module) => !MessageBundleLintRuleCompiler.Check(module))
-		.flatMap((module) => [...MessageBundleLintRuleCompiler.Errors(module)])
-
-	if (invalidModuleErrors.length > 0) {
-		console.error("invalidModuleErrors", invalidModuleErrors)
-	}
-
-	const resolvedLintRules = modules.filter((module): module is MessageBundleLintRule =>
-		MessageBundleLintRuleCompiler.Check(module)
-	)
+	console.info("worker-resolvedModules", resolvedModules)
 
 	return Comlink.proxy({
 		lint: async (settings: ProjectSettings2): Promise<LintReport[]> => {
@@ -84,7 +68,7 @@ export async function createLinter(
 			const promises: Promise<any>[] = []
 
 			for (const messageBundle of messageBundles as MessageBundle[]) {
-				for (const lintRule of resolvedLintRules) {
+				for (const lintRule of resolvedModules.messageBundleLintRules) {
 					const promise = lintRule.run({
 						messageBundle: messageBundle,
 						settings,

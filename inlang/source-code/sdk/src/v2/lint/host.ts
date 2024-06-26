@@ -9,7 +9,7 @@ const debug = _debug("sdk-v2:lintReports")
 
 export async function createLintWorker(
 	projectPath: string,
-	modules: string[],
+	settings: ProjectSettings2,
 	fs: Pick<NodeishFilesystemSubset, "readFile" | "readdir" | "mkdir">
 ) {
 	const createLinter = Comlink.wrap<typeof createLinterType>(
@@ -19,7 +19,7 @@ export async function createLintWorker(
 	debug("started lint-worker")
 
 	const fsProxy = Comlink.proxy(fs)
-	const linter = await createLinter(projectPath, modules, fsProxy)
+	const linter = await createLinter(projectPath, settings, fsProxy)
 
 	debug("created linter in lint-worker")
 

@@ -7,7 +7,6 @@ import {
 } from "../resolve-modules/errors.js"
 import { tryCatch } from "@inlang/result"
 import { resolveMessageBundleLintRules } from "./resolveMessageBundleLintRules.js"
-import { createImport } from "../resolve-modules/import.js"
 import { resolvePlugins2 } from "./resolvePlugins2.js"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { validatedModuleSettings } from "./validatedModuleSettings.js"
@@ -18,7 +17,7 @@ import type { MessageBundleLintRule } from "./types/lint.js"
 const ModuleCompiler = TypeCompiler.Compile(InlangModule)
 
 export const resolveModules: ResolveModule2Function = async (args) => {
-	const _import = args._import ?? createImport(args.projectPath, args.nodeishFs)
+	const _import = args._import
 
 	const allPlugins: Array<Plugin2> = []
 	const allMessageLintRules: Array<MessageBundleLintRule> = []
@@ -97,7 +96,6 @@ export const resolveModules: ResolveModule2Function = async (args) => {
 	const resolvedPlugins = await resolvePlugins2({
 		plugins: allPlugins,
 		settings: args.settings,
-		nodeishFs: args.nodeishFs,
 	})
 
 	const resolvedLintRules = resolveMessageBundleLintRules({ messageLintRules: allMessageLintRules })
