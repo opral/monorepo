@@ -12,6 +12,7 @@ import type { NodeishFilesystemSubset } from "@inlang/plugin"
 import type { LintConfig, LintReport } from "../types/lint.js"
 
 import _debug from "debug"
+import { devModuleImport } from "../dev-modules/import.js"
 const debug = _debug("sdk-v2:lint-report-worker")
 
 const lintConfigs: LintConfig[] = [
@@ -31,14 +32,17 @@ export async function createLinter(
 	fs: Pick<NodeishFilesystemSubset, "readFile" | "readdir" | "mkdir">
 ) {
 	debug("creating linter")
-	const _import = createImport(projectPath, fs)
+	const _import = devModuleImport
+	//const _import = createImport(projectPath, fs)
 
 	const resolvedModules = await resolveModules({
 		settings,
 		_import,
 	})
 
+	const customApi = resolvedModules.resolvedPluginApi.customApi
 	console.info("worker-resolvedModules", resolvedModules)
+	console.info("worker-customApi", customApi)
 
 	return Comlink.proxy({
 		lint: async (settings: ProjectSettings2): Promise<LintReport[]> => {

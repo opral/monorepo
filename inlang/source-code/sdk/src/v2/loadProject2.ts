@@ -9,6 +9,7 @@ import { loadSettings } from "./settings.js"
 import type { InlangProject2 } from "./types/project.js"
 import { MessageBundle, type LintReport, type Message } from "./types/index.js"
 import createSlotStorage from "../persistence/slotfiles/createSlotStorage.js"
+import { devModuleImport } from "./dev-modules/import.js"
 
 import { createRxDatabase, type RxCollection } from "rxdb"
 import { getRxStorageMemory } from "rxdb/plugins/storage-memory"
@@ -67,7 +68,8 @@ export async function loadProject(args: {
 
 	const projectSettings$ = new BehaviorSubject(projectSettings)
 
-	const _import = createImport(projectPath, nodeishFs)
+	//const _import = createImport(projectPath, nodeishFs)
+	const _import = devModuleImport
 	const modules = await resolveModules({
 		settings: projectSettings,
 		_import,
