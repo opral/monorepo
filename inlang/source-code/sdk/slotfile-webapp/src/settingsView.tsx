@@ -34,8 +34,9 @@ export function SettingsView({ project }: SettingsViewProps) {
 		}
 	}, [])
 
-	const updateSettings = (settings: any) => {
-		console.log(settings)
+	// @ts-ignore
+	const updateSettings = (event: any) => {
+		project.inlangProject.setSettings(event.detail.argument)
 		// eslint-disable-next-line no-console
 		// TODO update settings on project messageBundleCollection?.upsert(messageBundle.detail.argument)
 	}

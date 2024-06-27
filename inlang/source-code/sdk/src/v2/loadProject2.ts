@@ -7,12 +7,18 @@ import { createNodeishFsWithAbsolutePaths } from "../createNodeishFsWithAbsolute
 import { maybeCreateFirstProjectId } from "../migrations/maybeCreateFirstProjectId.js"
 import { loadSettings } from "./settings.js"
 import type { InlangProject2 } from "./types/project.js"
-import { MessageBundle, type Fix, type LintReport, type Message } from "./types/index.js"
+import {
+	MessageBundle,
+	ProjectSettings2,
+	type Fix,
+	type LintReport,
+	type Message,
+} from "./types/index.js"
 import { createDebugImport } from "./import-utils.js"
 
 import { createRxDatabase, type RxCollection } from "rxdb"
 import { getRxStorageMemory } from "rxdb/plugins/storage-memory"
-import { BehaviorSubject } from "rxjs"
+import { BehaviorSubject, from, switchMap, tap } from "rxjs"
 import { resolveModules } from "./resolveModules2.js"
 import { createLintWorker } from "./lint/host.js"
 import {
@@ -23,6 +29,8 @@ import createSlotStorageWriter from "../persistence/slotfiles/createSlotWriter.j
 
 import lintRule from "./dev-modules/lint-rule.js"
 import { importSequence } from "./import-utils.js"
+
+type ProjectState = "initializing" | "resolvingModules" | "loaded"
 
 /**
  *
@@ -71,12 +79,14 @@ export async function loadProject(args: {
 
 	const projectSettings = await loadSettings({ settingsFilePath, nodeishFs })
 
+	// Transform legacy fields
 	// @ts-ignore
 	projectSettings.languageTags = projectSettings.locales
 	// @ts-ignore
 	projectSettings.sourceLanguageTag = projectSettings.baseLocale
 
 	const projectSettings$ = new BehaviorSubject(projectSettings)
+	const lifecycle$ = new BehaviorSubject<ProjectState>("initializing")
 
 	const _import = importSequence(
 		createDebugImport({
@@ -85,15 +95,48 @@ export async function loadProject(args: {
 		createImport(projectPath, nodeishFs)
 	)
 
-	const modules = await resolveModules({
-		settings: projectSettings,
-		_import,
-	})
+	const settings$ = projectSettings$.asObservable()
 
-	console.info("resolvedModules", modules)
+	const modules$ = settings$.pipe(
+		switchMap((settings) => {
+			lifecycle$.next("resolvingModules")
+			return from(resolveModules({ settings, _import }))
+		}),
+		tap(() => lifecycle$.next("loaded"))
+	)
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const modules$ = new BehaviorSubject(modules)
+	let abortController: AbortController | undefined
+
+		// Watching for changes in settings file and updating the subject
+	;(() => {
+		abortController = new AbortController()
+
+		// NOTE: watch will not throw an exception since we don't await it here.
+		const watcher = nodeishFs.watch(settingsFilePath, {
+			signal: abortController.signal,
+			persistent: false,
+		})
+
+		;(async () => {
+			try {
+				//eslint-disable-next-line @typescript-eslint/no-unused-vars
+				for await (const event of watcher) {
+					const newSettings = await loadSettings({ settingsFilePath, nodeishFs })
+					projectSettings$.next(newSettings)
+				}
+			} catch (err: any) {
+				if (err.name === "AbortError") return
+				// https://github.com/opral/monorepo/issues/1647
+				// the file does not exist (yet)
+				// this is not testable beacause the fs.watch api differs
+				// from node and lix. lenghty
+				else if (err.code === "ENOENT") return
+				throw err
+			}
+		})()
+	})()
+
+	const linter = await createLintWorker(projectPath, projectSettings, nodeishFs)
 
 	// rxdb with memory storage configured
 	const database = await createRxDatabase<{
@@ -130,8 +173,6 @@ export async function loadProject(args: {
 		watch: true,
 	})
 
-	const linter = await createLintWorker(projectPath, projectSettings, nodeishFs)
-
 	const lintReports$ = new BehaviorSubject<LintReport[]>([])
 	const adapter = createMessageBundleSlotAdapter(
 		bundleStorage,
@@ -146,9 +187,15 @@ export async function loadProject(args: {
 	)
 	await startReplication(database.collections.messageBundles, adapter).awaitInitialReplication()
 
+	const setSettings = async (newSettings: ProjectSettings2) => {
+		// projectSettings$.next(newSettings); // Update the observable
+		await nodeishFs.writeFile(settingsFilePath, JSON.stringify(newSettings, null, 2)) // Write the new settings to the file
+	}
+
 	return {
 		id: projectId,
 		settings: projectSettings$,
+		setSettings: setSettings,
 		messageBundleCollection: database.collections.messageBundles,
 		installed: {
 			lintRules: [],

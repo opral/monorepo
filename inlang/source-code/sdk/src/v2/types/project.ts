@@ -34,7 +34,7 @@ export type InlangProject2 = {
 	// customApi: Subscribable<ResolvedPluginApi["customApi"]>
 	// TODO make this an rxDocument and use another persistence
 	settings: Subscribable<ProjectSettings2>
-	// setSettings: (config: ProjectSettings) => Result<void, RuntimeError.ProjectSettingsInvalidError>
+	setSettings: (config: ProjectSettings2) => void // Result<void, RuntimeError.ProjectSettingsInvalidError>
 
 	messageBundleCollection: RxCollection<MessageBundle>
 	// lintReportCollection: RxCollection<LintReport>
