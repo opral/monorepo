@@ -167,9 +167,6 @@ export default class InlangVariant extends LitElement {
 	@state()
 	private _pattern: string | undefined = undefined
 
-	@state()
-	private _isActive: boolean = false
-
 	private _getLintReports = (): LintReport[] | undefined => {
 		if (this.lintReports && this.lintReports.length > 0) {
 			if (

@@ -30,6 +30,13 @@ const mockMessageLintReports: LintReport[] = [
 		locale: "en",
 		body: "The bundle `mock_bundle_human_id` is missing the reference message for the locale `en`",
 	}),
+	createMockMessageLintReport({
+		ruleId: "messageBundleLintRule.inlang.missingReference",
+		messageBundleId: "mock_bundle_human_id",
+		messageId: "mock_message_id_en",
+		locale: "en",
+		body: "The bundle `mock_bundle_human_id` is missing the reference message for the locale `en`",
+	}),
 ]
 
 const mockVariantLintReports: LintReport[] = [
