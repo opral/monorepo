@@ -54,7 +54,7 @@ export default class InlangMessageBundle extends LitElement {
 	@property({ type: Array })
 	lintReports: LintReport[] | undefined
 
-	dispatchOnSetSettings(messageBundle: MessageBundle) {
+	dispatchOnChangeMessageBundle(messageBundle: MessageBundle) {
 		const onChangeMessageBundle = new CustomEvent("change-message-bundle", {
 			bubbles: true,
 			detail: {
@@ -64,9 +64,22 @@ export default class InlangMessageBundle extends LitElement {
 		this.dispatchEvent(onChangeMessageBundle)
 	}
 
+	dispatchOnFixLint(lintReport: LintReport, fix: LintReport["fixes"][0]["title"]) {
+		const onFixLint = new CustomEvent("fix-lint", {
+			bubbles: true,
+			detail: {
+				argument: {
+					lintReport,
+					fix,
+				},
+			},
+		})
+		this.dispatchEvent(onFixLint)
+	}
+
 	_triggerSave = () => {
 		if (this.messageBundle) {
-			this.dispatchOnSetSettings(this.messageBundle)
+			this.dispatchOnChangeMessageBundle(this.messageBundle)
 		}
 	}
 
@@ -87,6 +100,10 @@ export default class InlangMessageBundle extends LitElement {
 
 	_triggerRefresh = () => {
 		this.requestUpdate()
+	}
+
+	_fixLint = (lintReport: LintReport, fix: LintReport["fixes"][0]["title"]) => {
+		this.dispatchOnFixLint(lintReport, fix)
 	}
 
 	@state()
@@ -364,6 +381,7 @@ export default class InlangMessageBundle extends LitElement {
 									${lintReports && lintReports.length > 0
 										? html`<inlang-lint-report-tip
 												.lintReports=${lintReports.filter((report) => !report.variantId)}
+												.fixLint=${this._fixLint}
 										  ></inlang-lint-report-tip>`
 										: ``}
 								</div>
@@ -385,6 +403,7 @@ export default class InlangMessageBundle extends LitElement {
 										.addInput=${this._addInput}
 										.locale=${locale}
 										.lintReports=${lintReports}
+										.fixLint=${this._fixLint}
 									></inlang-variant>`
 							  })
 							: message?.selectors.length === 0 || !message
@@ -397,6 +416,7 @@ export default class InlangMessageBundle extends LitElement {
 									.triggerMessageBundleRefresh=${this._triggerRefresh}
 									.locale=${locale}
 									.lintReports=${lintReports}
+									.fixLint=${this._fixLint}
 							  ></inlang-variant>`
 							: ``}
 						${message?.selectors && message.selectors.length > 0
