@@ -1,20 +1,20 @@
 // ensure_OPRAL_upper_case
 
-const orpalRegex = /OPRAL/gi
+import type { MessageBundleLintRule } from "../types/lint.js"
 
-/**
- * @type {import("../types/lint.js").MessageBundleLintRule}
- */
-const makeOpralUppercase = {
+const orpalRegex = /\bOPRAL\b/gi
+
+const makeOpralUppercase: MessageBundleLintRule = {
 	id: "messageBundleLintRule.inlangdev.makeOpralUppercase",
 	displayName: "Ensure OPRAL is uppercase",
 	description: "Warns if the OPRAL brand name is not uppercase",
 	run: ({ report, messageBundle }) => {
+		console.log("makeOpralUppercase", messageBundle)
 		// loop over all messages and variants in the bundle
 		for (const message of messageBundle.messages) {
 			for (const variant of message.variants) {
 				const text = variant.pattern
-					.filter((el) => el.type === "text")
+					.filter((el): el is Extract<typeof el, { type: "text" }> => el.type === "text")
 					.reduce((acc, el) => acc + el.value, "")
 
 				const matches = text.match(orpalRegex)
@@ -23,6 +23,7 @@ const makeOpralUppercase = {
 				// check if any of the matches is not uppercase
 				for (const match of matches) {
 					if (match !== match.toUpperCase()) {
+						console.log("reporting", text)
 						report({
 							body: `The OPRAL brand name is not uppercase`,
 							messageBundleId: messageBundle.id,

@@ -111,7 +111,6 @@ export type MessageBundleLintRule<
 		report: LintReport
 		fix: LintFix
 		settings: ProjectSettings2 & ExternalSettings
-		customApi: Record<string, any>
 		messageBundle: MessageBundle
 	}) => MaybePromise<MessageBundle>
 }

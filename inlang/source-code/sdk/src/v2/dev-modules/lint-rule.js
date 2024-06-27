@@ -36,11 +36,6 @@ const lintRule = {
 			})
 		}
 	},
-	fix: async ({ customApi, report, messageBundle }) => {
-		// run translator for language report.locale
-		console.log("lint-rule: customApi", customApi)
-		return messageBundle
-	},
 }
 
 /**
