@@ -1,5 +1,5 @@
 import type { Repository } from "@lix-js/client"
-import type { ImportFunction } from "../resolve-modules/import.js"
+import { type ImportFunction, createImport } from "../resolve-modules/import.js"
 import { assertValidProjectPath } from "../validateProjectPath.js"
 import { normalizePath } from "@lix-js/fs"
 import { maybeAddModuleCache } from "../migrations/maybeAddModuleCache.js"
@@ -7,7 +7,8 @@ import { createNodeishFsWithAbsolutePaths } from "../createNodeishFsWithAbsolute
 import { maybeCreateFirstProjectId } from "../migrations/maybeCreateFirstProjectId.js"
 import { loadSettings } from "./settings.js"
 import type { InlangProject2 } from "./types/project.js"
-import { MessageBundle, type LintReport, type Message } from "./types/index.js"
+import { MessageBundle, type Fix, type LintReport, type Message } from "./types/index.js"
+import { createDebugImport } from "./import-utils.js"
 
 import { createRxDatabase, type RxCollection } from "rxdb"
 import { getRxStorageMemory } from "rxdb/plugins/storage-memory"
@@ -19,6 +20,9 @@ import {
 	startReplication,
 } from "./createMessageBundleSlotAdapter.js"
 import createSlotStorageWriter from "../persistence/slotfiles/createSlotWriter.js"
+
+import lintRule from "./dev-modules/lint-rule.js"
+import { importSequence } from "./import-utils.js"
 
 /**
  *
@@ -74,12 +78,21 @@ export async function loadProject(args: {
 
 	const projectSettings$ = new BehaviorSubject(projectSettings)
 
+	const _import = importSequence(
+		createDebugImport({
+			"sdk-dev:lint-rule.js": lintRule,
+		}),
+		createImport(projectPath, nodeishFs)
+	)
+
 	const modules = await resolveModules({
 		settings: projectSettings,
-		nodeishFs,
-		_import: args._import,
-		projectPath,
+		_import,
 	})
+
+	console.info("resolvedModules", modules)
+
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const modules$ = new BehaviorSubject(modules)
 
 	// rxdb with memory storage configured
@@ -117,30 +130,21 @@ export async function loadProject(args: {
 		watch: true,
 	})
 
-	const linter = await createLintWorker(projectPath, projectSettings.modules, nodeishFs)
+	const linter = await createLintWorker(projectPath, projectSettings, nodeishFs)
 
 	const lintReports$ = new BehaviorSubject<LintReport[]>([])
 	const adapter = createMessageBundleSlotAdapter(
 		bundleStorage,
 		messageStorage,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		async (source, bundle) => {
 			if (source === "adapter") {
 				const lintresults = await linter.lint(projectSettings)
 				lintReports$.next(lintresults)
-				console.log(lintresults)
 			}
 		}
 	)
 	await startReplication(database.collections.messageBundles, adapter).awaitInitialReplication()
-
-	// // linter.lint(projectSettings)
-
-	// adapter.pullStream$.subscribe({
-	// 	next: async () => {
-
-	// 		console.log(lintresults)
-	// 	},
-	// })
 
 	return {
 		id: projectId,
@@ -154,6 +158,10 @@ export async function loadProject(args: {
 		internal: {
 			bundleStorage,
 			messageStorage,
+		},
+		fix: async (report: LintReport, fix: Fix<LintReport>) => {
+			const fixed = await linter.fix(report, fix)
+			await database.collections.messageBundles.upsert(fixed)
 		},
 	}
 }

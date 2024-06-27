@@ -1,21 +1,22 @@
-import { createImport } from "./import.js"
+// import { createImport } from "./import.j
 import { endpoint } from "comlink-node/worker"
 import { populateLevel } from "./populateLintLevel.js"
-import { TypeCompiler } from "@sinclair/typebox/compiler"
-import { MessageBundleLintRule, type LintConfig, type LintReport } from "../types/lint.js"
-
+import { resolveModules } from "../resolveModules2.js"
 import * as Comlink from "comlink"
-import type { NodeishFilesystem } from "@lix-js/fs"
 import type { Message, MessageBundle } from "../types/message-bundle.js"
 import type { ProjectSettings2 } from "../types/project-settings.js"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
-
+import type { Fix, LintConfig, LintReport } from "../types/lint.js"
+import { createDebugImport, importSequence } from "../import-utils.js"
+import { createImport } from "./import.js"
+import lintRule from "../dev-modules/lint-rule.js"
+import makeOpralUppercase from "../dev-modules/opral-uppercase-lint-rule.js"
 import _debug from "debug"
 import { combineToBundles } from "../createMessageBundleSlotAdapter.js"
 import createSlotReader from "../../persistence/slotfiles/createSlotReader.js"
+import missingSelectorLintRule from "../dev-modules/missing-selector-lint-rule.js"
+import missingCatchallLintRule from "../dev-modules/missingCatchall.js"
 const debug = _debug("sdk-v2:lint-report-worker")
-
-const MessageBundleLintRuleCompiler = TypeCompiler.Compile(MessageBundleLintRule)
 
 const lintConfigs: LintConfig[] = [
 	{
@@ -28,62 +29,63 @@ const lintConfigs: LintConfig[] = [
 	},
 ]
 
-const bundleCollectionDir = "/messageBundle/"
-
 export async function createLinter(
 	projectPath: string,
-	moduleURIs: string[],
+	settings: ProjectSettings2,
 	fs: Pick<NodeishFilesystemSubset, "readFile" | "readdir" | "mkdir">
 ) {
 	debug("creating linter")
-	const _import = createImport(projectPath, fs)
+	const _import = importSequence(
+		createDebugImport({
+			"sdk-dev:lint-rule.js": lintRule,
+			"sdk-dev:opral-uppercase-lint.js": makeOpralUppercase,
+			"sdk-dev:missing-selector-lint-rule.js": missingSelectorLintRule,
+			"sdk-dev:missing-catchall-variant": missingCatchallLintRule,
+		}),
+		createImport(projectPath, fs)
+	)
 
-	const modules: unknown[] = await Promise.all(
-		moduleURIs.map(async (uri) => {
-			const module = await _import(uri)
-			return module.default
+	const resolvedModules = await resolveModules({
+		settings,
+		_import,
+	})
+
+	const customApi = resolvedModules.resolvedPluginApi.customApi
+	console.info("lint-worker resolvedModules", resolvedModules)
+	console.info("lint-worker customApi", customApi)
+
+	async function getMessageBundles() {
+		// get the affected message-bundle
+		const messageBundlesPath = projectPath + "/messagebundles/"
+		const messagesPath = projectPath + "/messages/"
+
+		const bundleStorage = await createSlotReader<MessageBundle>({
+			fs,
+			path: messageBundlesPath,
+			watch: false,
 		})
-	)
 
-	const invalidModuleErrors = modules
-		.filter((module) => !MessageBundleLintRuleCompiler.Check(module))
-		.flatMap((module) => [...MessageBundleLintRuleCompiler.Errors(module)])
+		const messageStorage = await createSlotReader<Message>({
+			fs,
+			path: messagesPath,
+			watch: false,
+		})
 
-	if (invalidModuleErrors.length > 0) {
-		console.error("invalidModuleErrors", invalidModuleErrors)
+		const bundles = await bundleStorage.readAll()
+		const messages = await messageStorage.readAll()
+		const messageBundles = combineToBundles(bundles, messages)
+		return messageBundles
 	}
-
-	const resolvedLintRules = modules.filter((module): module is MessageBundleLintRule =>
-		MessageBundleLintRuleCompiler.Check(module)
-	)
 
 	return Comlink.proxy({
 		lint: async (settings: ProjectSettings2): Promise<LintReport[]> => {
-			// TODO dedbulicate path config
-			const messageBundlesPath = projectPath + "/messagebundles/"
-			const messagesPath = projectPath + "/messages/"
-
-			const bundleStorage = await createSlotReader<MessageBundle>({
-				fs,
-				path: messageBundlesPath,
-				watch: false,
-			})
-
-			const messageStorage = await createSlotReader<Message>({
-				fs,
-				path: messagesPath,
-				watch: false,
-			})
-
-			const bundles = await bundleStorage.readAll()
-			const messages = await messageStorage.readAll()
-			const messageBundles = combineToBundles(bundles, messages)
+			const messageBundles = await getMessageBundles()
 
 			const reports: LintReport[] = []
 			const promises: Promise<any>[] = []
 
 			for (const messageBundle of messageBundles.values()) {
-				for (const lintRule of resolvedLintRules) {
+				for (const lintRule of resolvedModules.messageBundleLintRules) {
 					const promise = lintRule.run({
 						messageBundle: messageBundle,
 						settings,
@@ -98,9 +100,29 @@ export async function createLinter(
 			}
 
 			await Promise.all(promises)
-
-			console.info("lint reports worker", reports)
+			console.info("lint reports", reports)
 			return reports
+		},
+
+		fix: async <Report extends LintReport>(report: Report, fix: Fix<Report>) => {
+			//enforce that the fix exists on the lint-report
+			const usedFix = report.fixes.find((f) => f.title === fix.title)
+			if (!usedFix) throw new Error(`fix ${fix.title} not available on report "${report.body}"`)
+
+			const messageBundles = await getMessageBundles()
+			const bundle = [...messageBundles.values()].find(
+				(bundle) => bundle.id === report.messageBundleId
+			)
+
+			if (!bundle) throw new Error(`messageBundle ${report.messageBundleId} not found`)
+
+			const rule = resolvedModules.messageBundleLintRules.find((rule) => rule.id === report.ruleId)
+			if (!rule) throw new Error(`rule ${report.ruleId} not found`)
+			if (!rule.fix) throw new Error(`rule ${report.ruleId} does not have a fix function`)
+
+			const messageBundle = structuredClone(bundle)
+			const fixed = await rule.fix({ report, fix, settings, messageBundle })
+			return fixed
 		},
 	})
 }

@@ -15,6 +15,7 @@ export const MessageBundleComponent = createComponent({
 	react: React,
 	events: {
 		changeMessageBundle: "change-message-bundle",
+		fixLint: "fix-lint",
 	},
 })
 
@@ -89,6 +90,15 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 							settings={projectSettings as any}
 							lintReports={lintReports.filter((report) => report.messageBundleId === bundle.id)}
 							changeMessageBundle={onBundleChange as any}
+							fixLint={(e) => {
+								const { fix, lintReport } = e.detail.argument as {
+									fix: string
+									lintReport: LintReport
+								}
+
+								console.log("fixing", fix, lintReport)
+								project.inlangProject.fix(lintReport, { title: fix })
+							}}
 						/>
 					))}
 				</>
