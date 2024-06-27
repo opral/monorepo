@@ -378,7 +378,9 @@ export default class InlangMessageBundle extends LitElement {
 												>Sort</sl-button
 										  >`
 										: ``}
-									${lintReports && lintReports.length > 0
+									${lintReports &&
+									lintReports.length > 0 &&
+									lintReports.some((report) => !report.variantId)
 										? html`<inlang-lint-report-tip
 												.lintReports=${lintReports.filter((report) => !report.variantId)}
 												.fixLint=${this._fixLint}
