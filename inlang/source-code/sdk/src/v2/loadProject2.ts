@@ -9,7 +9,7 @@ import { loadSettings } from "./settings.js"
 import type { InlangProject2 } from "./types/project.js"
 import { MessageBundle, type LintReport, type Message } from "./types/index.js"
 import createSlotStorage from "../persistence/slotfiles/createSlotStorage.js"
-import { devModuleImport } from "./dev-modules/import.js"
+import { createDebugImport } from "./import-utils.js"
 
 import { createRxDatabase, type RxCollection } from "rxdb"
 import { getRxStorageMemory } from "rxdb/plugins/storage-memory"
@@ -20,6 +20,10 @@ import {
 	createMessageBundleSlotAdapter,
 	startReplication,
 } from "./createMessageBundleSlotAdapter.js"
+
+import translatorPlugin from "./dev-modules/translatorPlugin.js"
+import lintRule from "./dev-modules/lint-rule.js"
+import { importSequence } from "./import-utils.js"
 
 /**
  * @param projectPath - Absolute path to the inlang settings file.
@@ -68,8 +72,14 @@ export async function loadProject(args: {
 
 	const projectSettings$ = new BehaviorSubject(projectSettings)
 
-	//const _import = createImport(projectPath, nodeishFs)
-	const _import = devModuleImport
+	const _import = importSequence(
+		createDebugImport({
+			"sdk-dev:translator-plugin.js": translatorPlugin,
+			"sdk-dev:lint-rule.js": lintRule,
+		}),
+		createImport(projectPath, nodeishFs)
+	)
+
 	const modules = await resolveModules({
 		settings: projectSettings,
 		_import,
@@ -77,6 +87,7 @@ export async function loadProject(args: {
 
 	console.info("resolvedModules", modules)
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const modules$ = new BehaviorSubject(modules)
 
 	const bundleStorage = createSlotStorage<MessageBundle>(
@@ -122,24 +133,15 @@ export async function loadProject(args: {
 	const adapter = createMessageBundleSlotAdapter(
 		bundleStorage,
 		messageStorage,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		async (source, bundle) => {
 			if (source === "adapter") {
 				const lintresults = await linter.lint(projectSettings)
 				lintReports$.next(lintresults)
-				console.log(lintresults)
 			}
 		}
 	)
 	await startReplication(database.collections.messageBundles, adapter).awaitInitialReplication()
-
-	// // linter.lint(projectSettings)
-
-	// adapter.pullStream$.subscribe({
-	// 	next: async () => {
-
-	// 		console.log(lintresults)
-	// 	},
-	// })
 
 	return {
 		id: projectId,

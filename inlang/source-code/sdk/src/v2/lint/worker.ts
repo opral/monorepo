@@ -10,9 +10,11 @@ import type { Message, MessageBundle } from "../types/message-bundle.js"
 import type { ProjectSettings2 } from "../types/project-settings.js"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
 import type { LintConfig, LintReport } from "../types/lint.js"
-
+import { createDebugImport, importSequence } from "../import-utils.js"
+import { createImport } from "./import.js"
+import translatorPlugin from "../dev-modules/translatorPlugin.js"
+import lintRule from "../dev-modules/lint-rule.js"
 import _debug from "debug"
-import { devModuleImport } from "../dev-modules/import.js"
 const debug = _debug("sdk-v2:lint-report-worker")
 
 const lintConfigs: LintConfig[] = [
@@ -32,8 +34,13 @@ export async function createLinter(
 	fs: Pick<NodeishFilesystemSubset, "readFile" | "readdir" | "mkdir">
 ) {
 	debug("creating linter")
-	const _import = devModuleImport
-	//const _import = createImport(projectPath, fs)
+	const _import = importSequence(
+		createDebugImport({
+			"sdk-dev:translator-plugin.js": translatorPlugin,
+			"sdk-dev:lint-rule.js": lintRule,
+		}),
+		createImport(projectPath, fs)
+	)
 
 	const resolvedModules = await resolveModules({
 		settings,
@@ -41,8 +48,8 @@ export async function createLinter(
 	})
 
 	const customApi = resolvedModules.resolvedPluginApi.customApi
-	console.info("worker-resolvedModules", resolvedModules)
-	console.info("worker-customApi", customApi)
+	console.info("lint-worker resolvedModules", resolvedModules)
+	console.info("lint-worker customApi", customApi)
 
 	const translator:
 		| {
@@ -97,8 +104,6 @@ export async function createLinter(
 			}
 
 			await Promise.all(promises)
-
-			console.info("lint reports worker", reports)
 			return reports
 		},
 
@@ -122,6 +127,8 @@ export async function createLinter(
 			await messageStorage.connect(fs as NodeishFilesystem, messagesPath, false)
 			const rxDbAdapter = createMessageBundleSlotAdapter(bundleStorage, messageStorage, () => {})
 			const messageBundles = await rxDbAdapter.getAllMessageBundles()
+
+			console.info("lint fix messageBundles", messageBundles)
 
 			const messageBundle = messageBundles.find((bundle) => bundle.id === report.messageBundleId)
 			if (!messageBundle) throw new Error(`messageBundle ${report.messageBundleId} not found`)

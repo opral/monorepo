@@ -9,8 +9,8 @@ export const defaultProjectSettings = {
 	baseLocale: "en",
 	locales: ["en", "de"],
 	modules: [
-		"@dev/translator-plugin.js",
-		"@dev/lint-rule.js",
+		"sdk-dev:translator-plugin.js",
+		"sdk-dev:lint-rule.js",
 		// for instant gratification, we're adding common rules
 		// "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js",
 		// "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js",
