@@ -5,6 +5,37 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script>window.global = window;</script>
+    <style>
+      /* General styles for the tab container */
+      .tab-container {
+        display: flex;
+        border-bottom: 2px solid #ccc;
+        margin-bottom: 10px;
+      }
+
+      /* Styles for each tab */
+      .tab {
+        padding: 10px 20px;
+        cursor: pointer;
+        border: 1px solid #ccc;
+        border-bottom: none;
+        margin-right: 5px;
+        background-color: #f1f1f1;
+        transition: background-color 0.3s;
+      }
+
+      /* Active tab styles */
+      .tab.active {
+        background-color: #fff;
+        border-bottom: 2px solid #fff;
+        font-weight: bold;
+      }
+
+      /* Hover effect for tabs */
+      .tab:hover {
+        background-color: #ddd;
+      }
+    </style>
 <script type="module">
     
 </script>

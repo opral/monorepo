@@ -2505,6 +2505,9 @@ importers:
       '@inlang/sdk':
         specifier: workspace:*
         version: link:..
+      '@inlang/settings-component':
+        specifier: workspace:*
+        version: link:../../settings-component
       '@isomorphic-git/cors-proxy':
         specifier: ^2.7.1
         version: 2.7.1

@@ -1,11 +1,8 @@
-import { createMessageBundleSlotAdapter } from "../createMessageBundleSlotAdapter.js"
 // import { createImport } from "./import.j
 import { endpoint } from "comlink-node/worker"
 import { populateLevel } from "./populateLintLevel.js"
 import { resolveModules } from "../resolveModules2.js"
-import createSlotStorage from "../../persistence/slotfiles/createSlotStorage.js"
 import * as Comlink from "comlink"
-import type { NodeishFilesystem } from "@lix-js/fs"
 import type { Message, MessageBundle } from "../types/message-bundle.js"
 import type { ProjectSettings2 } from "../types/project-settings.js"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
@@ -16,6 +13,11 @@ import translatorPlugin from "../dev-modules/translatorPlugin.js"
 import lintRule from "../dev-modules/lint-rule.js"
 import makeOpralUppercase from "../dev-modules/opral-uppercase-lint-rule.js"
 import _debug from "debug"
+import {
+	combineToBundles,
+	createMessageBundleSlotAdapter,
+} from "../createMessageBundleSlotAdapter.js"
+import createSlotReader from "../../persistence/slotfiles/createSlotReader.js"
 const debug = _debug("sdk-v2:lint-report-worker")
 
 const lintConfigs: LintConfig[] = [
@@ -69,28 +71,26 @@ export async function createLinter(
 			const messageBundlesPath = projectPath + "/messagebundles/"
 			const messagesPath = projectPath + "/messages/"
 
-			const bundleStorage = createSlotStorage<MessageBundle>(
-				"bundle-storage-linter",
-				16 * 16 * 16 * 16,
-				3
-			)
-			await bundleStorage.connect(fs as NodeishFilesystem, messageBundlesPath, false)
+			const bundleStorage = await createSlotReader<MessageBundle>({
+				fs,
+				path: messageBundlesPath,
+				watch: false,
+			})
 
-			const messageStorage = createSlotStorage<Message>(
-				"message-storage-linter",
-				16 * 16 * 16 * 16,
-				3
-			)
-			await messageStorage.connect(fs as NodeishFilesystem, messagesPath, false)
+			const messageStorage = await createSlotReader<Message>({
+				fs,
+				path: messagesPath,
+				watch: false,
+			})
 
-			const rxDbAdapter = createMessageBundleSlotAdapter(bundleStorage, messageStorage, () => {})
-
-			const messageBundles = await rxDbAdapter.getAllMessageBundles()
+			const bundles = await bundleStorage.readAll()
+			const messages = await messageStorage.readAll()
+			const messageBundles = combineToBundles(bundles, messages)
 
 			const reports: LintReport[] = []
 			const promises: Promise<any>[] = []
 
-			for (const messageBundle of messageBundles as MessageBundle[]) {
+			for (const messageBundle of messageBundles.values()) {
 				for (const lintRule of resolvedModules.messageBundleLintRules) {
 					const promise = lintRule.run({
 						messageBundle: messageBundle,
@@ -114,25 +114,27 @@ export async function createLinter(
 			const messageBundlesPath = projectPath + "/messagebundles/"
 			const messagesPath = projectPath + "/messages/"
 
-			const bundleStorage = createSlotStorage<MessageBundle>(
-				"bundle-storage-linter",
-				16 * 16 * 16 * 16,
-				3
-			)
-			await bundleStorage.connect(fs as NodeishFilesystem, messageBundlesPath, false)
+			const bundleStorage = await createSlotReader<MessageBundle>({
+				fs,
+				path: messageBundlesPath,
+				watch: false,
+			})
 
-			const messageStorage = createSlotStorage<Message>(
-				"message-storage-linter",
-				16 * 16 * 16 * 16,
-				3
-			)
-			await messageStorage.connect(fs as NodeishFilesystem, messagesPath, false)
-			const rxDbAdapter = createMessageBundleSlotAdapter(bundleStorage, messageStorage, () => {})
-			const messageBundles = await rxDbAdapter.getAllMessageBundles()
+			const messageStorage = await createSlotReader<Message>({
+				fs,
+				path: messagesPath,
+				watch: false,
+			})
+
+			const bundles = await bundleStorage.readAll()
+			const messages = await messageStorage.readAll()
+			const messageBundles = combineToBundles(bundles, messages)
 
 			console.info("lint fix messageBundles", messageBundles)
 
-			const messageBundle = messageBundles.find((bundle) => bundle.id === report.messageBundleId)
+			const messageBundle = [...messageBundles.values()].find(
+				(bundle) => bundle.id === report.messageBundleId
+			)
 			if (!messageBundle) throw new Error(`messageBundle ${report.messageBundleId} not found`)
 
 			const translated = await translator?.translate({

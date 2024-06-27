@@ -7,9 +7,14 @@ import { randomHumanId } from "../../src/storage/human-id/human-readable-id.js"
 import { createMessage, createMessageBundle } from "../../src/v2/helper.js"
 import { MessageBundleList } from "./messageBundleListReact.js"
 import { MessageBundle } from "../../dist/v2/index.js"
+import { SettingsView } from "./settingsView.js"
 
 export function MainView() {
 	const [githubToken, setGithubToken] = useState<string>(localStorage.ghToken)
+
+	const [currentView, setCurrentView] = useState<"overview" | "messageList" | "settings">(
+		"messageList"
+	)
 
 	const onGithubTokenChange = (el: any) => {
 		const ghToken = el.target.value
@@ -204,7 +209,30 @@ export function MainView() {
 						>
 							Pull Changes
 						</button>
-						<MessageBundleList project={currentProject}></MessageBundleList>
+						<div className="tab-container">
+							<div
+								className={`tab ${currentView === "overview" ? "active" : ""}`}
+								onClick={() => setCurrentView("overview")}
+							>
+								Overview
+							</div>
+							<div
+								className={`tab ${currentView === "messageList" ? "active" : ""}`}
+								onClick={() => setCurrentView("messageList")}
+							>
+								MessageList
+							</div>
+							<div
+								className={`tab ${currentView === "settings" ? "active" : ""}`}
+								onClick={() => setCurrentView("settings")}
+							>
+								Settings
+							</div>
+						</div>
+						{currentView === "settings" && <SettingsView project={currentProject}></SettingsView>}
+						{currentView === "messageList" && (
+							<MessageBundleList project={currentProject}></MessageBundleList>
+						)}
 					</>
 				)}
 			</div>

@@ -1,7 +1,6 @@
-import type { JSONObject } from "@inlang/json-types"
-
 import { type Static, type TLiteral, type TTemplateLiteral, Type } from "@sinclair/typebox"
 import { LanguageTag } from "./language-tag.js"
+import type { JSONObject } from "@inlang/json-types"
 import { LintConfig, type MessageBundleLintRule, type MessageLintLevel } from "./lint.js"
 import type { Plugin2 } from "./plugin.js"
 
@@ -109,7 +108,7 @@ export type InstalledPlugin = {
 	// disabled: boolean
 }
 
-export type InstalledMessageLintRule = {
+export type InstalledLintRule = {
 	id: MessageBundleLintRule["id"]
 	displayName: MessageBundleLintRule["displayName"]
 	description: MessageBundleLintRule["description"]

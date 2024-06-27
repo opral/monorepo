@@ -3,56 +3,19 @@ import _debug from "debug"
 import type { SlotEntry, TransientSlotEntry } from "./types/SlotEntry.js"
 import { hash } from "./utill/hash.js"
 import { stringifySlotFile } from "./utill/stringifySlotFile.js"
-import { parseSlotFile } from "./utill/parseSlotFile.js"
-import type { SlotFileStates } from "./types/SlotFileStates.js"
 import type { SlotFile } from "./types/SlotFile.js"
 import type { HasId } from "./types/HasId.js"
 import { deepFreeze } from "./utill/deepFreeze.js"
 import { sortNamesByDistance } from "./utill/sortNamesByDistance.js"
+import createSlotStorageReader from "./createSlotReader.js"
 
-type FsType<ReadOnly extends boolean, Watch extends boolean> = ReadOnly extends true
-	? Watch extends true
-		? Pick<NodeishFilesystem, "readFile" | "readdir" | "watch">
-		: Pick<NodeishFilesystem, "readFile" | "readdir">
-	: Watch extends true
-	? Pick<NodeishFilesystem, "readFile" | "readdir" | "writeFile" | "mkdir" | "watch">
-	: Pick<NodeishFilesystem, "readFile" | "readdir" | "writeFile" | "mkdir">
-
-interface CommonParams {
+type createSlotStorageParams = {
 	path: string
 	slotsPerFile: number
 	fileNameCharacters: number
-}
-
-interface ReadonlyWatchParams extends CommonParams {
-	readonly: true
 	watch: true
-	fs: FsType<true, true>
+	fs: Pick<NodeishFilesystem, "readFile" | "readdir" | "writeFile" | "mkdir" | "watch">
 }
-
-interface ReadonlyNoWatchParams extends CommonParams {
-	readonly: true
-	watch: false
-	fs: FsType<true, false>
-}
-
-interface ReadwriteWatchParams extends CommonParams {
-	readonly: false
-	watch: true
-	fs: FsType<false, true>
-}
-
-interface ReadwriteNoWatchParams extends CommonParams {
-	readonly: false
-	watch: false
-	fs: FsType<false, false>
-}
-
-type createSlotStorageParams =
-	| ReadonlyWatchParams
-	| ReadonlyNoWatchParams
-	| ReadwriteWatchParams
-	| ReadwriteNoWatchParams
 
 /**
  *
@@ -95,16 +58,24 @@ type createSlotStorageParams =
  * @param path base path to store each collection in
  * @returns
  */
-export default async function createSlotStorage<DocType extends HasId>({
+export default async function createSlotStorageWriter<DocType extends HasId>({
 	fs,
 	path,
-	readonly,
 	watch,
 	slotsPerFile,
 	fileNameCharacters,
 }: createSlotStorageParams) {
+	// TODO add config to toggle creation - default should check if path exists instead
+	await fs.mkdir(path, { recursive: true })
+
+	const slotFileReader = await createSlotStorageReader<DocType>({
+		fs,
+		path,
+		watch,
+	})
+
 	const debug = _debug("sdk:slotfile:" + path)
-	const storageName = name
+
 	// property to use to test for identity of an object within a collection
 	// NOTE: use schema primary key like in https://github.com/pubkey/rxdb/blob/3bdfd66d1da5ccf9afe371b6665770f11e67908f/src/types/rx-schema.d.ts#L106
 	const idProperty = "id"
@@ -113,311 +84,11 @@ export default async function createSlotStorage<DocType extends HasId>({
 	const slotSize = slotsPerFile
 	const slotCharacters = (slotSize - 1).toString(16).length
 
-	const idToSlotFileName = new Map<string, string>()
-
-	// appended or update insert
-	const fileNamesToSlotfileStates = new Map<string, SlotFileStates<DocType>>()
-
 	// records that have been inserted and not persisted
 	const transientSlotEntries = new Map<string, TransientSlotEntry<DocType>>()
 
-	let changeCallback: (
-		source: "api" | "fs",
-		eventName: string,
-		records?: string[]
-	) => void = () => {}
-
-	const slotEntryStates = new Map<string, SlotEntry<DocType>>()
-
 	const normalizeObject = (objectToNormalize: any) => {
 		return objectToNormalize // TODO normalize json
-	}
-
-	/**
-	 *
-	 * Merges the updated Slotfile into the current Slotfile
-	 * - integrates records present in local changes that do not conflict with current disc state
-	 * - keeps localy conflicting records (those having local changes and updated in updatedSlotfileState) untouched
-	 *
-	 * @param currentSlotFileState
-	 * @param freshSlotFileState
-	 * @param localChanges
-	 */
-	const mergeRecordsWithoutLocalConflicts = (
-		currentSlotFileState: SlotFile<DocType>,
-		freshSlotFileState: SlotFile<DocType>,
-		localChanges: (SlotEntry<DocType> | null)[]
-	) => {
-		const mergedState = structuredClone(currentSlotFileState)
-		const conflictingSlotIndexes: number[] = []
-		const updatedSlotIndexes: number[] = []
-		const createdSlotIndexes: number[] = []
-		// content of a slotfile has changed we need to check each record
-		for (let currentSlotIndex = 0; currentSlotIndex <= slotsPerFile; currentSlotIndex += 1) {
-			const loadedSlotEntry = currentSlotFileState.recordSlots[currentSlotIndex]
-			const freshSlotEntry = freshSlotFileState.recordSlots[currentSlotIndex]
-
-			const changedRecord = localChanges[currentSlotIndex]
-
-			if (!loadedSlotEntry && !changedRecord && !freshSlotEntry) {
-				// no record in slot - NoOp
-				// debug("mergeRecordsWithoutLocalConflicts - no record in slot")
-			} else if (
-				loadedSlotEntry &&
-				freshSlotEntry &&
-				loadedSlotEntry.slotEntryHash === freshSlotEntry.slotEntryHash
-			) {
-				// nothing new from the loaded file for this record
-				// - no op
-				debug(
-					"mergeRecordsWithoutLocalConflicts - file and memory same state - " + currentSlotIndex
-				)
-			} else if (
-				loadedSlotEntry &&
-				freshSlotEntry &&
-				loadedSlotEntry.slotEntryHash !== freshSlotEntry.slotEntryHash
-			) {
-				if (!changedRecord) {
-					debug(
-						"mergeRecordsWithoutLocalConflicts - nothin changed in memory - no conflict - use fresh loaded state... - " +
-							currentSlotIndex
-					)
-					// nothin changed in memory - no conflict - use fresh loaded state...
-					mergedState.recordSlots[currentSlotIndex] = freshSlotEntry
-					updatedSlotIndexes.push(currentSlotIndex)
-				} else if (changedRecord) {
-					debug(
-						"mergeRecordsWithoutLocalConflicts - the record has changed in memory - and the data loaded from working copy has changed - keep memory origin and the memory untouched... - " +
-							currentSlotIndex
-					)
-					// the record has changed in memory - and the data loaded from working copy has changed - keep memory origin and the memory untouched
-					conflictingSlotIndexes.push(currentSlotIndex)
-					mergedState.contentHash = "conflicting"
-				}
-			} else if (!loadedSlotEntry && freshSlotEntry) {
-				if (!changedRecord) {
-					debug(
-						"mergeRecordsWithoutLocalConflicts - record found in update slotfile that didnt exist in memory yet... - " +
-							currentSlotIndex
-					)
-					// record found in update slotfile that didn
-					mergedState.recordSlots[currentSlotIndex] = freshSlotEntry
-					createdSlotIndexes.push(currentSlotIndex)
-				} else {
-					throw new Error("record created in slot file conflicts with loaded record in slot")
-				}
-			} else if (loadedSlotEntry && !freshSlotEntry) {
-				// NOTE: working file seem to have change to an older version that didn't know about the entry in the slot?
-				throw new Error("record does not exit in slot file anymore")
-			}
-		}
-
-		if (mergedState.contentHash != "conflicting") {
-			mergedState.contentHash = freshSlotFileState.contentHash
-		} else {
-			// TODO calculate new memory hash
-		}
-
-		return {
-			mergedState,
-			conflictingSlotIndexes,
-			updatedSlotIndexes,
-			createdSlotIndexes,
-		}
-	}
-
-	const loadSlotFileFromFs = async (slotFileName: string) => {
-		debug("loadSlotFileFromFs " + slotFileName)
-		// NOTE: we can use lix to check if the current file is conflicting and load the conflicting state
-		const statesBefore = fileNamesToSlotfileStates.get(slotFileName)
-
-		if (statesBefore && statesBefore.stateFlag !== "loadrequested") {
-			debug(`loadSlotFileFromFs ${slotFileName} skipped state was ${statesBefore.stateFlag}`)
-			return undefined
-		}
-
-		if (statesBefore) {
-			statesBefore.stateFlag = "loading"
-		}
-
-		const slotFileContent = await fs.readFile(path + slotFileName + ".slot", { encoding: "utf-8" })
-		const slotFileContentHash = await hash(slotFileContent)
-
-		if (
-			statesBefore &&
-			(statesBefore.memorySlotFileState?.contentHash === slotFileContentHash ||
-				statesBefore.fsSlotFileState?.contentHash === slotFileContentHash)
-		) {
-			debug("loadSlotFileFromWorkingCopy " + slotFileName + " hash was equal state -> loaded")
-			statesBefore.stateFlag = "loaded"
-			// content is equal - no further loading needed
-			return undefined
-		}
-
-		const slotFileContentParsed = await parseSlotFile<DocType>(slotFileContent)
-
-		const freshSlotfile: SlotFile<DocType> = {
-			contentHash: slotFileContentHash,
-			exists: true,
-			recordSlots: slotFileContentParsed,
-		}
-
-		if (!statesBefore) {
-			// Load new, yet unknown slot file to memory
-
-			const result = {
-				upsertedSlotFileStates: {
-					slotFileName: slotFileName,
-					fsSlotFileState: undefined,
-					stateFlag: "loaded" as const,
-					memorySlotFileState: freshSlotfile,
-					changedRecords: [],
-				},
-				created: [] as number[],
-				updated: [] as number[],
-				localConflicted: [] as number[],
-			}
-
-			let slotIndex = 0
-			// initial load of the slot file - we need to handle all records as unseen
-			for (const addeRecord of freshSlotfile.recordSlots) {
-				if (addeRecord) {
-					result.created.push(slotIndex)
-				}
-				slotIndex++
-			}
-			return result
-		}
-
-		const memoryOriginState = statesBefore.memorySlotFileState
-
-		if (memoryOriginState === undefined) {
-			throw new Error(
-				"memory origin state should exist for files we read from the disc (creation conflict??)"
-			)
-		}
-
-		// compute hashes for records that don't have a hash computed.
-		const mergeResult = mergeRecordsWithoutLocalConflicts(
-			memoryOriginState,
-			freshSlotfile,
-			statesBefore.changedRecords
-		)
-
-		debug(
-			"loadSlotFileFromWorkingCopy - mergeUnconflictingRecords done,  updating slot state to " +
-				statesBefore.stateFlag ===
-				"loadrequested"
-				? "loadrequested"
-				: "loaded"
-		)
-
-		const result = {
-			upsertedSlotFileStates: {
-				slotFileName: statesBefore.slotFileName,
-				changedRecords: statesBefore.changedRecords,
-				memorySlotFileState: mergeResult.mergedState,
-				fsSlotFileState: mergeResult.conflictingSlotIndexes.length > 0 ? freshSlotfile : undefined,
-
-				// check that no other load request hit in in the meantime
-				stateFlag:
-					statesBefore.stateFlag === "loadrequested"
-						? ("loadrequested" as const)
-						: ("loaded" as const),
-			},
-			created: mergeResult.createdSlotIndexes,
-			updated: mergeResult.updatedSlotIndexes,
-			localConflicted: mergeResult.conflictingSlotIndexes,
-		}
-
-		return result
-	}
-
-	const loadSlotFilesFromFs = async (forceReload?: boolean) => {
-		const loadResults = {
-			created: [] as string[],
-			updated: [] as string[],
-			conflicting: [] as string[],
-		}
-
-		const slotfileNamesToLoad = await fs.readdir(path)
-		const loadPromises: ReturnType<typeof loadSlotFileFromFs>[] = []
-		for (const slotFilePath of slotfileNamesToLoad) {
-			if (slotFilePath.endsWith(".slot")) {
-				const slotFileName = slotFilePath.slice(
-					0,
-					Math.max(0, slotFilePath.length - ".slot".length)
-				)
-				if (forceReload) {
-					const knownSlotFile = fileNamesToSlotfileStates.get(slotFileName)
-					if (knownSlotFile) {
-						knownSlotFile.stateFlag = "loadrequested"
-					}
-				}
-
-				loadPromises.push(loadSlotFileFromFs(slotFileName))
-			}
-		}
-
-		const fslLoadResults = await Promise.all(loadPromises)
-
-		for (const loadResult of fslLoadResults) {
-			if (loadResult) {
-				const freshState = loadResult.upsertedSlotFileStates
-				fileNamesToSlotfileStates.set(freshState.slotFileName, freshState)
-
-				for (const createdIndex of loadResult.created) {
-					const createdRecord = freshState.memorySlotFileState.recordSlots[createdIndex]
-					if (createdRecord?.data.id) {
-						idToSlotFileName.set(createdRecord.data.id, freshState.slotFileName)
-						updateSlotEntryStates(createdRecord.data.id, createdRecord.index)
-						loadResults.created.push(createdRecord?.data.id)
-					}
-				}
-
-				for (const updatedIndex of loadResult.updated) {
-					const updatedRecord = freshState.memorySlotFileState.recordSlots[updatedIndex]
-					if (updatedRecord?.data.id) {
-						idToSlotFileName.set(updatedRecord.data.id, freshState.slotFileName)
-						updateSlotEntryStates(updatedRecord.data.id, updatedRecord.index)
-						loadResults.updated.push(updatedRecord?.data.id)
-					}
-				}
-
-				for (const localConflictingIndex of loadResult.localConflicted) {
-					const conflictingRecord =
-						freshState.memorySlotFileState.recordSlots[localConflictingIndex]
-					if (conflictingRecord?.data.id) {
-						idToSlotFileName.set(conflictingRecord.data.id, freshState.slotFileName)
-						updateSlotEntryStates(conflictingRecord.data.id, conflictingRecord.index)
-						loadResults.conflicting.push(conflictingRecord?.data.id)
-					}
-				}
-
-				// TODO handle local conflicts (when the fs state differed to the memory state)
-			}
-		}
-
-		if (
-			loadResults.created.length > 0 ||
-			loadResults.updated.length > 0 ||
-			loadResults.conflicting.length > 0
-		) {
-			changeCallback("fs", "record-change")
-		}
-
-		const ids = new Set([
-			...loadResults.created,
-			...loadResults.updated,
-			...loadResults.conflicting,
-		])
-
-		if (ids.size > 0) {
-			changeCallback("fs", "records-change", [...ids.values()])
-		}
-		_internal.lastLoad = loadResults
-
-		return loadResults
 	}
 
 	let ongoingSave = undefined as any
@@ -440,10 +111,6 @@ export default async function createSlotStorage<DocType extends HasId>({
 	}
 
 	const saveChangesToDisk = async () => {
-		if (readonly) {
-			throw new Error("saveChangesToDisk can't be called in read only")
-		}
-
 		if (ongoingSave) {
 			debug("scheduling next save")
 			return await ongoingSave.then(saveChangesToDisk)
@@ -455,7 +122,7 @@ export default async function createSlotStorage<DocType extends HasId>({
 
 		// TODO get lock - so we don't expect further dirty flags comming up
 		debug("saveChangesToWorkingCopy - reloadDirtySlotFiles")
-		await loadSlotFilesFromFs()
+		await slotFileReader._internal.loadSlotFilesFromFs()
 
 		const changedIds = new Set<string>()
 
@@ -467,7 +134,7 @@ export default async function createSlotStorage<DocType extends HasId>({
 		debug(
 			"saveChangesToWorkingCopy - process changed and transient (created) slotentries for existing slot files"
 		)
-		for (const knownSlotFileStates of fileNamesToSlotfileStates.values()) {
+		for (const knownSlotFileStates of slotFileReader._internal.fileNamesToSlotfileStates.values()) {
 			debug(
 				"saveChangesToWorkingCopy - start proccessing " +
 					path +
@@ -582,7 +249,10 @@ export default async function createSlotStorage<DocType extends HasId>({
 						if (transientSlotEntry) {
 							if (transientSlotEntry._writingFlag) {
 								delete transientSlotEntry._writingFlag
-								idToSlotFileName.set(transientSlotEntry.data.id, knownSlotFileStates.slotFileName)
+								slotFileReader._internal.idToSlotFileName.set(
+									transientSlotEntry.data.id,
+									knownSlotFileStates.slotFileName
+								)
 								transientSlotEntries.delete(transientSlotEntry.data.id)
 								updatedSlotEntries.push(transientSlotEntry)
 								changedIds.add(transientSlotEntry.data.id)
@@ -646,7 +316,7 @@ export default async function createSlotStorage<DocType extends HasId>({
 			debug("saveChangesToWorkingCopy - write transient slotfiles - " + fileName)
 			await fs.writeFile(path + fileName + ".slot", memoryStateSlotfileContent)
 
-			fileNamesToSlotfileStates.set(fileName, {
+			slotFileReader._internal.fileNamesToSlotfileStates.set(fileName, {
 				slotFileName: fileName,
 				stateFlag: "loadrequested",
 				fsSlotFileState: undefined,
@@ -657,16 +327,16 @@ export default async function createSlotStorage<DocType extends HasId>({
 				if (transientSlotEntry?._writingFlag) {
 					// TODO conflicting ids?
 					delete transientSlotEntry._writingFlag
-					idToSlotFileName.set(transientSlotEntry.data.id, fileName)
+					slotFileReader._internal.idToSlotFileName.set(transientSlotEntry.data.id, fileName)
 					transientSlotEntries.delete(transientSlotEntry.data.id)
 					changedIds.add(transientSlotEntry.data.id)
 					updateSlotEntryStates(transientSlotEntry.data.id, transientSlotEntry.index)
 				}
 			}
-			changeCallback("api", "slots-changed")
+			slotFileReader._internal.changeCallback("api", "slots-changed")
 		}
 		if (changedIds.size > 0) {
-			changeCallback("api", "records-change", [...changedIds.values()])
+			slotFileReader._internal.changeCallback("api", "records-change", [...changedIds.values()])
 		}
 		ongoingSave = undefined
 		done()
@@ -699,12 +369,13 @@ export default async function createSlotStorage<DocType extends HasId>({
 			// TODO if we create more than slotCount/x records - skip writing to non transient files to avoid conflicts
 			// NOTE: if we can ask lix for "unmerged" records we could be even better on this threashold
 			const existingSlotFilesSortedByDistance = sortNamesByDistance(
-				[...fileNamesToSlotfileStates.keys()],
+				[...slotFileReader._internal.fileNamesToSlotfileStates.keys()],
 				fallbackFileName
 			)
 			for (const slotFileNameToCheck of existingSlotFilesSortedByDistance) {
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				const slotFileToCheck = fileNamesToSlotfileStates.get(slotFileNameToCheck)!
+				const slotFileToCheck =
+					slotFileReader._internal.fileNamesToSlotfileStates.get(slotFileNameToCheck)!
 				const slotsUsedByTransientsInSlotFile = reserverdSlotsByFile.get(slotFileNameToCheck) ?? []
 
 				if (
@@ -736,26 +407,15 @@ export default async function createSlotStorage<DocType extends HasId>({
 		return { reserverdSlotsByFile, transientSlotFiles }
 	}
 
-	const onSlotFileChange = (slotFileName: string) => {
-		const knownSlotFile = fileNamesToSlotfileStates.get(slotFileName)
-
-		if (knownSlotFile) {
-			knownSlotFile.stateFlag = "loadrequested"
-		}
-
-		debug("setting " + slotFileName + " to load requested and trigger load")
-
-		loadSlotFilesFromFs()
-	}
-
 	const getSlotFileByRecordId = (id: string) => {
-		const recordsSlotfileName = idToSlotFileName.get(id)
+		const recordsSlotfileName = slotFileReader._internal.idToSlotFileName.get(id)
 		if (recordsSlotfileName) {
-			return fileNamesToSlotfileStates.get(recordsSlotfileName)
+			return slotFileReader._internal.fileNamesToSlotfileStates.get(recordsSlotfileName)
 		}
 		return undefined
 	}
 
+	// NEEDED BY UPDATE
 	const updateSlotEntryStates = (slotEntryId: string, slotEntryIndex: number) => {
 		const recordSlotfile = getSlotFileByRecordId(slotEntryId)
 
@@ -798,7 +458,7 @@ export default async function createSlotStorage<DocType extends HasId>({
 			index: currentState.index,
 		}
 
-		slotEntryStates.set(slotEntryId, currentRecordState)
+		slotFileReader._internal.slotEntryStates.set(slotEntryId, currentRecordState)
 	}
 
 	/**
@@ -818,51 +478,7 @@ export default async function createSlotStorage<DocType extends HasId>({
 		// transient Slot entries can not conflict - just return the current one
 		if (transientSlotEntry) return transientSlotEntry
 
-		return slotEntryStates.get(id)
-	}
-
-	let abortController: AbortController | undefined
-
-	/**
-	 *
-	 */
-	const startWatchingSlotfileChanges = () => {
-		if (!watch) {
-			throw new Error("startWatchingSlotfileChanges must not be called in non watching storage")
-		}
-
-		const abortController = new AbortController()
-
-		// NOTE: watch will not throw an exception since we don't await it here.
-		const watcher = fs.watch(path, {
-			signal: abortController.signal,
-			persistent: false,
-		})
-
-		;(async () => {
-			try {
-				//eslint-disable-next-line @typescript-eslint/no-unused-vars
-				for await (const event of watcher) {
-					if (event.filename && event.filename.endsWith(".slot")) {
-						onSlotFileChange(
-							event.filename.slice(0, Math.max(0, event.filename.length - ".slot".length))
-						)
-					}
-				}
-			} catch (err: any) {
-				if (err.name === "AbortError") return
-				// https://github.com/opral/monorepo/issues/1647
-				// the file does not exist (yet)
-				// this is not testable beacause the fs.watch api differs
-				// from node and lix. lenghty
-				else if (err.code === "ENOENT") return
-				throw err
-			}
-		})()
-	}
-
-	const stopWatchingSlotfileChanges = () => {
-		abortController?.abort()
+		return slotFileReader._internal.getSlotEntryById(id)
 	}
 
 	const extractInfoFromId = async (docId: string) => {
@@ -889,37 +505,11 @@ export default async function createSlotStorage<DocType extends HasId>({
 		return matchingDocuments
 	}
 
-	const _internal = {
-		fileNamesToSlotfileStates,
-		transientSlotEntries,
-		fs,
-		storageName,
-		lastLoad: {},
-	}
-
-	// start
-
-	if (!readonly) {
-		await fs.mkdir(path, { recursive: true })
-	}
-
-	if (watch) {
-		startWatchingSlotfileChanges()
-	}
-
-	await loadSlotFilesFromFs(true)
-
-	// save and load all slot files from disc
-	await saveChangesToDisk()
-
 	return {
 		/**
 		 * internal properties used for debug purpose (checking internal states during tests)
 		 */
-		_internal,
-		dispose: () => {
-			stopWatchingSlotfileChanges()
-		},
+		...slotFileReader,
 		insert: async (document: DocType, saveToDisk = true) => {
 			const documentId = document[idProperty]
 
@@ -944,8 +534,8 @@ export default async function createSlotStorage<DocType extends HasId>({
 
 			transientSlotEntries.set(documentId, newSlotEntry)
 
-			changeCallback("api", "record-change")
-			changeCallback("api", "records-change", [documentId])
+			slotFileReader._internal.changeCallback("api", "record-change")
+			slotFileReader._internal.changeCallback("api", "records-change", [documentId])
 
 			if (saveToDisk) {
 				// TODO should we always return a promis even if we are not connected?
@@ -980,10 +570,11 @@ export default async function createSlotStorage<DocType extends HasId>({
 				slotEntryHash: objectHash,
 			}
 
-			const recordsSlotfileName = idToSlotFileName.get(documentId)
+			const recordsSlotfileName = slotFileReader._internal.idToSlotFileName.get(documentId)
 
 			if (recordsSlotfileName) {
-				const recordSlotfile = fileNamesToSlotfileStates.get(recordsSlotfileName)
+				const recordSlotfile =
+					slotFileReader._internal.fileNamesToSlotfileStates.get(recordsSlotfileName)
 
 				if (!recordSlotfile) {
 					throw Error("expected recordSlotfile not found")
@@ -1004,7 +595,7 @@ export default async function createSlotStorage<DocType extends HasId>({
 
 			updateSlotEntryStates(documentId, existingSlotEntry.index)
 
-			changeCallback("api", "records-change", [documentId])
+			slotFileReader._internal.changeCallback("api", "records-change", [documentId])
 			if (saveToDisk) {
 				return saveChangesToDisk()
 			}
@@ -1012,10 +603,12 @@ export default async function createSlotStorage<DocType extends HasId>({
 		save: () => {
 			return saveChangesToDisk()
 		},
-		loadSlotFilesFromWorkingCopy: loadSlotFilesFromFs,
 		findDocumentsById,
 		readAll: async (/*includeDeleted: boolean = false*/) => {
-			const objectIds: string[] = [...transientSlotEntries.keys(), ...idToSlotFileName.keys()]
+			const objectIds: string[] = [
+				...transientSlotEntries.keys(),
+				...slotFileReader._internal.idToSlotFileName.keys(),
+			]
 			// const allObjectsById = new Map<string, SlotEntry<DocType>>()
 			const matchingSlotEntries: SlotEntry<DocType>[] = []
 
@@ -1031,7 +624,7 @@ export default async function createSlotStorage<DocType extends HasId>({
 		},
 		resolveMergeConflict() {},
 		setCallback(callback: (source: "api" | "fs", eventName: string, records?: string[]) => void) {
-			changeCallback = callback
+			slotFileReader.setCallback(callback)
 		},
 	}
 }
