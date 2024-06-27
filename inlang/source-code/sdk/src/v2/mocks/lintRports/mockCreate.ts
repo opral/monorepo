@@ -16,7 +16,6 @@ export const createMockBundleLintReport = (props: {
 		locale: props.locale || "en",
 		level: props.level || "error",
 		body: props.body || "mock lint report body",
-		fixes: [],
 	}
 }
 
@@ -41,7 +40,6 @@ export const createMockMessageLintReport = (props: {
 		locale: props.locale || "en",
 		level: props.level || "error",
 		body: props.body || "mock lint report body",
-		fixes: [],
 	}
 }
 
@@ -70,6 +68,5 @@ export const createMockVariantLintReport = (props: {
 		locale: props.locale || "en",
 		level: props.level || "error",
 		body: props.body || "mock lint report body",
-		fixes: [],
 	}
 }
