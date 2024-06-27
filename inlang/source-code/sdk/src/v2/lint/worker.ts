@@ -9,7 +9,6 @@ import type { NodeishFilesystemSubset } from "@inlang/plugin"
 import type { LintConfig, LintFix, LintReport } from "../types/lint.js"
 import { createDebugImport, importSequence } from "../import-utils.js"
 import { createImport } from "./import.js"
-import translatorPlugin from "../dev-modules/translatorPlugin.js"
 import lintRule from "../dev-modules/lint-rule.js"
 import makeOpralUppercase from "../dev-modules/opral-uppercase-lint-rule.js"
 import _debug from "debug"
@@ -37,7 +36,6 @@ export async function createLinter(
 	debug("creating linter")
 	const _import = importSequence(
 		createDebugImport({
-			"sdk-dev:translator-plugin.js": translatorPlugin,
 			"sdk-dev:lint-rule.js": lintRule,
 			"sdk-dev:opral-uppercase-lint.js": makeOpralUppercase,
 			"sdk-dev:missing-selector-lint-rule.js": missingSelectorLintRule,
