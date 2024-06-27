@@ -1,34 +1,64 @@
 import "./inlang-message-bundle.ts"
 import type { Meta, StoryObj } from "@storybook/web-components"
 import { html } from "lit"
-import { multipleMatcherBundle, pluralBundle } from "@inlang/sdk/v2-mocks"
+import {
+	multipleMatcherBundle,
+	pluralBundle,
+	createMockBundleLintReport,
+	createMockMessageLintReport,
+	createMockVariantLintReport,
+} from "@inlang/sdk/v2-mocks"
 import { simplifyBundle } from "../helper/simplifyBundle.js"
-import { createMessage, type MessageBundle } from "@inlang/sdk/v2"
-import type { MessageLintReport } from "@inlang/message-lint-rule"
-import { ProjectSettings } from "@inlang/sdk"
+import { type LintReport, ProjectSettings2, type MessageBundle } from "@inlang/sdk/v2"
 
 const meta: Meta = {
 	component: "inlang-message-bundle",
 	title: "Public/inlang-message-bundle",
 }
 
-const mockLintReports: MessageLintReport[] = [
-	{
-		ruleId: "messageLintRule.inlang.missingTranslation",
-		messageId: "message-id",
-		languageTag: "de",
-		body: "test message",
-		level: "error",
-	},
+const mockMessageLintReports: LintReport[] = [
+	createMockBundleLintReport({
+		ruleId: "messageBundleLintRule.inlang.missingMessage",
+		messageBundleId: "mock_bundle_human_id",
+		locale: "de",
+		body: "The bundle `mock_bundle_human_id` is missing message for the locale `de`",
+	}),
+	createMockMessageLintReport({
+		ruleId: "messageBundleLintRule.inlang.missingReference",
+		messageBundleId: "mock_bundle_human_id",
+		messageId: "mock_message_id_en",
+		locale: "en",
+		body: "The bundle `mock_bundle_human_id` is missing the reference message for the locale `en`",
+	}),
+	createMockMessageLintReport({
+		ruleId: "messageBundleLintRule.inlang.missingReference",
+		messageBundleId: "mock_bundle_human_id",
+		messageId: "mock_message_id_en",
+		locale: "en",
+		body: "The bundle `mock_bundle_human_id` is missing the reference message for the locale `en`",
+	}),
 ]
 
-const mockSettings: ProjectSettings = {
+const mockVariantLintReports: LintReport[] = [
+	createMockVariantLintReport({
+		ruleId: "messageBundleLintRule.inlang.missingMessage",
+		messageBundleId: "mock_bundle_human_id",
+		variantId: "mock_variant_id_de_one",
+		locale: "de",
+		body: "The variant `one` is broken for the locale `de`",
+	}),
+]
+
+const mockSettings: ProjectSettings2 = {
 	$schema: "https://inlang.com/schema/project-settings",
-	sourceLanguageTag: "en",
-	languageTags: ["en", "de"],
-	messageLintRuleLevels: {
-		"messageLintRule.inlang.identicalPattern": "error",
-	},
+	baseLocale: "en",
+	locales: ["en", "de"],
+	lintConfig: [
+		{
+			ruleId: "messageBundleLintRule.inlang.identicalPattern",
+			level: "error",
+		},
+	],
 	modules: [
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@4/dist/index.js",
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js",
@@ -64,17 +94,6 @@ const simplifiedBundle = simplifyBundle(multipleMatcherBundle)
 
 export default meta
 
-export const Props: StoryObj = {
-	render: () =>
-		html`<inlang-message-bundle
-			.messageBundle=${simplifiedBundle}
-			.settings=${mockSettings}
-			.lintReports=${mockLintReports}
-			@change-message-bundle=${(messageBundle: MessageBundle) =>
-				console.info("changeMessageBundle", messageBundle)}
-		></inlang-message-bundle> `,
-}
-
 const bundleWithoutSelectors: MessageBundle = {
 	id: "message-bundle-id",
 	messages: [
@@ -102,6 +121,7 @@ export const Simple: StoryObj = {
 		html`<inlang-message-bundle
 			.messageBundle=${bundleWithoutSelectors}
 			.settings=${mockSettings}
+			.lintReports=${mockMessageLintReports}
 			@change-message-bundle=${(messageBundle: MessageBundle) =>
 				console.info("changeMessageBundle", messageBundle)}
 		></inlang-message-bundle> `,
@@ -112,18 +132,7 @@ export const WithSelectors: StoryObj = {
 		html`<inlang-message-bundle
 			.messageBundle=${pluralBundle}
 			.settings=${mockSettings}
-			.lintReports=${mockLintReports}
-			@change-message-bundle=${(messageBundle: MessageBundle) =>
-				console.info("changeMessageBundle", messageBundle)}
-		></inlang-message-bundle> `,
-}
-
-export const Stringified: StoryObj = {
-	render: () =>
-		html`<inlang-message-bundle
-			messageBundle=${JSON.stringify(pluralBundle)}
-			settings=${JSON.stringify(mockSettings)}
-			lintReports=${"[]"}
+			.lintReports=${[...mockMessageLintReports, ...mockVariantLintReports]}
 			@change-message-bundle=${(messageBundle: MessageBundle) =>
 				console.info("changeMessageBundle", messageBundle)}
 		></inlang-message-bundle> `,
