@@ -9,7 +9,6 @@ const makeOpralUppercase: MessageBundleLintRule = {
 	displayName: "Ensure OPRAL is uppercase",
 	description: "Warns if the OPRAL brand name is not uppercase",
 	run: ({ report, messageBundle }) => {
-		console.log("makeOpralUppercase", messageBundle)
 		// loop over all messages and variants in the bundle
 		for (const message of messageBundle.messages) {
 			for (const variant of message.variants) {
@@ -19,6 +18,10 @@ const makeOpralUppercase: MessageBundleLintRule = {
 
 				const matches = text.match(orpalRegex)
 				if (!matches) continue
+
+				const badMatches = matches.filter((match) => match !== match.toUpperCase())
+
+				if (badMatches.length === 0) continue
 
 				report({
 					body: `The OPRAL brand name is not uppercase`,

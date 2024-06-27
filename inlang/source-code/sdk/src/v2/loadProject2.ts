@@ -7,7 +7,7 @@ import { createNodeishFsWithAbsolutePaths } from "../createNodeishFsWithAbsolute
 import { maybeCreateFirstProjectId } from "../migrations/maybeCreateFirstProjectId.js"
 import { loadSettings } from "./settings.js"
 import type { InlangProject2 } from "./types/project.js"
-import { MessageBundle, type LintFix, type LintReport, type Message } from "./types/index.js"
+import { MessageBundle, type Fix, type LintReport, type Message } from "./types/index.js"
 import createSlotStorage from "../persistence/slotfiles/createSlotStorage.js"
 import { createDebugImport } from "./import-utils.js"
 
@@ -161,7 +161,7 @@ export async function loadProject(args: {
 			bundleStorage,
 			messageStorage,
 		},
-		fix: async (report: LintReport, fix: LintFix) => {
+		fix: async (report: LintReport, fix: Fix<LintReport>) => {
 			const fixed = await linter.fix(report, fix)
 			await database.collections.messageBundles.upsert(fixed)
 		},

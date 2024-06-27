@@ -54,22 +54,20 @@ export const LintConfig = Type.Object({
 })
 export type LintConfig = Static<typeof LintConfig>
 
-export type LintFix = {
-	title: string
-}
+type LintFix = { title: string }
 
 /**
  * The basis of a lint report (required to contruct a lint report union type)
  */
-export type LintReport = {
+export type LintReport<Fixes extends LintFix[] = LintFix[]> = {
 	ruleId: MessageBundleLintRule["id"]
-	// TODO SDK2 check if we should provide a lint target
 
-	messageBundleId: string // TODO replace with reference to message
+	// TODO SDK2 check if we should provide a lint target
+	messageBundleId: string
 	messageId: string | undefined
 	variantId: string | undefined
-	locale: LanguageTag
-	// TODO add matcher expression somehow - we want to deactivate lints on a message for a nonexisting variant...
+	locale: LanguageTag | undefined
+
 	level: MessageLintLevel
 	body: Translatable<string>
 
@@ -77,8 +75,13 @@ export type LintReport = {
 	 * The available fixes that can be automatically applied
 	 * Empty array = no automatic fixes
 	 */
-	fixes: LintFix[]
+	fixes: Fixes
 }
+
+/**
+ * Gets the allowed fixes type for a given report
+ */
+export type Fix<Report extends LintReport> = Report["fixes"][number]
 
 /**
  * The message bundle lint rule API.
@@ -107,9 +110,9 @@ export type MessageBundleLintRule<
 		report: (args: Omit<LintReport, "ruleId" | "level">) => void
 	}) => MaybePromise<void>
 
-	fix?: (args: {
-		report: LintReport
-		fix: LintFix
+	fix?: <Report extends LintReport>(args: {
+		report: Report
+		fix: Fix<Report>
 		settings: ProjectSettings2 & ExternalSettings
 		messageBundle: MessageBundle
 	}) => MaybePromise<MessageBundle>

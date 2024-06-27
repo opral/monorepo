@@ -1,8 +1,8 @@
 import type { Subscribable } from "rxjs"
 import type {
+	Fix,
 	InstalledLintRule,
 	InstalledPlugin,
-	LintFix,
 	LintReport,
 	Message,
 	MessageBundle,
@@ -45,5 +45,5 @@ export type InlangProject2 = {
 		messageStorage: Awaited<ReturnType<typeof createSlotStorage<Message>>>
 	}
 
-	fix: (lintReport: LintReport, fix: LintFix) => Promise<void>
+	fix: <Report extends LintReport>(lintReport: Report, fix: Fix<Report>) => Promise<void>
 }

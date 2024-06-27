@@ -6,7 +6,7 @@ import * as Comlink from "comlink"
 import type { Message, MessageBundle } from "../types/message-bundle.js"
 import type { ProjectSettings2 } from "../types/project-settings.js"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
-import type { LintConfig, LintFix, LintReport } from "../types/lint.js"
+import type { Fix, LintConfig, LintReport } from "../types/lint.js"
 import { createDebugImport, importSequence } from "../import-utils.js"
 import { createImport } from "./import.js"
 import lintRule from "../dev-modules/lint-rule.js"
@@ -102,7 +102,7 @@ export async function createLinter(
 			return reports
 		},
 
-		fix: async (report: LintReport, fix: LintFix) => {
+		fix: async <Report extends LintReport>(report: Report, fix: Fix<Report>) => {
 			//enforce that the fix exists on the lint-report
 			const usedFix = report.fixes.find((f) => f.title === fix.title)
 			if (!usedFix) throw new Error(`fix ${fix.title} not available on report "${report.body}"`)
@@ -113,6 +113,7 @@ export async function createLinter(
 			)
 
 			if (!bundle) throw new Error(`messageBundle ${report.messageBundleId} not found`)
+
 			const rule = resolvedModules.messageBundleLintRules.find((rule) => rule.id === report.ruleId)
 			if (!rule) throw new Error(`rule ${report.ruleId} not found`)
 			if (!rule.fix) throw new Error(`rule ${report.ruleId} does not have a fix function`)
