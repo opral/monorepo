@@ -117,7 +117,8 @@ export async function createLinter(
 			if (!rule) throw new Error(`rule ${report.ruleId} not found`)
 			if (!rule.fix) throw new Error(`rule ${report.ruleId} does not have a fix function`)
 
-			const fixed = await rule.fix({ report, fix, settings, messageBundle: bundle })
+			const messageBundle = structuredClone(bundle)
+			const fixed = await rule.fix({ report, fix, settings, messageBundle })
 			return fixed
 		},
 	})
