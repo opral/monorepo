@@ -15,6 +15,7 @@ import _debug from "debug"
 import { combineToBundles } from "../createMessageBundleSlotAdapter.js"
 import createSlotReader from "../../persistence/slotfiles/createSlotReader.js"
 import missingSelectorLintRule from "../dev-modules/missing-selector-lint-rule.js"
+import missingCatchallLintRule from "../dev-modules/missingCatchall.js"
 const debug = _debug("sdk-v2:lint-report-worker")
 
 const lintConfigs: LintConfig[] = [
@@ -39,6 +40,7 @@ export async function createLinter(
 			"sdk-dev:lint-rule.js": lintRule,
 			"sdk-dev:opral-uppercase-lint.js": makeOpralUppercase,
 			"sdk-dev:missing-selector-lint-rule.js": missingSelectorLintRule,
+			"sdk-dev:missing-catchall-variant": missingCatchallLintRule,
 		}),
 		createImport(projectPath, fs)
 	)
