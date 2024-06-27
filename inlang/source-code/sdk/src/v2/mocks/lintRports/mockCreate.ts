@@ -1,4 +1,3 @@
-import type { L } from "vitest/dist/reporters-5f784f42.js"
 import type { LintReport } from "../../types/lint.js"
 
 export const createMockBundleLintReport = (props: {
@@ -16,6 +15,7 @@ export const createMockBundleLintReport = (props: {
 		locale: props.locale || "en",
 		level: props.level || "error",
 		body: props.body || "mock lint report body",
+		fixes: [],
 	}
 }
 
@@ -35,6 +35,7 @@ export const createMockMessageLintReport = (props: {
 		locale: props.locale || "en",
 		level: props.level || "error",
 		body: props.body || "mock lint report body",
+		fixes: [],
 	}
 }
 
@@ -55,5 +56,6 @@ export const createMockVariantLintReport = (props: {
 		locale: props.locale || "en",
 		level: props.level || "error",
 		body: props.body || "mock lint report body",
+		fixes: [],
 	}
 }
