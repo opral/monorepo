@@ -5,6 +5,7 @@ import { Subject } from "rxjs"
 import { Message, MessageBundle } from "./types/message-bundle.js"
 import type createSlotStorage from "../persistence/slotfiles/createSlotStorage.js"
 import { replicateRxCollection } from "rxdb/plugins/replication"
+import type { SlotEntry } from "../persistence/slotfiles/types/SlotEntry.js"
 
 const debug = _debug("rxdb-adapter")
 type MessageUpdate = {
@@ -49,6 +50,33 @@ function compareMessages(
 	return updates
 }
 
+export const combineToBundles = (
+	bundles: SlotEntry<MessageBundle>[],
+	messages: SlotEntry<Message>[]
+) => {
+	debug("loadAllBundles")
+	const loadedBundles = new Map<string, MessageBundle>()
+	for (const bundle of bundles) {
+		loadedBundles.set(bundle.data.id, {
+			id: bundle.data.id,
+			alias: bundle.data.alias,
+			messages: [],
+		})
+	}
+
+	for (const message of messages) {
+		const loadBundle = loadedBundles.get((message.data as any).bundleId)
+		if (!loadBundle) {
+			console.warn("message without bundle found!" + message.data.bundleId)
+			continue
+		}
+
+		loadBundle.messages.push(message.data)
+	}
+
+	return loadedBundles
+}
+
 export function createMessageBundleSlotAdapter(
 	bundleStorage: Awaited<ReturnType<typeof createSlotStorage<MessageBundle>>>,
 	messageStorage: Awaited<ReturnType<typeof createSlotStorage<Message>>>,
@@ -77,27 +105,10 @@ export function createMessageBundleSlotAdapter(
 
 	const loadAllBundles = async () => {
 		debug("loadAllBundles")
-		const loadedBundles = new Map<string, MessageBundle>()
 		const bundles = await bundleStorage.readAll()
-		for (const bundle of bundles) {
-			loadedBundles.set(bundle.data.id, {
-				id: bundle.data.id,
-				alias: bundle.data.alias,
-				messages: [],
-			})
-		}
 
 		const messages = await messageStorage.readAll()
-		for (const message of messages) {
-			const loadBundle = loadedBundles.get((message.data as any).bundleId)
-			if (!loadBundle) {
-				console.warn("message without bundle found!" + message.data.bundleId)
-				continue
-			}
-
-			loadBundle.messages.push(message.data)
-		}
-
+		const loadedBundles = combineToBundles(bundles, messages)
 		debug("loadAllBundles - " + [...loadedBundles.keys()].length + " budles loaded")
 		loadedMessageBundles = loadedBundles
 	}

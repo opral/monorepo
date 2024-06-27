@@ -107,6 +107,7 @@ export async function loadProject(args: {
 		fs: nodeishFs,
 		path: messageBundlesPath,
 		watch: true,
+		readonly: false,
 	})
 
 	const messageStorage = await createSlotStorage<Message>({
@@ -115,6 +116,7 @@ export async function loadProject(args: {
 		fs: nodeishFs,
 		path: messagesPath,
 		watch: true,
+		readonly: false,
 	})
 
 	const linter = await createLintWorker(projectPath, projectSettings.modules, nodeishFs)

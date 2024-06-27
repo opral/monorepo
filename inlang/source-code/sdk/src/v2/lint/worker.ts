@@ -11,7 +11,11 @@ import type { ProjectSettings2 } from "../types/project-settings.js"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
 
 import _debug from "debug"
-import { createMessageBundleSlotAdapter } from "../createMessageBundleSlotAdapter.js"
+import {
+	combineToBundles,
+	createMessageBundleSlotAdapter,
+} from "../createMessageBundleSlotAdapter.js"
+import createSlotReader from "../../persistence/slotfiles/createSlotReader.js"
 const debug = _debug("sdk-v2:lint-report-worker")
 
 const MessageBundleLintRuleCompiler = TypeCompiler.Compile(MessageBundleLintRule)
@@ -62,32 +66,26 @@ export async function createLinter(
 			const messageBundlesPath = projectPath + "/messagebundles/"
 			const messagesPath = projectPath + "/messages/"
 
-			const bundleStorage = await createSlotStorage<MessageBundle>({
-				fileNameCharacters: 3,
-				slotsPerFile: 16 * 16 * 16 * 16,
+			const bundleStorage = await createSlotReader<MessageBundle>({
 				fs,
 				path: messageBundlesPath,
 				watch: false,
-				readonly: true,
 			})
 
-			const messageStorage = await createSlotStorage<Message>({
-				fileNameCharacters: 3,
-				slotsPerFile: 16 * 16 * 16 * 16,
+			const messageStorage = await createSlotReader<Message>({
 				fs,
-				path: messageBundlesPath,
+				path: messagesPath,
 				watch: false,
-				readonly: true,
 			})
 
-			const rxDbAdapter = createMessageBundleSlotAdapter(bundleStorage, messageStorage, () => {})
-
-			const messageBundles = await rxDbAdapter.getAllMessageBundles()
+			const bundles = await bundleStorage.readAll()
+			const messages = await messageStorage.readAll()
+			const messageBundles = combineToBundles(bundles, messages)
 
 			const reports: LintReport[] = []
 			const promises: Promise<any>[] = []
 
-			for (const messageBundle of messageBundles as MessageBundle[]) {
+			for (const messageBundle of messageBundles.values()) {
 				for (const lintRule of resolvedLintRules) {
 					const promise = lintRule.run({
 						messageBundle: messageBundle,
