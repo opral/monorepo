@@ -3,7 +3,7 @@ import { endpoint } from "comlink-node/worker"
 import { populateLevel } from "./populateLintLevel.js"
 import { TypeCompiler } from "@sinclair/typebox/compiler"
 import { MessageBundleLintRule, type LintConfig, type LintReport } from "../types/lint.js"
-import createSlotStorage from "../../persistence/slotfiles/createSlotStorage.js"
+
 import * as Comlink from "comlink"
 import type { NodeishFilesystem } from "@lix-js/fs"
 import type { Message, MessageBundle } from "../types/message-bundle.js"
@@ -11,10 +11,7 @@ import type { ProjectSettings2 } from "../types/project-settings.js"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
 
 import _debug from "debug"
-import {
-	combineToBundles,
-	createMessageBundleSlotAdapter,
-} from "../createMessageBundleSlotAdapter.js"
+import { combineToBundles } from "../createMessageBundleSlotAdapter.js"
 import createSlotReader from "../../persistence/slotfiles/createSlotReader.js"
 const debug = _debug("sdk-v2:lint-report-worker")
 

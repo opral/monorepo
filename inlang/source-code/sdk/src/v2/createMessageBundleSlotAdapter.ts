@@ -3,9 +3,9 @@ import type { RxCollection, RxReplicationPullStreamItem } from "rxdb"
 import _debug from "debug"
 import { Subject } from "rxjs"
 import { Message, MessageBundle } from "./types/message-bundle.js"
-import type createSlotStorage from "../persistence/slotfiles/createSlotStorage.js"
 import { replicateRxCollection } from "rxdb/plugins/replication"
 import type { SlotEntry } from "../persistence/slotfiles/types/SlotEntry.js"
+import type createSlotWriter from "../persistence/slotfiles/createSlotWriter.js"
 
 const debug = _debug("rxdb-adapter")
 type MessageUpdate = {
@@ -78,8 +78,8 @@ export const combineToBundles = (
 }
 
 export function createMessageBundleSlotAdapter(
-	bundleStorage: Awaited<ReturnType<typeof createSlotStorage<MessageBundle>>>,
-	messageStorage: Awaited<ReturnType<typeof createSlotStorage<Message>>>,
+	bundleStorage: Awaited<ReturnType<typeof createSlotWriter<MessageBundle>>>,
+	messageStorage: Awaited<ReturnType<typeof createSlotWriter<Message>>>,
 	onBundleChangeCb: (source: "adapter" | "api" | "fs", changedMessageBundle: MessageBundle) => void
 ) {
 	let loadedMessageBundles = new Map<string, MessageBundle>()

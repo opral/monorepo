@@ -1,5 +1,5 @@
 import { expect, describe, it } from "vitest"
-import createSlotStorage from "./createSlotStorage.js"
+import createSlotWriter from "./createSlotWriter.js"
 import fs from "node:fs/promises"
 
 type DocumentExample = {

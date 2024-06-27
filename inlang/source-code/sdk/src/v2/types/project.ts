@@ -8,7 +8,7 @@ import type {
 	ProjectSettings2,
 } from "./index.js"
 import type { RxCollection } from "rxdb"
-import type createSlotStorage from "../../persistence/slotfiles/createSlotStorage.js"
+import type createSlotWriter from "../../persistence/slotfiles/createSlotWriter.js"
 
 export type InlangProject2 = {
 	/**#
@@ -40,7 +40,7 @@ export type InlangProject2 = {
 	lintReports$: Subscribable<LintReport[]>
 
 	internal: {
-		bundleStorage: Awaited<ReturnType<typeof createSlotStorage<MessageBundle>>>
-		messageStorage: Awaited<ReturnType<typeof createSlotStorage<Message>>>
+		bundleStorage: Awaited<ReturnType<typeof createSlotWriter<MessageBundle>>>
+		messageStorage: Awaited<ReturnType<typeof createSlotWriter<Message>>>
 	}
 }

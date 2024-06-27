@@ -8,7 +8,6 @@ import { maybeCreateFirstProjectId } from "../migrations/maybeCreateFirstProject
 import { loadSettings } from "./settings.js"
 import type { InlangProject2 } from "./types/project.js"
 import { MessageBundle, type LintReport, type Message } from "./types/index.js"
-import createSlotStorage from "../persistence/slotfiles/createSlotStorage.js"
 
 import { createRxDatabase, type RxCollection } from "rxdb"
 import { getRxStorageMemory } from "rxdb/plugins/storage-memory"
@@ -19,6 +18,7 @@ import {
 	createMessageBundleSlotAdapter,
 	startReplication,
 } from "./createMessageBundleSlotAdapter.js"
+import createSlotStorageWriter from "../persistence/slotfiles/createSlotWriter.js"
 
 /**
  *
@@ -101,22 +101,20 @@ export async function loadProject(args: {
 		},
 	})
 
-	const bundleStorage = await createSlotStorage<MessageBundle>({
+	const bundleStorage = await createSlotStorageWriter<MessageBundle>({
 		fileNameCharacters: 3,
 		slotsPerFile: 16 * 16 * 16 * 16,
 		fs: nodeishFs,
 		path: messageBundlesPath,
 		watch: true,
-		readonly: false,
 	})
 
-	const messageStorage = await createSlotStorage<Message>({
+	const messageStorage = await createSlotStorageWriter<Message>({
 		fileNameCharacters: 3,
 		slotsPerFile: 16 * 16 * 16 * 16,
 		fs: nodeishFs,
 		path: messagesPath,
 		watch: true,
-		readonly: false,
 	})
 
 	const linter = await createLintWorker(projectPath, projectSettings.modules, nodeishFs)
