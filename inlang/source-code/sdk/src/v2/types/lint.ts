@@ -1,11 +1,5 @@
 import { Translatable } from "@inlang/translatable"
-import {
-	Type,
-	type Static,
-	type TLiteral,
-	type TObject,
-	type TTemplateLiteral,
-} from "@sinclair/typebox"
+import { Type, type Static, type TObject, type TTemplateLiteral } from "@sinclair/typebox"
 import type { JSONObject } from "@inlang/json-types"
 
 import type { MessageBundle } from "./message-bundle.js"
@@ -119,6 +113,15 @@ export const MessageBundleLintRule = Type.Object({
 	id: _MessageBundleLintRuleId,
 	displayName: Translatable(Type.String()),
 	description: Translatable(Type.String()),
+
+	/*
+	for: Type.Union([
+		Type.Literal("messageBundle"),
+		Type.Literal("message"),
+		Type.Literal("variant"),
+	]),
+	*/
+
 	/**
 	 * Tyepbox is must be used to validate the Json Schema.
 	 * Github discussion to upvote a plain Json Schema validator and read the benefits of Typebox

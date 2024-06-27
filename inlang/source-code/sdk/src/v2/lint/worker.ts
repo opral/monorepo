@@ -14,6 +14,7 @@ import { createDebugImport, importSequence } from "../import-utils.js"
 import { createImport } from "./import.js"
 import translatorPlugin from "../dev-modules/translatorPlugin.js"
 import lintRule from "../dev-modules/lint-rule.js"
+import makeOpralUppercase from "../dev-modules/opral-uppercase-lint-rule.js"
 import _debug from "debug"
 const debug = _debug("sdk-v2:lint-report-worker")
 
@@ -38,6 +39,7 @@ export async function createLinter(
 		createDebugImport({
 			"sdk-dev:translator-plugin.js": translatorPlugin,
 			"sdk-dev:lint-rule.js": lintRule,
+			"sdk-dev:opral-uppercase-lint.js": makeOpralUppercase,
 		}),
 		createImport(projectPath, fs)
 	)
