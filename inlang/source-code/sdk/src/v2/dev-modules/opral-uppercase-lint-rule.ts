@@ -4,6 +4,10 @@ import type { MessageBundleLintRule } from "../types/lint.js"
 
 const orpalRegex = /\bOPRAL\b/gi
 
+type Fixes = {
+	title: "Make OPRAL uppercase"
+}
+
 const makeOpralUppercase: MessageBundleLintRule = {
 	id: "messageBundleLintRule.inlangdev.makeOpralUppercase",
 	displayName: "Ensure OPRAL is uppercase",
@@ -23,17 +27,17 @@ const makeOpralUppercase: MessageBundleLintRule = {
 
 				if (badMatches.length === 0) continue
 
+				const fix: Fixes = {
+					title: "Make OPRAL uppercase",
+				}
+
 				report({
 					body: `The OPRAL brand name is not uppercase`,
 					messageBundleId: messageBundle.id,
 					messageId: message.id,
 					variantId: variant.id,
 					locale: message.locale,
-					fixes: [
-						{
-							title: "Make OPRAL uppercase",
-						},
-					],
+					fixes: [fix],
 				})
 			}
 		}
