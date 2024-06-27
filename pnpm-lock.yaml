@@ -2364,9 +2364,6 @@ importers:
       '@inlang/result':
         specifier: workspace:*
         version: link:../result
-      '@inlang/rpc':
-        specifier: workspace:*
-        version: link:../rpc
       '@inlang/translatable':
         specifier: workspace:*
         version: link:../versioned-interfaces/translatable
@@ -23843,7 +23840,7 @@ snapshots:
       '@types/node': 20.12.12
     optional: true
 
-  '@typescript-eslint/eslint-plugin@5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.3.2)':
+  '@typescript-eslint/eslint-plugin@5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.0.3)':
     dependencies:
       '@eslint-community/regexpp': 4.10.0
       '@typescript-eslint/parser': 5.56.0(eslint@8.57.0)(typescript@5.0.3)
@@ -23858,7 +23855,7 @@ snapshots:
       semver: 7.6.0
       tsutils: 3.21.0(typescript@5.0.3)
     optionalDependencies:
-      typescript: 5.3.2
+      typescript: 5.0.3
     transitivePeerDependencies:
       - supports-color
 
@@ -27295,7 +27292,7 @@ snapshots:
       '@babel/eslint-parser': 7.21.3(@babel/core@7.21.4)(eslint@8.57.0)
       '@babel/preset-react': 7.18.6(@babel/core@7.21.4)
       '@next/eslint-plugin-next': 13.2.4
-      '@typescript-eslint/eslint-plugin': 5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.3.2)
+      '@typescript-eslint/eslint-plugin': 5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.0.3)
       '@typescript-eslint/parser': 5.56.0(eslint@8.57.0)(typescript@5.0.3)
       confusing-browser-globals: 1.0.11
       eslint: 8.57.0
@@ -27305,7 +27302,7 @@ snapshots:
       eslint-import-resolver-typescript: 3.5.4(eslint-plugin-import@2.27.5)(eslint@8.57.0)
       eslint-plugin-etc: 2.0.2(eslint@8.57.0)(typescript@5.0.3)
       eslint-plugin-import: 2.27.5(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint-import-resolver-typescript@3.5.4)(eslint@8.57.0)
-      eslint-plugin-jest: 27.2.1(@typescript-eslint/eslint-plugin@5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.0.3))(eslint@8.57.0)(typescript@5.0.3)
+      eslint-plugin-jest: 27.2.1(@typescript-eslint/eslint-plugin@5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.0.3)
       eslint-plugin-jest-dom: 4.0.3(eslint@8.57.0)
       eslint-plugin-jest-formatting: 3.1.0(eslint@8.57.0)
       eslint-plugin-jsx-a11y: 6.7.1(eslint@8.57.0)
@@ -27529,12 +27526,12 @@ snapshots:
     dependencies:
       eslint: 8.57.0
 
-  eslint-plugin-jest@27.2.1(@typescript-eslint/eslint-plugin@5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.0.3))(eslint@8.57.0)(typescript@5.0.3):
+  eslint-plugin-jest@27.2.1(@typescript-eslint/eslint-plugin@5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.0.3):
     dependencies:
       '@typescript-eslint/utils': 5.62.0(eslint@8.57.0)(typescript@5.0.3)
       eslint: 8.57.0
     optionalDependencies:
-      '@typescript-eslint/eslint-plugin': 5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.3.2)
+      '@typescript-eslint/eslint-plugin': 5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.0.3)
     transitivePeerDependencies:
       - supports-color
       - typescript

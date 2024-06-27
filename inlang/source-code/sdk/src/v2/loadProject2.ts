@@ -21,7 +21,6 @@ import {
 	startReplication,
 } from "./createMessageBundleSlotAdapter.js"
 
-import translatorPlugin from "./dev-modules/translatorPlugin.js"
 import lintRule from "./dev-modules/lint-rule.js"
 import { importSequence } from "./import-utils.js"
 
@@ -81,7 +80,6 @@ export async function loadProject(args: {
 
 	const _import = importSequence(
 		createDebugImport({
-			"sdk-dev:translator-plugin.js": translatorPlugin,
 			"sdk-dev:lint-rule.js": lintRule,
 		}),
 		createImport(projectPath, nodeishFs)
