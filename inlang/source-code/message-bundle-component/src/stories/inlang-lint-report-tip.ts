@@ -58,6 +58,7 @@ export default class InlangLintReportTip extends LitElement {
 				gap: 4px;
 			}
 			.report-title {
+				padding-top: 2px;
 				font-size: 12px;
 				font-weight: 500;
 				color: var(--sl-color-neutral-950);
@@ -66,6 +67,20 @@ export default class InlangLintReportTip extends LitElement {
 				font-size: 12px;
 				color: var(--sl-color-neutral-600);
 				line-break: anywhere;
+			}
+			.report-fixes {
+				display: flex;
+				flex-direction: column;
+				gap: 4px;
+				padding-top: 4px;
+			}
+			.fix-button {
+				width: 100%;
+			}
+			.fix-button::part(base):hover {
+				background-color: var(--sl-color-neutral-100);
+				color: var(--sl-color-neutral-900);
+				border-color: var(--sl-color-neutral-400);
 			}
 			p {
 				margin: 0;
@@ -76,13 +91,16 @@ export default class InlangLintReportTip extends LitElement {
 	@property()
 	lintReports: LintReport[] | undefined
 
+	@property()
+	fixLint: (lintReport: LintReport, fix: LintReport["fixes"][0]["title"]) => void = () => {}
+
 	override render() {
 		return html`<sl-dropdown
 			distance="-4"
 			placement="bottom-start"
 			class="dropdown"
 			@sl-show=${(e: CustomEvent) => {
-				console.log(e)
+				//console.log(e)
 			}}
 		>
 			<div slot="trigger" class="lint-report-tip">
@@ -117,6 +135,20 @@ export default class InlangLintReportTip extends LitElement {
 						<div class="report-content">
 							<p class="report-title">${lintReport.ruleId && lintReport.ruleId.split(".")[2]}</p>
 							<p class="report-body">${lintReport.body}</p>
+							<div class="report-fixes">
+								${lintReport.fixes?.map((fix) => {
+									return html`
+										<sl-button
+											@click=${() => {
+												this.fixLint(lintReport, fix.title)
+											}}
+											class="fix-button"
+											size="small"
+											>${fix.title}</sl-button
+										>
+									`
+								})}
+							</div>
 						</div>
 					</div>`
 				})}

@@ -164,6 +164,9 @@ export default class InlangVariant extends LitElement {
 	@property()
 	triggerSave: () => void = () => {}
 
+	@property()
+	fixLint: (lintReport: LintReport, fix: LintReport["fixes"][0]["title"]) => void = () => {}
+
 	@state()
 	private _pattern: string | undefined = undefined
 
@@ -415,6 +418,7 @@ export default class InlangVariant extends LitElement {
 				${this._getLintReports() && this._getLintReports()!.length > 0
 					? html`<inlang-lint-report-tip
 							.lintReports=${this._getLintReports()}
+							.fixLint=${this.fixLint}
 					  ></inlang-lint-report-tip>`
 					: ``}
 			</div>
