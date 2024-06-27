@@ -1,4 +1,3 @@
-import type { NodeishFilesystemSubset } from "@inlang/plugin"
 import type { ProjectSettings2 } from "./project-settings.js"
 import type { ImportFunction } from "../../resolve-modules/import.js"
 import { Plugin2, type ResolvePlugins2Function, type ResolvedPlugin2Api } from "./plugin.js"
@@ -26,10 +25,8 @@ export const InlangModule = Type.Object({
  * Pass a custom `_import` function to override the default import function.
  */
 export type ResolveModule2Function = (args: {
-	projectPath: string
 	settings: ProjectSettings2
-	nodeishFs: NodeishFilesystemSubset
-	_import?: ImportFunction
+	_import: ImportFunction
 }) => Promise<{
 	/**
 	 * Metadata about the resolved module.

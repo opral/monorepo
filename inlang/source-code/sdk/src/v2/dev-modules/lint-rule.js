@@ -1,5 +1,5 @@
 /**
- * @type {import("../v2/types/lint.js").MessageBundleLintRule}
+ * @type {import("../types/lint.js").MessageBundleLintRule}
  */
 const lintRule = {
 	id: "messageBundleLintRule.inlangdev.missingLanguages",
@@ -11,14 +11,28 @@ const lintRule = {
 			messageBundle.messages.filter((msg) => msg.variants.length > 0).map((msg) => msg.locale)
 		)
 
+		if (presentLanguages.size === 0) {
+			// no messages in any language -> delete
+			report({
+				locale: "",
+				body: `No languages are present`,
+				messageId: undefined,
+				variantId: undefined,
+				messageBundleId: messageBundle.id,
+				fixes: [],
+			})
+			return
+		}
+
 		const missingLanguageTags = exclude(expectedLanguageTags, presentLanguages)
 		for (const missingLanguageTag of missingLanguageTags) {
 			report({
 				locale: missingLanguageTag,
 				body: `Missing language tag '${missingLanguageTag}'.`,
-				messageId: "", // TODO SDK2 fix type to allow undefined
-				variantId: "",
+				messageId: undefined,
+				variantId: undefined,
 				messageBundleId: messageBundle.id,
+				fixes: [],
 			})
 		}
 	},

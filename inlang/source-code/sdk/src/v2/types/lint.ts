@@ -41,7 +41,8 @@ export const MessageLintLevel = _MessageLintRuleLevel
 /**
  * Lint configuration for a given bundle/message/variant
  */
-export const LintConfig = Type.Object({ // TODO SDK2 Rename to LintSettings
+export const LintConfig = Type.Object({
+	// TODO SDK2 Rename to LintSettings
 	id: Type.Optional(Type.String({ description: "id of the lint config entry" })),
 	ruleId: _MessageBundleLintRuleId,
 	// TODO disable this for now - to only reach feature parity for now - this is purly experimental
@@ -53,13 +54,17 @@ export const LintConfig = Type.Object({ // TODO SDK2 Rename to LintSettings
 })
 export type LintConfig = Static<typeof LintConfig>
 
+export type LintFix = {
+	title: string
+}
+
 /**
  * The basis of a lint report (required to contruct a lint report union type)
  */
 export type LintReport = {
 	ruleId: MessageBundleLintRule["id"]
-	// TODO SDK2 check if we should provide a lint target 
-	
+	// TODO SDK2 check if we should provide a lint target
+
 	messageBundleId: string // TODO replace with reference to message
 	messageId: string | undefined
 	variantId: string | undefined
@@ -67,6 +72,12 @@ export type LintReport = {
 	// TODO add matcher expression somehow - we want to deactivate lints on a message for a nonexisting variant...
 	level: MessageLintLevel
 	body: Translatable<string>
+
+	/**
+	 * The available fixes that can be automatically applied
+	 * Empty array = no automatic fixes
+	 */
+	fixes: LintFix[]
 }
 
 /**
@@ -95,11 +106,27 @@ export type MessageBundleLintRule<
 		settings: ProjectSettings2 & ExternalSettings
 		report: (args: Omit<LintReport, "ruleId" | "level">) => void
 	}) => MaybePromise<void>
+
+	fix?: (args: {
+		report: LintReport
+		fix: LintFix
+		settings: ProjectSettings2 & ExternalSettings
+		messageBundle: MessageBundle
+	}) => MaybePromise<MessageBundle>
 }
 export const MessageBundleLintRule = Type.Object({
 	id: _MessageBundleLintRuleId,
 	displayName: Translatable(Type.String()),
 	description: Translatable(Type.String()),
+
+	/*
+	for: Type.Union([
+		Type.Literal("messageBundle"),
+		Type.Literal("message"),
+		Type.Literal("variant"),
+	]),
+	*/
+
 	/**
 	 * Tyepbox is must be used to validate the Json Schema.
 	 * Github discussion to upvote a plain Json Schema validator and read the benefits of Typebox

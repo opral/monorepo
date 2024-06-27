@@ -101,6 +101,7 @@ async function readModuleFromCDN(uri: string): Promise<string> {
 		"text/javascript",
 		"application/x-javascript",
 		"text/x-javascript",
+		"text/plain", //TODO remove this - only for githubusercontent
 	]
 
 	// if there is no content-type header, assume it's a JavaScript module & hope for the best

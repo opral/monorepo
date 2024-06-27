@@ -9,7 +9,8 @@ export const defaultProjectSettings = {
 	baseLocale: "en",
 	locales: ["en", "de"],
 	modules: [
-		"https://raw.githubusercontent.com/opral/monorepo/f6da6761ccbdf652c35eaa645b9c91747655526f/inlang/source-code/sdk/src/v2-lint-rule/index.js",
+		"sdk-dev:opral-uppercase-lint.js",
+		"sdk-dev:missing-selector-lint-rule.js",
 		// for instant gratification, we're adding common rules
 		// "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js",
 		// "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js",
