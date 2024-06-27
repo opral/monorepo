@@ -163,7 +163,7 @@ export async function loadProject(args: {
 		},
 		fix: async (report: LintReport, fix: LintFix) => {
 			const fixed = await linter.fix(report, fix)
-			database.collections.messageBundles.upsert(fixed)
+			await database.collections.messageBundles.upsert(fixed)
 		},
 	}
 }
