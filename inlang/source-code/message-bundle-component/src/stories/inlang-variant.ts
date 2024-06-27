@@ -170,6 +170,27 @@ export default class InlangVariant extends LitElement {
 	@state()
 	private _isActive: boolean = false
 
+	private _getLintReports = (): LintReport[] | undefined => {
+		if (this.lintReports && this.lintReports.length > 0) {
+			if (
+				(this.message?.selectors && this.message.selectors.length === 0) ||
+				!this.message?.selectors
+			) {
+				return this.lintReports
+			}
+			if (
+				this.message.selectors &&
+				this.message.selectors.length > 0 &&
+				this.lintReports.some((report) => report.variantId && report.variantId === this.variant?.id)
+			) {
+				return this.lintReports.filter(
+					(report) => report.variantId && report.variantId === this.variant?.id
+				)
+			}
+		}
+		return undefined
+	}
+
 	_save = () => {
 		if (this.message) {
 			// upsert variant
@@ -394,11 +415,10 @@ export default class InlangVariant extends LitElement {
 						  ></sl-button>`
 						: ``}
 				</div>
-				${this.lintReports &&
-				this.lintReports.length > 0 &&
-				this.message?.selectors &&
-				this.message.selectors.length === 0
-					? html`<inlang-lint-report-tip .lintReports=${this.lintReports}></inlang-lint-report-tip>`
+				${this._getLintReports() && this._getLintReports()!.length > 0
+					? html`<inlang-lint-report-tip
+							.lintReports=${this._getLintReports()}
+					  ></inlang-lint-report-tip>`
 					: ``}
 			</div>
 		</div> `

@@ -233,7 +233,9 @@ export default class InlangMessageBundle extends LitElement {
 					return this._renderMessage(
 						locale,
 						message,
-						this.lintReports?.filter((report) => report.locale === locale || report.messageId === message?.id)
+						this.lintReports?.filter(
+							(report) => report.locale === locale || report.messageId === message?.id
+						)
 					)
 				})}
 			</div>
@@ -361,7 +363,7 @@ export default class InlangMessageBundle extends LitElement {
 										: ``}
 									${lintReports && lintReports.length > 0
 										? html`<inlang-lint-report-tip
-												.lintReports=${lintReports}
+												.lintReports=${lintReports.filter((report) => !report.variantId)}
 										  ></inlang-lint-report-tip>`
 										: ``}
 								</div>
