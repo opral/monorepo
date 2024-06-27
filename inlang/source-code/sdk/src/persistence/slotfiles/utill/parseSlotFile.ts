@@ -79,7 +79,6 @@ export async function parseSlotFile<DocType extends HasId>(slotFileContent: stri
 				slotEntryHash: recordOnSlot.theirs.hash + recordOnSlot.mine.hash,
 				data: recordOnSlot.mine.data,
 				hash: recordOnSlot.mine.hash,
-				idHash: recordOnSlot.mine.idHash,
 				index: slotIndex,
 
 				mergeConflict: {
@@ -91,7 +90,6 @@ export async function parseSlotFile<DocType extends HasId>(slotFileContent: stri
 					theirsInfo: recordOnSlot.pullCommit,
 					hash: recordOnSlot.theirs.hash,
 					data: recordOnSlot.theirs.data,
-					idHash: recordOnSlot.theirs.idHash,
 				},
 			}
 

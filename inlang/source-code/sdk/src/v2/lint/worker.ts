@@ -62,19 +62,23 @@ export async function createLinter(
 			const messageBundlesPath = projectPath + "/messagebundles/"
 			const messagesPath = projectPath + "/messages/"
 
-			const bundleStorage = createSlotStorage<MessageBundle>(
-				"bundle-storage-linter",
-				16 * 16 * 16 * 16,
-				3
-			)
-			await bundleStorage.connect(fs as NodeishFilesystem, messageBundlesPath, false)
+			const bundleStorage = await createSlotStorage<MessageBundle>({
+				fileNameCharacters: 3,
+				slotsPerFile: 16 * 16 * 16 * 16,
+				fs,
+				path: messageBundlesPath,
+				watch: false,
+				readonly: true,
+			})
 
-			const messageStorage = createSlotStorage<Message>(
-				"message-storage-linter",
-				16 * 16 * 16 * 16,
-				3
-			)
-			await messageStorage.connect(fs as NodeishFilesystem, messagesPath, false)
+			const messageStorage = await createSlotStorage<Message>({
+				fileNameCharacters: 3,
+				slotsPerFile: 16 * 16 * 16 * 16,
+				fs,
+				path: messageBundlesPath,
+				watch: false,
+				readonly: true,
+			})
 
 			const rxDbAdapter = createMessageBundleSlotAdapter(bundleStorage, messageStorage, () => {})
 

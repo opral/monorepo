@@ -57,12 +57,16 @@ const handleChanges = () => {
 	// console.table(storage._fileNamesToSlotfileStates)
 }
 
-const storage = createSlotStorage<SampleDoc>("cli-storage", 16 * 16 * 16 * 16, 4)
+console.log("Connecting to file system....")
+const storage = await createSlotStorage<SampleDoc>({
+	slotsPerFile: 16 * 16 * 16 * 16,
+	fileNameCharacters: 4,
+	fs,
+	path: filePath,
+	watch: true
+})
 storage.setCallback(handleChanges)
 
-console.log("Connecting to file system....")
-
-await storage.connect(fs, filePath)
 
 console.log("....Connecting to file system done")
 console.log("Enter a command in the format: list | create <content> | update <id> <content>")

@@ -21,13 +21,13 @@ import {
 } from "./createMessageBundleSlotAdapter.js"
 
 /**
- * 
+ *
  * Lifecycle of load Project:
- * 
+ *
  * init - the async function has not yet returned
- * installing dependencies - 
- * 
- * 
+ * installing dependencies -
+ *
+ *
  * @param projectPath - Absolute path to the inlang settings file.
  * @param repo - An instance of a lix repo as returned by `openRepository`.
  * @param _import - Use `_import` to pass a custom import function for testing,
@@ -82,20 +82,6 @@ export async function loadProject(args: {
 	})
 	const modules$ = new BehaviorSubject(modules)
 
-	const bundleStorage = createSlotStorage<MessageBundle>(
-		"bundle-storage",
-		// use 65536 slots per slot file
-		16 * 16 * 16 * 16,
-		3
-	)
-
-	const messageStorage = createSlotStorage<Message>(
-		"message-storage",
-		// use 65536 slots per slot file
-		16 * 16 * 16 * 16,
-		3
-	)
-
 	// rxdb with memory storage configured
 	const database = await createRxDatabase<{
 		messageBundles: RxCollection<MessageBundle>
@@ -115,9 +101,21 @@ export async function loadProject(args: {
 		},
 	})
 
-	// connect the storage with the collection dir (will read all slot files and load all documents into memory)
-	await bundleStorage.connect(nodeishFs, messageBundlesPath)
-	await messageStorage.connect(nodeishFs, messagesPath)
+	const bundleStorage = await createSlotStorage<MessageBundle>({
+		fileNameCharacters: 3,
+		slotsPerFile: 16 * 16 * 16 * 16,
+		fs: nodeishFs,
+		path: messageBundlesPath,
+		watch: true,
+	})
+
+	const messageStorage = await createSlotStorage<Message>({
+		fileNameCharacters: 3,
+		slotsPerFile: 16 * 16 * 16 * 16,
+		fs: nodeishFs,
+		path: messagesPath,
+		watch: true,
+	})
 
 	const linter = await createLintWorker(projectPath, projectSettings.modules, nodeishFs)
 

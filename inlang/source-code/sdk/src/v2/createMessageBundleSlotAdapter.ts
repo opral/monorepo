@@ -50,8 +50,8 @@ function compareMessages(
 }
 
 export function createMessageBundleSlotAdapter(
-	bundleStorage: ReturnType<typeof createSlotStorage<MessageBundle>>,
-	messageStorage: ReturnType<typeof createSlotStorage<Message>>,
+	bundleStorage: Awaited<ReturnType<typeof createSlotStorage<MessageBundle>>>,
+	messageStorage: Awaited<ReturnType<typeof createSlotStorage<Message>>>,
 	onBundleChangeCb: (source: "adapter" | "api" | "fs", changedMessageBundle: MessageBundle) => void
 ) {
 	let loadedMessageBundles = new Map<string, MessageBundle>()

@@ -40,7 +40,7 @@ export type InlangProject2 = {
 	lintReports$: Subscribable<LintReport[]>
 
 	internal: {
-		bundleStorage: ReturnType<typeof createSlotStorage<MessageBundle>>
-		messageStorage: ReturnType<typeof createSlotStorage<Message>>
+		bundleStorage: Awaited<ReturnType<typeof createSlotStorage<MessageBundle>>>
+		messageStorage: Awaited<ReturnType<typeof createSlotStorage<Message>>>
 	}
 }

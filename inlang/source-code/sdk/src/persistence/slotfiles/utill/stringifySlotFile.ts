@@ -17,9 +17,7 @@ export async function stringifySlotFile<DocType extends HasId>(
 			const slotFileEntyHash = await hash(soltFileEntryString)
 
 			const dataString =
-				'{"idHash":"' +
-				slotfileEntry.idHash +
-				'", "hash":"' +
+				'{"hash":"' +
 				slotFileEntyHash +
 				'", "data": ' +
 				soltFileEntryString +
@@ -42,9 +40,7 @@ export async function stringifySlotFile<DocType extends HasId>(
 				slotFileContent += conflict.conflictMarkerSeparator + "\n"
 
 				const wrappedConflictDataString =
-					'{"idHash":"' +
-					slotfileEntry.idHash +
-					'", "hash":"' +
+					'{"hash":"' +
 					conflictHash +
 					'", "data": ' +
 					conflictDataString +
