@@ -1,5 +1,11 @@
 import { Translatable } from "@inlang/translatable"
-import { Type, type Static, type TObject, type TTemplateLiteral } from "@sinclair/typebox"
+import {
+	Type,
+	type Static,
+	type TLiteral,
+	type TObject,
+	type TTemplateLiteral,
+} from "@sinclair/typebox"
 import type { JSONObject } from "@inlang/json-types"
 
 import type { MessageBundle } from "./message-bundle.js"

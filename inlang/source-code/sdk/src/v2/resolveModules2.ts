@@ -66,7 +66,7 @@ export const resolveModules: ResolveModule2Function = async (args) => {
 
 		const result = validatedModuleSettings({
 			settingsSchema: importedModule.data.default.settingsSchema,
-			moduleSettings: args.settings[importedModule.data.default.id],
+			moduleSettings: (args.settings as any)[importedModule.data.default.id],
 		})
 		if (result !== "isValid") {
 			moduleErrors.push(new ModuleSettingsAreInvalidError({ module: module, errors: result }))
