@@ -1,6 +1,6 @@
 # What does this plugin do?
 
-This plugin works with [i18next](https://inlang.com/m/kl95463j) to read and write messages. It also determines how translation functions and namespaces are parsed and handled by [Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) – a helpful i18n VS Code extension.
+This plugin reads and writes messages for [i18next](https://inlang.com/m/kl95463j) setups. It also determines how translation functions and namespaces are parsed and handled by [Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) – a helpful i18n VS Code extension.
 
 ## Manual Installation
 
@@ -64,7 +64,7 @@ To use our plugin, you need to provide a path to the directory where your langua
 
 ## `variableReferencePattern`
 
-Defines the pattern for variable references. The default is how [i18next](https://inlang.com/m/kl95463j) suggests the usage of placeholders.
+This defines the pattern for variable references. The default is how [i18next](https://inlang.com/m/kl95463j) suggests using placeholders.
 
 default:
 
@@ -76,7 +76,7 @@ default:
 
 ## `sourceLanguageFilePath`
 
-This setting is optional and should only be used if the file name of your sourceLanguageTag does not match your pathPattern structure. For example, if your sourceLanguageTag is `en` but your sourceLanguage file is called `main.json`, you can use this setting to specify the path to the sourceLanguage file. Our recommendation is to rename the file to `en.json` and not use this setting.
+This setting is optional and should only be used if the file name of your sourceLanguageTag does not match your pathPattern structure. For example, if your sourceLanguageTag is `en` but your sourceLanguage file is called `main.json`, you can use this setting to specify the path to the sourceLanguage file. We recommend renaming the file to `en.json` and not using this setting.
 
 ### Without namespaces
 
@@ -109,7 +109,7 @@ With namespaces:
 
 `t("namespace:key")` or `t("key", { ns: "namespace" })`
 
-To learn about namespaces and how to use translation functions in your code, you can refer to [i18next documentation](https://www.i18next.com/principles/namespaces). The plugin is capable of parsing the code and providing the IDE-extension with this information.
+To learn about namespaces and how to use translation functions in your code, refer to the [i18next documentation](https://www.i18next.com/principles/namespaces). The plugin can parse the code and provide the VS Code extension (Sherlock) with this information.
 
 # Expected behavior
 
@@ -130,7 +130,7 @@ Run the following commands in your terminal (node and npm must be installed):
 
 Run `npm run build` to generate a build.
 
-The [dist](./dist/) directory is used to distribute the plugin directly via CDN like [jsDelivr](https://www.jsdelivr.com/). Using a CDN works because the inlang config uses dynamic imports to import plugins.
+The [dist](./dist/) directory distributes the plugin directly via a CDN like [jsDelivr](https://www.jsdelivr.com/). Using a CDN works because the inlang uses dynamic imports to import plugins.
 
 Read the [jsDelivr documentation](https://www.jsdelivr.com/?docs=gh) on importing from GitHub.
 

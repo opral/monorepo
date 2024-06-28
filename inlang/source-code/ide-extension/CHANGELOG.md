@@ -1,5 +1,12 @@
 # inlang-vs-code-extension
 
+## 1.48.2
+
+### Patch Changes
+
+- @inlang/rpc@0.3.36
+- @inlang/settings-component@1.0.30
+
 ## 1.48.1
 
 ### Patch Changes

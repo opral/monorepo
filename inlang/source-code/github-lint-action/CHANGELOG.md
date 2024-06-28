@@ -1,5 +1,11 @@
 # @inlang/github-lint-action
 
+## 0.3.18
+
+### Patch Changes
+
+- 123d206: Add comment logging
+
 ## 0.3.17
 
 ### Patch Changes
