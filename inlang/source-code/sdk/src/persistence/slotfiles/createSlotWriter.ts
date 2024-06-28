@@ -472,8 +472,6 @@ export default async function createSlotStorageWriter<DocType extends HasId>({
 	 * @returns
 	 */
 	const getSlotEntryById = (id: string) => {
-		debug("getSlotEntryById")
-
 		const transientSlotEntry = transientSlotEntries.get(id)
 		// transient Slot entries can not conflict - just return the current one
 		if (transientSlotEntry) return transientSlotEntry

@@ -13,7 +13,7 @@ export function MainView() {
 	const [githubToken, setGithubToken] = useState<string>(localStorage.ghToken)
 
 	const [currentView, setCurrentView] = useState<"overview" | "messageList" | "settings">(
-		"messageList"
+		"settings"
 	)
 
 	const onGithubTokenChange = (el: any) => {
@@ -69,6 +69,11 @@ export function MainView() {
 		Awaited<ReturnType<typeof openProject>> | undefined
 	>(undefined)
 
+	useEffect(() => {
+		if (githubToken && repoUrl && inlangProjectPath) {
+			doLoadProject()
+		}
+	}, [])
 	const doLoadProject = async () => {
 		setLoadingProjectState("Loading")
 		try {
@@ -84,8 +89,27 @@ export function MainView() {
 		setLoadingProjectState("")
 	}
 
-	const pull = (project: Awaited<ReturnType<typeof openProject>>) => {
-		project.pullChangesAndReloadSlots()
+	const [gitActive, setGitActive] = useState(false)
+	const pull = async (project: Awaited<ReturnType<typeof openProject>>) => {
+		setGitActive(true)
+		await project.pullChangesAndReloadSlots()
+		setGitActive(false)
+		// 	await s.pullChangesAndReloadSlots()
+		// 	document.querySelector<HTMLButtonElement>("#pull")!.disabled = false
+	}
+
+	const push = async (project: Awaited<ReturnType<typeof openProject>>) => {
+		setGitActive(true)
+		await project.pushChangesAndReloadSlots()
+		setGitActive(false)
+		// 	await s.pullChangesAndReloadSlots()
+		// 	document.querySelector<HTMLButtonElement>("#pull")!.disabled = false
+	}
+
+	const commit = async (project: Awaited<ReturnType<typeof openProject>>) => {
+		setGitActive(true)
+		await project.commitChanges()
+		setGitActive(false)
 		// 	await s.pullChangesAndReloadSlots()
 		// 	document.querySelector<HTMLButtonElement>("#pull")!.disabled = false
 	}
@@ -192,10 +216,24 @@ export function MainView() {
 						</button>
 						<br />
 						<br />
-						<button id="commit" type="button">
+						<button
+							id="commit"
+							type="button"
+							onClick={() => {
+								commit(currentProject)
+							}}
+							disabled={gitActive}
+						>
 							Commit Changes
 						</button>
-						<button id="push" type="button">
+						<button
+							id="push"
+							type="button"
+							onClick={() => {
+								push(currentProject)
+							}}
+							disabled={gitActive}
+						>
 							Push Changes
 						</button>
 						<br />
@@ -206,6 +244,7 @@ export function MainView() {
 							onClick={() => {
 								pull(currentProject)
 							}}
+							disabled={gitActive}
 						>
 							Pull Changes
 						</button>

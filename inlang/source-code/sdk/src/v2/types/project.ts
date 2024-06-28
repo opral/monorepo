@@ -1,4 +1,4 @@
-import type { Subscribable } from "rxjs"
+import type { Observable, Subscribable } from "rxjs"
 import type {
 	Fix,
 	InstalledLintRule,
@@ -19,13 +19,13 @@ export type InlangProject2 = {
 
 	installed: {
 		plugins: InstalledPlugin[] // TODO check how we get those subscribable
-		lintRules: InstalledLintRule[] // TODO check how we get those subscribable
+		lintRules: Observable<InstalledLintRule[]> // TODO check how we get those subscribable
 	}
 
 	// js libraries containing lint rules, importers, exporters, code matchers, registries (icu2)
 	// modules: {
 	// 	// TODO provide import exporter plugins: Subscribable<InstalledPlugin[]>
-	// 	messageLintRules: InstalledMessageLintRule[]
+	// 	messageBundleLintRules: InstalledMessageLintRule[]
 	// }
 	// errors: Subscribable<
 	// 	((typeof ModuleResolutionError)[keyof typeof ModuleResolutionError] | Error)[]

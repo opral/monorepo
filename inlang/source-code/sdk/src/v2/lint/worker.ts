@@ -91,7 +91,7 @@ export async function createLinter(
 						settings,
 						report: (report) => {
 							const reportWithRule = { ...report, ruleId: lintRule.id }
-							const fullReport = populateLevel(reportWithRule, lintConfigs)
+							const fullReport = populateLevel(reportWithRule, settings.lintConfig)
 							reports.push(fullReport)
 						},
 					})

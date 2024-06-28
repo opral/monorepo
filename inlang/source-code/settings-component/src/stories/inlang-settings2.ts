@@ -121,8 +121,7 @@ export default class InlangSettings2 extends LitElement {
 		[] as InlangProject2["installed"]["plugins"]
 
 	@property({ type: Array })
-	installedLintRules: InlangProject2["installed"]["lintRules"] =
-		[] as InlangProject2["installed"]["lintRules"]
+	installedLintRules: InstalledLintRule[] = [] as InstalledLintRule[]
 
 	dispatchOnSetSettings(settings: ProjectSettings2) {
 		const onSetSettings = new CustomEvent("set-settings", {
