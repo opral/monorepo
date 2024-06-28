@@ -4,25 +4,33 @@ import {
 	sourceLanguageTag,
 } from "virtual:paraglide-astro:runtime"
 import { type MiddlewareHandler } from "astro"
+import { AsyncLocalStorage } from "node:async_hooks"
+
+const localeStorage = new AsyncLocalStorage<string>()
 
 export const onRequest: MiddlewareHandler = async ({ url, locals, currentLocale }, next) => {
+	setLanguageTag(() => {
+		const maybeLang = localeStorage.getStore()
+		return maybeLang ?? sourceLanguageTag
+	})
+
 	const locale = currentLocale ?? getLangFromPath(url.pathname)
 	const dir = guessTextDirection(locale)
 
-	setLanguageTag(locale)
-
+	/** @deprecated */
 	locals.paraglide = {
 		lang: locale,
 		dir,
 	}
 
-	return await next()
+	return await localeStorage.run(locale, next)
 }
 
 function getLangFromPath(path: string) {
+	// TODO consider base path
+
 	const langOrPath = path.split("/").find(Boolean)
 	if (isAvailableLanguageTag(langOrPath)) return langOrPath
-
 	return sourceLanguageTag
 }
 
