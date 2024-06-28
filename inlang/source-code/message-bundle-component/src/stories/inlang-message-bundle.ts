@@ -135,7 +135,16 @@ export default class InlangMessageBundle extends LitElement {
 			<div class=${`header`}>
 				<div class="header-left">
 					<span># ${this.messageBundle?.id}</span>
-					<span class="alias">@ ${this.messageBundle?.alias?.default}</span>
+					${this.messageBundle?.alias
+						? html` <div class="alias-wrapper">
+								<span class="alias">Alias: ${this.messageBundle?.alias?.default}</span>
+								${Object.keys(this.messageBundle.alias).length > 1
+									? html`<div class="alias-counter">
+											+${Object.keys(this.messageBundle.alias).length - 1}
+									  </div>`
+									: ``}
+						  </div>`
+						: ``}
 				</div>
 				<div class="header-right">
 					${this._fakeInputs() && this._fakeInputs()!.length > 0
