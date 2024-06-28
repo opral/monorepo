@@ -29,6 +29,7 @@ import createSlotStorageWriter from "../persistence/slotfiles/createSlotWriter.j
 
 import lintRule from "./dev-modules/lint-rule.js"
 import { importSequence } from "./import-utils.js"
+import { createTestWorker } from "./rpc-fs/testHost.js"
 
 type ProjectState = "initializing" | "resolvingModules" | "loaded"
 
@@ -191,6 +192,8 @@ export async function loadProject(args: {
 		// projectSettings$.next(newSettings); // Update the observable
 		await nodeishFs.writeFile(settingsFilePath, JSON.stringify(newSettings, null, 2)) // Write the new settings to the file
 	}
+
+	createTestWorker(nodeishFs)
 
 	return {
 		id: projectId,
