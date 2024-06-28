@@ -36,6 +36,10 @@ export const messageBundleStyling = css`
 		opacity: 0.7;
 		border-radius: 1px;
 	}
+	.slotted-menu-wrapper {
+		display: flex;
+		flex-direction: column;
+	}
 	.inputs-wrapper {
 		display: flex;
 		align-items: center;

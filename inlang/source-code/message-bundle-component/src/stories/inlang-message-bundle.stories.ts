@@ -138,5 +138,36 @@ export const WithSelectors: StoryObj = {
 			@change-message-bundle=${(data: any) =>
 				console.info("changeMessageBundle", data.detail.argument)}
 			@fix-lint=${(data: any) => console.info("fixLint", data.detail.argument)}
-		></inlang-message-bundle> `,
+		>
+		</inlang-message-bundle> `,
+}
+
+export const WithSlots: StoryObj = {
+	render: () =>
+		html`<inlang-message-bundle
+			.messageBundle=${bundleWithoutSelectors}
+			.settings=${mockSettings}
+			.lintReports=${[]}
+			@change-message-bundle=${(data: any) =>
+				console.info("changeMessageBundle", data.detail.argument)}
+			@machine-translate=${(data: any) => console.info("onMachineTranslate", data.detail.argument)}
+			@revert=${(data: any) => console.info("onRevert", data.detail.argument)}
+		>
+			<div
+				slot="bundle-action"
+				@click=${() => {
+					console.log("copy link")
+				}}
+			>
+				Share
+			</div>
+			<div
+				slot="bundle-action"
+				@click=${() => {
+					console.log("open edit alias")
+				}}
+			>
+				Edit alias
+			</div>
+		</inlang-message-bundle> `,
 }

@@ -77,6 +77,32 @@ export default class InlangMessageBundle extends LitElement {
 		this.dispatchEvent(onFixLint)
 	}
 
+	dispatchOnMachineTranslate(messageId?: string, variantId?: string) {
+		const onMachineTranslate = new CustomEvent("machine-translate", {
+			bubbles: true,
+			detail: {
+				argument: {
+					messageId,
+					variantId,
+				},
+			},
+		})
+		this.dispatchEvent(onMachineTranslate)
+	}
+
+	dispatchOnRevert(messageId?: string, variantId?: string) {
+		const onRevert = new CustomEvent("revert", {
+			bubbles: true,
+			detail: {
+				argument: {
+					messageId,
+					variantId,
+				},
+			},
+		})
+		this.dispatchEvent(onRevert)
+	}
+
 	_triggerSave = () => {
 		if (this.messageBundle) {
 			this.dispatchOnChangeMessageBundle(this.messageBundle)
@@ -106,13 +132,29 @@ export default class InlangMessageBundle extends LitElement {
 		this.dispatchOnFixLint(lintReport, fix)
 	}
 
+	_machineTranslate = (messageId?: string, variantId?: string) => {
+		this.dispatchOnMachineTranslate(messageId, variantId)
+	}
+
+	_revert = (messageId?: string, variantId?: string) => {
+		this.dispatchOnRevert(messageId, variantId)
+	}
+
 	@state()
 	private _freshlyAddedVariants: string[] = []
+
+	@state()
+	private _bundleSlots: Element[] = []
 
 	override async firstUpdated() {
 		await this.updateComplete
 		// override primitive colors to match the design system
 		overridePrimitiveColors()
+
+		const children = this.children
+		this._bundleSlots = Array.from(children).filter((child) =>
+			child.slot ? child.slot === "bundle-action" : false
+		)
 	}
 
 	private _refLocale = (): LanguageTag | undefined => {
@@ -195,60 +237,40 @@ export default class InlangMessageBundle extends LitElement {
 									</sl-tooltip>
 								</inlang-add-input>
 						  </div>`}
-					<div class="separator"></div>
+					${this._bundleSlots && this._bundleSlots.length > 0
+						? html`<div class="separator"></div>
 
-					<sl-dropdown>
-						<sl-button
-							class="header-button"
-							variant="text"
-							size="small"
-							class="add-input-tag"
-							slot="trigger"
-							><svg
-								xmlns="http://www.w3.org/2000/svg"
-								width="18"
-								height="18"
-								viewBox="0 0 24 24"
-								slot="prefix"
-							>
-								<path
-									fill="currentColor"
-									d="M7 12a2 2 0 1 1-4 0a2 2 0 0 1 4 0m7 0a2 2 0 1 1-4 0a2 2 0 0 1 4 0m7 0a2 2 0 1 1-4 0a2 2 0 0 1 4 0"
-								/></svg
-						></sl-button>
-						<sl-menu>
-							<sl-menu-item value="alias"
-								><svg
-									slot="prefix"
-									xmlns="http://www.w3.org/2000/svg"
-									width="18"
-									height="18"
-									viewBox="0 0 24 24"
-									style="margin-right: -3px; margin-left: 12px; margin-top: -2px opacity: 0.7"
-								>
-									<path
-										fill="currentColor"
-										d="m16.828 1.416l5.755 5.755L7.755 22H2v-5.756zm0 8.681l2.927-2.926l-2.927-2.927l-2.926 2.927zm-4.34-1.512L4 17.074V20h2.926l8.488-8.488z"
-									/></svg
-								>Edit alias</sl-menu-item
-							>
-							<sl-menu-item value="alias"
-								><svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="20"
-									height="20"
-									style="margin-right: -3px; margin-left: 12px; margin-top: -2px; opacity: 0.7"
-									slot="prefix"
-									viewBox="0 0 24 24"
-								>
-									<path
-										fill="currentColor"
-										d="M11 17H7q-2.075 0-3.537-1.463T2 12t1.463-3.537T7 7h4v2H7q-1.25 0-2.125.875T4 12t.875 2.125T7 15h4zm-3-4v-2h8v2zm5 4v-2h4q1.25 0 2.125-.875T20 12t-.875-2.125T17 9h-4V7h4q2.075 0 3.538 1.463T22 12t-1.463 3.538T17 17z"
-									/></svg
-								>Share link</sl-menu-item
-							>
-						</sl-menu>
-					</sl-dropdown>
+								<sl-dropdown>
+									<sl-button
+										class="header-button"
+										variant="text"
+										size="small"
+										class="add-input-tag"
+										slot="trigger"
+										><svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="18"
+											height="18"
+											viewBox="0 0 24 24"
+											slot="prefix"
+										>
+											<path
+												fill="currentColor"
+												d="M7 12a2 2 0 1 1-4 0a2 2 0 0 1 4 0m7 0a2 2 0 1 1-4 0a2 2 0 0 1 4 0m7 0a2 2 0 1 1-4 0a2 2 0 0 1 4 0"
+											/></svg
+									></sl-button>
+									<sl-menu>
+										${this._bundleSlots.map((slot) => {
+											return html`<sl-menu-item
+												@click=${() => {
+													;(slot as HTMLElement).click()
+												}}
+												>${slot.textContent}</sl-menu-item
+											>`
+										})}
+									</sl-menu>
+								</sl-dropdown>`
+						: ``}
 				</div>
 			</div>
 			<div class="messages-container">
@@ -415,6 +437,8 @@ export default class InlangMessageBundle extends LitElement {
 										.locale=${locale}
 										.lintReports=${lintReports}
 										.fixLint=${this._fixLint}
+										.machineTranslate=${this._machineTranslate}
+										.revert=${this._revert}
 									></inlang-variant>`
 							  })
 							: message?.selectors.length === 0 || !message
@@ -428,6 +452,8 @@ export default class InlangMessageBundle extends LitElement {
 									.locale=${locale}
 									.lintReports=${lintReports}
 									.fixLint=${this._fixLint}
+									.machineTranslate=${this._machineTranslate}
+									.revert=${this._revert}
 							  ></inlang-variant>`
 							: ``}
 						${message?.selectors && message.selectors.length > 0
