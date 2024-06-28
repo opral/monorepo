@@ -9,8 +9,7 @@ import node from "@astrojs/node"
 export default defineConfig({
 	//configure this to your domain name
 	//site: "https://acme.com",
-	base: "/base",
-	trailingSlash: "always",
+
 	i18n: {
 		defaultLocale: "en",
 		locales: [
