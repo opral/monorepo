@@ -17,12 +17,12 @@ const meta: Meta = {
 }
 
 const mockMessageLintReports: LintReport[] = [
-	createMockBundleLintReport({
-		ruleId: "messageBundleLintRule.inlang.missingMessage",
-		messageBundleId: "mock_bundle_human_id",
-		locale: "de",
-		body: "The bundle `mock_bundle_human_id` is missing message for the locale `de`",
-	}),
+	// createMockBundleLintReport({
+	// 	ruleId: "messageBundleLintRule.inlang.missingMessage",
+	// 	messageBundleId: "mock_bundle_human_id",
+	// 	locale: "de",
+	// 	body: "The bundle `mock_bundle_human_id` is missing message for the locale `de`",
+	// }),
 	createMockMessageLintReport({
 		ruleId: "messageBundleLintRule.inlang.missingReference",
 		messageBundleId: "mock_bundle_human_id",

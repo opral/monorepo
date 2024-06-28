@@ -96,7 +96,7 @@ export default class InlangLintReportTip extends LitElement {
 
 	override render() {
 		return html`<sl-dropdown
-			distance="-4"
+			distance="4"
 			placement="bottom-start"
 			class="dropdown"
 			@sl-show=${(e: CustomEvent) => {

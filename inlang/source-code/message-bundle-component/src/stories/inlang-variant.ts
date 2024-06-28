@@ -303,18 +303,40 @@ export default class InlangVariant extends LitElement {
 		await this.updateComplete
 		// override primitive colors to match the design system
 		const selectorConfigurator = this.shadowRoot?.querySelector("inlang-selector-configurator")
-		const dropdown = selectorConfigurator?.shadowRoot?.querySelector("sl-dropdown")
-		if (dropdown) {
-			dropdown.addEventListener("sl-show", (e) => {
-				if (e.target === dropdown) {
+		const selectorDropdown = selectorConfigurator?.shadowRoot?.querySelector("sl-dropdown")
+		if (selectorDropdown) {
+			selectorDropdown.addEventListener("sl-show", (e) => {
+				if (e.target === selectorDropdown) {
 					//set parent class dropdown-open
 					selectorConfigurator?.parentElement?.classList.add("dropdown-open")
 				}
 			})
-			dropdown.addEventListener("sl-hide", (e) => {
-				if (e.target === dropdown) {
+			selectorDropdown.addEventListener("sl-hide", (e) => {
+				if (e.target === selectorDropdown) {
 					//remove parent class dropdown-open
 					selectorConfigurator?.parentElement?.classList.remove("dropdown-open")
+				}
+			})
+		}
+
+		const lintReportsTip = this.shadowRoot?.querySelector("inlang-lint-report-tip")
+		const lintReportDropdown = lintReportsTip?.shadowRoot?.querySelector("sl-dropdown")
+		if (lintReportDropdown) {
+			const previousSibling = lintReportsTip?.previousSibling?.previousSibling?.previousSibling
+			lintReportDropdown.addEventListener("sl-show", (e) => {
+				if (e.target === lintReportDropdown) {
+					//set parent class dropdown-open
+					if (previousSibling instanceof HTMLElement) {
+						previousSibling.classList.add("dropdown-open")
+					}
+				}
+			})
+			lintReportDropdown.addEventListener("sl-hide", (e) => {
+				if (e.target === lintReportDropdown) {
+					//remove parent class dropdown-open
+					if (previousSibling instanceof HTMLElement) {
+						previousSibling.classList.remove("dropdown-open")
+					}
 				}
 			})
 		}
