@@ -1,5 +1,17 @@
 # @inlang/plugin-next-intl
 
+## 1.3.49
+
+### Patch Changes
+
+- c26aac4: refactor icon
+
+## 1.3.48
+
+### Patch Changes
+
+- @inlang/sdk@0.36.3
+
 ## 1.3.47
 
 ### Patch Changes

@@ -7,7 +7,7 @@ describe("normaliseBase", () => {
 	})
 
 	it("should return absolute path if base is relative", () => {
-		expect(normaliseBase("..", new URL("http://example.com/a/b/c/"))).toBe("/a/b/")
+		expect(normaliseBase("..", new URL("http://example.com/a/b/c/"))).toBe("/a/b")
 	})
 
 	it("should return '' if base is at the root", () => {
@@ -15,6 +15,6 @@ describe("normaliseBase", () => {
 	})
 
 	it("should return absolute path if base is absolute", () => {
-		expect(normaliseBase("/a/b/", new URL("http://example.com/a/b/c/"))).toBe("/a/b/")
+		expect(normaliseBase("/a/b/", new URL("http://example.com/a/b/c/"))).toBe("/a/b")
 	})
 })

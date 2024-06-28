@@ -1,128 +1,107 @@
 import * as vscode from "vscode"
-import type { CommentJSONValue } from "comment-json/index.js"
-import { parse, stringify } from "comment-json"
-import * as path from "node:path"
-import * as fs from "node:fs"
 import { telemetry } from "../../services/telemetry/implementation.js"
-import { getGitOrigin } from "../settings/getGitOrigin.js"
-import { getSetting, updateSetting } from "../settings/index.js"
+import * as Sherlock from "@inlang/recommend-sherlock"
+import * as Ninja from "@inlang/recommend-ninja"
+import type { NodeishFilesystem } from "@lix-js/fs"
+import { CONFIGURATION } from "../../configuration.js"
 
-/**
- * Defines the structure of the extensions.json file.
- */
-type ExtensionsJson = {
-	recommendations: string[]
-}
-
-export async function isInWorkspaceRecommendation(args: {
+export function createRecommendationView(args: {
+	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
+	fs: NodeishFilesystem
 }) {
-	const vscodeFolderPath = path.join(args.workspaceFolder.uri.fsPath, ".vscode")
-	const extensionsJsonPath = path.join(vscodeFolderPath, "extensions.json")
-
-	let extensions: CommentJSONValue | undefined
-	// Read the extensions.json file
-	if (fs.existsSync(extensionsJsonPath) && fs.existsSync(vscodeFolderPath)) {
-		extensions = parse(fs.readFileSync(extensionsJsonPath, "utf8"))
-	}
-	const extensionsResult =
-		// @ts-expect-error
-		extensions?.recommendations?.includes("inlang.vs-code-extension") || false
-
-	if (extensionsResult === true) {
-		return true
-	} else {
-		return false
-	}
-}
-
-export const isDisabledRecommendation = async (): Promise<boolean> => {
-	const disabledRecommendations = await getSetting("disableRecommendation")
-	const gitOrigin = await getGitOrigin()
-	return disabledRecommendations ? disabledRecommendations.includes(gitOrigin) : false
-}
-
-export const updateDisabledRecommendation = async (): Promise<void> => {
-	await updateSetting("disableRecommendation", [
-		...(await getSetting("disableRecommendation")),
-		await getGitOrigin(),
-	])
-}
-
-export function createRecommendationBanner(args: { workspaceFolder: vscode.WorkspaceFolder }) {
 	return {
-		resolveWebviewView(webviewView: vscode.WebviewView) {
+		async resolveWebviewView(webviewView: vscode.WebviewView) {
 			webviewView.webview.options = {
 				enableScripts: true,
 			}
 
 			webviewView.webview.onDidReceiveMessage(async (message) => {
-				const vscodeFolderPath = path.join(args.workspaceFolder.uri.fsPath, ".vscode")
-				const extensionsJsonPath = path.join(vscodeFolderPath, "extensions.json")
-
 				switch (message.command) {
-					case "addRecommendation":
+					case "addSherlockToWorkspace":
 						if (args.workspaceFolder) {
-							// Check if the .vscode folder exists
-							if (!fs.existsSync(vscodeFolderPath)) {
-								fs.mkdirSync(vscodeFolderPath)
-							}
+							Sherlock.add({
+								fs: args.fs,
+								workingDirectory: args.workspaceFolder.uri.fsPath,
+							})
 
-							// Check if the extensions.json file exists
-							if (!fs.existsSync(extensionsJsonPath)) {
-								// Create a new extensions.json file with an empty recommendations array
-								fs.writeFileSync(
-									extensionsJsonPath,
-									JSON.stringify({ recommendations: [] }, undefined, 2)
-								)
-							}
+							telemetry.capture({
+								event: "IDE-EXTENSION recommendation: add Sherlock to workspace",
+								properties: { outcome: "Accepted" },
+							})
 
-							// Add the Inlang extension to the recommendations object
-							const newExtensions: ExtensionsJson = parse(
-								fs.readFileSync(extensionsJsonPath, "utf8")
-							) as any
-							newExtensions.recommendations.push("inlang.vs-code-extension")
-
-							// Write the updated extensions.json file
-							fs.writeFileSync(extensionsJsonPath, stringify(newExtensions, undefined, 2))
-
-							// Hide the banner
-							vscode.commands.executeCommand(
-								"setContext",
-								"sherlock:showRecommendationBanner",
-								false
-							)
+							CONFIGURATION.EVENTS.ON_DID_RECOMMENDATION_VIEW_CHANGE.fire()
 						}
 						break
-					case "rejectRecommendation":
-						// persist the user's choice in a workspace setting
-						await updateDisabledRecommendation()
+					case "addNinjaGithubAction":
+						Ninja.add({ fs: args.fs })
 
-						// Hide the banner
-						vscode.commands.executeCommand("setContext", "sherlock:showRecommendationBanner", false)
+						telemetry.capture({
+							event: "IDE-EXTENSION recommendation: add Ninja Github Action workflow to repository",
+							properties: { outcome: "Accepted" },
+						})
+
+						CONFIGURATION.EVENTS.ON_DID_RECOMMENDATION_VIEW_CHANGE.fire()
 						break
 				}
-
-				// Track the outcome
-				telemetry.capture({
-					event: "IDE-EXTENSION completed add to workspace recommendations",
-					// if the user does not react, the outcome is undefined aka "Ignored"
-					properties: { outcome: message.command === "addRecommendation" ? "Accepted" : "Ignored" },
-				})
 			})
 
-			webviewView.webview.html = getRecommendationBannerHtml({ webview: webviewView.webview })
+			webviewView.webview.html = await getRecommendationViewHtml({
+				webview: webviewView.webview,
+				workspaceFolder: args.workspaceFolder,
+				context: args.context,
+				fs: args.fs,
+			})
+
+			// Listen for updates
+			CONFIGURATION.EVENTS.ON_DID_RECOMMENDATION_VIEW_CHANGE.event(async () => {
+				webviewView.webview.html = await getRecommendationViewHtml({
+					webview: webviewView.webview,
+					workspaceFolder: args.workspaceFolder,
+					context: args.context,
+					fs: args.fs,
+				})
+			})
 		},
 	}
 }
 
-export function getRecommendationBannerHtml(args: { webview: vscode.Webview }): string {
+export async function getRecommendationViewHtml(args: {
+	webview: vscode.Webview
+	workspaceFolder: vscode.WorkspaceFolder
+	context: vscode.ExtensionContext
+	fs: NodeishFilesystem
+}): Promise<string> {
+	const shouldRecommendNinja = await Ninja.shouldRecommend({ fs: args.fs })
+	const shouldRecommendSherlock = await Sherlock.shouldRecommend({
+		fs: args.fs,
+		workingDirectory: args.workspaceFolder.uri.fsPath,
+	})
+	const isAdoptedSherlock = await Sherlock.isAdopted({
+		fs: args.fs,
+		workingDirectory: args.workspaceFolder.uri.fsPath,
+	})
+	const isAdoptedNinja = await Ninja.isAdopted({ fs: args.fs })
+
+	const codiconsUri = args.webview.asWebviewUri(
+		vscode.Uri.joinPath(args.context.extensionUri, "assets", "codicon.css")
+	)
+	const codiconsTtfUri = args.webview.asWebviewUri(
+		vscode.Uri.joinPath(args.context.extensionUri, "assets", "codicon.ttf")
+	)
+
 	return `<!DOCTYPE html>
         <html lang="en">
         <head>
             <meta charset="UTF-8">
-            <meta http-equiv="Content-Security-Policy" content="default-src 'none'; font-src ${args.webview.cspSource}; style-src ${args.webview.cspSource} 'unsafe-inline'; script-src ${args.webview.cspSource} 'unsafe-inline';">
+            <meta http-equiv="Content-Security-Policy" content="default-src 'none'; font-src ${
+							args.webview.cspSource
+						}; style-src ${args.webview.cspSource} 'unsafe-inline'; script-src ${
+		args.webview.cspSource
+	} 'unsafe-inline';">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<link href="${codiconsUri}" rel="stylesheet">
+			<link href="${codiconsTtfUri}" rel="stylesheet">
             <title>Recommendation</title>
 			<style>
 				body{
@@ -133,6 +112,21 @@ export function getRecommendationBannerHtml(args: { webview: vscode.Webview }): 
 				main {
 					margin: 5px 10px;
 				}
+				.container {
+					display: flex;
+					flex-direction: column;
+					width: 100%;
+					gap: 2px;
+				}
+				.item {
+					display: flex;
+					flex-direction: row;
+					align-items: center;
+					gap: 3px;
+				}
+				.item.active:hover {
+					cursor: pointer;
+				}
 				h1 {
 					font-size: 12px;
 					text-weight: bold;
@@ -141,7 +135,7 @@ export function getRecommendationBannerHtml(args: { webview: vscode.Webview }): 
 					display: block;
 					font-size: 12px;
 					line-height: 1.2;
-					margin-bottom: 10px;
+					margin-bottom: 5px;
 				}
 				button {
 					color: var(--vscode-button-foreground);
@@ -188,41 +182,63 @@ export function getRecommendationBannerHtml(args: { webview: vscode.Webview }): 
         </head>
         <body>
             <main>
-                <!--<span>Add the extension to be recommended for other users of your current workspace.</span>-->
+			
+			<div class="container">
+			${
+				shouldRecommendSherlock || shouldRecommendNinja || isAdoptedSherlock || isAdoptedNinja
+					? `<span>To improve your i18n workflow:</span>
+					${
+						shouldRecommendSherlock
+							? `<div class="item active" id="addSherlockToWorkspace"><span class="codicon codicon-add"></span><span>Add Sherlock to this VS Code workspace</span></div>`
+							: isAdoptedSherlock
+							? `<div class="item"><span class="codicon codicon-pass-filled"></span><span>Sherlock is recommended in this VS Code workspace.</span></div>`
+							: ``
+					}
+				${
+					shouldRecommendNinja
+						? `<div class="item active" id="addNinjaGithubAction"><span class="codicon codicon-add"></span><span>Add Ninja Github Action workflow to this repository</span></div>`
+						: isAdoptedNinja
+						? `<div class="item"><span class="codicon codicon-pass-filled"></span><span>Ninja Github Action workflow is installed.</span></div>`
+						: ``
+				}`
+					: `No recommendations available.`
+			}
 
-                <button id="addRecommendation">Add to workspace recommendation</button>
-                <!--<a id="rejectRecommendation" class="link"><span style="text-align: center;">Reject</a></span></a>-->
-            </main>
+				</div>
+			</main>
             <script>
                 const vscode = acquireVsCodeApi();
-                document.getElementById('addRecommendation').addEventListener('click', () => {
+                ${
+									shouldRecommendSherlock &&
+									`document.getElementById('addSherlockToWorkspace').addEventListener('click', () => {
                     vscode.postMessage({
-                        command: 'addRecommendation'
+                        command: 'addSherlockToWorkspace'
                     });
-                });
-                document.getElementById('rejectRecommendation').addEventListener('click', () => {
-                    vscode.postMessage({
-                        command: 'rejectRecommendation'
-                    });
-                });
-            </script>
-        </body>
-        </html>`
+                });`
+								}
+				${
+					shouldRecommendNinja &&
+					`document.getElementById('addNinjaGithubAction').addEventListener('click', () => {
+					vscode.postMessage({
+						command: 'addNinjaGithubAction'
+					});
+				});`
+				}
+			</script>
+		</body>
+		</html>`
 }
 
-export async function recommendationBannerView(args: { workspaceFolder: vscode.WorkspaceFolder }) {
-	if (
-		(await isDisabledRecommendation()) ||
-		(await isInWorkspaceRecommendation({ workspaceFolder: args.workspaceFolder }))
-	) {
-		return
-	} else {
-		vscode.commands.executeCommand("setContext", "sherlock:showRecommendationBanner", true)
-	}
-
-	vscode.window.registerWebviewViewProvider(
+export async function recommendationBannerView(args: {
+	context: vscode.ExtensionContext
+	workspaceFolder: vscode.WorkspaceFolder
+	nodeishFs: NodeishFilesystem
+}) {
+	return vscode.window.registerWebviewViewProvider(
 		"recommendationBanner",
-		createRecommendationBanner({
+		createRecommendationView({
+			fs: args.nodeishFs,
+			context: args.context,
 			workspaceFolder: args.workspaceFolder,
 		})
 	)

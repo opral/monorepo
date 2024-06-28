@@ -37,7 +37,7 @@ import {
 import { posthog as telemetryBrowser } from "posthog-js"
 import type { Result } from "@inlang/result"
 import { id } from "../../../../../marketplace-manifest.json"
-import * as Ninja from "@inlang/cross-sell-ninja"
+import * as Ninja from "@inlang/recommend-ninja"
 
 type EditorStateSchema = {
 	/**
@@ -147,7 +147,7 @@ type EditorStateSchema = {
 	languageTags: () => LanguageTag[]
 
 	isNinjaRecommendationDisabled: () => boolean
-	ninjaIsAdopted: Resource<boolean>
+	shouldRecommendNinja: Resource<boolean>
 	addNinja: (
 		triggerPushChanges: (message: string) => Promise<(() => void) | undefined>
 	) => Promise<void>
@@ -546,7 +546,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 			(repo) => repo.owner === routeParams().owner && repo.repository === routeParams().repository
 		)
 
-	const [ninjaIsAdopted, { refetch: refetchNinjaIsAdopted }] = createResource(
+	const [shouldRecommendNinja, { refetch: refetchShouldRecommendNinja }] = createResource(
 		() => {
 			if (repo() === undefined || isNinjaRecommendationDisabled()) {
 				return undefined
@@ -556,7 +556,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		async ({ fs }) => {
 			// wait for the browser to be idle
 			await new Promise((resolve) => requestIdleCallback(resolve))
-			return await Ninja.isAdopted({ fs })
+			return await Ninja.shouldRecommend({ fs })
 		}
 	)
 
@@ -564,9 +564,9 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 		triggerPushChanges: (message: string) => Promise<(() => void) | undefined> | undefined
 	) {
 		try {
-			if (!ninjaIsAdopted() && repo()) {
+			if (shouldRecommendNinja() && repo()) {
 				await Ninja.add({ fs: repo()!.nodeishFs })
-				refetchNinjaIsAdopted()
+				refetchShouldRecommendNinja()
 				// commit, push and pull
 				await triggerPushChanges("feat: add Ninja GitHub action 🥷")
 			}
@@ -789,7 +789,7 @@ export function EditorStateProvider(props: { children: JSXElement }) {
 					sourceLanguageTag,
 					languageTags,
 					isNinjaRecommendationDisabled,
-					ninjaIsAdopted,
+					shouldRecommendNinja,
 					addNinja,
 					tourStep,
 					setTourStep,

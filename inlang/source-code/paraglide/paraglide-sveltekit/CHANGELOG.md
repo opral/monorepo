@@ -1,5 +1,22 @@
 # @inlang/paraglide-sveltekit
 
+## 0.10.8
+
+### Patch Changes
+
+- 5ec62a4: Fixes a couple issues with the base-path during prerendering
+  - SSRd language during prerendering is now correct when using a base-path
+  - Alternate links are correctly generated during prerendering
+
+## 0.10.7
+
+### Patch Changes
+
+- Updated dependencies [e37eabf]
+  - @inlang/paraglide-js@1.11.0
+  - @lix-js/client@2.2.1
+  - @inlang/paraglide-vite@1.2.72
+
 ## 0.10.6
 
 ### Patch Changes
