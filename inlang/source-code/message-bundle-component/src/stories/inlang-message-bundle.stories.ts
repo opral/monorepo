@@ -122,6 +122,7 @@ export const Simple: StoryObj = {
 			.messageBundle=${bundleWithoutSelectors}
 			.settings=${mockSettings}
 			.lintReports=${mockMessageLintReports}
+			.filteredLocales=${["en"]}
 			@change-message-bundle=${(data: any) =>
 				console.info("changeMessageBundle", data.detail.argument)}
 			@fix-lint=${(data: any) => console.info("fixLint", data.detail.argument)}
@@ -134,6 +135,7 @@ export const WithSelectors: StoryObj = {
 			.messageBundle=${pluralBundle}
 			.settings=${mockSettings}
 			.lintReports=${[...mockMessageLintReports, ...mockVariantLintReports]}
+			.filteredLocales=${["en"]}
 			@change-message-bundle=${(data: any) =>
 				console.info("changeMessageBundle", data.detail.argument)}
 			@fix-lint=${(data: any) => console.info("fixLint", data.detail.argument)}

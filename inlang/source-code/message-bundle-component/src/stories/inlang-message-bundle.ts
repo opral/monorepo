@@ -7,7 +7,6 @@ import {
 	type Message,
 	type LanguageTag,
 	createVariant,
-	type Variant,
 	type LintReport,
 	type ProjectSettings2,
 } from "@inlang/sdk/v2" // Import the types
@@ -53,6 +52,9 @@ export default class InlangMessageBundle extends LitElement {
 
 	@property({ type: Array })
 	lintReports: LintReport[] | undefined
+
+	@property({ type: Array })
+	filteredLocales: LanguageTag[] | undefined
 
 	dispatchOnChangeMessageBundle(messageBundle: MessageBundle) {
 		const onChangeMessageBundle = new CustomEvent("change-message-bundle", {
@@ -119,8 +121,14 @@ export default class InlangMessageBundle extends LitElement {
 		return this.settings?.baseLocale
 	}
 
+	private _filteredLocales = (): LanguageTag[] | undefined => {
+		if (!this.filteredLocales) return this.settings?.locales
+		if (this.filteredLocales && this.filteredLocales.length === 0) return this.filteredLocales
+		return this.filteredLocales
+	}
+
 	private _locales = (): LanguageTag[] | undefined => {
-		return this.settings?.locales
+		return this._filteredLocales() || undefined
 	}
 
 	private _fakeInputs = (): string[] | undefined => {
