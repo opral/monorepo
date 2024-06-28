@@ -1,7 +1,7 @@
 import paraglide from "@inlang/paraglide-astro"
 import { defineConfig } from "astro/config"
 import mdx from "@astrojs/mdx"
-//import sitemap from "@astrojs/sitemap"
+import sitemap from "@astrojs/sitemap"
 import svelte, { vitePreprocess } from "@astrojs/svelte"
 import node from "@astrojs/node"
 
@@ -22,7 +22,6 @@ export default defineConfig({
 	},
 	integrations: [
 		mdx(),
-		/*
 		sitemap({
 			i18n: {
 				defaultLocale: "en",
@@ -32,7 +31,6 @@ export default defineConfig({
 				},
 			},
 		}),
-		*/
 		svelte({
 			preprocess: [vitePreprocess()],
 		}),
