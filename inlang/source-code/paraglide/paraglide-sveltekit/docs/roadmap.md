@@ -38,3 +38,13 @@ SvelteKit's `reroute` hook currently doens't play well with Vercel (see [sveltej
 3. Don't use translated `pathnames`
 
 We are working on contributing a fix for [sveltejs/kit#11879](https://github.com/sveltejs/kit/issues/11879), so this workaround will hopefully not be needed much longer.
+
+## Usage on Cloudflare
+
+Paraglide-SvelteKit makes use of `AsyncLocalStorage` to keep track of the language on the server without introducing cross-talk between concurrent requests. 
+
+`AsyncLocalStorage` is supported on Cloudflare, but you need to enable the `nodejs_compat` feature flag in `wrangler.toml`.
+
+```toml
+compatibility_flags = [ "nodejs_compat" ]
+```
