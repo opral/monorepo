@@ -15,15 +15,28 @@ export default class InlangLintReportTip extends LitElement {
 			.lint-report-tip {
 				height: 29px;
 				width: 29px;
-				color: var(--sl-color-danger-700);
 				display: flex;
 				align-items: center;
 				justify-content: center;
 				border-radius: 4px;
 				cursor: pointer;
+				color: var(--sl-color-neutral-700);
+			}
+			.lint-report-tip.error {
+				color: var(--sl-color-danger-700);
+			}
+			.lint-report-tip.warning {
+				color: var(--sl-color-warning-600);
 			}
 			.lint-report-tip:hover {
+				background-color: var(--sl-color-neutral-200);
+			}
+			.lint-report-tip.error:hover {
 				background-color: var(--sl-color-danger-200);
+			}
+			.lint-report-tip.warning:hover {
+				background-color: var(--sl-color-warning-200);
+				color: var(--sl-color-warning-700);
 			}
 			.dropdown-container {
 				font-size: 13px;
@@ -47,10 +60,16 @@ export default class InlangLintReportTip extends LitElement {
 			.report-icon {
 				height: 29px;
 				width: 29px;
-				color: var(--sl-color-danger-700);
+				color: var(--sl-color-neutral-700);
 				display: flex;
 				align-items: center;
 				justify-content: center;
+			}
+			.report-icon.error {
+				color: var(--sl-color-danger-700);
+			}
+			.report-icon.warning {
+				color: var(--sl-color-warning-500);
 			}
 			.report-content {
 				display: flex;
@@ -94,6 +113,16 @@ export default class InlangLintReportTip extends LitElement {
 	@property()
 	fixLint: (lintReport: LintReport, fix: LintReport["fixes"][0]["title"]) => void = () => {}
 
+	private _getLintReportLevelClass = () => {
+		if (this.lintReports?.some((report) => report.level === "error")) {
+			return "error"
+		}
+		if (this.lintReports?.some((report) => report.level === "warning")) {
+			return "warning"
+		}
+		return ""
+	}
+
 	override render() {
 		return html`<sl-dropdown
 			distance="4"
@@ -103,7 +132,7 @@ export default class InlangLintReportTip extends LitElement {
 				//console.log(e)
 			}}
 		>
-			<div slot="trigger" class="lint-report-tip">
+			<div slot="trigger" class=${"lint-report-tip " + this._getLintReportLevelClass()}>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					width="18"
@@ -119,7 +148,7 @@ export default class InlangLintReportTip extends LitElement {
 			<div class="dropdown-container">
 				${this.lintReports?.map((lintReport) => {
 					return html`<div class="dropdown-item">
-						<div class="report-icon">
+						<div class=${"report-icon " + lintReport.level}>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								width="18"
