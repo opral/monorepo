@@ -14,3 +14,4 @@ export type TelemetryEvents =
 	| "IDE-EXTENSION loaded project"
 	| "IDE-EXTENSION Editor opened via tooltip"
 	| "IDE-EXTENSION Settings View opened"
+	| "IDE-EXTENSION Message Bundle View opened"
