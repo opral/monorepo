@@ -6,6 +6,22 @@ import {
 import { type MiddlewareHandler } from "astro"
 import { AsyncLocalStorage } from "node:async_hooks"
 
+type NormalizedBase = `/${string}` | ""
+
+declare global {
+	interface ImportMeta {
+		env: {
+			/**
+			 * The base URL set in the astro.config.
+			 *
+			 * May include a trailing slash.
+			 * If no base is set, it defaults to "/".
+			 */
+			BASE_URL: string
+		}
+	}
+}
+
 const localeStorage = new AsyncLocalStorage<string>()
 
 export const onRequest: MiddlewareHandler = async ({ url, locals, currentLocale }, next) => {
@@ -14,7 +30,8 @@ export const onRequest: MiddlewareHandler = async ({ url, locals, currentLocale 
 		return maybeLang ?? sourceLanguageTag
 	})
 
-	const locale = currentLocale ?? getLangFromPath(url.pathname)
+	const normalizedBase = normalizeBase(import.meta.env.BASE_URL)
+	const locale = currentLocale ?? getLangFromPath(url.pathname, normalizedBase) ?? sourceLanguageTag
 	const dir = guessTextDirection(locale)
 
 	/** @deprecated */
@@ -26,12 +43,18 @@ export const onRequest: MiddlewareHandler = async ({ url, locals, currentLocale 
 	return await localeStorage.run(locale, next)
 }
 
-function getLangFromPath(path: string) {
-	// TODO consider base path
+function normalizeBase(rawBase: string): NormalizedBase {
+	if (rawBase === "/") return ""
+	// if there is a trailing slash, remove it
+	return (rawBase.endsWith("/") ? rawBase.slice(0, -1) : rawBase) as NormalizedBase
+}
 
-	const langOrPath = path.split("/").find(Boolean)
-	if (isAvailableLanguageTag(langOrPath)) return langOrPath
-	return sourceLanguageTag
+function getLangFromPath(path: string, base: NormalizedBase): string | undefined {
+	if (!path.startsWith(base)) return undefined
+
+	const withoutBasePath = path.replace(base, "")
+	const langOrPath = withoutBasePath.split("/").find(Boolean) // get the first segment
+	return isAvailableLanguageTag(langOrPath) ? langOrPath : undefined
 }
 
 function guessTextDirection(lang: string): "ltr" | "rtl" {
