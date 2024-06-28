@@ -112,7 +112,8 @@ const bundleWithoutSelectors: MessageBundle = {
 		},
 	],
 	alias: {
-		default: "alias",
+		default: "frontend_button_text",
+		ios: "frontendButtonText",
 	},
 }
 

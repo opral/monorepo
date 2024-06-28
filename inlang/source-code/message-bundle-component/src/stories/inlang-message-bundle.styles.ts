@@ -97,9 +97,27 @@ export const messageBundleStyling = css`
 		paddding-right: 4px;
 		padding-top: 1px;
 	}
+	.alias-wrapper {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
 	.alias {
 		font-weight: 400;
 		color: var(--sl-color-neutral-600);
+	}
+	.alias-counter {
+		height: 20px;
+		width: 24px;
+		font-weight: 500;
+		font-size: 11px;
+		color: var(--sl-color-neutral-600);
+		padding: 4px;
+		border-radius: 4px;
+		background-color: var(--sl-color-neutral-200);
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 	.messages-container {
 		width: 100%;
