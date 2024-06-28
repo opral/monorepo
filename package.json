@@ -35,8 +35,7 @@
 			"http-cache-semantics": "4.1.1",
 			"follow-redirects": "1.15.4",
 			"vitest": "0.34.6",
-			"@vitest/coverage-v8": "0.34.6",
-			"vite": "4.5.2"
+			"@vitest/coverage-v8": "0.34.6"
 		},
 		"auditConfig": {
 			"ignoreCves": [
