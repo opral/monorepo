@@ -71,7 +71,10 @@ const bundleWithoutSelectors: MessageBundle = {
 // REPLACE THIS
 //
 
-export async function messageBundlePanel(args: { context: vscode.ExtensionContext }) {
+export async function messageBundlePanel(args: {
+	context: vscode.ExtensionContext
+	id: MessageBundle["id"]
+}) {
 	const panel = vscode.window.createWebviewPanel(
 		"messageBundlePanel",
 		state().selectedProjectPath.split("/").pop() ?? "Settings",
@@ -83,6 +86,7 @@ export async function messageBundlePanel(args: { context: vscode.ExtensionContex
 	)
 
 	panel.webview.html = getWebviewContent({
+		id: args.id,
 		context: args.context,
 		webview: panel.webview,
 	})
@@ -100,6 +104,7 @@ export async function messageBundlePanel(args: { context: vscode.ExtensionContex
 }
 
 export function getWebviewContent(args: {
+	id: MessageBundle["id"]
 	context: vscode.ExtensionContext
 	webview: vscode.Webview
 }): string {
