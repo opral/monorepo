@@ -17,12 +17,12 @@ const meta: Meta = {
 }
 
 const mockMessageLintReports: LintReport[] = [
-	createMockBundleLintReport({
-		ruleId: "messageBundleLintRule.inlang.missingMessage",
-		messageBundleId: "mock_bundle_human_id",
-		locale: "de",
-		body: "The bundle `mock_bundle_human_id` is missing message for the locale `de`",
-	}),
+	// createMockBundleLintReport({
+	// 	ruleId: "messageBundleLintRule.inlang.missingMessage",
+	// 	messageBundleId: "mock_bundle_human_id",
+	// 	locale: "de",
+	// 	body: "The bundle `mock_bundle_human_id` is missing message for the locale `de`",
+	// }),
 	createMockMessageLintReport({
 		ruleId: "messageBundleLintRule.inlang.missingReference",
 		messageBundleId: "mock_bundle_human_id",
@@ -122,6 +122,7 @@ export const Simple: StoryObj = {
 			.messageBundle=${bundleWithoutSelectors}
 			.settings=${mockSettings}
 			.lintReports=${mockMessageLintReports}
+			.filteredLocales=${["en"]}
 			@change-message-bundle=${(data: any) =>
 				console.info("changeMessageBundle", data.detail.argument)}
 			@fix-lint=${(data: any) => console.info("fixLint", data.detail.argument)}
@@ -134,6 +135,7 @@ export const WithSelectors: StoryObj = {
 			.messageBundle=${pluralBundle}
 			.settings=${mockSettings}
 			.lintReports=${[...mockMessageLintReports, ...mockVariantLintReports]}
+			.filteredLocales=${["en"]}
 			@change-message-bundle=${(data: any) =>
 				console.info("changeMessageBundle", data.detail.argument)}
 			@fix-lint=${(data: any) => console.info("fixLint", data.detail.argument)}
