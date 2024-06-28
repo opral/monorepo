@@ -133,7 +133,6 @@ export async function loadProject(args: {
 							settingsSchema: rule.settingsSchema,
 						} satisfies InstalledLintRule)
 				)
-				debugger
 				return from([rules])
 			})
 		)
@@ -228,7 +227,6 @@ export async function loadProject(args: {
 				// eslint-disable-next-line no-constant-condition
 				while (true) {
 					lintsPending = false
-					debugger
 					const lintresults = await linter.lint(projectSettings$.value)
 
 					lintReports$.next(lintresults)

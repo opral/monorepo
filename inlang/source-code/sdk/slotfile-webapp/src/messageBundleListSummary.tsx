@@ -9,12 +9,15 @@ import { VariableSizeList as List } from "react-window"
 import { InlangProject2 } from "../../dist/v2/types/project.js"
 import { openProject } from "./storage/db-messagebundle.js"
 import { LintReport } from "../../dist/v2/index.js"
+import { LanguageTag } from "@inlang/language-tag"
 
 type MessageBundleListProps = {
 	project: Awaited<ReturnType<typeof openProject>>
 	projectSettings: ProjectSettings2
 	bundles: MessageBundle[]
 	reports: LintReport[]
+	activeLanguages: LanguageTag[]
+	onActiveLanguagesChange: (locales: LanguageTag[]) => void
 }
 
 export function MessageBundleListSummary({
@@ -22,29 +25,91 @@ export function MessageBundleListSummary({
 	projectSettings,
 	bundles,
 	reports,
+	activeLanguages,
+	onActiveLanguagesChange,
 }: MessageBundleListProps) {
 	// const [bundles, setBundles] = useState([] as MessageBundle[])
 	// const [lintReports, setLintReports] = useState([] as LintReport[])
 	const [installedLints, setInstalledLints] = useState([] as InstalledLintRule[])
 
+	const [mappedLintReports, setMappedLintReports] = useState({} as any)
+
 	useEffect(() => {
 		const sub = project.inlangProject.installed.lintRules.subscribe({
-			next: (lints) => {
-				setInstalledLints(lints)
+			next: (lintRules) => {
+				setInstalledLints(lintRules)
+
+				const bundleIds = new Set<string>()
+
+				for (const bundle of bundles) {
+					bundleIds.add(bundle.id)
+				}
+
+				const mapped = {} as any
+
+				for (const lintRule of lintRules) {
+					mapped[lintRule.id] = []
+				}
+
+				for (const report of reports) {
+					if (bundleIds.has(report.messageBundleId)) {
+						mapped[report.ruleId]?.push(report)
+					}
+				}
+				setMappedLintReports(mapped)
 			},
 		})
 
 		return () => {
 			sub.unsubscribe()
 		}
-	}, [])
+	}, [reports, bundles])
+
+	const toggleLocale = (locale: LanguageTag) => {
+		if (activeLanguages.length === 0) {
+			onActiveLanguagesChange(projectSettings.locales.filter((current) => current !== locale))
+			return
+		}
+
+		if (activeLanguages.includes(locale)) {
+			onActiveLanguagesChange(activeLanguages.filter((current) => current !== locale))
+		} else {
+			onActiveLanguagesChange(activeLanguages.concat(locale))
+		}
+	}
 
 	return (
-		<div>
-			Message Bundles: {bundles.length}
-			{installedLints.map((installedLint) => {
-				return <div>{installedLint.displayName as string}</div>
-			})}
+		<div className="summary">
+			<div>
+				{projectSettings.locales.map((locale) => {
+					return (
+						<div key={locale}>
+							<input
+								type="checkbox"
+								id="vehicle1"
+								name="vehicle1"
+								value="Bike"
+								checked={activeLanguages.length == 0 || activeLanguages.includes(locale)}
+								onChange={() => toggleLocale(locale)}
+							/>
+							{locale}
+						</div>
+					)
+				})}
+			</div>
+			<div className="messageCount">Message Bundles: {bundles.length}</div>
+			<div className="lintsReportsContainer">
+				{installedLints.map((installedLint) => {
+					const lintReports = mappedLintReports[installedLint.id]
+					return (
+						lintReports.length > 0 && (
+							<div className="lintsReports" key={installedLint.id}>
+								{installedLint.displayName as string} - {lintReports.length}
+							</div>
+						)
+					)
+				})}
+			</div>
 		</div>
 	)
 }

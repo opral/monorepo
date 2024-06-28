@@ -10,6 +10,7 @@ import { InlangProject2 } from "../../dist/v2/types/project.js"
 import { openProject } from "./storage/db-messagebundle.js"
 import { LintReport } from "../../dist/v2/index.js"
 import { MessageBundleListSummary } from "./messageBundleListSummary.js"
+import { LanguageTag } from "@inlang/language-tag"
 
 export const MessageBundleComponent = createComponent({
 	tagName: "inlang-message-bundle",
@@ -31,6 +32,8 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 	const [projectSettings, setProjectSettings] = useState<ProjectSettings2 | undefined>(undefined)
 	const [messageBundleCollection, setMessageBundleCollection] = useState<any>()
 
+	const [activeLocales, setActiveLocales] = useState<LanguageTag[]>([])
+
 	const [textSearch, setTextSearch] = useState("")
 
 	useEffect(() => {
@@ -43,6 +46,7 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 			selector = {
 				messages: {
 					$elemMatch: {
+						locale: { $in: activeLocales },
 						variants: {
 							$elemMatch: {
 								pattern: {
@@ -56,6 +60,10 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 						},
 					},
 				},
+			}
+
+			if (activeLocales.length === 0) {
+				delete selector.messages.$elemMatch.locale
 			}
 
 			// { $regex: textSearch, $options: "i" }
@@ -74,14 +82,14 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 			})
 			//.sort({ updatedAt: "desc" })
 			.$.subscribe((bundles) => {
-				query?.unsubscribe()
+				// query?.unsubscribe()
 				setBundles(bundles)
 			})
 
 		return () => {
 			query?.unsubscribe()
 		}
-	}, [textSearch])
+	}, [textSearch, activeLocales])
 
 	useEffect(() => {
 		const sub = project.inlangProject.lintReports$.subscribe({
@@ -146,6 +154,7 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 			}
 		}
 
+		console.log(activeLocales)
 		return (
 			<div style={style}>
 				<div ref={measureRef}>
@@ -155,6 +164,7 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 						settings={projectSettings}
 						lintReports={lintReports.filter((report) => report.messageBundleId === bundle.id)}
 						changeMessageBundle={onBundleChange as any}
+						filteredLocales={activeLocales.length > 0 ? activeLocales : undefined}
 						fixLint={(e: any) => {
 							const { fix, lintReport } = e.detail.argument as {
 								fix: string
@@ -192,9 +202,11 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 						projectSettings={projectSettings}
 						bundles={bundles}
 						reports={lintReports}
+						activeLanguages={activeLocales}
+						onActiveLanguagesChange={(actives) => setActiveLocales(actives)}
 					/>
 					<List
-						height={600} // Adjust based on your requirements
+						height={900} // Adjust based on your requirements
 						itemCount={bundles.length}
 						itemSize={getItemSize}
 						width={"100%"}

@@ -151,7 +151,7 @@ export function MainView() {
 
 	return (
 		<div>
-			<h3>MessageBundle + RxDB + SlotMaschine + Lix</h3>
+			<h3>Fink 2</h3>
 			<div>
 				GitHub token:{" "}
 				<input
