@@ -19,7 +19,7 @@ getResourceBundle().getText('message')
 The plugin will automatically extract messages from your code and show them inline in the editor. You can then click on the message to open the web editor and translate the message.
 
 1. Install the [Visual Studio Code extension (Sherlock)](https://inlang.com/m/r7kp499g)
-2. Storage plugin: Select a storage plugin, e.g. [inlang](https://inlang.com/m/ig84ng0o)
+2. Storage plugin: Select a storage plugin, e.g. [JSON](https://inlang.com/m/ig84ng0o) or use the possibility of [writing your own plugin](https://inlang.com/documentation/plugin/guide).
 3. Matcher plugin: Install this plugin (or copy the link below to your project settings)
 4. ✨ See your messages appear inline in the editor
 
