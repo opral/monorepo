@@ -1,6 +1,6 @@
 # What does the next-intl plugin do?
 
-`next-intl` is agnostic but recommends the json format. It also determines how messages are accessed on the frontend. To ensure compatibility with the inlang ecosystem and other inlang apps, a plugin is required to provide the necessary information to these apps.
+`next-intl` is agnostic but recommends the JSON format. It also determines how messages are accessed on the frontend. A plugin is required to provide the necessary information to ensure compatibility with the inlang ecosystem and other inlang apps.
 
 ## Manual Installation
 
@@ -52,7 +52,7 @@ You can add this settings also in the `project.inlang/settings.json`:
 
 ## `pathPattern`
 
-To use the plugin, you need to provide a path to the directory where your language-specific files are stored. Use the dynamic path syntax `{languageTag}` to specify the language name.
+To use the plugin, you must provide a path to the directory where your language-specific files are stored. Use the dynamic path syntax `{languageTag}` to specify the language name.
 
 ```json
 "pathPattern": "./messages/{languageTag}.json"
@@ -70,7 +70,7 @@ Example:
 
 ## `sourceLanguageFilePath`
 
-This setting is optional and should only be used if the file name of your sourceLanguageTag does not match your pathPattern structure. For example, if your sourceLanguageTag is `en` but your sourceLanguage file is called `main.json`, you can use this setting to specify the path to the sourceLanguage file. Our recommendation is to rename the file to `en.json` and not use this setting.
+This setting is optional and should only be used if the file name of your `sourceLanguageTag` does not match your pathPattern structure. For example, if your sourceLanguageTag is `en` but your sourceLanguage file is called `main.json`, you can use this setting to specify the path to the sourceLanguage file. We recommend renaming the file to `en.json` and not using this setting.
 
 ```json
 "sourceLanguageFilePath": "./resources/main.json"
@@ -78,7 +78,7 @@ This setting is optional and should only be used if the file name of your source
 
 # Install the Inlang Visual Studio Code extension (Sherlock) to supercharge your i18n workflow
 
-The plugin automatically informs [Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) how to extract keys and namespaces from your code in order to display inline annotations. A quick run through of the most important features can be found [here (loom)](https://www.loom.com/share/68bc13eceb454a8fa69a7cfec5569b8a). Install: [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension).
+The plugin automatically informs [Sherlock](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) how to extract keys and namespaces from your code to display inline annotations. A quick run-through of the most important features can be found [here (loom)](https://www.loom.com/share/68bc13eceb454a8fa69a7cfec5569b8a). Install: [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension).
 
 ## In-code usage
 
@@ -95,13 +95,13 @@ function About() {
 }
 ```
 
-To learn about namespaces and how to use translation functions in your code, you can refer to [next-intl documentation](https://next-intl-docs.vercel.app/docs/usage/messages). The plugin is capable of parsing the code and providing the IDE-extension with this information.
+To learn about namespaces and how to use translation functions in your code, you can refer to [next-intl documentation](https://next-intl-docs.vercel.app/docs/usage/messages). The plugin can pars the code and provide the VS Code extension (Sherlock) with this information.
 
-With version `1.3` it supports also `getTranslations`.
+Version `1.3` also supports `getTranslations`.
 
 # Expected behavior
 
-The message IDs are sorted in the order in which they appear in the sourceLanguage file. The nesting or flattening of IDs is detected on a file-by-file basis. If the sourceLanguage file contains nested IDs, the plugin will also create nested IDs in the targetLanguage files. If the sourceLanguage file contains flattened IDs, the plugin will also create flattened IDs in the targetLanguage files.
+The message IDs are sorted in the order in which they appear in the `sourceLanguage` file. The nesting or flattening of IDs is detected on a file-by-file basis. If the sourceLanguage file contains nested IDs, the plugin will also create nested IDs in the targetLanguage files. If the sourceLanguage file contains flattened IDs, the plugin will also create flattened IDs in the targetLanguage files.
 
 
 # Contributing
@@ -113,7 +113,7 @@ Run the following commands in your terminal (node and npm must be installed):
 1. `npm install`
 2. `npm run dev`
 
-`npm run dev` will start the development environment which automatically compiles the [src/index.ts](#getting-started) files to JavaScript ([dist/index.js](#getting-started)), runs tests defined in `*.test.ts` files and watches changes.
+`npm run dev` will start the development environment, which automatically compiles the [src/index.ts](#getting-started) files to JavaScript ([dist/index.js](#getting-started)), runs tests defined in `*.test.ts` files and watches changes.
 
 ## Publishing
 
