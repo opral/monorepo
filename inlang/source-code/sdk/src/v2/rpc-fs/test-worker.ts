@@ -3,24 +3,27 @@ import { getFs } from "./client.js"
 const fs = getFs()
 
 const ac = new AbortController()
-startWatching("/test.txt" ac.signal)
+startWatching("/test.txt", ac.signal)
 
+startEditing("/test.txt")
 
-for(let i = 0; i < 5; i++) {
-	const randomId = () => Math.random().toString(36).slice(2)
-	await fs.writeFile("/test.txt", `${randomId()}`)
-	await sleep(500)
-}
-
+await sleep(1500)
 ac.abort()
 
 async function startWatching(path: string, signal: AbortSignal) {
-	const watcher = await fs.watch(path)
-	console.info("watching", path, watcher)
+	const watcher = await fs.watch(path, { signal })
 	for await (const event of watcher) {
 		console.info(event)
 	}
 	console.info("done")
+}
+
+async function startEditing(path: string) {
+	while (true) {
+		const randomId = () => Math.random().toString(36).slice(2)
+		await fs.writeFile(path, `${randomId()}`)
+		await sleep(500)
+	}
 }
 
 function sleep(ms: number) {
