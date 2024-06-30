@@ -13,7 +13,7 @@ type createSlotStorageParams = {
 	path: string
 	slotsPerFile: number
 	fileNameCharacters: number
-	watch: true
+	watch: true | false
 	fs: Pick<NodeishFilesystem, "readFile" | "readdir" | "writeFile" | "mkdir" | "watch">
 }
 
@@ -122,7 +122,8 @@ export default async function createSlotStorageWriter<DocType extends HasId>({
 
 		// TODO get lock - so we don't expect further dirty flags comming up
 		debug("saveChangesToWorkingCopy - reloadDirtySlotFiles")
-		await slotFileReader._internal.loadSlotFilesFromFs()
+		// NOTE: For now we just laod all files again - we could optimize this by loading only the files that we actually write...
+		await slotFileReader._internal.loadSlotFilesFromFs(true)
 
 		const changedIds = new Set<string>()
 
@@ -508,6 +509,9 @@ export default async function createSlotStorageWriter<DocType extends HasId>({
 		 * internal properties used for debug purpose (checking internal states during tests)
 		 */
 		...slotFileReader,
+		_writerInternals: {
+			transientSlotEntries,
+		},
 		insert: async (document: DocType, saveToDisk = true) => {
 			const documentId = document[idProperty]
 
@@ -578,6 +582,7 @@ export default async function createSlotStorageWriter<DocType extends HasId>({
 					throw Error("expected recordSlotfile not found")
 				}
 				recordSlotfile.changedRecords[existingSlotEntry.index] = updatedSlotEntry
+				updateSlotEntryStates(documentId, existingSlotEntry.index)
 			} else {
 				// we are updating a transient object
 				const idHash = (existingSlotEntry as TransientSlotEntry<DocType>).idHash
@@ -590,8 +595,6 @@ export default async function createSlotStorageWriter<DocType extends HasId>({
 					idHash: idHash,
 				})
 			}
-
-			updateSlotEntryStates(documentId, existingSlotEntry.index)
 
 			slotFileReader._internal.changeCallback("api", "records-change", [documentId])
 			if (saveToDisk) {

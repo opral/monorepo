@@ -75,7 +75,6 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 	watch,
 }: createSlotStorageParams) {
 	const debug = _debug("sdk:slotfile:" + path)
-	const storageName = name
 	// property to use to test for identity of an object within a collection
 	// NOTE: use schema primary key like in https://github.com/pubkey/rxdb/blob/3bdfd66d1da5ccf9afe371b6665770f11e67908f/src/types/rx-schema.d.ts#L106
 	const idProperty = "id"
@@ -361,8 +360,6 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 						loadResults.conflicting.push(conflictingRecord?.data[idProperty])
 					}
 				}
-
-				// TODO handle local conflicts (when the fs state differed to the memory state)
 			}
 		}
 
@@ -490,13 +487,12 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 	const _internal = {
 		fileNamesToSlotfileStates,
 		fs,
-		storageName,
 		lastLoad: {},
 		loadSlotFilesFromFs,
 		idToSlotFileName,
 		changeCallback,
 		getSlotEntryById,
-		slotEntryStates
+		slotEntryStates,
 	}
 
 	// start
