@@ -3,7 +3,7 @@ import { customElement, property } from "lit/decorators.js"
 import type { MessageLintReport } from "@inlang/message-lint-rule"
 
 import SlToolTip from "@shoelace-style/shoelace/dist/components/tooltip/tooltip.component.js"
-import type { LintReport } from "@inlang/sdk/v2"
+import type { InstalledLintRule, LintReport } from "@inlang/sdk/v2"
 
 // in case an app defines it's own set of shoelace components, prevent double registering
 if (!customElements.get("sl-tooltip")) customElements.define("sl-tooltip", SlToolTip)
@@ -111,6 +111,9 @@ export default class InlangLintReportTip extends LitElement {
 	lintReports: LintReport[] | undefined
 
 	@property()
+	installedLintRules: InstalledLintRule[] | undefined
+
+	@property()
 	fixLint: (lintReport: LintReport, fix: LintReport["fixes"][0]["title"]) => void = () => {}
 
 	private _getLintReportLevelClass = () => {
@@ -121,6 +124,18 @@ export default class InlangLintReportTip extends LitElement {
 			return "warning"
 		}
 		return ""
+	}
+
+	private _getLintDisplayName = (ruleId: string) => {
+		const rule = this.installedLintRules?.find((rule) => rule.id === ruleId)
+
+		if (typeof rule?.displayName === "string") {
+			return rule.displayName
+		} else if (typeof rule === "object") {
+			return (rule?.displayName as { en: string }).en
+		} else {
+			return ruleId.split(".")[2]
+		}
 	}
 
 	override render() {
@@ -162,7 +177,7 @@ export default class InlangLintReportTip extends LitElement {
 							</svg>
 						</div>
 						<div class="report-content">
-							<p class="report-title">${lintReport.ruleId && lintReport.ruleId.split(".")[2]}</p>
+							<p class="report-title">${this._getLintDisplayName(lintReport.ruleId)}</p>
 							<p class="report-body">${lintReport.body}</p>
 							<div class="report-fixes">
 								${lintReport.fixes?.map((fix) => {
