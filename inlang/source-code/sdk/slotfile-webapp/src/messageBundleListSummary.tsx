@@ -11,10 +11,12 @@ import { openProject } from "./storage/db-messagebundle.js"
 import { LintReport } from "../../dist/v2/index.js"
 import { LanguageTag } from "@inlang/language-tag"
 
+import { RxDocument } from "rxdb"
+
 type MessageBundleListProps = {
 	project: Awaited<ReturnType<typeof openProject>>
 	projectSettings: ProjectSettings2
-	bundles: MessageBundle[]
+	bundles: RxDocument<MessageBundle>[]
 	reports: LintReport[]
 	activeLanguages: LanguageTag[]
 	onActiveLanguagesChange: (locales: LanguageTag[]) => void

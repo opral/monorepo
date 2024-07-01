@@ -17,7 +17,15 @@ import {
 } from "./types/index.js"
 import { createDebugImport } from "./import-utils.js"
 
-import { createRxDatabase, type RxCollection } from "rxdb"
+import {
+	createRxDatabase,
+	deepEqual,
+	stripAttachmentsDataFromDocument,
+	type RxCollection,
+	type RxConflictHandler,
+	type RxConflictHandlerInput,
+	type RxConflictHandlerOutput,
+} from "rxdb"
 import { getRxStorageMemory } from "rxdb/plugins/storage-memory"
 import { BehaviorSubject, combineLatest, from, map, switchMap, tap } from "rxjs"
 import { resolveModules } from "./resolveModules2.js"
@@ -190,6 +198,7 @@ export async function loadProject(args: {
 		messageBundles: {
 			schema: MessageBundle as any as typeof MessageBundle &
 				Readonly<{ version: number; primaryKey: string; additionalProperties: false | undefined }>,
+			conflictHandler: defaultConflictHandler,
 		},
 	})
 
@@ -264,4 +273,35 @@ export async function loadProject(args: {
 			await database.collections.messageBundles.upsert(fixed)
 		},
 	}
+}
+
+const defaultConflictHandler: RxConflictHandler<any> = function (
+	i: RxConflictHandlerInput<any>,
+	_context: string
+): Promise<RxConflictHandlerOutput<any>> {
+	console.log("defaultConflictHandler")
+	const newDocumentState = stripAttachmentsDataFromDocument(i.newDocumentState)
+	const realMasterState = stripAttachmentsDataFromDocument(i.realMasterState)
+
+	/**
+	 * If the documents are deep equal,
+	 * we have no conflict.
+	 * On your custom conflict handler you might only
+	 * check some properties, like the updatedAt time,
+	 * for better performance, because deepEqual is expensive.
+	 */
+	if (deepEqual(newDocumentState, realMasterState)) {
+		return Promise.resolve({
+			isEqual: true,
+		})
+	}
+
+	/**
+	 * The default conflict handler will always
+	 * drop the fork state and use the master state instead.
+	 */
+	return Promise.resolve({
+		isEqual: false,
+		documentData: i.realMasterState,
+	})
 }

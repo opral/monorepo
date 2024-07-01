@@ -11,6 +11,8 @@ import { openProject } from "./storage/db-messagebundle.js"
 import { LintReport } from "../../dist/v2/index.js"
 import { MessageBundleListSummary } from "./messageBundleListSummary.js"
 import { LanguageTag } from "@inlang/language-tag"
+import { RxDocument, deepEqual } from "rxdb"
+import { Subject } from "rxjs"
 
 export const MessageBundleComponent = createComponent({
 	tagName: "inlang-message-bundle",
@@ -22,12 +24,95 @@ export const MessageBundleComponent = createComponent({
 	},
 })
 
+type MessageBundleViewProps = {
+	bundle: RxDocument<MessageBundle>
+	// reports: Subject<LintReport[]>
+	projectSettings: ProjectSettings2
+	project: Awaited<ReturnType<typeof openProject>>
+	filteredLocales: LanguageTag[]
+}
+
+function MessageBundleView({
+	bundle,
+	// reports,
+	projectSettings,
+	project,
+	filteredLocales,
+}: MessageBundleViewProps) {
+	const [currentBundle, setBundle] = useState(bundle)
+	const [lintReports, setLintReports] = useState([] as LintReport[])
+
+	useEffect(() => {
+		// Assume bundle$ is an RxJS Subject or Observable
+
+		const subscription = bundle.$.subscribe((updatedBundle) => {
+			console.log("updateing Bundle from subscrube")
+			// Handle the bundle update
+			setBundle(updatedBundle)
+		})
+
+		return () => {
+			// Clean up the subscription when the component unmounts or when bundle changes
+			subscription.unsubscribe()
+		}
+	}, [bundle])
+
+	useEffect(() => {
+		const sub = project.inlangProject.lintReports$.subscribe({
+			next: (reports) => {
+				setLintReports(reports.filter((report) => report.messageBundleId === bundle.id))
+			},
+		})
+
+		return () => {
+			sub.unsubscribe()
+		}
+	}, [])
+
+	const onBundleChange = (messageBundle: { detail: { argument: MessageBundle } }) => {
+		// eslint-disable-next-line no-console
+		project.inlangProject.messageBundleCollection?.upsert(messageBundle.detail.argument)
+	}
+
+	return (
+		<MessageBundleComponent
+			key={bundle.id}
+			messageBundle={(currentBundle as any).toMutableJSON()}
+			settings={projectSettings}
+			lintReports={lintReports}
+			changeMessageBundle={onBundleChange as any}
+			filteredLocales={filteredLocales.length > 0 ? filteredLocales : undefined}
+			fixLint={(e: any) => {
+				const { fix, lintReport } = e.detail.argument as {
+					fix: string
+					lintReport: LintReport
+				}
+
+				console.log("fixing", fix, lintReport)
+				project.inlangProject.fix(lintReport, { title: fix })
+			}}
+		/>
+	)
+}
+
+// Custom comparison function to compare the logical contents of the bundle
+const areEqual = (prevProps: MessageBundleViewProps, nextProps: MessageBundleViewProps) => {
+	console.log("check")
+	// Assuming bundle has an id property to identify the logical record
+	return (
+		prevProps.bundle.id === nextProps.bundle.id &&
+		deepEqual(prevProps.filteredLocales, nextProps.filteredLocales)
+	)
+}
+
+const MessageBundleViewMemoed = React.memo(MessageBundleView, areEqual)
+
 type MessageBundleListProps = {
 	project: Awaited<ReturnType<typeof openProject>>
 }
 
 export function MessageBundleList({ project }: MessageBundleListProps) {
-	const [bundles, setBundles] = useState([] as MessageBundle[])
+	const [bundles, setBundles] = useState([] as RxDocument<MessageBundle>[])
 	const [lintReports, setLintReports] = useState([] as LintReport[])
 	const [projectSettings, setProjectSettings] = useState<ProjectSettings2 | undefined>(undefined)
 	const [messageBundleCollection, setMessageBundleCollection] = useState<any>()
@@ -82,7 +167,7 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 			})
 			//.sort({ updatedAt: "desc" })
 			.$.subscribe((bundles) => {
-				// query?.unsubscribe()
+				query?.unsubscribe()
 				setBundles(bundles)
 			})
 
@@ -90,18 +175,6 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 			query?.unsubscribe()
 		}
 	}, [textSearch, activeLocales])
-
-	useEffect(() => {
-		const sub = project.inlangProject.lintReports$.subscribe({
-			next: (reports) => {
-				setLintReports(reports)
-			},
-		})
-
-		return () => {
-			sub.unsubscribe()
-		}
-	}, [])
 
 	useEffect(() => {
 		let inlangProject: InlangProject2 | undefined = undefined
@@ -118,11 +191,6 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 			// unsubscribe inlangProject?.settings()
 		}
 	}, [])
-
-	const onBundleChange = (messageBundle: { detail: { argument: MessageBundle } }) => {
-		// eslint-disable-next-line no-console
-		messageBundleCollection?.upsert(messageBundle.detail.argument)
-	}
 
 	const listRef = useRef<List>(null)
 	const itemSizeMap = useRef<Record<number, number>>({})
@@ -158,22 +226,12 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 		return (
 			<div style={style}>
 				<div ref={measureRef}>
-					<MessageBundleComponent
+					<MessageBundleViewMemoed
 						key={bundle.id}
-						messageBundle={(bundle as any).toMutableJSON()}
-						settings={projectSettings}
-						lintReports={lintReports.filter((report) => report.messageBundleId === bundle.id)}
-						changeMessageBundle={onBundleChange as any}
-						filteredLocales={activeLocales.length > 0 ? activeLocales : undefined}
-						fixLint={(e: any) => {
-							const { fix, lintReport } = e.detail.argument as {
-								fix: string
-								lintReport: LintReport
-							}
-
-							console.log("fixing", fix, lintReport)
-							project.inlangProject.fix(lintReport, { title: fix })
-						}}
+						bundle={bundle}
+						projectSettings={projectSettings!}
+						filteredLocales={activeLocales}
+						project={project}
 					/>
 				</div>
 			</div>

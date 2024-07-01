@@ -247,13 +247,13 @@ export default class InlangVariant extends LitElement {
 	private _isDelaying: boolean = false
 
 	_delayedSave = () => {
-		if (this._isDelaying) return
+		// if (this._isDelaying) return
 
-		this._isDelaying = true
-		setTimeout(() => {
-			this._save()
-			this._isDelaying = false
-		}, 1000)
+		// this._isDelaying = true
+		// setTimeout(() => {
+		this._save()
+		// 	this._isDelaying = false
+		// }, 1000)
 	}
 
 	_updateMatch = (matchIndex: number, value: string) => {
