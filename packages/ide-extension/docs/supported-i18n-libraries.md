@@ -9,6 +9,7 @@ Here you can find a list of supported i18n libraries and their corresponding plu
 | [Paraglide JS](/m/gerre34r/library-inlang-paraglideJs) | [inlang message format](/m/reootnfj/plugin-inlang-messageFormat) + [m function matcher](/m/632iow21/plugin-inlang-mFunctionMatcher) |
 | i18next | [i18next](/m/3i8bor92/plugin-inlang-i18next) |
 | next-intl | [next-intl](/m/193hsyds/plugin-inlang-nextIntl) |
+| sap-ui5 | [JSON](/m/ig84ng0o/plugin-inlang-json) + [sap-ui5 matcher](/m/wrh36dfb/plugin-inlang-sapUI5) |
 | vue-i18n | [JSON](/m/ig84ng0o/plugin-inlang-json) + [t function matcher](/m/698iow33/plugin-inlang-tFunctionMatcher) |
 | libraries with regular JSON files | [JSON](/m/ig84ng0o/plugin-inlang-json) + [t function matcher](/m/698iow33/plugin-inlang-tFunctionMatcher) |
 
