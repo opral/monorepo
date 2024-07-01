@@ -2,8 +2,10 @@ import { html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
 //import { baseStyling } from "../../../styling/base.js"
 import "./default-array-input.js"
+import "./lint-config-array-input.js"
 import "./languageTags-input.js"
 import "./reference-pattern-input.js"
+import type { InstalledLintRule, InstalledPlugin } from "@inlang/sdk/v2"
 
 @customElement("array-input")
 export class ArrayInput extends LitElement {
@@ -14,6 +16,9 @@ export class ArrayInput extends LitElement {
 
 	@property()
 	moduleId?: string
+
+	@property()
+	modules?: Array<InstalledLintRule | InstalledPlugin>
 
 	@property()
 	value: Array<string> = []
@@ -60,22 +65,17 @@ export class ArrayInput extends LitElement {
 				></reference-pattern-input>
 			`
 		} else if (this.property === "lintConfig") {
-			// TODO: come up with custom lint config component
 			return html`
-				<default-array-input
+				<lint-config-array-input
 					exportparts="property, property-title, property-paragraph"
 					.property=${this.property}
 					.moduleId=${this.moduleId}
-					.value=${this.value.map((item) => JSON.stringify(item))}
+					.modules=${this.modules}
+					.value=${this.value}
 					.schema=${this.schema}
-					.handleInlangProjectChange=${(value: string[], property: string, moduleId: string) =>
-						this.handleInlangProjectChange(
-							value.map((item) => JSON.parse(item)),
-							property,
-							moduleId
-						)}
+					.handleInlangProjectChange=${this.handleInlangProjectChange}
 					.required=${this.required}
-				></default-array-input>
+				></lint-config-array-input>
 			`
 		} else {
 			return html`
