@@ -18,17 +18,6 @@ import missingSelectorLintRule from "../dev-modules/missing-selector-lint-rule.j
 import missingCatchallLintRule from "../dev-modules/missingCatchall.js"
 const debug = _debug("sdk-v2:lint-report-worker")
 
-const lintConfigs: LintConfig[] = [
-	{
-		id: "1234",
-		ruleId: "messageBundleLintRule.inlang.emptyPattern",
-		messageId: undefined,
-		bundleId: undefined,
-		variantId: undefined,
-		level: "error",
-	},
-]
-
 export async function createLinter(
 	projectPath: string,
 	settings: ProjectSettings2,
@@ -91,7 +80,7 @@ export async function createLinter(
 						settings,
 						report: (report) => {
 							const reportWithRule = { ...report, ruleId: lintRule.id }
-							const fullReport = populateLevel(reportWithRule, lintConfigs)
+							const fullReport = populateLevel(reportWithRule, settings.lintConfig)
 							reports.push(fullReport)
 						},
 					})

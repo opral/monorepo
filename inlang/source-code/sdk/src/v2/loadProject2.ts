@@ -11,14 +11,23 @@ import {
 	MessageBundle,
 	ProjectSettings2,
 	type Fix,
+	type InstalledLintRule,
 	type LintReport,
 	type Message,
 } from "./types/index.js"
 import { createDebugImport } from "./import-utils.js"
 
-import { createRxDatabase, type RxCollection } from "rxdb"
+import {
+	createRxDatabase,
+	deepEqual,
+	stripAttachmentsDataFromDocument,
+	type RxCollection,
+	type RxConflictHandler,
+	type RxConflictHandlerInput,
+	type RxConflictHandlerOutput,
+} from "rxdb"
 import { getRxStorageMemory } from "rxdb/plugins/storage-memory"
-import { BehaviorSubject, from, switchMap, tap } from "rxjs"
+import { BehaviorSubject, combineLatest, from, map, switchMap, tap } from "rxjs"
 import { resolveModules } from "./resolveModules2.js"
 import { createLintWorker } from "./lint/host.js"
 import {
@@ -30,6 +39,9 @@ import createSlotStorageWriter from "../persistence/slotfiles/createSlotWriter.j
 import lintRule from "./dev-modules/lint-rule.js"
 import { importSequence } from "./import-utils.js"
 import { createTestWorker } from "./rpc-fs/testHost.js"
+import makeOpralUppercase from "./dev-modules/opral-uppercase-lint-rule.js"
+import missingSelectorLintRule from "./dev-modules/missing-selector-lint-rule.js"
+import missingCatchallLintRule from "./dev-modules/missingCatchall.js"
 
 type ProjectState = "initializing" | "resolvingModules" | "loaded"
 
@@ -92,6 +104,9 @@ export async function loadProject(args: {
 	const _import = importSequence(
 		createDebugImport({
 			"sdk-dev:lint-rule.js": lintRule,
+			"sdk-dev:opral-uppercase-lint.js": makeOpralUppercase,
+			"sdk-dev:missing-selector-lint-rule.js": missingSelectorLintRule,
+			"sdk-dev:missing-catchall-variant": missingCatchallLintRule,
 		}),
 		createImport(projectPath, nodeishFs)
 	)
@@ -105,6 +120,35 @@ export async function loadProject(args: {
 		}),
 		tap(() => lifecycle$.next("loaded"))
 	)
+
+	const installedLintRules$ = new BehaviorSubject([] as InstalledLintRule[])
+
+	combineLatest([modules$, settings$])
+		.pipe(
+			switchMap(([modules, settings]) => {
+				lifecycle$.next("resolvingModules")
+				// TODO SDK2 handle module load errors
+				const rules = modules.messageBundleLintRules.map(
+					(rule) =>
+						({
+							id: rule.id,
+							displayName: rule.displayName,
+							description: rule.description,
+							module:
+								modules.meta.find((m) => m.id.includes(rule.id))?.module ??
+								"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
+							// default to warning, see https://github.com/opral/monorepo/issues/1254
+							level: "warning", // TODO SDK2 settings.messageLintRuleLevels?.[rule.id] ?? "warning",
+							settingsSchema: rule.settingsSchema,
+						} satisfies InstalledLintRule)
+				)
+				return from([rules])
+			})
+		)
+		.subscribe({
+			next: (rules) => installedLintRules$.next(rules),
+			error: (err) => console.error(err),
+		})
 
 	let abortController: AbortController | undefined
 
@@ -155,6 +199,7 @@ export async function loadProject(args: {
 		messageBundles: {
 			schema: MessageBundle as any as typeof MessageBundle &
 				Readonly<{ version: number; primaryKey: string; additionalProperties: false | undefined }>,
+			conflictHandler: defaultConflictHandler,
 		},
 	})
 
@@ -174,6 +219,8 @@ export async function loadProject(args: {
 		watch: true,
 	})
 
+	let lintsRunning = false
+	let lintsPending = false
 	const lintReports$ = new BehaviorSubject<LintReport[]>([])
 	const adapter = createMessageBundleSlotAdapter(
 		bundleStorage,
@@ -181,8 +228,23 @@ export async function loadProject(args: {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		async (source, bundle) => {
 			if (source === "adapter") {
-				const lintresults = await linter.lint(projectSettings)
-				lintReports$.next(lintresults)
+				if (lintsRunning) {
+					lintsPending = true
+					return
+				}
+				lintsRunning = true
+
+				// eslint-disable-next-line no-constant-condition
+				while (true) {
+					lintsPending = false
+					const lintresults = await linter.lint(projectSettings$.value)
+
+					lintReports$.next(lintresults)
+					if (!lintsPending) {
+						break
+					}
+				}
+				lintsRunning = false
 			}
 		}
 	)
@@ -201,7 +263,7 @@ export async function loadProject(args: {
 		setSettings: setSettings,
 		messageBundleCollection: database.collections.messageBundles,
 		installed: {
-			lintRules: [],
+			lintRules: installedLintRules$,
 			plugins: [],
 		},
 		lintReports$,
@@ -214,4 +276,35 @@ export async function loadProject(args: {
 			await database.collections.messageBundles.upsert(fixed)
 		},
 	}
+}
+
+const defaultConflictHandler: RxConflictHandler<any> = function (
+	i: RxConflictHandlerInput<any>,
+	_context: string
+): Promise<RxConflictHandlerOutput<any>> {
+	console.log("defaultConflictHandler")
+	const newDocumentState = stripAttachmentsDataFromDocument(i.newDocumentState)
+	const realMasterState = stripAttachmentsDataFromDocument(i.realMasterState)
+
+	/**
+	 * If the documents are deep equal,
+	 * we have no conflict.
+	 * On your custom conflict handler you might only
+	 * check some properties, like the updatedAt time,
+	 * for better performance, because deepEqual is expensive.
+	 */
+	if (deepEqual(newDocumentState, realMasterState)) {
+		return Promise.resolve({
+			isEqual: true,
+		})
+	}
+
+	/**
+	 * The default conflict handler will always
+	 * drop the fork state and use the master state instead.
+	 */
+	return Promise.resolve({
+		isEqual: false,
+		documentData: i.realMasterState,
+	})
 }
