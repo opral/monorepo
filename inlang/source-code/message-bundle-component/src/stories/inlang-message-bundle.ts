@@ -51,9 +51,6 @@ export default class InlangMessageBundle extends LitElement {
 	settings: ProjectSettings2 | undefined
 
 	@property({ type: Array })
-	lintReports: LintReport[] | undefined
-
-	@property({ type: Array })
 	filteredLocales: LanguageTag[] | undefined
 
 	dispatchOnChangeMessageBundle(messageBundle: MessageBundle) {
@@ -258,9 +255,9 @@ export default class InlangMessageBundle extends LitElement {
 					return this._renderMessage(
 						locale,
 						message,
-						this.lintReports?.filter(
+						this.messageBundle?.lintReports?.filter(
 							(report) => report.locale === locale || report.messageId === message?.id
-						)
+						) ?? []
 					)
 				})}
 			</div>
@@ -386,11 +383,13 @@ export default class InlangMessageBundle extends LitElement {
 												>Sort</sl-button
 										  >`
 										: ``}
-									${lintReports &&
-									lintReports.length > 0 &&
-									lintReports.some((report) => !report.variantId)
+									${this.messageBundle?.lintReports &&
+									this.messageBundle?.lintReports.length > 0 &&
+									this.messageBundle?.lintReports.some((report) => !report.variantId)
 										? html`<inlang-lint-report-tip
-												.lintReports=${lintReports.filter((report) => !report.variantId)}
+												.lintReports=${this.messageBundle?.lintReports.filter(
+													(report) => !report.variantId
+												) ?? []}
 												.fixLint=${this._fixLint}
 										  ></inlang-lint-report-tip>`
 										: ``}

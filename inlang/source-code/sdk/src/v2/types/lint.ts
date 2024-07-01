@@ -98,7 +98,7 @@ export type LintReport<Fixes extends LintFix[] = LintFix[]> = {
 	messageBundleId: string
 	messageId: string | undefined
 	variantId: string | undefined
-	locale: LanguageTag | undefined
+	// locale: LanguageTag | undefined
 
 	level: MessageLintLevel
 	body: Translatable<string>

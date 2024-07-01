@@ -40,7 +40,6 @@ function MessageBundleView({
 	filteredLocales,
 }: MessageBundleViewProps) {
 	const [currentBundle, setBundle] = useState(bundle)
-	const [lintReports, setLintReports] = useState([] as LintReport[])
 
 	useEffect(() => {
 		// Assume bundle$ is an RxJS Subject or Observable
@@ -57,17 +56,6 @@ function MessageBundleView({
 		}
 	}, [bundle])
 
-	useEffect(() => {
-		const sub = project.inlangProject.lintReports$.subscribe({
-			next: (reports) => {
-				setLintReports(reports.filter((report) => report.messageBundleId === bundle.id))
-			},
-		})
-
-		return () => {
-			sub.unsubscribe()
-		}
-	}, [])
 
 	const onBundleChange = (messageBundle: { detail: { argument: MessageBundle } }) => {
 		// eslint-disable-next-line no-console
@@ -79,7 +67,6 @@ function MessageBundleView({
 			key={bundle.id}
 			messageBundle={(currentBundle as any).toMutableJSON()}
 			settings={projectSettings}
-			lintReports={lintReports}
 			changeMessageBundle={onBundleChange as any}
 			filteredLocales={filteredLocales.length > 0 ? filteredLocales : undefined}
 			fixLint={(e: any) => {

@@ -3,7 +3,7 @@ import type { LintReport } from "../../types/lint.js"
 export const createMockBundleLintReport = (props: {
 	ruleId?: LintReport["ruleId"]
 	messageBundleId?: string
-	locale?: LintReport["locale"]
+	// locale?: LintReport["locale"]
 	level?: LintReport["level"]
 	body?: string
 }): LintReport => {
@@ -13,7 +13,7 @@ export const createMockBundleLintReport = (props: {
 		messageId: undefined,
 		variantId: undefined,
 		fixes: [],
-		locale: props.locale || "en",
+		// locale: props.locale || "en",
 		level: props.level || "error",
 		body: props.body || "mock lint report body",
 	}
@@ -23,7 +23,7 @@ export const createMockMessageLintReport = (props: {
 	ruleId?: LintReport["ruleId"]
 	messageBundleId?: string
 	messageId?: string
-	locale?: LintReport["locale"]
+	// locale?: LintReport["locale"]
 	level?: LintReport["level"]
 	body?: string
 }): LintReport => {
@@ -38,7 +38,7 @@ export const createMockMessageLintReport = (props: {
 				title: "Ignore",
 			},
 		],
-		locale: props.locale || "en",
+		// locale: props.locale || "en",
 		level: props.level || "error",
 		body: props.body || "mock lint report body",
 	}
@@ -49,7 +49,7 @@ export const createMockVariantLintReport = (props: {
 	messageBundleId?: string
 	messageId?: string
 	variantId?: string
-	locale?: LintReport["locale"]
+	// locale?: LintReport["locale"]
 	level?: LintReport["level"]
 	body?: string
 }): LintReport => {
@@ -68,7 +68,7 @@ export const createMockVariantLintReport = (props: {
 				title: "Ignore",
 			},
 		],
-		locale: props.locale || "en",
+		// locale: props.locale || "en",
 		level: props.level || "error",
 		body: props.body || "mock lint report body",
 	}
