@@ -105,7 +105,6 @@ export type Fix<Report extends LintReport> = Report["fixes"][number]
  * 	}>
  * ```
  */
-
 export type MessageBundleLintRule<
 	ExternalSettings extends Record<keyof ExternalProjectSettings, JSONObject> | unknown = unknown
 > = Omit<Static<typeof MessageBundleLintRule>, "settingsSchema"> & {
@@ -114,14 +113,21 @@ export type MessageBundleLintRule<
 	run: (args: {
 		messageBundle: MessageBundle
 		settings: ProjectSettings2 & ExternalSettings
-		report: (args: Omit<LintReport, "ruleId" | "level">) => void
+		report: (
+			args:
+				| (Omit<LintReport, "ruleId" | "level" | "messageBundleId" | "messageId" | "variantId"> & {
+						messageBundleId: string
+				  })
+				| { messageId: string }
+				| { variantId: string }
+		) => void
 	}) => MaybePromise<void>
 
 	fix?: <Report extends LintReport>(args: {
 		report: Report
 		fix: Fix<Report>
 		settings: ProjectSettings2 & ExternalSettings
-		messageBundle: MessageBundle
+		node: MessageBundle
 	}) => MaybePromise<MessageBundle>
 }
 export const MessageBundleLintRule = Type.Object({
