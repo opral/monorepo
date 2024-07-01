@@ -1,4 +1,4 @@
-import { getFs } from "./client.js"
+import { getFs } from "../client.js"
 
 const fs = getFs()
 

@@ -38,7 +38,7 @@ import createSlotStorageWriter from "../persistence/slotfiles/createSlotWriter.j
 
 import lintRule from "./dev-modules/lint-rule.js"
 import { importSequence } from "./import-utils.js"
-import { createTestWorker } from "./rpc-fs/testHost.js"
+import { createTestWorker } from "./rpc-fs/test/host.js"
 import makeOpralUppercase from "./dev-modules/opral-uppercase-lint-rule.js"
 import missingSelectorLintRule from "./dev-modules/missing-selector-lint-rule.js"
 import missingCatchallLintRule from "./dev-modules/missingCatchall.js"

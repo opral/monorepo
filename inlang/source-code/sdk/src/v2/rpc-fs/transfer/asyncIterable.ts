@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type * as Comlink from "comlink"
 
 const MESSAGE_TYPES = {
@@ -17,6 +16,17 @@ type Result<T, E> =
 			error: E
 	  }
 
+function safe<AsyncFn extends (...args: any[]) => Promise<any>>(afn: AsyncFn) {
+	return async (...args: Parameters<AsyncFn>): Promise<Result<ReturnType<AsyncFn>, unknown>> => {
+		try {
+			const iterable = await afn(...args)
+			return { ok: true, data: iterable }
+		} catch (error) {
+			return { ok: false, error }
+		}
+	}
+}
+
 async function next(iterator: AsyncIterator<any>): Promise<Result<IteratorResult<any>, unknown>> {
 	try {
 		const data = await iterator.next()
@@ -34,19 +44,23 @@ const listen = async (iterator: AsyncIterator<any>, port: MessagePort) => {
 			data: { type, value },
 		} = ev
 		switch (type) {
+			case MESSAGE_TYPES.RETURN: {
+				if (!iterator.return) throw new Error("Iterator does not support return")
+				const returnResult = await safe(iterator.return)(value)
+				port.postMessage(returnResult)
+				break
+			}
+
 			case MESSAGE_TYPES.NEXT: {
 				const nextResult = await next(iterator)
 				port.postMessage(nextResult)
 				break
 			}
-			case MESSAGE_TYPES.RETURN: {
-				const returnValue = await iterator.return(value)
-				port.postMessage({ ok: true, value: returnValue })
-				break
-			}
+
 			case MESSAGE_TYPES.THROW: {
-				const throwValue = await iterator.throw(value)
-				port.postMessage({ ok: true, value: throwValue })
+				if (!iterator.throw) throw new Error("Iterator does not support throw")
+				const throwResult = await safe(iterator.throw)(value)
+				port.postMessage(throwResult)
 				break
 			}
 			default:
@@ -59,11 +73,11 @@ type AvailableIteratorFunctions = { throw: boolean; return: boolean }
 type Serialized = [MessagePort, AvailableIteratorFunctions]
 
 const asyncIterableTransferHandler: Comlink.TransferHandler<AsyncIterable<any>, Serialized> = {
-	canHandle: (obj): obj is AsyncIterable<any> => {
-		return obj && obj[Symbol.asyncIterator]
+	canHandle: (obj: unknown): obj is AsyncIterable<any> => {
+		return !!obj && typeof obj === "object" && Symbol.asyncIterator in obj
 	},
 	serialize: (iterable) => {
-		const { port1, port2 } = new MessageChannel("")
+		const { port1, port2 } = new MessageChannel()
 		const iterator = iterable[Symbol.asyncIterator]()
 
 		const definedOptionalIteratorFns = {
@@ -113,9 +127,11 @@ const asyncIterableTransferHandler: Comlink.TransferHandler<AsyncIterable<any>, 
 			}
 		}
 
-		// Make it iterable so it can be used in for-await-of statement
-		iterator[Symbol.asyncIterator] = () => iterator
-		return iterator
+		const iterable = {
+			[Symbol.asyncIterator]: () => iterator,
+		}
+
+		return iterable
 	},
 }
 
