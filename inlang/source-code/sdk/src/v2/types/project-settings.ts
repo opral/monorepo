@@ -59,7 +59,11 @@ const InternalProjectSettings = Type.Object({
 			],
 		}
 	),
-	lintConfig: Type.Array(LintConfig),
+	lintConfig: Type.Array(LintConfig, {
+		title: "Levels for lint rules",
+		description:
+			"Adjust the lint rule levels in your project to choose between 'warning', 'error' and 'off'. If set to 'error', you can configure a CI process to prevent merging with existing reports. (When you want to configure your lint rules visit inlang.com/c/lint-rules)",
+	}),
 	experimental: Type.Optional(
 		Type.Record(Type.String(), Type.Literal(true), {
 			title: "Experimental settings",

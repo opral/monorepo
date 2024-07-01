@@ -51,6 +51,7 @@ export class GeneralInput extends LitElement {
 						exportparts="property, property-title, property-paragraph, button"
 						.property=${this.property}
 						.moduleId=${this.moduleId}
+						.modules=${this.modules}
 						.value=${this.value}
 						.schema=${this.schema}
 						.handleInlangProjectChange=${this.handleInlangProjectChange}
