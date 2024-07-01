@@ -422,6 +422,13 @@ export default class InlangVariant extends LitElement {
 			></sl-input>
 			<div class="actions">
 				<div class="dynamic-actions hide-dynamic-actions">
+					${this._getIsVariantEmpty() && this._isVariantMachineTranslatable()
+						? html`<sl-button
+								size="small"
+								@click=${() => this.machineTranslate(this.message?.id, this.variant?.id)}
+								>Machine Translate</sl-button
+						  >`
+						: ``}
 					${(this.message?.selectors.length === 0 && this.message?.variants.length <= 1) ||
 					!this.message?.selectors
 						? html`<inlang-selector-configurator
@@ -485,13 +492,7 @@ export default class InlangVariant extends LitElement {
 						  ></sl-tooltip>`
 						: ``}
 				</div>
-				${this._getIsVariantEmpty() && this._isVariantMachineTranslatable()
-					? html`<sl-button
-							size="small"
-							@click=${() => this.machineTranslate(this.message?.id, this.variant?.id)}
-							>Machine Translate</sl-button
-					  >`
-					: ``}
+
 				${this._getLintReports() && this._getLintReports()!.length > 0
 					? html`<inlang-lint-report-tip
 							.lintReports=${this._getLintReports()}
