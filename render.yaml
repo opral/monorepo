@@ -11,15 +11,20 @@ services:
     region: frankfurt
     plan: standard
     buildCommand: pnpm install && pnpm run build --projects=@inlang/website
-    startCommand: pnpm run production
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm production # configured in root package.json
     autoDeploy: true
     envVars:
+      - key: PORT
+        value: 3000 # @inlang/server
       - fromGroup: production
     buildFilter:
       paths:
         - inlang/source-code/website/**
         - inlang/source-code/markdown/**
         - inlang/source-code/marketplace-registry/**
+        - '**/*.md'
+      ignoredPaths:
+        - '**/CHANGELOG.md'
     domains:
       - inlang.com
 
@@ -32,9 +37,11 @@ services:
     # This disables branch previews for the git-proxy
     branch: main
     buildCommand: pnpm install && pnpm run build
-    startCommand: pnpm --filter @lix-js/server production
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @lix-js/server production
     autoDeploy: true
     envVars:
+      - key: PORT
+        value: 3001
       - fromGroup: production
     buildFilter:
       paths:
@@ -49,13 +56,13 @@ services:
     plan: standard
     branch: main
     buildCommand: pnpm install && pnpm run build --projects=@inlang/badge
-    startCommand: pnpm --filter @inlang/badge run production
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @inlang/badge run production
     autoDeploy: true
     envVars:
       - fromGroup: production
     buildFilter:
       paths:
-        - inlang/source-code/badge/**
+        - inlang/source-code/badge/CHANGELOG.md
     domains:
       - badge.inlang.com
 
@@ -65,14 +72,16 @@ services:
     region: frankfurt
     plan: standard
     pullRequestPreviewsEnabled: false
-    buildCommand: pnpm install && pnpm run build # TODO: --projects=@inlang/editor
-    startCommand: pnpm --filter @inlang/editor production
+    buildCommand: pnpm install && pnpm run --filter @inlang/editor... build
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @inlang/editor production
     autoDeploy: true
     envVars:
       - fromGroup: production
+      - key: PORT
+        value: 4003
     buildFilter:
       paths:
-        - inlang/source-code/editor/**
+        - inlang/source-code/editor/CHANGELOG.md
     domains:
       - fink.inlang.com
 
@@ -83,13 +92,15 @@ services:
     plan: standard
     pullRequestPreviewsEnabled: false
     buildCommand: pnpm install && pnpm run build
-    startCommand: pnpm --filter @inlang/manage production
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @inlang/manage production
     autoDeploy: true
     envVars:
       - fromGroup: production
+      - key: PORT
+        value: 4004
     buildFilter:
       paths:
-        - inlang/source-code/manage/**
+        - inlang/source-code/manage/CHANGELOG.md
     domains:
       - manage.inlang.com
 
@@ -103,3 +114,41 @@ services:
         - opral/source-code/website/**
     domains:
       - opral.com
+
+  - name: telemetry-proxy
+    type: web
+    runtime: node
+    region: frankfurt
+    plan: starter
+    branch: main
+    pullRequestPreviewsEnabled: false
+    buildCommand: pnpm install && pnpm run --filter @inlang/telemetry-proxy build
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm run --filter @inlang/telemetry-proxy production
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 4005
+    buildFilter:
+      paths:
+        - inlang/source-code/telemetry-proxy/**
+    domains:
+      - tm.inlang.com
+
+  - name: telemetry-proxy-parrot
+    type: web
+    runtime: node
+    region: frankfurt
+    plan: starter
+    branch: main
+    pullRequestPreviewsEnabled: false
+    buildCommand: pnpm install && pnpm run --filter @inlang/telemetry-proxy-parrot build
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm run --filter @inlang/telemetry-proxy-parrot production
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 4006
+    buildFilter:
+      paths:
+        - inlang/source-code/telemetry-proxy-parrot/**
+    domains:
+      - telemetry.inlang.com
