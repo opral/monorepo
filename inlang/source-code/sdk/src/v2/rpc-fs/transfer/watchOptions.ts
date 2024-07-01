@@ -56,13 +56,18 @@ const watchOptionsTransferHandler: Comlink.TransferHandler<WatchOptions, Seraili
 
 export { watchOptionsTransferHandler }
 
+/**
+ * Checks that the object is watchOptions **and** it has a signal
+ * @param obj
+ * @returns
+ */
 function isWatchOptions(obj: unknown): obj is WatchOptions {
 	if (!obj) return false
 	if (typeof obj !== "object") return false
 
 	const allowedKeys = ["signal", "recursive"]
 
-	if ("signal" in obj && !(obj["signal"] instanceof AbortSignal)) return false
+	if (!("signal" in obj) || !(obj["signal"] instanceof AbortSignal)) return false
 	if ("recursive" in obj && typeof obj["recursive"] !== "boolean") return false
 
 	for (const key in obj) {
