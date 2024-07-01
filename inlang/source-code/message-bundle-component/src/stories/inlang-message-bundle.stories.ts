@@ -16,6 +16,25 @@ const meta: Meta = {
 	title: "Public/inlang-message-bundle",
 }
 
+const mockInstalledLintRules = [
+	{
+		id: "messageBundleLintRule.inlang.missingMessage",
+		displayName: "Missing Message",
+		description: "Reports when a message is missing in a message bundle",
+		module:
+			"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js",
+		level: "error",
+	},
+	{
+		id: "messageBundleLintRule.inlang.missingReference",
+		displayName: "Missing Reference",
+		description: "Reports when a reference message is missing in a message bundle",
+		module:
+			"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js",
+		level: "warning",
+	},
+]
+
 const mockMessageLintReports: LintReport[] = [
 	createMockBundleLintReport({
 		ruleId: "messageBundleLintRule.inlang.missingMessage",
@@ -170,5 +189,19 @@ export const WithSlots: StoryObj = {
 			>
 				Edit alias
 			</div>
+		</inlang-message-bundle> `,
+}
+
+export const WithInstalledLintRules: StoryObj = {
+	render: () =>
+		html`<inlang-message-bundle
+			.messageBundle=${pluralBundle}
+			.settings=${mockSettings}
+			.lintReports=${[...mockMessageLintReports, ...mockVariantLintReports]}
+			.installedLintRules=${mockInstalledLintRules}
+			@change-message-bundle=${(data: any) =>
+				console.info("changeMessageBundle", data.detail.argument)}
+			@fix-lint=${(data: any) => console.info("fixLint", data.detail.argument)}
+		>
 		</inlang-message-bundle> `,
 }

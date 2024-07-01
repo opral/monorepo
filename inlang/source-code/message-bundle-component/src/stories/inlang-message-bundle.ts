@@ -31,6 +31,7 @@ import SlMenuItem from "@shoelace-style/shoelace/dist/components/menu-item/menu-
 import { getInputs } from "../helper/crud/input/get.js"
 import { createInput } from "../helper/crud/input/create.js"
 import sortAllVariants from "../helper/crud/variant/sortAll.js"
+import type { InstalledMessageLintRule } from "@inlang/sdk"
 
 // in case an app defines it's own set of shoelace components, prevent double registering
 if (!customElements.get("sl-tag")) customElements.define("sl-tag", SlTag)
@@ -62,6 +63,9 @@ export default class InlangMessageBundle extends LitElement {
 
 	@property({ type: Array })
 	lintReports: LintReport[] | undefined
+
+	@property({ type: Array })
+	installedLintRules: InstalledMessageLintRule[] | undefined
 
 	dispatchOnChangeMessageBundle(messageBundle: MessageBundle) {
 		const onChangeMessageBundle = new CustomEvent("change-message-bundle", {
@@ -423,6 +427,7 @@ export default class InlangMessageBundle extends LitElement {
 									lintReports.some((report) => !report.variantId)
 										? html`<inlang-lint-report-tip
 												.lintReports=${lintReports.filter((report) => !report.variantId)}
+												.installedLintRules=${this.installedLintRules}
 												.fixLint=${this._fixLint}
 										  ></inlang-lint-report-tip>`
 										: ``}
@@ -445,6 +450,7 @@ export default class InlangMessageBundle extends LitElement {
 										.addInput=${this._addInput}
 										.locale=${locale}
 										.lintReports=${lintReports}
+										.installedLintRules=${this.installedLintRules}
 										.fixLint=${this._fixLint}
 										.machineTranslate=${this._machineTranslate}
 										.revert=${this._revert}
@@ -460,6 +466,7 @@ export default class InlangMessageBundle extends LitElement {
 									.triggerMessageBundleRefresh=${this._triggerRefresh}
 									.locale=${locale}
 									.lintReports=${lintReports}
+									.installedLintRules=${this.installedLintRules}
 									.fixLint=${this._fixLint}
 									.machineTranslate=${this._machineTranslate}
 									.revert=${this._revert}

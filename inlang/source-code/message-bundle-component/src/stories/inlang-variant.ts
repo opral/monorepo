@@ -5,6 +5,7 @@ import {
 	createVariant,
 	type LanguageTag,
 	type LintReport,
+	type InstalledLintRule,
 } from "@inlang/sdk/v2"
 import { LitElement, css, html } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
@@ -152,6 +153,9 @@ export default class InlangVariant extends LitElement {
 
 	@property()
 	lintReports: LintReport[] | undefined
+
+	@property()
+	installedLintRules: InstalledLintRule[] | undefined
 
 	@property()
 	addMessage: (newMessage: Message) => void = () => {}
@@ -496,6 +500,7 @@ export default class InlangVariant extends LitElement {
 				${this._getLintReports() && this._getLintReports()!.length > 0
 					? html`<inlang-lint-report-tip
 							.lintReports=${this._getLintReports()}
+							.installedLintRules=${this.installedLintRules}
 							.fixLint=${this.fixLint}
 					  ></inlang-lint-report-tip>`
 					: ``}
