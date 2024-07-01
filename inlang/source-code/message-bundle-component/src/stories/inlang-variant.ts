@@ -5,11 +5,14 @@ import {
 	createVariant,
 	type LanguageTag,
 	type LintReport,
+	type InstalledLintRule,
 } from "@inlang/sdk/v2"
 import { LitElement, css, html } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
 import deleteVariant from "../helper/crud/variant/delete.js"
+import patternToString from "../helper/crud/pattern/patternToString.js"
+import stringToPattern from "../helper/crud/pattern/stringToPattern.js"
 
 import "./inlang-lint-report-tip.js"
 import "./inlang-selector-configurator.js"
@@ -154,6 +157,9 @@ export default class InlangVariant extends LitElement {
 	lintReports: LintReport[] | undefined
 
 	@property()
+	installedLintRules: InstalledLintRule[] | undefined
+
+	@property()
 	addMessage: (newMessage: Message) => void = () => {}
 
 	@property()
@@ -217,28 +223,21 @@ export default class InlangVariant extends LitElement {
 			if (this.variant) {
 				upsertVariant({
 					message: this.message,
-					variant: this._pattern
-						? createVariant({
-								id: this.variant.id,
-								match: this.variant.match,
-								text: this._pattern,
-						  })
-						: createVariant({
-								id: this.variant.id,
-								match: this.variant.match,
-								text: undefined,
-						  }),
+					variant: {
+						id: this.variant.id,
+						match: this.variant.match,
+						pattern: this._pattern ? stringToPattern({ text: this._pattern }) : [],
+					},
 				})
 			} else {
 				upsertVariant({
 					message: this.message,
-					variant: this._pattern
-						? createVariant({
-								text: this._pattern,
-						  })
-						: createVariant({
-								text: undefined,
-						  }),
+					variant: {
+						...createVariant({
+							text: "",
+						}),
+						pattern: this._pattern ? stringToPattern({ text: this._pattern }) : [],
+					},
 				})
 			}
 
@@ -279,17 +278,8 @@ export default class InlangVariant extends LitElement {
 	_updateMatch = (matchIndex: number, value: string) => {
 		//TODO improve this function
 		if (this.variant && this.message) {
-			this._pattern =
-				this.variant?.pattern
-					.map((p) => {
-						if ("value" in p) {
-							return p.value
-						} else if (p.type === "expression" && p.arg.type === "variable") {
-							return p.arg.name
-						}
-						return ""
-					})
-					.join(" ") || ""
+			this._pattern = this.variant ? patternToString({ pattern: this.variant.pattern }) : ""
+
 			updateMatch({
 				variant: this.variant,
 				matchIndex: matchIndex,
@@ -323,17 +313,7 @@ export default class InlangVariant extends LitElement {
 		await this.updateComplete
 
 		//load _pattern
-		this._pattern =
-			this.variant?.pattern
-				.map((p) => {
-					if ("value" in p) {
-						return p.value
-					} else if (p.type === "expression" && p.arg.type === "variable") {
-						return p.arg.name
-					}
-					return ""
-				})
-				.join(" ") || ""
+		this._pattern = this.variant ? patternToString({ pattern: this.variant.pattern }) : ""
 
 		// override primitive colors to match the design system
 		const selectorConfigurator = this.shadowRoot?.querySelector("inlang-selector-configurator")
@@ -403,18 +383,7 @@ export default class InlangVariant extends LitElement {
 				class="pattern"
 				size="small"
 				placeholder="Enter pattern ..."
-				value=${this.variant
-					? this.variant.pattern
-							.map((p) => {
-								if ("value" in p) {
-									return p.value
-								} else if (p.type === "expression" && p.arg.type === "variable") {
-									return p.arg.name
-								}
-								return ""
-							})
-							.join(" ")
-					: ""}
+				value=${this.variant ? patternToString({ pattern: this.variant.pattern }) : ""}
 				@input=${(e: Event) => {
 					this._pattern = (e.target as HTMLInputElement).value
 					this._delayedSave()
@@ -496,6 +465,7 @@ export default class InlangVariant extends LitElement {
 				${this._getLintReports() && this._getLintReports()!.length > 0
 					? html`<inlang-lint-report-tip
 							.lintReports=${this._getLintReports()}
+							.installedLintRules=${this.installedLintRules}
 							.fixLint=${this.fixLint}
 					  ></inlang-lint-report-tip>`
 					: ``}
