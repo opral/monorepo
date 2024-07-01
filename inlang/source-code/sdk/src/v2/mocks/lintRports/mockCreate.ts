@@ -34,6 +34,7 @@ export const createMockMessageLintReport = (props: {
 		variantId: undefined,
 		fixes: [
 			{
+				key: "nope",
 				title: "Ignore",
 			},
 		],
@@ -59,9 +60,11 @@ export const createMockVariantLintReport = (props: {
 		variantId: props.variantId || "mock_variant_id",
 		fixes: [
 			{
+				key: "nope",
 				title: "Mock fix variant",
 			},
 			{
+				key: "nope",
 				title: "Ignore",
 			},
 		],
