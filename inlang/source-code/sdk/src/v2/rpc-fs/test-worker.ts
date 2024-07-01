@@ -4,7 +4,6 @@ const fs = getFs()
 
 const ac = new AbortController()
 startWatching("/test.txt", ac.signal)
-
 startEditing("/test.txt")
 
 await sleep(1500)
