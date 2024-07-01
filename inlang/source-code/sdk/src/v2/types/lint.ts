@@ -136,7 +136,7 @@ export type MessageBundleLintRule<
 	settingsSchema?: TObject
 
 	run: (args: {
-		messageBundle: MessageBundle
+		node: MessageBundle
 		settings: ProjectSettings2 & ExternalSettings
 		report: (
 			args:

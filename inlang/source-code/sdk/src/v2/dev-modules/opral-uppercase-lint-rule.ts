@@ -13,7 +13,7 @@ const makeOpralUppercase: MessageBundleLintRule = {
 	id: "messageBundleLintRule.inlangdev.makeOpralUppercase",
 	displayName: "Ensure OPRAL is uppercase",
 	description: "Warns if the OPRAL brand name is not uppercase",
-	run: ({ report, messageBundle }) => {
+	run: ({ report, node: messageBundle }) => {
 		// loop over all messages and variants in the bundle
 		for (const message of messageBundle.messages) {
 			for (const variant of message.variants) {
@@ -44,7 +44,7 @@ const makeOpralUppercase: MessageBundleLintRule = {
 			}
 		}
 	},
-	fix: async ({ report, fix, messageBundle }) => {
+	fix: async ({ report, fix, node: messageBundle }) => {
 		if (fix.title !== "Make OPRAL uppercase") return messageBundle
 
 		if (!report.variantId || !report.messageId)

@@ -5,7 +5,7 @@ const missingCatchallLintRule: MessageBundleLintRule = {
 	id: "messageBundleLintRule.inlang.missingCatchall",
 	displayName: "Missing catchall",
 	description: "Warns if a message is missing a catchall variant",
-	run: ({ report, messageBundle }) => {
+	run: ({ report, node: messageBundle }) => {
 		for (const message of messageBundle.messages) {
 			if (message.selectors.length === 0) continue
 
@@ -20,15 +20,15 @@ const missingCatchallLintRule: MessageBundleLintRule = {
 					locale: message.locale,
 					fixes: [
 						{
-							key: "yadayada",
 							title: "Add catchall variant",
+							key: "catchall",
 						},
 					],
 				})
 			}
 		}
 	},
-	fix: ({ report, messageBundle }) => {
+	fix: ({ report, node: messageBundle }) => {
 		const message = messageBundle.messages.find((msg) => msg.id === report.messageId)
 		if (!message)
 			throw new Error(`message ${report.messageId} not found on bundle ${messageBundle.id}`)

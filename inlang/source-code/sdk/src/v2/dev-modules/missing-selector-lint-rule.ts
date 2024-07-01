@@ -6,7 +6,7 @@ const missingSelectorLintRule: MessageBundleLintRule = {
 	displayName: "Missing Selector",
 	description: "Detects if a selector is not used in a language",
 
-	run: ({ report, messageBundle, settings }) => {
+	run: ({ report, node: messageBundle, settings }) => {
 		const sourceMessage = messageBundle.messages.find(
 			(message) => message.locale === settings.baseLocale
 		)
@@ -38,8 +38,6 @@ const missingSelectorLintRule: MessageBundleLintRule = {
 				messageBundleId: messageBundle.id,
 				fixes: [],
 			})
-
-			// if there are missing selectors - report them
 		}
 	},
 }
