@@ -237,8 +237,8 @@ export async function loadProject(args: {
 				while (true) {
 					lintsPending = false
 					const lintresults = await linter.lint(projectSettings$.value)
-
-					lintReports$.next(lintresults)
+					const reports = Object.values(lintresults).flatMap((r) => r.reports)
+					lintReports$.next(reports)
 					if (!lintsPending) {
 						break
 					}
