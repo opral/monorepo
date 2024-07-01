@@ -7,8 +7,8 @@ export const openSettingsViewCommand = {
 	command: "sherlock.openSettingsView",
 	title: "Sherlock: Open Settings View",
 	register: commands.registerCommand,
-	callback: async function (node: ProjectViewNode) {
-		await settingsPanel({ context: node.context })
+	callback: async function (args: { node: ProjectViewNode }) {
+		await settingsPanel({ context: args.node.context })
 
 		telemetry.capture({
 			event: "IDE-EXTENSION Settings View opened",

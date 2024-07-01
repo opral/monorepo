@@ -5,6 +5,7 @@ import type { MessageBundleLintRule } from "../types/lint.js"
 const orpalRegex = /\bOPRAL\b/gi
 
 type Fixes = {
+	key: "OPRAL"
 	title: "Make OPRAL uppercase"
 }
 
@@ -28,6 +29,7 @@ const makeOpralUppercase: MessageBundleLintRule = {
 				if (badMatches.length === 0) continue
 
 				const fix: Fixes = {
+					key: "OPRAL",
 					title: "Make OPRAL uppercase",
 				}
 
