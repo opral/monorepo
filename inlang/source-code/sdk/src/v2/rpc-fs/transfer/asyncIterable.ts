@@ -32,19 +32,19 @@ const listen = async (iterator: AsyncIterator<any>, port: MessagePort) => {
 		} = ev
 		switch (type) {
 			case MESSAGE_TYPES.NEXT: {
-				const nextResult = await safe(iterator.next)()
+				const nextResult = await safe(iterator.next.bind(iterator))()
 				port.postMessage(nextResult)
 				break
 			}
 			case MESSAGE_TYPES.RETURN: {
 				if (!iterator.return) throw new Error("Iterator does not support return")
-				const returnResult = await safe(iterator.return)(value)
+				const returnResult = await safe(iterator.return.bind(iterator))(value)
 				port.postMessage(returnResult)
 				break
 			}
 			case MESSAGE_TYPES.THROW: {
 				if (!iterator.throw) throw new Error("Iterator does not support throw")
-				const throwResult = await safe(iterator.throw)(value)
+				const throwResult = await safe(iterator.throw.bind(iterator))(value)
 				port.postMessage(throwResult)
 				break
 			}

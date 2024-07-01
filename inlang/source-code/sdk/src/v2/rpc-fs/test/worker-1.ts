@@ -7,9 +7,10 @@ startEditing("/file.txt")
 async function startEditing(path: string) {
 	const TRUE = true // shut up eslint
 	while (TRUE) {
-		await fs.writeFile(path, `${Math.random().toString(36).slice(2)}`)
+		const newContent = `${Math.random().toString(36).slice(2)}`
+		await fs.writeFile(path, `${newContent}`)
 
-		console.info("worker-1: edited file")
+		console.info("worker-1: edited file", newContent)
 
 		await sleep(500)
 	}
