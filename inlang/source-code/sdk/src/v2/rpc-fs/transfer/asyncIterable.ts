@@ -1,10 +1,6 @@
 import type * as Comlink from "comlink"
 
-const MESSAGE_TYPES = {
-	NEXT: 0,
-	RETURN: 1,
-	THROW: 2,
-}
+const MESSAGE_TYPES = { NEXT: 0, RETURN: 1, THROW: 2 }
 
 type Result<T, E> =
 	| {
@@ -27,15 +23,6 @@ function safe<AsyncFn extends (...args: any[]) => Promise<any>>(afn: AsyncFn) {
 	}
 }
 
-async function next(iterator: AsyncIterator<any>): Promise<Result<IteratorResult<any>, unknown>> {
-	try {
-		const data = await iterator.next()
-		return { ok: true, data }
-	} catch (error) {
-		return { ok: false, error }
-	}
-}
-
 type NextValueResult = Result<IteratorResult<any>, unknown>
 
 const listen = async (iterator: AsyncIterator<any>, port: MessagePort) => {
@@ -44,19 +31,17 @@ const listen = async (iterator: AsyncIterator<any>, port: MessagePort) => {
 			data: { type, value },
 		} = ev
 		switch (type) {
+			case MESSAGE_TYPES.NEXT: {
+				const nextResult = await safe(iterator.next)()
+				port.postMessage(nextResult)
+				break
+			}
 			case MESSAGE_TYPES.RETURN: {
 				if (!iterator.return) throw new Error("Iterator does not support return")
 				const returnResult = await safe(iterator.return)(value)
 				port.postMessage(returnResult)
 				break
 			}
-
-			case MESSAGE_TYPES.NEXT: {
-				const nextResult = await next(iterator)
-				port.postMessage(nextResult)
-				break
-			}
-
 			case MESSAGE_TYPES.THROW: {
 				if (!iterator.throw) throw new Error("Iterator does not support throw")
 				const throwResult = await safe(iterator.throw)(value)
@@ -81,8 +66,8 @@ const asyncIterableTransferHandler: Comlink.TransferHandler<AsyncIterable<any>, 
 		const iterator = iterable[Symbol.asyncIterator]()
 
 		const definedOptionalIteratorFns = {
-			throw: !!iterator.throw,
-			return: !!iterator.return,
+			throw: "throw" in iterator,
+			return: "return" in iterator,
 		}
 
 		listen(iterator, port1)
@@ -105,26 +90,26 @@ const asyncIterableTransferHandler: Comlink.TransferHandler<AsyncIterable<any>, 
 				if (result.ok) return result.data
 				else throw result.error
 			},
-		}
 
-		// return and throw functions are optional (https://tc39.es/ecma262/#table-async-iterator-optional),
-		// so we check they're available
-		if (availableIteratorFns.return) {
-			iterator.return = async (value) => {
-				port.postMessage({ type: MESSAGE_TYPES.RETURN, value })
-				const result = await nextPortMessage()
-				if (result.ok) return result.data
-				else throw result.error
-			}
-		}
+			// return and throw functions are optional (https://tc39.es/ecma262/#table-async-iterator-optional),
+			// so we check if we need them before adding them
+			return: availableIteratorFns.return
+				? async (value) => {
+						port.postMessage({ type: MESSAGE_TYPES.RETURN, value })
+						const result = await nextPortMessage()
+						if (result.ok) return result.data
+						else throw result.error
+				  }
+				: undefined,
 
-		if (availableIteratorFns.throw) {
-			iterator.throw = async (value) => {
-				port.postMessage({ type: MESSAGE_TYPES.THROW, value })
-				const result = await nextPortMessage()
-				if (result.ok) return result.data
-				else throw result.error
-			}
+			throw: availableIteratorFns.throw
+				? async (value) => {
+						port.postMessage({ type: MESSAGE_TYPES.THROW, value })
+						const result = await nextPortMessage()
+						if (result.ok) return result.data
+						else throw result.error
+				  }
+				: undefined,
 		}
 
 		const iterable = {
