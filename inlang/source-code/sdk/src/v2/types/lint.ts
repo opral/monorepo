@@ -12,6 +12,13 @@ import type { MessageBundle } from "./message-bundle.js"
 import { LanguageTag } from "./language-tag.js"
 import type { ExternalProjectSettings, ProjectSettings2 } from "./project-settings.js"
 
+export type LintResult = {
+	[id: MessageBundle["id"]]: {
+		hash: string
+		reports: LintReport[]
+	}
+}
+
 /**
  * ---------------- AVOIDING CIRCULAR DEPENDENCIES ----------------
  *
