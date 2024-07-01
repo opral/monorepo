@@ -48,6 +48,15 @@ export default class InlangMessageBundle extends LitElement {
 	@property({ type: Object })
 	messageBundle: MessageBundle | undefined
 
+	@state()
+	private _messageBundle: MessageBundle | undefined
+
+	override updated(changedProperties: any) {
+		if (changedProperties.has("messageBundle")) {
+			this._messageBundle = structuredClone(this.messageBundle)
+		}
+	}
+
 	@property({ type: Object })
 	settings: ProjectSettings2 | undefined
 
@@ -104,21 +113,21 @@ export default class InlangMessageBundle extends LitElement {
 	}
 
 	_triggerSave = () => {
-		if (this.messageBundle) {
-			this.dispatchOnChangeMessageBundle(this.messageBundle)
+		if (this._messageBundle) {
+			this.dispatchOnChangeMessageBundle(this._messageBundle)
 		}
 	}
 
 	_addMessage = (message: Message) => {
-		if (this.messageBundle) {
-			this.messageBundle.messages.push(message)
+		if (this._messageBundle) {
+			this._messageBundle.messages.push(message)
 			this.requestUpdate()
 		}
 	}
 
 	_addInput = (name: string) => {
-		if (this.messageBundle) {
-			createInput({ messageBundle: this.messageBundle, inputName: name })
+		if (this._messageBundle) {
+			createInput({ messageBundle: this._messageBundle, inputName: name })
 		}
 		this._triggerSave()
 		this._triggerRefresh()
@@ -167,8 +176,8 @@ export default class InlangMessageBundle extends LitElement {
 
 	private _fakeInputs = (): string[] | undefined => {
 		const _refLanguageTag = this._refLocale()
-		return _refLanguageTag && this.messageBundle
-			? getInputs({ messageBundle: this.messageBundle })
+		return _refLanguageTag && this._messageBundle
+			? getInputs({ messageBundle: this._messageBundle })
 			: undefined
 	}
 
@@ -176,13 +185,13 @@ export default class InlangMessageBundle extends LitElement {
 		return html`
 			<div class=${`header`}>
 				<div class="header-left">
-					<span># ${this.messageBundle?.id}</span>
-					${this.messageBundle?.alias
+					<span># ${this._messageBundle?.id}</span>
+					${this._messageBundle?.alias
 						? html` <div class="alias-wrapper">
-								<span class="alias">Alias: ${this.messageBundle?.alias?.default}</span>
-								${Object.keys(this.messageBundle.alias).length > 1
+								<span class="alias">Alias: ${this._messageBundle?.alias?.default}</span>
+								${Object.keys(this._messageBundle.alias).length > 1
 									? html`<div class="alias-counter">
-											+${Object.keys(this.messageBundle.alias).length - 1}
+											+${Object.keys(this._messageBundle.alias).length - 1}
 									  </div>`
 									: ``}
 						  </div>`
@@ -276,7 +285,7 @@ export default class InlangMessageBundle extends LitElement {
 			<div class="messages-container">
 				${this._locales() &&
 				this._locales()?.map((locale) => {
-					const message = this.messageBundle?.messages.find((message) => message.locale === locale)
+					const message = this._messageBundle?.messages.find((message) => message.locale === locale)
 
 					return this._renderMessage(
 						locale,
