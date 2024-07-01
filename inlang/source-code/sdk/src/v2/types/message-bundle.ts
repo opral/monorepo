@@ -1,5 +1,6 @@
 import { Type, type Static } from "@sinclair/typebox"
 import { LanguageTag } from "./language-tag.js"
+import { LintReport } from "./lint.js"
 
 export type Literal = Static<typeof Literal>
 export const Literal = Type.Object({
@@ -118,6 +119,16 @@ export const Message = Type.Object({
 	variants: Type.Array(Variant),
 })
 
+export type MessageWithConflictMarkers = Static<typeof MessageWithConflictMarkers>
+export const MessageWithConflictMarkers = Type.Composite([
+	Message,
+	Type.Object({
+		// Thoughts: we should solve local conflicts by using the disc state - this is more aligned with autosave behaviour in editors?
+		// localConflict: Type.Optional(Message),
+		mergeConflict: Type.Optional(Message),
+	}),
+])
+
 export type MessageBundle = Static<typeof MessageBundle>
 export const MessageBundle = Type.Object(
 	{
@@ -126,11 +137,10 @@ export const MessageBundle = Type.Object(
 		alias: Type.Record(Type.String(), Type.String()),
 
 		// TODO SDK2 check how we get ignor inforation persisted for lints (messageBundle, message, variant)
-		// ignoredLings:  Type.Array(Type.String()),
+		// ignoredLints:  Type.Array(Type.String()),
 		messages: Type.Array(Message),
-		// TODO SDK2 - linting: consider lint reports via bundle directly
-		// TODO SDK2 - linting: add lint settings for bundles as first class properties to the bundle
-		// lintReports: Type.Array(MessageLintReport)
+		// TODO SDK2 - check how we can prevent the property to be overritten by the client its one direction
+		lintReports: Type.Optional(Type.Array(LintReport)),
 	},
 	{
 		version: 0,
