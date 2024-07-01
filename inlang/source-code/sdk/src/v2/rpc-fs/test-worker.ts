@@ -8,14 +8,15 @@ startWatching("/test.txt", ac.signal)
 startEditing("/test.txt")
 
 await sleep(1500)
-ac.abort()
+ac.abort("Some reason")
 
 async function startWatching(path: string, signal: AbortSignal) {
-	const watcher = await fs.watch(path, { signal })
-	for await (const event of watcher) {
-		console.info(event)
+	try {
+		const watcher = await fs.watch(path, { signal })
+		for await (const event of watcher) console.info(event)
+	} catch (err: any) {
+		console.info("done")
 	}
-	console.info("done")
 }
 
 async function startEditing(path: string) {

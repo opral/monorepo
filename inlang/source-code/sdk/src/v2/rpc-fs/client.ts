@@ -2,11 +2,10 @@ import { asyncIterableTransferHandler } from "./transfer-handlers.js"
 import * as Comlink from "comlink"
 import type { NodeishFilesystemSubset } from "../types/plugin.js"
 import { endpoint } from "comlink-node/worker"
-import { abortSignalTransferHandler } from "./abortSignalTransfer.js"
+import { watchOptionsTransferHandler } from "./watchOptionsTransferHandler.js"
 
-// @ts-ignore
 Comlink.transferHandlers.set("asyncIterable", asyncIterableTransferHandler)
-Comlink.transferHandlers.set("ABORT_SIGNAL", abortSignalTransferHandler)
+Comlink.transferHandlers.set("watchOptions", watchOptionsTransferHandler)
 
 export function getFs(): any {
 	const _fs = Comlink.wrap<NodeishFilesystemSubset>(endpoint)
@@ -16,15 +15,6 @@ export function getFs(): any {
 		readFile: _fs.readFile,
 		writeFile: _fs.writeFile,
 		mkdir: _fs.mkdir,
-		// @ts-ignore
-		watch: (path, options) => {
-			if (options.signal) {
-				console.log("signal", options.signal)
-				return _fs.watch(path, {
-					...options,
-					signal: Comlink.transfer(options.signal, [options.signal]),
-				})
-			} else return _fs.watch(path, options)
-		},
+		watch: _fs.watch,
 	}
 }
