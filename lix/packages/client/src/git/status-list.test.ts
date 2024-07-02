@@ -25,7 +25,7 @@ describe(
 				"https://github.com/inlang/ci-test-repo",
 				{
 					nodeishFs: fs,
-					branch: "test-symlink",
+					ref: "test-symlink",
 					debug: false,
 					experimentalFeatures: {
 						lixCommit: true,

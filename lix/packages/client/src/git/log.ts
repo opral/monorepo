@@ -1,6 +1,8 @@
 import isoGit from "../../vendored/isomorphic-git/index.js"
 import type { RepoContext } from "../openRepository.js"
 
+// TODO: handle shallows = [ 'sadf', 'sdf' ]
+
 export async function log(
 	ctx: RepoContext,
 	cmdArgs: {
