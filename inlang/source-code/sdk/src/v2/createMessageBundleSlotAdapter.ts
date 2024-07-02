@@ -233,11 +233,11 @@ export function createMessageBundleSlotAdapter(
 				} else {
 					loadedMessageBundleLintReports.delete(bundleId)
 				}
+				const clonedBundle = structuredClone(bundle)
+				clonedBundle.lintReports = currentReports ?? { hash: "", reports: [] }
+				loadedMessageBundles.set(bundleId, clonedBundle)
+				onBundleChange("fs", clonedBundle)
 			}
-			const clonedBundle = structuredClone(bundle)
-			clonedBundle.lintReports = currentReports ?? { hash: "", reports: [] }
-			loadedMessageBundles.set(bundleId, clonedBundle)
-			onBundleChange("fs", clonedBundle)
 		}
 	})
 
@@ -578,8 +578,6 @@ const conflictHandler: RxConflictHandler<any> = function (
 			isEqual: true,
 		})
 	}
-
-	console.log("conflict exists!")
 
 	/**
 	 * If a conflict exists, we have to resolve it.

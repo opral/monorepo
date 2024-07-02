@@ -55,7 +55,6 @@ function MessageBundleView({
 		}
 	}, [bundle])
 
-
 	const onBundleChange = (messageBundle: { detail: { argument: MessageBundle } }) => {
 		// eslint-disable-next-line no-console
 		project.inlangProject.messageBundleCollection?.upsert(messageBundle.detail.argument)
@@ -99,6 +98,7 @@ type MessageBundleListProps = {
 
 export function MessageBundleList({ project }: MessageBundleListProps) {
 	const [bundles, setBundles] = useState([] as RxDocument<MessageBundle>[])
+	const [currentListBundles, setCrurrentListBundles] = useState([] as RxDocument<MessageBundle>[])
 	const [lintReports, setLintReports] = useState([] as LintReport[])
 	const [projectSettings, setProjectSettings] = useState<ProjectSettings2 | undefined>(undefined)
 	const [messageBundleCollection, setMessageBundleCollection] = useState<any>()
@@ -109,6 +109,8 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 
 	useEffect(() => {
 		let query = undefined as any
+		let queryOnceSubscription = undefined as any
+		let querySubscription = undefined as any
 
 		// bundles[0].messages[0].variants[0].pattern
 		let selector = {} as any
@@ -147,18 +149,25 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 
 		const mc = project.inlangProject.messageBundleCollection
 		setMessageBundleCollection(mc)
-		query = mc
-			.find({
-				selector: selector,
-			})
+		query =
 			//.sort({ updatedAt: "desc" })
-			.$.subscribe((bundles) => {
-				query?.unsubscribe()
-				setBundles(bundles)
-			})
+			mc.find({
+				selector: selector,
+			}).$
+
+		queryOnceSubscription = query.subscribe((bundles: any) => {
+			queryOnceSubscription?.unsubscribe()
+
+			setCrurrentListBundles(bundles)
+		})
+
+		querySubscription = query.subscribe((bundles: any) => {
+			setBundles(bundles)
+		})
 
 		return () => {
-			query?.unsubscribe()
+			queryOnceSubscription?.unsubscribe()
+			querySubscription?.unsubscribe()
 		}
 	}, [textSearch, activeLocales])
 
@@ -195,7 +204,7 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 	}, [])
 
 	const renderRow = ({ index, style }) => {
-		const bundle = bundles[index]
+		const bundle = currentListBundles[index]
 
 		// Use a ref callback to measure the component's height
 		const measureRef = (el: HTMLDivElement | null) => {
@@ -208,7 +217,6 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 			}
 		}
 
-		console.log(activeLocales)
 		return (
 			<div style={style}>
 				<div ref={measureRef}>
@@ -251,7 +259,7 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 					/>
 					<List
 						height={900} // Adjust based on your requirements
-						itemCount={bundles.length}
+						itemCount={currentListBundles.length}
 						itemSize={getItemSize}
 						width={"100%"}
 						ref={listRef}
