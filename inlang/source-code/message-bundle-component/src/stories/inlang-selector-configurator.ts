@@ -2,11 +2,6 @@ import { LitElement, css, html } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 
 import SlDropdown from "@shoelace-style/shoelace/dist/components/dropdown/dropdown.component.js"
-import SlButton from "@shoelace-style/shoelace/dist/components/button/button.component.js"
-import SlSelect from "@shoelace-style/shoelace/dist/components/select/select.component.js"
-import SlOption from "@shoelace-style/shoelace/dist/components/option/option.component.js"
-import SlInput from "@shoelace-style/shoelace/dist/components/input/input.component.js"
-import SlTooltip from "@shoelace-style/shoelace/dist/components/tooltip/tooltip.component.js"
 
 import {
 	type Declaration,
@@ -18,14 +13,6 @@ import {
 import addSelector from "../helper/crud/selector/add.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
 import "./inlang-add-input.js"
-
-// in case an app defines it's own set of shoelace components, prevent double registering
-if (!customElements.get("sl-dropdown")) customElements.define("sl-dropdown", SlDropdown)
-if (!customElements.get("sl-button")) customElements.define("sl-button", SlButton)
-if (!customElements.get("sl-select")) customElements.define("sl-select", SlSelect)
-if (!customElements.get("sl-option")) customElements.define("sl-option", SlOption)
-if (!customElements.get("sl-input")) customElements.define("sl-input", SlInput)
-if (!customElements.get("sl-tooltip")) customElements.define("sl-tooltip", SlTooltip)
 
 @customElement("inlang-selector-configurator")
 export default class InlangSelectorConfigurator extends LitElement {

@@ -10,17 +10,17 @@ import {
 	type LintReport,
 	type ProjectSettings2,
 	type Declaration,
-} from "@inlang/sdk/v2" // Import the types
+} from "@inlang/sdk/v2"
+import type { InstalledMessageLintRule } from "@inlang/sdk"
 import { messageBundleStyling } from "./inlang-message-bundle.styles.js"
-import upsertVariant from "../helper/crud/variant/upsert.js"
-import deleteSelector from "../helper/crud/selector/delete.js"
-import deleteInput from "../helper/crud/input/delete.js"
 
+//internal components
 import "./inlang-variant.js"
 import "./inlang-lint-report-tip.js"
 import "./inlang-selector-configurator.js"
 import "./inlang-add-input.js"
 
+//shoelace components
 import SlTag from "@shoelace-style/shoelace/dist/components/tag/tag.component.js"
 import SlInput from "@shoelace-style/shoelace/dist/components/input/input.component.js"
 import SlButton from "@shoelace-style/shoelace/dist/components/button/button.component.js"
@@ -28,11 +28,8 @@ import SlTooltip from "@shoelace-style/shoelace/dist/components/tooltip/tooltip.
 import SlDropdown from "@shoelace-style/shoelace/dist/components/dropdown/dropdown.component.js"
 import SlMenu from "@shoelace-style/shoelace/dist/components/menu/menu.component.js"
 import SlMenuItem from "@shoelace-style/shoelace/dist/components/menu-item/menu-item.component.js"
-
-import getInputs from "../helper/crud/input/get.js"
-import createInput from "../helper/crud/input/create.js"
-import sortAllVariants from "../helper/crud/variant/sortAll.js"
-import type { InstalledMessageLintRule } from "@inlang/sdk"
+import SlSelect from "@shoelace-style/shoelace/dist/components/select/select.component.js"
+import SlOption from "@shoelace-style/shoelace/dist/components/option/option.component.js"
 
 // in case an app defines it's own set of shoelace components, prevent double registering
 if (!customElements.get("sl-tag")) customElements.define("sl-tag", SlTag)
@@ -42,22 +39,24 @@ if (!customElements.get("sl-tooltip")) customElements.define("sl-tooltip", SlToo
 if (!customElements.get("sl-dropdown")) customElements.define("sl-dropdown", SlDropdown)
 if (!customElements.get("sl-menu")) customElements.define("sl-menu", SlMenu)
 if (!customElements.get("sl-menu-item")) customElements.define("sl-menu-item", SlMenuItem)
+if (!customElements.get("sl-select")) customElements.define("sl-select", SlSelect)
+if (!customElements.get("sl-option")) customElements.define("sl-option", SlOption)
+
+//helpers
+import getInputs from "../helper/crud/input/get.js"
+import createInput from "../helper/crud/input/create.js"
+import sortAllVariants from "../helper/crud/variant/sortAll.js"
+import upsertVariant from "../helper/crud/variant/upsert.js"
+import deleteSelector from "../helper/crud/selector/delete.js"
+import deleteInput from "../helper/crud/input/delete.js"
 
 @customElement("inlang-message-bundle")
 export default class InlangMessageBundle extends LitElement {
 	static override styles = [baseStyling, messageBundleStyling]
 
+	//props
 	@property({ type: Object })
 	messageBundle: MessageBundle | undefined
-
-	@state()
-	private _messageBundle: MessageBundle | undefined
-
-	override updated(changedProperties: any) {
-		if (changedProperties.has("messageBundle")) {
-			this._messageBundle = structuredClone(this.messageBundle)
-		}
-	}
 
 	@property({ type: Object })
 	settings: ProjectSettings2 | undefined
@@ -71,6 +70,7 @@ export default class InlangMessageBundle extends LitElement {
 	@property({ type: Array })
 	installedLintRules: InstalledMessageLintRule[] | undefined
 
+	// events
 	dispatchOnChangeMessageBundle(messageBundle: MessageBundle) {
 		const onChangeMessageBundle = new CustomEvent("change-message-bundle", {
 			bubbles: true,
@@ -120,42 +120,9 @@ export default class InlangMessageBundle extends LitElement {
 		this.dispatchEvent(onRevert)
 	}
 
-	_triggerSave = () => {
-		if (this._messageBundle) {
-			this.dispatchOnChangeMessageBundle(this._messageBundle)
-		}
-	}
-
-	_addMessage = (message: Message) => {
-		if (this._messageBundle) {
-			this._messageBundle.messages.push(message)
-			this.requestUpdate()
-		}
-	}
-
-	_addInput = (name: string) => {
-		if (this._messageBundle) {
-			createInput({ messageBundle: this._messageBundle, inputName: name })
-		}
-		this._triggerSave()
-		this._triggerRefresh()
-	}
-
-	_triggerRefresh = () => {
-		this.requestUpdate()
-	}
-
-	_fixLint = (lintReport: LintReport, fix: LintReport["fixes"][0]["title"]) => {
-		this.dispatchOnFixLint(lintReport, fix)
-	}
-
-	_machineTranslate = (messageId?: string, variantId?: string) => {
-		this.dispatchOnMachineTranslate(messageId, variantId)
-	}
-
-	_revert = (messageId?: string, variantId?: string) => {
-		this.dispatchOnRevert(messageId, variantId)
-	}
+	// internal variables/states
+	@state()
+	private _messageBundle: MessageBundle | undefined
 
 	@state()
 	private _freshlyAddedVariants: string[] = []
@@ -163,15 +130,42 @@ export default class InlangMessageBundle extends LitElement {
 	@state()
 	private _bundleSlots: Element[] = []
 
-	override async firstUpdated() {
-		await this.updateComplete
-		// override primitive colors to match the design system
-		overridePrimitiveColors()
+	//functions
+	private _triggerSave = () => {
+		if (this._messageBundle) {
+			this.dispatchOnChangeMessageBundle(this._messageBundle)
+		}
+	}
 
-		const children = this.children
-		this._bundleSlots = Array.from(children).filter((child) =>
-			child.slot ? child.slot === "bundle-action" : false
-		)
+	private _addMessage = (message: Message) => {
+		if (this._messageBundle) {
+			this._messageBundle.messages.push(message)
+			this.requestUpdate()
+		}
+	}
+
+	private _addInput = (name: string) => {
+		if (this._messageBundle) {
+			createInput({ messageBundle: this._messageBundle, inputName: name })
+		}
+		this._triggerSave()
+		this._triggerRefresh()
+	}
+
+	private _triggerRefresh = () => {
+		this.requestUpdate()
+	}
+
+	private _fixLint = (lintReport: LintReport, fix: LintReport["fixes"][0]["title"]) => {
+		this.dispatchOnFixLint(lintReport, fix)
+	}
+
+	private _machineTranslate = (messageId?: string, variantId?: string) => {
+		this.dispatchOnMachineTranslate(messageId, variantId)
+	}
+
+	private _revert = (messageId?: string, variantId?: string) => {
+		this.dispatchOnRevert(messageId, variantId)
 	}
 
 	private _refLocale = (): LanguageTag | undefined => {
@@ -193,6 +187,27 @@ export default class InlangMessageBundle extends LitElement {
 		return _refLanguageTag && this._messageBundle
 			? getInputs({ messageBundle: this._messageBundle })
 			: undefined
+	}
+
+	// hooks
+	override updated(changedProperties: any) {
+		// works like useEffect
+		// In order to not mutate object references, we need to clone the object
+		// When the messageBundle prop changes, we update the internal state
+		if (changedProperties.has("messageBundle")) {
+			this._messageBundle = structuredClone(this.messageBundle)
+		}
+	}
+
+	override async firstUpdated() {
+		await this.updateComplete
+		// override primitive colors to match the design system
+		overridePrimitiveColors()
+
+		const children = this.children
+		this._bundleSlots = Array.from(children).filter((child) =>
+			child.slot ? child.slot === "bundle-action" : false
+		)
 	}
 
 	override render() {
@@ -531,7 +546,6 @@ export default class InlangMessageBundle extends LitElement {
 	}
 }
 
-// add types
 declare global {
 	interface HTMLElementTagNameMap {
 		"inlang-message-bundle": InlangMessageBundle
