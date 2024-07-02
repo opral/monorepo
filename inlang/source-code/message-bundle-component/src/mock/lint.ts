@@ -9,21 +9,18 @@ export const mockMessageLintReports: LintReport[] = [
 	createMockBundleLintReport({
 		ruleId: "messageBundleLintRule.inlang.missingMessage",
 		messageBundleId: "mock_bundle_human_id",
-		locale: "de",
 		body: "The bundle `mock_bundle_human_id` is missing message for the locale `de`",
 	}),
 	createMockMessageLintReport({
 		ruleId: "messageBundleLintRule.inlang.missingReference",
 		messageBundleId: "mock_bundle_human_id",
 		messageId: "mock_message_id_en",
-		locale: "en",
 		body: "The bundle `mock_bundle_human_id` is missing the reference message for the locale `en`",
 	}),
 	createMockMessageLintReport({
 		ruleId: "messageBundleLintRule.inlang.missingReference",
 		messageBundleId: "mock_bundle_human_id",
 		messageId: "mock_message_id_en",
-		locale: "en",
 		body: "The bundle `mock_bundle_human_id` is missing the reference message for the locale `en`",
 		level: "warning",
 	}),
@@ -34,7 +31,6 @@ export const mockVariantLintReports: LintReport[] = [
 		ruleId: "messageBundleLintRule.inlang.missingMessage",
 		messageBundleId: "mock_bundle_human_id",
 		variantId: "mock_variant_id_de_one",
-		locale: "de",
 		body: "The variant `one` is broken for the locale `de`",
 	}),
 ]

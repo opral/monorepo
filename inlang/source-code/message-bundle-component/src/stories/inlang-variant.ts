@@ -32,7 +32,7 @@ export default class InlangVariant extends LitElement {
 				font-size: 13px;
 			}
 			:host {
-				border-top: 1px solid var(--sl-color-neutral-300);
+				border-top: 1px solid var(--sl-input-border-color);
 			}
 			:host(:first-child) {
 				border-top: none;
@@ -47,8 +47,8 @@ export default class InlangVariant extends LitElement {
 			.match {
 				height: 44px;
 				width: 120px;
-				background-color: none;
-				border-right: 1px solid var(--sl-color-neutral-300);
+				background-color: var(--sl-input-background-color);
+				border-right: 1px solid var(--sl-input-border-color);
 				position: relative;
 				z-index: 0;
 			}
@@ -64,7 +64,7 @@ export default class InlangVariant extends LitElement {
 				min-height: 44px;
 			}
 			.match::part(input):hover {
-				background-color: var(--sl-color-neutral-50);
+				background-color: var(--sl-input-background-color-);
 			}
 			.pattern {
 				flex: 1;
@@ -80,15 +80,16 @@ export default class InlangVariant extends LitElement {
 				border: none;
 				border-radius: 0;
 				min-height: 44px;
+				background-color: var(--sl-input-background-color);
 			}
 			.pattern::part(input) {
 				min-height: 44px;
 			}
 			.pattern::part(input):hover {
-				background-color: var(--sl-color-neutral-50);
+				background-color: var(--sl-input-background-color-hover);
 			}
 			.pattern::part(input)::placeholder {
-				color: var(--sl-color-neutral-400);
+				color: var(--sl-input-placeholder-color);
 				font-size: 13px;
 			}
 			.actions {
@@ -102,30 +103,20 @@ export default class InlangVariant extends LitElement {
 				padding-right: 12px;
 				z-index: 3;
 			}
-			.add-selector {
-				height: 30px;
-				padding-right: 8px;
-				padding-left: 6px;
-				display: flex;
-				gap: 4px;
-				align-items: center;
-				justify-content: center;
-				color: var(--sl-color-neutral-600);
+			.add-selector::part(base) {
 				border-radius: 4px;
-				border: 1px solid var(--sl-color-neutral-300);
-				background-color: var(--sl-color-neutral-0);
 				cursor: pointer;
 				font-size: 13px;
 			}
-			.add-selector:hover {
-				color: var(--sl-color-neutral-900);
-				background-color: var(--sl-color-neutral-200);
-				border: 1px solid var(--sl-color-neutral-400);
+			sl-button::part(base) {
+				color: var(--sl-input-color);
+				background-color: var(--sl-input-background-color);
+				border: 1px solid var(--sl-input-border-color);
 			}
 			sl-button::part(base):hover {
-				color: var(--sl-color-neutral-900);
-				background-color: var(--sl-color-neutral-100);
-				border: 1px solid var(--sl-color-neutral-400);
+				color: var(--sl-input-color-hover);
+				background-color: var(--sl-input-background-color-hover);
+				border: 1px solid var(--sl-input-border-color-hover);
 			}
 			.dynamic-actions {
 				display: flex;
@@ -141,6 +132,10 @@ export default class InlangVariant extends LitElement {
 			}
 			.dropdown-open.dynamic-actions {
 				display: flex;
+			}
+			sl-tooltip::part(base) {
+				background-color: var(--sl-tooltip-background-color);
+				color: var(--sl-tooltip-color);
 			}
 		`,
 	]
@@ -419,18 +414,19 @@ export default class InlangVariant extends LitElement {
 								.addInput=${this.addInput}
 						  >
 								<sl-tooltip content="Add Selector to message"
-									><div class="add-selector">
+									><sl-button size="small" class="add-selector">
 										<svg
 											viewBox="0 0 24 24"
 											width="18"
 											height="18"
 											slot="prefix"
 											class="w-5 h-5 -mx-1"
+											style="margin-right: -3px"
 										>
 											<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path>
 										</svg>
 										Selector
-									</div>
+									</sl-button>
 								</sl-tooltip>
 						  </inlang-selector-configurator>`
 						: ``}
