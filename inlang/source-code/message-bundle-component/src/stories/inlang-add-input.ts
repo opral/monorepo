@@ -17,8 +17,8 @@ export default class InlangAddInput extends LitElement {
 			.dropdown-container {
 				font-size: 13px;
 				width: 240px;
-				background-color: white;
-				border: 1px solid var(--sl-color-neutral-300);
+				background-color: var(--sl-panel-background-color);
+				border: 1px solid var(--sl-input-border-color);
 				padding: 12px;
 				border-radius: 6px;
 				display: flex;
@@ -34,7 +34,7 @@ export default class InlangAddInput extends LitElement {
 				display: flex;
 				justify-content: space-between;
 				align-items: center;
-				color: var(--sl-color-neutral-900);
+				color: var(--sl-input-color);
 				font-size: 12px;
 			}
 			.dropdown-title {
@@ -45,13 +45,12 @@ export default class InlangAddInput extends LitElement {
 			.help-text {
 				display: flex;
 				gap: 8px;
-				color: var(--sl-color-neutral-900);
+				color: var(--sl-input-help-text-color);
 			}
 			.help-text p {
 				flex: 1;
 				margin: 0;
 				font-size: 12px;
-				color: var(--sl-color-neutral-500);
 				line-height: 1.5;
 			}
 			.actions {

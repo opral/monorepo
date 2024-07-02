@@ -1,8 +1,8 @@
 import { css } from "lit"
 
 /*
-* This gets into the published component
-*/
+ * This gets into the published component
+ */
 
 export const baseStyling = css`
 	:host {
@@ -429,7 +429,7 @@ export const baseStyling = css`
 		--sl-input-height-large: 3.125rem; /* 50px */
 
 		--sl-input-background-color: var(--sl-color-neutral-0);
-		--sl-input-background-color-hover: var(--sl-input-background-color);
+		--sl-input-background-color-hover: var(--sl-color-neutral-50);
 		--sl-input-background-color-focus: var(--sl-input-background-color);
 		--sl-input-background-color-disabled: var(--sl-color-neutral-100);
 		--sl-input-border-color: var(--sl-color-neutral-300);

@@ -27,8 +27,8 @@ export default class InlangSelectorConfigurator extends LitElement {
 			.dropdown-container {
 				font-size: 13px;
 				width: 240px;
-				background-color: white;
-				border: 1px solid var(--sl-color-neutral-300);
+				background-color: var(--sl-panel-background-color);
+				border: 1px solid var(--sl-input-border-color);
 				padding: 12px;
 				border-radius: 6px;
 				display: flex;
@@ -44,7 +44,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 				display: flex;
 				justify-content: space-between;
 				align-items: center;
-				color: var(--sl-color-neutral-900);
+				color: var(--sl-input-color);
 				font-size: 12px;
 			}
 			.dropdown-title {
@@ -57,22 +57,27 @@ export default class InlangSelectorConfigurator extends LitElement {
 			}
 			.add-input::part(base):hover {
 				background-color: var(--sl-color-neutral-100);
-				color: var(--sl-color-neutral-900);
+				color: var(--sl-input-color-hover);
 			}
 			sl-select::part(form-control-label) {
 				font-size: 13px;
-				color: var(--sl-color-neutral-700);
+				color: var(--sl-input-color);
 			}
 			sl-select::part(display-input) {
 				font-size: 13px;
-				color: var(--sl-color-neutral-950);
+				color: var(--sl-input-color);
 			}
 			sl-option::part(label) {
 				font-size: 14px;
+				color: var(--sl-input-color);
+			}
+			sl-option::part(base):hover {
+				background-color: var(--sl-input-background-color-hover);
 			}
 			.options-title {
 				font-size: 14px;
-				color: var(--sl-color-neutral-700);
+				color: var(--sl-input-color);
+				background-color: var(--sl-input-background-color);
 				margin: 0;
 				padding-bottom: 4px;
 			}
@@ -85,6 +90,14 @@ export default class InlangSelectorConfigurator extends LitElement {
 			.option {
 				width: 100%;
 			}
+			.option::part(base) {
+				background-color: var(--sl-input-background-color-hover);
+				border-radius: var(--sl-input-border-radius-small);
+			}
+			.option {
+				width: 100%;
+				background-color: var(--sl-input-background-color-hover);
+			}
 			.delete-icon {
 				color: var(--sl-color-neutral-400);
 				cursor: pointer;
@@ -95,13 +108,12 @@ export default class InlangSelectorConfigurator extends LitElement {
 			.help-text {
 				display: flex;
 				gap: 8px;
-				color: var(--sl-color-neutral-900);
+				color: var(--sl-input-help-text-color);
 			}
 			.help-text p {
 				flex: 1;
 				margin: 0;
 				font-size: 12px;
-				color: var(--sl-color-neutral-500);
 				line-height: 1.5;
 			}
 			.empty-image {
