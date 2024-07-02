@@ -2,8 +2,6 @@
 import "./style.css"
 import { createRoot } from "react-dom/client"
 
-import { MainView } from "./mainView.js"
-
 import "@inlang/message-bundle-component"
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `<div id="root"></div>`
@@ -11,7 +9,19 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `<div id="root"></di
 const domNode = document.getElementById("root")
 const root = createRoot(domNode!)
 //root.render(<MessageBundleList />)
-root.render(<MainView />)
+const isInIframe = window.self !== window.top
+
+if (isInIframe) {
+	const { MainViewIframe } = await import("./mainViewIframe.js")
+	root.render(
+		<MainViewIframe
+			projectPath={new URLSearchParams(window.location.search).get("inlangProjectPath")!}
+		/>
+	)
+} else {
+	const { MainViewHost } = await import("./mainViewHost.js")
+	root.render(<MainViewHost />)
+}
 // document.querySelector<HTMLButtonElement>("#pull")!.onclick = async (el) => {
 // 	// @ts-expect-error
 // 	el.disabled = true

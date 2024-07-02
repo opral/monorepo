@@ -20,4 +20,9 @@ export default defineConfig({
 			protocolImports: true,
 		}),
 	],
+	server: {
+		fs: {
+			strict: false,
+		},
+	},
 })

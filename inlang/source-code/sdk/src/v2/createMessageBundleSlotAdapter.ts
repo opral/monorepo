@@ -192,7 +192,6 @@ export function createMessageBundleSlotAdapter(
 		if (e !== "records-change" || !messageRecordIds) {
 			return
 		}
-		debugger
 
 		debug(source)
 

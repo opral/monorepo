@@ -1,7 +1,6 @@
 import { asyncIterableTransferHandler } from "./transfer/asyncIterable.js"
 import * as Comlink from "comlink"
 import type { NodeishFilesystemSubset } from "../types/plugin.js"
-import { endpoint } from "comlink-node/worker"
 import { watchOptionsTransferHandler } from "./transfer/watchOptions.js"
 
 Comlink.transferHandlers.set("asyncIterable", asyncIterableTransferHandler)
@@ -9,8 +8,9 @@ Comlink.transferHandlers.set("watchOptions", watchOptionsTransferHandler)
 
 type FileChangeInfo = { eventType: "rename" | "change"; filename: string | null }
 
-export function getFs(): NodeishFilesystemSubset {
-	const _fs = Comlink.wrap<NodeishFilesystemSubset>(endpoint)
+export function getFs(ep: Comlink.Endpoint): NodeishFilesystemSubset {
+	console.log("getFs", ep)
+	const _fs = Comlink.wrap<NodeishFilesystemSubset>(ep)
 
 	return {
 		readdir: _fs.readdir,

@@ -1,20 +1,18 @@
 import React, { KeyboardEventHandler, useEffect, useState } from "react"
 import { openProject } from "./storage/db-messagebundle.js"
-import { loadProject } from "../../dist/loadProject.js"
-import debug from "debug"
 import { pluralBundle } from "../../src/v2/mocks/index.js"
 import { randomHumanId } from "../../src/storage/human-id/human-readable-id.js"
 import { createMessage, createMessageBundle } from "../../src/v2/helper.js"
 import { MessageBundleList } from "./messageBundleListReact.js"
-import { MessageBundle } from "../../dist/v2/index.js"
+import { MessageBundle, getFs } from "../../dist/v2/index.js"
 import { SettingsView } from "./settingsView.js"
+import { createNodeishMemoryFs } from "@lix-js/fs"
+import { IFrame } from "./iFrame.js"
 
-export function MainView() {
+const fs = createNodeishMemoryFs()
+
+export function MainViewHost() {
 	const [githubToken, setGithubToken] = useState<string>(localStorage.ghToken)
-
-	const [currentView, setCurrentView] = useState<"overview" | "messageList" | "settings">(
-		"settings"
-	)
 
 	const onGithubTokenChange = (el: any) => {
 		const ghToken = el.target.value
@@ -45,7 +43,7 @@ export function MainView() {
 	}
 
 	const [inlangProjectPath, setInlangProjectPath] = useState<string>(
-		params.get("inpangProjectPath") ?? localStorage.inpangProjectPath ?? ""
+		params.get("inlangProjectPath") ?? localStorage.inpangProjectPath ?? ""
 	)
 
 	const onInlangRepoPathChange = (el: any) => {
@@ -77,7 +75,7 @@ export function MainView() {
 	const doLoadProject = async () => {
 		setLoadingProjectState("Loading")
 		try {
-			const loadedProject = await openProject(githubToken, repoUrl, inlangProjectPath)
+			const loadedProject = await openProject(fs, githubToken, repoUrl, inlangProjectPath)
 			setInlangProjectPathConfigs(inlangProjectPath)
 			setRepoConfigs(repoUrl)
 			setCurrentProject(loadedProject)
@@ -114,44 +112,9 @@ export function MainView() {
 		// 	document.querySelector<HTMLButtonElement>("#pull")!.disabled = false
 	}
 
-	const insertNMessageBundles = async (
-		project: Awaited<ReturnType<typeof openProject>>,
-		n: number
-	) => {
-		const messagesToAdd = [] as MessageBundle[]
-		for (let i = 0; i < n; i++) {
-			const newMessage = createMessage({
-				locale: "de",
-				text: "new",
-			})
-
-			const messageBundle = createMessageBundle({
-				alias: {},
-				messages: [newMessage],
-			})
-			messagesToAdd.push(messageBundle)
-		}
-
-		const messageBundles = project.inlangProject.messageBundleCollection
-		if (n === 1) {
-			const temp = structuredClone(pluralBundle)
-			temp.id = randomHumanId()
-			temp.messages[0].id = randomHumanId()
-			temp.messages[1].id = randomHumanId()
-
-			await messageBundles.insert(temp as any)
-			return
-		}
-
-		console.time("inserting " + n + " messageBundles")
-
-		await project.inlangProject.messageBundleCollection.bulkInsert(messagesToAdd)
-		console.timeEnd("inserting " + n + " messageBundles")
-	}
-
 	return (
 		<div>
-			<h3>Fink 2</h3>
+			<h3>{"Fink 2"}</h3>
 			<div>
 				GitHub token:{" "}
 				<input
@@ -184,94 +147,10 @@ export function MainView() {
 					(Re) Load Project
 				</button>
 				{loadingProjectState}
-				{currentProject && (
+				{currentProject && inlangProjectPath && (
 					<>
-						<br />
-						<h2>Actions</h2>
-						Add Message Bundles
-						<button
-							style={{ marginLeft: 10 }}
-							id="btnAdd1"
-							onClick={() => {
-								insertNMessageBundles(currentProject, 1)
-							}}
-						>
-							+ 1{" "}
-						</button>
-						<button
-							id="btnAdd100"
-							onClick={() => {
-								insertNMessageBundles(currentProject, 100)
-							}}
-						>
-							+ 100{" "}
-						</button>
-						<button
-							id="btnAdd1000"
-							onClick={() => {
-								insertNMessageBundles(currentProject, 1000)
-							}}
-						>
-							+ 1000{" "}
-						</button>
-						<br />
-						<br />
-						<button
-							id="commit"
-							type="button"
-							onClick={() => {
-								commit(currentProject)
-							}}
-							disabled={gitActive}
-						>
-							Commit Changes
-						</button>
-						<button
-							id="push"
-							type="button"
-							onClick={() => {
-								push(currentProject)
-							}}
-							disabled={gitActive}
-						>
-							Push Changes
-						</button>
-						<br />
-						<br />
-						<button
-							id="pull"
-							type="button"
-							onClick={() => {
-								pull(currentProject)
-							}}
-							disabled={gitActive}
-						>
-							Pull Changes
-						</button>
-						<div className="tab-container">
-							<div
-								className={`tab ${currentView === "overview" ? "active" : ""}`}
-								onClick={() => setCurrentView("overview")}
-							>
-								Overview
-							</div>
-							<div
-								className={`tab ${currentView === "messageList" ? "active" : ""}`}
-								onClick={() => setCurrentView("messageList")}
-							>
-								MessageList
-							</div>
-							<div
-								className={`tab ${currentView === "settings" ? "active" : ""}`}
-								onClick={() => setCurrentView("settings")}
-							>
-								Settings
-							</div>
-						</div>
-						{currentView === "settings" && <SettingsView project={currentProject}></SettingsView>}
-						{currentView === "messageList" && (
-							<MessageBundleList project={currentProject}></MessageBundleList>
-						)}
+						<IFrame src={"/?inlangProjectPath=" + inlangProjectPath} withFs={fs} />
+						{/* <IFrame src={"/?inlangProjectPath=" + inlangProjectPath} withFs={fs} /> */}
 					</>
 				)}
 			</div>

@@ -1,7 +1,8 @@
+import { endpoint } from "comlink-node/worker"
 import { loadProject } from "../../loadProject2.js"
 import { getFs } from "../client.js"
 
-const fs = getFs()
+const fs = getFs(endpoint)
 
 const repo = {
 	nodeishFs: fs,

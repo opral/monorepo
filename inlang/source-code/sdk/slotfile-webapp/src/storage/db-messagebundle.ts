@@ -1,13 +1,13 @@
 import { addRxPlugin } from "rxdb"
 import { RxDBQueryBuilderPlugin } from "rxdb/plugins/query-builder"
-import { createNodeishMemoryFs } from "@lix-js/client"
-import { loadProject, createTestWorker } from "@inlang/sdk/v2"
+import { loadProject } from "@inlang/sdk/v2"
 import { createNewProject } from "@inlang/sdk"
 import http from "isomorphic-git/http/web"
 
 // NOTE: I use isomorphic git because i went crazy with cors :-/ was faster to spin up a iso proxy
 import git, { pull, add, commit, push, statusMatrix } from "isomorphic-git"
 import { defaultProjectSettings } from "../../../dist/v2/defaultProjectSettings.js"
+import type { NodeishFilesystem } from "@lix-js/fs"
 
 addRxPlugin(RxDBQueryBuilderPlugin)
 
@@ -33,9 +33,12 @@ const createAwaitable = () => {
 	]
 }
 
-export const openProject = async (gittoken: string, githubRepo: string, projectPath: string) => {
-	const fs = createNodeishMemoryFs()
-
+export const openProject = async (
+	fs: NodeishFilesystem,
+	gittoken: string,
+	githubRepo: string,
+	projectPath: string
+) => {
 	await git.clone({
 		fs: fs,
 		http,
@@ -66,8 +69,6 @@ export const openProject = async (gittoken: string, githubRepo: string, projectP
 		projectPath,
 		repo: repo,
 	})
-
-	createTestWorker(fs)
 
 	const pullChangesAndReloadSlots = async () => {
 		await pull({

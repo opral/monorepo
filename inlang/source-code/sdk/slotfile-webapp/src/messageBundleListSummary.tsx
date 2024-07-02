@@ -7,14 +7,14 @@ import { MessageBundle } from "../../src/v2/types/message-bundle.js"
 import { InstalledLintRule, ProjectSettings2 } from "../../src/v2/types/project-settings.js"
 import { VariableSizeList as List } from "react-window"
 import { InlangProject2 } from "../../dist/v2/types/project.js"
-import { openProject } from "./storage/db-messagebundle.js"
+
 import { LintReport } from "../../dist/v2/index.js"
 import { LanguageTag } from "@inlang/language-tag"
 
 import { RxDocument } from "rxdb"
 
 type MessageBundleListProps = {
-	project: Awaited<ReturnType<typeof openProject>>
+	project: InlangProject2
 	projectSettings: ProjectSettings2
 	bundles: RxDocument<MessageBundle>[]
 	reports: LintReport[]
@@ -37,7 +37,7 @@ export function MessageBundleListSummary({
 	const [mappedLintReports, setMappedLintReports] = useState({} as any)
 
 	useEffect(() => {
-		const sub = project.inlangProject.installed.lintRules.subscribe({
+		const sub = project.installed.lintRules.subscribe({
 			next: (lintRules) => {
 				setInstalledLints(lintRules)
 

@@ -47,6 +47,8 @@ import missingCatchallLintRule from "./dev-modules/missingCatchall.js"
 
 type ProjectState = "initializing" | "resolvingModules" | "loaded"
 
+const isInIframe = window.self !== window.top
+
 /**
  *
  * Lifecycle of load Project:
@@ -86,12 +88,15 @@ export async function loadProject(args: {
 		nodeishFs: args.repo.nodeishFs,
 	})
 
-	await maybeAddModuleCache({ projectPath, repo: args.repo })
-	await maybeCreateFirstProjectId({ projectPath, repo: args.repo })
+	if (!isInIframe) {
+		await maybeAddModuleCache({ projectPath, repo: args.repo })
+		await maybeCreateFirstProjectId({ projectPath, repo: args.repo })
+	}
 
 	// no need to catch since we created the project ID with "maybeCreateFirstProjectId" earlier
-	const projectId = await nodeishFs.readFile(projectIdPath, { encoding: "utf-8" })
-
+	console.log("Reading Project path: ", projectPath)
+	const projectId = await args.repo.nodeishFs.readFile(projectIdPath, { encoding: "utf-8" })
+	console.log("Project ID: ", projectId)
 	const projectSettings = await loadSettings({ settingsFilePath, nodeishFs })
 
 	// Transform legacy fields

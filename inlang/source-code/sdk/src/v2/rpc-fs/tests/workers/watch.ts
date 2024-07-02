@@ -1,6 +1,7 @@
+import { endpoint } from "comlink-node/worker"
 import { getFs } from "../../client.js"
 
-const fs = getFs()
+const fs = getFs(endpoint)
 
 const watcher = fs.watch("/in.txt")
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
