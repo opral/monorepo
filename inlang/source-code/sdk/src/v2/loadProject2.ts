@@ -13,6 +13,7 @@ import {
 	type Fix,
 	type InstalledLintRule,
 	type LintReport,
+	type LintResult,
 	type Message,
 } from "./types/index.js"
 import { createDebugImport } from "./import-utils.js"
@@ -221,7 +222,7 @@ export async function loadProject(args: {
 
 	let lintsRunning = false
 	let lintsPending = false
-	const lintReports$ = new BehaviorSubject<LintReport[]>([])
+	const lintReports$ = new BehaviorSubject<LintResult>({})
 	const adapter = createMessageBundleSlotAdapter(
 		bundleStorage,
 		messageStorage,
@@ -238,15 +239,16 @@ export async function loadProject(args: {
 				while (true) {
 					lintsPending = false
 					const lintresults = await linter.lint(projectSettings$.value)
-					const reports = Object.values(lintresults).flatMap((r) => r.reports)
-					lintReports$.next(reports)
+
+					lintReports$.next(lintresults)
 					if (!lintsPending) {
 						break
 					}
 				}
 				lintsRunning = false
 			}
-		}
+		},
+		lintReports$
 	)
 	await startReplication(database.collections.messageBundles, adapter).awaitInitialReplication()
 

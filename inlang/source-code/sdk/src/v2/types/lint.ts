@@ -13,6 +13,7 @@ import { LanguageTag } from "./language-tag.js"
 import type { ExternalProjectSettings, ProjectSettings2 } from "./project-settings.js"
 
 export type LintResult = {
+	// TODO SDK 2 add property for report type - if is not specific for lint results?
 	[id: MessageBundle["id"]]: {
 		hash: string
 		reports: LintReport[]
@@ -61,11 +62,35 @@ export const LintConfig = Type.Object({
 })
 export type LintConfig = Static<typeof LintConfig>
 
-type LintFix = { title: string }
+type LintFix = { key: string; title: string }
+const LintFix = Type.Object({
+	key: Type.String(),
+	title: Type.String(),
+})
 
 /**
  * The basis of a lint report (required to contruct a lint report union type)
  */
+export const LintReport = Type.Object({
+	ruleId: Type.String(),
+
+	// TODO SDK2 check if we should provide a lint target
+	// target: Type.Object({
+	messageBundleId: Type.String(),
+	messageId: Type.Optional(Type.String()),
+	variantId: Type.Optional(Type.String()),
+	// }),
+
+	level: MessageLintLevel,
+	body: Translatable(Type.String()),
+
+	/**
+	 * The available fixes that can be automatically applied
+	 * Empty array = no automatic fixes
+	 */
+	fixes: Type.Array(LintFix),
+})
+
 export type LintReport<Fixes extends LintFix[] = LintFix[]> = {
 	ruleId: MessageBundleLintRule["id"]
 

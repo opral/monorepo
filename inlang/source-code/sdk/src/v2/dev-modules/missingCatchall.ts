@@ -20,6 +20,7 @@ const missingCatchallLintRule: MessageBundleLintRule = {
 					locale: message.locale,
 					fixes: [
 						{
+							key: "yadayada",
 							title: "Add catchall variant",
 						},
 					],

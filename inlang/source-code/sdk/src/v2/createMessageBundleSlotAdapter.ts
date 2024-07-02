@@ -6,6 +6,7 @@ import { Message, MessageBundle } from "./types/message-bundle.js"
 import { replicateRxCollection } from "rxdb/plugins/replication"
 import type { SlotEntry } from "../persistence/slotfiles/types/SlotEntry.js"
 import type createSlotWriter from "../persistence/slotfiles/createSlotWriter.js"
+import type { LintReport, LintResult } from "./types/lint.js"
 
 const debug = _debug("rxdb-adapter")
 type MessageUpdate = {
@@ -80,9 +81,18 @@ export const combineToBundles = (
 export function createMessageBundleSlotAdapter(
 	bundleStorage: Awaited<ReturnType<typeof createSlotWriter<MessageBundle>>>,
 	messageStorage: Awaited<ReturnType<typeof createSlotWriter<Message>>>,
-	onBundleChangeCb: (source: "adapter" | "api" | "fs", changedMessageBundle: MessageBundle) => void
+	onBundleChangeCb: (source: "adapter" | "api" | "fs", changedMessageBundle: MessageBundle) => void,
+	lintResults?: Subject<LintResult>
 ) {
 	let loadedMessageBundles = new Map<string, MessageBundle>()
+	const loadedMessageBundleLintReports = new Map<
+		string,
+		{
+			hash: string
+			reports: LintReport[]
+		}
+	>()
+
 	const pullStream$ = new Subject<RxReplicationPullStreamItem<any, any>>()
 
 	const onBundleChange = (
@@ -168,6 +178,24 @@ export function createMessageBundleSlotAdapter(
 			} else {
 				debug("bundle callback - NOT IMPlEMENTED  add MESSAGE")
 			}
+		}
+	})
+
+	lintResults?.subscribe((reportResults) => {
+		// for now we assume that messages exist before the reports
+		for (const [bundleId, bundle] of loadedMessageBundles) {
+			const currentReports = reportResults[bundleId]
+			if (reportResults[bundleId]!.hash !== loadedMessageBundleLintReports.get(bundleId)?.hash) {
+				if (currentReports) {
+					loadedMessageBundleLintReports.set(bundleId, currentReports)
+				} else {
+					loadedMessageBundleLintReports.delete(bundleId)
+				}
+			}
+			const clonedBundle = structuredClone(bundle)
+			clonedBundle.lintReports = currentReports?.reports
+			loadedMessageBundles.set(bundleId, clonedBundle)
+			onBundleChange("fs", clonedBundle)
 		}
 	})
 

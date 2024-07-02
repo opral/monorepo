@@ -4,6 +4,7 @@ import type {
 	InstalledLintRule,
 	InstalledPlugin,
 	LintReport,
+	LintResult,
 	Message,
 	MessageBundle,
 	ProjectSettings2,
@@ -38,7 +39,7 @@ export type InlangProject2 = {
 
 	messageBundleCollection: RxCollection<MessageBundle>
 	// lintReportCollection: RxCollection<LintReport>
-	lintReports$: Subscribable<LintReport[]>
+	lintReports$: Subscribable<LintResult>
 
 	internal: {
 		bundleStorage: Awaited<ReturnType<typeof createSlotWriter<MessageBundle>>>
