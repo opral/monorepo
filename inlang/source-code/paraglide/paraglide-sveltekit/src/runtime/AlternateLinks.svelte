@@ -24,7 +24,6 @@
 
 	$: localisedPath = parseRoute($page.url.pathname, absoluteBase)[0]
 	$: canonicalPath = strategy.getCanonicalPath(localisedPath, currentLang)
-	$: console.log("alternate canonicalPath: ", canonicalPath, "currentLang: ", currentLang, "localized: ", localisedPath)
 	$: alternateLinks = getAlternateLinks(canonicalPath, strategy)
 </script>
 
