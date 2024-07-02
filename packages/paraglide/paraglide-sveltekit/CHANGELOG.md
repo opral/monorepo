@@ -1,5 +1,11 @@
 # @inlang/paraglide-sveltekit
 
+## 0.10.9
+
+### Patch Changes
+
+- cf4019d: remove `console.log` statement that managed to slip by linting
+
 ## 0.10.8
 
 ### Patch Changes

@@ -1,5 +1,17 @@
 # @inlang/github-lint-action
 
+## 0.3.19
+
+### Patch Changes
+
+- 250d76d: Fix missing comment if PR already has a comment
+
+## 0.3.18
+
+### Patch Changes
+
+- 123d206: Add comment logging
+
 ## 0.3.17
 
 ### Patch Changes
