@@ -6,7 +6,14 @@ import * as Comlink from "comlink"
 import type { Message, MessageBundle } from "../types/message-bundle.js"
 import type { ProjectSettings2 } from "../types/project-settings.js"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
-import type { Fix, LintReport, LintResult } from "../types/lint.js"
+import type {
+	Fix,
+	LintConfig,
+	LintReport,
+	LintResult,
+	MessageBundleLintData,
+	MessageBundleLintRule,
+} from "../types/lint.js"
 import { createDebugImport, importSequence } from "../import-utils.js"
 import { createImport } from "./import.js"
 import lintRule from "../dev-modules/lint-rule.js"
@@ -76,14 +83,17 @@ export async function createLinter(
 
 				for (const lintRule of resolvedModules.messageBundleLintRules) {
 					const promise = lintRule.run({
-						messageBundle: messageBundle,
+						node: messageBundle,
 						settings,
-						report: (report) => {
-							const reportWithRule = { ...report, ruleId: lintRule.id }
-							const fullReport = populateLevel(reportWithRule, settings.lintConfig)
-
+						report: (reportData) => {
+							const report = toReport({
+								reportData,
+								messageBundle,
+								lintRule,
+								lintConfig: settings.lintConfig,
+							})
 							const reportsForBundle = reportsById[messageBundle.id] || []
-							reportsForBundle.push(fullReport)
+							reportsForBundle.push(report)
 						},
 					})
 					promises.push(promise as Promise<any>)
@@ -103,7 +113,6 @@ export async function createLinter(
 				}
 			}
 
-			console.log(result)
 			return result
 		},
 
@@ -124,10 +133,45 @@ export async function createLinter(
 			if (!rule.fix) throw new Error(`rule ${report.ruleId} does not have a fix function`)
 
 			const messageBundle = structuredClone(bundle)
-			const fixed = await rule.fix({ report, fix, settings, messageBundle })
+			const fixed = await rule.fix({ report, fix, settings, node: messageBundle })
 			return fixed
 		},
 	})
+}
+
+function toReport({
+	reportData,
+	messageBundle,
+	lintConfig,
+	lintRule,
+}: {
+	reportData: MessageBundleLintData
+	messageBundle: MessageBundle
+	lintRule: MessageBundleLintRule
+	lintConfig: LintConfig[]
+}): LintReport {
+	const report: Omit<LintReport, "level"> = {
+		ruleId: lintRule.id,
+		...reportData,
+	}
+
+	if ("variantId" in report) {
+		// find message ID
+		const message = messageBundle.messages.find((msg) =>
+			msg.variants.find((variant) => variant.id === report.variantId)
+		)
+		if (!message) throw new Error(`No message has a variant with id ${report.variantId}`)
+
+		//@ts-ignore
+		report.messageId = message.id
+		//@ts-ignore
+		report.bundleId = messageBundle.id
+	} else if ("messageId" in report) {
+		//@ts-ignore
+		report.bundleId = messageBundle.id
+	}
+
+	return populateLevel(report, lintConfig)
 }
 
 function hashLintReports(reports: LintReport[]) {

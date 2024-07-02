@@ -116,6 +116,16 @@ export type LintReport<Fixes extends LintFix[] = LintFix[]> = {
 export type Fix<Report extends LintReport> = Report["fixes"][number]
 
 /**
+ * The data that get's passed to the MessageBundleLint's `report` callback
+ */
+export type MessageBundleLintData =
+	| (Omit<LintReport, "ruleId" | "level" | "messageBundleId" | "messageId" | "variantId"> & {
+			messageBundleId: string
+	  })
+	| { messageId: string }
+	| { variantId: string }
+
+/**
  * The message bundle lint rule API.
  *
  * You can use your own settings by extending the type with a generic:
@@ -138,14 +148,7 @@ export type MessageBundleLintRule<
 	run: (args: {
 		node: MessageBundle
 		settings: ProjectSettings2 & ExternalSettings
-		report: (
-			args:
-				| (Omit<LintReport, "ruleId" | "level" | "messageBundleId" | "messageId" | "variantId"> & {
-						messageBundleId: string
-				  })
-				| { messageId: string }
-				| { variantId: string }
-		) => void
+		report: (data: MessageBundleLintData) => void
 	}) => MaybePromise<void>
 
 	fix?: <Report extends LintReport>(args: {
