@@ -7,14 +7,6 @@ import { watchOptionsTransferHandler } from "./transfer/watchOptions.js"
 Comlink.transferHandlers.set("asyncIterable", asyncIterableTransferHandler)
 Comlink.transferHandlers.set("watchOptions", watchOptionsTransferHandler)
 
-export function makeFsAvailableTo(fs: NodeishFilesystemSubset, wrkr: Worker) {
-	const _fs: NodeishFilesystemSubset = {
-		readdir: fs.readdir,
-		readFile: fs.readFile,
-		writeFile: fs.writeFile,
-		mkdir: fs.mkdir,
-		watch: fs.watch,
-	}
-
-	Comlink.expose(_fs, adapter(wrkr))
+export function makeFsAvailableTo(fs: NodeishFilesystemSubset, worker: Worker) {
+	Comlink.expose(fs, adapter(worker))
 }
