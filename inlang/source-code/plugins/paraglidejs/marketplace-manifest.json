@@ -1,0 +1,37 @@
+{
+	"$schema": "https://inlang.com/schema/marketplace-manifest",
+	"id": "plugin.inlang.paraglideJs",
+	"icon": "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/plugins/paraglideJs/assets/icon.png",
+	"displayName": {
+		"en": "paraglideJs"
+	},
+	"description": {
+		"en": "A plugin for inlang projects that works with paraglideJs and reads + writes resources."
+	},
+	"pages": {
+		"/": "./inlang/source-code/plugins/paraglideJs/README.md",
+		"/changelog": "./inlang/source-code/plugins/paraglideJs/CHANGELOG.md"
+	},
+	"keywords": [
+		"paraglideJs",
+		"javascript",
+		"react",
+		"nextjs",
+		"website",
+		"load",
+		"save",
+		"import",
+		"export",
+		"messages",
+		"plugin",
+		"svelte",
+		"solid",
+		"astro"
+	],
+	"recommends": ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g", "m/gerre34r"],
+	"publisherName": "inlang",
+	"website": "https://manage.inlang.com/install?module=plugin.inlang.paraglideJs",
+	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",
+	"license": "Apache-2.0",
+	"module": "https://cdn.jsdelivr.net/npm/@inlang/plugin-paraglideJs@latest/dist/index.js"
+}
