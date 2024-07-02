@@ -65,10 +65,11 @@ function isWatchOptions(obj: unknown): obj is WatchOptions {
 	if (!obj) return false
 	if (typeof obj !== "object") return false
 
-	const allowedKeys = ["signal", "recursive"]
+	const allowedKeys = ["signal", "recursive", "persistent"]
 
 	if (!("signal" in obj) || !(obj["signal"] instanceof AbortSignal)) return false
 	if ("recursive" in obj && typeof obj["recursive"] !== "boolean") return false
+	if ("persistent" in obj && typeof obj["persistent"] !== "boolean") return false
 
 	for (const key in obj) {
 		if (!allowedKeys.includes(key)) return false

@@ -1,21 +1,16 @@
+import { loadProject } from "../../loadProject2.js"
 import { getFs } from "../client.js"
 
 const fs = getFs()
 
-startEditing("/file.txt")
+const repo = {
+	nodeishFs: fs,
+	getFirstCommitHash: () => "dummy_first_hash",
+} as any
 
-async function startEditing(path: string) {
-	const TRUE = true // shut up eslint
-	while (TRUE) {
-		const newContent = `${Math.random().toString(36).slice(2)}`
-		await fs.writeFile(path, `${newContent}`)
+const inlangProject = await loadProject({
+	projectPath: "/teroject.inlang",
+	repo: repo,
+})
 
-		console.info("worker-1: edited file", newContent)
-
-		await sleep(500)
-	}
-}
-
-function sleep(ms: number) {
-	return new Promise((resolve) => setTimeout(resolve, ms))
-}
+inlangProject.messageBundleCollection.find().$.subscribe((msg) => console.info("worker", msg))
