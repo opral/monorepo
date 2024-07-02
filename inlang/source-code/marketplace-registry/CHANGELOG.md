@@ -1,5 +1,11 @@
 # @inlang/marketplace-registry
 
+## 1.5.10
+
+### Patch Changes
+
+- 1ef9a0e: add item to registry
+
 ## 1.5.9
 
 ### Patch Changes

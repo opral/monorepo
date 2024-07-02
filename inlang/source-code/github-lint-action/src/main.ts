@@ -266,51 +266,63 @@ ${lintSummary
 		})
 		if (issue.data.locked) return console.debug("PR is locked, comment is skipped")
 
-		// Check if PR already has a comment from this action
-		const existingComment = await octokit.rest.issues.listComments({
+		// Check if PR already has comments
+		const existingComments = await octokit.rest.issues.listComments({
 			owner,
 			repo,
 			issue_number: prNumber as number,
 		})
-		if (existingComment.data.length > 0) {
-			const commentId = existingComment.data.find(
-				(comment) =>
-					(comment.body?.includes(commentMergeline) || comment.body?.includes(commentResolved)) &&
-					comment.user?.login === "github-actions[bot]"
-			)?.id
-			if (commentId) {
-				console.debug("Updating existing comment")
-				if (results.every((result) => result.commentContent.length === 0)) {
-					console.debug("Reports have been fixed, updating comment and removing it")
-					await octokit.rest.issues.updateComment({
-						owner,
-						repo,
-						comment_id: commentId,
-						body: commentResolved,
-						as: "ninja-i18n",
-					})
-				} else {
-					console.debug("Reports have not been fixed, updating comment")
-					await octokit.rest.issues.updateComment({
-						owner,
-						repo,
-						comment_id: commentId,
-						body: commentContent,
-						as: "ninja-i18n",
-					})
+		// Check if a Ninja comment already exists
+		const ninjaCommentId = existingComments.data.find(
+			(comment) =>
+				(comment.body?.includes(commentMergeline) || comment.body?.includes(commentResolved)) &&
+				comment.user?.login === "github-actions[bot]"
+		)?.id
+		if (ninjaCommentId) {
+			console.debug("Updating existing comment")
+			if (results.every((result) => result.commentContent.length === 0)) {
+				console.debug("Reports have been fixed, updating comment")
+				const comment = await octokit.rest.issues.updateComment({
+					owner,
+					repo,
+					comment_id: ninjaCommentId,
+					body: commentResolved,
+					as: "ninja-i18n",
+				})
+				if (comment) {
+					console.debug("Comment updated:\n", comment?.data?.body)
+				}
+			} else {
+				console.debug("Reports have not been fixed, updating comment")
+				const comment = await octokit.rest.issues.updateComment({
+					owner,
+					repo,
+					comment_id: ninjaCommentId,
+					body: commentContent,
+					as: "ninja-i18n",
+				})
+				if (comment) {
+					console.debug("Comment updated:\n", comment?.data?.body)
 				}
 			}
 		} else if (results.every((result) => result.commentContent.length === 0)) {
 			console.debug("No lint reports found, skipping comment")
 		} else {
 			console.debug("Creating a new comment")
-			await octokit.rest.issues.createComment({
+			const comment = await octokit.rest.issues.createComment({
 				owner,
 				repo,
 				issue_number: prNumber as number,
 				body: commentContent,
 				as: "ninja-i18n",
 			})
+			// eslint-disable-next-line unicorn/no-null
+			core.debug(`createComment API response:\n${JSON.stringify(comment, null, 2)}`)
+			if (!comment || comment.status !== 201) {
+				throw new Error(`Failed to create a new comment [${comment?.status}]`)
+			} else {
+				console.debug("Comment created:\n", comment?.data?.body)
+			}
 		}
 
 		// Fail the workflow if new lint errors or project setup errors exist
