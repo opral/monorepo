@@ -192,8 +192,6 @@ export function createMessageBundleSlotAdapter(
 		if (e !== "records-change" || !messageRecordIds) {
 			return
 		}
-		debugger
-
 		debug(source)
 
 		for (const messageRecord of messageStorage.findDocumentsById(messageRecordIds)) {
