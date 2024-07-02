@@ -208,6 +208,7 @@ export default class InlangMessageBundle extends LitElement {
 	}
 
 	override render() {
+		console.log(this.messageBundle)
 		return html`
 			<div class=${`header`} part="header">
 				<div class="header-left">
@@ -333,6 +334,7 @@ export default class InlangMessageBundle extends LitElement {
 	}
 
 	private _renderMessage(locale: LanguageTag, message?: Message, lintReports?: LintReport[]) {
+		console.log(lintReports)
 		return html`
 			<div class="message">
 				<div class="language-container">
@@ -451,13 +453,11 @@ export default class InlangMessageBundle extends LitElement {
 												>Sort</sl-button
 										  >`
 										: ``}
-									${this.messageBundle?.lintReports &&
-									this.messageBundle?.lintReports?.reports.length > 0 &&
-									this.messageBundle?.lintReports?.reports.some((report) => !report.variantId)
+									${lintReports &&
+									lintReports.length > 0 &&
+									lintReports.some((report) => !report.variantId)
 										? html`<inlang-lint-report-tip
-												.lintReports=${this.messageBundle?.lintReports?.reports.filter(
-													(report) => !report.variantId
-												) ?? []}
+												.lintReports=${lintReports.filter((report) => !report.variantId) ?? []}
 												.installedLintRules=${this.installedLintRules}
 												.fixLint=${this._fixLint}
 										  ></inlang-lint-report-tip>`

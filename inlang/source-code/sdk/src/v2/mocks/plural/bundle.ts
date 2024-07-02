@@ -2,6 +2,7 @@ import type { MessageBundle } from "../../types/index.js"
 import {
 	createMockBundleLintReport,
 	createMockMessageLintReport,
+	createMockVariantLintReport,
 } from "../lintRports/mockCreate.js"
 
 export const pluralBundle: MessageBundle = {
@@ -187,11 +188,12 @@ export const pluralBundle: MessageBundle = {
 				messageId: "mock_message_id_en",
 				body: "The bundle `mock_bundle_human_id` is missing the reference message for the locale `en`",
 			}),
-			createMockMessageLintReport({
+			createMockVariantLintReport({
 				ruleId: "messageBundleLintRule.inlang.missingReference",
 				messageBundleId: "mock_bundle_human_id",
 				messageId: "mock_message_id_en",
 				body: "The bundle `mock_bundle_human_id` is missing the reference message for the locale `en`",
+				variantId: "mock_variant_id_en_other",
 				level: "warning",
 			}),
 		],
