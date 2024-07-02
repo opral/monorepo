@@ -22,7 +22,6 @@ export function MainViewIframe({ projectPath }: { projectPath: string }) {
 			projectPath,
 			repo: repo,
 		}).then((project) => {
-			console.log("project", project)
 			setCurrentProject(project)
 		})
 	}, [])
@@ -118,7 +117,14 @@ export function MainViewIframe({ projectPath }: { projectPath: string }) {
 								Settings
 							</div>
 						</div>
-						{currentView === "settings" && <SettingsView project={currentProject}></SettingsView>}
+						{currentView === "settings" && (
+							<SettingsView
+								project={{
+									projectPath: projectPath,
+									inlangProject: currentProject,
+								}}
+							></SettingsView>
+						)}
 						{currentView === "messageList" && (
 							<MessageBundleList project={currentProject}></MessageBundleList>
 						)}
