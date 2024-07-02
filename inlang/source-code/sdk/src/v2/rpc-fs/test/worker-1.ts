@@ -13,4 +13,7 @@ const inlangProject = await loadProject({
 	repo: repo,
 })
 
-inlangProject.messageBundleCollection.find().$.subscribe((msg) => console.info("worker", msg))
+inlangProject.settings.subscribe((settings) => console.info("worker settings", settings))
+inlangProject.messageBundleCollection
+	.find()
+	.$.subscribe((msg) => console.info("worker messages", msg))
