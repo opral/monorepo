@@ -119,11 +119,8 @@ export type Fix<Report extends LintReport> = Report["fixes"][number]
  * The data that get's passed to the MessageBundleLint's `report` callback
  */
 export type MessageBundleLintData =
-	| (Omit<LintReport, "ruleId" | "level" | "messageBundleId" | "messageId" | "variantId"> & {
-			messageBundleId: string
-	  })
-	| { messageId: string }
-	| { variantId: string }
+	| Omit<LintReport, "ruleId" | "level" | "messageBundleId" | "messageId" | "variantId"> &
+			({ messageBundleId: string } | { messageId: string } | { variantId: string })
 
 /**
  * The message bundle lint rule API.

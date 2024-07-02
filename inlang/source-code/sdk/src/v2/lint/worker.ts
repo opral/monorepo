@@ -150,25 +150,21 @@ function toReport({
 	lintRule: MessageBundleLintRule
 	lintConfig: LintConfig[]
 }): LintReport {
+	const messageId =
+		"messageId" in reportData
+			? reportData.messageId
+			: "variantId" in reportData
+			? messageBundle.messages.find((msg) =>
+					msg.variants.find((variant) => variant.id === reportData.variantId)
+			  )?.id
+			: undefined
+
 	const report: Omit<LintReport, "level"> = {
 		ruleId: lintRule.id,
+		messageBundleId: messageBundle.id,
+		messageId,
+		variantId: "variantId" in reportData ? reportData.variantId : undefined,
 		...reportData,
-	}
-
-	if ("variantId" in report) {
-		// find message ID
-		const message = messageBundle.messages.find((msg) =>
-			msg.variants.find((variant) => variant.id === report.variantId)
-		)
-		if (!message) throw new Error(`No message has a variant with id ${report.variantId}`)
-
-		//@ts-ignore
-		report.messageId = message.id
-		//@ts-ignore
-		report.bundleId = messageBundle.id
-	} else if ("messageId" in report) {
-		//@ts-ignore
-		report.bundleId = messageBundle.id
 	}
 
 	return populateLevel(report, lintConfig)
