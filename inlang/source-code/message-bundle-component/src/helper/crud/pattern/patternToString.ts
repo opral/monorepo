@@ -1,5 +1,16 @@
 import type { Pattern } from "@inlang/sdk/v2"
 
+/**
+ * MVP version of the function
+ *
+ * Converts a pattern to a string.
+ * @param props.pattern The pattern to convert to a string.
+ * @returns The pattern as a string.
+ *
+ * @example
+ * patternToString({ pattern: [{ value: "Hello" }, { type: "expression", arg: { type: "variable", name: "name" } }] }) -> "Hello {{name}}"
+ */
+
 const patterToString = (props: { pattern: Pattern }): string => {
 	if (!props.pattern) {
 		return ""
@@ -15,7 +26,7 @@ const patterToString = (props: { pattern: Pattern }): string => {
 			}
 			return ""
 		})
-		.join(" ")
+		.join("")
 }
 
 export default patterToString

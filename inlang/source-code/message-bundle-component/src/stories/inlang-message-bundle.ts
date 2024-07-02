@@ -29,8 +29,8 @@ import SlDropdown from "@shoelace-style/shoelace/dist/components/dropdown/dropdo
 import SlMenu from "@shoelace-style/shoelace/dist/components/menu/menu.component.js"
 import SlMenuItem from "@shoelace-style/shoelace/dist/components/menu-item/menu-item.component.js"
 
-import { getInputs } from "../helper/crud/input/get.js"
-import { createInput } from "../helper/crud/input/create.js"
+import getInputs from "../helper/crud/input/get.js"
+import createInput from "../helper/crud/input/create.js"
 import sortAllVariants from "../helper/crud/variant/sortAll.js"
 import type { InstalledMessageLintRule } from "@inlang/sdk"
 
