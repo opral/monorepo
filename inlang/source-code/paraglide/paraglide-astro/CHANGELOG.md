@@ -1,5 +1,19 @@
 # @inlang/paraglide-astro
 
+## 0.2.0
+
+### Minor Changes
+
+- bc6f038: In `output: "server"` mode `AsyncLocalStorage` is now used to scope the language-state to the current request.
+
+  `AsyncLocalStorage` is an experimental node API, but it's already extensively used in frameworks like NextJS and is [on track to become a proper TC39 spec](https://github.com/tc39/proposal-async-context). All major serverless platforms support it.
+
+  If you're using Cloudflare you will need to set `compatibility_flags = [ "nodejs_compat" ]` in `wrangler.toml.`
+
+### Patch Changes
+
+- bc6f038: The `base` path is now respected when detecting the language without `astro:i18n`
+
 ## 0.1.32
 
 ### Patch Changes
