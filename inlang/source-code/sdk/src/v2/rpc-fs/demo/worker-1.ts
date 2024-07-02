@@ -13,6 +13,7 @@ const inlangProject = await loadProject({
 	repo: repo,
 })
 
+// @ts-ignore
 inlangProject.settings.subscribe((settings) => console.info("worker settings", settings))
 inlangProject.messageBundleCollection
 	.find()

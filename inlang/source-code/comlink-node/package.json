@@ -10,11 +10,13 @@
 	},
 	"exports": {
 		".": {
+			"vitest": "./vitest.js",
 			"types": "./types.d.ts",
 			"node": "./node.js",
 			"import": "./not-node.js"
 		},
 		"./worker": {
+			"vitest": "./worker/vitest.js",
 			"types": "./worker/types.d.ts",
 			"node": "./worker/node.js",
 			"import": "./worker/not-node.js"

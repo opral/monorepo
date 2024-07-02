@@ -5,7 +5,7 @@ const fs = getFs()
 try {
 	const watcher = await fs.watch("/file.txt")
 	for await (const ev of watcher) {
-		const content = await fs.readFile("/file.txt", { encoding: "utf8" })
+		const content = await fs.readFile("/file.txt", { encoding: "utf-8" })
 		console.info("worker-2: file changed", content, ev)
 	}
 } catch (err: unknown) {
