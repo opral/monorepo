@@ -28,7 +28,7 @@ import {
 	type RxConflictHandlerOutput,
 } from "rxdb"
 import { getRxStorageMemory } from "rxdb/plugins/storage-memory"
-import { BehaviorSubject, combineLatest, from, map, switchMap, tap } from "rxjs"
+import { BehaviorSubject, combineLatest, from, switchMap, tap } from "rxjs"
 import { resolveModules } from "./resolveModules2.js"
 import { createLintWorker } from "./lint/host.js"
 import {
@@ -278,10 +278,10 @@ export async function loadProject(args: {
 }
 
 const defaultConflictHandler: RxConflictHandler<any> = function (
-	i: RxConflictHandlerInput<any>,
-	_context: string
+	i: RxConflictHandlerInput<any>
+	//_context: string
 ): Promise<RxConflictHandlerOutput<any>> {
-	console.log("defaultConflictHandler")
+	// console.log("defaultConflictHandler")
 	const newDocumentState = stripAttachmentsDataFromDocument(i.newDocumentState)
 	const realMasterState = stripAttachmentsDataFromDocument(i.realMasterState)
 
