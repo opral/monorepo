@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 /**
  * The Package version from package.json
  *
