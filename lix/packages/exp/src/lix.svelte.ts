@@ -8,6 +8,10 @@ export function openRepo (url, { branch, author }) {
   const repoProm = new Promise((resolve) => {repoAvailable = resolve})
   let branches = $state([branch])
 
+  // get git notes
+  let depth = 1
+  console.log('repo o', {depth})
+
   // move this to component ! as $state(openRepo...)?
   const state = $state({
     folders: [], // >> files()
@@ -26,6 +30,7 @@ export function openRepo (url, { branch, author }) {
     exclude: [],
     commits: [],
     unpushed: 0,
+    filepath: undefined,
 
     files: function (path) {
       let fileContent = $state('')
@@ -61,12 +66,52 @@ export function openRepo (url, { branch, author }) {
       }
     },
 
+    updateStatus: async function () {
+      await updateStatus()
+    },
+
     pull: async function () {
       const repo = await repoProm
       await repo.pull({
         fastForward: true,
         singleBranch: true,
       })
+      await updateStatus()
+    },
+
+    readNote: async function (params) {
+      const repo = await repoProm
+      return await repo.readNote(params)
+    },
+
+    async nextPage () { 
+      depth = depth + 10
+      const repo = await repoProm
+      await repo.fetch({ depth: 10, relative: true })
+      updateStatus()
+    },
+
+    clear () {
+      depth = 1
+      updateStatus()
+    },
+
+    fetch: async function (args) {
+      const repo = await repoProm
+
+      if (!args) {
+        // for generic refetch add notes update to the request
+        // FIXME: enable notes suppport as well as fork status on per repo level. use since for notes!
+        await Promise.all([
+          repo.fetch({ depth: 1, ref: 'refs/notes/commits',  remoteRef: 'refs/notes/commits', singleBranch: true }).catch((err) => {err}),
+          repo.fetch()
+        ])
+
+        await repo.fetch({ depth: 1, ref: 'refs/pull/2/head',  remoteRef: 'refs/pull/2/head', singleBranch: true }).catch((err) => {err})
+      } else {
+        await repo.fetch(args)
+      }
+      
       await updateStatus()
     },
 
@@ -78,6 +123,8 @@ export function openRepo (url, { branch, author }) {
       console.time('push')
       await repo.push()
       console.timeEnd('push')
+
+      depth = depth + 1
 
       await updateStatus()
     },
@@ -100,6 +147,7 @@ export function openRepo (url, { branch, author }) {
       await state.repo.commit({ message, include: includedFiles })
       console.timeEnd('commit')
 
+      depth = depth + 1
       await updateStatus().then(() => (state.exclude = []))
 
       await state.repo.push().catch(console.error)
@@ -124,9 +172,8 @@ export function openRepo (url, { branch, author }) {
     author, // TODO: check with git config
     // sparseFilter: ({ filename, type }) => type === 'folder' || filename.endsWith('.md')
   }).then(async (newRepo) => {
-    // @ts-ignore
-    window.repo = state.repo
     state.repo = newRepo
+    window.repo = state.repo
     repoAvailable(newRepo)
 
     state.currentBranch = await state.repo.getCurrentBranch()
@@ -146,34 +193,109 @@ export function openRepo (url, { branch, author }) {
       console.time('statusList')
       state.status = await state.repo.statusList({ includeStatus: ['materialized'] })
       console.timeEnd('statusList')
-      // Console.log(await repo.log({ filepath: '.npmrc' }))
 
-      // console.time('double log')
-      const originCommits = (await state.repo.log({ ref: 'origin/' + state.currentBranch, depth: 15 })).reduce((agg, com) => {
-        agg[com.oid] = true
+      // since: new Date(currentCommits[0].committer.timestamp * 1000) // TODO: log all origin commits from mergebase, or dont use same branch for local commits until publishing
+
+      // TODO: support for disjunkt "per file history" entries and prebundling the merge branch commits instead of dropping them!
+
+      const mergeBranches = {}
+      
+      const allOriginCommits = (await state.repo.log({ ref: 'origin/' + state.currentBranch, depth, filepath: state.filepath })) // 'refs/remotes/origin/'
+      const originIndex = allOriginCommits.reduce((agg, com) => {
+        agg[com.oid] = com
         return agg
       }, {})
 
-      let newUnpushed = 0
-      // ...await state.repo.log({  ref: 'refs/remotes/origin/' + state.currentBranch, depth: 5})
-      let foundOrigng= false
-      let currentCommitOid
-      state.commits = ([...await state.repo.log({ depth: 15 })]).map((com) => {
-        if (!currentCommitOid) {
-          currentCommitOid = com.oid
-          com.current = true
+      // remove the non first parent merge branch commits
+      const originCommits = []
+      let nextCommit = allOriginCommits[0].oid
+      while (originIndex[nextCommit]) {
+        const com = originIndex[nextCommit]
+        com.primary = true
+        originCommits.push(com)
+        
+        let rest
+        [nextCommit, ...rest] = com.commit.parent
+        if (rest?.length) {
+          mergeBranches[com.oid] = rest.map((oid) => {
+            if (!originIndex[oid]) {
+              return [{ oid }]
+            }
+            originIndex[oid].mergeBranch = true
+            return [originIndex[oid]]
+          })
         }
-        if (originCommits[com.oid]) {
-          if (!foundOrigng) {
-            foundOrigng = true
-            com.origin = true
+      }
+
+      // TODO: Move over all children of merge commits that are not primaries to the mergeBranches
+
+
+      const allHeadCommits = await state.repo.log({ depth, ref: 'HEAD', filepath: state.filepath })
+      const headIndex = allHeadCommits.reduce((agg, com) => {
+        agg[com.oid] = com
+        if (!originIndex[com.oid]) {
+          com.headOnly = true
+        }
+       
+        return agg
+      }, {})
+
+      // remove the non first parent merge branch commits
+      const headCommits = []
+      let nextHeadCommit = allHeadCommits[0].oid
+      while (headIndex[nextHeadCommit] && headIndex[nextHeadCommit].headOnly) {
+        const com = headIndex[nextHeadCommit]
+        headCommits.push(com)
+
+        let rest
+        [nextHeadCommit, ...rest] = com.commit.parent
+        if (rest?.length) {
+          mergeBranches[com.oid] = rest.map((oid) => {
+            if (!headIndex[oid]) {
+              return [ { oid }]
+            }
+            headIndex[oid].mergeBranch = true
+            return [headIndex[oid]]
+          })
+        }
+      }
+
+      // move the origin commits to the head branch that were cut off from end of origin branch
+      let lastOriginCommitParent = originCommits.at(-1)?.commit.parent[0]
+      while (headIndex[lastOriginCommitParent] && headIndex[lastOriginCommitParent].headOnly) {
+        originCommits.push(headIndex[lastOriginCommitParent])
+        delete headIndex[lastOriginCommitParent]
+        lastOriginCommitParent = originCommits.at(-1)?.commit.parent[0]
+      }
+
+      // fixme: apply this on final array in case these are the same or replaced
+      // const originHead = originCommits[0].oid
+      const localHead = allHeadCommits[0].oid
+      
+      originCommits[0].origin = true
+
+      const commits = [
+        ...headCommits.flatMap((com) => {
+          if (!headIndex[com.oid]) {
+            return []
           }
-        } else {
-          newUnpushed++
-        }
+          com.indent = 1
+          return com
+        }), 
+        ...originCommits
+      ].map((com) => {
+          if (com.oid === localHead) {
+            com.current = true
+          }
         return com
       })
-      // console.timeEnd('double log')
+
+      let newUnpushed = Object.values(headIndex).filter(com => com.headOnly).length
+
+      console.log(commits.map(com => ({ oid: com.oid, current: com.current, origin: com.origin, parent: [...com.commit.parent] })))
+      console.log({mergeBranches})
+      state.commits = commits
+      state.mergeBranches = mergeBranches // used for expanding merge commits
       state.unpushed = newUnpushed
 
       // console.time('folders')

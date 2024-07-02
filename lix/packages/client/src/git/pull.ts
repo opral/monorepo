@@ -21,7 +21,7 @@ export async function pull(
 
 	const oid = await isoGit.resolveRef({
 		fs: ctx.rawFs,
-		dir: "/",
+		dir: ctx.dir,
 		ref: "refs/remotes/origin/" + branchName,
 	})
 	const { commit } = await isoGit.readCommit({ fs: ctx.rawFs, dir: "/", oid })

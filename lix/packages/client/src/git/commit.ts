@@ -40,11 +40,13 @@ export async function commit(
 		author: overrideAuthor,
 		message,
 		include,
+		ammend
 	}: // TODO: exclude,
 	{
 		author?: any
 		message: string
 		include: string[]
+		ammend?: boolean
 		// exclude: string[]
 	}
 ) {
@@ -71,12 +73,12 @@ export async function commit(
 		dir: ctx.dir,
 		cache: ctx.cache,
 		author: overrideAuthor || ctx.author,
-		message: message,
+		message
 	}
 
 	if (ctx.experimentalFeatures.lixCommit) {
 		console.warn("using experimental commit for this repo.")
-		return doCommit(commitArgs)
+		return doCommit({...commitArgs, ammend})
 	} else {
 		return originalIsoGitCommit(commitArgs)
 	}
@@ -89,6 +91,7 @@ export async function doCommit({
 	ref,
 	author,
 	message,
+	ammend,
 }: {
 	cache: any
 	fs: NodeishFilesystem
@@ -96,6 +99,7 @@ export async function doCommit({
 	ref?: string
 	author: Author
 	message: string
+	ammend?: boolean
 }) {
 	const fileStates: {
 		[parentFolder: string]: PartialEntry[]
@@ -226,6 +230,12 @@ export async function doCommit({
 	})
 
 	const tree = await createTree("/", fileStates)
+
+	if (ammend) {
+		// TODO: get previous message and add ammend footer
+		message = (message || '') + "\n\n" + 'ammends: <TODO: oid>\n'
+		throw new Error("ammend not implemented yet")
+	}
 
 	return originalIsoGitCommit({
 		cache,

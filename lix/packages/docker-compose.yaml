@@ -2,51 +2,49 @@
 
 name: lix
 services:
-  git:
+  proxy:
     restart: always
-    container_name: git
-    image: git:12
-    hostname: git
-    # ports: [ "8000" ]
-    labels: [ dev.orbstack.domains=git.local ]
-    entrypoint: /start.sh
-    # stdin_open: true
-    # tty: true
-    # entrypoint: /bin/bash
+    container_name: proxy
+    image: proxy:6
     build:
-      context: ./server/git-test-server
-      dockerfile: Dockerfile
-    networks:
-      - lix
-    user: root
-    # env_file:
-    #   - ./.env
+      context: ./dev-server
+    ports:
+      - "80:80"
+      # - "9229:9229"
+    develop:
+      watch:
+        - action: sync
+          path: ./dev-server/
+          target: /workspace/
+          ignore:
+            - node_modules
+            - .pnpm-store
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - pnpm-store:/root/.local/share/pnpm/store/v3
 
   gitea:
-    labels: [ dev.orbstack.domains=gitea.local ]
-    image: gitea/gitea:1.21.11
+    labels: [ com.opral.lix.cors=exp.localhost ]
+    image: gitea/gitea:latest
     container_name: gitea
     hostname: gitea
     environment:
       - USER_UID=1000
       - USER_GID=1000
     restart: always
-    networks:
-      - lix
     volumes:
       - ./gitea:/data
       # - /etc/timezone:/etc/timezone:ro - /etc/localtime:/etc/localtime:ro
-    # ports:
-    #   - "3000:3000"
+    ports: ["3000"]
 
   runner:
     restart: always
-    container_name: gitea-runner
+    container_name: runner
     hostname: runner
-    image: gitea/act_runner:nightly
+    image: gitea/act_runner:latest
     environment:
       CONFIG_FILE: /config.yaml
-      GITEA_INSTANCE_URL: "http://gitea.local:3000"
+      GITEA_INSTANCE_URL: "http://gitea:3000"
       GITEA_RUNNER_REGISTRATION_TOKEN: "pb3VkhEXa03IaQPUFSGPP2nImshQYvr72d1ZYH3Z"
       GITEA_RUNNER_NAME: "local"
       GITEA_RUNNER_LABELS: ""
@@ -59,26 +57,18 @@ services:
     restart: always
     container_name: exp
     hostname: exp
-    labels: [ dev.orbstack.domains=exp.local ]
     image: exp:6
     build:
       dockerfile_inline: |
-        FROM node:20-slim
+        FROM node:20
         RUN apt upgrade && apt update
         RUN apt-get install openssl curl libssl-dev -y
         RUN npm -g install pnpm
         COPY --chown=app:app . /workspace
         RUN chmod +x /workspace/dev.sh
         WORKDIR /workspace
-        # todo: shell aliase
-    # ports: [ "3334" ]
-    working_dir: /workspace
+    ports: [ "3334"]
     entrypoint: /bin/bash ./dev.sh
-    # entrypoint: /bin/bash
-    # stdin_open: true
-    # tty: true
-    networks:
-      - lix
     develop:
       watch:
         - action: sync
@@ -91,28 +81,14 @@ services:
       - pnpm-store:/root/.local/share/pnpm/store/v3
 
   # josh:
-  #   restart: always
-  #   container_name: josh
-  #   hostname: josh
-  #   labels: [ dev.orbstack.domains=josh.local ]
   #   image: joshproject/josh-proxy:latest
   #   platform: linux/amd64
-  #   # entrypoint: /bin/bash
-  #   # stdin_open: true
-  #   # tty: true
-  #   networks:
-  #     - lix
-  #   ports:
-  #     - "8000"
+  #   ports:["8000"]
   #   environment:
   #     JOSH_REMOTE: https://github.com/opral
   #     JOSH_EXTRA_OPTS: "--require-auth"
   #   volumes:
   #     - josh-vol:/data/git
-
-networks:
-  lix:
-    driver: bridge
 
 volumes:
   pnpm-store: {}
