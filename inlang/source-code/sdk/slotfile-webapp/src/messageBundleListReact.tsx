@@ -12,7 +12,6 @@ import { LintReport } from "../../dist/v2/index.js"
 import { MessageBundleListSummary } from "./messageBundleListSummary.js"
 import { LanguageTag } from "@inlang/language-tag"
 import { RxDocument, deepEqual } from "rxdb"
-import { Subject } from "rxjs"
 
 export const MessageBundleComponent = createComponent({
 	tagName: "inlang-message-bundle",

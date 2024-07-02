@@ -255,9 +255,9 @@ export default class InlangMessageBundle extends LitElement {
 					return this._renderMessage(
 						locale,
 						message,
-						this.messageBundle?.lintReports?.filter(
-							(report) => report.locale === locale || report.messageId === message?.id
-						) ?? []
+						(this.messageBundle?.lintReports?.reports.filter(
+							(report) => /*report.locale === locale || */ report.messageId === message?.id
+						) as any) /** TODO SDK 2 fix type **/ ?? []
 					)
 				})}
 			</div>
@@ -384,10 +384,10 @@ export default class InlangMessageBundle extends LitElement {
 										  >`
 										: ``}
 									${this.messageBundle?.lintReports &&
-									this.messageBundle?.lintReports.length > 0 &&
-									this.messageBundle?.lintReports.some((report) => !report.variantId)
+									this.messageBundle?.lintReports?.reports.length > 0 &&
+									this.messageBundle?.lintReports?.reports.some((report) => !report.variantId)
 										? html`<inlang-lint-report-tip
-												.lintReports=${this.messageBundle?.lintReports.filter(
+												.lintReports=${this.messageBundle?.lintReports?.reports.filter(
 													(report) => !report.variantId
 												) ?? []}
 												.fixLint=${this._fixLint}

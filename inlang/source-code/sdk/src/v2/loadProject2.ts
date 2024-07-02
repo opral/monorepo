@@ -9,6 +9,8 @@ import { loadSettings } from "./settings.js"
 import type { InlangProject2 } from "./types/project.js"
 import {
 	MessageBundle,
+	MessageBundleRecord,
+	MessageRecord,
 	ProjectSettings2,
 	type Fix,
 	type InstalledLintRule,
@@ -194,16 +196,8 @@ export async function loadProject(args: {
 		ignoreDuplicate: true,
 	})
 
-	// add the hero collection
-	await database.addCollections({
-		messageBundles: {
-			schema: MessageBundle as any as typeof MessageBundle &
-				Readonly<{ version: number; primaryKey: string; additionalProperties: false | undefined }>,
-			conflictHandler: defaultConflictHandler,
-		},
-	})
 
-	const bundleStorage = await createSlotStorageWriter<MessageBundle>({
+	const bundleStorage = await createSlotStorageWriter<MessageBundleRecord>({
 		fileNameCharacters: 3,
 		slotsPerFile: 16 * 16 * 16 * 16,
 		fs: nodeishFs,
@@ -211,7 +205,7 @@ export async function loadProject(args: {
 		watch: true,
 	})
 
-	const messageStorage = await createSlotStorageWriter<Message>({
+	const messageStorage = await createSlotStorageWriter<MessageRecord>({
 		fileNameCharacters: 3,
 		slotsPerFile: 16 * 16 * 16 * 16,
 		fs: nodeishFs,
@@ -249,6 +243,16 @@ export async function loadProject(args: {
 		},
 		lintReports$
 	)
+
+	// add the hero collection
+	await database.addCollections({
+		messageBundles: {
+			schema: MessageBundle as any as typeof MessageBundle &
+				Readonly<{ version: number; primaryKey: string; additionalProperties: false | undefined }>,
+			conflictHandler: adapter.conflictHandler,
+		},
+	})
+
 	await startReplication(database.collections.messageBundles, adapter).awaitInitialReplication()
 
 	const setSettings = async (newSettings: ProjectSettings2) => {
@@ -277,33 +281,3 @@ export async function loadProject(args: {
 	}
 }
 
-const defaultConflictHandler: RxConflictHandler<any> = function (
-	i: RxConflictHandlerInput<any>,
-	_context: string
-): Promise<RxConflictHandlerOutput<any>> {
-	console.log("defaultConflictHandler")
-	const newDocumentState = stripAttachmentsDataFromDocument(i.newDocumentState)
-	const realMasterState = stripAttachmentsDataFromDocument(i.realMasterState)
-
-	/**
-	 * If the documents are deep equal,
-	 * we have no conflict.
-	 * On your custom conflict handler you might only
-	 * check some properties, like the updatedAt time,
-	 * for better performance, because deepEqual is expensive.
-	 */
-	if (deepEqual(newDocumentState, realMasterState)) {
-		return Promise.resolve({
-			isEqual: true,
-		})
-	}
-
-	/**
-	 * The default conflict handler will always
-	 * drop the fork state and use the master state instead.
-	 */
-	return Promise.resolve({
-		isEqual: false,
-		documentData: i.realMasterState,
-	})
-}
