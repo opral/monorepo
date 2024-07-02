@@ -1,4 +1,8 @@
 import type { MessageBundle } from "../../types/index.js"
+import {
+	createMockBundleLintReport,
+	createMockMessageLintReport,
+} from "../lintRports/mockCreate.js"
 
 export const pluralBundle: MessageBundle = {
 	id: "mock_bundle_human_id",
@@ -169,4 +173,27 @@ export const pluralBundle: MessageBundle = {
 			],
 		},
 	],
+	lintReports: {
+		hash: "testHash",
+		reports: [
+			createMockBundleLintReport({
+				ruleId: "messageBundleLintRule.inlang.missingMessage",
+				messageBundleId: "mock_bundle_human_id",
+				body: "The bundle `mock_bundle_human_id` is missing message for the locale `de`",
+			}),
+			createMockMessageLintReport({
+				ruleId: "messageBundleLintRule.inlang.missingReference",
+				messageBundleId: "mock_bundle_human_id",
+				messageId: "mock_message_id_en",
+				body: "The bundle `mock_bundle_human_id` is missing the reference message for the locale `en`",
+			}),
+			createMockMessageLintReport({
+				ruleId: "messageBundleLintRule.inlang.missingReference",
+				messageBundleId: "mock_bundle_human_id",
+				messageId: "mock_message_id_en",
+				body: "The bundle `mock_bundle_human_id` is missing the reference message for the locale `en`",
+				level: "warning",
+			}),
+		],
+	},
 }

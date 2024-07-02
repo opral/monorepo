@@ -15,7 +15,7 @@ export default class InlangLintReportTip extends LitElement {
 				justify-content: center;
 				border-radius: 4px;
 				cursor: pointer;
-				color: var(--sl-color-neutral-700);
+				color: var(--sl-input-color);
 			}
 			.lint-report-tip.error {
 				color: var(--sl-color-danger-700);
@@ -24,20 +24,16 @@ export default class InlangLintReportTip extends LitElement {
 				color: var(--sl-color-warning-600);
 			}
 			.lint-report-tip:hover {
-				background-color: var(--sl-color-neutral-200);
-			}
-			.lint-report-tip.error:hover {
-				background-color: var(--sl-color-danger-200);
+				background-color: var(--sl-input-background-color-hover);
 			}
 			.lint-report-tip.warning:hover {
-				background-color: var(--sl-color-warning-200);
 				color: var(--sl-color-warning-700);
 			}
 			.dropdown-container {
 				font-size: 13px;
 				width: 240px;
-				background-color: white;
-				border: 1px solid var(--sl-input-border-color);
+				background-color: var(--sl-panel-background-color);
+				border: 1px solid var(--sl-panel-border-color);
 				border-radius: 6px;
 				display: flex;
 				flex-direction: column;
@@ -55,7 +51,7 @@ export default class InlangLintReportTip extends LitElement {
 			.report-icon {
 				height: 29px;
 				width: 29px;
-				color: var(--sl-color-neutral-700);
+				color: var(--sl-input-color);
 				display: flex;
 				align-items: center;
 				justify-content: center;
@@ -75,11 +71,11 @@ export default class InlangLintReportTip extends LitElement {
 				padding-top: 2px;
 				font-size: 12px;
 				font-weight: 500;
-				color: var(--sl-color-neutral-950);
+				color: var(--sl-input-color);
 			}
 			.report-body {
 				font-size: 12px;
-				color: var(--sl-color-neutral-600);
+				color: var(--sl-input-help-text-color);
 				line-break: anywhere;
 			}
 			.report-fixes {
@@ -91,10 +87,15 @@ export default class InlangLintReportTip extends LitElement {
 			.fix-button {
 				width: 100%;
 			}
+			.fix-button::part(base) {
+				color: var(--sl-input-color);
+				background-color: var(--sl-input-background-color);
+				border: 1px solid var(--sl-input-border-color);
+			}
 			.fix-button::part(base):hover {
-				background-color: var(--sl-color-neutral-100);
-				color: var(--sl-color-neutral-900);
-				border-color: var(--sl-input-border-color);
+				color: var(--sl-input-color-hover);
+				background-color: var(--sl-input-background-color-hover);
+				border: 1px solid var(--sl-input-border-color-hover);
 			}
 			p {
 				margin: 0;
