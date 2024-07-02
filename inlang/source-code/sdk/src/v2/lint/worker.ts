@@ -3,7 +3,12 @@ import { endpoint } from "comlink-node/worker"
 import { populateLevel } from "./populateLintLevel.js"
 import { resolveModules } from "../resolveModules2.js"
 import * as Comlink from "comlink"
-import type { Message, MessageBundle } from "../types/message-bundle.js"
+import type {
+	Message,
+	MessageBundle,
+	MessageBundleRecord,
+	MessageRecord,
+} from "../types/message-bundle.js"
 import type { ProjectSettings2 } from "../types/project-settings.js"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
 import type { Fix, LintReport, LintResult } from "../types/lint.js"
@@ -44,13 +49,13 @@ export async function createLinter(
 		const messageBundlesPath = projectPath + "/messagebundles/"
 		const messagesPath = projectPath + "/messages/"
 
-		const bundleStorage = await createSlotReader<MessageBundle>({
+		const bundleStorage = await createSlotReader<MessageBundleRecord>({
 			fs,
 			path: messageBundlesPath,
 			watch: false,
 		})
 
-		const messageStorage = await createSlotReader<Message>({
+		const messageStorage = await createSlotReader<MessageRecord>({
 			fs,
 			path: messagesPath,
 			watch: false,

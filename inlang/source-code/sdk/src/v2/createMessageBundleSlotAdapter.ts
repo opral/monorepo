@@ -1,8 +1,21 @@
-import type { RxCollection, RxReplicationPullStreamItem } from "rxdb"
+import {
+	deepEqual,
+	type RxCollection,
+	type RxConflictHandler,
+	type RxConflictHandlerInput,
+	type RxConflictHandlerOutput,
+	type RxReplicationPullStreamItem,
+} from "rxdb"
 
 import _debug from "debug"
 import { Subject } from "rxjs"
-import { Message, MessageBundle } from "./types/message-bundle.js"
+import {
+	Message,
+	MessageBundle,
+	MessageBundleRecord,
+	MessageRecord,
+	MessageWithConflictMarkers,
+} from "./types/message-bundle.js"
 import { replicateRxCollection } from "rxdb/plugins/replication"
 import type { SlotEntry } from "../persistence/slotfiles/types/SlotEntry.js"
 import type createSlotWriter from "../persistence/slotfiles/createSlotWriter.js"
@@ -14,6 +27,12 @@ type MessageUpdate = {
 	message: Message // You can define a more specific type here if needed
 }
 
+/**
+ * receives two states of the same MessageBundle and extracts updates/inserts of messages within the bundle
+ * @param upsertedDocument
+ * @param previousState
+ * @returns
+ */
 function compareMessages(
 	upsertedDocument: MessageBundle,
 	previousState: MessageBundle
@@ -51,16 +70,39 @@ function compareMessages(
 	return updates
 }
 
+function recordToMessage(message: SlotEntry<MessageRecord>) {
+	return {
+		...message.data,
+		mergeConflict: message.mergeConflict
+			? {
+					...message.mergeConflict.data,
+					versionHash: message.mergeConflict.hash,
+			  }
+			: undefined,
+		versionHash: message.slotEntryHash,
+	}
+}
+
+function messageBundleToMessageBundleRecord(messageBundle: MessageBundle) {
+	const messageBundleRecord: MessageBundleRecord = {
+		id: messageBundle.id,
+		alias: structuredClone(messageBundle.alias),
+	}
+
+	return messageBundleRecord
+}
+
 export const combineToBundles = (
-	bundles: SlotEntry<MessageBundle>[],
-	messages: SlotEntry<Message>[]
+	bundles: SlotEntry<MessageBundleRecord>[],
+	messages: SlotEntry<MessageRecord>[]
 ) => {
 	debug("loadAllBundles")
 	const loadedBundles = new Map<string, MessageBundle>()
-	for (const bundle of bundles) {
-		loadedBundles.set(bundle.data.id, {
-			id: bundle.data.id,
-			alias: bundle.data.alias,
+	for (const bundleSlotEntry of bundles) {
+		loadedBundles.set(bundleSlotEntry.data.id, {
+			id: bundleSlotEntry.data.id,
+			alias: bundleSlotEntry.data.alias,
+			versionHash: bundleSlotEntry.hash,
 			messages: [],
 		})
 	}
@@ -71,16 +113,17 @@ export const combineToBundles = (
 			console.warn("message without bundle found!" + message.data.bundleId)
 			continue
 		}
+		const bundleMessage: MessageWithConflictMarkers = recordToMessage(message)
 
-		loadBundle.messages.push(message.data)
+		loadBundle.messages.push(bundleMessage)
 	}
 
 	return loadedBundles
 }
 
 export function createMessageBundleSlotAdapter(
-	bundleStorage: Awaited<ReturnType<typeof createSlotWriter<MessageBundle>>>,
-	messageStorage: Awaited<ReturnType<typeof createSlotWriter<Message>>>,
+	bundleStorage: Awaited<ReturnType<typeof createSlotWriter<MessageBundleRecord>>>,
+	messageStorage: Awaited<ReturnType<typeof createSlotWriter<MessageRecord>>>,
 	onBundleChangeCb: (source: "adapter" | "api" | "fs", changedMessageBundle: MessageBundle) => void,
 	lintResults?: Subject<LintResult>
 ) {
@@ -99,24 +142,23 @@ export function createMessageBundleSlotAdapter(
 		source: "adapter" | "api" | "fs",
 		changedMessageBundle: MessageBundle
 	) => {
-		if (source === "fs") {
-			// changes comming from fs need to be propagated to the pull stream again
-			pullStream$.next({
-				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- event api sucks atm - we know that we can expect slot entries in records-change event
-				documents: [changedMessageBundle],
-				// NOTE: we don't need to reconnect a collection at the moment - any checkpoint should work
-				checkpoint: {
-					now: Date.now(),
-				},
-			})
-		}
+		// if (source === "fs") {
+		// changes comming from fs need to be propagated to the pull stream again
+		pullStream$.next({
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- event api sucks atm - we know that we can expect slot entries in records-change event
+			documents: [changedMessageBundle],
+			// NOTE: we don't need to reconnect a collection at the moment - any checkpoint should work
+			checkpoint: {
+				now: Date.now(),
+			},
+		})
+		// }
 		onBundleChangeCb(source, changedMessageBundle)
 	}
 
 	const loadAllBundles = async () => {
 		debug("loadAllBundles")
 		const bundles = await bundleStorage.readAll()
-
 		const messages = await messageStorage.readAll()
 		const loadedBundles = combineToBundles(bundles, messages)
 		debug("loadAllBundles - " + [...loadedBundles.keys()].length + " budles loaded")
@@ -134,6 +176,7 @@ export function createMessageBundleSlotAdapter(
 			const loaded = loadedMessageBundles.get(bundleRecord.data.id)
 			if (loaded) {
 				const loadedBundle = structuredClone(loaded)
+				loadedBundle.versionHash = bundleRecord.slotEntryHash
 				loadedBundle.alias = bundleRecord.data.alias
 				loadedMessageBundles.set(bundleRecord.data.id, loadedBundle)
 
@@ -149,6 +192,7 @@ export function createMessageBundleSlotAdapter(
 		if (e !== "records-change" || !messageRecordIds) {
 			return
 		}
+		debugger
 
 		debug(source)
 
@@ -161,7 +205,7 @@ export function createMessageBundleSlotAdapter(
 				let messageIndex = 0
 				for (const message of loadedBundle.messages) {
 					if (message.id === messageRecord.data.id) {
-						loadedBundle.messages[messageIndex] = messageRecord.data as any
+						loadedBundle.messages[messageIndex] = recordToMessage(messageRecord)
 						found = true
 					}
 					messageIndex += 1
@@ -193,7 +237,7 @@ export function createMessageBundleSlotAdapter(
 				}
 			}
 			const clonedBundle = structuredClone(bundle)
-			clonedBundle.lintReports = currentReports?.reports
+			clonedBundle.lintReports = currentReports ?? { hash: "", reports: [] }
 			loadedMessageBundles.set(bundleId, clonedBundle)
 			onBundleChange("fs", clonedBundle)
 		}
@@ -207,6 +251,7 @@ export function createMessageBundleSlotAdapter(
 	return {
 		getAllMessageBundles,
 		pullStream$,
+		conflictHandler,
 
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 
@@ -214,6 +259,7 @@ export function createMessageBundleSlotAdapter(
 			debug("pushHandler called")
 
 			debug("pushHandler calling save to throttle")
+			// TODO SDK 2 fix serializatio
 			await bundleStorage.save()
 			await messageStorage.save()
 
@@ -225,49 +271,73 @@ export function createMessageBundleSlotAdapter(
 
 				if (!previousStateMessageBundle) {
 					debug("pushHandler called - whole new bundle!")
-					// XXX we clear the message array to not introduce a new type here:
-					const insertedMessageBundle = structuredClone(upsertedMessageBundle)
-					const messagesToInsert = insertedMessageBundle.messages
-					insertedMessageBundle.messages = []
+
+					const insertedMessageBundle = messageBundleToMessageBundleRecord(upsertedMessageBundle)
+					const messagesToInsert = upsertedMessageBundle.messages as Message[]
+
 					// insert Messages, insert Message Bundle
-					bundleStorage.insert(insertedMessageBundle as unknown as MessageBundle, false)
+					await bundleStorage.insert(insertedMessageBundle, false)
 					// add to loadedMessagebundle
 					for (const messageToInsert of messagesToInsert) {
-						const persistedMessage = messageToInsert as any
-						persistedMessage.bundleId = insertedMessageBundle.id
-						await messageStorage.insert(messageToInsert as unknown as Message, false)
+						const messageRecord: MessageRecord = {
+							id: messageToInsert.id,
+							bundleId: insertedMessageBundle.id,
+							locale: messageToInsert.locale,
+							declarations: structuredClone(messageToInsert.declarations),
+							variants: structuredClone(messageToInsert.variants),
+							selectors: structuredClone(messageToInsert.selectors),
+						}
+
+						await messageStorage.insert(messageRecord, false)
 					}
 					loadedMessageBundles.set(upsertedMessageBundle.id, upsertedMessageBundle)
 
 					changedBundles.add(upsertedMessageBundle)
 				} else {
 					debug("pushHandler called - known message bundle")
+					// TODO SDK2 take conflict handling into account!
 					const messageUpdates = compareMessages(upsertedMessageBundle, previousStateMessageBundle)
 
-					const updatedMessageBundle = structuredClone(upsertedMessageBundle)
-					updatedMessageBundle.messages = []
-					const previousMessageBundle = structuredClone(previousStateMessageBundle)
-					previousMessageBundle.messages = []
+					const updatedMessageBundle = messageBundleToMessageBundleRecord(upsertedMessageBundle)
+					const previousMessageBundle = messageBundleToMessageBundleRecord(
+						previousStateMessageBundle
+					)
 
 					let changeFlag = false
 
 					if (JSON.stringify(updatedMessageBundle) !== JSON.stringify(previousMessageBundle)) {
-						await bundleStorage.update(updatedMessageBundle as unknown as MessageBundle, false)
+						await bundleStorage.update(updatedMessageBundle as MessageBundleRecord, false)
 						debug("pushHandler called - bundle updated...")
 						changeFlag = true
 					}
 					for (const messageUpdate of messageUpdates) {
 						if (messageUpdate.action === "insert") {
 							debug("pushHandler called - message inserted...")
-							const persistedMessage = messageUpdate.message as any
-							persistedMessage.bundleId = updatedMessageBundle.id
-							await messageStorage.insert(persistedMessage, false)
+							const messageToInsert = messageUpdate.message
+
+							const messageRecord: MessageRecord = {
+								id: messageToInsert.id,
+								bundleId: updatedMessageBundle.id,
+								locale: messageToInsert.locale,
+								declarations: structuredClone(messageToInsert.declarations),
+								variants: structuredClone(messageToInsert.variants),
+								selectors: structuredClone(messageToInsert.selectors),
+							}
+							await messageStorage.insert(messageRecord, false)
 							changeFlag = true
 						} else if (messageUpdate.action === "update") {
 							debug("pushHandler called - message updated...")
-							const persistedMessage = messageUpdate.message as any
-							persistedMessage.bundleId = updatedMessageBundle.id
-							await messageStorage.update(persistedMessage, false)
+							const messageToUpdate = messageUpdate.message
+
+							const messageRecord: MessageRecord = {
+								id: messageToUpdate.id,
+								bundleId: updatedMessageBundle.id,
+								locale: messageToUpdate.locale,
+								declarations: structuredClone(messageToUpdate.declarations),
+								variants: structuredClone(messageToUpdate.variants),
+								selectors: structuredClone(messageToUpdate.selectors),
+							}
+							await messageStorage.update(messageRecord, false)
 							changeFlag = true
 						}
 					}
@@ -444,5 +514,85 @@ export function startReplication(
 			 */
 			stream$: adapter.pullStream$.asObservable(),
 		},
+	})
+}
+
+const conflictHandler: RxConflictHandler<any> = function (
+	i: RxConflictHandlerInput<any>,
+	context: string
+): Promise<RxConflictHandlerOutput<any>> {
+	// console.log("defaultConflictHandler")
+	// console.log(context)
+	// const newDocumentState = i.newDocumentState as undefined | MessageBundle
+
+	// const assumedMasterState = i.assumedMasterState as undefined | MessageBundle
+
+	// console.log("newDocumentState", newDocumentState)
+	// console.log("realMasterState", i.realMasterState)
+	// console.log("assumedMasterState", assumedMasterState)
+
+	// if (context === "downstream-check-if-equal-0") {
+	// 	// its a downstream change - we can expect a realMasterState
+	// 	const realMasterState = i.realMasterState as MessageBundle
+	// 	const newDocumentState = i.newDocumentState as MessageBundle
+
+	// 	// let resolvedDocument: MessageBundle | undefinend
+
+	// 	// integrate changes from the master into the fork
+	// 	if (newDocumentState.lintReports?.hash !== realMasterState.lintReports?.hash) {
+	// 		console.log('integrating lints')
+	// 		// always use lints from master - client doesnt write those
+	// 		newDocumentState.lintReports = realMasterState?.lintReports
+	// 	}
+
+	// 	if (newDocumentState.versionHash !== realMasterState.versionHash) {
+	// 		newDocumentState.alias = realMasterState.alias
+	// 	}
+
+	// 	// if (newDocumentState.messages)
+	// 	return Promise.resolve({
+	// 		isEqual: false,
+	// 		documentData: i.newDocumentState,
+	// 	})
+	// } else if (context === "upstream-check-if-equal") {
+	// 	// XXX FOR NOW integrate changes from the fork into the master
+	// 	return Promise.resolve({
+	// 		isEqual: false,
+	// 		documentData: i.realMasterState,
+	// 	})
+	// }
+
+	// return Promise.resolve({
+	// 	isEqual: true,
+	// })
+
+	/**
+	 * Here we detect if a conflict exists in the first place.
+	 * If there is no conflict, we return isEqual=true.
+	 * If there is a conflict, return isEqual=false.
+	 * In the default handler we do a deepEqual check,
+	 * but in your custom conflict handler you probably want
+	 * to compare specific properties of the document, like the updatedAt time,
+	 * for better performance because deepEqual() is expensive.
+	 */
+	if (deepEqual(i.newDocumentState, i.realMasterState)) {
+		return Promise.resolve({
+			isEqual: true,
+		})
+	}
+
+	console.log("conflict exists!")
+
+	/**
+	 * If a conflict exists, we have to resolve it.
+	 * The default conflict handler will always
+	 * drop the fork state and use the master state instead.
+	 *
+	 * In your custom conflict handler you likely want to merge properties
+	 * of the realMasterState and the newDocumentState instead.
+	 */
+	return Promise.resolve({
+		isEqual: false,
+		documentData: i.realMasterState,
 	})
 }

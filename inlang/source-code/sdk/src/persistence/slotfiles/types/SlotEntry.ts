@@ -1,7 +1,9 @@
 import { type HasId } from "./HasId.js"
 
 export type SlotEntry<DocType extends HasId> = {
+	// hash of the whole slot entry (including possible merge conflicts)
 	slotEntryHash: string
+	// hash of the data object
 	hash: string
 	// a normalized object
 	data: DocType

@@ -108,8 +108,6 @@ export const Declaration = Type.Union([InputDeclaration])
 export type Message = Static<typeof Message>
 export const Message = Type.Object({
 	id: Type.String(),
-	// TODO SDK2 we only need/have the property for records comming from slot storage - not used by the apps...
-	bundleId: Type.ReadonlyOptional(Type.String()),
 	locale: LanguageTag,
 	declarations: Type.Array(Declaration),
 	/**
@@ -117,6 +115,31 @@ export const Message = Type.Object({
 	 */
 	selectors: Type.Array(Expression),
 	variants: Type.Array(Variant),
+	versionHash: Type.Optional(Type.String()),
+})
+
+export type MessageRecord = Static<typeof MessageRecord>
+export const MessageRecord = Type.Object({
+	id: Type.String(),
+	// TODO SDK2 we only need/have the property for records comming from slot storage - not used by the apps...
+	bundleId: Type.String(),
+	locale: LanguageTag,
+	declarations: Type.Array(Declaration),
+	/**
+	 * The order in which the selectors are placed determines the precedence of patterns.
+	 */
+	selectors: Type.Array(Expression),
+	variants: Type.Array(Variant),
+})
+
+export type MessageBundleRecord = Static<typeof MessageBundleRecord>
+export const MessageBundleRecord = Type.Object({
+	// TODO SDK2 id format validation?
+	id: Type.String({ maxLength: 100 }),
+	alias: Type.Record(Type.String(), Type.String()),
+
+	// TODO SDK2 check how we get ignor inforation persisted for lints (messageBundle, message, variant)
+	// ignoredLints:  Type.Array(Type.String()),
 })
 
 export type MessageWithConflictMarkers = Static<typeof MessageWithConflictMarkers>
@@ -135,12 +158,18 @@ export const MessageBundle = Type.Object(
 		// TODO SDK2 id format validation?
 		id: Type.String({ maxLength: 100 }),
 		alias: Type.Record(Type.String(), Type.String()),
+		versionHash: Type.Optional(Type.String()),
 
 		// TODO SDK2 check how we get ignor inforation persisted for lints (messageBundle, message, variant)
 		// ignoredLints:  Type.Array(Type.String()),
-		messages: Type.Array(Message),
+		messages: Type.Array(MessageWithConflictMarkers),
 		// TODO SDK2 - check how we can prevent the property to be overritten by the client its one direction
-		lintReports: Type.Optional(Type.Array(LintReport)),
+		lintReports: Type.Optional(
+			Type.Object({
+				hash: Type.String(),
+				reports: Type.Array(LintReport),
+			})
+		),
 	},
 	{
 		version: 0,

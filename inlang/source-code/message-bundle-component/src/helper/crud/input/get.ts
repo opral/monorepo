@@ -1,6 +1,12 @@
 import type { Declaration, MessageBundle } from "@inlang/sdk/v2"
 
-export const getInputs = (props: { messageBundle: MessageBundle }): Declaration[] => {
+/**
+ * Gets all inputs from a message bundle.
+ * @param props.messageBundle The message bundle to get the inputs from.
+ * @returns All inputs from the message bundle.
+ */
+
+const getInputs = (props: { messageBundle: MessageBundle }): Declaration[] => {
 	const inputs: Declaration[] = []
 	for (const message of props.messageBundle.messages) {
 		for (const declaration of message.declarations) {
@@ -11,3 +17,5 @@ export const getInputs = (props: { messageBundle: MessageBundle }): Declaration[
 	}
 	return inputs
 }
+
+export default getInputs

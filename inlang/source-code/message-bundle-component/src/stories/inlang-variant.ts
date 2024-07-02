@@ -10,15 +10,18 @@ import {
 } from "@inlang/sdk/v2"
 import { LitElement, css, html } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
+
+//helpers
 import upsertVariant from "../helper/crud/variant/upsert.js"
 import deleteVariant from "../helper/crud/variant/delete.js"
 import patternToString from "../helper/crud/pattern/patternToString.js"
 import stringToPattern from "../helper/crud/pattern/stringToPattern.js"
-
-import "./inlang-lint-report-tip.js"
-import "./inlang-selector-configurator.js"
 import updateMatch from "../helper/crud/variant/updateMatch.js"
 import variantIsCatchAll from "../helper/crud/variant/isCatchAll.js"
+
+// internal components
+import "./inlang-lint-report-tip.js"
+import "./inlang-selector-configurator.js"
 
 @customElement("inlang-variant")
 export default class InlangVariant extends LitElement {
@@ -142,6 +145,7 @@ export default class InlangVariant extends LitElement {
 		`,
 	]
 
+	//props
 	@property()
 	message: Message | undefined
 
@@ -181,15 +185,22 @@ export default class InlangVariant extends LitElement {
 	@property()
 	revert: (messageId?: string, variantId?: string) => void = () => {}
 
+	//state
 	@state()
 	private _pattern: string | undefined = undefined
 
+	// @state()
+	// private _isDelaying: boolean = false
+
+	//functions
 	private _getLintReports = (): LintReport[] | undefined => {
+		// wether a lint report belongs to a variant or message and when they are shown
 		if (this.lintReports && this.lintReports.length > 0) {
 			if (
 				(this.message?.selectors && this.message.selectors.length === 0) ||
 				!this.message?.selectors
 			) {
+				// when there are no selectors the reports of the message and variant are shown on variant level
 				return this.lintReports
 			}
 			if (
@@ -197,6 +208,7 @@ export default class InlangVariant extends LitElement {
 				this.message.selectors.length > 0 &&
 				this.lintReports.some((report) => report.variantId && report.variantId === this.variant?.id)
 			) {
+				// when selectors are present, only the reports of the variant are shown
 				return this.lintReports.filter(
 					(report) => report.variantId && report.variantId === this.variant?.id
 				)
@@ -205,7 +217,7 @@ export default class InlangVariant extends LitElement {
 		return undefined
 	}
 
-	private _getIsVariantEmpty = (): boolean => {
+	private _isVariantEmpty = (): boolean => {
 		if (!this._pattern) return true
 		if (this._pattern === "") return true
 		return false
@@ -218,7 +230,7 @@ export default class InlangVariant extends LitElement {
 		return false
 	}
 
-	_save = () => {
+	private _save = () => {
 		if (this.message) {
 			// upsert variant
 			if (this.variant) {
@@ -245,15 +257,13 @@ export default class InlangVariant extends LitElement {
 			this.triggerSave()
 		} else if (this.locale && this._pattern) {
 			// new message
-			//TODO: only text pattern supported
 			this.addMessage(createMessage({ locale: this.locale, text: this._pattern }))
 			this.triggerSave()
 		}
 	}
 
-	_delete = () => {
+	private _delete = () => {
 		if (this.message && this.variant) {
-			// upsert variant
 			deleteVariant({
 				message: this.message,
 				variant: this.variant,
@@ -263,10 +273,7 @@ export default class InlangVariant extends LitElement {
 		}
 	}
 
-	@state()
-	private _isDelaying: boolean = false
-
-	_delayedSave = () => {
+	private _delayedSave = () => {
 		// if (this._isDelaying) return
 
 		// this._isDelaying = true
@@ -276,7 +283,7 @@ export default class InlangVariant extends LitElement {
 		// }, 1000)
 	}
 
-	_updateMatch = (matchIndex: number, value: string) => {
+	private _updateMatch = (matchIndex: number, value: string) => {
 		//TODO improve this function
 		if (this.variant && this.message) {
 			this._pattern = this.variant ? patternToString({ pattern: this.variant.pattern }) : ""
@@ -298,6 +305,7 @@ export default class InlangVariant extends LitElement {
 		}
 	}
 
+	// getter
 	private get _selectors(): string[] | undefined {
 		// @ts-ignore - just for prototyping
 		return this.message ? this.message.selectors.map((selector) => selector.arg.name) : undefined
@@ -310,13 +318,14 @@ export default class InlangVariant extends LitElement {
 		})
 	}
 
+	//hooks
 	override async firstUpdated() {
 		await this.updateComplete
 
 		//load _pattern
 		this._pattern = this.variant ? patternToString({ pattern: this.variant.pattern }) : ""
 
-		// override primitive colors to match the design system
+		// adds classes when dropdown is open, to keep it open when not hovering the variant
 		const selectorConfigurator = this.shadowRoot?.querySelector("inlang-selector-configurator")
 		const selectorDropdown = selectorConfigurator?.shadowRoot?.querySelector("sl-dropdown")
 		if (selectorDropdown) {
@@ -334,6 +343,7 @@ export default class InlangVariant extends LitElement {
 			})
 		}
 
+		// adds classes when dropdown is open, to keep it open when not hovering the variant
 		const lintReportsTip = this.shadowRoot?.querySelector("inlang-lint-report-tip")
 		const lintReportDropdown = lintReportsTip?.shadowRoot?.querySelector("sl-dropdown")
 		if (lintReportDropdown) {
@@ -358,7 +368,6 @@ export default class InlangVariant extends LitElement {
 	}
 
 	override render() {
-		//get html of dropdown -> fix the folling line
 		return html`<div class="variant">
 			${this.variant && this._matches
 				? this._matches.map((match, index) => {
@@ -392,7 +401,7 @@ export default class InlangVariant extends LitElement {
 			></sl-input>
 			<div class="actions">
 				<div class="dynamic-actions hide-dynamic-actions">
-					${this._getIsVariantEmpty() && this._isVariantMachineTranslatable()
+					${this._isVariantEmpty() && this._isVariantMachineTranslatable()
 						? html`<sl-button
 								size="small"
 								@click=${() => this.machineTranslate(this.message?.id, this.variant?.id)}

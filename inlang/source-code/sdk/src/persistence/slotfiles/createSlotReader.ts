@@ -561,6 +561,7 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 		resolveMergeConflict() {},
 		setCallback(callback: (source: "api" | "fs", eventName: string, records?: string[]) => void) {
 			changeCallback = callback
+			_internal.changeCallback = callback
 		},
 	}
 }

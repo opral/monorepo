@@ -2,14 +2,7 @@ import { LitElement, css, html } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 
 import SlDropdown from "@shoelace-style/shoelace/dist/components/dropdown/dropdown.component.js"
-import SlButton from "@shoelace-style/shoelace/dist/components/button/button.component.js"
 import SlInput from "@shoelace-style/shoelace/dist/components/input/input.component.js"
-import { add } from "../../../../../lix/packages/client/vendored/isomorphic-git/index.js"
-
-// in case an app defines it's own set of shoelace components, prevent double registering
-if (!customElements.get("sl-dropdown")) customElements.define("sl-dropdown", SlDropdown)
-if (!customElements.get("sl-button")) customElements.define("sl-button", SlButton)
-if (!customElements.get("sl-input")) customElements.define("sl-input", SlInput)
 
 @customElement("inlang-add-input")
 export default class InlangAddInput extends LitElement {
@@ -70,9 +63,11 @@ export default class InlangAddInput extends LitElement {
 		`,
 	]
 
+	//props
 	@property()
 	addInput: (inputName: string) => void = () => {}
 
+	//state
 	@state()
 	private _newInput: string | undefined
 

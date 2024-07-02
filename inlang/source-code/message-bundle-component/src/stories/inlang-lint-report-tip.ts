@@ -1,12 +1,7 @@
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
-import type { MessageLintReport } from "@inlang/message-lint-rule"
 
-import SlToolTip from "@shoelace-style/shoelace/dist/components/tooltip/tooltip.component.js"
 import type { InstalledLintRule, LintReport } from "@inlang/sdk/v2"
-
-// in case an app defines it's own set of shoelace components, prevent double registering
-if (!customElements.get("sl-tooltip")) customElements.define("sl-tooltip", SlToolTip)
 
 @customElement("inlang-lint-report-tip")
 export default class InlangLintReportTip extends LitElement {
@@ -107,6 +102,7 @@ export default class InlangLintReportTip extends LitElement {
 		`,
 	]
 
+	//props
 	@property()
 	lintReports: LintReport[] | undefined
 
@@ -116,6 +112,7 @@ export default class InlangLintReportTip extends LitElement {
 	@property()
 	fixLint: (lintReport: LintReport, fix: LintReport["fixes"][0]["title"]) => void = () => {}
 
+	//functions
 	private _getLintReportLevelClass = () => {
 		if (this.lintReports?.some((report) => report.level === "error")) {
 			return "error"
