@@ -15,7 +15,7 @@ import {
 	type LanguageTag,
 	type Message,
 } from "@inlang/sdk/v2"
-import { addSelector } from "../helper/crud/selector/add.js"
+import addSelector from "../helper/crud/selector/add.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
 import "./inlang-add-input.js"
 

@@ -1,5 +1,16 @@
 import type { Pattern } from "@inlang/sdk/v2"
 
+/**
+ * MVP version of the function
+ *
+ * Converts a string to a pattern.
+ * @param props.text The text to convert to a pattern.
+ * @returns The pattern of the text.
+ *
+ * @example
+ * stringToPattern({ text: "Hello {{name}}" }) -> [{ value: "Hello" }, { type: "expression", arg: { type: "variable", name: "name" } }]
+ */
+
 const stringToPattern = (props: { text: string }): Pattern => {
 	const pattern: Pattern = []
 	const regex = /{{(.*?)}}/g
