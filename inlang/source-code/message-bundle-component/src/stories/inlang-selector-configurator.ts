@@ -8,7 +8,13 @@ import SlOption from "@shoelace-style/shoelace/dist/components/option/option.com
 import SlInput from "@shoelace-style/shoelace/dist/components/input/input.component.js"
 import SlTooltip from "@shoelace-style/shoelace/dist/components/tooltip/tooltip.component.js"
 
-import { createMessage, createVariant, type LanguageTag, type Message } from "@inlang/sdk/v2"
+import {
+	type Declaration,
+	createMessage,
+	createVariant,
+	type LanguageTag,
+	type Message,
+} from "@inlang/sdk/v2"
 import { addSelector } from "../helper/crud/selector/add.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
 import "./inlang-add-input.js"
@@ -131,7 +137,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 	]
 
 	@property()
-	inputs: string[] | undefined
+	inputs: Declaration[] | undefined
 
 	@property()
 	message?: Message | undefined
@@ -274,14 +280,14 @@ export default class InlangSelectorConfigurator extends LitElement {
 	}
 
 	private _resetConfiguration = () => {
-		this._input = this.inputs && this.inputs[0]
+		this._input = this.inputs && this.inputs[0] && this.inputs[0].name
 		this._function = "plural"
 		this._matchers = this._getPluralCategories() || ["*"]
 	}
 
 	override async firstUpdated() {
 		await this.updateComplete
-		this._input = this.inputs && this.inputs[0]
+		this._input = this.inputs && this.inputs[0] && this.inputs[0].name
 		this._function = "plural"
 		this._matchers = this._getPluralCategories() || ["*"]
 	}
@@ -295,7 +301,10 @@ export default class InlangSelectorConfigurator extends LitElement {
 					const dropdown = this.shadowRoot?.querySelector("sl-dropdown")
 					if (dropdown) {
 						if (e.target === dropdown) {
-							this._input = this.inputs && this.inputs.length > 0 ? this.inputs[0] : undefined
+							this._input =
+								this.inputs && this.inputs.length > 0 && this.inputs[0]
+									? this.inputs[0].name
+									: undefined
 							if (this.inputs && this.inputs.length === 0) {
 								this._isNewInput = true
 							}
@@ -375,8 +384,8 @@ export default class InlangSelectorConfigurator extends LitElement {
 									value=${this._input || this.inputs?.[0]}
 							  >
 									${this.inputs &&
-									this.inputs.map((inputs) => {
-										return html`<sl-option value=${inputs}>${inputs}</sl-option>`
+									this.inputs.map((input) => {
+										return html`<sl-option value=${input.name}>${input.name}</sl-option>`
 									})}
 							  </sl-select>`
 							: html`<sl-input 

@@ -9,10 +9,12 @@ import {
 	createVariant,
 	type LintReport,
 	type ProjectSettings2,
+	type Declaration,
 } from "@inlang/sdk/v2" // Import the types
 import { messageBundleStyling } from "./inlang-message-bundle.styles.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
-import { deleteSelector } from "../helper/crud/selector/delete.js"
+import deleteSelector from "../helper/crud/selector/delete.js"
+import deleteInput from "../helper/crud/input/delete.js"
 
 import "./inlang-variant.js"
 import "./inlang-lint-report-tip.js"
@@ -186,7 +188,7 @@ export default class InlangMessageBundle extends LitElement {
 		return this._filteredLocales() || undefined
 	}
 
-	private _fakeInputs = (): string[] | undefined => {
+	private _inputs = (): Declaration[] | undefined => {
 		const _refLanguageTag = this._refLocale()
 		return _refLanguageTag && this._messageBundle
 			? getInputs({ messageBundle: this._messageBundle })
@@ -210,15 +212,28 @@ export default class InlangMessageBundle extends LitElement {
 						: ``}
 				</div>
 				<div class="header-right">
-					${this._fakeInputs() && this._fakeInputs()!.length > 0
+					${this._inputs() && this._inputs()!.length > 0
 						? html`<div class="inputs-wrapper">
 								Inputs:
 								<div class="inputs">
-									${this._fakeInputs()?.map(
+									${this._inputs()?.map(
 										(input) =>
-											html`<sl-tag class="input-tag" variant="neutral" size="small"
-												>${input}</sl-tag
-											>`
+											html`<sl-dropdown
+												><sl-tag slot="trigger" class="input-tag" variant="neutral" size="small"
+													>${input.name}</sl-tag
+												><sl-menu>
+													<sl-menu-item
+														value="delete"
+														@click=${() => {
+															deleteInput({ messageBundle: this._messageBundle!, input })
+															// deleteSelector({ message, index })
+															this._triggerSave()
+															this._triggerRefresh()
+														}}
+														>Delete</sl-menu-item
+													>
+												</sl-menu>
+											</sl-dropdown>`
 									)}
 									<inlang-add-input .addInput=${this._addInput}>
 										<sl-tooltip content="Add input to message bundle">
@@ -369,7 +384,7 @@ export default class InlangMessageBundle extends LitElement {
 									)}
 									<div class="add-selector-container">
 										<inlang-selector-configurator
-											.inputs=${this._fakeInputs()}
+											.inputs=${this._inputs()}
 											.message=${message}
 											.locale=${locale}
 											.triggerMessageBundleRefresh=${this._triggerRefresh}
@@ -451,7 +466,7 @@ export default class InlangMessageBundle extends LitElement {
 									return html`<inlang-variant
 										.variant=${variant}
 										.message=${message}
-										.inputs=${this._fakeInputs()}
+										.inputs=${this._inputs()}
 										.triggerSave=${this._triggerSave}
 										.triggerMessageBundleRefresh=${this._triggerRefresh}
 										.addMessage=${this._addMessage}
@@ -467,7 +482,7 @@ export default class InlangMessageBundle extends LitElement {
 							: message?.selectors.length === 0 || !message
 							? html`<inlang-variant
 									.message=${message}
-									.inputs=${this._fakeInputs()}
+									.inputs=${this._inputs()}
 									.triggerSave=${this._triggerSave}
 									.addMessage=${this._addMessage}
 									.addInput=${this._addInput}
