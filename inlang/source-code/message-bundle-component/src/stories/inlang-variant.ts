@@ -6,6 +6,7 @@ import {
 	type LanguageTag,
 	type LintReport,
 	type InstalledLintRule,
+	type Declaration,
 } from "@inlang/sdk/v2"
 import { LitElement, css, html } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
@@ -151,7 +152,7 @@ export default class InlangVariant extends LitElement {
 	variant: Variant | undefined
 
 	@property()
-	inputs: string[] | undefined
+	inputs: Declaration[] | undefined
 
 	@property()
 	lintReports: LintReport[] | undefined
