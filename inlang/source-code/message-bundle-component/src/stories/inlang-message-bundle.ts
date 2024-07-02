@@ -201,15 +201,15 @@ export default class InlangMessageBundle extends LitElement {
 		// override primitive colors to match the design system
 		overridePrimitiveColors()
 
-		const children = this.children
-		this._bundleSlots = [...children].filter((child) =>
+		const children = Array.from(this.children) // Convert HTMLCollection to array
+		this._bundleSlots = children.filter((child) =>
 			child.slot ? child.slot === "bundle-action" : false
 		)
 	}
 
 	override render() {
 		return html`
-			<div class=${`header`}>
+			<div class=${`header`} part="header">
 				<div class="header-left">
 					<span># ${this._messageBundle?.id}</span>
 					${this._messageBundle?.alias
@@ -231,8 +231,8 @@ export default class InlangMessageBundle extends LitElement {
 									${this._inputs()?.map(
 										(input) =>
 											html`<sl-dropdown
-												><sl-tag slot="trigger" class="input-tag" variant="neutral" size="small"
-													>${input.name}</sl-tag
+												><sl-button slot="trigger" class="input-tag" variant="neutral" size="small"
+													>${input.name}</sl-button
 												><sl-menu>
 													<sl-menu-item
 														value="delete"
@@ -249,17 +249,19 @@ export default class InlangMessageBundle extends LitElement {
 									)}
 									<inlang-add-input .addInput=${this._addInput}>
 										<sl-tooltip content="Add input to message bundle">
-											<sl-tag
-												class="add-input-tag"
-												variant="neutral"
-												size="small"
-												class="add-input-tag"
-												><svg viewBox="0 0 24 24" width="18" height="18" style="margin: 0 -2px">
+											<sl-button class="text-button" variant="neutral" size="small"
+												><svg
+													viewBox="0 0 24 24"
+													width="18"
+													height="18"
+													style="margin: 0 -2px"
+													slot="prefix"
+												>
 													<path
 														fill="currentColor"
 														d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"
 													></path></svg
-											></sl-tag>
+											></sl-button>
 										</sl-tooltip>
 									</inlang-add-input>
 								</div>
@@ -267,17 +269,13 @@ export default class InlangMessageBundle extends LitElement {
 						: html`<div class="inputs-wrapper">
 								<inlang-add-input .addInput=${this._addInput}>
 									<sl-tooltip content="Add input to message bundle">
-										<sl-button
-											class="header-button"
-											variant="text"
-											size="small"
-											class="add-input-tag"
+										<sl-button class="text-button" variant="text" size="small"
 											><svg
 												viewBox="0 0 24 24"
 												width="18"
 												height="18"
-												style="margin-right: -2px"
 												slot="prefix"
+												style="margin-right: -2px"
 											>
 												<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path></svg
 											>Input</sl-button
@@ -289,18 +287,14 @@ export default class InlangMessageBundle extends LitElement {
 						? html`<div class="separator"></div>
 
 								<sl-dropdown>
-									<sl-button
-										class="header-button"
-										variant="text"
-										size="small"
-										class="add-input-tag"
-										slot="trigger"
+									<sl-button class="text-button" variant="text" size="small" slot="trigger"
 										><svg
 											xmlns="http://www.w3.org/2000/svg"
 											width="18"
 											height="18"
 											viewBox="0 0 24 24"
 											slot="prefix"
+											style="margin: 0 -2px"
 										>
 											<path
 												fill="currentColor"
@@ -404,7 +398,7 @@ export default class InlangMessageBundle extends LitElement {
 											.addInput=${this._addInput}
 										>
 											<sl-tooltip content="Add Selector to message"
-												><div class="add-selector">
+												><sl-button size="small" class="add-selector">
 													<svg
 														viewBox="0 0 24 24"
 														width="18"
@@ -414,7 +408,7 @@ export default class InlangMessageBundle extends LitElement {
 													>
 														<path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"></path>
 													</svg>
-												</div>
+												</sl-button>
 											</sl-tooltip>
 										</inlang-selector-configurator>
 									</div>

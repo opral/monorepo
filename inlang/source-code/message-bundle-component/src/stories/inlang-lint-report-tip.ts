@@ -37,7 +37,7 @@ export default class InlangLintReportTip extends LitElement {
 				font-size: 13px;
 				width: 240px;
 				background-color: white;
-				border: 1px solid var(--sl-color-neutral-300);
+				border: 1px solid var(--sl-input-border-color);
 				border-radius: 6px;
 				display: flex;
 				flex-direction: column;
@@ -47,7 +47,7 @@ export default class InlangLintReportTip extends LitElement {
 				flex-direction: row;
 				gap: 12px;
 				padding: 8px 12px;
-				border-top: 1px solid var(--sl-color-neutral-300);
+				border-top: 1px solid var(--sl-input-border-color);
 			}
 			.dropdown-item:first-child {
 				border-top: none;
@@ -94,7 +94,7 @@ export default class InlangLintReportTip extends LitElement {
 			.fix-button::part(base):hover {
 				background-color: var(--sl-color-neutral-100);
 				color: var(--sl-color-neutral-900);
-				border-color: var(--sl-color-neutral-400);
+				border-color: var(--sl-input-border-color);
 			}
 			p {
 				margin: 0;
