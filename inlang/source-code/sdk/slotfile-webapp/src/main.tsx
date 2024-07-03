@@ -4,7 +4,9 @@ import { createRoot } from "react-dom/client"
 
 import "@inlang/message-bundle-component"
 
-document.querySelector<HTMLDivElement>("#app")!.innerHTML = `<div id="root"></div>`
+document.querySelector<HTMLDivElement>(
+	"#app"
+)!.innerHTML = `<div id="root" style="height: 100%"></div>`
 
 const domNode = document.getElementById("root")
 const root = createRoot(domNode!)

@@ -225,25 +225,26 @@ export async function loadProject(args: {
 		messageStorage,
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		async (source, bundle) => {
-			if (source === "adapter") {
-				if (lintsRunning) {
-					lintsPending = true
-					return
-				}
-				lintsRunning = true
-
-				// eslint-disable-next-line no-constant-condition
-				while (true) {
-					lintsPending = false
-					const lintresults = await linter.lint(projectSettings$.value)
-
-					lintReports$.next(lintresults)
-					if (!lintsPending) {
-						break
-					}
-				}
-				lintsRunning = false
+			// if (source === "adapter") {
+			if (lintsRunning) {
+				lintsPending = true
+				return
 			}
+			lintsRunning = true
+
+			// eslint-disable-next-line no-constant-condition
+			while (true) {
+				lintsPending = false
+				debugger
+				const lintresults = await linter.lint(projectSettings$.value)
+
+				lintReports$.next(lintresults)
+				if (!lintsPending) {
+					break
+				}
+			}
+			lintsRunning = false
+			// }
 		},
 		lintReports$
 	)

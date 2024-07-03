@@ -113,7 +113,7 @@ export function MainViewHost() {
 	}
 
 	return (
-		<div>
+		<div style={{ height: "100%" }}>
 			<h3>{"Fink 2"}</h3>
 			<div>
 				GitHub token:{" "}
@@ -146,14 +146,54 @@ export function MainViewHost() {
 				<button id="btnAdd1" onClick={doLoadProject} disabled={loadingProjectState === "Loading"}>
 					(Re) Load Project
 				</button>
-				{loadingProjectState}
-				{currentProject && inlangProjectPath && (
-					<>
-						<IFrame src={"/?inlangProjectPath=" + inlangProjectPath} withFs={fs} />
-						{/* <IFrame src={"/?inlangProjectPath=" + inlangProjectPath} withFs={fs} /> */}
-					</>
-				)}
 			</div>
+			{loadingProjectState}
+			{currentProject && inlangProjectPath && (
+				<>
+					<br />
+					<br />
+					<button
+						id="commit"
+						type="button"
+						onClick={() => {
+							commit(currentProject)
+						}}
+						disabled={gitActive}
+					>
+						Commit Changes
+					</button>
+					<button
+						id="push"
+						type="button"
+						onClick={() => {
+							push(currentProject)
+						}}
+						disabled={gitActive}
+					>
+						Push Changes
+					</button>
+					<br />
+					<br />
+					<button
+						id="pull"
+						type="button"
+						onClick={() => {
+							pull(currentProject)
+						}}
+						disabled={gitActive}
+					>
+						Pull Changes
+					</button>
+					<div className="container">
+						<div className="left">
+							<IFrame src={"/?inlangProjectPath=" + inlangProjectPath} withFs={fs} />
+						</div>
+						<div className="right">
+							<IFrame src={"/?inlangProjectPath=" + inlangProjectPath} withFs={fs} />
+						</div>
+					</div>
+				</>
+			)}
 		</div>
 	)
 }
