@@ -255,14 +255,3 @@ const InlangDocMeta = (props: {
 }
 
 export default InlangDocMeta
-
-function LixLogo() {
-	return (
-		<svg xmlns="http://www.w3.org/2000/svg" width="100%" fill="none" viewBox="0 0 48 33">
-			<path
-				fill="currentColor"
-				d="M26.854 10l4.005 7.628L40.964 0h6.208L34.85 20.91l6.491 10.908h-6.179l-4.304-7.542-4.233 7.542h-6.25l6.478-10.909L20.604 10h6.25zM10.898 31.818V10h6.052v21.818h-6.052zM6 .065v32H0v-32h6zM11 .065h16v5H11v-5z"
-			/>
-		</svg>
-	)
-}
