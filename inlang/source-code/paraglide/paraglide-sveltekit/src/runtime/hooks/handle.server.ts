@@ -7,7 +7,7 @@ import type { Handle } from "@sveltejs/kit"
 import type { I18nConfig } from "../adapter.server.js"
 import type { RoutingStrategy } from "../strategy.js"
 import type { ParaglideLocals } from "../locals.js"
-import { createContext } from "unctx"
+import { ALSContext, GlobalContext, type Context } from "./utils.js"
 
 /**
  * The default lang attribute string that's in SvelteKit's `src/app.html` file.
@@ -58,11 +58,11 @@ export type HandleOptions = {
 	 * ONLY DISABLE THIS IF YOU ARE CERTAIN YOUR ENVIRONMENT DOES
 	 * NOT ALLOW CONCURRENT REQUESTS.
 	 *
-	 * For example: Edge functions
+	 * For example in Vercel Edge functions
 	 *
-	 * @default true
+	 * @default false
 	 */
-	asyncLocalStorage?: boolean
+	disableAsyncLocalStorage?: boolean
 }
 
 export const createHandle = <T extends string>(
@@ -70,27 +70,31 @@ export const createHandle = <T extends string>(
 	i18n: I18nConfig<T>,
 	options: HandleOptions
 ): Handle => {
-	const shouldUseAsyncLocalStorage = options.asyncLocalStorage ?? true
-
-	let ALS = undefined
-	const languageContext = createContext<T>({
-		asyncContext: true,
-		AsyncLocalStorage: ALS,
-	})
-
-	i18n.runtime.setLanguageTag(() => {
-		const val = languageContext.tryUse()
-		return i18n.runtime.isAvailableLanguageTag(val) ? val : i18n.defaultLanguageTag
-	})
+	let languageContext: Context<T> | undefined = undefined
+	function initializeLanguageContext(
+		AsyncLocalStorage: typeof import("node:async_hooks").AsyncLocalStorage | undefined
+	) {
+		languageContext = AsyncLocalStorage ? new ALSContext(AsyncLocalStorage) : new GlobalContext()
+		i18n.runtime.setLanguageTag(() => {
+			if (!languageContext)
+				throw new Error(
+					"languageContext not initialized - This should never happen, please file an issue"
+				)
+			const val = languageContext.get()
+			return i18n.runtime.isAvailableLanguageTag(val) ? val : i18n.defaultLanguageTag
+		})
+	}
 
 	const langPlaceholder = options.langPlaceholder ?? "%paraglide.lang%"
 	const dirPlaceholder = options.textDirectionPlaceholder ?? "%paraglide.textDirection%"
 
 	return async ({ resolve, event }) => {
-		// make sure `node:async_hooks` has been loaded
-		if (shouldUseAsyncLocalStorage) {
-			const { AsyncLocalStorage } = await import("node:async_hooks")
-			ALS = AsyncLocalStorage
+		// if the langauge context is not yet initialized
+		if (!languageContext) {
+			const als = options.disableAsyncLocalStorage
+				? undefined
+				: (await import("node:async_hooks")).AsyncLocalStorage
+			initializeLanguageContext(als)
 		}
 
 		const [localisedPath, suffix] = parseRoute(event.url.pathname as `/${string}`, base)
@@ -140,6 +144,10 @@ export const createHandle = <T extends string>(
 		// @ts-expect-error
 		event.locals.paraglide = paraglideLocals
 
+		if (!languageContext)
+			throw new Error(
+				"languageContext not initialized - This should never happen, please file an issue"
+			)
 		return languageContext.callAsync(paraglideLocals.lang, async () => {
 			return await resolve(event, {
 				transformPageChunk({ html, done }) {
