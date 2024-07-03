@@ -5,6 +5,7 @@ import { InlangSettings2 } from "@inlang/settings-component"
 
 import { ProjectSettings2 } from "../../src/v2/types/project-settings.js"
 import { openProject } from "./storage/db-messagebundle.js"
+import { InstalledLintRule } from "../../dist/v2/index.js"
 
 export const SettingsComponen2 = createComponent({
 	tagName: "inlang-settings2",
@@ -21,11 +22,24 @@ type SettingsViewProps = {
 
 export function SettingsView({ project }: SettingsViewProps) {
 	const [settings, setSettings] = useState<ProjectSettings2 | undefined>(undefined)
+	const [installedLintRules, setInstalledLintRules] = useState<InstalledLintRule[]>([])
 
+	console.log(settings)
 	useEffect(() => {
 		const settingsSub = project.inlangProject.settings.subscribe({
 			next: (currentSettings) => {
 				setSettings(currentSettings)
+			},
+		})
+		return () => {
+			settingsSub.unsubscribe()
+		}
+	}, [])
+
+	useEffect(() => {
+		const settingsSub = project.inlangProject.installed.lintRules.subscribe({
+			next: (currentInstalledLintRules) => {
+				setInstalledLintRules(currentInstalledLintRules)
 			},
 		})
 		return () => {
@@ -41,6 +55,14 @@ export function SettingsView({ project }: SettingsViewProps) {
 	}
 
 	return (
-		<div>{settings && <SettingsComponen2 settings={settings} setSettings={updateSettings} />}</div>
+		<div>
+			{settings && (
+				<SettingsComponen2
+					settings={settings}
+					setSettings={updateSettings}
+					installedLintRules={installedLintRules}
+				/>
+			)}
+		</div>
 	)
 }
