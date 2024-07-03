@@ -61,7 +61,7 @@ export default function Page(props: PageProps) {
 		<>
 			<Title>{pageTitle()}</Title>
 			<Meta name="description" content={metaDescription()} />
-			{props.manifest && props.manifest.gallery ? (
+			{props.manifest && props.manifest.gallery && props.manifest.gallery.length > 0 ? (
 				<Meta name="og:image" content={props.manifest.gallery[0]} />
 			) : (
 				<Meta
@@ -70,7 +70,7 @@ export default function Page(props: PageProps) {
 				/>
 			)}
 			<Meta name="twitter:card" content="summary_large_image" />
-			{props.manifest && props.manifest.gallery ? (
+			{props.manifest && props.manifest.gallery && props.manifest.gallery.length > 0 ? (
 				<Meta name="twitter:image" content={props.manifest.gallery[0]} />
 			) : (
 				<Meta
