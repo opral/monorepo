@@ -7,15 +7,15 @@ import type { Handle } from "@sveltejs/kit"
 import type { I18nConfig } from "../adapter.server.js"
 import type { RoutingStrategy } from "../strategy.js"
 import type { ParaglideLocals } from "../locals.js"
-import { AsyncLocalStorage } from "node:async_hooks"
+import { createContext } from "unctx"
+
+const languageContext = createContext<string>()
 
 /**
  * The default lang attribute string that's in SvelteKit's `src/app.html` file.
  * If this is present on the `<html>` attribute it most likely needs to be replaced.
  */
 const SVELTEKIT_DEFAULT_LANG_ATTRIBUTE = 'lang="en"'
-
-const localeAsyncLocalStorage = new AsyncLocalStorage<string>()
 
 export type HandleOptions = {
 	/**
@@ -60,7 +60,7 @@ export const createHandle = <T extends string>(
 	options: HandleOptions
 ): Handle => {
 	i18n.runtime.setLanguageTag(() => {
-		const val = localeAsyncLocalStorage.getStore()
+		const val = languageContext.tryUse()
 		return i18n.runtime.isAvailableLanguageTag(val) ? val : i18n.defaultLanguageTag
 	})
 
@@ -111,11 +111,11 @@ export const createHandle = <T extends string>(
 			textDirection,
 		}
 
-		// @ts-expect-error
 		// The user needs to have the ParaglideLocals type in their app.d.ts file
+		// @ts-expect-error
 		event.locals.paraglide = paraglideLocals
 
-		return localeAsyncLocalStorage.run(paraglideLocals.lang, async () => {
+		return languageContext.callAsync(paraglideLocals.lang, async () => {
 			return await resolve(event, {
 				transformPageChunk({ html, done }) {
 					if (!done) return html
