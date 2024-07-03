@@ -99,11 +99,6 @@ export async function loadProject(args: {
 	console.log("Project ID: ", projectId)
 	const projectSettings = await loadSettings({ settingsFilePath, nodeishFs })
 
-	// Transform legacy fields
-	// @ts-ignore
-	projectSettings.languageTags = projectSettings.locales
-	// @ts-ignore
-	projectSettings.sourceLanguageTag = projectSettings.baseLocale
 
 	const projectSettings$ = new BehaviorSubject(projectSettings)
 	const lifecycle$ = new BehaviorSubject<ProjectState>("initializing")
@@ -219,33 +214,31 @@ export async function loadProject(args: {
 
 	let lintsRunning = false
 	let lintsPending = false
+
+	const lintMessages = async () => {
+		if (lintsRunning) {
+			lintsPending = true
+			return
+		}
+		lintsRunning = true
+
+		// eslint-disable-next-line no-constant-condition
+		while (true) {
+			lintsPending = false
+			const lintresults = await linter.lint(projectSettings$.value)
+			lintReports$.next(lintresults)
+			if (!lintsPending) {
+				break
+			}
+		}
+		lintsRunning = false
+	}
+
 	const lintReports$ = new BehaviorSubject<LintResult>({})
 	const adapter = createMessageBundleSlotAdapter(
 		bundleStorage,
 		messageStorage,
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		async (source, bundle) => {
-			// if (source === "adapter") {
-			if (lintsRunning) {
-				lintsPending = true
-				return
-			}
-			lintsRunning = true
-
-			// eslint-disable-next-line no-constant-condition
-			while (true) {
-				lintsPending = false
-				debugger
-				const lintresults = await linter.lint(projectSettings$.value)
-
-				lintReports$.next(lintresults)
-				if (!lintsPending) {
-					break
-				}
-			}
-			lintsRunning = false
-			// }
-		},
+		lintMessages,
 		lintReports$
 	)
 
@@ -259,6 +252,10 @@ export async function loadProject(args: {
 	})
 
 	await startReplication(database.collections.messageBundles, adapter).awaitInitialReplication()
+
+	projectSettings$.subscribe(() => {
+		lintMessages()
+	})
 
 	const setSettings = async (newSettings: ProjectSettings2) => {
 		// projectSettings$.next(newSettings); // Update the observable

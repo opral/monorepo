@@ -25,7 +25,6 @@ export function SettingsView({ project }: SettingsViewProps) {
 	useEffect(() => {
 		const settingsSub = project.inlangProject.settings.subscribe({
 			next: (currentSettings) => {
-				console.log("NEXT")
 				setSettings(currentSettings)
 			},
 		})
