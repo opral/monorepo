@@ -1,9 +1,9 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
-import "./../../field-header.js"
+import "../../field-header.js"
 
-@customElement("language-tags-input")
-export class LanguageTagsInput extends LitElement {
+@customElement("locale-input")
+export class LocaleInput extends LitElement {
 	static override styles = [
 		css`
 			.property {
@@ -132,7 +132,7 @@ export class LanguageTagsInput extends LitElement {
 				<sl-input
 					class="add-input"
 					size="small"
-					placeholder="Enter languageTag ..."
+					placeholder="Enter locale ..."
 					@input=${(e: Event) => this.handleInputChange(e)}
 					@keydown=${(e: KeyboardEvent) => {
 						if (e.key === "Enter") {
@@ -160,6 +160,6 @@ export class LanguageTagsInput extends LitElement {
 // add types
 declare global {
 	interface HTMLElementTagNameMap {
-		"language-tags-input": LanguageTagsInput
+		"locale-input": LocaleInput
 	}
 }
