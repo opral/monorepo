@@ -9,8 +9,6 @@ import type { RoutingStrategy } from "../strategy.js"
 import type { ParaglideLocals } from "../locals.js"
 import { createContext } from "unctx"
 
-const languageContext = createContext<string>()
-
 /**
  * The default lang attribute string that's in SvelteKit's `src/app.html` file.
  * If this is present on the `<html>` attribute it most likely needs to be replaced.
@@ -52,6 +50,19 @@ export type HandleOptions = {
 	 * ```
 	 */
 	textDirectionPlaceholder?: string
+
+	/**
+	 * If `AsyncLocalStorage` should be used to scope the language state to the current request.
+	 * This makes it impossible for requests to override each other's language.
+	 *
+	 * ONLY DISABLE THIS IF YOU ARE CERTAIN YOUR ENVIRONMENT DOES
+	 * NOT ALLOW CONCURRENT REQUESTS.
+	 *
+	 * For example: Edge functions
+	 *
+	 * @default true
+	 */
+	asyncLocalStorage?: boolean
 }
 
 export const createHandle = <T extends string>(
@@ -59,6 +70,14 @@ export const createHandle = <T extends string>(
 	i18n: I18nConfig<T>,
 	options: HandleOptions
 ): Handle => {
+	const shouldUseAsyncLocalStorage = options.asyncLocalStorage ?? true
+
+	let ALS = undefined
+	const languageContext = createContext<T>({
+		asyncContext: true,
+		AsyncLocalStorage: ALS,
+	})
+
 	i18n.runtime.setLanguageTag(() => {
 		const val = languageContext.tryUse()
 		return i18n.runtime.isAvailableLanguageTag(val) ? val : i18n.defaultLanguageTag
@@ -67,7 +86,13 @@ export const createHandle = <T extends string>(
 	const langPlaceholder = options.langPlaceholder ?? "%paraglide.lang%"
 	const dirPlaceholder = options.textDirectionPlaceholder ?? "%paraglide.textDirection%"
 
-	return ({ resolve, event }) => {
+	return async ({ resolve, event }) => {
+		// make sure `node:async_hooks` has been loaded
+		if (shouldUseAsyncLocalStorage) {
+			const { AsyncLocalStorage } = await import("node:async_hooks")
+			ALS = AsyncLocalStorage
+		}
+
 		const [localisedPath, suffix] = parseRoute(event.url.pathname as `/${string}`, base)
 		const langFromUrl = strategy.getLanguageFromLocalisedPath(localisedPath)
 
