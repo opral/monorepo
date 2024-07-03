@@ -34,6 +34,7 @@
 		"@lix-js/client": "^2.2.0",
 		"@types/react-dom": "^18.3.0",
 		"buffer": "^6.0.3",
+		"comlink": "^4.4.1",
 		"express": "^4.19.2",
 		"isomorphic-git": "^1.25.10",
 		"memfs": "4.6.0",

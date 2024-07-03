@@ -7,7 +7,6 @@ export type NormalizedBase = `/${string}` | ""
  */
 export function normaliseBase(baseValue: string, currentUrl: URL): NormalizedBase {
 	if (baseValue === "") return ""
-
-	const absoluteBase = new URL(baseValue, currentUrl).pathname as `/${string}`
-	return absoluteBase === "/" ? "" : absoluteBase
+	const absoluteBase = new URL(baseValue, currentUrl).pathname as NormalizedBase
+	return (absoluteBase.endsWith("/") ? absoluteBase.slice(0, -1) : absoluteBase) as NormalizedBase
 }

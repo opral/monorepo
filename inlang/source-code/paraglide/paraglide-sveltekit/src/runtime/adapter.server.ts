@@ -238,8 +238,10 @@ export function createI18n<T extends string>(runtime: Paraglide<T>, options?: I1
 		 * @returns
 		 */
 		getLanguageFromUrl(url: URL): T {
-			if (config.exclude(url.pathname)) return config.defaultLanguageTag
-			return strategy.getLanguageFromLocalisedPath(url.pathname) || config.defaultLanguageTag
+			const normalizedBase = normaliseBase(base)
+			const [localizedPath] = parseRoute(url.pathname, normalizedBase)
+			if (config.exclude(localizedPath)) return config.defaultLanguageTag
+			return strategy.getLanguageFromLocalisedPath(localizedPath) || config.defaultLanguageTag
 		},
 
 		/**

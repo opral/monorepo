@@ -30,7 +30,7 @@ import {
 	type RxConflictHandlerOutput,
 } from "rxdb"
 import { getRxStorageMemory } from "rxdb/plugins/storage-memory"
-import { BehaviorSubject, combineLatest, from, map, switchMap, tap } from "rxjs"
+import { BehaviorSubject, combineLatest, from, switchMap, tap } from "rxjs"
 import { resolveModules } from "./resolveModules2.js"
 import { createLintWorker } from "./lint/host.js"
 import {
@@ -46,6 +46,8 @@ import missingSelectorLintRule from "./dev-modules/missing-selector-lint-rule.js
 import missingCatchallLintRule from "./dev-modules/missingCatchall.js"
 
 type ProjectState = "initializing" | "resolvingModules" | "loaded"
+
+const isInIframe = window.self !== window.top
 
 /**
  *
@@ -86,12 +88,15 @@ export async function loadProject(args: {
 		nodeishFs: args.repo.nodeishFs,
 	})
 
-	await maybeAddModuleCache({ projectPath, repo: args.repo })
-	await maybeCreateFirstProjectId({ projectPath, repo: args.repo })
+	if (!isInIframe) {
+		await maybeAddModuleCache({ projectPath, repo: args.repo })
+		await maybeCreateFirstProjectId({ projectPath, repo: args.repo })
+	}
 
 	// no need to catch since we created the project ID with "maybeCreateFirstProjectId" earlier
-	const projectId = await nodeishFs.readFile(projectIdPath, { encoding: "utf-8" })
-
+	console.log("Reading Project path: ", projectPath)
+	const projectId = await args.repo.nodeishFs.readFile(projectIdPath, { encoding: "utf-8" })
+	console.log("Project ID: ", projectId)
 	const projectSettings = await loadSettings({ settingsFilePath, nodeishFs })
 
 	// Transform legacy fields
@@ -196,7 +201,6 @@ export async function loadProject(args: {
 		ignoreDuplicate: true,
 	})
 
-
 	const bundleStorage = await createSlotStorageWriter<MessageBundleRecord>({
 		fileNameCharacters: 3,
 		slotsPerFile: 16 * 16 * 16 * 16,
@@ -280,4 +284,3 @@ export async function loadProject(args: {
 		},
 	}
 }
-

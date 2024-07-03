@@ -8,8 +8,10 @@ const config = {
 		adapter: adapter(),
 		prerender: {
 			//Needed for correctly prerendering <link rel="alternate" hreflang="x" href="y">
-			origin: "https://example.com",
-			entries: ["*", "/de"],
+			origin: "https://github.io",
+		},
+		paths: {
+			base: "/paraglide-sveltekit/example",
 		},
 	},
 

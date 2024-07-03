@@ -181,9 +181,16 @@ export function createMessageBundleSlotAdapter(
 				loadedMessageBundles.set(bundleRecord.data.id, loadedBundle)
 
 				debug("bundle callback - streaming bundle to rxdb " + bundleRecord.data.id)
-				onBundleChange(source, loadedBundle)
 			} else {
-				debug("bundle callback - NOT IMPlEMENTED  add bundle")
+				const loadedBundle: MessageBundle = {
+					id: bundleRecord.data.id,
+					alias: bundleRecord.data.alias,
+					messages: [],
+				}
+				loadedBundle.versionHash = bundleRecord.slotEntryHash
+				loadedBundle.alias = bundleRecord.data.alias
+				loadedMessageBundles.set(bundleRecord.data.id, loadedBundle)
+				onBundleChange(source, loadedBundle)
 			}
 		}
 	})

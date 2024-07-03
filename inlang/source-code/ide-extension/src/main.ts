@@ -130,6 +130,7 @@ function setupFileSystemWatcher(args: {
 function registerExtensionComponents(args: {
 	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
+	nodeishFs: NodeishFilesystem
 }) {
 	args.context.subscriptions.push(
 		...Object.values(CONFIGURATION.COMMANDS).map((c) => c.register(c.command, c.callback as any))

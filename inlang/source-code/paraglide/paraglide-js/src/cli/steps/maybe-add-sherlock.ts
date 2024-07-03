@@ -3,7 +3,7 @@ import { prompt } from "~/cli/utils.js"
 import type { Repository } from "@lix-js/client"
 import type { CliStep } from "../utils.js"
 import type { InlangProject } from "@inlang/sdk"
-import * as Sherlock from "@inlang/cross-sell-sherlock"
+import * as Sherlock from "@inlang/recommend-sherlock"
 import { telemetry } from "~/services/telemetry/implementation.js"
 
 export const maybeAddSherlock: CliStep<

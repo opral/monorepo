@@ -1,5 +1,18 @@
 # @inlang/rpc
 
+## 0.3.36
+
+### Patch Changes
+
+- Updated dependencies [1ef9a0e]
+  - @inlang/marketplace-registry@1.5.10
+
+## 0.3.35
+
+### Patch Changes
+
+- @inlang/sdk@0.36.3
+
 ## 0.3.34
 
 ### Patch Changes

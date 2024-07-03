@@ -7,7 +7,6 @@ import { MessageBundle } from "../../src/v2/types/message-bundle.js"
 import { ProjectSettings2 } from "../../src/v2/types/project-settings.js"
 import { VariableSizeList as List } from "react-window"
 import { InlangProject2 } from "../../dist/v2/types/project.js"
-import { openProject } from "./storage/db-messagebundle.js"
 import { LintReport } from "../../dist/v2/index.js"
 import { MessageBundleListSummary } from "./messageBundleListSummary.js"
 import { LanguageTag } from "@inlang/language-tag"
@@ -27,7 +26,7 @@ type MessageBundleViewProps = {
 	bundle: RxDocument<MessageBundle>
 	// reports: Subject<LintReport[]>
 	projectSettings: ProjectSettings2
-	project: Awaited<ReturnType<typeof openProject>>
+	project: InlangProject2
 	filteredLocales: LanguageTag[]
 }
 
@@ -57,7 +56,7 @@ function MessageBundleView({
 
 	const onBundleChange = (messageBundle: { detail: { argument: MessageBundle } }) => {
 		// eslint-disable-next-line no-console
-		project.inlangProject.messageBundleCollection?.upsert(messageBundle.detail.argument)
+		project.messageBundleCollection?.upsert(messageBundle.detail.argument)
 	}
 
 	return (
@@ -74,7 +73,7 @@ function MessageBundleView({
 				}
 
 				console.log("fixing", fix, lintReport)
-				project.inlangProject.fix(lintReport, { title: fix })
+				project.fix(lintReport, { title: fix })
 			}}
 		/>
 	)
@@ -93,7 +92,7 @@ const areEqual = (prevProps: MessageBundleViewProps, nextProps: MessageBundleVie
 const MessageBundleViewMemoed = React.memo(MessageBundleView, areEqual)
 
 type MessageBundleListProps = {
-	project: Awaited<ReturnType<typeof openProject>>
+	project: InlangProject2
 }
 
 export function MessageBundleList({ project }: MessageBundleListProps) {
@@ -147,7 +146,7 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 		// 		selector: selector,
 		// 	})
 
-		const mc = project.inlangProject.messageBundleCollection
+		const mc = project.messageBundleCollection
 		setMessageBundleCollection(mc)
 		query =
 			//.sort({ updatedAt: "desc" })
@@ -174,7 +173,7 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 	useEffect(() => {
 		let inlangProject: InlangProject2 | undefined = undefined
 
-		inlangProject = project.inlangProject
+		inlangProject = project
 
 		inlangProject.settings.subscribe({
 			next: (settings) => {

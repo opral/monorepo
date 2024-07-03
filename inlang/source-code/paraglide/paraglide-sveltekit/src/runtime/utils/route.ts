@@ -27,13 +27,11 @@ export function parseRoute(
  * @param base The normalized base path
  * @param dataSuffix The data suffix (if it exists)
  */
-export function serializeRoute(
+export const serializeRoute = (
 	path: string,
 	normalizedBase: NormalizedBase,
 	dataSuffix: DataSuffix | undefined
-): string {
-	return [normalizedBase, path, dataSuffix ?? ""].filter((s) => s !== "/").join("") || "/"
-}
+) => [normalizedBase, path, dataSuffix ?? ""].filter((s) => s !== "/").join("") || "/"
 
 /**
  * Removes the base from an absolute path

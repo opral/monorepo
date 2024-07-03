@@ -1,5 +1,13 @@
 # @inlang/paraglide-js
 
+## 1.11.0
+
+### Minor Changes
+
+- e37eabf: - renamed packages `@inlang/cross-sell-X` to `@inlang/recommend-X` be more descriptive
+  - refactor recommendation view in Sherlock VS Code extension
+  - introduce new `shouldRecommend` function to `@inlang/recommend-sherlock` & `@inlang/recommend-ninja`
+
 ## 1.10.1
 
 ### Patch Changes
@@ -144,7 +152,7 @@
 
 ### Patch Changes
 
-- afaaffa: Bundle `@inlang/cross-sell-sherlock`. This is used to promot _once_ during `paraglide-js init` to ask if you want to install the Sherlock vscode extension
+- afaaffa: Bundle `@inlang/recommend-sherlock`. This is used to promot _once_ during `paraglide-js init` to ask if you want to install the Sherlock vscode extension
 
 ## 1.3.0
 
@@ -156,15 +164,15 @@
 
 ### Patch Changes
 
-- @inlang/cross-sell-sherlock@0.0.2
+- @inlang/recommend-sherlock@0.0.2
 
 ## 1.2.9
 
 ### Patch Changes
 
-- a99e35fee: use `@inlang/cross-sell-sherlock` during vscode extension initialization
+- a99e35fee: use `@inlang/recommend-sherlock` during vscode extension initialization
 - Updated dependencies [a99e35fee]
-  - @inlang/cross-sell-sherlock@0.0.2
+  - @inlang/recommend-sherlock@0.0.2
 
 ## 1.2.8
 

@@ -14,6 +14,7 @@ const settingsProperty = [
 	"editorColors.error.border",
 	"extract.autoHumanId.enabled",
 	"inlineAnnotations.enabled",
+	"appRecommendations.ninja.enabled",
 ] as const
 
 type SettingsProperty = (typeof settingsProperty)[number]

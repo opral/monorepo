@@ -23,6 +23,7 @@ export const CONFIGURATION = {
 		ON_DID_ERROR_TREE_VIEW_CHANGE: new EventEmitter<ErrorNode | undefined>(),
 		ON_DID_PREVIEW_LANGUAGE_TAG_CHANGE: new EventEmitter<string>(),
 		ON_DID_SETTINGS_VIEW_CHANGE: new EventEmitter<void>(),
+		ON_DID_RECOMMENDATION_VIEW_CHANGE: new EventEmitter<void>(),
 	},
 	COMMANDS: {
 		CREATE_MESSAGE: createMessageCommand,

@@ -1,5 +1,11 @@
 # @lix-js/fs
 
+## 2.2.0
+
+### Minor Changes
+
+- e8d74b9: New path normalization with better performance and single implementation. removed normalPath() function
+
 ## 2.1.0
 
 ### Minor Changes
