@@ -7,7 +7,6 @@ import { telemetry } from "~/services/telemetry/implementation.js"
 import { Logger } from "~/services/logger/index.js"
 import { findRepoRoot, openRepository, type Repository } from "@lix-js/client"
 import { findPackageJson } from "~/services/environment/package.js"
-import { promptSelection } from "~/cli/utils.js"
 import { checkForUncommittedChanges } from "~/cli/steps/check-for-uncomitted-changes.js"
 import { initializeInlangProject } from "~/cli/steps/initialize-inlang-project.js"
 import { maybeAddSherlock } from "~/cli/steps/maybe-add-sherlock.js"
@@ -17,14 +16,6 @@ import { updatePackageJson } from "~/cli/steps/update-package-json.js"
 import { runCompiler } from "~/cli/steps/run-compiler.js"
 import type { CliStep } from "../../utils.js"
 import { maybeAddNinja } from "~/cli/steps.js"
-
-const ADAPTER_LINKS = {
-	sveltekit: "https://inlang.com/m/dxnzrydw/paraglide-sveltekit-i18n",
-	nextjs: "https://inlang.com/m/osslbuzt/paraglide-next-i18n",
-	astro: "https://inlang.com/m/iljlwzfs/paraglide-astro-i18n",
-	solidstart: "https://inlang.com/m/n860p17j/paraglide-solidstart-i18n",
-	vite: "https://github.com/opral/monorepo/tree/main/inlang/source-code/paraglide/paraglide-vite",
-} as const
 
 export const initCommand = new Command()
 	.name("init")
@@ -81,36 +72,15 @@ export const initCommand = new Command()
 		const absoluteSettingsPath = nodePath.resolve(ctx9.projectPath, "settings.json")
 		const relativeSettingsFilePath = absoluteSettingsPath.replace(process.cwd(), ".")
 
-		let successMessage = dedent`inlang Paraglide-JS has been set up sucessfully.
+		const successMessage = dedent`inlang Paraglide-JS has been set up sucessfully.
 			
 			1. Run your install command (npm i, yarn install, etc)
 			2. Register all your languages in ${relativeSettingsFilePath}
 			3. Run the build script (npm run build, or similar.)
 			4. Done :) Happy paragliding 🪂
 			
-			`
-
-		const stackChoice = await promtStack()
-
-		if (Object.keys(ADAPTER_LINKS).includes(stackChoice)) {
-			successMessage += "\n\n"
-			successMessage += dedent`
-				HINT:
-				If you are using ${stackChoice} with paraglide, you will likely also want to use 
-
-				\`@inlang/paraglide-${stackChoice}\`
-
-				Read the documentation at:
-				${ADAPTER_LINKS[stackChoice as keyof typeof ADAPTER_LINKS]}
-			`
-		}
-
-		successMessage += "\n\n"
-		successMessage += dedent`
 			For questions and feedback, visit 
-			https://github.com/opral/monorepo/discussions.
-		`
-
+			https://github.com/opral/monorepo/discussions`
 		ctx.logger.box(successMessage)
 	})
 
@@ -207,22 +177,4 @@ export const addCompileStepToPackageJSON: CliStep<
 
 	if (shouldExit) process.exit(1)
 	return ctx
-}
-
-/**
- * Prompts the user to select the stack they are using & links to relevant documentation.
- */
-async function promtStack() {
-	return await promptSelection("Which tech stack are you using?", {
-		options: [
-			{ label: "Other", value: "other" },
-			{ label: "Vanilla", value: "vanilla" },
-			{ label: "NextJS", value: "nextjs" },
-			{ label: "SvelteKit", value: "sveltekit" },
-			{ label: "Astro", value: "astro" },
-			{ label: "SolidStart", value: "solidstart" },
-			{ label: "Vite", value: "vite" },
-		],
-		initial: "other",
-	})
 }
