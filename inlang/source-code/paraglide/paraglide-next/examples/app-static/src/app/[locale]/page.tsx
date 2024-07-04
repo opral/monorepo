@@ -1,10 +1,6 @@
-import { initializeLocaleCache } from "@/lib/localeCache"
 import * as m from "@/paraglide/messages.js"
-import { AvailableLanguageTag } from "@/paraglide/runtime"
 
-export default function Home({ params }: { params: { locale: AvailableLanguageTag } }) {
-	initializeLocaleCache(params.locale)
-
+export default function Home() {
 	return (
 		<>
 			<h1>{m.paraglide_and_next_app_router()}</h1>
