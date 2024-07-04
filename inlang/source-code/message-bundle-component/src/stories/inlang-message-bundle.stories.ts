@@ -1,8 +1,7 @@
 import "./inlang-message-bundle.ts"
 import type { Meta, StoryObj } from "@storybook/web-components"
 import { html } from "lit"
-import { multipleMatcherBundle, pluralBundle } from "@inlang/sdk/v2-mocks"
-import { simplifyBundle } from "../helper/simplifyBundle.js"
+import { pluralBundle } from "@inlang/sdk/v2-mocks"
 import {
 	mockInstalledLintRules,
 	mockMessageLintReports,
@@ -14,6 +13,26 @@ import { bundleWithoutSelectors } from "./../mock/messageBundle.ts"
 const meta: Meta = {
 	component: "inlang-message-bundle",
 	title: "Public/inlang-message-bundle",
+	argTypes: {
+		messageBundle: {
+			control: { type: "object" },
+			description: "Type MessageBundle: see sdk v2",
+		},
+		settings: {
+			control: { type: "object" },
+			description: "Type ProjectSettings2: see sdk v2",
+		},
+		installedLintRules: {
+			control: { type: "Array" },
+			description:
+				"Optional: Type InstalledLintRule[]: see sdk v2. If defined the reports will be shown with more meta data.",
+		},
+		filteredLocales: {
+			control: { type: "Array" },
+			description:
+				"Optional: Type LanguageTag[]. Pass it in when you want to filter the locales of the bundle. If not passed, all locales will be shown.",
+		},
+	},
 }
 
 export default meta
@@ -23,7 +42,6 @@ export const Simple: StoryObj = {
 		html`<inlang-message-bundle
 			.messageBundle=${bundleWithoutSelectors}
 			.settings=${mockSettings}
-			.lintReports=${mockMessageLintReports}
 			.filteredLocales=${["en", "de"]}
 			@change-message-bundle=${(data: any) =>
 				console.info("changeMessageBundle", data.detail.argument)}
@@ -36,7 +54,6 @@ export const Complex: StoryObj = {
 		html`<inlang-message-bundle
 			.messageBundle=${pluralBundle}
 			.settings=${mockSettings}
-			.lintReports=${[...mockMessageLintReports, ...mockVariantLintReports]}
 			.installedLintRules=${mockInstalledLintRules}
 			@change-message-bundle=${(data: any) =>
 				console.info("changeMessageBundle", data.detail.argument)}
@@ -81,10 +98,7 @@ export const Styled: StoryObj = {
 					--sl-input-color-focus: #ffffff;
 					--sl-input-color-hover: #ffffff;
 					--sl-input-placeholder-color: #a0a0a0;
-
-					/* greyShade */
 					--sl-input-background-color-disabled: #242424;
-					--sl-panel-border-color: #313131;
 
 					/* focus ring */
 					--sl-input-focus-ring-color: var(--inlang-color-primary);
