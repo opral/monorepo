@@ -42,6 +42,12 @@ The message bundle component emits the following events:
 - `fix-lint`: Emitted when the fix lint button is clicked. The event detail contains the associated lint report and the fix id.
 - `machine-translate`: Emitted when the machine translate button is clicked. The event detail contains the accociated messageId and variantId.
 
+## Slots
+
+The message bundle component uses slots to render additional message bundle actions:
+
+- Slot name -> `slot="bundle-action"`
+
 ## Usage
 
 - Solidjs - Prop: `prop:messageBundle={obj}` - Event: `on:change-message-bundle`
