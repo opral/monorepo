@@ -17,8 +17,8 @@ export const bundleWithoutSelectors: MessageBundle = {
 			],
 		},
 	],
-	alias: {
-		default: "frontend_button_text",
-		ios: "frontendButtonText",
-	},
+	alias: {},
+	// 	default: "frontend_button_text",
+	// 	ios: "frontendButtonText",
+	// },
 }

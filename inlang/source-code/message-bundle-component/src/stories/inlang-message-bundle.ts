@@ -104,18 +104,18 @@ export default class InlangMessageBundle extends LitElement {
 		this.dispatchEvent(onMachineTranslate)
 	}
 
-	dispatchOnRevert(messageId?: string, variantId?: string) {
-		const onRevert = new CustomEvent("revert", {
-			bubbles: true,
-			detail: {
-				argument: {
-					messageId,
-					variantId,
-				},
-			},
-		})
-		this.dispatchEvent(onRevert)
-	}
+	// dispatchOnRevert(messageId?: string, variantId?: string) {
+	// 	const onRevert = new CustomEvent("revert", {
+	// 		bubbles: true,
+	// 		detail: {
+	// 			argument: {
+	// 				messageId,
+	// 				variantId,
+	// 			},
+	// 		},
+	// 	})
+	// 	this.dispatchEvent(onRevert)
+	// }
 
 	// internal variables/states
 	@state()
@@ -161,9 +161,9 @@ export default class InlangMessageBundle extends LitElement {
 		this.dispatchOnMachineTranslate(messageId, variantId)
 	}
 
-	private _revert = (messageId?: string, variantId?: string) => {
-		this.dispatchOnRevert(messageId, variantId)
-	}
+	// private _revert = (messageId?: string, variantId?: string) => {
+	// 	this.dispatchOnRevert(messageId, variantId)
+	// }
 
 	private _refLocale = (): LanguageTag | undefined => {
 		return this.settings?.baseLocale
@@ -213,7 +213,7 @@ export default class InlangMessageBundle extends LitElement {
 			<div class=${`header`} part="header">
 				<div class="header-left">
 					<span># ${this._messageBundle?.id}</span>
-					${this._messageBundle?.alias
+					${this._messageBundle?.alias && Object.keys(this._messageBundle.alias).length > 0
 						? html` <div class="alias-wrapper">
 								<span class="alias">Alias: ${this._messageBundle?.alias?.default}</span>
 								${Object.keys(this._messageBundle.alias).length > 1
@@ -484,7 +484,6 @@ export default class InlangMessageBundle extends LitElement {
 										.installedLintRules=${this.installedLintRules}
 										.fixLint=${this._fixLint}
 										.machineTranslate=${this._machineTranslate}
-										.revert=${this._revert}
 									></inlang-variant>`
 							  })
 							: message?.selectors.length === 0 || !message
@@ -500,7 +499,6 @@ export default class InlangMessageBundle extends LitElement {
 									.installedLintRules=${this.installedLintRules}
 									.fixLint=${this._fixLint}
 									.machineTranslate=${this._machineTranslate}
-									.revert=${this._revert}
 							  ></inlang-variant>`
 							: ``}
 						${message?.selectors && message.selectors.length > 0
