@@ -1514,6 +1514,9 @@ importers:
       '@inlang/paraglide-js':
         specifier: workspace:*
         version: link:../paraglide-js
+      '@nimpl/getters':
+        specifier: ^1.4.1
+        version: 1.4.1(next@14.1.3(@babel/core@7.24.7)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.2.0))(react@18.2.0))(react-dom@18.3.1(react@18.2.0))(react@18.2.0)
       commander:
         specifier: ^12.0.0
         version: 12.1.0
@@ -1627,6 +1630,43 @@ importers:
       typescript:
         specifier: ^5.5.2
         version: 5.5.2
+
+  inlang/source-code/paraglide/paraglide-next/examples/app-static:
+    dependencies:
+      '@inlang/paraglide-next':
+        specifier: workspace:*
+        version: link:../..
+      '@nimpl/getters':
+        specifier: ^1.4.1
+        version: 1.4.1(next@14.1.3(@opentelemetry/api@1.9.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      consola:
+        specifier: ^3.2.3
+        version: 3.2.3
+      next:
+        specifier: ^14.1.3
+        version: 14.1.3(@opentelemetry/api@1.9.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react:
+        specifier: ^18
+        version: 18.2.0
+      react-dom:
+        specifier: ^18
+        version: 18.2.0(react@18.2.0)
+    devDependencies:
+      '@inlang/paraglide-js':
+        specifier: workspace:*
+        version: link:../../../paraglide-js
+      '@types/node':
+        specifier: ^20
+        version: 20.14.9
+      '@types/react':
+        specifier: ^18
+        version: 18.3.3
+      '@types/react-dom':
+        specifier: ^18
+        version: 18.3.0
+      typescript:
+        specifier: ^5.3.2
+        version: 5.3.3
 
   inlang/source-code/paraglide/paraglide-next/examples/pages:
     dependencies:
@@ -5568,6 +5608,13 @@ packages:
 
   '@nicolo-ribaudo/eslint-scope-5-internals@5.1.1-v1':
     resolution: {integrity: sha512-54/JRvkLIzzDWshCWfuhadfrfZVPiElY8Fcgmg1HroEly/EDSszzhBAsarCux+D/kOslTRquNzuyGSmUSTTHGg==}
+
+  '@nimpl/getters@1.4.1':
+    resolution: {integrity: sha512-eSzcBwDFTPYsUPWEBzD0diYv/d+Wx6YkzshjVxBZJmz9ZuqTjRDbyiQAVy3cknqKgN9kGPAQ58dnMS5R6pwmJQ==}
+    peerDependencies:
+      next: '>= 14.0.0'
+      react: '>= 18.2.0'
+      react-dom: '>= 18.2.0'
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -19662,6 +19709,18 @@ snapshots:
     dependencies:
       eslint-scope: 5.1.1
 
+  '@nimpl/getters@1.4.1(next@14.1.3(@babel/core@7.24.7)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.2.0))(react@18.2.0))(react-dom@18.3.1(react@18.2.0))(react@18.2.0)':
+    dependencies:
+      next: 14.1.3(@babel/core@7.24.7)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.2.0))(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.3.1(react@18.2.0)
+
+  '@nimpl/getters@1.4.1(next@14.1.3(@opentelemetry/api@1.9.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+    dependencies:
+      next: 14.1.3(@opentelemetry/api@1.9.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
       '@nodelib/fs.stat': 2.0.5
@@ -22823,7 +22882,7 @@ snapshots:
 
   '@types/cli-progress@3.11.5':
     dependencies:
-      '@types/node': 20.5.9
+      '@types/node': 20.14.9
 
   '@types/compression@1.7.5':
     dependencies:
@@ -22885,7 +22944,7 @@ snapshots:
 
   '@types/express-serve-static-core@4.19.3':
     dependencies:
-      '@types/node': 20.8.4
+      '@types/node': 20.14.9
       '@types/qs': 6.9.15
       '@types/range-parser': 1.2.7
       '@types/send': 0.17.4
@@ -22956,17 +23015,17 @@ snapshots:
 
   '@types/jsonfile@6.1.4':
     dependencies:
-      '@types/node': 20.5.9
+      '@types/node': 20.14.9
 
   '@types/jsonwebtoken@9.0.6':
     dependencies:
-      '@types/node': 20.5.9
+      '@types/node': 20.14.9
 
   '@types/keygrip@1.0.6': {}
 
   '@types/keyv@3.1.4':
     dependencies:
-      '@types/node': 20.14.7
+      '@types/node': 20.14.9
 
   '@types/lodash.merge@4.6.7':
     dependencies:
@@ -23014,7 +23073,7 @@ snapshots:
 
   '@types/node-fetch@2.6.11':
     dependencies:
-      '@types/node': 18.19.39
+      '@types/node': 20.14.9
       form-data: 4.0.0
 
   '@types/node@12.20.55': {}
@@ -23067,11 +23126,11 @@ snapshots:
 
   '@types/promptly@3.0.5':
     dependencies:
-      '@types/node': 20.5.9
+      '@types/node': 20.14.9
 
   '@types/prompts@2.4.9':
     dependencies:
-      '@types/node': 20.5.9
+      '@types/node': 20.14.9
       kleur: 3.0.3
 
   '@types/prop-types@15.7.12': {}
@@ -23097,7 +23156,7 @@ snapshots:
 
   '@types/responselike@1.0.3':
     dependencies:
-      '@types/node': 20.14.7
+      '@types/node': 20.14.9
 
   '@types/sax@1.2.7':
     dependencies:
@@ -23108,12 +23167,12 @@ snapshots:
   '@types/send@0.17.4':
     dependencies:
       '@types/mime': 1.3.5
-      '@types/node': 20.8.4
+      '@types/node': 20.14.9
 
   '@types/serve-static@1.15.7':
     dependencies:
       '@types/http-errors': 2.0.4
-      '@types/node': 20.8.4
+      '@types/node': 20.14.9
       '@types/send': 0.17.4
 
   '@types/shimmer@1.0.5': {}
@@ -23142,7 +23201,7 @@ snapshots:
 
   '@types/ws@8.5.10':
     dependencies:
-      '@types/node': 20.14.7
+      '@types/node': 20.14.9
 
   '@types/yargs-parser@21.0.3': {}
 
@@ -23152,7 +23211,7 @@ snapshots:
 
   '@types/yauzl@2.10.3':
     dependencies:
-      '@types/node': 20.14.7
+      '@types/node': 20.14.9
     optional: true
 
   '@typescript-eslint/eslint-plugin@5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.3.2)':
@@ -24107,11 +24166,11 @@ snapshots:
 
   '@wdio/repl@8.24.12':
     dependencies:
-      '@types/node': 20.14.7
+      '@types/node': 20.14.9
 
   '@wdio/reporter@8.39.0':
     dependencies:
-      '@types/node': 20.14.7
+      '@types/node': 20.14.9
       '@wdio/logger': 8.38.0
       '@wdio/types': 8.39.0
       diff: 5.2.0
@@ -24119,7 +24178,7 @@ snapshots:
 
   '@wdio/runner@8.39.0(typescript@5.3.2)':
     dependencies:
-      '@types/node': 20.14.7
+      '@types/node': 20.14.9
       '@wdio/config': 8.39.0
       '@wdio/globals': 8.39.0(typescript@5.3.2)
       '@wdio/logger': 8.38.0
@@ -24148,7 +24207,7 @@ snapshots:
 
   '@wdio/types@8.38.2':
     dependencies:
-      '@types/node': 20.14.7
+      '@types/node': 20.14.9
     optional: true
 
   '@wdio/types@8.39.0':
@@ -35922,7 +35981,7 @@ snapshots:
 
   webdriver@8.38.2:
     dependencies:
-      '@types/node': 20.14.7
+      '@types/node': 20.14.9
       '@types/ws': 8.5.10
       '@wdio/config': 8.38.2
       '@wdio/logger': 8.38.0
@@ -35941,7 +36000,7 @@ snapshots:
 
   webdriver@8.39.0:
     dependencies:
-      '@types/node': 20.14.7
+      '@types/node': 20.14.9
       '@types/ws': 8.5.10
       '@wdio/config': 8.39.0
       '@wdio/logger': 8.38.0
@@ -35959,7 +36018,7 @@ snapshots:
 
   webdriverio@8.38.2(typescript@5.3.2):
     dependencies:
-      '@types/node': 20.14.7
+      '@types/node': 20.14.9
       '@wdio/config': 8.38.2
       '@wdio/logger': 8.38.0
       '@wdio/protocols': 8.38.0
@@ -35994,7 +36053,7 @@ snapshots:
 
   webdriverio@8.39.0(typescript@5.2.2):
     dependencies:
-      '@types/node': 20.14.7
+      '@types/node': 20.14.9
       '@wdio/config': 8.39.0
       '@wdio/logger': 8.38.0
       '@wdio/protocols': 8.38.0
@@ -36029,7 +36088,7 @@ snapshots:
 
   webdriverio@8.39.0(typescript@5.3.2):
     dependencies:
-      '@types/node': 20.14.7
+      '@types/node': 20.14.9
       '@wdio/config': 8.39.0
       '@wdio/logger': 8.38.0
       '@wdio/protocols': 8.38.0
@@ -36063,7 +36122,7 @@ snapshots:
 
   webdriverio@8.39.0(typescript@5.3.3):
     dependencies:
-      '@types/node': 20.14.7
+      '@types/node': 20.14.9
       '@wdio/config': 8.39.0
       '@wdio/logger': 8.38.0
       '@wdio/protocols': 8.38.0
@@ -36098,7 +36157,7 @@ snapshots:
 
   webdriverio@8.39.0(typescript@5.5.2):
     dependencies:
-      '@types/node': 20.14.7
+      '@types/node': 20.14.9
       '@wdio/config': 8.39.0
       '@wdio/logger': 8.38.0
       '@wdio/protocols': 8.38.0

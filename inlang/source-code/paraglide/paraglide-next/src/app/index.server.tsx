@@ -12,3 +12,6 @@ export type { RoutingStrategy } from "./routing-strategy/interface"
 
 // Legacy
 export { createI18n } from "./legacy/createI18n.server.js"
+
+// temp
+export { getLanguageFromRequest } from "./middleware/getLanguageFromRequest"

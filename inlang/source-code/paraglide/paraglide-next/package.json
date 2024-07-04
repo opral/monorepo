@@ -54,6 +54,7 @@
 	},
 	"dependencies": {
 		"@inlang/paraglide-js": "workspace:*",
+		"@nimpl/getters": "^1.4.1",
 		"commander": "^12.0.0",
 		"consola": "^3.2.3",
 		"glob": "^10.3.15",

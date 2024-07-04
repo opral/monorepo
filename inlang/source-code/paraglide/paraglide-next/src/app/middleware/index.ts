@@ -5,7 +5,7 @@ import {
 	sourceLanguageTag,
 } from "$paraglide/runtime.js"
 import { addSeoHeaders } from "./headers"
-import { LANG_COOKIE, PARAGLIDE_LANGUAGE_HEADER_NAME } from "../constants"
+import { LANG_COOKIE_NAME, PARAGLIDE_LANGUAGE_HEADER_NAME } from "../constants"
 import { createCookieDetection } from "./detection/CookieDetection"
 import { createAcceptLanguageDetection } from "./detection/AcceptLanguageDetection"
 import type { NextRequest } from "next/server"
@@ -100,9 +100,9 @@ export function Middleware<T extends string>(opt: MiddlewareOptions<T>) {
 
 		// Update the locale-cookie
 		if (!localeCookieMatches) {
-			response.cookies.set(LANG_COOKIE.name, locale, {
-				sameSite: LANG_COOKIE.SameSite,
-				maxAge: LANG_COOKIE["Max-Age"],
+			response.cookies.set(LANG_COOKIE_NAME, locale, {
+				sameSite: "lax",
+				maxAge: 31557600,
 				path: request.nextUrl.basePath || "/",
 			})
 		}

@@ -1,23 +1,23 @@
-import * as NextNavigation from "next/navigation"
+import type { RoutingStrategy } from "../routing-strategy/interface"
+import {
+	usePathname as useNextNavigationPathname,
+	useRouter as useNextNavigationRouter,
+} from "next/navigation"
 import { languageTag, setLanguageTag } from "$paraglide/runtime.js"
 import { addBasePath, basePath } from "../utils/basePath"
-import type { RoutingStrategy } from "../routing-strategy/interface"
-import { createLocaliseHref } from "../localiseHref"
-import { serializeCookie } from "../utils/cookie"
-import { LANG_COOKIE } from "../constants"
+import { localizeHref } from "../localiseHref"
+import { languageCookie } from "../utils/cookie"
 import { createRedirects } from "./redirect"
 import { createLink } from "./Link"
 
 export type LocalisedNavigation<T extends string> = ReturnType<typeof Navigation<T>>
 
 export const Navigation = <T extends string>({ strategy }: { strategy: RoutingStrategy<T> }) => {
-	const localiseHref = createLocaliseHref(strategy)
-
 	/**
 	 * Get the current **non-localised** pathname. For example usePathname() on /de/dashboard?foo=bar would return "/dashboard"
 	 */
 	const usePathname = (): `/${string}` => {
-		const encodedLocalisedPathname = NextNavigation.usePathname()
+		const encodedLocalisedPathname = useNextNavigationPathname()
 		const localisedPathname = decodeURI(encodedLocalisedPathname) as `/${string}`
 		return strategy.getCanonicalPath(localisedPathname, languageTag() as T)
 	}
@@ -26,8 +26,7 @@ export const Navigation = <T extends string>({ strategy }: { strategy: RoutingSt
 	 * Get the router methods. For example router.push('/dashboard')
 	 */
 	const useRouter = () => {
-		const nextRouter = NextNavigation.useRouter()
-		const searchParams = NextNavigation.useSearchParams()
+		const nextRouter = useNextNavigationRouter()
 		const canonicalCurrentPathname = usePathname()
 
 		type NavigateOptions = Parameters<(typeof nextRouter)["push"]>[1]
@@ -45,7 +44,8 @@ export const Navigation = <T extends string>({ strategy }: { strategy: RoutingSt
 			const locale = options?.locale ?? (languageTag() as T)
 			const isLanguageSwitch = locale !== languageTag()
 
-			const localisedPath = localiseHref(
+			const localisedPath = localizeHref(
+				strategy,
 				canonicalDestinationPath,
 				locale,
 				canonicalCurrentPathname,
@@ -55,19 +55,11 @@ export const Navigation = <T extends string>({ strategy }: { strategy: RoutingSt
 			// If the current and new canonical paths are the same, but the language is different,
 			// we need to do a native reload to make sure the new language is used
 			if (canonicalCurrentPathname === canonicalDestinationPath && isLanguageSwitch) {
-				let destination = addBasePath(localisedPath, true)
-				const searchParamString = searchParams.toString()
-				if (searchParamString) {
-					destination += `?${searchParamString}`
-				}
+				//make sure to keep the search params
+				const destination = addBasePath(localisedPath, true) + window.location.search
 				history.pushState({}, "", destination)
 
-				document.cookie = serializeCookie({
-					...LANG_COOKIE,
-					value: locale,
-					Path: basePath ?? "/",
-				})
-
+				document.cookie = languageCookie(locale, basePath ?? "/")
 				window.location.reload()
 				return
 			}
@@ -89,7 +81,8 @@ export const Navigation = <T extends string>({ strategy }: { strategy: RoutingSt
 		) => {
 			const locale = options?.locale ?? (languageTag() as T)
 			const isLanguageSwitch = locale !== languageTag()
-			const localisedPath = localiseHref(
+			const localisedPath = localizeHref(
+				strategy,
 				canonicalDestinationPath,
 				locale,
 				canonicalCurrentPathname,
@@ -99,18 +92,11 @@ export const Navigation = <T extends string>({ strategy }: { strategy: RoutingSt
 			// If the current and new canonical paths are the same, but the language is different,
 			// we need to do a native reload to make sure the new language is used
 			if (canonicalCurrentPathname === canonicalDestinationPath && isLanguageSwitch) {
-				let destination = addBasePath(localisedPath, true)
-				const searchParamString = searchParams.toString()
-				if (searchParamString) {
-					destination += `?${searchParamString}`
-				}
+				//make sure to keep the search params
+				const destination = addBasePath(localisedPath, true) + window.location.search
 				history.replaceState({}, "", destination)
 
-				document.cookie = serializeCookie({
-					...LANG_COOKIE,
-					value: locale,
-					Path: basePath ?? "/",
-				})
+				document.cookie = document.cookie = languageCookie(locale, basePath ?? "/")
 
 				window.location.reload()
 				return
@@ -133,7 +119,13 @@ export const Navigation = <T extends string>({ strategy }: { strategy: RoutingSt
 		) => {
 			const locale = options?.locale ?? (languageTag() as T)
 			const isLanguageSwitch = locale !== languageTag()
-			const localisedPath = localiseHref(canonicalDestinationPath, locale, "/", isLanguageSwitch)
+			const localisedPath = localizeHref(
+				strategy,
+				canonicalDestinationPath,
+				locale,
+				"/",
+				isLanguageSwitch
+			)
 			return nextRouter.prefetch(localisedPath, options)
 		}
 
