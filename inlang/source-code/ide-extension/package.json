@@ -10,7 +10,7 @@
 		"url": "https://github.com/opral/monorepo.git"
 	},
 	"icon": "assets/sherlock-logo.png",
-	"version": "1.44.11",
+	"version": "1.48.2",
 	"engines": {
 		"vscode": "^1.84.2"
 	},
@@ -44,38 +44,38 @@
 		"views": {
 			"sherlock": [
 				{
-					"when": "sherlock:showRecommendationBanner && sherlock:hasProjectInWorkspace",
-					"id": "recommendationBanner",
-					"name": "Recommendation",
-					"type": "webview",
-					"group": "sherlock@1"
-				},
-				{
 					"when": "!sherlock:hasProjectInWorkspace",
 					"id": "gettingStartedView",
 					"name": "Getting Started",
 					"type": "webview",
-					"group": "sherlock@2"
+					"group": "sherlock@1"
 				},
 				{
 					"when": "sherlock:hasProjectInWorkspace",
 					"id": "projectView",
 					"name": "Projects",
 					"type": "tree",
-					"group": "sherlock@3"
+					"group": "sherlock@2"
 				},
 				{
 					"when": "sherlock:hasProjectInWorkspace",
 					"id": "messageView",
 					"name": "Messages",
 					"type": "webview",
-					"group": "sherlock@4"
+					"group": "sherlock@3"
 				},
 				{
 					"when": "sherlock:hasProjectInWorkspace",
 					"id": "errorView",
 					"name": "Errors",
 					"type": "tree",
+					"group": "sherlock@4"
+				},
+				{
+					"when": "sherlock:hasProjectInWorkspace",
+					"id": "recommendationBanner",
+					"name": "Recommendation",
+					"type": "webview",
 					"group": "sherlock@5"
 				}
 			]
@@ -193,7 +193,25 @@
 						}
 					}
 				},
+				"sherlock.extract": {
+					"type": "object",
+					"properties": {
+						"autoHumanId": {
+							"type": "object",
+							"properties": {
+								"enabled": {
+									"type": "boolean",
+									"default": true
+								}
+							}
+						}
+					}
+				},
 				"sherlock.inlineAnnotations.enabled": {
+					"type": "boolean",
+					"default": true
+				},
+				"sherlock.appRecommendations.ninja.enabled": {
 					"type": "boolean",
 					"default": true
 				}
@@ -219,6 +237,8 @@
 		"clean": "rm -rf ./dist ./node_modules"
 	},
 	"dependencies": {
+		"@inlang/recommend-ninja": "workspace:*",
+		"@inlang/recommend-sherlock": "workspace:*",
 		"@inlang/result": "workspace:*",
 		"@inlang/rpc": "workspace:*",
 		"@inlang/sdk": "workspace:*",
@@ -227,6 +247,7 @@
 		"@lix-js/client": "workspace:*",
 		"@lix-js/fs": "workspace:*",
 		"@vitest/coverage-v8": "0.34.6",
+		"comlink": "^4.4.1",
 		"https-proxy-agent": "7.0.2",
 		"lit-html": "^3.1.2",
 		"require-from-string": "^2.0.2",

@@ -1,5 +1,17 @@
 # 🕵️‍♂️ i18n inspector for VS Code
 
+<p>
+<a href="https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension" target="__blank"><img style="margin: 0;" src="https://img.shields.io/visual-studio-marketplace/v/inlang.vs-code-extension?color=1E90FF&label=VS%20Code%20Marketplace&logo=visual-studio-code" alt="Visual Studio Marketplace Version" /></a>
+<a href="https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension" target="__blank"><img style="margin: 0;" src="https://img.shields.io/visual-studio-marketplace/d/inlang.vs-code-extension?color=32CD32" alt="Visual Studio Marketplace Downloads" /></a>
+<a href="https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension" target="__blank"><img style="margin: 0;" src="https://img.shields.io/visual-studio-marketplace/i/inlang.vs-code-extension?color=3CB371" alt="Visual Studio Marketplace Installs" /></a>
+<br/>
+<a href="https://github.com/opral/monorepo" target="__blank"><img style="margin: 0;" src="https://img.shields.io/github/last-commit/opral/monorepo?color=9370DB" alt="GitHub last commit" /></a>
+<a href="https://github.com/opral/inlang-sherlock/issues" target="__blank"><img style="margin: 0;" src="https://img.shields.io/github/issues/opral/inlang-sherlock?color=20B2AA" alt="GitHub issues" /></a>
+<a href="https://github.com/opral/monorepo" target="__blank"><img alt="GitHub stars" style="margin: 0;" src="https://img.shields.io/github/stars/opral/monorepo?style=social"></a>
+</p>
+
+[![Inlang-ecosystem compatibility badge](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/assets/md-badges/inlang.svg)](https://inlang.com)
+
 Inspect i18n within VS Code with powerful tools designed to streamline the translation process. Visualize, edit, and lint translated strings effortlessly using Inline Decorations & Hover Support. Extract new strings with a simple click, making localization tasks more intuitive and efficient.
 
 Find the [source code on GitHub](https://github.com/opral/monorepo/tree/main/inlang/source-code/ide-extension).

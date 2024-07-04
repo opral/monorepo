@@ -10,6 +10,7 @@ import { default as _path } from "node:path"
 export function createFileSystemMapper(base: string, fs: NodeishFilesystem): NodeishFilesystem {
 	// Prevent path issue on non Unix based system normalizing the <base> before using it
 	const normalizedBase = normalizePath(base)
+
 	return {
 		// @ts-expect-error
 		readFile: async (
@@ -23,21 +24,36 @@ export function createFileSystemMapper(base: string, fs: NodeishFilesystem): Nod
 		},
 		writeFile: async (
 			path: Parameters<NodeishFilesystem["writeFile"]>[0],
-			data: Parameters<NodeishFilesystem["writeFile"]>[1]
+			data: Parameters<NodeishFilesystem["writeFile"]>[1],
+			options: Parameters<NodeishFilesystem["writeFile"]>[2]
 		) => {
 			return fs.writeFile(
 				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path)),
-				data
+				data,
+				options
 			)
 		},
-		mkdir: async (path: Parameters<NodeishFilesystem["mkdir"]>[0]) => {
+		mkdir: async (
+			path: Parameters<NodeishFilesystem["mkdir"]>[0],
+			options: Parameters<NodeishFilesystem["mkdir"]>[1]
+		) => {
 			return fs.mkdir(
-				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path))
+				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path)),
+				options
 			)
 		},
 		rmdir: async (path: Parameters<NodeishFilesystem["rmdir"]>[0]) => {
 			return fs.rmdir(
 				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path))
+			)
+		},
+		rm: async (
+			path: Parameters<NodeishFilesystem["rm"]>[0],
+			options: Parameters<NodeishFilesystem["rm"]>[1]
+		) => {
+			return fs.rm(
+				normalizePath(path.startsWith(normalizedBase) ? path : _path.resolve(normalizedBase, path)),
+				options
 			)
 		},
 		unlink: async (path: Parameters<NodeishFilesystem["unlink"]>[0]) => {

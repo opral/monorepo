@@ -1,5 +1,71 @@
 # @inlang/paraglide-unplugin
 
+## 1.8.3
+
+### Patch Changes
+
+- Updated dependencies [e37eabf]
+  - @inlang/paraglide-js@1.11.0
+  - @inlang/sdk@0.36.3
+  - @lix-js/client@2.2.1
+
+## 1.8.2
+
+### Patch Changes
+
+- Updated dependencies [2fc5feb]
+  - @inlang/sdk@0.36.2
+  - @inlang/paraglide-js@1.10.1
+
+## 1.8.1
+
+### Patch Changes
+
+- Updated dependencies [c5d145d]
+- Updated dependencies [1077e06]
+  - @inlang/paraglide-js@1.10.1
+  - @inlang/sdk@0.36.1
+
+## 1.8.0
+
+### Minor Changes
+
+- e1281d7: Only warn about non-fatal errors insetad of erroring
+
+### Patch Changes
+
+- Updated dependencies [8ec7b34]
+- Updated dependencies [05f9282]
+- Updated dependencies [33662e6]
+  - @inlang/sdk@0.36.0
+  - @inlang/paraglide-js@1.10.0
+
+## 1.7.2
+
+### Patch Changes
+
+- Updated dependencies [8e9fc0f]
+  - @inlang/sdk@0.35.9
+  - @inlang/paraglide-js@1.9.1
+
+## 1.7.1
+
+### Patch Changes
+
+- Updated dependencies [da7c207]
+  - @inlang/sdk@0.35.8
+  - @inlang/paraglide-js@1.9.1
+
+## 1.7.0
+
+### Minor Changes
+
+- c02ea3a: Better logging of errors that are thrown from the Inlang SDK. This should make errors more easily debuggable
+
+### Patch Changes
+
+- @inlang/paraglide-js@1.9.1
+
 ## 1.6.15
 
 ### Patch Changes

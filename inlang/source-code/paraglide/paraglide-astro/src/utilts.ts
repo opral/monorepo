@@ -8,6 +8,6 @@ function slash(p: string): string {
 
 const isWindows = typeof process !== "undefined" && process.platform === "win32"
 
-export function normalizePath(id: string) {
+export function nodeNormalizePath(id: string) {
 	return path.posix.normalize(isWindows ? slash(id) : id)
 }

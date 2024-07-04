@@ -109,6 +109,19 @@ it.skip("should ignore whitespace", async () => {
 	).toBe('"some-id"')
 })
 
+it(`should detect human readable id t("penguin_purple_shoe_window")`, async () => {
+	const sourceCode = `
+	const x = t("penguin_purple_shoe_window")
+	`
+	const settings: PluginSettings = {
+		pathPattern: "./{language}.json",
+	}
+	const matches = parse(sourceCode, settings)
+	expect(matches[0]?.messageId).toBe("penguin_purple_shoe_window")
+	expect(matches[0]?.position.start.character).toBe(14)
+	expect(matches[0]?.position.end.character).toBe(42)
+})
+
 it("should detect combined message.attribute ids", async () => {
 	const sourceCode = ` t('some-message.with-attribute')`
 	const settings: PluginSettings = {
@@ -277,4 +290,17 @@ it("should add the defined namespaces by getTranslations hook with namespace obj
 	const matches = parse(sourceCode, settings)
 	expect(matches).toHaveLength(1)
 	expect(matches[0]?.messageId).toBe("Metadata.button.a")
+})
+
+it("should add the defined namespace by useTranslations hook", async () => {
+	const sourceCode = `
+		const { t } = useTranslations('DirectoryPage');
+		<p>{t('title')}</p>
+	`
+	const settings: PluginSettings = {
+		pathPattern: "./{language}.json",
+	}
+	const matches = parse(sourceCode, settings)
+	expect(matches).toHaveLength(1)
+	expect(matches[0]?.messageId).toBe("DirectoryPage.title")
 })

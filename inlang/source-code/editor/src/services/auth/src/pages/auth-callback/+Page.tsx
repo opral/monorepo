@@ -1,7 +1,6 @@
 import { createEffect, createResource, Match, Switch } from "solid-js"
 import { getAuthClient } from "@lix-js/client"
 import MaterialSymbolsCheckCircleRounded from "~icons/material-symbols/check-circle-rounded"
-import MaterialSymbolsArrowBackRounded from "~icons/material-symbols/arrow-back-rounded"
 import { publicEnv } from "@inlang/env-variables"
 import { useLocalStorage } from "#src/services/local-storage/index.js"
 
@@ -47,18 +46,6 @@ export default function Page() {
 							<MaterialSymbolsCheckCircleRounded class="text-success w-16 h-16 self-center" />
 							<h2 class="text-xl font-medium self-center pt-2">Successfully logged in</h2>
 							<p class="self-center">You can close this window.</p>
-							<sl-button
-								class="pt-6"
-								prop:variant="primary"
-								onClick={() => {
-									// this pattern will break if the last opened window is not the login window
-									window.close()
-								}}
-							>
-								{/* @ts-ignore */}
-								<MaterialSymbolsArrowBackRounded slot="prefix" />
-								Return to app
-							</sl-button>
 						</div>
 					</div>
 				</Match>

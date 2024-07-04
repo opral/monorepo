@@ -1,5 +1,84 @@
 # @inlang/paraglide-next
 
+## 0.5.0
+
+### Minor Changes
+
+- 4e1aefa: `PrefixStrategy` now has a `prefixes` option to customize which prefix a language uses in the url.
+
+  ```ts
+  const strategy = PrefixStrategy<AvailableLanguageTag>({
+  	prefixes: {
+  		"de-CH": "swiss", // use /swiss instead of /de-CH in the URL
+  	},
+  })
+  ```
+
+  Prefixes must be unique and may not include slashes.
+
+  Inspired by [Astro's custom locale paths](https://docs.astro.build/en/guides/internationalization/#custom-locale-paths).
+
+### Patch Changes
+
+- Updated dependencies [e37eabf]
+  - @inlang/paraglide-js@1.11.0
+
+## 0.4.4
+
+### Patch Changes
+
+- 94f365b: Added a `generateAlternateLinks` API for easily adding `<link rel="alternate"` tags to your page `<head>`. This is _in addition_ to the `Link` HTTP-Headers that are already present.
+
+  Use it like this in your `layout.tsx` file:
+
+  ```tsx
+  // src/app/layout.tsx
+  import { generateAlternateLinks } from "@inlang/paraglide-next"
+  import { strategy } from "@/lib/i18n"
+  import type { Metadata, ResolvingMetadata } from "next"
+
+  export const generateMetadata = (params: any, parent: ResolvingMetadata): Metadata => {
+  	return {
+  		alternates: {
+  			languages: generateAlternateLinks({
+  				origin: "https://example.com", // the origin of your site
+  				strategy: strategy,
+  				resolvingMetadata: parent,
+  			}),
+  		},
+  	}
+  }
+  ```
+
+  > You do not need to do this on every page, just the root layout
+
+## 0.4.3
+
+### Patch Changes
+
+- Updated dependencies [c5d145d]
+  - @inlang/paraglide-js@1.10.1
+
+## 0.4.2
+
+### Patch Changes
+
+- Updated dependencies [33662e6]
+  - @inlang/paraglide-js@1.10.0
+
+## 0.4.1
+
+### Patch Changes
+
+- 1dafba0: The `init` CLI will now prompt you for your preferred routing strategy
+  - @inlang/paraglide-js@1.9.1
+
+## 0.4.0
+
+### Minor Changes
+
+- 0afbe0e: The middleware now allows you to detect the language using `middleware.detectLanguage(request)`. This can be useful if you need to access the language inside the middleware itself.
+
 ## 0.3.2
 
 ### Patch Changes

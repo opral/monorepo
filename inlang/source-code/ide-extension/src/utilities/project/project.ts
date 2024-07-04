@@ -7,13 +7,14 @@ import { openRepository } from "@lix-js/client"
 import { findRepoRoot } from "@lix-js/client"
 import { setState, state } from "../state.js"
 import { _import } from "../import/_import.js"
-import { isInWorkspaceRecommendation } from "../recommendation/recommendation.js"
+import * as Sherlock from "@inlang/recommend-sherlock"
 
 let projectViewNodes: ProjectViewNode[] = []
 
 export interface ProjectViewNode {
 	label: string
 	path: string
+	relativePath: string
 	isSelected: boolean
 	collapsibleState: vscode.TreeItemCollapsibleState
 	context: vscode.ExtensionContext
@@ -21,6 +22,7 @@ export interface ProjectViewNode {
 
 export function createProjectViewNodes(args: {
 	context: vscode.ExtensionContext
+	workspaceFolder: vscode.WorkspaceFolder
 }): ProjectViewNode[] {
 	const projectsInWorkspace = state().projectsInWorkspace
 
@@ -42,11 +44,14 @@ export function createProjectViewNodes(args: {
 		}
 
 		const projectPath = typeof project.projectPath === "string" ? project.projectPath : ""
-		const projectName = projectPath.split("/").slice(-2).join("/")
+		const projectName = projectPath.split("/").slice(-1).join("/").replace(".inlang", "")
+		const relativePath =
+			"./" + normalizePath(projectPath.replace(args.workspaceFolder.uri.fsPath, "./"))
 
 		return {
 			label: projectName,
 			path: project.projectPath,
+			relativePath: relativePath,
 			isSelected: project.projectPath === state().selectedProjectPath,
 			collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
 			context: args.context,
@@ -64,6 +69,7 @@ export function getTreeItem(args: {
 	return {
 		label: args.element.label,
 		tooltip: args.element.path,
+		description: args.element.relativePath,
 		iconPath: args.element.isSelected
 			? new vscode.ThemeIcon("pass-filled", new vscode.ThemeColor("sideBar.foreground"))
 			: new vscode.ThemeIcon("circle-large-outline", new vscode.ThemeColor("sideBar.foreground")),
@@ -122,13 +128,16 @@ export async function handleTreeSelection(args: {
 		CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.fire(undefined)
 		CONFIGURATION.EVENTS.ON_DID_ERROR_TREE_VIEW_CHANGE.fire(undefined)
 
+		const isInWorkspaceRecommendation = await Sherlock.shouldRecommend({
+			fs: args.nodeishFs,
+			workingDirectory: normalizePath(args.workspaceFolder.uri.fsPath),
+		})
+
 		telemetry.capture({
 			event: "IDE-EXTENSION loaded project",
 			properties: {
 				errors: inlangProject?.errors(),
-				isInWorkspaceRecommendation: await isInWorkspaceRecommendation({
-					workspaceFolder: args.workspaceFolder,
-				}),
+				isInWorkspaceRecommendation,
 			},
 		})
 	} catch (error) {
@@ -144,7 +153,8 @@ export function createTreeDataProvider(args: {
 	return {
 		getTreeItem: (element: ProjectViewNode) =>
 			getTreeItem({ element, nodeishFs: args.nodeishFs, workspaceFolder: args.workspaceFolder }),
-		getChildren: () => createProjectViewNodes({ context: args.context }),
+		getChildren: () =>
+			createProjectViewNodes({ context: args.context, workspaceFolder: args.workspaceFolder }),
 		onDidChangeTreeData: CONFIGURATION.EVENTS.ON_DID_PROJECT_TREE_VIEW_CHANGE.event,
 	}
 }

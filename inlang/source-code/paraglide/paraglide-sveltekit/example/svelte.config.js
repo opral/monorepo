@@ -1,4 +1,4 @@
-import adapter from "@sveltejs/adapter-static"
+import adapter from "@sveltejs/adapter-node"
 import { vitePreprocess } from "@sveltejs/vite-plugin-svelte"
 
 /** @type {import('@sveltejs/kit').Config} */
@@ -8,7 +8,10 @@ const config = {
 		adapter: adapter(),
 		prerender: {
 			//Needed for correctly prerendering <link rel="alternate" hreflang="x" href="y">
-			origin: "https://example.com",
+			origin: "https://github.io",
+		},
+		paths: {
+			base: "/paraglide-sveltekit/example",
 		},
 	},
 

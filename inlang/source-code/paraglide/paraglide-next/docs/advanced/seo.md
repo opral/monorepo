@@ -1,8 +1,8 @@
-# SEO 
+# SEO
 
 ## Translated Metadata
 
-You'll likely want to have metadata in different languages. 
+You'll likely want to have metadata in different languages.
 
 You can use messages in metadata just like everywhere else, as long as you're using `generateMetadata` instead of exporting `metadata`
 
@@ -15,13 +15,32 @@ export async function generateMetadata() {
 }
 ```
 
-
 > If you were to use `export const metadata` your metadata would always end up in the source language.
-
 
 ## Alternate Links / Sitemap
 
 Search engines like Google expect you to tell them about translated versions of your pages. Paraglide-Next does this by default by adding the `Link` Header to requests.
+
+If you also want to instead have the alternate links in your page's `<head>` you can use the `generateAlternateLinks` function to generate the links. In your root layout, add the following:
+
+```tsx
+// src/app/layout.tsx
+import { generateAlternateLinks } from "@inlang/paraglide-next"
+import { strategy } from "@/lib/i18n"
+import type { Metadata, ResolvingMetadata } from "next"
+
+export const generateMetadata = (params: any, parent: ResolvingMetadata): Metadata => {
+	return {
+		alternates: {
+			languages: generateAlternateLinks({
+				origin: "https://example.com", // the origin of your site
+				strategy: strategy,
+				resolvingMetadata: parent,
+			}),
+		},
+	}
+}
+```
 
 You **don't** need to add the translated versions of your site to your sitemap, although it doesn't hurt if you do. Adding one language is sufficient.
 
