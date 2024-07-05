@@ -112,4 +112,10 @@ function generateUUID(): string {
 		.join("-")
 }
 
-export const MessageChannelAdapter = { wrap }
+/**
+ * Wrap a substructural endpoint that does not support `postMessage` (like the one in VsCode)
+ * and allow it to at least transfer `MessagePorts`
+ */
+export function StructuredCloneAdapter(smc: StructuredCloneMessageChannel) {
+	wrap(smc)
+}

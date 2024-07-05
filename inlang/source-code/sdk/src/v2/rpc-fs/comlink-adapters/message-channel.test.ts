@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { MessageChannelAdapter } from "./structured-clone-adapter.js"
+import { StructuredCloneAdapter } from "./structured-clone-adapter.js"
 import * as Comlink from "comlink"
 import { asyncIterableTransferHandler } from "../transfer/asyncIterable.js"
 
@@ -13,8 +13,8 @@ describe("message-channel adapter", () => {
 			eepy: sleepyGenerator,
 		} as const
 
-		Comlink.expose(obj, MessageChannelAdapter.wrap(port1))
-		const proxied = Comlink.wrap<typeof obj>(MessageChannelAdapter.wrap(port2))
+		Comlink.expose(obj, StructuredCloneAdapter.wrap(port1))
+		const proxied = Comlink.wrap<typeof obj>(StructuredCloneAdapter.wrap(port2))
 
 		const result = []
 		for await (const i of await proxied.eepy(4)) {

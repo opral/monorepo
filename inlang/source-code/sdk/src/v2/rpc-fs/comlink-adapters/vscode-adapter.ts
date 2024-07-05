@@ -19,13 +19,8 @@ export function vscodeWebviewEndpoint(webview: WebView): Endpoint {
 
 		addEventListener(_, listener) {
 			const disposable = webview.onDidReceiveMessage((data) => {
-				if ("handleEvent" in listener) {
-					const ev = new MessageEvent("message", { data })
-					listener.handleEvent(ev)
-				} else {
-					const ev = new MessageEvent("message", { data })
-					listener(ev)
-				}
+				const ev = new MessageEvent("message", { data })
+				"handleEvent" in listener ? listener.handleEvent(ev) : listener(ev)
 			})
 
 			listeners.set(listener, disposable)
