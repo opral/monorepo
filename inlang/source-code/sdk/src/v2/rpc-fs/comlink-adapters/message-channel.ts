@@ -8,6 +8,15 @@ type EventListenerOrEventListenerObject = EventListener | EventListenerObject
 
 const portMessageSymbol = Symbol("inlang.sdk.rpc-fs.port-message")
 const comlinkMessageSymbol = Symbol("inlang.sdk.rpc-fs.comlink-message")
+const messagePortSymbol = Symbol("MessagePort")
+
+type SerializedMessagePort = {
+	[messagePortSymbol]: true
+	id: string
+}
+
+const isSerializedMessagePort = (thing: unknown): thing is SerializedMessagePort =>
+	!!thing && typeof thing === "object" && messagePortSymbol in thing
 
 type PortMessage = {
 	[portMessageSymbol]: true
@@ -21,10 +30,13 @@ type ComlinkMessage = {
 	[comlinkMessageSymbol]: true
 	value: any
 }
+
 const isComlinkMessage = (thing: unknown): thing is ComlinkMessage =>
 	!!thing && typeof thing === "object" && comlinkMessageSymbol in thing
 
-type Message = PortMessage | ComlinkMessage
+const raiseUnserializeableError = () => {
+	throw new TypeError("Unserializable return value")
+}
 
 /**
  * Wraps a comlink endpoint that does not support `transferables` on `postMessage` &
@@ -32,6 +44,7 @@ type Message = PortMessage | ComlinkMessage
  */
 export const StructuredCloneAdapter = (ep: Comlink.Endpoint): Comlink.Endpoint => {
 	const proxiedPorts = new Map<string, MessagePort>()
+	const portIds = new Map<MessagePort, string>()
 
 	return {
 		postMessage(message, transfer) {
@@ -46,12 +59,40 @@ export const StructuredCloneAdapter = (ep: Comlink.Endpoint): Comlink.Endpoint =
 				// proxy the ports
 				for (const port of ports) {
 					const id = generateUUID()
+					proxiedPorts.set(id, port)
+					portIds.set(port, id)
+				}
+
+				// replace all the ports in the message with their serialized counterparts
+
+				if (Array.isArray(message)) {
+					message = message.map((m) => {
+						if (m instanceof MessagePort) {
+							const id = portIds.get(m)
+							if (!id) raiseUnserializeableError()
+							return { [messagePortSymbol]: true, id }
+						}
+						return m
+					})
+				} else if (message instanceof MessagePort) {
+					const id = portIds.get(message)
+					if (!id) raiseUnserializeableError()
+					message = { [messagePortSymbol]: true, id }
 				}
 			}
+
+			const comlinkMesage: ComlinkMessage = {
+				[comlinkMessageSymbol]: true,
+				value: message,
+			}
+
+			ep.postMessage(comlinkMesage)
 		},
 
 		addEventListener(type, listener) {
-			ep.addEventListener("message", (ev: MessageEvent) => {})
+			ep.addEventListener("message", (ev: MessageEvent<PortMessage | ComlinkMessage>) => {
+				const data = ev.data
+			})
 		},
 
 		removeEventListener(type, listener) {
@@ -100,7 +141,7 @@ function hookup(
 	}
 
 	sce.addEventListener("message", (event) => {
-		if ("") const data = event.data as Message
+		const data = event.data as Message
 		if (!id) id = data.id
 		if (id !== data.id) return
 
