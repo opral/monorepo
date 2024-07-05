@@ -1,5 +1,5 @@
 import "@/lib/ui/styles.css"
-//import { Header } from "@/lib/ui/Header"
+import { Header } from "@/lib/ui/Header"
 import { AvailableLanguageTag, availableLanguageTags, languageTag } from "@/paraglide/runtime"
 import { LanguageProvider } from "@/lib/LanguageProvider"
 
@@ -35,6 +35,7 @@ export default function RootLayout({
 			<LanguageProvider>
 				<html lang={languageTag()}>
 					<body>
+						<Header />
 						<main className="container">{children}</main>
 					</body>
 				</html>
