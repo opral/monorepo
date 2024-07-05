@@ -16,7 +16,6 @@ describe("rpc-fs", () => {
 		expect(content).toBe("hello")
 	})
 
-	/*
 	it("can watch over rpc", async () => {
 		const fs = createNodeishMemoryFs()
 		const { port1, port2 } = new MessageChannel()
@@ -34,6 +33,8 @@ describe("rpc-fs", () => {
 					console.info("file changed", newContent)
 					updates.push(newContent)
 				}
+
+				return updates
 			} catch (err: unknown) {
 				console.info("done", err)
 				return updates
@@ -46,11 +47,13 @@ describe("rpc-fs", () => {
 		await new Promise((resolve) => setTimeout(resolve, 300))
 
 		await fs.writeFile("/test.txt", "update 1")
+		await new Promise((resolve) => setTimeout(resolve, 300))
 		await fs.writeFile("/test.txt", "update 2")
+
+		await new Promise((resolve) => setTimeout(resolve, 300))
 
 		ac.abort()
 		const updates = await watcherPromise
 		expect(updates).toEqual(["update 1", "update 2"])
 	})
-        */
 })

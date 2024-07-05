@@ -11,6 +11,8 @@ export function makeFsAvailableTo(fs: NodeishFilesystemSubset, ep: Comlink.Endpo
 	Comlink.expose(fs, adapter(ep))
 }
 
+type FileChangeInfo = { eventType: "rename" | "change"; filename: string | null }
+
 export function getFs(ep: Comlink.Endpoint): NodeishFilesystemSubset {
 	const _fs = Comlink.wrap<NodeishFilesystemSubset>(ep)
 
@@ -19,46 +21,22 @@ export function getFs(ep: Comlink.Endpoint): NodeishFilesystemSubset {
 		readFile: _fs.readFile as any,
 		writeFile: _fs.writeFile,
 		mkdir: _fs.mkdir,
-		watch: (path, options) => {
+		watch: async function* (path, options): AsyncIterable<FileChangeInfo> {
 			const signal = options?.signal
 			if (signal) delete options.signal
 
-			type FileChangeInfo = { eventType: "rename" | "change"; filename: string | null }
-
 			const remoteAC = signal ? new AbortController() : undefined
-			const stream = new ReadableStream<FileChangeInfo>({
-				async start(controller) {
-					const watcher = await _fs.watch(path, {
-						...options,
-						signal: remoteAC?.signal,
-					})
-
-					for await (const ev of watcher) {
-						controller.enqueue(ev)
-					}
-				},
-				cancel() {},
-				pull() {},
-			})
 
 			if (signal) {
 				signal.onabort = () => {
 					remoteAC?.abort(signal.reason)
-					throw "asd"
 				}
 			}
 
-			return toAsyncIterable(stream)
+			yield* await _fs.watch(path, {
+				...options,
+				signal: remoteAC?.signal,
+			})
 		},
-	}
-}
-
-async function* toAsyncIterable<T>(stream: ReadableStream<T>): AsyncIterable<T> {
-	const reader = stream.getReader()
-
-	while (true) {
-		const { done, value } = await reader.read()
-		if (done) break
-		yield value
 	}
 }
