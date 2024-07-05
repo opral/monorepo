@@ -4,7 +4,7 @@ import { getFs } from "./index.js"
 import { createNodeishMemoryFs } from "@lix-js/fs"
 
 describe("rpc-fs", () => {
-	it("can expose a filesystem over rpc", async () => {
+	it("can read and write a file over rpc", async () => {
 		const fs = createNodeishMemoryFs()
 		const { port1, port2 } = new MessageChannel()
 
@@ -30,13 +30,11 @@ describe("rpc-fs", () => {
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 				for await (const ev of watcher) {
 					const newContent = await _fs.readFile("/test.txt", { encoding: "utf-8" })
-					console.info("file changed", newContent)
 					updates.push(newContent)
 				}
 
 				return updates
 			} catch (err: unknown) {
-				console.info("done", err)
 				return updates
 			}
 		}
@@ -44,16 +42,23 @@ describe("rpc-fs", () => {
 		const ac = new AbortController()
 
 		const watcherPromise = startWatching("/test.txt", ac.signal)
-		await new Promise((resolve) => setTimeout(resolve, 300))
+		await sleep(50)
 
 		await fs.writeFile("/test.txt", "update 1")
-		await new Promise((resolve) => setTimeout(resolve, 300))
-		await fs.writeFile("/test.txt", "update 2")
+		await sleep(50)
 
-		await new Promise((resolve) => setTimeout(resolve, 300))
+		await fs.writeFile("/test.txt", "update 2")
+		await sleep(50)
 
 		ac.abort()
+		await sleep(50)
+
+		await fs.writeFile("/test.txt", "update after abort")
+		await sleep(50)
+
 		const updates = await watcherPromise
 		expect(updates).toEqual(["update 1", "update 2"])
 	})
 })
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
