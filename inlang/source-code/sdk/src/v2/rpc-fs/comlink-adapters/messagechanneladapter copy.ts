@@ -1,18 +1,10 @@
-/**
- * Copyright 2017 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *     http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import * as Comlink from "comlink"
 
-export interface StringMessageChannel extends EventTarget {
-	send(data: string): void
+/**
+ * A comlink Endpoint that does NOT support transfers on `postMessage`
+ */
+export interface StructuredCloneMessageChannel extends Comlink.Endpoint {
+	postMessage(data: any): void
 }
 
 interface Message {
@@ -21,80 +13,88 @@ interface Message {
 	messageChannels: string[][]
 }
 
-export const MessageChannelAdapter = (function () {
-	/* export */ function wrap(smc: StringMessageChannel, id: string | null = null): MessagePort {
-		const { port1, port2 } = new MessageChannel()
-		hookup(port2, smc, id)
-		return port1
+function wrap(smc: StructuredCloneMessageChannel, id: string | undefined = undefined): MessagePort {
+	const { port1, port2 } = new MessageChannel()
+	hookup(port2, smc, id)
+	return port1
+}
+
+function hookup(
+	internalPort: MessagePort,
+	smc: StructuredCloneMessageChannel,
+	id: string | undefined = undefined
+): void {
+	internalPort.onmessage = (event: MessageEvent<Message>) => {
+		if (!id) id = generateUUID()
+		const msg = event.data
+		const messageChannels = [...findMessagePorts(event.data)]
+		for (const messageChannel of messageChannels) {
+			const id = generateUUID()
+			const channel = replaceProperty(msg, messageChannel, id)
+			hookup(channel, smc, id)
+		}
+		const payload: Message = { id, msg, messageChannels }
+		smc.postMessage(payload)
 	}
 
-	function hookup(
-		internalPort: MessagePort,
-		smc: StringMessageChannel,
-		id: string | null = null
-	): void {
-		internalPort.onmessage = (event: MessageEvent) => {
-			if (!id) id = generateUID()
-			const msg = event.data
-			const messageChannels = [...findMessageChannels(event.data)]
-			for (const messageChannel of messageChannels) {
-				const id = generateUID()
-				const channel = replaceProperty(msg, messageChannel, id)
-				hookup(channel, smc, id)
-			}
-			const payload = JSON.stringify({ id, msg, messageChannels })
-			smc.send(payload)
-		}
+	smc.addEventListener("message", (event: MessageEvent<Message>) => {
+		const data = event.data
+		if (!id) id = data.id
+		if (id !== data.id) return
 
-		smc.addEventListener("message", (event) => {
-			const data = JSON.parse(event.data)
-			if (!id) id = data.id
-			if (id !== data.id) return
-			const mcs = data.messageChannels.map((messageChannel) => {
-				const id = messageChannel.reduce((obj, key) => obj[key], data.msg)
-				const port = wrap(smc, id)
-				replaceProperty(data.msg, messageChannel, port)
-				return port
-			})
-			internalPort.postMessage(data.msg, mcs)
+		const mcs = data.messageChannels.map((messageChannel) => {
+			const id = messageChannel.reduce((obj, key) => obj[key], data.msg)
+			const port = wrap(smc, id)
+
+			replaceProperty(data.msg, messageChannel, port)
+			return port
 		})
-	}
 
-	function replaceProperty(obj: any, path: string[], newVal: any): any {
-		for (const key of path.slice(0, -1)) obj = obj[key]
-		const key = path.at(-1)
-		const orig = obj[key]
-		obj[key] = newVal
-		return orig
-	}
+		internalPort.postMessage(data.msg, mcs)
+	})
+}
 
-	function* findMessageChannels(obj: any, path: string[] = []): Iterable<string[]> {
-		if (!obj) return
-		if (typeof obj === "string") return
-		if (obj instanceof MessagePort) {
-			yield [...path]
-			return
-		}
-		for (const key of Object.keys(obj)) {
-			path.push(key)
-			yield* findMessageChannels(obj[key], path)
-			path.pop()
-		}
-	}
+/**
+ * Replaces a property at a given path
+ * @param obj The object
+ * @param path The path to the property
+ * @param newVal The value to set it to
+ * @returns The original value at that path
+ */
+function replaceProperty(obj: any, path: string[], newVal: any): any {
+	for (const key of path.slice(0, -1)) obj = obj[key]
+	const key = path.at(-1) as keyof typeof obj
+	const orig = obj[key]
+	obj[key] = newVal
+	return orig
+}
 
-	function hex4(): string {
-		return Math.floor((1 + Math.random()) * 0x10000)
-			.toString(16)
-			.slice(1)
+/**
+ * Recursively iterates through an object to find the Message Ports
+ *
+ * @param obj The thing to iterate through
+ * @param path The path to the current object
+ * @returns The paths to the message ports
+ */
+function* findMessagePorts(obj: unknown, path: string[] = []): Iterable<string[]> {
+	if (!obj) return
+	if (typeof obj === "string") return
+	if (obj instanceof MessagePort) {
+		yield [...path]
+		return
 	}
-
-	const bits = 128
-	function generateUID(): string {
-		return new Array(bits / 16)
-			.fill(0)
-			.map((_) => hex4())
-			.join("")
+	for (const [key, value] of Object.entries(obj)) {
+		path.push(key)
+		yield* findMessagePorts(value, path)
+		path.pop()
 	}
+}
 
-	return { wrap }
-})()
+function generateUUID(): string {
+	return new Array(4)
+		.fill(0)
+		.map(() => Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(16))
+		.join("-")
+}
+
+export const MessageChannelAdapter = { wrap }

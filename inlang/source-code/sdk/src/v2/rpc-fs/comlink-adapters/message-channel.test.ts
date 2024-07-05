@@ -1,36 +1,54 @@
 import { describe, it, expect } from "vitest"
+import { MessageChannelAdapter } from "./messagechanneladapter copy.js"
 import * as Comlink from "comlink"
+import { asyncIterableTransferHandler } from "../transfer/asyncIterable.js"
+
+Comlink.transferHandlers.set("asyncIterable", asyncIterableTransferHandler)
 
 describe("message-channel adapter", () => {
 	it("works", async () => {
-		const { port1, port2 } = new MessageChannel()
-
-		const wrappedP1 = {
-			addEventListener: port1.addEventListener.bind(port1),
-			removeEventListener: port1.removeEventListener.bind(port1),
-			postMessage(message: any, transfer) {
-				console.log("postMessage", message, transfer)
-				port1.postMessage(message)
-			},
-		}
-
-		const wrappedP2 = {
-			addEventListener: port2.addEventListener.bind(port2),
-			removeEventListener: port2.removeEventListener.bind(port2),
-			postMessage(message: any, transfer) {
-				console.log("postMessage", message, transfer)
-				port2.postMessage(message)
-			},
-		}
+		const { port1, port2 } = StructuredCloneChannel()
 
 		const obj = {
-			helloWorld: () => Comlink.proxy(() => "Hello World!"),
+			eepy: sleepyGenerator,
 		} as const
 
-		Comlink.expose(obj, wrappedP1)
+		Comlink.expose(obj, MessageChannelAdapter.wrap(port1))
+		const proxied = Comlink.wrap<typeof obj>(MessageChannelAdapter.wrap(port2))
 
-		const proxied = Comlink.wrap<typeof obj>(wrappedP2)
-		const val = await proxied.helloWorld()
-		expect(await val()).toBe("Hello World!")
+		const result = []
+		for await (const i of await proxied.eepy(4)) {
+			result.push(i)
+		}
+		expect(result).toEqual([0, 1, 2, 3])
 	})
 })
+
+async function* sleepyGenerator(num: number) {
+	for (let i = 0; i < num; i++) {
+		await new Promise((resolve) => setTimeout(resolve, 10))
+		yield i
+	}
+}
+
+function StructuredCloneChannel(): MessageChannel {
+	const { port1, port2 } = new MessageChannel()
+
+	const wrappedP1 = {
+		addEventListener: port1.addEventListener.bind(port1),
+		removeEventListener: port1.removeEventListener.bind(port1),
+		postMessage(message: any) {
+			port1.postMessage(message)
+		},
+	} as MessagePort
+
+	const wrappedP2 = {
+		addEventListener: port2.addEventListener.bind(port2),
+		removeEventListener: port2.removeEventListener.bind(port2),
+		postMessage(message: any) {
+			port2.postMessage(message)
+		},
+	} as MessagePort
+
+	return { port1: wrappedP1, port2: wrappedP2 }
+}
