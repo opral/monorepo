@@ -48,8 +48,10 @@ function hookup(
 		smc.postMessage(payload)
 	}
 
-	smc.addEventListener("message", (event: MessageEvent<Message>) => {
-		const data = event.data
+	smc.addEventListener("message", (event: Event) => {
+		if (!(event instanceof MessageEvent)) return
+
+		const data = event.data as Message
 		if (!id) id = data.id
 		if (id !== data.id) return
 
@@ -85,12 +87,14 @@ function replaceProperty(obj: any, path: string[], newVal: any): any {
  *
  * @param obj The thing to iterate through
  * @param path The path to the current object
+ *
  * @returns The paths to the message ports
  */
 function* findMessagePorts(obj: unknown, path: string[] = []): Iterable<string[]> {
 	if (!obj) return
 	if (typeof obj === "string") return
 	if (obj instanceof MessagePort) {
+		// make a copy of the current path, as it mutates while being walked
 		yield [...path]
 		return
 	}
