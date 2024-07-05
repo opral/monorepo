@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { MessageChannelAdapter } from "./messagechanneladapter copy.js"
+import { MessageChannelAdapter } from "./structured-clone-adapter.js"
 import * as Comlink from "comlink"
 import { asyncIterableTransferHandler } from "../transfer/asyncIterable.js"
 
@@ -31,6 +31,9 @@ async function* sleepyGenerator(num: number) {
 	}
 }
 
+/**
+ * Creates a message channel that does not support transfer values, only stringified messages
+ */
 function StructuredCloneChannel(): MessageChannel {
 	const { port1, port2 } = new MessageChannel()
 

@@ -8,8 +8,19 @@ export interface StructuredCloneMessageChannel extends Comlink.Endpoint {
 }
 
 interface Message {
+	/**
+	 * The id of the messsage-channel to use
+	 */
 	id: string
+
+	/**
+	 * The stringified message
+	 */
 	msg: any
+
+	/**
+	 * An array of paths pointing to message ports
+	 */
 	messageChannels: string[][]
 }
 
