@@ -196,11 +196,17 @@ export default class InlangMessageBundle extends LitElement {
 		}
 	}
 
+	override connectedCallback() {
+		super.connectedCallback()
+		this._messageBundle = structuredClone(this.messageBundle)
+	}
+
 	override async firstUpdated() {
 		await this.updateComplete
 		// override primitive colors to match the design system
 		overridePrimitiveColors()
 
+		// eslint-disable-next-line unicorn/prefer-spread
 		const children = Array.from(this.children) // Convert HTMLCollection to array
 		this._bundleSlots = children.filter((child) =>
 			child.slot ? child.slot === "bundle-action" : false
@@ -208,7 +214,6 @@ export default class InlangMessageBundle extends LitElement {
 	}
 
 	override render() {
-		console.log(this.messageBundle)
 		return html`
 			<div class=${`header`} part="header">
 				<div class="header-left">
@@ -334,7 +339,6 @@ export default class InlangMessageBundle extends LitElement {
 	}
 
 	private _renderMessage(locale: LanguageTag, message?: Message, lintReports?: LintReport[]) {
-		console.log(lintReports)
 		return html`
 			<div class="message">
 				<div class="language-container">
