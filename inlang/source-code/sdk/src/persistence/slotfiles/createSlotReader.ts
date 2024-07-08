@@ -300,7 +300,13 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 		return result
 	}
 
-	const loadSlotFilesFromFs = async (forceReload?: boolean) => {
+	/**
+	 * Loads all scheduled slotfiles from disc
+	 *
+	 * @param {Object} options - The options object.
+	 * @param {DocType} options.forceReload - set to true if you want to reload all slotfiles even if not scheduled for reload (usually scheduled on change by watcher)
+	 */
+	const loadSlotFilesFromFs = async ({ forceReload }: { forceReload?: boolean }) => {
 		const loadResults = {
 			created: [] as string[],
 			updated: [] as string[],
@@ -394,7 +400,7 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 
 		debug("setting " + slotFileName + " to load requested and trigger load")
 
-		loadSlotFilesFromFs()
+		loadSlotFilesFromFs({})
 	}
 
 	const getSlotFileByRecordId = (id: string) => {
@@ -531,7 +537,7 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 		startWatchingSlotfileChanges()
 	}
 
-	await loadSlotFilesFromFs(true)
+	await loadSlotFilesFromFs({forceReload: true})
 
 	return {
 		/**

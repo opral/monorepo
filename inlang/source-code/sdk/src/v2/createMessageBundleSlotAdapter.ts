@@ -172,7 +172,7 @@ export function createMessageBundleSlotAdapter(
 
 		debug(source)
 
-		for (const bundleRecord of bundleStorage.findDocumentsById(bundleRecordIds)) {
+		for (const bundleRecord of bundleStorage.findByIds(bundleRecordIds)) {
 			const loaded = loadedMessageBundles.get(bundleRecord.data.id)
 			if (loaded) {
 				const loadedBundle = structuredClone(loaded)
@@ -201,7 +201,7 @@ export function createMessageBundleSlotAdapter(
 		}
 		debug(source)
 
-		for (const messageRecord of messageStorage.findDocumentsById(messageRecordIds)) {
+		for (const messageRecord of messageStorage.findByIds(messageRecordIds)) {
 			const loaded = loadedMessageBundles.get((messageRecord.data as any).bundleId)
 			if (loaded) {
 				const loadedBundle = structuredClone(loaded)
@@ -281,7 +281,7 @@ export function createMessageBundleSlotAdapter(
 					const messagesToInsert = upsertedMessageBundle.messages as Message[]
 
 					// insert Messages, insert Message Bundle
-					await bundleStorage.insert(insertedMessageBundle, false)
+					await bundleStorage.insert({ document: insertedMessageBundle, saveToDisk: false })
 					// add to loadedMessagebundle
 					for (const messageToInsert of messagesToInsert) {
 						const messageRecord: MessageRecord = {
@@ -293,7 +293,7 @@ export function createMessageBundleSlotAdapter(
 							selectors: structuredClone(messageToInsert.selectors),
 						}
 
-						await messageStorage.insert(messageRecord, false)
+						await messageStorage.insert({ document: messageRecord, saveToDisk: false })
 					}
 					loadedMessageBundles.set(upsertedMessageBundle.id, upsertedMessageBundle)
 
@@ -311,7 +311,10 @@ export function createMessageBundleSlotAdapter(
 					let changeFlag = false
 
 					if (JSON.stringify(updatedMessageBundle) !== JSON.stringify(previousMessageBundle)) {
-						await bundleStorage.update(updatedMessageBundle as MessageBundleRecord, false)
+						await bundleStorage.update({
+							document: updatedMessageBundle as MessageBundleRecord,
+							saveToDisk: false,
+						})
 						debug("pushHandler called - bundle updated...")
 						changeFlag = true
 					}
@@ -328,7 +331,7 @@ export function createMessageBundleSlotAdapter(
 								variants: structuredClone(messageToInsert.variants),
 								selectors: structuredClone(messageToInsert.selectors),
 							}
-							await messageStorage.insert(messageRecord, false)
+							await messageStorage.insert({ document: messageRecord, saveToDisk: false })
 							changeFlag = true
 						} else if (messageUpdate.action === "update") {
 							debug("pushHandler called - message updated...")
@@ -342,7 +345,7 @@ export function createMessageBundleSlotAdapter(
 								variants: structuredClone(messageToUpdate.variants),
 								selectors: structuredClone(messageToUpdate.selectors),
 							}
-							await messageStorage.update(messageRecord, false)
+							await messageStorage.update({ document: messageRecord, saveToDisk: false })
 							changeFlag = true
 						}
 					}

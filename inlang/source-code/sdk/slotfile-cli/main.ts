@@ -88,7 +88,7 @@ rl.on("line", async (input: string) => {
 		if (id) {
 			const content = [id, ...contentArr].join(" ")
 			const recordId = randomHumanId()
-			storage.insert({ id: recordId, content })
+			storage.insert({ document: { id: recordId, content }})
 			console.log("created!")
 			console.table(storage.findDocumentsById([recordId]))
 			return
