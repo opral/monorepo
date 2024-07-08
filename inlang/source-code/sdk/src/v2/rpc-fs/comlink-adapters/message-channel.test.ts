@@ -13,8 +13,8 @@ describe("message-channel adapter", () => {
 			eepy: sleepyGenerator,
 		} as const
 
-		Comlink.expose(obj, StructuredCloneAdapter.wrap(port1))
-		const proxied = Comlink.wrap<typeof obj>(StructuredCloneAdapter.wrap(port2))
+		Comlink.expose(obj, StructuredCloneAdapter(port1))
+		const proxied = Comlink.wrap<typeof obj>(StructuredCloneAdapter(port2))
 
 		const result = []
 		for await (const i of await proxied.eepy(4)) {

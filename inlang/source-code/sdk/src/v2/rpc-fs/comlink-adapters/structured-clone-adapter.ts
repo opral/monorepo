@@ -117,5 +117,5 @@ function generateUUID(): string {
  * and allow it to at least transfer `MessagePorts`
  */
 export function StructuredCloneAdapter(smc: StructuredCloneMessageChannel) {
-	wrap(smc)
+	return wrap(smc)
 }
