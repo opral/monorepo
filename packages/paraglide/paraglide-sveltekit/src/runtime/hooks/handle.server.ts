@@ -113,13 +113,17 @@ export const createHandle = <T extends string>(
 
 		if (lang !== langFromUrl && !i18n.exclude(localisedPath)) {
 			// redirect to the correct language
+
 			const localisedPathname = strategy.getLocalisedPath(localisedPath, lang)
 			const fullPath = serializeRoute(localisedPathname, base, suffix)
+
+			const url = new URL(event.url)
+			url.pathname = fullPath
 
 			return new Response(undefined, {
 				status: 302,
 				headers: {
-					Location: fullPath,
+					Location: url.href,
 				},
 			})
 		}
