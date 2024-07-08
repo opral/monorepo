@@ -1,4 +1,4 @@
-import { hash } from "./hash.js"
+import { hashString } from "./hash.js"
 import type { HasId } from "../types/HasId.js"
 import type { SlotFile } from "../types/SlotFile.js"
 import type { SlotEntry } from "../types/SlotEntry.js"
@@ -12,7 +12,7 @@ async function stringifySlot<DocType extends HasId>(
 	} else {
 		let slot = ""
 		const soltFileEntryString = JSON.stringify(slotfileEntry.data)
-		const slotFileEntyHash = await hash(soltFileEntryString)
+		const slotFileEntyHash = await hashString(soltFileEntryString)
 
 		const dataString = '{"hash":"' + slotFileEntyHash + '", "data": ' + soltFileEntryString + "},"
 
@@ -23,7 +23,7 @@ async function stringifySlot<DocType extends HasId>(
 			slot += dataString + "\n"
 
 			const conflictDataString = JSON.stringify(conflict.data)
-			const conflictHash = await hash(conflictDataString)
+			const conflictHash = await hashString(conflictDataString)
 
 			if (conflict.hash !== conflictHash) {
 				// conflicts are imutable - we shouldn't change it and the string should be the same

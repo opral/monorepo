@@ -1,7 +1,7 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 import _debug from "debug"
 import type { SlotEntry, TransientSlotEntry } from "./types/SlotEntry.js"
-import { hash } from "./utill/hash.js"
+import { createBlobOid, hashString } from "./utill/hash.js"
 import { stringifySlotFile } from "./utill/stringifySlotFile.js"
 import type { SlotFile } from "./types/SlotFile.js"
 import type { HasId } from "./types/HasId.js"
@@ -16,6 +16,15 @@ type createSlotStorageParams = {
 	watch: true | false
 	fs: Pick<NodeishFilesystem, "readFile" | "readdir" | "writeFile" | "mkdir" | "watch">
 }
+
+/**
+ * On write to disc we move the current slotfile state to head state - since we don't expect a commit to happen
+ * 1. On first load
+ * 2. On head change 
+ *  -> getStatusList 
+ *  -> compare git blob oid's with working copy/head state
+ *  -> if oids differ read headState into slot file
+ */
 
 /**
  *
@@ -54,8 +63,13 @@ type createSlotStorageParams = {
  *  from a higher stage Records can com If you create an object it would be stored in memory as a
  * transient record.
  *
- * @param fs nodeFs to use for persistence
- * @param path base path to store each collection in
+ * @returns {Promise<void>} A promise that resolves when the operation is complete.
+ * @param {Object} options - The options object.
+ * @param options.fs nodeFs to use for persistence
+ * @param options.path base path to store each collection in
+ * @param options.watch true to watch the slot file folder and mark files be reloaded
+ * @param options.slotsPerFile how many slots should a file have
+ * @param options.fileNameCharacters how many characters to use for the files that we create
  * @returns
  */
 export default async function createSlotStorageWriter<DocType extends HasId>({
@@ -65,6 +79,8 @@ export default async function createSlotStorageWriter<DocType extends HasId>({
 	slotsPerFile,
 	fileNameCharacters,
 }: createSlotStorageParams) {
+
+
 	// TODO add config to toggle creation - default should check if path exists instead
 	await fs.mkdir(path, { recursive: true })
 
@@ -123,7 +139,7 @@ export default async function createSlotStorageWriter<DocType extends HasId>({
 		// TODO get lock - so we don't expect further dirty flags comming up
 		debug("saveChangesToWorkingCopy - reloadDirtySlotFiles")
 		// NOTE: For now we just laod all files again - we could optimize this by loading only the files that we actually write...
-		await slotFileReader._internal.loadSlotFilesFromFs({forceReload: true})
+		await slotFileReader._internal.loadSlotFilesFromFs({ forceReload: true })
 
 		const changedIds = new Set<string>()
 
@@ -223,7 +239,10 @@ export default async function createSlotStorageWriter<DocType extends HasId>({
 				// we await two operations here which could lead to simultanous changes until we locked
 				// we could make this process intercept on detected changes...?
 				const newSlotFileContent = await stringifySlotFile<DocType>(slotFileStateToWrite, slotSize)
-				slotFileStateToWrite.contentHash = await hash(newSlotFileContent)
+
+				const encoder = new TextEncoder();
+				const uint8Array = encoder.encode(newSlotFileContent);
+				slotFileStateToWrite.contentHash = await createBlobOid(uint8Array)
 
 				// let newMemorySlotfileContent = newSlotFileContent
 				// if (conflictingSlotFile) {
@@ -238,7 +257,7 @@ export default async function createSlotStorageWriter<DocType extends HasId>({
 
 				// apply every non conflicting in memory state to the working copy
 				debug("writing file" + path + knownSlotFileStates.slotFileName)
-				await fs.writeFile(path + knownSlotFileStates.slotFileName + ".slot", newSlotFileContent)
+				await fs.writeFile(path + knownSlotFileStates.slotFileName + ".slot", uint8Array)
 				debug("file written writing file" + path + knownSlotFileStates.slotFileName)
 
 				const updatedSlotEntries = [] as SlotEntry<DocType>[]
@@ -481,7 +500,7 @@ export default async function createSlotStorageWriter<DocType extends HasId>({
 	}
 
 	const extractInfoFromId = async (docId: string) => {
-		const entryIdHash = await hash(docId)
+		const entryIdHash = await hashString(docId)
 		const slotIndex = parseInt(entryIdHash.slice(-slotCharacters), 16)
 
 		return {
@@ -536,7 +555,7 @@ export default async function createSlotStorageWriter<DocType extends HasId>({
 
 			const normalizedObject = normalizeObject(document)
 			const stringifiedObject = JSON.stringify(normalizedObject)
-			const objectHash = await hash(stringifiedObject)
+			const objectHash = await hashString(stringifiedObject)
 			const { slotIndex, entryIdHash } = await extractInfoFromId(document.id)
 
 			const newSlotEntry: TransientSlotEntry<DocType> = {
@@ -581,7 +600,7 @@ export default async function createSlotStorageWriter<DocType extends HasId>({
 
 			const normalizedObject = normalizeObject(document)
 			const stringifiedObject = JSON.stringify(normalizedObject)
-			const objectHash = await hash(stringifiedObject)
+			const objectHash = await hashString(stringifiedObject)
 			// update slot files changed records
 			const updatedSlotEntry: SlotEntry<DocType> = {
 				index: existingSlotEntry.index,
