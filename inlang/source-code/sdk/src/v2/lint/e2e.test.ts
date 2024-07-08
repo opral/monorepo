@@ -7,8 +7,6 @@ import { createNewProject } from "../createNewProject.js"
 import { loadProject } from "../loadProject2.js"
 import type { ProjectSettings2 } from "../types/project-settings.js"
 import type { MessageBundle } from "../types/message-bundle.js"
-import type { Observable } from "rxjs"
-import { replicateRxCollection } from "rxdb/plugins/replication"
 
 const settings: ProjectSettings2 = {
 	baseLocale: "en",
@@ -18,7 +16,7 @@ const settings: ProjectSettings2 = {
 }
 
 describe("Lint Worker", () => {
-	it("initializes successfully", async () => {
+	it("lints successfully", async () => {
 		const fs = createNodeishMemoryFs()
 
 		const projectPath = "/project.inlang"
@@ -36,8 +34,11 @@ describe("Lint Worker", () => {
 				terminate: () => {},
 			}),
 		})
+
+		const bundleId = "dummy_elephant"
+
 		await project.messageBundleCollection.insert({
-			id: "dummy_elephant",
+			id: bundleId,
 			messages: [
 				{
 					id: "dummy_elephant_en",
@@ -57,11 +58,7 @@ describe("Lint Worker", () => {
 		makeLinterAvailableTo(port2)
 		const linter = await connectToLinter(projectPath, settings, fs, port1)
 		const result = await linter.lint(settings)
-
-		console.log(result)
-
-		expect(linter.fix).toBeDefined()
-		expect(linter.lint).toBeDefined()
+		expect(bundleId in result).toBe(true)
 	})
 })
 
