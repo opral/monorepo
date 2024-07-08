@@ -7,6 +7,8 @@ import { createNewProject } from "../createNewProject.js"
 import { loadProject } from "../loadProject2.js"
 import type { ProjectSettings2 } from "../types/project-settings.js"
 import type { MessageBundle } from "../types/message-bundle.js"
+import type { Observable } from "rxjs"
+import { replicateRxCollection } from "rxdb/plugins/replication"
 
 const settings: ProjectSettings2 = {
 	baseLocale: "en",
@@ -34,31 +36,37 @@ describe("Lint Worker", () => {
 				terminate: () => {},
 			}),
 		})
-
-		await project.internal.bundleStorage.insert({
-			id: "happy_elephant",
+		await project.messageBundleCollection.insert({
+			id: "dummy_elephant",
+			messages: [
+				{
+					id: "dummy_elephant_en",
+					locale: "en",
+					declarations: [],
+					selectors: [],
+					variants: [],
+				},
+			],
 			alias: {},
 		})
 
-		await project.internal.messageStorage.insert({
-			id: "happy_elephant_en",
-			bundleId: "happy_elephant",
-			locale: "en",
-			variants: [],
-			selectors: [],
-			declarations: [],
-		})
-
-		const messages = project.messageBundleCollection.find()
-		console.log("messages", messages)
+		await sleep(50)
 
 		const { port1, port2 } = new MessageChannel()
-		/*
+
 		makeLinterAvailableTo(port2)
 		const linter = await connectToLinter(projectPath, settings, fs, port1)
+		const result = await linter.lint(settings)
+
+		console.log(result)
 
 		expect(linter.fix).toBeDefined()
 		expect(linter.lint).toBeDefined()
-        */
 	})
 })
+
+async function sleep(ms: number) {
+	return new Promise((resolve) => {
+		setTimeout(resolve, ms)
+	})
+}

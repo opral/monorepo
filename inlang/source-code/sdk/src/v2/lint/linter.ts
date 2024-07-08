@@ -19,7 +19,7 @@ import type {
 	MessageBundleLintRule,
 } from "../types/lint.js"
 import { createDebugImport, importSequence } from "../import-utils.js"
-import { createImport } from "./import.js"
+import { createImport, type ImportFunction } from "./import.js"
 import lintRule from "../dev-modules/lint-rule.js"
 import makeOpralUppercase from "../dev-modules/opral-uppercase-lint-rule.js"
 import _debug from "debug"
@@ -32,10 +32,11 @@ const debug = _debug("sdk-v2:lint-report-worker")
 export async function createLinter(
 	projectPath: string,
 	settings: ProjectSettings2,
-	fs: Pick<NodeishFilesystemSubset, "readFile" | "readdir" | "mkdir">
+	fs: Pick<NodeishFilesystemSubset, "readFile" | "readdir" | "mkdir">,
+	_import: ImportFunction | undefined = undefined
 ) {
 	debug("creating linter")
-	const _import = importSequence(
+	_import ??= importSequence(
 		createDebugImport({
 			"sdk-dev:lint-rule.js": lintRule,
 			"sdk-dev:opral-uppercase-lint.js": makeOpralUppercase,
@@ -125,12 +126,12 @@ export async function createLinter(
 			const usedFix = report.fixes.find((f) => f.title === fix.title)
 			if (!usedFix) throw new Error(`fix ${fix.title} not available on report "${report.body}"`)
 
+			// find the message-bundle this lint-report belongs to
 			const messageBundles = await getMessageBundles()
 			const bundle = [...messageBundles.values()].find(
 				(bundle) => bundle.id === report.target.messageBundleId
 			)
-
-			if (!bundle) throw new Error(`messageBundle ${report.target.messageBundleId} not found`)
+			if (!bundle) throw new Error(`MessageBundle ${report.target.messageBundleId} not found`)
 
 			const rule = resolvedModules.messageBundleLintRules.find((rule) => rule.id === report.ruleId)
 			if (!rule) throw new Error(`rule ${report.ruleId} not found`)

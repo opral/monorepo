@@ -234,7 +234,10 @@ export function createMessageBundleSlotAdapter(
 		// for now we assume that messages exist before the reports
 		for (const [bundleId, bundle] of loadedMessageBundles) {
 			const currentReports = reportResults[bundleId]
-			if (reportResults[bundleId]!.hash !== loadedMessageBundleLintReports.get(bundleId)?.hash) {
+			if (
+				currentReports &&
+				currentReports.hash !== loadedMessageBundleLintReports.get(bundleId)?.hash
+			) {
 				if (currentReports) {
 					loadedMessageBundleLintReports.set(bundleId, currentReports)
 				} else {
