@@ -240,7 +240,7 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 					stateFlag: "loaded" as const,
 					memorySlotFileState: freshSlotfile,
 					changedRecords: [],
-				},
+				} as SlotFileStates<DocType>,
 				created: [] as number[],
 				updated: [] as number[],
 				localConflicted: [] as number[],
@@ -291,7 +291,7 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 					statesBefore.stateFlag === "loadrequested"
 						? ("loadrequested" as const)
 						: ("loaded" as const),
-			},
+			} as SlotFileStates<DocType>,
 			created: mergeResult.createdSlotIndexes,
 			updated: mergeResult.updatedSlotIndexes,
 			localConflicted: mergeResult.conflictingSlotIndexes,
