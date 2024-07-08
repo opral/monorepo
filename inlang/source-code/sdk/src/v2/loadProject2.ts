@@ -9,6 +9,8 @@ import { loadSettings } from "./settings.js"
 import type { InlangProject2 } from "./types/project.js"
 import {
 	MessageBundle,
+	MessageBundleRecord,
+	MessageRecord,
 	ProjectSettings2,
 	type Fix,
 	type InstalledLintRule,
@@ -28,7 +30,7 @@ import {
 	type RxConflictHandlerOutput,
 } from "rxdb"
 import { getRxStorageMemory } from "rxdb/plugins/storage-memory"
-import { BehaviorSubject, combineLatest, from, map, switchMap, tap } from "rxjs"
+import { BehaviorSubject, combineLatest, from, switchMap, tap } from "rxjs"
 import { resolveModules } from "./resolveModules2.js"
 import { createLintWorker } from "./lint/host.js"
 import {
@@ -44,6 +46,8 @@ import missingSelectorLintRule from "./dev-modules/missing-selector-lint-rule.js
 import missingCatchallLintRule from "./dev-modules/missingCatchall.js"
 
 type ProjectState = "initializing" | "resolvingModules" | "loaded"
+
+const isInIframe = window.self !== window.top
 
 /**
  *
@@ -84,19 +88,17 @@ export async function loadProject(args: {
 		nodeishFs: args.repo.nodeishFs,
 	})
 
-	await maybeAddModuleCache({ projectPath, repo: args.repo })
-	await maybeCreateFirstProjectId({ projectPath, repo: args.repo })
+	if (!isInIframe) {
+		await maybeAddModuleCache({ projectPath, repo: args.repo })
+		await maybeCreateFirstProjectId({ projectPath, repo: args.repo })
+	}
 
 	// no need to catch since we created the project ID with "maybeCreateFirstProjectId" earlier
-	const projectId = await nodeishFs.readFile(projectIdPath, { encoding: "utf-8" })
-
+	console.log("Reading Project path: ", projectPath)
+	const projectId = await args.repo.nodeishFs.readFile(projectIdPath, { encoding: "utf-8" })
+	console.log("Project ID: ", projectId)
 	const projectSettings = await loadSettings({ settingsFilePath, nodeishFs })
 
-	// Transform legacy fields
-	// @ts-ignore
-	projectSettings.languageTags = projectSettings.locales
-	// @ts-ignore
-	projectSettings.sourceLanguageTag = projectSettings.baseLocale
 
 	const projectSettings$ = new BehaviorSubject(projectSettings)
 	const lifecycle$ = new BehaviorSubject<ProjectState>("initializing")
@@ -194,16 +196,7 @@ export async function loadProject(args: {
 		ignoreDuplicate: true,
 	})
 
-	// add the hero collection
-	await database.addCollections({
-		messageBundles: {
-			schema: MessageBundle as any as typeof MessageBundle &
-				Readonly<{ version: number; primaryKey: string; additionalProperties: false | undefined }>,
-			conflictHandler: defaultConflictHandler,
-		},
-	})
-
-	const bundleStorage = await createSlotStorageWriter<MessageBundle>({
+	const bundleStorage = await createSlotStorageWriter<MessageBundleRecord>({
 		fileNameCharacters: 3,
 		slotsPerFile: 16 * 16 * 16 * 16,
 		fs: nodeishFs,
@@ -211,7 +204,7 @@ export async function loadProject(args: {
 		watch: true,
 	})
 
-	const messageStorage = await createSlotStorageWriter<Message>({
+	const messageStorage = await createSlotStorageWriter<MessageRecord>({
 		fileNameCharacters: 3,
 		slotsPerFile: 16 * 16 * 16 * 16,
 		fs: nodeishFs,
@@ -221,35 +214,48 @@ export async function loadProject(args: {
 
 	let lintsRunning = false
 	let lintsPending = false
+
+	const lintMessages = async () => {
+		if (lintsRunning) {
+			lintsPending = true
+			return
+		}
+		lintsRunning = true
+
+		// eslint-disable-next-line no-constant-condition
+		while (true) {
+			lintsPending = false
+			const lintresults = await linter.lint(projectSettings$.value)
+			lintReports$.next(lintresults)
+			if (!lintsPending) {
+				break
+			}
+		}
+		lintsRunning = false
+	}
+
 	const lintReports$ = new BehaviorSubject<LintResult>({})
 	const adapter = createMessageBundleSlotAdapter(
 		bundleStorage,
 		messageStorage,
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		async (source, bundle) => {
-			if (source === "adapter") {
-				if (lintsRunning) {
-					lintsPending = true
-					return
-				}
-				lintsRunning = true
-
-				// eslint-disable-next-line no-constant-condition
-				while (true) {
-					lintsPending = false
-					const lintresults = await linter.lint(projectSettings$.value)
-
-					lintReports$.next(lintresults)
-					if (!lintsPending) {
-						break
-					}
-				}
-				lintsRunning = false
-			}
-		},
+		lintMessages,
 		lintReports$
 	)
+
+	// add the hero collection
+	await database.addCollections({
+		messageBundles: {
+			schema: MessageBundle as any as typeof MessageBundle &
+				Readonly<{ version: number; primaryKey: string; additionalProperties: false | undefined }>,
+			conflictHandler: adapter.conflictHandler,
+		},
+	})
+
 	await startReplication(database.collections.messageBundles, adapter).awaitInitialReplication()
+
+	projectSettings$.subscribe(() => {
+		lintMessages()
+	})
 
 	const setSettings = async (newSettings: ProjectSettings2) => {
 		// projectSettings$.next(newSettings); // Update the observable
@@ -275,35 +281,4 @@ export async function loadProject(args: {
 			await database.collections.messageBundles.upsert(fixed)
 		},
 	}
-}
-
-const defaultConflictHandler: RxConflictHandler<any> = function (
-	i: RxConflictHandlerInput<any>,
-	_context: string
-): Promise<RxConflictHandlerOutput<any>> {
-	console.log("defaultConflictHandler")
-	const newDocumentState = stripAttachmentsDataFromDocument(i.newDocumentState)
-	const realMasterState = stripAttachmentsDataFromDocument(i.realMasterState)
-
-	/**
-	 * If the documents are deep equal,
-	 * we have no conflict.
-	 * On your custom conflict handler you might only
-	 * check some properties, like the updatedAt time,
-	 * for better performance, because deepEqual is expensive.
-	 */
-	if (deepEqual(newDocumentState, realMasterState)) {
-		return Promise.resolve({
-			isEqual: true,
-		})
-	}
-
-	/**
-	 * The default conflict handler will always
-	 * drop the fork state and use the master state instead.
-	 */
-	return Promise.resolve({
-		isEqual: false,
-		documentData: i.realMasterState,
-	})
 }

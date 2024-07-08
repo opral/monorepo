@@ -31,7 +31,7 @@ const missingSelectorLintRule: MessageBundleLintRule = {
 			if (missing.size === 0) continue
 
 			report({
-				locale: message.locale,
+				// locale: message.locale,
 				body: `Missing selector(s): ${[...missing].join(", ")}`,
 				messageId: undefined,
 				variantId: undefined,

@@ -7,6 +7,8 @@ import type {
 	LintResult,
 	Message,
 	MessageBundle,
+	MessageBundleRecord,
+	MessageRecord,
 	ProjectSettings2,
 } from "./index.js"
 import type { RxCollection } from "rxdb"
@@ -42,8 +44,8 @@ export type InlangProject2 = {
 	lintReports$: Subscribable<LintResult>
 
 	internal: {
-		bundleStorage: Awaited<ReturnType<typeof createSlotWriter<MessageBundle>>>
-		messageStorage: Awaited<ReturnType<typeof createSlotWriter<Message>>>
+		bundleStorage: Awaited<ReturnType<typeof createSlotWriter<MessageBundleRecord>>>
+		messageStorage: Awaited<ReturnType<typeof createSlotWriter<MessageRecord>>>
 	}
 
 	fix: <Report extends LintReport>(lintReport: Report, fix: Fix<Report>) => Promise<void>

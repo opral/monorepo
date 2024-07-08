@@ -1,5 +1,11 @@
 # @inlang/plugin-json
 
+## 5.1.55
+
+### Patch Changes
+
+- @inlang/sdk@0.36.3
+
 ## 5.1.54
 
 ### Patch Changes

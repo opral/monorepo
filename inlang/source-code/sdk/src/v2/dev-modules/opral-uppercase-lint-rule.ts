@@ -38,7 +38,7 @@ const makeOpralUppercase: MessageBundleLintRule = {
 					messageBundleId: messageBundle.id,
 					messageId: message.id,
 					variantId: variant.id,
-					locale: message.locale,
+					// locale: message.locale,
 					fixes: [fix],
 				})
 			}

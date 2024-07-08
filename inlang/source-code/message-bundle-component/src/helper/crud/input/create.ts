@@ -1,6 +1,16 @@
 import type { MessageBundle } from "@inlang/sdk/v2"
 
-export const createInput = (props: { messageBundle: MessageBundle; inputName: string }) => {
+/**
+ * Creates an input in all messages of a message bundle.
+ * The function mutates the message bundle.
+ * @param props.messageBundle The message bundle to create the input in.
+ * @param props.inputName The name of the input to create.
+ *
+ * @example
+ * createInput({ messageBundle, inputName: "myInput" })
+ */
+
+const createInput = (props: { messageBundle: MessageBundle; inputName: string }) => {
 	for (const message of props.messageBundle.messages) {
 		if (message.declarations.some((declaration) => declaration.name === props.inputName)) {
 			console.error("Input with name already exists")
@@ -20,3 +30,5 @@ export const createInput = (props: { messageBundle: MessageBundle; inputName: st
 		}
 	}
 }
+
+export default createInput

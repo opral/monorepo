@@ -14,7 +14,6 @@ const lintRule = {
 		if (presentLanguages.size === 0) {
 			// no messages in any language -> delete
 			report({
-				locale: "",
 				body: `No languages are present`,
 				messageId: undefined,
 				variantId: undefined,
@@ -27,7 +26,7 @@ const lintRule = {
 		const missingLanguageTags = exclude(expectedLanguageTags, presentLanguages)
 		for (const missingLanguageTag of missingLanguageTags) {
 			report({
-				locale: missingLanguageTag,
+				// locale: missingLanguageTag,
 				body: `Missing language tag '${missingLanguageTag}'.`,
 				messageId: undefined,
 				variantId: undefined,

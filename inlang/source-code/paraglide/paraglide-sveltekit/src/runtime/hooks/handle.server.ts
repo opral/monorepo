@@ -1,4 +1,4 @@
-import { parseRoute } from "../utils/route.js"
+import { parseRoute, serializeRoute } from "../utils/route.js"
 import { negotiateLanguagePreferences } from "@inlang/paraglide-js/internal/adapter-utils"
 import { base } from "$app/paths"
 import { dev } from "$app/environment"
@@ -68,7 +68,7 @@ export const createHandle = <T extends string>(
 	const dirPlaceholder = options.textDirectionPlaceholder ?? "%paraglide.textDirection%"
 
 	return ({ resolve, event }) => {
-		const [localisedPath] = parseRoute(event.url.pathname as `/${string}`, base)
+		const [localisedPath, suffix] = parseRoute(event.url.pathname as `/${string}`, base)
 		const langFromUrl = strategy.getLanguageFromLocalisedPath(localisedPath)
 
 		const langCookie = event.cookies.get(LANG_COOKIE_NAME)
@@ -85,10 +85,12 @@ export const createHandle = <T extends string>(
 		if (lang !== langFromUrl && !i18n.exclude(localisedPath)) {
 			// redirect to the correct language
 			const localisedPathname = strategy.getLocalisedPath(localisedPath, lang)
+			const fullPath = serializeRoute(localisedPathname, base, suffix)
+
 			return new Response(undefined, {
 				status: 302,
 				headers: {
-					Location: localisedPathname,
+					Location: fullPath,
 				},
 			})
 		}

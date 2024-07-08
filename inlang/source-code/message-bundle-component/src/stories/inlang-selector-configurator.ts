@@ -2,24 +2,17 @@ import { LitElement, css, html } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 
 import SlDropdown from "@shoelace-style/shoelace/dist/components/dropdown/dropdown.component.js"
-import SlButton from "@shoelace-style/shoelace/dist/components/button/button.component.js"
-import SlSelect from "@shoelace-style/shoelace/dist/components/select/select.component.js"
-import SlOption from "@shoelace-style/shoelace/dist/components/option/option.component.js"
-import SlInput from "@shoelace-style/shoelace/dist/components/input/input.component.js"
-import SlTooltip from "@shoelace-style/shoelace/dist/components/tooltip/tooltip.component.js"
 
-import { createMessage, createVariant, type LanguageTag, type Message } from "@inlang/sdk/v2"
-import { addSelector } from "../helper/crud/selector/add.js"
+import {
+	type Declaration,
+	createMessage,
+	createVariant,
+	type LanguageTag,
+	type Message,
+} from "@inlang/sdk/v2"
+import addSelector from "../helper/crud/selector/add.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
 import "./inlang-add-input.js"
-
-// in case an app defines it's own set of shoelace components, prevent double registering
-if (!customElements.get("sl-dropdown")) customElements.define("sl-dropdown", SlDropdown)
-if (!customElements.get("sl-button")) customElements.define("sl-button", SlButton)
-if (!customElements.get("sl-select")) customElements.define("sl-select", SlSelect)
-if (!customElements.get("sl-option")) customElements.define("sl-option", SlOption)
-if (!customElements.get("sl-input")) customElements.define("sl-input", SlInput)
-if (!customElements.get("sl-tooltip")) customElements.define("sl-tooltip", SlTooltip)
 
 @customElement("inlang-selector-configurator")
 export default class InlangSelectorConfigurator extends LitElement {
@@ -34,8 +27,8 @@ export default class InlangSelectorConfigurator extends LitElement {
 			.dropdown-container {
 				font-size: 13px;
 				width: 240px;
-				background-color: white;
-				border: 1px solid var(--sl-color-neutral-300);
+				background-color: var(--sl-panel-background-color);
+				border: 1px solid var(--sl-input-border-color);
 				padding: 12px;
 				border-radius: 6px;
 				display: flex;
@@ -51,7 +44,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 				display: flex;
 				justify-content: space-between;
 				align-items: center;
-				color: var(--sl-color-neutral-900);
+				color: var(--sl-input-color);
 				font-size: 12px;
 			}
 			.dropdown-title {
@@ -64,22 +57,27 @@ export default class InlangSelectorConfigurator extends LitElement {
 			}
 			.add-input::part(base):hover {
 				background-color: var(--sl-color-neutral-100);
-				color: var(--sl-color-neutral-900);
+				color: var(--sl-input-color-hover);
 			}
 			sl-select::part(form-control-label) {
 				font-size: 13px;
-				color: var(--sl-color-neutral-700);
+				color: var(--sl-input-color);
 			}
 			sl-select::part(display-input) {
 				font-size: 13px;
-				color: var(--sl-color-neutral-950);
+				color: var(--sl-input-color);
 			}
 			sl-option::part(label) {
 				font-size: 14px;
+				color: var(--sl-input-color);
+			}
+			sl-option::part(base):hover {
+				background-color: var(--sl-input-background-color-hover);
 			}
 			.options-title {
 				font-size: 14px;
-				color: var(--sl-color-neutral-700);
+				color: var(--sl-input-color);
+				background-color: var(--sl-input-background-color);
 				margin: 0;
 				padding-bottom: 4px;
 			}
@@ -92,6 +90,14 @@ export default class InlangSelectorConfigurator extends LitElement {
 			.option {
 				width: 100%;
 			}
+			.option::part(base) {
+				background-color: var(--sl-input-background-color-hover);
+				border-radius: var(--sl-input-border-radius-small);
+			}
+			.option {
+				width: 100%;
+				background-color: var(--sl-input-background-color-hover);
+			}
 			.delete-icon {
 				color: var(--sl-color-neutral-400);
 				cursor: pointer;
@@ -102,13 +108,12 @@ export default class InlangSelectorConfigurator extends LitElement {
 			.help-text {
 				display: flex;
 				gap: 8px;
-				color: var(--sl-color-neutral-900);
+				color: var(--sl-input-help-text-color);
 			}
 			.help-text p {
 				flex: 1;
 				margin: 0;
 				font-size: 12px;
-				color: var(--sl-color-neutral-500);
 				line-height: 1.5;
 			}
 			.empty-image {
@@ -131,7 +136,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 	]
 
 	@property()
-	inputs: string[] | undefined
+	inputs: Declaration[] | undefined
 
 	@property()
 	message?: Message | undefined
@@ -274,14 +279,14 @@ export default class InlangSelectorConfigurator extends LitElement {
 	}
 
 	private _resetConfiguration = () => {
-		this._input = this.inputs && this.inputs[0]
+		this._input = this.inputs && this.inputs[0] && this.inputs[0].name
 		this._function = "plural"
 		this._matchers = this._getPluralCategories() || ["*"]
 	}
 
 	override async firstUpdated() {
 		await this.updateComplete
-		this._input = this.inputs && this.inputs[0]
+		this._input = this.inputs && this.inputs[0] && this.inputs[0].name
 		this._function = "plural"
 		this._matchers = this._getPluralCategories() || ["*"]
 	}
@@ -295,7 +300,10 @@ export default class InlangSelectorConfigurator extends LitElement {
 					const dropdown = this.shadowRoot?.querySelector("sl-dropdown")
 					if (dropdown) {
 						if (e.target === dropdown) {
-							this._input = this.inputs && this.inputs.length > 0 ? this.inputs[0] : undefined
+							this._input =
+								this.inputs && this.inputs.length > 0 && this.inputs[0]
+									? this.inputs[0].name
+									: undefined
 							if (this.inputs && this.inputs.length === 0) {
 								this._isNewInput = true
 							}
@@ -375,8 +383,8 @@ export default class InlangSelectorConfigurator extends LitElement {
 									value=${this._input || this.inputs?.[0]}
 							  >
 									${this.inputs &&
-									this.inputs.map((inputs) => {
-										return html`<sl-option value=${inputs}>${inputs}</sl-option>`
+									this.inputs.map((input) => {
+										return html`<sl-option value=${input.name}>${input.name}</sl-option>`
 									})}
 							  </sl-select>`
 							: html`<sl-input 

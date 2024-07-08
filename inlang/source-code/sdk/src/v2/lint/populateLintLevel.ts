@@ -24,8 +24,8 @@ const keys = [
 	["ruleId", "ruleId"],
 	["bundleId", "messageBundleId"],
 	["messageId", "messageId"],
-	["variantId", "variantId"],
-	["messageLocale", "locale"],
+	["variantId", "variantId"], // ["messageLocale"], // , "locale"],
+	// ,
 ] as const satisfies [keyof LintConfig, keyof LintReport][]
 
 function configMatches(report: Omit<LintReport, "level">, config: LintConfig): boolean {

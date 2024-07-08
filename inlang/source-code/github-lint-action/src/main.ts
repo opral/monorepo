@@ -281,36 +281,49 @@ ${lintSummary
 			if (commentId) {
 				console.debug("Updating existing comment")
 				if (results.every((result) => result.commentContent.length === 0)) {
-					console.debug("Reports have been fixed, updating comment and removing it")
-					await octokit.rest.issues.updateComment({
+					console.debug("Reports have been fixed, updating comment")
+					const comment = await octokit.rest.issues.updateComment({
 						owner,
 						repo,
 						comment_id: commentId,
 						body: commentResolved,
 						as: "ninja-i18n",
 					})
+					if (comment) {
+						console.debug("Comment updated:\n", comment?.data?.body)
+					}
 				} else {
 					console.debug("Reports have not been fixed, updating comment")
-					await octokit.rest.issues.updateComment({
+					const comment = await octokit.rest.issues.updateComment({
 						owner,
 						repo,
 						comment_id: commentId,
 						body: commentContent,
 						as: "ninja-i18n",
 					})
+					if (comment) {
+						console.debug("Comment updated:\n", comment?.data?.body)
+					}
 				}
 			}
 		} else if (results.every((result) => result.commentContent.length === 0)) {
 			console.debug("No lint reports found, skipping comment")
 		} else {
 			console.debug("Creating a new comment")
-			await octokit.rest.issues.createComment({
+			const comment = await octokit.rest.issues.createComment({
 				owner,
 				repo,
 				issue_number: prNumber as number,
 				body: commentContent,
 				as: "ninja-i18n",
 			})
+			// eslint-disable-next-line unicorn/no-null
+			core.debug(`createComment API response:\n${JSON.stringify(comment, null, 2)}`)
+			if (!comment || comment.status !== 201) {
+				throw new Error(`Failed to create a new comment [${comment?.status}]`)
+			} else {
+				console.debug("Comment created:\n", comment?.data?.body)
+			}
 		}
 
 		// Fail the workflow if new lint errors or project setup errors exist

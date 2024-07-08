@@ -2,6 +2,16 @@
 
 # Sherlock – i18n inspector for Visual Studio Code
 
+<p>
+<a href="https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension" target="__blank"><img src="https://img.shields.io/visual-studio-marketplace/v/inlang.vs-code-extension?color=1E90FF&label=VS%20Code%20Marketplace&logo=visual-studio-code" alt="Visual Studio Marketplace Version" /></a>
+<a href="https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension" target="__blank"><img src="https://img.shields.io/visual-studio-marketplace/d/inlang.vs-code-extension?color=32CD32" alt="Visual Studio Marketplace Downloads" /></a>
+<a href="https://marketplace.visualstudio.com/items?itemName=inlang.vs-code-extension" target="__blank"><img src="https://img.shields.io/visual-studio-marketplace/i/inlang.vs-code-extension?color=3CB371" alt="Visual Studio Marketplace Installs" /></a>
+<br/>
+<a href="https://github.com/opral/monorepo" target="__blank"><img src="https://img.shields.io/github/last-commit/opral/monorepo?color=9370DB" alt="GitHub last commit" /></a>
+<a href="https://github.com/opral/inlang-sherlock/issues" target="__blank"><img src="https://img.shields.io/github/issues/opral/inlang-sherlock?color=20B2AA" alt="GitHub issues" /></a>
+<a href="https://github.com/opral/monorepo" target="__blank"><img alt="GitHub stars" src="https://img.shields.io/github/stars/opral/monorepo?style=social"></a>
+</p>
+
 Visualize, edit, and lint translated strings effortlessly using Inline Decorations & Hover Support. Extract new strings with a simple click, making localization tasks more intuitive and efficient.
 
 <div>
@@ -18,17 +28,16 @@ Visualize, edit, and lint translated strings effortlessly using Inline Decoratio
 	<br />
 </div>
 
-
 <img width="100%" src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/source-code/ide-extension/assets/sherlock-cover-small.png"/>
 
 <br>
 <br>
 
-✅ Streamline the i18n translation process. 
+✅  Streamline the i18n translation process. 
 
-✅ Visualize, edit, and lint translations.
+✅  Visualize, edit, and lint translations.
 
-✅ Extract new translations with a simple click.
+✅  Extract new translations with a simple click.
 
 
 <br>

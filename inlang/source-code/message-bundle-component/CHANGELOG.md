@@ -1,5 +1,11 @@
 # @inlang/message-bundle-component
 
+## 0.1.21
+
+### Patch Changes
+
+- @inlang/sdk@0.36.3
+
 ## 0.1.20
 
 ### Patch Changes

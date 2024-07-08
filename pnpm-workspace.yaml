@@ -3,7 +3,7 @@ packages:
   - '!lix/packages/exp'
   - 'inlang/development-projects/*'
   - 'inlang/source-code/*'
-  - 'inlang/source-code/cross-sell/*'
+  - 'inlang/source-code/recommendations/*'
   - 'inlang/source-code/plugins/*'
   - 'inlang/source-code/paraglide/*'
   - 'inlang/source-code/end-to-end-tests/*'

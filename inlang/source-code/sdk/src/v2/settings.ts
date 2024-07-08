@@ -30,7 +30,16 @@ export async function loadSettings(args: {
 			path: args.settingsFilePath,
 		})
 	}
-	return parseSettings(json.data)
+
+	const projectSettings = parseSettings(json.data)
+
+
+	// Transform legacy fields
+	// @ts-ignore
+	projectSettings.languageTags = projectSettings.locales
+	// @ts-ignore
+	projectSettings.sourceLanguageTag = projectSettings.baseLocale
+	return projectSettings
 }
 
 const parseSettings = (settings: unknown) => {

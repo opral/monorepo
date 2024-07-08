@@ -17,7 +17,7 @@ const missingCatchallLintRule: MessageBundleLintRule = {
 					messageBundleId: messageBundle.id,
 					messageId: message.id,
 					variantId: undefined,
-					locale: message.locale,
+					// locale: message.locale,
 					fixes: [
 						{
 							title: "Add catchall variant",

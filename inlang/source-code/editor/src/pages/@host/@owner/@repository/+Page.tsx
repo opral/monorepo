@@ -63,7 +63,7 @@ function TheActualPage() {
 		languageTags,
 		userIsCollaborator,
 		isNinjaRecommendationDisabled,
-		ninjaIsAdopted,
+		shouldRecommendNinja,
 		filteredMessageLintRules,
 		localChanges,
 	} = useEditorState()
@@ -183,7 +183,7 @@ function TheActualPage() {
 						<ListHeader />
 						<Show
 							when={
-								ninjaIsAdopted() === false &&
+								shouldRecommendNinja() === true &&
 								filteredMessageLintRules().length !== 0 &&
 								userIsCollaborator() &&
 								!isNinjaRecommendationDisabled()

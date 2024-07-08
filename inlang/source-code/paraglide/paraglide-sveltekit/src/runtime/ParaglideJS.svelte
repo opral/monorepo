@@ -34,11 +34,7 @@
 	 */
 	export let i18n: I18n<T>
 
-	/**
-	 * The language tag that was autodetected from the URL.
-	 */
-	$: autodetectedLanguage = i18n.getLanguageFromUrl($page.url)
-	$: lang = languageTag ?? autodetectedLanguage
+	$: lang = languageTag ?? i18n.getLanguageFromUrl($page.url)
 	$: if (browser) i18n.config.runtime.setLanguageTag(lang)
 	$: if (browser) document.documentElement.lang = lang
 	$: if (browser) document.documentElement.dir = i18n.config.textDirection[lang] ?? "ltr"

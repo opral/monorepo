@@ -1,5 +1,20 @@
 # @inlang/github-lint-action
 
+## 0.3.18
+
+### Patch Changes
+
+- 123d206: Add comment logging
+
+## 0.3.17
+
+### Patch Changes
+
+- Updated dependencies [e8d74b9]
+  - @lix-js/fs@2.2.0
+  - @inlang/sdk@0.36.3
+  - @lix-js/client@2.2.1
+
 ## 0.3.16
 
 ### Patch Changes
