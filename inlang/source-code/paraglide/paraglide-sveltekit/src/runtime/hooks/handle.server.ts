@@ -8,6 +8,7 @@ import type { I18nConfig } from "../adapter.server.js"
 import type { RoutingStrategy } from "../strategy.js"
 import type { ParaglideLocals } from "../locals.js"
 import { ALSContext, GlobalContext, type Context } from "./utils.js"
+import { getHrefBetween } from "../utils/diff-urls.js"
 
 /**
  * The default lang attribute string that's in SvelteKit's `src/app.html` file.
@@ -117,13 +118,15 @@ export const createHandle = <T extends string>(
 			const localisedPathname = strategy.getLocalisedPath(localisedPath, lang)
 			const fullPath = serializeRoute(localisedPathname, base, suffix)
 
-			const url = new URL(event.url)
-			url.pathname = fullPath
+			const to = new URL(event.url)
+			to.pathname = fullPath
+
+			const href = getHrefBetween(event.url, to)
 
 			return new Response(undefined, {
 				status: 302,
 				headers: {
-					Location: url.href,
+					Location: href,
 				},
 			})
 		}
