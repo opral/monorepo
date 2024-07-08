@@ -186,6 +186,6 @@ function hash(url: string) {
 	return hash.toString(36)
 }
 
-export async function makeLinterAvailableTo(ep: Comlink.Endpoint) {
+export function makeLinterAvailableTo(ep: Comlink.Endpoint) {
 	Comlink.expose(createLinter, ep)
 }
