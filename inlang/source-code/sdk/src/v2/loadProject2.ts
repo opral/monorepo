@@ -16,23 +16,13 @@ import {
 	type InstalledLintRule,
 	type LintReport,
 	type LintResult,
-	type Message,
 } from "./types/index.js"
 import { createDebugImport } from "./import-utils.js"
-
-import {
-	createRxDatabase,
-	deepEqual,
-	stripAttachmentsDataFromDocument,
-	type RxCollection,
-	type RxConflictHandler,
-	type RxConflictHandlerInput,
-	type RxConflictHandlerOutput,
-} from "rxdb"
+import { createRxDatabase, type RxCollection } from "rxdb"
 import { getRxStorageMemory } from "rxdb/plugins/storage-memory"
 import { BehaviorSubject, combineLatest, from, switchMap, tap } from "rxjs"
 import { resolveModules } from "./resolveModules2.js"
-import { createLintWorker } from "./lint/host.js"
+import { createLintWorker, type LinterFactory } from "./lint/host.js"
 import {
 	createMessageBundleSlotAdapter,
 	startReplication,
@@ -46,8 +36,6 @@ import missingSelectorLintRule from "./dev-modules/missing-selector-lint-rule.js
 import missingCatchallLintRule from "./dev-modules/missingCatchall.js"
 
 type ProjectState = "initializing" | "resolvingModules" | "loaded"
-
-const isInIframe = window.self !== window.top
 
 /**
  *
@@ -69,6 +57,7 @@ export async function loadProject(args: {
 	repo: Repository
 	appId?: string
 	_import?: ImportFunction
+	_lintFactory?: LinterFactory
 }): Promise<InlangProject2> {
 	// TODO SDK2 check if we need to use the new normalize path here
 	const projectPath = normalizePath(args.projectPath)
@@ -88,17 +77,12 @@ export async function loadProject(args: {
 		nodeishFs: args.repo.nodeishFs,
 	})
 
-	if (!isInIframe) {
-		await maybeAddModuleCache({ projectPath, repo: args.repo })
-		await maybeCreateFirstProjectId({ projectPath, repo: args.repo })
-	}
+	await maybeAddModuleCache({ projectPath, repo: args.repo })
+	await maybeCreateFirstProjectId({ projectPath, repo: args.repo })
 
 	// no need to catch since we created the project ID with "maybeCreateFirstProjectId" earlier
-	console.log("Reading Project path: ", projectPath)
 	const projectId = await args.repo.nodeishFs.readFile(projectIdPath, { encoding: "utf-8" })
-	console.log("Project ID: ", projectId)
 	const projectSettings = await loadSettings({ settingsFilePath, nodeishFs })
-
 
 	const projectSettings$ = new BehaviorSubject(projectSettings)
 	const lifecycle$ = new BehaviorSubject<ProjectState>("initializing")
@@ -183,7 +167,13 @@ export async function loadProject(args: {
 		})()
 	})()
 
-	const linter = await createLintWorker(projectPath, projectSettings, nodeishFs)
+	const lintFactory = args._lintFactory ?? createLintWorker
+
+	const linter = await lintFactory({
+		projectPath,
+		settings: projectSettings,
+		nodeishFs,
+	})
 
 	// rxdb with memory storage configured
 	const database = await createRxDatabase<{
@@ -259,7 +249,7 @@ export async function loadProject(args: {
 
 	const setSettings = async (newSettings: ProjectSettings2) => {
 		// projectSettings$.next(newSettings); // Update the observable
-		await nodeishFs.writeFile(settingsFilePath, JSON.stringify(newSettings, null, 2)) // Write the new settings to the file
+		await nodeishFs.writeFile(settingsFilePath, JSON.stringify(newSettings, undefined, 2)) // Write the new settings to the file
 	}
 
 	return {
