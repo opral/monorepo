@@ -1,14 +1,7 @@
-// import { createImport } from "./import.j
-import { endpoint } from "comlink-node/worker"
 import { populateLevel } from "./populateLintLevel.js"
 import { resolveModules } from "../resolveModules2.js"
 import * as Comlink from "comlink"
-import type {
-	Message,
-	MessageBundle,
-	MessageBundleRecord,
-	MessageRecord,
-} from "../types/message-bundle.js"
+import type { MessageBundle, MessageBundleRecord, MessageRecord } from "../types/message-bundle.js"
 import type { ProjectSettings2 } from "../types/project-settings.js"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
 import type {
@@ -193,4 +186,6 @@ function hash(url: string) {
 	return hash.toString(36)
 }
 
-Comlink.expose(createLinter, endpoint)
+export async function makeLinterAvailableTo(ep: Comlink.Endpoint) {
+	Comlink.expose(createLinter, ep)
+}
