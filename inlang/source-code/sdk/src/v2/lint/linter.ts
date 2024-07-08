@@ -1,7 +1,13 @@
 import { populateLevel } from "./populateLintLevel.js"
 import { resolveModules } from "../resolveModules2.js"
 import * as Comlink from "comlink"
-import type { MessageBundle, MessageBundleRecord, MessageRecord } from "../types/message-bundle.js"
+import type {
+	MessageBundle,
+	MessageBundleRecord,
+	MessageRecord,
+	Message,
+	Variant,
+} from "../types/message-bundle.js"
 import type { ProjectSettings2 } from "../types/project-settings.js"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
 import type {
@@ -121,10 +127,10 @@ export async function createLinter(
 
 			const messageBundles = await getMessageBundles()
 			const bundle = [...messageBundles.values()].find(
-				(bundle) => bundle.id === report.messageBundleId
+				(bundle) => bundle.id === report.target.messageBundleId
 			)
 
-			if (!bundle) throw new Error(`messageBundle ${report.messageBundleId} not found`)
+			if (!bundle) throw new Error(`messageBundle ${report.target.messageBundleId} not found`)
 
 			const rule = resolvedModules.messageBundleLintRules.find((rule) => rule.id === report.ruleId)
 			if (!rule) throw new Error(`rule ${report.ruleId} not found`)
@@ -148,24 +154,40 @@ function toReport({
 	lintRule: MessageBundleLintRule
 	lintConfig: LintConfig[]
 }): LintReport {
-	const messageId =
-		"messageId" in reportData
-			? reportData.messageId
-			: "variantId" in reportData
-			? messageBundle.messages.find((msg) =>
-					msg.variants.find((variant) => variant.id === reportData.variantId)
-			  )?.id
-			: undefined
+	const messageId: string | undefined = isMessage(reportData.target)
+		? reportData.target.id
+		: isVariant(reportData.target)
+		? messageBundle.messages.find((msg) =>
+				msg.variants.find((variant) => variant.id === reportData.target.id)
+		  )?.id
+		: undefined
+
+	const variantId = isVariant(reportData.target) ? reportData.target.id : undefined
 
 	const report: Omit<LintReport, "level"> = {
 		ruleId: lintRule.id,
-		messageBundleId: messageBundle.id,
-		messageId,
-		variantId: "variantId" in reportData ? reportData.variantId : undefined,
-		...reportData,
+		target: {
+			messageBundleId: messageBundle.id,
+			messageId,
+			variantId,
+		},
+		body: reportData.body,
+		fixes: reportData.fixes || [],
 	}
 
 	return populateLevel(report, lintConfig)
+}
+
+function isVariant(data: MessageBundleLintData["target"]): data is Variant {
+	return "pattern" in data
+}
+
+function isMessage(data: MessageBundleLintData["target"]): data is Message {
+	return "variants" in data
+}
+
+function isMessageBundle(data: MessageBundleLintData["target"]): data is MessageBundle {
+	return "messages" in data
 }
 
 function hashLintReports(reports: LintReport[]) {

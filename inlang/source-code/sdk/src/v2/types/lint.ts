@@ -1,4 +1,5 @@
 import { Translatable } from "@inlang/translatable"
+import { LanguageTag } from "./language-tag.js"
 import {
 	Type,
 	type Static,
@@ -7,9 +8,7 @@ import {
 	type TTemplateLiteral,
 } from "@sinclair/typebox"
 import type { JSONObject } from "@inlang/json-types"
-
-import type { MessageBundle } from "./message-bundle.js"
-import { LanguageTag } from "./language-tag.js"
+import type { Message, MessageBundle, Variant } from "./message-bundle.js"
 import type { ExternalProjectSettings, ProjectSettings2 } from "./project-settings.js"
 
 export type LintResult = {
@@ -65,7 +64,7 @@ export type LintConfig = Static<typeof LintConfig>
 type LintFix = { key: string; title: string }
 const LintFix = Type.Object({
 	key: Type.String(),
-	title: Type.String(),
+	title: Translatable(Type.String()),
 })
 
 /**
@@ -74,12 +73,11 @@ const LintFix = Type.Object({
 export const LintReport = Type.Object({
 	ruleId: Type.String(),
 
-	// TODO SDK2 check if we should provide a lint target
-	// target: Type.Object({
-	messageBundleId: Type.String(),
-	messageId: Type.Optional(Type.String()),
-	variantId: Type.Optional(Type.String()),
-	// }),
+	target: Type.Object({
+		messageBundleId: Type.String(),
+		messageId: Type.Optional(Type.String()),
+		variantId: Type.Optional(Type.String()),
+	}),
 
 	level: MessageLintLevel,
 	body: Translatable(Type.String()),
@@ -94,11 +92,11 @@ export const LintReport = Type.Object({
 export type LintReport<Fixes extends LintFix[] = LintFix[]> = {
 	ruleId: MessageBundleLintRule["id"]
 
-	// TODO SDK2 check if we should provide a lint target
-	messageBundleId: string
-	messageId: string | undefined
-	variantId: string | undefined
-	// locale: LanguageTag | undefined
+	target: {
+		messageBundleId: string
+		messageId: string | undefined
+		variantId: string | undefined
+	}
 
 	level: MessageLintLevel
 	body: Translatable<string>
@@ -118,9 +116,11 @@ export type Fix<Report extends LintReport> = Report["fixes"][number]
 /**
  * The data that get's passed to the MessageBundleLint's `report` callback
  */
-export type MessageBundleLintData =
-	| Omit<LintReport, "ruleId" | "level" | "messageBundleId" | "messageId" | "variantId"> &
-			({ messageBundleId: string } | { messageId: string } | { variantId: string })
+export type MessageBundleLintData = {
+	body: Translatable<string>
+	target: MessageBundle | Message | Variant
+	fixes?: LintFix[]
+}
 
 /**
  * The message bundle lint rule API.
@@ -155,18 +155,11 @@ export type MessageBundleLintRule<
 		node: MessageBundle
 	}) => MaybePromise<MessageBundle>
 }
+
 export const MessageBundleLintRule = Type.Object({
 	id: _MessageBundleLintRuleId,
 	displayName: Translatable(Type.String()),
 	description: Translatable(Type.String()),
-
-	/*
-	for: Type.Union([
-		Type.Literal("messageBundle"),
-		Type.Literal("message"),
-		Type.Literal("variant"),
-	]),
-	*/
 
 	/**
 	 * Tyepbox is must be used to validate the Json Schema.
@@ -179,5 +172,4 @@ export const MessageBundleLintRule = Type.Object({
 /**
  * ---------------- UTILITIES ----------------
  */
-
 type MaybePromise<T> = T | Promise<T>

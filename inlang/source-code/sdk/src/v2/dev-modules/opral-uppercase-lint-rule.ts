@@ -35,10 +35,8 @@ const makeOpralUppercase: MessageBundleLintRule = {
 
 				report({
 					body: `The OPRAL brand name is not uppercase`,
-					messageBundleId: messageBundle.id,
-					messageId: message.id,
-					variantId: variant.id,
-					// locale: message.locale,
+					// @type MessageBundle | Message | Variant
+					target: variant,
 					fixes: [fix],
 				})
 			}
@@ -47,14 +45,16 @@ const makeOpralUppercase: MessageBundleLintRule = {
 	fix: async ({ report, fix, node: messageBundle }) => {
 		if (fix.title !== "Make OPRAL uppercase") return messageBundle
 
-		if (!report.variantId || !report.messageId)
+		if (!report.target.variantId || !report.target.messageId)
 			throw new Error("report must have variantId and messageId")
 
-		const msg = messageBundle.messages.find((msg) => msg.id === report.messageId)
-		if (!msg) throw new Error(`message ${report.messageId} not found on bundle ${messageBundle.id}`)
+		const msg = messageBundle.messages.find((msg) => msg.id === report.target.messageId)
+		if (!msg)
+			throw new Error(`message ${report.target.messageId} not found on bundle ${messageBundle.id}`)
 
-		const variant = msg.variants.find((variant) => variant.id === report.variantId)
-		if (!variant) throw new Error(`variant ${report.variantId} not found on message ${msg.id}`)
+		const variant = msg.variants.find((variant) => variant.id === report.target.variantId)
+		if (!variant)
+			throw new Error(`variant ${report.target.variantId} not found on message ${msg.id}`)
 
 		variant.pattern = variant.pattern.map((el) => {
 			if (el.type !== "text") return el
