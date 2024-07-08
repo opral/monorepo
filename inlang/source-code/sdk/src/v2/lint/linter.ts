@@ -186,10 +186,6 @@ function isMessage(data: MessageBundleLintData["target"]): data is Message {
 	return "variants" in data
 }
 
-function isMessageBundle(data: MessageBundleLintData["target"]): data is MessageBundle {
-	return "messages" in data
-}
-
 function hashLintReports(reports: LintReport[]) {
 	const stringified = JSON.stringify(reports)
 	return hash(stringified)
