@@ -18,8 +18,13 @@ import type {
 	MessageBundleLintData,
 	MessageBundleLintRule,
 } from "../types/lint.js"
-import { createDebugImport, importSequence } from "../import-utils.js"
-import { createImport, type ImportFunction } from "./import.js"
+import { createDebugImport, importSequence } from "../import/utils.js"
+import {
+	createCDNImportWithReadOnlyCache,
+	createDiskImport,
+	type ImportFunction,
+} from "../import/index.js"
+
 import lintRule from "../dev-modules/lint-rule.js"
 import makeOpralUppercase from "../dev-modules/opral-uppercase-lint-rule.js"
 import _debug from "debug"
@@ -43,7 +48,8 @@ export async function createLinter(
 			"sdk-dev:missing-selector-lint-rule.js": missingSelectorLintRule,
 			"sdk-dev:missing-catchall-variant": missingCatchallLintRule,
 		}),
-		createImport(projectPath, fs)
+		createDiskImport({ readFile: fs.readFile }),
+		createCDNImportWithReadOnlyCache(projectPath, fs)
 	)
 
 	const resolvedModules = await resolveModules({
