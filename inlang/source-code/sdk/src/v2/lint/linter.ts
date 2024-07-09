@@ -1,5 +1,4 @@
 import { populateLevel } from "./populateLintLevel.js"
-import { resolveModules } from "../resolveModules2.js"
 import * as Comlink from "comlink"
 import type {
 	MessageBundle,
@@ -9,39 +8,32 @@ import type {
 	Variant,
 } from "../types/message-bundle.js"
 import type { ProjectSettings2 } from "../types/project-settings.js"
-import type { NodeishFilesystemSubset } from "@inlang/plugin"
-import type {
-	Fix,
-	LintConfig,
-	LintReport,
-	LintResult,
-	MessageBundleLintData,
+import {
 	MessageBundleLintRule,
+	type Fix,
+	type LintConfig,
+	type LintReport,
+	type LintResult,
+	type MessageBundleLintData,
 } from "../types/lint.js"
 import { createDebugImport, importSequence } from "../import/utils.js"
-import {
-	createCDNImportWithReadOnlyCache,
-	createDiskImport,
-	type ImportFunction,
-} from "../import/index.js"
+import { createCDNImportWithReadOnlyCache, createDiskImport } from "../import/index.js"
 
 import lintRule from "../dev-modules/lint-rule.js"
 import makeOpralUppercase from "../dev-modules/opral-uppercase-lint-rule.js"
-import _debug from "debug"
 import { combineToBundles } from "../createMessageBundleSlotAdapter.js"
 import createSlotReader from "../../persistence/slotfiles/createSlotReader.js"
 import missingSelectorLintRule from "../dev-modules/missing-selector-lint-rule.js"
 import missingCatchallLintRule from "../dev-modules/missingCatchall.js"
-const debug = _debug("sdk-v2:lint-report-worker")
+import { loadProject } from "../loadProject2.js"
+import type { Repository } from "@lix-js/client"
+import { getFs } from "../rpc-fs/index.js"
+import type { Subscribable } from "rxjs"
 
-export async function createLinter(
-	projectPath: string,
-	settings: ProjectSettings2,
-	fs: Pick<NodeishFilesystemSubset, "readFile" | "readdir" | "mkdir">,
-	_import: ImportFunction | undefined = undefined
-) {
-	debug("creating linter")
-	_import ??= importSequence(
+export async function createLinter(projectPath: string, fsEp: Comlink.Endpoint) {
+	const fs = getFs(fsEp)
+
+	const _import = importSequence(
 		createDebugImport({
 			"sdk-dev:lint-rule.js": lintRule,
 			"sdk-dev:opral-uppercase-lint.js": makeOpralUppercase,
@@ -52,10 +44,29 @@ export async function createLinter(
 		createCDNImportWithReadOnlyCache(projectPath, fs)
 	)
 
-	const resolvedModules = await resolveModules({
-		settings,
+	const repo = {
+		nodeishFs: fs,
+		getFirstCommitHash() {
+			return "dummy_first_hash"
+		},
+	} as unknown as Repository
+
+	const project = await loadProject({
+		repo,
+		projectPath,
 		_import,
+		_lintFactory: async () => ({
+			lint: async () => ({}),
+			fix: async () => ({} as MessageBundle),
+			terminate: () => {},
+		}),
 	})
+
+	const resolvedModules = {
+		messageBundleLintRules: await next(project.installed.lintRules),
+	} as any
+
+	console.info("resolvedModules", resolvedModules)
 
 	async function getMessageBundles() {
 		// get the affected message-bundle
@@ -96,7 +107,7 @@ export async function createLinter(
 					const promise = lintRule.run({
 						node: messageBundle,
 						settings,
-						report: (reportData) => {
+						report: (reportData: any) => {
 							const report = toReport({
 								reportData,
 								messageBundle,
@@ -128,6 +139,8 @@ export async function createLinter(
 		},
 
 		fix: async <Report extends LintReport>(report: Report, fix: Fix<Report>) => {
+			const settings = await next(project.settings)
+
 			//enforce that the fix exists on the lint-report
 			const usedFix = report.fixes.find((f) => f.title === fix.title)
 			if (!usedFix) throw new Error(`fix ${fix.title} not available on report "${report.body}"`)
@@ -139,7 +152,9 @@ export async function createLinter(
 			)
 			if (!bundle) throw new Error(`MessageBundle ${report.target.messageBundleId} not found`)
 
-			const rule = resolvedModules.messageBundleLintRules.find((rule) => rule.id === report.ruleId)
+			const rule = resolvedModules.messageBundleLintRules.find(
+				(rule: any) => rule.id === report.ruleId
+			)
 			if (!rule) throw new Error(`rule ${report.ruleId} not found`)
 			if (!rule.fix) throw new Error(`rule ${report.ruleId} does not have a fix function`)
 
@@ -209,6 +224,16 @@ function hash(url: string) {
 	)
 
 	return hash.toString(36)
+}
+
+async function next<T>(obs: Subscribable<T>): Promise<T> {
+	return new Promise((resolve) => {
+		obs.subscribe({
+			next(value) {
+				resolve(value)
+			},
+		})
+	})
 }
 
 export function makeLinterAvailableTo(ep: Comlink.Endpoint) {

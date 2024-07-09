@@ -173,12 +173,7 @@ export async function loadProject(args: {
 	})()
 
 	const lintFactory = args._lintFactory ?? createLintWorker
-
-	const linter = await lintFactory({
-		projectPath,
-		settings: projectSettings,
-		nodeishFs,
-	})
+	const linter = await lintFactory({ projectPath, nodeishFs })
 
 	// rxdb with memory storage configured
 	const database = await createRxDatabase<{
