@@ -1,16 +1,15 @@
-import { asyncIterableTransferHandler } from "./transfer/asyncIterable.js"
 import * as Comlink from "comlink"
+import { asyncIterableTransferHandler } from "./transfer/asyncIterable.js"
 import { watchOptionsTransferHandler } from "./transfer/watchOptions.js"
-import { adapter } from "comlink-node"
-import type { NodeishFilesystem } from "@lix-js/fs"
 import { nodeishStatsTransferHandler } from "./transfer/nodeishStats.js"
+import type { NodeishFilesystem } from "@lix-js/fs"
 
 Comlink.transferHandlers.set("asyncIterable", asyncIterableTransferHandler)
 Comlink.transferHandlers.set("watchOptions", watchOptionsTransferHandler)
 Comlink.transferHandlers.set("NodeishStats", nodeishStatsTransferHandler)
 
 export function makeFsAvailableTo(fs: NodeishFilesystem, ep: Comlink.Endpoint) {
-	Comlink.expose(fs, adapter(ep))
+	Comlink.expose(fs, ep)
 }
 
 type FileChangeInfo = { eventType: "rename" | "change"; filename: string | null }
