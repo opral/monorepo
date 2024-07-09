@@ -29,6 +29,7 @@
 		"@inlang/message-bundle-component": "workspace:*",
 		"@inlang/sdk": "workspace:*",
 		"@inlang/settings-component": "workspace:*",
+		"@inlang/env-variables": "workspace:*",
 		"@isomorphic-git/cors-proxy": "^2.7.1",
 		"@lit/react": "^1.0.5",
 		"@lix-js/client": "^2.2.0",

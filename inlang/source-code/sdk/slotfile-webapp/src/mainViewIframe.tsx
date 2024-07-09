@@ -6,24 +6,37 @@ import { MessageBundleList } from "./messageBundleListReact.js"
 import { type InlangProject2, MessageBundle, getFs, loadProject } from "../../dist/v2/index.js"
 import { SettingsView } from "./settingsView.js"
 import * as Comlink from "comlink"
+import { openRepository } from "@lix-js/client"
+import { publicEnv } from "@inlang/env-variables"
 
 export const isInIframe = window.self !== window.top
 const fs = getFs(Comlink.windowEndpoint(window.parent))
-const repo = {
-	nodeishFs: fs,
-	getFirstCommitHash: () => "dummy_first_hash",
-} as any
 
-export function MainViewIframe({ projectPath }: { projectPath: string }) {
+export function MainViewIframe({ projectPath, repoUrl }: { projectPath: string; repoUrl: string }) {
 	const [currentProject, setCurrentProject] = useState<InlangProject2 | undefined>(undefined)
 
 	useEffect(() => {
-		loadProject({
-			projectPath,
-			repo: repo,
-		}).then((project) => {
+		;(async () => {
+			const [host, owner, repository] = repoUrl.split("/")
+			const repo = await openRepository(
+				`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${host}/${owner}/${repository}`,
+				{
+					nodeishFs: fs as any, // TODO SDK2 check,
+					// branch,
+					// debugTime: true,
+					// for testing purposes. if commented out, will use whitelist to enable for certain repos
+					// experimentalFeatures: {
+					// 	lazyClone: true,
+					// 	lixCommit: true,
+					// }
+				}
+			)
+			const project = await loadProject({
+				projectPath,
+				repo: repo,
+			})
 			setCurrentProject(project)
-		})
+		})()
 	}, [])
 
 	const [currentView, setCurrentView] = useState<"overview" | "messageList" | "settings">(

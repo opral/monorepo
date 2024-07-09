@@ -202,6 +202,62 @@ export async function loadProject(args: {
 		watch: true,
 	})
 
+	// Watching for changes in current head and update the message states
+
+	const branch = await args.repo.getCurrentBranch()
+
+	const currentBranchCommitPath = ".git/refs/heads/" + branch?.toLowerCase()
+
+	let currentHeadCommit: string | undefined = undefined
+
+	const updateMessageHeadState = async (newHeadCommit: string) => {
+		if (currentHeadCommit !== newHeadCommit) {
+			const statusList = await args.repo.statusList({
+				filepaths: [messagesPath],
+			})
+			messageStorage._internal.updateSlotFileHeadStates(statusList as any, args.repo.readBlob)
+		}
+		currentHeadCommit = newHeadCommit
+	}
+
+	;(() => {
+		abortController = new AbortController()
+
+		// NOTE: watch will not throw an exception since we don't await it here.
+		const watcher = nodeishFs.watch(currentBranchCommitPath, {
+			signal: abortController.signal,
+			persistent: false,
+		})
+
+		;(async () => {
+
+			const currentHeadCommit = await args.repo.nodeishFs.readFile(
+				".git/refs/heads/" + branch?.toLowerCase(),
+				{ encoding: "utf-8" }
+			)
+			await updateMessageHeadState(currentHeadCommit)
+			try {
+				//eslint-disable-next-line @typescript-eslint/no-unused-vars
+				for await (const event of watcher) {
+					console.log("commit seem to have changed")
+					const newCommit = await args.repo.nodeishFs.readFile(
+						".git/refs/heads/" + branch?.toLowerCase(),
+						{ encoding: "utf-8" }
+					)
+					await updateMessageHeadState(newCommit)
+				}
+			} catch (err: any) {
+				if (err.name === "AbortError") return
+				// https://github.com/opral/monorepo/issues/1647
+				// the file does not exist (yet)
+				// this is not testable beacause the fs.watch api differs
+				// from node and lix. lenghty
+				else if (err.code === "ENOENT") return
+				throw err
+			}
+		})()
+	})()
+
 	let lintsRunning = false
 	let lintsPending = false
 
