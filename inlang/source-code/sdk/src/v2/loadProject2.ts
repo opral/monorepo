@@ -1,5 +1,10 @@
 import type { Repository } from "@lix-js/client"
-import { type ImportFunction, createImport } from "../resolve-modules/import.js"
+import {
+	type ImportFunction,
+	createCDNImportWithWriteCache,
+	createDiskImport,
+} from "./import/index.js"
+import { importSequence, createDebugImport } from "./import/utils.js"
 import { assertValidProjectPath } from "../validateProjectPath.js"
 import { normalizePath } from "@lix-js/fs"
 import { maybeAddModuleCache } from "../migrations/maybeAddModuleCache.js"
@@ -17,7 +22,7 @@ import {
 	type LintReport,
 	type LintResult,
 } from "./types/index.js"
-import { createDebugImport } from "./import-utils.js"
+
 import { createRxDatabase, type RxCollection } from "rxdb"
 import { getRxStorageMemory } from "rxdb/plugins/storage-memory"
 import { BehaviorSubject, combineLatest, from, switchMap, tap } from "rxjs"
@@ -30,7 +35,6 @@ import {
 import createSlotStorageWriter from "../persistence/slotfiles/createSlotWriter.js"
 
 import lintRule from "./dev-modules/lint-rule.js"
-import { importSequence } from "./import-utils.js"
 import makeOpralUppercase from "./dev-modules/opral-uppercase-lint-rule.js"
 import missingSelectorLintRule from "./dev-modules/missing-selector-lint-rule.js"
 import missingCatchallLintRule from "./dev-modules/missingCatchall.js"
@@ -94,7 +98,8 @@ export async function loadProject(args: {
 			"sdk-dev:missing-selector-lint-rule.js": missingSelectorLintRule,
 			"sdk-dev:missing-catchall-variant": missingCatchallLintRule,
 		}),
-		createImport(projectPath, nodeishFs)
+		createDiskImport(nodeishFs),
+		createCDNImportWithWriteCache(projectPath, nodeishFs)
 	)
 
 	const settings$ = projectSettings$.asObservable()
