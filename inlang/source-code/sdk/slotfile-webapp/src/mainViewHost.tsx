@@ -208,10 +208,16 @@ export function MainViewHost() {
 					</button>
 					<div className="container">
 						<div className="left">
-							<IFrame src={"/?inlangProjectPath=" + inlangProjectPath} withFs={fs} />
+							<IFrame
+								src={"/?inlangProjectPath=" + inlangProjectPath + "&repo=" + repoUrl}
+								withFs={fs}
+							/>
 						</div>
 						<div className="right">
-							<IFrame src={"/?inlangProjectPath=" + inlangProjectPath} withFs={fs} />
+							<IFrame
+								src={"/?inlangProjectPath=" + inlangProjectPath + "&repo=" + repoUrl}
+								withFs={fs}
+							/>
 						</div>
 					</div>
 				</>

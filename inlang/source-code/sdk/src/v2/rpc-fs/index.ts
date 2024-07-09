@@ -3,20 +3,30 @@ import * as Comlink from "comlink"
 import type { NodeishFilesystemSubset } from "../types/plugin.js"
 import { watchOptionsTransferHandler } from "./transfer/watchOptions.js"
 import { adapter } from "comlink-node"
+import type { NodeishFilesystem } from "@lix-js/fs"
 
 Comlink.transferHandlers.set("asyncIterable", asyncIterableTransferHandler)
 Comlink.transferHandlers.set("watchOptions", watchOptionsTransferHandler)
 
-export function makeFsAvailableTo(fs: NodeishFilesystemSubset, ep: Comlink.Endpoint) {
+export function makeFsAvailableTo(fs: NodeishFilesystem, ep: Comlink.Endpoint) {
 	Comlink.expose(fs, adapter(ep))
 }
 
 type FileChangeInfo = { eventType: "rename" | "change"; filename: string | null }
 
-export function getFs(ep: Comlink.Endpoint): NodeishFilesystemSubset {
-	const _fs = Comlink.wrap<NodeishFilesystemSubset>(ep)
+export function getFs(ep: Comlink.Endpoint): NodeishFilesystem {
+	const _fs = Comlink.wrap<NodeishFilesystem>(ep)
 
 	return {
+		_createPlaceholder: _fs._createPlaceholder,
+		_isPlaceholder: _fs._isPlaceholder,
+		readlink: _fs.readlink,
+		stat: _fs.stat,
+		lstat: _fs.lstat,
+		rm: _fs.rm,
+		rmdir: _fs.rmdir,
+		symlink: _fs.symlink,
+		unlink: _fs.unlink,
 		readdir: _fs.readdir,
 		readFile: _fs.readFile as any,
 		writeFile: _fs.writeFile,

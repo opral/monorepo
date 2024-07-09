@@ -244,7 +244,7 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 
 		if (!statesBefore) {
 			// Load new, yet unknown slot file to memory
-			
+
 			const result = {
 				upsertedSlotFileStates: {
 					slotFileName: slotFileName,
@@ -408,10 +408,13 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 	const loadSlotFileFromHead = async (
 		currentState: SlotFileStates<DocType>,
 		headBlobOid: string,
-		readBlob: (oid: string) => Promise<string>
+		readBlob: Awaited<ReturnType<typeof openRepository>>["readBlob"]
 	) => {
 		// TODO load the head state of the slot file
-		const jsonString = await readBlob(headBlobOid)
+		const blobResult = await readBlob({ oid: headBlobOid })
+
+		const decoder = new TextDecoder("utf-8")
+		const jsonString = decoder.decode(blobResult.blob)
 		const headRecordSlots = await parseSlotFile<DocType>(jsonString)
 
 		const headSlotFileState: SlotFile<DocType> = {
@@ -473,9 +476,8 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 	 */
 	const updateSlotFileHeadStates = async (
 		statusList: Awaited<ReturnType<Awaited<ReturnType<typeof openRepository>>["statusList"]>>,
-		readBlob: (oid: string) => Promise<string>
+		readBlob: Awaited<ReturnType<typeof openRepository>>["readBlob"]
 	) => {
-
 		// TODO lockfile
 		const loadHeadPromises: ReturnType<typeof loadSlotFileFromHead>[] = []
 
@@ -494,7 +496,9 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 				statusEntryDetails.headOid &&
 				currentState.headSlotfileState?.contentHash !== statusEntryDetails.headOid
 			) {
-				loadHeadPromises.push(loadSlotFileFromHead(currentState, statusEntryDetails.headOid, readBlob))
+				loadHeadPromises.push(
+					loadSlotFileFromHead(currentState, statusEntryDetails.headOid, readBlob)
+				)
 			}
 		}
 
@@ -670,7 +674,8 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 		changeCallback,
 		getSlotEntryById,
 		slotEntryStates,
-		updateSlotFileHeadStates
+		updateSlotEntryStates,
+		updateSlotFileHeadStates,
 	}
 
 	// start

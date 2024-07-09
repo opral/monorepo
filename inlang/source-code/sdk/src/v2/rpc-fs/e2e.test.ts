@@ -4,7 +4,7 @@ import { getFs } from "./index.js"
 import { createNodeishMemoryFs } from "@lix-js/fs"
 
 describe("rpc-fs", () => {
-	it("can read and write a file over rpc", async () => {
+	it("can read and write a file over rpc - utf-8 encoding ", async () => {
 		const fs = createNodeishMemoryFs()
 		const { port1, port2 } = new MessageChannel()
 
@@ -14,6 +14,34 @@ describe("rpc-fs", () => {
 		_fs.writeFile("/test.txt", "hello")
 		const content = await _fs.readFile("/test.txt", { encoding: "utf-8" })
 		expect(content).toBe("hello")
+	})
+
+	it("can read and write a file over rpc - binary encoding", async () => {
+		const fs = createNodeishMemoryFs()
+		const { port1, port2 } = new MessageChannel()
+
+		makeFsAvailableTo(fs, port1)
+		const _fs = getFs(port2)
+
+		_fs.writeFile("/test.txt", "hello")
+		const content = await _fs.readFile("/test.txt")
+		const decoder = new TextDecoder()
+		const stringResult = decoder.decode(content)
+		expect(stringResult).toBe("hello")
+	})
+
+	it("can read stats of non existing file", async () => {
+		const fs = createNodeishMemoryFs()
+		const { port1, port2 } = new MessageChannel()
+
+		makeFsAvailableTo(fs, port1)
+		const _fs = getFs(port2)
+
+		_fs.writeFile("/test.txt", "hello")
+		const content = await _fs.stat("/test.txt")
+
+		expect(content).toBe(true)
+		
 	})
 
 	it("can watch over rpc", async () => {
