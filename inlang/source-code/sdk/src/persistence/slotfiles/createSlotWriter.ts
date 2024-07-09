@@ -123,7 +123,7 @@ export default async function createSlotStorageWriter<DocType extends HasId>({
 		// TODO get lock - so we don't expect further dirty flags comming up
 		debug("saveChangesToWorkingCopy - reloadDirtySlotFiles")
 		// NOTE: For now we just laod all files again - we could optimize this by loading only the files that we actually write...
-		await slotFileReader._internal.loadSlotFilesFromFs(true)
+		await slotFileReader._internal.loadSlotFilesFromFs({forceReload: true})
 
 		const changedIds = new Set<string>()
 
@@ -490,7 +490,7 @@ export default async function createSlotStorageWriter<DocType extends HasId>({
 		}
 	}
 
-	const findDocumentsById = (docIds: string[] /*, withDeleted: boolean*/): SlotEntry<DocType>[] => {
+	const findByIds = (docIds: string[] /*, withDeleted: boolean*/): SlotEntry<DocType>[] => {
 		const matchingDocuments: SlotEntry<DocType>[] = []
 
 		for (const docId of docIds) {
@@ -512,7 +512,21 @@ export default async function createSlotStorageWriter<DocType extends HasId>({
 		_writerInternals: {
 			transientSlotEntries,
 		},
-		insert: async (document: DocType, saveToDisk = true) => {
+		/**
+		 * Inserts a document.
+		 *
+		 * @param {Object} options - The options object.
+		 * @param {DocType} options.document - The document to be inserted.
+		 * @param {boolean} [options.saveToDisk=true] - Whether to save the document to disk or keep it as transient until the next save - allows batchign
+		 * @returns {Promise<void>} A promise that resolves when the operation is complete.
+		 */
+		insert: async ({
+			document,
+			saveToDisk = true,
+		}: {
+			document: DocType
+			saveToDisk?: boolean
+		}) => {
 			const documentId = document[idProperty]
 
 			const existingSlotRecord = getSlotEntryById(documentId)
@@ -545,7 +559,13 @@ export default async function createSlotStorageWriter<DocType extends HasId>({
 				return saveChangesToDisk()
 			}
 		},
-		update: async (document: DocType, saveToDisk = true) => {
+		update: async ({
+			document,
+			saveToDisk = true,
+		}: {
+			document: DocType
+			saveToDisk?: boolean
+		}) => {
 			debug("UPDATE")
 
 			const documentId = document[idProperty]
@@ -604,7 +624,7 @@ export default async function createSlotStorageWriter<DocType extends HasId>({
 		save: () => {
 			return saveChangesToDisk()
 		},
-		findDocumentsById,
+		findByIds,
 		readAll: async (/*includeDeleted: boolean = false*/) => {
 			const objectIds: string[] = [
 				...transientSlotEntries.keys(),

@@ -1,5 +1,5 @@
 import { endpoint } from "comlink-node/worker"
-import { getFs } from "../client.js"
+import { getFs } from "../index.js"
 
 const fs = getFs(endpoint)
 

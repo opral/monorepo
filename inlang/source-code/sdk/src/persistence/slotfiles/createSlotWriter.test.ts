@@ -27,10 +27,13 @@ describe("Disconnected slot storage", () => {
 			id: "1",
 			content: "first document",
 		}
-		await slotStorage.insert(insertedDocument, false)
+		await slotStorage.insert({
+			document: insertedDocument,
+			saveToDisk: false,
+		})
 
 		expect(slotStorage._writerInternals.transientSlotEntries.size).eq(1)
-		const docs1 = await slotStorage.findDocumentsById([insertedDocument.id])
+		const docs1 = await slotStorage.findByIds([insertedDocument.id])
 		expect(docs1.length).eq(1)
 		// expect(Object.isFrozen(docs1[0])).eq(true, "Records returned by slotStorage should be frozen")
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- we check the length before
@@ -38,9 +41,9 @@ describe("Disconnected slot storage", () => {
 		const updateDocument = structuredClone(insertedDocument)
 		updateDocument.content = "updated"
 
-		await slotStorage.update(updateDocument, false)
+		await slotStorage.update({ document: updateDocument, saveToDisk: false })
 		expect(slotStorage._writerInternals.transientSlotEntries.size).eq(1)
-		const docs2 = await slotStorage.findDocumentsById([updateDocument.id])
+		const docs2 = await slotStorage.findByIds([updateDocument.id])
 		expect(docs2.length).eq(1)
 		expect(docs2[0]!.data.content).eq(updateDocument.content)
 	})
@@ -59,7 +62,7 @@ describe("Disconnected slot storage", () => {
 			content: "first document",
 		}
 		try {
-			await slotStorage.update(nonExistingRecord)
+			await slotStorage.update({ document: nonExistingRecord })
 		} catch (e) {
 			expect((e as Error).message).contain("does not exist")
 		}
@@ -80,13 +83,13 @@ describe("Disconnected slot storage", () => {
 			content: "first document",
 		}
 
-		await slotStorage.insert(insertedDocument, false)
+		await slotStorage.insert({ document: insertedDocument, saveToDisk: false })
 
 		expect(slotStorage._writerInternals.transientSlotEntries.size).eq(1)
 
 		await slotStorage.save()
 		expect(slotStorage._writerInternals.transientSlotEntries.size).eq(0)
-		const docs1 = await slotStorage.findDocumentsById([insertedDocument.id])
+		const docs1 = await slotStorage.findByIds([insertedDocument.id])
 		expect(docs1.length).eq(1)
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- we check the length before
 		expect(docs1[0]!.data.content).eq(insertedDocument.content)
@@ -114,13 +117,13 @@ describe("Disconnected slot storage", () => {
 			id: "1",
 			content: "first document",
 		}
-		await slotStorage1.insert(insertedDocument, false)
+		await slotStorage1.insert({ document: insertedDocument, saveToDisk: false })
 		expect(slotStorage1._writerInternals.transientSlotEntries.size).eq(1)
 		await slotStorage1.save()
 		expect(slotStorage1._writerInternals.transientSlotEntries.size).eq(0)
 
 		// force reload to avoid waiting for fs event
-		await slotStorage2.loadSlotFilesFromWorkingCopy(true)
+		await slotStorage2.loadSlotFilesFromWorkingCopy({ forceReload: true })
 
 		const currentDocumentsStorage1 = await slotStorage1.readAll()
 		const currentDocumentsStorage2 = await slotStorage2.readAll()
@@ -130,15 +133,15 @@ describe("Disconnected slot storage", () => {
 
 		const updateInSlot1 = structuredClone(insertedDocument)
 		updateInSlot1.content = "updated in slot1"
-		await slotStorage1.update(updateInSlot1, false)
+		await slotStorage1.update({ document: updateInSlot1, saveToDisk: false })
 
 		const updateInSlot2 = structuredClone(insertedDocument)
 		updateInSlot2.content = "updated in slot2"
-		await slotStorage2.update(updateInSlot2, false)
+		await slotStorage2.update({ document: updateInSlot2, saveToDisk: false })
 
 		await slotStorage1.save()
 		await slotStorage2.save()
-		const conflictingRecord = slotStorage2.findDocumentsById([insertedDocument.id])[0]
+		const conflictingRecord = slotStorage2.findByIds([insertedDocument.id])[0]
 
 		expect(conflictingRecord?.localConflict).not.eq(undefined)
 	}, 200000)
