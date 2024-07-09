@@ -1,5 +1,5 @@
 import { WorkerPrototype as Worker } from "comlink-node"
-import { makeFsAvailableTo } from "../host.js"
+import { makeFsAvailableTo } from "../index.js"
 import type { NodeishFilesystem } from "@lix-js/fs"
 
 export function createTestWorker(fs: NodeishFilesystem) {
