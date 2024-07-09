@@ -7,7 +7,7 @@ import * as runtime from "$paraglide/runtime.js"
 import { PrefixStrategy } from "../strategy"
 
 const reroute = createReroute<"en" | "de">(
-	PrefixStrategy(runtime.availableLanguageTags, runtime.sourceLanguageTag, {}, {})
+	PrefixStrategy(runtime.availableLanguageTags, runtime.sourceLanguageTag, {}, {}, "always")
 )
 
 describe("reroute", () => {

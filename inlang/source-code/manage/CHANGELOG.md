@@ -1,5 +1,11 @@
 # @inlang/manage
 
+## 0.4.3
+
+### Patch Changes
+
+- a377572: Update app server settings
+
 ## 0.4.2
 
 ### Patch Changes

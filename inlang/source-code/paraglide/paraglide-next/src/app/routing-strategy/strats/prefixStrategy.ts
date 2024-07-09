@@ -103,8 +103,10 @@ export function PrefixStrategy<T extends string>({
 		// get the prefix for this language
 		const prefix = resolvedPrefixes[locale] ?? locale
 
-		const pathWithoutLocale: `/${string}` = localisedPath.startsWith(`/${prefix}`)
-			? ((localisedPath.replace(`/${prefix}`, "") || "/") as `/${string}`)
+		const pathWithoutLocale: `/${string}` = localisedPath.startsWith(`/${prefix}/`)
+			? (localisedPath.replace(`/${prefix}`, "") as `/${string}`)
+			: localisedPath === `/${prefix}`
+			? "/"
 			: localisedPath
 
 		for (const [canonicalPathDefinition, translationsForPath] of Object.entries(
@@ -166,7 +168,10 @@ export function PrefixStrategy<T extends string>({
 			const pathWithoutBase = request.nextUrl.pathname
 
 			const entries = Object.entries(resolvedPrefixes) as [T, string][]
-			const entry = entries.find(([, prefix]) => pathWithoutBase.startsWith(`/${prefix}`))
+			const entry = entries.find(
+				([, prefix]) =>
+					pathWithoutBase.startsWith(`/${prefix}/`) || pathWithoutBase === `/${prefix}`
+			)
 			const detected = entry?.[0]
 
 			// If no prefix is detected and prefixDefault is "never" -> use default language
