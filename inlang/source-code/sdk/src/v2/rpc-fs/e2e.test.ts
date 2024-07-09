@@ -30,7 +30,7 @@ describe("rpc-fs", () => {
 		expect(stringResult).toBe("hello")
 	})
 
-	it("can read stats of non existing file", async () => {
+	it("can read stats of an existing file", async () => {
 		const fs = createNodeishMemoryFs()
 		const { port1, port2 } = new MessageChannel()
 
@@ -38,10 +38,8 @@ describe("rpc-fs", () => {
 		const _fs = getFs(port2)
 
 		_fs.writeFile("/test.txt", "hello")
-		const content = await _fs.stat("/test.txt")
-
-		expect(content).toBe(true)
-		
+		const stat = await _fs.stat("/test.txt")
+		expect(stat.isFile()).toBe(true)
 	})
 
 	it("can watch over rpc", async () => {
