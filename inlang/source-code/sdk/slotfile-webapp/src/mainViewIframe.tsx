@@ -21,6 +21,7 @@ export function MainViewIframe({ projectPath, repoUrl }: { projectPath: string; 
 			const repo = await openRepository(
 				`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${host}/${owner}/${repository}`,
 				{
+					
 					nodeishFs: fs as any, // TODO SDK2 check,
 					// branch,
 					// debugTime: true,
