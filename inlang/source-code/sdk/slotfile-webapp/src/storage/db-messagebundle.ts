@@ -5,15 +5,12 @@ import { createNewProject } from "@inlang/sdk"
 import http from "isomorphic-git/http/web"
 
 // NOTE: I use isomorphic git because i went crazy with cors :-/ was faster to spin up a iso proxy
-import git, { pull, add, commit, push, statusMatrix } from "isomorphic-git"
+// import git, { pull, add, commit, push, statusMatrix } from "isomorphic-git"
 import { defaultProjectSettings } from "../../../dist/v2/defaultProjectSettings.js"
-import type { NodeishFilesystem } from "@lix-js/fs"
+
+import type { Repository } from "@lix-js/client"
 
 addRxPlugin(RxDBQueryBuilderPlugin)
-
-// NOTE: All those properties are hardcoded for now - dont get crazy ;-) #POC
-const gittoken = "YOUR_GITHUB_TOKEN_HERE"
-const corsProxy = "http://localhost:9998" // cors Proxy expected to run - start it via pnpm run proxy
 
 const dir = "/"
 
@@ -34,31 +31,15 @@ const createAwaitable = () => {
 }
 
 export const openProject = async (
-	fs: NodeishFilesystem,
+	repo: Repository,
 	gittoken: string,
 	githubRepo: string,
 	projectPath: string
 ) => {
-	await git.clone({
-		fs: fs,
-		http,
-		dir: dir,
-		corsProxy: corsProxy,
-		url: githubRepo,
-		singleBranch: true,
-		depth: 1,
-	})
-
-	// we don't use any of the repo funciton for now
-	const repo = {
-		nodeishFs: fs,
-		getFirstCommitHash: () => "dummy_first_hash",
-	} as any
-
 	try {
 		await createNewProject({
 			projectPath,
-			repo: repo,
+			repo: repo as any,
 			projectSettings: defaultProjectSettings as any,
 		})
 	} catch (e) {
@@ -67,7 +48,7 @@ export const openProject = async (
 
 	const inlangProject = await loadProject({
 		projectPath,
-		repo: repo,
+		repo: repo as any,
 	})
 
 	const pullChangesAndReloadSlots = async () => {
@@ -80,79 +61,76 @@ export const openProject = async (
 				name: "Meeee",
 			},
 		})
+		await repo.pull({})
 		await inlangProject.internal.bundleStorage.loadSlotFilesFromWorkingCopy(true)
 		await inlangProject.internal.messageStorage.loadSlotFilesFromWorkingCopy(true)
 	}
 
 	const pushChangesAndReloadSlots = async () => {
-		await push({
-			fs,
-			http,
-			dir,
-			onAuth: () => {
-				return { username: gittoken }
-			},
-		})
-		await inlangProject.internal.bundleStorage.loadSlotFilesFromWorkingCopy(true)
-		await inlangProject.internal.messageStorage.loadSlotFilesFromWorkingCopy(true)
+		// TODO use lix repo instead
+		// await push({
+		// 	fs,
+		// 	http,
+		// 	dir,
+		// 	onAuth: () => {
+		// 		return { username: gittoken }
+		// 	},
+		// })
+		// await inlangProject.internal.bundleStorage.loadSlotFilesFromWorkingCopy(true)
+		// await inlangProject.internal.messageStorage.loadSlotFilesFromWorkingCopy(true)
 	}
 
-	let ongoingCommit = undefined as any
+	const ongoingCommit = undefined as any
 
 	const commitChanges = async () => {
-		if (ongoingCommit) {
-			await ongoingCommit.then(commitChanges)
-			return
-		}
-
-		const awaitable = createAwaitable()
-		ongoingCommit = awaitable[0]
-		const done = awaitable[1]
-
-		const FILE = 0,
-			WORKDIR = 2,
-			STAGE = 3
-		const filenames = (
-			await statusMatrix({
-				dir: dir,
-				fs: fs,
-			})
-		)
-			.filter((row) => row[WORKDIR] !== row[STAGE])
-			.map((row) => row[FILE])
-
-		if (filenames.length == 0) {
-			return
-		}
-
-		await add({
-			dir: dir,
-			fs: fs,
-			filepath: filenames,
-		})
-
-		try {
-			await commit({
-				dir: dir,
-				fs: fs,
-				message: "db commit",
-				author: {
-					email: "test@test.te",
-					name: "jojo",
-				},
-			})
-		} catch (e) {
-			// eslint-disable-next-line no-console
-			console.log(e)
-		}
-		ongoingCommit = undefined
-		done()
+		// TODO use lix repo instead
+		// if (ongoingCommit) {
+		// 	await ongoingCommit.then(commitChanges)
+		// 	return
+		// }
+		// const awaitable = createAwaitable()
+		// ongoingCommit = awaitable[0]
+		// const done = awaitable[1]
+		// const FILE = 0,
+		// 	WORKDIR = 2,
+		// 	STAGE = 3
+		// const filenames = (
+		// 	await statusMatrix({
+		// 		dir: dir,
+		// 		fs: fs,
+		// 	})
+		// )
+		// 	.filter((row) => row[WORKDIR] !== row[STAGE])
+		// 	.map((row) => row[FILE])
+		// if (filenames.length == 0) {
+		// 	return
+		// }
+		// await add({
+		// 	dir: dir,
+		// 	fs: fs,
+		// 	filepath: filenames,
+		// })
+		// try {
+		// 	await commit({
+		// 		dir: dir,
+		// 		fs: fs,
+		// 		message: "db commit",
+		// 		author: {
+		// 			email: "test@test.te",
+		// 			name: "jojo",
+		// 		},
+		// 	})
+		// } catch (e) {
+		// 	// eslint-disable-next-line no-console
+		// 	console.log(e)
+		// }
+		// ongoingCommit = undefined
+		// done()
 	}
 
 	return {
 		inlangProject,
 		projectPath,
-		fs,
 		pullChangesAndReloadSlots,
 		pushChangesAndReloadSlots,
 		commitChanges,

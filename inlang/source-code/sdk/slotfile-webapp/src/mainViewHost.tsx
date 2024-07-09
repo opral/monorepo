@@ -6,9 +6,10 @@ import { createMessage, createMessageBundle } from "../../src/v2/helper.js"
 import { MessageBundleList } from "./messageBundleListReact.js"
 import { MessageBundle, getFs } from "../../dist/v2/index.js"
 import { SettingsView } from "./settingsView.js"
+import { publicEnv } from "@inlang/env-variables"
 import { createNodeishMemoryFs } from "@lix-js/fs"
 import { IFrame } from "./iFrame.js"
-
+import { openRepository } from "@lix-js/client"
 const fs = createNodeishMemoryFs()
 
 export function MainViewHost() {
@@ -75,7 +76,28 @@ export function MainViewHost() {
 	const doLoadProject = async () => {
 		setLoadingProjectState("Loading")
 		try {
-			const loadedProject = await openProject(fs, githubToken, repoUrl, inlangProjectPath)
+			const [host, owner, repository] = repoUrl.split("/")
+
+			const newRepo = await openRepository(
+				`${publicEnv.PUBLIC_GIT_PROXY_BASE_URL}/git/${host}/${owner}/${repository}`,
+				{
+					nodeishFs: fs,
+					// branch,
+					// debugTime: true,
+					// for testing purposes. if commented out, will use whitelist to enable for certain repos
+					// experimentalFeatures: {
+					// 	lazyClone: true,
+					// 	lixCommit: true,
+					// }
+				}
+			)
+
+			if (window && !import.meta.env.PROD) {
+				// @ts-expect-error
+				window.repo = newRepo
+			}
+
+			const loadedProject = await openProject(newRepo, githubToken, repoUrl, inlangProjectPath)
 			setInlangProjectPathConfigs(inlangProjectPath)
 			setRepoConfigs(repoUrl)
 			setCurrentProject(loadedProject)

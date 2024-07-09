@@ -92,7 +92,7 @@ export class LintConfigArrayInput extends LitElement {
 	}
 
 	private _getConfigLevel(moduleId?: LintConfig["ruleId"]) {
-		return this.value?.find((config) => config.ruleId === moduleId)?.level || "warning"
+		return this.value?.find((config) => config.ruleId === moduleId)?.level || "error"
 	}
 
 	private _getDisplayName(displayName?: { en: string } | string) {
@@ -147,7 +147,7 @@ export class LintConfigArrayInput extends LitElement {
 										<sl-select
 											id=${module.id}
 											exportparts="listbox:option-wrapper"
-											value=${this._getConfigLevel(module.id as LintConfig["ruleId"]) || "warning"}
+											value=${this._getConfigLevel(module.id as LintConfig["ruleId"]) || "error"}
 											placeholder="warning"
 											class="select"
 											size="small"
