@@ -9,9 +9,11 @@ export const createMockBundleLintReport = (props: {
 }): LintReport => {
 	return {
 		ruleId: props.ruleId || "messageBundleLintRule.namespace.exampleRule",
-		messageBundleId: props.messageBundleId || "mock_bundle_human_id",
-		messageId: undefined,
-		variantId: undefined,
+		target: {
+			messageBundleId: props.messageBundleId || "mock_bundle_human_id",
+			messageId: undefined,
+			variantId: undefined,
+		},
 		fixes: [],
 		// locale: props.locale || "en",
 		level: props.level || "error",
@@ -29,9 +31,11 @@ export const createMockMessageLintReport = (props: {
 }): LintReport => {
 	return {
 		ruleId: props.ruleId || "messageBundleLintRule.namespace.exampleRule",
-		messageBundleId: props.messageBundleId || "mock_bundle_human_id",
-		messageId: props.messageId || "mock_message_id",
-		variantId: undefined,
+		target: {
+			messageBundleId: props.messageBundleId || "mock_bundle_human_id",
+			messageId: props.messageId || "mock_message_id",
+			variantId: undefined,
+		},
 		fixes: [
 			{
 				key: "nope",
@@ -55,9 +59,11 @@ export const createMockVariantLintReport = (props: {
 }): LintReport => {
 	return {
 		ruleId: props.ruleId || "messageBundleLintRule.namespace.exampleRule",
-		messageBundleId: props.messageBundleId || "mock_bundle_human_id",
-		messageId: props.messageId || "mock_message_id",
-		variantId: props.variantId || "mock_variant_id",
+		target: {
+			messageBundleId: props.messageBundleId || "mock_bundle_human_id",
+			messageId: props.messageId || "mock_message_id",
+			variantId: props.variantId || "mock_variant_id",
+		},
 		fixes: [
 			{
 				key: "nope",

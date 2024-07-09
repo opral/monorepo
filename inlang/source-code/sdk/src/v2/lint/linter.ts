@@ -26,7 +26,7 @@ import createSlotReader from "../../persistence/slotfiles/createSlotReader.js"
 import missingSelectorLintRule from "../dev-modules/missing-selector-lint-rule.js"
 import missingCatchallLintRule from "../dev-modules/missingCatchall.js"
 import { loadProject } from "../loadProject2.js"
-import type { Repository } from "@lix-js/client"
+import { type Repository } from "@lix-js/client"
 import { getFs } from "../rpc-fs/index.js"
 import type { Subscribable } from "rxjs"
 
@@ -46,10 +46,15 @@ export async function createLinter(projectPath: string, fsEp: Comlink.Endpoint) 
 
 	const repo = {
 		nodeishFs: fs,
-		getFirstCommitHash() {
+		getFirstCommitHash: async () => {
+			console.info("getFirstCommitHash")
 			return "dummy_first_hash"
 		},
-	} as unknown as Repository
+		getCurrentBranch: async () => {
+			confirm("getCurrentBranch")
+			return "main"
+		},
+	} as Repository
 
 	const project = await loadProject({
 		repo,

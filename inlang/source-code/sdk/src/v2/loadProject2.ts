@@ -205,7 +205,6 @@ export async function loadProject(args: {
 	// Watching for changes in current head and update the message states
 
 	const branch = await args.repo.getCurrentBranch()
-
 	const currentBranchCommitPath = ".git/refs/heads/" + branch?.toLowerCase()
 
 	let currentHeadCommit: string | undefined = undefined
@@ -215,7 +214,10 @@ export async function loadProject(args: {
 			const statusList = await args.repo.statusList({
 				filepaths: [messagesPath],
 			})
-			messageStorage._internal.updateSlotFileHeadStates(statusList as any, args.repo.readBlob)
+			messageStorage._internal.updateSlotFileHeadStates(
+				statusList as any,
+				(args.repo as any).readBlob
+			)
 		}
 		currentHeadCommit = newHeadCommit
 	}
@@ -230,7 +232,6 @@ export async function loadProject(args: {
 		})
 
 		;(async () => {
-
 			const currentHeadCommit = await args.repo.nodeishFs.readFile(
 				".git/refs/heads/" + branch?.toLowerCase(),
 				{ encoding: "utf-8" }

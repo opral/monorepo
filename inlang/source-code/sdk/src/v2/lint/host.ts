@@ -1,15 +1,15 @@
 import * as Comlink from "comlink"
 import type { createLinter as createLinterType } from "./linter.js"
-import type { NodeishFilesystemSubset } from "@inlang/plugin"
 import { WorkerPrototype as Worker, adapter } from "comlink-node"
 import type { ProjectSettings2 } from "../types/project-settings.js"
 import type { Fix, LintReport, LintResult } from "../types/lint.js"
 import type { MessageBundle } from "../types/message-bundle.js"
 import { makeFsAvailableTo } from "../rpc-fs/index.js"
+import type { NodeishFilesystem } from "@lix-js/fs"
 
 export type LinterFactory = (opts: {
 	projectPath: string
-	nodeishFs: NodeishFilesystemSubset
+	nodeishFs: NodeishFilesystem
 }) => Promise<{
 	terminate: () => void
 	lint: (settings: ProjectSettings2) => Promise<LintResult>
@@ -31,7 +31,7 @@ export const createLintWorker: LinterFactory = async ({ projectPath, nodeishFs }
 
 export async function connectToLinter(
 	projectPath: string,
-	fs: NodeishFilesystemSubset,
+	fs: NodeishFilesystem,
 	ep: Comlink.Endpoint
 ) {
 	const { port1, port2 } = new MessageChannel()

@@ -23,6 +23,7 @@ export async function createNewProject(args: {
 
 	await nodeishFs.mkdir(args.projectPath, { recursive: true })
 	await Promise.all([
+		nodeishFs.writeFile(`${args.projectPath}/project_id`, "12345"),
 		nodeishFs.writeFile(`${args.projectPath}/settings.json`, settingsText),
 		nodeishFs.writeFile(`${args.projectPath}/.gitignore`, "cache"),
 		nodeishFs.mkdir(`${args.projectPath}/cache/modules`, { recursive: true }),

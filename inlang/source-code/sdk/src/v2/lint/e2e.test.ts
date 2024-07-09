@@ -18,11 +18,9 @@ const settings: ProjectSettings2 = {
 describe("Lint Worker", () => {
 	it("lints successfully", async () => {
 		const fs = createNodeishMemoryFs()
-
 		const projectPath = "/project.inlang"
 
 		const repo = await openRepository("file://", { nodeishFs: fs })
-		repo.getFirstCommitHash = async () => "dummy_first_hash"
 
 		await createNewProject({ repo, projectPath, projectSettings: settings })
 		const project = await loadProject({
@@ -56,7 +54,7 @@ describe("Lint Worker", () => {
 		const { port1, port2 } = new MessageChannel()
 
 		makeLinterAvailableTo(port2)
-		const linter = await connectToLinter(projectPath, settings, fs, port1)
+		const linter = await connectToLinter(projectPath, fs, port1)
 		const result = await linter.lint(settings)
 		expect(bundleId in result).toBe(true)
 	})

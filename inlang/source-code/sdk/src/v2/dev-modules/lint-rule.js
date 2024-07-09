@@ -15,9 +15,7 @@ const lintRule = {
 			// no messages in any language -> delete
 			report({
 				body: `No languages are present`,
-				messageId: undefined,
-				variantId: undefined,
-				messageBundleId: messageBundle.id,
+				target: messageBundle,
 				fixes: [],
 			})
 			return
@@ -28,9 +26,7 @@ const lintRule = {
 			report({
 				// locale: missingLanguageTag,
 				body: `Missing language tag '${missingLanguageTag}'.`,
-				messageId: undefined,
-				variantId: undefined,
-				messageBundleId: messageBundle.id,
+				target: messageBundle,
 				fixes: [],
 			})
 		}
