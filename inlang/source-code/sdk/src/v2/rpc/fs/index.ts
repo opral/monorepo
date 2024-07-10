@@ -1,12 +1,6 @@
+import "../setup.js"
 import * as Comlink from "comlink"
-import { asyncIterableTransferHandler } from "./transfer/asyncIterable.js"
-import { watchOptionsTransferHandler } from "./transfer/watchOptions.js"
-import { nodeishStatsTransferHandler } from "./transfer/nodeishStats.js"
 import type { NodeishFilesystem } from "@lix-js/fs"
-
-Comlink.transferHandlers.set("asyncIterable", asyncIterableTransferHandler)
-Comlink.transferHandlers.set("watchOptions", watchOptionsTransferHandler)
-Comlink.transferHandlers.set("NodeishStats", nodeishStatsTransferHandler)
 
 export function makeFsAvailableTo(fs: NodeishFilesystem, ep: Comlink.Endpoint) {
 	Comlink.expose(fs, ep)
@@ -32,21 +26,7 @@ export function getFs(ep: Comlink.Endpoint): NodeishFilesystem {
 		writeFile: _fs.writeFile,
 		mkdir: _fs.mkdir,
 		watch: async function* (path, options): AsyncIterable<FileChangeInfo> {
-			const signal = options?.signal
-			if (signal) delete options.signal
-
-			const remoteAC = signal ? new AbortController() : undefined
-
-			if (signal) {
-				signal.onabort = () => {
-					remoteAC?.abort(signal.reason)
-				}
-			}
-
-			yield* await _fs.watch(path, {
-				...options,
-				signal: remoteAC?.signal,
-			})
+			yield* await _fs.watch(path, options)
 		},
 	}
 }
