@@ -173,7 +173,7 @@ export async function loadProject(args: {
 	})()
 
 	const lintFactory = args._lintFactory ?? createLintWorker
-	const linter = await lintFactory({ projectPath, nodeishFs })
+	const linter = await lintFactory({ projectPath, repo: args.repo })
 
 	// rxdb with memory storage configured
 	const database = await createRxDatabase<{
@@ -225,11 +225,6 @@ export async function loadProject(args: {
 		currentHeadCommit = newHeadCommit
 	}
 
-	const freshCommit = await args.repo.nodeishFs.readFile(
-		".git/refs/heads/" + branch?.toLowerCase(),
-		{ encoding: "utf-8" }
-	)
-	await updateMessageHeadState(freshCommit)
 	;(() => {
 		abortController = new AbortController()
 
@@ -243,7 +238,6 @@ export async function loadProject(args: {
 			try {
 				//eslint-disable-next-line @typescript-eslint/no-unused-vars
 				for await (const event of watcher) {
-					console.log("commit seem to have changed")
 					const newCommit = await args.repo.nodeishFs.readFile(
 						".git/refs/heads/" + branch?.toLowerCase(),
 						{ encoding: "utf-8" }

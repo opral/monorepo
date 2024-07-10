@@ -54,7 +54,7 @@ describe("Lint Worker", () => {
 		const { port1, port2 } = new MessageChannel()
 
 		makeLinterAvailableTo(port2)
-		const linter = await connectToLinter(projectPath, fs, port1)
+		const linter = await connectToLinter(projectPath, repo, port1)
 		const result = await linter.lint(settings)
 		expect(bundleId in result).toBe(true)
 	})

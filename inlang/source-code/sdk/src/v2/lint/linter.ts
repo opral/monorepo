@@ -1,12 +1,6 @@
 import { populateLevel } from "./populateLintLevel.js"
 import * as Comlink from "comlink"
-import type {
-	MessageBundle,
-	MessageBundleRecord,
-	MessageRecord,
-	Message,
-	Variant,
-} from "../types/message-bundle.js"
+import type { MessageBundle, Message, Variant } from "../types/message-bundle.js"
 import type { ProjectSettings2 } from "../types/project-settings.js"
 import {
 	MessageBundleLintRule,
@@ -21,17 +15,14 @@ import { createCDNImportWithReadOnlyCache, createDiskImport } from "../import/in
 
 import lintRule from "../dev-modules/lint-rule.js"
 import makeOpralUppercase from "../dev-modules/opral-uppercase-lint-rule.js"
-import { combineToBundles } from "../createMessageBundleSlotAdapter.js"
-import createSlotReader from "../../persistence/slotfiles/createSlotReader.js"
 import missingSelectorLintRule from "../dev-modules/missing-selector-lint-rule.js"
 import missingCatchallLintRule from "../dev-modules/missingCatchall.js"
 import { loadProject } from "../loadProject2.js"
-import { type Repository } from "@lix-js/client"
-import { getFs } from "../rpc-fs/index.js"
+import { connectToRepo } from "../rpc/repo/index.js"
 import type { Subscribable } from "rxjs"
 
-export async function createLinter(projectPath: string, fsEp: Comlink.Endpoint) {
-	const fs = getFs(fsEp)
+export async function createLinter(projectPath: string, repoEp: Comlink.Endpoint) {
+	const repo = connectToRepo(repoEp)
 
 	const _import = importSequence(
 		createDebugImport({
@@ -40,21 +31,9 @@ export async function createLinter(projectPath: string, fsEp: Comlink.Endpoint) 
 			"sdk-dev:missing-selector-lint-rule.js": missingSelectorLintRule,
 			"sdk-dev:missing-catchall-variant": missingCatchallLintRule,
 		}),
-		createDiskImport({ readFile: fs.readFile }),
-		createCDNImportWithReadOnlyCache(projectPath, fs)
+		createDiskImport({ readFile: repo.nodeishFs.readFile }),
+		createCDNImportWithReadOnlyCache(projectPath, repo.nodeishFs)
 	)
-
-	const repo = {
-		nodeishFs: fs,
-		getFirstCommitHash: async () => {
-			console.info("getFirstCommitHash")
-			return "dummy_first_hash"
-		},
-		getCurrentBranch: async () => {
-			confirm("getCurrentBranch")
-			return "main"
-		},
-	} as Repository
 
 	const project = await loadProject({
 		repo,
@@ -70,30 +49,13 @@ export async function createLinter(projectPath: string, fsEp: Comlink.Endpoint) 
 	const resolvedModules = {
 		messageBundleLintRules: await next(project.installed.lintRules),
 	} as any
-
 	console.info("resolvedModules", resolvedModules)
 
 	async function getMessageBundles() {
-		// get the affected message-bundle
-		const messageBundlesPath = projectPath + "/messagebundles/"
-		const messagesPath = projectPath + "/messages/"
-
-		const bundleStorage = await createSlotReader<MessageBundleRecord>({
-			fs,
-			path: messageBundlesPath,
-			watch: false,
-		})
-
-		const messageStorage = await createSlotReader<MessageRecord>({
-			fs,
-			path: messagesPath,
-			watch: false,
-		})
-
-		const bundles = await bundleStorage.readAll()
-		const messages = await messageStorage.readAll()
-		const messageBundles = combineToBundles(bundles, messages)
-		return messageBundles
+		const bundles = (await project.messageBundleCollection.find().exec()).map((bundle) =>
+			bundle.toMutableJSON()
+		)
+		return bundles
 	}
 
 	return Comlink.proxy({
