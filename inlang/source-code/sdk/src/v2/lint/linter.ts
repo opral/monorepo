@@ -10,13 +10,12 @@ import {
 	type LintResult,
 	type MessageBundleLintData,
 } from "../types/lint.js"
-import { createDebugImport, importSequence } from "../import/utils.js"
-import { createCDNImportWithReadOnlyCache, createDiskImport } from "../import/index.js"
-
 import lintRule from "../dev-modules/lint-rule.js"
 import makeOpralUppercase from "../dev-modules/opral-uppercase-lint-rule.js"
 import missingSelectorLintRule from "../dev-modules/missing-selector-lint-rule.js"
 import missingCatchallLintRule from "../dev-modules/missingCatchall.js"
+import { createDebugImport, importSequence } from "../import/utils.js"
+import { createCDNImportWithReadOnlyCache, createDiskImport } from "../import/index.js"
 import { loadProject } from "../loadProject2.js"
 import { connectToRepo } from "../rpc/repo/index.js"
 import type { Subscribable } from "rxjs"
@@ -49,18 +48,13 @@ export async function createLinter(projectPath: string, repoEp: Comlink.Endpoint
 	const resolvedModules = {
 		messageBundleLintRules: await next(project.installed.lintRules),
 	} as any
-	console.info("resolvedModules", resolvedModules)
-
-	async function getMessageBundles() {
-		const bundles = (await project.messageBundleCollection.find().exec()).map((bundle) =>
-			bundle.toMutableJSON()
-		)
-		return bundles
-	}
 
 	return Comlink.proxy({
 		lint: async (settings: ProjectSettings2): Promise<LintResult> => {
-			const messageBundles = await getMessageBundles()
+			const messageBundles = (await project.messageBundleCollection.find().exec()).map((bundle) =>
+				bundle.toMutableJSON()
+			)
+
 			const reportsById: {
 				[bundleId: string]: LintReport[]
 			} = {}
@@ -112,12 +106,16 @@ export async function createLinter(projectPath: string, repoEp: Comlink.Endpoint
 			const usedFix = report.fixes.find((f) => f.title === fix.title)
 			if (!usedFix) throw new Error(`fix ${fix.title} not available on report "${report.body}"`)
 
-			// find the message-bundle this lint-report belongs to
-			const messageBundles = await getMessageBundles()
-			const bundle = [...messageBundles.values()].find(
-				(bundle) => bundle.id === report.target.messageBundleId
-			)
-			if (!bundle) throw new Error(`MessageBundle ${report.target.messageBundleId} not found`)
+			const bundleDoc = await project.messageBundleCollection
+				.findOne({
+					selector: {
+						id: report.target.messageBundleId,
+					},
+				})
+				.exec()
+
+			if (!bundleDoc) throw new Error(`MessageBundle ${report.target.messageBundleId} not found`)
+			const bundle = bundleDoc.toMutableJSON()
 
 			const rule = resolvedModules.messageBundleLintRules.find(
 				(rule: any) => rule.id === report.ruleId
