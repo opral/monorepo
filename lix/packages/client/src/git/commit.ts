@@ -179,7 +179,7 @@ export async function doCommit({
 
 			if (!stagingState && refState) {
 				// placeholders are not in the index - we need to add the proper state entry to the commit to prevent deletion
-				if (refStateType === "tree" || (fs._isPlaceholder && fs._isPlaceholder(filepath))) {
+				if (refStateType === "tree" || (fs._isPlaceholder && await fs._isPlaceholder(filepath))) {
 					fileStates[fileDir]?.push({
 						mode: (await refState.mode()).toString(8),
 						path: getBasename(filepath),

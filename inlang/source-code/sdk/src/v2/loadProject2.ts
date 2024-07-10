@@ -204,7 +204,8 @@ export async function loadProject(args: {
 
 	// Watching for changes in current head and update the message states
 
-	const branch = await args.repo.getCurrentBranch()
+	const branch = "main" // await args.repo.getCurrentBranch()
+
 	const currentBranchCommitPath = ".git/refs/heads/" + branch?.toLowerCase()
 
 	let currentHeadCommit: string | undefined = undefined
@@ -212,7 +213,9 @@ export async function loadProject(args: {
 	const updateMessageHeadState = async (newHeadCommit: string) => {
 		if (currentHeadCommit !== newHeadCommit) {
 			const statusList = await args.repo.statusList({
-				filepaths: [messagesPath],
+				filter: (filePath) => {
+					return ("." + messagesPath).startsWith(filePath)
+				},
 			})
 			messageStorage._internal.updateSlotFileHeadStates(
 				statusList as any,
@@ -222,6 +225,11 @@ export async function loadProject(args: {
 		currentHeadCommit = newHeadCommit
 	}
 
+	const freshCommit = await args.repo.nodeishFs.readFile(
+		".git/refs/heads/" + branch?.toLowerCase(),
+		{ encoding: "utf-8" }
+	)
+	await updateMessageHeadState(freshCommit)
 	;(() => {
 		abortController = new AbortController()
 
@@ -232,11 +240,6 @@ export async function loadProject(args: {
 		})
 
 		;(async () => {
-			const currentHeadCommit = await args.repo.nodeishFs.readFile(
-				".git/refs/heads/" + branch?.toLowerCase(),
-				{ encoding: "utf-8" }
-			)
-			await updateMessageHeadState(currentHeadCommit)
 			try {
 				//eslint-disable-next-line @typescript-eslint/no-unused-vars
 				for await (const event of watcher) {
