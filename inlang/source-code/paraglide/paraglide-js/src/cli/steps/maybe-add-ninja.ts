@@ -14,26 +14,27 @@ export const maybeAddNinja: CliStep<
 	},
 	unknown
 > = async (ctx) => {
-	const response = await prompt(
-		"Do you want to add the 🥷 Ninja Github Action for linting translations in CI?" +
-			"\n\n" +
-			"https://inlang.com/m/3gk8n4n4/app-inlang-ninjaI18nAction",
-		{
-			type: "confirm",
-			initial: true,
-		}
-	)
+	ctx.logger.box(await Ninja.shouldRecommend({ fs: ctx.repo.nodeishFs }))
+	if (await Ninja.shouldRecommend({ fs: ctx.repo.nodeishFs })) {
+		const response = await prompt(
+			"Do you want to add the 🥷 Ninja Github Action for linting translations in CI?" +
+				"\n\n" +
+				"https://inlang.com/m/3gk8n4n4/app-inlang-ninjaI18nAction",
+			{
+				type: "confirm",
+				initial: true,
+			}
+		)
 
-	if (response !== true) return ctx
+		if (response !== true) return ctx
 
-	try {
-		if (!(await Ninja.shouldRecommend({ fs: ctx.repo.nodeishFs }))) {
+		try {
 			await Ninja.add({ fs: ctx.repo.nodeishFs })
 			telemetry.capture({ event: "PARAGLIDE JS init added Ninja" })
 			ctx.logger.success("Added the 🥷 Ninja Github Action for linting translations")
+		} catch (error) {
+			ctx.logger.error("Failed to add the 🥷 Ninja Github Action. Please open an issue")
 		}
-	} catch (error) {
-		ctx.logger.error("Failed to add the 🥷 Ninja Github Action. Please open an issue")
 	}
 
 	return ctx
