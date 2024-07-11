@@ -14,7 +14,6 @@ export const maybeAddNinja: CliStep<
 	},
 	unknown
 > = async (ctx) => {
-	ctx.logger.box(await Ninja.shouldRecommend({ fs: ctx.repo.nodeishFs }))
 	if (await Ninja.shouldRecommend({ fs: ctx.repo.nodeishFs })) {
 		const response = await prompt(
 			"Do you want to add the 🥷 Ninja Github Action for linting translations in CI?" +
