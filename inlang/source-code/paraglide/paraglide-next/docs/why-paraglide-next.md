@@ -14,7 +14,7 @@ Messages are fully typesafe, even with parameters, and share the same API both o
 
 Paraglide-Next offers Localised routing with translated pathnames, without requiring a `[locale]` parameter in your routes.	
 
-[-> Get started here](https://inlang.com/m/osslbuzt/paraglide-next-i18n/get-started)
+[➡ Get started here](https://inlang.com/m/osslbuzt/paraglide-next-i18n/get-started)
 
 # People Love It
 
