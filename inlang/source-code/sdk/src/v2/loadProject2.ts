@@ -131,6 +131,8 @@ export async function loadProject(args: {
 							// default to warning, see https://github.com/opral/monorepo/issues/1254
 							level: "warning", // TODO SDK2 settings.messageLintRuleLevels?.[rule.id] ?? "warning",
 							settingsSchema: rule.settingsSchema,
+							run: rule.run,
+							fix: rule.fix,
 						} satisfies InstalledLintRule)
 				)
 				return from([rules])

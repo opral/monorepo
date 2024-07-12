@@ -11,7 +11,7 @@ import type { MessageBundle } from "../types/message-bundle.js"
 const settings: ProjectSettings2 = {
 	baseLocale: "en",
 	locales: ["en", "de"],
-	modules: [],
+	modules: ["sdk-dev:opral-uppercase-lint.js"],
 	lintConfig: [],
 }
 
@@ -43,7 +43,13 @@ describe("Lint Worker", () => {
 					locale: "en",
 					declarations: [],
 					selectors: [],
-					variants: [],
+					variants: [
+						{
+							id: "dummy_elephant_en_1",
+							match: [],
+							pattern: [{ type: "text", value: "Opral" }],
+						},
+					],
 				},
 			],
 			alias: {},
@@ -57,6 +63,7 @@ describe("Lint Worker", () => {
 		const linter = await connectToLinter(projectPath, repo, port1)
 		const result = await linter.lint(settings)
 		expect(bundleId in result).toBe(true)
+		expect(result[bundleId]?.reports).toHaveLength(1)
 	})
 })
 
