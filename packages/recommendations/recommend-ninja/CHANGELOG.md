@@ -1,5 +1,11 @@
 # @inlang/recommend-ninja
 
+## 0.1.1
+
+### Patch Changes
+
+- 59c8b11: Fix Ninja recommendation and adoption if working directory is not the repo root
+
 ## 0.1.0
 
 ### Minor Changes
