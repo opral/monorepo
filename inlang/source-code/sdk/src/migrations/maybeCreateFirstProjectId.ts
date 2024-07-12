@@ -30,6 +30,8 @@ export async function maybeCreateFirstProjectId(args: {
 						console.error("Failed to write project_id", error)
 					})
 			}
+		} else {
+			throw error
 		}
 	}
 }

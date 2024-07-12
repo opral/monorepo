@@ -1,5 +1,16 @@
 # @inlang/paraglide-next
 
+## 0.5.1
+
+### Patch Changes
+
+- 7dfecf1: fix issue where path-segments that start with a language tag confused the router.
+
+  Eg: `/entropy` would match the language `en` & be resolved to `/tropy`
+
+- Updated dependencies [14d80b3]
+  - @inlang/paraglide-js@1.11.1
+
 ## 0.5.0
 
 ### Minor Changes

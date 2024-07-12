@@ -51,11 +51,7 @@ if (isProduction) {
 
 // used by sdk load test
 app.get("/ping", (_, response) => {
-	response.send(
-		`http://localhost:${process.env.PORT ?? 3000} ${
-			process.env.MOCK_TRANSLATE ? "MOCK_TRANSLATE" : ""
-		}\n`
-	)
+	response.send(`http://localhost:3000 ${process.env.MOCK_TRANSLATE ? "MOCK_TRANSLATE" : ""}\n`)
 })
 
 const serializedMarketplaceManifest = JSON.stringify(MarketplaceManifest)
@@ -98,7 +94,7 @@ app.use(
 
 // ----------------- START SERVER -----------------
 
-const port = process.env.PORT ?? 3000
+const port = 3000
 app.listen(port)
 console.info(`Server running at http://localhost:${port}/`)
 

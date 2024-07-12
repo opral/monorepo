@@ -5,7 +5,7 @@ const lintRule = {
 	id: "messageBundleLintRule.inlangdev.missingLanguages",
 	displayName: "Missing Languages",
 	description: "Detects missing languages",
-	run: ({ settings, report, messageBundle }) => {
+	run: ({ settings, report, node: messageBundle }) => {
 		const expectedLanguageTags = new Set(settings.locales)
 		const presentLanguages = new Set(
 			messageBundle.messages.filter((msg) => msg.variants.length > 0).map((msg) => msg.locale)
@@ -15,9 +15,7 @@ const lintRule = {
 			// no messages in any language -> delete
 			report({
 				body: `No languages are present`,
-				messageId: undefined,
-				variantId: undefined,
-				messageBundleId: messageBundle.id,
+				target: messageBundle,
 				fixes: [],
 			})
 			return
@@ -28,9 +26,7 @@ const lintRule = {
 			report({
 				// locale: missingLanguageTag,
 				body: `Missing language tag '${missingLanguageTag}'.`,
-				messageId: undefined,
-				variantId: undefined,
-				messageBundleId: messageBundle.id,
+				target: messageBundle,
 				fixes: [],
 			})
 		}

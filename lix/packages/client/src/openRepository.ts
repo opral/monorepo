@@ -30,6 +30,7 @@ import { lixFs } from "./lixFs.js"
 
 // types
 import type { NodeishFilesystem } from "@lix-js/fs"
+import { readBlob } from "./git/readBlob.js"
 
 export type { RepoContext } from "./repoContext.js"
 export type { RepoState } from "./repoState.js"
@@ -94,6 +95,7 @@ export async function openRepository(
 		mergeUpstream: mergeUpstream.bind(undefined, ctx),
 		push: push.bind(undefined, ctx),
 		pull: pull.bind(undefined, ctx, state),
+		readBlob: readBlob.bind(undefined, ctx),
 
 		...(ctx.experimentalFeatures.lixFs ? lixFs(state.nodeishFs) : {}),
 

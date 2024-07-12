@@ -126,7 +126,9 @@ export async function repoState(
 
 		// FIXME: this has to be part of the checkout it self to prevent race condition!!
 		const oids: string[] = []
-		const placeholders: string[] = allBatchFiles.filter((entry) => rawFs._isPlaceholder?.(entry))
+		const placeholders = await Promise.all(
+			allBatchFiles.filter((entry) => rawFs._isPlaceholder?.(entry))
+		)
 		for (const placeholder of placeholders) {
 			const stats = await rawFs.stat(placeholder)
 

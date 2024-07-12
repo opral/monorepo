@@ -5,7 +5,6 @@ import type {
 	InstalledPlugin,
 	LintReport,
 	LintResult,
-	Message,
 	MessageBundle,
 	MessageBundleRecord,
 	MessageRecord,

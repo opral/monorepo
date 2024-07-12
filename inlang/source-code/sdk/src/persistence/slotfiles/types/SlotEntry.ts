@@ -7,6 +7,11 @@ export type SlotEntry<DocType extends HasId> = {
 	hash: string
 	// a normalized object
 	data: DocType
+	gitState: 'commited' | 'uncommited',
+	headState?: {
+		data: DocType
+		hash: string
+	}
 	localConflict?: {
 		data: DocType
 		hash: string

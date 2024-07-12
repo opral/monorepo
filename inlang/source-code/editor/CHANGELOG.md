@@ -1,5 +1,11 @@
 # @inlang/editor
 
+## 0.1.8
+
+### Patch Changes
+
+- a377572: Update app server settings
+
 ## 0.1.7
 
 ### Patch Changes

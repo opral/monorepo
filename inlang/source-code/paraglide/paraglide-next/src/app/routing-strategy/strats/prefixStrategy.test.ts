@@ -47,6 +47,10 @@ describe("getCanonicalPath", () => {
 		expect(getCanonicalPath("/en/translated/1", "en")).toBe("/canonical-translated/1")
 		expect(getCanonicalPath("/de-CH/uebersetzt/1", "de-CH")).toBe("/canonical-translated/1")
 	})
+
+	it("does not get confused by a path that starts with a language tag", () => {
+		expect(getCanonicalPath("/de-something-else", "de")).toBe("/de-something-else")
+	})
 })
 
 describe("getLocalisedPath", () => {

@@ -6,7 +6,7 @@ const missingSelectorLintRule: MessageBundleLintRule = {
 	displayName: "Missing Selector",
 	description: "Detects if a selector is not used in a language",
 
-	run: ({ report, messageBundle, settings }) => {
+	run: ({ report, node: messageBundle, settings }) => {
 		const sourceMessage = messageBundle.messages.find(
 			(message) => message.locale === settings.baseLocale
 		)
@@ -33,13 +33,9 @@ const missingSelectorLintRule: MessageBundleLintRule = {
 			report({
 				// locale: message.locale,
 				body: `Missing selector(s): ${[...missing].join(", ")}`,
-				messageId: undefined,
-				variantId: undefined,
-				messageBundleId: messageBundle.id,
+				target: messageBundle,
 				fixes: [],
 			})
-
-			// if there are missing selectors - report them
 		}
 	},
 }

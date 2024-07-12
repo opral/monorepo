@@ -37,6 +37,6 @@ if (isProduction) {
 
 app.use(router)
 
-const port = process.env.PORT ?? 4004
+const port = 4004
 app.listen(port)
 console.info(`Server listening at http://localhost:${port}/`)

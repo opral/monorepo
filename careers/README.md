@@ -1,3 +1,3 @@
-Jobs at inlang.
+Jobs at Opral (inlang & lix).
 
-write `hello@inlang.com` to apply
+Write `hello@opral.com` to apply.  

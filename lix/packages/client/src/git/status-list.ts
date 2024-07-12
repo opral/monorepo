@@ -185,7 +185,7 @@ export async function _statusList({
 					return undefined
 				}
 
-				if (fs._isPlaceholder && fs._isPlaceholder(filepath)) {
+				if (fs._isPlaceholder && (await fs._isPlaceholder(filepath))) {
 					if (includeStatus.includes("unmodified") || filepaths.includes(filepath)) {
 						const headType = head && (await head.type())
 						if (headType !== "blob") {

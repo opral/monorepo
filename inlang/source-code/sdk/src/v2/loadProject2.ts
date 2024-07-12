@@ -1,5 +1,10 @@
 import type { Repository } from "@lix-js/client"
-import { type ImportFunction, createImport } from "../resolve-modules/import.js"
+import {
+	type ImportFunction,
+	createCDNImportWithWriteCache,
+	createDiskImport,
+} from "./import/index.js"
+import { importSequence, createDebugImport } from "./import/utils.js"
 import { assertValidProjectPath } from "../validateProjectPath.js"
 import { normalizePath } from "@lix-js/fs"
 import { maybeAddModuleCache } from "../migrations/maybeAddModuleCache.js"
@@ -16,23 +21,13 @@ import {
 	type InstalledLintRule,
 	type LintReport,
 	type LintResult,
-	type Message,
 } from "./types/index.js"
-import { createDebugImport } from "./import-utils.js"
 
-import {
-	createRxDatabase,
-	deepEqual,
-	stripAttachmentsDataFromDocument,
-	type RxCollection,
-	type RxConflictHandler,
-	type RxConflictHandlerInput,
-	type RxConflictHandlerOutput,
-} from "rxdb"
+import { createRxDatabase, type RxCollection } from "rxdb"
 import { getRxStorageMemory } from "rxdb/plugins/storage-memory"
 import { BehaviorSubject, combineLatest, from, switchMap, tap } from "rxjs"
 import { resolveModules } from "./resolveModules2.js"
-import { createLintWorker } from "./lint/host.js"
+import { createLintWorker, type LinterFactory } from "./lint/host.js"
 import {
 	createMessageBundleSlotAdapter,
 	startReplication,
@@ -40,14 +35,11 @@ import {
 import createSlotStorageWriter from "../persistence/slotfiles/createSlotWriter.js"
 
 import lintRule from "./dev-modules/lint-rule.js"
-import { importSequence } from "./import-utils.js"
 import makeOpralUppercase from "./dev-modules/opral-uppercase-lint-rule.js"
 import missingSelectorLintRule from "./dev-modules/missing-selector-lint-rule.js"
 import missingCatchallLintRule from "./dev-modules/missingCatchall.js"
 
 type ProjectState = "initializing" | "resolvingModules" | "loaded"
-
-const isInIframe = window.self !== window.top
 
 /**
  *
@@ -69,6 +61,7 @@ export async function loadProject(args: {
 	repo: Repository
 	appId?: string
 	_import?: ImportFunction
+	_lintFactory?: LinterFactory
 }): Promise<InlangProject2> {
 	// TODO SDK2 check if we need to use the new normalize path here
 	const projectPath = normalizePath(args.projectPath)
@@ -88,17 +81,12 @@ export async function loadProject(args: {
 		nodeishFs: args.repo.nodeishFs,
 	})
 
-	if (!isInIframe) {
-		await maybeAddModuleCache({ projectPath, repo: args.repo })
-		await maybeCreateFirstProjectId({ projectPath, repo: args.repo })
-	}
+	await maybeAddModuleCache({ projectPath, repo: args.repo })
+	await maybeCreateFirstProjectId({ projectPath, repo: args.repo })
 
 	// no need to catch since we created the project ID with "maybeCreateFirstProjectId" earlier
-	console.log("Reading Project path: ", projectPath)
 	const projectId = await args.repo.nodeishFs.readFile(projectIdPath, { encoding: "utf-8" })
-	console.log("Project ID: ", projectId)
 	const projectSettings = await loadSettings({ settingsFilePath, nodeishFs })
-
 
 	const projectSettings$ = new BehaviorSubject(projectSettings)
 	const lifecycle$ = new BehaviorSubject<ProjectState>("initializing")
@@ -110,7 +98,8 @@ export async function loadProject(args: {
 			"sdk-dev:missing-selector-lint-rule.js": missingSelectorLintRule,
 			"sdk-dev:missing-catchall-variant": missingCatchallLintRule,
 		}),
-		createImport(projectPath, nodeishFs)
+		createDiskImport(nodeishFs),
+		createCDNImportWithWriteCache(projectPath, nodeishFs)
 	)
 
 	const settings$ = projectSettings$.asObservable()
@@ -142,6 +131,8 @@ export async function loadProject(args: {
 							// default to warning, see https://github.com/opral/monorepo/issues/1254
 							level: "warning", // TODO SDK2 settings.messageLintRuleLevels?.[rule.id] ?? "warning",
 							settingsSchema: rule.settingsSchema,
+							run: rule.run,
+							fix: rule.fix,
 						} satisfies InstalledLintRule)
 				)
 				return from([rules])
@@ -183,7 +174,8 @@ export async function loadProject(args: {
 		})()
 	})()
 
-	const linter = await createLintWorker(projectPath, projectSettings, nodeishFs)
+	const lintFactory = args._lintFactory ?? createLintWorker
+	const linter = await lintFactory({ projectPath, repo: args.repo })
 
 	// rxdb with memory storage configured
 	const database = await createRxDatabase<{
@@ -211,6 +203,60 @@ export async function loadProject(args: {
 		path: messagesPath,
 		watch: true,
 	})
+
+	// Watching for changes in current head and update the message states
+
+	const branch = "main" // await args.repo.getCurrentBranch()
+
+	const currentBranchCommitPath = ".git/refs/heads/" + branch?.toLowerCase()
+
+	let currentHeadCommit: string | undefined = undefined
+
+	const updateMessageHeadState = async (newHeadCommit: string) => {
+		if (currentHeadCommit !== newHeadCommit) {
+			const statusList = await args.repo.statusList({
+				filter: (filePath) => {
+					return ("." + messagesPath).startsWith(filePath)
+				},
+			})
+			messageStorage._internal.updateSlotFileHeadStates(
+				statusList as any,
+				(args.repo as any).readBlob
+			)
+		}
+		currentHeadCommit = newHeadCommit
+	}
+
+	;(() => {
+		abortController = new AbortController()
+
+		// NOTE: watch will not throw an exception since we don't await it here.
+		const watcher = nodeishFs.watch(currentBranchCommitPath, {
+			signal: abortController.signal,
+			persistent: false,
+		})
+
+		;(async () => {
+			try {
+				//eslint-disable-next-line @typescript-eslint/no-unused-vars
+				for await (const event of watcher) {
+					const newCommit = await args.repo.nodeishFs.readFile(
+						".git/refs/heads/" + branch?.toLowerCase(),
+						{ encoding: "utf-8" }
+					)
+					await updateMessageHeadState(newCommit)
+				}
+			} catch (err: any) {
+				if (err.name === "AbortError") return
+				// https://github.com/opral/monorepo/issues/1647
+				// the file does not exist (yet)
+				// this is not testable beacause the fs.watch api differs
+				// from node and lix. lenghty
+				else if (err.code === "ENOENT") return
+				throw err
+			}
+		})()
+	})()
 
 	let lintsRunning = false
 	let lintsPending = false
@@ -259,7 +305,7 @@ export async function loadProject(args: {
 
 	const setSettings = async (newSettings: ProjectSettings2) => {
 		// projectSettings$.next(newSettings); // Update the observable
-		await nodeishFs.writeFile(settingsFilePath, JSON.stringify(newSettings, null, 2)) // Write the new settings to the file
+		await nodeishFs.writeFile(settingsFilePath, JSON.stringify(newSettings, undefined, 2)) // Write the new settings to the file
 	}
 
 	return {

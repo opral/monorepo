@@ -1,8 +1,8 @@
 import type { Repository } from "@lix-js/client"
 import type { NodeishFilesystem } from "@lix-js/fs"
-import { ProjectSettings } from "@inlang/project-settings"
 import { assertValidProjectPath } from "../validateProjectPath.js"
 import { defaultProjectSettings } from "./defaultProjectSettings.js"
+import type { ProjectSettings2 } from "./types/project-settings.js"
 
 /**
  * Creates a new project in the given directory.
@@ -11,7 +11,7 @@ import { defaultProjectSettings } from "./defaultProjectSettings.js"
 export async function createNewProject(args: {
 	projectPath: string
 	repo: Repository
-	projectSettings?: ProjectSettings
+	projectSettings?: ProjectSettings2
 }): Promise<void> {
 	assertValidProjectPath(args.projectPath)
 
@@ -23,6 +23,7 @@ export async function createNewProject(args: {
 
 	await nodeishFs.mkdir(args.projectPath, { recursive: true })
 	await Promise.all([
+		nodeishFs.writeFile(`${args.projectPath}/project_id`, "12345"),
 		nodeishFs.writeFile(`${args.projectPath}/settings.json`, settingsText),
 		nodeishFs.writeFile(`${args.projectPath}/.gitignore`, "cache"),
 		nodeishFs.mkdir(`${args.projectPath}/cache/modules`, { recursive: true }),

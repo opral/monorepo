@@ -32,7 +32,7 @@
 		"@inlang/env-variables": "workspace:*",
 		"@isomorphic-git/cors-proxy": "^2.7.1",
 		"@lit/react": "^1.0.5",
-		"@lix-js/client": "^2.2.0",
+		"@lix-js/client": "workspace:*",
 		"@types/react-dom": "^18.3.0",
 		"buffer": "^6.0.3",
 		"comlink": "^4.4.1",

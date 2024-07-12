@@ -1,5 +1,11 @@
 # @inlang/badge
 
+## 0.7.40
+
+### Patch Changes
+
+- a377572: Update app server settings
+
 ## 0.7.39
 
 ### Patch Changes

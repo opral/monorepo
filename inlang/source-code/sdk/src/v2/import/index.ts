@@ -1,10 +1,8 @@
 import dedent from "dedent"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
+import { ModuleImportError } from "./errors.js"
+import { withCache, withReadOnlyCache } from "./cache.js"
 import { tryCatch } from "@inlang/result"
-import { withReadOnlyCache } from "../../resolve-modules/cache.js"
-import { ModuleImportError } from "../../resolve-modules/errors.js"
-
-// TODO deduplicate this module
 
 /**
  * Importing ES modules either from a local path, or from a url.
@@ -14,32 +12,47 @@ import { ModuleImportError } from "../../resolve-modules/errors.js"
  */
 export type ImportFunction = (uri: string) => Promise<any>
 
-/**
- * Creates the import function.
- *
- * This function is required to import modules from a local path.
- *
- * @example
- *   const $import = createImport({ readFile: fs.readFile, fetch });
- *   const module = await _import('./some-module.js');
- */
-export function createImport(
+export function createCDNImportWithWriteCache(
 	projectPath: string,
-	nodeishFs: Pick<NodeishFilesystemSubset, "readFile">
-) {
-	return (uri: string) => $import(uri, projectPath, nodeishFs)
+	nodeishFs: Pick<NodeishFilesystemSubset, "readFile" | "writeFile" | "mkdir">
+): ImportFunction {
+	return async (uri: string) => {
+		if (!uri.startsWith("http"))
+			throw new ModuleImportError({ module: uri, cause: new Error("Malformed URL") })
+		const moduleAsText = await withCache(readModuleFromCDN, projectPath, nodeishFs)(uri)
+		return await moduleFromText(moduleAsText, uri)
+	}
 }
 
-async function $import(
-	uri: string,
+export function createCDNImportWithReadOnlyCache(
 	projectPath: string,
 	nodeishFs: Pick<NodeishFilesystemSubset, "readFile">
-): Promise<any> {
-	const moduleAsText = uri.startsWith("http")
-		? await withReadOnlyCache(readModuleFromCDN, projectPath, nodeishFs)(uri)
-		: await readModulefromDisk(uri, nodeishFs.readFile)
+): ImportFunction {
+	return async (uri: string) => {
+		if (!uri.startsWith("http"))
+			throw new ModuleImportError({ module: uri, cause: new Error("Malformed URL") })
+		const moduleAsText = await withReadOnlyCache(readModuleFromCDN, projectPath, nodeishFs)(uri)
+		return await moduleFromText(moduleAsText, uri)
+	}
+}
 
-	const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(moduleAsText)
+export function createDiskImport({
+	readFile,
+}: Pick<NodeishFilesystemSubset, "readFile">): ImportFunction {
+	return async (uri: string) => {
+		let moduleAsText: string
+		try {
+			moduleAsText = await readFile(uri, { encoding: "utf-8" })
+		} catch (error) {
+			throw new ModuleImportError({ module: uri, cause: error as Error })
+		}
+
+		return await moduleFromText(moduleAsText, uri)
+	}
+}
+
+async function moduleFromText(content: string, uri: string) {
+	const moduleWithMimeType = "data:application/javascript," + encodeURIComponent(content)
 
 	try {
 		return await import(/* @vite-ignore */ moduleWithMimeType)
@@ -50,21 +63,6 @@ async function $import(
 
 				The error indicates that the imported file does not exist on JSDelivr. For non-existent files, JSDelivr returns a 404 text that JS cannot parse as a module and throws a SyntaxError.`
 		}
-		throw new ModuleImportError({ module: uri, cause: error as Error })
-	}
-}
-
-/**
- * Tries to read the module from disk
- * @throws {ModuleImportError}
- */
-async function readModulefromDisk(
-	uri: string,
-	readFile: NodeishFilesystemSubset["readFile"]
-): Promise<string> {
-	try {
-		return await readFile(uri, { encoding: "utf-8" })
-	} catch (error) {
 		throw new ModuleImportError({ module: uri, cause: error as Error })
 	}
 }
@@ -101,9 +99,9 @@ async function readModuleFromCDN(uri: string): Promise<string> {
 	const JS_CONTENT_TYPES = [
 		"application/javascript",
 		"text/javascript",
-		"text/plain", //TODO remove this - only for githubusercontent
 		"application/x-javascript",
 		"text/x-javascript",
+		"text/plain", //TODO remove this - only for githubusercontent
 	]
 
 	// if there is no content-type header, assume it's a JavaScript module & hope for the best

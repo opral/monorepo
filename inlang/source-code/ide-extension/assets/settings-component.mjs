@@ -28131,7 +28131,7 @@ var InlangModule = import_typebox9.Type.Object({
 // ../sdk/dist/resolve-modules/message-lint-rules/resolveMessageLintRules.js
 var import_value = __toESM(require_value2(), 1);
 
-// ../../../node_modules/.pnpm/dedent@1.5.1_babel-plugin-macros@2.8.0/node_modules/dedent/dist/dedent.mjs
+// ../../../node_modules/.pnpm/dedent@1.5.1/node_modules/dedent/dist/dedent.mjs
 function ownKeys(object, enumerableOnly) {
   var keys = Object.keys(object);
   if (Object.getOwnPropertySymbols) {
@@ -28709,41 +28709,6 @@ var registry = [
     pricing: "Free"
   },
   {
-    uniqueID: "0023fsjj",
-    $schema: "https://inlang.com/schema/marketplace-manifest",
-    id: "app.lokalise.i18nally",
-    icon: "https://avatars.githubusercontent.com/u/14294501?s=200&v=4",
-    gallery: [
-      "https://github.com/lokalise/i18n-ally/blob/main/screenshots/full-logo-new.png?raw=true"
-    ],
-    displayName: {
-      en: "i18n ally"
-    },
-    description: {
-      en: "\u{1F30D} All in one i18n extension for VS Code"
-    },
-    readme: {
-      en: "./inlang/external-projects/i18n-ally/README.md"
-    },
-    keywords: [
-      "apps",
-      "i18n-ally",
-      "i18n ally",
-      "vs-code",
-      "ide-extension",
-      "javascript",
-      "developer",
-      "i18n",
-      "external"
-    ],
-    recommends: ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g"],
-    pricing: "free",
-    publisherName: "lokalise",
-    publisherIcon: "https://avatars.githubusercontent.com/u/14294501?s=200&v=4",
-    website: "https://marketplace.visualstudio.com/items?itemName=lokalise.i18n-ally",
-    license: "MIT License"
-  },
-  {
     uniqueID: "gkrpgoir",
     id: "app.parrot.figmaPlugin",
     icon: "https://cdn.jsdelivr.net/gh/parrot-global/parrot@main/parrot-logo.svg",
@@ -28765,30 +28730,6 @@ var registry = [
     publisherName: "Parrot.global",
     publisherIcon: "https://cdn.jsdelivr.net/gh/parrot-global/parrot@main/parrot-logo.svg",
     license: "PolyForm Strict License 1.0.0"
-  },
-  {
-    uniqueID: "1153khjh",
-    $schema: "https://inlang.com/schema/marketplace-manifest",
-    id: "app.tolgee.tolgee-platform",
-    gallery: [
-      "https://user-images.githubusercontent.com/18496315/188632536-3547fd70-755c-4a32-9b1e-fb1afbf84b33.png"
-    ],
-    icon: "https://user-images.githubusercontent.com/18496315/188628892-33fcc282-26f1-4035-8105-95952bd93de9.svg",
-    displayName: {
-      en: "Tolgee"
-    },
-    description: {
-      en: "An open-source localization platform developers enjoy to work with."
-    },
-    readme: {
-      en: "./inlang/external-projects/tolgee/README.md"
-    },
-    keywords: ["apps", "tolgee", "editor", "messages", "translator", "external"],
-    recommends: ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g"],
-    pricing: "start free",
-    publisherName: "tolgee",
-    publisherIcon: "https://user-images.githubusercontent.com/18496315/188628892-33fcc282-26f1-4035-8105-95952bd93de9.svg",
-    license: "Apache-2.0"
   },
   {
     uniqueID: "940fn8mg",
@@ -29414,39 +29355,6 @@ var registry = [
     license: "Apache-2.0"
   },
   {
-    uniqueID: "hheug211",
-    $schema: "https://inlang.com/schema/marketplace-manifest",
-    id: "library.amannn.nextintl",
-    icon: "https://emojis.wiki/thumbs/emojis/globe-with-meridians.webp",
-    gallery: ["https://github.com/amannn/next-intl/blob/main/media/logo.png?raw=true"],
-    displayName: {
-      en: "next-intl"
-    },
-    description: {
-      en: "Internationalization (i18n) for Next.js that gets out of your way."
-    },
-    readme: {
-      en: "./inlang/external-projects/next-intl/README.md"
-    },
-    keywords: [
-      "libraries",
-      "next-intl",
-      "nextjs",
-      "next",
-      "react",
-      "developer",
-      "i18n",
-      "external",
-      "inlang",
-      "unlisted"
-    ],
-    recommends: ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g"],
-    publisherName: "amannn",
-    publisherIcon: "https://avatars.githubusercontent.com/u/4038316?v=4",
-    website: "https://next-intl-docs.vercel.app",
-    license: "MIT License"
-  },
-  {
     uniqueID: "fnhuwzrx",
     $schema: "https://inlang.com/schema/marketplace-manifest",
     id: "library.brikev.remix-paraglidejs",
@@ -29478,39 +29386,6 @@ var registry = [
     website: "https://github.com/BRIKEV/remix-paraglidejs",
     license: "MIT License",
     pricing: "Free"
-  },
-  {
-    uniqueID: "kl95463j",
-    $schema: "https://inlang.com/schema/marketplace-manifest",
-    id: "library.i18next.i18next",
-    icon: "https://avatars.githubusercontent.com/u/8546082?s=200&v=4",
-    gallery: [
-      "https://github.com/i18next/i18next/blob/master/assets/i18next-ecosystem.jpg?raw=true"
-    ],
-    displayName: {
-      en: "i18next library"
-    },
-    description: {
-      en: "learn once - translate everywhere"
-    },
-    readme: {
-      en: "./inlang/external-projects/i18next/README.md"
-    },
-    keywords: [
-      "libraries",
-      "i18next",
-      "javascript",
-      "developer",
-      "i18n",
-      "external",
-      "inlang",
-      "unlisted"
-    ],
-    recommends: ["m/3i8bor92", "m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g"],
-    publisherName: "i18next",
-    publisherIcon: "https://avatars.githubusercontent.com/u/8546082?s=200&v=4",
-    website: "https://www.i18next.com",
-    license: "MIT License"
   },
   {
     uniqueID: "8y8sxj09",
@@ -29845,94 +29720,6 @@ var registry = [
     publisherName: "inlang",
     publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
     license: "Apache-2.0"
-  },
-  {
-    uniqueID: "kkfjusgu",
-    $schema: "https://inlang.com/schema/marketplace-manifest",
-    id: "library.kaisermann.svelte-i18n",
-    icon: "https://avatars.githubusercontent.com/u/23617963?s=200&v=4",
-    gallery: ["https://avatars.githubusercontent.com/u/23617963?s=200&v=4"],
-    displayName: {
-      en: "svelte-i18n"
-    },
-    description: {
-      en: "Internationalization library for Svelte"
-    },
-    readme: {
-      en: "./inlang/external-projects/svelte-i18n/README.md"
-    },
-    keywords: ["libraries", "developer", "i18n", "external", "unlisted"],
-    recommends: ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g", "m/gerre34r"],
-    publisherName: "kaisermann",
-    publisherIcon: "https://avatars.githubusercontent.com/u/12702016?v=4",
-    website: "https://github.com/kaisermann/svelte-i18n",
-    license: "MIT License"
-  },
-  {
-    uniqueID: "29dg63g3",
-    $schema: "https://inlang.com/schema/marketplace-manifest",
-    id: "library.kazupon.vuei18n",
-    icon: "https://raw.githubusercontent.com/kazupon/vue-i18n/ca513046480ecdb4565072a3b38ec0e2643f43e3/assets/vue-i18n-logo.svg",
-    gallery: [
-      "https://raw.githubusercontent.com/kazupon/vue-i18n/ca513046480ecdb4565072a3b38ec0e2643f43e3/assets/vue-i18n-logo.svg"
-    ],
-    displayName: {
-      en: "Vue I18n"
-    },
-    description: {
-      en: "Vue I18n is internationalization plugin for Vue.js"
-    },
-    readme: {
-      en: "./inlang/external-projects/vue-i18n/README.md"
-    },
-    keywords: [
-      "libraries",
-      "vue-i18n",
-      "vue",
-      "javascript",
-      "developer",
-      "i18n",
-      "external",
-      "unlisted"
-    ],
-    recommends: ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g", "m/gerre34r"],
-    publisherName: "kazupon",
-    publisherIcon: "https://avatars.githubusercontent.com/u/72989?v=4",
-    website: "https://kazupon.github.io/vue-i18n",
-    license: "MIT License"
-  },
-  {
-    uniqueID: "j8f8f832",
-    $schema: "https://inlang.com/schema/marketplace-manifest",
-    id: "library.QuiiBz.nextinternational",
-    icon: "https://github.com/QuiiBz/next-international/blob/main/assets/logo-black.png?raw=true",
-    gallery: [
-      "https://github.com/QuiiBz/next-international/blob/main/assets/logo-black.png?raw=true"
-    ],
-    displayName: {
-      en: "next-international"
-    },
-    description: {
-      en: "Type-safe internationalization (i18n) for Next.js"
-    },
-    readme: {
-      en: "./inlang/external-projects/next-international/README.md"
-    },
-    keywords: [
-      "libraries",
-      "nextjs",
-      "next",
-      "javascript",
-      "developer",
-      "i18n",
-      "external",
-      "unlisted"
-    ],
-    recommends: ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g"],
-    publisherName: "QuiiBz",
-    publisherIcon: "https://avatars.githubusercontent.com/u/43268759?v=4",
-    website: "https://next-international.vercel.app",
-    license: "MIT License"
   },
   {
     uniqueID: "ewkole66",
@@ -30314,6 +30101,29 @@ var registry = [
     website: "https://manage.inlang.com/install?module=plugin.inlang.nextIntl",
     license: "Apache-2.0",
     module: "https://cdn.jsdelivr.net/npm/@inlang/plugin-next-intl@latest/dist/index.js"
+  },
+  {
+    uniqueID: "wrh36dfb",
+    $schema: "https://inlang.com/schema/marketplace-manifest",
+    id: "plugin.inlang.sapUI5",
+    icon: "https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/source-code/plugins/sap-ui5/assets/icon.png",
+    displayName: {
+      en: "SAP UI5 plugin"
+    },
+    description: {
+      en: "Enables the inlang Visual Studio Code extension (Sherlock) to work with SAP UI5"
+    },
+    pages: {
+      "/": "./inlang/source-code/plugins/sap-ui5/README.md",
+      "/changelog": "./inlang/source-code/plugins/sap-ui5/CHANGELOG.md"
+    },
+    keywords: ["website", "vscode", "sap", "sapui5", "plugin"],
+    recommends: ["m/tdozzpar", "m/2qj2w8pu", "m/r7kp499g", "m/gerre34r"],
+    publisherName: "inlang",
+    publisherIcon: "https://inlang.com/favicon/safari-pinned-tab.svg",
+    website: "https://manage.inlang.com/install?module=plugin.inlang.sapUI5",
+    license: "Apache-2.0",
+    module: "https://cdn.jsdelivr.net/npm/@inlang/plugin-sap-ui5@latest/dist/index.js"
   },
   {
     uniqueID: "698iow33",

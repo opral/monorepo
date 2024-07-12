@@ -73,7 +73,7 @@ export async function parseSlotFile<DocType extends HasId>(slotFileContent: stri
 		}
 
 		if (recordOnSlot.__conflict) {
-			const conflictingSlotEntry = {
+			const conflictingSlotEntry: SlotEntry<DocType> = {
 				// we don't need to compute a new hash -> combination of mine and there allows us to check
 				// if the file has changed with respect to this record
 				slotEntryHash: recordOnSlot.theirs.hash + recordOnSlot.mine.hash,
@@ -91,6 +91,8 @@ export async function parseSlotFile<DocType extends HasId>(slotFileContent: stri
 					hash: recordOnSlot.theirs.hash,
 					data: recordOnSlot.theirs.data,
 				},
+				// TODO SDK2 HEADState
+				gitState: "uncommited",
 			}
 
 			// NOTE: we only expect a conflict if both slots cary a value!

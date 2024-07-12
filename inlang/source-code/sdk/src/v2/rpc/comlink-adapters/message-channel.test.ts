@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest"
 import { StructuredCloneAdapter } from "./structured-clone-adapter.js"
 import * as Comlink from "comlink"
-import { asyncIterableTransferHandler } from "../transfer/asyncIterable.js"
+import { asyncIterableTransferHandler } from "../transfer-handlers/asyncIterable.js"
 
 Comlink.transferHandlers.set("asyncIterable", asyncIterableTransferHandler)
 

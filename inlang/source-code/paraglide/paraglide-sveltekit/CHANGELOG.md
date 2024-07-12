@@ -1,5 +1,19 @@
 # @inlang/paraglide-sveltekit
 
+## 0.10.10
+
+### Patch Changes
+
+- Updated dependencies [14d80b3]
+  - @inlang/paraglide-js@1.11.1
+  - @inlang/paraglide-vite@1.2.73
+
+## 0.10.9
+
+### Patch Changes
+
+- cf4019d: remove `console.log` statement that managed to slip by linting
+
 ## 0.10.8
 
 ### Patch Changes

@@ -122,4 +122,6 @@ export type InstalledLintRule = {
 	module: string
 	level: MessageLintLevel
 	settingsSchema: MessageBundleLintRule["settingsSchema"]
+	run: MessageBundleLintRule["run"]
+	fix?: MessageBundleLintRule["fix"]
 }

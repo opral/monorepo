@@ -63,7 +63,7 @@ router.all("/git-proxy/" + "*", gitProxy)
 app.use(router)
 
 // --- Start server ---
-const port = process.env.PORT ?? 3001
+const port = 3001
 app.listen(port)
 console.info(`Server running at http://localhost:${port}/`)
 

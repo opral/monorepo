@@ -217,7 +217,7 @@ export function createNodeishMemoryFs(): NodeishFilesystem {
 			state.fsMap.set(path, { placeholder: true })
 		},
 
-		_isPlaceholder: function (path: Parameters<NodeishFilesystem["writeFile"]>[0]) {
+		_isPlaceholder: async function (path: Parameters<NodeishFilesystem["writeFile"]>[0]) {
 			path = normalizePath(path, { trailingSlash: "always", leadingSlash: "always" })
 			const entry = state.fsMap.get(path)
 

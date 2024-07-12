@@ -8,7 +8,8 @@ import node from "@astrojs/node"
 // https://astro.build/config
 export default defineConfig({
 	//configure this to your domain name
-	site: "https://acme.com",
+	//site: "https://acme.com",
+
 	i18n: {
 		defaultLocale: "en",
 		locales: [
@@ -23,9 +24,9 @@ export default defineConfig({
 		mdx(),
 		sitemap({
 			i18n: {
-				defaultLocale: "en", // All urls that don't contain `es` or `fr` after `https://stargazers.club/` will be treated as default locale, i.e. `en`
+				defaultLocale: "en",
 				locales: {
-					en: "en-US", // The `defaultLocale` value must present in `locales` keys
+					en: "en-US",
 					de: "de-CH",
 				},
 			},
@@ -38,7 +39,7 @@ export default defineConfig({
 			outdir: "./src/paraglide",
 		}),
 	],
-	//output: "server",
+	output: "server",
 	adapter: node({
 		mode: "standalone",
 	}),

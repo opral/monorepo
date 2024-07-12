@@ -1,12 +1,13 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 import _debug from "debug"
 import type { SlotEntry } from "./types/SlotEntry.js"
-import { hash } from "./utill/hash.js"
+import { createBlobOid, hashString } from "./utill/hash.js"
 import { parseSlotFile } from "./utill/parseSlotFile.js"
 import type { SlotFileStates } from "./types/SlotFileStates.js"
 import type { SlotFile } from "./types/SlotFile.js"
 import type { HasId } from "./types/HasId.js"
 import { deepFreeze } from "./utill/deepFreeze.js"
+import { openRepository } from "@lix-js/client"
 
 type FsType<Watch extends boolean> = Watch extends true
 	? Pick<NodeishFilesystem, "readFile" | "readdir" | "watch">
@@ -70,6 +71,15 @@ type createSlotStorageParams = NonWatchingReadonlyParams | WatchingReadonlyParam
  * @returns
  */
 export default async function createSlotStorageReader<DocType extends HasId>({
+	/* git - thoughts: if we pass the git object we can check if the staging/head and working differ, 
+		- if the current commit changes we walk the tree of the current commit to find differences in the slot files
+		
+		- changes between two commit, between the working copy and the head
+		
+		- if this is the case: we have uncommited changes
+		  - a slot may differ
+
+	 */
 	fs,
 	path,
 	watch,
@@ -208,8 +218,8 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 			statesBefore.stateFlag = "loading"
 		}
 
-		const slotFileContent = await fs.readFile(path + slotFileName + ".slot", { encoding: "utf-8" })
-		const slotFileContentHash = await hash(slotFileContent)
+		const slotFileContent = await fs.readFile(path + slotFileName + ".slot")
+		const slotFileContentHash = await createBlobOid(slotFileContent)
 
 		if (
 			statesBefore &&
@@ -222,7 +232,9 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 			return undefined
 		}
 
-		const slotFileContentParsed = await parseSlotFile<DocType>(slotFileContent)
+		const decoder = new TextDecoder("utf-8")
+		const jsonString = decoder.decode(slotFileContent)
+		const slotFileContentParsed = await parseSlotFile<DocType>(jsonString)
 
 		const freshSlotfile: SlotFile<DocType> = {
 			contentHash: slotFileContentHash,
@@ -237,6 +249,8 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 				upsertedSlotFileStates: {
 					slotFileName: slotFileName,
 					fsSlotFileState: undefined,
+					// TODO make sure we reload load the slotfile states for new files comming from git
+					headSlotfileState: undefined,
 					stateFlag: "loaded" as const,
 					memorySlotFileState: freshSlotfile,
 					changedRecords: [],
@@ -285,7 +299,7 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 				changedRecords: statesBefore.changedRecords,
 				memorySlotFileState: mergeResult.mergedState,
 				fsSlotFileState: mergeResult.conflictingSlotIndexes.length > 0 ? freshSlotfile : undefined,
-
+				headSlotfileState: statesBefore.headSlotfileState,
 				// check that no other load request hit in in the meantime
 				stateFlag:
 					statesBefore.stateFlag === "loadrequested"
@@ -391,6 +405,147 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 		return loadResults
 	}
 
+	const loadSlotFileFromHead = async (
+		currentState: SlotFileStates<DocType>,
+		headBlobOid: string,
+		readBlob: Awaited<ReturnType<typeof openRepository>>["readBlob"]
+	) => {
+		// TODO load the head state of the slot file
+		const blobResult = await readBlob({ oid: headBlobOid })
+
+		const decoder = new TextDecoder("utf-8")
+		const jsonString = decoder.decode(blobResult.blob)
+		const headRecordSlots = await parseSlotFile<DocType>(jsonString)
+
+		const headSlotFileState: SlotFile<DocType> = {
+			contentHash: headBlobOid,
+			exists: true,
+			recordSlots: headRecordSlots,
+		}
+
+		const uncommitedSlotIndexes: number[] = []
+		const unawareHeadSlotIndexes: number[] = []
+		const indexToId: string[] = []
+
+		const maxSlotsPerFile = Math.max(
+			currentState.memorySlotFileState.recordSlots.length,
+			Math.max(headRecordSlots.length, currentState.changedRecords.length)
+		)
+
+		for (let currentSlotIndex = 0; currentSlotIndex <= maxSlotsPerFile; currentSlotIndex += 1) {
+			const loadedSlotEntry = currentState.memorySlotFileState.recordSlots[currentSlotIndex]
+			const headSlotEntry = headRecordSlots[currentSlotIndex]
+			const changedRecord = currentState.changedRecords[currentSlotIndex]
+
+			if (!loadedSlotEntry && !changedRecord && !headSlotEntry) {
+				// no record in slot - NoOp
+				// debug("mergeRecordsWithoutLocalConflicts - no record in slot")
+			} else if (
+				loadedSlotEntry &&
+				headSlotEntry &&
+				loadedSlotEntry.slotEntryHash === headSlotEntry.slotEntryHash
+			) {
+				// nothing new from the loaded file for this record
+				// - no op
+			} else if (
+				loadedSlotEntry &&
+				headSlotEntry &&
+				loadedSlotEntry.slotEntryHash !== headSlotEntry.slotEntryHash
+			) {
+				uncommitedSlotIndexes.push(currentSlotIndex)
+				indexToId[currentSlotIndex] = loadedSlotEntry.data[idProperty]
+			} else if (!loadedSlotEntry && headSlotEntry) {
+				unawareHeadSlotIndexes.push(currentSlotIndex)
+			} else if (loadedSlotEntry && !headSlotEntry) {
+				indexToId[currentSlotIndex] = loadedSlotEntry.data[idProperty]
+				uncommitedSlotIndexes.push(currentSlotIndex)
+			}
+		}
+
+		return {
+			currentState,
+			headSlotFileState,
+			uncommitedSlotIndexes,
+			unawareHeadSlotIndexes,
+			indexToId,
+		}
+	}
+
+	/**
+	 * should be triggered whenever the status list is changed (when the head commit changed)
+	 */
+	const updateSlotFileHeadStates = async (
+		statusList: Awaited<ReturnType<Awaited<ReturnType<typeof openRepository>>["statusList"]>>,
+		readBlob: Awaited<ReturnType<typeof openRepository>>["readBlob"]
+	) => {
+		// TODO lockfile
+		const loadHeadPromises: ReturnType<typeof loadSlotFileFromHead>[] = []
+
+		// first collect all updates from head
+		for (const statusEntry of statusList) {
+			// TODO go through all slot files and check the head oid - if it differs - update slotfile
+			const statusEntryDetails = (statusEntry as any)[2] as { headOid: string | undefined }
+			const statusEntryFileName = statusEntry[0]
+			const currentState = fileNamesToSlotfileStates.get(statusEntryFileName)
+			if (!currentState) {
+				continue
+			}
+
+			if (
+				currentState.memorySlotFileState.contentHash !== statusEntryDetails.headOid &&
+				statusEntryDetails.headOid &&
+				currentState.headSlotfileState?.contentHash !== statusEntryDetails.headOid
+			) {
+				loadHeadPromises.push(
+					loadSlotFileFromHead(currentState, statusEntryDetails.headOid, readBlob)
+				)
+			}
+		}
+
+		const headLoadResults = await Promise.all(loadHeadPromises)
+
+		const changedIds: string[] = []
+
+		for (const statusEntry of statusList) {
+			// TODO go through all slot files and check the head oid - if it differs - update slotfile
+			const statusEntryDetails = (statusEntry as any)[2] as { headOid: string | undefined }
+			const statusEntryFileName = statusEntry[0]
+			const currentState = fileNamesToSlotfileStates.get(statusEntryFileName)
+			if (!currentState) {
+				continue
+			}
+
+			if (
+				currentState.memorySlotFileState.contentHash === statusEntryDetails.headOid &&
+				currentState.headSlotfileState
+			) {
+				currentState.headSlotfileState = undefined
+				// TODO trigger change event
+				for (const record of currentState.memorySlotFileState.recordSlots) {
+					if (record?.headState) {
+						changedIds.push(record.data[idProperty])
+						updateSlotEntryStates(record.data[idProperty], record.index)
+					}
+				}
+			}
+		}
+
+		for (const headLoadedResult of headLoadResults) {
+			headLoadedResult.currentState.headSlotfileState = headLoadedResult.headSlotFileState
+			for (const uncommitedSlotIndex of headLoadedResult.uncommitedSlotIndexes) {
+				const id = headLoadedResult.indexToId[uncommitedSlotIndex]!
+				updateSlotEntryStates(id, uncommitedSlotIndex)
+				changedIds.push(id)
+			}
+
+			// TODO how shall we handle headLoadedResult.unawareHeadSlotIndexes
+		}
+
+		if (changedIds.length > 0) {
+			changeCallback("fs", "records-change", changedIds)
+		}
+	}
+
 	const onSlotFileChange = (slotFileName: string) => {
 		const knownSlotFile = fileNamesToSlotfileStates.get(slotFileName)
 
@@ -444,10 +599,30 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 			mergeConflict = deepFreeze(recordOriginState.mergeConflict)
 		}
 
+		const headSlotEntry = recordSlotfile.headSlotfileState?.recordSlots[slotIndex]
+		let headState = headSlotEntry
+			? deepFreeze({
+					data: headSlotEntry.data,
+					hash: headSlotEntry.hash,
+			  })
+			: undefined
+		let gitState: "uncommited" | "commited" = "uncommited"
+		if (headState) {
+			if (currentState.hash === recordSlotfile.headSlotfileState?.recordSlots[slotIndex]?.hash) {
+				// if the hash is the same we don't pass the head state but flag it as commited
+				headState = undefined
+				gitState = "commited"
+			} else {
+				gitState = "uncommited"
+			}
+		}
+
 		const currentRecordState: SlotEntry<DocType> = {
 			slotEntryHash: currentState.hash,
 			hash: deepFreeze(currentState.hash),
 			data: deepFreeze(currentState.data),
+			headState,
+			gitState,
 			localConflict: localConflict,
 			mergeConflict,
 			index: currentState.index,
@@ -499,6 +674,8 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 		changeCallback,
 		getSlotEntryById,
 		slotEntryStates,
+		updateSlotEntryStates,
+		updateSlotFileHeadStates,
 	}
 
 	// start
@@ -537,7 +714,7 @@ export default async function createSlotStorageReader<DocType extends HasId>({
 		startWatchingSlotfileChanges()
 	}
 
-	await loadSlotFilesFromFs({forceReload: true})
+	await loadSlotFilesFromFs({ forceReload: true })
 
 	return {
 		/**

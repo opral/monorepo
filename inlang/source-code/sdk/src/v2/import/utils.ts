@@ -1,5 +1,5 @@
-import { ModuleImportError } from "../resolve-modules/errors.js"
-import type { InlangModule } from "./types/module.js"
+import { ModuleImportError } from "../../resolve-modules/errors.js"
+import type { InlangModule } from "../types/module.js"
 
 /**
  * @throws {ModuleImportError}
