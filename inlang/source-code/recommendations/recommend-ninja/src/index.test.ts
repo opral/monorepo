@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from "vitest"
+import { describe, it, expect, vi } from "vitest"
 import * as yaml from "js-yaml"
 import { add, shouldRecommend, isAdopted } from "./index.js"
-import type { NodeishFilesystem } from "@lix-js/fs"
+import { createNodeishMemoryFs } from "@lix-js/fs"
 
 const githubConfig = `
 [core]
@@ -64,186 +64,132 @@ vi.mock("js-yaml", async () => {
 	}
 })
 
-describe("GitHub Actions Workflow Adoption Checks", () => {
-	let fsMock: NodeishFilesystem
-
-	beforeEach(() => {
-		fsMock = {
-			readdir: vi.fn(),
-			// @ts-expect-error
-			readFile: vi.fn((path) => {
-				if (path === ".github/workflows/ninja_i18n.yml") {
-					return Promise.resolve(ninjaI18nYaml)
-				} else if (path === ".git/config") {
-					return Promise.resolve(githubConfig)
-				} else {
-					return Promise.reject(new Error("File not found"))
-				}
-			}),
-			stat: vi.fn(),
-			writeFile: vi.fn(),
-			mkdir: vi.fn(),
-		}
-	})
-
+describe("GitHub Actions Workflow Adoption Checks", async () => {
 	it("detects adoption of Ninja i18n GitHub Action", async () => {
-		// @ts-expect-error
-		fsMock.readdir.mockResolvedValue(["ninja_i18n.yml"])
-		// @ts-expect-error
-		fsMock.stat.mockResolvedValue({ isDirectory: () => false })
+		const fs = createNodeishMemoryFs()
+		await fs.mkdir(".git")
+		await fs.writeFile(".git/config", githubConfig)
+		await fs.mkdir(".github/workflows", { recursive: true })
+		await fs.writeFile(".github/workflows/ninja_i18n.yml", ninjaI18nYaml)
 
-		await expect(shouldRecommend({ fs: fsMock })).resolves.toBe(false)
+		// expected to be false because the action is already adopted
+		await expect(shouldRecommend({ fs })).resolves.toBe(false)
 	})
 
 	it("correctly adds the Ninja i18n GitHub Action workflow", async () => {
-		// @ts-expect-error
-		fsMock.stat.mockRejectedValue(new Error("File not found"))
+		const fs = createNodeishMemoryFs()
+		await fs.mkdir(".git")
+		await fs.writeFile(".git/config", githubConfig)
+		await fs.mkdir(".github/workflows", { recursive: true })
 
-		await add({ fs: fsMock })
+		await add({ fs })
 
-		expect(fsMock.mkdir).toHaveBeenCalledWith(".github/workflows", { recursive: true })
 		// @ts-expect-error
-		const writtenContent = fsMock.writeFile.mock.calls[0][1]
+		const writtenContent = await fs.readFile(".github/workflows/ninja_i18n.yml", "utf8")
 		expect(writtenContent).toContain("name: Ninja i18n action")
 		expect(writtenContent).toContain("uses: opral/ninja-i18n-action@main")
 	})
 
 	it("returns false if the repo is not hosted on GitHub", async () => {
-		// @ts-expect-error
-		fsMock.readFile.mockImplementation((path) => {
-			if (path === ".github/workflows/ninja_i18n.yml") {
-				return Promise.resolve(ninjaI18nYaml)
-			} else if (path === ".git/config") {
-				return Promise.resolve(gitlabConfig)
-			} else {
-				return Promise.reject(new Error("File not found"))
-			}
-		})
+		const fs = createNodeishMemoryFs()
+		await fs.mkdir(".git")
+		await fs.writeFile(".git/config", gitlabConfig)
+		await fs.mkdir(".github/workflows", { recursive: true })
 
-		await expect(shouldRecommend({ fs: fsMock })).resolves.toBe(false)
+		await expect(shouldRecommend({ fs })).resolves.toBe(false)
 	})
 
-	it("does not find the action in deep nested directories beyond level 3", async () => {
-		// @ts-expect-error
-		fsMock.stat.mockResolvedValue({ isDirectory: () => true })
-		// @ts-expect-error
-		fsMock.readdir.mockImplementation((path) => {
-			if (path.endsWith("level1")) return Promise.resolve(["level2"])
-			if (path.endsWith("level2")) return Promise.resolve(["level3"])
-			if (path.endsWith("level3")) return Promise.resolve([])
-			return Promise.resolve(["level1"])
-		})
-		// @ts-expect-error
-		fsMock.stat.mockImplementation((path) =>
-			Promise.resolve({
-				isDirectory: () => path.includes("level"),
-			})
-		)
+	it("does find action in deep nested directories within level 4", async () => {
+		const fs = createNodeishMemoryFs()
+		await fs.mkdir(".git")
+		await fs.writeFile(".git/config", githubConfig)
+		await fs.mkdir(".github/workflows/level1/level2/level3", { recursive: true })
+		await fs.writeFile(".github/workflows/level1/level2/level3/ninja_i18n.yml", ninjaI18nYaml)
 
-		await expect(isAdopted({ fs: fsMock })).resolves.toBe(false)
+		await expect(isAdopted({ fs })).resolves.toBe(true)
 	})
 
-	it("does not search beyond a depth of 3", async () => {
-		// @ts-expect-error
-		fsMock.readdir.mockImplementation((path) => {
-			if (path.endsWith("level3")) return Promise.resolve(["tooDeepDirectory"])
-			return Promise.resolve(["level1"])
-		})
-		// @ts-expect-error
-		fsMock.stat.mockImplementation((path) =>
-			Promise.resolve({
-				isDirectory: () => !path.endsWith(".yml"),
-			})
+	it("does not find the action in deep nested directories beyond level 4", async () => {
+		const fs = createNodeishMemoryFs()
+		await fs.mkdir(".git")
+		await fs.writeFile(".git/config", githubConfig)
+		await fs.mkdir(".github/workflows/level1/level2/level3/level4", { recursive: true })
+		await fs.writeFile(
+			".github/workflows/level1/level2/level3/level4/ninja_i18n.yml",
+			ninjaI18nYaml
 		)
 
-		await expect(isAdopted({ fs: fsMock })).resolves.toBe(false)
+		await expect(isAdopted({ fs })).resolves.toBe(false)
 	})
 
 	it("returns false if checking directory existence throws an error", async () => {
-		// @ts-expect-error
-		fsMock.stat.mockRejectedValue(new Error("Filesystem error"))
+		const fs = createNodeishMemoryFs()
+		fs.stat = async () => {
+			throw new Error("File not found")
+		}
 
-		await expect(shouldRecommend({ fs: fsMock })).resolves.toBe(false)
+		await expect(shouldRecommend({ fs })).resolves.toBe(false)
 	})
 
 	it("returns true when the action is found in a nested directory within depth limit", async () => {
-		// @ts-expect-error
-		fsMock.stat.mockResolvedValue({ isDirectory: () => true })
-		// @ts-expect-error
-		fsMock.readdir.mockImplementation((path) => {
-			if (path === ".github/workflows") return Promise.resolve(["level1"])
-			if (path === ".github/workflows/level1") return Promise.resolve(["level2"])
-			if (path === ".github/workflows/level1/level2") return Promise.resolve(["ninja_i18n.yml"])
-			return Promise.resolve([])
-		})
+		const fs = createNodeishMemoryFs()
+		await fs.mkdir(".git")
+		await fs.writeFile(".git/config", githubConfig)
+		await fs.mkdir(".github/workflows/level1", { recursive: true })
+		await fs.writeFile(".github/workflows/level1/ninja_i18n.yml", ninjaI18nYaml)
 
-		// @ts-expect-error
-		fsMock.readFile.mockImplementation((path) => {
-			if (path === ".github/workflows/level1/level2/ninja_i18n.yml") {
-				return Promise.resolve(ninjaI18nYaml)
-			} else if (path === ".git/config") {
-				return Promise.resolve(githubConfig)
-			} else {
-				return Promise.reject(new Error("File not found"))
-			}
-		})
-
-		// @ts-expect-error
-		fsMock.stat.mockImplementation((path) =>
-			Promise.resolve({
-				isDirectory: () => !path.endsWith(".yml"),
-			})
-		)
-
-		await expect(shouldRecommend({ fs: fsMock })).resolves.toBe(false)
+		await expect(isAdopted({ fs })).resolves.toBe(true)
 	})
 
 	it("returns false and logs an error for malformed YAML content", async () => {
-		// @ts-expect-error
-		fsMock.stat.mockResolvedValue({ isDirectory: () => true })
-		// @ts-expect-error
-		fsMock.readdir.mockResolvedValue(["ninja_i18n.yml"])
-		// @ts-expect-error
-		fsMock.readFile.mockResolvedValue("malformed yaml content")
-		// @ts-expect-error
-		fsMock.stat.mockResolvedValue({ isDirectory: () => false })
+		const fs = createNodeishMemoryFs()
+		await fs.mkdir(".git")
+		await fs.writeFile(".git/config", githubConfig)
+		await fs.mkdir(".github/workflows", { recursive: true })
+		await fs.writeFile(".github/workflows/ninja_i18n.yml", "malformed yaml content")
 
-		await expect(shouldRecommend({ fs: fsMock })).resolves.toBe(false)
+		await expect(isAdopted({ fs })).resolves.toBe(false)
 	})
 
 	it("creates the workflow directory if it does not exist", async () => {
-		// @ts-expect-error
-		fsMock.stat.mockRejectedValue(new Error("File not found"))
+		const fs = createNodeishMemoryFs()
+		await fs.mkdir(".git")
+		await fs.writeFile(".git/config", githubConfig)
 
-		await add({ fs: fsMock })
+		await add({ fs })
 
-		expect(fsMock.mkdir).toHaveBeenCalledWith(".github/workflows", { recursive: true })
+		const exists = await fs.stat(".github/workflows")
+		expect(exists.isDirectory()).toBe(true)
 	})
 
 	it("handles errors when creating the workflow directory in add function", async () => {
-		// @ts-expect-error
-		fsMock.stat.mockResolvedValue({ isDirectory: () => false })
-		// @ts-expect-error
-		fsMock.mkdir.mockRejectedValue(new Error("Filesystem error"))
+		const fs = createNodeishMemoryFs()
+		fs.mkdir = async () => {
+			throw new Error("Failed to create directory")
+		}
 
-		await expect(add({ fs: fsMock })).rejects.toThrow("Filesystem error")
+		await expect(add({ fs })).rejects.toThrow("Failed to create directory")
 	})
 
-	it("should detect adoption of Ninja i18n GitHub Action using isAdopted", async () => {
-		// @ts-expect-error
-		fsMock.readdir.mockResolvedValue(["ninja_i18n.yml"])
-		// @ts-expect-error
-		fsMock.stat.mockResolvedValue({ isDirectory: () => false })
+	it("detect workflow in the higher root directory if the working directory is in a subdirectory", async () => {
+		const fs = createNodeishMemoryFs()
+		await fs.mkdir("../../.git")
+		await fs.writeFile("../../.git/config", githubConfig)
+		await fs.mkdir("../../.github/workflows", { recursive: true })
+		await fs.writeFile("../../.github/workflows/ninja_i18n.yml", ninjaI18nYaml)
 
-		await expect(isAdopted({ fs: fsMock })).resolves.toBe(true)
+		await expect(isAdopted({ fs })).resolves.toBe(true)
 	})
 
-	it("should handle the case when action is not adopted using isAdopted", async () => {
-		// @ts-expect-error
-		fsMock.readdir.mockResolvedValue([])
-		// @ts-expect-error
-		fsMock.stat.mockResolvedValue({ isDirectory: () => false })
+	it("should add workflow in the higher root directory if the working directory is in a subdirectory", async () => {
+		const fs = createNodeishMemoryFs()
+		await fs.mkdir("../../.git")
+		await fs.writeFile("../../.git/config", githubConfig)
+		await fs.mkdir("../../subdir", { recursive: true })
 
-		await expect(isAdopted({ fs: fsMock })).resolves.toBe(false)
+		await add({ fs })
+
+		const exists = await fs.stat("../../.github/workflows/ninja_i18n.yml")
+		expect(exists.isFile()).toBe(true)
 	})
 })

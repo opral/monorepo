@@ -24,6 +24,7 @@
 	"dependencies": {
 		"@inlang/sdk": "workspace:*",
 		"@lix-js/fs": "workspace:*",
+		"@lix-js/client": "workspace:*",
 		"@sinclair/typebox": "^0.31.17",
 		"js-yaml": "^4.1.0"
 	},

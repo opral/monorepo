@@ -1,4 +1,5 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
+import { findRepoRoot } from "@lix-js/client"
 import { type Static } from "@sinclair/typebox"
 import { Value } from "@sinclair/typebox/value"
 import * as yaml from "js-yaml" // Assuming you have a YAML parsing library
@@ -12,11 +13,12 @@ import { GitHubActionsWorkflow } from "./types.js"
  */
 export async function shouldRecommend(args: { fs: NodeishFilesystem }): Promise<boolean> {
 	try {
+		const gitConfigPath = (await relativePathStringFromRoot(args.fs)) + ".git/config"
 		// Check if the .git/config file exists
-		await args.fs.stat(".git/config")
+		await args.fs.stat(gitConfigPath)
 
 		// Read the .git/config file
-		const configData = await args.fs.readFile(".git/config", { encoding: "utf-8" })
+		const configData = await args.fs.readFile(gitConfigPath, { encoding: "utf-8" })
 		const match = configData.match(/url = (.+)/)
 		const remoteOriginUrl = match ? match[1] : undefined
 
@@ -85,7 +87,9 @@ export async function isAdopted(args: { fs: NodeishFilesystem }): Promise<boolea
 	}
 
 	// Start the search from the workflow directory
-	return await searchWorkflowFiles(".github/workflows")
+	return await searchWorkflowFiles(
+		(await relativePathStringFromRoot(args.fs)) + ".github/workflows"
+	)
 }
 
 /**
@@ -95,7 +99,7 @@ export async function isAdopted(args: { fs: NodeishFilesystem }): Promise<boolea
  * @returns {Promise<void>} - A promise that resolves when the action workflow is successfully added.
  */
 export async function add(args: { fs: NodeishFilesystem }): Promise<void> {
-	const workflowDirPath = ".github/workflows"
+	const workflowDirPath = (await relativePathStringFromRoot(args.fs)) + ".github/workflows"
 	const workflowFilePath = `${workflowDirPath}/ninja_i18n.yml`
 	const ninjaI18nWorkflowYaml = `
 name: Ninja i18n action
@@ -140,4 +144,16 @@ jobs:
 
 	// Write the Ninja i18n workflow YAML to the file
 	await args.fs.writeFile(workflowFilePath, ninjaI18nWorkflowYaml)
+}
+
+async function relativePathStringFromRoot(fs: NodeishFilesystem): Promise<string> {
+	const repoRoot = await findRepoRoot({
+		nodeishFs: fs,
+		path: process.cwd(),
+	})
+	const repoRootPath = repoRoot?.replace("file://", "") ?? ""
+	const currentWorkingDirectory = process.cwd()
+	const directoriesAboveRepoRootLength =
+		currentWorkingDirectory.replace(repoRootPath, "").split("/").length - 1
+	return "../".repeat(directoriesAboveRepoRootLength)
 }
