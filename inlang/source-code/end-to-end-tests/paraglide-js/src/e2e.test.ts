@@ -53,12 +53,6 @@ describe.concurrent("paraglide-js", () => {
 				await wait(PROMPT_TO)
 				await pressKey("enter")
 
-				await waitForText("Github Action")
-				await wait(PROMPT_TO)
-				await writeText("y")
-				await wait(PROMPT_TO)
-				await pressKey("enter")
-
 				await wait(CLEANUP_TO)
 
 				//check that the settings.json file exists
