@@ -1,5 +1,12 @@
 # inlang-vs-code-extension
 
+## 1.48.3
+
+### Patch Changes
+
+- Updated dependencies [59c8b11]
+  - @inlang/recommend-ninja@0.1.1
+
 ## 1.48.2
 
 ### Patch Changes

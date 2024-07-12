@@ -1,5 +1,43 @@
 # @inlang/paraglide-sveltekit
 
+## 0.11.0
+
+### Minor Changes
+
+- 82581f7: Adds a `disableAsyncLocalStorage` option to `i18n.handle`. This allows you to opt out of using the experimental `AsyncLocalStorage` API.
+
+  **Warning**
+  Disabling `AsyncLocalStorage` removes the protection against concurrent requests overriding each other's language state.
+
+  Only opt out if `AsyncLocalStorage` if you are certain your environment does not handle concurrent requests in the same process. For example in Vercel Edge functions or Cloudflare Workers.
+
+  In environments where only one request is processed in a given process disabling `AsyncLocalStorage` can yield performance gains.
+
+  **Example**
+
+  ```ts
+  // src/hooks.server.js
+  import { i18n } from "$lib/i18n"
+
+  export const handle = i18n.handle({
+  	disableAsyncLocalStorage: true, // @default = false
+  })
+  ```
+
+### Patch Changes
+
+- 72b2f34: fix: Preserve query parameters when redirecting ([inlang-paraglide-js#168](https://github.com/opral/inlang-paraglide-js/issues/168))
+
+  `i18n.handle` redirects requests if the pathname does not fit the detected language. Previously this would remove any query parameters from the URL. This is no longer the case.
+
+  ```ts
+  redirect(303, "/login?from=/home") // will be redirected to /<lang>/login?from=/home
+  ```
+
+- Updated dependencies [59c8b11]
+  - @inlang/paraglide-js@1.11.2
+  - @inlang/paraglide-vite@1.2.74
+
 ## 0.10.10
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @inlang/paraglide-js
 
+## 1.11.2
+
+### Patch Changes
+
+- 59c8b11: Fix Ninja recommendation and adoption if working directory is not the repo root
+
 ## 1.11.1
 
 ### Patch Changes
