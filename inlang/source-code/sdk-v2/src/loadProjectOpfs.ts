@@ -49,8 +49,6 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 
 	// TODO SDK-v2 listen to changes on the settings file - how do multiple instance of a project get informed about changes?
 	const projectSettings$ = new BehaviorSubject(projectSettings)
-  const observable = projectSettings$.asObservable()
-  
   
 
 	const _import = importSequence(
@@ -126,12 +124,12 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 		},
 		settings: {
       get: () => projectSettings$.getValue(),
-      set: async (settings:     ) => { 
+      set: async (settings: ProjectSettings2) => { 
         // TODO SDK-v2 implement
       },
       subscribe: projectSettings$.asObservable().subscribe,
     },
-    bundle: {ewdffwdr
+    bundle: {
       select: db.selectFrom("bundle"),
       insert: (bundle: Bundle) => {
         return db.insertInto("bundle").values({
@@ -252,8 +250,6 @@ export const populateVariants = (messageSelect: SelectQueryBuilder<Database, "me
     ).as("variants"),
   ])
 }
-
-
 
 function json<T>(value: T): RawBuilder<T> {
 	// NOTE we cant use jsonb for now since kisley
