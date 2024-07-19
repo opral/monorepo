@@ -15,3 +15,4 @@ packages:
   - 'inlang/source-code/versioned-interfaces/*'
   - 'inlang/source-code/sdk/load-test'
   - 'inlang/source-code/sdk/multi-project-test'
+  - 'inlang/source-code/sdk-v2/sample-app'
