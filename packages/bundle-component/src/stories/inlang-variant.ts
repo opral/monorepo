@@ -359,7 +359,9 @@ export default class InlangVariant extends LitElement {
 							!this.message?.selectors
 								? html`<inlang-selector-configurator
 										.inputs=${this.inputs}
-										.bundleId=${this.message!.bundleId}
+										.bundleId=${this.message?.bundleId
+											? this.message?.bundleId
+											: "TODO SDK-v2 @nils check how we deal with undefined"}
 										.message=${this.message}
 										.locale=${this.locale}
 										.triggerMessageBundleRefresh=${this.triggerMessageBundleRefresh}

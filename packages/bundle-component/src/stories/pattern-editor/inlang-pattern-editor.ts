@@ -65,27 +65,43 @@ export default class InlangPatternEditor extends LitElement {
 
 	// set editor state
 	private _setEditorState = () => {
+		this._removeTextContentListener?.()
 		// only handling strings so far -> TODO: handle real patterns
-		this.editor.update(() => {
-			const root = $getRoot()
-			if (root.getChildren().length === 0) {
-				const paragraphNode = $createParagraphNode()
-				const textNode = $createTextNode(
-					this.pattern ? patternToString({ pattern: this.pattern }) : ""
-				)
-				paragraphNode.append(textNode)
-				root.append(paragraphNode)
-			} else {
-				const paragraphNode = root.getChildren()[0]!
-				paragraphNode.remove()
-				const newpParagraphNode = $createParagraphNode()
-				const textNode = $createTextNode(
-					this.pattern ? patternToString({ pattern: this.pattern }) : ""
-				)
-				newpParagraphNode.append(textNode)
-				root.append(newpParagraphNode)
+		this.editor.update(
+			() => {
+				const root = $getRoot()
+				if (root.getChildren().length === 0) {
+					const paragraphNode = $createParagraphNode()
+					const textNode = $createTextNode(
+						this.pattern ? patternToString({ pattern: this.pattern }) : ""
+					)
+					paragraphNode.append(textNode)
+					root.append(paragraphNode)
+				} else {
+					const paragraphNode = root.getChildren()[0]!
+					paragraphNode.remove()
+					const newpParagraphNode = $createParagraphNode()
+					const textNode = $createTextNode(
+						this.pattern ? patternToString({ pattern: this.pattern }) : ""
+					)
+					newpParagraphNode.append(textNode)
+					root.append(newpParagraphNode)
+				}
+			},
+			{
+				discrete: true,
 			}
-		})
+		)
+
+		this._removeTextContentListener = this.editor.registerTextContentListener(
+			(textContent: any) => {
+				// The latest text content of the editor!
+
+				//check if something changed
+				this.dispatchOnChangePattern(stringToPattern({ text: textContent }))
+				this._editorTextContent = textContent
+			}
+		)
 	}
 
 	override async firstUpdated() {
@@ -96,15 +112,19 @@ export default class InlangPatternEditor extends LitElement {
 			registerPlainText(this.editor)
 
 			// listen to text content changes and dispatch `change-pattern` event
-			this.editor.registerTextContentListener((textContent) => {
-				// The latest text content of the editor!
+			this._removeTextContentListener = this.editor.registerTextContentListener(
+				(textContent: any) => {
+					// The latest text content of the editor!
 
-				//check if something changed
-				this.dispatchOnChangePattern(stringToPattern({ text: textContent }))
-				this._editorTextContent = textContent
-			})
+					//check if something changed
+					this.dispatchOnChangePattern(stringToPattern({ text: textContent }))
+					this._editorTextContent = textContent
+				}
+			)
 		}
 	}
+
+	private _removeTextContentListener: undefined | (() => void)
 
 	override render() {
 		return html`
