@@ -1,4 +1,5 @@
 import "./inlang-pattern-editor.ts"
+import "./../testing/reactivePatternEditorWrapper.ts"
 import type { Meta, StoryObj } from "@storybook/web-components"
 import { html } from "lit"
 import { pluralBundle } from "@inlang/sdk-v2"
@@ -31,4 +32,9 @@ export const Empty: StoryObj = {
 			>
 			</inlang-pattern-editor>
 		`,
+}
+
+export const Reactive: StoryObj = {
+	render: () =>
+		html` <inlang-reactive-pattern-editor-wrapper></inlang-reactive-pattern-editor-wrapper> `,
 }
