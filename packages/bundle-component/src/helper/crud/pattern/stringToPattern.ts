@@ -1,4 +1,4 @@
-import type { Pattern } from "@inlang/sdk/v2"
+import type { Pattern } from "@inlang/sdk-v2"
 
 /**
  * MVP version of the function

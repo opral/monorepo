@@ -1,4 +1,4 @@
-import type { Variant } from "@inlang/sdk/v2"
+import type { Variant } from "@inlang/sdk-v2"
 
 /**
  * Update the match at the specified index with the new value.

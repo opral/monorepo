@@ -1,4 +1,4 @@
-import type { Declaration, MessageBundle } from "@inlang/sdk/v2"
+import type { Declaration, NestedBundle } from "@inlang/sdk-v2"
 
 /**
  * Gets all inputs from a message bundle.
@@ -6,7 +6,7 @@ import type { Declaration, MessageBundle } from "@inlang/sdk/v2"
  * @returns All inputs from the message bundle.
  */
 
-const getInputs = (props: { messageBundle: MessageBundle }): Declaration[] => {
+const getInputs = (props: { messageBundle: NestedBundle }): Declaration[] => {
 	const inputs: Declaration[] = []
 	for (const message of props.messageBundle.messages) {
 		for (const declaration of message.declarations) {

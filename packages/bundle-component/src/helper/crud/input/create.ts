@@ -1,4 +1,4 @@
-import type { MessageBundle } from "@inlang/sdk/v2"
+import type { NestedBundle } from "@inlang/sdk-v2"
 
 /**
  * Creates an input in all messages of a message bundle.
@@ -10,7 +10,7 @@ import type { MessageBundle } from "@inlang/sdk/v2"
  * createInput({ messageBundle, inputName: "myInput" })
  */
 
-const createInput = (props: { messageBundle: MessageBundle; inputName: string }) => {
+const createInput = (props: { messageBundle: NestedBundle; inputName: string }) => {
 	for (const message of props.messageBundle.messages) {
 		if (message.declarations.some((declaration) => declaration.name === props.inputName)) {
 			console.error("Input with name already exists")

@@ -10,7 +10,7 @@ import {
 	type LanguageTag,
 	type Message,
 	type Variant,
-} from "@inlang/sdk/v2"
+} from "@inlang/sdk-v2"
 import addSelector from "../helper/crud/selector/add.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
 import "./inlang-add-input.js"
@@ -367,15 +367,13 @@ export default class InlangSelectorConfigurator extends LitElement {
 				class="dropdown"
 				@sl-show=${(e: CustomEvent) => {
 					const dropdown = this.shadowRoot?.querySelector("sl-dropdown")
-					if (dropdown) {
-						if (e.target === dropdown) {
-							this._input =
-								this.inputs && this.inputs.length > 0 && this.inputs[0]
-									? this.inputs[0].name
-									: undefined
-							if (this.inputs && this.inputs.length === 0) {
-								this._isNewInput = true
-							}
+					if (dropdown && e.target === dropdown) {
+						this._input =
+							this.inputs && this.inputs.length > 0 && this.inputs[0]
+								? this.inputs[0].name
+								: undefined
+						if (this.inputs && this.inputs.length === 0) {
+							this._isNewInput = true
 						}
 					}
 				}}
@@ -518,7 +516,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 										// get the last input element and focus it
 										setTimeout(() => {
 											const inputs = this.shadowRoot?.querySelectorAll(".option")
-											const lastInput = inputs && (inputs[inputs.length - 1] as HTMLInputElement)
+											const lastInput = inputs && (inputs.at(-1) as HTMLInputElement)
 											lastInput?.focus(), 100
 										})
 									}}

@@ -1,13 +1,14 @@
 import { describe, expect, it } from "vitest"
 import deleteInput from "./delete.js"
-import { createMessageBundle } from "@inlang/sdk/v2"
+import { createBundle } from "@inlang/sdk-v2"
 
 describe("deleteInput", () => {
 	it("Should delete a specific input declarations", () => {
-		const messageBundle = createMessageBundle({
+		const messageBundle = createBundle({
 			id: "bundleId",
 			messages: [
 				{
+					bundleId: "bundleId",
 					id: "testId",
 					locale: "en",
 					selectors: [],
@@ -38,6 +39,7 @@ describe("deleteInput", () => {
 					variants: [],
 				},
 				{
+					bundleId: "bundleId",
 					id: "testId",
 					locale: "en",
 					selectors: [],

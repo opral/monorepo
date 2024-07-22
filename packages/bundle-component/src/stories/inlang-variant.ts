@@ -5,7 +5,7 @@ import {
 	type LintReport,
 	type InstalledLintRule,
 	type Declaration,
-} from "@inlang/sdk/v2"
+} from "@inlang/sdk-v2"
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
 

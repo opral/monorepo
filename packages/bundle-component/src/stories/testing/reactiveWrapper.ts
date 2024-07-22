@@ -3,7 +3,7 @@ import { customElement, property, state } from "lit/decorators.js"
 
 import "./../inlang-bundle.js"
 import "./../actions/inlang-bundle-action.js"
-import type { LintReport, MessageBundle, ProjectSettings2 } from "@inlang/sdk/v2"
+import type { LintReport, NestedBundle, ProjectSettings2 } from "@inlang/sdk-v2"
 import type { InstalledMessageLintRule } from "@inlang/sdk"
 import { pluralBundle } from "@inlang/sdk/v2-mocks"
 import {
@@ -16,7 +16,7 @@ import { mockSettings } from "../../mock/settings.js"
 @customElement("inlang-reactive-wrapper")
 export default class InlangReactiveWrapper extends LitElement {
 	@property({ type: Object })
-	bundle: MessageBundle | undefined
+	bundle: NestedBundle | undefined
 
 	@property({ type: Object })
 	settings: ProjectSettings2 | undefined

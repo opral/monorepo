@@ -1,4 +1,4 @@
-import type { Declaration, MessageBundle } from "@inlang/sdk/v2"
+import type { Declaration, NestedBundle } from "@inlang/sdk-v2"
 
 /**
  * Deletes an input from all messages of a message bundle.
@@ -7,7 +7,7 @@ import type { Declaration, MessageBundle } from "@inlang/sdk/v2"
  * @param props.input The input to delete.
  */
 
-const deleteInput = (props: { messageBundle: MessageBundle; input: Declaration }) => {
+const deleteInput = (props: { messageBundle: NestedBundle; input: Declaration }) => {
 	for (const message of props.messageBundle.messages) {
 		const index = message.declarations.findIndex((d) => d.name === props.input.name)
 		if (index === -1) {

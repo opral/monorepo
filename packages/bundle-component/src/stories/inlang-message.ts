@@ -1,6 +1,6 @@
 import type { InstalledMessageLintRule, LanguageTag } from "@inlang/sdk"
 import type { Declaration, LintReport, Message, ProjectSettings2, Variant } from "@inlang/sdk/v2"
-import { createVariant } from "@inlang/sdk/v2"
+import { createVariant } from "@inlang/sdk-v2"
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
 import deleteSelector from "../helper/crud/selector/delete.js"

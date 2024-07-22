@@ -1,13 +1,14 @@
 import { describe, expect, it } from "vitest"
 import getInput from "./get.js"
-import { createMessageBundle } from "@inlang/sdk/v2"
+import { createBundle } from "@inlang/sdk-v2"
 
 describe("getInput", () => {
 	it("Should return all found input declarations", () => {
-		const messageBundle = createMessageBundle({
+		const messageBundle = createBundle({
 			id: "bundleId",
 			messages: [
 				{
+					bundleId: "bundleId",
 					id: "testId",
 					locale: "en",
 					selectors: [],
@@ -27,6 +28,7 @@ describe("getInput", () => {
 					variants: [],
 				},
 				{
+					bundleId: "bundleId",
 					id: "testId",
 					locale: "en",
 					selectors: [],
@@ -46,6 +48,7 @@ describe("getInput", () => {
 					variants: [],
 				},
 				{
+					bundleId: "bundleId",
 					id: "testId",
 					locale: "en",
 					selectors: [],

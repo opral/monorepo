@@ -1,4 +1,4 @@
-import type { LintReport } from "@inlang/sdk/v2"
+import type { LintReport } from "@inlang/sdk-v2"
 import {
 	createMockBundleLintReport,
 	createMockMessageLintReport,
