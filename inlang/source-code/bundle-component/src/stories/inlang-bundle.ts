@@ -396,8 +396,11 @@ export default class InlangBundle extends LitElement {
 							.fixLint=${this._fixLint}
 						>
 							${sortAllVariants({
-								variants: this._fillMessage(this._bundle!.id, structuredClone(message), locale)
-									.variants,
+								variants: this._fillMessage(
+									this._bundle?.id ? this._bundle?.id : "WHATTT", // TODO SDK-v2 @nils check how we deal with undefined
+									structuredClone(message),
+									locale
+								).variants,
 								ignoreVariantIds: this._freshlyAddedVariants,
 							})?.map((fakevariant) => {
 								const variant = message?.variants.find((v) => v.id === fakevariant.id)

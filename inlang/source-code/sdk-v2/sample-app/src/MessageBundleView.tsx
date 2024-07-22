@@ -58,7 +58,16 @@ function MessageBundleView({
 	}
 
 	const onMesageInsert = (event: { detail: { argument: NestedBundle } }) => {
-		debugger
+		console.log("onMesageInsert", event)
+	}
+	const onMesageUpdate = (event: { detail: { argument: NestedBundle } }) => {
+		console.log("onMesageUpdate", event)
+	}
+	const onVariantInsert = (event: { detail: { argument: NestedBundle } }) => {
+		console.log("onVariantInsert", event)
+	}
+	const onVariantUpdate = (event: { detail: { argument: NestedBundle } }) => {
+		console.log("onVariantUpdate", event)
 	}
 
 	return (
@@ -68,6 +77,9 @@ function MessageBundleView({
 			settings={projectSettings}
 			changeMessageBundle={onBundleChange as any}
 			insertMessage={onMesageInsert as any}
+			updateMessage={onMesageUpdate as any}
+			insertVariant={onVariantInsert as any}
+			updateVariant={onVariantUpdate as any}
 			filteredLocales={filteredLocales.length > 0 ? filteredLocales : undefined}
 			fixLint={(e: any) => {
 				const { fix, lintReport } = e.detail.argument as {
