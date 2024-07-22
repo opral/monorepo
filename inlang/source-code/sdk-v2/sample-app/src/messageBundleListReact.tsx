@@ -21,7 +21,7 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 	const [currentListBundles, setCrurrentListBundles] = useState([] as NestedBundle[])
 
 	const [lintReports, setLintReports] = useState([] as LintReport[])
-	const [projectSettings, setProjectSettings] = useState<ProjectSettings2 | undefined>(undefined)
+	const [projectSettings, setProjectSettings] = useState<ProjectSettings2>(project.settings.get())
 	const [messageBundleCollection, setMessageBundleCollection] = useState<any>()
 
 	const [activeLocales, setActiveLocales] = useState<LanguageTag[]>([])
@@ -38,19 +38,9 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 	}, [textSearch, activeLocales])
 
 	useEffect(() => {
-		let inlangProject: InlangProject | undefined = undefined
-
-		inlangProject = project
-
-		// inlangProject.settings.subscribe({
-		// 	next: (settings) => {
-		// 		setProjectSettings(settings)
-		// 	},
-		// })
-		setProjectSettings(inlangProject.settings.get())
-
+		const settingsSubscription = project.settings.subscribe(setProjectSettings)
 		return () => {
-			// unsubscribe inlangProject?.settings()
+			settingsSubscription.unsubscribe()
 		}
 	}, [])
 

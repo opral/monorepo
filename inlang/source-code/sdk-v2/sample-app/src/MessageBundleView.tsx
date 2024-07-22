@@ -5,7 +5,7 @@ import { ProjectSettings2 } from "../../src/types/project-settings.js"
 import { InlangProject } from "../../src/types/project.js"
 import { LintReport } from "../../src/types/lint.js"
 import { LanguageTag } from "../../src/types/language-tag.js"
-import { NestedBundle } from "../../src/index.js"
+import { NestedBundle, NestedMessage, Variant } from "../../src/index.js"
 
 export const MessageBundleComponent = createComponent({
 	tagName: "inlang-bundle",
@@ -18,6 +18,7 @@ export const MessageBundleComponent = createComponent({
 
 		insertVariant: "insert-variant",
 		updateVariant: "update-variant",
+		deleteVariant: "delete-variant",
 		fixLint: "fix-lint",
 	},
 })
@@ -57,17 +58,25 @@ function MessageBundleView({
 		// project.messageBundleCollection?.upsert(messageBundle.detail.argument)
 	}
 
-	const onMesageInsert = (event: { detail: { argument: NestedBundle } }) => {
-		console.log("onMesageInsert", event)
+	const onMesageInsert = (event: { detail: { argument: { message: NestedMessage } } }) => {
+		const insertedMessage = event.detail.argument.message
+		const dbPromise = project.message.insert(insertedMessage).execute()
 	}
-	const onMesageUpdate = (event: { detail: { argument: NestedBundle } }) => {
-		console.log("onMesageUpdate", event)
+	const onMesageUpdate = (event: { detail: { argument: { message: NestedMessage } } }) => {
+		const updatedMessage = event.detail.argument.message
+		const dbPromise = project.message.update(updatedMessage).execute()
 	}
-	const onVariantInsert = (event: { detail: { argument: NestedBundle } }) => {
-		console.log("onVariantInsert", event)
+	const onVariantInsert = (event: { detail: { argument: { variant: Variant } } }) => {
+		const insertedVariant = event.detail.argument.variant
+		const dbPromise = project.variant.insert(insertedVariant).execute()
 	}
-	const onVariantUpdate = (event: { detail: { argument: NestedBundle } }) => {
-		console.log("onVariantUpdate", event)
+	const onVariantUpdate = (event: { detail: { argument: { variant: Variant } } }) => {
+		const updatedVariant = event.detail.argument.variant
+		const dbPromise = project.variant.update(updatedVariant).execute()
+	}
+	const onVariantDelete = (event: { detail: { argument: { variant: Variant } } }) => {
+		const deletedVariant = event.detail.argument.variant
+		const dbPromise = project.variant.delete(deletedVariant).execute()
 	}
 
 	return (
@@ -80,6 +89,7 @@ function MessageBundleView({
 			updateMessage={onMesageUpdate as any}
 			insertVariant={onVariantInsert as any}
 			updateVariant={onVariantUpdate as any}
+			deleteVariant={onVariantDelete as any}
 			filteredLocales={filteredLocales.length > 0 ? filteredLocales : undefined}
 			fixLint={(e: any) => {
 				const { fix, lintReport } = e.detail.argument as {
