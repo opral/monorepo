@@ -1,5 +1,5 @@
 import type { Pattern } from "@inlang/sdk-v2"
-import { LitElement, css, html } from "lit"
+import { LitElement, css, html, type PropertyValues } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import { ref, createRef, type Ref } from "lit/directives/ref.js"
 import { createEditor } from "lexical"
@@ -33,10 +33,11 @@ export default class InlangPatternEditor extends LitElement {
 
 	//state
 	@state()
-	_editorTextContent: string = ""
+	_patternState: Pattern | undefined
 
 	// dispatch `change-pattern` event with the new pattern
 	dispatchOnChangePattern(pattern: Pattern) {
+		debugger
 		const onChangePattern = new CustomEvent("change-pattern", {
 			detail: {
 				argument: pattern,
@@ -53,11 +54,10 @@ export default class InlangPatternEditor extends LitElement {
 	// create editor
 	editor = createEditor(config)
 
-	// update editor when pattern changes
-	override updated(changedProperties: Map<string | number | symbol, unknown>) {
+	override updated(changedProperties: PropertyValues<this>) {
 		if (
 			changedProperties.has("pattern") &&
-			patternToString({ pattern: this.pattern! }) !== this._editorTextContent
+			JSON.stringify(this.pattern as any) !== JSON.stringify(this._patternState)
 		) {
 			this._setEditorState()
 		}
@@ -66,6 +66,8 @@ export default class InlangPatternEditor extends LitElement {
 	// set editor state
 	private _setEditorState = () => {
 		this._removeTextContentListener?.()
+
+		this._patternState = this.pattern
 		// only handling strings so far -> TODO: handle real patterns
 		this.editor.update(
 			() => {
@@ -93,15 +95,17 @@ export default class InlangPatternEditor extends LitElement {
 			}
 		)
 
+		// if (reAddEventListner) {
 		this._removeTextContentListener = this.editor.registerTextContentListener(
 			(textContent: any) => {
 				// The latest text content of the editor!
-
+				this._patternState = stringToPattern({ text: textContent })
+				// this.requestUpdate("pattern")
 				//check if something changed
-				this.dispatchOnChangePattern(stringToPattern({ text: textContent }))
-				this._editorTextContent = textContent
+				this.dispatchOnChangePattern(this._patternState)
 			}
 		)
+		// }
 	}
 
 	override async firstUpdated() {
@@ -111,14 +115,19 @@ export default class InlangPatternEditor extends LitElement {
 			this.editor.setRootElement(contentEditableElement)
 			registerPlainText(this.editor)
 
+			console.log("registering event first time")
 			// listen to text content changes and dispatch `change-pattern` event
 			this._removeTextContentListener = this.editor.registerTextContentListener(
 				(textContent: any) => {
 					// The latest text content of the editor!
+					console.log("textContent:", textContent)
 
 					//check if something changed
-					this.dispatchOnChangePattern(stringToPattern({ text: textContent }))
-					this._editorTextContent = textContent
+
+					this._patternState = stringToPattern({ text: textContent })
+					// this.requestUpdate("pattern")
+					//check if something changed
+					this.dispatchOnChangePattern(this._patternState)
 				}
 			)
 		}
@@ -179,7 +188,7 @@ export default class InlangPatternEditor extends LitElement {
 					contenteditable
 					${ref(this.contentEditableElementRef)}
 				></div>
-				${this._editorTextContent === ""
+				${this.pattern === undefined || this.pattern?.length === 0
 					? html`<p class="inlang-pattern-editor-placeholder">Enter pattern ...</p>`
 					: ""}
 			</div>
