@@ -1,20 +1,26 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { createMessage, createMessageBundle, createVariant } from "@inlang/sdk/v2"
+import { createMessage, createBundle, createVariant } from "@inlang/sdk-v2"
 import { describe, expect, it } from "vitest"
 import upsertVariant from "./upsert.js"
 
 describe("upsertVariant", () => {
 	it("Should update existing variant", () => {
-		const bundle = createMessageBundle({
+		const bundle = createBundle({
 			id: "bundle-id",
 			messages: [
 				{
+					bundleId: "bundle-id",
 					id: "test_message_id",
 					locale: "en",
 					declarations: [],
 					selectors: [],
 					variants: [
-						createVariant({ id: "test_upsertVariant_id", match: ["*"], text: "Hello World" }),
+						createVariant({
+							messageId: "testId",
+							id: "test_upsertVariant_id",
+							match: ["*"],
+							text: "Hello World",
+						}),
 					],
 				},
 			],
@@ -28,6 +34,7 @@ describe("upsertVariant", () => {
 		upsertVariant({
 			message: bundle.messages[0]!,
 			variant: {
+				messageId: bundle.messages[0]!.id,
 				id: "test_upsertVariant_id",
 				match: ["*"],
 				pattern: [{ type: "text", value: "Hello Universe" }],
@@ -41,9 +48,11 @@ describe("upsertVariant", () => {
 	})
 
 	it("Should create a new variant", () => {
-		const bundle = createMessageBundle({
+		const bundle = createBundle({
 			id: "bundle-id",
-			messages: [createMessage({ locale: "en", text: "Hello World", match: ["*"] })],
+			messages: [
+				createMessage({ bundleId: "bundle-id", locale: "en", text: "Hello World", match: ["*"] }),
+			],
 		})
 
 		expect(bundle.messages).toHaveLength(1)
@@ -54,6 +63,7 @@ describe("upsertVariant", () => {
 		upsertVariant({
 			message: bundle.messages[0]!,
 			variant: {
+				messageId: bundle.messages[0]!.id,
 				id: "test_upsertVariant_id",
 				match: ["one"],
 				pattern: [{ type: "text", value: "Hello Universe" }],

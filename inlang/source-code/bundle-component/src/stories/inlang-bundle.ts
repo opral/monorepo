@@ -2,7 +2,7 @@ import { html, LitElement } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import overridePrimitiveColors from "../helper/overridePrimitiveColors.js"
 import {
-	type MessageBundle,
+	type Bundle,
 	type Message,
 	type Pattern,
 	type LanguageTag,
@@ -13,8 +13,8 @@ import {
 	createMessage,
 	type Variant,
 	type Expression,
-} from "@inlang/sdk/v2"
-import type { InstalledMessageLintRule } from "@inlang/sdk"
+} from "@inlang/sdk-v2"
+import type { InstalledMessageLintRule, NestedBundle, NestedMessage } from "@inlang/sdk-v2"
 
 //internal components
 import "./inlang-bundle-root.js"
@@ -64,7 +64,7 @@ import updateMatch from "../helper/crud/variant/updateMatch.js"
 export default class InlangBundle extends LitElement {
 	//props
 	@property({ type: Object })
-	bundle: MessageBundle | undefined
+	bundle: Bundle | undefined
 
 	@property({ type: Object })
 	settings: ProjectSettings2 | undefined
@@ -165,7 +165,7 @@ export default class InlangBundle extends LitElement {
 
 	// internal variables/states
 	@state()
-	private _bundle: MessageBundle | undefined
+	private _bundle: NestedBundle | undefined
 
 	@state()
 	private _freshlyAddedVariants: string[] = []
@@ -180,7 +180,7 @@ export default class InlangBundle extends LitElement {
 		}
 	}
 
-	private _addMessage = (message: Message) => {
+	private _addMessage = (message: NestedMessage) => {
 		if (this._bundle) {
 			this._bundle.messages.push(message)
 		}
@@ -230,7 +230,7 @@ export default class InlangBundle extends LitElement {
 	}
 
 	private _getBundleActions = (): Element[] => {
-		return Array.from(this.children)
+		return [...this.children]
 			.filter((child) => child instanceof InlangBundleAction)
 			.map((child) => {
 				child.setAttribute("slot", "bundle-action")
@@ -256,10 +256,10 @@ export default class InlangBundle extends LitElement {
 	}
 
 	// fill message with empty message if message is undefined to fix layout shift (will not be committed)
-	private _fillMessage = (message: Message | undefined, locale: LanguageTag): Message => {
+	private _fillMessage = (message: NestedMessage | undefined, locale: LanguageTag): NestedMessage => {
 		if (message) {
 			if (message.variants.length === 0) {
-				message.variants.push(createVariant({ match: [] }))
+				message.variants.push(createVariant({ messageId: message.id, match: [] }))
 			}
 			return message
 		} else {

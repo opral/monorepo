@@ -1,4 +1,4 @@
-import { type Variant } from "@inlang/sdk/v2"
+import { type Variant } from "@inlang/sdk-v2"
 
 /**
  * Sort all variants by their match values.

@@ -1,6 +1,6 @@
-import type { MessageBundle } from "@inlang/sdk/v2"
+import type { NestedBundle } from "@inlang/sdk-v2"
 
-export const simplifyBundle = (bundle: MessageBundle) => {
+export const simplifyBundle = (bundle: NestedBundle) => {
 	// all patterns should become a single text pattern that is randomized
 	for (const message of bundle.messages) {
 		for (const variant of message.variants) {
