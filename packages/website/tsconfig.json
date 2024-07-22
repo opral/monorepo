@@ -1,18 +1,10 @@
 {
 	"extends": "../tsconfig.base.json",
-	"include": ["src/**/*"],
+	"include": ["src/**/*.ts"],
 	"compilerOptions": {
-		"moduleResolution": "Node16",
-		"lib": ["DOM", "DOM.Iterable", "ESNext"],
-		"types": ["vite/client", "unplugin-icons/types/solid"],
-		"jsx": "preserve",
-		"jsxImportSource": "solid-js",
-		"esModuleInterop": true,
-		"resolveJsonModule": true,
+		"lib": ["ESNext", "DOM"],
+		"types": [],
 		"outDir": "./dist",
-		"paths": {
-			// need to be defined in the vite config too!
-			"#src/*": ["./src/*"]
-		}
+		"rootDir": "./src"
 	}
 }
