@@ -11,7 +11,7 @@ import type { JSONObject } from "@inlang/json-types"
 // import type { MessageBundle } from "./message-bundle.js"
 import { LanguageTag } from "./language-tag.js"
 import type { ExternalProjectSettings, ProjectSettings2 } from "./project-settings.js"
-import type { BundleWithMessages } from "./sdkTypes.js"
+import type { NestedBundle } from "./schema.js"
 
 // export type LintResult = {
 // 	// TODO SDK 2 add property for report type - if is not specific for lint results?
@@ -76,11 +76,11 @@ export const LintReport = Type.Object({
 	ruleId: Type.String(),
 
 	// TODO SDK2 check if we should provide a lint target
-	// target: Type.Object({
-	messageBundleId: Type.String(),
-	messageId: Type.Optional(Type.String()),
-	variantId: Type.Optional(Type.String()),
-	// }),
+	target: Type.Object({
+		bundleId: Type.String(),
+		messageId: Type.Optional(Type.String()),
+		variantId: Type.Optional(Type.String()),
+	}),
 
 	level: MessageLintLevel,
 	body: Translatable(Type.String()),
@@ -96,9 +96,11 @@ export type LintReport<Fixes extends LintFix[] = LintFix[]> = {
 	ruleId: MessageBundleLintRule["id"]
 
 	// TODO SDK2 check if we should provide a lint target
-	messageBundleId: string
-	messageId: string | undefined
-	variantId: string | undefined
+	target: {
+		bundleId: string
+		messageId: string | undefined
+		variantId: string | undefined
+	}
 	// locale: LanguageTag | undefined
 
 	level: MessageLintLevel
@@ -138,7 +140,7 @@ export type MessageBundleLintRule<
 	settingsSchema?: TObject
 
 	run: (args: {
-		messageBundle: BundleWithMessages
+		messageBundle: NestedBundle
 		settings: ProjectSettings2 & ExternalSettings
 		report: (args: Omit<LintReport, "ruleId" | "level">) => void
 	}) => MaybePromise<void>
@@ -147,8 +149,8 @@ export type MessageBundleLintRule<
 		report: Report
 		fix: Fix<Report>
 		settings: ProjectSettings2 & ExternalSettings
-		messageBundle: BundleWithMessages
-	}) => MaybePromise<BundleWithMessages>
+		messageBundle: NestedBundle
+	}) => MaybePromise<NestedBundle>
 }
 export const MessageBundleLintRule = Type.Object({
 	id: _MessageBundleLintRuleId,

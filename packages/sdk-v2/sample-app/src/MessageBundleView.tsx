@@ -1,23 +1,28 @@
 import React, { useEffect, useState } from "react"
 import { createComponent } from "@lit/react"
-import { InlangMessageBundle } from "@inlang/message-bundle-component"
-import { BundleWithMessages } from "../../src/types/sdkTypes.js"
+import { InlangBundle } from "@inlang/bundle-component"
 import { ProjectSettings2 } from "../../src/types/project-settings.js"
 import { InlangProject } from "../../src/types/project.js"
 import { LintReport } from "../../src/types/lint.js"
 import { LanguageTag } from "../../src/types/language-tag.js"
+import { NestedBundle } from "../../src/index.js"
 
 export const MessageBundleComponent = createComponent({
-	tagName: "inlang-message-bundle",
-	elementClass: InlangMessageBundle,
+	tagName: "inlang-bundle",
+	elementClass: InlangBundle,
 	react: React,
 	events: {
 		changeMessageBundle: "change-message-bundle",
+		insertMessage: "insert-message",
+		updateMessage: "update-message",
+
+		insertVariant: "insert-variant",
+		updateVariant: "update-variant",
 		fixLint: "fix-lint",
 	},
 })
 type MessageBundleViewProps = {
-	bundle: BundleWithMessages // TODO SDK2 make SDK Bundle a reactive query that delivers the bundle instead
+	bundle: NestedBundle // TODO SDK2 make SDK Bundle a reactive query that delivers the bundle instead
 	// reports: Subject<LintReport[]>
 	projectSettings: ProjectSettings2
 	project: InlangProject
@@ -46,18 +51,23 @@ function MessageBundleView({
 		// }
 	}, [bundle])
 
-	const onBundleChange = (messageBundle: { detail: { argument: BundleWithMessages } }) => {
+	const onBundleChange = (messageBundle: { detail: { argument: NestedBundle } }) => {
 		// eslint-disable-next-line no-console
 		// TODO SDK-V2 check how we update the bundle in v2 sql
 		// project.messageBundleCollection?.upsert(messageBundle.detail.argument)
 	}
 
+	const onMesageInsert = (event: { detail: { argument: NestedBundle } }) => {
+		debugger
+	}
+
 	return (
 		<MessageBundleComponent
 			key={bundle.id}
-			messageBundle={currentBundle as any}
+			bundle={currentBundle}
 			settings={projectSettings}
 			changeMessageBundle={onBundleChange as any}
+			insertMessage={onMesageInsert as any}
 			filteredLocales={filteredLocales.length > 0 ? filteredLocales : undefined}
 			fixLint={(e: any) => {
 				const { fix, lintReport } = e.detail.argument as {

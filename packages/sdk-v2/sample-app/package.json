@@ -34,7 +34,7 @@
 		"comlink": "^4.4.1",
 		"@types/react-dom": "^18.3.0",
 		"@inlang/sdk-v2": "workspace:*",
-		"@inlang/message-bundle-component": "workspace:*",
+		"@inlang/bundle-component": "workspace:*",
 		"@inlang/settings-component": "workspace:*"
 	}
 }

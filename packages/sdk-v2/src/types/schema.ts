@@ -1,39 +1,15 @@
 import type { Insertable, JSONColumnType, Selectable, Updateable } from "kysely"
 
+import type { LintReport } from "./lint.js"
+
 export type Database = {
 	bundle: BundleTable
 	message: MessageTable
 	variant: VariantTable
 
-	LintReport: LintReport
+	lintReport: LintReport
 	// todo - move out of database
 	settings: Settings
-}
-
-export type MessageLintLevel = "error" | "warning" | "off"
-
-type LintFix = { key: string; title: string }
-
-/**
- * The basis of a lint report (required to contruct a lint report union type)
- */
-export type LintReport = {
-	ruleId: string
-
-	target: {
-		messageBundleId: string
-		messageId?: string
-		variantId?: string
-	}
-
-	level: MessageLintLevel
-	body: string
-
-	/**
-	 * The available fixes that can be automatically applied
-	 * Empty array = no automatic fixes
-	 */
-	fixes: LintFix[]
 }
 
 type AliasMap = {
@@ -69,7 +45,6 @@ type VariantTable = {
 
 export type Bundle = Selectable<BundleTable>
 
-
 export type NestedMessage = Message & {
 	variants: Variant[]
 }
@@ -77,7 +52,6 @@ export type NestedMessage = Message & {
 export type NestedBundle = Bundle & {
 	messages: NestedMessage[]
 }
-
 
 export type NewBundle = Insertable<BundleTable>
 export type UpdatedBundle = Updateable<BundleTable>
@@ -118,6 +92,18 @@ export type InputDeclaration = {
 export type Expression = {
 	type: "expression"
 	arg: VariableReference | Literal
+	annotation?: FunctionAnnotation
+}
+
+export type FunctionAnnotation = {
+	type: "function"
+	name: string
+	options: Option[]
+}
+
+export type Option = {
+	name: string
+	value: Literal | VariableReference
 }
 
 export type Settings = {

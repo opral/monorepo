@@ -21,10 +21,10 @@
 		"./src"
 	],
 	"scripts": {
-		"build": "npm run prepare-env-variables && tsc --build",
-		"dev": "npm run prepare-env-variables && tsc --watch",
+		"build": "pnpm run prepare-env-variables && tsc --build",
+		"dev": "pnpm run prepare-env-variables && tsc --watch",
 		"prepare-env-variables": "node ./src/env-variables/createIndexFile.js",
-		"test": "npm run prepare-env-variables && tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"test": "pnpm run prepare-env-variables && tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
@@ -38,8 +38,10 @@
 		"@inlang/json-types": "workspace:*",
 		"@inlang/translatable": "workspace:*",
 		"@inlang/plugin": "workspace:*",
+		"@lix-js/fs": "workspace:*",
 		"@sqlite.org/sqlite-wasm": "^3.46.0-build2",
 		"deepmerge-ts": "^5.1.0",
+		"dedent": "1.5.1",
 		"kysely": "^0.27.4",
 		"sqlocal": "^0.10.1",
 		"rxjs": "7.8.1",

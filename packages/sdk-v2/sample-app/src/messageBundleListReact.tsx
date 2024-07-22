@@ -2,15 +2,15 @@ import { useCallback, useEffect, useRef, useState } from "react"
 
 import {
 	InlangProject,
-	BundleWithMessages,
 	LintReport,
 	LanguageTag,
 	ProjectSettings2,
+	NestedBundle,
 } from "../../src/types/index.js"
 import { VariableSizeList as List } from "react-window"
 import { MessageBundleViewMemoed } from "./MessageBundleView.js"
 import { MessageBundleListSummary } from "./messageBundleListSummary.js"
-import { InlangProject2 } from "../../../sdk/dist/v2/types/index.js"
+import { populateMessages } from "../../src/loadProjectOpfs.js"
 
 type MessageBundleListProps = {
 	project: InlangProject
@@ -18,7 +18,7 @@ type MessageBundleListProps = {
 
 export function MessageBundleList({ project }: MessageBundleListProps) {
 	const [bundles, setBundles] = useState([] as RxDocument<MessageBundle>[])
-	const [currentListBundles, setCrurrentListBundles] = useState([] as BundleWithMessages[])
+	const [currentListBundles, setCrurrentListBundles] = useState([] as NestedBundle[])
 
 	const [lintReports, setLintReports] = useState([] as LintReport[])
 	const [projectSettings, setProjectSettings] = useState<ProjectSettings2 | undefined>(undefined)
@@ -30,8 +30,7 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 
 	useEffect(() => {
 		// TODO SDK-v2 setup query that filters by active language, reported lints, bundle ids and searches text within the filtered variants
-		project.bundle
-			.select()
+		populateMessages(project.bundle.select)
 			.execute()
 			.then((freshBundles: any) => {
 				setCrurrentListBundles(freshBundles)
@@ -43,11 +42,12 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 
 		inlangProject = project
 
-		inlangProject.settings.subscribe({
-			next: (settings) => {
-				setProjectSettings(settings)
-			},
-		})
+		// inlangProject.settings.subscribe({
+		// 	next: (settings) => {
+		// 		setProjectSettings(settings)
+		// 	},
+		// })
+		setProjectSettings(inlangProject.settings.get())
 
 		return () => {
 			// unsubscribe inlangProject?.settings()

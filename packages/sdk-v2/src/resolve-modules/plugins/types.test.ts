@@ -1,8 +1,8 @@
-import { ProjectSettings } from "@inlang/project-settings"
 import { Value } from "@sinclair/typebox/value"
 import { describe, test, expect } from "vitest"
 import { expectType } from "tsd"
 import { Plugin } from "@inlang/plugin"
+import { ProjectSettings2 } from "../../types/project-settings.js"
 
 describe("Plugin", () => {
 	test("meta.id should enforce plugin.namespace.* patterns", () => {
@@ -36,16 +36,17 @@ describe("Plugin", () => {
 	})
 
 	test("meta.id should be a valid inlang.config.setting key", () => {
-		const settings: ProjectSettings = {
-			sourceLanguageTag: "en",
-			languageTags: ["en", "de"],
+		const settings: ProjectSettings2 = {
+			baseLocale: "en",
+			locales: ["en", "de"],
 			modules: [],
+			lintConfig: [],
 		}
 		const cases = ["plugin.namespace.helloWorld", "plugin.namespace.i18n"]
 
 		for (const _case of cases) {
 			const mergedSettings = { ...settings, [_case]: {} }
-			expect(Value.Check(ProjectSettings, mergedSettings)).toBe(true)
+			expect(Value.Check(ProjectSettings2, mergedSettings)).toBe(true)
 			// @ts-ignore - type mismatch error. fix after refactor
 			expect(Value.Check(Plugin["properties"]["id"], _case)).toBe(true)
 		}

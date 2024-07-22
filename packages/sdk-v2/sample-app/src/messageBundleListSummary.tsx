@@ -5,13 +5,13 @@ import {
 	ProjectSettings2,
 	LintReport,
 	LanguageTag,
-	BundleWithMessages,
+	NestedBundle
 } from "../../src/types/index.js"
 
 type MessageBundleListSummaryProps = {
 	project: InlangProject
 	projectSettings: ProjectSettings2
-	bundles: BundleWithMessages[]
+	bundles: NestedBundle[]
 	reports: LintReport[]
 	activeLanguages: LanguageTag[]
 	onActiveLanguagesChange: (locales: LanguageTag[]) => void
@@ -49,7 +49,7 @@ export function MessageBundleListSummary({
 				}
 
 				for (const report of reports) {
-					if (bundleIds.has(report.messageBundleId)) {
+					if (bundleIds.has(report.target.bundleId)) {
 						mapped[report.ruleId]?.push(report)
 					}
 				}

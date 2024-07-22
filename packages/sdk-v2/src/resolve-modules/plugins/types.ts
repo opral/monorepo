@@ -7,9 +7,9 @@ import type {
 	PluginHasInvalidSchemaError,
 	PluginsDoNotProvideLoadOrSaveMessagesError,
 } from "./errors.js"
-import type { Message } from "@inlang/message"
+
 import type { CustomApiInlangIdeExtension, Plugin } from "@inlang/plugin"
-import type { ProjectSettings } from "@inlang/project-settings"
+import type { ProjectSettings2 } from "../../types/project-settings.js"
 
 /**
  * The filesystem is a subset of project lisa's nodeish filesystem.
@@ -26,7 +26,7 @@ export type NodeishFilesystemSubset = Pick<
  */
 export type ResolvePluginsFunction = (args: {
 	plugins: Array<Plugin>
-	settings: ProjectSettings
+	settings: ProjectSettings2
 	nodeishFs: NodeishFilesystemSubset
 }) => Promise<{
 	data: ResolvedPluginApi
@@ -44,15 +44,16 @@ export type ResolvePluginsFunction = (args: {
  * The API after resolving the plugins.
  */
 export type ResolvedPluginApi = {
-	loadMessages: (args: {
-		settings: ProjectSettings
-		nodeishFs: NodeishFilesystemSubset
-	}) => Promise<Message[]> | Message[]
-	saveMessages: (args: {
-		settings: ProjectSettings
-		messages: Message[]
-		nodeishFs: NodeishFilesystemSubset
-	}) => Promise<void> | void
+	// TODO SDK-v2 needed implement importer exporter?
+	// loadMessages: (args: {
+	// 	settings: ProjectSettings2
+	// 	nodeishFs: NodeishFilesystemSubset
+	// }) => Promise<Message[]> | Message[]
+	// saveMessages: (args: {
+	// 	settings: ProjectSettings
+	// 	messages: Message[]
+	// 	nodeishFs: NodeishFilesystemSubset
+	// }) => Promise<void> | void
 	/**
 	 * App specific APIs.
 	 *

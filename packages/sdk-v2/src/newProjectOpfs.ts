@@ -46,7 +46,6 @@ export async function newProjectOpfs(args: {
     selectors TEXT NOT NULL
   );
 
-  
   CREATE TABLE Variant (
     id TEXT PRIMARY KEY, 
     messageId TEXT NOT NULL,

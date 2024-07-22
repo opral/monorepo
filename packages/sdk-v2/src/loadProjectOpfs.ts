@@ -1,6 +1,21 @@
-import { Kysely, ParseJSONResultsPlugin, sql, type RawBuilder, type SelectQueryBuilder } from "kysely"
+import {
+	Kysely,
+	ParseJSONResultsPlugin,
+	sql,
+	type RawBuilder,
+	type SelectQueryBuilder,
+} from "kysely"
 import { SQLocalKysely } from "sqlocal/kysely"
-import type { Bundle, BundleNested, Database, LintReport, Message, NestedBundle, NestedMessage, NewBundle, NewMessage, NewVariant, Variant } from "./types/schema.js"
+import type {
+	Bundle,
+	Database,
+	Message,
+	NestedBundle,
+	NewBundle,
+	NewMessage,
+	NewVariant,
+	Variant,
+} from "./types/schema.js"
 import { jsonArrayFrom } from "kysely/helpers/sqlite"
 import { loadSettings } from "./settings.js"
 import { BehaviorSubject, combineLatest, from, switchMap, tap } from "rxjs"
@@ -14,8 +29,6 @@ import missingCatchallLintRule from "./dev-modules/missingCatchall.js"
 import { resolveModules } from "./resolveModules2.js"
 import type { InstalledLintRule, ProjectSettings2 } from "./types/project-settings.js"
 import type { InlangProject } from "./types/project.js"
-import type { BundleWithMessages } from "./types/sdkTypes.js"
-import { observeNotification } from "rxjs/internal/Notification"
 
 // extend the SQLocalKysely class to expose a rawSql function
 // needed for non parametrized queries
@@ -37,7 +50,7 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 
 	const projectDir = await opfsRoot.getDirectoryHandle(args.inlangFolderPath)
 
-  // loading the settings from opfs
+	// loading the settings from opfs
 	const settingsFilePath = "settings.json"
 	const settingsFileHandle = await projectDir.getFileHandle(settingsFilePath)
 	const settingsFile = await settingsFileHandle.getFile()
@@ -49,7 +62,6 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 
 	// TODO SDK-v2 listen to changes on the settings file - how do multiple instance of a project get informed about changes?
 	const projectSettings$ = new BehaviorSubject(projectSettings)
-  
 
 	const _import = importSequence(
 		createDebugImport({
@@ -86,7 +98,8 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 							displayName: rule.displayName,
 							description: rule.description,
 							module:
-								(modules as any).meta.find((m) => m.id.includes(rule.id))?.module ??
+								(modules as any).meta.find((m: { id: string | any[] }) => m.id.includes(rule.id))
+									?.module ??
 								"Unknown module. You stumbled on a bug in inlang's source code. Please open an issue.",
 							// default to warning, see https://github.com/opral/monorepo/issues/1254
 							level: "warning", // TODO SDK2 settings.messageLintRuleLevels?.[rule.id] ?? "warning",
@@ -123,132 +136,132 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 			plugins: [],
 		},
 		settings: {
-      get: () => projectSettings$.getValue(),
-      set: async (settings: ProjectSettings2) => { 
-        // TODO SDK-v2 implement
-      },
-      subscribe: projectSettings$.asObservable().subscribe,
-    },
-    bundle: {
-      select: db.selectFrom("bundle"),
-      insert: (bundle: Bundle) => {
-        return db.insertInto("bundle").values({
-          id: bundle.id,
-          alias: json(bundle.alias) as any // TODO SDK-v2 check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
-        })
-      },
-      update: (bundle: Partial<Bundle> & { id: string }) => {
-        const bundleProperties = structuredClone(bundle as any) // TODO SDK-v2 check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
-        delete bundleProperties.id
-        if (bundle.alias) {
-          bundleProperties.alias = json(bundle.alias) as any
-        } 
-        return db.updateTable("bundle").set(bundleProperties).where('bundle.id', '=', bundle.id)
-      },
-      delete: (bundle: Bundle) => {
-        return db.deleteFrom("bundle").where('bundle.id', '=', bundle.id)
-      }
-    },
-    message: {
-      select: db.selectFrom("message"),
-      insert: (message: Message) => {
-        return db.insertInto("message").values({
-          id: message.id,
-          bundleId: message.bundleId,
-          locale: message.locale,
-          declarations: json(message.declarations) as any, // TODO SDK-v2 check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
-          selectors: json(message.selectors) as any, // TODO SDK-v2 check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
-        })
-      },
-      update: (message: Partial<Message> & { id: string }) => {
-        
-        const messageProperties = structuredClone(message as any) // TODO SDK-v2 check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
-        delete messageProperties.id
-        if (message.declarations) {
-          messageProperties.declarations = json(message.declarations) as any
-        } 
-        if (message.selectors) {
-          // TODO SDK-v2 shall we structure clone here?
-          messageProperties.selectors = json(message.selectors) as any
-        } 
-
-        return db.updateTable("message").set(messageProperties).where('message.id', '=', message.id)
-      },
-      delete: (message: Message) => {
-        return db.deleteFrom("message").where('message.id', '=', message.id)
-      }
-    },
-    variant: {
-      select: db.selectFrom("variant"),
-      insert: (variant: Variant) => {
-        return db.insertInto("variant").values({
-          id: variant.id,
-          messageId: variant.messageId,
-          match: json(variant.match) as any, // TODO SDK-v2 check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
-          pattern: json(variant.pattern) as any, // TODO SDK-v2 check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
-        })
-      },
-      update: (variant: Partial<Variant> & { id: string } ) => {
-        
-        const variantProperties = structuredClone(variant as any) // TODO SDK-v2 check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
-        delete variantProperties.id
-        if (variant.match) {
-          variantProperties.declarations = json(variant.match) as any
-        } 
-        if (variant.pattern) {
-          // TODO SDK-v2 shall we structure clone here?
-          variantProperties.selectors = json(variant.pattern) as any
-        } 
-
-        return db.updateTable("variant").set(variantProperties).where('variant.id', '=', variant.id)
-      },
-      delete: (variant: Variant) => {
-        return db.deleteFrom("variant").where('variant.id', '=', variant.id)
-      }
-    },
-		fix: async (report: LintReport, fix: Fix<LintReport>) => {
-			// TODO SDK-v2 implement fix
-			// const fixed = await linter.fix(report, fix)
-			// await database.collections.messageBundles.upsert(fixed)
+			get: () => projectSettings$.getValue(),
+			set: async (settings: ProjectSettings2) => {
+				// TODO SDK-v2 implement
+			},
+			subscribe: projectSettings$.asObservable().subscribe,
 		},
+		bundle: {
+			select: db.selectFrom("bundle"),
+			insert: (bundle: Bundle) => {
+				return db.insertInto("bundle").values({
+					id: bundle.id,
+					alias: json(bundle.alias) as any, // TODO SDK-v2 check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
+				})
+			},
+			update: (bundle: Partial<Bundle> & { id: string }) => {
+				const bundleProperties = structuredClone(bundle as any) // TODO SDK-v2 check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
+				delete bundleProperties.id
+				if (bundle.alias) {
+					bundleProperties.alias = json(bundle.alias) as any
+				}
+				return db.updateTable("bundle").set(bundleProperties).where("bundle.id", "=", bundle.id)
+			},
+			delete: (bundle: Bundle) => {
+				return db.deleteFrom("bundle").where("bundle.id", "=", bundle.id)
+			},
+		},
+		message: {
+			select: db.selectFrom("message"),
+			insert: (message: Message) => {
+				return db.insertInto("message").values({
+					id: message.id,
+					bundleId: message.bundleId,
+					locale: message.locale,
+					declarations: json(message.declarations) as any, // TODO SDK-v2 check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
+					selectors: json(message.selectors) as any, // TODO SDK-v2 check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
+				})
+			},
+			update: (message: Partial<Message> & { id: string }) => {
+				const messageProperties = structuredClone(message as any) // TODO SDK-v2 check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
+				delete messageProperties.id
+				if (message.declarations) {
+					messageProperties.declarations = json(message.declarations) as any
+				}
+				if (message.selectors) {
+					// TODO SDK-v2 shall we structure clone here?
+					messageProperties.selectors = json(message.selectors) as any
+				}
+
+				return db.updateTable("message").set(messageProperties).where("message.id", "=", message.id)
+			},
+			delete: (message: Message) => {
+				return db.deleteFrom("message").where("message.id", "=", message.id)
+			},
+		},
+		variant: {
+			select: db.selectFrom("variant"),
+			insert: (variant: Variant) => {
+				return db.insertInto("variant").values({
+					id: variant.id,
+					messageId: variant.messageId,
+					match: json(variant.match) as any, // TODO SDK-v2 check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
+					pattern: json(variant.pattern) as any, // TODO SDK-v2 check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
+				})
+			},
+			update: (variant: Partial<Variant> & { id: string }) => {
+				const variantProperties = structuredClone(variant as any) // TODO SDK-v2 check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
+				delete variantProperties.id
+				if (variant.match) {
+					variantProperties.declarations = json(variant.match) as any
+				}
+				if (variant.pattern) {
+					// TODO SDK-v2 shall we structure clone here?
+					variantProperties.selectors = json(variant.pattern) as any
+				}
+
+				return db.updateTable("variant").set(variantProperties).where("variant.id", "=", variant.id)
+			},
+			delete: (variant: Variant) => {
+				return db.deleteFrom("variant").where("variant.id", "=", variant.id)
+			},
+		},
+		// fix: async (report: LintReport, fix: Fix<LintReport>) => {
+		// 	// TODO SDK-v2 implement fix
+		// 	// const fixed = await linter.fix(report, fix)
+		// 	// await database.collections.messageBundles.upsert(fixed)
+		// },
 		close: () => {
 			// TODO SDK-v2 close database again
 		},
 	}
 }
 
-
-
 export const populateMessages = (bundleSelect: SelectQueryBuilder<Database, "bundle", object>) => {
 	return bundleSelect.select((eb) => [
-			// select all columns from bundle
-			"id",
-			"alias",
-			// select all columns from messages as "messages"
-			jsonArrayFrom(
-				populateVariants(eb.selectFrom("message"))
-					.whereRef("message.bundleId", "=", ("bundle.id" as any)) // TODO SDK-v2 check how get aliases into populateVariants
-			).as("messages"),
-		])
+		// select all columns from bundle
+		"id",
+		"alias",
+		// select all columns from messages as "messages"
+		jsonArrayFrom(
+			populateVariants(eb.selectFrom("message")).whereRef(
+				"message.bundleId",
+				"=",
+				"bundle.id" as any
+			) // TODO SDK-v2 check how get aliases into populateVariants
+		).as("messages"),
+	])
 }
 
-export const populateVariants = (messageSelect: SelectQueryBuilder<Database, "message", object>) => {
-	return messageSelect
-  .select((eb) => [
-    // select all columns from message
-    "id",
-    "bundleId",
-    "locale",
-    "declarations",
-    "selectors",
-    // select all columns from variants as "variants"
-    jsonArrayFrom(
-      eb
-        .selectFrom("variant")
-        .select(["id", "messageId", "match", "pattern"])
-        .whereRef("variant.messageId", "=", "message.id")
-    ).as("variants"),
-  ])
+export const populateVariants = (
+	messageSelect: SelectQueryBuilder<Database, "message", object>
+) => {
+	return messageSelect.select((eb) => [
+		// select all columns from message
+		"id",
+		"bundleId",
+		"locale",
+		"declarations",
+		"selectors",
+		// select all columns from variants as "variants"
+		jsonArrayFrom(
+			eb
+				.selectFrom("variant")
+				.select(["id", "messageId", "match", "pattern"])
+				.whereRef("variant.messageId", "=", "message.id")
+		).as("variants"),
+	])
 }
 
 function json<T>(value: T): RawBuilder<T> {
@@ -259,7 +272,7 @@ function json<T>(value: T): RawBuilder<T> {
 }
 
 const insertBundles = (db: Kysely<Database>) => {
-	return async (bundleToInsert: BundleWithMessages[]) => {
+	return async (bundleToInsert: NestedBundle[]) => {
 		let bundles: NewBundle[] = []
 		let messages: NewMessage[] = []
 		let variants: NewVariant[] = []
@@ -301,7 +314,6 @@ const insertBundles = (db: Kysely<Database>) => {
 
 				// manual batching to avoid too many db operations
 				if (bundles.length > 300) {
-					console.log("Bundles created: " + i)
 					const now = new Date().getTime()
 					console.time("Creating " + bundles.length + " Bundles/Messages/Variants " + now)
 
