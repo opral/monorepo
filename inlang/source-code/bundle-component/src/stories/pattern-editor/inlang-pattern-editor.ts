@@ -1,4 +1,4 @@
-import type { Pattern } from "@inlang/sdk/v2"
+import type { Pattern } from "@inlang/sdk-v2"
 import { LitElement, css, html } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import { ref, createRef, type Ref } from "lit/directives/ref.js"
@@ -55,10 +55,11 @@ export default class InlangPatternEditor extends LitElement {
 
 	// update editor when pattern changes
 	override updated(changedProperties: Map<string | number | symbol, unknown>) {
-		if (changedProperties.has("pattern")) {
-			if (patternToString({ pattern: this.pattern! }) !== this._editorTextContent) {
-				this._setEditorState()
-			}
+		if (
+			changedProperties.has("pattern") &&
+			patternToString({ pattern: this.pattern! }) !== this._editorTextContent
+		) {
+			this._setEditorState()
 		}
 	}
 

@@ -1,4 +1,4 @@
-import type { ProjectSettings2 } from "@inlang/sdk/v2"
+import type { ProjectSettings2 } from "@inlang/sdk-v2"
 
 export const mockSettings: ProjectSettings2 = {
 	$schema: "https://inlang.com/schema/project-settings",

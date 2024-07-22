@@ -1,6 +1,6 @@
 import {
 	type Variant,
-	type Message,
+	type NestedMessage,
 	type LanguageTag,
 	type LintReport,
 	type InstalledLintRule,
@@ -137,7 +137,7 @@ export default class InlangVariant extends LitElement {
 
 	//props
 	@property()
-	message: Message | undefined
+	message: NestedMessage | undefined
 
 	@property()
 	locale: LanguageTag | undefined
@@ -158,7 +158,7 @@ export default class InlangVariant extends LitElement {
 	setHoveredVariantId: (variantId: string | undefined) => void = () => {}
 
 	@property()
-	addMessage: (newMessage: Message) => void = () => {}
+	addMessage: (newMessage: NestedMessage) => void = () => {}
 
 	@property()
 	addInput: (inputName: string) => void = () => {}
@@ -215,11 +215,13 @@ export default class InlangVariant extends LitElement {
 			if (
 				this.message.selectors &&
 				this.message.selectors.length > 0 &&
-				this.lintReports.some((report) => report.variantId && report.variantId === this.variant?.id)
+				this.lintReports.some(
+					(report) => report.target.variantId && report.target.variantId === this.variant?.id
+				)
 			) {
 				// when selectors are present, only the reports of the variant are shown
 				return this.lintReports.filter(
-					(report) => report.variantId && report.variantId === this.variant?.id
+					(report) => report.target.variantId && report.target.variantId === this.variant?.id
 				)
 			}
 		}
@@ -307,19 +309,19 @@ export default class InlangVariant extends LitElement {
 			if (lintReportDropdown) {
 				const previousSibling = lintReportsTip?.previousSibling?.previousSibling?.previousSibling
 				lintReportDropdown.addEventListener("sl-show", (e) => {
-					if (e.target === lintReportDropdown) {
-						//set parent class dropdown-open
-						if (previousSibling instanceof HTMLElement) {
-							previousSibling.classList.add("dropdown-open")
-						}
+					if (
+						e.target === lintReportDropdown && //set parent class dropdown-open
+						previousSibling instanceof HTMLElement
+					) {
+						previousSibling.classList.add("dropdown-open")
 					}
 				})
 				lintReportDropdown.addEventListener("sl-hide", (e) => {
-					if (e.target === lintReportDropdown) {
-						//remove parent class dropdown-open
-						if (previousSibling instanceof HTMLElement) {
-							previousSibling.classList.remove("dropdown-open")
-						}
+					if (
+						e.target === lintReportDropdown && //remove parent class dropdown-open
+						previousSibling instanceof HTMLElement
+					) {
+						previousSibling.classList.remove("dropdown-open")
 					}
 				})
 			}
@@ -357,6 +359,7 @@ export default class InlangVariant extends LitElement {
 							!this.message?.selectors
 								? html`<inlang-selector-configurator
 										.inputs=${this.inputs}
+										.bundleId=${this.message!.bundleId}
 										.message=${this.message}
 										.locale=${this.locale}
 										.triggerMessageBundleRefresh=${this.triggerMessageBundleRefresh}

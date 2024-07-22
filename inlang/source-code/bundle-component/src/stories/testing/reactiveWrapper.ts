@@ -3,13 +3,14 @@ import { customElement, property, state } from "lit/decorators.js"
 
 import "./../inlang-bundle.js"
 import "./../actions/inlang-bundle-action.js"
-import type { LintReport, NestedBundle, ProjectSettings2 } from "@inlang/sdk-v2"
-import type { InstalledMessageLintRule } from "@inlang/sdk"
-import { pluralBundle } from "@inlang/sdk/v2-mocks"
+import type { InstalledLintRule, LintReport, NestedBundle, ProjectSettings2 } from "@inlang/sdk-v2"
+// import type { InstalledMessageLintRule } from "@inlang/sdk-v2"
+import { pluralBundle } from "@inlang/sdk-v2"
+
 import {
 	mockInstalledLintRules,
-	mockMessageLintReports,
-	mockVariantLintReports,
+	// mockMessageLintReports,
+	// mockVariantLintReports,
 } from "../../mock/lint.js"
 import { mockSettings } from "../../mock/settings.js"
 
@@ -22,7 +23,7 @@ export default class InlangReactiveWrapper extends LitElement {
 	settings: ProjectSettings2 | undefined
 
 	@property({ type: Array })
-	installedLintRules: InstalledMessageLintRule[] | undefined
+	installedLintRules: InstalledLintRule[] | undefined
 
 	@state()
 	_lintReports: { hash: string; reports: LintReport[] } | undefined
@@ -33,20 +34,19 @@ export default class InlangReactiveWrapper extends LitElement {
 	}
 
 	override async firstUpdated() {
-		this._lintReports = {
-			hash: "hash",
-			reports: [],
-		}
-
-		setInterval(() => {
-			if (this._lintReports) {
-				this._lintReports = {
-					...this._lintReports,
-					reports: [...mockMessageLintReports, ...mockVariantLintReports],
-				}
-			}
-		}, 1900)
-
+		// TODO SDK-v2 lint reports - mock
+		// this._lintReports = {
+		// 	hash: "hash",
+		// 	reports: [],
+		// }
+		// setInterval(() => {
+		// 	if (this._lintReports) {
+		// 		this._lintReports = {
+		// 			...this._lintReports,
+		// 			reports: [...mockMessageLintReports, ...mockVariantLintReports],
+		// 		}
+		// 	}
+		// }, 1900)
 		// setInterval(() => {
 		// 	if (this._lintReports) {
 		// 		this._lintReports = {
@@ -61,7 +61,7 @@ export default class InlangReactiveWrapper extends LitElement {
 		return html`<inlang-bundle
 			.bundle=${{ ...(this.bundle || pluralBundle), lintReports: this._lintReports }}
 			.settings=${this.settings || mockSettings}
-			.installedLintRules=${this.installedLintRules || mockInstalledLintRules}
+			.installedLintRules=${[] /*this.installedLintRules || mockInstalledLintRules*/}
 			@change-message-bundle=${(data: any) => {
 				this.bundle = data.detail.argument
 			}}

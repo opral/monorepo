@@ -1,7 +1,7 @@
 import "./inlang-pattern-editor.ts"
 import type { Meta, StoryObj } from "@storybook/web-components"
 import { html } from "lit"
-import { pluralBundle } from "@inlang/sdk/v2-mocks"
+import { pluralBundle } from "@inlang/sdk-v2"
 import stringToPattern from "../../helper/crud/pattern/stringToPattern.ts"
 
 const meta: Meta = {

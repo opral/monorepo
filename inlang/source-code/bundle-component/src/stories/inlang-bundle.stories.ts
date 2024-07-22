@@ -2,14 +2,14 @@ import "./inlang-bundle.ts"
 import "./testing/reactiveWrapper.ts"
 import type { Meta, StoryObj } from "@storybook/web-components"
 import { html } from "lit"
-import {
-	mockInstalledLintRules,
-	mockMessageLintReports,
-	mockVariantLintReports,
-} from "../mock/lint.ts"
+// import {
+// 	mockInstalledLintRules,
+// 	mockMessageLintReports,
+// 	mockVariantLintReports,
+// } from "../mock/lint.ts"
 import { mockSettings } from "../mock/settings.ts"
 import { bundleWithoutSelectors } from "../mock/messageBundle.ts"
-import { pluralBundle } from "@inlang/sdk/v2-mocks"
+import { pluralBundle } from "@inlang/sdk-v2"
 
 import "./actions/inlang-bundle-action.ts"
 
@@ -60,7 +60,7 @@ export const Complex: StoryObj = {
 		return html`<inlang-bundle
 			.bundle=${pluralBundle}
 			.settings=${mockSettings}
-			.installedLintRules=${mockInstalledLintRules}
+			.installedLintRules=${[]}
 			@update-bundle=${(data: any) => console.info("updateBundle", data.detail.argument)}
 			@insert-message=${(data: any) => console.info("insertMessage", data.detail.argument)}
 			@update-message=${(data: any) => console.info("updateMessage", data.detail.argument)}
@@ -141,8 +141,7 @@ export const Styled: StoryObj = {
 			<inlang-bundle
 				.bundle=${pluralBundle}
 				.settings=${mockSettings}
-				.lintReports=${[...mockMessageLintReports, ...mockVariantLintReports]}
-				.installedLintRules=${mockInstalledLintRules}
+				.lintReports=${[]}
 				@change-message-bundle=${(data: any) =>
 					console.info("changeMessageBundle", data.detail.argument)}
 				@fix-lint=${(data: any) => console.info("fixLint", data.detail.argument)}
@@ -161,11 +160,7 @@ export const Styled: StoryObj = {
 
 export const ReactiveLints: StoryObj = {
 	render: () => {
-		return html`<inlang-reactive-wrapper
-			.bundle=${pluralBundle}
-			.settings=${mockSettings}
-			.installedLintRules=${mockInstalledLintRules}
-		>
+		return html`<inlang-reactive-wrapper .bundle=${pluralBundle} .settings=${mockSettings}>
 		</inlang-reactive-wrapper> `
 	},
 }

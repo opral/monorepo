@@ -10,6 +10,7 @@ import {
 	type LanguageTag,
 	type Message,
 	type Variant,
+	type NestedMessage,
 } from "@inlang/sdk-v2"
 import addSelector from "../helper/crud/selector/add.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
@@ -147,7 +148,10 @@ export default class InlangSelectorConfigurator extends LitElement {
 	inputs: Declaration[] | undefined
 
 	@property()
-	message?: Message | undefined
+	bundleId: string | undefined
+
+	@property()
+	message?: NestedMessage | undefined
 
 	@property()
 	locale: LanguageTag | undefined
@@ -159,7 +163,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 	triggerSave: () => void = () => {}
 
 	@property()
-	addMessage: (newMessage: Message) => void = () => {}
+	addMessage: (newMessage: NestedMessage) => void = () => {}
 
 	@property()
 	addInput: (inputName: string) => void = () => {}
@@ -240,7 +244,11 @@ export default class InlangSelectorConfigurator extends LitElement {
 		if (this._input) {
 			if (!this.message && this.locale) {
 				// create selector in not present message
-				const newMessage = createMessage({ locale: this.locale, text: "" })
+				const newMessage = createMessage({
+					bundleId: this.bundleId!,
+					locale: this.locale,
+					text: "",
+				})
 
 				// add selector
 				addSelector({
@@ -315,7 +323,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 	}
 
 	private _addVariants = (props: {
-		message: Message
+		message: NestedMessage
 		variantMatcherArrays: string[][]
 		newMatchers: string[]
 	}) => {
@@ -327,6 +335,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 						upsertVariant({
 							message: props.message,
 							variant: createVariant({
+								messageId: props.message.id,
 								// combine the matches that are already present with the new category -> like a matrix
 								match: [...variantMatcherArray, category],
 							}),
@@ -338,6 +347,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 					upsertVariant({
 						message: props.message,
 						variant: createVariant({
+							messageId: props.message.id,
 							// combine the matches that are already present with the new category -> like a matrix
 							match: [category],
 						}),
@@ -516,6 +526,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 										// get the last input element and focus it
 										setTimeout(() => {
 											const inputs = this.shadowRoot?.querySelectorAll(".option")
+											// @ts-ignore -- .at seems not to be available in the type? @NilsJacobsen
 											const lastInput = inputs && (inputs.at(-1) as HTMLInputElement)
 											lastInput?.focus(), 100
 										})
