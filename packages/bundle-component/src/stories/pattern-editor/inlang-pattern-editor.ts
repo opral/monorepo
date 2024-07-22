@@ -37,7 +37,6 @@ export default class InlangPatternEditor extends LitElement {
 
 	// dispatch `change-pattern` event with the new pattern
 	dispatchOnChangePattern(pattern: Pattern) {
-		debugger
 		const onChangePattern = new CustomEvent("change-pattern", {
 			detail: {
 				argument: pattern,
@@ -62,6 +61,17 @@ export default class InlangPatternEditor extends LitElement {
 			this._setEditorState()
 		}
 	}
+
+	// // update editor when pattern changes
+	// override updated(changedProperties: Map<string | number | symbol, unknown>) {
+	// 	if (
+	// 		changedProperties.has("pattern")
+	// 		// TODO how do wset the pettern?
+	// 	) {
+	// 		// debugger
+	// 		this._setEditorState()
+	// 	}
+	// }
 
 	// set editor state
 	private _setEditorState = () => {
@@ -115,13 +125,10 @@ export default class InlangPatternEditor extends LitElement {
 			this.editor.setRootElement(contentEditableElement)
 			registerPlainText(this.editor)
 
-			console.log("registering event first time")
 			// listen to text content changes and dispatch `change-pattern` event
 			this._removeTextContentListener = this.editor.registerTextContentListener(
 				(textContent: any) => {
 					// The latest text content of the editor!
-					console.log("textContent:", textContent)
-
 					//check if something changed
 
 					this._patternState = stringToPattern({ text: textContent })

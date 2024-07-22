@@ -140,7 +140,7 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 			set: async (settings: ProjectSettings2) => {
 				// TODO SDK-v2 implement
 			},
-			subscribe: projectSettings$.asObservable().subscribe,
+			subscribe: () => projectSettings$.subscribe(),
 		},
 		bundle: {
 			select: db.selectFrom("bundle"),
@@ -176,6 +176,7 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 			update: (message: Partial<Message> & { id: string }) => {
 				const messageProperties = structuredClone(message as any) // TODO SDK-v2 check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
 				delete messageProperties.id
+				delete messageProperties.variants
 				if (message.declarations) {
 					messageProperties.declarations = json(message.declarations) as any
 				}
@@ -204,11 +205,11 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 				const variantProperties = structuredClone(variant as any) // TODO SDK-v2 check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
 				delete variantProperties.id
 				if (variant.match) {
-					variantProperties.declarations = json(variant.match) as any
+					variantProperties.match = json(variant.match) as any
 				}
 				if (variant.pattern) {
 					// TODO SDK-v2 shall we structure clone here?
-					variantProperties.selectors = json(variant.pattern) as any
+					variantProperties.pattern = json(variant.pattern) as any
 				}
 
 				return db.updateTable("variant").set(variantProperties).where("variant.id", "=", variant.id)

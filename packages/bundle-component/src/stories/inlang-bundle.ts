@@ -407,6 +407,7 @@ export default class InlangBundle extends LitElement {
 								return html`<inlang-variant
 									slot="variant"
 									.variant=${variant}
+									.bundleId=${this.bundle!.id}
 									.message=${message}
 									.inputs=${this._inputs()}
 									.triggerSave=${this._triggerSave}

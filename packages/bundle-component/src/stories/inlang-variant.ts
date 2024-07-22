@@ -135,6 +135,9 @@ export default class InlangVariant extends LitElement {
 		`,
 	]
 
+	@property()
+	bundleId: string | undefined
+
 	//props
 	@property()
 	message: NestedMessage | undefined
@@ -359,9 +362,7 @@ export default class InlangVariant extends LitElement {
 							!this.message?.selectors
 								? html`<inlang-selector-configurator
 										.inputs=${this.inputs}
-										.bundleId=${this.message?.bundleId
-											? this.message?.bundleId
-											: "TODO SDK-v2 @nils check how we deal with undefined"}
+										.bundleId=${this.message?.bundleId ? this.message?.bundleId : this.bundleId!}
 										.message=${this.message}
 										.locale=${this.locale}
 										.triggerMessageBundleRefresh=${this.triggerMessageBundleRefresh}
