@@ -1,9 +1,7 @@
-import type { BehaviorSubject, Observable, Observer, Subscribable, Subscription } from "rxjs"
+import type { BehaviorSubject, Observer, Subscription } from "rxjs"
 import type {
-	Fix,
 	InstalledLintRule,
 	InstalledPlugin,
-	LintReport,
 	ProjectSettings2,
 	// LintResult,
 	// Message,
@@ -13,7 +11,15 @@ import type {
 	// ProjectSettings2,
 } from "./index.js"
 import type { Bundle, Database, Message, NestedBundle, NestedMessage, Variant } from "./schema.js"
-import type { DeleteQueryBuilder, DeleteResult, InsertQueryBuilder, InsertResult, SelectQueryBuilder, UpdateQueryBuilder, UpdateResult } from "kysely"
+import type {
+	DeleteQueryBuilder,
+	DeleteResult,
+	InsertQueryBuilder,
+	InsertResult,
+	SelectQueryBuilder,
+	UpdateQueryBuilder,
+	UpdateResult,
+} from "kysely"
 
 export type InlangProject = {
 	/**#
@@ -29,29 +35,37 @@ export type InlangProject = {
 	settings: {
 		get: () => ProjectSettings2
 		set: (settings: ProjectSettings2) => Promise<void>
-		subscribe: (observerOrNext?: Partial<Observer<ProjectSettings2>> | ((value: ProjectSettings2) => void), error?: (error: any) => void, complete?: () => void) => Subscription
+		subscribe: (
+			observerOrNext?: Partial<Observer<ProjectSettings2>> | ((value: ProjectSettings2) => void),
+			error?: (error: any) => void,
+			complete?: () => void
+		) => Subscription
 	}
 	bundle: {
 		select: SelectQueryBuilder<Database, "bundle", object>
 		insert: (bundle: NestedBundle) => InsertQueryBuilder<Database, "bundle", InsertResult>
-		update: (bundle: Partial<Bundle> & { id: string }) => UpdateQueryBuilder<Database, "bundle", "bundle", UpdateResult>
-		delete: (bundle: Bundle) =>  DeleteQueryBuilder<Database, "bundle", DeleteResult>
+		update: (
+			bundle: Partial<Bundle> & { id: string }
+		) => UpdateQueryBuilder<Database, "bundle", "bundle", UpdateResult>
+		delete: (bundle: Bundle) => DeleteQueryBuilder<Database, "bundle", DeleteResult>
 	}
 	message: {
 		select: SelectQueryBuilder<Database, "message", object>
 		insert: (message: NestedMessage) => InsertQueryBuilder<Database, "message", InsertResult>
-		update: (message: Partial<Message> & { id: string }) => UpdateQueryBuilder<Database, "message", "message", UpdateResult>
-		delete: (message: Message) =>  DeleteQueryBuilder<Database, "message", DeleteResult>
+		update: (
+			message: Partial<Message> & { id: string }
+		) => UpdateQueryBuilder<Database, "message", "message", UpdateResult>
+		delete: (message: Message) => DeleteQueryBuilder<Database, "message", DeleteResult>
 	}
 	variant: {
 		select: SelectQueryBuilder<Database, "variant", object>
 		insert: (variant: Variant) => InsertQueryBuilder<Database, "variant", InsertResult>
 		update: (variant: Variant) => UpdateQueryBuilder<Database, "variant", "variant", UpdateResult>
-		delete: (bundle: Variant) =>  DeleteQueryBuilder<Database, "variant", DeleteResult>
+		delete: (bundle: Variant) => DeleteQueryBuilder<Database, "variant", DeleteResult>
 	}
-	reports: {
-		select: any
-	}
+	// reports: {
+	// 	select: any
+	// }
 	// js libraries containing lint rules, importers, exporters, code matchers, registries (icu2)
 	// modules: {
 	// 	// TODO provide import exporter plugins: Subscribable<InstalledPlugin[]>
@@ -70,6 +84,6 @@ export type InlangProject = {
 	// 	selectNested:
 	// }
 
-	fix: <Report extends LintReport>(lintReport: Report, fix: Fix<Report>) => Promise<void>
+	// fix: <Report extends LintReport>(lintReport: Report, fix: Fix<Report>) => Promise<void>
 	close: () => void
 }

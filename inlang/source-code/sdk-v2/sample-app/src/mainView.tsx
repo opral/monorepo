@@ -1,13 +1,10 @@
-import { useEffect, useState } from "react"
-import { pluralBundle } from "../../src/v2/mocks/index.js"
-import { randomHumanId } from "../../src/storage/human-id/human-readable-id.js"
-import { createMessage, createMessageBundle } from "../../src/v2/helper.js"
+import { useState } from "react"
 import { MessageBundleList } from "./messageBundleListReact.js"
 import { type InlangProject2, MessageBundle, getFs, loadProject } from "../../dist/v2/index.js"
 import { SettingsView } from "./settingsView.js"
-import { BundleWithMessages } from "../../src/types/sdkTypes.js"
-import { createBundle } from "../../src/mock/mockhelper.js"
-import { InlangProject } from "../../src/types/index.js"
+
+import { createMockBundle } from "../../src/mock/mockhelper.js"
+import { InlangProject, NestedBundle, NestedBundle } from "../../src/types/index.js"
 
 export function MainView({ inlangProject }: { inlangProject: InlangProject2 }) {
 	const [currentView, setCurrentView] = useState<"overview" | "messageList" | "settings">(
@@ -15,21 +12,21 @@ export function MainView({ inlangProject }: { inlangProject: InlangProject2 }) {
 	)
 
 	const insertNMessageBundles = async (project: InlangProject, n: number) => {
-		const messagesToAdd = [] as BundleWithMessages[]
+		const messagesToAdd = [] as NestedBundle[]
 		for (let i = 0; i < n; i++) {
-			const newBundle = createBundle({
+			const newBundle = createMockBundle({
 				languageTags: ["de"],
 				nInputs: 3,
 				nSelectors: 2,
 				nExpressions: 3,
 			})
 
-			messagesToAdd.push(newBundle)
-		}
+			// messagesToAdd.push(newBundle)
 
-		console.time("inserting " + n + " messageBundles")
-		await project.bundle.insert(messagesToAdd)
-		console.timeEnd("inserting " + n + " messageBundles")
+			console.time("inserting " + n + " messageBundles")
+			await project.bundle.insert(newBundle).execute()
+			console.timeEnd("inserting " + n + " messageBundles")
+		}
 	}
 
 	return (

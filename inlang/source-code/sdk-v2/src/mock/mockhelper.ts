@@ -1,9 +1,15 @@
-import type { Declaration, Expression, LintReport, Pattern } from "../types/schema.js"
-import type { BundleWithMessages, MessageWithVariants } from "../types/sdkTypes.js"
+import type {
+	Declaration,
+	Expression,
+	NestedBundle,
+	NestedMessage,
+	Pattern,
+} from "../types/schema.js"
 
-import { inputNames, inputsWithSelectors, simpleInputs, translations } from "./mockdata"
+import { inputNames, inputsWithSelectors, simpleInputs, translations } from "./mockdata.js"
 import { v4 } from "uuid"
 import { randomHumanId } from "../human-id/human-readable-id.js"
+import type { LintReport } from "../types/lint.js"
 
 export function generateUUID() {
 	return v4()
@@ -41,7 +47,7 @@ function generateCombinations(variants: string[][]): string[][] {
  * @param nSelectors number of selectors to add like plural forms or numbers
  * @param nExpressions number of expressens to add to the variant patterns (like name placeholders)
  */
-export function createBundle(args: {
+export function createMockBundle(args: {
 	languageTags: string[]
 	nInputs: number
 	nSelectors: number
@@ -64,7 +70,7 @@ export function createBundle(args: {
 			inputs.push(inputsWithSelectors.gender("gender").inputDeclaration)
 			matchers.push(inputsWithSelectors.gender("gender").matcher)
 		} else {
-			const inputName: string = inputNames[i]
+			const inputName: string = inputNames[i]!
 			selectors.push(inputsWithSelectors.number(inputName).selector)
 			inputs.push(inputsWithSelectors.number(inputName).inputDeclaration)
 			matchers.push(inputsWithSelectors.number(inputName).matcher)
@@ -73,7 +79,7 @@ export function createBundle(args: {
 
 	// fill up the remaining inputs with simple inputs (no selector function and matchers)
 	for (let i = inputs.length; i < args.nInputs; i++) {
-		const inputName: string = inputNames[i] // TODO generate a selector name
+		const inputName: string = inputNames[i]! // TODO generate a selector name
 		if (i === 0) {
 			inputs.push(simpleInputs.string(inputName).inputDeclaration)
 		} else {
@@ -86,14 +92,13 @@ export function createBundle(args: {
 		args.languageTags,
 		inputs,
 		selectors,
-		generateCombinations(matchers),
-		args.nExpressions
+		generateCombinations(matchers)
 	)
 	return {
 		id: bundleId,
 		alias: bundleAlias,
 		messages: messages,
-	} as BundleWithMessages
+	} as NestedBundle
 }
 
 function createMessages(
@@ -101,10 +106,9 @@ function createMessages(
 	languageTags: string[],
 	inputs: Declaration[],
 	selectors: Expression[],
-	variants: string[][],
-	nExpressions: number
+	variants: string[][]
 ) {
-	const messagesByLanguage: Record<string, MessageWithVariants> = {}
+	const messagesByLanguage: Record<string, NestedMessage> = {}
 
 	for (const lanugageTag of languageTags) {
 		const messageId = generateUUID()
@@ -121,11 +125,11 @@ function createMessages(
 	for (const variant of variants) {
 		const patternsByLanguage = createPattern(inputs, languageTags)
 		for (const lanugageTag of languageTags) {
-			messagesByLanguage[lanugageTag].variants.push({
+			messagesByLanguage[lanugageTag]!.variants.push({
 				id: generateUUID(),
 				match: variant,
-				messageId: messagesByLanguage[lanugageTag].id,
-				pattern: patternsByLanguage[lanugageTag],
+				messageId: messagesByLanguage[lanugageTag]!.id,
+				pattern: patternsByLanguage[lanugageTag]!,
 			})
 		}
 	}
@@ -141,19 +145,19 @@ function createPattern(inputs: Declaration[], languageTags: string[]) {
 		patterns[lanugageTag] = []
 	}
 
-	const textIndex = Math.floor(Math.random() * translations["en-US"].length)
+	const textIndex = Math.floor(Math.random() * translations["en-US"]!.length)
 	for (const lanugageTag of languageTags) {
-		patterns[lanugageTag].push({ type: "text", value: translations[lanugageTag][textIndex] })
+		patterns[lanugageTag]!.push({ type: "text", value: translations[lanugageTag]![textIndex]! })
 	}
 
 	for (const input of inputs) {
-		const textIndex = Math.floor(Math.random() * translations["en-US"].length)
+		const textIndex = Math.floor(Math.random() * translations["en-US"]!.length)
 		for (const lanugageTag of languageTags) {
-			patterns[lanugageTag].push({ type: "text", value: translations[lanugageTag][textIndex] })
+			patterns[lanugageTag]!.push({ type: "text", value: translations[lanugageTag]![textIndex]! })
 		}
 
 		for (const lanugageTag of languageTags) {
-			patterns[lanugageTag].push({
+			patterns[lanugageTag]!.push({
 				type: "expression",
 				arg: { type: "variable", name: input.name },
 			})
@@ -163,12 +167,12 @@ function createPattern(inputs: Declaration[], languageTags: string[]) {
 	return patterns
 }
 
-export function mockReports(messageBundle: ReturnType<typeof createBundle>) {
+export function mockReports(messageBundle: ReturnType<typeof createMockBundle>) {
 	const lintReports: LintReport[] = []
 	lintReports.push({
-		ruleId: "uniqueAlias",
+		ruleId: "messageBundleLintRule.test.uniqueAlias",
 		target: {
-			messageBundleId: messageBundle.id,
+			bundleId: messageBundle.id,
 			messageId: undefined,
 			variantId: undefined,
 		},
@@ -184,9 +188,9 @@ export function mockReports(messageBundle: ReturnType<typeof createBundle>) {
 
 	for (const message of messageBundle.messages) {
 		lintReports.push({
-			ruleId: "outdatedTranslation",
+			ruleId: "messageBundleLintRule.test.outdatedTranslation",
 			target: {
-				messageBundleId: messageBundle.id,
+				bundleId: messageBundle.id,
 				messageId: message.id,
 				variantId: undefined,
 			},
@@ -202,9 +206,9 @@ export function mockReports(messageBundle: ReturnType<typeof createBundle>) {
 
 		for (const variant of message.variants) {
 			lintReports.push({
-				ruleId: "opralLowerCase",
+				ruleId: "messageBundleLintRule.test.opralLowerCase",
 				target: {
-					messageBundleId: messageBundle.id,
+					bundleId: messageBundle.id,
 					messageId: message.id,
 					variantId: variant.id,
 				},

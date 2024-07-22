@@ -19,8 +19,8 @@ const PluginCompiler = TypeCompiler.Compile(Plugin)
 export const resolvePlugins2: ResolvePlugins2Function = async (args) => {
 	const result: Awaited<ReturnType<ResolvePlugins2Function>> = {
 		data: {
-			loadMessages: undefined as any,
-			saveMessages: undefined as any,
+			// loadMessages: undefined as any,
+			// saveMessages: undefined as any,
 			customApi: {},
 		},
 		errors: [],
@@ -55,13 +55,14 @@ export const resolvePlugins2: ResolvePlugins2Function = async (args) => {
 		}
 
 		// -- ALREADY DEFINED LOADMESSAGES / SAVEMESSAGES / DETECTEDLANGUAGETAGS --
-		if (typeof plugin.loadMessages === "function" && result.data.loadMessages !== undefined) {
-			result.errors.push(new PluginLoadMessagesFunctionAlreadyDefinedError({ id: plugin.id }))
-		}
+		// TODO SDK-v2 check if we can reuse this for export/import
+		// if (typeof plugin.loadMessages === "function" && result.data.loadMessages !== undefined) {
+		// 	result.errors.push(new PluginLoadMessagesFunctionAlreadyDefinedError({ id: plugin.id }))
+		// }
 
-		if (typeof plugin.saveMessages === "function" && result.data.saveMessages !== undefined) {
-			result.errors.push(new PluginSaveMessagesFunctionAlreadyDefinedError({ id: plugin.id }))
-		}
+		// if (typeof plugin.saveMessages === "function" && result.data.saveMessages !== undefined) {
+		// 	result.errors.push(new PluginSaveMessagesFunctionAlreadyDefinedError({ id: plugin.id }))
+		// }
 
 		// --- ADD APP SPECIFIC API ---
 		if (typeof plugin.addCustomApi === "function") {
@@ -92,13 +93,14 @@ export const resolvePlugins2: ResolvePlugins2Function = async (args) => {
 		 * -------------- BEGIN ADDING TO RESULT --------------
 		 */
 
-		if (typeof plugin.loadMessages === "function") {
-			result.data.loadMessages = plugin.loadMessages
-		}
+		// TODO SDK-v2 we remove load/save Message for now
+		// if (typeof plugin.loadMessages === "function") {
+		// 	result.data.loadMessages = plugin.loadMessages
+		// }
 
-		if (typeof plugin.saveMessages === "function") {
-			result.data.saveMessages = plugin.saveMessages
-		}
+		// if (typeof plugin.saveMessages === "function") {
+		// 	result.data.saveMessages = plugin.saveMessages
+		// }
 
 		if (typeof plugin.addCustomApi === "function") {
 			const { data: customApi } = tryCatch(() =>
@@ -114,13 +116,14 @@ export const resolvePlugins2: ResolvePlugins2Function = async (args) => {
 
 	// --- LOADMESSAGE / SAVEMESSAGE NOT DEFINED ---
 
-	if (
-		!experimentalPersistence &&
-		(typeof result.data.loadMessages !== "function" ||
-			typeof result.data.saveMessages !== "function")
-	) {
-		result.errors.push(new PluginsDoNotProvideLoadOrSaveMessagesError())
-	}
+	// TODO SDK-v2 check if we can use that for exporter importer
+	// if (
+	// 	!experimentalPersistence &&
+	// 	(typeof result.data.loadMessages !== "function" ||
+	// 		typeof result.data.saveMessages !== "function")
+	// ) {
+	// 	result.errors.push(new PluginsDoNotProvideLoadOrSaveMessagesError())
+	// }
 
 	return result
 }

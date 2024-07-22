@@ -20,19 +20,21 @@ export function populateLevel(
 	return { ...report, level: "error" }
 }
 
-const keys = [
-	["ruleId", "ruleId"],
-	["bundleId", "messageBundleId"],
-	["messageId", "messageId"],
-	["variantId", "variantId"], // ["messageLocale"], // , "locale"],
-	// ,
-] as const satisfies [keyof LintConfig, keyof LintReport][]
+// TODO SDK-v2 loris - discuss how we want this to be implemented
+// const keys = [
+// 	["ruleId", "ruleId"],
+// 	["bundleId", "bundleId"],
+// 	["messageId", "messageId"],
+// 	["variantId", "variantId"], // ["messageLocale"], // , "locale"],
+// 	// ,
+// ] as const satisfies [keyof LintConfig, keyof LintReport][]
 
 function configMatches(report: Omit<LintReport, "level">, config: LintConfig): boolean {
-	for (const [configKey, reportKey] of keys) {
-		if (config[configKey] === undefined) continue
-		if (config[configKey] !== report[reportKey]) return false
-	}
+	// TODO SDK-v2 loris - discuss how we want this to be implemented
+	// for (const [configKey, reportKey] of keys) {
+	// 	if (config[configKey] === undefined) continue
+	// 	if (config[configKey] !== report[reportKey]) return false
+	// }
 
 	return true
 }

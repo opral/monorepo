@@ -1,6 +1,5 @@
 import type { ValueError } from "@sinclair/typebox/errors"
 export * from "./plugins/errors.js"
-export * from "./message-lint-rules/errors.js"
 
 export class ModuleError extends Error {
 	public readonly module: string

@@ -3,7 +3,7 @@ import "./style.css"
 import { createRoot } from "react-dom/client"
 import { PageView } from "./PageView.js"
 
-import "@inlang/message-bundle-component"
+import "@inlang/bundle-component"
 
 document.querySelector<HTMLDivElement>(
 	"#app"

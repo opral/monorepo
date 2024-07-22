@@ -1,8 +1,8 @@
 import dedent from "dedent"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
 import { tryCatch } from "@inlang/result"
-import { withReadOnlyCache } from "../../resolve-modules/cache.js"
-import { ModuleImportError } from "../../resolve-modules/errors.js"
+import { withReadOnlyCache } from "../resolve-modules/cache.js"
+import { ModuleImportError } from "../resolve-modules/errors.js"
 
 // TODO deduplicate this module
 
