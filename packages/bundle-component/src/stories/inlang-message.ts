@@ -1,5 +1,5 @@
-import type { InstalledMessageLintRule, LanguageTag } from "@inlang/sdk"
-import type { Declaration, LintReport, Message, ProjectSettings2, Variant } from "@inlang/sdk/v2"
+import type { InstalledLintRule, LanguageTag, NestedMessage } from "@inlang/sdk-v2"
+import type { Declaration, LintReport, Message, ProjectSettings2, Variant } from "@inlang/sdk-v2"
 import { createVariant } from "@inlang/sdk-v2"
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
@@ -158,13 +158,13 @@ export default class InlangMessage extends LitElement {
 	locale: LanguageTag | undefined
 
 	@property()
-	message: Message | undefined
+	message: NestedMessage | undefined
 
 	@property()
 	lintReports: LintReport[] | undefined
 
 	@property()
-	installedLintRules: InstalledMessageLintRule[] | undefined
+	installedLintRules: InstalledLintRule[] | undefined
 
 	@property({ type: Object })
 	settings: ProjectSettings2 | undefined
@@ -179,7 +179,7 @@ export default class InlangMessage extends LitElement {
 	addInput: (name: string) => void = () => {}
 
 	@property()
-	addMessage: (message: Message) => void = () => {}
+	addMessage: (message: NestedMessage) => void = () => {}
 
 	@property()
 	resetFreshlyAddedVariants: (newArray: string[]) => void = () => {}
@@ -266,6 +266,7 @@ export default class InlangMessage extends LitElement {
 								<div class="add-selector-container">
 									<inlang-selector-configurator
 										.inputs=${this.inputs}
+										.bundleId=${this.message.bundleId}
 										.message=${this.message}
 										.locale=${this.locale}
 										.triggerMessageBundleRefresh=${this.triggerMessageBundleRefresh}
@@ -333,9 +334,11 @@ export default class InlangMessage extends LitElement {
 									: ``}
 								${this.lintReports &&
 								this.lintReports.length > 0 &&
-								this.lintReports.some((report) => !report.variantId)
+								this.lintReports.some((report) => !report.target.variantId)
 									? html`<inlang-lint-report-tip
-											.lintReports=${this.lintReports.filter((report) => !report.variantId) ?? []}
+											.lintReports=${this.lintReports.filter(
+												(report) => !report.target.variantId
+											) ?? []}
 											.installedLintRules=${this.installedLintRules}
 											.fixLint=${this.fixLint}
 									  ></inlang-lint-report-tip>`
@@ -349,6 +352,7 @@ export default class InlangMessage extends LitElement {
 						? html`<p
 								@click=${() => {
 									const variant = createVariant({
+										messageId: this.message!.id,
 										// combine the matches that are already present with the new category -> like a matrix
 										match: this.message?.selectors.map(() => "null"),
 									})

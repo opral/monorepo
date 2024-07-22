@@ -22,7 +22,7 @@ const overridePrimitiveColors = () => {
 const appendCSSProperties = (
 	colorShades: Record<number, string>,
 	primitive: string,
-	element: HTMLElement
+	element: Element
 ) => {
 	let textContent = Object.entries(colorShades)
 		.map(([index, shade]) => `--sl-color-${primitive}-${index}: ${shade} !important;`)

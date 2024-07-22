@@ -14,7 +14,7 @@ import {
 	type Variant,
 	type Expression,
 } from "@inlang/sdk-v2"
-import type { InstalledMessageLintRule, NestedBundle, NestedMessage } from "@inlang/sdk-v2"
+import type { InstalledLintRule, NestedBundle, NestedMessage } from "@inlang/sdk-v2"
 
 //internal components
 import "./inlang-bundle-root.js"
@@ -64,7 +64,7 @@ import updateMatch from "../helper/crud/variant/updateMatch.js"
 export default class InlangBundle extends LitElement {
 	//props
 	@property({ type: Object })
-	bundle: Bundle | undefined
+	bundle: NestedBundle | undefined
 
 	@property({ type: Object })
 	settings: ProjectSettings2 | undefined
@@ -73,7 +73,7 @@ export default class InlangBundle extends LitElement {
 	filteredLocales: LanguageTag[] | undefined
 
 	@property({ type: Array })
-	installedLintRules: InstalledMessageLintRule[] | undefined
+	installedLintRules: InstalledLintRule[] | undefined
 
 	//disable shadow root -> because of contenteditable selection API
 	override createRenderRoot() {
@@ -230,6 +230,7 @@ export default class InlangBundle extends LitElement {
 	}
 
 	private _getBundleActions = (): Element[] => {
+		// @ts-ignore -- @NilsJacobsen check why this produces a ts error
 		return [...this.children]
 			.filter((child) => child instanceof InlangBundleAction)
 			.map((child) => {
@@ -256,19 +257,23 @@ export default class InlangBundle extends LitElement {
 	}
 
 	// fill message with empty message if message is undefined to fix layout shift (will not be committed)
-	private _fillMessage = (message: NestedMessage | undefined, locale: LanguageTag): NestedMessage => {
+	private _fillMessage = (
+		bundleId: string,
+		message: NestedMessage | undefined,
+		locale: LanguageTag
+	): NestedMessage => {
 		if (message) {
 			if (message.variants.length === 0) {
 				message.variants.push(createVariant({ messageId: message.id, match: [] }))
 			}
 			return message
 		} else {
-			return createMessage({ locale: locale, text: "" })
+			return createMessage({ bundleId, locale: locale, text: "" })
 		}
 	}
 
 	private _handleUpdatePattern = (
-		message: Message | undefined,
+		message: NestedMessage | undefined,
 		variant: Variant | undefined,
 		newPattern: Pattern,
 		locale: LanguageTag
@@ -288,12 +293,12 @@ export default class InlangBundle extends LitElement {
 				this.dispatchOnUpdateVariant(upsertedVariant)
 			}
 		} else {
-			const newVariant = {
-				...createVariant({ match: [] }),
-				pattern: newPattern,
-			}
-
 			if (message) {
+				const newVariant = {
+					...createVariant({ messageId: message!.id, match: [] }),
+					pattern: newPattern,
+				}
+
 				// A message object exists -> just add the new variant
 				upsertVariant({
 					message: message!,
@@ -301,9 +306,20 @@ export default class InlangBundle extends LitElement {
 				})
 				this.dispatchOnInsertVariant(newVariant)
 			} else {
+				const messageWithoutVariant = createMessage({
+					bundleId: this.bundle!.id,
+					locale: locale,
+					text: "test",
+				})
+
+				const newVariant = {
+					...createVariant({ messageId: messageWithoutVariant!.id, match: [] }),
+					pattern: newPattern,
+				}
+
 				// A message object does not exist yet -> create one that also contains the new variant
 				const newMessage = {
-					...createMessage({ locale: locale, text: "test" }),
+					...messageWithoutVariant,
 					selectors: [],
 					declarations: [],
 					locale: locale,
@@ -359,9 +375,11 @@ export default class InlangBundle extends LitElement {
 					${this._locales() &&
 					this._locales()?.map((locale) => {
 						const message = this._bundle?.messages.find((message) => message.locale === locale)
-						const lintReports = this._bundle?.lintReports?.reports.filter(
-							(report) => report.messageId === message?.id
-						)
+						// TODO SDK-v2 lint reports
+						const lintReports = [] as any[]
+						// const lintReports = this._bundle?.lintReports?.reports.filter(
+						// 	(report) => report.messageId === message?.id
+						// )
 						return html`<inlang-message
 							.locale=${locale}
 							.message=${message}
@@ -378,7 +396,8 @@ export default class InlangBundle extends LitElement {
 							.fixLint=${this._fixLint}
 						>
 							${sortAllVariants({
-								variants: this._fillMessage(structuredClone(message), locale).variants,
+								variants: this._fillMessage(this._bundle!.id, structuredClone(message), locale)
+									.variants,
 								ignoreVariantIds: this._freshlyAddedVariants,
 							})?.map((fakevariant) => {
 								const variant = message?.variants.find((v) => v.id === fakevariant.id)

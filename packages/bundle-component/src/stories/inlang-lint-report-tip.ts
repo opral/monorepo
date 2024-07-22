@@ -1,7 +1,7 @@
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
 
-import type { InstalledLintRule, LintReport } from "@inlang/sdk/v2"
+import type { InstalledLintRule, LintReport } from "@inlang/sdk-v2"
 
 @customElement("inlang-lint-report-tip")
 export default class InlangLintReportTip extends LitElement {
