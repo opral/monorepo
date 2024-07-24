@@ -13,7 +13,8 @@ import type { PluginSettings } from "../settings.js"
 const createParser = (
 	settings: PluginSettings,
 	defaultNS: string | undefined,
-	keyPrefix: string | undefined
+	keyPrefix: string | undefined,
+	path: string
 ) => {
 	// Create a Parsimmon language
 	return Parsimmon.createLanguage({
@@ -109,9 +110,21 @@ const createParser = (
 							// if namespace gets parsed, prepend it to the messageId
 							messageId = namespace + ":" + (keyPrefix ? keyPrefix + "." : "") + messageId
 						} else if (!messageId.includes(":")) {
+							// If no namespace gets parsed, try parsing it from the pathname
+							var foundFileNS = false
+							var namespaces = Object.keys(settings.pathPattern)
+							for (let ns of namespaces) {
+								if (path.includes("/" + ns + "/")) {
+									messageId = ns + ":" + (keyPrefix ? keyPrefix + "." : "") + messageId
+									break
+								}
+							}
+
 							// if no namespace gets parsed and the namespace is not already included in the messageId, prepend the default namespace
-							const defaultNamespace = defaultNS ? defaultNS : Object.keys(settings.pathPattern)[0]
-							messageId = defaultNamespace + ":" + (keyPrefix ? keyPrefix + "." : "") + messageId
+							if (!foundFileNS) {
+								const defaultNamespace = defaultNS ? defaultNS : namespaces[0]
+								messageId = defaultNamespace + ":" + (keyPrefix ? keyPrefix + "." : "") + messageId
+							}
 						}
 					}
 
@@ -232,13 +245,13 @@ function parseNameSpaces(settings: PluginSettings, sourceCode: string) {
 }
 
 // Parse the expression
-export function parse(sourceCode: string, settings: PluginSettings) {
+export function parse(sourceCode: string, settings: PluginSettings, path: string) {
 	try {
 		const namespaceParserResult: undefined | { ns: string; keyPrefix: string | undefined } =
 			parseNameSpaces(settings, sourceCode)
 		const namespace = namespaceParserResult?.ns
 		const keyPrefix = namespaceParserResult?.keyPrefix
-		const parser = createParser(settings, namespace, keyPrefix)
+		const parser = createParser(settings, namespace, keyPrefix, path)
 		return parser.entry!.tryParse(sourceCode)
 	} catch {
 		return []
