@@ -29,7 +29,7 @@ export async function newProjectOpfs(args: {
 	await writableStream.close()
 
 	const sqliteDbFilePath = args.inlangFolderPath + "/inlang.sqlite"
-	await projectDir.removeEntry("sqliteDbFilePath")
+	await projectDir.removeEntry("inlang.sqlite")
 	const { sql, destroy } = new SQLocal(sqliteDbFilePath)
 
 	await sql`
