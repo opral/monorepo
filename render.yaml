@@ -28,6 +28,18 @@ services:
     domains:
       - inlang.com
 
+  - name: lix-website
+    type: web
+    runtime: static
+    autoDeploy: true
+    staticPublishPath: ./lix/website/dist/client
+    buildCommand: pnpm install && pnpm --filter lix-website run build
+    buildFilter:
+      paths:
+        - opral/lix/website/**
+    domains:
+      - lix.opral.com
+
   - name: git-proxy
     type: web
     runtime: node
