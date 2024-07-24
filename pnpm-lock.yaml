@@ -2169,6 +2169,58 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(jsdom@22.1.0)(playwright@1.45.0)(safaridriver@0.1.2)(terser@5.31.1)(webdriverio@8.39.0(typescript@5.5.2))
 
+  inlang/source-code/plugins/paraglidejs:
+    dependencies:
+      '@inlang/detect-json-formatting':
+        specifier: workspace:*
+        version: link:../../detect-json-formatting
+      '@inlang/sdk':
+        specifier: workspace:*
+        version: link:../../sdk
+      '@sinclair/typebox':
+        specifier: 0.31.28
+        version: 0.31.28
+    devDependencies:
+      '@inlang/cli':
+        specifier: workspace:*
+        version: link:../../cli
+      '@inlang/plugin':
+        specifier: workspace:*
+        version: link:../../versioned-interfaces/plugin
+      '@inlang/plugin-m-function-matcher':
+        specifier: workspace:*
+        version: link:../m-function-matcher
+      '@inlang/plugin-message-format':
+        specifier: workspace:*
+        version: link:../inlang-message-format
+      '@lix-js/fs':
+        specifier: workspace:*
+        version: link:../../../../lix/packages/fs
+      '@size-limit/preset-small-lib':
+        specifier: ^8.2.4
+        version: 8.2.6(size-limit@11.1.4)
+      '@types/lodash.merge':
+        specifier: ^4.6.7
+        version: 4.6.7
+      '@types/parsimmon':
+        specifier: 1.10.6
+        version: 1.10.6
+      '@vitest/coverage-v8':
+        specifier: 0.34.6
+        version: 0.34.6(vitest@0.34.6(jsdom@24.1.0)(playwright@1.45.0)(safaridriver@0.1.2)(terser@5.31.1)(webdriverio@8.39.0(typescript@5.5.2)))
+      parsimmon:
+        specifier: ^1.18.1
+        version: 1.18.1
+      patch-package:
+        specifier: 6.5.1
+        version: 6.5.1
+      typescript:
+        specifier: ^5.5.2
+        version: 5.5.2
+      vitest:
+        specifier: 0.34.6
+        version: 0.34.6(jsdom@24.1.0)(playwright@1.45.0)(safaridriver@0.1.2)(terser@5.31.1)(webdriverio@8.39.0(typescript@5.5.2))
+
   inlang/source-code/plugins/sap-ui5:
     dependencies:
       '@inlang/plugin':
@@ -6128,7 +6180,7 @@ packages:
     resolution: {integrity: sha512-IT4+IV3D4lIyoDrp4FUfx4dT2yW/5KIl2MXAsqqItGTbz1xUhtSyP9nS2kLXNnhLG4I2Nku/X+vKFMmRG+oMDA==}
     peerDependencies:
       '@babel/core': 7.x
-      vite: 2.x || 3.x || 4.x || 5.x
+      vite: 4.5.2
 
   '@prefresh/babel-plugin@0.5.1':
     resolution: {integrity: sha512-uG3jGEAysxWoyG3XkYfjYHgaySFrSsaEb4GagLzYaxlydbuREtaX+FTxuIidp241RaLl85XoHg9Ej6E4+V1pcg==}
@@ -23923,7 +23975,7 @@ snapshots:
 
   acorn-walk@8.3.3:
     dependencies:
-      acorn: 8.11.3
+      acorn: 8.12.0
 
   acorn@8.11.3: {}
 
@@ -33226,7 +33278,7 @@ snapshots:
 
   strip-literal@1.3.0:
     dependencies:
-      acorn: 8.11.3
+      acorn: 8.12.0
 
   strip-literal@2.1.0:
     dependencies:
