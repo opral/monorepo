@@ -1,4 +1,4 @@
-import { logBook } from "./log-book"
+import { blogPosts } from "./blogPosts"
 import "./style.css"
 import { useCases } from "./use-cases"
 import { lixCover, lixCoverMobile } from "./lixCover"
@@ -40,12 +40,12 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 					.join("")}
     </ul>
 
-    <h2 class="mt-12 mb-4 text-xl font-medium text-slate-950">Company logbook</h2>
+    <h2 class="mt-12 mb-4 text-xl font-medium text-slate-950">Blog posts</h2>
     <p class="text-slate-600 leading-[1.7]">
-        In this thread you can follow the latest Lix updates.
+        Find the latest blog posts and updates on our <a href="https://opral.substack.com/" target="_blank">Substack</a>.
     </p>
     <ul class="leading-[2] pl-6 mb-8">
-        ${logBook
+        ${blogPosts
 					.map(
 						(entry) => `
             <li>
