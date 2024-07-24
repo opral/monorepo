@@ -225,6 +225,19 @@ export default class InlangSelectorConfigurator extends LitElement {
 		this.dispatchEvent(onInsertVariant)
 	}
 
+	dispatchOnUpdateVariant(variant: Variant) {
+		const onUpdateVariant = new CustomEvent("update-variant", {
+			bubbles: true,
+			composed: true,
+			detail: {
+				argument: {
+					variant,
+				},
+			},
+		})
+		this.dispatchEvent(onUpdateVariant)
+	}
+
 	private _getPluralCategories = (): string[] | undefined => {
 		return this.locale
 			? [...new Intl.PluralRules(this.locale).resolvedOptions().pluralCategories, "*"]
@@ -299,8 +312,8 @@ export default class InlangSelectorConfigurator extends LitElement {
 					},
 				})
 
-				const updatedVariant = structuredClone(this.message.variants)
-				this.dispatchOnUpdateMessage(this.message, updatedVariant)
+				const updatedVariants = structuredClone(this.message.variants)
+				this.dispatchOnUpdateMessage(this.message, updatedVariants)
 
 				this._addVariants({
 					message: this.message,
@@ -310,10 +323,14 @@ export default class InlangSelectorConfigurator extends LitElement {
 
 				// only inserted variants should be dispatched -> show filter
 				const insertedVariants = this.message.variants.filter(
-					(variant) => !updatedVariant.find((v) => v.id === variant.id)
+					(variant) => !updatedVariants.find((v) => v.id === variant.id)
 				)
 				for (const variant of insertedVariants) {
 					this.dispatchOnInsertVariant(variant)
+				}
+
+				for (const updatedVariant of updatedVariants) {
+					this.dispatchOnUpdateVariant(updatedVariant)
 				}
 			}
 

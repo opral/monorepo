@@ -90,7 +90,19 @@ export function MainView({ inlangProject }: { inlangProject: InlangProject2 }) {
 					></SettingsView>
 				)} */}
 				{currentView === "messageList" && (
+					<>
+{/* 
+	We need to filter:
+	- languages (languageTag) message.locale in (...languageTag)
+	- lint reports (lint id) reports.lintId in (...reportIds)
+	- bundles (bundle id) bundles.id in (...bundleIds)
+	- 
+	
+	 and search by 					
+						<!-- search/filter component --> 
+*/}
 					<MessageBundleList project={inlangProject}></MessageBundleList>
+					</>
 				)}
 			</div>
 		</div>

@@ -29,6 +29,7 @@ import missingCatchallLintRule from "./dev-modules/missingCatchall.js"
 import { resolveModules } from "./resolveModules2.js"
 import type { InstalledLintRule, ProjectSettings2 } from "./types/project-settings.js"
 import type { InlangProject } from "./types/project.js"
+import type { LanguageTag } from "@inlang/plugin"
 
 // extend the SQLocalKysely class to expose a rawSql function
 // needed for non parametrized queries
@@ -60,9 +61,10 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 		settingsFileContent: settingsFileContent,
 	})
 
-	// TODO SDK-v2 listen to changes on the settings file - how do multiple instance of a project get informed about changes?
+	// TODO SDK-v2 LIX listen to changes on the settings file - how do multiple instance of a project get informed about changes?
 	const projectSettings$ = new BehaviorSubject(projectSettings)
 
+	// TODO SDK-v2 LIX how to deal with plugins we want to load?
 	const _import = importSequence(
 		createDebugImport({
 			"sdk-dev:lint-rule.js": lintRule,
@@ -90,7 +92,7 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 		.pipe(
 			switchMap(([modules]) => {
 				lifecycle$.next("resolvingModules")
-				// TODO SDK2 handle module load errors
+				// TODO SDK-v2 handle module load errors
 				const rules = (modules as any).messageBundleLintRules.map(
 					(rule: any) =>
 						({
@@ -142,7 +144,26 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 			},
 			subscribe: () => projectSettings$.subscribe(),
 		},
+		
 		bundle: {
+			/*
+			search: (args: { lintRulesIds: string[], locales: LanguageTag[], bundleIds: string[], text: string }): string[] {
+				const query = // my fancy search query
+				return {
+					result: async () => {
+
+					}
+					subscribe: (cb) => {
+						
+						return {
+							unsubscribe: () => {
+
+							}
+						}
+					}
+				}
+			},
+			*/
 			select: db.selectFrom("bundle"),
 			insert: (bundle: Bundle) => {
 				return db.insertInto("bundle").values({

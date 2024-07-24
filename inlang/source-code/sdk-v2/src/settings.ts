@@ -60,6 +60,6 @@ const parseSettings = (settings: unknown) => {
 		})
 	}
 
-	// TODO SDK2 check migration (the new project settings changes to locales and baseLocale!)
+	// TODO SDK-v2 check migration (the new project settings changes to locales and baseLocale!)
 	return settings as unknown as ProjectSettings2
 }
