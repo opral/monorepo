@@ -7,8 +7,8 @@ export const ideExtensionConfig = (
 ): ReturnType<Exclude<Plugin["addCustomApi"], undefined>> => ({
 	"app.inlang.ideExtension": {
 		messageReferenceMatchers: [
-			async (args: { documentText: string; path: string }) => {
-				return parse(args.documentText, settings, arg.path)
+			async (args: { documentText: string; documentPath: string }) => {
+				return parse(args.documentText, settings, args.documentPath)
 			},
 		],
 		extractMessageOptions: [
