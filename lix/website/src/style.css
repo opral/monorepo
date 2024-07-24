@@ -5,3 +5,7 @@ body {
     margin: 0;
     font-family: "Inter var", sans-serif;
 }
+
+div {
+    box-sizing: border-box;
+}
