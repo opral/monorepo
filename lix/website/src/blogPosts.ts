@@ -1,9 +1,9 @@
-type LogBook = {
+type BlogPost = {
 	title: string
 	link: string
 }
 
-export const logBook: Array<LogBook> = [
+export const blogPosts: Array<BlogPost> = [
 	{
 		title: "Accelerate by years part IV - The prototype",
 		link: "https://opral.substack.com/p/accelerate-by-years-iv-the-prototype",
