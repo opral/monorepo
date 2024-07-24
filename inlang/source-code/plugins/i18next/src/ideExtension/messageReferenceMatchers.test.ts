@@ -9,7 +9,7 @@ it("should not match a function that end with t but is not a t function", async 
 	const settings: PluginSettings = {
 		pathPattern: "./{language}.json",
 	}
-	const matches = parse(sourceCode, settings)
+	const matches = parse(sourceCode, settings, "")
 	expect(matches).toHaveLength(0)
 })
 
@@ -20,7 +20,7 @@ it("should not match a string without a t function", async () => {
 	const settings: PluginSettings = {
 		pathPattern: "./{language}.json",
 	}
-	const matches = parse(sourceCode, settings)
+	const matches = parse(sourceCode, settings, "")
 	expect(matches).toHaveLength(0)
 })
 
@@ -32,7 +32,7 @@ it('should detect double quotes t("id")', async () => {
 	const settings: PluginSettings = {
 		pathPattern: "./{language}.json",
 	}
-	const matches = parse(sourceCode, settings)
+	const matches = parse(sourceCode, settings, "")
 	expect(matches[0]?.messageId).toBe("some-id")
 	expect(matches[0]?.position.start.character).toBe(17)
 	expect(matches[0]?.position.end.character).toBe(26)
@@ -49,7 +49,7 @@ it(`should detect single quotes t('id')`, async () => {
 	const settings: PluginSettings = {
 		pathPattern: "./{language}.json",
 	}
-	const matches = parse(sourceCode, settings)
+	const matches = parse(sourceCode, settings, "")
 	expect(matches[0]?.messageId).toBe("some-id")
 	expect(matches[0]?.position.start.character).toBe(17)
 	expect(matches[0]?.position.end.character).toBe(26)
@@ -62,7 +62,7 @@ it(`should detect human readable id t("penguin_purple_shoe_window")`, async () =
 	const settings: PluginSettings = {
 		pathPattern: "./{language}.json",
 	}
-	const matches = parse(sourceCode, settings)
+	const matches = parse(sourceCode, settings, "")
 	expect(matches[0]?.messageId).toBe("penguin_purple_shoe_window")
 	expect(matches[0]?.position.start.character).toBe(14)
 	expect(matches[0]?.position.end.character).toBe(42)
@@ -76,7 +76,7 @@ it(`should detect JSX <p>{t('id')}</p>`, async () => {
 	const settings: PluginSettings = {
 		pathPattern: "./{language}.json",
 	}
-	const matches = parse(sourceCode, settings)
+	const matches = parse(sourceCode, settings, "")
 	expect(matches[0]?.messageId).toBe("some-id")
 	expect(matches[0]?.position.start.character).toBe(11)
 	expect(matches[0]?.position.end.character).toBe(20)
@@ -90,7 +90,7 @@ it("should detect t('id', ...args)", async () => {
 	const settings: PluginSettings = {
 		pathPattern: "./{language}.json",
 	}
-	const matches = parse(sourceCode, settings)
+	const matches = parse(sourceCode, settings, "")
 	expect(matches[0]?.messageId).toBe("some-id")
 	expect(
 		sourceCode.slice(matches[0]?.position.start.character, matches[0]?.position.end.character)
@@ -104,7 +104,7 @@ it("should not mismatch a string with different quotation marks", async () => {
 	const settings: PluginSettings = {
 		pathPattern: "./{language}.json",
 	}
-	const matches = parse(sourceCode, settings)
+	const matches = parse(sourceCode, settings, "")
 	expect(matches).toHaveLength(0)
 })
 
@@ -115,7 +115,7 @@ it.skip("should ignore whitespace", async () => {
 	const settings: PluginSettings = {
 		pathPattern: "./{language}.json",
 	}
-	const matches = parse(sourceCode, settings)
+	const matches = parse(sourceCode, settings, "")
 	expect(matches[0]?.messageId).toBe("some-id")
 	expect(
 		sourceCode.slice(matches[0]?.position.start.character, matches[0]?.position.end.character)
@@ -127,7 +127,7 @@ it("should detect combined message.attribute ids", async () => {
 	const settings: PluginSettings = {
 		pathPattern: "./{language}.json",
 	}
-	const matches = parse(sourceCode, settings)
+	const matches = parse(sourceCode, settings, "")
 	expect(matches[0]?.messageId).toBe("some-message.with-attribute")
 })
 
@@ -159,7 +159,7 @@ it("should work on a production JSX example", async () => {
 	const settings: PluginSettings = {
 		pathPattern: "./{language}.json",
 	}
-	const matches = parse(sourceCode, settings)
+	const matches = parse(sourceCode, settings, "")
 	expect(matches).toHaveLength(3)
 	expect(matches[0]?.messageId).toBe("hello-world")
 	expect(matches[1]?.messageId).toBe("404.title")
@@ -197,7 +197,7 @@ it("should work on a production JSX example with namespaces", async () => {
 			vital: "./{language}/vital.json",
 		},
 	}
-	const matches = parse(sourceCode, settings)
+	const matches = parse(sourceCode, settings, "")
 	expect(matches).toHaveLength(3)
 	expect(matches[0]?.messageId).toBe("common:hello-world")
 	expect(matches[1]?.messageId).toBe("vital:404.title")
@@ -223,7 +223,7 @@ it("should work on a production JSX example with namespaces option syntax", asyn
 			test: "./{language}/test.json",
 		},
 	}
-	const matches = parse(sourceCode, settings)
+	const matches = parse(sourceCode, settings, "")
 	expect(matches).toHaveLength(8)
 	expect(matches[0]?.messageId).toBe("common:a")
 	expect(matches[1]?.messageId).toBe("vital:b")
@@ -244,24 +244,39 @@ it("should work on a production JSX example with namespaces option syntax and ad
 			common: "./{language}/common.json",
 		},
 	}
-	const matches = parse(sourceCode, settings)
+	const matches = parse(sourceCode, settings, "")
 	expect(matches).toHaveLength(1)
 	expect(matches[0]?.messageId).toBe("common:a")
 })
 
-// it("should add the default namespace if required by pathPattern", async () => {
-// 	const sourceCode = `
-// 		<p>{t("a")}</p>
-// 	`
-// 	const settings: PluginSettings = {
-// 		pathPattern: {
-// 			common: "./{language}/common.json",
-// 		},
-// 	}
-// 	const matches = parse(sourceCode, settings)
-// 	expect(matches).toHaveLength(1)
-// 	expect(matches[0]?.messageId).toBe("common:a")
-// })
+it("should add the default namespace if none found in path and no namespace is defined", async () => {
+	const sourceCode = `
+		<p>{t("a")}</p>
+	`
+	const settings: PluginSettings = {
+		pathPattern: {
+			common: "./{language}/common.json",
+		},
+	}
+	const matches = parse(sourceCode, settings, "")
+	expect(matches).toHaveLength(1)
+	expect(matches[0]?.messageId).toBe("common:a")
+})
+
+it("should add the namespace found in the path if no namespace is defined", async () => {
+	const sourceCode = `
+		<p>{t("a")}</p>
+	`
+	const settings: PluginSettings = {
+		pathPattern: {
+			common: "./{language}/common.json",
+			backend: "./backend/{language}/common.json",
+		},
+	}
+	const matches = parse(sourceCode, settings, "/backend/file.ts")
+	expect(matches).toHaveLength(1)
+	expect(matches[0]?.messageId).toBe("backend:a")
+})
 
 it("should add the defined namespace by useTranslation hook", async () => {
 	const sourceCode = `
@@ -274,7 +289,7 @@ it("should add the defined namespace by useTranslation hook", async () => {
 			login: "./{language}/login.json",
 		},
 	}
-	const matches = parse(sourceCode, settings)
+	const matches = parse(sourceCode, settings, "")
 	expect(matches).toHaveLength(1)
 	expect(matches[0]?.messageId).toBe("login:a")
 })
@@ -290,7 +305,7 @@ it("should add the defined namespace by useTranslation hook with arrat pattern",
 			login: "./{language}/login.json",
 		},
 	}
-	const matches = parse(sourceCode, settings)
+	const matches = parse(sourceCode, settings, "")
 	expect(matches).toHaveLength(1)
 	expect(matches[0]?.messageId).toBe("login:a")
 })
@@ -308,7 +323,7 @@ it("should add the defined namespace by useTranslation hook with array pattern",
 			login: "./{language}/login.json",
 		},
 	}
-	const matches = parse(sourceCode, settings)
+	const matches = parse(sourceCode, settings, "")
 	expect(matches).toHaveLength(3)
 	expect(matches[0]?.messageId).toBe("login:a")
 	expect(matches[1]?.messageId).toBe("test:a")
@@ -326,7 +341,7 @@ it("should add the defined namespace by useTranslation hook and keyPrefix", asyn
 			login: "./{language}/login.json",
 		},
 	}
-	const matches = parse(sourceCode, settings)
+	const matches = parse(sourceCode, settings, "")
 	expect(matches).toHaveLength(1)
 	expect(matches[0]?.messageId).toBe("home:intro.a")
 })
@@ -342,7 +357,7 @@ it("should add the defined namespace when using next-intl conform useTranslation
 			login: "./{language}/login.json",
 		},
 	}
-	const matches = parse(sourceCode, settings)
+	const matches = parse(sourceCode, settings, "")
 	expect(matches).toHaveLength(1)
 	expect(matches[0]?.messageId).toBe("home:a")
 })
