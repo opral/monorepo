@@ -13,7 +13,7 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
             <path d="M24 0.261719V128.262H0V0.261719H24Z" fill="#07B6D4" />
             <path d="M44 0.261719H108V20.2617H44V0.261719Z" fill="#07B6D4" />
         </svg>
-        <br>is the first of it's kind change control system.
+        <br>the first of it's kind change control system.
     </h1>
     <p class="text-slate-600 leading-[1.7]">
         With Lix you get <b class="text-slate-950 font-semibold">full traceability</b>.
