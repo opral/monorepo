@@ -3324,18 +3324,9 @@ importers:
       '@lit-labs/ssr-client':
         specifier: ^1.1.7
         version: 1.1.7
-      '@types/lodash-es':
-        specifier: ^4.17.12
-        version: 4.17.12
-      kebab-case:
-        specifier: ^2.0.1
-        version: 2.0.1
       lit:
         specifier: ^3.1.4
         version: 3.1.4
-      lodash-es:
-        specifier: ^4.17.21
-        version: 4.17.21
       vike:
         specifier: ^0.4.181
         version: 0.4.181(vite@5.3.4)
@@ -12482,12 +12473,6 @@ packages:
       '@types/node': 20.14.10
     dev: true
 
-  /@types/lodash-es@4.17.12:
-    resolution: {integrity: sha512-0NgftHUcV4v34VhXm8QBSftKVXtbkBG3ViCjs6+eJ5a6y6Mi/jiFGPc1sC7QK+9BFhWrURE3EOggmWaSxL9OzQ==}
-    dependencies:
-      '@types/lodash': 4.17.1
-    dev: false
-
   /@types/lodash.merge@4.6.7:
     resolution: {integrity: sha512-OwxUJ9E50gw3LnAefSHJPHaBLGEKmQBQ7CZe/xflHkyy/wH2zVyEIAKReHvVrrn7zKdF58p16We9kMfh7v0RRQ==}
     dependencies:
@@ -12496,6 +12481,7 @@ packages:
 
   /@types/lodash@4.17.1:
     resolution: {integrity: sha512-X+2qazGS3jxLAIz5JDXDzglAF3KpijdhFxlf/V1+hEsOUc+HnWi81L/uv/EvGuV90WY+7mPGFCUDGfQC3Gj95Q==}
+    dev: true
 
   /@types/marked@4.3.2:
     resolution: {integrity: sha512-a79Yc3TOk6dGdituy8hmTTJXjOkZ7zsFYV10L337ttq/rec8lRMDBpV7fL3uLx6TgbFCa5DU/h8FmIBQPSbU0w==}
@@ -21665,10 +21651,6 @@ packages:
     resolution: {integrity: sha512-7n6wXq4gNgBELfDCpzKc+mRrZFs7D+wgfF5WRFLNAr4DA/qtr9Js8uOAVAfHhuLMfAcQ0pRKqbpjx+TcJVdE1Q==}
     dev: true
 
-  /kebab-case@2.0.1:
-    resolution: {integrity: sha512-vwwEnpFH5hwkoK2pGnPmGUoRjpE1NRjvdWY6BLlqucF7zPBPwKNxv5bPbW3/Cq1S+nmnL4kLcArGYdKDD3w2Xw==}
-    dev: false
-
   /keen-slider@6.8.6:
     resolution: {integrity: sha512-dcEQ7GDBpCjUQA8XZeWh3oBBLLmyn8aoeIQFGL/NTVkoEOsmlnXqA4QykUm/SncolAZYGsEk/PfUhLZ7mwMM2w==}
     dev: false
@@ -22083,10 +22065,6 @@ packages:
     dependencies:
       p-locate: 6.0.0
     dev: true
-
-  /lodash-es@4.17.21:
-    resolution: {integrity: sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==}
-    dev: false
 
   /lodash.castarray@4.4.0:
     resolution: {integrity: sha512-aVx8ztPv7/2ULbArGJ2Y42bG1mEQ5mGjpdvrbJcJFU3TbYybe+QlLS4pst9zV52ymy2in1KpFPiZnAOATxD4+Q==}
