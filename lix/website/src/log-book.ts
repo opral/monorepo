@@ -24,8 +24,4 @@ export const logBook: Array<LogBook> = [
 		title: "June 2024 update",
 		link: "https://opral.substack.com/p/june-2024-update",
 	},
-	{
-		title: "Company State of Opral 2023",
-		link: "https://opral.substack.com/p/company-state-of-inlang-opral-2023",
-	},
 ]
