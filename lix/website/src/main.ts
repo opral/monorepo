@@ -13,13 +13,14 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
             <path d="M24 0.261719V128.262H0V0.261719H24Z" fill="#07B6D4" />
             <path d="M44 0.261719H108V20.2617H44V0.261719Z" fill="#07B6D4" />
         </svg>
-        <br>the first of it's kind change control system.
+        <br>
+        The first of it's kind change control system.
     </h1>
     <p class="text-slate-600 leading-[1.7]">
-        With Lix you get <b class="text-slate-950 font-semibold">full traceability</b>.
+        Lix provides <b class="text-slate-950 font-semibold">traceability of changes</b> for files stored in lix.
     </p>
     <p class="text-slate-600 leading-[1.7] mb-8">
-        A change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g., .xlsx, .sqlite, or .inlang. 
+        The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g., .xlsx, .sqlite, or .inlang. 
     </p>
     <div class="w-full hidden sm:block">${lixCover}</div>
     <div class="w-full block sm:hidden">${lixCoverMobile}</div>
