@@ -8,7 +8,7 @@ import type { Plugin2 } from "./plugin.js"
  * ---------------- Specific Language Tag field meta information ----------------
  */
 
-// TODO SDK2 naming?
+// TODO SDK-v2 naming?
 const BaseLocale = LanguageTag
 BaseLocale.title = "Source language tag"
 BaseLocale.description =
