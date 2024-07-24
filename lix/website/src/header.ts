@@ -10,7 +10,7 @@ document.querySelector<HTMLDivElement>("#header")!.innerHTML = `
                     <path d="M764.166 213H236.319V284.019H764.166V213Z"></path>
                 </g>
             </svg>
-            Subscribe
+            Substack
         </a>
     </div>
 `
