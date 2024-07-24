@@ -1,6 +1,7 @@
 import { logBook } from "./log-book"
 import "./style.css"
 import { useCases } from "./use-cases"
+import { lixCover, lixCoverMobile } from "./lixCover"
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div class="w-full max-w-screen-[700px] px-4 mx-auto">
@@ -20,8 +21,8 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     <p class="text-slate-600 leading-[1.7] mb-8">
         A change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g., .xlsx, .sqlite, or .inlang. 
     </p>
-    <img src="./../assets/LixWebsiteCover.svg" alt="lix website cover" class="w-full hidden sm:block"></img>
-    <img src="./../assets/LixWebsiteCoverMobile.svg" alt="lix website cover" class="w-full block sm:hidden"></img>
+    <div class="w-full hidden sm:block">${lixCover}</div>
+    <div class="w-full block sm:hidden">${lixCoverMobile}</div>
     <h2 class="mt-12 mb-4 text-xl font-medium text-slate-950">Use cases</h2>
     <p class="text-slate-600 leading-[1.7]">
         We collected a ranch of case studies and small excurses into different use cases of Lix.
