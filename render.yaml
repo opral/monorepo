@@ -32,7 +32,8 @@ services:
     type: web
     runtime: static
     autoDeploy: true
-    staticPublishPath: ./lix/website
+    staticPublishPath: ./lix/website/dist/client
+    buildCommand: pnpm install && pnpm --filter lix-website run build
     buildFilter:
       paths:
         - opral/lix/website/**
