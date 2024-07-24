@@ -13,13 +13,14 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
             <path d="M24 0.261719V128.262H0V0.261719H24Z" fill="#07B6D4" />
             <path d="M44 0.261719H108V20.2617H44V0.261719Z" fill="#07B6D4" />
         </svg>
-        <br>is the first of it's kind change control system.
+        <br>
+        The first of it's kind change control system.
     </h1>
     <p class="text-slate-600 leading-[1.7]">
-        With Lix you get <b class="text-slate-950 font-semibold">full traceability</b>.
+        Lix provides <b class="text-slate-950 font-semibold">traceability of changes</b> for files stored in lix.
     </p>
     <p class="text-slate-600 leading-[1.7] mb-8">
-        A change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g., .xlsx, .sqlite, or .inlang. 
+        The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g., .xlsx, .sqlite, or .inlang. 
     </p>
     <div class="w-full hidden sm:block">${lixCover}</div>
     <div class="w-full block sm:hidden">${lixCoverMobile}</div>
@@ -56,9 +57,9 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     </ul>
 
     <div class="border border-slate-200 rounded-lg p-7 my-16">
-        <h2 class="mt-0 mb-4 text-xl font-medium text-slate-950">Build better apps with built-in change control</h2>
+        <h2 class="mt-0 mb-4 text-xl font-medium text-slate-950">Lix SDK</h2>
         <p class="text-slate-600 leading-[1.7]">
-            Lix also provides a SDK that should enable third party developer to build app with change control with the Lix system.
+            The Lix SDK allows you to build web apps with built-in change control.
         </p>
         <div class="mt-6 w-full text-center text-[16px] px-3 py-3 text-slate-700 font-medium rounded-lg bg-slate-100 hover:bg-slate-200 border-none cursor-none pointer-events-none">Lix SDK<span class="bg-slate-300 rounded px-2 py-1 ml-3">Comming soon</span></div>
     </div>
