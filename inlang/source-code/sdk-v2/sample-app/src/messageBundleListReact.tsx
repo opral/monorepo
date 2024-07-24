@@ -8,7 +8,7 @@ import {
 	NestedBundle,
 } from "../../src/types/index.js"
 import { VariableSizeList as List } from "react-window"
-import { MessageBundleViewMemoed } from "./MessageBundleView.js"
+import { MessageBundleView, MessageBundleViewMemoed } from "./MessageBundleView.js"
 import { MessageBundleListSummary } from "./messageBundleListSummary.js"
 import { populateMessages } from "../../src/loadProjectOpfs.js"
 
@@ -29,12 +29,20 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 	const [textSearch, setTextSearch] = useState("")
 
 	useEffect(() => {
-		// TODO SDK-v2 setup query that filters by active language, reported lints, bundle ids and searches text within the filtered variants
 		populateMessages(project.bundle.select)
 			.execute()
 			.then((freshBundles: any) => {
 				setCrurrentListBundles(freshBundles)
 			})
+		// TODO SDK-v2 setup query that filters by active language, reported lints, bundle ids and searches text within the filtered variants
+		const intervalId = setInterval(() => {
+			populateMessages(project.bundle.select)
+				.execute()
+				.then((freshBundles: any) => {
+					setCrurrentListBundles(freshBundles)
+				})
+		}, 1000)
+		return () => clearInterval(intervalId)
 	}, [textSearch, activeLocales])
 
 	useEffect(() => {
@@ -46,48 +54,6 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 
 	const listRef = useRef<List>(null)
 	const itemSizeMap = useRef<Record<number, number>>({})
-
-	const getItemSize = (index: number) => {
-		// Default to a standard size if not yet measured
-		return itemSizeMap.current[index] || 100
-	}
-
-	const setItemSize = useCallback((index: number, size: number) => {
-		if (size !== 0 && listRef.current && itemSizeMap.current[index] !== size) {
-			itemSizeMap.current[index] = size
-
-			listRef.current.resetAfterIndex(index)
-		}
-	}, [])
-
-	const renderRow = ({ index, style }) => {
-		const bundle = currentListBundles[index]
-
-		// Use a ref callback to measure the component's height
-		const measureRef = (el: HTMLDivElement | null) => {
-			if (el) {
-				setTimeout(() => {
-					const height = el.getBoundingClientRect().height
-					// console.log("size for index:" + index + " " + height)
-					setItemSize(index, height)
-				}, 10)
-			}
-		}
-
-		return (
-			<div style={style}>
-				<div ref={measureRef}>
-					<MessageBundleViewMemoed
-						key={bundle.id}
-						bundle={bundle}
-						projectSettings={projectSettings!}
-						filteredLocales={activeLocales}
-						project={project}
-					/>
-				</div>
-			</div>
-		)
-	}
 
 	return (
 		<div>
@@ -114,15 +80,17 @@ export function MessageBundleList({ project }: MessageBundleListProps) {
 						activeLanguages={activeLocales}
 						onActiveLanguagesChange={(actives) => setActiveLocales(actives)}
 					/>
-					<List
-						height={900} // Adjust based on your requirements
-						itemCount={currentListBundles.length}
-						itemSize={getItemSize}
-						width={"100%"}
-						ref={listRef}
-					>
-						{renderRow}
-					</List>
+					{currentListBundles.map((bundle) => {
+						return (
+							<MessageBundleView
+								key={bundle.id}
+								bundle={bundle}
+								projectSettings={projectSettings!}
+								filteredLocales={activeLocales}
+								project={project}
+							/>
+						)
+					})}
 				</>
 			)}
 			{!projectSettings && <>loading</>}
