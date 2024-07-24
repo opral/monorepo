@@ -29,7 +29,7 @@ type MessageBundleViewProps = {
 	project: InlangProject
 	filteredLocales: LanguageTag[]
 }
-function MessageBundleView({
+export function MessageBundleView({
 	bundle,
 	// reports,
 	projectSettings,
@@ -38,7 +38,6 @@ function MessageBundleView({
 }: MessageBundleViewProps) {
 	const [currentBundle, setBundle] = useState(bundle)
 
-	console.log("render MessageBundle View")
 	useEffect(() => {
 		// Assume bundle$ is an RxJS Subject or Observable
 		// const subscription = bundle.$.subscribe((updatedBundle) => {
@@ -102,12 +101,3 @@ function MessageBundleView({
 		/>
 	)
 }
-// Custom comparison function to compare the logical contents of the bundle
-const areEqual = (prevProps: MessageBundleViewProps, nextProps: MessageBundleViewProps) => {
-	console.log("check")
-	// Assuming bundle has an id property to identify the logical record
-	return (
-		prevProps.bundle.id === nextProps.bundle.id && true // deepEqual(prevProps.filteredLocales, nextProps.filteredLocales)
-	)
-}
-export const MessageBundleViewMemoed = React.memo(MessageBundleView, areEqual)
