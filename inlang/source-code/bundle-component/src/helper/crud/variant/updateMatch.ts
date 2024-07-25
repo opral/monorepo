@@ -1,4 +1,4 @@
-import type { Variant } from "@inlang/sdk-v2"
+import type { Expression, Variant } from "@inlang/sdk-v2"
 
 /**
  * Update the match at the specified index with the new value.
@@ -8,10 +8,12 @@ import type { Variant } from "@inlang/sdk-v2"
  * @param props.value The new value to set at the match index.
  */
 
-const updateMatch = (props: { variant: Variant; matchIndex: number; value: string }) => {
-	// update the match at index matchIndex with value (mutates variant)
-	if (props.matchIndex < 0 || props.matchIndex >= props.variant.match.length) return
-	props.variant.match[props.matchIndex] = props.value
+const updateMatch = (props: { variant: Variant; selectorName: string; value: string }) => {
+	// if matchName is not in variant, return
+	if (!props.variant.match[props.selectorName]) return
+
+	// update the match with value (mutates variant)
+	props.variant.match[props.selectorName] = props.value
 }
 
 export default updateMatch
