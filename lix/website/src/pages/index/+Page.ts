@@ -54,7 +54,12 @@ export const Page = () => html` ${header}
 		<h2 class="mt-12 mb-4 text-xl font-medium text-slate-950">Blog posts</h2>
 		<p class="text-slate-600 leading-[1.7]">
 			Find the latest blog posts and updates on our
-			<a href="https://opral.substack.com/" target="_blank">Substack</a>.
+			<a
+				class="text-slate-950 underline decoration-slate-300 font-medium hover:decoration-slate-950"
+				href="https://opral.substack.com/"
+				target="_blank"
+				>Substack</a
+			>.
 		</p>
 		<ul class="leading-[2] pl-6 mb-8">
 			${blogPosts.map(
