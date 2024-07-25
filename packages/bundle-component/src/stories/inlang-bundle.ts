@@ -264,7 +264,7 @@ export default class InlangBundle extends LitElement {
 	): NestedMessage => {
 		if (message) {
 			if (message.variants.length === 0) {
-				message.variants.push(createVariant({ messageId: message.id, match: [] }))
+				message.variants.push(createVariant({ messageId: message.id, match: {} }))
 			}
 			return message
 		} else {
@@ -295,7 +295,7 @@ export default class InlangBundle extends LitElement {
 		} else {
 			if (message) {
 				const newVariant = {
-					...createVariant({ messageId: message!.id, match: [] }),
+					...createVariant({ messageId: message!.id, match: {} }),
 					pattern: newPattern,
 				}
 
@@ -313,7 +313,7 @@ export default class InlangBundle extends LitElement {
 				})
 
 				const newVariant = {
-					...createVariant({ messageId: messageWithoutVariant!.id, match: [] }),
+					...createVariant({ messageId: messageWithoutVariant!.id, match: {} }),
 					pattern: newPattern,
 				}
 
@@ -402,6 +402,7 @@ export default class InlangBundle extends LitElement {
 									locale
 								).variants,
 								ignoreVariantIds: this._freshlyAddedVariants,
+								selectors: message?.selectors || [],
 							})?.map((fakevariant) => {
 								const variant = message?.variants.find((v) => v.id === fakevariant.id)
 								return html`<inlang-variant

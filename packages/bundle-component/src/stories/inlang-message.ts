@@ -354,7 +354,13 @@ export default class InlangMessage extends LitElement {
 									const variant = createVariant({
 										messageId: this.message!.id,
 										// combine the matches that are already present with the new category -> like a matrix
-										match: this.message?.selectors.map(() => "null"),
+										match: (() => {
+											let match: Record<string, string> = {}
+											for (const selector of this.message!.selectors) {
+												match[selector.arg.name] = "null"
+											}
+											return match
+										})(),
 									})
 									this.freshlyAddedVariants.push(variant.id)
 									upsertVariant({

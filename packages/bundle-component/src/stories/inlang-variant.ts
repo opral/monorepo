@@ -5,6 +5,7 @@ import {
 	type LintReport,
 	type InstalledLintRule,
 	type Declaration,
+	type Expression,
 } from "@inlang/sdk-v2"
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
@@ -242,39 +243,24 @@ export default class InlangVariant extends LitElement {
 		}
 	}
 
-	private _updateMatch = (matchIndex: number, value: string) => {
+	private _updateMatch = (selectorName: string, value: string) => {
 		//TODO improve this function
 		if (this.variant && this.message) {
 			updateMatch({
 				variant: this.variant,
-				matchIndex: matchIndex,
+				selectorName,
 				value,
 			})
 			const variantID = this.variant.id
 
 			const changedVariant = this.message.variants.find((v) => v.id === variantID)
 			if (changedVariant) {
-				changedVariant.match[matchIndex] = value
+				changedVariant.match[selectorName] = value
 			}
 
 			this.dispatchOnUpdateVariant(this.variant)
 			this.triggerMessageBundleRefresh()
 		}
-	}
-
-	// getter
-	private get _selectors(): string[] | undefined {
-		// @ts-ignore - just for prototyping
-		return this.message ? this.message.selectors.map((selector) => selector.arg.name) : undefined
-	}
-
-	private get _matches(): string[] | undefined {
-		// @ts-ignore - just for prototyping
-		return this._selectors
-			? this._selectors.map((_, index) => {
-					return this.variant && this.variant.match[index]
-			  })
-			: undefined
 	}
 
 	//hooks
@@ -334,8 +320,8 @@ export default class InlangVariant extends LitElement {
 	override render() {
 		return !(!this.variant && this.message && this.message?.selectors.length > 0)
 			? html`<div class="variant">
-					${this.variant && this._matches
-						? this._matches.map((match, index) => {
+					${this.variant
+						? Object.entries(this.variant.match).map(([selectorName, match]) => {
 								return html`
 									<sl-input
 										id="${this.message!.id}-${this.variant!.id}-${match}"
@@ -347,7 +333,7 @@ export default class InlangVariant extends LitElement {
 												`${this.message!.id}-${this.variant!.id}-${match}`
 											)
 											if (element && e.target === element) {
-												this._updateMatch(index, (e.target as HTMLInputElement).value)
+												this._updateMatch(selectorName, (e.target as HTMLInputElement).value)
 											}
 										}}
 									></sl-input>
