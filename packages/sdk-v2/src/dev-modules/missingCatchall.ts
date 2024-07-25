@@ -9,7 +9,9 @@ const missingCatchallLintRule: MessageBundleLintRule = {
 		for (const message of messageBundle.messages) {
 			if (message.selectors.length === 0) continue
 
-			const hasCatchall = message.variants.some((variant) => variant.match.every((m) => m === "*"))
+			const hasCatchall = message.variants.some((variant) =>
+				Object.values(variant.match)?.every((m) => m === "*")
+			)
 
 			if (!hasCatchall) {
 				report({

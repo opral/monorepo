@@ -68,7 +68,7 @@ export const pluralBundle: NestedBundle = {
 				{
 					messageId: "mock_message_id_de",
 					id: "mock_variant_id_de_zero",
-					match: ["zero"],
+					match: { numProducts: "zero" },
 					pattern: [
 						{
 							type: "text",
@@ -79,7 +79,7 @@ export const pluralBundle: NestedBundle = {
 				{
 					messageId: "mock_message_id_de",
 					id: "mock_variant_id_de_one",
-					match: ["one"],
+					match: { numProducts: "one" },
 					pattern: [
 						{
 							type: "text",
@@ -90,7 +90,7 @@ export const pluralBundle: NestedBundle = {
 				{
 					messageId: "mock_message_id_de",
 					id: "mock_variant_id_de_other",
-					match: ["other"],
+					match: { numProducts: "other" },
 					pattern: [
 						{
 							type: "expression",
@@ -142,7 +142,7 @@ export const pluralBundle: NestedBundle = {
 				{
 					messageId: "mock_message_id_de",
 					id: "mock_variant_id_en_zero",
-					match: ["zero"],
+					match: { numProducts: "zero" },
 					pattern: [
 						{
 							type: "text",
@@ -153,7 +153,7 @@ export const pluralBundle: NestedBundle = {
 				{
 					messageId: "mock_message_id_de",
 					id: "mock_variant_id_en_one",
-					match: ["one"],
+					match: { numProducts: "one" },
 					pattern: [
 						{
 							type: "text",
@@ -164,7 +164,7 @@ export const pluralBundle: NestedBundle = {
 				{
 					messageId: "mock_message_id_de",
 					id: "mock_variant_id_en_other",
-					match: ["other"],
+					match: { numProducts: "other" },
 					pattern: [
 						{
 							type: "expression",

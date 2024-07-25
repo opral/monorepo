@@ -91,7 +91,7 @@ export function MainView({ inlangProject }: { inlangProject: InlangProject2 }) {
 				)} */}
 				{currentView === "messageList" && (
 					<>
-{/* 
+						{/* 
 	We need to filter:
 	- languages (languageTag) message.locale in (...languageTag)
 	- lint reports (lint id) reports.lintId in (...reportIds)
@@ -101,7 +101,7 @@ export function MainView({ inlangProject }: { inlangProject: InlangProject2 }) {
 	 and search by 					
 						<!-- search/filter component --> 
 */}
-					<MessageBundleList project={inlangProject}></MessageBundleList>
+						<MessageBundleList project={inlangProject}></MessageBundleList>
 					</>
 				)}
 			</div>

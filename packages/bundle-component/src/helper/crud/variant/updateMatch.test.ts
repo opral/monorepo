@@ -7,44 +7,29 @@ describe("updateMatch", () => {
 		const variant: Variant = createVariant({
 			messageId: "testId",
 			id: "test-id",
-			match: ["apple", "banana", "cherry"],
+			match: { selector1: "apple", selector2: "banana", selector3: "cherry" },
 		})
-		const matchIndex = 1
+		const selectorName = "selector2"
 		const value = "orange"
 
-		updateMatch({ variant, matchIndex, value })
+		updateMatch({ variant, selectorName, value })
 
-		expect(variant.match[matchIndex]).toBe(value)
-		expect(variant.match.length).toBe(3)
+		expect(variant.match[selectorName]).toBe(value)
+		expect(Object.keys(variant.match).length).toBe(3)
 	})
 
-	it("should not update the value if match index is out of range", () => {
+	it("should not update the value if match name doesn't exist", () => {
 		const variant: Variant = createVariant({
 			messageId: "testId",
 			id: "test-id",
-			match: ["apple", "banana", "cherry"],
+			match: { selector1: "apple", selector2: "banana", selector3: "cherry" },
 		})
-		const matchIndex = 3
+		const selectorName = "selector4"
 		const value = "orange"
 
-		updateMatch({ variant, matchIndex, value })
+		updateMatch({ variant, selectorName, value })
 
-		expect(variant.match[matchIndex]).toBeUndefined()
-		expect(variant.match.length).toBe(3)
-	})
-
-	it("should not update the value if match index is negative", () => {
-		const variant: Variant = createVariant({
-			messageId: "testId",
-			id: "test-id",
-			match: ["apple", "banana", "cherry"],
-		})
-		const matchIndex = -1
-		const value = "orange"
-
-		updateMatch({ variant, matchIndex, value })
-
-		expect(variant.match[matchIndex]).toBeUndefined()
-		expect(variant.match.length).toBe(3)
+		expect(variant.match[selectorName]).toBeUndefined()
+		expect(Object.keys(variant.match).length).toBe(3)
 	})
 })

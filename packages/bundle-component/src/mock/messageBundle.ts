@@ -13,7 +13,7 @@ export const bundleWithoutSelectors: NestedBundle = {
 				{
 					messageId: "message-id-en",
 					id: "variant-id-en-*",
-					match: [],
+					match: {},
 					pattern: [{ type: "text", value: "{count} new messages" }],
 				},
 			],
@@ -28,7 +28,7 @@ export const bundleWithoutSelectors: NestedBundle = {
 				{
 					messageId: "message-id-de",
 					id: "variant-id-de-*",
-					match: [],
+					match: {},
 					pattern: [{ type: "text", value: "{count} neue Nachrichten" }],
 				},
 			],

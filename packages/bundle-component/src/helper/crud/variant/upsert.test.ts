@@ -18,7 +18,7 @@ describe("upsertVariant", () => {
 						createVariant({
 							messageId: "testId",
 							id: "test_upsertVariant_id",
-							match: ["*"],
+							match: { count: "*" },
 							text: "Hello World",
 						}),
 					],
@@ -36,7 +36,7 @@ describe("upsertVariant", () => {
 			variant: {
 				messageId: bundle.messages[0]!.id,
 				id: "test_upsertVariant_id",
-				match: ["*"],
+				match: { count: "*" },
 				pattern: [{ type: "text", value: "Hello Universe" }],
 			},
 		})
@@ -51,7 +51,12 @@ describe("upsertVariant", () => {
 		const bundle = createBundle({
 			id: "bundle-id",
 			messages: [
-				createMessage({ bundleId: "bundle-id", locale: "en", text: "Hello World", match: ["*"] }),
+				createMessage({
+					bundleId: "bundle-id",
+					locale: "en",
+					text: "Hello World",
+					match: { count: "*" },
+				}),
 			],
 		})
 
@@ -65,7 +70,7 @@ describe("upsertVariant", () => {
 			variant: {
 				messageId: bundle.messages[0]!.id,
 				id: "test_upsertVariant_id",
-				match: ["one"],
+				match: { count: "one" },
 				pattern: [{ type: "text", value: "Hello Universe" }],
 			},
 		})
