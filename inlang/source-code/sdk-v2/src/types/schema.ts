@@ -39,7 +39,7 @@ type VariantTable = {
 	id: string
 	// @relation to Message
 	messageId: MessageTable["id"]
-	match: JSONColumnType<string[]>
+	match: JSONColumnType<Record<Expression["arg"]["name"], string>>
 	pattern: JSONColumnType<Pattern> // JSON
 }
 

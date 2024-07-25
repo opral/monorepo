@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { loadProjectOpfs, newProjectOpfs } from "../../src/index.js"
 import { MainView } from "./mainView.js"
 

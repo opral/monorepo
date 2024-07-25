@@ -1,6 +1,13 @@
 import { randomHumanId } from "./human-id/human-readable-id.js"
 import { v4 as uuid } from "uuid"
-import type { LanguageTag, NestedBundle, NestedMessage, Text, Variant } from "./types/index.js"
+import type {
+	Expression,
+	LanguageTag,
+	NestedBundle,
+	NestedMessage,
+	Text,
+	Variant,
+} from "./types/index.js"
 
 /**
  * create v2 Bundle with a random human ID
@@ -31,7 +38,7 @@ export function createMessage(args: {
 	bundleId: string
 	locale: LanguageTag
 	text: string
-	match?: Array<string>
+	match?: Record<Expression["arg"]["name"], string>
 }): NestedMessage {
 	const messageId = uuid()
 	return {
@@ -52,12 +59,12 @@ export function createVariant(args: {
 	messageId: string
 	id?: string
 	text?: string
-	match?: Array<string>
+	match?: Record<Expression["arg"]["name"], string>
 }): Variant {
 	return {
 		messageId: args.messageId,
 		id: args.id ? args.id : uuid(),
-		match: args.match ? args.match : [],
+		match: args.match ? args.match : {},
 		pattern: [toTextElement(args.text ?? "")],
 	}
 }

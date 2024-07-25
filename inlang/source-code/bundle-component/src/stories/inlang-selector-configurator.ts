@@ -11,6 +11,7 @@ import {
 	type Message,
 	type Variant,
 	type NestedMessage,
+	type Expression,
 } from "@inlang/sdk-v2"
 import addSelector from "../helper/crud/selector/add.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
@@ -282,8 +283,9 @@ export default class InlangSelectorConfigurator extends LitElement {
 
 				this._addVariants({
 					message: newMessage,
-					variantMatcherArrays: [],
+					variantsMatcher: [],
 					newMatchers: newMatchers,
+					newSelectorName: this._input,
 				})
 				this.addMessage(newMessage)
 				this.dispatchOnInsertMessage(newMessage, newMessage.variants)
@@ -293,7 +295,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 			} else if (this.message) {
 				// get variant matchers arrays
 				const _variants = structuredClone(this.message ? this.message.variants : [])
-				const _variantMatcherArrays = _variants.map((variant) => variant.match)
+				const _variantsMatcher = _variants.map((variant) => variant.match)
 
 				// add selector
 				addSelector({
@@ -317,8 +319,9 @@ export default class InlangSelectorConfigurator extends LitElement {
 
 				this._addVariants({
 					message: this.message,
-					variantMatcherArrays: _variantMatcherArrays,
+					variantsMatcher: _variantsMatcher,
 					newMatchers: newMatchers,
+					newSelectorName: this._input,
 				})
 
 				// only inserted variants should be dispatched -> show filter
@@ -341,20 +344,21 @@ export default class InlangSelectorConfigurator extends LitElement {
 
 	private _addVariants = (props: {
 		message: NestedMessage
-		variantMatcherArrays: string[][]
+		variantsMatcher: Record<Expression["arg"]["name"], string>[]
 		newMatchers: string[]
+		newSelectorName: string
 	}) => {
 		const newMatchers = props.newMatchers.filter((category) => category !== "*")
 		if (newMatchers) {
-			if (props.variantMatcherArrays && props.variantMatcherArrays.length > 0) {
-				for (const variantMatcherArray of props.variantMatcherArrays) {
+			if (props.variantsMatcher && props.variantsMatcher.length > 0) {
+				for (const variantMatcher of props.variantsMatcher) {
 					for (const category of newMatchers) {
 						upsertVariant({
 							message: props.message,
 							variant: createVariant({
 								messageId: props.message.id,
 								// combine the matches that are already present with the new category -> like a matrix
-								match: [...variantMatcherArray, category],
+								match: { ...variantMatcher, ...{ [props.newSelectorName]: category } },
 							}),
 						})
 					}
@@ -366,7 +370,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 						variant: createVariant({
 							messageId: props.message.id,
 							// combine the matches that are already present with the new category -> like a matrix
-							match: [category],
+							match: { [props.newSelectorName]: category },
 						}),
 					})
 				}

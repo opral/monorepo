@@ -20,23 +20,23 @@ export function generateUUID() {
  * @param variants
  * @returns an array of variants and there vorresponding matachers like [['one', 'one'], ['one', '*'],['*', 'one'], ['*', '*']]
  */
-function generateCombinations(variants: string[][]): string[][] {
-	const combinations: string[][] = []
+function generateCombinations(variants: string[][], selector: string[]): Record<string, string>[] {
+	const combinations: Record<string, string>[] = []
 
-	function backtrack(path: string[], index: number) {
+	function backtrack(path: Record<string, string>, index: number) {
 		if (index === variants.length) {
-			combinations.push([...path])
+			combinations.push(path)
 			return
 		}
 
 		for (const variant of variants[index]!) {
-			path.push(variant)
+			path[selector[index]!] = variant
 			backtrack(path, index + 1)
-			path.pop()
+			delete path[selector[index]!]
 		}
 	}
 
-	backtrack([], 0)
+	backtrack({}, 0)
 	return combinations
 }
 
@@ -92,7 +92,7 @@ export function createMockBundle(args: {
 		args.languageTags,
 		inputs,
 		selectors,
-		generateCombinations(matchers)
+		generateCombinations(matchers, selectors)
 	)
 	return {
 		id: bundleId,
@@ -106,7 +106,7 @@ function createMessages(
 	languageTags: string[],
 	inputs: Declaration[],
 	selectors: Expression[],
-	variants: string[][]
+	variants: Array<Record<Expression["arg"]["name"], string>>
 ) {
 	const messagesByLanguage: Record<string, NestedMessage> = {}
 

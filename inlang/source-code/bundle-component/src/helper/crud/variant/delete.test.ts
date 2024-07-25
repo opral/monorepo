@@ -12,8 +12,8 @@ describe("deleteVariant", () => {
 			selectors: [],
 			declarations: [],
 			variants: [
-				createVariant({ messageId, id: "a", match: ["*"] }),
-				createVariant({ messageId, id: "b", match: ["one"] }),
+				createVariant({ messageId, id: "a", match: { count: "*" } }),
+				createVariant({ messageId, id: "b", match: { count: "one" } }),
 			],
 		}
 

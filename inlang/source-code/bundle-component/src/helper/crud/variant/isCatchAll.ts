@@ -6,7 +6,7 @@ import type { Variant } from "@inlang/sdk-v2"
  * @returns True if the variant has a catch-all match.
  */
 const variantIsCatchAll = (props: { variant: Variant }): boolean => {
-	if (props.variant.match.filter((match) => match !== "*").length === 0) {
+	if (Object.values(props.variant.match).filter((match) => match !== "*").length === 0) {
 		return true
 	} else {
 		return false
