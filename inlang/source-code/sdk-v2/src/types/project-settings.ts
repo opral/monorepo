@@ -8,13 +8,14 @@ import type { Plugin2 } from "./plugin.js"
  * ---------------- Specific Language Tag field meta information ----------------
  */
 
-// TODO SDK-v2 naming?
+// TODO SDK-v2 SETTINGS naming?
 const BaseLocale = LanguageTag
 BaseLocale.title = "Source language tag"
 BaseLocale.description =
 	"Set the reference language for your project. It needs to be a valid BCP-47 language tag."
 
 const InternalProjectSettings = Type.Object({
+	// TODO SDK-v2 SETTINGS do we need to generate a settings v2 schema?
 	$schema: Type.Optional(Type.Literal("https://inlang.com/schema/project-settings")),
 	baseLocale: BaseLocale,
 	locales: Type.Array(LanguageTag, {

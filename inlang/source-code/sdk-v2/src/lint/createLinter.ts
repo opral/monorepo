@@ -1,4 +1,4 @@
-// TODO SDK-v2 implement linting
+// TODO SDK-v2 LINT implement linting
 // import { populateLevel } from "./populateLintLevel.js"
 // import * as Comlink from "comlink"
 // import type { ProjectSettings2 } from "../types/project-settings.js"
@@ -41,7 +41,7 @@
 // 				reportsById[messageBundle.id] = []
 
 // 				for (const lintRule of inlangProject.installed.lintRules.getValue()) {
-//                     // TODO SDK-v2 get message lint rules separatly
+//                     // TODO SDK-v2 LINT get message lint rules separatly
 //                     const messageBundleLintRule = lintRule as unknown as MessageBundleLintRule
 // 					const promise = messageBundleLintRule.run({
 // 						messageBundle: messageBundle,
@@ -85,7 +85,7 @@
 
 // 			if (!bundle) throw new Error(`messageBundle ${report.messageBundleId} not found`)
 
-//             // TODO SDK-v2 get message lint rules separatly
+//             // TODO SDK-v2 LINT get message lint rules separatly
 // 			const rule = inlangProject.installed.lintRules.getValue().find((rule) => rule.id === report.ruleId) as unknown as MessageBundleLintRule
 // 			if (!rule) throw new Error(`rule ${report.ruleId} not found`)
 // 			if (!rule.fix) throw new Error(`rule ${report.ruleId} does not have a fix function`)

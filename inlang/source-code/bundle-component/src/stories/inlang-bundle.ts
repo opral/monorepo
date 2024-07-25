@@ -375,7 +375,7 @@ export default class InlangBundle extends LitElement {
 					${this._locales() &&
 					this._locales()?.map((locale) => {
 						const message = this._bundle?.messages.find((message) => message.locale === locale)
-						// TODO SDK-v2 lint reports
+						// TODO SDK-v2 LINT reports
 						const lintReports = [] as any[]
 						// const lintReports = this._bundle?.lintReports?.reports.filter(
 						// 	(report) => report.messageId === message?.id

@@ -34,7 +34,7 @@ export default class InlangReactiveWrapper extends LitElement {
 	}
 
 	override async firstUpdated() {
-		// TODO SDK-v2 lint reports - mock
+		// TODO SDK-v2 LINT reports - mock
 		// this._lintReports = {
 		// 	hash: "hash",
 		// 	reports: [],

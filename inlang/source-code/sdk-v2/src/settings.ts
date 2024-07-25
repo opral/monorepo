@@ -22,7 +22,7 @@ export async function loadSettings(args: {
 
 	const projectSettings = parseSettings(json.data)
 
-	// TODO SDK-v2 - Add legacy fields - needed for settings component to work, check how we can get rid of those
+	// TODO SDK-v2 SETTINGS @NilsJacobsen can i drop this? - Add legacy fields - needed for settings component to work, check how we can get rid of those
 	// @ts-ignore
 	projectSettings.languageTags = projectSettings.locales
 	// @ts-ignore
@@ -31,7 +31,7 @@ export async function loadSettings(args: {
 }
 
 const parseSettings = (settings: unknown) => {
-	// TODO SDK-v2 check how we want to deal with migration here
+	// TODO SDK-v2 SETTINGS check how we want to deal with migration here
 	// const settingsCompiler = TypeCompiler.Compile(ProjectSettings2)
 	// const withMigration = migrateIfOutdated(settings as any)
 	// if (settingsCompiler.Check(withMigration) === false) {
@@ -60,6 +60,6 @@ const parseSettings = (settings: unknown) => {
 		})
 	}
 
-	// TODO SDK-v2 check migration (the new project settings changes to locales and baseLocale!)
+	// TODO SDK-v2 SETTINGS check migration (the new project settings changes to locales and baseLocale!)
 	return settings as unknown as ProjectSettings2
 }

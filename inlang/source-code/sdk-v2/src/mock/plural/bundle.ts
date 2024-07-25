@@ -181,7 +181,7 @@ export const pluralBundle: NestedBundle = {
 				},
 			],
 		},
-	] /*, TODO SDK-v2 lint reports
+	] /*, TODO SDK-v2 LINT reports
 	lintReports: {
 		hash: "testHash",
 		reports: [
