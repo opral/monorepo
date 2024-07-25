@@ -15,6 +15,7 @@ export async function onRenderHtml(pageContext: PageContextServer) {
       <head>
         <title>Lix - Change Control System</title>
         <link rel="icon" type="image/x-icon" href="/favicon.svg">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0">
       </head>
       <body>
        ${dangerouslySkipEscape(content)}
