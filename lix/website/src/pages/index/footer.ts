@@ -3,7 +3,7 @@ import { html } from "lit"
 const footerLinks = [
 	{
 		title: "GitHub",
-		link: "https://github.com/opral/monorepo/tree/main/lix",
+		link: "https://lix.opral.com",
 	},
 	{
 		title: "Twitter",
