@@ -92,7 +92,7 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 		.pipe(
 			switchMap(([modules]) => {
 				lifecycle$.next("resolvingModules")
-				// TODO SDK-v2 handle module load errors
+				// TODO SDK-v2 LINT handle module load errors
 				const rules = (modules as any).messageBundleLintRules.map(
 					(rule: any) =>
 						({
@@ -118,7 +118,7 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 
 	const sqliteDbFilePath = args.inlangFolderPath + "/inlang.sqlite"
 
-	// TODO SDK-v2 SQLocalKysely currently only support (1 client) <-> (1 instance worker) communication with an db instance for reports to work we need (n clients) <-> (1 instance) communication
+	// TODO SDK-v2 LINT SQLocalKysely currently only support (1 client) <-> (1 instance worker) communication with an db instance for reports to work we need (n clients) <-> (1 instance) communication
 	const sqliteDb = new SQLocalKyselyWithRaw(sqliteDbFilePath)
 	const { dialect, sql, rawSql } = sqliteDb
 
@@ -128,10 +128,13 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 	})
 
 	return {
+		// TODO SDK-v2 LIX
 		id: "TODO SDK-v2",
 		// db,
 		// sql,
 		// rawSql,
+		// TODO SDK-v2 API if we expose only the api, what helper Method should the SDK provide insert/update/delete for bundle/message/variant? how shall we deal with nested queries?
+		// db: db, 
 
 		installed: {
 			lintRules: installedLintRules$,
@@ -140,7 +143,7 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 		settings: {
 			get: () => projectSettings$.getValue(),
 			set: async (settings: ProjectSettings2) => {
-				// TODO SDK-v2 implement
+				// TODO SDK-v2 LIX write the file back to lix
 			},
 			subscribe: () => projectSettings$.subscribe(),
 		},
@@ -168,11 +171,11 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 			insert: (bundle: Bundle) => {
 				return db.insertInto("bundle").values({
 					id: bundle.id,
-					alias: json(bundle.alias) as any, // TODO SDK-v2 check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
+					alias: json(bundle.alias) as any, // TODO SDK-v2 KISELY check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
 				})
 			},
 			update: (bundle: Partial<Bundle> & { id: string }) => {
-				const bundleProperties = structuredClone(bundle as any) // TODO SDK-v2 check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
+				const bundleProperties = structuredClone(bundle as any) // TODO SDK-v2 KISELY check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
 				delete bundleProperties.id
 				if (bundle.alias) {
 					bundleProperties.alias = json(bundle.alias) as any
@@ -190,19 +193,18 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 					id: message.id,
 					bundleId: message.bundleId,
 					locale: message.locale,
-					declarations: json(message.declarations) as any, // TODO SDK-v2 check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
-					selectors: json(message.selectors) as any, // TODO SDK-v2 check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
+					declarations: json(message.declarations) as any, // TODO SDK-v2 KISELY check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
+					selectors: json(message.selectors) as any, // TODO SDK-v2 KISELY check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
 				})
 			},
 			update: (message: Partial<Message> & { id: string }) => {
-				const messageProperties = structuredClone(message as any) // TODO SDK-v2 check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
+				const messageProperties = structuredClone(message as any) // TODO SDK-v2 KISELY check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
 				delete messageProperties.id
 				delete messageProperties.variants
 				if (message.declarations) {
 					messageProperties.declarations = json(message.declarations) as any
 				}
 				if (message.selectors) {
-					// TODO SDK-v2 shall we structure clone here?
 					messageProperties.selectors = json(message.selectors) as any
 				}
 
@@ -218,18 +220,17 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 				return db.insertInto("variant").values({
 					id: variant.id,
 					messageId: variant.messageId,
-					match: json(variant.match) as any, // TODO SDK-v2 check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
-					pattern: json(variant.pattern) as any, // TODO SDK-v2 check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
+					match: json(variant.match) as any, // TODO SDK-v2 KISELY check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
+					pattern: json(variant.pattern) as any, // TODO SDK-v2 KISELY check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
 				})
 			},
 			update: (variant: Partial<Variant> & { id: string }) => {
-				const variantProperties = structuredClone(variant as any) // TODO SDK-v2 check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
+				const variantProperties = structuredClone(variant as any) // TODO SDK-v2 KISELY check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
 				delete variantProperties.id
 				if (variant.match) {
 					variantProperties.match = json(variant.match) as any
 				}
 				if (variant.pattern) {
-					// TODO SDK-v2 shall we structure clone here?
 					variantProperties.pattern = json(variant.pattern) as any
 				}
 
@@ -240,12 +241,12 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 			},
 		},
 		// fix: async (report: LintReport, fix: Fix<LintReport>) => {
-		// 	// TODO SDK-v2 implement fix
+		// 	// TODO SDK-v2 LINT implement fix
 		// 	// const fixed = await linter.fix(report, fix)
 		// 	// await database.collections.messageBundles.upsert(fixed)
 		// },
 		close: () => {
-			// TODO SDK-v2 close database again
+			// TODO SDK-v2 LIX lifecylce of the database? close database again
 		},
 	}
 }
@@ -261,7 +262,7 @@ export const populateMessages = (bundleSelect: SelectQueryBuilder<Database, "bun
 				"message.bundleId",
 				"=",
 				"bundle.id" as any
-			) // TODO SDK-v2 check how get aliases into populateVariants
+			) 
 		).as("messages"),
 	])
 }

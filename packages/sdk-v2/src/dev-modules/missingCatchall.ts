@@ -35,7 +35,7 @@ const missingCatchallLintRule: MessageBundleLintRule = {
 		if (!message)
 			throw new Error(`message ${report.target.messageId} not found on bundle ${messageBundle.id}`)
 
-		// TODO SDK-v2
+		// TODO SDK-v2 LINT
 		// const catchallVariant = createVariant({
 		// 	text: "",
 		// 	match: message.selectors.map(() => "*"),

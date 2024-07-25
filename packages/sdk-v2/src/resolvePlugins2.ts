@@ -55,7 +55,7 @@ export const resolvePlugins2: ResolvePlugins2Function = async (args) => {
 		}
 
 		// -- ALREADY DEFINED LOADMESSAGES / SAVEMESSAGES / DETECTEDLANGUAGETAGS --
-		// TODO SDK-v2 check if we can reuse this for export/import
+		// TODO SDK-v2 IMPORT/EXPORT check if we can reuse this for export/import
 		// if (typeof plugin.loadMessages === "function" && result.data.loadMessages !== undefined) {
 		// 	result.errors.push(new PluginLoadMessagesFunctionAlreadyDefinedError({ id: plugin.id }))
 		// }
@@ -93,7 +93,7 @@ export const resolvePlugins2: ResolvePlugins2Function = async (args) => {
 		 * -------------- BEGIN ADDING TO RESULT --------------
 		 */
 
-		// TODO SDK-v2 we remove load/save Message for now
+		// TODO SDK-v2 IMPORT/EXPORT we remove load/save Message for now
 		// if (typeof plugin.loadMessages === "function") {
 		// 	result.data.loadMessages = plugin.loadMessages
 		// }
@@ -116,7 +116,7 @@ export const resolvePlugins2: ResolvePlugins2Function = async (args) => {
 
 	// --- LOADMESSAGE / SAVEMESSAGE NOT DEFINED ---
 
-	// TODO SDK-v2 check if we can use that for exporter importer
+	// TODO SDK-v2 IMPORT/EXPORT check if we can use that for exporter importer
 	// if (
 	// 	!experimentalPersistence &&
 	// 	(typeof result.data.loadMessages !== "function" ||

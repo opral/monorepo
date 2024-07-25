@@ -44,7 +44,7 @@ export type ResolvePluginsFunction = (args: {
  * The API after resolving the plugins.
  */
 export type ResolvedPluginApi = {
-	// TODO SDK-v2 needed implement importer exporter?
+	// TODO SDK-v2 IMPORT/EXPORT needed implement importer exporter?
 	// loadMessages: (args: {
 	// 	settings: ProjectSettings2
 	// 	nodeishFs: NodeishFilesystemSubset

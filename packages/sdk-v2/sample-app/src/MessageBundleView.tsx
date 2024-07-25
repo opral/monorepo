@@ -78,6 +78,8 @@ export function MessageBundleView({
 		const dbPromise = project.variant.delete(deletedVariant).execute()
 	}
 
+	console.log(currentBundle)
+
 	return (
 		<MessageBundleComponent
 			key={bundle.id}

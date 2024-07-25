@@ -51,7 +51,7 @@ export const MessageLintLevel = _MessageLintRuleLevel
  * Lint configuration for a given bundle/message/variant
  */
 export const LintConfig = Type.Object({
-	// TODO SDK-v2 Rename to LintSettings
+	// TODO SDK-v2 LINT Rename to LintSettings
 	id: Type.Optional(Type.String({ description: "id of the lint config entry" })),
 	ruleId: _MessageBundleLintRuleId,
 	// TODO disable this for now - to only reach feature parity for now - this is purly experimental
@@ -75,7 +75,7 @@ const LintFix = Type.Object({
 export const LintReport = Type.Object({
 	ruleId: Type.String(),
 
-	// TODO SDK-v2 check if we should provide a lint target
+	// TODO SDK-v2 LINT check if we should provide a lint target
 	target: Type.Object({
 		bundleId: Type.String(),
 		messageId: Type.Optional(Type.String()),
@@ -95,7 +95,7 @@ export const LintReport = Type.Object({
 export type LintReport<Fixes extends LintFix[] = LintFix[]> = {
 	ruleId: MessageBundleLintRule["id"]
 
-	// TODO SDK-v2 check if we should provide a lint target
+	// TODO SDK-v2 LINT check if we should provide a lint target
 	target: {
 		bundleId: string
 		messageId: string | undefined

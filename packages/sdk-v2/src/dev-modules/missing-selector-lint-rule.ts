@@ -1,5 +1,5 @@
 import type { MessageBundleLintRule } from "../types/lint.js"
-// TODO SDK-v2
+// TODO SDK-v2 LINT
 // import type { VariableReference } from "../types/message-bundle.js"
 type VariableReference = any
 

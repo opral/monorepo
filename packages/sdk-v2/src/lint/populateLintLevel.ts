@@ -20,7 +20,7 @@ export function populateLevel(
 	return { ...report, level: "error" }
 }
 
-// TODO SDK-v2 loris - discuss how we want this to be implemented
+// TODO SDK-v2 LINT loris - discuss how we want this to be implemented
 // const keys = [
 // 	["ruleId", "ruleId"],
 // 	["bundleId", "bundleId"],
@@ -30,7 +30,7 @@ export function populateLevel(
 // ] as const satisfies [keyof LintConfig, keyof LintReport][]
 
 function configMatches(report: Omit<LintReport, "level">, config: LintConfig): boolean {
-	// TODO SDK-v2 loris - discuss how we want this to be implemented
+	// TODO SDK-v2 LINT loris - discuss how we want this to be implemented
 	// for (const [configKey, reportKey] of keys) {
 	// 	if (config[configKey] === undefined) continue
 	// 	if (config[configKey] !== report[reportKey]) return false
