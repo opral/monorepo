@@ -4,7 +4,7 @@ With Lix you get full **traceability**.
 
 A change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g., .xlsx, .sqlite, or .inlang.
 
-### Read more at [lix.opral.com](lix.opral.com)
+### Read more at [lix.opral.com](https://lix.opral.com)
 
 ---
 <br>
