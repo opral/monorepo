@@ -161,7 +161,7 @@ export default class InlangMessage extends LitElement {
 	message: NestedMessage | undefined
 
 	@property()
-	lintReports: LintReport[] | undefined
+	messageValidationReports: Array<any> | undefined
 
 	@property()
 	installedLintRules: InstalledLintRule[] | undefined
@@ -332,13 +332,9 @@ export default class InlangMessage extends LitElement {
 										  >`
 										: ``
 									: ``}
-								${this.lintReports &&
-								this.lintReports.length > 0 &&
-								this.lintReports.some((report) => !report.target.variantId)
+								${this.messageValidationReports && this.messageValidationReports.length > 0
 									? html`<inlang-lint-report-tip
-											.lintReports=${this.lintReports.filter(
-												(report) => !report.target.variantId
-											) ?? []}
+											.lintReports=${this.messageValidationReports}
 											.installedLintRules=${this.installedLintRules}
 											.fixLint=${this.fixLint}
 									  ></inlang-lint-report-tip>`

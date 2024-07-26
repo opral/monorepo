@@ -51,14 +51,8 @@ import getInputs from "../helper/crud/input/get.js"
 import createInput from "../helper/crud/input/create.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
 import patternToString from "../helper/crud/pattern/patternToString.js"
-import stringToPattern from "../helper/crud/pattern/stringToPattern.js"
 import sortAllVariants from "../helper/crud/variant/sortAll.js"
 import InlangBundleAction from "./actions/inlang-bundle-action.js"
-import deleteInput from "../helper/crud/input/delete.js"
-import deleteSelector from "../helper/crud/selector/delete.js"
-import addSelector from "../helper/crud/selector/add.js"
-import deleteVariant from "../helper/crud/variant/delete.js"
-import updateMatch from "../helper/crud/variant/updateMatch.js"
 
 @customElement("inlang-bundle")
 export default class InlangBundle extends LitElement {
@@ -74,6 +68,15 @@ export default class InlangBundle extends LitElement {
 
 	@property({ type: Array })
 	installedLintRules: InstalledLintRule[] | undefined
+
+	@property({ type: Array })
+	bundleValidationReports: Array<any> | undefined
+
+	@property({ type: Array })
+	messageValidationReports: Array<any> | undefined
+
+	@property({ type: Array })
+	variantValidationReports: Array<any> | undefined
 
 	//disable shadow root -> because of contenteditable selection API
 	override createRenderRoot() {
@@ -362,6 +365,9 @@ export default class InlangBundle extends LitElement {
 				<inlang-bundle-header
 					.bundle=${this._bundle}
 					.settings=${this.settings}
+					.installedLintRules=${this.installedLintRules}
+					.bundleValidationReports=${this.bundleValidationReports}
+					.fixLint=${this._fixLint}
 					.addInput=${this._addInput}
 					.triggerSave=${this._triggerSave}
 					.triggerRefresh=${this._triggerRefresh}
@@ -375,15 +381,14 @@ export default class InlangBundle extends LitElement {
 					${this._locales() &&
 					this._locales()?.map((locale) => {
 						const message = this._bundle?.messages.find((message) => message.locale === locale)
+						const _messageValidationReports = this.messageValidationReports?.filter(
+							(report: any) => report.typeId === message?.id
+						)
 						// TODO SDK-v2 lint reports
-						const lintReports = [] as any[]
-						// const lintReports = this._bundle?.lintReports?.reports.filter(
-						// 	(report) => report.messageId === message?.id
-						// )
 						return html`<inlang-message
 							.locale=${locale}
 							.message=${message}
-							.lintReports=${lintReports}
+							.messageValidationReports=${_messageValidationReports}
 							.installedLintRules=${this.installedLintRules}
 							.settings=${this.settings}
 							.inputs=${this._inputs()}
@@ -405,6 +410,10 @@ export default class InlangBundle extends LitElement {
 								selectors: message?.selectors || [],
 							})?.map((fakevariant) => {
 								const variant = message?.variants.find((v) => v.id === fakevariant.id)
+								const _variantValidationReports: Array<any> | undefined =
+									this.variantValidationReports?.filter(
+										(report: any) => report.typeId === variant?.id
+									)
 								return html`<inlang-variant
 									slot="variant"
 									.variant=${variant}
@@ -416,7 +425,8 @@ export default class InlangBundle extends LitElement {
 									.addMessage=${this._addMessage}
 									.addInput=${this._addInput}
 									.locale=${locale}
-									.lintReports=${lintReports}
+									.variantValidationReports=${_variantValidationReports}
+									.messageValidationReports=${_messageValidationReports}
 									.installedLintRules=${this.installedLintRules}
 									.fixLint=${this._fixLint}
 								>
