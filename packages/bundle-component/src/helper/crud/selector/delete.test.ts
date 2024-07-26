@@ -25,7 +25,22 @@ describe("deleteSelector", () => {
 				},
 			],
 			declarations: [],
-			variants: [],
+			variants: [
+				{
+					id: "variantId",
+					messageId: "testId",
+					match: {
+						count: "1",
+						name: "John",
+					},
+					pattern: [
+						{
+							type: "text",
+							value: "Hello ",
+						},
+					],
+				},
+			],
 		}
 
 		deleteSelector({ message, index: 0 })
@@ -33,5 +48,6 @@ describe("deleteSelector", () => {
 		expect(message.selectors.length).toBe(1)
 		// @ts-ignore
 		expect(message.selectors[0]!.arg.name).toBe("name")
+		expect(Object.keys(message.variants[0]!.match).length).toBe(1)
 	})
 })

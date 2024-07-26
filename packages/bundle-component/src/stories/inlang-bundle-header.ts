@@ -1,6 +1,8 @@
 import type {
 	Declaration,
+	InstalledLintRule,
 	LanguageTag,
+	LintReport,
 	Message,
 	NestedBundle,
 	ProjectSettings2,
@@ -137,6 +139,15 @@ export default class InlangBundleHeader extends LitElement {
 	settings: ProjectSettings2 | undefined
 
 	@property()
+	bundleValidationReports: Array<any> | undefined
+
+	@property({ type: Array })
+	installedLintRules: InstalledLintRule[] | undefined
+
+	@property()
+	fixLint: (lintReport: LintReport, fix: LintReport["fixes"][0]["title"]) => void = () => {}
+
+	@property()
 	addInput: (input: Declaration) => void = () => {}
 
 	@property()
@@ -203,7 +214,6 @@ export default class InlangBundleHeader extends LitElement {
 														value="delete"
 														@click=${() => {
 															deleteInput({ messageBundle: this.bundle!, input })
-															// deleteSelector({ message, index })
 															this.requestUpdate()
 															for (const message of this.bundle!.messages) {
 																this.dispatchOnUpdateMessage(message, [])
@@ -282,6 +292,11 @@ export default class InlangBundleHeader extends LitElement {
 									</sl-menu>
 								</sl-dropdown>`
 						: ``}
+					<inlang-lint-report-tip
+						.lintReports=${this.bundleValidationReports}
+						.installedLintRules=${this.installedLintRules}
+						.fixLint=${this.fixLint}
+					></inlang-lint-report-tip>
 				</div>
 			</div>
 		`
