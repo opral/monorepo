@@ -15,7 +15,7 @@ const deleteSelector = (props: { message: NestedMessage; index: number }) => {
 	if (selectorName) {
 		props.message.selectors.splice(props.index, 1)
 		for (const variant of props.message.variants) {
-			for (const name in Object.keys(variant.match)) {
+			for (const name in variant.match) {
 				if (name === selectorName) {
 					delete variant.match[name]
 				}
