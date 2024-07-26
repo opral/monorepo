@@ -51,14 +51,8 @@ import getInputs from "../helper/crud/input/get.js"
 import createInput from "../helper/crud/input/create.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
 import patternToString from "../helper/crud/pattern/patternToString.js"
-import stringToPattern from "../helper/crud/pattern/stringToPattern.js"
 import sortAllVariants from "../helper/crud/variant/sortAll.js"
 import InlangBundleAction from "./actions/inlang-bundle-action.js"
-import deleteInput from "../helper/crud/input/delete.js"
-import deleteSelector from "../helper/crud/selector/delete.js"
-import addSelector from "../helper/crud/selector/add.js"
-import deleteVariant from "../helper/crud/variant/delete.js"
-import updateMatch from "../helper/crud/variant/updateMatch.js"
 
 @customElement("inlang-bundle")
 export default class InlangBundle extends LitElement {
