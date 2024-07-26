@@ -282,7 +282,8 @@ export default class InlangVariant extends LitElement {
 		// works like useEffect
 		// In order to not mutate object references, we need to clone the object
 		// When the messageBundle prop changes, we update the internal state
-		if (changedProperties.has("lintReports")) {
+		if (changedProperties.has("variantValidationReports", "messageValidationReports")) {
+			console.log("variantValidationReports or messageValidationReports changed")
 			// adds classes when dropdown is open, to keep it open when not hovering the variant
 			const lintReportsTip = this.shadowRoot?.querySelector("inlang-lint-report-tip")
 			const lintReportDropdown = lintReportsTip?.shadowRoot?.querySelector("sl-dropdown")
