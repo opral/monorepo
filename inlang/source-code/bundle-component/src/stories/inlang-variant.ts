@@ -209,21 +209,18 @@ export default class InlangVariant extends LitElement {
 	}
 
 	//functions
-	private _getLintReports = (): LintReport[] | undefined => {
+	private _getLintReports = (): LintReport[] => {
 		// wether a lint report belongs to a variant or message and when they are shown
 		if (
-			(this.message?.selectors && this.message.selectors.length === 0) ||
-			!this.message?.selectors
+			((this.message?.selectors && this.message.selectors.length === 0) ||
+				!this.message?.selectors) &&
+			this.message?.variants.length === 1
 		) {
 			// when there are no selectors the reports of the message and variant are shown on variant level
 			return (this.messageValidationReports || []).concat(this.variantValidationReports || [])
 		}
-		if (this.message.selectors && this.message.selectors.length > 0) {
-			// when selectors are present, only the reports of the variant are shown
-			return this.variantValidationReports
-		}
 
-		return undefined
+		return this.variantValidationReports || []
 	}
 
 	private _delete = () => {
@@ -312,6 +309,7 @@ export default class InlangVariant extends LitElement {
 	}
 
 	override render() {
+		console.log(this.message)
 		return !(!this.variant && this.message && this.message?.selectors.length > 0)
 			? html`<div class="variant">
 					${this.variant
