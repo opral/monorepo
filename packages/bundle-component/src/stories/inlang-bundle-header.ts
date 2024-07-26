@@ -214,7 +214,6 @@ export default class InlangBundleHeader extends LitElement {
 														value="delete"
 														@click=${() => {
 															deleteInput({ messageBundle: this.bundle!, input })
-															// deleteSelector({ message, index })
 															this.requestUpdate()
 															for (const message of this.bundle!.messages) {
 																this.dispatchOnUpdateMessage(message, [])
