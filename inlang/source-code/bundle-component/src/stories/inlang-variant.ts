@@ -153,7 +153,10 @@ export default class InlangVariant extends LitElement {
 	inputs: Declaration[] | undefined
 
 	@property()
-	lintReports: LintReport[] | undefined
+	variantValidationReports: Array<any> | undefined
+
+	@property()
+	messageValidationReports: Array<any> | undefined
 
 	@property()
 	installedLintRules: InstalledLintRule[] | undefined
@@ -208,27 +211,18 @@ export default class InlangVariant extends LitElement {
 	//functions
 	private _getLintReports = (): LintReport[] | undefined => {
 		// wether a lint report belongs to a variant or message and when they are shown
-		if (this.lintReports && this.lintReports.length > 0) {
-			if (
-				(this.message?.selectors && this.message.selectors.length === 0) ||
-				!this.message?.selectors
-			) {
-				// when there are no selectors the reports of the message and variant are shown on variant level
-				return this.lintReports
-			}
-			if (
-				this.message.selectors &&
-				this.message.selectors.length > 0 &&
-				this.lintReports.some(
-					(report) => report.target.variantId && report.target.variantId === this.variant?.id
-				)
-			) {
-				// when selectors are present, only the reports of the variant are shown
-				return this.lintReports.filter(
-					(report) => report.target.variantId && report.target.variantId === this.variant?.id
-				)
-			}
+		if (
+			(this.message?.selectors && this.message.selectors.length === 0) ||
+			!this.message?.selectors
+		) {
+			// when there are no selectors the reports of the message and variant are shown on variant level
+			return (this.messageValidationReports || []).concat(this.variantValidationReports || [])
 		}
+		if (this.message.selectors && this.message.selectors.length > 0) {
+			// when selectors are present, only the reports of the variant are shown
+			return this.variantValidationReports
+		}
+
 		return undefined
 	}
 

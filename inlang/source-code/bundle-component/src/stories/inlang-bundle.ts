@@ -75,6 +75,15 @@ export default class InlangBundle extends LitElement {
 	@property({ type: Array })
 	installedLintRules: InstalledLintRule[] | undefined
 
+	@property({ type: Array })
+	bundleValidationReports: Array<any> | undefined
+
+	@property({ type: Array })
+	messageValidationReports: Array<any> | undefined
+
+	@property({ type: Array })
+	variantValidationReports: Array<any> | undefined
+
 	//disable shadow root -> because of contenteditable selection API
 	override createRenderRoot() {
 		return this
@@ -362,6 +371,9 @@ export default class InlangBundle extends LitElement {
 				<inlang-bundle-header
 					.bundle=${this._bundle}
 					.settings=${this.settings}
+					.installedLintRules=${this.installedLintRules}
+					.bundleValidationReports=${this.bundleValidationReports}
+					.fixLint=${this._fixLint}
 					.addInput=${this._addInput}
 					.triggerSave=${this._triggerSave}
 					.triggerRefresh=${this._triggerRefresh}
@@ -375,15 +387,14 @@ export default class InlangBundle extends LitElement {
 					${this._locales() &&
 					this._locales()?.map((locale) => {
 						const message = this._bundle?.messages.find((message) => message.locale === locale)
+						const _messageValidationReports = this.messageValidationReports?.filter(
+							(report: any) => report.typeId === message?.id
+						)
 						// TODO SDK-v2 lint reports
-						const lintReports = [] as any[]
-						// const lintReports = this._bundle?.lintReports?.reports.filter(
-						// 	(report) => report.messageId === message?.id
-						// )
 						return html`<inlang-message
 							.locale=${locale}
 							.message=${message}
-							.lintReports=${lintReports}
+							.messageValidationReports=${_messageValidationReports}
 							.installedLintRules=${this.installedLintRules}
 							.settings=${this.settings}
 							.inputs=${this._inputs()}
@@ -405,6 +416,10 @@ export default class InlangBundle extends LitElement {
 								selectors: message?.selectors || [],
 							})?.map((fakevariant) => {
 								const variant = message?.variants.find((v) => v.id === fakevariant.id)
+								const _variantValidationReports: Array<any> | undefined =
+									this.variantValidationReports?.filter(
+										(report: any) => report.typeId === variant?.id
+									)
 								return html`<inlang-variant
 									slot="variant"
 									.variant=${variant}
@@ -416,7 +431,8 @@ export default class InlangBundle extends LitElement {
 									.addMessage=${this._addMessage}
 									.addInput=${this._addInput}
 									.locale=${locale}
-									.lintReports=${lintReports}
+									.variantValidationReports=${_variantValidationReports}
+									.messageValidationReports=${_messageValidationReports}
 									.installedLintRules=${this.installedLintRules}
 									.fixLint=${this._fixLint}
 								>
