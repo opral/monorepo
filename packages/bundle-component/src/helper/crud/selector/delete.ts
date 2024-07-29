@@ -11,13 +11,18 @@ import type { NestedMessage } from "@inlang/sdk-v2"
  */
 
 const deleteSelector = (props: { message: NestedMessage; index: number }) => {
-	props.message.selectors.splice(props.index, 1)
-	for (const variant of props.message.variants) {
-		for (const name in Object.keys(variant.match)) {
-			if (name === props.message.selectors[props.index]!.arg.name) {
-				delete variant.match[name]
+	const selectorName = props.message.selectors[props.index]!.arg.name
+	if (selectorName) {
+		props.message.selectors.splice(props.index, 1)
+		for (const variant of props.message.variants) {
+			for (const name in variant.match) {
+				if (name === selectorName) {
+					delete variant.match[name]
+				}
 			}
 		}
+	} else {
+		console.error("Index is not pointing on a selector")
 	}
 }
 

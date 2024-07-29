@@ -22,14 +22,14 @@ import { BehaviorSubject, combineLatest, from, switchMap, tap } from "rxjs"
 import { createDebugImport, importSequence } from "./import-utils.js"
 
 // development only
-import lintRule from "./dev-modules/lint-rule.js"
-import makeOpralUppercase from "./dev-modules/opral-uppercase-lint-rule.js"
-import missingSelectorLintRule from "./dev-modules/missing-selector-lint-rule.js"
-import missingCatchallLintRule from "./dev-modules/missingCatchall.js"
-import { resolveModules } from "./resolveModules2.js"
+// import lintRule from "./dev-modules/lint-rule.js"
+// import makeOpralUppercase from "./dev-modules/opral-uppercase-lint-rule.js"
+// import missingSelectorLintRule from "./dev-modules/missing-selector-lint-rule.js"
+// import missingCatchallLintRule from "./dev-modules/missingCatchall.js"
 import type { InstalledLintRule, ProjectSettings2 } from "./types/project-settings.js"
 import type { InlangProject } from "./types/project.js"
-import type { LanguageTag } from "@inlang/plugin"
+import { resolvePlugins } from "./resolvePlugins2.js"
+// import type { LanguageTag } from "@inlang/plugin"
 
 // extend the SQLocalKysely class to expose a rawSql function
 // needed for non parametrized queries
@@ -65,15 +65,17 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 	const projectSettings$ = new BehaviorSubject(projectSettings)
 
 	// TODO SDK-v2 LIX how to deal with plugins we want to load?
-	const _import = importSequence(
-		createDebugImport({
-			"sdk-dev:lint-rule.js": lintRule,
-			"sdk-dev:opral-uppercase-lint.js": makeOpralUppercase,
-			"sdk-dev:missing-selector-lint-rule.js": missingSelectorLintRule,
-			"sdk-dev:missing-catchall-variant": missingCatchallLintRule,
-		}) /*,
-		createImport(projectPath, nodeishFs)*/
-	)
+	const _import = importSequence()
+	/**
+	 * Lint rules are now Lix validation rules, therefore this needs to be reimplemented
+	 */
+	// 	createDebugImport({
+	// 		"sdk-dev:lint-rule.js": lintRule,
+	// 		"sdk-dev:opral-uppercase-lint.js": makeOpralUppercase,
+	// 		"sdk-dev:missing-selector-lint-rule.js": missingSelectorLintRule,
+	// 		"sdk-dev:missing-catchall-variant": missingCatchallLintRule,
+	// 	}),
+	// createImport(projectPath, nodeishFs)
 	const lifecycle$ = new BehaviorSubject<ProjectState>("initializing")
 
 	const settings$ = projectSettings$.asObservable()
@@ -81,7 +83,7 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 	const modules$ = settings$.pipe(
 		switchMap((settings: any) => {
 			lifecycle$.next("resolvingModules")
-			return from(resolveModules({ settings, _import }))
+			return from(resolvePlugins({ settings, _import }))
 		}),
 		tap(() => lifecycle$.next("loaded"))
 	)
@@ -147,7 +149,7 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 			},
 			subscribe: () => projectSettings$.subscribe(),
 		},
-		
+
 		bundle: {
 			/*
 			search: (args: { lintRulesIds: string[], locales: LanguageTag[], bundleIds: string[], text: string }): string[] {

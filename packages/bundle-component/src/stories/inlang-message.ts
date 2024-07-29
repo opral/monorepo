@@ -161,7 +161,7 @@ export default class InlangMessage extends LitElement {
 	message: NestedMessage | undefined
 
 	@property()
-	lintReports: LintReport[] | undefined
+	messageValidationReports: Array<any> | undefined
 
 	@property()
 	installedLintRules: InstalledLintRule[] | undefined
@@ -227,7 +227,7 @@ export default class InlangMessage extends LitElement {
 					  >
 							<div class="selector-container">
 								${this.message.selectors.map(
-									(selector, index) => html`<sl-dropdown>
+									(selector: any, index: any) => html`<sl-dropdown>
 										<div class="selector" slot="trigger">
 											${
 												// @ts-ignore
@@ -332,13 +332,9 @@ export default class InlangMessage extends LitElement {
 										  >`
 										: ``
 									: ``}
-								${this.lintReports &&
-								this.lintReports.length > 0 &&
-								this.lintReports.some((report) => !report.target.variantId)
+								${this.messageValidationReports && this.messageValidationReports.length > 0
 									? html`<inlang-lint-report-tip
-											.lintReports=${this.lintReports.filter(
-												(report) => !report.target.variantId
-											) ?? []}
+											.lintReports=${this.messageValidationReports}
 											.installedLintRules=${this.installedLintRules}
 											.fixLint=${this.fixLint}
 									  ></inlang-lint-report-tip>`
@@ -355,7 +351,7 @@ export default class InlangMessage extends LitElement {
 										messageId: this.message!.id,
 										// combine the matches that are already present with the new category -> like a matrix
 										match: (() => {
-											let match: Record<string, string> = {}
+											const match: Record<string, string> = {}
 											for (const selector of this.message!.selectors) {
 												match[selector.arg.name] = "null"
 											}

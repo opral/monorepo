@@ -43,6 +43,7 @@ export default class InlangLintReportTip extends LitElement {
 				flex-direction: row;
 				gap: 12px;
 				padding: 8px 12px;
+				padding-bottom: 10px;
 				border-top: 1px solid var(--sl-input-border-color);
 			}
 			.dropdown-item:first-child {
@@ -177,20 +178,22 @@ export default class InlangLintReportTip extends LitElement {
 						<div class="report-content">
 							<p class="report-title">${this._getLintDisplayName(lintReport.ruleId)}</p>
 							<p class="report-body">${lintReport.body}</p>
-							<div class="report-fixes">
-								${lintReport.fixes?.map((fix) => {
-									return html`
-										<sl-button
-											@click=${() => {
-												this.fixLint(lintReport, fix.title)
-											}}
-											class="fix-button"
-											size="small"
-											>${fix.title}</sl-button
-										>
-									`
-								})}
-							</div>
+							${lintReport.fixes && lintReport.fixes.length > 0
+								? html`<div class="report-fixes">
+										${lintReport.fixes?.map((fix) => {
+											return html`
+												<sl-button
+													@click=${() => {
+														this.fixLint(lintReport, fix.title)
+													}}
+													class="fix-button"
+													size="small"
+													>${fix.title}</sl-button
+												>
+											`
+										})}
+								  </div>`
+								: ""}
 						</div>
 					</div>`
 				})}

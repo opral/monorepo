@@ -1,42 +1,107 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-import type { ResolvePlugins2Function } from "./types/index.js"
-import { Plugin } from "@inlang/plugin"
+import { tryCatch } from "@inlang/result"
+import { TypeCompiler } from "@sinclair/typebox/compiler"
+import { validatedPluginSettings } from "./validatedPluginSettings.js"
 import {
+	Plugin2,
+	InlangPlugin,
+	type ResolvePluginsFunction,
+	type ResolvePlugin2Function,
+} from "./types/plugin.js"
+import {
+	PluginError,
+	PluginImportError,
+	PluginHasNoExportsError,
+	PluginExportIsInvalidError,
+	PluginSettingsAreInvalidError,
 	PluginReturnedInvalidCustomApiError,
-	PluginLoadMessagesFunctionAlreadyDefinedError,
-	PluginSaveMessagesFunctionAlreadyDefinedError,
-	PluginsDoNotProvideLoadOrSaveMessagesError,
+	PluginImportFilesFunctionAlreadyDefinedError,
+	PluginExportFilesFunctionAlreadyDefinedError,
+	PluginToBeImportedFilesFunctionAlreadyDefinedError,
 	PluginHasInvalidIdError,
 	PluginHasInvalidSchemaError,
+	PluginsDoNotProvideImportOrExportFilesError,
 } from "./types/plugin-errors.js"
 import { deepmerge } from "deepmerge-ts"
-import { TypeCompiler } from "@sinclair/typebox/compiler"
-import { tryCatch } from "@inlang/result"
 
-// @ts-ignore - type mismatch error
-const PluginCompiler = TypeCompiler.Compile(Plugin)
+const PluginCompiler = TypeCompiler.Compile(InlangPlugin)
 
-export const resolvePlugins2: ResolvePlugins2Function = async (args) => {
-	const result: Awaited<ReturnType<ResolvePlugins2Function>> = {
+export const resolvePlugins: ResolvePlugin2Function = async (args) => {
+	const _import = args._import
+
+	const allPlugins: Array<Plugin2> = []
+	const meta: Awaited<ReturnType<ResolvePlugin2Function>>["meta"] = []
+	const moduleErrors: Array<PluginError> = []
+
+	async function resolvePlugin(plugin: string) {
+		const importedPlugin = await tryCatch<InlangPlugin>(() => _import(plugin))
+
+		// -- FAILED TO IMPORT --
+		if (importedPlugin.error) {
+			moduleErrors.push(
+				new PluginImportError({
+					plugin,
+					cause: importedPlugin.error as Error,
+				})
+			)
+			return
+		}
+
+		// -- PLUGIN DOES NOT EXPORT ANYTHING --
+		if (importedPlugin.data?.default === undefined) {
+			moduleErrors.push(
+				new PluginHasNoExportsError({
+					plugin,
+				})
+			)
+			return
+		}
+
+		// -- CHECK IF PLUGIN IS SYNTACTICALLY VALID
+		const isValidPlugin = PluginCompiler.Check(importedPlugin.data)
+		if (!isValidPlugin) {
+			const errors = [...PluginCompiler.Errors(importedPlugin.data)]
+			moduleErrors.push(
+				new PluginExportIsInvalidError({
+					plugin,
+					errors,
+				})
+			)
+
+			return
+		}
+
+		// -- VALIDATE PLUGIN SETTINGS
+		const result = validatedPluginSettings({
+			settingsSchema: importedPlugin.data.default.settingsSchema,
+			pluginSettings: (args.settings as any)[importedPlugin.data.default.id],
+		})
+		if (result !== "isValid") {
+			moduleErrors.push(new PluginSettingsAreInvalidError({ plugin, errors: result }))
+			return
+		}
+
+		meta.push({
+			plugin,
+			id: importedPlugin.data.default.id,
+		})
+
+		allPlugins.push(importedPlugin.data.default as Plugin2)
+	}
+
+	await Promise.all(args.settings.modules.map(resolvePlugin))
+
+	const result: Awaited<ReturnType<ResolvePluginsFunction>> = {
 		data: {
-			// loadMessages: undefined as any,
-			// saveMessages: undefined as any,
+			toBeImportedFiles: {},
+			importFiles: {},
+			exportFiles: {},
 			customApi: {},
 		},
-		errors: [],
+		errors: [...moduleErrors],
 	}
 
-	const experimentalPersistence = !!args.settings.experimental?.persistence
-	if (experimentalPersistence) {
-		// debug("Using experimental persistence")
-	}
-
-	for (const plugin of args.plugins) {
+	for (const plugin of allPlugins) {
 		const errors = [...PluginCompiler.Errors(plugin)]
-
-		/**
-		 * -------------- RESOLVE PLUGIN --------------
-		 */
 
 		// -- INVALID ID in META --
 		const hasInvalidId = errors.some((error) => error.path === "/id")
@@ -54,19 +119,35 @@ export const resolvePlugins2: ResolvePlugins2Function = async (args) => {
 			)
 		}
 
-		// -- ALREADY DEFINED LOADMESSAGES / SAVEMESSAGES / DETECTEDLANGUAGETAGS --
-		// TODO SDK-v2 IMPORT/EXPORT check if we can reuse this for export/import
-		// if (typeof plugin.loadMessages === "function" && result.data.loadMessages !== undefined) {
-		// 	result.errors.push(new PluginLoadMessagesFunctionAlreadyDefinedError({ id: plugin.id }))
-		// }
+		// -- CHECK FOR ALREADY DEFINED FUNCTIONS --
+		if (typeof plugin.toBeImportedFiles === "function") {
+			if (result.data.toBeImportedFiles[plugin.id]) {
+				result.errors.push(
+					new PluginToBeImportedFilesFunctionAlreadyDefinedError({ id: plugin.id })
+				)
+			} else {
+				result.data.toBeImportedFiles[plugin.id] = plugin.toBeImportedFiles
+			}
+		}
 
-		// if (typeof plugin.saveMessages === "function" && result.data.saveMessages !== undefined) {
-		// 	result.errors.push(new PluginSaveMessagesFunctionAlreadyDefinedError({ id: plugin.id }))
-		// }
+		if (typeof plugin.importFiles === "function") {
+			if (result.data.importFiles[plugin.id]) {
+				result.errors.push(new PluginImportFilesFunctionAlreadyDefinedError({ id: plugin.id }))
+			} else {
+				result.data.importFiles[plugin.id] = plugin.importFiles
+			}
+		}
 
-		// --- ADD APP SPECIFIC API ---
+		if (typeof plugin.exportFiles === "function") {
+			if (result.data.exportFiles[plugin.id]) {
+				result.errors.push(new PluginExportFilesFunctionAlreadyDefinedError({ id: plugin.id }))
+			} else {
+				result.data.exportFiles[plugin.id] = plugin.exportFiles
+			}
+		}
+
+		// -- ADD APP SPECIFIC API --
 		if (typeof plugin.addCustomApi === "function") {
-			// TODO: why do we call this function 2 times (here for validation and later for retrieving the actual value)?
 			const { data: customApi, error } = tryCatch(() =>
 				plugin.addCustomApi!({
 					settings: args.settings,
@@ -81,49 +162,30 @@ export const resolvePlugins2: ResolvePlugins2Function = async (args) => {
 						cause: new Error(`The return value must be an object. Received "${typeof customApi}".`),
 					})
 				)
+			} else {
+				result.data.customApi = deepmerge(result.data.customApi, customApi)
 			}
 		}
 
 		// -- CONTINUE IF ERRORS --
-		if (result.errors.length > 0) {
+		if (errors.length > 0) {
 			continue
-		}
-
-		/**
-		 * -------------- BEGIN ADDING TO RESULT --------------
-		 */
-
-		// TODO SDK-v2 IMPORT/EXPORT we remove load/save Message for now
-		// if (typeof plugin.loadMessages === "function") {
-		// 	result.data.loadMessages = plugin.loadMessages
-		// }
-
-		// if (typeof plugin.saveMessages === "function") {
-		// 	result.data.saveMessages = plugin.saveMessages
-		// }
-
-		if (typeof plugin.addCustomApi === "function") {
-			const { data: customApi } = tryCatch(() =>
-				plugin.addCustomApi!({
-					settings: args.settings,
-				})
-			)
-			if (customApi) {
-				result.data.customApi = deepmerge(result.data.customApi, customApi)
-			}
 		}
 	}
 
-	// --- LOADMESSAGE / SAVEMESSAGE NOT DEFINED ---
+	// -- IMPORT / EXPORT NOT DEFINED FOR ANY PLUGIN --
+	if (
+		Object.keys(result.data.toBeImportedFiles).length === 0 &&
+		Object.keys(result.data.importFiles).length === 0 &&
+		Object.keys(result.data.exportFiles).length === 0
+	) {
+		result.errors.push(new PluginsDoNotProvideImportOrExportFilesError())
+	}
 
-	// TODO SDK-v2 IMPORT/EXPORT check if we can use that for exporter importer
-	// if (
-	// 	!experimentalPersistence &&
-	// 	(typeof result.data.loadMessages !== "function" ||
-	// 		typeof result.data.saveMessages !== "function")
-	// ) {
-	// 	result.errors.push(new PluginsDoNotProvideLoadOrSaveMessagesError())
-	// }
-
-	return result
+	return {
+		meta,
+		plugins: allPlugins,
+		resolvedPluginApi: result.data,
+		errors: result.errors,
+	}
 }

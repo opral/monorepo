@@ -16,8 +16,8 @@ const missingSelectorLintRule: MessageBundleLintRule = {
 
 		const expectedSelectors = new Set(
 			sourceMessage.selectors
-				.filter((selector) => selector.arg.type === "variable")
-				.map((selector) => (selector.arg as VariableReference).name)
+				.filter((selector: any) => selector.arg.type === "variable")
+				.map((selector: any) => (selector.arg as VariableReference).name)
 		)
 
 		for (const message of messageBundle.messages) {
@@ -25,8 +25,8 @@ const missingSelectorLintRule: MessageBundleLintRule = {
 
 			const selectors = new Set(
 				message.selectors
-					.filter((selector) => selector.arg.type === "variable")
-					.map((selector) => (selector.arg as VariableReference).name)
+					.filter((selector: any) => selector.arg.type === "variable")
+					.map((selector: any) => (selector.arg as VariableReference).name)
 			)
 
 			const missing = exclude(expectedSelectors, selectors)
