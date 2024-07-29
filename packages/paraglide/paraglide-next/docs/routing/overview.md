@@ -4,8 +4,12 @@
 
 A "Routing Strategy" defines how the localised routing is supposed to work in your App. 
 
-It's an interface for providing a two-way mapping between 
- 
+It's an interface for providing a two-way mapping between the URL and the route that's supposed to be rendered. 
+
+Eg: `https://example.com/de/ueber-uns` ↔ `/about`
+
+The strategy is also responsible for detecting the langauge based on the current Request.
+
 Most of the time you will not be writing your own Routing Strategy & instead be using a prebuilt one.
 
 - [Prefix Strategy (default)](prefix-strategy)
