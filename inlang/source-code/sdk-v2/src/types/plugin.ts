@@ -8,7 +8,11 @@ import {
 import type { JSONObject } from "@inlang/json-types"
 import type { CustomApiInlangIdeExtension } from "./customApis/app.inlang.ideExtension.js"
 import { Translatable } from "@inlang/translatable"
-import type { ProjectSettings2, ExternalProjectSettings } from "./project-settings.js"
+import {
+	type ProjectSettings2 as ProjectSettings2Type,
+	type ExternalProjectSettings as ExternalProjectSettingsType,
+	ExternalProjectSettings,
+} from "./project-settings.js"
 import type {
 	PluginHasInvalidIdError,
 	PluginHasInvalidSchemaError,
@@ -17,6 +21,8 @@ import type {
 	PluginSaveMessagesFunctionAlreadyDefinedError,
 	PluginsDoNotProvideLoadOrSaveMessagesError,
 } from "./plugin-errors.js"
+import { NestedBundle } from "./schema.js"
+import { TranslationFile, type TranslationFile as TranslationFileType } from "./translation-file.js"
 
 // ---------------------------- RUNTIME VALIDATION TYPES ---------------------------------------------
 
@@ -36,26 +42,24 @@ import type {
  * ```
  */
 export type Plugin2<
-	ExternalSettings extends Record<keyof ExternalProjectSettings, JSONObject> | unknown = unknown
+	ExternalSettings extends Record<keyof ExternalProjectSettingsType, JSONObject> | unknown = unknown
 > = Omit<
 	Static<typeof Plugin2>,
-	"loadMessages" | "saveMessages" | "addCustomApi" | "settingsSchema"
+	"toBeImportedFiles" | "importFiles" | "exportFiles" | "addCustomApi" | "settingsSchema"
 > & {
 	settingsSchema?: TObject
 	/**
-	 * Load messages.
+	 * Import / Export files.
 	 */
-	// TODO SDK-V2 check how to setup loadMessages
-	// loadMessages?: (args: {
-	// 	settings: ProjectSettings2 & ExternalSettings
-	// 	// nodeishFs: NodeishFilesystemSubset
-	// }) => Promise<Message[]> | Message[]
-	// TODO SDK-V2 check how to setup saveMessages
-	// saveMessages?: (args: {
-	// 	// messages: Message[]
-	// 	settings: ProjectSettings2 & ExternalSettings
-	// 	// nodeishFs: NodeishFilesystemSubset
-	// }) => Promise<void> | void
+	toBeImportedFiles?: (args: {
+		settings: ProjectSettings2Type & ExternalSettings
+		nodeFs: unknown
+	}) => Promise<Array<TranslationFileType>> | Array<TranslationFileType>
+	importFiles?: (args: { files: Array<TranslationFileType> }) => { bundles: NestedBundle }
+	exportFiles?: (args: {
+		bundles: NestedBundle
+		settings: ProjectSettings2Type & ExternalSettings
+	}) => Array<TranslationFileType>
 	/**
 	 * Define app specific APIs.
 	 *
@@ -67,7 +71,7 @@ export type Plugin2<
 	 *  })
 	 */
 	addCustomApi?: (args: {
-		settings: ProjectSettings2 & ExternalSettings
+		settings: ProjectSettings2Type & ExternalSettings
 	}) =>
 		| Record<`app.${string}.${string}`, unknown>
 		| { "app.inlang.ideExtension": CustomApiInlangIdeExtension }
@@ -86,8 +90,24 @@ export const Plugin2 = Type.Object({
 	 * https://github.com/opral/monorepo/discussions/1503
 	 */
 	settingsSchema: Type.Optional(Type.Object({}, { additionalProperties: true })),
-	loadMessages: Type.Optional(Type.Any()),
-	saveMessages: Type.Optional(Type.Any()),
+	toBeImportedFiles: Type.Optional(
+		Type.Function(
+			[Type.Object({ settings: ExternalProjectSettings, nodeFs: Type.Any() })],
+			Type.Array(TranslationFile)
+		)
+	),
+	importFiles: Type.Optional(
+		Type.Function(
+			[Type.Object({ files: Type.Array(TranslationFile) })],
+			Type.Object({ bundles: NestedBundle })
+		)
+	),
+	exportFiles: Type.Optional(
+		Type.Function(
+			[Type.Object({ bundles: NestedBundle, settings: ExternalProjectSettings })],
+			Type.Array(TranslationFile)
+		)
+	),
 	/**
 	 * @deprecated removed
 	 */
@@ -100,7 +120,7 @@ export const Plugin2 = Type.Object({
  */
 export type ResolvePlugins2Function = (args: {
 	plugins: Array<Plugin2>
-	settings: ProjectSettings2
+	settings: ProjectSettings2Type
 }) => Promise<{
 	data: ResolvedPlugin2Api
 	errors: Array<
@@ -117,17 +137,9 @@ export type ResolvePlugins2Function = (args: {
  * The API after resolving the plugins.
  */
 export type ResolvedPlugin2Api = {
-	// TODO SDK-V2 check how to setup loadMessages
-	// loadMessages: (args: {
-	// 	settings: ProjectSettings2
-	// 	nodeishFs: NodeishFilesystemSubset
-	// }) => Promise<Message[]> | Message[]
-	// TODO SDK-V2 check how to setup saveMessages
-	// saveMessages: (args: {
-	// 	settings: ProjectSettings2
-	// 	messages: Message[]
-	// 	nodeishFs: NodeishFilesystemSubset
-	// }) => Promise<void> | void
+	toBeImportedFiles: Array<Plugin2["toBeImportedFiles"]>
+	importFiles: Array<Plugin2["importFiles"]>
+	exportFiles: Array<Plugin2["exportFiles"]>
 	/**
 	 * App specific APIs.
 	 *
