@@ -50,6 +50,7 @@ export type Plugin2<
 	settingsSchema?: TObject
 	/**
 	 * Import / Export files.
+	 * see https://linear.app/opral/issue/MESDK-157/sdk-v2-release-on-sqlite
 	 */
 	toBeImportedFiles?: (args: {
 		settings: ProjectSettings2Type & ExternalSettings
@@ -85,11 +86,14 @@ export const Plugin2 = Type.Object({
 	displayName: Translatable(Type.String()),
 	description: Translatable(Type.String()),
 	/**
-	 * Tyepbox is must be used to validate the Json Schema.
+	 * Tyepbox must be used to validate the Json Schema.
 	 * Github discussion to upvote a plain Json Schema validator and read the benefits of Typebox
 	 * https://github.com/opral/monorepo/discussions/1503
 	 */
 	settingsSchema: Type.Optional(Type.Object({}, { additionalProperties: true })),
+	/**
+	 * see https://linear.app/opral/issue/MESDK-157/sdk-v2-release-on-sqlite
+	 */
 	toBeImportedFiles: Type.Optional(
 		Type.Function(
 			[Type.Object({ settings: ExternalProjectSettings, nodeFs: Type.Any() })],
@@ -137,6 +141,10 @@ export type ResolvePlugins2Function = (args: {
  * The API after resolving the plugins.
  */
 export type ResolvedPlugin2Api = {
+	/**
+	 * Importer / Exporter functions.
+	 * see https://linear.app/opral/issue/MESDK-157/sdk-v2-release-on-sqlite
+	 */
 	toBeImportedFiles: Array<Plugin2["toBeImportedFiles"]>
 	importFiles: Array<Plugin2["importFiles"]>
 	exportFiles: Array<Plugin2["exportFiles"]>
