@@ -9,7 +9,7 @@ import type { Declaration, NestedBundle } from "@inlang/sdk-v2"
 
 const deleteInput = (props: { messageBundle: NestedBundle; input: Declaration }) => {
 	for (const message of props.messageBundle.messages) {
-		const index = message.declarations.findIndex((d) => d.name === props.input.name)
+		const index = message.declarations.findIndex((d: any) => d.name === props.input.name)
 		if (index === -1) {
 			continue
 		} else {
