@@ -25,6 +25,12 @@ import type {
 import { NestedBundle } from "./schema.js"
 import { TranslationFile, type TranslationFile as TranslationFileType } from "./translation-file.js"
 
+export const PluginId = Type.String({
+	pattern: "^plugin\\.([a-z][a-zA-Z0-9]*)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)$",
+	examples: ["plugin.namespace.id"],
+}) as unknown as TTemplateLiteral<[TLiteral<`plugin.${string}.${string}`>]>
+export type PluginId = Static<typeof PluginId>
+
 // ---------------------------- RUNTIME VALIDATION TYPES ---------------------------------------------
 
 /**
@@ -33,13 +39,13 @@ import { TranslationFile, type TranslationFile as TranslationFileType } from "./
  * You can use your own settings by extending the plugin with a generic:
  *
  * ```ts
- * 	type PluginSettings = {
- *  	filePath: string
- * 	}
+ *  type PluginSettings = {
+ *    filePath: string
+ *  }
  *
- * 	const plugin: Plugin<{
- * 		"plugin.your.id": PluginSettings
- * 	}>
+ *  const plugin: Plugin<{
+ *    "plugin.your.id": PluginSettings
+ *  }>
  * ```
  */
 export type Plugin2<
@@ -67,9 +73,9 @@ export type Plugin2<
 	 *
 	 * @example
 	 * addCustomApi: () => ({
-	 * 	 "app.inlang.ide-extension": {
-	 * 	   messageReferenceMatcher: () => {}
-	 * 	 }
+	 *   "app.inlang.ide-extension": {
+	 *     messageReferenceMatcher: () => {}
+	 *   }
 	 *  })
 	 */
 	addCustomApi?: (args: {
@@ -80,14 +86,11 @@ export type Plugin2<
 }
 
 export const Plugin2 = Type.Object({
-	id: Type.String({
-		pattern: "^plugin\\.([a-z][a-zA-Z0-9]*)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)$",
-		examples: ["plugin.namespace.id"],
-	}) as unknown as TTemplateLiteral<[TLiteral<`plugin.${string}.${string}`>]>,
+	id: PluginId,
 	displayName: Translatable(Type.String()),
 	description: Translatable(Type.String()),
 	/**
-	 * Tyepbox must be used to validate the Json Schema.
+	 * Typebox must be used to validate the Json Schema.
 	 * Github discussion to upvote a plain Json Schema validator and read the benefits of Typebox
 	 * https://github.com/opral/monorepo/discussions/1503
 	 */
@@ -144,25 +147,25 @@ export type ResolvePlugins2Function = (args: {
  */
 export type ResolvedPlugin2Api = {
 	/**
-	 * Importer / Exporter functions.
+	 *  * Importer / Exporter functions.
 	 * see https://linear.app/opral/issue/MESDK-157/sdk-v2-release-on-sqlite
 	 */
-	toBeImportedFiles: Array<Plugin2["toBeImportedFiles"]>
-	importFiles: Array<Plugin2["importFiles"]>
-	exportFiles: Array<Plugin2["exportFiles"]>
+	toBeImportedFiles: Record<PluginId, Plugin2["toBeImportedFiles"] | undefined>
+	importFiles: Record<PluginId, Plugin2["importFiles"] | undefined>
+	exportFiles: Record<PluginId, Plugin2["exportFiles"] | undefined>
 	/**
 	 * App specific APIs.
 	 *
 	 * @example
 	 *  // define
 	 *  customApi: ({ settings }) => ({
-	 * 	 "app.inlang.ide-extension": {
-	 * 	   messageReferenceMatcher: () => {
-	 * 		 // use settings
-	 * 		 settings.pathPattern
-	 * 		return
-	 * 	   }
-	 * 	 }
+	 *    "app.inlang.ide-extension": {
+	 *      messageReferenceMatcher: () => {
+	 *        // use settings
+	 *        settings.pathPattern
+	 *       return
+	 *      }
+	 *    }
 	 *  })
 	 *  // use
 	 *  customApi['app.inlang.ide-extension'].messageReferenceMatcher()
