@@ -1,8 +1,8 @@
 import dedent from "dedent"
 import type { NodeishFilesystemSubset } from "@inlang/plugin"
 import { tryCatch } from "@inlang/result"
-import { withReadOnlyCache } from "../resolve-modules/cache.js"
-import { ModuleImportError } from "../resolve-modules/errors.js"
+import { withReadOnlyCache } from "../resolve-plugins/cache.js"
+import { PluginImportError } from "../types/plugin-errors.js"
 
 // TODO deduplicate this module
 
@@ -50,7 +50,7 @@ async function $import(
 
 				The error indicates that the imported file does not exist on JSDelivr. For non-existent files, JSDelivr returns a 404 text that JS cannot parse as a module and throws a SyntaxError.`
 		}
-		throw new ModuleImportError({ module: uri, cause: error as Error })
+		throw new PluginImportError({ plugin: uri, cause: error as Error })
 	}
 }
 
@@ -65,7 +65,7 @@ async function readModulefromDisk(
 	try {
 		return await readFile(uri, { encoding: "utf-8" })
 	} catch (error) {
-		throw new ModuleImportError({ module: uri, cause: error as Error })
+		throw new PluginImportError({ plugin: uri, cause: error as Error })
 	}
 }
 
@@ -78,20 +78,20 @@ async function readModulefromDisk(
  */
 async function readModuleFromCDN(uri: string): Promise<string> {
 	if (!isValidUrl(uri))
-		throw new ModuleImportError({ module: uri, cause: new Error("Malformed URL") })
+		throw new PluginImportError({ plugin: uri, cause: new Error("Malformed URL") })
 
 	const result = await tryCatch(async () => await fetch(uri))
 	if (result.error) {
-		throw new ModuleImportError({
-			module: uri,
+		throw new PluginImportError({
+			plugin: uri,
 			cause: result.error,
 		})
 	}
 
 	const response = result.data
 	if (!response.ok) {
-		throw new ModuleImportError({
-			module: uri,
+		throw new PluginImportError({
+			plugin: uri,
 			cause: new Error(
 				`Failed to fetch module. HTTP status: ${response.status}, Message: ${response.statusText}`
 			),
@@ -109,8 +109,8 @@ async function readModuleFromCDN(uri: string): Promise<string> {
 	// if there is no content-type header, assume it's a JavaScript module & hope for the best
 	const contentType = response.headers.get("content-type")?.toLowerCase()
 	if (contentType && !JS_CONTENT_TYPES.some((knownType) => contentType.includes(knownType))) {
-		throw new ModuleImportError({
-			module: uri,
+		throw new PluginImportError({
+			plugin: uri,
 			cause: new Error(`Server responded with ${contentType} insetad of a JavaScript module`),
 		})
 	}

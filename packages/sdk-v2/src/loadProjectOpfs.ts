@@ -26,9 +26,9 @@ import { createDebugImport, importSequence } from "./import-utils.js"
 // import makeOpralUppercase from "./dev-modules/opral-uppercase-lint-rule.js"
 // import missingSelectorLintRule from "./dev-modules/missing-selector-lint-rule.js"
 // import missingCatchallLintRule from "./dev-modules/missingCatchall.js"
-import { resolveModules } from "./resolveModules2.js"
 import type { InstalledLintRule, ProjectSettings2 } from "./types/project-settings.js"
 import type { InlangProject } from "./types/project.js"
+import { resolvePlugins } from "./resolvePlugins2.js"
 // import type { LanguageTag } from "@inlang/plugin"
 
 // extend the SQLocalKysely class to expose a rawSql function
@@ -83,7 +83,7 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 	const modules$ = settings$.pipe(
 		switchMap((settings: any) => {
 			lifecycle$.next("resolvingModules")
-			return from(resolveModules({ settings, _import }))
+			return from(resolvePlugins({ settings, _import }))
 		}),
 		tap(() => lifecycle$.next("loaded"))
 	)
