@@ -227,7 +227,7 @@ export default class InlangMessage extends LitElement {
 					  >
 							<div class="selector-container">
 								${this.message.selectors.map(
-									(selector, index) => html`<sl-dropdown>
+									(selector: any, index: any) => html`<sl-dropdown>
 										<div class="selector" slot="trigger">
 											${
 												// @ts-ignore
@@ -351,7 +351,7 @@ export default class InlangMessage extends LitElement {
 										messageId: this.message!.id,
 										// combine the matches that are already present with the new category -> like a matrix
 										match: (() => {
-											let match: Record<string, string> = {}
+											const match: Record<string, string> = {}
 											for (const selector of this.message!.selectors) {
 												match[selector.arg.name] = "null"
 											}
