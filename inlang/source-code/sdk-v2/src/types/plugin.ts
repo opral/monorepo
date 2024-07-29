@@ -16,10 +16,11 @@ import {
 import type {
 	PluginHasInvalidIdError,
 	PluginHasInvalidSchemaError,
-	PluginLoadMessagesFunctionAlreadyDefinedError,
 	PluginReturnedInvalidCustomApiError,
-	PluginSaveMessagesFunctionAlreadyDefinedError,
-	PluginsDoNotProvideLoadOrSaveMessagesError,
+	PluginImportFilesFunctionAlreadyDefinedError,
+	PluginExportFilesFunctionAlreadyDefinedError,
+	PluginsDoNotProvideImportOrExportFilesError,
+	PluginToBeImportedFilesFunctionAlreadyDefinedError,
 } from "./plugin-errors.js"
 import { NestedBundle } from "./schema.js"
 import { TranslationFile, type TranslationFile as TranslationFileType } from "./translation-file.js"
@@ -129,11 +130,12 @@ export type ResolvePlugins2Function = (args: {
 	data: ResolvedPlugin2Api
 	errors: Array<
 		| PluginReturnedInvalidCustomApiError
-		| PluginLoadMessagesFunctionAlreadyDefinedError
-		| PluginSaveMessagesFunctionAlreadyDefinedError
+		| PluginToBeImportedFilesFunctionAlreadyDefinedError
+		| PluginImportFilesFunctionAlreadyDefinedError
+		| PluginExportFilesFunctionAlreadyDefinedError
 		| PluginHasInvalidIdError
 		| PluginHasInvalidSchemaError
-		| PluginsDoNotProvideLoadOrSaveMessagesError
+		| PluginsDoNotProvideImportOrExportFilesError
 	>
 }>
 
