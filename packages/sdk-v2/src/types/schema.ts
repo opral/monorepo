@@ -83,40 +83,40 @@ export const NestedBundle = Type.Object({
 })
 
 // Export types
-export type BundleTableType = Static<typeof BundleTable>
-export type MessageTableType = Static<typeof MessageTable>
-export type VariantTableType = Static<typeof VariantTable>
+export type BundleTable = Static<typeof BundleTable>
+export type MessageTable = Static<typeof MessageTable>
+export type VariantTable = Static<typeof VariantTable>
 
-export type Bundle = Selectable<BundleTableType>
+export type Bundle = Selectable<BundleTable>
 
-export type NestedMessage = Selectable<MessageTableType> & {
-	variants: Selectable<VariantTableType>[]
+export type NestedMessage = Selectable<MessageTable> & {
+	variants: Selectable<VariantTable>[]
 }
 
-export type NestedBundle = Selectable<BundleTableType> & {
+export type NestedBundle = Selectable<BundleTable> & {
 	messages: NestedMessage[]
 }
 
-export type NewBundle = Insertable<BundleTableType>
-export type UpdatedBundle = Updateable<BundleTableType>
+export type NewBundle = Insertable<BundleTable>
+export type UpdatedBundle = Updateable<BundleTable>
 
-export type Message = Selectable<MessageTableType>
-export type NewMessage = Insertable<MessageTableType>
-export type UpdatedMessage = Updateable<MessageTableType>
+export type Message = Selectable<MessageTable>
+export type NewMessage = Insertable<MessageTable>
+export type UpdatedMessage = Updateable<MessageTable>
 
-export type Variant = Selectable<VariantTableType>
-export type NewVariant = Insertable<VariantTableType>
-export type UpdatedVariant = Updateable<VariantTableType>
+export type Variant = Selectable<VariantTable>
+export type NewVariant = Insertable<VariantTable>
+export type UpdatedVariant = Updateable<VariantTable>
 
-export type PatternType = Static<typeof Pattern>
-export type TextType = Static<typeof Text>
-export type VariableReferenceType = Static<typeof VariableReference>
-export type LiteralType = Static<typeof Literal>
-export type DeclarationType = Static<typeof Declaration>
-export type ExpressionType = Static<typeof Expression>
-export type FunctionAnnotationType = Static<typeof FunctionAnnotation>
-export type OptionType = Static<typeof Option>
-export type SettingsType = Static<typeof Settings>
+export type Pattern = Static<typeof Pattern>
+export type Text = Static<typeof Text>
+export type VariableReference = Static<typeof VariableReference>
+export type Literal = Static<typeof Literal>
+export type Declaration = Static<typeof Declaration>
+export type Expression = Static<typeof Expression>
+export type FunctionAnnotation = Static<typeof FunctionAnnotation>
+export type Option = Static<typeof Option>
+export type Settings = Static<typeof Settings>
 
 export type Database = {
 	bundle: Static<typeof BundleTable>
