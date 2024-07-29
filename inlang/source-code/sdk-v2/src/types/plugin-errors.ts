@@ -21,21 +21,30 @@ export class PluginHasInvalidSchemaError extends Error {
 	}
 }
 
-export class PluginLoadMessagesFunctionAlreadyDefinedError extends Error {
+export class PluginToBeImportedFilesFunctionAlreadyDefinedError extends Error {
 	constructor(options: { id: Plugin["id"] }) {
 		super(
-			`Plugin "${options.id}" defines the \`loadMessages()\` function, but it was already defined by another plugin.\n\nInlang only allows one plugin to define the \`loadMessages()\` function.`
+			`Plugin "${options.id}" defines the \`toBeImportedFiles()\` function, but it was already defined by another plugin.\n\nInlang only allows one plugin to define the \`toBeImportedFiles()\` function.`
 		)
-		this.name = "PluginLoadMessagesFunctionAlreadyDefinedError"
+		this.name = "PluginToBeImportedFilesFunctionAlreadyDefinedError"
 	}
 }
 
-export class PluginSaveMessagesFunctionAlreadyDefinedError extends Error {
+export class PluginImportFilesFunctionAlreadyDefinedError extends Error {
 	constructor(options: { id: Plugin["id"] }) {
 		super(
-			`Plugin "${options.id}" defines the \`saveMessages()\` function, but it was already defined by another plugin.\n\nInlang only allows one plugin to define the \`saveMessages()\` function.`
+			`Plugin "${options.id}" defines the \`importFiles()\` function, but it was already defined by another plugin.\n\nInlang only allows one plugin to define the \`ImportFiles()\` function.`
 		)
-		this.name = "PluginSaveMessagesFunctionAlreadyDefinedError"
+		this.name = "PluginImportFilesFunctionAlreadyDefinedError"
+	}
+}
+
+export class PluginExportFilesFunctionAlreadyDefinedError extends Error {
+	constructor(options: { id: Plugin["id"] }) {
+		super(
+			`Plugin "${options.id}" defines the \`exportFiles()\` function, but it was already defined by another plugin.\n\nInlang only allows one plugin to define the \`ExportFiles()\` function.`
+		)
+		this.name = "PluginExportFilesFunctionAlreadyDefinedError"
 	}
 }
 
@@ -46,11 +55,11 @@ export class PluginReturnedInvalidCustomApiError extends Error {
 	}
 }
 
-export class PluginsDoNotProvideLoadOrSaveMessagesError extends Error {
+export class PluginsDoNotProvideImportOrExportFilesError extends Error {
 	constructor() {
 		super(
-			`No plugin provides a \`loadMessages()\` or \`saveMessages()\` function\n\nIn case no plugin threw an error, you likely forgot to add a plugin that handles the loading and saving of messages. Refer to the marketplace for available plugins https://inlang.com/marketplace.`
+			`No plugin provides a \`importFiles()\` or \`exportFiles()\` function\n\nIn case no plugin threw an error, you likely forgot to add a plugin that handles the import and export of messages. Refer to the marketplace for available plugins https://inlang.com/marketplace.`
 		)
-		this.name = "PluginsDoNotProvideLoadOrSaveMessagesError"
+		this.name = "PluginsDoNotProvideImportOrExportFilesError"
 	}
 }
