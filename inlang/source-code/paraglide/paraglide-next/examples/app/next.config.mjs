@@ -8,4 +8,7 @@ export default paraglide({
 
 	basePath: "/base",
 	output: "standalone",
+	experimental: {
+		typedRoutes: true,
+	},
 })

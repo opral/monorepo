@@ -6,7 +6,7 @@ import {
 } from "$paraglide/runtime.js"
 import { addBasePath, basePath } from "../utils/basePath"
 import NextLink from "next/link"
-import React from "react"
+import React, { ComponentProps } from "react"
 import { RoutingStrategy } from "../routing-strategy/interface"
 import { createLocaliseHref } from "../localiseHref"
 import { serializeCookie } from "../utils/cookie"
@@ -14,25 +14,30 @@ import { LANG_COOKIE } from "../constants"
 import { rsc } from "rsc-env"
 import { DEV } from "../env"
 
-type LocalisedLink<T extends string> = (
-	props: Omit<Parameters<typeof import("next/link").default>[0], "locale"> & { locale?: T }
+type LocalizedLink<T extends string> = (
+	props: LocalizedLinkProps<T>
 ) => ReturnType<typeof import("next/link").default>
+
+type LocalizedLinkProps<T extends string> = Omit<
+	ComponentProps<typeof import("next/link").default>,
+	"locale"
+> & { locale?: T }
 
 /**
  * Creates a link component that localises the href based on the current language.
  * @param languageTag A function that returns the current language tag.
  */
-export function createLink<T extends string>(strategy: RoutingStrategy<T>): LocalisedLink<T> {
+export function createLink<T extends string>(strategy: RoutingStrategy<T>) {
 	const localiseHref = createLocaliseHref(strategy)
 
-	return React.forwardRef<
-		HTMLAnchorElement,
-		Omit<Parameters<typeof NextLink>[0], "locale"> & { locale?: T }
-	>((props, ref): ReturnType<typeof NextLink> => {
+	const Link: LocalizedLink<T> = React.forwardRef((props, ref) => {
 		const currentLanguageTag = languageTag() as T
 
 		if (DEV && props.locale && !isAvailableLanguageTag(props.locale)) {
-			const disjunctionFormatter = new Intl.ListFormat("en", { style: "long", type: "disjunction" })
+			const disjunctionFormatter = new Intl.ListFormat("en", {
+				style: "long",
+				type: "disjunction",
+			})
 			const availableLanguageTagsString = disjunctionFormatter.format(
 				availableLanguageTags.map((tag) => `"${tag}"`)
 			)
@@ -69,4 +74,6 @@ export function createLink<T extends string>(strategy: RoutingStrategy<T>): Loca
 			/>
 		)
 	})
+
+	return Link
 }

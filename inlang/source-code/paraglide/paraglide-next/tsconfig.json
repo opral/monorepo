@@ -4,14 +4,18 @@
 		"isolatedModules": true,
 		"module": "ESNext",
 		"moduleResolution": "Bundler",
+		"moduleDetection": "force",
 		"strict": true,
 		"declaration": true,
 		"allowJs": true,
 		"checkJs": true,
 		"jsx": "react",
 		"outDir": "dist",
-		"skipLibCheck": true,
-		"declarationMap": false
+		"declarationMap": false,
+		"noResolve": true,
+		"importHelpers": false,
+		"isolatedDeclarations": true,
+		"skipLibCheck": true
 	},
 	"include": ["src"],
 	"exclude": ["examples", "examples/*"]
