@@ -1,22 +1,20 @@
 import type { ProjectSettings2 } from "./project-settings.js"
 import type { ImportFunction } from "../resolve-modules/import.js"
 import { Plugin2, type ResolvePlugins2Function, type ResolvedPlugin2Api } from "./plugin.js"
-import { MessageBundleLintRule } from "./lint.js"
 import type { ModuleHasNoExportsError, ModuleImportError } from "./module-errors.js"
-import type { resolveMessageBundleLintRules } from "../resolveMessageBundleLintRules.js"
 import { Type } from "@sinclair/typebox"
 
 /**
- * An inlang module has a default export that is either a plugin or a message lint rule.
+ * An inlang plugin module has a default export that is a plugin.
  *
  * @example
  *   export default myPlugin
  */
 // not using Static<infer T> here because the type is not inferred correctly
 // due to type overwrites in modules.
-export type InlangModule = { default: Plugin2 | MessageBundleLintRule }
-export const InlangModule = Type.Object({
-	default: Type.Union([Plugin2, MessageBundleLintRule]),
+export type InlangPlugin = { default: Plugin2 }
+export const InlangPlugin = Type.Object({
+	default: Plugin2,
 })
 
 /**
@@ -47,16 +45,12 @@ export type ResolveModule2Function = (args: {
 		/**
 		 * The resolved item id of the module.
 		 */
-		id: Plugin2["id"] | MessageBundleLintRule["id"]
+		id: Plugin2["id"]
 	}>
 	/**
 	 * The resolved plugins.
 	 */
 	plugins: Array<Plugin2>
-	/**
-	 * The resolved message lint rules.
-	 */
-	messageBundleLintRules: Array<MessageBundleLintRule>
 	/**
 	 * The resolved api provided by plugins.
 	 */
@@ -67,13 +61,11 @@ export type ResolveModule2Function = (args: {
 	 * This includes errors from:
 	 * - importing module
 	 * - resolving plugins
-	 * - resolving lint rules
 	 * - resolving the runtime plugin api
 	 */
 	errors: Array<
 		| ModuleHasNoExportsError
 		| ModuleImportError
 		| Awaited<ReturnType<ResolvePlugins2Function>>["errors"][number]
-		| Awaited<ReturnType<typeof resolveMessageBundleLintRules>>["errors"][number]
 	>
 }>
