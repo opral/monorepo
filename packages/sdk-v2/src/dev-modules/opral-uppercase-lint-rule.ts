@@ -18,13 +18,13 @@ const makeOpralUppercase: MessageBundleLintRule = {
 		for (const message of messageBundle.messages) {
 			for (const variant of message.variants) {
 				const text = variant.pattern
-					.filter((el): el is Extract<typeof el, { type: "text" }> => el.type === "text")
-					.reduce((acc, el) => acc + el.value, "")
+					.filter((el: any): el is Extract<typeof el, { type: "text" }> => el.type === "text")
+					.reduce((acc: any, el: any) => acc + el.value, "")
 
 				const matches = text.match(orpalRegex)
 				if (!matches) continue
 
-				const badMatches = matches.filter((match) => match !== match.toUpperCase())
+				const badMatches = matches.filter((match: any) => match !== match.toUpperCase())
 
 				if (badMatches.length === 0) continue
 
@@ -60,7 +60,7 @@ const makeOpralUppercase: MessageBundleLintRule = {
 		if (!variant)
 			throw new Error(`variant ${report.target.variantId} not found on message ${msg.id}`)
 
-		variant.pattern = variant.pattern.map((el) => {
+		variant.pattern = variant.pattern.map((el: any) => {
 			if (el.type !== "text") return el
 			el.value = el.value.replaceAll(orpalRegex, "OPRAL")
 			return el
