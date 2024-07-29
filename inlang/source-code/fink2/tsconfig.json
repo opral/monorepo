@@ -1,0 +1,15 @@
+{
+	"include": ["src/**/*.ts"],
+	"extends": "../tsconfig.base.json",
+	"compilerOptions": {
+		"outDir": "dist",
+		"experimentalDecorators": true,
+		"noImplicitOverride": false,
+		"module": "Node16",
+		"lib": ["ES2020", "DOM", "DOM.Iterable"],
+		"skipLibCheck": true,
+		"moduleResolution": "Node16",
+		"allowImportingTsExtensions": false,
+		"noEmit": true
+	}
+}
