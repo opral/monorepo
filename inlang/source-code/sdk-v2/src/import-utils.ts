@@ -1,8 +1,8 @@
-import { ModuleImportError } from "./resolve-modules/errors.js"
-import type { InlangPlugin } from "./types/module.js"
+import type { InlangPlugin } from "./types/plugin.js"
+import { PluginImportError } from "./types/plugin-errors.js"
 
 /**
- * @throws {ModuleImportError}
+ * @throws {PluginImportError}
  */
 type Importer = (uri: string) => Promise<InlangPlugin>
 
@@ -10,8 +10,8 @@ export function createDebugImport(importMap: Record<string, InlangPlugin["defaul
 	return async (uri) => {
 		const resolved = importMap[uri]
 		if (resolved) return { default: resolved }
-		throw new ModuleImportError({
-			module: uri,
+		throw new PluginImportError({
+			plugin: uri,
 			cause: new Error("Not found"),
 		})
 	}
@@ -22,12 +22,12 @@ export function createDebugImport(importMap: Record<string, InlangPlugin["defaul
  */
 export function importSequence(...importers: Importer[]): Importer {
 	return async (uri) => {
-		let lastError: ModuleImportError | undefined = undefined
+		let lastError: PluginImportError | undefined = undefined
 		for (const importer of importers) {
 			try {
 				return await importer(uri)
 			} catch (error) {
-				if (error instanceof ModuleImportError) {
+				if (error instanceof PluginImportError) {
 					lastError = error
 					continue
 				}
@@ -36,8 +36,8 @@ export function importSequence(...importers: Importer[]): Importer {
 		}
 
 		if (lastError) throw lastError
-		throw new ModuleImportError({
-			module: uri,
+		throw new PluginImportError({
+			plugin: uri,
 			cause: new Error("Not found"),
 		})
 	}

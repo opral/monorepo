@@ -1,15 +1,21 @@
 import type { NodeishFilesystem } from "@lix-js/fs"
 import type {
+	PluginError,
+	PluginImportError,
+	PluginHasNoExportsError,
+	PluginExportIsInvalidError,
+	PluginSettingsAreInvalidError,
 	PluginReturnedInvalidCustomApiError,
-	PluginLoadMessagesFunctionAlreadyDefinedError,
-	PluginSaveMessagesFunctionAlreadyDefinedError,
+	PluginImportFilesFunctionAlreadyDefinedError,
+	PluginExportFilesFunctionAlreadyDefinedError,
+	PluginToBeImportedFilesFunctionAlreadyDefinedError,
 	PluginHasInvalidIdError,
 	PluginHasInvalidSchemaError,
-	PluginsDoNotProvideLoadOrSaveMessagesError,
-} from "./errors.js"
+	PluginsDoNotProvideImportOrExportFilesError,
+} from "../types/plugin-errors.js"
 
 import type { CustomApiInlangIdeExtension, Plugin } from "@inlang/plugin"
-import type { ProjectSettings2 } from "../../types/project-settings.js"
+import type { ProjectSettings2 } from "../types/project-settings.js"
 
 /**
  * The filesystem is a subset of project lisa's nodeish filesystem.
@@ -31,12 +37,18 @@ export type ResolvePluginsFunction = (args: {
 }) => Promise<{
 	data: ResolvedPluginApi
 	errors: Array<
+		| PluginError
+		| PluginImportError
+		| PluginHasNoExportsError
+		| PluginExportIsInvalidError
+		| PluginSettingsAreInvalidError
 		| PluginReturnedInvalidCustomApiError
-		| PluginLoadMessagesFunctionAlreadyDefinedError
-		| PluginSaveMessagesFunctionAlreadyDefinedError
+		| PluginImportFilesFunctionAlreadyDefinedError
+		| PluginExportFilesFunctionAlreadyDefinedError
+		| PluginToBeImportedFilesFunctionAlreadyDefinedError
 		| PluginHasInvalidIdError
 		| PluginHasInvalidSchemaError
-		| PluginsDoNotProvideLoadOrSaveMessagesError
+		| PluginsDoNotProvideImportOrExportFilesError
 	>
 }>
 

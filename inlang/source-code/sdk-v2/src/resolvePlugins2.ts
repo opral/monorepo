@@ -1,5 +1,18 @@
-import type { ResolvePlugins2Function } from "./types/index.js"
+import { tryCatch } from "@inlang/result"
+import { TypeCompiler } from "@sinclair/typebox/compiler"
+import { validatedPluginSettings } from "./validatedPluginSettings.js"
 import {
+	Plugin2,
+	InlangPlugin,
+	type ResolvePluginsFunction,
+	type ResolvePlugin2Function,
+} from "./types/plugin.js"
+import {
+	PluginError,
+	PluginImportError,
+	PluginHasNoExportsError,
+	PluginExportIsInvalidError,
+	PluginSettingsAreInvalidError,
 	PluginReturnedInvalidCustomApiError,
 	PluginImportFilesFunctionAlreadyDefinedError,
 	PluginExportFilesFunctionAlreadyDefinedError,
@@ -9,24 +22,85 @@ import {
 	PluginsDoNotProvideImportOrExportFilesError,
 } from "./types/plugin-errors.js"
 import { deepmerge } from "deepmerge-ts"
-import { TypeCompiler } from "@sinclair/typebox/compiler"
-import { tryCatch } from "@inlang/result"
-import { Plugin2 } from "./types/plugin.js"
 
-const PluginCompiler = TypeCompiler.Compile(Plugin2)
+const PluginCompiler = TypeCompiler.Compile(InlangPlugin)
 
-export const resolvePlugins2: ResolvePlugins2Function = async (args) => {
-	const result: Awaited<ReturnType<ResolvePlugins2Function>> = {
+export const resolvePlugins: ResolvePlugin2Function = async (args) => {
+	const _import = args._import
+
+	const allPlugins: Array<Plugin2> = []
+	const meta: Awaited<ReturnType<ResolvePlugin2Function>>["meta"] = []
+	const moduleErrors: Array<PluginError> = []
+
+	async function resolvePlugin(plugin: string) {
+		const importedPlugin = await tryCatch<InlangPlugin>(() => _import(plugin))
+
+		// -- FAILED TO IMPORT --
+		if (importedPlugin.error) {
+			moduleErrors.push(
+				new PluginImportError({
+					plugin,
+					cause: importedPlugin.error as Error,
+				})
+			)
+			return
+		}
+
+		// -- PLUGIN DOES NOT EXPORT ANYTHING --
+		if (importedPlugin.data?.default === undefined) {
+			moduleErrors.push(
+				new PluginHasNoExportsError({
+					plugin,
+				})
+			)
+			return
+		}
+
+		// -- CHECK IF PLUGIN IS SYNTACTICALLY VALID
+		const isValidPlugin = PluginCompiler.Check(importedPlugin.data)
+		if (!isValidPlugin) {
+			const errors = [...PluginCompiler.Errors(importedPlugin.data)]
+			moduleErrors.push(
+				new PluginExportIsInvalidError({
+					plugin,
+					errors,
+				})
+			)
+
+			return
+		}
+
+		// -- VALIDATE PLUGIN SETTINGS
+		const result = validatedPluginSettings({
+			settingsSchema: importedPlugin.data.default.settingsSchema,
+			pluginSettings: (args.settings as any)[importedPlugin.data.default.id],
+		})
+		if (result !== "isValid") {
+			moduleErrors.push(new PluginSettingsAreInvalidError({ plugin, errors: result }))
+			return
+		}
+
+		meta.push({
+			plugin,
+			id: importedPlugin.data.default.id,
+		})
+
+		allPlugins.push(importedPlugin.data.default as Plugin2)
+	}
+
+	await Promise.all(args.settings.modules.map(resolvePlugin))
+
+	const result: Awaited<ReturnType<ResolvePluginsFunction>> = {
 		data: {
 			toBeImportedFiles: {},
 			importFiles: {},
 			exportFiles: {},
 			customApi: {},
 		},
-		errors: [],
+		errors: [...moduleErrors],
 	}
 
-	for (const plugin of args.plugins) {
+	for (const plugin of allPlugins) {
 		const errors = [...PluginCompiler.Errors(plugin)]
 
 		// -- INVALID ID in META --
@@ -108,5 +182,10 @@ export const resolvePlugins2: ResolvePlugins2Function = async (args) => {
 		result.errors.push(new PluginsDoNotProvideImportOrExportFilesError())
 	}
 
-	return result
+	return {
+		meta,
+		plugins: allPlugins,
+		resolvedPluginApi: result.data,
+		errors: result.errors,
+	}
 }

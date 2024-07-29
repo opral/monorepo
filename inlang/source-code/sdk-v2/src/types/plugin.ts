@@ -24,6 +24,10 @@ import type {
 } from "./plugin-errors.js"
 import { NestedBundle } from "./schema.js"
 import { TranslationFile, type TranslationFile as TranslationFileType } from "./translation-file.js"
+import type { ProjectSettings2 } from "./project-settings.js"
+import type { ImportFunction } from "../resolve-plugins/import.js"
+import type { PluginHasNoExportsError, PluginImportError } from "./plugin-errors.js"
+import type { NodeishFilesystem } from "@lix-js/fs"
 
 export const PluginId = Type.String({
 	pattern: "^plugin\\.([a-z][a-zA-Z0-9]*)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)$",
@@ -166,6 +170,136 @@ export type ResolvedPlugin2Api = {
 	 *       return
 	 *      }
 	 *    }
+	 *  })
+	 *  // use
+	 *  customApi['app.inlang.ide-extension'].messageReferenceMatcher()
+	 */
+	customApi: Record<`app.${string}.${string}` | `library.${string}.${string}`, unknown> & {
+		"app.inlang.ideExtension"?: CustomApiInlangIdeExtension
+	}
+}
+
+// ---------------------------- RESOLVE PLUGIN API TYPES ---------------------------------------------
+/**
+ * An inlang plugin module has a default export that is a plugin.
+ *
+ * @example
+ *   export default myPlugin
+ */
+// not using Static<infer T> here because the type is not inferred correctly
+// due to type overwrites in modules.
+export type InlangPlugin = { default: Plugin2 }
+export const InlangPlugin = Type.Object({
+	default: Plugin2,
+})
+
+/**
+ * Function that resolves modules from the config.
+ *
+ * Pass a custom `_import` function to override the default import function.
+ */
+export type ResolvePlugin2Function = (args: {
+	settings: ProjectSettings2
+	_import: ImportFunction
+}) => Promise<{
+	/**
+	 * Metadata about the resolved module.
+	 *
+	 * @example
+	 * [{
+	 * 	  id: "plugin.inlang.json",
+	 * 	  module: "https://myplugin.com/index.js"
+	 * }]
+	 */
+	meta: Array<{
+		/**
+		 * The plugin link.
+		 *
+		 * @example "https://myplugin.com/index.js"
+		 */
+		plugin: string
+		/**
+		 * The resolved item id of the module.
+		 */
+		id: Plugin2["id"]
+	}>
+	/**
+	 * The resolved plugins.
+	 */
+	plugins: Array<Plugin2>
+	/**
+	 * The resolved api provided by plugins.
+	 */
+	resolvedPluginApi: ResolvedPlugin2Api
+	/**
+	 * Errors during the resolution process.
+	 *
+	 * This includes errors from:
+	 * - importing module
+	 * - resolving plugins
+	 * - resolving the runtime plugin api
+	 */
+	errors: Array<
+		| PluginHasNoExportsError
+		| PluginImportError
+		| Awaited<ReturnType<ResolvePlugins2Function>>["errors"][number]
+	>
+}>
+
+/**
+ * The filesystem is a subset of project lisa's nodeish filesystem.
+ *
+ * - only uses minimally required functions to decrease the API footprint on the ecosystem.
+ */
+export type NodeishFilesystemSubset = Pick<
+	NodeishFilesystem,
+	"readFile" | "readdir" | "mkdir" | "writeFile" | "watch"
+>
+
+/**
+ * Function that resolves (imports and initializes) the plugins.
+ */
+export type ResolvePluginsFunction = (args: {
+	plugins: Array<Plugin2>
+	settings: ProjectSettings2
+	nodeishFs: NodeishFilesystemSubset
+}) => Promise<{
+	data: ResolvedPluginApi
+	errors: Array<
+		| PluginReturnedInvalidCustomApiError
+		| PluginToBeImportedFilesFunctionAlreadyDefinedError
+		| PluginImportFilesFunctionAlreadyDefinedError
+		| PluginExportFilesFunctionAlreadyDefinedError
+		| PluginHasInvalidIdError
+		| PluginHasInvalidSchemaError
+		| PluginsDoNotProvideImportOrExportFilesError
+	>
+}>
+
+/**
+ * The API after resolving the plugins.
+ */
+export type ResolvedPluginApi = {
+	/**
+	 * Importer / Exporter functions.
+	 * see https://linear.app/opral/issue/MESDK-157/sdk-v2-release-on-sqlite
+	 */
+	toBeImportedFiles: Record<PluginId, Plugin2["toBeImportedFiles"] | undefined>
+	importFiles: Record<PluginId, Plugin2["importFiles"] | undefined>
+	exportFiles: Record<PluginId, Plugin2["exportFiles"] | undefined>
+	/**
+	 * App specific APIs.
+	 *
+	 * @example
+	 *  // define
+	 *  customApi: ({ settings }) => ({
+	 * 	 "app.inlang.ide-extension": {
+	 * 	   messageReferenceMatcher: () => {
+	 * 		 // use settings
+	 * 		 settings.pathPattern
+	 * 		return
+	 * 	   }
+	 * 	 }
 	 *  })
 	 *  // use
 	 *  customApi['app.inlang.ide-extension'].messageReferenceMatcher()

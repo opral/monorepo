@@ -2,7 +2,7 @@ import { Value } from "@sinclair/typebox/value"
 import { describe, test, expect } from "vitest"
 import { expectType } from "tsd"
 import { Plugin } from "@inlang/plugin"
-import { ProjectSettings2 } from "../../types/project-settings.js"
+import { ProjectSettings2 } from "../types/project-settings.js"
 
 describe("Plugin", () => {
 	test("meta.id should enforce plugin.namespace.* patterns", () => {
