@@ -1,0 +1,12 @@
+{
+	"extends": "../tsconfig.base.json",
+	"include": ["src/**/*"],
+	"compilerOptions": {
+		"allowImportingTsExtensions": false,
+		"emitDeclarationOnly": false,
+		"module": "Node16",
+		"lib": ["ESNext", "DOM"],
+		"outDir": "./dist",
+		"rootDir": "./src"
+	}
+}
