@@ -66,7 +66,9 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 
 	// TODO SDK-v2 LIX how to deal with plugins we want to load?
 	const _import = importSequence()
-	// Lint rules are now Lix validation rules, therefore this needs to be reimplemented
+	/**
+	 * Lint rules are now Lix validation rules, therefore this needs to be reimplemented
+	 */
 	// 	createDebugImport({
 	// 		"sdk-dev:lint-rule.js": lintRule,
 	// 		"sdk-dev:opral-uppercase-lint.js": makeOpralUppercase,
