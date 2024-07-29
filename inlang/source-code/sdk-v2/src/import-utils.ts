@@ -1,12 +1,12 @@
 import { ModuleImportError } from "./resolve-modules/errors.js"
-import type { InlangModule } from "./types/module.js"
+import type { InlangPlugin } from "./types/module.js"
 
 /**
  * @throws {ModuleImportError}
  */
-type Importer = (uri: string) => Promise<InlangModule>
+type Importer = (uri: string) => Promise<InlangPlugin>
 
-export function createDebugImport(importMap: Record<string, InlangModule["default"]>): Importer {
+export function createDebugImport(importMap: Record<string, InlangPlugin["default"]>): Importer {
 	return async (uri) => {
 		const resolved = importMap[uri]
 		if (resolved) return { default: resolved }

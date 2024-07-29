@@ -1,9 +1,9 @@
 import type { TSchema } from "@sinclair/typebox"
 import { Value, type ValueError } from "@sinclair/typebox/value"
-import type { InlangModule } from "./types/module.js"
+import type { InlangPlugin } from "./types/module.js"
 
 export const validatedModuleSettings = (args: {
-	settingsSchema: InlangModule["default"]["settingsSchema"]
+	settingsSchema: InlangPlugin["default"]["settingsSchema"]
 	moduleSettings: unknown
 }): "isValid" | ValueError[] => {
 	if (args.settingsSchema && args.moduleSettings) {
