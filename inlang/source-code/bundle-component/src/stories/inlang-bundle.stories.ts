@@ -12,6 +12,12 @@ import { bundleWithoutSelectors } from "../mock/messageBundle.ts"
 import { pluralBundle } from "@inlang/sdk-v2"
 
 import "./actions/inlang-bundle-action.ts"
+import {
+	mockBundleLintReports,
+	mockInstalledLintRules,
+	mockMessageLintReports,
+	mockVariantLintReports,
+} from "../mock/lint.ts"
 
 const meta: Meta = {
 	component: "inlang-bundle",
@@ -60,7 +66,10 @@ export const Complex: StoryObj = {
 		return html`<inlang-bundle
 			.bundle=${pluralBundle}
 			.settings=${mockSettings}
-			.installedLintRules=${[]}
+			.installedLintRules=${mockInstalledLintRules}
+			.bundleValidationReports=${mockBundleLintReports}
+			.messageValidationReports=${mockMessageLintReports}
+			.variantValidationReports=${mockVariantLintReports}
 			@update-bundle=${(data: any) => console.info("updateBundle", data.detail.argument)}
 			@insert-message=${(data: any) => console.info("insertMessage", data.detail.argument)}
 			@update-message=${(data: any) => console.info("updateMessage", data.detail.argument)}
