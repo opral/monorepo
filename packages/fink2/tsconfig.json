@@ -1,15 +1,25 @@
 {
-	"include": ["src/**/*.ts"],
-	"extends": "../tsconfig.base.json",
+	"include": ["src"],
 	"compilerOptions": {
-		"outDir": "dist",
-		"experimentalDecorators": true,
-		"noImplicitOverride": false,
-		"module": "Node16",
+		"composite": true,
+		"target": "ES2022",
+		"useDefineForClassFields": true,
 		"lib": ["ES2020", "DOM", "DOM.Iterable"],
+		"module": "Node16",
 		"skipLibCheck": true,
+		"experimentalDecorators": true,
+
 		"moduleResolution": "Node16",
-		"allowImportingTsExtensions": false,
-		"noEmit": true
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"moduleDetection": "force",
+		"noEmit": true,
+		"jsx": "react-jsx",
+
+		/* Linting */
+		"strict": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noFallthroughCasesInSwitch": true
 	}
 }

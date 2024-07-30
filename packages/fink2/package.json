@@ -1,11 +1,12 @@
 {
 	"name": "@inlang/fink2",
-	"version": "0.0.1",
 	"private": true,
+	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
-		"build": "tsc && vite build",
+		"build": "tsc -b && vite build",
+		"lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
 		"preview": "vite preview"
 	},
 	"overrides": {
@@ -13,16 +14,21 @@
 		"@types/react-dom": "npm:types-react-dom@rc"
 	},
 	"dependencies": {
-		"@lit/context": "^1.1.2",
-		"@tailwindcss/vite": "^4.0.0-alpha.17",
+		"react": "19.0.0-rc-941e1b4a-20240729",
+		"react-dom": "19.0.0-rc-941e1b4a-20240729"
+	},
+	"devDependencies": {
+    "@tailwindcss/vite": "^4.0.0-alpha.17",
+		"tailwindcss": "^4.0.0-alpha.17",
 		"@types/react": "npm:types-react@rc",
 		"@types/react-dom": "npm:types-react-dom@rc",
-		"lit": "^3.1.4",
-		"react": "19.0.0-rc-941e1b4a-20240729",
-		"react-dom": "19.0.0-rc-941e1b4a-20240729",
-		"tailwindcss": "^4.0.0-alpha.17",
-		"typescript": "^5.5.3",
-		"vike": "^0.4.182",
+		"@typescript-eslint/eslint-plugin": "^7.15.0",
+		"@typescript-eslint/parser": "^7.15.0",
+		"@vitejs/plugin-react": "^4.3.1",
+		"eslint": "^8.57.0",
+		"eslint-plugin-react-hooks": "^4.6.2",
+		"eslint-plugin-react-refresh": "^0.4.7",
+		"typescript": "^5.2.2",
 		"vite": "^5.3.4"
 	}
 }
