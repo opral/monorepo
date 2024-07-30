@@ -9,7 +9,7 @@ import { v4 } from "uuid"
 /**
  *
  */
-export async function openLixFromOPFS(path: string) {
+export async function openLixFromOpfs(path: string) {
 	const { dialect, sql, createCallbackFunction } = new SQLocalKysely(path)
 
 	const db = new Kysely<Database>({
