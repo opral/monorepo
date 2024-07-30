@@ -25,7 +25,7 @@ export const Page = () => html` ${header}
 				<path d="M44 0.261719H108V20.2617H44V0.261719Z" fill="#07B6D4" />
 			</svg>
 			<br />
-			The first of it's kind change control system.
+			The world's first change control system.
 		</h1>
 		<p class="text-slate-600 leading-[1.7]">
 			Lix provides <b class="text-slate-950 font-semibold">traceability of changes</b> for files
