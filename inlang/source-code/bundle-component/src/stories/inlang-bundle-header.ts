@@ -292,11 +292,13 @@ export default class InlangBundleHeader extends LitElement {
 									</sl-menu>
 								</sl-dropdown>`
 						: ``}
-					<inlang-lint-report-tip
-						.lintReports=${this.bundleValidationReports}
-						.installedLintRules=${this.installedLintRules}
-						.fixLint=${this.fixLint}
-					></inlang-lint-report-tip>
+					${this.bundleValidationReports && this.bundleValidationReports.length > 0
+						? html`<inlang-lint-report-tip
+								.lintReports=${this.bundleValidationReports}
+								.installedLintRules=${this.installedLintRules}
+								.fixLint=${this.fixLint}
+						  ></inlang-lint-report-tip>`
+						: ``}
 				</div>
 			</div>
 		`
