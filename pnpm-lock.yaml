@@ -823,6 +823,9 @@ importers:
       react-dom:
         specifier: 19.0.0-rc-941e1b4a-20240729
         version: 19.0.0-rc-941e1b4a-20240729(react@19.0.0-rc-941e1b4a-20240729)
+      react-router-dom:
+        specifier: ^6.25.1
+        version: 6.25.1(react-dom@19.0.0-rc-941e1b4a-20240729)(react@19.0.0-rc-941e1b4a-20240729)
     devDependencies:
       '@tailwindcss/vite':
         specifier: ^4.0.0-alpha.17
@@ -10658,6 +10661,11 @@ packages:
 
   /@remirror/core-constants@2.0.2:
     resolution: {integrity: sha512-dyHY+sMF0ihPus3O27ODd4+agdHMEmuRdyiZJ2CCWjPV5UFmn17ZbElvk6WOGVE4rdCJKZQCrPV2BcikOMLUGQ==}
+    dev: false
+
+  /@remix-run/router@1.18.0:
+    resolution: {integrity: sha512-L3jkqmqoSVBVKHfpGZmLrex0lxR5SucGA0sUfFzGctehw+S/ggL9L/0NnC5mw6P8HUWpFZ3nQw3cRApjjWx9Sw==}
+    engines: {node: '>=14.0.0'}
     dev: false
 
   /@resvg/resvg-js-android-arm-eabi@2.6.0:
@@ -28741,6 +28749,29 @@ packages:
       use-callback-ref: 1.3.2(@types/react@18.3.3)(react@18.3.1)
       use-sidecar: 1.1.2(@types/react@18.3.3)(react@18.3.1)
     dev: true
+
+  /react-router-dom@6.25.1(react-dom@19.0.0-rc-941e1b4a-20240729)(react@19.0.0-rc-941e1b4a-20240729):
+    resolution: {integrity: sha512-0tUDpbFvk35iv+N89dWNrJp+afLgd+y4VtorJZuOCXK0kkCWjEvb3vTJM++SYvMEpbVwXKf3FjeVveVEb6JpDQ==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      react: '>=16.8'
+      react-dom: '>=16.8'
+    dependencies:
+      '@remix-run/router': 1.18.0
+      react: 19.0.0-rc-941e1b4a-20240729
+      react-dom: 19.0.0-rc-941e1b4a-20240729(react@19.0.0-rc-941e1b4a-20240729)
+      react-router: 6.25.1(react@19.0.0-rc-941e1b4a-20240729)
+    dev: false
+
+  /react-router@6.25.1(react@19.0.0-rc-941e1b4a-20240729):
+    resolution: {integrity: sha512-u8ELFr5Z6g02nUtpPAggP73Jigj1mRePSwhS/2nkTrlPU5yEkH1vYzWNyvSnSzeeE2DNqWdH+P8OhIh9wuXhTw==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      react: '>=16.8'
+    dependencies:
+      '@remix-run/router': 1.18.0
+      react: 19.0.0-rc-941e1b4a-20240729
+    dev: false
 
   /react-style-singleton@2.2.1(@types/react@18.3.3)(react@18.2.0):
     resolution: {integrity: sha512-ZWj0fHEMyWkHzKYUr2Bs/4zU6XLmq9HsgBURm7g5pAVfyn49DgUiNgY2d4lXRlYSiCif9YBGpQleewkcqddc7g==}

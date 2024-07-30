@@ -15,11 +15,11 @@
 	},
 	"dependencies": {
 		"react": "19.0.0-rc-941e1b4a-20240729",
-		"react-dom": "19.0.0-rc-941e1b4a-20240729"
+		"react-dom": "19.0.0-rc-941e1b4a-20240729",
+		"react-router-dom": "^6.25.1"
 	},
 	"devDependencies": {
-    "@tailwindcss/vite": "^4.0.0-alpha.17",
-		"tailwindcss": "^4.0.0-alpha.17",
+		"@tailwindcss/vite": "^4.0.0-alpha.17",
 		"@types/react": "npm:types-react@rc",
 		"@types/react-dom": "npm:types-react-dom@rc",
 		"@typescript-eslint/eslint-plugin": "^7.15.0",
@@ -28,6 +28,7 @@
 		"eslint": "^8.57.0",
 		"eslint-plugin-react-hooks": "^4.6.2",
 		"eslint-plugin-react-refresh": "^0.4.7",
+		"tailwindcss": "^4.0.0-alpha.17",
 		"typescript": "^5.2.2",
 		"vite": "^5.3.4"
 	}

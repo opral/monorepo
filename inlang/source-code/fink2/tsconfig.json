@@ -8,6 +8,7 @@
 		"module": "Node16",
 		"skipLibCheck": true,
 		"experimentalDecorators": true,
+		"allowImportingTsExtensions": true,
 
 		"moduleResolution": "Node16",
 		"resolveJsonModule": true,
