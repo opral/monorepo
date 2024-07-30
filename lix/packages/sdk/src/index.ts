@@ -1,4 +1,4 @@
-export { openLixFromOPFS } from "./openLixFromOpfs.js"
+export { openLixFromOpfs } from "./openLixFromOpfs.js"
 export { newLixFile } from "./newLix.js"
 export * from "./plugin.js"
 export * from "./schema.js"
