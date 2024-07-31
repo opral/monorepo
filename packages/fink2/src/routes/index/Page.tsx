@@ -1,18 +1,33 @@
-import { useState } from "react"
-import { Link } from "react-router-dom"
+import { useEffect, useState } from "react";
+import Layout from "../../layout.tsx";
+import { poll } from "../../poll.ts";
+import { projectAtom } from "../../state.ts";
+import { useAtom } from "jotai";
+import { Settings } from "@inlang/sdk2";
 
 export default function App() {
-	const [name, setName] = useState("Unknown")
+	const [project] = useAtom(projectAtom);
+	const settings2 = project?.settings.get();
+	console.log("rendering", settings2);
+	const [settings, setSettings] = useState<Settings | undefined>(
+		project?.settings.get()
+	);
+
+	useEffect(() => {
+		poll({
+			every: 5000,
+			fn: async () => {
+				setSettings(project?.settings.get());
+			},
+		});
+	}, [project?.settings]);
 
 	return (
 		<>
-			<label>
-				Your name:
-				<input name="firstName" onChange={(e) => setName(e.target.value)} />
-			</label>
-
-			<p className="text-red-500">Your name is {name}</p>
-			<Link to="/other">go to other</Link>
+			<Layout>
+				<p>settings {settings?.modules ?? "fallback"}</p>
+				<p>settings 2 {settings2?.modules ?? "fallback"}</p>
+			</Layout>
 		</>
-	)
+	);
 }

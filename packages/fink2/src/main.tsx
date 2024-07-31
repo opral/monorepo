@@ -2,13 +2,18 @@ import React from "react"
 import ReactDOM from "react-dom/client"
 import "./style.css"
 import { createBrowserRouter, RouterProvider } from "react-router-dom"
-import { routes } from "./routes.tsx"
+import { routes } from "./routes/routes.tsx";
+import "@shoelace-style/shoelace/dist/themes/light.css";
+import { setBasePath } from "@shoelace-style/shoelace/dist/utilities/base-path.js";
 
-const router = createBrowserRouter(routes)
+setBasePath(
+	"https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.16.0/cdn/"
+);
+
+const router = createBrowserRouter(routes);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
 	<React.StrictMode>
-		{/* @ts-expect-error - type mismatch somehwere */}
 		<RouterProvider router={router} />
 	</React.StrictMode>
-)
+);
