@@ -31,7 +31,7 @@ export const Page = () => html` ${header}
 			"Every work that we create, every time we collaborate, everything we automate, it revolves
 			around changes. A system, that can understand changes and inform you about that this changes
 			happened, means that you have a system to collaborate, validate, automate and create." -
-			Insight
+			Samuel Stroschein, Founder of Opral (lix & inlang)
 		</p>
 		<p class="text-slate-600 leading-[1.7]">
 			Lix provides <b class="text-slate-950 font-semibold">traceability of changes</b> for files
