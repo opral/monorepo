@@ -1,0 +1,6 @@
+:root {
+	--vp-c-brand-1: hsl(265, 68%, 71%);
+	--vp-c-brand-2: hsl(265, 68%, 63%);
+	--vp-c-brand-3: hsl(265, 68%, 55%);
+	--vp-c-brand-soft: hsl(265, 68%, 63%, 0.2);
+}
