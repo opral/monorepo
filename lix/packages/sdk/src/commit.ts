@@ -1,8 +1,8 @@
 import { Kysely } from "kysely"
-import type { Database } from "./schema.js"
+import type { LixDatabase } from "./schema.js"
 import { v4 } from "uuid"
 
-export async function commit(args: { db: Kysely<Database>; userId: string; description: string }) {
+export async function commit(args: { db: Kysely<LixDatabase>; userId: string; description: string }) {
 	return args.db.transaction().execute(async () => {
 		const commit = await args.db
 			.insertInto("commit")

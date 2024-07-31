@@ -2,9 +2,9 @@
 	"include": ["src"],
 	"compilerOptions": {
 		"composite": true,
-		"target": "ES2022",
+		"target": "ES2023",
 		"useDefineForClassFields": true,
-		"lib": ["ES2020", "DOM", "DOM.Iterable"],
+		"lib": ["ES2023", "DOM", "DOM.Iterable"],
 		"module": "Node16",
 		"skipLibCheck": true,
 		"experimentalDecorators": true,

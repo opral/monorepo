@@ -1,0 +1,51 @@
+{
+	"name": "@inlang/sdk2",
+	"type": "module",
+	"license": "Apache-2.0",
+	"publishConfig": {
+		"access": "public"
+	},
+	"homepage": "https://inlang.com/documentation/sdk",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/opral/inlang-message-sdk"
+	},
+	"exports": {
+		".": "./dist/index.js"
+	},
+	"files": [
+		"./dist",
+		"./src",
+		"./vendored"
+	],
+	"scripts": {
+		"build": "tsc --build",
+		"dev": "tsc --watch",
+		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"lint": "eslint ./src --fix",
+		"format": "prettier ./src --write",
+		"clean": "rm -rf ./dist ./node_modules"
+	},
+	"engines": {
+		"node": ">=18.0.0"
+	},
+	"dependencies": {
+		"@lix-js/sdk": "workspace:*",
+		"@sinclair/typebox": "^0.31.17",
+		"deepmerge-ts": "^5.1.0",
+		"install": "^0.13.0",
+		"kysely": "^0.27.4",
+		"rxjs": "7.8.1",
+		"uuid": "^10.0.0",
+		"sqlocal": "workspace:*"
+	},
+	"devDependencies": {
+		"@types/debug": "^4.1.12",
+		"@vitest/coverage-v8": "^0.33.0",
+		"@vitest/web-worker": "^1.6.0",
+		"jsdom": "22.1.0",
+		"typescript": "^5.5.2",
+		"vite": "^5.3.2",
+		"vitest": "^0.33.0"
+	}
+}

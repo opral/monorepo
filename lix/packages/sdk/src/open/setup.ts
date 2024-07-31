@@ -1,19 +1,16 @@
 /* eslint-disable unicorn/no-null */
+import type { SQLocalKysely } from "sqlocal/kysely"
+import type { LixPlugin } from "../plugin.js"
 import { Kysely, ParseJSONResultsPlugin } from "kysely"
-import { SQLocalKysely } from "sqlocal/kysely"
-import type { Database, LixFile } from "./schema.js"
-import type { LixPlugin } from "./plugin.js"
-import { commit } from "./commit.js"
+import type { LixDatabase, LixFile } from "../schema.js"
+import { commit } from "../commit.js"
 import { v4 } from "uuid"
 
-/**
- *
- */
-export async function openLixFromOpfs(args: { path: string }) {
-	const { dialect, sql, createCallbackFunction } = new SQLocalKysely(args.path)
+export async function setup(args: { sqlocal: SQLocalKysely }) {
+	const { dialect, sql, createCallbackFunction, getDatabaseContent } = args.sqlocal
 
-	const db = new Kysely<Database>({
-		dialect,
+	const db = new Kysely<LixDatabase>({
+		dialect: dialect,
 		plugins: [new ParseJSONResultsPlugin()],
 	})
 
@@ -56,6 +53,7 @@ export async function openLixFromOpfs(args: { path: string }) {
 
 	return {
 		db,
+		toBlob: async () => new Blob([await getDatabaseContent()]),
 		sql,
 		plugins,
 		commit: (args: { userId: string; description: string }) => {
@@ -65,6 +63,14 @@ export async function openLixFromOpfs(args: { path: string }) {
 }
 
 async function loadPlugins(sql: any) {
+	await sql`
+		CREATE TABLE IF NOT EXISTS file (
+			id TEXT PRIMARY KEY,
+			path TEXT NOT NULL,
+			blob BLOB NOT NULL
+		) strict;
+	`
+
 	const pluginFiles = await sql`
     SELECT * FROM file
     WHERE path GLOB 'lix/plugin/*'
@@ -73,7 +79,7 @@ async function loadPlugins(sql: any) {
 	const plugins: LixPlugin[] = []
 	for (const plugin of pluginFiles) {
 		const text = btoa(decoder.decode(plugin.blob))
-		const pluginModule = await import("data:text/javascript;base64," + text)
+		const pluginModule = await import(/* @vite-ignore */ "data:text/javascript;base64," + text)
 		plugins.push(pluginModule.default)
 		if (pluginModule.default.setup) {
 			await pluginModule.default.setup()
@@ -102,7 +108,7 @@ async function handleFileChange(args: {
 	oldBlob: LixFile["blob"]
 	newBlob: LixFile["blob"]
 	plugins: LixPlugin[]
-	db: Kysely<Database>
+	db: Kysely<LixDatabase>
 }) {
 	for (const plugin of args.plugins) {
 		const diffs = await plugin.diff?.file?.({
@@ -198,7 +204,7 @@ async function handleFileInsert(args: {
 	fileId: LixFile["id"]
 	newBlob: LixFile["blob"]
 	plugins: LixPlugin[]
-	db: Kysely<Database>
+	db: Kysely<LixDatabase>
 }) {
 	for (const plugin of args.plugins) {
 		const diffs = await plugin.diff?.file?.({

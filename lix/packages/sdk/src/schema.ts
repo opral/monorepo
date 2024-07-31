@@ -1,6 +1,6 @@
 import type { LixPlugin } from "./plugin.js"
 
-export type Database = {
+export type LixDatabase = {
 	file: LixFile
 	change: Change
 	commit: Commit

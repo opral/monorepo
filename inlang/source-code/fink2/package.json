@@ -9,19 +9,18 @@
 		"lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
 		"preview": "vite preview"
 	},
-	"overrides": {
-		"@types/react": "npm:types-react@rc",
-		"@types/react-dom": "npm:types-react-dom@rc"
-	},
 	"dependencies": {
+		"@inlang/sdk2": "workspace:*",
+		"@shoelace-style/shoelace": "^2.16.0",
+		"jotai": "^2.9.1",
 		"react": "19.0.0-rc-941e1b4a-20240729",
 		"react-dom": "19.0.0-rc-941e1b4a-20240729",
 		"react-router-dom": "^6.25.1"
 	},
 	"devDependencies": {
+		"@types/react": "^18.3.3",
+		"@types/react-dom": "^18.3.0",
 		"@tailwindcss/vite": "^4.0.0-alpha.17",
-		"@types/react": "npm:types-react@rc",
-		"@types/react-dom": "npm:types-react-dom@rc",
 		"@typescript-eslint/eslint-plugin": "^7.15.0",
 		"@typescript-eslint/parser": "^7.15.0",
 		"@vitejs/plugin-react": "^4.3.1",
