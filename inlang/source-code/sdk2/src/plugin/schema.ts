@@ -1,7 +1,7 @@
 import type { TObject } from "@sinclair/typebox"
 import type { NestedBundle, Settings } from "../schema/schema.js"
 
-export type Plugin2 = {
+export type InlangPlugin2 = {
 	/**
 	 * The key of the plugin.
 	 */
@@ -34,5 +34,5 @@ export type Plugin2 = {
 export type ResourceFile = {
 	path: string
 	content: string
-	pluginKey: Plugin2["key"]
+	pluginKey: InlangPlugin2["key"]
 }

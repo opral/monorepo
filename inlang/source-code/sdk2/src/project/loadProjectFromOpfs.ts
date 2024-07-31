@@ -3,6 +3,8 @@ import { SQLocalKysely } from "sqlocal/kysely"
 import type { Database, Settings } from "../schema/schema.js"
 import { openLixFromOpfs } from "@lix-js/sdk"
 import { deepmerge } from "deepmerge-ts"
+import { loadPlugins } from "../plugin/loadPlugins.js"
+import type { InlangPlugin2, ResourceFile } from "../plugin/schema.js"
 
 /**
  *
@@ -29,8 +31,17 @@ export async function loadProjectFromOpfs(args: { path: string }) {
 
 	let settings = JSON.parse(new TextDecoder().decode(settingsFile.blob)) as Settings
 
+	const plugins = await loadPlugins({ settings })
+
 	return {
 		db,
+		plugins,
+		importFiles: (args: { pluginKey: InlangPlugin2["key"]; files: ResourceFile }) => {
+			throw new Error("Not implemented")
+		},
+		exportFiles: (args: { pluginKey: InlangPlugin2["key"] }) => {
+			throw new Error("Not implemented")
+		},
 		settings: {
 			get: () => settings,
 			set: async (newSettings: Partial<Settings>) => {
