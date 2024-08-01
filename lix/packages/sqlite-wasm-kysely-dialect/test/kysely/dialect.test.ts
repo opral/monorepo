@@ -9,24 +9,14 @@ import {
 import { SqliteWasmDriver } from "../../src/kysely";
 import { sleep } from "../test-utils/sleep";
 import { createInMemoryDatabase } from "../../src";
+import { createDialect } from "../../src/dialect";
 
 describe("kysely dialect", () => {
-  // const { dialect, transaction } = new SQLocalKysely(
-  // 	'kysely-dialect-test.sqlite3'
-  // );
-
-  const dialect = {
-    createAdapter: () => new SqliteAdapter(),
-    createDriver: () =>
-      new SqliteWasmDriver({
-        database: createInMemoryDatabase({
-          readOnly: false,
-        }),
-      }),
-    createIntrospector: (db) => new SqliteIntrospector(db),
-    createQueryCompiler: () => new SqliteQueryCompiler(),
-  };
-  const db = new Kysely<DB>({ dialect });
+  const db = new Kysely<DB>({
+    dialect: createDialect({
+      database: createInMemoryDatabase({ readOnly: false }),
+    }),
+  });
 
   type DB = {
     groceries: {

@@ -3,8 +3,7 @@
   "version": "0.1.0",
   "type": "module",
   "exports": {
-    ".": "./dist/index.js",
-    "./kysely": "./dist/kysely/index.js"
+    ".": "./dist/index.js"
   },
   "files": [
     "dist",
