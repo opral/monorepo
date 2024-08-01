@@ -1,12 +1,11 @@
 import { type Static, Type } from "@sinclair/typebox"
-import { JSONObject } from "@inlang/json-types"
 
 /**
  * ---------------- Specific Language Tag field meta information ----------------
  */
 
-export type ProjectSettings2 = Static<typeof ProjectSettings2>
-export const ProjectSettings2 = Type.Object({
+export type ProjectSettings = Static<typeof ProjectSettings>
+export const ProjectSettings = Type.Object({
 	// TODO SDK-v2 SETTINGS do we need to generate a settings v2 schema?
 	$schema: Type.Optional(Type.Literal("https://inlang.com/schema/project-settings")),
 	baseLocale: Type.String({
@@ -62,15 +61,8 @@ export const ProjectSettings2 = Type.Object({
 		})
 	),
 	/**
-	 * Settings defined by plugins.
+	 * plugin.*: JSONObject
 	 *
-	 * @example
-	 *   plugin: {
-	 *     "i18next": {},
-	 *     "messageFormat": {}
-	 *   }
+	 * The plugin settings are validated when importing plugins
 	 */
-	plugin: Type.Record(Type.String(), JSONObject, {
-		description: "Settings defined by plugins. Referencable by plugin key.",
-	}),
 })

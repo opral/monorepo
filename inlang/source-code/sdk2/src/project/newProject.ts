@@ -1,6 +1,6 @@
 import { newLixFile, openLixFromOpfs, uuidv4 } from "@lix-js/sdk"
 import { SQLocalKysely } from "sqlocal/kysely"
-import type { ProjectSettings2 } from "../schema/settings.js"
+import type { ProjectSettings } from "../schema/settings.js"
 
 /**
  * Creates a new inlang project.
@@ -100,9 +100,7 @@ const defaultProjectSettings = {
 		// the m function matcher should be installed by default in case Sherlock (VS Code extension) is adopted
 		// "https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js",
 	],
-	plugin: {
-		"plugin.inlang.messageFormat": {
-			pathPattern: "./messages/{languageTag}.json",
-		},
+	"plugin.i18next": {
+		pathPattern: "./messages/{languageTag}.json",
 	},
-} satisfies ProjectSettings2
+} satisfies ProjectSettings
