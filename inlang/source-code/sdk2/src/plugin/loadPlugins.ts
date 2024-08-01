@@ -1,8 +1,8 @@
-import type { Settings } from "../schema/schema.js"
+import type { ProjectSettings } from "../schema/settings.js"
 import { PluginError, PluginImportError } from "./errors.js"
 import type { InlangPlugin2 } from "./schema.js"
 
-export async function loadPlugins(args: { settings: Settings }): Promise<{
+export async function loadPlugins(args: { settings: ProjectSettings }): Promise<{
 	plugins: InlangPlugin2[]
 	errors: PluginError[]
 }> {

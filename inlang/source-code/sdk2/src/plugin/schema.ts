@@ -1,5 +1,6 @@
 import type { TObject } from "@sinclair/typebox"
-import type { NestedBundle, Settings } from "../schema/schema.js"
+import type { NestedBundle } from "../schema/schema.js"
+import type { ProjectSettings } from "../schema/settings.js"
 
 export type InlangPlugin2 = {
 	/**
@@ -13,11 +14,11 @@ export type InlangPlugin2 = {
 	 * see https://linear.app/opral/issue/MESDK-157/sdk-v2-release-on-sqlite
 	 */
 	toBeImportedFiles?: (args: {
-		settings: Settings
+		settings: ProjectSettings
 		nodeFs: unknown
 	}) => Promise<Array<ResourceFile>> | Array<ResourceFile>
 	importFiles?: (args: { files: Array<ResourceFile> }) => { bundles: NestedBundle }
-	exportFiles?: (args: { bundles: NestedBundle; settings: Settings }) => Array<ResourceFile>
+	exportFiles?: (args: { bundles: NestedBundle; settings: ProjectSettings }) => Array<ResourceFile>
 	/**
 	 * Define app specific APIs.
 	 *
@@ -28,7 +29,7 @@ export type InlangPlugin2 = {
 	 *   }
 	 *  })
 	 */
-	addCustomApi?: (args: { settings: Settings }) => Record<string, unknown>
+	addCustomApi?: (args: { settings: ProjectSettings }) => Record<string, unknown>
 }
 
 export type ResourceFile = {

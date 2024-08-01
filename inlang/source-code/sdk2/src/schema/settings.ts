@@ -1,11 +1,7 @@
-import { type Static, Type } from "@sinclair/typebox"
+import { type Static, Type, type TTemplateLiteral, type TLiteral } from "@sinclair/typebox"
+import { JSONObject } from "@inlang/json-types"
 
-/**
- * ---------------- Specific Language Tag field meta information ----------------
- */
-
-export type ProjectSettings = Static<typeof ProjectSettings>
-export const ProjectSettings = Type.Object({
+const SDKSettings = Type.Object({
 	// TODO SDK-v2 SETTINGS do we need to generate a settings v2 schema?
 	$schema: Type.Optional(Type.Literal("https://inlang.com/schema/project-settings")),
 	baseLocale: Type.String({
@@ -18,7 +14,23 @@ export const ProjectSettings = Type.Object({
 		description:
 			"Set the locales that are available in your project. All locales needs to be a valid BCP-47 language tag. Needs to include the base locale tag.",
 	}),
-
+	// exits for backwards compatibility
+	// remove in SDK-v3
+	sourceLanguageTag: Type.Optional(
+		Type.String({
+			description: "Use baseLocale instead.",
+			deprecated: true,
+		})
+	),
+	// exits for backwards compatibility
+	// remove in SDK-v3
+	languageTags: Type.Optional(
+		Type.Array(Type.String(), {
+			uniqueItems: true,
+			deprecated: true,
+			description: "Use locales instead.",
+		})
+	),
 	/**
 	 * The modules to load.
 	 *
@@ -66,3 +78,38 @@ export const ProjectSettings = Type.Object({
 	 * The plugin settings are validated when importing plugins
 	 */
 })
+
+/**
+ * Settings defined via apps, plugins, lint rules, etc.
+ *
+ * Using external settings to only allow `plugin.*` keys
+ * and don't block the SDK from adding new settings.
+ */
+const ExternalSettings = Type.Record(
+	Type.String({
+		pattern: `^((plugin)\\.([a-z][a-zA-Z0-9]*(?:[A-Z][a-z0-9]*)*)|\\$schema|${
+			// pattern must include the settings properties
+			Object.keys(SDKSettings.properties)
+				.map((key) => key.replaceAll(".", "\\."))
+				.join("|")
+		})$`,
+		description: "The key must be conform to `plugin.*`.",
+		examples: ["plugin.csv-importer", "plugin.i18next"],
+	}) as unknown as TTemplateLiteral<[TLiteral<`${"plugin"}.${string}`>]>,
+	// Using JSON (array and object) as a workaround to make the
+	// intersection between `InternalSettings`, which contains an array,
+	// and `ExternalSettings` which are objects possible
+	JSON as unknown as typeof JSONObject,
+	{ description: "Settings defined by apps, plugins, etc." }
+)
+
+export type ProjectSettings = Omit<
+	Static<typeof ProjectSettings>,
+	"languageTags" | "sourceLanguageTag"
+> & {
+	/** @deprecated Use `baseLocale` */
+	sourceLanguageTag?: string
+	/** @deprecated Use `locales` */
+	languageTags?: string[]
+}
+export const ProjectSettings = Type.Intersect([SDKSettings, ExternalSettings])
