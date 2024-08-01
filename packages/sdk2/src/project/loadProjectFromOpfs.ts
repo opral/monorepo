@@ -1,10 +1,11 @@
 import { Kysely, ParseJSONResultsPlugin } from "kysely"
 import { SQLocalKysely } from "sqlocal/kysely"
-import type { Database, Settings } from "../schema/schema.js"
+import type { Database } from "../schema/schema.js"
 import { openLixFromOpfs } from "@lix-js/sdk"
 import { deepmerge } from "deepmerge-ts"
 import { loadPlugins } from "../plugin/loadPlugins.js"
 import type { InlangPlugin2, ResourceFile } from "../plugin/schema.js"
+import type { ProjectSettings } from "../schema/settings.js"
 
 /**
  *
@@ -44,7 +45,7 @@ export async function loadProjectFromOpfs(args: { path: string }) {
 		},
 		settings: {
 			get: () => settings,
-			set: async (newSettings: Partial<Settings>) => {
+			set: async (newSettings: Partial<ProjectSettings>) => {
 				// merge settings
 				const merged = deepmerge(settings, newSettings)
 				// save settings in lix
@@ -56,7 +57,7 @@ export async function loadProjectFromOpfs(args: { path: string }) {
 					})
 					.execute()
 				// if successful, update local settings
-				settings = merged as Settings
+				settings = merged as ProjectSettings
 			},
 		},
 		toBlob: () => lix.toBlob,

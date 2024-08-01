@@ -41,11 +41,7 @@ export const Declaration = Type.Object({
 
 export const Pattern = Type.Array(Type.Union([Text, Expression]))
 
-export const Settings = Type.Object({
-	baseLocale: Type.String(),
-	locales: Type.String(),
-	modules: Type.String(),
-})
+
 
 export const BundleTable = Type.Object({
 	id: Type.String(),
@@ -115,7 +111,6 @@ export type Declaration = Static<typeof Declaration>
 export type Expression = Static<typeof Expression>
 export type FunctionAnnotation = Static<typeof FunctionAnnotation>
 export type Option = Static<typeof Option>
-export type Settings = Static<typeof Settings>
 
 export type Database = {
 	bundle: Static<typeof BundleTable>
