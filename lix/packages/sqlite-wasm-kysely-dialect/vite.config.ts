@@ -3,7 +3,7 @@ import { defineConfig } from "vite";
 export default defineConfig({
   test: {
     browser: {
-      enabled: true,
+      enabled: false,
       headless: true,
       name: "chrome",
     },
