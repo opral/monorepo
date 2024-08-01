@@ -36,6 +36,7 @@ import { resolvePlugins } from "./resolvePlugins2.js"
 class SQLocalKyselyWithRaw extends SQLocalKysely {
 	rawSql = async <T extends Record<string, any>[]>(rawSql: string) => {
 		const { rows, columns } = await this.exec(rawSql, [], "all")
+		//@ts-ignore
 		return this.convertRowsToObjects(rows, columns) as T
 	}
 }
@@ -136,7 +137,7 @@ export async function loadProjectOpfs(args: { inlangFolderPath: string }): Promi
 		// sql,
 		// rawSql,
 		// TODO SDK-v2 API if we expose only the api, what helper Method should the SDK provide insert/update/delete for bundle/message/variant? how shall we deal with nested queries?
-		// db: db, 
+		// db: db,
 
 		installed: {
 			lintRules: installedLintRules$,
@@ -264,7 +265,7 @@ export const populateMessages = (bundleSelect: SelectQueryBuilder<Database, "bun
 				"message.bundleId",
 				"=",
 				"bundle.id" as any
-			) 
+			)
 		).as("messages"),
 	])
 }

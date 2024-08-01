@@ -1,29 +1,56 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Layout from "../../layout.tsx";
 import { poll } from "../../poll.ts";
-import { projectAtom } from "../../state.ts";
+import { projectAtom, selectedProjectPathAtom } from "../../state.ts";
 import { useAtom } from "jotai";
-import { Settings } from "@inlang/sdk2";
+import { loadProjectFromOpfs } from "@inlang/sdk2";
+// import { MessageBundle } from "../../components/InlangBundle.tsx";
+// import { mockBundle } from "../../mock/mockHelper.ts";
 
 export default function App() {
-	const [project] = useAtom(projectAtom);
-	const [settings, setSettings] = useState<Settings | undefined>(
-		project?.settings.get()
+	const [project, setProject] = useAtom(projectAtom);
+	const [selectedProjectPath] = useAtom(
+		selectedProjectPathAtom
 	);
 
 	useEffect(() => {
+		console.log("project on page", project)
 		poll({
-			every: 5000,
+			every: 2000,
 			fn: async () => {
-				setSettings(project?.settings.get());
+				if (selectedProjectPath) {
+					const project = await loadProjectFromOpfs({ path: selectedProjectPath });
+					setProject(project);
+				}
 			},
 		});
-	}, [project?.settings]);
+	}, []);
 
+	console.log("App rerendered")
 	return (
 		<>
 			<Layout>
-				<p>{settings?.modules ?? "fallback"}</p>
+				<p>{JSON.stringify(project?.settings.get()) ?? "fallback"}</p>
+				{/* <MessageBundle
+					// key={bundle.id}
+					bundle={mockBundle}
+					settings={project?.db.settings.get()}
+					changeMessageBundle={onBundleChange as any}
+					insertMessage={onMesageInsert as any}
+					updateMessage={onMesageUpdate as any}
+					insertVariant={onVariantInsert as any}
+					updateVariant={onVariantUpdate as any}
+					deleteVariant={onVariantDelete as any}
+					filteredLocales={filteredLocales.length > 0 ? filteredLocales : undefined}
+					fixLint={(e: any) => {
+						const { fix, lintReport } = e.detail.argument as {
+							fix: string
+							lintReport: LintReport
+						}
+		
+						project.fix(lintReport, { title: fix })
+					}}
+				/> */}
 			</Layout>
 		</>
 	);

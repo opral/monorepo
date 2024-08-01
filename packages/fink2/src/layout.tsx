@@ -1,22 +1,20 @@
-import SlButton from "@shoelace-style/shoelace/dist/react/button/index.js";
 import { useAtom } from "jotai";
 import { projectAtom, selectedProjectPathAtom } from "./state.ts";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import SlDialog from "@shoelace-style/shoelace/dist/react/dialog/index.js";
 import { loadProjectFromOpfs, newProject } from "@inlang/sdk2";
 import {
-	SlDropdown,
 	SlInput,
-	SlMenu,
-	SlMenuItem,
+	SlButton,
+	SlOption,
+	SlSelect,
 } from "@shoelace-style/shoelace/dist/react";
-import { poll } from "./poll.ts";
+import { Link } from "react-router-dom";
 
 export default function Layout(props: { children: React.ReactNode }) {
 	return (
 		<div className="p-6 space-y-4">
 			<MenuBar />
-			<hr></hr>
 			{props.children}
 		</div>
 	);
@@ -25,9 +23,10 @@ export default function Layout(props: { children: React.ReactNode }) {
 const MenuBar = () => {
 	return (
 		<>
-			<div className="flex gap-2">
+			<div className="flex gap-2 mb-12">
 				<CreateNewProject />
 				<SelectProject />
+				<SettingsButton />
 			</div>
 		</>
 	);
@@ -40,48 +39,69 @@ const SelectProject = () => {
 	const [, setProject] = useAtom(projectAtom);
 	const [existingProjects, setExistingProjects] = useState<string[]>([]);
 
-	useEffect(() => {
-		poll({
-			every: 2000,
-			fn: async () => {
-				const result: string[] = [];
-				const opfsRoot = await navigator.storage.getDirectory();
-				// @ts-expect-error - TS doesn't know about the keys method
-				for await (const name of opfsRoot.keys()) {
-					if (name.endsWith(".inlang")) {
-						result.push(name);
-					}
-				}
-				return result;
-			},
-			cb: (value) => setExistingProjects(value),
-		});
-	}, []);
+	const getProjects = async () => {
+		const projects: string[] = []
+		const opfsRoot = await navigator.storage.getDirectory();
+		// @ts-expect-error - TS doesn't know about the keys method
+		for await (const name of opfsRoot.keys()) {
+			if (name.endsWith(".inlang")) {
+				projects.push(name);
+			}
+		}
+		return projects;
+	}
+
+	// useEffect(() => {
+
+	// 	getProjects().then((result) => {
+			
+	// 	})
+
+	// 		poll({
+	// 			every: 2000,
+	// 			fn: async () => {
+	// 				console.log("poll2")
+	// 				const result: string[] = [];
+	// 				const opfsRoot = await navigator.storage.getDirectory();
+	// 				// @ts-expect-error - TS doesn't know about the keys method
+	// 				for await (const name of opfsRoot.keys()) {
+	// 					if (name.endsWith(".inlang")) {
+	// 						result.push(name);
+	// 					}
+	// 				}
+	// 				return result;
+	// 			},
+	// 			cb: (value) => {
+	// 				console.log("Callback with value:", value);
+	// 				setExistingProjects(value);
+	// 			},
+	// 		});
+		
+	// }, []);
 
 	return (
-		<div>
-			<SlDropdown>
-				<SlButton slot="trigger" caret size="small">
-					{selectedProjectPath ? selectedProjectPath : "Select project"}
-				</SlButton>
-				<SlMenu>
-					{existingProjects.map((name) => (
-						<SlMenuItem
-							type="checkbox"
-							key={name}
-							checked={name === selectedProjectPath}
-							onClick={async () => {
-								setSelectedProjectPath(name);
-								const project = await loadProjectFromOpfs({ path: name });
-								setProject(project);
-							}}
-						>
-							{name}
-						</SlMenuItem>
-					))}
-				</SlMenu>
-			</SlDropdown>
-		</div>
+		<>
+			<SlSelect
+				size="small"
+				placeholder={selectedProjectPath ? selectedProjectPath : "Select project"}
+				onSlChange={async (e: any) => {
+					setSelectedProjectPath(e.target.value);
+					const project = await loadProjectFromOpfs({ path: e.target.value });
+					console.log("project", project)
+					setProject(project);
+				}}
+				onSlShow={ async () => {
+					const projects = await getProjects();
+					setExistingProjects(projects);
+				}}
+			>
+				{existingProjects.map((name) => (
+					<SlOption key={name} value={name}>
+						{name}
+					</SlOption>
+				))}
+			</SlSelect>
+		</>
 	);
 };
 
@@ -139,3 +159,20 @@ const CreateNewProject = () => {
 		</>
 	);
 };
+
+const SettingsButton = () => {
+	// check if window.location.pathname === "/settings"
+	const isSettingsPage = window.location.pathname === "/settings";
+
+	return (
+		<Link to={isSettingsPage ? "/" : "/settings" }>
+			<SlButton
+				slot="trigger"
+				size="small"
+				variant={isSettingsPage ? "primary" : "default"}
+			>
+				Settings
+			</SlButton>
+		</Link>
+	)
+}
