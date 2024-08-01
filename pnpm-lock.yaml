@@ -817,9 +817,18 @@ importers:
 
   inlang/source-code/fink2:
     dependencies:
+      '@inlang/bundle-component':
+        specifier: workspace:*
+        version: link:../bundle-component
       '@inlang/sdk2':
         specifier: workspace:*
         version: link:../sdk2
+      '@inlang/settings-component':
+        specifier: workspace:*
+        version: link:../settings-component
+      '@lit/react':
+        specifier: ^1.0.5
+        version: 1.0.5(@types/react@18.3.3)
       '@shoelace-style/shoelace':
         specifier: ^2.16.0
         version: 2.16.0(@types/react@18.3.3)
@@ -2851,6 +2860,76 @@ importers:
       react-dom:
         specifier: ^18.2.0
         version: 18.2.0(react@18.2.0)
+      storybook:
+        specifier: ^7.6.16
+        version: 7.6.19
+      typescript:
+        specifier: 5.4.5
+        version: 5.4.5
+      vitest:
+        specifier: 0.34.6
+        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.25.1)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.0)(webdriverio@8.39.1(typescript@5.4.5))
+
+  inlang/source-code/settings-component2:
+    dependencies:
+      '@inlang/sdk':
+        specifier: workspace:^
+        version: link:../sdk
+      '@inlang/sdk2':
+        specifier: workspace:^
+        version: link:../sdk2
+      '@lit/task':
+        specifier: ^1.0.0
+        version: 1.0.0
+      '@shoelace-style/shoelace':
+        specifier: 2.14.0
+        version: 2.14.0(@types/react@18.3.3)
+      '@sinclair/typebox':
+        specifier: 0.31.28
+        version: 0.31.28
+      chroma-js:
+        specifier: ^2.4.2
+        version: 2.4.2
+    devDependencies:
+      '@inlang/marketplace-registry':
+        specifier: workspace:^
+        version: link:../marketplace-registry
+      '@nx/storybook':
+        specifier: ^18.0.4
+        version: 18.3.4(@babel/traverse@7.24.8)(@swc/core@1.7.3(@swc/helpers@0.5.5))(@types/node@20.14.10)(js-yaml@4.1.0)(nx@18.3.4(@swc/core@1.7.3(@swc/helpers@0.5.5)))(typescript@5.4.5)
+      '@storybook/addon-essentials':
+        specifier: ^7.6.16
+        version: 7.6.19(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@storybook/addon-links':
+        specifier: ^7.6.16
+        version: 7.6.19(react@18.3.1)
+      '@storybook/blocks':
+        specifier: ^7.6.16
+        version: 7.6.19(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@storybook/web-components':
+        specifier: ^7.6.16
+        version: 7.6.19(lit@3.1.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@storybook/web-components-vite':
+        specifier: ^7.6.16
+        version: 7.6.19(lit@3.1.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.4.5)(vite@5.3.4(@types/node@20.14.10)(lightningcss@1.25.1)(terser@5.31.0))
+      '@types/chroma-js':
+        specifier: ^2.4.4
+        version: 2.4.4
+      '@vitest/coverage-v8':
+        specifier: 0.34.6
+        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.25.1)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.0)(webdriverio@8.39.1(typescript@5.4.5)))
+      esbuild:
+        specifier: ^0.20.0
+        version: 0.20.2
+      lit:
+        specifier: ^3.1.2
+        version: 3.1.4
+      react:
+        specifier: ^18.2.0
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.3.1(react@18.3.1)
       storybook:
         specifier: ^7.6.16
         version: 7.6.19
@@ -24432,10 +24511,10 @@ snapshots:
 
   '@storybook/csf-tools@7.6.19':
     dependencies:
-      '@babel/generator': 7.24.5
-      '@babel/parser': 7.24.5
-      '@babel/traverse': 7.24.5
-      '@babel/types': 7.24.5
+      '@babel/generator': 7.24.10
+      '@babel/parser': 7.24.8
+      '@babel/traverse': 7.24.8
+      '@babel/types': 7.25.2
       '@storybook/csf': 0.1.7
       '@storybook/types': 7.6.19
       fs-extra: 11.2.0
@@ -24617,6 +24696,26 @@ snapshots:
       '@storybook/core-server': 7.6.19
       '@storybook/node-logger': 7.6.19
       '@storybook/web-components': 7.6.19(lit@3.1.3)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      magic-string: 0.30.10
+    transitivePeerDependencies:
+      - '@preact/preset-vite'
+      - bufferutil
+      - encoding
+      - lit
+      - react
+      - react-dom
+      - supports-color
+      - typescript
+      - utf-8-validate
+      - vite
+      - vite-plugin-glimmerx
+
+  '@storybook/web-components-vite@7.6.19(lit@3.1.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.4.5)(vite@5.3.4(@types/node@20.14.10)(lightningcss@1.25.1)(terser@5.31.0))':
+    dependencies:
+      '@storybook/builder-vite': 7.6.19(typescript@5.4.5)(vite@5.3.4(@types/node@20.14.10)(lightningcss@1.25.1)(terser@5.31.0))
+      '@storybook/core-server': 7.6.19
+      '@storybook/node-logger': 7.6.19
+      '@storybook/web-components': 7.6.19(lit@3.1.4)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       magic-string: 0.30.10
     transitivePeerDependencies:
       - '@preact/preset-vite'
@@ -39080,7 +39179,7 @@ snapshots:
     dependencies:
       cac: 6.7.14
       debug: 4.3.5
-      mlly: 1.7.0
+      mlly: 1.7.1
       pathe: 1.1.2
       picocolors: 1.0.1
       vite: 5.3.4(@types/node@20.14.10)(lightningcss@1.25.1)(terser@5.31.0)

@@ -6,7 +6,7 @@ import { JSONObject } from "@inlang/json-types"
  */
 
 export type ProjectSettings2 = Static<typeof ProjectSettings2>
-const ProjectSettings2 = Type.Object({
+export const ProjectSettings2 = Type.Object({
 	// TODO SDK-v2 SETTINGS do we need to generate a settings v2 schema?
 	$schema: Type.Optional(Type.Literal("https://inlang.com/schema/project-settings")),
 	baseLocale: Type.String({

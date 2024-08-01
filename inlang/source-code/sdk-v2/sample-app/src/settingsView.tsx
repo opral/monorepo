@@ -23,7 +23,6 @@ export function SettingsView({ project }: SettingsViewProps) {
 	const [settings, setSettings] = useState<ProjectSettings2 | undefined>(undefined)
 	const [installedLintRules, setInstalledLintRules] = useState<InstalledLintRule[]>([])
 
-	console.log(settings)
 	useEffect(() => {
 		const settingsSub = project.inlangProject.settings.subscribe({
 			next: (currentSettings) => {

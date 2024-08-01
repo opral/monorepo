@@ -1,6 +1,6 @@
 import { RouteObject } from "react-router-dom"
 import IndexPage from "./index/Page.tsx"
-import OtherPage from "./other/Page.tsx"
+import SettingsPage from "./settings/Page.tsx"
 
 export const routes: RouteObject[] = [
 	{
@@ -8,7 +8,7 @@ export const routes: RouteObject[] = [
 		element: <IndexPage />,
 	},
 	{
-		path: "/other",
-		element: <OtherPage />,
+		path: "/settings",
+		element: <SettingsPage />,
 	},
 ]

@@ -4,13 +4,16 @@
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
-		"dev": "vite",
+		"dev": "vite --host",
 		"build": "tsc -b && vite build",
 		"lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
 		"preview": "vite preview"
 	},
 	"dependencies": {
 		"@inlang/sdk2": "workspace:*",
+		"@inlang/settings-component": "workspace:*",
+		"@inlang/bundle-component": "workspace:*",
+		"@lit/react": "^1.0.5",
 		"@shoelace-style/shoelace": "^2.16.0",
 		"jotai": "^2.9.1",
 		"react": "19.0.0-rc-941e1b4a-20240729",
@@ -18,9 +21,9 @@
 		"react-router-dom": "^6.25.1"
 	},
 	"devDependencies": {
+		"@tailwindcss/vite": "^4.0.0-alpha.17",
 		"@types/react": "^18.3.3",
 		"@types/react-dom": "^18.3.0",
-		"@tailwindcss/vite": "^4.0.0-alpha.17",
 		"@typescript-eslint/eslint-plugin": "^7.15.0",
 		"@typescript-eslint/parser": "^7.15.0",
 		"@vitejs/plugin-react": "^4.3.1",
