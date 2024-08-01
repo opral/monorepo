@@ -11,7 +11,7 @@
 	},
 	"dependencies": {
 		"@inlang/sdk2": "workspace:*",
-		"@inlang/settings-component": "workspace:*",
+		"@inlang/settings-component2": "workspace:*",
 		"@inlang/bundle-component": "workspace:*",
 		"@lit/react": "^1.0.5",
 		"@shoelace-style/shoelace": "^2.16.0",

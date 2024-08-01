@@ -5,7 +5,6 @@ import "./string/string-input.js"
 import "./array/array-input.js"
 import "./object/object-input.js"
 import "./union/path-pattern-input.js"
-import type { InstalledMessageLintRule, InstalledPlugin } from "@inlang/sdk"
 @customElement("general-input")
 export class GeneralInput extends LitElement {
 	//static override styles = baseStyling
@@ -17,7 +16,7 @@ export class GeneralInput extends LitElement {
 	moduleId?: string
 
 	@property()
-	modules?: Array<InstalledMessageLintRule | InstalledPlugin>
+	modules?: Array<any>
 
 	@property()
 	value: string = ""

@@ -1,6 +1,5 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
-import { InlangModule, type InstalledMessageLintRule, type InstalledPlugin } from "@inlang/sdk"
 import "./../../field-header.js"
 
 @customElement("lint-rule-level-object-input")
@@ -64,10 +63,10 @@ export class LintRuleLevelObjectInput extends LitElement {
 	moduleId?: string
 
 	@property()
-	modules?: Array<InstalledMessageLintRule | InstalledPlugin>
+	modules?: Array<any>
 
 	@property()
-	value: Record<InlangModule["default"]["id"], string> = {}
+	value: Record<string, string> = {}
 
 	@property()
 	schema: any = {}
@@ -77,7 +76,7 @@ export class LintRuleLevelObjectInput extends LitElement {
 
 	@property()
 	handleInlangProjectChange: (
-		value: Record<InlangModule["default"]["id"], string>,
+		value: Record<string, string>,
 		key: string,
 		moduleId?: string
 	) => void = () => {}
@@ -125,8 +124,8 @@ export class LintRuleLevelObjectInput extends LitElement {
 						const input =
 							slSelect.shadowRoot?.querySelector<HTMLInputElement>(".select__display-input")
 						if (input && input.value) {
-							input.value = this.value[moduleId as InlangModule["default"]["id"]]
-								? (this.value[moduleId as InlangModule["default"]["id"]] as string)
+							input.value = this.value[moduleId as string]
+								? (this.value[moduleId as string] as string)
 								: "warning"
 						}
 					}
