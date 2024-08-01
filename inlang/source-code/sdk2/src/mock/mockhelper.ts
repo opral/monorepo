@@ -7,6 +7,7 @@ import type {
 	Pattern,
 } from "../schema/schema.js"
 import { inputNames, inputsWithSelectors, simpleInputs, translations } from "./mockdata.js"
+//@ts-ignore
 import { v4 } from "uuid"
 
 export function generateUUID() {

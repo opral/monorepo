@@ -1,6 +1,5 @@
 import { css, html, LitElement } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
-import { InlangModule } from "@inlang/sdk"
 
 @customElement("default-object-input")
 export class DefaultObjectInput extends LitElement {
@@ -72,7 +71,7 @@ export class DefaultObjectInput extends LitElement {
 	moduleId?: string
 
 	@property()
-	value: Record<InlangModule["default"]["id"], string> = {}
+	value: Record<string, string> = {}
 
 	@property()
 	schema: any = {}
@@ -88,7 +87,7 @@ export class DefaultObjectInput extends LitElement {
 
 	@property()
 	handleInlangProjectChange: (
-		value: Record<InlangModule["default"]["id"], string>,
+		value: Record<string, string>,
 		key: string,
 		moduleId?: string
 	) => void = () => {}
@@ -126,7 +125,7 @@ export class DefaultObjectInput extends LitElement {
 		}
 	}
 
-	handleDeleteItemClick(key: InlangModule["default"]["id"]) {
+	handleDeleteItemClick(key: string) {
 		if (this.value) {
 			delete this.value[key]
 			this.handleInlangProjectChange(this.value, this.property, this.moduleId)
@@ -169,7 +168,7 @@ export class DefaultObjectInput extends LitElement {
 								<div class="remove-icon">
 									<div
 										@click=${() => {
-											this.handleDeleteItemClick(key as InlangModule["default"]["id"])
+											this.handleDeleteItemClick(key as string)
 										}}
 									>
 										<svg

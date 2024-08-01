@@ -1,7 +1,7 @@
 import { html, LitElement, css } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import { baseStyling } from "../styling/base.js"
-import { type ProjectSettings2 } from "@inlang/sdk2"
+import { ProjectSettings } from "@inlang/sdk2"
 import checkRequired from "./../helper/checkRequired.js"
 import overridePrimitiveColors from "./../helper/overridePrimitiveColors.js"
 import { registry } from "@inlang/marketplace-registry"
@@ -107,12 +107,12 @@ export default class InlangSettings extends LitElement {
 	]
 
 	@property({ type: Object })
-	settings: ProjectSettings2 = {} as ProjectSettings2
+	settings: ProjectSettings = {} as ProjectSettings
 
 	@property({ type: Array })
 	installedPlugins: Array<any> = []
 
-	dispatchOnSetSettings(settings: ProjectSettings2) {
+	dispatchOnSetSettings(settings: ProjectSettings) {
 		const onSetSettings = new CustomEvent("set-settings", {
 			detail: {
 				argument: settings,
@@ -122,7 +122,7 @@ export default class InlangSettings extends LitElement {
 	}
 
 	@state()
-	private _newSettings: ProjectSettings2 | undefined = undefined
+	private _newSettings: ProjectSettings | undefined = undefined
 
 	@state()
 	private _unsavedChanges: boolean = false
@@ -148,10 +148,13 @@ export default class InlangSettings extends LitElement {
 		if (this._newSettings && moduleId) {
 			this._newSettings = {
 				...this._newSettings,
-				[moduleId]: {
-					...this._newSettings[moduleId],
-					[property]: value,
-				},
+				// plugin: {
+				// 	...this._newSettings.plugin
+				// 	[moduleId]: {
+				// 		...this._newSettings[moduleId],
+				// 		[property]: value,
+				// 	},
+				// }
 			}
 		} else if (this._newSettings) {
 			this._newSettings = {
@@ -189,11 +192,8 @@ export default class InlangSettings extends LitElement {
 		}
 	> {
 		const _settings = this.settings
-		const _installedPlugins = this.installedPlugins
-		const _installedMessageLintRules = this.installedMessageLintRules
 
 		if (!_settings) throw new Error("No inlang settings")
-		if (!_installedPlugins) throw new Error("No installed plugins")
 
 		const generalSchema: Record<
 			string,
@@ -201,24 +201,24 @@ export default class InlangSettings extends LitElement {
 				meta?: any
 				schema?: Record<string, Record<string, unknown>>
 			}
-		> = { internal: { schema: ProjectSettings2.allOf[0] } }
+		> = { internal: { schema: ProjectSettings } }
 
-		for (const plugin of _installedPlugins) {
-			if (plugin.settingsSchema) {
-				generalSchema[plugin.id] = {
-					schema: plugin.settingsSchema,
-					meta: plugin,
-				}
-			}
-		}
-		for (const lintRule of _installedMessageLintRules) {
-			if (lintRule.settingsSchema) {
-				generalSchema[lintRule.id] = {
-					schema: lintRule.settingsSchema,
-					meta: lintRule,
-				}
-			}
-		}
+		// for (const plugin of _installedPlugins) {
+		// 	if (plugin.settingsSchema) {
+		// 		generalSchema[plugin.id] = {
+		// 			schema: plugin.settingsSchema,
+		// 			meta: plugin,
+		// 		}
+		// 	}
+		// }
+		// for (const lintRule of _installedMessageLintRules) {
+		// 	if (lintRule.settingsSchema) {
+		// 		generalSchema[lintRule.id] = {
+		// 			schema: lintRule.settingsSchema,
+		// 			meta: lintRule,
+		// 		}
+		// 	}
+		// }
 
 		return generalSchema
 	}
@@ -262,7 +262,7 @@ export default class InlangSettings extends LitElement {
 											<general-input
 												exportparts="property, property-title, property-paragraph, option, option-wrapper, button"
 												.property=${property}
-												.modules=${this.installedMessageLintRules || []}
+												.modules=${[]}
 												.value=${structuredClone(
 													this._newSettings?.[property as keyof typeof this._newSettings]
 												)}

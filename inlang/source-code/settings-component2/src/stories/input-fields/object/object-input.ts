@@ -1,7 +1,6 @@
 import { html, LitElement } from "lit"
 import { customElement, property } from "lit/decorators.js"
 //import { baseStyling } from "../../../styling/base.js"
-import { InlangModule } from "@inlang/sdk"
 import "./default-object-input.js"
 import "./lint-rule-level-object-input.js"
 
@@ -25,7 +24,7 @@ export class ObjectInput extends LitElement {
 	valuePlaceholder?: string
 
 	@property()
-	value: Record<InlangModule["default"]["id"], string> = {}
+	value: Record<string, string> = {}
 
 	@property()
 	schema: any = {}
@@ -41,7 +40,7 @@ export class ObjectInput extends LitElement {
 
 	@property()
 	handleInlangProjectChange: (
-		value: Record<InlangModule["default"]["id"], string>,
+		value: Record<string, string>,
 		key: string,
 		moduleId?: string
 	) => void = () => {}

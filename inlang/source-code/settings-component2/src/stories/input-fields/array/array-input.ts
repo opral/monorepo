@@ -4,7 +4,6 @@ import { customElement, property } from "lit/decorators.js"
 import "./default-array-input.js"
 import "./locale-input.js"
 import "./reference-pattern-input.js"
-import type { InstalledLintRule, InstalledPlugin } from "@inlang/sdk-v2"
 
 @customElement("array-input")
 export class ArrayInput extends LitElement {
@@ -17,7 +16,7 @@ export class ArrayInput extends LitElement {
 	moduleId?: string
 
 	@property()
-	modules?: Array<InstalledLintRule | InstalledPlugin>
+	modules?: Array<any>
 
 	@property()
 	value: Array<string> = []

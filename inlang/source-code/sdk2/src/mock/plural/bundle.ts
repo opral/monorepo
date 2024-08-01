@@ -1,9 +1,4 @@
-import type { NestedBundle } from "../../types/index.js"
-import {
-	createMockBundleLintReport,
-	createMockMessageLintReport,
-	createMockVariantLintReport,
-} from "../lintRports/mockCreate.js"
+import type { NestedBundle } from "../../schema/schema.js"
 
 export const pluralBundle: NestedBundle = {
 	id: "mock_bundle_human_id",
