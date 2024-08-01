@@ -6,7 +6,7 @@
 
 # Caveats
 
-1. Links in the same Layout Component as `<ParagldieJS>` will not be translated. This will also log a warning in development.
+1. Links in the same Layout Component as `<ParaglideJS>` will not be translated. This will also log a warning in development.
 2. Messages are not reactive. Don't use them in server-side module scope.
 3. Side effects triggered by `data` will run on language changes even if the data didn't change. If the data is language-dependent the side effect will run twice. 
 4. The `languageTag` function cannot be used inside param matchers.
