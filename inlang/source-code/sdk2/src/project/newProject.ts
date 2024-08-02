@@ -97,7 +97,4 @@ const defaultProjectSettings = {
 		// the m function matcher should be installed by default in case Sherlock (VS Code extension) is adopted
 		// "https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js",
 	],
-	"plugin.i18next": {
-		pathPattern: "./messages/{languageTag}.json",
-	},
 } satisfies ProjectSettings
