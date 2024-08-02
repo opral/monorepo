@@ -1,4 +1,4 @@
-import { type Expression, type NestedMessage } from "@inlang/sdk-v2"
+import { type Expression, type NestedMessage } from "@inlang/sdk2"
 import { describe, expect, it } from "vitest"
 import addSelector from "./add.js"
 
@@ -18,7 +18,7 @@ describe("addSelector", () => {
 				},
 			],
 			declarations: [],
-			variants: []
+			variants: [],
 		}
 
 		const newSelector = {

@@ -1,8 +1,6 @@
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
 
-import type { InstalledLintRule, LintReport } from "@inlang/sdk-v2"
-
 @customElement("inlang-lint-report-tip")
 export default class InlangLintReportTip extends LitElement {
 	static override styles = [
@@ -106,27 +104,27 @@ export default class InlangLintReportTip extends LitElement {
 
 	//props
 	@property()
-	lintReports: LintReport[] | undefined
+	lintReports: any | undefined
 
 	@property()
-	installedLintRules: InstalledLintRule[] | undefined
+	installedLintRules: any | undefined
 
 	@property()
-	fixLint: (lintReport: LintReport, fix: LintReport["fixes"][0]["title"]) => void = () => {}
+	fixLint: (lintReport: any, fix: any) => void = () => {}
 
 	//functions
 	private _getLintReportLevelClass = () => {
-		if (this.lintReports?.some((report) => report.level === "error")) {
+		if (this.lintReports?.some((report: any) => report.level === "error")) {
 			return "error"
 		}
-		if (this.lintReports?.some((report) => report.level === "warning")) {
+		if (this.lintReports?.some((report: any) => report.level === "warning")) {
 			return "warning"
 		}
 		return ""
 	}
 
 	private _getLintDisplayName = (ruleId: string) => {
-		const rule = this.installedLintRules?.find((rule) => rule.id === ruleId)
+		const rule = this.installedLintRules?.find((rule: any) => rule.id === ruleId)
 
 		if (typeof rule?.displayName === "string") {
 			return rule.displayName
@@ -160,7 +158,7 @@ export default class InlangLintReportTip extends LitElement {
 				</svg>
 			</div>
 			<div class="dropdown-container">
-				${this.lintReports?.map((lintReport) => {
+				${this.lintReports?.map((lintReport: any) => {
 					return html`<div class="dropdown-item">
 						<div class=${"report-icon " + lintReport.level}>
 							<svg
@@ -180,7 +178,7 @@ export default class InlangLintReportTip extends LitElement {
 							<p class="report-body">${lintReport.body}</p>
 							${lintReport.fixes && lintReport.fixes.length > 0
 								? html`<div class="report-fixes">
-										${lintReport.fixes?.map((fix) => {
+										${lintReport.fixes?.map((fix: any) => {
 											return html`
 												<sl-button
 													@click=${() => {

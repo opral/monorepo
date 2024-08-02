@@ -1,4 +1,4 @@
-import type { Pattern } from "@inlang/sdk-v2"
+import type { Pattern } from "@inlang/sdk2"
 import { LitElement, css, html, type PropertyValues } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import { ref, createRef, type Ref } from "lit/directives/ref.js"

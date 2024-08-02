@@ -1,12 +1,10 @@
 import {
 	type Variant,
 	type NestedMessage,
-	type LanguageTag,
-	type LintReport,
-	type InstalledLintRule,
 	type Declaration,
 	type Expression,
-} from "@inlang/sdk-v2"
+	type ProjectSettings,
+} from "@inlang/sdk2"
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
 
@@ -144,7 +142,7 @@ export default class InlangVariant extends LitElement {
 	message: NestedMessage | undefined
 
 	@property()
-	locale: LanguageTag | undefined
+	locale: ProjectSettings["locales"][number] | undefined
 
 	@property()
 	variant: Variant | undefined
@@ -157,9 +155,6 @@ export default class InlangVariant extends LitElement {
 
 	@property()
 	messageValidationReports: Array<any> | undefined
-
-	@property()
-	installedLintRules: InstalledLintRule[] | undefined
 
 	@property()
 	setHoveredVariantId: (variantId: string | undefined) => void = () => {}
@@ -175,9 +170,6 @@ export default class InlangVariant extends LitElement {
 
 	@property()
 	triggerSave: () => void = () => {}
-
-	@property()
-	fixLint: (lintReport: LintReport, fix: LintReport["fixes"][0]["title"]) => void = () => {}
 
 	// @property()
 	// revert: (messageId?: string, variantId?: string) => void = () => {}
@@ -209,19 +201,19 @@ export default class InlangVariant extends LitElement {
 	}
 
 	//functions
-	private _getLintReports = (): LintReport[] => {
-		// wether a lint report belongs to a variant or message and when they are shown
-		if (
-			((this.message?.selectors && this.message.selectors.length === 0) ||
-				!this.message?.selectors) &&
-			this.message?.variants.length === 1
-		) {
-			// when there are no selectors the reports of the message and variant are shown on variant level
-			return (this.messageValidationReports || []).concat(this.variantValidationReports || [])
-		}
+	// private _getLintReports = (): any[] => {
+	// 	// wether a lint report belongs to a variant or message and when they are shown
+	// 	if (
+	// 		((this.message?.selectors && this.message.selectors.length === 0) ||
+	// 			!this.message?.selectors) &&
+	// 		this.message?.variants.length === 1
+	// 	) {
+	// 		// when there are no selectors the reports of the message and variant are shown on variant level
+	// 		return (this.messageValidationReports || []).concat(this.variantValidationReports || [])
+	// 	}
 
-		return this.variantValidationReports || []
-	}
+	// 	return this.variantValidationReports || []
+	// }
 
 	private _delete = () => {
 		if (this.message && this.variant) {
@@ -390,14 +382,6 @@ export default class InlangVariant extends LitElement {
 								  ></sl-tooltip>`
 								: ``}
 						</div>
-
-						${this._getLintReports() && this._getLintReports()!.length > 0
-							? html`<inlang-lint-report-tip
-									.lintReports=${this._getLintReports()}
-									.installedLintRules=${this.installedLintRules}
-									.fixLint=${this.fixLint}
-							  ></inlang-lint-report-tip>`
-							: ``}
 					</div>
 			  </div> `
 			: undefined

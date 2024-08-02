@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import createInput from "./create.js"
-import { createBundle } from "@inlang/sdk-v2"
+import { createBundle } from "@inlang/sdk2"
 
 describe("createInput", () => {
 	it("Should create an input declarations", () => {

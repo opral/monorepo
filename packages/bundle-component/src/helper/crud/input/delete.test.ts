@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import deleteInput from "./delete.js"
-import { createBundle } from "@inlang/sdk-v2"
+import { createBundle } from "@inlang/sdk2"
 
 describe("deleteInput", () => {
 	it("Should delete a specific input declarations", () => {

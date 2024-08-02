@@ -1,4 +1,4 @@
-import type { NestedBundle } from "@inlang/sdk-v2"
+import type { NestedBundle } from "@inlang/sdk2"
 
 export const bundleWithoutSelectors: NestedBundle = {
 	id: "message-bundle-id",

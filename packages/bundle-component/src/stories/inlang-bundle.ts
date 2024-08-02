@@ -5,16 +5,14 @@ import {
 	type Bundle,
 	type Message,
 	type Pattern,
-	type LanguageTag,
-	type LintReport,
-	type ProjectSettings2,
+	type ProjectSettings,
 	type Declaration,
 	createVariant,
 	createMessage,
 	type Variant,
 	type Expression,
-} from "@inlang/sdk-v2"
-import type { InstalledLintRule, NestedBundle, NestedMessage } from "@inlang/sdk-v2"
+} from "@inlang/sdk2"
+import type { NestedBundle, NestedMessage } from "@inlang/sdk2"
 
 //internal components
 import "./inlang-bundle-root.js"
@@ -61,13 +59,10 @@ export default class InlangBundle extends LitElement {
 	bundle: NestedBundle | undefined
 
 	@property({ type: Object })
-	settings: ProjectSettings2 | undefined
+	settings: ProjectSettings | undefined
 
 	@property({ type: Array })
-	filteredLocales: LanguageTag[] | undefined
-
-	@property({ type: Array })
-	installedLintRules: InstalledLintRule[] | undefined
+	filteredLocales: ProjectSettings["locales"][number][] | undefined
 
 	@property({ type: Array })
 	bundleValidationReports: Array<any> | undefined
@@ -138,19 +133,19 @@ export default class InlangBundle extends LitElement {
 		this.dispatchEvent(onUpdateMessage)
 	}
 
-	dispatchOnFixLint(lintReport: LintReport, fix: LintReport["fixes"][0]["title"]) {
-		const onFixLint = new CustomEvent("fix-lint", {
-			bubbles: true,
-			composed: true,
-			detail: {
-				argument: {
-					lintReport,
-					fix,
-				},
-			},
-		})
-		this.dispatchEvent(onFixLint)
-	}
+	// dispatchOnFixLint(lintReport: LintReport, fix: LintReport["fixes"][0]["title"]) {
+	// 	const onFixLint = new CustomEvent("fix-lint", {
+	// 		bubbles: true,
+	// 		composed: true,
+	// 		detail: {
+	// 			argument: {
+	// 				lintReport,
+	// 				fix,
+	// 			},
+	// 		},
+	// 	})
+	// 	this.dispatchEvent(onFixLint)
+	// }
 
 	dispatchOnMachineTranslate(messageId?: string, variantId?: string) {
 		const onMachineTranslate = new CustomEvent("machine-translate", {
@@ -209,21 +204,21 @@ export default class InlangBundle extends LitElement {
 		this._freshlyAddedVariants = newArray
 	}
 
-	private _fixLint = (lintReport: LintReport, fix: LintReport["fixes"][0]["title"]) => {
-		this.dispatchOnFixLint(lintReport, fix)
-	}
+	// private _fixLint = (lintReport: LintReport, fix: LintReport["fixes"][0]["title"]) => {
+	// 	this.dispatchOnFixLint(lintReport, fix)
+	// }
 
-	private _refLocale = (): LanguageTag | undefined => {
+	private _refLocale = (): ProjectSettings["locales"][number] | undefined => {
 		return this.settings?.baseLocale
 	}
 
-	private _filteredLocales = (): LanguageTag[] | undefined => {
+	private _filteredLocales = (): ProjectSettings["locales"][number][] | undefined => {
 		if (!this.filteredLocales) return this.settings?.locales
 		if (this.filteredLocales && this.filteredLocales.length === 0) return this.filteredLocales
 		return this.filteredLocales
 	}
 
-	private _locales = (): LanguageTag[] | undefined => {
+	private _locales = (): ProjectSettings["locales"][number][] | undefined => {
 		return this._filteredLocales() || undefined
 	}
 
@@ -263,7 +258,7 @@ export default class InlangBundle extends LitElement {
 	private _fillMessage = (
 		bundleId: string,
 		message: NestedMessage | undefined,
-		locale: LanguageTag
+		locale: ProjectSettings["locales"][number]
 	): NestedMessage => {
 		if (message) {
 			if (message.variants.length === 0) {
@@ -279,7 +274,7 @@ export default class InlangBundle extends LitElement {
 		message: NestedMessage | undefined,
 		variant: Variant | undefined,
 		newPattern: Pattern,
-		locale: LanguageTag
+		locale: ProjectSettings["locales"][number]
 	) => {
 		if (variant) {
 			if (!message) {
@@ -365,9 +360,7 @@ export default class InlangBundle extends LitElement {
 				<inlang-bundle-header
 					.bundle=${this._bundle}
 					.settings=${this.settings}
-					.installedLintRules=${this.installedLintRules}
 					.bundleValidationReports=${this.bundleValidationReports}
-					.fixLint=${this._fixLint}
 					.addInput=${this._addInput}
 					.triggerSave=${this._triggerSave}
 					.triggerRefresh=${this._triggerRefresh}
@@ -389,7 +382,6 @@ export default class InlangBundle extends LitElement {
 							.locale=${locale}
 							.message=${message}
 							.messageValidationReports=${_messageValidationReports}
-							.installedLintRules=${this.installedLintRules}
 							.settings=${this.settings}
 							.inputs=${this._inputs()}
 							.freshlyAddedVariants=${this._freshlyAddedVariants}
@@ -398,7 +390,6 @@ export default class InlangBundle extends LitElement {
 							.resetFreshlyAddedVariants=${this._resetFreshlyAddedVariants}
 							.triggerSave=${this._triggerSave}
 							.triggerMessageBundleRefresh=${this._triggerRefresh}
-							.fixLint=${this._fixLint}
 						>
 							${sortAllVariants({
 								variants: this._fillMessage(
@@ -427,8 +418,6 @@ export default class InlangBundle extends LitElement {
 									.locale=${locale}
 									.variantValidationReports=${_variantValidationReports}
 									.messageValidationReports=${_messageValidationReports}
-									.installedLintRules=${this.installedLintRules}
-									.fixLint=${this._fixLint}
 								>
 									<inlang-pattern-editor
 										id=${variant?.id}

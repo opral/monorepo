@@ -1,15 +1,15 @@
-import type { ProjectSettings2 } from "@inlang/sdk-v2"
+import type { ProjectSettings } from "@inlang/sdk2"
 
-export const mockSettings: ProjectSettings2 = {
+export const mockSettings: ProjectSettings = {
 	$schema: "https://inlang.com/schema/project-settings",
 	baseLocale: "en",
 	locales: ["en", "de", "nl"],
-	lintConfig: [
-		{
-			ruleId: "messageBundleLintRule.inlang.identicalPattern",
-			level: "error",
-		},
-	],
+	// lintConfig: [
+	// 	{
+	// 		ruleId: "messageBundleLintRule.inlang.identicalPattern",
+	// 		level: "error",
+	// 	},
+	// ],
 	modules: [
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@4/dist/index.js",
 		"https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js",

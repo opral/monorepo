@@ -1,4 +1,4 @@
-import { createVariant } from "@inlang/sdk-v2"
+import { createVariant } from "@inlang/sdk2"
 import { describe, expect, it } from "vitest"
 import variantIsCatchAll from "./isCatchAll.js"
 

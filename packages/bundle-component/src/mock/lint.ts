@@ -1,9 +1,3 @@
-import type { LintReport } from "@inlang/sdk-v2"
-import // createMockBundleLintReport,
-// createMockMessageLintReport,
-// createMockVariantLintReport,
-"@inlang/sdk-v2"
-
 // export const mockMessageLintReports: LintReport[] = [
 // 	createMockMessageLintReport({
 // 		ruleId: "messageBundleLintRule.inlang.missingReference",

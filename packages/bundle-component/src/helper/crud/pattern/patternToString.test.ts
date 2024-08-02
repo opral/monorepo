@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import patternToString from "./patternToString.js"
-import type { Pattern } from "@inlang/sdk-v2"
+import type { Pattern } from "@inlang/sdk2"
 
 describe("patternToString", () => {
 	it("Should transform pattern to string", () => {
