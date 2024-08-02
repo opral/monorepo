@@ -14,7 +14,6 @@ export function poll<T>(args: {
 	cb?: (value: Awaited<T>) => void;
 }) {
 	const poll = async () => {
-		console.log("poll every:", args.every);
 		const value = await args.fn();
 		args.cb?.(value);
 		setTimeout(poll, args.every);
