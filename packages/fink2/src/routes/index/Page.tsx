@@ -1,3 +1,4 @@
+import MessageBundle from "../../components/InlangBundle.tsx";
 import Layout from "../../layout.tsx";
 import { projectAtom } from "../../state.ts";
 import { useAtom } from "jotai";
@@ -10,6 +11,14 @@ export default function App() {
 		<>
 			<Layout>
 				<p>{JSON.stringify(project?.settings.get()) ?? "fallback"}</p>
+				<MessageBundle
+					bundle={{
+						id: "bundleId",
+						alias: "{}",
+						messages: [],
+					}}
+					settings={project?.settings.get()}
+				/>
 				{/* <MessageBundle
 					// key={bundle.id}
 					bundle={mockBundle}
