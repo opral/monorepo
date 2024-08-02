@@ -32,9 +32,7 @@ const InlangBundle = (props: { bundleId: string }) => {
     poll({
       every: 2000,
       fn: async () => {
-        console.log("poll: " + props.bundleId)
         const bundle = await getNestedBundleById(project.db.selectFrom("bundle"), props.bundleId);
-        console.log("bundle", bundle)
         setBundle(bundle);
       }
     })
