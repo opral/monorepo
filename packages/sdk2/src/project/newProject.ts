@@ -88,9 +88,6 @@ const defaultProjectSettings = {
 	baseLocale: "en",
 	locales: ["en", "de"],
 	modules: [
-		"sdk-dev:opral-uppercase-lint.js",
-		"sdk-dev:missing-selector-lint-rule.js",
-		"sdk-dev:missing-catchall-variant",
 		// for instant gratification, we're adding common rules
 		// "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js",
 		// "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js",
