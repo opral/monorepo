@@ -40,5 +40,4 @@ export const insertNestedBundle = async (
 				.execute();
 		});
 	});
-	console.log({ x });
 };
