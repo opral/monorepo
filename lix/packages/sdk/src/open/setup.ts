@@ -43,10 +43,10 @@ export async function setup(args: { database: SqliteDatabase }) {
 		name: "handle_file_insert",
 		arity: 2,
 		// @ts-expect-error - dynamic function
-		xFunc: (_, fileId: any, newBlob: any) => {
+		xFunc: (_, fileId: any, newData: any) => {
 			handleFileInsert({
 				fileId,
-				newBlob,
+				newData,
 				plugins,
 				db,
 			})
@@ -57,7 +57,7 @@ export async function setup(args: { database: SqliteDatabase }) {
 	await sql`
 	CREATE TEMP TRIGGER file_inserted AFTER INSERT ON file
 	BEGIN
-	  SELECT handle_file_insert(NEW.id, NEW.blob);
+	  SELECT handle_file_insert(NEW.id, NEW.data);
 	END;
 	`.execute(db)
 
@@ -65,6 +65,10 @@ export async function setup(args: { database: SqliteDatabase }) {
 		db,
 		toBlob: () => new Blob([contentFromDatabase(args.database)]),
 		plugins,
+		close: async () => {
+			args.database.close()
+			await db.destroy()
+		},
 		commit: (args: { userId: string; description: string }) => {
 			return commit({ db, ...args })
 		},
@@ -206,14 +210,14 @@ async function handleFileChange(args: {
 // creates initial commit
 async function handleFileInsert(args: {
 	fileId: LixFile["id"]
-	newBlob: LixFile["data"]
+	newData: LixFile["data"]
 	plugins: LixPlugin[]
 	db: Kysely<LixDatabase>
 }) {
 	for (const plugin of args.plugins) {
 		const diffs = await plugin.diff?.file?.({
 			old: undefined,
-			neu: args.newBlob,
+			neu: args.newData,
 		})
 		for (const diff of diffs ?? []) {
 			await args.db
