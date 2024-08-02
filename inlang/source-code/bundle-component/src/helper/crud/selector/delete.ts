@@ -1,4 +1,4 @@
-import type { NestedMessage } from "@inlang/sdk-v2"
+import type { NestedMessage } from "@inlang/sdk2"
 
 /**
  * Deletes a selector from a message.

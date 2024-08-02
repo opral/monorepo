@@ -5,6 +5,7 @@ export type { InlangProject } from "./project/api.js"
 export * from "./schema/schema.js"
 export * from "./schema/settings.js"
 export * from "./mock/index.js"
+export * from "./helper.js"
 export {
 	newBundleId,
 	/**

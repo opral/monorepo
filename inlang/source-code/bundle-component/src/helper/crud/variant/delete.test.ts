@@ -1,4 +1,4 @@
-import { type NestedMessage, createVariant } from "@inlang/sdk-v2"
+import { type NestedMessage, createVariant } from "@inlang/sdk2"
 import { describe, expect, it } from "vitest"
 import deleteVariant from "./delete.js"
 

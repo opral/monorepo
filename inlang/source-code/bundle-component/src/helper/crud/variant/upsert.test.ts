@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { createMessage, createBundle, createVariant } from "@inlang/sdk-v2"
+import { createMessage, createBundle, createVariant } from "@inlang/sdk2"
 import { describe, expect, it } from "vitest"
 import upsertVariant from "./upsert.js"
 

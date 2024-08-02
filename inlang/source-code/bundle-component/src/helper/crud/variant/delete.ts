@@ -1,4 +1,4 @@
-import type { NestedMessage, Variant } from "@inlang/sdk-v2"
+import type { NestedMessage, Variant } from "@inlang/sdk2"
 
 /**
  * Deletes a variant from a message.

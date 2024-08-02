@@ -1,6 +1,5 @@
-import type { InstalledLintRule, LanguageTag, NestedMessage } from "@inlang/sdk-v2"
-import type { Declaration, LintReport, Message, ProjectSettings2, Variant } from "@inlang/sdk-v2"
-import { createVariant } from "@inlang/sdk-v2"
+import type { NestedMessage, Declaration, Message, ProjectSettings, Variant } from "@inlang/sdk2"
+import { createVariant } from "@inlang/sdk2"
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
 import deleteSelector from "../helper/crud/selector/delete.js"
@@ -155,7 +154,7 @@ export default class InlangMessage extends LitElement {
 	]
 
 	@property()
-	locale: LanguageTag | undefined
+	locale: ProjectSettings["locales"][number] | undefined
 
 	@property()
 	message: NestedMessage | undefined
@@ -163,11 +162,8 @@ export default class InlangMessage extends LitElement {
 	@property()
 	messageValidationReports: Array<any> | undefined
 
-	@property()
-	installedLintRules: InstalledLintRule[] | undefined
-
 	@property({ type: Object })
-	settings: ProjectSettings2 | undefined
+	settings: ProjectSettings | undefined
 
 	@property({ type: Array })
 	inputs: Declaration[] | undefined
@@ -187,9 +183,6 @@ export default class InlangMessage extends LitElement {
 	@property()
 	triggerMessageBundleRefresh: () => void = () => {}
 
-	@property()
-	fixLint: (lintReport: LintReport, fix: LintReport["fixes"][0]["title"]) => void = () => {}
-
 	dispatchOnInsertVariant(variant: Variant) {
 		const onInsertVariant = new CustomEvent("insert-variant", {
 			bubbles: true,
@@ -203,7 +196,7 @@ export default class InlangMessage extends LitElement {
 		this.dispatchEvent(onInsertVariant)
 	}
 
-	private _refLocale = (): LanguageTag | undefined => {
+	private _refLocale = (): ProjectSettings["locales"][number] | undefined => {
 		return this.settings?.baseLocale
 	}
 
@@ -331,13 +324,6 @@ export default class InlangMessage extends LitElement {
 												>Sort</sl-button
 										  >`
 										: ``
-									: ``}
-								${this.messageValidationReports && this.messageValidationReports.length > 0
-									? html`<inlang-lint-report-tip
-											.lintReports=${this.messageValidationReports}
-											.installedLintRules=${this.installedLintRules}
-											.fixLint=${this.fixLint}
-									  ></inlang-lint-report-tip>`
 									: ``}
 							</div>
 					  </div>`

@@ -1,13 +1,4 @@
-import type {
-	Declaration,
-	InstalledLintRule,
-	LanguageTag,
-	LintReport,
-	Message,
-	NestedBundle,
-	ProjectSettings2,
-	Variant,
-} from "@inlang/sdk-v2"
+import type { Declaration, Message, NestedBundle, ProjectSettings, Variant } from "@inlang/sdk2"
 import { LitElement, css, html } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import getInputs from "../helper/crud/input/get.js"
@@ -136,16 +127,10 @@ export default class InlangBundleHeader extends LitElement {
 	bundle: NestedBundle | undefined
 
 	@property()
-	settings: ProjectSettings2 | undefined
+	settings: ProjectSettings | undefined
 
 	@property()
 	bundleValidationReports: Array<any> | undefined
-
-	@property({ type: Array })
-	installedLintRules: InstalledLintRule[] | undefined
-
-	@property()
-	fixLint: (lintReport: LintReport, fix: LintReport["fixes"][0]["title"]) => void = () => {}
 
 	@property()
 	addInput: (input: Declaration) => void = () => {}
@@ -291,13 +276,6 @@ export default class InlangBundleHeader extends LitElement {
 										<slot name="bundle-action"></slot>
 									</sl-menu>
 								</sl-dropdown>`
-						: ``}
-					${this.bundleValidationReports && this.bundleValidationReports.length > 0
-						? html`<inlang-lint-report-tip
-								.lintReports=${this.bundleValidationReports}
-								.installedLintRules=${this.installedLintRules}
-								.fixLint=${this.fixLint}
-						  ></inlang-lint-report-tip>`
 						: ``}
 				</div>
 			</div>

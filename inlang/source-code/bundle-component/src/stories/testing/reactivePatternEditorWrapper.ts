@@ -1,7 +1,7 @@
 import { LitElement, html } from "lit"
 import { customElement, state } from "lit/decorators.js"
 import "./../pattern-editor/inlang-pattern-editor.js"
-import type { Pattern } from "@inlang/sdk-v2"
+import type { Pattern } from "@inlang/sdk2"
 
 @customElement("inlang-reactive-pattern-editor-wrapper")
 export default class InlangReactivePatternEditorWrapper extends LitElement {

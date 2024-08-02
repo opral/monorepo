@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import updateMatch from "./updateMatch.js"
-import { createVariant, type Variant } from "@inlang/sdk-v2"
+import { createVariant, type Variant } from "@inlang/sdk2"
 
 describe("updateMatch", () => {
 	it("should update the value at the specified match index", () => {

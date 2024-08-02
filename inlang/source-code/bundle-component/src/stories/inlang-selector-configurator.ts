@@ -7,12 +7,12 @@ import {
 	type Declaration,
 	createMessage,
 	createVariant,
-	type LanguageTag,
 	type Message,
 	type Variant,
 	type NestedMessage,
 	type Expression,
-} from "@inlang/sdk-v2"
+	type ProjectSettings,
+} from "@inlang/sdk2"
 import addSelector from "../helper/crud/selector/add.js"
 import upsertVariant from "../helper/crud/variant/upsert.js"
 import "./inlang-add-input.js"
@@ -155,7 +155,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 	message?: NestedMessage | undefined
 
 	@property()
-	locale: LanguageTag | undefined
+	locale: ProjectSettings["locales"][number] | undefined
 
 	@property()
 	triggerMessageBundleRefresh: () => void = () => {}

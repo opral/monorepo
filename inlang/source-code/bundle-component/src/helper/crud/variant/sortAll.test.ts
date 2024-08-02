@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import sortAllVariants from "./sortAll.js"
-import { createVariant, type Expression, type Variant } from "@inlang/sdk-v2"
+import { createVariant, type Expression, type Variant } from "@inlang/sdk2"
 
 describe("sortAllVariants", () => {
 	it("should sort variants based on matches (desc-alphabetically)", () => {
