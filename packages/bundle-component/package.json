@@ -7,13 +7,11 @@
 	},
 	"description": "",
 	"exports": {
-		".": {
-			"import": "./dist/index.mjs",
-			"types": "./dist/index.d.ts"
-		}
+		".": "./dist/index.js"
 	},
 	"scripts": {
-		"build": "pnpm run format && esbuild src/index.ts --bundle --external:node:crypto --format=esm --platform=browser --outfile=dist/index.mjs && tsc --emitDeclarationOnly --declaration --outDir dist",
+		"dev": "tsc --watch",
+		"build": "tsc",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
 		"format": "prettier --write **/*.ts",
 		"storybook": "storybook dev -p 6006"
