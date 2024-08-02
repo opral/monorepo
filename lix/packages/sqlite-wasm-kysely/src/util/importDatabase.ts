@@ -1,5 +1,5 @@
 import { sqliteModule } from "../kysely/sqlite3InitModule.js";
-import { Database } from "@sqlite.org/sqlite-wasm";
+import { Database } from "@eliaspourquoi/sqlite-node-wasm";
 
 export const importDatabase = ({
   db,
