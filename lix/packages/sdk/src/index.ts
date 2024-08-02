@@ -1,5 +1,4 @@
 export { openLixInMemory } from "./open/openLixInMemory.js"
-export { openLixFromOpfs } from "./open/openLixFromOpfs.js"
 export { newLixFile } from "./newLix.js"
 export * from "./plugin.js"
 export * from "./schema.js"

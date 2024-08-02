@@ -2722,9 +2722,6 @@ importers:
       sqlite-wasm-kysely:
         specifier: workspace:*
         version: link:../../../lix/packages/sqlite-wasm-kysely
-      sqlocal:
-        specifier: workspace:*
-        version: link:../../../lix/packages/sqlocal
       uuid:
         specifier: ^10.0.0
         version: 10.0.0
@@ -3566,9 +3563,6 @@ importers:
       sqlite-wasm-kysely:
         specifier: 'workspace: *'
         version: link:../sqlite-wasm-kysely
-      sqlocal:
-        specifier: 'workspace: *'
-        version: link:../sqlocal
       uuid:
         specifier: ^10.0.0
         version: 10.0.0
