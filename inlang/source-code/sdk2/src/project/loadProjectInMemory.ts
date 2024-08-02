@@ -55,19 +55,16 @@ export async function loadProjectInMemory(args: { blob: Blob }) {
 		},
 		settings: {
 			get: () => settings,
-			set: async (newSettings: Partial<ProjectSettings>) => {
-				// merge settings
-				const merged = deepmerge(settings, newSettings)
-				// save settings in lix
+			set: async (newSettings: ProjectSettings) => {
 				await lix.db
 					.updateTable("file")
 					.where("path", "is", "/settings.json")
 					.set({
-						data: await new Blob([JSON.stringify(merged, undefined, 2)]).arrayBuffer(),
+						data: await new Blob([JSON.stringify(newSettings, undefined, 2)]).arrayBuffer(),
 					})
 					.execute()
 				// if successful, update local settings
-				settings = merged as ProjectSettings
+				settings = newSettings
 			},
 		},
 		toBlob: async () => {
