@@ -22,6 +22,7 @@
 		"build": "tsc --build",
 		"dev": "tsc --watch",
 		"test": "tsc --noEmit && vitest run --passWithNoTests --coverage",
+		"test:watch": "vitest",
 		"lint": "eslint ./src --fix",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"

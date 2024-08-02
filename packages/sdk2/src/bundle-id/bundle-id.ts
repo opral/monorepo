@@ -2,7 +2,7 @@
 // import murmurhash3 from "murmurhash3js"
 import { adjectives, animals, verbs } from "./words.js"
 
-export function newBundleId() {
+export function bundleId() {
 	return `${adjectives[Math.floor(Math.random() * 256)]}_${
 		adjectives[Math.floor(Math.random() * 256)]
 	}_${animals[Math.floor(Math.random() * 256)]}_${verbs[Math.floor(Math.random() * 256)]}`

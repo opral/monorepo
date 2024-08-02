@@ -1,14 +1,9 @@
-import { CamelCasePlugin, Kysely, ParseJSONResultsPlugin } from "kysely"
-import type { Database } from "../schema/schema.js"
 import { openLixInMemory } from "@lix-js/sdk"
 import type { InlangPlugin2, ResourceFile } from "../plugin/schema.js"
 import type { ProjectSettings } from "../schema/settings.js"
-import {
-	contentFromDatabase,
-	createDialect,
-	createInMemoryDatabase,
-	importDatabase,
-} from "sqlite-wasm-kysely"
+import { contentFromDatabase, createInMemoryDatabase, importDatabase } from "sqlite-wasm-kysely"
+import { initKysely } from "../database/initKysely.js"
+import { initHandleSaveToLixOnChange } from "./initHandleSaveToLixOnChange.js"
 
 /**
  *
@@ -24,12 +19,7 @@ export async function loadProjectInMemory(args: { blob: Blob }) {
 	const sqlite = await createInMemoryDatabase({})
 	importDatabase({ db: sqlite, content: new Uint8Array(dbFile.data) })
 
-	const db = new Kysely<Database>({
-		dialect: createDialect({
-			database: sqlite,
-		}),
-		plugins: [new ParseJSONResultsPlugin(), new CamelCasePlugin()],
-	})
+	const db = initKysely({ sqlite })
 
 	const settingsFile = await lix.db
 		.selectFrom("file")
@@ -39,7 +29,7 @@ export async function loadProjectInMemory(args: { blob: Blob }) {
 
 	let settings = JSON.parse(new TextDecoder().decode(settingsFile.data)) as ProjectSettings
 
-	// const plugins = await loadPlugins({ settings })
+	await initHandleSaveToLixOnChange({ sqlite, db, lix })
 
 	return {
 		db,
@@ -65,6 +55,11 @@ export async function loadProjectInMemory(args: { blob: Blob }) {
 				// if successful, update local settings
 				settings = newSettings
 			},
+		},
+		close: async () => {
+			sqlite.close()
+			await db.destroy()
+			await lix.close()
 		},
 		toBlob: async () => {
 			const inlangDbContent = contentFromDatabase(sqlite)
