@@ -21,28 +21,28 @@ export async function newProject(): Promise<Blob> {
 
 	try {
 		await sql`
-CREATE TABLE Bundle (
+CREATE TABLE bundle (
   id TEXT PRIMARY KEY,
   alias TEXT NOT NULL
 );
 
-CREATE TABLE Message (
+CREATE TABLE message (
   id TEXT PRIMARY KEY, 
-  bundleId TEXT NOT NULL,
+  bundle_id TEXT NOT NULL,
   locale TEXT NOT NULL,
   declarations TEXT NOT NULL,
   selectors TEXT NOT NULL
 );
 
-CREATE TABLE Variant (
+CREATE TABLE variant (
   id TEXT PRIMARY KEY, 
-  messageId TEXT NOT NULL,
+  message_id TEXT NOT NULL,
   match TEXT NOT NULL,
   pattern TEXT NOT NULL
 );
   
-CREATE INDEX idx_message_bundleId ON Message (bundleId);
-CREATE INDEX idx_variant_messageId ON Variant (messageId);
+CREATE INDEX idx_message_bundle_id ON message (bundle_id);
+CREATE INDEX idx_variant_message_id ON variant (message_id);
 		`.execute(db)
 
 		const inlangDbContent = contentFromDatabase(sqlite)
