@@ -1,32 +1,11 @@
-import { useEffect } from "react";
 import Layout from "../../layout.tsx";
-import { poll } from "../../poll.ts";
-import { projectAtom, selectedProjectPathAtom } from "../../state.ts";
+import { projectAtom } from "../../state.ts";
 import { useAtom } from "jotai";
-import { loadProjectFromOpfs } from "@inlang/sdk2";
 // import { MessageBundle } from "../../components/InlangBundle.tsx";
 // import { mockBundle } from "../../mock/mockHelper.ts";
 
 export default function App() {
-	const [project, setProject] = useAtom(projectAtom);
-	const [selectedProjectPath] = useAtom(
-		selectedProjectPathAtom
-	);
-
-	useEffect(() => {
-		console.log("project on page", project)
-		poll({
-			every: 2000,
-			fn: async () => {
-				if (selectedProjectPath) {
-					const project = await loadProjectFromOpfs({ path: selectedProjectPath });
-					setProject(project);
-				}
-			},
-		});
-	}, []);
-
-	console.log("App rerendered")
+	const [project] = useAtom(projectAtom);
 	return (
 		<>
 			<Layout>

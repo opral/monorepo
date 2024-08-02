@@ -10,11 +10,12 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
+		"@inlang/bundle-component": "workspace:*",
 		"@inlang/sdk2": "workspace:*",
 		"@inlang/settings-component2": "workspace:*",
-		"@inlang/bundle-component": "workspace:*",
 		"@lit/react": "^1.0.5",
 		"@shoelace-style/shoelace": "^2.16.0",
+		"@sqlite.org/sqlite-wasm": "^3.46.0-build2",
 		"jotai": "^2.9.1",
 		"react": "19.0.0-rc-941e1b4a-20240729",
 		"react-dom": "19.0.0-rc-941e1b4a-20240729",
