@@ -11,11 +11,7 @@
 		"checkJs": true,
 		"jsx": "react",
 		"outDir": "dist",
-		"declarationMap": false,
-		"noResolve": true,
-		"importHelpers": false,
-		"isolatedDeclarations": true,
-		"skipLibCheck": true
+		"declarationMap": false
 	},
 	"include": ["src"],
 	"exclude": ["examples", "examples/*"]

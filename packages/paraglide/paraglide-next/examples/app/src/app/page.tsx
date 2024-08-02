@@ -6,7 +6,7 @@ export default function Home() {
 	return (
 		<>
 			<NextLink href="/about">About</NextLink>
-			<Link href="/asdf">About</Link>
+			<Link href="/about">About</Link>
 			<h1>{m.paraglide_and_next_app_router()}</h1>
 			<p>{m.this_app_was_localised_with_paraglide()}</p>
 			<p>{m.switch_languages_in_top_right()}</p>
