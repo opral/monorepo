@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="registry.dtd" type="application/xml-dtd"?>
+<registry xml:lang="en">
+    <!-- All regex here are to be seen as provisory. See issue #422. -->
+    <validationRule id="anyNumber" regex="-?(0|([1-9]\d*))(\.\d*)?([eE][-+]?\d+)?" />
+    <validationRule id="positiveInteger" regex="0|([1-9]\d*)" />
+    <validationRule id="currencyCode" regex="[A-Z]{3}" />
+    <validationRule id="timeZoneId" regex="[a-zA-Z/]+" />
+    <validationRule id="anything" regex=".*" />
+    <validationRule id="anythingNotEmpty" regex=".+" />
+    <validationRule id="iso8601" regex="\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}" />
+    <validationRule id="xmlDate"
+        regex="-?([1-9][0-9]{3,}|0[0-9]{3})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])(Z|[+-]((0[0-9]|1[0-3]):[0-5][0-9]|14:00))?" />
+    <validationRule id="xmlTime"
+        regex="(([01][0-9]|2[0-3])(:[0-5][0-9]){2}(\.[0-9]+)?|24:00:00(\.0+)?)(Z|[+-]((0[0-9]|1[0-3]):[0-5][0-9]|14:00))?" />
+
+    <function name="datetime">
+        <!--
+        https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat -->
+        <description>
+            Locale-sensitive date and time formatting
+        </description>
+
+        <formatSignature>
+            <input validationRule="iso8601" />
+            <option name="dateStyle" values="full long medium short">
+                <description>
+                    The predefined date formatting style to use.
+                </description>
+            </option>
+            <option name="timeStyle" values="full long medium short">
+                <description>
+                    The predefined time formatting style to use.
+                </description>
+            </option>
+            <option name="calendar"
+                values="buddhist chinese coptic dangi ethioaa ethiopic gregory hebrew indian islamic islamic-umalqura islamic-tbla islamic-civil islamic-rgsa iso8601 japanese persian roc">
+                <description>
+                    Calendar to use.
+                </description>
+            </option>
+            <option name="numberingSystem"
+                values="arab arabext bali beng deva fullwide gujr guru hanidec khmr knda laoo latn limb mlym mong mymr orya tamldec telu thai tibt">
+                <description>
+                    Numbering system to use.
+                </description>
+            </option>
+            <option name="timeZone" validationRule="timeZoneId">
+                <description>
+                    The time zone to use.
+                    The only value implementations must recognize is "UTC";
+                    the default is the runtime's default time zone.
+                    Implementations may also recognize the time zone names of the IANA time zone
+                    database,
+                    such as "Asia/Shanghai", "Asia/Kolkata", "America/New_York".
+                </description>
+            </option>
+            <option name="hourCycle" values="h11 h12 h23 h24">
+                <description>
+                    The hour cycle to use.
+                </description>
+            </option>
+        </formatSignature>
+
+        <!-- TODO: clarify if this is OK or if it is an abuse.
+      The intention is to show that dateStyle / timeStyle and the other
+      options are conflicting, you can use either / or, but not both.
+    -->
+        <formatSignature>
+            <input validationRule="iso8601" />
+            <option name="calendar"
+                values="buddhist chinese coptic dangi ethioaa ethiopic gregory hebrew indian islamic islamic-umalqura islamic-tbla islamic-civil islamic-rgsa iso8601 japanese persian roc">
+                <description>
+                    Calendar to use.
+                </description>
+            </option>
+            <option name="dayPeriod" values="narrow short long">
+                <description>
+                    The formatting style used for day periods like "in the morning", "am", "noon",
+                    "n" etc.
+                </description>
+            </option>
+            <option name="numberingSystem"
+                values="arab arabext bali beng deva fullwide gujr guru hanidec khmr knda laoo latn limb mlym mong mymr orya tamldec telu thai tibt">
+                <description>
+                    Numbering system to use.
+                </description>
+            </option>
+            <option name="timeZone" validationRule="timeZoneId">
+                <description>
+                    The time zone to use.
+                    The only value implementations must recognize is "UTC";
+                    the default is the runtime's default time zone.
+                    Implementations may also recognize the time zone names of the IANA time zone
+                    database,
+                    such as "Asia/Shanghai", "Asia/Kolkata", "America/New_York".
+                </description>
+            </option>
+            <option name="hourCycle" values="h11 h12 h23 h24">
+                <description>
+                    The hour cycle to use.
+                </description>
+            </option>
+            <option name="weekday" values="long short narrow">
+                <description>
+                    The representation of the weekday.
+                </description>
+            </option>
+            <option name="era" values="long short narrow">
+                <description>
+                    The representation of the era.
+                </description>
+            </option>
+            <option name="year" values="numeric 2-digit">
+                <description>
+                    The representation of the year.
+                </description>
+            </option>
+            <option name="month" values="numeric 2-digit long short narrow">
+                <description>
+                    The representation of the month.
+                </description>
+            </option>
+            <option name="day" values="numeric 2-digit">
+                <description>
+                    The representation of the day.
+                </description>
+            </option>
+            <option name="hour" values="numeric 2-digit">
+                <description>
+                    The representation of the hour.
+                </description>
+            </option>
+            <option name="minute" values="numeric 2-digit">
+                <description>
+                    The representation of the minute.
+                </description>
+            </option>
+            <option name="second" values="numeric 2-digit">
+                <description>
+                    The representation of the second.
+                </description>
+            </option>
+            <option name="fractionalSecondDigits" values="1 2 3">
+                <description>
+                    The number of digits used to represent fractions of a second
+                    (any additional digits are truncated).
+                </description>
+            </option>
+            <option name="timeZoneName"
+                values="long short shortOffset longOffset shortGeneric longGeneric">
+                <description>
+                    The localized representation of the time zone name.
+                </description>
+            </option>
+        </formatSignature>
+    </function>
+
+    <function name="date">
+        <description>
+            Date formatting
+        </description>
+
+        <formatSignature>
+            <input validationRule="xmlDate" />
+            <option name="style" values="full long medium short">
+                <description>
+                    The predefined date formatting style to use.
+                </description>
+            </option>
+        </formatSignature>
+    </function>
+
+    <function name="time">
+        <description>
+            Time formatting
+        </description>
+
+        <formatSignature>
+            <input validationRule="xmlTime" />
+            <option name="style" values="full long medium short">
+                <description>
+                    The predefined time formatting style to use.
+                </description>
+            </option>
+        </formatSignature>
+    </function>
+
+    <function name="number">
+        <!--
+        https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat -->
+        <description>
+            Number selection and formatting
+        </description>
+
+        <formatSignature>
+            <input validationRule="anyNumber" />
+            <option name="compactDisplay" values="short long" default="short">
+                <description>
+                    Only used when notation is "compact".
+                </description>
+            </option>
+            <option name="currency" validationRule="currencyCode">
+                <description>
+                    The currency to use in currency formatting.
+                    Possible values are the ISO 4217 currency codes, such as "USD" for the US
+                    dollar,
+                    "EUR" for the euro, or "CNY" for the Chinese RMB — see the
+                    Current currency &amp; funds code list
+                    (https://www.unicode.org/cldr/charts/latest/supplemental/detailed_territory_currency_information.html).
+                    There is no default value; if the style is "currency", the currency property
+                    must be provided.
+                </description>
+            </option>
+            <option name="currencyDisplay" values="symbol narrowSymbol code name" default="symbol">
+                <description>
+                    How to display the currency in currency formatting.
+                </description>
+            </option>
+            <option name="currencySign" values="accounting standard" default="standard">
+                <description>
+                    In many locales, accounting format means to wrap the number with parentheses
+                    instead of appending a minus sign. You can enable this formatting by setting the
+                    currencySign option to "accounting".
+                </description>
+            </option>
+            <option name="notation" values="standard scientific engineering compact"
+                default="standard">
+                <description>
+                    The formatting that should be displayed for the number.
+                </description>
+            </option>
+            <option name="numberingSystem"
+                values="arab arabext bali beng deva fullwide gujr guru hanidec khmr knda laoo latn limb mlym mong mymr orya tamldec telu thai tibt">
+                <description>
+                    Numbering system to use.
+                </description>
+            </option>
+            <option name="signDisplay" values="auto always exceptZero never" default="auto">
+                <description>
+                    When to display the sign for the number. "negative" value is Experimental.
+                </description>
+            </option>
+            <option name="style" values="decimal currency percent unit" default="decimal">
+                <description>
+                    The formatting style to use.
+                </description>
+            </option>
+            <option name="unit" validationRule="anythingNotEmpty">
+                <description>
+                    The unit to use in unit formatting.
+                    Possible values are core unit identifiers, defined in UTS #35, Part 2, Section
+                    6.
+                    A subset of units from the full list was selected for use in ECMAScript.
+                    Pairs of simple units can be concatenated with "-per-" to make a compound unit.
+                    There is no default value; if the style is "unit", the unit property must be
+                    provided.
+                </description>
+            </option>
+            <option name="unitDisplay" values="long short narrow" default="short">
+                <description>
+                    The unit formatting style to use in unit formatting.
+                </description>
+            </option>
+            <option name="minimumIntegerDigits" values="positiveInteger" default="1">
+                <description>
+                    The minimum number of integer digits to use.
+                    A value with a smaller number of integer digits than this number will be
+                    left-padded with zeros (to the specified length) when formatted.
+                </description>
+            </option>
+            <option name="minimumFractionDigits" values="positiveInteger">
+                <description>
+                    The minimum number of fraction digits to use.
+                    The default for plain number and percent formatting is 0;
+                    the default for currency formatting is the number of minor unit digits provided
+                    by
+                    the ISO 4217 currency code list (2 if the list doesn't provide that
+                    information).
+                </description>
+            </option>
+            <option name="maximumFractionDigits" values="positiveInteger">
+                <description>
+                    The maximum number of fraction digits to use.
+                    The default for plain number formatting is the larger of minimumFractionDigits
+                    and 3;
+                    the default for currency formatting is the larger of minimumFractionDigits and
+                    the number of minor
+                    unit digits provided by the ISO 4217 currency code list (2 if the list doesn't
+                    provide that information);
+                    the default for percent formatting is the larger of minimumFractionDigits and 0.
+                </description>
+            </option>
+            <option name="minimumSignificantDigits" values="positiveInteger" default="1">
+                <description>
+                    The minimum number of significant digits to use.
+                </description>
+            </option>
+            <option name="maximumSignificantDigits" values="positiveInteger" default="21">
+                <description>
+                    The maximum number of significant digits to use.
+                </description>
+            </option>
+        </formatSignature>
+
+        <matchSignature>
+            <input validationRule="anyNumber" />
+            <option name="select" values="plural ordinal exact" default="plural">
+                <description>
+                    The number selection type.
+
+                    One of three selection models for numeric values, defaulting to "plural".
+
+                    Each selector type matches numeric values to keys using the "number-literal"
+                    production from the ABNF.
+                    The "plural" and "ordinal" selectors also use plural or ordinal rules from CLDR
+                    to match categories "zero", "one", "two", "few", "many" and "other" with a lower
+                    match quality than exact numeric match.
+                </description>
+            </option>
+            <option name="minimumIntegerDigits" values="positiveInteger" default="1">
+                <description>
+                    The minimum number of integer digits to use.
+                    A value with a smaller number of integer digits than this number will be
+                    left-padded with zeros (to the specified length) when formatted.
+                </description>
+            </option>
+            <option name="minimumFractionDigits" values="positiveInteger">
+                <description>
+                    The minimum number of fraction digits to use.
+                    The default for plain number and percent formatting is 0;
+                    the default for currency formatting is the number of minor unit digits provided
+                    by
+                    the ISO 4217 currency code list (2 if the list doesn't provide that
+                    information).
+                </description>
+            </option>
+            <option name="maximumFractionDigits" values="positiveInteger">
+                <description>
+                    The maximum number of fraction digits to use.
+                    The default for plain number formatting is the larger of minimumFractionDigits
+                    and 3;
+                    the default for currency formatting is the larger of minimumFractionDigits and
+                    the number of minor
+                    unit digits provided by the ISO 4217 currency code list (2 if the list doesn't
+                    provide that information);
+                    the default for percent formatting is the larger of minimumFractionDigits and 0.
+                </description>
+            </option>
+            <option name="minimumSignificantDigits" values="positiveInteger" default="1">
+                <description>
+                    The minimum number of significant digits to use.
+                </description>
+            </option>
+            <option name="maximumSignificantDigits" values="positiveInteger" default="21">
+                <description>
+                    The maximum number of significant digits to use.
+                </description>
+            </option>
+            <match validationRule="anyNumber" values="zero one two few many other" />
+        </matchSignature>
+
+        <alias name="integer">
+            <description>Integer selection and formatting</description>
+            <setOption name="maximumFractionDigits" value="0" />
+            <setOption name="style" value="decimal" />
+        </alias>
+
+        <alias name="ordinal" supports="match">
+            <description>Ordinal number selection</description>
+            <setOption name="select" value="ordinal" />
+        </alias>
+
+        <alias name="plural" supports="match">
+            <description>Plural number selection</description>
+            <setOption name="select" value="plural" />
+        </alias>
+    </function>
+
+    <function name="string">
+        <description>
+            Formatting of strings as a literal and selection based on string equality
+        </description>
+
+        <formatSignature>
+            <input validationRule="anything" />
+        </formatSignature>
+
+        <matchSignature>
+            <input validationRule="anything" />
+            <match validationRule="anything" />
+        </matchSignature>
+    </function>
+</registry>
