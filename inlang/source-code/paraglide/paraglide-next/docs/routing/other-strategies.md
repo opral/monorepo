@@ -41,7 +41,8 @@ The beatuy of the `RoutingStrategy` interface is that you can easily create your
 ```ts
 const MyStrategy: RoutingStrategy<AvailableLanguageTag> = {
 	/**
-	 * This function get's a request & returns the language that should be used.
+	 * This function is called inside the middleware to determine the language for the current request.
+	 *
 	 * It's also OK to say you don't know & return undefined. In that case the Language Cookie will be used,
 	 * or Language negotiation if no cookie is present.
  	 */
@@ -56,7 +57,10 @@ const MyStrategy: RoutingStrategy<AvailableLanguageTag> = {
 	 * @example /de/ueber-uns + de -> /about
 	 *
 	 */
-	getCanonicalPath(localisedPath: `/${string}`, locale: AvailableLanguageTag): `/${string}`
+	getCanonicalPath(
+		localisedPath: `/${string}`,
+		locale: AvailableLanguageTag
+	): `/${string}`
 
 
 	/**
@@ -67,8 +71,11 @@ const MyStrategy: RoutingStrategy<AvailableLanguageTag> = {
 	 *
 	 * @example /about + de -> /de/ueber-uns
 	 */
-	getLocalisedUrl(canonicalPath: `/${string}`, targetLocale: AvailableLanguageTag, isLanugageSwitch: boolean)
-		: import("url").UrlObject
+	getLocalisedUrl(
+		canonicalPath: `/${string}`,
+		targetLocale: AvailableLanguageTag,
+		isLanugageSwitch: boolean
+	) : import("url").UrlObject
 }
 ```
 

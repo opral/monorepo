@@ -17,7 +17,8 @@
 			"/": "./inlang/source-code/paraglide/paraglide-sveltekit/docs/why-paraglide.md",
 			"/getting-started": "./inlang/source-code/paraglide/paraglide-sveltekit/README.md",
 			"/localised-routing": "./inlang/source-code/paraglide/paraglide-sveltekit/docs/localised-routing.md",
-			"/advanced-usage": "./inlang/source-code/paraglide/paraglide-sveltekit/docs/advanced-usage.md"
+			"/advanced-usage": "./inlang/source-code/paraglide/paraglide-sveltekit/docs/advanced-usage.md",
+			"/deployment": "./inlang/source-code/paraglide/paraglide-sveltekit/docs/deployment.md"
 		},
 
 		"Appendix": {
