@@ -1,5 +1,5 @@
 import { Database } from "@eliaspourquoi/sqlite-node-wasm";
-import { sqliteModule } from "../kysely/sqlite3InitModule.js";
+import { sqliteModule } from "../kysely/sqliteModule.js";
 
 /**
  * Exports the content of a database as a Uint8Array.

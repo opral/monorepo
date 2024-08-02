@@ -1,6 +1,6 @@
 import { CompiledQuery, DatabaseConnection, QueryResult } from "kysely";
 import { Database } from "@eliaspourquoi/sqlite-node-wasm";
-import { sqliteModule } from "./sqlite3InitModule.js";
+import { sqliteModule } from "./sqliteModule.js";
 
 export class SqliteWasmConnection implements DatabaseConnection {
   readonly #db: Database;

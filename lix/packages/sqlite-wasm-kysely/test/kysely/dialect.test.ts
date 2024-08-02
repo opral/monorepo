@@ -11,10 +11,10 @@ import { sleep } from "../test-utils/sleep";
 import { createInMemoryDatabase } from "../../src";
 import { createDialect } from "../../src/dialect";
 
-describe("kysely dialect", () => {
+describe("kysely dialect", async () => {
   const db = new Kysely<DB>({
     dialect: createDialect({
-      database: createInMemoryDatabase({ readOnly: false }),
+      database: await createInMemoryDatabase({ readOnly: false }),
     }),
   });
 

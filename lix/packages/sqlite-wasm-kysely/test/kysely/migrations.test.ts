@@ -9,14 +9,15 @@ import {
 } from "kysely";
 import { createInMemoryDatabase } from "../../src";
 
-describe("kysely migrations", () => {
+describe("kysely migrations", async () => {
+  const database = await createInMemoryDatabase({
+    readOnly: false,
+  });
   const dialect = {
     createAdapter: () => new SqliteAdapter(),
     createDriver: () =>
       new SqliteWasmDriver({
-        database: createInMemoryDatabase({
-          readOnly: false,
-        }),
+        database,
       }),
     createIntrospector: (db) => new SqliteIntrospector(db),
     createQueryCompiler: () => new SqliteQueryCompiler(),

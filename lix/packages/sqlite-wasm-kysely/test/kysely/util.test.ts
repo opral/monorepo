@@ -14,12 +14,12 @@ import {
   importDatabase,
 } from "../../src";
 
-describe("kysely dialect", () => {
+describe("kysely dialect", async () => {
   // const { dialect, transaction } = new SQLocalKysely(
   // 	'kysely-dialect-test.sqlite3'
   // );
 
-  const sqliteDb1 = createInMemoryDatabase({
+  const sqliteDb1 = await createInMemoryDatabase({
     readOnly: false,
   });
 
@@ -35,7 +35,7 @@ describe("kysely dialect", () => {
     },
   });
 
-  const sqliteDb2 = createInMemoryDatabase({
+  const sqliteDb2 = await createInMemoryDatabase({
     readOnly: false,
   });
 

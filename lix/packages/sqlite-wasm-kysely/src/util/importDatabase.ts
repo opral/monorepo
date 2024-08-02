@@ -1,4 +1,4 @@
-import { sqliteModule } from "../kysely/sqlite3InitModule.js";
+import { sqliteModule } from "../kysely/sqliteModule.js";
 import { Database } from "@eliaspourquoi/sqlite-node-wasm";
 
 export const importDatabase = ({
