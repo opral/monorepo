@@ -29,13 +29,13 @@ const InlangBundle = (props: { bundleId: string }) => {
 
   useEffect(() => {
     if (!project) return
-    poll({
-      every: 2000,
-      fn: async () => {
-        const bundle = await getNestedBundleById(project.db.selectFrom("bundle"), props.bundleId);
-        setBundle(bundle);
-      }
-    })
+    setTimeout(async () => {
+			const bundle = await getNestedBundleById(
+				project.db.selectFrom("bundle"),
+				props.bundleId
+			);
+			setBundle(bundle);
+		}, 2000);
   }, [])
 
   return (
