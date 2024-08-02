@@ -1,4 +1,3 @@
-export { newProject as newProjectNext } from "./project/newProjectNext.js"
 export { newProject } from "./project/newProject.js"
 export { loadProjectInMemory } from "./project/loadProjectInMemory.js"
 export type { InlangProject } from "./project/api.js"

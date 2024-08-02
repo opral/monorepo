@@ -123,7 +123,6 @@ const CreateNewProject = () => {
 		const fileHandle = await opfsRoot.getFileHandle(fileName, { create: true });
 		const writable = await fileHandle.createWritable();
 		const file = await newProject();
-		// const file = await newProjectNext();
 		await writable.write(file);
 		await writable.close();
 		setLoading(false);
