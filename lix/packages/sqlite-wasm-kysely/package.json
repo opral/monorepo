@@ -16,7 +16,7 @@
     "format": "prettier . --write"
   },
   "dependencies": {
-    "@sqlite.org/sqlite-wasm": "^3.46.0-build2"
+    "@eliaspourquoi/sqlite-node-wasm": "^3.46.0-build2"
   },
   "devDependencies": {
     "@vitest/browser": "^1.6.0",

@@ -1,5 +1,4 @@
-import sqlite3InitModule from "@sqlite.org/sqlite-wasm";
-
+import sqlite3InitModule from "@eliaspourquoi/sqlite-node-wasm";
 
 let wasm;
 
@@ -10,7 +9,7 @@ if (typeof process !== "undefined") {
   // @ts-expect-error - node specific
   const fs = await import("node:fs");
   wasm = fs.readFileSync(
-    "./node_modules/@sqlite.org/sqlite-wasm/sqlite-wasm/jswasm/sqlite3.wasm",
+    "./node_modules/@eliaspourquoi/sqlite-node-wasm/sqlite-wasm/jswasm/sqlite3.wasm",
   );
 }
 

@@ -1,5 +1,5 @@
 import { DatabaseConnection } from "kysely";
-import { Database } from "@sqlite.org/sqlite-wasm";
+import { Database } from "@eliaspourquoi/sqlite-node-wasm";
 
 export interface SqliteWasmDialectConfig {
   /**

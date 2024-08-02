@@ -1,5 +1,5 @@
 import { CompiledQuery, DatabaseConnection, Driver } from "kysely";
-import { Database } from "@sqlite.org/sqlite-wasm";
+import { Database } from "@eliaspourquoi/sqlite-node-wasm";
 import { SqliteWasmDialectConfig } from "./SqliteWasmDialectConfig.js";
 import { ConnectionMutex } from "./ConnectionMutex.js";
 import { SqliteWasmConnection } from "./SqliteWasmConnection.js";
