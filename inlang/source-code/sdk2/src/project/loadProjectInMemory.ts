@@ -1,7 +1,6 @@
 import { Kysely, ParseJSONResultsPlugin } from "kysely"
 import type { Database } from "../schema/schema.js"
 import { openLixInMemory } from "@lix-js/sdk"
-import { deepmerge } from "deepmerge-ts"
 import type { InlangPlugin2, ResourceFile } from "../plugin/schema.js"
 import type { ProjectSettings } from "../schema/settings.js"
 import {
