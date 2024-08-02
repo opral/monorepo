@@ -18,15 +18,14 @@ export default function App() {
 	useEffect(() => {
 		if (project) {
 			getBundleIds().then((bundleIds) => {
-				console.log("bundleIds", bundleIds)
 				// setup demo if project is empty
 				if (bundleIds.length === 0) {
-					console.info("Insert demo bundle in empty project")
+					console.info("Insert demo bundle in empty project");
 					insertNestedBundle(project, pluralBundle).then(() => {
-						getBundleIds()
-					})
+						getBundleIds();
+					});
 				}
-			})
+			});
 		}
 	}, [project])
 
