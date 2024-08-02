@@ -5,11 +5,11 @@ import { projectAtom } from "../../state.js"
 import Settings from "../../components/InlangSettings.tsx"
 
 export default function App() {
-	const [project] = useAtom(projectAtom)
+	const [project] = useAtom(projectAtom);
 
 	useEffect(() => {
-		console.log(project?.settings.get())
-	})
+		console.log(project?.settings.get());
+	});
 
 	return (
 		<>
@@ -21,8 +21,8 @@ export default function App() {
 						// @ts-expect-error - TODO: fix this
 						onSetSettings={(event: CustomEvent) => {
 							// console.log(settings)
-							console.log("event.detail", event.detail);
-							project.settings.set(event.detail);
+							console.log("event.detail", event.detail.argument);
+							project.settings.set(event.detail.argument);
 						}}
 					/>
 				)}
