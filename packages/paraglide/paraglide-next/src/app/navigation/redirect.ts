@@ -5,6 +5,9 @@ import {
 } from "next/navigation"
 import type { RoutingStrategy } from "../routing-strategy/interface"
 
+export type LocalizedRedirect = typeof NextRedirect
+export type LocalizedPermanentRedirect = typeof NextPermanentRedirect
+
 export function createRedirects<T extends string>(
 	languageTag: () => T,
 	strategy: RoutingStrategy<T>
@@ -17,7 +20,7 @@ export function createRedirects<T extends string>(
 	 *
 	 *  @param url the url to redirect to
 	 */
-	const redirect: typeof NextRedirect = (...args) => {
+	const redirect: LocalizedRedirect = (...args) => {
 		args[0] = localiseHref(args[0], languageTag(), "/", false)
 		NextRedirect(...args)
 	}
@@ -28,7 +31,7 @@ export function createRedirects<T extends string>(
 	 *
 	 * @param url the url to redirect to
 	 */
-	const permanentRedirect: typeof NextPermanentRedirect = (...args) => {
+	const permanentRedirect: LocalizedPermanentRedirect = (...args) => {
 		args[0] = localiseHref(args[0], languageTag(), "/", false)
 		NextPermanentRedirect(...args)
 	}
