@@ -1,11 +1,9 @@
 import { Link } from "@/lib/i18n"
 import * as m from "@/paraglide/messages.js"
-import NextLink from "next/link"
 
 export default function Home() {
 	return (
 		<>
-			<NextLink href="/about">About</NextLink>
 			<Link href="/about">About</Link>
 			<h1>{m.paraglide_and_next_app_router()}</h1>
 			<p>{m.this_app_was_localised_with_paraglide()}</p>
