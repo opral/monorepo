@@ -14,7 +14,8 @@ export const importDatabase = ({
 }) => {
   const deserializeFlag = readOnly
     ? sqliteModule.capi.SQLITE_DESERIALIZE_READONLY
-    : sqliteModule.capi.SQLITE_DESERIALIZE_FREEONCLOSE;
+    : sqliteModule.capi.SQLITE_DESERIALIZE_FREEONCLOSE |
+      sqliteModule.capi.SQLITE_DESERIALIZE_RESIZEABLE;
 
   const contentPointer = sqliteModule.wasm.allocFromTypedArray(content);
   const deserializeReturnCode = sqliteModule.capi.sqlite3_deserialize(
@@ -24,8 +25,6 @@ export const importDatabase = ({
     content.byteLength, // db size
     content.byteLength, // content size
     deserializeFlag,
-    // Optionally:
-    // | sqlite3.capi.SQLITE_DESERIALIZE_RESIZEABLE
   );
 
   // check if the deserialization was successfull
