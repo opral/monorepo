@@ -9,7 +9,7 @@ import {
 import { SqliteWasmDriver } from "../../src/kysely";
 import { sleep } from "../test-utils/sleep";
 import {
-  blobFromDatabase,
+  contentFromDatabase,
   createInMemoryDatabase,
   importDatabase,
 } from "../../src";
@@ -87,8 +87,11 @@ describe("kysely dialect", () => {
       { id: 3, name: "rice" },
     ]);
 
-    const db1Blob = blobFromDatabase(sqliteDb1);
-    importDatabase({ db: sqliteDb2, content: db1Blob });
+    const db1Content = contentFromDatabase(sqliteDb1);
+    importDatabase({
+      db: sqliteDb2,
+      content: db1Content,
+    });
 
     const select2 = await db2.selectFrom("groceries").selectAll().execute();
     expect(select2).toEqual([
