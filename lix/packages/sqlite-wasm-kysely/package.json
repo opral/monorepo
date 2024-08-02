@@ -1,5 +1,5 @@
 {
-  "name": "sqlite-wasm-kysely-dialect",
+  "name": "sqlite-wasm-kysely",
   "version": "0.1.0",
   "type": "module",
   "exports": {
