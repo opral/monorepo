@@ -1,9 +1,0 @@
-{
-	"editor.formatOnSave": true,
-	"editor.defaultFormatter": "esbenp.prettier-vscode",
-	"[javascript]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
-	"testing.automaticallyOpenPeekView": "never",
-	"typescript.tsdk": "node_modules/typescript/lib"
-}
