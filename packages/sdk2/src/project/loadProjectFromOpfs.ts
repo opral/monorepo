@@ -30,7 +30,7 @@ export async function loadProjectFromOpfs(args: { path: string }) {
 		.where("path", "=", "/settings.json")
 		.executeTakeFirstOrThrow()
 
-	let settings = JSON.parse(new TextDecoder().decode(settingsFile.blob)) as Settings
+	let settings = JSON.parse(new TextDecoder().decode(settingsFile.blob)) as ProjectSettings
 
 	const plugins = await loadPlugins({ settings })
 
