@@ -41,8 +41,6 @@ export const Declaration = Type.Object({
 
 export const Pattern = Type.Array(Type.Union([Text, Expression]))
 
-
-
 export const BundleTable = Type.Object({
 	id: Type.String(),
 	alias: Type.Any(), // TODO: Use appropriate Typebox type for JSONColumnType<AliasMap>

@@ -1,4 +1,4 @@
-import { Kysely, ParseJSONResultsPlugin } from "kysely"
+import { CamelCasePlugin, Kysely, ParseJSONResultsPlugin } from "kysely"
 import type { Database } from "../schema/schema.js"
 import { openLixInMemory } from "@lix-js/sdk"
 import type { InlangPlugin2, ResourceFile } from "../plugin/schema.js"
@@ -28,7 +28,7 @@ export async function loadProjectInMemory(args: { blob: Blob }) {
 		dialect: createDialect({
 			database: sqlite,
 		}),
-		plugins: [new ParseJSONResultsPlugin()],
+		plugins: [new ParseJSONResultsPlugin(), new CamelCasePlugin()],
 	})
 
 	const settingsFile = await lix.db
