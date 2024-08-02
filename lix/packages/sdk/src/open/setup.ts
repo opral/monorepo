@@ -16,46 +16,50 @@ export async function setup(args: { database: SqliteDatabase }) {
 
 	const plugins = await loadPlugins(db)
 
-	// args.database.createFunction({
-	// 	name: "fileModified",
-	// 	arity: 3,
-	// 	// @ts-expect-error - dynamic function
-	// 	xFunc: (_, fileId: any, oldBlob: any, newBlob: any) =>
-	// 		handleFileChange({
-	// 			fileId,
-	// 			oldBlob,
-	// 			newBlob,
-	// 			plugins,
-	// 			db,
-	// 		}),
-	// })
+	args.database.createFunction({
+		name: "handle_file_change",
+		arity: 3,
+		// @ts-expect-error - dynamic function
+		xFunc: (_, fileId: any, oldData: any, neuData: any) => {
+			handleFileChange({
+				fileId,
+				oldData,
+				neuData,
+				plugins,
+				db,
+			})
+			return
+		},
+	})
 
-	// await sql`
-	// CREATE TEMP TRIGGER file_modified AFTER UPDATE ON File
-	// BEGIN
-	//   SELECT fileModified(NEW.id, OLD.blob, NEW.blob);
-	// END;
-	// `.execute(db)
+	await sql`
+	CREATE TEMP TRIGGER file_modified AFTER UPDATE ON file
+	BEGIN
+	  SELECT handle_file_change(NEW.id, OLD.data, NEW.data);
+	END;
+	`.execute(db)
 
-	// args.database.createFunction({
-	// 	name: "fileInserted",
-	// 	arity: 2,
-	// 	// @ts-expect-error - dynamic function
-	// 	xFunc: (_, fileId: any, newBlob: any) =>
-	// 		handleFileInsert({
-	// 			fileId,
-	// 			newBlob,
-	// 			plugins,
-	// 			db,
-	// 		}),
-	// })
+	args.database.createFunction({
+		name: "handle_file_insert",
+		arity: 2,
+		// @ts-expect-error - dynamic function
+		xFunc: (_, fileId: any, newBlob: any) => {
+			handleFileInsert({
+				fileId,
+				newBlob,
+				plugins,
+				db,
+			})
+			return
+		},
+	})
 
-	// await sql`
-	// CREATE TEMP TRIGGER file_inserted AFTER INSERT ON File
-	// BEGIN
-	//   SELECT fileInserted(NEW.id, NEW.blob);
-	// END;
-	// `.execute(db)
+	await sql`
+	CREATE TEMP TRIGGER file_inserted AFTER INSERT ON file
+	BEGIN
+	  SELECT handle_file_insert(NEW.id, NEW.blob);
+	END;
+	`.execute(db)
 
 	return {
 		db,
@@ -105,15 +109,15 @@ async function loadPlugins(db: Kysely<LixDatabase>) {
 
 async function handleFileChange(args: {
 	fileId: LixFile["id"]
-	oldBlob: LixFile["data"]
-	newBlob: LixFile["data"]
+	oldData: LixFile["data"]
+	neuData: LixFile["data"]
 	plugins: LixPlugin[]
 	db: Kysely<LixDatabase>
 }) {
 	for (const plugin of args.plugins) {
 		const diffs = await plugin.diff?.file?.({
-			old: args.oldBlob,
-			neu: args.newBlob,
+			old: args.oldData,
+			neu: args.neuData,
 		})
 		for (const diff of diffs ?? []) {
 			const previousUncomittedChange = await args.db
