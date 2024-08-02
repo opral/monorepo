@@ -2,7 +2,6 @@ import {
 	type Variant,
 	type NestedMessage,
 	type Declaration,
-	type Expression,
 	type ProjectSettings,
 } from "@inlang/sdk2"
 import { LitElement, css, html } from "lit"
@@ -302,7 +301,6 @@ export default class InlangVariant extends LitElement {
 	}
 
 	override render() {
-		console.log(this.message)
 		return !(!this.variant && this.message && this.message?.selectors.length > 0)
 			? html`<div class="variant">
 					${this.variant
