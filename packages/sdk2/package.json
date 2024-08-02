@@ -36,8 +36,9 @@
 		"install": "^0.13.0",
 		"kysely": "^0.27.4",
 		"rxjs": "7.8.1",
-		"uuid": "^10.0.0",
-		"sqlocal": "workspace:*"
+		"sqlite-wasm-kysely": "workspace:*",
+		"sqlocal": "workspace:*",
+		"uuid": "^10.0.0"
 	},
 	"devDependencies": {
 		"@inlang/json-types": "workspace:*",
