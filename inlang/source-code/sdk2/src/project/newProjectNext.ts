@@ -1,6 +1,7 @@
-import { newLixFile, openLixFromOpfs, uuidv4 } from "@lix-js/sdk"
-import { SQLocalKysely } from "sqlocal/kysely"
+import { newLixFile, openLixInMemory, uuidv4 } from "@lix-js/sdk"
 import type { ProjectSettings } from "../schema/settings.js"
+import { contentFromDatabase, createDialect, createInMemoryDatabase } from "sqlite-wasm-kysely"
+import { Kysely, sql } from "kysely"
 
 /**
  * Creates a new inlang project.
@@ -9,14 +10,17 @@ import type { ProjectSettings } from "../schema/settings.js"
  * e.g. the user's computer, cloud storage, or OPFS in the browser.
  */
 export async function newProject(): Promise<Blob> {
-	const sqlocal = new SQLocalKysely({
-		storage: {
-			type: "memory",
-		},
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	})
+	const db = new Kysely({
+		dialect: createDialect({
+			database: sqlite,
+		}),
 	})
 
 	try {
-		await sqlocal.sql`
+		await sql`
 CREATE TABLE Bundle (
   id TEXT PRIMARY KEY,
   alias TEXT NOT NULL
@@ -39,31 +43,29 @@ CREATE TABLE Variant (
   
 CREATE INDEX idx_message_bundleId ON Message (bundleId);
 CREATE INDEX idx_variant_messageId ON Variant (messageId);
-		`
-		const dbBuffer = await sqlocal.getDatabaseContent()
-		// TODO load in memory
-		// doesn't work atm because the lix file is not imported with the tables
-		// const lix = await openLixInMemory({ blob: await newLixFile() })
+		`.execute(db)
 
-		const interimPath = `temporary-${uuidv4()}.lix`
-		const opfsRoot = await navigator.storage.getDirectory()
-		const fileHandle = await opfsRoot.getFileHandle(interimPath, { create: true })
-		const file = await fileHandle.createWritable()
-		const lixBlob = await newLixFile()
-		await file.write(lixBlob)
-		await file.close()
-		const lix = await openLixFromOpfs({ path: interimPath })
+		const inlangDbContent = contentFromDatabase(sqlite)
+
+		const sizeInMB = inlangDbContent.length / 1_048_576
+
+		console.log({ sizeInMB })
+
+		const lix = await openLixInMemory({ blob: await newLixFile() })
+
+		console.log("right before insertInto files")
 
 		// write files to lix
 		await lix.db
 			.insertInto("file")
 			.values([
+				// // TODO fix this file write which is throwing
 				{
 					// TODO ensure posix paths validation with lix
 					path: "/db.sqlite",
 					// TODO let lix generate the id
 					id: uuidv4(),
-					data: dbBuffer,
+					data: inlangDbContent,
 				},
 				{
 					path: "/settings.json",
@@ -74,12 +76,13 @@ CREATE INDEX idx_variant_messageId ON Variant (messageId);
 				},
 			])
 			.execute()
-		const blob = await lix.toBlob()
-		// delete the interim file from opfs (workaround until in memory exists)
-		await opfsRoot.removeEntry(interimPath)
-		return blob
+		console.log("after insert into")
+		return lix.toBlob()
+	} catch (e) {
+		throw new Error(`Failed to create new inlang project: ${e}`, { cause: e })
 	} finally {
-		await sqlocal.destroy()
+		sqlite.close()
+		await db.destroy()
 	}
 }
 
