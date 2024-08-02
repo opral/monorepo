@@ -201,7 +201,7 @@ export default class InlangSettings extends LitElement {
 				meta?: any
 				schema?: Record<string, Record<string, unknown>>
 			}
-		> = { internal: { schema: ProjectSettings } }
+		> = { internal: { schema: ProjectSettings.allOf[0] } }
 
 		// for (const plugin of _installedPlugins) {
 		// 	if (plugin.settingsSchema) {
@@ -227,12 +227,11 @@ export default class InlangSettings extends LitElement {
 		return html` <div class="container" part="base">
 			${Object.entries(this._settingProperties).map(([key, value]) => {
 				// TODO remove marketplace registry (bundling is too expensive)
-				const item = registry.find((item) => item.id === value.meta?.id)
+				//const item = registry.find((item) => item.id === value.meta?.id)
 				return value.schema?.properties && this._newSettings
 					? html`<div class="module-container" part="module">
 							${value.meta &&
 							(value.meta?.displayName as { en: string }).en &&
-							item &&
 							html`<div>
 								<h2 part="module-title">
 									${value.meta && (value.meta?.displayName as { en: string }).en}
@@ -244,20 +243,19 @@ export default class InlangSettings extends LitElement {
 											d="M11 17H7c-1.383 0-2.562-.488-3.537-1.463C2.488 14.562 2.001 13.383 2 12c0-1.383.487-2.562 1.463-3.537C4.439 7.488 5.618 7 7 7h4v2H7c-.833 0-1.542.292-2.125.875A2.893 2.893 0 004 12c0 .833.292 1.542.875 2.125A2.893 2.893 0 007 15h4v2zm-3-4v-2h8v2H8zm5 4v-2h4c.833 0 1.542-.292 2.125-.875A2.893 2.893 0 0020 12c0-.833-.292-1.542-.875-2.125A2.893 2.893 0 0017 9h-4V7h4c1.383 0 2.563.488 3.538 1.463.975.975 1.463 2.154 1.462 3.537 0 1.383-.488 2.562-1.463 3.538-.975.976-2.154 1.463-3.537 1.462h-4z"
 										></path>
 									</svg>
-									<a
-										target="_blank"
-										href=${`https://inlang.com/m/${item.uniqueID}/${item.id.replaceAll(".", "-")}`}
-										class="module-link"
-									>
-										${`https://inlang.com/.../${item.id.replaceAll(".", "-")}`}
-									</a>
 									<div class="module-type">
 										${value.meta.id.startsWith("plugin") ? "Plugin" : "Lint Rule"}
 									</div>
 								</div>
 							</div>`}
 							${Object.entries(value.schema.properties).map(([property, schema]) => {
-								if (property === "$schema" || property === "modules") return undefined
+								if (
+									property === "$schema" ||
+									property === "modules" ||
+									property === "languageTags" ||
+									property === "sourceLanguageTag"
+								)
+									return undefined
 								return key === "internal"
 									? html`
 											<general-input
