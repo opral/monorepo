@@ -15,16 +15,18 @@ export default function App() {
 		<>
 			<Layout>
 				<h1 className="text-2xl -mt-8 mb-8">Settings</h1>
-				{project && project?.settings.get() &&
+				{project && project?.settings.get() && (
 					<Settings
 						settings={project?.settings.get()}
+						// @ts-expect-error - TODO: fix this
 						onSetSettings={(event: CustomEvent) => {
 							// console.log(settings)
-							console.log("event.detail", event.detail)
-							project.settings.set(event.detail)
+							console.log("event.detail", event.detail);
+							project.settings.set(event.detail);
 						}}
-					/>}
+					/>
+				)}
 			</Layout>
 		</>
-	)
+	);
 }

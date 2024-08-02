@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAtom } from "jotai";
 import { projectAtom, selectedProjectPathAtom } from "./state.ts";
 import { useMemo, useState } from "react";
 import SlDialog from "@shoelace-style/shoelace/dist/react/dialog/index.js";
-import { loadProjectFromOpfs, newProject } from "@inlang/sdk2";
+import { loadProjectInMemory, newProject } from "@inlang/sdk2";
 import {
 	SlInput,
 	SlButton,
@@ -40,7 +41,7 @@ const SelectProject = () => {
 	const [existingProjects, setExistingProjects] = useState<string[]>([]);
 
 	const getProjects = async () => {
-		const projects: string[] = []
+		const projects: string[] = [];
 		const opfsRoot = await navigator.storage.getDirectory();
 		// @ts-expect-error - TS doesn't know about the keys method
 		for await (const name of opfsRoot.keys()) {
@@ -49,12 +50,12 @@ const SelectProject = () => {
 			}
 		}
 		return projects;
-	}
+	};
 
 	// useEffect(() => {
 
 	// 	getProjects().then((result) => {
-			
+
 	// 	})
 
 	// 		poll({
@@ -76,21 +77,25 @@ const SelectProject = () => {
 	// 				setExistingProjects(value);
 	// 			},
 	// 		});
-		
+
 	// }, []);
 
 	return (
 		<>
 			<SlSelect
 				size="small"
-				placeholder={selectedProjectPath ? selectedProjectPath : "Select project"}
+				placeholder={
+					selectedProjectPath ? selectedProjectPath : "Select project"
+				}
 				onSlChange={async (e: any) => {
 					setSelectedProjectPath(e.target.value);
-					const project = await loadProjectFromOpfs({ path: e.target.value });
-					console.log("project", project)
+					const opfsRoot = await navigator.storage.getDirectory();
+					const fileHandle = await opfsRoot.getFileHandle(e.target.value);
+					const file = await fileHandle.getFile();
+					const project = await loadProjectInMemory({ blob: file });
 					setProject(project);
 				}}
-				onSlShow={ async () => {
+				onSlShow={async () => {
 					const projects = await getProjects();
 					setExistingProjects(projects);
 				}}
@@ -118,6 +123,7 @@ const CreateNewProject = () => {
 		const fileHandle = await opfsRoot.getFileHandle(fileName, { create: true });
 		const writable = await fileHandle.createWritable();
 		const file = await newProject();
+		// const file = await newProjectNext();
 		await writable.write(file);
 		await writable.close();
 		setLoading(false);
@@ -165,7 +171,7 @@ const SettingsButton = () => {
 	const isSettingsPage = window.location.pathname === "/settings";
 
 	return (
-		<Link to={isSettingsPage ? "/" : "/settings" }>
+		<Link to={isSettingsPage ? "/" : "/settings"}>
 			<SlButton
 				slot="trigger"
 				size="small"
@@ -174,5 +180,5 @@ const SettingsButton = () => {
 				Settings
 			</SlButton>
 		</Link>
-	)
-}
+	);
+};
