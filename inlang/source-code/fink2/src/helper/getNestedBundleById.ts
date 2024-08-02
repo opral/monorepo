@@ -1,4 +1,4 @@
-import { InlangProject, Database, NestedBundle } from "@inlang/sdk2";
+import { Database } from "@inlang/sdk2";
 import { SelectQueryBuilder } from "kysely";
 import { jsonArrayFrom } from "kysely/helpers/sqlite";
 
@@ -14,7 +14,7 @@ const populateMessages = (
 			populateVariants(eb.selectFrom("message")).whereRef(
 				"message.bundleId",
 				"=",
-				"bundle.id" as any
+				"bundleId"
 			)
 		).as("messages"),
 	]);
