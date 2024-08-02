@@ -7,14 +7,14 @@ import {
 import { addBasePath, basePath } from "../utils/basePath"
 import NextLink from "next/link"
 import React, { ComponentProps } from "react"
-import { RoutingStrategy } from "../routing-strategy/interface"
 import { createLocaliseHref } from "../localiseHref"
 import { serializeCookie } from "../utils/cookie"
 import { LANG_COOKIE } from "../constants"
 import { rsc } from "rsc-env"
 import { DEV } from "../env"
+import type { RoutingStrategy } from "../routing-strategy/interface"
 
-type LocalizedLink<T extends string> = (
+export type LocalizedLink<T extends string> = (
 	props: LocalizedLinkProps<T>
 ) => ReturnType<typeof import("next/link").default>
 

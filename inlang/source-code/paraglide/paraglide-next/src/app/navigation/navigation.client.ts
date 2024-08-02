@@ -4,28 +4,57 @@ import { addBasePath, basePath } from "../utils/basePath"
 import { createLocaliseHref } from "../localiseHref"
 import { serializeCookie } from "../utils/cookie"
 import { LANG_COOKIE } from "../constants"
-import { createRedirects } from "./redirect"
-import { createLink } from "./Link"
+import { createRedirects, LocalizedPermanentRedirect, LocalizedRedirect } from "./redirect"
+import { createLink, LocalizedLink } from "./Link"
 import type { RoutingStrategy } from "../routing-strategy/interface"
 
-export type LocalisedNavigation<T extends string> = ReturnType<typeof Navigation<T>>
+export type LocalisedNavigation<T extends string> = {
+	Link: LocalizedLink<T>
+	usePathname: LocalizedUsePathname
+	redirect: LocalizedRedirect
+	permanentRedirect: LocalizedPermanentRedirect
+	useRouter: LocalizedUseRouter<T>
+}
 
-export const Navigation = <T extends string>({ strategy }: { strategy: RoutingStrategy<T> }) => {
-	const localiseHref = createLocaliseHref(strategy)
+export const Navigation = <T extends string>({
+	strategy,
+}: {
+	strategy: RoutingStrategy<T>
+}): LocalisedNavigation<T> => {
+	const Link = createLink(strategy)
+	const usePathname = createUsePathname(strategy)
+	const { redirect, permanentRedirect } = createRedirects(languageTag, strategy)
+	const useRouter = createUseRouter(strategy, usePathname)
 
-	/**
-	 * Get the current **non-localised** pathname. For example usePathname() on /de/dashboard?foo=bar would return "/dashboard"
-	 */
-	const usePathname = (): `/${string}` => {
+	return {
+		useRouter,
+		usePathname,
+		redirect,
+		permanentRedirect,
+		Link,
+	}
+}
+
+type LocalizedUsePathname = () => `/${string}`
+/**
+ * Creates a `usePathname` function that returns the current _canonical_ path.
+ * Next's built-in one would return the current _localised_ path.
+ */
+function createUsePathname<T extends string>(strategy: RoutingStrategy<T>): LocalizedUsePathname {
+	return (): `/${string}` => {
 		const encodedLocalisedPathname = NextNavigation.usePathname()
 		const localisedPathname = decodeURI(encodedLocalisedPathname) as `/${string}`
 		return strategy.getCanonicalPath(localisedPathname, languageTag() as T)
 	}
+}
 
-	/**s
-	 * Get the router methods. For example router.push('/dashboard')
-	 */
-	const useRouter = () => {
+type LocalizedUseRouter<T extends string> = ReturnType<typeof createUseRouter<T>>
+function createUseRouter<T extends string>(
+	strategy: RoutingStrategy<T>,
+	usePathname: LocalizedUsePathname
+) {
+	return () => {
+		const localiseHref = createLocaliseHref(strategy)
 		const nextRouter = NextNavigation.useRouter()
 		const searchParams = NextNavigation.useSearchParams()
 		const canonicalCurrentPathname = usePathname()
@@ -143,12 +172,5 @@ export const Navigation = <T extends string>({ strategy }: { strategy: RoutingSt
 			replace,
 			prefetch,
 		}
-	}
-
-	return {
-		useRouter,
-		usePathname,
-		...createRedirects(languageTag, strategy),
-		Link: createLink(strategy),
 	}
 }
