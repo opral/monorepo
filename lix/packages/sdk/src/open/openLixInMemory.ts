@@ -1,17 +1,16 @@
-import { SQLocalKysely } from "sqlocal/kysely"
+import { createInMemoryDatabase, importDatabase } from "sqlite-wasm-kysely"
 import { setup } from "./setup.js"
 
 /**
  *
  */
 export async function openLixInMemory(args: { blob: Blob }) {
-	const sqlocal = new SQLocalKysely({
-		storage: {
-			type: "memory",
-			// TODO @martin-lysk doesn't load from memory
-			dbContent: await args.blob.arrayBuffer(),
-		},
+	const database = await createInMemoryDatabase({
+		readOnly: false,
 	})
-
-	return setup({ sqlocal })
+	importDatabase({
+		db: database,
+		content: new Uint8Array(await args.blob.arrayBuffer()),
+	})
+	return setup({ database })
 }

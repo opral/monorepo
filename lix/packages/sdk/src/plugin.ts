@@ -15,8 +15,8 @@ export type LixPlugin<T extends Record<string, Record<string, unknown>> = Record
 	>
 	diff: {
 		file?: (args: {
-			old?: LixFile["blob"]
-			neu: LixFile["blob"]
+			old?: LixFile["data"]
+			neu: LixFile["data"]
 		}) => MaybePromise<Array<DiffReport>>
 	} & Record<
 		// other primitives

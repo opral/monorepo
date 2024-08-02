@@ -1,60 +1,65 @@
-/* eslint-disable unicorn/no-null */
-import type { SQLocalKysely } from "sqlocal/kysely"
 import type { LixPlugin } from "../plugin.js"
-import { Kysely, ParseJSONResultsPlugin } from "kysely"
+import { Kysely, ParseJSONResultsPlugin, sql } from "kysely"
 import type { LixDatabase, LixFile } from "../schema.js"
 import { commit } from "../commit.js"
 import { v4 } from "uuid"
+import { contentFromDatabase, createDialect, type SqliteDatabase } from "sqlite-wasm-kysely"
 
-export async function setup(args: { sqlocal: SQLocalKysely }) {
-	const { dialect, sql, createCallbackFunction, getDatabaseContent } = args.sqlocal
-
+/**
+ * Common setup between different lix environments.
+ */
+export async function setup(args: { database: SqliteDatabase }) {
 	const db = new Kysely<LixDatabase>({
-		dialect: dialect,
+		dialect: createDialect({ database: args.database }),
 		plugins: [new ParseJSONResultsPlugin()],
 	})
 
-	const plugins = await loadPlugins(sql)
+	const plugins = await loadPlugins(db)
 
-	await createCallbackFunction("fileModified", (fileId, oldBlob, newBlob) =>
-		handleFileChange({
-			fileId,
-			oldBlob,
-			newBlob,
-			plugins,
-			db,
-		})
-	)
+	// args.database.createFunction({
+	// 	name: "fileModified",
+	// 	arity: 3,
+	// 	// @ts-expect-error - dynamic function
+	// 	xFunc: (_, fileId: any, oldBlob: any, newBlob: any) =>
+	// 		handleFileChange({
+	// 			fileId,
+	// 			oldBlob,
+	// 			newBlob,
+	// 			plugins,
+	// 			db,
+	// 		}),
+	// })
 
-	await sql`
-  CREATE TEMP TRIGGER file_modified AFTER UPDATE ON File
-  BEGIN
-    SELECT fileModified(NEW.id, OLD.blob, NEW.blob);
-  END;
-  `
+	// await sql`
+	// CREATE TEMP TRIGGER file_modified AFTER UPDATE ON File
+	// BEGIN
+	//   SELECT fileModified(NEW.id, OLD.blob, NEW.blob);
+	// END;
+	// `.execute(db)
 
-	await createCallbackFunction("fileInserted", (fileId, newBlob) =>
-		handleFileInsert({
-			fileId,
-			newBlob,
-			plugins,
-			db,
-		})
-	)
+	// args.database.createFunction({
+	// 	name: "fileInserted",
+	// 	arity: 2,
+	// 	// @ts-expect-error - dynamic function
+	// 	xFunc: (_, fileId: any, newBlob: any) =>
+	// 		handleFileInsert({
+	// 			fileId,
+	// 			newBlob,
+	// 			plugins,
+	// 			db,
+	// 		}),
+	// })
 
-	await sql`
-  CREATE TEMP TRIGGER file_inserted AFTER INSERT ON File
-  BEGIN
-    SELECT fileInserted(NEW.id, NEW.blob);
-  END;
-  `
-
-	await registerDiffComponents(plugins)
+	// await sql`
+	// CREATE TEMP TRIGGER file_inserted AFTER INSERT ON File
+	// BEGIN
+	//   SELECT fileInserted(NEW.id, NEW.blob);
+	// END;
+	// `.execute(db)
 
 	return {
 		db,
-		toBlob: async () => new Blob([await getDatabaseContent()]),
-		sql,
+		toBlob: () => new Blob([contentFromDatabase(args.database)]),
 		plugins,
 		commit: (args: { userId: string; description: string }) => {
 			return commit({ db, ...args })
@@ -62,23 +67,18 @@ export async function setup(args: { sqlocal: SQLocalKysely }) {
 	}
 }
 
-async function loadPlugins(sql: any) {
-	await sql`
-		CREATE TABLE IF NOT EXISTS file (
-			id TEXT PRIMARY KEY,
-			path TEXT NOT NULL,
-			blob BLOB NOT NULL
-		) strict;
-	`
-
-	const pluginFiles = await sql`
+async function loadPlugins(db: Kysely<LixDatabase>) {
+	const pluginFiles = (
+		await sql`
     SELECT * FROM file
     WHERE path GLOB 'lix/plugin/*'
-  `
+  `.execute(db)
+	).rows as unknown as LixFile[]
+
 	const decoder = new TextDecoder("utf8")
 	const plugins: LixPlugin[] = []
 	for (const plugin of pluginFiles) {
-		const text = btoa(decoder.decode(plugin.blob))
+		const text = btoa(decoder.decode(plugin.data))
 		const pluginModule = await import(/* @vite-ignore */ "data:text/javascript;base64," + text)
 		plugins.push(pluginModule.default)
 		if (pluginModule.default.setup) {
@@ -88,25 +88,25 @@ async function loadPlugins(sql: any) {
 	return plugins as LixPlugin[]
 }
 
-// TODO register on behalf of apps or leave it up to every app?
-//      - if every apps registers, components can be lazy loaded
-async function registerDiffComponents(plugins: LixPlugin[]) {
-	for (const plugin of plugins) {
-		for (const type in plugin.diffComponent) {
-			const component = plugin.diffComponent[type]?.()
-			const name = "lix-plugin-" + plugin.key + "-diff-" + type
-			if (customElements.get(name) === undefined) {
-				// @ts-ignore
-				customElements.define(name, component)
-			}
-		}
-	}
-}
+// // TODO register on behalf of apps or leave it up to every app?
+// //      - if every apps registers, components can be lazy loaded
+// async function registerDiffComponents(plugins: LixPlugin[]) {
+// 	for (const plugin of plugins) {
+// 		for (const type in plugin.diffComponent) {
+// 			const component = plugin.diffComponent[type]?.()
+// 			const name = "lix-plugin-" + plugin.key + "-diff-" + type
+// 			if (customElements.get(name) === undefined) {
+// 				// @ts-ignore
+// 				customElements.define(name, component)
+// 			}
+// 		}
+// 	}
+// }
 
 async function handleFileChange(args: {
 	fileId: LixFile["id"]
-	oldBlob: LixFile["blob"]
-	newBlob: LixFile["blob"]
+	oldBlob: LixFile["data"]
+	newBlob: LixFile["data"]
 	plugins: LixPlugin[]
 	db: Kysely<LixDatabase>
 }) {
@@ -202,7 +202,7 @@ async function handleFileChange(args: {
 // creates initial commit
 async function handleFileInsert(args: {
 	fileId: LixFile["id"]
-	newBlob: LixFile["blob"]
+	newBlob: LixFile["data"]
 	plugins: LixPlugin[]
 	db: Kysely<LixDatabase>
 }) {

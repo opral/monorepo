@@ -10,7 +10,7 @@ export type LixDatabase = {
 export type LixFile = {
 	id: string
 	path: string
-	blob: ArrayBuffer
+	data: ArrayBuffer
 }
 
 export type Commit = {
