@@ -226,6 +226,7 @@ export default class InlangSettings extends LitElement {
 	override render() {
 		return html` <div class="container" part="base">
 			${Object.entries(this._settingProperties).map(([key, value]) => {
+				// TODO remove marketplace registry (bundling is too expensive)
 				const item = registry.find((item) => item.id === value.meta?.id)
 				return value.schema?.properties && this._newSettings
 					? html`<div class="module-container" part="module">

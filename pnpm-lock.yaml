@@ -2872,9 +2872,9 @@ importers:
 
   inlang/source-code/settings-component2:
     dependencies:
-      '@inlang/sdk2':
+      '@inlang/marketplace-registry':
         specifier: workspace:^
-        version: link:../sdk2
+        version: link:../marketplace-registry
       '@lit/task':
         specifier: ^1.0.0
         version: 1.0.0
@@ -2887,10 +2887,13 @@ importers:
       chroma-js:
         specifier: ^2.4.2
         version: 2.4.2
+      lit:
+        specifier: ^3.1.2
+        version: 3.1.4
     devDependencies:
-      '@inlang/marketplace-registry':
+      '@inlang/sdk2':
         specifier: workspace:^
-        version: link:../marketplace-registry
+        version: link:../sdk2
       '@nx/storybook':
         specifier: ^18.0.4
         version: 18.3.4(@types/node@20.14.10)(nx@18.3.3)(typescript@5.4.5)
@@ -2915,12 +2918,6 @@ importers:
       '@vitest/coverage-v8':
         specifier: 0.34.6
         version: 0.34.6(vitest@0.34.6)
-      esbuild:
-        specifier: ^0.20.0
-        version: 0.20.2
-      lit:
-        specifier: ^3.1.2
-        version: 3.1.4
       react:
         specifier: ^18.2.0
         version: 18.3.1
@@ -3647,17 +3644,11 @@ importers:
         specifier: 0.34.6
         version: 0.34.6(@vitest/browser@1.6.0)(webdriverio@8.39.1)
 
-  lix/packages/sqlite-wasm-kysely:
+  lix/packages/sqlite-wasm-kysely-dialect:
     dependencies:
       '@sqlite.org/sqlite-wasm':
         specifier: ^3.46.0-build2
         version: 3.46.0-build2
-      coincident:
-        specifier: ^1.2.3
-        version: 1.2.3
-      nanoid:
-        specifier: ^5.0.7
-        version: 5.0.7
     devDependencies:
       '@vitest/browser':
         specifier: ^1.6.0
@@ -3668,9 +3659,6 @@ importers:
       prettier:
         specifier: ^3.3.2
         version: 3.3.3
-      taze:
-        specifier: ^0.14.2
-        version: 0.14.3
       typescript:
         specifier: ^5.5.3
         version: 5.5.3
@@ -3683,9 +3671,6 @@ importers:
       webdriverio:
         specifier: ^8.39.1
         version: 8.39.1(typescript@5.5.3)
-      wrangler:
-        specifier: ^3.63.1
-        version: 3.67.1
 
   lix/packages/sqlocal:
     dependencies:
@@ -8905,14 +8890,6 @@ packages:
       - nx
     dev: true
 
-  /@nrwl/devkit@18.3.4(nx@18.3.4):
-    resolution: {integrity: sha512-Fty9Huqm12OYueU3uLJl3uvBUl5BvEyPfvw8+rLiNx9iftdEattM8C+268eAbIRRSLSOVXlWsJH4brlc6QZYYw==}
-    dependencies:
-      '@nx/devkit': 18.3.4(nx@18.3.4)
-    transitivePeerDependencies:
-      - nx
-    dev: true
-
   /@nrwl/js@18.3.4(@types/node@20.14.10)(nx@18.3.3)(typescript@5.4.5):
     resolution: {integrity: sha512-oyiMoxzDVGQe5E4UFGO/WAOU211HEIdRxSEOfs1lPhvA8lKbUa0IWDqPOugNws/YHAr+vUTU3sZDJ3uU3RJuYQ==}
     dependencies:
@@ -9108,7 +9085,7 @@ packages:
     peerDependencies:
       nx: '>= 16 <= 19'
     dependencies:
-      '@nrwl/devkit': 18.3.4(nx@18.3.4)
+      '@nrwl/devkit': 18.3.4(nx@18.3.3)
       ejs: 3.1.10
       enquirer: 2.3.6
       ignore: 5.3.1
@@ -18471,6 +18448,7 @@ packages:
 
   /chownr@1.1.4:
     resolution: {integrity: sha512-jJ0bqzaylmJtVnNgzTeSOs8DPavpbYgEr/b0YL8/2GO3xJEhInFmhKMUnEJQjZumK7KXGFhUy89PrsJWlakBVg==}
+    requiresBuild: true
     dev: true
 
   /chownr@2.0.0:
@@ -34427,7 +34405,7 @@ packages:
     dependencies:
       cac: 6.7.14
       debug: 4.3.5
-      mlly: 1.7.0
+      mlly: 1.7.1
       pathe: 1.1.2
       picocolors: 1.0.1
       vite: 5.3.4(@types/node@20.14.10)
