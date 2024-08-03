@@ -5,6 +5,7 @@ export * from "./schema/schemaV2.js"
 export * from "./schema/settings.js"
 export * from "./mock/index.js"
 export * from "./helper.js"
+export * from "./query-utilities/index.js"
 export {
 	generateBundleId,
 	/**
