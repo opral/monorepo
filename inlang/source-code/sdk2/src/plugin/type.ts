@@ -19,7 +19,7 @@ export type InlangPlugin = {
 	 */
 	loadMessages?: (args: {
 		settings: ProjectSettings
-		nodeishFs: typeof fs
+		nodeishFs: Pick<typeof fs, "readFile" | "readdir" | "mkdir" | "writeFile">
 	}) => Promise<Message[]> | Message[]
 	/**
 	 * @deprecated Use `exportFiles` instead.
@@ -27,7 +27,7 @@ export type InlangPlugin = {
 	saveMessages?: (args: {
 		messages: Message[]
 		settings: ProjectSettings
-		nodeishFs: typeof fs
+		nodeishFs: Pick<typeof fs, "readFile" | "readdir" | "mkdir" | "writeFile">
 	}) => Promise<void> | void
 	/**
 	 * Import / Export files.
