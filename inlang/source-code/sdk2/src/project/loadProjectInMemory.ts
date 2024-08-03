@@ -1,15 +1,13 @@
 import { openLixInMemory } from "@lix-js/sdk"
-import type { InlangPlugin, ResourceFile } from "../plugin/type.js"
-import type { ProjectSettings } from "../schema/settings.js"
-import { contentFromDatabase, createInMemoryDatabase, importDatabase } from "sqlite-wasm-kysely"
-import { initKysely } from "../database/initKysely.js"
-import { initHandleSaveToLixOnChange } from "./initHandleSaveToLixOnChange.js"
+import { createInMemoryDatabase, importDatabase } from "sqlite-wasm-kysely"
+import { loadProject } from "./loadProject.js"
 
 /**
- *
+ * Load a project from a blob in memory.
  */
 export async function loadProjectInMemory(args: { blob: Blob }) {
 	const lix = await openLixInMemory({ blob: args.blob })
+
 	const dbFile = await lix.db
 		.selectFrom("file")
 		.select("data")
@@ -19,60 +17,5 @@ export async function loadProjectInMemory(args: { blob: Blob }) {
 	const sqlite = await createInMemoryDatabase({})
 	importDatabase({ db: sqlite, content: new Uint8Array(dbFile.data) })
 
-	const db = initKysely({ sqlite })
-
-	const settingsFile = await lix.db
-		.selectFrom("file")
-		.select("data")
-		.where("path", "=", "/settings.json")
-		.executeTakeFirstOrThrow()
-
-	let settings = JSON.parse(new TextDecoder().decode(settingsFile.data)) as ProjectSettings
-
-	await initHandleSaveToLixOnChange({ sqlite, db, lix })
-
-	return {
-		db,
-		plugins: [] as InlangPlugin[],
-		importFiles: (args: { pluginKey: InlangPlugin["key"]; files: ResourceFile }) => {
-			args
-			throw new Error("Not implemented")
-		},
-		exportFiles: (args: { pluginKey: InlangPlugin["key"] }) => {
-			args
-			throw new Error("Not implemented")
-		},
-		settings: {
-			get: () => settings,
-			set: async (newSettings: ProjectSettings) => {
-				await lix.db
-					.updateTable("file")
-					.where("path", "is", "/settings.json")
-					.set({
-						data: await new Blob([JSON.stringify(newSettings, undefined, 2)]).arrayBuffer(),
-					})
-					.execute()
-				// if successful, update local settings
-				settings = newSettings
-			},
-		},
-		close: async () => {
-			sqlite.close()
-			await db.destroy()
-			await lix.close()
-		},
-		toBlob: async () => {
-			const inlangDbContent = contentFromDatabase(sqlite)
-			// flush in-memory db to lix
-			await lix.db
-				.updateTable("file")
-				.where("path", "is", "/db.sqlite")
-				.set({
-					data: inlangDbContent,
-				})
-				.execute()
-			return lix.toBlob()
-		},
-		lix,
-	}
+	return await loadProject({ sqlite, lix })
 }
