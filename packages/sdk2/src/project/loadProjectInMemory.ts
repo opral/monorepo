@@ -1,5 +1,5 @@
 import { openLixInMemory } from "@lix-js/sdk"
-import type { InlangPlugin2, ResourceFile } from "../plugin/schema.js"
+import type { InlangPlugin, ResourceFile } from "../plugin/type.js"
 import type { ProjectSettings } from "../schema/settings.js"
 import { contentFromDatabase, createInMemoryDatabase, importDatabase } from "sqlite-wasm-kysely"
 import { initKysely } from "../database/initKysely.js"
@@ -33,12 +33,12 @@ export async function loadProjectInMemory(args: { blob: Blob }) {
 
 	return {
 		db,
-		plugins: [] as InlangPlugin2[],
-		importFiles: (args: { pluginKey: InlangPlugin2["key"]; files: ResourceFile }) => {
+		plugins: [] as InlangPlugin[],
+		importFiles: (args: { pluginKey: InlangPlugin["key"]; files: ResourceFile }) => {
 			args
 			throw new Error("Not implemented")
 		},
-		exportFiles: (args: { pluginKey: InlangPlugin2["key"] }) => {
+		exportFiles: (args: { pluginKey: InlangPlugin["key"] }) => {
 			args
 			throw new Error("Not implemented")
 		},

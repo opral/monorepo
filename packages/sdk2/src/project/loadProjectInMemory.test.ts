@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
 import { newProject } from "./newProject.js"
 import { loadProjectInMemory } from "./loadProjectInMemory.js"
-import { bundleId } from "../bundle-id/bundle-id.js"
+import { generateBundleId } from "../bundle-id/bundle-id.js"
 import { uuidv4 } from "@lix-js/sdk"
 
 test("roundtrip should succeed", async () => {
@@ -14,7 +14,7 @@ test("roundtrip should succeed", async () => {
 	const insertedBundle = await project1.db
 		.insertInto("bundle")
 		.values({
-			id: bundleId(),
+			id: generateBundleId(),
 			// @ts-expect-error - manual stringification
 			alias: JSON.stringify({ default: "bundle1" }),
 		})
@@ -36,7 +36,7 @@ test("it should persist changes of bundles, messages, and variants to lix ", asy
 	const bundle = await project1.db
 		.insertInto("bundle")
 		.values({
-			id: bundleId(),
+			id: generateBundleId(),
 			// @ts-expect-error - manual stringification
 			alias: JSON.stringify({ default: "bundle1" }),
 		})

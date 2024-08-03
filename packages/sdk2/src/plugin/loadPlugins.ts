@@ -1,12 +1,12 @@
 import type { ProjectSettings } from "../schema/settings.js"
 import { PluginError, PluginImportError } from "./errors.js"
-import type { InlangPlugin2 } from "./schema.js"
+import type { InlangPlugin } from "./type.js"
 
 export async function loadPlugins(args: { settings: ProjectSettings }): Promise<{
-	plugins: InlangPlugin2[]
+	plugins: InlangPlugin[]
 	errors: PluginError[]
 }> {
-	const plugins: InlangPlugin2[] = []
+	const plugins: InlangPlugin[] = []
 	const errors: PluginError[] = []
 	for (const uri of args.settings.modules) {
 		try {

@@ -1,0 +1,59 @@
+import type { TObject } from "@sinclair/typebox"
+import type { BundleNested, Message } from "../schema/schemaV2.js"
+import type { ProjectSettings } from "../schema/settings.js"
+// eslint-disable-next-line no-restricted-imports
+import type fs from "node:fs/promises"
+
+export type InlangPlugin = {
+	/**
+	 * @deprecated Use `key` instead.
+	 */
+	id: string
+	/**
+	 * The key of the plugin.
+	 */
+	key: string
+	settingsSchema?: TObject
+	/**
+	 * @deprecated Use `importFiles` instead.
+	 */
+	loadMessages?: (args: {
+		settings: ProjectSettings
+		nodeishFs: typeof fs
+	}) => Promise<Message[]> | Message[]
+	/**
+	 * @deprecated Use `exportFiles` instead.
+	 */
+	saveMessages?: (args: {
+		messages: Message[]
+		settings: ProjectSettings
+		nodeishFs: typeof fs
+	}) => Promise<void> | void
+	/**
+	 * Import / Export files.
+	 * see https://linear.app/opral/issue/MESDK-157/sdk-v2-release-on-sqlite
+	 */
+	toBeImportedFiles?: (args: {
+		settings: ProjectSettings
+		nodeFs: typeof fs
+	}) => Promise<Array<ResourceFile>> | Array<ResourceFile>
+	importFiles?: (args: { files: Array<ResourceFile> }) => { bundles: BundleNested }
+	exportFiles?: (args: { bundles: BundleNested; settings: ProjectSettings }) => Array<ResourceFile>
+	/**
+	 * Define app specific APIs.
+	 *
+	 * @example
+	 * addCustomApi: () => ({
+	 *   "app.inlang.ide-extension": {
+	 *     messageReferenceMatcher: () => {}
+	 *   }
+	 *  })
+	 */
+	addCustomApi?: (args: { settings: ProjectSettings }) => Record<string, unknown>
+}
+
+export type ResourceFile = {
+	path: string
+	content: string
+	pluginKey: InlangPlugin["key"]
+}
