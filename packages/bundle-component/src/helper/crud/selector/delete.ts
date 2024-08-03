@@ -1,4 +1,4 @@
-import type { NestedMessage } from "@inlang/sdk2"
+import type { MessageNested } from "@inlang/sdk2"
 
 /**
  * Deletes a selector from a message.
@@ -10,7 +10,7 @@ import type { NestedMessage } from "@inlang/sdk2"
  * deleteSelector({ message, index: 0 })
  */
 
-const deleteSelector = (props: { message: NestedMessage; index: number }) => {
+const deleteSelector = (props: { message: MessageNested; index: number }) => {
 	const selectorName = props.message.selectors[props.index]!.arg.name
 	if (selectorName) {
 		props.message.selectors.splice(props.index, 1)

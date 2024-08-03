@@ -1,10 +1,10 @@
-import { type Expression, type NestedMessage } from "@inlang/sdk2"
+import { type Expression, type MessageNested } from "@inlang/sdk2"
 import { describe, expect, it } from "vitest"
 import addSelector from "./add.js"
 
 describe("addSelector", () => {
 	it("Should add selector", () => {
-		const message: NestedMessage = {
+		const message: MessageNested = {
 			bundleId: "testId",
 			id: "testId",
 			locale: "en",

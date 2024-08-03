@@ -1,4 +1,4 @@
-import type { Declaration, Message, NestedBundle, ProjectSettings, Variant } from "@inlang/sdk2"
+import type { Declaration, Message, BundleNested, ProjectSettings, Variant } from "@inlang/sdk2"
 import { LitElement, css, html } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import getInputs from "../helper/crud/input/get.js"
@@ -124,7 +124,7 @@ export default class InlangBundleHeader extends LitElement {
 	]
 
 	@property()
-	bundle: NestedBundle | undefined
+	bundle: BundleNested | undefined
 
 	@property()
 	settings: ProjectSettings | undefined

@@ -1,4 +1,4 @@
-import type { NestedMessage, Declaration, Message, ProjectSettings, Variant } from "@inlang/sdk2"
+import type { MessageNested, Declaration, ProjectSettings, Variant } from "@inlang/sdk2"
 import { createVariant } from "@inlang/sdk2"
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
@@ -157,7 +157,7 @@ export default class InlangMessage extends LitElement {
 	locale: ProjectSettings["locales"][number] | undefined
 
 	@property()
-	message: NestedMessage | undefined
+	message: MessageNested | undefined
 
 	@property()
 	messageValidationReports: Array<any> | undefined
@@ -175,7 +175,7 @@ export default class InlangMessage extends LitElement {
 	addInput: (name: string) => void = () => {}
 
 	@property()
-	addMessage: (message: NestedMessage) => void = () => {}
+	addMessage: (message: MessageNested) => void = () => {}
 
 	@property()
 	resetFreshlyAddedVariants: (newArray: string[]) => void = () => {}

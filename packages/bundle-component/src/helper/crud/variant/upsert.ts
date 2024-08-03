@@ -1,4 +1,4 @@
-import type { NestedMessage, Variant } from "@inlang/sdk2"
+import type { MessageNested, Variant } from "@inlang/sdk2"
 
 /**
  * Upsert a variant into a message. If a variant with the same match already exists, it will be updated, otherwise a new variant will be added.
@@ -8,7 +8,7 @@ import type { NestedMessage, Variant } from "@inlang/sdk2"
  */
 
 const upsertVariant = (props: {
-	message: NestedMessage
+	message: MessageNested
 	variant: Variant
 }): Variant | undefined => {
 	const existingVariant = props.message.variants.find((variant) => variant.id === props.variant.id)

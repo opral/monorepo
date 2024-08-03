@@ -2,7 +2,6 @@ import { html, LitElement } from "lit"
 import { customElement, property, state } from "lit/decorators.js"
 import overridePrimitiveColors from "../helper/overridePrimitiveColors.js"
 import {
-	type Bundle,
 	type Message,
 	type Pattern,
 	type ProjectSettings,
@@ -10,9 +9,8 @@ import {
 	createVariant,
 	createMessage,
 	type Variant,
-	type Expression,
 } from "@inlang/sdk2"
-import type { NestedBundle, NestedMessage } from "@inlang/sdk2"
+import type { BundleNested, MessageNested } from "@inlang/sdk2"
 
 //internal components
 import "./inlang-bundle-root.js"
@@ -56,7 +54,7 @@ import InlangBundleAction from "./actions/inlang-bundle-action.js"
 export default class InlangBundle extends LitElement {
 	//props
 	@property({ type: Object })
-	bundle: NestedBundle | undefined
+	bundle: BundleNested | undefined
 
 	@property({ type: Object })
 	settings: ProjectSettings | undefined
@@ -163,7 +161,7 @@ export default class InlangBundle extends LitElement {
 
 	// internal variables/states
 	@state()
-	private _bundle: NestedBundle | undefined
+	private _bundle: BundleNested | undefined
 
 	@state()
 	private _freshlyAddedVariants: string[] = []
@@ -178,7 +176,7 @@ export default class InlangBundle extends LitElement {
 		}
 	}
 
-	private _addMessage = (message: NestedMessage) => {
+	private _addMessage = (message: MessageNested) => {
 		if (this._bundle) {
 			this._bundle.messages.push(message)
 		}
@@ -257,9 +255,9 @@ export default class InlangBundle extends LitElement {
 	// fill message with empty message if message is undefined to fix layout shift (will not be committed)
 	private _fillMessage = (
 		bundleId: string,
-		message: NestedMessage | undefined,
+		message: MessageNested | undefined,
 		locale: ProjectSettings["locales"][number]
-	): NestedMessage => {
+	): MessageNested => {
 		if (message) {
 			if (message.variants.length === 0) {
 				message.variants.push(createVariant({ messageId: message.id, match: {} }))
@@ -271,7 +269,7 @@ export default class InlangBundle extends LitElement {
 	}
 
 	private _handleUpdatePattern = (
-		message: NestedMessage | undefined,
+		message: MessageNested | undefined,
 		variant: Variant | undefined,
 		newPattern: Pattern,
 		locale: ProjectSettings["locales"][number]
