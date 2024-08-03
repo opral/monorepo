@@ -1,8 +1,15 @@
 // @ts-ignore
 import { v4 as uuid } from "uuid"
-import type { Expression, NestedBundle, NestedMessage, Text, Variant } from "./schema/schema.js"
+import type {
+	Bundle,
+	BundleNested,
+	Expression,
+	MessageNested,
+	Text,
+	Variant,
+} from "./schema/schemaV2.js"
 import type { ProjectSettings } from "./schema/settings.js"
-import { newBundleId } from "./bundle-id/bundle-id.js"
+import { generateBundleId } from "./bundle-id/bundle-id.js"
 
 /**
  * create v2 Bundle with a random human ID
@@ -15,11 +22,11 @@ import { newBundleId } from "./bundle-id/bundle-id.js"
  */
 export function createBundle(args: {
 	id?: string
-	messages: NestedMessage[]
-	alias?: NestedBundle["alias"]
-}): NestedBundle {
+	messages: MessageNested[]
+	alias?: Bundle["alias"]
+}): BundleNested {
 	return {
-		id: args.id ?? newBundleId(),
+		id: args.id ?? generateBundleId(),
 		alias: args.alias ?? {},
 		messages: args.messages,
 	}
@@ -34,7 +41,7 @@ export function createMessage(args: {
 	locale: ProjectSettings["locales"][number]
 	text: string
 	match?: Record<Expression["arg"]["name"], string>
-}): NestedMessage {
+}): MessageNested {
 	const messageId = uuid()
 	return {
 		bundleId: args.bundleId,

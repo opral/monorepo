@@ -1,9 +1,9 @@
-import { Database } from "@inlang/sdk2";
+import { InlangDatabaseSchema } from "@inlang/sdk2";
 import { SelectQueryBuilder } from "kysely";
 import { jsonArrayFrom } from "kysely/helpers/sqlite";
 
 const populateMessages = (
-	bundleSelect: SelectQueryBuilder<Database, "bundle", object>
+	bundleSelect: SelectQueryBuilder<InlangDatabaseSchema, "bundle", object>
 ) => {
 	return bundleSelect.select((eb) => [
 		// select all columns from bundle
@@ -21,7 +21,7 @@ const populateMessages = (
 };
 
 const populateVariants = (
-	messageSelect: SelectQueryBuilder<Database, "message", object>
+	messageSelect: SelectQueryBuilder<InlangDatabaseSchema, "message", object>
 ) => {
 	return messageSelect.select((eb) => [
 		// select all columns from message
@@ -41,7 +41,7 @@ const populateVariants = (
 };
 
 export const getNestedBundleById = async (
-	bundleBuider: SelectQueryBuilder<Database, "bundle", object>,
+	bundleBuider: SelectQueryBuilder<InlangDatabaseSchema, "bundle", object>,
 	bundleId: string
 ) => {
 	return await populateMessages(bundleBuider)

@@ -3,8 +3,7 @@ import { InlangBundle as LitInlangBundle } from "@inlang/bundle-component"
 import React, { useEffect, useState } from "react";
 import { useAtom } from "jotai";
 import { projectAtom } from "../state.ts";
-import { poll } from "../poll.ts";
-import { NestedBundle } from "@inlang/sdk2";
+import { BundleNested } from "@inlang/sdk2";
 import { getNestedBundleById } from "../helper/getNestedBundleById.ts";
 
 export const ReactBundle = createComponent({
@@ -25,7 +24,7 @@ export const ReactBundle = createComponent({
 
 const InlangBundle = (props: { bundleId: string }) => {
   const [project] = useAtom(projectAtom);
-  const [bundle, setBundle] = useState<NestedBundle | undefined>(undefined);
+  const [bundle, setBundle] = useState<BundleNested | undefined>(undefined);
 
   useEffect(() => {
     if (!project) return

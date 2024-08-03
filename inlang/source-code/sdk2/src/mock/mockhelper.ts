@@ -1,11 +1,12 @@
-import { newBundleId } from "../bundle-id/bundle-id.js"
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type {
+	BundleNested,
 	Declaration,
 	Expression,
-	NestedBundle,
-	NestedMessage,
+	MessageNested,
 	Pattern,
-} from "../schema/schema.js"
+} from "../schema/schemaV2.js"
+import { generateBundleId } from "../bundle-id/bundle-id.js"
 import { inputNames, inputsWithSelectors, simpleInputs, translations } from "./mockdata.js"
 //@ts-ignore
 import { v4 } from "uuid"
@@ -52,10 +53,10 @@ export function createMockBundle(args: {
 	nSelectors: number
 	nExpressions: number
 }) {
-	const bundleId = newBundleId()
+	const bundleId = generateBundleId()
 	const bundleAlias = {
 		// TODO generate more realistic message bundle name like login_button or welcome_message or learn_more_lix
-		default: "name_" + newBundleId(),
+		default: "name_" + generateBundleId(),
 	}
 
 	const selectors: any[] = []
@@ -97,7 +98,7 @@ export function createMockBundle(args: {
 		id: bundleId,
 		alias: bundleAlias,
 		messages: messages,
-	} as NestedBundle
+	} as BundleNested
 }
 
 function createMessages(
@@ -107,7 +108,7 @@ function createMessages(
 	selectors: Expression[],
 	variants: Array<Record<Expression["arg"]["name"], string>>
 ) {
-	const messagesByLanguage: Record<string, NestedMessage> = {}
+	const messagesByLanguage: Record<string, MessageNested> = {}
 
 	for (const lanugageTag of languageTags) {
 		const messageId = generateUUID()
@@ -122,6 +123,9 @@ function createMessages(
 	}
 
 	for (const variant of variants) {
+		const y = messagesByLanguage["en"]!
+
+		y
 		const patternsByLanguage = createPattern(inputs, languageTags)
 		for (const lanugageTag of languageTags) {
 			messagesByLanguage[lanugageTag]!.variants.push({

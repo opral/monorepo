@@ -70,3 +70,15 @@ export const Variant = Type.Object({
 	match: Type.Any(), // TODO: Use appropriate Typebox type for JSONColumnType<Record<Expression["arg"]["name"], string>>
 	pattern: Pattern,
 })
+
+export type MessageNested = Static<typeof MessageNested>
+export const MessageNested = Type.Intersect([
+	Message,
+	Type.Object({ variants: Type.Array(Variant) }),
+])
+
+export type BundleNested = Static<typeof BundleNested>
+export const BundleNested = Type.Intersect([
+	Bundle,
+	Type.Object({ messages: Type.Array(MessageNested) }),
+])
