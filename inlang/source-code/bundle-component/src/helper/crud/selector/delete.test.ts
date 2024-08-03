@@ -1,10 +1,10 @@
-import { type NestedMessage } from "@inlang/sdk2"
+import { type MessageNested } from "@inlang/sdk2"
 import { describe, expect, it } from "vitest"
 import deleteSelector from "./delete.js"
 
 describe("deleteSelector", () => {
 	it("Should delete selector", () => {
-		const message: NestedMessage = {
+		const message: MessageNested = {
 			bundleId: "bundleTestId",
 			id: "testId",
 			locale: "en",

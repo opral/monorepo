@@ -1,4 +1,4 @@
-import { createVariant, type Expression, type NestedMessage } from "@inlang/sdk2"
+import { createVariant, type Expression, type MessageNested } from "@inlang/sdk2"
 
 /**
  * Adds a selector to a message.
@@ -10,7 +10,7 @@ import { createVariant, type Expression, type NestedMessage } from "@inlang/sdk2
  * addSelector({ message, selector: { type: "expression", arg: { type: "variable", name: "mySelector" } } })
  */
 
-const addSelector = (props: { message: NestedMessage; selector: Expression }) => {
+const addSelector = (props: { message: MessageNested; selector: Expression }) => {
 	props.message.selectors.push(props.selector)
 	if (props.message.variants.length !== 0) {
 		for (const variant of props.message.variants) {
