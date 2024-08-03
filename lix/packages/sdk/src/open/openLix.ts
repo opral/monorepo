@@ -8,7 +8,7 @@ import { contentFromDatabase, createDialect, type SqliteDatabase } from "sqlite-
 /**
  * Common setup between different lix environments.
  */
-export async function setup(args: { database: SqliteDatabase }) {
+export async function openLix(args: { database: SqliteDatabase }) {
 	const db = new Kysely<LixDatabase>({
 		dialect: createDialect({ database: args.database }),
 		plugins: [new ParseJSONResultsPlugin()],

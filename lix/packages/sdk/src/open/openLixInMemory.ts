@@ -1,5 +1,5 @@
 import { createInMemoryDatabase, importDatabase } from "sqlite-wasm-kysely"
-import { setup } from "./setup.js"
+import { openLix } from "./openLix.js"
 
 /**
  *
@@ -12,5 +12,5 @@ export async function openLixInMemory(args: { blob: Blob }) {
 		db: database,
 		content: new Uint8Array(await args.blob.arrayBuffer()),
 	})
-	return setup({ database })
+	return openLix({ database })
 }
