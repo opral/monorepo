@@ -8,10 +8,13 @@ import { push } from "./git/push.js"
 import { pull } from "./git/pull.js"
 import { listRemotes } from "./git/listRemotes.js"
 import { log } from "./git/log.js"
+import { fetch } from "./git/fetch.js"
 import { getOrigin } from "./git/getOrigin.js"
 import { getBranches } from "./git/getBranches.js"
 import { getCurrentBranch } from "./git/getCurrentBranch.js"
 import { checkout } from "./git/checkout.js"
+
+import { readNote } from "./git/notes.js"
 
 // github depenedent
 import { getMeta } from "./github/getMeta.js"
@@ -85,6 +88,8 @@ export async function openRepository(
 		getMeta: getMeta.bind(undefined, ctx),
 		listRemotes: listRemotes.bind(undefined, ctx, state),
 		log: log.bind(undefined, ctx),
+		fetch: fetch.bind(undefined, ctx, state),
+		readNote: readNote.bind(undefined, ctx, state),
 		getOrigin: getOrigin.bind(undefined, ctx, state),
 		getBranches: getBranches.bind(undefined, ctx),
 		getCurrentBranch: getCurrentBranch.bind(undefined, ctx, state),
@@ -92,7 +97,7 @@ export async function openRepository(
 		checkout: checkout.bind(undefined, ctx, state),
 		createFork: createFork.bind(undefined, ctx),
 		mergeUpstream: mergeUpstream.bind(undefined, ctx),
-		push: push.bind(undefined, ctx),
+		push: push.bind(undefined, ctx, state),
 		pull: pull.bind(undefined, ctx, state),
 
 		...(ctx.experimentalFeatures.lixFs ? lixFs(state.nodeishFs) : {}),

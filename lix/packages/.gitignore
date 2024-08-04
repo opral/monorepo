@@ -1,2 +1,4 @@
 pnpm-lock.yaml
-gitea
+gitea/ssh
+gitea/git
+gitea/gitea/actions_log

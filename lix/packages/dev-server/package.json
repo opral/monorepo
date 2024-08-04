@@ -1,0 +1,16 @@
+{
+  "name": "dev-server",
+  "version": "1.0.0",
+  "description": "docker dev proxy",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm exec workerd serve --watch --inspector-addr=0.0.0.0:9229 --verbose ./config.capnp --socket-addr=ingest=0.0.0.0:80"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "workerd": "1.20240314.0"
+  }
+}
