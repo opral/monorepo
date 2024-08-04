@@ -17,11 +17,11 @@ export async function pull(
 	}
 
 	const branchName =
-		state.branchName || (await isoGit.currentBranch({ fs: ctx.rawFs, dir: "/" })) || "HEAD"
+		state.ref || (await isoGit.currentBranch({ fs: ctx.rawFs, dir: "/" })) || "HEAD"
 
 	const oid = await isoGit.resolveRef({
 		fs: ctx.rawFs,
-		dir: "/",
+		dir: ctx.dir,
 		ref: "refs/remotes/origin/" + branchName,
 	})
 	const { commit } = await isoGit.readCommit({ fs: ctx.rawFs, dir: "/", oid })

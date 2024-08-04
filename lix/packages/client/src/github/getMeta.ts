@@ -34,6 +34,10 @@ export async function getMeta(ctx: RepoContext) {
 	if ("error" in res) {
 		return { error: res.error }
 	} else {
+		const ownerType: "user" | "organization" = res.data.owner.type.toLowerCase()
+
+		let ownerRights = false //  ownerType === 'user' && res.data.owner.login === login
+
 		return {
 			allowForking: res.data.allow_forking,
 			name: res.data.name,
@@ -44,9 +48,10 @@ export async function getMeta(ctx: RepoContext) {
 				admin: res.data.permissions?.admin || false,
 				push: res.data.permissions?.push || false,
 				pull: res.data.permissions?.pull || false,
+				owner: ownerRights,
 			},
 			owner: {
-				type: res.data.owner.type.toLowerCase(), // 'user' | 'organization'
+				type: ownerType,
 				name: res.data.owner.name || undefined,
 				email: res.data.owner.email || undefined,
 				login: res.data.owner.login,

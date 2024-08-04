@@ -8,10 +8,16 @@ import { push } from "./git/push.js"
 import { pull } from "./git/pull.js"
 import { listRemotes } from "./git/listRemotes.js"
 import { log } from "./git/log.js"
+import { fetch } from "./git/fetch.js"
+import { fetchRefs } from "./git/fetchRefs.js"
 import { getOrigin } from "./git/getOrigin.js"
-import { getBranches } from "./git/getBranches.js"
+import { listBranches } from "./git/listBranches.js"
 import { getCurrentBranch } from "./git/getCurrentBranch.js"
+import { resolveRef } from "./git/resolveRef.js"
+import { coreRefs } from "./git/coreRefs.js"
 import { checkout } from "./git/checkout.js"
+
+import { readNote } from "./git/notes.js"
 
 // github depenedent
 import { getMeta } from "./github/getMeta.js"
@@ -56,7 +62,7 @@ export async function openRepository(
 		author?: any
 		nodeishFs?: NodeishFilesystem
 		workingDirectory?: string
-		branch?: string
+		ref?: string
 		debug?: boolean
 
 		// Do not expose internal args, if using in app code needs ts ignore and comment
@@ -79,20 +85,25 @@ export async function openRepository(
 		nodeishFs: state.nodeishFs,
 
 		commit: commit.bind(undefined, ctx, state),
+		resolveRef: resolveRef.bind(undefined, ctx),
+		coreRefs: coreRefs.bind(undefined, ctx),
 		status: status.bind(undefined, ctx, state),
 		statusList: statusList.bind(undefined, ctx, state),
 		forkStatus: forkStatus.bind(undefined, ctx),
 		getMeta: getMeta.bind(undefined, ctx),
 		listRemotes: listRemotes.bind(undefined, ctx, state),
 		log: log.bind(undefined, ctx),
+		fetch: fetch.bind(undefined, ctx, state),
+		fetchRefs: fetchRefs.bind(undefined, ctx),
+		readNote: readNote.bind(undefined, ctx, state),
 		getOrigin: getOrigin.bind(undefined, ctx, state),
-		getBranches: getBranches.bind(undefined, ctx),
-		getCurrentBranch: getCurrentBranch.bind(undefined, ctx, state),
+		listBranches: listBranches.bind(undefined, ctx),
+		getCurrentBranch: getCurrentBranch.bind(undefined, ctx),
 		getFirstCommitHash: getFirstCommitHash.bind(undefined, ctx),
 		checkout: checkout.bind(undefined, ctx, state),
 		createFork: createFork.bind(undefined, ctx),
 		mergeUpstream: mergeUpstream.bind(undefined, ctx),
-		push: push.bind(undefined, ctx),
+		push: push.bind(undefined, ctx, state),
 		pull: pull.bind(undefined, ctx, state),
 
 		...(ctx.experimentalFeatures.lixFs ? lixFs(state.nodeishFs) : {}),

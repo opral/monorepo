@@ -40,7 +40,7 @@ export async function inflatePackResponse(packResonseBody: Uint8Array) {
 	}
 }
 
-export async function inflatePackfile(packfile: any) {
+export async function inflatePackfile(packfile: any, { minimal = false } = {}) {
 	// TODO check how to deal with external ref deltas here - do we want to try to get them locally?
 	const getExternalRefDelta = (oid: string) => console.warn("trying to catch external ref", oid) // readObject({ fs, cache, gitdir, oid })
 
@@ -67,6 +67,9 @@ export async function inflatePackfile(packfile: any) {
 			inflatedPack[typeKey][hash] = commit.parse()
 		} else if (object.type === "blob") {
 			object.string = object.object.toString()
+			if (minimal) {
+				delete object.object
+			}
 			inflatedPack[typeKey][hash] = object
 		} else {
 			inflatedPack[typeKey][hash] = object
@@ -74,7 +77,9 @@ export async function inflatePackfile(packfile: any) {
 	}
 
 	Object.values(inflatedPack.commits || {}).forEach((commit: any) => {
-		inflatedPack.trees[commit.tree] = extractTree(trees, commit.tree)
+		if (inflatedPack.trees) {
+			inflatedPack.trees[commit.tree] = extractTree(trees, commit.tree)
+		}
 	})
 
 	// add the remaining trees that are not part of commit trees

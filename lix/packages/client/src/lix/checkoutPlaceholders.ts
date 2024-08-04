@@ -15,13 +15,13 @@ export async function checkOutPlaceholders(
 	} = {}
 ) {
 	const { rawFs, cache, dir } = ctx
-	const { branchName, checkedOut, sparseFilter } = state
+	const { ref, checkedOut, sparseFilter } = state
 
 	await _checkout({
 		fs: ctx.rawFs,
 		cache,
 		dir,
-		ref: branchName,
+		ref,
 		filepaths: [],
 	})
 
@@ -34,7 +34,7 @@ export async function checkOutPlaceholders(
 		dir,
 		cache,
 		gitdir: ".git",
-		trees: [isoGit.TREE({ ref: branchName })],
+		trees: [isoGit.TREE({ ref })],
 
 		map: async function (fullpath, [commit]) {
 			if (!commit) {
