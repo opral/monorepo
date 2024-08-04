@@ -3,6 +3,7 @@ import type { BundleNested, Message } from "../schema/schemaV2.js"
 import type { ProjectSettings } from "../schema/settings.js"
 // eslint-disable-next-line no-restricted-imports
 import type fs from "node:fs/promises"
+import type { ResourceFile } from "../project/api.js"
 
 export type InlangPlugin = {
 	/**
@@ -50,10 +51,4 @@ export type InlangPlugin = {
 	 *  })
 	 */
 	addCustomApi?: (args: { settings: ProjectSettings }) => Record<string, unknown>
-}
-
-export type ResourceFile = {
-	path: string
-	content: string
-	pluginKey: InlangPlugin["key"]
 }
