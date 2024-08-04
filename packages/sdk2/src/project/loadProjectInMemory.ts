@@ -8,7 +8,7 @@ import { loadProject } from "./loadProject.js"
 export async function loadProjectInMemory(
 	args: {
 		blob: Blob
-	} & Pick<Parameters<typeof loadProject>[0], "_mockPlugins">
+	} & Omit<Parameters<typeof loadProject>[0], "sqlite" | "lix">
 ) {
 	const lix = await openLixInMemory({ blob: args.blob })
 
