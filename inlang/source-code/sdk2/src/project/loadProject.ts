@@ -1,17 +1,29 @@
 import { type Lix } from "@lix-js/sdk"
-import type { InlangPlugin, ResourceFile } from "../plugin/type.js"
+import type { InlangPlugin, ResourceFile } from "../plugin/schema.js"
 import type { ProjectSettings } from "../schema/settings.js"
 import { contentFromDatabase, type SqliteDatabase } from "sqlite-wasm-kysely"
 import { initKysely } from "../database/initKysely.js"
 import { initHandleSaveToLixOnChange } from "./initHandleSaveToLixOnChange.js"
+import { importPlugins } from "../plugin/importPlugins.js"
 
 /**
  * Common load project logic.
  */
-export async function loadProject({ sqlite, lix }: { sqlite: SqliteDatabase; lix: Lix }) {
-	const db = initKysely({ sqlite })
+export async function loadProject(args: {
+	sqlite: SqliteDatabase
+	lix: Lix
+	/**
+	 * For testing purposes only.
+	 *
+	 * @example
+	 *   const project = await loadProject({ _mockPlugins: { "my-plugin": InlangPlugin } })
+	 *
+	 */
+	_mockPlugins?: Record<string, InlangPlugin>
+}) {
+	const db = initKysely({ sqlite: args.sqlite })
 
-	const settingsFile = await lix.db
+	const settingsFile = await args.lix.db
 		.selectFrom("file")
 		.select("data")
 		.where("path", "=", "/settings.json")
@@ -19,11 +31,27 @@ export async function loadProject({ sqlite, lix }: { sqlite: SqliteDatabase; lix
 
 	let settings = JSON.parse(new TextDecoder().decode(settingsFile.data)) as ProjectSettings
 
-	await initHandleSaveToLixOnChange({ sqlite, db, lix })
+	const { plugins, errors: pluginErrors } = await importPlugins({
+		settings,
+		mockPlugins: args._mockPlugins,
+	})
+
+	await initHandleSaveToLixOnChange({ sqlite: args.sqlite, db, lix: args.lix })
 
 	return {
 		db,
-		plugins: [] as InlangPlugin[],
+		plugins: {
+			get: () => plugins,
+			subscribe: () => {
+				throw new Error("Not implemented")
+			},
+		},
+		errors: {
+			get: () => pluginErrors,
+			subscribe: () => {
+				throw new Error("Not implemented")
+			},
+		},
 		importFiles: (args: { pluginKey: InlangPlugin["key"]; files: ResourceFile }) => {
 			args
 			throw new Error("Not implemented")
@@ -35,7 +63,7 @@ export async function loadProject({ sqlite, lix }: { sqlite: SqliteDatabase; lix
 		settings: {
 			get: () => settings,
 			set: async (newSettings: ProjectSettings) => {
-				await lix.db
+				await args.lix.db
 					.updateTable("file")
 					.where("path", "is", "/settings.json")
 					.set({
@@ -45,24 +73,27 @@ export async function loadProject({ sqlite, lix }: { sqlite: SqliteDatabase; lix
 				// if successful, update local settings
 				settings = newSettings
 			},
+			subscribe: () => {
+				throw new Error("Not implemented")
+			},
 		},
 		close: async () => {
-			sqlite.close()
+			args.sqlite.close()
 			await db.destroy()
-			await lix.close()
+			await args.lix.close()
 		},
 		toBlob: async () => {
-			const inlangDbContent = contentFromDatabase(sqlite)
+			const inlangDbContent = contentFromDatabase(args.sqlite)
 			// flush db to lix
-			await lix.db
+			await args.lix.db
 				.updateTable("file")
 				.where("path", "is", "/db.sqlite")
 				.set({
 					data: inlangDbContent,
 				})
 				.execute()
-			return lix.toBlob()
+			return args.lix.toBlob()
 		},
-		lix,
+		lix: args.lix,
 	}
 }
