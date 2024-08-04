@@ -1,10 +1,11 @@
 import { type Lix } from "@lix-js/sdk"
-import type { InlangPlugin, ResourceFile } from "../plugin/schema.js"
+import type { InlangPlugin } from "../plugin/schema.js"
 import type { ProjectSettings } from "../schema/settings.js"
 import { contentFromDatabase, type SqliteDatabase } from "sqlite-wasm-kysely"
 import { initKysely } from "../database/initKysely.js"
 import { initHandleSaveToLixOnChange } from "./initHandleSaveToLixOnChange.js"
 import { importPlugins } from "../plugin/importPlugins.js"
+import type { InlangProject } from "./api.js"
 
 /**
  * Common load project logic.
@@ -52,12 +53,10 @@ export async function loadProject(args: {
 				throw new Error("Not implemented")
 			},
 		},
-		importFiles: (args: { pluginKey: InlangPlugin["key"]; files: ResourceFile }) => {
-			args
+		importFiles: () => {
 			throw new Error("Not implemented")
 		},
-		exportFiles: (args: { pluginKey: InlangPlugin["key"] }) => {
-			args
+		exportFiles: () => {
 			throw new Error("Not implemented")
 		},
 		settings: {
@@ -95,5 +94,5 @@ export async function loadProject(args: {
 			return args.lix.toBlob()
 		},
 		lix: args.lix,
-	}
+	} satisfies InlangProject
 }
