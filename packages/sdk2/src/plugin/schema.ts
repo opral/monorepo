@@ -8,7 +8,7 @@ export type InlangPlugin = {
 	/**
 	 * @deprecated Use `key` instead.
 	 */
-	id: string
+	id?: string
 	/**
 	 * The key of the plugin.
 	 */

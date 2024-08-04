@@ -9,7 +9,7 @@ import { Kysely, sql } from "kysely"
  * The app is responsible for saving the project "whereever"
  * e.g. the user's computer, cloud storage, or OPFS in the browser.
  */
-export async function newProject(): Promise<Blob> {
+export async function newProject(args?: { settings?: ProjectSettings }): Promise<Blob> {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	})
@@ -64,7 +64,7 @@ CREATE INDEX idx_variant_message_id ON variant (message_id);
 					path: "/settings.json",
 					id: uuidv4(),
 					data: await new Blob([
-						JSON.stringify(defaultProjectSettings, undefined, 2),
+						JSON.stringify(args?.settings ?? defaultProjectSettings, undefined, 2),
 					]).arrayBuffer(),
 				},
 			])

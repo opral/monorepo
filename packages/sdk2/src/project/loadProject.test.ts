@@ -67,3 +67,25 @@ test("get and set settings", async () => {
 	const updatedSettings = project.settings.get()
 	expect(updatedSettings["plugin.key"]).toEqual({ test: "value" })
 })
+
+test("providing mock plugins should be possible", async () => {
+	const project = await loadProjectInMemory({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en"],
+				modules: ["/my-cool-plugin.js"],
+			},
+		}),
+		_mockPlugins: {
+			"/my-cool-plugin.js": {
+				key: "my-cool-plugin",
+			},
+		},
+	})
+
+	const plugins = project.plugins.get()
+	expect(plugins.length).toBe(1)
+	expect(plugins[0]?.key).toBe("my-cool-plugin")
+	expect(project.errors.get().length).toBe(0)
+})
