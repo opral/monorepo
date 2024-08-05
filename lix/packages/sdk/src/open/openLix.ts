@@ -22,7 +22,7 @@ export async function openLix(args: {
 	 * @example
 	 *   const lix = await openLixInMemory({ blob: await newLixFile(), providePlugin: [myPlugin] })
 	 */
-	providePlugin?: LixPlugin[]
+	providePlugins?: LixPlugin[]
 }) {
 	const db = new Kysely<LixDatabase>({
 		dialect: createDialect({ database: args.database }),
@@ -30,8 +30,8 @@ export async function openLix(args: {
 	})
 
 	const plugins = await loadPlugins(db)
-	if (args.providePlugin && args.providePlugin.length > 0) {
-		plugins.push(...args.providePlugin)
+	if (args.providePlugins && args.providePlugins.length > 0) {
+		plugins.push(...args.providePlugins)
 	}
 
 	args.database.createFunction({

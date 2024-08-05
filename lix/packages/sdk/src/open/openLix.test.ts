@@ -9,6 +9,6 @@ test("providing plugins should be possible", async () => {
 		glob: "*",
 		diff: {},
 	}
-	const lix = await openLixInMemory({ blob: await newLixFile(), providePlugin: [mockPlugin] })
+	const lix = await openLixInMemory({ blob: await newLixFile(), providePlugins: [mockPlugin] })
 	expect(lix.plugins).toContain(mockPlugin)
 })
