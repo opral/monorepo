@@ -15,7 +15,7 @@ import { Link } from "react-router-dom";
 
 export default function Layout(props: { children: React.ReactNode }) {
 	return (
-		<div className="p-6 space-y-4">
+		<div className="p-6 max-w-7xl mx-auto px-4 h-full">
 			<MenuBar />
 			{props.children}
 		</div>
@@ -25,11 +25,13 @@ export default function Layout(props: { children: React.ReactNode }) {
 const MenuBar = () => {
 	return (
 		<>
-			<div className="flex gap-2 mb-12">
-				<CreateNewProject />
+			<div className="flex gap-2 mb-12 justify-between">
 				<SelectProject />
-				<SettingsButton />
-				<ImportComponent />
+				<div>
+					<CreateNewProject />
+					<ImportComponent />
+					<SettingsButton />
+				</div>
 			</div>
 		</>
 	);
@@ -111,7 +113,7 @@ const CreateNewProject = () => {
 					setShowDialog(true);
 				}}
 			>
-				Create new project
+				New project
 			</SlButton>
 			<SlDialog
 				label="Create new project"
@@ -141,15 +143,10 @@ const CreateNewProject = () => {
 
 const SettingsButton = () => {
 	// check if window.location.pathname === "/settings"
-	const isSettingsPage = window.location.pathname === "/settings";
 
 	return (
-		<Link to={isSettingsPage ? "/" : "/settings"}>
-			<SlButton
-				slot="trigger"
-				size="small"
-				variant={isSettingsPage ? "primary" : "default"}
-			>
+		<Link to="/settings">
+			<SlButton slot="trigger" size="small" variant="default">
 				Settings
 			</SlButton>
 		</Link>

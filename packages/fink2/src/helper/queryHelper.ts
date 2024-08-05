@@ -61,19 +61,15 @@ const queryHelper = {
 			db: Kysely<InlangDatabaseSchema>,
 			message: Partial<Message> & { id: string }
 		) => {
-			const messageProperties = structuredClone(message as any); // TODO SDK-v2 KISELY check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
-			delete messageProperties.id;
-			delete messageProperties.variants;
-			if (message.declarations) {
-				messageProperties.declarations = json(message.declarations) as any;
-			}
-			if (message.selectors) {
-				messageProperties.selectors = json(message.selectors) as any;
-			}
+		
 
 			return db
 				.updateTable("message")
-				.set(messageProperties)
+				.set({
+					...message,
+					declarations: json(message.declarations) as any,
+					selectors: json(message.selectors) as any,
+				})
 				.where("message.id", "=", message.id);
 		},
 		delete: (db: Kysely<InlangDatabaseSchema>, message: Message) => {
@@ -94,18 +90,13 @@ const queryHelper = {
 			db: Kysely<InlangDatabaseSchema>,
 			variant: Partial<Variant> & { id: string }
 		) => {
-			const variantProperties = structuredClone(variant as any); // TODO SDK-v2 KISELY check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
-			delete variantProperties.id;
-			if (variant.match) {
-				variantProperties.match = json(variant.match) as any;
-			}
-			if (variant.pattern) {
-				variantProperties.pattern = json(variant.pattern) as any;
-			}
-
 			return db
 				.updateTable("variant")
-				.set(variantProperties)
+				.set({
+					...variant,
+					match: json(variant.match) as any,
+					pattern: json(variant.pattern) as any,
+				})
 				.where("variant.id", "=", variant.id);
 		},
 		delete: (db: Kysely<InlangDatabaseSchema>, variant: Variant) => {

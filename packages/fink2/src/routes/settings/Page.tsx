@@ -3,6 +3,8 @@ import Layout from "../../layout.tsx";
 import { useAtom } from "jotai";
 import { projectAtom } from "../../state.js";
 import Settings from "../../components/InlangSettings.tsx";
+import { Link } from "react-router-dom";
+import { SlButton } from "@shoelace-style/shoelace/dist/react";
 
 export default function App() {
 	const [project] = useAtom(projectAtom);
@@ -21,7 +23,15 @@ export default function App() {
 	return (
 		<>
 			<Layout>
-				<h1 className="text-2xl -mt-8 mb-8">Settings</h1>
+				<div className="flex items-center mb-8 gap-4">
+					<Link to="/">
+						<SlButton slot="trigger" size="small" variant="default">
+							Back
+						</SlButton>
+					</Link>
+					<h1 className="text-2xl">Settings</h1>
+				</div>
+
 				{project && settings && (
 					<Settings
 						settings={settings}
