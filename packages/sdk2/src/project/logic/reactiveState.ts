@@ -10,9 +10,9 @@ import type { ProjectSettings } from "../../schema/settings.js";
  * getter or subscription is too high (internally).
  */
 export type ReactiveState = {
-	plugins: BehaviorSubject<Readonly<InlangPlugin[]>>;
-	errors: BehaviorSubject<Readonly<Error[]>>;
-	settings: BehaviorSubject<Readonly<ProjectSettings>>;
+	plugins$: BehaviorSubject<Readonly<InlangPlugin[]>>;
+	errors$: BehaviorSubject<Readonly<Error[]>>;
+	settings$: BehaviorSubject<Readonly<ProjectSettings>>;
 };
 
 export async function createReactiveState(args: {
@@ -20,15 +20,15 @@ export async function createReactiveState(args: {
 	errors: Error[];
 	settings: ProjectSettings;
 }): Promise<ReactiveState> {
-	const plugins = new BehaviorSubject<Readonly<InlangPlugin[]>>(args.plugins);
-	const errors = new BehaviorSubject<Readonly<Error[]>>(args.errors);
-	const settings = new BehaviorSubject<Readonly<ProjectSettings>>(
+	const plugins$ = new BehaviorSubject<Readonly<InlangPlugin[]>>(args.plugins);
+	const errors$ = new BehaviorSubject<Readonly<Error[]>>(args.errors);
+	const settings$ = new BehaviorSubject<Readonly<ProjectSettings>>(
 		args.settings
 	);
 
 	return {
-		plugins,
-		errors,
-		settings,
+		plugins$,
+		errors$,
+		settings$,
 	};
 }

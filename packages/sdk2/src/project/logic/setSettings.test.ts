@@ -16,7 +16,7 @@ test("setSettings an update to baseLocale and locales should update sourceLangua
 	await setSettings({
 		newSettings: settings,
 		lix,
-		reactiveState: { settings: settingsSubject },
+		reactiveState: { settings$: settingsSubject },
 	});
 
 	const updatedSettings = settingsSubject.getValue();
@@ -43,7 +43,7 @@ test("it should throw if sourceLanguageTag or languageTags are changed to enforc
 				languageTags: ["en", "fr"],
 			},
 			lix,
-			reactiveState: { settings: settingsSubject },
+			reactiveState: { settings$: settingsSubject },
 		})
 	).rejects.toThrow();
 });
@@ -60,7 +60,7 @@ test("it should mutate the settings object in case an error is thrown", async ()
 	await setSettings({
 		newSettings: settings,
 		lix,
-		reactiveState: { settings: settingsSubject },
+		reactiveState: { settings$: settingsSubject },
 	});
 
 	expect(settings).toStrictEqual(settings);
@@ -88,7 +88,7 @@ test("the settings should be persisted to lix", async () => {
 	await setSettings({
 		newSettings: settings,
 		lix,
-		reactiveState: { settings: settingsSubject },
+		reactiveState: { settings$: settingsSubject },
 	});
 
 	const settingsFile = await lix.db

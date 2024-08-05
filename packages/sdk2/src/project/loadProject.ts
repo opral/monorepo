@@ -55,19 +55,19 @@ export async function loadProject(args: {
 		db,
 		plugins: {
 			get: () =>
-				structuredClone(reactiveState.plugins.getValue()) as InlangPlugin[],
-			subscribe: withStructuredClone(reactiveState.plugins)
+				structuredClone(reactiveState.plugins$.getValue()) as InlangPlugin[],
+			subscribe: withStructuredClone(reactiveState.plugins$)
 				.subscribe as Subscription<InlangPlugin[]>,
 		},
 		errors: {
-			get: () => structuredClone(reactiveState.errors.getValue()) as Error[],
-			subscribe: withStructuredClone(reactiveState.errors)
+			get: () => structuredClone(reactiveState.errors$.getValue()) as Error[],
+			subscribe: withStructuredClone(reactiveState.errors$)
 				.subscribe as Subscription<Error[]>,
 		},
 		settings: {
 			get: () =>
-				structuredClone(reactiveState.settings.getValue()) as ProjectSettings,
-			subscribe: withStructuredClone(reactiveState.settings)
+				structuredClone(reactiveState.settings$.getValue()) as ProjectSettings,
+			subscribe: withStructuredClone(reactiveState.settings$)
 				.subscribe as Subscription<ProjectSettings>,
 			set: (newSettings) =>
 				setSettings({ newSettings, lix: args.lix, reactiveState }),
