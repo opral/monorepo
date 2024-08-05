@@ -1,13 +1,13 @@
-import type { ValueError } from "@sinclair/typebox/errors"
+import type { ValueError } from "@sinclair/typebox/errors";
 
 export class PluginError extends Error {
-	public readonly plugin: string
+	public readonly plugin: string;
 
 	constructor(message: string, options: { plugin: string; cause?: Error }) {
-		super(message)
-		this.name = "PluginError"
-		this.plugin = options.plugin
-		this.cause = options.cause
+		super(message);
+		this.name = "PluginError";
+		this.plugin = options.plugin;
+		this.cause = options.cause;
 	}
 }
 
@@ -19,8 +19,8 @@ export class PluginHasNoExportsError extends PluginError {
 		super(
 			`Plugin "${options.plugin}" has no exports. Every plugin must have an "export default".`,
 			options
-		)
-		this.name = "PluginHasNoExportsError"
+		);
+		this.name = "PluginHasNoExportsError";
 	}
 }
 
@@ -29,8 +29,11 @@ export class PluginHasNoExportsError extends PluginError {
  */
 export class PluginImportError extends PluginError {
 	constructor(options: { plugin: string; cause: Error }) {
-		super(`Couldn't import the plugin "${options.plugin}":\n\n${options.cause}`, options)
-		this.name = "PluginImportError"
+		super(
+			`Couldn't import the plugin "${options.plugin}":\n\n${options.cause}`,
+			options
+		);
+		this.name = "PluginImportError";
 	}
 }
 
@@ -40,12 +43,14 @@ export class PluginExportIsInvalidError extends PluginError {
 			`The export(s) of "${options.plugin}" are invalid:\n\n${options.errors
 				.map(
 					(error) =>
-						`"${error.path}" "${JSON.stringify(error.value, undefined, 2)}": "${error.message}"`
+						`"${error.path}" "${JSON.stringify(error.value, undefined, 2)}": "${
+							error.message
+						}"`
 				)
 				.join("\n")}`,
 			options
-		)
-		this.name = "PluginExportIsInvalidError"
+		);
+		this.name = "PluginExportIsInvalidError";
 	}
 }
 
@@ -55,13 +60,15 @@ export class PluginSettingsAreInvalidError extends PluginError {
 			`The settings of "${options.plugin}" are invalid:\n\n${options.errors
 				.map(
 					(error) =>
-						`Path "${error.path}" with value "${JSON.stringify(error.value, undefined, 2)}": "${
-							error.message
-						}"`
+						`Path "${error.path}" with value "${JSON.stringify(
+							error.value,
+							undefined,
+							2
+						)}": "${error.message}"`
 				)
 				.join("\n")}`,
 			options
-		)
-		this.name = "PluginSettingsAreInvalidError"
+		);
+		this.name = "PluginSettingsAreInvalidError";
 	}
 }

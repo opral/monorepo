@@ -1,5 +1,10 @@
-import { type Static, Type, type TTemplateLiteral, type TLiteral } from "@sinclair/typebox"
-import { JSONObject } from "@inlang/json-types"
+import {
+	type Static,
+	Type,
+	type TTemplateLiteral,
+	type TLiteral,
+} from "@sinclair/typebox";
+import { JSONObject } from "@inlang/json-types";
 
 const SDKSettings = Type.Object({
 	// TODO SDK-v2 SETTINGS do we need to generate a settings v2 schema?
@@ -108,15 +113,15 @@ const ExternalSettings = Type.Record(
 	// and `ExternalSettings` which are objects possible
 	JSON as unknown as typeof JSONObject,
 	{ description: "Settings defined by apps, plugins, etc." }
-)
+);
 
 export type ProjectSettings = Omit<
 	Static<typeof ProjectSettings>,
 	"languageTags" | "sourceLanguageTag"
 > & {
 	/** @deprecated Use `baseLocale` */
-	sourceLanguageTag?: string
+	sourceLanguageTag?: string;
 	/** @deprecated Use `locales` */
-	languageTags?: string[]
-}
-export const ProjectSettings = Type.Intersect([SDKSettings, ExternalSettings])
+	languageTags?: string[];
+};
+export const ProjectSettings = Type.Intersect([SDKSettings, ExternalSettings]);

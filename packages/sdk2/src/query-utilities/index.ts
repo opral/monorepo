@@ -1,1 +1,1 @@
-export { selectBundleNested } from "./selectBundleNested.js"
+export { selectBundleNested } from "./selectBundleNested.js";
