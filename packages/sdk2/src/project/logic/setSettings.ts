@@ -1,6 +1,7 @@
 import type { Lix } from "@lix-js/sdk";
 import type { ProjectSettings } from "../../schema/settings.js";
 import type { ReactiveState } from "./reactiveState.js";
+import dedent from "dedent";
 
 export async function setSettings(args: {
 	newSettings: ProjectSettings;
@@ -10,10 +11,27 @@ export async function setSettings(args: {
 	const previousSettings = args.reactiveState.settings.getValue();
 	if (
 		previousSettings.sourceLanguageTag !== args.newSettings.sourceLanguageTag ||
-		previousSettings.languageTags !== args.newSettings.languageTags
+		// Check if the length is different, and if so,
+		// check if the the tags are different
+		previousSettings.languageTags?.length !==
+			args.newSettings.languageTags?.length ||
+		args.newSettings.languageTags?.some(
+			(tag, i) => tag !== previousSettings.languageTags?.[i]
+		)
 	) {
 		throw new Error(
-			"Changing sourceLanguageTag or languageTags is not supported in v2 and above. Use baseLocale and locales instead."
+			dedent`
+			The sourceLanguageTag and/or languageTags differ from 
+			the baseLocale and/or locales.
+
+			Changing sourceLanguageTag or languageTags is not supported 
+			in v2 and above. Use baseLocale and locales instead:
+
+			\`\`\`diff
+			-settings.sourceLanguageTag = "en";
+			+settings.baseLocale = "en";
+			\`\`\`
+		`
 		);
 	}
 

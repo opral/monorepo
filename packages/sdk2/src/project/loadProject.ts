@@ -9,6 +9,7 @@ import type { InlangProject, Subscription } from "./api.js";
 import { createReactiveState } from "./logic/reactiveState.js";
 import { BehaviorSubject, map } from "rxjs";
 import { setSettings } from "./logic/setSettings.js";
+import { withLanguageTagToLocaleMigration } from "../migrations/v2/withLanguageTagToLocaleMigration.js";
 
 /**
  * Common load project logic.
@@ -33,9 +34,9 @@ export async function loadProject(args: {
 		.where("path", "=", "/settings.json")
 		.executeTakeFirstOrThrow();
 
-	const settings = JSON.parse(
-		new TextDecoder().decode(settingsFile.data)
-	) as ProjectSettings;
+	const settings = withLanguageTagToLocaleMigration(
+		JSON.parse(new TextDecoder().decode(settingsFile.data)) as ProjectSettings
+	);
 
 	const { plugins, errors: pluginErrors } = await importPlugins({
 		settings,
@@ -107,3 +108,4 @@ export async function loadProject(args: {
 function withStructuredClone<T>(subject: BehaviorSubject<T>) {
 	return subject.pipe(map((v) => structuredClone(v)));
 }
+

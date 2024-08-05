@@ -103,7 +103,6 @@ test("it should set sourceLanguageTag and languageTags if non-existent to make v
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
-				modules: [],
 			},
 		}),
 	});
