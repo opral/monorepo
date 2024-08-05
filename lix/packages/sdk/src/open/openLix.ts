@@ -8,13 +8,31 @@ import { contentFromDatabase, createDialect, type SqliteDatabase } from "sqlite-
 /**
  * Common setup between different lix environments.
  */
-export async function openLix(args: { database: SqliteDatabase }) {
+export async function openLix(args: {
+	database: SqliteDatabase
+	/**
+	 * Usecase are lix apps that define their own file format,
+	 * like inlang (unlike a markdown, csv, or json plugin).
+	 *
+	 * (+) avoids separating app code from plugin code and
+	 *     resulting bundling logic.
+	 * (-) such a file format must always be opened with the
+	 *     file format sdk. the file is not portable
+	 *
+	 * @example
+	 *   const lix = await openLixInMemory({ blob: await newLixFile(), providePlugin: [myPlugin] })
+	 */
+	providePlugins?: LixPlugin[]
+}) {
 	const db = new Kysely<LixDatabase>({
 		dialect: createDialect({ database: args.database }),
 		plugins: [new ParseJSONResultsPlugin()],
 	})
 
 	const plugins = await loadPlugins(db)
+	if (args.providePlugins && args.providePlugins.length > 0) {
+		plugins.push(...args.providePlugins)
+	}
 
 	args.database.createFunction({
 		name: "handle_file_change",
