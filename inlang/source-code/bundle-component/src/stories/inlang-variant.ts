@@ -25,10 +25,10 @@ export default class InlangVariant extends LitElement {
 				font-size: 13px;
 			}
 			:host {
-				border-top: 1px solid var(--sl-input-border-color);
+				border-top: 1px solid var(--sl-input-border-color) !important;
 			}
 			:host(:first-child) {
-				border-top: none;
+				border-top: none !important;
 			}
 			.variant {
 				position: relative;
