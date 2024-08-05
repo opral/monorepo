@@ -20,11 +20,11 @@ export default class InlangMessage extends LitElement {
 				position: relative;
 				display: flex;
 				min-height: 44px;
-				border: 1px solid var(--sl-input-border-color);
-				border-top: none;
+				border: 1px solid var(--sl-input-border-color) !important;
+				border-top: none !important;
 			}
 			.message:first-child {
-				border-top: 1px solid var(--sl-input-border-color);
+				border-top: 1px solid var(--sl-input-border-color) !important;
 			}
 			.language-container {
 				font-weight: 500;

@@ -10,6 +10,7 @@ import {
 	SlOption,
 	SlSelect,
 } from "@shoelace-style/shoelace/dist/react";
+import ImportComponent from "./components/Import.tsx";
 import { Link } from "react-router-dom";
 
 export default function Layout(props: { children: React.ReactNode }) {
@@ -28,6 +29,7 @@ const MenuBar = () => {
 				<CreateNewProject />
 				<SelectProject />
 				<SettingsButton />
+				<ImportComponent />
 			</div>
 		</>
 	);
@@ -51,34 +53,6 @@ const SelectProject = () => {
 		}
 		return projects;
 	};
-
-	// useEffect(() => {
-
-	// 	getProjects().then((result) => {
-
-	// 	})
-
-	// 		poll({
-	// 			every: 2000,
-	// 			fn: async () => {
-	// 				console.log("poll2")
-	// 				const result: string[] = [];
-	// 				const opfsRoot = await navigator.storage.getDirectory();
-	// 				// @ts-expect-error - TS doesn't know about the keys method
-	// 				for await (const name of opfsRoot.keys()) {
-	// 					if (name.endsWith(".inlang")) {
-	// 						result.push(name);
-	// 					}
-	// 				}
-	// 				return result;
-	// 			},
-	// 			cb: (value) => {
-	// 				console.log("Callback with value:", value);
-	// 				setExistingProjects(value);
-	// 			},
-	// 		});
-
-	// }, []);
 
 	return (
 		<>
