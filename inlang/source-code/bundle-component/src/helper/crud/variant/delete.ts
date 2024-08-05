@@ -1,4 +1,4 @@
-import type { NestedMessage, Variant } from "@inlang/sdk2"
+import type { MessageNested, Variant } from "@inlang/sdk2"
 
 /**
  * Deletes a variant from a message.
@@ -7,7 +7,7 @@ import type { NestedMessage, Variant } from "@inlang/sdk2"
  * @param props.variant The variant to delete.
  */
 
-const deleteVariant = (props: { message: NestedMessage; variant: Variant }) => {
+const deleteVariant = (props: { message: MessageNested; variant: Variant }) => {
 	// index from array where the variant is located
 	const index = props.message.variants.findIndex((variant) => variant.id === props.variant.id)
 

@@ -12,12 +12,12 @@
 		"format": "prettier ./src --write"
 	},
 	"dependencies": {
-		"sqlocal" : "workspace: *",
-		"sqlite-wasm-kysely": "workspace: *",
 		"kysely": "^0.27.4",
+		"sqlite-wasm-kysely": "workspace: *",
 		"uuid": "^10.0.0"
 	},
 	"devDependencies": {
-		"@types/uuid": "^10.0.0"
+		"@types/uuid": "^10.0.0",
+		"vitest": "0.34.6"
 	}
 }

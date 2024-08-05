@@ -1,6 +1,6 @@
-import type { NestedBundle } from "../../schema/schema.js"
+import type { BundleNested } from "../../schema/schemaV2.js";
 
-export const pluralBundle: NestedBundle = {
+export const pluralBundle: BundleNested = {
 	id: "mock_bundle_human_id",
 	alias: {
 		default: "mock_bundle_alias",
@@ -201,4 +201,4 @@ export const pluralBundle: NestedBundle = {
 			}),
 		],
 	},*/,
-}
+};

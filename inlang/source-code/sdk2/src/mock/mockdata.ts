@@ -360,7 +360,7 @@ export const translations: { [key: string]: string[] } = {
 		"Mensagem: ",
 		"Detalhes: ",
 	],
-}
+};
 
 export const inputNames: string[] = [
 	"username",
@@ -387,7 +387,7 @@ export const inputNames: string[] = [
 	"confirmationDetails",
 	"errorMessage",
 	"errorDetails",
-]
+];
 
 export const simpleInputs = {
 	string: (name: string) => ({
@@ -403,7 +403,7 @@ export const simpleInputs = {
 			},
 		},
 	}),
-}
+};
 
 export const inputsWithSelectors = {
 	number: (name: string) => ({
@@ -462,4 +462,4 @@ export const inputsWithSelectors = {
 
 		matcher: ["male", "female", "*"],
 	}),
-}
+};

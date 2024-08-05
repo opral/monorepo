@@ -1,11 +1,11 @@
-import { type NestedMessage, createVariant } from "@inlang/sdk2"
+import { type MessageNested, createVariant } from "@inlang/sdk2"
 import { describe, expect, it } from "vitest"
 import deleteVariant from "./delete.js"
 
 describe("deleteVariant", () => {
 	it("Should delete variant", () => {
 		const messageId = "testId"
-		const message: NestedMessage = {
+		const message: MessageNested = {
 			bundleId: "testBundleId",
 			id: messageId,
 			locale: "en",

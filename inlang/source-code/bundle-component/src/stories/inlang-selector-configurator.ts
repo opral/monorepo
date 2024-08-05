@@ -9,7 +9,7 @@ import {
 	createVariant,
 	type Message,
 	type Variant,
-	type NestedMessage,
+	type MessageNested,
 	type Expression,
 	type ProjectSettings,
 } from "@inlang/sdk2"
@@ -152,7 +152,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 	bundleId: string | undefined
 
 	@property()
-	message?: NestedMessage | undefined
+	message?: MessageNested | undefined
 
 	@property()
 	locale: ProjectSettings["locales"][number] | undefined
@@ -164,7 +164,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 	triggerSave: () => void = () => {}
 
 	@property()
-	addMessage: (newMessage: NestedMessage) => void = () => {}
+	addMessage: (newMessage: MessageNested) => void = () => {}
 
 	@property()
 	addInput: (inputName: string) => void = () => {}
@@ -343,7 +343,7 @@ export default class InlangSelectorConfigurator extends LitElement {
 	}
 
 	private _addVariants = (props: {
-		message: NestedMessage
+		message: MessageNested
 		variantsMatcher: Record<Expression["arg"]["name"], string>[]
 		newMatchers: string[]
 		newSelectorName: string

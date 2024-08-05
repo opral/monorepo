@@ -1,6 +1,11 @@
-import { newLixFile, openLixFromOpfs, uuidv4 } from "@lix-js/sdk"
-import { SQLocalKysely } from "sqlocal/kysely"
-import type { ProjectSettings } from "../schema/settings.js"
+import { newLixFile, openLixInMemory, uuidv4 } from "@lix-js/sdk";
+import type { ProjectSettings } from "../schema/settings.js";
+import {
+	contentFromDatabase,
+	createDialect,
+	createInMemoryDatabase,
+} from "sqlite-wasm-kysely";
+import { Kysely, sql } from "kysely";
 
 /**
  * Creates a new inlang project.
@@ -8,51 +13,47 @@ import type { ProjectSettings } from "../schema/settings.js"
  * The app is responsible for saving the project "whereever"
  * e.g. the user's computer, cloud storage, or OPFS in the browser.
  */
-export async function newProject(): Promise<Blob> {
-	const sqlocal = new SQLocalKysely({
-		storage: {
-			type: "memory",
-		},
-	})
+export async function newProject(args?: {
+	settings?: ProjectSettings;
+}): Promise<Blob> {
+	const sqlite = await createInMemoryDatabase({
+		readOnly: false,
+	});
+	const db = new Kysely({
+		dialect: createDialect({
+			database: sqlite,
+		}),
+	});
 
 	try {
-		await sqlocal.sql`
-CREATE TABLE Bundle (
+		await sql`
+CREATE TABLE bundle (
   id TEXT PRIMARY KEY,
   alias TEXT NOT NULL
 );
 
-CREATE TABLE Message (
+CREATE TABLE message (
   id TEXT PRIMARY KEY, 
-  bundleId TEXT NOT NULL,
+  bundle_id TEXT NOT NULL,
   locale TEXT NOT NULL,
   declarations TEXT NOT NULL,
   selectors TEXT NOT NULL
 );
 
-CREATE TABLE Variant (
+CREATE TABLE variant (
   id TEXT PRIMARY KEY, 
-  messageId TEXT NOT NULL,
+  message_id TEXT NOT NULL,
   match TEXT NOT NULL,
   pattern TEXT NOT NULL
 );
   
-CREATE INDEX idx_message_bundleId ON Message (bundleId);
-CREATE INDEX idx_variant_messageId ON Variant (messageId);
-		`
-		const dbBuffer = await sqlocal.getDatabaseContent()
-		// TODO load in memory
-		// doesn't work atm because the lix file is not imported with the tables
-		// const lix = await openLixInMemory({ blob: await newLixFile() })
+CREATE INDEX idx_message_bundle_id ON message (bundle_id);
+CREATE INDEX idx_variant_message_id ON variant (message_id);
+		`.execute(db);
 
-		const interimPath = `temporary-${uuidv4()}.lix`
-		const opfsRoot = await navigator.storage.getDirectory()
-		const fileHandle = await opfsRoot.getFileHandle(interimPath, { create: true })
-		const file = await fileHandle.createWritable()
-		const lixBlob = await newLixFile()
-		await file.write(lixBlob)
-		await file.close()
-		const lix = await openLixFromOpfs({ path: interimPath })
+		const inlangDbContent = contentFromDatabase(sqlite);
+
+		const lix = await openLixInMemory({ blob: await newLixFile() });
 
 		// write files to lix
 		await lix.db
@@ -63,23 +64,27 @@ CREATE INDEX idx_variant_messageId ON Variant (messageId);
 					path: "/db.sqlite",
 					// TODO let lix generate the id
 					id: uuidv4(),
-					data: dbBuffer,
+					data: inlangDbContent,
 				},
 				{
 					path: "/settings.json",
 					id: uuidv4(),
 					data: await new Blob([
-						JSON.stringify(defaultProjectSettings, undefined, 2),
+						JSON.stringify(
+							args?.settings ?? defaultProjectSettings,
+							undefined,
+							2
+						),
 					]).arrayBuffer(),
 				},
 			])
-			.execute()
-		const blob = await lix.toBlob()
-		// delete the interim file from opfs (workaround until in memory exists)
-		await opfsRoot.removeEntry(interimPath)
-		return blob
+			.execute();
+		return lix.toBlob();
+	} catch (e) {
+		throw new Error(`Failed to create new inlang project: ${e}`, { cause: e });
 	} finally {
-		await sqlocal.destroy()
+		sqlite.close();
+		await db.destroy();
 	}
 }
 
@@ -97,4 +102,4 @@ const defaultProjectSettings = {
 		// the m function matcher should be installed by default in case Sherlock (VS Code extension) is adopted
 		// "https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@latest/dist/index.js",
 	],
-} satisfies ProjectSettings
+} satisfies ProjectSettings;

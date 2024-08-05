@@ -1,12 +1,20 @@
-import { type Static, Type, type TTemplateLiteral, type TLiteral } from "@sinclair/typebox"
-import { JSONObject } from "@inlang/json-types"
+import {
+	type Static,
+	Type,
+	type TTemplateLiteral,
+	type TLiteral,
+} from "@sinclair/typebox";
+import { JSONObject } from "@inlang/json-types";
 
 const SDKSettings = Type.Object({
 	// TODO SDK-v2 SETTINGS do we need to generate a settings v2 schema?
-	$schema: Type.Optional(Type.Literal("https://inlang.com/schema/project-settings")),
+	$schema: Type.Optional(
+		Type.Literal("https://inlang.com/schema/project-settings")
+	),
 	baseLocale: Type.String({
 		title: "Base locale",
-		description: "The base locale of the project. We recommend BCP-47 language tags.",
+		description:
+			"The base locale of the project. We recommend BCP-47 language tags.",
 	}),
 	locales: Type.Array(Type.String(), {
 		uniqueItems: true,
@@ -40,36 +48,40 @@ const SDKSettings = Type.Object({
 	 * 	  "https://cdn.jsdelivr.net/npm/@inlang/plugin-csv@1/dist/index.js",
 	 *  ]
 	 */
-	modules: Type.Array(
-		Type.Intersect([
-			Type.String({
-				description: "The module must be a valid URI according to RFC 3986.",
-				pattern:
-					"(?:[A-Za-z][A-Za-z0-9+.-]*:/{2})?(?:(?:[A-Za-z0-9-._~]|%[A-Fa-f0-9]{2})+(?::([A-Za-z0-9-._~]?|[%][A-Fa-f0-9]{2})+)?@)?(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\\.){1,126}[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?::[0-9]+)?(?:/(?:[A-Za-z0-9-._~]|%[A-Fa-f0-9]{2})*)*(?:\\?(?:[A-Za-z0-9-._~]+(?:=(?:[A-Za-z0-9-._~+]|%[A-Fa-f0-9]{2})+)?)(?:&|;[A-Za-z0-9-._~]+(?:=(?:[A-Za-z0-9-._~+]|%[A-Fa-f0-9]{2})+)?)*)?",
-			}),
-			Type.String({
-				description: "The module must end with `.js`.",
-				pattern: ".*\\.js$",
-			}),
-			Type.String({
-				description: "The module can only contain a major version number.",
-				pattern: "^(?!.*@\\d\\.)[^]*$",
-			}),
-		]),
-		{
-			uniqueItems: true,
-			description: "The modules to load. Must be a valid URI but can be relative.",
-			examples: [
-				"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@3/dist/index.js",
-				"https://cdn.jsdelivr.net/npm/@inlang/plugin-csv@1/dist/index.js",
-				"./local-testing-plugin.js",
-			],
-		}
+	modules: Type.Optional(
+		Type.Array(
+			Type.Intersect([
+				Type.String({
+					description: "The module must be a valid URI according to RFC 3986.",
+					pattern:
+						"(?:[A-Za-z][A-Za-z0-9+.-]*:/{2})?(?:(?:[A-Za-z0-9-._~]|%[A-Fa-f0-9]{2})+(?::([A-Za-z0-9-._~]?|[%][A-Fa-f0-9]{2})+)?@)?(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\\.){1,126}[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?::[0-9]+)?(?:/(?:[A-Za-z0-9-._~]|%[A-Fa-f0-9]{2})*)*(?:\\?(?:[A-Za-z0-9-._~]+(?:=(?:[A-Za-z0-9-._~+]|%[A-Fa-f0-9]{2})+)?)(?:&|;[A-Za-z0-9-._~]+(?:=(?:[A-Za-z0-9-._~+]|%[A-Fa-f0-9]{2})+)?)*)?",
+				}),
+				Type.String({
+					description: "The module must end with `.js`.",
+					pattern: ".*\\.js$",
+				}),
+				Type.String({
+					description: "The module can only contain a major version number.",
+					pattern: "^(?!.*@\\d\\.)[^]*$",
+				}),
+			]),
+			{
+				uniqueItems: true,
+				description:
+					"The modules to load. Must be a valid URI but can be relative.",
+				examples: [
+					"https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@3/dist/index.js",
+					"https://cdn.jsdelivr.net/npm/@inlang/plugin-csv@1/dist/index.js",
+					"./local-testing-plugin.js",
+				],
+			}
+		)
 	),
 	experimental: Type.Optional(
 		Type.Record(Type.String(), Type.Literal(true), {
 			title: "Experimental settings",
-			description: "Experimental settings that are used for product development.",
+			description:
+				"Experimental settings that are used for product development.",
 		})
 	),
 	/**
@@ -77,7 +89,7 @@ const SDKSettings = Type.Object({
 	 *
 	 * The plugin settings are validated when importing plugins
 	 */
-})
+});
 
 /**
  * Settings defined via apps, plugins, lint rules, etc.
@@ -101,15 +113,15 @@ const ExternalSettings = Type.Record(
 	// and `ExternalSettings` which are objects possible
 	JSON as unknown as typeof JSONObject,
 	{ description: "Settings defined by apps, plugins, etc." }
-)
+);
 
 export type ProjectSettings = Omit<
 	Static<typeof ProjectSettings>,
 	"languageTags" | "sourceLanguageTag"
 > & {
 	/** @deprecated Use `baseLocale` */
-	sourceLanguageTag?: string
+	sourceLanguageTag?: string;
 	/** @deprecated Use `locales` */
-	languageTags?: string[]
-}
-export const ProjectSettings = Type.Intersect([SDKSettings, ExternalSettings])
+	languageTags?: string[];
+};
+export const ProjectSettings = Type.Intersect([SDKSettings, ExternalSettings]);

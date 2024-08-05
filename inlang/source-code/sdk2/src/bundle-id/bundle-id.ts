@@ -1,11 +1,13 @@
 // we use murmur for best distribution https://medium.com/miro-engineering/choosing-a-hash-function-to-solve-a-data-sharding-problem-c656259e2b54
 // import murmurhash3 from "murmurhash3js"
-import { adjectives, animals, verbs } from "./words.js"
+import { adjectives, animals, verbs } from "./words.js";
 
-export function newBundleId() {
+export function generateBundleId() {
 	return `${adjectives[Math.floor(Math.random() * 256)]}_${
 		adjectives[Math.floor(Math.random() * 256)]
-	}_${animals[Math.floor(Math.random() * 256)]}_${verbs[Math.floor(Math.random() * 256)]}`
+	}_${animals[Math.floor(Math.random() * 256)]}_${
+		verbs[Math.floor(Math.random() * 256)]
+	}`;
 }
 
 // TODO needed for what?

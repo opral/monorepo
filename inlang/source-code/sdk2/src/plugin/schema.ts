@@ -1,24 +1,50 @@
-import type { TObject } from "@sinclair/typebox"
-import type { NestedBundle } from "../schema/schema.js"
-import type { ProjectSettings } from "../schema/settings.js"
+import type { TObject } from "@sinclair/typebox";
+import type { BundleNested, Message } from "../schema/schemaV2.js";
+import type { ProjectSettings } from "../schema/settings.js";
+// eslint-disable-next-line no-restricted-imports
+import type fs from "node:fs/promises";
+import type { ResourceFile } from "../project/api.js";
 
-export type InlangPlugin2 = {
+export type InlangPlugin = {
+	/**
+	 * @deprecated Use `key` instead.
+	 */
+	id?: string;
 	/**
 	 * The key of the plugin.
 	 */
-	key: string
-	apiVersion: "2"
-	settingsSchema?: TObject
+	key: string;
+	settingsSchema?: TObject;
+	/**
+	 * @deprecated Use `importFiles` instead.
+	 */
+	loadMessages?: (args: {
+		settings: ProjectSettings;
+		nodeishFs: Pick<typeof fs, "readFile" | "readdir" | "mkdir" | "writeFile">;
+	}) => Promise<Message[]> | Message[];
+	/**
+	 * @deprecated Use `exportFiles` instead.
+	 */
+	saveMessages?: (args: {
+		messages: Message[];
+		settings: ProjectSettings;
+		nodeishFs: Pick<typeof fs, "readFile" | "readdir" | "mkdir" | "writeFile">;
+	}) => Promise<void> | void;
 	/**
 	 * Import / Export files.
 	 * see https://linear.app/opral/issue/MESDK-157/sdk-v2-release-on-sqlite
 	 */
 	toBeImportedFiles?: (args: {
-		settings: ProjectSettings
-		nodeFs: unknown
-	}) => Promise<Array<ResourceFile>> | Array<ResourceFile>
-	importFiles?: (args: { files: Array<ResourceFile> }) => { bundles: NestedBundle }
-	exportFiles?: (args: { bundles: NestedBundle; settings: ProjectSettings }) => Array<ResourceFile>
+		settings: ProjectSettings;
+		nodeFs: typeof fs;
+	}) => Promise<Array<ResourceFile>> | Array<ResourceFile>;
+	importFiles?: (args: { files: Array<ResourceFile> }) => {
+		bundles: BundleNested;
+	};
+	exportFiles?: (args: {
+		bundles: BundleNested;
+		settings: ProjectSettings;
+	}) => Array<ResourceFile>;
 	/**
 	 * Define app specific APIs.
 	 *
@@ -29,11 +55,7 @@ export type InlangPlugin2 = {
 	 *   }
 	 *  })
 	 */
-	addCustomApi?: (args: { settings: ProjectSettings }) => Record<string, unknown>
-}
-
-export type ResourceFile = {
-	path: string
-	content: string
-	pluginKey: InlangPlugin2["key"]
-}
+	addCustomApi?: (args: {
+		settings: ProjectSettings;
+	}) => Record<string, unknown>;
+};
