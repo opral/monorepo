@@ -1,7 +1,7 @@
 import { Kysely, sql } from "kysely"
 import { contentFromDatabase, type SqliteDatabase } from "sqlite-wasm-kysely"
 import type { Lix } from "@lix-js/sdk"
-import type { InlangDatabaseSchema } from "../database/schema.js"
+import type { InlangDatabaseSchema } from "../../database/schema.js"
 
 /**
  * Saves updates of the database (file) to lix.
