@@ -1,25 +1,29 @@
-import { Kysely, sql } from "kysely"
-import { contentFromDatabase, type SqliteDatabase } from "sqlite-wasm-kysely"
-import type { Lix } from "@lix-js/sdk"
-import type { InlangDatabaseSchema } from "../../database/schema.js"
+import { Kysely, sql } from "kysely";
+import { contentFromDatabase, type SqliteDatabase } from "sqlite-wasm-kysely";
+import type { Lix } from "@lix-js/sdk";
+import type { InlangDatabaseSchema } from "../../database/schema.js";
 
 /**
  * Saves updates of the database (file) to lix.
  */
 export async function initHandleSaveToLixOnChange(args: {
-	sqlite: SqliteDatabase
-	db: Kysely<InlangDatabaseSchema>
-	lix: Lix
+	sqlite: SqliteDatabase;
+	db: Kysely<InlangDatabaseSchema>;
+	lix: Lix;
 }) {
 	args.sqlite.createFunction({
 		name: "save_db_file_to_lix",
 		arity: 0,
 		// @ts-expect-error - dynamic function
 		xFunc: () => {
-			const data = contentFromDatabase(args.sqlite)
-			args.lix.db.updateTable("file").set("data", data).where("path", "=", "/db.sqlite").execute()
+			const data = contentFromDatabase(args.sqlite);
+			args.lix.db
+				.updateTable("file")
+				.set("data", data)
+				.where("path", "=", "/db.sqlite")
+				.execute();
 		},
-	})
+	});
 
 	// better way to write to lix on updates?
 	await sql`
@@ -69,5 +73,5 @@ export async function initHandleSaveToLixOnChange(args: {
 	END;
 
 
-	`.execute(args.db)
+	`.execute(args.db);
 }

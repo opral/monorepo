@@ -255,7 +255,7 @@ export const animals = [
 	"wren",
 	"yak",
 	"zebra",
-]
+];
 
 export const adjectives = [
 	"acidic",
@@ -514,7 +514,7 @@ export const adjectives = [
 	"zany",
 	"zesty",
 	"zippy",
-]
+];
 
 export const adverbs = [
 	"ablaze",
@@ -773,7 +773,7 @@ export const adverbs = [
 	"within",
 	"wrongly",
 	"yonder",
-]
+];
 
 export const verbs = [
 	"absorb",
@@ -1032,4 +1032,4 @@ export const verbs = [
 	"zap",
 	"zip",
 	"zoom",
-]
+];

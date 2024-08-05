@@ -1,6 +1,6 @@
-import { CamelCasePlugin, Kysely, ParseJSONResultsPlugin } from "kysely"
-import type { InlangDatabaseSchema } from "./schema.js"
-import { createDialect, type SqliteDatabase } from "sqlite-wasm-kysely"
+import { CamelCasePlugin, Kysely, ParseJSONResultsPlugin } from "kysely";
+import type { InlangDatabaseSchema } from "./schema.js";
+import { createDialect, type SqliteDatabase } from "sqlite-wasm-kysely";
 
 export function initKysely(args: { sqlite: SqliteDatabase }) {
 	const db = new Kysely<InlangDatabaseSchema>({
@@ -13,6 +13,6 @@ export function initKysely(args: { sqlite: SqliteDatabase }) {
 			//       the cost of camelCase mapping seems high
 			new CamelCasePlugin(),
 		],
-	})
-	return db
+	});
+	return db;
 }

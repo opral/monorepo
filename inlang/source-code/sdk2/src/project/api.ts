@@ -1,9 +1,9 @@
-import type { Kysely } from "kysely"
-import type { InlangDatabaseSchema } from "../database/schema.js"
-import type { InlangPlugin } from "../plugin/schema.js"
-import type { BundleNested } from "../schema/schemaV2.js"
-import type { ProjectSettings } from "../schema/settings.js"
-import type { Lix } from "@lix-js/sdk"
+import type { Kysely } from "kysely";
+import type { InlangDatabaseSchema } from "../database/schema.js";
+import type { InlangPlugin } from "../plugin/schema.js";
+import type { BundleNested } from "../schema/schemaV2.js";
+import type { ProjectSettings } from "../schema/settings.js";
+import type { Lix } from "@lix-js/sdk";
 
 export type InlangProject = {
 	db: Kysely<InlangDatabaseSchema>;

@@ -1,8 +1,8 @@
-import { type Lix } from "@lix-js/sdk"
-import type { InlangPlugin } from "../plugin/schema.js"
-import type { ProjectSettings } from "../schema/settings.js"
-import { contentFromDatabase, type SqliteDatabase } from "sqlite-wasm-kysely"
-import { initKysely } from "../database/initKysely.js"
+import { type Lix } from "@lix-js/sdk";
+import type { InlangPlugin } from "../plugin/schema.js";
+import type { ProjectSettings } from "../schema/settings.js";
+import { contentFromDatabase, type SqliteDatabase } from "sqlite-wasm-kysely";
+import { initKysely } from "../database/initKysely.js";
 import { initHandleSaveToLixOnChange } from "./logic/initHandleSaveToLixOnChange.js";
 import { importPlugins } from "../plugin/importPlugins.js";
 import type { InlangProject, Subscription } from "./api.js";

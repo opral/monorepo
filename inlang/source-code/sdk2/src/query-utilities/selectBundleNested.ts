@@ -1,6 +1,6 @@
-import type { Kysely } from "kysely"
-import { jsonArrayFrom } from "kysely/helpers/sqlite"
-import type { InlangDatabaseSchema } from "../database/schema.js"
+import type { Kysely } from "kysely";
+import { jsonArrayFrom } from "kysely/helpers/sqlite";
+import type { InlangDatabaseSchema } from "../database/schema.js";
 
 /**
  * Select bundles with nested messages and variants.
@@ -43,5 +43,5 @@ export const selectBundleNested = (db: Kysely<InlangDatabaseSchema>) => {
 				])
 				.whereRef("message.bundleId", "=", "bundle.id")
 		).as("messages"),
-	])
-}
+	]);
+};
