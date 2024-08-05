@@ -2710,6 +2710,9 @@ importers:
       '@sinclair/typebox':
         specifier: ^0.31.17
         version: 0.31.28
+      dedent:
+        specifier: 1.5.1
+        version: 1.5.1
       install:
         specifier: ^0.13.0
         version: 0.13.0
