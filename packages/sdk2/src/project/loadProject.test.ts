@@ -61,6 +61,7 @@ test("get and set settings", async () => {
 	expect(settings["plugin.key"]).toBeUndefined()
 
 	const copied = structuredClone(settings)
+
 	copied["plugin.key"] = { test: "value" }
 	await project.settings.set(copied)
 
@@ -89,3 +90,20 @@ test("providing mock plugins should be possible", async () => {
 	expect(plugins[0]?.key).toBe("my-cool-plugin")
 	expect(project.errors.get().length).toBe(0)
 })
+
+test("it should set sourceLanguageTag and languageTags if non-existent to make v1 plugins work", async () => {
+	const project = await loadProjectInMemory({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+				modules: [],
+			},
+		}),
+	});
+	const settings = project.settings.get();
+	expect(settings.baseLocale).toBe("en");
+	expect(settings.sourceLanguageTag).toBe("en");
+	expect(settings.languageTags).toEqual(["en", "de"]);
+	expect(settings.locales).toEqual(["en", "de"]);
+});
