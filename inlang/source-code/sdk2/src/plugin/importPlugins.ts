@@ -21,7 +21,7 @@ export async function importPlugins(args: {
 }> {
 	const plugins: InlangPlugin[] = [];
 	const errors: PluginError[] = [];
-	for (const uri of args.settings.modules) {
+	for (const uri of args.settings.modules ?? []) {
 		const mockPlugin = args.mockPlugins?.[uri];
 		if (mockPlugin) {
 			plugins.push(mockPlugin);
