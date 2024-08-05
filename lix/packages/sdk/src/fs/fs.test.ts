@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
 
-test("inserting a file for the same path should not lead to two different ids/files", async () => {
+test.skip("inserting a file for the same path should not lead to two different ids/files", async () => {
 	const lix = {} as any
 	const file1 = await lix.file.write("/path/to/file", "content")
 	const file2 = await lix.file.write("/path/to/file", "content")

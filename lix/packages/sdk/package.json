@@ -8,6 +8,8 @@
 	},
 	"scripts": {
 		"build": "tsc --build",
+		"test": "vitest run",
+		"test:watch": "vitest",
 		"dev": "tsc --watch",
 		"format": "prettier ./src --write"
 	},
