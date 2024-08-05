@@ -79,18 +79,21 @@ test("it should copy all files in a directory into lix", async () => {
 	} satisfies ProjectSettings;
 
 	const mockDirectory = {
-		"./project.inlang/cache/plugin/29j49j2": "cache value",
-		"./project.inlang/.gitignore": "git value",
-		"./project.inlang/prettierrc.json": "prettier value",
-		"./project.inlang/README.md": "readme value",
-		"./project.inlang/settings.json": JSON.stringify(mockSettings),
+		"/project.inlang/cache/plugin/29j49j2": "cache value",
+		"/project.inlang/.gitignore": "git value",
+		"/project.inlang/prettierrc.json": "prettier value",
+		"/project.inlang/README.md": "readme value",
+		"/project.inlang/settings.json": JSON.stringify(mockSettings),
 	};
 	const fs = Volume.fromJSON(mockDirectory).promises;
 	const project = await loadProjectFromDirectory({
 		fs: fs as any,
-		path: "./project.inlang",
+		path: "/project.inlang",
 	});
-	const files = await project.lix.db.selectFrom("file").selectAll().execute();
+	const files = (
+		await project.lix.db.selectFrom("file").selectAll().execute()
+	).filter((file) => file.path !== "/db.sqlite");
+
 	expect(files.length).toBe(5);
 
 	const filesByPath = files.reduce((acc, file) => {
