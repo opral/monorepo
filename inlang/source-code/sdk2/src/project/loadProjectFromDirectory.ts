@@ -5,6 +5,9 @@ import { uuidv4, type Lix } from "@lix-js/sdk";
 import type fs from "node:fs/promises";
 // eslint-disable-next-line no-restricted-imports
 import nodePath from "node:path";
+import type { InlangPlugin } from "../plugin/schema.js";
+import { insertNestedBundle } from "./util/insertBundleNested.js";
+import { fromMessageV1 } from "./util/fromMessageV1.js";
 
 /**
  * Loads a project from a directory.
@@ -18,13 +21,54 @@ export async function loadProjectFromDirectory(
 		"blob"
 	>
 ) {
-	const project = await loadProjectInMemory({
+	const tempProject = await loadProjectInMemory({
 		// pass common arguments to loadProjectInMemory
 		...args,
 		blob: await newProject(),
 	});
-	await copyFiles({ fs: args.fs, path: args.path, lix: project.lix });
+	await copyFiles({ fs: args.fs, path: args.path, lix: tempProject.lix });
+
+	// TODO loadMessages - since settings are not reactiv yet - just reload the project
+	const project = await loadProjectInMemory({
+		// pass common arguments to loadProjectInMemory
+		...args,
+		blob: await tempProject.toBlob(),
+	});
+
+	for (const plugin of project.plugins.get()) {
+		// TODO loadMessages - make sure that we have configured either loadMessages and saveMessages or import export
+		// TODO loadMessages - make sure only one pair is defined?
+		if (plugin.loadMessages !== undefined) {
+			// TODO loadMessages - inserting messages will generate a change for every record
+			await loadLegacyMessages({
+				project,
+				fs: args.fs,
+				loadMessagesFn: plugin.loadMessages,
+			});
+		}
+	}
+
 	return project;
+}
+
+async function loadLegacyMessages(args: {
+	project: Awaited<ReturnType<typeof loadProjectInMemory>>;
+	loadMessagesFn: Required<InlangPlugin>["loadMessages"]; 
+	fs: typeof fs;
+}) {
+	// TODO loadMessages - check why tsc thinks this could be undefined
+	const loadedLegacyMessages = await args.loadMessagesFn({
+		settings: args.project.settings.get(),
+		nodeishFs: args.fs,
+	});
+	const insertQueries = [];
+
+	for (const legacyMessage of loadedLegacyMessages) {
+		const messageBundle = fromMessageV1(legacyMessage);
+		insertQueries.push(insertNestedBundle(args.project, messageBundle));
+	}
+
+	return Promise.all(insertQueries);
 }
 
 /**
