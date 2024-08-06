@@ -2,7 +2,7 @@ import type { DiffReport, LixPlugin } from "@lix-js/sdk";
 import { Bundle, Message, Variant } from "../schema/schemaV2.js";
 import { loadProjectInMemory } from "../project/loadProjectInMemory.js";
 
-export const lixPluginV1: LixPlugin<{
+export const inlangLixPluginV1: LixPlugin<{
 	bundle: Bundle;
 	message: Message;
 	variant: Variant;
@@ -46,7 +46,10 @@ export const lixPluginV1: LixPlugin<{
 					.where("id", "=", bundle.id)
 					.executeTakeFirst();
 				result.push(
-					...(await lixPluginV1.diff.bundle({ old: oldBundle, neu: bundle }))
+					...(await inlangLixPluginV1.diff.bundle({
+						old: oldBundle,
+						neu: bundle,
+					}))
 				);
 			}
 			for (const message of newProjectMessages) {
@@ -57,7 +60,10 @@ export const lixPluginV1: LixPlugin<{
 					.executeTakeFirst();
 
 				result.push(
-					...(await lixPluginV1.diff.message({ old: oldMessage, neu: message }))
+					...(await inlangLixPluginV1.diff.message({
+						old: oldMessage,
+						neu: message,
+					}))
 				);
 			}
 			for (const variant of newProjectVariants) {
@@ -67,7 +73,10 @@ export const lixPluginV1: LixPlugin<{
 					.where("id", "=", variant.id)
 					.executeTakeFirst();
 				result.push(
-					...(await lixPluginV1.diff.variant({ old: oldVariant, neu: variant }))
+					...(await inlangLixPluginV1.diff.variant({
+						old: oldVariant,
+						neu: variant,
+					}))
 				);
 			}
 			return result;
