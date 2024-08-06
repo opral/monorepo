@@ -55,7 +55,9 @@ export async function loadProject(args: {
 		db,
 		plugins: {
 			get: () =>
-				structuredClone(reactiveState.plugins$.getValue()) as InlangPlugin[],
+				// TODO loadMessages - we cant use structuredClone since we have a function
+				// structuredClone(reactiveState.plugins$.getValue()) as InlangPlugin[],
+				reactiveState.plugins$.getValue() as InlangPlugin[],
 			subscribe: withStructuredClone(reactiveState.plugins$)
 				.subscribe as Subscription<InlangPlugin[]>,
 		},

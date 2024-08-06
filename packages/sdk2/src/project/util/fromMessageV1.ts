@@ -15,7 +15,7 @@ import type {
  */
 export function fromMessageV1(messageV1: MessageV1): BundleNested {
 	// TODO loadMessages - derive bundleId humandIdFromHash ?
-	const bundleId = "deriveBundleIdFromMessageID";
+	const bundleId = messageV1.id; // "deriveBundleIdFromMessageID";
 
 	const languages = [
 		...new Set(messageV1.variants.map((variant) => variant.languageTag)),
@@ -90,7 +90,9 @@ export function fromMessageV1(messageV1: MessageV1): BundleNested {
 
 	return {
 		id: messageV1.id,
-		alias: messageV1.alias,
+		alias: {
+			default: messageV1.id,
+		},
 		messages,
 	};
 }
