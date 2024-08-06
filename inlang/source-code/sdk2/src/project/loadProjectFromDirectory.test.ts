@@ -2,7 +2,7 @@
 import { expect, test } from "vitest";
 import { ProjectSettings } from "../schema/settings.js";
 import { Volume } from "memfs";
-import { loadProjectFromDirectory } from "./loadProjectFromDirectory.js";
+import { loadProjectFromDirectoryInMemory } from "./loadProjectFromDirectory.js";
 import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
 import type { Text } from "../schema/schemaV2.js";
 import type { InlangPlugin } from "../plugin/schema.js";
@@ -71,7 +71,7 @@ test("plugin.loadMessages and plugin.saveMessages should work for legacy purpose
 		} satisfies ProjectSettings),
 	};
 	const fs = Volume.fromJSON(mockRepo).promises;
-	const project = await loadProjectFromDirectory({
+	const project = await loadProjectFromDirectoryInMemory({
 		fs: fs as any,
 		path: "./project.inlang",
 		_mockPlugins: {
@@ -121,7 +121,7 @@ test.skip("it should copy all files in a directory into lix", async () => {
 		"/project.inlang/settings.json": JSON.stringify(mockSettings),
 	};
 	const fs = Volume.fromJSON(mockDirectory).promises;
-	const project = await loadProjectFromDirectory({
+	const project = await loadProjectFromDirectoryInMemory({
 		fs: fs as any,
 		path: "/project.inlang",
 	});
