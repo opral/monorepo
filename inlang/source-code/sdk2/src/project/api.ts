@@ -4,9 +4,17 @@ import type { InlangPlugin } from "../plugin/schema.js";
 import type { BundleNested } from "../schema/schemaV2.js";
 import type { ProjectSettings } from "../schema/settings.js";
 import type { Lix } from "@lix-js/sdk";
+import type { SqliteDatabase } from "sqlite-wasm-kysely";
 
 export type InlangProject = {
 	db: Kysely<InlangDatabaseSchema>;
+	/**
+	 * @deprecated Don't use this. Only an internal hack to unblock
+	 * fink v2.
+	 *
+	 * TODO remove this
+	 */
+	_sqlite: SqliteDatabase;
 	plugins: {
 		get: () => InlangPlugin[];
 		subscribe: Subscription<InlangPlugin[]>;
@@ -32,7 +40,7 @@ export type InlangProject = {
 
 export type ResourceFile = {
 	path: string;
-	content: string;
+	content: ArrayBuffer;
 	pluginKey: InlangPlugin["key"];
 };
 

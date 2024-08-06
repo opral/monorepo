@@ -1,4 +1,5 @@
 import { InlangProject, BundleNested } from "@inlang/sdk2";
+import { json } from "./toJSONRawBuilder.ts";
 
 export const insertNestedBundle = async (
 	project: InlangProject | undefined,
@@ -8,13 +9,13 @@ export const insertNestedBundle = async (
 		throw new Error("Project is undefined");
 	}
 	await project.db
-			.insertInto("bundle")
-			.values({
-				id: bundle.id,
-				alias: JSON.stringify(bundle.alias),
-			})
-			.returning("id")
-			.execute();
+		.insertInto("bundle")
+		.values({
+			id: bundle.id,
+			alias: json(bundle.alias),
+		})
+		.returning("id")
+		.execute();
 
 	bundle.messages.forEach(async (message) => {
 		await project.db
@@ -23,8 +24,8 @@ export const insertNestedBundle = async (
 				id: message.id,
 				bundleId: bundle.id,
 				locale: message.locale,
-				declarations: JSON.stringify(message.declarations),
-				selectors: JSON.stringify(message.selectors),
+				declarations: json(message.declarations),
+				selectors: json(message.selectors),
 			})
 			.execute();
 
@@ -34,10 +35,11 @@ export const insertNestedBundle = async (
 				.values({
 					id: variant.id,
 					messageId: message.id,
-					match: JSON.stringify(variant.match),
-					pattern: JSON.stringify(variant.pattern),
+					match: json(variant.match),
+					pattern: json(variant.pattern),
 				})
 				.execute();
 		});
 	});
 };
+

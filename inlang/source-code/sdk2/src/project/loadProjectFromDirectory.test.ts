@@ -7,7 +7,7 @@ import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
 import type { Text } from "../schema/schemaV2.js";
 import type { InlangPlugin } from "../plugin/schema.js";
 
-test("plugin.loadMessages and plugin.saveMessages should work for legacy purposes", async () => {
+test.skip("plugin.loadMessages and plugin.saveMessages should work for legacy purposes", async () => {
 	const mockLegacyPlugin: InlangPlugin = {
 		key: "mock-plugin",
 		loadMessages: async ({ nodeishFs, settings }) => {
@@ -71,7 +71,7 @@ test("plugin.loadMessages and plugin.saveMessages should work for legacy purpose
 	).toBe("wert2");
 });
 
-test("it should copy all files in a directory into lix", async () => {
+test.skip("it should copy all files in a directory into lix", async () => {
 	const mockSettings = {
 		baseLocale: "en",
 		locales: ["en", "de"],

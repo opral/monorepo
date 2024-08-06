@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAtom } from "jotai";
 import { projectAtom, selectedProjectPathAtom } from "./state.ts";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import SlDialog from "@shoelace-style/shoelace/dist/react/dialog/index.js";
 import { loadProjectInMemory, newProject } from "@inlang/sdk2";
 import {
@@ -12,11 +12,68 @@ import {
 } from "@shoelace-style/shoelace/dist/react";
 import ImportComponent from "./components/Import.tsx";
 import { Link } from "react-router-dom";
+import ModeSwitcher from "./components/ModeSwitcher.tsx";
 
 export default function Layout(props: { children: React.ReactNode }) {
+	const [project] = useAtom(projectAtom);
+	const [numUncommittedChanges, setNumUncommittedChanges] = useState(0);
+	const [numCommittedChanges, setNumCommittedChanges] = useState(0);
+	const [numCommits, setNumCommits] = useState(0);
+
+	useEffect(() => {
+		setInterval(async () => {
+			const uncommittedChanges = await project?.lix.db
+				.selectFrom("change")
+				.selectAll()
+				.where("commit_id", "is", null)
+				.execute();
+			const committedChanges = await project?.lix.db
+				.selectFrom("change")
+				.selectAll()
+				.where("commit_id", "is not", null)
+				.execute();
+			const numCommits = await project?.lix.db
+				.selectFrom("commit")
+				.selectAll()
+				.execute();
+			if (uncommittedChanges) {
+				setNumUncommittedChanges(uncommittedChanges.length);
+			}
+			if (committedChanges) {
+				setNumCommittedChanges(committedChanges.length);
+			}
+			if (numCommits) {
+				setNumCommits(numCommits.length);
+			}
+		}, 1500);
+	});
+
 	return (
 		<div className="p-6 max-w-7xl mx-auto px-4 h-full">
 			<MenuBar />
+			{window && window.location.pathname === "/changes" && (
+				<>
+					<hr></hr>
+					<div className="flex gap-2">
+						<p>Outstanding changes: {numUncommittedChanges}</p>
+						<p>Committed changes: {numCommittedChanges}</p>
+						<p>Commits: {numCommits}</p>
+						<SlButton
+							onClick={async () => {
+								console.log("executing commit");
+								await project?.lix.commit({
+									userId: "Samuel",
+									description:
+										"Nils, extra wieder ne nachtschicht für dich geschoben",
+								});
+							}}
+						>
+							commit changes
+						</SlButton>
+					</div>
+					<hr></hr>
+				</>
+			)}
 			{props.children}
 		</div>
 	);
@@ -27,6 +84,7 @@ const MenuBar = () => {
 		<>
 			<div className="flex gap-2 mb-12 justify-between">
 				<SelectProject />
+				<ModeSwitcher />
 				<div>
 					<CreateNewProject />
 					<ImportComponent />
@@ -91,6 +149,9 @@ const CreateNewProject = () => {
 	const [fileName, setFileName] = useState("");
 	const [loading, setLoading] = useState(false);
 
+	const [, setProject] = useAtom(projectAtom);
+	const [, setSelectedProjectPath] = useAtom(selectedProjectPathAtom);
+
 	const isValid = useMemo(() => fileName.endsWith(".inlang"), [fileName]);
 
 	const handleCreateNewProject = async () => {
@@ -103,6 +164,9 @@ const CreateNewProject = () => {
 		await writable.close();
 		setLoading(false);
 		setShowDialog(false);
+		const project = await loadProjectInMemory({ blob: file });
+		setProject(project);
+		setSelectedProjectPath(fileName);
 	};
 
 	return (

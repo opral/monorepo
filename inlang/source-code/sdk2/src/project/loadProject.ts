@@ -83,6 +83,7 @@ export async function loadProject(args: {
 			await db.destroy();
 			await args.lix.close();
 		},
+		_sqlite: args.sqlite,
 		toBlob: async () => {
 			const inlangDbContent = contentFromDatabase(args.sqlite);
 			// flush db to lix
@@ -93,7 +94,7 @@ export async function loadProject(args: {
 					data: inlangDbContent,
 				})
 				.execute();
-			return args.lix.toBlob();
+			return await args.lix.toBlob();
 		},
 		lix: args.lix,
 	};

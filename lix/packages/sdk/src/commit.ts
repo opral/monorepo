@@ -2,9 +2,13 @@ import { Kysely } from "kysely"
 import type { LixDatabase } from "./schema.js"
 import { v4 } from "uuid"
 
-export async function commit(args: { db: Kysely<LixDatabase>; userId: string; description: string }) {
-	return args.db.transaction().execute(async () => {
-		const commit = await args.db
+export async function commit(args: {
+	db: Kysely<LixDatabase>
+	userId: string
+	description: string
+}) {
+	return args.db.transaction().execute(async (trx) => {
+		const commit = await trx
 			.insertInto("commit")
 			.values({
 				id: v4(),
@@ -16,7 +20,7 @@ export async function commit(args: { db: Kysely<LixDatabase>; userId: string; de
 			.returning("id")
 			.executeTakeFirstOrThrow()
 
-		return await args.db
+		return await trx
 			.updateTable("change")
 			.where("commit_id", "is", undefined)
 			.set({
