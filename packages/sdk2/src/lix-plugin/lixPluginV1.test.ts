@@ -1,7 +1,263 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { test, expect, describe } from "vitest";
 import { lixPluginV1 } from "./lixPluginV1.js";
 import type { Variant } from "../schema/schemaV2.js";
 import type { DiffReport } from "@lix-js/sdk";
+import { newProject } from "../project/newProject.js";
+import { loadProjectInMemory } from "../project/loadProjectInMemory.js";
+
+describe("plugin.diff.file", () => {
+	test("insert of bundle", async () => {
+		const neuProject = await loadProjectInMemory({ blob: await newProject() });
+		await neuProject.db
+			.insertInto("bundle")
+			.values({
+				id: "1",
+				// @ts-expect-error - database expects stringified json
+				alias: JSON.stringify({}),
+			})
+			.execute();
+		const diffReports = await lixPluginV1.diff.file!({
+			old: undefined,
+			neu: await (await neuProject.toBlob()).arrayBuffer(),
+		});
+		expect(diffReports).toEqual([
+			{ type: "bundle", value: { id: "1", alias: {} } } satisfies DiffReport,
+		]);
+	});
+
+	test("update of bundle", async () => {
+		const oldProject = await loadProjectInMemory({ blob: await newProject() });
+		await oldProject.db
+			.insertInto("bundle")
+			.values([
+				{
+					id: "1",
+					// @ts-expect-error - database expects stringified json
+					alias: JSON.stringify({}),
+				},
+				{
+					id: "2",
+					// @ts-expect-error - database expects stringified json
+					alias: JSON.stringify({}),
+				},
+			])
+			.execute();
+		const neuProject = await loadProjectInMemory({ blob: await newProject() });
+		await neuProject.db
+			.insertInto("bundle")
+			.values([
+				{
+					id: "1",
+					// @ts-expect-error - database expects stringified json
+					alias: JSON.stringify({
+						default: "Peter Parker",
+					}),
+				},
+				{
+					id: "2",
+					// @ts-expect-error - database expects stringified json
+					alias: JSON.stringify({}),
+				},
+			])
+			.execute();
+		const diffReports = await lixPluginV1.diff.file!({
+			old: await (await oldProject.toBlob()).arrayBuffer(),
+			neu: await (await neuProject.toBlob()).arrayBuffer(),
+		});
+		expect(diffReports).toEqual([
+			{
+				type: "bundle",
+				value: { id: "1", alias: { default: "Peter Parker" } },
+			} satisfies DiffReport,
+		]);
+	});
+
+	test("insert of message", async () => {
+		const neuProject = await loadProjectInMemory({ blob: await newProject() });
+		await neuProject.db
+			.insertInto("message")
+			.values({
+				id: "1",
+				// @ts-expect-error - database expects stringified json
+				declarations: JSON.stringify([]),
+				bundleId: "unknown",
+				// @ts-expect-error - database expects stringified json
+				selectors: JSON.stringify({}),
+				locale: "en",
+			})
+			.execute();
+		const diffReports = await lixPluginV1.diff.file!({
+			old: undefined,
+			neu: await (await neuProject.toBlob()).arrayBuffer(),
+		});
+		expect(diffReports).toEqual([
+			{
+				type: "message",
+				value: {
+					id: "1",
+					declarations: [],
+					bundleId: "unknown",
+					selectors: {},
+					locale: "en",
+				},
+			} satisfies DiffReport,
+		]);
+	});
+	test("update of message", async () => {
+		const oldProject = await loadProjectInMemory({ blob: await newProject() });
+		await oldProject.db
+			.insertInto("message")
+			.values([
+				{
+					id: "1",
+					// @ts-expect-error - database expects stringified json
+					declarations: JSON.stringify([]),
+					bundleId: "unknown",
+					// @ts-expect-error - database expects stringified json
+					selectors: JSON.stringify({}),
+					locale: "en",
+				},
+				{
+					id: "2",
+					// @ts-expect-error - database expects stringified json
+					declarations: JSON.stringify([]),
+					bundleId: "unknown",
+					// @ts-expect-error - database expects stringified json
+					selectors: JSON.stringify({}),
+					locale: "en",
+				},
+			])
+			.execute();
+		const neuProject = await loadProjectInMemory({ blob: await newProject() });
+		await neuProject.db
+			.insertInto("message")
+			.values([
+				{
+					id: "1",
+					// @ts-expect-error - database expects stringified json
+					declarations: JSON.stringify([]),
+					bundleId: "unknown",
+					// @ts-expect-error - database expects stringified json
+					selectors: JSON.stringify({}),
+					locale: "de",
+				},
+				{
+					id: "2",
+					// @ts-expect-error - database expects stringified json
+					declarations: JSON.stringify([]),
+					bundleId: "unknown",
+					// @ts-expect-error - database expects stringified json
+					selectors: JSON.stringify({}),
+					locale: "en",
+				},
+			])
+			.execute();
+		const diffReports = await lixPluginV1.diff.file!({
+			old: await (await oldProject.toBlob()).arrayBuffer(),
+			neu: await (await neuProject.toBlob()).arrayBuffer(),
+		});
+		expect(diffReports).toEqual([
+			{
+				type: "message",
+				value: {
+					id: "1",
+					declarations: [],
+					bundleId: "unknown",
+					selectors: {},
+					locale: "de",
+				},
+			} satisfies DiffReport,
+		]);
+	});
+	test("insert of variant", async () => {
+		const neuProject = await loadProjectInMemory({ blob: await newProject() });
+		await neuProject.db
+			.insertInto("variant")
+			.values({
+				id: "1",
+				messageId: "1",
+				// @ts-expect-error - database expects stringified json
+				pattern: JSON.stringify([{ type: "text", value: "hello world" }]),
+				match: JSON.stringify({}),
+			})
+			.execute();
+		const diffReports = await lixPluginV1.diff.file!({
+			old: undefined,
+			neu: await (await neuProject.toBlob()).arrayBuffer(),
+		});
+		expect(diffReports).toEqual([
+			{
+				type: "variant",
+				value: {
+					id: "1",
+					messageId: "1",
+					pattern: [{ type: "text", value: "hello world" }],
+					match: {},
+				},
+			} satisfies DiffReport,
+		]);
+	});
+	test("update of variant", async () => {
+		const oldProject = await loadProjectInMemory({ blob: await newProject() });
+		await oldProject.db
+			.insertInto("variant")
+			.values([
+				{
+					id: "1",
+					messageId: "1",
+					// @ts-expect-error - database expects stringified json
+					pattern: JSON.stringify([{ type: "text", value: "hello world" }]),
+					match: JSON.stringify({}),
+				},
+				{
+					id: "2",
+					messageId: "1",
+					// @ts-expect-error - database expects stringified json
+					pattern: JSON.stringify([{ type: "text", value: "hello world" }]),
+					match: JSON.stringify({}),
+				},
+			])
+			.execute();
+		const neuProject = await loadProjectInMemory({ blob: await newProject() });
+		await neuProject.db
+			.insertInto("variant")
+			.values([
+				{
+					id: "1",
+					messageId: "1",
+					// @ts-expect-error - database expects stringified json
+					pattern: JSON.stringify([
+						{ type: "text", value: "hello world from Berlin" },
+					]),
+					match: JSON.stringify({}),
+				},
+				{
+					id: "2",
+					messageId: "1",
+					// @ts-expect-error - database expects stringified json
+					pattern: JSON.stringify([{ type: "text", value: "hello world" }]),
+					match: JSON.stringify({}),
+				},
+			])
+			.execute();
+		const diffReports = await lixPluginV1.diff.file!({
+			old: await (await oldProject.toBlob()).arrayBuffer(),
+			neu: await (await neuProject.toBlob()).arrayBuffer(),
+		});
+		expect(diffReports).toEqual([
+			{
+				type: "variant",
+				value: {
+					id: "1",
+					messageId: "1",
+					pattern: [{ type: "text", value: "hello world from Berlin" }],
+					match: {},
+				},
+			} satisfies DiffReport,
+		]);
+	});
+});
 
 describe("plugin.diff.variant", () => {
 	test("old and neu are the same should not report a diff", async () => {
@@ -36,7 +292,7 @@ describe("plugin.diff.variant", () => {
 		};
 		const diff = await lixPluginV1.diff.variant({ old, neu });
 		expect(diff).toEqual([
-			{ type: "variant", value: neu, meta: {} } satisfies DiffReport,
+			{ type: "variant", value: neu } satisfies DiffReport,
 		]);
 	});
 
@@ -50,7 +306,7 @@ describe("plugin.diff.variant", () => {
 		};
 		const diff = await lixPluginV1.diff.variant({ old, neu });
 		expect(diff).toEqual([
-			{ type: "variant", value: neu, meta: {} } satisfies DiffReport,
+			{ type: "variant", value: neu } satisfies DiffReport,
 		]);
 	});
 });
