@@ -1,6 +1,7 @@
 import type { DiffReport, LixPlugin } from "@lix-js/sdk";
 import { Bundle, Message, Variant } from "../schema/schemaV2.js";
-import { loadProjectInMemory } from "../project/loadProjectInMemory.js";
+import { loadDatabaseInMemory } from "sqlite-wasm-kysely";
+import { initKysely } from "../database/initKysely.js";
 
 export const inlangLixPluginV1: LixPlugin<{
 	bundle: Bundle;
@@ -20,28 +21,35 @@ export const inlangLixPluginV1: LixPlugin<{
 	// },
 	diff: {
 		// TODO does not account for deletions
-		file: async ({ old, neu }) => {
+		file: async ({ old, neu, path }) => {
+			// can only handle the database for now
+			if (path === undefined || path?.endsWith("db.sqlite") === false) {
+				return [];
+			}
 			const result: DiffReport[] = [];
-			const oldProject = old
-				? await loadProjectInMemory({ blob: new Blob([old]) })
+			const oldDb = old
+				? initKysely({ sqlite: await loadDatabaseInMemory(old) })
 				: undefined;
-			const newProject = await loadProjectInMemory({ blob: new Blob([neu]) });
-			const newProjectBundles = await newProject.db
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			const newDb = initKysely({
+				sqlite: await loadDatabaseInMemory(neu),
+			});
+			const newProjectBundles = await newDb
 				.selectFrom("bundle")
 				.selectAll()
 				.execute();
-			const newProjectMessages = await newProject.db
+			const newProjectMessages = await newDb
 				.selectFrom("message")
 				.selectAll()
 				.execute();
-			const newProjectVariants = await newProject.db
+			const newProjectVariants = await newDb
 				.selectFrom("variant")
 				.selectAll()
 				.execute();
 
 			for (const bundle of newProjectBundles) {
-				const oldBundle = await oldProject?.db
-					.selectFrom("bundle")
+				const oldBundle = await oldDb
+					?.selectFrom("bundle")
 					.selectAll()
 					.where("id", "=", bundle.id)
 					.executeTakeFirst();
@@ -53,8 +61,8 @@ export const inlangLixPluginV1: LixPlugin<{
 				);
 			}
 			for (const message of newProjectMessages) {
-				const oldMessage = await oldProject?.db
-					.selectFrom("message")
+				const oldMessage = await oldDb
+					?.selectFrom("message")
 					.selectAll()
 					.where("id", "=", message.id)
 					.executeTakeFirst();
@@ -67,8 +75,8 @@ export const inlangLixPluginV1: LixPlugin<{
 				);
 			}
 			for (const variant of newProjectVariants) {
-				const oldVariant = await oldProject?.db
-					.selectFrom("variant")
+				const oldVariant = await oldDb
+					?.selectFrom("variant")
 					.selectAll()
 					.where("id", "=", variant.id)
 					.executeTakeFirst();

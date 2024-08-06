@@ -1,6 +1,7 @@
 import { openLixInMemory } from "@lix-js/sdk";
 import { createInMemoryDatabase, importDatabase } from "sqlite-wasm-kysely";
 import { loadProject } from "./loadProject.js";
+import { inlangLixPluginV1 } from "../lix-plugin/inlangLixPluginV1.js";
 
 /**
  * Load a project from a blob in memory.
@@ -10,7 +11,10 @@ export async function loadProjectInMemory(
 		blob: Blob;
 	} & Omit<Parameters<typeof loadProject>[0], "sqlite" | "lix">
 ) {
-	const lix = await openLixInMemory({ blob: args.blob });
+	const lix = await openLixInMemory({
+		blob: args.blob,
+		providePlugins: [inlangLixPluginV1],
+	});
 
 	const dbFile = await lix.db
 		.selectFrom("file")
