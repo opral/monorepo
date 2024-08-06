@@ -1,5 +1,6 @@
 import { Bundle, InlangDatabaseSchema, Message, Variant } from "@inlang/sdk2";
-import { Kysely, RawBuilder, sql } from "kysely";
+import { Kysely } from "kysely";
+import { json } from "./toJSONRawBuilder.ts";
 
 const queryHelper = {
 	bundle: {
@@ -25,7 +26,7 @@ const queryHelper = {
 		insert: (db: Kysely<InlangDatabaseSchema>, bundle: Bundle) => {
 			return db.insertInto("bundle").values({
 				id: bundle.id,
-				alias: json(bundle.alias) as any, // TODO SDK-v2 KISELY check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
+				alias: json(bundle.alias), // TODO SDK-v2 KISELY check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
 			});
 		},
 		update: (
@@ -35,7 +36,7 @@ const queryHelper = {
 			const bundleProperties = structuredClone(bundle as any); // TODO SDK-v2 KISELY check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
 			delete bundleProperties.id;
 			if (bundle.alias) {
-				bundleProperties.alias = json(bundle.alias) as any;
+				bundleProperties.alias = json(bundle.alias);
 			}
 			return db
 				.updateTable("bundle")
@@ -53,22 +54,20 @@ const queryHelper = {
 				id: message.id,
 				bundleId: message.bundleId,
 				locale: message.locale,
-				declarations: json(message.declarations) as any, // TODO SDK-v2 KISELY check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
-				selectors: json(message.selectors) as any, // TODO SDK-v2 KISELY check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
+				declarations: json(message.declarations), // TODO SDK-v2 KISELY check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
+				selectors: json(message.selectors), // TODO SDK-v2 KISELY check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
 			});
 		},
 		update: (
 			db: Kysely<InlangDatabaseSchema>,
 			message: Partial<Message> & { id: string }
 		) => {
-		
-
 			return db
 				.updateTable("message")
 				.set({
 					...message,
-					declarations: json(message.declarations) as any,
-					selectors: json(message.selectors) as any,
+					declarations: json(message.declarations),
+					selectors: json(message.selectors),
 				})
 				.where("message.id", "=", message.id);
 		},
@@ -82,8 +81,8 @@ const queryHelper = {
 			return db.insertInto("variant").values({
 				id: variant.id,
 				messageId: variant.messageId,
-				match: json(variant.match) as any, // TODO SDK-v2 KISELY check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
-				pattern: json(variant.pattern) as any, // TODO SDK-v2 KISELY check why kysely complains see https://kysely.dev/docs/recipes/extending-kysely#expression
+				match: json(variant.match),
+				pattern: json(variant.pattern),
 			});
 		},
 		update: (
@@ -94,8 +93,8 @@ const queryHelper = {
 				.updateTable("variant")
 				.set({
 					...variant,
-					match: json(variant.match) as any,
-					pattern: json(variant.pattern) as any,
+					match: json(variant.match),
+					pattern: json(variant.pattern),
 				})
 				.where("variant.id", "=", variant.id);
 		},
@@ -107,9 +106,3 @@ const queryHelper = {
 
 export default queryHelper;
 
-function json<T>(value: T): RawBuilder<T> {
-	// NOTE we cant use jsonb for now since kisley
-	// - couldn't find out how to return json instead of bytes in a selectFrom(...).select statment
-	//  return sql`jsonb(${JSON.stringify(value)})`
-	return sql`json(${JSON.stringify(value)})`;
-}
