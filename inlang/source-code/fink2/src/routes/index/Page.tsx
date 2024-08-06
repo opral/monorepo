@@ -44,6 +44,10 @@ export default function App() {
 					bundleIds.map((bundleId) => (
 						<InlangBundle key={bundleId} bundleId={bundleId} />
 					))}
+				{(!project || !selectedProjectPath) && <>No project selected</>}
+				{project && selectedProjectPath && bundleIds.length === 0 && (
+					<>No bundles found, please import demo ...</>
+				)}
 			</Layout>
 		</>
 	);
