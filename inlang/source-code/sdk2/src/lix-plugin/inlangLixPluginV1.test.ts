@@ -24,7 +24,12 @@ describe("plugin.diff.file", () => {
 			path: "/db.sqlite",
 		});
 		expect(diffReports).toEqual([
-			{ type: "bundle", value: { id: "1", alias: {} } } satisfies DiffReport,
+			{
+				type: "bundle",
+				operation: "insert",
+				old: undefined,
+				neu: { id: "1", alias: {} },
+			} satisfies DiffReport,
 		]);
 	});
 
@@ -71,7 +76,9 @@ describe("plugin.diff.file", () => {
 		expect(diffReports).toEqual([
 			{
 				type: "bundle",
-				value: { id: "1", alias: { default: "Peter Parker" } },
+				operation: "update",
+				old: { id: "1", alias: {} },
+				neu: { id: "1", alias: { default: "Peter Parker" } },
 			} satisfies DiffReport,
 		]);
 	});
@@ -98,7 +105,9 @@ describe("plugin.diff.file", () => {
 		expect(diffReports).toEqual([
 			{
 				type: "message",
-				value: {
+				operation: "insert",
+				old: undefined,
+				neu: {
 					id: "1",
 					declarations: [],
 					bundleId: "unknown",
@@ -165,7 +174,15 @@ describe("plugin.diff.file", () => {
 		expect(diffReports).toEqual([
 			{
 				type: "message",
-				value: {
+				operation: "update",
+				old: {
+					id: "1",
+					declarations: [],
+					bundleId: "unknown",
+					selectors: {},
+					locale: "en",
+				},
+				neu: {
 					id: "1",
 					declarations: [],
 					bundleId: "unknown",
@@ -195,7 +212,9 @@ describe("plugin.diff.file", () => {
 		expect(diffReports).toEqual([
 			{
 				type: "variant",
-				value: {
+				operation: "insert",
+				old: undefined,
+				neu: {
 					id: "1",
 					messageId: "1",
 					pattern: [{ type: "text", value: "hello world" }],
@@ -248,14 +267,21 @@ describe("plugin.diff.file", () => {
 			])
 			.execute();
 		const diffReports = await inlangLixPluginV1.diff.file!({
-		old: contentFromDatabase(oldProject._sqlite),
+			old: contentFromDatabase(oldProject._sqlite),
 			neu: contentFromDatabase(neuProject._sqlite),
 			path: "/db.sqlite",
 		});
 		expect(diffReports).toEqual([
 			{
+				operation: "update",
 				type: "variant",
-				value: {
+				old: {
+					id: "1",
+					messageId: "1",
+					pattern: [{ type: "text", value: "hello world" }],
+					match: {},
+				},
+				neu: {
 					id: "1",
 					messageId: "1",
 					pattern: [{ type: "text", value: "hello world from Berlin" }],
@@ -299,7 +325,7 @@ describe("plugin.diff.variant", () => {
 		};
 		const diff = await inlangLixPluginV1.diff.variant({ old, neu });
 		expect(diff).toEqual([
-			{ type: "variant", value: neu } satisfies DiffReport,
+			{ operation: "update", type: "variant", neu, old } satisfies DiffReport,
 		]);
 	});
 
@@ -313,7 +339,7 @@ describe("plugin.diff.variant", () => {
 		};
 		const diff = await inlangLixPluginV1.diff.variant({ old, neu });
 		expect(diff).toEqual([
-			{ type: "variant", value: neu } satisfies DiffReport,
+			{ operation: "insert", type: "variant", neu, old } satisfies DiffReport,
 		]);
 	});
 });
