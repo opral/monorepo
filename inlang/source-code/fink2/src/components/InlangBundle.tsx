@@ -40,7 +40,6 @@ const InlangBundle = (props: { bundleId: string }) => {
 			.execute();
 
 		if (uncommittedChanges) {
-			console.log(uncommittedChanges);
 			setChangedIds(uncommittedChanges.map((change) => change.value.id));
 		}
 	};
