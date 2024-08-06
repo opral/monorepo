@@ -16,7 +16,7 @@ export type LixPlugin<T extends Record<string, Record<string, unknown>> = Record
 	diff: {
 		file?: (args: {
 			old?: LixFile["data"]
-			neu: LixFile["data"]
+			neu?: LixFile["data"]
 			// TODO remove this hack in favor of
 			// providing the entire lix file object
 			path?: LixFile["path"]
@@ -24,25 +24,45 @@ export type LixPlugin<T extends Record<string, Record<string, unknown>> = Record
 	} & Record<
 		// other primitives
 		keyof T,
-		(args: { old?: T[keyof T]; neu: T[keyof T] }) => MaybePromise<Array<DiffReport>>
+		(args: { old?: T[keyof T]; neu?: T[keyof T] }) => MaybePromise<Array<DiffReport>>
 	>
 }
 
 type MaybePromise<T> = T | Promise<T>
 
 /**
- * - diff reports do not contain html
- *   to separate frontend from backend.
- *   The frontend will render the diff reports
- *   (without slowing down the backend on each diff request).
+ * A diff report is a report if a change has been made.
  */
 export type DiffReport = {
 	type: string
-	/**
-	 * Must be a valid JSON.
-	 */
-	value: Record<string, any> & {
+	operation: "insert" | "update" | "delete"
+	old?: Record<string, any> & { id: string }
+	neu?: Record<string, any> & { id: string }
+	meta?: Record<string, any>
+} & (DiffReportInsertion | DiffReportUpdate | DiffReportDeletion)
+
+type DiffReportInsertion = {
+	operation: "insert"
+	old: undefined
+	neu: Record<string, any> & {
 		id: string
 	}
-	meta?: Record<string, any>
+}
+
+type DiffReportUpdate = {
+	operation: "update"
+	old: Record<string, any> & {
+		id: string
+	}
+	neu: Record<string, any> & {
+		id: string
+	}
+}
+
+type DiffReportDeletion = {
+	operation: "delete"
+	old: Record<string, any> & {
+		id: string
+	}
+	neu: undefined
 }

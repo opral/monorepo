@@ -30,12 +30,28 @@ export const ReactBundle = createComponent({
 const InlangBundle = (props: { bundleId: string }) => {
 	const [project] = useAtom(projectAtom);
 	const [bundle, setBundle] = useState<BundleNested | undefined>(undefined);
+	const [changedIds, setChangedIds] = useState<string[]>([]);
+
+	const calculateChangedBundleIds = async () => {
+		const uncommittedChanges = await project?.lix.db
+			.selectFrom("change")
+			.selectAll()
+			.where("commit_id", "is", null)
+			.execute();
+
+		if (uncommittedChanges) {
+			// @ts-expect-error - https://github.com/opral/lix-sdk/issues/27
+			setChangedIds(uncommittedChanges.map((change) => change.value.id));
+		}
+	};
 
 	useEffect(() => {
 		if (!project) return;
 		queryBundle();
-		setTimeout(async () => {
+		calculateChangedBundleIds();
+		setInterval(async () => {
 			queryBundle();
+			calculateChangedBundleIds();
 		}, 2000);
 	}, []);
 
@@ -94,19 +110,49 @@ const InlangBundle = (props: { bundleId: string }) => {
 	return (
 		<>
 			{bundle && (
-				<ReactBundle
-					style={{ all: "initial" }}
-					bundle={bundle}
-					settings={project?.settings.get()}
-					insertMessage={onMesageInsert as any}
-					updateMessage={onMesageUpdate as any}
-					insertVariant={onVariantInsert as any}
-					updateVariant={onVariantUpdate as any}
-					deleteVariant={onVariantDelete as any}
-				/>
+				<div className="relative">
+					<ReactBundle
+						style={{ all: "initial" }}
+						bundle={bundle}
+						settings={project?.settings.get()}
+						insertMessage={onMesageInsert as any}
+						updateMessage={onMesageUpdate as any}
+						insertVariant={onVariantInsert as any}
+						updateVariant={onVariantUpdate as any}
+						deleteVariant={onVariantDelete as any}
+					/>
+					<div className="absolute top-[14px] right-0 pointer-events-none translate-x-6">
+						{arraysIntersect(getAllNestedIds(bundle), changedIds) && (
+							<div className="bg-blue-500 w-3 h-3 text-white p-1 rounded-full" />
+						)}
+					</div>
+				</div>
 			)}
 		</>
 	);
 };
 
 export default InlangBundle;
+
+const getAllNestedIds = (bundle: BundleNested): string[] => {
+	const messageIds = bundle.messages.map((message) => message.id);
+	const variantIds = bundle.messages
+		.flatMap((message) => message.variants)
+		.map((variant) => variant.id);
+	return [...messageIds, ...variantIds, ...bundle.id];
+};
+
+function arraysIntersect(arr1: any[], arr2: any[]): boolean {
+	// Convert the first array to a Set
+	const set1 = new Set(arr1);
+
+	// Check if any element in arr2 exists in set1
+	for (const element of arr2) {
+		if (set1.has(element)) {
+			return true;
+		}
+	}
+
+	// If no elements are found in the intersection
+	return false;
+}

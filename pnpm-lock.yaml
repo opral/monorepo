@@ -835,6 +835,9 @@ importers:
       '@sqlite.org/sqlite-wasm':
         specifier: ^3.46.0-build2
         version: 3.46.0-build2
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
       jotai:
         specifier: ^2.9.1
         version: 2.9.1(@types/react@18.3.3)(react@19.0.0-rc-941e1b4a-20240729)

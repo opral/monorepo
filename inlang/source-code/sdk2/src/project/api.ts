@@ -40,7 +40,7 @@ export type InlangProject = {
 
 export type ResourceFile = {
 	path: string;
-	content: string;
+	content: ArrayBuffer;
 	pluginKey: InlangPlugin["key"];
 };
 

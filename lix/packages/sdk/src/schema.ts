@@ -52,11 +52,13 @@ export type Change = {
 	/**
 	 * The value of the change.
 	 *
+	 * The value is `undefined` for a delete operation.
+	 *
 	 * @example
 	 *   - For a csv cell change, the value would be the new cell value.
 	 *   - For an inlang message change, the value would be the new message.
 	 */
-	value: Record<string, any> & {
+	value?: Record<string, any> & {
 		id: string
 	} // JSONB
 	/**
