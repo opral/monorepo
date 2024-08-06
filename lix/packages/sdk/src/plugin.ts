@@ -40,7 +40,7 @@ export type DiffReport = {
 
 type DiffReportInsertion = {
 	operation: "insert"
-	old?: never
+	old: undefined
 	neu: Record<string, any> & {
 		id: string
 	}
@@ -61,5 +61,5 @@ type DiffReportDeletion = {
 	old: Record<string, any> & {
 		id: string
 	}
-	neu?: never
+	neu: undefined
 }
