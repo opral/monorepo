@@ -6,7 +6,7 @@ import type fs from "node:fs/promises";
 // eslint-disable-next-line no-restricted-imports
 import nodePath from "node:path";
 import type { InlangPlugin } from "../plugin/schema.js";
-import { insertNestedBundle } from "./util/insertBundleNested.js";
+import { insertBundleNested } from "../query-utilities/insertBundleNested.js";
 import { fromMessageV1 } from "./util/fromMessageV1.js";
 
 /**
@@ -15,7 +15,7 @@ import { fromMessageV1 } from "./util/fromMessageV1.js";
  * Main use case are dev tools that want to load a project from a directory
  * that is stored in git.
  */
-export async function loadProjectFromDirectory(
+export async function loadProjectFromDirectoryInMemory(
 	args: { path: string; fs: typeof fs } & Omit<
 		Parameters<typeof loadProjectInMemory>[0],
 		"blob"
@@ -53,10 +53,9 @@ export async function loadProjectFromDirectory(
 
 async function loadLegacyMessages(args: {
 	project: Awaited<ReturnType<typeof loadProjectInMemory>>;
-	loadMessagesFn: Required<InlangPlugin>["loadMessages"]; 
+	loadMessagesFn: Required<InlangPlugin>["loadMessages"];
 	fs: typeof fs;
 }) {
-	// TODO loadMessages - check why tsc thinks this could be undefined
 	const loadedLegacyMessages = await args.loadMessagesFn({
 		settings: args.project.settings.get(),
 		nodeishFs: args.fs,
@@ -65,7 +64,7 @@ async function loadLegacyMessages(args: {
 
 	for (const legacyMessage of loadedLegacyMessages) {
 		const messageBundle = fromMessageV1(legacyMessage);
-		insertQueries.push(insertNestedBundle(args.project, messageBundle));
+		insertQueries.push(insertBundleNested(args.project.db, messageBundle));
 	}
 
 	return Promise.all(insertQueries);

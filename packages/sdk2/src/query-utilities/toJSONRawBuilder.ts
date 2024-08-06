@@ -1,4 +1,4 @@
-import { RawBuilder, sql } from "kysely";
+import { type RawBuilder, sql } from "kysely";
 
 export function json<T>(value: T): RawBuilder<T> {
 	// NOTE we cant use jsonb for now since kisley

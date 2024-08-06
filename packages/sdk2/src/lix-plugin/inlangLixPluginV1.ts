@@ -22,8 +22,7 @@ export const inlangLixPluginV1: LixPlugin<{
 	diff: {
 		// TODO does not account for deletions
 		file: async ({ old, neu, path }) => {
-			const diffRunId = new Date().getTime() + "_" + Math.random();
-			console.time(diffRunId + " diff:");
+			
 			// can only handle the database for now
 			if (path === undefined || path?.endsWith("db.sqlite") === false) {
 				return [];
@@ -89,7 +88,7 @@ export const inlangLixPluginV1: LixPlugin<{
 					}))
 				);
 			}
-			console.timeEnd(diffRunId + " diff:");
+			
 			return result;
 		},
 		bundle: ({ old, neu }) =>
