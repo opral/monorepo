@@ -28,6 +28,8 @@ export async function loadProjectFromDirectoryInMemory(
 	});
 	await copyFiles({ fs: args.fs, path: args.path, lix: tempProject.lix });
 
+	// TODO loadMessages - call tempProject.lix.settled() to wait for the new settings file
+
 	// TODO loadMessages - since settings are not reactiv yet - just reload the project
 	const project = await loadProjectInMemory({
 		// pass common arguments to loadProjectInMemory
@@ -36,15 +38,16 @@ export async function loadProjectFromDirectoryInMemory(
 	});
 
 	for (const plugin of project.plugins.get()) {
-		// TODO loadMessages - make sure that we have configured either loadMessages and saveMessages or import export
-		// TODO loadMessages - make sure only one pair is defined?
+		// TODO loadMessages - make sure that we have configured either loadMessages and saveMessages xor import and export (throw in other cases)
 		if (plugin.loadMessages !== undefined) {
-			// TODO loadMessages - inserting messages will generate a change for every record
 			await loadLegacyMessages({
 				project,
 				fs: args.fs,
 				loadMessagesFn: plugin.loadMessages,
 			});
+
+			// TODO check user id and description (where will this one appear?)
+			await project.lix.commit({ userId: 'inlangBot', description: "legacy load and save messages"})
 		}
 	}
 
