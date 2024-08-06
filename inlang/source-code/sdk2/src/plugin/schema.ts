@@ -1,5 +1,6 @@
 import type { TObject } from "@sinclair/typebox";
-import type { BundleNested, Message } from "../schema/schemaV2.js";
+import type { BundleNested } from "../schema/schemaV2.js";
+import type { MessageV1 } from "../schema/schemaV1.js";
 import type { ProjectSettings } from "../schema/settings.js";
 // eslint-disable-next-line no-restricted-imports
 import type fs from "node:fs/promises";
@@ -21,12 +22,12 @@ export type InlangPlugin = {
 	loadMessages?: (args: {
 		settings: ProjectSettings;
 		nodeishFs: Pick<typeof fs, "readFile" | "readdir" | "mkdir" | "writeFile">;
-	}) => Promise<Message[]> | Message[];
+	}) => Promise<MessageV1[]> | MessageV1[];
 	/**
 	 * @deprecated Use `exportFiles` instead.
 	 */
 	saveMessages?: (args: {
-		messages: Message[];
+		messages: MessageV1[];
 		settings: ProjectSettings;
 		nodeishFs: Pick<typeof fs, "readFile" | "readdir" | "mkdir" | "writeFile">;
 	}) => Promise<void> | void;
