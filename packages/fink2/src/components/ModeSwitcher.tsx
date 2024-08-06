@@ -42,6 +42,7 @@ const ModeSwitcher = () => {
 		<div className="h-[34px] px-[2px] flex items-center bg-zinc-100 rounded">
 			{data.map((item) => (
 				<SwitcherButton
+					key={item.path}
 					path={item.path}
 					name={item.name}
 					numUncommittedChanges={numUncommittedChanges}
