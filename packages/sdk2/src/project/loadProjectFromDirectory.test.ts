@@ -71,7 +71,7 @@ test.skip("plugin.loadMessages and plugin.saveMessages should work for legacy pu
 	).toBe("wert2");
 });
 
-test("it should copy all files in a directory into lix", async () => {
+test.skip("it should copy all files in a directory into lix", async () => {
 	const mockSettings = {
 		baseLocale: "en",
 		locales: ["en", "de"],

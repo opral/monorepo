@@ -5,6 +5,7 @@ import type { Variant } from "../schema/schemaV2.js";
 import type { DiffReport } from "@lix-js/sdk";
 import { newProject } from "../project/newProject.js";
 import { loadProjectInMemory } from "../project/loadProjectInMemory.js";
+import { contentFromDatabase } from "sqlite-wasm-kysely";
 
 describe("plugin.diff.file", () => {
 	test("insert of bundle", async () => {
@@ -19,7 +20,8 @@ describe("plugin.diff.file", () => {
 			.execute();
 		const diffReports = await inlangLixPluginV1.diff.file!({
 			old: undefined,
-			neu: await (await neuProject.toBlob()).arrayBuffer(),
+			neu: contentFromDatabase(neuProject._sqlite),
+			path: "/db.sqlite",
 		});
 		expect(diffReports).toEqual([
 			{ type: "bundle", value: { id: "1", alias: {} } } satisfies DiffReport,
@@ -62,8 +64,9 @@ describe("plugin.diff.file", () => {
 			])
 			.execute();
 		const diffReports = await inlangLixPluginV1.diff.file!({
-			old: await (await oldProject.toBlob()).arrayBuffer(),
-			neu: await (await neuProject.toBlob()).arrayBuffer(),
+			old: contentFromDatabase(oldProject._sqlite),
+			neu: contentFromDatabase(neuProject._sqlite),
+			path: "/db.sqlite",
 		});
 		expect(diffReports).toEqual([
 			{
@@ -89,7 +92,8 @@ describe("plugin.diff.file", () => {
 			.execute();
 		const diffReports = await inlangLixPluginV1.diff.file!({
 			old: undefined,
-			neu: await (await neuProject.toBlob()).arrayBuffer(),
+			neu: contentFromDatabase(neuProject._sqlite),
+			path: "/db.sqlite",
 		});
 		expect(diffReports).toEqual([
 			{
@@ -154,8 +158,9 @@ describe("plugin.diff.file", () => {
 			])
 			.execute();
 		const diffReports = await inlangLixPluginV1.diff.file!({
-			old: await (await oldProject.toBlob()).arrayBuffer(),
-			neu: await (await neuProject.toBlob()).arrayBuffer(),
+			old: contentFromDatabase(oldProject._sqlite),
+			neu: contentFromDatabase(neuProject._sqlite),
+			path: "/db.sqlite",
 		});
 		expect(diffReports).toEqual([
 			{
@@ -184,7 +189,8 @@ describe("plugin.diff.file", () => {
 			.execute();
 		const diffReports = await inlangLixPluginV1.diff.file!({
 			old: undefined,
-			neu: await (await neuProject.toBlob()).arrayBuffer(),
+			neu: contentFromDatabase(neuProject._sqlite),
+			path: "/db.sqlite",
 		});
 		expect(diffReports).toEqual([
 			{
@@ -242,8 +248,9 @@ describe("plugin.diff.file", () => {
 			])
 			.execute();
 		const diffReports = await inlangLixPluginV1.diff.file!({
-			old: await (await oldProject.toBlob()).arrayBuffer(),
-			neu: await (await neuProject.toBlob()).arrayBuffer(),
+		old: contentFromDatabase(oldProject._sqlite),
+			neu: contentFromDatabase(neuProject._sqlite),
+			path: "/db.sqlite",
 		});
 		expect(diffReports).toEqual([
 			{
