@@ -54,7 +54,7 @@ export default function Layout(props: { children: React.ReactNode }) {
 			<div className="flex gap-2">
 				<p>Outstanding changes: {numUncommittedChanges}</p>
 				<p>Committed changes: {numCommittedChanges}</p>
-				<p>Commits: {numCommittedChanges}</p>
+				<p>Commits: {numCommits}</p>
 				<SlButton
 					onClick={async () => {
 						console.log("executing commit");
