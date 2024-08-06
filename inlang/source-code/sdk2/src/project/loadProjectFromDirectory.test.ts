@@ -46,6 +46,9 @@ test.skip("plugin.loadMessages and plugin.saveMessages should work for legacy pu
 	const project = await loadProjectFromDirectory({
 		fs: fs as any,
 		path: "./project.inlang",
+		_mockPlugins: {
+			"./mock-module.js": mockLegacyPlugin,
+		},
 	});
 	const bundles = await selectBundleNested(project.db).execute();
 	const bundlesOrdered = bundles.sort((a, b) =>
