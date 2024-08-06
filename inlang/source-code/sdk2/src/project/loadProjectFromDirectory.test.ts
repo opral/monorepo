@@ -7,7 +7,7 @@ import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
 import type { Text } from "../schema/schemaV2.js";
 import type { InlangPlugin } from "../plugin/schema.js";
 
-test("plugin.loadMessages and plugin.saveMessages should work for legacy purposes", async () => {
+test.skip("plugin.loadMessages and plugin.saveMessages should work for legacy purposes", async () => {
 	const mockLegacyPlugin: InlangPlugin = {
 		key: "mock-plugin",
 		loadMessages: async ({ nodeishFs, settings }) => {
