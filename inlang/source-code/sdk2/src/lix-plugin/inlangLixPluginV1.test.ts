@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { test, expect, describe } from "vitest";
-import { lixPluginV1 } from "./lixPluginV1.js";
+import { inlangLixPluginV1 } from "./inlangLixPluginV1.js";
 import type { Variant } from "../schema/schemaV2.js";
 import type { DiffReport } from "@lix-js/sdk";
 import { newProject } from "../project/newProject.js";
@@ -17,7 +17,7 @@ describe("plugin.diff.file", () => {
 				alias: JSON.stringify({}),
 			})
 			.execute();
-		const diffReports = await lixPluginV1.diff.file!({
+		const diffReports = await inlangLixPluginV1.diff.file!({
 			old: undefined,
 			neu: await (await neuProject.toBlob()).arrayBuffer(),
 		});
@@ -61,7 +61,7 @@ describe("plugin.diff.file", () => {
 				},
 			])
 			.execute();
-		const diffReports = await lixPluginV1.diff.file!({
+		const diffReports = await inlangLixPluginV1.diff.file!({
 			old: await (await oldProject.toBlob()).arrayBuffer(),
 			neu: await (await neuProject.toBlob()).arrayBuffer(),
 		});
@@ -87,7 +87,7 @@ describe("plugin.diff.file", () => {
 				locale: "en",
 			})
 			.execute();
-		const diffReports = await lixPluginV1.diff.file!({
+		const diffReports = await inlangLixPluginV1.diff.file!({
 			old: undefined,
 			neu: await (await neuProject.toBlob()).arrayBuffer(),
 		});
@@ -153,7 +153,7 @@ describe("plugin.diff.file", () => {
 				},
 			])
 			.execute();
-		const diffReports = await lixPluginV1.diff.file!({
+		const diffReports = await inlangLixPluginV1.diff.file!({
 			old: await (await oldProject.toBlob()).arrayBuffer(),
 			neu: await (await neuProject.toBlob()).arrayBuffer(),
 		});
@@ -182,7 +182,7 @@ describe("plugin.diff.file", () => {
 				match: JSON.stringify({}),
 			})
 			.execute();
-		const diffReports = await lixPluginV1.diff.file!({
+		const diffReports = await inlangLixPluginV1.diff.file!({
 			old: undefined,
 			neu: await (await neuProject.toBlob()).arrayBuffer(),
 		});
@@ -241,7 +241,7 @@ describe("plugin.diff.file", () => {
 				},
 			])
 			.execute();
-		const diffReports = await lixPluginV1.diff.file!({
+		const diffReports = await inlangLixPluginV1.diff.file!({
 			old: await (await oldProject.toBlob()).arrayBuffer(),
 			neu: await (await neuProject.toBlob()).arrayBuffer(),
 		});
@@ -273,7 +273,7 @@ describe("plugin.diff.variant", () => {
 			messageId: "5",
 			pattern: [{ type: "text", value: "hello world" }],
 		};
-		const diff = await lixPluginV1.diff.variant({ old, neu });
+		const diff = await inlangLixPluginV1.diff.variant({ old, neu });
 		expect(diff).toEqual([]);
 	});
 
@@ -290,7 +290,7 @@ describe("plugin.diff.variant", () => {
 			messageId: "5",
 			pattern: [{ type: "text", value: "hello world from Berlin" }],
 		};
-		const diff = await lixPluginV1.diff.variant({ old, neu });
+		const diff = await inlangLixPluginV1.diff.variant({ old, neu });
 		expect(diff).toEqual([
 			{ type: "variant", value: neu } satisfies DiffReport,
 		]);
@@ -304,7 +304,7 @@ describe("plugin.diff.variant", () => {
 			messageId: "5",
 			pattern: [{ type: "text", value: "hello world" }],
 		};
-		const diff = await lixPluginV1.diff.variant({ old, neu });
+		const diff = await inlangLixPluginV1.diff.variant({ old, neu });
 		expect(diff).toEqual([
 			{ type: "variant", value: neu } satisfies DiffReport,
 		]);
