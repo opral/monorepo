@@ -158,11 +158,11 @@ async function handleFileChange(args: {
 		for (const diff of diffs ?? []) {
 			// assume an insert or update operation as the default
 			// if diff.neu is not present, it's a delete operation
-			const id = diff.neu?.id ?? diff.old?.id
+			const value = diff.neu ?? diff.old
 			const previousUncomittedChange = await args.db
 				.selectFrom("change")
 				.selectAll()
-				.where((eb) => eb.ref("value", "->>").key("id"), "=", id)
+				.where((eb) => eb.ref("value", "->>").key("id"), "=", value.id)
 				.where("type", "=", diff.type)
 				.where("file_id", "=", args.fileId)
 				.where("plugin_key", "=", plugin.key)
@@ -179,7 +179,7 @@ async function handleFileChange(args: {
 						file_id: args.fileId,
 						plugin_key: plugin.key,
 						// @ts-expect-error - database expects stringified json
-						value: JSON.stringify(diff.value),
+						value: JSON.stringify(value),
 						meta: JSON.stringify(diff.meta),
 					})
 					.execute()
@@ -189,7 +189,7 @@ async function handleFileChange(args: {
 			const previousCommittedChange = await args.db
 				.selectFrom("change")
 				.selectAll()
-				.where((eb) => eb.ref("value", "->>").key("id"), "=", id)
+				.where((eb) => eb.ref("value", "->>").key("id"), "=", value.id)
 				.where("type", "=", diff.type)
 				.where("file_id", "=", args.fileId)
 				.where("commit_id", "is not", null)
@@ -210,7 +210,7 @@ async function handleFileChange(args: {
 					// drop the change because it's identical
 					await args.db
 						.deleteFrom("change")
-						.where((eb) => eb.ref("value", "->>").key("id"), "=", id)
+						.where((eb) => eb.ref("value", "->>").key("id"), "=", value.id)
 						.where("type", "=", diff.type)
 						.where("file_id", "=", args.fileId)
 						.where("plugin_key", "=", plugin.key)
@@ -226,7 +226,7 @@ async function handleFileChange(args: {
 			// to avoid (potentially) saving every keystroke change
 			await args.db
 				.updateTable("change")
-				.where((eb) => eb.ref("value", "->>").key("id"), "=", id)
+				.where((eb) => eb.ref("value", "->>").key("id"), "=", value.id)
 				.where("type", "=", diff.type)
 				.where("file_id", "=", args.fileId)
 				.where("plugin_key", "=", plugin.key)
@@ -234,7 +234,7 @@ async function handleFileChange(args: {
 				.set({
 					id: v4(),
 					// @ts-expect-error - database expects stringified json
-					value: JSON.stringify(diff.value),
+					value: JSON.stringify(value),
 					meta: JSON.stringify(diff.meta),
 				})
 				.execute()
