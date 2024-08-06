@@ -32,23 +32,25 @@ export const inlangLixPluginV1: LixPlugin<{
 				? initKysely({ sqlite: await loadDatabaseInMemory(old) })
 				: undefined;
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			const newDb = initKysely({
-				sqlite: await loadDatabaseInMemory(neu),
-			});
+			const newDb = neu
+				? initKysely({
+						sqlite: await loadDatabaseInMemory(neu),
+				  })
+				: undefined;
 			const newProjectBundles = await newDb
-				.selectFrom("bundle")
+				?.selectFrom("bundle")
 				.selectAll()
 				.execute();
 			const newProjectMessages = await newDb
-				.selectFrom("message")
+				?.selectFrom("message")
 				.selectAll()
 				.execute();
 			const newProjectVariants = await newDb
-				.selectFrom("variant")
+				?.selectFrom("variant")
 				.selectAll()
 				.execute();
 
-			for (const bundle of newProjectBundles) {
+			for (const bundle of newProjectBundles ?? []) {
 				const oldBundle = await oldDb
 					?.selectFrom("bundle")
 					.selectAll()
@@ -61,7 +63,7 @@ export const inlangLixPluginV1: LixPlugin<{
 					}))
 				);
 			}
-			for (const message of newProjectMessages) {
+			for (const message of newProjectMessages ?? []) {
 				const oldMessage = await oldDb
 					?.selectFrom("message")
 					.selectAll()
@@ -75,7 +77,7 @@ export const inlangLixPluginV1: LixPlugin<{
 					}))
 				);
 			}
-			for (const variant of newProjectVariants) {
+			for (const variant of newProjectVariants ?? []) {
 				const oldVariant = await oldDb
 					?.selectFrom("variant")
 					.selectAll()
@@ -106,20 +108,25 @@ function jsonStringifyComparison({
 	type,
 }: {
 	old?: Bundle | Message | Variant;
-	neu: Bundle | Message | Variant;
+	neu?: Bundle | Message | Variant;
 	type: "bundle" | "message" | "variant";
 }): DiffReport[] {
 	if (old === undefined && neu) {
-		return [{ type, value: neu }];
-	} else if (old && neu === undefined) {
-		throw new Error(
-			"Deletions are not supported yet. https://github.com/opral/monorepo/pull/3043"
-		);
+		return [{ type, old, neu, operation: "insert" } satisfies DiffReport];
+	} else if (old !== undefined && neu === undefined) {
+		return [{ type, old, neu, operation: "delete" } satisfies DiffReport];
+	} else if (old && neu) {
+		const hasDiff = JSON.stringify(old) !== JSON.stringify(neu);
+		if (hasDiff) {
+			return [
+				{
+					type,
+					operation: "update",
+					old,
+					neu,
+				} satisfies DiffReport,
+			];
+		}
 	}
-	const hasDiff = JSON.stringify(old) !== JSON.stringify(neu);
-	if (hasDiff) {
-		return [{ type, value: neu }];
-	} else {
-		return [];
-	}
+	return [];
 }
