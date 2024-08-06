@@ -17,11 +17,11 @@ export type InlangProject = {
 	_sqlite: SqliteDatabase;
 	plugins: {
 		get: () => readonly InlangPlugin[];
-		subscribe: Subscription<InlangPlugin[]>;
+		subscribe: Subscription<readonly InlangPlugin[]>;
 	};
 	errors: {
 		get: () => readonly Error[];
-		subscribe: Subscription<Error[]>;
+		subscribe: Subscription<readonly Error[]>;
 	};
 	settings: {
 		get: () => ProjectSettings;
