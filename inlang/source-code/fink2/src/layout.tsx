@@ -149,6 +149,9 @@ const CreateNewProject = () => {
 	const [fileName, setFileName] = useState("");
 	const [loading, setLoading] = useState(false);
 
+	const [, setProject] = useAtom(projectAtom);
+	const [, setSelectedProjectPath] = useAtom(selectedProjectPathAtom);
+
 	const isValid = useMemo(() => fileName.endsWith(".inlang"), [fileName]);
 
 	const handleCreateNewProject = async () => {
@@ -161,6 +164,9 @@ const CreateNewProject = () => {
 		await writable.close();
 		setLoading(false);
 		setShowDialog(false);
+		const project = await loadProjectInMemory({ blob: file });
+		setProject(project);
+		setSelectedProjectPath(fileName);
 	};
 
 	return (
