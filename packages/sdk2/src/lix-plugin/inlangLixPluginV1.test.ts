@@ -18,10 +18,14 @@ describe("plugin.diff.file", () => {
 				alias: JSON.stringify({}),
 			})
 			.execute();
+		const path = "/db.sqlite";
 		const diffReports = await inlangLixPluginV1.diff.file!({
 			old: undefined,
-			neu: contentFromDatabase(neuProject._sqlite),
-			path: "/db.sqlite",
+			neu: {
+				id: "uuid",
+				path,
+				data: contentFromDatabase(neuProject._sqlite),
+			},
 		});
 		expect(diffReports).toEqual([
 			{
@@ -68,11 +72,20 @@ describe("plugin.diff.file", () => {
 				},
 			])
 			.execute();
+
 		const diffReports = await inlangLixPluginV1.diff.file!({
-			old: contentFromDatabase(oldProject._sqlite),
-			neu: contentFromDatabase(neuProject._sqlite),
-			path: "/db.sqlite",
+			old: {
+				id: "uuid",
+				path: "/db.sqlite",
+				data: contentFromDatabase(oldProject._sqlite),
+			},
+			neu: {
+				id: "uuid",
+				path: "/db.sqlite",
+				data: contentFromDatabase(neuProject._sqlite),
+			},
 		});
+
 		expect(diffReports).toEqual([
 			{
 				type: "bundle",
@@ -99,8 +112,11 @@ describe("plugin.diff.file", () => {
 			.execute();
 		const diffReports = await inlangLixPluginV1.diff.file!({
 			old: undefined,
-			neu: contentFromDatabase(neuProject._sqlite),
-			path: "/db.sqlite",
+			neu: {
+				id: "uuid",
+				path: "/db.sqlite",
+				data: contentFromDatabase(neuProject._sqlite),
+			},
 		});
 		expect(diffReports).toEqual([
 			{
@@ -167,9 +183,16 @@ describe("plugin.diff.file", () => {
 			])
 			.execute();
 		const diffReports = await inlangLixPluginV1.diff.file!({
-			old: contentFromDatabase(oldProject._sqlite),
-			neu: contentFromDatabase(neuProject._sqlite),
-			path: "/db.sqlite",
+			old: {
+				id: "uuid",
+				path: "/db.sqlite",
+				data: contentFromDatabase(oldProject._sqlite),
+			},
+			neu: {
+				id: "uuid",
+				path: "/db.sqlite",
+				data: contentFromDatabase(neuProject._sqlite),
+			},
 		});
 		expect(diffReports).toEqual([
 			{
@@ -206,8 +229,11 @@ describe("plugin.diff.file", () => {
 			.execute();
 		const diffReports = await inlangLixPluginV1.diff.file!({
 			old: undefined,
-			neu: contentFromDatabase(neuProject._sqlite),
-			path: "/db.sqlite",
+			neu: {
+				id: "uuid",
+				path: "/db.sqlite",
+				data: contentFromDatabase(neuProject._sqlite),
+			},
 		});
 		expect(diffReports).toEqual([
 			{
@@ -267,9 +293,16 @@ describe("plugin.diff.file", () => {
 			])
 			.execute();
 		const diffReports = await inlangLixPluginV1.diff.file!({
-			old: contentFromDatabase(oldProject._sqlite),
-			neu: contentFromDatabase(neuProject._sqlite),
-			path: "/db.sqlite",
+			old: {
+				id: "uuid",
+				path: "/db.sqlite",
+				data: contentFromDatabase(oldProject._sqlite),
+			},
+			neu: {
+				id: "uuid",
+				path: "/db.sqlite",
+				data: contentFromDatabase(neuProject._sqlite),
+			},
 		});
 		expect(diffReports).toEqual([
 			{
