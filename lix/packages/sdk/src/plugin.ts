@@ -17,6 +17,9 @@ export type LixPlugin<T extends Record<string, Record<string, unknown>> = Record
 		file?: (args: {
 			old?: LixFile["data"]
 			neu: LixFile["data"]
+			// TODO remove this hack in favor of
+			// providing the entire lix file object
+			path?: LixFile["path"]
 		}) => MaybePromise<Array<DiffReport>>
 	} & Record<
 		// other primitives
