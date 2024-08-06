@@ -7,7 +7,6 @@ export const insertBundleNested = async (
 	db: Kysely<InlangDatabaseSchema>,
 	bundle: BundleNested
 ): Promise<void> => {
-	// TODO loadMessages - what shall we return instead of void here?
 	await db
 		.insertInto("bundle")
 		.values({

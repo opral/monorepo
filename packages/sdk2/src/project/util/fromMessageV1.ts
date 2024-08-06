@@ -57,7 +57,6 @@ export function fromMessageV1(messageV1: MessageV1): BundleNested {
 			variants.push({
 				match: v1Variant.match,
 				pattern: fromPatternV1(v1Variant.pattern),
-				// TODO loadMessages - is there any case where we support more than one variant per message with he old sdk?
 				id: messageId + "_" + variantIndex,
 				messageId: messageId,
 			});
