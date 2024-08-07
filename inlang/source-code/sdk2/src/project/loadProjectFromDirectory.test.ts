@@ -8,6 +8,78 @@ import type { Text } from "../schema/schemaV2.js";
 import type { InlangPlugin } from "../plugin/schema.js";
 import type { MessageV1, VariantV1 } from "../schema/schemaV1.js";
 
+test("plugin.loadMessages and plugin.saveMessages must not be condigured together with import export", async () => {
+	const mockLegacyPlugin: InlangPlugin = {
+		key: "mock-legacy-plugin",
+		loadMessages: async () => {
+			return [];
+		},
+		saveMessages: async () => {},
+	};
+
+	const mockLegacyPlugin2: InlangPlugin = {
+		key: "mock-legacy-plugin-2",
+		loadMessages: async () => {
+			return [];
+		},
+		saveMessages: async () => {},
+	};
+
+	const mockImportExportPlugin: InlangPlugin = {
+		key: "mock-import-export-plugin",
+		exportFiles: () => {
+			return [];
+		},
+		importFiles: () => {
+			return {} as any;
+		},
+	};
+
+	const mockPluginMapping = {
+		"./mock-legacy-module.js": mockLegacyPlugin,
+		"./mock-legacy-module-2.js": mockLegacyPlugin2,
+		"./mock-import-export-plugin.js": mockImportExportPlugin,
+	};
+
+	await expect(
+		(async () => {
+			await loadProjectFromDirectoryInMemory({
+				fs: Volume.fromJSON({
+					"./project.inlang/settings.json": JSON.stringify({
+						baseLocale: "en",
+						locales: ["en", "de"],
+						modules: ["./mock-legacy-module.js", "./mock-legacy-module-2.js"],
+					} satisfies ProjectSettings),
+				}).promises as any,
+				path: "./project.inlang",
+				_mockPlugins: mockPluginMapping,
+			});
+		})()
+	).rejects.toThrowError();
+
+	await expect(
+		(async () => {
+			await loadProjectFromDirectoryInMemory({
+				fs: Volume.fromJSON({
+					"./project.inlang/settings.json": JSON.stringify({
+						baseLocale: "en",
+						locales: ["en", "de"],
+						modules: [
+							"./mock-legacy-module.js",
+							"./mock-import-export-plugin.js",
+						],
+					} satisfies ProjectSettings),
+				}).promises as any,
+				path: "./project.inlang",
+				_mockPlugins: mockPluginMapping,
+			});
+		})()
+	).rejects.toThrowError();
+
+	console.log('test')
+});
+
+
 test("plugin.loadMessages and plugin.saveMessages should work for legacy purposes", async () => {
 	const mockLegacyPlugin: InlangPlugin = {
 		key: "mock-plugin",

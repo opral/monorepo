@@ -41,8 +41,8 @@ export function toMessageV1(bundle: BundleNested): MessageV1 {
 	}));
 
 	return {
-		id: bundle.id,
-		alias: bundle.alias,
+		id: bundle.alias.default!,
+		alias: {},
 		variants,
 		selectors,
 	};

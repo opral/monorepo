@@ -32,21 +32,25 @@ const messageV1: MessageV1 = {
 	selectors: [],
 };
 
+const humanReadableId = "awful_lamb_mend_smooth";
+
 const bundle = {
-	alias: {},
-	id: "hello_world",
+	alias: {
+		default: "hello_world",
+	},
+	id: "awful_lamb_mend_smooth",
 	messages: [
 		{
-			bundleId: "deriveBundleIdFromMessageID",
+			bundleId: humanReadableId,
 			declarations: [],
-			id: "deriveBundleIdFromMessageID_en",
+			id: humanReadableId + "_en",
 			locale: "en",
 			selectors: [],
 			variants: [
 				{
-					id: "deriveBundleIdFromMessageID_en_1",
+					id: humanReadableId + "_en_1",
 					match: [],
-					messageId: "deriveBundleIdFromMessageID_en",
+					messageId: humanReadableId + "_en",
 					pattern: [
 						{
 							type: "text",
@@ -57,16 +61,16 @@ const bundle = {
 			],
 		},
 		{
-			bundleId: "deriveBundleIdFromMessageID",
+			bundleId: humanReadableId,
 			declarations: [],
-			id: "deriveBundleIdFromMessageID_de",
+			id: humanReadableId + "_de",
 			locale: "de",
 			selectors: [],
 			variants: [
 				{
-					id: "deriveBundleIdFromMessageID_de_1",
+					id: humanReadableId + "_de_1",
 					match: [],
-					messageId: "deriveBundleIdFromMessageID_de",
+					messageId: humanReadableId + "_de",
 					pattern: [
 						{
 							type: "text",
