@@ -1,14 +1,13 @@
-import { InlangProject, BundleNested } from "@inlang/sdk2";
-import { json } from "./toJSONRawBuilder.ts";
+import type { Kysely } from "kysely";
+import type { BundleNested } from "../schema/schemaV2.js";
+import { json } from "./toJSONRawBuilder.js";
+import type { InlangDatabaseSchema } from "../database/schema.js";
 
-export const insertNestedBundle = async (
-	project: InlangProject | undefined,
+export const insertBundleNested = async (
+	db: Kysely<InlangDatabaseSchema>,
 	bundle: BundleNested
 ): Promise<void> => {
-	if (project === undefined) {
-		throw new Error("Project is undefined");
-	}
-	await project.db
+	await db
 		.insertInto("bundle")
 		.values({
 			id: bundle.id,
@@ -17,8 +16,8 @@ export const insertNestedBundle = async (
 		.returning("id")
 		.execute();
 
-	bundle.messages.forEach(async (message) => {
-		await project.db
+	for (const message of bundle.messages) {
+		await db
 			.insertInto("message")
 			.values({
 				id: message.id,
@@ -29,8 +28,8 @@ export const insertNestedBundle = async (
 			})
 			.execute();
 
-		message.variants.forEach(async (variant) => {
-			await project.db
+		for (const variant of message.variants) {
+			await db
 				.insertInto("variant")
 				.values({
 					id: variant.id,
@@ -39,7 +38,6 @@ export const insertNestedBundle = async (
 					pattern: json(variant.pattern),
 				})
 				.execute();
-		});
-	});
+		}
+	}
 };
-

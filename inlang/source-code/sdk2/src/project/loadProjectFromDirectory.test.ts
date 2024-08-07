@@ -2,23 +2,51 @@
 import { expect, test } from "vitest";
 import { ProjectSettings } from "../schema/settings.js";
 import { Volume } from "memfs";
-import { loadProjectFromDirectory } from "./loadProjectFromDirectory.js";
+import { loadProjectFromDirectoryInMemory } from "./loadProjectFromDirectory.js";
 import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
 import type { Text } from "../schema/schemaV2.js";
 import type { InlangPlugin } from "../plugin/schema.js";
+import type { MessageV1, VariantV1 } from "../schema/schemaV1.js";
 
-test.skip("plugin.loadMessages and plugin.saveMessages should work for legacy purposes", async () => {
+test("plugin.loadMessages and plugin.saveMessages should work for legacy purposes", async () => {
 	const mockLegacyPlugin: InlangPlugin = {
 		key: "mock-plugin",
 		loadMessages: async ({ nodeishFs, settings }) => {
 			const pathPattern = settings["plugin.mock-plugin"]?.pathPattern as string;
+
+			const messages: MessageV1[] = [];
+
 			// @ts-expect-error - language tag is always given by the sdk v2
 			for (const languageTag of settings.languageTags) {
 				const data = await nodeishFs.readFile(
 					pathPattern.replace("{languageTag}", languageTag)
 				);
-				return JSON.parse(data.toString());
+
+				for (const [key, value] of Object.entries(
+					JSON.parse(data.toString())
+				)) {
+					const exisitngMessage = messages.find(
+						(message) => message.id === key
+					);
+					const variant = {
+						languageTag: languageTag,
+						match: [],
+						pattern: [{ type: "Text", value: value }],
+					} as VariantV1;
+					if (exisitngMessage !== undefined) {
+						exisitngMessage.variants.push(variant);
+					} else {
+						messages.push({
+							alias: {},
+							id: key,
+							selectors: [],
+							variants: [variant],
+						});
+					}
+				}
 			}
+
+			return messages;
 		},
 		saveMessages: async () => {},
 	};
@@ -43,9 +71,12 @@ test.skip("plugin.loadMessages and plugin.saveMessages should work for legacy pu
 		} satisfies ProjectSettings),
 	};
 	const fs = Volume.fromJSON(mockRepo).promises;
-	const project = await loadProjectFromDirectory({
+	const project = await loadProjectFromDirectoryInMemory({
 		fs: fs as any,
 		path: "./project.inlang",
+		_mockPlugins: {
+			"./mock-module.js": mockLegacyPlugin,
+		},
 	});
 	const bundles = await selectBundleNested(project.db).execute();
 	const bundlesOrdered = bundles.sort((a, b) =>
@@ -58,16 +89,20 @@ test.skip("plugin.loadMessages and plugin.saveMessages should work for legacy pu
 	expect(
 		(bundlesOrdered[0]?.messages[0]?.variants[0]?.pattern[0] as Text)?.value
 	).toBe("value1");
-	expect(
-		(bundlesOrdered[0]?.messages[0]?.variants[1]?.pattern[0] as Text)?.value
-	).toBe("value2");
 
 	expect(bundlesOrdered[0]?.messages[1]?.locale).toBe("de");
 	expect(
 		(bundlesOrdered[0]?.messages[1]?.variants[0]?.pattern[0] as Text)?.value
 	).toBe("wert1");
+
+	expect(bundlesOrdered[1]?.messages[0]?.locale).toBe("en");
 	expect(
-		(bundlesOrdered[0]?.messages[1]?.variants[1]?.pattern[0] as Text)?.value
+		(bundlesOrdered[1]?.messages[0]?.variants[0]?.pattern[0] as Text)?.value
+	).toBe("value2");
+
+	expect(bundlesOrdered[1]?.messages[1]?.locale).toBe("de");
+	expect(
+		(bundlesOrdered[1]?.messages[1]?.variants[0]?.pattern[0] as Text)?.value
 	).toBe("wert2");
 });
 
@@ -86,7 +121,7 @@ test.skip("it should copy all files in a directory into lix", async () => {
 		"/project.inlang/settings.json": JSON.stringify(mockSettings),
 	};
 	const fs = Volume.fromJSON(mockDirectory).promises;
-	const project = await loadProjectFromDirectory({
+	const project = await loadProjectFromDirectoryInMemory({
 		fs: fs as any,
 		path: "/project.inlang",
 	});
