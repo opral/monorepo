@@ -29,14 +29,14 @@ type MaybePromise<T> = T | Promise<T>
  */
 export type DiffReport = {
 	type: string
-	operation: "insert" | "update" | "delete"
+	operation: "create" | "update" | "delete"
 	old?: Record<string, any> & { id: string }
 	neu?: Record<string, any> & { id: string }
 	meta?: Record<string, any>
 } & (DiffReportInsertion | DiffReportUpdate | DiffReportDeletion)
 
 type DiffReportInsertion = {
-	operation: "insert"
+	operation: "create"
 	old: undefined
 	neu: Record<string, any> & {
 		id: string

@@ -183,6 +183,7 @@ async function handleFileChange(args: {
 						id: v4(),
 						type: diff.type,
 						file_id: fileId,
+						operation: diff.operation,
 						plugin_key: plugin.key,
 						// @ts-expect-error - database expects stringified json
 						value: JSON.stringify(value),
@@ -239,6 +240,7 @@ async function handleFileChange(args: {
 				.where("commit_id", "is", null)
 				.set({
 					id: v4(),
+					operation: diff.operation,
 					// @ts-expect-error - database expects stringified json
 					value: JSON.stringify(value),
 					meta: JSON.stringify(diff.meta),
@@ -267,6 +269,7 @@ async function handleFileInsert(args: {
 					type: diff.type,
 					file_id: args.neu.id,
 					plugin_key: plugin.key,
+					operation: diff.operation,
 					// @ts-expect-error - database expects stringified json
 					value: JSON.stringify(diff.value),
 					meta: JSON.stringify(diff.meta),

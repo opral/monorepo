@@ -31,7 +31,8 @@ export async function newLixFile(): Promise<Blob> {
         type TEXT NOT NULL,
         file_id TEXT NOT NULL,
         plugin_key TEXT NOT NULL,
-        value TEXT NULL,
+        operation TEXT NOT NULL,
+        value TEXT,
         meta TEXT,
         commit_id TEXT
         ) strict;
