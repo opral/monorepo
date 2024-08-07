@@ -40,7 +40,13 @@ const InlangBundle = (props: { bundleId: string }) => {
 			.execute();
 
 		if (uncommittedChanges) {
-			setChangedIds(uncommittedChanges.map((change) => change.value.id));
+			// TODO
+			// https://github.com/opral/lix-sdk/issues/27
+			setChangedIds(
+				uncommittedChanges
+					.filter((change) => change.value?.id !== undefined)
+					.map((change) => change.value!.id)
+			);
 		}
 	};
 

@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { SlButton, SlDialog } from "@shoelace-style/shoelace/dist/react";
-import { type BundleNested } from "@inlang/sdk2";
 import { projectAtom } from "./../state.ts";
 import { useAtom } from "jotai";
 import { demoBundles } from "./../../demo/bundles.ts";
-import { insertNestedBundle } from "./../helper/insertNestedBundle.ts";
+import { insertBundleNested } from "@inlang/sdk2";
 
 const ImportComponent = () => {
 	const [showDialog, setShowDialog] = useState(false);
@@ -14,10 +13,9 @@ const ImportComponent = () => {
 	const handleImport = async () => {
 		if (project) {
 			setLoading(true);
-			demoBundles.forEach(async (bundle) => {
-				console.log(bundle);
-				await insertNestedBundle(project, bundle as unknown as BundleNested);
-			});
+			for (const bundle of demoBundles) {
+				await insertBundleNested(project.db, bundle);
+			}
 
 			setLoading(false);
 			setShowDialog(false);
