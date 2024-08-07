@@ -43,7 +43,7 @@ const ImportComponent = () => {
 					slot="footer"
 					onClick={handleImport}
 				>
-					Import demo ast
+					Import demo bundles
 				</SlButton>
 			</SlDialog>
 		</>
