@@ -24,7 +24,7 @@ test.todo("changes should contain the operation reported by diffs", async () => 
 				return [
 					{
 						type: "mock",
-						operation: "insert",
+						operation: "create",
 						old: undefined,
 						neu: {
 							id: "uuid",
