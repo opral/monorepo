@@ -110,7 +110,7 @@ function jsonStringifyComparison({
 	type: "bundle" | "message" | "variant";
 }): DiffReport[] {
 	if (old === undefined && neu) {
-		return [{ type, old, neu, operation: "insert" } satisfies DiffReport];
+		return [{ type, old, neu, operation: "create" } satisfies DiffReport];
 	} else if (old !== undefined && neu === undefined) {
 		return [{ type, old, neu, operation: "delete" } satisfies DiffReport];
 	} else if (old && neu) {

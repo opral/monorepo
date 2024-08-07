@@ -20,7 +20,7 @@ test.todo("changes should contain the operation reported by diffs", async () => 
 		glob: "*",
 		diff: {
 			file: async ({ neu }) => {
-				const json = JSON.parse(new TextDecoder().decode(neu))
+				const json = JSON.parse(new TextDecoder().decode(neu?.data))
 				return [
 					{
 						type: "mock",

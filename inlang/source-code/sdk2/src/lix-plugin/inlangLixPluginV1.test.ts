@@ -30,7 +30,7 @@ describe("plugin.diff.file", () => {
 		expect(diffReports).toEqual([
 			{
 				type: "bundle",
-				operation: "insert",
+				operation: "create",
 				old: undefined,
 				neu: { id: "1", alias: {} },
 			} satisfies DiffReport,
@@ -121,7 +121,7 @@ describe("plugin.diff.file", () => {
 		expect(diffReports).toEqual([
 			{
 				type: "message",
-				operation: "insert",
+				operation: "create",
 				old: undefined,
 				neu: {
 					id: "1",
@@ -238,7 +238,7 @@ describe("plugin.diff.file", () => {
 		expect(diffReports).toEqual([
 			{
 				type: "variant",
-				operation: "insert",
+				operation: "create",
 				old: undefined,
 				neu: {
 					id: "1",
@@ -372,7 +372,7 @@ describe("plugin.diff.variant", () => {
 		};
 		const diff = await inlangLixPluginV1.diff.variant({ old, neu });
 		expect(diff).toEqual([
-			{ operation: "insert", type: "variant", neu, old } satisfies DiffReport,
+			{ operation: "create", type: "variant", neu, old } satisfies DiffReport,
 		]);
 	});
 });
