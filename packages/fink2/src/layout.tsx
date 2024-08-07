@@ -51,29 +51,6 @@ export default function Layout(props: { children: React.ReactNode }) {
 	return (
 		<div className="p-6 max-w-7xl mx-auto px-4 h-full">
 			<MenuBar />
-			{window && window.location.pathname === "/changes" && (
-				<>
-					<hr></hr>
-					<div className="flex gap-2">
-						<p>Outstanding changes: {numUncommittedChanges}</p>
-						<p>Committed changes: {numCommittedChanges}</p>
-						<p>Commits: {numCommits}</p>
-						<SlButton
-							onClick={async () => {
-								console.log("executing commit");
-								await project?.lix.commit({
-									userId: "Samuel",
-									description:
-										"Nils, extra wieder ne nachtschicht für dich geschoben",
-								});
-							}}
-						>
-							commit changes
-						</SlButton>
-					</div>
-					<hr></hr>
-				</>
-			)}
 			{props.children}
 		</div>
 	);
