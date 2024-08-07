@@ -1,8 +1,7 @@
 import { Link } from "react-router-dom";
 import clsx from "clsx";
-import { projectAtom } from "../state.ts";
+import { pendingChangesAtom } from "../state.ts";
 import { useAtom } from "jotai";
-import { useEffect, useState } from "react";
 
 const data: { path: string; name: string }[] = [
 	{
@@ -16,27 +15,7 @@ const data: { path: string; name: string }[] = [
 ];
 
 const ModeSwitcher = () => {
-	const [project] = useAtom(projectAtom);
-	const [numUncommittedChanges, setNumUncommittedChanges] = useState(0);
-
-	const calculateNumUncommittedChanges = async () => {
-		const uncommittedChanges = await project?.lix.db
-			.selectFrom("change")
-			.selectAll()
-			.where("commit_id", "is", null)
-			.execute();
-
-		if (uncommittedChanges) {
-			setNumUncommittedChanges(uncommittedChanges.length);
-		}
-	};
-
-	useEffect(() => {
-		calculateNumUncommittedChanges();
-		setInterval(async () => {
-			calculateNumUncommittedChanges();
-		}, 1500);
-	});
+	const [pendingChanges] = useAtom(pendingChangesAtom);
 
 	return (
 		<div className="h-[34px] px-[2px] flex items-center bg-zinc-100 rounded">
@@ -45,7 +24,7 @@ const ModeSwitcher = () => {
 					key={item.path}
 					path={item.path}
 					name={item.name}
-					numUncommittedChanges={numUncommittedChanges}
+					numUncommittedChanges={pendingChanges.length}
 				/>
 			))}
 		</div>
