@@ -39,15 +39,21 @@ export async function openLix(args: {
 
 	args.database.createFunction({
 		name: "handle_file_change",
-		arity: 4,
+		arity: 6,
 		// @ts-expect-error - dynamic function
-		xFunc: (_, fileId: any, oldData: any, neuData: any, path: any) => {
+		xFunc: (_, ...args) => {
 			maybePendingPromises.push(
 				handleFileChange({
-					fileId,
-					path,
-					oldData,
-					neuData,
+					old: {
+						id: args[0] as any,
+						path: args[1] as any,
+						data: args[2] as any,
+					},
+					neu: {
+						id: args[3] as any,
+						path: args[4] as any,
+						data: args[5] as any,
+					},
 					plugins,
 					db,
 				})
@@ -59,7 +65,7 @@ export async function openLix(args: {
 	await sql`
 	CREATE TEMP TRIGGER file_modified AFTER UPDATE ON file
 	BEGIN
-	  SELECT handle_file_change(NEW.id, OLD.data, NEW.data, OLD.path);
+	  SELECT handle_file_change(NEW.id, NEW.path, NEW.data, OLD.id, OLD.path, OLD.data);
 	END;
 	`.execute(db)
 
@@ -67,14 +73,16 @@ export async function openLix(args: {
 		name: "handle_file_insert",
 		arity: 3,
 		// @ts-expect-error - dynamic function
-		xFunc: (_, fileId: any, newData: any, path: any) => {
+		xFunc: (_, id: any, path: any, data: any) => {
 			maybePendingPromises.push(
 				handleFileInsert({
-					fileId,
-					newData,
+					neu: {
+						id,
+						path,
+						data,
+					},
 					plugins,
 					db,
-					path,
 				})
 			)
 			return
@@ -84,7 +92,7 @@ export async function openLix(args: {
 	await sql`
 	CREATE TEMP TRIGGER file_inserted AFTER INSERT ON file
 	BEGIN
-	  SELECT handle_file_insert(NEW.id, NEW.data, NEW.path);
+	  SELECT handle_file_insert(NEW.id, NEW.path, NEW.data);
 	END;
 	`.execute(db)
 
@@ -142,18 +150,16 @@ async function loadPlugins(db: Kysely<LixDatabase>) {
 // }
 
 async function handleFileChange(args: {
-	fileId: LixFile["id"]
-	path: LixFile["path"]
-	oldData: LixFile["data"]
-	neuData: LixFile["data"]
+	old: LixFile
+	neu: LixFile
 	plugins: LixPlugin[]
 	db: Kysely<LixDatabase>
 }) {
+	const fileId = args.neu?.id ?? args.old?.id
 	for (const plugin of args.plugins) {
 		const diffs = await plugin.diff?.file?.({
-			old: args.oldData,
-			neu: args.neuData,
-			path: args.path,
+			old: args.old,
+			neu: args.neu,
 		})
 		for (const diff of diffs ?? []) {
 			// assume an insert or update operation as the default
@@ -164,7 +170,7 @@ async function handleFileChange(args: {
 				.selectAll()
 				.where((eb) => eb.ref("value", "->>").key("id"), "=", value.id)
 				.where("type", "=", diff.type)
-				.where("file_id", "=", args.fileId)
+				.where("file_id", "=", fileId)
 				.where("plugin_key", "=", plugin.key)
 				.where("commit_id", "is", null)
 				.executeTakeFirst()
@@ -176,7 +182,7 @@ async function handleFileChange(args: {
 					.values({
 						id: v4(),
 						type: diff.type,
-						file_id: args.fileId,
+						file_id: fileId,
 						plugin_key: plugin.key,
 						// @ts-expect-error - database expects stringified json
 						value: JSON.stringify(value),
@@ -191,7 +197,7 @@ async function handleFileChange(args: {
 				.selectAll()
 				.where((eb) => eb.ref("value", "->>").key("id"), "=", value.id)
 				.where("type", "=", diff.type)
-				.where("file_id", "=", args.fileId)
+				.where("file_id", "=", fileId)
 				.where("commit_id", "is not", null)
 				.where("plugin_key", "=", plugin.key)
 				.innerJoin("commit", "commit.id", "change.commit_id")
@@ -212,7 +218,7 @@ async function handleFileChange(args: {
 						.deleteFrom("change")
 						.where((eb) => eb.ref("value", "->>").key("id"), "=", value.id)
 						.where("type", "=", diff.type)
-						.where("file_id", "=", args.fileId)
+						.where("file_id", "=", fileId)
 						.where("plugin_key", "=", plugin.key)
 						.where("commit_id", "is", null)
 						.execute()
@@ -228,7 +234,7 @@ async function handleFileChange(args: {
 				.updateTable("change")
 				.where((eb) => eb.ref("value", "->>").key("id"), "=", value.id)
 				.where("type", "=", diff.type)
-				.where("file_id", "=", args.fileId)
+				.where("file_id", "=", fileId)
 				.where("plugin_key", "=", plugin.key)
 				.where("commit_id", "is", null)
 				.set({
@@ -244,17 +250,14 @@ async function handleFileChange(args: {
 
 // creates initial commit
 async function handleFileInsert(args: {
-	fileId: LixFile["id"]
-	path: LixFile["path"]
-	newData: LixFile["data"]
+	neu: LixFile
 	plugins: LixPlugin[]
 	db: Kysely<LixDatabase>
 }) {
 	for (const plugin of args.plugins) {
 		const diffs = await plugin.diff?.file?.({
 			old: undefined,
-			neu: args.newData,
-			path: args.path,
+			neu: args.neu,
 		})
 		for (const diff of diffs ?? []) {
 			await args.db
@@ -262,7 +265,7 @@ async function handleFileInsert(args: {
 				.values({
 					id: v4(),
 					type: diff.type,
-					file_id: args.fileId,
+					file_id: args.neu.id,
 					plugin_key: plugin.key,
 					// @ts-expect-error - database expects stringified json
 					value: JSON.stringify(diff.value),
@@ -287,7 +290,7 @@ async function handleFileInsert(args: {
 			return await args.db
 				.updateTable("change")
 				.where("commit_id", "is", null)
-				.where("file_id", "=", args.fileId)
+				.where("file_id", "=", args.neu.id)
 				.set({
 					commit_id: commit.id,
 				})
