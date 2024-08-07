@@ -1,14 +1,9 @@
 import { createComponent } from "@lit/react";
 import { InlangBundle as LitInlangBundle } from "@inlang/bundle-component"
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useAtom } from "jotai";
-import { projectAtom } from "../state.ts";
-import {
-	BundleNested,
-	MessageNested,
-	Variant,
-	selectBundleNested,
-} from "@inlang/sdk2";
+import { pendingChangesAtom, projectAtom } from "../state.ts";
+import { BundleNested, MessageNested, Variant } from "@inlang/sdk2";
 import queryHelper from "../helper/queryHelper.ts";
 
 export const ReactBundle = createComponent({
@@ -27,46 +22,9 @@ export const ReactBundle = createComponent({
 	},
 });
 
-const InlangBundle = (props: { bundleId: string }) => {
+const InlangBundle = (props: { bundle: BundleNested }) => {
 	const [project] = useAtom(projectAtom);
-	const [bundle, setBundle] = useState<BundleNested | undefined>(undefined);
-	const [changedIds, setChangedIds] = useState<string[]>([]);
-
-	const calculateChangedBundleIds = async () => {
-		const uncommittedChanges = await project?.lix.db
-			.selectFrom("change")
-			.selectAll()
-			.where("commit_id", "is", null)
-			.execute();
-
-		if (uncommittedChanges) {
-			// TODO
-			// https://github.com/opral/lix-sdk/issues/27
-			setChangedIds(
-				uncommittedChanges
-					.filter((change) => change.value?.id !== undefined)
-					.map((change) => change.value!.id)
-			);
-		}
-	};
-
-	useEffect(() => {
-		if (!project) return;
-		queryBundle();
-		calculateChangedBundleIds();
-		setInterval(async () => {
-			queryBundle();
-			calculateChangedBundleIds();
-		}, 2000);
-	}, []);
-
-	const queryBundle = async () => {
-		if (!project) return;
-		const bundle = await selectBundleNested(project.db)
-			.where("id", "=", props.bundleId)
-			.executeTakeFirst();
-		setBundle(bundle);
-	};
+	const [pendingChanges] = useAtom(pendingChangesAtom);
 
 	const onMesageInsert = (event: {
 		detail: { argument: { message: MessageNested } };
@@ -114,11 +72,11 @@ const InlangBundle = (props: { bundleId: string }) => {
 
 	return (
 		<>
-			{bundle && (
+			{props.bundle && (
 				<div className="relative">
 					<ReactBundle
 						style={{ all: "initial" }}
-						bundle={bundle}
+						bundle={props.bundle}
 						settings={project?.settings.get()}
 						insertMessage={onMesageInsert as any}
 						updateMessage={onMesageUpdate as any}
@@ -127,7 +85,10 @@ const InlangBundle = (props: { bundleId: string }) => {
 						deleteVariant={onVariantDelete as any}
 					/>
 					<div className="absolute top-[14px] right-0 pointer-events-none translate-x-6">
-						{arraysIntersect(getAllNestedIds(bundle), changedIds) && (
+						{arraysIntersect(
+							getAllNestedIds(props.bundle),
+							pendingChanges.map((change) => change.id)
+						) && (
 							<div className="bg-blue-500 w-3 h-3 text-white p-1 rounded-full" />
 						)}
 					</div>
@@ -147,6 +108,7 @@ const getAllNestedIds = (bundle: BundleNested): string[] => {
 	return [...messageIds, ...variantIds, ...bundle.id];
 };
 
+// @NilsJacobsen what is this function for? 
 function arraysIntersect(arr1: any[], arr2: any[]): boolean {
 	// Convert the first array to a Set
 	const set1 = new Set(arr1);

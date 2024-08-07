@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAtom } from "jotai";
-import { projectAtom, selectedProjectPathAtom } from "./state.ts";
+import { selectedProjectPathAtom, withPollingAtom } from "./state.ts";
 import { useEffect, useMemo, useState } from "react";
 import SlDialog from "@shoelace-style/shoelace/dist/react/dialog/index.js";
-import { loadProjectInMemory, newProject } from "@inlang/sdk2";
+import { newProject } from "@inlang/sdk2";
 import {
 	SlInput,
 	SlButton,
@@ -15,37 +15,12 @@ import { Link } from "react-router-dom";
 import ModeSwitcher from "./components/ModeSwitcher.tsx";
 
 export default function Layout(props: { children: React.ReactNode }) {
-	const [project] = useAtom(projectAtom);
-	const [numUncommittedChanges, setNumUncommittedChanges] = useState(0);
-	const [numCommittedChanges, setNumCommittedChanges] = useState(0);
-	const [numCommits, setNumCommits] = useState(0);
-
+	const [, setWithPolling] = useAtom(withPollingAtom);
 	useEffect(() => {
-		setInterval(async () => {
-			const uncommittedChanges = await project?.lix.db
-				.selectFrom("change")
-				.selectAll()
-				.where("commit_id", "is", null)
-				.execute();
-			const committedChanges = await project?.lix.db
-				.selectFrom("change")
-				.selectAll()
-				.where("commit_id", "is not", null)
-				.execute();
-			const numCommits = await project?.lix.db
-				.selectFrom("commit")
-				.selectAll()
-				.execute();
-			if (uncommittedChanges) {
-				setNumUncommittedChanges(uncommittedChanges.length);
-			}
-			if (committedChanges) {
-				setNumCommittedChanges(committedChanges.length);
-			}
-			if (numCommits) {
-				setNumCommits(numCommits.length);
-			}
-		}, 1500);
+		const interval = setInterval(() => {
+			setWithPolling(Date.now());
+		}, 2000);
+		return () => clearInterval(interval);
 	});
 
 	return (
@@ -76,7 +51,6 @@ const SelectProject = () => {
 	const [selectedProjectPath, setSelectedProjectPath] = useAtom(
 		selectedProjectPathAtom
 	);
-	const [, setProject] = useAtom(projectAtom);
 	const [existingProjects, setExistingProjects] = useState<string[]>([]);
 
 	const getProjects = async () => {
@@ -98,13 +72,8 @@ const SelectProject = () => {
 				placeholder={
 					selectedProjectPath ? selectedProjectPath : "Select project"
 				}
-				onSlChange={async (e: any) => {
+				onSlChange={(e: any) => {
 					setSelectedProjectPath(e.target.value);
-					const opfsRoot = await navigator.storage.getDirectory();
-					const fileHandle = await opfsRoot.getFileHandle(e.target.value);
-					const file = await fileHandle.getFile();
-					const project = await loadProjectInMemory({ blob: file });
-					setProject(project);
 				}}
 				onSlShow={async () => {
 					const projects = await getProjects();
@@ -126,7 +95,6 @@ const CreateNewProject = () => {
 	const [fileName, setFileName] = useState("");
 	const [loading, setLoading] = useState(false);
 
-	const [, setProject] = useAtom(projectAtom);
 	const [, setSelectedProjectPath] = useAtom(selectedProjectPathAtom);
 
 	const isValid = useMemo(() => fileName.endsWith(".inlang"), [fileName]);
@@ -141,8 +109,6 @@ const CreateNewProject = () => {
 		await writable.close();
 		setLoading(false);
 		setShowDialog(false);
-		const project = await loadProjectInMemory({ blob: file });
-		setProject(project);
 		setSelectedProjectPath(fileName);
 	};
 
