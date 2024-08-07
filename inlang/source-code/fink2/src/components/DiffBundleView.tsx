@@ -43,8 +43,8 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 							(variant) => variant.id === latestCommitedChange.value!.id
 						);
 						if (variant) {
-							variant.match = latestCommitedChange.value.match;
-							variant.pattern = latestCommitedChange.value.pattern;
+							variant.match = latestCommitedChange.value?.match;
+							variant.pattern = latestCommitedChange.value?.pattern;
 						}
 					}
 				}
@@ -60,7 +60,7 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 			.selectAll()
 			.where("commit_id", "is not", null)
 			.where("type", "=", "variant")
-			.where((eb) => eb.ref("value", "->>").key("id"), "=", change.value.id)
+			.where((eb) => eb.ref("value", "->>").key("id"), "=", change.value?.id)
 			.innerJoin("commit", "commit.id", "change.commit_id")
 			.orderBy("commit.zoned_date_time desc")
 			.executeTakeFirst();
@@ -80,7 +80,7 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 					<span className="font-bold text-zinc-950">You</span> changed the{" "}
 					<span className="font-bold text-zinc-950">{change.type}</span> with
 					the id{" "}
-					<span className="font-bold text-zinc-950">{change.value.id}</span>
+					<span className="font-bold text-zinc-950">{change.value?.id}</span>
 				</p>
 			))}
 			<div className="flex gap-8">

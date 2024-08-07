@@ -180,7 +180,9 @@ export default function App() {
 								{change.type}
 							</span>{" "}
 							with the id{" "}
-							<span className="font-bold text-zinc-950">{change.value.id}</span>
+							<span className="font-bold text-zinc-950">
+								{change.value?.id}
+							</span>
 						</p>
 					))}
 				</div>
