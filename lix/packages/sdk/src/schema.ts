@@ -44,7 +44,7 @@ export type Change = {
 	 *
 	 * The operation is taken from the diff reports.
 	 */
-	operation: "insert" | "update" | "delete"
+	operation: "create" | "update" | "delete"
 
 	/**
 	 * The type of change that was made.
