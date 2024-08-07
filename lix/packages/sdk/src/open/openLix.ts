@@ -183,6 +183,7 @@ async function handleFileChange(args: {
 						id: v4(),
 						type: diff.type,
 						file_id: fileId,
+						operation: diff.operation,
 						plugin_key: plugin.key,
 						// @ts-expect-error - database expects stringified json
 						value: JSON.stringify(value),
