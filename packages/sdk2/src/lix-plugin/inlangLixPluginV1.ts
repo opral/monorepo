@@ -21,20 +21,19 @@ export const inlangLixPluginV1: LixPlugin<{
 	// },
 	diff: {
 		// TODO does not account for deletions
-		file: async ({ old, neu, path }) => {
-			
+		file: async ({ old, neu }) => {
 			// can only handle the database for now
-			if (path === undefined || path?.endsWith("db.sqlite") === false) {
+			if (neu === undefined || neu.path?.endsWith("db.sqlite") === false) {
 				return [];
 			}
 			const result: DiffReport[] = [];
 			const oldDb = old
-				? initKysely({ sqlite: await loadDatabaseInMemory(old) })
+				? initKysely({ sqlite: await loadDatabaseInMemory(old.data) })
 				: undefined;
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			const newDb = neu
 				? initKysely({
-						sqlite: await loadDatabaseInMemory(neu),
+						sqlite: await loadDatabaseInMemory(neu.data),
 				  })
 				: undefined;
 			const newProjectBundles = await newDb
