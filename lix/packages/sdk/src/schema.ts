@@ -4,6 +4,12 @@ export type LixDatabase = {
 	file: LixFile
 	change: Change
 	commit: Commit
+	ref: Ref
+}
+
+export type Ref = {
+	name: string
+	commit_id: string
 }
 
 // named lix file to avoid conflict with built-in file type
@@ -20,7 +26,8 @@ export type Commit = {
 	//  think of real-time collaboration scenarios
 	user_id: string // @relation to a user
 	description: string
-	zoned_date_time: string
+	created?: string
+	parent_id: string
 	// @relation changes: Change[]
 }
 
@@ -67,6 +74,8 @@ export type Change = {
 	value?: Record<string, any> & {
 		id: string
 	} // JSONB
+
+	conflict?: any[] | null
 	/**
 	 * Additional metadata for the change used by the plugin
 	 * to process changes.
