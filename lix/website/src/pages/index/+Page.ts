@@ -7,7 +7,7 @@ import { footer } from "./footer.ts"
 
 export const Page = () => html` ${header}
 	<!-- main section -->
-	<div class="w-full max-w-screen-[700px] px-4 mx-auto">
+	<div class="w-full max-w-2xl px-4 mx-auto">
 		<h1 class="w-full md:w-[55%] mt-12 mb-8 text-3xl leading-[1.3] text-slate-950 font-medium">
 			<svg
 				width="40"

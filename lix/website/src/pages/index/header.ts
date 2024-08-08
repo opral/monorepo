@@ -1,7 +1,7 @@
 import { html } from "lit"
 
 export const header = html`
-	<div class="w-full max-w-screen-[700px] px-4 mx-auto my-8 flex items-center justify-end gap-4">
+	<div class="w-full max-w-2xl px-4 mx-auto my-8 flex items-center justify-end gap-4">
 		<a
 			href="https://github.com/opral/monorepo"
 			target="_blanc"

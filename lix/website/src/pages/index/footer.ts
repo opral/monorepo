@@ -17,7 +17,7 @@ const footerLinks = [
 
 export const footer = html`
 	<div class="w-full h-[1px] bg-slate-200 my-16"></div>
-	<div class="w-full max-w-screen-[700px] px-4 mx-auto my-16">
+	<div class="w-full max-w-2xl px-4 mx-auto my-16">
 		<p class="mt-12 mb-4 text-slate-950 font-medium">© Lix by Opral</p>
 		<ul class="leading-[1.7] pl-0 list-none flex gap-2">
 			${footerLinks.map(
