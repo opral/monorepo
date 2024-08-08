@@ -27,6 +27,7 @@ describe.each(["regular", "message-modules"] as const)("paraglide", async functi
 		const output = await compile({
 			messages: [],
 			settings: { languageTags: ["en", "de"], sourceLanguageTag: "en", modules: [] },
+			projectId: undefined,
 		})
 		expect(output["messages/en.js"]).includes("export {}")
 		expect(output["messages/de.js"]).includes("export {}")
@@ -531,5 +532,6 @@ describe.each(["regular", "message-modules"] as const)("paraglide", async functi
 		messages: mockMessages,
 		settings: mockSettings,
 		outputStructure: outputStyle,
+		projectId: undefined,
 	})
 })
