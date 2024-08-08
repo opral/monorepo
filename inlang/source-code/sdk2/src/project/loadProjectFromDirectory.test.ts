@@ -76,7 +76,6 @@ test("plugin.loadMessages and plugin.saveMessages must not be condigured togethe
 		})()
 	).rejects.toThrowError();
 
-	console.log('test')
 });
 
 
