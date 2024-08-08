@@ -1,3 +1,5 @@
+import { generateStableBundleId } from "../../bundle-id/bundle-id.js";
+import type { InlangPlugin } from "../../plugin/schema.js";
 import type { MessageV1, PatternV1 } from "../../schema/schemaV1.js";
 import type {
 	BundleNested,
@@ -13,16 +15,17 @@ import type {
  *
  * @throws If the message cannot be represented in the v1 format
  */
-export function fromMessageV1(messageV1: MessageV1): BundleNested {
-	// TODO loadMessages - derive bundleId humandIdFromHash ?
-	const bundleId = messageV1.id; // "deriveBundleIdFromMessageID";
+export function fromMessageV1(
+	messageV1: MessageV1,
+	pluginKey: NonNullable<InlangPlugin["key"] | InlangPlugin["id"]>
+): BundleNested {
+	const bundleId = generateStableBundleId(messageV1.id);
 
 	const languages = [
 		...new Set(messageV1.variants.map((variant) => variant.languageTag)),
 	];
 
 	const messages: MessageNested[] = languages.map((language): MessageNested => {
-		// TODO loadMessages - since we only have one message per bundle - we could use the language key to gernerate a stable id for a message?
 		const messageId = bundleId + "_" + language;
 		//All variants that will be part of this message
 		const v1Variants = messageV1.variants.filter(
@@ -88,9 +91,9 @@ export function fromMessageV1(messageV1: MessageV1): BundleNested {
 	});
 
 	return {
-		id: messageV1.id,
+		id: bundleId,
 		alias: {
-			default: messageV1.id,
+			[pluginKey]: messageV1.id,
 		},
 		messages,
 	};

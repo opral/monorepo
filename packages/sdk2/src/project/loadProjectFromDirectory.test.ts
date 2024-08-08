@@ -8,9 +8,81 @@ import type { Text } from "../schema/schemaV2.js";
 import type { InlangPlugin } from "../plugin/schema.js";
 import type { MessageV1, VariantV1 } from "../schema/schemaV1.js";
 
+test("plugin.loadMessages and plugin.saveMessages must not be condigured together with import export", async () => {
+	const mockLegacyPlugin: InlangPlugin = {
+		key: "mock-legacy-plugin",
+		loadMessages: async () => {
+			return [];
+		},
+		saveMessages: async () => {},
+	};
+
+	const mockLegacyPlugin2: InlangPlugin = {
+		key: "mock-legacy-plugin-2",
+		loadMessages: async () => {
+			return [];
+		},
+		saveMessages: async () => {},
+	};
+
+	const mockImportExportPlugin: InlangPlugin = {
+		key: "mock-import-export-plugin",
+		exportFiles: () => {
+			return [];
+		},
+		importFiles: () => {
+			return {} as any;
+		},
+	};
+
+	const mockPluginMapping = {
+		"./mock-legacy-module.js": mockLegacyPlugin,
+		"./mock-legacy-module-2.js": mockLegacyPlugin2,
+		"./mock-import-export-plugin.js": mockImportExportPlugin,
+	};
+
+	await expect(
+		(async () => {
+			await loadProjectFromDirectoryInMemory({
+				fs: Volume.fromJSON({
+					"./project.inlang/settings.json": JSON.stringify({
+						baseLocale: "en",
+						locales: ["en", "de"],
+						modules: ["./mock-legacy-module.js", "./mock-legacy-module-2.js"],
+					} satisfies ProjectSettings),
+				}).promises as any,
+				path: "./project.inlang",
+				_mockPlugins: mockPluginMapping,
+			});
+		})()
+	).rejects.toThrowError();
+
+	await expect(
+		(async () => {
+			await loadProjectFromDirectoryInMemory({
+				fs: Volume.fromJSON({
+					"./project.inlang/settings.json": JSON.stringify({
+						baseLocale: "en",
+						locales: ["en", "de"],
+						modules: [
+							"./mock-legacy-module.js",
+							"./mock-import-export-plugin.js",
+						],
+					} satisfies ProjectSettings),
+				}).promises as any,
+				path: "./project.inlang",
+				_mockPlugins: mockPluginMapping,
+			});
+		})()
+	).rejects.toThrowError();
+});
+
+
 test("plugin.loadMessages and plugin.saveMessages should work for legacy purposes", async () => {
 	const mockLegacyPlugin: InlangPlugin = {
-		key: "mock-plugin",
+		id: "mock-legacy-plugin",
+		// @ts-expect-error - id is deprecated, key can be undefined
+		key: undefined,
 		loadMessages: async ({ nodeishFs, settings }) => {
 			const pathPattern = settings["plugin.mock-plugin"]?.pathPattern as string;
 
@@ -78,13 +150,22 @@ test("plugin.loadMessages and plugin.saveMessages should work for legacy purpose
 			"./mock-module.js": mockLegacyPlugin,
 		},
 	});
+
 	const bundles = await selectBundleNested(project.db).execute();
+
 	const bundlesOrdered = bundles.sort((a, b) =>
-		a.alias["default"]!.localeCompare(b.alias["default"]!)
+		a.alias[mockLegacyPlugin.id!]!.localeCompare(b.alias[mockLegacyPlugin.id!]!)
 	);
+
+	// expect the alias to be the key or id (as fallback) of the plugin
+	// see https://github.com/opral/monorepo/pull/3048#discussion_r1707395555
+	for (const bundle of bundles) {
+		expect(Object.keys(bundle.alias)).toEqual([mockLegacyPlugin.id!]);
+	}
+
 	expect(bundles.length).toBe(2);
-	expect(bundlesOrdered[0]?.alias.default).toBe("key1");
-	expect(bundlesOrdered[1]?.alias.default).toBe("key2");
+	expect(bundlesOrdered[0]?.alias[mockLegacyPlugin.id!]).toBe("key1");
+	expect(bundlesOrdered[1]?.alias[mockLegacyPlugin.id!]).toBe("key2");
 	expect(bundlesOrdered[0]?.messages[0]?.locale).toBe("en");
 	expect(
 		(bundlesOrdered[0]?.messages[0]?.variants[0]?.pattern[0] as Text)?.value

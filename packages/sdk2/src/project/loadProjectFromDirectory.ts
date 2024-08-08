@@ -28,27 +28,79 @@ export async function loadProjectFromDirectoryInMemory(
 	});
 	await copyFiles({ fs: args.fs, path: args.path, lix: tempProject.lix });
 
-	// TODO loadMessages - call tempProject.lix.settled() to wait for the new settings file
-
-	// TODO loadMessages - since settings are not reactiv yet - just reload the project
+	// TODO call tempProject.lix.settled() to wait for the new settings file, and remove reload of the proejct as soon as reactive settings has landed
+	// NOTE: we need to ensure two things:
+	// 1. settled needs to include the changes from the copyFiles call
+	// 2. the changes created from the copyFiles call need to be realized and lead to a signal on the settings
 	const project = await loadProjectInMemory({
 		// pass common arguments to loadProjectInMemory
 		...args,
 		blob: await tempProject.toBlob(),
 	});
 
-	for (const plugin of project.plugins.get()) {
-		// TODO loadMessages - make sure that we have configured either loadMessages and saveMessages xor import and export (throw in other cases)
-		if (plugin.loadMessages !== undefined) {
-			await loadLegacyMessages({
-				project,
-				fs: args.fs,
-				loadMessagesFn: plugin.loadMessages,
-			});
+	// TODO i guess we should move this validation logic into sdk2/src/project/loadProject.ts
+	// Two scenarios could arise:
+	// 1. set settings is called from an app - it should detect and reject the setting of settings -> app need to be able to validate before calling set
+	// 2. the settings file loaded from disc here is corrupted -> user has to fix the file on disc
 
-			// TODO check user id and description (where will this one appear?)
-			await project.lix.commit({ userId: 'inlangBot', description: "legacy load and save messages"})
-		}
+	const loadMessagesPlugins = project.plugins
+		.get()
+		.filter((plugin) => plugin.loadMessages !== undefined);
+	const saveMessagesPlugins = project.plugins
+		.get()
+		.filter((plugin) => plugin.saveMessages !== undefined);
+	const exportPlugins = project.plugins
+		.get()
+		.filter((plugin) => plugin.importFiles !== undefined);
+	const importPlugins = project.plugins
+		.get()
+		.filter((plugin) => plugin.exportFiles !== undefined);
+
+	if (loadMessagesPlugins.length > 1 || saveMessagesPlugins.length > 1) {
+		throw new Error(
+			"Max one loadMessages (found: " +
+				loadMessagesPlugins.length +
+				") and one saveMessages plugins (found: " +
+				saveMessagesPlugins.length +
+				") are allowed "
+		);
+	}
+
+	if (
+		(loadMessagesPlugins.length > 0 || saveMessagesPlugins.length > 0) &&
+		(exportPlugins.length > 0 || importPlugins.length > 0)
+	) {
+		throw new Error(
+			"Plugins for loadMessages (found: " +
+				loadMessagesPlugins.length +
+				") and saveMessages plugins (found: " +
+				saveMessagesPlugins.length +
+				") must not coexist with import (found: " +
+				importPlugins.length +
+				") or export (found: " +
+				exportPlugins.length +
+				") "
+		);
+	}
+
+	const chosenLegacyPlugin = loadMessagesPlugins[0];
+
+	if (!chosenLegacyPlugin) {
+		return project;
+	}
+
+	if (chosenLegacyPlugin.loadMessages) {
+		await loadLegacyMessages({
+			project,
+			fs: args.fs,
+			pluginKey: chosenLegacyPlugin.key ?? chosenLegacyPlugin.id,
+			loadMessagesFn: chosenLegacyPlugin.loadMessages,
+		});
+		// TODO check user id and description (where will this one appear?)
+		await project.lix.commit({
+			userId: "inlang-bot",
+			description: "legacy load and save messages",
+		});
 	}
 
 	return project;
@@ -56,6 +108,7 @@ export async function loadProjectFromDirectoryInMemory(
 
 async function loadLegacyMessages(args: {
 	project: Awaited<ReturnType<typeof loadProjectInMemory>>;
+	pluginKey: NonNullable<InlangPlugin["key"] | InlangPlugin["id"]>;
 	loadMessagesFn: Required<InlangPlugin>["loadMessages"];
 	fs: typeof fs;
 }) {
@@ -66,7 +119,7 @@ async function loadLegacyMessages(args: {
 	const insertQueries = [];
 
 	for (const legacyMessage of loadedLegacyMessages) {
-		const messageBundle = fromMessageV1(legacyMessage);
+		const messageBundle = fromMessageV1(legacyMessage, args.pluginKey);
 		insertQueries.push(insertBundleNested(args.project.db, messageBundle));
 	}
 
