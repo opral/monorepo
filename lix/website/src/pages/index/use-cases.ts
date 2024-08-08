@@ -10,4 +10,9 @@ export const useCases: Array<UseCase> = [
 		year: 2024,
 		link: "https://opral.substack.com/cp/146431448",
 	},
+	{
+		title: "Collaborative Markdown with Lix Change Control",
+		year: 2024,
+		link: "https://opral.substack.com/p/collaborative-markdown-with-lix-change",
+	},
 ]

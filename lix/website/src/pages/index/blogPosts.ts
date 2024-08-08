@@ -5,6 +5,10 @@ type BlogPost = {
 
 export const blogPosts: Array<BlogPost> = [
 	{
+		title: "July 2024 update",
+		link: "https://opral.substack.com/p/july-2024-update",
+	},
+	{
 		title: "Accelerate by years part IV - The prototype",
 		link: "https://opral.substack.com/p/accelerate-by-years-iv-the-prototype",
 	},
