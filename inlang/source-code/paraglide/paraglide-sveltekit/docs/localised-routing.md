@@ -143,7 +143,7 @@ goto(i18n.resolveRoute("/about"))
 Language switchers are tricky because we need to dynamically translate the current URL path, which is itself translated. We need to get the untranslated version of the current path & translate it into the target language.
 
 <doc-accordion
-	heading="Wait, do I thought I don't need wrap my links with Paraglide-SvelteKit?"
+	heading="Wait, I thought I didn't need to wrap my links with Paraglide-SvelteKit?"
 	text="Language switchers are the one exception to this rule.">
 </doc-accordion>
 

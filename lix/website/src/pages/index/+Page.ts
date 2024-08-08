@@ -25,8 +25,14 @@ export const Page = () => html` ${header}
 				<path d="M44 0.261719H108V20.2617H44V0.261719Z" fill="#07B6D4" />
 			</svg>
 			<br />
-			The first of it's kind change control system.
+			The world's first change control system.
 		</h1>
+		<p class="text-slate-600 leading-[1.7] italic pl-8 border-l-2 border-zinc-200 my-8">
+			"Every work that we create, every time we collaborate, everything we automate, it revolves
+			around changes. A system, that can understand changes and inform you about that this changes
+			happened, means that you have a system to collaborate, validate, automate and create." -
+			Samuel Stroschein, Founder of Opral (lix & inlang)
+		</p>
 		<p class="text-slate-600 leading-[1.7]">
 			Lix provides <b class="text-slate-950 font-semibold">traceability of changes</b> for files
 			stored in lix.

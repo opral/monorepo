@@ -15,7 +15,7 @@ const ignoreDirectory = `# ignore everything because the directory is auto-gener
 export type CompileOptions = {
 	messages: Readonly<Message[]>
 	settings: ProjectSettings
-	projectId?: string | undefined
+	projectId: string | undefined
 	/**
 	 * The file-structure of the compiled output.
 	 *
