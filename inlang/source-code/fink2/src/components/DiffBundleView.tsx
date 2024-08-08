@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { projectAtom } from "../state.ts";
 import { useAtom } from "jotai";
 import { BundleNested, InlangProject, selectBundleNested } from "@inlang/sdk2";
-import { ReactBundle } from "./InlangBundle.tsx";
+import SingleDiffBundle from "./SingleDiffBundle.tsx";
 
 const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 	const [project] = useAtom(projectAtom);
@@ -31,23 +31,27 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 				</p>
 			))}
 			<div className="flex gap-8">
-				<div className="flex-1 opacity-50">
+				<div className="flex-1">
 					<p className="font-medium pb-2 pt-4">Old:</p>
-					{oldBundle && (
-						<ReactBundle
-							style={{ pointerEvents: "none" }}
-							bundle={oldBundle}
-							settings={project?.settings.get()}
+					{oldBundle && bundle && project && (
+						<SingleDiffBundle
+							bundle={bundle}
+							oldBundle={oldBundle}
+							settings={project.settings.get()}
+							changes={props.changes}
+							type="old"
 						/>
 					)}
 				</div>
 				<div className="flex-1">
 					<p className="font-medium pb-2 pt-4">New:</p>
-					{bundle && (
-						<ReactBundle
-							style={{ pointerEvents: "none" }}
+					{oldBundle && bundle && project && (
+						<SingleDiffBundle
 							bundle={bundle}
-							settings={project?.settings.get()}
+							oldBundle={oldBundle}
+							settings={project.settings.get()}
+							changes={props.changes}
+							type="neu"
 						/>
 					)}
 				</div>
