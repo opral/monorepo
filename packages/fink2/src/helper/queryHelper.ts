@@ -65,7 +65,9 @@ const queryHelper = {
 			return db
 				.updateTable("message")
 				.set({
-					...message,
+					id: message.id,
+					bundleId: message.bundleId,
+					locale: message.locale,
 					declarations: json(message.declarations),
 					selectors: json(message.selectors),
 				})
@@ -92,7 +94,8 @@ const queryHelper = {
 			return db
 				.updateTable("variant")
 				.set({
-					...variant,
+					id: variant.id,
+					messageId: variant.messageId,
 					match: json(variant.match),
 					pattern: json(variant.pattern),
 				})
