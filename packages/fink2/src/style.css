@@ -1,1 +1,10 @@
 @import "tailwindcss";
+
+.inlang-pattern-editor-neu .inlang-pattern-editor-contenteditable {
+    background-color: #B2F4D4;
+    border: 1px solid #16A34B;
+}
+.inlang-pattern-editor-old .inlang-pattern-editor-contenteditable {
+    background-color: #F3C9CD;
+    border: 1px solid #DA2728;
+}
