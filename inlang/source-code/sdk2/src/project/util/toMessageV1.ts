@@ -1,3 +1,4 @@
+import type { InlangPlugin } from "../../plugin/schema.js";
 import type {
 	ExpressionV1,
 	MessageV1,
@@ -15,7 +16,10 @@ import type {
  *
  * @throws If the message cannot be represented in the v1 format
  */
-export function toMessageV1(bundle: BundleNested): MessageV1 {
+export function toMessageV1(
+	bundle: BundleNested,
+	pluginKey: NonNullable<InlangPlugin["key"] | InlangPlugin["id"]>
+): MessageV1 {
 	const variants: VariantV1[] = [];
 	const selectorNames = new Set<string>();
 
@@ -40,9 +44,15 @@ export function toMessageV1(bundle: BundleNested): MessageV1 {
 		name,
 	}));
 
+	const alias = bundle.alias[pluginKey];
+
+	if (alias === undefined) {
+		throw new Error(`Missing alias for plugin key "${pluginKey}"`);
+	}
+
 	return {
-		id: bundle.id,
-		alias: bundle.alias,
+		id: alias,
+		alias: {},
 		variants,
 		selectors,
 	};

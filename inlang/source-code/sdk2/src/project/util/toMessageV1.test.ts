@@ -4,6 +4,23 @@ import { Value } from "@sinclair/typebox/value";
 import { MessageV1 } from "../../schema/schemaV1.js";
 import { BundleNested } from "../../schema/schemaV2.js";
 
+test("toMessageV1", () => {
+	expect(Value.Check(BundleNested, bundle)).toBe(true);
+
+	const message: unknown = toMessageV1(bundle, "mock");
+	expect(Value.Check(MessageV1, message)).toBe(true);
+
+	expect(message).toStrictEqual(messageV1);
+});
+
+test("it should throw if the alias is missing", () => {
+	expect(() => toMessageV1(bundle, "missing")).toThrowError(
+		`Missing alias for plugin key "missing"`
+	);
+});
+
+test.todo("with variable references", () => {});
+
 const messageV1: MessageV1 = {
 	id: "hello_world",
 	alias: {},
@@ -32,21 +49,25 @@ const messageV1: MessageV1 = {
 	selectors: [],
 };
 
-const bundle: BundleNested = {
-	alias: {},
-	id: "hello_world",
+const humanReadableId = "awful_lamb_mend_smooth";
+
+const bundle = {
+	alias: {
+		mock: "hello_world",
+	},
+	id: "awful_lamb_mend_smooth",
 	messages: [
 		{
-			bundleId: "deriveBundleIdFromMessageID",
+			bundleId: humanReadableId,
 			declarations: [],
-			id: "deriveBundleIdFromMessageID_en",
+			id: humanReadableId + "_en",
 			locale: "en",
 			selectors: [],
 			variants: [
 				{
-					id: "deriveBundleIdFromMessageID_en_1",
+					id: humanReadableId + "_en_1",
 					match: [],
-					messageId: "deriveBundleIdFromMessageID_en",
+					messageId: humanReadableId + "_en",
 					pattern: [
 						{
 							type: "text",
@@ -57,16 +78,16 @@ const bundle: BundleNested = {
 			],
 		},
 		{
-			bundleId: "deriveBundleIdFromMessageID",
+			bundleId: humanReadableId,
 			declarations: [],
-			id: "deriveBundleIdFromMessageID_de",
+			id: humanReadableId + "_de",
 			locale: "de",
 			selectors: [],
 			variants: [
 				{
-					id: "deriveBundleIdFromMessageID_de_1",
+					id: humanReadableId + "_de_1",
 					match: [],
-					messageId: "deriveBundleIdFromMessageID_de",
+					messageId: humanReadableId + "_de",
 					pattern: [
 						{
 							type: "text",
@@ -77,15 +98,4 @@ const bundle: BundleNested = {
 			],
 		},
 	],
-};
-
-test("toMessageV1", () => {
-	expect(Value.Check(BundleNested, bundle)).toBe(true);
-
-	const message: unknown = toMessageV1(bundle);
-	expect(Value.Check(MessageV1, message)).toBe(true);
-
-	expect(message).toEqual(messageV1);
-});
-
-test.todo("with variable references", () => {});
+} as BundleNested;
