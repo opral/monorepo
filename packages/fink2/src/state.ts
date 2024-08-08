@@ -1,6 +1,7 @@
 import { atom } from "jotai";
 import { loadProjectInMemory, selectBundleNested } from "@inlang/sdk2";
 import { atomWithStorage } from "jotai/utils";
+import { jsonObjectFrom } from "kysely/helpers/sqlite";
 
 export const selectedProjectPathAtom = atomWithStorage<string | undefined>(
 	"selected-project-path",
@@ -51,24 +52,47 @@ export const committedChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const project = await get(projectAtom);
 	if (!project) return [];
-	return await project.lix.db
+	const result = await project.lix.db
 		.selectFrom("change")
-		.selectAll()
+		.select((eb) => [
+			"change.id",
+			"change.commit_id",
+			"change.file_id",
+			"change.operation",
+			"change.type",
+			"change.value",
+			jsonObjectFrom(
+				eb
+					.selectFrom("commit")
+					.select([
+						"commit.id",
+						"commit.user_id",
+						"commit.description",
+						"commit.zoned_date_time",
+					])
+					.whereRef("change.commit_id", "=", "commit.id")
+			).as("commit"),
+		])
 		.where("commit_id", "is not", null)
 		.innerJoin("commit", "commit.id", "change.commit_id")
 		.orderBy("commit.zoned_date_time desc")
 		.execute();
+
+	return result;
 });
 
 export const pendingChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const project = await get(projectAtom);
 	if (!project) return [];
-	return await project.lix.db
+	const result = await project.lix.db
 		.selectFrom("change")
 		.selectAll()
 		.where("commit_id", "is", null)
 		.execute();
+
+	//console.log(result);
+	return result;
 });
 
 export const commitsAtom = atom(async (get) => {
