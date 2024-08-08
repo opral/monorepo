@@ -31,6 +31,45 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 					<span className="font-bold text-zinc-950">{change.value?.id}</span>
 				</p>
 			))}
+
+			{/* 
+					* TODO unbundle
+				
+					- change `type` to `show`
+	
+
+			<div className="flex">
+		
+				<inlang-bundle old neu show="old">
+					{messages.map((message) => {
+						const previousMessage = lix.db
+							.selectFrom("change")
+							.where("type", "=", "message");
+						return (
+							<inlang-message old={previousMessage} neu={message} show="neu">
+								<inlang-variant old neu show="old"></inlang-variant>
+							</inlang-message>
+						);
+					})}
+				</inlang-bundle>
+				<inlang-bundle old neu show="neu">
+					{messages.map((message) => {
+						const previousMessage = lix.db
+							.selectFrom("change")
+							.where("type", "=", "message");
+						return (
+							<inlang-message old={previousMessage} neu={message} show="neu" editable>
+								{variants.map((variant) => {
+									if (pendingChange === false && variant.isRef === false){
+										return ""
+									}
+									return <inlang-variant old neu show="neu" editable></inlang-variant>;
+								})}
+							</inlang-message>
+						);
+					})}
+				</inlang-bundle>
+			</div> */}
 			<div className="flex gap-8">
 				<div className="flex-1">
 					<p className="font-medium pb-2 pt-4">Old:</p>
@@ -75,7 +114,8 @@ const queryNewBundle = async (
 
 	if (bundle) {
 		setBundle(bundle);
-		const oldBundle = bundle;
+		const oldBundle = structuredClone(bundle);
+		// TODO proper query
 		for (const change of props.changes) {
 			const latestCommitedChange = await getLatestCommitedChange(
 				project,
