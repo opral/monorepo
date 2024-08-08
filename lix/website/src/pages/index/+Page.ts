@@ -89,7 +89,7 @@ export const Page = () => html` ${header}
 			<div
 				class="mt-6 w-full text-center text-[16px] px-3 py-3 text-slate-700 font-medium rounded-lg bg-slate-100 hover:bg-slate-200 border-none cursor-none pointer-events-none"
 			>
-				Lix SDK<span class="bg-slate-300 rounded px-2 py-1 ml-3">Comming soon</span>
+				Lix SDK<span class="bg-slate-300 rounded px-2 py-1 ml-3">Coming soon</span>
 			</div>
 		</div>
 	</div>
