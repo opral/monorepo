@@ -125,21 +125,53 @@ export default function App() {
 					{committedChanges.map((change) => (
 						<p
 							key={change.id + Math.random()}
-							className="text-zinc-600 h-[46px] bg-zinc-50 px-4 py-3 rounded"
+							className="text-zinc-500 h-[46px] bg-zinc-50 px-4 py-3 rounded text-sm!"
 						>
-							<span className="font-bold text-zinc-950">You</span>
-							{" changed the "}
-							<span className="font-bold text-zinc-950">
+							<span className="font-semibold text-zinc-950">
+								{change.commit?.user_id}
+							</span>
+							{" changed a "}
+							<span className="font-semibold text-zinc-950">
 								{change.type}
 							</span>{" "}
-							with the id{" "}
-							<span className="font-bold text-zinc-950">
-								{change.value?.id}
-							</span>
+							-{" "}
+							{change.commit?.zoned_date_time && (
+								<span className="font-semibold text-zinc-950">
+									{timeAgo(change.commit?.zoned_date_time)}
+								</span>
+							)}
 						</p>
 					))}
 				</div>
 			</Layout>
 		</>
 	);
+}
+
+function timeAgo(dateString: string) {
+	const now = new Date();
+	const pastDate = new Date(dateString);
+	//@ts-ignore
+	const secondsAgo = Math.floor((now - pastDate) / 1000);
+
+	const intervals = {
+		year: 31536000,
+		month: 2592000,
+		week: 604800,
+		day: 86400,
+		hour: 3600,
+		minute: 60,
+		second: 1,
+	};
+
+	for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+		const interval = Math.floor(secondsAgo / secondsInUnit);
+		if (interval > 1) {
+			return `${interval} ${unit}s ago`;
+		} else if (interval === 1) {
+			return `1 ${unit} ago`;
+		}
+	}
+
+	return "just now";
 }

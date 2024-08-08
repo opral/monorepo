@@ -1,4 +1,4 @@
-import { BundleNested, MessageNested, ProjectSettings } from "@inlang/sdk2";
+import { BundleNested, ProjectSettings } from "@inlang/sdk2";
 import { createComponent } from "@lit/react";
 import {
 	InlangBundleHeader as LitInlangBundleHeader,
@@ -75,6 +75,14 @@ const SingleDiffBundle = (props: {
 												)
 										)}
 									></InlangPatternEditor>
+									{change && props.type === "neu" && (
+										<div
+											slot="pattern-editor"
+											className="absolute right-4 h-full flex items-center text-green-800"
+										>
+											by You | 2 min ago
+										</div>
+									)}
 								</InlangVariant>
 							);
 						})}

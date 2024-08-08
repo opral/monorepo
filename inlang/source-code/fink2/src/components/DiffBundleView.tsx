@@ -13,6 +13,7 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 
 	useEffect(() => {
 		if (!project) return;
+		queryNewBundle(project, props, setBundle, setOldBundle);
 		const interval = setInterval(async () => {
 			await queryNewBundle(project, props, setBundle, setOldBundle);
 		}, 1000);

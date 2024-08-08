@@ -75,26 +75,26 @@ export const demoBundles: BundleNested[] = [
 					},
 				],
 			},
-			{
-				id: "message-couch-panther-oven",
-				bundleId: "pink-tiger-leaf-frog",
-				locale: "de",
-				selectors: [],
-				declarations: [],
-				variants: [
-					{
-						id: "variant-chair-monkey-spoon",
-						messageId: "message-couch-panther-oven",
-						match: {},
-						pattern: [
-							{
-								type: "text",
-								value: "Das ist eine Beschreibung",
-							},
-						],
-					},
-				],
-			},
+			// {
+			// 	id: "message-couch-panther-oven",
+			// 	bundleId: "pink-tiger-leaf-frog",
+			// 	locale: "de",
+			// 	selectors: [],
+			// 	declarations: [],
+			// 	variants: [
+			// 		{
+			// 			id: "variant-chair-monkey-spoon",
+			// 			messageId: "message-couch-panther-oven",
+			// 			match: {},
+			// 			pattern: [
+			// 				{
+			// 					type: "text",
+			// 					value: "Das ist eine Beschreibung",
+			// 				},
+			// 			],
+			// 		},
+			// 	],
+			// },
 		],
 	},
 	{
