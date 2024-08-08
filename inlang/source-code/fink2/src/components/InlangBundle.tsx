@@ -26,20 +26,27 @@ const InlangBundle = (props: { bundle: BundleNested }) => {
 	const [project] = useAtom(projectAtom);
 	const [pendingChanges] = useAtom(pendingChangesAtom);
 
-	const onMesageInsert = (event: {
+	const onMesageInsert = async (event: {
 		detail: { argument: { message: MessageNested } };
 	}) => {
 		if (project) {
 			const insertedMessage = event.detail.argument.message;
-			queryHelper.message.insert(project.db, insertedMessage).execute();
+			const result = await queryHelper.message
+				.insert(project.db, insertedMessage)
+				.execute();
+			//console.log(result);
 		}
 	};
-	const onMesageUpdate = (event: {
+	const onMesageUpdate = async (event: {
 		detail: { argument: { message: MessageNested } };
 	}) => {
+		console.log("message update");
 		if (project) {
 			const updatedMessage = event.detail.argument.message;
-			queryHelper.message.update(project.db, updatedMessage).execute();
+			const result = await queryHelper.message
+				.update(project.db, updatedMessage)
+				.execute();
+			//console.log(result);
 		}
 	};
 	const onVariantInsert = async (event: {
@@ -50,23 +57,30 @@ const InlangBundle = (props: { bundle: BundleNested }) => {
 			const result = await queryHelper.variant
 				.insert(project.db, insertedVariant)
 				.execute();
-			console.log(result);
+			//console.log(result);
 		}
 	};
 	const onVariantUpdate = async (event: {
 		detail: { argument: { variant: Variant } };
 	}) => {
+		console.log("update variant");
 		if (project) {
 			const updatedVariant = event.detail.argument.variant;
-			await queryHelper.variant.update(project.db, updatedVariant).execute();
+			const result = await queryHelper.variant
+				.update(project.db, updatedVariant)
+				.execute();
+			//console.log(result);
 		}
 	};
-	const onVariantDelete = (event: {
+	const onVariantDelete = async (event: {
 		detail: { argument: { variant: Variant } };
 	}) => {
 		if (project) {
 			const deletedVariant = event.detail.argument.variant;
-			queryHelper.variant.delete(project.db, deletedVariant).execute();
+			const result = await queryHelper.variant
+				.delete(project.db, deletedVariant)
+				.execute();
+			//console.log(result);
 		}
 	};
 
