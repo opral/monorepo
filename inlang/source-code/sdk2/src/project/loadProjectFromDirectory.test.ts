@@ -81,7 +81,9 @@ test("plugin.loadMessages and plugin.saveMessages must not be condigured togethe
 
 test("plugin.loadMessages and plugin.saveMessages should work for legacy purposes", async () => {
 	const mockLegacyPlugin: InlangPlugin = {
-		key: "mock-plugin",
+		id: "mock-legacy-plugin",
+		// @ts-expect-error - id is deprecated, key can be undefined
+		key: undefined,
 		loadMessages: async ({ nodeishFs, settings }) => {
 			const pathPattern = settings["plugin.mock-plugin"]?.pathPattern as string;
 
@@ -149,13 +151,22 @@ test("plugin.loadMessages and plugin.saveMessages should work for legacy purpose
 			"./mock-module.js": mockLegacyPlugin,
 		},
 	});
+
 	const bundles = await selectBundleNested(project.db).execute();
+
 	const bundlesOrdered = bundles.sort((a, b) =>
-		a.alias["default"]!.localeCompare(b.alias["default"]!)
+		a.alias[mockLegacyPlugin.id!]!.localeCompare(b.alias[mockLegacyPlugin.id!]!)
 	);
+
+	// expect the alias to be the key or id (as fallback) of the plugin
+	// see https://github.com/opral/monorepo/pull/3048#discussion_r1707395555
+	for (const bundle of bundles) {
+		expect(Object.keys(bundle.alias)).toEqual([mockLegacyPlugin.id!]);
+	}
+
 	expect(bundles.length).toBe(2);
-	expect(bundlesOrdered[0]?.alias.default).toBe("key1");
-	expect(bundlesOrdered[1]?.alias.default).toBe("key2");
+	expect(bundlesOrdered[0]?.alias[mockLegacyPlugin.id!]).toBe("key1");
+	expect(bundlesOrdered[1]?.alias[mockLegacyPlugin.id!]).toBe("key2");
 	expect(bundlesOrdered[0]?.messages[0]?.locale).toBe("en");
 	expect(
 		(bundlesOrdered[0]?.messages[0]?.variants[0]?.pattern[0] as Text)?.value

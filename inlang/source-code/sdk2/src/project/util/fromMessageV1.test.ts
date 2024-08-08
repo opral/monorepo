@@ -36,7 +36,7 @@ const humanReadableId = "awful_lamb_mend_smooth";
 
 const bundle = {
 	alias: {
-		default: "hello_world",
+		mock: "hello_world",
 	},
 	id: "awful_lamb_mend_smooth",
 	messages: [
@@ -86,7 +86,7 @@ const bundle = {
 test("fromMessageV1", () => {
 	expect(Value.Check(MessageV1, messageV1)).toBe(true);
 
-	const nestedBundle: unknown = fromMessageV1(messageV1);
+	const nestedBundle: unknown = fromMessageV1(messageV1, "mock");
 	expect(Value.Check(BundleNested, nestedBundle)).toBe(true);
 
 	expect(nestedBundle).toEqual(bundle);

@@ -1,4 +1,5 @@
 import { humanIdHash } from "../../bundle-id/bundle-id.js";
+import type { InlangPlugin } from "../../plugin/schema.js";
 import type { MessageV1, PatternV1 } from "../../schema/schemaV1.js";
 import type {
 	BundleNested,
@@ -14,7 +15,10 @@ import type {
  *
  * @throws If the message cannot be represented in the v1 format
  */
-export function fromMessageV1(messageV1: MessageV1): BundleNested {
+export function fromMessageV1(
+	messageV1: MessageV1,
+	pluginKey: NonNullable<InlangPlugin["key"] | InlangPlugin["id"]>
+): BundleNested {
 	const bundleId = humanIdHash(messageV1.id);
 
 	const languages = [
@@ -89,7 +93,7 @@ export function fromMessageV1(messageV1: MessageV1): BundleNested {
 	return {
 		id: bundleId,
 		alias: {
-			default: messageV1.id,
+			[pluginKey]: messageV1.id,
 		},
 		messages,
 	};

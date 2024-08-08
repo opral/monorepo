@@ -83,16 +83,22 @@ export async function loadProjectFromDirectoryInMemory(
 		);
 	}
 
-	const loadMessages = loadMessagesPlugins[0]?.loadMessages;
-	if (loadMessages) {
+	const chosenLegacyPlugin = loadMessagesPlugins[0];
+
+	if (!chosenLegacyPlugin) {
+		return project;
+	}
+
+	if (chosenLegacyPlugin.loadMessages) {
 		await loadLegacyMessages({
 			project,
 			fs: args.fs,
-			loadMessagesFn: loadMessages,
+			pluginKey: chosenLegacyPlugin.key ?? chosenLegacyPlugin.id,
+			loadMessagesFn: chosenLegacyPlugin.loadMessages,
 		});
 		// TODO check user id and description (where will this one appear?)
 		await project.lix.commit({
-			userId: "inlangBot",
+			userId: "inlang-bot",
 			description: "legacy load and save messages",
 		});
 	}
@@ -102,6 +108,7 @@ export async function loadProjectFromDirectoryInMemory(
 
 async function loadLegacyMessages(args: {
 	project: Awaited<ReturnType<typeof loadProjectInMemory>>;
+	pluginKey: NonNullable<InlangPlugin["key"] | InlangPlugin["id"]>;
 	loadMessagesFn: Required<InlangPlugin>["loadMessages"];
 	fs: typeof fs;
 }) {
@@ -112,7 +119,7 @@ async function loadLegacyMessages(args: {
 	const insertQueries = [];
 
 	for (const legacyMessage of loadedLegacyMessages) {
-		const messageBundle = fromMessageV1(legacyMessage);
+		const messageBundle = fromMessageV1(legacyMessage, args.pluginKey);
 		insertQueries.push(insertBundleNested(args.project.db, messageBundle));
 	}
 
