@@ -1,4 +1,4 @@
-import type { MessageNested, Declaration, ProjectSettings, Variant } from "@inlang/sdk2"
+import type { MessageNested, Declaration, ProjectSettings, Variant, Message } from "@inlang/sdk2"
 import { createVariant } from "@inlang/sdk2"
 import { LitElement, css, html } from "lit"
 import { customElement, property } from "lit/decorators.js"
@@ -196,6 +196,33 @@ export default class InlangMessage extends LitElement {
 		this.dispatchEvent(onInsertVariant)
 	}
 
+	dispatchOnUpdateMessage(message: Message, variants: Variant[]) {
+		const onUpdateMessage = new CustomEvent("update-message", {
+			bubbles: true,
+			composed: true,
+			detail: {
+				argument: {
+					message,
+					variants,
+				},
+			},
+		})
+		this.dispatchEvent(onUpdateMessage)
+	}
+
+	dispatchOnUpdateVariant(variant: Variant) {
+		const onUpdateVariant = new CustomEvent("update-variant", {
+			bubbles: true,
+			composed: true,
+			detail: {
+				argument: {
+					variant,
+				},
+			},
+		})
+		this.dispatchEvent(onUpdateVariant)
+	}
+
 	private _refLocale = (): ProjectSettings["locales"][number] | undefined => {
 		return this.settings?.baseLocale
 	}
@@ -232,6 +259,10 @@ export default class InlangMessage extends LitElement {
 												value="delete"
 												@click=${() => {
 													deleteSelector({ message: this.message!, index })
+													this.dispatchOnUpdateMessage(this.message!, this.message!.variants)
+													for (const variant of this.message!.variants) {
+														this.dispatchOnUpdateVariant(variant)
+													}
 													this.triggerMessageBundleRefresh()
 												}}
 												><svg
