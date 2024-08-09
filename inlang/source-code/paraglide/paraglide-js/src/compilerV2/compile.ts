@@ -1,4 +1,4 @@
-import { compileMessage } from "./compileMessage.js"
+import { compileBundle } from "./compileBundle.js"
 import { ProjectSettings, type Message, LanguageTag, lookup } from "@inlang/sdk"
 import { telemetry } from "../services/telemetry/implementation.js"
 import { i } from "../services/codegen/identifier.js"
@@ -52,7 +52,7 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 	)
 
 	const compiledMessages = opts.messages.map((message) =>
-		compileMessage(message, fallbackMap, opts.outputStructure)
+		compileBundle(message, fallbackMap, opts.outputStructure)
 	)
 
 	const pkgJson = await getPackageJson(fs, process.cwd())

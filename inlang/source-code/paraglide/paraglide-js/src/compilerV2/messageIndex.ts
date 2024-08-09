@@ -1,16 +1,16 @@
-import { i } from "~/services/codegen/identifier.js"
-import type { LanguageTag, Message } from "@inlang/sdk"
-import { paramsType, type Params } from "./paramsType.js"
-import { isValidJSIdentifier } from "~/services/valid-js-identifier/index.js"
+import { i } from "../services/codegen/identifier.js"
+import { inputsType, type InputTypeMap } from "./inputsType.js"
+import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
 import { optionsType } from "./optionsType.js"
 import { reexportAliases } from "./aliases.js"
+import type { LanguageTag, MessageBundle } from "@inlang/sdk/v2"
 
-export const messageIndexFunction = (args: {
-	message: Message
-	params: Params
+export const bundleIndexFunction = (args: {
+	bundle: MessageBundle
+	inputTypes: InputTypeMap
 	availableLanguageTags: LanguageTag[]
 }) => {
-	const hasParams = Object.keys(args.params).length > 0
+	const hasInputs = Object.keys(args.inputTypes).length > 0
 
 	return `/**
  * This message has been compiled by [inlang paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
@@ -20,20 +20,20 @@ export const messageIndexFunction = (args: {
  * 
  * - The params are NonNullable<unknown> because the inlang SDK does not provide information on the type of a param (yet).
  * 
- * ${paramsType(args.params, true)}
+ * ${inputsType(args.inputs, true)}
  * ${optionsType({ languageTags: args.availableLanguageTags })}
  * @returns {string}
  */
 /* @__NO_SIDE_EFFECTS__ */
-export const ${args.message.id} = (params ${hasParams ? "" : "= {}"}, options = {}) => {
+export const ${args.bundle.id} = (params ${hasInputs ? "" : "= {}"}, options = {}) => {
 	return {
 ${args.availableLanguageTags
 	// sort language tags alphabetically to make the generated code more readable
 	.sort((a, b) => a.localeCompare(b))
-	.map((tag) => `\t\t${isValidJSIdentifier(tag) ? tag : `"${tag}"`}: ${i(tag)}.${args.message.id}`)
+	.map((tag) => `\t\t${isValidJSIdentifier(tag) ? tag : `"${tag}"`}: ${i(tag)}.${args.bundle.id}`)
 	.join(",\n")}
-	}[options.languageTag ?? languageTag()](${hasParams ? "params" : ""})
+	}[options.languageTag ?? languageTag()](${hasInputs ? "params" : ""})
 }
-${reexportAliases(args.message)}
+${reexportAliases(args.bundle)}
 `
 }
