@@ -1,4 +1,4 @@
-import type { LanguageTag, Message, MessageBundle } from "@inlang/sdk2"
+import type { Message, BundleNested } from "@inlang/sdk2"
 import { compilePattern } from "./compilePattern.js"
 import { inputsType, type InputTypeMap } from "./inputsType.js"
 import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
@@ -6,11 +6,12 @@ import { escapeForDoubleQuoteString } from "../services/codegen/escape.js"
 import { reexportAliases } from "./aliases.js"
 import { bundleIndexFunction } from "./messageIndex.js"
 
+type LanguageTag = string
 type Resource = {
 	/**
-	 * The original message
+	 * The original message-bundle
 	 */
-	source: MessageBundle
+	source: BundleNested
 	/**
 	 * The parameters needed for this message
 	 */
@@ -41,7 +42,7 @@ type Resource = {
  * @param lookupTable A table that maps language tags to their fallbacks.
  */
 export const compileBundle = (
-	bundle: MessageBundle,
+	bundle: BundleNested,
 	fallbackMap: Record<LanguageTag, LanguageTag | undefined>
 ): Resource => {
 	if (!isValidJSIdentifier(bundle.id)) {
@@ -57,12 +58,12 @@ export const compileBundle = (
 	let params: InputTypeMap = {}
 
 	for (const message of bundle.messages) {
-		if (compiledMessages[message.languageTag]) {
-			throw new Error(`Duplicate language tag: ${message.languageTag}`)
+		if (compiledMessages[message.locale]) {
+			throw new Error(`Duplicate language tag: ${message.locale}`)
 		}
 
 		// merge params
-		const { compiled, inputs: variantParams } = compilePattern(message.pattern)
+		const { compiled, inputs: variantParams } = compilePattern(message.locale, message.pattern)
 		params = { ...params, ...variantParams }
 
 		// set the pattern for the language tag
@@ -117,7 +118,7 @@ const messageFunction = (args: {
  * @returns {string}
  */
 /* @__NO_SIDE_EFFECTS__ */
-export const ${args.message.id} = (${hasInputs ? "params" : ""}) => {
+export const ${args.message.id} = (${hasInputs ? "inputs" : ""}) => {
 	return ${hasSelectors ? args.compiledPattern : args.compiledPattern}
 } 
 `

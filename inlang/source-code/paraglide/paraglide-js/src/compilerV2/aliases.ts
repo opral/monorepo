@@ -1,4 +1,4 @@
-import type { MessageBundle } from "@inlang/sdk/v2"
+import type { BundleNested } from "@inlang/sdk2"
 
 /**
  * Returns re-export statements for each alias of a MessageBundle.
@@ -6,7 +6,7 @@ import type { MessageBundle } from "@inlang/sdk/v2"
  *
  * @param bundle
  */
-export function reexportAliases(bundle: MessageBundle) {
+export function reexportAliases(bundle: BundleNested) {
 	let code = ""
 
 	if (bundle.alias["default"] && bundle.id !== bundle.alias["default"]) {
