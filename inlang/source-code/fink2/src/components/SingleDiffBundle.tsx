@@ -50,6 +50,7 @@ const SingleDiffBundle = (props: {
 						message={message}
 						locale={message.locale}
 						settings={props.settings}
+						className="hide-new-variant"
 					>
 						{message.variants.map((variant) => {
 							const change = props.changes.find(
@@ -58,43 +59,49 @@ const SingleDiffBundle = (props: {
 							const oldVariant = oldMessage?.variants.find(
 								(oldVariant) => oldVariant.id === variant.id
 							);
-							return (
-								<InlangVariant
-									slot="variant"
-									key={variant.id}
-									bundleId={props.bundle.id}
-									message={message}
-									locale={message.locale}
-									variant={variant}
-									className={clsx(!change ? "opacity-30" : "")}
-								>
-									<InlangPatternEditor
-										slot="pattern-editor"
-										pattern={
-											props.show === "neu"
-												? variant.pattern
-												: oldVariant?.pattern
-										}
-										className={clsx(
-											change &&
-												clsx(
-													props.show === "neu"
-														? "inlang-pattern-editor-neu"
-														: "inlang-pattern-editor-old"
-												)
-										)}
-									></InlangPatternEditor>
-									{change && props.show === "neu" && (
-										<div
+							if (
+								props.show === "neu" ||
+								(props.show === "old" && oldVariant?.pattern)
+							) {
+								return (
+									<InlangVariant
+										slot="variant"
+										key={variant.id}
+										bundleId={props.bundle.id}
+										message={message}
+										locale={message.locale}
+										variant={variant}
+										className={clsx(!change ? "opacity-30" : "")}
+									>
+										<InlangPatternEditor
 											slot="pattern-editor"
-											className="absolute right-4 h-full flex items-center text-green-800"
-										>
-											by You | last few seconds
-										</div>
-									)}
-								</InlangVariant>
-							);
+											pattern={
+												props.show === "neu"
+													? variant.pattern
+													: oldVariant?.pattern
+											}
+											className={clsx(
+												change &&
+													clsx(
+														props.show === "neu"
+															? "inlang-pattern-editor-neu"
+															: "inlang-pattern-editor-old"
+													)
+											)}
+										></InlangPatternEditor>
+										{change && props.show === "neu" && (
+											<div
+												slot="pattern-editor"
+												className="absolute right-4 h-full flex items-center text-green-800"
+											>
+												by You | last few seconds
+											</div>
+										)}
+									</InlangVariant>
+								);
+							}
 						})}
+						);
 					</InlangMessage>
 				);
 			})}

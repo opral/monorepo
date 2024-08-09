@@ -3,6 +3,7 @@ import { projectAtom } from "../state.ts";
 import { useAtom } from "jotai";
 import { BundleNested, InlangProject, selectBundleNested } from "@inlang/sdk2";
 import SingleDiffBundle from "./SingleDiffBundle.tsx";
+import { SlButton } from "@shoelace-style/shoelace/dist/react";
 
 const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 	const [project] = useAtom(projectAtom);
@@ -20,12 +21,18 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 		return () => clearInterval(interval);
 	}, [project, props]);
 
-	useEffect(() => {
-		console.log("oldBundle state", oldBundle);
-	}, [oldBundle]);
+	const handleDiscard = () => {
+		console.log("discard new ->", oldBundle);
+	};
+
 	return (
-		<div className="bg-zinc-100 rounded p-4 mt-4">
-			<h3 className="font-medium text-[16px] pb-4">{props.bundleId}</h3>
+		<div className="bg-zinc-50 rounded p-4 mt-4">
+			<div className="flex justify-between">
+				<h3 className="font-medium text-[16px] pb-4">{props.bundleId}</h3>
+				<SlButton size="small" onClick={() => handleDiscard()}>
+					Discard
+				</SlButton>
+			</div>
 			{props.changes.map((change) => (
 				<p className="text-zinc-600" key={change.id}>
 					<span className="font-bold text-zinc-950">You</span> changed the{" "}
@@ -131,7 +138,6 @@ const queryNewBundle = async (
 								variant.match = latestCommitedChange.value.match;
 							} else {
 								//insert
-								console.log(change);
 								message.variants = message.variants.filter(
 									(variant) => variant.id !== change.value.id
 								);
