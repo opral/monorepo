@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest"
 import { compile } from "./compile.js"
-import { createBundle, createMessage, MessageNested } from "@inlang/sdk2"
+import { createBundle, MessageNested } from "@inlang/sdk2"
 
 const msg: MessageNested = {
 	locale: "en",
@@ -42,19 +42,28 @@ const msg: MessageNested = {
 	],
 }
 
+const germanMessage: MessageNested = {
+	id: "some_message_de",
+	locale: "de",
+	bundleId: "some_bundle",
+	declarations: [],
+	selectors: [],
+	variants: [
+		{
+			id: "some_variant",
+			match: [],
+			messageId: "some_message_de",
+			pattern: [{ type: "text", value: "Hallo Welt!" }],
+		},
+	],
+}
+
 describe("compile", () => {
 	it("compiles", async () => {
 		const bundleId = "my_bundle"
 		const bundle = createBundle({
 			id: bundleId,
-			messages: [
-				msg,
-				createMessage({
-					bundleId,
-					locale: "de",
-					text: "Hallo Welt!",
-				}),
-			],
+			messages: [msg, germanMessage],
 		})
 
 		const output = await compile({
@@ -107,8 +116,8 @@ describe("compile", () => {
 			import * as registry from './registry.js';
 			/** @returns {string} */
 			/* @__NO_SIDE_EFFECTS__ */
-			const a07133ae_d15b_4cf7_bade_c43fb02863f2 = () => \`Hallo Welt!\`;
-			export { a07133ae_d15b_4cf7_bade_c43fb02863f2 as my_bundle };
+			const some_message_de = () => \`Hallo Welt!\`;
+			export { some_message_de as my_bundle };
 			",
 			  "messages/en.js": "/* eslint-disable */
 			import * as registry from './registry.js';
