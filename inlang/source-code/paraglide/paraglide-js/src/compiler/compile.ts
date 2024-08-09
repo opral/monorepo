@@ -62,6 +62,7 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 		{
 			event: "PARAGLIDE-JS compile executed",
 			properties: {
+				version: PARJS_PACKAGE_VERSION,
 				stack,
 			},
 		},
