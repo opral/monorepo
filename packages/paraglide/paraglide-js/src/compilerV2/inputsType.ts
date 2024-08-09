@@ -1,7 +1,7 @@
 import { escapeForSingleQuoteString } from "../services/codegen/escape.js"
 import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
 
-export type InputTypeMap = Record<string, "NonNullable<unknown>">
+export type InputTypeMap = Record<string, string>
 
 /**
  * Generates a JSDoc comment for an input object
