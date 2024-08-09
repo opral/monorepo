@@ -69,13 +69,14 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 		let file = ["/* eslint-disable */", "import * as registry from './registry.js' "].join("\n")
 
 		for (const bundle of compiledBundles) {
-			const locales = bundle.bundle.source.messages.map((m) => m.locale)
-			const missingLocales = opts.settings.locales.filter((l) => !locales.includes(l))
-
 			const compiledMessage = bundle.messages[locale]
 			if (!compiledMessage) continue
 			file += `\n${compiledMessage.code}`
 			file += `\nexport { ${i(compiledMessage.source.id)} as ${bundle.bundle.source.id} }`
+
+			// Language Fallbacks
+			const locales = bundle.bundle.source.messages.map((m) => m.locale)
+			const missingLocales = opts.settings.locales.filter((l) => !locales.includes(l))
 
 			for (const missingLocale of missingLocales) {
 				const fallbackLocale = fallbackMap[missingLocale]
@@ -86,6 +87,13 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 						bundle.bundle.source.id
 					)}'`
 			}
+
+			// Bundle Aliases
+			const alias = bundle.bundle.source.alias
+				? Object.values(bundle.bundle.source.alias).at(0)
+				: undefined
+
+			if (alias) file += `\nexport { ${compiledMessage.source.id} as ${i(alias)} }`
 		}
 
 		output[filename] = await fmt(file)
