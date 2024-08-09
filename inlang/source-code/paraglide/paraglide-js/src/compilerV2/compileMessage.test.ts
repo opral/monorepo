@@ -45,6 +45,17 @@ describe("compileMessage", () => {
 		expect(compiled.typeRestrictions).toEqual({
 			"second Input": "number",
 		})
-		expect(compiled.code).toMatchInlineSnapshot()
+		expect(compiled.code).toMatchInlineSnapshot(`
+			"/**
+			 * @param {{ 'second Input': number, fistInput: NonNullable<unknown> }} inputs
+			 * @returns {string}
+			 */
+			/* @__NO_SIDE_EFFECTS__ */
+			const some_message = (inputs) => {
+				const selectors = [ inputs.fistInput, registry.plural(\\"en\\", inputs['second Input']) ]
+					if (selectors[0] === \\"1\\" && selectors[1] === \\"2\\") return \`One\`
+				return \`Many\`
+			}"
+		`)
 	})
 })
