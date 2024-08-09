@@ -82,7 +82,7 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 		for (const bundle of compiledBundles) {
 			const compiledMessage = bundle.messages[locale]
 			if (!compiledMessage) continue
-			file += `\nexport const ${bundle.source.id} = ${compiledMessage.code}`
+			file += `\nexport const ${bundle.bundle.source.id} = ${compiledMessage.code}`
 		}
 
 		output[filename] = await fmt(file)

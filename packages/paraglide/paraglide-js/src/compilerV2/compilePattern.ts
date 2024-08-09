@@ -11,19 +11,24 @@ import type { Compilation } from "./types.js"
  *  const { compiled, params } = compilePattern([{ type: "Text", value: "Hello " }, { type: "VariableReference", name: "name" }])
  *  >> compiled === "`Hello ${params.name}`"
  */
-export const compilePattern = (lang: string, pattern: Pattern): Compilation => {
-	const compiledPatternElements = pattern.map((element): Compilation => {
+export const compilePattern = (lang: string, pattern: Pattern): Compilation<Pattern> => {
+	const compiledPatternElements = pattern.map((element): Compilation<Pattern[number]> => {
 		switch (element.type) {
 			case "text":
-				return { code: escapeForTemplateLiteral(element.value), typeRestrictions: {} }
-			case "expression":
+				return {
+					code: escapeForTemplateLiteral(element.value),
+					typeRestrictions: {},
+					source: element,
+				}
+			case "expression": {
 				const compiledExpression = compileExpression(lang, element)
 				const code = "${" + compiledExpression.code + "}"
-				return { code, typeRestrictions: compiledExpression.typeRestrictions }
+				return { code, typeRestrictions: compiledExpression.typeRestrictions, source: element }
+			}
 		}
 	})
 	const code = backtick(compiledPatternElements.map((res) => res.code).join(""))
 
 	const typeRestrictions: Record<string, string> = {}
-	return { code, typeRestrictions }
+	return { code, typeRestrictions, source: pattern }
 }
