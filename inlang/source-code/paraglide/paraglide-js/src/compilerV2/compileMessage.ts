@@ -87,11 +87,15 @@ function addTypes(compilation: Compilation<MessageNested>): Compilation<MessageN
 		tr[name] = "NonNullable<unknown>"
 	}
 
-	const jsdoc = `/**
+	const code = `/**
  * ${inputsType(tr, false)}
- */`
+ * @returns {string}
+ */
+/* @__NO_SIDE_EFFECTS__ */
+${compilation.code}`
+
 	return {
 		...compilation,
-		code: jsdoc + compilation.code,
+		code,
 	}
 }

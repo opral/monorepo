@@ -1,9 +1,10 @@
 import { describe, it, expect } from "vitest"
 import { compile } from "./compile.js"
-import { createBundle, createMessage } from "@inlang/sdk2"
+import { createBundle, createMessage, MessageNested } from "@inlang/sdk2"
 
-const msg: Message = {
+const msg: MessageNested = {
 	locale: "en",
+	bundleId: "some_bundle",
 	id: "some_message",
 	declarations: [
 		{
@@ -28,11 +29,13 @@ const msg: Message = {
 	variants: [
 		{
 			id: "1",
+			messageId: "some_message",
 			match: ["1", "2"],
 			pattern: [{ type: "text", value: "One" }],
 		},
 		{
 			id: "2",
+			messageId: "some_message",
 			match: ["*", "*"],
 			pattern: [{ type: "text", value: "Many" }],
 		},
@@ -102,11 +105,19 @@ describe("compile", () => {
 			",
 			  "messages/de.js": "/* eslint-disable */
 			import * as registry from './registry.js';
-			export const my_bundle = () => \`Hallo Welt!\`;
+			/** @returns {string} */
+			/* @__NO_SIDE_EFFECTS__ */
+			const a07133ae_d15b_4cf7_bade_c43fb02863f2 = () => \`Hallo Welt!\`;
+			export { a07133ae_d15b_4cf7_bade_c43fb02863f2 as my_bundle };
 			",
 			  "messages/en.js": "/* eslint-disable */
 			import * as registry from './registry.js';
-			export const my_bundle = (inputs) => {
+			/**
+			 * @param {{ 'second Input': number; fistInput: NonNullable<unknown> }} inputs
+			 * @returns {string}
+			 */
+			/* @__NO_SIDE_EFFECTS__ */
+			const some_message = (inputs) => {
 			  const selectors = [
 			    inputs.fistInput,
 			    registry.plural('en', inputs['second Input']),
@@ -114,6 +125,7 @@ describe("compile", () => {
 			  if (selectors[0] === '1' && selectors[1] === '2') return \`One\`;
 			  return \`Many\`;
 			};
+			export { some_message as my_bundle };
 			",
 			  "registry.js": "/* eslint-disable */
 
