@@ -45,18 +45,6 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 	const fallbackMap = getFallbackMap(opts.settings.locales, opts.settings.baseLocale)
 
 	const compiledBundles = opts.bundles.map((bundle) => compileBundle(bundle, fallbackMap))
-
-	// telemetry
-	const pkgJson = await getPackageJson(fs, process.cwd())
-	const stack = getStackInfo(pkgJson)
-	telemetry.capture(
-		{
-			event: "PARAGLIDE-JS compile executed",
-			properties: { stack },
-		},
-		opts.projectId
-	)
-
 	const indexFile = [
 		"/* eslint-disable */",
 		'import { languageTag } from "./runtime.js"',
@@ -88,6 +76,17 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 		output[filename] = await fmt(file)
 	}
 
+	// telemetry
+	const pkgJson = await getPackageJson(fs, process.cwd())
+	const stack = getStackInfo(pkgJson)
+	telemetry.capture(
+		{
+			event: "PARAGLIDE-JS compile executed",
+			properties: { stack },
+		},
+		opts.projectId
+	)
+
 	telemetry.shutdown()
 	return output
 }
@@ -95,7 +94,9 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 async function fmt(js: string): Promise<string> {
 	return await prettier.format(js, {
 		arrowParens: "always",
+		singleQuote: true,
 		parser: "babel",
+		plugins: ["prettier-plugin-jsdoc"],
 	})
 }
 
