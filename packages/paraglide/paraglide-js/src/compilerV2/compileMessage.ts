@@ -4,6 +4,7 @@ import { escapeForDoubleQuoteString } from "../services/codegen/escape.js"
 import { compileExpression } from "./compileExpression.js"
 import { mergeTypeRestrictions, type Compilation } from "./types.js"
 import { inputsType } from "./inputsType.js"
+import { i } from "~/services/codegen/identifier.js"
 
 /**
  * Returns the compiled message as a string
@@ -29,7 +30,7 @@ function compileMessageWithOneVariant(message: MessageNested): Compilation<Messa
 		throw new Error("Message must have exactly one variant")
 	const hasInputs = message.declarations.some((decl) => decl.type === "input")
 	const compiledPattern = compilePattern(message.locale, variant.pattern)
-	const code = `(${hasInputs ? "inputs" : ""}) => ${compiledPattern.code}`
+	const code = `const ${i(message.id)} = (${hasInputs ? "inputs" : ""}) => ${compiledPattern.code}`
 	return { code, typeRestrictions: compiledPattern.typeRestrictions, source: message }
 }
 
@@ -69,7 +70,7 @@ function compileMessageWithMultipleVariants(message: MessageNested): Compilation
 		...compiledSelectors.map((v) => v.typeRestrictions),
 	].reduce(mergeTypeRestrictions, {})
 
-	const code = `(${hasInputs ? "inputs" : ""}) => {
+	const code = `const ${i(message.id)} = (${hasInputs ? "inputs" : ""}) => {
 	${selectorCode}
 	${compiledVariants.map((l) => `\t${l.code}`).join("\n")}
 }`
