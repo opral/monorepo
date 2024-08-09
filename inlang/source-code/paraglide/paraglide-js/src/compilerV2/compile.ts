@@ -17,7 +17,7 @@ const ignoreDirectory = `# ignore everything because the directory is auto-gener
 
 export type CompileOptions = {
 	bundles: Readonly<BundleNested[]>
-	settings: ProjectSettings
+	settings: Pick<ProjectSettings, "baseLocale" | "locales">
 	projectId: string | undefined
 }
 
@@ -42,7 +42,7 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 
 	//Maps each language to it's fallback
 	//If there is no fallback, it will be undefined
-	const fallbackMap = getFallbackMap(opts.settings.languageTags, opts.settings.sourceLanguageTag)
+	const fallbackMap = getFallbackMap(opts.settings.locales, opts.settings.baseLocale)
 
 	const compiledBundles = opts.bundles.map((bundle) => compileBundle(bundle, fallbackMap))
 
@@ -57,125 +57,49 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 		opts.projectId
 	)
 
-	const resources: Record<string, string> = {}
+	const indexFile = [
+		"/* eslint-disable */",
+		'import { languageTag } from "./runtime.js"',
+		opts.settings.locales
+			.map((locale) => `import * as ${i(locale)} from "./messages/${locale}.js"`)
+			.join("\n"),
+		"\n",
+		compiledBundles.map(({ bundle }) => bundle.code).join("\n\n"),
+	].join("\n")
 
-	for (const compiledBundle of compiledBundles) {
-		for (const languageTag of Object.keys(compiledBundle.translations)) {
-			if (languageTag === "index") continue
-			if (!resources[languageTag]) resources[languageTag] = ""
-			resources[languageTag] += "\n\n" + compiledBundle.translations[languageTag]
-		}
+	const output: Record<string, string> = {
+		".prettierignore": ignoreDirectory,
+		".gitignore": ignoreDirectory,
+		"runtime.js": await fmt(createRuntime(opts.settings)),
+		"registry.js": await fmt(createRegistry()),
+		"messages.js": await fmt(indexFile),
 	}
 
-	const languagesWithMessages = new Set<LanguageTag>(Object.keys(resources))
+	for (const locale of opts.settings.locales) {
+		const filename = `messages/${locale}.js`
+		let file = ["/* eslint-disable */", "import * as registry from './registry.js' "].join("\n")
 
-	const languagesWithoutMessages = opts.settings.languageTags.filter(
-		(languageTag) => !languagesWithMessages.has(languageTag)
-	)
+		for (const bundle of compiledBundles) {
+			const compiledMessage = bundle.messages[locale]
+			if (!compiledMessage) continue
+			file += `\nexport const ${bundle.source.id} = ${compiledMessage.code}`
+		}
 
-	// only add fallback content if there isn't yet a file with that language
-	for (const languageTag of languagesWithoutMessages) {
-		if (!resources[languageTag]) resources[languageTag] = "\n\nexport {};"
+		output[filename] = await fmt(file)
 	}
 
 	telemetry.shutdown()
-
-	// boilerplate files
-	let output: Record<string, string> = {
-		".prettierignore": ignoreDirectory,
-		".gitignore": ignoreDirectory,
-		"runtime.js": createRuntime(opts.settings),
-		"registry.js": createRegistry(),
-	}
-
-	if (opts.outputStructure === "message-modules") {
-		// add all the index files
-		for (const message of compiledBundles) {
-			output[`messages/index/${message.source.id}.js`] = [
-				"/* eslint-disable */",
-				'import { languageTag } from "../../runtime.js"',
-				opts.settings.languageTags
-					.map(
-						(languageTag) =>
-							`import * as ${i(languageTag)} from "../${languageTag}/${message.source.id}.js"`
-					)
-					.join("\n"),
-				"\n",
-				message.index,
-			].join("\n")
-
-			// add all the message files
-			for (const [lang, source] of Object.entries(message.translations)) {
-				output[`messages/${lang}/${message.source.id}.js`] = [
-					"/* eslint-disable */",
-					`/** 
-* This file contains language specific message functions for tree-shaking. 
-* 
-*! WARNING: Only import messages from this file if you want to manually
-*! optimize your bundle. Else, import from the \`messages.js\` file. 
-* 
-* Your bundler will (in the future) automatically replace the index function 
-* with a language specific message function in the build step. 
-*/`,
-					source,
-				].join("\n")
-			}
-		}
-
-		const messageIDs = compiledBundles.map((message) => message.source.id)
-
-		// add the barrel files
-		output["messages.js"] = [
-			"/* eslint-disable */",
-			...messageIDs.map((id) => `export * from "./messages/index/${id}.js"`),
-		].join("\n")
-
-		for (const languageTag of opts.settings.languageTags) {
-			output[`messages/${languageTag}.js`] = [
-				"/* eslint-disable */",
-				...(messageIDs.length === 0
-					? ["export {}"]
-					: messageIDs.map((id) => `export * from "./${languageTag}/${id}.js"`)),
-			].join("\n")
-		}
-	} else {
-		output = {
-			...output,
-			// message index file
-			"messages.js": [
-				"/* eslint-disable */",
-				'import { languageTag } from "./runtime.js"',
-				opts.settings.languageTags
-					.map((languageTag) => `import * as ${i(languageTag)} from "./messages/${languageTag}.js"`)
-					.join("\n"),
-				"\n",
-				compiledBundles.map((message) => message.index).join("\n\n"),
-			].join("\n"),
-			...Object.fromEntries(
-				Object.entries(resources).map(([languageTag, content]) => [
-					`messages/${languageTag}.js`,
-					[
-						"/* eslint-disable */",
-						`/** 
- * This file contains language specific message functions for tree-shaking. 
- * 
- *! WARNING: Only import messages from this file if you want to manually
- *! optimize your bundle. Else, import from the \`messages.js\` file. 
- * 
- * Your bundler will (in the future) automatically replace the index function 
- * with a language specific message function in the build step. 
- */`,
-						content,
-					].join("\n"),
-				])
-			),
-		}
-	}
-
 	return output
 }
 
-export function getFallbackMap<T extends LanguageTag>(
+async function fmt(js: string): Promise<string> {
+	return await prettier.format(js, {
+		arrowParens: "always",
+		parser: "babel",
+	})
+}
+
+export function getFallbackMap<T extends string>(
 	languageTags: T[],
 	sourceLanguageTag: NoInfer<T>
 ): Record<T, T | undefined> {
