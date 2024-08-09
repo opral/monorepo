@@ -2,6 +2,7 @@ import type { Pattern } from "@inlang/sdk2"
 import { escapeForTemplateLiteral } from "../services/codegen/escape.js"
 import { backtick } from "../services/codegen/quotes.js"
 import { compileExpression } from "./compileExpression.js"
+import type { Compilation } from "./types.js"
 
 /**
  * Compiles a pattern into a template literal string.
@@ -10,26 +11,19 @@ import { compileExpression } from "./compileExpression.js"
  *  const { compiled, params } = compilePattern([{ type: "Text", value: "Hello " }, { type: "VariableReference", name: "name" }])
  *  >> compiled === "`Hello ${params.name}`"
  */
-export const compilePattern = (
-	lang: string,
-	pattern: Pattern
-): {
-	inputs: Record<string, "NonNullable<unknown>">
-	compiled: string
-} => {
-	const inputs: Record<string, "NonNullable<unknown>"> = {}
-	const compiled = backtick(
-		pattern
-			.map((element) => {
-				switch (element.type) {
-					case "text":
-						return escapeForTemplateLiteral(element.value)
-					case "expression":
-						return "${" + compileExpression(lang, element) + "}"
-				}
-			})
-			.join("")
-	)
+export const compilePattern = (lang: string, pattern: Pattern): Compilation => {
+	const compiledPatternElements = pattern.map((element): Compilation => {
+		switch (element.type) {
+			case "text":
+				return { code: escapeForTemplateLiteral(element.value), typeRestrictions: {} }
+			case "expression":
+				const compiledExpression = compileExpression(lang, element)
+				const code = "${" + compiledExpression.code + "}"
+				return { code, typeRestrictions: compiledExpression.typeRestrictions }
+		}
+	})
+	const code = backtick(compiledPatternElements.map((res) => res.code).join(""))
 
-	return { inputs, compiled }
+	const typeRestrictions: Record<string, string> = {}
+	return { code, typeRestrictions }
 }

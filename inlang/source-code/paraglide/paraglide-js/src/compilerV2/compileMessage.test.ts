@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { compileMessage } from "./compileMessage"
+import { compileMessage } from "./compileMessage.js"
 import type { Message } from "@inlang/sdk/v2"
 
 describe("compileMessage", () => {
@@ -42,10 +42,13 @@ describe("compileMessage", () => {
 		}
 
 		const compiled = compileMessage(msg)
-		expect(compiled).toMatchInlineSnapshot(`
+		expect(compiled.typeRestrictions).toEqual({
+			"second Input": "number",
+		})
+		expect(compiled.code).toMatchInlineSnapshot(`
 			"(inputs) => {
-				const selectors = [ inputs.fistInput, registry.plural(inputs['second Input']) ]
-				if (selectors[0] === \\"1\\" && selectors[1] === \\"2\\") return \`One\`
+				const selectors = [ inputs.fistInput, registry.plural(\\"en\\", inputs['second Input']) ]
+					if (selectors[0] === \\"1\\" && selectors[1] === \\"2\\") return \`One\`
 				return \`Many\`
 			}"
 		`)
