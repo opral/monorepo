@@ -3,6 +3,7 @@ import { compilePattern } from "./compilePattern.js"
 import { escapeForDoubleQuoteString } from "../services/codegen/escape.js"
 import { compileExpression } from "./compileExpression.js"
 import { mergeTypeRestrictions, type Compilation } from "./types.js"
+import { inputsType } from "./inputsType.js"
 
 /**
  * Returns the compiled message as a string
@@ -15,9 +16,11 @@ export const compileMessage = (message: MessageNested): Compilation<MessageNeste
 	// return empty string instead?
 	if (message.variants.length == 0) throw new Error("Message must have at least one variant")
 	const hasMultipleVariants = message.variants.length > 1
-	return hasMultipleVariants
-		? compileMessageWithMultipleVariants(message)
-		: compileMessageWithOneVariant(message)
+	return addTypes(
+		hasMultipleVariants
+			? compileMessageWithMultipleVariants(message)
+			: compileMessageWithOneVariant(message)
+	)
 }
 
 function compileMessageWithOneVariant(message: MessageNested): Compilation<MessageNested> {
@@ -72,4 +75,22 @@ function compileMessageWithMultipleVariants(message: MessageNested): Compilation
 }`
 
 	return { code, typeRestrictions: tr, source: message }
+}
+
+function addTypes(compilation: Compilation<MessageNested>): Compilation<MessageNested> {
+	// add types for the inputs
+	const tr = structuredClone(compilation.typeRestrictions)
+	for (const decl of compilation.source.declarations) {
+		const name = decl.value.arg.name
+		if (name in tr) continue
+		tr[name] = "NonNullable<unknown>"
+	}
+
+	const jsdoc = `/**
+ * ${inputsType(tr, false)}
+ */`
+	return {
+		...compilation,
+		code: jsdoc + compilation.code,
+	}
 }
