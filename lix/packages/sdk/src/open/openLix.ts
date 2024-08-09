@@ -149,6 +149,69 @@ async function loadPlugins(db: Kysely<LixDatabase>) {
 // 	}
 // }
 
+async function getChangeHistory({
+	atomId,
+	depth,
+	fileId,
+	pluginKey,
+	diffType,
+	db,
+}: {
+	atomId: string
+	depth: number
+	fileId: string
+	pluginKey: string
+	diffType: string
+	db: Kysely<LixDatabase>
+}): Promise<any[]> {
+	if (depth > 1) {
+		throw new Error("depth > 1 not supported yet")
+	}
+
+	const { commit_id } = await db
+		.selectFrom("ref")
+		.select("commit_id")
+		.where("name", "=", "current")
+		.executeTakeFirstOrThrow()
+
+	let nextCommitId = commit_id
+	let firstChange
+	while (!firstChange && nextCommitId) {
+		const commit = await db
+			.selectFrom("commit")
+			.selectAll()
+			.where("id", "=", nextCommitId)
+			.executeTakeFirstOrThrow()
+
+		nextCommitId = commit.parent_id
+
+		firstChange = await db
+			.selectFrom("change")
+			.selectAll()
+			.where("commit_id", "=", commit.id)
+			.where((eb) => eb.ref("value", "->>").key("id"), "=", atomId)
+			.where("plugin_key", "=", pluginKey)
+			.where("file_id", "=", fileId)
+			.where("type", "=", diffType)
+			.executeTakeFirst()
+	}
+
+	const changes: any[] = [firstChange]
+
+	// TODO: walk change parents until depth
+	// await db
+	// 	.selectFrom("change")
+	// 	.select("id")
+	// 	.where((eb) => eb.ref("value", "->>").key("id"), "=", atomId)
+	// 	.where("type", "=", diffType)
+	// 	.where("file_id", "=", fileId)
+	// 	.where("plugin_key", "=", pluginKey)
+	// 	.where("commit_id", "is not", null)
+	// 	.executeTakeFirst()
+
+	return changes
+}
+
 async function handleFileChange(args: {
 	old: LixFile
 	neu: LixFile
@@ -156,15 +219,18 @@ async function handleFileChange(args: {
 	db: Kysely<LixDatabase>
 }) {
 	const fileId = args.neu?.id ?? args.old?.id
+
 	for (const plugin of args.plugins) {
 		const diffs = await plugin.diff?.file?.({
 			old: args.old,
 			neu: args.neu,
 		})
+
 		for (const diff of diffs ?? []) {
 			// assume an insert or update operation as the default
 			// if diff.neu is not present, it's a delete operation
 			const value = diff.neu ?? diff.old
+
 			const previousUncomittedChange = await args.db
 				.selectFrom("change")
 				.selectAll()
@@ -177,6 +243,17 @@ async function handleFileChange(args: {
 
 			// no uncommitted change exists
 			if (previousUncomittedChange === undefined) {
+				const parent = (
+					await getChangeHistory({
+						atomId: value.id,
+						depth: 1,
+						db: args.db,
+						fileId,
+						pluginKey: plugin.key,
+						diffType: diff.type,
+					})
+				)[0]
+
 				await args.db
 					.insertInto("change")
 					.values({
@@ -187,6 +264,7 @@ async function handleFileChange(args: {
 						plugin_key: plugin.key,
 						// @ts-expect-error - database expects stringified json
 						value: JSON.stringify(value),
+						parent_id: parent?.id,
 						meta: JSON.stringify(diff.meta),
 					})
 					.execute()
@@ -202,7 +280,7 @@ async function handleFileChange(args: {
 				.where("commit_id", "is not", null)
 				.where("plugin_key", "=", plugin.key)
 				.innerJoin("commit", "commit.id", "change.commit_id")
-				.orderBy("commit.zoned_date_time desc")
+				.orderBy("commit.created desc")
 				.executeTakeFirst()
 
 			// working change exists but is identical to previously committed change
@@ -211,8 +289,9 @@ async function handleFileChange(args: {
 					// @ts-expect-error - dynamic type
 					old: previousCommittedChange.value,
 					// @ts-expect-error - dynamic type
-					neu: diff.value,
+					neu: diff.neu,
 				})
+
 				if (diffPreviousCommittedChange?.length === 0) {
 					// drop the change because it's identical
 					await args.db
@@ -250,7 +329,7 @@ async function handleFileChange(args: {
 	}
 }
 
-// creates initial commit
+// creates initial changes for new files
 async function handleFileInsert(args: {
 	neu: LixFile
 	plugins: LixPlugin[]
@@ -262,6 +341,8 @@ async function handleFileInsert(args: {
 			neu: args.neu,
 		})
 		for (const diff of diffs ?? []) {
+			const value = diff.neu ?? diff.old
+
 			await args.db
 				.insertInto("change")
 				.values({
@@ -271,33 +352,10 @@ async function handleFileInsert(args: {
 					plugin_key: plugin.key,
 					operation: diff.operation,
 					// @ts-expect-error - database expects stringified json
-					value: JSON.stringify(diff.value),
+					value: JSON.stringify(value),
 					meta: JSON.stringify(diff.meta),
 				})
 				.execute()
 		}
-		// commit changes for the file
-		args.db.transaction().execute(async () => {
-			const commit = await args.db
-				.insertInto("commit")
-				.values({
-					id: v4(),
-					user_id: "system",
-					// todo - use zoned datetime
-					zoned_date_time: new Date().toISOString(),
-					description: "initial commit",
-				})
-				.returning("id")
-				.executeTakeFirstOrThrow()
-
-			return await args.db
-				.updateTable("change")
-				.where("commit_id", "is", null)
-				.where("file_id", "=", args.neu.id)
-				.set({
-					commit_id: commit.id,
-				})
-				.execute()
-		})
 	}
 }

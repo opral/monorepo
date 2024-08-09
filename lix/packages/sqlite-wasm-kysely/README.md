@@ -1,10 +1,11 @@
 ## Usage
 
 ```ts
-const db = createInMemoryDatabase()
+const db = createInMemoryDatabase();
 
-const kysely = new Kysely<DB>({ dialect: createDialect({
-    database: db
-  })
+const kysely = new Kysely<DB>({
+  dialect: createDialect({
+    database: db,
+  }),
 });
 ```
