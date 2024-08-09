@@ -1,24 +1,24 @@
-import type { Message } from "@inlang/sdk"
+import type { MessageBundle } from "@inlang/sdk/v2"
 
 /**
- * Returns re-export statements for each alias of a message.
+ * Returns re-export statements for each alias of a MessageBundle.
  * If no aliases are present, this function returns an empty string.
  *
- * @param message
+ * @param bundle
  */
-export function reexportAliases(message: Message) {
+export function reexportAliases(bundle: MessageBundle) {
 	let code = ""
 
-	if (message.alias["default"] && message.id !== message.alias["default"]) {
+	if (bundle.alias["default"] && bundle.id !== bundle.alias["default"]) {
 		code += `
 /**
- * Change the reference from the alias \`m.${message.alias["default"]}()\` to \`m.${message.id}()\`:
+ * Change the reference from the alias \`m.${bundle.alias["default"]}()\` to \`m.${bundle.id}()\`:
  * \`\`\`diff
- * - m.${message.alias["default"]}()
- * + m.${message.id}()
+ * - m.${bundle.alias["default"]}()
+ * + m.${bundle.id}()
  * \`\`\`
  * ---
- * \`${message.alias["default"]}\` is an alias for the message \`${message.id}\`.
+ * \`${bundle.alias["default"]}\` is an alias for the message \`${bundle.id}\`.
  * Referencing aliases instead of the message ID has downsides like:
  *
  * - The alias might be renamed in the future, breaking the code.
@@ -27,12 +27,12 @@ export function reexportAliases(message: Message) {
  * Read more about aliases and their downsides here 
  * @see inlang.com/link.
  * ---
- * @deprecated reference the message by id \`m.${message.id}()\` instead
+ * @deprecated reference the MessageBundle by id \`m.${bundle.id}()\` instead
  * 
- * @param {Parameters<typeof ${message.id}>} args
- * @returns {ReturnType<typeof ${message.id}>}
+ * @param {Parameters<typeof ${bundle.id}>} args
+ * @returns {ReturnType<typeof ${bundle.id}>}
  */
-export const ${message.alias["default"]} = (...args) => ${message.id}(...args);
+export const ${bundle.alias["default"]} = (...args) => ${bundle.id}(...args);
 `
 	}
 
