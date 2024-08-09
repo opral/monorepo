@@ -4,8 +4,8 @@ import type { Pattern } from "@inlang/sdk2"
 
 it("should compile a text only pattern", () => {
 	const pattern: Pattern = [{ type: "text", value: "Hello" }]
-	const { compiled } = compilePattern("en", pattern)
-	expect(compiled).toBe("`Hello`")
+	const { code } = compilePattern("en", pattern)
+	expect(code).toBe("`Hello`")
 })
 
 it("should compile a pattern with multiple VariableReference's", () => {
@@ -22,32 +22,32 @@ it("should compile a pattern with multiple VariableReference's", () => {
 		{ type: "expression", arg: { type: "variable", name: "count" } },
 		{ type: "text", value: " messages." },
 	]
-	const { compiled } = compilePattern("en", pattern)
-	expect(compiled).toBe("`Hello ${inputs.name}! You have ${inputs.count} messages.`")
+	const { code } = compilePattern("en", pattern)
+	expect(code).toBe("`Hello ${inputs.name}! You have ${inputs.count} messages.`")
 })
 
 it("should escape backticks", () => {
 	const pattern: Pattern = [{ type: "text", value: "`Hello world`" }]
-	const { compiled } = compilePattern("en", pattern)
-	expect(compiled).toBe("`\\`Hello world\\``")
+	const { code } = compilePattern("en", pattern)
+	expect(code).toBe("`\\`Hello world\\``")
 })
 
 it("should escape backslashes", () => {
 	const pattern: Pattern = [{ type: "text", value: "\\Hello world\\" }]
-	const { compiled } = compilePattern("en", pattern)
-	expect(compiled).toBe("`\\\\Hello world\\\\`")
+	const { code } = compilePattern("en", pattern)
+	expect(code).toBe("`\\\\Hello world\\\\`")
 })
 
 it("should escape escaped backticks", () => {
 	const pattern: Pattern = [{ type: "text", value: "\\`Hello world\\`" }]
-	const { compiled } = compilePattern("en", pattern)
-	expect(compiled).toBe("`\\\\\\`Hello world\\\\\\``")
+	const { code } = compilePattern("en", pattern)
+	expect(code).toBe("`\\\\\\`Hello world\\\\\\``")
 })
 
 it("should escape variable interpolation ( ${} )", () => {
 	const pattern: Pattern = [{ type: "text", value: "${name" }]
-	const { compiled } = compilePattern("en", pattern)
-	expect(compiled).toBe("`\\${name`")
+	const { code } = compilePattern("en", pattern)
+	expect(code).toBe("`\\${name`")
 })
 
 it("should compile a pattern with multiple VariableReference's", () => {
@@ -58,8 +58,8 @@ it("should compile a pattern with multiple VariableReference's", () => {
 		{ type: "expression", arg: { type: "variable", name: "count" } },
 		{ type: "text", value: " messages." },
 	]
-	const { compiled } = compilePattern("en", pattern)
-	expect(compiled).toBe("`Hello ${inputs.name}! You have ${inputs.count} messages.`")
+	const { code } = compilePattern("en", pattern)
+	expect(code).toBe("`Hello ${inputs.name}! You have ${inputs.count} messages.`")
 })
 
 it("should compile a pattern with a variableReference that isn't a valid JS identifier", () => {
@@ -73,6 +73,6 @@ it("should compile a pattern with a variableReference that isn't a valid JS iden
 			},
 		},
 	]
-	const { compiled } = compilePattern("en", pattern)
-	expect(compiled).toBe("`Hello ${inputs['000']}`")
+	const { code } = compilePattern("en", pattern)
+	expect(code).toBe("`Hello ${inputs['000']}`")
 })
