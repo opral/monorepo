@@ -4,7 +4,7 @@ import { inputsType, type InputTypeMap } from "./inputsType.js"
 import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
 import { escapeForDoubleQuoteString } from "../services/codegen/escape.js"
 import { reexportAliases } from "./aliases.js"
-import { messageIndexFunction } from "./messageIndex.js"
+import { messageIndexFunction } from "./bundleIndex.js"
 
 type Resource = {
 	/**
@@ -88,10 +88,10 @@ export const compileVariant = (variant: Variant): Resource => {
 								params,
 								languageTag,
 								compiledPattern,
-						  })
+							})
 						: fallbackLanguage
-						? reexportMessage(message, fallbackLanguage, output)
-						: messageIdFallback(message, languageTag),
+							? reexportMessage(message, fallbackLanguage, output)
+							: messageIdFallback(message, languageTag),
 				]
 			})
 		),

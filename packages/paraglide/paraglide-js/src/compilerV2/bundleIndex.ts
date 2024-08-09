@@ -6,11 +6,20 @@ import { reexportAliases } from "./aliases.js"
 import type { BundleNested } from "@inlang/sdk2"
 
 export const bundleIndexFunction = (args: {
+	/**
+	 * The bundle to compile
+	 */
 	bundle: BundleNested
-	inputTypes: InputTypeMap
+	/**
+	 * The type-restrictions acquired from compiling the messages in this bundle
+	 */
+	typeRestrictions: InputTypeMap
+	/**
+	 * The language tags which are available
+	 */
 	availableLanguageTags: string[]
 }) => {
-	const hasInputs = Object.keys(args.inputTypes).length > 0
+	const hasInputs = Object.keys(args.typeRestrictions).length > 0
 
 	return `/**
  * This message has been compiled by [inlang paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
@@ -20,7 +29,7 @@ export const bundleIndexFunction = (args: {
  * 
  * - The params are NonNullable<unknown> because the inlang SDK does not provide information on the type of a param (yet).
  * 
- * ${inputsType(args.inputTypes, true)}
+ * ${inputsType(args.typeRestrictions, true)}
  * ${optionsType({ languageTags: args.availableLanguageTags })}
  * @returns {string}
  */

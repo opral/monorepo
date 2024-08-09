@@ -7,18 +7,19 @@ import type { BundleNested } from "@inlang/sdk2"
  * @param bundle
  */
 export function reexportAliases(bundle: BundleNested) {
-	let code = ""
+	const aliases = Object.values(bundle.alias)
+	if (aliases.length > 1) throw new Error("Only one alias is allowed per bundle") // really?
+	const alias = aliases[0]
+	if (!alias || alias === bundle.id) return ""
 
-	if (bundle.alias["default"] && bundle.id !== bundle.alias["default"]) {
-		code += `
-/**
+	return `/**
  * Change the reference from the alias \`m.${bundle.alias["default"]}()\` to \`m.${bundle.id}()\`:
  * \`\`\`diff
- * - m.${bundle.alias["default"]}()
+ * - m.${alias}()
  * + m.${bundle.id}()
  * \`\`\`
  * ---
- * \`${bundle.alias["default"]}\` is an alias for the message \`${bundle.id}\`.
+ * \`${alias}\` is an alias for the message \`${bundle.id}\`.
  * Referencing aliases instead of the message ID has downsides like:
  *
  * - The alias might be renamed in the future, breaking the code.
@@ -32,9 +33,6 @@ export function reexportAliases(bundle: BundleNested) {
  * @param {Parameters<typeof ${bundle.id}>} args
  * @returns {ReturnType<typeof ${bundle.id}>}
  */
-export const ${bundle.alias["default"]} = (...args) => ${bundle.id}(...args);
+export const ${alias} = (...args) => ${bundle.id}(...args);
 `
-	}
-
-	return code
 }
