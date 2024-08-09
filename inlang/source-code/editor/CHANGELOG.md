@@ -1,5 +1,11 @@
 # @inlang/editor
 
+## 0.1.10
+
+### Patch Changes
+
+- d36ba43: Fix undefined error when changing settings
+
 ## 0.1.9
 
 ### Patch Changes
