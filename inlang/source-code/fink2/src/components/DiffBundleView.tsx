@@ -20,6 +20,9 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 		return () => clearInterval(interval);
 	}, [project, props]);
 
+	useEffect(() => {
+		console.log("oldBundle state", oldBundle);
+	}, [oldBundle]);
 	return (
 		<div className="bg-zinc-100 rounded p-4 mt-4">
 			<h3 className="font-medium text-[16px] pb-4">{props.bundleId}</h3>
@@ -33,13 +36,10 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 			))}
 
 			{/* 
-					* TODO unbundle
-				
-					- change `type` to `show`
-	
+			* TODO unbundle
+			- change `type` to `show`
 
 			<div className="flex">
-		
 				<inlang-bundle old neu show="old">
 					{messages.map((message) => {
 						const previousMessage = lix.db
@@ -79,7 +79,7 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 							oldBundle={oldBundle}
 							settings={project.settings.get()}
 							changes={props.changes}
-							type="old"
+							show="old"
 						/>
 					)}
 				</div>
@@ -91,7 +91,7 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 							oldBundle={oldBundle}
 							settings={project.settings.get()}
 							changes={props.changes}
-							type="neu"
+							show="neu"
 						/>
 					)}
 				</div>
@@ -121,21 +121,22 @@ const queryNewBundle = async (
 				project,
 				change
 			);
-			if (
-				latestCommitedChange &&
-				latestCommitedChange.value &&
-				latestCommitedChange.type === "variant"
-			) {
-				const message = oldBundle.messages.find(
-					(message) => message.id === latestCommitedChange.value!.messageId
-				);
-				if (message) {
-					const variant = message.variants.find(
-						(variant) => variant.id === latestCommitedChange.value!.id
-					);
-					if (variant) {
-						variant.match = latestCommitedChange.value?.match;
-						variant.pattern = latestCommitedChange.value?.pattern;
+			if (change && change.value && change.type === "variant") {
+				for (const message of oldBundle.messages) {
+					for (const variant of message.variants) {
+						if (variant.id === change.value.id) {
+							if (latestCommitedChange?.value?.pattern) {
+								//update
+								variant.pattern = latestCommitedChange.value.pattern;
+								variant.match = latestCommitedChange.value.match;
+							} else {
+								//insert
+								console.log(change);
+								message.variants = message.variants.filter(
+									(variant) => variant.id !== change.value.id
+								);
+							}
+						}
 					}
 				}
 			}
