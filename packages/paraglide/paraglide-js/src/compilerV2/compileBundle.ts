@@ -14,17 +14,7 @@ type Resource = {
 }
 
 /**
- * Returns the compiled messages for the given message.
- *
- * @example
- *   {
- *      index: "export const hello_world = (params) => { ... }",
- *      en: "export const hello_world = (params) => { ... }",
- *      de: "export const hello_world = (params) => { ... }",
- *   }
- *
- * @param bundle The message to compile
- * @param lookupTable A table that maps language tags to their fallbacks.
+ * Compiles all the messages in the bundle and returns an index-function + each compiled message
  */
 export const compileBundle = (
 	bundle: BundleNested,
