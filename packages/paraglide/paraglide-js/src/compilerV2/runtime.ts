@@ -1,11 +1,9 @@
-import type { ProjectSettings } from "@inlang/sdk"
+import type { ProjectSettings } from "@inlang/sdk2"
 
 /**
  * Returns the code for the `runtime.js` module
  */
-export function createRuntime(
-	opts: Pick<ProjectSettings, "languageTags" | "sourceLanguageTag">
-): string {
+export function createRuntime(opts: Pick<ProjectSettings, "baseLocale" | "locales">): string {
 	return `/* eslint-disable */
 /** @type {((tag: AvailableLanguageTag) => void) | undefined} */ 
 let _onSetLanguageTag
@@ -19,7 +17,7 @@ let _onSetLanguageTag
  *     return
  *   }
  */
-export const sourceLanguageTag = "${opts.sourceLanguageTag}"
+export const sourceLanguageTag = "${opts.baseLocale}"
 
 /**
  * The project's available language tags.
@@ -29,7 +27,7 @@ export const sourceLanguageTag = "${opts.sourceLanguageTag}"
  *     throw new Error("Language tag not available")
  *   }
  */
-export const availableLanguageTags = /** @type {const} */ (${JSON.stringify(opts.languageTags)})
+export const availableLanguageTags = /** @type {const} */ (${JSON.stringify(opts.locales)})
 
 /**
  * Get the current language tag.

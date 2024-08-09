@@ -5,7 +5,11 @@ import { compileMessage } from "./compileMessage.js"
 import { mergeTypeRestrictions, type Compilation } from "./types.js"
 
 type Resource = {
+	/** The bundle that was used to generate this resource */
+	source: BundleNested
+	/** The compilation result for the bundle index */
 	bundle: Compilation
+	/** The compilation results for the languages */
 	messages: {
 		[languageTag: string]: Compilation
 	}
@@ -58,6 +62,7 @@ export const compileBundle = (
 	}
 
 	return {
+		source: bundle,
 		bundle: compiledBundle,
 		messages: compiledMessages,
 	}
