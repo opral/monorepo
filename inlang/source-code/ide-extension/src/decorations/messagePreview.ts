@@ -66,6 +66,7 @@ export async function messagePreview(args: { context: vscode.ExtensionContext })
 		const wrappedDecorations = (messageReferenceMatchers ?? []).map(async (matcher) => {
 			const messages = await matcher({
 				documentText: activeTextEditor.document.getText(),
+				documentPath: activeTextEditor.document.uri.path,
 			})
 
 			return messages.map(async (message) => {
