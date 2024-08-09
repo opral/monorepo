@@ -74,18 +74,22 @@ describe("compile", () => {
 			*
 			",
 			  "messages.js": "/* eslint-disable */
-			import { languageTag } from \\"./runtime.js\\";
-			import * as en from \\"./messages/en.js\\";
-			import * as de from \\"./messages/de.js\\";
+			import { languageTag } from './runtime.js';
+			import * as en from './messages/en.js';
+			import * as de from './messages/de.js';
 
 			/**
-			 * This message has been compiled by [inlang paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
+			 * This message has been compiled by [inlang
+			 * paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
 			 *
-			 * - Don't edit the message's code. Use [Sherlock (VS Code extension)](https://inlang.com/m/r7kp499g/app-inlang-ideExtension),
-			 *   the [web editor](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor) instead, or edit the translation files manually.
+			 * - Don't edit the message's code. Use [Sherlock (VS Code
+			 *   extension)](https://inlang.com/m/r7kp499g/app-inlang-ideExtension), the
+			 *   [web
+			 *   editor](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor)
+			 *   instead, or edit the translation files manually.
 			 *
 			 * @param {{ 'second Input': number }} inputs
-			 * @param {{ languageTag?: \\"en\\" | \\"de\\" }} options
+			 * @param {{ languageTag?: 'en' | 'de' }} options
 			 * @returns {string}
 			 */
 			/* @__NO_SIDE_EFFECTS__ */
@@ -97,26 +101,26 @@ describe("compile", () => {
 			};
 			",
 			  "messages/de.js": "/* eslint-disable */
-			import * as registry from \\"./registry.js\\";
+			import * as registry from './registry.js';
 			export const my_bundle = () => \`Hallo Welt!\`;
 			",
 			  "messages/en.js": "/* eslint-disable */
-			import * as registry from \\"./registry.js\\";
+			import * as registry from './registry.js';
 			export const my_bundle = (inputs) => {
 			  const selectors = [
 			    inputs.fistInput,
-			    registry.plural(\\"en\\", inputs[\\"second Input\\"]),
+			    registry.plural('en', inputs['second Input']),
 			  ];
-			  if (selectors[0] === \\"1\\" && selectors[1] === \\"2\\") return \`One\`;
+			  if (selectors[0] === '1' && selectors[1] === '2') return \`One\`;
 			  return \`Many\`;
 			};
 			",
 			  "registry.js": "/* eslint-disable */
 
 			/**
-			 * @param {import(\\"./runtime.js\\").AvailableLanguageTags} lang
+			 * @param {import('./runtime.js').AvailableLanguageTags} lang
 			 * @param {number} input
-			 * @param {{ type: \\"cardinal\\" | \\"ordinal\\" }} options
+			 * @param {{ type: 'cardinal' | 'ordinal' }} options
 			 * @returns {string}
 			 */
 			export function plural(lang, input, options) {
@@ -132,31 +136,31 @@ describe("compile", () => {
 			 * The project's source language tag.
 			 *
 			 * @example
-			 *   if (newlySelectedLanguageTag === sourceLanguageTag){
+			 *   if (newlySelectedLanguageTag === sourceLanguageTag) {
 			 *     // do nothing as the source language tag is the default language
-			 *     return
+			 *     return;
 			 *   }
 			 */
-			export const sourceLanguageTag = \\"en\\";
+			export const sourceLanguageTag = 'en';
 
 			/**
 			 * The project's available language tags.
 			 *
 			 * @example
-			 *   if (availableLanguageTags.includes(userSelectedLanguageTag) === false){
-			 *     throw new Error(\\"Language tag not available\\")
+			 *   if (availableLanguageTags.includes(userSelectedLanguageTag) === false) {
+			 *     throw new Error('Language tag not available');
 			 *   }
 			 */
-			export const availableLanguageTags = /** @type {const} */ ([\\"en\\", \\"de\\"]);
+			export const availableLanguageTags = /** @type {const} */ (['en', 'de']);
 
 			/**
 			 * Get the current language tag.
 			 *
 			 * @example
-			 *   if (languageTag() === \\"de\\"){
-			 *     console.log(\\"Germany 🇩🇪\\")
-			 *   } else if (languageTag() === \\"nl\\"){
-			 *     console.log(\\"Netherlands 🇳🇱\\")
+			 *   if (languageTag() === 'de') {
+			 *     console.log('Germany 🇩🇪');
+			 *   } else if (languageTag() === 'nl') {
+			 *     console.log('Netherlands 🇳🇱');
 			 *   }
 			 *
 			 * @type {() => AvailableLanguageTag}
@@ -167,22 +171,21 @@ describe("compile", () => {
 			 * Set the language tag.
 			 *
 			 * @example
-			 *
 			 *   // changing to language
-			 *   setLanguageTag(\\"en\\")
+			 *   setLanguageTag('en');
 			 *
 			 *   // passing a getter function also works.
 			 *   //
 			 *   // a getter function is useful for resolving a language tag
 			 *   // on the server where every request has a different language tag
 			 *   setLanguageTag(() => {
-			 *     return request.langaugeTag
-			 *   })
+			 *     return request.langaugeTag;
+			 *   });
 			 *
 			 * @param {AvailableLanguageTag | (() => AvailableLanguageTag)} tag
 			 */
 			export const setLanguageTag = (tag) => {
-			  if (typeof tag === \\"function\\") {
+			  if (typeof tag === 'function') {
 			    languageTag = enforceLanguageTag(tag);
 			  } else {
 			    languageTag = enforceLanguageTag(() => tag);
@@ -195,6 +198,7 @@ describe("compile", () => {
 
 			/**
 			 * Wraps an untrusted function and enforces that it returns a language tag.
+			 *
 			 * @param {() => AvailableLanguageTag} unsafeLanguageTag
 			 * @returns {() => AvailableLanguageTag}
 			 */
@@ -213,15 +217,15 @@ describe("compile", () => {
 			/**
 			 * Set the \`onSetLanguageTag()\` callback function.
 			 *
-			 * The function can be used to trigger client-side side-effects such as
-			 * making a new request to the server with the updated language tag,
-			 * or re-rendering the UI on the client (SPA apps).
+			 * The function can be used to trigger client-side side-effects such as making a
+			 * new request to the server with the updated language tag, or re-rendering the
+			 * UI on the client (SPA apps).
 			 *
-			 * - Don't use this function on the server (!).
-			 *   Triggering a side-effect is only useful on the client because a server-side
-			 *   environment doesn't need to re-render the UI.
-			 *
-			 * - The \`onSetLanguageTag()\` callback can only be defined once to avoid unexpected behavior.
+			 * - Don't use this function on the server (!). Triggering a side-effect is only
+			 *   useful on the client because a server-side environment doesn't need to
+			 *   re-render the UI.
+			 * - The \`onSetLanguageTag()\` callback can only be defined once to avoid
+			 *   unexpected behavior.
 			 *
 			 * @example
 			 *   // if you use inlang paraglide on the server, make sure
@@ -230,8 +234,8 @@ describe("compile", () => {
 			 *     onSetLanguageTag((tag) => {
 			 *       // (for example) make a new request to the
 			 *       // server with the updated language tag
-			 *       window.location.href = \`/\${tag}/\${window.location.pathname}\`
-			 *     })
+			 *       window.location.href = \`/\${tag}/\${window.location.pathname}\`;
+			 *     });
 			 *   }
 			 *
 			 * @param {(languageTag: AvailableLanguageTag) => void} fn
@@ -244,11 +248,11 @@ describe("compile", () => {
 			 * Check if something is an available language tag.
 			 *
 			 * @example
-			 * 	if (isAvailableLanguageTag(params.locale)) {
-			 * 		setLanguageTag(params.locale)
-			 * 	} else {
-			 * 		setLanguageTag(\\"en\\")
-			 * 	}
+			 *   if (isAvailableLanguageTag(params.locale)) {
+			 *     setLanguageTag(params.locale);
+			 *   } else {
+			 *     setLanguageTag('en');
+			 *   }
 			 *
 			 * @param {any} thing
 			 * @returns {thing is AvailableLanguageTag}
@@ -265,7 +269,7 @@ describe("compile", () => {
 			 * @example
 			 *   setLanguageTag(request.languageTag as AvailableLanguageTag)
 			 *
-			 * @typedef {typeof availableLanguageTags[number]} AvailableLanguageTag
+			 * @typedef {(typeof availableLanguageTags)[number]} AvailableLanguageTag
 			 */
 			",
 			}
