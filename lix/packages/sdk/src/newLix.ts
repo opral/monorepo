@@ -1,5 +1,9 @@
-import { Kysely, sql } from "kysely"
-import { createDialect, createInMemoryDatabase, contentFromDatabase } from "sqlite-wasm-kysely"
+import { Kysely, sql } from "kysely";
+import {
+	createDialect,
+	createInMemoryDatabase,
+	contentFromDatabase,
+} from "sqlite-wasm-kysely";
 
 /**
  * Creates a new lix file.
@@ -10,13 +14,13 @@ import { createDialect, createInMemoryDatabase, contentFromDatabase } from "sqli
 export async function newLixFile(): Promise<Blob> {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
-	})
+	});
 
 	const db = new Kysely({
 		dialect: createDialect({
 			database: sqlite,
 		}),
-	})
+	});
 
 	try {
 		await sql`
@@ -52,14 +56,14 @@ export async function newLixFile(): Promise<Blob> {
       ) strict;
 
       INSERT INTO ref values ('current', '00000000-0000-0000-0000-000000000000');
-    `.execute(db)
+    `.execute(db);
 
-		return new Blob([contentFromDatabase(sqlite)])
+		return new Blob([contentFromDatabase(sqlite)]);
 	} catch (e) {
-		throw new Error(`Failed to create new Lix file: ${e}`, { cause: e })
+		throw new Error(`Failed to create new Lix file: ${e}`, { cause: e });
 	} finally {
 		// in any case destroy the memory db
-		sqlite.close()
-		await db.destroy()
+		sqlite.close();
+		await db.destroy();
 	}
 }

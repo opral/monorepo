@@ -1,62 +1,70 @@
-import type { LixFile } from "./schema.js"
+import type { LixFile } from "./schema.js";
 
 // named lixplugin to avoid conflict with built-in plugin type
-export type LixPlugin<T extends Record<string, Record<string, unknown>> = Record<string, never>> = {
-	key: string
-	glob: string
+export type LixPlugin<
+	T extends Record<string, Record<string, unknown>> = Record<string, never>,
+> = {
+	key: string;
+	glob: string;
 	// getting around bundling for the prototype
-	setup?: () => Promise<void>
+	setup?: () => Promise<void>;
 	diffComponent?: {
-		file?: () => HTMLElement
+		file?: () => HTMLElement;
 	} & Record<
 		// other primitives
 		keyof T,
 		(() => HTMLElement) | undefined
-	>
+	>;
 	diff: {
-		file?: (args: { old?: LixFile; neu?: LixFile }) => MaybePromise<Array<DiffReport>>
+		file?: (args: {
+			old?: LixFile;
+			neu?: LixFile;
+		}) => MaybePromise<Array<DiffReport>>;
 	} & Record<
 		// other primitives
 		keyof T,
-		(args: { old?: T[keyof T]; neu?: T[keyof T] }) => MaybePromise<Array<DiffReport>>
-	>
-}
+		(args: {
+			old?: T[keyof T];
+			neu?: T[keyof T];
+		}) => MaybePromise<Array<DiffReport>>
+	>;
+};
 
-type MaybePromise<T> = T | Promise<T>
+type MaybePromise<T> = T | Promise<T>;
 
 /**
  * A diff report is a report if a change has been made.
  */
 export type DiffReport = {
-	type: string
-	operation: "create" | "update" | "delete"
-	old?: Record<string, any> & { id: string }
-	neu?: Record<string, any> & { id: string }
-	meta?: Record<string, any>
-} & (DiffReportInsertion | DiffReportUpdate | DiffReportDeletion)
+	type: string;
+	operation: "create" | "update" | "delete";
+	old?: Record<string, any> & { id: string };
+	neu?: Record<string, any> & { id: string };
+	meta?: Record<string, any>;
+} & (DiffReportInsertion | DiffReportUpdate | DiffReportDeletion);
 
 type DiffReportInsertion = {
-	operation: "create"
-	old: undefined
+	operation: "create";
+	old: undefined;
 	neu: Record<string, any> & {
-		id: string
-	}
-}
+		id: string;
+	};
+};
 
 type DiffReportUpdate = {
-	operation: "update"
+	operation: "update";
 	old: Record<string, any> & {
-		id: string
-	}
+		id: string;
+	};
 	neu: Record<string, any> & {
-		id: string
-	}
-}
+		id: string;
+	};
+};
 
 type DiffReportDeletion = {
-	operation: "delete"
+	operation: "delete";
 	old: Record<string, any> & {
-		id: string
-	}
-	neu: undefined
-}
+		id: string;
+	};
+	neu: undefined;
+};

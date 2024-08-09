@@ -1,21 +1,21 @@
-import { Kysely } from "kysely"
-import type { LixDatabase } from "./schema.js"
-import { v4 } from "uuid"
+import { Kysely } from "kysely";
+import type { LixDatabase } from "./schema.js";
+import { v4 } from "uuid";
 
 export async function commit(args: {
-	db: Kysely<LixDatabase>
-	userId: string
-	description: string
+	db: Kysely<LixDatabase>;
+	userId: string;
+	description: string;
 	// merge?: boolean
 }) {
-	const newCommitId = v4()
+	const newCommitId = v4();
 
 	return args.db.transaction().execute(async (trx) => {
 		const { commit_id: parent_id } = await trx
 			.selectFrom("ref")
 			.select("commit_id")
 			.where("name", "=", "current")
-			.executeTakeFirstOrThrow()
+			.executeTakeFirstOrThrow();
 
 		const commit = await trx
 			.insertInto("commit")
@@ -27,13 +27,13 @@ export async function commit(args: {
 				parent_id,
 			})
 			.returning("id")
-			.executeTakeFirstOrThrow()
+			.executeTakeFirstOrThrow();
 
 		await trx
 			.updateTable("ref")
 			.where("name", "=", "current")
 			.set({ commit_id: newCommitId })
-			.execute()
+			.execute();
 
 		// if (!args.merge) {
 		// 	// look for all conflicts and remove them if there is a new change that has same id
@@ -58,6 +58,6 @@ export async function commit(args: {
 			.set({
 				commit_id: commit.id,
 			})
-			.execute()
-	})
+			.execute();
+	});
 }

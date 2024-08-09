@@ -1,15 +1,19 @@
-import type { LixPlugin } from "../plugin.js"
-import { Kysely, ParseJSONResultsPlugin, sql } from "kysely"
-import type { LixDatabase, LixFile } from "../schema.js"
-import { commit } from "../commit.js"
-import { v4 } from "uuid"
-import { contentFromDatabase, createDialect, type SqliteDatabase } from "sqlite-wasm-kysely"
+import type { LixPlugin } from "../plugin.js";
+import { Kysely, ParseJSONResultsPlugin, sql } from "kysely";
+import type { LixDatabase, LixFile } from "../schema.js";
+import { commit } from "../commit.js";
+import { v4 } from "uuid";
+import {
+	contentFromDatabase,
+	createDialect,
+	type SqliteDatabase,
+} from "sqlite-wasm-kysely";
 
 /**
  * Common setup between different lix environments.
  */
 export async function openLix(args: {
-	database: SqliteDatabase
+	database: SqliteDatabase;
 	/**
 	 * Usecase are lix apps that define their own file format,
 	 * like inlang (unlike a markdown, csv, or json plugin).
@@ -22,20 +26,20 @@ export async function openLix(args: {
 	 * @example
 	 *   const lix = await openLixInMemory({ blob: await newLixFile(), providePlugin: [myPlugin] })
 	 */
-	providePlugins?: LixPlugin[]
+	providePlugins?: LixPlugin[];
 }) {
 	const db = new Kysely<LixDatabase>({
 		dialect: createDialect({ database: args.database }),
 		plugins: [new ParseJSONResultsPlugin()],
-	})
+	});
 
-	const plugins = await loadPlugins(db)
+	const plugins = await loadPlugins(db);
 	if (args.providePlugins && args.providePlugins.length > 0) {
-		plugins.push(...args.providePlugins)
+		plugins.push(...args.providePlugins);
 	}
 
 	// TODO better api for awaiting pending promises
-	const maybePendingPromises: Promise<any>[] = []
+	const maybePendingPromises: Promise<any>[] = [];
 
 	args.database.createFunction({
 		name: "handle_file_change",
@@ -56,18 +60,18 @@ export async function openLix(args: {
 					},
 					plugins,
 					db,
-				})
-			)
-			return
+				}),
+			);
+			return;
 		},
-	})
+	});
 
 	await sql`
 	CREATE TEMP TRIGGER file_modified AFTER UPDATE ON file
 	BEGIN
 	  SELECT handle_file_change(NEW.id, NEW.path, NEW.data, OLD.id, OLD.path, OLD.data);
 	END;
-	`.execute(db)
+	`.execute(db);
 
 	args.database.createFunction({
 		name: "handle_file_insert",
@@ -83,34 +87,34 @@ export async function openLix(args: {
 					},
 					plugins,
 					db,
-				})
-			)
-			return
+				}),
+			);
+			return;
 		},
-	})
+	});
 
 	await sql`
 	CREATE TEMP TRIGGER file_inserted AFTER INSERT ON file
 	BEGIN
 	  SELECT handle_file_insert(NEW.id, NEW.path, NEW.data);
 	END;
-	`.execute(db)
+	`.execute(db);
 
 	return {
 		db,
 		toBlob: async () => {
-			await Promise.all(maybePendingPromises)
-			return new Blob([contentFromDatabase(args.database)])
+			await Promise.all(maybePendingPromises);
+			return new Blob([contentFromDatabase(args.database)]);
 		},
 		plugins,
 		close: async () => {
-			args.database.close()
-			await db.destroy()
+			args.database.close();
+			await db.destroy();
 		},
 		commit: (args: { userId: string; description: string }) => {
-			return commit({ db, ...args })
+			return commit({ db, ...args });
 		},
-	}
+	};
 }
 
 async function loadPlugins(db: Kysely<LixDatabase>) {
@@ -119,19 +123,21 @@ async function loadPlugins(db: Kysely<LixDatabase>) {
     SELECT * FROM file
     WHERE path GLOB 'lix/plugin/*'
   `.execute(db)
-	).rows as unknown as LixFile[]
+	).rows as unknown as LixFile[];
 
-	const decoder = new TextDecoder("utf8")
-	const plugins: LixPlugin[] = []
+	const decoder = new TextDecoder("utf8");
+	const plugins: LixPlugin[] = [];
 	for (const plugin of pluginFiles) {
-		const text = btoa(decoder.decode(plugin.data))
-		const pluginModule = await import(/* @vite-ignore */ "data:text/javascript;base64," + text)
-		plugins.push(pluginModule.default)
+		const text = btoa(decoder.decode(plugin.data));
+		const pluginModule = await import(
+			/* @vite-ignore */ "data:text/javascript;base64," + text
+		);
+		plugins.push(pluginModule.default);
 		if (pluginModule.default.setup) {
-			await pluginModule.default.setup()
+			await pluginModule.default.setup();
 		}
 	}
-	return plugins as LixPlugin[]
+	return plugins as LixPlugin[];
 }
 
 // // TODO register on behalf of apps or leave it up to every app?
@@ -157,33 +163,33 @@ async function getChangeHistory({
 	diffType,
 	db,
 }: {
-	atomId: string
-	depth: number
-	fileId: string
-	pluginKey: string
-	diffType: string
-	db: Kysely<LixDatabase>
+	atomId: string;
+	depth: number;
+	fileId: string;
+	pluginKey: string;
+	diffType: string;
+	db: Kysely<LixDatabase>;
 }): Promise<any[]> {
 	if (depth > 1) {
-		throw new Error("depth > 1 not supported yet")
+		throw new Error("depth > 1 not supported yet");
 	}
 
 	const { commit_id } = await db
 		.selectFrom("ref")
 		.select("commit_id")
 		.where("name", "=", "current")
-		.executeTakeFirstOrThrow()
+		.executeTakeFirstOrThrow();
 
-	let nextCommitId = commit_id
-	let firstChange
+	let nextCommitId = commit_id;
+	let firstChange;
 	while (!firstChange && nextCommitId) {
 		const commit = await db
 			.selectFrom("commit")
 			.selectAll()
 			.where("id", "=", nextCommitId)
-			.executeTakeFirstOrThrow()
+			.executeTakeFirstOrThrow();
 
-		nextCommitId = commit.parent_id
+		nextCommitId = commit.parent_id;
 
 		firstChange = await db
 			.selectFrom("change")
@@ -193,10 +199,10 @@ async function getChangeHistory({
 			.where("plugin_key", "=", pluginKey)
 			.where("file_id", "=", fileId)
 			.where("type", "=", diffType)
-			.executeTakeFirst()
+			.executeTakeFirst();
 	}
 
-	const changes: any[] = [firstChange]
+	const changes: any[] = [firstChange];
 
 	// TODO: walk change parents until depth
 	// await db
@@ -209,27 +215,27 @@ async function getChangeHistory({
 	// 	.where("commit_id", "is not", null)
 	// 	.executeTakeFirst()
 
-	return changes
+	return changes;
 }
 
 async function handleFileChange(args: {
-	old: LixFile
-	neu: LixFile
-	plugins: LixPlugin[]
-	db: Kysely<LixDatabase>
+	old: LixFile;
+	neu: LixFile;
+	plugins: LixPlugin[];
+	db: Kysely<LixDatabase>;
 }) {
-	const fileId = args.neu?.id ?? args.old?.id
+	const fileId = args.neu?.id ?? args.old?.id;
 
 	for (const plugin of args.plugins) {
 		const diffs = await plugin.diff?.file?.({
 			old: args.old,
 			neu: args.neu,
-		})
+		});
 
 		for (const diff of diffs ?? []) {
 			// assume an insert or update operation as the default
 			// if diff.neu is not present, it's a delete operation
-			const value = diff.neu ?? diff.old
+			const value = diff.neu ?? diff.old;
 
 			const previousUncomittedChange = await args.db
 				.selectFrom("change")
@@ -239,7 +245,7 @@ async function handleFileChange(args: {
 				.where("file_id", "=", fileId)
 				.where("plugin_key", "=", plugin.key)
 				.where("commit_id", "is", null)
-				.executeTakeFirst()
+				.executeTakeFirst();
 
 			// no uncommitted change exists
 			if (previousUncomittedChange === undefined) {
@@ -252,7 +258,7 @@ async function handleFileChange(args: {
 						pluginKey: plugin.key,
 						diffType: diff.type,
 					})
-				)[0]
+				)[0];
 
 				await args.db
 					.insertInto("change")
@@ -267,8 +273,8 @@ async function handleFileChange(args: {
 						parent_id: parent?.id,
 						meta: JSON.stringify(diff.meta),
 					})
-					.execute()
-				continue
+					.execute();
+				continue;
 			}
 
 			const previousCommittedChange = await args.db
@@ -281,7 +287,7 @@ async function handleFileChange(args: {
 				.where("plugin_key", "=", plugin.key)
 				.innerJoin("commit", "commit.id", "change.commit_id")
 				.orderBy("commit.created desc")
-				.executeTakeFirst()
+				.executeTakeFirst();
 
 			// working change exists but is identical to previously committed change
 			if (previousCommittedChange) {
@@ -290,7 +296,7 @@ async function handleFileChange(args: {
 					old: previousCommittedChange.value,
 					// @ts-expect-error - dynamic type
 					neu: diff.neu,
-				})
+				});
 
 				if (diffPreviousCommittedChange?.length === 0) {
 					// drop the change because it's identical
@@ -301,8 +307,8 @@ async function handleFileChange(args: {
 						.where("file_id", "=", fileId)
 						.where("plugin_key", "=", plugin.key)
 						.where("commit_id", "is", null)
-						.execute()
-					continue
+						.execute();
+					continue;
 				}
 			}
 
@@ -324,24 +330,24 @@ async function handleFileChange(args: {
 					value: JSON.stringify(value),
 					meta: JSON.stringify(diff.meta),
 				})
-				.execute()
+				.execute();
 		}
 	}
 }
 
 // creates initial changes for new files
 async function handleFileInsert(args: {
-	neu: LixFile
-	plugins: LixPlugin[]
-	db: Kysely<LixDatabase>
+	neu: LixFile;
+	plugins: LixPlugin[];
+	db: Kysely<LixDatabase>;
 }) {
 	for (const plugin of args.plugins) {
 		const diffs = await plugin.diff?.file?.({
 			old: undefined,
 			neu: args.neu,
-		})
+		});
 		for (const diff of diffs ?? []) {
-			const value = diff.neu ?? diff.old
+			const value = diff.neu ?? diff.old;
 
 			await args.db
 				.insertInto("change")
@@ -355,7 +361,7 @@ async function handleFileInsert(args: {
 					value: JSON.stringify(value),
 					meta: JSON.stringify(diff.meta),
 				})
-				.execute()
+				.execute();
 		}
 	}
 }

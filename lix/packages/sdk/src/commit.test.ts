@@ -1,7 +1,7 @@
-import { expect, test } from "vitest"
-import { openLixInMemory } from "./open/openLixInMemory.js"
-import { newLixFile } from "./newLix.js"
-import type { LixPlugin } from "./plugin.js"
+import { expect, test } from "vitest";
+import { openLixInMemory } from "./open/openLixInMemory.js";
+import { newLixFile } from "./newLix.js";
+import type { LixPlugin } from "./plugin.js";
 
 test("should be able to add and commit changes", async () => {
 	const mockPlugin: LixPlugin = {
@@ -19,7 +19,7 @@ test("should be able to add and commit changes", async () => {
 									id: "test",
 									text: "inserted text",
 								},
-						  }
+							}
 						: {
 								type: "text",
 								operation: "update",
@@ -31,28 +31,31 @@ test("should be able to add and commit changes", async () => {
 									id: "test",
 									text: "updated text",
 								},
-						  },
-				]
+							},
+				];
 			},
 		},
-	}
-	const lix = await openLixInMemory({ blob: await newLixFile(), providePlugins: [mockPlugin] })
+	};
+	const lix = await openLixInMemory({
+		blob: await newLixFile(),
+		providePlugins: [mockPlugin],
+	});
 
 	const firstRef = await lix.db
 		.selectFrom("ref")
 		.selectAll()
 		.where("name", "=", "current")
-		.executeTakeFirstOrThrow()
-	expect(firstRef.commit_id).toBe("00000000-0000-0000-0000-000000000000")
+		.executeTakeFirstOrThrow();
+	expect(firstRef.commit_id).toBe("00000000-0000-0000-0000-000000000000");
 
-	var enc = new TextEncoder()
+	var enc = new TextEncoder();
 
 	await lix.db
 		.insertInto("file")
 		.values({ id: "test", path: "test.txt", data: enc.encode("test") })
-		.execute()
+		.execute();
 
-	const changes = await lix.db.selectFrom("change").selectAll().execute()
+	const changes = await lix.db.selectFrom("change").selectAll().execute();
 
 	expect(changes).toEqual([
 		{
@@ -69,20 +72,23 @@ test("should be able to add and commit changes", async () => {
 			commit_id: null,
 			conflict: null,
 		},
-	])
+	]);
 
-	await lix.commit({ userId: "tester", description: "test" })
+	await lix.commit({ userId: "tester", description: "test" });
 
 	const secondRef = await lix.db
 		.selectFrom("ref")
 		.selectAll()
 		.where("name", "=", "current")
-		.executeTakeFirstOrThrow()
+		.executeTakeFirstOrThrow();
 
-	expect(secondRef.commit_id).not.toBe("00000000-0000-0000-0000-000000000000")
+	expect(secondRef.commit_id).not.toBe("00000000-0000-0000-0000-000000000000");
 
-	const commits = await lix.db.selectFrom("commit").selectAll().execute()
-	const commitedChanges = await lix.db.selectFrom("change").selectAll().execute()
+	const commits = await lix.db.selectFrom("commit").selectAll().execute();
+	const commitedChanges = await lix.db
+		.selectFrom("change")
+		.selectAll()
+		.execute();
 
 	expect(commitedChanges).toEqual([
 		{
@@ -99,7 +105,7 @@ test("should be able to add and commit changes", async () => {
 			commit_id: commits[0]?.id!,
 			conflict: null,
 		},
-	])
+	]);
 
 	expect(commits).toEqual([
 		{
@@ -109,18 +115,21 @@ test("should be able to add and commit changes", async () => {
 			parent_id: "00000000-0000-0000-0000-000000000000",
 			user_id: "tester",
 		},
-	])
+	]);
 
 	await lix.db
 		.updateTable("file")
 		.set({ data: enc.encode("test updated text") })
 		.where("id", "=", "test")
-		.execute()
+		.execute();
 
 	// TODO: replace with settled()
-	await new Promise((resolve) => setTimeout(resolve, 100))
+	await new Promise((resolve) => setTimeout(resolve, 100));
 
-	const updatedChanges = await lix.db.selectFrom("change").selectAll().execute()
+	const updatedChanges = await lix.db
+		.selectFrom("change")
+		.selectAll()
+		.execute();
 
 	expect(updatedChanges).toEqual([
 		{
@@ -151,10 +160,10 @@ test("should be able to add and commit changes", async () => {
 			commit_id: null,
 			conflict: null,
 		},
-	])
+	]);
 
-	await lix.commit({ userId: "tester", description: "test 2" })
-	const newCommits = await lix.db.selectFrom("commit").selectAll().execute()
+	await lix.commit({ userId: "tester", description: "test 2" });
+	const newCommits = await lix.db.selectFrom("commit").selectAll().execute();
 	expect(newCommits).toEqual([
 		{
 			id: newCommits[0]?.id!,
@@ -170,5 +179,5 @@ test("should be able to add and commit changes", async () => {
 			parent_id: newCommits[0]?.id!,
 			user_id: "tester",
 		},
-	])
-})
+	]);
+});
