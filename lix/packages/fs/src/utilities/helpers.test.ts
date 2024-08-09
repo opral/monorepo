@@ -17,11 +17,11 @@ test("not add a slash", () => {
 })
 
 test("should add leading slash", () => {
-	expect(normalizePath("project.inlang", { leadingSlash: 'always'})).toBe("/project.inlang")
+	expect(normalizePath("project.inlang", { leadingSlash: "always" })).toBe("/project.inlang")
 })
 
 test("should add trailing slash", () => {
-	expect(normalizePath("project.inlang", { trailingSlash: 'always' })).toBe("project.inlang/")
+	expect(normalizePath("project.inlang", { trailingSlash: "always" })).toBe("project.inlang/")
 })
 
 describe("keep heading slashes free for windows norm", () => {
@@ -55,7 +55,7 @@ describe("strip trailing slashes", () => {
 		["..\\..\\foo/bar", "/foo/bar"],
 		["..\\\\..\\\\foo/bar", "/foo/bar"],
 		["//foo/bar\\baz", "/foo/bar/baz"],
- 		["//foo\\bar\\baz", "/foo/bar/baz"],
+		["//foo\\bar\\baz", "/foo/bar/baz"],
 		["/user/docs/Letter.txt", "/user/docs/Letter.txt"],
 		["\\\\.\\CdRomX", "/CdRomX"],
 		["\\\\.\\PhysicalDiskX", "/PhysicalDiskX"],
@@ -67,7 +67,9 @@ describe("strip trailing slashes", () => {
 
 	for (const unit of units) {
 		it(`should normalize ${unit[0]}`, () => {
-			expect(normalizePath(unit[0], { leadingSlash: 'always', trailingSlash: 'strip' })).toBe(unit[1])
+			expect(normalizePath(unit[0], { leadingSlash: "always", trailingSlash: "strip" })).toBe(
+				unit[1]
+			)
 		})
 	}
 })
@@ -75,8 +77,8 @@ describe("strip trailing slashes", () => {
 describe("keep trailing slashes", () => {
 	const units: [string, string][] = [
 		["\\", "/"],
- 		["foo\\bar\\baz\\", "/foo/bar/baz/"],
-	 	["foo\\\\bar\\\\baz\\\\", "/foo/bar/baz/"],
+		["foo\\bar\\baz\\", "/foo/bar/baz/"],
+		["foo\\\\bar\\\\baz\\\\", "/foo/bar/baz/"],
 		["foo//bar//baz//", "/foo/bar/baz/"],
 		["foo/bar/baz", "/foo/bar/baz"],
 		["foo//bar/./baz//", "/foo/bar/baz/"],
@@ -87,7 +89,7 @@ describe("keep trailing slashes", () => {
 
 	for (const unit of units) {
 		it(`should normalize ${unit[0]}`, () => {
-			expect(normalizePath(unit[0], { leadingSlash: 'always' })).toBe(unit[1])
+			expect(normalizePath(unit[0], { leadingSlash: "always" })).toBe(unit[1])
 		})
 	}
 })
@@ -98,7 +100,7 @@ describe("get dirname", () => {
 		["/", "/"],
 		["foo/bar/baz/", "/foo/bar/"],
 		["./foo/bar/baz/", "/foo/bar/"],
-		["/home/user1/documents/", "/home/user1/"]
+		["/home/user1/documents/", "/home/user1/"],
 	]
 
 	for (const unit of units) {
