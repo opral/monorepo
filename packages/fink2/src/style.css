@@ -8,3 +8,11 @@
     background-color: #F3C9CD;
     border: 1px solid #DA2728;
 }
+
+.hide-new-variant::part(new-variant) {
+    display: none;
+}
+
+p {
+    line-height: 15px;
+}

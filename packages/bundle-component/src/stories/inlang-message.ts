@@ -363,6 +363,7 @@ export default class InlangMessage extends LitElement {
 					<slot name="variant"></slot>
 					${this.message?.selectors && this.message.selectors.length > 0
 						? html`<p
+								part="new-variant"
 								@click=${() => {
 									const variant = createVariant({
 										messageId: this.message!.id,

@@ -148,7 +148,7 @@ export default function App() {
 	);
 }
 
-function timeAgo(dateString: string) {
+export function timeAgo(dateString: string) {
 	const now = new Date();
 	const pastDate = new Date(dateString);
 	//@ts-ignore
