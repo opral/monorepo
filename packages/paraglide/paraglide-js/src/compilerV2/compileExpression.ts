@@ -1,16 +1,21 @@
-import type { Expression, FunctionAnnotation } from "@inlang/sdk/v2"
-import { isValidJSIdentifier } from "../services/valid-js-identifier"
-import { escapeForDoubleQuoteString, escapeForSingleQuoteString } from "../services/codegen/escape"
+import type { Expression, FunctionAnnotation } from "@inlang/sdk2"
+import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
+import {
+	escapeForDoubleQuoteString,
+	escapeForSingleQuoteString,
+} from "../services/codegen/escape.js"
 
-export function compileExpression(expression: Expression): string {
+export function compileExpression(lang: string, expression: Expression): string {
 	if (expression.annotation) {
 		const fn = expression.annotation
+		const hasOptions = fn.options.length > 0
 
-		if (fn.options.length === 0) return `registry.${fn.name}(${compileArg(expression.arg)})`
-		else return `registry.${fn.name}(${compileArg(expression.arg)}, ${compileOptions(fn.options)})`
-	} else {
-		return compileArg(expression.arg)
+		const args = [`"${lang}"`, compileArg(expression.arg)]
+		if (hasOptions) args.push(compileOptions(fn.options))
+
+		return `registry.${fn.name}(${args.join(", ")})`
 	}
+	return compileArg(expression.arg)
 }
 
 function compileOptions(options: FunctionAnnotation["options"]): string {
@@ -21,7 +26,7 @@ function compileOptions(options: FunctionAnnotation["options"]): string {
 function compileArg(arg: Expression["arg"]): string {
 	switch (arg.type) {
 		case "literal":
-			return `"${escapeForDoubleQuoteString(arg.value)}"`
+			return `"${escapeForDoubleQuoteString(arg.name)}"`
 		case "variable": {
 			const escaped = !isValidJSIdentifier(arg.name)
 			return escaped ? `inputs['${escapeForSingleQuoteString(arg.name)}']` : `inputs.${arg.name}`

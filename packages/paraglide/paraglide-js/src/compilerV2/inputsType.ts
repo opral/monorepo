@@ -12,19 +12,19 @@ export type InputTypeMap = Record<string, "NonNullable<unknown>">
  *   const jsdoc = jsdocFromParams({ name: "NonNullable<unknown>", count: "NonNullable<unknown>" })
  *   const message = `/** ${paramsType} *\/ const mes2 => \`Hello ${params.name}! You have ${params.count} messages.\``
  */
-export const inputsType = (params: InputTypeMap, isMessagesIndex: boolean) => {
-	if (Object.keys(params).length === 0) {
+export const inputsType = (inputs: InputTypeMap, isMessagesIndex: boolean) => {
+	if (Object.keys(inputs).length === 0) {
 		return isMessagesIndex ? "@param {{}} inputs" : ""
 	}
 
-	const fieldTypes: `${string}: ${string}`[] = []
-	for (const [name, type] of Object.entries(params)) {
-		if (isValidJSIdentifier(name)) {
-			fieldTypes.push(`${name}: ${type}`)
-		} else {
-			fieldTypes.push(`'${escapeForSingleQuoteString(name)}': ${type}`)
-		}
+	const typeEntries: string[] = []
+	for (const [name, type] of Object.entries(inputs)) {
+		const line = isValidJSIdentifier(name)
+			? `${name}: ${type}`
+			: `'${escapeForSingleQuoteString(name)}': ${type}`
+
+		typeEntries.push(line)
 	}
 
-	return `@param {{ ${fieldTypes.join(", ")} }} inputs`
+	return `@param {{ ${typeEntries.join(", ")} }} inputs`
 }

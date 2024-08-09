@@ -1,4 +1,4 @@
-import type { Pattern } from "@inlang/sdk/v2"
+import type { Pattern } from "@inlang/sdk2"
 import { escapeForTemplateLiteral } from "../services/codegen/escape.js"
 import { backtick } from "../services/codegen/quotes.js"
 import { compileExpression } from "./compileExpression.js"
@@ -11,6 +11,7 @@ import { compileExpression } from "./compileExpression.js"
  *  >> compiled === "`Hello ${params.name}`"
  */
 export const compilePattern = (
+	lang: string,
 	pattern: Pattern
 ): {
 	inputs: Record<string, "NonNullable<unknown>">
@@ -24,7 +25,7 @@ export const compilePattern = (
 					case "text":
 						return escapeForTemplateLiteral(element.value)
 					case "expression":
-						return "${" + compileExpression(element) + "}"
+						return "${" + compileExpression(lang, element) + "}"
 				}
 			})
 			.join("")
