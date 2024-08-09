@@ -1,10 +1,10 @@
-import type { LanguageTag, Message, MessageBundle } from "@inlang/sdk/v2"
+import type { LanguageTag, Message, MessageBundle } from "@inlang/sdk2"
 import { compilePattern } from "./compilePattern.js"
 import { inputsType, type InputTypeMap } from "./inputsType.js"
 import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
 import { escapeForDoubleQuoteString } from "../services/codegen/escape.js"
 import { reexportAliases } from "./aliases.js"
-import { messageIndexFunction } from "./messageIndex.js"
+import { bundleIndexFunction } from "./messageIndex.js"
 
 type Resource = {
 	/**
@@ -50,45 +50,43 @@ export const compileBundle = (
 		)
 	}
 
-	const compiledPatterns: Record<LanguageTag, string> = {}
+	const compiledMessages: Record<LanguageTag, string> = {}
 	// parameter names and TypeScript types
 	// only allowing types that JS transpiles to strings under the hood like string and number.
 	// the pattern nodes must be extended to hold type information in the future.
 	let params: InputTypeMap = {}
 
-	for (const variant of bundle.variants) {
-		if (compiledPatterns[variant.languageTag]) {
-			throw new Error(
-				`Duplicate language tag: ${variant.languageTag}. Multiple variants for one language tag are not supported in paraglide yet. `
-			)
+	for (const message of bundle.messages) {
+		if (compiledMessages[message.languageTag]) {
+			throw new Error(`Duplicate language tag: ${message.languageTag}`)
 		}
 
 		// merge params
-		const { compiled, inputs: variantParams } = compilePattern(variant.pattern)
+		const { compiled, inputs: variantParams } = compilePattern(message.pattern)
 		params = { ...params, ...variantParams }
 
 		// set the pattern for the language tag
-		compiledPatterns[variant.languageTag] = compiled
+		compiledMessages[message.languageTag] = compiled
 	}
 
 	const resource: Resource = {
 		source: bundle,
 		params,
-		index: messageIndexFunction({
+		index: bundleIndexFunction({
 			bundle,
-			params,
+			inputTypes: params,
 			availableLanguageTags: Object.keys(fallbackMap),
 		}),
 		translations: Object.fromEntries(
 			Object.entries(fallbackMap).map(([languageTag, fallbackLanguage]) => {
-				const compiledPattern = compiledPatterns[languageTag]
+				const compiledPattern = compiledMessages[languageTag]
 
 				return [
 					languageTag,
 					compiledPattern
 						? messageFunction({
 								message: bundle,
-								params,
+								inputTypes: params,
 								languageTag,
 								compiledPattern,
 						  })
@@ -105,7 +103,7 @@ export const compileBundle = (
 
 const messageFunction = (args: {
 	message: Message
-	params: InputTypeMap
+	inputTypes: InputTypeMap
 	languageTag: LanguageTag
 	compiledPattern: string
 }) => {
@@ -115,14 +113,13 @@ const messageFunction = (args: {
 
 	return `
 /**
- * ${inputsType(args.params, false)}
+ * ${inputsType(args.inputTypes, false)}
  * @returns {string}
  */
 /* @__NO_SIDE_EFFECTS__ */
 export const ${args.message.id} = (${hasInputs ? "params" : ""}) => {
 	return ${hasSelectors ? args.compiledPattern : args.compiledPattern}
 } 
-${reexportAliases(args.message)}
 `
 }
 

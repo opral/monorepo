@@ -63,6 +63,7 @@
 		"@inlang/language-tag": "workspace:*",
 		"@inlang/plugin-message-format": "workspace:*",
 		"@inlang/sdk": "workspace:*",
+		"@inlang/sdk2": "workspace:*",
 		"@lix-js/client": "workspace:*",
 		"@lix-js/fs": "workspace:*",
 		"@rollup/plugin-terser": "0.4.3",
