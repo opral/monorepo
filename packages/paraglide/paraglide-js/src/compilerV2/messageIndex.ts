@@ -3,12 +3,12 @@ import { inputsType, type InputTypeMap } from "./inputsType.js"
 import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
 import { optionsType } from "./optionsType.js"
 import { reexportAliases } from "./aliases.js"
-import type { LanguageTag, MessageBundle } from "@inlang/sdk/v2"
+import type { BundleNested } from "@inlang/sdk2"
 
 export const bundleIndexFunction = (args: {
-	bundle: MessageBundle
+	bundle: BundleNested
 	inputTypes: InputTypeMap
-	availableLanguageTags: LanguageTag[]
+	availableLanguageTags: string[]
 }) => {
 	const hasInputs = Object.keys(args.inputTypes).length > 0
 
@@ -20,7 +20,7 @@ export const bundleIndexFunction = (args: {
  * 
  * - The params are NonNullable<unknown> because the inlang SDK does not provide information on the type of a param (yet).
  * 
- * ${inputsType(args.inputs, true)}
+ * ${inputsType(args.inputTypes, true)}
  * ${optionsType({ languageTags: args.availableLanguageTags })}
  * @returns {string}
  */

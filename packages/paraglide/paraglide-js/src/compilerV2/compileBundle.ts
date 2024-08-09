@@ -1,10 +1,10 @@
-import type { Message, BundleNested } from "@inlang/sdk2"
-import { compilePattern } from "./compilePattern.js"
+import type { BundleNested } from "@inlang/sdk2"
 import { inputsType, type InputTypeMap } from "./inputsType.js"
 import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
 import { escapeForDoubleQuoteString } from "../services/codegen/escape.js"
 import { reexportAliases } from "./aliases.js"
 import { bundleIndexFunction } from "./messageIndex.js"
+import { compileMessage } from "./compileMessage.js"
 
 type LanguageTag = string
 type Resource = {
@@ -55,19 +55,16 @@ export const compileBundle = (
 	// parameter names and TypeScript types
 	// only allowing types that JS transpiles to strings under the hood like string and number.
 	// the pattern nodes must be extended to hold type information in the future.
-	let params: InputTypeMap = {}
+	const params: InputTypeMap = {}
 
 	for (const message of bundle.messages) {
 		if (compiledMessages[message.locale]) {
 			throw new Error(`Duplicate language tag: ${message.locale}`)
 		}
 
-		// merge params
-		const { compiled, inputs: variantParams } = compilePattern(message.locale, message.pattern)
-		params = { ...params, ...variantParams }
-
+		const compiled = compileMessage(message)
 		// set the pattern for the language tag
-		compiledMessages[message.languageTag] = compiled
+		compiledMessages[message.locale] = compiled
 	}
 
 	const resource: Resource = {
@@ -86,7 +83,7 @@ export const compileBundle = (
 					languageTag,
 					compiledPattern
 						? messageFunction({
-								message: bundle,
+								bundle,
 								inputTypes: params,
 								languageTag,
 								compiledPattern,
@@ -103,14 +100,13 @@ export const compileBundle = (
 }
 
 const messageFunction = (args: {
-	message: Message
+	bundle: BundleNested
 	inputTypes: InputTypeMap
 	languageTag: LanguageTag
 	compiledPattern: string
 }) => {
-	const inputs = args.message.declarations.filter((decl) => decl.type === "input")
+	const inputs = args.bundle.declarations.filter((decl) => decl.type === "input")
 	const hasInputs = inputs.length > 0
-	const hasSelectors = args.message.selectors
 
 	return `
 /**
@@ -118,34 +114,28 @@ const messageFunction = (args: {
  * @returns {string}
  */
 /* @__NO_SIDE_EFFECTS__ */
-export const ${args.message.id} = (${hasInputs ? "inputs" : ""}) => {
-	return ${hasSelectors ? args.compiledPattern : args.compiledPattern}
+export const ${args.bundle.id} = (${hasInputs ? "inputs" : ""}) => {
+	return ${args.compiledPattern}
 } 
 `
 }
 
-function reexportMessage(
-	message: Message,
-	fromLanguageTag: string,
-	output: "regular" | "message-modules"
-) {
-	const exports: string[] = [message.id]
+function reexportMessage(bundle: BundleNested, fromLanguageTag: string) {
+	const exports: string[] = [bundle.id]
 
-	if (message.alias["default"] && message.id !== message.alias["default"]) {
-		exports.push(message.alias["default"])
+	if (bundle.alias["default"] && bundle.id !== bundle.alias["default"]) {
+		exports.push(bundle.alias["default"])
 	}
 
-	const from = output === "message-modules" ? `../${fromLanguageTag}.js` : `./${fromLanguageTag}.js`
-
-	return `export { ${exports.join(", ")} } from "${from}"`
+	return `export { ${exports.join(", ")} } from "./${fromLanguageTag}.js"`
 }
 
-function messageIdFallback(message: Message, languageTag: string) {
+function messageIdFallback(bundle: BundleNested, languageTag: string) {
 	return `/**
- * Failed to resolve message ${message.id} for languageTag "${languageTag}". 
+ * Failed to resolve message ${bundle.id} for languageTag "${languageTag}". 
  * @returns {string}
  */
 /* @__NO_SIDE_EFFECTS__ */
-export const ${message.id} = () => "${escapeForDoubleQuoteString(message.id)}"
-${reexportAliases(message)}`
+export const ${bundle.id} = () => "${escapeForDoubleQuoteString(bundle.id)}"
+${reexportAliases(bundle)}`
 }
