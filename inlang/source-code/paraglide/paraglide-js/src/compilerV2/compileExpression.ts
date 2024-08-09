@@ -6,7 +6,7 @@ import {
 } from "../services/codegen/escape.js"
 import { mergeTypeRestrictions, type Compilation } from "./types.js"
 
-export function compileExpression(lang: string, expression: Expression): Compilation {
+export function compileExpression(lang: string, expression: Expression): Compilation<Expression> {
 	if (expression.annotation) {
 		const fn = expression.annotation
 		const hasOptions = fn.options.length > 0
@@ -24,17 +24,19 @@ export function compileExpression(lang: string, expression: Expression): Compila
 		}
 
 		const code = `registry.${fn.name}(${args.join(", ")})`
-		return { code, typeRestrictions }
+		return { code, typeRestrictions, source: expression }
 	}
 	const code = compileArg(expression.arg)
-	return { code, typeRestrictions: {} }
+	return { code, typeRestrictions: {}, source: expression }
 }
 
-function compileOptions(options: FunctionAnnotation["options"]): Compilation {
+function compileOptions(
+	options: FunctionAnnotation["options"]
+): Compilation<FunctionAnnotation["options"]> {
 	const entires: string[] = options.map((option) => `${option.name}: ${compileArg(option.value)}`)
 	const code = "{" + entires.join(", ") + "}"
 	// TODO Type-Narrowing for options
-	return { code, typeRestrictions: {} }
+	return { code, typeRestrictions: {}, source: options }
 }
 
 function compileArg(arg: Expression["arg"]): string {

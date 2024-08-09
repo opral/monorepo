@@ -84,18 +84,16 @@ describe("compile", () => {
 			 * - Don't edit the message's code. Use [Sherlock (VS Code extension)](https://inlang.com/m/r7kp499g/app-inlang-ideExtension),
 			 *   the [web editor](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor) instead, or edit the translation files manually.
 			 *
-			 * - The params are NonNullable<unknown> because the inlang SDK does not provide information on the type of a param (yet).
-			 *
 			 * @param {{ 'second Input': number }} inputs
 			 * @param {{ languageTag?: \\"en\\" | \\"de\\" }} options
 			 * @returns {string}
 			 */
 			/* @__NO_SIDE_EFFECTS__ */
-			export const my_bundle = (params, options = {}) => {
+			export const my_bundle = (inputs, options = {}) => {
 			  return {
 			    de: de.my_bundle,
 			    en: en.my_bundle,
-			  }[options.languageTag ?? languageTag()](params);
+			  }[options.languageTag ?? languageTag()](inputs);
 			};
 			",
 			  "messages/de.js": "/* eslint-disable */
