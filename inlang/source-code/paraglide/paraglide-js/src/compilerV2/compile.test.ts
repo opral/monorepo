@@ -2,17 +2,50 @@ import { describe, it, expect } from "vitest"
 import { compile } from "./compile.js"
 import { createBundle, createMessage } from "@inlang/sdk2"
 
+const msg: Message = {
+	locale: "en",
+	id: "some_message",
+	declarations: [
+		{
+			type: "input",
+			name: "fistInput",
+			value: { type: "expression", arg: { type: "variable", name: "fistInput" } },
+		},
+		{
+			type: "input",
+			name: "secondInput",
+			value: { type: "expression", arg: { type: "variable", name: "second Input" } },
+		},
+	],
+	selectors: [
+		{ type: "expression", arg: { type: "variable", name: "fistInput" } },
+		{
+			type: "expression",
+			arg: { type: "variable", name: "second Input" },
+			annotation: { type: "function", name: "plural", options: [] },
+		},
+	],
+	variants: [
+		{
+			id: "1",
+			match: ["1", "2"],
+			pattern: [{ type: "text", value: "One" }],
+		},
+		{
+			id: "2",
+			match: ["*", "*"],
+			pattern: [{ type: "text", value: "Many" }],
+		},
+	],
+}
+
 describe("compile", () => {
 	it("compiles", async () => {
 		const bundleId = "my_bundle"
 		const bundle = createBundle({
 			id: bundleId,
 			messages: [
-				createMessage({
-					bundleId,
-					locale: "en",
-					text: "Hello World!",
-				}),
+				msg,
 				createMessage({
 					bundleId,
 					locale: "de",
@@ -53,16 +86,16 @@ describe("compile", () => {
 			 *
 			 * - The params are NonNullable<unknown> because the inlang SDK does not provide information on the type of a param (yet).
 			 *
-			 * @param {{}} inputs
+			 * @param {{ 'second Input': number }} inputs
 			 * @param {{ languageTag?: \\"en\\" | \\"de\\" }} options
 			 * @returns {string}
 			 */
 			/* @__NO_SIDE_EFFECTS__ */
-			export const my_bundle = (params = {}, options = {}) => {
+			export const my_bundle = (params, options = {}) => {
 			  return {
 			    de: de.my_bundle,
 			    en: en.my_bundle,
-			  }[options.languageTag ?? languageTag()]();
+			  }[options.languageTag ?? languageTag()](params);
 			};
 			",
 			  "messages/de.js": "/* eslint-disable */
@@ -71,7 +104,14 @@ describe("compile", () => {
 			",
 			  "messages/en.js": "/* eslint-disable */
 			import * as registry from \\"./registry.js\\";
-			export const my_bundle = () => \`Hello World!\`;
+			export const my_bundle = (inputs) => {
+			  const selectors = [
+			    inputs.fistInput,
+			    registry.plural(\\"en\\", inputs[\\"second Input\\"]),
+			  ];
+			  if (selectors[0] === \\"1\\" && selectors[1] === \\"2\\") return \`One\`;
+			  return \`Many\`;
+			};
 			",
 			  "registry.js": "/* eslint-disable */
 
