@@ -4,23 +4,37 @@ import {
 	escapeForDoubleQuoteString,
 	escapeForSingleQuoteString,
 } from "../services/codegen/escape.js"
+import { mergeTypeRestrictions, type Compilation } from "./types.js"
 
-export function compileExpression(lang: string, expression: Expression): string {
+export function compileExpression(lang: string, expression: Expression): Compilation {
 	if (expression.annotation) {
 		const fn = expression.annotation
 		const hasOptions = fn.options.length > 0
 
-		const args = [`"${lang}"`, compileArg(expression.arg)]
-		if (hasOptions) args.push(compileOptions(fn.options))
+		let typeRestrictions: Record<string, string> = {}
+		if (fn.name === "plural" && expression.arg.type === "variable") {
+			typeRestrictions[expression.arg.name] = "number"
+		}
 
-		return `registry.${fn.name}(${args.join(", ")})`
+		const args = [`"${lang}"`, compileArg(expression.arg)]
+		if (hasOptions) {
+			const options = compileOptions(fn.options)
+			args.push(options.code)
+			typeRestrictions = mergeTypeRestrictions(typeRestrictions, options.typeRestrictions)
+		}
+
+		const code = `registry.${fn.name}(${args.join(", ")})`
+		return { code, typeRestrictions }
 	}
-	return compileArg(expression.arg)
+	const code = compileArg(expression.arg)
+	return { code, typeRestrictions: {} }
 }
 
-function compileOptions(options: FunctionAnnotation["options"]): string {
+function compileOptions(options: FunctionAnnotation["options"]): Compilation {
 	const entires: string[] = options.map((option) => `${option.name}: ${compileArg(option.value)}`)
-	return "{ " + entires.join(", ") + " }"
+	const code = "{" + entires.join(", ") + "}"
+	// TODO Type-Narrowing for options
+	return { code, typeRestrictions: {} }
 }
 
 function compileArg(arg: Expression["arg"]): string {

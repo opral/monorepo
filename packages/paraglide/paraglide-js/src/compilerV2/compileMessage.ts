@@ -2,6 +2,7 @@ import type { MessageNested } from "@inlang/sdk2"
 import { compilePattern } from "./compilePattern.js"
 import { escapeForDoubleQuoteString } from "../services/codegen/escape.js"
 import { compileExpression } from "./compileExpression.js"
+import { mergeTypeRestrictions, type Compilation } from "./types.js"
 
 /**
  * Returns the compiled message as a string
@@ -10,7 +11,8 @@ import { compileExpression } from "./compileExpression.js"
  * @param message The message to compile
  * @returns (inputs) => string
  */
-export const compileMessage = (message: MessageNested): string => {
+export const compileMessage = (message: MessageNested): Compilation => {
+	// return empty string instead?
 	if (message.variants.length == 0) throw new Error("Message must have at least one variant")
 	const hasMultipleVariants = message.variants.length > 1
 	return hasMultipleVariants
@@ -18,28 +20,34 @@ export const compileMessage = (message: MessageNested): string => {
 		: compileMessageWithOneVariant(message)
 }
 
-function compileMessageWithOneVariant(message: MessageNested): string {
+function compileMessageWithOneVariant(message: MessageNested): Compilation {
 	const variant = message.variants[0]
 	if (!variant || message.variants.length !== 1)
 		throw new Error("Message must have exactly one variant")
 	const hasInputs = message.declarations.some((decl) => decl.type === "input")
-	return `(${hasInputs ? "inputs" : ""}) => ${
-		compilePattern(message.locale, variant.pattern).compiled
-	}`
+	const compiledPattern = compilePattern(message.locale, variant.pattern)
+	const code = `(${hasInputs ? "inputs" : ""}) => ${compiledPattern.code}`
+	return { code, typeRestrictions: compiledPattern.typeRestrictions }
 }
 
-function compileMessageWithMultipleVariants(message: MessageNested): string {
+function compileMessageWithMultipleVariants(message: MessageNested): Compilation {
 	if (message.variants.length <= 1) throw new Error("Message must have more than one variant")
 	const hasInputs = message.declarations.some((decl) => decl.type === "input")
 
-	const computedSelectors =
-		"const selectors = [ " +
-		message.selectors.map((selector) => compileExpression(message.locale, selector)).join(", ") +
-		" ]"
+	const compiledSelectors = message.selectors.map((selector) =>
+		compileExpression(message.locale, selector)
+	)
 
-	const compiledVariants = message.variants.map((variant) => {
-		const allWildcards = variant.match.every((m) => m === "*")
-		if (allWildcards) return "return " + compilePattern(message.locale, variant.pattern).compiled
+	const selectorCode = `const selectors = [ ${compiledSelectors
+		.map((sel) => sel.code)
+		.join(", ")} ]`
+
+	const compiledVariants = message.variants.map((variant): Compilation => {
+		const compiledPattern = compilePattern(message.locale, variant.pattern)
+		const typeRestrictions = compiledPattern.typeRestrictions
+
+		const allWildcards: boolean = variant.match.every((m: string) => m === "*")
+		if (allWildcards) return { code: `return ${compiledPattern.code}`, typeRestrictions }
 
 		const conditions: string[] = []
 		for (let i = 0; i < variant.match.length; i++) {
@@ -47,16 +55,21 @@ function compileMessageWithMultipleVariants(message: MessageNested): string {
 			conditions.push(`selectors[${i}] === "${escapeForDoubleQuoteString(variant.match[i])}"`)
 		}
 
-		return (
-			"if (" +
-			conditions.join(" && ") +
-			") return " +
-			compilePattern(message.locale, variant.pattern).compiled
-		)
+		return {
+			code: `if (${conditions.join(" && ")}) return ${compiledPattern.code}`,
+			typeRestrictions,
+		}
 	})
 
-	return `(${hasInputs ? "inputs" : ""}) => {
-	${computedSelectors}
-${compiledVariants.map((l) => `\t${l}`).join("\n")}
+	const tr = [
+		...compiledVariants.map((v) => v.typeRestrictions),
+		...compiledSelectors.map((v) => v.typeRestrictions),
+	].reduce(mergeTypeRestrictions, {})
+
+	const code = `(${hasInputs ? "inputs" : ""}) => {
+	${selectorCode}
+	${compiledVariants.map((l) => `\t${l.code}`).join("\n")}
 }`
+
+	return { code, typeRestrictions: tr }
 }

@@ -16,7 +16,7 @@ const ignoreDirectory = `# ignore everything because the directory is auto-gener
 export type CompileOptions = {
 	messages: Readonly<Message[]>
 	settings: ProjectSettings
-	projectId?: string | undefined
+	projectId: string | undefined
 }
 
 const defaultCompileOptions = {
@@ -44,9 +44,9 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 
 	const compiledBundles = opts.messages.map((message) => compileBundle(message, fallbackMap))
 
+	// telemetry
 	const pkgJson = await getPackageJson(fs, process.cwd())
 	const stack = getStackInfo(pkgJson)
-
 	telemetry.capture(
 		{
 			event: "PARAGLIDE-JS compile executed",
@@ -187,5 +187,5 @@ export function getFallbackMap<T extends LanguageTag>(
 			if (lang === fallbackLanguage) return [lang, undefined]
 			else return [lang, fallbackLanguage]
 		})
-	)
+	) as Record<T, T | undefined>
 }
