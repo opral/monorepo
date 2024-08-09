@@ -1,12 +1,13 @@
 import { describe, it, expect } from "vitest"
 import { compileMessage } from "./compileMessage.js"
-import type { Message } from "@inlang/sdk/v2"
+import type { MessageNested } from "@inlang/sdk2"
 
 describe("compileMessage", () => {
 	it("compiles a message with variants", () => {
-		const msg: Message = {
+		const msg: MessageNested = {
 			locale: "en",
 			id: "some_message",
+			bundleId: "some_bundle",
 			declarations: [
 				{
 					type: "input",
@@ -30,11 +31,13 @@ describe("compileMessage", () => {
 			variants: [
 				{
 					id: "1",
+					messageId: "some_message",
 					match: ["1", "2"],
 					pattern: [{ type: "text", value: "One" }],
 				},
 				{
 					id: "2",
+					messageId: "some_message",
 					match: ["*", "*"],
 					pattern: [{ type: "text", value: "Many" }],
 				},
