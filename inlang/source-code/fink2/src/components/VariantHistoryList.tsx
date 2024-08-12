@@ -56,7 +56,7 @@ const VariantHistoryList = (props: {
 	}, [project]);
 
 	return (
-		<div className="divide-y divide-zinc-200 -mt-6 -mb-2 max-h-[360px] overflow-y-scroll">
+		<div className="divide-y divide-zinc-200 -mt-6 -mb-2 max-h-[440px] overflow-y-scroll">
 			{changes.map((change) => {
 				return (
 					<div key={change.id} className="py-6 px-1">
