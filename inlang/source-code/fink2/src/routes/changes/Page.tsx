@@ -123,10 +123,12 @@ export default function App() {
 				</div>
 				<div className="flex flex-col gap-2 py-4">
 					{commits.map((commit) => (
-						<div className="flex gap-2 items-center justify-between bg-zinc-50 px-4 py-3 rounded h-[46px]">
+						<div
+							key={commit.id + Math.random()}
+							className="flex gap-2 items-center justify-between bg-zinc-50 px-4 py-3 rounded h-[46px]"
+						>
 							<div className="flex gap-2 items-center">
 								<p
-									key={commit.id + Math.random()}
 									className="text-zinc-950 text-sm! font-semibold"
 								>
 									By {commit.user_id}
