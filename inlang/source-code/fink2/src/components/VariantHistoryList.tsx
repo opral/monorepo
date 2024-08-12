@@ -24,7 +24,7 @@ const VariantHistoryList = (props: {
 			.where((eb) => eb.ref("value", "->>").key("id"), "=", props.variantId)
 			.innerJoin("commit", "commit.id", "change.commit_id")
 			.orderBy("commit.user_id desc")
-			.orderBy("commit.zoned_date_time desc")
+			.orderBy("commit.created desc")
 			.execute();
 
 		setChanges(result);
@@ -68,7 +68,7 @@ const VariantHistoryList = (props: {
 								changed variant
 							</h3>
 							<p className="text-[16px] text-zinc-700">
-								{timeAgo(change.zoned_date_time)}
+								{timeAgo(change.created)}
 							</p>
 						</div>
 						<div className="flex gap-2 mt-1">
@@ -95,9 +95,9 @@ const VariantHistoryList = (props: {
 								variant="default"
 								size="medium"
 								className="mt-4 ml-auto"
-								loading={loading === change.zoned_date_time}
+								loading={loading === change.created}
 								onClick={() =>
-									handleRollback(change.value, change.zoned_date_time)
+									handleRollback(change.value, change.created)
 								}
 							>
 								Rollback

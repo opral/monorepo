@@ -161,7 +161,7 @@ const getLatestCommitedChange = async (project: InlangProject, change: any) => {
 		.where("type", "=", "variant")
 		.where((eb) => eb.ref("value", "->>").key("id"), "=", change.value?.id)
 		.innerJoin("commit", "commit.id", "change.commit_id")
-		.orderBy("commit.zoned_date_time desc")
+		.orderBy("commit.created desc")
 		.executeTakeFirst();
 
 	if (latestCommitedChange) {
