@@ -45,7 +45,8 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 	//If there is no fallback, it will be undefined
 	const fallbackMap = getFallbackMap(opts.settings.locales, opts.settings.baseLocale)
 
-	const compiledBundles = opts.bundles.map((bundle) => compileBundle(bundle, fallbackMap))
+	const resources = opts.bundles.map((bundle) => compileBundle(bundle, fallbackMap))
+
 	const indexFile = [
 		"/* eslint-disable */",
 		'import { languageTag } from "./runtime.js"',
@@ -53,7 +54,7 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 			.map((locale) => `import * as ${i(locale)} from "./messages/${locale}.js"`)
 			.join("\n"),
 		"\n",
-		compiledBundles.map(({ bundle }) => bundle.code).join("\n\n"),
+		resources.map(({ bundle }) => bundle.code).join("\n\n"),
 	].join("\n")
 
 	const output: Record<string, string> = {
@@ -64,33 +65,32 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 		"messages.js": await fmt(indexFile),
 	}
 
+	// generate message files
 	for (const locale of opts.settings.locales) {
 		const filename = `messages/${locale}.js`
 		let file = ["/* eslint-disable */", "import * as registry from '../registry.js' "].join("\n")
 
-		for (const bundle of compiledBundles) {
-			const compiledMessage = bundle.messages[locale]
-			if (!compiledMessage) continue
-			file += `\n${compiledMessage.code}`
-			file += `\nexport { ${i(compiledMessage.source.id)} as ${bundle.bundle.source.id} }`
-
-			// Language Fallbacks
-			const locales = bundle.bundle.source.messages.map((m) => m.locale)
-			const missingLocales = opts.settings.locales.filter((l) => !locales.includes(l))
-
-			for (const missingLocale of missingLocales) {
-				const fallbackLocale = fallbackMap[missingLocale]
+		for (const resource of resources) {
+			const compiledMessage = resource.messages[locale]
+			if (!compiledMessage) {
+				// add fallback
+				const fallbackLocale = fallbackMap[locale]
 				if (fallbackLocale)
-					file += `\nexport { ${i(bundle.bundle.source.id)} } from "./${fallbackLocale}.js"`
+					file += `\nexport { ${i(resource.bundle.source.id)} } from "./${fallbackLocale}.js"`
 				else
-					file += `\nexport const ${i(bundle.bundle.source.id)} = '${escapeForSingleQuoteString(
-						bundle.bundle.source.id
+					file += `\nexport const ${i(resource.bundle.source.id)} = '${escapeForSingleQuoteString(
+						resource.bundle.source.id
 					)}'`
+
+				continue
 			}
 
+			file += `\n${compiledMessage.code}`
+			file += `\nexport { ${i(compiledMessage.source.id)} as ${resource.bundle.source.id} }`
+
 			// Bundle Aliases
-			const alias = bundle.bundle.source.alias
-				? Object.values(bundle.bundle.source.alias).at(0)
+			const alias = resource.bundle.source.alias
+				? Object.values(resource.bundle.source.alias).at(0)
 				: undefined
 
 			if (alias) file += `\nexport { ${i(compiledMessage.source.id)} as ${i(alias)} }`
