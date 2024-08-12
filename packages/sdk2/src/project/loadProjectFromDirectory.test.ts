@@ -77,7 +77,6 @@ test("plugin.loadMessages and plugin.saveMessages must not be condigured togethe
 	).rejects.toThrowError();
 });
 
-
 test("plugin.loadMessages and plugin.saveMessages should work for legacy purposes", async () => {
 	const mockLegacyPlugin: InlangPlugin = {
 		id: "mock-legacy-plugin",
