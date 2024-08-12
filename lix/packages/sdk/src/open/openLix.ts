@@ -69,7 +69,7 @@ export async function openLix(args: {
 	await sql`
 	CREATE TEMP TRIGGER file_modified AFTER UPDATE ON file
 	BEGIN
-	  SELECT handle_file_change(NEW.id, NEW.path, NEW.data, OLD.id, OLD.path, OLD.data);
+	  SELECT handle_file_change(OLD.id, OLD.path, OLD.data, NEW.id, NEW.path, NEW.data);
 	END;
 	`.execute(db);
 
