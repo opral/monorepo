@@ -42,10 +42,10 @@ const SwitcherButton = (props: {
 		<Link key={props.path} to={props.path}>
 			<div
 				className={clsx(
-					"h-8 items-center px-4 flex text-xs! box-border",
+					"h-8 items-center px-4 flex text-xs! border rounded box-border",
 					window && window.location.pathname === props.path
-						? "bg-white border border-zinc-300 rounded"
-						: ""
+						? "bg-white border-zinc-300"
+						: "border-transparent"
 				)}
 			>
 				{props.name}
