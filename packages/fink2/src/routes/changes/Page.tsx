@@ -135,7 +135,7 @@ export default function App() {
 								</p>
 								<p className="text-sm! text-zinc-600">{commit.description}</p>
 							</div>
-							<p className="text-sm!">{timeAgo(commit.zoned_date_time)}</p>
+							<p className="text-sm!">{timeAgo(commit.created)}</p>
 						</div>
 					))}
 				</div>
