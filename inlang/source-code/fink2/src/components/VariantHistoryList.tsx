@@ -2,11 +2,18 @@ import { useAtom } from "jotai";
 import { projectAtom } from "../state.ts";
 import { useEffect, useState } from "react";
 import { timeAgo } from "../routes/changes/Page.tsx";
-import { Pattern } from "@inlang/sdk2";
+import { Pattern, Variant } from "@inlang/sdk2";
+import { SlButton } from "@shoelace-style/shoelace/dist/react";
+import queryHelper from "../helper/queryHelper.ts";
 
-const VariantHistoryList = (props: { variantId: string }) => {
+const VariantHistoryList = (props: {
+	variantId: string;
+	setHistoryModalOpen: (value: boolean) => void;
+	setSelectedVariantId: (value: string | null) => void;
+}) => {
 	const [project] = useAtom(projectAtom);
 	const [changes, setChanges] = useState<any[]>([]);
+	const [loading, setLoading] = useState<string | undefined>(undefined);
 
 	const getChanges = async () => {
 		if (!project) return;
@@ -21,6 +28,22 @@ const VariantHistoryList = (props: { variantId: string }) => {
 			.execute();
 
 		setChanges(result);
+	};
+
+	const handleRollback = async (
+		revertedVariant: Variant,
+		zoned_date_time: string
+	) => {
+		if (project) {
+			setLoading(zoned_date_time);
+			await queryHelper.variant.update(project.db, revertedVariant).execute();
+
+			setTimeout(() => {
+				setLoading(undefined);
+				props.setHistoryModalOpen(false);
+				props.setSelectedVariantId(null);
+			}, 2000);
+		}
 	};
 
 	useEffect(() => {
@@ -64,8 +87,21 @@ const VariantHistoryList = (props: { variantId: string }) => {
 								{change.description}
 							</p>
 						</div>
-						<div className="rounded border border-zinc-200 bg-zinc-50 px-4 py-3 text-[16px]! mt-4 text-zinc-700">
-							{patternToString({ pattern: change.value.pattern })}
+						<div className="flex gap-2">
+							<div className="flex-1 rounded border border-zinc-200 bg-zinc-50 px-3 py-[10px] text-[13px]! font-medium mt-4 text-zinc-700">
+								{patternToString({ pattern: change.value.pattern })}
+							</div>
+							<SlButton
+								variant="default"
+								size="medium"
+								className="mt-4 ml-auto"
+								loading={loading === change.zoned_date_time}
+								onClick={() =>
+									handleRollback(change.value, change.zoned_date_time)
+								}
+							>
+								Rollback
+							</SlButton>
 						</div>
 					</div>
 				);
