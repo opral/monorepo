@@ -3,5 +3,6 @@
 	"currentLanguageTag": "Der aktuelle Sprachtag ist \"{languageTag}\".",
 	"greeting": "Hallo {name}! Du hast {count} Nachrichten.",
 	"hello": "Hallo Welt!",
-	"with_backtick": "`Hallo Welt!`"
+	"with_backtick": "`Hallo Welt!`",
+	"missing_in_english": "Message fehlt auf Englisch"
 }
