@@ -2,7 +2,6 @@ import { Command } from "commander"
 import nodeFsPromises from "node:fs/promises"
 import { resolve } from "node:path"
 import { Logger } from "~/services/logger/index.js"
-import { openRepository, findRepoRoot } from "@lix-js/client"
 import { runCompiler } from "~/cli/steps/run-compiler2.js"
 import { DEFAULT_OUTDIR } from "~/cli/defaults.js"
 import { classifyProjectErrors } from "~/services/error-handling.js"
@@ -24,19 +23,13 @@ export const compileCommand2 = new Command()
 
 		logger.info(`Compiling inlang project at "${options.project}".`)
 
-		const repoRoot = await findRepoRoot({ nodeishFs: nodeFsPromises, path })
-		const repo = await openRepository(repoRoot || "file://" + process.cwd(), {
-			nodeishFs: nodeFsPromises,
-		})
-
-		if (!repoRoot) {
-			logger.warn(`Could not find repository root for path ${path}`)
-		}
-
+		console.log("loading project into memory from: ", { path })
 		const project = await loadProjectFromDirectoryInMemory({
 			path,
 			fs: nodeFsPromises,
 		})
+		console.log(project)
+		console.log(project.errors.get())
 
 		const errors = project.errors.get()
 
@@ -60,7 +53,7 @@ export const compileCommand2 = new Command()
 
 		await runCompiler({
 			project,
-			repo,
+			fs: nodeFsPromises,
 			outdir: options.outdir,
 		})
 

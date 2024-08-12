@@ -3,13 +3,13 @@ import type { CliStep } from "../utils.js"
 import path from "node:path"
 import { compile } from "~/compilerV2/compile.js"
 import { writeOutput } from "~/services/file-handling/write-output.js"
-import type { Repository } from "@lix-js/client"
+import type { NodeishFilesystem } from "@lix-js/fs"
 
 export const runCompiler: CliStep<
 	{
 		project: InlangProject
 		outdir: string
-		repo: Repository
+		fs: NodeishFilesystem
 	},
 	unknown
 > = async (ctx) => {
@@ -22,6 +22,6 @@ export const runCompiler: CliStep<
 		projectId: undefined,
 	})
 
-	await writeOutput(absoluteOutdir, output, ctx.repo.nodeishFs)
+	await writeOutput(absoluteOutdir, output, ctx.fs)
 	return ctx
 }
