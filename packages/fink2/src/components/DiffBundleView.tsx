@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { projectAtom } from "../state.ts";
 import { useAtom } from "jotai";
-import { BundleNested, InlangProject, selectBundleNested } from "@inlang/sdk2";
+import { BundleNested, InlangProject, updateBundleNested, selectBundleNested } from "@inlang/sdk2";
 import SingleDiffBundle from "./SingleDiffBundle.tsx";
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
 
@@ -21,8 +21,10 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 		return () => clearInterval(interval);
 	}, [project, props]);
 
-	const handleDiscard = () => {
-		console.log("discard new ->", oldBundle);
+	const handleDiscard = async () => {
+		if (project && oldBundle) {
+			await updateBundleNested(project?.db, oldBundle);
+		}
 	};
 
 	return (
