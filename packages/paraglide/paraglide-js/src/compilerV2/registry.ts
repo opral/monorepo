@@ -2,7 +2,7 @@ export function createRegistry() {
 	return `/* eslint-disable */
 
 /**
- * @param {import("./runtime.js").AvailableLanguageTags} lang
+ * @param {import("./runtime.js").AvailableLanguageTag} lang
  * @param {number} input
  * @param {{ type: "cardinal" | "ordinal" }} options
  * @returns {string}

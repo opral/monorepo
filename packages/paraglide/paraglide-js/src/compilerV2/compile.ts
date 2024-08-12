@@ -66,7 +66,7 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 
 	for (const locale of opts.settings.locales) {
 		const filename = `messages/${locale}.js`
-		let file = ["/* eslint-disable */", "import * as registry from './registry.js' "].join("\n")
+		let file = ["/* eslint-disable */", "import * as registry from '../registry.js' "].join("\n")
 
 		for (const bundle of compiledBundles) {
 			const compiledMessage = bundle.messages[locale]
@@ -93,7 +93,7 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 				? Object.values(bundle.bundle.source.alias).at(0)
 				: undefined
 
-			if (alias) file += `\nexport { ${compiledMessage.source.id} as ${i(alias)} }`
+			if (alias) file += `\nexport { ${i(compiledMessage.source.id)} as ${i(alias)} }`
 		}
 
 		output[filename] = await fmt(file)
