@@ -72,6 +72,7 @@ const SingleDiffBundle = (props: {
 										locale={message.locale}
 										variant={variant}
 										className={clsx(!change ? "opacity-30" : "")}
+										noHistory={true}
 									>
 										<InlangPatternEditor
 											slot="pattern-editor"
@@ -94,7 +95,7 @@ const SingleDiffBundle = (props: {
 												slot="pattern-editor"
 												className="absolute right-4 h-full flex items-center text-green-800"
 											>
-												by You | last few seconds
+												by You
 											</div>
 										)}
 									</InlangVariant>
