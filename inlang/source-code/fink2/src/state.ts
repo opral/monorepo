@@ -99,6 +99,10 @@ export const commitsAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const project = await get(projectAtom);
 	if (!project) return [];
-	return await project.lix.db.selectFrom("commit").selectAll().execute();
+	return await project.lix.db
+		.selectFrom("commit")
+		.selectAll()
+		.orderBy("commit.zoned_date_time desc")
+		.execute();
 });
 
