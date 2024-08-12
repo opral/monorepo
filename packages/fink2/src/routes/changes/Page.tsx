@@ -115,32 +115,26 @@ export default function App() {
 				))}
 				<div className="flex gap-4 items-center bg-zinc-100 rounded px-4 py-2 justify-between mt-8 h-[46px]">
 					<div className="flex items-center gap-2 justify-between w-full">
-						<p className="text-sm font-medium">History</p>
+						<p className="text-sm font-medium">Commit history</p>
 						<div className="text-xs! text-zinc-700 bg-zinc-300 h-5 rounded flex items-center px-2 font-medium">
 							{commits.length} commits
 						</div>
 					</div>
 				</div>
 				<div className="flex flex-col gap-2 py-4">
-					{committedChanges.map((change) => (
-						<p
-							key={change.id + Math.random()}
-							className="text-zinc-500 h-[46px] bg-zinc-50 px-4 py-3 rounded text-sm!"
-						>
-							<span className="font-semibold text-zinc-950">
-								{change.commit?.user_id}
-							</span>
-							{" changed a "}
-							<span className="font-semibold text-zinc-950">
-								{change.type}
-							</span>{" "}
-							-{" "}
-							{change.commit?.zoned_date_time && (
-								<span className="font-semibold text-zinc-950">
-									{timeAgo(change.commit?.zoned_date_time)}
-								</span>
-							)}
-						</p>
+					{commits.map((commit) => (
+						<div className="flex gap-2 items-center justify-between bg-zinc-50 px-4 py-3 rounded h-[46px]">
+							<div className="flex gap-2 items-center">
+								<p
+									key={commit.id + Math.random()}
+									className="text-zinc-950 text-sm! font-semibold"
+								>
+									By {commit.user_id}
+								</p>
+								<p className="text-sm! text-zinc-600">{commit.description}</p>
+							</div>
+							<p className="text-sm!">{timeAgo(commit.zoned_date_time)}</p>
+						</div>
 					))}
 				</div>
 			</Layout>

@@ -26,7 +26,7 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 	};
 
 	return (
-		<div className="bg-zinc-50 rounded p-4 mt-4">
+		<div className="bg-zinc-50 rounded p-4 mt-2">
 			<div className="flex justify-between">
 				<h3 className="font-medium text-[16px] pb-4">{props.bundleId}</h3>
 				<SlButton size="small" onClick={() => handleDiscard()}>
