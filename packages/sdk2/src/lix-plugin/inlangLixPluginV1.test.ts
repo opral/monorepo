@@ -323,6 +323,38 @@ describe("plugin.diff.file", () => {
 			} satisfies DiffReport,
 		]);
 	});
+
+	// https://github.com/opral/lix-sdk/issues/33
+	test("it should generate changes after the first change", async () => {
+		const project = await loadProjectInMemory({ blob: await newProject() });
+
+		const initialChanges = await project.lix.db
+			.selectFrom("change")
+			.selectAll()
+			.execute();
+		expect(initialChanges.length).toEqual(0);
+
+		await project.db
+			.insertInto("bundle")
+			.values({
+				id: "1",
+				// @ts-expect-error - database expects stringified json
+				alias: JSON.stringify({}),
+			})
+			.execute();
+
+		// workaround until await lix.settled() is implemented
+		await new Promise((resolve) => setTimeout(resolve, 500));
+
+		const changes = await project.lix.db
+			.selectFrom("change")
+			.selectAll()
+			.execute();
+
+		expect(changes.length).toBe(1);
+		expect(changes[0]?.value?.id).toBe("1");
+		expect(changes[0]?.operation).toBe("create");
+	});
 });
 
 describe("plugin.diff.variant", () => {

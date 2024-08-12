@@ -16,12 +16,16 @@ export async function initHandleSaveToLixOnChange(args: {
 		arity: 0,
 		// @ts-expect-error - dynamic function
 		xFunc: () => {
-			const data = contentFromDatabase(args.sqlite);
-			args.lix.db
-				.updateTable("file")
-				.set("data", data)
-				.where("path", "=", "/db.sqlite")
-				.execute();
+			(async () => {
+				await new Promise((resolve) => setTimeout(resolve, 100));
+				const data = contentFromDatabase(args.sqlite);
+				await args.lix.db
+					.updateTable("file")
+					.set("data", data)
+					.where("path", "=", "/db.sqlite")
+					.execute();
+			})();
+			return;
 		},
 	});
 
