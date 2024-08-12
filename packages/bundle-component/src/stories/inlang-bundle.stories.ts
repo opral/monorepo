@@ -77,6 +77,7 @@ export const Complex: StoryObj = {
 			@insert-variant=${(data: any) => console.info("insertVariant", data.detail.argument)}
 			@update-variant=${(data: any) => console.info("updateVariant", data.detail.argument)}
 			@delete-variant=${(data: any) => console.info("deleteVariant", data.detail.argument)}
+			@show-history=${(data: any) => console.info("showHistory", data.detail.argument)}
 			@fix-lint=${(data: any) => console.info("fixLint", data.detail.argument)}
 		>
 			<inlang-bundle-action

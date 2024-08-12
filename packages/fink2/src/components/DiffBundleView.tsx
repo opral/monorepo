@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { projectAtom } from "../state.ts";
 import { useAtom } from "jotai";
-import { BundleNested, InlangProject, selectBundleNested } from "@inlang/sdk2";
+import { BundleNested, InlangProject, updateBundleNested, selectBundleNested } from "@inlang/sdk2";
 import SingleDiffBundle from "./SingleDiffBundle.tsx";
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
 
@@ -21,12 +21,14 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 		return () => clearInterval(interval);
 	}, [project, props]);
 
-	const handleDiscard = () => {
-		console.log("discard new ->", oldBundle);
+	const handleDiscard = async () => {
+		if (project && oldBundle) {
+			await updateBundleNested(project?.db, oldBundle);
+		}
 	};
 
 	return (
-		<div className="bg-zinc-50 rounded p-4 mt-4">
+		<div className="bg-zinc-50 rounded p-4 mt-2">
 			<div className="flex justify-between">
 				<h3 className="font-medium text-[16px] pb-4">{props.bundleId}</h3>
 				<SlButton size="small" onClick={() => handleDiscard()}>
