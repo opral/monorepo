@@ -249,16 +249,16 @@ async function handleFileChange(args: {
 
 			// no uncommitted change exists
 			if (previousUncomittedChange === undefined) {
-				const parent = (
-					await getChangeHistory({
-						atomId: value.id,
-						depth: 1,
-						db: args.db,
-						fileId,
-						pluginKey: plugin.key,
-						diffType: diff.type,
-					})
-				)[0];
+				// const parent = (
+				// 	await getChangeHistory({
+				// 		atomId: value.id,
+				// 		depth: 1,
+				// 		db: args.db,
+				// 		fileId,
+				// 		pluginKey: plugin.key,
+				// 		diffType: diff.type,
+				// 	})
+				// )[0];
 
 				await args.db
 					.insertInto("change")
@@ -270,7 +270,6 @@ async function handleFileChange(args: {
 						plugin_key: plugin.key,
 						// @ts-expect-error - database expects stringified json
 						value: JSON.stringify(value),
-						parent_id: parent?.id,
 						meta: JSON.stringify(diff.meta),
 					})
 					.execute();
