@@ -2,7 +2,6 @@ import { useAtom } from "jotai";
 import { projectAtom } from "../state.ts";
 import { useEffect, useState } from "react";
 import { InlangProject } from "@inlang/sdk2";
-import { jsonObjectFrom } from "kysely/helpers/sqlite";
 import { timeAgo } from "../routes/changes/Page.tsx";
 
 const VariantHistory = (props: { variantId: string }) => {
@@ -21,11 +20,11 @@ const VariantHistory = (props: { variantId: string }) => {
 		return () => clearInterval(interval);
 	}, []);
 
+	useEffect(() => {
+		console.log(latestCommit);
+	}, [latestCommit]);
 	return (
-		<div
-			slot="pattern-editor"
-			className="absolute right-4 h-full flex items-center text-zinc-400 text-sm!"
-		>
+		<div className="flex items-center text-zinc-400 text-sm!">
 			{latestCommit?.user_id && (
 				<p>
 					by {latestCommit?.user_id} | {timeAgo(latestCommit?.zoned_date_time)}

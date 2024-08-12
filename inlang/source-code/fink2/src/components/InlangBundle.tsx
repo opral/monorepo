@@ -18,11 +18,15 @@ export const ReactBundle = createComponent({
 		insertVariant: "insert-variant",
 		updateVariant: "update-variant",
 		deleteVariant: "delete-variant",
+		showHistory: "show-history",
 		fixLint: "fix-lint",
 	},
 });
 
-const InlangBundle = (props: { bundle: BundleNested }) => {
+const InlangBundle = (props: {
+	bundle: BundleNested;
+	setShowHistory: (variantId: string) => void;
+}) => {
 	const [project] = useAtom(projectAtom);
 	const [pendingChanges] = useAtom(pendingChangesAtom);
 
@@ -97,6 +101,9 @@ const InlangBundle = (props: { bundle: BundleNested }) => {
 						insertVariant={onVariantInsert as any}
 						updateVariant={onVariantUpdate as any}
 						deleteVariant={onVariantDelete as any}
+						showHistory={(event: any) =>
+							props.setShowHistory(event.detail.argument.variantId)
+						}
 					/>
 					<div className="absolute top-[14px] right-0 pointer-events-none translate-x-6">
 						{arraysIntersect(
