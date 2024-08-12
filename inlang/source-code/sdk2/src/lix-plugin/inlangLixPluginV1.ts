@@ -36,10 +36,16 @@ export const inlangLixPluginV1: LixPlugin<{
 						sqlite: await loadDatabaseInMemory(neu.data),
 				  })
 				: undefined;
-			const newProjectBundles = await newDb
-				?.selectFrom("bundle")
-				.selectAll()
-				.execute();
+				const oldProjectBundles = await oldDb
+					?.selectFrom("bundle")
+					.selectAll()
+					.execute();
+				const newProjectBundles = await newDb
+					?.selectFrom("bundle")
+					.selectAll()
+					.execute();
+
+				console.log({ oldProjectBundles, newProjectBundles });
 			const newProjectMessages = await newDb
 				?.selectFrom("message")
 				.selectAll()
