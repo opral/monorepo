@@ -50,7 +50,12 @@ const SwitcherButton = (props: {
 			>
 				{props.name}
 				{props.path === "/changes" && (
-					<div className="ml-2 text-xs! text-zinc-700 bg-zinc-300 h-5 rounded flex items-center px-2 font-medium -mr-1">
+					<div className={clsx("ml-2 text-xs!  h-5 rounded flex items-center px-2 font-medium -mr-1",
+						props.numUncommittedChanges === 0
+							? "text-zinc-700 bg-zinc-300"
+							: "text-blue-700 bg-blue-200"
+					)}
+					>
 						{props.numUncommittedChanges}
 					</div>
 				)}
