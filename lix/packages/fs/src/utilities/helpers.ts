@@ -18,19 +18,25 @@ export function assertIsAbsolutePath(path: string) {
 	}
 }
 
-export function normalizePath(path: string, { trailingSlash, leadingSlash }: { trailingSlash?: 'always' | 'strip', leadingSlash?: 'always' } = {}): string {
-	path = path.replace(/^\.\//, '/')
+export function normalizePath(
+	path: string,
+	{
+		trailingSlash,
+		leadingSlash,
+	}: { trailingSlash?: "always" | "strip"; leadingSlash?: "always" } = {}
+): string {
+	path = path.replace(/^\.\//, "/")
 
-	if (path === "\\" || path === "" || path === "/" || path === "."  || path === "//.") {
+	if (path === "\\" || path === "" || path === "/" || path === "." || path === "//.") {
 		return "/"
 	}
 
 	if (path.length <= 1) {
 		return path
 	}
-	
-	const hadTrailingSlash = path[path.length - 1] === '/' || path[path.length - 1] === '\\'
-	const addleadingSlash = leadingSlash === 'always' || path[0] === '/' || path[0] === '\\'
+
+	const hadTrailingSlash = path[path.length - 1] === "/" || path[path.length - 1] === "\\"
+	const addleadingSlash = leadingSlash === "always" || path[0] === "/" || path[0] === "\\"
 
 	const segs = path.split(/[/\\]+/)
 	const stack: string[] = []
@@ -42,28 +48,28 @@ export function normalizePath(path: string, { trailingSlash, leadingSlash }: { t
 		}
 	}
 
-	if ((trailingSlash !== 'strip') && (hadTrailingSlash || trailingSlash === 'always')) {
+	if (trailingSlash !== "strip" && (hadTrailingSlash || trailingSlash === "always")) {
 		stack.push("")
 	}
 
-	return addleadingSlash ?  ('/' + stack.join("/")) : stack.join("/")
+	return addleadingSlash ? "/" + stack.join("/") : stack.join("/")
 }
 
 export function getDirname(path: string): string {
 	const dirname = path
-	.split("/")
-	.filter((x) => x)
-	.slice(0, -1)
-	.join("/")
+		.split("/")
+		.filter((x) => x)
+		.slice(0, -1)
+		.join("/")
 
-	return normalizePath(dirname, { leadingSlash: 'always', trailingSlash: 'always'}) ?? path
+	return normalizePath(dirname, { leadingSlash: "always", trailingSlash: "always" }) ?? path
 }
 
-export function getBasename(path: string): string {	
+export function getBasename(path: string): string {
 	return (
 		path
 			.split("/")
 			.filter((x) => x)
-			.at(-1) ?? ''
+			.at(-1) ?? ""
 	)
 }

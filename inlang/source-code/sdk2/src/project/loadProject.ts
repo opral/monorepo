@@ -54,8 +54,7 @@ export async function loadProject(args: {
 	return {
 		db,
 		plugins: {
-			get: () =>
-				reactiveState.plugins$.getValue() as InlangPlugin[],
+			get: () => reactiveState.plugins$.getValue() as InlangPlugin[],
 			subscribe: withStructuredClone(reactiveState.plugins$)
 				.subscribe as Subscription<InlangPlugin[]>,
 		},
@@ -109,4 +108,3 @@ export async function loadProject(args: {
 function withStructuredClone<T>(subject: BehaviorSubject<T>) {
 	return subject.pipe(map((v) => structuredClone(v)));
 }
-

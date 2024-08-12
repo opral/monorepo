@@ -1,5 +1,9 @@
-import { Kysely, sql } from "kysely"
-import { createDialect, createInMemoryDatabase, contentFromDatabase } from "sqlite-wasm-kysely"
+import { Kysely, sql } from "kysely";
+import {
+	createDialect,
+	createInMemoryDatabase,
+	contentFromDatabase,
+} from "sqlite-wasm-kysely";
 
 /**
  * Creates a new lix file.
@@ -10,20 +14,26 @@ import { createDialect, createInMemoryDatabase, contentFromDatabase } from "sqli
 export async function newLixFile(): Promise<Blob> {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
-	})
+	});
+
 	const db = new Kysely({
 		dialect: createDialect({
 			database: sqlite,
 		}),
-	})
+	});
 
 	try {
 		await sql`
+      CREATE TABLE ref (
+        name TEXT PRIMARY KEY,
+        commit_id TEXT
+      );
+
       CREATE TABLE 'file' (
         id TEXT PRIMARY KEY,
         path TEXT NOT NULL,
         data BLOB NOT NULL
-        ) strict;
+      ) strict;
       
       CREATE TABLE change (
         id TEXT PRIMARY KEY,
@@ -35,22 +45,25 @@ export async function newLixFile(): Promise<Blob> {
         value TEXT,
         meta TEXT,
         commit_id TEXT
-        ) strict;
+      ) strict;
         
       CREATE TABLE 'commit' (
         id TEXT PRIMARY KEY,
         user_id TEXT NOT NULL,
+        parent_id TEXT NOT NULL,
         description TEXT NOT NULL,
-        zoned_date_time TEXT NOT NULL
+        created TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
       ) strict;
-    `.execute(db)
 
-		return new Blob([contentFromDatabase(sqlite)])
+      INSERT INTO ref values ('current', '00000000-0000-0000-0000-000000000000');
+    `.execute(db);
+
+		return new Blob([contentFromDatabase(sqlite)]);
 	} catch (e) {
-		throw new Error(`Failed to create new Lix file: ${e}`, { cause: e })
+		throw new Error(`Failed to create new Lix file: ${e}`, { cause: e });
 	} finally {
 		// in any case destroy the memory db
-		sqlite.close()
-		await db.destroy()
+		sqlite.close();
+		await db.destroy();
 	}
 }

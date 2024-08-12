@@ -89,7 +89,7 @@ export const inlangLixPluginV1: LixPlugin<{
 					}))
 				);
 			}
-			
+
 			return result;
 		},
 		bundle: ({ old, neu }) =>
