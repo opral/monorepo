@@ -53,7 +53,11 @@ export default function App() {
 				}}
 			>
 				{selectedVariantId && (
-					<VariantHistoryList variantId={selectedVariantId} />
+					<VariantHistoryList
+						variantId={selectedVariantId}
+						setHistoryModalOpen={setHistoryModalOpen}
+						setSelectedVariantId={setSelectedVariantId}
+					/>
 				)}
 			</SlDialog>
 		</>
