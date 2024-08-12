@@ -71,28 +71,30 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 		let file = ["/* eslint-disable */", "import * as registry from '../registry.js' "].join("\n")
 
 		for (const resource of resources) {
+			// Bundle Aliases
+			const alias = resource.bundle.source.alias
+				? Object.values(resource.bundle.source.alias).at(0)
+				: undefined
+
 			const compiledMessage = resource.messages[locale]
 			if (!compiledMessage) {
 				// add fallback
 				const fallbackLocale = fallbackMap[locale]
-				if (fallbackLocale)
+				if (fallbackLocale) {
 					file += `\nexport { ${i(resource.bundle.source.id)} } from "./${fallbackLocale}.js"`
-				else
+					if (alias) file += `\nexport { ${i(alias)} } from "./${fallbackLocale}.js"`
+				} else {
 					file += `\nexport const ${i(resource.bundle.source.id)} = '${escapeForSingleQuoteString(
 						resource.bundle.source.id
 					)}'`
+					if (alias) file += `\nexport {${i(resource.bundle.source.id)} as ${i(alias)}}`
+				}
 
 				continue
 			}
 
 			file += `\n${compiledMessage.code}`
 			file += `\nexport { ${i(compiledMessage.source.id)} as ${resource.bundle.source.id} }`
-
-			// Bundle Aliases
-			const alias = resource.bundle.source.alias
-				? Object.values(resource.bundle.source.alias).at(0)
-				: undefined
-
 			if (alias) file += `\nexport { ${i(compiledMessage.source.id)} as ${i(alias)} }`
 		}
 
