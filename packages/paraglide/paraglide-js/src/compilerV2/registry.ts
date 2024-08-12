@@ -4,8 +4,9 @@ export function createRegistry() {
 /**
  * @param {import("./runtime.js").AvailableLanguageTag} lang
  * @param {number} input
- * @param {{ type: "cardinal" | "ordinal" }} options
- * @returns {string}
+ * @param {object} [options]
+ * @param {"cardinal" | "ordinal"} [options.type="cardinal"] 
+ * @returns {"zero" | "one" | "two" | "few" | "many" | "other"}
  */
 export function plural(lang, input, options) {
     const formatter = new Intl.PluralRules(lang, options)
