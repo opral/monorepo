@@ -23,13 +23,10 @@ export const compileCommand2 = new Command()
 
 		logger.info(`Compiling inlang project at "${options.project}".`)
 
-		console.log("loading project into memory from: ", { path })
 		const project = await loadProjectFromDirectoryInMemory({
 			path,
 			fs: nodeFsPromises,
 		})
-		console.log(project)
-		console.log(project.errors.get())
 
 		const errors = project.errors.get()
 
