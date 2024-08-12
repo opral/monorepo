@@ -72,6 +72,7 @@ const SingleDiffBundle = (props: {
 										locale={message.locale}
 										variant={variant}
 										className={clsx(!change ? "opacity-30" : "")}
+										noHistory={true}
 									>
 										<InlangPatternEditor
 											slot="pattern-editor"
