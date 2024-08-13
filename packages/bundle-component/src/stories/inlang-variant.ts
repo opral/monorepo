@@ -156,6 +156,9 @@ export default class InlangVariant extends LitElement {
 	messageValidationReports: Array<any> | undefined
 
 	@property()
+	noHistory: boolean = false
+
+	@property()
 	setHoveredVariantId: (variantId: string | undefined) => void = () => {}
 
 	@property()
@@ -197,6 +200,19 @@ export default class InlangVariant extends LitElement {
 			},
 		})
 		this.dispatchEvent(onUpdateVariant)
+	}
+
+	dispatchOnShowHistory(variantId: string) {
+		const onShowHistory = new CustomEvent("show-history", {
+			bubbles: true,
+			composed: true,
+			detail: {
+				argument: {
+					variantId,
+				},
+			},
+		})
+		this.dispatchEvent(onShowHistory)
 	}
 
 	//functions
@@ -380,6 +396,27 @@ export default class InlangVariant extends LitElement {
 								  ></sl-tooltip>`
 								: ``}
 						</div>
+						${!this.noHistory
+							? html`<sl-tooltip content="Show history of variant">
+									<sl-button
+										size="small"
+										@click=${() =>
+											this.variant ? this.dispatchOnShowHistory(this.variant?.id) : undefined}
+										><svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="20px"
+											height="20px"
+											viewBox="0 0 24 24"
+											slot="prefix"
+											style="margin: 0 -3px"
+										>
+											<path
+												fill="currentColor"
+												d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89l.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7s-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.95 8.95 0 0 0 13 21a9 9 0 0 0 0-18m-1 5v5l4.28 2.54l.72-1.21l-3.5-2.08V8z"
+											/></svg
+									></sl-button>
+							  </sl-tooltip>`
+							: ``}
 					</div>
 			  </div> `
 			: undefined

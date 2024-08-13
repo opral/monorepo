@@ -26,7 +26,7 @@ export const projectAtom = atom(async (get) => {
 			const file = await project.toBlob();
 			await writable.write(file);
 			await writable.close();
-		}, 2000);
+		}, 1000);
 		return project;
 	} catch (e) {
 		console.error(e);
@@ -68,14 +68,14 @@ export const committedChangesAtom = atom(async (get) => {
 						"commit.id",
 						"commit.user_id",
 						"commit.description",
-						"commit.zoned_date_time",
+						"commit.created",
 					])
 					.whereRef("change.commit_id", "=", "commit.id")
 			).as("commit"),
 		])
 		.where("commit_id", "is not", null)
 		.innerJoin("commit", "commit.id", "change.commit_id")
-		.orderBy("commit.zoned_date_time desc")
+		.orderBy("commit.created desc")
 		.execute();
 
 	return result;
@@ -99,6 +99,10 @@ export const commitsAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const project = await get(projectAtom);
 	if (!project) return [];
-	return await project.lix.db.selectFrom("commit").selectAll().execute();
+	return await project.lix.db
+		.selectFrom("commit")
+		.selectAll()
+		.orderBy("commit.created desc")
+		.execute();
 });
 

@@ -17,7 +17,7 @@ export default function App() {
 				// TODO not working why?
 				setSettings(settings);
 			}
-		}, 3000);
+		}, 2000);
 	}, [project]);
 
 	return (

@@ -18,11 +18,15 @@ export const ReactBundle = createComponent({
 		insertVariant: "insert-variant",
 		updateVariant: "update-variant",
 		deleteVariant: "delete-variant",
+		showHistory: "show-history",
 		fixLint: "fix-lint",
 	},
 });
 
-const InlangBundle = (props: { bundle: BundleNested }) => {
+const InlangBundle = (props: {
+	bundle: BundleNested;
+	setShowHistory: (variantId: string) => void;
+}) => {
 	const [project] = useAtom(projectAtom);
 	const [pendingChanges] = useAtom(pendingChangesAtom);
 
@@ -31,10 +35,7 @@ const InlangBundle = (props: { bundle: BundleNested }) => {
 	}) => {
 		if (project) {
 			const insertedMessage = event.detail.argument.message;
-			const result = await queryHelper.message
-				.insert(project.db, insertedMessage)
-				.execute();
-			//console.log(result);
+			await queryHelper.message.insert(project.db, insertedMessage).execute();
 		}
 	};
 	const onMesageUpdate = async (event: {
@@ -43,10 +44,7 @@ const InlangBundle = (props: { bundle: BundleNested }) => {
 		console.log("message update");
 		if (project) {
 			const updatedMessage = event.detail.argument.message;
-			const result = await queryHelper.message
-				.update(project.db, updatedMessage)
-				.execute();
-			//console.log(result);
+			await queryHelper.message.update(project.db, updatedMessage).execute();
 		}
 	};
 	const onVariantInsert = async (event: {
@@ -54,10 +52,7 @@ const InlangBundle = (props: { bundle: BundleNested }) => {
 	}) => {
 		if (project) {
 			const insertedVariant = event.detail.argument.variant;
-			const result = await queryHelper.variant
-				.insert(project.db, insertedVariant)
-				.execute();
-			//console.log(result);
+			await queryHelper.variant.insert(project.db, insertedVariant).execute();
 		}
 	};
 	const onVariantUpdate = async (event: {
@@ -66,10 +61,7 @@ const InlangBundle = (props: { bundle: BundleNested }) => {
 		console.log("update variant");
 		if (project) {
 			const updatedVariant = event.detail.argument.variant;
-			const result = await queryHelper.variant
-				.update(project.db, updatedVariant)
-				.execute();
-			//console.log(result);
+			await queryHelper.variant.update(project.db, updatedVariant).execute();
 		}
 	};
 	const onVariantDelete = async (event: {
@@ -77,10 +69,7 @@ const InlangBundle = (props: { bundle: BundleNested }) => {
 	}) => {
 		if (project) {
 			const deletedVariant = event.detail.argument.variant;
-			const result = await queryHelper.variant
-				.delete(project.db, deletedVariant)
-				.execute();
-			//console.log(result);
+			await queryHelper.variant.delete(project.db, deletedVariant).execute();
 		}
 	};
 
@@ -97,14 +86,21 @@ const InlangBundle = (props: { bundle: BundleNested }) => {
 						insertVariant={onVariantInsert as any}
 						updateVariant={onVariantUpdate as any}
 						deleteVariant={onVariantDelete as any}
+						showHistory={(event: any) =>
+							props.setShowHistory(event.detail.argument.variantId)
+						}
 					/>
-					<div className="absolute top-[14px] right-0 pointer-events-none translate-x-6">
+					<div className="absolute top-0 right-0 pointer-events-none h-full">
 						{arraysIntersect(
 							getAllNestedIds(props.bundle),
-							pendingChanges.map((change) => change.id)
-						) && (
-							<div className="bg-blue-500 w-3 h-3 text-white p-1 rounded-full" />
-						)}
+							pendingChanges.map((change) => {
+								if (change.value) {
+									return change.value.id;
+								} else {
+									return undefined;
+								}
+							})
+						) && <div className="bg-blue-500 w-[3px] h-full text-white" />}
 					</div>
 				</div>
 			)}

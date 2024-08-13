@@ -2,7 +2,6 @@ import { useAtom } from "jotai";
 import { projectAtom } from "../state.ts";
 import { useEffect, useState } from "react";
 import { InlangProject } from "@inlang/sdk2";
-import { jsonObjectFrom } from "kysely/helpers/sqlite";
 import { timeAgo } from "../routes/changes/Page.tsx";
 
 const VariantHistory = (props: { variantId: string }) => {
@@ -21,14 +20,14 @@ const VariantHistory = (props: { variantId: string }) => {
 		return () => clearInterval(interval);
 	}, []);
 
+	useEffect(() => {
+		console.log(latestCommit);
+	}, [latestCommit]);
 	return (
-		<div
-			slot="pattern-editor"
-			className="absolute right-4 h-full flex items-center text-zinc-400 text-sm!"
-		>
+		<div className="flex items-center text-zinc-400 text-sm!">
 			{latestCommit?.user_id && (
 				<p>
-					by {latestCommit?.user_id} | {timeAgo(latestCommit?.zoned_date_time)}
+					by {latestCommit?.user_id} | {timeAgo(latestCommit?.created)}
 				</p>
 			)}
 		</div>
@@ -46,7 +45,7 @@ const queryLatestCommit = async (project: InlangProject, variantId: string) => {
 		.where((eb) => eb.ref("value", "->>").key("id"), "=", variantId)
 		.innerJoin("commit", "commit.id", "change.commit_id")
 		.orderBy("commit.user_id desc")
-		.orderBy("commit.zoned_date_time desc")
+		.orderBy("commit.created desc")
 		.executeTakeFirst();
 
 	return result;
