@@ -638,7 +638,7 @@ describe("paraglide", () => {
 		const program = project.createProgram()
 		const diagnostics = ts.getPreEmitDiagnostics(program)
 		for (const diagnostic of diagnostics) {
-			console.error(diagnostic.messageText)
+			console.error(diagnostic.messageText, diagnostic.file?.fileName)
 		}
 		expect(diagnostics.length).toEqual(0)
 	})
