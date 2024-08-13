@@ -41,14 +41,6 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 					Discard
 				</SlButton>
 			</div>
-			{props.changes.map((change) => (
-				<p className="text-zinc-600" key={change.id}>
-					<span className="font-bold text-zinc-950">You</span> changed the{" "}
-					<span className="font-bold text-zinc-950">{change.type}</span> with
-					the id{" "}
-					<span className="font-bold text-zinc-950">{change.value?.id}</span>
-				</p>
-			))}
 
 			{/* 
 			* TODO unbundle
@@ -85,9 +77,8 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 					})}
 				</inlang-bundle>
 			</div> */}
-			<div className="flex gap-8">
+			<div className="flex gap-4">
 				<div className="flex-1">
-					<p className="font-medium pb-2 pt-4">Old:</p>
 					{oldBundle && bundle && project && (
 						<SingleDiffBundle
 							bundle={bundle}
@@ -99,7 +90,6 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 					)}
 				</div>
 				<div className="flex-1">
-					<p className="font-medium pb-2 pt-4">New:</p>
 					{oldBundle && bundle && project && (
 						<SingleDiffBundle
 							bundle={bundle}
