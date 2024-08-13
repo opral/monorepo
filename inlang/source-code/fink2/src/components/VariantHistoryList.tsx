@@ -42,7 +42,7 @@ const VariantHistoryList = (props: {
 				setLoading(undefined);
 				props.setHistoryModalOpen(false);
 				props.setSelectedVariantId(null);
-			}, 2000);
+			}, 1000);
 		}
 	};
 
@@ -51,7 +51,7 @@ const VariantHistoryList = (props: {
 		getChanges();
 		const interval = setInterval(async () => {
 			await getChanges();
-		}, 2000);
+		}, 1000);
 		return () => clearInterval(interval);
 	}, [project]);
 
