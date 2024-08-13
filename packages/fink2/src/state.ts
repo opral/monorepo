@@ -28,6 +28,9 @@ export const projectAtom = atom(async (get) => {
 			await writable.close();
 		}, 1000);
 
+		//@ts-ignore
+		window.lix = project.lix;
+
 		return project;
 	} catch (e) {
 		console.error(e);
@@ -195,6 +198,3 @@ window.deleteAll = async () => {
 		await database.handle.remove();
 	}
 };
-
-//@ts-ignore
-window.lix = project.lix;
