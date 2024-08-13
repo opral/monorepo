@@ -24,7 +24,7 @@ const VariantHistoryList = (props: {
 			.where((eb) => eb.ref("value", "->>").key("id"), "=", props.variantId)
 			.innerJoin("commit", "commit.id", "change.commit_id")
 			.orderBy("commit.user_id desc")
-			.orderBy("commit.zoned_date_time desc")
+			.orderBy("commit.created desc")
 			.execute();
 
 		setChanges(result);
