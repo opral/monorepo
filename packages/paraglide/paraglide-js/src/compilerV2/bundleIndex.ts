@@ -25,7 +25,7 @@ export const bundleIndexFunction = (args: {
  * This message has been compiled by [inlang paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
  *
  * - Don't edit the message's code. Use [Sherlock (VS Code extension)](https://inlang.com/m/r7kp499g/app-inlang-ideExtension),
- *   the [web editor](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor) instead, or edit the translation files manually.
+ *   [Fink](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor) instead, or edit the translation files manually.
  * 
  * ${inputsType(args.typeRestrictions, true)}
  * ${optionsType({ languageTags: args.availableLanguageTags })}
