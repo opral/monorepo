@@ -10,7 +10,7 @@ import { SlDialog } from "@shoelace-style/shoelace/dist/react";
 // import { InlangPatternEditor } from "../../components/SingleDiffBundle.tsx";
 // import VariantHistory from "../../components/VariantHistory.tsx";
 import VariantHistoryList from "../../components/VariantHistoryList.tsx";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import NoProjectView from "../../components/NoProjectView.tsx";
 
 // import VariantHistory from "../../components/VariantHistory.tsx";

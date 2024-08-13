@@ -2,7 +2,6 @@ import {
 	commitsAtom,
 	pendingChangesAtom,
 	projectAtom,
-	committedChangesAtom,
 	bundlesNestedAtom,
 } from "../../state.ts";
 import { atom, useAtom } from "jotai";
@@ -34,7 +33,6 @@ export default function App() {
 	const [project] = useAtom(projectAtom);
 	const [pendingChanges] = useAtom(pendingChangesAtom);
 	const [commits] = useAtom(commitsAtom);
-	const [committedChanges] = useAtom(committedChangesAtom);
 	const [bundlesWithChanges] = useAtom(bundleIdsWithPendingChangesAtom);
 	const [commitAuthor, setCommitAuthor] = useState<string>("");
 	const [commitDescription, setCommitDescription] = useState<string>("");
@@ -128,14 +126,12 @@ export default function App() {
 							className="flex gap-2 items-center justify-between bg-zinc-50 px-4 py-3 rounded h-[46px]"
 						>
 							<div className="flex gap-2 items-center">
-								<p
-									className="text-zinc-950 text-sm! font-semibold"
-								>
+								<p className="text-zinc-950 text-sm! font-semibold">
 									By {commit.user_id}
 								</p>
 								<p className="text-sm! text-zinc-600">{commit.description}</p>
 							</div>
-							<p className="text-sm!">{timeAgo(commit.zoned_date_time)}</p>
+							<p className="text-sm!">{timeAgo(commit.created!)}</p>
 						</div>
 					))}
 				</div>

@@ -71,7 +71,7 @@ const SelectProject = () => {
 	return (
 		<>
 			<SlSelect
-				disabled={existingProjects.length === 0}
+				//disabled={existingProjects.length === 0}
 				size="small"
 				placeholder={
 					selectedProjectPath ? selectedProjectPath : "Select project"
