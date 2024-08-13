@@ -2,9 +2,8 @@ import { jsIdentifier } from "../services/codegen/identifier.js"
 import { inputsType, type InputTypeMap } from "./inputsType.js"
 import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
 import { optionsType } from "./optionsType.js"
-import { reexportAliases } from "./aliases.js"
-import type { BundleNested } from "@inlang/sdk2"
 import { escapeForDoubleQuoteString } from "~/services/codegen/escape.js"
+import type { BundleNested } from "@inlang/sdk2"
 
 export const bundleIndexFunction = (args: {
 	/**
@@ -53,7 +52,14 @@ ${args.availableLanguageTags
 		code += `\nexport { ${jsIdentifier(args.bundle.id)} as "${escapeForDoubleQuoteString(args.bundle.id)}" }`
 	}
 
-	// export the aliases;
-	code += `\n${reexportAliases(args.bundle)}`
+	const aliases = Object.values(args.bundle.alias)
+	for (const alias of aliases) {
+		if (isValidJSIdentifier(alias)) {
+			code += `\nexport { ${jsIdentifier(args.bundle.id)} as ${alias} }`
+		} else {
+			code += `\nexport { ${jsIdentifier(args.bundle.id)} as "${escapeForDoubleQuoteString(alias)}" }`
+		}
+	}
+
 	return code
 }
