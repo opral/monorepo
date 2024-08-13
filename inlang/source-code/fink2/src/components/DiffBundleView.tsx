@@ -11,6 +11,7 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 	const [oldBundle, setOldBundle] = useState<BundleNested | undefined>(
 		undefined
 	);
+	const [loadingDiscard, setLoadingDiscard] = useState(false);
 
 	useEffect(() => {
 		if (!project) return;
@@ -23,6 +24,7 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 
 	const handleDiscard = async () => {
 		if (project && oldBundle) {
+			setLoadingDiscard(true);
 			await updateBundleNested(project?.db, oldBundle);
 		}
 	};
@@ -31,7 +33,11 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 		<div className="bg-zinc-50 rounded p-4 mt-2">
 			<div className="flex justify-between">
 				<h3 className="font-medium text-[16px] pb-4">{props.bundleId}</h3>
-				<SlButton size="small" onClick={() => handleDiscard()}>
+				<SlButton
+					size="small"
+					loading={loadingDiscard}
+					onClick={() => handleDiscard()}
+				>
 					Discard
 				</SlButton>
 			</div>
