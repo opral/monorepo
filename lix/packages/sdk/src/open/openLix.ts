@@ -69,7 +69,7 @@ export async function openLix(args: {
 	await sql`
 	CREATE TEMP TRIGGER file_modified AFTER UPDATE ON file
 	BEGIN
-	  SELECT handle_file_change(NEW.id, NEW.path, NEW.data, OLD.id, OLD.path, OLD.data);
+	  SELECT handle_file_change(OLD.id, OLD.path, OLD.data, NEW.id, NEW.path, NEW.data);
 	END;
 	`.execute(db);
 
@@ -187,8 +187,11 @@ async function getChangeHistory({
 			.selectFrom("commit")
 			.selectAll()
 			.where("id", "=", nextCommitId)
-			.executeTakeFirstOrThrow();
+			.executeTakeFirst();
 
+		if (!commit) {
+			break;
+		}
 		nextCommitId = commit.parent_id;
 
 		firstChange = await db
@@ -267,10 +270,10 @@ async function handleFileChange(args: {
 						type: diff.type,
 						file_id: fileId,
 						operation: diff.operation,
+						parent_id: parent?.id,
 						plugin_key: plugin.key,
 						// @ts-expect-error - database expects stringified json
 						value: JSON.stringify(value),
-						parent_id: parent?.id,
 						meta: JSON.stringify(diff.meta),
 					})
 					.execute();
