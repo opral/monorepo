@@ -37,7 +37,7 @@ export default function App() {
 						settings={settings}
 						// @ts-expect-error - TODO: fix this
 						onSetSettings={(event: CustomEvent) => {
-							console.log("event.detail.arguments", event.detail.argument);
+							//console.log("event.detail.arguments", event.detail.argument);
 							project.settings.set(event.detail.argument);
 						}}
 					/>
