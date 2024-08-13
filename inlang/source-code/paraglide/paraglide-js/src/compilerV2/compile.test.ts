@@ -228,12 +228,11 @@ const output = await compile({
 	projectId: undefined,
 })
 
-beforeEach(() => {
-	// reset the imports to make sure that the runtime is reloaded
-	vi.resetModules()
-})
-
 describe("paraglide", () => {
+	beforeEach(() => {
+		// reset the imports to make sure that the runtime is reloaded
+		vi.resetModules()
+	})
 	describe("output-formalities", () => {
 		// the compiled should be ignored to avoid merge conflicts
 		test("the files should include a gitignore file", async () => {
@@ -553,7 +552,7 @@ describe("paraglide", () => {
 		})
 	})
 
-	test.skip("typesafety", async () => {
+	test("ts", async () => {
 		const project = await typescriptProject({
 			useInMemoryFileSystem: true,
 			compilerOptions: {
@@ -571,7 +570,6 @@ describe("paraglide", () => {
 				project.createSourceFile(fileName, code)
 			}
 		}
-
 		project.createSourceFile(
 			"test.ts",
 			`
@@ -639,6 +637,9 @@ describe("paraglide", () => {
 
 		const program = project.createProgram()
 		const diagnostics = ts.getPreEmitDiagnostics(program)
-		expect(diagnostics).toEqual([])
+		for (const diagnostic of diagnostics) {
+			console.error(diagnostic.messageText)
+		}
+		expect(diagnostics.length).toEqual(0)
 	})
 })
