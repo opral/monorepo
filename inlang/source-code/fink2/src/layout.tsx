@@ -34,9 +34,12 @@ export default function Layout(props: { children: React.ReactNode }) {
 const MenuBar = () => {
 	return (
 		<>
-			<div className="flex gap-2 mb-12 justify-between">
+			<div className="relative flex gap-2 mb-12 justify-between items-center">
+				<div className="absolute left-[50%] -translate-x-[50%]">
+					<ModeSwitcher />
+				</div>
 				<SelectProject />
-				<ModeSwitcher />
+
 				<div>
 					<CreateNewProject size="small" />
 					<ImportComponent />
@@ -68,6 +71,7 @@ const SelectProject = () => {
 	return (
 		<>
 			<SlSelect
+				disabled={existingProjects.length === 0}
 				size="small"
 				placeholder={
 					selectedProjectPath ? selectedProjectPath : "Select project"
