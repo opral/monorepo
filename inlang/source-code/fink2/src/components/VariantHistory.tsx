@@ -27,7 +27,7 @@ const VariantHistory = (props: { variantId: string }) => {
 		<div className="flex items-center text-zinc-400 text-sm!">
 			{latestCommit?.user_id && (
 				<p>
-					by {latestCommit?.user_id} | {timeAgo(latestCommit?.zoned_date_time)}
+					by {latestCommit?.user_id} | {timeAgo(latestCommit?.created)}
 				</p>
 			)}
 		</div>
