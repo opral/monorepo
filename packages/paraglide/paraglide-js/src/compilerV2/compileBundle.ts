@@ -30,7 +30,7 @@ export const compileBundle = (
 		const compiled = compileMessage(message)
 		// set the pattern for the language tag
 		compiledMessages[message.locale] = compiled
-		typeRestrictions = mergeTypeRestrictions(typeRestrictions, compiled.typeRestrictions)
+		typeRestrictions = mergeTypeRestrictions(compiled.typeRestrictions, typeRestrictions)
 	}
 
 	const compiledBundle: Compilation<BundleNested> = {
