@@ -2,7 +2,7 @@ import { useAtom } from "jotai";
 import { projectAtom } from "../state.ts";
 import { useEffect, useState } from "react";
 import { InlangProject } from "@inlang/sdk2";
-import { timeAgo } from "../routes/changes/Page.tsx";
+import timeAgo from "../helper/timeAgo.ts";
 
 const VariantHistory = (props: { variantId: string }) => {
 	const [project] = useAtom(projectAtom);
