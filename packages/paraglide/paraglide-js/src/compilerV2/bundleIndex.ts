@@ -19,7 +19,7 @@ export const bundleIndexFunction = (args: {
 	 */
 	availableLanguageTags: string[]
 }) => {
-	const hasInputs = Object.keys(args.typeRestrictions).length > 0
+	const hasInputs = args.bundle.messages.find((m) => m.declarations.length > 0)
 
 	let code = `/**
  * This translation has been compiled by [@inlang/paraglide-js](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
