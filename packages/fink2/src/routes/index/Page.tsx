@@ -11,6 +11,7 @@ import { SlDialog } from "@shoelace-style/shoelace/dist/react";
 // import VariantHistory from "../../components/VariantHistory.tsx";
 import VariantHistoryList from "../../components/VariantHistoryList.tsx";
 import { useEffect, useState } from "react";
+import NoProjectView from "../../components/NoProjectView.tsx";
 
 // import VariantHistory from "../../components/VariantHistory.tsx";
 
@@ -39,7 +40,7 @@ export default function App() {
 							setShowHistory={handleOpenHistoryModal}
 						/>
 					))}
-				{(!project || !selectedProjectPath) && <>No project selected</>}
+				{(!project || !selectedProjectPath) && <NoProjectView />}
 				{project && selectedProjectPath && bundlesNested.length === 0 && (
 					<>No bundles found, please import demo ...</>
 				)}
