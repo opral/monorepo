@@ -1,6 +1,6 @@
 import { compileBundle } from "./compileBundle.js"
 import { telemetry } from "../services/telemetry/implementation.js"
-import { i } from "../services/codegen/identifier.js"
+import { jsIdentifier } from "../services/codegen/identifier.js"
 import { getStackInfo } from "../services/telemetry/stack-detection.js"
 import { getPackageJson } from "../services/environment/package.js"
 import { createRuntime } from "./runtime.js"
@@ -51,7 +51,7 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 		"/* eslint-disable */",
 		'import { languageTag } from "./runtime.js"',
 		opts.settings.locales
-			.map((locale) => `import * as ${i(locale)} from "./messages/${locale}.js"`)
+			.map((locale) => `import * as ${jsIdentifier(locale)} from "./messages/${locale}.js"`)
 			.join("\n"),
 		"\n",
 		resources.map(({ bundle }) => bundle.code).join("\n\n"),
@@ -60,9 +60,9 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 	const output: Record<string, string> = {
 		".prettierignore": ignoreDirectory,
 		".gitignore": ignoreDirectory,
-		"runtime.js": await fmt(createRuntime(opts.settings)),
-		"registry.js": await fmt(createRegistry()),
-		"messages.js": await fmt(indexFile),
+		"runtime.js": createRuntime(opts.settings),
+		"registry.js": createRegistry(),
+		"messages.js": indexFile,
 	}
 
 	// generate message files
@@ -81,24 +81,26 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 				// add fallback
 				const fallbackLocale = fallbackMap[locale]
 				if (fallbackLocale) {
-					file += `\nexport { ${i(resource.bundle.source.id)} } from "./${fallbackLocale}.js"`
-					if (alias) file += `\nexport { ${i(alias)} } from "./${fallbackLocale}.js"`
+					file += `\nexport { ${jsIdentifier(resource.bundle.source.id)} } from "./${fallbackLocale}.js"`
+					if (alias) file += `\nexport { ${jsIdentifier(alias)} } from "./${fallbackLocale}.js"`
 				} else {
-					file += `\nexport const ${i(resource.bundle.source.id)} = '${escapeForSingleQuoteString(
+					file += `\nexport const ${jsIdentifier(resource.bundle.source.id)} = '${escapeForSingleQuoteString(
 						resource.bundle.source.id
 					)}'`
-					if (alias) file += `\nexport {${i(resource.bundle.source.id)} as ${i(alias)}}`
+					if (alias)
+						file += `\nexport {${jsIdentifier(resource.bundle.source.id)} as ${jsIdentifier(alias)}}`
 				}
 
 				continue
 			}
 
 			file += `\n${compiledMessage.code}`
-			file += `\nexport { ${i(compiledMessage.source.id)} as ${resource.bundle.source.id} }`
-			if (alias) file += `\nexport { ${i(compiledMessage.source.id)} as ${i(alias)} }`
+			file += `\nexport { ${jsIdentifier(compiledMessage.source.id)} as ${resource.bundle.source.id} }`
+			if (alias)
+				file += `\nexport { ${jsIdentifier(compiledMessage.source.id)} as ${jsIdentifier(alias)} }`
 		}
 
-		output[filename] = await fmt(file)
+		output[filename] = file
 	}
 
 	// telemetry
@@ -113,6 +115,32 @@ export const compile = async (args: CompileOptions): Promise<Record<string, stri
 	)
 
 	telemetry.shutdown()
+	return await formatFiles(output)
+}
+
+async function formatFiles(files: Record<string, string>): Promise<Record<string, string>> {
+	const output: Record<string, string> = {}
+	const promises: Promise<void>[] = []
+
+	for (const [key, value] of Object.entries(files)) {
+		if (!key.endsWith(".js")) {
+			output[key] = value
+			continue
+		}
+
+		promises.push(
+			new Promise((resolve, reject) => {
+				fmt(value)
+					.then((formatted) => {
+						output[key] = formatted
+						resolve()
+					})
+					.catch(reject)
+			})
+		)
+	}
+
+	await Promise.all(promises)
 	return output
 }
 

@@ -31,7 +31,7 @@ it("should compile a bundle", () => {
 		 * This message has been compiled by [inlang paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
 		 *
 		 * - Don't edit the message's code. Use [Sherlock (VS Code extension)](https://inlang.com/m/r7kp499g/app-inlang-ideExtension),
-		 *   the [web editor](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor) instead, or edit the translation files manually.
+		 *   [Fink](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor) instead, or edit the translation files manually.
 		 * 
 		 * @param {{}} inputs
 		 * @param {{ languageTag?: \\"en\\" | \\"de\\" }} options
@@ -53,14 +53,14 @@ it("should compile a bundle", () => {
 		        {
 		          "bundleId": "my_bundle",
 		          "declarations": [],
-		          "id": "c35d5203-874a-4c6c-82f2-e3e9938c79d6",
+		          "id": "e6f94263-7364-4414-bef0-19bb72e5a183",
 		          "locale": "en",
 		          "selectors": [],
 		          "variants": [
 		            {
-		              "id": "a223b171-a7c3-4f1d-94f3-a454f64f6258",
+		              "id": "2fea4950-2cad-43c3-9439-72a2a8e4a9de",
 		              "match": {},
-		              "messageId": "c35d5203-874a-4c6c-82f2-e3e9938c79d6",
+		              "messageId": "e6f94263-7364-4414-bef0-19bb72e5a183",
 		              "pattern": [
 		                {
 		                  "type": "text",
@@ -73,14 +73,14 @@ it("should compile a bundle", () => {
 		        {
 		          "bundleId": "my_bundle",
 		          "declarations": [],
-		          "id": "07c7eed7-f2dc-43d4-8fdd-ac0d506d8e4a",
+		          "id": "0b712644-2dba-4326-ad5b-347e0d82999d",
 		          "locale": "de",
 		          "selectors": [],
 		          "variants": [
 		            {
-		              "id": "c99f32d2-92ff-4427-9e51-d75d170d65ba",
+		              "id": "89834b0b-7fc3-441e-a99d-d3da53b9e15d",
 		              "match": {},
-		              "messageId": "07c7eed7-f2dc-43d4-8fdd-ac0d506d8e4a",
+		              "messageId": "0b712644-2dba-4326-ad5b-347e0d82999d",
 		              "pattern": [
 		                {
 		                  "type": "text",
@@ -101,18 +101,18 @@ it("should compile a bundle", () => {
 		 * @returns {string}
 		 */
 		/* @__NO_SIDE_EFFECTS__ */
-		const _07c7eed7_f2dc_43d4_8fdd_ac0d506d8e4a = () => \`Hallo Welt!\`",
+		const _0b712644_2dba_4326_ad5b_347e0d82999d = () => \`Hallo Welt!\`",
 		      "source": {
 		        "bundleId": "my_bundle",
 		        "declarations": [],
-		        "id": "07c7eed7-f2dc-43d4-8fdd-ac0d506d8e4a",
+		        "id": "0b712644-2dba-4326-ad5b-347e0d82999d",
 		        "locale": "de",
 		        "selectors": [],
 		        "variants": [
 		          {
-		            "id": "c99f32d2-92ff-4427-9e51-d75d170d65ba",
+		            "id": "89834b0b-7fc3-441e-a99d-d3da53b9e15d",
 		            "match": {},
-		            "messageId": "07c7eed7-f2dc-43d4-8fdd-ac0d506d8e4a",
+		            "messageId": "0b712644-2dba-4326-ad5b-347e0d82999d",
 		            "pattern": [
 		              {
 		                "type": "text",
@@ -130,18 +130,18 @@ it("should compile a bundle", () => {
 		 * @returns {string}
 		 */
 		/* @__NO_SIDE_EFFECTS__ */
-		const c35d5203_874a_4c6c_82f2_e3e9938c79d6 = () => \`Hello World!\`",
+		const e6f94263_7364_4414_bef0_19bb72e5a183 = () => \`Hello World!\`",
 		      "source": {
 		        "bundleId": "my_bundle",
 		        "declarations": [],
-		        "id": "c35d5203-874a-4c6c-82f2-e3e9938c79d6",
+		        "id": "e6f94263-7364-4414-bef0-19bb72e5a183",
 		        "locale": "en",
 		        "selectors": [],
 		        "variants": [
 		          {
-		            "id": "a223b171-a7c3-4f1d-94f3-a454f64f6258",
+		            "id": "2fea4950-2cad-43c3-9439-72a2a8e4a9de",
 		            "match": {},
-		            "messageId": "c35d5203-874a-4c6c-82f2-e3e9938c79d6",
+		            "messageId": "e6f94263-7364-4414-bef0-19bb72e5a183",
 		            "pattern": [
 		              {
 		                "type": "text",
