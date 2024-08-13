@@ -34,11 +34,14 @@ export default function Layout(props: { children: React.ReactNode }) {
 const MenuBar = () => {
 	return (
 		<>
-			<div className="flex gap-2 mb-12 justify-between">
+			<div className="relative flex gap-2 mb-12 justify-between items-center">
+				<div className="absolute left-[50%] -translate-x-[50%]">
+					<ModeSwitcher />
+				</div>
 				<SelectProject />
-				<ModeSwitcher />
+
 				<div>
-					<CreateNewProject />
+					<CreateNewProject size="small" />
 					<ImportComponent />
 					<SettingsButton />
 				</div>
@@ -68,6 +71,7 @@ const SelectProject = () => {
 	return (
 		<>
 			<SlSelect
+				//disabled={existingProjects.length === 0}
 				size="small"
 				placeholder={
 					selectedProjectPath ? selectedProjectPath : "Select project"
@@ -90,7 +94,7 @@ const SelectProject = () => {
 	);
 };
 
-const CreateNewProject = () => {
+export const CreateNewProject = (props: { size: "small" | "large" }) => {
 	const [showDialog, setShowDialog] = useState(false);
 	const [fileName, setFileName] = useState("");
 	const [loading, setLoading] = useState(false);
@@ -114,14 +118,41 @@ const CreateNewProject = () => {
 
 	return (
 		<>
-			<SlButton
-				size="small"
-				onClick={() => {
-					setShowDialog(true);
-				}}
-			>
-				New project
-			</SlButton>
+			{props.size === "small" ? (
+				<SlButton
+					size="small"
+					variant="default"
+					onClick={() => {
+						setShowDialog(true);
+					}}
+				>
+					New project
+				</SlButton>
+			) : (
+				<SlButton
+					size="medium"
+					variant="primary"
+					onClick={() => {
+						setShowDialog(true);
+					}}
+				>
+					<svg
+						//@ts-ignore
+						slot="prefix"
+						xmlns="http://www.w3.org/2000/svg"
+						width="20px"
+						height="20px"
+						viewBox="0 0 24 24"
+						className="-mr-1"
+					>
+						<path
+							fill="currentColor"
+							d="M19 12.998h-6v6h-2v-6H5v-2h6v-6h2v6h6z"
+						/>
+					</svg>
+					Create project
+				</SlButton>
+			)}
 			<SlDialog
 				label="Create new project"
 				open={showDialog}
