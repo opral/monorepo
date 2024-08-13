@@ -187,8 +187,11 @@ async function getChangeHistory({
 			.selectFrom("commit")
 			.selectAll()
 			.where("id", "=", nextCommitId)
-			.executeTakeFirstOrThrow();
+			.executeTakeFirst();
 
+		if (!commit) {
+			break;
+		}
 		nextCommitId = commit.parent_id;
 
 		firstChange = await db
@@ -249,16 +252,16 @@ async function handleFileChange(args: {
 
 			// no uncommitted change exists
 			if (previousUncomittedChange === undefined) {
-				// const parent = (
-				// 	await getChangeHistory({
-				// 		atomId: value.id,
-				// 		depth: 1,
-				// 		db: args.db,
-				// 		fileId,
-				// 		pluginKey: plugin.key,
-				// 		diffType: diff.type,
-				// 	})
-				// )[0];
+				const parent = (
+					await getChangeHistory({
+						atomId: value.id,
+						depth: 1,
+						db: args.db,
+						fileId,
+						pluginKey: plugin.key,
+						diffType: diff.type,
+					})
+				)[0];
 
 				await args.db
 					.insertInto("change")
@@ -267,6 +270,7 @@ async function handleFileChange(args: {
 						type: diff.type,
 						file_id: fileId,
 						operation: diff.operation,
+						parent_id: parent?.id,
 						plugin_key: plugin.key,
 						// @ts-expect-error - database expects stringified json
 						value: JSON.stringify(value),
