@@ -127,19 +127,27 @@ export default function App() {
 						</div>
 					</div>
 				</div>
-				<div className="flex flex-col gap-2 py-4">
+				<div className="flex flex-col gap-2 my-4 relative">
+					<div className="w-[1px] h-full absolute py-6 translate-x-[11.5px] -z-10">
+						<div className="w-full h-full border-r-[2px] border-zinc-300 border-dashed " />
+					</div>
 					{commits.map((commit) => (
 						<div
 							key={commit.id + Math.random()}
-							className="flex gap-2 items-center justify-between bg-zinc-50 px-4 py-3 rounded h-[46px]"
+							className="flex gap-3 items-center"
 						>
-							<div className="flex gap-2 items-center">
-								<p className="text-zinc-950 text-sm! font-semibold">
-									By {commit.user_id}
-								</p>
-								<p className="text-sm! text-zinc-600">{commit.description}</p>
+							<div className="w-6 h-6 bg-zinc-200 flex items-center justify-center rounded-full">
+								<div className="w-2.5 h-2.5 bg-zinc-700 rounded-full"></div>
 							</div>
-							<p className="text-sm!">{timeAgo(commit.created!)}</p>
+							<div className="flex-1 flex gap-2 items-center justify-between bg-zinc-50 px-4 py-3 rounded h-[46px]">
+								<div className="flex gap-2 items-center">
+									<p className="text-zinc-950 text-sm! font-semibold">
+										By {commit.user_id}
+									</p>
+									<p className="text-sm! text-zinc-600">{commit.description}</p>
+								</div>
+								<p className="text-sm!">{timeAgo(commit.created!)}</p>
+							</div>
 						</div>
 					))}
 				</div>
