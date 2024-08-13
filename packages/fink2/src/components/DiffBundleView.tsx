@@ -35,7 +35,8 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 				<h3 className="font-medium text-[16px]">{props.bundleId}</h3>
 				<div className="flex items-center gap-3">
 					<div className="text-xs! text-zinc-700 bg-zinc-300 h-5 rounded flex items-center px-2 font-medium">
-						{props.changes.length} changes
+						{props.changes.length}{" "}
+						{props.changes.length === 1 ? "change" : "changes"}
 					</div>
 					<SlButton
 						size="small"
