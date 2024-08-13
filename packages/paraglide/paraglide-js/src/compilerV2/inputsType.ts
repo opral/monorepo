@@ -5,12 +5,7 @@ export type InputTypeMap = Record<string, string>
 
 /**
  * Generates a JSDoc comment for an input object
- *
- * Returns an empty string if the params object is empty.
- *
- * @example
- *   const jsdoc = jsdocFromParams({ name: "NonNullable<unknown>", count: "NonNullable<unknown>" })
- *   const message = `/** ${paramsType} *\/ const mes2 => \`Hello ${params.name}! You have ${params.count} messages.\``
+ * Returns an empty string if the input object is empty.
  */
 export const inputsType = (inputs: InputTypeMap, isMessagesIndex: boolean) => {
 	if (Object.keys(inputs).length === 0) {
