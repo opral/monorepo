@@ -46,6 +46,7 @@ describe("compileMessage", () => {
 
 		const compiled = compileMessage(msg)
 		expect(compiled.typeRestrictions).toEqual({
+			fistInput: "NonNullable<unknown>",
 			"second Input": "number",
 		})
 		expect(compiled.code).toMatchInlineSnapshot(`

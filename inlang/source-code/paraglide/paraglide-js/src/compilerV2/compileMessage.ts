@@ -96,6 +96,7 @@ ${compilation.code}`
 
 	return {
 		...compilation,
+		typeRestrictions: tr,
 		code,
 	}
 }
