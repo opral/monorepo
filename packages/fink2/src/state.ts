@@ -26,7 +26,7 @@ export const projectAtom = atom(async (get) => {
 			const file = await project.toBlob();
 			await writable.write(file);
 			await writable.close();
-		}, 2000);
+		}, 1000);
 		return project;
 	} catch (e) {
 		console.error(e);
