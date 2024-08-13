@@ -4,6 +4,7 @@ import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
 import { optionsType } from "./optionsType.js"
 import { reexportAliases } from "./aliases.js"
 import type { BundleNested } from "@inlang/sdk2"
+import { escapeForDoubleQuoteString } from "~/services/codegen/escape.js"
 
 export const bundleIndexFunction = (args: {
 	/**
@@ -21,18 +22,18 @@ export const bundleIndexFunction = (args: {
 }) => {
 	const hasInputs = Object.keys(args.typeRestrictions).length > 0
 
-	return `/**
- * This message has been compiled by [inlang paraglide](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
+	let code = `/**
+ * This translation has been compiled by [@inlang/paraglide-js](https://inlang.com/m/gerre34r/library-inlang-paraglideJs).
  *
- * - Don't edit the message's code. Use [Sherlock (VS Code extension)](https://inlang.com/m/r7kp499g/app-inlang-ideExtension),
- *   [Fink](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor) instead, or edit the translation files manually.
+ * - Don't edit this code. Instead use [Sherlock (VS Code extension)](https://inlang.com/m/r7kp499g/app-inlang-ideExtension) or
+ *   [Fink](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor) to edit the translation instead, or edit the translation files manually.
  * 
  * ${inputsType(args.typeRestrictions, true)}
  * ${optionsType({ languageTags: args.availableLanguageTags })}
  * @returns {string}
  */
 /* @__NO_SIDE_EFFECTS__ */
-export const ${args.bundle.id} = (inputs ${hasInputs ? "" : "= {}"}, options = {}) => {
+const ${jsIdentifier(args.bundle.id)} = (inputs ${hasInputs ? "" : "= {}"}, options = {}) => {
 	return {
 ${args.availableLanguageTags
 	// sort language tags alphabetically to make the generated code more readable
@@ -43,7 +44,16 @@ ${args.availableLanguageTags
 	)
 	.join(",\n")}
 	}[options.languageTag ?? languageTag()](${hasInputs ? "inputs" : ""})
-}
-${reexportAliases(args.bundle)}
-`
+}`
+
+	// export the index function
+	if (isValidJSIdentifier(args.bundle.id)) {
+		code += `\nexport { ${args.bundle.id} }`
+	} else {
+		code += `\nexport { ${jsIdentifier(args.bundle.id)} as "${escapeForDoubleQuoteString(args.bundle.id)}" }`
+	}
+
+	// export the aliases;
+	code += `\n${reexportAliases(args.bundle)}`
+	return code
 }

@@ -23,7 +23,10 @@ export function compileExpression(lang: string, expression: Expression): Compila
 			typeRestrictions = mergeTypeRestrictions(typeRestrictions, options.typeRestrictions)
 		}
 
-		const code = `registry.${fn.name}(${args.join(", ")})`
+		const code = isValidJSIdentifier(fn.name)
+			? `registry.${fn.name}(${args.join(", ")})`
+			: `registry["${escapeForDoubleQuoteString(fn.name)}"](${args.join(", ")})`
+
 		return { code, typeRestrictions, source: expression }
 	}
 	const code = compileArg(expression.arg)
@@ -35,7 +38,7 @@ function compileOptions(
 ): Compilation<FunctionAnnotation["options"]> {
 	const entires: string[] = options.map((option) => `${option.name}: ${compileArg(option.value)}`)
 	const code = "{" + entires.join(", ") + "}"
-	// TODO Type-Narrowing for options
+	// TODO Type-Narrowing for options - do we support using inputs as options yet?
 	return { code, typeRestrictions: {}, source: options }
 }
 
