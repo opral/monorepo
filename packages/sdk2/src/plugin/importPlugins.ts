@@ -55,19 +55,3 @@ async function fetchModuleWithCache(uri: string): Promise<string> {
 	}
 	return await response.text();
 }
-
-function fetchModuleFromCDN(uri: string): Promise<string> {
-	const response = await fetch(uri);
-	if (!response.ok) {
-		throw new Error(
-			`Failed to fetch the plugin. Is the link ${uri} valid? ${response.statusText}`
-		);
-	}
-	return await response.text();
-}
-
-/**
- * Reads the module from disk
- * @param path
- */
-function fetchModuleFromPath(path: string): Promise<string> {}
