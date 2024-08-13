@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAtom } from "jotai";
-import { selectedProjectPathAtom, withPollingAtom } from "./state.ts";
+import { projectAtom, selectedProjectPathAtom, withPollingAtom } from "./state.ts";
 import { useEffect, useMemo, useState } from "react";
 import SlDialog from "@shoelace-style/shoelace/dist/react/dialog/index.js";
 import { newProject } from "@inlang/sdk2";
@@ -19,7 +19,7 @@ export default function Layout(props: { children: React.ReactNode }) {
 	useEffect(() => {
 		const interval = setInterval(() => {
 			setWithPolling(Date.now());
-		}, 2000);
+		}, 1000);
 		return () => clearInterval(interval);
 	});
 
@@ -42,7 +42,6 @@ const MenuBar = () => {
 
 				<div>
 					<CreateNewProject size="small" />
-					<ImportComponent />
 					<SettingsButton />
 				</div>
 			</div>
@@ -71,7 +70,7 @@ const SelectProject = () => {
 	return (
 		<>
 			<SlSelect
-				//disabled={existingProjects.length === 0}
+				disabled={selectedProjectPath === undefined}
 				size="small"
 				placeholder={
 					selectedProjectPath ? selectedProjectPath : "Select project"
@@ -160,10 +159,10 @@ export const CreateNewProject = (props: { size: "small" | "large" }) => {
 			>
 				<SlInput
 					label="Filename"
-					helpText="The file name must end with .inlang"
-					placeholder="happy-elephant.inlang"
+					helpText={fileName ? `Create project file ${fileName}` : "Enter the name of your inlang file"}
+					placeholder="my-website"
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					onInput={(e: any) => setFileName(e.target.value)}
+					onInput={(e: any) => setFileName(e.target.value ? e.target.value + ".inlang" : "")}
 				></SlInput>
 				<SlButton
 					loading={loading}
@@ -180,11 +179,14 @@ export const CreateNewProject = (props: { size: "small" | "large" }) => {
 };
 
 const SettingsButton = () => {
-	// check if window.location.pathname === "/settings"
+	const [project] = useAtom(projectAtom);
 
 	return (
 		<Link to="/settings">
-			<SlButton slot="trigger" size="small" variant="default">
+			<SlButton
+				disabled={project === undefined}
+				slot="trigger" size="small" variant="default"
+			>
 				Settings
 			</SlButton>
 		</Link>

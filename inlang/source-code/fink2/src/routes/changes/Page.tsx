@@ -6,7 +6,7 @@ import {
 } from "../../state.ts";
 import { atom, useAtom } from "jotai";
 import Layout from "../../layout.tsx";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
 	SlButton,
 	SlDialog,
@@ -44,8 +44,14 @@ export default function App() {
 			userId: commitAuthor,
 			description: commitDescription,
 		});
-		setShowDialog(false);
 	};
+
+	useEffect(() => {
+		// close dialog after commit
+		if (pendingChanges.length === 0) {
+			setShowDialog(false);
+		}
+	})
 
 	const getScopedChangesByBundle = (bundle: BundleNested) => {
 		const pendingChangesForBundle = pendingChanges.filter((change) => {
@@ -72,6 +78,7 @@ export default function App() {
 					<SlButton
 						size="small"
 						variant="primary"
+						disabled={pendingChanges.length === 0}
 						onClick={() => {
 							setShowDialog(true);
 						}}
