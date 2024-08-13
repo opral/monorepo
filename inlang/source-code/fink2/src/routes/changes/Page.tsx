@@ -71,7 +71,12 @@ export default function App() {
 				<div className="flex gap-4 items-center bg-zinc-100 rounded px-4 py-2 justify-between mb-4">
 					<div className="flex items-center gap-2">
 						<p className="text-sm font-medium">
-							{pendingChanges.length} Pending change[s]
+							<span className="text-zinc-800 bg-zinc-300 px-[6px] py-[2px] rounded mr-2">
+								{pendingChanges.length}
+							</span>
+							{pendingChanges.length === 1
+								? "Pending change"
+								: "Pending changes"}
 						</p>
 						{/* <p>{numCommittedChanges} Committed changes </p>
 						<p>{numCommits} Commits</p> */}

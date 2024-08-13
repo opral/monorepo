@@ -33,7 +33,7 @@ export default function Layout(props: { children: React.ReactNode }) {
 const MenuBar = () => {
 	return (
 		<>
-			<div className="relative flex gap-2 mb-12 justify-between items-center">
+			<div className="relative flex gap-2 mb-8 justify-between items-center">
 				<div className="absolute left-[50%] -translate-x-[50%]">
 					<ModeSwitcher />
 				</div>
