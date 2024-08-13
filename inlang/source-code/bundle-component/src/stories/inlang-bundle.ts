@@ -425,7 +425,7 @@ export default class InlangBundle extends LitElement {
 											this._handleUpdatePattern(message, variant, event.detail.argument, locale)
 										}}
 									></inlang-pattern-editor>
-									${patternToString({ pattern: variant?.pattern || [] }) === ""
+									<!-- ${patternToString({ pattern: variant?.pattern || [] }) === ""
 										? html`<inlang-variant-action
 												slot="variant-action"
 												actionTitle="Machine Translate"
@@ -434,7 +434,7 @@ export default class InlangBundle extends LitElement {
 													this.dispatchOnMachineTranslate(message?.id, variant?.id)
 												}}
 										  ></inlang-variant-action>`
-										: ``}
+										: ``} -->
 								</inlang-variant>`
 							})}
 						</inlang-message>`

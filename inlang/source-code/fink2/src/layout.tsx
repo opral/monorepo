@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAtom } from "jotai";
-import { selectedProjectPathAtom, withPollingAtom } from "./state.ts";
+import { projectAtom, selectedProjectPathAtom, withPollingAtom } from "./state.ts";
 import { useEffect, useMemo, useState } from "react";
 import SlDialog from "@shoelace-style/shoelace/dist/react/dialog/index.js";
 import { newProject } from "@inlang/sdk2";
@@ -19,7 +19,7 @@ export default function Layout(props: { children: React.ReactNode }) {
 	useEffect(() => {
 		const interval = setInterval(() => {
 			setWithPolling(Date.now());
-		}, 2000);
+		}, 1000);
 		return () => clearInterval(interval);
 	});
 
@@ -34,12 +34,14 @@ export default function Layout(props: { children: React.ReactNode }) {
 const MenuBar = () => {
 	return (
 		<>
-			<div className="flex gap-2 mb-12 justify-between">
+			<div className="relative flex gap-2 mb-12 justify-between items-center">
+				<div className="absolute left-[50%] -translate-x-[50%]">
+					<ModeSwitcher />
+				</div>
 				<SelectProject />
-				<ModeSwitcher />
+
 				<div>
-					<CreateNewProject />
-					<ImportComponent />
+					<CreateNewProject size="small" />
 					<SettingsButton />
 				</div>
 			</div>
@@ -68,6 +70,7 @@ const SelectProject = () => {
 	return (
 		<>
 			<SlSelect
+				disabled={selectedProjectPath === undefined}
 				size="small"
 				placeholder={
 					selectedProjectPath ? selectedProjectPath : "Select project"
@@ -90,7 +93,7 @@ const SelectProject = () => {
 	);
 };
 
-const CreateNewProject = () => {
+export const CreateNewProject = (props: { size: "small" | "large" }) => {
 	const [showDialog, setShowDialog] = useState(false);
 	const [fileName, setFileName] = useState("");
 	const [loading, setLoading] = useState(false);
@@ -114,14 +117,41 @@ const CreateNewProject = () => {
 
 	return (
 		<>
-			<SlButton
-				size="small"
-				onClick={() => {
-					setShowDialog(true);
-				}}
-			>
-				New project
-			</SlButton>
+			{props.size === "small" ? (
+				<SlButton
+					size="small"
+					variant="default"
+					onClick={() => {
+						setShowDialog(true);
+					}}
+				>
+					New project
+				</SlButton>
+			) : (
+				<SlButton
+					size="medium"
+					variant="primary"
+					onClick={() => {
+						setShowDialog(true);
+					}}
+				>
+					<svg
+						//@ts-ignore
+						slot="prefix"
+						xmlns="http://www.w3.org/2000/svg"
+						width="20px"
+						height="20px"
+						viewBox="0 0 24 24"
+						className="-mr-1"
+					>
+						<path
+							fill="currentColor"
+							d="M19 12.998h-6v6h-2v-6H5v-2h6v-6h2v6h6z"
+						/>
+					</svg>
+					Create project
+				</SlButton>
+			)}
 			<SlDialog
 				label="Create new project"
 				open={showDialog}
@@ -129,10 +159,10 @@ const CreateNewProject = () => {
 			>
 				<SlInput
 					label="Filename"
-					helpText="The file name must end with .inlang"
-					placeholder="happy-elephant.inlang"
+					helpText={fileName ? `Create project file ${fileName}` : "Enter the name of your inlang file"}
+					placeholder="my-website"
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					onInput={(e: any) => setFileName(e.target.value)}
+					onInput={(e: any) => setFileName(e.target.value ? e.target.value + ".inlang" : "")}
 				></SlInput>
 				<SlButton
 					loading={loading}
@@ -149,11 +179,14 @@ const CreateNewProject = () => {
 };
 
 const SettingsButton = () => {
-	// check if window.location.pathname === "/settings"
+	const [project] = useAtom(projectAtom);
 
 	return (
 		<Link to="/settings">
-			<SlButton slot="trigger" size="small" variant="default">
+			<SlButton
+				disabled={project === undefined}
+				slot="trigger" size="small" variant="default"
+			>
 				Settings
 			</SlButton>
 		</Link>
