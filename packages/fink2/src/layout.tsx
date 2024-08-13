@@ -10,7 +10,6 @@ import {
 	SlOption,
 	SlSelect,
 } from "@shoelace-style/shoelace/dist/react";
-import ImportComponent from "./components/Import.tsx";
 import { Link } from "react-router-dom";
 import ModeSwitcher from "./components/ModeSwitcher.tsx";
 
@@ -164,6 +163,9 @@ export const CreateNewProject = (props: { size: "small" | "large" }) => {
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					onInput={(e: any) => setFileName(e.target.value ? e.target.value + ".inlang" : "")}
 				></SlInput>
+				<div className="mt-6 p-4 text-slate-600 bg-slate-200 border border-slate-600 rounded text-[14px]!">
+					<span className="font-semibold">Info:</span> Demo data will be imported automatically until we can import your own data.
+				</div>
 				<SlButton
 					loading={loading}
 					variant="primary"
