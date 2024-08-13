@@ -1,4 +1,4 @@
-import { i } from "../services/codegen/identifier.js"
+import { jsIdentifier } from "../services/codegen/identifier.js"
 import { inputsType, type InputTypeMap } from "./inputsType.js"
 import { isValidJSIdentifier } from "../services/valid-js-identifier/index.js"
 import { optionsType } from "./optionsType.js"
@@ -37,7 +37,10 @@ export const ${args.bundle.id} = (inputs ${hasInputs ? "" : "= {}"}, options = {
 ${args.availableLanguageTags
 	// sort language tags alphabetically to make the generated code more readable
 	.sort((a, b) => a.localeCompare(b))
-	.map((tag) => `\t\t${isValidJSIdentifier(tag) ? tag : `"${tag}"`}: ${i(tag)}.${args.bundle.id}`)
+	.map(
+		(tag) =>
+			`\t\t${isValidJSIdentifier(tag) ? tag : `"${tag}"`}: ${jsIdentifier(tag)}.${args.bundle.id}`
+	)
 	.join(",\n")}
 	}[options.languageTag ?? languageTag()](${hasInputs ? "inputs" : ""})
 }
