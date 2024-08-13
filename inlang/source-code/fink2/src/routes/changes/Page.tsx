@@ -14,6 +14,7 @@ import {
 } from "@shoelace-style/shoelace/dist/react";
 import DiffBundleView from "../../components/DiffBundleView.tsx";
 import { BundleNested } from "@inlang/sdk2";
+import timeAgo from "../../helper/timeAgo.ts";
 
 const bundleIdsWithPendingChangesAtom = atom(async (get) => {
 	const bundlesNested = await get(bundlesNestedAtom);
@@ -51,7 +52,7 @@ export default function App() {
 		if (pendingChanges.length === 0) {
 			setShowDialog(false);
 		}
-	})
+	});
 
 	const getScopedChangesByBundle = (bundle: BundleNested) => {
 		const pendingChangesForBundle = pendingChanges.filter((change) => {
@@ -145,32 +146,4 @@ export default function App() {
 			</Layout>
 		</>
 	);
-}
-
-export function timeAgo(dateString: string) {
-	const now = new Date();
-	const pastDate = new Date(dateString);
-	//@ts-ignore
-	const secondsAgo = Math.floor((now - pastDate) / 1000);
-
-	const intervals = {
-		year: 31536000,
-		month: 2592000,
-		week: 604800,
-		day: 86400,
-		hour: 3600,
-		minute: 60,
-		second: 1,
-	};
-
-	for (const [unit, secondsInUnit] of Object.entries(intervals)) {
-		const interval = Math.floor(secondsAgo / secondsInUnit);
-		if (interval > 1) {
-			return `${interval} ${unit}s ago`;
-		} else if (interval === 1) {
-			return `1 ${unit} ago`;
-		}
-	}
-
-	return "just now";
 }
