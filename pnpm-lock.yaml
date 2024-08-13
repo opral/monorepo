@@ -7,30 +7,28 @@ settings:
 overrides:
   http-cache-semantics: 4.1.1
   follow-redirects: 1.15.4
-  vitest: 0.34.6
-  '@vitest/coverage-v8': 0.34.6
 
 importers:
 
   .:
     devDependencies:
       '@changesets/cli':
-        specifier: ^2.26.0
+        specifier: ^2.27.7
         version: 2.27.7
       '@inlang/cli':
         specifier: workspace:*
         version: link:inlang/source-code/cli
       '@typescript-eslint/eslint-plugin':
-        specifier: ^6.6.0
+        specifier: ^6.21.0
         version: 6.21.0(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.57.0)(typescript@5.5.4)
       '@typescript-eslint/parser':
-        specifier: ^6.6.0
+        specifier: ^6.21.0
         version: 6.21.0(eslint@8.57.0)(typescript@5.5.4)
       eslint:
-        specifier: ^8.32.0
+        specifier: ^8.57.0
         version: 8.57.0
       eslint-config-prettier:
-        specifier: ^8.6.0
+        specifier: ^8.10.0
         version: 8.10.0(eslint@8.57.0)
       eslint-plugin-unicorn:
         specifier: ^45.0.2
@@ -44,12 +42,9 @@ importers:
       prettier:
         specifier: 2.8.3
         version: 2.8.3
-      typescript:
-        specifier: ^5.5.2
-        version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: ^2.0.5
+        version: 2.0.5(@types/node@20.14.14)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.5)
 
   inlang/development-projects/inlang-nextjs:
     dependencies:
@@ -194,14 +189,14 @@ importers:
         specifier: 20.8.4
         version: 20.8.4
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: ^0.33.0
+        version: 0.33.0(vitest@0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       typescript:
         specifier: 5.2.2
         version: 5.2.2
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.34.3
+        version: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/bundle-component:
     dependencies:
@@ -261,8 +256,8 @@ importers:
         specifier: ^2.4.4
         version: 2.4.4
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: ^0.33.0
+        version: 0.33.0(vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       esbuild:
         specifier: ^0.20.0
         version: 0.20.2
@@ -279,8 +274,8 @@ importers:
         specifier: ^7.6.16
         version: 7.6.20
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.33.0
+        version: 0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/cli:
     dependencies:
@@ -331,8 +326,8 @@ importers:
         specifier: ^2.4.4
         version: 2.4.9
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: ^0.33.0
+        version: 0.33.0(vitest@0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       cli-progress:
         specifier: ^3.12.0
         version: 3.12.0
@@ -367,8 +362,8 @@ importers:
         specifier: 5.2.2
         version: 5.2.2
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.34.3
+        version: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/design-system:
     dependencies:
@@ -377,17 +372,17 @@ importers:
         version: 4.1.0
     devDependencies:
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: 0.34.3
+        version: 0.34.3(vitest@0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       tailwindcss:
         specifier: ^3.3.3
-        version: 3.4.9(ts-node@10.9.2(@swc/core@1.7.6)(typescript@5.2.2))
+        version: 3.4.9(ts-node@10.9.2(@swc/core@1.7.6)(@types/node@20.14.14)(typescript@5.2.2))
       typescript:
         specifier: 5.2.2
         version: 5.2.2
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.34.3
+        version: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/detect-json-formatting:
     dependencies:
@@ -396,13 +391,13 @@ importers:
         version: 2.0.0
     devDependencies:
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: 0.34.3
+        version: 0.34.3(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       typescript:
         specifier: 5.2.2
         version: 5.2.2
       vitest:
-        specifier: 0.34.6
+        specifier: ^0.34.1
         version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/doc-layout-component:
@@ -451,8 +446,8 @@ importers:
         specifier: ^2.4.4
         version: 2.4.4
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: ^0.33.0
+        version: 0.33.0(vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       esbuild:
         specifier: ^0.20.0
         version: 0.20.2
@@ -469,8 +464,8 @@ importers:
         specifier: ^7.6.16
         version: 7.6.20
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.33.0
+        version: 0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/editor:
     dependencies:
@@ -731,8 +726,8 @@ importers:
         specifier: 0.2.0
         version: 0.2.0
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.34.3
+        version: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/end-to-end-tests/paraglide-js:
     dependencies:
@@ -794,8 +789,8 @@ importers:
         specifier: 20.6.0
         version: 20.6.0
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: 0.34.3
+        version: 0.34.3(vitest@0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       dotenv:
         specifier: ^16.3.1
         version: 16.4.5
@@ -809,8 +804,8 @@ importers:
         specifier: 5.2.2
         version: 5.2.2
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.34.3
+        version: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
       zod:
         specifier: ^3.22.2
         version: 3.23.8
@@ -916,8 +911,8 @@ importers:
         specifier: ^20.11.16
         version: 20.14.14
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: ^0.33.0
+        version: 0.33.0(vitest@0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       dotenv:
         specifier: ^16.4.1
         version: 16.4.5
@@ -928,8 +923,8 @@ importers:
         specifier: ^5.3.3
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.34.3
+        version: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/ide-extension:
     dependencies:
@@ -1074,14 +1069,14 @@ importers:
         version: 0.31.28
     devDependencies:
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: 0.34.3
+        version: 0.34.3(vitest@0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       typescript:
         specifier: 5.2.2
         version: 5.2.2
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.34.3
+        version: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/manage:
     dependencies:
@@ -1227,13 +1222,13 @@ importers:
         version: link:../telemetry
       tailwindcss:
         specifier: 3.3.3
-        version: 3.3.3(ts-node@10.9.2(@swc/core@1.7.6)(typescript@5.3.2))
+        version: 3.3.3(ts-node@10.9.2(@swc/core@1.7.6)(@types/node@20.14.14)(typescript@5.3.2))
       typescript:
         specifier: 5.3.2
         version: 5.3.2
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.34.3
+        version: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/marketplace-registry:
     dependencies:
@@ -1273,8 +1268,8 @@ importers:
         specifier: workspace:*
         version: link:../../sdk
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: 0.33.0
+        version: 0.33.0(vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       patch-package:
         specifier: 6.5.1
         version: 6.5.1
@@ -1282,8 +1277,8 @@ importers:
         specifier: ^5.1.3
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.33.0
+        version: 0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/message-lint-rules/emptyPattern:
     dependencies:
@@ -1301,8 +1296,8 @@ importers:
         specifier: workspace:*
         version: link:../../sdk
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: 0.33.0
+        version: 0.33.0(vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       patch-package:
         specifier: 6.5.1
         version: 6.5.1
@@ -1310,8 +1305,8 @@ importers:
         specifier: ^5.1.3
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.33.0
+        version: 0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/message-lint-rules/identicalPattern:
     dependencies:
@@ -1332,8 +1327,8 @@ importers:
         specifier: workspace:*
         version: link:../../sdk
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: 0.33.0
+        version: 0.33.0(vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       patch-package:
         specifier: 6.5.1
         version: 6.5.1
@@ -1341,8 +1336,8 @@ importers:
         specifier: ^5.1.3
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.33.0
+        version: 0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/message-lint-rules/messageWithoutSource:
     dependencies:
@@ -1360,8 +1355,8 @@ importers:
         specifier: workspace:*
         version: link:../../sdk
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: 0.33.0
+        version: 0.33.0(vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       patch-package:
         specifier: 6.5.1
         version: 6.5.1
@@ -1369,8 +1364,8 @@ importers:
         specifier: ^5.1.3
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.33.0
+        version: 0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/message-lint-rules/missingTranslation:
     dependencies:
@@ -1388,8 +1383,8 @@ importers:
         specifier: workspace:*
         version: link:../../sdk
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: 0.33.0
+        version: 0.33.0(vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       patch-package:
         specifier: 6.5.1
         version: 6.5.1
@@ -1397,8 +1392,8 @@ importers:
         specifier: ^5.1.3
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.33.0
+        version: 0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/message-lint-rules/snakeCaseId:
     dependencies:
@@ -1416,8 +1411,8 @@ importers:
         specifier: workspace:*
         version: link:../../sdk
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: 0.33.0
+        version: 0.33.0(vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       patch-package:
         specifier: 6.5.1
         version: 6.5.1
@@ -1425,8 +1420,8 @@ importers:
         specifier: ^5.5.2
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.33.0
+        version: 0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/message-lint-rules/validJsIdentifier:
     dependencies:
@@ -1444,8 +1439,8 @@ importers:
         specifier: workspace:*
         version: link:../../sdk
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: 0.33.0
+        version: 0.33.0(vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       patch-package:
         specifier: 6.5.1
         version: 6.5.1
@@ -1453,8 +1448,8 @@ importers:
         specifier: ^5.5.2
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.33.0
+        version: 0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/paraglide/paraglide-astro:
     dependencies:
@@ -1572,8 +1567,8 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: 0.34.3
+        version: 0.34.3(vitest@0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       memfs:
         specifier: 4.6.0
         version: 4.6.0(quill-delta@5.1.0)(rxjs@7.8.1)(tslib@2.6.3)
@@ -1593,8 +1588,8 @@ importers:
         specifier: ^4.3.2
         version: 4.3.2(typescript@5.5.4)(vite@4.5.3(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5))
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.34.3
+        version: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/paraglide/paraglide-js/example:
     dependencies:
@@ -1606,7 +1601,7 @@ importers:
         specifier: ^5.5.2
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
+        specifier: ^0.34.6
         version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/paraglide/paraglide-next:
@@ -1803,8 +1798,8 @@ importers:
         specifier: ^5.5.2
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.34.3
+        version: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/paraglide/paraglide-rollup/example:
     devDependencies:
@@ -1831,7 +1826,7 @@ importers:
         version: 0.13.6(solid-js@1.8.19)
       '@solidjs/start':
         specifier: ^1.0.2
-        version: 1.0.6(rollup@4.20.0)(solid-js@1.8.19)(vinxi@0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(terser@5.31.5))(vite@5.4.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5))
+        version: 1.0.6(rollup@4.20.0)(solid-js@1.8.19)(vinxi@0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(magicast@0.3.4)(terser@5.31.5))(vite@5.4.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5))
       solid-js:
         specifier: ^1.8.17
         version: 1.8.19
@@ -1840,14 +1835,14 @@ importers:
         specifier: ^20.14.9
         version: 20.14.14
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: 1.6.0
+        version: 1.6.0(vitest@1.6.0(@types/node@20.14.14)(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.5))
       typescript:
         specifier: ^5.5.2
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 1.6.0
+        version: 1.6.0(@types/node@20.14.14)(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.5)
 
   inlang/source-code/paraglide/paraglide-sveltekit:
     dependencies:
@@ -1916,8 +1911,8 @@ importers:
         specifier: ^3.0.1
         version: 3.0.1(rollup@3.29.1)(svelte@5.0.0-next.210)(vite@5.4.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5))
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: ^1.0.0
+        version: 1.6.0(@types/node@20.14.14)(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.5)
 
   inlang/source-code/paraglide/paraglide-sveltekit/example:
     dependencies:
@@ -1978,8 +1973,8 @@ importers:
         specifier: ^4.5.0
         version: 4.5.3(@types/node@20.9.3)(lightningcss@1.26.0)(terser@5.31.5)
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.34.3
+        version: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/paraglide/paraglide-vite:
     dependencies:
@@ -1994,8 +1989,8 @@ importers:
         specifier: ^5.5.2
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.34.3
+        version: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/paraglide/paraglide-vite/example:
     devDependencies:
@@ -2040,8 +2035,8 @@ importers:
         specifier: ^5.5.2
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.34.3
+        version: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/paraglide/paraglide-webpack/example:
     devDependencies:
@@ -2095,8 +2090,8 @@ importers:
         specifier: 1.10.6
         version: 1.10.6
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: ^0.33.0
+        version: 0.33.0(vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       flat:
         specifier: ^5.0.2
         version: 5.0.2
@@ -2110,8 +2105,8 @@ importers:
         specifier: ^5.5.2
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.33.0
+        version: 0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/plugins/inlang-message-format:
     devDependencies:
@@ -2128,14 +2123,14 @@ importers:
         specifier: ^0.31.17
         version: 0.31.28
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: ^0.33.0
+        version: 0.33.0(vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       typescript:
         specifier: ^5.5.2
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.33.0
+        version: 0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/plugins/json:
     dependencies:
@@ -2162,8 +2157,8 @@ importers:
         specifier: 4.6.7
         version: 4.6.7
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: ^0.33.0
+        version: 0.33.0(vitest@0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       flat:
         specifier: ^5.0.2
         version: 5.0.2
@@ -2177,8 +2172,8 @@ importers:
         specifier: ^5.5.2
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.34.3
+        version: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/plugins/m-function-matcher:
     dependencies:
@@ -2202,8 +2197,8 @@ importers:
         specifier: 1.10.6
         version: 1.10.6
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: ^0.33.0
+        version: 0.33.0(vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       parsimmon:
         specifier: ^1.18.1
         version: 1.18.1
@@ -2214,8 +2209,8 @@ importers:
         specifier: ^5.5.2
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.33.0
+        version: 0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/plugins/next-intl:
     dependencies:
@@ -2251,8 +2246,8 @@ importers:
         specifier: 1.10.6
         version: 1.10.6
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: ^0.33.0
+        version: 0.33.0(vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       flat:
         specifier: ^5.0.2
         version: 5.0.2
@@ -2266,8 +2261,8 @@ importers:
         specifier: ^5.5.2
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.33.0
+        version: 0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/plugins/sap-ui5:
     dependencies:
@@ -2291,8 +2286,8 @@ importers:
         specifier: 1.10.6
         version: 1.10.6
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: ^0.33.0
+        version: 0.33.0(vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       parsimmon:
         specifier: ^1.18.1
         version: 1.18.1
@@ -2303,8 +2298,8 @@ importers:
         specifier: ^5.1.3
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.33.0
+        version: 0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/plugins/t-function-matcher:
     dependencies:
@@ -2328,8 +2323,8 @@ importers:
         specifier: 1.10.6
         version: 1.10.6
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: ^0.33.0
+        version: 0.33.0(vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       parsimmon:
         specifier: ^1.18.1
         version: 1.18.1
@@ -2340,8 +2335,8 @@ importers:
         specifier: ^5.5.2
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.33.0
+        version: 0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/recommendations/recommend-ninja:
     dependencies:
@@ -2365,8 +2360,8 @@ importers:
         specifier: ^4.0.9
         version: 4.0.9
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: 0.33.0
+        version: 0.33.0(vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       patch-package:
         specifier: 6.5.1
         version: 6.5.1
@@ -2374,8 +2369,8 @@ importers:
         specifier: ^5.1.3
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.33.0
+        version: 0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/recommendations/recommend-sherlock:
     devDependencies:
@@ -2392,8 +2387,8 @@ importers:
         specifier: ^1.84.2
         version: 1.92.0
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: 0.33.0
+        version: 0.33.0(vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       comment-json:
         specifier: ^4.2.3
         version: 4.2.4
@@ -2407,14 +2402,14 @@ importers:
         specifier: ^5.1.3
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.33.0
+        version: 0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/result:
     devDependencies:
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: 0.34.3
+        version: 0.34.3(vitest@0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       tsd:
         specifier: 0.29.0
         version: 0.29.0
@@ -2422,8 +2417,8 @@ importers:
         specifier: ^5.5.2
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.34.3
+        version: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/rpc:
     dependencies:
@@ -2471,14 +2466,14 @@ importers:
         specifier: 4.17.17
         version: 4.17.17
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: 0.34.3
+        version: 0.34.3(vitest@0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       typescript:
         specifier: ^5.5.2
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.34.3
+        version: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/sdk:
     dependencies:
@@ -2547,8 +2542,8 @@ importers:
         specifier: 5.0.0
         version: 5.0.0
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: ^0.33.0
+        version: 0.33.0(vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       jsdom:
         specifier: 22.1.0
         version: 22.1.0
@@ -2562,8 +2557,8 @@ importers:
         specifier: ^5.5.2
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: ^0.33.0
+        version: 0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/sdk-v2:
     dependencies:
@@ -2626,11 +2621,11 @@ importers:
         specifier: ^9.0.8
         version: 9.0.8
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: ^0.33.0
+        version: 0.33.0(vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       '@vitest/web-worker':
         specifier: ^1.6.0
-        version: 1.6.0(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        version: 1.6.0(vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       jsdom:
         specifier: 22.1.0
         version: 22.1.0
@@ -2647,8 +2642,8 @@ importers:
         specifier: ^5.3.2
         version: 5.4.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5)
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: ^0.33.0
+        version: 0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/sdk-v2/sample-app:
     dependencies:
@@ -2760,11 +2755,11 @@ importers:
         specifier: ^3.0.7
         version: 3.0.7
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: ^0.33.0
+        version: 0.33.0(vitest@2.0.5(@types/node@20.14.14)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.5))
       '@vitest/web-worker':
         specifier: ^1.6.0
-        version: 1.6.0(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        version: 1.6.0(vitest@2.0.5(@types/node@20.14.14)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.5))
       jsdom:
         specifier: 22.1.0
         version: 22.1.0
@@ -2778,8 +2773,8 @@ importers:
         specifier: ^5.3.2
         version: 5.4.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5)
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: ^2.0.5
+        version: 2.0.5(@types/node@20.14.14)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.5)
 
   inlang/source-code/server:
     dependencies:
@@ -2879,8 +2874,8 @@ importers:
         specifier: ^2.4.4
         version: 2.4.4
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: ^0.33.0
+        version: 0.33.0(vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       esbuild:
         specifier: ^0.20.0
         version: 0.20.2
@@ -2900,8 +2895,8 @@ importers:
         specifier: 5.4.5
         version: 5.4.5
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.33.0
+        version: 0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/settings-component2:
     dependencies:
@@ -2949,8 +2944,8 @@ importers:
         specifier: ^2.4.4
         version: 2.4.4
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: ^0.33.0
+        version: 0.33.0(vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       react:
         specifier: ^18.2.0
         version: 18.3.1
@@ -2964,8 +2959,8 @@ importers:
         specifier: 5.4.5
         version: 5.4.5
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.33.0
+        version: 0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/telemetry:
     dependencies:
@@ -2992,14 +2987,14 @@ importers:
         specifier: 4.17.17
         version: 4.17.17
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: 0.34.3
+        version: 0.34.3(vitest@0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       typescript:
         specifier: ^5.5.2
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.34.3
+        version: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/telemetry-proxy:
     dependencies:
@@ -3052,7 +3047,7 @@ importers:
         specifier: ^5.5.2
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
+        specifier: ^0.34.4
         version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/templates/plugin:
@@ -3070,7 +3065,7 @@ importers:
         specifier: ^5.5.2
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
+        specifier: ^0.34.4
         version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/versioned-interfaces/language-tag:
@@ -3086,8 +3081,8 @@ importers:
         specifier: ^5.5.2
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.34.4
+        version: 0.34.4(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/versioned-interfaces/marketplace-manifest:
     dependencies:
@@ -3105,8 +3100,8 @@ importers:
         specifier: ^5.5.2
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.34.3
+        version: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/versioned-interfaces/message:
     dependencies:
@@ -3218,8 +3213,8 @@ importers:
         specifier: ^5.5.2
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.34.3
+        version: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/versioned-interfaces/translatable:
     dependencies:
@@ -3237,8 +3232,8 @@ importers:
         specifier: ^5.5.2
         version: 5.5.4
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.34.3
+        version: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   inlang/source-code/website:
     dependencies:
@@ -3500,8 +3495,8 @@ importers:
         specifier: '12.4.0 '
         version: 12.4.0
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: 1.1.1
+        version: 1.1.1(vitest@1.1.1(@types/node@20.14.14)(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.5))
       eslint:
         specifier: 9.0.0
         version: 9.0.0
@@ -3512,8 +3507,8 @@ importers:
         specifier: 5.2.2
         version: 5.2.2
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 1.1.1
+        version: 1.1.1(@types/node@20.14.14)(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.5)
 
   lix/packages/code-style:
     dependencies:
@@ -3622,8 +3617,8 @@ importers:
         specifier: 20.12.7
         version: 20.12.7
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: 0.34.3
+        version: 0.34.3(vitest@0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       eslint:
         specifier: 9.0.0
         version: 9.0.0
@@ -3634,8 +3629,8 @@ importers:
         specifier: 0.31.0
         version: 0.31.0
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.34.3
+        version: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   lix/packages/sdk:
     dependencies:
@@ -3714,8 +3709,8 @@ importers:
         specifier: 20.12.7
         version: 20.12.7
       '@vitest/coverage-v8':
-        specifier: 0.34.6
-        version: 0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
+        specifier: 0.34.3
+        version: 0.34.3(vitest@0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))
       eslint:
         specifier: 9.0.0
         version: 9.0.0
@@ -3726,8 +3721,8 @@ importers:
         specifier: 5.2.2
         version: 5.2.2
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: 0.34.3
+        version: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
 
   lix/packages/sqlite-wasm-kysely:
     dependencies:
@@ -3737,7 +3732,7 @@ importers:
     devDependencies:
       '@vitest/browser':
         specifier: ^1.6.0
-        version: 1.6.0(playwright@1.39.0)(safaridriver@0.1.2)(vitest@0.34.6)(webdriverio@8.40.2)
+        version: 1.6.0(playwright@1.39.0)(vitest@1.6.0)(webdriverio@8.40.2)
       kysely:
         specifier: ^0.27.4
         version: 0.27.4
@@ -3751,8 +3746,8 @@ importers:
         specifier: ^5.3.3
         version: 5.4.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5)
       vitest:
-        specifier: 0.34.6
-        version: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+        specifier: ^1.6.0
+        version: 1.6.0(@types/node@20.14.14)(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.5)
       webdriverio:
         specifier: ^8.39.1
         version: 8.40.2
@@ -9006,7 +9001,7 @@ packages:
     peerDependencies:
       playwright: '*'
       safaridriver: '*'
-      vitest: 0.34.6
+      vitest: 1.6.0
       webdriverio: '*'
     peerDependenciesMeta:
       playwright:
@@ -9016,22 +9011,90 @@ packages:
       webdriverio:
         optional: true
 
+  '@vitest/coverage-v8@0.33.0':
+    resolution: {integrity: sha512-Rj5IzoLF7FLj6yR7TmqsfRDSeaFki6NAJ/cQexqhbWkHEV2htlVGrmuOde3xzvFsCbLCagf4omhcIaVmfU8Okg==}
+    peerDependencies:
+      vitest: '>=0.32.0 <1'
+
+  '@vitest/coverage-v8@0.34.3':
+    resolution: {integrity: sha512-bNjP0RHe8UxdklCigZlk6FVCNbOiqVjWnpZJ1zKixpvb7YHSaZiN/w+mzpvXIoqyxyePzKC+L+G1oj7SB20PJw==}
+    peerDependencies:
+      vitest: '>=0.32.0 <1'
+
   '@vitest/coverage-v8@0.34.6':
     resolution: {integrity: sha512-fivy/OK2d/EsJFoEoxHFEnNGTg+MmdZBAVK9Ka4qhXR2K3J0DS08vcGVwzDtXSuUMabLv4KtPcpSKkcMXFDViw==}
     peerDependencies:
-      vitest: 0.34.6
+      vitest: '>=0.32.0 <1'
+
+  '@vitest/coverage-v8@1.1.1':
+    resolution: {integrity: sha512-TCXSh6sA92t7D5p7HJ64sPCi+szP8E3NiKTsR3YR8vVEVZB9yclQu2btktCthxahKBl7PwheP5OuejYg13xccg==}
+    peerDependencies:
+      vitest: ^1.0.0
+
+  '@vitest/coverage-v8@1.6.0':
+    resolution: {integrity: sha512-KvapcbMY/8GYIG0rlwwOKCVNRc0OL20rrhFkg/CHNzncV03TE2XWvO5w9uZYoxNiMEBacAJt3unSOiZ7svePew==}
+    peerDependencies:
+      vitest: 1.6.0
+
+  '@vitest/expect@0.33.0':
+    resolution: {integrity: sha512-sVNf+Gla3mhTCxNJx+wJLDPp/WcstOe0Ksqz4Vec51MmgMth/ia0MGFEkIZmVGeTL5HtjYR4Wl/ZxBxBXZJTzQ==}
+
+  '@vitest/expect@0.34.3':
+    resolution: {integrity: sha512-F8MTXZUYRBVsYL1uoIft1HHWhwDbSzwAU9Zgh8S6WFC3YgVb4AnFV2GXO3P5Em8FjEYaZtTnQYoNwwBrlOMXgg==}
+
+  '@vitest/expect@0.34.4':
+    resolution: {integrity: sha512-XlMKX8HyYUqB8dsY8Xxrc64J2Qs9pKMt2Z8vFTL4mBWXJsg4yoALHzJfDWi8h5nkO4Zua4zjqtapQ/IluVkSnA==}
 
   '@vitest/expect@0.34.6':
     resolution: {integrity: sha512-QUzKpUQRc1qC7qdGo7rMK3AkETI7w18gTCUrsNnyjjJKYiuUB9+TQK3QnR1unhCnWRC0AbKv2omLGQDF/mIjOw==}
 
+  '@vitest/expect@1.1.1':
+    resolution: {integrity: sha512-Qpw01C2Hyb3085jBkOJLQ7HRX0Ncnh2qV4p+xWmmhcIUlMykUF69zsnZ1vPmAjZpomw9+5tWEGOQ0GTfR8U+kA==}
+
+  '@vitest/expect@1.6.0':
+    resolution: {integrity: sha512-ixEvFVQjycy/oNgHjqsL6AZCDduC+tflRluaHIzKIsdbzkLn2U/iBnVeJwB6HsIjQBdfMR8Z0tRxKUsvFJEeWQ==}
+
+  '@vitest/expect@2.0.5':
+    resolution: {integrity: sha512-yHZtwuP7JZivj65Gxoi8upUN2OzHTi3zVfjwdpu2WrvCZPLwsJ2Ey5ILIPccoW23dd/zQBlJ4/dhi7DWNyXCpA==}
+
   '@vitest/pretty-format@2.0.5':
     resolution: {integrity: sha512-h8k+1oWHfwTkyTkb9egzwNMfJAEx4veaPSnMeKbVSjp4euqGSbQlm5+6VHwTr7u4FJslVVsUG5nopCaAYdOmSQ==}
+
+  '@vitest/runner@0.33.0':
+    resolution: {integrity: sha512-UPfACnmCB6HKRHTlcgCoBh6ppl6fDn+J/xR8dTufWiKt/74Y9bHci5CKB8tESSV82zKYtkBJo9whU3mNvfaisg==}
+
+  '@vitest/runner@0.34.3':
+    resolution: {integrity: sha512-lYNq7N3vR57VMKMPLVvmJoiN4bqwzZ1euTW+XXYH5kzr3W/+xQG3b41xJn9ChJ3AhYOSoweu974S1V3qDcFESA==}
+
+  '@vitest/runner@0.34.4':
+    resolution: {integrity: sha512-hwwdB1StERqUls8oV8YcpmTIpVeJMe4WgYuDongVzixl5hlYLT2G8afhcdADeDeqCaAmZcSgLTLtqkjPQF7x+w==}
 
   '@vitest/runner@0.34.6':
     resolution: {integrity: sha512-1CUQgtJSLF47NnhN+F9X2ycxUP0kLHQ/JWvNHbeBfwW8CzEGgeskzNnHDyv1ieKTltuR6sdIHV+nmR6kPxQqzQ==}
 
+  '@vitest/runner@1.1.1':
+    resolution: {integrity: sha512-8HokyJo1SnSi3uPFKfWm/Oq1qDwLC4QDcVsqpXIXwsRPAg3gIDh8EbZ1ri8cmQkBxdOu62aOF9B4xcqJhvt4xQ==}
+
+  '@vitest/runner@1.6.0':
+    resolution: {integrity: sha512-P4xgwPjwesuBiHisAVz/LSSZtDjOTPYZVmNAnpHHSR6ONrf8eCJOFRvUwdHn30F5M1fxhqtl7QZQUk2dprIXAg==}
+
+  '@vitest/runner@2.0.5':
+    resolution: {integrity: sha512-TfRfZa6Bkk9ky4tW0z20WKXFEwwvWhRY+84CnSEtq4+3ZvDlJyY32oNTJtM7AW9ihW90tX/1Q78cb6FjoAs+ig==}
+
+  '@vitest/snapshot@0.33.0':
+    resolution: {integrity: sha512-tJjrl//qAHbyHajpFvr8Wsk8DIOODEebTu7pgBrP07iOepR5jYkLFiqLq2Ltxv+r0uptUb4izv1J8XBOwKkVYA==}
+
+  '@vitest/snapshot@0.34.3':
+    resolution: {integrity: sha512-QyPaE15DQwbnIBp/yNJ8lbvXTZxS00kRly0kfFgAD5EYmCbYcA+1EEyRalc93M0gosL/xHeg3lKAClIXYpmUiQ==}
+
+  '@vitest/snapshot@0.34.4':
+    resolution: {integrity: sha512-GCsh4coc3YUSL/o+BPUo7lHQbzpdttTxL6f4q0jRx2qVGoYz/cyTRDJHbnwks6TILi6560bVWoBpYC10PuTLHw==}
+
   '@vitest/snapshot@0.34.6':
     resolution: {integrity: sha512-B3OZqYn6k4VaN011D+ve+AA4whM4QkcwcrwaKwAbyyvS/NB1hCWjFIBQxAQQSQir9/RtyAAGuq+4RJmbn2dH4w==}
+
+  '@vitest/snapshot@1.1.1':
+    resolution: {integrity: sha512-WnMHjv4VdHLbFGgCdVVvyRkRPnOKN75JJg+LLTdr6ah7YnL75W+7CTIMdzPEPzaDxA8r5yvSVlc1d8lH3yE28w==}
 
   '@vitest/snapshot@1.6.0':
     resolution: {integrity: sha512-+Hx43f8Chus+DCmygqqfetcAZrDJwvTj0ymqjQq4CvmpKFSTVteEOBzCusu1x2tt4OJcvBflyHUE0DZSLgEMtQ==}
@@ -9039,19 +9102,52 @@ packages:
   '@vitest/snapshot@2.0.5':
     resolution: {integrity: sha512-SgCPUeDFLaM0mIUHfaArq8fD2WbaXG/zVXjRupthYfYGzc8ztbFbu6dUNOblBG7XLMR1kEhS/DNnfCZ2IhdDew==}
 
+  '@vitest/spy@0.33.0':
+    resolution: {integrity: sha512-Kv+yZ4hnH1WdiAkPUQTpRxW8kGtH8VRTnus7ZTGovFYM1ZezJpvGtb9nPIjPnptHbsyIAxYZsEpVPYgtpjGnrg==}
+
+  '@vitest/spy@0.34.3':
+    resolution: {integrity: sha512-N1V0RFQ6AI7CPgzBq9kzjRdPIgThC340DGjdKdPSE8r86aUSmeliTUgkTqLSgtEwWWsGfBQ+UetZWhK0BgJmkQ==}
+
+  '@vitest/spy@0.34.4':
+    resolution: {integrity: sha512-PNU+fd7DUPgA3Ya924b1qKuQkonAW6hL7YUjkON3wmBwSTIlhOSpy04SJ0NrRsEbrXgMMj6Morh04BMf8k+w0g==}
+
   '@vitest/spy@0.34.6':
     resolution: {integrity: sha512-xaCvneSaeBw/cz8ySmF7ZwGvL0lBjfvqc1LpQ/vcdHEvpLn3Ff1vAvjw+CoGn0802l++5L/pxb7whwcWAw+DUQ==}
+
+  '@vitest/spy@1.1.1':
+    resolution: {integrity: sha512-hDU2KkOTfFp4WFFPWwHFauddwcKuGQ7gF6Un/ZZkCogoAiTMN7/7YKvUDbywPZZ754iCQGjdUmXN3t4k0jm1IQ==}
+
+  '@vitest/spy@1.6.0':
+    resolution: {integrity: sha512-leUTap6B/cqi/bQkXUu6bQV5TZPx7pmMBKBQiI0rJA8c3pB56ZsaTbREnF7CJfmvAS4V2cXIBAh/3rVwrrCYgw==}
+
+  '@vitest/spy@2.0.5':
+    resolution: {integrity: sha512-c/jdthAhvJdpfVuaexSrnawxZz6pywlTPe84LUB2m/4t3rl2fTo9NFGBG4oWgaD+FTgDDV8hJ/nibT7IfH3JfA==}
+
+  '@vitest/utils@0.33.0':
+    resolution: {integrity: sha512-pF1w22ic965sv+EN6uoePkAOTkAPWM03Ri/jXNyMIKBb/XHLDPfhLvf/Fa9g0YECevAIz56oVYXhodLvLQ/awA==}
+
+  '@vitest/utils@0.34.3':
+    resolution: {integrity: sha512-kiSnzLG6m/tiT0XEl4U2H8JDBjFtwVlaE8I3QfGiMFR0QvnRDfYfdP3YvTBWM/6iJDAyaPY6yVQiCTUc7ZzTHA==}
+
+  '@vitest/utils@0.34.4':
+    resolution: {integrity: sha512-yR2+5CHhp/K4ySY0Qtd+CAL9f5Yh1aXrKfAT42bq6CtlGPh92jIDDDSg7ydlRow1CP+dys4TrOrbELOyNInHSg==}
 
   '@vitest/utils@0.34.6':
     resolution: {integrity: sha512-IG5aDD8S6zlvloDsnzHw0Ut5xczlF+kv2BOTo+iXfPr54Yhi5qbVOgGB1hZaVq4iJ4C/MZ2J0y15IlsV/ZcI0A==}
 
+  '@vitest/utils@1.1.1':
+    resolution: {integrity: sha512-E9LedH093vST/JuBSyHLFMpxJKW3dLhe/flUSPFedoyj4wKiFX7Jm8gYLtOIiin59dgrssfmFv0BJ1u8P/LC/A==}
+
   '@vitest/utils@1.6.0':
     resolution: {integrity: sha512-21cPiuGMoMZwiOHa2i4LXkMkMkCGzA+MVFV70jRwHo95dL4x/ts5GZhML1QWuy7yfp3WzK3lRvZi3JnXTYqrBw==}
+
+  '@vitest/utils@2.0.5':
+    resolution: {integrity: sha512-d8HKbqIcya+GR67mkZbrzhS5kKhtp8dQLcmRZLGTscGVg7yImT82cIrhtn2L8+VujWcy6KZweApgNmPsTAO/UQ==}
 
   '@vitest/web-worker@1.6.0':
     resolution: {integrity: sha512-VVKzjk6PVKfaXfhRwTxXaQ0NCp2BoUPhiR2OYd3InZb60jbZVmKquvngFXgvgOf1aDT8ztloMi8yu3wj9eRcuQ==}
     peerDependencies:
-      vitest: 0.34.6
+      vitest: ^1.0.0
 
   '@volar/kit@2.4.0-alpha.18':
     resolution: {integrity: sha512-dZMSNhesh23lhd61ax2l04IgIcYofAjm8M+5BKAmX47ROweyc8RrrslszCFUJynlmXx6JS1PoHqvo8+E0aAYQQ==}
@@ -9586,6 +9682,10 @@ packages:
   assertion-error@1.1.0:
     resolution: {integrity: sha512-jgsaNduz+ndvGyFt3uSuWqvy4lCnIJiovtouQN5JZHOKCS2QuhEdbcQHFhVksz2N2U9hXJo8odG7ETyWlEeuDw==}
 
+  assertion-error@2.0.1:
+    resolution: {integrity: sha512-Izi8RQcffqCeNVgFigKli1ssklIbpHnCYc6AknXGYoB6grJqyeby7jv12JUQgmTAnIDnbck1uxksT4dzN3PWBA==}
+    engines: {node: '>=12'}
+
   ast-types-flow@0.0.7:
     resolution: {integrity: sha512-eBvWn1lvIApYMhzQMsu9ciLfkBY499mFZlNqG+/9WR7PVlroQw0vG30cOQQbaKz3sCEc44TAOu2ykzqXSNnwag==}
 
@@ -10080,6 +10180,10 @@ packages:
     resolution: {integrity: sha512-RITGBfijLkBddZvnn8jdqoTypxvqbOLYQkGGxXzeFjVHvudaPw0HNFD9x928/eUwYWd2dPCugVqspGALTZZQKw==}
     engines: {node: '>=4'}
 
+  chai@5.1.1:
+    resolution: {integrity: sha512-pT1ZgP8rPNqUgieVaEY+ryQr6Q4HXNg8Ei9UnLUrjN4IA7dvQC5JB+/kxVcPNDHyBcc/26CXPkbNzq3qwrOEKA==}
+    engines: {node: '>=12'}
+
   chalk@2.4.2:
     resolution: {integrity: sha512-Mti+f9lpJNcwF4tWV8/OrTTtF1gZi+f8FqlyAdouralcFWFQWF2+NgCHShjkCb+IFBLq9buZwE1xckQU4peSuQ==}
     engines: {node: '>=4'}
@@ -10109,6 +10213,10 @@ packages:
 
   check-error@1.0.3:
     resolution: {integrity: sha512-iKEoDYaRmd1mxM90a2OEfWhjsjPpYPuQ+lMYsoxB126+t8fw7ySEO48nmDg5COTjxDI65/Y2OWpeEHk3ZOe8zg==}
+
+  check-error@2.1.1:
+    resolution: {integrity: sha512-OAlb+T7V4Op9OwdkjmguYRqncdlx5JiofwOAUkmTF+jNdHwzTaTs4sRAGpzLF3oOz5xAyDGrPgeIDFQmDOTiJw==}
+    engines: {node: '>= 16'}
 
   cheerio-select@2.1.0:
     resolution: {integrity: sha512-9v9kG0LvzrlcungtnJtpGNxY+fzECQKhK4EGJX2vByejiMX84MFNQw4UxPJl3bFbTMw+Dfs37XaIkCwTZfLh4g==}
@@ -10786,6 +10894,10 @@ packages:
 
   deep-eql@4.1.4:
     resolution: {integrity: sha512-SUwdGfqdKOwxCPeVYjwSyRpJ7Z+fhpwIAtmCUdZIWZ/YP5R9WAsyuSgpLVDi9bjWoN2LXHNss/dk3urXtdQxGg==}
+    engines: {node: '>=6'}
+
+  deep-eql@5.0.2:
+    resolution: {integrity: sha512-h5k/5U50IJJFpzfL6nO9jaaumfjO/f2NjK/oYB2Djzm4p9L+3T9qWpZqZ2hAbLPuuYq9wrU08WQyBTL5GbPk5Q==}
     engines: {node: '>=6'}
 
   deep-equal@2.2.3:
@@ -13092,6 +13204,10 @@ packages:
     resolution: {integrity: sha512-n3s8EwkdFIJCG3BPKBYvskgXGoy88ARzvegkitk60NxRdwltLOTaH7CUiMRXvwYorl0Q712iEjcWB+fK/MrWVw==}
     engines: {node: '>=10'}
 
+  istanbul-lib-source-maps@5.0.6:
+    resolution: {integrity: sha512-yg2d+Em4KizZC5niWhQaIomgf5WlL4vOOjZ5xGCmF8SnPE/mDWWXgvRExdcpCgh9lLRRa1/fSYp2ymmbJ1pI+A==}
+    engines: {node: '>=10'}
+
   istanbul-reports@3.1.7:
     resolution: {integrity: sha512-BewmUXImeuRk2YY0PVbxgKAysvhRPUQE0h5QRM++nVWyubKGV0l8qQ5op8+B2DOmwSe63Jivj0BjkPQVf8fP5g==}
     engines: {node: '>=8'}
@@ -13671,6 +13787,9 @@ packages:
   loupe@2.3.7:
     resolution: {integrity: sha512-zSMINGVYkdpYSOBmLi0D1Uo7JU9nVdQKrHxC8eYlV+9YKK9WePqAlL7lSlorG/U2Fw1w0hTBmaa/jrQ3UbPHtA==}
 
+  loupe@3.1.1:
+    resolution: {integrity: sha512-edNu/8D5MKVfGVFRhFf8aAxiTM6Wumfz5XsaatSxlD3w4R1d/WEKUTydCdPGbl9K7QG/Ca3GnDV2sIKIpXRQcw==}
+
   lower-case@2.0.2:
     resolution: {integrity: sha512-7fm3l3NAF9WfN6W3JOmf5drwpVqX78JtoGJ3A6W0a6ZnldM41w2fV5D490psKFTpMds8TJse/eHLFFsNHHjHgg==}
 
@@ -13732,6 +13851,9 @@ packages:
 
   magicast@0.2.11:
     resolution: {integrity: sha512-6saXbRDA1HMkqbsvHOU6HBjCVgZT460qheRkLhJQHWAbhXoWESI3Kn/dGGXyKs15FFKR85jsUqFx2sMK0wy/5g==}
+
+  magicast@0.3.4:
+    resolution: {integrity: sha512-TyDF/Pn36bBji9rWKHlZe+PZb6Mx5V8IHCSxk7X4aljM4e/vyDvZZYwHewdVaqiA0nb3ghfHU/6AUpDxWoER2Q==}
 
   make-dir@1.3.0:
     resolution: {integrity: sha512-2w31R7SJtieJJnQtGc7RVL2StM2vGYVfqUOvUDxH6bC6aJTxPxTF0GnIgCyu7tjockiUWAYQRbxa7vKn34s5sQ==}
@@ -14996,6 +15118,10 @@ packages:
 
   pathval@1.1.1:
     resolution: {integrity: sha512-Dp6zGqpTdETdR63lehJYPeIOqpiNBNtc7BpWSLrOje7UaIsE5aY92r/AunQA7rsXvet3lrJ3JnZX29UPTKXyKQ==}
+
+  pathval@2.0.0:
+    resolution: {integrity: sha512-vE7JKRyES09KiunauX7nd2Q9/L7lhok4smP9RZTDeD4MVs72Dp2qNFVz39Nz5a0FVEW0BJR6C0DYrq6unoziZA==}
+    engines: {node: '>= 14.16'}
 
   pbkdf2@3.1.2:
     resolution: {integrity: sha512-iuh7L6jA7JEGu2WxDwtQP1ddOpaJNC4KlDEFfdQajSGgGPNi4OyDc2R7QnbY2bR9QjBVGwgvTdNJZoE7RaxUMA==}
@@ -16967,9 +17093,21 @@ packages:
   tinybench@2.9.0:
     resolution: {integrity: sha512-0+DUvqWMValLmha6lr4kD8iAMK1HzV0/aKnCtWb9v9641TnP/MFb7Pc2bxoxQjTXAErryXVgUOfv2YqNllqGeg==}
 
+  tinypool@0.6.0:
+    resolution: {integrity: sha512-FdswUUo5SxRizcBc6b1GSuLpLjisa8N8qMyYoP3rl+bym+QauhtJP5bvZY1ytt8krKGmMLYIRl36HBZfeAoqhQ==}
+    engines: {node: '>=14.0.0'}
+
   tinypool@0.7.0:
     resolution: {integrity: sha512-zSYNUlYSMhJ6Zdou4cJwo/p7w5nmAH17GRfU/ui3ctvjXFErXXkruT4MWW6poDeXgCaIBlGLrfU6TbTXxyGMww==}
     engines: {node: '>=14.0.0'}
+
+  tinypool@0.8.4:
+    resolution: {integrity: sha512-i11VH5gS6IFeLY3gMBQ00/MmLncVP7JLXOw1vlgkytLmJK7QnEr7NXf0LBdxfmNPAeyetukOk0bOYrJrFGjYJQ==}
+    engines: {node: '>=14.0.0'}
+
+  tinypool@1.0.0:
+    resolution: {integrity: sha512-KIKExllK7jp3uvrNtvRBYBWBOAXSX8ZvoaD8T+7KB/QHIuoJW3Pmr60zucywjAlMb5TeXUkcs/MWeWLu0qvuAQ==}
+    engines: {node: ^18.0.0 || >=20.0.0}
 
   tinyrainbow@1.2.0:
     resolution: {integrity: sha512-weEDEq7Z5eTHPDh4xjX789+fHfF+P8boiFB+0vbWzpbnbsEr/GRaohi/uMKxg8RZMXnl1ItAi/IUHWMsjDV7kQ==}
@@ -16977,6 +17115,10 @@ packages:
 
   tinyspy@2.2.1:
     resolution: {integrity: sha512-KYad6Vy5VDWV4GH3fjpseMQ/XU2BhIYP7Vzd0LG44qRWm/Yt2WCOTicFdvmgo6gWaqooMQCawTtILVQJupKu7A==}
+    engines: {node: '>=14.0.0'}
+
+  tinyspy@3.0.0:
+    resolution: {integrity: sha512-q5nmENpTHgiPVd1cJDDc9cVoYN5x4vCvwT3FMilvKPKneCBZAxn2YWQjDF0UMcE9k0Cay1gBiDfTMU0g+mPMQA==}
     engines: {node: '>=14.0.0'}
 
   tippy.js@6.3.7:
@@ -17766,9 +17908,39 @@ packages:
     resolution: {integrity: sha512-WGEYqIuJ2/P3sBoSVKsGvp/UKpW4wVSaAFdA18gthyMCEExN6nVteoA+Rv1wQFLKXTVL9JRpeGJjcLzcRRgGCA==}
     hasBin: true
 
+  vite-node@0.33.0:
+    resolution: {integrity: sha512-19FpHYbwWWxDr73ruNahC+vtEdza52kA90Qb3La98yZ0xULqV8A5JLNPUff0f5zID4984tW7l3DH2przTJUZSw==}
+    engines: {node: '>=v14.18.0'}
+    hasBin: true
+
+  vite-node@0.34.3:
+    resolution: {integrity: sha512-+0TzJf1g0tYXj6tR2vEyiA42OPq68QkRZCu/ERSo2PtsDJfBpDyEfuKbRvLmZqi/CgC7SCBtyC+WjTGNMRIaig==}
+    engines: {node: '>=v14.18.0'}
+    hasBin: true
+
+  vite-node@0.34.4:
+    resolution: {integrity: sha512-ho8HtiLc+nsmbwZMw8SlghESEE3KxJNp04F/jPUCLVvaURwt0d+r9LxEqCX5hvrrOQ0GSyxbYr5ZfRYhQ0yVKQ==}
+    engines: {node: '>=v14.18.0'}
+    hasBin: true
+
   vite-node@0.34.6:
     resolution: {integrity: sha512-nlBMJ9x6n7/Amaz6F3zJ97EBwR2FkzhBRxF5e+jE6LA3yi6Wtc2lyTij1OnDMIr34v5g/tVQtsVAzhT0jc5ygA==}
     engines: {node: '>=v14.18.0'}
+    hasBin: true
+
+  vite-node@1.1.1:
+    resolution: {integrity: sha512-2bGE5w4jvym5v8llF6Gu1oBrmImoNSs4WmRVcavnG2me6+8UQntTqLiAMFyiAobp+ZXhj5ZFhI7SmLiFr/jrow==}
+    engines: {node: ^18.0.0 || >=20.0.0}
+    hasBin: true
+
+  vite-node@1.6.0:
+    resolution: {integrity: sha512-de6HJgzC+TFzOu0NTC4RAIsyf/DY/ibWDYQUcuEA84EMHhcefTUGkjFHKKEJhQN4A+6I0u++kr3l36ZF2d7XRw==}
+    engines: {node: ^18.0.0 || >=20.0.0}
+    hasBin: true
+
+  vite-node@2.0.5:
+    resolution: {integrity: sha512-LdsW4pxj0Ot69FAoXZ1yTnA9bjGohr2yNBU7QKRxpz8ITSkhuDl6h3zS/tvgz4qrNjeRnvrWeXQ8ZF7Um4W00Q==}
+    engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
 
   vite-plugin-dts@3.9.1:
@@ -17936,6 +18108,99 @@ packages:
       vite:
         optional: true
 
+  vitest@0.33.0:
+    resolution: {integrity: sha512-1CxaugJ50xskkQ0e969R/hW47za4YXDUfWJDxip1hwbnhUjYolpfUn2AMOulqG/Dtd9WYAtkHmM/m3yKVrEejQ==}
+    engines: {node: '>=v14.18.0'}
+    hasBin: true
+    peerDependencies:
+      '@edge-runtime/vm': '*'
+      '@vitest/browser': '*'
+      '@vitest/ui': '*'
+      happy-dom: '*'
+      jsdom: '*'
+      playwright: '*'
+      safaridriver: '*'
+      webdriverio: '*'
+    peerDependenciesMeta:
+      '@edge-runtime/vm':
+        optional: true
+      '@vitest/browser':
+        optional: true
+      '@vitest/ui':
+        optional: true
+      happy-dom:
+        optional: true
+      jsdom:
+        optional: true
+      playwright:
+        optional: true
+      safaridriver:
+        optional: true
+      webdriverio:
+        optional: true
+
+  vitest@0.34.3:
+    resolution: {integrity: sha512-7+VA5Iw4S3USYk+qwPxHl8plCMhA5rtfwMjgoQXMT7rO5ldWcdsdo3U1QD289JgglGK4WeOzgoLTsGFu6VISyQ==}
+    engines: {node: '>=v14.18.0'}
+    hasBin: true
+    peerDependencies:
+      '@edge-runtime/vm': '*'
+      '@vitest/browser': '*'
+      '@vitest/ui': '*'
+      happy-dom: '*'
+      jsdom: '*'
+      playwright: '*'
+      safaridriver: '*'
+      webdriverio: '*'
+    peerDependenciesMeta:
+      '@edge-runtime/vm':
+        optional: true
+      '@vitest/browser':
+        optional: true
+      '@vitest/ui':
+        optional: true
+      happy-dom:
+        optional: true
+      jsdom:
+        optional: true
+      playwright:
+        optional: true
+      safaridriver:
+        optional: true
+      webdriverio:
+        optional: true
+
+  vitest@0.34.4:
+    resolution: {integrity: sha512-SE/laOsB6995QlbSE6BtkpXDeVNLJc1u2LHRG/OpnN4RsRzM3GQm4nm3PQCK5OBtrsUqnhzLdnT7se3aeNGdlw==}
+    engines: {node: '>=v14.18.0'}
+    hasBin: true
+    peerDependencies:
+      '@edge-runtime/vm': '*'
+      '@vitest/browser': '*'
+      '@vitest/ui': '*'
+      happy-dom: '*'
+      jsdom: '*'
+      playwright: '*'
+      safaridriver: '*'
+      webdriverio: '*'
+    peerDependenciesMeta:
+      '@edge-runtime/vm':
+        optional: true
+      '@vitest/browser':
+        optional: true
+      '@vitest/ui':
+        optional: true
+      happy-dom:
+        optional: true
+      jsdom:
+        optional: true
+      playwright:
+        optional: true
+      safaridriver:
+        optional: true
+      webdriverio:
+        optional: true
+
   vitest@0.34.6:
     resolution: {integrity: sha512-+5CALsOvbNKnS+ZHMXtuUC7nL8/7F1F2DnHGjSsszX8zCjWSSviphCb/NuS9Nzf4Q03KyyDRBAXhF/8lffME4Q==}
     engines: {node: '>=v14.18.0'}
@@ -17965,6 +18230,81 @@ packages:
       safaridriver:
         optional: true
       webdriverio:
+        optional: true
+
+  vitest@1.1.1:
+    resolution: {integrity: sha512-Ry2qs4UOu/KjpXVfOCfQkTnwSXYGrqTbBZxw6reIYEFjSy1QUARRg5pxiI5BEXy+kBVntxUYNMlq4Co+2vD3fQ==}
+    engines: {node: ^18.0.0 || >=20.0.0}
+    hasBin: true
+    peerDependencies:
+      '@edge-runtime/vm': '*'
+      '@types/node': ^18.0.0 || >=20.0.0
+      '@vitest/browser': ^1.0.0
+      '@vitest/ui': ^1.0.0
+      happy-dom: '*'
+      jsdom: '*'
+    peerDependenciesMeta:
+      '@edge-runtime/vm':
+        optional: true
+      '@types/node':
+        optional: true
+      '@vitest/browser':
+        optional: true
+      '@vitest/ui':
+        optional: true
+      happy-dom:
+        optional: true
+      jsdom:
+        optional: true
+
+  vitest@1.6.0:
+    resolution: {integrity: sha512-H5r/dN06swuFnzNFhq/dnz37bPXnq8xB2xB5JOVk8K09rUtoeNN+LHWkoQ0A/i3hvbUKKcCei9KpbxqHMLhLLA==}
+    engines: {node: ^18.0.0 || >=20.0.0}
+    hasBin: true
+    peerDependencies:
+      '@edge-runtime/vm': '*'
+      '@types/node': ^18.0.0 || >=20.0.0
+      '@vitest/browser': 1.6.0
+      '@vitest/ui': 1.6.0
+      happy-dom: '*'
+      jsdom: '*'
+    peerDependenciesMeta:
+      '@edge-runtime/vm':
+        optional: true
+      '@types/node':
+        optional: true
+      '@vitest/browser':
+        optional: true
+      '@vitest/ui':
+        optional: true
+      happy-dom:
+        optional: true
+      jsdom:
+        optional: true
+
+  vitest@2.0.5:
+    resolution: {integrity: sha512-8GUxONfauuIdeSl5f9GTgVEpg5BTOlplET4WEDaeY2QBiN8wSm68vxN/tb5z405OwppfoCavnwXafiaYBC/xOA==}
+    engines: {node: ^18.0.0 || >=20.0.0}
+    hasBin: true
+    peerDependencies:
+      '@edge-runtime/vm': '*'
+      '@types/node': ^18.0.0 || >=20.0.0
+      '@vitest/browser': 2.0.5
+      '@vitest/ui': 2.0.5
+      happy-dom: '*'
+      jsdom: '*'
+    peerDependenciesMeta:
+      '@edge-runtime/vm':
+        optional: true
+      '@types/node':
+        optional: true
+      '@vitest/browser':
+        optional: true
+      '@vitest/ui':
+        optional: true
+      happy-dom:
+        optional: true
+      jsdom:
         optional: true
 
   vm-browserify@1.1.2:
@@ -22847,11 +23187,11 @@ snapshots:
     dependencies:
       solid-js: 1.8.19
 
-  '@solidjs/start@1.0.6(rollup@4.20.0)(solid-js@1.8.19)(vinxi@0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(terser@5.31.5))(vite@5.4.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5))':
+  '@solidjs/start@1.0.6(rollup@4.20.0)(solid-js@1.8.19)(vinxi@0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(magicast@0.3.4)(terser@5.31.5))(vite@5.4.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5))':
     dependencies:
-      '@vinxi/plugin-directives': 0.4.1(vinxi@0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(terser@5.31.5))
-      '@vinxi/server-components': 0.4.1(vinxi@0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(terser@5.31.5))
-      '@vinxi/server-functions': 0.4.1(vinxi@0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(terser@5.31.5))
+      '@vinxi/plugin-directives': 0.4.1(vinxi@0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(magicast@0.3.4)(terser@5.31.5))
+      '@vinxi/server-components': 0.4.1(vinxi@0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(magicast@0.3.4)(terser@5.31.5))
+      '@vinxi/server-functions': 0.4.1(vinxi@0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(magicast@0.3.4)(terser@5.31.5))
       defu: 6.1.4
       error-stack-parser: 2.1.4
       glob: 10.4.5
@@ -24427,7 +24767,7 @@ snapshots:
       '@types/node': 20.14.14
     optional: true
 
-  '@typescript-eslint/eslint-plugin@5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.0.3)':
+  '@typescript-eslint/eslint-plugin@5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.3.2)':
     dependencies:
       '@eslint-community/regexpp': 4.11.0
       '@typescript-eslint/parser': 5.56.0(eslint@8.57.0)(typescript@5.0.3)
@@ -24442,7 +24782,7 @@ snapshots:
       semver: 7.6.3
       tsutils: 3.21.0(typescript@5.0.3)
     optionalDependencies:
-      typescript: 5.0.3
+      typescript: 5.3.2
     transitivePeerDependencies:
       - supports-color
 
@@ -24990,7 +25330,7 @@ snapshots:
     transitivePeerDependencies:
       - uWebSockets.js
 
-  '@vinxi/plugin-directives@0.4.1(vinxi@0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(terser@5.31.5))':
+  '@vinxi/plugin-directives@0.4.1(vinxi@0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(magicast@0.3.4)(terser@5.31.5))':
     dependencies:
       '@babel/parser': 7.25.3
       acorn: 8.12.1
@@ -25001,29 +25341,29 @@ snapshots:
       magicast: 0.2.11
       recast: 0.23.9
       tslib: 2.6.3
-      vinxi: 0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(terser@5.31.5)
+      vinxi: 0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(magicast@0.3.4)(terser@5.31.5)
 
-  '@vinxi/server-components@0.4.1(vinxi@0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(terser@5.31.5))':
+  '@vinxi/server-components@0.4.1(vinxi@0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(magicast@0.3.4)(terser@5.31.5))':
     dependencies:
-      '@vinxi/plugin-directives': 0.4.1(vinxi@0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(terser@5.31.5))
+      '@vinxi/plugin-directives': 0.4.1(vinxi@0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(magicast@0.3.4)(terser@5.31.5))
       acorn: 8.12.1
       acorn-loose: 8.4.0
       acorn-typescript: 1.4.13(acorn@8.12.1)
       astring: 1.8.6
       magicast: 0.2.11
       recast: 0.23.9
-      vinxi: 0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(terser@5.31.5)
+      vinxi: 0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(magicast@0.3.4)(terser@5.31.5)
 
-  '@vinxi/server-functions@0.4.1(vinxi@0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(terser@5.31.5))':
+  '@vinxi/server-functions@0.4.1(vinxi@0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(magicast@0.3.4)(terser@5.31.5))':
     dependencies:
-      '@vinxi/plugin-directives': 0.4.1(vinxi@0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(terser@5.31.5))
+      '@vinxi/plugin-directives': 0.4.1(vinxi@0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(magicast@0.3.4)(terser@5.31.5))
       acorn: 8.12.1
       acorn-loose: 8.4.0
       acorn-typescript: 1.4.13(acorn@8.12.1)
       astring: 1.8.6
       magicast: 0.2.11
       recast: 0.23.9
-      vinxi: 0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(terser@5.31.5)
+      vinxi: 0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(magicast@0.3.4)(terser@5.31.5)
 
   '@vitejs/plugin-react@4.3.1(vite@5.4.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5))':
     dependencies:
@@ -25036,6 +25376,42 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@vitest/browser@1.6.0(playwright@1.39.0)(safaridriver@0.1.2)(vitest@0.33.0)(webdriverio@8.40.2)':
+    dependencies:
+      '@vitest/utils': 1.6.0
+      magic-string: 0.30.11
+      sirv: 2.0.4
+      vitest: 0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+    optionalDependencies:
+      playwright: 1.39.0
+      safaridriver: 0.1.2
+      webdriverio: 8.40.2
+    optional: true
+
+  '@vitest/browser@1.6.0(playwright@1.39.0)(safaridriver@0.1.2)(vitest@0.34.3)(webdriverio@8.40.2)':
+    dependencies:
+      '@vitest/utils': 1.6.0
+      magic-string: 0.30.11
+      sirv: 2.0.4
+      vitest: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+    optionalDependencies:
+      playwright: 1.39.0
+      safaridriver: 0.1.2
+      webdriverio: 8.40.2
+    optional: true
+
+  '@vitest/browser@1.6.0(playwright@1.39.0)(safaridriver@0.1.2)(vitest@0.34.4)(webdriverio@8.40.2)':
+    dependencies:
+      '@vitest/utils': 1.6.0
+      magic-string: 0.30.11
+      sirv: 2.0.4
+      vitest: 0.34.4(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+    optionalDependencies:
+      playwright: 1.39.0
+      safaridriver: 0.1.2
+      webdriverio: 8.40.2
+    optional: true
+
   '@vitest/browser@1.6.0(playwright@1.39.0)(safaridriver@0.1.2)(vitest@0.34.6)(webdriverio@8.40.2)':
     dependencies:
       '@vitest/utils': 1.6.0
@@ -25046,6 +25422,110 @@ snapshots:
       playwright: 1.39.0
       safaridriver: 0.1.2
       webdriverio: 8.40.2
+    optional: true
+
+  '@vitest/browser@1.6.0(playwright@1.39.0)(vitest@1.6.0)(webdriverio@8.40.2)':
+    dependencies:
+      '@vitest/utils': 1.6.0
+      magic-string: 0.30.11
+      sirv: 2.0.4
+      vitest: 1.6.0(@types/node@20.14.14)(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.5)
+    optionalDependencies:
+      playwright: 1.39.0
+      webdriverio: 8.40.2
+
+  '@vitest/browser@1.6.0(vitest@1.1.1)':
+    dependencies:
+      '@vitest/utils': 1.6.0
+      magic-string: 0.30.11
+      sirv: 2.0.4
+      vitest: 1.1.1(@types/node@20.14.14)(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.5)
+    optional: true
+
+  '@vitest/coverage-v8@0.33.0(vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))':
+    dependencies:
+      '@ampproject/remapping': 2.3.0
+      '@bcoe/v8-coverage': 0.2.3
+      istanbul-lib-coverage: 3.2.2
+      istanbul-lib-report: 3.0.1
+      istanbul-lib-source-maps: 4.0.1
+      istanbul-reports: 3.1.7
+      magic-string: 0.30.11
+      picocolors: 1.0.1
+      std-env: 3.7.0
+      test-exclude: 6.0.0
+      v8-to-istanbul: 9.2.0
+      vitest: 0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+    transitivePeerDependencies:
+      - supports-color
+
+  '@vitest/coverage-v8@0.33.0(vitest@0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))':
+    dependencies:
+      '@ampproject/remapping': 2.3.0
+      '@bcoe/v8-coverage': 0.2.3
+      istanbul-lib-coverage: 3.2.2
+      istanbul-lib-report: 3.0.1
+      istanbul-lib-source-maps: 4.0.1
+      istanbul-reports: 3.1.7
+      magic-string: 0.30.11
+      picocolors: 1.0.1
+      std-env: 3.7.0
+      test-exclude: 6.0.0
+      v8-to-istanbul: 9.2.0
+      vitest: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+    transitivePeerDependencies:
+      - supports-color
+
+  '@vitest/coverage-v8@0.33.0(vitest@2.0.5(@types/node@20.14.14)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.5))':
+    dependencies:
+      '@ampproject/remapping': 2.3.0
+      '@bcoe/v8-coverage': 0.2.3
+      istanbul-lib-coverage: 3.2.2
+      istanbul-lib-report: 3.0.1
+      istanbul-lib-source-maps: 4.0.1
+      istanbul-reports: 3.1.7
+      magic-string: 0.30.11
+      picocolors: 1.0.1
+      std-env: 3.7.0
+      test-exclude: 6.0.0
+      v8-to-istanbul: 9.2.0
+      vitest: 2.0.5(@types/node@20.14.14)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.5)
+    transitivePeerDependencies:
+      - supports-color
+
+  '@vitest/coverage-v8@0.34.3(vitest@0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))':
+    dependencies:
+      '@ampproject/remapping': 2.3.0
+      '@bcoe/v8-coverage': 0.2.3
+      istanbul-lib-coverage: 3.2.2
+      istanbul-lib-report: 3.0.1
+      istanbul-lib-source-maps: 4.0.1
+      istanbul-reports: 3.1.7
+      magic-string: 0.30.11
+      picocolors: 1.0.1
+      std-env: 3.7.0
+      test-exclude: 6.0.0
+      v8-to-istanbul: 9.2.0
+      vitest: 0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+    transitivePeerDependencies:
+      - supports-color
+
+  '@vitest/coverage-v8@0.34.3(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))':
+    dependencies:
+      '@ampproject/remapping': 2.3.0
+      '@bcoe/v8-coverage': 0.2.3
+      istanbul-lib-coverage: 3.2.2
+      istanbul-lib-report: 3.0.1
+      istanbul-lib-source-maps: 4.0.1
+      istanbul-reports: 3.1.7
+      magic-string: 0.30.11
+      picocolors: 1.0.1
+      std-env: 3.7.0
+      test-exclude: 6.0.0
+      v8-to-istanbul: 9.2.0
+      vitest: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+    transitivePeerDependencies:
+      - supports-color
 
   '@vitest/coverage-v8@0.34.6(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))':
     dependencies:
@@ -25064,15 +25544,108 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@vitest/coverage-v8@1.1.1(vitest@1.1.1(@types/node@20.14.14)(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.5))':
+    dependencies:
+      '@ampproject/remapping': 2.3.0
+      '@bcoe/v8-coverage': 0.2.3
+      debug: 4.3.6(supports-color@8.1.1)
+      istanbul-lib-coverage: 3.2.2
+      istanbul-lib-report: 3.0.1
+      istanbul-lib-source-maps: 4.0.1
+      istanbul-reports: 3.1.7
+      magic-string: 0.30.11
+      magicast: 0.3.4
+      picocolors: 1.0.1
+      std-env: 3.7.0
+      test-exclude: 6.0.0
+      v8-to-istanbul: 9.2.0
+      vitest: 1.1.1(@types/node@20.14.14)(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.5)
+    transitivePeerDependencies:
+      - supports-color
+
+  '@vitest/coverage-v8@1.6.0(vitest@1.6.0(@types/node@20.14.14)(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.5))':
+    dependencies:
+      '@ampproject/remapping': 2.3.0
+      '@bcoe/v8-coverage': 0.2.3
+      debug: 4.3.6(supports-color@8.1.1)
+      istanbul-lib-coverage: 3.2.2
+      istanbul-lib-report: 3.0.1
+      istanbul-lib-source-maps: 5.0.6
+      istanbul-reports: 3.1.7
+      magic-string: 0.30.11
+      magicast: 0.3.4
+      picocolors: 1.0.1
+      std-env: 3.7.0
+      strip-literal: 2.1.0
+      test-exclude: 6.0.0
+      vitest: 1.6.0(@types/node@20.14.14)(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.5)
+    transitivePeerDependencies:
+      - supports-color
+
+  '@vitest/expect@0.33.0':
+    dependencies:
+      '@vitest/spy': 0.33.0
+      '@vitest/utils': 0.33.0
+      chai: 4.5.0
+
+  '@vitest/expect@0.34.3':
+    dependencies:
+      '@vitest/spy': 0.34.3
+      '@vitest/utils': 0.34.3
+      chai: 4.5.0
+
+  '@vitest/expect@0.34.4':
+    dependencies:
+      '@vitest/spy': 0.34.4
+      '@vitest/utils': 0.34.4
+      chai: 4.5.0
+
   '@vitest/expect@0.34.6':
     dependencies:
       '@vitest/spy': 0.34.6
       '@vitest/utils': 0.34.6
       chai: 4.5.0
 
+  '@vitest/expect@1.1.1':
+    dependencies:
+      '@vitest/spy': 1.1.1
+      '@vitest/utils': 1.1.1
+      chai: 4.5.0
+
+  '@vitest/expect@1.6.0':
+    dependencies:
+      '@vitest/spy': 1.6.0
+      '@vitest/utils': 1.6.0
+      chai: 4.5.0
+
+  '@vitest/expect@2.0.5':
+    dependencies:
+      '@vitest/spy': 2.0.5
+      '@vitest/utils': 2.0.5
+      chai: 5.1.1
+      tinyrainbow: 1.2.0
+
   '@vitest/pretty-format@2.0.5':
     dependencies:
       tinyrainbow: 1.2.0
+
+  '@vitest/runner@0.33.0':
+    dependencies:
+      '@vitest/utils': 0.33.0
+      p-limit: 4.0.0
+      pathe: 1.1.2
+
+  '@vitest/runner@0.34.3':
+    dependencies:
+      '@vitest/utils': 0.34.3
+      p-limit: 4.0.0
+      pathe: 1.1.2
+
+  '@vitest/runner@0.34.4':
+    dependencies:
+      '@vitest/utils': 0.34.4
+      p-limit: 4.0.0
+      pathe: 1.1.2
 
   '@vitest/runner@0.34.6':
     dependencies:
@@ -25080,7 +25653,48 @@ snapshots:
       p-limit: 4.0.0
       pathe: 1.1.2
 
+  '@vitest/runner@1.1.1':
+    dependencies:
+      '@vitest/utils': 1.1.1
+      p-limit: 5.0.0
+      pathe: 1.1.2
+
+  '@vitest/runner@1.6.0':
+    dependencies:
+      '@vitest/utils': 1.6.0
+      p-limit: 5.0.0
+      pathe: 1.1.2
+
+  '@vitest/runner@2.0.5':
+    dependencies:
+      '@vitest/utils': 2.0.5
+      pathe: 1.1.2
+
+  '@vitest/snapshot@0.33.0':
+    dependencies:
+      magic-string: 0.30.11
+      pathe: 1.1.2
+      pretty-format: 29.7.0
+
+  '@vitest/snapshot@0.34.3':
+    dependencies:
+      magic-string: 0.30.11
+      pathe: 1.1.2
+      pretty-format: 29.7.0
+
+  '@vitest/snapshot@0.34.4':
+    dependencies:
+      magic-string: 0.30.11
+      pathe: 1.1.2
+      pretty-format: 29.7.0
+
   '@vitest/snapshot@0.34.6':
+    dependencies:
+      magic-string: 0.30.11
+      pathe: 1.1.2
+      pretty-format: 29.7.0
+
+  '@vitest/snapshot@1.1.1':
     dependencies:
       magic-string: 0.30.11
       pathe: 1.1.2
@@ -25098,11 +25712,59 @@ snapshots:
       magic-string: 0.30.11
       pathe: 1.1.2
 
+  '@vitest/spy@0.33.0':
+    dependencies:
+      tinyspy: 2.2.1
+
+  '@vitest/spy@0.34.3':
+    dependencies:
+      tinyspy: 2.2.1
+
+  '@vitest/spy@0.34.4':
+    dependencies:
+      tinyspy: 2.2.1
+
   '@vitest/spy@0.34.6':
     dependencies:
       tinyspy: 2.2.1
 
+  '@vitest/spy@1.1.1':
+    dependencies:
+      tinyspy: 2.2.1
+
+  '@vitest/spy@1.6.0':
+    dependencies:
+      tinyspy: 2.2.1
+
+  '@vitest/spy@2.0.5':
+    dependencies:
+      tinyspy: 3.0.0
+
+  '@vitest/utils@0.33.0':
+    dependencies:
+      diff-sequences: 29.6.3
+      loupe: 2.3.7
+      pretty-format: 29.7.0
+
+  '@vitest/utils@0.34.3':
+    dependencies:
+      diff-sequences: 29.6.3
+      loupe: 2.3.7
+      pretty-format: 29.7.0
+
+  '@vitest/utils@0.34.4':
+    dependencies:
+      diff-sequences: 29.6.3
+      loupe: 2.3.7
+      pretty-format: 29.7.0
+
   '@vitest/utils@0.34.6':
+    dependencies:
+      diff-sequences: 29.6.3
+      loupe: 2.3.7
+      pretty-format: 29.7.0
+
+  '@vitest/utils@1.1.1':
     dependencies:
       diff-sequences: 29.6.3
       loupe: 2.3.7
@@ -25115,10 +25777,24 @@ snapshots:
       loupe: 2.3.7
       pretty-format: 29.7.0
 
-  '@vitest/web-worker@1.6.0(vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))':
+  '@vitest/utils@2.0.5':
+    dependencies:
+      '@vitest/pretty-format': 2.0.5
+      estree-walker: 3.0.3
+      loupe: 3.1.1
+      tinyrainbow: 1.2.0
+
+  '@vitest/web-worker@1.6.0(vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2))':
     dependencies:
       debug: 4.3.5
-      vitest: 0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+      vitest: 0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2)
+    transitivePeerDependencies:
+      - supports-color
+
+  '@vitest/web-worker@1.6.0(vitest@2.0.5(@types/node@20.14.14)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.5))':
+    dependencies:
+      debug: 4.3.5
+      vitest: 2.0.5(@types/node@20.14.14)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.5)
     transitivePeerDependencies:
       - supports-color
 
@@ -25879,6 +26555,8 @@ snapshots:
 
   assertion-error@1.1.0: {}
 
+  assertion-error@2.0.1: {}
+
   ast-types-flow@0.0.7: {}
 
   ast-types-flow@0.0.8: {}
@@ -26455,7 +27133,7 @@ snapshots:
 
   bytes@3.1.2: {}
 
-  c12@1.11.1:
+  c12@1.11.1(magicast@0.3.4):
     dependencies:
       chokidar: 3.6.0
       confbox: 0.1.7
@@ -26469,6 +27147,8 @@ snapshots:
       perfect-debounce: 1.0.0
       pkg-types: 1.1.3
       rc9: 2.1.2
+    optionalDependencies:
+      magicast: 0.3.4
 
   cac@6.7.14: {}
 
@@ -26552,6 +27232,14 @@ snapshots:
       pathval: 1.1.1
       type-detect: 4.1.0
 
+  chai@5.1.1:
+    dependencies:
+      assertion-error: 2.0.1
+      check-error: 2.1.1
+      deep-eql: 5.0.2
+      loupe: 3.1.1
+      pathval: 2.0.0
+
   chalk@2.4.2:
     dependencies:
       ansi-styles: 3.2.1
@@ -26578,6 +27266,8 @@ snapshots:
   check-error@1.0.3:
     dependencies:
       get-func-name: 2.0.2
+
+  check-error@2.1.1: {}
 
   cheerio-select@2.1.0:
     dependencies:
@@ -27257,6 +27947,8 @@ snapshots:
     dependencies:
       type-detect: 4.1.0
 
+  deep-eql@5.0.2: {}
+
   deep-equal@2.2.3:
     dependencies:
       array-buffer-byte-length: 1.0.1
@@ -27922,17 +28614,17 @@ snapshots:
       '@babel/eslint-parser': 7.21.3(@babel/core@7.21.4)(eslint@8.57.0)
       '@babel/preset-react': 7.18.6(@babel/core@7.21.4)
       '@next/eslint-plugin-next': 13.2.4
-      '@typescript-eslint/eslint-plugin': 5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.0.3)
+      '@typescript-eslint/eslint-plugin': 5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.3.2)
       '@typescript-eslint/parser': 5.56.0(eslint@8.57.0)(typescript@5.0.3)
       confusing-browser-globals: 1.0.11
       eslint: 8.57.0
       eslint-config-prettier: 8.8.0(eslint@8.57.0)
       eslint-import-resolver-jsconfig: 1.1.0
       eslint-import-resolver-node: 0.3.7
-      eslint-import-resolver-typescript: 3.5.4(eslint-plugin-import@2.27.5(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0))(eslint@8.57.0)
+      eslint-import-resolver-typescript: 3.5.4(eslint-plugin-import@2.27.5)(eslint@8.57.0)
       eslint-plugin-etc: 2.0.2(eslint@8.57.0)(typescript@5.0.3)
-      eslint-plugin-import: 2.27.5(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint-import-resolver-typescript@3.5.4(eslint-plugin-import@2.27.5(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0))(eslint@8.57.0))(eslint@8.57.0)
-      eslint-plugin-jest: 27.2.1(@typescript-eslint/eslint-plugin@5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.0.3)
+      eslint-plugin-import: 2.27.5(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint-import-resolver-typescript@3.5.4)(eslint@8.57.0)
+      eslint-plugin-jest: 27.2.1(@typescript-eslint/eslint-plugin@5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.0.3))(eslint@8.57.0)(typescript@5.0.3)
       eslint-plugin-jest-dom: 4.0.3(eslint@8.57.0)
       eslint-plugin-jest-formatting: 3.1.0(eslint@8.57.0)
       eslint-plugin-jsx-a11y: 6.7.1(eslint@8.57.0)
@@ -27961,8 +28653,8 @@ snapshots:
       '@typescript-eslint/parser': 6.21.0(eslint@8.41.0)(typescript@5.0.4)
       eslint: 8.41.0
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.41.0))(eslint@8.41.0)
-      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.41.0))(eslint@8.41.0))(eslint@8.41.0)
+      eslint-import-resolver-typescript: 3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1)(eslint@8.41.0)
+      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.41.0)
       eslint-plugin-jsx-a11y: 6.9.0(eslint@8.41.0)
       eslint-plugin-react: 7.35.0(eslint@8.41.0)
       eslint-plugin-react-hooks: 4.6.2(eslint@8.41.0)
@@ -28027,12 +28719,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.5.4(eslint-plugin-import@2.27.5(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0))(eslint@8.57.0):
+  eslint-import-resolver-typescript@3.5.4(eslint-plugin-import@2.27.5)(eslint@8.57.0):
     dependencies:
       debug: 4.3.6(supports-color@8.1.1)
       enhanced-resolve: 5.17.1
       eslint: 8.57.0
-      eslint-plugin-import: 2.27.5(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint-import-resolver-typescript@3.5.4(eslint-plugin-import@2.27.5(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0))(eslint@8.57.0))(eslint@8.57.0)
+      eslint-plugin-import: 2.27.5(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint-import-resolver-typescript@3.5.4)(eslint@8.57.0)
       get-tsconfig: 4.7.6
       globby: 13.2.2
       is-core-module: 2.15.0
@@ -28041,13 +28733,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.41.0))(eslint@8.41.0):
+  eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1)(eslint@8.41.0):
     dependencies:
       debug: 4.3.6(supports-color@8.1.1)
       enhanced-resolve: 5.17.1
       eslint: 8.41.0
-      eslint-module-utils: 2.8.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.41.0))(eslint@8.41.0))(eslint@8.41.0)
-      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.41.0))(eslint@8.41.0))(eslint@8.41.0)
+      eslint-module-utils: 2.8.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1)(eslint@8.41.0))(eslint@8.41.0)
+      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.41.0)
       fast-glob: 3.3.2
       get-tsconfig: 4.7.6
       is-core-module: 2.15.0
@@ -28058,25 +28750,35 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-module-utils@2.8.1(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.5.4(eslint-plugin-import@2.27.5(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0))(eslint@8.57.0))(eslint@8.57.0):
+  eslint-module-utils@2.8.1(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.5.4(eslint-plugin-import@2.27.5)(eslint@8.57.0))(eslint@8.57.0):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
       '@typescript-eslint/parser': 5.56.0(eslint@8.57.0)(typescript@5.0.3)
       eslint: 8.57.0
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.5.4(eslint-plugin-import@2.27.5(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0))(eslint@8.57.0)
+      eslint-import-resolver-typescript: 3.5.4(eslint-plugin-import@2.27.5)(eslint@8.57.0)
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.8.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.41.0))(eslint@8.41.0))(eslint@8.41.0):
+  eslint-module-utils@2.8.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1)(eslint@8.41.0))(eslint@8.41.0):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
       '@typescript-eslint/parser': 6.21.0(eslint@8.41.0)(typescript@5.0.4)
       eslint: 8.41.0
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.41.0))(eslint@8.41.0)
+      eslint-import-resolver-typescript: 3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1)(eslint@8.41.0)
+    transitivePeerDependencies:
+      - supports-color
+
+  eslint-module-utils@2.8.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint@8.41.0):
+    dependencies:
+      debug: 3.2.7
+    optionalDependencies:
+      '@typescript-eslint/parser': 6.21.0(eslint@8.57.0)(typescript@5.5.4)
+      eslint: 8.41.0
+      eslint-import-resolver-node: 0.3.9
     transitivePeerDependencies:
       - supports-color
 
@@ -28093,7 +28795,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.27.5(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint-import-resolver-typescript@3.5.4(eslint-plugin-import@2.27.5(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0))(eslint@8.57.0))(eslint@8.57.0):
+  eslint-plugin-import@2.27.5(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint-import-resolver-typescript@3.5.4)(eslint@8.57.0):
     dependencies:
       array-includes: 3.1.8
       array.prototype.flat: 1.3.2
@@ -28102,7 +28804,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.0
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.8.1(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.5.4(eslint-plugin-import@2.27.5(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0))(eslint@8.57.0))(eslint@8.57.0)
+      eslint-module-utils: 2.8.1(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.5.4(eslint-plugin-import@2.27.5)(eslint@8.57.0))(eslint@8.57.0)
       has: 1.0.4
       is-core-module: 2.15.0
       is-glob: 4.0.3
@@ -28118,7 +28820,7 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.41.0))(eslint@8.41.0))(eslint@8.41.0):
+  eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.41.0):
     dependencies:
       array-includes: 3.1.8
       array.prototype.findlastindex: 1.2.5
@@ -28128,7 +28830,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.41.0
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.8.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.21.0(eslint@8.41.0)(typescript@5.0.4))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint@8.41.0))(eslint@8.41.0))(eslint@8.41.0)
+      eslint-module-utils: 2.8.1(@typescript-eslint/parser@6.21.0(eslint@8.57.0)(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint@8.41.0)
       hasown: 2.0.2
       is-core-module: 2.15.0
       is-glob: 4.0.3
@@ -28139,7 +28841,7 @@ snapshots:
       semver: 6.3.1
       tsconfig-paths: 3.15.0
     optionalDependencies:
-      '@typescript-eslint/parser': 6.21.0(eslint@8.41.0)(typescript@5.0.4)
+      '@typescript-eslint/parser': 6.21.0(eslint@8.57.0)(typescript@5.5.4)
     transitivePeerDependencies:
       - eslint-import-resolver-typescript
       - eslint-import-resolver-webpack
@@ -28156,12 +28858,12 @@ snapshots:
     dependencies:
       eslint: 8.57.0
 
-  eslint-plugin-jest@27.2.1(@typescript-eslint/eslint-plugin@5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.0.3):
+  eslint-plugin-jest@27.2.1(@typescript-eslint/eslint-plugin@5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.0.3))(eslint@8.57.0)(typescript@5.0.3):
     dependencies:
       '@typescript-eslint/utils': 5.62.0(eslint@8.57.0)(typescript@5.0.3)
       eslint: 8.57.0
     optionalDependencies:
-      '@typescript-eslint/eslint-plugin': 5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.0.3)
+      '@typescript-eslint/eslint-plugin': 5.56.0(@typescript-eslint/parser@5.56.0(eslint@8.57.0)(typescript@5.3.2))(eslint@8.57.0)(typescript@5.3.2)
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -30461,6 +31163,14 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  istanbul-lib-source-maps@5.0.6:
+    dependencies:
+      '@jridgewell/trace-mapping': 0.3.25
+      debug: 4.3.6(supports-color@8.1.1)
+      istanbul-lib-coverage: 3.2.2
+    transitivePeerDependencies:
+      - supports-color
+
   istanbul-reports@3.1.7:
     dependencies:
       html-escaper: 2.0.2
@@ -31112,6 +31822,10 @@ snapshots:
     dependencies:
       get-func-name: 2.0.2
 
+  loupe@3.1.1:
+    dependencies:
+      get-func-name: 2.0.2
+
   lower-case@2.0.2:
     dependencies:
       tslib: 2.6.3
@@ -31170,6 +31884,12 @@ snapshots:
       '@babel/parser': 7.25.3
       '@babel/types': 7.25.2
       recast: 0.23.9
+
+  magicast@0.3.4:
+    dependencies:
+      '@babel/parser': 7.25.3
+      '@babel/types': 7.25.2
+      source-map-js: 1.2.0
 
   make-dir@1.3.0:
     dependencies:
@@ -32365,7 +33085,7 @@ snapshots:
 
   nice-try@1.0.5: {}
 
-  nitropack@2.9.7(@azure/identity@4.4.1):
+  nitropack@2.9.7(@azure/identity@4.4.1)(magicast@0.3.4):
     dependencies:
       '@cloudflare/kv-asset-handler': 0.3.4
       '@netlify/functions': 2.8.1
@@ -32380,7 +33100,7 @@ snapshots:
       '@types/http-proxy': 1.17.15
       '@vercel/nft': 0.26.5
       archiver: 7.0.1
-      c12: 1.11.1
+      c12: 1.11.1(magicast@0.3.4)
       chalk: 5.3.0
       chokidar: 3.6.0
       citty: 0.1.6
@@ -33213,6 +33933,8 @@ snapshots:
 
   pathval@1.1.1: {}
 
+  pathval@2.0.0: {}
+
   pbkdf2@3.1.2:
     dependencies:
       create-hash: 1.2.0
@@ -33362,13 +34084,21 @@ snapshots:
       postcss: 8.4.39
       ts-node: 10.9.2(@swc/core@1.7.6)(@types/node@20.14.14)(typescript@5.0.4)
 
-  postcss-load-config@4.0.2(postcss@8.4.39)(ts-node@10.9.2(@swc/core@1.7.6)(typescript@5.3.2)):
+  postcss-load-config@4.0.2(postcss@8.4.39)(ts-node@10.9.2(@swc/core@1.7.6)(@types/node@20.14.14)(typescript@5.3.2)):
     dependencies:
       lilconfig: 3.1.2
       yaml: 2.4.2
     optionalDependencies:
       postcss: 8.4.39
       ts-node: 10.9.2(@swc/core@1.7.6)(@types/node@20.14.14)(typescript@5.3.2)
+
+  postcss-load-config@4.0.2(postcss@8.4.41)(ts-node@10.9.2(@swc/core@1.7.6)(@types/node@20.14.14)(typescript@5.2.2)):
+    dependencies:
+      lilconfig: 3.1.2
+      yaml: 2.4.2
+    optionalDependencies:
+      postcss: 8.4.41
+      ts-node: 10.9.2(@swc/core@1.7.6)(@types/node@20.14.14)(typescript@5.2.2)
 
   postcss-load-config@4.0.2(postcss@8.4.41)(ts-node@10.9.2(@swc/core@1.7.6)(@types/node@20.14.14)(typescript@5.3.2)):
     dependencies:
@@ -33393,14 +34123,6 @@ snapshots:
     optionalDependencies:
       postcss: 8.4.41
       ts-node: 10.9.2(@swc/core@1.7.6)(@types/node@20.5.9)(typescript@5.5.4)
-
-  postcss-load-config@4.0.2(postcss@8.4.41)(ts-node@10.9.2(@swc/core@1.7.6)(typescript@5.2.2)):
-    dependencies:
-      lilconfig: 3.1.2
-      yaml: 2.4.2
-    optionalDependencies:
-      postcss: 8.4.41
-      ts-node: 10.9.2(@swc/core@1.7.6)(@types/node@20.5.9)(typescript@5.2.2)
 
   postcss-nested@6.0.1(postcss@8.4.39):
     dependencies:
@@ -35475,7 +36197,7 @@ snapshots:
     transitivePeerDependencies:
       - ts-node
 
-  tailwindcss@3.3.3(ts-node@10.9.2(@swc/core@1.7.6)(typescript@5.3.2)):
+  tailwindcss@3.3.3(ts-node@10.9.2(@swc/core@1.7.6)(@types/node@20.14.14)(typescript@5.3.2)):
     dependencies:
       '@alloc/quick-lru': 5.2.0
       arg: 5.0.2
@@ -35494,9 +36216,36 @@ snapshots:
       postcss: 8.4.39
       postcss-import: 15.1.0(postcss@8.4.39)
       postcss-js: 4.0.1(postcss@8.4.39)
-      postcss-load-config: 4.0.2(postcss@8.4.39)(ts-node@10.9.2(@swc/core@1.7.6)(typescript@5.3.2))
+      postcss-load-config: 4.0.2(postcss@8.4.39)(ts-node@10.9.2(@swc/core@1.7.6)(@types/node@20.14.14)(typescript@5.3.2))
       postcss-nested: 6.0.1(postcss@8.4.39)
       postcss-selector-parser: 6.0.16
+      resolve: 1.22.8
+      sucrase: 3.35.0
+    transitivePeerDependencies:
+      - ts-node
+
+  tailwindcss@3.4.9(ts-node@10.9.2(@swc/core@1.7.6)(@types/node@20.14.14)(typescript@5.2.2)):
+    dependencies:
+      '@alloc/quick-lru': 5.2.0
+      arg: 5.0.2
+      chokidar: 3.6.0
+      didyoumean: 1.2.2
+      dlv: 1.1.3
+      fast-glob: 3.3.2
+      glob-parent: 6.0.2
+      is-glob: 4.0.3
+      jiti: 1.21.6
+      lilconfig: 2.1.0
+      micromatch: 4.0.7
+      normalize-path: 3.0.0
+      object-hash: 3.0.0
+      picocolors: 1.0.1
+      postcss: 8.4.41
+      postcss-import: 15.1.0(postcss@8.4.41)
+      postcss-js: 4.0.1(postcss@8.4.41)
+      postcss-load-config: 4.0.2(postcss@8.4.41)(ts-node@10.9.2(@swc/core@1.7.6)(@types/node@20.14.14)(typescript@5.2.2))
+      postcss-nested: 6.2.0(postcss@8.4.41)
+      postcss-selector-parser: 6.1.1
       resolve: 1.22.8
       sucrase: 3.35.0
     transitivePeerDependencies:
@@ -35576,33 +36325,6 @@ snapshots:
       postcss-import: 15.1.0(postcss@8.4.41)
       postcss-js: 4.0.1(postcss@8.4.41)
       postcss-load-config: 4.0.2(postcss@8.4.41)(ts-node@10.9.2(@swc/core@1.7.6)(@types/node@20.5.9)(typescript@5.5.4))
-      postcss-nested: 6.2.0(postcss@8.4.41)
-      postcss-selector-parser: 6.1.1
-      resolve: 1.22.8
-      sucrase: 3.35.0
-    transitivePeerDependencies:
-      - ts-node
-
-  tailwindcss@3.4.9(ts-node@10.9.2(@swc/core@1.7.6)(typescript@5.2.2)):
-    dependencies:
-      '@alloc/quick-lru': 5.2.0
-      arg: 5.0.2
-      chokidar: 3.6.0
-      didyoumean: 1.2.2
-      dlv: 1.1.3
-      fast-glob: 3.3.2
-      glob-parent: 6.0.2
-      is-glob: 4.0.3
-      jiti: 1.21.6
-      lilconfig: 2.1.0
-      micromatch: 4.0.7
-      normalize-path: 3.0.0
-      object-hash: 3.0.0
-      picocolors: 1.0.1
-      postcss: 8.4.41
-      postcss-import: 15.1.0(postcss@8.4.41)
-      postcss-js: 4.0.1(postcss@8.4.41)
-      postcss-load-config: 4.0.2(postcss@8.4.41)(ts-node@10.9.2(@swc/core@1.7.6)(typescript@5.2.2))
       postcss-nested: 6.2.0(postcss@8.4.41)
       postcss-selector-parser: 6.1.1
       resolve: 1.22.8
@@ -35974,11 +36696,19 @@ snapshots:
 
   tinybench@2.9.0: {}
 
+  tinypool@0.6.0: {}
+
   tinypool@0.7.0: {}
+
+  tinypool@0.8.4: {}
+
+  tinypool@1.0.0: {}
 
   tinyrainbow@1.2.0: {}
 
   tinyspy@2.2.1: {}
+
+  tinyspy@3.0.0: {}
 
   tippy.js@6.3.7:
     dependencies:
@@ -36127,6 +36857,27 @@ snapshots:
       diff: 4.0.2
       make-error: 1.3.6
       typescript: 5.0.4
+      v8-compile-cache-lib: 3.0.1
+      yn: 3.1.1
+    optionalDependencies:
+      '@swc/core': 1.7.6
+    optional: true
+
+  ts-node@10.9.2(@swc/core@1.7.6)(@types/node@20.14.14)(typescript@5.2.2):
+    dependencies:
+      '@cspotcode/source-map-support': 0.8.1
+      '@tsconfig/node10': 1.0.11
+      '@tsconfig/node12': 1.0.11
+      '@tsconfig/node14': 1.0.3
+      '@tsconfig/node16': 1.0.4
+      '@types/node': 20.14.14
+      acorn: 8.12.1
+      acorn-walk: 8.3.3
+      arg: 4.1.3
+      create-require: 1.1.1
+      diff: 4.0.2
+      make-error: 1.3.6
+      typescript: 5.2.2
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
     optionalDependencies:
@@ -36885,7 +37636,7 @@ snapshots:
       source-map-support: 0.5.21
       vite: 4.5.3(@types/node@20.5.9)(lightningcss@1.26.0)(terser@5.31.5)
 
-  vinxi@0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(terser@5.31.5):
+  vinxi@0.4.1(@azure/identity@4.4.1)(@types/node@20.14.14)(ioredis@5.4.1)(lightningcss@1.26.0)(magicast@0.3.4)(terser@5.31.5):
     dependencies:
       '@babel/core': 7.25.2
       '@babel/plugin-syntax-jsx': 7.24.7(@babel/core@7.25.2)
@@ -36907,7 +37658,7 @@ snapshots:
       hookable: 5.5.3
       http-proxy: 1.18.1
       micromatch: 4.0.7
-      nitropack: 2.9.7(@azure/identity@4.4.1)
+      nitropack: 2.9.7(@azure/identity@4.4.1)(magicast@0.3.4)
       node-fetch-native: 1.6.4
       path-to-regexp: 6.2.2
       pathe: 1.1.2
@@ -36953,6 +37704,60 @@ snapshots:
       - uWebSockets.js
       - xml2js
 
+  vite-node@0.33.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5):
+    dependencies:
+      cac: 6.7.14
+      debug: 4.3.6(supports-color@8.1.1)
+      mlly: 1.7.1
+      pathe: 1.1.2
+      picocolors: 1.0.1
+      vite: 4.5.3(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5)
+    transitivePeerDependencies:
+      - '@types/node'
+      - less
+      - lightningcss
+      - sass
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+
+  vite-node@0.34.3(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5):
+    dependencies:
+      cac: 6.7.14
+      debug: 4.3.6(supports-color@8.1.1)
+      mlly: 1.7.1
+      pathe: 1.1.2
+      picocolors: 1.0.1
+      vite: 4.5.3(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5)
+    transitivePeerDependencies:
+      - '@types/node'
+      - less
+      - lightningcss
+      - sass
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+
+  vite-node@0.34.4(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5):
+    dependencies:
+      cac: 6.7.14
+      debug: 4.3.6(supports-color@8.1.1)
+      mlly: 1.7.1
+      pathe: 1.1.2
+      picocolors: 1.0.1
+      vite: 4.5.3(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5)
+    transitivePeerDependencies:
+      - '@types/node'
+      - less
+      - lightningcss
+      - sass
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+
   vite-node@0.34.6(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5):
     dependencies:
       cac: 6.7.14
@@ -36960,6 +37765,60 @@ snapshots:
       mlly: 1.7.1
       pathe: 1.1.2
       picocolors: 1.0.1
+      vite: 5.4.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5)
+    transitivePeerDependencies:
+      - '@types/node'
+      - less
+      - lightningcss
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+
+  vite-node@1.1.1(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5):
+    dependencies:
+      cac: 6.7.14
+      debug: 4.3.6(supports-color@8.1.1)
+      pathe: 1.1.2
+      picocolors: 1.0.1
+      vite: 5.4.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5)
+    transitivePeerDependencies:
+      - '@types/node'
+      - less
+      - lightningcss
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+
+  vite-node@1.6.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5):
+    dependencies:
+      cac: 6.7.14
+      debug: 4.3.6(supports-color@8.1.1)
+      pathe: 1.1.2
+      picocolors: 1.0.1
+      vite: 5.4.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5)
+    transitivePeerDependencies:
+      - '@types/node'
+      - less
+      - lightningcss
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+
+  vite-node@2.0.5(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5):
+    dependencies:
+      cac: 6.7.14
+      debug: 4.3.6(supports-color@8.1.1)
+      pathe: 1.1.2
+      tinyrainbow: 1.2.0
       vite: 5.4.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5)
     transitivePeerDependencies:
       - '@types/node'
@@ -37189,6 +38048,130 @@ snapshots:
     optionalDependencies:
       vite: 5.4.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5)
 
+  vitest@0.33.0(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2):
+    dependencies:
+      '@types/chai': 4.3.17
+      '@types/chai-subset': 1.3.5
+      '@types/node': 20.14.14
+      '@vitest/expect': 0.33.0
+      '@vitest/runner': 0.33.0
+      '@vitest/snapshot': 0.33.0
+      '@vitest/spy': 0.33.0
+      '@vitest/utils': 0.33.0
+      acorn: 8.12.1
+      acorn-walk: 8.3.3
+      cac: 6.7.14
+      chai: 4.5.0
+      debug: 4.3.6(supports-color@8.1.1)
+      local-pkg: 0.4.3
+      magic-string: 0.30.11
+      pathe: 1.1.2
+      picocolors: 1.0.1
+      std-env: 3.7.0
+      strip-literal: 1.3.0
+      tinybench: 2.9.0
+      tinypool: 0.6.0
+      vite: 4.5.3(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5)
+      vite-node: 0.33.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@vitest/browser': 1.6.0(playwright@1.39.0)(safaridriver@0.1.2)(vitest@0.33.0)(webdriverio@8.40.2)
+      jsdom: 22.1.0
+      playwright: 1.39.0
+      safaridriver: 0.1.2
+      webdriverio: 8.40.2
+    transitivePeerDependencies:
+      - less
+      - lightningcss
+      - sass
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+
+  vitest@0.34.3(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2):
+    dependencies:
+      '@types/chai': 4.3.17
+      '@types/chai-subset': 1.3.5
+      '@types/node': 20.14.14
+      '@vitest/expect': 0.34.3
+      '@vitest/runner': 0.34.3
+      '@vitest/snapshot': 0.34.3
+      '@vitest/spy': 0.34.3
+      '@vitest/utils': 0.34.3
+      acorn: 8.12.1
+      acorn-walk: 8.3.3
+      cac: 6.7.14
+      chai: 4.5.0
+      debug: 4.3.6(supports-color@8.1.1)
+      local-pkg: 0.4.3
+      magic-string: 0.30.11
+      pathe: 1.1.2
+      picocolors: 1.0.1
+      std-env: 3.7.0
+      strip-literal: 1.3.0
+      tinybench: 2.9.0
+      tinypool: 0.7.0
+      vite: 4.5.3(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5)
+      vite-node: 0.34.3(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@vitest/browser': 1.6.0(playwright@1.39.0)(safaridriver@0.1.2)(vitest@0.34.3)(webdriverio@8.40.2)
+      jsdom: 22.1.0
+      playwright: 1.39.0
+      safaridriver: 0.1.2
+      webdriverio: 8.40.2
+    transitivePeerDependencies:
+      - less
+      - lightningcss
+      - sass
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+
+  vitest@0.34.4(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2):
+    dependencies:
+      '@types/chai': 4.3.17
+      '@types/chai-subset': 1.3.5
+      '@types/node': 20.14.14
+      '@vitest/expect': 0.34.4
+      '@vitest/runner': 0.34.4
+      '@vitest/snapshot': 0.34.4
+      '@vitest/spy': 0.34.4
+      '@vitest/utils': 0.34.4
+      acorn: 8.12.1
+      acorn-walk: 8.3.3
+      cac: 6.7.14
+      chai: 4.5.0
+      debug: 4.3.6(supports-color@8.1.1)
+      local-pkg: 0.4.3
+      magic-string: 0.30.11
+      pathe: 1.1.2
+      picocolors: 1.0.1
+      std-env: 3.7.0
+      strip-literal: 1.3.0
+      tinybench: 2.9.0
+      tinypool: 0.7.0
+      vite: 5.4.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5)
+      vite-node: 0.34.4(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@vitest/browser': 1.6.0(playwright@1.39.0)(safaridriver@0.1.2)(vitest@0.34.4)(webdriverio@8.40.2)
+      jsdom: 22.1.0
+      playwright: 1.39.0
+      safaridriver: 0.1.2
+      webdriverio: 8.40.2
+    transitivePeerDependencies:
+      - less
+      - lightningcss
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+
   vitest@0.34.6(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(playwright@1.39.0)(safaridriver@0.1.2)(terser@5.31.5)(webdriverio@8.40.2):
     dependencies:
       '@types/chai': 4.3.17
@@ -37221,6 +38204,113 @@ snapshots:
       playwright: 1.39.0
       safaridriver: 0.1.2
       webdriverio: 8.40.2
+    transitivePeerDependencies:
+      - less
+      - lightningcss
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+
+  vitest@1.1.1(@types/node@20.14.14)(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.5):
+    dependencies:
+      '@vitest/expect': 1.1.1
+      '@vitest/runner': 1.1.1
+      '@vitest/snapshot': 1.1.1
+      '@vitest/spy': 1.1.1
+      '@vitest/utils': 1.1.1
+      acorn-walk: 8.3.3
+      cac: 6.7.14
+      chai: 4.5.0
+      debug: 4.3.6(supports-color@8.1.1)
+      execa: 8.0.1
+      local-pkg: 0.5.0
+      magic-string: 0.30.11
+      pathe: 1.1.2
+      picocolors: 1.0.1
+      std-env: 3.7.0
+      strip-literal: 1.3.0
+      tinybench: 2.9.0
+      tinypool: 0.8.4
+      vite: 5.4.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5)
+      vite-node: 1.1.1(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@types/node': 20.14.14
+      '@vitest/browser': 1.6.0(vitest@1.1.1)
+      jsdom: 22.1.0
+    transitivePeerDependencies:
+      - less
+      - lightningcss
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+
+  vitest@1.6.0(@types/node@20.14.14)(@vitest/browser@1.6.0)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.5):
+    dependencies:
+      '@vitest/expect': 1.6.0
+      '@vitest/runner': 1.6.0
+      '@vitest/snapshot': 1.6.0
+      '@vitest/spy': 1.6.0
+      '@vitest/utils': 1.6.0
+      acorn-walk: 8.3.3
+      chai: 4.5.0
+      debug: 4.3.6(supports-color@8.1.1)
+      execa: 8.0.1
+      local-pkg: 0.5.0
+      magic-string: 0.30.11
+      pathe: 1.1.2
+      picocolors: 1.0.1
+      std-env: 3.7.0
+      strip-literal: 2.1.0
+      tinybench: 2.9.0
+      tinypool: 0.8.4
+      vite: 5.4.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5)
+      vite-node: 1.6.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@types/node': 20.14.14
+      '@vitest/browser': 1.6.0(playwright@1.39.0)(vitest@1.6.0)(webdriverio@8.40.2)
+      jsdom: 22.1.0
+    transitivePeerDependencies:
+      - less
+      - lightningcss
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+
+  vitest@2.0.5(@types/node@20.14.14)(jsdom@22.1.0)(lightningcss@1.26.0)(terser@5.31.5):
+    dependencies:
+      '@ampproject/remapping': 2.3.0
+      '@vitest/expect': 2.0.5
+      '@vitest/pretty-format': 2.0.5
+      '@vitest/runner': 2.0.5
+      '@vitest/snapshot': 2.0.5
+      '@vitest/spy': 2.0.5
+      '@vitest/utils': 2.0.5
+      chai: 5.1.1
+      debug: 4.3.6(supports-color@8.1.1)
+      execa: 8.0.1
+      magic-string: 0.30.11
+      pathe: 1.1.2
+      std-env: 3.7.0
+      tinybench: 2.9.0
+      tinypool: 1.0.0
+      tinyrainbow: 1.2.0
+      vite: 5.4.0(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5)
+      vite-node: 2.0.5(@types/node@20.14.14)(lightningcss@1.26.0)(terser@5.31.5)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@types/node': 20.14.14
+      jsdom: 22.1.0
     transitivePeerDependencies:
       - less
       - lightningcss
