@@ -9,8 +9,7 @@ import { posthog } from "posthog-js";
 import { PostHogProvider } from 'posthog-js/react'
 
 posthog.init(import.meta.env.VITE_POSTHOG_TOKEN ?? "", {
-	api_host: import.meta.env.PROD ? "https://tm.inlang.com" : "http://localhost:4005",
-	person_profiles: 'identified_only'
+	api_host: import.meta.env.PROD ? "https://tm.inlang.com" : "http://localhost:4005"
 })
 
 setBasePath(

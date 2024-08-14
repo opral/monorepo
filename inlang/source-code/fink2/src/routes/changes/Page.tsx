@@ -6,7 +6,7 @@ import {
 } from "../../state.ts";
 import { atom, useAtom } from "jotai";
 import Layout from "../../layout.tsx";
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import {
 	SlButton,
 	SlDialog,
@@ -40,7 +40,6 @@ export default function App() {
 	const [showDialog, setShowDialog] = useState(false);
 
 	const handleCommit = async () => {
-		//console.log("executing commit");
 		await project?.lix.commit({
 			userId: commitAuthor,
 			description: commitDescription,
@@ -114,29 +113,38 @@ export default function App() {
 								open={showDialog}
 								onSlRequestClose={() => setShowDialog(false)}
 							>
-								<div className="flex flex-col gap-4">
-									<SlInput
-										label="Author"
-										helpText="Enter your name"
-										placeholder="Max Mustermann"
-										// eslint-disable-next-line @typescript-eslint/no-explicit-any
-										onInput={(e: any) => setCommitAuthor(e.target.value)}
-									></SlInput>
-									<SlInput
-										label="Description"
-										helpText="Add a description of the changes"
-										placeholder="I updated the german translations"
-										// eslint-disable-next-line @typescript-eslint/no-explicit-any
-										onInput={(e: any) => setCommitDescription(e.target.value)}
-									></SlInput>
-								</div>
-								<SlButton
-									variant="primary"
-									slot="footer"
-									onClick={handleCommit}
-								>
-									Commit changes
-								</SlButton>
+								<form onSubmit={(e: FormEvent<Element>) => {
+									e.preventDefault()
+									handleCommit()
+								}}>
+									<div className="flex flex-col gap-4">
+										<SlInput
+											required
+											label="Author"
+											helpText="Enter your name"
+											placeholder="Max Mustermann"
+											// eslint-disable-next-line @typescript-eslint/no-explicit-any
+											onInput={(e: any) => setCommitAuthor(e.target.value)}
+										></SlInput>
+										<SlInput
+											required
+											label="Description"
+											helpText="Add a description of the changes"
+											placeholder="I updated the german translations"
+											// eslint-disable-next-line @typescript-eslint/no-explicit-any
+											onInput={(e: any) => setCommitDescription(e.target.value)}
+										></SlInput>
+									</div>
+									<div className="mt-6 flex justify-end">
+										<SlButton
+											variant="primary"
+											slot="footer"
+											type="submit"
+										>
+											Commit changes
+										</SlButton>
+									</div>
+								</form>
 							</SlDialog>
 						</div>
 					</div>
