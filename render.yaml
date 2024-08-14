@@ -40,6 +40,19 @@ services:
     domains:
       - lix.opral.com
 
+  - name: fink2
+    type: web
+    runtime: static
+    autoDeploy: true
+    branch: lix-integration
+    staticPublishPath: ./inlang/source-code/fink2/dist
+    buildCommand: pnpm install && pnpm run --filter @inlang/fink2... build
+    buildFilter:
+      paths:
+        - inlang/source-code/fink2/**
+    envVars:
+      - fromGroup: production
+
   - name: git-proxy
     type: web
     runtime: node
