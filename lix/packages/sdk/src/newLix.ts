@@ -29,11 +29,23 @@ export async function newLixFile(): Promise<Blob> {
         commit_id TEXT
       );
 
-      CREATE TABLE 'file' (
+      CREATE TABLE file_internal (
         id TEXT PRIMARY KEY,
         path TEXT NOT NULL,
         data BLOB NOT NULL
       ) strict;
+  
+      CREATE TABLE change_queue (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        file_id TEXT,
+        path TEXT NOT NULL,
+        data BLOB
+      ) strict;
+  
+      create view file as
+        select z.id as id, z.path as path, z.data as data, MAX(z.mx) as queue_id from 
+          (select file_id as id, path, data, id as mx from change_queue UNION select id, path, data, 0 as mx from file_internal) as z
+        group by z.id;
       
       CREATE TABLE change (
         id TEXT PRIMARY KEY,
@@ -56,6 +68,23 @@ export async function newLixFile(): Promise<Blob> {
       ) strict;
 
       INSERT INTO ref values ('current', '00000000-0000-0000-0000-000000000000');
+
+      CREATE TRIGGER file_update INSTEAD OF UPDATE ON file
+      BEGIN
+        insert into change_queue(file_id, path, data) values(NEW.id, NEW.path, NEW.data);
+        select triggerWorker();
+      END;
+
+      CREATE TRIGGER file_insert INSTEAD OF INSERT ON file
+      BEGIN
+        insert into change_queue(file_id, path, data) values(NEW.id, NEW.path, NEW.data);
+        select triggerWorker();
+      END;
+
+      CREATE TRIGGER change_queue_remove BEFORE DELETE ON change_queue
+      BEGIN
+        insert or replace into file_internal(id, path, data) values(OLD.file_id, OLD.path, OLD.data);
+      END;
     `.execute(db);
 
 		return new Blob([contentFromDatabase(sqlite)]);

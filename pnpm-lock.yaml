@@ -3631,6 +3631,9 @@ importers:
       kysely:
         specifier: ^0.27.4
         version: 0.27.4
+      minimatch:
+        specifier: ^10.0.1
+        version: 10.0.1
       prettier:
         specifier: ^3.3.3
         version: 3.3.3
@@ -3644,6 +3647,15 @@ importers:
       '@types/uuid':
         specifier: ^10.0.0
         version: 10.0.0
+      autoprefixer:
+        specifier: ^10.4.20
+        version: 10.4.20(postcss@8.4.41)
+      postcss:
+        specifier: ^8.4.41
+        version: 8.4.41
+      tailwindcss:
+        specifier: ^4.0.0-alpha.17
+        version: 4.0.0-alpha.18
       typescript:
         specifier: ^5.5.4
         version: 5.5.4
