@@ -10,8 +10,19 @@ export function parse(messageSource: string): Omit<MessageNested, "id" | "locale
 
 	const declarations: Declaration[] = []
 
+	/**
+	 * A case-path is an array of numbers and strings
+	 *
+	 * The number denotes that this is the n-th selector on it's level. The string is the match-value
+	 * that will result in this case.
+	 */
+	type CasePath = [number, string][]
+
+	// All the case-paths that exist in the message
+	const cases: CasePath[] = []
+
 	const branches: { value: string; cases: string[] }[] = []
-	function walk(el: MessageFormatElement) {
+	function walk(el: MessageFormatElement, path: CasePath) {
 		switch (el.type) {
 			case TYPE.argument: {
 				declarations.push({
@@ -30,7 +41,7 @@ export function parse(messageSource: string): Omit<MessageNested, "id" | "locale
 		}
 	}
 
-	for (const el of ast) walk(el)
+	for (const el of ast) walk(el, [])
 
 	const message: Omit<MessageNested, "id" | "locale" | "bundleId"> = {
 		declarations: [],
