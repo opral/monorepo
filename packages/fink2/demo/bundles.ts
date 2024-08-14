@@ -64,7 +64,7 @@ import { BundleNested } from "@inlang/sdk2";
             "pattern": [
               {
                 "type": "text",
-                "value": "Meine tolle Todo Applikatifff"
+                "value": "Meine tolle Todo App"
               }
             ]
           }
