@@ -11,6 +11,7 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 	const [oldBundle, setOldBundle] = useState<BundleNested | undefined>(
 		undefined
 	);
+	const [loadingDiscard, setLoadingDiscard] = useState(false);
 
 	useEffect(() => {
 		if (!project) return;
@@ -23,26 +24,29 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 
 	const handleDiscard = async () => {
 		if (project && oldBundle) {
+			setLoadingDiscard(true);
 			await updateBundleNested(project?.db, oldBundle);
 		}
 	};
 
 	return (
 		<div className="bg-zinc-50 rounded p-4 mt-2">
-			<div className="flex justify-between">
-				<h3 className="font-medium text-[16px] pb-4">{props.bundleId}</h3>
-				<SlButton size="small" onClick={() => handleDiscard()}>
-					Discard
-				</SlButton>
+			<div className="flex justify-between items-center mb-3">
+				<h3 className="font-medium text-[16px]">{props.bundleId}</h3>
+				<div className="flex items-center gap-3">
+					<div className="text-xs! text-zinc-700 bg-zinc-300 h-5 rounded flex items-center px-2 font-medium">
+						{props.changes.length}{" "}
+						{props.changes.length === 1 ? "change" : "changes"}
+					</div>
+					<SlButton
+						size="small"
+						loading={loadingDiscard}
+						onClick={() => handleDiscard()}
+					>
+						Discard
+					</SlButton>
+				</div>
 			</div>
-			{props.changes.map((change) => (
-				<p className="text-zinc-600" key={change.id}>
-					<span className="font-bold text-zinc-950">You</span> changed the{" "}
-					<span className="font-bold text-zinc-950">{change.type}</span> with
-					the id{" "}
-					<span className="font-bold text-zinc-950">{change.value?.id}</span>
-				</p>
-			))}
 
 			{/* 
 			* TODO unbundle
@@ -79,9 +83,8 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 					})}
 				</inlang-bundle>
 			</div> */}
-			<div className="flex gap-8">
+			<div className="flex gap-4">
 				<div className="flex-1">
-					<p className="font-medium pb-2 pt-4">Old:</p>
 					{oldBundle && bundle && project && (
 						<SingleDiffBundle
 							bundle={bundle}
@@ -93,7 +96,6 @@ const DiffBundleView = (props: { changes: any[]; bundleId: string }) => {
 					)}
 				</div>
 				<div className="flex-1">
-					<p className="font-medium pb-2 pt-4">New:</p>
 					{oldBundle && bundle && project && (
 						<SingleDiffBundle
 							bundle={bundle}
