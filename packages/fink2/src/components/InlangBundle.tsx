@@ -73,8 +73,6 @@ const InlangBundle = (props: {
 		}
 	};
 
-	console.log(props.bundle);
-
 	return (
 		<>
 			{props.bundle && (
