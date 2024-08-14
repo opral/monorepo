@@ -48,7 +48,6 @@ export async function importPlugins(args: {
 }
 
 async function fetchModuleWithCache(uri: string): Promise<string> {
-	console.warn("fetchWithCache is not implemented");
 	const response = await fetch(uri);
 	if (!response.ok) {
 		throw new Error(
