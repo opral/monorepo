@@ -17,7 +17,8 @@ export async function initHandleSaveToLixOnChange(args: {
 		// @ts-expect-error - dynamic function
 		xFunc: () => {
 			(async () => {
-				await new Promise((resolve) => setTimeout(resolve, 100));
+				// We have to await the database operations to be finished and the database to eb in a consistent state, otherwise contentFromDatabase will crash! 100 ms is too short for current test cases, but we need a proper solution for this
+				await new Promise((resolve) => setTimeout(resolve, 400));
 				const data = contentFromDatabase(args.sqlite);
 				await args.lix.db
 					.updateTable("file")

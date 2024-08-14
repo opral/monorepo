@@ -91,7 +91,6 @@ const plugin = {
 
 	diff: {
 		file: async ({ old, neu }) => {
-			console.log({ old, neu })
 			/** @type {import("@lix-js/sdk").DiffReport[]} */
 			const result = []
 			// top level import doesn't work
