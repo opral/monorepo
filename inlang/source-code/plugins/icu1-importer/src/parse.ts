@@ -126,9 +126,17 @@ export function generateBranches(elements: MessageFormatElement[], branch: Branc
 	return branches
 }
 
-export function parse(messageSource: string): Omit<MessageNested, "id" | "locale" | "bundleId"> {
-	const ast = parseICU(messageSource)
-
+export function createMessage(
+	messageSource: string,
+	bundleId: string,
+	locale: string
+): MessageNested {
+	const ast = parseICU(messageSource, {
+		ignoreTag: true, // TODO: Change once we support markup
+		requiresOtherClause: false,
+		locale: new Intl.Locale(locale),
+		shouldParseSkeletons: true,
+	})
 	const branches = generateBranches(ast, NULL_BRANCH)
 
 	const inputs = new Set<string>()
@@ -154,7 +162,12 @@ export function parse(messageSource: string): Omit<MessageNested, "id" | "locale
 		}
 	}
 
-	const message: Omit<MessageNested, "id" | "locale" | "bundleId"> = {
+	const messageId = `${bundleId}_${locale}`
+
+	const message: MessageNested = {
+		id: messageId,
+		bundleId,
+		locale,
 		declarations: [...inputs].map((name) => ({
 			type: "input",
 			name,
@@ -165,7 +178,21 @@ export function parse(messageSource: string): Omit<MessageNested, "id" | "locale
 			arg: { type: "variable", name },
 			annotation: fn ? { type: "function", name: fn, options: [] } : undefined,
 		})),
-		variants: [],
+		variants: branches.map((branch) => {
+			const match = selectors.map(([name, fn]) => {
+				const matches = branch.match.find((m) => m[0] === name && m[1] === fn)
+				if (matches) return matches[2]
+				else return "*"
+			})
+
+			const variantId = `${messageId}_${match.map((m) => (m === "*" ? "any" : m)).join("_")}`
+			return {
+				id: variantId,
+				messageId,
+				match,
+				pattern: branch.pattern,
+			}
+		}),
 	}
 
 	return message

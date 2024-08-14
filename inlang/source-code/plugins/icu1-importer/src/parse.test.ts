@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest"
 import { parse } from "@formatjs/icu-messageformat-parser"
-import { generateBranches, NULL_BRANCH } from "./parse.js"
+import { generateBranches, NULL_BRANCH, createMessage } from "./parse.js"
 
 describe("generateBranches", () => {
 	it("should generate a single branch for a text-only message", () => {
@@ -288,5 +288,143 @@ describe("generateBranches", () => {
 				match: [["value1", undefined, "b"]],
 			},
 		])
+	})
+})
+
+describe("createMessage", () => {
+	it("creates a message for a branchless string", () => {
+		const message = createMessage("Hello World", "sad_elephant", "en")
+		expect(message).toEqual({
+			bundleId: "sad_elephant",
+			declarations: [],
+			id: "sad_elephant_en",
+			locale: "en",
+			selectors: [],
+			variants: [
+				{
+					id: "sad_elephant_en_",
+					match: [],
+					messageId: "sad_elephant_en",
+					pattern: [
+						{
+							type: "text",
+							value: "Hello World",
+						},
+					],
+				},
+			],
+		})
+	})
+
+	it("creates a message with multiple variants", () => {
+		const icu1 =
+			"It's {season, select, spring {spring} summer {summer} fall {fall} winter {winter}}!"
+		const message = createMessage(icu1, "sad_elephant", "en")
+		expect(message).toEqual({
+			bundleId: "sad_elephant",
+			declarations: [
+				{
+					name: "season",
+					type: "input",
+					value: {
+						arg: {
+							name: "season",
+							type: "variable",
+						},
+						type: "expression",
+					},
+				},
+			],
+			id: "sad_elephant_en",
+			locale: "en",
+			selectors: [
+				{
+					annotation: undefined,
+					arg: {
+						name: "season",
+						type: "variable",
+					},
+					type: "expression",
+				},
+			],
+			variants: [
+				{
+					id: "sad_elephant_en_spring",
+					match: ["spring"],
+					messageId: "sad_elephant_en",
+					pattern: [
+						{
+							type: "text",
+							value: "It's ",
+						},
+						{
+							type: "text",
+							value: "spring",
+						},
+						{
+							type: "text",
+							value: "!",
+						},
+					],
+				},
+				{
+					id: "sad_elephant_en_summer",
+					match: ["summer"],
+					messageId: "sad_elephant_en",
+					pattern: [
+						{
+							type: "text",
+							value: "It's ",
+						},
+						{
+							type: "text",
+							value: "summer",
+						},
+						{
+							type: "text",
+							value: "!",
+						},
+					],
+				},
+				{
+					id: "sad_elephant_en_fall",
+					match: ["fall"],
+					messageId: "sad_elephant_en",
+					pattern: [
+						{
+							type: "text",
+							value: "It's ",
+						},
+						{
+							type: "text",
+							value: "fall",
+						},
+						{
+							type: "text",
+							value: "!",
+						},
+					],
+				},
+				{
+					id: "sad_elephant_en_winter",
+					match: ["winter"],
+					messageId: "sad_elephant_en",
+					pattern: [
+						{
+							type: "text",
+							value: "It's ",
+						},
+						{
+							type: "text",
+							value: "winter",
+						},
+						{
+							type: "text",
+							value: "!",
+						},
+					],
+				},
+			],
+		})
 	})
 })
