@@ -46,7 +46,7 @@ export default class InlangVariant extends LitElement {
 				z-index: 0;
 			}
 			.match:focus-within {
-				z-index: 1;
+				z-index: 3;
 			}
 			.match::part(base) {
 				border: none;
@@ -59,31 +59,12 @@ export default class InlangVariant extends LitElement {
 			.match::part(input):hover {
 				background-color: var(--sl-input-background-color-);
 			}
-			.pattern {
-				flex: 1;
-				background-color: none;
-				height: 44px;
+			.variant {
 				position: relative;
 				z-index: 0;
 			}
-			.pattern:focus-within {
-				z-index: 1;
-			}
-			.pattern::part(base) {
-				border: none;
-				border-radius: 0;
-				min-height: 44px;
-				background-color: var(--sl-input-background-color);
-			}
-			.pattern::part(input) {
-				min-height: 44px;
-			}
-			.pattern::part(input):hover {
-				background-color: var(--sl-input-background-color-hover);
-			}
-			.pattern::part(input)::placeholder {
-				color: var(--sl-input-placeholder-color);
-				font-size: 13px;
+			.variant:focus-within {
+				z-index: 3;
 			}
 			.actions {
 				position: absolute;
@@ -115,7 +96,7 @@ export default class InlangVariant extends LitElement {
 				display: flex;
 				align-items: center;
 				gap: 4px;
-				z-index: 2;
+				z-index: 3;
 			}
 			.hide-dynamic-actions {
 				display: none;
@@ -129,6 +110,10 @@ export default class InlangVariant extends LitElement {
 			sl-tooltip::part(base) {
 				background-color: var(--sl-tooltip-background-color);
 				color: var(--sl-tooltip-color);
+			}
+			.history-button {
+				position: relative;
+				z-index: 0;
 			}
 		`,
 	]
@@ -290,7 +275,6 @@ export default class InlangVariant extends LitElement {
 		// In order to not mutate object references, we need to clone the object
 		// When the messageBundle prop changes, we update the internal state
 		if (changedProperties.has("variantValidationReports", "messageValidationReports")) {
-			console.log("variantValidationReports or messageValidationReports changed")
 			// adds classes when dropdown is open, to keep it open when not hovering the variant
 			const lintReportsTip = this.shadowRoot?.querySelector("inlang-lint-report-tip")
 			const lintReportDropdown = lintReportsTip?.shadowRoot?.querySelector("sl-dropdown")
@@ -339,7 +323,7 @@ export default class InlangVariant extends LitElement {
 								`
 						  })
 						: undefined}
-					<slot name="pattern-editor"></slot>
+					<slot name="pattern-editor" class="pattern-editor"></slot>
 					<div class="actions">
 						<div class="dynamic-actions hide-dynamic-actions">
 							<slot name="variant-action"></slot>
@@ -397,25 +381,27 @@ export default class InlangVariant extends LitElement {
 								: ``}
 						</div>
 						${!this.noHistory
-							? html`<sl-tooltip content="Show history of variant">
-									<sl-button
-										size="small"
-										@click=${() =>
-											this.variant ? this.dispatchOnShowHistory(this.variant?.id) : undefined}
-										><svg
-											xmlns="http://www.w3.org/2000/svg"
-											width="20px"
-											height="20px"
-											viewBox="0 0 24 24"
-											slot="prefix"
-											style="margin: 0 -3px"
-										>
-											<path
-												fill="currentColor"
-												d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89l.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7s-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.95 8.95 0 0 0 13 21a9 9 0 0 0 0-18m-1 5v5l4.28 2.54l.72-1.21l-3.5-2.08V8z"
-											/></svg
-									></sl-button>
-							  </sl-tooltip>`
+							? html`<div class="history-button">
+									<sl-tooltip content="Show history of variant">
+										<sl-button
+											size="small"
+											@click=${() =>
+												this.variant ? this.dispatchOnShowHistory(this.variant?.id) : undefined}
+											><svg
+												xmlns="http://www.w3.org/2000/svg"
+												width="20px"
+												height="20px"
+												viewBox="0 0 24 24"
+												slot="prefix"
+												style="margin: 0 -3px"
+											>
+												<path
+													fill="currentColor"
+													d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89l.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7s-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.95 8.95 0 0 0 13 21a9 9 0 0 0 0-18m-1 5v5l4.28 2.54l.72-1.21l-3.5-2.08V8z"
+												/></svg
+										></sl-button>
+									</sl-tooltip>
+							  </div>`
 							: ``}
 					</div>
 			  </div> `
