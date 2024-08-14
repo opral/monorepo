@@ -1,0 +1,33 @@
+{
+	"title": "My Awesome Todo App",
+	"description": "This is a simple todo app that showcases Inlang in a real world application.",
+
+	"app_today": "Today {{date}}",
+	"app_nrOfTodos": "{{count}} tasks",
+	"app_markAsDone": "Mark as done",
+	"app_markAsIncomplete": "Mark as incomplete",
+	"app_deleteTodo": "Delete",
+	"app_placeholder": "Add todo...",
+	"app_addTodo": "Add new",
+
+	"pages_home_goToTodoApp": "Enter app",
+	"pages_todo_goToHome": "Back",
+	"pages_error_404_title": "Page not found",
+	"pages_error_cta": "Click here to return to the homepage",
+
+	"server_error_generic": "Something went wrong",
+	"server_error_missingField": "The field {{field}} is missing",
+	"server_error_incorrectField": "The field {{field}} has an invalid data type",
+
+	"server_logs_loaded": "Loaded {count} todos",
+	"server_logs_added": "{{id}} added a new todo",
+	"server_logs_deleted": "{{id}} deleted a todo",
+	"server_logs_completed": "{{id}} marked a todo as done",
+	"server_logs_incompleted": "{{id}} marked a todo as incomplete",
+
+	"languageSwitcher_chooseLanguage": "Choose language",
+
+	"footer_madeBy": "Made with ❤️ by Inlang",
+	"footer_linkToDocs": "Visit the <a href=\"https://www.inlang.com\">docs</a> to learn more about Inlang.",
+	"footer_linkToGithub": "View the source code on Github"
+}
