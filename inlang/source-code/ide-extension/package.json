@@ -279,7 +279,7 @@
 		"mocha": "^10.2.0",
 		"node-fetch": "^3.3.2",
 		"ovsx": "^0.8.4",
-		"posthog-node": "^3.6.3",
+		"posthog-node": "^4.0.1",
 		"ts-node": "^10.9.1",
 		"typescript": "5.3.2",
 		"wdio-vscode-service": "^6.0.0"
