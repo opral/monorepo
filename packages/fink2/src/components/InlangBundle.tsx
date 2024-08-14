@@ -1,5 +1,5 @@
 import { createComponent } from "@lit/react";
-import { InlangBundle as LitInlangBundle } from "@inlang/bundle-component"
+import { InlangBundle as LitInlangBundle } from "@inlang/bundle-component";
 import React from "react";
 import { useAtom } from "jotai";
 import { pendingChangesAtom, projectAtom } from "../state.ts";
@@ -118,7 +118,7 @@ const getAllNestedIds = (bundle: BundleNested): string[] => {
 	return [...messageIds, ...variantIds, ...bundle.id];
 };
 
-// @NilsJacobsen what is this function for? 
+// @NilsJacobsen what is this function for?
 function arraysIntersect(arr1: any[], arr2: any[]): boolean {
 	// Convert the first array to a Set
 	const set1 = new Set(arr1);
