@@ -76,7 +76,7 @@ const InlangBundle = (props: {
 	return (
 		<>
 			{props.bundle && (
-				<div className="relative mb-4 overflow-hidden">
+				<div className="relative overflow-hidden">
 					<ReactBundle
 						style={{ all: "initial" }}
 						bundle={props.bundle}
