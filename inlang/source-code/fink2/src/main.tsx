@@ -8,7 +8,7 @@ import { setBasePath } from "@shoelace-style/shoelace/dist/utilities/base-path.j
 import { posthog } from "posthog-js";
 import { PostHogProvider } from 'posthog-js/react'
 
-posthog.init(import.meta.env.VITE_POSTHOG_TOKEN ?? "", {
+posthog.init(import.meta.env.PUBLIC_POSTHOG_TOKEN ?? "", {
 	api_host: import.meta.env.PROD ? "https://tm.inlang.com" : "http://localhost:4005"
 })
 
