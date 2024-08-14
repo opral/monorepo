@@ -3,7 +3,7 @@ import {
 	TYPE,
 	type MessageFormatElement,
 } from "@formatjs/icu-messageformat-parser"
-import type { Declaration, MessageNested, Option, Pattern } from "@inlang/sdk2"
+import type { MessageNested, Option, Pattern } from "@inlang/sdk2"
 
 /**
  * Represents a (partial) branch
@@ -15,13 +15,13 @@ type Branch = {
 	pattern: Pattern
 
 	/**
-	 * The (partial) selector-values that are needed to produce this branch
+	 * The (partial) match-values that are needed to produce this branch
 	 * [arg, function?, match]
 	 */
-	selectors: [string, string | undefined, string][]
+	match: [string, string | undefined, string][]
 }
 
-export const NULL_BRANCH: Branch = { pattern: [], selectors: [] }
+export const NULL_BRANCH: Branch = { pattern: [], match: [] }
 
 /**
  * Takes in an ICU1 AST and returns all the branches it could generate
@@ -86,7 +86,7 @@ export function generateBranches(elements: MessageFormatElement[], branch: Branc
 				const newBranches: Branch[] = []
 
 				for (const [option, optionValue] of Object.entries(element.options)) {
-					let selector: Branch["selectors"][number] | undefined = undefined
+					let selector: Branch["match"][number] | undefined = undefined
 
 					if (element.type === TYPE.select && option !== "other") {
 						selector = [element.value, undefined, option]
@@ -106,9 +106,7 @@ export function generateBranches(elements: MessageFormatElement[], branch: Branc
 							optionValue.value,
 							structuredClone({
 								...existingBranch,
-								selectors: selector
-									? [...existingBranch.selectors, selector]
-									: existingBranch.selectors,
+								match: selector ? [...existingBranch.match, selector] : existingBranch.match,
 							})
 						)
 						newBranches.push(...newBranchesForBranch)
@@ -133,9 +131,40 @@ export function parse(messageSource: string): Omit<MessageNested, "id" | "locale
 
 	const branches = generateBranches(ast, NULL_BRANCH)
 
+	const inputs = new Set<string>()
+	for (const branch of branches) {
+		for (const elem of branch.pattern) {
+			if (elem.type === "expression") {
+				inputs.add(elem.arg.name)
+			}
+		}
+		for (const selector of branch.match) {
+			inputs.add(selector[0])
+		}
+	}
+
+	// each unique pair of [variable, function] in the branche's matchers will become a selector
+	const selectors: [string, string | undefined][] = []
+	for (const branch of branches) {
+		for (const [selectorVariable, selectorFunction] of branch.match) {
+			const selector: [string, string | undefined] = [selectorVariable, selectorFunction]
+			const alreadyExists = selectors.find((s) => s[0] === selector[0] && s[1] === selector[1])
+			if (alreadyExists) continue
+			else selectors.push(selector)
+		}
+	}
+
 	const message: Omit<MessageNested, "id" | "locale" | "bundleId"> = {
-		declarations: [],
-		selectors: [],
+		declarations: [...inputs].map((name) => ({
+			type: "input",
+			name,
+			value: { type: "expression", arg: { type: "variable", name } },
+		})),
+		selectors: selectors.map(([name, fn]) => ({
+			type: "expression",
+			arg: { type: "variable", name },
+			annotation: fn ? { type: "function", name: fn, options: [] } : undefined,
+		})),
 		variants: [],
 	}
 
