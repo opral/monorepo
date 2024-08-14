@@ -14,3 +14,4 @@ export {
 	generateBundleId as randomHumanId,
 } from "./bundle-id/bundle-id.js";
 export type { InlangDatabaseSchema } from "./database/schema.js";
+export type { InlangPlugin } from "./plugin/schema.js";
