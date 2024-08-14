@@ -40,7 +40,7 @@ export type InlangPlugin = {
 		nodeFs: typeof fs;
 	}) => Promise<Array<ResourceFile>> | Array<ResourceFile>;
 	importFiles?: (args: { files: Array<ResourceFile> }) => {
-		bundles: BundleNested;
+		bundles: BundleNested[];
 	};
 	exportFiles?: (args: {
 		bundles: BundleNested;
