@@ -51,10 +51,10 @@ export async function loadProjectFromDirectoryInMemory(
 		.filter((plugin) => plugin.saveMessages !== undefined);
 	const exportPlugins = project.plugins
 		.get()
-		.filter((plugin) => plugin.importFiles !== undefined);
+		.filter((plugin) => plugin.exportFiles !== undefined);
 	const importPlugins = project.plugins
 		.get()
-		.filter((plugin) => plugin.exportFiles !== undefined);
+		.filter((plugin) => plugin.importFiles !== undefined);
 
 	if (loadMessagesPlugins.length > 1 || saveMessagesPlugins.length > 1) {
 		throw new Error(
@@ -81,6 +81,24 @@ export async function loadProjectFromDirectoryInMemory(
 				exportPlugins.length +
 				") "
 		);
+	}
+
+	for (const importer of importPlugins) {
+		const files = importer.toBeImportedFiles
+			? await importer.toBeImportedFiles({
+					settings: project.settings.get(),
+					nodeFs: args.fs,
+			  })
+			: [];
+
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		const { bundles } = importer.importFiles!({ files });
+
+		const insertQueries = bundles.map((bundle) =>
+			insertBundleNested(project.db, bundle)
+		);
+
+		await Promise.all(insertQueries);
 	}
 
 	const chosenLegacyPlugin = loadMessagesPlugins[0];
