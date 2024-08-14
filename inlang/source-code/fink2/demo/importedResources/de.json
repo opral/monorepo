@@ -1,0 +1,27 @@
+{
+	"title": "Meine tolle Todo Applikatifff",
+
+	"app_today": "Heute, {{date}}",
+	"app_nrOfTodos": "{{count}} Aufgaben",
+	"app_markAsDone": "Als erledigt markiert",
+	"app_markAsIncomplete": "Als unvollständig Aldwin",
+	"app_deleteTodo": "Löschen",
+
+	"pages_home_goToTodoApp": "Zur Todo-App",
+	"pages_todo_goToHome": "Zurück",
+	"pages_error_404_title": "Seite nicht gefunden",
+	"pages_error_cta": "Hier klicken, um zur Startseite zurückzukehren",
+
+	"server_error_generic": "Etwas ist schief gelaufen",
+	"server_error_missingField": "Das Feld '{{field}}' ist nicht gesetzt",
+	"server_error_incorrectField": "Das Feld '{field}' hat einen ungültigen Datentyp",
+
+	"server_logs_loaded": "{{count}} Aufgaben geladen",
+	"server_logs_added": "{{id}} hat ein Todo erstellt",
+	"server_logs_deleted": "{{id}} hat ein Todo gelöscht",
+	"server_logs_completed": "{{id}} hat ein Todo als erledigt markiert",
+	"server_logs_incompleted": "{{id}} hat ein Todo als unvollständig markiert",
+
+	"footer_madeBy": "Mit ❤️ von Inlang erstellt",
+	"footer_linkToDocs": "Besuchen Sie die <a href=\"https://www.inlang.com\">Dokumentation</a> um mehr über Inlang zu erfahren."
+}

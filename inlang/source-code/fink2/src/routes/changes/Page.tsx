@@ -70,7 +70,7 @@ export default function App() {
 				<div className="relative pb-10">
 					{commits.length > 0 && (
 						<div className="w-[1px] h-full absolute pt-6 translate-x-[9.3px] -z-10">
-							<div className="w-full h-[calc(100%_+_10px)] border-r-[2px] border-zinc-400 border-dashed" />
+							<div className="w-full h-[calc(100%_+_70px)] border-r-[2px] border-zinc-400 border-dashed" />
 						</div>
 					)}
 
@@ -113,10 +113,12 @@ export default function App() {
 								open={showDialog}
 								onSlRequestClose={() => setShowDialog(false)}
 							>
-								<form onSubmit={(e: FormEvent<Element>) => {
-									e.preventDefault()
-									handleCommit()
-								}}>
+								<form
+									onSubmit={(e: FormEvent<Element>) => {
+										e.preventDefault();
+										handleCommit();
+									}}
+								>
 									<div className="flex flex-col gap-4">
 										<SlInput
 											required
@@ -136,11 +138,7 @@ export default function App() {
 										></SlInput>
 									</div>
 									<div className="mt-6 flex justify-end">
-										<SlButton
-											variant="primary"
-											slot="footer"
-											type="submit"
-										>
+										<SlButton variant="primary" slot="footer" type="submit">
 											Commit changes
 										</SlButton>
 									</div>
@@ -168,6 +166,12 @@ export default function App() {
 						</div>
 					</div>
 				</div> */}
+				{commits.length > 0 && (
+					<div className="w-full pl-[48px] flex items-center gap-8 text-sm! text-zinc-500 font-medium pt-4 pb-6">
+						History
+						<div className="w-full h-[2px] bg-zinc-200 flex-1" />
+					</div>
+				)}
 				<div className="flex flex-col gap-2 relative">
 					<div className="w-[1px] h-full absolute py-6 translate-x-[9.3px] -z-10">
 						<div className="w-full h-full border-r-[2px] border-zinc-400" />
