@@ -39,8 +39,11 @@ export type InlangProject = {
 };
 
 export type ResourceFile = {
+	/** The absolute filepath of the resource */
 	path: string;
+	/** The binary content of the resource */
 	content: ArrayBuffer;
+	/** The plugin which loaded this resource */
 	pluginKey: InlangPlugin["key"];
 };
 
