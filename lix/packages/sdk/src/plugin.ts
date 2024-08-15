@@ -15,6 +15,7 @@ export type LixPlugin<
 		keyof T,
 		(() => HTMLElement) | undefined
 	>;
+	merge?: any;
 	diff: {
 		file?: (args: {
 			old?: LixFile;

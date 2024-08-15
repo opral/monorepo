@@ -83,6 +83,8 @@ export type Change = {
 	value?: Record<string, any> & {
 		id: string;
 	}; // JSONB
+
+	conflict?: any[] | null;
 	/**
 	 * Additional metadata for the change used by the plugin
 	 * to process changes.

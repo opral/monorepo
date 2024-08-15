@@ -2,6 +2,7 @@ import type { LixPlugin } from "../plugin.js";
 import { Kysely, ParseJSONResultsPlugin } from "kysely";
 import type { LixDatabase } from "../schema.js";
 import { commit } from "../commit.js";
+import { merge } from "../merge.js";
 import { handleFileChange, handleFileInsert } from "../file-handlers.js";
 import { loadPlugins } from "../load-plugin.js";
 import {
@@ -79,43 +80,50 @@ export async function openLix(args: {
 			.limit(1)
 			.executeTakeFirst();
 
-		if (entry) {
-			const existingFile = await db
-				.selectFrom("file_internal")
-				.select("data")
-				.select("path")
-				.where("id", "=", entry.file_id)
-				.limit(1)
-				.executeTakeFirst();
+		try {
+			if (entry) {
+				const existingFile = await db
+					.selectFrom("file_internal")
+					.select("data")
+					.select("path")
+					.where("id", "=", entry.file_id)
+					.limit(1)
+					.executeTakeFirst();
 
-			if (existingFile?.data) {
-				await handleFileChange({
-					queueEntry: entry,
-					old: {
-						id: entry.file_id,
-						path: existingFile?.path,
-						data: existingFile?.data,
-					},
-					neu: {
-						id: entry.file_id,
-						path: entry.path,
-						data: entry.data,
-					},
-					plugins,
-					db,
-				});
-			} else {
-				await handleFileInsert({
-					queueEntry: entry,
-					neu: {
-						id: entry.file_id,
-						path: entry.path,
-						data: entry.data,
-					},
-					plugins,
-					db,
-				});
+				if (existingFile?.data) {
+					await handleFileChange({
+						queueEntry: entry,
+						old: {
+							id: entry.file_id,
+							path: existingFile?.path,
+							data: existingFile?.data,
+						},
+						neu: {
+							id: entry.file_id,
+							path: entry.path,
+							data: entry.data,
+						},
+						plugins,
+						db,
+					});
+				} else {
+					await handleFileInsert({
+						queueEntry: entry,
+						neu: {
+							id: entry.file_id,
+							path: entry.path,
+							data: entry.data,
+						},
+						plugins,
+						db,
+					});
+				}
 			}
+		} catch (error) {
+			resolve!(); // TODO: fix type
+			pending = undefined;
+			hasMoreEntriesSince = undefined;
+			throw new Error("error in change generation");
 		}
 
 		// console.log("getrting { numEntries }");
@@ -159,14 +167,29 @@ export async function openLix(args: {
 			args.database.close();
 			await db.destroy();
 		},
-		commit: (args: { userId: string; description: string }) => {
+		commit: async (args: { userId: string; description: string }) => {
+			await settled();
 			return commit({ db, ...args });
+		},
+		merge: async ({
+			incommingDb,
+			userId,
+		}: {
+			incommingDb: Kysely<LixDatabase>;
+			userId: string;
+		}) => {
+			return merge({
+				db,
+				incommingDb,
+				plugins,
+				userId,
+			});
 		},
 	};
 }
 
-// // TODO register on behalf of apps or leave it up to every app?
-// //      - if every apps registers, components can be lazy loaded
+// TODO register on behalf of apps or leave it up to every app?
+//      - if every apps registers, components can be lazy loaded
 // async function registerDiffComponents(plugins: LixPlugin[]) {
 // 	for (const plugin of plugins) {
 // 		for (const type in plugin.diffComponent) {
@@ -179,4 +202,3 @@ export async function openLix(args: {
 // 		}
 // 	}
 // }
-

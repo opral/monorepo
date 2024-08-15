@@ -87,6 +87,7 @@ test("should use queue and settled correctly", async () => {
 	expect(changes).toEqual([
 		{
 			id: changes[0]?.id!,
+			conflict: null,
 			parent_id: null,
 			type: "text",
 			file_id: "test",
@@ -145,6 +146,7 @@ test("should use queue and settled correctly", async () => {
 		{
 			id: updatedChanges[0]?.id!,
 			parent_id: null,
+			conflict: null,
 			type: "text",
 			file_id: "test",
 			operation: "update",

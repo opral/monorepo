@@ -6,7 +6,7 @@ export async function commit(args: {
 	db: Kysely<LixDatabase>;
 	userId: string;
 	description: string;
-	// merge?: boolean
+	merge?: boolean;
 }) {
 	const newCommitId = v4();
 
@@ -35,22 +35,26 @@ export async function commit(args: {
 			.set({ commit_id: newCommitId })
 			.execute();
 
-		// if (!args.merge) {
-		// 	// look for all conflicts and remove them if there is a new change that has same id
-		// 	// TODO: needs checking of type and plugin? and integrate into one sql statement
-		// 	const newChanges = (
-		// 		await trx.selectFrom("change").where("commit_id", "is", null).selectAll().execute()
-		// 	).map((change) => change.value.id)
+		if (!args.merge) {
+			// look for all conflicts and remove them if there is a new change that has same id
+			// TODO: needs checking of type and plugin? and integrate into one sql statement
+			const newChanges = (
+				await trx
+					.selectFrom("change")
+					.where("commit_id", "is", null)
+					.selectAll()
+					.execute()
+			).map((change) => change.value?.id);
 
-		// 	await trx
-		// 		.updateTable("change")
-		// 		.set({
-		// 			conflict: null,
-		// 		})
-		// 		.where("conflict", "is not", null)
-		// 		.where((eb) => eb.ref("value", "->>").key("id"), "in", newChanges)
-		// 		.execute()
-		// }
+			await trx
+				.updateTable("change")
+				.set({
+					conflict: null,
+				})
+				.where("conflict", "is not", null)
+				.where((eb) => eb.ref("value", "->>").key("id"), "in", newChanges)
+				.execute();
+		}
 
 		return await trx
 			.updateTable("change")

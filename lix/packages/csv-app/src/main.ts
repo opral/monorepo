@@ -117,19 +117,7 @@ export class App extends BaseElement {
 				} catch (e) {
 					console.log(e)
 				}
-
-				async function saveDb() {
-					// FIXME: saving B- crashes!
-					if (!self.lix || self.dbName.startsWith("B-")) {
-						return
-					}
-
-					await saveInOPFS({ blob: await self.lix.toBlob(), path: self.dbName }).then(() =>
-						console.log(self.dbName + " saved to opfs")
-					)
-				}
-
-				setInterval(saveDb, 5000 + Math.floor(Math.random() * 1000)) // add jitter beacause saving db concurrently crashes sqlite
+				// setInterval(saveDb, 5000 + Math.floor(Math.random() * 1000)) // add jitter beacause saving db concurrently crashes sqlite
 			})
 		}
 	}
@@ -148,7 +136,7 @@ export class App extends BaseElement {
 		const fileA = await (await fileHandleA.getFile()).arrayBuffer()
 
 		const fileHandleB = await opfsRoot.getFileHandle("B" + lixOPFSPath, {
-			create: false,
+			create: true,
 		})
 
 		const writable = await fileHandleB.createWritable()
@@ -157,7 +145,31 @@ export class App extends BaseElement {
 	}
 
 	async merge() {
-		await this.lix.merge({ path: "B" + lixOPFSPath, userId: this.username })
+		navigator.storage.getDirectory().then(async (dir) => {
+			try {
+				const handle = await dir.getFileHandle("B" + lixOPFSPath, {
+					create: false,
+				})
+
+				const dbBlob = await (await handle.getFile()).arrayBuffer()
+
+				await this.lix.merge({
+					incommingDb: (
+						await openLixInMemory({ arrayBuffer: dbBlob, providePlugins: [plugin] })
+					).db,
+					userId: this.username,
+				})
+			} catch (e) {
+				console.log(e)
+			}
+			// setInterval(saveDb, 5000 + Math.floor(Math.random() * 1000)) // add jitter beacause saving db concurrently crashes sqlite
+		})
+	}
+
+	async save() {
+		await saveInOPFS({ blob: await this.lix.toBlob(), path: this.dbName }).then(() =>
+			console.log(this.dbName + " saved to opfs")
+		)
 	}
 
 	@state() dbName = ""
@@ -181,6 +193,8 @@ export class App extends BaseElement {
 				<file-importer .lix=${this.lix}></file-importer>
 
 				<button @click=${this.merge}>Merge B into A</button>
+
+				<button @click=${this.save}>Save to OPFS</button>
 			</div>
 			<hr style="margin-top: 1rem;" />
 			${this.lix

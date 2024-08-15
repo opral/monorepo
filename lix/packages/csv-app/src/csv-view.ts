@@ -49,13 +49,12 @@ export class CsvView extends BaseElement {
 					.where("commit_id", "is", null)
 					.execute()
 
-				const conflicts = []
-				// await this.lix?.db
-				// 	.selectFrom("change")
-				// 	.selectAll()
-				// 	.where("file_id", "=", this.fileId)
-				// 	.where("conflict", "is not", null)
-				// 	.execute()
+				const conflicts = await this.lix?.db
+					.selectFrom("change")
+					.selectAll()
+					.where("file_id", "=", this.fileId)
+					.where("conflict", "is not", null)
+					.execute()
 
 				const changes = await this.lix?.db
 					.selectFrom("change")

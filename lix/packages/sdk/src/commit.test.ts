@@ -66,6 +66,7 @@ test("should be able to add and commit changes", async () => {
 			id: changes[0]?.id!,
 			parent_id: null,
 			type: "text",
+			conflict: null,
 			file_id: "test",
 			plugin_key: "mock-plugin",
 			value: {
@@ -101,6 +102,7 @@ test("should be able to add and commit changes", async () => {
 			type: "text",
 			file_id: "test",
 			plugin_key: "mock-plugin",
+			conflict: null,
 			value: {
 				id: "test",
 				text: "inserted text",
@@ -141,6 +143,7 @@ test("should be able to add and commit changes", async () => {
 			type: "text",
 			file_id: "test",
 			plugin_key: "mock-plugin",
+			conflict: null,
 			value: {
 				id: "test",
 				text: "inserted text",
@@ -155,6 +158,7 @@ test("should be able to add and commit changes", async () => {
 			type: "text",
 			file_id: "test",
 			plugin_key: "mock-plugin",
+			conflict: null,
 			value: {
 				id: "test",
 				text: "updated text",
