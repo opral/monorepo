@@ -86,7 +86,7 @@ export async function loadProjectFromDirectoryInMemory(
 	for (const importer of importPlugins) {
 		const files = importer.toBeImportedFiles
 			? await importer.toBeImportedFiles({
-					settings: project.settings.get(),
+					settings: project.settings.get() as any,
 					nodeFs: args.fs,
 			  })
 			: [];
