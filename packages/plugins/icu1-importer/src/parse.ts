@@ -102,13 +102,10 @@ export function generateBranches(elements: MessageFormatElement[], branch: Branc
 					}
 
 					for (const existingBranch of branches) {
-						const newBranchesForBranch = generateBranches(
-							optionValue.value,
-							structuredClone({
-								...existingBranch,
-								match: selector ? [...existingBranch.match, selector] : existingBranch.match,
-							})
-						)
+						const newBranchesForBranch = generateBranches(optionValue.value, {
+							...existingBranch,
+							match: selector ? [...existingBranch.match, selector] : existingBranch.match,
+						})
 						newBranches.push(...newBranchesForBranch)
 					}
 				}
