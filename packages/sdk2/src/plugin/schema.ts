@@ -45,7 +45,7 @@ export type InlangPlugin<
 		bundles: BundleNested[];
 	};
 	exportFiles?: (args: {
-		bundles: BundleNested;
+		bundles: BundleNested[];
 		settings: ProjectSettings & ExternalSettings;
 	}) => Array<ResourceFile>;
 	/**

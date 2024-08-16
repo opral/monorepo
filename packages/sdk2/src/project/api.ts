@@ -31,9 +31,11 @@ export type InlangProject = {
 	lix: Lix;
 	importFiles: (args: {
 		pluginKey: InlangPlugin["key"];
-		files: ResourceFile;
-	}) => BundleNested;
-	exportFiles: (args: { pluginKey: InlangPlugin["key"] }) => ResourceFile[];
+		files: ResourceFile[];
+	}) => BundleNested[];
+	exportFiles: (args: {
+		pluginKey: InlangPlugin["key"];
+	}) => Promise<ResourceFile[]>;
 	close: () => Promise<void>;
 	toBlob: () => Promise<Blob>;
 };

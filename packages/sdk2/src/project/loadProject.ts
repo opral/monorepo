@@ -10,6 +10,9 @@ import { createReactiveState } from "./logic/reactiveState.js";
 import { BehaviorSubject, map } from "rxjs";
 import { setSettings } from "./logic/setSettings.js";
 import { withLanguageTagToLocaleMigration } from "../migrations/v2/withLanguageTagToLocaleMigration.js";
+import { PluginError } from "../plugin/errors.js";
+import { insertBundleNested } from "../query-utilities/insertBundleNested.js";
+import { selectBundleNested } from "../query-utilities/selectBundleNested.js";
 
 /**
  * Common load project logic.
@@ -71,11 +74,59 @@ export async function loadProject(args: {
 			set: (newSettings) =>
 				setSettings({ newSettings, lix: args.lix, reactiveState }),
 		},
-		importFiles: () => {
-			throw new Error("Not implemented");
+		importFiles: ({ files, pluginKey }) => {
+			const plugin = plugins.find((p) => p.key === pluginKey);
+			if (!plugin)
+				throw new PluginError(`No plugin with key "${pluginKey}" found`, {
+					plugin: pluginKey,
+				});
+
+			if (!plugin.importFiles) {
+				// fail silently?
+				throw new PluginError(
+					`Plugin "${pluginKey}" does not implement importFiles`,
+					{
+						plugin: pluginKey,
+					}
+				);
+			}
+
+			const { bundles } = plugin.importFiles({
+				files,
+			});
+
+			bundles.map((bundle) =>
+				// TODO: await?
+				insertBundleNested(db, bundle)
+			);
+
+			return bundles;
 		},
-		exportFiles: () => {
-			throw new Error("Not implemented");
+		exportFiles: async ({ pluginKey }) => {
+			const plugin = plugins.find((p) => p.key === pluginKey);
+			if (!plugin)
+				throw new PluginError(`No plugin with key "${pluginKey}" found`, {
+					plugin: pluginKey,
+				});
+
+			if (!plugin.exportFiles) {
+				// fail silently?
+				throw new PluginError(
+					`Plugin "${pluginKey}" does not implement exportFiles`,
+					{
+						plugin: pluginKey,
+					}
+				);
+			}
+
+			const bundles = await selectBundleNested(db).selectAll().execute();
+			const files = plugin.exportFiles({
+				bundles: bundles,
+				settings: structuredClone(
+					reactiveState.settings$.getValue()
+				) as ProjectSettings,
+			});
+			return files;
 		},
 		close: async () => {
 			args.sqlite.close();
