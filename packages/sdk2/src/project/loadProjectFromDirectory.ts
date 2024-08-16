@@ -117,18 +117,6 @@ export async function loadProjectFromDirectoryInMemory(
 		});
 	}
 
-	const ogExportFiles = project.exportFiles;
-
-	project.exportFiles = async ({ pluginKey }) => {
-		const files = await ogExportFiles({ pluginKey });
-
-		for (const file of files) {
-			args.fs.writeFile(file.path, new Uint8Array(file.content));
-		}
-
-		return files;
-	};
-
 	return project;
 }
 
