@@ -137,6 +137,15 @@ importers:
         specifier: ^4.5.0
         version: 4.5.3(@types/node@22.2.0)(lightningcss@1.26.0)(terser@5.31.5)
 
+  inlang/development-projects/sdk-importer:
+    dependencies:
+      '@inlang/icu1-importer':
+        specifier: workspace:*
+        version: link:../../source-code/plugins/icu1-importer
+      '@inlang/sdk2':
+        specifier: workspace:*
+        version: link:../../source-code/sdk2
+
   inlang/source-code/badge:
     dependencies:
       '@inlang/env-variables':
@@ -3675,15 +3684,6 @@ importers:
       '@types/uuid':
         specifier: ^10.0.0
         version: 10.0.0
-      autoprefixer:
-        specifier: ^10.4.20
-        version: 10.4.20(postcss@8.4.41)
-      postcss:
-        specifier: ^8.4.41
-        version: 8.4.41
-      tailwindcss:
-        specifier: ^4.0.0-alpha.17
-        version: 4.0.0-alpha.18
       typescript:
         specifier: ^5.5.4
         version: 5.5.4

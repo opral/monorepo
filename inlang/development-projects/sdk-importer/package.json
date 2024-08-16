@@ -1,0 +1,10 @@
+{
+    "name": "sdk2-importer",
+    "version": "0.0.1",
+    "private": true,
+    "type": "module",
+    "dependencies": {
+        "@inlang/sdk2": "workspace:*",
+        "@inlang/icu1-importer": "workspace:*"
+    }
+}
