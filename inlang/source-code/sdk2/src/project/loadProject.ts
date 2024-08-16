@@ -93,11 +93,15 @@ export async function loadProject(args: {
 
 			const { bundles } = plugin.importFiles({
 				files,
+				settings: structuredClone(
+					reactiveState.settings$.getValue()
+				) as ProjectSettings,
 			});
 
 			const insertPromises = bundles.map((bundle) =>
 				insertBundleNested(db, bundle)
 			);
+
 			await Promise.all(insertPromises);
 			return bundles;
 		},

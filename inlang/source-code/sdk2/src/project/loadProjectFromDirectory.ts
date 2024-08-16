@@ -85,14 +85,10 @@ export async function loadProjectFromDirectoryInMemory(
 			  })
 			: [];
 
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		const { bundles } = importer.importFiles!({ files });
-
-		const insertQueries = bundles.map((bundle) =>
-			insertBundleNested(project.db, bundle)
-		);
-
-		await Promise.all(insertQueries);
+		await project.importFiles({
+			pluginKey: importer.key,
+			files,
+		});
 
 		// TODO check user id and description (where will this one appear?)
 		await project.lix.commit({
