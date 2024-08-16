@@ -5,11 +5,20 @@ export type LixDatabase = {
 	change: Change;
 	commit: Commit;
 	ref: Ref;
+	file_internal: LixFile;
+	change_queue: ChangeQueueEntry;
 };
 
 export type Ref = {
 	name: string;
 	commit_id: string;
+};
+
+export type ChangeQueueEntry = {
+	id?: number;
+	path: string;
+	file_id: LixFile["id"];
+	data: ArrayBuffer;
 };
 
 // named lix file to avoid conflict with built-in file type

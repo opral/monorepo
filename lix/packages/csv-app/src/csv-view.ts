@@ -119,6 +119,7 @@ export class CsvView extends BaseElement {
 										<tr>
 											${csv.meta.fields!.map((field) => {
 												const cellId = `${row.id}-${field}`
+
 												const uncommittedChanges = this.uncommittedChanges.filter(
 													(change) => change.value?.id === cellId
 												)

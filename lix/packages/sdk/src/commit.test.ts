@@ -19,7 +19,7 @@ test("should be able to add and commit changes", async () => {
 									id: "test",
 									text: "inserted text",
 								},
-							}
+						  }
 						: {
 								type: "text",
 								operation: "update",
@@ -31,7 +31,7 @@ test("should be able to add and commit changes", async () => {
 									id: "test",
 									text: "updated text",
 								},
-							},
+						  },
 				];
 			},
 		},
@@ -48,14 +48,18 @@ test("should be able to add and commit changes", async () => {
 		.executeTakeFirstOrThrow();
 	expect(firstRef.commit_id).toBe("00000000-0000-0000-0000-000000000000");
 
-	var enc = new TextEncoder();
+	const enc = new TextEncoder();
 
 	await lix.db
 		.insertInto("file")
 		.values({ id: "test", path: "test.txt", data: enc.encode("test") })
 		.execute();
 
+	await lix.settled();
+
 	const changes = await lix.db.selectFrom("change").selectAll().execute();
+
+	// console.log(await lix.db.selectFrom("queue").selectAll().execute());
 
 	expect(changes).toEqual([
 		{
@@ -70,7 +74,7 @@ test("should be able to add and commit changes", async () => {
 			},
 			meta: null,
 			commit_id: null,
-			conflict: null,
+			operation: "create",
 		},
 	]);
 
@@ -103,7 +107,7 @@ test("should be able to add and commit changes", async () => {
 			},
 			meta: null,
 			commit_id: commits[0]?.id!,
-			conflict: null,
+			operation: "create",
 		},
 	]);
 
@@ -123,8 +127,7 @@ test("should be able to add and commit changes", async () => {
 		.where("id", "=", "test")
 		.execute();
 
-	// TODO: replace with settled()
-	await new Promise((resolve) => setTimeout(resolve, 100));
+	await lix.settled();
 
 	const updatedChanges = await lix.db
 		.selectFrom("change")
@@ -144,7 +147,7 @@ test("should be able to add and commit changes", async () => {
 			},
 			meta: null,
 			commit_id: commits[0]?.id,
-			conflict: null,
+			operation: "create",
 		},
 		{
 			id: updatedChanges[1]?.id!,
@@ -158,7 +161,7 @@ test("should be able to add and commit changes", async () => {
 			},
 			meta: null,
 			commit_id: null,
-			conflict: null,
+			operation: "update",
 		},
 	]);
 
