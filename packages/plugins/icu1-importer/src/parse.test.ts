@@ -427,4 +427,28 @@ describe("createMessage", () => {
 			],
 		})
 	})
+
+	it("treats tags as text", () => {
+		const message = createMessage("<b>Hello</b>", "sad_elephant", "en")
+		expect(message).toEqual({
+			bundleId: "sad_elephant",
+			declarations: [],
+			id: "sad_elephant_en",
+			locale: "en",
+			selectors: [],
+			variants: [
+				{
+					id: "sad_elephant_en_",
+					match: [],
+					messageId: "sad_elephant_en",
+					pattern: [
+						{
+							type: "text",
+							value: "<b>Hello</b>",
+						},
+					],
+				},
+			],
+		})
+	})
 })
