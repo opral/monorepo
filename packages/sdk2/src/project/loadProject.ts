@@ -74,7 +74,7 @@ export async function loadProject(args: {
 			set: (newSettings) =>
 				setSettings({ newSettings, lix: args.lix, reactiveState }),
 		},
-		importFiles: ({ files, pluginKey }) => {
+		importFiles: async ({ files, pluginKey }) => {
 			const plugin = plugins.find((p) => p.key === pluginKey);
 			if (!plugin)
 				throw new PluginError(`No plugin with key "${pluginKey}" found`, {
@@ -95,11 +95,10 @@ export async function loadProject(args: {
 				files,
 			});
 
-			bundles.map((bundle) =>
-				// TODO: await?
+			const insertPromises = bundles.map((bundle) =>
 				insertBundleNested(db, bundle)
 			);
-
+			await Promise.all(insertPromises);
 			return bundles;
 		},
 		exportFiles: async ({ pluginKey }) => {

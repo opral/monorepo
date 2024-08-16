@@ -32,7 +32,7 @@ export type InlangProject = {
 	importFiles: (args: {
 		pluginKey: InlangPlugin["key"];
 		files: ResourceFile[];
-	}) => BundleNested[];
+	}) => Promise<BundleNested[]>;
 	exportFiles: (args: {
 		pluginKey: InlangPlugin["key"];
 	}) => Promise<ResourceFile[]>;
